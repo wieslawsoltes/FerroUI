@@ -170,7 +170,8 @@ use crate::utilities::EventArgs;
 use crate::*;
 use std::rc::Rc;
 """,
-    "FerroUI.Controls": """use crate::application_lifetimes::IApplicationLifetime;
+    "FerroUI.Controls": """use crate::animation::*;
+use crate::application_lifetimes::IApplicationLifetime;
 use crate::automation::peers::*;
 use crate::chrome::*;
 use crate::documents::*;
@@ -179,6 +180,8 @@ use crate::pull_to_refresh::*;
 use crate::templates::{DataTemplates, IDataTemplate, ITemplateOf};
 use crate::primitives::*;
 use crate::*;
+use ferroui_base::animation::easings::Easing;
+use ferroui_base::animation::TimeSpan;
 use ferroui_base::collections::FerroList;
 use ferroui_base::controls::{Classes, IResourceDictionary, ResourceDictionary, ResourcesChangedEventArgs};
 use ferroui_base::data::core::ValueTypes;
