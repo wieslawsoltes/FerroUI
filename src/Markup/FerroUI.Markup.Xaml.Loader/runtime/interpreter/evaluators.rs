@@ -223,19 +223,17 @@ fn assignment_plan(node: &Rc<dyn IXamlAstNode>, assignment: &XamlPropertyAssignm
     Ok(AssignmentPlan { _node: node.clone(), setters, value_types })
 }
 
-/// The setter a property assignment always uses, when its plan leaves exactly one
-/// (`None`: the setter is chosen by the run-time type of the value). The decision is the
-/// one [`property_assignment`] makes; the emitter of Rust source asks for it here.
+/// The setters a property assignment chooses from, in order, and the types
+/// of its values: the plan [`property_assignment`] follows (one setter: it is
+/// always used; several: the first that takes the run-time value of the last
+/// value). The emitter of Rust source unrolls the choice from it.
 #[cfg(any(feature = "emitter", test))]
-pub(crate) fn single_setter(
+pub(crate) fn plan_setters(
     node: &Rc<dyn IXamlAstNode>,
     assignment: &XamlPropertyAssignmentNode,
-) -> XamlResult<Option<Rc<dyn IXamlPropertySetter>>> {
+) -> XamlResult<(Vec<Rc<dyn IXamlPropertySetter>>, Vec<Rc<dyn IXamlType>>)> {
     let plan = assignment_plan(node, assignment)?;
-    Ok(match plan.setters.as_slice() {
-        [setter] => Some(setter.clone()),
-        _ => None,
-    })
+    Ok((plan.setters, plan.value_types))
 }
 
 fn property_assignment(
