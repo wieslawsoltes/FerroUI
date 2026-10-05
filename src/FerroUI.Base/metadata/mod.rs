@@ -6,6 +6,7 @@ mod i_add_child;
 mod markup_assembly;
 mod markup_macros;
 mod markup_type;
+mod property_accessors;
 mod service_provider;
 pub mod typed_path;
 
@@ -17,6 +18,7 @@ pub use markup_type::{
     MarkupInvokeError, MarkupLiteral, MarkupMethod, MarkupParameter, MarkupProperty, MarkupType, MarkupTypeKind, MarkupTyped,
     MarkupValue, TypeOf,
 };
+pub use property_accessors::{property_accessors, record_property_accessor, PropertyAccessor};
 pub use typed_path::TypedPathElement;
 pub use service_provider::{service, EmptyServiceProvider, IServiceProvider};
 
