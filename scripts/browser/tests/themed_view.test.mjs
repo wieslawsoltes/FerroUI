@@ -81,11 +81,17 @@ check("shortcuts of the browser are not swallowed", async (page) => {
     // The recorder has noted whether the view prevented the key; it then cancels the shortcut itself,
     // so that a reload or a new tab does not replace the page under test.
     await page.evaluate("(globalThis.keepPage = true)");
+    // Chrome reserves ctrl+t (with ctrl+n and ctrl+w): some builds never deliver it to the page, so the view
+    // cannot swallow it there. When it is delivered, it must keep its default action like the others.
+    const reserved = ["ctrl+t"];
     for (const [key, modifier] of [["r", "ctrl"], ["r", "meta"], ["l", "ctrl"], ["l", "meta"], ["t", "ctrl"], ["F5", null], ["F12", null]]) {
+        const name = `${modifier ? modifier + "+" : ""}${key}`;
+        const before = await page.evaluate("keys.length");
         await page.press(key, modifier ? [modifier] : []);
         const last = await page.lastKey();
-        assert(last.key.toLowerCase() === key.toLowerCase(), `the page did not see ${modifier ?? ""}+${key}`);
-        assert(!last.prevented, `${modifier ? modifier + "+" : ""}${key} was prevented`);
+        const seen = await page.evaluate("keys.length") > before && last.key.toLowerCase() === key.toLowerCase();
+        assert(seen || reserved.includes(name), `the page did not see ${name}`);
+        assert(!seen || !last.prevented, `${name} was prevented`);
     }
     assert((await page.state()).text === "Text box", `a shortcut typed into the text box: "${(await page.state()).text}"`);
     await page.evaluate("(globalThis.keepPage = false, true)");
