@@ -69,6 +69,7 @@ codegen-units = 4
 inherits = "release"
 opt-level = "z"
 lto = "fat"
+codegen-units = 1
 # The XAML front end and run-time loader compile the theme documents before the first frame: at
 # opt-level "z" the first frame of themed_view comes 3 s later, for 1.1 MB less code.
 [profile.browser.package.xamlx]
