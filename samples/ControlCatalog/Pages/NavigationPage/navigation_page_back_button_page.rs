@@ -311,13 +311,12 @@ impl NavigationPageBackButtonPage {
 
     /// `await DemoNav.PushAsync(page); AddLog(message(page.Header))`.
     fn push_then_log(&self, page: Ref<ContentPage>, message: impl FnOnce(String) -> String + 'static) {
-        let header = header_text(&page);
-        let push = self.nav().push_async(page);
+        let push = self.nav().push_async(page.clone());
         let weak = self.to_ref().downgrade();
         drop(mini_mvvm::start_async(async move {
             let _ = push.await;
             if let Some(this) = weak.upgrade() {
-                this.add_log(&message(header));
+                this.add_log(&message(header_text(&page)));
             }
         }));
     }
