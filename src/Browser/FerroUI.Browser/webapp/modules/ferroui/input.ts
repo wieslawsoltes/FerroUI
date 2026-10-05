@@ -20,23 +20,335 @@ enum RawInputModifiers {
     PenBarrelButton = 2048
 }
 
+/*
+* This is a hack to handle older Firefox (before v127 from June 2024) clipboard events in a more convenient way for framework users.
+* In the browser, events go in order KeyDown -> Paste -> KeyUp.
+* On KeyDown we trigger the handlers of the framework, which might execute readClipboard.
+* When readClipboard was executed, we mark ClipboardState as Pending and setup clipboard promise,
+* which will un-handle KeyDown event, basically allowing browser to pass a Paste event properly.
+* On actual Paste event we execute promise callbacks, resuming async operation, and returning pasted text to the app.
+* Note #1, on every KeyUp event we will reset all the state and reject pending promises if any, as this event it expected to come after Paste.
+* Note #2, whole this code will be executed only on older browsers where clipboard.read/readText is not available.
+* Note #3, with all of these hacks Clipboard.ReadText will still work only on actual "paste" gesture initiated by user.
+* */
+enum ClipboardState {
+    None,
+    Ready,
+    Pending
+}
+
+interface WriteableClipboardItem {
+    data: Record<string, string | Blob>;
+}
+
+interface WriteableClipboardSource {
+    items: WriteableClipboardItem[];
+}
+
+interface ClipboardResult {
+    error?: string;
+    result?: ReadableDataItem[];
+}
+
+// Differs from the original: an item of a drag operation also holds the data transfer of its
+// event, whose getData reads string values while the event is dispatched.
+type ReadableDataItem = {
+    type: "clipboardItem";
+    value: ClipboardItem;
+} | {
+    type: "dataTransferItem";
+    value: DataTransferItem;
+    dataTransfer?: DataTransfer;
+} | {
+    type: "string";
+    value: string;
+};
+
+// The "file" value is the File of the page. The original wraps it into a storage item of its
+// storage module, which is not ported yet; the framework does not read it until then.
+type ReadableDataValue = {
+    type: "string";
+    value: string;
+} | {
+    type: "bytes";
+    value: Uint8Array;
+} | {
+    type: "file";
+    value: File;
+};
+
 export class InputHelper {
-    static backgroundHandlersInitialized = false;
+    static clipboardState: ClipboardState = ClipboardState.None;
+    static resolveClipboard?: (value: ClipboardResult) => void;
+    static rejectClipboard?: (reason?: any) => void;
 
     public static initializeBackgroundHandlers() {
-        if (this.backgroundHandlersInitialized) {
+        if (this.clipboardState !== ClipboardState.None) {
             return;
         }
 
-        // The only handler of the page that is not bound to a view is the "paste" listener of the
-        // clipboard fallback for old browsers. It is installed here together with the clipboard.
-        this.backgroundHandlersInitialized = true;
+        globalThis.document.addEventListener("paste", args => {
+            if (this.clipboardState !== ClipboardState.Pending || !this.resolveClipboard) {
+                return;
+            }
+
+            const items = this.getDataTransferItems(args.clipboardData);
+            const result: ClipboardResult = { result: items.map((item) => ({ type: "dataTransferItem", value: item })) };
+            this.resolveClipboard(result);
+        });
+        this.clipboardState = ClipboardState.Ready;
+    }
+
+    private static getDataTransferItems(dataTransfer?: DataTransfer | null): DataTransferItem[] {
+        const dataTransferList = dataTransfer?.items;
+        return dataTransferList == null ? [] : Array.from(dataTransferList);
+    }
+
+    public static isClipboardFormatSupported(format: string): boolean {
+        const supports = (ClipboardItem as any).supports as ((type: string) => boolean) | undefined;
+        if (supports) {
+            return supports.call(ClipboardItem, format);
+        }
+
+        return format === "text/plain" || format === "text/html" || format === "image/png";
+    }
+
+    public static createWriteableClipboardSource(): WriteableClipboardSource {
+        return { items: [] };
+    }
+
+    public static createWriteableClipboardItem(source: WriteableClipboardSource): WriteableClipboardItem {
+        const item = { data: {} };
+        source.items.push(item);
+        return item;
+    }
+
+    public static addStringToWriteableClipboardItem(item: WriteableClipboardItem, format: string, value: string) {
+        item.data[format] = value;
+    }
+
+    // The bytes are a view over the memory of the module, valid only during the call: they are
+    // copied.
+    public static addBytesToWriteableClipboardItem(item: WriteableClipboardItem, format: string, value: Uint8Array) {
+        const bytes = value.slice(0, value.byteLength);
+        item.data[format] = new Blob([bytes], { type: format });
+    }
+
+    public static async readClipboard(window: Window): Promise<ClipboardResult> {
+        const clipboard = window.navigator.clipboard;
+
+        try {
+            if (clipboard.read) {
+                const clipboardItems = await clipboard.read();
+                const result: ClipboardResult = { result: clipboardItems.map((item) => ({ type: "clipboardItem", value: item })) };
+                return result;
+            } else if (clipboard.readText) {
+                const item: ReadableDataItem = {
+                    type: "string",
+                    value: await clipboard.readText()
+                };
+                const result: ClipboardResult = { result: [item] };
+                return result;
+            } else {
+                try {
+                    return await new Promise<ClipboardResult>((resolve, reject) => {
+                        this.clipboardState = ClipboardState.Pending;
+                        this.resolveClipboard = resolve;
+                        this.rejectClipboard = reject;
+                    });
+                } finally {
+                    this.clipboardState = ClipboardState.Ready;
+                    this.resolveClipboard = undefined;
+                    this.rejectClipboard = undefined;
+                }
+            }
+        } catch (ex: unknown) {
+            if (ex instanceof Error && ex.name === "NotAllowedError") {
+                const result: ClipboardResult = { error: "denied" };
+                return result;
+            }
+            throw ex;
+        }
+    }
+
+    public static async writeClipboard(window: Window, source?: WriteableClipboardSource | null): Promise<string> {
+        try {
+            const items = source?.items ?? [];
+            if (items.length === 0) {
+                await window.navigator.clipboard.writeText("");
+                return "";
+            }
+
+            if (window.navigator.clipboard.write) {
+                await window.navigator.clipboard.write(items.map(item => new ClipboardItem(item.data)));
+            } else {
+                await this.writeFirstText(window, items);
+            }
+
+            return "";
+        } catch (error: unknown) {
+            if (error instanceof Error && error.name === "NotAllowedError") {
+                return "denied";
+            }
+            throw error;
+        }
+    }
+
+    private static async writeFirstText(window: Window, items: WriteableClipboardItem[]): Promise<void> {
+        for (const item of items) {
+            for (const format in item.data) {
+                if (!format.startsWith("text/")) {
+                    continue;
+                }
+
+                let value = item.data[format];
+                if (typeof value !== "string") {
+                    value = "";
+                }
+
+                await window.navigator.clipboard.writeText(value);
+                return;
+            }
+        }
+    }
+
+    public static getReadableDataItemFormats(item: ReadableDataItem): readonly string[] {
+        /* eslint-disable indent */
+        switch (item.type) {
+            case "clipboardItem":
+                return item.value.types;
+            case "dataTransferItem":
+                switch (item.value.kind) {
+                    case "string":
+                        return [item.value.type];
+                    case "file":
+                        return ["Files"];
+                    default:
+                        return [];
+                }
+            case "string":
+                return ["text/plain"];
+            default:
+                return [];
+        }
+        /* eslint-enable indent */
+    }
+
+    // Asynchronous, used to read the clipboard.
+    public static async tryGetReadableDataItemValueAsync(item: ReadableDataItem, format: string): Promise<ReadableDataValue | null> {
+        const type = item.type;
+
+        /* eslint-disable indent */
+        switch (type) {
+            case "clipboardItem": {
+                const clipboardItem = item.value;
+                if (!clipboardItem.types.includes(format)) {
+                    return null;
+                }
+
+                const blob = await clipboardItem.getType(format);
+
+                return format.startsWith("text/")
+                    ? { type: "string", value: await blob.text() }
+                    : { type: "bytes", value: await this.getBlobBytes(blob) };
+            }
+
+            case "dataTransferItem": {
+                const dataTransferItem = item.value;
+
+                switch (dataTransferItem.kind) {
+                    case "string": {
+                        if (format !== dataTransferItem.type) {
+                            return null;
+                        }
+
+                        const stringValue = await new Promise<string>((resolve) => dataTransferItem.getAsString((str) => resolve(str)));
+                        return { type: "string", value: stringValue };
+                    }
+
+                    case "file": {
+                        if (format !== "Files") {
+                            return null;
+                        }
+
+                        const file = dataTransferItem.getAsFile();
+                        return file == null ? null : { type: "file", value: file };
+                    }
+
+                    default:
+                        return null;
+                }
+            }
+
+            case "string": {
+                return format.startsWith("text/")
+                    ? { type: "string", value: item.value }
+                    : { type: "bytes", value: await this.getBlobBytes(new Blob([item.value])) };
+            }
+
+            default:
+                return null;
+        }
+        /* eslint-enable indent */
+    }
+
+    // Synchronous, used only to read a drag-and-drop item.
+    public static tryGetReadableDataItemValue(item: ReadableDataItem, format: string): ReadableDataValue | null {
+        const type = item.type;
+
+        if (type !== "dataTransferItem") {
+            return null;
+        }
+
+        const dataTransferItem = item.value;
+
+        /* eslint-disable indent */
+        switch (dataTransferItem.kind) {
+            case "string": {
+                if (format !== dataTransferItem.type) {
+                    return null;
+                }
+
+                // Differs from the original, which reads the value with getAsString: its callback
+                // runs after the event, so the value read here was always empty. getData of the
+                // data transfer of the event answers synchronously (during a drop; in the other
+                // events of the operation the browser protects the values and answers "").
+                let stringValue = "";
+                if (item.dataTransfer !== undefined) {
+                    stringValue = item.dataTransfer.getData(format);
+                } else {
+                    dataTransferItem.getAsString(function (str) { stringValue = str; });
+                }
+                return { type: "string", value: stringValue };
+            }
+
+            case "file": {
+                if (format !== "Files") {
+                    return null;
+                }
+
+                const file = dataTransferItem.getAsFile();
+                return file == null ? null : { type: "file", value: file };
+            }
+
+            default:
+                return null;
+        }
+        /* eslint-enable indent */
+    }
+
+    private static async getBlobBytes(blob: Blob): Promise<Uint8Array> {
+        const bytes = (blob as any).bytes as (() => Promise<Uint8Array>) | undefined;
+        return bytes
+            ? await bytes.call(blob)
+            : new Uint8Array(await blob.arrayBuffer());
     }
 
     public static subscribeInputEvents(element: HTMLInputElement, topLevelId: number) {
         const keySub = this.subscribeKeyEvents(element, topLevelId);
         const pointerSub = this.subscribePointerEvents(element, topLevelId);
         const textSub = this.subscribeTextEvents(element, topLevelId);
+        const dndSub = this.subscribeDropEvents(element, topLevelId);
         const paneSub = this.subscribeKeyboardGeometryChange(element, topLevelId);
         // Not in the original, which never tells the framework that the view lost the focus.
         const focusSub = this.subscribeFocusEvents(element, topLevelId);
@@ -45,6 +357,7 @@ export class InputHelper {
             keySub();
             pointerSub();
             textSub();
+            dndSub();
             paneSub();
             focusSub();
         };
@@ -79,7 +392,15 @@ export class InputHelper {
     //
     // The default action of a key lies in the key going down; a key going up is prevented only
     // when the application handled it.
+    //
+    // One exception to 2: a key down whose handling started a read of the clipboard through the
+    // paste event (browsers without the asynchronous Clipboard API, see ClipboardState) keeps its
+    // default action, which is the paste.
     private static shouldPreventDefault(args: KeyboardEvent, handled: boolean): boolean {
+        if (args.type === "keydown" && handled && this.clipboardState === ClipboardState.Pending) {
+            return false;
+        }
+
         if (args.isComposing || args.key === "Process" || args.key === "Dead" || args.keyCode === 229) {
             return false;
         }
@@ -121,6 +442,11 @@ export class InputHelper {
                 FerroExports.InputHelper?.OnKeyUp(topLevelId, args.code, args.key, this.getModifiers(args)) ?? false;
             if (this.shouldPreventDefault(args, handled)) {
                 args.preventDefault();
+            }
+
+            // Differs from the original, which rejects without a reason.
+            if (this.rejectClipboard) {
+                this.rejectClipboard(new Error("The key was released without a paste event."));
             }
         };
 
@@ -261,6 +587,38 @@ export class InputHelper {
 
         return () => {
             element.removeEventListener("focusout", focusOutHandler);
+        };
+    }
+
+    public static subscribeDropEvents(
+        element: HTMLInputElement,
+        topLevelId: number
+    ) {
+        const handler = (args: DragEvent) => {
+            const dataTransfer = args.dataTransfer;
+            if (dataTransfer == null) {
+                return;
+            }
+
+            const items: ReadableDataItem[] =
+                this.getDataTransferItems(dataTransfer).map((item) => ({ type: "dataTransferItem", value: item, dataTransfer }));
+
+            FerroExports.InputHelper?.OnDragDrop(topLevelId, args.type, args.offsetX, args.offsetY, this.getModifiers(args), dataTransfer, items);
+        };
+        const overAndDropHandler = (args: DragEvent) => {
+            args.preventDefault();
+            handler(args);
+        };
+        element.addEventListener("dragover", overAndDropHandler);
+        element.addEventListener("dragenter", handler);
+        element.addEventListener("dragleave", handler);
+        element.addEventListener("drop", overAndDropHandler);
+
+        return () => {
+            element.removeEventListener("dragover", overAndDropHandler);
+            element.removeEventListener("dragenter", handler);
+            element.removeEventListener("dragleave", handler);
+            element.removeEventListener("drop", overAndDropHandler);
         };
     }
 
