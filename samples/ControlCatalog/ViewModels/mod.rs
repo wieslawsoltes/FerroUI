@@ -11,11 +11,14 @@ mod context_page_view_model;
 mod cursor_page_view_model;
 mod data_validation_view_model;
 mod expander_page_view_model;
+mod flex_item_view_model;
+mod flex_view_model;
 mod list_box_page_view_model;
 mod main_window_view_model;
 mod main_window_view_model_page_list;
 mod menu_item_view_model;
 mod menu_page_view_model;
+mod notification_view_model;
 mod platform_information_view_model;
 mod platform_settings_view_model;
 pub(crate) mod random;
@@ -35,11 +38,14 @@ pub use context_page_view_model::ContextPageViewModel;
 pub use cursor_page_view_model::{CursorPageViewModel, StandardCursorModel};
 pub use data_validation_view_model::DataValidationViewModel;
 pub use expander_page_view_model::ExpanderPageViewModel;
+pub use flex_item_view_model::FlexItemViewModel;
+pub use flex_view_model::FlexViewModel;
 pub use list_box_page_view_model::{ItemModel, ListBoxPageViewModel};
 pub use main_window_view_model::MainWindowViewModel;
 pub use main_window_view_model_page_list::UnavailablePage;
 pub use menu_item_view_model::MenuItemViewModel;
 pub use menu_page_view_model::MenuPageViewModel;
+pub use notification_view_model::NotificationViewModel;
 pub use platform_information_view_model::PlatformInformationViewModel;
 pub use platform_settings_view_model::PlatformSettingsViewModel;
 pub use refresh_container_view_model::RefreshContainerViewModel;
@@ -63,6 +69,9 @@ pub(crate) const CLASSES: &[&XamlClass] = &[];
 /// The types of this namespace declared with `ferro_markup_type!` / `ferro_markup_enum!`
 /// (`<X as MarkupTyped>::MARKUP`).
 pub(crate) const MARKUP_TYPES: &[&MarkupType] = &[
+    <NotificationViewModel as MarkupTyped>::MARKUP,
+    <FlexViewModel as MarkupTyped>::MARKUP,
+    <FlexItemViewModel as MarkupTyped>::MARKUP,
     <ApplicationViewModel as MarkupTyped>::MARKUP,
     <ComboBoxPageViewModel as MarkupTyped>::MARKUP,
     <ContextPageViewModel as MarkupTyped>::MARKUP,
@@ -98,6 +107,9 @@ pub(crate) const MARKUP_TYPES: &[&MarkupType] = &[
 /// What the untyped value conversions must know about the types of this namespace
 /// (`ValueTypes::register_reference::<X>()`, nullable forms, casts to contracts).
 pub(crate) fn register_value_types() {
+    ValueTypes::register_reference::<NotificationViewModel>();
+    ValueTypes::register_reference::<FlexViewModel>();
+    ValueTypes::register_reference::<FlexItemViewModel>();
     ValueTypes::register_reference::<ApplicationViewModel>();
     ValueTypes::register_reference::<ComboBoxPageViewModel>();
     ValueTypes::register_reference::<ContextPageViewModel>();
@@ -141,4 +153,11 @@ pub(crate) fn debug_write_line(message: &str) {
     if cfg!(debug_assertions) {
         eprintln!("{message}");
     }
+}
+
+/// Makes the typed lists of the view models known to markup (`ferro_markup_list!`).
+pub(crate) fn register_lists() {
+    cursor_page_view_model::StandardCursorList::register();
+    tree_view_page_view_model::NodeList::register();
+    wrap_panel_page_view_model::WrapPanelItemList::register();
 }

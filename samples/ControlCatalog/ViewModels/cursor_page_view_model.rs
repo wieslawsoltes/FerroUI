@@ -1,14 +1,17 @@
 //! Port of `ViewModels/CursorPageViewModel.cs`.
 
+use ferroui_base::collections::FerroList;
 use ferroui_base::data::model::{BindableList, Event, INotifyPropertyChanged};
 use ferroui_base::input::{Cursor, StandardCursorType};
 use ferroui_base::media::imaging::Bitmap;
 use ferroui_base::platform::AssetLoader;
 use ferroui_base::utilities::Uri;
 use ferroui_base::{ferro_markup_type, PixelPoint};
-use ferroui_controls::ItemsSource;
 use mini_mvvm::ViewModelBase;
 use std::rc::Rc;
+
+ferroui_controls::ferro_markup_list!(pub StandardCursorList: Rc<StandardCursorModel>);
+
 
 /// The values of `StandardCursorType`, in the order of their declaration
 /// (`Enum.GetValues<StandardCursorType>()`).
@@ -87,9 +90,8 @@ ferro_markup_type!(class CursorPageViewModel {
     handles: [CursorPageViewModel, Rc<CursorPageViewModel>, Option<Rc<CursorPageViewModel>>],
     constructors: [() => CursorPageViewModel::new],
     properties: [
-        // A list a binding delivers to an items source property.
-        StandardCursors: ItemsSource {
-            get: |this: &Rc<CursorPageViewModel>| ItemsSource::from(this.standard_cursors())
+        StandardCursors: FerroList<Rc<StandardCursorModel>> {
+            get: |this: &Rc<CursorPageViewModel>| this.standard_cursors().items().clone()
         },
         CustomCursor: Rc<Cursor> { get: |this: &Rc<CursorPageViewModel>| this.custom_cursor() },
     ],

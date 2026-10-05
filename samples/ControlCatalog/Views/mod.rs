@@ -4,11 +4,15 @@ use crate::markup::XamlClass;
 use ferroui_base::metadata::MarkupType;
 use ferroui_base::TypeInfo;
 
+mod custom_notification_view;
+
+pub use custom_notification_view::CustomNotificationView;
+
 /// The classes of this namespace (`X::TYPE`).
-pub(crate) const TYPES: &[&TypeInfo] = &[];
+pub(crate) const TYPES: &[&TypeInfo] = &[CustomNotificationView::TYPE];
 
 /// The classes of this namespace that have a document (`&X::XAML_CLASS`).
-pub(crate) const CLASSES: &[&XamlClass] = &[];
+pub(crate) const CLASSES: &[&XamlClass] = &[&CustomNotificationView::XAML_CLASS];
 
 /// The types of this namespace declared with `ferro_markup_type!` / `ferro_markup_enum!`
 /// (`<X as MarkupTyped>::MARKUP`).

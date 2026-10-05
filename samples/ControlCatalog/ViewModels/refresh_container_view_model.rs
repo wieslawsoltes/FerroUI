@@ -2,9 +2,15 @@
 
 use ferroui_base::data::model::{BindableList, Event, INotifyPropertyChanged};
 use ferroui_base::ferro_markup_type;
+use ferroui_base::threading::{DispatcherPriority, DispatcherTimer};
 use ferroui_controls::ItemsSource;
 use mini_mvvm::ViewModelBase;
+use std::cell::{Cell, RefCell};
+use std::future::Future;
+use std::pin::Pin;
 use std::rc::Rc;
+use std::task::{Context, Poll, Waker};
+use std::time::Duration;
 
 /// The view model of the refresh container page: the items of its list.
 pub struct RefreshContainerViewModel {
@@ -32,6 +38,52 @@ impl RefreshContainerViewModel {
     pub fn items(&self) -> Rc<BindableList<String>> {
         self.items.clone()
     }
+
+    pub async fn add_to_top(&self) {
+        delay(Duration::from_millis(3000)).await;
+        let count = self.items.items().count() as i32;
+        self.items.items().insert(0, format!("Item {}", 200 - count));
+    }
+}
+
+#[derive(Default)]
+struct DelayState {
+    elapsed: Cell<bool>,
+    waker: RefCell<Option<Waker>>,
+}
+
+/// `Task.Delay(duration)`: completes when a dispatcher timer of `duration`
+/// has ticked.
+struct Delay(Rc<DelayState>);
+
+impl Future for Delay {
+    type Output = ();
+
+    fn poll(self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<()> {
+        if self.0.elapsed.get() {
+            Poll::Ready(())
+        } else {
+            *self.0.waker.borrow_mut() = Some(cx.waker().clone());
+            Poll::Pending
+        }
+    }
+}
+
+fn delay(duration: Duration) -> Delay {
+    let state = Rc::new(DelayState::default());
+    let timer_state = state.clone();
+    DispatcherTimer::run_once(
+        move || {
+            timer_state.elapsed.set(true);
+            let waker = timer_state.waker.borrow_mut().take();
+            if let Some(waker) = waker {
+                waker.wake();
+            }
+        },
+        duration,
+        DispatcherPriority::DEFAULT,
+    );
+    Delay(state)
 }
 
 ferro_markup_type!(class RefreshContainerViewModel {

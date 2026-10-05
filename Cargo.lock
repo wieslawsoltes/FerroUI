@@ -105,6 +105,7 @@ dependencies = [
  "ferroui-themes-fluent",
  "ferroui-themes-simple",
  "mini-mvvm",
+ "skia-safe",
  "unicode-normalization",
 ]
 

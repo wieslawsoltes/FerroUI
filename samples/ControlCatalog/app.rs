@@ -1,13 +1,9 @@
 //! Port of `App.xaml.cs`: the class of the document `App.xaml`.
 //!
-//! Not ported: the branches of `OnFrameworkInitializationCompleted` and
-//! `SetCatalogThemes` for the activity and single-view lifetimes (they
-//! create a `MainView`, whose base class `DrawerPage` is not ported).
-//!
-//! TEMPORARY, each part marked where it is: while `App.xaml`,
-//! `MainWindow.xaml` or the Fluent theme do not load, the application
-//! starts with the largest subset that does (see [`crate::temporary`]).
+//! TEMPORARY, marked where it is: while `App.xaml` does not load, the
+//! application loads the subset of it that does (see [`crate::temporary`]).
 
+use crate::main_view::MainView;
 use crate::main_window::MainWindow;
 use crate::markup::{describe, try_load_document_group, xaml_class};
 use crate::models::CatalogTheme;
@@ -22,7 +18,8 @@ use ferroui_base::{
 };
 use ferroui_controls::application_lifetimes::IActivatableLifetime;
 use ferroui_controls::{
-    Application, ApplicationImpl, ApplicationImplExt, NativeDock, NativeMenuItem, NewApplication, Window,
+    Application, ApplicationImpl, ApplicationImplExt, Control, NativeDock, NativeMenuItem, NewApplication, Page,
+    PageNavigationHost, Window,
 };
 use ferroui_themes_fluent::FluentTheme;
 use ferroui_themes_simple::SimpleTheme;
@@ -74,23 +71,25 @@ impl ApplicationImpl for App {
 
         this.load_document();
 
-        *this.fluent_theme.borrow_mut() = temporary::fluent_theme(this);
+        *this.fluent_theme.borrow_mut() = from_markup_value::<Ref<FluentTheme>>(&this.resource("FluentTheme"));
         *this.simple_theme.borrow_mut() = from_markup_value::<Ref<SimpleTheme>>(&this.resource("SimpleTheme"));
         *this.color_picker_fluent.borrow_mut() = from_markup_value::<Rc<dyn IStyle>>(&this.resource("ColorPickerFluent"));
         *this.color_picker_simple.borrow_mut() = from_markup_value::<Rc<dyn IStyle>>(&this.resource("ColorPickerSimple"));
 
-        // TEMPORARY: the managed original starts with the Fluent theme; while it does not load
-        // the catalog starts with the Simple theme (`FERROUI_CATALOG_THEME=fluent|simple` asks for
-        // one of them).
-        let initial_theme = temporary::initial_theme(this.fluent_theme.borrow().is_some());
-        this.prev_theme.set(initial_theme);
-        Self::set_catalog_themes(initial_theme);
+        Self::set_catalog_themes(CatalogTheme::Fluent);
     }
 
     fn on_framework_initialization_completed(this: &Self) {
         let lifetime = this.application_lifetime();
         if let Some(desktop_lifetime) = lifetime.as_ref().and_then(|l| l.as_classic_desktop_style_application_lifetime()) {
             desktop_lifetime.set_main_window(Some(Self::create_main_window()));
+        } else if let Some(single_view_factory_application_lifetime) =
+            lifetime.as_ref().and_then(|l| l.as_activity_application_lifetime())
+        {
+            single_view_factory_application_lifetime.set_main_view_factory(Some(Rc::new(Self::create_main_view_host)));
+        } else if let Some(single_view_lifetime) = lifetime.as_ref().and_then(|l| l.as_single_view_application_lifetime())
+        {
+            single_view_lifetime.set_main_view(Some(Self::create_main_view_host()));
         }
 
         if let Some(activatable_application_lifetime) = this.try_get::<dyn IActivatableLifetime>() {
@@ -127,14 +126,12 @@ impl App {
     /// `FerroXamlLoader.Load(this)`: populates the application from
     /// `App.xaml`, with the dictionary it includes (`CustomThemes.xaml`).
     ///
-    /// TEMPORARY: while `App.xaml` or `CustomThemes.xaml` is listed in
-    /// `excluded.txt` the subset of them that loads is loaded instead.
+    /// TEMPORARY: while `App.xaml` is listed in `excluded.txt` the subset of
+    /// it that loads is loaded instead.
     fn load_document(&self) {
         crate::register_types();
         let root: BoxedValue = Rc::new(self.to_ref());
-        let result = if crate::excluded(Self::DOCUMENT_PATH).is_some()
-            || crate::excluded(temporary::CUSTOM_THEMES_PATH).is_some()
-        {
+        let result = if crate::excluded(Self::DOCUMENT_PATH).is_some() {
             temporary::load_app_document_subset(root)
         } else {
             try_load_document_group(Self::DOCUMENT_PATH, Some(root), &[temporary::CUSTOM_THEMES_PATH]).map(|_| ())
@@ -150,17 +147,19 @@ impl App {
     }
 
     /// `new MainWindow { DataContext = new MainWindowViewModel() }`.
-    ///
-    /// TEMPORARY: while `MainWindow.xaml` is listed in `excluded.txt` the
-    /// window is the code-built shell of [`crate::temporary`].
     fn create_main_window() -> Ref<Window> {
-        let view_model = MainWindowViewModel::new();
-        if crate::excluded(MainWindow::DOCUMENT_PATH).is_some() {
-            return temporary::shell::create_shell_window(view_model);
-        }
         let window = MainWindow::new();
-        window.set_data_context(Some(view_model as BoxedValue));
+        window.set_data_context(Some(MainWindowViewModel::new() as BoxedValue));
         window.upcast()
+    }
+
+    /// `new PageNavigationHost { Page = new MainView { DataContext = new MainWindowViewModel() } }`.
+    fn create_main_view_host() -> Ref<Control> {
+        let page = MainView::new();
+        page.set_data_context(Some(MainWindowViewModel::new() as BoxedValue));
+        let host = PageNavigationHost::new();
+        host.set_page(page.upcast::<Page>());
+        host.upcast()
     }
 
     pub fn on_dock_new_window_clicked(&self, _sender: &Option<BoxedValue>, _e: &EventArgs) {
@@ -222,8 +221,8 @@ impl App {
             app.theme_styles_container.add(Style::new());
         }
 
-        // A theme or colour picker style that is not available leaves its slot as it is
-        // (TEMPORARY: the managed original has all four; see `crate::temporary`).
+        // A colour picker style that is not available leaves its slot as it is (TEMPORARY: the
+        // managed original has both; see `crate::temporary`).
         if theme == CatalogTheme::Fluent {
             if let Some(fluent_theme) = app.fluent_theme.borrow().clone() {
                 app.theme_styles_container.set(0, fluent_theme.as_style());
@@ -251,6 +250,15 @@ impl App {
                 if let Some(old_window) = old_window {
                     old_window.close();
                 }
+            } else if let Some(single_view_factory_application_lifetime) =
+                lifetime.as_ref().and_then(|l| l.as_activity_application_lifetime())
+            {
+                single_view_factory_application_lifetime
+                    .set_main_view_factory(Some(Rc::new(Self::create_main_view_host)));
+            } else if let Some(single_view_lifetime) =
+                lifetime.as_ref().and_then(|l| l.as_single_view_application_lifetime())
+            {
+                single_view_lifetime.set_main_view(Some(Self::create_main_view_host()));
             }
         }
     }

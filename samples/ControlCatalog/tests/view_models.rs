@@ -1,10 +1,9 @@
-//! Tests of the main view model, its models and the temporary shell.
+//! Tests of the main view model, its models and the main view.
 //!
 //! Not ports: the upstream sample has no tests.
 
 use super::support::*;
 use crate::models::{HomeSection, PageItem};
-use crate::temporary::shell::create_shell;
 use crate::view_models::MainWindowViewModel;
 use ferroui_base::media::StreamGeometry;
 use ferroui_base::threading::Dispatcher;
@@ -125,47 +124,69 @@ fn the_title_bar_decoration_switches_change_the_decorations() {
     assert_eq!(TitleBarDecorations::ALL, view_model.title_bar_decorations());
 }
 
+/// The main window with the view model as its data context, shown.
+fn show_main_window(view_model: &Rc<MainWindowViewModel>) -> ferroui_base::Ref<crate::MainWindow> {
+    let window = crate::MainWindow::new();
+    window.set_data_context(Some(view_model.clone() as ferroui_base::BoxedValue));
+    window.show();
+    Dispatcher::ui_thread().run_jobs(None);
+    window
+}
+
+#[test]
+fn the_main_view_navigates_to_the_home_page_and_gives_the_view_model_its_navigator() {
+    let _app = start_catalog_application();
+    let view_model = MainWindowViewModel::new();
+    let window = show_main_window(&view_model);
+
+    let navigator = view_model.navigator().expect("the navigation page of the main view");
+    assert_eq!(1, navigator.stack_depth());
+    assert!(view_model.current_page_item().is_some_and(|current| Rc::ptr_eq(&current, &view_model.home_item())));
+    window.close();
+}
+
 #[test]
 fn navigating_to_an_item_replaces_the_page_and_marks_its_section() {
     let _app = start_catalog_application();
     let view_model = MainWindowViewModel::new();
-    let shell = create_shell(view_model.clone());
-    shell.window.show();
-    let item = shell.first_page.clone().expect("a page that loads");
+    let window = show_main_window(&view_model);
+    let item = view_model.home_sections()[0].items().unwrap()[0].clone();
 
     view_model.navigate_to_item(&item);
     Dispatcher::ui_thread().run_jobs(None);
 
     assert!(view_model.current_page_item().is_some_and(|current| Rc::ptr_eq(&current, &item)));
-    assert_eq!(1, shell.navigation_page.stack_depth());
+    assert_eq!(1, view_model.navigator().unwrap().stack_depth());
     let section = view_model.home_sections().iter().find(|s| s.title() == item.section()).cloned().unwrap();
     assert!(section.is_current());
     assert!(section.is_expanded());
-    shell.window.close();
+    window.close();
 }
 
 /// Every page the application offers constructs and is shown by the
-/// navigation page of the shell (TEMPORARY shell, see `temporary.rs`).
+/// navigation page of the main view (the settings page needs the
+/// application of the catalog and is left to the smoke run of the desktop
+/// entry point).
 #[test]
-fn every_available_page_is_shown_by_the_shell() {
+fn every_available_page_is_shown_by_the_main_view() {
     let _app = start_catalog_application();
     let view_model = MainWindowViewModel::new();
-    let shell = create_shell(view_model.clone());
-    shell.window.show();
+    let window = show_main_window(&view_model);
 
     let mut shown = 0;
-    for section in view_model.home_sections().iter() {
-        for item in section.items().unwrap().iter() {
-            view_model.navigate_to_item(item);
-            Dispatcher::ui_thread().run_jobs(None);
-            assert!(
-                view_model.current_page_item().is_some_and(|current| Rc::ptr_eq(&current, item)),
-                "{} is not the current page",
-                item.header()
-            );
-            shown += 1;
+    for item in crate::smoke::pages(&view_model) {
+        if Rc::ptr_eq(&item, &view_model.settings_item()) {
+            continue;
         }
+        view_model.navigate_to_item(&item);
+        Dispatcher::ui_thread().run_jobs(None);
+        assert!(
+            view_model.current_page_item().is_some_and(|current| Rc::ptr_eq(&current, &item)),
+            "{} is not the current page",
+            item.header()
+        );
+        shown += 1;
     }
-    assert!(shown > 0);
-    shell.window.close();
+    assert!(shown > 1);
+    window.close();
 }

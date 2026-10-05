@@ -1,15 +1,19 @@
 //! Port of `ViewModels/TreeViewPageViewModel.cs`.
 
 use super::random::Random;
+use ferroui_base::collections::FerroList;
 use ferroui_base::data::model::{BindableList, Event, INotifyPropertyChanged};
 use ferroui_base::ferro_markup_type;
 use ferroui_base::input::ICommand;
 use ferroui_controls::primitives::SelectedItemsList;
-use ferroui_controls::{box_item, unbox_item, ItemsSource, SelectionMode};
+use ferroui_controls::{box_item, unbox_item, SelectionMode};
 use mini_mvvm::{MiniCommand, ViewModelBase};
 use std::cell::{Cell, RefCell};
 use std::fmt;
 use std::rc::{Rc, Weak};
+
+ferroui_controls::ferro_markup_list!(pub NodeList: Rc<Node>);
+
 
 /// The view model of the tree view page.
 pub struct TreeViewPageViewModel {
@@ -152,7 +156,7 @@ ferro_markup_type!(class TreeViewPageViewModel {
     constructors: [() => TreeViewPageViewModel::new],
     properties: [
         // A list a binding delivers to an items source property.
-        Items: ItemsSource { get: |this: &Rc<TreeViewPageViewModel>| ItemsSource::from(this.items()) },
+        Items: FerroList<Rc<Node>> { get: |this: &Rc<TreeViewPageViewModel>| this.items().items().clone() },
         SelectedItems: SelectedItemsList { get: |this: &Rc<TreeViewPageViewModel>| this.selected_items() },
         AddItemCommand: Rc<dyn ICommand> {
             get: |this: &Rc<TreeViewPageViewModel>| this.add_item_command().as_command()
@@ -267,7 +271,7 @@ ferro_markup_type!(class Node as "TreeViewPageViewModel+Node" {
         Header: String { get: |this: &Rc<Node>| this.header() },
         AreChildrenInitialized: bool { get: |this: &Rc<Node>| this.are_children_initialized() },
         // A list a binding delivers to an items source property.
-        Children: ItemsSource { get: |this: &Rc<Node>| ItemsSource::from(this.children()) },
+        Children: FerroList<Rc<Node>> { get: |this: &Rc<Node>| this.children().items().clone() },
     ],
     methods: [
         fn AddItem() => |this: &Rc<Node>| this.add_item(),

@@ -10,7 +10,12 @@
 use super::support::*;
 use crate::markup::{describe, try_load_text};
 use crate::App;
-use ferroui_base::{instantiate, BoxedValue};
+use ferroui_base::media::{IBrush, VisualBrush};
+use ferroui_base::platform::IBitmapImpl;
+use ferroui_base::{instantiate, BoxedValue, FerroLocator};
+use ferroui_controls::platform::{IPlatformIconLoader, IWindowIconImpl};
+use ferroui_controls::{Control, Panel};
+use std::io;
 use std::rc::Rc;
 
 const XMLNS: &str = "xmlns='https://github.com/ferroui' xmlns:x='http://schemas.microsoft.com/winfx/2006/xaml'";
@@ -48,7 +53,6 @@ fn gap_c003_native_menu_item_icon_from_text() {
 }
 
 #[test]
-#[ignore = "gap C004: the item type of a view-model list is not known to a compiled binding of an item template"]
 fn gap_c004_item_type_of_a_view_model_list_for_compiled_bindings() {
     let _app = start_catalog_application();
     // Upstream: the data type of an item template is inferred from the element type of the
@@ -71,13 +75,100 @@ fn gap_c005_theme_variant_key_in_a_compiled_binding() {
     }
 }
 
+#[test]
+#[ignore = "gap C009: Calendar.WeekNumberRule is not converted from text (CalendarWeekRule has no markup metadata)"]
+fn gap_c009_calendar_week_rule_from_text() {
+    let _app = start_catalog_application();
+    let xaml = format!("<Calendar {XMLNS} ShowWeekNumbers='True' WeekNumberRule='FirstFourDayWeek' />");
+    if let Err(error) = try_load_text(&xaml, None, None) {
+        panic!("{}", describe(&error));
+    }
+}
+
+#[test]
+#[ignore = "gap C010: the columns of a TableView cannot be added from markup"]
+fn gap_c010_table_view_columns_from_markup() {
+    let _app = start_catalog_application();
+    let xaml = format!(
+        "<TableView {XMLNS}><TableView.Columns><TableViewColumn Header='Country' Width='2*' /></TableView.Columns></TableView>"
+    );
+    if let Err(error) = try_load_text(&xaml, None, None) {
+        panic!("{}", describe(&error));
+    }
+}
+
+#[test]
+#[ignore = "gap C006: a VisualBrush is neither mutable, immutable nor a composition render resource"]
+fn gap_c006_visual_brush_is_a_composition_render_resource() {
+    let _app = start_application();
+    // The compositor converts an opacity mask that is not a render resource with
+    // `BrushExtensions::to_immutable`, which panics for a visual brush.
+    let brush: Rc<dyn IBrush> = VisualBrush::new().into();
+    assert!(brush.as_composition_render_resource().is_some() || brush.as_mutable_brush().is_some());
+}
+
+#[test]
+#[ignore = "gap C011: the pages of a TabbedPage / CarouselPage (MultiPage.Pages) cannot be added from markup"]
+fn gap_c011_multi_page_pages_from_markup() {
+    let _app = start_catalog_application();
+    for xaml in [
+        format!("<TabbedPage {XMLNS}><ContentPage Header='One' /><ContentPage Header='Two' /></TabbedPage>"),
+        format!("<CarouselPage {XMLNS}><ContentPage Header='One' /></CarouselPage>"),
+    ] {
+        if let Err(error) = try_load_text(&xaml, None, None) {
+            panic!("{}", describe(&error));
+        }
+    }
+}
+
 /// The table of the elements removed from `App.xaml` matches the document,
 /// and the subset loads into an application (TEMPORARY, see `temporary.rs`).
 #[test]
 fn the_subset_of_the_application_document_loads() {
     let _app = start_application();
+    // The tray icon of the document loads its icon through the icon loader of the platform.
+    let loader: Rc<dyn IPlatformIconLoader> = Rc::new(TestIconLoader);
+    FerroLocator::current_mutable().bind::<dyn IPlatformIconLoader>().to_constant(loader);
     let root: BoxedValue = Rc::new(instantiate(App::construct()));
     if let Err(error) = crate::temporary::load_app_document_subset(root) {
         panic!("{}", describe(&error));
+    }
+}
+
+/// The table of the elements removed from `MainWindow.xaml` matches the
+/// document, and the subset loads into a main window whose content is the
+/// real main view (TEMPORARY, see `temporary.rs`).
+#[test]
+fn the_subset_of_the_main_window_document_loads() {
+    let _app = start_catalog_application();
+    let window = crate::MainWindow::new();
+    let panel = window.content().and_then(|content| Control::from_boxed(&content)).expect("the root panel");
+    assert_eq!(1, panel.cast::<Panel>().expect("a panel").children().count());
+}
+
+struct TestIconImpl(Vec<u8>);
+
+impl IWindowIconImpl for TestIconImpl {
+    fn save(&self, output_stream: &mut dyn io::Write) -> io::Result<()> {
+        output_stream.write_all(&self.0)
+    }
+}
+
+/// An icon loader that keeps the bytes of the icon.
+struct TestIconLoader;
+
+impl IPlatformIconLoader for TestIconLoader {
+    fn load_icon_from_file(&self, file_name: &str) -> io::Result<Rc<dyn IWindowIconImpl>> {
+        Ok(Rc::new(TestIconImpl(file_name.as_bytes().to_vec())))
+    }
+
+    fn load_icon_from_stream(&self, stream: &mut dyn io::Read) -> io::Result<Rc<dyn IWindowIconImpl>> {
+        let mut data = Vec::new();
+        stream.read_to_end(&mut data)?;
+        Ok(Rc::new(TestIconImpl(data)))
+    }
+
+    fn load_icon_from_bitmap(&self, _bitmap: Rc<dyn IBitmapImpl>) -> Rc<dyn IWindowIconImpl> {
+        Rc::new(TestIconImpl(Vec::new()))
     }
 }

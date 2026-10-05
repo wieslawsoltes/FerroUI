@@ -23,9 +23,11 @@ mod app;
 mod assets;
 mod decorated_window;
 mod icons;
+mod main_view;
 mod main_window;
 pub mod markup;
 mod register_types;
+mod smoke;
 pub mod temporary;
 mod transparent_styles;
 
@@ -45,17 +47,18 @@ pub mod views;
 pub use app::App;
 pub use assets::{documents, excluded, excluded_documents, ExcludedDocument};
 pub use decorated_window::DecoratedWindow;
+pub use main_view::MainView;
 pub use main_window::MainWindow;
 pub use register_types::{register_types, ASSEMBLY};
-pub use temporary::shell::show_every_page;
+pub use smoke::show_every_page;
 pub use transparent_styles::TransparentStyles;
 
 /// The classes of the root namespace `ControlCatalog` (`X::TYPE`).
-pub(crate) const ROOT_TYPES: &[&TypeInfo] = &[App::TYPE, DecoratedWindow::TYPE, MainWindow::TYPE, TransparentStyles::TYPE];
+pub(crate) const ROOT_TYPES: &[&TypeInfo] = &[App::TYPE, DecoratedWindow::TYPE, MainView::TYPE, MainWindow::TYPE, TransparentStyles::TYPE];
 
 /// The classes of the root namespace that have a document (`&X::XAML_CLASS`).
 pub(crate) const ROOT_CLASSES: &[&XamlClass] =
-    &[&App::XAML_CLASS, &DecoratedWindow::XAML_CLASS, &MainWindow::XAML_CLASS, &TransparentStyles::XAML_CLASS];
+    &[&App::XAML_CLASS, &DecoratedWindow::XAML_CLASS, &MainView::XAML_CLASS, &MainWindow::XAML_CLASS, &TransparentStyles::XAML_CLASS];
 
 /// The types of the root namespace declared with `ferro_markup_type!` / `ferro_markup_enum!`.
 pub(crate) const ROOT_MARKUP_TYPES: &[&MarkupType] = &[];

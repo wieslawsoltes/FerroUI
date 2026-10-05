@@ -3,9 +3,9 @@
 //! `main_window_view_model_page_list.rs`.
 //!
 //! Not ported, because what they name does not exist in the framework yet:
-//! `AboutCommand` (the about dialog of the dialogs assembly),
-//! `ValidatedDateExample` (`System.DateTime` and the `[Required]`
-//! validation attribute), `Win32WindowCornerPreferences` and
+//! `AboutCommand` (the about dialog of the dialogs assembly), the
+//! `[Required]` validation attribute of `ValidatedDateExample` (data
+//! annotations), `Win32WindowCornerPreferences` and
 //! `Win32WindowCornerPreference` (`Win32Properties`).
 
 use crate::icons::Icons;
@@ -17,6 +17,7 @@ use ferroui_base::data::model::{Event, INotifyPropertyChanged};
 use ferroui_base::input::ICommand;
 use ferroui_base::media::StreamGeometry;
 use ferroui_base::styling::ControlTheme;
+use ferroui_base::utilities::DateTime;
 use ferroui_base::{ferro_markup_type, Ref, Thickness};
 use ferroui_controls::chrome::TitleBarDecorations;
 use ferroui_controls::{Application, INavigation, ItemsSource, SplitViewDisplayMode};
@@ -50,6 +51,7 @@ pub struct MainWindowViewModel {
     is_drawer_opened: Cell<bool>,
     display_mode: Cell<SplitViewDisplayMode>,
     query: RefCell<Option<String>>,
+    validated_date_example: Cell<Option<DateTime>>,
     exit_command: Rc<MiniCommand>,
     navigate_to_page_command: Rc<MiniCommand>,
     settings_command: Rc<MiniCommand>,
@@ -162,6 +164,7 @@ impl MainWindowViewModel {
                 is_drawer_opened: Cell::new(true),
                 display_mode: Cell::new(SplitViewDisplayMode::default()),
                 query: RefCell::new(Some(String::new())),
+                validated_date_example: Cell::new(None),
                 exit_command,
                 navigate_to_page_command,
                 settings_command,
@@ -407,6 +410,15 @@ impl MainWindowViewModel {
         self.home_command.clone()
     }
 
+    /// A required date which demonstrates validation for the date picker.
+    pub fn validated_date_example(&self) -> Option<DateTime> {
+        self.validated_date_example.get()
+    }
+
+    pub fn set_validated_date_example(&self, value: Option<DateTime>) {
+        self.base.raise_and_set_if_changed_cell(&self.validated_date_example, value, "ValidatedDateExample");
+    }
+
     pub fn navigate_to_item(&self, item: &Rc<PageItem>) {
         if let Some(this) = self.this.upgrade() {
             drop(start_async(Self::navigate_to_async(this, Some(item.clone()))));
@@ -559,6 +571,10 @@ ferro_markup_type!(class MainWindowViewModel {
             set: |this: &Vm, value: SplitViewDisplayMode| this.set_display_mode(value)
         },
         Query: Option<String> { get: |this: &Vm| this.query(), set: |this: &Vm, value: Option<String>| this.set_query(value) },
+        ValidatedDateExample: Option<DateTime> {
+            get: |this: &Vm| this.validated_date_example(),
+            set: |this: &Vm, value: Option<DateTime>| this.set_validated_date_example(value)
+        },
         ExitCommand: Rc<dyn ICommand> { get: |this: &Vm| -> Rc<dyn ICommand> { this.exit_command() } },
         NavigateToPageCommand: Rc<dyn ICommand> {
             get: |this: &Vm| -> Rc<dyn ICommand> { this.navigate_to_page_command() }

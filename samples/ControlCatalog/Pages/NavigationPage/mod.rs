@@ -14,6 +14,16 @@ mod lavenir_dish_detail_view;
 mod lavenir_menu_view;
 mod lavenir_profile_view;
 mod lavenir_reservations_view;
+mod navigation_page_appearance_page;
+mod navigation_page_attached_methods_page;
+mod navigation_page_events_page;
+mod navigation_page_first_look_page;
+mod navigation_page_gesture_page;
+mod navigation_page_modal_page;
+mod navigation_page_modal_transitions_page;
+mod navigation_page_stack_page;
+mod navigation_page_title_page;
+mod navigation_page_toolbar_page;
 mod pulse_home_view;
 mod pulse_login_view;
 mod pulse_profile_view;
@@ -35,6 +45,16 @@ pub use lavenir_dish_detail_view::LAvenirDishDetailView;
 pub use lavenir_menu_view::{DishSelected, LAvenirMenuView};
 pub use lavenir_profile_view::LAvenirProfileView;
 pub use lavenir_reservations_view::LAvenirReservationsView;
+pub use navigation_page_appearance_page::NavigationPageAppearancePage;
+pub use navigation_page_attached_methods_page::NavigationPageAttachedMethodsPage;
+pub use navigation_page_events_page::NavigationPageEventsPage;
+pub use navigation_page_first_look_page::NavigationPageFirstLookPage;
+pub use navigation_page_gesture_page::NavigationPageGesturePage;
+pub use navigation_page_modal_page::NavigationPageModalPage;
+pub use navigation_page_modal_transitions_page::NavigationPageModalTransitionsPage;
+pub use navigation_page_stack_page::NavigationPageStackPage;
+pub use navigation_page_title_page::NavigationPageTitlePage;
+pub use navigation_page_toolbar_page::NavigationPageToolbarPage;
 pub use pulse_home_view::PulseHomeView;
 pub use pulse_login_view::PulseLoginView;
 pub use pulse_profile_view::PulseProfileView;
@@ -57,6 +77,16 @@ pub(crate) const TYPES: &[&TypeInfo] = &[
     LAvenirMenuView::TYPE,
     LAvenirProfileView::TYPE,
     LAvenirReservationsView::TYPE,
+    NavigationPageAppearancePage::TYPE,
+    NavigationPageAttachedMethodsPage::TYPE,
+    NavigationPageEventsPage::TYPE,
+    NavigationPageFirstLookPage::TYPE,
+    NavigationPageGesturePage::TYPE,
+    NavigationPageModalPage::TYPE,
+    NavigationPageModalTransitionsPage::TYPE,
+    NavigationPageStackPage::TYPE,
+    NavigationPageTitlePage::TYPE,
+    NavigationPageToolbarPage::TYPE,
     PulseHomeView::TYPE,
     PulseLoginView::TYPE,
     PulseProfileView::TYPE,
@@ -80,6 +110,16 @@ pub(crate) const CLASSES: &[&XamlClass] = &[
     &LAvenirMenuView::XAML_CLASS,
     &LAvenirProfileView::XAML_CLASS,
     &LAvenirReservationsView::XAML_CLASS,
+    &NavigationPageAppearancePage::XAML_CLASS,
+    &NavigationPageAttachedMethodsPage::XAML_CLASS,
+    &NavigationPageEventsPage::XAML_CLASS,
+    &NavigationPageFirstLookPage::XAML_CLASS,
+    &NavigationPageGesturePage::XAML_CLASS,
+    &NavigationPageModalPage::XAML_CLASS,
+    &NavigationPageModalTransitionsPage::XAML_CLASS,
+    &NavigationPageStackPage::XAML_CLASS,
+    &NavigationPageTitlePage::XAML_CLASS,
+    &NavigationPageToolbarPage::XAML_CLASS,
     &PulseHomeView::XAML_CLASS,
     &PulseLoginView::XAML_CLASS,
     &PulseProfileView::XAML_CLASS,

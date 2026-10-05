@@ -28,6 +28,9 @@ ferroui-markup-xaml = { workspace = true }
 ferroui-markup-xaml-loader = { workspace = true, features = ["runtime"] }
 ferroui-themes-simple = { workspace = true }
 ferroui-themes-fluent = { workspace = true }
+# The Skia lease of `Pages/TabbedPage/FluidNavBar` (custom drawing on the canvas of the backend).
+ferroui-skia = { workspace = true }
+skia-safe = { workspace = true }
 mini-mvvm = { path = "../MiniMvvm" }
 # The compatibility decomposition of the search keys of the pages (`PageItem::create_search_key`).
 unicode-normalization = "0.1"

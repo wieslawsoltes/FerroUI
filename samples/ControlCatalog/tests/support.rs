@@ -42,8 +42,7 @@ pub fn start_catalog_application() -> UnitTestApplicationScope {
     FerroRuntimeXamlLoader::register();
 
     let application = Application::current().expect("the unit test application");
-    // TEMPORARY: the subset of the dictionary that loads, while it is listed in `excluded.txt`.
-    let custom_themes = match crate::temporary::load_custom_themes() {
+    let custom_themes = match try_load_document("/CustomThemes.xaml", None) {
         Ok(value) => value,
         Err(error) => panic!("/CustomThemes.xaml: {}", describe(&error)),
     };

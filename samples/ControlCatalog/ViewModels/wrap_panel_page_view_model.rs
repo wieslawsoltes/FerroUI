@@ -1,6 +1,7 @@
 //! Port of `ViewModels/WrapPanelPageViewModel.cs`.
 
 use super::random::Random;
+use ferroui_base::collections::FerroList;
 use ferroui_base::data::model::{BindableList, Event, INotifyPropertyChanged};
 use ferroui_base::layout::Orientation;
 use ferroui_base::{ferro_markup_type, Thickness};
@@ -8,6 +9,9 @@ use ferroui_controls::{ItemsSource, WrapPanelItemsAlignment};
 use mini_mvvm::ViewModelBase;
 use std::cell::Cell;
 use std::rc::Rc;
+
+ferroui_controls::ferro_markup_list!(pub WrapPanelItemList: Rc<WrapPanelItemViewModel>);
+
 
 /// The view model of the wrap panel page.
 pub struct WrapPanelPageViewModel {
@@ -178,7 +182,9 @@ ferro_markup_type!(class WrapPanelPageViewModel {
             get: |this: &Rc<WrapPanelPageViewModel>| ItemsSource::from(this.items_alignments())
         },
         Orientations: ItemsSource { get: |this: &Rc<WrapPanelPageViewModel>| ItemsSource::from(this.orientations()) },
-        Items: ItemsSource { get: |this: &Rc<WrapPanelPageViewModel>| ItemsSource::from(this.items()) },
+        Items: FerroList<Rc<WrapPanelItemViewModel>> {
+            get: |this: &Rc<WrapPanelPageViewModel>| this.items().items().clone()
+        },
         ItemsAlignment: WrapPanelItemsAlignment {
             get: |this: &Rc<WrapPanelPageViewModel>| this.items_alignment(),
             set: |this: &Rc<WrapPanelPageViewModel>, value: WrapPanelItemsAlignment| this.set_items_alignment(value)
