@@ -2,17 +2,13 @@
 
 ## State (read this first; every worker updates it before stopping)
 
-- Stage E1 is DONE on branch `xaml-compiler` (pull request "XAML compiler: stage E1 - build the
-  draft, emitter of objects, registered properties, constants and names"). The draft builds; the
-  checked-in `tests/FerroUI.Markup.Xaml.UnitTests/emitter/generated.rs` is the real output of the
-  emitter; the differential harness is green: 54 of the 66 corpus documents are eligible and all
-  54 build object trees equal to the run-time loader's (three of them, `duplicate_name.xaml`,
-  `multiline_duplicate_name.xaml` and `end_init_failure.xaml`, by failing with the same exception
-  type and message).
-- Review fixes of the E1 pull request are in (section 3, "Review fixes").
-- Stage E2 has not started. Its branch is `xaml-compiler-e2`, stacked on `xaml-compiler`
-  (see section 7 for the plan).
-- Nothing is half-done in the working tree of the E1 branch.
+- Stage E1 is DONE: branch `xaml-compiler`, pull request #7.
+- Stage E2 is DONE: branch `xaml-compiler-e2`, stacked on `xaml-compiler` (its pull request says
+  so). Corpus: 71 of 75 documents eligible, all 71 match the run-time loader. The four that are
+  not eligible need E3/E4 (bindings, styles, templates, resources). Theme documents: 0 of 167
+  eligible, 144 of them because a node needs the parent stack (E3); measured by
+  `emitter::repository_documents::measure_theme_documents`.
+- Stage E3 is next (section 7). Nothing is half-done in the working tree of either branch.
 
 Design documents in the repository: `docs/porting/xaml.md`, sections 9 (emitter design: call forms
 A/B/C, build integration, code-behind), 9.5 (source scanner), 9.12 (the 14 rulings), 9.13, and
@@ -183,7 +179,7 @@ draft's handling of errors and the conversions to `object` did not match the int
 in E1 by `rt::at` and `rt::to_object`). The draft's predicted `generated.rs` compiled too; it was
 replaced by the real output.
 
-## 5. Why plain members and collection adds were stopped, and how E2 should do it
+## 5. Why the draft stopped at plain members and collection adds (history; E2 did it as section 7 describes)
 
 Reasons the draft stopped:
 
@@ -328,28 +324,54 @@ of the XAML test crate (most wait for the emitter); catalog gaps C101, C102, C20
 property), C305 (`List<T>` with `x:TypeArguments`), C306 (`Slider.Ticks` from text), C310
 (`TimeSpan` from text); C006/C007 belong to rendering.
 
-## 7. Next steps
+## 7. What stage E2 delivered, and the next steps
 
-E2 (branch `xaml-compiler-e2`, stacked on `xaml-compiler`), in this order:
+E2 (branch `xaml-compiler-e2`):
 
-1. Public Rust paths, mechanically. Plan: the generator (`scripts/generate_markup_types.py`)
-   resolves the `pub mod` / `pub use` tree of each framework crate (named and glob re-exports)
-   and writes, per crate, a generated table of the shortest public path of every registered class,
-   enumeration, value type and contract, as a macro invocation whose tokens are the crate-relative
-   public path (`crate::layout::HorizontalAlignment`): the macro takes the handle and the path
-   string from the same tokens, so rustc checks that the path names the registered type. A
-   checked-in file in the XAML test crate names every recorded path from outside the crates
-   (drift-tested like `generated.rs`), so rustc checks that each path is public. Then remove
-   `PUBLIC_MODULES`, `ROOT_RUST_PATHS` and both `VALUE_RUST_PATHS`.
-2. Typed accessor functions for plain members (section 5, item 1). The workable form found while
-   doing E1: the declaration macros emit, next to `impl MarkupTyped for T`, an inherent
-   `impl T { #[doc(hidden)] pub fn __markup_get_Name(this: &This) -> V { (get)(this) } .. }`
-   (inherent impls may be written in any module of the defining crate, so the function is public
-   wherever the type is, with no module publicity problem), and record the function name in the
-   metadata (`MarkupProperty.emit_get` / `emit_set`, `MarkupMethod.emit`). A declaration of a type
-   of another crate cannot have an inherent impl: it needs an opt-out form and stays form C.
-3. Collection adds: the `FerroList<T>` projection (`{getter}(&target).add(value)`), then adders
-   declared in metadata.
-4. Declared accessors of attached properties (`Canvas.Left`).
-5. Extend the corpus with what that makes eligible; report eligible / matching counts.
+- Public Rust paths, mechanically: `scripts/rust_paths.py` (called by
+  `generate_markup_types.py`, target `rust-paths`) resolves the module tree of each framework crate
+  and writes `rust_paths.rs` per crate: classes, non-generic markup types, contracts, and the
+  registered instantiations of generic types (rendered with absolute paths). `ferro_rust_paths!`
+  registers `CLASS_RUST_PATHS`, `MARKUP_RUST_PATHS` (with a trait flag) and `TYPE_RUST_PATHS` (by
+  `TypeId` of the type itself). The hand lists of the draft are gone. The XAML test crate's
+  `emitter/rust_paths_check.rs` (checked in, drift-tested) names every recorded path and every
+  public property accessor from outside the crates: 346 classes, 511 markup types, 1136 accessors.
+- Typed functions of declared members: the declaration macros generate, next to the declaration, an
+  inherent `impl` of the declared type with `__markup_get_<Name>`, `__markup_set_<Name>`,
+  `__markup_static_get_<Name>`, `__markup_static_set_<Name>`, `__markup_<Method>_<n>`,
+  `__markup_new_<n>` and `__markup_parse` (`MarkupEmit` in the metadata; a pool of indices keeps
+  overloads apart). `MarkupType::this` and `MarkupType::value` record the instance type and the
+  value type (what constructors and `Parse` return: `this:` if stated, else the first handle).
+  The run-time type system tags projected methods (`DeclaredMember`) and constructors with their
+  declarations.
+- Property accessors are recorded with the type whose `impl` declares them (`Self`) and their
+  visibility (some framework accessors live in another type's `impl`, e.g. `ThemeVariant` holds
+  two of `StyledElement`'s).
+- Emitter: declared setters and static attached accessors, collection adds (`AdderSetter` with a
+  declared or registered getter), method-call nodes, declared constructors with arguments, list
+  constants, `rt::cast` (the loader's cast where `ValueTypes::is_assignable` proves it),
+  `rt::argument` (a nullable instance converted as the loader converts it). The untyped-value
+  normalisation (`to_untyped`, `normalize_object`, `box_object`) moved to the runtime library.
+- The carriers `FerroListOf<T>` and `AddChildOf<T>` of the controls crate are public (hidden) so
+  generated code can call their functions.
 
+Next, E3 (stack it on `xaml-compiler-e2`):
+
+1. The compiled context (ruling 7, design R1): move `RuntimeContext` (`runtime/interpreter/
+   runtime_context.rs`, with the name scope field and the eager parent stack provider of
+   `runtime/framework/services.rs`) into `ferroui-markup-xaml` as `xaml_il::runtime::XamlIlContext`,
+   re-seat the interpreter on it, then emit `ctx.push_parent` / `pop_parent` exactly where the
+   interpreter pushes (`needs_parent_stack` of the node, `ParentStackVisitor`). That alone makes
+   most theme documents get past the first blocker.
+2. Markup extensions (9.3.4): the provide-value target property set and cleared on the context,
+   `provide_value` called through the declared member, the dynamic setter chain of
+   `property_assignment` unrolled over the setters `assignment_plan` keeps (design 9.3.3, last row).
+3. Static and dynamic resources, `x:Static` of properties and fields (typed functions exist for
+   static properties; fields need one: add `__markup_field_<Name>` to the macros).
+4. Compiled bindings: binding path nodes as typed builder calls (`runtime/framework/binding_path.rs`
+   is the interpreter; the typed hook `MarkupProperty::typed_path_element` shows the typed form).
+5. Measure the start-up effect on `themed_window` from E3 on (the task describes how on Linux).
+
+Members still without a typed function (form C would be needed, or a macro extension): events,
+fields, indexers, and declarations of types that are not local to the declaring crate (none
+exist today: every declaration compiled with the generated `impl`).
