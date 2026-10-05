@@ -8,6 +8,7 @@ use crate::cursor::FerroNativeCursor;
 use crate::deferred_framebuffer::DeferredFramebuffer;
 use crate::ferro_native_drag_source::{data_transfer_from_handle, free_data_transfer_handle};
 use crate::ferro_native_text_input_method::FerroNativeTextInputMethod;
+use crate::frn_automation_peer::FrnAutomationPeer;
 use crate::helpers::*;
 use crate::interop::*;
 use crate::metal::MetalPlatformSurface;
@@ -33,8 +34,11 @@ use ferroui_base::platform::{
 use ferroui_base::reactive::IDisposable;
 use ferroui_base::threading::{Dispatcher, DispatcherPriority};
 use ferroui_base::{FerroLocator, LocatorExtensions, PixelPoint, Point, Rect, Ref, Size, Vector, Visual};
+use ferroui_controls::automation::peers::{AutomationPeer, ControlAutomationPeer};
 use ferroui_controls::platform::{IPlatformHandle, IPopupImpl, IScreenImpl, ITopLevelImpl, PlatformThemeVariant};
-use ferroui_controls::{AcrylicPlatformCompensationLevels, TopLevel, WindowResizeReason, WindowTransparencyLevel};
+use ferroui_controls::{
+    AcrylicPlatformCompensationLevels, Control, TopLevel, WindowResizeReason, WindowTransparencyLevel,
+};
 use ferroui_microcom::{ComPtr, HResult};
 use std::any::{Any, TypeId};
 use std::cell::{Cell, RefCell};
@@ -394,6 +398,13 @@ impl TopLevelImpl {
     fn run_jobs_before_input() {
         Dispatcher::ui_thread()
             .run_jobs(Some(DispatcherPriority::from_value(DispatcherPriority::INPUT.value() + 1)));
+    }
+
+    /// The automation peer of the focus root of the top-level, if it is a
+    /// control.
+    pub fn get_automation_peer(&self) -> Option<Ref<AutomationPeer>> {
+        let focus_root = self.input_root()?.focus_root();
+        focus_root.cast::<Control>().map(|c| ControlAutomationPeer::create_peer_for_element(&c))
     }
 
     pub fn raw_text_input_event(&self, time_stamp: u64, text: &str) -> bool {
@@ -924,8 +935,11 @@ impl<P: TopLevelParent> IFrnTopLevelEventsImpl for TopLevelEvents<P> {
     }
 
     fn get_automation_peer(&self) -> Option<ComPtr<IFrnAutomationPeer>> {
-        // Automation peers are not ported yet: the top-level has none.
-        None
+        crate::callback_base::guard(None, || {
+            let native = self.0.top_level().get_automation_peer();
+
+            FrnAutomationPeer::wrap_native(native)
+        })
     }
 
     fn drag_event(
@@ -1393,5 +1407,22 @@ mod tests {
         // No-ops without a native object.
         top_level.invalidate();
         top_level.set_cursor(None);
+    }
+
+    // Not from upstream: the top-level reports the peer of its focus root to
+    // native code when the focus root is a control.
+    #[test]
+    fn automation_peer_is_the_peer_of_the_focus_root_control() {
+        let _dispatcher = Dispatcher::unit_test_scope();
+        let _scope = FerroLocator::enter_scope();
+        let (top_level, _) = top_level(false);
+        assert!(top_level.get_automation_peer().is_none());
+
+        top_level.set_input_root(Rc::new(InputRoot { root: InputElement::new() }));
+        assert!(top_level.get_automation_peer().is_none());
+
+        let root = ferroui_controls::Border::new();
+        top_level.set_input_root(Rc::new(InputRoot { root: root.clone().upcast() }));
+        assert_eq!(top_level.get_automation_peer(), Some(ControlAutomationPeer::create_peer_for_element(&root)));
     }
 }
