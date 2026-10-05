@@ -267,13 +267,14 @@ pub fn argument<T: Clone + 'static, V: PartialEq + 'static>(
 }
 
 /// `value` as the value of a member that declares the Rust type `T`, through
-/// the assignability casts of the untyped value conversions (an interface
-/// handle, a registered cast, a nullable form): the conversion the run-time
-/// loader applies to the argument (`to_exact` of the value as the loader
-/// holds it, [`into_markup_value`]). The emitter writes it only where
-/// [`ValueTypes::is_assignable`] holds for the two types, which is exactly
-/// when the cast succeeds.
-pub fn cast<T: Clone + 'static, V: PartialEq + 'static>(value: V) -> T {
+/// the assignability casts of the untyped value conversions (a registered
+/// cast, a nullable form): the conversion the run-time loader applies to the
+/// argument (`to_exact` of the value as the loader holds it,
+/// [`into_markup_value`]). The emitter writes it only where no static
+/// conversion states the cast and [`ValueTypes::is_assignable`] holds for the
+/// two types, which is when the cast succeeds; a value it does not convert is
+/// the `InvalidCastException` of the loader at `line`, `position`.
+pub fn cast<T: Clone + 'static, V: PartialEq + 'static>(value: V, line: i32, position: i32) -> Result<T, XamlLoadException> {
     let target = ValueType::of::<T>();
     let converted = match into_markup_value(value) {
         Some(boxed) if boxed.value_type_id() == target.id() => Some(boxed),
@@ -281,7 +282,7 @@ pub fn cast<T: Clone + 'static, V: PartialEq + 'static>(value: V) -> T {
         None => ValueTypes::try_convert(None, target).flatten(),
     };
     match converted.as_ref().and_then(|converted| converted.downcast_ref::<T>()) {
-        Some(value) => value.clone(),
-        None => panic!("{} is not assignable from the value (the emitter checked that it is)", target.name()),
+        Some(value) => Ok(value.clone()),
+        None => Err(at("InvalidCastException", format!("Unable to cast the value to {}.", target.name()), line, position)),
     }
 }

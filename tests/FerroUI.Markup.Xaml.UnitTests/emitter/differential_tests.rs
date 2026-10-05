@@ -12,7 +12,8 @@ use std::rc::Rc;
 
 use ferroui_base::controls::{INameScope, NameScope};
 use ferroui_base::data::core::ValueTypes;
-use ferroui_base::metadata::IServiceProvider;
+use ferroui_base::diagnostics::FerroObjectDiagnosticExtensions as _;
+use ferroui_base::metadata::{IServiceProvider, MarkupType};
 use ferroui_base::{BoxedValue, FerroObject, FerroProperty, FerroPropertyRegistry, Ref, StyledElement};
 use ferroui_markup_xaml::xaml_il::runtime::compiled::CompiledLoadError;
 use ferroui_markup_xaml::xaml_il::runtime::XamlIlRuntimeHelpers;
@@ -44,12 +45,15 @@ fn display(value: &BoxedValue) -> String {
 
 /// The canonical dump of an object tree: the full name of the class and,
 /// for a styled element, whether it is initialised; every registered
-/// property (of the class, and attached) that is set, sorted by name, and
-/// every direct property of the class, with its value in display form (an
-/// object value is shown as its class); for a named element, whether the
-/// name scope of the root finds it under its name; for an element with a
-/// name scope of its own, whether that scope is completed; then the logical
-/// children of a styled element, recursively.
+/// property (of the class, and attached) that is set, with the priority of
+/// its value, and every direct property of the class; every plain property
+/// the markup metadata of the class and its base classes declares with a
+/// getter, read through that getter; all of them sorted, with the value in
+/// display form (an object value is shown as its class) and, for a
+/// collection, its items, an object item dumped recursively; for a named
+/// element, whether the name scope of the root finds it under its name; for
+/// an element with a name scope of its own, whether that scope is completed;
+/// then the logical children of a styled element, recursively.
 fn dump(object: &Ref<FerroObject>, root_scope: Option<&Rc<dyn INameScope>>, indent: usize, output: &mut String) {
     let pad = "  ".repeat(indent);
     let class = object.get_type();
@@ -75,12 +79,28 @@ fn dump(object: &Ref<FerroObject>, root_scope: Option<&Rc<dyn INameScope>>, inde
         if !object.is_set(property) {
             continue;
         }
-        let value = display(&object.get_value_untyped(property));
-        lines.push(format!("{pad}  {}.{} = {value}\n", property.owner_type().name(), property.name()));
+        let priority = object.get_diagnostic(property).priority();
+        let value = display_value(&object.get_value_untyped(property), indent + 1);
+        lines.push(format!("{pad}  {}.{} = {value} ({priority:?})\n", property.owner_type().name(), property.name()));
     }
     for property in registry.get_registered_direct(class).iter() {
-        let value = display(&object.get_value_untyped(property));
+        let value = display_value(&object.get_value_untyped(property), indent + 1);
         lines.push(format!("{pad}  direct {}.{} = {value}\n", property.owner_type().name(), property.name()));
+    }
+    let mut current = Some(class);
+    while let Some(type_) = current {
+        for property in type_.markup().map(|markup| markup.properties).unwrap_or_default() {
+            let Some(get) = property.get else { continue };
+            let value = match get(&[Some(Rc::new(object.clone()) as BoxedValue)]) {
+                Ok(value) => match value {
+                    Some(value) => display_value(&value, indent + 1),
+                    None => "null".to_string(),
+                },
+                Err(error) => format!("<error: {error}>"),
+            };
+            lines.push(format!("{pad}  plain {}.{} = {value}\n", type_.name(), property.name));
+        }
+        current = type_.base_type();
     }
     lines.sort();
     for line in &lines {
@@ -101,6 +121,103 @@ fn dump(object: &Ref<FerroObject>, root_scope: Option<&Rc<dyn INameScope>>, inde
             dump(&child.upcast::<FerroObject>(), root_scope, indent + 1, output);
         }
     }
+}
+
+/// A value in display form ([`display`]) and, when it is a collection, its items: an
+/// object item dumped recursively at `indent`, any other item in display form.
+fn display_value(value: &BoxedValue, indent: usize) -> String {
+    let shown = display(value);
+    let Some(items) = collection_items(value) else {
+        return shown;
+    };
+    let items = match items {
+        Ok(items) => items,
+        Err(error) => return format!("{shown} <{error}>"),
+    };
+    let pad = "  ".repeat(indent + 1);
+    let mut text = format!("{shown} with {} items", items.len());
+    for item in items {
+        match item.as_ref().and_then(|item| ValueTypes::as_object(&**item)) {
+            Some(object) if indent < 8 => {
+                let mut inner = String::new();
+                dump(&object, None, indent + 1, &mut inner);
+                text.push('\n');
+                text.push_str(inner.trim_end_matches('\n'));
+            }
+            _ => text.push_str(&format!("\n{pad}{}", item.as_ref().map(display).unwrap_or_else(|| "null".to_string()))),
+        }
+    }
+    text
+}
+
+/// Whether the type with markup metadata `markup`, or one of its base types, declares
+/// an `Add` method: the collections markup adds items to.
+fn declares_add(markup: Option<&'static MarkupType>) -> bool {
+    let mut current = markup;
+    while let Some(type_) = current {
+        if type_.methods.iter().any(|method| method.name == "Add") {
+            return true;
+        }
+        current = type_.base_type();
+    }
+    false
+}
+
+/// The items of `value` when it is a collection markup adds to (its type declares `Add`):
+/// `Some(Ok(items))`, or `Some(Err(..))` for a collection this harness cannot enumerate,
+/// so that a difference in the contents of such a collection can never compare as equal.
+/// `None` for any other value.
+fn collection_items(value: &BoxedValue) -> Option<Result<Vec<Option<BoxedValue>>, String>> {
+    use ferroui_base::collections::FerroList;
+    use ferroui_base::controls::Classes;
+    use ferroui_base::styling::Styles;
+    use ferroui_controls::documents::{Inline, InlineCollection};
+    use ferroui_controls::templates::{DataTemplates, IDataTemplate};
+    use ferroui_controls::{ColumnDefinition, ColumnDefinitions, Control, Controls, ItemCollection, RowDefinition, RowDefinitions};
+
+    let markup = match ValueTypes::as_object(&**value) {
+        Some(object) => object.get_type().markup(),
+        None => MarkupType::find_by_handle(value.value_type_id()),
+    };
+    if !declares_add(markup) {
+        return None;
+    }
+    fn objects<T: ferroui_base::ObjectType>(items: Vec<Ref<T>>) -> Vec<Option<BoxedValue>> {
+        items.into_iter().map(|item| Some(Rc::new(item.upcast::<FerroObject>()) as BoxedValue)).collect()
+    }
+    let any = &**value;
+    if let Some(list) = any.downcast_ref::<Controls>() {
+        return Some(Ok(objects(list.to_vec())));
+    }
+    if let Some(list) = any.downcast_ref::<FerroList<Ref<Control>>>() {
+        return Some(Ok(objects(list.to_vec())));
+    }
+    if let Some(list) = any.downcast_ref::<RowDefinitions>() {
+        return Some(Ok(objects::<RowDefinition>(list.to_vec())));
+    }
+    if let Some(list) = any.downcast_ref::<ColumnDefinitions>() {
+        return Some(Ok(objects::<ColumnDefinition>(list.to_vec())));
+    }
+    if let Some(list) = any.downcast_ref::<InlineCollection>() {
+        return Some(Ok(objects::<Inline>(list.to_vec())));
+    }
+    if let Some(list) = any.downcast_ref::<FerroList<Ref<Inline>>>() {
+        return Some(Ok(objects(list.to_vec())));
+    }
+    if let Some(list) = any.downcast_ref::<ItemCollection>() {
+        return Some(Ok(list.to_vec()));
+    }
+    if let Some(classes) = any.downcast_ref::<Classes>() {
+        return Some(Ok((0..classes.count()).map(|index| Some(Rc::new(classes.get(index)) as BoxedValue)).collect()));
+    }
+    if let Some(templates) = any.downcast_ref::<DataTemplates>() {
+        let items: Vec<Rc<dyn IDataTemplate>> = templates.to_vec();
+        return Some(Ok(items.into_iter().map(|item| Some(Rc::new(item) as BoxedValue)).collect()));
+    }
+    if let Some(styles) = ValueTypes::as_object(any).and_then(|object| object.cast::<Styles>()) {
+        return Some(Ok((0..styles.count()).map(|index| Some(Rc::new(styles.get(index)) as BoxedValue)).collect()));
+    }
+    Some(Err(format!("a collection of type {} the harness cannot enumerate", any.type_name())))
 }
 
 fn dump_root(root: &BoxedValue) -> String {
@@ -430,4 +547,18 @@ fn print_transformed_tree() {
         Ok(tree) => println!("{tree}"),
         Err(error) => println!("{name} does not transform: {error}"),
     }
+}
+
+/// Not from upstream. A list built from text (`RowDefinitions='Auto,*'`) is created once:
+/// its capacity, every `Add` and the property setter receive the same list, so the compiled
+/// grid has the definitions the text states, as the run-time loader's has.
+#[test]
+fn a_list_built_from_text_is_one_list() {
+    use ferroui_controls::Grid;
+
+    let _base = xaml_test_base();
+    let built = build_generated("grid_definitions_text.xaml").expect("the document is generated").expect("it builds");
+    let grid = ValueTypes::as_object(&*built).and_then(|object| object.cast::<Grid>()).expect("the root is a grid");
+    assert_eq!(grid.row_definitions().count(), 2);
+    assert_eq!(grid.column_definitions().count(), 3);
 }
