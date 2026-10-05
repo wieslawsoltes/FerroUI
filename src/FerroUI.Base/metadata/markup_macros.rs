@@ -341,6 +341,27 @@ macro_rules! ferro_markup_enum {
                 &MARKUP
             };
         }
+
+        $crate::__ferro_compiler_metadata!(impl $type_ {
+            /// The typed function of a value of the flags from its integer value
+            /// (see `MarkupEmit`): the members whose bits are all set, combined. The
+            /// emitter of Rust source writes it for a value made of members only.
+            #[doc(hidden)]
+            #[allow(clippy::all)]
+            pub fn __markup_flags(value: i64) -> Self {
+                #[allow(unused_mut)]
+                let mut result = $type_::empty();
+                $(
+                    {
+                        let bits = $value.bits() as i64;
+                        if value & bits == bits {
+                            result = result | $value;
+                        }
+                    }
+                )*
+                result
+            }
+        });
     };
 }
 
@@ -476,6 +497,10 @@ macro_rules! __ferro_markup_items {
                 type_: || $crate::data::core::ValueType::of::<$type_>(),
                 get: || $crate::metadata::into_markup_value::<$type_>(($get)()),
                 attributes: &[],
+                emit: $crate::__ferro_compiler_metadata!(@value ::std::option::Option::Some($crate::metadata::MarkupEmit {
+                    function: ::std::concat!("__markup_field_", ::std::stringify!($name)),
+                    fallible: false,
+                })),
             },)*
         ];
         $crate::__ferro_markup_items!($m, $this; $($($rest)*)?);
@@ -1224,7 +1249,18 @@ macro_rules! __ferro_markup_fns {
     ($this:ty, $value:ty; type_info: $type_info:ty $(, $($rest:tt)*)?) => {
         $crate::__ferro_markup_fns!($this, $value; $($($rest)*)?);
     };
-    ($this:ty, $value:ty; fields: [$($fields:tt)*] $(, $($rest:tt)*)?) => {
+    ($this:ty, $value:ty; fields: [$($name:ident : $type_:ty => $get:expr),* $(,)?] $(, $($rest:tt)*)?) => {
+        $crate::__paste! {
+            $(
+                /// The typed function of a static field (see `MarkupEmit`).
+                #[doc(hidden)]
+                #[allow(non_snake_case, private_interfaces, clippy::all)]
+                #[inline]
+                pub fn [<__markup_field_ $name>]() -> $type_ {
+                    ($get)()
+                }
+            )*
+        }
         $crate::__ferro_markup_fns!($this, $value; $($($rest)*)?);
     };
     ($this:ty, $value:ty; events: [$($events:tt)*] $(, $($rest:tt)*)?) => {
