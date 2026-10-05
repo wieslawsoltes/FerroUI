@@ -1,22 +1,22 @@
-# XAML ahead-of-time compiler: handover of the E1 draft
+# XAML ahead-of-time compiler: handover
 
-State at handover: the run-time loader (`FerroRuntimeXamlLoader`) is complete for what the two themes
-and the ControlCatalog need and all its suites are green (stage 2b-10 is on main). The emitter exists
-only as an UNCOMPILED draft. Nothing of the draft has been built or run. This document is everything
-needed to continue without the local history.
+## State (read this first; every worker updates it before stopping)
 
-Files of this handover:
-
-- `e1-draft-on-main.patch`: the draft against main (the commit named at the top of
-  `e1-draft-on-main.new-files.txt`). `patch -p1` from the repository root; it creates the new files.
-- `e1-draft-on-main.new-files.txt`: the files the patch creates.
-- `e1-draft.patch`: the original draft against 4850763-minus-2b-10 (history only; do not apply).
-- `AUTHOR-REPORT.md`: the full report of the draft's author (file list, metadata additions, node
-  coverage, unverified signatures).
+- Stage E1 is DONE on branch `xaml-compiler` (pull request "XAML compiler: stage E1 - build the
+  draft, emitter of objects, registered properties, constants and names"). The draft builds; the
+  checked-in `tests/FerroUI.Markup.Xaml.UnitTests/emitter/generated.rs` is the real output of the
+  emitter; the differential harness is green: 51 of the 63 corpus documents are eligible and all
+  51 build object trees equal to the run-time loader's (one of them, `duplicate_name.xaml`, by
+  failing with the same message).
+- Stage E2 has not started. Its branch is `xaml-compiler-e2`, stacked on `xaml-compiler`
+  (see section 7 for the plan).
+- Nothing is half-done in the working tree of the E1 branch.
 
 Design documents in the repository: `docs/porting/xaml.md`, sections 9 (emitter design: call forms
 A/B/C, build integration, code-behind), 9.5 (source scanner), 9.12 (the 14 rulings), 9.13, and
-decisions 1 to 27. Read section 9 before touching the emitter.
+decisions 1 to 27. Read section 9 before touching the emitter. `DRAFT-AUTHOR-REPORT.md` is the
+report of the author of the uncompiled draft (history: everything it lists as unverified was
+verified when E1 built it, see section 4).
 
 ## 1. Rules that are not negotiable
 
@@ -95,76 +95,66 @@ Suite counts on main with 2b-10 (passed/ignored): base 3755/0, controls 3803/0, 
 xamlx 99/0, markup-xaml 183/0, loader 371/1, XAML tests 546/11, Simple 195/2, Fluent 192/1,
 control-catalog 435/156. Any stage must keep these (catalog and themes may only grow).
 
-## 3. What the draft contains
+## 3. What stage E1 delivered
 
-New files:
+Run-time library (`ferroui-markup-xaml`):
 
-| File | Content |
-|---|---|
-| `src/Markup/FerroUI.Markup.Xaml.Loader/rust_emitter/mod.rs` | module documentation, re-exports |
-| `.../rust_emitter/emitter.rs` | `emit_document(root, configuration, function_name, document_name) -> Result<String, UnsupportedNode>`; the walk over the transformed tree |
-| `.../rust_emitter/source.rs` | `rust_string_literal`, `function_name_of`, unit tests |
-| `.../rust_emitter/compiled.rs` | `compile_documents`, `generate_file`: the functions, a `DOCUMENTS` table, `try_load`, `register_compiled_xaml` |
-| `tests/FerroUI.Markup.Xaml.UnitTests/emitter/mod.rs` | why the output is checked in; the regeneration command |
-| `.../emitter/corpus.rs` | 40 small documents; `EXPECTED_ELIGIBLE` (22), `EXPECTED_NOT_ELIGIBLE` (7) |
-| `.../emitter/generated.rs` | A PREDICTION of the emitter's output written by a throwaway script. It may not compile and may differ from the real output |
-| `.../emitter/differential_tests.rs` | drift test, ignored regenerate test, eligibility test, dump comparison, load by URI |
+- `xaml_il::runtime::compiled` (new, the `rt` of generated code): `at` (a load error at a position,
+  with exactly the message the run-time loader gives: `<message> Line L, position P. (line L
+  position P)`), `name_scope_of` (the name scope field of a context), `register_name`,
+  `complete_root_name_scope`, `untyped_object_form` (moved here from the loader's
+  `runtime/type_system/values.rs`, which re-exports it: one implementation for both back ends) and
+  `to_object` (a value as the argument of a member typed `object`, as `to_exact` converts it).
 
-Changed files:
+Base (`ferroui-base`):
 
-| File | Change |
-|---|---|
-| `src/FerroUI.Base/metadata/markup_type.rs` | `MarkupType.rust_path`, `MarkupType::register_rust_paths`, `rust_path_of_handle`, `rust_path()`; `MarkupConstructor.emit`; `MarkupEnumMember.rust_variant` |
-| `src/FerroUI.Base/metadata/markup_macros.rs` | constructors record `stringify!($new)`; plain enumeration members record the variant identifier (helper `__ferro_markup_enum_variant_name!`), flags members `None` |
-| `src/FerroUI.Base/type_system.rs` | `TypeInfo::register_rust_paths`, `TypeInfo::rust_path` |
-| `src/FerroUI.Base/register_types.rs` | `types![TYPES, RUST_PATHS; ..]` yields both tables; hand list `VALUE_RUST_PATHS` |
-| `src/FerroUI.Controls/register_types.rs` | same; `PUBLIC_MODULES` filter; hand lists `ROOT_RUST_PATHS` (12 classes), `VALUE_RUST_PATHS` |
-| `scripts/generate_markup_types.py` | finds the type list in its new form (`types![TYPES`); merged by hand with the 2b-10 changes |
-| loader `lib.rs` | `pub mod rust_emitter;` (feature `runtime`) |
-| loader `runtime/interpreter/evaluators.rs`, `mod.rs` | `pub(crate) fn single_setter(..)`: the setter an assignment always uses when its plan leaves exactly one |
-| loader `runtime/framework/methods.rs` | `RuntimeDocumentTypeBuilderProvider::transformed_root()` |
-| loader `ferro_xaml_il_runtime_compiler.rs` | `transform_document(xaml, name, configuration)`: parse and transform ONE document exactly as `load_group`, return the root, the configuration and the type system; nothing built or cached |
-| test crate `lib.rs` | `pub mod emitter;` |
+- `metadata::property_accessors` (new): `record_property_accessor`, `property_accessors`. The
+  `ferro_property!(for Owner; ..)` form (so every accessor of a `ferro_properties!` block) records
+  the owner type, the accessor name and the definition the first time the accessor runs on a
+  thread. The emitter names a registered property by a recorded accessor, never by a naming rule.
+  Accessors declared with the plain `ferro_property!(..)` form outside a block are not recorded;
+  such a property makes a document not eligible (measure and fix in E2 if any is reachable).
 
-The C003 part of the original draft (the `IBitmap` contract and its converter mapping) is NOT in
-`e1-draft-on-main.patch`: it went to main with 2b-10.
+Loader (`ferroui-markup-xaml-loader`, `rust_emitter/`):
 
-Node coverage of the draft (see `AUTHOR-REPORT.md` for the exact list): a root object of an
-object-model class with a default constructor and a public path; value-with-manipulation and
-manipulation groups; object initialization (`begin_init` / `try_end_init`); a property assignment
-with one direct-call setter over a styled or attached property (`target.set_value(Owner::x_property(), typed)`);
-text, constants (string, double, boolean, 32/64-bit integers, plain enumeration by value), null,
-`x:Static` of a plain enumeration member; vector-like constants and grid lengths through the
-recorded constructor text; root-scope handling; name-scope registration with a text name.
-Everything else returns `UnsupportedNode` (direct properties, hence `Name`; plain properties and
-adders; markup extensions; templates; styles; resources; events; `x:Type`; flags enumerations;
-constructor arguments; anything needing the parent stack).
+- `emitter.rs`: values (new object with a default constructor, `XamlValueNodeWithBeginInit`,
+  compiler locals: `XamlAstLocalInitializationNodeEmitter` / `XamlAstCompilerLocalNode`, text,
+  every numeric / boolean / character / enumeration constant as `constant_value` reads it, NaN and
+  infinities, `{x:Null}`, `{x:Static}` of an enumeration member, vector-like and grid length
+  constants), manipulations (object initialisation, groups, `XamlAstManipulationImperativeNode`
+  over `XamlAstImperativeValueManipulation`, property assignments of styled, attached and direct
+  properties through the accessors the type system projects for them, name registration, the scope
+  of the root object). The value conversions are the ones `to_exact` applies: exact type,
+  `Some(..)` into the nullable form, `rt::to_object(..)` into `object`, class upcasts. Every
+  object creation and assignment carries a position marker comment. Paths are absolute (`::crate`).
+- `compiled.rs`: the generated file has `use ::ferroui_markup_xaml::xaml_il::runtime::compiled as rt;`;
+  `transformed_tree` (feature `testing`) prints the AST the emitter walks.
+- `runtime/interpreter`: `numeric_constant` is shared with the emitter (`pub(crate)`).
 
-Regeneration command (after the draft compiles):
-`cargo test -p ferroui-markup-xaml-tests --lib emitter::differential_tests::regenerate_emitter_output -- --ignored --exact`.
-If the checked-in `generated.rs` does not compile, empty its functions and its `DOCUMENTS` table by
-hand first, then regenerate.
+Tests (`tests/FerroUI.Markup.Xaml.UnitTests/emitter`): the corpus has 63 documents; the dump
+covers set registered properties, every direct property, the initialised state, the name scope of
+the root (named elements found, completion) and logical children; a failed load compares by
+message; `compiled_documents_are_registered_by_uri` loads through `FerroXamlLoader` with a
+`StandardAssetLoader` bound in a locator scope; `print_transformed_tree` is an ignored diagnostic
+(`FERROUI_EMITTER_DOCUMENT=<name>`). The test crate enables the loader's `testing` feature.
 
-## 4. Signatures the author could not verify (check these first when building)
+Not eligible in E1 and why (the reasons the harness prints): declared accessors of attached
+properties (`Canvas.Left`, `TextBlock.TextAlignment` set on a text block, `BaselineOffset`), plain
+properties and collection adds (`Children`, `Styles`, `Resources`), types without a recorded public
+Rust path (`FontStyle`, `Viewbox`, `LayoutTransformControl`: the hand lists), bindings (parent
+stack), templates (`ControlTemplate` is not a class of the object model), constructor arguments
+(`Background='Red'` builds a brush with arguments).
 
-- The `types!` pattern `$(crate :: $($segment:ident)::+),*` matching every entry of the lists.
-- Closure-to-function-pointer coercion inside the constant tuple arrays of `value_paths!`.
-- `XamlAstNewClrObjectNode.constructor.as_any()`; `IXamlPropertySetter::as_any()`; `visit_node`
-  accepting `&mut NeedsParentStack` and visiting the whole tree.
-- `IXamlType::name()` / `namespace()` / `full_name()` as used in `emitter.rs`.
-- In generated code: `Ref<T>::begin_init()` / `try_end_init()` reached by deref to `StyledElement`;
-  `&Ref<Border>` coercing to `&StyledElement` for `NameScope::set_name_scope`;
-  `INameScope::complete(&**scope)`; `ServiceProviderExtensions::get_name_scope(&**provider)`;
-  `std::rc::Rc::new(value) as ferroui_base::BoxedValue`; `Type::new()` existing for every corpus
-  class; attached definitions (`Grid::row_property()`) passing to `set_value` by deref coercion;
-  `ferroui_base::input::InputElement`, `ferroui_base::layout::Layoutable`, `ferroui_base::Visual`
-  being nameable from another crate.
-- In the tests: `FerroPropertyRegistry::get_registered` / `get_registered_attached` returning
-  `Rc<Vec<&'static FerroProperty>>`; `FerroList::to_vec()`; `RuntimeXamlLoaderConfiguration::new()`
-  matching the defaults of `FerroRuntimeXamlLoader::load`; whether `xaml_test_base()` installs an
-  `IAssetLoader` (if not, the URI test only checks `generated::try_load`).
-- `CompiledXamlLoader` still returns `Option<BoxedValue>` in the tree (ruling: `Result`); the
-  generated `try_load` panics with the message of a failed build until that is changed.
+Deliberately not done in E1: `CompiledXamlLoader` still returns `Option` (ruling 6 wants
+`Result`; it touches the Simple theme's hand-registered loader, so it goes with the build
+integration in E5); the generated `try_load` panics with the message of a failed build.
+
+## 4. Verified when E1 built the draft
+
+Every signature the draft's author listed as unverified compiled as written, except that the
+draft's handling of errors and the conversions to `object` did not match the interpreter (fixed
+in E1 by `rt::at` and `rt::to_object`). The draft's predicted `generated.rs` compiled too; it was
+replaced by the real output.
 
 ## 5. Why plain members and collection adds were stopped, and how E2 should do it
 
@@ -311,12 +301,28 @@ of the XAML test crate (most wait for the emitter); catalog gaps C101, C102, C20
 property), C305 (`List<T>` with `x:TypeArguments`), C306 (`Slider.Ticks` from text), C310
 (`TimeSpan` from text); C006/C007 belong to rendering.
 
-## 7. First steps for the cloud worker
+## 7. Next steps
 
-1. Apply `e1-draft-on-main.patch`; `cargo check -p ferroui-base -p ferroui-controls` (macro and
-   table changes first), then the loader with feature `runtime`, then the test crate.
-2. Fix signatures from section 4. Empty `generated.rs` if it does not compile; regenerate.
-3. Make the drift test, the eligibility test and the dump comparison green; report measured
-   eligible / matching / not eligible counts for the 40 documents.
-4. Run the generator `--check` and the full suites; the numbers of section 2 must hold.
-5. Then E2 as in section 5.
+E2 (branch `xaml-compiler-e2`, stacked on `xaml-compiler`), in this order:
+
+1. Public Rust paths, mechanically. Plan: the generator (`scripts/generate_markup_types.py`)
+   resolves the `pub mod` / `pub use` tree of each framework crate (named and glob re-exports)
+   and writes, per crate, a generated table of the shortest public path of every registered class,
+   enumeration, value type and contract, as a macro invocation whose tokens are the crate-relative
+   public path (`crate::layout::HorizontalAlignment`): the macro takes the handle and the path
+   string from the same tokens, so rustc checks that the path names the registered type. A
+   checked-in file in the XAML test crate names every recorded path from outside the crates
+   (drift-tested like `generated.rs`), so rustc checks that each path is public. Then remove
+   `PUBLIC_MODULES`, `ROOT_RUST_PATHS` and both `VALUE_RUST_PATHS`.
+2. Typed accessor functions for plain members (section 5, item 1). The workable form found while
+   doing E1: the declaration macros emit, next to `impl MarkupTyped for T`, an inherent
+   `impl T { #[doc(hidden)] pub fn __markup_get_Name(this: &This) -> V { (get)(this) } .. }`
+   (inherent impls may be written in any module of the defining crate, so the function is public
+   wherever the type is, with no module publicity problem), and record the function name in the
+   metadata (`MarkupProperty.emit_get` / `emit_set`, `MarkupMethod.emit`). A declaration of a type
+   of another crate cannot have an inherent impl: it needs an opt-out form and stays form C.
+3. Collection adds: the `FerroList<T>` projection (`{getter}(&target).add(value)`), then adders
+   declared in metadata.
+4. Declared accessors of attached properties (`Canvas.Left`).
+5. Extend the corpus with what that makes eligible; report eligible / matching counts.
+
