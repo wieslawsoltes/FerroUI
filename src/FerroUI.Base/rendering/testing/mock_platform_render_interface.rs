@@ -17,24 +17,117 @@ use std::io::Read;
 use std::rc::Rc;
 
 /// A platform geometry that behaves like its bounding rectangle.
+///
+/// As the headless geometries of the reference, rectangle and line
+/// geometries also know their corner points (`HeadlessGeometryWithEdgesStub`),
+/// and a transformed geometry knows the transformed points of its source
+/// (`HeadlessTransformedGeometryStub`): fill intersections between such
+/// geometries and with stream geometries use a separating axis test on them.
 pub struct MockGeometryImpl {
     bounds: Cell<Rect>,
-    source: Option<(Rc<dyn IGeometryImpl>, Matrix)>,
+    source: Option<(Rc<MockGeometryImpl>, Matrix)>,
+    edges: Option<Vec<Point>>,
 }
 
 impl MockGeometryImpl {
     pub fn new(bounds: Rect) -> Rc<MockGeometryImpl> {
-        Rc::new(MockGeometryImpl { bounds: Cell::new(bounds), source: None })
+        Rc::new(MockGeometryImpl { bounds: Cell::new(bounds), source: None, edges: None })
+    }
+
+    /// A geometry with the given corner points
+    /// (`HeadlessGeometryWithEdgesStub`).
+    fn with_edges(bounds: Rect, points: Vec<Point>) -> Rc<MockGeometryImpl> {
+        Rc::new(MockGeometryImpl { bounds: Cell::new(bounds), source: None, edges: Some(points) })
+    }
+
+    /// `HeadlessRectangleGeometryContextStub`.
+    pub fn rectangle(bounds: Rect) -> Rc<MockGeometryImpl> {
+        Self::with_edges(bounds, vec![bounds.top_left(), bounds.top_right(), bounds.bottom_left(), bounds.bottom_right()])
+    }
+
+    /// `HeadlessLineGeometryContextStub`.
+    pub fn line(p1: Point, p2: Point) -> Rc<MockGeometryImpl> {
+        let bounds = Rect::from_points(
+            Point::new(p1.x.min(p2.x), p1.y.min(p2.y)),
+            Point::new(p1.x.max(p2.x), p1.y.max(p2.y)),
+        );
+        Self::with_edges(bounds, vec![p1, p2])
+    }
+
+    /// The points of the geometry when it is a geometry with edges
+    /// (`IHeadlessGeometryWithEdges.Points`): its own points, or, for a
+    /// transformed geometry, the transformed points of its source (none
+    /// when the source has no edges).
+    fn edge_points(&self) -> Option<Vec<Point>> {
+        match &self.source {
+            Some((source, transform)) => Some(
+                source.edges.as_ref().map_or_else(Vec::new, |points| {
+                    points.iter().map(|p| p.transform(*transform)).collect()
+                }),
+            ),
+            None => self.edges.clone(),
+        }
     }
 }
 
+/// The points of a geometry with edges, if `geometry` is one of the mock
+/// geometries that has them.
+fn edge_points_of(geometry: &dyn IGeometryImpl) -> Option<Vec<Point>> {
+    geometry.as_any().downcast_ref::<MockGeometryImpl>().and_then(MockGeometryImpl::edge_points)
+}
+
+/// `IHeadlessGeometryWithEdges.ProjectionOnAxis`.
+fn projection_on_axis(points: &[Point], axis: Vector) -> (f64, f64) {
+    let mut min = f64::INFINITY;
+    let mut max = f64::NEG_INFINITY;
+    for point in points {
+        let p = axis.x * point.x + axis.y * point.y;
+        if p < min {
+            min = p;
+        }
+        if p > max {
+            max = p;
+        }
+    }
+    (min, max)
+}
+
+/// `IHeadlessGeometryWithEdges.GetAxes`, with the reference's choice of the
+/// other point of an edge (`(i + i) % Count`).
+fn axes(points: &[Point]) -> Vec<Vector> {
+    let count = points.len();
+    (0..count)
+        .map(|i| {
+            let point = points[i];
+            let other_point = points[(i + i) % count];
+            let edge = Vector::new(point.x - other_point.x, point.y - other_point.y);
+            Vector::new(-edge.y, edge.x)
+        })
+        .collect()
+}
+
+/// Whether a separating axis of the two point sets exists.
+fn separated(a: &[Point], b: &[Point]) -> bool {
+    let mut all = axes(a);
+    all.extend(axes(b));
+    all.into_iter().any(|axis| {
+        let (min, max) = projection_on_axis(a, axis);
+        let (min2, max2) = projection_on_axis(b, axis);
+        max < min2 || max2 < min
+    })
+}
+
+/// The intersection of the geometry with bounds `a` with the geometry with
+/// bounds `b`, from the point of view of `a`: as the headless and Skia
+/// geometries of the reference, `a` containing `b` means `b` is fully
+/// inside `a`.
 fn rect_intersection(a: Rect, b: Rect) -> IntersectionResult {
     if a.width <= 0.0 || a.height <= 0.0 || b.width <= 0.0 || b.height <= 0.0 || !a.intersects(b) {
         IntersectionResult::Empty
     } else if a.contains_rect(b) {
-        IntersectionResult::FullyContains
-    } else if b.contains_rect(a) {
         IntersectionResult::FullyInside
+    } else if b.contains_rect(a) {
+        IntersectionResult::FullyContains
     } else {
         IntersectionResult::Intersects
     }
@@ -58,6 +151,25 @@ impl IGeometryImpl for MockGeometryImpl {
         self.bounds.get().contains(point)
     }
     fn get_fill_intersection_result(&self, geometry: &dyn IGeometryImpl) -> IntersectionResult {
+        // A geometry with edges of its own (not a transformed one, which
+        // uses the bounds as the base class of the reference does) tests
+        // the edges of another geometry with edges.
+        if let (None, Some(points)) = (&self.source, &self.edges) {
+            if let Some(other) = edge_points_of(geometry) {
+                if separated(points, &other) {
+                    return IntersectionResult::Empty;
+                }
+                let bounds = self.get_render_bounds(None);
+                let other_bounds = geometry.get_render_bounds(None);
+                if bounds.contains_rect(other_bounds) {
+                    return IntersectionResult::FullyInside;
+                }
+                if other_bounds.contains_rect(bounds) {
+                    return IntersectionResult::FullyContains;
+                }
+                return IntersectionResult::Intersects;
+            }
+        }
         rect_intersection(self.bounds.get(), geometry.bounds())
     }
     fn intersect(&self, geometry: &dyn IGeometryImpl) -> Option<Rc<dyn IGeometryImpl>> {
@@ -74,9 +186,23 @@ impl IGeometryImpl for MockGeometryImpl {
         bounds.inflate(half).contains(point) && !bounds.deflate(half).contains_exclusive(point)
     }
     fn with_transform(&self, transform: Matrix) -> Rc<dyn ITransformedGeometryImpl> {
+        // As the reference, the transform of a transformed geometry is
+        // combined with the new one over the same source.
+        let (source, transform) = match &self.source {
+            Some((source, own)) => (source.clone(), *own * transform),
+            None => (
+                Rc::new(MockGeometryImpl {
+                    bounds: Cell::new(self.bounds.get()),
+                    source: None,
+                    edges: self.edges.clone(),
+                }),
+                transform,
+            ),
+        };
         Rc::new(MockGeometryImpl {
-            bounds: Cell::new(self.bounds.get().transform_to_aabb(transform)),
-            source: Some((MockGeometryImpl::new(self.bounds.get()), transform)),
+            bounds: Cell::new(source.bounds.get().transform_to_aabb(transform)),
+            source: Some((source, transform)),
+            edges: None,
         })
     }
     fn try_get_point_at_distance(&self, _distance: f64) -> Option<Point> {
@@ -99,7 +225,7 @@ impl IGeometryImpl for MockGeometryImpl {
 impl ITransformedGeometryImpl for MockGeometryImpl {
     fn source_geometry(&self) -> Rc<dyn IGeometryImpl> {
         match &self.source {
-            Some((source, _)) => source.clone(),
+            Some((source, _)) => source.clone() as Rc<dyn IGeometryImpl>,
             None => MockGeometryImpl::new(self.bounds.get()),
         }
     }
@@ -108,8 +234,9 @@ impl ITransformedGeometryImpl for MockGeometryImpl {
     }
 }
 
-/// A stream geometry whose shape is the bounding box of the points written
-/// to it.
+/// A stream geometry whose bounds are the bounding box of the points
+/// written to it; a point is in its fill when it is in one of the triangles
+/// of consecutive points.
 pub struct MockStreamGeometryImpl {
     points: Rc<RefCell<Vec<Point>>>,
 }
@@ -151,9 +278,43 @@ impl IGeometryImpl for MockStreamGeometryImpl {
         self.as_rect().get_widened_geometry(pen)
     }
     fn fill_contains(&self, point: Point) -> bool {
-        self.as_rect().fill_contains(point)
+        // As the headless stream geometry of the reference: the point is
+        // tested against the triangles of consecutive points (the geometry
+        // is assumed to be convex), with the algorithm from
+        // https://www.blackpawn.com/texts/pointinpoly/default.html.
+        let points = self.points.borrow();
+        let count = points.len();
+        for i in 0..count {
+            let a = points[i];
+            let b = points[(i + 1) % count];
+            let c = points[(i + 2) % count];
+
+            let v0 = c - a;
+            let v1 = b - a;
+            let v2 = point - a;
+
+            let dot00 = v0.x * v0.x + v0.y * v0.y;
+            let dot01 = v0.x * v1.x + v0.y * v1.y;
+            let dot02 = v0.x * v2.x + v0.y * v2.y;
+            let dot11 = v1.x * v1.x + v1.y * v1.y;
+            let dot12 = v1.x * v2.x + v1.y * v2.y;
+
+            let inv_denom = 1.0 / (dot00 * dot11 - dot01 * dot01);
+            let u = (dot11 * dot02 - dot01 * dot12) * inv_denom;
+            let v = (dot00 * dot12 - dot01 * dot02) * inv_denom;
+            if u >= 0.0 && v >= 0.0 && u + v < 1.0 {
+                return true;
+            }
+        }
+        false
     }
     fn get_fill_intersection_result(&self, geometry: &dyn IGeometryImpl) -> IntersectionResult {
+        // As the headless stream geometry of the reference: against a
+        // geometry with edges, a separating axis test on the points.
+        if let Some(other) = edge_points_of(geometry) {
+            let points = self.points.borrow();
+            return if separated(&points, &other) { IntersectionResult::Empty } else { IntersectionResult::Intersects };
+        }
         self.as_rect().get_fill_intersection_result(geometry)
     }
     fn intersect(&self, geometry: &dyn IGeometryImpl) -> Option<Rc<dyn IGeometryImpl>> {
@@ -422,10 +583,10 @@ impl IPlatformRenderInterface for MockPlatformRenderInterface {
         MockGeometryImpl::new(rect)
     }
     fn create_line_geometry(&self, p1: Point, p2: Point) -> Rc<dyn IGeometryImpl> {
-        MockGeometryImpl::new(Rect::from_points(p1, p2).normalize())
+        MockGeometryImpl::line(p1, p2)
     }
     fn create_rectangle_geometry(&self, rect: Rect) -> Rc<dyn IGeometryImpl> {
-        MockGeometryImpl::new(rect)
+        MockGeometryImpl::rectangle(rect)
     }
     fn create_stream_geometry(&self) -> Rc<dyn IStreamGeometryImpl> {
         MockStreamGeometryImpl::new()
