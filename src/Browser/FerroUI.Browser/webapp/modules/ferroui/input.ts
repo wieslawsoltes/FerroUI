@@ -62,6 +62,8 @@ type ReadableDataItem = {
 } | {
     type: "string";
     value: string;
+    // Not in the original: the format of a string read from a paste event (text/plain when absent).
+    format?: string;
 };
 
 // The "file" value is the File of the page. The original wraps it into a storage item of its
@@ -92,8 +94,15 @@ export class InputHelper {
                 return;
             }
 
-            const items = this.getDataTransferItems(args.clipboardData);
-            const result: ClipboardResult = { result: items.map((item) => ({ type: "dataTransferItem", value: item })) };
+            // Differs from the original, which resolves with the items of the event: they are read
+            // after the event, when the browser no longer gives their values (getAsString never
+            // calls back), so the read never completed. The string values are read now; a file
+            // stays an item of the event.
+            const clipboardData = args.clipboardData;
+            const items: ReadableDataItem[] = this.getDataTransferItems(clipboardData).map((item) => item.kind === "string" && clipboardData != null
+                ? { type: "string", value: clipboardData.getData(item.type), format: item.type }
+                : { type: "dataTransferItem", value: item });
+            const result: ClipboardResult = { result: items };
             this.resolveClipboard(result);
         });
         this.clipboardState = ClipboardState.Ready;
@@ -227,7 +236,7 @@ export class InputHelper {
                         return [];
                 }
             case "string":
-                return ["text/plain"];
+                return [item.format ?? "text/plain"];
             default:
                 return [];
         }
@@ -281,6 +290,10 @@ export class InputHelper {
             }
 
             case "string": {
+                if (item.format !== undefined && format !== item.format) {
+                    return null;
+                }
+
                 return format.startsWith("text/")
                     ? { type: "string", value: item.value }
                     : { type: "bytes", value: await this.getBlobBytes(new Blob([item.value])) };
