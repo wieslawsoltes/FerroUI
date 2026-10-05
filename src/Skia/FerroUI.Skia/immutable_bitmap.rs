@@ -1,3 +1,4 @@
+use crate::gpu::{drawable_image, needs_mipmaps, ISkiaGrContext};
 use crate::helpers::image_saving_helper;
 use crate::i_drawable_bitmap_impl::IDrawableBitmapImpl;
 use crate::locked_framebuffer::LockedFramebuffer;
@@ -296,6 +297,7 @@ impl IBitmapImpl for ImmutableBitmap {
 impl IDrawableBitmapImpl for ImmutableBitmap {
     fn draw(
         &self,
+        gr_context: Option<&dyn ISkiaGrContext>,
         canvas: &Canvas,
         source_rect: &Rect,
         dest_rect: &Rect,
@@ -303,7 +305,7 @@ impl IDrawableBitmapImpl for ImmutableBitmap {
         paint: &Paint,
     ) {
         canvas.draw_image_rect_with_sampling_options(
-            self.image(),
+            drawable_image(gr_context, self.image(), needs_mipmaps(&sampling_options)),
             Some((source_rect, SrcRectConstraint::Fast)),
             dest_rect,
             sampling_options,

@@ -670,7 +670,7 @@ impl DrawingContextImpl {
 
         let (tile_x, tile_y) = Self::get_tile_modes(tile_mode);
 
-        let image = intermediate.snapshot_image();
+        let image = crate::gpu::drawable_image(self.gr_context.as_deref(), intermediate.snapshot_image(), false);
 
         let mut paint_transform =
             sk::Matrix::concat(&tile_transform, &sk::Matrix::scale(((96.0 / dpi.x) as f32, (96.0 / dpi.y) as f32)));
@@ -856,33 +856,52 @@ impl DrawingContextImpl {
             .unwrap_or_else(|| panic!("Unable to create the alpha color filter"))
     }
 
+    /// A repeating, nearly transparent shader over the noise texture of
+    /// acrylic materials.
+    fn create_acrylic_noise_shader(image: &sk::Image) -> Option<sk::Shader> {
+        const NOISE_OPACITY: f64 = 0.0225;
+
+        let shader =
+            image.to_shader((sk::TileMode::Repeat, sk::TileMode::Repeat), sk::SamplingOptions::default(), None)?;
+        Some(shader.with_color_filter(Self::create_alpha_color_filter(NOISE_OPACITY)))
+    }
+
     /// The noise texture of acrylic materials as a repeating, nearly
     /// transparent shader.
-    fn acrylic_noise_shader() -> Option<sk::Shader> {
+    fn acrylic_noise_shader(&self) -> Option<sk::Shader> {
         thread_local! {
-            static ACRYLIC_NOISE_SHADER: std::cell::OnceCell<Option<sk::Shader>> = const { std::cell::OnceCell::new() };
+            static ACRYLIC_NOISE: std::cell::OnceCell<Option<(sk::Image, sk::Shader)>> =
+                const { std::cell::OnceCell::new() };
         }
 
-        const NOISE_OPACITY: f64 = 0.0225;
         static NOISE_ASSET: &[u8] = include_bytes!("assets/noise_asset_256x256_png.png");
 
-        ACRYLIC_NOISE_SHADER.with(|shader| {
-            shader
-                .get_or_init(|| {
-                    let image = sk::Image::from_encoded(sk::Data::new_copy(NOISE_ASSET))?;
-                    let shader = image.to_shader(
-                        (sk::TileMode::Repeat, sk::TileMode::Repeat),
-                        sk::SamplingOptions::default(),
-                        None,
-                    )?;
-                    Some(shader.with_color_filter(Self::create_alpha_color_filter(NOISE_OPACITY)))
-                })
-                .clone()
+        ACRYLIC_NOISE.with(|noise| {
+            let noise = noise.get_or_init(|| {
+                let image = sk::Image::from_encoded(sk::Data::new_copy(NOISE_ASSET))?;
+                let shader = Self::create_acrylic_noise_shader(&image)?;
+                Some((image, shader))
+            });
+            let (image, shader) = noise.as_ref()?;
+
+            // The cached shader samples the image itself. A GPU context that
+            // draws another form of the image gets a shader over that form.
+            match &self.gr_context {
+                Some(gr_context) => {
+                    let drawable = gr_context.drawable_image(image, false);
+                    if drawable.unique_id() == image.unique_id() {
+                        Some(shader.clone())
+                    } else {
+                        Self::create_acrylic_noise_shader(&drawable)
+                    }
+                }
+                None => Some(shader.clone()),
+            }
         })
     }
 
     /// Creates a paint wrapper for an acrylic material.
-    fn create_acrylic_paint(mut paint: sk::Paint, material: &dyn IExperimentalAcrylicMaterial) -> PaintWrapper {
+    fn create_acrylic_paint(&self, mut paint: sk::Paint, material: &dyn IExperimentalAcrylicMaterial) -> PaintWrapper {
         paint.set_anti_alias(true);
 
         let tint_color = material.tint_color();
@@ -897,7 +916,7 @@ impl DrawingContextImpl {
         ));
         let tint_shader = sk::shaders::color(tint);
         let effective_tint = sk::shaders::blend(sk::BlendMode::SrcOver, backdrop, tint_shader);
-        let compose = match Self::acrylic_noise_shader() {
+        let compose = match self.acrylic_noise_shader() {
             Some(noise) => sk::shaders::blend(sk::BlendMode::SrcOver, effective_tint, noise),
             None => effective_tint,
         };
@@ -1151,7 +1170,7 @@ impl IDrawingContextImpl for DrawingContextImpl {
         paint.set_blend_mode(to_sk_blend_mode(self.render_options.bitmap_blending_mode));
         paint.set_anti_alias(self.render_options.edge_mode != EdgeMode::Aliased);
 
-        drawable_image.draw(self.canvas.get(), &s, &d, sampling_options, &paint);
+        drawable_image.draw(self.gr_context.as_deref(), self.canvas.get(), &s, &d, sampling_options, &paint);
         SkPaintCache::return_reset(paint);
     }
 
@@ -1707,7 +1726,8 @@ impl IDrawingContextWithAcrylicLikeSupport for DrawingContextImpl {
 
         let rc = to_sk_rect(rect.rect);
 
-        let fill = Self::create_acrylic_paint(self.fill_paint.take().unwrap_or_default(), material);
+        let paint = self.fill_paint.take().unwrap_or_default();
+        let fill = self.create_acrylic_paint(paint, material);
 
         if rect.is_rounded() {
             let sk_round_rect = SkRoundRectCache::get_and_set_radii(&rc, &rect);

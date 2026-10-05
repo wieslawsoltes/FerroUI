@@ -1,4 +1,5 @@
 use crate::framebuffer_render_target::FramebufferRenderTarget;
+use crate::gpu::ISkiaGrContext;
 use crate::i_drawable_bitmap_impl::IDrawableBitmapImpl;
 use crate::writeable_bitmap_impl::WriteableBitmapImpl;
 use ferroui_base::media::imaging::BitmapEncoderOptions;
@@ -107,13 +108,14 @@ impl IRenderTargetBitmapImpl for RenderTargetBitmapImpl {
 impl IDrawableBitmapImpl for RenderTargetBitmapImpl {
     fn draw(
         &self,
+        gr_context: Option<&dyn ISkiaGrContext>,
         canvas: &Canvas,
         source_rect: &Rect,
         dest_rect: &Rect,
         sampling_options: SamplingOptions,
         paint: &Paint,
     ) {
-        self.bitmap.draw(canvas, source_rect, dest_rect, sampling_options, paint);
+        self.bitmap.draw(gr_context, canvas, source_rect, dest_rect, sampling_options, paint);
     }
 }
 

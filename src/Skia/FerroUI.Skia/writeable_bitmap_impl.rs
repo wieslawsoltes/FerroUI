@@ -1,3 +1,4 @@
+use crate::gpu::{drawable_image, needs_mipmaps, ISkiaGrContext};
 use crate::helpers::image_saving_helper;
 use crate::i_drawable_bitmap_impl::IDrawableBitmapImpl;
 use crate::immutable_bitmap::{decode_bitmap, decode_bitmap_to_size};
@@ -136,6 +137,7 @@ impl IBitmapImpl for WriteableBitmapImpl {
 impl IDrawableBitmapImpl for WriteableBitmapImpl {
     fn draw(
         &self,
+        gr_context: Option<&dyn ISkiaGrContext>,
         canvas: &Canvas,
         source_rect: &Rect,
         dest_rect: &Rect,
@@ -152,10 +154,10 @@ impl IDrawableBitmapImpl for WriteableBitmapImpl {
             self.image_valid.set(true);
         }
 
-        let image = self.image.borrow();
-        if let Some(image) = image.as_ref() {
+        let image = self.image.borrow().clone();
+        if let Some(image) = image {
             canvas.draw_image_rect_with_sampling_options(
-                image,
+                drawable_image(gr_context, image, needs_mipmaps(&sampling_options)),
                 Some((source_rect, SrcRectConstraint::Fast)),
                 dest_rect,
                 sampling_options,

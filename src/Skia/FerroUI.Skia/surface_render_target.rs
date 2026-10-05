@@ -1,5 +1,5 @@
 use crate::drawing_context_impl::{CreateInfo, DrawingContextImpl};
-use crate::gpu::{ISkiaGpu, ISkiaGpuRenderSession, ISkiaGrContext, ISkiaSurface};
+use crate::gpu::{drawable_image, needs_mipmaps, ISkiaGpu, ISkiaGpuRenderSession, ISkiaGrContext, ISkiaSurface};
 use crate::helpers::image_saving_helper;
 use crate::helpers::pixel_format_helper;
 use crate::i_drawable_bitmap_impl::IDrawableBitmapImpl;
@@ -227,14 +227,19 @@ impl IDrawingContextLayerImpl for SurfaceRenderTarget {
             .as_any_mut()
             .downcast_mut::<DrawingContextImpl>()
             .unwrap_or_else(|| panic!("The layer can only be blitted onto a drawing context of the Skia backend"));
+        let gr_context = context.gr_context().cloned();
         let canvas = context.canvas();
 
         if self.surface.can_blit() {
             self.surface.blit(canvas);
         } else {
+            // Drawing a surface draws its snapshot. The snapshot of an
+            // in-memory layer is a raster image, which the canvas of a GPU
+            // context may draw in another form only.
+            let image = drawable_image(gr_context.as_deref(), self.snapshot_image(), false);
             let old_matrix = canvas.local_to_device();
             canvas.reset_matrix();
-            self.surface.surface().draw(canvas, (0.0, 0.0), SamplingOptions::default(), None);
+            canvas.draw_image_with_sampling_options(image, (0.0, 0.0), SamplingOptions::default(), None);
             canvas.set_matrix(&old_matrix);
         }
     }
@@ -273,13 +278,16 @@ impl IDrawingContextLayerImpl for SurfaceRenderTarget {
 impl IDrawableBitmapImpl for SurfaceRenderTarget {
     fn draw(
         &self,
+        gr_context: Option<&dyn ISkiaGrContext>,
         canvas: &Canvas,
         source_rect: &Rect,
         dest_rect: &Rect,
         sampling_options: SamplingOptions,
         paint: &Paint,
     ) {
-        let image = self.snapshot_image();
+        // The snapshot of a surface of the context lives on the GPU already;
+        // the one of an in-memory surface does not.
+        let image = drawable_image(gr_context, self.snapshot_image(), needs_mipmaps(&sampling_options));
         canvas.draw_image_rect_with_sampling_options(
             image,
             Some((source_rect, SrcRectConstraint::Fast)),

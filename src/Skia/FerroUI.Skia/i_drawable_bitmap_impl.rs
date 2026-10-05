@@ -1,3 +1,4 @@
+use crate::gpu::ISkiaGrContext;
 use crate::immutable_bitmap::ImmutableBitmap;
 use crate::render_target_bitmap_impl::RenderTargetBitmapImpl;
 use crate::surface_render_target::SurfaceRenderTarget;
@@ -9,10 +10,13 @@ use skia_safe::{Canvas, Paint, Rect, SamplingOptions};
 pub trait IDrawableBitmapImpl: IBitmapImpl {
     /// Draws the bitmap onto a canvas.
     ///
-    /// `source_rect` is the part of the bitmap to draw and `dest_rect` where
-    /// to draw it.
+    /// `gr_context` is the GPU context the canvas draws with, if any: a
+    /// bitmap that draws an image draws the form of it the context can draw
+    /// (see [`ISkiaGrContext::drawable_image`]). `source_rect` is the part of
+    /// the bitmap to draw and `dest_rect` where to draw it.
     fn draw(
         &self,
+        gr_context: Option<&dyn ISkiaGrContext>,
         canvas: &Canvas,
         source_rect: &Rect,
         dest_rect: &Rect,

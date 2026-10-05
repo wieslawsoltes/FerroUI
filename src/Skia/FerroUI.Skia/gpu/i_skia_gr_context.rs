@@ -1,4 +1,4 @@
-use skia_safe::{Image, ImageInfo, Surface, SurfaceProps};
+use skia_safe::{Image, ImageInfo, MipmapMode, SamplingOptions, Surface, SurfaceProps};
 use std::any::Any;
 
 /// The Skia GPU backend a context runs on.
@@ -40,9 +40,40 @@ pub trait ISkiaGrContext {
     /// image.
     fn snapshot_to_raster(&self, surface: &mut Surface) -> Option<Image>;
 
+    /// The form of `image` that canvases of this context draw.
+    ///
+    /// `mipmapped` tells that the image is going to be sampled with
+    /// mipmaps (see [`needs_mipmaps`]).
+    ///
+    /// A context that uploads raster images by itself when they are drawn
+    /// (Ganesh) returns the image as it is, which is the default. A context
+    /// that draws only images living on the GPU (Graphite) returns a
+    /// texture-backed image of the same contents, uploading it the first
+    /// time and reusing the texture while the image is alive. When the
+    /// image cannot be uploaded it is returned as it is.
+    fn drawable_image(&self, image: &Image, mipmapped: bool) -> Image {
+        let _ = mipmapped;
+        image.clone()
+    }
+
     /// Whether the GPU device behind the context was lost.
     fn is_lost(&self) -> bool;
 
     /// Lets a GPU implementation recover its concrete context type.
     fn as_any(&self) -> &dyn Any;
+}
+
+/// The form of `image` that a canvas drawing with `gr_context` draws; see
+/// [`ISkiaGrContext::drawable_image`]. Without a GPU context the canvas is
+/// a raster one and draws the image as it is.
+pub fn drawable_image(gr_context: Option<&dyn ISkiaGrContext>, image: Image, mipmapped: bool) -> Image {
+    match gr_context {
+        Some(gr_context) => gr_context.drawable_image(&image, mipmapped),
+        None => image,
+    }
+}
+
+/// Whether sampling an image with `sampling_options` reads its mipmaps.
+pub fn needs_mipmaps(sampling_options: &SamplingOptions) -> bool {
+    !sampling_options.use_cubic && sampling_options.mipmap != MipmapMode::None
 }
