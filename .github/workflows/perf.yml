@@ -38,6 +38,14 @@ jobs:
     runs-on: macos-15
     timeout-minutes: 240
     steps:
+      # The report script of the workflow's own commit measures both refs,
+      # so that refs from before the script existed can be measured too.
+      - name: Check out the report script
+        uses: actions/checkout@v4
+        with:
+          path: tools
+          sparse-checkout: scripts/perf-report.py
+          sparse-checkout-cone-mode: false
       - name: Check out the ref
         uses: actions/checkout@v4
         with:
@@ -90,21 +98,21 @@ jobs:
         if: inputs.baseline != ''
         env:
           CARGO_TARGET_DIR: ${{ github.workspace }}/target-baseline
-        run: python3 measured/scripts/perf-report.py --source baseline --size-only
+        run: python3 tools/scripts/perf-report.py --source baseline --size-only
       - name: Build the ref
         env:
           CARGO_TARGET_DIR: ${{ github.workspace }}/target-measured
           EXTRA_RUSTFLAGS: ${{ inputs.rustflags }}
         run: |
           if [ -n "$EXTRA_RUSTFLAGS" ]; then export RUSTFLAGS="$EXTRA_RUSTFLAGS"; fi
-          python3 measured/scripts/perf-report.py --source measured --size-only
+          python3 tools/scripts/perf-report.py --source measured --size-only
       - name: Measure the baseline
         if: inputs.baseline != ''
         env:
           CARGO_TARGET_DIR: ${{ github.workspace }}/target-baseline
           RUNS: ${{ inputs.runs }}
         run: >
-          python3 measured/scripts/perf-report.py --source baseline --no-build --runs "$RUNS"
+          python3 tools/scripts/perf-report.py --source baseline --no-build --runs "$RUNS"
           --save baseline.json --markdown "$GITHUB_STEP_SUMMARY" --title "Baseline"
       - name: Measure the ref
         env:
@@ -118,7 +126,7 @@ jobs:
             # reported in the comparison, not turned into a failed job.
             set -- "$@" --check baseline.json --no-fail
           fi
-          python3 measured/scripts/perf-report.py "$@"
+          python3 tools/scripts/perf-report.py "$@"
       - name: Keep the numbers
         if: always()
         uses: actions/upload-artifact@v4
