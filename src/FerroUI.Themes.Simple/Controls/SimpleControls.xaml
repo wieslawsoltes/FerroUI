@@ -40,6 +40,7 @@
         <MergeResourceInclude Source="ferres://FerroUI.Themes.Simple/Controls/TabStripItem.xaml" />
         <MergeResourceInclude Source="ferres://FerroUI.Themes.Simple/Controls/TabControl.xaml" />
         <MergeResourceInclude Source="ferres://FerroUI.Themes.Simple/Controls/TabItem.xaml" />
+        <MergeResourceInclude Source="ferres://FerroUI.Themes.Simple/Controls/PipsPager.xaml" />
         <MergeResourceInclude Source="ferres://FerroUI.Themes.Simple/Controls/PopupRoot.xaml" />
         <MergeResourceInclude Source="ferres://FerroUI.Themes.Simple/Controls/OverlayPopupHost.xaml" />
         <MergeResourceInclude Source="ferres://FerroUI.Themes.Simple/Controls/EmbeddableControlRoot.xaml" />
@@ -51,17 +52,34 @@
         <MergeResourceInclude Source="ferres://FerroUI.Themes.Simple/Controls/Menu.xaml" />
         <MergeResourceInclude Source="ferres://FerroUI.Themes.Simple/Controls/MenuItem.xaml" />
         <MergeResourceInclude Source="ferres://FerroUI.Themes.Simple/Controls/ContextMenu.xaml" />
+        <MergeResourceInclude Source="ferres://FerroUI.Themes.Simple/Controls/CalendarButton.xaml" />
+        <MergeResourceInclude Source="ferres://FerroUI.Themes.Simple/Controls/CalendarDayButton.xaml" />
+        <MergeResourceInclude Source="ferres://FerroUI.Themes.Simple/Controls/CalendarItem.xaml" />
+        <MergeResourceInclude Source="ferres://FerroUI.Themes.Simple/Controls/Calendar.xaml" />
         <MergeResourceInclude Source="ferres://FerroUI.Themes.Simple/Controls/Slider.xaml" />
+        <MergeResourceInclude Source="ferres://FerroUI.Themes.Simple/Controls/NotificationCard.xaml" />
         <MergeResourceInclude Source="ferres://FerroUI.Themes.Simple/Controls/NumericUpDown.xaml" />
         <MergeResourceInclude Source="ferres://FerroUI.Themes.Simple/Controls/DateTimePickerShared.xaml" />
+        <MergeResourceInclude Source="ferres://FerroUI.Themes.Simple/Controls/DatePicker.xaml" />
+        <MergeResourceInclude Source="ferres://FerroUI.Themes.Simple/Controls/TimePicker.xaml" />
         <MergeResourceInclude Source="ferres://FerroUI.Themes.Simple/Controls/SplitView.xaml" />
         <MergeResourceInclude Source="ferres://FerroUI.Themes.Simple/Controls/SplitButton.xaml" />
         <MergeResourceInclude Source="ferres://FerroUI.Themes.Simple/Controls/SelectableTextBlock.xaml" />
+        <MergeResourceInclude Source="ferres://FerroUI.Themes.Simple/Controls/RefreshContainer.xaml" />
+        <MergeResourceInclude Source="ferres://FerroUI.Themes.Simple/Controls/RefreshVisualizer.xaml" />
         <MergeResourceInclude Source="ferres://FerroUI.Themes.Simple/Controls/ThemeVariantScope.xaml" />
         <MergeResourceInclude Source="ferres://FerroUI.Themes.Simple/Controls/HeaderedContentControl.xaml"/>
+        <MergeResourceInclude Source="ferres://FerroUI.Themes.Simple/Controls/TextSelectionHandle.xaml" />
         <MergeResourceInclude Source="ferres://FerroUI.Themes.Simple/Controls/CommandBar.xaml" />
         <MergeResourceInclude Source="ferres://FerroUI.Themes.Simple/Controls/ContentPage.xaml" />
+        <MergeResourceInclude Source="ferres://FerroUI.Themes.Simple/Controls/CarouselPage.xaml" />
+        <MergeResourceInclude Source="ferres://FerroUI.Themes.Simple/Controls/DrawerPage.xaml" />
         <MergeResourceInclude Source="ferres://FerroUI.Themes.Simple/Controls/NavigationPage.xaml" />
+        <MergeResourceInclude Source="ferres://FerroUI.Themes.Simple/Controls/TabbedPage.xaml" />
+        <MergeResourceInclude Source="ferres://FerroUI.Themes.Simple/Controls/TableView.xaml" />
+        <MergeResourceInclude Source="ferres://FerroUI.Themes.Simple/Controls/TableViewCell.xaml" />
+        <MergeResourceInclude Source="ferres://FerroUI.Themes.Simple/Controls/TableViewColumnHeader.xaml" />
+        <MergeResourceInclude Source="ferres://FerroUI.Themes.Simple/Controls/TableViewRow.xaml" />
       </ResourceDictionary.MergedDictionaries>
     </ResourceDictionary>
   </Styles.Resources>

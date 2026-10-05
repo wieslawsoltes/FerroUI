@@ -176,3 +176,23 @@ fn gap_g10_system_date_time() {
         "<ResourceDictionary {XMLNS} xmlns:sys='using:System'><DataTemplate x:Key='t' DataType='sys:DateTime'><TextBlock /></DataTemplate></ResourceDictionary>"
     ));
 }
+
+#[test]
+#[ignore = "gap G20: the static member System.DateTime.Today is not known to markup"]
+fn gap_g20_system_date_time_today() {
+    let _app = start_application();
+    // `Controls/CalendarDatePicker.xaml` (both themes): the day number of the calendar glyph.
+    load_text(&format!(
+        "<TextBlock {XMLNS} xmlns:sys='using:System' Text='{{Binding Source={{x:Static sys:DateTime.Today}}, Path=Day}}' />"
+    ));
+}
+
+#[test]
+#[ignore = "gap G21: the contract INotification has no markup metadata"]
+fn gap_g21_notification_contract_as_data_type() {
+    let _app = start_application();
+    // `Controls/WindowNotificationManager.xaml` (both themes): the data template of the items panel of its template.
+    load_text(&format!(
+        "<ResourceDictionary {XMLNS}><DataTemplate x:Key='t' DataType='INotification'><TextBlock /></DataTemplate></ResourceDictionary>"
+    ));
+}

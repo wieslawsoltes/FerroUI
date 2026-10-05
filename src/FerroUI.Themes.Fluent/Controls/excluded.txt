@@ -3,24 +3,8 @@
 # FluentControls.xaml; remove a line here and run the script again to include a document.
 #
 # Controls (or types the theme names) that are not ported:
-Calendar.xaml | Calendar, CalendarItem
-CalendarButton.xaml | CalendarButton
-CalendarDatePicker.xaml | CalendarDatePicker, Calendar
-CalendarDayButton.xaml | CalendarDayButton
-CalendarItem.xaml | CalendarItem
-CarouselPage.xaml | CarouselPage
-DatePicker.xaml | DatePicker, DatePickerPresenter, DateTimePickerPanel
-DrawerPage.xaml | DrawerPage
 ManagedFileChooser.xaml | FerroUI.Dialogs (ManagedFileChooser, ManagedFileChooserOverwritePrompt, ChildFitter, converters)
-NotificationCard.xaml | NotificationCard
-PipsPager.xaml | PipsPager
-RefreshContainer.xaml | RefreshContainer
-RefreshVisualizer.xaml | RefreshVisualizer
-TabbedPage.xaml | TabbedPage
-TableView.xaml | TableView, TableViewColumnHeadersPresenter
-TableViewCell.xaml | TableViewCell
-TableViewColumnHeader.xaml | TableViewColumnHeader
-TableViewRow.xaml | TableViewRow, TableViewCellsPresenter
-TextSelectionHandle.xaml | TextSelectionHandle
-TimePicker.xaml | TimePicker, TimePickerPresenter, DateTimePickerPanel
-WindowNotificationManager.xaml | WindowNotificationManager
+#
+# Ported controls whose document does not load yet (see the gap tests of the Simple theme crate):
+CalendarDatePicker.xaml | gap G20: the static member System.DateTime.Today is not known to markup
+WindowNotificationManager.xaml | gap G21: the contract INotification has no markup metadata (DataType of a data template)

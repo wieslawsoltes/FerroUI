@@ -4,7 +4,7 @@
 //! [`FluentTheme`]) to its styles and shows a window with a stack panel of
 //! a text block, a button, a check box, a text box, a slider, a progress
 //! bar and a list box that is too small for its items, so that it shows a
-//! scroll bar.
+//! scroll bar, next to a calendar, a date picker and a time picker.
 //!
 //! ```text
 //! cargo run -p ferroui-themes-simple --example themed_window
@@ -18,13 +18,14 @@
 //! code the lifetime returns. `FERROUI_THEME_VARIANT=dark|light` requests a
 //! theme variant instead of following the system.
 
+use ferroui_base::layout::Orientation;
 use ferroui_base::styling::{Styles, ThemeVariant};
 use ferroui_base::threading::{DispatcherPriority, DispatcherTimer};
 use ferroui_base::{ferro_class, ferro_impl_classes, instantiate, BoxedValue, FerroObjectImpl, Ref, Thickness};
 use ferroui_controls::primitives::TemplatedControl;
 use ferroui_controls::{
-    AppBuilder, Application, ApplicationImpl, ApplicationImplExt, Button, CheckBox, Control, ListBox, NewApplication,
-    ProgressBar, Slider, StackPanel, TextBlock, TextBox, Window,
+    AppBuilder, Application, ApplicationImpl, ApplicationImplExt, Button, Calendar, CheckBox, Control, DatePicker,
+    ListBox, NewApplication, ProgressBar, Slider, StackPanel, TextBlock, TextBox, TimePicker, Window,
 };
 use ferroui_desktop::AppBuilderDesktopExtensions;
 use ferroui_themes_fluent::FluentTheme;
@@ -120,7 +121,7 @@ fn create_main_window() -> Ref<Window> {
 
     let panel = StackPanel::new();
     panel.set_spacing(10.0);
-    panel.set_margin(Thickness::uniform(16.0));
+    panel.set_width(388.0);
     panel.children().add(title);
     panel.children().add(button);
     panel.children().add(check_box);
@@ -129,20 +130,36 @@ fn create_main_window() -> Ref<Window> {
     panel.children().add(progress_bar);
     panel.children().add(list_box);
 
+    // The date and time controls.
+    let dates = StackPanel::new();
+    dates.set_spacing(10.0);
+    dates.children().add(Calendar::new());
+    dates.children().add(DatePicker::new());
+    dates.children().add(TimePicker::new());
+
+    let columns = StackPanel::new();
+    columns.set_orientation(Orientation::Horizontal);
+    columns.set_spacing(24.0);
+    columns.set_margin(Thickness::uniform(16.0));
+    columns.children().add(panel.clone());
+    columns.children().add(dates.clone());
+
     let window = Window::new();
     window.set_title(Some("FerroUI themed window".to_string()));
-    window.set_width(420.0);
-    window.set_height(460.0);
-    window.set_content(Some(Control::boxed(&panel)));
+    window.set_width(820.0);
+    window.set_height(520.0);
+    window.set_content(Some(Control::boxed(&columns)));
 
     window.opened({
         let window = window.clone();
         let panel = panel.clone();
+        let dates = dates.clone();
         move || {
             println!("Window opened: theme variant {:?}", window.actual_theme_variant());
             // What the theme gave each control: the smoke test reads these lines.
             println!("Window: template={} background={}", window.template().is_some(), window.background().is_some());
-            for child in panel.children().snapshot().iter() {
+            let children = panel.children().snapshot().iter().chain(dates.children().snapshot().iter()).cloned().collect::<Vec<_>>();
+            for child in children.iter() {
                 let name = child.get_type().name();
                 match child.cast::<TemplatedControl>() {
                     Some(templated) => println!(

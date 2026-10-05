@@ -101,13 +101,7 @@ fn should_define_control_theme_for_built_in_templated_controls() {
     // the theme for now (`Controls/excluded.txt`); a control with a theme is not in that list.
     for control in &templated_controls {
         let themed = default_control_themes.iter().any(|themed| std::ptr::eq(*themed, *control));
-        // The themes of the picker presenters are part of the document of their picker.
-        let document = match control.name() {
-            "DatePickerPresenter" => "DatePicker",
-            "TimePickerPresenter" => "TimePicker",
-            name => name,
-        };
-        let excluded = crate::assets::is_excluded(&format!("/Controls/{document}.xaml"));
+        let excluded = crate::assets::is_excluded(&format!("/Controls/{}.xaml", control.name()));
         assert_eq!(!excluded, themed, "{}", control.name());
     }
 }

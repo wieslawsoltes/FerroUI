@@ -180,7 +180,13 @@ control_tests! {
     auto_complete_box => "AutoCompleteBox";
     button => "Button";
     button_spinner => "ButtonSpinner";
+    calendar => "Calendar";
+    calendar_button => "CalendarButton";
+    calendar_date_picker => "CalendarDatePicker", ignore = "gap G20: the static member System.DateTime.Today is not known to markup (CalendarDatePicker.xaml is left out)";
+    calendar_day_button => "CalendarDayButton";
+    calendar_item => "CalendarItem";
     carousel => "Carousel";
+    carousel_page => "CarouselPage";
     check_box => "CheckBox";
     combo_box => "ComboBox";
     combo_box_item => "ComboBoxItem";
@@ -191,6 +197,9 @@ control_tests! {
     content_page => "ContentPage";
     context_menu => "ContextMenu";
     data_validation_errors => "DataValidationErrors";
+    date_picker => "DatePicker";
+    date_picker_presenter => "DatePickerPresenter";
+    drawer_page => "DrawerPage";
     drop_down_button => "DropDownButton";
     expander => "Expander";
     flyout_presenter => "FlyoutPresenter";
@@ -206,10 +215,14 @@ control_tests! {
     menu_flyout_presenter => "MenuFlyoutPresenter";
     menu_item => "MenuItem";
     navigation_page => "NavigationPage";
+    notification_card => "NotificationCard";
     numeric_up_down => "NumericUpDown";
     path_icon => "PathIcon";
+    pips_pager => "PipsPager";
     progress_bar => "ProgressBar";
     radio_button => "RadioButton";
+    refresh_container => "RefreshContainer";
+    refresh_visualizer => "RefreshVisualizer";
     repeat_button => "RepeatButton";
     scroll_bar => "ScrollBar";
     scroll_viewer => "ScrollViewer";
@@ -222,14 +235,23 @@ control_tests! {
     tab_item => "TabItem";
     tab_strip => "TabStrip";
     tab_strip_item => "TabStripItem";
+    tabbed_page => "TabbedPage";
+    table_view => "TableView";
+    table_view_cell => "TableViewCell";
+    table_view_column_header => "TableViewColumnHeader";
+    table_view_row => "TableViewRow";
     text_box => "TextBox";
+    text_selection_handle => "TextSelectionHandle";
     theme_variant_scope => "ThemeVariantScope";
+    time_picker => "TimePicker";
+    time_picker_presenter => "TimePickerPresenter";
     toggle_button => "ToggleButton";
     toggle_switch => "ToggleSwitch";
     tool_tip => "ToolTip";
     transitioning_content_control => "TransitioningContentControl";
     tree_view => "TreeView";
     tree_view_item => "TreeViewItem";
+    window_notification_manager => "WindowNotificationManager", ignore = "gap G21: the contract INotification has no markup metadata (DataType of a data template) (WindowNotificationManager.xaml is left out)";
 }
 
 /// The window itself is themed: its template is applied when it is shown
