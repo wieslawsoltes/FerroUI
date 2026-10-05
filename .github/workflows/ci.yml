@@ -49,45 +49,12 @@ jobs:
     name: Check (browser, wasm32-unknown-emscripten)
     runs-on: ubuntu-latest
     timeout-minutes: 90
-    env:
-      # Pinned together: see docs/porting/browser-platform.md, section 3.
-      EMSDK_VERSION: "6.0.10"
-      RUST_VERSION: "1.90.0"
-      # Skia's prebuilt binaries leave symbols to the linker of the application.
-      EMCC_CFLAGS: "-s ERROR_ON_UNDEFINED_SYMBOLS=0"
     steps:
       - uses: actions/checkout@v4
-      - uses: dtolnay/rust-toolchain@master
+      - uses: ./.github/actions/browser-toolchain
         with:
-          toolchain: ${{ env.RUST_VERSION }}
-          targets: wasm32-unknown-emscripten
-      - uses: Swatinem/rust-cache@v2
-        with:
-          key: browser
-      - name: Cache the Emscripten SDK
-        id: emsdk-cache
-        uses: actions/cache@v4
-        with:
-          path: ~/emsdk
-          key: emsdk-${{ runner.os }}-${{ env.EMSDK_VERSION }}
-      - name: Install the Emscripten SDK
-        if: steps.emsdk-cache.outputs.cache-hit != 'true'
-        run: |
-          git clone --depth 1 https://github.com/emscripten-core/emsdk ~/emsdk
-          ~/emsdk/emsdk install "$EMSDK_VERSION"
-          ~/emsdk/emsdk activate "$EMSDK_VERSION"
-      - name: Activate the Emscripten SDK
-        run: |
-          source ~/emsdk/emsdk_env.sh
-          echo "EMSDK=$EMSDK" >> "$GITHUB_ENV"
-          echo "$EMSDK" >> "$GITHUB_PATH"
-          echo "$EMSDK/upstream/emscripten" >> "$GITHUB_PATH"
-          emcc --version
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 24
-          cache: npm
-          cache-dependency-path: src/Browser/FerroUI.Browser/webapp/package-lock.json
+          cache-key: browser
+          wasm-bindgen: "true"
       - name: Script module (type check, lint, bundle, pixel test)
         working-directory: src/Browser/FerroUI.Browser/webapp
         run: |
@@ -108,28 +75,39 @@ jobs:
           -p ferroui-base -p ferroui-controls -p ferroui-markup -p ferroui-markup-xaml -p ferroui-markup-xaml-loader
           -p ferroui-opengl -p ferroui-skia -p ferroui-harfbuzz -p ferroui-fonts-inter
           -p ferroui-themes-simple -p ferroui-themes-fluent -p mini-mvvm -p control-catalog
-          -p ferroui-browser
+          -p ferroui-browser -p control-catalog-browser
       - name: Check the examples of the browser crate
         run: cargo check --locked --target wasm32-unknown-emscripten -p ferroui-browser --examples
-      - name: Cache the wasm-bindgen command-line tool
-        id: wasm-bindgen-cache
-        uses: actions/cache@v4
-        with:
-          path: ~/wasm-bindgen
-          key: wasm-bindgen-${{ runner.os }}-${{ hashFiles('Cargo.toml') }}
-      - name: Install the wasm-bindgen command-line tool
-        if: steps.wasm-bindgen-cache.outputs.cache-hit != 'true'
-        run: |
-          version="$(sed -n 's/^wasm-bindgen = "=\(.*\)"$/\1/p' Cargo.toml)"
-          cargo install wasm-bindgen-cli --version "$version" --locked --root ~/wasm-bindgen
       - name: Build the themed view site
-        run: |
-          echo "$HOME/wasm-bindgen/bin" >> "$GITHUB_PATH"
-          export PATH="$HOME/wasm-bindgen/bin:$PATH"
-          scripts/build-browser.sh themed_view
+        run: scripts/build-browser.sh themed_view
       - name: Behaviour tests in headless Chrome
         run: node scripts/browser/tests/themed_view.test.mjs
       - name: Build the storage view site
         run: scripts/build-browser.sh storage_view
       - name: Storage behaviour tests in headless Chrome
         run: node scripts/browser/tests/storage_view.test.mjs
+
+  browser-site:
+    name: ControlCatalog in the browser (headless Chrome)
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/browser-toolchain
+        with:
+          # Shared with the Pages workflow, which builds the same site.
+          cache-key: browser-site
+          wasm-bindgen: "true"
+      - name: Build the site
+        run: scripts/build-browser.sh control-catalog-browser
+      - name: Test the site (WebGL2 and 2D canvas, resize, console)
+        run: node scripts/browser/test-site.mjs target/browser/control-catalog-browser --screenshot target/browser/screenshots/control-catalog.png
+      - name: Sizes of the published modules
+        run: node scripts/browser/module-sizes.mjs target/browser/control-catalog-browser >> "$GITHUB_STEP_SUMMARY"
+      - name: Keep the screenshot
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: control-catalog-browser-screenshot
+          path: target/browser/screenshots
+          if-no-files-found: ignore
