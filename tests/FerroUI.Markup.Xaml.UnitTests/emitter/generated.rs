@@ -44,7 +44,7 @@ pub fn build_border_padding_xaml(
     let name_scope = rt::name_scope_of(service_provider.as_ref());
     border_0.begin_init();
     // border_padding.xaml(1,2) Padding
-    border_0.set_value(::ferroui_controls::Decorator::padding_property(), ::ferroui_base::Thickness::new(1.0_f64, 2.0_f64, 3.0_f64, 4.0_f64));
+    border_0.set_value(::ferroui_controls::Decorator::padding_property(), ::ferroui_base::Thickness::__markup_new_3(1.0_f64, 2.0_f64, 3.0_f64, 4.0_f64));
     border_0.try_end_init().map_err(|error| rt::at(rt::TARGET_INVOCATION_EXCEPTION, error, 1, 2))?;
     rt::complete_root_name_scope(::core::option::Option::Some(&border_0), name_scope.as_ref(), 1, 2)?;
     ::core::result::Result::Ok(border_0)
@@ -66,7 +66,7 @@ pub fn build_border_padding_uniform_xaml(
     let name_scope = rt::name_scope_of(service_provider.as_ref());
     border_0.begin_init();
     // border_padding_uniform.xaml(1,2) Padding
-    border_0.set_value(::ferroui_controls::Decorator::padding_property(), ::ferroui_base::Thickness::new(5.0_f64, 5.0_f64, 5.0_f64, 5.0_f64));
+    border_0.set_value(::ferroui_controls::Decorator::padding_property(), ::ferroui_base::Thickness::__markup_new_3(5.0_f64, 5.0_f64, 5.0_f64, 5.0_f64));
     border_0.try_end_init().map_err(|error| rt::at(rt::TARGET_INVOCATION_EXCEPTION, error, 1, 2))?;
     rt::complete_root_name_scope(::core::option::Option::Some(&border_0), name_scope.as_ref(), 1, 2)?;
     ::core::result::Result::Ok(border_0)
@@ -88,9 +88,9 @@ pub fn build_border_thickness_and_radius_xaml(
     let name_scope = rt::name_scope_of(service_provider.as_ref());
     border_0.begin_init();
     // border_thickness_and_radius.xaml(1,2) BorderThickness
-    border_0.set_value(::ferroui_controls::Border::border_thickness_property(), ::ferroui_base::Thickness::new(2.0_f64, 2.0_f64, 2.0_f64, 2.0_f64));
+    border_0.set_value(::ferroui_controls::Border::border_thickness_property(), ::ferroui_base::Thickness::__markup_new_3(2.0_f64, 2.0_f64, 2.0_f64, 2.0_f64));
     // border_thickness_and_radius.xaml(1,2) CornerRadius
-    border_0.set_value(::ferroui_controls::Border::corner_radius_property(), ::ferroui_base::CornerRadius::new(3.0_f64, 4.0_f64, 5.0_f64, 6.0_f64));
+    border_0.set_value(::ferroui_controls::Border::corner_radius_property(), ::ferroui_base::CornerRadius::__markup_new_3(3.0_f64, 4.0_f64, 5.0_f64, 6.0_f64));
     border_0.try_end_init().map_err(|error| rt::at(rt::TARGET_INVOCATION_EXCEPTION, error, 1, 2))?;
     rt::complete_root_name_scope(::core::option::Option::Some(&border_0), name_scope.as_ref(), 1, 2)?;
     ::core::result::Result::Ok(border_0)
@@ -112,7 +112,7 @@ pub fn build_border_margin_xaml(
     let name_scope = rt::name_scope_of(service_provider.as_ref());
     border_0.begin_init();
     // border_margin.xaml(1,2) Margin
-    border_0.set_value(::ferroui_base::layout::Layoutable::margin_property(), ::ferroui_base::Thickness::new(10.0_f64, 20.0_f64, 10.0_f64, 20.0_f64));
+    border_0.set_value(::ferroui_base::layout::Layoutable::margin_property(), ::ferroui_base::Thickness::__markup_new_3(10.0_f64, 20.0_f64, 10.0_f64, 20.0_f64));
     border_0.try_end_init().map_err(|error| rt::at(rt::TARGET_INVOCATION_EXCEPTION, error, 1, 2))?;
     rt::complete_root_name_scope(::core::option::Option::Some(&border_0), name_scope.as_ref(), 1, 2)?;
     ::core::result::Result::Ok(border_0)
@@ -386,7 +386,7 @@ pub fn build_border_child_with_text_xaml(
     let name_scope = rt::name_scope_of(service_provider.as_ref());
     border_0.begin_init();
     // border_child_with_text.xaml(1,2) Padding
-    border_0.set_value(::ferroui_controls::Decorator::padding_property(), ::ferroui_base::Thickness::new(4.0_f64, 4.0_f64, 4.0_f64, 4.0_f64));
+    border_0.set_value(::ferroui_controls::Decorator::padding_property(), ::ferroui_base::Thickness::__markup_new_3(4.0_f64, 4.0_f64, 4.0_f64, 4.0_f64));
     // border_child_with_text.xaml(1,112) Child
     // border_child_with_text.xaml(1,112) TextBlock
     let text_block_0 = ::ferroui_controls::TextBlock::new();
@@ -421,7 +421,7 @@ pub fn build_border_nested_xaml(
     border_1.begin_init();
     border_0.set_value(::ferroui_controls::Decorator::child_property(), ::core::option::Option::Some(::core::clone::Clone::clone(&border_1).upcast::<::ferroui_controls::Control>()));
     // border_nested.xaml(1,100) Margin
-    border_1.set_value(::ferroui_base::layout::Layoutable::margin_property(), ::ferroui_base::Thickness::new(1.0_f64, 1.0_f64, 1.0_f64, 1.0_f64));
+    border_1.set_value(::ferroui_base::layout::Layoutable::margin_property(), ::ferroui_base::Thickness::__markup_new_3(1.0_f64, 1.0_f64, 1.0_f64, 1.0_f64));
     // border_nested.xaml(1,119) Child
     // border_nested.xaml(1,119) Border
     let border_2 = ::ferroui_controls::Border::new();
@@ -778,9 +778,9 @@ pub fn build_border_many_properties_xaml(
     // border_many_properties.xaml(1,2) Height
     border_0.set_value(::ferroui_base::layout::Layoutable::height_property(), 100.0_f64);
     // border_many_properties.xaml(1,2) Margin
-    border_0.set_value(::ferroui_base::layout::Layoutable::margin_property(), ::ferroui_base::Thickness::new(1.0_f64, 2.0_f64, 3.0_f64, 4.0_f64));
+    border_0.set_value(::ferroui_base::layout::Layoutable::margin_property(), ::ferroui_base::Thickness::__markup_new_3(1.0_f64, 2.0_f64, 3.0_f64, 4.0_f64));
     // border_many_properties.xaml(1,2) Padding
-    border_0.set_value(::ferroui_controls::Decorator::padding_property(), ::ferroui_base::Thickness::new(8.0_f64, 8.0_f64, 8.0_f64, 8.0_f64));
+    border_0.set_value(::ferroui_controls::Decorator::padding_property(), ::ferroui_base::Thickness::__markup_new_3(8.0_f64, 8.0_f64, 8.0_f64, 8.0_f64));
     // border_many_properties.xaml(1,2) Opacity
     border_0.set_value(::ferroui_base::Visual::opacity_property(), 0.75_f64);
     // border_many_properties.xaml(1,2) HorizontalAlignment
@@ -899,6 +899,28 @@ fn build_name_property_xaml_untyped(
     ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
 }
 
+/// Generated from `brush_from_text.xaml`.
+pub fn build_brush_from_text_xaml(
+    service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
+) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::Border>, ::ferroui_markup_xaml::XamlLoadException> {
+    // brush_from_text.xaml(1,2) Border
+    let border_0 = ::ferroui_controls::Border::new();
+    let name_scope = rt::name_scope_of(service_provider.as_ref());
+    border_0.begin_init();
+    // brush_from_text.xaml(1,2) Background
+    border_0.set_value(::ferroui_controls::Border::background_property(), rt::cast(::ferroui_base::media::immutable::ImmutableSolidColorBrush::__markup_new_0(4294901760_u32)));
+    border_0.try_end_init().map_err(|error| rt::at(rt::TARGET_INVOCATION_EXCEPTION, error, 1, 2))?;
+    rt::complete_root_name_scope(::core::option::Option::Some(&border_0), name_scope.as_ref(), 1, 2)?;
+    ::core::result::Result::Ok(border_0)
+}
+
+fn build_brush_from_text_xaml_untyped(
+    service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
+) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadException> {
+    let root = build_brush_from_text_xaml(service_provider)?;
+    ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
+}
+
 /// Generated from `text_block_font_style_weight.xaml`.
 pub fn build_text_block_font_style_weight_xaml(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
@@ -965,7 +987,7 @@ pub fn build_text_block_padding_font_xaml(
     let name_scope = rt::name_scope_of(service_provider.as_ref());
     text_block_0.begin_init();
     // text_block_padding_font.xaml(1,2) Padding
-    text_block_0.set_value(::ferroui_controls::TextBlock::padding_property(), ::ferroui_base::Thickness::new(1.0_f64, 2.0_f64, 1.0_f64, 2.0_f64));
+    text_block_0.set_value(::ferroui_controls::TextBlock::padding_property(), ::ferroui_base::Thickness::__markup_new_3(1.0_f64, 2.0_f64, 1.0_f64, 2.0_f64));
     // text_block_padding_font.xaml(1,2) FontSize
     text_block_0.set_value(::ferroui_controls::TextBlock::font_size_property(), 11.5_f64);
     // text_block_padding_font.xaml(1,2) BaselineOffset
@@ -1059,7 +1081,7 @@ pub fn build_border_negative_margin_xaml(
     let name_scope = rt::name_scope_of(service_provider.as_ref());
     border_0.begin_init();
     // border_negative_margin.xaml(1,2) Margin
-    border_0.set_value(::ferroui_base::layout::Layoutable::margin_property(), ::ferroui_base::Thickness::new(-4.0_f64, 0.0_f64, -2.5_f64, 1.0_f64));
+    border_0.set_value(::ferroui_base::layout::Layoutable::margin_property(), ::ferroui_base::Thickness::__markup_new_3(-4.0_f64, 0.0_f64, -2.5_f64, 1.0_f64));
     border_0.try_end_init().map_err(|error| rt::at(rt::TARGET_INVOCATION_EXCEPTION, error, 1, 2))?;
     rt::complete_root_name_scope(::core::option::Option::Some(&border_0), name_scope.as_ref(), 1, 2)?;
     ::core::result::Result::Ok(border_0)
@@ -1136,7 +1158,7 @@ pub fn build_content_control_element_xaml(
     border_0.begin_init();
     content_control_0.set_value(::ferroui_controls::ContentControl::content_property(), rt::to_object(::core::clone::Clone::clone(&border_0)));
     // content_control_element.xaml(1,108) Padding
-    border_0.set_value(::ferroui_controls::Decorator::padding_property(), ::ferroui_base::Thickness::new(2.0_f64, 2.0_f64, 2.0_f64, 2.0_f64));
+    border_0.set_value(::ferroui_controls::Decorator::padding_property(), ::ferroui_base::Thickness::__markup_new_3(2.0_f64, 2.0_f64, 2.0_f64, 2.0_f64));
     border_0.try_end_init().map_err(|error| rt::at(rt::TARGET_INVOCATION_EXCEPTION, error, 1, 108))?;
     content_control_0.try_end_init().map_err(|error| rt::at(rt::TARGET_INVOCATION_EXCEPTION, error, 1, 2))?;
     rt::complete_root_name_scope(::core::option::Option::Some(&content_control_0), name_scope.as_ref(), 1, 2)?;
@@ -1544,7 +1566,7 @@ pub fn build_user_control_properties_xaml(
     // user_control_properties.xaml(1,2) Height
     user_control_0.set_value(::ferroui_base::layout::Layoutable::height_property(), 200.0_f64);
     // user_control_properties.xaml(1,2) Padding
-    user_control_0.set_value(::ferroui_controls::primitives::TemplatedControl::padding_property(), ::ferroui_base::Thickness::new(5.0_f64, 5.0_f64, 5.0_f64, 5.0_f64));
+    user_control_0.set_value(::ferroui_controls::primitives::TemplatedControl::padding_property(), ::ferroui_base::Thickness::__markup_new_3(5.0_f64, 5.0_f64, 5.0_f64, 5.0_f64));
     // user_control_properties.xaml(1,2) Opacity
     user_control_0.set_value(::ferroui_base::Visual::opacity_property(), 0.9_f64);
     // user_control_properties.xaml(1,156) Content
@@ -1555,7 +1577,7 @@ pub fn build_user_control_properties_xaml(
     // user_control_properties.xaml(1,166) Text
     text_block_0.set_value(::ferroui_controls::TextBlock::text_property(), ::core::option::Option::Some(::std::string::String::from("Body")));
     // user_control_properties.xaml(1,156) Margin
-    text_block_0.set_value(::ferroui_base::layout::Layoutable::margin_property(), ::ferroui_base::Thickness::new(2.0_f64, 2.0_f64, 2.0_f64, 2.0_f64));
+    text_block_0.set_value(::ferroui_base::layout::Layoutable::margin_property(), ::ferroui_base::Thickness::__markup_new_3(2.0_f64, 2.0_f64, 2.0_f64, 2.0_f64));
     text_block_0.try_end_init().map_err(|error| rt::at(rt::TARGET_INVOCATION_EXCEPTION, error, 1, 156))?;
     user_control_0.try_end_init().map_err(|error| rt::at(rt::TARGET_INVOCATION_EXCEPTION, error, 1, 2))?;
     rt::complete_root_name_scope(::core::option::Option::Some(&user_control_0), name_scope.as_ref(), 1, 2)?;
@@ -1578,7 +1600,7 @@ pub fn build_multiline_document_xaml(
     let name_scope = rt::name_scope_of(service_provider.as_ref());
     border_0.begin_init();
     // multiline_document.xaml(1,2) Padding
-    border_0.set_value(::ferroui_controls::Decorator::padding_property(), ::ferroui_base::Thickness::new(2.0_f64, 2.0_f64, 2.0_f64, 2.0_f64));
+    border_0.set_value(::ferroui_controls::Decorator::padding_property(), ::ferroui_base::Thickness::__markup_new_3(2.0_f64, 2.0_f64, 2.0_f64, 2.0_f64));
     // multiline_document.xaml(3,4) Child
     // multiline_document.xaml(3,4) Border
     let border_1 = ::ferroui_controls::Border::new();
@@ -1588,7 +1610,7 @@ pub fn build_multiline_document_xaml(
     border_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("first")));
     rt::register_name(name_scope.as_ref(), "first", ::core::clone::Clone::clone(&border_1).upcast::<::ferroui_base::FerroObject>(), 3, 11)?;
     // multiline_document.xaml(3,4) Margin
-    border_1.set_value(::ferroui_base::layout::Layoutable::margin_property(), ::ferroui_base::Thickness::new(1.0_f64, 1.0_f64, 1.0_f64, 1.0_f64));
+    border_1.set_value(::ferroui_base::layout::Layoutable::margin_property(), ::ferroui_base::Thickness::__markup_new_3(1.0_f64, 1.0_f64, 1.0_f64, 1.0_f64));
     // multiline_document.xaml(5,6) Child
     // multiline_document.xaml(5,6) TextBlock
     let text_block_0 = ::ferroui_controls::TextBlock::new();
@@ -1692,21 +1714,21 @@ pub fn build_grid_definitions_elements_xaml(
     // grid_definitions_elements.xaml(1,119) RowDefinition
     let row_definition_0 = ::ferroui_controls::RowDefinition::new();
     // grid_definitions_elements.xaml(1,119) Height
-    row_definition_0.set_value(::ferroui_controls::RowDefinition::height_property(), ::ferroui_controls::GridLength::new(0.0_f64, ::ferroui_controls::GridUnitType::Auto));
+    row_definition_0.set_value(::ferroui_controls::RowDefinition::height_property(), ::ferroui_controls::GridLength::__markup_new_2(0.0_f64, ::ferroui_controls::GridUnitType::Auto));
     ::ferroui_controls::RowDefinitions::__markup_Add_0(&row_definitions_collection_0, ::core::clone::Clone::clone(&row_definition_0));
     // grid_definitions_elements.xaml(1,149) RowDefinitions
     let row_definitions_collection_1 = ::ferroui_controls::Grid::__markup_get_RowDefinitions(&::core::clone::Clone::clone(&grid_0));
     // grid_definitions_elements.xaml(1,149) RowDefinition
     let row_definition_1 = ::ferroui_controls::RowDefinition::new();
     // grid_definitions_elements.xaml(1,149) Height
-    row_definition_1.set_value(::ferroui_controls::RowDefinition::height_property(), ::ferroui_controls::GridLength::new(2.0_f64, ::ferroui_controls::GridUnitType::Star));
+    row_definition_1.set_value(::ferroui_controls::RowDefinition::height_property(), ::ferroui_controls::GridLength::__markup_new_2(2.0_f64, ::ferroui_controls::GridUnitType::Star));
     ::ferroui_controls::RowDefinitions::__markup_Add_0(&row_definitions_collection_1, ::core::clone::Clone::clone(&row_definition_1));
     // grid_definitions_elements.xaml(1,223) ColumnDefinitions
     let column_definitions_collection_0 = ::ferroui_controls::Grid::__markup_get_ColumnDefinitions(&::core::clone::Clone::clone(&grid_0));
     // grid_definitions_elements.xaml(1,223) ColumnDefinition
     let column_definition_0 = ::ferroui_controls::ColumnDefinition::new();
     // grid_definitions_elements.xaml(1,223) Width
-    column_definition_0.set_value(::ferroui_controls::ColumnDefinition::width_property(), ::ferroui_controls::GridLength::new(100.0_f64, ::ferroui_controls::GridUnitType::Pixel));
+    column_definition_0.set_value(::ferroui_controls::ColumnDefinition::width_property(), ::ferroui_controls::GridLength::__markup_new_2(100.0_f64, ::ferroui_controls::GridUnitType::Pixel));
     ::ferroui_controls::ColumnDefinitions::__markup_Add_0(&column_definitions_collection_0, ::core::clone::Clone::clone(&column_definition_0));
     // grid_definitions_elements.xaml(1,279) Children
     let children_collection_0 = ::ferroui_controls::Panel::__markup_get_Children(&::core::clone::Clone::clone(&grid_0).upcast::<::ferroui_controls::Panel>());
@@ -2154,6 +2176,7 @@ pub const DOCUMENTS: &[(&str, BuildDocument)] = &[
     ("panel_children.xaml", build_panel_children_xaml_untyped as BuildDocument),
     ("named_element.xaml", build_named_element_xaml_untyped as BuildDocument),
     ("name_property.xaml", build_name_property_xaml_untyped as BuildDocument),
+    ("brush_from_text.xaml", build_brush_from_text_xaml_untyped as BuildDocument),
     ("text_block_font_style_weight.xaml", build_text_block_font_style_weight_xaml_untyped as BuildDocument),
     ("text_block_text_layout.xaml", build_text_block_text_layout_xaml_untyped as BuildDocument),
     ("text_block_padding_font.xaml", build_text_block_padding_font_xaml_untyped as BuildDocument),

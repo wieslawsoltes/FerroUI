@@ -449,13 +449,10 @@ pub struct MarkupConstructor {
     pub parameter_info: &'static [MarkupParameter],
     /// Creates the instance from the arguments.
     pub invoke: MarkupInvoke,
-    /// The callable of the declaration as source text (`stringify!` of what
-    /// follows `=>`, for example `Thickness::new`), for the emitter of Rust
-    /// source. The text is relative to the declaring module; the emitter
-    /// uses it only when it has the form `<TypeName>::<function>` with the
-    /// name of the declared type, which it prints as
-    /// `<public path of the type>::<function>(arguments..)`.
-    pub emit: Option<&'static str>,
+    /// The typed function the declaration generated for the constructor
+    /// (see [`MarkupEmit`]): `__markup_new_<n>(a0: A, ..) -> T`, where `T` is
+    /// the value type of the declared type ([`MarkupType::value`]).
+    pub emit: Option<MarkupEmit>,
 }
 
 /// A property that is not a registered property: a plain property with a
@@ -500,6 +497,8 @@ pub struct MarkupProperty {
 /// | property getter / setter | `__markup_get_<Name>(this: &This) -> T` / `__markup_set_<Name>(this: &This, value: T)` |
 /// | static property getter / setter | `__markup_static_get_<Name>() -> T` / `__markup_static_set_<Name>(value: T)` |
 /// | method (instance or static), in declaration order `n` | `__markup_<Name>_<n>([this: &This,] a0: A, ..) -> R` |
+/// | constructor, in declaration order `n` | `__markup_new_<n>(a0: A, ..) -> T` |
+/// | `Parse(string)` | `__markup_parse(text: String) -> Result<T, MarkupInvokeError>` |
 ///
 /// A fallible member (`try`) returns `Result<T, MarkupInvokeError>`
 /// ([`markup_result`] of the callable's result).
@@ -676,10 +675,12 @@ pub struct MarkupType {
     /// declaration, else the declared type (`Ref<Class>` for a class). The
     /// typed functions of the instance members ([`MarkupEmit`]) take it.
     pub this: Option<TypeOf>,
-    /// The Rust type the typed function of `parse` returns
-    /// (`__markup_parse(text: String) -> Result<T, MarkupInvokeError>`): the
-    /// instance type, or `Rc<dyn Trait>` for a contract without `this:`.
-    pub parse_type: Option<TypeOf>,
+    /// The Rust type of a value of the type as its constructors and its
+    /// `Parse` return it, and so their typed functions ([`MarkupEmit`]):
+    /// the instance type when the declaration states `this:`, else the
+    /// first of its handles, else the declared type (`Rc<dyn Trait>` for a
+    /// contract). `Ref<Class>` for a class.
+    pub value: Option<TypeOf>,
 }
 
 impl MarkupType {
@@ -712,7 +713,7 @@ impl MarkupType {
             attributes: &[],
             notify_property_changed: None,
             this: None,
-            parse_type: None,
+            value: None,
         }
     }
 

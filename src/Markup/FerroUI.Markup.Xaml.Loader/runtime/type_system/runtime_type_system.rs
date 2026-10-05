@@ -931,6 +931,7 @@ impl RuntimeTypeSystem {
                 invoker: RuntimeInvoker::Static(constructor.invoke),
                 is_public: true,
                 parameter_attributes,
+                declared: Some(constructor),
             }));
         }
         for property in markup.properties {
@@ -1336,6 +1337,7 @@ impl RuntimeTypeSystem {
                 })),
                 is_public: true,
                 parameter_attributes: Vec::new(),
+                declared: None,
             }));
         }
         let markup = MarkupType::find_by_type_info(type_info).or_else(|| {
@@ -1533,6 +1535,7 @@ impl RuntimeTypeSystem {
                 invoker: RuntimeInvoker::None,
                 is_public: false,
                 parameter_attributes: Vec::new(),
+                declared: None,
             }));
         }
         super::object_model::project_object_model_members(self, type_, type_info, &mut members);
@@ -1747,7 +1750,8 @@ impl MemberBuilder {
             parameter_handles,
             invoker,
             is_public: true,
-                parameter_attributes: Vec::new(),
+            parameter_attributes: Vec::new(),
+            declared: None,
         }));
     }
 
