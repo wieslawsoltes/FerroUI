@@ -10,7 +10,7 @@
 //! | a declared static `GetName` / `SetName` of a registered attached property | replaces the plain accessor and carries the attributes of the property (`property_attributes`, `assign_binding`) |
 //! | `properties:` | instance properties |
 //! | `indexers:` | the property `Item` with index parameters (`get_Item` / `set_Item`) and `[DefaultMember("Item")]` on the type |
-//! | `fields:` | static fields. FALLBACK: for a type that declares no `static_properties:`, a value that is not the definition of a registered property or routed event is also a static property (`get_Name`) |
+//! | `fields:` | static fields (static properties are declared with `static_properties:`) |
 //! | `static_properties:` | static properties (`get_Name` / `set_Name` static accessors), no field |
 //! | `constructors:` | public constructors; a parameter has the attributes its declaration states (`(name: T [Attribute(..)]) => ..`). FALLBACK: a constructor in the positional form gives a parameter the attributes of the property that names itself its `[ConstructorArgument]` (same type, in order) |
 //! | an attribute argument `[a, b]` | an array-valued argument (`XamlValue::Array`) |

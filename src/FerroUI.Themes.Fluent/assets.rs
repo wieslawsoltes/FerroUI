@@ -26,17 +26,21 @@ pub fn excluded_documents() -> &'static [ExcludedDocument] {
 }
 
 /// Whether the document with the rooted asset path `path` is left out of
-/// the theme.
+/// the theme. (Used by the tests of the crate: the constructor of the theme
+/// loads the documents its class document includes.)
+#[cfg(test)]
 pub(crate) fn is_excluded(path: &str) -> bool {
     EXCLUDED.iter().any(|excluded| excluded.path == path)
 }
 
 /// The embedded documents, as `(rooted asset path, content)`.
+#[cfg(test)]
 pub(crate) fn documents() -> &'static [(&'static str, &'static [u8])] {
     ASSETS
 }
 
 /// The content of the embedded document with the rooted asset path `path`.
+#[cfg(test)]
 pub(crate) fn document(path: &str) -> Option<&'static [u8]> {
     ASSETS.iter().find(|(asset_path, _)| *asset_path == path).map(|(_, content)| *content)
 }

@@ -744,17 +744,12 @@ fn runtime_library_collections_have_count_and_an_indexer() {
 }
 
 #[test]
-fn a_static_value_is_a_static_field_and_a_static_property() {
+fn a_static_value_declared_as_a_field_is_a_field_only() {
     let ts = projection_system();
     let probe = ts.find_type("RtProjection.Probe").expect("the type");
     let field = probe.fields().into_iter().find(|f| f.name() == "Shared").expect("the field");
     assert!(field.is_static());
-    let property = probe.properties().into_iter().find(|p| p.name() == "Shared").expect("the property");
-    let getter = property.getter().expect("the getter");
-    assert!(getter.is_static() && getter.parameters().is_empty());
-    assert!(property.setter().is_none());
-    let value = method(&probe, "get_Shared").invoke(&[]).expect("invoke");
-    assert_eq!(from_markup_value::<String>(&value).as_deref(), Some("shared"));
+    assert!(!probe.properties().iter().any(|p| p.name() == "Shared"));
 
     // The definitions of registered properties are fields only.
     let layoutable = ts.find_type("FerroUI.Layout.Layoutable").expect("the class");
@@ -763,13 +758,12 @@ fn a_static_value_is_a_static_field_and_a_static_property() {
 }
 
 #[test]
-fn a_constructor_parameter_has_the_attributes_of_its_constructor_argument_property() {
+fn a_constructor_parameter_has_the_attributes_its_declaration_states() {
     let ts = projection_system();
+    // The positional form states none.
     let probe = ts.find_type("RtProjection.Probe").expect("the type");
     let constructor = probe.constructors().into_iter().find(|c| c.parameters().len() == 1).expect("the constructor");
-    let parameter = constructor.get_parameter_info(0).expect("the parameter");
-    assert_eq!(attribute_names(parameter.custom_attributes()), ["FerroUI.Metadata.InheritDataTypeFromAttribute"]);
-    assert_eq!(parameter.custom_attributes()[0].parameters(), [XamlValue::Int32(2)]);
+    assert!(constructor.get_parameter_info(0).expect("the parameter").custom_attributes().is_empty());
 
     // The binding to the templated parent: its property is looked up in the control
     // template scope, also when it is given as the constructor argument.
@@ -878,10 +872,9 @@ fn a_declared_constructor_parameter_has_its_declared_attributes() {
     assert!(named.get_parameter_info(1).expect("the parameter").custom_attributes().is_empty());
     assert!(named.get_parameter_info(2).is_err());
 
-    // FALLBACK: the positional form still takes them from the constructor argument property.
+    // The positional form states no parameter attributes.
     let positional = constructors.iter().find(|c| c.parameters().len() == 1).expect("the constructor");
-    let parameter = positional.get_parameter_info(0).expect("the parameter");
-    assert_eq!(parameter.custom_attributes()[0].parameters(), [XamlValue::Int32(2)]);
+    assert!(positional.get_parameter_info(0).expect("the parameter").custom_attributes().is_empty());
 }
 
 #[test]

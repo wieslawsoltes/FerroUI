@@ -761,7 +761,7 @@ ferro_markup_type!(class TestDataContext {
         GenericProperty: Rc<ListItemCollectionViewInt32> { get: TestDataContext::generic_property },
         DecimalValue: Decimal { get: TestDataContext::decimal_value, set: TestDataContext::set_decimal_value },
     ],
-    fields: [StaticProperty: String => TestDataContext::static_property],
+    static_properties: [StaticProperty: String { get: TestDataContext::static_property }],
 });
 
 // The instantiations of generic types of the runtime library the properties

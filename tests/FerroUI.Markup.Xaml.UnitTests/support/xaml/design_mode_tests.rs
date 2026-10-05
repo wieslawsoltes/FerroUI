@@ -27,7 +27,7 @@ impl DesignModeTests {
 
 ferro_markup_type!(static DesignModeTests {
     namespace: "FerroUI.Markup.Xaml.UnitTests.Xaml",
-    fields: [SomeStaticProperty: Option<BoxedValue> => DesignModeTests::some_static_property],
+    static_properties: [SomeStaticProperty: Option<BoxedValue> { get: DesignModeTests::some_static_property }],
 });
 
 pub(crate) const MODULE: TypeModule = TypeModule {

@@ -80,9 +80,6 @@ pub fn attribute_type_name(name: &str) -> String {
     }
 }
 
-/// The collections that derive from `DefinitionList<T>` of the managed original.
-const DEFINITION_LISTS: &[&str] = &["FerroUI.Controls.ColumnDefinitions", "FerroUI.Controls.RowDefinitions"];
-
 type GenericIndex = (usize, HashMap<String, Vec<&'static MarkupType>>);
 
 /// The run-time type system.
@@ -913,48 +910,15 @@ impl RuntimeTypeSystem {
             }
         }
         // The attributes of a constructor parameter are the ones its declaration states
-        // (`(property: T [InheritDataTypeFrom(2)]) => ..`).
-        //
-        // FALLBACK (to be removed once the declarations state parameter attributes): a
-        // constructor declared in the positional form takes them from the property that
-        // repeats the annotation in the managed original (`TemplateBinding(property)` and
-        // `TemplateBinding.Property`, both with `[InheritDataTypeFrom]`): a parameter has
-        // the attributes of the property that declares itself as a constructor argument of
-        // the parameter's type (the k-th such property for the k-th parameter of that
-        // type), without the marker itself.
-        let constructor_arguments: Vec<(Rc<dyn IXamlType>, &'static [MarkupAttribute])> = markup
-            .properties
-            .iter()
-            .filter(|p| p.attributes.iter().any(|a| a.name == attributes::CONSTRUCTOR_ARGUMENT))
-            .filter(|p| p.attributes.len() > 1)
-            .map(|p| (self.resolve((p.type_)()), p.attributes))
-            .collect();
+        // (`(property: T [InheritDataTypeFrom(2)]) => ..`); a constructor declared in the
+        // positional form states none.
         for constructor in markup.constructors {
             let (parameters, parameter_handles) = self.resolve_all(constructor.parameters);
-            let mut used = vec![false; constructor_arguments.len()];
             let declared = !constructor.parameter_info.is_empty();
-            let parameter_attributes: Vec<Vec<Rc<dyn IXamlCustomAttribute>>> = parameters
-                .iter()
-                .enumerate()
-                .map(|(parameter_index, parameter)| {
-                    if declared {
-                        return self.project_attributes(constructor.parameter_attributes(parameter_index));
-                    }
-                    let found = constructor_arguments
-                        .iter()
-                        .enumerate()
-                        .find(|(index, (type_, _))| !used[*index] && type_.equals(&**parameter));
-                    match found {
-                        Some((index, (_, declared))) => {
-                            used[index] = true;
-                            declared
-                                .iter()
-                                .filter(|a| a.name != attributes::CONSTRUCTOR_ARGUMENT)
-                                .map(|a| self.project_attribute(a))
-                                .collect()
-                        }
-                        None => Vec::new(),
-                    }
+            let parameter_attributes: Vec<Vec<Rc<dyn IXamlCustomAttribute>>> = (0..parameters.len())
+                .map(|parameter_index| match declared {
+                    true => self.project_attributes(constructor.parameter_attributes(parameter_index)),
+                    false => Vec::new(),
                 })
                 .collect();
             members.constructors.push(Rc::new(RuntimeConstructor {
@@ -1097,41 +1061,6 @@ impl RuntimeTypeSystem {
                 value: RuntimeFieldValue::Getter(field.get),
                 attributes: self.project_attributes(field.attributes),
             }));
-            // FALLBACK (to be removed once the declarations use `static_properties:`): a
-            // type that declares no static property at all may still list the static
-            // properties of the managed original (`Brushes.Red`, `ThemeVariant.Light`)
-            // among its `fields:`, so each of its static values is found as either. A type
-            // that declares `static_properties:` has made the distinction: its fields are
-            // fields only. The definitions of registered properties and routed events are
-            // fields of the managed original and looked up as fields only.
-            if !markup.static_properties.is_empty() || is_definition_field((field.type_)()) {
-                continue;
-            }
-            let field_type = self.resolve((field.type_)());
-            let get = field.get;
-            let getter = self.method(
-                type_,
-                format!("get_{}", field.name),
-                true,
-                field_type.clone(),
-                (Vec::new(), Vec::new()),
-                RuntimeInvoker::Dynamic(Rc::new(move |arguments: &[MarkupValue]| {
-                    check_count(arguments, 0)?;
-                    Ok(get())
-                })),
-                Vec::new(),
-            );
-            members.methods.push(getter.clone());
-            members.properties.push(Rc::new(RuntimeProperty {
-                name: field.name.to_string(),
-                declaring_type: weak.clone(),
-                property_type: field_type,
-                getter: Some(getter),
-                setter: None,
-                attributes: self.project_attributes(field.attributes),
-                ferro_property: None,
-                indexer_parameters: Vec::new(),
-            }));
         }
         // Static properties: `static T Name { get; set; }` (static accessors, no field).
         for property in markup.static_properties {
@@ -1226,20 +1155,6 @@ impl RuntimeTypeSystem {
             }
         }
         members.attributes.extend(self.project_attributes(markup.attributes));
-        // FALLBACK (to be removed): `[FerroList(Separators = new[] { ",", " " })]` of the
-        // base class of the row and column definition lists. Metadata states it as
-        // `attributes: [FerroList(Separators = [",", " "])]`; until the declarations of
-        // these two types carry it, it is supplied here (never when they do).
-        if DEFINITION_LISTS.contains(&markup.full_name().as_str())
-            && !markup.attributes.iter().any(|a| a.name == attributes::FERRO_LIST)
-        {
-            let separators = XamlValue::Array(vec![XamlValue::String(",".to_string()), XamlValue::String(" ".to_string())]);
-            members.attributes.push(RuntimeCustomAttribute::new(
-                self.attribute_type(attributes::FERRO_LIST),
-                Vec::new(),
-                vec![("Separators".to_string(), separators)],
-            ));
-        }
         // A content property that an own property doesn't carry is stated on the type.
         if let Some(content) = markup.content_property {
             if !members.properties.iter().any(|p| p.name == content) {
