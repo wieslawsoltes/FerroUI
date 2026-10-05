@@ -556,6 +556,17 @@ ferro_markup_type!(struct DateTime {
     handles: [DateTime],
     parse: |s: &str| DateTime::parse(s, &CultureInfo::invariant_culture()),
     constructors: [() => DateTime::default],
+    // `static DateTime Now { get; }` and the like are static properties of the managed
+    // original; `MinValue` and `MaxValue` are its static read-only fields.
+    fields: [
+        MinValue: DateTime => || DateTime::MIN_VALUE,
+        MaxValue: DateTime => || DateTime::MAX_VALUE,
+    ],
+    static_properties: [
+        Now: DateTime { get: DateTime::now },
+        UtcNow: DateTime { get: DateTime::utc_now },
+        Today: DateTime { get: DateTime::today },
+    ],
 });
 
 ferro_markup_type!(struct DateTimeOffset {

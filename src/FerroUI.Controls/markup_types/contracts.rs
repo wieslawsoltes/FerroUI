@@ -128,7 +128,23 @@ ferro_markup_type!(interface dyn IPopupHost as "IPopupHost" {
 });
 
 /// The types declared in this file.
+// FerroUI.Controls.Notifications: the data type of the notification templates of the themes.
+ferro_markup_type!(interface dyn crate::notifications::INotification as "INotification" {
+    namespace: "FerroUI.Controls.Notifications",
+    handles: [
+        Rc<dyn crate::notifications::INotification>,
+        Option<Rc<dyn crate::notifications::INotification>>
+    ],
+    this: Rc<dyn crate::notifications::INotification>,
+    properties: [
+        Title: Option<String> { get: |n: &Rc<dyn crate::notifications::INotification>| n.title() },
+        Message: Option<String> { get: |n: &Rc<dyn crate::notifications::INotification>| n.message() },
+        Type: crate::notifications::NotificationType { get: |n: &Rc<dyn crate::notifications::INotification>| n.type_() },
+    ],
+});
+
 pub(super) const TYPES: &[&MarkupType] = &[
+    <dyn crate::notifications::INotification as MarkupTyped>::MARKUP,
     <AddChildOf<Ref<Control>> as MarkupTyped>::MARKUP,
     <AddChildOf<Ref<Inline>> as MarkupTyped>::MARKUP,
     <dyn IDataTemplate as MarkupTyped>::MARKUP,
@@ -147,6 +163,7 @@ pub(super) const TYPES: &[&MarkupType] = &[
 /// Registers the nullable forms of the contract handles that can be held in
 /// untyped values with the untyped value conversions of the current thread.
 pub(super) fn register_value_types() {
+    ValueTypes::register_nullable::<Rc<dyn crate::notifications::INotification>>();
     ValueTypes::register_nullable::<Rc<dyn IAddChild<Ref<Control>>>>();
     ValueTypes::register_nullable::<Rc<dyn IAddChild<Ref<Inline>>>>();
     ValueTypes::register_nullable::<Rc<dyn IDataTemplate>>();

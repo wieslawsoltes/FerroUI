@@ -311,6 +311,15 @@ CONTROLS = {
         'constructors': [
             "(String) => |header: String| NativeMenuItem::with_header(&header)",
         ],
+        'events': [
+            """Click(Option<BoxedValue>, EventArgs) => |this: &Ref<NativeMenuItem>, handler: MarkupDelegate| {
+                let sender = this.downgrade();
+                this.click(move |_item: &NativeMenuItem| {
+                    handler.invoke(&[into_markup_value(sender.upgrade()), into_markup_value(EventArgs::EMPTY)]);
+                })
+            }""",
+        ],
+        'note': """// The handler of `Click` takes the sender and empty event arguments in the managed original (`EventHandler`).""",
     },
     'Application': {
         'properties': [

@@ -264,7 +264,11 @@ ferro_markup_type!(class crate::data::BindingError as "Exception" {
 ferro_markup_type!(class Bitmap {
     namespace: "FerroUI.Media.Imaging",
     handles: [Rc<Bitmap>, Option<Rc<Bitmap>>],
-    interfaces: [Rc<dyn crate::media::IImage>, Rc<dyn crate::media::IImageBrushSource>],
+    interfaces: [
+        Rc<dyn crate::media::IImage>,
+        Rc<dyn crate::media::IImageBrushSource>,
+        Rc<dyn crate::media::imaging::IBitmap>,
+    ],
 });
 
 // FerroUI.Media.Immutable
@@ -454,6 +458,7 @@ pub(super) fn register_value_types() {
     ValueTypes::register_nullable::<Rc<Bitmap>>();
     ValueTypes::register_cast::<Rc<Bitmap>, Rc<dyn crate::media::IImage>>(|bitmap| bitmap.clone());
     ValueTypes::register_cast::<Rc<Bitmap>, Rc<dyn crate::media::IImageBrushSource>>(|bitmap| bitmap.clone());
+    ValueTypes::register_cast::<Rc<Bitmap>, Rc<dyn crate::media::imaging::IBitmap>>(|bitmap| bitmap.clone());
     ValueTypes::register_nullable::<UnsetValueType>();
     ValueTypes::register_nullable::<EventArgs>();
     ValueTypes::register_nullable::<CancelEventArgs>();

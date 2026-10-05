@@ -334,3 +334,24 @@ fn g08_missing_static_resource_inside_a_control_template_has_no_setter_for_the_u
     ));
     window.show();
 }
+
+// --- G20: a static property of a type of the runtime library -------------------
+
+#[test]
+fn g20_static_date_time_today() {
+    use ferroui_base::utilities::DateTime;
+    let _base = xaml_test_base();
+    let border = load_as::<Ref<Border>>(&format!(
+        "<Border {NS} xmlns:sys='using:System' Tag='{{x:Static sys:DateTime.Today}}' />"
+    ));
+    let tag = border.tag().expect("the tag");
+    assert_eq!(tag.downcast_ref::<DateTime>(), Some(&DateTime::today()));
+}
+
+// --- G21: a contract of the notifications as the data type of a template --------
+
+#[test]
+fn g21_notification_contract_as_data_type() {
+    let _base = xaml_test_base();
+    resource(&dictionary("<DataTemplate x:Key='t' DataType='INotification'><TextBlock /></DataTemplate>", ""), "t");
+}

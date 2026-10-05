@@ -26,7 +26,6 @@ fn gap_c001_static_resource_not_found_at_load_time_is_delayed() {
 }
 
 #[test]
-#[ignore = "gap C002: NativeMenuItem.Click cannot be assigned a handler from markup"]
 fn gap_c002_native_menu_item_click_handler() {
     let _app = start_application();
     let root: BoxedValue = Rc::new(instantiate(App::construct()));
