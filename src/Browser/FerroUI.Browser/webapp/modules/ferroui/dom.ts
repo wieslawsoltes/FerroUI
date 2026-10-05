@@ -155,13 +155,16 @@ export class FerroDOM {
         }
     }
 
+    // Differs from the original, which returns left, top, bottom, right while the framework reads
+    // left, top, right, bottom, so that the bottom inset became the right one and the other way
+    // round.
     public static getSafeAreaPadding(globalThis: Window): number[] {
         const top = parseFloat(getComputedStyle(globalThis.document.documentElement).getPropertyValue("--ferro-sat"));
         const bottom = parseFloat(getComputedStyle(globalThis.document.documentElement).getPropertyValue("--ferro-sab"));
         const left = parseFloat(getComputedStyle(globalThis.document.documentElement).getPropertyValue("--ferro-sal"));
         const right = parseFloat(getComputedStyle(globalThis.document.documentElement).getPropertyValue("--ferro-sar"));
 
-        return [left, top, bottom, right];
+        return [left, top, right, bottom];
     }
 
     public static getDarkMode(globalThis: Window): number[] {
