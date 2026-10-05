@@ -52,6 +52,7 @@ The macOS job of the CI workflow is the authoritative full run. After opening th
 
 - Work on the branch named in your task. Never push to `main`.
 - Commits are small and each one builds.
+- Every commit is authored and committed as the owner: `git config --global user.name "Wiesław Šoltés"` and `git config --global user.email "wieslawsoltes@users.noreply.github.com"` before the first commit. Check with `git log --format='%an <%ae> | %cn <%ce>'` before pushing.
 - Open one pull request against `main`. Its description states:
   - what was ported: files, and tests added per item;
   - the exact result line of every test suite you ran, and the result of the workspace check, the naming check and the generator check;
