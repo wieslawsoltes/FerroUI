@@ -628,6 +628,7 @@ pub fn parent_vtable<T: ObjectType, V>() -> &'static V {
 ///
 /// Cloning the handle shares the object. Equality and hashing are by object
 /// identity.
+#[repr(transparent)]
 pub struct Ref<T: ObjectType> {
     ptr: Rc<dyn Any>,
     _marker: PhantomData<T>,
@@ -641,6 +642,20 @@ impl<T: ObjectType> Ref<T> {
         T: Upcast<U>,
     {
         Ref { ptr: self.ptr, _marker: PhantomData }
+    }
+
+    /// Borrows the handle as a handle of a base class, without a copy of the
+    /// handle (the borrowing form of [`upcast`](Self::upcast)).
+    #[inline]
+    pub fn upcast_ref<U: ObjectType>(&self) -> &Ref<U>
+    where
+        T: Upcast<U>,
+    {
+        // SAFETY: `Ref` is `repr(transparent)` over its `Rc<dyn Any>`; the
+        // marker is zero-sized, so `Ref<T>` and `Ref<U>` have the same layout
+        // and the same valid values, and `T: Upcast<U>` makes the object a `U`,
+        // which is exactly what `upcast` asserts for an owned handle.
+        unsafe { &*(self as *const Ref<T> as *const Ref<U>) }
     }
 
     /// Returns a handle of class `U` if the object is a `U`.
