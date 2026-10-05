@@ -209,7 +209,24 @@ def is_pub(visibility):
     return visibility is not None and visibility.strip() == "pub"
 
 
-def parse_module(path, file, body):
+def path_attributes(text):
+    """The file each `#[path = "..."] mod name;` of a file names, by module name.
+
+    Read from the text with its comments (string literals are emptied with them)."""
+    return {
+        m.group(2): m.group(1)
+        for m in re.finditer(r'#\[\s*path\s*=\s*"([^"]*)"\s*\]\s*(?:pub(?:\([^)]*\))?\s+)?mod\s+(\w+)\s*;', text)
+    }
+
+
+def read_module(path, file):
+    """The module in `file`, its submodules read from the files they name."""
+    with open(file, encoding="utf-8") as f:
+        text = f.read()
+    return parse_module(path, file, strip_comments(text), path_attributes(text))
+
+
+def parse_module(path, file, body, paths=None):
     module = Module(path, file)
     for statement in top_level_statements(body):
         attributes, s = split_attributes(statement)
@@ -219,11 +236,13 @@ def parse_module(path, file, body):
         if m:
             name = m.group(2)
             directory = os.path.dirname(file) if os.path.basename(file) in ("lib.rs", "mod.rs") else file[:-3]
-            for candidate in (os.path.join(directory, name + ".rs"), os.path.join(directory, name, "mod.rs")):
+            candidates = [os.path.join(directory, name + ".rs"), os.path.join(directory, name, "mod.rs")]
+            if paths and name in paths:
+                # `#[path = "..."]`: relative to the directory of the file that declares the module.
+                candidates = [os.path.join(os.path.dirname(file), paths[name])]
+            for candidate in candidates:
                 if os.path.exists(candidate):
-                    with open(candidate, encoding="utf-8") as f:
-                        child = parse_module(path + [name], candidate, strip_comments(f.read()))
-                    module.children[name] = (m.group("vis"), child)
+                    module.children[name] = (m.group("vis"), read_module(path + [name], candidate))
                     break
             continue
         m = re.match(VIS + r"mod\s+(\w+)\s*\{", s)
@@ -259,7 +278,8 @@ class Crate:
     def __init__(self, crate_root):
         lib = os.path.join(crate_root, "lib.rs")
         with open(lib, encoding="utf-8") as f:
-            self.root = parse_module([], lib, strip_comments(f.read()))
+            text = f.read()
+        self.root = parse_module([], lib, strip_comments(text), path_attributes(text))
         self.modules = {}
         self._index(self.root)
         self.namespaces = {}
@@ -461,7 +481,8 @@ def registered_types(crate_root, crate):
         result.append(("class", "::".join(segments), "register_types.rs", crate.resolve((), segments)))
     for name in re.findall(r"<\s*([\w:]+)\s+as\s+StaticType\s*>::TYPE", table):
         result.append(("class", name, "register_types.rs", crate.resolve(("register_types",), name.split("::"))))
-    # A class named through the imports of the registration (`Border::TYPE`).
+    # `Class::TYPE`: a class named through the imports of the registration or of a type table
+    # (`Border::TYPE`), never through `crate::` and never the `<T as StaticType>::TYPE` form above.
     for name in re.findall(r"(?<![\w:>])([A-Za-z_][\w:]*)::TYPE\b", table):
         if name.split("::")[0] != "crate":
             result.append(("class", name, "register_types.rs", crate.resolve(("register_types",), name.split("::"))))
