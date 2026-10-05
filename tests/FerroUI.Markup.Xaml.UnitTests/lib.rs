@@ -9,6 +9,10 @@
 //! their markup metadata and registered by [`register_types`] under the
 //! assembly `FerroUI.Markup.Xaml.UnitTests`.
 
+// Generated code of the emitter's corpus (`emitter/generated.rs`) names the classes of this
+// crate by absolute paths, as it names the classes of any other crate.
+extern crate self as ferroui_markup_xaml_tests;
+
 use ferroui_base::metadata::{MarkupAssembly, XmlnsDefinition};
 use ferroui_base::TypeInfo;
 
