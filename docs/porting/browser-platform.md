@@ -203,8 +203,8 @@ src/Browser/FerroUI.Browser/
   dist/                      built JS (generated, not committed)
 src/FerroUI.Fonts.Inter/     embedded default font
 samples/ControlCatalog.Browser/
-  Cargo.toml, main.rs        binary crate (required by wasm-bindgen on Emscripten)
-  wwwroot/index.html, app.css, main.js
+  Cargo.toml, program.rs     binary crate (required by wasm-bindgen on Emscripten)
+  wwwroot/index.html, app.css, main.js, favicon.svg
 ```
 
 Workspace changes: the crates above as members, plus `src/FerroUI.OpenGL` (the OpenGL contracts, upstream `Avalonia.OpenGL`, which the Ganesh path of `FerroUI.Skia` and the WebGL render target implement); `skia-safe` features per target in the manifest of `FerroUI.Skia` (`graphite`+`metal` on Apple targets, `gl` on Emscripten); `FerroUI.Native` and `FerroUI.Desktop` are never built for the WASM target (the browser build selects its package).
@@ -212,7 +212,9 @@ Workspace changes: the crates above as members, plus `src/FerroUI.OpenGL` (the O
 Tooling:
 
 - **Emscripten configuration**: plain `cargo build --target wasm32-unknown-emscripten` plus a repository script (`scripts/build-browser.sh` or an `xtask`) that runs esbuild, builds, and assembles `wwwroot` + `.js` + `.wasm` into a `dist` directory served by any static server. No trunk and no wasm-pack (wasm-pack has an open request for this target; trunk support **[U]**).
-- Link settings (in `.cargo/config.toml` for the target) **[M]**: `linker = "em++"` (Skia needs the C++ runtime), `-sWASM_BINDGEN`, `-sMODULARIZE`, `-sEXPORT_ES6`, `-sMAX_WEBGL_VERSION=2`, `-sALLOW_MEMORY_GROWTH=1`, `-sEXPORTED_RUNTIME_METHODS=GL,HEAPU8` (the JS side must reach Emscripten's `GL` object and the module memory), `-sINVOKE_RUN=0` (the host page starts the application; without it `main` also runs twice), `-sSTACK_SIZE=8MB` (the default stack of 64 KB is too small for layout and markup loading), `-sGL_ENABLE_GET_PROC_ADDRESS=1` (the OpenGL entry points of a context are resolved by name), and `EMCC_CFLAGS="-s ERROR_ON_UNDEFINED_SYMBOLS=0"` as rust-skia requires. No `-Cpanic=abort` and no `-Crelocation-model=static`. The backend imports its script module by a relative specifier, so there are no `wasm-bindgen` snippets to copy: `scripts/build-browser.sh` assembles the site from the host page, `ferroui.js` and the `.js`/`.wasm` pair of the application (`target/wasm32-unknown-emscripten/<profile>/examples/` for an example of the browser crate).
+- Link settings (in `.cargo/config.toml` for the target) **[M]**: `linker = "em++"` (Skia needs the C++ runtime), `-sWASM_BINDGEN`, `-sMODULARIZE`, `-sEXPORT_ES6`, `-sMAX_WEBGL_VERSION=2`, `-sALLOW_MEMORY_GROWTH=1`, `-sEXPORTED_RUNTIME_METHODS=GL,HEAPU8` (the JS side must reach Emscripten's `GL` object and the module memory), `-sINVOKE_RUN=0` (the host page starts the application; without it `main` also runs twice), `-sSTACK_SIZE=8MB` (the default stack of 64 KB is too small for layout and markup loading), `-sGL_ENABLE_GET_PROC_ADDRESS=1` (the OpenGL entry points of a context are resolved by name), and `EMCC_CFLAGS="-s ERROR_ON_UNDEFINED_SYMBOLS=0"` as rust-skia requires. No `-Cpanic=abort` and no `-Crelocation-model=static`. The backend imports its script module by a relative specifier, so there are no `wasm-bindgen` snippets to copy: `scripts/build-browser.sh <application>` assembles the site from the host page, `ferroui.js` and the `.js`/`.wasm` pair of the application: an example of the browser crate (`target/wasm32-unknown-emscripten/<profile>/examples/`) or a binary package of the workspace with its host page in the `wwwroot/` of the package (`target/wasm32-unknown-emscripten/<profile>/`, where the module of a binary is named after the target with `-` replaced by `_`).
+- **Browser scripts** (`scripts/browser/`): `chrome.mjs` drives headless Chrome over the DevTools protocol; `test-site.mjs` is the end-to-end test of a site (start-up, WebGL2 and 2D-canvas rendering, resize, console errors; run by the `browser-site` job of CI and before every Pages deployment); `module-sizes.mjs` prints the raw, gzip and brotli sizes of the files of a site; `render-placeholder-assets.mjs` draws the placeholder artwork of the published catalog.
+- **Publication**: `.github/workflows/pages.yml` builds the ControlCatalog site, tests it and deploys it to GitHub Pages on pushes to `main` and on manual runs. The toolchain steps are shared with CI through the composite action `.github/actions/browser-toolchain`. GitHub Pages compresses responses itself (gzip, including `application/wasm`; no brotli was offered for `Accept-Encoding: br, gzip` when measured on 2026-10-05) and does not serve precompressed files, so the site carries none.
 - **`wasm32-unknown-unknown` configuration**: trunk, with the same `webapp` bundle.
 - TypeScript: keep upstream's esbuild script and ESLint configuration; three bundles as upstream. Asset fingerprinting and import maps are not needed initially.
 
@@ -267,6 +269,14 @@ Measured on macOS arm64 with Emscripten 6.0.10, Rust 1.90.0, `skia-safe` 0.153.3
 - The `themed_view` example of `FerroUI.Browser` (Fluent theme, embedded Inter font, run-time XAML loader) renders correctly in headless Chrome 154 through WebGL2 (Skia Ganesh), through the 2D-canvas path (`?RenderingMode=Software2D`), with the dark variant at a device scale factor of 2, and re-lays out when its host element is resized. The page is up within a few seconds from a local server.
 - Additional link settings: `-sSTACK_SIZE=8MB` (the default 64 KB stack is too small) and `-sGL_ENABLE_GET_PROC_ADDRESS=1` (the OpenGL entry points of the context are resolved by name).
 - Size of that example, release profile of the workspace, not optimised for size: 48.7 MB of WASM, 10.2 MB with gzip. Reducing it (size optimisation, `wasm-opt`, the build-time XAML compiler instead of the run-time loader) is open.
+
+### Verified with the ControlCatalog host (2026-10-05)
+
+Measured on Linux x86_64 with Emscripten 6.0.10, Rust 1.90.0 and `wasm-bindgen` 0.2.129; browser evidence from headless Chromium 141 (the Playwright build of the cloud image) with WebGL through SwiftShader.
+
+- `samples/ControlCatalog.Browser` (crate `control-catalog-browser`) starts the catalog with the Fluent theme in the single-view lifetime; `scripts/browser/test-site.mjs` passes for `?RenderingMode=WebGL2` (the canvas has a WebGL2 context) and `?RenderingMode=Software2D` (a 2D context): the application is up 8 to 9 s after navigation from a local server, the main view is drawn, it is laid out again when the page grows from 1024x700 to 1440x900 and shrinks to 800x600, and nothing is logged as an error (`images/control_catalog_browser.png`). SwiftShader satisfies `failIfMajorPerformanceCaveat` when Chrome runs with `--use-angle=swiftshader --enable-unsafe-swiftshader`, which the driver passes.
+- The catalog logs the binding warnings of the gap the desktop host shows too (`$parent[MainView].ViewModel`, plain properties of a class through a base handle; see `CRITICAL-PATH.md`, item 23a); they go to the console log, as the console trace listener of the managed original writes them.
+- Size, release profile of the workspace, not optimised for size: 84.8 MB of WASM, 32.2 MB with gzip at level 9, 26.4 MB with brotli at quality 11; the script of the module 195 kB (39 kB gzip). Pointer and keyboard input were not part of this check.
 
 ### Still not verified
 
@@ -419,9 +429,9 @@ Phase key: 1 = MVP, 2 = input, 3 = services, 4 = late, – = not ported. Rust pa
 
 | Upstream file | Purpose | FerroUI counterpart (`samples/ControlCatalog.Browser/`) | Phase |
 |---|---|---|---|
-| `Program.cs` | Entry: build app, parse options from the query string, start on `"out"` | `main.rs` | 1 (minimal), 3 (catalog) |
+| `Program.cs` | Entry: build app, parse options from the query string, start on `"out"` | `program.rs` (ported; `PreferFileDialogPolyfill` waits for the storage provider) | 3 |
 | `ControlCatalog.Browser.csproj` | WASM SDK project, threads off | `Cargo.toml` | 1 |
-| `wwwroot/index.html`, `app.css`, `favicon.ico` | Host page with splash | same | 1 |
+| `wwwroot/index.html`, `app.css`, `favicon.ico` | Host page with splash | `index.html`, `app.css`, `favicon.svg` (a neutral placeholder mark instead of the upstream logo) | 1 |
 | `wwwroot/main.js` | Runtime bootstrap | `main.js` importing the generated module | 1 |
 | `EmbedSample.Browser.cs`, `wwwroot/embed.js` | Native control host demo (iframe, DOM button) | `embed_sample_browser.rs`, `embed.js` | 4 |
 
