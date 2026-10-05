@@ -147,11 +147,12 @@ fn gap_c310_time_span_property_from_text() {
 }
 
 #[test]
-#[ignore = "gap C311: a binding is not accepted by AutoCompleteBox.ValueMemberBinding ([AssignBinding])"]
 fn gap_c311_binding_assigned_to_value_member_binding() {
     let _app = start_application();
+    // As `Pages/AutoCompleteBoxPage.xaml`: a compiled binding needs the data type of its source.
     let auto_complete_box = from_markup_value::<Ref<AutoCompleteBox>>(&Some(load_text(&format!(
-        "<AutoCompleteBox {XMLNS} ValueMemberBinding='{{Binding Capital}}'/>"
+        "<AutoCompleteBox {XMLNS} xmlns:models='using:ControlCatalog.Models' \
+           ValueMemberBinding='{{Binding Capital, x:DataType=models:StateData}}'/>"
     ))))
     .expect("an auto complete box");
     assert!(auto_complete_box.value_member_binding().is_some());
