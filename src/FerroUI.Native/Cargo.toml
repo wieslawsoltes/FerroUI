@@ -1,0 +1,28 @@
+[package]
+name = "ferroui-native"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+
+[lib]
+path = "lib.rs"
+
+[dependencies]
+ferroui-base.workspace = true
+ferroui-controls.workspace = true
+ferroui-microcom.workspace = true
+ferroui-skia.workspace = true
+
+[build-dependencies]
+cc.workspace = true
+microcom-codegen = { path = "../tools/MicroCom.CodeGenerator" }
+
+[[example]]
+name = "raw_window"
+path = "examples/raw_window.rs"
+
+[[example]]
+name = "platform_window"
+path = "examples/platform_window.rs"
