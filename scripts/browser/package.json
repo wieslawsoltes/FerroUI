@@ -1,0 +1,8 @@
+{
+  "name": "ferroui-browser-tools",
+  "private": true,
+  "description": "Tools of the browser build (scripts/build-browser.sh): wasm-opt of Binaryen.",
+  "devDependencies": {
+    "binaryen": "132.0.0"
+  }
+}

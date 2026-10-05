@@ -83,6 +83,11 @@ case " ${EMCC_CFLAGS:-} " in
   *) export EMCC_CFLAGS="${EMCC_CFLAGS:+$EMCC_CFLAGS }$REQUIRED_EMCC_FLAG";;
 esac
 
+if [ "$PROFILE" = "browser" ]; then
+  echo "== tools of the browser build"
+  (cd "$ROOT/scripts/browser" && npm ci --no-audit --no-fund)
+fi
+
 echo "== script module"
 (cd "$CRATE/webapp" && npm ci --no-audit --no-fund && npm run typecheck && npm run lint && npm run build)
 
@@ -105,5 +110,18 @@ mkdir -p "$OUT"
 cp -R "$WWWROOT"/. "$OUT"/
 cp "$CRATE/dist/ferroui.js" "$CRATE/dist/ferroui.js.map" "$OUT"/
 cp "$BUILT/$EXAMPLE.js" "$BUILT/$EXAMPLE.wasm" "$OUT"/
+
+if [ "$PROFILE" = "browser" ]; then
+  # emcc linked at -O2 (see above); wasm-opt of the pinned Binaryen (scripts/browser/package.json, the
+  # version of Emscripten 6.0.10) optimises the module for size with the settings and the features
+  # emcc uses for its own wasm-opt run. The JavaScript build of wasm-opt takes several minutes.
+  echo "== wasm-opt -Oz"
+  "$ROOT/scripts/browser/node_modules/.bin/wasm-opt" -Oz \
+    --low-memory-unused --zero-filled-memory --pass-arg=directize-initial-contents-immutable \
+    --mvp-features --enable-threads --enable-bulk-memory --enable-bulk-memory-opt \
+    --enable-call-indirect-overlong --enable-multivalue --enable-mutable-globals \
+    --enable-nontrapping-float-to-int --enable-reference-types --enable-sign-ext \
+    "$OUT/$EXAMPLE.wasm" -o "$OUT/$EXAMPLE.wasm"
+fi
 ls -la "$OUT"
 echo "site written to $OUT"
