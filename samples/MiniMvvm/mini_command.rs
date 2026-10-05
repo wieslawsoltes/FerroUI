@@ -1,6 +1,7 @@
 //! Port of `MiniCommand.cs`.
 
 use ferroui_base::input::ICommand;
+use ferroui_base::metadata::from_markup_value;
 use ferroui_base::reactive::{Disposable, IDisposable};
 use ferroui_base::threading::{
     Dispatcher, DispatcherPriority, DispatcherTask, DispatcherTimer, FerroSynchronizationContext,
@@ -153,10 +154,11 @@ impl MiniCommand {
     }
 }
 
-/// `(T)parameter`.
+/// `(T)parameter`: a markup cast, so that a parameter a binding read from a
+/// typed property of a markup class converts as well as one boxed as `T`.
 fn cast<T: Clone + 'static>(parameter: Option<&BoxedValue>) -> T {
-    match parameter.and_then(|value| value.downcast_ref::<T>()) {
-        Some(value) => value.clone(),
+    match from_markup_value::<T>(&parameter.cloned()) {
+        Some(value) => value,
         None => panic!("Unable to cast the command parameter to type '{}'.", std::any::type_name::<T>()),
     }
 }
