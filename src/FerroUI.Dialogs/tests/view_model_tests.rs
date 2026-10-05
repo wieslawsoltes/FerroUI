@@ -149,7 +149,7 @@ fn open_navigates_to_the_suggested_location_with_folders_first_sorted_ignoring_c
     let _scope = scope(&tree.path());
 
     let options = open_options(&tree, FilePickerOpenOptions::new());
-    let model = ManagedFileChooserViewModel::for_open_file(&options, ManagedFileDialogOptions::new());
+    let model = ManagedFileChooserViewModel::new_open_file(&options, ManagedFileDialogOptions::new());
 
     assert_eq!(Some(tree.path()), model.location());
     assert_eq!(vec!["A_folder", "b_folder", "a.TXT", "b.txt", "c.png"], names(&model.items()));
@@ -292,7 +292,7 @@ fn the_first_filter_is_selected_and_applies_to_files_only() {
         FilePickerOpenOptions::new()
             .with_file_type_filter(vec![file_type("Text", &["*.txt"]), file_type("Images", &["*.png"])]),
     );
-    let model = ManagedFileChooserViewModel::for_open_file(&options, ManagedFileDialogOptions::new());
+    let model = ManagedFileChooserViewModel::new_open_file(&options, ManagedFileDialogOptions::new());
 
     assert!(model.show_filters());
     assert_eq!(2, model.filters().count());
@@ -311,7 +311,7 @@ fn the_all_files_pattern_shows_every_file() {
     let tree = Tree::new("all-files");
     let _scope = scope(&tree.path());
     let options = open_options(&tree, FilePickerOpenOptions::new().with_file_type_filter(vec![file_type("All", &["*.txt", "*.*"])]));
-    let model = ManagedFileChooserViewModel::for_open_file(&options, ManagedFileDialogOptions::new());
+    let model = ManagedFileChooserViewModel::new_open_file(&options, ManagedFileDialogOptions::new());
 
     assert_eq!(vec!["A_folder", "b_folder", "a.TXT", "b.txt", "c.png"], names(&model.items()));
 }
@@ -323,7 +323,7 @@ fn a_folder_picker_lists_folders_only() {
     let options = FolderPickerOpenOptions::new().with_allow_multiple(true);
     let mut options = options;
     options.set_suggested_start_location(Some(tree.folder()));
-    let model = ManagedFileChooserViewModel::for_open_folder(&options, ManagedFileDialogOptions::new());
+    let model = ManagedFileChooserViewModel::new_open_folder(&options, ManagedFileDialogOptions::new());
 
     assert_eq!(vec!["A_folder", "b_folder"], names(&model.items()));
     assert!(model.selecting_folder());
@@ -355,7 +355,7 @@ fn selecting_several_files_quotes_their_names() {
     let tree = Tree::new("select-several");
     let _scope = scope(&tree.path());
     let options = open_options(&tree, FilePickerOpenOptions::new().with_allow_multiple(true));
-    let model = ManagedFileChooserViewModel::for_open_file(&options, ManagedFileDialogOptions::new());
+    let model = ManagedFileChooserViewModel::new_open_file(&options, ManagedFileDialogOptions::new());
     let completed = completions(&model);
 
     assert_eq!(SelectionMode::MULTIPLE, model.selection_mode());
@@ -393,7 +393,7 @@ fn a_folder_picker_clears_the_selection_and_completes_with_the_location() {
     let _scope = scope(&tree.path());
     let mut options = FolderPickerOpenOptions::new();
     options.set_suggested_start_location(Some(tree.folder()));
-    let model = ManagedFileChooserViewModel::for_open_folder(&options, ManagedFileDialogOptions::new());
+    let model = ManagedFileChooserViewModel::new_open_folder(&options, ManagedFileDialogOptions::new());
     let completed = completions(&model);
 
     select(&model, &["A_folder"]);
@@ -411,7 +411,7 @@ fn saving_preselects_the_suggested_file_and_adds_the_default_extension() {
     let mut options = FilePickerSaveOptions::new().with_default_extension("txt").with_show_overwrite_prompt(false);
     options.set_suggested_start_location(Some(tree.folder()));
     options.set_suggested_file_name(Some("c.png".to_string()));
-    let model = ManagedFileChooserViewModel::for_save_file(&options, ManagedFileDialogOptions::new());
+    let model = ManagedFileChooserViewModel::new_save_file(&options, ManagedFileDialogOptions::new());
     let completed = completions(&model);
 
     assert_eq!(Some("Save file".to_string()), model.title());
@@ -432,7 +432,7 @@ fn saving_over_an_existing_file_asks_first() {
     let _scope = scope(&tree.path());
     let mut options = FilePickerSaveOptions::new();
     options.set_suggested_start_location(Some(tree.folder()));
-    let model = ManagedFileChooserViewModel::for_save_file(&options, ManagedFileDialogOptions::new());
+    let model = ManagedFileChooserViewModel::new_save_file(&options, ManagedFileDialogOptions::new());
     let completed = completions(&model);
     let prompted = Rc::new(RefCell::new(Vec::new()));
     let sink = prompted.clone();

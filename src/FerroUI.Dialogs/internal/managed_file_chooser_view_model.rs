@@ -250,7 +250,7 @@ impl ManagedFileChooserViewModel {
     }
 
     /// The chooser of an open file picker.
-    pub fn for_open_file(file_picker_open: &FilePickerOpenOptions, options: ManagedFileDialogOptions) -> Rc<Self> {
+    pub fn new_open_file(file_picker_open: &FilePickerOpenOptions, options: ManagedFileDialogOptions) -> Rc<Self> {
         let this = Self::new(options);
         *this.title.borrow_mut() = Some(file_picker_open.title().unwrap_or("Open file").to_string());
 
@@ -259,7 +259,7 @@ impl ManagedFileChooserViewModel {
                 file_type_filter
                     .iter()
                     .enumerate()
-                    .map(|(i, f)| ManagedFileChooserFilterViewModel::with_index(f, i as i32)),
+                    .map(|(i, f)| ManagedFileChooserFilterViewModel::new_with_index(f, i as i32)),
             );
             *this.selected_filter.borrow_mut() = Some(this.filters.get(0));
             this.show_filters.set(true);
@@ -274,7 +274,7 @@ impl ManagedFileChooserViewModel {
     }
 
     /// The chooser of a save file picker.
-    pub fn for_save_file(file_picker_save: &FilePickerSaveOptions, options: ManagedFileDialogOptions) -> Rc<Self> {
+    pub fn new_save_file(file_picker_save: &FilePickerSaveOptions, options: ManagedFileDialogOptions) -> Rc<Self> {
         let this = Self::new(options);
         *this.title.borrow_mut() = Some(file_picker_save.title().unwrap_or("Save file").to_string());
 
@@ -283,7 +283,7 @@ impl ManagedFileChooserViewModel {
                 file_type_choices
                     .iter()
                     .enumerate()
-                    .map(|(i, f)| ManagedFileChooserFilterViewModel::with_index(f, i as i32)),
+                    .map(|(i, f)| ManagedFileChooserFilterViewModel::new_with_index(f, i as i32)),
             );
             *this.selected_filter.borrow_mut() = Some(this.filters.get(0));
             this.show_filters.set(true);
@@ -300,7 +300,7 @@ impl ManagedFileChooserViewModel {
     }
 
     /// The chooser of a folder picker.
-    pub fn for_open_folder(folder_picker_open: &FolderPickerOpenOptions, options: ManagedFileDialogOptions) -> Rc<Self> {
+    pub fn new_open_folder(folder_picker_open: &FolderPickerOpenOptions, options: ManagedFileDialogOptions) -> Rc<Self> {
         let this = Self::new(options);
         *this.title.borrow_mut() = Some(folder_picker_open.title().unwrap_or("Select directory").to_string());
 

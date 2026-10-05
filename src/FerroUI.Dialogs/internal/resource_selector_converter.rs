@@ -46,6 +46,11 @@ impl ResourceSelectorConverter {
 
         Ok(self.try_get_resource(&ResourceKey::from(key.as_str()), None).flatten())
     }
+
+    /// `ConvertBack`: fails, the conversion has no inverse.
+    pub fn convert_back(&self, _value: Option<&BoxedValue>) -> Result<Option<BoxedValue>, BindingError> {
+        Err(BindingError::message("The method or operation is not implemented."))
+    }
 }
 
 /// The value converter contract of a [`ResourceSelectorConverter`].
@@ -61,14 +66,13 @@ impl IValueConverter for ResourceSelectorConverterHandle {
         self.0.convert(value)
     }
 
-    /// Fails: the conversion has no inverse.
     fn convert_back(
         &self,
-        _value: Option<&BoxedValue>,
+        value: Option<&BoxedValue>,
         _target_type: ValueType,
         _parameter: Option<&BoxedValue>,
     ) -> Result<Option<BoxedValue>, BindingError> {
-        Err(BindingError::message("The method or operation is not implemented."))
+        self.0.convert_back(value)
     }
 }
 

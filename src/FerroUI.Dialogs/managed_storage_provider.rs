@@ -294,7 +294,7 @@ impl BclStorageProvider for ManagedStorageProvider {
     ) -> LocalBoxFuture<io::Result<OpenFilePickerResult>> {
         let this = self.clone();
         Box::pin(async move {
-            let model = ManagedFileChooserViewModel::for_open_file(&options, this.managed_options.clone());
+            let model = ManagedFileChooserViewModel::new_open_file(&options, this.managed_options.clone());
             let results = this.show(model.clone()).await?;
 
             let files = results
@@ -317,7 +317,7 @@ impl BclStorageProvider for ManagedStorageProvider {
     ) -> LocalBoxFuture<io::Result<SaveFilePickerResult>> {
         let this = self.clone();
         Box::pin(async move {
-            let model = ManagedFileChooserViewModel::for_save_file(&options, this.managed_options.clone());
+            let model = ManagedFileChooserViewModel::new_save_file(&options, this.managed_options.clone());
             let results = this.show(model.clone()).await?;
 
             let file = results.first().map(|result| BclStorageFile::new(FileSystemInfo::file(result)) as Rc<dyn IStorageFile>);
@@ -337,7 +337,7 @@ impl BclStorageProvider for ManagedStorageProvider {
     ) -> LocalBoxFuture<io::Result<Vec<Rc<dyn IStorageFolder>>>> {
         let this = self.clone();
         Box::pin(async move {
-            let model = ManagedFileChooserViewModel::for_open_folder(&options, this.managed_options.clone());
+            let model = ManagedFileChooserViewModel::new_open_folder(&options, this.managed_options.clone());
             let results = this.show(model).await?;
 
             Ok(results
