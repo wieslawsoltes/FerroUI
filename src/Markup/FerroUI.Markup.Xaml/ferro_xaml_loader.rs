@@ -36,13 +36,16 @@ pub trait IRuntimeXamlLoader {
 }
 
 /// The loader of the compiled documents of one assembly (crate): returns
-/// the object built from the document with the absolute URI `uri`, or
-/// `None` if the assembly has no such document.
+/// the object built from the document with the absolute URI `uri`,
+/// `Ok(None)` if the assembly has no such document, and the load error when
+/// building the document failed.
 ///
 /// This is what the XAML compiler generates per crate; it stands in for
 /// the generated `TryLoad(IServiceProvider, string)` method the managed
-/// original finds by reflection.
-pub type CompiledXamlLoader = fn(service_provider: Option<&Rc<dyn IServiceProvider>>, uri: &str) -> Option<BoxedValue>;
+/// original finds by reflection (whose `null` is `Ok(None)` and whose
+/// exception is the error).
+pub type CompiledXamlLoader =
+    fn(service_provider: Option<&Rc<dyn IServiceProvider>>, uri: &str) -> Result<Option<BoxedValue>, XamlLoadException>;
 
 fn compiled_loaders() -> &'static RwLock<HashMap<String, CompiledXamlLoader>> {
     static LOADERS: OnceLock<RwLock<HashMap<String, CompiledXamlLoader>>> = OnceLock::new();
@@ -165,7 +168,7 @@ impl FerroXamlLoader {
         let compiled_loader =
             asset_locator.get_assembly(uri, base_uri).and_then(|assembly| Self::compiled_loader(assembly.name()));
         if let Some(compiled_loader) = compiled_loader {
-            if let Some(compiled_result) = compiled_loader(sp, absolute_uri.absolute_uri()) {
+            if let Some(compiled_result) = compiled_loader(sp, absolute_uri.absolute_uri())? {
                 return Ok(compiled_result);
             }
         }

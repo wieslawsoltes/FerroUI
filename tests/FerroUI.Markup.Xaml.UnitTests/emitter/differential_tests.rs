@@ -316,9 +316,9 @@ fn compiled_documents_are_registered_by_uri() {
     // The loader of the assembly finds the document by its URI, whatever its case, and
     // nothing else.
     let direct = generated::try_load(None, &uri.to_uppercase().replace("FERRES://", "ferres://"));
-    assert!(direct.is_some(), "{uri} is not found by the generated loader");
-    assert!(generated::try_load(None, &format!("{}missing.xaml", generated::ROOT_URI)).is_none());
-    assert!(generated::try_load(None, "ferres://Other.Assembly/border_empty.xaml").is_none());
+    assert!(matches!(direct, Ok(Some(_))), "{uri} is not found by the generated loader");
+    assert!(matches!(generated::try_load(None, &format!("{}missing.xaml", generated::ROOT_URI)), Ok(None)));
+    assert!(matches!(generated::try_load(None, "ferres://Other.Assembly/border_empty.xaml"), Ok(None)));
 
     // Through the loader of the runtime library: it asks the asset loader which assembly
     // the URI belongs to, and that assembly's registered loader for the document.
@@ -337,6 +337,37 @@ fn compiled_documents_are_registered_by_uri() {
         }
         Err(error) => panic!("{uri} did not load through FerroXamlLoader: {}", describe(&error)),
     }
+}
+
+/// Not from upstream. A compiled document that fails to build is an error of the load
+/// through the compiled loader, as it is through the run-time loader: the same exception
+/// type and message, and no panic.
+#[test]
+fn a_compiled_document_that_fails_to_build_fails_the_load() {
+    use ferroui_base::platform::{AssetAssembly, IAssetLoader, StandardAssetLoader};
+    use ferroui_base::utilities::{Uri, UriKind};
+    use ferroui_base::FerroLocator;
+    use ferroui_markup_xaml::FerroXamlLoader;
+
+    let _base = xaml_test_base();
+    let name = "duplicate_name.xaml";
+    let (_, xaml) = DOCUMENTS.iter().find(|(document, _)| *document == name).expect("a corpus document");
+    let interpreted = try_load(xaml).err().expect("the run-time loader fails");
+    let uri = format!("{}{name}", generated::ROOT_URI);
+
+    let direct = generated::try_load(None, &uri).err().expect("the generated loader fails");
+    assert_eq!(failure(&direct), failure(&interpreted));
+
+    let _locator_scope = FerroLocator::enter_scope();
+    FerroLocator::current_mutable()
+        .bind::<dyn IAssetLoader>()
+        .to_constant(Rc::new(StandardAssetLoader::new(Some(&AssetAssembly::new(generated::ASSEMBLY_NAME)))));
+    generated::register_compiled_xaml();
+    let parsed = Uri::new(&uri, UriKind::Absolute).expect("an absolute URI");
+    let loaded = FerroXamlLoader::try_load_with_service_provider(None, &parsed, None);
+    FerroXamlLoader::unregister_compiled_xaml(generated::ASSEMBLY_NAME);
+    let error = loaded.err().expect("the load through FerroXamlLoader fails");
+    assert_eq!(failure(&error), failure(&interpreted));
 }
 
 /// Prints the transformed tree the emitter walks for the corpus document named by the

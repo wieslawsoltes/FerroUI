@@ -8,7 +8,7 @@ use crate::{ColorPaletteResources, ColorPaletteResourcesCollection};
 use ferroui_base::metadata::{into_markup_value, IServiceProvider, MarkupAssembly, MarkupType, MarkupTyped, XmlnsDefinition, FERRO_XML_NAMESPACE};
 use ferroui_base::data::core::ValueTypes;
 use ferroui_base::{BoxedValue, TypeInfo};
-use ferroui_markup_xaml::FerroXamlLoader;
+use ferroui_markup_xaml::{FerroXamlLoader, XamlLoadException};
 use ferroui_markup_xaml_loader::FerroRuntimeXamlLoader;
 use std::rc::Rc;
 
@@ -62,9 +62,9 @@ pub fn register_types() {
 ///
 /// This is the table the XAML compiler generates per crate; it is written
 /// by hand until the compiler exists.
-fn try_load(service_provider: Option<&Rc<dyn IServiceProvider>>, uri: &str) -> Option<BoxedValue> {
+fn try_load(service_provider: Option<&Rc<dyn IServiceProvider>>, uri: &str) -> Result<Option<BoxedValue>, XamlLoadException> {
     if uri.eq_ignore_ascii_case(FluentTheme::DOCUMENT_URI) {
-        return into_markup_value(FluentTheme::with_service_provider(service_provider.cloned()));
+        return Ok(into_markup_value(FluentTheme::with_service_provider(service_provider.cloned())));
     }
-    None
+    Ok(None)
 }
