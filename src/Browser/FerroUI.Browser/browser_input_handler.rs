@@ -3,7 +3,7 @@ use crate::browser_drag_data_transfer::BrowserDragDataTransfer;
 use crate::browser_input_pane::BrowserInputPane;
 use crate::browser_mouse_device::{BrowserMouseDevice, ContainerPointerCapture, IPointerCapture};
 use crate::browser_text_input_method::BrowserTextInputMethod;
-use crate::interop::{input_helper, JsObject};
+use crate::interop::{ferro_module, input_helper, JsObject};
 use crate::key_interop;
 use crate::windowing_platform::BrowserWindowingPlatform;
 use ferroui_base::input::raw::{
@@ -14,6 +14,7 @@ use ferroui_base::input::{
     DragDropEffects, IDataTransfer, IInputDevice, IInputRoot, IntermediatePoints, KeyDeviceType, MouseDevice, PenDevice, RawInputModifiers,
     TouchDevice,
 };
+use ferroui_base::threading::Dispatcher;
 use ferroui_base::{FerroLocator, LocatorExtensions, Point, Size, Vector};
 use std::cell::{Cell, LazyCell, RefCell};
 use std::rc::{Rc, Weak};
@@ -462,6 +463,14 @@ impl BrowserInputHandler {
         data_transfer: &JsObject,
         items: JsObject,
     ) -> bool {
+        if matches!(type_, "dragenter" | "dragover" | "dragleave" | "drop") {
+            // If a file is dropped, the storage module is needed to read it. Not awaited, as in
+            // the original.
+            Dispatcher::ui_thread().to_task_scheduler().start_local(async {
+                let _ = ferro_module::import_storage().await;
+            });
+        }
+
         let effect_allowed = input_helper::get_effect_allowed(data_transfer);
         let (handled, drop_effect) = self.on_drag_event_core(
             type_,
@@ -496,9 +505,8 @@ impl BrowserInputHandler {
             _ => return (false, None),
         };
 
-        // The original imports its storage module here, so that a dropped file can be read. The
-        // storage module and the storage files are not ported yet; a dropped file has no value
-        // (see BrowserDataTransferHelper).
+        // The original imports its storage module here; `on_drag_event` does, before the event
+        // is handled.
 
         let position = Point::new(offset_x, offset_y);
 

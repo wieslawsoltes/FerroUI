@@ -4,10 +4,6 @@ use ferroui_base::input::DataFormat;
 use std::rc::Rc;
 
 const FORMAT_TEXT_PLAIN: &str = "text/plain";
-// The format the page gives the files of a drag operation. The file data format (`DataFormat.File`
-// of the original) is not ported in the core yet, so the name is not mapped: files are seen as a
-// platform format of that name.
-#[cfg(test)]
 const FORMAT_FILES: &str = "Files";
 const FORMAT_IMAGE: &str = "image/png";
 const APP_PREFIX: &str = "application/frn-fmt.";
@@ -16,6 +12,7 @@ const APP_PREFIX: &str = "application/frn-fmt.";
 pub(crate) fn to_data_format(format_string: &str) -> DataFormat {
     match format_string {
         FORMAT_TEXT_PLAIN => DataFormat::text().into(),
+        FORMAT_FILES => DataFormat::file().into(),
         _ if is_text_format(format_string) => DataFormat::from_system_name::<String>(format_string, APP_PREFIX).into(),
         _ => DataFormat::from_system_name::<Rc<[u8]>>(format_string, APP_PREFIX).into(),
     }
@@ -35,6 +32,10 @@ pub(crate) fn is_text_format(format: &str) -> bool {
 pub(crate) fn to_browser_format(format: &DataFormat) -> String {
     if DataFormat::text() == *format {
         return FORMAT_TEXT_PLAIN.to_string();
+    }
+
+    if DataFormat::file() == *format {
+        return FORMAT_FILES.to_string();
     }
 
     if DataFormat::bitmap() == *format {
@@ -88,10 +89,9 @@ mod tests {
     }
 
     #[test]
-    fn files_are_a_platform_format_until_the_file_format_exists() {
-        let files = to_data_format(FORMAT_FILES);
-        assert_eq!(DataFormatKind::Platform, files.kind());
-        assert_eq!("Files", files.identifier());
+    fn files_are_the_file_format() {
+        assert!(DataFormat::file() == to_data_format("Files"));
+        assert_eq!("Files", to_browser_format(&DataFormat::file()));
     }
 
     #[test]
