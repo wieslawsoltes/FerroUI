@@ -142,7 +142,9 @@ struct FileSystemEntry {
 
 /// The entries of a directory (`DirectoryInfo.EnumerateFileSystemInfos()`).
 /// A link is an entry of the kind of its target; a link without target is a
-/// file. Entries that no longer exist are left out (`Exists`).
+/// file. An entry whose metadata cannot be read (it no longer exists) is
+/// left out (`Exists`); a failure to read the directory itself is reported,
+/// as the enumeration of the original throws.
 fn enumerate_file_system_infos(directory: &str) -> std::io::Result<Vec<FileSystemEntry>> {
     let mut entries = Vec::new();
     for entry in std::fs::read_dir(directory)? {
@@ -536,7 +538,7 @@ impl ManagedFileChooserViewModel {
         );
     }
 
-    fn navigate_root(&self, initial_selection_name: Option<&str>) {
+    fn navigate_root(&self, initial_selection_name: Option<&str>) -> std::io::Result<()> {
         if cfg!(windows) {
             // The root of the system folder.
             let system = std::env::var("SystemRoot").unwrap_or_else(|_| "C:\\Windows".to_string());
@@ -545,9 +547,9 @@ impl ManagedFileChooserViewModel {
                 .last()
                 .map(|root| root.to_string_lossy().into_owned())
                 .unwrap_or(system);
-            self.navigate(Some(&root), initial_selection_name);
+            self.try_navigate(Some(&root), initial_selection_name)
         } else {
-            self.navigate(Some("/"), initial_selection_name);
+            self.try_navigate(Some("/"), initial_selection_name)
         }
     }
 
@@ -571,18 +573,33 @@ impl ManagedFileChooserViewModel {
     /// Navigates to the directory `path`, or to the root of the file system
     /// when it does not exist, and selects the file named
     /// `initial_selection_name` there.
+    ///
+    /// # Panics
+    /// Panics when the directory cannot be read for another reason than a
+    /// denied access (the exception `Navigate` lets through in the
+    /// original); see [`try_navigate`](Self::try_navigate).
     pub fn navigate(&self, path: Option<&str>, initial_selection_name: Option<&str>) {
+        if let Err(error) = self.try_navigate(path, initial_selection_name) {
+            panic!("{}: {error}", path.unwrap_or_default());
+        }
+    }
+
+    /// [`navigate`](Self::navigate), reporting the failure to read the
+    /// directory. A denied access is not a failure: the directory is shown
+    /// empty, as the original catches the access exception.
+    pub fn try_navigate(&self, path: Option<&str>, initial_selection_name: Option<&str>) -> std::io::Result<()> {
         if !directory_exists(path) {
-            self.navigate_root(initial_selection_name);
+            return self.navigate_root(initial_selection_name);
         } else {
             let path = path.unwrap_or_default();
             self.set_location(Some(path.to_string()));
             self.items.clear();
             self.selected_items.clear();
 
-            // The original ignores a denied access; any failure to read the directory leaves it empty.
-            let Ok(mut infos) = enumerate_file_system_infos(path) else {
-                return;
+            let mut infos = match enumerate_file_system_infos(path) {
+                Ok(infos) => infos,
+                Err(error) if error.kind() == std::io::ErrorKind::PermissionDenied => return Ok(()),
+                Err(error) => return Err(error),
             };
 
             if !self.show_hidden_files() {
@@ -642,6 +659,8 @@ impl ManagedFileChooserViewModel {
 
             self.base.raise_property_changed("QuickLinksSelectedIndex");
         }
+
+        Ok(())
     }
 
     pub fn go_up(&self) {
