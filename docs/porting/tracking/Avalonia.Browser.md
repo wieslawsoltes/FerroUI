@@ -10,16 +10,16 @@ Generated from upstream commit `17350180c33b063f0e98abbfd19aa3cae63f5d56`. Back 
 | FerroUI | `src/Browser/FerroUI.Browser` (exists) |
 | Crate | `ferroui-browser` |
 | Phase / priority | 3 - browser / P2 |
-| Files | 24/49 (49.0%), 3 not applicable |
-| Types | 27/61 (44.3%) |
-| Members | 136/426 (31.9%) |
+| Files | 29/49 (59.2%), 3 not applicable |
+| Types | 33/61 (54.1%) |
+| Members | 180/426 (42.3%) |
 | Contracts (interfaces) | 0/0 |
 | Property registrations | 0/0 |
 | Routed events | 0/0 |
 
 ## Files
 
-### `(project root)` - files 12/28, types 15/35, members 81/177
+### `(project root)` - files 17/28, types 20/35, members 111/177
 
 | Upstream file | Rust file | Status | Types | Members | Notes |
 |---|---|---|---|---|---|
@@ -32,10 +32,10 @@ Generated from upstream commit `17350180c33b063f0e98abbfd19aa3cae63f5d56`. Back 
 | `BrowserDataTransferHelper.cs` | `browser_data_transfer_helper.rs` | missing | 0/1 | 0/2 |  |
 | `BrowserDragDataTransfer.cs` | `browser_drag_data_transfer.rs` | missing | 0/1 | 0/4 |  |
 | `BrowserDragDataTransferItem.cs` | `browser_drag_data_transfer_item.rs` | missing | 0/1 | 0/4 |  |
-| `BrowserInputHandler.cs` | `browser_input_handler.rs` | missing | 0/1 | 0/14 |  |
-| `BrowserInputPane.cs` | `browser_input_pane.rs` | missing | 0/1 | 0/1 |  |
+| `BrowserInputHandler.cs` | `browser_input_handler.rs` | partial | 1/1 | 13/14 |  |
+| `BrowserInputPane.cs` | `browser_input_pane.rs` | present | 1/1 | 1/1 |  |
 | `BrowserInsetsManager.cs` | `browser_insets_manager.rs` | missing | 0/1 | 0/5 |  |
-| `BrowserMouseDevice.cs` | `browser_mouse_device.rs` | missing | 0/2 | 0/4 |  |
+| `BrowserMouseDevice.cs` | `browser_mouse_device.rs` | partial | 1/2 | 2/4 |  |
 | `BrowserNativeControlHost.cs` | `browser_native_control_host.rs` | missing | 0/1 | 0/5 |  |
 | `BrowserPlatformSettings.cs` | `browser_platform_settings.rs` | present | 1/1 | 6/6 |  |
 | `BrowserRuntimePlatform.cs` | `browser_runtime_platform.rs` | present | 2/2 | 3/3 |  |
@@ -43,12 +43,12 @@ Generated from upstream commit `17350180c33b063f0e98abbfd19aa3cae63f5d56`. Back 
 | `BrowserSingleThreadedDispatcherImpl.cs` | `browser_single_threaded_dispatcher_impl.rs` | present | 1/1 | 12/12 |  |
 | `BrowserSingleViewLifetime.cs` | `browser_single_view_lifetime.rs` | present | 1/1 | 3/3 |  |
 | `BrowserSystemNavigationManager.cs` | `browser_system_navigation_manager.rs` | missing | 0/1 | 0/2 |  |
-| `BrowserTextInputMethod.cs` | `browser_text_input_method.rs` | missing | 0/1 | 0/10 |  |
-| `BrowserTopLevelImpl.cs` | `browser_top_level_impl.rs` | partial | 1/1 | 27/30 |  |
+| `BrowserTextInputMethod.cs` | `browser_text_input_method.rs` | present | 1/1 | 10/10 |  |
+| `BrowserTopLevelImpl.cs` | `browser_top_level_impl.rs` | partial | 1/1 | 28/30 |  |
 | `ClipboardImpl.cs` | `clipboard_impl.rs` | missing | 0/1 | 0/3 |  |
 | `Cursor.cs` | `cursor.rs` | present | 2/2 | 9/9 |  |
 | `JSObjectControlHandle.cs` | `js_object_control_handle.rs` | partial | 0/2 | 0/5 | renamed: snake case of the acronym |
-| `KeyInterop.cs` | `key_interop.rs` | missing | 0/1 | 0/3 |  |
+| `KeyInterop.cs` | `key_interop.rs` | present | 1/1 | 3/3 |  |
 | `WinStubs.cs` | `win_stubs.rs` | present | 1/1 | 3/3 |  |
 | `WindowingPlatform.cs` | `windowing_platform.rs` | partial | 1/1 | 8/10 |  |
 
@@ -73,11 +73,23 @@ Generated from upstream commit `17350180c33b063f0e98abbfd19aa3cae63f5d56`. Back 
 
 </details>
 
-<details><summary><code>BrowserTopLevelImpl.cs</code> - 3 missing</summary>
+<details><summary><code>BrowserInputHandler.cs</code> - 1 missing</summary>
 
-- `BrowserTopLevelImpl` (class): 3 missing
+- `BrowserInputHandler` (class): 1 missing
+  - `bool OnDragEvent(string type, double offsetX, double offsetY, int modifiers, JSObject dataTransfer, JSObjec...`
+
+</details>
+
+<details><summary><code>BrowserMouseDevice.cs</code> - 3 missing</summary>
+
+- `BrowserMouseDevice.BrowserMousePointer` (class, internal): **type missing** (2 members)
+
+</details>
+
+<details><summary><code>BrowserTopLevelImpl.cs</code> - 2 missing</summary>
+
+- `BrowserTopLevelImpl` (class): 2 missing
   - `static BrowserTopLevelImpl()` *(static)*
-  - `BrowserInputHandler InputHandler { get; }`
   - `Size? FrameSize { get; }`
 
 </details>
@@ -97,7 +109,7 @@ Generated from upstream commit `17350180c33b063f0e98abbfd19aa3cae63f5d56`. Back 
 
 </details>
 
-### `Interop` - files 5/10, types 4/11, members 9/123
+### `Interop` - files 5/10, types 5/11, members 23/123
 
 | Upstream file | Rust file | Status | Types | Members | Notes |
 |---|---|---|---|---|---|
@@ -105,7 +117,7 @@ Generated from upstream commit `17350180c33b063f0e98abbfd19aa3cae63f5d56`. Back 
 | `CanvasHelper.cs` | `interop/canvas_helper.rs` | partial | 1/2 | 1/9 |  |
 | `DomHelper.cs` | `interop/dom_helper.rs` | partial | 1/1 | 5/15 |  |
 | `GeneralHelpers.cs` | - | n/a | - | - | not-applicable: reflective access to script objects: replaced by typed property getters in interop/ |
-| `InputHelper.cs` | `interop/input_helper.rs` | partial | 0/1 | 0/37 |  |
+| `InputHelper.cs` | `interop/input_helper.rs` | partial | 1/1 | 14/37 |  |
 | `JsCallbackHelper.cs` | - | n/a | - | - | not-applicable: restores the synchronisation context of the managed runtime in callbacks: no equivalent concept |
 | `NativeControlHostHelper.cs` | `interop/native_control_host_helper.rs` | missing | 0/1 | 0/7 |  |
 | `NavigationHelper.cs` | `interop/navigation_helper.rs` | missing | 0/1 | 0/3 |  |
@@ -154,9 +166,32 @@ Generated from upstream commit `17350180c33b063f0e98abbfd19aa3cae63f5d56`. Back 
 
 </details>
 
-<details><summary><code>InputHelper.cs</code> - 38 missing</summary>
+<details><summary><code>InputHelper.cs</code> - 23 missing</summary>
 
-- `InputHelper` (class, internal): **type missing** (37 members)
+- `InputHelper` (class) (ported as module-level items): 23 missing
+  - `static Task RedirectInputAsync(int topLevelId, Action<BrowserTopLevelImpl> handler)`
+  - `static Task<T> RedirectInputRetunAsync<T>(int topLevelId, Func<BrowserTopLevelImpl, T> handler, T @default)`
+  - `static void SubscribeInputEvents(JSObject htmlElement, int topLevelId)`
+  - `static Task OnDragDrop(int topLevelId, string type, double offsetX, double offsetY, int modifiers, JSObject...`
+  - `static double[] GetCoalescedEvents(JSObject pointerEvent)`
+  - `static void ClearInputElement(JSObject htmlElement)`
+  - `static void FocusElement(JSObject htmlElement)`
+  - `static void SetCursor(JSObject htmlElement, string kind)`
+  - `static void HideElement(JSObject htmlElement)`
+  - `static void ShowElement(JSObject htmlElement)`
+  - `static void SetSurroundingText(JSObject htmlElement, string text, int start, int end)`
+  - `static void SetBounds(JSObject htmlElement, int x, int y, int width, int height, int caret)`
+  - `static void InitializeBackgroundHandlers(JSObject globalThis)`
+  - `static bool IsClipboardFormatSupported(string format)`
+  - `static JSObject CreateWriteableClipboardSource()`
+  - `static JSObject CreateWriteableClipboardItem(JSObject source)`
+  - `static void AddStringToWriteableClipboardItem(JSObject item, string format, string value)`
+  - `static void AddBytesToWriteableClipboardItem(JSObject item, string format, [JSMarshalAs<JSType.MemoryView>]...`
+  - `static Task<JSObject> ReadClipboardAsync(JSObject window)`
+  - `static Task<string> WriteClipboardAsync(JSObject globalThis, JSObject? source)`
+  - `static string[] GetReadableDataItemFormats(JSObject item)`
+  - `static Task<JSObject?> TryGetReadableDataItemValueAsync(JSObject item, string format)`
+  - `static JSObject? TryGetReadableDataItemValue(JSObject item, string format)`
 
 </details>
 

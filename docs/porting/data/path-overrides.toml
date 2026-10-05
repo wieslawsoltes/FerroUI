@@ -88,6 +88,12 @@ upstream = ["Data/Optional.cs"]
 kind = "not-applicable"
 reason = "Optional<T> is Rust `Option<T>` (porting guide, Types table)"
 
+[[map]]
+project = "Avalonia.Base"
+upstream = ["Collections/Pooled/*"]
+kind = "not-applicable"
+reason = "ArrayPool-backed List<T>/Stack<T> (Collections.Pooled) that avoid garbage-collected allocations: Vec<T> (porting guide, Types table); WeakHashList keeps a pool of the lists it returns"
+
 [[rust_only]]
 path = "src/FerroUI.Base/type_system.rs"
 reason = "object model runtime (Ref/WeakRef handles, TypeInfo, class macros): replaces the CLR type system, virtual dispatch and GC references"

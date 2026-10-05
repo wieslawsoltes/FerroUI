@@ -9,7 +9,7 @@ Status: **done** (ported, tested, integrated), **partial** (integrated with list
 | 1 | Class model, property system | `Avalonia.Base` root, `PropertyStore/` | done | 29 upstream tests wait on styling / bindings / dispatcher integration |
 | 2 | Dispatcher, timers, async on the dispatcher | `Threading/` | done | |
 | 3 | Service locator, logging | `AvaloniaLocator.cs`, `Logging/` | done | |
-| 4 | Collections | `Collections/` | partial | `FerroList`, `FerroDictionary` done; list extensions, weak events to port |
+| 4 | Collections | `Collections/`, `Utilities/Weak*` | done | `FerroList`, `FerroDictionary`, the collection contracts, list/dictionary/collection-changed extensions, `WeakEvent`, `WeakEvents`, `WeakEventHandlerManager`, `WeakHashList` (2026-10-05). `Collections/Pooled` is not applicable (`Vec<T>`); `FerroList` enumerates through snapshots in place of its enumerator and `OnMutating`. The binding plugins, compiled-binding accessors and `Visual` keep their own weak subscriptions; moving them onto `WeakEvents` is open |
 | 5 | Logical tree, `StyledElement` | `StyledElement.cs`, `LogicalTree/` | done | |
 | 6 | Styling, themes, resources, name scopes | `Styling/`, `Controls/` (Base) | done | |
 | 7 | Visual tree, `Visual` | `Visual*.cs`, `VisualTree/` | partial | composition attachment arrives with (12) |

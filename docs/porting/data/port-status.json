@@ -504,23 +504,23 @@
    "scope": "in",
    "detail": "full",
    "files": [
-    1062,
-    1293,
+    1077,
+    1286,
     0
    ],
    "types": [
-    1321,
-    1720,
+    1338,
+    1709,
     0
    ],
    "members": [
-    9294,
-    12036,
-    31
+    9364,
+    11739,
+    34
    ],
    "interfaces": [
-    211,
-    264
+    217,
+    263
    ],
    "propertyRegistrations": [
     224,
@@ -530,17 +530,17 @@
     41,
     41
    ],
-   "notApplicableFiles": 6,
+   "notApplicableFiles": 13,
    "matchKinds": {
     "alias fn": 9,
-    "const": 332,
+    "const": 333,
     "derive": 64,
-    "field": 548,
-    "fn": 5886,
+    "field": 551,
+    "fn": 5947,
     "free fn": 10,
     "free item": 16,
     "getter fn": 4,
-    "overload fn": 264,
+    "overload fn": 269,
     "trait": 346,
     "trait fn": 64,
     "variant": 1751
@@ -933,8 +933,32 @@
     "Collections/AvaloniaDictionary.cs": [
      "collections/ferro_dictionary.rs"
     ],
+    "Collections/AvaloniaDictionaryExtensions.cs": [
+     "collections/ferro_dictionary_extensions.rs"
+    ],
     "Collections/AvaloniaList.cs": [
      "collections/ferro_list.rs"
+    ],
+    "Collections/AvaloniaListExtensions.cs": [
+     "collections/ferro_list_extensions.rs"
+    ],
+    "Collections/IAvaloniaDictionary.cs": [
+     "collections/i_ferro_dictionary.rs"
+    ],
+    "Collections/IAvaloniaList.cs": [
+     "collections/i_ferro_list.rs"
+    ],
+    "Collections/IAvaloniaListItemValidator.cs": [
+     "collections/i_ferro_list_item_validator.rs"
+    ],
+    "Collections/IAvaloniaReadOnlyDictionary.cs": [
+     "collections/i_ferro_read_only_dictionary.rs"
+    ],
+    "Collections/IAvaloniaReadOnlyList.cs": [
+     "collections/i_ferro_read_only_list.rs"
+    ],
+    "Collections/NotifyCollectionChangedExtensions.cs": [
+     "collections/notify_collection_changed_extensions.rs"
     ],
     "CombinedGeometry.cs": [
      "combined_geometry.rs"
@@ -3063,6 +3087,12 @@
     "Rendering/Composition/Animations/Interpolators.cs": [
      "rendering/composition/animations/interpolators.rs"
     ],
+    "Rendering/Composition/Brushes/ServerSimpleContentBrush.cs": [
+     "rendering/composition/brushes/server_simple_content_brush.rs"
+    ],
+    "Rendering/Composition/Brushes/ServerSimpleImageBrush.cs": [
+     "rendering/composition/brushes/server_simple_image_brush.rs"
+    ],
     "Rendering/Composition/CompositingRenderer.cs": [
      "rendering/composition/compositing_renderer.rs"
     ],
@@ -3098,6 +3128,9 @@
     ],
     "Rendering/Composition/Drawing/CompositionRenderData.cs": [
      "rendering/composition/drawing/composition_render_data.rs"
+    ],
+    "Rendering/Composition/Drawing/CompositionRenderDataSceneBrushContent.cs": [
+     "rendering/composition/drawing/composition_render_data_scene_brush_content.rs"
     ],
     "Rendering/Composition/Drawing/CompositorResourceHelpers.cs": [
      "rendering/composition/drawing/compositor_resource_helpers.rs"
@@ -3672,6 +3705,9 @@
     "Utilities/CharacterReader.cs": [
      "utilities/character_reader.rs"
     ],
+    "Utilities/IWeakEventSubscriber.cs": [
+     "utilities/i_weak_event_subscriber.rs"
+    ],
     "Utilities/IdentifierParser.cs": [
      "utilities/identifier_parser.rs"
     ],
@@ -3705,8 +3741,17 @@
     "Utilities/ValueSpan.cs": [
      "utilities/value_span.rs"
     ],
+    "Utilities/WeakEvent.cs": [
+     "utilities/weak_event.rs"
+    ],
+    "Utilities/WeakEventHandlerManager.cs": [
+     "utilities/weak_event_handler_manager.rs"
+    ],
     "Utilities/WeakEvents.cs": [
      "utilities/weak_events.rs"
+    ],
+    "Utilities/WeakHashList.cs": [
+     "utilities/weak_hash_list.rs"
     ],
     "Vector.cs": [
      "vector.rs"
@@ -3799,6 +3844,7 @@
     "metadata/markup_assembly.rs",
     "metadata/markup_macros.rs",
     "metadata/markup_type.rs",
+    "metadata/property_accessors.rs",
     "metadata/service_provider.rs",
     "metadata/typed_path.rs",
     "numerics/matrix3x2.rs",
@@ -3943,17 +3989,17 @@
    "scope": "in",
    "detail": "full",
    "files": [
-    527,
+    532,
     538,
     0
    ],
    "types": [
-    597,
+    606,
     628,
     0
    ],
    "members": [
-    6008,
+    6046,
     6405,
     1
    ],
@@ -3974,15 +4020,24 @@
     "const": 33,
     "derive": 2,
     "field": 29,
-    "fn": 5405,
+    "fn": 5442,
     "free item": 4,
-    "overload fn": 75,
+    "overload fn": 76,
     "trait": 37,
     "variant": 423
    },
    "presentFiles": {
     "AcrylicPlatformCompensationLevels.cs": [
      "acrylic_platform_compensation_levels.rs"
+    ],
+    "Animation/ConnectedAnimation.cs": [
+     "animation/connected_animation.rs"
+    ],
+    "Animation/ConnectedAnimationConfiguration.cs": [
+     "animation/connected_animation_configuration.rs"
+    ],
+    "Animation/ConnectedAnimationService.cs": [
+     "animation/connected_animation_service.rs"
     ],
     "AppBuilder.cs": [
      "app_builder.rs"
@@ -4119,6 +4174,9 @@
     "Automation/Peers/DatePickerAutomationPeer.cs": [
      "automation/peers/date_picker_automation_peer.rs"
     ],
+    "Automation/Peers/DrawerPageAutomationPeer.cs": [
+     "automation/peers/drawer_page_automation_peer.rs"
+    ],
     "Automation/Peers/EmbeddableControlRootAutomationPeer.cs": [
      "automation/peers/embeddable_control_root_automation_peer.rs"
     ],
@@ -4160,6 +4218,9 @@
     ],
     "Automation/Peers/NumericUpDownAutomationPeer.cs": [
      "automation/peers/numeric_up_down_automation_peer.rs"
+    ],
+    "Automation/Peers/PipsPagerAutomationPeer.cs": [
+     "automation/peers/pips_pager_automation_peer.rs"
     ],
     "Automation/Peers/PopupAutomationPeer.cs": [
      "automation/peers/popup_automation_peer.rs"
@@ -6521,17 +6582,17 @@
    "scope": "in",
    "detail": "full",
    "files": [
-    24,
+    29,
     49,
     0
    ],
    "types": [
-    27,
+    33,
     61,
     0
    ],
    "members": [
-    136,
+    180,
     426,
     0
    ],
@@ -6551,8 +6612,8 @@
    "matchKinds": {
     "const": 1,
     "field": 2,
-    "fn": 112,
-    "free fn": 13,
+    "fn": 139,
+    "free fn": 30,
     "free item": 2,
     "overload fn": 3,
     "variant": 3
@@ -6567,6 +6628,15 @@
     "BrowserAppBuilder.cs": [
      "browser_app_builder.rs"
     ],
+    "BrowserInputHandler.cs": [
+     "browser_input_handler.rs"
+    ],
+    "BrowserInputPane.cs": [
+     "browser_input_pane.rs"
+    ],
+    "BrowserMouseDevice.cs": [
+     "browser_mouse_device.rs"
+    ],
     "BrowserPlatformSettings.cs": [
      "browser_platform_settings.rs"
     ],
@@ -6578,6 +6648,9 @@
     ],
     "BrowserSingleViewLifetime.cs": [
      "browser_single_view_lifetime.rs"
+    ],
+    "BrowserTextInputMethod.cs": [
+     "browser_text_input_method.rs"
     ],
     "BrowserTopLevelImpl.cs": [
      "browser_top_level_impl.rs"
@@ -6602,6 +6675,9 @@
     ],
     "JSObjectControlHandle.cs": [
      "js_object_control_handle.rs"
+    ],
+    "KeyInterop.cs": [
+     "key_interop.rs"
     ],
     "Rendering/BrowserRenderTimer.cs": [
      "rendering/browser_render_timer.rs"
@@ -7119,6 +7195,7 @@
     "object_casts.rs",
     "register_types.rs",
     "test_support.rs",
+    "xaml_il/runtime/compiled.rs",
     "xamlx_runtime.rs"
    ]
   },
@@ -7380,6 +7457,9 @@
     "runtime/type_system/tests.rs",
     "runtime/type_system/values.rs",
     "runtime/value_parser.rs",
+    "rust_emitter/compiled.rs",
+    "rust_emitter/emitter.rs",
+    "rust_emitter/source.rs",
     "testing/bindings.rs",
     "testing/objects.rs",
     "testing/styles.rs"
