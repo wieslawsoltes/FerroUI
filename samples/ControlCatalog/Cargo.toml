@@ -18,6 +18,11 @@ autoexamples = false
 [lib]
 path = "lib.rs"
 
+[features]
+# Embeds the neutral artwork of `PlaceholderAssets/` in place of the brand assets of the upstream
+# project (see `build.rs`); the browser host of the sample selects it for the published site.
+placeholder-branding = []
+
 [dependencies]
 ferroui-base = { workspace = true }
 ferroui-controls = { workspace = true }

@@ -7,6 +7,14 @@
 //! `register_types()`, next to the table of the documents `excluded.txt`
 //! lists.
 //!
+//! With the feature `placeholder-branding` an asset `Assets/<path>` that has
+//! a counterpart `PlaceholderAssets/<path>` is embedded with the content of
+//! the counterpart, and the path data of a `StreamGeometry` resource with
+//! the key `<key>` in a document is replaced by the content of
+//! `PlaceholderAssets/StreamGeometry/<key>.txt`: the neutral artwork the
+//! published browser site shows in place of the brand assets of the
+//! upstream project.
+//!
 //! `$OUT_DIR/document_tests.rs` holds one test per document (it loads
 //! through the run-time loader) and one per document with a class (the
 //! class constructs, loads its document and is shown in a window); a test
@@ -21,8 +29,12 @@ use std::path::{Path, PathBuf};
 /// The list of the documents that do not load yet.
 const EXCLUDED_LIST: &str = "excluded.txt";
 
+/// The directory of the placeholder artwork of the feature
+/// `placeholder-branding`, with the layout of `Assets/`.
+const PLACEHOLDER_DIRECTORY: &str = "PlaceholderAssets";
+
 /// Directories of the crate that hold no assets.
-const SKIPPED_DIRECTORIES: &[&str] = &["target", "tests", "examples"];
+const SKIPPED_DIRECTORIES: &[&str] = &["target", "tests", "examples", PLACEHOLDER_DIRECTORY];
 
 /// Files that are assets whatever their directory.
 const ASSET_FILES: &[&str] = &["Pages/teapot.bin"];
@@ -86,6 +98,80 @@ fn test_name(asset_path: &str) -> String {
     name
 }
 
+/// Embeds the placeholder artwork in place of the assets it replaces. Every
+/// placeholder must replace an asset, so that a renamed asset cannot slip
+/// through with its original content.
+fn substitute_placeholders(root: &Path, assets: &mut [(String, PathBuf)]) {
+    let directory = root.join(PLACEHOLDER_DIRECTORY);
+    println!("cargo::rerun-if-changed={}", directory.display());
+    let mut placeholders: Vec<String> = fs::read_dir(&directory)
+        .unwrap_or_else(|e| panic!("cannot read {}: {e}", directory.display()))
+        .map(|entry| entry.expect("directory entry").file_name().to_string_lossy().into_owned())
+        .filter(|name| !name.starts_with('.') && name != "README.md" && !directory.join(name).is_dir())
+        .collect();
+    placeholders.sort();
+
+    for name in placeholders {
+        let asset_path = format!("/Assets/{name}");
+        let entry = assets
+            .iter_mut()
+            .find(|(path, _)| *path == asset_path)
+            .unwrap_or_else(|| panic!("{PLACEHOLDER_DIRECTORY}/{name} replaces no asset: there is no Assets/{name}"));
+        entry.1 = directory.join(&name);
+    }
+}
+
+/// Replaces the path data of the `StreamGeometry` resources named by the
+/// files of `PlaceholderAssets/StreamGeometry` in the documents; a changed
+/// document is written below `$OUT_DIR/placeholder` and embedded from there.
+/// Every file must replace at least one resource.
+fn substitute_placeholder_geometries(root: &Path, out_dir: &Path, assets: &mut [(String, PathBuf)]) {
+    let directory = root.join(PLACEHOLDER_DIRECTORY).join("StreamGeometry");
+    println!("cargo::rerun-if-changed={}", directory.display());
+    let mut geometries: Vec<(String, String)> = fs::read_dir(&directory)
+        .unwrap_or_else(|e| panic!("cannot read {}: {e}", directory.display()))
+        .map(|entry| entry.expect("directory entry").path())
+        .filter_map(|path| {
+            let key = path.file_name()?.to_str()?.strip_suffix(".txt")?.to_string();
+            let data = fs::read_to_string(&path).unwrap_or_else(|e| panic!("cannot read {}: {e}", path.display()));
+            Some((key, data.trim().to_string()))
+        })
+        .collect();
+    geometries.sort();
+
+    let mut replaced = vec![0usize; geometries.len()];
+    for (asset_path, path) in assets.iter_mut().filter(|(asset_path, _)| asset_path.ends_with(".xaml")) {
+        let mut content = fs::read_to_string(&*path).unwrap_or_else(|e| panic!("cannot read {}: {e}", path.display()));
+        let mut changed = false;
+        for ((key, data), count) in geometries.iter().zip(replaced.iter_mut()) {
+            let start_tag = format!("<StreamGeometry x:Key=\"{key}\">");
+            let mut from = 0;
+            while let Some(start) = content[from..].find(&start_tag).map(|at| from + at + start_tag.len()) {
+                let end = start
+                    + content[start..]
+                        .find("</StreamGeometry>")
+                        .unwrap_or_else(|| panic!("{asset_path}: the resource {key} is not closed"));
+                content.replace_range(start..end, data);
+                from = start + data.len();
+                *count += 1;
+                changed = true;
+            }
+        }
+        if changed {
+            let target = out_dir.join("placeholder").join(asset_path.trim_start_matches('/'));
+            fs::create_dir_all(target.parent().expect("a parent directory"))
+                .unwrap_or_else(|e| panic!("cannot create the directory of {}: {e}", target.display()));
+            if fs::read_to_string(&target).ok().as_deref() != Some(content.as_str()) {
+                fs::write(&target, &content).unwrap_or_else(|e| panic!("cannot write {}: {e}", target.display()));
+            }
+            *path = target;
+        }
+    }
+    for ((key, _), count) in geometries.iter().zip(&replaced) {
+        assert!(*count > 0, "{PLACEHOLDER_DIRECTORY}/StreamGeometry/{key}.txt replaces no StreamGeometry resource of a document");
+    }
+}
+
 struct Excluded {
     path: String,
     /// The reason applies to the test of the class only (the document loads).
@@ -100,6 +186,11 @@ fn main() {
     let mut assets = Vec::new();
     collect(&root, &root, &mut assets);
     assets.sort();
+
+    if env::var_os("CARGO_FEATURE_PLACEHOLDER_BRANDING").is_some() {
+        substitute_placeholders(&root, &mut assets);
+        substitute_placeholder_geometries(&root, &out_dir, &mut assets);
+    }
 
     let mut text = String::from("pub(crate) static ASSETS: &[(&str, &[u8])] = &[\n");
     for (asset_path, path) in &assets {
