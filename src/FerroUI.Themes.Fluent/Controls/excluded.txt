@@ -3,4 +3,3 @@
 # FluentControls.xaml; remove a line here and run the script again to include a document.
 #
 # Controls (or types the theme names) that are not ported:
-ManagedFileChooser.xaml | FerroUI.Dialogs (ManagedFileChooser, ManagedFileChooserOverwritePrompt, ChildFitter, converters)

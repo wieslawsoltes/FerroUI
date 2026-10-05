@@ -65,6 +65,7 @@
         <MergeResourceInclude Source="ferres://FerroUI.Themes.Simple/Controls/DatePicker.xaml" />
         <MergeResourceInclude Source="ferres://FerroUI.Themes.Simple/Controls/TimePicker.xaml" />
         <MergeResourceInclude Source="ferres://FerroUI.Themes.Simple/Controls/SplitView.xaml" />
+        <MergeResourceInclude Source="ferres://FerroUI.Themes.Simple/Controls/ManagedFileChooser.xaml" />
         <MergeResourceInclude Source="ferres://FerroUI.Themes.Simple/Controls/SplitButton.xaml" />
         <MergeResourceInclude Source="ferres://FerroUI.Themes.Simple/Controls/SelectableTextBlock.xaml" />
         <MergeResourceInclude Source="ferres://FerroUI.Themes.Simple/Controls/RefreshContainer.xaml" />

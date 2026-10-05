@@ -31,6 +31,7 @@ pub fn register_types() {
     static ONCE: std::sync::Once = std::sync::Once::new();
     ONCE.call_once(|| {
         ferroui_markup_xaml::register_types();
+        ferroui_dialogs::register_types();
         TypeInfo::register_namespaces(NAMESPACES);
         TypeInfo::register_all(TYPES);
         MarkupAssembly::register(&ASSEMBLY);

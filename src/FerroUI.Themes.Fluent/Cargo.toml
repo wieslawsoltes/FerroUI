@@ -20,6 +20,8 @@ path = "lib.rs"
 [dependencies]
 ferroui-base = { workspace = true }
 ferroui-controls = { workspace = true }
+# The managed dialogs, whose control themes are part of the theme (as the upstream project reference).
+ferroui-dialogs = { workspace = true }
 ferroui-markup-xaml = { workspace = true }
 # The documents of the theme are loaded through the run-time XAML loader until the build-time
 # compiler exists; the dependency goes away with it (the theme then only needs the runtime library).

@@ -29,12 +29,13 @@ use ferroui_controls::{Application, Border, Control, Window};
 use std::cell::RefCell;
 use std::rc::Rc;
 
-/// The class of the controls assembly named `name`.
+/// The class of the controls or the dialogs assembly named `name`.
 fn control_type(name: &str) -> &'static TypeInfo {
-    let mut found = TypeInfo::registered_types()
-        .into_iter()
-        .filter(|type_| type_.name() == name && type_.module_path().starts_with("ferroui_controls"));
-    let type_ = found.next().unwrap_or_else(|| panic!("{name} is not a class of the controls assembly"));
+    let mut found = TypeInfo::registered_types().into_iter().filter(|type_| {
+        type_.name() == name
+            && (type_.module_path().starts_with("ferroui_controls") || type_.module_path().starts_with("ferroui_dialogs"))
+    });
+    let type_ = found.next().unwrap_or_else(|| panic!("{name} is not a class of the controls or the dialogs assembly"));
     assert!(found.next().is_none(), "{name} is ambiguous");
     type_
 }
@@ -211,6 +212,8 @@ control_tests! {
     label => "Label";
     list_box => "ListBox";
     list_box_item => "ListBoxItem";
+    managed_file_chooser => "ManagedFileChooser";
+    managed_file_chooser_overwrite_prompt => "ManagedFileChooserOverwritePrompt";
     menu => "Menu";
     menu_flyout_presenter => "MenuFlyoutPresenter";
     menu_item => "MenuItem";
@@ -344,4 +347,64 @@ fn command_bar_presents_its_command_lists() {
     assert_eq!(1, primary_host.item_count());
     assert_eq!(1, overflow_presenter.item_count());
     assert!(primary.get_visual_parent().is_some(), "the primary command is presented");
+}
+
+/// Not from upstream: the file chooser of the theme presents its view model:
+/// the quick links, the entries of the folder and the selection.
+#[test]
+fn managed_file_chooser_presents_its_view_model() {
+    use ferroui_base::metadata::from_markup_value;
+    use ferroui_base::threading::Dispatcher;
+    use ferroui_controls::{ListBox, TextBox};
+    use ferroui_dialogs::internal::{ManagedFileChooserItemViewModel, ManagedFileChooserViewModel};
+    use ferroui_dialogs::{ManagedFileChooser, ManagedFileDialogOptions};
+
+    let _app = start_themed_application();
+    let root = std::env::temp_dir().join(format!("ferroui-theme-chooser-{}", std::process::id()));
+    let _ = std::fs::remove_dir_all(&root);
+    std::fs::create_dir_all(root.join("folder")).unwrap();
+    std::fs::write(root.join("file.txt"), b"text").unwrap();
+
+    let model = ManagedFileChooserViewModel::new(ManagedFileDialogOptions::new());
+    model.navigate(Some(&root.to_string_lossy()), None);
+    let chooser = ManagedFileChooser::new();
+    chooser.set_data_context(Some(model.clone() as ferroui_base::BoxedValue));
+    let applied: Rc<RefCell<Option<NameScopeRef>>> = Rc::new(RefCell::new(None));
+    {
+        let applied = applied.clone();
+        let _ = chooser.template_applied(move |_, e| *applied.borrow_mut() = Some(e.name_scope().clone()));
+    }
+    let window = Window::new();
+    window.set_content(Some(Control::boxed(&chooser)));
+    window.show();
+    window.update_layout();
+
+    let name_scope = applied.borrow().clone().expect("TemplateApplied was raised");
+    let find = |name: &str| -> Ref<FerroObject> {
+        name_scope.find(name).unwrap_or_else(|| panic!("the part {name} is not in the template"))
+    };
+
+    let files = find("PART_Files").cast::<ListBox>().expect("a list box");
+    let entries: Vec<String> = files
+        .items()
+        .to_vec()
+        .iter()
+        .filter_map(|item| from_markup_value::<Rc<ManagedFileChooserItemViewModel>>(item))
+        .map(|item| item.display_name().unwrap())
+        .collect();
+    assert_eq!(vec!["folder", "file.txt"], entries);
+
+    let quick_links = find("PART_QuickLinks").cast::<ListBox>().expect("a list box");
+    assert_eq!(model.quick_links().count(), quick_links.items().count());
+
+    let location = find("Location").cast::<TextBox>().expect("a text box");
+    assert_eq!(Some(root.to_string_lossy().into_owned()), location.text());
+
+    // A selection of the list box is the selection of the view model.
+    files.set_selected_index(1);
+    Dispatcher::ui_thread().run_jobs(None);
+    assert_eq!(Some("file.txt".to_string()), model.file_name());
+
+    window.close();
+    let _ = std::fs::remove_dir_all(&root);
 }
