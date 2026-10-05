@@ -253,3 +253,30 @@ fn sample_gallery_page_opens_a_sample_on_its_navigation_host() {
     assert!(content.is::<ScrollViewer>());
     window.close();
 }
+
+#[test]
+fn the_header_of_a_section_of_the_drawer_navigates_to_the_page_of_the_section() {
+    // Not from upstream (the sample has no tests): the expander of a section passes the page item
+    // of the section, which a binding reads from a typed property, to the navigation command; the
+    // command must convert it (a click on the header panicked in the browser host).
+    use crate::view_models::MainWindowViewModel;
+    use crate::MainView;
+    use ferroui_controls::{Page, PageNavigationHost};
+    let _app = start_catalog_application();
+    let view = MainView::new();
+    let view_model = MainWindowViewModel::new();
+    view.set_data_context(Some(view_model.clone() as BoxedValue));
+    let host = PageNavigationHost::new();
+    host.set_page(view.clone().upcast::<Page>());
+    let window = show(&host.upcast(), 1100.0);
+
+    let expander = descendants::<HomeItemExpander>(&view)[0].clone();
+    let header: Ref<SelectableButton> = named(&expander, "ExpanderHeader");
+    let command = header.command().expect("the navigation command");
+    command.execute(header.command_parameter().as_ref());
+    Dispatcher::ui_thread().run_jobs(None);
+
+    let section = view_model.home_sections()[0].clone();
+    assert_eq!(Some(section.page_item().header()), view_model.current_page_item().map(|item| item.header()));
+    window.close();
+}
