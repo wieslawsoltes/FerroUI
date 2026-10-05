@@ -75,9 +75,14 @@ impl PropertySetSnapshot {
     }
 
     /// Resolves the server objects the snapshot refers to on `compositor`,
-    /// nested property sets included. Panics if one of them is not an
-    /// animatable server object (upstream casts the server object of the
-    /// composition object to `ServerObject` when it takes the snapshot).
+    /// nested property sets included.
+    ///
+    /// Upstream the snapshot holds the server objects themselves. An id
+    /// names its server object until the composition object that holds it is
+    /// dropped, disposed or not, and the snapshot is resolved by the batch
+    /// that carries it, which precedes the release of any object it refers
+    /// to; an id that names no animatable object leaves the parameter
+    /// without an object, as a null reference does upstream.
     pub fn resolve(&self, compositor: &ServerCompositor) {
         for value in self.dic.values() {
             match &value.object {
@@ -86,10 +91,9 @@ impl PropertySetSnapshot {
                     if resolved.get().is_some() {
                         continue;
                     }
-                    let Some(object) = compositor.get_animated_object(*id) else {
-                        panic!("server object {id:?} of a reference parameter is not an animatable server object");
-                    };
-                    let _ = resolved.set(ServerExpressionObject(object));
+                    if let Some(object) = compositor.get_animated_object(*id) {
+                        let _ = resolved.set(ServerExpressionObject(object));
+                    }
                 }
                 None => {}
             }
