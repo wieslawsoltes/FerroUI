@@ -42,6 +42,10 @@ impl IGradientStop for ImmutableGradientStop {
     fn offset(&self) -> f64 {
         self.offset
     }
+
+    fn is_immutable_gradient_stop(&self) -> bool {
+        true
+    }
 }
 
 #[cfg(test)]

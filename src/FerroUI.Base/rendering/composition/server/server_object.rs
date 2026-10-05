@@ -4,7 +4,7 @@ use super::{
 };
 use crate::rendering::composition::animations::IAnimationInstance;
 use crate::rendering::composition::expressions::{ExpressionObjectKey, ExpressionVariant, IExpressionObject};
-use crate::media::{IBrush, IPen, ITransform};
+use crate::media::{IBrush, IGradientStop, IPen, ITransform};
 use crate::rendering::composition::drawing::IRenderDataGeometry;
 use crate::rendering::composition::transport::BatchStreamReader;
 use std::any::{Any, TypeId};
@@ -69,6 +69,11 @@ pub trait IServerObject: 'static {
 
     /// The object as a transform, if it is a server-side transform.
     fn as_transform(self: Rc<Self>) -> Option<Rc<dyn ITransform>> {
+        None
+    }
+
+    /// The object as a gradient stop, if it is a server-side gradient stop.
+    fn as_gradient_stop(self: Rc<Self>) -> Option<Rc<dyn IGradientStop>> {
         None
     }
 

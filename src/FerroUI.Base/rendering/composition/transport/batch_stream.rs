@@ -31,6 +31,12 @@ use std::time::Duration;
 /// A job executed by the server compositor on the render thread.
 pub type ServerJob = Box<dyn FnOnce(&ServerCompositor)>;
 
+/// A job executed by the server compositor on the render thread with a
+/// server object, which is resolved when the batch is read: upstream the
+/// job holds the server object itself, so it reaches an object the same
+/// batch disposes (the dispose list of a batch precedes its jobs).
+pub type ServerObjectJob = Box<dyn FnOnce(&ServerCompositor, Option<Rc<dyn IServerObject>>)>;
+
 /// Creates the server-side counterpart of a composition object on the
 /// render thread.
 pub type ServerObjectFactory = Box<dyn FnOnce(&Rc<ServerCompositor>, ServerObjectId) -> Rc<dyn IServerObject>>;
@@ -66,6 +72,8 @@ pub enum BatchObject {
     ServerObject(ServerObjectId),
     Marker(BatchMarker),
     Job(ServerJob),
+    /// Preceded by the `ServerObject` the job works with.
+    ObjectJob(ServerObjectJob),
     Create(ServerObjectFactory),
     /// Any other reference-typed payload (render data resources, platform
     /// handles, lists).

@@ -10,7 +10,9 @@ mod server_composition_bitmap_cache;
 mod server_composition_cache_mode;
 mod server_composition_container_visual;
 mod server_composition_draw_list_visual;
+mod server_composition_drawing_surface;
 mod server_composition_experimental_acrylic_visual;
+mod server_composition_gradient_stop;
 mod server_composition_solid_color_visual;
 mod server_composition_surface;
 mod server_composition_surface_visual;
@@ -18,6 +20,7 @@ mod server_composition_target;
 mod server_composition_visual;
 mod server_composition_visual_collection;
 mod server_compositor_animations;
+mod server_custom_composition_visual;
 mod server_object_animations;
 mod server_size_dependant_visual;
 mod server_visual_render_context;
@@ -45,12 +48,12 @@ pub use fps_counter::FpsCounter;
 pub use frame_time_graph::FrameTimeGraph;
 pub use i_server_clock_item::IServerClockItem;
 pub use readback_indices::{ReadbackIndices, ReadbackWriteScope};
+pub(crate) use server_composition_simple_brush::server_simple_brush;
 pub use server_composition_simple_brush::{
     ServerCompositionSimpleBrush, ServerCompositionSimpleConicGradientBrush, ServerCompositionSimpleGradientBrush,
     ServerCompositionSimpleLinearGradientBrush, ServerCompositionSimpleRadialGradientBrush,
     ServerCompositionSimpleSolidColorBrush, ServerCompositionSimpleTileBrush,
 };
-pub(crate) use server_composition_simple_brush::server_simple_brush;
 pub use server_composition_simple_geometry::ServerCompositionSimpleGeometry;
 // The server-side tile brushes live with the composition brushes, as
 // upstream; they belong to this namespace.
@@ -66,7 +69,15 @@ pub use server_composition_bitmap_cache::ServerCompositionBitmapCache;
 pub use server_composition_cache_mode::ServerCompositionCacheMode;
 pub use server_composition_container_visual::ServerCompositionContainerVisual;
 pub use server_composition_draw_list_visual::ServerCompositionDrawListVisual;
+pub use server_composition_drawing_surface::{DrawingSurfaceUpdateError, ServerCompositionDrawingSurface};
 pub use server_composition_experimental_acrylic_visual::ServerCompositionExperimentalAcrylicVisual;
+pub use server_composition_gradient_stop::ServerCompositionGradientStop;
+// The server-side composition brushes are in the namespace of the server
+// objects upstream.
+pub use super::brushes::{
+    ServerCompositionConicGradientBrush, ServerCompositionGradientBrush, ServerCompositionLinearGradientBrush,
+    ServerCompositionRadialGradientBrush, ServerCompositionSolidColorBrush,
+};
 pub use server_composition_solid_color_visual::ServerCompositionSolidColorVisual;
 pub use server_composition_surface::{IServerCompositionSurface, ServerCompositionSurfaceChanged};
 pub use server_composition_surface_visual::ServerCompositionSurfaceVisual;
@@ -77,6 +88,7 @@ pub use server_composition_visual::{
 };
 pub use server_composition_visual_collection::ServerCompositionVisualCollection;
 pub use server_compositor_animations::ServerCompositorAnimations;
+pub use server_custom_composition_visual::ServerCompositionCustomVisual;
 pub use server_object::{
     impl_animated_server_object, IAnimatedServerObject, IServerObject, ServerExpressionObject, ServerObject, ServerObjectId,
 };
@@ -88,6 +100,7 @@ pub use server_property_host::{
     IServerPropertyHost, ServerPropertyValue, ServerResourceRef, ServerValueChange,
 };
 pub use server_render_resource::{
-    impl_simple_server_render_resource, IServerRenderResource, IServerRenderResourceHost,
-    IServerRenderResourceObserver, ServerRenderResourceCore, SimpleServerRenderResource,
+    impl_server_render_resource, impl_simple_server_render_resource, IServerRenderResource,
+    IServerRenderResourceHost, IServerRenderResourceObserver, ServerRenderResource, ServerRenderResourceCore,
+    SimpleServerRenderResource,
 };

@@ -10,6 +10,18 @@ pub trait IGradientStop: 'static {
 
     /// The gradient stop offset.
     fn offset(&self) -> f64;
+
+    /// The stop as a composition gradient stop, if it is one (the `is
+    /// CompositionGradientStop` test of upstream).
+    fn as_composition_gradient_stop(&self) -> Option<&crate::rendering::composition::CompositionGradientStop> {
+        None
+    }
+
+    /// Whether the stop is an [`ImmutableGradientStop`](crate::media::immutable::ImmutableGradientStop)
+    /// (the `as ImmutableGradientStop` test of upstream).
+    fn is_immutable_gradient_stop(&self) -> bool {
+        false
+    }
 }
 
 impl<T: ObjectType + Upcast<GradientStop>> IGradientStop for RefAdapter<T> {
