@@ -1004,7 +1004,7 @@ pub fn build_style_with_selector_xaml(
     // style_with_selector.xaml(1,150) Property
     ::ferroui_base::styling::Setter::__markup_set_Property(&value_0, rt::cast(rt::property(::ferroui_base::Visual::opacity_property()), 1, 150)?);
     // style_with_selector.xaml(1,143) Value
-    ::ferroui_base::styling::Setter::__markup_set_Value(&value_0, rt::to_object(0.5_f64));
+    ::ferroui_base::styling::Setter::__markup_set_Value(&value_0, rt::setter_value(&value_0, rt::to_object(0.5_f64)));
     ::ferroui_base::styling::StyleBase::__markup_Add_0(style_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(::core::clone::Clone::clone(&value_0), 1, 143)?);
     ::ferroui_base::styling::Styles::__markup_Add_0(&styles_collection_0, rt::cast(style_0.clone(), 1, 115)?).map_err(|error| rt::at(rt::TARGET_INVOCATION_EXCEPTION, error, 1, 115))?;
     border_0.try_end_init().map_err(|error| rt::at(rt::TARGET_INVOCATION_EXCEPTION, error, 1, 2))?;
@@ -3074,7 +3074,7 @@ pub fn build_control_theme_resources_xaml(
             // control_theme_resources.xaml(1,217) Property
             ::ferroui_base::styling::Setter::__markup_set_Property(&value_1, rt::cast(rt::property(::ferroui_base::Visual::opacity_property()), 1, 217)?);
             // control_theme_resources.xaml(1,210) Value
-            ::ferroui_base::styling::Setter::__markup_set_Value(&value_1, rt::to_object(0.5_f64));
+            ::ferroui_base::styling::Setter::__markup_set_Value(&value_1, rt::setter_value(&value_1, rt::to_object(0.5_f64)));
             ::ferroui_base::styling::StyleBase::__markup_Add_0(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(::core::clone::Clone::clone(&value_1), 1, 210)?);
             ::core::result::Result::Ok(rt::to_value(control_theme_0.clone()))
         }),
@@ -3112,7 +3112,7 @@ pub fn build_control_theme_resources_xaml(
             context.set_target_property(rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)));
             let provided_1 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0(&extension_1, rt::service_provider(&context)).map_err(|error| rt::at(rt::TARGET_INVOCATION_EXCEPTION, error, 1, 376))?;
             context.set_target_property(::core::option::Option::None);
-            ::ferroui_base::styling::Setter::__markup_set_Value(&value_3, ::core::clone::Clone::clone(&provided_1));
+            ::ferroui_base::styling::Setter::__markup_set_Value(&value_3, rt::setter_value(&value_3, ::core::clone::Clone::clone(&provided_1)));
             context.pop_parent();
             ::ferroui_base::styling::StyleBase::__markup_Add_0(control_theme_1.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(::core::clone::Clone::clone(&value_3), 1, 347)?);
             // control_theme_resources.xaml(1,410) Content
@@ -3126,7 +3126,7 @@ pub fn build_control_theme_resources_xaml(
             context.set_target_property(rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)));
             let provided_2 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0(&extension_2, rt::service_provider(&context));
             context.set_target_property(::core::option::Option::None);
-            ::ferroui_base::styling::Setter::__markup_set_Value(&value_5, rt::to_object(::core::clone::Clone::clone(&provided_2)));
+            ::ferroui_base::styling::Setter::__markup_set_Value(&value_5, rt::setter_value(&value_5, rt::to_object(::core::clone::Clone::clone(&provided_2))));
             context.pop_parent();
             ::ferroui_base::styling::StyleBase::__markup_Add_0(control_theme_1.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(::core::clone::Clone::clone(&value_5), 1, 410)?);
             context.pop_parent();
@@ -3780,7 +3780,7 @@ pub fn build_control_theme_template_xaml(
                 211,
             )?;
             ::ferroui_markup_xaml::templates::ControlTemplate::__markup_set_Content(&value_1, rt::to_object(::core::clone::Clone::clone(&deferred_0)));
-            ::ferroui_base::styling::Setter::__markup_set_Value(&value_0, rt::to_object(::core::clone::Clone::clone(&value_1)));
+            ::ferroui_base::styling::Setter::__markup_set_Value(&value_0, rt::setter_value(&value_0, rt::to_object(::core::clone::Clone::clone(&value_1))));
             ::ferroui_base::styling::StyleBase::__markup_Add_0(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(::core::clone::Clone::clone(&value_0), 1, 166)?);
             ::core::result::Result::Ok(rt::to_value(control_theme_0.clone()))
         }),
@@ -3826,7 +3826,7 @@ pub fn build_style_selectors_xaml(
     // style_selectors.xaml(1,179) Property
     ::ferroui_base::styling::Setter::__markup_set_Property(&value_0, rt::cast(rt::property(::ferroui_base::Visual::opacity_property()), 1, 179)?);
     // style_selectors.xaml(1,172) Value
-    ::ferroui_base::styling::Setter::__markup_set_Value(&value_0, rt::to_object(0.5_f64));
+    ::ferroui_base::styling::Setter::__markup_set_Value(&value_0, rt::setter_value(&value_0, rt::to_object(0.5_f64)));
     ::ferroui_base::styling::StyleBase::__markup_Add_0(style_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(::core::clone::Clone::clone(&value_0), 1, 172)?);
     ::ferroui_base::styling::Styles::__markup_Add_0(&styles_collection_0, rt::cast(style_0.clone(), 1, 127)?).map_err(|error| rt::at(rt::TARGET_INVOCATION_EXCEPTION, error, 1, 127))?;
     // style_selectors.xaml(1,220) Styles
@@ -3843,7 +3843,7 @@ pub fn build_style_selectors_xaml(
     // style_selectors.xaml(1,263) Property
     ::ferroui_base::styling::Setter::__markup_set_Property(&value_1, rt::cast(rt::property(::ferroui_base::Visual::opacity_property()), 1, 263)?);
     // style_selectors.xaml(1,256) Value
-    ::ferroui_base::styling::Setter::__markup_set_Value(&value_1, rt::to_object(0.5_f64));
+    ::ferroui_base::styling::Setter::__markup_set_Value(&value_1, rt::setter_value(&value_1, rt::to_object(0.5_f64)));
     ::ferroui_base::styling::StyleBase::__markup_Add_0(style_1.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(::core::clone::Clone::clone(&value_1), 1, 256)?);
     ::ferroui_base::styling::Styles::__markup_Add_0(&styles_collection_1, rt::cast(style_1.clone(), 1, 220)?).map_err(|error| rt::at(rt::TARGET_INVOCATION_EXCEPTION, error, 1, 220))?;
     // style_selectors.xaml(1,304) Styles
@@ -3860,7 +3860,7 @@ pub fn build_style_selectors_xaml(
     // style_selectors.xaml(1,347) Property
     ::ferroui_base::styling::Setter::__markup_set_Property(&value_2, rt::cast(rt::property(::ferroui_base::Visual::opacity_property()), 1, 347)?);
     // style_selectors.xaml(1,340) Value
-    ::ferroui_base::styling::Setter::__markup_set_Value(&value_2, rt::to_object(0.5_f64));
+    ::ferroui_base::styling::Setter::__markup_set_Value(&value_2, rt::setter_value(&value_2, rt::to_object(0.5_f64)));
     ::ferroui_base::styling::StyleBase::__markup_Add_0(style_2.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(::core::clone::Clone::clone(&value_2), 1, 340)?);
     ::ferroui_base::styling::Styles::__markup_Add_0(&styles_collection_2, rt::cast(style_2.clone(), 1, 304)?).map_err(|error| rt::at(rt::TARGET_INVOCATION_EXCEPTION, error, 1, 304))?;
     // style_selectors.xaml(1,388) Styles
@@ -3877,7 +3877,7 @@ pub fn build_style_selectors_xaml(
     // style_selectors.xaml(1,448) Property
     ::ferroui_base::styling::Setter::__markup_set_Property(&value_3, rt::cast(rt::property(::ferroui_base::Visual::opacity_property()), 1, 448)?);
     // style_selectors.xaml(1,441) Value
-    ::ferroui_base::styling::Setter::__markup_set_Value(&value_3, rt::to_object(0.5_f64));
+    ::ferroui_base::styling::Setter::__markup_set_Value(&value_3, rt::setter_value(&value_3, rt::to_object(0.5_f64)));
     ::ferroui_base::styling::StyleBase::__markup_Add_0(style_3.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(::core::clone::Clone::clone(&value_3), 1, 441)?);
     ::ferroui_base::styling::Styles::__markup_Add_0(&styles_collection_3, rt::cast(style_3.clone(), 1, 388)?).map_err(|error| rt::at(rt::TARGET_INVOCATION_EXCEPTION, error, 1, 388))?;
     // style_selectors.xaml(1,489) Styles
@@ -3894,7 +3894,7 @@ pub fn build_style_selectors_xaml(
     // style_selectors.xaml(1,536) Property
     ::ferroui_base::styling::Setter::__markup_set_Property(&value_4, rt::cast(rt::property(::ferroui_base::Visual::opacity_property()), 1, 536)?);
     // style_selectors.xaml(1,529) Value
-    ::ferroui_base::styling::Setter::__markup_set_Value(&value_4, rt::to_object(0.5_f64));
+    ::ferroui_base::styling::Setter::__markup_set_Value(&value_4, rt::setter_value(&value_4, rt::to_object(0.5_f64)));
     ::ferroui_base::styling::StyleBase::__markup_Add_0(style_4.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(::core::clone::Clone::clone(&value_4), 1, 529)?);
     ::ferroui_base::styling::Styles::__markup_Add_0(&styles_collection_4, rt::cast(style_4.clone(), 1, 489)?).map_err(|error| rt::at(rt::TARGET_INVOCATION_EXCEPTION, error, 1, 489))?;
     // style_selectors.xaml(1,577) Styles
@@ -3910,7 +3910,7 @@ pub fn build_style_selectors_xaml(
     // style_selectors.xaml(1,630) Property
     ::ferroui_base::styling::Setter::__markup_set_Property(&value_5, rt::cast(rt::property(::ferroui_base::Visual::opacity_property()), 1, 630)?);
     // style_selectors.xaml(1,623) Value
-    ::ferroui_base::styling::Setter::__markup_set_Value(&value_5, rt::to_object(0.5_f64));
+    ::ferroui_base::styling::Setter::__markup_set_Value(&value_5, rt::setter_value(&value_5, rt::to_object(0.5_f64)));
     ::ferroui_base::styling::StyleBase::__markup_Add_0(style_5.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(::core::clone::Clone::clone(&value_5), 1, 623)?);
     ::ferroui_base::styling::Styles::__markup_Add_0(&styles_collection_5, rt::cast(style_5.clone(), 1, 577)?).map_err(|error| rt::at(rt::TARGET_INVOCATION_EXCEPTION, error, 1, 577))?;
     // style_selectors.xaml(1,671) Styles
@@ -3926,7 +3926,7 @@ pub fn build_style_selectors_xaml(
     // style_selectors.xaml(1,722) Property
     ::ferroui_base::styling::Setter::__markup_set_Property(&value_6, rt::cast(rt::property(::ferroui_base::Visual::opacity_property()), 1, 722)?);
     // style_selectors.xaml(1,715) Value
-    ::ferroui_base::styling::Setter::__markup_set_Value(&value_6, rt::to_object(0.5_f64));
+    ::ferroui_base::styling::Setter::__markup_set_Value(&value_6, rt::setter_value(&value_6, rt::to_object(0.5_f64)));
     ::ferroui_base::styling::StyleBase::__markup_Add_0(style_6.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(::core::clone::Clone::clone(&value_6), 1, 715)?);
     ::ferroui_base::styling::Styles::__markup_Add_0(&styles_collection_6, rt::cast(style_6.clone(), 1, 671)?).map_err(|error| rt::at(rt::TARGET_INVOCATION_EXCEPTION, error, 1, 671))?;
     // style_selectors.xaml(1,763) Styles
@@ -3942,7 +3942,7 @@ pub fn build_style_selectors_xaml(
     // style_selectors.xaml(1,809) Property
     ::ferroui_base::styling::Setter::__markup_set_Property(&value_7, rt::cast(rt::property(::ferroui_base::Visual::opacity_property()), 1, 809)?);
     // style_selectors.xaml(1,802) Value
-    ::ferroui_base::styling::Setter::__markup_set_Value(&value_7, rt::to_object(0.5_f64));
+    ::ferroui_base::styling::Setter::__markup_set_Value(&value_7, rt::setter_value(&value_7, rt::to_object(0.5_f64)));
     ::ferroui_base::styling::StyleBase::__markup_Add_0(style_7.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(::core::clone::Clone::clone(&value_7), 1, 802)?);
     ::ferroui_base::styling::Styles::__markup_Add_0(&styles_collection_7, rt::cast(style_7.clone(), 1, 763)?).map_err(|error| rt::at(rt::TARGET_INVOCATION_EXCEPTION, error, 1, 763))?;
     // style_selectors.xaml(1,850) Styles
@@ -3960,7 +3960,7 @@ pub fn build_style_selectors_xaml(
     // style_selectors.xaml(1,898) Property
     ::ferroui_base::styling::Setter::__markup_set_Property(&value_8, rt::cast(rt::property(::ferroui_base::Visual::opacity_property()), 1, 898)?);
     // style_selectors.xaml(1,891) Value
-    ::ferroui_base::styling::Setter::__markup_set_Value(&value_8, rt::to_object(0.5_f64));
+    ::ferroui_base::styling::Setter::__markup_set_Value(&value_8, rt::setter_value(&value_8, rt::to_object(0.5_f64)));
     ::ferroui_base::styling::StyleBase::__markup_Add_0(style_8.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(::core::clone::Clone::clone(&value_8), 1, 891)?);
     ::ferroui_base::styling::Styles::__markup_Add_0(&styles_collection_8, rt::cast(style_8.clone(), 1, 850)?).map_err(|error| rt::at(rt::TARGET_INVOCATION_EXCEPTION, error, 1, 850))?;
     // style_selectors.xaml(1,939) Styles
@@ -3975,7 +3975,7 @@ pub fn build_style_selectors_xaml(
     // style_selectors.xaml(1,977) Property
     ::ferroui_base::styling::Setter::__markup_set_Property(&value_9, rt::cast(rt::property(::ferroui_base::Visual::opacity_property()), 1, 977)?);
     // style_selectors.xaml(1,970) Value
-    ::ferroui_base::styling::Setter::__markup_set_Value(&value_9, rt::to_object(0.5_f64));
+    ::ferroui_base::styling::Setter::__markup_set_Value(&value_9, rt::setter_value(&value_9, rt::to_object(0.5_f64)));
     ::ferroui_base::styling::StyleBase::__markup_Add_0(style_9.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(::core::clone::Clone::clone(&value_9), 1, 970)?);
     ::ferroui_base::styling::Styles::__markup_Add_0(&styles_collection_9, rt::cast(style_9.clone(), 1, 939)?).map_err(|error| rt::at(rt::TARGET_INVOCATION_EXCEPTION, error, 1, 939))?;
     border_0.try_end_init().map_err(|error| rt::at(rt::TARGET_INVOCATION_EXCEPTION, error, 1, 2))?;
@@ -4011,7 +4011,7 @@ pub fn build_style_nested_xaml(
     // style_nested.xaml(1,147) Property
     ::ferroui_base::styling::Setter::__markup_set_Property(&value_0, rt::cast(rt::property(::ferroui_base::Visual::opacity_property()), 1, 147)?);
     // style_nested.xaml(1,140) Value
-    ::ferroui_base::styling::Setter::__markup_set_Value(&value_0, rt::to_object(0.25_f64));
+    ::ferroui_base::styling::Setter::__markup_set_Value(&value_0, rt::setter_value(&value_0, rt::to_object(0.25_f64)));
     ::ferroui_base::styling::StyleBase::__markup_Add_0(style_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(::core::clone::Clone::clone(&value_0), 1, 140)?);
     // style_nested.xaml(1,181) Content
     // style_nested.xaml(1,181) Style
@@ -4025,7 +4025,7 @@ pub fn build_style_nested_xaml(
     // style_nested.xaml(1,216) Property
     ::ferroui_base::styling::Setter::__markup_set_Property(&value_1, rt::cast(rt::property(::ferroui_base::Visual::opacity_property()), 1, 216)?);
     // style_nested.xaml(1,209) Value
-    ::ferroui_base::styling::Setter::__markup_set_Value(&value_1, rt::to_object(0.75_f64));
+    ::ferroui_base::styling::Setter::__markup_set_Value(&value_1, rt::setter_value(&value_1, rt::to_object(0.75_f64)));
     ::ferroui_base::styling::StyleBase::__markup_Add_0(style_1.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(::core::clone::Clone::clone(&value_1), 1, 209)?);
     ::ferroui_base::styling::StyleBase::__markup_Add_1(style_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(style_1.clone(), 1, 181)?);
     // style_nested.xaml(1,258) Content
@@ -4041,7 +4041,7 @@ pub fn build_style_nested_xaml(
     // style_nested.xaml(1,313) Property
     ::ferroui_base::styling::Setter::__markup_set_Property(&value_2, rt::cast(rt::property(::ferroui_base::layout::Layoutable::margin_property()), 1, 313)?);
     // style_nested.xaml(1,306) Value
-    ::ferroui_base::styling::Setter::__markup_set_Value(&value_2, rt::to_object(::ferroui_base::Thickness::__markup_new_3(2.0_f64, 2.0_f64, 2.0_f64, 2.0_f64)));
+    ::ferroui_base::styling::Setter::__markup_set_Value(&value_2, rt::setter_value(&value_2, rt::to_object(::ferroui_base::Thickness::__markup_new_3(2.0_f64, 2.0_f64, 2.0_f64, 2.0_f64))));
     ::ferroui_base::styling::StyleBase::__markup_Add_0(style_2.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(::core::clone::Clone::clone(&value_2), 1, 306)?);
     ::ferroui_base::styling::StyleBase::__markup_Add_1(style_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(style_2.clone(), 1, 258)?);
     ::ferroui_base::styling::Styles::__markup_Add_0(&styles_collection_0, rt::cast(style_0.clone(), 1, 115)?).map_err(|error| rt::at(rt::TARGET_INVOCATION_EXCEPTION, error, 1, 115))?;
@@ -4105,7 +4105,7 @@ pub fn build_style_resources_xaml(
     context.set_target_property(rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)));
     let provided_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0(&extension_0, rt::service_provider(&context)).map_err(|error| rt::at(rt::TARGET_INVOCATION_EXCEPTION, error, 1, 259))?;
     context.set_target_property(::core::option::Option::None);
-    ::ferroui_base::styling::Setter::__markup_set_Value(&value_1, ::core::clone::Clone::clone(&provided_0));
+    ::ferroui_base::styling::Setter::__markup_set_Value(&value_1, rt::setter_value(&value_1, ::core::clone::Clone::clone(&provided_0)));
     context.pop_parent();
     ::ferroui_base::styling::StyleBase::__markup_Add_0(style_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(::core::clone::Clone::clone(&value_1), 1, 230)?);
     // style_resources.xaml(1,293) Content
@@ -4119,7 +4119,7 @@ pub fn build_style_resources_xaml(
     context.set_target_property(rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)));
     let provided_1 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0(&extension_1, rt::service_provider(&context));
     context.set_target_property(::core::option::Option::None);
-    ::ferroui_base::styling::Setter::__markup_set_Value(&value_3, rt::to_object(::core::clone::Clone::clone(&provided_1)));
+    ::ferroui_base::styling::Setter::__markup_set_Value(&value_3, rt::setter_value(&value_3, rt::to_object(::core::clone::Clone::clone(&provided_1))));
     context.pop_parent();
     ::ferroui_base::styling::StyleBase::__markup_Add_0(style_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(::core::clone::Clone::clone(&value_3), 1, 293)?);
     context.pop_parent();

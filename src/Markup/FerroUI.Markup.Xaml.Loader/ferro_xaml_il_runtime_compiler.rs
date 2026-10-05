@@ -31,6 +31,7 @@ use crate::compiler_extensions::{
 };
 use crate::runtime::framework::{self, DocumentBody, RuntimeDocumentTypeBuilderProvider};
 use crate::runtime::type_system::RuntimeTypeSystem;
+use xamlx::type_system::IXamlMethod;
 
 thread_local! {
     static TYPE_SYSTEM: RefCell<Option<Rc<RuntimeTypeSystem>>> = const { RefCell::new(None) };
@@ -266,7 +267,7 @@ impl FerroXamlIlRuntimeCompiler {
         for provider in &group.providers {
             let (root, configuration, document) =
                 provider.transformed_root().ok_or_else(|| XamlError::invalid_operation("The document was not transformed"))?;
-            transformed.push(TransformedDocument { root, configuration, document });
+            transformed.push(TransformedDocument { root, configuration, document, build: provider.build_method() });
         }
         Ok(transformed)
     }
@@ -486,4 +487,7 @@ pub(crate) struct TransformedDocument {
     /// What the document adds to its contexts: the base URI and the static
     /// providers (the namespace information).
     pub document: Rc<crate::runtime::interpreter::RuntimeDocument>,
+    /// The build method of the document in its group (what a call from another
+    /// document of the group calls).
+    pub build: Option<Rc<dyn IXamlMethod>>,
 }

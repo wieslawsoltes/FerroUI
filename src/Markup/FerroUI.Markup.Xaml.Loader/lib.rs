@@ -35,7 +35,7 @@ mod ferro_runtime_xaml_loader;
 mod ferro_xaml_il_runtime_compiler;
 
 #[cfg(feature = "runtime")]
-pub use ferro_runtime_xaml_loader::FerroRuntimeXamlLoader;
+pub use ferro_runtime_xaml_loader::{DocumentGroup, FerroRuntimeXamlLoader};
 #[cfg(feature = "runtime")]
 pub use ferro_xaml_il_runtime_compiler::FerroXamlIlRuntimeCompiler;
 

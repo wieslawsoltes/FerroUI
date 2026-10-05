@@ -31,6 +31,7 @@ use xamlx::type_system::{IXamlConstructor, IXamlField, IXamlMethod, IXamlPropert
 use crate::compiler_extensions::ast_nodes::{
     FerroXamlIlFerroListConstantAstNode, FerroXamlIlFontFamilyAstNode, FerroXamlIlGridLengthAstNode, FerroXamlIlVectorLikeConstantAstNode,
 };
+use crate::compiler_extensions::group_transformers::NewServiceProviderNode;
 use crate::compiler_extensions::transformers::{
     CombinatorSelectorType, EnsureCapacityNode, FerroNameScopeRegistrationXamlIlNode, FerroXamlIlWellKnownTypesExtensions,
     HandleRootObjectScopeNode, OptionsMarkupExtensionMethod, ResourceAdderSetter, XamlIlAttachedPropertyEqualsSelector,
@@ -100,7 +101,7 @@ enum Kind {
     /// A `System.Type` value (`{x:Type}`): a class of the object model or a
     /// markup type. It has no Rust form of its own: it is written in the
     /// representation the destination declares ([`Emitter::coerce`]).
-    SystemType { class: Option<&'static TypeInfo>, markup: Option<&'static MarkupType> },
+    SystemType { class: Option<&'static TypeInfo>, markup: Option<&'static MarkupType>, primitive: Option<&'static str> },
 }
 
 struct Typed {
@@ -254,7 +255,12 @@ fn primitive_type_name(id: TypeId) -> Option<&'static str> {
             [$((TypeId::of::<$type_>(), ::std::stringify!($type_))),*]
         };
     }
-    let table = primitives!(bool, char, i8, u8, i16, u16, i32, u32, i64, u64, f32, f64, String);
+    let table = primitives!(bool, char, i8, u8, i16, u16, i32, u32, i64, u64, f32, f64);
+    if id == TypeId::of::<String>() {
+        // Not a primitive of the language: named by its full path, as generated code names
+        // the items of the prelude.
+        return Some("::std::string::String");
+    }
     table.iter().find(|(known, _)| *known == id).map(|(_, name)| *name)
 }
 
@@ -265,7 +271,12 @@ fn primitive_type_name(id: TypeId) -> Option<&'static str> {
 /// reference; [`ValueType`](ferroui_base::data::core::ValueType) and
 /// [`TypeId`] the canonical handle; each also as `Option<_>`. `None` if the
 /// type has no such representation.
-fn system_type_as(class: Option<&'static TypeInfo>, markup: Option<&'static MarkupType>, target: TypeId) -> Option<String> {
+fn system_type_as(
+    class: Option<&'static TypeInfo>,
+    markup: Option<&'static MarkupType>,
+    primitive: Option<&'static str>,
+    target: TypeId,
+) -> Option<String> {
     use ferroui_base::data::core::ValueType;
     let class_expr = match class {
         Some(class) => Some(format!("<{} as ::ferroui_base::StaticType>::TYPE", absolute(class.rust_path()?))),
@@ -273,6 +284,7 @@ fn system_type_as(class: Option<&'static TypeInfo>, markup: Option<&'static Mark
     };
     let handle_expr = match (&class_expr, markup) {
         (Some(class_expr), _) => Some(format!("rt::class_handle({class_expr})")),
+        (None, None) if primitive.is_some() => primitive.map(|name| format!("::ferroui_base::data::core::ValueType::of::<{name}>()")),
         (None, Some(markup)) => {
             let path = markup.rust_path()?;
             let qualified = match markup.rust_path_is_trait() {
@@ -366,6 +378,8 @@ struct Emitter<'a> {
     /// the name scope.
     uses_context: bool,
     uses_name_scope: bool,
+    /// The functions of the other documents of the group.
+    documents: &'a DocumentFunctions,
     /// The property assignments being emitted, the innermost last: the
     /// property a markup extension provides its value for is the one of the
     /// innermost (the interpreter's nearest parent assignment node).
@@ -477,6 +491,31 @@ impl Emitter<'_> {
         if let Some(n) = node.cast::<XamlIlBindingPathNode>() {
             return self.binding_path(node, &n);
         }
+        if node.is::<NewServiceProviderNode>() {
+            // `XamlIlRuntimeHelpers.CreateRootServiceProviderV3(context)`.
+            let types = self.configuration.try_get_ferro_types().map_err(|e| failed(node, e))?;
+            let method = types
+                .runtime_helpers
+                .get_method(|m| m.name() == NewServiceProviderNode::CREATE_ROOT_SERVICE_PROVIDER_METHOD_NAME)
+                .map_err(|e| failed(node, e))?;
+            let runtime = method
+                .as_any()
+                .downcast_ref::<RuntimeMethod>()
+                .ok_or_else(|| unsupported(node, "CreateRootServiceProviderV3 is not a method of the run-time type system"))?;
+            self.uses_context = true;
+            let context = Typed {
+                expr: "rt::service_provider(&context)".to_string(),
+                kind: Kind::Exact {
+                    id: TypeId::of::<Rc<dyn IServiceProvider>>(),
+                    nullable: Some(TypeId::of::<Option<Rc<dyn IServiceProvider>>>()),
+                },
+            };
+            let call = self.declared_call(node, runtime, &[context])?;
+            let returned = self.declared_return(node, runtime)?;
+            let local = self.local_named("service_provider");
+            self.line(format!("let {local} = {call};"));
+            return Ok(Typed { expr: format!("{local}.clone()"), kind: self.kind_of(returned) });
+        }
         if node.cast::<dyn XamlIlSelectorNode>().is_some() {
             return Ok(match self.selector(node)? {
                 Some(local) => Typed {
@@ -516,10 +555,11 @@ impl Emitter<'_> {
                 Some(_) => None,
                 None => metadata_of(runtime),
             };
-            if class.is_none() && markup.is_none() {
+            let primitive = runtime.handle().and_then(|handle| primitive_type_name(handle.id()));
+            if class.is_none() && markup.is_none() && primitive.is_none() {
                 return Err(unsupported(node, format!("{} has no metadata", runtime.full_name())));
             }
-            return Ok(Typed { expr: String::new(), kind: Kind::SystemType { class, markup } });
+            return Ok(Typed { expr: String::new(), kind: Kind::SystemType { class, markup, primitive } });
         }
         if let Some(n) = node.cast::<XamlConstantNode>() {
             let type_ = IXamlAstValueNode::type_(&*n).get_clr_type().map_err(|e| failed(node, e))?;
@@ -977,10 +1017,19 @@ impl Emitter<'_> {
                 };
                 Some(if nullable { format!("::core::option::Option::Some({handle})") } else { handle })
             }
-            Kind::SystemType { class, markup } => system_type_as(class, markup, target),
+            Kind::SystemType { class, markup, primitive } => system_type_as(class, markup, primitive, target),
             Kind::Null => {
                 let is_nullable_class = TypeInfo::find_by_handle(target).is_some_and(|(_, nullable)| nullable);
-                (is_nullable_class || target == object || target == TypeId::of::<Option<String>>())
+                // The null of a nullable form (`Option<T>`): what the untyped value conversions
+                // convert null to, a value of exactly the target type.
+                let is_nullable_form = || {
+                    use ferroui_base::data::core::{ValueType, ValueTypes};
+                    matches!(
+                        ValueTypes::try_convert(None, ValueType::new(target, "")),
+                        Some(Some(null)) if null.value_type_id() == target
+                    )
+                };
+                (is_nullable_class || target == object || target == TypeId::of::<Option<String>>() || is_nullable_form())
                     .then(|| "::core::option::Option::None".to_string())
             }
         }
@@ -1492,6 +1541,17 @@ impl Emitter<'_> {
                 return Err(unsupported(node, format!("the handle of {} is not the handle of its class", runtime.full_name())));
             }
             return Ok(format!("rt::class_handle(<{} as ::ferroui_base::StaticType>::TYPE)", absolute(path)));
+        }
+        // An element reference (`Option<ElementRef<Control>>`): named by its class.
+        if let Some((class, nullable)) = ferroui_base::data::core::ValueTypes::element_ref_class(handle.id()) {
+            let path = class
+                .rust_path()
+                .ok_or_else(|| unsupported(node, format!("no public Rust path is recorded for {}", class.full_name())))?;
+            let element_ref = format!("::ferroui_base::ElementRef<{}>", absolute(path));
+            return Ok(match nullable {
+                true => format!("::ferroui_base::data::core::ValueType::of::<::core::option::Option<{element_ref}>>()"),
+                false => format!("::ferroui_base::data::core::ValueType::of::<{element_ref}>()"),
+            });
         }
         let markup = metadata_of(runtime).ok_or_else(|| unsupported(node, format!("{} has no metadata", runtime.full_name())))?;
         if markup.handles.first().map(|first| first().id()) != Some(handle.id()) {
@@ -2203,6 +2263,20 @@ impl Emitter<'_> {
             .downcast_ref::<XamlWrappedMethod>()
             .map(|wrapped| wrapped.method().clone())
             .ok_or_else(|| unsupported(node, "a method call with argument casts"))?;
+        if let Some((function, class)) = self.documents.get(&method) {
+            // `Build(serviceProvider)` of another document of the group: its function.
+            let (function, class) = (function.clone(), *class);
+            let values = call.arguments.borrow().clone();
+            let [service_provider] = values.as_slice() else {
+                return Err(unsupported(node, "a call of the build method of a document without its service provider"));
+            };
+            let service_provider = self.value(&service_provider.as_node())?;
+            let service_provider = self
+                .coerce(&service_provider, TypeId::of::<Option<Rc<dyn IServiceProvider>>>())
+                .ok_or_else(|| unsupported(node, "the service provider of a build method that is not one"))?;
+            let handle = class.handle().ok_or_else(|| unsupported(node, "the root class of the document has no handle"))?;
+            return Ok((format!("{function}({service_provider})?"), Some(handle)));
+        }
         let runtime = method
             .as_any()
             .downcast_ref::<RuntimeMethod>()
@@ -2272,6 +2346,20 @@ impl Emitter<'_> {
         ) {
             if let Some(checked) = self.checked_cast(&value_node.as_node(), last, parameter, *handle, method)? {
                 *last = checked;
+            }
+        }
+        // `Setter.Value`: the value converted to the type of the setter's property, as the
+        // run-time loader converts it before it calls the setter.
+        if self.member_name(method) == "FerroUI.Styling.Setter.set_Value" {
+            let object = TypeId::of::<Option<BoxedValue>>();
+            if let (Some(last), Some(value_node)) = (arguments.last_mut(), values.last()) {
+                let untyped = self.coerce(last, object).ok_or_else(|| {
+                    unsupported(&value_node.as_node(), format!("{property_name}: the value cannot be stated as an object"))
+                })?;
+                *last = Typed {
+                    expr: format!("rt::setter_value(&{}, {untyped})", target.expr),
+                    kind: Kind::Exact { id: object, nullable: None },
+                };
             }
         }
         let call = self.declared_call(node, method, &arguments)?;
@@ -2677,6 +2765,72 @@ pub fn emit_document(
     function_name: &str,
     document_name: &str,
 ) -> Result<String, UnsupportedNode> {
+    emit_function(root, configuration, document, namespaces, function_name, document_name, &DocumentFunctions::default(), None)
+}
+
+/// The class of the root object a transformed document builds, if it is a
+/// class of the object model.
+pub fn root_class_of(root: &Rc<dyn IXamlAstNode>) -> Option<&'static TypeInfo> {
+    let group = root.as_value_with_manipulation_node()?;
+    let type_ = group.value().type_().get_clr_type().ok()?;
+    runtime_type(&type_).and_then(RuntimeType::type_info)
+}
+
+/// The generated functions of the other documents of a group, by the
+/// address of their `Build` method: what a call of the method (a style or
+/// resource include the group transformers linked) calls.
+#[derive(Default)]
+pub struct DocumentFunctions {
+    builds: HashMap<usize, (String, &'static TypeInfo)>,
+    /// The functions the emitted documents call, in the order of the calls.
+    called: std::cell::RefCell<Vec<String>>,
+}
+
+impl DocumentFunctions {
+    /// Records that `build`, the build method of a document whose root is an
+    /// object of `class`, is the generated function `function_name`.
+    pub fn insert(&mut self, build: &Rc<dyn IXamlMethod>, function_name: &str, class: &'static TypeInfo) {
+        self.builds.insert(node_address(build), (function_name.to_string(), class));
+    }
+
+    fn get(&self, method: &Rc<dyn IXamlMethod>) -> Option<&(String, &'static TypeInfo)> {
+        let found = self.builds.get(&node_address(method))?;
+        let mut called = self.called.borrow_mut();
+        if !called.contains(&found.0) {
+            called.push(found.0.clone());
+        }
+        Some(found)
+    }
+
+    /// The functions the documents emitted so far call.
+    pub fn called(&self) -> Vec<String> {
+        self.called.borrow().clone()
+    }
+}
+
+/// [`emit_document`] for a document of a group: calls of the build methods
+/// of the other documents call their functions (`documents`); with
+/// `populate` (the class of the root instance, for a document with
+/// `x:Class`) the function populates an existing root instead of building
+/// one:
+///
+/// ```ignore
+/// pub fn <function_name>(
+///     service_provider: Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
+///     root: &::ferroui_base::Ref<RootClass>,
+/// ) -> Result<(), ::ferroui_markup_xaml::XamlLoadException>
+/// ```
+#[allow(clippy::too_many_arguments)]
+pub fn emit_function(
+    root: &Rc<dyn IXamlAstNode>,
+    configuration: &TransformerConfiguration,
+    document: &RuntimeDocument,
+    namespaces: &str,
+    function_name: &str,
+    document_name: &str,
+    documents: &DocumentFunctions,
+    populate: Option<&'static TypeInfo>,
+) -> Result<String, UnsupportedNode> {
     if context_definition(configuration) != FRAMEWORK_CONTEXT {
         return Err(unsupported(root, "the language does not define the context of the framework language"));
     }
@@ -2708,11 +2862,18 @@ pub fn emit_document(
         uses_name_scope: false,
         assignments: Vec::new(),
         position: std::cell::Cell::new((0, 0)),
+        documents,
     };
     // `Build`: the root object, then `Populate` with a context of its own (its name
     // scope field is filled from the parent service provider) whose root object is
-    // the root.
-    let created = emitter.value(&root_value)?;
+    // the root. `Populate` alone acts on the given root.
+    let created = match populate {
+        Some(class) => {
+            emitter.line("let root = root.clone();".to_string());
+            Typed { expr: "root".to_string(), kind: Kind::Class(class) }
+        }
+        None => emitter.value(&root_value)?,
+    };
     let Kind::Class(root_class) = created.kind else {
         return Err(unsupported(&root_value, "the root object is not a class of the object model"));
     };
@@ -2725,16 +2886,25 @@ pub fn emit_document(
     ));
     emitter.line("let name_scope = context.name_scope_field();".to_string());
     emitter.manipulation(&manipulation.as_node(), &created)?;
-    emitter.line(format!("::core::result::Result::Ok({})", created.expr));
+    match populate {
+        Some(_) => emitter.line("::core::result::Result::Ok(())".to_string()),
+        None => emitter.line(format!("::core::result::Result::Ok({})", created.expr)),
+    }
 
     let mut source = String::new();
     source.push_str(&format!("/// Generated from `{}`.\n", document_name.replace('`', "'").replace(['\r', '\n'], " ")));
     source.push_str(&format!("pub fn {function_name}(\n"));
     source.push_str("    service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,\n");
-    source.push_str(&format!(
-        ") -> ::core::result::Result<::ferroui_base::Ref<{}>, ::ferroui_markup_xaml::XamlLoadException> {{\n",
-        absolute(root_path)
-    ));
+    match populate {
+        Some(_) => {
+            source.push_str(&format!("    root: &::ferroui_base::Ref<{}>,\n", absolute(root_path)));
+            source.push_str(") -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadException> {\n");
+        }
+        None => source.push_str(&format!(
+            ") -> ::core::result::Result<::ferroui_base::Ref<{}>, ::ferroui_markup_xaml::XamlLoadException> {{\n",
+            absolute(root_path)
+        )),
+    }
     for line in &emitter.lines {
         source.push_str(line);
         source.push('\n');

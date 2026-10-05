@@ -239,7 +239,26 @@ impl FerroRuntimeXamlLoader {
                 "No precompiled XAML found for {type_name}, make sure to specify x:Class and include your XAML file as FerroResource"
             )));
         };
-        let uri = Uri::new(&uri_text, UriKind::Absolute).map_err(|e| {
+        let group = Self::document_group(&uri_text, &type_name)?;
+        let (uri, text, included, assembly) = (group.uri, group.text, group.included, group.assembly);
+
+        let stream: Box<dyn Read> = Box::new(Cursor::new(text.into_bytes()));
+        let mut document =
+            RuntimeXamlLoaderDocument::from_stream_with_base_uri_and_root_instance(Some(uri), Some(instance.clone()), stream);
+        document.service_provider = service_provider.cloned();
+        let mut documents = vec![document];
+        documents.extend(included.into_iter().map(|(uri, text)| included_document(uri, text)));
+        let mut configuration = RuntimeXamlLoaderConfiguration::new();
+        configuration.local_assembly = assembly;
+        Self::load_group(documents, Some(configuration)).map(|_| ())
+    }
+
+    /// The document at `uri_text` (of the class named `type_name`, for the
+    /// errors) with every document it includes, directly or not, that the
+    /// asset loader has, and the assembly of the document: the group the
+    /// document of a class is loaded (and compiled) as.
+    pub fn document_group(uri_text: &str, type_name: &str) -> Result<DocumentGroup, XamlLoadException> {
+        let uri = Uri::new(uri_text, UriKind::Absolute).map_err(|e| {
             XamlLoadException::with_message(format!("The URI '{uri_text}' of the XAML document of {type_name} is invalid: {e}"))
         })?;
         // The document of a class is found wherever the class is created, as compiled
@@ -262,16 +281,7 @@ impl FerroRuntimeXamlLoader {
         // builds.
         let mut included = Vec::new();
         collect_included_documents(&*assets, Some(&uri), &text, &mut vec![uri.absolute_uri().to_string()], &mut included);
-
-        let stream: Box<dyn Read> = Box::new(Cursor::new(text.into_bytes()));
-        let mut document =
-            RuntimeXamlLoaderDocument::from_stream_with_base_uri_and_root_instance(Some(uri), Some(instance.clone()), stream);
-        document.service_provider = service_provider.cloned();
-        let mut documents = vec![document];
-        documents.extend(included.into_iter().map(|(uri, text)| included_document(uri, text)));
-        let mut configuration = RuntimeXamlLoaderConfiguration::new();
-        configuration.local_assembly = MarkupAssembly::find(assembly.name());
-        Self::load_group(documents, Some(configuration)).map(|_| ())
+        Ok(DocumentGroup { uri, text, included, assembly: MarkupAssembly::find(assembly.name()) })
     }
 
     /// Makes the run-time loader the loader `FerroXamlLoader` falls back to
@@ -284,6 +294,19 @@ impl FerroRuntimeXamlLoader {
             FerroLocator::current_mutable().bind::<dyn IRuntimeXamlLoader>().to_constant(loader);
         }
     }
+}
+
+/// The document of a class with the documents it includes
+/// ([`FerroRuntimeXamlLoader::document_group`]).
+pub struct DocumentGroup {
+    /// The URI and the text of the document.
+    pub uri: Uri,
+    pub text: String,
+    /// The documents it includes, directly or not, in the order they are
+    /// found, each with its text.
+    pub included: Vec<(Uri, String)>,
+    /// The assembly of the document, if it is registered.
+    pub assembly: Option<&'static MarkupAssembly>,
 }
 
 /// The run-time loader as the service of the XAML runtime library.

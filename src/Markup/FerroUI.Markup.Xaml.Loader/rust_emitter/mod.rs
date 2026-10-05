@@ -89,8 +89,8 @@ mod compiled;
 mod emitter;
 mod source;
 
-pub use compiled::{compile_documents, generate_file, CompiledDocument, GeneratedFile};
+pub use compiled::{compile_documents, generate_class_file, generate_file, CompiledDocument, GeneratedFile};
 #[cfg(any(test, feature = "testing"))]
-pub use compiled::transformed_tree;
+pub use compiled::{transformed_class_group, transformed_tree};
 pub use emitter::{emit_document, UnsupportedNode};
 pub use source::{function_name_of, rust_string_literal};
