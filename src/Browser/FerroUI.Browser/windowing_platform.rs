@@ -2,13 +2,14 @@ use crate::browser_activatable_lifetime::BrowserActivatableLifetime;
 use crate::browser_platform_settings::BrowserPlatformSettings;
 use crate::browser_runtime_platform::BrowserRuntimePlatform;
 use crate::browser_screens::BrowserScreens;
+use crate::browser_system_navigation_manager::BrowserSystemNavigationManagerImpl;
 use crate::browser_single_threaded_dispatcher_impl::BrowserSingleThreadedDispatcherImpl;
 use crate::cursor::CssCursorFactory;
 use crate::interop::JsObject;
 use crate::win_stubs::IconLoaderStub;
 use ferroui_base::input::platform::{KeyGestureFormatInfo, PlatformHotkeyConfiguration};
 use ferroui_base::input::{IKeyboardDevice, KeyboardDevice};
-use ferroui_base::platform::{ICursorFactory, IPlatformSettings, IRuntimePlatform};
+use ferroui_base::platform::{ICursorFactory, IPlatformSettings, IRuntimePlatform, ISystemNavigationManagerImpl};
 use ferroui_base::threading::Dispatcher;
 use ferroui_base::FerroLocator;
 use ferroui_controls::application_lifetimes::IActivatableLifetime;
@@ -74,6 +75,7 @@ impl BrowserWindowingPlatform {
         let keyboard_device: Rc<dyn IKeyboardDevice> = keyboard;
         let platform_settings = BrowserPlatformSettings::new();
         let activatable_lifetime = BrowserActivatableLifetime::new();
+        let system_navigation_manager = Rc::new(BrowserSystemNavigationManagerImpl::default());
         let locator = FerroLocator::current_mutable();
         locator
             .bind::<dyn IRuntimePlatform>()
@@ -87,6 +89,9 @@ impl BrowserWindowingPlatform {
             // With their concrete types, for the callbacks of the page: they
             // only go to the services of this backend.
             .bind_to_self(platform_settings)
+            .bind::<dyn ISystemNavigationManagerImpl>()
+            .to_constant(system_navigation_manager.clone())
+            .bind_to_self(system_navigation_manager)
             // Created on first use, as the screens subscribe to the changes of the page.
             .bind::<dyn IScreenImpl>()
             .to_func(|| Some(BrowserScreens::instance() as Rc<dyn IScreenImpl>))

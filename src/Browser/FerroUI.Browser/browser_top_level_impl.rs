@@ -1,22 +1,25 @@
 use crate::browser_app_builder::BrowserPlatformOptions;
 use crate::browser_input_handler::{BrowserInputHandler, IInputTopLevel};
+use crate::browser_insets_manager::BrowserInsetsManager;
 use crate::clipboard_impl::ClipboardImpl;
 use crate::cursor::CssCursor;
 use crate::interop::{dom_helper, input_helper, JsObject};
 use crate::js_object_control_handle::JsObjectControlHandle;
 use crate::rendering::RenderTargetBrowserSurface;
+use crate::storage::BrowserLauncher;
 use crate::windowing_platform::BrowserWindowingPlatform;
 use ferroui_base::input::platform::{Clipboard, IClipboard};
 use ferroui_base::input::raw::IRawInputEventArgs;
 use ferroui_base::input::text_input::ITextInputMethodImpl;
 use ferroui_base::input::IInputRoot;
+use ferroui_base::platform::storage::ILauncher;
 use ferroui_base::platform::surfaces::IPlatformRenderSurface;
 use ferroui_base::platform::{ICursorImpl, IOptionalFeatureProvider, ISystemNavigationManagerImpl};
 use ferroui_base::reactive::IDisposable;
 use ferroui_base::rendering::composition::Compositor;
 use ferroui_base::{FerroLocator, LocatorExtensions, PixelPoint, Point, Rect, Size};
 use ferroui_controls::platform::{
-    IInputPane, IPlatformHandle, IPopupImpl, IScreenImpl, ITopLevelImpl, PlatformThemeVariant,
+    IInputPane, IInsetsManager, IPlatformHandle, IPopupImpl, IScreenImpl, ITopLevelImpl, PlatformThemeVariant,
 };
 use ferroui_controls::{AcrylicPlatformCompensationLevels, WindowResizeReason, WindowTransparencyLevel};
 use std::any::{Any, TypeId};
@@ -38,6 +41,7 @@ pub struct BrowserTopLevelImpl {
     #[allow(dead_code)] // the native control host attaches to this
     native_control_host: JsObject,
     input_handler: Rc<BrowserInputHandler>,
+    insets_manager: Rc<BrowserInsetsManager>,
     clipboard: Rc<Clipboard>,
     current_cursor: RefCell<String>,
     surface: RefCell<Option<Rc<RenderTargetBrowserSurface>>>,
@@ -96,6 +100,7 @@ impl BrowserTopLevelImpl {
                 container,
                 native_control_host,
                 input_handler,
+                insets_manager: Rc::new(BrowserInsetsManager::new()),
                 clipboard: Clipboard::new(Rc::new(ClipboardImpl::new())),
                 current_cursor: RefCell::new(CssCursor::DEFAULT.to_string()),
                 surface: RefCell::new(Some(surface)),
@@ -149,6 +154,7 @@ impl BrowserTopLevelImpl {
             if let Some(resized) = resized {
                 resized(surface.client_size(), WindowResizeReason::User);
             }
+            self.insets_manager.notify_safe_area_padding_changed();
         }
     }
 
@@ -226,6 +232,11 @@ impl IOptionalFeatureProvider for BrowserTopLevelImpl {
             return Some(Rc::new(service));
         }
 
+        if feature_type == TypeId::of::<dyn IInsetsManager>() {
+            let insets_manager: Rc<dyn IInsetsManager> = self.insets_manager.clone();
+            return Some(Rc::new(insets_manager));
+        }
+
         if feature_type == TypeId::of::<dyn IClipboard>() {
             let clipboard: Rc<dyn IClipboard> = self.clipboard.clone();
             return Some(Rc::new(clipboard));
@@ -234,6 +245,11 @@ impl IOptionalFeatureProvider for BrowserTopLevelImpl {
         if feature_type == TypeId::of::<dyn IInputPane>() {
             let input_pane: Rc<dyn IInputPane> = self.input_handler.input_pane().clone();
             return Some(Rc::new(input_pane));
+        }
+
+        if feature_type == TypeId::of::<dyn ILauncher>() {
+            let launcher: Rc<dyn ILauncher> = Rc::new(BrowserLauncher::new());
+            return Some(Rc::new(launcher));
         }
 
         None

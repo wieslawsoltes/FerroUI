@@ -28,6 +28,18 @@ extern "C" {
     #[wasm_bindgen(js_namespace = FerroDOM, js_name = createFerroHost)]
     fn create_ferro_host_raw(element: &JsObject) -> JsObject;
 
+    /// Whether the document is shown in full screen.
+    #[wasm_bindgen(js_namespace = FerroDOM, js_name = isFullscreen)]
+    pub fn is_fullscreen(global_this: &JsObject) -> bool;
+
+    // Answers with a promise, which nobody waits for.
+    #[wasm_bindgen(js_namespace = FerroDOM, js_name = setFullscreen)]
+    fn set_fullscreen_raw(global_this: &JsObject, is_fullscreen: bool) -> JsObject;
+
+    /// The safe area insets of the page: left, top, right, bottom.
+    #[wasm_bindgen(js_namespace = FerroDOM, js_name = getSafeAreaPadding)]
+    pub fn get_safe_area_padding(global_this: &JsObject) -> Vec<f64>;
+
     #[wasm_bindgen(js_namespace = FerroDOM, js_name = getDarkMode)]
     pub fn get_dark_mode(global_this: &JsObject) -> Vec<i32>;
 
@@ -39,6 +51,12 @@ extern "C" {
 
     #[wasm_bindgen(js_namespace = FerroDOM, js_name = initGlobalDomEvents)]
     pub fn init_global_dom_events(global_this: &JsObject);
+}
+
+/// Shows the document in full screen or ends the full screen. Nothing waits
+/// for the answer: the page may refuse the request (without a user gesture).
+pub fn set_fullscreen(global_this: &JsObject, is_fullscreen: bool) {
+    drop(set_fullscreen_raw(global_this, is_fullscreen));
 }
 
 impl HostContent {
