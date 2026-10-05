@@ -15,6 +15,9 @@ ferroui-controls.workspace = true
 ferroui-microcom.workspace = true
 ferroui-skia.workspace = true
 
+[dev-dependencies]
+ferroui-harfbuzz.workspace = true
+
 [build-dependencies]
 cc.workspace = true
 microcom-codegen = { path = "../tools/MicroCom.CodeGenerator" }

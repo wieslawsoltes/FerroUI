@@ -274,6 +274,7 @@ dependencies = [
  "cc",
  "ferroui-base",
  "ferroui-controls",
+ "ferroui-harfbuzz",
  "ferroui-microcom",
  "ferroui-skia",
  "microcom-codegen",

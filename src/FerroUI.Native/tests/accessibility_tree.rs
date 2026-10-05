@@ -36,6 +36,7 @@ mod macos {
     use ferroui_native::{
         FerroNativePlatformExtensions, FerroNativePlatformOptions, FerroNativeRenderingMode, MacOSTopLevelHandle,
     };
+    use ferroui_harfbuzz::HarfBuzzApplicationExtensions;
     use ferroui_skia::SkiaApplicationExtensions;
     use std::cell::Cell;
     use std::process::ExitCode;
@@ -239,6 +240,7 @@ mod macos {
             ..Default::default()
         };
         let _builder = AppBuilder::configure::<Application>()
+            .use_harfbuzz()
             .use_ferro_native()
             .use_skia()
             .with(Rc::new(options))
