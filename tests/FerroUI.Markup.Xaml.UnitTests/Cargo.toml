@@ -1,0 +1,23 @@
+[package]
+name = "ferroui-markup-xaml-tests"
+description = "The unit tests of the FerroUI XAML stack: documents loaded at run time through the run-time XAML loader"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+publish = false
+autotests = false
+autobenches = false
+autoexamples = false
+
+[lib]
+path = "lib.rs"
+
+[dependencies]
+ferroui-base = { workspace = true, features = ["testing"] }
+ferroui-controls = { workspace = true, features = ["testing"] }
+ferroui-markup = { workspace = true }
+ferroui-markup-xaml = { workspace = true }
+ferroui-markup-xaml-loader = { workspace = true, features = ["runtime"] }
+xamlx = { workspace = true }
