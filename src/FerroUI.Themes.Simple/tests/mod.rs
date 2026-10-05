@@ -2,6 +2,7 @@ mod control_templates;
 mod control_theme_tests;
 mod documents;
 mod gaps;
+mod load_time;
 mod public_api_tests;
 mod resource_dictionary_tests;
 mod simple_theme_tests;
