@@ -358,3 +358,51 @@ fn property_set_values_and_snapshot() {
     assert!(result.is_err());
     assert_eq!(animation.composition_type_name(), "ExpressionAnimation");
 }
+
+/// Not from upstream: two visuals whose animations refer to each other
+/// through reference parameters are released once their composition
+/// objects are dropped, and a parameter whose object is gone reads as a
+/// parameter without an object.
+#[test]
+fn mutually_referencing_animations_do_not_keep_their_objects_alive() {
+    let fixture = Fixture::new();
+    let compositor = &fixture.compositor;
+    let a = compositor.create_solid_color_visual();
+    let b = compositor.create_solid_color_visual();
+    a.set_offset(Vector3D::new(1.0, 0.0, 0.0));
+    b.set_offset(Vector3D::new(2.0, 0.0, 0.0));
+
+    let ani_a = compositor.create_expression_animation_with("other.Offset.X");
+    ani_a.set_reference_parameter("other", (*b).clone());
+    a.start_animation("RotationAngle", &*ani_a);
+    let ani_b = compositor.create_expression_animation_with("other.Offset.X");
+    ani_b.set_reference_parameter("other", (*a).clone());
+    b.start_animation("RotationAngle", &*ani_b);
+    fixture.run_jobs();
+
+    let server_a = Rc::downgrade(&fixture.server(&a));
+    let server_b = Rc::downgrade(&fixture.server(&b));
+    let instance = ani_a.create_instance(a.server(), None);
+    instance.resolve(compositor.server());
+    instance.initialize(
+        Duration::ZERO,
+        ExpressionVariant::create(0f32),
+        ServerCompositionVisualProps::id_of_rotation_angle_property(),
+    );
+    assert_eq!(
+        instance.evaluate(Duration::ZERO, ExpressionVariant::create(0f32)),
+        ExpressionVariant::Double(2.0)
+    );
+
+    drop((a, b, ani_a, ani_b));
+    // The release of the dropped objects rides on a later batch.
+    let _other = compositor.create_solid_color_visual();
+    fixture.run_jobs();
+
+    assert!(server_a.upgrade().is_none());
+    assert!(server_b.upgrade().is_none());
+    assert_eq!(
+        instance.evaluate(Duration::ZERO, ExpressionVariant::create(0f32)),
+        ExpressionVariant::default()
+    );
+}
