@@ -1,33 +1,45 @@
 use crate::interop::promise_helper::{JsError, JsTask};
-use crate::interop::{stream_helper, JsObject};
+use crate::interop::{storage_helper, stream_helper, JsObject};
+use ferroui_base::logging::{LogArea, LogEventLevel, Logger};
 use ferroui_base::threading::Dispatcher;
 use std::cell::RefCell;
 use std::future::Future;
 use std::io::{self, Seek, SeekFrom, Write};
-use std::pin::Pin;
 use std::rc::Rc;
-use std::task::{Context, Poll, Waker};
+use std::task::{Poll, Waker};
 
 /// Loose wrapper implementation of a stream on top of the File System
 /// Access API's `FileSystemWritableFileStream`.
 ///
-/// The page writes only asynchronously. [`write_async`](Self::write_async)
-/// and [`close_async`](Self::close_async) are upstream's `WriteAsync` and
-/// `DisposeAsync`. The synchronous [`Write`] the storage contracts hand out
-/// issues the same writes without waiting for them: the script stream
-/// queues them in order, and the first failure is reported by the next
-/// call to `write` or `flush`. Dropping the stream closes it, which commits
-/// the file once the queued writes are done; await
-/// [`close_async`](Self::close_async) to know when that happened. The
-/// storage items wait for such closes before they open a file or read its
-/// properties (see [`closes_settled`]).
+/// The page writes only asynchronously. [`write_async`](Self::write_async),
+/// [`flush_async`](Self::flush_async) and [`close_async`](Self::close_async)
+/// are upstream's `WriteAsync`, `FlushAsync` and `DisposeAsync`. The
+/// synchronous [`Write`] the storage contracts hand out issues the same
+/// writes without waiting for them (the browser cannot block): the script
+/// stream queues them in order, and `write` and `flush` report a failure
+/// that has already settled. Dropping the stream closes it, which commits
+/// the file once the queued writes are done. Until that close settles, the
+/// storage items wait before they open the same file or read its
+/// properties, and a failed write or close is logged and reported by the
+/// next opening of that file (see [`settle_pending_closes`]).
 pub struct WriteableStream {
     js_reference: Option<JsObject>,
+    // The storage item of the file, to which a failed close is reported.
+    item: Option<JsObject>,
     // Unfortunately we can't read current length/position, so we need to keep it on this side
     // only.
     length: u64,
     position: u64,
-    error: Rc<RefCell<Option<JsError>>>,
+    requests: Rc<RefCell<Requests>>,
+}
+
+/// The requests of a stream nobody waits for, and the first failure among
+/// them.
+#[derive(Default)]
+struct Requests {
+    pending: usize,
+    error: Option<JsError>,
+    wakers: Vec<Waker>,
 }
 
 fn disposed() -> io::Error {
@@ -35,8 +47,10 @@ fn disposed() -> io::Error {
 }
 
 impl WriteableStream {
-    pub(crate) fn new(js_reference: JsObject, initial_length: u64) -> Self {
-        Self { js_reference: Some(js_reference), length: initial_length, position: 0, error: Rc::default() }
+    /// The stream `js_reference` over the file of the storage item `item`,
+    /// which is `initial_length` bytes long when the stream opens.
+    pub(crate) fn new(js_reference: JsObject, item: Option<JsObject>, initial_length: u64) -> Self {
+        Self { js_reference: Some(js_reference), item, length: initial_length, position: 0, requests: Rc::default() }
     }
 
     fn js_reference(&self) -> io::Result<&JsObject> {
@@ -99,32 +113,66 @@ impl WriteableStream {
         Ok(task)
     }
 
+    /// Resolves once every write, seek and truncation issued through the
+    /// synchronous members has settled, with the first failure among them.
+    pub async fn flush_async(&mut self) -> io::Result<()> {
+        requests_settled(self.requests.clone()).await;
+        self.take_error()
+    }
+
     /// Closes the stream, which commits the written content to the file.
     pub async fn close_async(mut self) -> io::Result<()> {
         let Some(js_reference) = self.js_reference.take() else {
             return Ok(());
         };
-        stream_helper::close_async(&js_reference).await.map(|_| ()).map_err(io::Error::from)?;
-        self.take_error()
+        let close = stream_helper::close_async(&js_reference).await;
+        requests_settled(self.requests.clone()).await;
+        self.take_error()?;
+        close.map(|_| ()).map_err(io::Error::from)
     }
 
-    /// Records the failure of a request nobody waits for, for the next call
-    /// to report.
+    /// Counts a request nobody waits for and records its failure, for the
+    /// next call to report.
     fn observe(&self, task: JsTask) {
-        let error = self.error.clone();
+        self.requests.borrow_mut().pending += 1;
+        let requests = self.requests.clone();
         Dispatcher::ui_thread().to_task_scheduler().start_local(async move {
-            if let Err(failure) = task.await {
-                error.borrow_mut().get_or_insert(failure);
-            }
+            let result = task.await;
+            let wakers = {
+                let mut requests = requests.borrow_mut();
+                if let Err(failure) = result {
+                    requests.error.get_or_insert(failure);
+                }
+                requests.pending -= 1;
+                if requests.pending == 0 {
+                    std::mem::take(&mut requests.wakers)
+                } else {
+                    Vec::new()
+                }
+            };
+            wakers.into_iter().for_each(Waker::wake);
         });
     }
 
     fn take_error(&self) -> io::Result<()> {
-        match self.error.borrow_mut().take() {
+        match self.requests.borrow_mut().error.take() {
             Some(error) => Err(error.into()),
             None => Ok(()),
         }
     }
+}
+
+/// Resolves once no request of `requests` is pending.
+fn requests_settled(requests: Rc<RefCell<Requests>>) -> impl Future<Output = ()> {
+    std::future::poll_fn(move |cx| {
+        let mut requests = requests.borrow_mut();
+        if requests.pending == 0 {
+            Poll::Ready(())
+        } else {
+            requests.wakers.push(cx.waker().clone());
+            Poll::Pending
+        }
+    })
 }
 
 impl Write for WriteableStream {
@@ -136,7 +184,8 @@ impl Write for WriteableStream {
     }
 
     fn flush(&mut self) -> io::Result<()> {
-        // Nothing to flush: the page queues every write. Reports a failed earlier write.
+        // The page queues every write and cannot be waited for here: reports a failure that has
+        // settled. `flush_async` waits.
         self.take_error()
     }
 }
@@ -168,74 +217,126 @@ fn seek_target(position: SeekFrom, current: u64, length: u64) -> io::Result<u64>
 
 impl Drop for WriteableStream {
     fn drop(&mut self) {
-        if let Some(js_reference) = self.js_reference.take() {
-            // Upstream's `Dispose`: close without waiting. The close is counted until it settles.
-            let close = stream_helper::close_async(&js_reference);
-            PENDING_CLOSES.with(|pending| pending.borrow_mut().count += 1);
-            Dispatcher::ui_thread().to_task_scheduler().start_local(async move {
-                let _ = close.await;
-                close_settled();
-            });
-        }
+        let Some(js_reference) = self.js_reference.take() else {
+            return;
+        };
+        // Upstream's `Dispose`: close without waiting. The close stays registered for its file
+        // until it settles, and with its failure until an opening of the file reports it.
+        let close = stream_helper::close_async(&js_reference);
+        let pending = Rc::new(PendingClose { item: self.item.take(), state: RefCell::default() });
+        PENDING_CLOSES.with(|closes| closes.borrow_mut().push(pending.clone()));
+        let requests = self.requests.clone();
+        Dispatcher::ui_thread().to_task_scheduler().start_local(async move {
+            let close = close.await;
+            requests_settled(requests.clone()).await;
+            let error = requests.borrow_mut().error.take().or(close.err());
+            if let Some(error) = &error {
+                if let Some(logger) = Logger::try_get(LogEventLevel::Error, LogArea::BROWSER_PLATFORM) {
+                    logger.log(None, &format!("Writing a file failed: {error}"));
+                }
+            }
+            pending.settle(error);
+        });
     }
 }
 
-/// Closes of dropped streams that have not settled yet.
+/// The close of a dropped stream: settled once the page has committed the
+/// file or failed to.
 #[derive(Default)]
-struct PendingCloses {
-    count: usize,
+struct CloseState {
+    settled: bool,
+    error: Option<JsError>,
     wakers: Vec<Waker>,
 }
 
-thread_local! {
-    static PENDING_CLOSES: RefCell<PendingCloses> = RefCell::new(PendingCloses::default());
+struct PendingClose {
+    item: Option<JsObject>,
+    state: RefCell<CloseState>,
 }
 
-fn close_settled() {
-    let wakers = PENDING_CLOSES.with(|pending| {
-        let mut pending = pending.borrow_mut();
-        pending.count -= 1;
-        if pending.count == 0 {
-            std::mem::take(&mut pending.wakers)
-        } else {
-            Vec::new()
+impl PendingClose {
+    fn settle(self: &Rc<Self>, error: Option<JsError>) {
+        let wakers = {
+            let mut state = self.state.borrow_mut();
+            state.settled = true;
+            state.error = error;
+            std::mem::take(&mut state.wakers)
+        };
+        // A close that succeeded has nothing left to report.
+        if self.state.borrow().error.is_none() {
+            PENDING_CLOSES.with(|closes| closes.borrow_mut().retain(|close| !Rc::ptr_eq(close, self)));
         }
-    });
-    wakers.into_iter().for_each(Waker::wake);
-}
+        wakers.into_iter().for_each(Waker::wake);
+    }
 
-/// Resolves once no stream dropped so far is still closing: a file written
-/// through the synchronous [`Write`] has its content committed then.
-pub(crate) fn closes_settled() -> impl Future<Output = ()> {
-    ClosesSettled
-}
-
-struct ClosesSettled;
-
-impl Future for ClosesSettled {
-    type Output = ();
-
-    fn poll(self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<()> {
-        PENDING_CLOSES.with(|pending| {
-            let mut pending = pending.borrow_mut();
-            if pending.count == 0 {
+    fn settled(self: Rc<Self>) -> impl Future<Output = ()> {
+        std::future::poll_fn(move |cx| {
+            let mut state = self.state.borrow_mut();
+            if state.settled {
                 Poll::Ready(())
             } else {
-                pending.wakers.push(cx.waker().clone());
+                state.wakers.push(cx.waker().clone());
                 Poll::Pending
             }
         })
     }
+
+    /// Takes the failure of the settled close, which is then reported.
+    fn take_error(self: &Rc<Self>) -> Option<JsError> {
+        let error = self.state.borrow_mut().error.take();
+        PENDING_CLOSES.with(|closes| closes.borrow_mut().retain(|close| !Rc::ptr_eq(close, self)));
+        error
+    }
+}
+
+thread_local! {
+    static PENDING_CLOSES: RefCell<Vec<Rc<PendingClose>>> = const { RefCell::new(Vec::new()) };
+}
+
+/// Waits for the closes of the dropped streams over the file of the storage
+/// item `item` (the same entry, whichever item opened it). A file written
+/// through the synchronous [`Write`] has its content committed then.
+///
+/// With `report`, fails with the first failed write or close among them,
+/// which is then reported; without, failures are left for the next
+/// opening.
+pub(crate) async fn settle_pending_closes(item: &JsObject, report: bool) -> io::Result<()> {
+    let closes = PENDING_CLOSES.with(|closes| closes.borrow().clone());
+    let mut first_error = None;
+    for close in closes {
+        let Some(close_item) = &close.item else { continue };
+        if !is_same_entry(item, close_item).await {
+            continue;
+        }
+        close.clone().settled().await;
+        if report {
+            if let Some(error) = close.take_error() {
+                first_error.get_or_insert(error);
+            }
+        }
+    }
+    match first_error {
+        Some(error) => Err(io::Error::other(format!("Writing the file failed: {error}"))),
+        None => Ok(()),
+    }
+}
+
+async fn is_same_entry(item: &JsObject, other: &JsObject) -> bool {
+    if item == other {
+        return true;
+    }
+    storage_helper::is_same_entry(item, other).await.ok().and_then(|same| same.as_bool()).unwrap_or(false)
 }
 
 #[cfg(test)]
 mod tests {
-    // Not from upstream (upstream has no tests of the browser streams): the position arithmetic,
-    // which needs no page.
+    // Not from upstream (upstream has no tests of the browser streams): the parts that need no
+    // page.
     use super::*;
+    use std::task::Context;
 
     #[test]
-    fn closes_settled_waits_for_every_pending_close() {
+    fn a_close_settles_for_its_waiters_and_keeps_only_its_failure() {
         use std::sync::atomic::{AtomicUsize, Ordering};
         use std::sync::Arc;
         use std::task::Wake;
@@ -250,16 +351,31 @@ mod tests {
         let waker = Waker::from(counter.clone());
         let mut context = Context::from_waker(&waker);
 
-        assert_eq!(Pin::new(&mut closes_settled()).poll(&mut context), Poll::Ready(()));
+        let succeeded = Rc::new(PendingClose { item: None, state: RefCell::default() });
+        let failed = Rc::new(PendingClose { item: None, state: RefCell::default() });
+        PENDING_CLOSES.with(|closes| closes.borrow_mut().extend([succeeded.clone(), failed.clone()]));
 
-        PENDING_CLOSES.with(|pending| pending.borrow_mut().count += 2);
-        let mut settled = closes_settled();
-        assert_eq!(Pin::new(&mut settled).poll(&mut context), Poll::Pending);
-        close_settled();
-        assert_eq!(counter.0.load(Ordering::SeqCst), 0);
-        close_settled();
+        let mut waiting = Box::pin(succeeded.clone().settled());
+        assert_eq!(waiting.as_mut().poll(&mut context), Poll::Pending);
+        succeeded.settle(None);
         assert_eq!(counter.0.load(Ordering::SeqCst), 1);
-        assert_eq!(Pin::new(&mut settled).poll(&mut context), Poll::Ready(()));
+        assert_eq!(waiting.as_mut().poll(&mut context), Poll::Ready(()));
+
+        failed.settle(Some(JsError::new("The disk is full")));
+        assert_eq!(PENDING_CLOSES.with(|closes| closes.borrow().len()), 1, "only the failed close is kept");
+        assert_eq!(failed.take_error(), Some(JsError::new("The disk is full")));
+        assert_eq!(PENDING_CLOSES.with(|closes| closes.borrow().len()), 0, "a reported failure is dropped");
+    }
+
+    #[test]
+    fn requests_settled_waits_for_the_pending_requests() {
+        let requests = Rc::new(RefCell::new(Requests { pending: 1, ..Default::default() }));
+        let mut settled = Box::pin(requests_settled(requests.clone()));
+        let waker = Waker::noop();
+        let mut context = Context::from_waker(waker);
+        assert_eq!(settled.as_mut().poll(&mut context), Poll::Pending);
+        requests.borrow_mut().pending = 0;
+        assert_eq!(settled.as_mut().poll(&mut context), Poll::Ready(()));
     }
 
     #[test]

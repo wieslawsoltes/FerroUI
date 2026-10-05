@@ -1,5 +1,5 @@
 use super::blob_readable_stream::BlobReadableStream;
-use super::writeable_stream::{closes_settled, WriteableStream};
+use super::writeable_stream::{settle_pending_closes, WriteableStream};
 use crate::browser_app_builder::BrowserPlatformOptions;
 use crate::interop::promise_helper::JsError;
 use crate::interop::storage_helper::{self, StorageItemProperties};
@@ -347,9 +347,12 @@ impl JsStorageItem {
     fn get_basic_properties_async(&self) -> LocalBoxFuture<ItemProperties> {
         let handle = self.file_handle();
         Box::pin(async move {
-            closes_settled().await;
             let properties = match handle {
-                Some(handle) => storage_helper::get_properties(&handle).await.ok().and_then(non_null),
+                Some(handle) => {
+                    // Failures of earlier writes are left for the next opening of the file.
+                    let _ = settle_pending_closes(&handle, false).await;
+                    storage_helper::get_properties(&handle).await.ok().and_then(non_null)
+                }
                 None => None,
             };
             let properties = properties.map(JsCast::unchecked_into::<StorageItemProperties>);
@@ -516,7 +519,7 @@ impl JsStorageFile {
     /// the stream is returned: the stream of the contract is synchronous.
     pub async fn open_read_stream_async(&self) -> io::Result<BlobReadableStream> {
         let handle = self.base.require_file_handle()?;
-        closes_settled().await;
+        settle_pending_closes(&handle, true).await?;
         let blob = storage_helper::open_read(&handle).await.map_err(denied)?;
         let mut stream = BlobReadableStream::new(blob);
         stream.load_async().await?;
@@ -526,15 +529,12 @@ impl JsStorageFile {
     /// Opens the file for writing, truncated.
     pub async fn open_write_stream_async(&self) -> io::Result<WriteableStream> {
         let handle = self.base.require_file_handle()?;
-        closes_settled().await;
-        let properties = storage_helper::get_properties(&handle).await.map_err(denied)?;
+        settle_pending_closes(&handle, true).await?;
         let stream_writer = storage_helper::open_write(&handle).await.map_err(denied)?;
-        let size = non_null(properties)
-            .and_then(|properties| properties.unchecked_into::<StorageItemProperties>().size())
-            .map(|size| size as i64)
-            .unwrap_or(0);
 
-        Ok(WriteableStream::new(stream_writer, size.max(0) as u64))
+        // Upstream starts from the size the file had, although `openWrite` truncates it
+        // (`keepExistingData: false`), so a seek relative to the end landed past the content.
+        Ok(WriteableStream::new(stream_writer, Some(handle), 0))
     }
 }
 

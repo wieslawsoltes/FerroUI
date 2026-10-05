@@ -187,6 +187,18 @@ export class StorageItem {
         }
     }
 
+    // Whether both items are the same entry of the file system, whichever handle they hold. Not upstream:
+    // the framework waits for the closing streams of a file before it opens the file again.
+    public static async isSameEntry(item: StorageItem, other: StorageItem): Promise<boolean> {
+        if (item === other) {
+            return true;
+        }
+        if (!item.handle || !other.handle) {
+            return false;
+        }
+        return await (item.handle.isSameEntry(other.handle as any) as Promise<boolean>);
+    }
+
     public static async saveBookmark(item: StorageItem): Promise<string | null> {
         // If file was previously bookmarked, just return old one.
         if (item.bookmarkId) {
