@@ -19,18 +19,75 @@ use ferroui_base::{BoxedValue, FerroObject, Ref, StyledElement, TypeInfo};
 
 use crate::{ServiceProviderExtensions, XamlLoadException};
 
-/// The load error of a failure at the position `line`, `position` of the
-/// document, with the message the run-time loader gives a failure of the
-/// node it was evaluating: the message of the load exception of the
-/// compiler (the message followed by `Line <line>, position <position>.`
-/// unless both are 0), then the position in parentheses.
-pub fn at(message: impl Display, line: i32, position: i32) -> XamlLoadException {
-    let message = match (line, position) {
-        (0, 0) => message.to_string(),
+/// The exception a step of generated code failed with: the type name of the
+/// exception the managed original throws there (the name the run-time
+/// loader gives its error as well, `XamlError::type_name` of the loader
+/// crate), its message and the position of the node being built. It is the
+/// inner error of the [`XamlLoadException`] the step returns
+/// ([`at`]).
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct CompiledLoadError {
+    type_name: &'static str,
+    message: String,
+    line_number: i32,
+    line_position: i32,
+}
+
+impl CompiledLoadError {
+    /// The name of the exception type (`ArgumentException`,
+    /// `TargetInvocationException`, ...).
+    pub fn type_name(&self) -> &'static str {
+        self.type_name
+    }
+
+    /// The message, without the position.
+    pub fn message(&self) -> &str {
+        &self.message
+    }
+
+    /// The line of the node that was being built.
+    pub fn line_number(&self) -> i32 {
+        self.line_number
+    }
+
+    /// The position of the node that was being built.
+    pub fn line_position(&self) -> i32 {
+        self.line_position
+    }
+}
+
+impl Display for CompiledLoadError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}: {}", self.type_name, self.message)
+    }
+}
+
+impl std::error::Error for CompiledLoadError {}
+
+/// The load error of a failure, an exception of the type `type_name`, at
+/// the position `line`, `position` of the document, with the message the
+/// run-time loader gives a failure of the node it was evaluating: the
+/// message of the load exception of the compiler (the message followed by
+/// `Line <line>, position <position>.` unless both are 0), then the
+/// position in parentheses. The inner error is a [`CompiledLoadError`]
+/// that carries the type name.
+pub fn at(type_name: &'static str, message: impl Display, line: i32, position: i32) -> XamlLoadException {
+    let message = message.to_string();
+    let positioned = match (line, position) {
+        (0, 0) => message.clone(),
         _ => format!("{message} Line {line}, position {position}."),
     };
-    XamlLoadException::with_message(format!("{message} (line {line} position {position})"))
+    XamlLoadException::with_inner(
+        format!("{positioned} (line {line} position {position})"),
+        CompiledLoadError { type_name, message, line_number: line, line_position: position },
+    )
 }
+
+/// The type name of the exception a member call of generated code that
+/// fails with an error of its own is reported as: the run-time loader
+/// reports the failure of a member it invokes (`EndInit`, a setter) as the
+/// exception that wraps the exception of the member.
+pub const TARGET_INVOCATION_EXCEPTION: &str = "TargetInvocationException";
 
 /// The name scope field of the context of a document
 /// (`FerroXamlIlContextNameScopeField`): the name scope of the parent
@@ -50,8 +107,16 @@ pub fn register_name(
     line: i32,
     position: i32,
 ) -> Result<(), XamlLoadException> {
-    let scope = scope.ok_or_else(|| at("The runtime context has no name scope to register a name in", line, position))?;
-    scope.try_register(name, element).map_err(|error: NameScopeError| at(error, line, position))
+    let scope = scope.ok_or_else(|| {
+        at("NullReferenceException", "The runtime context has no name scope to register a name in", line, position)
+    })?;
+    scope.try_register(name, element).map_err(|error: NameScopeError| {
+        let type_name = match error {
+            NameScopeError::Completed => "InvalidOperationException",
+            NameScopeError::DuplicateName(_) => "ArgumentException",
+        };
+        at(type_name, error, line, position)
+    })
 }
 
 /// The handling of the scope of the root object of a document: when the
@@ -68,7 +133,8 @@ pub fn complete_root_name_scope(
     if let Some(root) = root {
         NameScope::set_name_scope(root, scope.cloned().map(NameScopeRef));
     }
-    let scope = scope.ok_or_else(|| at("The runtime context has no name scope to complete", line, position))?;
+    let scope =
+        scope.ok_or_else(|| at("NullReferenceException", "The runtime context has no name scope to complete", line, position))?;
     scope.complete();
     Ok(())
 }

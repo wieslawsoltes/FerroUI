@@ -23,7 +23,7 @@ pub fn build_border_empty_xaml(
     let border_0 = ::ferroui_controls::Border::new();
     let name_scope = rt::name_scope_of(service_provider.as_ref());
     border_0.begin_init();
-    border_0.try_end_init().map_err(|error| rt::at(error, 1, 2))?;
+    border_0.try_end_init().map_err(|error| rt::at(rt::TARGET_INVOCATION_EXCEPTION, error, 1, 2))?;
     rt::complete_root_name_scope(Some(&border_0), name_scope.as_ref(), 1, 2)?;
     Ok(border_0)
 }
@@ -45,7 +45,7 @@ pub fn build_border_padding_xaml(
     border_0.begin_init();
     // border_padding.xaml(1,2) Padding
     border_0.set_value(::ferroui_controls::Decorator::padding_property(), ::ferroui_base::Thickness::new(1.0_f64, 2.0_f64, 3.0_f64, 4.0_f64));
-    border_0.try_end_init().map_err(|error| rt::at(error, 1, 2))?;
+    border_0.try_end_init().map_err(|error| rt::at(rt::TARGET_INVOCATION_EXCEPTION, error, 1, 2))?;
     rt::complete_root_name_scope(Some(&border_0), name_scope.as_ref(), 1, 2)?;
     Ok(border_0)
 }
@@ -67,7 +67,7 @@ pub fn build_border_padding_uniform_xaml(
     border_0.begin_init();
     // border_padding_uniform.xaml(1,2) Padding
     border_0.set_value(::ferroui_controls::Decorator::padding_property(), ::ferroui_base::Thickness::new(5.0_f64, 5.0_f64, 5.0_f64, 5.0_f64));
-    border_0.try_end_init().map_err(|error| rt::at(error, 1, 2))?;
+    border_0.try_end_init().map_err(|error| rt::at(rt::TARGET_INVOCATION_EXCEPTION, error, 1, 2))?;
     rt::complete_root_name_scope(Some(&border_0), name_scope.as_ref(), 1, 2)?;
     Ok(border_0)
 }
@@ -91,7 +91,7 @@ pub fn build_border_thickness_and_radius_xaml(
     border_0.set_value(::ferroui_controls::Border::border_thickness_property(), ::ferroui_base::Thickness::new(2.0_f64, 2.0_f64, 2.0_f64, 2.0_f64));
     // border_thickness_and_radius.xaml(1,2) CornerRadius
     border_0.set_value(::ferroui_controls::Border::corner_radius_property(), ::ferroui_base::CornerRadius::new(3.0_f64, 4.0_f64, 5.0_f64, 6.0_f64));
-    border_0.try_end_init().map_err(|error| rt::at(error, 1, 2))?;
+    border_0.try_end_init().map_err(|error| rt::at(rt::TARGET_INVOCATION_EXCEPTION, error, 1, 2))?;
     rt::complete_root_name_scope(Some(&border_0), name_scope.as_ref(), 1, 2)?;
     Ok(border_0)
 }
@@ -113,7 +113,7 @@ pub fn build_border_margin_xaml(
     border_0.begin_init();
     // border_margin.xaml(1,2) Margin
     border_0.set_value(::ferroui_base::layout::Layoutable::margin_property(), ::ferroui_base::Thickness::new(10.0_f64, 20.0_f64, 10.0_f64, 20.0_f64));
-    border_0.try_end_init().map_err(|error| rt::at(error, 1, 2))?;
+    border_0.try_end_init().map_err(|error| rt::at(rt::TARGET_INVOCATION_EXCEPTION, error, 1, 2))?;
     rt::complete_root_name_scope(Some(&border_0), name_scope.as_ref(), 1, 2)?;
     Ok(border_0)
 }
@@ -137,7 +137,7 @@ pub fn build_border_size_xaml(
     border_0.set_value(::ferroui_base::layout::Layoutable::width_property(), 100.0_f64);
     // border_size.xaml(1,2) Height
     border_0.set_value(::ferroui_base::layout::Layoutable::height_property(), 50.5_f64);
-    border_0.try_end_init().map_err(|error| rt::at(error, 1, 2))?;
+    border_0.try_end_init().map_err(|error| rt::at(rt::TARGET_INVOCATION_EXCEPTION, error, 1, 2))?;
     rt::complete_root_name_scope(Some(&border_0), name_scope.as_ref(), 1, 2)?;
     Ok(border_0)
 }
@@ -159,7 +159,7 @@ pub fn build_border_min_width_xaml(
     border_0.begin_init();
     // border_min_width.xaml(1,2) MinWidth
     border_0.set_value(::ferroui_base::layout::Layoutable::min_width_property(), 12.0_f64);
-    border_0.try_end_init().map_err(|error| rt::at(error, 1, 2))?;
+    border_0.try_end_init().map_err(|error| rt::at(rt::TARGET_INVOCATION_EXCEPTION, error, 1, 2))?;
     rt::complete_root_name_scope(Some(&border_0), name_scope.as_ref(), 1, 2)?;
     Ok(border_0)
 }
@@ -181,7 +181,7 @@ pub fn build_border_opacity_xaml(
     border_0.begin_init();
     // border_opacity.xaml(1,2) Opacity
     border_0.set_value(::ferroui_base::Visual::opacity_property(), 0.25_f64);
-    border_0.try_end_init().map_err(|error| rt::at(error, 1, 2))?;
+    border_0.try_end_init().map_err(|error| rt::at(rt::TARGET_INVOCATION_EXCEPTION, error, 1, 2))?;
     rt::complete_root_name_scope(Some(&border_0), name_scope.as_ref(), 1, 2)?;
     Ok(border_0)
 }
@@ -203,7 +203,7 @@ pub fn build_border_is_visible_xaml(
     border_0.begin_init();
     // border_is_visible.xaml(1,2) IsVisible
     border_0.set_value(::ferroui_base::Visual::is_visible_property(), false);
-    border_0.try_end_init().map_err(|error| rt::at(error, 1, 2))?;
+    border_0.try_end_init().map_err(|error| rt::at(rt::TARGET_INVOCATION_EXCEPTION, error, 1, 2))?;
     rt::complete_root_name_scope(Some(&border_0), name_scope.as_ref(), 1, 2)?;
     Ok(border_0)
 }
@@ -225,7 +225,7 @@ pub fn build_border_clip_to_bounds_xaml(
     border_0.begin_init();
     // border_clip_to_bounds.xaml(1,2) ClipToBounds
     border_0.set_value(::ferroui_base::Visual::clip_to_bounds_property(), true);
-    border_0.try_end_init().map_err(|error| rt::at(error, 1, 2))?;
+    border_0.try_end_init().map_err(|error| rt::at(rt::TARGET_INVOCATION_EXCEPTION, error, 1, 2))?;
     rt::complete_root_name_scope(Some(&border_0), name_scope.as_ref(), 1, 2)?;
     Ok(border_0)
 }
@@ -247,7 +247,7 @@ pub fn build_border_z_index_xaml(
     border_0.begin_init();
     // border_z_index.xaml(1,2) ZIndex
     border_0.set_value(::ferroui_base::Visual::z_index_property(), 3_i32);
-    border_0.try_end_init().map_err(|error| rt::at(error, 1, 2))?;
+    border_0.try_end_init().map_err(|error| rt::at(rt::TARGET_INVOCATION_EXCEPTION, error, 1, 2))?;
     rt::complete_root_name_scope(Some(&border_0), name_scope.as_ref(), 1, 2)?;
     Ok(border_0)
 }
@@ -269,7 +269,7 @@ pub fn build_border_horizontal_alignment_xaml(
     border_0.begin_init();
     // border_horizontal_alignment.xaml(1,2) HorizontalAlignment
     border_0.set_value(::ferroui_base::layout::Layoutable::horizontal_alignment_property(), ::ferroui_base::layout::HorizontalAlignment::Center);
-    border_0.try_end_init().map_err(|error| rt::at(error, 1, 2))?;
+    border_0.try_end_init().map_err(|error| rt::at(rt::TARGET_INVOCATION_EXCEPTION, error, 1, 2))?;
     rt::complete_root_name_scope(Some(&border_0), name_scope.as_ref(), 1, 2)?;
     Ok(border_0)
 }
@@ -291,7 +291,7 @@ pub fn build_border_vertical_alignment_xaml(
     border_0.begin_init();
     // border_vertical_alignment.xaml(1,2) VerticalAlignment
     border_0.set_value(::ferroui_base::layout::Layoutable::vertical_alignment_property(), ::ferroui_base::layout::VerticalAlignment::Bottom);
-    border_0.try_end_init().map_err(|error| rt::at(error, 1, 2))?;
+    border_0.try_end_init().map_err(|error| rt::at(rt::TARGET_INVOCATION_EXCEPTION, error, 1, 2))?;
     rt::complete_root_name_scope(Some(&border_0), name_scope.as_ref(), 1, 2)?;
     Ok(border_0)
 }
@@ -313,7 +313,7 @@ pub fn build_border_layout_rounding_xaml(
     border_0.begin_init();
     // border_layout_rounding.xaml(1,2) UseLayoutRounding
     border_0.set_value(::ferroui_base::layout::Layoutable::use_layout_rounding_property(), false);
-    border_0.try_end_init().map_err(|error| rt::at(error, 1, 2))?;
+    border_0.try_end_init().map_err(|error| rt::at(rt::TARGET_INVOCATION_EXCEPTION, error, 1, 2))?;
     rt::complete_root_name_scope(Some(&border_0), name_scope.as_ref(), 1, 2)?;
     Ok(border_0)
 }
@@ -339,7 +339,7 @@ pub fn build_border_input_flags_xaml(
     border_0.set_value(::ferroui_base::input::InputElement::focusable_property(), true);
     // border_input_flags.xaml(1,2) IsHitTestVisible
     border_0.set_value(::ferroui_base::input::InputElement::is_hit_test_visible_property(), false);
-    border_0.try_end_init().map_err(|error| rt::at(error, 1, 2))?;
+    border_0.try_end_init().map_err(|error| rt::at(rt::TARGET_INVOCATION_EXCEPTION, error, 1, 2))?;
     rt::complete_root_name_scope(Some(&border_0), name_scope.as_ref(), 1, 2)?;
     Ok(border_0)
 }
@@ -364,8 +364,8 @@ pub fn build_border_child_xaml(
     let text_block_0 = ::ferroui_controls::TextBlock::new();
     text_block_0.begin_init();
     border_0.set_value(::ferroui_controls::Decorator::child_property(), Some(text_block_0.clone().upcast::<::ferroui_controls::Control>()));
-    text_block_0.try_end_init().map_err(|error| rt::at(error, 1, 100))?;
-    border_0.try_end_init().map_err(|error| rt::at(error, 1, 2))?;
+    text_block_0.try_end_init().map_err(|error| rt::at(rt::TARGET_INVOCATION_EXCEPTION, error, 1, 100))?;
+    border_0.try_end_init().map_err(|error| rt::at(rt::TARGET_INVOCATION_EXCEPTION, error, 1, 2))?;
     rt::complete_root_name_scope(Some(&border_0), name_scope.as_ref(), 1, 2)?;
     Ok(border_0)
 }
@@ -394,8 +394,8 @@ pub fn build_border_child_with_text_xaml(
     border_0.set_value(::ferroui_controls::Decorator::child_property(), Some(text_block_0.clone().upcast::<::ferroui_controls::Control>()));
     // border_child_with_text.xaml(1,122) Text
     text_block_0.set_value(::ferroui_controls::TextBlock::text_property(), Some(String::from("Hello")));
-    text_block_0.try_end_init().map_err(|error| rt::at(error, 1, 112))?;
-    border_0.try_end_init().map_err(|error| rt::at(error, 1, 2))?;
+    text_block_0.try_end_init().map_err(|error| rt::at(rt::TARGET_INVOCATION_EXCEPTION, error, 1, 112))?;
+    border_0.try_end_init().map_err(|error| rt::at(rt::TARGET_INVOCATION_EXCEPTION, error, 1, 2))?;
     rt::complete_root_name_scope(Some(&border_0), name_scope.as_ref(), 1, 2)?;
     Ok(border_0)
 }
@@ -436,10 +436,10 @@ pub fn build_border_nested_xaml(
     border_2.set_value(::ferroui_controls::Decorator::child_property(), Some(text_block_0.clone().upcast::<::ferroui_controls::Control>()));
     // border_nested.xaml(1,151) Text
     text_block_0.set_value(::ferroui_controls::TextBlock::text_property(), Some(String::from("Deep")));
-    text_block_0.try_end_init().map_err(|error| rt::at(error, 1, 141))?;
-    border_2.try_end_init().map_err(|error| rt::at(error, 1, 119))?;
-    border_1.try_end_init().map_err(|error| rt::at(error, 1, 100))?;
-    border_0.try_end_init().map_err(|error| rt::at(error, 1, 2))?;
+    text_block_0.try_end_init().map_err(|error| rt::at(rt::TARGET_INVOCATION_EXCEPTION, error, 1, 141))?;
+    border_2.try_end_init().map_err(|error| rt::at(rt::TARGET_INVOCATION_EXCEPTION, error, 1, 119))?;
+    border_1.try_end_init().map_err(|error| rt::at(rt::TARGET_INVOCATION_EXCEPTION, error, 1, 100))?;
+    border_0.try_end_init().map_err(|error| rt::at(rt::TARGET_INVOCATION_EXCEPTION, error, 1, 2))?;
     rt::complete_root_name_scope(Some(&border_0), name_scope.as_ref(), 1, 2)?;
     Ok(border_0)
 }
@@ -461,7 +461,7 @@ pub fn build_text_block_text_xaml(
     text_block_0.begin_init();
     // text_block_text.xaml(1,102) Text
     text_block_0.set_value(::ferroui_controls::TextBlock::text_property(), Some(String::from("Hi \"there\" \\ you")));
-    text_block_0.try_end_init().map_err(|error| rt::at(error, 1, 2))?;
+    text_block_0.try_end_init().map_err(|error| rt::at(rt::TARGET_INVOCATION_EXCEPTION, error, 1, 2))?;
     rt::complete_root_name_scope(Some(&text_block_0), name_scope.as_ref(), 1, 2)?;
     Ok(text_block_0)
 }
@@ -483,7 +483,7 @@ pub fn build_text_block_empty_text_xaml(
     text_block_0.begin_init();
     // text_block_empty_text.xaml(1,102) Text
     text_block_0.set_value(::ferroui_controls::TextBlock::text_property(), Some(String::from("")));
-    text_block_0.try_end_init().map_err(|error| rt::at(error, 1, 2))?;
+    text_block_0.try_end_init().map_err(|error| rt::at(rt::TARGET_INVOCATION_EXCEPTION, error, 1, 2))?;
     rt::complete_root_name_scope(Some(&text_block_0), name_scope.as_ref(), 1, 2)?;
     Ok(text_block_0)
 }
@@ -505,7 +505,7 @@ pub fn build_text_block_font_size_xaml(
     text_block_0.begin_init();
     // text_block_font_size.xaml(1,2) FontSize
     text_block_0.set_value(::ferroui_controls::TextBlock::font_size_property(), 20.0_f64);
-    text_block_0.try_end_init().map_err(|error| rt::at(error, 1, 2))?;
+    text_block_0.try_end_init().map_err(|error| rt::at(rt::TARGET_INVOCATION_EXCEPTION, error, 1, 2))?;
     rt::complete_root_name_scope(Some(&text_block_0), name_scope.as_ref(), 1, 2)?;
     Ok(text_block_0)
 }
@@ -529,7 +529,7 @@ pub fn build_stack_panel_properties_xaml(
     stack_panel_0.set_value(::ferroui_controls::StackPanel::orientation_property(), ::ferroui_base::layout::Orientation::Horizontal);
     // stack_panel_properties.xaml(1,2) Spacing
     stack_panel_0.set_value(::ferroui_controls::StackPanel::spacing_property(), 4.0_f64);
-    stack_panel_0.try_end_init().map_err(|error| rt::at(error, 1, 2))?;
+    stack_panel_0.try_end_init().map_err(|error| rt::at(rt::TARGET_INVOCATION_EXCEPTION, error, 1, 2))?;
     rt::complete_root_name_scope(Some(&stack_panel_0), name_scope.as_ref(), 1, 2)?;
     Ok(stack_panel_0)
 }
@@ -551,7 +551,7 @@ pub fn build_dock_panel_last_child_fill_xaml(
     dock_panel_0.begin_init();
     // dock_panel_last_child_fill.xaml(1,2) LastChildFill
     dock_panel_0.set_value(::ferroui_controls::DockPanel::last_child_fill_property(), false);
-    dock_panel_0.try_end_init().map_err(|error| rt::at(error, 1, 2))?;
+    dock_panel_0.try_end_init().map_err(|error| rt::at(rt::TARGET_INVOCATION_EXCEPTION, error, 1, 2))?;
     rt::complete_root_name_scope(Some(&dock_panel_0), name_scope.as_ref(), 1, 2)?;
     Ok(dock_panel_0)
 }
@@ -573,7 +573,7 @@ pub fn build_button_content_text_xaml(
     button_0.begin_init();
     // button_content_text.xaml(1,99) Content
     button_0.set_value(::ferroui_controls::ContentControl::content_property(), rt::to_object(String::from("Click")));
-    button_0.try_end_init().map_err(|error| rt::at(error, 1, 2))?;
+    button_0.try_end_init().map_err(|error| rt::at(rt::TARGET_INVOCATION_EXCEPTION, error, 1, 2))?;
     rt::complete_root_name_scope(Some(&button_0), name_scope.as_ref(), 1, 2)?;
     Ok(button_0)
 }
@@ -600,8 +600,8 @@ pub fn build_user_control_content_element_xaml(
     user_control_0.set_value(::ferroui_controls::ContentControl::content_property(), rt::to_object(border_0.clone()));
     // user_control_content_element.xaml(1,105) Width
     border_0.set_value(::ferroui_base::layout::Layoutable::width_property(), 8.0_f64);
-    border_0.try_end_init().map_err(|error| rt::at(error, 1, 105))?;
-    user_control_0.try_end_init().map_err(|error| rt::at(error, 1, 2))?;
+    border_0.try_end_init().map_err(|error| rt::at(rt::TARGET_INVOCATION_EXCEPTION, error, 1, 105))?;
+    user_control_0.try_end_init().map_err(|error| rt::at(rt::TARGET_INVOCATION_EXCEPTION, error, 1, 2))?;
     rt::complete_root_name_scope(Some(&user_control_0), name_scope.as_ref(), 1, 2)?;
     Ok(user_control_0)
 }
@@ -623,7 +623,7 @@ pub fn build_control_tag_xaml(
     border_0.begin_init();
     // control_tag.xaml(1,99) Tag
     border_0.set_value(::ferroui_controls::Control::tag_property(), rt::to_object(String::from("marker")));
-    border_0.try_end_init().map_err(|error| rt::at(error, 1, 2))?;
+    border_0.try_end_init().map_err(|error| rt::at(rt::TARGET_INVOCATION_EXCEPTION, error, 1, 2))?;
     rt::complete_root_name_scope(Some(&border_0), name_scope.as_ref(), 1, 2)?;
     Ok(border_0)
 }
@@ -652,8 +652,8 @@ pub fn build_attached_grid_position_xaml(
     text_block_0.set_value(::ferroui_controls::Grid::row_property(), 1_i32);
     // attached_grid_position.xaml(1,100) Column
     text_block_0.set_value(::ferroui_controls::Grid::column_property(), 2_i32);
-    text_block_0.try_end_init().map_err(|error| rt::at(error, 1, 100))?;
-    border_0.try_end_init().map_err(|error| rt::at(error, 1, 2))?;
+    text_block_0.try_end_init().map_err(|error| rt::at(rt::TARGET_INVOCATION_EXCEPTION, error, 1, 100))?;
+    border_0.try_end_init().map_err(|error| rt::at(rt::TARGET_INVOCATION_EXCEPTION, error, 1, 2))?;
     rt::complete_root_name_scope(Some(&border_0), name_scope.as_ref(), 1, 2)?;
     Ok(border_0)
 }
@@ -680,8 +680,8 @@ pub fn build_attached_dock_xaml(
     border_0.set_value(::ferroui_controls::Decorator::child_property(), Some(text_block_0.clone().upcast::<::ferroui_controls::Control>()));
     // attached_dock.xaml(1,100) Dock
     text_block_0.set_value(::ferroui_controls::DockPanel::dock_property(), ::ferroui_controls::Dock::Right);
-    text_block_0.try_end_init().map_err(|error| rt::at(error, 1, 100))?;
-    border_0.try_end_init().map_err(|error| rt::at(error, 1, 2))?;
+    text_block_0.try_end_init().map_err(|error| rt::at(rt::TARGET_INVOCATION_EXCEPTION, error, 1, 100))?;
+    border_0.try_end_init().map_err(|error| rt::at(rt::TARGET_INVOCATION_EXCEPTION, error, 1, 2))?;
     rt::complete_root_name_scope(Some(&border_0), name_scope.as_ref(), 1, 2)?;
     Ok(border_0)
 }
@@ -703,7 +703,7 @@ pub fn build_x_null_child_xaml(
     border_0.begin_init();
     // x_null_child.xaml(1,99) Child
     border_0.set_value(::ferroui_controls::Decorator::child_property(), None);
-    border_0.try_end_init().map_err(|error| rt::at(error, 1, 2))?;
+    border_0.try_end_init().map_err(|error| rt::at(rt::TARGET_INVOCATION_EXCEPTION, error, 1, 2))?;
     rt::complete_root_name_scope(Some(&border_0), name_scope.as_ref(), 1, 2)?;
     Ok(border_0)
 }
@@ -725,7 +725,7 @@ pub fn build_x_static_enum_xaml(
     border_0.begin_init();
     // x_static_enum.xaml(1,99) HorizontalAlignment
     border_0.set_value(::ferroui_base::layout::Layoutable::horizontal_alignment_property(), ::ferroui_base::layout::HorizontalAlignment::Right);
-    border_0.try_end_init().map_err(|error| rt::at(error, 1, 2))?;
+    border_0.try_end_init().map_err(|error| rt::at(rt::TARGET_INVOCATION_EXCEPTION, error, 1, 2))?;
     rt::complete_root_name_scope(Some(&border_0), name_scope.as_ref(), 1, 2)?;
     Ok(border_0)
 }
@@ -770,8 +770,8 @@ pub fn build_border_many_properties_xaml(
     text_block_0.set_value(::ferroui_controls::TextBlock::text_property(), Some(String::from("All")));
     // border_many_properties.xaml(1,231) IsVisible
     text_block_0.set_value(::ferroui_base::Visual::is_visible_property(), true);
-    text_block_0.try_end_init().map_err(|error| rt::at(error, 1, 231))?;
-    border_0.try_end_init().map_err(|error| rt::at(error, 1, 2))?;
+    text_block_0.try_end_init().map_err(|error| rt::at(rt::TARGET_INVOCATION_EXCEPTION, error, 1, 231))?;
+    border_0.try_end_init().map_err(|error| rt::at(rt::TARGET_INVOCATION_EXCEPTION, error, 1, 2))?;
     rt::complete_root_name_scope(Some(&border_0), name_scope.as_ref(), 1, 2)?;
     Ok(border_0)
 }
@@ -794,7 +794,7 @@ pub fn build_named_element_xaml(
     // named_element.xaml(1,99) Name
     border_0.set_direct_value(::ferroui_base::StyledElement::name_property(), Some(String::from("root")));
     rt::register_name(name_scope.as_ref(), "root", border_0.clone().upcast::<::ferroui_base::FerroObject>(), 1, 99)?;
-    border_0.try_end_init().map_err(|error| rt::at(error, 1, 2))?;
+    border_0.try_end_init().map_err(|error| rt::at(rt::TARGET_INVOCATION_EXCEPTION, error, 1, 2))?;
     rt::complete_root_name_scope(Some(&border_0), name_scope.as_ref(), 1, 2)?;
     Ok(border_0)
 }
@@ -822,8 +822,8 @@ pub fn build_name_property_xaml(
     // name_property.xaml(1,110) Name
     text_block_0.set_direct_value(::ferroui_base::StyledElement::name_property(), Some(String::from("inner")));
     rt::register_name(name_scope.as_ref(), "inner", text_block_0.clone().upcast::<::ferroui_base::FerroObject>(), 1, 110)?;
-    text_block_0.try_end_init().map_err(|error| rt::at(error, 1, 100))?;
-    border_0.try_end_init().map_err(|error| rt::at(error, 1, 2))?;
+    text_block_0.try_end_init().map_err(|error| rt::at(rt::TARGET_INVOCATION_EXCEPTION, error, 1, 100))?;
+    border_0.try_end_init().map_err(|error| rt::at(rt::TARGET_INVOCATION_EXCEPTION, error, 1, 2))?;
     rt::complete_root_name_scope(Some(&border_0), name_scope.as_ref(), 1, 2)?;
     Ok(border_0)
 }
@@ -845,7 +845,7 @@ pub fn build_text_block_unicode_text_xaml(
     text_block_0.begin_init();
     // text_block_unicode_text.xaml(1,102) Text
     text_block_0.set_value(::ferroui_controls::TextBlock::text_property(), Some(String::from("caf\u{e9} \u{1f600} tab\tend")));
-    text_block_0.try_end_init().map_err(|error| rt::at(error, 1, 2))?;
+    text_block_0.try_end_init().map_err(|error| rt::at(rt::TARGET_INVOCATION_EXCEPTION, error, 1, 2))?;
     rt::complete_root_name_scope(Some(&text_block_0), name_scope.as_ref(), 1, 2)?;
     Ok(text_block_0)
 }
@@ -867,7 +867,7 @@ pub fn build_text_block_multiline_text_xaml(
     text_block_0.begin_init();
     // text_block_multiline_text.xaml(1,102) Text
     text_block_0.set_value(::ferroui_controls::TextBlock::text_property(), Some(String::from("first\nsecond")));
-    text_block_0.try_end_init().map_err(|error| rt::at(error, 1, 2))?;
+    text_block_0.try_end_init().map_err(|error| rt::at(rt::TARGET_INVOCATION_EXCEPTION, error, 1, 2))?;
     rt::complete_root_name_scope(Some(&text_block_0), name_scope.as_ref(), 1, 2)?;
     Ok(text_block_0)
 }
@@ -891,7 +891,7 @@ pub fn build_border_exponent_numbers_xaml(
     border_0.set_value(::ferroui_base::Visual::opacity_property(), 0.001_f64);
     // border_exponent_numbers.xaml(1,2) Width
     border_0.set_value(::ferroui_base::layout::Layoutable::width_property(), 150.0_f64);
-    border_0.try_end_init().map_err(|error| rt::at(error, 1, 2))?;
+    border_0.try_end_init().map_err(|error| rt::at(rt::TARGET_INVOCATION_EXCEPTION, error, 1, 2))?;
     rt::complete_root_name_scope(Some(&border_0), name_scope.as_ref(), 1, 2)?;
     Ok(border_0)
 }
@@ -913,7 +913,7 @@ pub fn build_border_negative_margin_xaml(
     border_0.begin_init();
     // border_negative_margin.xaml(1,2) Margin
     border_0.set_value(::ferroui_base::layout::Layoutable::margin_property(), ::ferroui_base::Thickness::new(-4.0_f64, 0.0_f64, -2.5_f64, 1.0_f64));
-    border_0.try_end_init().map_err(|error| rt::at(error, 1, 2))?;
+    border_0.try_end_init().map_err(|error| rt::at(rt::TARGET_INVOCATION_EXCEPTION, error, 1, 2))?;
     rt::complete_root_name_scope(Some(&border_0), name_scope.as_ref(), 1, 2)?;
     Ok(border_0)
 }
@@ -939,7 +939,7 @@ pub fn build_border_auto_size_xaml(
     border_0.set_value(::ferroui_base::layout::Layoutable::max_width_property(), ::core::primitive::f64::INFINITY);
     // border_auto_size.xaml(1,2) MinHeight
     border_0.set_value(::ferroui_base::layout::Layoutable::min_height_property(), 0.0_f64);
-    border_0.try_end_init().map_err(|error| rt::at(error, 1, 2))?;
+    border_0.try_end_init().map_err(|error| rt::at(rt::TARGET_INVOCATION_EXCEPTION, error, 1, 2))?;
     rt::complete_root_name_scope(Some(&border_0), name_scope.as_ref(), 1, 2)?;
     Ok(border_0)
 }
@@ -963,7 +963,7 @@ pub fn build_content_control_alignment_xaml(
     content_control_0.set_value(::ferroui_controls::ContentControl::horizontal_content_alignment_property(), ::ferroui_base::layout::HorizontalAlignment::Stretch);
     // content_control_alignment.xaml(1,2) VerticalContentAlignment
     content_control_0.set_value(::ferroui_controls::ContentControl::vertical_content_alignment_property(), ::ferroui_base::layout::VerticalAlignment::Center);
-    content_control_0.try_end_init().map_err(|error| rt::at(error, 1, 2))?;
+    content_control_0.try_end_init().map_err(|error| rt::at(rt::TARGET_INVOCATION_EXCEPTION, error, 1, 2))?;
     rt::complete_root_name_scope(Some(&content_control_0), name_scope.as_ref(), 1, 2)?;
     Ok(content_control_0)
 }
@@ -990,8 +990,8 @@ pub fn build_content_control_element_xaml(
     content_control_0.set_value(::ferroui_controls::ContentControl::content_property(), rt::to_object(border_0.clone()));
     // content_control_element.xaml(1,108) Padding
     border_0.set_value(::ferroui_controls::Decorator::padding_property(), ::ferroui_base::Thickness::new(2.0_f64, 2.0_f64, 2.0_f64, 2.0_f64));
-    border_0.try_end_init().map_err(|error| rt::at(error, 1, 108))?;
-    content_control_0.try_end_init().map_err(|error| rt::at(error, 1, 2))?;
+    border_0.try_end_init().map_err(|error| rt::at(rt::TARGET_INVOCATION_EXCEPTION, error, 1, 108))?;
+    content_control_0.try_end_init().map_err(|error| rt::at(rt::TARGET_INVOCATION_EXCEPTION, error, 1, 2))?;
     rt::complete_root_name_scope(Some(&content_control_0), name_scope.as_ref(), 1, 2)?;
     Ok(content_control_0)
 }
@@ -1018,8 +1018,8 @@ pub fn build_button_content_element_xaml(
     button_0.set_value(::ferroui_controls::ContentControl::content_property(), rt::to_object(text_block_0.clone()));
     // button_content_element.xaml(1,110) Text
     text_block_0.set_value(::ferroui_controls::TextBlock::text_property(), Some(String::from("Inner")));
-    text_block_0.try_end_init().map_err(|error| rt::at(error, 1, 100))?;
-    button_0.try_end_init().map_err(|error| rt::at(error, 1, 2))?;
+    text_block_0.try_end_init().map_err(|error| rt::at(rt::TARGET_INVOCATION_EXCEPTION, error, 1, 100))?;
+    button_0.try_end_init().map_err(|error| rt::at(rt::TARGET_INVOCATION_EXCEPTION, error, 1, 2))?;
     rt::complete_root_name_scope(Some(&button_0), name_scope.as_ref(), 1, 2)?;
     Ok(button_0)
 }
@@ -1046,8 +1046,8 @@ pub fn build_button_content_property_element_xaml(
     button_0.set_value(::ferroui_controls::ContentControl::content_property(), rt::to_object(border_0.clone()));
     // button_content_property_element.xaml(1,116) Width
     border_0.set_value(::ferroui_base::layout::Layoutable::width_property(), 3.0_f64);
-    border_0.try_end_init().map_err(|error| rt::at(error, 1, 116))?;
-    button_0.try_end_init().map_err(|error| rt::at(error, 1, 2))?;
+    border_0.try_end_init().map_err(|error| rt::at(rt::TARGET_INVOCATION_EXCEPTION, error, 1, 116))?;
+    button_0.try_end_init().map_err(|error| rt::at(rt::TARGET_INVOCATION_EXCEPTION, error, 1, 2))?;
     rt::complete_root_name_scope(Some(&button_0), name_scope.as_ref(), 1, 2)?;
     Ok(button_0)
 }
@@ -1071,7 +1071,7 @@ pub fn build_content_tag_null_xaml(
     content_control_0.set_value(::ferroui_controls::Control::tag_property(), None);
     // content_tag_null.xaml(1,122) Content
     content_control_0.set_value(::ferroui_controls::ContentControl::content_property(), None);
-    content_control_0.try_end_init().map_err(|error| rt::at(error, 1, 2))?;
+    content_control_0.try_end_init().map_err(|error| rt::at(rt::TARGET_INVOCATION_EXCEPTION, error, 1, 2))?;
     rt::complete_root_name_scope(Some(&content_control_0), name_scope.as_ref(), 1, 2)?;
     Ok(content_control_0)
 }
@@ -1093,7 +1093,7 @@ pub fn build_content_x_static_enum_xaml(
     content_control_0.begin_init();
     // content_x_static_enum.xaml(1,107) Content
     content_control_0.set_value(::ferroui_controls::ContentControl::content_property(), rt::to_object(::ferroui_controls::Dock::Bottom));
-    content_control_0.try_end_init().map_err(|error| rt::at(error, 1, 2))?;
+    content_control_0.try_end_init().map_err(|error| rt::at(rt::TARGET_INVOCATION_EXCEPTION, error, 1, 2))?;
     rt::complete_root_name_scope(Some(&content_control_0), name_scope.as_ref(), 1, 2)?;
     Ok(content_control_0)
 }
@@ -1120,8 +1120,8 @@ pub fn build_attached_dock_x_static_xaml(
     border_0.set_value(::ferroui_controls::Decorator::child_property(), Some(text_block_0.clone().upcast::<::ferroui_controls::Control>()));
     // attached_dock_x_static.xaml(1,110) Dock
     text_block_0.set_value(::ferroui_controls::DockPanel::dock_property(), ::ferroui_controls::Dock::Left);
-    text_block_0.try_end_init().map_err(|error| rt::at(error, 1, 100))?;
-    border_0.try_end_init().map_err(|error| rt::at(error, 1, 2))?;
+    text_block_0.try_end_init().map_err(|error| rt::at(rt::TARGET_INVOCATION_EXCEPTION, error, 1, 100))?;
+    border_0.try_end_init().map_err(|error| rt::at(rt::TARGET_INVOCATION_EXCEPTION, error, 1, 2))?;
     rt::complete_root_name_scope(Some(&border_0), name_scope.as_ref(), 1, 2)?;
     Ok(border_0)
 }
@@ -1152,8 +1152,8 @@ pub fn build_attached_grid_spans_xaml(
     border_1.set_value(::ferroui_controls::Grid::column_span_property(), 3_i32);
     // attached_grid_spans.xaml(1,100) IsSharedSizeScope
     border_1.set_value(::ferroui_controls::Grid::is_shared_size_scope_property(), true);
-    border_1.try_end_init().map_err(|error| rt::at(error, 1, 100))?;
-    border_0.try_end_init().map_err(|error| rt::at(error, 1, 2))?;
+    border_1.try_end_init().map_err(|error| rt::at(rt::TARGET_INVOCATION_EXCEPTION, error, 1, 100))?;
+    border_0.try_end_init().map_err(|error| rt::at(rt::TARGET_INVOCATION_EXCEPTION, error, 1, 2))?;
     rt::complete_root_name_scope(Some(&border_0), name_scope.as_ref(), 1, 2)?;
     Ok(border_0)
 }
@@ -1194,9 +1194,9 @@ pub fn build_named_nested_elements_xaml(
     rt::register_name(name_scope.as_ref(), "inner", text_block_0.clone().upcast::<::ferroui_base::FerroObject>(), 1, 147)?;
     // named_nested_elements.xaml(1,162) Text
     text_block_0.set_value(::ferroui_controls::TextBlock::text_property(), Some(String::from("x")));
-    text_block_0.try_end_init().map_err(|error| rt::at(error, 1, 137))?;
-    border_1.try_end_init().map_err(|error| rt::at(error, 1, 115))?;
-    border_0.try_end_init().map_err(|error| rt::at(error, 1, 2))?;
+    text_block_0.try_end_init().map_err(|error| rt::at(rt::TARGET_INVOCATION_EXCEPTION, error, 1, 137))?;
+    border_1.try_end_init().map_err(|error| rt::at(rt::TARGET_INVOCATION_EXCEPTION, error, 1, 115))?;
+    border_0.try_end_init().map_err(|error| rt::at(rt::TARGET_INVOCATION_EXCEPTION, error, 1, 2))?;
     rt::complete_root_name_scope(Some(&border_0), name_scope.as_ref(), 1, 2)?;
     Ok(border_0)
 }
@@ -1227,8 +1227,8 @@ pub fn build_named_content_xaml(
     // named_content.xaml(1,124) Name
     border_0.set_direct_value(::ferroui_base::StyledElement::name_property(), Some(String::from("content")));
     rt::register_name(name_scope.as_ref(), "content", border_0.clone().upcast::<::ferroui_base::FerroObject>(), 1, 124)?;
-    border_0.try_end_init().map_err(|error| rt::at(error, 1, 117))?;
-    user_control_0.try_end_init().map_err(|error| rt::at(error, 1, 2))?;
+    border_0.try_end_init().map_err(|error| rt::at(rt::TARGET_INVOCATION_EXCEPTION, error, 1, 117))?;
+    user_control_0.try_end_init().map_err(|error| rt::at(rt::TARGET_INVOCATION_EXCEPTION, error, 1, 2))?;
     rt::complete_root_name_scope(Some(&user_control_0), name_scope.as_ref(), 1, 2)?;
     Ok(user_control_0)
 }
@@ -1259,8 +1259,8 @@ pub fn build_duplicate_name_xaml(
     // duplicate_name.xaml(1,119) Name
     border_1.set_direct_value(::ferroui_base::StyledElement::name_property(), Some(String::from("same")));
     rt::register_name(name_scope.as_ref(), "same", border_1.clone().upcast::<::ferroui_base::FerroObject>(), 1, 119)?;
-    border_1.try_end_init().map_err(|error| rt::at(error, 1, 112))?;
-    border_0.try_end_init().map_err(|error| rt::at(error, 1, 2))?;
+    border_1.try_end_init().map_err(|error| rt::at(rt::TARGET_INVOCATION_EXCEPTION, error, 1, 112))?;
+    border_0.try_end_init().map_err(|error| rt::at(rt::TARGET_INVOCATION_EXCEPTION, error, 1, 2))?;
     rt::complete_root_name_scope(Some(&border_0), name_scope.as_ref(), 1, 2)?;
     Ok(border_0)
 }
@@ -1293,8 +1293,8 @@ pub fn build_name_and_x_name_xaml(
     rt::register_name(name_scope.as_ref(), "b", text_block_0.clone().upcast::<::ferroui_base::FerroObject>(), 1, 119)?;
     // name_and_x_name.xaml(1,130) Tag
     text_block_0.set_value(::ferroui_controls::Control::tag_property(), rt::to_object(String::from("t")));
-    text_block_0.try_end_init().map_err(|error| rt::at(error, 1, 109))?;
-    border_0.try_end_init().map_err(|error| rt::at(error, 1, 2))?;
+    text_block_0.try_end_init().map_err(|error| rt::at(rt::TARGET_INVOCATION_EXCEPTION, error, 1, 109))?;
+    border_0.try_end_init().map_err(|error| rt::at(rt::TARGET_INVOCATION_EXCEPTION, error, 1, 2))?;
     rt::complete_root_name_scope(Some(&border_0), name_scope.as_ref(), 1, 2)?;
     Ok(border_0)
 }
@@ -1331,8 +1331,8 @@ pub fn build_user_control_properties_xaml(
     text_block_0.set_value(::ferroui_controls::TextBlock::text_property(), Some(String::from("Body")));
     // user_control_properties.xaml(1,156) Margin
     text_block_0.set_value(::ferroui_base::layout::Layoutable::margin_property(), ::ferroui_base::Thickness::new(2.0_f64, 2.0_f64, 2.0_f64, 2.0_f64));
-    text_block_0.try_end_init().map_err(|error| rt::at(error, 1, 156))?;
-    user_control_0.try_end_init().map_err(|error| rt::at(error, 1, 2))?;
+    text_block_0.try_end_init().map_err(|error| rt::at(rt::TARGET_INVOCATION_EXCEPTION, error, 1, 156))?;
+    user_control_0.try_end_init().map_err(|error| rt::at(rt::TARGET_INVOCATION_EXCEPTION, error, 1, 2))?;
     rt::complete_root_name_scope(Some(&user_control_0), name_scope.as_ref(), 1, 2)?;
     Ok(user_control_0)
 }
