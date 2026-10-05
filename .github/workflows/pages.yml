@@ -6,7 +6,8 @@ name: Pages
 # workflow reports that Pages is not enabled and ends without building or deploying, so it does not fail.
 #
 # The site is published only while its WebAssembly module stays within the size budget below
-# (PUBLISHED_MODULE_GZIP_BUDGET_MB, with gzip): above it the build job fails before anything is uploaded.
+# (PUBLISHED_MODULE_GZIP_BUDGET_MB, with gzip): above it the size budget step of the deploy job fails and
+# nothing is deployed. The raw and gzip sizes are in the summaries of both jobs.
 #
 # The site is the output of `scripts/build-browser.sh control-catalog-browser`, uploaded as it is: GitHub
 # Pages compresses responses itself (gzip, negotiated with Accept-Encoding) and does not serve
@@ -40,6 +41,8 @@ jobs:
     timeout-minutes: 120
     outputs:
       enabled: ${{ steps.pages.outputs.enabled }}
+      wasm-raw-bytes: ${{ steps.sizes.outputs.wasm_raw_bytes }}
+      wasm-gzip-bytes: ${{ steps.sizes.outputs.wasm_gzip_bytes }}
     steps:
       - name: Is GitHub Pages enabled with GitHub Actions as its source?
         id: pages
@@ -68,11 +71,12 @@ jobs:
       - name: Test the site before publishing it
         if: steps.pages.outputs.enabled == 'true'
         run: node scripts/browser/tests/control_catalog.test.mjs target/browser/control-catalog-browser
-      - name: Sizes of the published modules, within the budget
+      - name: Sizes of the published modules
+        id: sizes
         if: steps.pages.outputs.enabled == 'true'
         run: >
           node scripts/browser/module-sizes.mjs target/browser/control-catalog-browser
-          --gzip-budget-mb "$PUBLISHED_MODULE_GZIP_BUDGET_MB" | tee -a "$GITHUB_STEP_SUMMARY"
+          --github-output "$GITHUB_OUTPUT" | tee -a "$GITHUB_STEP_SUMMARY"
       - uses: actions/configure-pages@v5
         if: steps.pages.outputs.enabled == 'true'
       - uses: actions/upload-pages-artifact@v3
@@ -90,5 +94,24 @@ jobs:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
+      - name: Size budget of the WebAssembly module
+        env:
+          RAW_BYTES: ${{ needs.build.outputs.wasm-raw-bytes }}
+          GZIP_BYTES: ${{ needs.build.outputs.wasm-gzip-bytes }}
+        run: |
+          budget_bytes=$((PUBLISHED_MODULE_GZIP_BUDGET_MB * 1000000))
+          mb() { awk -v bytes="$1" 'BEGIN { printf "%.2f MB", bytes / 1000000 }'; }
+          {
+            echo "| WebAssembly module | Raw | gzip -9 | gzip budget |"
+            echo "|---|---:|---:|---:|"
+            echo "| control-catalog-browser | $(mb "$RAW_BYTES") | $(mb "$GZIP_BYTES") | $(mb "$budget_bytes") |"
+          } >> "$GITHUB_STEP_SUMMARY"
+          if [ -z "$GZIP_BYTES" ] || [ "$GZIP_BYTES" -gt "$budget_bytes" ]; then
+            message="The WebAssembly module is $(mb "${GZIP_BYTES:-0}") with gzip, over the budget of $(mb "$budget_bytes") (PUBLISHED_MODULE_GZIP_BUDGET_MB); the site is not deployed."
+            echo "::error title=Over the size budget::$message"
+            echo "**$message**" >> "$GITHUB_STEP_SUMMARY"
+            exit 1
+          fi
+          echo "Within the gzip budget of $(mb "$budget_bytes")." >> "$GITHUB_STEP_SUMMARY"
       - id: deployment
         uses: actions/deploy-pages@v4
