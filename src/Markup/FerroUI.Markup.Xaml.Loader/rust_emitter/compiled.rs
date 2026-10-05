@@ -17,7 +17,7 @@ use ::ferroui_markup_xaml::RuntimeXamlLoaderConfiguration;
 
 use crate::FerroXamlIlRuntimeCompiler;
 
-use super::emitter::{emit_document, namespace_table};
+use super::emitter::{emit_document, emit_function, namespace_table, root_class_of, DocumentFunctions};
 use super::source::{function_name_of, rust_string_literal};
 
 /// The result of compiling one document.
@@ -324,6 +324,15 @@ fn json_string(text: &str) -> String {
     literal
 }
 
+/// A group of documents with owned texts as the borrowed form
+/// [`FerroXamlIlRuntimeCompiler::transform_documents`] takes.
+#[allow(clippy::type_complexity)]
+fn borrowed<'a>(
+    documents: &'a [(String, String, Option<String>, Option<&'static ferroui_base::TypeInfo>)],
+) -> Vec<(&'a str, &'a str, Option<String>, Option<&'static ferroui_base::TypeInfo>)> {
+    documents.iter().map(|(name, xaml, base_uri, class)| (name.as_str(), xaml.as_str(), base_uri.clone(), *class)).collect()
+}
+
 /// The name of the untyped build function that wraps the build function `function_name`.
 fn untyped_function_name(function_name: &str) -> String {
     format!("{function_name}_untyped")
@@ -337,6 +346,159 @@ pub fn transformed_tree(name: &str, xaml: &str, configuration: &RuntimeXamlLoade
     FerroXamlIlRuntimeCompiler::transform_document(xaml, name, None, configuration)
         .map(|transformed| crate::testing::objects::dump_tree(&transformed.root))
         .map_err(|error| error.message())
+}
+
+/// The transformed trees of the group of the document registered for
+/// `class` (the document with every document it includes), as text, by
+/// document name: what the emitter walks for a group. With the `testing`
+/// feature.
+#[cfg(any(test, feature = "testing"))]
+pub fn transformed_class_group(class: &'static ferroui_base::TypeInfo) -> Result<Vec<(String, String)>, String> {
+    let uri = crate::FerroRuntimeXamlLoader::class_document(class)
+        .ok_or_else(|| format!("no document is registered for {}", class.full_name()))?;
+    let group = crate::FerroRuntimeXamlLoader::document_group(&uri, &class.full_name()).map_err(|e| e.message().to_string())?;
+    let mut documents = vec![(group.uri.absolute_path().trim_start_matches('/').to_string(), group.text, Some(group.uri.to_string()), Some(class))];
+    for (uri, text) in group.included {
+        documents.push((uri.absolute_path().trim_start_matches('/').to_string(), text, Some(uri.to_string()), None));
+    }
+    let mut configuration = RuntimeXamlLoaderConfiguration::new();
+    configuration.local_assembly = group.assembly;
+    let transformed = FerroXamlIlRuntimeCompiler::transform_documents(&borrowed(&documents), &configuration)
+        .map_err(|error| error.message())?;
+    Ok(documents
+        .iter()
+        .zip(transformed)
+        .map(|(document, transformed)| (document.0.clone(), crate::testing::objects::dump_tree(&transformed.root)))
+        .collect())
+}
+
+/// The generated file of the documents of a class: the document registered
+/// for `class` (with `x:Class`) and every document it includes, transformed
+/// as one group exactly as the run-time loader loads them
+/// (`FerroRuntimeXamlLoader::load_object`), each emitted as a function: the
+/// document of the class as `populate`, which populates an existing
+/// instance, the others as build functions the include calls of the group
+/// call. The file is a module of the crate of the class (that crate is
+/// named `crate` in it). `Err` lists the documents that are not eligible,
+/// with the reasons: a class is compiled whole or not at all.
+pub fn generate_class_file(class: &'static ferroui_base::TypeInfo) -> Result<String, String> {
+    let uri = crate::FerroRuntimeXamlLoader::class_document(class)
+        .ok_or_else(|| format!("no document is registered for {}", class.full_name()))?;
+    let group = crate::FerroRuntimeXamlLoader::document_group(&uri, &class.full_name()).map_err(|e| e.message().to_string())?;
+    let name_of = |uri: &ferroui_base::utilities::Uri| uri.absolute_path().trim_start_matches('/').to_string();
+    let mut documents = vec![(name_of(&group.uri), group.text.clone(), Some(group.uri.to_string()), Some(class))];
+    for (uri, text) in &group.included {
+        documents.push((name_of(uri), text.clone(), Some(uri.to_string()), None));
+    }
+    let mut configuration = RuntimeXamlLoaderConfiguration::new();
+    configuration.local_assembly = group.assembly;
+    let transformed = FerroXamlIlRuntimeCompiler::transform_documents(&borrowed(&documents), &configuration)
+        .map_err(|error| format!("the group does not transform: {}", error.message()))?;
+
+    // The functions of the documents, by their build methods.
+    let mut functions = DocumentFunctions::default();
+    let mut names = Vec::with_capacity(documents.len());
+    for (index, (document, transformed)) in documents.iter().zip(&transformed).enumerate() {
+        let function_name = match index {
+            0 => function_name_of(&document.0).replacen("build_", "populate_", 1),
+            _ => function_name_of(&document.0),
+        };
+        if index > 0 {
+            if let (Some(build), Some(root_class)) = (&transformed.build, root_class_of(&transformed.root)) {
+                functions.insert(build, &function_name, root_class);
+            }
+        }
+        names.push(function_name);
+    }
+
+    // The document of the class, then the documents its calls reach (a document the group
+    // merged into another one is not called and not emitted).
+    let mut tables: Vec<String> = Vec::new();
+    let mut sources = Vec::with_capacity(documents.len());
+    let mut not_eligible = Vec::new();
+    let mut emitted: Vec<usize> = Vec::new();
+    let mut pending = vec![0usize];
+    while let Some(index) = pending.pop() {
+        if emitted.contains(&index) {
+            continue;
+        }
+        emitted.push(index);
+        let (document, transformed, function_name) = (&documents[index], &transformed[index], &names[index]);
+        let table = namespace_table(&transformed.document).ok_or_else(|| format!("{}: no namespace information", document.0))?;
+        let table_index = match tables.iter().position(|known| *known == table) {
+            Some(known) => known,
+            None => {
+                tables.push(table);
+                tables.len() - 1
+            }
+        };
+        let populate = (index == 0).then_some(class);
+        match emit_function(
+            &transformed.root,
+            &transformed.configuration,
+            &transformed.document,
+            &format!("XML_NAMESPACES_{table_index}"),
+            function_name,
+            &document.0,
+            &functions,
+            populate,
+        ) {
+            Ok(source) => sources.push(source),
+            Err(reason) => not_eligible.push(format!("{}: {reason}", document.0)),
+        }
+        for called in functions.called() {
+            if let Some(next) = names.iter().position(|name| *name == called) {
+                if !emitted.contains(&next) && !pending.contains(&next) {
+                    pending.push(next);
+                }
+            }
+        }
+    }
+    if !not_eligible.is_empty() {
+        return Err(not_eligible.join("\n"));
+    }
+
+    let class_path = class.rust_path().ok_or_else(|| format!("no public Rust path is recorded for {}", class.full_name()))?;
+    let mut source = String::new();
+    source.push_str("// @generated by the Rust emitter of ferroui-markup-xaml-loader (rust_emitter::generate_class_file).\n");
+    source.push_str("// Do not edit: regenerate it (see the header of the module that includes this file).\n");
+    source.push_str(&format!(
+        "// The document of `{}` and the {} it calls, of a group of {} documents.\n",
+        class.full_name(),
+        sources.len() - 1,
+        documents.len()
+    ));
+    source.push('\n');
+    source.push_str("#![allow(dead_code, unused_imports)]\n");
+    source.push('\n');
+    source.push_str("use ::ferroui_markup_xaml::xaml_il::runtime::compiled as rt;\n");
+    for (index, table) in tables.iter().enumerate() {
+        source.push('\n');
+        source.push_str("/// The XML namespaces of documents of this file, as the compiler resolved them.\n");
+        source.push_str(&format!("const XML_NAMESPACES_{index}: rt::XmlNamespaceTable = {table};\n"));
+    }
+    source.push('\n');
+    source.push_str(&format!(
+        "/// Populates `root` from the document of the class (`{}`), with a root service provider\n",
+        names[0]
+    ));
+    source.push_str("/// over `service_provider` (`XamlIlRuntimeHelpers.CreateRootServiceProviderV3`), as the\n");
+    source.push_str("/// run-time loader populates it.\n");
+    source.push_str("pub fn populate(\n");
+    source.push_str("    service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,\n");
+    source.push_str(&format!("    root: &::ferroui_base::Ref<::{}>,\n", class_path.trim_start_matches("::")));
+    source.push_str(") -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadException> {\n");
+    source.push_str("    let service_provider =\n");
+    source.push_str("        ::ferroui_markup_xaml::xaml_il::runtime::XamlIlRuntimeHelpers::create_root_service_provider_v3(service_provider);\n");
+    source.push_str(&format!("    {}(::core::option::Option::Some(service_provider), root)\n", names[0]));
+    source.push_str("}\n");
+    for function in &sources {
+        source.push('\n');
+        source.push_str(function);
+    }
+    // The file is a module of the crate of the class: that crate is `crate` in it.
+    let own_crate = class_path.trim_start_matches("::").split("::").next().unwrap_or_default();
+    Ok(source.replace(&format!("::{own_crate}::"), "crate::"))
 }
 
 #[cfg(test)]
