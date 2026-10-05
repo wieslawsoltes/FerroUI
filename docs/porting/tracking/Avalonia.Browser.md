@@ -10,42 +10,42 @@ Generated from upstream commit `17350180c33b063f0e98abbfd19aa3cae63f5d56`. Back 
 | FerroUI | `src/Browser/FerroUI.Browser` (exists) |
 | Crate | `ferroui-browser` |
 | Phase / priority | 3 - browser / P2 |
-| Files | 29/49 (59.2%), 3 not applicable |
-| Types | 33/61 (54.1%) |
-| Members | 180/426 (42.3%) |
+| Files | 47/49 (95.9%), 3 not applicable |
+| Types | 52/61 (85.2%) |
+| Members | 295/426 (69.2%) |
 | Contracts (interfaces) | 0/0 |
 | Property registrations | 0/0 |
 | Routed events | 0/0 |
 
 ## Files
 
-### `(project root)` - files 17/28, types 20/35, members 111/177
+### `(project root)` - files 27/28, types 31/35, members 151/177
 
 | Upstream file | Rust file | Status | Types | Members | Notes |
 |---|---|---|---|---|---|
 | `AvaloniaView.cs` | `ferro_view.rs` | partial | 1/1 | 3/4 | renamed: the view type is named after the framework |
 | `BrowserActivatableLifetime.cs` | `browser_activatable_lifetime.rs` | present | 1/1 | 1/1 |  |
-| `BrowserAppBuilder.cs` | `browser_app_builder.rs` | partial | 3/3 | 6/13 |  |
-| `BrowserClipboardDataTransfer.cs` | `browser_clipboard_data_transfer.rs` | missing | 0/1 | 0/4 |  |
-| `BrowserClipboardDataTransferItem.cs` | `browser_clipboard_data_transfer_item.rs` | missing | 0/1 | 0/4 |  |
-| `BrowserDataFormatHelper.cs` | `browser_data_format_helper.rs` | missing | 0/1 | 0/2 |  |
-| `BrowserDataTransferHelper.cs` | `browser_data_transfer_helper.rs` | missing | 0/1 | 0/2 |  |
-| `BrowserDragDataTransfer.cs` | `browser_drag_data_transfer.rs` | missing | 0/1 | 0/4 |  |
-| `BrowserDragDataTransferItem.cs` | `browser_drag_data_transfer_item.rs` | missing | 0/1 | 0/4 |  |
-| `BrowserInputHandler.cs` | `browser_input_handler.rs` | partial | 1/1 | 13/14 |  |
+| `BrowserAppBuilder.cs` | `browser_app_builder.rs` | partial | 3/3 | 7/13 |  |
+| `BrowserClipboardDataTransfer.cs` | `browser_clipboard_data_transfer.rs` | present | 1/1 | 4/4 |  |
+| `BrowserClipboardDataTransferItem.cs` | `browser_clipboard_data_transfer_item.rs` | partial | 1/1 | 3/4 |  |
+| `BrowserDataFormatHelper.cs` | `browser_data_format_helper.rs` | present | 1/1 | 2/2 |  |
+| `BrowserDataTransferHelper.cs` | `browser_data_transfer_helper.rs` | present | 1/1 | 2/2 |  |
+| `BrowserDragDataTransfer.cs` | `browser_drag_data_transfer.rs` | present | 1/1 | 4/4 |  |
+| `BrowserDragDataTransferItem.cs` | `browser_drag_data_transfer_item.rs` | partial | 1/1 | 3/4 |  |
+| `BrowserInputHandler.cs` | `browser_input_handler.rs` | present | 1/1 | 14/14 |  |
 | `BrowserInputPane.cs` | `browser_input_pane.rs` | present | 1/1 | 1/1 |  |
-| `BrowserInsetsManager.cs` | `browser_insets_manager.rs` | missing | 0/1 | 0/5 |  |
+| `BrowserInsetsManager.cs` | `browser_insets_manager.rs` | present | 1/1 | 5/5 |  |
 | `BrowserMouseDevice.cs` | `browser_mouse_device.rs` | partial | 1/2 | 2/4 |  |
 | `BrowserNativeControlHost.cs` | `browser_native_control_host.rs` | missing | 0/1 | 0/5 |  |
 | `BrowserPlatformSettings.cs` | `browser_platform_settings.rs` | present | 1/1 | 6/6 |  |
 | `BrowserRuntimePlatform.cs` | `browser_runtime_platform.rs` | present | 2/2 | 3/3 |  |
-| `BrowserScreens.cs` | `browser_screens.rs` | missing | 0/2 | 0/11 |  |
+| `BrowserScreens.cs` | `browser_screens.rs` | partial | 2/2 | 10/11 |  |
 | `BrowserSingleThreadedDispatcherImpl.cs` | `browser_single_threaded_dispatcher_impl.rs` | present | 1/1 | 12/12 |  |
 | `BrowserSingleViewLifetime.cs` | `browser_single_view_lifetime.rs` | present | 1/1 | 3/3 |  |
-| `BrowserSystemNavigationManager.cs` | `browser_system_navigation_manager.rs` | missing | 0/1 | 0/2 |  |
+| `BrowserSystemNavigationManager.cs` | `browser_system_navigation_manager.rs` | present | 1/1 | 2/2 |  |
 | `BrowserTextInputMethod.cs` | `browser_text_input_method.rs` | present | 1/1 | 10/10 |  |
 | `BrowserTopLevelImpl.cs` | `browser_top_level_impl.rs` | partial | 1/1 | 28/30 |  |
-| `ClipboardImpl.cs` | `clipboard_impl.rs` | missing | 0/1 | 0/3 |  |
+| `ClipboardImpl.cs` | `clipboard_impl.rs` | present | 1/1 | 3/3 |  |
 | `Cursor.cs` | `cursor.rs` | present | 2/2 | 9/9 |  |
 | `JSObjectControlHandle.cs` | `js_object_control_handle.rs` | partial | 0/2 | 0/5 | renamed: snake case of the acronym |
 | `KeyInterop.cs` | `key_interop.rs` | present | 1/1 | 3/3 |  |
@@ -59,13 +59,12 @@ Generated from upstream commit `17350180c33b063f0e98abbfd19aa3cae63f5d56`. Back 
 
 </details>
 
-<details><summary><code>BrowserAppBuilder.cs</code> - 7 missing</summary>
+<details><summary><code>BrowserAppBuilder.cs</code> - 6 missing</summary>
 
-- `BrowserPlatformOptions` (record): 5 missing
+- `BrowserPlatformOptions` (record): 4 missing
   - `Func<string, string>? FrameworkAssetPathResolver { get; set; }`
   - `bool RegisterAvaloniaServiceWorker { get; set; }`
   - `string? AvaloniaServiceWorkerScope { get; set; }`
-  - `bool PreferFileDialogPolyfill { get; set; }`
   - `bool? PreferManagedThreadDispatcher { get; set; }`
 - `BrowserAppBuilder` (class): 2 missing
   - `static async Task StartBrowserAppAsync(this AppBuilder builder, string mainDivId, BrowserPlatformOptions? o...`
@@ -73,16 +72,30 @@ Generated from upstream commit `17350180c33b063f0e98abbfd19aa3cae63f5d56`. Back 
 
 </details>
 
-<details><summary><code>BrowserInputHandler.cs</code> - 1 missing</summary>
+<details><summary><code>BrowserClipboardDataTransferItem.cs</code> - 1 missing</summary>
 
-- `BrowserInputHandler` (class): 1 missing
-  - `bool OnDragEvent(string type, double offsetX, double offsetY, int modifiers, JSObject dataTransfer, JSObjec...`
+- `BrowserClipboardDataTransferItem` (class): 1 missing
+  - `void Dispose()`
+
+</details>
+
+<details><summary><code>BrowserDragDataTransferItem.cs</code> - 1 missing</summary>
+
+- `BrowserDragDataTransferItem` (class): 1 missing
+  - `void Dispose()`
 
 </details>
 
 <details><summary><code>BrowserMouseDevice.cs</code> - 3 missing</summary>
 
 - `BrowserMouseDevice.BrowserMousePointer` (class, internal): **type missing** (2 members)
+
+</details>
+
+<details><summary><code>BrowserScreens.cs</code> - 1 missing</summary>
+
+- `BrowserScreen` (class): 1 missing
+  - `bool IsCurrent { get; set; }` *(internal; getter `is_current` found, setter `set_is_current` missing)*
 
 </details>
 
@@ -109,31 +122,30 @@ Generated from upstream commit `17350180c33b063f0e98abbfd19aa3cae63f5d56`. Back 
 
 </details>
 
-### `Interop` - files 5/10, types 5/11, members 23/123
+### `Interop` - files 9/10, types 9/11, members 57/123
 
 | Upstream file | Rust file | Status | Types | Members | Notes |
 |---|---|---|---|---|---|
-| `AvaloniaModule.cs` | `interop/ferro_module.rs` | partial | 1/1 | 1/10 | renamed: the module is named after the framework; it is imported statically, so the asynchronous import and path resolution members have no counterpart |
+| `AvaloniaModule.cs` | `interop/ferro_module.rs` | partial | 1/1 | 2/10 | renamed: the module is named after the framework; it is imported statically, so the asynchronous import and path resolution members have no counterpart |
 | `CanvasHelper.cs` | `interop/canvas_helper.rs` | partial | 1/2 | 1/9 |  |
-| `DomHelper.cs` | `interop/dom_helper.rs` | partial | 1/1 | 5/15 |  |
+| `DomHelper.cs` | `interop/dom_helper.rs` | partial | 1/1 | 7/15 |  |
 | `GeneralHelpers.cs` | - | n/a | - | - | not-applicable: reflective access to script objects: replaced by typed property getters in interop/ |
-| `InputHelper.cs` | `interop/input_helper.rs` | partial | 1/1 | 14/37 |  |
+| `InputHelper.cs` | `interop/input_helper.rs` | partial | 1/1 | 19/37 |  |
 | `JsCallbackHelper.cs` | - | n/a | - | - | not-applicable: restores the synchronisation context of the managed runtime in callbacks: no equivalent concept |
 | `NativeControlHostHelper.cs` | `interop/native_control_host_helper.rs` | missing | 0/1 | 0/7 |  |
-| `NavigationHelper.cs` | `interop/navigation_helper.rs` | missing | 0/1 | 0/3 |  |
-| `ScreenHelper.cs` | `interop/screen_helper.rs` | missing | 0/1 | 0/11 |  |
-| `StorageHelper.cs` | `interop/storage_helper.rs` | missing | 0/1 | 0/22 |  |
-| `StreamHelper.cs` | `interop/stream_helper.rs` | missing | 0/1 | 0/6 |  |
+| `NavigationHelper.cs` | `interop/navigation_helper.rs` | partial | 1/1 | 1/3 |  |
+| `ScreenHelper.cs` | `interop/screen_helper.rs` | partial | 1/1 | 2/11 |  |
+| `StorageHelper.cs` | `interop/storage_helper.rs` | partial | 1/1 | 17/22 |  |
+| `StreamHelper.cs` | `interop/stream_helper.rs` | present | 1/1 | 6/6 |  |
 | `TimerHelper.cs` | `interop/timer_helper.rs` | partial | 1/1 | 2/3 |  |
 
-<details><summary><code>AvaloniaModule.cs</code> - 9 missing</summary>
+<details><summary><code>AvaloniaModule.cs</code> - 8 missing</summary>
 
-- `AvaloniaModule` (class) (ported as module-level items): 9 missing
+- `AvaloniaModule` (class) (ported as module-level items): 8 missing
   - `static Task ImportMainToWorkerContext()`
   - `const string StorageModuleName`
   - `const string AssetsBasePath`
   - `static Task ImportMain()`
-  - `static Task ImportStorage()`
   - `static string ResolveServiceWorkerPath()`
   - `static bool IsMobile()`
   - `static bool IsTv()`
@@ -150,29 +162,26 @@ Generated from upstream commit `17350180c33b063f0e98abbfd19aa3cae63f5d56`. Back 
 
 </details>
 
-<details><summary><code>DomHelper.cs</code> - 10 missing</summary>
+<details><summary><code>DomHelper.cs</code> - 8 missing</summary>
 
-- `DomHelper` (class) (ported as module-level items): 10 missing
+- `DomHelper` (class) (ported as module-level items): 8 missing
   - `static JSObject GetGlobalThis()` *(internal)*
   - `static JSObject CreateAvaloniaHost(JSObject element)`
   - `static bool IsFullscreen(JSObject globalThis)`
-  - `static Task SetFullscreen(JSObject globalThis, bool isFullscreen)`
   - `static double[] GetSafeAreaPadding(JSObject globalThis)`
   - `static int[] GetDarkMode(JSObject globalThis)`
   - `static string? GetNavigatorLanguage(JSObject globalThis)`
   - `static void AddCssClass(JSObject element, string className)`
   - `static void InitGlobalDomEvents(JSObject globalThis)`
-  - `static Task ScreensChanged()`
 
 </details>
 
-<details><summary><code>InputHelper.cs</code> - 23 missing</summary>
+<details><summary><code>InputHelper.cs</code> - 18 missing</summary>
 
-- `InputHelper` (class) (ported as module-level items): 23 missing
+- `InputHelper` (class) (ported as module-level items): 18 missing
   - `static Task RedirectInputAsync(int topLevelId, Action<BrowserTopLevelImpl> handler)`
   - `static Task<T> RedirectInputRetunAsync<T>(int topLevelId, Func<BrowserTopLevelImpl, T> handler, T @default)`
   - `static void SubscribeInputEvents(JSObject htmlElement, int topLevelId)`
-  - `static Task OnDragDrop(int topLevelId, string type, double offsetX, double offsetY, int modifiers, JSObject...`
   - `static double[] GetCoalescedEvents(JSObject pointerEvent)`
   - `static void ClearInputElement(JSObject htmlElement)`
   - `static void FocusElement(JSObject htmlElement)`
@@ -187,11 +196,41 @@ Generated from upstream commit `17350180c33b063f0e98abbfd19aa3cae63f5d56`. Back 
   - `static JSObject CreateWriteableClipboardItem(JSObject source)`
   - `static void AddStringToWriteableClipboardItem(JSObject item, string format, string value)`
   - `static void AddBytesToWriteableClipboardItem(JSObject item, string format, [JSMarshalAs<JSType.MemoryView>]...`
-  - `static Task<JSObject> ReadClipboardAsync(JSObject window)`
-  - `static Task<string> WriteClipboardAsync(JSObject globalThis, JSObject? source)`
   - `static string[] GetReadableDataItemFormats(JSObject item)`
-  - `static Task<JSObject?> TryGetReadableDataItemValueAsync(JSObject item, string format)`
-  - `static JSObject? TryGetReadableDataItemValue(JSObject item, string format)`
+
+</details>
+
+<details><summary><code>NavigationHelper.cs</code> - 2 missing</summary>
+
+- `NavigationHelper` (class) (ported as module-level items): 2 missing
+  - `static void AddBackHandler([JSMarshalAs<JSType.Function<JSType.Boolean>>] Func<bool> backHandlerCallback)`
+  - `static bool WindowOpen(string uri, string target)`
+
+</details>
+
+<details><summary><code>ScreenHelper.cs</code> - 9 missing</summary>
+
+- `ScreenHelper` (class) (ported as module-level items): 9 missing
+  - `static void SubscribeOnChanged(JSObject globalThis)`
+  - `static JSObject[] GetAllScreens(JSObject globalThis)`
+  - `static string GetDisplayName(JSObject screen)`
+  - `static double GetScaling(JSObject screen)`
+  - `static double[] GetBounds(JSObject screen)`
+  - `static double[] GetWorkingArea(JSObject screen)`
+  - `static bool IsCurrent(JSObject screen)`
+  - `static bool IsPrimary(JSObject screen)`
+  - `static int GetCurrentOrientation(JSObject screen)`
+
+</details>
+
+<details><summary><code>StorageHelper.cs</code> - 5 missing</summary>
+
+- `StorageHelper` (class) (ported as module-level items): 5 missing
+  - `static bool HasNativeFilePicker()`
+  - `static JSObject CreateWellKnownDirectory(string wellKnownDirectory)`
+  - `static JSObject[] ItemsArray(JSObject item)`
+  - `static JSObject[] FilesToItemsArray(JSObject item)`
+  - `static JSObject CreateAcceptType(string description, string[] mimeTypes, string[]? extensions)`
 
 </details>
 
@@ -238,16 +277,48 @@ Generated from upstream commit `17350180c33b063f0e98abbfd19aa3cae63f5d56`. Back 
 
 </details>
 
-### `Storage` - files 0/4, types 0/7, members 0/75
+### `Storage` - files 4/4, types 4/7, members 41/75
 
 | Upstream file | Rust file | Status | Types | Members | Notes |
 |---|---|---|---|---|---|
-| `BlobReadableStream.cs` | `storage/blob_readable_stream.rs` | missing | 0/1 | 0/16 |  |
-| `BrowserLauncher.cs` | `storage/browser_launcher.rs` | missing | 0/1 | 0/2 |  |
-| `BrowserStorageProvider.cs` | `storage/browser_storage_provider.rs` | missing | 0/4 | 0/40 |  |
-| `WriteableStream.cs` | `storage/writeable_stream.rs` | missing | 0/1 | 0/17 |  |
+| `BlobReadableStream.cs` | `storage/blob_readable_stream.rs` | partial | 1/1 | 9/16 |  |
+| `BrowserLauncher.cs` | `storage/browser_launcher.rs` | present | 1/1 | 2/2 |  |
+| `BrowserStorageProvider.cs` | `storage/browser_storage_provider.rs` | partial | 1/4 | 18/40 |  |
+| `WriteableStream.cs` | `storage/writeable_stream.rs` | partial | 1/1 | 12/17 |  |
 
-## Other files: typescript - 4/33
+<details><summary><code>BlobReadableStream.cs</code> - 7 missing</summary>
+
+- `BlobReadableStream` (class): 7 missing
+  - `override long Position { get; set; }` *(getter `position` found, setter `set_position` missing)*
+  - `override void Flush()`
+  - `override void SetLength(long value)`
+  - `override void Write(byte[] buffer, int offset, int count)`
+  - `override async ValueTask<int> ReadAsync(Memory<byte> buffer, CancellationToken cancellationToken = default)` *(1 of 2 overloads found)*
+  - `override IAsyncResult BeginRead(byte[] buffer, int offset, int count, AsyncCallback? callback, object? state)`
+  - `override int EndRead(IAsyncResult asyncResult)`
+
+</details>
+
+<details><summary><code>BrowserStorageProvider.cs</code> - 25 missing</summary>
+
+- `JSStorageItem` (class, internal): **type missing** (13 members)
+- `JSStorageFile` (class, internal): **type missing** (3 members)
+- `JSStorageFolder` (class, internal): **type missing** (6 members)
+
+</details>
+
+<details><summary><code>WriteableStream.cs</code> - 5 missing</summary>
+
+- `WriteableStream` (class): 5 missing
+  - `override int Read(byte[] buffer, int offset, int count)`
+  - `override Task WriteAsync(byte[] buffer, int offset, int count, CancellationToken cancellationToken)` *(1 of 2 overloads found)*
+  - `override IAsyncResult BeginWrite(byte[] buffer, int offset, int count, AsyncCallback? callback, object? state)`
+  - `override void EndWrite(IAsyncResult asyncResult)`
+  - `override async ValueTask DisposeAsync()`
+
+</details>
+
+## Other files: typescript - 8/33
 
 <details><summary>File list</summary>
 
@@ -279,10 +350,10 @@ Generated from upstream commit `17350180c33b063f0e98abbfd19aa3cae63f5d56`. Back 
 | `webapp/modules/avalonia/singleThreadedDispatcher.ts` | `webapp/modules/ferro/singleThreadedDispatcher.ts` | missing |
 | `webapp/modules/avalonia/stream.ts` | `webapp/modules/ferro/stream.ts` | missing |
 | `webapp/modules/avalonia/timer.ts` | `webapp/modules/ferro/timer.ts` | missing |
-| `webapp/modules/storage.ts` | `webapp/modules/storage.ts` | missing |
-| `webapp/modules/storage/indexedDb.ts` | `webapp/modules/storage/indexedDb.ts` | missing |
-| `webapp/modules/storage/storageItem.ts` | `webapp/modules/storage/storageItem.ts` | missing |
-| `webapp/modules/storage/storageProvider.ts` | `webapp/modules/storage/storageProvider.ts` | missing |
+| `webapp/modules/storage.ts` | `webapp/modules/storage.ts` | present |
+| `webapp/modules/storage/indexedDb.ts` | `webapp/modules/storage/indexedDb.ts` | present |
+| `webapp/modules/storage/storageItem.ts` | `webapp/modules/storage/storageItem.ts` | present |
+| `webapp/modules/storage/storageProvider.ts` | `webapp/modules/storage/storageProvider.ts` | present |
 | `webapp/package.json` | `webapp/package.json` | present |
 | `webapp/tsconfig.json` | `webapp/tsconfig.json` | present |
 | `webapp/types/dotnet.d.ts` | `webapp/types/dotnet.d.ts` | missing |
@@ -293,4 +364,8 @@ Generated from upstream commit `17350180c33b063f0e98abbfd19aa3cae63f5d56`. Back 
 
 Rust sources of this crate that no upstream file maps to. Give each a reason in `docs/porting/data/path-overrides.toml` (`[[rust_only]]`), or map upstream files to it (`[[map]]`).
 
-Tests, examples and build scripts (not scanned): `examples/themed_view/main.rs`.
+| Rust file | Reason | Types defined |
+|---|---|---|
+| `interop/completion_helper.rs` | **unmapped** | `Completions`, `IPromiseTracker`, `PagePromiseTracker`, `PendingRequest`, `PromiseError`, `PromiseFuture`, `PromiseOutcome` |
+
+Tests, examples and build scripts (not scanned): `examples/storage_view/main.rs`, `examples/themed_view/main.rs`.

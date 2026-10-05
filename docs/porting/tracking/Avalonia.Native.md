@@ -10,9 +10,9 @@ Generated from upstream commit `17350180c33b063f0e98abbfd19aa3cae63f5d56`. Back 
 | FerroUI | `src/FerroUI.Native` (exists) |
 | Crate | `ferroui-native` |
 | Phase / priority | 1 - desktop (macOS) / P0 |
-| Files | 39/49 (79.6%) |
-| Types | 49/85 (57.6%) |
-| Members | 299/601 (49.8%) |
+| Files | 40/49 (81.6%) |
+| Types | 51/85 (60.0%) |
+| Members | 371/601 (61.7%) |
 | Contracts (interfaces) | 0/4 |
 | Property registrations | 1/1 |
 | Routed events | 0/0 |
@@ -30,7 +30,7 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 
 ## Files
 
-### `(project root)` - files 39/49, types 49/85, members 299/601
+### `(project root)` - files 40/49, types 51/85, members 371/601
 
 | Upstream file | Rust file | Status | Types | Members | Notes |
 |---|---|---|---|---|---|
@@ -42,7 +42,7 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 | `AvaloniaNativePlatformExtensions.cs` | `ferro_native_platform_extensions.rs` | partial | 4/4 | 10/13 |  |
 | `AvaloniaNativeRenderTimer.cs` | `ferro_native_render_timer.rs` | partial | 1/1 | 3/4 |  |
 | `AvaloniaNativeTextInputMethod.cs` | `ferro_native_text_input_method.rs` | present | 1/1 | 6/6 |  |
-| `AvnAutomationPeer.cs` | `frn_automation_peer.rs` | missing | 0/2 | 0/71 |  |
+| `AvnAutomationPeer.cs` | `frn_automation_peer.rs` | present | 2/2 | 71/71 |  |
 | `AvnDispatcher.cs` | `frn_dispatcher.rs` | present | 1/1 | 1/1 |  |
 | `AvnString.cs` | `frn_string.rs` | partial | 2/6 | 9/18 |  |
 | `CallbackBase.cs` | `callback_base.rs` | partial | 0/1 | 0/1 |  |
@@ -79,7 +79,7 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 | `StorageItem.cs` | `storage_item.rs` | missing | 0/3 | 0/24 |  |
 | `StorageProviderApi.cs` | `storage_provider_api.rs` | missing | 0/3 | 0/26 |  |
 | `StorageProviderImpl.cs` | `storage_provider_impl.rs` | missing | 0/1 | 0/14 |  |
-| `TopLevelImpl.cs` | `top_level_impl.rs` | partial | 3/3 | 55/62 |  |
+| `TopLevelImpl.cs` | `top_level_impl.rs` | partial | 3/3 | 56/62 |  |
 | `TrayIconImpl.cs` | `tray_icon_impl.rs` | present | 1/1 | 8/8 |  |
 | `WindowImpl.cs` | `window_impl.rs` | partial | 1/1 | 31/32 |  |
 | `WindowImplBase.cs` | `window_impl_base.rs` | partial | 1/2 | 19/23 |  |
@@ -188,14 +188,13 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 
 </details>
 
-<details><summary><code>TopLevelImpl.cs</code> - 7 missing</summary>
+<details><summary><code>TopLevelImpl.cs</code> - 6 missing</summary>
 
-- `TopLevelImpl` (class): 6 missing
+- `TopLevelImpl` (class): 5 missing
   - `Compositor Compositor { get; }`
   - `virtual void SetFrameThemeVariant(PlatformThemeVariant? themeVariant)`
   - `IMouseDevice? MouseDevice { get; }`
   - `INativeControlHostImpl? NativeControlHost { get; }`
-  - `AutomationPeer? GetAutomationPeer()`
   - `virtual IPopupImpl? CreatePopup()`
 - `TopLevelImpl.TopLevelEvents` (class): 1 missing
   - `TopLevelEvents(TopLevelImpl parent)`
@@ -325,4 +324,4 @@ Rust sources of this crate that no upstream file maps to. Give each a reason in 
 |---|---|---|
 | `frn_menu_item.rs` | **unmapped** | `FrnMenuItem` |
 
-Tests, examples and build scripts (not scanned): `build.rs`, `examples/platform_window.rs`, `examples/raw_window.rs`, `menu_tests.rs`.
+Tests, examples and build scripts (not scanned): `build.rs`, `examples/platform_window.rs`, `examples/raw_window.rs`, `menu_tests.rs`, `tests/accessibility_tree.rs`.

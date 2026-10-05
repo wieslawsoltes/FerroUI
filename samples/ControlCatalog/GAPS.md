@@ -46,7 +46,7 @@ One gap of the framework blocks no document of the list: C101, a reflection bind
 | `Pages/CompositionPage.xaml` | `Compositor.CreateExpressionAnimation`, `CreateColorKeyFrameAnimation`, `CreateVector3KeyFrameAnimation`, `CreateAnimationGroup`, `CompositionObject.ImplicitAnimations`, `CompositionCustomVisual`. |
 | `Pages/AutoCompleteBoxPage.xaml` | `LogicalExtensions.GetLogicalDescendants`; the document also needs gap C310. |
 | `Pages/NumericUpDownPage.xaml` | `CultureInfo.GetCultures(CultureTypes.SpecificCultures)`. |
-| `Pages/DialogsPage.xaml` | `ManagedStorageProvider` (the managed dialogs library); the document also needs gap C305. |
+| `Pages/DialogsPage.xaml` | The code-behind of the page is not ported yet (`ManagedStorageProvider` is available in `ferroui-dialogs`); the document also needs gap C305. |
 | `Pages/DragAndDropPage.xaml` | `DialogsPage.ReadTextFromFile`, which waits for `DialogsPage`. |
 | `Pages/OpenGlPage.xaml` | The OpenGL library (`OpenGlControlBase`, `GlInterface`), `Compositor.CreateCompositionVisualSnapshot`. |
 | `Pages/OpenGl/OpenGlInteropPage.xaml` | The OpenGL library (`GlInterface`, `IGlContext`), composition GPU interop (`ICompositionGpuInterop`, `CompositionDrawingSurface`). |
