@@ -1,0 +1,18 @@
+[package]
+name = "mini-mvvm"
+description = "The small view-model library of the FerroUI samples: a view-model base, commands and property observables"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+publish = false
+autotests = false
+autobenches = false
+autoexamples = false
+
+[lib]
+path = "lib.rs"
+
+[dependencies]
+ferroui-base = { workspace = true }

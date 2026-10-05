@@ -1,0 +1,105 @@
+//! Minimal reproductions of gaps of the framework found while porting a
+//! group of the sample (see `gaps.rs`).
+
+use super::support::*;
+use crate::markup::{describe, try_load_text};
+use crate::pages::ContextFlyoutPage;
+use crate::view_models::{ItemModel, ListBoxPageViewModel};
+use ferroui_base::metadata::from_markup_value;
+use ferroui_base::{BoxedValue, Ref};
+use ferroui_controls::{Border, ComboBox, Control, ListBox, Menu, Window};
+
+const XMLNS: &str = "xmlns='https://github.com/ferroui' xmlns:x='http://schemas.microsoft.com/winfx/2006/xaml'";
+
+/// Shows `control` as the content of a window.
+fn show(control: &Ref<Control>) -> Ref<Window> {
+    let window = Window::new();
+    window.set_width(400.0);
+    window.set_height(300.0);
+    window.set_content(Some(Control::boxed(control)));
+    window.show();
+    window
+}
+
+#[test]
+fn gap_c200_cast_with_a_prefix_in_a_reflection_binding_path() {
+    let _app = start_catalog_application();
+    // Upstream: `(viewModels:ItemModel).ID` casts the item to the type the prefix names; the
+    // prefix is resolved with the namespaces of the document.
+    let list_box = from_markup_value::<Ref<ListBox>>(&Some(load_text(&format!(
+        "<ListBox {XMLNS} xmlns:viewModels='using:ControlCatalog.ViewModels' x:DataType='viewModels:ListBoxPageViewModel' \
+           ItemsSource='{{Binding Items}}' \
+           DisplayMemberBinding=\"{{Binding (viewModels:ItemModel).ID, StringFormat='{{}}Item {{0:N0}}'}}\"/>"
+    ))))
+    .expect("a list box");
+    list_box.set_data_context(Some(ListBoxPageViewModel::new() as BoxedValue));
+    let window = show(&list_box.clone().upcast());
+    assert!(list_box.container_from_index(0).is_some());
+    window.close();
+    let _ = ItemModel::new(0);
+}
+
+#[test]
+#[ignore = "gap C201: System.Collections.ArrayList is not a markup type"]
+fn gap_c201_array_list_in_markup() {
+    let _app = start_application();
+    // Upstream: an `ArrayList` element collects its children (null included) and is the items
+    // source of the combo box.
+    let combo_box = from_markup_value::<Ref<ComboBox>>(&Some(load_text(&format!(
+        "<ComboBox {XMLNS} xmlns:col='using:System.Collections' xmlns:sys='using:System'>\
+           <ComboBox.ItemsSource>\
+             <col:ArrayList><x:Null /><sys:String>Hello</sys:String><sys:String>World</sys:String></col:ArrayList>\
+           </ComboBox.ItemsSource>\
+         </ComboBox>"
+    ))))
+    .expect("a combo box");
+    assert_eq!(3, combo_box.item_count());
+}
+
+#[test]
+#[ignore = "gap C202: OnPlatform as an element with On children does not load"]
+fn gap_c202_on_platform_element_with_on_children() {
+    let _app = start_application();
+    // Upstream: the element form of the extension takes `On` children (its content) and
+    // provides the value of the matching option, converted to the type of the property.
+    let border = from_markup_value::<Ref<Border>>(&Some(load_text(&format!(
+        "<Border {XMLNS}>\
+           <Border.Background>\
+             <OnPlatform Default='Gray'><On Options='macOS, Linux, Windows' Content='Green' /></OnPlatform>\
+           </Border.Background>\
+         </Border>"
+    ))))
+    .expect("a border");
+    assert!(border.background().is_some());
+}
+
+#[test]
+#[ignore = "gap C203: a handler with plain event arguments is not accepted for PopupFlyoutBase.Opening, and cannot see the cancellable arguments the event passes"]
+fn gap_c203_flyout_opening_handler() {
+    let _app = start_application();
+    // Upstream: `Opening` is an `EventHandler`; the page declares
+    // `ContextFlyoutPage_Opening(object? sender, EventArgs e)` and tests `e is CancelEventArgs`.
+    let xaml = format!(
+        "<ContentPage {XMLNS} x:Class='ControlCatalog.Pages.ContextFlyoutPage'>\
+           <Border><Border.ContextFlyout><Flyout Opening='ContextFlyoutPage_Opening'/></Border.ContextFlyout></Border>\
+         </ContentPage>"
+    );
+    let page = (ContextFlyoutPage::XAML_CLASS.create_uninitialized)();
+    if let Err(error) = try_load_text(&xaml, None, Some(page)) {
+        panic!("{}", describe(&error));
+    }
+}
+
+#[test]
+fn gap_c204_menu_under_the_simple_theme() {
+    let _app = start_catalog_application();
+    // Upstream: the menu shows; the template of the Simple theme finds the control theme
+    // `SimpleMenuScrollViewer` of the same theme.
+    let menu = from_markup_value::<Ref<Menu>>(&Some(load_text(&format!(
+        "<Menu {XMLNS}><MenuItem Header='_First'><MenuItem Header='Item'/></MenuItem></Menu>"
+    ))))
+    .expect("a menu");
+    let window = show(&menu.clone().upcast());
+    assert!(menu.is_attached_to_visual_tree());
+    window.close();
+}

@@ -1,0 +1,41 @@
+[package]
+name = "control-catalog"
+description = "The ControlCatalog sample of FerroUI: a page per control, the validation application of the port"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+publish = false
+build = "build.rs"
+
+# Unit tests live next to the code (`tests/` modules of the library), not as
+# integration test targets.
+autotests = false
+autobenches = false
+autoexamples = false
+
+[lib]
+path = "lib.rs"
+
+[dependencies]
+ferroui-base = { workspace = true }
+ferroui-controls = { workspace = true }
+ferroui-markup = { workspace = true }
+ferroui-markup-xaml = { workspace = true }
+# The documents of the sample are loaded through the run-time XAML loader until the build-time
+# compiler exists; the dependency goes away with it.
+ferroui-markup-xaml-loader = { workspace = true, features = ["runtime"] }
+ferroui-themes-simple = { workspace = true }
+ferroui-themes-fluent = { workspace = true }
+mini-mvvm = { path = "../MiniMvvm" }
+# The compatibility decomposition of the search keys of the pages (`PageItem::create_search_key`).
+unicode-normalization = "0.1"
+
+[dev-dependencies]
+ferroui-base = { workspace = true, features = ["testing"] }
+ferroui-controls = { workspace = true, features = ["testing"] }
+# The render interface, font manager and text shaper of the tests: the pages decode bitmaps and
+# lay out text, which the mock services of the framework tests do not.
+ferroui-skia = { workspace = true }
+ferroui-harfbuzz = { workspace = true }
