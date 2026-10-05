@@ -1,6 +1,7 @@
 //! The runtime helpers compiled (and interpreted) markup calls, and the
 //! contracts of the runtime context of a document.
 
+pub mod compiled;
 mod i_ferro_xaml_il_control_template_provider;
 mod i_ferro_xaml_il_parent_stack_provider;
 mod i_ferro_xaml_il_xml_namespace_info_provider_v1;

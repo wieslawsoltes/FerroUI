@@ -339,30 +339,11 @@ impl fmt::Debug for RuntimeArray {
 }
 
 /// The form in which an object of the object model is handed to an UNTYPED
-/// target (a property of type `object`: content, a tag, an item, a setter
-/// value). The framework's convention for controls held in untyped values
-/// is the handle of the control base class (`Ref<Control>`), whatever the
-/// class of the control; other objects are held in the handle of their own
-/// class. `None` if `value` already is in that form (or is no object).
-pub fn untyped_object_form(value: &BoxedValue) -> Option<BoxedValue> {
-    thread_local! {
-        static CONTROL: std::cell::OnceCell<Option<(&'static TypeInfo, ValueType)>> =
-            const { std::cell::OnceCell::new() };
-    }
-    let object = ValueTypes::as_object(&**value)?;
-    let control = CONTROL.with(|control| {
-        *control.get_or_init(|| {
-            let type_info = TypeInfo::find("FerroUI.Controls", "Control")?;
-            Some((type_info, ValueType::new(type_info.handle()?, type_info.name())))
-        })
-    });
-    let (control_type, control_handle) = control?;
-    if !control_type.is_assignable_from(object.get_type()) || value.value_type_id() == control_handle.id() {
-        return None;
-    }
-    let root: BoxedValue = Rc::new(object);
-    ValueTypes::try_convert_registered(&root, control_handle)
-}
+/// target: the convention of the runtime library, shared with generated
+/// code ([`compiled::untyped_object_form`]).
+///
+/// [`compiled::untyped_object_form`]: ferroui_markup_xaml::xaml_il::runtime::compiled::untyped_object_form
+pub use ferroui_markup_xaml::xaml_il::runtime::compiled::untyped_object_form;
 
 /// The object of the object model behind a contract handle, for the
 /// contracts of the base library that can tell (a property typed with the
