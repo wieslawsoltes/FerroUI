@@ -12,6 +12,7 @@ import { FerroExports } from "./ferroui/ferroExports";
 import { CompletionHelper } from "./ferroui/completionHelper";
 import { ScreenHelper } from "./ferroui/screens";
 import { NavigationHelper } from "./ferroui/navigationHelper";
+import { StreamHelper } from "./ferroui/stream";
 import { PromiseHelper } from "./ferroui/promiseHelper";
 
 export {
@@ -29,5 +30,6 @@ export {
     CompletionHelper,
     ScreenHelper,
     NavigationHelper,
+    StreamHelper,
     PromiseHelper
 };
