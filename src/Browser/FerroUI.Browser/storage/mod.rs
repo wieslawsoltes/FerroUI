@@ -9,4 +9,5 @@ mod writeable_stream;
 pub use blob_readable_stream::BlobReadableStream;
 pub use browser_launcher::BrowserLauncher;
 pub use browser_storage_provider::BrowserStorageProvider;
+pub(crate) use browser_storage_provider::JsStorageFile;
 pub use writeable_stream::WriteableStream;
