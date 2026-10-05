@@ -15,6 +15,25 @@ import { NavigationHelper } from "./ferroui/navigationHelper";
 import { StreamHelper } from "./ferroui/stream";
 import { PromiseHelper } from "./ferroui/promiseHelper";
 
+function getModuleUrl(): string {
+    return import.meta.url;
+}
+
+function resolveModuleUrl(name: string): string {
+    const meta = import.meta as ImportMeta & { resolve?: (specifier: string) => string };
+    return meta.resolve ? meta.resolve(name) : new URL(name, import.meta.url).href;
+}
+
+// The storage bundle, imported on first use: it carries the file system polyfill. The framework
+// calls into it through StorageModule.module.
+const StorageModule: { module?: any } = {};
+
+async function importStorage(): Promise<void> {
+    if (!StorageModule.module) {
+        StorageModule.module = await import(resolveModuleUrl("./storage.js"));
+    }
+}
+
 export {
     Caniuse,
     InputHelper,
@@ -31,5 +50,9 @@ export {
     ScreenHelper,
     NavigationHelper,
     StreamHelper,
-    PromiseHelper
+    PromiseHelper,
+    StorageModule,
+    getModuleUrl,
+    resolveModuleUrl,
+    importStorage
 };

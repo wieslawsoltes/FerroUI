@@ -30,5 +30,11 @@ http://detectmobilebrowsers.com/ (public domain), as the upstream module does.
     WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
     SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
+The storage bundle (`storage.js`, built from `webapp/modules/storage.ts`) includes the
+`native-file-system-adapter` polyfill (https://github.com/jimmywarting/native-file-system-adapter, MIT,
+Copyright (c) 2019 Jimmy Wärting), pinned in `webapp/package.json` to commit
+`d43ad841581c2cc3ce47bbd1e8f11950ebdff027`, the commit the upstream project pins. Its optional dependency
+`fetch-blob` (MIT) is installed with it and is not bundled.
+
 Build-time tools, not distributed with the crate: esbuild (MIT) and TypeScript (Apache-2.0), pinned in
 `webapp/package.json` and `webapp/package-lock.json`.
