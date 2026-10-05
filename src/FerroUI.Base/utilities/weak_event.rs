@@ -124,7 +124,9 @@ impl<S: WeakEventSender, A: WeakEventArgs + ?Sized> WeakEvent<S, A> {
     /// The managed original removes the handler through the sender it
     /// captured; here the removal holds the sender weakly (a strong
     /// reference would keep it alive through its own subscription), so the
-    /// handler is not removed from a sender that no longer exists.
+    /// handler is not removed from a sender that no longer exists. It also
+    /// holds the handler weakly: the handler holds the subscription, which
+    /// holds the removal, and the sender owns the handler.
     pub fn register<Sub, Unsub>(subscribe: Sub, unsubscribe: Unsub) -> Rc<Self>
     where
         Sub: Fn(&S, &Rc<WeakEventHandler<A>>) + 'static,
@@ -134,9 +136,10 @@ impl<S: WeakEventSender, A: WeakEventArgs + ?Sized> WeakEvent<S, A> {
         Self::new(Box::new(move |t: &S, s: Rc<WeakEventHandler<A>>| {
             subscribe(t, &s);
             let t = t.downgrade_sender();
+            let s = Rc::downgrade(&s);
             let unsubscribe = unsubscribe.clone();
             Box::new(move || {
-                if let Some(t) = S::upgrade_sender(&t) {
+                if let (Some(t), Some(s)) = (S::upgrade_sender(&t), s.upgrade()) {
                     unsubscribe(&t, &s);
                 }
             })
@@ -212,10 +215,13 @@ impl<S: WeakEventSender> WeakEvent<S, EventArgs> {
                 }
             });
             subscribe(s, &handler);
+            // The sender owns the handler, which holds the subscription: the
+            // removal refers to both weakly.
             let s = s.downgrade_sender();
+            let handler = Rc::downgrade(&handler);
             let unsubscribe = unsubscribe.clone();
             Box::new(move || {
-                if let Some(s) = S::upgrade_sender(&s) {
+                if let (Some(s), Some(handler)) = (S::upgrade_sender(&s), handler.upgrade()) {
                     unsubscribe(&s, &handler);
                 }
             })
@@ -427,6 +433,23 @@ mod tests {
         add_subscriber(&source, Box::new(move || h.set(true)));
         source.fire();
         assert!(!handled.get());
+    }
+
+    /// Not from upstream: the managed test relies on the garbage collector;
+    /// here dropping the source must free the subscription and the source.
+    #[test]
+    fn dropping_the_source_frees_the_subscription() {
+        let subscriber = Subscriber::new(None);
+        let source = EventSource::new();
+        let weak_ev = EventSource::weak_ev();
+        weak_ev.subscribe(&source, &subscriber);
+        let subscription = weak_ev.subscriptions.borrow().entries.get(&source.sender_address()).cloned().unwrap();
+        assert!(subscription.upgrade().is_some());
+
+        drop(source);
+
+        // The subscription, and with it its weak reference to the source, is gone.
+        assert!(subscription.upgrade().is_none());
     }
 
     fn add_subscriber(source: &Rc<EventSource>, func: Box<dyn Fn()>) {
