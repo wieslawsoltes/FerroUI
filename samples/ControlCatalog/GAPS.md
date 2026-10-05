@@ -1,0 +1,78 @@
+# ControlCatalog: open gaps
+
+The documents of the sample that do not load yet, grouped by what they wait for. `excluded.txt` is the machine-readable list (the generated tests of a listed document are ignored with its reason); this page explains each open entry. Every gap of the framework has a minimal reproduction in `tests/gaps*.rs`, ignored with the same identifier, which passes once the gap is closed:
+
+```sh
+cargo test -p control-catalog -- --ignored gap_
+```
+
+Status: 219 documents, 174 load and show their class; 45 are listed below.
+
+## Gaps of the framework
+
+| Gap | What is missing | Reproduction | Documents |
+|---|---|---|---|
+| C102 | `FerroUI.Data.DataValidationException` is not declared for markup (`<data:DataValidationException>` with `x:Arguments`). | `gaps_a::gap_c102_data_validation_exception_in_markup` | `Pages/TextBox/TextBoxValidationPage.xaml` |
+| C201 | `System.Collections.ArrayList` is not a type of the markup type system: the element and its children (null included) as an items source. | `gaps_b::gap_c201_array_list_in_markup` | `Pages/ComboBoxPage.xaml` |
+| C202 | `OnPlatform` written as an element with `On` children has no content property and is not accepted as the value of the property it is set on. | `gaps_b::gap_c202_on_platform_element_with_on_children` | `Pages/PlatformInfoPage.xaml` |
+| C203 | A handler whose second parameter is `EventArgs` is not accepted for `PopupFlyoutBase.Opening`, and the handler cannot reach the cancellable arguments the event passes. | `gaps_b::gap_c203_flyout_opening_handler` | `Pages/ContextFlyoutPage.xaml` |
+| C207 | A compiled binding does not stream (`^`) a property of type `IObservable<T>` (the view model declares it as `ObservableValue`): "Compiled bindings do not support stream bindings for objects of type ObservableValue". | `gaps_b::gap_c207_compiled_stream_binding_of_an_observable` | `Pages/ListBoxPage.xaml` |
+| C208 | `FontFamily.Name` is not declared in the markup metadata of `FontFamily`, so `{Binding Name}` with `x:DataType="FontFamily"` does not resolve. | `gaps_b::gap_c208_font_family_name_in_a_compiled_binding` | `Pages/ComboBoxPage.xaml` |
+| C209 | The methods `TextBox.Cut`, `Copy`, `Paste` and `Clear` are not declared for markup, so they cannot be bound as commands (`{Binding $parent[TextBox].Cut}`). | `gaps_b::gap_c209_text_box_methods_as_commands` | `Pages/ContextFlyoutPage.xaml` |
+| C301 | A method name is not accepted for a property of a delegate type (`ToolTip.CustomPopupPlacementCallback`, `PopupFlyoutBase.CustomPopupPlacementCallback`). | `gaps_c::gap_c301_method_name_for_a_delegate_property` | `Pages/FlyoutsPage.xaml`, `Pages/ToolTipPage.xaml` |
+| C305 | `System.Collections.Generic.List`1` with `x:TypeArguments` is not a type of the markup type system, so a list created in markup is not accepted by `ItemsControl.ItemsSource`. | `gaps_c::gap_c305_generic_list_element` | `Pages/FocusPage.xaml`, `Pages/RefreshContainerPage.xaml`, and `Pages/DialogsPage.xaml` (which also waits for its code-behind) |
+| C306 | `Slider.Ticks` (`TickList`) is not converted from text (`Ticks="0,20,25,40,75,100"`). | `gaps_c::gap_c306_slider_ticks_from_text` | `Pages/SliderPage.xaml` |
+| C309 | `System.Collections.ArrayList` with enumeration values as children is not a type of the markup type system. | `gaps_c::gap_c309_array_list_element` | `Pages/ViewboxPage.xaml` |
+| C310 | `AutoCompleteBox.MinimumPopulateDelay` (`TimeSpan`) is not converted from text (`"00:00:01"`). | `gaps_c::gap_c310_time_span_property_from_text` | `Pages/AutoCompleteBoxPage.xaml` (which also waits for its code-behind) |
+
+One gap of the framework blocks no document of the list: C101, a reflection binding (`x:CompileBindings="False"`) cannot resolve `$parent[prefix:Type]` for a type of a `using:` namespace (`gaps_a::gap_c101_reflection_binding_parent_of_prefixed_type`). The theme of `SampleGalleryPage` uses such paths with compiled bindings, which resolve them.
+
+## Types and assemblies that are not ported
+
+| Document | Missing |
+|---|---|
+| `App.xaml` | The assembly `FerroUI.Controls.ColorPicker`: its Fluent and Simple style documents (`ferres://FerroUI.Controls.ColorPicker/Themes/{Fluent,Simple}/...`). The application loads the rest of the document (`temporary.rs`). |
+| `MainWindow.xaml` | `Win32Properties` (the attached property `WindowCornerPreference`). The window loads the rest of the document (`temporary.rs`). |
+| `Pages/ColorPickerPage.xaml` | `ColorPicker`, `ColorPreviewer`, `ColorSlider`, `ColorSpectrum`, `ColorView`, `FlatHalfColorPalette` (the colour picker assembly). |
+| `Pages/WindowCustomizationsPage.xaml` | `Win32Properties`; `MainWindowViewModel.Win32WindowCornerPreferences` and `Win32WindowCornerPreference` wait for it. |
+
+## Code-behind that needs framework API the port does not have
+
+| Document | Missing API |
+|---|---|
+| `Pages/ClipboardPage.xaml` | `DataFormat.File` and `ClipboardExtensions.TryGetFilesAsync` (`AsyncDataTransferExtensions.TryGetFilesAsync`): storage items as clipboard data. The handlers `CopyFiles` and `PasteFiles` use them; the platform clipboard does not map the file format either (`FerroUI.Native/clipboard_data_format_helper.rs`). Everything else the page uses (`DataFormat.CreateBytesApplicationFormat`, `DataTransfer`, `TryGetInProcessDataAsync`, `WindowNotificationManager`, `DispatcherTimer`) exists. |
+| `Pages/Gestures/GesturePullPage.xaml` | `Compositor.CreateVector3KeyFrameAnimation` (the key frame animation classes are listed by the generated composition schema but not ported), `Compositor.CreateImplicitAnimationCollection`, `CompositionObject.ImplicitAnimations`, `KeyFrameAnimation.InsertExpressionKeyFrame`, `LogicalExtensions.FindLogicalDescendantOfType`. |
+| `Pages/Gestures/GestureSwipePage.xaml` | `Compositor.CreateVector3KeyFrameAnimation`, `Compositor.CreateImplicitAnimationCollection`, `CompositionObject.ImplicitAnimations`, `KeyFrameAnimation.InsertExpressionKeyFrame`. |
+| `Pages/CompositionPage.xaml` | `Compositor.CreateExpressionAnimation`, `CreateColorKeyFrameAnimation`, `CreateVector3KeyFrameAnimation`, `CreateAnimationGroup`, `CompositionObject.ImplicitAnimations`, `CompositionCustomVisual`. |
+| `Pages/AutoCompleteBoxPage.xaml` | `LogicalExtensions.GetLogicalDescendants`; the document also needs gap C310. |
+| `Pages/NumericUpDownPage.xaml` | `CultureInfo.GetCultures(CultureTypes.SpecificCultures)`. |
+| `Pages/DialogsPage.xaml` | `ManagedStorageProvider` (the managed dialogs library); the document also needs gap C305. |
+| `Pages/DragAndDropPage.xaml` | `DialogsPage.ReadTextFromFile`, which waits for `DialogsPage`. |
+| `Pages/OpenGlPage.xaml` | The OpenGL library (`OpenGlControlBase`, `GlInterface`), `Compositor.CreateCompositionVisualSnapshot`. |
+| `Pages/OpenGl/OpenGlInteropPage.xaml` | The OpenGL library (`GlInterface`, `IGlContext`), composition GPU interop (`ICompositionGpuInterop`, `CompositionDrawingSurface`). |
+| `Pages/OpenGl/OpenGlLeasePage.xaml` | The OpenGL library (`GlInterface`), `CompositionCustomVisualHandler`, `ISkiaSharpApiLeaseFeature`. |
+| `Pages/ContentPage/ContentPagePerformancePage.xaml`, `Pages/CarouselPage/CarouselPagePerformancePage.xaml`, `Pages/DrawerPage/DrawerPagePerformancePage.xaml`, `Pages/NavigationPage/NavigationPagePerformancePage.xaml`, `Pages/TabbedPage/TabbedPagePerformancePage.xaml` | `NavigationPerformanceMonitorHelper` measures the managed heap (`GC.GetTotalMemory`, `GC.Collect`), which has no counterpart. |
+
+## Classes of the sample that are not ported yet
+
+These documents load without their class (the survey test, `cargo test -p control-catalog -- --ignored survey`, with `CATALOG_SURVEY` set); their code-behind is sample work, not a framework gap:
+
+- `Pages/CarouselPage/CareCompanionAppPage.xaml`
+- `Pages/ConnectedAnimationDemoPage.xaml`
+- `Pages/NavigationDemoPage.xaml`
+- `Pages/NavigationPage/FerroFlixAppPage.xaml`
+- `Pages/NavigationPage/LAvenirAppPage.xaml`
+- `Pages/NavigationPage/NavigationPageCurvedHeaderPage.xaml`
+- `Pages/NavigationPage/NavigationPageInteractiveHeaderPage.xaml`
+- `Pages/NavigationPage/NavigationPageMvvmPage.xaml`
+- `Pages/NavigationPage/NavigationPagePassDataPage.xaml`
+- `Pages/NavigationPage/NavigationPageScrollAwarePage.xaml`
+- `Pages/NavigationPage/NavigationPageTransitionsPage.xaml`
+- `Pages/NavigationPage/PulseAppPage.xaml`
+- `Pages/NavigationPage/RetroGamingAppPage.xaml`
+
+## Test harness
+
+| Document | Why |
+|---|---|
+| `Pages/SettingsPage.xaml` | `{x:Static local:App.CurrentTheme}` needs the application of the catalog as the current application. The page loads in the application, which offers it; the unit test application is not that application. |
