@@ -6,7 +6,9 @@
 # <example> is an example of the browser crate (src/Browser/FerroUI.Browser/examples/<example>,
 # with its host page in wwwroot/). The site is written to target/browser/<example> (or --out):
 # the host page, the script module of the platform (ferroui.js, built from webapp/ with esbuild)
-# and the WebAssembly module with its script. Serve the directory with any static web server.
+# and the WebAssembly module with its script, and for the browser profile .gz and .br copies of
+# them. Serve the directory with any static web server; the module must be served as
+# application/wasm, which lets the browser compile it while it downloads.
 # The module is built with the cargo profile `browser` (the release profile optimised for size, see
 # docs/porting/browser-size.md); --debug builds the dev profile, --profile any other profile.
 #
@@ -122,6 +124,11 @@ if [ "$PROFILE" = "browser" ]; then
     --enable-call-indirect-overlong --enable-multivalue --enable-mutable-globals \
     --enable-nontrapping-float-to-int --enable-reference-types --enable-sign-ext \
     "$OUT/$EXAMPLE.wasm" -o "$OUT/$EXAMPLE.wasm"
+
+  # Precompressed copies (.gz, .br) next to the files, for servers that serve them with
+  # Content-Encoding instead of compressing on every request.
+  echo "== precompressed files"
+  node "$ROOT/scripts/browser/compress.mjs" "$OUT"
 fi
 ls -la "$OUT"
 echo "site written to $OUT"
