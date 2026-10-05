@@ -7,12 +7,13 @@ use crate::interop::{dom_helper, input_helper, JsObject};
 use crate::js_object_control_handle::JsObjectControlHandle;
 use crate::rendering::RenderTargetBrowserSurface;
 use crate::storage::BrowserLauncher;
+use crate::storage::BrowserStorageProvider;
 use crate::windowing_platform::BrowserWindowingPlatform;
 use ferroui_base::input::platform::{Clipboard, IClipboard};
 use ferroui_base::input::raw::IRawInputEventArgs;
 use ferroui_base::input::text_input::ITextInputMethodImpl;
 use ferroui_base::input::IInputRoot;
-use ferroui_base::platform::storage::ILauncher;
+use ferroui_base::platform::storage::{ILauncher, IStorageProvider};
 use ferroui_base::platform::surfaces::IPlatformRenderSurface;
 use ferroui_base::platform::{ICursorImpl, IOptionalFeatureProvider, ISystemNavigationManagerImpl};
 use ferroui_base::reactive::IDisposable;
@@ -43,6 +44,7 @@ pub struct BrowserTopLevelImpl {
     input_handler: Rc<BrowserInputHandler>,
     insets_manager: Rc<BrowserInsetsManager>,
     clipboard: Rc<Clipboard>,
+    storage_provider: Rc<dyn IStorageProvider>,
     current_cursor: RefCell<String>,
     surface: RefCell<Option<Rc<RenderTargetBrowserSurface>>>,
     top_level_id: i32,
@@ -102,6 +104,7 @@ impl BrowserTopLevelImpl {
                 input_handler,
                 insets_manager: Rc::new(BrowserInsetsManager::new()),
                 clipboard: Clipboard::new(Rc::new(ClipboardImpl::new())),
+                storage_provider: Rc::new(BrowserStorageProvider::new()),
                 current_cursor: RefCell::new(CssCursor::DEFAULT.to_string()),
                 surface: RefCell::new(Some(surface)),
                 top_level_id,
@@ -217,6 +220,10 @@ impl IDisposable for BrowserTopLevelImpl {
 
 impl IOptionalFeatureProvider for BrowserTopLevelImpl {
     fn try_get_feature(&self, feature_type: TypeId) -> Option<Rc<dyn Any>> {
+        if feature_type == TypeId::of::<dyn IStorageProvider>() {
+            return Some(Rc::new(self.storage_provider.clone()));
+        }
+
         if feature_type == TypeId::of::<dyn ITextInputMethodImpl>() {
             let text_input_method: Rc<dyn ITextInputMethodImpl> = self.input_handler.text_input_method().clone();
             return Some(Rc::new(text_input_method));
