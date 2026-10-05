@@ -21,6 +21,8 @@ path = "lib.rs"
 [dependencies]
 ferroui-base = { workspace = true }
 ferroui-controls = { workspace = true }
+# The about dialog.
+ferroui-dialogs = { workspace = true }
 ferroui-markup = { workspace = true }
 ferroui-markup-xaml = { workspace = true }
 # The documents of the sample are loaded through the run-time XAML loader until the build-time
