@@ -8,3 +8,4 @@ node_modules/
 
 # The toolchain of the browser target installed by scripts/browser/setup.sh.
 /.tools/
+__pycache__/

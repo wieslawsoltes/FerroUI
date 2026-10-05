@@ -302,12 +302,13 @@ impl TypeInfo {
     /// path another crate names it by (`"ferroui_controls::Border"`). The
     /// declaring module ([`module_path`](Self::module_path)) is often
     /// private, so the path cannot be derived from it; a crate records the
-    /// paths of its type table in its `register_types()`. The emitter of
-    /// Rust source reads them; nothing else does.
+    /// table of its generated `rust_paths.rs` ([`ferro_rust_paths!`](crate::ferro_rust_paths))
+    /// in its `register_types()`. The emitter of Rust source reads them;
+    /// nothing else does.
     pub fn register_rust_paths(paths: &[(&'static TypeInfo, &'static str)]) {
         let mut registry = write_registry();
         for &(type_, path) in paths {
-            registry.rust_paths.insert(type_ as *const TypeInfo as usize, path);
+            registry.rust_paths.insert(type_ as *const TypeInfo as usize, (type_, path));
         }
     }
 
@@ -315,7 +316,13 @@ impl TypeInfo {
     /// ([`register_rust_paths`](Self::register_rust_paths)), if its crate
     /// recorded one.
     pub fn rust_path(&'static self) -> Option<&'static str> {
-        read_registry().rust_paths.get(&(self as *const TypeInfo as usize)).copied()
+        read_registry().rust_paths.get(&(self as *const TypeInfo as usize)).map(|entry| entry.1)
+    }
+
+    /// Every class with a registered public Rust path, with the path, in no
+    /// particular order.
+    pub fn all_rust_paths() -> Vec<(&'static TypeInfo, &'static str)> {
+        read_registry().rust_paths.values().copied().collect()
     }
 
     /// Finds a known type by namespace and name.
@@ -402,7 +409,7 @@ struct TypeRegistry {
     by_handle: HashMap<TypeId, (&'static TypeInfo, bool)>,
     namespaces: Vec<(&'static str, &'static str)>,
     /// The public Rust paths of classes, by the address of their type.
-    rust_paths: HashMap<usize, &'static str>,
+    rust_paths: HashMap<usize, (&'static TypeInfo, &'static str)>,
 }
 
 impl TypeRegistry {

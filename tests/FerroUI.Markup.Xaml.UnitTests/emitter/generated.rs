@@ -1306,6 +1306,84 @@ fn build_name_and_x_name_xaml_untyped(
     ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
 }
 
+/// Generated from `deep_nesting.xaml`.
+pub fn build_deep_nesting_xaml(
+    service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
+) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::Border>, ::ferroui_markup_xaml::XamlLoadException> {
+    // deep_nesting.xaml(1,2) Border
+    let border_0 = ::ferroui_controls::Border::new();
+    let name_scope = rt::name_scope_of(service_provider.as_ref());
+    border_0.begin_init();
+    // deep_nesting.xaml(1,100) Child
+    // deep_nesting.xaml(1,100) Decorator
+    let decorator_0 = ::ferroui_controls::Decorator::new();
+    decorator_0.begin_init();
+    border_0.set_value(::ferroui_controls::Decorator::child_property(), ::core::option::Option::Some(::core::clone::Clone::clone(&decorator_0).upcast::<::ferroui_controls::Control>()));
+    // deep_nesting.xaml(1,111) Child
+    // deep_nesting.xaml(1,111) Border
+    let border_1 = ::ferroui_controls::Border::new();
+    border_1.begin_init();
+    decorator_0.set_value(::ferroui_controls::Decorator::child_property(), ::core::option::Option::Some(::core::clone::Clone::clone(&border_1).upcast::<::ferroui_controls::Control>()));
+    // deep_nesting.xaml(1,119) Child
+    // deep_nesting.xaml(1,119) Viewbox
+    let viewbox_0 = ::ferroui_controls::Viewbox::new();
+    viewbox_0.begin_init();
+    border_1.set_value(::ferroui_controls::Decorator::child_property(), ::core::option::Option::Some(::core::clone::Clone::clone(&viewbox_0).upcast::<::ferroui_controls::Control>()));
+    // deep_nesting.xaml(1,128) Child
+    // deep_nesting.xaml(1,128) Border
+    let border_2 = ::ferroui_controls::Border::new();
+    border_2.begin_init();
+    viewbox_0.set_value(::ferroui_controls::Viewbox::child_property(), ::core::option::Option::Some(::core::clone::Clone::clone(&border_2).upcast::<::ferroui_controls::Control>()));
+    // deep_nesting.xaml(1,136) Child
+    // deep_nesting.xaml(1,136) TextBlock
+    let text_block_0 = ::ferroui_controls::TextBlock::new();
+    text_block_0.begin_init();
+    border_2.set_value(::ferroui_controls::Decorator::child_property(), ::core::option::Option::Some(::core::clone::Clone::clone(&text_block_0).upcast::<::ferroui_controls::Control>()));
+    // deep_nesting.xaml(1,146) Text
+    text_block_0.set_value(::ferroui_controls::TextBlock::text_property(), ::core::option::Option::Some(::std::string::String::from("deep")));
+    text_block_0.try_end_init().map_err(|error| rt::at(rt::TARGET_INVOCATION_EXCEPTION, error, 1, 136))?;
+    border_2.try_end_init().map_err(|error| rt::at(rt::TARGET_INVOCATION_EXCEPTION, error, 1, 128))?;
+    viewbox_0.try_end_init().map_err(|error| rt::at(rt::TARGET_INVOCATION_EXCEPTION, error, 1, 119))?;
+    border_1.try_end_init().map_err(|error| rt::at(rt::TARGET_INVOCATION_EXCEPTION, error, 1, 111))?;
+    decorator_0.try_end_init().map_err(|error| rt::at(rt::TARGET_INVOCATION_EXCEPTION, error, 1, 100))?;
+    border_0.try_end_init().map_err(|error| rt::at(rt::TARGET_INVOCATION_EXCEPTION, error, 1, 2))?;
+    rt::complete_root_name_scope(::core::option::Option::Some(&border_0), name_scope.as_ref(), 1, 2)?;
+    ::core::result::Result::Ok(border_0)
+}
+
+fn build_deep_nesting_xaml_untyped(
+    service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
+) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadException> {
+    let root = build_deep_nesting_xaml(service_provider)?;
+    ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
+}
+
+/// Generated from `layout_transform_control.xaml`.
+pub fn build_layout_transform_control_xaml(
+    service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
+) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::LayoutTransformControl>, ::ferroui_markup_xaml::XamlLoadException> {
+    // layout_transform_control.xaml(1,2) LayoutTransformControl
+    let layout_transform_control_0 = ::ferroui_controls::LayoutTransformControl::new();
+    let name_scope = rt::name_scope_of(service_provider.as_ref());
+    layout_transform_control_0.begin_init();
+    // layout_transform_control.xaml(1,116) Child
+    // layout_transform_control.xaml(1,116) Border
+    let border_0 = ::ferroui_controls::Border::new();
+    border_0.begin_init();
+    layout_transform_control_0.set_value(::ferroui_controls::Decorator::child_property(), ::core::option::Option::Some(::core::clone::Clone::clone(&border_0).upcast::<::ferroui_controls::Control>()));
+    border_0.try_end_init().map_err(|error| rt::at(rt::TARGET_INVOCATION_EXCEPTION, error, 1, 116))?;
+    layout_transform_control_0.try_end_init().map_err(|error| rt::at(rt::TARGET_INVOCATION_EXCEPTION, error, 1, 2))?;
+    rt::complete_root_name_scope(::core::option::Option::Some(&layout_transform_control_0), name_scope.as_ref(), 1, 2)?;
+    ::core::result::Result::Ok(layout_transform_control_0)
+}
+
+fn build_layout_transform_control_xaml_untyped(
+    service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
+) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadException> {
+    let root = build_layout_transform_control_xaml(service_provider)?;
+    ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
+}
+
 /// Generated from `user_control_properties.xaml`.
 pub fn build_user_control_properties_xaml(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
@@ -1506,6 +1584,8 @@ pub const DOCUMENTS: &[(&str, BuildDocument)] = &[
     ("named_content.xaml", build_named_content_xaml_untyped as BuildDocument),
     ("duplicate_name.xaml", build_duplicate_name_xaml_untyped as BuildDocument),
     ("name_and_x_name.xaml", build_name_and_x_name_xaml_untyped as BuildDocument),
+    ("deep_nesting.xaml", build_deep_nesting_xaml_untyped as BuildDocument),
+    ("layout_transform_control.xaml", build_layout_transform_control_xaml_untyped as BuildDocument),
     ("user_control_properties.xaml", build_user_control_properties_xaml_untyped as BuildDocument),
     ("multiline_document.xaml", build_multiline_document_xaml_untyped as BuildDocument),
     ("multiline_duplicate_name.xaml", build_multiline_duplicate_name_xaml_untyped as BuildDocument),

@@ -21,6 +21,7 @@ mod ferro_xaml_loader;
 mod markup_extension;
 mod object_casts;
 mod register_types;
+mod rust_paths;
 mod runtime_xaml_loader_configuration;
 mod runtime_xaml_loader_document;
 mod xaml_load_exception;

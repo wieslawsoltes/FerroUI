@@ -49,8 +49,8 @@
 //!
 //! | What | Source |
 //! |---|---|
-//! | the path of a class | `TypeInfo::rust_path()`: the type tables of the crates (`register_types.rs`) |
-//! | the path of an enumeration or value type | `MarkupType::rust_path()` (`MarkupType::register_rust_paths`) |
+//! | the path of a class | `TypeInfo::rust_path()`: the generated `rust_paths.rs` of the crate (`scripts/rust_paths.py`: the shortest public path, from the module tree of the crate) |
+//! | the path of an enumeration, value type or contract | `MarkupType::rust_path()`, from the same file |
 //! | an enumeration member | `MarkupEnumMember::rust_variant` (the declaration macro) |
 //! | a constructor with arguments | `MarkupConstructor::emit` (`stringify!` of the declared callable), used only in the form `<TypeName>::<function>` |
 //! | the default constructor of a class | the convention `Type::new()` (porting guide, "Classes"), checked against `TypeInfo::default_constructor` |

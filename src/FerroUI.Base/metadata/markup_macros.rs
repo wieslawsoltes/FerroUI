@@ -1187,3 +1187,54 @@ macro_rules! __ferro_markup_attribute_properties {
         $crate::__ferro_markup_attribute_properties!([$($done,)*] $($($rest)*)?)
     };
 }
+
+/// The table of public Rust paths of the registered types of a crate, from
+/// its generated `rust_paths.rs` (`scripts/rust_paths.py`, called by
+/// `scripts/generate_markup_types.py`).
+///
+/// ```ignore
+/// ferro_rust_paths! {
+///     classes: [crate::Border, crate::primitives::Popup],
+///     types: [crate::Dock, crate::GridLength],
+///     contracts: [crate::templates::IDataTemplate],
+/// }
+/// ```
+///
+/// Every entry is a crate-relative public path. It defines
+/// `CLASS_RUST_PATHS: &[(&TypeInfo, &str)]` (the runtime type of each
+/// class) and `MARKUP_RUST_PATHS: &[(&MarkupType, &str, bool)]` (the
+/// metadata of each type, of `dyn Trait` for a contract, and whether the
+/// path names a trait), each with the path as another crate names it
+/// (`crate` replaced by the name of the crate). The item and
+/// the text come from the same tokens, so the text names exactly the
+/// registered type. The crate passes both tables to
+/// [`TypeInfo::register_rust_paths`](crate::TypeInfo::register_rust_paths)
+/// and [`MarkupType::register_rust_paths`](super::MarkupType::register_rust_paths).
+#[macro_export]
+macro_rules! ferro_rust_paths {
+    (
+        classes: [$(crate $(:: $class:ident)+),* $(,)?],
+        types: [$(crate $(:: $type_:ident)+),* $(,)?],
+        contracts: [$(crate $(:: $contract:ident)+),* $(,)?] $(,)?
+    ) => {
+        /// The public Rust paths of the classes of the type table.
+        pub(crate) const CLASS_RUST_PATHS: &[(&'static $crate::TypeInfo, &'static str)] = &[$((
+            <crate $(:: $class)+ as $crate::StaticType>::TYPE,
+            ::std::concat!(::std::env!("CARGO_CRATE_NAME") $(, "::", ::std::stringify!($class))+),
+        )),*];
+
+        /// The public Rust paths of the markup types of the type lists.
+        pub(crate) const MARKUP_RUST_PATHS: &[(&'static $crate::metadata::MarkupType, &'static str, bool)] = &[
+            $((
+                <crate $(:: $type_)+ as $crate::metadata::MarkupTyped>::MARKUP,
+                ::std::concat!(::std::env!("CARGO_CRATE_NAME") $(, "::", ::std::stringify!($type_))+),
+                false,
+            ),)*
+            $((
+                <dyn crate $(:: $contract)+ as $crate::metadata::MarkupTyped>::MARKUP,
+                ::std::concat!(::std::env!("CARGO_CRATE_NAME") $(, "::", ::std::stringify!($contract))+),
+                true,
+            ),)*
+        ];
+    };
+}
