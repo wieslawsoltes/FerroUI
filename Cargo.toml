@@ -9,6 +9,7 @@ members = [
     "src/FerroUI.MicroCom",
     "src/FerroUI.Native",
     "src/FerroUI.Desktop",
+    "src/Browser/FerroUI.Browser",
     "src/FerroUI.Fonts.Inter",
     "src/FerroUI.Themes.Simple",
     "src/FerroUI.Themes.Fluent",
@@ -40,6 +41,7 @@ xamlx = { path = "external/XamlX/src/XamlX" }
 ferroui-microcom = { path = "src/FerroUI.MicroCom" }
 ferroui-native = { path = "src/FerroUI.Native" }
 ferroui-desktop = { path = "src/FerroUI.Desktop" }
+ferroui-browser = { path = "src/Browser/FerroUI.Browser" }
 ferroui-fonts-inter = { path = "src/FerroUI.Fonts.Inter" }
 ferroui-themes-simple = { path = "src/FerroUI.Themes.Simple" }
 ferroui-themes-fluent = { path = "src/FerroUI.Themes.Fluent" }
@@ -50,6 +52,8 @@ bitflags = "2"
 paste = "1"
 cc = "1"
 skia-safe = { version = "0.153" }
+# The version of the `wasm-bindgen` command-line tool on PATH has to be this exact version.
+wasm-bindgen = "=0.2.129"
 roxmltree = "0.20"
 harfbuzz-sys = { version = "0.8", default-features = false, features = ["bundled"] }
 rust_decimal = { version = "1.43", default-features = false }

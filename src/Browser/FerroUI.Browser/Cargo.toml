@@ -1,0 +1,28 @@
+[package]
+name = "ferroui-browser"
+description = "The browser platform of FerroUI: a top-level in an element of a web page, rendered with WebGL or to a 2D canvas"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+
+[lib]
+path = "lib.rs"
+
+[dependencies]
+ferroui-base.workspace = true
+ferroui-controls.workspace = true
+ferroui-opengl.workspace = true
+ferroui-skia.workspace = true
+ferroui-harfbuzz.workspace = true
+wasm-bindgen.workspace = true
+
+[dev-dependencies]
+# The example shows a themed view with the embedded default font.
+ferroui-themes-fluent.workspace = true
+ferroui-fonts-inter.workspace = true
+
+[[example]]
+name = "themed_view"
+path = "examples/themed_view/main.rs"

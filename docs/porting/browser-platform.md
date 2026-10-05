@@ -71,7 +71,7 @@ Constraints this puts on `FerroUI.Skia`:
 - A framebuffer surface path (upstream `IFramebufferPlatformSurface`, `RetainedFramebuffer`) is required for the raster fallback.
 - A "graphics not ready yet" state is required (upstream `IPlatformGraphicsReadyStateFeature`): the compositor may exist before the render target does.
 
-Browser rendering modes mirror upstream: `FerroBrowserRenderingMode { Software2D = 1, WebGL1, WebGL2 }`, default order WebGL2, WebGL1, Software2D, with `failIfMajorPerformanceCaveat: true` so that software GL falls through to the raster path. Add `WebGpu` only with the Vello configuration.
+Browser rendering modes mirror upstream: `BrowserRenderingMode { Software2D = 1, WebGL1, WebGL2 }`, default order WebGL2, WebGL1, Software2D, with `failIfMajorPerformanceCaveat: true` so that software GL falls through to the raster path. Add `WebGpu` only with the Vello configuration.
 
 ## 5. JS interop shape (question 3)
 
@@ -135,9 +135,9 @@ Threads: upstream's multithreaded mode moves the UI to a worker with a blocking 
 
 ## 7. Windowing model (question 5)
 
-- **Lifetime**: `FerroBrowserSingleViewLifetime` implementing the single-view and single-top-level lifetime contracts. `main_view` set and get forward to the view.
+- **Lifetime**: `BrowserSingleViewLifetime` implementing the single-view and single-top-level lifetime contracts. `main_view` set and get forward to the view.
 - **Top-level**: `FerroView` (upstream `AvaloniaView`) owns an embeddable control root over `BrowserTopLevelImpl`. One per host element; constructing more views on other elements is allowed after `setup_browser_app`. A process-wide id-to-weak-top-level map routes JS callbacks.
-- **No windows**: the windowing platform's `create_window` returns an error. Anything in `FerroUI.Controls` that assumes a `Window` (dialogs, message boxes, window-hosted popups, menus that open native windows) needs an overlay-based path.
+- **No windows**: the windowing platform's `create_window` panics, as the upstream method throws. Anything in `FerroUI.Controls` that assumes a `Window` (dialogs, message boxes, window-hosted popups, menus that open native windows) needs an overlay-based path.
 - **Popups**: `create_popup()` returns `None`; the overlay popup host and overlay layer in the top-level are used, positioned by the managed popup positioner. Popups are clipped to the canvas. The overlay popup host and the managed positioner must therefore be part of the first usable `FerroUI.Controls`, not a later addition.
 - **Size and DPI**: `ResizeObserver` reports device pixels and `devicePixelRatio`; client size is `pixels / dpr`; `render_scaling` and `desktop_scaling` are both the device pixel ratio. The canvas backing size is set at the start of each draw from the last observed size. Zoom and monitor changes arrive as a scaling change.
 - **Coordinates**: `point_to_screen` and `point_to_client` are identity upstream. Keep it for the MVP; correct it with `getBoundingClientRect` when screens are ported.
@@ -212,7 +212,7 @@ Workspace changes: the crates above as members, plus `src/FerroUI.OpenGL` (the O
 Tooling:
 
 - **Emscripten configuration**: plain `cargo build --target wasm32-unknown-emscripten` plus a repository script (`scripts/build-browser.sh` or an `xtask`) that runs esbuild, builds, and assembles `wwwroot` + `.js` + `.wasm` into a `dist` directory served by any static server. No trunk and no wasm-pack (wasm-pack has an open request for this target; trunk support **[U]**).
-- Link settings (in `.cargo/config.toml` for the target) **[M]**: `linker = "em++"` (Skia needs the C++ runtime), `-sWASM_BINDGEN`, `-sMODULARIZE`, `-sEXPORT_ES6`, `-sMAX_WEBGL_VERSION=2`, `-sALLOW_MEMORY_GROWTH=1`, `-sEXPORTED_RUNTIME_METHODS=GL,HEAPU8` (the JS side must reach Emscripten's `GL` object and the module memory), `-sINVOKE_RUN=0` (otherwise `main` runs twice), and `EMCC_CFLAGS="-s ERROR_ON_UNDEFINED_SYMBOLS=0"` as rust-skia requires. No `-Cpanic=abort` and no `-Crelocation-model=static`. `emcc` writes the JS snippets of `wasm-bindgen` next to `deps/<name>.js`, so the site is assembled from the `deps` directory.
+- Link settings (in `.cargo/config.toml` for the target) **[M]**: `linker = "em++"` (Skia needs the C++ runtime), `-sWASM_BINDGEN`, `-sMODULARIZE`, `-sEXPORT_ES6`, `-sMAX_WEBGL_VERSION=2`, `-sALLOW_MEMORY_GROWTH=1`, `-sEXPORTED_RUNTIME_METHODS=GL,HEAPU8` (the JS side must reach Emscripten's `GL` object and the module memory), `-sINVOKE_RUN=0` (the host page starts the application; without it `main` also runs twice), `-sSTACK_SIZE=8MB` (the default stack of 64 KB is too small for layout and markup loading), `-sGL_ENABLE_GET_PROC_ADDRESS=1` (the OpenGL entry points of a context are resolved by name), and `EMCC_CFLAGS="-s ERROR_ON_UNDEFINED_SYMBOLS=0"` as rust-skia requires. No `-Cpanic=abort` and no `-Crelocation-model=static`. The backend imports its script module by a relative specifier, so there are no `wasm-bindgen` snippets to copy: `scripts/build-browser.sh` assembles the site from the host page, `ferroui.js` and the `.js`/`.wasm` pair of the application (`target/wasm32-unknown-emscripten/<profile>/examples/` for an example of the browser crate).
 - **`wasm32-unknown-unknown` configuration**: trunk, with the same `webapp` bundle.
 - TypeScript: keep upstream's esbuild script and ESLint configuration; three bundles as upstream. Asset fingerprinting and import maps are not needed initially.
 
@@ -260,6 +260,14 @@ Measured on macOS arm64 with Emscripten 6.0.10, Rust 1.90.0, `skia-safe` 0.153.3
 - The core crates (`FerroUI.Base`, `FerroUI.Controls`, the markup crates and the run-time loader, both themes, `FerroUI.HarfBuzz`, the ControlCatalog library) compile for the target unchanged. `FerroUI.Skia` needs its Skia features per target.
 - No published Skia binary combines Graphite and Ganesh; with unsupported feature combinations the build of `skia-bindings` silently falls back to compiling Skia from source (and currently fails there). Feature resolution must be checked with `cargo tree -e features` before building for a new target.
 
+### Verified with the backend skeleton (2026-10-05)
+
+- Rust imports the script module by a plain relative specifier (`#[wasm_bindgen(raw_module = "./ferroui.js")]`), so the crate checks and tests without the bundle; the site places `ferroui.js` next to the script of the WebAssembly module. Exports of a library crate reach the page; properties of script objects are read with typed getters, without `js-sys`.
+- The application does not start when the module is instantiated: the host page creates the module, hands it to the script side (`FerroExports.attach(runtime)`) and then calls the exported entry point. Every export is therefore resolved before the first callback fires.
+- The `themed_view` example of `FerroUI.Browser` (Fluent theme, embedded Inter font, run-time XAML loader) renders correctly in headless Chrome 154 through WebGL2 (Skia Ganesh), through the 2D-canvas path (`?RenderingMode=Software2D`), with the dark variant at a device scale factor of 2, and re-lays out when its host element is resized. The page is up within a few seconds from a local server.
+- Additional link settings: `-sSTACK_SIZE=8MB` (the default 64 KB stack is too small) and `-sGL_ENABLE_GET_PROC_ADDRESS=1` (the OpenGL entry points of the context are resolved by name).
+- Size of that example, release profile of the workspace, not optimised for size: 48.7 MB of WASM, 10.2 MB with gzip. Reducing it (size optimisation, `wasm-opt`, the build-time XAML compiler instead of the run-time loader) is open.
+
 ### Still not verified
 
 - Firefox, Safari and mobile browsers; WebGL1; the `failIfMajorPerformanceCaveat` fallback to the raster path.
@@ -281,7 +289,7 @@ Measured on macOS arm64 with Emscripten 6.0.10, Rust 1.90.0, `skia-safe` 0.153.3
 | `input.ts` key handlers | Handlers return a promise and call `preventDefault` in `.then`; `keydown` prevents default unless the event was handled while a clipboard read is pending, `keyup` prevents default when **not** handled. In effect almost every key's default action is suppressed while the host has focus | Return `bool` synchronously; define an explicit policy for which browser shortcuts pass through |
 | `input.ts` pointer unsubscription | Removes `pointerover` instead of `pointermove`; the `beforeinput` listener is never removed | Fix |
 | `BrowserInputHandler.OnWheel` | Fixed divisor 50, `deltaMode` ignored | Honour `deltaMode` |
-| `softwareRenderTarget.ts` | A premultiplied framebuffer is passed to `putImageData`, which expects straight alpha; translucent pixels over page content come out wrong | Use an opaque canvas for the software path or unpremultiply |
+| `softwareRenderTarget.ts` | A premultiplied framebuffer is passed to `putImageData`, which expects straight alpha; translucent pixels over page content come out wrong | Fixed: the frame is converted to straight alpha into a retained buffer before it is put on the canvas (opaque and transparent pixels are copied unchanged); `webapp/tests/software-blit.test.mjs` checks the composited pixels in headless Chrome |
 | `BrowserTopLevelImpl` | `PointToScreen` is the identity; `LostFocus` is never raised; `Dispose` does not unsubscribe input | Fix in Phase 2/3 |
 | `BrowserInputHandler.OnPointerMove` | The coalesced-points loop steps the index by the item size while bounding by point count | Re-derive rather than transliterate |
 | `stream.ts` `write` | The copy fallback writes the original span, not the copy | Rewritten anyway |
@@ -298,7 +306,7 @@ Phase key: 1 = MVP, 2 = input, 3 = services, 4 = late, – = not ported. Rust pa
 | `Avalonia.Browser.csproj` | Project, native asset references, bun/esbuild targets | `Cargo.toml` + build script for `webapp` | 1 |
 | `build/Avalonia.Browser.props` | `AvaloniaAllowWebGl2` default | Cargo feature / documented link flag | 1 |
 | `build/Avalonia.Browser.targets` | emcc flags, exported runtime methods, static web assets with fingerprinting | `.cargo/config.toml` flags + `scripts/build-browser.sh`; no fingerprinting | 1 |
-| `BrowserAppBuilder.cs` | Options, rendering-mode enum, `StartBrowserAppAsync`, `SetupBrowserAppAsync`, `UseBrowser` | `browser_app_builder.rs` (`FerroBrowserPlatformOptions`, `FerroBrowserRenderingMode`, `start_browser_app`, `setup_browser_app`, `use_browser`) | 1 |
+| `BrowserAppBuilder.cs` | Options, rendering-mode enum, `StartBrowserAppAsync`, `SetupBrowserAppAsync`, `UseBrowser` | `browser_app_builder.rs` (`BrowserPlatformOptions`, `BrowserRenderingMode`, `start_browser_app`, `setup_browser_app`, `use_browser`) | 1 |
 | `BrowserSingleViewLifetime.cs` | Single-view lifetime | `browser_single_view_lifetime.rs` | 1 |
 | `AvaloniaView.cs` | Host element to embeddable root, splash removal | `ferro_view.rs` | 1 |
 | `WindowingPlatform.cs` | Service registration, thread detection, windowing platform that refuses windows | `windowing_platform.rs` (no thread detection) | 1 |

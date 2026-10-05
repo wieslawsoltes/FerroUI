@@ -44,15 +44,15 @@ Percentages are `present / (total - waived)`. Member matching is by name with re
 
 | | Ported | Total | Waived | % |
 |---|---:|---:|---:|---:|
-| C# files | 1876 | 2373 | 0 | 79.1% |
-| Types | 2401 | 3290 | 0 | 73.0% |
-| Members | 17533 | 24161 | 43 | 72.7% |
+| C# files | 1900 | 2370 | 0 | 80.2% |
+| Types | 2428 | 3287 | 0 | 73.9% |
+| Members | 17669 | 24146 | 43 | 73.3% |
 | Contracts (interfaces) | 364 | 465 | - | 78.3% |
 | Property registrations | 1163 | 1233 | - | 94.3% |
 | Routed events | 108 | 108 | - | 100.0% |
-| Other files (native sources, XAML, TypeScript, fonts) | 235 | 268 | - | 87.7% |
+| Other files (native sources, XAML, TypeScript, fonts) | 239 | 268 | - | 89.2% |
 
-41 upstream files are not applicable and not counted. Out of the current scope (platform backends, below): 524 files, 1197 types, 13006 members.
+44 upstream files are not applicable and not counted. Out of the current scope (platform backends, below): 524 files, 1197 types, 13006 members.
 
 ## Projects
 
@@ -77,7 +77,7 @@ The % column is member coverage (file coverage for plain file lists).
 | [Avalonia.Remote.Protocol](tracking/Avalonia.Remote.Protocol.md) | `src/Avalonia.Remote.Protocol` | `src/FerroUI.Remote.Protocol` | `ferroui-remote-protocol` | 0/14 | 0/55 | 0/202 (1 waived) | 0.0% | 4 - tooling | P3 |
 | [Avalonia.Themes.Fluent](tracking/Avalonia.Themes.Fluent.md) | `src/Avalonia.Themes.Fluent` | `src/FerroUI.Themes.Fluent` | `ferroui-themes-fluent` | 5/5 | 6/6 | 68/73 | 93.2% | 2 - xaml + themes | P1 |
 | [Avalonia.Themes.Simple](tracking/Avalonia.Themes.Simple.md) | `src/Avalonia.Themes.Simple` | `src/FerroUI.Themes.Simple` | `ferroui-themes-simple` | 1/1 | 1/1 | 1/1 | 100.0% | 2 - xaml + themes | P2 |
-| [Avalonia.Browser](tracking/Avalonia.Browser.md) | `src/Browser/Avalonia.Browser` | `src/Browser/FerroUI.Browser` | `ferroui-browser` | 0/52 | 0/64 | 0/441 | 0.0% | 3 - browser | P2 |
+| [Avalonia.Browser](tracking/Avalonia.Browser.md) | `src/Browser/Avalonia.Browser` | `src/Browser/FerroUI.Browser` | `ferroui-browser` | 24/49 | 27/61 | 136/426 | 31.9% | 3 - browser | P2 |
 | [Avalonia.HarfBuzz](tracking/Avalonia.HarfBuzz.md) | `src/HarfBuzz/Avalonia.HarfBuzz` | `src/HarfBuzz/FerroUI.HarfBuzz` | `ferroui-harfbuzz` | 3/3 | 3/3 | 5/8 | 62.5% | 1 - rendering | P0 |
 | [Avalonia.Headless](tracking/Avalonia.Headless.md) | `src/Headless/Avalonia.Headless` | `src/Headless/FerroUI.Headless` | `ferroui-headless` | 0/11 | 0/24 | 0/251 | 0.0% | 1 - test infrastructure | P1 |
 | [Avalonia.Headless.NUnit](tracking/Avalonia.Headless.NUnit.md) | `src/Headless/Avalonia.Headless.NUnit` | `src/Headless/FerroUI.Headless.NUnit` | `ferroui-headless-nunit` | 0/4 | 0/4 | 0/4 | 0.0% | 1 - test infrastructure | P1 |
@@ -96,7 +96,7 @@ Non-C# files that belong to these projects:
 | [Avalonia.Fonts.Inter](tracking/Avalonia.Fonts.Inter.md) | fonts | 6 | 6 |
 | [Avalonia.Themes.Fluent](tracking/Avalonia.Themes.Fluent.md) | axaml | 86 | 86 |
 | [Avalonia.Themes.Simple](tracking/Avalonia.Themes.Simple.md) | axaml | 81 | 81 |
-| [Avalonia.Browser](tracking/Avalonia.Browser.md) | typescript | 0 | 33 |
+| [Avalonia.Browser](tracking/Avalonia.Browser.md) | typescript | 4 | 33 |
 
 Native interop contract `src/Avalonia.Native/avn.idl` -> `src/FerroUI.Native/frn.idl`: interfaces 58/58, methods 328/328, enums 23/23, structs 8/8 (details in [Avalonia.Native](tracking/Avalonia.Native.md)).
 
@@ -150,7 +150,7 @@ Libraries.
 | `src/Avalonia.Vulkan` | 30 | `src/FerroUI.Vulkan` | not created | [Avalonia.Vulkan](tracking/Avalonia.Vulkan.md) (out of scope) |
 | `src/Avalonia.Wayland` | 81 | `src/FerroUI.Wayland` | not created | [Avalonia.Wayland](tracking/Avalonia.Wayland.md) (out of scope) |
 | `src/Avalonia.X11` | 88 | `src/FerroUI.X11` | not created | [Avalonia.X11](tracking/Avalonia.X11.md) (out of scope) |
-| `src/Browser/Avalonia.Browser` | 52 | `src/Browser/FerroUI.Browser` | not created | [Avalonia.Browser](tracking/Avalonia.Browser.md) |
+| `src/Browser/Avalonia.Browser` | 52 | `src/Browser/FerroUI.Browser` | workspace member | [Avalonia.Browser](tracking/Avalonia.Browser.md) |
 | `src/HarfBuzz/Avalonia.HarfBuzz` | 3 | `src/HarfBuzz/FerroUI.HarfBuzz` | workspace member | [Avalonia.HarfBuzz](tracking/Avalonia.HarfBuzz.md) |
 | `src/Headless/Avalonia.Headless` | 11 | `src/Headless/FerroUI.Headless` | not created | [Avalonia.Headless](tracking/Avalonia.Headless.md) |
 | `src/Headless/Avalonia.Headless.NUnit` | 4 | `src/Headless/FerroUI.Headless.NUnit` | not created | [Avalonia.Headless.NUnit](tracking/Avalonia.Headless.NUnit.md) |
@@ -302,6 +302,7 @@ Upstream unit tests are ported next to the code (`#[cfg(test)] mod tests` or `<f
 | `samples/ControlCatalog` | `samples/ControlCatalog` (not tracked) |
 | `samples/ControlCatalog.Desktop` | `samples/ControlCatalog.Desktop` (not tracked) |
 | `samples/MiniMvvm` | `samples/MiniMvvm` (not tracked) |
+| `src/Browser/FerroUI.Browser` | `src/Browser/Avalonia.Browser` |
 | `src/FerroUI.Base` | `src/Avalonia.Base` |
 | `src/FerroUI.Controls` | `src/Avalonia.Controls` |
 | `src/FerroUI.Desktop` | `src/Avalonia.Desktop` |
@@ -323,7 +324,7 @@ FerroUI-only crates have no upstream source directory (for example the MicroCom 
 
 ## Rust-only files
 
-283 Rust source files have no upstream counterpart (276 without a recorded reason). They are listed at the end of each project page.
+283 Rust source files have no upstream counterpart (272 without a recorded reason). They are listed at the end of each project page.
 
 | Project | Rust file | Reason |
 |---|---|---|
@@ -561,14 +562,14 @@ FerroUI-only crates have no upstream source directory (for example the MicroCom 
 | [Avalonia.Controls](tracking/Avalonia.Controls.md) | `src/FerroUI.Controls/utils/debug_display.rs` | **unmapped** |
 | [Avalonia.Controls](tracking/Avalonia.Controls.md) | `src/FerroUI.Controls/utils/masked_text_provider.rs` | **unmapped** |
 | [Avalonia.Controls](tracking/Avalonia.Controls.md) | `src/FerroUI.Controls/window_decorations.rs` | **unmapped** |
-| [Avalonia.Fonts.Inter](tracking/Avalonia.Fonts.Inter.md) | `src/FerroUI.Fonts.Inter/assets.rs` | **unmapped** |
+| [Avalonia.Fonts.Inter](tracking/Avalonia.Fonts.Inter.md) | `src/FerroUI.Fonts.Inter/assets.rs` | embeds the font files: the counterpart of the resource items of the upstream project file |
 | [Avalonia.MicroCom](tracking/Avalonia.MicroCom.md) | `src/FerroUI.MicroCom/com_ptr.rs` | port of the MicroCom.Runtime package, which upstream consumes as a NuGet binary |
 | [Avalonia.MicroCom](tracking/Avalonia.MicroCom.md) | `src/FerroUI.MicroCom/guid.rs` | port of the MicroCom.Runtime package, which upstream consumes as a NuGet binary |
 | [Avalonia.MicroCom](tracking/Avalonia.MicroCom.md) | `src/FerroUI.MicroCom/hresult.rs` | port of the MicroCom.Runtime package, which upstream consumes as a NuGet binary |
 | [Avalonia.MicroCom](tracking/Avalonia.MicroCom.md) | `src/FerroUI.MicroCom/unknown.rs` | port of the MicroCom.Runtime package, which upstream consumes as a NuGet binary |
 | [Avalonia.Native](tracking/Avalonia.Native.md) | `src/FerroUI.Native/frn_menu_item.rs` | **unmapped** |
-| [Avalonia.OpenGL](tracking/Avalonia.OpenGL.md) | `src/FerroUI.OpenGL/entry_points.rs` | **unmapped** |
-| [Avalonia.OpenGL](tracking/Avalonia.OpenGL.md) | `src/FerroUI.OpenGL/testing.rs` | **unmapped** |
+| [Avalonia.OpenGL](tracking/Avalonia.OpenGL.md) | `src/FerroUI.OpenGL/entry_points.rs` | the entry point table macro: takes the place of the upstream source generator for GetProcAddress attributes |
+| [Avalonia.OpenGL](tracking/Avalonia.OpenGL.md) | `src/FerroUI.OpenGL/testing.rs` | scripted OpenGL implementation of the unit tests |
 | [Avalonia.Themes.Fluent](tracking/Avalonia.Themes.Fluent.md) | `src/FerroUI.Themes.Fluent/assets.rs` | **unmapped** |
 | [Avalonia.Themes.Fluent](tracking/Avalonia.Themes.Fluent.md) | `src/FerroUI.Themes.Fluent/register_types.rs` | **unmapped** |
 | [Avalonia.Themes.Simple](tracking/Avalonia.Themes.Simple.md) | `src/FerroUI.Themes.Simple/assets.rs` | **unmapped** |
@@ -602,7 +603,7 @@ FerroUI-only crates have no upstream source directory (for example the MicroCom 
 | [Avalonia.Markup.Xaml.Loader](tracking/Avalonia.Markup.Xaml.Loader.md) | `src/Markup/FerroUI.Markup.Xaml.Loader/testing/bindings.rs` | **unmapped** |
 | [Avalonia.Markup.Xaml.Loader](tracking/Avalonia.Markup.Xaml.Loader.md) | `src/Markup/FerroUI.Markup.Xaml.Loader/testing/objects.rs` | **unmapped** |
 | [Avalonia.Markup.Xaml.Loader](tracking/Avalonia.Markup.Xaml.Loader.md) | `src/Markup/FerroUI.Markup.Xaml.Loader/testing/styles.rs` | **unmapped** |
-| [Avalonia.Skia](tracking/Avalonia.Skia.md) | `src/Skia/FerroUI.Skia/gpu/ganesh/ganesh_gr_context.rs` | **unmapped** |
+| [Avalonia.Skia](tracking/Avalonia.Skia.md) | `src/Skia/FerroUI.Skia/gpu/ganesh/ganesh_gr_context.rs` | the Ganesh implementation of the backend-neutral GPU context (the binding has separate Ganesh and Graphite context types) |
 | [Avalonia.Skia](tracking/Avalonia.Skia.md) | `src/Skia/FerroUI.Skia/gpu/graphite/graphite_gr_context.rs` | **unmapped** |
 | [Avalonia.Skia](tracking/Avalonia.Skia.md) | `src/Skia/FerroUI.Skia/gpu/i_skia_gr_context.rs` | **unmapped** |
 | [Avalonia.Skia](tracking/Avalonia.Skia.md) | `src/Skia/FerroUI.Skia/gpu/metal/tests.rs` | **unmapped** |

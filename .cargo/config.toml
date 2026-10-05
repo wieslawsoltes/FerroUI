@@ -1,0 +1,24 @@
+# The browser target. Requires the Emscripten SDK (emsdk 6.0.10, `source emsdk_env.sh`), the
+# `wasm-bindgen` command-line tool of the version of the crate on PATH, and
+# EMCC_CFLAGS="-s ERROR_ON_UNDEFINED_SYMBOLS=0" (Skia). See docs/porting/browser-platform.md, and
+# scripts/build-browser.sh, which sets all of this up.
+[target.wasm32-unknown-emscripten]
+# Skia needs the C++ runtime.
+linker = "em++"
+rustflags = [
+  # Let the linker run wasm-bindgen and merge its glue.
+  "-Clink-arg=-sWASM_BINDGEN",
+  # An ES module with a factory function as its default export.
+  "-Clink-arg=-sMODULARIZE",
+  "-Clink-arg=-sEXPORT_ES6",
+  "-Clink-arg=-sALLOW_MEMORY_GROWTH=1",
+  # The default stack of 64 KB is far too small for layout and markup loading.
+  "-Clink-arg=-sSTACK_SIZE=8MB",
+  "-Clink-arg=-sMAX_WEBGL_VERSION=2",
+  # The entry points of the WebGL emulation are looked up by name.
+  "-Clink-arg=-sGL_ENABLE_GET_PROC_ADDRESS=1",
+  # The script side registers WebGL contexts with `GL` and reads frames from the module memory.
+  "-Clink-arg=-sEXPORTED_RUNTIME_METHODS=GL,HEAPU8",
+  # The host page starts the application; nothing runs when the module is instantiated.
+  "-Clink-arg=-sINVOKE_RUN=0",
+]

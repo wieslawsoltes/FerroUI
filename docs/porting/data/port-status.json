@@ -6521,18 +6521,18 @@
    "scope": "in",
    "detail": "full",
    "files": [
-    0,
-    52,
+    24,
+    49,
     0
    ],
    "types": [
-    0,
-    64,
+    27,
+    61,
     0
    ],
    "members": [
-    0,
-    441,
+    136,
+    426,
     0
    ],
    "interfaces": [
@@ -6547,9 +6547,90 @@
     0,
     0
    ],
-   "notApplicableFiles": 0,
-   "matchKinds": {},
-   "presentFiles": {},
+   "notApplicableFiles": 3,
+   "matchKinds": {
+    "const": 1,
+    "field": 2,
+    "fn": 112,
+    "free fn": 13,
+    "free item": 2,
+    "overload fn": 3,
+    "variant": 3
+   },
+   "presentFiles": {
+    "AvaloniaView.cs": [
+     "ferro_view.rs"
+    ],
+    "BrowserActivatableLifetime.cs": [
+     "browser_activatable_lifetime.rs"
+    ],
+    "BrowserAppBuilder.cs": [
+     "browser_app_builder.rs"
+    ],
+    "BrowserPlatformSettings.cs": [
+     "browser_platform_settings.rs"
+    ],
+    "BrowserRuntimePlatform.cs": [
+     "browser_runtime_platform.rs"
+    ],
+    "BrowserSingleThreadedDispatcherImpl.cs": [
+     "browser_single_threaded_dispatcher_impl.rs"
+    ],
+    "BrowserSingleViewLifetime.cs": [
+     "browser_single_view_lifetime.rs"
+    ],
+    "BrowserTopLevelImpl.cs": [
+     "browser_top_level_impl.rs"
+    ],
+    "Cursor.cs": [
+     "cursor.rs"
+    ],
+    "Interop/AvaloniaModule.cs": [
+     "interop/ferro_module.rs"
+    ],
+    "Interop/CanvasHelper.cs": [
+     "interop/canvas_helper.rs"
+    ],
+    "Interop/DomHelper.cs": [
+     "interop/dom_helper.rs"
+    ],
+    "Interop/InputHelper.cs": [
+     "interop/input_helper.rs"
+    ],
+    "Interop/TimerHelper.cs": [
+     "interop/timer_helper.rs"
+    ],
+    "JSObjectControlHandle.cs": [
+     "js_object_control_handle.rs"
+    ],
+    "Rendering/BrowserRenderTimer.cs": [
+     "rendering/browser_render_timer.rs"
+    ],
+    "Rendering/BrowserSharedRenderLoop.cs": [
+     "rendering/browser_shared_render_loop.rs"
+    ],
+    "Rendering/BrowserSoftwareRenderTarget.cs": [
+     "rendering/browser_software_render_target.rs"
+    ],
+    "Rendering/BrowserSurface.cs": [
+     "rendering/browser_surface.rs"
+    ],
+    "Rendering/BrowserWebGlRenderTarget.cs": [
+     "rendering/browser_web_gl_render_target.rs"
+    ],
+    "Rendering/RenderTargetBrowserSurface.cs": [
+     "rendering/render_target_browser_surface.rs"
+    ],
+    "Rendering/WebRenderTarget.cs": [
+     "rendering/web_render_target.rs"
+    ],
+    "WinStubs.cs": [
+     "win_stubs.rs"
+    ],
+    "WindowingPlatform.cs": [
+     "windowing_platform.rs"
+    ]
+   },
    "rustOnly": []
   },
   {

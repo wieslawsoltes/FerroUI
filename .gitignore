@@ -1,3 +1,7 @@
 /target
 **/*.rs.bk
 .DS_Store
+
+# The script module of the browser platform is built from webapp/ (scripts/build-browser.sh).
+node_modules/
+/src/Browser/FerroUI.Browser/dist/

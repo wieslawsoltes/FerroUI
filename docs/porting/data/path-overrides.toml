@@ -136,3 +136,73 @@ project = "Avalonia.Native (native sources)"
 upstream = ["inc/avalonia-native.h"]
 kind = "not-applicable"
 reason = "generated header: produced at build time from frn.idl by microcom-codegen (scripts/sync-native.sh)"
+
+# ------------------------------------------------------------ Avalonia.OpenGL
+
+[[rust_only]]
+path = "src/FerroUI.OpenGL/entry_points.rs"
+reason = "the entry point table macro: takes the place of the upstream source generator for GetProcAddress attributes"
+
+[[rust_only]]
+path = "src/FerroUI.OpenGL/testing.rs"
+reason = "scripted OpenGL implementation of the unit tests"
+
+# -------------------------------------------------------------- Avalonia.Skia
+
+[[rust_only]]
+path = "src/Skia/FerroUI.Skia/gpu/ganesh/*.rs"
+reason = "the Ganesh implementation of the backend-neutral GPU context (the binding has separate Ganesh and Graphite context types)"
+
+# -------------------------------------------------------- Avalonia.Fonts.Inter
+
+[[rust_only]]
+path = "src/FerroUI.Fonts.Inter/assets.rs"
+reason = "embeds the font files: the counterpart of the resource items of the upstream project file"
+
+# ----------------------------------------------------------- Avalonia.Browser
+
+[[map]]
+project = "Avalonia.Browser"
+upstream = ["AvaloniaView.cs"]
+kind = "renamed"
+rust = "ferro_view.rs"
+reason = "the view type is named after the framework"
+
+[[map]]
+project = "Avalonia.Browser"
+upstream = ["Interop/AvaloniaModule.cs"]
+kind = "renamed"
+rust = "interop/ferro_module.rs"
+reason = "the module is named after the framework; it is imported statically, so the asynchronous import and path resolution members have no counterpart"
+
+[[map]]
+project = "Avalonia.Browser"
+upstream = ["JSObjectControlHandle.cs"]
+kind = "renamed"
+rust = "js_object_control_handle.rs"
+reason = "snake case of the acronym"
+
+[[map]]
+project = "Avalonia.Browser"
+upstream = ["Rendering/WebRenderTarget.cs"]
+kind = "renamed"
+rust = "rendering/web_render_target.rs"
+reason = "the file is named after its script-side counterpart upstream; it declares the render target base"
+
+[[map]]
+project = "Avalonia.Browser"
+upstream = ["Rendering/RenderWorker.cs"]
+kind = "not-applicable"
+reason = "threaded mode (render worker): not ported, the browser platform is single-threaded (docs/porting/browser-platform.md 6)"
+
+[[map]]
+project = "Avalonia.Browser"
+upstream = ["Interop/JsCallbackHelper.cs"]
+kind = "not-applicable"
+reason = "restores the synchronisation context of the managed runtime in callbacks: no equivalent concept"
+
+[[map]]
+project = "Avalonia.Browser"
+upstream = ["Interop/GeneralHelpers.cs"]
+kind = "not-applicable"
+reason = "reflective access to script objects: replaced by typed property getters in interop/"

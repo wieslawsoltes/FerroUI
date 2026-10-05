@@ -1,0 +1,43 @@
+//! The browser platform.
+//!
+//! An application runs on the main thread of a web page, inside the
+//! WebAssembly module the host page creates. There are no windows: content
+//! is shown by a [`FerroView`] over an element of the page, set as the main
+//! view of the single-view lifetime that
+//! [`BrowserAppBuilder::start_browser_app`] installs. The browser drives
+//! everything: dispatcher work is posted as tasks, rendering follows the
+//! animation frames, and the start-up function returns to the page.
+//!
+//! The script side of the platform is the `ferroui.js` module built from
+//! `webapp/`. [`interop`] is the only place that crosses the boundary: it
+//! imports functions of that module and exports the callbacks the module
+//! invokes.
+
+pub mod interop;
+pub mod rendering;
+
+mod browser_activatable_lifetime;
+mod browser_app_builder;
+mod browser_platform_settings;
+mod browser_runtime_platform;
+mod browser_single_threaded_dispatcher_impl;
+mod browser_single_view_lifetime;
+mod browser_top_level_impl;
+mod cursor;
+mod ferro_view;
+mod js_object_control_handle;
+mod win_stubs;
+mod windowing_platform;
+
+pub use browser_activatable_lifetime::BrowserActivatableLifetime;
+pub use browser_app_builder::{BrowserAppBuilder, BrowserPlatformOptions, BrowserRenderingMode};
+pub use browser_platform_settings::BrowserPlatformSettings;
+pub use browser_runtime_platform::{BrowserRuntimePlatform, BrowserRuntimePlatformServices};
+pub use browser_single_threaded_dispatcher_impl::BrowserSingleThreadedDispatcherImpl;
+pub use browser_single_view_lifetime::BrowserSingleViewLifetime;
+pub use browser_top_level_impl::BrowserTopLevelImpl;
+pub use cursor::{CssCursor, CssCursorFactory};
+pub use ferro_view::FerroView;
+pub use js_object_control_handle::{JsObjectControlHandle, JsObjectPlatformHandle};
+pub use win_stubs::IconLoaderStub;
+pub use windowing_platform::BrowserWindowingPlatform;

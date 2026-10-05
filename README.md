@@ -145,6 +145,7 @@ The layout follows the upstream project so that files can be compared side by si
 | `src/FerroUI.Native`, `native/FerroUI.Native` | `ferroui-native` | macOS platform backend and its native library |
 | `src/FerroUI.MicroCom` | `ferroui-microcom` | COM-style interop runtime used by the native backend |
 | `src/FerroUI.Desktop` | `ferroui-desktop` | Desktop entry point and platform detection |
+| `src/Browser/FerroUI.Browser` | `ferroui-browser` | Browser platform backend (WebAssembly) and its script module |
 | `src/FerroUI.Themes.Fluent`, `src/FerroUI.Themes.Simple` | `ferroui-themes-fluent`, `ferroui-themes-simple` | Themes |
 | `samples` | `control-catalog`, `control-catalog-desktop`, `mini-mvvm` | Sample applications |
 | `tests` | | Ported XAML test suites |

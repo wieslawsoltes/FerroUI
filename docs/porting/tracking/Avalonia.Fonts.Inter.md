@@ -53,4 +53,4 @@ Rust sources of this crate that no upstream file maps to. Give each a reason in 
 
 | Rust file | Reason | Types defined |
 |---|---|---|
-| `assets.rs` | **unmapped** |  |
+| `assets.rs` | embeds the font files: the counterpart of the resource items of the upstream project file |  |

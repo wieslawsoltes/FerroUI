@@ -145,5 +145,5 @@ Rust sources of this crate that no upstream file maps to. Give each a reason in 
 
 | Rust file | Reason | Types defined |
 |---|---|---|
-| `entry_points.rs` | **unmapped** | `GetProcAddress` |
-| `testing.rs` | **unmapped** | `FakeGl`, `State` |
+| `entry_points.rs` | the entry point table macro: takes the place of the upstream source generator for GetProcAddress attributes | `GetProcAddress` |
+| `testing.rs` | scripted OpenGL implementation of the unit tests | `FakeGl`, `State` |
