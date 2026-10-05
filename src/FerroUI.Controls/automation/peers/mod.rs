@@ -20,6 +20,7 @@ mod control_automation_peer;
 #[cfg(test)]
 mod control_automation_peer_tests;
 mod date_picker_automation_peer;
+mod drawer_page_automation_peer;
 mod embeddable_control_root_automation_peer;
 #[cfg(test)]
 mod embeddable_control_root_automation_peer_tests;
@@ -46,6 +47,7 @@ mod none_automation_peer;
 mod numeric_up_down_automation_peer;
 #[cfg(test)]
 mod page_automation_peer_tests;
+mod pips_pager_automation_peer;
 mod popup_automation_peer;
 mod popup_root_automation_peer;
 mod progress_bar_automation_peer;
@@ -92,6 +94,7 @@ pub use control_automation_peer::{
     ControlAutomationPeer, ControlAutomationPeerImpl, ControlAutomationPeerImplExt, ControlAutomationPeerVTable,
 };
 pub use date_picker_automation_peer::DatePickerAutomationPeer;
+pub use drawer_page_automation_peer::DrawerPageAutomationPeer;
 pub use embeddable_control_root_automation_peer::EmbeddableControlRootAutomationPeer;
 pub use expander_automation_peer::ExpanderAutomationPeer;
 pub use image_automation_peer::ImageAutomationPeer;
@@ -109,6 +112,7 @@ pub use native_menu_bar_automation_peer::NativeMenuBarAutomationPeer;
 pub use navigation_page_automation_peer::NavigationPageAutomationPeer;
 pub use none_automation_peer::NoneAutomationPeer;
 pub use numeric_up_down_automation_peer::NumericUpDownAutomationPeer;
+pub use pips_pager_automation_peer::PipsPagerAutomationPeer;
 pub use popup_automation_peer::PopupAutomationPeer;
 pub use popup_root_automation_peer::PopupRootAutomationPeer;
 pub use progress_bar_automation_peer::ProgressBarAutomationPeer;

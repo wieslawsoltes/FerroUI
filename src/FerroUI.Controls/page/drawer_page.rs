@@ -258,6 +258,10 @@ impl InputElementImpl for DrawerPage {
 }
 
 impl ControlImpl for DrawerPage {
+    fn on_create_automation_peer(this: &Self) -> Ref<crate::automation::peers::AutomationPeer> {
+        crate::automation::peers::DrawerPageAutomationPeer::new(this).upcast()
+    }
+
     fn on_loaded(this: &Self, e: &RoutedEventArgs) {
         Self::parent_on_loaded(this, e);
 
@@ -410,8 +414,6 @@ impl PageImpl for DrawerPage {
         this.update_content_safe_area_padding();
     }
 }
-
-// AUTOMATION-SEAM: OnCreateAutomationPeer -> DrawerPageAutomationPeer (automation pass)
 
 ferro_properties! {
     impl DrawerPage {

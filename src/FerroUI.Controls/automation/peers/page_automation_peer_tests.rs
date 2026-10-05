@@ -1,9 +1,11 @@
 use super::{
     AutomationControlType, AutomationPeer, CarouselPageAutomationPeer, ContentPageAutomationPeer,
-    ControlAutomationPeer, NavigationPageAutomationPeer, TabbedPageAutomationPeer,
+    ControlAutomationPeer, DrawerPageAutomationPeer, NavigationPageAutomationPeer, TabbedPageAutomationPeer,
 };
+use crate::automation::provider::IExpandCollapseProvider;
+use crate::automation::ExpandCollapseState;
 use crate::test_support::{boxed_str, test_scope};
-use crate::{CarouselPage, ContentPage, NavigationPage, Page, TabbedPage};
+use crate::{CarouselPage, ContentPage, DrawerPage, NavigationPage, Page, TabbedPage};
 use ferroui_base::{BoxedValue, Ref};
 use std::rc::Rc;
 
@@ -200,6 +202,114 @@ mod navigation_page_peer {
         let peer = create_peer(&page);
 
         assert!(peer.get_name().is_empty());
+    }
+}
+
+mod drawer_page_peer {
+    use super::*;
+
+    fn create_peer(page: &DrawerPage) -> Ref<DrawerPageAutomationPeer> {
+        ControlAutomationPeer::create_peer_for_element(page).cast().expect("a drawer page automation peer")
+    }
+
+    #[test]
+    fn creates_drawer_page_automation_peer() {
+        let _scope = test_scope();
+        let page = DrawerPage::new();
+        let peer: Ref<AutomationPeer> = ControlAutomationPeer::create_peer_for_element(&page);
+
+        assert!(std::ptr::eq(peer.get_type(), DrawerPageAutomationPeer::TYPE));
+    }
+
+    #[test]
+    fn control_type_is_pane() {
+        let _scope = test_scope();
+        let page = DrawerPage::new();
+        let peer = create_peer(&page);
+
+        assert_eq!(AutomationControlType::Pane, peer.get_automation_control_type());
+    }
+
+    #[test]
+    fn name_returns_string_header() {
+        let _scope = test_scope();
+        let page = DrawerPage::new();
+        page.set_header(boxed_str("Menu"));
+        let peer = create_peer(&page);
+
+        assert_eq!("Menu", peer.get_name());
+    }
+
+    #[test]
+    fn name_returns_to_string_for_non_string_header() {
+        let _scope = test_scope();
+        let page = DrawerPage::new();
+        page.set_header(Some(Rc::new(42_i32) as BoxedValue));
+        let peer = create_peer(&page);
+
+        assert_eq!("42", peer.get_name());
+    }
+
+    #[test]
+    fn name_is_empty_when_no_header() {
+        let _scope = test_scope();
+        let page = DrawerPage::new();
+        let peer = create_peer(&page);
+
+        assert!(peer.get_name().is_empty());
+    }
+
+    #[test]
+    fn implements_i_expand_collapse_provider() {
+        let _scope = test_scope();
+        let page = DrawerPage::new();
+        let peer = create_peer(&page);
+
+        assert!(peer.get_provider::<dyn IExpandCollapseProvider>().is_some());
+    }
+
+    #[test]
+    fn expand_collapse_state_collapsed_when_closed() {
+        let _scope = test_scope();
+        let page = DrawerPage::new();
+        page.set_is_open(false);
+        let peer = create_peer(&page);
+
+        assert_eq!(ExpandCollapseState::Collapsed, peer.expand_collapse_state());
+    }
+
+    #[test]
+    fn expand_collapse_state_expanded_when_open() {
+        let _scope = test_scope();
+        let page = DrawerPage::new();
+        page.set_is_open(true);
+        let peer = create_peer(&page);
+
+        assert_eq!(ExpandCollapseState::Expanded, peer.expand_collapse_state());
+    }
+
+    #[test]
+    fn expand_sets_is_open_true() {
+        let _scope = test_scope();
+        let page = DrawerPage::new();
+        page.set_is_open(false);
+        let peer = create_peer(&page);
+
+        peer.expand().expect("the drawer page is enabled");
+
+        assert!(page.is_open());
+    }
+
+    #[test]
+    fn collapse_sets_is_open_false() {
+        let _scope = test_scope();
+        let page = DrawerPage::new();
+        page.set_is_open(true);
+        let peer = create_peer(&page);
+
+        peer.collapse().expect("the drawer page is enabled");
+
+        assert!(!page.is_open());
     }
 }
 
