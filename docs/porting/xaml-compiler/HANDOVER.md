@@ -2,13 +2,16 @@
 
 ## State (read this first; every worker updates it before stopping)
 
-- Stage E1 is DONE: branch `xaml-compiler`, pull request #7.
-- Stage E2 is DONE: branch `xaml-compiler-e2`, stacked on `xaml-compiler` (its pull request says
-  so). Corpus: 71 of 75 documents eligible, all 71 match the run-time loader. The four that are
-  not eligible need E3/E4 (bindings, styles, templates, resources). Theme documents: 0 of 167
-  eligible, 144 of them because a node needs the parent stack (E3); measured by
-  `emitter::repository_documents::measure_theme_documents`.
-- Stage E3 is next (section 7). Nothing is half-done in the working tree of either branch.
+- Stage E1 is DONE and merged into `main` (pull request #7).
+- Stage E2 is DONE on branch `xaml-compiler-e2` (pull request #9, against `main`, linear, rebased
+  on `main` after E1 merged). Corpus: 77 of 81 documents eligible, all 77 match the run-time
+  loader. The four that are not eligible need E3/E4 (a binding: parent stack; a style selector;
+  a control template: deferred content; resources). Theme documents: measured by the ignored
+  test `emitter::repository_documents::measure_theme_documents` (each theme compiled as one group);
+  the first blocker of most of them is the parent stack (E3).
+- Everything E2 adds exists only with the `compiler-metadata` feature of the base crate (section
+  7, "Cost"); a default build carries none of it.
+- Stage E3 is next (section 7). Nothing is half-done in the working tree.
 
 Design documents in the repository: `docs/porting/xaml.md`, sections 9 (emitter design: call forms
 A/B/C, build integration, code-behind), 9.5 (source scanner), 9.12 (the 14 rulings), 9.13, and
@@ -354,6 +357,38 @@ E2 (branch `xaml-compiler-e2`):
   normalisation (`to_untyped`, `normalize_object`, `box_object`) moved to the runtime library.
 - The carriers `FerroListOf<T>` and `AddChildOf<T>` of the controls crate are public (hidden) so
   generated code can call their functions.
+- Review fixes of pull request #9 (orchestrator review):
+  - A list constant (`RowDefinitions='Auto,*'`) is held in a local: capacity, every `Add` and the
+    setter receive the same list (before, every use created a new one). `Emitter::bind` holds any
+    created value that a manipulation or several uses need. Test
+    `a_list_built_from_text_is_one_list`.
+  - The differential dump shows the priority of every set registered property, every plain
+    property read through its declared getter, and the items of every collection markup adds to
+    (`collection_items`, a table of the collection types; a collection it cannot enumerate is a
+    difference, never a match).
+  - Static conversions: a receiver is borrowed through the declared base chain (deref coercion)
+    or as a handle of the declaring class (`Ref::upcast_ref`, new, the one new `unsafe`, in the
+    class model); a value whose declaration lists a contract becomes the contract's handle by an
+    unsizing coercion. `rt::cast` remains for registered casts only and returns the loader's
+    `InvalidCastException`. Locals of value types are cloned where they are passed by value.
+  - Cost: metadata fields only the emitter reads (`MarkupEmit` names, `MarkupType::this` /
+    `value`) have the type `CompilerMetadata<T>` (the value with `compiler-metadata`, the
+    zero-sized `NotRecorded<T>` without it); `__ferro_compiler_metadata!` expands the typed
+    `__markup_*` functions and those values, or nothing; `ferro_rust_paths!` defines
+    `register_rust_paths()`, empty without the feature, and the path registries exist only with
+    it. Measured: a stripped release binary that registers every type of base, controls and
+    markup-xaml is 39,521,328 bytes and holds no `__markup_*` name and no recorded path by
+    default, 39,846,672 bytes (131 function names, 118 controls paths) with the feature. Generated
+    code calls the typed functions, so a crate that compiles generated code enables the feature
+    (E5 decides how applications get it).
+- Open items of E1 done in E2: the position map of 9.3.6 (`GeneratedFile::position_map`, checked
+  in as `emitter/generated.map.json` and drift-tested); value priority in the dump; URIs compared
+  as upstream's `OrdinalIgnoreCase` (`rt::uri_equals`); group transforms (`compile_documents`
+  transforms the documents of an assembly as one group with their URIs as base URIs,
+  `FerroXamlIlRuntimeCompiler::transform_documents`).
+- Direct properties: assigned through `set_direct_value` (the registered direct setter, the path
+  of the interpreter's `set_value_untyped`); the corpus sets `Name`, `SelectedIndex` and
+  `SelectedItem`.
 
 Next, E3 (stack it on `xaml-compiler-e2`):
 
