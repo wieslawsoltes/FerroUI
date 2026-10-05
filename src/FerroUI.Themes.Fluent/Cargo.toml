@@ -1,0 +1,31 @@
+[package]
+name = "ferroui-themes-fluent"
+description = "The FerroUI Fluent theme: control themes, colour palettes and resources for the control set, in light and dark variants"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+build = "build.rs"
+
+# Unit tests live next to the code (`tests/` modules of the library), not as
+# integration test targets.
+autotests = false
+autobenches = false
+autoexamples = false
+
+[lib]
+path = "lib.rs"
+
+[dependencies]
+ferroui-base = { workspace = true }
+ferroui-controls = { workspace = true }
+ferroui-markup-xaml = { workspace = true }
+# The documents of the theme are loaded through the run-time XAML loader until the build-time
+# compiler exists; the dependency goes away with it (the theme then only needs the runtime library).
+ferroui-markup-xaml-loader = { workspace = true, features = ["runtime"] }
+
+[dev-dependencies]
+ferroui-base = { workspace = true, features = ["testing"] }
+ferroui-controls = { workspace = true, features = ["testing"] }
+
