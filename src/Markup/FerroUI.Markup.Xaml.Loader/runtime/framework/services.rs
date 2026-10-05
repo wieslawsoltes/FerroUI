@@ -23,7 +23,6 @@ use ferroui_markup_xaml::xaml_il::runtime::{
     FerroXamlIlXmlNamespaceInfo, FrameworkContextServices, IFerroXamlIlXmlNamespaceInfoProvider, IXamlIlContextServices,
     XmlNamespaces,
 };
-use ferroui_markup_xaml::ServiceProviderExtensions;
 use xamlx::exceptions::XamlResult;
 use xamlx::type_system::IXamlType;
 
@@ -31,22 +30,20 @@ use crate::runtime::interpreter::{
     IRuntimeContextServices, RuntimeContext, RuntimeContextService, XmlNamespaceInfoProvider,
 };
 
-/// The name scope field of the context (`FerroXamlIlContextNameScopeField`):
-/// filled in the constructor of the context from the parent service
-/// provider; null when the parent has no name scope.
-pub struct FerroNameScopeField(pub Option<Rc<dyn INameScope>>);
+/// The name scope field of the context (`FerroXamlIlContextNameScopeField`),
+/// declared with the context in the runtime library.
+pub use ferroui_markup_xaml::xaml_il::runtime::FerroXamlIlContextNameScopeField as FerroNameScopeField;
 
 /// The context initialiser that fills the name scope field: the context
 /// type builder callback of the language.
 pub fn initialize_name_scope_field(context: &Rc<RuntimeContext>) -> XamlResult<()> {
-    let scope = context.parent_service_provider().and_then(|parent| parent.get_name_scope());
-    context.set_extension(Rc::new(FerroNameScopeField(scope)));
+    context.initialize_name_scope_field();
     Ok(())
 }
 
 /// The value of the name scope field of a context.
 pub fn name_scope_of(context: &RuntimeContext) -> Option<Rc<dyn INameScope>> {
-    context.extension::<FerroNameScopeField>().and_then(|field| field.0.clone())
+    context.name_scope_field()
 }
 
 struct NamespaceInfoProvider {

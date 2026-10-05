@@ -3,11 +3,12 @@
 //! `DOCUMENTS` is the input of the emitter (`generated.rs` is its output for the
 //! eligible ones). `EXPECTED_ELIGIBLE` lists the documents that must be eligible (a
 //! regression of the emitter's coverage fails the harness); `EXPECTED_NOT_ELIGIBLE`
-//! the ones that must not be (bindings, styles with selectors, templates, resources,
-//! collection adds, declared members and types without a recorded Rust path are outside
-//! this increment). A document in neither list is only reported. A document whose load
-//! fails is compared by the exception type and the message of the error (`duplicate_name.xaml`,
-//! `multiline_duplicate_name.xaml`, `end_init_failure.xaml`, whose control fails in `EndInit`). A document whose
+//! the ones that must not be (styles with selectors, templates, collection adds, declared
+//! members and types without a recorded Rust path are outside this increment). A document
+//! in neither list is only reported. A document whose load fails is compared by the
+//! exception type and the message of the error (`duplicate_name.xaml`,
+//! `multiline_duplicate_name.xaml`, `end_init_failure.xaml`, whose control fails in
+//! `EndInit`, `static_resource_missing.xaml`). A document whose
 //! load panics (a value a validator rejects) cannot be in the corpus: the harness does not
 //! catch panics.
 
@@ -94,6 +95,27 @@ pub const DOCUMENTS: &[(&str, &str)] = &[
     ("direct_selected_index.xaml", "<ListBox xmlns='https://github.com/ferroui' xmlns:x='http://schemas.microsoft.com/winfx/2006/xaml' SelectedIndex='-1'></ListBox>"),
     ("direct_selected_item_null.xaml", "<ListBox xmlns='https://github.com/ferroui' xmlns:x='http://schemas.microsoft.com/winfx/2006/xaml' SelectedItem='{x:Null}'></ListBox>"),
     ("direct_selected_item_text.xaml", "<ComboBox xmlns='https://github.com/ferroui' xmlns:x='http://schemas.microsoft.com/winfx/2006/xaml' SelectedItem='text'></ComboBox>"),
+    ("binding_element_name.xaml", "<StackPanel xmlns='https://github.com/ferroui' xmlns:x='http://schemas.microsoft.com/winfx/2006/xaml'><TextBlock x:Name='source' Text='x'/><TextBlock Text='{Binding #source.Text}'/></StackPanel>"),
+    ("binding_data_context.xaml", "<StackPanel xmlns='https://github.com/ferroui' xmlns:x='http://schemas.microsoft.com/winfx/2006/xaml' DataContext='hello'><TextBlock Text='{Binding}'/></StackPanel>"),
+    ("binding_mode.xaml", "<StackPanel xmlns='https://github.com/ferroui' xmlns:x='http://schemas.microsoft.com/winfx/2006/xaml' DataContext='hello'><TextBlock Text='{Binding Mode=OneTime}'/><TextBlock Text='{Binding Path=., Mode=OneWay, FallbackValue=none}'/></StackPanel>"),
+    ("dynamic_resource_unresolved.xaml", "<Border xmlns='https://github.com/ferroui' xmlns:x='http://schemas.microsoft.com/winfx/2006/xaml' Background='{DynamicResource AccentBrush}'></Border>"),
+    ("type_extension.xaml", "<Border xmlns='https://github.com/ferroui' xmlns:x='http://schemas.microsoft.com/winfx/2006/xaml' Tag='{x:Type Button}'></Border>"),
+    ("static_resource_local.xaml", "<Border xmlns='https://github.com/ferroui' xmlns:x='http://schemas.microsoft.com/winfx/2006/xaml'><Border.Resources><SolidColorBrush x:Key='Accent' Color='Red'/></Border.Resources><Border Background='{StaticResource Accent}'/></Border>"),
+    ("dynamic_resource_local.xaml", "<Border xmlns='https://github.com/ferroui' xmlns:x='http://schemas.microsoft.com/winfx/2006/xaml'><Border.Resources><SolidColorBrush x:Key='Accent' Color='Red'/></Border.Resources><Border Background='{DynamicResource Accent}'/></Border>"),
+    ("static_resource_missing.xaml", "<Border xmlns='https://github.com/ferroui' xmlns:x='http://schemas.microsoft.com/winfx/2006/xaml' Background='{StaticResource Missing}'></Border>"),
+    ("x_static_converter.xaml", "<TextBlock xmlns='https://github.com/ferroui' xmlns:x='http://schemas.microsoft.com/winfx/2006/xaml' Tag='{x:Static ObjectConverters.IsNotNull}'></TextBlock>"),
+    ("x_static_text_trimming.xaml", "<TextBlock xmlns='https://github.com/ferroui' xmlns:x='http://schemas.microsoft.com/winfx/2006/xaml' TextTrimming='{x:Static TextTrimming.CharacterEllipsis}'></TextBlock>"),
+    ("resources_many.xaml", "<Border xmlns='https://github.com/ferroui' xmlns:x='http://schemas.microsoft.com/winfx/2006/xaml'><Border.Resources><x:Double x:Key='A'>1</x:Double><x:Double x:Key='B'>2</x:Double><SolidColorBrush x:Key='C' Color='Blue'/></Border.Resources></Border>"),
+    ("resource_dictionary_root.xaml", "<ResourceDictionary xmlns='https://github.com/ferroui' xmlns:x='http://schemas.microsoft.com/winfx/2006/xaml'><x:Double x:Key='A'>1</x:Double><SolidColorBrush x:Key='B' Color='Green'/><x:String x:Key='C'>text</x:String></ResourceDictionary>"),
+    ("transitions.xaml", "<Border xmlns='https://github.com/ferroui' xmlns:x='http://schemas.microsoft.com/winfx/2006/xaml'><Border.Transitions><Transitions><DoubleTransition Property='Opacity' Duration='0:0:0.2'/></Transitions></Border.Transitions></Border>"),
+    ("control_theme_resources.xaml", "<Border xmlns='https://github.com/ferroui' xmlns:x='http://schemas.microsoft.com/winfx/2006/xaml'><Border.Resources><SolidColorBrush x:Key='Accent' Color='Red'/><ControlTheme x:Key='Base' TargetType='Button'><Setter Property='Opacity' Value='0.5'/></ControlTheme><ControlTheme x:Key='Derived' TargetType='Button' BasedOn='{StaticResource Base}'><Setter Property='Background' Value='{StaticResource Accent}'/><Setter Property='Foreground' Value='{DynamicResource Accent}'/></ControlTheme></Border.Resources></Border>"),
+    ("compiled_binding_element.xaml", "<StackPanel xmlns='https://github.com/ferroui' xmlns:x='http://schemas.microsoft.com/winfx/2006/xaml' x:CompileBindings='True'><TextBlock x:Name='source' Text='x'/><TextBlock Text='{Binding #source.Text}'/></StackPanel>"),
+    ("compiled_binding_data_type.xaml", "<StackPanel xmlns='https://github.com/ferroui' xmlns:x='http://schemas.microsoft.com/winfx/2006/xaml'><StackPanel.DataContext><TextBlock Text='context'/></StackPanel.DataContext><TextBlock x:DataType='TextBlock' Text='{CompiledBinding Text}'/></StackPanel>"),
+    ("compiled_binding_parent.xaml", "<Border xmlns='https://github.com/ferroui' xmlns:x='http://schemas.microsoft.com/winfx/2006/xaml' Tag='t'><TextBlock Text='{CompiledBinding $parent[Border].Tag}'/></Border>"),
+    ("compiled_binding_plain_property.xaml", "<StackPanel xmlns='https://github.com/ferroui' xmlns:x='http://schemas.microsoft.com/winfx/2006/xaml'><StackPanel.DataContext><ResourceDictionary><x:Double x:Key='A'>1</x:Double><x:Double x:Key='B'>2</x:Double></ResourceDictionary></StackPanel.DataContext><TextBlock x:DataType='ResourceDictionary' Text='{CompiledBinding Count}'/><TextBlock x:DataType='ResourceDictionary' Tag='{CompiledBinding Count}'/></StackPanel>"),
+    ("on_platform.xaml", "<StackPanel xmlns='https://github.com/ferroui' xmlns:x='http://schemas.microsoft.com/winfx/2006/xaml'><TextBlock Text='{OnPlatform Linux=lin, Default=def}'/><TextBlock Text='{OnPlatform Windows=win, Default=def}'/><Border Opacity='{OnPlatform 0.5, Linux=0.25}'/></StackPanel>"),
+    ("font_family.xaml", "<StackPanel xmlns='https://github.com/ferroui' xmlns:x='http://schemas.microsoft.com/winfx/2006/xaml'><TextBlock FontFamily='Arial'/><TextBlock FontFamily='Arial, Consolas'/></StackPanel>"),
+    ("flags_value.xaml", "<Border xmlns='https://github.com/ferroui' xmlns:x='http://schemas.microsoft.com/winfx/2006/xaml' xmlns:c='using:FerroUI.Controls.Converters'><Border.Resources><c:CornerRadiusFilterConverter x:Key='Filter' Filter='TopLeft, BottomRight'/></Border.Resources></Border>"),
 ];
 
 /// The documents that must be eligible for emission.
@@ -175,12 +197,33 @@ pub const EXPECTED_ELIGIBLE: &[&str] = &[
     "direct_selected_index.xaml",
     "direct_selected_item_null.xaml",
     "direct_selected_item_text.xaml",
+    "binding.xaml",
+    "binding_element_name.xaml",
+    "binding_data_context.xaml",
+    "binding_mode.xaml",
+    "dynamic_resource_unresolved.xaml",
+    "type_extension.xaml",
+    "static_resource_missing.xaml",
+    "resources.xaml",
+    "static_resource_local.xaml",
+    "dynamic_resource_local.xaml",
+    "x_static_converter.xaml",
+    "x_static_text_trimming.xaml",
+    "resources_many.xaml",
+    "resource_dictionary_root.xaml",
+    "transitions.xaml",
+    "control_theme_resources.xaml",
+    "compiled_binding_element.xaml",
+    "compiled_binding_data_type.xaml",
+    "compiled_binding_parent.xaml",
+    "compiled_binding_plain_property.xaml",
+    "on_platform.xaml",
+    "font_family.xaml",
+    "flags_value.xaml",
 ];
 
 /// The documents that must not be eligible for emission.
 pub const EXPECTED_NOT_ELIGIBLE: &[&str] = &[
-    "binding.xaml",
     "style_with_selector.xaml",
     "control_template.xaml",
-    "resources.xaml",
 ];

@@ -15,7 +15,7 @@ pub mod services;
 
 pub use evaluators::{constant_value, AssignmentPlan, StandardNodeEvaluator};
 #[cfg(any(feature = "emitter", test))]
-pub(crate) use evaluators::{numeric_constant, single_setter};
+pub(crate) use evaluators::{numeric_constant, plan_setters};
 pub use interpreter::{
     runtime_error, EvalContext, EvalResult, IXamlAstEvaluableNode, IXamlConstructorEvaluator,
     IXamlEvaluablePropertySetter,
