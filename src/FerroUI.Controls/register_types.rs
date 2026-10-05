@@ -17,6 +17,7 @@ use ferroui_base::{StaticType, TypeInfo};
 /// declaring module.
 const NAMESPACES: &[(&str, &str)] = &[
     ("ferroui_controls", "FerroUI.Controls"),
+    ("ferroui_controls::animation", "FerroUI.Animation"),
     ("ferroui_controls::app_builder", "FerroUI"),
     ("ferroui_controls::application", "FerroUI"),
     ("ferroui_controls::application_lifetimes", "FerroUI.Controls.ApplicationLifetimes"),
@@ -124,6 +125,9 @@ pub fn register_types() {
 const TYPES: &[&TypeInfo] = types![
     // FerroUI
     crate::application::Application,
+    // FerroUI.Animation
+    crate::animation::ConnectedAnimationProxy,
+    crate::animation::ConnectedAnimationService,
     // FerroUI.Automation
     crate::automation::AutomationProperties,
     // FerroUI.Automation.Peers
