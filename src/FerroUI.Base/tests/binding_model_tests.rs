@@ -910,4 +910,35 @@ mod metadata_typed_path {
         target.set_data_context(Some(other));
         assert_eq!(target.get_value(plain), 9);
     }
+
+    /// Not from upstream: the owner of a plain property may come as a box of
+    /// its handle, the form in which an items control gives an item to its
+    /// container as data context, and the value is converted to the type of
+    /// the target property (the untyped expression).
+    #[test]
+    fn a_plain_property_is_read_from_a_handle_of_its_owner_through_the_untyped_expression() {
+        let silent = <HookSilent as MarkupTyped>::MARKUP.find_property("Value").unwrap();
+        let hook = silent.typed_path_element.expect("the hook");
+        let converted = FerroProperty::register::<Target, f64>("HookSilentConverted", -1.0);
+
+        // The box is the object.
+        let path = hook(&CompiledBindingPathBuilder::new(), false).expect("the typed element").build();
+        let target = Target::new();
+        let expression = target.bind_binding(converted, &CompiledBinding::new(path));
+        assert!(expression.as_any().is::<BindingExpression>());
+        target.set_data_context(Some(Rc::new(HookSilent { value: Cell::new(3) })));
+        assert_eq!(target.get_value(converted), 3.0);
+
+        // The box holds a handle of the object.
+        let path = hook(&CompiledBindingPathBuilder::new(), false).expect("the typed element").build();
+        let target = Target::new();
+        let source = Rc::new(HookSilent { value: Cell::new(5) });
+        target.bind_binding(converted, &CompiledBinding::new(path).with_mode(BindingMode::TwoWay));
+        let handle: BoxedValue = Rc::new(source.clone());
+        target.set_data_context(Some(handle));
+        assert_eq!(target.get_value(converted), 5.0);
+        // And is written through the same handle.
+        target.set_value(converted, 7.0);
+        assert_eq!(source.value.get(), 7);
+    }
 }

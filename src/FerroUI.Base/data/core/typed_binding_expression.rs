@@ -155,14 +155,17 @@ impl<TSource: 'static, TValue: PropertyValue> TypedClrPropertyInfo<TSource, TVal
         }
     }
 
-    fn uses_handle(&self) -> bool {
-        matches!(self.getter, Some(TypedGetter::Handle(_))) || matches!(self.setter, Some(TypedSetter::Handle(_)))
-    }
-
-    /// The owner behind an untyped handle: the box is the shared object.
+    /// The owner behind an untyped value: the box is the shared object, or
+    /// holds a handle of it (the form in which an items control gives its
+    /// items to their containers as data context), or an object that is
+    /// assignable to the owner type. As the typed expression reads its
+    /// source.
     fn owner_of(target: &BoxedValue) -> Option<Rc<TSource>> {
         let any: Rc<dyn Any> = target.clone();
-        any.downcast::<TSource>().ok()
+        any.downcast::<TSource>().ok().or_else(|| {
+            ValueTypes::try_cast(target, ValueType::of::<Rc<TSource>>())
+                .and_then(|cast| cast.downcast_ref::<Rc<TSource>>().cloned())
+        })
     }
 
     /// Converts an untyped value to the type of the property (null to the
@@ -222,17 +225,11 @@ impl<TSource: 'static, TValue: PropertyValue> IPropertyInfo for TypedClrProperty
     }
 
     fn try_get_boxed(&self, target: &BoxedValue) -> Result<Option<BoxedValue>, BindingError> {
-        if !self.uses_handle() {
-            return self.try_get(&**target);
-        }
         let Some(owner) = Self::owner_of(target) else { return Ok(None) };
         Ok(ValueTypes::normalize(BooleanBoxes::box_value(&self.try_get_from(&owner)?)))
     }
 
     fn set_boxed(&self, target: &BoxedValue, value: Option<&BoxedValue>) -> Result<(), BindingError> {
-        if !self.uses_handle() {
-            return self.set(&**target, value);
-        }
         if self.setter.is_none() {
             return Err(BindingError::message(format!("Property {} doesn't have a setter", self.name)));
         }
