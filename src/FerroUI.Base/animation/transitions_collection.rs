@@ -17,7 +17,7 @@ impl Transitions {
     pub fn new() -> Self {
         let list = FerroList::new();
         list.set_reset_behavior(ResetBehavior::Remove);
-        list.set_validator(Some(Rc::new(Self::validate)));
+        list.set_validate(Some(Rc::new(Self::validate)));
         Self(Rc::new(list))
     }
 

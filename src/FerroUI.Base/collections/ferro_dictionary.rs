@@ -1,12 +1,12 @@
 use super::{CollectionChangedHandler, NotifyCollectionChangedAction, NotifyCollectionChangedEventArgs};
 use crate::data::core::INDEXER_NAME;
-use crate::data::model::{Event, INotifyPropertyChanged};
-use crate::utilities::HandlerList;
+use crate::data::model::{CollectionChange, Event, INotifyCollectionChanged, INotifyPropertyChanged};
+use crate::utilities::{HandlerList, WeakEventSender};
 use std::cell::RefCell;
 use std::collections::HashMap;
 use std::fmt::Display;
 use std::hash::Hash;
-use std::rc::Rc;
+use std::rc::{Rc, Weak};
 
 /// The storage of a [`FerroDictionary`]: a hash index over entry slots.
 ///
@@ -75,7 +75,35 @@ pub struct FerroDictionary<K, V>(Rc<FerroDictionaryData<K, V>>);
 struct FerroDictionaryData<K, V> {
     inner: RefCell<Inner<K, V>>,
     collection_changed: HandlerList<CollectionChangedHandler<(K, V)>>,
+    /// The untyped form of the collection changed event
+    /// ([`INotifyCollectionChanged`]), raised after the typed handlers.
+    untyped_collection_changed: Event<CollectionChange>,
     property_changed: Event<str>,
+}
+
+/// The weak form of a [`FerroDictionary`] handle.
+pub struct WeakFerroDictionary<K, V>(Weak<FerroDictionaryData<K, V>>);
+
+impl<K, V> Clone for WeakFerroDictionary<K, V> {
+    fn clone(&self) -> Self {
+        Self(self.0.clone())
+    }
+}
+
+impl<K: 'static, V: 'static> WeakEventSender for FerroDictionary<K, V> {
+    type Weak = WeakFerroDictionary<K, V>;
+
+    fn downgrade_sender(&self) -> WeakFerroDictionary<K, V> {
+        WeakFerroDictionary(Rc::downgrade(&self.0))
+    }
+
+    fn upgrade_sender(weak: &WeakFerroDictionary<K, V>) -> Option<Self> {
+        weak.0.upgrade().map(FerroDictionary)
+    }
+
+    fn sender_address(&self) -> usize {
+        Rc::as_ptr(&self.0) as *const () as usize
+    }
 }
 
 impl<K, V> Clone for FerroDictionary<K, V> {
@@ -123,6 +151,7 @@ impl<K: Eq + Hash + Clone + Display, V: Clone> FerroDictionary<K, V> {
         Self(Rc::new(FerroDictionaryData {
             inner: RefCell::new(Inner::with_capacity(capacity)),
             collection_changed: HandlerList::new(),
+            untyped_collection_changed: Event::new(),
             property_changed: Event::new(),
         }))
     }
@@ -151,9 +180,10 @@ impl<K: Eq + Hash + Clone + Display, V: Clone> FerroDictionary<K, V> {
         self.0.collection_changed.remove(token)
     }
 
-    /// Whether anything is subscribed to changes of the collection.
+    /// Whether anything is subscribed to changes of the collection, typed or
+    /// untyped.
     pub fn has_collection_changed_subscribers(&self) -> bool {
-        !self.0.collection_changed.is_empty()
+        !self.0.collection_changed.is_empty() || self.0.untyped_collection_changed.has_handlers()
     }
 
     /// The number of entries.
@@ -198,7 +228,7 @@ impl<K: Eq + Hash + Clone + Display, V: Clone> FerroDictionary<K, V> {
         match old {
             Some(old) => {
                 self.0.property_changed.raise(&format!("{INDEXER_NAME}[{key}]"));
-                if !self.0.collection_changed.is_empty() {
+                if self.has_collection_changed_subscribers() {
                     self.raise_collection_changed(
                         NotifyCollectionChangedAction::Replace,
                         &[(key.clone(), value)],
@@ -230,7 +260,7 @@ impl<K: Eq + Hash + Clone + Display, V: Clone> FerroDictionary<K, V> {
         self.0.property_changed.raise("Count");
         self.0.property_changed.raise(INDEXER_NAME);
 
-        if !self.0.collection_changed.is_empty() {
+        if self.has_collection_changed_subscribers() {
             self.raise_collection_changed(NotifyCollectionChangedAction::Remove, &[], &old.to_vec());
         }
     }
@@ -268,7 +298,7 @@ impl<K: Eq + Hash + Clone + Display, V: Clone> FerroDictionary<K, V> {
                 self.0.property_changed.raise("Count");
                 self.0.property_changed.raise(&format!("{INDEXER_NAME}[{key}]"));
 
-                if !self.0.collection_changed.is_empty() {
+                if self.has_collection_changed_subscribers() {
                     self.raise_collection_changed(NotifyCollectionChangedAction::Remove, &[], &[(key.clone(), value)]);
                 }
                 true
@@ -281,7 +311,7 @@ impl<K: Eq + Hash + Clone + Display, V: Clone> FerroDictionary<K, V> {
         self.0.property_changed.raise("Count");
         self.0.property_changed.raise(&format!("{INDEXER_NAME}[{key}]"));
 
-        if !self.0.collection_changed.is_empty() {
+        if self.has_collection_changed_subscribers() {
             self.raise_collection_changed(NotifyCollectionChangedAction::Add, &[(key, value)], &[]);
         }
     }
@@ -292,6 +322,19 @@ impl<K: Eq + Hash + Clone + Display, V: Clone> FerroDictionary<K, V> {
         for (_, handler) in self.0.collection_changed.snapshot().iter() {
             handler(&e);
         }
+        self.0.untyped_collection_changed.raise(&CollectionChange {
+            action,
+            new_starting_index: -1,
+            new_count: new_items.len(),
+            old_starting_index: -1,
+            old_count: old_items.len(),
+        });
+    }
+}
+
+impl<K, V> INotifyCollectionChanged for FerroDictionary<K, V> {
+    fn collection_changed(&self) -> &Event<CollectionChange> {
+        &self.0.untyped_collection_changed
     }
 }
 
