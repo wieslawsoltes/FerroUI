@@ -10,10 +10,10 @@ Generated from upstream commit `17350180c33b063f0e98abbfd19aa3cae63f5d56`. Back 
 | FerroUI | `src/FerroUI.Base` (exists) |
 | Crate | `ferroui-base` |
 | Phase / priority | 0 - core / P0 |
-| Files | 1077/1286 (83.7%), 13 not applicable |
-| Types | 1338/1709 (78.3%) |
-| Members | 9364/11739 (34 waived) (80.0%) |
-| Contracts (interfaces) | 217/263 |
+| Files | 1102/1286 (85.7%), 13 not applicable |
+| Types | 1394/1709 (81.6%) |
+| Members | 9652/11739 (31 waived) (82.4%) |
+| Contracts (interfaces) | 231/263 |
 | Property registrations | 224/239 |
 | Routed events | 41/41 |
 
@@ -171,9 +171,9 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 | `Avalonia.Platform.IDrawingContextLayerImpl` | public | `Platform/IDrawingContextImpl.cs` | 4/4 | present |
 | `Avalonia.Platform.IDrawingContextLayerWithRenderContextAffinityImpl` | public | `Platform/IDrawingContextImpl.cs` | 2/2 | present |
 | `Avalonia.Platform.IDrawingContextWithAcrylicLikeSupport` | public | `Platform/IDrawingContextWithAcrylicLikeSupport.cs` | 1/1 | present |
-| `Avalonia.Platform.IExternalObjectsHandleWrapRenderInterfaceContextFeature` | public | `Platform/IExternalObjectsRenderInterfaceContextFeature.cs` | 0/2 | missing |
-| `Avalonia.Platform.IExternalObjectsRenderInterfaceContextFeature` | public | `Platform/IExternalObjectsRenderInterfaceContextFeature.cs` | 0/9 | missing |
-| `Avalonia.Platform.IExternalObjectsWrappedGpuHandle` | public | `Platform/IExternalObjectsRenderInterfaceContextFeature.cs` | 0/0 | missing |
+| `Avalonia.Platform.IExternalObjectsHandleWrapRenderInterfaceContextFeature` | public | `Platform/IExternalObjectsRenderInterfaceContextFeature.cs` | 2/2 | present |
+| `Avalonia.Platform.IExternalObjectsRenderInterfaceContextFeature` | public | `Platform/IExternalObjectsRenderInterfaceContextFeature.cs` | 8/9 | partial |
+| `Avalonia.Platform.IExternalObjectsWrappedGpuHandle` | public | `Platform/IExternalObjectsRenderInterfaceContextFeature.cs` | 0/0 | present |
 | `Avalonia.Platform.IFontManagerImpl` | public | `Platform/IFontManagerImpl.cs` | 6/6 | present |
 | `Avalonia.Platform.IGeometryContext` | public | `Platform/IGeometryContext.cs` | 7/7 | present |
 | `Avalonia.Platform.IGeometryImpl` | public | `Platform/IGeometryImpl.cs` | 12/13 | partial |
@@ -188,9 +188,9 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 | `Avalonia.Platform.IPlatformHandle` | public | `Platform/IPlatformHandle.cs` | 2/2 | present |
 | `Avalonia.Platform.IPlatformRenderInterface` | public | `Platform/IPlatformRenderInterface.cs` | 27/27 | present |
 | `Avalonia.Platform.IPlatformRenderInterfaceContext` | public | `Platform/IPlatformRenderInterface.cs` | 6/6 | present |
-| `Avalonia.Platform.IPlatformRenderInterfaceImportedImage` | public | `Platform/IExternalObjectsRenderInterfaceContextFeature.cs` | 0/4 | missing |
-| `Avalonia.Platform.IPlatformRenderInterfaceImportedObject` | public | `Platform/IExternalObjectsRenderInterfaceContextFeature.cs` | 0/0 | missing |
-| `Avalonia.Platform.IPlatformRenderInterfaceImportedSemaphore` | public | `Platform/IExternalObjectsRenderInterfaceContextFeature.cs` | 0/0 | missing |
+| `Avalonia.Platform.IPlatformRenderInterfaceImportedImage` | public | `Platform/IExternalObjectsRenderInterfaceContextFeature.cs` | 4/4 | present |
+| `Avalonia.Platform.IPlatformRenderInterfaceImportedObject` | public | `Platform/IExternalObjectsRenderInterfaceContextFeature.cs` | 0/0 | present |
+| `Avalonia.Platform.IPlatformRenderInterfaceImportedSemaphore` | public | `Platform/IExternalObjectsRenderInterfaceContextFeature.cs` | 0/0 | present |
 | `Avalonia.Platform.IPlatformRenderInterfaceRegion` | public | `Platform/IPlatformRenderInterfaceRegion.cs` | 7/7 | present |
 | `Avalonia.Platform.IPlatformSettings` | public | `Platform/IPlatformSettings.cs` | 9/9 | present |
 | `Avalonia.Platform.IPlatformThreadingInterface` | public | `Platform/IPlatformThreadingInterface.cs` | 4/4 | present |
@@ -228,7 +228,7 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 | `Avalonia.Rendering.Composition.Animations.IAnimationInstance` | internal | `Rendering/Composition/Animations/IAnimationInstance.cs` | 6/6 | present |
 | `Avalonia.Rendering.Composition.Animations.ICompositionAnimationBase` | public | `Rendering/Composition/Animations/ICompositionAnimationBase.cs` | 0/1 | partial |
 | `Avalonia.Rendering.Composition.Animations.IInterpolator<T>` | internal | `Rendering/Composition/Animations/Interpolators.cs` | 1/1 | present |
-| `Avalonia.Rendering.Composition.Animations.IKeyFrames` | internal | `Rendering/Composition/Animations/KeyFrames.cs` | 0/1 | missing |
+| `Avalonia.Rendering.Composition.Animations.IKeyFrames` | internal | `Rendering/Composition/Animations/KeyFrames.cs` | 1/1 | present |
 | `Avalonia.Rendering.Composition.Drawing.ICompositionRenderResource` | internal | `Rendering/Composition/Drawing/ICompositionRenderResource.cs` | 2/2 | present |
 | `Avalonia.Rendering.Composition.Drawing.ICompositionRenderResource<T>` | internal | `Rendering/Composition/Drawing/ICompositionRenderResource.cs` | 1/1 | present |
 | `Avalonia.Rendering.Composition.Drawing.IRenderDataGeometry` | public | `Rendering/Composition/Drawing/IRenderDataGeometry.cs` | 1/1 | present |
@@ -238,13 +238,13 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 | `Avalonia.Rendering.Composition.Expressions.IExpressionObject` | internal | `Rendering/Composition/Expressions/ExpressionEvaluationContext.cs` | 1/1 | present |
 | `Avalonia.Rendering.Composition.Expressions.IExpressionParameterCollection` | internal | `Rendering/Composition/Expressions/ExpressionEvaluationContext.cs` | 2/2 | present |
 | `Avalonia.Rendering.Composition.HitTesting.ICompositionHitTester<T>` | internal | `Rendering/Composition/HitTesting/ICompositionHitTester.cs` | 5/5 | present |
-| `Avalonia.Rendering.Composition.ICompositionGpuImportedObject` | public | `Rendering/Composition/CompositionExternalMemory.cs` | 0/2 | missing |
-| `Avalonia.Rendering.Composition.ICompositionGpuInterop` | public | `Rendering/Composition/CompositionExternalMemory.cs` | 0/11 | missing |
-| `Avalonia.Rendering.Composition.ICompositionImportableSharedGpuContextImage` | public | `Rendering/Composition/CompositionExternalMemory.cs` | 0/0 | missing |
-| `Avalonia.Rendering.Composition.ICompositionImportableSharedGpuContextObject` | public | `Rendering/Composition/CompositionExternalMemory.cs` | 0/0 | missing |
-| `Avalonia.Rendering.Composition.ICompositionImportableSharedGpuContextSemaphore` | public | `Rendering/Composition/CompositionExternalMemory.cs` | 0/0 | missing |
-| `Avalonia.Rendering.Composition.ICompositionImportedGpuImage` | public | `Rendering/Composition/CompositionExternalMemory.cs` | 0/0 | missing |
-| `Avalonia.Rendering.Composition.ICompositionImportedGpuSemaphore` | public | `Rendering/Composition/CompositionExternalMemory.cs` | 0/0 | missing |
+| `Avalonia.Rendering.Composition.ICompositionGpuImportedObject` | public | `Rendering/Composition/CompositionExternalMemory.cs` | 2/2 | present |
+| `Avalonia.Rendering.Composition.ICompositionGpuInterop` | public | `Rendering/Composition/CompositionExternalMemory.cs` | 9/11 | partial |
+| `Avalonia.Rendering.Composition.ICompositionImportableSharedGpuContextImage` | public | `Rendering/Composition/CompositionExternalMemory.cs` | 0/0 | present |
+| `Avalonia.Rendering.Composition.ICompositionImportableSharedGpuContextObject` | public | `Rendering/Composition/CompositionExternalMemory.cs` | 0/0 | present |
+| `Avalonia.Rendering.Composition.ICompositionImportableSharedGpuContextSemaphore` | public | `Rendering/Composition/CompositionExternalMemory.cs` | 0/0 | present |
+| `Avalonia.Rendering.Composition.ICompositionImportedGpuImage` | public | `Rendering/Composition/CompositionExternalMemory.cs` | 0/0 | present |
+| `Avalonia.Rendering.Composition.ICompositionImportedGpuSemaphore` | public | `Rendering/Composition/CompositionExternalMemory.cs` | 0/0 | present |
 | `Avalonia.Rendering.Composition.ICompositionTargetDebugEvents` | internal | `Rendering/Composition/ICompositionTargetDebugEvents.cs` | 3/3 | present |
 | `Avalonia.Rendering.Composition.ICompositorScheduler` | internal | `Rendering/Composition/Compositor.cs` | 1/1 | present |
 | `Avalonia.Rendering.Composition.ICompositorSerializable` | internal | `Rendering/Composition/ICompositorSerializable.cs` | 2/2 | present |
@@ -1646,26 +1646,26 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 
 </details>
 
-### `Input` - files 88/90, types 109/115, members 1081/1136
+### `Input` - files 88/90, types 109/115, members 1088/1136
 
 | Upstream file | Rust file | Status | Types | Members | Notes |
 |---|---|---|---|---|---|
 | `AccessKeyHandler.cs` | `input/access_key_handler.rs` | partial | 4/4 | 22/23 |  |
-| `AsyncDataTransferExtensions.cs` | `input/async_data_transfer_extensions.rs` | partial | 1/1 | 6/10 |  |
-| `AsyncDataTransferItemExtensions.cs` | `input/async_data_transfer_item_extensions.rs` | partial | 1/1 | 4/5 |  |
+| `AsyncDataTransferExtensions.cs` | `input/async_data_transfer_extensions.rs` | partial | 1/1 | 8/10 |  |
+| `AsyncDataTransferItemExtensions.cs` | `input/async_data_transfer_item_extensions.rs` | present | 1/1 | 5/5 |  |
 | `AsyncToSyncDataTransfer.cs` | `input/async_to_sync_data_transfer.rs` | present | 1/1 | 6/6 |  |
 | `AsyncToSyncDataTransferItem.cs` | `input/async_to_sync_data_transfer_item.rs` | present | 1/1 | 4/4 |  |
 | `ContextRequestedEventArgs.cs` | `input/context_requested_event_args.rs` | present | 1/1 | 7/7 |  |
 | `Cursor.cs` | `input/cursor.rs` | partial | 2/2 | 30/31 |  |
-| `DataFormat.cs` | `input/data_format.rs` | partial | 1/1 | 18/19 |  |
+| `DataFormat.cs` | `input/data_format.rs` | present | 1/1 | 19/19 |  |
 | `DataFormatKind.cs` | `input/data_format_kind.rs` | present | 1/1 | 4/4 |  |
 | `DataFormatOfT.cs` | `input/data_format_of_t.rs` | present | 1/1 | 1/1 |  |
 | `DataFormats.cs` | `input/data_formats.rs` | missing | 0/1 | 0/0 |  |
 | `DataObject.cs` | `input/data_object.rs` | missing | 0/1 | 0/0 |  |
 | `DataTransfer.cs` | `input/data_transfer.rs` | present | 1/1 | 6/6 |  |
-| `DataTransferExtensions.cs` | `input/data_transfer_extensions.rs` | partial | 1/1 | 6/8 |  |
+| `DataTransferExtensions.cs` | `input/data_transfer_extensions.rs` | present | 1/1 | 8/8 |  |
 | `DataTransferItem.cs` | `input/data_transfer_item.rs` | partial | 1/1 | 10/12 |  |
-| `DataTransferItemExtensions.cs` | `input/data_transfer_item_extensions.rs` | partial | 1/1 | 4/5 |  |
+| `DataTransferItemExtensions.cs` | `input/data_transfer_item_extensions.rs` | present | 1/1 | 5/5 |  |
 | `DragDrop.cs` | `input/drag_drop.rs` | present | 1/1 | 16/16 |  |
 | `DragDropDevice.cs` | `input/drag_drop_device.rs` | present | 1/1 | 2/2 |  |
 | `DragDropEffects.cs` | `input/drag_drop_effects.rs` | present | 1/1 | 4/4 |  |
@@ -1748,20 +1748,11 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 
 </details>
 
-<details><summary><code>AsyncDataTransferExtensions.cs</code> - 4 missing</summary>
+<details><summary><code>AsyncDataTransferExtensions.cs</code> - 2 missing</summary>
 
-- `AsyncDataTransferExtensions` (class): 4 missing
+- `AsyncDataTransferExtensions` (class): 2 missing
   - `static IDataTransfer ToSynchronous(this IAsyncDataTransfer asyncDataTransfer, string logArea)` *(internal)*
   - `static IAsyncDataTransfer ToAsynchronous(this IDataTransfer dataTransfer)` *(internal)*
-  - `static Task<IStorageItem?> TryGetFileAsync(this IAsyncDataTransfer dataTransfer)`
-  - `static Task<IStorageItem[]?> TryGetFilesAsync(this IAsyncDataTransfer dataTransfer)`
-
-</details>
-
-<details><summary><code>AsyncDataTransferItemExtensions.cs</code> - 1 missing</summary>
-
-- `AsyncDataTransferItemExtensions` (class): 1 missing
-  - `static Task<IStorageItem?> TryGetFileAsync(this IAsyncDataTransferItem dataTransferItem)`
 
 </details>
 
@@ -1772,33 +1763,11 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 
 </details>
 
-<details><summary><code>DataFormat.cs</code> - 1 missing</summary>
-
-- `DataFormat` (class): 1 missing
-  - `static DataFormat<IStorageItem> File { get; }`
-
-</details>
-
-<details><summary><code>DataTransferExtensions.cs</code> - 2 missing</summary>
-
-- `DataTransferExtensions` (class): 2 missing
-  - `static IStorageItem? TryGetFile(this IDataTransfer dataTransfer)`
-  - `static IStorageItem[]? TryGetFiles(this IDataTransfer dataTransfer)`
-
-</details>
-
 <details><summary><code>DataTransferItem.cs</code> - 2 missing</summary>
 
 - `DataTransferItem` (class): 2 missing
   - `void SetFile(IStorageItem? value)`
   - `static DataTransferItem CreateFile(IStorageItem? value)`
-
-</details>
-
-<details><summary><code>DataTransferItemExtensions.cs</code> - 1 missing</summary>
-
-- `DataTransferItemExtensions` (class): 1 missing
-  - `static IStorageItem? TryGetFile(this IDataTransferItem dataTransferItem)`
 
 </details>
 
@@ -3247,7 +3216,7 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 | `XmlnsDefinitionAttribute.cs` | `metadata/xmlns_definition_attribute.rs` | missing | 0/1 | 0/3 |  |
 | `XmlnsPrefixAttribute.cs` | `metadata/xmlns_prefix_attribute.rs` | missing | 0/1 | 0/3 |  |
 
-### `Platform` - files 39/51, types 61/83, members 364/451 (1 waived)
+### `Platform` - files 41/51, types 75/83, members 411/451 (1 waived)
 
 | Upstream file | Rust file | Status | Types | Members | Notes |
 |---|---|---|---|---|---|
@@ -3260,7 +3229,7 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 | `ICursorImpl.cs` | `platform/i_cursor_impl.rs` | present | 1/1 | 0/0 |  |
 | `IDrawingContextImpl.cs` | `platform/i_drawing_context_impl.rs` | partial | 4/5 | 36/37 |  |
 | `IDrawingContextWithAcrylicLikeSupport.cs` | `platform/i_drawing_context_with_acrylic_like_support.rs` | present | 1/1 | 1/1 |  |
-| `IExternalObjectsRenderInterfaceContextFeature.cs` | `platform/i_external_objects_render_interface_context_feature.rs` | missing | 0/6 | 0/15 |  |
+| `IExternalObjectsRenderInterfaceContextFeature.cs` | `platform/i_external_objects_render_interface_context_feature.rs` | partial | 6/6 | 14/15 |  |
 | `IFontManagerImpl.cs` | `platform/i_font_manager_impl.rs` | present | 1/1 | 6/6 |  |
 | `IGeometryContext.cs` | `platform/i_geometry_context.rs` | present | 1/1 | 7/7 |  |
 | `IGeometryImpl.cs` | `platform/i_geometry_impl.rs` | partial | 1/1 | 12/13 |  |
@@ -3268,7 +3237,7 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 | `ILockedFramebuffer.cs` | `platform/i_locked_framebuffer.rs` | present | 1/1 | 6/6 |  |
 | `IMacOSTopLevelPlatformHandle.cs` | `platform/i_mac_os_top_level_platform_handle.rs` | present | 1/1 | 4/4 |  |
 | `IPlatformBehaviorInhibition.cs` | `platform/i_platform_behavior_inhibition.rs` | present | 1/1 | 1/1 |  |
-| `IPlatformGpu.cs` | `platform/i_platform_gpu.rs` | partial | 3/5 | 7/7 |  |
+| `IPlatformGpu.cs` | `platform/i_platform_gpu.rs` | partial | 4/5 | 7/7 |  |
 | `IPlatformHandle.cs` | `platform/i_platform_handle.rs` | present | 1/1 | 2/2 |  |
 | `IPlatformRenderInterface.cs` | `platform/i_platform_render_interface.rs` | present | 2/2 | 33/33 |  |
 | `IPlatformRenderInterfaceRegion.cs` | `platform/i_platform_render_interface_region.rs` | present | 1/1 | 7/7 |  |
@@ -3292,7 +3261,7 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 | `PixelFormat.cs` | `platform/pixel_format.rs` | partial | 3/3 | 40/41 |  |
 | `PlatformColorValues.cs` | `platform/platform_color_values.rs` | present | 3/3 | 10/10 |  |
 | `PlatformGraphicsDeviceAdapterDescription.cs` | `platform/platform_graphics_device_adapter_description.rs` | missing | 0/1 | 0/3 |  |
-| `PlatformGraphicsExternalMemory.cs` | `platform/platform_graphics_external_memory.rs` | missing | 0/7 | 0/33 |  |
+| `PlatformGraphicsExternalMemory.cs` | `platform/platform_graphics_external_memory.rs` | present | 7/7 | 33/33 |  |
 | `PlatformHandle.cs` | `platform/platform_handle.rs` | present | 1/1 | 9/9 |  |
 | `RenderTargetProperties.cs` | `platform/render_target_properties.rs` | missing (types found elsewhere) | 3/3 | 11/11 | types found in `platform/i_render_target.rs` (add to path-overrides.toml) |
 | `RetainedFramebuffer.cs` | `platform/retained_framebuffer.rs` | partial | 1/1 | 8/9 |  |
@@ -3316,6 +3285,13 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 
 </details>
 
+<details><summary><code>IExternalObjectsRenderInterfaceContextFeature.cs</code> - 1 missing</summary>
+
+- `IExternalObjectsRenderInterfaceContextFeature` (interface): 1 missing
+  - `IPlatformRenderInterfaceImportedImage ImportImage(ICompositionImportableSharedGpuContextImage image)` *(1 of 2 overloads found)*
+
+</details>
+
 <details><summary><code>IGeometryImpl.cs</code> - 1 missing</summary>
 
 - `IGeometryImpl` (interface): 1 missing
@@ -3323,10 +3299,9 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 
 </details>
 
-<details><summary><code>IPlatformGpu.cs</code> - 2 missing</summary>
+<details><summary><code>IPlatformGpu.cs</code> - 1 missing</summary>
 
 - `IPlatformGraphicsWithFeatures` (interface, public): **type missing** (0 members)
-- `PlatformGraphicsContextLostException` (class, public): **type missing** (0 members)
 
 </details>
 
@@ -3866,28 +3841,28 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 
 </details>
 
-### `Rendering/Composition` - files 18/26, types 23/41, members 135/274 (2 waived)
+### `Rendering/Composition` - files 25/26, types 41/41, members 243/274
 
 | Upstream file | Rust file | Status | Types | Members | Notes |
 |---|---|---|---|---|---|
 | `CompositingRenderer.cs` | `rendering/composition/compositing_renderer.rs` | partial | 1/1 | 19/20 |  |
-| `CompositionCustomVisual.cs` | `rendering/composition/composition_custom_visual.rs` | missing | 0/1 | 0/2 |  |
-| `CompositionCustomVisualHandler.cs` | `rendering/composition/composition_custom_visual_handler.rs` | missing | 0/1 | 0/13 |  |
+| `CompositionCustomVisual.cs` | `rendering/composition/composition_custom_visual.rs` | present | 1/1 | 2/2 |  |
+| `CompositionCustomVisualHandler.cs` | `rendering/composition/composition_custom_visual_handler.rs` | present | 1/1 | 13/13 |  |
 | `CompositionDrawListVisual.cs` | `rendering/composition/composition_draw_list_visual.rs` | partial | 1/1 | 4/6 |  |
-| `CompositionDrawingSurface.cs` | `rendering/composition/composition_drawing_surface.rs` | missing | 0/1 | 0/8 |  |
+| `CompositionDrawingSurface.cs` | `rendering/composition/composition_drawing_surface.rs` | partial | 1/1 | 6/8 |  |
 | `CompositionExperimentalAcrylicVisual.cs` | `rendering/composition/composition_experimental_acrylic_visual.rs` | present | 1/1 | 1/1 |  |
-| `CompositionExternalMemory.cs` | `rendering/composition/composition_external_memory.rs` | missing | 0/8 | 0/17 |  |
-| `CompositionGradientStop.cs` | `rendering/composition/composition_gradient_stop.rs` | missing | 0/1 | 0/1 |  |
-| `CompositionInterop.cs` | `rendering/composition/composition_interop.rs` | missing | 0/4 | 0/31 |  |
-| `CompositionObject.cs` | `rendering/composition/composition_object.rs` | partial | 1/1 | 10/17 |  |
+| `CompositionExternalMemory.cs` | `rendering/composition/composition_external_memory.rs` | partial | 8/8 | 15/17 |  |
+| `CompositionGradientStop.cs` | `rendering/composition/composition_gradient_stop.rs` | present | 1/1 | 1/1 |  |
+| `CompositionInterop.cs` | `rendering/composition/composition_interop.rs` | partial | 4/4 | 27/31 |  |
+| `CompositionObject.cs` | `rendering/composition/composition_object.rs` | partial | 1/1 | 11/17 |  |
 | `CompositionOptions.cs` | `rendering/composition/composition_options.rs` | present | 1/1 | 4/4 |  |
-| `CompositionPropertySet.cs` | `rendering/composition/composition_property_set.rs` | missing | 0/2 | 0/27 (2 waived) |  |
+| `CompositionPropertySet.cs` | `rendering/composition/composition_property_set.rs` | present | 2/2 | 27/27 |  |
 | `CompositionSurface.cs` | `rendering/composition/composition_surface.rs` | present | 1/1 | 1/1 |  |
 | `CompositionTarget.cs` | `rendering/composition/composition_target.rs` | present | 1/1 | 4/4 |  |
 | `CompositionTransform.cs` | `rendering/composition/composition_transform.rs` | missing (types found elsewhere) | 1/1 | 0/0 | types found in `rendering/composition/server/server_composition_simple_transform.rs` (add to path-overrides.toml) |
 | `CompositionTransparencyLevel.cs` | `rendering/composition/composition_transparency_level.rs` | present | 1/1 | 5/5 |  |
-| `Compositor.Factories.cs` | `rendering/composition/compositor_factories.rs` | partial | 1/1 | 4/17 |  |
-| `Compositor.cs` | `rendering/composition/compositor.rs` | partial | 2/2 | 17/26 |  |
+| `Compositor.Factories.cs` | `rendering/composition/compositor_factories.rs` | present | 1/1 | 17/17 |  |
+| `Compositor.cs` | `rendering/composition/compositor.rs` | partial | 2/2 | 20/26 |  |
 | `ContainerVisual.cs` | `rendering/composition/container_visual.rs` | partial | 1/1 | 1/8 |  |
 | `ElementCompositionPreview.cs` | `rendering/composition/element_composition_preview.rs` | present | 1/1 | 3/3 |  |
 | `Enums.cs` | `rendering/composition/enums.rs` | present | 4/4 | 41/41 |  |
@@ -3912,10 +3887,36 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 
 </details>
 
-<details><summary><code>CompositionObject.cs</code> - 7 missing</summary>
+<details><summary><code>CompositionDrawingSurface.cs</code> - 2 missing</summary>
 
-- `CompositionObject` (class): 7 missing
-  - `ImplicitAnimationCollection? ImplicitAnimations { get; set; }`
+- `CompositionDrawingSurface` (class): 2 missing
+  - `new ServerCompositionDrawingSurface Server { get; }` *(internal)*
+  - `~CompositionDrawingSurface()` *(protected)*
+
+</details>
+
+<details><summary><code>CompositionExternalMemory.cs</code> - 2 missing</summary>
+
+- `ICompositionGpuInterop` (interface): 2 missing
+  - `ICompositionImportedGpuImage ImportImage(ICompositionImportableSharedGpuContextImage image)` *(1 of 2 overloads found)*
+  - `ICompositionImportedGpuImage ImportSemaphore(ICompositionImportableSharedGpuContextSemaphore image)` *(1 of 2 overloads found)*
+
+</details>
+
+<details><summary><code>CompositionInterop.cs</code> - 4 missing</summary>
+
+- `CompositionInterop` (class): 2 missing
+  - `ICompositionImportedGpuImage ImportImage(ICompositionImportableSharedGpuContextImage image)` *(1 of 2 overloads found)*
+  - `ICompositionImportedGpuImage ImportSemaphore(ICompositionImportableSharedGpuContextSemaphore image)` *(1 of 2 overloads found)*
+- `CompositionGpuImportedObjectBase` (class): 2 missing
+  - `abstract void Import()` *(protected)*
+  - `abstract void Dispose()`
+
+</details>
+
+<details><summary><code>CompositionObject.cs</code> - 6 missing</summary>
+
+- `CompositionObject` (class): 6 missing
   - `virtual void StartAnimation(string propertyName, CompositionAnimation animation, ExpressionVariant? finalVa...` *(internal; 1 of 2 overloads found)*
   - `void StartAnimationGroup(ICompositionAnimationBase grp)`
   - `bool StartAnimationGroup(ICompositionAnimationBase grp, string target, ExpressionVariant finalValue)` *(internal)*
@@ -3925,37 +3926,15 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 
 </details>
 
-<details><summary><code>Compositor.Factories.cs</code> - 13 missing</summary>
+<details><summary><code>Compositor.cs</code> - 6 missing</summary>
 
-- `Compositor` (class) in `rendering/composition/compositor.rs`: 13 missing
-  - `ExpressionAnimation CreateExpressionAnimation()`
-  - `ExpressionAnimation CreateExpressionAnimation(string expression)`
-  - `ImplicitAnimationCollection CreateImplicitAnimationCollection()`
-  - `CompositionAnimationGroup CreateAnimationGroup()`
-  - `CompositionCustomVisual CreateCustomVisual(CompositionCustomVisualHandler handler)`
-  - `CompositionDrawingSurface CreateDrawingSurface()`
-  - `CompositionSolidColorBrush CreateSolidColorBrush()`
-  - `CompositionSolidColorBrush CreateSolidColorBrush(Color color)`
-  - `CompositionLinearGradientBrush CreateLinearGradientBrush()`
-  - `CompositionConicGradientBrush CreateConicGradientBrush()`
-  - `CompositionRadialGradientBrush CreateRadialGradientBrush()`
-  - `CompositionGradientStop CreateGradientStop(double offset, Color color)`
-  - `CompositionGradientStop CreateGradientStop()`
-
-</details>
-
-<details><summary><code>Compositor.cs</code> - 9 missing</summary>
-
-- `Compositor` (class): 9 missing
+- `Compositor` (class): 6 missing
   - `IRenderLoop Loop { get; }` *(internal)*
-  - `IEasing DefaultEasing { get; }` *(internal)*
   - `Compositor(IRenderLoop loop, IPlatformGraphics? gpu, bool useUiThreadForSynchronousCommits = false)` *(internal; 1 of 3 constructors found)*
   - `Compositor(IRenderLoop loop, IPlatformGraphics? gpu, bool useUiThreadForSynchronousCommits, ICompositorSche...` *(internal; 1 of 3 constructors found)*
-  - `Task InvokeServerJobAsync(Action job, bool postTarget = false)` *(internal)*
-  - `Task<T> InvokeServerJobAsync<T>(Func<T> job, bool postTarget = false)` *(internal)*
+  - `Task<T> InvokeServerJobAsync<T>(Func<T> job, bool postTarget = false)` *(internal; 1 of 2 overloads found)*
   - `ValueTask<IReadOnlyDictionary<Type, object>> GetRenderInterfacePublicFeatures()` *(internal)*
   - `async Task<Bitmap> CreateCompositionVisualSnapshot(CompositionVisual visual, double scaling)`
-  - `async ValueTask<ICompositionGpuInterop?> TryGetCompositionGpuInterop()`
 
 </details>
 
@@ -3979,28 +3958,61 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 
 </details>
 
-### `Rendering/Composition/Animations` - files 3/13, types 17/32, members 20/137 (1 waived)
+### `Rendering/Composition/Animations` - files 13/13, types 32/32, members 115/137
 
 | Upstream file | Rust file | Status | Types | Members | Notes |
 |---|---|---|---|---|---|
-| `AnimationInstanceBase.cs` | `rendering/composition/animations/animation_instance_base.rs` | missing | 0/1 | 0/12 |  |
-| `CompositionAnimation.cs` | `rendering/composition/animations/composition_animation.rs` | missing | 0/1 | 0/16 (1 waived) |  |
-| `CompositionAnimationGroup.cs` | `rendering/composition/animations/composition_animation_group.rs` | missing | 0/1 | 0/6 |  |
-| `ExpressionAnimation.cs` | `rendering/composition/animations/expression_animation.rs` | missing | 0/1 | 0/3 |  |
-| `ExpressionAnimationInstance.cs` | `rendering/composition/animations/expression_animation_instance.rs` | missing | 0/1 | 0/3 |  |
+| `AnimationInstanceBase.cs` | `rendering/composition/animations/animation_instance_base.rs` | partial | 1/1 | 9/12 |  |
+| `CompositionAnimation.cs` | `rendering/composition/animations/composition_animation.rs` | partial | 1/1 | 14/16 |  |
+| `CompositionAnimationGroup.cs` | `rendering/composition/animations/composition_animation_group.rs` | partial | 1/1 | 5/6 |  |
+| `ExpressionAnimation.cs` | `rendering/composition/animations/expression_animation.rs` | present | 1/1 | 3/3 |  |
+| `ExpressionAnimationInstance.cs` | `rendering/composition/animations/expression_animation_instance.rs` | present | 1/1 | 3/3 |  |
 | `IAnimationInstance.cs` | `rendering/composition/animations/i_animation_instance.rs` | present | 1/1 | 6/6 |  |
 | `ICompositionAnimationBase.cs` | `rendering/composition/animations/i_composition_animation_base.rs` | partial | 1/1 | 0/1 |  |
-| `ImplicitAnimationCollection.cs` | `rendering/composition/animations/implicit_animation_collection.rs` | missing | 0/1 | 0/22 |  |
+| `ImplicitAnimationCollection.cs` | `rendering/composition/animations/implicit_animation_collection.rs` | partial | 1/1 | 19/22 |  |
 | `Interpolators.cs` | `rendering/composition/animations/interpolators.rs` | partial | 13/13 | 14/26 |  |
-| `KeyFrameAnimation.cs` | `rendering/composition/animations/key_frame_animation.rs` | missing | 0/4 | 0/17 |  |
-| `KeyFrameAnimationInstance.cs` | `rendering/composition/animations/key_frame_animation_instance.rs` | missing | 0/1 | 0/5 |  |
-| `KeyFrames.cs` | `rendering/composition/animations/key_frames.rs` | missing (types found elsewhere) | 2/4 | 0/12 | types found in `animation/key_frame.rs`, `animation/key_frames.rs` (add to path-overrides.toml) |
-| `PropertySetSnapshot.cs` | `rendering/composition/animations/property_set_snapshot.rs` | missing | 0/2 | 0/8 |  |
+| `KeyFrameAnimation.cs` | `rendering/composition/animations/key_frame_animation.rs` | present | 4/4 | 17/17 |  |
+| `KeyFrameAnimationInstance.cs` | `rendering/composition/animations/key_frame_animation_instance.rs` | present | 1/1 | 5/5 |  |
+| `KeyFrames.cs` | `rendering/composition/animations/key_frames.rs` | present | 4/4 | 12/12 |  |
+| `PropertySetSnapshot.cs` | `rendering/composition/animations/property_set_snapshot.rs` | present | 2/2 | 8/8 |  |
+
+<details><summary><code>AnimationInstanceBase.cs</code> - 3 missing</summary>
+
+- `AnimationInstanceBase` (class): 3 missing
+  - `void Initialize(CompositionProperty property, HashSet<(string name, string member)> trackedObjects)` *(protected; 1 of 2 overloads found)*
+  - `abstract ExpressionVariant EvaluateCore(TimeSpan now, ExpressionVariant currentValue)` *(protected)*
+  - `ExpressionVariant Evaluate(TimeSpan now, ExpressionVariant currentValue)`
+
+</details>
+
+<details><summary><code>CompositionAnimation.cs</code> - 2 missing</summary>
+
+- `CompositionAnimation` (class): 2 missing
+  - `abstract IAnimationInstance CreateInstance(ServerObject targetObject, ExpressionVariant? finalValue)` *(internal)*
+  - `void ICompositionAnimationBase.InternalOnly()` *(explicit)*
+
+</details>
+
+<details><summary><code>CompositionAnimationGroup.cs</code> - 1 missing</summary>
+
+- `CompositionAnimationGroup` (class): 1 missing
+  - `void ICompositionAnimationBase.InternalOnly()` *(explicit)*
+
+</details>
 
 <details><summary><code>ICompositionAnimationBase.cs</code> - 1 missing</summary>
 
 - `ICompositionAnimationBase` (interface): 1 missing
   - `void InternalOnly()` *(internal)*
+
+</details>
+
+<details><summary><code>ImplicitAnimationCollection.cs</code> - 3 missing</summary>
+
+- `ImplicitAnimationCollection` (class): 3 missing
+  - `IEnumerator<KeyValuePair<string, ICompositionAnimationBase>> GetEnumerator()`
+  - `IEnumerator IEnumerable.GetEnumerator()` *(explicit)*
+  - `bool ICollection<KeyValuePair<string, ICompositionAnimationBase>>.Contains(KeyValuePair<string, ICompositio...` *(explicit)*
 
 </details>
 
@@ -4033,31 +4045,38 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 
 </details>
 
-<details><summary><code>KeyFrames.cs</code> - 14 missing</summary>
-
-- `KeyFrames<T>` (class) in `animation/key_frames.rs`: 3 missing
-  - `void InsertExpressionKeyFrame(float normalizedProgressKey, string value, IEasing easingFunction)`
-  - `void Insert(float normalizedProgressKey, T value, IEasing easingFunction)`
-  - `ServerKeyFrame<T>[] Snapshot()`
-- `KeyFrame<T>` (struct) in `animation/key_frame.rs`: 4 missing
-  - `float NormalizedProgressKey`
-  - `T Value`
-  - `Expression Expression`
-  - `IEasing EasingFunction`
-- `ServerKeyFrame<T>` (struct, internal): **type missing** (4 members)
-- `IKeyFrames` (interface, internal): **type missing** (1 members)
-
-</details>
-
-### `Rendering/Composition/Brushes` - files 2/5, types 1/20, members 4/32
+### `Rendering/Composition/Brushes` - files 4/5, types 5/20, members 14/32
 
 | Upstream file | Rust file | Status | Types | Members | Notes |
 |---|---|---|---|---|---|
-| `CompositionBrush.cs` | `rendering/composition/brushes/composition_brush.rs` | missing | 0/6 | 0/8 |  |
-| `ServerCompositionBrush.cs` | `rendering/composition/brushes/server_composition_brush.rs` | missing | 0/6 | 0/9 |  |
+| `CompositionBrush.cs` | `rendering/composition/brushes/composition_brush.rs` | partial | 3/6 | 5/8 |  |
+| `ServerCompositionBrush.cs` | `rendering/composition/brushes/server_composition_brush.rs` | partial | 1/6 | 5/9 |  |
 | `ServerSimpleCompositionBrush.cs` | `rendering/composition/brushes/server_simple_composition_brush.rs` | missing (types found elsewhere) | 1/6 | 4/6 | types found in `rendering/composition/server/server_composition_simple_brush.rs` (add to path-overrides.toml) |
 | `ServerSimpleContentBrush.cs` | `rendering/composition/brushes/server_simple_content_brush.rs` | partial | 0/1 | 0/4 |  |
 | `ServerSimpleImageBrush.cs` | `rendering/composition/brushes/server_simple_image_brush.rs` | partial | 0/1 | 0/5 |  |
+
+<details><summary><code>CompositionBrush.cs</code> - 6 missing</summary>
+
+- `CompositionLinearGradientBrush` (class, internal): **type missing** (0 members)
+- `CompositionRadialGradientBrush` (class, internal): **type missing** (1 members)
+- `CompositionConicGradientBrush` (class, internal): **type missing** (0 members)
+- `CompositionGradientBrush` (class): 2 missing
+  - `new ServerCompositionGradientBrush Server { get; }` *(internal)*
+  - `override void SerializeChangesCore(BatchStreamWriter writer)` *(private protected)*
+
+</details>
+
+<details><summary><code>ServerCompositionBrush.cs</code> - 9 missing</summary>
+
+- `ServerCompositionBrush` (class, internal): **type missing** (2 members)
+- `ServerCompositionGradientBrush` (class): 1 missing
+  - `static CompositionProperty<List<IGradientStop>> s_IdOfGradientStopsProperty` *(internal)*
+- `ServerCompositionConicGradientBrush` (class, internal): **type missing** (0 members)
+- `ServerCompositionLinearGradientBrush` (class, internal): **type missing** (0 members)
+- `ServerCompositionRadialGradientBrush` (class, internal): **type missing** (1 members)
+- `ServerCompositionSolidColorBrush` (class, internal): **type missing** (0 members)
+
+</details>
 
 <details><summary><code>ServerSimpleCompositionBrush.cs</code> - 7 missing</summary>
 
@@ -4235,7 +4254,7 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 | `ICompositionHitTester.cs` | `rendering/composition/hit_testing/i_composition_hit_tester.rs` | present | 1/1 | 5/5 |  |
 | `PointCompositionHitTester.cs` | `rendering/composition/hit_testing/point_composition_hit_tester.rs` | present | 1/1 | 5/5 |  |
 
-### `Rendering/Composition/Server` - files 30/34, types 34/41, members 185/261
+### `Rendering/Composition/Server` - files 33/34, types 38/41, members 205/261
 
 | Upstream file | Rust file | Status | Types | Members | Notes |
 |---|---|---|---|---|---|
@@ -4253,9 +4272,9 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 | `ServerCompositionCacheMode.cs` | `rendering/composition/server/server_composition_cache_mode.rs` | partial | 0/1 | 0/3 |  |
 | `ServerCompositionContainerVisual.cs` | `rendering/composition/server/server_composition_container_visual.rs` | partial | 1/1 | 0/1 |  |
 | `ServerCompositionDrawListVisual.cs` | `rendering/composition/server/server_composition_draw_list_visual.rs` | present | 1/1 | 5/5 |  |
-| `ServerCompositionDrawingSurface.cs` | `rendering/composition/server/server_composition_drawing_surface.rs` | missing | 0/1 | 0/7 |  |
+| `ServerCompositionDrawingSurface.cs` | `rendering/composition/server/server_composition_drawing_surface.rs` | present | 1/1 | 7/7 |  |
 | `ServerCompositionExperimentalAcrylicVisual.cs` | `rendering/composition/server/server_composition_experimental_acrylic_visual.rs` | present | 1/1 | 4/4 |  |
-| `ServerCompositionGradientStop.cs` | `rendering/composition/server/server_composition_gradient_stop.rs` | missing | 0/1 | 0/0 |  |
+| `ServerCompositionGradientStop.cs` | `rendering/composition/server/server_composition_gradient_stop.rs` | present | 1/1 | 0/0 |  |
 | `ServerCompositionSimpleGeometry.cs` | `rendering/composition/server/server_composition_simple_geometry.rs` | present | 1/1 | 0/0 |  |
 | `ServerCompositionSolidColorVisual.cs` | `rendering/composition/server/server_composition_solid_color_visual.rs` | present | 1/1 | 1/1 |  |
 | `ServerCompositionSurface.cs` | `rendering/composition/server/server_composition_surface.rs` | partial | 0/1 | 0/3 |  |
@@ -4263,13 +4282,13 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 | `ServerCompositionTarget.cs` | `rendering/composition/server/server_composition_target.rs` | partial | 1/1 | 15/18 |  |
 | `ServerCompositor.Passes.cs` | `rendering/composition/server/server_compositor.rs` | present | 1/1 | 4/4 | partial merged into main file |
 | `ServerCompositor.UserApis.cs` | `rendering/composition/server/server_compositor.rs` | present | 1/1 | 5/5 | partial merged into main file |
-| `ServerCompositor.cs` | `rendering/composition/server/server_compositor.rs` | partial | 1/1 | 16/26 |  |
+| `ServerCompositor.cs` | `rendering/composition/server/server_compositor.rs` | partial | 1/1 | 18/26 |  |
 | `ServerCompositorAnimations.cs` | `rendering/composition/server/server_compositor_animations.rs` | present | 1/1 | 5/5 |  |
-| `ServerCustomCompositionVisual.cs` | `rendering/composition/server/server_custom_composition_visual.rs` | missing | 0/1 | 0/10 |  |
+| `ServerCustomCompositionVisual.cs` | `rendering/composition/server/server_custom_composition_visual.rs` | partial | 1/1 | 7/10 |  |
 | `ServerList.cs` | `rendering/composition/server/server_list.rs` | partial | 1/1 | 3/4 |  |
 | `ServerObject.cs` | `rendering/composition/server/server_object.rs` | partial | 1/1 | 10/12 |  |
 | `ServerObjectAnimations.cs` | `rendering/composition/server/server_object_animations.rs` | present | 1/1 | 11/11 |  |
-| `ServerRenderResource.cs` | `rendering/composition/server/server_render_resource.rs` | partial | 5/6 | 19/43 |  |
+| `ServerRenderResource.cs` | `rendering/composition/server/server_render_resource.rs` | partial | 6/6 | 23/43 |  |
 | `ServerSizeDependantVisual.cs` | `rendering/composition/server/server_size_dependant_visual.rs` | partial | 1/1 | 2/3 |  |
 | `ServerVisualRenderContext.cs` | `rendering/composition/server/server_visual_render_context.rs` | present | 1/1 | 2/2 |  |
 | `SimpleServerObject.cs` | `rendering/composition/server/simple_server_object.rs` | missing | 0/1 | 0/7 |  |
@@ -4324,9 +4343,9 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 
 </details>
 
-<details><summary><code>ServerCompositor.cs</code> - 10 missing</summary>
+<details><summary><code>ServerCompositor.cs</code> - 8 missing</summary>
 
-- `ServerCompositor` (class): 10 missing
+- `ServerCompositor` (class): 8 missing
   - `BatchStreamObjectPool<object?> BatchObjectPool` *(internal)*
   - `BatchStreamMemoryPool BatchMemoryPool` *(internal)*
   - `static readonly object RenderThreadDisposeStartMarker` *(internal)*
@@ -4335,8 +4354,15 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
   - `static readonly object RenderThreadPostTargetJobsStartMarker` *(internal)*
   - `static readonly object RenderThreadPostTargetJobsEndMarker` *(internal)*
   - `void EnqueueBatch(CompositionBatch batch)`
-  - `bool CheckAccess()`
-  - `void VerifyAccess()`
+
+</details>
+
+<details><summary><code>ServerCustomCompositionVisual.cs</code> - 3 missing</summary>
+
+- `ServerCompositionCustomVisual` (class): 3 missing
+  - `void OnTick()`
+  - `void HandlerInvalidate()` *(internal)*
+  - `void HandlerInvalidate(Rect rc)` *(internal)*
 
 </details>
 
@@ -4355,7 +4381,7 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 
 </details>
 
-<details><summary><code>ServerRenderResource.cs</code> - 25 missing</summary>
+<details><summary><code>ServerRenderResource.cs</code> - 20 missing</summary>
 
 - `SimpleServerRenderResource` (class): 10 missing
   - `new void SetValue<T>(CompositionProperty prop, ref T field, T value)` *(protected)*
@@ -4368,7 +4394,17 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
   - `void AddObserver(IServerRenderResourceObserver observer)`
   - `void RemoveObserver(IServerRenderResourceObserver observer)`
   - `void IServerRenderResourceHost.ResourcePropertyChanged()` *(explicit)*
-- `ServerRenderResource` (class, internal): **type missing** (14 members)
+- `ServerRenderResource` (class): 10 missing
+  - `new void SetValue<T>(CompositionProperty prop, ref T field, T value)` *(protected)*
+  - `void SetValue<T>(ref T field, T value)` *(protected)*
+  - `void Invalidated()` *(protected)*
+  - `override void ValuesInvalidated()` *(protected)*
+  - `void RemoveObserversFromProperty<T>(ref T field)` *(protected)*
+  - `virtual void Dispose()`
+  - `virtual void PropertyChanged()` *(protected)*
+  - `void AddObserver(IServerRenderResourceObserver observer)`
+  - `void RemoveObserver(IServerRenderResourceObserver observer)`
+  - `void IServerRenderResourceHost.ResourcePropertyChanged()` *(explicit)*
 
 </details>
 
@@ -4878,7 +4914,7 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 
 </details>
 
-### `Utilities` - files 20/46, types 28/74, members 169/489 (1 waived)
+### `Utilities` - files 21/46, types 29/74, members 170/489 (1 waived)
 
 | Upstream file | Rust file | Status | Types | Members | Notes |
 |---|---|---|---|---|---|
@@ -4890,7 +4926,7 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 | `BidiDictionary.cs` | `utilities/bidi_dictionary.rs` | missing | 0/1 | 0/6 |  |
 | `BinarySearchExtension.cs` | `utilities/binary_search_extension.rs` | missing | 0/1 | 0/2 |  |
 | `BooleanBoxes.cs` | `utilities/boolean_boxes.rs` | present | 1/1 | 3/3 |  |
-| `ByteSizeHelper.cs` | `utilities/byte_size_helper.rs` | missing | 0/1 | 0/1 |  |
+| `ByteSizeHelper.cs` | `utilities/byte_size_helper.rs` | present | 1/1 | 1/1 |  |
 | `CharacterReader.cs` | `utilities/character_reader.rs` | present | 1/1 | 14/14 |  |
 | `DisposableLock.cs` | `utilities/disposable_lock.rs` | missing | 0/1 | 0/2 |  |
 | `FrugalList.cs` | `utilities/frugal_list.rs` | missing | 0/11 | 0/139 |  |
@@ -5130,7 +5166,7 @@ Rust sources of this crate that no upstream file maps to. Give each a reason in 
 | `media/tile_mode.rs` | **unmapped** | `TileMode` |
 | `metadata/markup_assembly.rs` | **unmapped** | `MarkupAssembly`, `XmlnsDefinition`, `XmlnsPrefix` |
 | `metadata/markup_macros.rs` | **unmapped** |  |
-| `metadata/markup_type.rs` | **unmapped** | `MarkupArguments`, `MarkupAttribute`, `MarkupAttributeValue`, `MarkupConstructor`, `MarkupDelegate`, `MarkupDelegateMethod`, `MarkupEnumMember`, `MarkupEvent`, `MarkupField`, `MarkupGeneric`, `MarkupIndexer`, `MarkupInvoke`, ... (23 total) |
+| `metadata/markup_type.rs` | **unmapped** | `CompilerMetadata`, `MarkupArguments`, `MarkupAttribute`, `MarkupAttributeValue`, `MarkupConstructor`, `MarkupDelegate`, `MarkupDelegateMethod`, `MarkupEmit`, `MarkupEnumMember`, `MarkupEvent`, `MarkupField`, `MarkupGeneric`, ... (26 total) |
 | `metadata/property_accessors.rs` | **unmapped** | `PropertyAccessor` |
 | `metadata/service_provider.rs` | **unmapped** | `EmptyServiceProvider`, `IServiceProvider` |
 | `metadata/typed_path.rs` | **unmapped** | `TypedPathElement`, `TypedPathFallback`, `TypedPathGetter`, `TypedPathNotifying`, `TypedPathProbe`, `TypedPathSetter`, `TypedPathShared` |
@@ -5192,10 +5228,12 @@ Rust sources of this crate that no upstream file maps to. Give each a reason in 
 | `rendering/composition/server/server_composition_visual/walker.rs` | **unmapped** | `IServerTreeVisitor`, `TreeWalkContext`, `TreeWalkerFrame` |
 | `rendering/composition/server/server_composition_visual_collection.rs` | **unmapped** | `ServerCompositionVisualCollection` |
 | `rendering/composition/server/server_property_host.rs` | **unmapped** | `AsServerRenderResource`, `IServerAnimatedPropertyHost`, `IServerPropertyHost`, `ServerPropertyValue`, `ServerResourceRef`, `ServerValueChange` |
+| `rendering/composition/test_compositor.rs` | **unmapped** | `TestCompositor` |
 | `rendering/i_hit_tester.rs` | **unmapped** | `IHitTester` |
 | `rendering/managed_hit_tester.rs` | **unmapped** | `ManagedHitTester` |
 | `rendering/testing/mock_drawing_context_impl.rs` | **unmapped** | `DrawingLog`, `MockDrawingContextImpl`, `MockDrawingContextLayerImpl`, `MockRenderTargetBitmapImpl` |
 | `rendering/testing/mock_platform_render_interface.rs` | **unmapped** | `MockGeometryImpl`, `MockGlyphRunImpl`, `MockPlatformRenderInterface`, `MockPlatformRenderInterfaceContext`, `MockRegion`, `MockRenderTarget`, `MockStreamGeometryContext`, `MockStreamGeometryImpl` |
+| `rust_paths.rs` | **unmapped** |  |
 | `styling/test_support.rs` | **unmapped** | `ChildIndexHandlers`, `Class1`, `Class2`, `Class3`, `PanelIndexProvider`, `StyledAsClass1`, `TestPanel`, `TestRoot` |
 | `styling/testing.rs` | **unmapped** |  |
 | `styling/visual_query_provider.rs` | **unmapped** | `Inner`, `VisualQueryProvider` |
@@ -5230,4 +5268,4 @@ Rust sources of this crate that no upstream file maps to. Give each a reason in 
 | `utilities/time_zone_info.rs` | **unmapped** | `LocalUtcOffsetProvider`, `TimeZoneInfo` |
 | `utilities/uri.rs` | **unmapped** | `Uri`, `UriFormatError`, `UriKind` |
 
-Tests, examples and build scripts (not scanned): `animation/tests/animatable_tests.rs`, `animation/tests/animation_iteration_tests.rs`, `animation/tests/brush_transition_tests.rs`, `animation/tests/effect_tests.rs`, `animation/tests/key_spline_tests.rs`, `animation/tests/mod.rs`, `animation/tests/page_transition_tests.rs`, `animation/tests/spring_tests.rs`, `animation/tests/style_animation_tests.rs`, `animation/tests/transitions_tests.rs`, `controls/resource_tests.rs`, `data/converters/composite_format_tests.rs`, `data/core/plugins/markup_members_tests.rs`, `diagnostics/diagnostics_tests.rs`, `ferro_object_tests.rs`, `input/data_transfer_tests.rs`, `input/input_tests.rs`, `interactivity/interactive_tests.rs`, `markup_types/markup_types_tests.rs`, `media/drawing_context_tests.rs`, `media/font_manager_tests.rs`, `media/fonts/font_collection_tests.rs`, `media/fonts/tables/cmap/cmap_table_tests.rs`, `media/fonts/tables/glyf/glyf_table_contour_walk_tests.rs`, `media/fonts/tables/glyf/glyf_table_point_matching_tests.rs`, `media/fonts/tables/glyf/glyf_table_tests.rs`, `media/formatted_text_tests.rs`, `media/glyph_typeface_tests.rs`, `media/imaging/imaging_tests.rs`, `media/media_context_tests.rs`, `media/text_formatting/shaped_buffer_tests.rs`, `media/text_formatting/split_text_runs_tests.rs`, `media/text_formatting/text_characters_tests.rs`, `media/text_formatting/text_collapsing_bidi_tests.rs`, `media/text_formatting/text_formatter_tests.rs`, `media/text_formatting/text_formatter_wrap_characterization_tests.rs`, `media/text_formatting/text_layout_tests.rs`, `media/text_formatting/text_line_tests.rs`, `media/text_formatting/text_run_cache_tests.rs`, `media/text_formatting/unicode/bidi_algorithm_tests.rs`, `media/text_formatting/unicode/bidi_class_tests.rs`, `media/text_formatting/unicode/codepoint_has_script_extension_tests.rs`, `media/text_formatting/unicode/codepoint_tests.rs`, `media/text_formatting/unicode/grapheme_break_class_trie_generator_tests.rs`, `media/text_formatting/unicode/line_break_enumerator_tests.rs`, `media/text_formatting/unicode/property_value_alias_helper_tests.rs`, `media/text_formatting/unicode/sentence_break_enumerator_tests.rs`, `media/text_formatting/unicode/unicode_data_tests.rs`, `media/text_formatting/unicode/unicode_trie_tests.rs`, `media/text_formatting/unicode/utf16_utils_tests.rs`, `media/text_formatting/unicode/word_break_enumerator_tests.rs`, `metadata/markup_type_tests.rs`, `platform/storage/file_io/bcl_storage_tests.rs`, `platform/storage/file_io/storage_provider_helper_tests.rs`, `platform/storage/storage_tests.rs`, `rendering/composition/compositor_tests.rs`, `rendering/composition/drawing/render_data_stream_hit_test.rs`, `rendering/composition/drawing/render_data_tests.rs`, `rendering/composition/drawing/render_resource_tests.rs`, `rendering/composition/expressions/expression_tests.rs`, `rendering/i_custom_hit_test.rs`, `styling/container_tests.rs`, `styling/selector_tests.rs`, `styling/style_tests.rs`, `tests/attached_property_tests.rs`, `tests/binding_default_value_converter_tests.rs`, `tests/binding_expression_observer_indexer_tests.rs`, `tests/binding_expression_tests_attached_property.rs`, `tests/binding_expression_tests_data_validation.rs`, `tests/binding_expression_tests_ferro_property.rs`, `tests/binding_expression_tests_get_value.rs`, `tests/binding_expression_tests_indexer.rs`, `tests/binding_expression_tests_mode.rs`, `tests/binding_expression_tests_negation.rs`, `tests/binding_expression_tests_observable.rs`, `tests/binding_expression_tests_property.rs`, `tests/binding_expression_tests_set_value.rs`, `tests/binding_expression_tests_task.rs`, `tests/binding_expression_tests_update_source_trigger.rs`, `tests/binding_model_tests.rs`, `tests/binding_null_conditional_tests.rs`, `tests/binding_operations_tests.rs`, `tests/binding_plugin_tests.rs`, `tests/binding_setter_tests.rs`, `tests/binding_test_support.rs`, `tests/binding_typed_expression_tests.rs`, `tests/class_registration_tests.rs`, `tests/compiled_binding_tests_create.rs`, `tests/direct_property_tests.rs`, `tests/ferro_object_tests_add_owner.rs`, `tests/ferro_object_tests_attached.rs`, `tests/ferro_object_tests_binding.rs`, `tests/ferro_object_tests_binding_two_way.rs`, `tests/ferro_object_tests_coercion.rs`, `tests/ferro_object_tests_data_validation.rs`, `tests/ferro_object_tests_direct.rs`, `tests/ferro_object_tests_get_observable.rs`, `tests/ferro_object_tests_get_value.rs`, `tests/ferro_object_tests_inheritance.rs`, `tests/ferro_object_tests_metadata.rs`, `tests/ferro_object_tests_on_property_changed.rs`, `tests/ferro_object_tests_reentrancy.rs`, `tests/ferro_object_tests_set_current_value.rs`, `tests/ferro_object_tests_set_value.rs`, `tests/ferro_object_tests_validation.rs`, `tests/ferro_property_registry_tests.rs`, `tests/ferro_property_tests.rs`, `tests/mod.rs`, `tests/property_registration_tests.rs`, `tests/property_store/frame_priority_extensions_tests.rs`, `tests/property_store/mod.rs`, `tests/property_store/value_store_tests_frames.rs`, `tests/property_store/value_store_tests_inheritance.rs`, `tests/reference_semantics_tests.rs`, `tests/styled_property_tests.rs`, `threading/dispatcher_priority_queue_tests.rs`, `threading/dispatcher_tests.rs`, `tree_tests.rs`, `utilities/date_time_net_tests.rs`, `utilities/date_time_tests.rs`, `utilities/number_format_net_tests.rs`, `visual_render_tests.rs`.
+Tests, examples and build scripts (not scanned): `animation/tests/animatable_tests.rs`, `animation/tests/animation_iteration_tests.rs`, `animation/tests/brush_transition_tests.rs`, `animation/tests/effect_tests.rs`, `animation/tests/key_spline_tests.rs`, `animation/tests/mod.rs`, `animation/tests/page_transition_tests.rs`, `animation/tests/spring_tests.rs`, `animation/tests/style_animation_tests.rs`, `animation/tests/transitions_tests.rs`, `controls/resource_tests.rs`, `data/converters/composite_format_tests.rs`, `data/core/plugins/markup_members_tests.rs`, `diagnostics/diagnostics_tests.rs`, `ferro_object_tests.rs`, `input/data_transfer_tests.rs`, `input/input_tests.rs`, `interactivity/interactive_tests.rs`, `markup_types/markup_types_tests.rs`, `media/drawing_context_tests.rs`, `media/font_manager_tests.rs`, `media/fonts/font_collection_tests.rs`, `media/fonts/tables/cmap/cmap_table_tests.rs`, `media/fonts/tables/glyf/glyf_table_contour_walk_tests.rs`, `media/fonts/tables/glyf/glyf_table_point_matching_tests.rs`, `media/fonts/tables/glyf/glyf_table_tests.rs`, `media/formatted_text_tests.rs`, `media/glyph_typeface_tests.rs`, `media/imaging/imaging_tests.rs`, `media/media_context_tests.rs`, `media/text_formatting/shaped_buffer_tests.rs`, `media/text_formatting/split_text_runs_tests.rs`, `media/text_formatting/text_characters_tests.rs`, `media/text_formatting/text_collapsing_bidi_tests.rs`, `media/text_formatting/text_formatter_tests.rs`, `media/text_formatting/text_formatter_wrap_characterization_tests.rs`, `media/text_formatting/text_layout_tests.rs`, `media/text_formatting/text_line_tests.rs`, `media/text_formatting/text_run_cache_tests.rs`, `media/text_formatting/unicode/bidi_algorithm_tests.rs`, `media/text_formatting/unicode/bidi_class_tests.rs`, `media/text_formatting/unicode/codepoint_has_script_extension_tests.rs`, `media/text_formatting/unicode/codepoint_tests.rs`, `media/text_formatting/unicode/grapheme_break_class_trie_generator_tests.rs`, `media/text_formatting/unicode/line_break_enumerator_tests.rs`, `media/text_formatting/unicode/property_value_alias_helper_tests.rs`, `media/text_formatting/unicode/sentence_break_enumerator_tests.rs`, `media/text_formatting/unicode/unicode_data_tests.rs`, `media/text_formatting/unicode/unicode_trie_tests.rs`, `media/text_formatting/unicode/utf16_utils_tests.rs`, `media/text_formatting/unicode/word_break_enumerator_tests.rs`, `metadata/markup_type_tests.rs`, `platform/storage/file_io/bcl_storage_tests.rs`, `platform/storage/file_io/storage_provider_helper_tests.rs`, `platform/storage/storage_tests.rs`, `rendering/composition/animations/composition_animation_tests.rs`, `rendering/composition/brushes/composition_brush_tests.rs`, `rendering/composition/composition_drawing_surface_tests.rs`, `rendering/composition/compositor_tests.rs`, `rendering/composition/drawing/render_data_stream_hit_test.rs`, `rendering/composition/drawing/render_data_tests.rs`, `rendering/composition/drawing/render_resource_tests.rs`, `rendering/composition/expressions/expression_tests.rs`, `rendering/i_custom_hit_test.rs`, `styling/container_tests.rs`, `styling/selector_tests.rs`, `styling/style_tests.rs`, `tests/attached_property_tests.rs`, `tests/binding_default_value_converter_tests.rs`, `tests/binding_expression_observer_indexer_tests.rs`, `tests/binding_expression_tests_attached_property.rs`, `tests/binding_expression_tests_data_validation.rs`, `tests/binding_expression_tests_ferro_property.rs`, `tests/binding_expression_tests_get_value.rs`, `tests/binding_expression_tests_indexer.rs`, `tests/binding_expression_tests_mode.rs`, `tests/binding_expression_tests_negation.rs`, `tests/binding_expression_tests_observable.rs`, `tests/binding_expression_tests_property.rs`, `tests/binding_expression_tests_set_value.rs`, `tests/binding_expression_tests_task.rs`, `tests/binding_expression_tests_update_source_trigger.rs`, `tests/binding_model_tests.rs`, `tests/binding_null_conditional_tests.rs`, `tests/binding_operations_tests.rs`, `tests/binding_plugin_tests.rs`, `tests/binding_setter_tests.rs`, `tests/binding_test_support.rs`, `tests/binding_typed_expression_tests.rs`, `tests/class_registration_tests.rs`, `tests/compiled_binding_tests_create.rs`, `tests/direct_property_tests.rs`, `tests/ferro_object_tests_add_owner.rs`, `tests/ferro_object_tests_attached.rs`, `tests/ferro_object_tests_binding.rs`, `tests/ferro_object_tests_binding_two_way.rs`, `tests/ferro_object_tests_coercion.rs`, `tests/ferro_object_tests_data_validation.rs`, `tests/ferro_object_tests_direct.rs`, `tests/ferro_object_tests_get_observable.rs`, `tests/ferro_object_tests_get_value.rs`, `tests/ferro_object_tests_inheritance.rs`, `tests/ferro_object_tests_metadata.rs`, `tests/ferro_object_tests_on_property_changed.rs`, `tests/ferro_object_tests_reentrancy.rs`, `tests/ferro_object_tests_set_current_value.rs`, `tests/ferro_object_tests_set_value.rs`, `tests/ferro_object_tests_validation.rs`, `tests/ferro_property_registry_tests.rs`, `tests/ferro_property_tests.rs`, `tests/mod.rs`, `tests/property_registration_tests.rs`, `tests/property_store/frame_priority_extensions_tests.rs`, `tests/property_store/mod.rs`, `tests/property_store/value_store_tests_frames.rs`, `tests/property_store/value_store_tests_inheritance.rs`, `tests/reference_semantics_tests.rs`, `tests/styled_property_tests.rs`, `threading/dispatcher_priority_queue_tests.rs`, `threading/dispatcher_tests.rs`, `tree_tests.rs`, `utilities/date_time_net_tests.rs`, `utilities/date_time_tests.rs`, `utilities/number_format_net_tests.rs`, `visual_render_tests.rs`.

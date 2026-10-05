@@ -165,6 +165,24 @@ reason = "the Ganesh implementation of the backend-neutral GPU context (the bind
 path = "src/FerroUI.Fonts.Inter/assets.rs"
 reason = "embeds the font files: the counterpart of the resource items of the upstream project file"
 
+# ------------------------------------------------------------ Avalonia.Dialogs
+
+[[rust_only]]
+path = "src/FerroUI.Dialogs/assets.rs"
+reason = "embeds the document of the about dialog and its font: the counterpart of the resource items of the upstream project file"
+
+[[rust_only]]
+path = "src/FerroUI.Dialogs/register_types.rs"
+reason = "the type table of the crate (porting guide, Classes): namespaces, classes, markup metadata, the document loader"
+
+[[rust_only]]
+path = "src/FerroUI.Dialogs/markup.rs"
+reason = "loads the document of the about dialog with the run-time loader until the XAML compiler generates InitializeComponent"
+
+[[rust_only]]
+path = "src/FerroUI.Dialogs/task_completion_source.rs"
+reason = "the TaskCompletionSource<T> of the base library the storage provider awaits windows, popups and flyouts with"
+
 # ----------------------------------------------------------- Avalonia.Browser
 
 [[map]]

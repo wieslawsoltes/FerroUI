@@ -397,7 +397,7 @@ Rust sources of this crate that no upstream file maps to. Give each a reason in 
 | `runtime/type_system/core_types.rs` | **unmapped** |  |
 | `runtime/type_system/list_converter.rs` | **unmapped** | `RuntimeListConverter` |
 | `runtime/type_system/object_model.rs` | **unmapped** |  |
-| `runtime/type_system/runtime_type.rs` | **unmapped** | `MembersInit`, `RuntimeAssembly`, `RuntimeConstructor`, `RuntimeCustomAttribute`, `RuntimeEvent`, `RuntimeField`, `RuntimeFieldValue`, `RuntimeInvoker`, `RuntimeMembers`, `RuntimeMethod`, `RuntimeParameterInfo`, `RuntimeProperty`, ... (16 total) |
+| `runtime/type_system/runtime_type.rs` | **unmapped** | `DeclaredMember`, `MembersInit`, `RuntimeAssembly`, `RuntimeConstructor`, `RuntimeCustomAttribute`, `RuntimeEvent`, `RuntimeField`, `RuntimeFieldValue`, `RuntimeInvoker`, `RuntimeMembers`, `RuntimeMethod`, `RuntimeParameterInfo`, ... (17 total) |
 | `runtime/type_system/runtime_type_system.rs` | **unmapped** | `GenericIndex`, `MemberBuilder`, `RuntimeTypeSystem` |
 | `runtime/type_system/tests.rs` | **unmapped** | `Declared`, `Detached`, `Probe` |
 | `runtime/type_system/values.rs` | **unmapped** | `ArrayForm`, `DeferredContentFactory`, `ITypeDescriptorContext`, `RuntimeArray`, `RuntimeTypeValue` |

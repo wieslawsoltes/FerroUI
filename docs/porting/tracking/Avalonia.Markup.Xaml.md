@@ -270,6 +270,7 @@ Rust sources of this crate that no upstream file maps to. Give each a reason in 
 | `converters/type_converter.rs` | **unmapped** | `ITypeDescriptorContext`, `ServiceProviderTypeDescriptorContext`, `TypeConverter` |
 | `object_casts.rs` | **unmapped** | `ElementResourceNode`, `FromXamlObject`, `ObjectKey`, `StyleResourceProvider`, `TargetProperty`, `XamlResourceNode` |
 | `register_types.rs` | **unmapped** |  |
+| `rust_paths.rs` | **unmapped** |  |
 | `test_support.rs` | **unmapped** | `LazyParents`, `TestAssetLoader`, `TestServiceProvider` |
 | `xaml_il/runtime/compiled.rs` | **unmapped** | `CompiledLoadError` |
 | `xamlx_runtime.rs` | **unmapped** | `IXamlParentStackProviderV1`, `IXamlXmlNamespaceInfoProviderV1`, `XamlXmlNamespaceInfoV1` |

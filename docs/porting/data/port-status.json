@@ -504,22 +504,22 @@
    "scope": "in",
    "detail": "full",
    "files": [
-    1077,
+    1102,
     1286,
     0
    ],
    "types": [
-    1338,
+    1394,
     1709,
     0
    ],
    "members": [
-    9364,
+    9652,
     11739,
-    34
+    31
    ],
    "interfaces": [
-    217,
+    231,
     263
    ],
    "propertyRegistrations": [
@@ -533,17 +533,17 @@
    "notApplicableFiles": 13,
    "matchKinds": {
     "alias fn": 9,
-    "const": 333,
+    "const": 346,
     "derive": 64,
-    "field": 551,
-    "fn": 5947,
+    "field": 579,
+    "fn": 6166,
     "free fn": 10,
     "free item": 16,
     "getter fn": 4,
-    "overload fn": 269,
-    "trait": 346,
-    "trait fn": 64,
-    "variant": 1751
+    "overload fn": 274,
+    "trait": 347,
+    "trait fn": 70,
+    "variant": 1767
    },
    "presentFiles": {
     "Animation/Animatable.cs": [
@@ -2808,6 +2808,9 @@
     "Platform/IDrawingContextWithAcrylicLikeSupport.cs": [
      "platform/i_drawing_context_with_acrylic_like_support.rs"
     ],
+    "Platform/IExternalObjectsRenderInterfaceContextFeature.cs": [
+     "platform/i_external_objects_render_interface_context_feature.rs"
+    ],
     "Platform/IFontManagerImpl.cs": [
      "platform/i_font_manager_impl.rs"
     ],
@@ -2891,6 +2894,9 @@
     ],
     "Platform/PlatformColorValues.cs": [
      "platform/platform_color_values.rs"
+    ],
+    "Platform/PlatformGraphicsExternalMemory.cs": [
+     "platform/platform_graphics_external_memory.rs"
     ],
     "Platform/PlatformHandle.cs": [
      "platform/platform_handle.rs"
@@ -3078,14 +3084,50 @@
     "RelativeScalar.cs": [
      "relative_scalar.rs"
     ],
+    "Rendering/Composition/Animations/AnimationInstanceBase.cs": [
+     "rendering/composition/animations/animation_instance_base.rs"
+    ],
+    "Rendering/Composition/Animations/CompositionAnimation.cs": [
+     "rendering/composition/animations/composition_animation.rs"
+    ],
+    "Rendering/Composition/Animations/CompositionAnimationGroup.cs": [
+     "rendering/composition/animations/composition_animation_group.rs"
+    ],
+    "Rendering/Composition/Animations/ExpressionAnimation.cs": [
+     "rendering/composition/animations/expression_animation.rs"
+    ],
+    "Rendering/Composition/Animations/ExpressionAnimationInstance.cs": [
+     "rendering/composition/animations/expression_animation_instance.rs"
+    ],
     "Rendering/Composition/Animations/IAnimationInstance.cs": [
      "rendering/composition/animations/i_animation_instance.rs"
     ],
     "Rendering/Composition/Animations/ICompositionAnimationBase.cs": [
      "rendering/composition/animations/i_composition_animation_base.rs"
     ],
+    "Rendering/Composition/Animations/ImplicitAnimationCollection.cs": [
+     "rendering/composition/animations/implicit_animation_collection.rs"
+    ],
     "Rendering/Composition/Animations/Interpolators.cs": [
      "rendering/composition/animations/interpolators.rs"
+    ],
+    "Rendering/Composition/Animations/KeyFrameAnimation.cs": [
+     "rendering/composition/animations/key_frame_animation.rs"
+    ],
+    "Rendering/Composition/Animations/KeyFrameAnimationInstance.cs": [
+     "rendering/composition/animations/key_frame_animation_instance.rs"
+    ],
+    "Rendering/Composition/Animations/KeyFrames.cs": [
+     "rendering/composition/animations/key_frames.rs"
+    ],
+    "Rendering/Composition/Animations/PropertySetSnapshot.cs": [
+     "rendering/composition/animations/property_set_snapshot.rs"
+    ],
+    "Rendering/Composition/Brushes/CompositionBrush.cs": [
+     "rendering/composition/brushes/composition_brush.rs"
+    ],
+    "Rendering/Composition/Brushes/ServerCompositionBrush.cs": [
+     "rendering/composition/brushes/server_composition_brush.rs"
     ],
     "Rendering/Composition/Brushes/ServerSimpleContentBrush.cs": [
      "rendering/composition/brushes/server_simple_content_brush.rs"
@@ -3096,17 +3138,38 @@
     "Rendering/Composition/CompositingRenderer.cs": [
      "rendering/composition/compositing_renderer.rs"
     ],
+    "Rendering/Composition/CompositionCustomVisual.cs": [
+     "rendering/composition/composition_custom_visual.rs"
+    ],
+    "Rendering/Composition/CompositionCustomVisualHandler.cs": [
+     "rendering/composition/composition_custom_visual_handler.rs"
+    ],
     "Rendering/Composition/CompositionDrawListVisual.cs": [
      "rendering/composition/composition_draw_list_visual.rs"
     ],
+    "Rendering/Composition/CompositionDrawingSurface.cs": [
+     "rendering/composition/composition_drawing_surface.rs"
+    ],
     "Rendering/Composition/CompositionExperimentalAcrylicVisual.cs": [
      "rendering/composition/composition_experimental_acrylic_visual.rs"
+    ],
+    "Rendering/Composition/CompositionExternalMemory.cs": [
+     "rendering/composition/composition_external_memory.rs"
+    ],
+    "Rendering/Composition/CompositionGradientStop.cs": [
+     "rendering/composition/composition_gradient_stop.rs"
+    ],
+    "Rendering/Composition/CompositionInterop.cs": [
+     "rendering/composition/composition_interop.rs"
     ],
     "Rendering/Composition/CompositionObject.cs": [
      "rendering/composition/composition_object.rs"
     ],
     "Rendering/Composition/CompositionOptions.cs": [
      "rendering/composition/composition_options.rs"
+    ],
+    "Rendering/Composition/CompositionPropertySet.cs": [
+     "rendering/composition/composition_property_set.rs"
     ],
     "Rendering/Composition/CompositionSurface.cs": [
      "rendering/composition/composition_surface.rs"
@@ -3291,8 +3354,14 @@
     "Rendering/Composition/Server/ServerCompositionDrawListVisual.cs": [
      "rendering/composition/server/server_composition_draw_list_visual.rs"
     ],
+    "Rendering/Composition/Server/ServerCompositionDrawingSurface.cs": [
+     "rendering/composition/server/server_composition_drawing_surface.rs"
+    ],
     "Rendering/Composition/Server/ServerCompositionExperimentalAcrylicVisual.cs": [
      "rendering/composition/server/server_composition_experimental_acrylic_visual.rs"
+    ],
+    "Rendering/Composition/Server/ServerCompositionGradientStop.cs": [
+     "rendering/composition/server/server_composition_gradient_stop.rs"
     ],
     "Rendering/Composition/Server/ServerCompositionSimpleGeometry.cs": [
      "rendering/composition/server/server_composition_simple_geometry.rs"
@@ -3323,6 +3392,9 @@
     ],
     "Rendering/Composition/Server/ServerCompositorAnimations.cs": [
      "rendering/composition/server/server_compositor_animations.rs"
+    ],
+    "Rendering/Composition/Server/ServerCustomCompositionVisual.cs": [
+     "rendering/composition/server/server_custom_composition_visual.rs"
     ],
     "Rendering/Composition/Server/ServerList.cs": [
      "rendering/composition/server/server_list.rs"
@@ -3702,6 +3774,9 @@
     "Utilities/BooleanBoxes.cs": [
      "utilities/boolean_boxes.rs"
     ],
+    "Utilities/ByteSizeHelper.cs": [
+     "utilities/byte_size_helper.rs"
+    ],
     "Utilities/CharacterReader.cs": [
      "utilities/character_reader.rs"
     ],
@@ -3905,10 +3980,12 @@
     "rendering/composition/server/server_composition_visual/walker.rs",
     "rendering/composition/server/server_composition_visual_collection.rs",
     "rendering/composition/server/server_property_host.rs",
+    "rendering/composition/test_compositor.rs",
     "rendering/i_hit_tester.rs",
     "rendering/managed_hit_tester.rs",
     "rendering/testing/mock_drawing_context_impl.rs",
     "rendering/testing/mock_platform_render_interface.rs",
+    "rust_paths.rs",
     "styling/test_support.rs",
     "styling/testing.rs",
     "styling/visual_query_provider.rs",
@@ -5662,6 +5739,7 @@
     "primitives/selecting_items_control_tests_multiple.rs",
     "primitives/selecting_items_control_tests_selected_value.rs",
     "register_types.rs",
+    "rust_paths.rs",
     "scroll_viewer_tests_i_logical_scrollable.rs",
     "selection/selection_model_tests_multiple.rs",
     "selection/selection_model_tests_single.rs",
@@ -5825,17 +5903,17 @@
    "scope": "in",
    "detail": "full",
    "files": [
-    0,
+    17,
     17,
     0
    ],
    "types": [
-    0,
+    18,
     18,
     0
    ],
    "members": [
-    0,
+    94,
     94,
     0
    ],
@@ -5844,7 +5922,7 @@
     0
    ],
    "propertyRegistrations": [
-    0,
+    1,
     1
    ],
    "routedEvents": [
@@ -5852,9 +5930,73 @@
     0
    ],
    "notApplicableFiles": 0,
-   "matchKinds": {},
-   "presentFiles": {},
-   "rustOnly": []
+   "matchKinds": {
+    "alias fn": 1,
+    "field": 3,
+    "fn": 84,
+    "overload fn": 2,
+    "trait": 1,
+    "variant": 3
+   },
+   "presentFiles": {
+    "AboutAvaloniaDialog.xaml.cs": [
+     "about_ferro_dialog_xaml.rs"
+    ],
+    "Internal/AvaloniaDialogsInternalViewModelBase.cs": [
+     "internal/ferro_dialogs_internal_view_model_base.rs"
+    ],
+    "Internal/BclMountedVolumeInfoProvider.cs": [
+     "internal/bcl_mounted_volume_info_provider.rs"
+    ],
+    "Internal/ChildFitter.cs": [
+     "internal/child_fitter.rs"
+    ],
+    "Internal/FileSizeStringConverter.cs": [
+     "internal/file_size_string_converter.rs"
+    ],
+    "Internal/ManagedFileChooserFilterViewModel.cs": [
+     "internal/managed_file_chooser_filter_view_model.rs"
+    ],
+    "Internal/ManagedFileChooserItemType.cs": [
+     "internal/managed_file_chooser_item_type.rs"
+    ],
+    "Internal/ManagedFileChooserItemViewModel.cs": [
+     "internal/managed_file_chooser_item_view_model.rs"
+    ],
+    "Internal/ManagedFileChooserNavigationItem.cs": [
+     "internal/managed_file_chooser_navigation_item.rs"
+    ],
+    "Internal/ManagedFileChooserSources.cs": [
+     "internal/managed_file_chooser_sources.rs"
+    ],
+    "Internal/ManagedFileChooserViewModel.cs": [
+     "internal/managed_file_chooser_view_model.rs"
+    ],
+    "Internal/ResourceSelectorConverter.cs": [
+     "internal/resource_selector_converter.rs"
+    ],
+    "ManagedFileChooser.cs": [
+     "managed_file_chooser.rs"
+    ],
+    "ManagedFileChooserOverwritePrompt.cs": [
+     "managed_file_chooser_overwrite_prompt.rs"
+    ],
+    "ManagedFileDialogExtensions.cs": [
+     "managed_file_dialog_extensions.rs"
+    ],
+    "ManagedFileDialogOptions.cs": [
+     "managed_file_dialog_options.rs"
+    ],
+    "ManagedStorageProvider.cs": [
+     "managed_storage_provider.rs"
+    ]
+   },
+   "rustOnly": [
+    "assets.rs",
+    "markup.rs",
+    "register_types.rs",
+    "task_completion_source.rs"
+   ]
   },
   {
    "name": "Avalonia.Fonts.Inter",
@@ -6073,17 +6215,17 @@
    "scope": "in",
    "detail": "full",
    "files": [
-    39,
+    40,
     49,
     0
    ],
    "types": [
-    49,
+    51,
     85,
     0
    ],
    "members": [
-    299,
+    371,
     601,
     0
    ],
@@ -6102,9 +6244,10 @@
    "notApplicableFiles": 0,
    "matchKinds": {
     "field": 17,
-    "fn": 260,
+    "fn": 331,
     "free fn": 5,
     "overload fn": 9,
+    "trait": 1,
     "trait fn": 1,
     "variant": 7
    },
@@ -6129,6 +6272,9 @@
     ],
     "AvaloniaNativeTextInputMethod.cs": [
      "ferro_native_text_input_method.rs"
+    ],
+    "AvnAutomationPeer.cs": [
+     "frn_automation_peer.rs"
     ],
     "AvnDispatcher.cs": [
      "frn_dispatcher.rs"
@@ -6582,17 +6728,17 @@
    "scope": "in",
    "detail": "full",
    "files": [
-    29,
+    47,
     49,
     0
    ],
    "types": [
-    33,
+    52,
     61,
     0
    ],
    "members": [
-    180,
+    295,
     426,
     0
    ],
@@ -6611,11 +6757,12 @@
    "notApplicableFiles": 3,
    "matchKinds": {
     "const": 1,
-    "field": 2,
-    "fn": 139,
-    "free fn": 30,
-    "free item": 2,
+    "field": 3,
+    "fn": 209,
+    "free fn": 68,
+    "free item": 7,
     "overload fn": 3,
+    "trait": 1,
     "variant": 3
    },
    "presentFiles": {
@@ -6628,11 +6775,32 @@
     "BrowserAppBuilder.cs": [
      "browser_app_builder.rs"
     ],
+    "BrowserClipboardDataTransfer.cs": [
+     "browser_clipboard_data_transfer.rs"
+    ],
+    "BrowserClipboardDataTransferItem.cs": [
+     "browser_clipboard_data_transfer_item.rs"
+    ],
+    "BrowserDataFormatHelper.cs": [
+     "browser_data_format_helper.rs"
+    ],
+    "BrowserDataTransferHelper.cs": [
+     "browser_data_transfer_helper.rs"
+    ],
+    "BrowserDragDataTransfer.cs": [
+     "browser_drag_data_transfer.rs"
+    ],
+    "BrowserDragDataTransferItem.cs": [
+     "browser_drag_data_transfer_item.rs"
+    ],
     "BrowserInputHandler.cs": [
      "browser_input_handler.rs"
     ],
     "BrowserInputPane.cs": [
      "browser_input_pane.rs"
+    ],
+    "BrowserInsetsManager.cs": [
+     "browser_insets_manager.rs"
     ],
     "BrowserMouseDevice.cs": [
      "browser_mouse_device.rs"
@@ -6643,17 +6811,26 @@
     "BrowserRuntimePlatform.cs": [
      "browser_runtime_platform.rs"
     ],
+    "BrowserScreens.cs": [
+     "browser_screens.rs"
+    ],
     "BrowserSingleThreadedDispatcherImpl.cs": [
      "browser_single_threaded_dispatcher_impl.rs"
     ],
     "BrowserSingleViewLifetime.cs": [
      "browser_single_view_lifetime.rs"
     ],
+    "BrowserSystemNavigationManager.cs": [
+     "browser_system_navigation_manager.rs"
+    ],
     "BrowserTextInputMethod.cs": [
      "browser_text_input_method.rs"
     ],
     "BrowserTopLevelImpl.cs": [
      "browser_top_level_impl.rs"
+    ],
+    "ClipboardImpl.cs": [
+     "clipboard_impl.rs"
     ],
     "Cursor.cs": [
      "cursor.rs"
@@ -6669,6 +6846,18 @@
     ],
     "Interop/InputHelper.cs": [
      "interop/input_helper.rs"
+    ],
+    "Interop/NavigationHelper.cs": [
+     "interop/navigation_helper.rs"
+    ],
+    "Interop/ScreenHelper.cs": [
+     "interop/screen_helper.rs"
+    ],
+    "Interop/StorageHelper.cs": [
+     "interop/storage_helper.rs"
+    ],
+    "Interop/StreamHelper.cs": [
+     "interop/stream_helper.rs"
     ],
     "Interop/TimerHelper.cs": [
      "interop/timer_helper.rs"
@@ -6700,6 +6889,18 @@
     "Rendering/WebRenderTarget.cs": [
      "rendering/web_render_target.rs"
     ],
+    "Storage/BlobReadableStream.cs": [
+     "storage/blob_readable_stream.rs"
+    ],
+    "Storage/BrowserLauncher.cs": [
+     "storage/browser_launcher.rs"
+    ],
+    "Storage/BrowserStorageProvider.cs": [
+     "storage/browser_storage_provider.rs"
+    ],
+    "Storage/WriteableStream.cs": [
+     "storage/writeable_stream.rs"
+    ],
     "WinStubs.cs": [
      "win_stubs.rs"
     ],
@@ -6707,7 +6908,9 @@
      "windowing_platform.rs"
     ]
    },
-   "rustOnly": []
+   "rustOnly": [
+    "interop/completion_helper.rs"
+   ]
   },
   {
    "name": "Avalonia.HarfBuzz",
@@ -7194,6 +7397,7 @@
     "converters/type_converter.rs",
     "object_casts.rs",
     "register_types.rs",
+    "rust_paths.rs",
     "test_support.rs",
     "xaml_il/runtime/compiled.rs",
     "xamlx_runtime.rs"
