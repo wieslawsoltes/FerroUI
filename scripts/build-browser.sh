@@ -5,8 +5,8 @@
 #
 # <example> is an example of the browser crate (src/Browser/FerroUI.Browser/examples/<example>,
 # with its host page in wwwroot/). The site is written to target/browser/<example> (or --out):
-# the host page, the script module of the platform (ferroui.js, built from webapp/ with esbuild)
-# and the WebAssembly module with its script. Serve the directory with any static web server.
+# the host page, the script modules of the platform (ferroui.js and storage.js, built from webapp/
+# with esbuild) and the WebAssembly module with its script. Serve the directory with any static web server.
 #
 # Needs: the Emscripten SDK activated in the shell (emsdk 6.0.10: `source emsdk_env.sh`), the Rust
 # target wasm32-unknown-emscripten, the wasm-bindgen command-line tool of the version of the
@@ -93,7 +93,8 @@ BUILT="$TARGET_DIR/wasm32-unknown-emscripten/$PROFILE/examples"
 rm -rf -- "$OUT"
 mkdir -p "$OUT"
 cp -R "$WWWROOT"/. "$OUT"/
-cp "$CRATE/dist/ferroui.js" "$CRATE/dist/ferroui.js.map" "$OUT"/
+# The main script module, and the storage bundle it imports on first use from the same directory.
+cp "$CRATE/dist/ferroui.js" "$CRATE/dist/ferroui.js.map" "$CRATE/dist/storage.js" "$CRATE/dist/storage.js.map" "$OUT"/
 cp "$BUILT/$EXAMPLE.js" "$BUILT/$EXAMPLE.wasm" "$OUT"/
 ls -la "$OUT"
 echo "site written to $OUT"

@@ -26,3 +26,7 @@ ferroui-fonts-inter.workspace = true
 [[example]]
 name = "themed_view"
 path = "examples/themed_view/main.rs"
+
+[[example]]
+name = "storage_view"
+path = "examples/storage_view/main.rs"
