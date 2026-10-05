@@ -402,6 +402,9 @@ Rust sources of this crate that no upstream file maps to. Give each a reason in 
 | `runtime/type_system/tests.rs` | **unmapped** | `Declared`, `Detached`, `Probe` |
 | `runtime/type_system/values.rs` | **unmapped** | `ArrayForm`, `DeferredContentFactory`, `ITypeDescriptorContext`, `RuntimeArray`, `RuntimeTypeValue` |
 | `runtime/value_parser.rs` | **unmapped** | `RuntimeCompileTimeValueParser` |
+| `rust_emitter/compiled.rs` | **unmapped** | `CompiledDocument`, `GeneratedFile` |
+| `rust_emitter/emitter.rs` | **unmapped** | `EmitResult`, `Emitter`, `Kind`, `NeedsParentStack`, `Typed`, `UnsupportedNode` |
+| `rust_emitter/source.rs` | **unmapped** |  |
 | `testing/bindings.rs` | **unmapped** | `BindingsPipelineOptions`, `NodeCollector` |
 | `testing/objects.rs` | **unmapped** | `Collector`, `Dumper` |
 | `testing/styles.rs` | **unmapped** | `Collector` |
