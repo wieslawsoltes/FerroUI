@@ -6,7 +6,8 @@
 //! the ones that must not be (bindings, styles with selectors, templates, resources,
 //! collection adds, declared members and types without a recorded Rust path are outside
 //! this increment). A document in neither list is only reported. A document whose load
-//! fails is compared by the message of the error (`duplicate_name.xaml`). A document whose
+//! fails is compared by the exception type and the message of the error (`duplicate_name.xaml`,
+//! `multiline_duplicate_name.xaml`, `end_init_failure.xaml`, whose control fails in `EndInit`). A document whose
 //! load panics (a value a validator rejects) cannot be in the corpus: the harness does not
 //! catch panics.
 
@@ -75,6 +76,9 @@ pub const DOCUMENTS: &[(&str, &str)] = &[
     ("deep_nesting.xaml", "<Border xmlns='https://github.com/ferroui' xmlns:x='http://schemas.microsoft.com/winfx/2006/xaml'><Decorator><Border><Viewbox><Border><TextBlock Text='deep'/></Border></Viewbox></Border></Decorator></Border>"),
     ("layout_transform_control.xaml", "<LayoutTransformControl xmlns='https://github.com/ferroui' xmlns:x='http://schemas.microsoft.com/winfx/2006/xaml'><Border/></LayoutTransformControl>"),
     ("user_control_properties.xaml", "<UserControl xmlns='https://github.com/ferroui' xmlns:x='http://schemas.microsoft.com/winfx/2006/xaml' Width='320' Height='200' Padding='5' Opacity='0.9'><TextBlock Text='Body' Margin='2'/></UserControl>"),
+    ("multiline_document.xaml", "<Border xmlns='https://github.com/ferroui' xmlns:x='http://schemas.microsoft.com/winfx/2006/xaml'\n        Padding='2'>\n  <Border x:Name='first'\n          Margin='1'>\n    <TextBlock Name='second' Text='two'/>\n  </Border>\n</Border>\n"),
+    ("multiline_duplicate_name.xaml", "<Border xmlns='https://github.com/ferroui' xmlns:x='http://schemas.microsoft.com/winfx/2006/xaml'>\n  <Border x:Name='same'>\n    <Border\n        x:Name='same'/>\n  </Border>\n</Border>\n"),
+    ("end_init_failure.xaml", "<Border xmlns='https://github.com/ferroui'\n        xmlns:t='clr-namespace:FerroUI.Markup.Xaml.UnitTests;assembly=FerroUI.Markup.Xaml.UnitTests'>\n  <t:FailingEndInit Tag='x'/>\n</Border>\n"),
 ];
 
 /// The documents that must be eligible for emission.
@@ -130,6 +134,9 @@ pub const EXPECTED_ELIGIBLE: &[&str] = &[
     "duplicate_name.xaml",
     "name_and_x_name.xaml",
     "user_control_properties.xaml",
+    "multiline_document.xaml",
+    "multiline_duplicate_name.xaml",
+    "end_init_failure.xaml",
 ];
 
 /// The documents that must not be eligible for emission.

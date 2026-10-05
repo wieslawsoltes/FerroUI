@@ -1344,6 +1344,116 @@ fn build_user_control_properties_xaml_untyped(
     ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
 }
 
+/// Generated from `multiline_document.xaml`.
+pub fn build_multiline_document_xaml(
+    service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
+) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::Border>, ::ferroui_markup_xaml::XamlLoadException> {
+    // multiline_document.xaml(1,2) Border
+    let border_0 = ::ferroui_controls::Border::new();
+    let name_scope = rt::name_scope_of(service_provider.as_ref());
+    border_0.begin_init();
+    // multiline_document.xaml(1,2) Padding
+    border_0.set_value(::ferroui_controls::Decorator::padding_property(), ::ferroui_base::Thickness::new(2.0_f64, 2.0_f64, 2.0_f64, 2.0_f64));
+    // multiline_document.xaml(3,4) Child
+    // multiline_document.xaml(3,4) Border
+    let border_1 = ::ferroui_controls::Border::new();
+    border_1.begin_init();
+    border_0.set_value(::ferroui_controls::Decorator::child_property(), ::core::option::Option::Some(::core::clone::Clone::clone(&border_1).upcast::<::ferroui_controls::Control>()));
+    // multiline_document.xaml(3,11) Name
+    border_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("first")));
+    rt::register_name(name_scope.as_ref(), "first", ::core::clone::Clone::clone(&border_1).upcast::<::ferroui_base::FerroObject>(), 3, 11)?;
+    // multiline_document.xaml(3,4) Margin
+    border_1.set_value(::ferroui_base::layout::Layoutable::margin_property(), ::ferroui_base::Thickness::new(1.0_f64, 1.0_f64, 1.0_f64, 1.0_f64));
+    // multiline_document.xaml(5,6) Child
+    // multiline_document.xaml(5,6) TextBlock
+    let text_block_0 = ::ferroui_controls::TextBlock::new();
+    text_block_0.begin_init();
+    border_1.set_value(::ferroui_controls::Decorator::child_property(), ::core::option::Option::Some(::core::clone::Clone::clone(&text_block_0).upcast::<::ferroui_controls::Control>()));
+    // multiline_document.xaml(5,16) Name
+    text_block_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("second")));
+    rt::register_name(name_scope.as_ref(), "second", ::core::clone::Clone::clone(&text_block_0).upcast::<::ferroui_base::FerroObject>(), 5, 16)?;
+    // multiline_document.xaml(5,30) Text
+    text_block_0.set_value(::ferroui_controls::TextBlock::text_property(), ::core::option::Option::Some(::std::string::String::from("two")));
+    text_block_0.try_end_init().map_err(|error| rt::at(rt::TARGET_INVOCATION_EXCEPTION, error, 5, 6))?;
+    border_1.try_end_init().map_err(|error| rt::at(rt::TARGET_INVOCATION_EXCEPTION, error, 3, 4))?;
+    border_0.try_end_init().map_err(|error| rt::at(rt::TARGET_INVOCATION_EXCEPTION, error, 1, 2))?;
+    rt::complete_root_name_scope(::core::option::Option::Some(&border_0), name_scope.as_ref(), 1, 2)?;
+    ::core::result::Result::Ok(border_0)
+}
+
+fn build_multiline_document_xaml_untyped(
+    service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
+) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadException> {
+    let root = build_multiline_document_xaml(service_provider)?;
+    ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
+}
+
+/// Generated from `multiline_duplicate_name.xaml`.
+pub fn build_multiline_duplicate_name_xaml(
+    service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
+) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::Border>, ::ferroui_markup_xaml::XamlLoadException> {
+    // multiline_duplicate_name.xaml(1,2) Border
+    let border_0 = ::ferroui_controls::Border::new();
+    let name_scope = rt::name_scope_of(service_provider.as_ref());
+    border_0.begin_init();
+    // multiline_duplicate_name.xaml(2,4) Child
+    // multiline_duplicate_name.xaml(2,4) Border
+    let border_1 = ::ferroui_controls::Border::new();
+    border_1.begin_init();
+    border_0.set_value(::ferroui_controls::Decorator::child_property(), ::core::option::Option::Some(::core::clone::Clone::clone(&border_1).upcast::<::ferroui_controls::Control>()));
+    // multiline_duplicate_name.xaml(2,11) Name
+    border_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("same")));
+    rt::register_name(name_scope.as_ref(), "same", ::core::clone::Clone::clone(&border_1).upcast::<::ferroui_base::FerroObject>(), 2, 11)?;
+    // multiline_duplicate_name.xaml(3,6) Child
+    // multiline_duplicate_name.xaml(3,6) Border
+    let border_2 = ::ferroui_controls::Border::new();
+    border_2.begin_init();
+    border_1.set_value(::ferroui_controls::Decorator::child_property(), ::core::option::Option::Some(::core::clone::Clone::clone(&border_2).upcast::<::ferroui_controls::Control>()));
+    // multiline_duplicate_name.xaml(4,9) Name
+    border_2.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("same")));
+    rt::register_name(name_scope.as_ref(), "same", ::core::clone::Clone::clone(&border_2).upcast::<::ferroui_base::FerroObject>(), 4, 9)?;
+    border_2.try_end_init().map_err(|error| rt::at(rt::TARGET_INVOCATION_EXCEPTION, error, 3, 6))?;
+    border_1.try_end_init().map_err(|error| rt::at(rt::TARGET_INVOCATION_EXCEPTION, error, 2, 4))?;
+    border_0.try_end_init().map_err(|error| rt::at(rt::TARGET_INVOCATION_EXCEPTION, error, 1, 2))?;
+    rt::complete_root_name_scope(::core::option::Option::Some(&border_0), name_scope.as_ref(), 1, 2)?;
+    ::core::result::Result::Ok(border_0)
+}
+
+fn build_multiline_duplicate_name_xaml_untyped(
+    service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
+) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadException> {
+    let root = build_multiline_duplicate_name_xaml(service_provider)?;
+    ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
+}
+
+/// Generated from `end_init_failure.xaml`.
+pub fn build_end_init_failure_xaml(
+    service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
+) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::Border>, ::ferroui_markup_xaml::XamlLoadException> {
+    // end_init_failure.xaml(1,2) Border
+    let border_0 = ::ferroui_controls::Border::new();
+    let name_scope = rt::name_scope_of(service_provider.as_ref());
+    border_0.begin_init();
+    // end_init_failure.xaml(3,4) Child
+    // end_init_failure.xaml(3,4) FailingEndInit
+    let failing_end_init_0 = ::ferroui_markup_xaml_tests::support::emitter::FailingEndInit::new();
+    failing_end_init_0.begin_init();
+    border_0.set_value(::ferroui_controls::Decorator::child_property(), ::core::option::Option::Some(::core::clone::Clone::clone(&failing_end_init_0).upcast::<::ferroui_controls::Control>()));
+    // end_init_failure.xaml(3,21) Tag
+    failing_end_init_0.set_value(::ferroui_controls::Control::tag_property(), rt::to_object(::std::string::String::from("x")));
+    failing_end_init_0.try_end_init().map_err(|error| rt::at(rt::TARGET_INVOCATION_EXCEPTION, error, 3, 4))?;
+    border_0.try_end_init().map_err(|error| rt::at(rt::TARGET_INVOCATION_EXCEPTION, error, 1, 2))?;
+    rt::complete_root_name_scope(::core::option::Option::Some(&border_0), name_scope.as_ref(), 1, 2)?;
+    ::core::result::Result::Ok(border_0)
+}
+
+fn build_end_init_failure_xaml_untyped(
+    service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
+) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadException> {
+    let root = build_end_init_failure_xaml(service_provider)?;
+    ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
+}
+
 /// The build function of every eligible document, by document name.
 pub const DOCUMENTS: &[(&str, BuildDocument)] = &[
     ("border_empty.xaml", build_border_empty_xaml_untyped as BuildDocument),
@@ -1397,6 +1507,9 @@ pub const DOCUMENTS: &[(&str, BuildDocument)] = &[
     ("duplicate_name.xaml", build_duplicate_name_xaml_untyped as BuildDocument),
     ("name_and_x_name.xaml", build_name_and_x_name_xaml_untyped as BuildDocument),
     ("user_control_properties.xaml", build_user_control_properties_xaml_untyped as BuildDocument),
+    ("multiline_document.xaml", build_multiline_document_xaml_untyped as BuildDocument),
+    ("multiline_duplicate_name.xaml", build_multiline_duplicate_name_xaml_untyped as BuildDocument),
+    ("end_init_failure.xaml", build_end_init_failure_xaml_untyped as BuildDocument),
 ];
 
 /// The loader of the compiled markup of the assembly: builds the document with the URI

@@ -16,6 +16,7 @@ pub mod assets;
 pub mod helpers;
 pub mod loader;
 
+pub mod emitter;
 pub mod sample_ferro_object;
 pub mod setter_tests;
 pub mod style_tests;
@@ -52,6 +53,7 @@ impl TypeModule {
 const MODULES: &[&TypeModule] = &[
     // FerroUI.Markup.Xaml.UnitTests
     &ROOT,
+    &emitter::MODULE,
     &setter_tests::MODULE,
     &style_tests::MODULE,
     &xaml_il_tests::MODULE,
@@ -110,6 +112,7 @@ pub(crate) fn register() {
         TypeInfo::register_all(module.types);
         MarkupType::register_all(module.markup_types);
     }
+    TypeInfo::register_rust_paths(emitter::RUST_PATHS);
     ValueTypes::register_global(register_value_types);
     assets::register();
 }
