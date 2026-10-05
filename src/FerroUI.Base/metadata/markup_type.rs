@@ -480,6 +480,35 @@ pub struct MarkupProperty {
     /// property and for a property with a fallible setter. See
     /// [`typed_path`](super::typed_path).
     pub typed_path_element: Option<super::typed_path::TypedPathElement>,
+    /// The typed accessor functions the declaration generated for the
+    /// getter and the setter (see [`MarkupEmit`]); `None` for an accessor
+    /// that is not declared.
+    pub emit_get: Option<MarkupEmit>,
+    pub emit_set: Option<MarkupEmit>,
+}
+
+/// A typed function the declaration forms generate for a declared member,
+/// for the emitter of Rust source: an associated function of the declared
+/// type (`#[doc(hidden)] pub fn __markup_get_Child(this: &Ref<Border>) -> ..`),
+/// public wherever the type is, that calls the declared callable with
+/// exactly the declared types. Generated code calls it by the public path
+/// of the type and `function`, whatever form the callable has (a path or a
+/// closure).
+///
+/// | Member | Function |
+/// |---|---|
+/// | property getter / setter | `__markup_get_<Name>(this: &This) -> T` / `__markup_set_<Name>(this: &This, value: T)` |
+/// | static property getter / setter | `__markup_static_get_<Name>() -> T` / `__markup_static_set_<Name>(value: T)` |
+/// | method (instance or static), in declaration order `n` | `__markup_<Name>_<n>([this: &This,] a0: A, ..) -> R` |
+///
+/// A fallible member (`try`) returns `Result<T, MarkupInvokeError>`
+/// ([`markup_result`] of the callable's result).
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub struct MarkupEmit {
+    /// The name of the associated function.
+    pub function: &'static str,
+    /// Whether the function returns `Result<_, MarkupInvokeError>`.
+    pub fallible: bool,
 }
 
 /// An indexer (`this[..]` of the managed original): a property with index
@@ -512,6 +541,9 @@ pub struct MarkupMethod {
     /// a static method.
     pub invoke: MarkupInvoke,
     pub attributes: &'static [MarkupAttribute],
+    /// The typed function the declaration generated for the method (see
+    /// [`MarkupEmit`]).
+    pub emit: Option<MarkupEmit>,
 }
 
 /// A static field of the managed original: a `static readonly` field or a
@@ -640,6 +672,14 @@ pub struct MarkupType {
     /// properties of the type are read once.
     pub notify_property_changed:
         Option<fn(&dyn crate::AnyValue) -> Option<&dyn crate::data::model::INotifyPropertyChanged>>,
+    /// The Rust type instance members receive (`&This`): the `this:` of the
+    /// declaration, else the declared type (`Ref<Class>` for a class). The
+    /// typed functions of the instance members ([`MarkupEmit`]) take it.
+    pub this: Option<TypeOf>,
+    /// The Rust type the typed function of `parse` returns
+    /// (`__markup_parse(text: String) -> Result<T, MarkupInvokeError>`): the
+    /// instance type, or `Rc<dyn Trait>` for a contract without `this:`.
+    pub parse_type: Option<TypeOf>,
 }
 
 impl MarkupType {
@@ -671,6 +711,8 @@ impl MarkupType {
             enum_from_value: None,
             attributes: &[],
             notify_property_changed: None,
+            this: None,
+            parse_type: None,
         }
     }
 
