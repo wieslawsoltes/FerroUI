@@ -5,10 +5,6 @@ use wasm_bindgen::prelude::*;
 /// of the WebAssembly module: the site places both files side by side.
 pub const MAIN_MODULE_NAME: &str = "./ferroui.js";
 
-/// The name the storage bundle is imported by, relative to the main script
-/// module.
-pub const STORAGE_MODULE_NAME: &str = "./storage.js";
-
 #[wasm_bindgen(raw_module = "./ferroui.js")]
 extern "C" {
     /// Whether the page runs on a mobile device.
