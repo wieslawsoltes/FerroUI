@@ -43,7 +43,9 @@ impl IRenderDataGeometry for ClientGeometry {
 }
 
 fn is_immutable_brush(brush: &Rc<dyn IBrush>) -> bool {
-    brush.as_mutable_brush().is_none() && brush.as_composition_render_resource().is_none()
+    brush.as_mutable_brush().is_none()
+        && brush.as_composition_render_resource().is_none()
+        && brush.as_composition_brush().is_none()
 }
 
 fn is_immutable_pen(pen: &Rc<dyn IPen>) -> bool {
@@ -68,10 +70,19 @@ pub(crate) fn brush_get_server_resource(
     if is_immutable_brush(brush) {
         return Some(BatchResource::Value(brush.clone()));
     }
-    match brush_render_resource(&**brush) {
-        Some(resource) => Some(BatchResource::Server(resource.get_for_compositor(compositor))),
-        None => not_compatible("The brush"),
+    if let Some(resource) = brush_render_resource(&**brush) {
+        return Some(BatchResource::Server(resource.get_for_compositor(compositor)));
     }
+    if let Some(composition_brush) = brush.as_composition_brush() {
+        // The server object belongs to its own compositor's render loop;
+        // handing it to another compositor would share one resource across
+        // two render threads.
+        if !std::ptr::eq(&**composition_brush.compositor(), compositor) {
+            panic!("{} belongs to a different compositor", composition_brush.type_name());
+        }
+        return Some(BatchResource::Server(composition_brush.server()));
+    }
+    not_compatible("The brush")
 }
 
 /// The form of a brush that render data refers to (`GetServer`).

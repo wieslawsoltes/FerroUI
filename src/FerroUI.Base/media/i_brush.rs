@@ -93,6 +93,12 @@ pub trait IBrush: 'static {
         None
     }
 
+    /// The brush as a composition brush, when it is one (the `is
+    /// CompositionBrush` test of upstream).
+    fn as_composition_brush(&self) -> Option<&crate::rendering::composition::CompositionBrush> {
+        None
+    }
+
     /// The brush as an [`IImmutableBrush`] handle, when it is immutable.
     fn into_immutable_brush(self: Rc<Self>) -> Option<Rc<dyn IImmutableBrush>> {
         None

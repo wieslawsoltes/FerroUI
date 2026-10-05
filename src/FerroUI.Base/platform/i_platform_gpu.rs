@@ -43,3 +43,15 @@ pub trait IPlatformGraphicsContext: IOptionalFeatureProvider {
     /// Lets the backend recover the concrete context type.
     fn as_any(&self) -> &dyn std::any::Any;
 }
+
+/// The graphics context a GPU object belongs to was lost.
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
+pub struct PlatformGraphicsContextLostException;
+
+impl std::fmt::Display for PlatformGraphicsContextLostException {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.write_str("The platform graphics context was lost.")
+    }
+}
+
+impl std::error::Error for PlatformGraphicsContextLostException {}

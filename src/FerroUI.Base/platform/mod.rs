@@ -9,7 +9,9 @@ mod i_glyph_run_impl;
 mod i_locked_framebuffer;
 mod i_optional_feature_provider;
 mod i_platform_behavior_inhibition;
+mod i_external_objects_render_interface_context_feature;
 mod i_platform_gpu;
+mod platform_graphics_external_memory;
 mod i_platform_render_interface;
 mod i_platform_render_interface_region;
 mod i_platform_threading_interface;
@@ -29,7 +31,19 @@ pub use i_glyph_run_impl::IGlyphRunImpl;
 pub use i_locked_framebuffer::ILockedFramebuffer;
 pub use i_optional_feature_provider::IOptionalFeatureProvider;
 pub use i_platform_behavior_inhibition::IPlatformBehaviorInhibition;
-pub use i_platform_gpu::{IPlatformGraphics, IPlatformGraphicsContext, IPlatformGraphicsReadyStateFeature};
+pub use i_external_objects_render_interface_context_feature::{
+    IExternalObjectsHandleWrapRenderInterfaceContextFeature, IExternalObjectsRenderInterfaceContextFeature,
+    IExternalObjectsWrappedGpuHandle, IPlatformRenderInterfaceImportedImage, IPlatformRenderInterfaceImportedObject,
+    IPlatformRenderInterfaceImportedSemaphore,
+};
+pub use i_platform_gpu::{
+    IPlatformGraphics, IPlatformGraphicsContext, IPlatformGraphicsReadyStateFeature, PlatformGraphicsContextLostException,
+};
+pub use platform_graphics_external_memory::{
+    KnownPlatformGraphicsExternalImageHandleTypes, KnownPlatformGraphicsExternalSemaphoreHandleTypes,
+    PlatformGraphicsDrmFormat, PlatformGraphicsExternalImageDmaBufProperties, PlatformGraphicsExternalImageFormat,
+    PlatformGraphicsExternalImageProperties, PlatformGraphicsExternalImageVulkanProperties,
+};
 pub use i_platform_render_interface::{IPlatformRenderInterface, IPlatformRenderInterfaceContext};
 pub use i_platform_render_interface_region::IPlatformRenderInterfaceRegion;
 pub use i_render_target::{

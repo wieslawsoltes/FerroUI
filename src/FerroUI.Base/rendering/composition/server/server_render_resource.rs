@@ -1,4 +1,4 @@
-use super::{ServerCompositor, ServerValueChange};
+use super::{IAnimatedServerObject, ServerCompositor, ServerObject, ServerValueChange};
 use std::cell::{Cell, RefCell};
 use std::rc::{Rc, Weak};
 
@@ -83,6 +83,43 @@ impl ServerRenderResourceCore {
 
         if let (Some(new_child), Some(observer)) = (&change.new_resource, &observer) {
             new_child.add_observer(observer);
+        }
+
+        self.invalidated(host);
+    }
+
+    /// Assigns a property field that holds a list of values (the
+    /// `IEnumerable` branch of `SetValue`): moves the observation of the
+    /// resource from the render resources of the old list to those of the
+    /// new one and records the change. The lists differ by reference, which
+    /// is the caller's equality test.
+    pub fn set_list_value(
+        &self,
+        host: &dyn IServerRenderResourceHost,
+        old_children: Vec<Rc<dyn IServerRenderResource>>,
+        new_children: Vec<Rc<dyn IServerRenderResource>>,
+        assign: &mut dyn FnMut(),
+    ) {
+        if self.disposed.get() {
+            assign();
+            return;
+        }
+
+        let observer: Option<Rc<dyn IServerRenderResourceObserver>> =
+            host.as_render_resource_rc().map(|this| this as Rc<dyn IServerRenderResourceObserver>);
+
+        if let Some(observer) = &observer {
+            for child in &old_children {
+                child.remove_observer(observer);
+            }
+        }
+
+        assign();
+
+        if let Some(observer) = &observer {
+            for child in &new_children {
+                child.add_observer(observer);
+            }
         }
 
         self.invalidated(host);
@@ -271,3 +308,167 @@ macro_rules! __impl_simple_server_render_resource {
 }
 
 pub use crate::__impl_simple_server_render_resource as impl_simple_server_render_resource;
+
+/// The base of the animatable server-side render resources (upstream
+/// `ServerRenderResource`, a `ServerObject`), as a part the resource classes
+/// embed: the animation support of the server object, the resource core and
+/// the handle of the object as a render resource.
+pub struct ServerRenderResource {
+    object: ServerObject,
+    this: Weak<dyn IServerRenderResource>,
+    core: ServerRenderResourceCore,
+}
+
+impl ServerRenderResource {
+    /// `owner` and `this` are the object that embeds the part.
+    pub fn new(
+        compositor: &Rc<ServerCompositor>,
+        owner: Weak<dyn IAnimatedServerObject>,
+        this: Weak<dyn IServerRenderResource>,
+    ) -> Self {
+        Self { object: ServerObject::new(compositor, owner), this, core: ServerRenderResourceCore::new() }
+    }
+
+    /// The embedded `ServerObject`.
+    pub fn object(&self) -> &ServerObject {
+        &self.object
+    }
+
+    pub fn compositor(&self) -> Option<Rc<ServerCompositor>> {
+        self.object.compositor()
+    }
+
+    pub fn core(&self) -> &ServerRenderResourceCore {
+        &self.core
+    }
+
+    pub fn is_disposed(&self) -> bool {
+        self.core.is_disposed()
+    }
+
+    pub fn as_render_resource_rc(&self) -> Option<Rc<dyn IServerRenderResource>> {
+        self.this.upgrade()
+    }
+}
+
+/// Implements the render resource and animation contracts of a class that
+/// embeds a [`ServerRenderResource`] in the field `$base`: the members
+/// `ServerRenderResource` gives its subclasses upstream.
+///
+/// As upstream, `SetValue` goes through the resource core only: the
+/// `SetValue` of the render resource hides the one of `ServerObject`, so a
+/// direct set does not invalidate the animations that depend on the
+/// property. `$get` resolves a composition property by name.
+///
+/// The class implements `IServerObject` itself, with `values_invalidated`
+/// invalidating the resource (`self.$base.core().invalidated(self)`).
+#[macro_export]
+#[doc(hidden)]
+macro_rules! __impl_server_render_resource {
+    ($ty:ty, $base:ident, composition_property: $get:expr) => {
+        $crate::rendering::composition::server::impl_server_render_resource!(@resource $ty, $base);
+
+        impl $crate::rendering::composition::server::IServerAnimatedPropertyHost for $ty {
+            fn set_animated_value(
+                &self,
+                property: &'static $crate::rendering::composition::server::CompositionProperty,
+                current_value: $crate::rendering::composition::expressions::ExpressionVariant,
+                committed_at: ::std::time::Duration,
+                animation: ::std::rc::Rc<dyn $crate::rendering::composition::animations::IAnimationInstance>,
+            ) {
+                self.$base.object().set_animated_value(property, current_value, committed_at, animation);
+            }
+
+            fn remove_animation_for_property(
+                &self,
+                property: &'static $crate::rendering::composition::server::CompositionProperty,
+            ) {
+                self.$base.object().remove_animation_for_property(property);
+            }
+
+            fn notify_animated_value_changed(
+                &self,
+                _property: &'static $crate::rendering::composition::server::CompositionProperty,
+            ) {
+                $crate::rendering::composition::server::IServerObject::values_invalidated(self);
+            }
+        }
+
+        impl $crate::rendering::composition::server::IAnimatedServerObject for $ty {
+            fn server_object(&self) -> &$crate::rendering::composition::server::ServerObject {
+                self.$base.object()
+            }
+
+            fn get_composition_property(
+                &self,
+                field_name: &str,
+            ) -> Option<&'static $crate::rendering::composition::server::CompositionProperty> {
+                ($get)(field_name)
+            }
+
+            fn as_server_object_dyn(&self) -> &dyn $crate::rendering::composition::server::IServerObject {
+                self
+            }
+        }
+    };
+    (@resource $ty:ty, $base:ident) => {
+        impl $crate::rendering::composition::server::IServerRenderResourceObserver for $ty {
+            fn dependency_queued_invalidate(
+                &self,
+                _sender: &dyn $crate::rendering::composition::server::IServerRenderResource,
+            ) {
+                self.$base.core().dependency_queued_invalidate(self);
+            }
+        }
+
+        impl $crate::rendering::composition::server::IServerRenderResource for $ty {
+            fn add_observer(
+                &self,
+                observer: &::std::rc::Rc<dyn $crate::rendering::composition::server::IServerRenderResourceObserver>,
+            ) {
+                self.$base.core().add_observer(observer);
+            }
+
+            fn remove_observer(
+                &self,
+                observer: &::std::rc::Rc<dyn $crate::rendering::composition::server::IServerRenderResourceObserver>,
+            ) {
+                self.$base.core().remove_observer(observer);
+            }
+
+            fn queued_invalidate(&self) {
+                self.$base.core().queued_invalidate(self);
+            }
+        }
+
+        impl $crate::rendering::composition::server::IServerRenderResourceHost for $ty {
+            fn compositor(&self) -> Option<::std::rc::Rc<$crate::rendering::composition::server::ServerCompositor>> {
+                self.$base.compositor()
+            }
+
+            fn as_render_resource_rc(
+                &self,
+            ) -> Option<::std::rc::Rc<dyn $crate::rendering::composition::server::IServerRenderResource>> {
+                self.$base.as_render_resource_rc()
+            }
+        }
+
+        impl $crate::rendering::composition::server::IServerPropertyHost for $ty {
+            fn server_compositor(
+                &self,
+            ) -> Option<::std::rc::Rc<$crate::rendering::composition::server::ServerCompositor>> {
+                self.$base.compositor()
+            }
+
+            fn set_value(
+                &self,
+                _property: &'static $crate::rendering::composition::server::CompositionProperty,
+                change: $crate::rendering::composition::server::ServerValueChange<'_>,
+            ) {
+                self.$base.core().set_value(self, change);
+            }
+        }
+    };
+}
+
+pub use crate::__impl_server_render_resource as impl_server_render_resource;

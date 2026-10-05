@@ -2,9 +2,11 @@ use super::animations::{CompositionAnimationGroup, ExpressionAnimation, Implicit
 use super::server::{RenderSurfaces, ServerCompositionContainerVisual};
 use super::visual::CompositionVisualKind;
 use super::{
-    CompositionContainerVisual, CompositionSolidColorVisual, CompositionSurfaceVisual, CompositionTarget,
+    CompositionDrawingSurface, CompositionCustomVisual, ICompositionCustomVisualHandler, CompositionConicGradientBrush, CompositionGradientStop, CompositionLinearGradientBrush,
+    CompositionRadialGradientBrush, CompositionSolidColorBrush, CompositionContainerVisual, CompositionSolidColorVisual, CompositionSurfaceVisual, CompositionTarget,
     CompositionVisual, Compositor,
 };
+use crate::media::Color;
 use std::rc::Rc;
 
 impl Compositor {
@@ -48,7 +50,43 @@ impl Compositor {
         CompositionSolidColorVisual::new(&self.this_rc())
     }
 
+    pub fn create_custom_visual(&self, handler: Rc<dyn ICompositionCustomVisualHandler>) -> CompositionCustomVisual {
+        CompositionCustomVisual::new(&self.this_rc(), handler)
+    }
+
+    pub fn create_drawing_surface(&self) -> CompositionDrawingSurface {
+        CompositionDrawingSurface::new(&self.this_rc())
+    }
+
     pub fn create_surface_visual(&self) -> CompositionSurfaceVisual {
         CompositionSurfaceVisual::new(&self.this_rc())
+    }
+
+    pub fn create_solid_color_brush(&self) -> CompositionSolidColorBrush {
+        CompositionSolidColorBrush::new(&self.this_rc())
+    }
+
+    pub fn create_solid_color_brush_with(&self, color: Color) -> CompositionSolidColorBrush {
+        CompositionSolidColorBrush::with_color(&self.this_rc(), color)
+    }
+
+    pub fn create_linear_gradient_brush(&self) -> CompositionLinearGradientBrush {
+        CompositionLinearGradientBrush::new(&self.this_rc())
+    }
+
+    pub fn create_conic_gradient_brush(&self) -> CompositionConicGradientBrush {
+        CompositionConicGradientBrush::new(&self.this_rc())
+    }
+
+    pub fn create_radial_gradient_brush(&self) -> CompositionRadialGradientBrush {
+        CompositionRadialGradientBrush::new(&self.this_rc())
+    }
+
+    pub fn create_gradient_stop_with(&self, offset: f64, color: Color) -> Rc<CompositionGradientStop> {
+        CompositionGradientStop::with_offset_and_color(&self.this_rc(), offset, color)
+    }
+
+    pub fn create_gradient_stop(&self) -> Rc<CompositionGradientStop> {
+        CompositionGradientStop::new(&self.this_rc())
     }
 }

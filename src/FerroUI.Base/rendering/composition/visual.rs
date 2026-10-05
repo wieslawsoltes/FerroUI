@@ -10,6 +10,7 @@
 //! (`CompositionDrawListVisual`, `CompositionSolidColorVisual`, ...).
 
 use super::animations::{ICompositionAnimation, ICompositionAnimationBase, ImplicitAnimationCollection};
+use super::composition_custom_visual::CustomVisualData;
 use super::composition_draw_list_visual::DrawListData;
 use super::composition_object::ICompositionObjectAnimations;
 use super::drawing::brush_get_server_resource;
@@ -44,6 +45,7 @@ pub(crate) enum CompositionVisualKind {
     DrawList(DrawListData),
     SolidColor(CompositionSolidColorVisualProps),
     Surface(CompositionSurfaceVisualProps),
+    Custom(CustomVisualData),
 }
 
 /// A node of the composition visual tree.
@@ -105,17 +107,30 @@ impl CompositionVisual {
         kind: CompositionVisualKind,
         content: impl FnOnce() -> Box<dyn IServerVisualContent> + 'static,
     ) -> Rc<CompositionVisual> {
+        Self::create_with(compositor, kind, content, |_| {})
+    }
+
+    /// [`create`](Self::create), with `created` called on the render
+    /// thread right after the server-side visual has been created.
+    pub(crate) fn create_with(
+        compositor: &Rc<Compositor>,
+        kind: CompositionVisualKind,
+        content: impl FnOnce() -> Box<dyn IServerVisualContent> + 'static,
+        created: impl FnOnce(&Rc<ServerCompositionVisual>) + 'static,
+    ) -> Rc<CompositionVisual> {
         let children_server =
             compositor.create_server_object(|compositor, _| ServerCompositionVisualCollection::new(compositor));
         let readback = Arc::new(VisualReadback::new());
         let server_readback = readback.clone();
         let server = compositor.create_server_object(move |compositor, _| {
-            ServerCompositionVisual::new(
+            let visual = ServerCompositionVisual::new(
                 compositor,
                 compositor.get::<ServerCompositionVisualCollection>(children_server),
                 server_readback,
                 content(),
-            )
+            );
+            created(&visual);
+            visual
         });
         let visual = Rc::new_cyclic(|this: &Weak<CompositionVisual>| CompositionVisual {
             this: this.clone(),
@@ -138,6 +153,7 @@ impl CompositionVisual {
             CompositionVisualKind::DrawList(data) => data.initialize_defaults(self),
             CompositionVisualKind::SolidColor(props) => props.initialize_defaults(self),
             CompositionVisualKind::Surface(props) => props.initialize_defaults(self),
+            CompositionVisualKind::Custom(data) => data.props().initialize_defaults(self),
         }
     }
 
@@ -147,6 +163,7 @@ impl CompositionVisual {
             CompositionVisualKind::DrawList(data) => data.props(),
             CompositionVisualKind::SolidColor(props) => props.base(),
             CompositionVisualKind::Surface(props) => props.base(),
+            CompositionVisualKind::Custom(data) => data.props(),
         }
     }
 
@@ -327,6 +344,7 @@ impl CompositionVisual {
             CompositionVisualKind::DrawList(data) => data.serialize_changes_core(self, writer),
             CompositionVisualKind::SolidColor(props) => props.serialize_changes_core(self, writer),
             CompositionVisualKind::Surface(props) => props.serialize_changes_core(self, writer),
+            CompositionVisualKind::Custom(data) => data.props().serialize_changes_core(self, writer),
         }
     }
 }
@@ -413,6 +431,9 @@ impl ICompositionObjectAnimations for CompositionVisual {
             }
             CompositionVisualKind::SolidColor(props) => props.start_animation(self, property_name, animation, final_value),
             CompositionVisualKind::Surface(props) => props.start_animation(self, property_name, animation, final_value),
+            CompositionVisualKind::Custom(data) => {
+                data.props().start_animation(self, property_name, animation, final_value)
+            }
         }
     }
 
@@ -442,6 +463,7 @@ impl AsCompositionObject for CompositionVisual {
             CompositionVisualKind::DrawList(_) => "CompositionDrawListVisual",
             CompositionVisualKind::SolidColor(_) => "CompositionSolidColorVisual",
             CompositionVisualKind::Surface(_) => "CompositionSurfaceVisual",
+            CompositionVisualKind::Custom(_) => "CompositionCustomVisual",
         }
     }
 }
