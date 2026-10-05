@@ -14,7 +14,6 @@ pub mod ferro_module;
 pub mod input_helper;
 pub mod navigation_helper;
 pub mod screen_helper;
-pub mod promise_helper;
 pub mod storage_helper;
 pub mod stream_helper;
 pub mod timer_helper;

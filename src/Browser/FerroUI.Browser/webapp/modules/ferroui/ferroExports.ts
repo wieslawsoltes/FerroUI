@@ -88,13 +88,6 @@ export class FerroExports {
         });
     }
 
-    public static get PromiseHelper() {
-        return FerroExports.group("PromiseHelper", {
-            OnResolved: "PromiseHelper_OnResolved",
-            OnRejected: "PromiseHelper_OnRejected"
-        });
-    }
-
     public static get CanvasHelper() {
         return FerroExports.group("CanvasHelper", {
             OnSizeChanged: "CanvasHelper_OnSizeChanged"
