@@ -16,6 +16,10 @@ path = "lib.rs"
 [features]
 # Exposes the render test doubles in `rendering::testing` to other crates.
 testing = []
+# Records, when a type registers its properties, which accessor function returns each
+# property definition (`metadata::property_accessors`). Only the emitter of Rust source of
+# the markup compiler reads it; applications do not enable it and pay nothing for it.
+compiler-metadata = []
 
 [dependencies]
 bitflags.workspace = true

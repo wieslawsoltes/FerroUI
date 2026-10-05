@@ -620,6 +620,31 @@ impl<T: PropertyValue> StyledPropertyOptions<T> {
     }
 }
 
+/// Records the accessor `$name` of `$owner` returning `$property`
+/// (`metadata::record_property_accessor`) with the `compiler-metadata`
+/// feature of this crate; expands to nothing without it.
+#[cfg(feature = "compiler-metadata")]
+#[doc(hidden)]
+#[macro_export]
+macro_rules! __record_property_accessor {
+    ($owner:ident, $name:ident, $property:expr) => {
+        $crate::metadata::record_property_accessor(
+            <$owner as $crate::StaticType>::TYPE,
+            ::std::stringify!($name),
+            $crate::Registrable::as_registered_property($property),
+        )
+    };
+}
+
+/// Records the accessor `$name` of `$owner` returning `$property` with the
+/// `compiler-metadata` feature of this crate; expands to nothing without it.
+#[cfg(not(feature = "compiler-metadata"))]
+#[doc(hidden)]
+#[macro_export]
+macro_rules! __record_property_accessor {
+    ($owner:ident, $name:ident, $property:expr) => {};
+}
+
 /// Declares the accessor of a single property definition.
 ///
 /// ```ignore
@@ -675,11 +700,7 @@ macro_rules! ferro_property {
                         ::std::option::Option::None => {
                             let property: &'static $ty = $body;
                             CELL.set(::std::option::Option::Some(property));
-                            $crate::metadata::record_property_accessor(
-                                <$owner as $crate::StaticType>::TYPE,
-                                ::std::stringify!($name),
-                                $crate::Registrable::as_registered_property(property),
-                            );
+                            $crate::__record_property_accessor!($owner, $name, property);
                             property
                         }
                     }

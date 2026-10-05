@@ -415,6 +415,7 @@ impl RuntimeDocumentTypeBuilderProvider {
     /// The transformed root node of the document and the configuration it was
     /// transformed with: what the emitter of Rust source (the second back end)
     /// reads. `None` until the group has been transformed.
+    #[cfg(any(feature = "emitter", test))]
     pub(crate) fn transformed_root(
         &self,
     ) -> Option<(Rc<dyn IXamlAstNode>, Rc<xamlx::transform::TransformerConfiguration>)> {

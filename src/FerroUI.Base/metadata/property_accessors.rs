@@ -20,6 +20,11 @@
 //! A definition can have several accessors (an owner added with `add_owner`
 //! declares its own accessor returning the same definition); each of them
 //! returns the identical definition.
+//!
+//! Only with the `compiler-metadata` feature, which the emitter enables:
+//! without it the macros record nothing and the table does not exist, so
+//! shipped applications neither pay for the recording on the first call of
+//! an accessor nor carry the table.
 
 use std::cell::RefCell;
 use std::collections::HashMap;

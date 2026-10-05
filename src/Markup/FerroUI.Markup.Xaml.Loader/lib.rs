@@ -26,7 +26,7 @@ pub mod parsers;
 pub mod runtime;
 
 /// The emitter of Rust source: the build-time back end over the same transformed AST.
-#[cfg(feature = "runtime")]
+#[cfg(any(feature = "emitter", all(test, feature = "runtime")))]
 pub mod rust_emitter;
 
 #[cfg(feature = "runtime")]

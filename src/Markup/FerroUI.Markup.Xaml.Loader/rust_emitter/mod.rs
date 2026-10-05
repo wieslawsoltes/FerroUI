@@ -53,7 +53,7 @@
 //! | an enumeration member | `MarkupEnumMember::rust_variant` (the declaration macro) |
 //! | a constructor with arguments | `MarkupConstructor::emit` (`stringify!` of the declared callable), used only in the form `<TypeName>::<function>` |
 //! | the default constructor of a class | the convention `Type::new()` (porting guide, "Classes"), checked against `TypeInfo::default_constructor` |
-//! | the definition of a registered property | the accessor the declaration macro recorded for it (`ferroui_base::metadata::property_accessors`) |
+//! | the definition of a registered property | the accessor the declaration macro recorded for it (`ferroui_base::metadata::property_accessors`, feature `compiler-metadata` of the base crate, which the `emitter` feature of this crate enables) |
 //!
 //! The emitter never resolves a member by name itself: the member is the one
 //! the transformers put into the AST, and the Rust type of every value is

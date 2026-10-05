@@ -226,6 +226,7 @@ fn assignment_plan(node: &Rc<dyn IXamlAstNode>, assignment: &XamlPropertyAssignm
 /// The setter a property assignment always uses, when its plan leaves exactly one
 /// (`None`: the setter is chosen by the run-time type of the value). The decision is the
 /// one [`property_assignment`] makes; the emitter of Rust source asks for it here.
+#[cfg(any(feature = "emitter", test))]
 pub(crate) fn single_setter(
     node: &Rc<dyn IXamlAstNode>,
     assignment: &XamlPropertyAssignmentNode,
