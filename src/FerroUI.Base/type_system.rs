@@ -164,6 +164,7 @@ impl TypeInfo {
 
     /// Whether the type has a static initialisation of its own
     /// ([`with_class_init`](Self::with_class_init)).
+    #[cfg(feature = "compiler-metadata")]
     pub(crate) fn has_class_init(&self) -> bool {
         self.class_init.is_some()
     }
