@@ -793,7 +793,7 @@ impl Visual {
             list.set_reset_behavior(ResetBehavior::Remove);
             let weak = self.to_ref().downgrade();
             let validator_owner = weak.clone();
-            list.set_validator(Some(Rc::new(move |item: &Ref<Visual>| {
+            list.set_validate(Some(Rc::new(move |item: &Ref<Visual>| {
                 if let Some(parent) = item.visual_parent() {
                     let owner = validator_owner.upgrade();
                     panic!(

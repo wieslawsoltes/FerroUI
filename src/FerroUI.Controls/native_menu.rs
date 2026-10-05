@@ -33,7 +33,7 @@ impl FerroObjectImpl for NativeMenu {
         Self::parent_constructed(this);
 
         let weak = this.to_ref().downgrade();
-        this.items.set_validator(Some(Rc::new({
+        this.items.set_validate(Some(Rc::new({
             let weak = weak.clone();
             move |item: &Ref<NativeMenuItemBase>| Self::validate(&weak, item)
         })));

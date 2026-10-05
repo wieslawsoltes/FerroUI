@@ -47,7 +47,7 @@ impl FerroObjectImpl for Styles {
                 }
             },
         ));
-        this.styles.set_validator(Some(Rc::new(|item: &Rc<dyn IStyle>| {
+        this.styles.set_validate(Some(Rc::new(|item: &Rc<dyn IStyle>| {
             if let Some(theme) = item.as_object().and_then(|o| o.downcast_ref::<ControlTheme>()) {
                 panic!(
                     "ControlTheme (for {}) cannot be added to a Styles collection.",

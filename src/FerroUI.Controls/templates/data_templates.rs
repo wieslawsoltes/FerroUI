@@ -23,7 +23,7 @@ impl DataTemplates {
     pub fn new() -> Self {
         let list = FerroList::new();
         list.set_reset_behavior(ResetBehavior::Remove);
-        list.set_validator(Some(Rc::new(|item: &Rc<dyn IDataTemplate>| {
+        list.set_validate(Some(Rc::new(|item: &Rc<dyn IDataTemplate>| {
             let valid = match item.as_typed_data_template() {
                 Some(typed) => typed.data_type().is_some(),
                 None => true,
