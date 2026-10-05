@@ -75,10 +75,10 @@ fn gap_c005_theme_variant_key_in_a_compiled_binding() {
 }
 
 #[test]
-#[ignore = "gap C009: Calendar.WeekNumberRule is not converted from text (CalendarWeekRule has no markup metadata)"]
 fn gap_c009_calendar_week_rule_from_text() {
     let _app = start_catalog_application();
-    let xaml = format!("<Calendar {XMLNS} ShowWeekNumbers='True' WeekNumberRule='FirstFourDayWeek' />");
+    // As `Pages/CalendarPage.xaml`: the week-number rule with the week numbers shown.
+    let xaml = format!("<Calendar {XMLNS} WeekNumberRule='FirstFourDayWeek' IsWeekNumberVisible='True' />");
     if let Err(error) = try_load_text(&xaml, None, None) {
         panic!("{}", describe(&error));
     }
@@ -122,7 +122,8 @@ fn gap_c011_multi_page_pages_from_markup() {
 /// and the subset loads into an application (TEMPORARY, see `temporary.rs`).
 #[test]
 fn the_subset_of_the_application_document_loads() {
-    let _app = start_application();
+    // The icon of a native menu item of the document is decoded as a bitmap.
+    let _app = start_catalog_application();
     // The tray icon of the document loads its icon through the icon loader of the platform.
     let loader: Rc<dyn IPlatformIconLoader> = Rc::new(TestIconLoader);
     FerroLocator::current_mutable().bind::<dyn IPlatformIconLoader>().to_constant(loader);
