@@ -1,5 +1,6 @@
 use super::{DataFormatKind, DataFormatOf};
 use crate::media::imaging::Bitmap;
+use crate::platform::storage::IStorageItem;
 use std::fmt;
 use std::rc::Rc;
 
@@ -17,6 +18,7 @@ pub struct DataFormat {
 thread_local! {
     static TEXT: DataFormatOf<String> = DataFormat::create_universal_format("Text");
     static BITMAP: DataFormatOf<Rc<Bitmap>> = DataFormat::create_universal_format("Bitmap");
+    static FILE: DataFormatOf<Rc<dyn IStorageItem>> = DataFormat::create_universal_format("File");
 }
 
 impl DataFormat {
@@ -45,6 +47,12 @@ impl DataFormat {
     /// [`Bitmap`].
     pub fn bitmap() -> DataFormatOf<Rc<Bitmap>> {
         BITMAP.with(Clone::clone)
+    }
+
+    /// A data format representing a single file. Its data type is a shared
+    /// [`IStorageItem`].
+    pub fn file() -> DataFormatOf<Rc<dyn IStorageItem>> {
+        FILE.with(Clone::clone)
     }
 
     /// Creates a name for this format, usable by the underlying platform.

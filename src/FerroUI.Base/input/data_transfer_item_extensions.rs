@@ -1,5 +1,6 @@
 use super::{DataFormat, DataFormatOf, IDataTransferItem};
 use crate::media::imaging::Bitmap;
+use crate::platform::storage::IStorageItem;
 use std::rc::Rc;
 
 /// Contains extension methods for [`IDataTransferItem`].
@@ -23,6 +24,13 @@ pub trait DataTransferItemExtensions: IDataTransferItem {
     /// Returns a bitmap, if available, from the item.
     fn try_get_bitmap(&self) -> Option<Rc<Bitmap>> {
         self.try_get_value(&DataFormat::bitmap())
+    }
+
+    /// Returns a file (or folder), if available, from the item.
+    ///
+    /// See [`DataFormat::file`].
+    fn try_get_file(&self) -> Option<Rc<dyn IStorageItem>> {
+        self.try_get_value(&DataFormat::file())
     }
 }
 
