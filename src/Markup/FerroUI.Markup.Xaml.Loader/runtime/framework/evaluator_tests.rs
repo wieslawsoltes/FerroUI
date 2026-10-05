@@ -34,7 +34,7 @@ use crate::compiler_extensions::transformers::*;
 use crate::compiler_extensions::*;
 use crate::runtime::interpreter::{
     EvalContext, IXamlConstructorEvaluator, IXamlMethodEvaluator, IXamlSetterEvaluator, Interpreter, RuntimeContext,
-    RuntimeContextDefinition, RuntimeDocument,
+    RuntimeDocument,
 };
 use crate::runtime::type_system::{
     DeferredContentFactory, RuntimeArray, RuntimeConstructor, RuntimeMethod, RuntimeTypeSystem,
@@ -160,7 +160,7 @@ impl Harness {
         interpreter.constructor_evaluators.push(recorder.clone());
         let interpreter = Rc::new(interpreter);
         let context = RuntimeContext::new(
-            RuntimeContextDefinition::new(&fw.configuration),
+            crate::runtime::interpreter::context_definition(&fw.configuration),
             interpreter.services.clone(),
             None,
             Rc::from(Vec::new()),

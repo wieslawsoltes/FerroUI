@@ -19,7 +19,8 @@ use ferroui_base::{ferro_markup_type, BoxedValue};
 use crate::runtime::type_system::ITypeDescriptorContext;
 
 use super::runtime_context::{
-    IRuntimeContextServices, RuntimeContext, RuntimeContextService, XamlXmlNamespaceInfo, XmlNamespaceInfoProvider,
+    IRuntimeContextServices, IXamlIlContextServices, RuntimeContext, RuntimeContextService, XamlXmlNamespaceInfo,
+    XmlNamespaceInfoProvider,
 };
 
 /// Provides the root object of the document being built.
@@ -104,7 +105,7 @@ impl IXamlXmlNamespaceInfoProvider for XmlNamespaceInfoProvider {
 /// `Rc<dyn IXamlXmlNamespaceInfoProvider>`.
 pub struct DefaultRuntimeContextServices;
 
-impl IRuntimeContextServices for DefaultRuntimeContextServices {
+impl IXamlIlContextServices for DefaultRuntimeContextServices {
     fn get_own_service(
         &self,
         context: &Rc<RuntimeContext>,
@@ -128,20 +129,22 @@ impl IRuntimeContextServices for DefaultRuntimeContextServices {
         }
     }
 
-    fn get_namespace_info_service(
-        &self,
-        provider: &Rc<XmlNamespaceInfoProvider>,
-        service_type: TypeId,
-    ) -> Option<Rc<dyn Any>> {
-        service(service_type, || provider.clone() as Rc<dyn IXamlXmlNamespaceInfoProvider>)
-    }
-
     fn get_parent_root_object(&self, parent: &Rc<dyn IServiceProvider>) -> Option<MarkupValue> {
         parent.get_service_of::<Rc<dyn IRootObjectProvider>>().map(|provider| provider.root_object())
     }
 
     fn get_parent_stack(&self, parent: &Rc<dyn IServiceProvider>) -> Option<Vec<MarkupValue>> {
         parent.get_service_of::<Rc<dyn IXamlParentStackProvider>>().map(|provider| provider.parents())
+    }
+}
+
+impl IRuntimeContextServices for DefaultRuntimeContextServices {
+    fn get_namespace_info_service(
+        &self,
+        provider: &Rc<XmlNamespaceInfoProvider>,
+        service_type: TypeId,
+    ) -> Option<Rc<dyn Any>> {
+        service(service_type, || provider.clone() as Rc<dyn IXamlXmlNamespaceInfoProvider>)
     }
 }
 
