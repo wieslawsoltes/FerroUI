@@ -172,7 +172,9 @@ export class StorageItem {
         }
 
         // If we are using polyfill, let it decide permissions by itself, we can't request anything in this case.
-        if (!Caniuse.hasNativeFilePicker()) {
+        // Upstream checks only for the native picker; with the polyfill preferred the handle is the polyfill's
+        // even where the browser has native pickers, and its save handle reports no write permission.
+        if (!Caniuse.hasNativeFilePicker() || !this.hasNativeHandle()) {
             return;
         }
 
@@ -192,7 +194,7 @@ export class StorageItem {
         }
 
         // Bookmarks are not supported with polyfill.
-        if (!item.handle || !Caniuse.hasNativeFilePicker()) {
+        if (!item.handle || !Caniuse.hasNativeFilePicker() || !item.hasNativeHandle()) {
             return null;
         }
 
@@ -216,6 +218,12 @@ export class StorageItem {
         } finally {
             connection.close();
         }
+    }
+
+    // Whether the handle is one of the browser (only those can be stored in IndexedDB or asked for permissions).
+    private hasNativeHandle(): boolean {
+        const nativeHandle = (globalThis as any).FileSystemHandle;
+        return nativeHandle !== undefined && this.handle instanceof nativeHandle;
     }
 
     private generateBookmarkId(): string {
