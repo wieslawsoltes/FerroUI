@@ -1,0 +1,19 @@
+[package]
+name = "ferroui-skia"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+build = "build.rs"
+
+[lib]
+path = "lib.rs"
+
+[dependencies]
+ferroui-base.workspace = true
+ferroui-controls.workspace = true
+skia-safe.workspace = true
+
+[dev-dependencies]
+ferroui-harfbuzz.workspace = true
