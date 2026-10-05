@@ -16,3 +16,6 @@ pub use server_composition_brush::{
 
 pub use server_simple_content_brush::ServerCompositionSimpleContentBrush;
 pub use server_simple_image_brush::ServerCompositionSimpleImageBrush;
+
+#[cfg(test)]
+mod composition_brush_tests;

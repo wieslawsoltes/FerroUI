@@ -325,6 +325,8 @@ pub mod testing;
 #[cfg(test)]
 mod app_builder_tests;
 #[cfg(test)]
+mod compositor_hit_testing_tests;
+#[cfg(test)]
 mod application_tests;
 #[cfg(test)]
 mod design_tests;

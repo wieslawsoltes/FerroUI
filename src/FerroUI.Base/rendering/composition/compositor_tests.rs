@@ -1177,3 +1177,109 @@ fn an_object_created_while_another_is_serialized_is_serialized_with_the_same_bat
     // The batch is applied: the server objects were created before use.
     s.run_jobs();
 }
+
+/// Port of `CompositionAnimationTests.ExpressionAnimation_Requeues_Target_When_Another_Animation_Is_Invalidated_During_Evaluation`.
+#[test]
+fn expression_animation_requeues_target_when_another_animation_is_invalidated_during_evaluation() {
+    use super::ICompositionObjectAnimations;
+
+    let s = CompositorCanvas::new();
+    let border = TestBorder::filled(0.0, 0.0, 10.0, 10.0);
+    s.canvas.add(&border);
+    s.run_jobs();
+
+    let visual = ElementComposition::get_element_visual(&border).unwrap();
+    let opacity_animation = visual.compositor().create_expression_animation_with("this.Target.RotationAngle * 0.1");
+    let rotation_animation = visual.compositor().create_expression_animation_with("this.Target.Offset.X * 0.5");
+
+    visual.start_animation("Opacity", &*opacity_animation);
+    visual.start_animation("RotationAngle", &*rotation_animation);
+
+    s.run_jobs();
+    visual.set_offset(Vector3D::new(100.0, 0.0, 0.0));
+    s.run_jobs();
+
+    let server = s.compositor.server().get::<ServerCompositionVisual>(visual.server()).unwrap();
+    assert_eq!(50.0, server.rotation_angle());
+    assert_eq!(5.0, server.opacity());
+}
+
+/// Not from upstream: a custom visual receives the messages sent to it on
+/// the render thread, draws through its handler, and its handler gets
+/// animation frame updates while it asks for them.
+#[test]
+fn custom_visual_draws_through_its_handler() {
+    use crate::media::immutable::ImmutableSolidColorBrush;
+    use crate::media::{Colors, ImmediateDrawingContext};
+    use crate::rendering::composition::{CompositionCustomVisualHandler, ICompositionCustomVisualHandler};
+    use std::any::Any;
+
+    #[derive(Default)]
+    struct Handler {
+        base: CompositionCustomVisualHandler,
+        messages: RefCell<Vec<i32>>,
+        frames: Cell<i32>,
+        clip_contains: Cell<Option<bool>>,
+    }
+
+    impl ICompositionCustomVisualHandler for Handler {
+        fn handler_base(&self) -> &CompositionCustomVisualHandler {
+            &self.base
+        }
+
+        fn on_message(&self, message: Rc<dyn Any>) {
+            let value = *message.downcast_ref::<i32>().unwrap();
+            self.messages.borrow_mut().push(value);
+            if value == 1 {
+                self.base.register_for_next_animation_frame_update();
+            }
+        }
+
+        fn on_animation_frame_update(&self) {
+            self.frames.set(self.frames.get() + 1);
+            if self.frames.get() < 3 {
+                self.base.register_for_next_animation_frame_update();
+            }
+            self.base.invalidate();
+        }
+
+        fn on_render(&self, drawing_context: &mut ImmediateDrawingContext<'_>) {
+            self.clip_contains.set(Some(self.base.render_clip_contains(Point::new(1.0, 1.0))));
+            let size = self.base.effective_size();
+            drawing_context.fill_rectangle(
+                &ImmutableSolidColorBrush::new(Colors::GREEN),
+                Rect::new(0.0, 0.0, size.x, size.y),
+                0.0,
+            );
+        }
+    }
+
+    let s = CompositorCanvas::new();
+    let log = s.render_interface.log().clone();
+    let handler = Rc::new(Handler::default());
+    let visual = s.compositor.create_custom_visual(handler.clone());
+    visual.set_size(Vector::new(20.0, 10.0));
+    ElementComposition::set_element_child_visual(&s.canvas, Some((*visual).clone()));
+    visual.send_handler_message(Rc::new(1i32));
+    visual.send_handler_message(Rc::new(2i32));
+    assert!(handler.messages.borrow().is_empty());
+    s.run_jobs();
+
+    assert_eq!(*handler.messages.borrow(), [1, 2]);
+    assert_eq!(handler.base.effective_size(), Vector::new(20.0, 10.0));
+    assert_eq!(1, log.count("DrawRectangle Green"), "{:?}", log.entries());
+    assert_eq!(handler.clip_contains.get(), Some(true));
+
+    // The handler asked for frames: it gets them until it stops asking.
+    for _ in 0..5 {
+        s.run_jobs();
+    }
+    assert_eq!(handler.frames.get(), 3);
+    assert!(!s.compositor.server().animations().need_next_tick());
+
+    // The render APIs are only available while the handler draws.
+    let result = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
+        handler.base.render_clip_contains(Point::new(1.0, 1.0))
+    }));
+    assert!(result.is_err());
+}

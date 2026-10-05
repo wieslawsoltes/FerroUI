@@ -132,3 +132,7 @@ pub use animations::{
 
 #[cfg(test)]
 mod compositor_tests;
+#[cfg(test)]
+mod composition_drawing_surface_tests;
+#[cfg(test)]
+mod test_compositor;
