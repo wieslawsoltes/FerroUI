@@ -67,6 +67,23 @@ impl fmt::Display for PromiseError {
 
 impl std::error::Error for PromiseError {}
 
+impl From<PromiseError> for std::io::Error {
+    /// The error as an I/O error whose payload is the rejection (read it back
+    /// with `get_ref` and `downcast_ref::<PromiseError>` for its name and
+    /// message). The kind follows the name of the DOM exception, so that a
+    /// caller can tell a missing item, a refused permission and a cancelled
+    /// request apart; any other name is [`std::io::ErrorKind::Other`].
+    fn from(error: PromiseError) -> Self {
+        let kind = match error.name() {
+            "NotFoundError" => std::io::ErrorKind::NotFound,
+            "NotAllowedError" | "SecurityError" => std::io::ErrorKind::PermissionDenied,
+            "AbortError" => std::io::ErrorKind::Interrupted,
+            _ => std::io::ErrorKind::Other,
+        };
+        std::io::Error::new(kind, error)
+    }
+}
+
 /// The outcome of a promise: its value or its rejection.
 pub type PromiseOutcome<V> = Result<V, PromiseError>;
 
@@ -148,6 +165,10 @@ impl<V> Completions<V> {
 
 /// The outcome of a promise of the page, as a future. Dropping the future
 /// forgets the request: an answer that comes later is ignored.
+///
+/// # Panics
+/// Polling the future again after it returned its outcome panics: the
+/// request is gone once its outcome has been taken.
 pub struct PromiseFuture<V> {
     completions: Rc<Completions<V>>,
     request_id: u32,
@@ -368,6 +389,37 @@ mod tests {
 
         let next = completions.await_promise(&tracker, &"next".to_string());
         assert_ne!(waiting.request_id(), next.request_id());
+    }
+
+    #[test]
+    #[should_panic(expected = "polled after it completed")]
+    fn polling_again_after_the_outcome_panics() {
+        let completions = Completions::new();
+        let tracker = RecordingTracker::default();
+        let waker = Arc::new(CountingWaker::default());
+
+        let mut future = completions.await_promise(&tracker, &"promise".to_string());
+        completions.complete(future.request_id(), Ok("value".to_string()));
+        assert_eq!(Poll::Ready(Ok("value".to_string())), poll(&mut future, &waker));
+        let _ = poll(&mut future, &waker);
+    }
+
+    #[test]
+    fn a_rejection_is_an_io_error_that_keeps_the_name_and_the_message() {
+        for (name, kind) in [
+            ("NotFoundError", std::io::ErrorKind::NotFound),
+            ("NotAllowedError", std::io::ErrorKind::PermissionDenied),
+            ("SecurityError", std::io::ErrorKind::PermissionDenied),
+            ("AbortError", std::io::ErrorKind::Interrupted),
+            ("TypeError", std::io::ErrorKind::Other),
+            ("", std::io::ErrorKind::Other),
+        ] {
+            let error: std::io::Error = PromiseError::new(name, "The user aborted a request.").into();
+            assert_eq!(kind, error.kind(), "{name}");
+            let rejection = error.get_ref().and_then(|inner| inner.downcast_ref::<PromiseError>()).expect("the rejection");
+            assert_eq!(name, rejection.name());
+            assert_eq!("The user aborted a request.", rejection.message());
+        }
     }
 
     #[test]
