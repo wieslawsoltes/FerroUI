@@ -25,6 +25,10 @@ pub mod parsers;
 #[cfg(feature = "runtime")]
 pub mod runtime;
 
+/// The emitter of Rust source: the build-time back end over the same transformed AST.
+#[cfg(feature = "runtime")]
+pub mod rust_emitter;
+
 #[cfg(feature = "runtime")]
 mod ferro_runtime_xaml_loader;
 #[cfg(feature = "runtime")]

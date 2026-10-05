@@ -14,6 +14,8 @@ use ferroui_base::TypeInfo;
 
 pub mod support;
 
+pub mod emitter;
+
 #[cfg(test)]
 mod data;
 

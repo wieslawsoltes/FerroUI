@@ -221,6 +221,31 @@ impl FerroXamlIlRuntimeCompiler {
         GROUPS.with(|groups| groups.borrow_mut().clear());
     }
 
+    /// Parses and transforms ONE document exactly as [`Self::load_group`] does (same
+    /// language, transformers, group transformers and diagnostics) and returns its
+    /// transformed root node with the configuration and the type system of the transform:
+    /// the input of the emitter of Rust source ([`crate::rust_emitter`]). Nothing is
+    /// built and nothing is cached.
+    pub(crate) fn transform_document(
+        xaml: &str,
+        name: &str,
+        configuration: &RuntimeXamlLoaderConfiguration,
+    ) -> XamlResult<(
+        Rc<dyn xamlx::ast::IXamlAstNode>,
+        Rc<xamlx::transform::TransformerConfiguration>,
+        Rc<RuntimeTypeSystem>,
+    )> {
+        let runtime_type_system = Self::type_system();
+        let sources =
+            [DocumentSource { xaml: xaml.to_string(), override_type: None, name: name.to_string(), base_uri: None }];
+        let group = Self::transform_group(&runtime_type_system, &sources, configuration)?;
+        let transformed = group.providers.first().and_then(|provider| provider.transformed_root());
+        match transformed {
+            Some((root, transformer_configuration)) => Ok((root, transformer_configuration, runtime_type_system)),
+            None => Err(XamlError::invalid_operation("The document was not transformed")),
+        }
+    }
+
     /// Parses and transforms the documents of a group and prepares their build and
     /// populate methods: everything of `LoadGroup` up to running them.
     fn transform_group(
