@@ -22,9 +22,11 @@ pub use xaml_il_runtime_helpers::{
 };
 
 pub use xaml_il_context::{
-    FrameworkContextServices, IStaticServiceProvider, IXamlIlContextServices, XamlIlContext, XamlIlContextDefinition,
+    FerroXamlIlContextNameScopeField, FrameworkContextServices, IStaticServiceProvider, IXamlIlContextServices, XamlIlContext, XamlIlContextDefinition,
     XamlIlContextService,
 };
 
+#[cfg(test)]
+mod compiled_tests;
 #[cfg(test)]
 mod xaml_il_runtime_helpers_tests;
