@@ -35,12 +35,16 @@
 //! is ever written, and such a document keeps loading through the run-time
 //! loader.
 //!
-//! The supported nodes: the root object and child objects of classes of the
-//! object model with a default constructor (with the top-down `BeginInit`
-//! of objects usable during initialisation, and the compiler locals that
-//! carry them), object initialisation (`BeginInit` / `EndInit`), assignments
-//! of registered properties (styled, attached and direct) through the
-//! accessors the type system projects for them, text, numeric, boolean,
+//! The supported nodes: objects of classes of the object model (default
+//! constructors, the top-down `BeginInit` of objects usable during
+//! initialisation, the compiler locals that carry them) and of markup types
+//! (declared constructors, with arguments), object initialisation
+//! (`BeginInit` / `EndInit`), assignments of registered properties (styled,
+//! attached and direct) through the accessors the type system projects for
+//! them, assignments through declared accessors (plain properties, static
+//! accessors of attached properties), collection adds (`AdderSetter`, with a
+//! declared or registered getter and a declared adder), method calls of
+//! declared methods and `Parse`, list constants, text, numeric, boolean,
 //! character and enumeration constants, `{x:Null}`, `{x:Static}` of an
 //! enumeration member, the vector-like and grid length constants, name
 //! registration and the scope of the root object.
@@ -50,11 +54,12 @@
 //! | What | Source |
 //! |---|---|
 //! | the path of a class | `TypeInfo::rust_path()`: the generated `rust_paths.rs` of the crate (`scripts/rust_paths.py`: the shortest public path, from the module tree of the crate) |
-//! | the path of an enumeration, value type or contract | `MarkupType::rust_path()`, from the same file |
+//! | the path of an enumeration, value type, contract or generic instantiation | `MarkupType::rust_path()`, from the same file |
 //! | an enumeration member | `MarkupEnumMember::rust_variant` (the declaration macro) |
-//! | a constructor with arguments | `MarkupConstructor::emit` (`stringify!` of the declared callable), used only in the form `<TypeName>::<function>` |
+//! | a declared member (constructor, property accessor, method, `Parse`) | its typed function, an associated function of the declared type the declaration macros generate (`MarkupEmit`: `__markup_new_0`, `__markup_get_Child`, `__markup_Add_0`, `__markup_parse`) |
 //! | the default constructor of a class | the convention `Type::new()` (porting guide, "Classes"), checked against `TypeInfo::default_constructor` |
-//! | the definition of a registered property | the accessor the declaration macro recorded for it (`ferroui_base::metadata::property_accessors`, feature `compiler-metadata` of the base crate, which the `emitter` feature of this crate enables) |
+//! | the definition of a registered property | a public accessor the declaration macro recorded for it, by the path of the type whose `impl` declares it (`ferroui_base::metadata::property_accessors`, `rust_path_of_type`; feature `compiler-metadata` of the base crate, which the `emitter` feature of this crate enables), the first in declaration order |
+//! | a conversion without a static form (an interface handle, a registered cast) | `rt::cast`, the loader's own cast, where `ValueTypes::is_assignable` proves it exists |
 //!
 //! The emitter never resolves a member by name itself: the member is the one
 //! the transformers put into the AST, and the Rust type of every value is
@@ -64,14 +69,13 @@
 //! # Not in this increment
 //!
 //! Call form C (the untyped invokers) is not emitted at all: a node that
-//! would need it makes the document not eligible. That covers plain
-//! (non-registered) properties, declared accessors of attached properties,
-//! collection adds, markup extensions, bindings, templates and deferred
-//! content, styles, resources, event handlers, `x:Type`, flags
-//! enumerations, constructor arguments and everything that needs the parent
-//! stack. The transform still runs against the run-time type system (the
-//! host of the emitter links the framework); the source scanner of section
-//! 9.5 replaces that later.
+//! would need it makes the document not eligible. That covers members of
+//! metadata without a typed function, markup extensions, bindings, templates
+//! and deferred content, styles, resources, event handlers, `x:Type`, flags
+//! enumerations, indexers and everything that needs the parent stack. The
+//! transform still runs against the run-time type system (the host of the
+//! emitter links the framework); the source scanner of section 9.5 replaces
+//! that later.
 
 mod compiled;
 mod emitter;
