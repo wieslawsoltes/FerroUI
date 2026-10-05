@@ -33,19 +33,23 @@ fn documents_under(directory: &Path, found: &mut Vec<PathBuf>) {
 fn measure_theme_documents() {
     let _base = xaml_test_base();
     let root = Path::new(env!("CARGO_MANIFEST_DIR")).join("../..");
-    let mut paths = Vec::new();
-    for theme in ["src/FerroUI.Themes.Simple", "src/FerroUI.Themes.Fluent"] {
-        documents_under(&root.join(theme), &mut paths);
+    // Each theme is an assembly: its documents are compiled as one group, by their URIs.
+    let mut compiled = Vec::new();
+    for (theme, assembly) in [("src/FerroUI.Themes.Simple", "FerroUI.Themes.Simple"), ("src/FerroUI.Themes.Fluent", "FerroUI.Themes.Fluent")] {
+        let theme_root = root.join(theme);
+        let mut paths = Vec::new();
+        documents_under(&theme_root, &mut paths);
+        let texts: Vec<(String, String)> = paths
+            .iter()
+            .map(|path| {
+                let name = path.strip_prefix(&theme_root).unwrap_or(path).display().to_string();
+                (name, std::fs::read_to_string(path).unwrap_or_default())
+            })
+            .collect();
+        let documents: Vec<(&str, &str)> = texts.iter().map(|(name, text)| (name.as_str(), text.as_str())).collect();
+        let root_uri = format!("ferres://{assembly}/");
+        compiled.extend(compile_documents(&documents, Some(&root_uri), &RuntimeXamlLoaderConfiguration::new()));
     }
-    let texts: Vec<(String, String)> = paths
-        .iter()
-        .map(|path| {
-            let name = path.strip_prefix(&root).unwrap_or(path).display().to_string();
-            (name, std::fs::read_to_string(path).unwrap_or_default())
-        })
-        .collect();
-    let documents: Vec<(&str, &str)> = texts.iter().map(|(name, text)| (name.as_str(), text.as_str())).collect();
-    let compiled = compile_documents(&documents, &RuntimeXamlLoaderConfiguration::new());
     let mut reasons: BTreeMap<String, usize> = BTreeMap::new();
     let mut eligible = 0;
     for document in &compiled {

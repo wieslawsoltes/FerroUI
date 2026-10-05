@@ -236,15 +236,49 @@ impl FerroXamlIlRuntimeCompiler {
         Rc<xamlx::transform::TransformerConfiguration>,
         Rc<RuntimeTypeSystem>,
     )> {
+        let (mut roots, transformer_configuration, runtime_type_system) =
+            Self::transform_documents(&[(name, xaml, None)], configuration)?;
+        let root = roots.pop().ok_or_else(|| XamlError::invalid_operation("The document was not transformed"))?;
+        Ok((root, transformer_configuration, runtime_type_system))
+    }
+
+    /// Parses and transforms the documents `(name, xaml, base URI)` as ONE group, exactly as
+    /// [`Self::load_group`] transforms a group (the group transformers see every document:
+    /// the includes between them are resolved as upstream's build resolves the documents
+    /// of an assembly), and returns the transformed root node of each document, in order,
+    /// with the configuration and the type system of the transform. Nothing is built and
+    /// nothing is cached.
+    #[cfg(any(feature = "emitter", test))]
+    pub(crate) fn transform_documents(
+        documents: &[(&str, &str, Option<String>)],
+        configuration: &RuntimeXamlLoaderConfiguration,
+    ) -> XamlResult<(
+        Vec<Rc<dyn xamlx::ast::IXamlAstNode>>,
+        Rc<xamlx::transform::TransformerConfiguration>,
+        Rc<RuntimeTypeSystem>,
+    )> {
         let runtime_type_system = Self::type_system();
-        let sources =
-            [DocumentSource { xaml: xaml.to_string(), override_type: None, name: name.to_string(), base_uri: None }];
+        let sources: Vec<DocumentSource> = documents
+            .iter()
+            .map(|(name, xaml, base_uri)| DocumentSource {
+                xaml: xaml.to_string(),
+                override_type: None,
+                name: name.to_string(),
+                base_uri: base_uri.clone(),
+            })
+            .collect();
         let group = Self::transform_group(&runtime_type_system, &sources, configuration)?;
-        let transformed = group.providers.first().and_then(|provider| provider.transformed_root());
-        match transformed {
-            Some((root, transformer_configuration)) => Ok((root, transformer_configuration, runtime_type_system)),
-            None => Err(XamlError::invalid_operation("The document was not transformed")),
+        let mut roots = Vec::with_capacity(group.providers.len());
+        let mut transformer_configuration = None;
+        for provider in &group.providers {
+            let (root, configuration) =
+                provider.transformed_root().ok_or_else(|| XamlError::invalid_operation("The document was not transformed"))?;
+            roots.push(root);
+            transformer_configuration = Some(configuration);
         }
+        let transformer_configuration =
+            transformer_configuration.ok_or_else(|| XamlError::invalid_operation("The group has no document"))?;
+        Ok((roots, transformer_configuration, runtime_type_system))
     }
 
     /// Parses and transforms the documents of a group and prepares their build and

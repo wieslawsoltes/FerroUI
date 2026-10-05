@@ -2182,6 +2182,72 @@ fn build_panel_children_x_null_tag_xaml_untyped(
     ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
 }
 
+/// Generated from `direct_selected_index.xaml`.
+pub fn build_direct_selected_index_xaml(
+    service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
+) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::ListBox>, ::ferroui_markup_xaml::XamlLoadException> {
+    // direct_selected_index.xaml(1,2) ListBox
+    let list_box_0 = ::ferroui_controls::ListBox::new();
+    let name_scope = rt::name_scope_of(service_provider.as_ref());
+    list_box_0.begin_init();
+    // direct_selected_index.xaml(1,2) SelectedIndex
+    list_box_0.set_direct_value(::ferroui_controls::primitives::SelectingItemsControl::selected_index_property(), -1_i32);
+    list_box_0.try_end_init().map_err(|error| rt::at(rt::TARGET_INVOCATION_EXCEPTION, error, 1, 2))?;
+    rt::complete_root_name_scope(::core::option::Option::Some(&list_box_0), name_scope.as_ref(), 1, 2)?;
+    ::core::result::Result::Ok(list_box_0)
+}
+
+fn build_direct_selected_index_xaml_untyped(
+    service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
+) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadException> {
+    let root = build_direct_selected_index_xaml(service_provider)?;
+    ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
+}
+
+/// Generated from `direct_selected_item_null.xaml`.
+pub fn build_direct_selected_item_null_xaml(
+    service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
+) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::ListBox>, ::ferroui_markup_xaml::XamlLoadException> {
+    // direct_selected_item_null.xaml(1,2) ListBox
+    let list_box_0 = ::ferroui_controls::ListBox::new();
+    let name_scope = rt::name_scope_of(service_provider.as_ref());
+    list_box_0.begin_init();
+    // direct_selected_item_null.xaml(1,100) SelectedItem
+    list_box_0.set_direct_value(::ferroui_controls::primitives::SelectingItemsControl::selected_item_property(), ::core::option::Option::None);
+    list_box_0.try_end_init().map_err(|error| rt::at(rt::TARGET_INVOCATION_EXCEPTION, error, 1, 2))?;
+    rt::complete_root_name_scope(::core::option::Option::Some(&list_box_0), name_scope.as_ref(), 1, 2)?;
+    ::core::result::Result::Ok(list_box_0)
+}
+
+fn build_direct_selected_item_null_xaml_untyped(
+    service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
+) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadException> {
+    let root = build_direct_selected_item_null_xaml(service_provider)?;
+    ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
+}
+
+/// Generated from `direct_selected_item_text.xaml`.
+pub fn build_direct_selected_item_text_xaml(
+    service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
+) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::ComboBox>, ::ferroui_markup_xaml::XamlLoadException> {
+    // direct_selected_item_text.xaml(1,2) ComboBox
+    let combo_box_0 = ::ferroui_controls::ComboBox::new();
+    let name_scope = rt::name_scope_of(service_provider.as_ref());
+    combo_box_0.begin_init();
+    // direct_selected_item_text.xaml(1,101) SelectedItem
+    combo_box_0.set_direct_value(::ferroui_controls::primitives::SelectingItemsControl::selected_item_property(), rt::to_object(::std::string::String::from("text")));
+    combo_box_0.try_end_init().map_err(|error| rt::at(rt::TARGET_INVOCATION_EXCEPTION, error, 1, 2))?;
+    rt::complete_root_name_scope(::core::option::Option::Some(&combo_box_0), name_scope.as_ref(), 1, 2)?;
+    ::core::result::Result::Ok(combo_box_0)
+}
+
+fn build_direct_selected_item_text_xaml_untyped(
+    service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
+) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadException> {
+    let root = build_direct_selected_item_text_xaml(service_provider)?;
+    ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
+}
+
 /// The build function of every eligible document, by document name.
 pub const DOCUMENTS: &[(&str, BuildDocument)] = &[
     ("border_empty.xaml", build_border_empty_xaml_untyped as BuildDocument),
@@ -2258,20 +2324,20 @@ pub const DOCUMENTS: &[(&str, BuildDocument)] = &[
     ("font_weight_number.xaml", build_font_weight_number_xaml_untyped as BuildDocument),
     ("user_control_named_children.xaml", build_user_control_named_children_xaml_untyped as BuildDocument),
     ("panel_children_x_null_tag.xaml", build_panel_children_x_null_tag_xaml_untyped as BuildDocument),
+    ("direct_selected_index.xaml", build_direct_selected_index_xaml_untyped as BuildDocument),
+    ("direct_selected_item_null.xaml", build_direct_selected_item_null_xaml_untyped as BuildDocument),
+    ("direct_selected_item_text.xaml", build_direct_selected_item_text_xaml_untyped as BuildDocument),
 ];
 
 /// The loader of the compiled markup of the assembly: builds the document with the URI
-/// `uri` (compared without regard to case); `Ok(None)` if this file has no such document,
+/// `uri` (compared as upstream's `OrdinalIgnoreCase`, `rt::uri_equals`); `Ok(None)` if this
+/// file has no such document,
 /// the load error of the build if it fails.
 pub fn try_load(
     service_provider: ::core::option::Option<&::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
     uri: &str,
 ) -> ::core::result::Result<::core::option::Option<::ferroui_base::BoxedValue>, ::ferroui_markup_xaml::XamlLoadException> {
-    let name = match uri.get(..ROOT_URI.len()) {
-        ::core::option::Option::Some(root) if root.eq_ignore_ascii_case(ROOT_URI) => &uri[ROOT_URI.len()..],
-        _ => return ::core::result::Result::Ok(::core::option::Option::None),
-    };
-    let ::core::option::Option::Some((_, build)) = ::core::iter::Iterator::find(&mut DOCUMENTS.iter(), |(document, _)| document.eq_ignore_ascii_case(name)) else {
+    let ::core::option::Option::Some((_, build)) = ::core::iter::Iterator::find(&mut DOCUMENTS.iter(), |(document, _)| rt::uri_equals(uri, ROOT_URI, document)) else {
         return ::core::result::Result::Ok(::core::option::Option::None);
     };
     let provider = ::ferroui_markup_xaml::xaml_il::runtime::XamlIlRuntimeHelpers::create_root_service_provider_v3(
