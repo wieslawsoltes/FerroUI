@@ -11,7 +11,8 @@ use ferroui_base::reactive::{Disposable, IDisposable};
 use ferroui_base::threading::{Dispatcher, DispatcherPriority};
 use ferroui_base::{FerroLocator, LocatorExtensions, Ref};
 use ferroui_controls::platform::{INativeMenuExporter, ITopLevelNativeMenuExporter};
-use ferroui_controls::{Application, NativeDock, NativeMenu, NativeMenuItem, NativeMenuItemSeparator};
+use ferroui_controls::{Application, NativeDock, NativeMenu, NativeMenuItem, NativeMenuItemSeparator, WindowBase};
+use ferroui_dialogs::AboutFerroDialog;
 use ferroui_microcom::ComPtr;
 use std::cell::{Cell, RefCell};
 use std::rc::{Rc, Weak};
@@ -132,9 +133,25 @@ impl FerroNativeMenuExporter {
     fn create_default_app_menu() -> Ref<NativeMenu> {
         let result = NativeMenu::new();
 
-        // The about dialog is not ported yet: the item has no click handler
-        // until it is, so the system shows it disabled.
         let about_item = NativeMenuItem::with_header("About FerroUI");
+
+        // The subscription lives as long as the item.
+        let _ = about_item.click(|_| {
+            Dispatcher::ui_thread().invoke_async_task_local(|| async {
+                let dialog = AboutFerroDialog::new();
+
+                let main_window = Application::current()
+                    .and_then(|app| app.application_lifetime())
+                    .and_then(|lifetime| lifetime.as_classic_desktop_style_application_lifetime().and_then(|d| d.main_window()))
+                    .filter(|main_window| main_window.is_visible());
+                match main_window {
+                    Some(main_window) => {
+                        let _ = dialog.show_dialog(&main_window).await;
+                    }
+                    None => WindowBase::show(&dialog),
+                }
+            });
+        });
 
         result.add(about_item);
 
