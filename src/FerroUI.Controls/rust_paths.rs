@@ -367,4 +367,23 @@ ferroui_base::ferro_rust_paths! {
         crate::templates::ITreeDataTemplate,
         crate::templates::ITypedDataTemplate,
     ],
+    generics: [
+        (crate::AddChildOf<::ferroui_base::Ref<crate::Control>>, "ferroui_controls::AddChildOf<::ferroui_base::Ref<::ferroui_controls::Control>>"),
+        (crate::AddChildOf<::ferroui_base::Ref<crate::documents::Inline>>, "ferroui_controls::AddChildOf<::ferroui_base::Ref<::ferroui_controls::documents::Inline>>"),
+        (crate::FerroListOf<::ferroui_base::Ref<crate::ColumnDefinition>>, "ferroui_controls::FerroListOf<::ferroui_base::Ref<::ferroui_controls::ColumnDefinition>>"),
+        (crate::FerroListOf<::ferroui_base::Ref<crate::Control>>, "ferroui_controls::FerroListOf<::ferroui_base::Ref<::ferroui_controls::Control>>"),
+        (crate::FerroListOf<::ferroui_base::Ref<crate::NativeMenuItemBase>>, "ferroui_controls::FerroListOf<::ferroui_base::Ref<::ferroui_controls::NativeMenuItemBase>>"),
+        (crate::FerroListOf<::ferroui_base::Ref<crate::Page>>, "ferroui_controls::FerroListOf<::ferroui_base::Ref<::ferroui_controls::Page>>"),
+        (crate::FerroListOf<::ferroui_base::Ref<crate::RowDefinition>>, "ferroui_controls::FerroListOf<::ferroui_base::Ref<::ferroui_controls::RowDefinition>>"),
+        (crate::FerroListOf<::ferroui_base::Ref<crate::TableViewColumn>>, "ferroui_controls::FerroListOf<::ferroui_base::Ref<::ferroui_controls::TableViewColumn>>"),
+        (crate::FerroListOf<::ferroui_base::Ref<crate::TrayIcon>>, "ferroui_controls::FerroListOf<::ferroui_base::Ref<::ferroui_controls::TrayIcon>>"),
+        (crate::FerroListOf<::ferroui_base::Ref<crate::documents::Inline>>, "ferroui_controls::FerroListOf<::ferroui_base::Ref<::ferroui_controls::documents::Inline>>"),
+        (crate::FerroListOf<::std::rc::Rc<dyn crate::ICommandBarElement>>, "ferroui_controls::FerroListOf<::std::rc::Rc<dyn ::ferroui_controls::ICommandBarElement>>"),
+        (crate::FerroListOf<::std::rc::Rc<dyn crate::templates::IDataTemplate>>, "ferroui_controls::FerroListOf<::std::rc::Rc<dyn ::ferroui_controls::templates::IDataTemplate>>"),
+    ],
+    generic_contracts: [
+        (crate::ITemplateOf<::ferroui_base::Ref<crate::Control>>, "ferroui_controls::ITemplateOf<::ferroui_base::Ref<::ferroui_controls::Control>>"),
+        (crate::ITemplateOf<::std::option::Option<::ferroui_base::Ref<crate::Control>>>, "ferroui_controls::ITemplateOf<::std::option::Option<::ferroui_base::Ref<::ferroui_controls::Control>>>"),
+        (crate::ITemplateOf<::std::option::Option<::ferroui_base::Ref<crate::Panel>>>, "ferroui_controls::ITemplateOf<::std::option::Option<::ferroui_base::Ref<::ferroui_controls::Panel>>>"),
+    ],
 }

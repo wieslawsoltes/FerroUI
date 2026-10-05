@@ -27,7 +27,8 @@ use std::rc::Rc;
 // contract belongs to the base crate, so each is declared on a marker.
 
 /// Carries the metadata of `IAddChild<T>` for a child type of this crate.
-pub(crate) struct AddChildOf<T>(std::marker::PhantomData<T>);
+#[doc(hidden)]
+pub struct AddChildOf<T>(std::marker::PhantomData<T>);
 
 ferro_markup_type!(interface AddChildOf<Ref<Control>> as "IAddChild`1" {
     namespace: "FerroUI.Metadata",

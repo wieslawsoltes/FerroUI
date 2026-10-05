@@ -23,6 +23,11 @@ pub(crate) mod lists;
 mod plain;
 mod values;
 
+// The carriers of the metadata of instantiations of types of the base crate: public
+// (hidden) so that generated Rust source can call the typed functions of their members.
+pub use contracts::AddChildOf;
+pub use plain::FerroListOf;
+
 #[cfg(test)]
 mod markup_types_tests;
 

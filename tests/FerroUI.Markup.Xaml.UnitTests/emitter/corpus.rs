@@ -158,6 +158,7 @@ pub const EXPECTED_ELIGIBLE: &[&str] = &[
     "multiline_duplicate_name.xaml",
     "end_init_failure.xaml",
     "grid_definitions_elements.xaml",
+    "grid_definitions_text.xaml",
     "canvas_children.xaml",
     "dock_panel_children.xaml",
     "nested_panels.xaml",
@@ -176,5 +177,4 @@ pub const EXPECTED_NOT_ELIGIBLE: &[&str] = &[
     "style_with_selector.xaml",
     "control_template.xaml",
     "resources.xaml",
-    "grid_definitions_text.xaml",
 ];

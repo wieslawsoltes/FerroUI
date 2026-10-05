@@ -1769,12 +1769,17 @@ macro_rules! __ferro_markup_attribute_properties {
 /// }
 /// ```
 ///
-/// Every entry is a crate-relative public path. It defines
+/// Every entry is a crate-relative public path; an instantiation of a
+/// generic type (`generics`, `generic_contracts` for a trait) is the type
+/// with every path absolute, and the path text the generator rendered for
+/// it (checked from outside the crate by the XAML test crate). It defines
 /// `CLASS_RUST_PATHS: &[(&TypeInfo, &str)]` (the runtime type of each
 /// class) and `MARKUP_RUST_PATHS: &[(&MarkupType, &str, bool)]` (the
 /// metadata of each type, of `dyn Trait` for a contract, and whether the
 /// path names a trait), each with the path as another crate names it
-/// (`crate` replaced by the name of the crate). The item and
+/// (`crate` replaced by the name of the crate), and `TYPE_RUST_PATHS: &[(fn() -> TypeId, &str)]`
+/// (the non-generic types by the `TypeId` of the type itself, for
+/// [`register_type_rust_paths`](super::register_type_rust_paths)). The item and
 /// the text come from the same tokens, so the text names exactly the
 /// registered type. The crate passes both tables to
 /// [`TypeInfo::register_rust_paths`](crate::TypeInfo::register_rust_paths)
@@ -1784,13 +1789,31 @@ macro_rules! ferro_rust_paths {
     (
         classes: [$(crate $(:: $class:ident)+),* $(,)?],
         types: [$(crate $(:: $type_:ident)+),* $(,)?],
-        contracts: [$(crate $(:: $contract:ident)+),* $(,)?] $(,)?
+        contracts: [$(crate $(:: $contract:ident)+),* $(,)?],
+        generics: [$(($generic:ty, $generic_path:literal)),* $(,)?],
+        generic_contracts: [$(($generic_contract:path, $generic_contract_path:literal)),* $(,)?] $(,)?
     ) => {
         /// The public Rust paths of the classes of the type table.
         pub(crate) const CLASS_RUST_PATHS: &[(&'static $crate::TypeInfo, &'static str)] = &[$((
             <crate $(:: $class)+ as $crate::StaticType>::TYPE,
             ::std::concat!(::std::env!("CARGO_CRATE_NAME") $(, "::", ::std::stringify!($class))+),
         )),*];
+
+        /// The public Rust paths of the types, by the `TypeId` of the type itself.
+        pub(crate) const TYPE_RUST_PATHS: &[(fn() -> ::std::any::TypeId, &'static str)] = &[
+            $((
+                || ::std::any::TypeId::of::<crate $(:: $class)+>(),
+                ::std::concat!(::std::env!("CARGO_CRATE_NAME") $(, "::", ::std::stringify!($class))+),
+            ),)*
+            $((
+                || ::std::any::TypeId::of::<crate $(:: $type_)+>(),
+                ::std::concat!(::std::env!("CARGO_CRATE_NAME") $(, "::", ::std::stringify!($type_))+),
+            ),)*
+            $((
+                || ::std::any::TypeId::of::<dyn crate $(:: $contract)+>(),
+                ::std::concat!(::std::env!("CARGO_CRATE_NAME") $(, "::", ::std::stringify!($contract))+),
+            ),)*
+        ];
 
         /// The public Rust paths of the markup types of the type lists.
         pub(crate) const MARKUP_RUST_PATHS: &[(&'static $crate::metadata::MarkupType, &'static str, bool)] = &[
@@ -1804,6 +1827,8 @@ macro_rules! ferro_rust_paths {
                 ::std::concat!(::std::env!("CARGO_CRATE_NAME") $(, "::", ::std::stringify!($contract))+),
                 true,
             ),)*
+            $((<$generic as $crate::metadata::MarkupTyped>::MARKUP, $generic_path, false),)*
+            $((<dyn $generic_contract as $crate::metadata::MarkupTyped>::MARKUP, $generic_contract_path, true),)*
         ];
     };
 }

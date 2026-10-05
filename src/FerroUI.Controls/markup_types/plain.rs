@@ -133,7 +133,8 @@ ferro_markup_type!(class DataTemplates {
 
 /// Carries the metadata of the notifying list of items of this crate (the
 /// list type belongs to the base crate).
-pub(crate) struct FerroListOf<T>(std::marker::PhantomData<T>);
+#[doc(hidden)]
+pub struct FerroListOf<T>(std::marker::PhantomData<T>);
 
 // The lists the named collections of this crate derive from.
 
