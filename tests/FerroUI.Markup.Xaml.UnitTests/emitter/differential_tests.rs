@@ -169,6 +169,37 @@ fn regenerate_emitter_output() {
     std::fs::write(GENERATED_PATH, file.source).expect("emitter/generated.rs can be written");
 }
 
+/// Not from upstream. The emitter's output depends only on the documents and
+/// the declarations, never on what ran earlier on the thread: the corpus
+/// compiled on a fresh thread is the corpus compiled on a thread that first
+/// initialised every registered type (in reverse order of registration),
+/// loaded every document through the run-time loader and compiled the
+/// corpus once already.
+#[test]
+fn output_does_not_depend_on_what_ran_before() {
+    let fresh = std::thread::spawn(|| {
+        let _base = xaml_test_base();
+        generate().source
+    })
+    .join()
+    .expect("the fresh thread compiles the corpus");
+    let after = std::thread::spawn(|| {
+        let _base = xaml_test_base();
+        for type_ in ferroui_base::TypeInfo::registered_types().into_iter().rev() {
+            type_.ensure_class_init();
+        }
+        for (_, xaml) in DOCUMENTS {
+            let _ = try_load(xaml);
+        }
+        let _ = generate();
+        generate().source
+    })
+    .join()
+    .expect("the second thread compiles the corpus");
+    assert!(fresh == after, "the output differs: {}", first_difference(&fresh, &after));
+    assert_eq!(fresh, include_str!("generated.rs"));
+}
+
 #[test]
 fn eligibility_of_the_corpus_is_as_expected() {
     let _base = xaml_test_base();
