@@ -14,6 +14,7 @@ the comparison) as Markdown, for example to `$GITHUB_STEP_SUMMARY`.
     python3 scripts/perf-report.py --save target/perf-baseline.json
     python3 scripts/perf-report.py --check target/perf-baseline.json
     python3 scripts/perf-report.py --size-only
+    python3 scripts/perf-report.py --source ../baseline --save baseline.json
 
 Only the Python standard library, `cargo` and `strip` are used. The startup
 figures depend on the load of the machine and are only comparable between
@@ -35,6 +36,7 @@ import tempfile
 import threading
 import time
 
+# The checkout that is built; `--source` selects another one.
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 # name, cargo arguments, path under the profile directory, arguments, line that marks the first window
@@ -249,6 +251,7 @@ def main():
     parser.add_argument("--runs", type=int, default=7, help="warm launches per application (default 7)")
     parser.add_argument("--exit-ms", type=int, default=1500, help="how long each launch stays open (default 1500)")
     parser.add_argument("--no-build", action="store_true", help="measure the executables that are already built")
+    parser.add_argument("--source", metavar="DIR", help="build and measure this checkout (default: the one of the script)")
     parser.add_argument("--size-only", action="store_true", help="measure the sizes only; launch nothing")
     parser.add_argument("--save", metavar="FILE", help="store the numbers as a baseline")
     parser.add_argument("--check", metavar="FILE", help="compare with a stored baseline")
@@ -259,6 +262,9 @@ def main():
     options = parser.parse_args()
     if options.runs < 1:
         parser.error("--runs must be at least 1")
+    if options.source:
+        global ROOT
+        ROOT = os.path.abspath(options.source)
 
     results = measure(options.runs, options.exit_ms, not options.no_build, options.size_only)
     print_table(results)

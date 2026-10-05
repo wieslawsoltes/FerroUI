@@ -1,0 +1,115 @@
+name: Performance
+
+# Stripped size and warm start-up time of hello_window, themed_window and
+# control-catalog-desktop on macOS (scripts/perf-report.py). Run by hand; the
+# table goes to the job summary. With a baseline, both refs are built and
+# measured in the same job, one after the other, and the summary compares them.
+
+on:
+  workflow_dispatch:
+    inputs:
+      ref:
+        description: Branch, tag or commit to measure
+        required: true
+        default: main
+      baseline:
+        description: Branch, tag or commit to compare with (empty for none)
+        required: false
+        default: ""
+      runs:
+        description: Warm launches per application (at least 7)
+        required: false
+        default: "9"
+      rustflags:
+        description: RUSTFLAGS for the build of the ref, not of the baseline (experiments; empty for none)
+        required: false
+        default: ""
+
+permissions:
+  contents: read
+
+env:
+  CARGO_TERM_COLOR: always
+  CARGO_INCREMENTAL: 0
+
+jobs:
+  report:
+    name: Size and start-up (macOS)
+    runs-on: macos-15
+    timeout-minutes: 240
+    steps:
+      - name: Check out the ref
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.ref }}
+          path: measured
+      - name: Check out the baseline
+        if: inputs.baseline != ''
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.baseline }}
+          path: baseline
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Validate the inputs
+        env:
+          RUNS: ${{ inputs.runs }}
+        run: |
+          case "$RUNS" in
+            ''|*[!0-9]*) echo "::error::runs must be a number"; exit 1 ;;
+          esac
+          if [ "$RUNS" -lt 7 ]; then echo "::error::runs must be at least 7"; exit 1; fi
+      - name: Describe the job
+        env:
+          REF: ${{ inputs.ref }}
+          BASELINE: ${{ inputs.baseline }}
+          EXTRA_RUSTFLAGS: ${{ inputs.rustflags }}
+        run: |
+          {
+            echo "## Size and start-up"
+            echo
+            echo "Measured: \`$REF\` at \`$(git -C measured rev-parse HEAD)\`"
+            if [ -n "$BASELINE" ]; then
+              echo "Baseline: \`$BASELINE\` at \`$(git -C baseline rev-parse HEAD)\`"
+            fi
+            if [ -n "$EXTRA_RUSTFLAGS" ]; then
+              echo "RUSTFLAGS of the measured build: \`$EXTRA_RUSTFLAGS\`"
+            fi
+            echo
+            echo "Sizes are of the stripped executables. Start-up is the time from process start to the"
+            echo "window-opened line (\`Window opened\`, in the catalog \`App activated\`), median of warm"
+            echo "launches; the first launch of each new executable is listed separately."
+            echo
+          } >> "$GITHUB_STEP_SUMMARY"
+      # Both checkouts build into one target directory, so the second build
+      # reuses the dependencies the first one compiled. RUSTFLAGS is only set
+      # when given (set at all, even empty, it replaces the flags of
+      # .cargo/config.toml), and only for the ref, so that a baseline of the
+      # same ref measures the effect of the flags.
+      - name: Measure the baseline
+        if: inputs.baseline != ''
+        env:
+          CARGO_TARGET_DIR: ${{ github.workspace }}/target
+          RUNS: ${{ inputs.runs }}
+        run: |
+          python3 measured/scripts/perf-report.py --source baseline --runs "$RUNS" \
+            --save baseline.json --markdown "$GITHUB_STEP_SUMMARY" --title "Baseline"
+      - name: Measure the ref
+        env:
+          CARGO_TARGET_DIR: ${{ github.workspace }}/target
+          EXTRA_RUSTFLAGS: ${{ inputs.rustflags }}
+          RUNS: ${{ inputs.runs }}
+          HAS_BASELINE: ${{ inputs.baseline != '' }}
+        run: |
+          if [ -n "$EXTRA_RUSTFLAGS" ]; then export RUSTFLAGS="$EXTRA_RUSTFLAGS"; fi
+          set -- --source measured --runs "$RUNS" --save measured.json --markdown "$GITHUB_STEP_SUMMARY" --title "Measured"
+          if [ "$HAS_BASELINE" = "true" ]; then
+            set -- "$@" --check baseline.json
+          fi
+          python3 measured/scripts/perf-report.py "$@"
+      - name: Keep the numbers
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: perf-report
+          path: "*.json"
+          if-no-files-found: ignore
