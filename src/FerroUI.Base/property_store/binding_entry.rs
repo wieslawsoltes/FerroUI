@@ -110,10 +110,7 @@ impl<T: PropertyValue> BindingEntry<T> {
     }
 
     fn invalid_value(&self) -> BindingValue<T> {
-        BindingValue::binding_error(BindingError::message(format!(
-            "The value is not valid for property '{}'.",
-            self.property.name()
-        )))
+        BindingValue::binding_error(invalid_value_error(self.property))
     }
 
     fn cached_default_value(&self) -> T {
@@ -215,6 +212,13 @@ impl<T: PropertyValue> IDisposable for BindingEntry<T> {
         self.unsubscribe();
         self.binding_completed();
     }
+}
+
+/// The error of a value that fails the validation of the property (compiled
+/// once, not per value type).
+#[cold]
+fn invalid_value_error(property: &FerroProperty) -> BindingError {
+    BindingError::message(format!("The value is not valid for property '{}'.", property.name()))
 }
 
 struct TypedObserver<T: PropertyValue>(Rc<BindingEntry<T>>);
