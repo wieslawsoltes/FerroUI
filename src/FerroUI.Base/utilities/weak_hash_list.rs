@@ -10,7 +10,7 @@ use std::rc::{Rc, Weak};
 /// an array; beyond that the list switches to a dictionary that counts how
 /// many times each item was added.
 pub struct WeakHashList<T: ?Sized + 'static> {
-    dic: Option<HashMap<Key<T>, i32>>,
+    dic: Option<OrderedDic<T>>,
     arr: Option<Vec<Option<Weak<T>>>>,
     arr_count: usize,
     need_compact: Cell<bool>,
@@ -31,6 +31,69 @@ impl<T: ?Sized> Key<T> {
 
     fn make_weak(r: &Rc<T>) -> Self {
         Self { hash_code: address(Rc::as_ptr(r)), weak: Some(Rc::downgrade(r)), strong: None }
+    }
+}
+
+impl<T: ?Sized> Clone for Key<T> {
+    fn clone(&self) -> Self {
+        Self { weak: self.weak.clone(), strong: self.strong.clone(), hash_code: self.hash_code }
+    }
+}
+
+/// The dictionary storage: a hash index over entry slots, so that
+/// enumeration follows insertion order, and a removed slot is reused by the
+/// next addition (most recently freed first), as the managed dictionary does.
+struct OrderedDic<T: ?Sized> {
+    entries: Vec<Option<(Key<T>, i32)>>,
+    free: Vec<usize>,
+    map: HashMap<Key<T>, usize>,
+}
+
+impl<T: ?Sized> OrderedDic<T> {
+    fn new() -> Self {
+        Self { entries: Vec::new(), free: Vec::new(), map: HashMap::new() }
+    }
+
+    fn is_empty(&self) -> bool {
+        self.map.is_empty()
+    }
+
+    fn get(&self, key: &Key<T>) -> Option<i32> {
+        self.map.get(key).and_then(|&slot| self.entries[slot].as_ref()).map(|(_, count)| *count)
+    }
+
+    /// Sets the count of `key`, adding the entry if it is not present. An
+    /// existing entry keeps its key.
+    fn set(&mut self, key: Key<T>, count: i32) {
+        if let Some(&slot) = self.map.get(&key) {
+            if let Some(entry) = &mut self.entries[slot] {
+                entry.1 = count;
+            }
+            return;
+        }
+        let slot = match self.free.pop() {
+            Some(slot) => {
+                self.entries[slot] = Some((key.clone(), count));
+                slot
+            }
+            None => {
+                self.entries.push(Some((key.clone(), count)));
+                self.entries.len() - 1
+            }
+        };
+        self.map.insert(key, slot);
+    }
+
+    fn remove(&mut self, key: &Key<T>) {
+        if let Some(slot) = self.map.remove(key) {
+            self.entries[slot] = None;
+            self.free.push(slot);
+        }
+    }
+
+    /// The keys, in enumeration order.
+    fn keys(&self) -> impl Iterator<Item = &Key<T>> {
+        self.entries.iter().flatten().map(|(key, _)| key)
     }
 }
 
@@ -102,10 +165,10 @@ impl<T: ?Sized + 'static> WeakHashList<T> {
     pub fn add(&mut self, item: &Rc<T>) {
         if let Some(dic) = &mut self.dic {
             let strong_key = Key::make_strong(item);
-            if let Some(cnt) = dic.get(&strong_key).copied() {
-                dic.insert(strong_key, cnt + 1);
+            if let Some(cnt) = dic.get(&strong_key) {
+                dic.set(strong_key, cnt + 1);
             } else {
-                dic.insert(Key::make_weak(item), 1);
+                dic.set(Key::make_weak(item), 1);
             }
             return;
         }
@@ -127,7 +190,7 @@ impl<T: ?Sized + 'static> WeakHashList<T> {
         }
 
         let existing: Vec<Rc<T>> = arr.iter().filter_map(|r| r.as_ref().and_then(Weak::upgrade)).collect();
-        self.dic = Some(HashMap::new());
+        self.dic = Some(OrderedDic::new());
         for target in &existing {
             self.add(target);
         }
@@ -150,9 +213,9 @@ impl<T: ?Sized + 'static> WeakHashList<T> {
         } else if let Some(dic) = &mut self.dic {
             let strong_key = Key::make_strong(item);
 
-            if let Some(cnt) = dic.get(&strong_key).copied() {
+            if let Some(cnt) = dic.get(&strong_key) {
                 if cnt > 1 {
-                    dic.insert(strong_key, cnt - 1);
+                    dic.set(strong_key, cnt - 1);
                     return;
                 }
             }
@@ -328,5 +391,27 @@ mod tests {
         // And new value should fill empty space.
         let forty_two: Rc<str> = Rc::from("42");
         target.add(&forty_two);
+    }
+
+    /// Not from upstream: the dictionary storage enumerates in insertion
+    /// order and reuses the most recently freed slot, as the managed
+    /// dictionary does.
+    #[test]
+    fn dictionary_storage_keeps_insertion_order() {
+        let mut target = WeakHashList::<str>::new();
+        let items = strings(WeakHashList::<str>::DEFAULT_ARRAY_SIZE + 4);
+        for item in &items {
+            target.add(item);
+        }
+
+        target.remove(&items[2]);
+        let added: Rc<str> = Rc::from("added");
+        target.add(&added);
+
+        let mut expected = items.clone();
+        expected[2] = added.clone();
+        let alive = target.get_alive(None).unwrap();
+        assert_eq!(alive.len(), expected.len());
+        assert!(alive.iter().zip(&expected).all(|(a, e)| Rc::ptr_eq(a, e)));
     }
 }
