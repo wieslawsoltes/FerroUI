@@ -1,0 +1,54 @@
+html, body {
+    height: 100%;
+}
+
+#out {
+    position: relative;
+    width: 100%;
+    height: 100%;
+}
+
+/* HTML styles for the splash screen */
+.ferroui-splash {
+    position: absolute;
+    height: 100%;
+    width: 100%;
+    background: white;
+    font-family: sans-serif;
+    justify-content: center;
+    align-items: center;
+    display: flex;
+    pointer-events: none;
+}
+
+.ferroui-splash h2 {
+    font-weight: 400;
+    font-size: 1.5rem;
+}
+
+.ferroui-splash.splash-close {
+    transition: opacity 200ms, display 200ms;
+    display: none;
+    opacity: 0;
+}
+
+/* Light theme styles */
+@media (prefers-color-scheme: light) {
+    .ferroui-splash {
+        background: white;
+    }
+
+    .ferroui-splash h2 {
+        color: #1b2a4e;
+    }
+}
+
+@media (prefers-color-scheme: dark) {
+    .ferroui-splash {
+        background: #1b2a4e;
+    }
+
+    .ferroui-splash h2 {
+        color: white;
+    }
+}

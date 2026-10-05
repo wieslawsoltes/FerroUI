@@ -1,0 +1,199 @@
+// Behaviour tests of the browser storage provider on the storage_view example, in headless Chrome.
+//
+//   scripts/build-browser.sh storage_view
+//   node scripts/browser/tests/storage_view.test.mjs [<site directory>]     default: target/browser/storage_view
+//
+// Scenarios run in the page through the `storageViewRun` export of the example, which uses the storage
+// provider of the top-level as an application would; their outcome is read with `storageViewResult`.
+// The pickers of the page are replaced by functions that hand out handles of the origin private file
+// system (installed before the storage bundle is first imported, which is when the polyfill looks for
+// the native pickers), except in the polyfill checks: there the polyfill shows its own file input, which
+// the test answers through the DevTools protocol, and saves through a download.
+import fs from "node:fs";
+import os from "node:os";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
+import { open, run, assert, sleep } from "../harness.mjs";
+
+const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..", "..", "..");
+const site = process.argv[2] ?? path.join(process.env.CARGO_TARGET_DIR ?? path.join(root, "target"), "browser", "storage_view");
+
+// Installs the pickers of the tests and a fresh origin private file system:
+// input.txt ("first file"), second.txt ("second file"), saved.txt (empty) and the folder work/.
+const STUBS = `(async () => {
+    const root = await navigator.storage.getDirectory();
+    for await (const [name] of root.entries()) { await root.removeEntry(name, { recursive: true }); }
+    const write = async (dir, name, text) => {
+        const handle = await dir.getFileHandle(name, { create: true });
+        const writable = await handle.createWritable(); await writable.write(text); await writable.close();
+        return handle;
+    };
+    const input = await write(root, "input.txt", "first file");
+    const second = await write(root, "second.txt", "second file");
+    const saved = await root.getFileHandle("saved.txt", { create: true });
+    const work = await root.getDirectoryHandle("work", { create: true });
+    globalThis.pickerCalls = [];
+    globalThis.pickerResult = { open: [input], save: saved, folder: work, cancel: false };
+    const record = (kind, options) => {
+        const { startIn, ...rest } = options ?? {};
+        pickerCalls.push({ kind, startIn: typeof startIn === "string" ? startIn : typeof startIn, ...rest });
+        if (pickerResult.cancel) { throw new DOMException("The user aborted a request.", "AbortError"); }
+    };
+    globalThis.showOpenFilePicker = async (options) => { record("open", options); return pickerResult.open; };
+    globalThis.showSaveFilePicker = async (options) => { record("save", options); return pickerResult.save; };
+    globalThis.showDirectoryPicker = async (options) => { record("folder", options); return pickerResult.folder; };
+    globalThis.opfsText = async (...names) => {
+        let dir = await navigator.storage.getDirectory();
+        for (const name of names.slice(0, -1)) { dir = await dir.getDirectoryHandle(name); }
+        return await (await (await dir.getFileHandle(names[names.length - 1])).getFile()).text();
+    };
+    globalThis.opfsHandle = async (name) => (await navigator.storage.getDirectory()).getFileHandle(name);
+    return true;
+})()`;
+
+async function start({ query = "", stubs = true } = {}) {
+    const page = await open(site, { query, width: 320, height: 200 });
+    await page.waitForView(200);
+    if (stubs) { await page.evaluate(STUBS); }
+    // Runs a scenario and resolves to its outcome as an object of name/value pairs.
+    page.scenario = async (name, argument = "", { timeout = 30000, userGesture = false } = {}) => {
+        const call = `storageView.storageViewRun(${JSON.stringify(name)}, ${JSON.stringify(argument)})`;
+        await page.send("Runtime.evaluate", { expression: call, userGesture });
+        await page.waitFor(`storageView.storageViewResult(${JSON.stringify(name)}) !== ""`, timeout);
+        const line = await page.evaluate(`storageView.storageViewResult(${JSON.stringify(name)})`);
+        const result = Object.fromEntries(line.split(";").map((pair) => {
+            const i = pair.indexOf("="); return [pair.slice(0, i), pair.slice(i + 1)];
+        }));
+        assert(result.error === undefined, `scenario ${name} failed: ${line}`);
+        return result;
+    };
+    page.calls = async () => JSON.parse(await page.evaluate("JSON.stringify(pickerCalls)"));
+    return page;
+}
+
+const checks = [];
+const check = (name, body, options) => checks.push([name, async () => {
+    const page = await start(options);
+    try { await body(page); } catch (error) { error.message += "\n" + page.log.slice(-8).join("\n"); throw error; } finally { await page.close(); }
+}]);
+const expect = (actual, expected, what) => assert(actual === expected, `${what}: expected ${JSON.stringify(expected)}, got ${JSON.stringify(actual)}`);
+
+check("the provider can open, save and pick folders", async (page) => {
+    const result = await page.scenario("capabilities");
+    expect(result.can_open, "true", "can_open"); expect(result.can_save, "true", "can_save"); expect(result.can_pick_folder, "true", "can_pick_folder");
+});
+
+check("the open picker returns the picked file, whose stream reads its content", async (page) => {
+    const result = await page.scenario("open_read");
+    expect(result.count, "1", "files"); expect(result.names, "input.txt", "names"); expect(result.paths, "input.txt", "relative path");
+    expect(result.content, "first file", "content"); expect(result.sizes, "Some(10)/true", "size and modification date");
+    const [call] = await page.calls();
+    expect(call.kind, "open", "picker"); expect(call.multiple, false, "multiple");
+    expect(call.excludeAcceptAllOption, true, "a filter without the any-file type excludes the accept-all option");
+    expect(JSON.stringify(call.types), JSON.stringify([
+        { description: "Plain Text", accept: { "text/plain": [".txt"] } },
+        { description: "Data", accept: { "application/octet-stream": [".bin"] } }
+    ]), "accept types");
+    expect(call._preferPolyfill, false, "polyfill preference");
+});
+
+check("the open picker returns several files when multiple selection is allowed", async (page) => {
+    await page.evaluate("(async () => { pickerResult.open = [await opfsHandle('input.txt'), await opfsHandle('second.txt')]; })()");
+    const result = await page.scenario("open_read", "multiple");
+    expect(result.count, "2", "files"); expect(result.content, "first file|second file", "contents");
+    expect((await page.calls())[0].multiple, true, "multiple");
+});
+
+check("a canceled picker gives no files and no error", async (page) => {
+    await page.evaluate("pickerResult.cancel = true");
+    expect((await page.scenario("open_read")).count, "0", "files after cancel");
+    expect((await page.scenario("save_write", "report")).saved, "none", "saved file after cancel");
+});
+
+check("the save picker suggests the name with its extension and the written stream reaches the file", async (page) => {
+    const result = await page.scenario("save_write", "report");
+    expect(result.saved, "saved.txt", "saved file");
+    const [call] = await page.calls();
+    expect(call.kind, "save", "picker"); expect(call.suggestedName, "report.txt", "suggested name");
+    await page.waitFor(`opfsText("saved.txt").then((text) => text === "Hello, storage")`, 10000);
+});
+
+check("a large file written while the module memory grows reads back unchanged", async (page) => {
+    const length = 3000000;
+    const memoryBefore = await page.evaluate("storageView.HEAPU8.buffer.byteLength");
+    expect((await page.scenario("large", String(length), { timeout: 60000 })).written, String(length), "written");
+    const memoryAfter = await page.evaluate("storageView.HEAPU8.buffer.byteLength");
+    assert(memoryAfter > memoryBefore, `the module memory did not grow (${memoryBefore} bytes)`);
+    await page.evaluate("(async () => { pickerResult.open = [await opfsHandle('saved.txt')]; })()");
+    const result = await page.scenario("read_large", String(length), { timeout: 60000 });
+    expect(result.length, String(length), "length read back"); expect(result.equal, "true", "content read back");
+    const size = await page.evaluate("opfsHandle('saved.txt').then((h) => h.getFile()).then((f) => f.size)");
+    expect(size, length, "size of the file");
+});
+
+check("a folder creates, lists, finds and deletes its items", async (page) => {
+    const result = await page.scenario("folder");
+    expect(result.folder, "work", "folder"); expect(result.items, "a.txt:file,sub:folder", "items");
+    expect(result.a, "A", "content of a created file"); expect(result.missing, "true", "a missing file is not found");
+    expect(result.mismatch, "true", "a file is not found as a folder"); expect(result.sub, "b.txt", "items of the sub folder");
+    expect(result.after_delete, "sub", "items after the delete");
+    expect(await page.evaluate("opfsText('work', 'sub', 'b.txt')"), "B", "nested file on disk");
+});
+
+check("an item moves to another folder", async (page) => {
+    const result = await page.scenario("move");
+    expect(result.moved, "moved.txt", "moved item"); expect(result.target, "moved.txt", "items of the target");
+    expect(result.left, "true", "the item left its folder");
+});
+
+check("a bookmark survives a reload, opens only as its kind and is released", async (page) => {
+    const saved = await page.scenario("bookmark_save");
+    expect(saved.can_bookmark, "true", "can bookmark");
+    assert(saved.bookmark.length > 0, "no bookmark");
+    await page.evaluate("location.reload()");
+    await page.waitForView(200);
+    await page.waitFor("globalThis.storageView && storageView.storageViewResult");
+    const opened = await page.scenario("bookmark_open", saved.bookmark);
+    expect(opened.file, "input.txt", "bookmarked file"); expect(opened.content, "first file", "content of the bookmarked file");
+    expect(opened.as_folder, "false", "a file bookmark opens as a folder");
+    expect((await page.scenario("bookmark_open", "not a bookmark")).file, "none", "an invalid bookmark");
+    expect((await page.scenario("bookmark_release", saved.bookmark)).reopened, "false", "the released bookmark reopened");
+});
+
+check("a well-known folder is a start location of the pickers", async (page) => {
+    const result = await page.scenario("well_known");
+    expect(result.name, "documents", "name"); expect(result.path_lookup_none, "true", "lookup by path");
+    expect((await page.scenario("pick_folder_start_in_documents")).count, "1", "folders");
+    expect((await page.calls()).pop().startIn, "documents", "start location");
+});
+
+check("with the polyfill preferred, the open picker reads a file chosen in a file input", async (page) => {
+    const file = path.join(fs.mkdtempSync(path.join(os.tmpdir(), "ferroui-storage-")), "upload.txt");
+    fs.writeFileSync(file, "from disk");
+    await page.send("Page.setInterceptFileChooserDialog", { enabled: true });
+    const chooser = new Promise((resolve) => {
+        const poll = setInterval(async () => {
+            const node = await page.evaluate(`(() => { const input = document.querySelector("input[type=file]"); return input ? input.multiple : null; })()`);
+            if (node !== null) { clearInterval(poll); resolve(node); }
+        }, 100);
+    });
+    const running = page.scenario("open_read", "", { userGesture: true });
+    const multiple = await chooser;
+    expect(multiple, false, "multiple selection of the file input");
+    const { root: document } = await page.send("DOM.getDocument", {});
+    const { nodeId } = await page.send("DOM.querySelector", { nodeId: document.nodeId, selector: "input[type=file]" });
+    await page.send("DOM.setFileInputFiles", { files: [file], nodeId });
+    const result = await running;
+    expect(result.count, "1", "files"); expect(result.names, "upload.txt", "names"); expect(result.content, "from disk", "content");
+}, { query: "?PreferPolyfill=true", stubs: false });
+
+check("with the polyfill preferred, the save picker downloads the written file", async (page) => {
+    const downloads = fs.mkdtempSync(path.join(os.tmpdir(), "ferroui-downloads-"));
+    await page.send("Browser.setDownloadBehavior", { behavior: "allow", downloadPath: downloads });
+    expect((await page.scenario("save_write", "report")).saved, "report.txt", "saved file");
+    const file = path.join(downloads, "report.txt");
+    for (let i = 0; i < 100 && !(fs.existsSync(file) && fs.readFileSync(file, "utf8") === "Hello, storage"); i++) { await sleep(100); }
+    expect(fs.existsSync(file) ? fs.readFileSync(file, "utf8") : null, "Hello, storage", "downloaded content");
+}, { query: "?PreferPolyfill=true", stubs: false });
+
+await run(checks);
