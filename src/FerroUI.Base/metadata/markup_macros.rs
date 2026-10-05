@@ -122,11 +122,16 @@
 /// exact Rust types the callable takes and returns.
 #[macro_export]
 macro_rules! ferro_markup_type {
+    // A contract (`dyn Trait`): without a `this:` part its instance members
+    // receive the unsized trait object, which has no value type of its own.
+    ($kind:ident dyn $trait_:path as $name:literal { $($body:tt)* }) => {
+        $crate::ferro_markup_type!(@impl $kind dyn $trait_, $name, implied_dyn, { $($body)* });
+    };
     ($kind:ident $type_:ty { $($body:tt)* }) => {
-        $crate::ferro_markup_type!(@impl $kind $type_, ::std::stringify!($type_), { $($body)* });
+        $crate::ferro_markup_type!(@impl $kind $type_, ::std::stringify!($type_), implied, { $($body)* });
     };
     ($kind:ident $type_:ty as $name:literal { $($body:tt)* }) => {
-        $crate::ferro_markup_type!(@impl $kind $type_, $name, { $($body)* });
+        $crate::ferro_markup_type!(@impl $kind $type_, $name, implied, { $($body)* });
     };
 
     (@nullable struct $m:ident, $type_:ty) => {
@@ -141,7 +146,32 @@ macro_rules! ferro_markup_type {
     (@kind interface) => { $crate::metadata::MarkupTypeKind::Interface };
     (@kind static) => { $crate::metadata::MarkupTypeKind::Static };
 
-    (@build $kind:ident $type_:ty, $name:expr, $this:ty, { $($body:tt)* }) => {
+    (@this $kind:ident implied_dyn $m:ident, $this:ty) => {};
+    (@parse_type implied_dyn $m:ident, $type_:ty, $this:ty) => {
+        $m.parse_type = ::std::option::Option::Some(|| $crate::data::core::ValueType::of::<::std::rc::Rc<$type_>>());
+    };
+    (@parse_type $form:ident $m:ident, $type_:ty, $this:ty) => {
+        $m.parse_type = ::std::option::Option::Some(|| $crate::data::core::ValueType::of::<$this>());
+    };
+
+    // The typed functions of the members, as associated functions of the type.
+    (@fns implied_dyn $type_:ty, $this:ty; $($body:tt)*) => {
+        impl $type_ {
+            $crate::__ferro_markup_fns!($this, ::std::rc::Rc<$type_>; $($body)*);
+        }
+    };
+    (@fns $form:ident $type_:ty, $this:ty; $($body:tt)*) => {
+        impl $type_ {
+            $crate::__ferro_markup_fns!($this, $this; $($body)*);
+        }
+    };
+    (@this $kind:ident $form:ident $m:ident, $this:ty) => {
+        $m.this = ::std::option::Option::Some(|| $crate::data::core::ValueType::of::<$this>());
+    };
+
+    (@build $kind:ident $type_:ty, $name:expr, $this:ty, $form:ident, { $($body:tt)* }) => {
+        $crate::ferro_markup_type!(@fns $form $type_, $this; $($body)*);
+
         impl $crate::metadata::MarkupTyped for $type_ {
             const MARKUP: &'static $crate::metadata::MarkupType = {
                 static MARKUP: $crate::metadata::MarkupType = {
@@ -152,6 +182,8 @@ macro_rules! ferro_markup_type {
                         ::std::module_path!(),
                     );
                     $crate::ferro_markup_type!(@nullable $kind markup, $type_);
+                    $crate::ferro_markup_type!(@this $kind $form markup, $this);
+                    $crate::ferro_markup_type!(@parse_type $form markup, $type_, $this);
                     $crate::__ferro_markup_items!(markup, $this; $($body)*);
                     markup
                 };
@@ -161,20 +193,20 @@ macro_rules! ferro_markup_type {
     };
     // Finds the `this:` part, wherever it is written; the declared type is
     // the default.
-    (@scan $kind:ident $type_:ty, $name:expr, [$($seen:tt)*] this: $this:ty, $($rest:tt)*) => {
-        $crate::ferro_markup_type!(@build $kind $type_, $name, $this, { $($seen)* $($rest)* });
+    (@scan $kind:ident $type_:ty, $name:expr, $default:ident, [$($seen:tt)*] this: $this:ty, $($rest:tt)*) => {
+        $crate::ferro_markup_type!(@build $kind $type_, $name, $this, explicit, { $($seen)* $($rest)* });
     };
-    (@scan $kind:ident $type_:ty, $name:expr, [$($seen:tt)*] this: $this:ty) => {
-        $crate::ferro_markup_type!(@build $kind $type_, $name, $this, { $($seen)* });
+    (@scan $kind:ident $type_:ty, $name:expr, $default:ident, [$($seen:tt)*] this: $this:ty) => {
+        $crate::ferro_markup_type!(@build $kind $type_, $name, $this, explicit, { $($seen)* });
     };
-    (@scan $kind:ident $type_:ty, $name:expr, [$($seen:tt)*] $next:tt $($rest:tt)*) => {
-        $crate::ferro_markup_type!(@scan $kind $type_, $name, [$($seen)* $next] $($rest)*);
+    (@scan $kind:ident $type_:ty, $name:expr, $default:ident, [$($seen:tt)*] $next:tt $($rest:tt)*) => {
+        $crate::ferro_markup_type!(@scan $kind $type_, $name, $default, [$($seen)* $next] $($rest)*);
     };
-    (@scan $kind:ident $type_:ty, $name:expr, [$($seen:tt)*]) => {
-        $crate::ferro_markup_type!(@build $kind $type_, $name, $type_, { $($seen)* });
+    (@scan $kind:ident $type_:ty, $name:expr, $default:ident, [$($seen:tt)*]) => {
+        $crate::ferro_markup_type!(@build $kind $type_, $name, $type_, $default, { $($seen)* });
     };
-    (@impl $kind:ident $type_:ty, $name:expr, { $($body:tt)* }) => {
-        $crate::ferro_markup_type!(@scan $kind $type_, $name, [] $($body)*);
+    (@impl $kind:ident $type_:ty, $name:expr, $default:ident, { $($body:tt)* }) => {
+        $crate::ferro_markup_type!(@scan $kind $type_, $name, $default, [] $($body)*);
     };
 }
 
@@ -374,6 +406,8 @@ macro_rules! __ferro_markup_items {
                 typed_path_element: $crate::__ferro_markup_typed_path!(
                     $this, $type_, ::std::stringify!($name); [] [] $($accessors)*
                 ),
+                emit_get: $crate::__ferro_markup_emit_accessor!(get $name; $($accessors)*),
+                emit_set: $crate::__ferro_markup_emit_accessor!(set $name; $($accessors)*),
             },)*
         ];
         $crate::__ferro_markup_items!($m, $this; $($($rest)*)?);
@@ -414,7 +448,7 @@ macro_rules! __ferro_markup_items {
     };
 
     ($m:ident, $this:ty; methods: [$($methods:tt)*] $(, $($rest:tt)*)?) => {
-        $m.methods = $crate::__ferro_markup_methods!($this; [] $($methods)*);
+        $m.methods = $crate::__ferro_markup_pool!(methods { $this; [] $($methods)* });
         $crate::__ferro_markup_items!($m, $this; $($($rest)*)?);
     };
 
@@ -441,6 +475,8 @@ macro_rules! __ferro_markup_items {
                 set: $crate::__ferro_markup_static_setter!($type_; $($accessors)*),
                 attributes: $crate::__ferro_markup_attributes!([] $($($attributes)*)?),
                 typed_path_element: ::std::option::Option::None,
+                emit_get: $crate::__ferro_markup_emit_accessor!(static_get $name; $($accessors)*),
+                emit_set: $crate::__ferro_markup_emit_accessor!(static_set $name; $($accessors)*),
             },)*
         ];
         $crate::__ferro_markup_items!($m, $this; $($($rest)*)?);
@@ -797,104 +833,560 @@ macro_rules! __ferro_markup_static_setter {
 #[doc(hidden)]
 #[macro_export]
 macro_rules! __ferro_markup_methods {
-    ($this:ty; [$($done:expr,)*]) => {
+    ([$($pool:ident)*] $this:ty; [$($done:expr,)*]) => {
         &[$($done),*]
     };
 
-    ($this:ty; [$($done:expr,)*]
+    ([$index:ident $($pool:ident)*] $this:ty; [$($done:expr,)*]
         static try fn $name:ident ($($parameter:ty),* $(,)?) $(-> $return_:ty)? => $call:ident $(:: $segment:ident)* [$($attributes:tt)*] $(, $($rest:tt)*)?
     ) => {
-        $crate::__ferro_markup_methods!($this; [$($done,)* $crate::__ferro_markup_method!(
-            $this; [static] [try] $name ($($parameter),*) ($($return_)?) ($call $(:: $segment)*) [$($attributes)*]
+        $crate::__ferro_markup_methods!([$($pool)*] $this; [$($done,)* $crate::__ferro_markup_method!(
+            $index $this; [static] [try] $name ($($parameter),*) ($($return_)?) ($call $(:: $segment)*) [$($attributes)*]
         ),] $($($rest)*)?)
     };
 
-    ($this:ty; [$($done:expr,)*]
+    ([$index:ident $($pool:ident)*] $this:ty; [$($done:expr,)*]
         static try fn $name:ident ($($parameter:ty),* $(,)?) $(-> $return_:ty)? => ($($call:tt)*) [$($attributes:tt)*] $(, $($rest:tt)*)?
     ) => {
-        $crate::__ferro_markup_methods!($this; [$($done,)* $crate::__ferro_markup_method!(
-            $this; [static] [try] $name ($($parameter),*) ($($return_)?) (($($call)*)) [$($attributes)*]
+        $crate::__ferro_markup_methods!([$($pool)*] $this; [$($done,)* $crate::__ferro_markup_method!(
+            $index $this; [static] [try] $name ($($parameter),*) ($($return_)?) (($($call)*)) [$($attributes)*]
         ),] $($($rest)*)?)
     };
 
-    ($this:ty; [$($done:expr,)*]
+    ([$index:ident $($pool:ident)*] $this:ty; [$($done:expr,)*]
         static try fn $name:ident ($($parameter:ty),* $(,)?) $(-> $return_:ty)? => $call:expr  $(, $($rest:tt)*)?
     ) => {
-        $crate::__ferro_markup_methods!($this; [$($done,)* $crate::__ferro_markup_method!(
-            $this; [static] [try] $name ($($parameter),*) ($($return_)?) ($call) []
+        $crate::__ferro_markup_methods!([$($pool)*] $this; [$($done,)* $crate::__ferro_markup_method!(
+            $index $this; [static] [try] $name ($($parameter),*) ($($return_)?) ($call) []
         ),] $($($rest)*)?)
     };
 
-    ($this:ty; [$($done:expr,)*]
+    ([$index:ident $($pool:ident)*] $this:ty; [$($done:expr,)*]
         static fn $name:ident ($($parameter:ty),* $(,)?) $(-> $return_:ty)? => $call:ident $(:: $segment:ident)* [$($attributes:tt)*] $(, $($rest:tt)*)?
     ) => {
-        $crate::__ferro_markup_methods!($this; [$($done,)* $crate::__ferro_markup_method!(
-            $this; [static] [] $name ($($parameter),*) ($($return_)?) ($call $(:: $segment)*) [$($attributes)*]
+        $crate::__ferro_markup_methods!([$($pool)*] $this; [$($done,)* $crate::__ferro_markup_method!(
+            $index $this; [static] [] $name ($($parameter),*) ($($return_)?) ($call $(:: $segment)*) [$($attributes)*]
         ),] $($($rest)*)?)
     };
 
-    ($this:ty; [$($done:expr,)*]
+    ([$index:ident $($pool:ident)*] $this:ty; [$($done:expr,)*]
         static fn $name:ident ($($parameter:ty),* $(,)?) $(-> $return_:ty)? => ($($call:tt)*) [$($attributes:tt)*] $(, $($rest:tt)*)?
     ) => {
-        $crate::__ferro_markup_methods!($this; [$($done,)* $crate::__ferro_markup_method!(
-            $this; [static] [] $name ($($parameter),*) ($($return_)?) (($($call)*)) [$($attributes)*]
+        $crate::__ferro_markup_methods!([$($pool)*] $this; [$($done,)* $crate::__ferro_markup_method!(
+            $index $this; [static] [] $name ($($parameter),*) ($($return_)?) (($($call)*)) [$($attributes)*]
         ),] $($($rest)*)?)
     };
 
-    ($this:ty; [$($done:expr,)*]
+    ([$index:ident $($pool:ident)*] $this:ty; [$($done:expr,)*]
         static fn $name:ident ($($parameter:ty),* $(,)?) $(-> $return_:ty)? => $call:expr  $(, $($rest:tt)*)?
     ) => {
-        $crate::__ferro_markup_methods!($this; [$($done,)* $crate::__ferro_markup_method!(
-            $this; [static] [] $name ($($parameter),*) ($($return_)?) ($call) []
+        $crate::__ferro_markup_methods!([$($pool)*] $this; [$($done,)* $crate::__ferro_markup_method!(
+            $index $this; [static] [] $name ($($parameter),*) ($($return_)?) ($call) []
         ),] $($($rest)*)?)
     };
 
-    ($this:ty; [$($done:expr,)*]
+    ([$index:ident $($pool:ident)*] $this:ty; [$($done:expr,)*]
         try fn $name:ident ($($parameter:ty),* $(,)?) $(-> $return_:ty)? => $call:ident $(:: $segment:ident)* [$($attributes:tt)*] $(, $($rest:tt)*)?
     ) => {
-        $crate::__ferro_markup_methods!($this; [$($done,)* $crate::__ferro_markup_method!(
-            $this; [] [try] $name ($($parameter),*) ($($return_)?) ($call $(:: $segment)*) [$($attributes)*]
+        $crate::__ferro_markup_methods!([$($pool)*] $this; [$($done,)* $crate::__ferro_markup_method!(
+            $index $this; [] [try] $name ($($parameter),*) ($($return_)?) ($call $(:: $segment)*) [$($attributes)*]
         ),] $($($rest)*)?)
     };
 
-    ($this:ty; [$($done:expr,)*]
+    ([$index:ident $($pool:ident)*] $this:ty; [$($done:expr,)*]
         try fn $name:ident ($($parameter:ty),* $(,)?) $(-> $return_:ty)? => ($($call:tt)*) [$($attributes:tt)*] $(, $($rest:tt)*)?
     ) => {
-        $crate::__ferro_markup_methods!($this; [$($done,)* $crate::__ferro_markup_method!(
-            $this; [] [try] $name ($($parameter),*) ($($return_)?) (($($call)*)) [$($attributes)*]
+        $crate::__ferro_markup_methods!([$($pool)*] $this; [$($done,)* $crate::__ferro_markup_method!(
+            $index $this; [] [try] $name ($($parameter),*) ($($return_)?) (($($call)*)) [$($attributes)*]
         ),] $($($rest)*)?)
     };
 
-    ($this:ty; [$($done:expr,)*]
+    ([$index:ident $($pool:ident)*] $this:ty; [$($done:expr,)*]
         try fn $name:ident ($($parameter:ty),* $(,)?) $(-> $return_:ty)? => $call:expr  $(, $($rest:tt)*)?
     ) => {
-        $crate::__ferro_markup_methods!($this; [$($done,)* $crate::__ferro_markup_method!(
-            $this; [] [try] $name ($($parameter),*) ($($return_)?) ($call) []
+        $crate::__ferro_markup_methods!([$($pool)*] $this; [$($done,)* $crate::__ferro_markup_method!(
+            $index $this; [] [try] $name ($($parameter),*) ($($return_)?) ($call) []
         ),] $($($rest)*)?)
     };
 
-    ($this:ty; [$($done:expr,)*]
+    ([$index:ident $($pool:ident)*] $this:ty; [$($done:expr,)*]
         fn $name:ident ($($parameter:ty),* $(,)?) $(-> $return_:ty)? => $call:ident $(:: $segment:ident)* [$($attributes:tt)*] $(, $($rest:tt)*)?
     ) => {
-        $crate::__ferro_markup_methods!($this; [$($done,)* $crate::__ferro_markup_method!(
-            $this; [] [] $name ($($parameter),*) ($($return_)?) ($call $(:: $segment)*) [$($attributes)*]
+        $crate::__ferro_markup_methods!([$($pool)*] $this; [$($done,)* $crate::__ferro_markup_method!(
+            $index $this; [] [] $name ($($parameter),*) ($($return_)?) ($call $(:: $segment)*) [$($attributes)*]
         ),] $($($rest)*)?)
     };
 
-    ($this:ty; [$($done:expr,)*]
+    ([$index:ident $($pool:ident)*] $this:ty; [$($done:expr,)*]
         fn $name:ident ($($parameter:ty),* $(,)?) $(-> $return_:ty)? => ($($call:tt)*) [$($attributes:tt)*] $(, $($rest:tt)*)?
     ) => {
-        $crate::__ferro_markup_methods!($this; [$($done,)* $crate::__ferro_markup_method!(
-            $this; [] [] $name ($($parameter),*) ($($return_)?) (($($call)*)) [$($attributes)*]
+        $crate::__ferro_markup_methods!([$($pool)*] $this; [$($done,)* $crate::__ferro_markup_method!(
+            $index $this; [] [] $name ($($parameter),*) ($($return_)?) (($($call)*)) [$($attributes)*]
         ),] $($($rest)*)?)
     };
 
-    ($this:ty; [$($done:expr,)*]
+    ([$index:ident $($pool:ident)*] $this:ty; [$($done:expr,)*]
         fn $name:ident ($($parameter:ty),* $(,)?) $(-> $return_:ty)? => $call:expr  $(, $($rest:tt)*)?
     ) => {
-        $crate::__ferro_markup_methods!($this; [$($done,)* $crate::__ferro_markup_method!(
-            $this; [] [] $name ($($parameter),*) ($($return_)?) ($call) []
+        $crate::__ferro_markup_methods!([$($pool)*] $this; [$($done,)* $crate::__ferro_markup_method!(
+            $index $this; [] [] $name ($($parameter),*) ($($return_)?) ($call) []
         ),] $($($rest)*)?)
+    };
+}
+
+/// The typed functions of `methods: [..]` (see `MarkupEmit`), in declaration order: the
+/// same order and pool of indices as [`__ferro_markup_methods!`].
+#[doc(hidden)]
+#[macro_export]
+macro_rules! __ferro_markup_method_fns {
+    ([$($pool:ident)*] $this:ty;) => {};
+
+    ([$index:ident $($pool:ident)*] $this:ty;
+        static try fn $name:ident ($($parameter:ty),* $(,)?) $(-> $return_:ty)? => $call:ident $(:: $segment:ident)* [$($attributes:tt)*] $(, $($rest:tt)*)?
+    ) => {
+        $crate::__ferro_markup_method_fn!(
+            $index [static] [try] $this; $name ($($return_)?) ($call $(:: $segment)*) [] [a0 a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13 a14 a15] ($($parameter),*)
+        );
+        $crate::__ferro_markup_method_fns!([$($pool)*] $this; $($($rest)*)?);
+    };
+
+    ([$index:ident $($pool:ident)*] $this:ty;
+        static try fn $name:ident ($($parameter:ty),* $(,)?) $(-> $return_:ty)? => ($($call:tt)*) [$($attributes:tt)*] $(, $($rest:tt)*)?
+    ) => {
+        $crate::__ferro_markup_method_fn!(
+            $index [static] [try] $this; $name ($($return_)?) (($($call)*)) [] [a0 a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13 a14 a15] ($($parameter),*)
+        );
+        $crate::__ferro_markup_method_fns!([$($pool)*] $this; $($($rest)*)?);
+    };
+
+    ([$index:ident $($pool:ident)*] $this:ty;
+        static try fn $name:ident ($($parameter:ty),* $(,)?) $(-> $return_:ty)? => $call:expr  $(, $($rest:tt)*)?
+    ) => {
+        $crate::__ferro_markup_method_fn!(
+            $index [static] [try] $this; $name ($($return_)?) ($call) [] [a0 a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13 a14 a15] ($($parameter),*)
+        );
+        $crate::__ferro_markup_method_fns!([$($pool)*] $this; $($($rest)*)?);
+    };
+
+    ([$index:ident $($pool:ident)*] $this:ty;
+        static fn $name:ident ($($parameter:ty),* $(,)?) $(-> $return_:ty)? => $call:ident $(:: $segment:ident)* [$($attributes:tt)*] $(, $($rest:tt)*)?
+    ) => {
+        $crate::__ferro_markup_method_fn!(
+            $index [static] [] $this; $name ($($return_)?) ($call $(:: $segment)*) [] [a0 a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13 a14 a15] ($($parameter),*)
+        );
+        $crate::__ferro_markup_method_fns!([$($pool)*] $this; $($($rest)*)?);
+    };
+
+    ([$index:ident $($pool:ident)*] $this:ty;
+        static fn $name:ident ($($parameter:ty),* $(,)?) $(-> $return_:ty)? => ($($call:tt)*) [$($attributes:tt)*] $(, $($rest:tt)*)?
+    ) => {
+        $crate::__ferro_markup_method_fn!(
+            $index [static] [] $this; $name ($($return_)?) (($($call)*)) [] [a0 a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13 a14 a15] ($($parameter),*)
+        );
+        $crate::__ferro_markup_method_fns!([$($pool)*] $this; $($($rest)*)?);
+    };
+
+    ([$index:ident $($pool:ident)*] $this:ty;
+        static fn $name:ident ($($parameter:ty),* $(,)?) $(-> $return_:ty)? => $call:expr  $(, $($rest:tt)*)?
+    ) => {
+        $crate::__ferro_markup_method_fn!(
+            $index [static] [] $this; $name ($($return_)?) ($call) [] [a0 a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13 a14 a15] ($($parameter),*)
+        );
+        $crate::__ferro_markup_method_fns!([$($pool)*] $this; $($($rest)*)?);
+    };
+
+    ([$index:ident $($pool:ident)*] $this:ty;
+        try fn $name:ident ($($parameter:ty),* $(,)?) $(-> $return_:ty)? => $call:ident $(:: $segment:ident)* [$($attributes:tt)*] $(, $($rest:tt)*)?
+    ) => {
+        $crate::__ferro_markup_method_fn!(
+            $index [] [try] $this; $name ($($return_)?) ($call $(:: $segment)*) [] [a0 a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13 a14 a15] ($($parameter),*)
+        );
+        $crate::__ferro_markup_method_fns!([$($pool)*] $this; $($($rest)*)?);
+    };
+
+    ([$index:ident $($pool:ident)*] $this:ty;
+        try fn $name:ident ($($parameter:ty),* $(,)?) $(-> $return_:ty)? => ($($call:tt)*) [$($attributes:tt)*] $(, $($rest:tt)*)?
+    ) => {
+        $crate::__ferro_markup_method_fn!(
+            $index [] [try] $this; $name ($($return_)?) (($($call)*)) [] [a0 a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13 a14 a15] ($($parameter),*)
+        );
+        $crate::__ferro_markup_method_fns!([$($pool)*] $this; $($($rest)*)?);
+    };
+
+    ([$index:ident $($pool:ident)*] $this:ty;
+        try fn $name:ident ($($parameter:ty),* $(,)?) $(-> $return_:ty)? => $call:expr  $(, $($rest:tt)*)?
+    ) => {
+        $crate::__ferro_markup_method_fn!(
+            $index [] [try] $this; $name ($($return_)?) ($call) [] [a0 a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13 a14 a15] ($($parameter),*)
+        );
+        $crate::__ferro_markup_method_fns!([$($pool)*] $this; $($($rest)*)?);
+    };
+
+    ([$index:ident $($pool:ident)*] $this:ty;
+        fn $name:ident ($($parameter:ty),* $(,)?) $(-> $return_:ty)? => $call:ident $(:: $segment:ident)* [$($attributes:tt)*] $(, $($rest:tt)*)?
+    ) => {
+        $crate::__ferro_markup_method_fn!(
+            $index [] [] $this; $name ($($return_)?) ($call $(:: $segment)*) [] [a0 a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13 a14 a15] ($($parameter),*)
+        );
+        $crate::__ferro_markup_method_fns!([$($pool)*] $this; $($($rest)*)?);
+    };
+
+    ([$index:ident $($pool:ident)*] $this:ty;
+        fn $name:ident ($($parameter:ty),* $(,)?) $(-> $return_:ty)? => ($($call:tt)*) [$($attributes:tt)*] $(, $($rest:tt)*)?
+    ) => {
+        $crate::__ferro_markup_method_fn!(
+            $index [] [] $this; $name ($($return_)?) (($($call)*)) [] [a0 a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13 a14 a15] ($($parameter),*)
+        );
+        $crate::__ferro_markup_method_fns!([$($pool)*] $this; $($($rest)*)?);
+    };
+
+    ([$index:ident $($pool:ident)*] $this:ty;
+        fn $name:ident ($($parameter:ty),* $(,)?) $(-> $return_:ty)? => $call:expr  $(, $($rest:tt)*)?
+    ) => {
+        $crate::__ferro_markup_method_fn!(
+            $index [] [] $this; $name ($($return_)?) ($call) [] [a0 a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13 a14 a15] ($($parameter),*)
+        );
+        $crate::__ferro_markup_method_fns!([$($pool)*] $this; $($($rest)*)?);
+    };
+}
+
+/// A pool of indices for the members of one declaration that have no
+/// unique name (overloaded methods): the data of the metadata and the typed
+/// functions both take the indices from here, in declaration order.
+#[doc(hidden)]
+#[macro_export]
+macro_rules! __ferro_markup_pool {
+    (methods { $($arguments:tt)* }) => {
+        $crate::__ferro_markup_methods!([_0 _1 _2 _3 _4 _5 _6 _7 _8 _9 _10 _11 _12 _13 _14 _15 _16 _17 _18 _19 _20 _21 _22 _23 _24 _25 _26 _27 _28 _29 _30 _31 _32 _33 _34 _35 _36 _37 _38 _39 _40 _41 _42 _43 _44 _45 _46 _47 _48 _49 _50 _51 _52 _53 _54 _55 _56 _57 _58 _59 _60 _61 _62 _63 _64 _65 _66 _67 _68 _69 _70 _71 _72 _73 _74 _75 _76 _77 _78 _79 _80 _81 _82 _83 _84 _85 _86 _87 _88 _89 _90 _91 _92 _93 _94 _95 _96 _97 _98 _99 _100 _101 _102 _103 _104 _105 _106 _107 _108 _109 _110 _111 _112 _113 _114 _115 _116 _117 _118 _119 _120 _121 _122 _123 _124 _125 _126 _127 _128 _129 _130 _131 _132 _133 _134 _135 _136 _137 _138 _139 _140 _141 _142 _143 _144 _145 _146 _147 _148 _149 _150 _151 _152 _153 _154 _155 _156 _157 _158 _159] $($arguments)*)
+    };
+    (method_fns { $($arguments:tt)* }) => {
+        $crate::__ferro_markup_method_fns!([_0 _1 _2 _3 _4 _5 _6 _7 _8 _9 _10 _11 _12 _13 _14 _15 _16 _17 _18 _19 _20 _21 _22 _23 _24 _25 _26 _27 _28 _29 _30 _31 _32 _33 _34 _35 _36 _37 _38 _39 _40 _41 _42 _43 _44 _45 _46 _47 _48 _49 _50 _51 _52 _53 _54 _55 _56 _57 _58 _59 _60 _61 _62 _63 _64 _65 _66 _67 _68 _69 _70 _71 _72 _73 _74 _75 _76 _77 _78 _79 _80 _81 _82 _83 _84 _85 _86 _87 _88 _89 _90 _91 _92 _93 _94 _95 _96 _97 _98 _99 _100 _101 _102 _103 _104 _105 _106 _107 _108 _109 _110 _111 _112 _113 _114 _115 _116 _117 _118 _119 _120 _121 _122 _123 _124 _125 _126 _127 _128 _129 _130 _131 _132 _133 _134 _135 _136 _137 _138 _139 _140 _141 _142 _143 _144 _145 _146 _147 _148 _149 _150 _151 _152 _153 _154 _155 _156 _157 _158 _159] $($arguments)*);
+    };
+}
+
+/// Whether a member is declared with `try`.
+#[doc(hidden)]
+#[macro_export]
+macro_rules! __ferro_markup_is_try {
+    ([]) => {
+        false
+    };
+    ([try]) => {
+        true
+    };
+}
+
+/// The `MarkupEmit` of an accessor of a property: `get` / `set` /
+/// `static_get` / `static_set`, the name, the accessors.
+#[doc(hidden)]
+#[macro_export]
+macro_rules! __ferro_markup_emit_accessor {
+    ($which:ident $name:ident;) => {
+        ::std::option::Option::None
+    };
+    (get $name:ident; get: $accessor:expr $(, $($rest:tt)*)?) => {
+        $crate::__ferro_markup_emit_accessor!(@emit "__markup_get_", $name, false)
+    };
+    (get $name:ident; try_get: $accessor:expr $(, $($rest:tt)*)?) => {
+        $crate::__ferro_markup_emit_accessor!(@emit "__markup_get_", $name, true)
+    };
+    (set $name:ident; set: $accessor:expr $(, $($rest:tt)*)?) => {
+        $crate::__ferro_markup_emit_accessor!(@emit "__markup_set_", $name, false)
+    };
+    (set $name:ident; try_set: $accessor:expr $(, $($rest:tt)*)?) => {
+        $crate::__ferro_markup_emit_accessor!(@emit "__markup_set_", $name, true)
+    };
+    (static_get $name:ident; get: $accessor:expr $(, $($rest:tt)*)?) => {
+        $crate::__ferro_markup_emit_accessor!(@emit "__markup_static_get_", $name, false)
+    };
+    (static_get $name:ident; try_get: $accessor:expr $(, $($rest:tt)*)?) => {
+        $crate::__ferro_markup_emit_accessor!(@emit "__markup_static_get_", $name, true)
+    };
+    (static_set $name:ident; set: $accessor:expr $(, $($rest:tt)*)?) => {
+        $crate::__ferro_markup_emit_accessor!(@emit "__markup_static_set_", $name, false)
+    };
+    (static_set $name:ident; try_set: $accessor:expr $(, $($rest:tt)*)?) => {
+        $crate::__ferro_markup_emit_accessor!(@emit "__markup_static_set_", $name, true)
+    };
+    (@emit $prefix:literal, $name:ident, $fallible:literal) => {
+        ::std::option::Option::Some($crate::metadata::MarkupEmit {
+            function: ::std::concat!($prefix, ::std::stringify!($name)),
+            fallible: $fallible,
+        })
+    };
+    ($which:ident $name:ident; $other:ident : $accessor:expr $(, $($rest:tt)*)?) => {
+        $crate::__ferro_markup_emit_accessor!($which $name; $($($rest)*)?)
+    };
+}
+
+/// The typed functions of a declaration (see `MarkupEmit`), as associated
+/// functions of the declared type: written into an `impl` block of the type
+/// by [`ferro_markup_type!`](crate::ferro_markup_type) and
+/// [`ferro_class_info!`](crate::ferro_class_info). `this, value; parts..`:
+/// the instance type, the type of a value of the type (what `Parse`
+/// returns: the type itself, `Rc<dyn Trait>` for a contract) and the parts
+/// of the declaration body, as `__ferro_markup_items!` reads them.
+#[doc(hidden)]
+#[macro_export]
+macro_rules! __ferro_markup_fns {
+    ($this:ty, $value:ty;) => {};
+
+    ($this:ty, $value:ty; properties: [
+        $($name:ident : $type_:ty { $($accessors:tt)* } $([$($attributes:tt)*])?),* $(,)?
+    ] $(, $($rest:tt)*)?) => {
+        $($crate::__ferro_markup_property_fns!($this, $type_, $name; $($accessors)*);)*
+        $crate::__ferro_markup_fns!($this, $value; $($($rest)*)?);
+    };
+
+    ($this:ty, $value:ty; static_properties: [
+        $($name:ident : $type_:ty { $($accessors:tt)* } $([$($attributes:tt)*])?),* $(,)?
+    ] $(, $($rest:tt)*)?) => {
+        $($crate::__ferro_markup_static_property_fns!($type_, $name; $($accessors)*);)*
+        $crate::__ferro_markup_fns!($this, $value; $($($rest)*)?);
+    };
+
+    ($this:ty, $value:ty; methods: [$($methods:tt)*] $(, $($rest:tt)*)?) => {
+        $crate::__ferro_markup_pool!(method_fns { $this; $($methods)* });
+        $crate::__ferro_markup_fns!($this, $value; $($($rest)*)?);
+    };
+
+    // The other parts declare no typed function.
+    ($this:ty, $value:ty; namespace: $namespace:literal $(, $($rest:tt)*)?) => {
+        $crate::__ferro_markup_fns!($this, $value; $($($rest)*)?);
+    };
+    ($this:ty, $value:ty; handles: [$($handle:ty),* $(,)?] $(, $($rest:tt)*)?) => {
+        $crate::__ferro_markup_fns!($this, $value; $($($rest)*)?);
+    };
+    ($this:ty, $value:ty; base: $base:ty $(, $($rest:tt)*)?) => {
+        $crate::__ferro_markup_fns!($this, $value; $($($rest)*)?);
+    };
+    ($this:ty, $value:ty; interfaces: [$($interface:ty),* $(,)?] $(, $($rest:tt)*)?) => {
+        $crate::__ferro_markup_fns!($this, $value; $($($rest)*)?);
+    };
+    ($this:ty, $value:ty; generic: $definition:literal [$($argument:ty),* $(,)?] $(, $($rest:tt)*)?) => {
+        $crate::__ferro_markup_fns!($this, $value; $($($rest)*)?);
+    };
+    ($this:ty, $value:ty; content: $content:ident $(, $($rest:tt)*)?) => {
+        $crate::__ferro_markup_fns!($this, $value; $($($rest)*)?);
+    };
+    ($this:ty, $value:ty; attributes: [$($attributes:tt)*] $(, $($rest:tt)*)?) => {
+        $crate::__ferro_markup_fns!($this, $value; $($($rest)*)?);
+    };
+    ($this:ty, $value:ty; constructors: [$($constructors:tt)*] $(, $($rest:tt)*)?) => {
+        $crate::__ferro_markup_fns!($this, $value; $($($rest)*)?);
+    };
+    ($this:ty, $value:ty; parse: $parse:expr $(, $($rest:tt)*)?) => {
+        /// The typed function of the `Parse(string)` of the type (see `MarkupEmit`).
+        #[doc(hidden)]
+        #[allow(private_interfaces, clippy::all)]
+        #[inline]
+        pub fn __markup_parse(text: ::std::string::String) -> ::std::result::Result<$value, $crate::metadata::MarkupInvokeError> {
+            $crate::metadata::markup_result(($parse)(text.as_str()))
+        }
+        $crate::__ferro_markup_fns!($this, $value; $($($rest)*)?);
+    };
+    ($this:ty, $value:ty; indexers: [$($indexers:tt)*] $(, $($rest:tt)*)?) => {
+        $crate::__ferro_markup_fns!($this, $value; $($($rest)*)?);
+    };
+    ($this:ty, $value:ty; property_attributes: [$($attributes:tt)*] $(, $($rest:tt)*)?) => {
+        $crate::__ferro_markup_fns!($this, $value; $($($rest)*)?);
+    };
+    ($this:ty, $value:ty; notify_property_changed: $object:ty $(, $($rest:tt)*)?) => {
+        $crate::__ferro_markup_fns!($this, $value; $($($rest)*)?);
+    };
+    ($this:ty, $value:ty; type_info: $type_info:ty $(, $($rest:tt)*)?) => {
+        $crate::__ferro_markup_fns!($this, $value; $($($rest)*)?);
+    };
+    ($this:ty, $value:ty; fields: [$($fields:tt)*] $(, $($rest:tt)*)?) => {
+        $crate::__ferro_markup_fns!($this, $value; $($($rest)*)?);
+    };
+    ($this:ty, $value:ty; events: [$($events:tt)*] $(, $($rest:tt)*)?) => {
+        $crate::__ferro_markup_fns!($this, $value; $($($rest)*)?);
+    };
+}
+
+/// The typed accessor functions of an instance property.
+#[doc(hidden)]
+#[macro_export]
+macro_rules! __ferro_markup_property_fns {
+    ($this:ty, $type_:ty, $name:ident;) => {};
+    ($this:ty, $type_:ty, $name:ident; get: $get:expr $(, $($rest:tt)*)?) => {
+        $crate::__paste! {
+            #[doc(hidden)]
+            #[allow(non_snake_case, private_interfaces, clippy::all)]
+            #[inline]
+            pub fn [<__markup_get_ $name>](this: &$this) -> $type_ {
+                ($get)(this)
+            }
+        }
+        $crate::__ferro_markup_property_fns!($this, $type_, $name; $($($rest)*)?);
+    };
+    ($this:ty, $type_:ty, $name:ident; try_get: $get:expr $(, $($rest:tt)*)?) => {
+        $crate::__paste! {
+            #[doc(hidden)]
+            #[allow(non_snake_case, private_interfaces, clippy::all)]
+            #[inline]
+            pub fn [<__markup_get_ $name>](
+                this: &$this,
+            ) -> ::std::result::Result<$type_, $crate::metadata::MarkupInvokeError> {
+                $crate::metadata::markup_result(($get)(this))
+            }
+        }
+        $crate::__ferro_markup_property_fns!($this, $type_, $name; $($($rest)*)?);
+    };
+    ($this:ty, $type_:ty, $name:ident; set: $set:expr $(, $($rest:tt)*)?) => {
+        $crate::__paste! {
+            #[doc(hidden)]
+            #[allow(non_snake_case, private_interfaces, clippy::all)]
+            #[inline]
+            pub fn [<__markup_set_ $name>](this: &$this, value: $type_) {
+                let _ = ($set)(this, value);
+            }
+        }
+        $crate::__ferro_markup_property_fns!($this, $type_, $name; $($($rest)*)?);
+    };
+    ($this:ty, $type_:ty, $name:ident; try_set: $set:expr $(, $($rest:tt)*)?) => {
+        $crate::__paste! {
+            #[doc(hidden)]
+            #[allow(non_snake_case, private_interfaces, clippy::all)]
+            #[inline]
+            pub fn [<__markup_set_ $name>](
+                this: &$this,
+                value: $type_,
+            ) -> ::std::result::Result<(), $crate::metadata::MarkupInvokeError> {
+                $crate::metadata::markup_result(($set)(this, value)).map(|_| ())
+            }
+        }
+        $crate::__ferro_markup_property_fns!($this, $type_, $name; $($($rest)*)?);
+    };
+}
+
+/// The typed accessor functions of a static property.
+#[doc(hidden)]
+#[macro_export]
+macro_rules! __ferro_markup_static_property_fns {
+    ($type_:ty, $name:ident;) => {};
+    ($type_:ty, $name:ident; get: $get:expr $(, $($rest:tt)*)?) => {
+        $crate::__paste! {
+            #[doc(hidden)]
+            #[allow(non_snake_case, private_interfaces, clippy::all)]
+            #[inline]
+            pub fn [<__markup_static_get_ $name>]() -> $type_ {
+                ($get)()
+            }
+        }
+        $crate::__ferro_markup_static_property_fns!($type_, $name; $($($rest)*)?);
+    };
+    ($type_:ty, $name:ident; try_get: $get:expr $(, $($rest:tt)*)?) => {
+        $crate::__paste! {
+            #[doc(hidden)]
+            #[allow(non_snake_case, private_interfaces, clippy::all)]
+            #[inline]
+            pub fn [<__markup_static_get_ $name>]() -> ::std::result::Result<$type_, $crate::metadata::MarkupInvokeError> {
+                $crate::metadata::markup_result(($get)())
+            }
+        }
+        $crate::__ferro_markup_static_property_fns!($type_, $name; $($($rest)*)?);
+    };
+    ($type_:ty, $name:ident; set: $set:expr $(, $($rest:tt)*)?) => {
+        $crate::__paste! {
+            #[doc(hidden)]
+            #[allow(non_snake_case, private_interfaces, clippy::all)]
+            #[inline]
+            pub fn [<__markup_static_set_ $name>](value: $type_) {
+                let _ = ($set)(value);
+            }
+        }
+        $crate::__ferro_markup_static_property_fns!($type_, $name; $($($rest)*)?);
+    };
+    ($type_:ty, $name:ident; try_set: $set:expr $(, $($rest:tt)*)?) => {
+        $crate::__paste! {
+            #[doc(hidden)]
+            #[allow(non_snake_case, private_interfaces, clippy::all)]
+            #[inline]
+            pub fn [<__markup_static_set_ $name>](
+                value: $type_,
+            ) -> ::std::result::Result<(), $crate::metadata::MarkupInvokeError> {
+                $crate::metadata::markup_result(($set)(value)).map(|_| ())
+            }
+        }
+        $crate::__ferro_markup_static_property_fns!($type_, $name; $($($rest)*)?);
+    };
+}
+
+/// The typed function of one method: `index [static]? [try]? this; Name
+/// (return)? (callable) [arguments] [names] (parameters)`: the parameters are
+/// paired with names from the pool of names, then the function is written.
+#[doc(hidden)]
+#[macro_export]
+macro_rules! __ferro_markup_method_fn {
+    ($index:ident $static_:tt $try_:tt $this:ty; $name:ident ($($return_:ty)?) ($call:expr)
+        [$($argument:ident : $parameter:ty,)*] [$($names:ident)*] ()
+    ) => {
+        $crate::__ferro_markup_method_fn!(@emit $index $static_ $try_ $this; $name ($($return_)?) ($call)
+            [$($argument : $parameter,)*]);
+    };
+    ($index:ident $static_:tt $try_:tt $this:ty; $name:ident ($($return_:ty)?) ($call:expr)
+        [$($done:tt)*] [$next:ident $($names:ident)*] ($parameter:ty $(, $rest:ty)*)
+    ) => {
+        $crate::__ferro_markup_method_fn!($index $static_ $try_ $this; $name ($($return_)?) ($call)
+            [$($done)* $next : $parameter,] [$($names)*] ($($rest),*));
+    };
+    (@emit $index:ident [] $try_:tt $this:ty; $name:ident ($($return_:ty)?) ($call:expr)
+        [$($argument:ident : $parameter:ty,)*]
+    ) => {
+        $crate::__paste! {
+            #[doc(hidden)]
+            #[allow(non_snake_case, private_interfaces, clippy::all)]
+            #[inline]
+            pub fn [<__markup_ $name $index>](
+                this: &$this $(, $argument: $parameter)*
+            ) -> $crate::__ferro_markup_fn_return!($try_ ($($return_)?)) {
+                $crate::__ferro_markup_fn_body!($try_ ($($return_)?) ($call)(this $(, $argument)*))
+            }
+        }
+    };
+    (@emit $index:ident [static] $try_:tt $this:ty; $name:ident ($($return_:ty)?) ($call:expr)
+        [$($argument:ident : $parameter:ty,)*]
+    ) => {
+        $crate::__paste! {
+            #[doc(hidden)]
+            #[allow(non_snake_case, private_interfaces, clippy::all)]
+            #[inline]
+            pub fn [<__markup_ $name $index>](
+                $($argument: $parameter),*
+            ) -> $crate::__ferro_markup_fn_return!($try_ ($($return_)?)) {
+                $crate::__ferro_markup_fn_body!($try_ ($($return_)?) ($call)($($argument),*))
+            }
+        }
+    };
+}
+
+/// The return type of a typed function: `[try]? (return)?`.
+#[doc(hidden)]
+#[macro_export]
+macro_rules! __ferro_markup_fn_return {
+    ([] ()) => { () };
+    ([] ($return_:ty)) => { $return_ };
+    ([try] ()) => { ::std::result::Result<(), $crate::metadata::MarkupInvokeError> };
+    ([try] ($return_:ty)) => { ::std::result::Result<$return_, $crate::metadata::MarkupInvokeError> };
+}
+
+/// The body of a typed function: `[try]? (return)? call`.
+#[doc(hidden)]
+#[macro_export]
+macro_rules! __ferro_markup_fn_body {
+    ([] () $($call:tt)*) => {{
+        let _ = $($call)*;
+    }};
+    ([] ($return_:ty) $($call:tt)*) => {
+        $($call)*
+    };
+    ([try] () $($call:tt)*) => {
+        $crate::metadata::markup_result($($call)*).map(|_| ())
+    };
+    ([try] ($return_:ty) $($call:tt)*) => {
+        $crate::metadata::markup_result($($call)*)
     };
 }
 
@@ -902,7 +1394,7 @@ macro_rules! __ferro_markup_methods {
 #[doc(hidden)]
 #[macro_export]
 macro_rules! __ferro_markup_method {
-    ($this:ty; [] $try_:tt $name:ident ($($parameter:ty),*) ($($return_:ty)?) ($call:expr) [$($attributes:tt)*]) => {
+    ($index:ident $this:ty; [] $try_:tt $name:ident ($($parameter:ty),*) ($($return_:ty)?) ($call:expr) [$($attributes:tt)*]) => {
         $crate::metadata::MarkupMethod {
             name: ::std::stringify!($name),
             is_static: false,
@@ -919,9 +1411,13 @@ macro_rules! __ferro_markup_method {
                 )
             },
             attributes: $crate::__ferro_markup_attributes!([] $($attributes)*),
+            emit: ::std::option::Option::Some($crate::metadata::MarkupEmit {
+                function: ::std::concat!("__markup_", ::std::stringify!($name), ::std::stringify!($index)),
+                fallible: $crate::__ferro_markup_is_try!($try_),
+            }),
         }
     };
-    ($this:ty; [static] $try_:tt $name:ident ($($parameter:ty),*) ($($return_:ty)?) ($call:expr) [$($attributes:tt)*]) => {
+    ($index:ident $this:ty; [static] $try_:tt $name:ident ($($parameter:ty),*) ($($return_:ty)?) ($call:expr) [$($attributes:tt)*]) => {
         $crate::metadata::MarkupMethod {
             name: ::std::stringify!($name),
             is_static: true,
@@ -938,6 +1434,10 @@ macro_rules! __ferro_markup_method {
                 )
             },
             attributes: $crate::__ferro_markup_attributes!([] $($attributes)*),
+            emit: ::std::option::Option::Some($crate::metadata::MarkupEmit {
+                function: ::std::concat!("__markup_", ::std::stringify!($name), ::std::stringify!($index)),
+                fallible: $crate::__ferro_markup_is_try!($try_),
+            }),
         }
     };
 }

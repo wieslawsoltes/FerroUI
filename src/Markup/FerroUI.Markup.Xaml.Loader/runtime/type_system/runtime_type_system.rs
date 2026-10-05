@@ -23,6 +23,7 @@ use xamlx::type_system::{
 
 use super::core_types;
 use super::runtime_type::{
+    DeclaredMember,
     substitute, to_exact, type_key, RuntimeAssembly, RuntimeConstructor, RuntimeCustomAttribute, RuntimeEvent,
     RuntimeField, RuntimeFieldValue, RuntimeInvoker, RuntimeMembers, RuntimeMethod, RuntimeProperty, RuntimeType,
     RuntimeTypeKind, RuntimeTypeOrigin, RuntimeTypeSpec,
@@ -892,6 +893,7 @@ impl RuntimeTypeSystem {
             attributes,
             generic_parameters: Vec::new(),
             generic_arguments: Vec::new(),
+            declared: None,
         })
     }
 
@@ -944,6 +946,7 @@ impl RuntimeTypeSystem {
                     RuntimeInvoker::Static(get),
                     Vec::new(),
                 )
+                .with_declared(DeclaredMember::Getter(property))
             });
             let setter = property.set.map(|set| {
                 self.method(
@@ -955,6 +958,7 @@ impl RuntimeTypeSystem {
                     RuntimeInvoker::Static(set),
                     Vec::new(),
                 )
+                .with_declared(DeclaredMember::Setter(property))
             });
             let mut attributes = self.project_attributes(property.attributes);
             if markup.content_property == Some(property.name) {
@@ -1030,26 +1034,32 @@ impl RuntimeTypeSystem {
                 Some(return_type) => self.resolve(return_type()),
                 None => self.void(),
             };
-            members.methods.push(self.method(
-                type_,
-                method.name.to_string(),
-                method.is_static,
-                return_type,
-                self.resolve_all(method.parameters),
-                RuntimeInvoker::Static(method.invoke),
-                self.project_attributes(method.attributes),
-            ));
+            members.methods.push(
+                self.method(
+                    type_,
+                    method.name.to_string(),
+                    method.is_static,
+                    return_type,
+                    self.resolve_all(method.parameters),
+                    RuntimeInvoker::Static(method.invoke),
+                    self.project_attributes(method.attributes),
+                )
+                .with_declared(DeclaredMember::Method(method)),
+            );
         }
         if let Some(parse) = markup.parse {
-            members.methods.push(self.method(
-                type_,
-                "Parse".to_string(),
-                true,
-                self_type.clone(),
-                (vec![self.get("System.String")], vec![Some(ValueType::of::<String>())]),
-                RuntimeInvoker::Static(parse),
-                Vec::new(),
-            ));
+            members.methods.push(
+                self.method(
+                    type_,
+                    "Parse".to_string(),
+                    true,
+                    self_type.clone(),
+                    (vec![self.get("System.String")], vec![Some(ValueType::of::<String>())]),
+                    RuntimeInvoker::Static(parse),
+                    Vec::new(),
+                )
+                .with_declared(DeclaredMember::Parse(markup)),
+            );
         }
         for field in markup.fields {
             members.fields.push(Rc::new(RuntimeField {
@@ -1076,6 +1086,7 @@ impl RuntimeTypeSystem {
                     RuntimeInvoker::Static(get),
                     Vec::new(),
                 )
+                .with_declared(DeclaredMember::StaticGetter(property))
             });
             let setter = property.set.map(|set| {
                 self.method(
@@ -1087,6 +1098,7 @@ impl RuntimeTypeSystem {
                     RuntimeInvoker::Static(set),
                     Vec::new(),
                 )
+                .with_declared(DeclaredMember::StaticSetter(property))
             });
             members.methods.extend(getter.iter().cloned());
             members.methods.extend(setter.iter().cloned());
@@ -1504,6 +1516,7 @@ impl RuntimeTypeSystem {
                     attributes: merged,
                     generic_parameters: method.generic_parameters.clone(),
                     generic_arguments: method.generic_arguments.clone(),
+                    declared: method.declared,
                 });
             }
         }

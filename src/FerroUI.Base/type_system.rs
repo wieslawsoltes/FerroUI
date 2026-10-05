@@ -1194,6 +1194,8 @@ macro_rules! ferro_class_info {
 
     (@markup $name:ident { $($body:tt)* }) => {
         impl $name {
+            $crate::__ferro_markup_fns!($crate::Ref<$name>, $crate::Ref<$name>; $($body)*);
+
             #[doc(hidden)]
             pub const __MARKUP: ::std::option::Option<&'static $crate::metadata::MarkupType> = {
                 static MARKUP: $crate::metadata::MarkupType = {
@@ -1213,6 +1215,7 @@ macro_rules! ferro_class_info {
                         use $crate::ClassDefaults as _;
                         <$name>::__INTERFACES
                     };
+                    markup.this = ::std::option::Option::Some(|| $crate::data::core::ValueType::of::<$crate::Ref<$name>>());
                     $crate::__ferro_markup_items!(markup, $crate::Ref<$name>; $($body)*);
                     markup
                 };

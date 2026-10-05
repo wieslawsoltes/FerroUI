@@ -31,7 +31,7 @@ mod runtime_type_system;
 mod values;
 
 pub use runtime_type::{
-    RuntimeAssembly, RuntimeConstructor, RuntimeCustomAttribute, RuntimeEvent, RuntimeField, RuntimeFieldValue,
+    DeclaredMember, RuntimeAssembly, RuntimeConstructor, RuntimeCustomAttribute, RuntimeEvent, RuntimeField, RuntimeFieldValue,
     RuntimeInvoker, RuntimeMembers, RuntimeMethod, RuntimeProperty, RuntimeType, RuntimeTypeKind, RuntimeTypeOrigin,
 };
 pub use runtime_type_system::{

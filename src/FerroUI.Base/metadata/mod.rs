@@ -15,7 +15,7 @@ pub use i_add_child::IAddChild;
 pub use markup_assembly::{MarkupAssembly, XmlnsDefinition, XmlnsPrefix, FERRO_XML_NAMESPACE};
 pub use markup_type::{
     attributes, from_markup_value, into_markup_value, markup_result, MarkupArguments, MarkupAttribute, MarkupAttributeValue,
-    MarkupConstructor, MarkupDelegate, MarkupEnumMember, MarkupEvent, MarkupField, MarkupGeneric, MarkupIndexer, MarkupInvoke,
+    MarkupConstructor, MarkupDelegate, MarkupEmit, MarkupEnumMember, MarkupEvent, MarkupField, MarkupGeneric, MarkupIndexer, MarkupInvoke,
     MarkupInvokeError, MarkupLiteral, MarkupMethod, MarkupParameter, MarkupProperty, MarkupType, MarkupTypeKind, MarkupTyped,
     MarkupValue, TypeOf,
 };
