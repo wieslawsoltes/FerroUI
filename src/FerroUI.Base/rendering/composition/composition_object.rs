@@ -1,8 +1,8 @@
-use super::animations::{ICompositionAnimation, ICompositionAnimationBase};
+use super::animations::{ICompositionAnimation, ICompositionAnimationBase, ImplicitAnimationCollection};
 use super::expressions::ExpressionVariant;
 use super::server::{CompositionProperty, ServerObjectId};
-use super::{Compositor, ICompositorSerializable, PendingAnimations};
-use std::cell::Cell;
+use super::{CompositionPropertySet, Compositor, ICompositorSerializable, PendingAnimations};
+use std::cell::{Cell, RefCell};
 use std::rc::Rc;
 
 /// The part every composition object embeds: what upstream's abstract
@@ -22,6 +22,7 @@ pub struct CompositionObject {
     is_disposed: Cell<bool>,
     registered_for_serialization: Cell<bool>,
     pending_animations: PendingAnimations,
+    implicit_animations: RefCell<Option<Rc<ImplicitAnimationCollection>>>,
 }
 
 impl CompositionObject {
@@ -32,7 +33,25 @@ impl CompositionObject {
             is_disposed: Cell::new(false),
             registered_for_serialization: Cell::new(false),
             pending_animations: PendingAnimations::new(),
+            implicit_animations: RefCell::new(None),
         }
+    }
+
+    /// The collection of implicit animations attached to this object.
+    pub fn implicit_animations(&self) -> Option<Rc<ImplicitAnimationCollection>> {
+        self.implicit_animations.borrow().clone()
+    }
+
+    pub fn set_implicit_animations(&self, value: Option<Rc<ImplicitAnimationCollection>>) {
+        *self.implicit_animations.borrow_mut() = value;
+    }
+
+    /// The implicit animation attached to a property of the object, if
+    /// there is one (`ImplicitAnimations?.TryGetValue(name)` of the
+    /// generated setters).
+    pub fn implicit_animation(&self, property_name: &str) -> Option<Rc<dyn ICompositionAnimationBase>> {
+        let animations = self.implicit_animations.borrow().clone()?;
+        animations.try_get_value(property_name)
     }
 
     pub fn compositor(&self) -> &Rc<Compositor> {
@@ -136,11 +155,25 @@ impl Drop for CompositionObject {
     }
 }
 
+/// A composition object as code refers to any composition object: a
+/// reference parameter of an animation, an object stored in a property set
+/// (upstream `CompositionObject` as a parameter type).
+pub trait AsCompositionObject: 'static {
+    /// The embedded `CompositionObject`.
+    fn as_composition_object(&self) -> &CompositionObject;
+
+    /// The name of the class of the object, for messages.
+    fn composition_type_name(&self) -> &'static str;
+
+    /// The object as a property set, if it is one (the `is
+    /// CompositionPropertySet` test of upstream).
+    fn as_property_set(self: Rc<Self>) -> Option<Rc<CompositionPropertySet>> {
+        None
+    }
+}
+
 /// The animation members of `CompositionObject`, written against the class
 /// that embeds one.
-///
-/// Animation groups and implicit animation collections arrive with the
-/// animation engine; until then a group can only be a single animation.
 pub trait ICompositionObjectAnimations {
     /// `StartAnimation(propertyName, animation, finalValue)` of the class:
     /// returns `false` for a property the class does not know.
@@ -182,11 +215,35 @@ pub trait ICompositionObjectAnimations {
         self.composition_object().stop_animation(property);
     }
 
-    /// Starts an animation group: each animation on its target property.
+    /// Starts an animation group.
+    /// The StartAnimationGroup method on CompositionObject lets you start CompositionAnimationGroup.
+    /// All the animations in the group will be started at the same time on the object.
     fn start_animation_group(&self, grp: &dyn ICompositionAnimationBase) {
         if let Some(animation) = grp.as_composition_animation() {
             let Some(target) = animation.target() else { panic!("Animation Target can't be null") };
             self.start_animation(&target, animation);
+        } else if let Some(group) = grp.as_composition_animation_group() {
+            for a in group.animations() {
+                let Some(target) = a.target() else { panic!("Animation Target can't be null") };
+                self.start_animation(&target, &*a);
+            }
+        }
+    }
+
+    /// `StartAnimationGroupPart`.
+    fn start_animation_group_part(
+        &self,
+        animation: &dyn ICompositionAnimation,
+        target: &str,
+        final_value: ExpressionVariant,
+    ) -> bool {
+        let Some(animation_target) = animation.target() else { panic!("Animation Target can't be null") };
+        if animation_target == target {
+            self.start_animation_with_final_value(&animation_target, animation, Some(final_value));
+            true
+        } else {
+            self.start_animation(&animation_target, animation);
+            false
         }
     }
 
@@ -199,17 +256,23 @@ pub trait ICompositionObjectAnimations {
         target: &str,
         final_value: ExpressionVariant,
     ) -> bool {
-        let Some(animation) = grp.as_composition_animation() else {
-            panic!("the animation is neither an animation nor a group of animations");
-        };
-        let Some(animation_target) = animation.target() else { panic!("Animation Target can't be null") };
-        if animation_target == target {
-            self.start_animation_with_final_value(&animation_target, animation, Some(final_value));
-            true
-        } else {
-            self.start_animation(&animation_target, animation);
-            false
+        if let Some(animation) = grp.as_composition_animation() {
+            return self.start_animation_group_part(animation, target, final_value);
         }
+        if let Some(group) = grp.as_composition_animation_group() {
+            let mut matched = false;
+            for a in group.animations() {
+                if a.target().is_none() {
+                    panic!("Animation Target can't be null");
+                }
+                if self.start_animation_group_part(&*a, target, final_value) {
+                    matched = true;
+                }
+            }
+            return matched;
+        }
+
+        panic!("the animation is neither an animation nor a group of animations");
     }
 
     /// Stops an animation group.
@@ -217,7 +280,11 @@ pub trait ICompositionObjectAnimations {
         if let Some(animation) = grp.as_composition_animation() {
             let Some(target) = animation.target() else { panic!("Animation Target can't be null") };
             self.stop_animation(&target);
+        } else if let Some(group) = grp.as_composition_animation_group() {
+            for a in group.animations() {
+                let Some(target) = a.target() else { panic!("Animation Target can't be null") };
+                self.stop_animation(&target);
+            }
         }
     }
 }
-

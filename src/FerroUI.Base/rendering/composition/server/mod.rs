@@ -77,7 +77,9 @@ pub use server_composition_visual::{
 };
 pub use server_composition_visual_collection::ServerCompositionVisualCollection;
 pub use server_compositor_animations::ServerCompositorAnimations;
-pub use server_object::{impl_animated_server_object, IAnimatedServerObject, IServerObject, ServerObject, ServerObjectId};
+pub use server_object::{
+    impl_animated_server_object, IAnimatedServerObject, IServerObject, ServerExpressionObject, ServerObject, ServerObjectId,
+};
 pub use server_object_animations::ServerObjectAnimations;
 pub use server_size_dependant_visual::ServerSizeDependantVisual;
 pub use server_visual_render_context::ServerVisualRenderContext;

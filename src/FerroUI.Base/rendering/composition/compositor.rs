@@ -3,6 +3,8 @@ use super::transport::{
     BatchMarker, BatchObject, BatchStreamWriter, CommittedBatch, CompositionBatch, ServerJob, ServerObjectFactory,
 };
 use super::{CompositionOptions, ICompositorSerializable};
+use crate::animation::easings::{IEasing, SplineEasing};
+use crate::animation::KeySpline;
 use crate::platform::IPlatformGraphics;
 use crate::reactive::{Disposable, IDisposable};
 use crate::rendering::composition::server::IServerObject;
@@ -61,6 +63,7 @@ pub struct Compositor {
     scheduler: Weak<dyn ICompositorScheduler>,
     dispatcher: Arc<Dispatcher>,
     after_commit: HandlerList<dyn Fn()>,
+    default_easing: Rc<dyn IEasing>,
 }
 
 /// The render loop task of a compositor. The loop may tick on any thread;
@@ -169,6 +172,7 @@ impl Compositor {
             scheduler: Rc::downgrade(scheduler),
             dispatcher,
             after_commit: HandlerList::new(),
+            default_easing: Rc::new(SplineEasing::with_key_spline(KeySpline::with_points(0.25, 0.1, 0.25, 1.0))),
         });
         COMPOSITORS.with(|compositors| {
             let mut compositors = compositors.borrow_mut();
@@ -177,6 +181,11 @@ impl Compositor {
         });
         render_loop.add(loop_task);
         compositor
+    }
+
+    /// The easing of the key frames that are inserted without one.
+    pub(crate) fn default_easing(&self) -> Rc<dyn IEasing> {
+        self.default_easing.clone()
     }
 
     /// The render loop the server compositor is driven by.

@@ -1,12 +1,12 @@
-use super::animations::ICompositionAnimationBase;
+use super::animations::{ICompositionAnimation, ICompositionAnimationBase};
 use super::container_visual::HIT_TEST_AABB_TREE_THRESHOLD;
 use super::expressions::ExpressionVariant;
-use super::generated::{CompositionTargetHooks, CompositionTargetProps};
+use super::generated::{CompositionTargetHooks, CompositionTargetProps, ServerCompositionTargetProps};
 use super::hit_testing::{is_hit, ICompositionHitTester};
-use super::server::{RenderSurfaces, ServerCompositionTarget, ServerObjectId};
+use super::server::{CompositionProperty, RenderSurfaces, ServerCompositionTarget, ServerObjectId};
 use super::transport::{BatchStreamWriter, IRegisterForSerialization};
 use super::{
-    CompositionObject, CompositionTransparencyLevel, CompositionVisual, Compositor, ICompositionObject,
+    AsCompositionObject, CompositionObject, CompositionTransparencyLevel, ICompositionObjectAnimations, CompositionVisual, Compositor, ICompositionObject,
     ICompositionObjectHost, ICompositionTargetDebugEvents, ICompositorSerializable, PendingAnimations,
 };
 use crate::media::IntersectionResult;
@@ -380,17 +380,48 @@ impl ICompositionObjectHost for CompositionTarget {
         self.object.pending_animations()
     }
 
-    fn implicit_animation(&self, _property_name: &str) -> Option<Rc<dyn ICompositionAnimationBase>> {
-        None
+    fn implicit_animation(&self, property_name: &str) -> Option<Rc<dyn ICompositionAnimationBase>> {
+        self.object.implicit_animation(property_name)
     }
 
     fn start_animation_group(
         &self,
-        _grp: &Rc<dyn ICompositionAnimationBase>,
-        _target: &str,
-        _final_value: ExpressionVariant,
+        grp: &Rc<dyn ICompositionAnimationBase>,
+        target: &str,
+        final_value: ExpressionVariant,
+    ) -> bool {
+        self.start_animation_group_for(&**grp, target, final_value)
+    }
+}
+
+/// The class has no animated property: upstream does not override
+/// `StartAnimation`, whose base implementation rejects every property.
+impl ICompositionObjectAnimations for CompositionTarget {
+    fn try_start_animation(
+        &self,
+        _property_name: &str,
+        _animation: &dyn ICompositionAnimation,
+        _final_value: Option<ExpressionVariant>,
     ) -> bool {
         false
+    }
+
+    fn get_composition_property(&self, property_name: &str) -> Option<&'static CompositionProperty> {
+        ServerCompositionTargetProps::get_composition_property(property_name)
+    }
+
+    fn composition_object(&self) -> &CompositionObject {
+        &self.object
+    }
+}
+
+impl AsCompositionObject for CompositionTarget {
+    fn as_composition_object(&self) -> &CompositionObject {
+        &self.object
+    }
+
+    fn composition_type_name(&self) -> &'static str {
+        "CompositionTarget"
     }
 }
 

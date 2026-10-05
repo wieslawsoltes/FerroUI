@@ -1,3 +1,4 @@
+use super::animations::{CompositionAnimationGroup, ExpressionAnimation, ImplicitAnimationCollection};
 use super::server::{RenderSurfaces, ServerCompositionContainerVisual};
 use super::visual::CompositionVisualKind;
 use super::{
@@ -23,6 +24,24 @@ impl Compositor {
             CompositionVisualKind::Container(super::generated::CompositionContainerVisualProps::new()),
             || Box::new(ServerCompositionContainerVisual),
         )
+    }
+
+    pub fn create_expression_animation(&self) -> Rc<ExpressionAnimation> {
+        ExpressionAnimation::new(&self.this_rc())
+    }
+
+    pub fn create_expression_animation_with(&self, expression: &str) -> Rc<ExpressionAnimation> {
+        let animation = ExpressionAnimation::new(&self.this_rc());
+        animation.set_expression(Some(expression.to_owned()));
+        animation
+    }
+
+    pub fn create_implicit_animation_collection(&self) -> Rc<ImplicitAnimationCollection> {
+        ImplicitAnimationCollection::new(&self.this_rc())
+    }
+
+    pub fn create_animation_group(&self) -> Rc<CompositionAnimationGroup> {
+        CompositionAnimationGroup::new(&self.this_rc())
     }
 
     pub fn create_solid_color_visual(&self) -> CompositionSolidColorVisual {
