@@ -1,17 +1,21 @@
 use crate::browser_app_builder::BrowserPlatformOptions;
+use crate::browser_input_handler::{BrowserInputHandler, IInputTopLevel};
 use crate::cursor::CssCursor;
 use crate::interop::{dom_helper, input_helper, JsObject};
 use crate::js_object_control_handle::JsObjectControlHandle;
 use crate::rendering::RenderTargetBrowserSurface;
 use crate::windowing_platform::BrowserWindowingPlatform;
 use ferroui_base::input::raw::IRawInputEventArgs;
+use ferroui_base::input::text_input::ITextInputMethodImpl;
 use ferroui_base::input::IInputRoot;
 use ferroui_base::platform::surfaces::IPlatformRenderSurface;
 use ferroui_base::platform::{ICursorImpl, IOptionalFeatureProvider, ISystemNavigationManagerImpl};
 use ferroui_base::reactive::IDisposable;
 use ferroui_base::rendering::composition::Compositor;
 use ferroui_base::{FerroLocator, LocatorExtensions, PixelPoint, Point, Rect, Size};
-use ferroui_controls::platform::{IPlatformHandle, IPopupImpl, IScreenImpl, ITopLevelImpl, PlatformThemeVariant};
+use ferroui_controls::platform::{
+    IInputPane, IPlatformHandle, IPopupImpl, IScreenImpl, ITopLevelImpl, PlatformThemeVariant,
+};
 use ferroui_controls::{AcrylicPlatformCompensationLevels, WindowResizeReason, WindowTransparencyLevel};
 use std::any::{Any, TypeId};
 use std::cell::{Cell, RefCell};
@@ -29,17 +33,15 @@ type Callback<T> = RefCell<Option<Rc<T>>>;
 /// The top-level of a view: a canvas inside an element of the page.
 pub struct BrowserTopLevelImpl {
     container: JsObject,
-    #[allow(dead_code)] // the native control host and the text input method attach to these
+    #[allow(dead_code)] // the native control host attaches to this
     native_control_host: JsObject,
-    #[allow(dead_code)]
-    input_element: JsObject,
+    input_handler: Rc<BrowserInputHandler>,
     current_cursor: RefCell<String>,
     surface: RefCell<Option<Rc<RenderTargetBrowserSurface>>>,
     top_level_id: i32,
     compositor: Rc<Compositor>,
     handle: Rc<dyn IPlatformHandle>,
     acrylic_compensation_levels: AcrylicPlatformCompensationLevels,
-    input_root: RefCell<Option<Rc<dyn IInputRoot>>>,
 
     input: Callback<dyn Fn(Rc<dyn IRawInputEventArgs>)>,
     paint: Callback<dyn Fn(Rect)>,
@@ -61,9 +63,11 @@ impl BrowserTopLevelImpl {
     /// `native_control_host` is the element native controls are placed in
     /// and `input_element` the hidden input element of the view.
     pub fn new(container: JsObject, native_control_host: JsObject, input_element: JsObject) -> Rc<Self> {
-        // Once, before the first top-level: the events of the page that are not bound to a view.
+        // Once, before the first top-level: the events and the handlers of the page that are not
+        // bound to a view.
         if !GLOBAL_EVENTS_INITIALIZED.with(|initialized| initialized.replace(true)) {
             dom_helper::init_global_dom_events(&BrowserWindowingPlatform::global_this());
+            input_helper::initialize_background_handlers(&BrowserWindowingPlatform::global_this());
         }
 
         let top_level_id = LAST_TOP_LEVEL_ID.with(|last| {
@@ -71,47 +75,57 @@ impl BrowserTopLevelImpl {
             last.get()
         });
 
-        let opts = FerroLocator::current().get_service::<BrowserPlatformOptions>().unwrap_or_default();
-        let surface = RenderTargetBrowserSurface::create(&container, &opts.rendering_mode, top_level_id);
-        let compositor = surface.compositor();
+        let this = Rc::new_cyclic(|this: &Weak<Self>| {
+            TOP_LEVELS.with(|top_levels| top_levels.borrow_mut().insert(top_level_id, this.clone()));
 
-        let this = Rc::new(Self {
-            handle: Rc::new(JsObjectControlHandle::new(container.clone())),
-            container,
-            native_control_host,
-            input_element,
-            current_cursor: RefCell::new(CssCursor::DEFAULT.to_string()),
-            surface: RefCell::new(Some(surface.clone())),
-            top_level_id,
-            compositor,
-            acrylic_compensation_levels: AcrylicPlatformCompensationLevels::new(1.0, 1.0, 1.0),
-            input_root: RefCell::new(None),
-            input: RefCell::new(None),
-            paint: RefCell::new(None),
-            resized: RefCell::new(None),
-            scaling_changed: RefCell::new(None),
-            transparency_level_changed: RefCell::new(None),
-            closed: RefCell::new(None),
-            lost_focus: RefCell::new(None),
-        });
-        TOP_LEVELS.with(|top_levels| top_levels.borrow_mut().insert(top_level_id, Rc::downgrade(&this)));
+            // The input handler reaches its top-level through a weak reference: the top-level
+            // owns the handler.
+            let input_top_level: Weak<dyn IInputTopLevel> = this.clone();
+            let input_handler =
+                BrowserInputHandler::new(input_top_level, container.clone(), input_element, top_level_id);
 
-        surface.size_changed({
-            let this = Rc::downgrade(&this);
-            Rc::new(move || {
-                if let Some(this) = this.upgrade() {
-                    this.on_size_changed();
-                }
-            })
+            let opts = FerroLocator::current().get_service::<BrowserPlatformOptions>().unwrap_or_default();
+            let surface = RenderTargetBrowserSurface::create(&container, &opts.rendering_mode, top_level_id);
+            let compositor = surface.compositor();
+
+            Self {
+                handle: Rc::new(JsObjectControlHandle::new(container.clone())),
+                container,
+                native_control_host,
+                input_handler,
+                current_cursor: RefCell::new(CssCursor::DEFAULT.to_string()),
+                surface: RefCell::new(Some(surface)),
+                top_level_id,
+                compositor,
+                acrylic_compensation_levels: AcrylicPlatformCompensationLevels::new(1.0, 1.0, 1.0),
+                input: RefCell::new(None),
+                paint: RefCell::new(None),
+                resized: RefCell::new(None),
+                scaling_changed: RefCell::new(None),
+                transparency_level_changed: RefCell::new(None),
+                closed: RefCell::new(None),
+                lost_focus: RefCell::new(None),
+            }
         });
-        surface.scaling_changed({
-            let this = Rc::downgrade(&this);
-            Rc::new(move || {
-                if let Some(this) = this.upgrade() {
-                    this.on_scaling_changed();
-                }
-            })
-        });
+
+        if let Some(surface) = this.surface() {
+            surface.size_changed({
+                let this = Rc::downgrade(&this);
+                Rc::new(move || {
+                    if let Some(this) = this.upgrade() {
+                        this.on_size_changed();
+                    }
+                })
+            });
+            surface.scaling_changed({
+                let this = Rc::downgrade(&this);
+                Rc::new(move || {
+                    if let Some(this) = this.upgrade() {
+                        this.on_scaling_changed();
+                    }
+                })
+            });
+        }
 
         this
     }
@@ -144,9 +158,37 @@ impl BrowserTopLevelImpl {
         self.top_level_id
     }
 
+    /// The input handler of the top-level: what turns the events of the
+    /// page into raw input events.
+    pub fn input_handler(&self) -> &Rc<BrowserInputHandler> {
+        &self.input_handler
+    }
+
     /// The input root the top-level delivers input to.
     pub fn input_root(&self) -> Option<Rc<dyn IInputRoot>> {
-        self.input_root.borrow().clone()
+        self.input_handler.input_root()
+    }
+
+    /// The keyboard focus of the page left the element of the top-level.
+    // Differs from the original, where the lost-focus notification is never raised.
+    pub(crate) fn on_lost_focus(&self) {
+        let lost_focus = self.lost_focus.borrow().clone();
+        if let Some(lost_focus) = lost_focus {
+            self.input_handler().text_input_method().while_focus_leaves_view(|| lost_focus());
+        }
+    }
+}
+
+impl IInputTopLevel for BrowserTopLevelImpl {
+    fn dispatch_input(&self, args: Rc<dyn IRawInputEventArgs>) {
+        let input = self.input.borrow().clone();
+        if let Some(input) = input {
+            input(args);
+        }
+    }
+
+    fn page_size(&self) -> Size {
+        ITopLevelImpl::client_size(self)
     }
 }
 
@@ -156,11 +198,20 @@ impl IDisposable for BrowserTopLevelImpl {
         if let Some(surface) = surface {
             surface.dispose();
         }
+
+        // Differs from the original, which leaves the listeners of the element in place: a
+        // disposed top-level no longer receives the input of the page.
+        self.input_handler.dispose();
     }
 }
 
 impl IOptionalFeatureProvider for BrowserTopLevelImpl {
     fn try_get_feature(&self, feature_type: TypeId) -> Option<Rc<dyn Any>> {
+        if feature_type == TypeId::of::<dyn ITextInputMethodImpl>() {
+            let text_input_method: Rc<dyn ITextInputMethodImpl> = self.input_handler.text_input_method().clone();
+            return Some(Rc::new(text_input_method));
+        }
+
         if feature_type == TypeId::of::<dyn ISystemNavigationManagerImpl>() {
             let service = FerroLocator::current().get_service::<dyn ISystemNavigationManagerImpl>()?;
             return Some(Rc::new(service));
@@ -169,6 +220,11 @@ impl IOptionalFeatureProvider for BrowserTopLevelImpl {
         if feature_type == TypeId::of::<dyn IScreenImpl>() {
             let service = FerroLocator::current().get_service::<dyn IScreenImpl>()?;
             return Some(Rc::new(service));
+        }
+
+        if feature_type == TypeId::of::<dyn IInputPane>() {
+            let input_pane: Rc<dyn IInputPane> = self.input_handler.input_pane().clone();
+            return Some(Rc::new(input_pane));
         }
 
         None
@@ -241,7 +297,7 @@ impl ITopLevelImpl for BrowserTopLevelImpl {
     }
 
     fn set_input_root(&self, input_root: Rc<dyn IInputRoot>) {
-        *self.input_root.borrow_mut() = Some(input_root);
+        self.input_handler.set_input_root(input_root);
     }
 
     fn point_to_client(&self, point: PixelPoint) -> Point {

@@ -46,6 +46,24 @@ export class FerroExports {
         return group;
     }
 
+    public static get InputHelper() {
+        return FerroExports.group("InputHelper", {
+            OnKeyDown: "InputHelper_OnKeyDown",
+            OnKeyUp: "InputHelper_OnKeyUp",
+            OnBeforeInput: "InputHelper_OnBeforeInput",
+            OnCompositionStart: "InputHelper_OnCompositionStart",
+            OnCompositionUpdate: "InputHelper_OnCompositionUpdate",
+            OnCompositionEnd: "InputHelper_OnCompositionEnd",
+            OnPointerMove: "InputHelper_OnPointerMove",
+            OnPointerDown: "InputHelper_OnPointerDown",
+            OnPointerUp: "InputHelper_OnPointerUp",
+            OnPointerCancel: "InputHelper_OnPointerCancel",
+            OnWheel: "InputHelper_OnWheel",
+            OnKeyboardGeometryChange: "InputHelper_OnKeyboardGeometryChange",
+            OnLostFocus: "InputHelper_OnLostFocus"
+        });
+    }
+
     public static get DomHelper() {
         return FerroExports.group("DomHelper", {
             DarkModeChanged: "DomHelper_DarkModeChanged",
