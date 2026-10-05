@@ -175,15 +175,15 @@ impl IXamlAstVisitor for NeedsParentStack {
 /// The Rust expression that yields the definition of a registered property:
 /// a call of an accessor recorded by the declaration macros
 /// ([`property_accessors`]) on a type with a public Rust path. Every
-/// recorded accessor returns the identical definition; the one declared by
-/// `preferred` (the type the property was resolved on) is taken when it
-/// exists.
+/// recorded accessor returns the identical definition; the first one in the
+/// order of [`property_accessors`] (the type the property was resolved on
+/// and its base types, then the type that registered it and its base
+/// types) whose type has a public Rust path is taken, so the choice depends
+/// only on the declarations, never on what ran earlier on the thread.
 fn property_definition(property: &'static FerroProperty, preferred: Option<&'static TypeInfo>) -> Result<String, String> {
-    let accessors = property_accessors(property);
-    let chosen = preferred
-        .and_then(|preferred| accessors.iter().find(|accessor| std::ptr::eq(accessor.owner, preferred)))
-        .into_iter()
-        .chain(accessors.iter())
+    let accessors = property_accessors(property, preferred);
+    let chosen = accessors
+        .iter()
         .find_map(|accessor| accessor.owner.rust_path().map(|path| format!("{}::{}()", absolute(path), accessor.name)));
     chosen.ok_or_else(|| match accessors.is_empty() {
         true => format!("no accessor of the property {} is recorded", property.name()),

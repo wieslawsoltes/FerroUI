@@ -18,7 +18,7 @@ pub use markup_type::{
     MarkupInvokeError, MarkupLiteral, MarkupMethod, MarkupParameter, MarkupProperty, MarkupType, MarkupTypeKind, MarkupTyped,
     MarkupValue, TypeOf,
 };
-pub use property_accessors::{property_accessors, record_property_accessor, PropertyAccessor};
+pub use property_accessors::{declared_property_accessors, property_accessors, record_property_accessor, PropertyAccessor};
 pub use typed_path::TypedPathElement;
 pub use service_provider::{service, EmptyServiceProvider, IServiceProvider};
 

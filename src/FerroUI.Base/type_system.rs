@@ -162,6 +162,12 @@ impl TypeInfo {
         }
     }
 
+    /// Whether the type has a static initialisation of its own
+    /// ([`with_class_init`](Self::with_class_init)).
+    pub(crate) fn has_class_init(&self) -> bool {
+        self.class_init.is_some()
+    }
+
     /// Ensures the static initialisation of the type and of its base types
     /// has run on the current thread: handle casts and property definitions
     /// are registered (properties in declaration order) and the static
