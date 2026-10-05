@@ -21,3 +21,9 @@ ferroui-markup = { workspace = true }
 ferroui-markup-xaml = { workspace = true }
 ferroui-markup-xaml-loader = { workspace = true, features = ["runtime", "emitter", "testing"] }
 xamlx = { workspace = true }
+
+[dev-dependencies]
+# The measurement of the theme documents (`emitter::repository_documents`, an ignored test)
+# compiles each theme's documents as a group, which names the types of the theme crates.
+ferroui-themes-simple = { workspace = true }
+ferroui-themes-fluent = { workspace = true }

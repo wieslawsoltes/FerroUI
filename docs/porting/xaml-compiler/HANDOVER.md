@@ -6,9 +6,11 @@
 - Stage E2 is DONE on branch `xaml-compiler-e2` (pull request #9, against `main`, linear, rebased
   on `main` after E1 merged). Corpus: 77 of 81 documents eligible, all 77 match the run-time
   loader. The four that are not eligible need E3/E4 (a binding: parent stack; a style selector;
-  a control template: deferred content; resources). Theme documents: measured by the ignored
-  test `emitter::repository_documents::measure_theme_documents` (each theme compiled as one group);
-  the first blocker of most of them is the parent stack (E3).
+  a control template: deferred content; resources). Theme documents: 0 of 163 eligible (each theme
+  compiled as one group, without its `x:Class` document and the documents its `excluded.txt`
+  leaves out): 146 are blocked first by the parent stack (E3), 14 by `Content` setters, 2 by
+  `EnsureCapacityNode`, 1 by `x:Static` of a static property; measured by the ignored test
+  `emitter::repository_documents::measure_theme_documents`.
 - Everything E2 adds exists only with the `compiler-metadata` feature of the base crate (section
   7, "Cost"); a default build carries none of it.
 - Stage E3 is next (section 7). Nothing is half-done in the working tree.
