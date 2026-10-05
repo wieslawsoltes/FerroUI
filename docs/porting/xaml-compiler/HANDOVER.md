@@ -5,9 +5,11 @@
 - Stage E1 is DONE on branch `xaml-compiler` (pull request "XAML compiler: stage E1 - build the
   draft, emitter of objects, registered properties, constants and names"). The draft builds; the
   checked-in `tests/FerroUI.Markup.Xaml.UnitTests/emitter/generated.rs` is the real output of the
-  emitter; the differential harness is green: 51 of the 63 corpus documents are eligible and all
-  51 build object trees equal to the run-time loader's (one of them, `duplicate_name.xaml`, by
-  failing with the same message).
+  emitter; the differential harness is green: 54 of the 66 corpus documents are eligible and all
+  54 build object trees equal to the run-time loader's (three of them, `duplicate_name.xaml`,
+  `multiline_duplicate_name.xaml` and `end_init_failure.xaml`, by failing with the same exception
+  type and message).
+- Review fixes of the E1 pull request are in (section 3, "Review fixes").
 - Stage E2 has not started. Its branch is `xaml-compiler-e2`, stacked on `xaml-compiler`
   (see section 7 for the plan).
 - Nothing is half-done in the working tree of the E1 branch.
@@ -108,10 +110,16 @@ Run-time library (`ferroui-markup-xaml`):
 
 Base (`ferroui-base`):
 
-- `metadata::property_accessors` (new): `record_property_accessor`, `property_accessors`. The
+- `metadata::property_accessors` (new, feature `compiler-metadata` only):
+  `record_property_accessor`, `declared_property_accessors`, `property_accessors`. The
   `ferro_property!(for Owner; ..)` form (so every accessor of a `ferro_properties!` block) records
-  the owner type, the accessor name and the definition the first time the accessor runs on a
-  thread. The emitter names a registered property by a recorded accessor, never by a naming rule.
+  the owner type, the accessor name and the definition when the type registers its properties
+  (its static initialisation). `property_accessors(property, preferred)` initialises the types it
+  consults (the resolving type and its bases, then the registering type and its bases) and lists
+  their accessors in declaration order, so the choice is independent of execution order. Without
+  the feature the macro records nothing and the table does not exist. The loader's `emitter`
+  feature (which gates `rust_emitter`) enables it; the XAML test crate turns `emitter` on.
+  The emitter names a registered property by a recorded accessor, never by a naming rule.
   Accessors declared with the plain `ferro_property!(..)` form outside a block are not recorded;
   such a property makes a document not eligible (measure and fix in E2 if any is reachable).
 
@@ -145,9 +153,28 @@ Rust path (`FontStyle`, `Viewbox`, `LayoutTransformControl`: the hand lists), bi
 stack), templates (`ControlTemplate` is not a class of the object model), constructor arguments
 (`Background='Red'` builds a brush with arguments).
 
-Deliberately not done in E1: `CompiledXamlLoader` still returns `Option` (ruling 6 wants
-`Result`; it touches the Simple theme's hand-registered loader, so it goes with the build
-integration in E5); the generated `try_load` panics with the message of a failed build.
+Review fixes (after the E1 review):
+
+- Determinism of accessor selection and the `compiler-metadata` feature (above).
+- `rt::at(type_name, message, line, position)`: load errors of generated code carry the exception
+  type the run-time loader reports (`CompiledLoadError` as the inner error); the harness compares
+  type and message.
+- `CompiledXamlLoader` returns `Result<Option<BoxedValue>, XamlLoadException>` (ruling 7);
+  `FerroXamlLoader` propagates the error; the generated `try_load` returns the build error
+  instead of panicking; the hand-written loaders of both themes and of the catalog follow.
+- Prelude names in generated code are fully qualified (`::core::option::Option::Some`, ...).
+- Colliding build function names (`a-b.xaml` / `a_b.xaml`, case, `x.xaml_untyped`) are a
+  not-eligible diagnostic of the later document.
+- Corpus: multi-line documents (error on line 4) and a control whose `EndInit` fails
+  (`support::emitter::FailingEndInit`, registered with its Rust path; the test crate has
+  `extern crate self as ferroui_markup_xaml_tests` for that).
+
+Open items left for E2 and later (from the E1 review): the `.map.json` position map of 9.3.6
+(only marker comments exist); value priority in the canonical dump (it shows set values, not the
+priority they were set at); case folding of document URIs in the generated `try_load` is ASCII
+only (`eq_ignore_ascii_case`), check it against upstream's URI comparison; group transforms (the
+emitter compiles single documents with `transform_document`, the run-time loader transforms
+groups with includes, section 6).
 
 ## 4. Verified when E1 built the draft
 
