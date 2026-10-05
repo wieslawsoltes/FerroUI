@@ -9,7 +9,9 @@
 # target/browser/<application> (or --out): the host page, the script modules of the platform
 # (ferroui.js and storage.js, built from webapp/ with esbuild), the service worker (ferroui-sw.js, at
 # the root of the site, which its scope and the save picker polyfill need) and the WebAssembly module
-# with its script. Serve the directory with any static web server.
+# with its script, plus the files that build scripts of the application leave for the site in
+# `$OUT_DIR/browser-site/` (asset bundles the host page downloads). Serve the directory with any
+# static web server.
 #
 # The module is built with the `browser` profile of the workspace (optimised for size, see
 # docs/porting/browser-platform.md, section 18), or with the `dev` profile with --debug.
@@ -110,7 +112,11 @@ echo "== script module"
 echo "== WebAssembly module ($PROFILE)"
 FLAGS=()
 [ "$PROFILE" = "browser" ] && FLAGS+=(--profile browser)
-(cd "$ROOT" && cargo build --locked --target wasm32-unknown-emscripten "${CARGO_SELECTION[@]}" "${FLAGS[@]}")
+# The messages of the build name the output directories of the build scripts.
+MESSAGES="$(mktemp)"
+trap 'rm -f -- "$MESSAGES"' EXIT
+(cd "$ROOT" && cargo build --locked --target wasm32-unknown-emscripten "${CARGO_SELECTION[@]}" "${FLAGS[@]}" \
+  --message-format=json-render-diagnostics > "$MESSAGES")
 
 echo "== site"
 BUILT="$TARGET_DIR/wasm32-unknown-emscripten/$PROFILE"
@@ -130,5 +136,16 @@ cp "$CRATE/dist/ferroui.js" "$CRATE/dist/ferroui.js.map" "$CRATE/dist/storage.js
 # has to sit at the root of the site, next to the host page.
 cp "$CRATE/dist/ferroui-sw.js" "$CRATE/dist/ferroui-sw.js.map" "$OUT"/
 cp "$BUILT/$APPLICATION.js" "$BUILT/$WASM" "$OUT"/
+# Files the build scripts of the application wrote for the site.
+node -e 'const fs = require("fs"), path = require("path");
+  const dirs = new Set();
+  for (const line of fs.readFileSync(process.argv[1], "utf8").split("\n")) {
+    if (!line.startsWith("{")) continue;
+    const message = JSON.parse(line);
+    if (message.reason === "build-script-executed" && message.out_dir) dirs.add(path.join(message.out_dir, "browser-site"));
+  }
+  for (const dir of dirs) if (fs.existsSync(dir)) console.log(dir);' "$MESSAGES" | while read -r SITE_FILES; do
+  cp -R "$SITE_FILES"/. "$OUT"/
+done
 ls -la "$OUT"
 echo "site written to $OUT"
