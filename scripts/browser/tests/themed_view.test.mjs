@@ -22,7 +22,7 @@ async function start(query = "") {
         const i = pair.indexOf("="); return [pair.slice(0, i), pair.slice(i + 1)];
     }));
     // Records, after the handlers of the view ran, whether each key kept its default action.
-    await page.evaluate(`(globalThis.keys = [], document.addEventListener("keydown", (e) => keys.push({ key: e.key, prevented: e.defaultPrevented })), true)`);
+    await page.evaluate(`(globalThis.keys = [], document.addEventListener("keydown", (e) => { keys.push({ key: e.key, prevented: e.defaultPrevented }); if (globalThis.keepPage) { e.preventDefault(); } }), true)`);
     page.lastKey = async () => await page.evaluate("JSON.stringify(keys[keys.length - 1])").then(JSON.parse);
     return page;
 }
@@ -78,6 +78,9 @@ check("typing in a text box edits its text and does not act on the page", async 
 
 check("shortcuts of the browser are not swallowed", async (page) => {
     await page.click(...TEXT_BOX);
+    // The recorder has noted whether the view prevented the key; it then cancels the shortcut itself,
+    // so that a reload or a new tab does not replace the page under test.
+    await page.evaluate("(globalThis.keepPage = true)");
     for (const [key, modifier] of [["r", "ctrl"], ["r", "meta"], ["l", "ctrl"], ["l", "meta"], ["t", "ctrl"], ["F5", null], ["F12", null]]) {
         await page.press(key, modifier ? [modifier] : []);
         const last = await page.lastKey();
@@ -85,6 +88,7 @@ check("shortcuts of the browser are not swallowed", async (page) => {
         assert(!last.prevented, `${modifier ? modifier + "+" : ""}${key} was prevented`);
     }
     assert((await page.state()).text === "Text box", `a shortcut typed into the text box: "${(await page.state()).text}"`);
+    await page.evaluate("(globalThis.keepPage = false, true)");
     // A dead key (an accent waiting for its letter) belongs to the input method.
     await page.send("Input.dispatchKeyEvent", { type: "rawKeyDown", key: "Dead", code: "BracketLeft", windowsVirtualKeyCode: 219 });
     await page.send("Input.dispatchKeyEvent", { type: "keyUp", key: "Dead", code: "BracketLeft", windowsVirtualKeyCode: 219 });
