@@ -558,6 +558,7 @@ pub const fn not_recorded<T>() -> CompilerMetadata<Option<T>> {
 /// | static property getter / setter | `__markup_static_get_<Name>() -> T` / `__markup_static_set_<Name>(value: T)` |
 /// | method (instance or static), in declaration order `n` | `__markup_<Name>_<n>([this: &This,] a0: A, ..) -> R` |
 /// | constructor, in declaration order `n` | `__markup_new_<n>(a0: A, ..) -> T` |
+/// | static field | `__markup_field_<Name>() -> T` |
 /// | `Parse(string)` | `__markup_parse(text: String) -> Result<T, MarkupInvokeError>` |
 ///
 /// A fallible member (`try`) returns `Result<T, MarkupInvokeError>`
@@ -615,6 +616,8 @@ pub struct MarkupField {
     pub type_: TypeOf,
     pub get: fn() -> MarkupValue,
     pub attributes: &'static [MarkupAttribute],
+    /// The typed function of the field, for the emitter of Rust source.
+    pub emit: CompilerMetadata<Option<MarkupEmit>>,
 }
 
 /// An event that is not a routed event: handlers are attached through
