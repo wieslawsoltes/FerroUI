@@ -146,7 +146,9 @@ fn universal_formats_have_stable_identity_and_display() {
     assert_eq!(DataFormatKind::Universal, DataFormat::text().kind());
     assert_eq!("Universal: Text", DataFormat::text().to_string());
     assert_eq!("Universal: Bitmap", DataFormat::bitmap().to_string());
+    assert_eq!("Universal: File", DataFormat::file().to_string());
     assert!(DataFormat::text().as_data_format() != DataFormat::bitmap().as_data_format());
+    assert!(DataFormat::file().as_data_format() != DataFormat::text().as_data_format());
     assert!(panics(|| {
         DataFormat::text().to_system_name("prefix.");
     }));
