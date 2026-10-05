@@ -1,4 +1,5 @@
 use crate::documents::TextElement;
+use crate::primitives::{TextSelectionHandleCanvas, TextSelectorLayer};
 use crate::{Border, Control, ControlImpl, TextBlock, TextBox, TextBoxTextInputMethodClient};
 use ferroui_base::input::InputElementImpl;
 use ferroui_base::interactivity::InteractiveImpl;
@@ -19,7 +20,7 @@ use ferroui_base::{
     ferro_class, ferro_property, instantiate, AttachedProperty, FerroObjectImpl, FerroObjectImplExt,
     FerroProperty, FerroPropertyChangedEventArgs, PixelRect, Point, Rect, Ref, Size, StyledElementImpl,
     StyledProperty, StyledPropertyMetadata, Visual, VisualImpl, VisualImplExt,
-    VisualTreeAttachmentEventArgs,
+    VisualTreeAttachmentEventArgs, WeakRef,
 };
 use std::cell::{Cell, RefCell};
 use std::rc::{Rc, Weak};
@@ -51,7 +52,10 @@ pub struct TextPresenter {
     pending_caret_text_position: Cell<Option<i32>>,
     navigation_position: Cell<Point>,
     previous_offset: Cell<Option<Point>>,
-    // Not ported: `_layer` (waits for `TextSelectorLayer`).
+    /// The text selector layer the handle canvas was last added to (a layer
+    /// of the top level: referred to weakly).
+    layer: RefCell<Option<WeakRef<TextSelectorLayer>>>,
+    text_selection_handle_canvas: RefCell<Option<Ref<TextSelectionHandleCanvas>>>,
     caret_bounds_changed: HandlerList<dyn Fn()>,
     current_im_client: RefCell<Option<Weak<TextBoxTextInputMethodClient>>>,
     /// The UTF-16 form of `Text` (the outer `None`: not transcoded since the
@@ -210,7 +214,7 @@ impl VisualImpl for TextPresenter {
     fn on_detached_from_visual_tree(this: &Self, e: &VisualTreeAttachmentEventArgs) {
         Self::parent_on_detached_from_visual_tree(this, e);
 
-        // Not ported: `RemoveTextSelectionCanvas()` (waits for `TextSelectionHandleCanvas` / `TextSelectorLayer`).
+        this.remove_text_selection_canvas();
 
         let caret_timer = this.caret_timer.borrow().clone();
 
@@ -508,6 +512,8 @@ impl TextPresenter {
             pending_caret_text_position: Cell::new(None),
             navigation_position: Cell::new(Point::default()),
             previous_offset: Cell::new(None),
+            layer: RefCell::new(None),
+            text_selection_handle_canvas: RefCell::new(None),
             caret_bounds_changed: HandlerList::new(),
             current_im_client: RefCell::new(None),
             utf16_text: RefCell::new(None),
@@ -768,9 +774,12 @@ impl TextPresenter {
         self.set_value(Self::selection_end_property(), value)
     }
 
-    // `TextSelectionHandleCanvas` (the property) is not ported: it waits for
-    // the touch selection handles, which live in an overlay layer of the top
-    // level.
+    /// The canvas of the touch selection handles of the presenter, once
+    /// they have been asked for. It lives in the text selector layer of the
+    /// top level.
+    pub(crate) fn text_selection_handle_canvas(&self) -> Option<Ref<TextSelectionHandleCanvas>> {
+        self.text_selection_handle_canvas.borrow().clone()
+    }
 
     /// The input method client that currently edits the text of the
     /// presenter. The client refers to the presenter, so the presenter
@@ -882,10 +891,56 @@ impl TextPresenter {
 
     pub fn show_caret(&self) {
         self.ensure_caret_timer();
-        // Not ported: `EnsureTextSelectionLayer()` (waits for `TextSelectionHandleCanvas` / `TextSelectorLayer`).
+        self.ensure_text_selection_layer();
         self.caret_blink.set(true);
         self.start_caret_timer();
         self.invalidate_visual();
+    }
+
+    pub(crate) fn ensure_text_selection_layer(&self) {
+        let canvas = self.text_selection_handle_canvas();
+        let canvas = match canvas {
+            Some(canvas) => canvas,
+            None => {
+                let canvas = TextSelectionHandleCanvas::new();
+                *self.text_selection_handle_canvas.borrow_mut() = Some(canvas.clone());
+                canvas
+            }
+        };
+        canvas.set_presenter(Some(&self.to_ref()));
+        let layer = TextSelectorLayer::get_text_selector_layer(self);
+        *self.layer.borrow_mut() = layer.as_ref().map(Ref::downgrade);
+        let is_in_layer = |parent: &Option<Ref<Visual>>| match (parent, &layer) {
+            (Some(parent), Some(layer)) => *parent == *layer,
+            (None, None) => true,
+            _ => false,
+        };
+        let parent = canvas.visual_parent();
+        if parent.is_some() && !is_in_layer(&parent) {
+            if let Some(l) = parent.and_then(|parent| parent.cast::<TextSelectorLayer>()) {
+                l.remove(canvas.clone());
+            }
+        }
+        if let Some(layer) = &layer {
+            if !is_in_layer(&canvas.visual_parent()) {
+                layer.add(canvas);
+            }
+        }
+    }
+
+    pub(crate) fn remove_text_selection_canvas(&self) {
+        // The reference holds the layer strongly; here it is weak, so the canvas is released
+        // from the presenter also when the layer is already gone.
+        let had_layer = self.layer.borrow().is_some();
+        let layer = self.layer.borrow().as_ref().and_then(WeakRef::upgrade);
+        if let (true, Some(canvas)) = (had_layer, self.text_selection_handle_canvas()) {
+            canvas.set_presenter(None);
+            if let Some(layer) = layer {
+                layer.remove(canvas);
+            }
+        }
+
+        *self.text_selection_handle_canvas.borrow_mut() = None;
     }
 
     pub fn hide_caret(&self) {

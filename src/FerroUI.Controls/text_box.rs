@@ -368,7 +368,11 @@ impl InputElementImpl for TextBox {
             presenter.show_caret();
         }
 
-        // Not ported: showing the touch selection handles (waits for `TextSelectionHandleCanvas`).
+        if this.selection_start() != this.selection_end() {
+            if let Some(canvas) = presenter.as_ref().and_then(|presenter| presenter.text_selection_handle_canvas()) {
+                canvas.show(false);
+            }
+        }
     }
 
     fn on_lost_focus(this: &Self, e: &FocusChangedEventArgs) {
@@ -382,7 +386,9 @@ impl InputElementImpl for TextBox {
             }
 
             this.set_current_value(Self::reveal_password_property(), false);
-            // Not ported: `RemoveTextSelectionCanvas()` (waits for `TextSelectionHandleCanvas`).
+            if let Some(presenter) = this.presenter() {
+                presenter.remove_text_selection_canvas();
+            }
         }
 
         this.update_command_states();
@@ -739,10 +745,12 @@ impl InputElementImpl for TextBox {
                     this.select_word(&text, caret_index, caret_index, caret_index);
                 }
 
-                // Not ported: `EnsureTextSelectionLayer()` (waits for `TextSelectionHandleCanvas`).
+                presenter.ensure_text_selection_layer();
 
                 if this.selection_start() != this.selection_end() {
-                    // Not ported: showing the touch selection handles (waits for `TextSelectionHandleCanvas`).
+                    if let Some(canvas) = presenter.text_selection_handle_canvas() {
+                        canvas.show(true);
+                    }
                 } else {
                     presenter
                         .raise_event(&ContextRequestedEventArgs::from_pointer_event_args(e.pointer_event_args()));
@@ -752,15 +760,22 @@ impl InputElementImpl for TextBox {
             this.has_touch_selection.set(true);
 
             e.set_handled(true);
-            // Not ported: `PerformFeedback(FeedbackAction.Hold)` (waits for `PlatformFeedback`).
+            let element: &InputElement = this;
+            crate::platform::PlatformFeedbackExtensions::perform_feedback(element, crate::platform::FeedbackAction::hold());
         }
     }
 
     fn on_tapped(this: &Self, e: &TappedEventArgs) {
         Self::parent_on_tapped(this, e);
 
-        // Not ported: a tap of a pointer other than the mouse shows the touch selection handles
-        // (waits for `TextSelectionHandleCanvas`).
+        if e.pointer().type_() != PointerType::Mouse {
+            if let Some(presenter) = this.presenter() {
+                presenter.ensure_text_selection_layer();
+                if let Some(canvas) = presenter.text_selection_handle_canvas() {
+                    canvas.show(false);
+                }
+            }
+        }
     }
 
     fn on_pointer_pressed(this: &Self, e: &PointerPressedEventArgs) {
@@ -782,7 +797,9 @@ impl InputElementImpl for TextBox {
             let text: Vec<u16> = text.encode_utf16().collect();
 
             if e.pointer().type_() == PointerType::Mouse && click_info.properties.is_left_button_pressed {
-                // Not ported: hiding the touch selection handles (waits for `TextSelectionHandleCanvas`).
+                if let Some(canvas) = presenter.text_selection_handle_canvas() {
+                    canvas.hide();
+                }
                 this.current_click_count.set(e.click_count());
                 let point = e.get_position(Some(&presenter));
 
@@ -836,7 +853,10 @@ impl InputElementImpl for TextBox {
                     let selection_end = this.selection_end();
 
                     this.select_word(&text, caret_index, selection_start, selection_end);
-                    // Not ported: showing the touch selection handles (waits for `TextSelectionHandleCanvas`).
+                    presenter.ensure_text_selection_layer();
+                    if let Some(canvas) = presenter.text_selection_handle_canvas() {
+                        canvas.show(false);
+                    }
                 }
             }
         }

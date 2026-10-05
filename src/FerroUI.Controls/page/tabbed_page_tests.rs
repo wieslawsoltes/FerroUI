@@ -12,7 +12,7 @@
 
 use super::navigation_page_tests::{page, page_h, same};
 use super::{
-    ContentPage, NavigatedFromEventArgs, NavigatedToEventArgs, NavigationType, Page, PageList,
+    ContentPage, DrawerPage, NavigatedFromEventArgs, NavigatedToEventArgs, NavigationType, Page, PageList,
     PageSelectionChangedEventArgs, SelectingMultiPage, TabPlacement, TabbedPage,
 };
 use crate::templates::{FuncControlTemplate, FuncDataTemplate, FuncTemplateNameScopeExtensions, IDataTemplate};
@@ -1041,5 +1041,27 @@ fn page_icon_template_round_trips() {
     assert!(template_is(&page.icon_template(), &template));
 }
 
-// DRAWER-SEAM: `DrawerPage_DrawerIconTemplate_RoundTrips` and
-// `DrawerPage_DrawerIcon_With_Geometry_Does_Not_Throw` test the drawer page and belong to its port.
+#[test]
+fn drawer_page_drawer_icon_template_round_trips() {
+    let _scope = test_scope();
+    let template = border_template();
+    let dp = DrawerPage::new();
+    dp.set_drawer_icon_template(Some(template.clone()));
+    assert!(template_is(&dp.drawer_icon_template(), &template));
+}
+
+#[test]
+fn drawer_page_drawer_icon_with_geometry_does_not_throw() {
+    let _scope = test_scope();
+    let geometry: BoxedValue = Rc::new(EllipseGeometry::with_rect(Rect::new(0.0, 0.0, 10.0, 10.0)));
+    let dp = DrawerPage::new();
+    dp.set_drawer_icon(Some(geometry));
+    let template: Rc<dyn IDataTemplate> =
+        FuncDataTemplate::new(|_| true, |_, _| Some(PathIcon::new().upcast()), false);
+    dp.set_drawer_icon_template(Some(template));
+    let _root = TestRoot::with_child(dp.clone());
+
+    let geometry: BoxedValue = Rc::new(EllipseGeometry::with_rect(Rect::new(0.0, 0.0, 20.0, 20.0)));
+    dp.set_drawer_icon(Some(geometry));
+    assert!(dp.drawer_icon().is_some());
+}

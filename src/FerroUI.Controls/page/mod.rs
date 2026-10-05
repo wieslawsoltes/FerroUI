@@ -25,6 +25,11 @@ mod page_selection_changed_event_args;
 mod selecting_multi_page;
 mod tab_placement;
 mod tabbed_page;
+mod drawer_behavior;
+mod drawer_closing_event_args;
+mod drawer_layout_behavior;
+mod drawer_page;
+mod drawer_placement;
 
 pub use bar_layout_behavior::BarLayoutBehavior;
 pub use content_page::ContentPage;
@@ -55,6 +60,11 @@ pub use selecting_multi_page::{
 };
 pub use tab_placement::TabPlacement;
 pub use tabbed_page::TabbedPage;
+pub use drawer_behavior::DrawerBehavior;
+pub use drawer_closing_event_args::DrawerClosingEventArgs;
+pub use drawer_layout_behavior::DrawerLayoutBehavior;
+pub use drawer_page::DrawerPage;
+pub use drawer_placement::DrawerPlacement;
 
 #[cfg(test)]
 mod carousel_page_tests;
@@ -78,3 +88,9 @@ mod page_navigation_host_tests;
 mod tabbed_page_tests;
 #[cfg(test)]
 mod tabbed_page_tests_data_template;
+#[cfg(test)]
+mod drawer_page_tests;
+#[cfg(test)]
+mod drawer_page_tests_lifecycle;
+#[cfg(test)]
+mod drawer_page_tests_templates;

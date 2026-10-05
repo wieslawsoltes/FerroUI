@@ -3,23 +3,20 @@
 
 use super::navigation_page_tests::*;
 use super::{
-    ModalPoppedEventArgs, ModalPushedEventArgs, NavigatedFromEventArgs, NavigatedToEventArgs, NavigationPage,
+    DrawerBehavior, DrawerPage, ModalPoppedEventArgs, ModalPushedEventArgs, NavigatedFromEventArgs, NavigatedToEventArgs, NavigationPage,
     NavigationType, PageInsertedEventArgs, PageRemovedEventArgs,
 };
 use crate::presenters::ContentPresenter;
 use crate::shapes::Path;
 use crate::templates::{FuncControlTemplate, FuncTemplateNameScopeExtensions, IControlTemplate};
 use crate::test_support::{boxed_str, string_of, test_scope, TestRoot};
-use crate::{Border, Button, Control, Panel};
+use crate::{Border, Button, Control, Panel, PathIcon};
+use ferroui_base::media::StreamGeometry;
 use ferroui_base::Ref;
 use std::cell::RefCell;
 use std::rc::Rc;
 
 // --- BackButtonContentTests ---
-
-// DRAWER-SEAM: `DrawerToggle_UsesMenuIconWithoutMutatingPageBackButtonContent` and
-// `DrawerBehaviorChange_DoesNotClearCustomPathIcon` set a drawer page on the navigation page
-// (`SetDrawerPage`) and belong to the port of the drawer page.
 
 #[derive(Default)]
 struct BackButtonParts {
@@ -72,6 +69,28 @@ fn create_navigation_page_with_back_button_parts(parts: &Rc<BackButtonParts>) ->
 }
 
 #[test]
+fn drawer_toggle_uses_menu_icon_without_mutating_page_back_button_content() {
+    let _scope = test_scope();
+    let parts = Rc::new(BackButtonParts::default());
+    let nav = create_navigation_page_with_back_button_parts(&parts);
+    nav.resources().add_value("NavigationPageMenuIcon", StreamGeometry::new());
+    let drawer = DrawerPage::new();
+    let root = TestRoot::with_child(nav.clone());
+    root.execute_initial_layout_pass();
+    nav.set_drawer_page(Some(&drawer));
+
+    let page = page_h("Root");
+    wait(nav.push_async(&page));
+
+    let default_icon = parts.default_icon.borrow().clone().expect("the default icon was created");
+    let content_presenter = parts.content_presenter.borrow().clone().expect("the content presenter was created");
+    assert!(NavigationPage::get_back_button_content(&page).is_none());
+    assert!(!default_icon.is_visible());
+    let content = content_presenter.content().as_ref().and_then(Control::from_boxed);
+    assert!(content.is_some_and(|content| content.is::<PathIcon>()));
+}
+
+#[test]
 fn current_page_back_button_content_updates_rendered_presenter() {
     let _scope = test_scope();
     let parts = Rc::new(BackButtonParts::default());
@@ -95,6 +114,33 @@ fn current_page_back_button_content_updates_rendered_presenter() {
 
     assert!(default_icon.is_visible());
     assert!(content_presenter.content().is_none());
+}
+
+#[test]
+fn drawer_behavior_change_does_not_clear_custom_path_icon() {
+    let _scope = test_scope();
+    let parts = Rc::new(BackButtonParts::default());
+    let nav = create_navigation_page_with_back_button_parts(&parts);
+    let drawer = DrawerPage::new();
+    let root = TestRoot::with_child(nav.clone());
+    root.execute_initial_layout_pass();
+    nav.set_drawer_page(Some(&drawer));
+
+    let custom_icon = PathIcon::new();
+    let page = page_h("Root");
+    NavigationPage::set_back_button_content(&page, Some(Control::boxed(custom_icon.clone())));
+
+    wait(nav.push_async(&page));
+    drawer.set_drawer_behavior(DrawerBehavior::Locked);
+    nav.set_drawer_page(Some(&drawer));
+
+    let default_icon = parts.default_icon.borrow().clone().expect("the default icon was created");
+    let content_presenter = parts.content_presenter.borrow().clone().expect("the content presenter was created");
+    let held = NavigationPage::get_back_button_content(&page).as_ref().and_then(Control::from_boxed);
+    assert!(same(&custom_icon, &held));
+    let content = content_presenter.content().as_ref().and_then(Control::from_boxed);
+    assert!(same(&custom_icon, &content));
+    assert!(!default_icon.is_visible());
 }
 
 // --- PopToRootTests ---

@@ -30,3 +30,13 @@ pub use items_presenter::ItemsPresenter;
 
 #[cfg(test)]
 mod items_presenter_tests;
+
+mod table_view_cells_presenter;
+mod table_view_column_headers_presenter;
+pub(crate) mod table_view_layout_helper;
+
+pub use table_view_cells_presenter::TableViewCellsPresenter;
+pub use table_view_column_headers_presenter::TableViewColumnHeadersPresenter;
+
+#[cfg(test)]
+mod table_view_layout_helper_tests;

@@ -1,5 +1,5 @@
 use crate::i_native_menu_item_exporter_events_impl_bridge::INativeMenuItemExporterEventsImplBridge;
-use crate::native_menu::append_optional_value;
+use crate::utils::debug_display::{append_optional_value, debug_type_name};
 use crate::{MenuItem, MenuItemToggleType, NativeMenu, NativeMenuItemBase};
 use ferroui_base::input::{ICommand, KeyGesture};
 use ferroui_base::media::imaging::IBitmap;
@@ -315,7 +315,7 @@ impl NativeMenuItem {
 
     /// The text that describes the item in diagnostics.
     pub(crate) fn build_debug_display(&self, builder: &mut String, include_content: bool) {
-        builder.push_str(&crate::native_menu::debug_type_name(self));
+        builder.push_str(&debug_type_name(self));
 
         if include_content {
             append_optional_value(builder, "Header", self.header().as_deref());

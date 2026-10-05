@@ -19,6 +19,7 @@ use crate::automation::peers::*;
 use crate::chrome::*;
 use crate::documents::*;
 use crate::presenters::*;
+use crate::pull_to_refresh::*;
 use crate::templates::{DataTemplates, IDataTemplate, ITemplateOf};
 use crate::primitives::*;
 use crate::*;
@@ -516,6 +517,24 @@ ferro_class_info!(ProgressBar {
     },
 });
 
+ferro_class_info!(RefreshContainer {
+    markup: {
+        namespace: "FerroUI.Controls",
+        fields: [
+            RefreshRequestedEvent: RoutedEvent<RefreshRequestedEventArgs> => || *RefreshContainer::refresh_requested_event(),
+        ],
+    },
+});
+
+ferro_class_info!(RefreshVisualizer {
+    markup: {
+        namespace: "FerroUI.Controls",
+        fields: [
+            RefreshRequestedEvent: RoutedEvent<RefreshRequestedEventArgs> => || *RefreshVisualizer::refresh_requested_event(),
+        ],
+    },
+});
+
 ferro_class_info!(RelativePanel {
     markup: {
         namespace: "FerroUI.Controls",
@@ -723,6 +742,16 @@ ferro_class_info!(TabItem {
     markup: {
         namespace: "FerroUI.Controls",
         attributes: [PseudoClasses(":pressed", ":selected")],
+    },
+});
+
+ferro_class_info!(TableView {
+    markup: {
+        namespace: "FerroUI.Controls",
+        properties: [
+            DisplayMemberBinding: Option<AssignedBinding> { get: TableView::display_member_binding, set: TableView::set_display_member_binding } [AssignBinding, InheritDataTypeFromItems("ItemsSource")],
+            ItemTemplate: Option<Rc<dyn IDataTemplate>> { get: TableView::item_template, set: TableView::set_item_template } [InheritDataTypeFromItems("ItemsSource")],
+        ],
     },
 });
 
@@ -1361,6 +1390,27 @@ ferro_class_info!(VisualLayerManager {
     },
 });
 
+// FerroUI.Controls.PullToRefresh
+
+ferro_class_info!(RefreshInfoProvider {
+    markup: {
+        namespace: "FerroUI.Controls.PullToRefresh",
+        fields: [
+            RefreshStartedEvent: RoutedEvent<RoutedEventArgs> => || *RefreshInfoProvider::refresh_started_event(),
+            RefreshCompletedEvent: RoutedEvent<RoutedEventArgs> => || *RefreshInfoProvider::refresh_completed_event(),
+        ],
+    },
+});
+
+ferro_class_info!(ScrollablePullGestureRecognizer {
+    markup: {
+        namespace: "FerroUI.Controls.PullToRefresh",
+        properties: [
+            IsMouseEnabled: bool { get: ScrollablePullGestureRecognizer::is_mouse_enabled, set: ScrollablePullGestureRecognizer::set_is_mouse_enabled },
+        ],
+    },
+});
+
 // FerroUI.Interactivity
 
 /// Carries the metadata of `RoutedEvent<TEventArgs>` for the arguments of this crate.
@@ -1385,6 +1435,13 @@ ferro_markup_type!(class RoutedEventOf<RangeBaseValueChangedEventArgs> as "Route
     handles: [RoutedEvent<RangeBaseValueChangedEventArgs>, Option<RoutedEvent<RangeBaseValueChangedEventArgs>>],
     base: RoutedEvent,
     generic: "RoutedEvent`1" [RangeBaseValueChangedEventArgs],
+});
+
+ferro_markup_type!(class RoutedEventOf<RefreshRequestedEventArgs> as "RoutedEvent`1" {
+    namespace: "FerroUI.Interactivity",
+    handles: [RoutedEvent<RefreshRequestedEventArgs>, Option<RoutedEvent<RefreshRequestedEventArgs>>],
+    base: RoutedEvent,
+    generic: "RoutedEvent`1" [RefreshRequestedEventArgs],
 });
 
 ferro_markup_type!(class RoutedEventOf<RequestBringIntoViewEventArgs> as "RoutedEvent`1" {
@@ -1497,6 +1554,13 @@ ferro_markup_type!(class RangeBaseValueChangedEventArgs {
     ],
 });
 
+ferro_markup_type!(class RefreshRequestedEventArgs {
+    namespace: "FerroUI.Controls",
+    handles: [RefreshRequestedEventArgs],
+    this: Rc<dyn IRoutedEventArgs>,
+    base: Rc<dyn IRoutedEventArgs>,
+});
+
 ferro_markup_type!(class RequestBringIntoViewEventArgs {
     namespace: "FerroUI.Controls",
     handles: [RequestBringIntoViewEventArgs],
@@ -1607,6 +1671,7 @@ pub(super) fn register_value_types() {
     ValueTypes::register_cast::<RoutedEvent<CancelRoutedEventArgs>, RoutedEvent>(|event| event.as_routed_event());
     ValueTypes::register_cast::<RoutedEvent<PageSelectionChangedEventArgs>, RoutedEvent>(|event| event.as_routed_event());
     ValueTypes::register_cast::<RoutedEvent<RangeBaseValueChangedEventArgs>, RoutedEvent>(|event| event.as_routed_event());
+    ValueTypes::register_cast::<RoutedEvent<RefreshRequestedEventArgs>, RoutedEvent>(|event| event.as_routed_event());
     ValueTypes::register_cast::<RoutedEvent<RequestBringIntoViewEventArgs>, RoutedEvent>(|event| event.as_routed_event());
     ValueTypes::register_cast::<RoutedEvent<ScrollChangedEventArgs>, RoutedEvent>(|event| event.as_routed_event());
     ValueTypes::register_cast::<RoutedEvent<SelectionChangedEventArgs>, RoutedEvent>(|event| event.as_routed_event());
@@ -1627,6 +1692,7 @@ pub(super) const TYPES: &[&MarkupType] = &[
     <RoutedEventOf<CancelRoutedEventArgs> as MarkupTyped>::MARKUP,
     <RoutedEventOf<PageSelectionChangedEventArgs> as MarkupTyped>::MARKUP,
     <RoutedEventOf<RangeBaseValueChangedEventArgs> as MarkupTyped>::MARKUP,
+    <RoutedEventOf<RefreshRequestedEventArgs> as MarkupTyped>::MARKUP,
     <RoutedEventOf<RequestBringIntoViewEventArgs> as MarkupTyped>::MARKUP,
     <RoutedEventOf<ScrollChangedEventArgs> as MarkupTyped>::MARKUP,
     <RoutedEventOf<SelectionChangedEventArgs> as MarkupTyped>::MARKUP,
@@ -1639,6 +1705,7 @@ pub(super) const TYPES: &[&MarkupType] = &[
     <RoutedEventOf<VectorEventArgs> as MarkupTyped>::MARKUP,
     <PageSelectionChangedEventArgs as MarkupTyped>::MARKUP,
     <RangeBaseValueChangedEventArgs as MarkupTyped>::MARKUP,
+    <RefreshRequestedEventArgs as MarkupTyped>::MARKUP,
     <RequestBringIntoViewEventArgs as MarkupTyped>::MARKUP,
     <ScrollChangedEventArgs as MarkupTyped>::MARKUP,
     <SelectionChangedEventArgs as MarkupTyped>::MARKUP,

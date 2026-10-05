@@ -140,6 +140,7 @@ pub use crate::flyouts::{
     PopupFlyoutBaseImplExt, PopupFlyoutBaseVTable,
 };
 pub use crate::split_view::SplitViewTemplateSettings;
+pub use crate::pips_pager::PipsPagerTemplateSettings;
 
 // --- datetimepickers ---
 pub use crate::date_time_pickers::{
@@ -151,3 +152,9 @@ pub use crate::date_time_pickers::{
 pub use crate::calendar::{
     CalendarBlackoutDatesCollection, CalendarButton, CalendarDayButton, CalendarItem, SelectedDatesCollection,
 };
+mod text_selection_canvas;
+mod text_selection_handle;
+pub use text_selection_canvas::TextSelectionHandleCanvas;
+pub use text_selection_handle::TextSelectionHandle;
+#[cfg(test)]
+mod text_selection_canvas_tests;

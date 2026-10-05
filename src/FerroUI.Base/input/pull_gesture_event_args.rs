@@ -27,8 +27,8 @@ impl PullGestureEventArgs {
         }
     }
 
-    #[allow(dead_code)]
-    pub(crate) fn get_next_free_id() -> i32 {
+    #[doc(hidden)]
+    pub fn get_next_free_id() -> i32 {
         NEXT_ID.fetch_add(1, Ordering::Relaxed)
     }
 

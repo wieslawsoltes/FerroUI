@@ -48,3 +48,10 @@ mod test_theme_page;
 pub use test_theme_page::{
     add_page_themes, carousel_page_template, carousel_template, content_page_template, create_page_test_theme,
 };
+mod test_theme_pips_pager;
+pub use test_theme_pips_pager::{add_pips_pager_themes, pips_pager_template, pips_pager_theme};
+mod test_theme_pull_to_refresh;
+pub use test_theme_pull_to_refresh::{
+    add_pull_to_refresh_themes, refresh_container_template, refresh_container_theme, refresh_visualizer_template,
+    refresh_visualizer_theme,
+};

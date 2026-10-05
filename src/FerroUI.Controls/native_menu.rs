@@ -1,4 +1,5 @@
 use crate::i_native_menu_exporter_events_impl_bridge::INativeMenuExporterEventsImplBridge;
+use crate::utils::debug_display::debug_type_name;
 use crate::{NativeMenuItem, NativeMenuItemBase};
 use ferroui_base::collections::{FerroList, NotifyCollectionChangedEventArgs, ResetBehavior};
 use ferroui_base::reactive::{Disposable, IDisposable};
@@ -210,48 +211,4 @@ pub(crate) fn debug_display(object: &FerroObject) -> String {
         None => builder.push_str(&debug_type_name(object)),
     }
     builder
-}
-
-/// The name of the type of an object in a description: the simple name
-/// for the types of the framework, the namespace-qualified name for any
-/// other type.
-pub(crate) fn debug_type_name(object: &FerroObject) -> String {
-    let type_ = object.get_type();
-    let namespace = type_.namespace();
-
-    if namespace == "FerroUI" || namespace.starts_with("FerroUI.") {
-        type_.name().to_string()
-    } else {
-        type_.full_name()
-    }
-}
-
-/// Appends ` (name = value)` to a description, or extends the parenthesis
-/// the description ends with. Nothing is appended for no value or an empty
-/// one, and a long value is cut.
-pub(crate) fn append_optional_value(builder: &mut String, name: &str, value: Option<&str>) {
-    const MAX_VALUE_LENGTH: usize = 50;
-
-    let Some(value) = value.filter(|value| !value.is_empty()) else { return };
-
-    if builder.ends_with(')') {
-        builder.pop();
-        builder.push_str(", ");
-    } else {
-        builder.push_str(" (");
-    }
-
-    builder.push_str(name);
-    builder.push_str(" = ");
-
-    // The reference counts UTF-16 code units.
-    let units: Vec<u16> = value.encode_utf16().collect();
-    if units.len() > MAX_VALUE_LENGTH {
-        builder.push_str(&String::from_utf16_lossy(&units[..MAX_VALUE_LENGTH - 1]));
-        builder.push('…');
-    } else {
-        builder.push_str(value);
-    }
-
-    builder.push(')');
 }

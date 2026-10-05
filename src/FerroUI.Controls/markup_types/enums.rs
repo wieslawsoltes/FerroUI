@@ -75,6 +75,14 @@ ferro_markup_enum!(
     { namespace: "FerroUI.Controls" }
 );
 ferro_markup_enum!(Dock { Left, Bottom, Right, Top }, { namespace: "FerroUI.Controls" });
+ferro_markup_enum!(DrawerBehavior { Auto, Flyout, Locked, Disabled }, { namespace: "FerroUI.Controls" });
+ferro_markup_enum!(
+    DrawerLayoutBehavior {
+        Overlay, Split, CompactOverlay, CompactInline,
+    },
+    { namespace: "FerroUI.Controls" }
+);
+ferro_markup_enum!(DrawerPlacement { Left, Right, Top, Bottom }, { namespace: "FerroUI.Controls" });
 ferro_markup_enum!(ExpandDirection { Down, Up, Left, Right }, { namespace: "FerroUI.Controls" });
 ferro_markup_enum!(FeedbackType { None, Auto, Sound, Haptic }, { namespace: "FerroUI.Controls" });
 ferro_markup_enum!(
@@ -125,6 +133,18 @@ ferro_markup_enum!(
     { namespace: "FerroUI.Controls" }
 );
 ferro_markup_enum!(PlatformInhibitionType { AppSleep }, { namespace: "FerroUI.Controls" });
+ferro_markup_enum!(
+    RefreshVisualizerOrientation {
+        Auto, Normal, Rotate90DegreesCounterclockwise, Rotate270DegreesCounterclockwise,
+    },
+    { namespace: "FerroUI.Controls" }
+);
+ferro_markup_enum!(
+    RefreshVisualizerState {
+        Idle, Peeking, Interacting, Pending, Refreshing,
+    },
+    { namespace: "FerroUI.Controls" }
+);
 ferro_markup_enum!(flags SelectionMode {
     Single = SelectionMode::SINGLE,
     Multiple = SelectionMode::MULTIPLE,
@@ -324,6 +344,9 @@ pub(super) const TYPES: &[&MarkupType] = &[
     <CommandBarDefaultLabelPosition as MarkupTyped>::MARKUP,
     <CommandBarOverflowButtonVisibility as MarkupTyped>::MARKUP,
     <Dock as MarkupTyped>::MARKUP,
+    <DrawerBehavior as MarkupTyped>::MARKUP,
+    <DrawerLayoutBehavior as MarkupTyped>::MARKUP,
+    <DrawerPlacement as MarkupTyped>::MARKUP,
     <ExpandDirection as MarkupTyped>::MARKUP,
     <FeedbackType as MarkupTyped>::MARKUP,
     <FlexAlignContent as MarkupTyped>::MARKUP,
@@ -342,6 +365,8 @@ pub(super) const TYPES: &[&MarkupType] = &[
     <NavigationType as MarkupTyped>::MARKUP,
     <PlacementMode as MarkupTyped>::MARKUP,
     <PlatformInhibitionType as MarkupTyped>::MARKUP,
+    <RefreshVisualizerOrientation as MarkupTyped>::MARKUP,
+    <RefreshVisualizerState as MarkupTyped>::MARKUP,
     <SelectionMode as MarkupTyped>::MARKUP,
     <ShutdownMode as MarkupTyped>::MARKUP,
     <SizeToContent as MarkupTyped>::MARKUP,
@@ -395,6 +420,9 @@ pub(super) fn register_value_types() {
     ValueTypes::register_nullable::<CommandBarDefaultLabelPosition>();
     ValueTypes::register_nullable::<CommandBarOverflowButtonVisibility>();
     ValueTypes::register_nullable::<Dock>();
+    ValueTypes::register_nullable::<DrawerBehavior>();
+    ValueTypes::register_nullable::<DrawerLayoutBehavior>();
+    ValueTypes::register_nullable::<DrawerPlacement>();
     ValueTypes::register_nullable::<ExpandDirection>();
     ValueTypes::register_nullable::<FeedbackType>();
     ValueTypes::register_nullable::<FlexAlignContent>();
@@ -413,6 +441,8 @@ pub(super) fn register_value_types() {
     ValueTypes::register_nullable::<NavigationType>();
     ValueTypes::register_nullable::<PlacementMode>();
     ValueTypes::register_nullable::<PlatformInhibitionType>();
+    ValueTypes::register_nullable::<RefreshVisualizerOrientation>();
+    ValueTypes::register_nullable::<RefreshVisualizerState>();
     ValueTypes::register_nullable::<SelectionMode>();
     ValueTypes::register_nullable::<ShutdownMode>();
     ValueTypes::register_nullable::<SizeToContent>();

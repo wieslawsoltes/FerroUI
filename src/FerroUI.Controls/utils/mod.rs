@@ -45,3 +45,6 @@ pub use selecting_items_control_selection_adapter::{
 // --- datetimepickers ---
 mod time_utils;
 pub(crate) use time_utils::TimeUtils;
+
+// --- debug display (native menu, table view) ---
+pub(crate) mod debug_display;

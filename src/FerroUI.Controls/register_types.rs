@@ -57,6 +57,11 @@ const NAMESPACES: &[(&str, &str)] = &[
     ("ferroui_controls::date_time_pickers::date_time_picker_panel", "FerroUI.Controls.Primitives"),
     ("ferroui_controls::date_time_pickers::picker_presenter_base", "FerroUI.Controls.Primitives"),
     ("ferroui_controls::page", "FerroUI.Controls"),
+    ("ferroui_controls::pull_to_refresh", "FerroUI.Controls"),
+    ("ferroui_controls::pull_to_refresh::refresh_info_provider", "FerroUI.Controls.PullToRefresh"),
+    ("ferroui_controls::pull_to_refresh::scrollable_pull_gesture_recognizer", "FerroUI.Controls.PullToRefresh"),
+    ("ferroui_controls::pips_pager", "FerroUI.Controls"),
+    ("ferroui_controls::pips_pager::pips_pager_template_settings", "FerroUI.Controls.Primitives"),
     ("ferroui_controls::platform", "FerroUI.Controls.Platform"),
     ("ferroui_controls::platform::mac_os_properties", "FerroUI.Controls"),
     ("ferroui_controls::platform::x11_properties", "FerroUI.Controls"),
@@ -354,6 +359,11 @@ const TYPES: &[&TypeInfo] = types![
     crate::notifications::NotificationCard,
     crate::notifications::WindowNotificationManager,
     // --- pulltorefresh ---
+    crate::pull_to_refresh::RefreshContainer,
+    crate::pull_to_refresh::RefreshVisualizer,
+    // FerroUI.Controls.PullToRefresh
+    crate::pull_to_refresh::RefreshInfoProvider,
+    crate::pull_to_refresh::ScrollablePullGestureRecognizer,
     // --- calendar ---
     crate::calendar::Calendar,
     crate::calendar::CalendarButton,
@@ -379,10 +389,25 @@ const TYPES: &[&TypeInfo] = types![
     crate::page::SelectingMultiPage,
     crate::page::TabbedPage,
     // --- page-drawer ---
+    crate::page::DrawerPage,
     // --- pipspager ---
+    crate::pips_pager::PipsPager,
+    // FerroUI.Controls.Primitives
+    crate::pips_pager::PipsPagerTemplateSettings,
     // --- connected-animation ---
     // --- tableview ---
+    crate::TableView,
+    crate::TableViewCell,
+    crate::TableViewColumn,
+    crate::TableViewColumnHeader,
+    crate::TableViewRow,
+    // FerroUI.Controls.Presenters
+    crate::presenters::TableViewCellsPresenter,
+    crate::presenters::TableViewColumnHeadersPresenter,
     // --- textselection ---
+    // FerroUI.Controls.Primitives
+    crate::primitives::TextSelectionHandle,
+    crate::primitives::TextSelectionHandleCanvas,
     // --- leftovers ---
 ];
 

@@ -3937,17 +3937,17 @@
    "scope": "in",
    "detail": "full",
    "files": [
-    500,
+    527,
     538,
     0
    ],
    "types": [
-    570,
+    597,
     628,
     0
    ],
    "members": [
-    5701,
+    6008,
     6405,
     1
    ],
@@ -3956,23 +3956,23 @@
     83
    ],
    "propertyRegistrations": [
-    868,
+    936,
     938
    ],
    "routedEvents": [
-    59,
+    67,
     67
    ],
    "notApplicableFiles": 1,
    "matchKinds": {
-    "const": 31,
+    "const": 33,
     "derive": 2,
     "field": 29,
-    "fn": 5121,
+    "fn": 5405,
     "free item": 4,
     "overload fn": 75,
     "trait": 37,
-    "variant": 402
+    "variant": 423
    },
    "presentFiles": {
     "AcrylicPlatformCompensationLevels.cs": [
@@ -4782,6 +4782,21 @@
     "Page/DefaultPageDataTemplate.cs": [
      "page/default_page_data_template.rs"
     ],
+    "Page/DrawerBehavior.cs": [
+     "page/drawer_behavior.rs"
+    ],
+    "Page/DrawerClosingEventArgs.cs": [
+     "page/drawer_closing_event_args.rs"
+    ],
+    "Page/DrawerLayoutBehavior.cs": [
+     "page/drawer_layout_behavior.rs"
+    ],
+    "Page/DrawerPage.cs": [
+     "page/drawer_page.rs"
+    ],
+    "Page/DrawerPlacement.cs": [
+     "page/drawer_placement.rs"
+    ],
     "Page/INavigation.cs": [
      "page/i_navigation.rs"
     ],
@@ -4850,6 +4865,15 @@
     ],
     "PathIcon.cs": [
      "path_icon.rs"
+    ],
+    "PipsPager/PipsPager.cs": [
+     "pips_pager/pips_pager.rs"
+    ],
+    "PipsPager/PipsPagerSelectedIndexChangedEventArgs.cs": [
+     "pips_pager/pips_pager_selected_index_changed_event_args.rs"
+    ],
+    "PipsPager/PipsPagerTemplateSettings.cs": [
+     "pips_pager/pips_pager_template_settings.rs"
     ],
     "PixelPointEventArgs.cs": [
      "pixel_point_event_args.rs"
@@ -4992,6 +5016,15 @@
     "Presenters/ScrollContentPresenter.cs": [
      "presenters/scroll_content_presenter.rs"
     ],
+    "Presenters/TableViewCellsPresenter.cs": [
+     "presenters/table_view_cells_presenter.rs"
+    ],
+    "Presenters/TableViewColumnHeadersPresenter.cs": [
+     "presenters/table_view_column_headers_presenter.rs"
+    ],
+    "Presenters/TableViewLayoutHelper.cs": [
+     "presenters/table_view_layout_helper.rs"
+    ],
     "Presenters/TextPresenter.cs": [
      "presenters/text_presenter.rs"
     ],
@@ -5103,6 +5136,12 @@
     "Primitives/TextSearch.cs": [
      "primitives/text_search.rs"
     ],
+    "Primitives/TextSelectionCanvas.cs": [
+     "primitives/text_selection_canvas.rs"
+    ],
+    "Primitives/TextSelectionHandle.cs": [
+     "primitives/text_selection_handle.rs"
+    ],
     "Primitives/TextSelectorLayer.cs": [
      "primitives/text_selector_layer.rs"
     ],
@@ -5123,6 +5162,33 @@
     ],
     "ProgressBar.cs": [
      "progress_bar.rs"
+    ],
+    "PullToRefresh/RefreshCompletionDeferral.cs": [
+     "pull_to_refresh/refresh_completion_deferral.rs"
+    ],
+    "PullToRefresh/RefreshContainer.cs": [
+     "pull_to_refresh/refresh_container.rs"
+    ],
+    "PullToRefresh/RefreshInfoProvider.cs": [
+     "pull_to_refresh/refresh_info_provider.rs"
+    ],
+    "PullToRefresh/RefreshRequestedEventArgs.cs": [
+     "pull_to_refresh/refresh_requested_event_args.rs"
+    ],
+    "PullToRefresh/RefreshVisualizer.cs": [
+     "pull_to_refresh/refresh_visualizer.rs"
+    ],
+    "PullToRefresh/RefreshVisualizerOrientation.cs": [
+     "pull_to_refresh/refresh_visualizer_orientation.rs"
+    ],
+    "PullToRefresh/RefreshVisualizerState.cs": [
+     "pull_to_refresh/refresh_visualizer_state.rs"
+    ],
+    "PullToRefresh/ScrollViewerIRefreshInfoProviderAdapter.cs": [
+     "pull_to_refresh/scroll_viewer_i_refresh_info_provider_adapter.rs"
+    ],
+    "PullToRefresh/ScrollablePullGestureRecognizer.cs": [
+     "pull_to_refresh/scrollable_pull_gesture_recognizer.rs"
     ],
     "RadioButton.cs": [
      "radio_button.rs"
@@ -5267,6 +5333,21 @@
     ],
     "TabItem.cs": [
      "tab_item.rs"
+    ],
+    "TableView.cs": [
+     "table_view.rs"
+    ],
+    "TableViewCell.cs": [
+     "table_view_cell.rs"
+    ],
+    "TableViewColumn.cs": [
+     "table_view_column.rs"
+    ],
+    "TableViewColumnHeader.cs": [
+     "table_view_column_header.rs"
+    ],
+    "TableViewRow.cs": [
+     "table_view_row.rs"
     ],
     "Templates/DataTemplateExtensions.cs": [
      "templates/data_template_extensions.rs"
@@ -5498,6 +5579,8 @@
     "mouse_test_helper.rs",
     "navigable_containers.rs",
     "page/carousel_page_tests_interaction.rs",
+    "page/drawer_page_tests_lifecycle.rs",
+    "page/drawer_page_tests_templates.rs",
     "page/navigation_page_tests_lifecycle.rs",
     "page/navigation_page_tests_navigating.rs",
     "page/navigation_page_tests_stack.rs",
@@ -5535,11 +5618,14 @@
     "testing/test_theme_command_bar.rs",
     "testing/test_theme_notifications.rs",
     "testing/test_theme_page.rs",
+    "testing/test_theme_pips_pager.rs",
+    "testing/test_theme_pull_to_refresh.rs",
     "testing/test_theme_split_view.rs",
     "testing/unit_test_application.rs",
     "text_box_tests_data_validation.rs",
     "text_box_tests_input.rs",
     "top_level_tests_platform_features.rs",
+    "utils/debug_display.rs",
     "utils/masked_text_provider.rs",
     "window_decorations.rs"
    ]

@@ -174,6 +174,7 @@ use crate::automation::peers::*;
 use crate::chrome::*;
 use crate::documents::*;
 use crate::presenters::*;
+use crate::pull_to_refresh::*;
 use crate::templates::{DataTemplates, IDataTemplate, ITemplateOf};
 use crate::primitives::*;
 use crate::*;

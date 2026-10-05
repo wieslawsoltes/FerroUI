@@ -572,6 +572,11 @@ pub use notifications::{
 };
 
 // --- pulltorefresh ---
+pub mod pull_to_refresh;
+pub use pull_to_refresh::{
+    RefreshCompletionDeferral, RefreshContainer, RefreshRequestedEventArgs, RefreshVisualizer,
+    RefreshVisualizerOrientation, RefreshVisualizerState,
+};
 
 // --- calendar ---
 mod calendar;
@@ -610,12 +615,29 @@ pub use page::{
 };
 
 // --- page-drawer ---
+pub use page::{DrawerBehavior, DrawerClosingEventArgs, DrawerLayoutBehavior, DrawerPage, DrawerPlacement};
 
 // --- pipspager ---
+mod pips_pager;
+pub use pips_pager::{PipsPager, PipsPagerSelectedIndexChangedEventArgs, PipsPagerTemplateSettings};
 
 // --- connected-animation ---
 
 // --- tableview ---
+mod table_view;
+mod table_view_cell;
+mod table_view_column;
+mod table_view_column_header;
+mod table_view_row;
+pub use table_view::TableView;
+pub use table_view_cell::TableViewCell;
+pub use table_view_column::TableViewColumn;
+pub use table_view_column_header::TableViewColumnHeader;
+pub use table_view_row::TableViewRow;
+#[cfg(test)]
+mod table_view_column_header_tests;
+#[cfg(test)]
+mod table_view_tests;
 
 // --- textselection ---
 

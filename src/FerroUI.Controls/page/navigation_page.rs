@@ -1,7 +1,8 @@
 use super::{
-    start_async, BarLayoutBehavior, INavigation, ModalPoppedEventArgs, ModalPushedEventArgs, MultiPage, MultiPageImpl,
-    NavigatedFromEventArgs, NavigatedToEventArgs, NavigatingFromEventArgs, NavigationEventArgs, NavigationType, Page,
-    PageImpl, PageInsertedEventArgs, PageList, PageRemovedEventArgs, SafeAreaPaddingExtensions,
+    start_async, BarLayoutBehavior, DrawerBehavior, DrawerPage, INavigation, ModalPoppedEventArgs,
+    ModalPushedEventArgs, MultiPage, MultiPageImpl, NavigatedFromEventArgs, NavigatedToEventArgs,
+    NavigatingFromEventArgs, NavigationEventArgs, NavigationType, Page, PageImpl, PageInsertedEventArgs, PageList,
+    PageRemovedEventArgs, SafeAreaPaddingExtensions,
 };
 use crate::automation::AutomationProperties;
 use crate::presenters::ContentPresenter;
@@ -87,8 +88,8 @@ pub struct NavigationPage {
     is_nav_bar_effectively_visible: Cell<bool>,
     effective_bar_height: Cell<f64>,
     is_back_button_effectively_enabled: Cell<bool>,
-    // DRAWER-SEAM: `private DrawerPage? _drawerPage` (a weak reference to the drawer page hosting this
-    // navigation page, set by `SetDrawerPage`). See `drawer_page_allows_toggle`.
+    /// The drawer page hosting this navigation page; set by `set_drawer_page`.
+    drawer_page: RefCell<Option<WeakRef<DrawerPage>>>,
     override_transition: RefCell<Option<Rc<dyn IPageTransition>>>,
     swipe_start_point: Cell<Point>,
     last_swipe_gesture_id: Cell<i32>,
@@ -1077,6 +1078,7 @@ impl NavigationPage {
             is_nav_bar_effectively_visible: Cell::new(false),
             effective_bar_height: Cell::new(0.0),
             is_back_button_effectively_enabled: Cell::new(false),
+            drawer_page: RefCell::new(None),
             override_transition: RefCell::new(None),
             swipe_start_point: Cell::new(Point::default()),
             last_swipe_gesture_id: Cell::new(0),
@@ -1529,22 +1531,31 @@ impl NavigationPage {
         }
     }
 
-    /// Whether a drawer page hosts this navigation page and lets the back
-    /// button toggle its drawer.
-    // DRAWER-SEAM: upstream evaluates, in every caller, `_drawerPage != null &&
-    // _drawerPage.DrawerBehavior != DrawerBehavior.Locked && _drawerPage.DrawerBehavior !=
-    // DrawerBehavior.Disabled`. Without the drawer page there is never one.
-    fn drawer_page_allows_toggle(&self) -> bool {
-        false
+    /// The drawer page hosting this navigation page.
+    fn drawer_page(&self) -> Option<Ref<DrawerPage>> {
+        self.drawer_page.borrow().as_ref().and_then(WeakRef::upgrade)
     }
 
-    // DRAWER-SEAM: `internal void SetDrawerPage(DrawerPage? drawerPage)`: stores the drawer page in
-    // `_drawerPage`, then calls `update_is_back_button_effectively_visible()` and
-    // `update_back_button_content()`.
+    /// Whether a drawer page hosts this navigation page and lets the back
+    /// button toggle its drawer.
+    fn drawer_page_allows_toggle(&self) -> bool {
+        self.drawer_page().is_some_and(|drawer_page| {
+            drawer_page.drawer_behavior() != DrawerBehavior::Locked
+                && drawer_page.drawer_behavior() != DrawerBehavior::Disabled
+        })
+    }
+
+    pub(crate) fn set_drawer_page(&self, drawer_page: Option<&DrawerPage>) {
+        *self.drawer_page.borrow_mut() = drawer_page.map(|drawer_page| drawer_page.to_ref().downgrade());
+        self.update_is_back_button_effectively_visible();
+        self.update_back_button_content();
+    }
 
     fn back_button_clicked(&self, _event_args: &RoutedEventArgs) {
         if self.stack_depth() <= 1 && self.drawer_page_allows_toggle() {
-            // DRAWER-SEAM: `_drawerPage.IsOpen = !_drawerPage.IsOpen;`
+            if let Some(drawer_page) = self.drawer_page() {
+                drawer_page.set_is_open(!drawer_page.is_open());
+            }
             return;
         }
         if self.can_go_back() {

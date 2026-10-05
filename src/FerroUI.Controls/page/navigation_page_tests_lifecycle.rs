@@ -5,7 +5,7 @@
 
 use super::navigation_page_tests::*;
 use super::{
-    ContentPage, ModalPoppedEventArgs, NavigatedFromEventArgs, NavigatedToEventArgs, NavigationEventArgs,
+    ContentPage, DrawerPage, ModalPoppedEventArgs, NavigatedFromEventArgs, NavigatedToEventArgs, NavigationEventArgs,
     NavigationPage, NavigationType, Page, PageList, PageNavigationExtensions,
 };
 use crate::mouse_test_helper::MouseTestHelper;
@@ -1041,5 +1041,31 @@ fn content_page_content_set_to_non_page_does_not_throw() {
 
 // --- DrawerPageFirstPageTests ---
 
-// DRAWER-SEAM: `DrawerPage_ContentReplaced_ResendsNavigatedToOnLoad` hosts navigation pages in a drawer
-// page and belongs to the port of the drawer page.
+#[test]
+fn drawer_page_content_replaced_resends_navigated_to_on_load() {
+    let _scope = test_scope();
+    let root = TestRoot::new();
+    let nav1 = NavigationPage::new();
+    let page1 = page();
+    let drawer = DrawerPage::new();
+    drawer.set_content(Some(Control::boxed(nav1.clone())));
+    root.set_child(drawer.clone());
+    root.execute_initial_layout_pass();
+
+    let first_args = slot::<NavigatedToEventArgs>();
+    page1.navigated_to(store(&first_args));
+    nav1.set_content(Some(Control::boxed(page1.clone())));
+
+    assert!(first_args.borrow().is_some());
+
+    let nav2 = NavigationPage::new();
+    let page2 = page();
+
+    let second_args = slot::<NavigatedToEventArgs>();
+    page2.navigated_to(store(&second_args));
+
+    drawer.set_content(Some(Control::boxed(nav2.clone())));
+    nav2.set_content(Some(Control::boxed(page2.clone())));
+
+    assert!(second_args.borrow().is_some());
+}
