@@ -9,8 +9,8 @@
 //!
 //! ```ignore
 //! pub fn build_border_xaml(
-//!     service_provider: Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-//! ) -> Result<::ferroui_base::Ref<::ferroui_controls::Border>, ::ferroui_markup_xaml::XamlLoadException> {
+//!     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
+//! ) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::Border>, ::ferroui_markup_xaml::XamlLoadException> {
 //!     // border.xaml(1,2) Border
 //!     let border_0 = ::ferroui_controls::Border::new();
 //!     let name_scope = rt::name_scope_of(service_provider.as_ref());
@@ -18,8 +18,8 @@
 //!     // border.xaml(1,2) Padding
 //!     border_0.set_value(::ferroui_controls::Decorator::padding_property(), ::ferroui_base::Thickness::new(1.0_f64, ..));
 //!     border_0.try_end_init().map_err(|error| rt::at(rt::TARGET_INVOCATION_EXCEPTION, error, 1, 2))?;
-//!     rt::complete_root_name_scope(Some(&border_0), name_scope.as_ref(), 1, 2)?;
-//!     Ok(border_0)
+//!     rt::complete_root_name_scope(::core::option::Option::Some(&border_0), name_scope.as_ref(), 1, 2)?;
+//!     ::core::result::Result::Ok(border_0)
 //! }
 //! ```
 //!

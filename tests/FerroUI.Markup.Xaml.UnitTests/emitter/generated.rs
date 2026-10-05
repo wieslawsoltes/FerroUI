@@ -12,33 +12,33 @@ pub const ROOT_URI: &str = "ferres://FerroUI.Markup.Xaml.UnitTests/Emitter/";
 
 /// An untyped build function: the root object as the loader returns it.
 pub type BuildDocument = fn(
-    Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadException>;
+    ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
+) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadException>;
 
 /// Generated from `border_empty.xaml`.
 pub fn build_border_empty_xaml(
-    service_provider: Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> Result<::ferroui_base::Ref<::ferroui_controls::Border>, ::ferroui_markup_xaml::XamlLoadException> {
+    service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
+) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::Border>, ::ferroui_markup_xaml::XamlLoadException> {
     // border_empty.xaml(1,2) Border
     let border_0 = ::ferroui_controls::Border::new();
     let name_scope = rt::name_scope_of(service_provider.as_ref());
     border_0.begin_init();
     border_0.try_end_init().map_err(|error| rt::at(rt::TARGET_INVOCATION_EXCEPTION, error, 1, 2))?;
-    rt::complete_root_name_scope(Some(&border_0), name_scope.as_ref(), 1, 2)?;
-    Ok(border_0)
+    rt::complete_root_name_scope(::core::option::Option::Some(&border_0), name_scope.as_ref(), 1, 2)?;
+    ::core::result::Result::Ok(border_0)
 }
 
 fn build_border_empty_xaml_untyped(
-    service_provider: Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadException> {
+    service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
+) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadException> {
     let root = build_border_empty_xaml(service_provider)?;
-    Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
+    ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
 }
 
 /// Generated from `border_padding.xaml`.
 pub fn build_border_padding_xaml(
-    service_provider: Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> Result<::ferroui_base::Ref<::ferroui_controls::Border>, ::ferroui_markup_xaml::XamlLoadException> {
+    service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
+) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::Border>, ::ferroui_markup_xaml::XamlLoadException> {
     // border_padding.xaml(1,2) Border
     let border_0 = ::ferroui_controls::Border::new();
     let name_scope = rt::name_scope_of(service_provider.as_ref());
@@ -46,21 +46,21 @@ pub fn build_border_padding_xaml(
     // border_padding.xaml(1,2) Padding
     border_0.set_value(::ferroui_controls::Decorator::padding_property(), ::ferroui_base::Thickness::new(1.0_f64, 2.0_f64, 3.0_f64, 4.0_f64));
     border_0.try_end_init().map_err(|error| rt::at(rt::TARGET_INVOCATION_EXCEPTION, error, 1, 2))?;
-    rt::complete_root_name_scope(Some(&border_0), name_scope.as_ref(), 1, 2)?;
-    Ok(border_0)
+    rt::complete_root_name_scope(::core::option::Option::Some(&border_0), name_scope.as_ref(), 1, 2)?;
+    ::core::result::Result::Ok(border_0)
 }
 
 fn build_border_padding_xaml_untyped(
-    service_provider: Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadException> {
+    service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
+) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadException> {
     let root = build_border_padding_xaml(service_provider)?;
-    Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
+    ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
 }
 
 /// Generated from `border_padding_uniform.xaml`.
 pub fn build_border_padding_uniform_xaml(
-    service_provider: Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> Result<::ferroui_base::Ref<::ferroui_controls::Border>, ::ferroui_markup_xaml::XamlLoadException> {
+    service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
+) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::Border>, ::ferroui_markup_xaml::XamlLoadException> {
     // border_padding_uniform.xaml(1,2) Border
     let border_0 = ::ferroui_controls::Border::new();
     let name_scope = rt::name_scope_of(service_provider.as_ref());
@@ -68,21 +68,21 @@ pub fn build_border_padding_uniform_xaml(
     // border_padding_uniform.xaml(1,2) Padding
     border_0.set_value(::ferroui_controls::Decorator::padding_property(), ::ferroui_base::Thickness::new(5.0_f64, 5.0_f64, 5.0_f64, 5.0_f64));
     border_0.try_end_init().map_err(|error| rt::at(rt::TARGET_INVOCATION_EXCEPTION, error, 1, 2))?;
-    rt::complete_root_name_scope(Some(&border_0), name_scope.as_ref(), 1, 2)?;
-    Ok(border_0)
+    rt::complete_root_name_scope(::core::option::Option::Some(&border_0), name_scope.as_ref(), 1, 2)?;
+    ::core::result::Result::Ok(border_0)
 }
 
 fn build_border_padding_uniform_xaml_untyped(
-    service_provider: Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadException> {
+    service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
+) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadException> {
     let root = build_border_padding_uniform_xaml(service_provider)?;
-    Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
+    ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
 }
 
 /// Generated from `border_thickness_and_radius.xaml`.
 pub fn build_border_thickness_and_radius_xaml(
-    service_provider: Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> Result<::ferroui_base::Ref<::ferroui_controls::Border>, ::ferroui_markup_xaml::XamlLoadException> {
+    service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
+) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::Border>, ::ferroui_markup_xaml::XamlLoadException> {
     // border_thickness_and_radius.xaml(1,2) Border
     let border_0 = ::ferroui_controls::Border::new();
     let name_scope = rt::name_scope_of(service_provider.as_ref());
@@ -92,21 +92,21 @@ pub fn build_border_thickness_and_radius_xaml(
     // border_thickness_and_radius.xaml(1,2) CornerRadius
     border_0.set_value(::ferroui_controls::Border::corner_radius_property(), ::ferroui_base::CornerRadius::new(3.0_f64, 4.0_f64, 5.0_f64, 6.0_f64));
     border_0.try_end_init().map_err(|error| rt::at(rt::TARGET_INVOCATION_EXCEPTION, error, 1, 2))?;
-    rt::complete_root_name_scope(Some(&border_0), name_scope.as_ref(), 1, 2)?;
-    Ok(border_0)
+    rt::complete_root_name_scope(::core::option::Option::Some(&border_0), name_scope.as_ref(), 1, 2)?;
+    ::core::result::Result::Ok(border_0)
 }
 
 fn build_border_thickness_and_radius_xaml_untyped(
-    service_provider: Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadException> {
+    service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
+) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadException> {
     let root = build_border_thickness_and_radius_xaml(service_provider)?;
-    Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
+    ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
 }
 
 /// Generated from `border_margin.xaml`.
 pub fn build_border_margin_xaml(
-    service_provider: Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> Result<::ferroui_base::Ref<::ferroui_controls::Border>, ::ferroui_markup_xaml::XamlLoadException> {
+    service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
+) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::Border>, ::ferroui_markup_xaml::XamlLoadException> {
     // border_margin.xaml(1,2) Border
     let border_0 = ::ferroui_controls::Border::new();
     let name_scope = rt::name_scope_of(service_provider.as_ref());
@@ -114,21 +114,21 @@ pub fn build_border_margin_xaml(
     // border_margin.xaml(1,2) Margin
     border_0.set_value(::ferroui_base::layout::Layoutable::margin_property(), ::ferroui_base::Thickness::new(10.0_f64, 20.0_f64, 10.0_f64, 20.0_f64));
     border_0.try_end_init().map_err(|error| rt::at(rt::TARGET_INVOCATION_EXCEPTION, error, 1, 2))?;
-    rt::complete_root_name_scope(Some(&border_0), name_scope.as_ref(), 1, 2)?;
-    Ok(border_0)
+    rt::complete_root_name_scope(::core::option::Option::Some(&border_0), name_scope.as_ref(), 1, 2)?;
+    ::core::result::Result::Ok(border_0)
 }
 
 fn build_border_margin_xaml_untyped(
-    service_provider: Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadException> {
+    service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
+) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadException> {
     let root = build_border_margin_xaml(service_provider)?;
-    Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
+    ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
 }
 
 /// Generated from `border_size.xaml`.
 pub fn build_border_size_xaml(
-    service_provider: Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> Result<::ferroui_base::Ref<::ferroui_controls::Border>, ::ferroui_markup_xaml::XamlLoadException> {
+    service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
+) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::Border>, ::ferroui_markup_xaml::XamlLoadException> {
     // border_size.xaml(1,2) Border
     let border_0 = ::ferroui_controls::Border::new();
     let name_scope = rt::name_scope_of(service_provider.as_ref());
@@ -138,21 +138,21 @@ pub fn build_border_size_xaml(
     // border_size.xaml(1,2) Height
     border_0.set_value(::ferroui_base::layout::Layoutable::height_property(), 50.5_f64);
     border_0.try_end_init().map_err(|error| rt::at(rt::TARGET_INVOCATION_EXCEPTION, error, 1, 2))?;
-    rt::complete_root_name_scope(Some(&border_0), name_scope.as_ref(), 1, 2)?;
-    Ok(border_0)
+    rt::complete_root_name_scope(::core::option::Option::Some(&border_0), name_scope.as_ref(), 1, 2)?;
+    ::core::result::Result::Ok(border_0)
 }
 
 fn build_border_size_xaml_untyped(
-    service_provider: Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadException> {
+    service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
+) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadException> {
     let root = build_border_size_xaml(service_provider)?;
-    Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
+    ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
 }
 
 /// Generated from `border_min_width.xaml`.
 pub fn build_border_min_width_xaml(
-    service_provider: Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> Result<::ferroui_base::Ref<::ferroui_controls::Border>, ::ferroui_markup_xaml::XamlLoadException> {
+    service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
+) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::Border>, ::ferroui_markup_xaml::XamlLoadException> {
     // border_min_width.xaml(1,2) Border
     let border_0 = ::ferroui_controls::Border::new();
     let name_scope = rt::name_scope_of(service_provider.as_ref());
@@ -160,21 +160,21 @@ pub fn build_border_min_width_xaml(
     // border_min_width.xaml(1,2) MinWidth
     border_0.set_value(::ferroui_base::layout::Layoutable::min_width_property(), 12.0_f64);
     border_0.try_end_init().map_err(|error| rt::at(rt::TARGET_INVOCATION_EXCEPTION, error, 1, 2))?;
-    rt::complete_root_name_scope(Some(&border_0), name_scope.as_ref(), 1, 2)?;
-    Ok(border_0)
+    rt::complete_root_name_scope(::core::option::Option::Some(&border_0), name_scope.as_ref(), 1, 2)?;
+    ::core::result::Result::Ok(border_0)
 }
 
 fn build_border_min_width_xaml_untyped(
-    service_provider: Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadException> {
+    service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
+) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadException> {
     let root = build_border_min_width_xaml(service_provider)?;
-    Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
+    ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
 }
 
 /// Generated from `border_opacity.xaml`.
 pub fn build_border_opacity_xaml(
-    service_provider: Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> Result<::ferroui_base::Ref<::ferroui_controls::Border>, ::ferroui_markup_xaml::XamlLoadException> {
+    service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
+) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::Border>, ::ferroui_markup_xaml::XamlLoadException> {
     // border_opacity.xaml(1,2) Border
     let border_0 = ::ferroui_controls::Border::new();
     let name_scope = rt::name_scope_of(service_provider.as_ref());
@@ -182,21 +182,21 @@ pub fn build_border_opacity_xaml(
     // border_opacity.xaml(1,2) Opacity
     border_0.set_value(::ferroui_base::Visual::opacity_property(), 0.25_f64);
     border_0.try_end_init().map_err(|error| rt::at(rt::TARGET_INVOCATION_EXCEPTION, error, 1, 2))?;
-    rt::complete_root_name_scope(Some(&border_0), name_scope.as_ref(), 1, 2)?;
-    Ok(border_0)
+    rt::complete_root_name_scope(::core::option::Option::Some(&border_0), name_scope.as_ref(), 1, 2)?;
+    ::core::result::Result::Ok(border_0)
 }
 
 fn build_border_opacity_xaml_untyped(
-    service_provider: Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadException> {
+    service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
+) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadException> {
     let root = build_border_opacity_xaml(service_provider)?;
-    Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
+    ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
 }
 
 /// Generated from `border_is_visible.xaml`.
 pub fn build_border_is_visible_xaml(
-    service_provider: Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> Result<::ferroui_base::Ref<::ferroui_controls::Border>, ::ferroui_markup_xaml::XamlLoadException> {
+    service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
+) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::Border>, ::ferroui_markup_xaml::XamlLoadException> {
     // border_is_visible.xaml(1,2) Border
     let border_0 = ::ferroui_controls::Border::new();
     let name_scope = rt::name_scope_of(service_provider.as_ref());
@@ -204,21 +204,21 @@ pub fn build_border_is_visible_xaml(
     // border_is_visible.xaml(1,2) IsVisible
     border_0.set_value(::ferroui_base::Visual::is_visible_property(), false);
     border_0.try_end_init().map_err(|error| rt::at(rt::TARGET_INVOCATION_EXCEPTION, error, 1, 2))?;
-    rt::complete_root_name_scope(Some(&border_0), name_scope.as_ref(), 1, 2)?;
-    Ok(border_0)
+    rt::complete_root_name_scope(::core::option::Option::Some(&border_0), name_scope.as_ref(), 1, 2)?;
+    ::core::result::Result::Ok(border_0)
 }
 
 fn build_border_is_visible_xaml_untyped(
-    service_provider: Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadException> {
+    service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
+) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadException> {
     let root = build_border_is_visible_xaml(service_provider)?;
-    Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
+    ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
 }
 
 /// Generated from `border_clip_to_bounds.xaml`.
 pub fn build_border_clip_to_bounds_xaml(
-    service_provider: Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> Result<::ferroui_base::Ref<::ferroui_controls::Border>, ::ferroui_markup_xaml::XamlLoadException> {
+    service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
+) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::Border>, ::ferroui_markup_xaml::XamlLoadException> {
     // border_clip_to_bounds.xaml(1,2) Border
     let border_0 = ::ferroui_controls::Border::new();
     let name_scope = rt::name_scope_of(service_provider.as_ref());
@@ -226,21 +226,21 @@ pub fn build_border_clip_to_bounds_xaml(
     // border_clip_to_bounds.xaml(1,2) ClipToBounds
     border_0.set_value(::ferroui_base::Visual::clip_to_bounds_property(), true);
     border_0.try_end_init().map_err(|error| rt::at(rt::TARGET_INVOCATION_EXCEPTION, error, 1, 2))?;
-    rt::complete_root_name_scope(Some(&border_0), name_scope.as_ref(), 1, 2)?;
-    Ok(border_0)
+    rt::complete_root_name_scope(::core::option::Option::Some(&border_0), name_scope.as_ref(), 1, 2)?;
+    ::core::result::Result::Ok(border_0)
 }
 
 fn build_border_clip_to_bounds_xaml_untyped(
-    service_provider: Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadException> {
+    service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
+) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadException> {
     let root = build_border_clip_to_bounds_xaml(service_provider)?;
-    Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
+    ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
 }
 
 /// Generated from `border_z_index.xaml`.
 pub fn build_border_z_index_xaml(
-    service_provider: Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> Result<::ferroui_base::Ref<::ferroui_controls::Border>, ::ferroui_markup_xaml::XamlLoadException> {
+    service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
+) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::Border>, ::ferroui_markup_xaml::XamlLoadException> {
     // border_z_index.xaml(1,2) Border
     let border_0 = ::ferroui_controls::Border::new();
     let name_scope = rt::name_scope_of(service_provider.as_ref());
@@ -248,21 +248,21 @@ pub fn build_border_z_index_xaml(
     // border_z_index.xaml(1,2) ZIndex
     border_0.set_value(::ferroui_base::Visual::z_index_property(), 3_i32);
     border_0.try_end_init().map_err(|error| rt::at(rt::TARGET_INVOCATION_EXCEPTION, error, 1, 2))?;
-    rt::complete_root_name_scope(Some(&border_0), name_scope.as_ref(), 1, 2)?;
-    Ok(border_0)
+    rt::complete_root_name_scope(::core::option::Option::Some(&border_0), name_scope.as_ref(), 1, 2)?;
+    ::core::result::Result::Ok(border_0)
 }
 
 fn build_border_z_index_xaml_untyped(
-    service_provider: Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadException> {
+    service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
+) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadException> {
     let root = build_border_z_index_xaml(service_provider)?;
-    Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
+    ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
 }
 
 /// Generated from `border_horizontal_alignment.xaml`.
 pub fn build_border_horizontal_alignment_xaml(
-    service_provider: Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> Result<::ferroui_base::Ref<::ferroui_controls::Border>, ::ferroui_markup_xaml::XamlLoadException> {
+    service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
+) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::Border>, ::ferroui_markup_xaml::XamlLoadException> {
     // border_horizontal_alignment.xaml(1,2) Border
     let border_0 = ::ferroui_controls::Border::new();
     let name_scope = rt::name_scope_of(service_provider.as_ref());
@@ -270,21 +270,21 @@ pub fn build_border_horizontal_alignment_xaml(
     // border_horizontal_alignment.xaml(1,2) HorizontalAlignment
     border_0.set_value(::ferroui_base::layout::Layoutable::horizontal_alignment_property(), ::ferroui_base::layout::HorizontalAlignment::Center);
     border_0.try_end_init().map_err(|error| rt::at(rt::TARGET_INVOCATION_EXCEPTION, error, 1, 2))?;
-    rt::complete_root_name_scope(Some(&border_0), name_scope.as_ref(), 1, 2)?;
-    Ok(border_0)
+    rt::complete_root_name_scope(::core::option::Option::Some(&border_0), name_scope.as_ref(), 1, 2)?;
+    ::core::result::Result::Ok(border_0)
 }
 
 fn build_border_horizontal_alignment_xaml_untyped(
-    service_provider: Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadException> {
+    service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
+) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadException> {
     let root = build_border_horizontal_alignment_xaml(service_provider)?;
-    Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
+    ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
 }
 
 /// Generated from `border_vertical_alignment.xaml`.
 pub fn build_border_vertical_alignment_xaml(
-    service_provider: Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> Result<::ferroui_base::Ref<::ferroui_controls::Border>, ::ferroui_markup_xaml::XamlLoadException> {
+    service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
+) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::Border>, ::ferroui_markup_xaml::XamlLoadException> {
     // border_vertical_alignment.xaml(1,2) Border
     let border_0 = ::ferroui_controls::Border::new();
     let name_scope = rt::name_scope_of(service_provider.as_ref());
@@ -292,21 +292,21 @@ pub fn build_border_vertical_alignment_xaml(
     // border_vertical_alignment.xaml(1,2) VerticalAlignment
     border_0.set_value(::ferroui_base::layout::Layoutable::vertical_alignment_property(), ::ferroui_base::layout::VerticalAlignment::Bottom);
     border_0.try_end_init().map_err(|error| rt::at(rt::TARGET_INVOCATION_EXCEPTION, error, 1, 2))?;
-    rt::complete_root_name_scope(Some(&border_0), name_scope.as_ref(), 1, 2)?;
-    Ok(border_0)
+    rt::complete_root_name_scope(::core::option::Option::Some(&border_0), name_scope.as_ref(), 1, 2)?;
+    ::core::result::Result::Ok(border_0)
 }
 
 fn build_border_vertical_alignment_xaml_untyped(
-    service_provider: Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadException> {
+    service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
+) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadException> {
     let root = build_border_vertical_alignment_xaml(service_provider)?;
-    Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
+    ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
 }
 
 /// Generated from `border_layout_rounding.xaml`.
 pub fn build_border_layout_rounding_xaml(
-    service_provider: Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> Result<::ferroui_base::Ref<::ferroui_controls::Border>, ::ferroui_markup_xaml::XamlLoadException> {
+    service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
+) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::Border>, ::ferroui_markup_xaml::XamlLoadException> {
     // border_layout_rounding.xaml(1,2) Border
     let border_0 = ::ferroui_controls::Border::new();
     let name_scope = rt::name_scope_of(service_provider.as_ref());
@@ -314,21 +314,21 @@ pub fn build_border_layout_rounding_xaml(
     // border_layout_rounding.xaml(1,2) UseLayoutRounding
     border_0.set_value(::ferroui_base::layout::Layoutable::use_layout_rounding_property(), false);
     border_0.try_end_init().map_err(|error| rt::at(rt::TARGET_INVOCATION_EXCEPTION, error, 1, 2))?;
-    rt::complete_root_name_scope(Some(&border_0), name_scope.as_ref(), 1, 2)?;
-    Ok(border_0)
+    rt::complete_root_name_scope(::core::option::Option::Some(&border_0), name_scope.as_ref(), 1, 2)?;
+    ::core::result::Result::Ok(border_0)
 }
 
 fn build_border_layout_rounding_xaml_untyped(
-    service_provider: Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadException> {
+    service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
+) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadException> {
     let root = build_border_layout_rounding_xaml(service_provider)?;
-    Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
+    ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
 }
 
 /// Generated from `border_input_flags.xaml`.
 pub fn build_border_input_flags_xaml(
-    service_provider: Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> Result<::ferroui_base::Ref<::ferroui_controls::Border>, ::ferroui_markup_xaml::XamlLoadException> {
+    service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
+) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::Border>, ::ferroui_markup_xaml::XamlLoadException> {
     // border_input_flags.xaml(1,2) Border
     let border_0 = ::ferroui_controls::Border::new();
     let name_scope = rt::name_scope_of(service_provider.as_ref());
@@ -340,21 +340,21 @@ pub fn build_border_input_flags_xaml(
     // border_input_flags.xaml(1,2) IsHitTestVisible
     border_0.set_value(::ferroui_base::input::InputElement::is_hit_test_visible_property(), false);
     border_0.try_end_init().map_err(|error| rt::at(rt::TARGET_INVOCATION_EXCEPTION, error, 1, 2))?;
-    rt::complete_root_name_scope(Some(&border_0), name_scope.as_ref(), 1, 2)?;
-    Ok(border_0)
+    rt::complete_root_name_scope(::core::option::Option::Some(&border_0), name_scope.as_ref(), 1, 2)?;
+    ::core::result::Result::Ok(border_0)
 }
 
 fn build_border_input_flags_xaml_untyped(
-    service_provider: Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadException> {
+    service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
+) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadException> {
     let root = build_border_input_flags_xaml(service_provider)?;
-    Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
+    ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
 }
 
 /// Generated from `border_child.xaml`.
 pub fn build_border_child_xaml(
-    service_provider: Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> Result<::ferroui_base::Ref<::ferroui_controls::Border>, ::ferroui_markup_xaml::XamlLoadException> {
+    service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
+) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::Border>, ::ferroui_markup_xaml::XamlLoadException> {
     // border_child.xaml(1,2) Border
     let border_0 = ::ferroui_controls::Border::new();
     let name_scope = rt::name_scope_of(service_provider.as_ref());
@@ -363,24 +363,24 @@ pub fn build_border_child_xaml(
     // border_child.xaml(1,100) TextBlock
     let text_block_0 = ::ferroui_controls::TextBlock::new();
     text_block_0.begin_init();
-    border_0.set_value(::ferroui_controls::Decorator::child_property(), Some(text_block_0.clone().upcast::<::ferroui_controls::Control>()));
+    border_0.set_value(::ferroui_controls::Decorator::child_property(), ::core::option::Option::Some(::core::clone::Clone::clone(&text_block_0).upcast::<::ferroui_controls::Control>()));
     text_block_0.try_end_init().map_err(|error| rt::at(rt::TARGET_INVOCATION_EXCEPTION, error, 1, 100))?;
     border_0.try_end_init().map_err(|error| rt::at(rt::TARGET_INVOCATION_EXCEPTION, error, 1, 2))?;
-    rt::complete_root_name_scope(Some(&border_0), name_scope.as_ref(), 1, 2)?;
-    Ok(border_0)
+    rt::complete_root_name_scope(::core::option::Option::Some(&border_0), name_scope.as_ref(), 1, 2)?;
+    ::core::result::Result::Ok(border_0)
 }
 
 fn build_border_child_xaml_untyped(
-    service_provider: Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadException> {
+    service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
+) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadException> {
     let root = build_border_child_xaml(service_provider)?;
-    Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
+    ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
 }
 
 /// Generated from `border_child_with_text.xaml`.
 pub fn build_border_child_with_text_xaml(
-    service_provider: Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> Result<::ferroui_base::Ref<::ferroui_controls::Border>, ::ferroui_markup_xaml::XamlLoadException> {
+    service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
+) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::Border>, ::ferroui_markup_xaml::XamlLoadException> {
     // border_child_with_text.xaml(1,2) Border
     let border_0 = ::ferroui_controls::Border::new();
     let name_scope = rt::name_scope_of(service_provider.as_ref());
@@ -391,26 +391,26 @@ pub fn build_border_child_with_text_xaml(
     // border_child_with_text.xaml(1,112) TextBlock
     let text_block_0 = ::ferroui_controls::TextBlock::new();
     text_block_0.begin_init();
-    border_0.set_value(::ferroui_controls::Decorator::child_property(), Some(text_block_0.clone().upcast::<::ferroui_controls::Control>()));
+    border_0.set_value(::ferroui_controls::Decorator::child_property(), ::core::option::Option::Some(::core::clone::Clone::clone(&text_block_0).upcast::<::ferroui_controls::Control>()));
     // border_child_with_text.xaml(1,122) Text
-    text_block_0.set_value(::ferroui_controls::TextBlock::text_property(), Some(String::from("Hello")));
+    text_block_0.set_value(::ferroui_controls::TextBlock::text_property(), ::core::option::Option::Some(::std::string::String::from("Hello")));
     text_block_0.try_end_init().map_err(|error| rt::at(rt::TARGET_INVOCATION_EXCEPTION, error, 1, 112))?;
     border_0.try_end_init().map_err(|error| rt::at(rt::TARGET_INVOCATION_EXCEPTION, error, 1, 2))?;
-    rt::complete_root_name_scope(Some(&border_0), name_scope.as_ref(), 1, 2)?;
-    Ok(border_0)
+    rt::complete_root_name_scope(::core::option::Option::Some(&border_0), name_scope.as_ref(), 1, 2)?;
+    ::core::result::Result::Ok(border_0)
 }
 
 fn build_border_child_with_text_xaml_untyped(
-    service_provider: Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadException> {
+    service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
+) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadException> {
     let root = build_border_child_with_text_xaml(service_provider)?;
-    Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
+    ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
 }
 
 /// Generated from `border_nested.xaml`.
 pub fn build_border_nested_xaml(
-    service_provider: Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> Result<::ferroui_base::Ref<::ferroui_controls::Border>, ::ferroui_markup_xaml::XamlLoadException> {
+    service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
+) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::Border>, ::ferroui_markup_xaml::XamlLoadException> {
     // border_nested.xaml(1,2) Border
     let border_0 = ::ferroui_controls::Border::new();
     let name_scope = rt::name_scope_of(service_provider.as_ref());
@@ -419,86 +419,86 @@ pub fn build_border_nested_xaml(
     // border_nested.xaml(1,100) Border
     let border_1 = ::ferroui_controls::Border::new();
     border_1.begin_init();
-    border_0.set_value(::ferroui_controls::Decorator::child_property(), Some(border_1.clone().upcast::<::ferroui_controls::Control>()));
+    border_0.set_value(::ferroui_controls::Decorator::child_property(), ::core::option::Option::Some(::core::clone::Clone::clone(&border_1).upcast::<::ferroui_controls::Control>()));
     // border_nested.xaml(1,100) Margin
     border_1.set_value(::ferroui_base::layout::Layoutable::margin_property(), ::ferroui_base::Thickness::new(1.0_f64, 1.0_f64, 1.0_f64, 1.0_f64));
     // border_nested.xaml(1,119) Child
     // border_nested.xaml(1,119) Border
     let border_2 = ::ferroui_controls::Border::new();
     border_2.begin_init();
-    border_1.set_value(::ferroui_controls::Decorator::child_property(), Some(border_2.clone().upcast::<::ferroui_controls::Control>()));
+    border_1.set_value(::ferroui_controls::Decorator::child_property(), ::core::option::Option::Some(::core::clone::Clone::clone(&border_2).upcast::<::ferroui_controls::Control>()));
     // border_nested.xaml(1,119) Opacity
     border_2.set_value(::ferroui_base::Visual::opacity_property(), 0.5_f64);
     // border_nested.xaml(1,141) Child
     // border_nested.xaml(1,141) TextBlock
     let text_block_0 = ::ferroui_controls::TextBlock::new();
     text_block_0.begin_init();
-    border_2.set_value(::ferroui_controls::Decorator::child_property(), Some(text_block_0.clone().upcast::<::ferroui_controls::Control>()));
+    border_2.set_value(::ferroui_controls::Decorator::child_property(), ::core::option::Option::Some(::core::clone::Clone::clone(&text_block_0).upcast::<::ferroui_controls::Control>()));
     // border_nested.xaml(1,151) Text
-    text_block_0.set_value(::ferroui_controls::TextBlock::text_property(), Some(String::from("Deep")));
+    text_block_0.set_value(::ferroui_controls::TextBlock::text_property(), ::core::option::Option::Some(::std::string::String::from("Deep")));
     text_block_0.try_end_init().map_err(|error| rt::at(rt::TARGET_INVOCATION_EXCEPTION, error, 1, 141))?;
     border_2.try_end_init().map_err(|error| rt::at(rt::TARGET_INVOCATION_EXCEPTION, error, 1, 119))?;
     border_1.try_end_init().map_err(|error| rt::at(rt::TARGET_INVOCATION_EXCEPTION, error, 1, 100))?;
     border_0.try_end_init().map_err(|error| rt::at(rt::TARGET_INVOCATION_EXCEPTION, error, 1, 2))?;
-    rt::complete_root_name_scope(Some(&border_0), name_scope.as_ref(), 1, 2)?;
-    Ok(border_0)
+    rt::complete_root_name_scope(::core::option::Option::Some(&border_0), name_scope.as_ref(), 1, 2)?;
+    ::core::result::Result::Ok(border_0)
 }
 
 fn build_border_nested_xaml_untyped(
-    service_provider: Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadException> {
+    service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
+) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadException> {
     let root = build_border_nested_xaml(service_provider)?;
-    Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
+    ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
 }
 
 /// Generated from `text_block_text.xaml`.
 pub fn build_text_block_text_xaml(
-    service_provider: Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> Result<::ferroui_base::Ref<::ferroui_controls::TextBlock>, ::ferroui_markup_xaml::XamlLoadException> {
+    service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
+) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::TextBlock>, ::ferroui_markup_xaml::XamlLoadException> {
     // text_block_text.xaml(1,2) TextBlock
     let text_block_0 = ::ferroui_controls::TextBlock::new();
     let name_scope = rt::name_scope_of(service_provider.as_ref());
     text_block_0.begin_init();
     // text_block_text.xaml(1,102) Text
-    text_block_0.set_value(::ferroui_controls::TextBlock::text_property(), Some(String::from("Hi \"there\" \\ you")));
+    text_block_0.set_value(::ferroui_controls::TextBlock::text_property(), ::core::option::Option::Some(::std::string::String::from("Hi \"there\" \\ you")));
     text_block_0.try_end_init().map_err(|error| rt::at(rt::TARGET_INVOCATION_EXCEPTION, error, 1, 2))?;
-    rt::complete_root_name_scope(Some(&text_block_0), name_scope.as_ref(), 1, 2)?;
-    Ok(text_block_0)
+    rt::complete_root_name_scope(::core::option::Option::Some(&text_block_0), name_scope.as_ref(), 1, 2)?;
+    ::core::result::Result::Ok(text_block_0)
 }
 
 fn build_text_block_text_xaml_untyped(
-    service_provider: Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadException> {
+    service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
+) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadException> {
     let root = build_text_block_text_xaml(service_provider)?;
-    Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
+    ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
 }
 
 /// Generated from `text_block_empty_text.xaml`.
 pub fn build_text_block_empty_text_xaml(
-    service_provider: Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> Result<::ferroui_base::Ref<::ferroui_controls::TextBlock>, ::ferroui_markup_xaml::XamlLoadException> {
+    service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
+) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::TextBlock>, ::ferroui_markup_xaml::XamlLoadException> {
     // text_block_empty_text.xaml(1,2) TextBlock
     let text_block_0 = ::ferroui_controls::TextBlock::new();
     let name_scope = rt::name_scope_of(service_provider.as_ref());
     text_block_0.begin_init();
     // text_block_empty_text.xaml(1,102) Text
-    text_block_0.set_value(::ferroui_controls::TextBlock::text_property(), Some(String::from("")));
+    text_block_0.set_value(::ferroui_controls::TextBlock::text_property(), ::core::option::Option::Some(::std::string::String::from("")));
     text_block_0.try_end_init().map_err(|error| rt::at(rt::TARGET_INVOCATION_EXCEPTION, error, 1, 2))?;
-    rt::complete_root_name_scope(Some(&text_block_0), name_scope.as_ref(), 1, 2)?;
-    Ok(text_block_0)
+    rt::complete_root_name_scope(::core::option::Option::Some(&text_block_0), name_scope.as_ref(), 1, 2)?;
+    ::core::result::Result::Ok(text_block_0)
 }
 
 fn build_text_block_empty_text_xaml_untyped(
-    service_provider: Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadException> {
+    service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
+) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadException> {
     let root = build_text_block_empty_text_xaml(service_provider)?;
-    Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
+    ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
 }
 
 /// Generated from `text_block_font_size.xaml`.
 pub fn build_text_block_font_size_xaml(
-    service_provider: Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> Result<::ferroui_base::Ref<::ferroui_controls::TextBlock>, ::ferroui_markup_xaml::XamlLoadException> {
+    service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
+) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::TextBlock>, ::ferroui_markup_xaml::XamlLoadException> {
     // text_block_font_size.xaml(1,2) TextBlock
     let text_block_0 = ::ferroui_controls::TextBlock::new();
     let name_scope = rt::name_scope_of(service_provider.as_ref());
@@ -506,21 +506,21 @@ pub fn build_text_block_font_size_xaml(
     // text_block_font_size.xaml(1,2) FontSize
     text_block_0.set_value(::ferroui_controls::TextBlock::font_size_property(), 20.0_f64);
     text_block_0.try_end_init().map_err(|error| rt::at(rt::TARGET_INVOCATION_EXCEPTION, error, 1, 2))?;
-    rt::complete_root_name_scope(Some(&text_block_0), name_scope.as_ref(), 1, 2)?;
-    Ok(text_block_0)
+    rt::complete_root_name_scope(::core::option::Option::Some(&text_block_0), name_scope.as_ref(), 1, 2)?;
+    ::core::result::Result::Ok(text_block_0)
 }
 
 fn build_text_block_font_size_xaml_untyped(
-    service_provider: Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadException> {
+    service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
+) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadException> {
     let root = build_text_block_font_size_xaml(service_provider)?;
-    Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
+    ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
 }
 
 /// Generated from `stack_panel_properties.xaml`.
 pub fn build_stack_panel_properties_xaml(
-    service_provider: Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> Result<::ferroui_base::Ref<::ferroui_controls::StackPanel>, ::ferroui_markup_xaml::XamlLoadException> {
+    service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
+) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::StackPanel>, ::ferroui_markup_xaml::XamlLoadException> {
     // stack_panel_properties.xaml(1,2) StackPanel
     let stack_panel_0 = ::ferroui_controls::StackPanel::new();
     let name_scope = rt::name_scope_of(service_provider.as_ref());
@@ -530,21 +530,21 @@ pub fn build_stack_panel_properties_xaml(
     // stack_panel_properties.xaml(1,2) Spacing
     stack_panel_0.set_value(::ferroui_controls::StackPanel::spacing_property(), 4.0_f64);
     stack_panel_0.try_end_init().map_err(|error| rt::at(rt::TARGET_INVOCATION_EXCEPTION, error, 1, 2))?;
-    rt::complete_root_name_scope(Some(&stack_panel_0), name_scope.as_ref(), 1, 2)?;
-    Ok(stack_panel_0)
+    rt::complete_root_name_scope(::core::option::Option::Some(&stack_panel_0), name_scope.as_ref(), 1, 2)?;
+    ::core::result::Result::Ok(stack_panel_0)
 }
 
 fn build_stack_panel_properties_xaml_untyped(
-    service_provider: Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadException> {
+    service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
+) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadException> {
     let root = build_stack_panel_properties_xaml(service_provider)?;
-    Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
+    ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
 }
 
 /// Generated from `dock_panel_last_child_fill.xaml`.
 pub fn build_dock_panel_last_child_fill_xaml(
-    service_provider: Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> Result<::ferroui_base::Ref<::ferroui_controls::DockPanel>, ::ferroui_markup_xaml::XamlLoadException> {
+    service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
+) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::DockPanel>, ::ferroui_markup_xaml::XamlLoadException> {
     // dock_panel_last_child_fill.xaml(1,2) DockPanel
     let dock_panel_0 = ::ferroui_controls::DockPanel::new();
     let name_scope = rt::name_scope_of(service_provider.as_ref());
@@ -552,43 +552,43 @@ pub fn build_dock_panel_last_child_fill_xaml(
     // dock_panel_last_child_fill.xaml(1,2) LastChildFill
     dock_panel_0.set_value(::ferroui_controls::DockPanel::last_child_fill_property(), false);
     dock_panel_0.try_end_init().map_err(|error| rt::at(rt::TARGET_INVOCATION_EXCEPTION, error, 1, 2))?;
-    rt::complete_root_name_scope(Some(&dock_panel_0), name_scope.as_ref(), 1, 2)?;
-    Ok(dock_panel_0)
+    rt::complete_root_name_scope(::core::option::Option::Some(&dock_panel_0), name_scope.as_ref(), 1, 2)?;
+    ::core::result::Result::Ok(dock_panel_0)
 }
 
 fn build_dock_panel_last_child_fill_xaml_untyped(
-    service_provider: Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadException> {
+    service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
+) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadException> {
     let root = build_dock_panel_last_child_fill_xaml(service_provider)?;
-    Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
+    ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
 }
 
 /// Generated from `button_content_text.xaml`.
 pub fn build_button_content_text_xaml(
-    service_provider: Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> Result<::ferroui_base::Ref<::ferroui_controls::Button>, ::ferroui_markup_xaml::XamlLoadException> {
+    service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
+) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::Button>, ::ferroui_markup_xaml::XamlLoadException> {
     // button_content_text.xaml(1,2) Button
     let button_0 = ::ferroui_controls::Button::new();
     let name_scope = rt::name_scope_of(service_provider.as_ref());
     button_0.begin_init();
     // button_content_text.xaml(1,99) Content
-    button_0.set_value(::ferroui_controls::ContentControl::content_property(), rt::to_object(String::from("Click")));
+    button_0.set_value(::ferroui_controls::ContentControl::content_property(), rt::to_object(::std::string::String::from("Click")));
     button_0.try_end_init().map_err(|error| rt::at(rt::TARGET_INVOCATION_EXCEPTION, error, 1, 2))?;
-    rt::complete_root_name_scope(Some(&button_0), name_scope.as_ref(), 1, 2)?;
-    Ok(button_0)
+    rt::complete_root_name_scope(::core::option::Option::Some(&button_0), name_scope.as_ref(), 1, 2)?;
+    ::core::result::Result::Ok(button_0)
 }
 
 fn build_button_content_text_xaml_untyped(
-    service_provider: Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadException> {
+    service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
+) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadException> {
     let root = build_button_content_text_xaml(service_provider)?;
-    Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
+    ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
 }
 
 /// Generated from `user_control_content_element.xaml`.
 pub fn build_user_control_content_element_xaml(
-    service_provider: Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> Result<::ferroui_base::Ref<::ferroui_controls::UserControl>, ::ferroui_markup_xaml::XamlLoadException> {
+    service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
+) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::UserControl>, ::ferroui_markup_xaml::XamlLoadException> {
     // user_control_content_element.xaml(1,2) UserControl
     let user_control_0 = ::ferroui_controls::UserControl::new();
     let name_scope = rt::name_scope_of(service_provider.as_ref());
@@ -597,48 +597,48 @@ pub fn build_user_control_content_element_xaml(
     // user_control_content_element.xaml(1,105) Border
     let border_0 = ::ferroui_controls::Border::new();
     border_0.begin_init();
-    user_control_0.set_value(::ferroui_controls::ContentControl::content_property(), rt::to_object(border_0.clone()));
+    user_control_0.set_value(::ferroui_controls::ContentControl::content_property(), rt::to_object(::core::clone::Clone::clone(&border_0)));
     // user_control_content_element.xaml(1,105) Width
     border_0.set_value(::ferroui_base::layout::Layoutable::width_property(), 8.0_f64);
     border_0.try_end_init().map_err(|error| rt::at(rt::TARGET_INVOCATION_EXCEPTION, error, 1, 105))?;
     user_control_0.try_end_init().map_err(|error| rt::at(rt::TARGET_INVOCATION_EXCEPTION, error, 1, 2))?;
-    rt::complete_root_name_scope(Some(&user_control_0), name_scope.as_ref(), 1, 2)?;
-    Ok(user_control_0)
+    rt::complete_root_name_scope(::core::option::Option::Some(&user_control_0), name_scope.as_ref(), 1, 2)?;
+    ::core::result::Result::Ok(user_control_0)
 }
 
 fn build_user_control_content_element_xaml_untyped(
-    service_provider: Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadException> {
+    service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
+) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadException> {
     let root = build_user_control_content_element_xaml(service_provider)?;
-    Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
+    ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
 }
 
 /// Generated from `control_tag.xaml`.
 pub fn build_control_tag_xaml(
-    service_provider: Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> Result<::ferroui_base::Ref<::ferroui_controls::Border>, ::ferroui_markup_xaml::XamlLoadException> {
+    service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
+) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::Border>, ::ferroui_markup_xaml::XamlLoadException> {
     // control_tag.xaml(1,2) Border
     let border_0 = ::ferroui_controls::Border::new();
     let name_scope = rt::name_scope_of(service_provider.as_ref());
     border_0.begin_init();
     // control_tag.xaml(1,99) Tag
-    border_0.set_value(::ferroui_controls::Control::tag_property(), rt::to_object(String::from("marker")));
+    border_0.set_value(::ferroui_controls::Control::tag_property(), rt::to_object(::std::string::String::from("marker")));
     border_0.try_end_init().map_err(|error| rt::at(rt::TARGET_INVOCATION_EXCEPTION, error, 1, 2))?;
-    rt::complete_root_name_scope(Some(&border_0), name_scope.as_ref(), 1, 2)?;
-    Ok(border_0)
+    rt::complete_root_name_scope(::core::option::Option::Some(&border_0), name_scope.as_ref(), 1, 2)?;
+    ::core::result::Result::Ok(border_0)
 }
 
 fn build_control_tag_xaml_untyped(
-    service_provider: Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadException> {
+    service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
+) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadException> {
     let root = build_control_tag_xaml(service_provider)?;
-    Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
+    ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
 }
 
 /// Generated from `attached_grid_position.xaml`.
 pub fn build_attached_grid_position_xaml(
-    service_provider: Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> Result<::ferroui_base::Ref<::ferroui_controls::Border>, ::ferroui_markup_xaml::XamlLoadException> {
+    service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
+) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::Border>, ::ferroui_markup_xaml::XamlLoadException> {
     // attached_grid_position.xaml(1,2) Border
     let border_0 = ::ferroui_controls::Border::new();
     let name_scope = rt::name_scope_of(service_provider.as_ref());
@@ -647,28 +647,28 @@ pub fn build_attached_grid_position_xaml(
     // attached_grid_position.xaml(1,100) TextBlock
     let text_block_0 = ::ferroui_controls::TextBlock::new();
     text_block_0.begin_init();
-    border_0.set_value(::ferroui_controls::Decorator::child_property(), Some(text_block_0.clone().upcast::<::ferroui_controls::Control>()));
+    border_0.set_value(::ferroui_controls::Decorator::child_property(), ::core::option::Option::Some(::core::clone::Clone::clone(&text_block_0).upcast::<::ferroui_controls::Control>()));
     // attached_grid_position.xaml(1,100) Row
     text_block_0.set_value(::ferroui_controls::Grid::row_property(), 1_i32);
     // attached_grid_position.xaml(1,100) Column
     text_block_0.set_value(::ferroui_controls::Grid::column_property(), 2_i32);
     text_block_0.try_end_init().map_err(|error| rt::at(rt::TARGET_INVOCATION_EXCEPTION, error, 1, 100))?;
     border_0.try_end_init().map_err(|error| rt::at(rt::TARGET_INVOCATION_EXCEPTION, error, 1, 2))?;
-    rt::complete_root_name_scope(Some(&border_0), name_scope.as_ref(), 1, 2)?;
-    Ok(border_0)
+    rt::complete_root_name_scope(::core::option::Option::Some(&border_0), name_scope.as_ref(), 1, 2)?;
+    ::core::result::Result::Ok(border_0)
 }
 
 fn build_attached_grid_position_xaml_untyped(
-    service_provider: Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadException> {
+    service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
+) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadException> {
     let root = build_attached_grid_position_xaml(service_provider)?;
-    Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
+    ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
 }
 
 /// Generated from `attached_dock.xaml`.
 pub fn build_attached_dock_xaml(
-    service_provider: Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> Result<::ferroui_base::Ref<::ferroui_controls::Border>, ::ferroui_markup_xaml::XamlLoadException> {
+    service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
+) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::Border>, ::ferroui_markup_xaml::XamlLoadException> {
     // attached_dock.xaml(1,2) Border
     let border_0 = ::ferroui_controls::Border::new();
     let name_scope = rt::name_scope_of(service_provider.as_ref());
@@ -677,48 +677,48 @@ pub fn build_attached_dock_xaml(
     // attached_dock.xaml(1,100) TextBlock
     let text_block_0 = ::ferroui_controls::TextBlock::new();
     text_block_0.begin_init();
-    border_0.set_value(::ferroui_controls::Decorator::child_property(), Some(text_block_0.clone().upcast::<::ferroui_controls::Control>()));
+    border_0.set_value(::ferroui_controls::Decorator::child_property(), ::core::option::Option::Some(::core::clone::Clone::clone(&text_block_0).upcast::<::ferroui_controls::Control>()));
     // attached_dock.xaml(1,100) Dock
     text_block_0.set_value(::ferroui_controls::DockPanel::dock_property(), ::ferroui_controls::Dock::Right);
     text_block_0.try_end_init().map_err(|error| rt::at(rt::TARGET_INVOCATION_EXCEPTION, error, 1, 100))?;
     border_0.try_end_init().map_err(|error| rt::at(rt::TARGET_INVOCATION_EXCEPTION, error, 1, 2))?;
-    rt::complete_root_name_scope(Some(&border_0), name_scope.as_ref(), 1, 2)?;
-    Ok(border_0)
+    rt::complete_root_name_scope(::core::option::Option::Some(&border_0), name_scope.as_ref(), 1, 2)?;
+    ::core::result::Result::Ok(border_0)
 }
 
 fn build_attached_dock_xaml_untyped(
-    service_provider: Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadException> {
+    service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
+) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadException> {
     let root = build_attached_dock_xaml(service_provider)?;
-    Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
+    ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
 }
 
 /// Generated from `x_null_child.xaml`.
 pub fn build_x_null_child_xaml(
-    service_provider: Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> Result<::ferroui_base::Ref<::ferroui_controls::Border>, ::ferroui_markup_xaml::XamlLoadException> {
+    service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
+) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::Border>, ::ferroui_markup_xaml::XamlLoadException> {
     // x_null_child.xaml(1,2) Border
     let border_0 = ::ferroui_controls::Border::new();
     let name_scope = rt::name_scope_of(service_provider.as_ref());
     border_0.begin_init();
     // x_null_child.xaml(1,99) Child
-    border_0.set_value(::ferroui_controls::Decorator::child_property(), None);
+    border_0.set_value(::ferroui_controls::Decorator::child_property(), ::core::option::Option::None);
     border_0.try_end_init().map_err(|error| rt::at(rt::TARGET_INVOCATION_EXCEPTION, error, 1, 2))?;
-    rt::complete_root_name_scope(Some(&border_0), name_scope.as_ref(), 1, 2)?;
-    Ok(border_0)
+    rt::complete_root_name_scope(::core::option::Option::Some(&border_0), name_scope.as_ref(), 1, 2)?;
+    ::core::result::Result::Ok(border_0)
 }
 
 fn build_x_null_child_xaml_untyped(
-    service_provider: Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadException> {
+    service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
+) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadException> {
     let root = build_x_null_child_xaml(service_provider)?;
-    Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
+    ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
 }
 
 /// Generated from `x_static_enum.xaml`.
 pub fn build_x_static_enum_xaml(
-    service_provider: Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> Result<::ferroui_base::Ref<::ferroui_controls::Border>, ::ferroui_markup_xaml::XamlLoadException> {
+    service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
+) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::Border>, ::ferroui_markup_xaml::XamlLoadException> {
     // x_static_enum.xaml(1,2) Border
     let border_0 = ::ferroui_controls::Border::new();
     let name_scope = rt::name_scope_of(service_provider.as_ref());
@@ -726,21 +726,21 @@ pub fn build_x_static_enum_xaml(
     // x_static_enum.xaml(1,99) HorizontalAlignment
     border_0.set_value(::ferroui_base::layout::Layoutable::horizontal_alignment_property(), ::ferroui_base::layout::HorizontalAlignment::Right);
     border_0.try_end_init().map_err(|error| rt::at(rt::TARGET_INVOCATION_EXCEPTION, error, 1, 2))?;
-    rt::complete_root_name_scope(Some(&border_0), name_scope.as_ref(), 1, 2)?;
-    Ok(border_0)
+    rt::complete_root_name_scope(::core::option::Option::Some(&border_0), name_scope.as_ref(), 1, 2)?;
+    ::core::result::Result::Ok(border_0)
 }
 
 fn build_x_static_enum_xaml_untyped(
-    service_provider: Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadException> {
+    service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
+) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadException> {
     let root = build_x_static_enum_xaml(service_provider)?;
-    Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
+    ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
 }
 
 /// Generated from `border_many_properties.xaml`.
 pub fn build_border_many_properties_xaml(
-    service_provider: Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> Result<::ferroui_base::Ref<::ferroui_controls::Border>, ::ferroui_markup_xaml::XamlLoadException> {
+    service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
+) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::Border>, ::ferroui_markup_xaml::XamlLoadException> {
     // border_many_properties.xaml(1,2) Border
     let border_0 = ::ferroui_controls::Border::new();
     let name_scope = rt::name_scope_of(service_provider.as_ref());
@@ -765,51 +765,51 @@ pub fn build_border_many_properties_xaml(
     // border_many_properties.xaml(1,231) TextBlock
     let text_block_0 = ::ferroui_controls::TextBlock::new();
     text_block_0.begin_init();
-    border_0.set_value(::ferroui_controls::Decorator::child_property(), Some(text_block_0.clone().upcast::<::ferroui_controls::Control>()));
+    border_0.set_value(::ferroui_controls::Decorator::child_property(), ::core::option::Option::Some(::core::clone::Clone::clone(&text_block_0).upcast::<::ferroui_controls::Control>()));
     // border_many_properties.xaml(1,241) Text
-    text_block_0.set_value(::ferroui_controls::TextBlock::text_property(), Some(String::from("All")));
+    text_block_0.set_value(::ferroui_controls::TextBlock::text_property(), ::core::option::Option::Some(::std::string::String::from("All")));
     // border_many_properties.xaml(1,231) IsVisible
     text_block_0.set_value(::ferroui_base::Visual::is_visible_property(), true);
     text_block_0.try_end_init().map_err(|error| rt::at(rt::TARGET_INVOCATION_EXCEPTION, error, 1, 231))?;
     border_0.try_end_init().map_err(|error| rt::at(rt::TARGET_INVOCATION_EXCEPTION, error, 1, 2))?;
-    rt::complete_root_name_scope(Some(&border_0), name_scope.as_ref(), 1, 2)?;
-    Ok(border_0)
+    rt::complete_root_name_scope(::core::option::Option::Some(&border_0), name_scope.as_ref(), 1, 2)?;
+    ::core::result::Result::Ok(border_0)
 }
 
 fn build_border_many_properties_xaml_untyped(
-    service_provider: Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadException> {
+    service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
+) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadException> {
     let root = build_border_many_properties_xaml(service_provider)?;
-    Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
+    ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
 }
 
 /// Generated from `named_element.xaml`.
 pub fn build_named_element_xaml(
-    service_provider: Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> Result<::ferroui_base::Ref<::ferroui_controls::Border>, ::ferroui_markup_xaml::XamlLoadException> {
+    service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
+) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::Border>, ::ferroui_markup_xaml::XamlLoadException> {
     // named_element.xaml(1,2) Border
     let border_0 = ::ferroui_controls::Border::new();
     let name_scope = rt::name_scope_of(service_provider.as_ref());
     border_0.begin_init();
     // named_element.xaml(1,99) Name
-    border_0.set_direct_value(::ferroui_base::StyledElement::name_property(), Some(String::from("root")));
-    rt::register_name(name_scope.as_ref(), "root", border_0.clone().upcast::<::ferroui_base::FerroObject>(), 1, 99)?;
+    border_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("root")));
+    rt::register_name(name_scope.as_ref(), "root", ::core::clone::Clone::clone(&border_0).upcast::<::ferroui_base::FerroObject>(), 1, 99)?;
     border_0.try_end_init().map_err(|error| rt::at(rt::TARGET_INVOCATION_EXCEPTION, error, 1, 2))?;
-    rt::complete_root_name_scope(Some(&border_0), name_scope.as_ref(), 1, 2)?;
-    Ok(border_0)
+    rt::complete_root_name_scope(::core::option::Option::Some(&border_0), name_scope.as_ref(), 1, 2)?;
+    ::core::result::Result::Ok(border_0)
 }
 
 fn build_named_element_xaml_untyped(
-    service_provider: Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadException> {
+    service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
+) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadException> {
     let root = build_named_element_xaml(service_provider)?;
-    Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
+    ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
 }
 
 /// Generated from `name_property.xaml`.
 pub fn build_name_property_xaml(
-    service_provider: Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> Result<::ferroui_base::Ref<::ferroui_controls::Border>, ::ferroui_markup_xaml::XamlLoadException> {
+    service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
+) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::Border>, ::ferroui_markup_xaml::XamlLoadException> {
     // name_property.xaml(1,2) Border
     let border_0 = ::ferroui_controls::Border::new();
     let name_scope = rt::name_scope_of(service_provider.as_ref());
@@ -818,71 +818,71 @@ pub fn build_name_property_xaml(
     // name_property.xaml(1,100) TextBlock
     let text_block_0 = ::ferroui_controls::TextBlock::new();
     text_block_0.begin_init();
-    border_0.set_value(::ferroui_controls::Decorator::child_property(), Some(text_block_0.clone().upcast::<::ferroui_controls::Control>()));
+    border_0.set_value(::ferroui_controls::Decorator::child_property(), ::core::option::Option::Some(::core::clone::Clone::clone(&text_block_0).upcast::<::ferroui_controls::Control>()));
     // name_property.xaml(1,110) Name
-    text_block_0.set_direct_value(::ferroui_base::StyledElement::name_property(), Some(String::from("inner")));
-    rt::register_name(name_scope.as_ref(), "inner", text_block_0.clone().upcast::<::ferroui_base::FerroObject>(), 1, 110)?;
+    text_block_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("inner")));
+    rt::register_name(name_scope.as_ref(), "inner", ::core::clone::Clone::clone(&text_block_0).upcast::<::ferroui_base::FerroObject>(), 1, 110)?;
     text_block_0.try_end_init().map_err(|error| rt::at(rt::TARGET_INVOCATION_EXCEPTION, error, 1, 100))?;
     border_0.try_end_init().map_err(|error| rt::at(rt::TARGET_INVOCATION_EXCEPTION, error, 1, 2))?;
-    rt::complete_root_name_scope(Some(&border_0), name_scope.as_ref(), 1, 2)?;
-    Ok(border_0)
+    rt::complete_root_name_scope(::core::option::Option::Some(&border_0), name_scope.as_ref(), 1, 2)?;
+    ::core::result::Result::Ok(border_0)
 }
 
 fn build_name_property_xaml_untyped(
-    service_provider: Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadException> {
+    service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
+) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadException> {
     let root = build_name_property_xaml(service_provider)?;
-    Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
+    ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
 }
 
 /// Generated from `text_block_unicode_text.xaml`.
 pub fn build_text_block_unicode_text_xaml(
-    service_provider: Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> Result<::ferroui_base::Ref<::ferroui_controls::TextBlock>, ::ferroui_markup_xaml::XamlLoadException> {
+    service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
+) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::TextBlock>, ::ferroui_markup_xaml::XamlLoadException> {
     // text_block_unicode_text.xaml(1,2) TextBlock
     let text_block_0 = ::ferroui_controls::TextBlock::new();
     let name_scope = rt::name_scope_of(service_provider.as_ref());
     text_block_0.begin_init();
     // text_block_unicode_text.xaml(1,102) Text
-    text_block_0.set_value(::ferroui_controls::TextBlock::text_property(), Some(String::from("caf\u{e9} \u{1f600} tab\tend")));
+    text_block_0.set_value(::ferroui_controls::TextBlock::text_property(), ::core::option::Option::Some(::std::string::String::from("caf\u{e9} \u{1f600} tab\tend")));
     text_block_0.try_end_init().map_err(|error| rt::at(rt::TARGET_INVOCATION_EXCEPTION, error, 1, 2))?;
-    rt::complete_root_name_scope(Some(&text_block_0), name_scope.as_ref(), 1, 2)?;
-    Ok(text_block_0)
+    rt::complete_root_name_scope(::core::option::Option::Some(&text_block_0), name_scope.as_ref(), 1, 2)?;
+    ::core::result::Result::Ok(text_block_0)
 }
 
 fn build_text_block_unicode_text_xaml_untyped(
-    service_provider: Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadException> {
+    service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
+) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadException> {
     let root = build_text_block_unicode_text_xaml(service_provider)?;
-    Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
+    ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
 }
 
 /// Generated from `text_block_multiline_text.xaml`.
 pub fn build_text_block_multiline_text_xaml(
-    service_provider: Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> Result<::ferroui_base::Ref<::ferroui_controls::TextBlock>, ::ferroui_markup_xaml::XamlLoadException> {
+    service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
+) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::TextBlock>, ::ferroui_markup_xaml::XamlLoadException> {
     // text_block_multiline_text.xaml(1,2) TextBlock
     let text_block_0 = ::ferroui_controls::TextBlock::new();
     let name_scope = rt::name_scope_of(service_provider.as_ref());
     text_block_0.begin_init();
     // text_block_multiline_text.xaml(1,102) Text
-    text_block_0.set_value(::ferroui_controls::TextBlock::text_property(), Some(String::from("first\nsecond")));
+    text_block_0.set_value(::ferroui_controls::TextBlock::text_property(), ::core::option::Option::Some(::std::string::String::from("first\nsecond")));
     text_block_0.try_end_init().map_err(|error| rt::at(rt::TARGET_INVOCATION_EXCEPTION, error, 1, 2))?;
-    rt::complete_root_name_scope(Some(&text_block_0), name_scope.as_ref(), 1, 2)?;
-    Ok(text_block_0)
+    rt::complete_root_name_scope(::core::option::Option::Some(&text_block_0), name_scope.as_ref(), 1, 2)?;
+    ::core::result::Result::Ok(text_block_0)
 }
 
 fn build_text_block_multiline_text_xaml_untyped(
-    service_provider: Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadException> {
+    service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
+) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadException> {
     let root = build_text_block_multiline_text_xaml(service_provider)?;
-    Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
+    ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
 }
 
 /// Generated from `border_exponent_numbers.xaml`.
 pub fn build_border_exponent_numbers_xaml(
-    service_provider: Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> Result<::ferroui_base::Ref<::ferroui_controls::Border>, ::ferroui_markup_xaml::XamlLoadException> {
+    service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
+) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::Border>, ::ferroui_markup_xaml::XamlLoadException> {
     // border_exponent_numbers.xaml(1,2) Border
     let border_0 = ::ferroui_controls::Border::new();
     let name_scope = rt::name_scope_of(service_provider.as_ref());
@@ -892,21 +892,21 @@ pub fn build_border_exponent_numbers_xaml(
     // border_exponent_numbers.xaml(1,2) Width
     border_0.set_value(::ferroui_base::layout::Layoutable::width_property(), 150.0_f64);
     border_0.try_end_init().map_err(|error| rt::at(rt::TARGET_INVOCATION_EXCEPTION, error, 1, 2))?;
-    rt::complete_root_name_scope(Some(&border_0), name_scope.as_ref(), 1, 2)?;
-    Ok(border_0)
+    rt::complete_root_name_scope(::core::option::Option::Some(&border_0), name_scope.as_ref(), 1, 2)?;
+    ::core::result::Result::Ok(border_0)
 }
 
 fn build_border_exponent_numbers_xaml_untyped(
-    service_provider: Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadException> {
+    service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
+) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadException> {
     let root = build_border_exponent_numbers_xaml(service_provider)?;
-    Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
+    ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
 }
 
 /// Generated from `border_negative_margin.xaml`.
 pub fn build_border_negative_margin_xaml(
-    service_provider: Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> Result<::ferroui_base::Ref<::ferroui_controls::Border>, ::ferroui_markup_xaml::XamlLoadException> {
+    service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
+) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::Border>, ::ferroui_markup_xaml::XamlLoadException> {
     // border_negative_margin.xaml(1,2) Border
     let border_0 = ::ferroui_controls::Border::new();
     let name_scope = rt::name_scope_of(service_provider.as_ref());
@@ -914,21 +914,21 @@ pub fn build_border_negative_margin_xaml(
     // border_negative_margin.xaml(1,2) Margin
     border_0.set_value(::ferroui_base::layout::Layoutable::margin_property(), ::ferroui_base::Thickness::new(-4.0_f64, 0.0_f64, -2.5_f64, 1.0_f64));
     border_0.try_end_init().map_err(|error| rt::at(rt::TARGET_INVOCATION_EXCEPTION, error, 1, 2))?;
-    rt::complete_root_name_scope(Some(&border_0), name_scope.as_ref(), 1, 2)?;
-    Ok(border_0)
+    rt::complete_root_name_scope(::core::option::Option::Some(&border_0), name_scope.as_ref(), 1, 2)?;
+    ::core::result::Result::Ok(border_0)
 }
 
 fn build_border_negative_margin_xaml_untyped(
-    service_provider: Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadException> {
+    service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
+) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadException> {
     let root = build_border_negative_margin_xaml(service_provider)?;
-    Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
+    ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
 }
 
 /// Generated from `border_auto_size.xaml`.
 pub fn build_border_auto_size_xaml(
-    service_provider: Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> Result<::ferroui_base::Ref<::ferroui_controls::Border>, ::ferroui_markup_xaml::XamlLoadException> {
+    service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
+) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::Border>, ::ferroui_markup_xaml::XamlLoadException> {
     // border_auto_size.xaml(1,2) Border
     let border_0 = ::ferroui_controls::Border::new();
     let name_scope = rt::name_scope_of(service_provider.as_ref());
@@ -940,21 +940,21 @@ pub fn build_border_auto_size_xaml(
     // border_auto_size.xaml(1,2) MinHeight
     border_0.set_value(::ferroui_base::layout::Layoutable::min_height_property(), 0.0_f64);
     border_0.try_end_init().map_err(|error| rt::at(rt::TARGET_INVOCATION_EXCEPTION, error, 1, 2))?;
-    rt::complete_root_name_scope(Some(&border_0), name_scope.as_ref(), 1, 2)?;
-    Ok(border_0)
+    rt::complete_root_name_scope(::core::option::Option::Some(&border_0), name_scope.as_ref(), 1, 2)?;
+    ::core::result::Result::Ok(border_0)
 }
 
 fn build_border_auto_size_xaml_untyped(
-    service_provider: Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadException> {
+    service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
+) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadException> {
     let root = build_border_auto_size_xaml(service_provider)?;
-    Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
+    ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
 }
 
 /// Generated from `content_control_alignment.xaml`.
 pub fn build_content_control_alignment_xaml(
-    service_provider: Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> Result<::ferroui_base::Ref<::ferroui_controls::ContentControl>, ::ferroui_markup_xaml::XamlLoadException> {
+    service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
+) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::ContentControl>, ::ferroui_markup_xaml::XamlLoadException> {
     // content_control_alignment.xaml(1,2) ContentControl
     let content_control_0 = ::ferroui_controls::ContentControl::new();
     let name_scope = rt::name_scope_of(service_provider.as_ref());
@@ -964,21 +964,21 @@ pub fn build_content_control_alignment_xaml(
     // content_control_alignment.xaml(1,2) VerticalContentAlignment
     content_control_0.set_value(::ferroui_controls::ContentControl::vertical_content_alignment_property(), ::ferroui_base::layout::VerticalAlignment::Center);
     content_control_0.try_end_init().map_err(|error| rt::at(rt::TARGET_INVOCATION_EXCEPTION, error, 1, 2))?;
-    rt::complete_root_name_scope(Some(&content_control_0), name_scope.as_ref(), 1, 2)?;
-    Ok(content_control_0)
+    rt::complete_root_name_scope(::core::option::Option::Some(&content_control_0), name_scope.as_ref(), 1, 2)?;
+    ::core::result::Result::Ok(content_control_0)
 }
 
 fn build_content_control_alignment_xaml_untyped(
-    service_provider: Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadException> {
+    service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
+) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadException> {
     let root = build_content_control_alignment_xaml(service_provider)?;
-    Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
+    ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
 }
 
 /// Generated from `content_control_element.xaml`.
 pub fn build_content_control_element_xaml(
-    service_provider: Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> Result<::ferroui_base::Ref<::ferroui_controls::ContentControl>, ::ferroui_markup_xaml::XamlLoadException> {
+    service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
+) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::ContentControl>, ::ferroui_markup_xaml::XamlLoadException> {
     // content_control_element.xaml(1,2) ContentControl
     let content_control_0 = ::ferroui_controls::ContentControl::new();
     let name_scope = rt::name_scope_of(service_provider.as_ref());
@@ -987,26 +987,26 @@ pub fn build_content_control_element_xaml(
     // content_control_element.xaml(1,108) Border
     let border_0 = ::ferroui_controls::Border::new();
     border_0.begin_init();
-    content_control_0.set_value(::ferroui_controls::ContentControl::content_property(), rt::to_object(border_0.clone()));
+    content_control_0.set_value(::ferroui_controls::ContentControl::content_property(), rt::to_object(::core::clone::Clone::clone(&border_0)));
     // content_control_element.xaml(1,108) Padding
     border_0.set_value(::ferroui_controls::Decorator::padding_property(), ::ferroui_base::Thickness::new(2.0_f64, 2.0_f64, 2.0_f64, 2.0_f64));
     border_0.try_end_init().map_err(|error| rt::at(rt::TARGET_INVOCATION_EXCEPTION, error, 1, 108))?;
     content_control_0.try_end_init().map_err(|error| rt::at(rt::TARGET_INVOCATION_EXCEPTION, error, 1, 2))?;
-    rt::complete_root_name_scope(Some(&content_control_0), name_scope.as_ref(), 1, 2)?;
-    Ok(content_control_0)
+    rt::complete_root_name_scope(::core::option::Option::Some(&content_control_0), name_scope.as_ref(), 1, 2)?;
+    ::core::result::Result::Ok(content_control_0)
 }
 
 fn build_content_control_element_xaml_untyped(
-    service_provider: Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadException> {
+    service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
+) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadException> {
     let root = build_content_control_element_xaml(service_provider)?;
-    Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
+    ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
 }
 
 /// Generated from `button_content_element.xaml`.
 pub fn build_button_content_element_xaml(
-    service_provider: Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> Result<::ferroui_base::Ref<::ferroui_controls::Button>, ::ferroui_markup_xaml::XamlLoadException> {
+    service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
+) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::Button>, ::ferroui_markup_xaml::XamlLoadException> {
     // button_content_element.xaml(1,2) Button
     let button_0 = ::ferroui_controls::Button::new();
     let name_scope = rt::name_scope_of(service_provider.as_ref());
@@ -1015,26 +1015,26 @@ pub fn build_button_content_element_xaml(
     // button_content_element.xaml(1,100) TextBlock
     let text_block_0 = ::ferroui_controls::TextBlock::new();
     text_block_0.begin_init();
-    button_0.set_value(::ferroui_controls::ContentControl::content_property(), rt::to_object(text_block_0.clone()));
+    button_0.set_value(::ferroui_controls::ContentControl::content_property(), rt::to_object(::core::clone::Clone::clone(&text_block_0)));
     // button_content_element.xaml(1,110) Text
-    text_block_0.set_value(::ferroui_controls::TextBlock::text_property(), Some(String::from("Inner")));
+    text_block_0.set_value(::ferroui_controls::TextBlock::text_property(), ::core::option::Option::Some(::std::string::String::from("Inner")));
     text_block_0.try_end_init().map_err(|error| rt::at(rt::TARGET_INVOCATION_EXCEPTION, error, 1, 100))?;
     button_0.try_end_init().map_err(|error| rt::at(rt::TARGET_INVOCATION_EXCEPTION, error, 1, 2))?;
-    rt::complete_root_name_scope(Some(&button_0), name_scope.as_ref(), 1, 2)?;
-    Ok(button_0)
+    rt::complete_root_name_scope(::core::option::Option::Some(&button_0), name_scope.as_ref(), 1, 2)?;
+    ::core::result::Result::Ok(button_0)
 }
 
 fn build_button_content_element_xaml_untyped(
-    service_provider: Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadException> {
+    service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
+) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadException> {
     let root = build_button_content_element_xaml(service_provider)?;
-    Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
+    ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
 }
 
 /// Generated from `button_content_property_element.xaml`.
 pub fn build_button_content_property_element_xaml(
-    service_provider: Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> Result<::ferroui_base::Ref<::ferroui_controls::Button>, ::ferroui_markup_xaml::XamlLoadException> {
+    service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
+) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::Button>, ::ferroui_markup_xaml::XamlLoadException> {
     // button_content_property_element.xaml(1,2) Button
     let button_0 = ::ferroui_controls::Button::new();
     let name_scope = rt::name_scope_of(service_provider.as_ref());
@@ -1043,50 +1043,50 @@ pub fn build_button_content_property_element_xaml(
     // button_content_property_element.xaml(1,116) Border
     let border_0 = ::ferroui_controls::Border::new();
     border_0.begin_init();
-    button_0.set_value(::ferroui_controls::ContentControl::content_property(), rt::to_object(border_0.clone()));
+    button_0.set_value(::ferroui_controls::ContentControl::content_property(), rt::to_object(::core::clone::Clone::clone(&border_0)));
     // button_content_property_element.xaml(1,116) Width
     border_0.set_value(::ferroui_base::layout::Layoutable::width_property(), 3.0_f64);
     border_0.try_end_init().map_err(|error| rt::at(rt::TARGET_INVOCATION_EXCEPTION, error, 1, 116))?;
     button_0.try_end_init().map_err(|error| rt::at(rt::TARGET_INVOCATION_EXCEPTION, error, 1, 2))?;
-    rt::complete_root_name_scope(Some(&button_0), name_scope.as_ref(), 1, 2)?;
-    Ok(button_0)
+    rt::complete_root_name_scope(::core::option::Option::Some(&button_0), name_scope.as_ref(), 1, 2)?;
+    ::core::result::Result::Ok(button_0)
 }
 
 fn build_button_content_property_element_xaml_untyped(
-    service_provider: Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadException> {
+    service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
+) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadException> {
     let root = build_button_content_property_element_xaml(service_provider)?;
-    Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
+    ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
 }
 
 /// Generated from `content_tag_null.xaml`.
 pub fn build_content_tag_null_xaml(
-    service_provider: Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> Result<::ferroui_base::Ref<::ferroui_controls::ContentControl>, ::ferroui_markup_xaml::XamlLoadException> {
+    service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
+) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::ContentControl>, ::ferroui_markup_xaml::XamlLoadException> {
     // content_tag_null.xaml(1,2) ContentControl
     let content_control_0 = ::ferroui_controls::ContentControl::new();
     let name_scope = rt::name_scope_of(service_provider.as_ref());
     content_control_0.begin_init();
     // content_tag_null.xaml(1,107) Tag
-    content_control_0.set_value(::ferroui_controls::Control::tag_property(), None);
+    content_control_0.set_value(::ferroui_controls::Control::tag_property(), ::core::option::Option::None);
     // content_tag_null.xaml(1,122) Content
-    content_control_0.set_value(::ferroui_controls::ContentControl::content_property(), None);
+    content_control_0.set_value(::ferroui_controls::ContentControl::content_property(), ::core::option::Option::None);
     content_control_0.try_end_init().map_err(|error| rt::at(rt::TARGET_INVOCATION_EXCEPTION, error, 1, 2))?;
-    rt::complete_root_name_scope(Some(&content_control_0), name_scope.as_ref(), 1, 2)?;
-    Ok(content_control_0)
+    rt::complete_root_name_scope(::core::option::Option::Some(&content_control_0), name_scope.as_ref(), 1, 2)?;
+    ::core::result::Result::Ok(content_control_0)
 }
 
 fn build_content_tag_null_xaml_untyped(
-    service_provider: Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadException> {
+    service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
+) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadException> {
     let root = build_content_tag_null_xaml(service_provider)?;
-    Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
+    ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
 }
 
 /// Generated from `content_x_static_enum.xaml`.
 pub fn build_content_x_static_enum_xaml(
-    service_provider: Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> Result<::ferroui_base::Ref<::ferroui_controls::ContentControl>, ::ferroui_markup_xaml::XamlLoadException> {
+    service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
+) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::ContentControl>, ::ferroui_markup_xaml::XamlLoadException> {
     // content_x_static_enum.xaml(1,2) ContentControl
     let content_control_0 = ::ferroui_controls::ContentControl::new();
     let name_scope = rt::name_scope_of(service_provider.as_ref());
@@ -1094,21 +1094,21 @@ pub fn build_content_x_static_enum_xaml(
     // content_x_static_enum.xaml(1,107) Content
     content_control_0.set_value(::ferroui_controls::ContentControl::content_property(), rt::to_object(::ferroui_controls::Dock::Bottom));
     content_control_0.try_end_init().map_err(|error| rt::at(rt::TARGET_INVOCATION_EXCEPTION, error, 1, 2))?;
-    rt::complete_root_name_scope(Some(&content_control_0), name_scope.as_ref(), 1, 2)?;
-    Ok(content_control_0)
+    rt::complete_root_name_scope(::core::option::Option::Some(&content_control_0), name_scope.as_ref(), 1, 2)?;
+    ::core::result::Result::Ok(content_control_0)
 }
 
 fn build_content_x_static_enum_xaml_untyped(
-    service_provider: Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadException> {
+    service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
+) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadException> {
     let root = build_content_x_static_enum_xaml(service_provider)?;
-    Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
+    ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
 }
 
 /// Generated from `attached_dock_x_static.xaml`.
 pub fn build_attached_dock_x_static_xaml(
-    service_provider: Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> Result<::ferroui_base::Ref<::ferroui_controls::Border>, ::ferroui_markup_xaml::XamlLoadException> {
+    service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
+) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::Border>, ::ferroui_markup_xaml::XamlLoadException> {
     // attached_dock_x_static.xaml(1,2) Border
     let border_0 = ::ferroui_controls::Border::new();
     let name_scope = rt::name_scope_of(service_provider.as_ref());
@@ -1117,26 +1117,26 @@ pub fn build_attached_dock_x_static_xaml(
     // attached_dock_x_static.xaml(1,100) TextBlock
     let text_block_0 = ::ferroui_controls::TextBlock::new();
     text_block_0.begin_init();
-    border_0.set_value(::ferroui_controls::Decorator::child_property(), Some(text_block_0.clone().upcast::<::ferroui_controls::Control>()));
+    border_0.set_value(::ferroui_controls::Decorator::child_property(), ::core::option::Option::Some(::core::clone::Clone::clone(&text_block_0).upcast::<::ferroui_controls::Control>()));
     // attached_dock_x_static.xaml(1,110) Dock
     text_block_0.set_value(::ferroui_controls::DockPanel::dock_property(), ::ferroui_controls::Dock::Left);
     text_block_0.try_end_init().map_err(|error| rt::at(rt::TARGET_INVOCATION_EXCEPTION, error, 1, 100))?;
     border_0.try_end_init().map_err(|error| rt::at(rt::TARGET_INVOCATION_EXCEPTION, error, 1, 2))?;
-    rt::complete_root_name_scope(Some(&border_0), name_scope.as_ref(), 1, 2)?;
-    Ok(border_0)
+    rt::complete_root_name_scope(::core::option::Option::Some(&border_0), name_scope.as_ref(), 1, 2)?;
+    ::core::result::Result::Ok(border_0)
 }
 
 fn build_attached_dock_x_static_xaml_untyped(
-    service_provider: Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadException> {
+    service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
+) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadException> {
     let root = build_attached_dock_x_static_xaml(service_provider)?;
-    Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
+    ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
 }
 
 /// Generated from `attached_grid_spans.xaml`.
 pub fn build_attached_grid_spans_xaml(
-    service_provider: Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> Result<::ferroui_base::Ref<::ferroui_controls::Border>, ::ferroui_markup_xaml::XamlLoadException> {
+    service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
+) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::Border>, ::ferroui_markup_xaml::XamlLoadException> {
     // attached_grid_spans.xaml(1,2) Border
     let border_0 = ::ferroui_controls::Border::new();
     let name_scope = rt::name_scope_of(service_provider.as_ref());
@@ -1145,7 +1145,7 @@ pub fn build_attached_grid_spans_xaml(
     // attached_grid_spans.xaml(1,100) Border
     let border_1 = ::ferroui_controls::Border::new();
     border_1.begin_init();
-    border_0.set_value(::ferroui_controls::Decorator::child_property(), Some(border_1.clone().upcast::<::ferroui_controls::Control>()));
+    border_0.set_value(::ferroui_controls::Decorator::child_property(), ::core::option::Option::Some(::core::clone::Clone::clone(&border_1).upcast::<::ferroui_controls::Control>()));
     // attached_grid_spans.xaml(1,100) RowSpan
     border_1.set_value(::ferroui_controls::Grid::row_span_property(), 2_i32);
     // attached_grid_spans.xaml(1,100) ColumnSpan
@@ -1154,162 +1154,162 @@ pub fn build_attached_grid_spans_xaml(
     border_1.set_value(::ferroui_controls::Grid::is_shared_size_scope_property(), true);
     border_1.try_end_init().map_err(|error| rt::at(rt::TARGET_INVOCATION_EXCEPTION, error, 1, 100))?;
     border_0.try_end_init().map_err(|error| rt::at(rt::TARGET_INVOCATION_EXCEPTION, error, 1, 2))?;
-    rt::complete_root_name_scope(Some(&border_0), name_scope.as_ref(), 1, 2)?;
-    Ok(border_0)
+    rt::complete_root_name_scope(::core::option::Option::Some(&border_0), name_scope.as_ref(), 1, 2)?;
+    ::core::result::Result::Ok(border_0)
 }
 
 fn build_attached_grid_spans_xaml_untyped(
-    service_provider: Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadException> {
+    service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
+) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadException> {
     let root = build_attached_grid_spans_xaml(service_provider)?;
-    Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
+    ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
 }
 
 /// Generated from `named_nested_elements.xaml`.
 pub fn build_named_nested_elements_xaml(
-    service_provider: Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> Result<::ferroui_base::Ref<::ferroui_controls::Border>, ::ferroui_markup_xaml::XamlLoadException> {
+    service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
+) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::Border>, ::ferroui_markup_xaml::XamlLoadException> {
     // named_nested_elements.xaml(1,2) Border
     let border_0 = ::ferroui_controls::Border::new();
     let name_scope = rt::name_scope_of(service_provider.as_ref());
     border_0.begin_init();
     // named_nested_elements.xaml(1,99) Name
-    border_0.set_direct_value(::ferroui_base::StyledElement::name_property(), Some(String::from("outer")));
-    rt::register_name(name_scope.as_ref(), "outer", border_0.clone().upcast::<::ferroui_base::FerroObject>(), 1, 99)?;
+    border_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("outer")));
+    rt::register_name(name_scope.as_ref(), "outer", ::core::clone::Clone::clone(&border_0).upcast::<::ferroui_base::FerroObject>(), 1, 99)?;
     // named_nested_elements.xaml(1,115) Child
     // named_nested_elements.xaml(1,115) Border
     let border_1 = ::ferroui_controls::Border::new();
     border_1.begin_init();
-    border_0.set_value(::ferroui_controls::Decorator::child_property(), Some(border_1.clone().upcast::<::ferroui_controls::Control>()));
+    border_0.set_value(::ferroui_controls::Decorator::child_property(), ::core::option::Option::Some(::core::clone::Clone::clone(&border_1).upcast::<::ferroui_controls::Control>()));
     // named_nested_elements.xaml(1,122) Name
-    border_1.set_direct_value(::ferroui_base::StyledElement::name_property(), Some(String::from("middle")));
-    rt::register_name(name_scope.as_ref(), "middle", border_1.clone().upcast::<::ferroui_base::FerroObject>(), 1, 122)?;
+    border_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("middle")));
+    rt::register_name(name_scope.as_ref(), "middle", ::core::clone::Clone::clone(&border_1).upcast::<::ferroui_base::FerroObject>(), 1, 122)?;
     // named_nested_elements.xaml(1,137) Child
     // named_nested_elements.xaml(1,137) TextBlock
     let text_block_0 = ::ferroui_controls::TextBlock::new();
     text_block_0.begin_init();
-    border_1.set_value(::ferroui_controls::Decorator::child_property(), Some(text_block_0.clone().upcast::<::ferroui_controls::Control>()));
+    border_1.set_value(::ferroui_controls::Decorator::child_property(), ::core::option::Option::Some(::core::clone::Clone::clone(&text_block_0).upcast::<::ferroui_controls::Control>()));
     // named_nested_elements.xaml(1,147) Name
-    text_block_0.set_direct_value(::ferroui_base::StyledElement::name_property(), Some(String::from("inner")));
-    rt::register_name(name_scope.as_ref(), "inner", text_block_0.clone().upcast::<::ferroui_base::FerroObject>(), 1, 147)?;
+    text_block_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("inner")));
+    rt::register_name(name_scope.as_ref(), "inner", ::core::clone::Clone::clone(&text_block_0).upcast::<::ferroui_base::FerroObject>(), 1, 147)?;
     // named_nested_elements.xaml(1,162) Text
-    text_block_0.set_value(::ferroui_controls::TextBlock::text_property(), Some(String::from("x")));
+    text_block_0.set_value(::ferroui_controls::TextBlock::text_property(), ::core::option::Option::Some(::std::string::String::from("x")));
     text_block_0.try_end_init().map_err(|error| rt::at(rt::TARGET_INVOCATION_EXCEPTION, error, 1, 137))?;
     border_1.try_end_init().map_err(|error| rt::at(rt::TARGET_INVOCATION_EXCEPTION, error, 1, 115))?;
     border_0.try_end_init().map_err(|error| rt::at(rt::TARGET_INVOCATION_EXCEPTION, error, 1, 2))?;
-    rt::complete_root_name_scope(Some(&border_0), name_scope.as_ref(), 1, 2)?;
-    Ok(border_0)
+    rt::complete_root_name_scope(::core::option::Option::Some(&border_0), name_scope.as_ref(), 1, 2)?;
+    ::core::result::Result::Ok(border_0)
 }
 
 fn build_named_nested_elements_xaml_untyped(
-    service_provider: Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadException> {
+    service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
+) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadException> {
     let root = build_named_nested_elements_xaml(service_provider)?;
-    Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
+    ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
 }
 
 /// Generated from `named_content.xaml`.
 pub fn build_named_content_xaml(
-    service_provider: Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> Result<::ferroui_base::Ref<::ferroui_controls::UserControl>, ::ferroui_markup_xaml::XamlLoadException> {
+    service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
+) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::UserControl>, ::ferroui_markup_xaml::XamlLoadException> {
     // named_content.xaml(1,2) UserControl
     let user_control_0 = ::ferroui_controls::UserControl::new();
     let name_scope = rt::name_scope_of(service_provider.as_ref());
     user_control_0.begin_init();
     // named_content.xaml(1,104) Name
-    user_control_0.set_direct_value(::ferroui_base::StyledElement::name_property(), Some(String::from("host")));
-    rt::register_name(name_scope.as_ref(), "host", user_control_0.clone().upcast::<::ferroui_base::FerroObject>(), 1, 104)?;
+    user_control_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("host")));
+    rt::register_name(name_scope.as_ref(), "host", ::core::clone::Clone::clone(&user_control_0).upcast::<::ferroui_base::FerroObject>(), 1, 104)?;
     // named_content.xaml(1,117) Content
     // named_content.xaml(1,117) Border
     let border_0 = ::ferroui_controls::Border::new();
     border_0.begin_init();
-    user_control_0.set_value(::ferroui_controls::ContentControl::content_property(), rt::to_object(border_0.clone()));
+    user_control_0.set_value(::ferroui_controls::ContentControl::content_property(), rt::to_object(::core::clone::Clone::clone(&border_0)));
     // named_content.xaml(1,124) Name
-    border_0.set_direct_value(::ferroui_base::StyledElement::name_property(), Some(String::from("content")));
-    rt::register_name(name_scope.as_ref(), "content", border_0.clone().upcast::<::ferroui_base::FerroObject>(), 1, 124)?;
+    border_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("content")));
+    rt::register_name(name_scope.as_ref(), "content", ::core::clone::Clone::clone(&border_0).upcast::<::ferroui_base::FerroObject>(), 1, 124)?;
     border_0.try_end_init().map_err(|error| rt::at(rt::TARGET_INVOCATION_EXCEPTION, error, 1, 117))?;
     user_control_0.try_end_init().map_err(|error| rt::at(rt::TARGET_INVOCATION_EXCEPTION, error, 1, 2))?;
-    rt::complete_root_name_scope(Some(&user_control_0), name_scope.as_ref(), 1, 2)?;
-    Ok(user_control_0)
+    rt::complete_root_name_scope(::core::option::Option::Some(&user_control_0), name_scope.as_ref(), 1, 2)?;
+    ::core::result::Result::Ok(user_control_0)
 }
 
 fn build_named_content_xaml_untyped(
-    service_provider: Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadException> {
+    service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
+) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadException> {
     let root = build_named_content_xaml(service_provider)?;
-    Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
+    ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
 }
 
 /// Generated from `duplicate_name.xaml`.
 pub fn build_duplicate_name_xaml(
-    service_provider: Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> Result<::ferroui_base::Ref<::ferroui_controls::Border>, ::ferroui_markup_xaml::XamlLoadException> {
+    service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
+) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::Border>, ::ferroui_markup_xaml::XamlLoadException> {
     // duplicate_name.xaml(1,2) Border
     let border_0 = ::ferroui_controls::Border::new();
     let name_scope = rt::name_scope_of(service_provider.as_ref());
     border_0.begin_init();
     // duplicate_name.xaml(1,99) Name
-    border_0.set_direct_value(::ferroui_base::StyledElement::name_property(), Some(String::from("same")));
-    rt::register_name(name_scope.as_ref(), "same", border_0.clone().upcast::<::ferroui_base::FerroObject>(), 1, 99)?;
+    border_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("same")));
+    rt::register_name(name_scope.as_ref(), "same", ::core::clone::Clone::clone(&border_0).upcast::<::ferroui_base::FerroObject>(), 1, 99)?;
     // duplicate_name.xaml(1,112) Child
     // duplicate_name.xaml(1,112) Border
     let border_1 = ::ferroui_controls::Border::new();
     border_1.begin_init();
-    border_0.set_value(::ferroui_controls::Decorator::child_property(), Some(border_1.clone().upcast::<::ferroui_controls::Control>()));
+    border_0.set_value(::ferroui_controls::Decorator::child_property(), ::core::option::Option::Some(::core::clone::Clone::clone(&border_1).upcast::<::ferroui_controls::Control>()));
     // duplicate_name.xaml(1,119) Name
-    border_1.set_direct_value(::ferroui_base::StyledElement::name_property(), Some(String::from("same")));
-    rt::register_name(name_scope.as_ref(), "same", border_1.clone().upcast::<::ferroui_base::FerroObject>(), 1, 119)?;
+    border_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("same")));
+    rt::register_name(name_scope.as_ref(), "same", ::core::clone::Clone::clone(&border_1).upcast::<::ferroui_base::FerroObject>(), 1, 119)?;
     border_1.try_end_init().map_err(|error| rt::at(rt::TARGET_INVOCATION_EXCEPTION, error, 1, 112))?;
     border_0.try_end_init().map_err(|error| rt::at(rt::TARGET_INVOCATION_EXCEPTION, error, 1, 2))?;
-    rt::complete_root_name_scope(Some(&border_0), name_scope.as_ref(), 1, 2)?;
-    Ok(border_0)
+    rt::complete_root_name_scope(::core::option::Option::Some(&border_0), name_scope.as_ref(), 1, 2)?;
+    ::core::result::Result::Ok(border_0)
 }
 
 fn build_duplicate_name_xaml_untyped(
-    service_provider: Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadException> {
+    service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
+) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadException> {
     let root = build_duplicate_name_xaml(service_provider)?;
-    Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
+    ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
 }
 
 /// Generated from `name_and_x_name.xaml`.
 pub fn build_name_and_x_name_xaml(
-    service_provider: Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> Result<::ferroui_base::Ref<::ferroui_controls::Border>, ::ferroui_markup_xaml::XamlLoadException> {
+    service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
+) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::Border>, ::ferroui_markup_xaml::XamlLoadException> {
     // name_and_x_name.xaml(1,2) Border
     let border_0 = ::ferroui_controls::Border::new();
     let name_scope = rt::name_scope_of(service_provider.as_ref());
     border_0.begin_init();
     // name_and_x_name.xaml(1,99) Name
-    border_0.set_direct_value(::ferroui_base::StyledElement::name_property(), Some(String::from("a")));
-    rt::register_name(name_scope.as_ref(), "a", border_0.clone().upcast::<::ferroui_base::FerroObject>(), 1, 99)?;
+    border_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("a")));
+    rt::register_name(name_scope.as_ref(), "a", ::core::clone::Clone::clone(&border_0).upcast::<::ferroui_base::FerroObject>(), 1, 99)?;
     // name_and_x_name.xaml(1,109) Child
     // name_and_x_name.xaml(1,109) TextBlock
     let text_block_0 = ::ferroui_controls::TextBlock::new();
     text_block_0.begin_init();
-    border_0.set_value(::ferroui_controls::Decorator::child_property(), Some(text_block_0.clone().upcast::<::ferroui_controls::Control>()));
+    border_0.set_value(::ferroui_controls::Decorator::child_property(), ::core::option::Option::Some(::core::clone::Clone::clone(&text_block_0).upcast::<::ferroui_controls::Control>()));
     // name_and_x_name.xaml(1,119) Name
-    text_block_0.set_direct_value(::ferroui_base::StyledElement::name_property(), Some(String::from("b")));
-    rt::register_name(name_scope.as_ref(), "b", text_block_0.clone().upcast::<::ferroui_base::FerroObject>(), 1, 119)?;
+    text_block_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("b")));
+    rt::register_name(name_scope.as_ref(), "b", ::core::clone::Clone::clone(&text_block_0).upcast::<::ferroui_base::FerroObject>(), 1, 119)?;
     // name_and_x_name.xaml(1,130) Tag
-    text_block_0.set_value(::ferroui_controls::Control::tag_property(), rt::to_object(String::from("t")));
+    text_block_0.set_value(::ferroui_controls::Control::tag_property(), rt::to_object(::std::string::String::from("t")));
     text_block_0.try_end_init().map_err(|error| rt::at(rt::TARGET_INVOCATION_EXCEPTION, error, 1, 109))?;
     border_0.try_end_init().map_err(|error| rt::at(rt::TARGET_INVOCATION_EXCEPTION, error, 1, 2))?;
-    rt::complete_root_name_scope(Some(&border_0), name_scope.as_ref(), 1, 2)?;
-    Ok(border_0)
+    rt::complete_root_name_scope(::core::option::Option::Some(&border_0), name_scope.as_ref(), 1, 2)?;
+    ::core::result::Result::Ok(border_0)
 }
 
 fn build_name_and_x_name_xaml_untyped(
-    service_provider: Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadException> {
+    service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
+) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadException> {
     let root = build_name_and_x_name_xaml(service_provider)?;
-    Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
+    ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
 }
 
 /// Generated from `user_control_properties.xaml`.
 pub fn build_user_control_properties_xaml(
-    service_provider: Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> Result<::ferroui_base::Ref<::ferroui_controls::UserControl>, ::ferroui_markup_xaml::XamlLoadException> {
+    service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
+) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::UserControl>, ::ferroui_markup_xaml::XamlLoadException> {
     // user_control_properties.xaml(1,2) UserControl
     let user_control_0 = ::ferroui_controls::UserControl::new();
     let name_scope = rt::name_scope_of(service_provider.as_ref());
@@ -1326,22 +1326,22 @@ pub fn build_user_control_properties_xaml(
     // user_control_properties.xaml(1,156) TextBlock
     let text_block_0 = ::ferroui_controls::TextBlock::new();
     text_block_0.begin_init();
-    user_control_0.set_value(::ferroui_controls::ContentControl::content_property(), rt::to_object(text_block_0.clone()));
+    user_control_0.set_value(::ferroui_controls::ContentControl::content_property(), rt::to_object(::core::clone::Clone::clone(&text_block_0)));
     // user_control_properties.xaml(1,166) Text
-    text_block_0.set_value(::ferroui_controls::TextBlock::text_property(), Some(String::from("Body")));
+    text_block_0.set_value(::ferroui_controls::TextBlock::text_property(), ::core::option::Option::Some(::std::string::String::from("Body")));
     // user_control_properties.xaml(1,156) Margin
     text_block_0.set_value(::ferroui_base::layout::Layoutable::margin_property(), ::ferroui_base::Thickness::new(2.0_f64, 2.0_f64, 2.0_f64, 2.0_f64));
     text_block_0.try_end_init().map_err(|error| rt::at(rt::TARGET_INVOCATION_EXCEPTION, error, 1, 156))?;
     user_control_0.try_end_init().map_err(|error| rt::at(rt::TARGET_INVOCATION_EXCEPTION, error, 1, 2))?;
-    rt::complete_root_name_scope(Some(&user_control_0), name_scope.as_ref(), 1, 2)?;
-    Ok(user_control_0)
+    rt::complete_root_name_scope(::core::option::Option::Some(&user_control_0), name_scope.as_ref(), 1, 2)?;
+    ::core::result::Result::Ok(user_control_0)
 }
 
 fn build_user_control_properties_xaml_untyped(
-    service_provider: Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadException> {
+    service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
+) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadException> {
     let root = build_user_control_properties_xaml(service_provider)?;
-    Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
+    ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
 }
 
 /// The build function of every eligible document, by document name.
@@ -1410,7 +1410,7 @@ pub fn try_load(
         ::core::option::Option::Some(root) if root.eq_ignore_ascii_case(ROOT_URI) => &uri[ROOT_URI.len()..],
         _ => return ::core::result::Result::Ok(::core::option::Option::None),
     };
-    let ::core::option::Option::Some((_, build)) = DOCUMENTS.iter().find(|(document, _)| document.eq_ignore_ascii_case(name)) else {
+    let ::core::option::Option::Some((_, build)) = ::core::iter::Iterator::find(&mut DOCUMENTS.iter(), |(document, _)| document.eq_ignore_ascii_case(name)) else {
         return ::core::result::Result::Ok(::core::option::Option::None);
     };
     let provider = ::ferroui_markup_xaml::xaml_il::runtime::XamlIlRuntimeHelpers::create_root_service_provider_v3(

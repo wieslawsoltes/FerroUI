@@ -91,8 +91,8 @@ pub fn generate_file(
     source.push('\n');
     source.push_str("/// An untyped build function: the root object as the loader returns it.\n");
     source.push_str("pub type BuildDocument = fn(\n");
-    source.push_str("    Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,\n");
-    source.push_str(") -> Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadException>;\n");
+    source.push_str("    ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,\n");
+    source.push_str(") -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadException>;\n");
 
     let mut report = Vec::with_capacity(compiled.len());
     let mut table = Vec::new();
@@ -103,10 +103,10 @@ pub fn generate_file(
                 source.push_str(function);
                 source.push('\n');
                 source.push_str(&format!("fn {}_untyped(\n", document.function_name));
-                source.push_str("    service_provider: Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,\n");
-                source.push_str(") -> Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadException> {\n");
+                source.push_str("    service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,\n");
+                source.push_str(") -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadException> {\n");
                 source.push_str(&format!("    let root = {}(service_provider)?;\n", document.function_name));
-                source.push_str("    Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)\n");
+                source.push_str("    ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)\n");
                 source.push_str("}\n");
                 table.push(format!(
                     "    ({}, {}_untyped as BuildDocument),\n",
@@ -138,7 +138,7 @@ pub fn generate_file(
     source.push_str("        ::core::option::Option::Some(root) if root.eq_ignore_ascii_case(ROOT_URI) => &uri[ROOT_URI.len()..],\n");
     source.push_str("        _ => return ::core::result::Result::Ok(::core::option::Option::None),\n");
     source.push_str("    };\n");
-    source.push_str("    let ::core::option::Option::Some((_, build)) = DOCUMENTS.iter().find(|(document, _)| document.eq_ignore_ascii_case(name)) else {\n");
+    source.push_str("    let ::core::option::Option::Some((_, build)) = ::core::iter::Iterator::find(&mut DOCUMENTS.iter(), |(document, _)| document.eq_ignore_ascii_case(name)) else {\n");
     source.push_str("        return ::core::result::Result::Ok(::core::option::Option::None);\n");
     source.push_str("    };\n");
     source.push_str("    let provider = ::ferroui_markup_xaml::xaml_il::runtime::XamlIlRuntimeHelpers::create_root_service_provider_v3(\n");
