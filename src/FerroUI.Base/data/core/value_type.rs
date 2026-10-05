@@ -264,6 +264,53 @@ fn with_registry<R>(f: impl FnOnce(&mut Registry) -> R) -> R {
     REGISTRY.with(|r| f(r.borrow_mut().as_mut().expect("registry is initialized")))
 }
 
+// The insertions of the registration functions. The registration functions
+// are instantiated once per registered type; what they do with the table
+// does not depend on the type, so it lives here, compiled once.
+
+fn insert_display(id: TypeId, display: DisplayFn) {
+    with_registry(|r| {
+        r.display.insert(id, display);
+    });
+}
+
+fn insert_nullable(id: TypeId, unwrap: UnwrapFn, null: NullFn, inner: ValueType) {
+    with_registry(|r| {
+        r.nullable.insert(id, unwrap);
+        r.null_values.insert(id, null);
+        r.nullable_inner.insert(id, inner);
+    });
+}
+
+fn insert_cast(key: (TypeId, TypeId), cast: ConvertFn) {
+    with_registry(|r| {
+        r.conversions.insert(key, cast.clone());
+        r.casts.insert(key, cast);
+    });
+}
+
+fn insert_conversion(key: (TypeId, TypeId), convert: ConvertFn) {
+    with_registry(|r| {
+        r.conversions.insert(key, convert);
+    });
+}
+
+fn insert_object(id: TypeId, as_object: ObjectFn, from_object: FromObjectFn, class: &'static TypeInfo) {
+    with_registry(|r| {
+        r.objects.insert(id, (as_object, from_object, class));
+    });
+}
+
+fn insert_interface(interface: TypeId, class: &'static TypeInfo, convert: InterfaceFn) {
+    with_registry(|r| {
+        let entries = r.interfaces.entry(interface).or_default();
+        match entries.iter_mut().find(|e| std::ptr::eq(e.0, class)) {
+            Some(entry) => entry.1 = convert,
+            None => entries.push((class, convert)),
+        }
+    });
+}
+
 /// The per-thread table of value type knowledge used by untyped bindings.
 pub struct ValueTypes;
 
@@ -303,9 +350,7 @@ impl ValueTypes {
         fn display<T: fmt::Display + 'static>(value: &dyn AnyValue) -> String {
             value.downcast_ref::<T>().map(T::to_string).unwrap_or_default()
         }
-        with_registry(|r| {
-            r.display.insert(TypeId::of::<T>(), display::<T>);
-        });
+        insert_display(TypeId::of::<T>(), display::<T>);
     }
 
     /// Registers `Option<T>` as the nullable form of `T`: untyped bindings
@@ -321,11 +366,7 @@ impl ValueTypes {
         fn null<T: PropertyValue>() -> BoxedValue {
             Rc::new(Option::<T>::None)
         }
-        with_registry(|r| {
-            r.nullable.insert(TypeId::of::<Option<T>>(), unwrap::<T>);
-            r.null_values.insert(TypeId::of::<Option<T>>(), null::<T>);
-            r.nullable_inner.insert(TypeId::of::<Option<T>>(), ValueType::of::<T>());
-        });
+        insert_nullable(TypeId::of::<Option<T>>(), unwrap::<T>, null::<T>, ValueType::of::<T>());
         Self::register_cast::<T, Option<T>>(|v| Some(v.clone()));
     }
 
@@ -335,24 +376,16 @@ impl ValueTypes {
     pub fn register_cast<TFrom: 'static, TTo: PropertyValue>(cast: impl Fn(&TFrom) -> TTo + 'static) {
         let cast: ConvertFn =
             Rc::new(move |v: &BoxedValue| v.downcast_ref::<TFrom>().map(|v| Rc::new(cast(v)) as BoxedValue));
-        with_registry(|r| {
-            let key = (TypeId::of::<TFrom>(), TypeId::of::<TTo>());
-            r.conversions.insert(key, cast.clone());
-            r.casts.insert(key, cast);
-        });
+        insert_cast((TypeId::of::<TFrom>(), TypeId::of::<TTo>()), cast);
     }
 
     /// Registers a conversion between two value types. Returning `None`
     /// means the value cannot be converted.
     pub fn register_conversion<TFrom: 'static, TTo: PropertyValue>(convert: impl Fn(&TFrom) -> Option<TTo> + 'static) {
-        with_registry(|r| {
-            r.conversions.insert(
-                (TypeId::of::<TFrom>(), TypeId::of::<TTo>()),
-                Rc::new(move |v: &BoxedValue| {
-                    v.downcast_ref::<TFrom>().and_then(&convert).map(|v| Rc::new(v) as BoxedValue)
-                }),
-            );
-        });
+        insert_conversion(
+            (TypeId::of::<TFrom>(), TypeId::of::<TTo>()),
+            Rc::new(move |v: &BoxedValue| v.downcast_ref::<TFrom>().and_then(&convert).map(|v| Rc::new(v) as BoxedValue)),
+        );
     }
 
     /// Registers the conversion of text to `T` through `parse`, the
@@ -371,9 +404,7 @@ impl ValueTypes {
         fn from_object<T: ObjectType>(value: Ref<FerroObject>) -> Option<BoxedValue> {
             value.cast::<T>().map(|v| Rc::new(v) as BoxedValue)
         }
-        with_registry(|r| {
-            r.objects.insert(TypeId::of::<Ref<T>>(), (as_object::<T>, from_object::<T>, T::TYPE));
-        });
+        insert_object(TypeId::of::<Ref<T>>(), as_object::<T>, from_object::<T>, T::TYPE);
         Self::register_nullable::<Ref<T>>();
         Self::register_conversion::<Ref<FerroObject>, Ref<T>>(|o| o.cast::<T>());
         Self::register_conversion::<Ref<FerroObject>, Option<Ref<T>>>(|o| o.cast::<T>().map(Some));
@@ -437,13 +468,7 @@ impl ValueTypes {
     pub fn register_interface<T: ObjectType, I: PropertyValue>(cast: fn(Ref<T>) -> I) {
         let convert: InterfaceFn =
             Rc::new(move |o: &Ref<FerroObject>| o.cast::<T>().map(|o| Rc::new(cast(o)) as BoxedValue));
-        with_registry(|r| {
-            let entries = r.interfaces.entry(TypeId::of::<I>()).or_default();
-            match entries.iter_mut().find(|e| std::ptr::eq(e.0, T::TYPE)) {
-                Some(entry) => entry.1 = convert,
-                None => entries.push((T::TYPE, convert)),
-            }
-        });
+        insert_interface(TypeId::of::<I>(), T::TYPE, convert);
         Self::register_nullable::<I>();
     }
 
@@ -1146,22 +1171,16 @@ impl ValueTypes {
     /// conversion.
     pub fn register_boxed_cast<TFrom: 'static, TTo: PropertyValue>(cast: impl Fn(&BoxedValue) -> Option<TTo> + 'static) {
         let cast: ConvertFn = Rc::new(move |v: &BoxedValue| cast(v).map(|v| Rc::new(v) as BoxedValue));
-        with_registry(|r| {
-            let key = (TypeId::of::<TFrom>(), TypeId::of::<TTo>());
-            r.conversions.insert(key, cast.clone());
-            r.casts.insert(key, cast);
-        });
+        insert_cast((TypeId::of::<TFrom>(), TypeId::of::<TTo>()), cast);
     }
 
     pub fn register_boxed_conversion<TFrom: 'static, TTo: PropertyValue>(
         convert: impl Fn(&BoxedValue) -> Option<TTo> + 'static,
     ) {
-        with_registry(|r| {
-            r.conversions.insert(
-                (TypeId::of::<TFrom>(), TypeId::of::<TTo>()),
-                Rc::new(move |v: &BoxedValue| convert(v).map(|v| Rc::new(v) as BoxedValue)),
-            );
-        });
+        insert_conversion(
+            (TypeId::of::<TFrom>(), TypeId::of::<TTo>()),
+            Rc::new(move |v: &BoxedValue| convert(v).map(|v| Rc::new(v) as BoxedValue)),
+        );
     }
 }
 
