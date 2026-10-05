@@ -298,6 +298,7 @@ impl TypeInfo {
         }
     }
 
+    #[cfg(feature = "compiler-metadata")]
     /// Declares the public Rust paths of classes: pairs of a class and the
     /// path another crate names it by (`"ferroui_controls::Border"`). The
     /// declaring module ([`module_path`](Self::module_path)) is often
@@ -312,6 +313,7 @@ impl TypeInfo {
         }
     }
 
+    #[cfg(feature = "compiler-metadata")]
     /// The public Rust path of the class
     /// ([`register_rust_paths`](Self::register_rust_paths)), if its crate
     /// recorded one.
@@ -319,6 +321,7 @@ impl TypeInfo {
         read_registry().rust_paths.get(&(self as *const TypeInfo as usize)).map(|entry| entry.1)
     }
 
+    #[cfg(feature = "compiler-metadata")]
     /// Every class with a registered public Rust path, with the path, in no
     /// particular order.
     pub fn all_rust_paths() -> Vec<(&'static TypeInfo, &'static str)> {
@@ -409,6 +412,7 @@ struct TypeRegistry {
     by_handle: HashMap<TypeId, (&'static TypeInfo, bool)>,
     namespaces: Vec<(&'static str, &'static str)>,
     /// The public Rust paths of classes, by the address of their type.
+    #[cfg(feature = "compiler-metadata")]
     rust_paths: HashMap<usize, (&'static TypeInfo, &'static str)>,
 }
 
@@ -1209,7 +1213,7 @@ macro_rules! ferro_class_info {
 
     (@markup $name:ident { $($body:tt)* }) => {
         impl $name {
-            $crate::__ferro_markup_fns!($crate::Ref<$name>, $crate::Ref<$name>; $($body)*);
+            $crate::__ferro_compiler_metadata!($crate::__ferro_markup_fns!($crate::Ref<$name>, $crate::Ref<$name>; $($body)*););
 
             #[doc(hidden)]
             pub const __MARKUP: ::std::option::Option<&'static $crate::metadata::MarkupType> = {
@@ -1230,8 +1234,10 @@ macro_rules! ferro_class_info {
                         use $crate::ClassDefaults as _;
                         <$name>::__INTERFACES
                     };
-                    markup.this = ::std::option::Option::Some(|| $crate::data::core::ValueType::of::<$crate::Ref<$name>>());
-                    markup.value = ::std::option::Option::Some(|| $crate::data::core::ValueType::of::<$crate::Ref<$name>>());
+                    $crate::__ferro_compiler_metadata!(
+                        markup.this = ::std::option::Option::Some(|| $crate::data::core::ValueType::of::<$crate::Ref<$name>>());
+                        markup.value = ::std::option::Option::Some(|| $crate::data::core::ValueType::of::<$crate::Ref<$name>>());
+                    );
                     $crate::__ferro_markup_items!(markup, $crate::Ref<$name>; $($body)*);
                     markup
                 };

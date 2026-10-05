@@ -83,9 +83,7 @@ pub fn register_types() {
     ONCE.call_once(|| {
         TypeInfo::register_namespaces(NAMESPACES);
         TypeInfo::register_all(TYPES);
-        TypeInfo::register_rust_paths(crate::rust_paths::CLASS_RUST_PATHS);
-        crate::metadata::register_type_rust_paths(crate::rust_paths::TYPE_RUST_PATHS);
-        crate::metadata::MarkupType::register_rust_paths(crate::rust_paths::MARKUP_RUST_PATHS);
+        crate::rust_paths::register_rust_paths();
         MarkupAssembly::register(&ASSEMBLY);
         crate::markup_types::register();
     });
