@@ -132,7 +132,9 @@ struct FerroListData<T> {
     items: RefCell<Rc<Vec<T>>>,
     collection_changed: HandlerList<CollectionChangedHandler<T>>,
     /// The untyped form of the collection changed event
-    /// ([`INotifyCollectionChanged`]), raised after the typed handlers.
+    /// ([`INotifyCollectionChanged`]). Its handlers share their tokens with
+    /// the typed ones, so that one change runs all of them in subscription
+    /// order, as the single event of the original.
     untyped_collection_changed: Event<CollectionChange>,
     property_changed: Event<str>,
     validator: RefCell<Option<ListValidator<T>>>,
@@ -229,10 +231,11 @@ impl<T: Clone> Default for FerroList<T> {
 impl<T: Clone> FerroList<T> {
     /// Creates an empty list.
     pub fn new() -> Self {
+        let ids = Rc::new(Cell::new(1));
         Self(Rc::new(FerroListData {
             items: RefCell::new(Rc::new(Vec::new())),
-            collection_changed: HandlerList::new(),
-            untyped_collection_changed: Event::new(),
+            collection_changed: HandlerList::with_shared_ids(ids.clone()),
+            untyped_collection_changed: Event::with_shared_ids(ids),
             property_changed: Event::new(),
             validator: RefCell::new(None),
             reset_behavior: Cell::new(ResetBehavior::Reset),
@@ -577,20 +580,7 @@ impl<T: Clone> FerroList<T> {
     }
 
     fn notify(&self, e: NotifyCollectionChangedEventArgs<'_, T>) {
-        if !self.0.collection_changed.is_empty() {
-            for (_, handler) in self.0.collection_changed.snapshot().iter() {
-                handler(&e);
-            }
-        }
-        if self.0.untyped_collection_changed.has_handlers() {
-            self.0.untyped_collection_changed.raise(&CollectionChange {
-                action: e.action,
-                new_starting_index: e.new_starting_index,
-                new_count: e.new_items.len(),
-                old_starting_index: e.old_starting_index,
-                old_count: e.old_items.len(),
-            });
-        }
+        raise_collection_changed(&self.0.collection_changed, &self.0.untyped_collection_changed, &e);
     }
 
     fn notify_add(&self, items: &[T], index: usize) {
@@ -619,6 +609,37 @@ impl<T: Clone> FerroList<T> {
         });
 
         self.notify_count_changed();
+    }
+}
+
+/// Runs the typed and the untyped handlers of a collection changed event in
+/// subscription order (their tokens come from one counter).
+pub(super) fn raise_collection_changed<T>(
+    typed: &HandlerList<CollectionChangedHandler<T>>,
+    untyped: &Event<CollectionChange>,
+    e: &NotifyCollectionChangedEventArgs<'_, T>,
+) {
+    if typed.is_empty() && !untyped.has_handlers() {
+        return;
+    }
+    let typed = typed.snapshot();
+    let untyped = untyped.snapshot();
+    let change = CollectionChange {
+        action: e.action,
+        new_starting_index: e.new_starting_index,
+        new_count: e.new_items.len(),
+        old_starting_index: e.old_starting_index,
+        old_count: e.old_items.len(),
+    };
+    let (mut i, mut j) = (0, 0);
+    while i < typed.len() || j < untyped.len() {
+        if j == untyped.len() || (i < typed.len() && typed[i].0 < untyped[j].0) {
+            (typed[i].1)(e);
+            i += 1;
+        } else {
+            (untyped[j].1)(&change);
+            j += 1;
+        }
     }
 }
 
@@ -1048,6 +1069,22 @@ mod tests {
         target.remove_all(to_remove);
 
         assert!(log.borrow().is_empty());
+    }
+
+    /// Not from upstream: typed and untyped handlers run in subscription
+    /// order, as the handlers of the single event of the original.
+    #[test]
+    fn typed_and_untyped_handlers_run_in_subscription_order() {
+        let target = FerroList::from_items([1]);
+        let log = Rc::new(RefCell::new(Vec::new()));
+        let (a, b, c) = (log.clone(), log.clone(), log.clone());
+        target.collection_changed().add(Rc::new(move |_: &CollectionChange| a.borrow_mut().push("untyped 1")));
+        target.add_collection_changed(Rc::new(move |_: &NotifyCollectionChangedEventArgs<'_, i32>| b.borrow_mut().push("typed")));
+        target.collection_changed().add(Rc::new(move |_: &CollectionChange| c.borrow_mut().push("untyped 2")));
+
+        target.add(2);
+
+        assert_eq!(*log.borrow(), ["untyped 1", "typed", "untyped 2"]);
     }
 
     #[test]

@@ -21,6 +21,18 @@ impl<A: ?Sized> Event<A> {
         Self { handlers: HandlerList::new() }
     }
 
+    /// An event whose handler tokens come from `ids`, a counter shared with
+    /// other handler lists (see [`HandlerList::with_shared_ids`]).
+    pub fn with_shared_ids(ids: std::rc::Rc<std::cell::Cell<u64>>) -> Self {
+        Self { handlers: HandlerList::with_shared_ids(ids) }
+    }
+
+    /// The current handlers with their tokens; later changes do not affect
+    /// it.
+    pub fn snapshot(&self) -> Rc<Vec<(u64, Rc<dyn Fn(&A)>)>> {
+        self.handlers.snapshot()
+    }
+
     /// Adds a handler; returns the token that removes it.
     pub fn add(&self, handler: Rc<dyn Fn(&A)>) -> u64 {
         self.handlers.add(handler)

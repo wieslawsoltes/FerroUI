@@ -6,7 +6,27 @@ use std::rc::Rc;
 /// when the list actually changes.
 pub struct HandlerList<F: ?Sized> {
     handlers: RefCell<Rc<Vec<(u64, Rc<F>)>>>,
-    next_id: Cell<u64>,
+    next_id: HandlerIds,
+}
+
+/// Where the tokens of a handler list come from.
+enum HandlerIds {
+    Own(Cell<u64>),
+    /// A counter shared with other lists, so that tokens across them are in
+    /// subscription order (the typed and untyped forms of one event).
+    Shared(Rc<Cell<u64>>),
+}
+
+impl HandlerIds {
+    fn next(&self) -> u64 {
+        let cell = match self {
+            Self::Own(cell) => cell,
+            Self::Shared(cell) => cell,
+        };
+        let id = cell.get();
+        cell.set(id + 1);
+        id
+    }
 }
 
 impl<F: ?Sized> Default for HandlerList<F> {
@@ -17,7 +37,13 @@ impl<F: ?Sized> Default for HandlerList<F> {
 
 impl<F: ?Sized> HandlerList<F> {
     pub fn new() -> Self {
-        Self { handlers: RefCell::new(Rc::new(Vec::new())), next_id: Cell::new(1) }
+        Self { handlers: RefCell::new(Rc::new(Vec::new())), next_id: HandlerIds::Own(Cell::new(1)) }
+    }
+
+    /// A list whose tokens come from `ids`, a counter shared with other
+    /// lists: tokens across all of them increase in subscription order.
+    pub fn with_shared_ids(ids: Rc<Cell<u64>>) -> Self {
+        Self { handlers: RefCell::new(Rc::new(Vec::new())), next_id: HandlerIds::Shared(ids) }
     }
 
     #[inline]
@@ -31,8 +57,7 @@ impl<F: ?Sized> HandlerList<F> {
 
     /// Adds a handler and returns a token that removes it again.
     pub fn add(&self, handler: Rc<F>) -> u64 {
-        let id = self.next_id.get();
-        self.next_id.set(id + 1);
+        let id = self.next_id.next();
         let mut handlers = self.handlers.borrow_mut();
         Rc::make_mut_or_clone(&mut handlers).push((id, handler));
         id
