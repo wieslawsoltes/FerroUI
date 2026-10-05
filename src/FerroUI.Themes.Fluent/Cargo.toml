@@ -18,16 +18,20 @@ autoexamples = false
 path = "lib.rs"
 
 [dependencies]
-ferroui-base = { workspace = true }
+# The compiled markup of the theme (`compiled_xaml.rs`) calls the typed functions of the declared
+# members, which exist with this feature (docs/porting/xaml-compiler/HANDOVER.md, section 7, "Cost";
+# `compiler-metadata`, what only the emitter reads, is a feature of the tests alone).
+ferroui-base = { workspace = true, features = ["markup-functions"] }
 ferroui-controls = { workspace = true }
 # The managed dialogs, whose control themes are part of the theme (as the upstream project reference).
 ferroui-dialogs = { workspace = true }
 ferroui-markup-xaml = { workspace = true }
-# The documents of the theme are loaded through the run-time XAML loader until the build-time
-# compiler exists; the dependency goes away with it (the theme then only needs the runtime library).
-ferroui-markup-xaml-loader = { workspace = true, features = ["runtime"] }
 
 [dev-dependencies]
 ferroui-base = { workspace = true, features = ["testing"] }
 ferroui-controls = { workspace = true, features = ["testing"] }
+# The theme is loaded from its compiled markup (`compiled_xaml.rs`); the run-time XAML loader and
+# its emitter generate that file and check it (`tests/compiled_xaml_tests.rs`), and the tests load
+# documents at run time.
+ferroui-markup-xaml-loader = { workspace = true, features = ["runtime", "testing", "emitter"] }
 

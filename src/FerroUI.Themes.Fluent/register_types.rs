@@ -9,7 +9,6 @@ use ferroui_base::metadata::{into_markup_value, IServiceProvider, MarkupAssembly
 use ferroui_base::data::core::ValueTypes;
 use ferroui_base::{BoxedValue, TypeInfo};
 use ferroui_markup_xaml::{FerroXamlLoader, XamlLoadException};
-use ferroui_markup_xaml_loader::FerroRuntimeXamlLoader;
 use std::rc::Rc;
 
 /// The dotted namespaces of the modules of this crate.
@@ -47,11 +46,11 @@ pub fn register_types() {
         ferroui_dialogs::register_types();
         TypeInfo::register_namespaces(NAMESPACES);
         TypeInfo::register_all(TYPES);
+        crate::rust_paths::register_rust_paths();
         MarkupType::register_all(MARKUP_TYPES);
         ValueTypes::register_global(|| ValueTypes::register_nullable::<DensityStyle>());
         MarkupAssembly::register(&ASSEMBLY);
         crate::assets::register();
-        FerroRuntimeXamlLoader::register_class_document(FluentTheme::TYPE, FluentTheme::DOCUMENT_URI);
         FerroXamlLoader::register_compiled_xaml(ASSEMBLY.name, try_load);
     });
 }

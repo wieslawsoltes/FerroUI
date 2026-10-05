@@ -1,9 +1,8 @@
-//! A measurement, not a check: the time the Simple theme takes to load, which
-//! today is parsing, transforming and interpreting its documents through the
-//! run-time loader at start-up (the work the ahead-of-time XAML compiler
-//! removes). The first load includes the parse and the transform; the
-//! second reuses the transformed documents the loader caches and only
-//! interprets them. Not a test of upstream.
+//! A measurement, not a check: the time the Simple theme takes to load. The
+//! theme is built by its compiled markup (`compiled_xaml.rs`): no document
+//! is parsed, transformed or interpreted at start-up. The first load also
+//! pays for what the process does once (the registration of the types);
+//! the second load is the build alone. Not a test of upstream.
 //!
 //! ```text
 //! cargo test --release -p ferroui-themes-simple --lib tests::load_time -- --ignored --nocapture
