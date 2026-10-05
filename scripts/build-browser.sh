@@ -1,19 +1,21 @@
 #!/bin/bash
 # Builds a browser application and assembles its site.
 #
-#   scripts/build-browser.sh <example> [--debug] [--out <directory>]
+#   scripts/build-browser.sh <application> [--debug] [--out <directory>]
 #
-# <example> is an example of the browser crate (src/Browser/FerroUI.Browser/examples/<example>,
-# with its host page in wwwroot/). The site is written to target/browser/<example> (or --out):
-# the host page, the script modules of the platform (ferroui.js and storage.js, built from webapp/
-# with esbuild) and the WebAssembly module with its script. Serve the directory with any static web server.
+# <application> is either an example of the browser crate (src/Browser/FerroUI.Browser/examples/
+# <application>, with its host page in wwwroot/) or a binary package of the workspace with its host
+# page in the wwwroot/ directory of the package (control-catalog-browser). The site is written to
+# target/browser/<application> (or --out): the host page, the script modules of the platform
+# (ferroui.js and storage.js, built from webapp/ with esbuild) and the WebAssembly module with its
+# script. Serve the directory with any static web server.
 #
 # Needs: the Emscripten SDK activated in the shell (emsdk 6.0.10: `source emsdk_env.sh`), the Rust
 # target wasm32-unknown-emscripten, the wasm-bindgen command-line tool of the version of the
 # wasm-bindgen crate on PATH, node and npm. See docs/porting/browser-platform.md.
 set -euo pipefail
 
-EXAMPLE=""
+APPLICATION=""
 PROFILE="release"
 OUT=""
 while [ $# -gt 0 ]; do
@@ -21,20 +23,38 @@ while [ $# -gt 0 ]; do
     --debug) PROFILE="debug";;
     --out) shift; OUT="$1";;
     -*) echo "unknown option: $1" >&2; exit 2;;
-    *) EXAMPLE="$1";;
+    *) APPLICATION="$1";;
   esac
   shift
 done
-if [ -z "$EXAMPLE" ]; then
-  echo "usage: scripts/build-browser.sh <example> [--debug] [--out <directory>]" >&2
+if [ -z "$APPLICATION" ]; then
+  echo "usage: scripts/build-browser.sh <application> [--debug] [--out <directory>]" >&2
   exit 2
 fi
 
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 CRATE="$ROOT/src/Browser/FerroUI.Browser"
 TARGET_DIR="${CARGO_TARGET_DIR:-$ROOT/target}"
-OUT="${OUT:-$TARGET_DIR/browser/$EXAMPLE}"
-WWWROOT="$CRATE/examples/$EXAMPLE/wwwroot"
+OUT="${OUT:-$TARGET_DIR/browser/$APPLICATION}"
+
+command -v node >/dev/null || { echo "node is not on PATH" >&2; exit 1; }
+# An example of the browser crate, or else the binary of the workspace package of that name.
+if [ -d "$CRATE/examples/$APPLICATION" ]; then
+  KIND="example"
+  WWWROOT="$CRATE/examples/$APPLICATION/wwwroot"
+  CARGO_SELECTION=(-p ferroui-browser --example "$APPLICATION")
+else
+  KIND="bin"
+  MANIFEST="$(cd "$ROOT" && cargo metadata --no-deps --format-version 1 --locked | node -e '
+    let text = ""; process.stdin.on("data", (chunk) => text += chunk).on("end", () => {
+      const found = JSON.parse(text).packages.find((p) => p.name === process.argv[1]
+        && p.targets.some((t) => t.kind.includes("bin") && t.name === process.argv[1]));
+      if (found) console.log(found.manifest_path);
+    });' "$APPLICATION")"
+  [ -n "$MANIFEST" ] || { echo "$APPLICATION is neither an example of the browser crate nor a binary package of the workspace" >&2; exit 2; }
+  WWWROOT="$(dirname "$MANIFEST")/wwwroot"
+  CARGO_SELECTION=(-p "$APPLICATION" --bin "$APPLICATION")
+fi
 
 command -v emcc >/dev/null || { echo "emcc is not on PATH: activate the Emscripten SDK first" >&2; exit 1; }
 command -v em++ >/dev/null || { echo "em++ (the linker of the target) is not on PATH: activate the Emscripten SDK first" >&2; exit 1; }
@@ -86,15 +106,21 @@ echo "== script module"
 echo "== WebAssembly module ($PROFILE)"
 FLAGS=()
 [ "$PROFILE" = "release" ] && FLAGS+=(--release)
-(cd "$ROOT" && cargo build --target wasm32-unknown-emscripten -p ferroui-browser --example "$EXAMPLE" "${FLAGS[@]}")
+(cd "$ROOT" && cargo build --locked --target wasm32-unknown-emscripten "${CARGO_SELECTION[@]}" "${FLAGS[@]}")
 
 echo "== site"
-BUILT="$TARGET_DIR/wasm32-unknown-emscripten/$PROFILE/examples"
+BUILT="$TARGET_DIR/wasm32-unknown-emscripten/$PROFILE"
+[ "$KIND" = "example" ] && BUILT="$BUILT/examples"
+# The script of the module names the WebAssembly file it loads: the name of the target with `-`
+# replaced by `_` for a binary, the name of the target for an example.
+WASM="$(sed -n 's/.*locateFile("\([^"]*\.wasm\)".*/\1/p; s/.*new URL("\([^"]*\.wasm\)".*/\1/p' "$BUILT/$APPLICATION.js" | head -n 1)"
+[ -n "$WASM" ] || WASM="$APPLICATION.wasm"
+[ -f "$BUILT/$WASM" ] || { echo "the script of the module loads $WASM, which the build did not write" >&2; exit 1; }
 rm -rf -- "$OUT"
 mkdir -p "$OUT"
 cp -R "$WWWROOT"/. "$OUT"/
 # The main script module, and the storage bundle it imports on first use from the same directory.
 cp "$CRATE/dist/ferroui.js" "$CRATE/dist/ferroui.js.map" "$CRATE/dist/storage.js" "$CRATE/dist/storage.js.map" "$OUT"/
-cp "$BUILT/$EXAMPLE.js" "$BUILT/$EXAMPLE.wasm" "$OUT"/
+cp "$BUILT/$APPLICATION.js" "$BUILT/$WASM" "$OUT"/
 ls -la "$OUT"
 echo "site written to $OUT"

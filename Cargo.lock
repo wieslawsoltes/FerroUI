@@ -117,6 +117,18 @@ dependencies = [
 ]
 
 [[package]]
+name = "control-catalog-browser"
+version = "0.1.0"
+dependencies = [
+ "control-catalog",
+ "ferroui-base",
+ "ferroui-browser",
+ "ferroui-controls",
+ "ferroui-fonts-inter",
+ "wasm-bindgen",
+]
+
+[[package]]
 name = "control-catalog-desktop"
 version = "0.1.0"
 dependencies = [
