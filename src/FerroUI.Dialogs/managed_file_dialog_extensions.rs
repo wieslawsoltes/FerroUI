@@ -2,7 +2,7 @@ use crate::{ManagedFileDialogOptions, ManagedStorageProvider};
 use ferroui_base::platform::storage::IStorageProvider;
 use ferroui_base::{FerroLocator, LocatorExtensions, ObjectType, Ref, Upcast};
 use ferroui_controls::platform::{IMountedVolumeInfoProvider, IStorageProviderFactory};
-use ferroui_controls::{AppBuilder, ContentControl, TopLevel};
+use ferroui_controls::{AppBuilder, ContentControl, TopLevel, Window};
 use std::rc::Rc;
 
 /// The factory of the managed storage providers: one per top level, with
@@ -34,9 +34,12 @@ pub trait ManagedFileDialogExtensions {
     /// Uses the managed file chooser for the file and folder pickers of
     /// every top level, shown in a new `TWindow`.
     ///
+    /// The class model states the `Window` constraint of the original; its
+    /// `new()` constraint is checked when the extension is used.
+    ///
     /// # Panics
     /// Panics when `TWindow` has no parameterless constructor.
-    fn use_managed_system_dialogs_with<TWindow: ObjectType + Upcast<ContentControl>>(&self) -> AppBuilder;
+    fn use_managed_system_dialogs_with<TWindow: ObjectType + Upcast<Window>>(&self) -> AppBuilder;
 }
 
 /// The options registered with the locator, with `custom_root_factory` as
@@ -74,14 +77,14 @@ impl ManagedFileDialogExtensions for AppBuilder {
         use_managed_system_dialogs(self, None)
     }
 
-    fn use_managed_system_dialogs_with<TWindow: ObjectType + Upcast<ContentControl>>(&self) -> AppBuilder {
+    fn use_managed_system_dialogs_with<TWindow: ObjectType + Upcast<Window>>(&self) -> AppBuilder {
         let constructor = TWindow::TYPE
             .default_constructor()
             .unwrap_or_else(|| panic!("{} has no parameterless constructor.", TWindow::TYPE.name()));
         use_managed_system_dialogs(
             self,
             Some(Rc::new(move || {
-                constructor().cast::<ContentControl>().expect("the window type derives from ContentControl")
+                constructor().cast::<Window>().expect("the window type derives from Window").upcast::<ContentControl>()
             })),
         )
     }
