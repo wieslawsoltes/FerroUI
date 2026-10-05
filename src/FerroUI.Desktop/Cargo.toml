@@ -1,0 +1,28 @@
+[package]
+name = "ferroui-desktop"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+
+[lib]
+path = "lib.rs"
+
+[dependencies]
+ferroui-base.workspace = true
+ferroui-controls.workspace = true
+ferroui-skia.workspace = true
+ferroui-harfbuzz.workspace = true
+
+[target.'cfg(target_os = "macos")'.dependencies]
+ferroui-native.workspace = true
+
+[dev-dependencies]
+# The example opens a window before the compositing renderer exists and
+# says so; see examples/hello_window.rs.
+ferroui-controls = { workspace = true, features = ["testing"] }
+
+[[example]]
+name = "hello_window"
+path = "examples/hello_window.rs"
