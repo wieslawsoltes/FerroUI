@@ -648,7 +648,7 @@ impl Button {
     fn subscribe_can_execute_changed(&self, command: &Rc<dyn ICommand>) {
         // A weak subscription: it ends with this control, so a command
         // that outlives the control keeps no handler of it.
-        let subscription = WeakEvents::command_can_execute_changed(command, &self.to_ref(), |this| {
+        let subscription = WeakEvents::subscribe_command_can_execute_changed(command, &self.to_ref(), |this| {
             this.can_execute_changed_handler()
         });
         let old = self.can_execute_change_subscription.replace(Some(subscription));

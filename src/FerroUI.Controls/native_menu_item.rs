@@ -53,7 +53,7 @@ impl FerroObjectImpl for NativeMenuItem {
                 // A weak subscription, as in the reference: it ends with
                 // this item.
                 let subscription =
-                    WeakEvents::command_can_execute_changed(&new_command, &this.to_ref(), |this| this.can_execute_changed());
+                    WeakEvents::subscribe_command_can_execute_changed(&new_command, &this.to_ref(), |this| this.can_execute_changed());
                 let old = this.can_execute_changed_subscription.replace(Some(subscription));
                 if let Some(old) = old {
                     old.dispose();
