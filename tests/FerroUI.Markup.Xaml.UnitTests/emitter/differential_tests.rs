@@ -10,6 +10,7 @@
 
 use std::rc::Rc;
 
+use ferroui_base::controls::{INameScope, NameScope};
 use ferroui_base::data::core::ValueTypes;
 use ferroui_base::metadata::IServiceProvider;
 use ferroui_base::{BoxedValue, FerroObject, FerroProperty, FerroPropertyRegistry, Ref, StyledElement};
@@ -30,21 +31,39 @@ fn generate() -> GeneratedFile {
     generate_file(generated::ASSEMBLY_NAME, generated::ROOT_URI, DOCUMENTS, &RuntimeXamlLoaderConfiguration::new())
 }
 
-/// The canonical dump of an object tree: the full name of the class, every
-/// registered property (of the class, and attached) that is set, sorted by
-/// name, with its value in display form (an object value is shown as its
-/// class), then the logical children of a styled element, recursively.
-fn dump(object: &Ref<FerroObject>, indent: usize, output: &mut String) {
+/// A value in display form: an object of the object model as its class.
+fn display(value: &BoxedValue) -> String {
+    match ValueTypes::as_object(&**value) {
+        Some(inner) => format!("<{}>", inner.get_type().full_name()),
+        None => ValueTypes::to_display_string(Some(value)),
+    }
+}
+
+/// The canonical dump of an object tree: the full name of the class and,
+/// for a styled element, whether it is initialised; every registered
+/// property (of the class, and attached) that is set, sorted by name, and
+/// every direct property of the class, with its value in display form (an
+/// object value is shown as its class); for a named element, whether the
+/// name scope of the root finds it under its name; for an element with a
+/// name scope of its own, whether that scope is completed; then the logical
+/// children of a styled element, recursively.
+fn dump(object: &Ref<FerroObject>, root_scope: Option<&Rc<dyn INameScope>>, indent: usize, output: &mut String) {
     let pad = "  ".repeat(indent);
     let class = object.get_type();
-    output.push_str(&format!("{pad}{}\n", class.full_name()));
+    let styled = object.cast::<StyledElement>();
+    let initialized = match &styled {
+        Some(styled) if styled.is_initialized() => " (initialized)",
+        Some(_) => " (not initialized)",
+        None => "",
+    };
+    output.push_str(&format!("{pad}{}{initialized}\n", class.full_name()));
 
     let registry = FerroPropertyRegistry::instance();
     let mut properties: Vec<&'static FerroProperty> = Vec::new();
     let registered = registry.get_registered(class);
     let attached = registry.get_registered_attached(class);
     for property in registered.iter().chain(attached.iter()) {
-        if !properties.iter().any(|known| std::ptr::eq(*known, *property)) {
+        if !property.is_direct() && !properties.iter().any(|known| std::ptr::eq(*known, *property)) {
             properties.push(*property);
         }
     }
@@ -53,21 +72,30 @@ fn dump(object: &Ref<FerroObject>, indent: usize, output: &mut String) {
         if !object.is_set(property) {
             continue;
         }
-        let value: BoxedValue = object.get_value_untyped(property);
-        let text = match ValueTypes::as_object(&*value) {
-            Some(inner) => format!("<{}>", inner.get_type().full_name()),
-            None => ValueTypes::to_display_string(Some(&value)),
-        };
-        lines.push(format!("{pad}  {}.{} = {text}\n", property.owner_type().name(), property.name()));
+        let value = display(&object.get_value_untyped(property));
+        lines.push(format!("{pad}  {}.{} = {value}\n", property.owner_type().name(), property.name()));
+    }
+    for property in registry.get_registered_direct(class).iter() {
+        let value = display(&object.get_value_untyped(property));
+        lines.push(format!("{pad}  direct {}.{} = {value}\n", property.owner_type().name(), property.name()));
     }
     lines.sort();
     for line in &lines {
         output.push_str(line);
     }
 
-    if let Some(styled) = object.cast::<StyledElement>() {
+    if let Some(styled) = &styled {
+        if let Some(name) = styled.name() {
+            let found = root_scope
+                .and_then(|scope| scope.find(&name))
+                .is_some_and(|found| std::ptr::eq(&*found, &**object));
+            output.push_str(&format!("{pad}  named '{name}', found in the scope of the root: {found}\n"));
+        }
+        if let Some(scope) = NameScope::get_name_scope(styled) {
+            output.push_str(&format!("{pad}  has a name scope, completed: {}\n", scope.0.is_completed()));
+        }
         for child in styled.logical_children().to_vec() {
-            dump(&child.upcast::<FerroObject>(), indent + 1, output);
+            dump(&child.upcast::<FerroObject>(), root_scope, indent + 1, output);
         }
     }
 }
@@ -75,7 +103,10 @@ fn dump(object: &Ref<FerroObject>, indent: usize, output: &mut String) {
 fn dump_root(root: &BoxedValue) -> String {
     let mut output = String::new();
     match ValueTypes::as_object(&**root) {
-        Some(object) => dump(&object, 0, &mut output),
+        Some(object) => {
+            let scope = object.cast::<StyledElement>().and_then(|styled| NameScope::get_name_scope(&styled)).map(|scope| scope.0);
+            dump(&object, scope.as_ref(), 0, &mut output);
+        }
         None => output.push_str("<the root is not an object of the object model>\n"),
     }
     output
@@ -175,13 +206,14 @@ fn both_back_ends_build_equal_object_trees() {
             println!("not eligible  {name}");
             continue;
         };
+        // A failed load is compared by its message, which carries the position.
         let interpreted = match try_load(xaml) {
             Ok(root) => dump_root(&root),
-            Err(error) => format!("<load error: {}>\n", describe(&error)),
+            Err(error) => format!("<error: {}>\n", error.message()),
         };
         let generated = match built {
             Ok(root) => dump_root(&root),
-            Err(error) => format!("<build error: {error}>\n"),
+            Err(error) => format!("<error: {error}>\n"),
         };
         if interpreted == generated {
             matches += 1;
@@ -199,15 +231,14 @@ fn both_back_ends_build_equal_object_trees() {
 
 #[test]
 fn compiled_documents_are_registered_by_uri() {
-    use ferroui_base::platform::IAssetLoader;
+    use ferroui_base::platform::{AssetAssembly, IAssetLoader, StandardAssetLoader};
     use ferroui_base::utilities::{Uri, UriKind};
-    use ferroui_base::{FerroLocator, LocatorExtensions};
+    use ferroui_base::FerroLocator;
     use ferroui_markup_xaml::FerroXamlLoader;
 
     let _base = xaml_test_base();
     let Some((name, _)) = generated::DOCUMENTS.first() else {
-        println!("generated.rs holds no document");
-        return;
+        panic!("generated.rs holds no document");
     };
     let uri = format!("{}{name}", generated::ROOT_URI);
 
@@ -220,17 +251,45 @@ fn compiled_documents_are_registered_by_uri() {
 
     // Through the loader of the runtime library: it asks the asset loader which assembly
     // the URI belongs to, and that assembly's registered loader for the document.
+    let _locator_scope = FerroLocator::enter_scope();
+    FerroLocator::current_mutable()
+        .bind::<dyn IAssetLoader>()
+        .to_constant(Rc::new(StandardAssetLoader::new(Some(&AssetAssembly::new(generated::ASSEMBLY_NAME)))));
     generated::register_compiled_xaml();
-    if FerroLocator::current().get_service::<dyn IAssetLoader>().is_none() {
-        println!("no asset loader is registered in this scope: FerroXamlLoader::load is not exercised");
-        return;
-    }
     let parsed = Uri::new(&uri, UriKind::Absolute).expect("an absolute URI");
-    match FerroXamlLoader::load(&parsed, None) {
+    let loaded = FerroXamlLoader::try_load_with_service_provider(None, &parsed, None);
+    ferroui_markup_xaml::FerroXamlLoader::unregister_compiled_xaml(generated::ASSEMBLY_NAME);
+    match loaded {
         Ok(root) => {
             let expected = build_generated(name).expect("the document is generated").expect("it builds");
             assert_eq!(dump_root(&root), dump_root(&expected));
         }
         Err(error) => panic!("{uri} did not load through FerroXamlLoader: {}", describe(&error)),
+    }
+}
+
+/// Prints the transformed tree the emitter walks for the corpus document named by the
+/// environment variable `FERROUI_EMITTER_DOCUMENT`: a diagnostic for a document that is
+/// not eligible.
+///
+/// ```text
+/// FERROUI_EMITTER_DOCUMENT=border_child.xaml cargo test -p ferroui-markup-xaml-tests --lib \
+///     emitter::differential_tests::print_transformed_tree -- --ignored --exact --nocapture
+/// ```
+#[test]
+#[ignore = "a diagnostic: prints the transformed tree of one corpus document"]
+fn print_transformed_tree() {
+    let _base = xaml_test_base();
+    let Ok(name) = std::env::var("FERROUI_EMITTER_DOCUMENT") else {
+        println!("FERROUI_EMITTER_DOCUMENT names no document");
+        return;
+    };
+    let Some((_, xaml)) = DOCUMENTS.iter().find(|(document, _)| *document == name) else {
+        println!("{name} is not a document of the corpus");
+        return;
+    };
+    match ferroui_markup_xaml_loader::rust_emitter::transformed_tree(&name, xaml, &RuntimeXamlLoaderConfiguration::new()) {
+        Ok(tree) => println!("{tree}"),
+        Err(error) => println!("{name} does not transform: {error}"),
     }
 }
