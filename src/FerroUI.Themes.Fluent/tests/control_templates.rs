@@ -308,3 +308,40 @@ fn every_themed_control_has_a_test() {
         assert!(crate::assets::is_excluded(&format!("/Controls/{name}.xaml")), "{name} has a test but no control theme");
     }
 }
+
+/// The items controls of the command bar template present the command lists
+/// of the bar: their items sources are bound to `VisiblePrimaryCommands` and
+/// `OverflowItems` of the templated parent, plain properties that the
+/// binding reads through the root object handle of the templated parent.
+#[test]
+fn command_bar_presents_its_command_lists() {
+    use ferroui_controls::command_bar::{CommandBar, CommandBarButton};
+    use ferroui_controls::ItemsControl;
+
+    let _app = start_themed_application();
+    let bar = CommandBar::new();
+    let name_scope: Rc<RefCell<Option<NameScopeRef>>> = Rc::new(RefCell::new(None));
+    let _ = bar.template_applied({
+        let name_scope = name_scope.clone();
+        move |_, e| *name_scope.borrow_mut() = Some(e.name_scope().clone())
+    });
+    let primary = CommandBarButton::new();
+    bar.primary_commands().add(primary.as_command_bar_element());
+    let secondary = CommandBarButton::new();
+    bar.secondary_commands().add(secondary.as_command_bar_element());
+
+    let window = Window::new();
+    window.set_content(Some(Control::boxed(&bar)));
+    window.show();
+
+    let name_scope = name_scope.borrow().clone().expect("the template of the command bar was applied");
+    let primary_host = name_scope.find_as::<ItemsControl>("PART_PrimaryCommands").expect("the primary commands host");
+    let overflow_presenter =
+        name_scope.find_as::<ItemsControl>("PART_OverflowPresenter").expect("the overflow presenter");
+
+    assert_eq!(Some(bar.visible_primary_commands().as_items_source()), primary_host.items_source());
+    assert_eq!(Some(bar.overflow_items().as_items_source()), overflow_presenter.items_source());
+    assert_eq!(1, primary_host.item_count());
+    assert_eq!(1, overflow_presenter.item_count());
+    assert!(primary.get_visual_parent().is_some(), "the primary command is presented");
+}
