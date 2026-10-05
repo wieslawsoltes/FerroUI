@@ -6,17 +6,23 @@ release profile, then prints for each the size of the stripped executable and
 the time from process start to the first window (median of several warm
 launches, with the load average of the machine before and after them; all
 applications are built first, the launches wait for the load of the machine
-to settle and go round the applications). With
-`--check <file>` the numbers are compared with a stored baseline and the
-script fails when one regressed by more than the tolerance; `--save <file>`
-stores the numbers as a baseline; `--markdown <file>` appends the table (and
-the comparison) as Markdown, for example to `$GITHUB_STEP_SUMMARY`.
+to settle and go round the applications).
+
+With `--baseline-target <dir>` the executables of an earlier build in that
+cargo target directory are launched too, alternately with the measured ones,
+and the two are compared: the fair comparison of start-up times, since both
+see the same machine. With `--check <file>` the numbers are compared with
+numbers stored by `--save <file>` instead. Either comparison fails the script
+when a number regressed by more than its tolerance, unless `--no-fail` is
+given. `--markdown <file>` appends the tables and the comparison as Markdown,
+for example to `$GITHUB_STEP_SUMMARY`.
 
     python3 scripts/perf-report.py
     python3 scripts/perf-report.py --save target/perf-baseline.json
     python3 scripts/perf-report.py --check target/perf-baseline.json
     python3 scripts/perf-report.py --size-only
-    python3 scripts/perf-report.py --source ../baseline --save baseline.json
+    python3 scripts/perf-report.py --source ../baseline --size-only   # builds ../baseline
+    python3 scripts/perf-report.py --baseline-target ../baseline/target
 
 Only the Python standard library, `cargo` and `strip` are used. The startup
 figures depend on the load of the machine and are only comparable between
@@ -132,9 +138,27 @@ def settle(max_seconds, threshold):
         time.sleep(5)
 
 
-def measure(runs, exit_ms, do_build, size_only, settle_seconds, settle_load):
-    results = {}
-    launches = []
+def locate(target, directory, label):
+    """Stripped copies of the executables under the target directory `target`, in `directory`/`label`."""
+    copies = os.path.join(directory, label)
+    os.makedirs(copies, exist_ok=True)
+    found = {}
+    for name, _, relative_path, arguments, marker in APPLICATIONS:
+        executable = os.path.join(target, "release", relative_path)
+        if not os.path.exists(executable):
+            sys.exit(f"{executable} does not exist; build it first (or run without --no-build)")
+        stripped = stripped_copy(executable, copies)
+        found[name] = (stripped, [stripped] + arguments, marker)
+    return found
+
+
+def measure(runs, exit_ms, do_build, size_only, settle_seconds, settle_load, baseline_target=None):
+    """Sizes and start-up times of the applications, as {set: {application: numbers}}.
+
+    The set "measured" is the build of the checkout; with `baseline_target`,
+    the set "baseline" is the build already in that target directory, and
+    the launches of the two alternate.
+    """
     with tempfile.TemporaryDirectory(prefix="ferroui-perf-") as directory:
         # Everything is built before anything is launched, so that no launch
         # runs on a machine that is still busy with a build.
@@ -144,50 +168,62 @@ def measure(runs, exit_ms, do_build, size_only, settle_seconds, settle_load):
                 if cargo_arguments not in built:
                     build(cargo_arguments)
                     built.append(cargo_arguments)
-        for name, _, relative_path, arguments, marker in APPLICATIONS:
-            executable = os.path.join(target_directory(), "release", relative_path)
-            if not os.path.exists(executable):
-                sys.exit(f"{executable} does not exist; run without --no-build")
-            stripped = stripped_copy(executable, directory)
-            results[name] = {"size_bytes": os.path.getsize(stripped)}
-            launches.append((name, [stripped] + arguments, marker))
+        sets = {}
+        if baseline_target:
+            sets["baseline"] = locate(baseline_target, directory, "baseline")
+        sets["measured"] = locate(target_directory(), directory, "measured")
+        results = {
+            label: {name: {"size_bytes": os.path.getsize(stripped)} for name, (stripped, _, _) in found.items()}
+            for label, found in sets.items()
+        }
         if size_only:
             return results
 
+        names = [name for name, _, _, _, _ in APPLICATIONS]
+        labels = list(sets)
         settle(settle_seconds, settle_load)
         load_before = load_average()
         # The first launch of a new executable pays for the validation of its
         # code signature; it is measured once per file and kept apart.
-        first = {}
+        first = {label: {} for label in labels}
         launched = set()
-        for name, command, marker in launches:
-            elapsed = time_to_marker(command, marker, exit_ms)
-            first[name] = None if command[0] in launched or elapsed is None else round(elapsed, 1)
-            launched.add(command[0])
-            time.sleep(0.2)
-        # The warm launches go round the applications, so that a change of
-        # the load of the machine affects all of them alike.
-        times = {name: [] for name, _, _ in launches}
-        for _ in range(runs):
-            for name, command, marker in launches:
+        for name in names:
+            for label in labels:
+                stripped, command, marker = sets[label][name]
                 elapsed = time_to_marker(command, marker, exit_ms)
-                if elapsed is not None:
-                    times[name].append(elapsed)
+                first[label][name] = None if stripped in launched or elapsed is None else round(elapsed, 1)
+                launched.add(stripped)
                 time.sleep(0.2)
+        # The warm launches go round the applications, so that a change of
+        # the load of the machine affects all of them alike; the baseline and
+        # the measured build of an application are launched one after the
+        # other, in alternating order.
+        times = {label: {name: [] for name in names} for label in labels}
+        for run in range(runs):
+            for name in names:
+                for label in labels if run % 2 == 0 else reversed(labels):
+                    _, command, marker = sets[label][name]
+                    elapsed = time_to_marker(command, marker, exit_ms)
+                    if elapsed is not None:
+                        times[label][name].append(elapsed)
+                    time.sleep(0.2)
         load_after = load_average()
-        for name, _, marker in launches:
-            if len(times[name]) < runs:
-                sys.exit(f"{name}: the line /{marker}/ was printed in {len(times[name])} of {runs} launches")
-            results[name].update(
-                {
-                    "startup_ms": round(statistics.median(times[name]), 1),
-                    "startup_min_ms": round(min(times[name]), 1),
-                    "startup_max_ms": round(max(times[name]), 1),
-                    "runs": runs,
-                    "first_launch_ms": first[name],
-                    "load_average": [load_before, load_after],
-                }
-            )
+        for label in labels:
+            for name in names:
+                marker = sets[label][name][2]
+                measured = times[label][name]
+                if len(measured) < runs:
+                    sys.exit(f"{name} ({label}): the line /{marker}/ was printed in {len(measured)} of {runs} launches")
+                results[label][name].update(
+                    {
+                        "startup_ms": round(statistics.median(measured), 1),
+                        "startup_min_ms": round(min(measured), 1),
+                        "startup_max_ms": round(max(measured), 1),
+                        "runs": runs,
+                        "first_launch_ms": first[label][name],
+                        "load_average": [load_before, load_after],
+                    }
+                )
     return results
 
 
@@ -290,6 +326,13 @@ def main():
     parser.add_argument("--size-only", action="store_true", help="measure the sizes only; launch nothing")
     parser.add_argument("--save", metavar="FILE", help="store the numbers as a baseline")
     parser.add_argument("--check", metavar="FILE", help="compare with a stored baseline")
+    parser.add_argument(
+        "--baseline-target",
+        metavar="DIR",
+        help="cargo target directory of a baseline build; its executables are launched alternately with the "
+        "measured ones and compared with them",
+    )
+    parser.add_argument("--save-baseline", metavar="FILE", help="store the numbers of --baseline-target")
     parser.add_argument("--markdown", metavar="FILE", help="append the table (and the comparison) as Markdown")
     parser.add_argument("--title", default="Size and startup", help="heading of the Markdown table")
     parser.add_argument("--settle-seconds", type=int, default=300, help="longest wait for the load to settle (default 300)")
@@ -304,21 +347,44 @@ def main():
         global ROOT
         ROOT = os.path.abspath(options.source)
 
-    results = measure(
-        options.runs, options.exit_ms, not options.no_build, options.size_only, options.settle_seconds, options.settle_load
+    measured = measure(
+        options.runs,
+        options.exit_ms,
+        not options.no_build,
+        options.size_only,
+        options.settle_seconds,
+        options.settle_load,
+        options.baseline_target,
     )
-    print_table(results)
+    results = measured["measured"]
     machine = describe_machine()
-    print(machine)
-
-    markdown = markdown_table(results, options.title) + [machine, ""]
-    failed = False
-    if options.check:
+    markdown = []
+    baseline = None
+    baseline_name = None
+    if "baseline" in measured:
+        baseline = measured["baseline"]
+        baseline_name = "the baseline build"
+        print("\nbaseline (" + options.baseline_target + ")", end="")
+        print_table(baseline)
+        markdown += markdown_table(baseline, f"{options.title}: baseline")
+        if options.save_baseline:
+            with open(options.save_baseline, "w") as file:
+                json.dump(baseline, file, indent=2)
+                file.write("\n")
+        print("\nmeasured", end="")
+    elif options.check:
         with open(options.check) as file:
             baseline = json.load(file)
+        baseline_name = os.path.basename(options.check)
+    print_table(results)
+    print(machine)
+    markdown += markdown_table(results, options.title) + [machine, ""]
+
+    failed = False
+    if baseline is not None:
         rows = comparison(results, baseline, options.size_tolerance, options.time_tolerance)
         print_comparison(rows)
-        markdown += markdown_comparison(rows, f"{options.title}: change against {os.path.basename(options.check)}")
+        markdown += markdown_comparison(rows, f"{options.title}: change against {baseline_name}")
         failed = any(row[5] for row in rows)
 
     if options.save:
