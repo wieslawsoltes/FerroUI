@@ -57,10 +57,10 @@ ferro_impl_classes!(
 ferro_class_info!(AboutFerroDialog {
     new: AboutFerroDialog::new,
     markup: {
-        properties: [
-            Version: String { get: |_: &Ref<AboutFerroDialog>| AboutFerroDialog::version() },
-            IsDevelopmentBuild: bool { get: |_: &Ref<AboutFerroDialog>| AboutFerroDialog::is_development_build() },
-            Copyright: String { get: |_: &Ref<AboutFerroDialog>| AboutFerroDialog::copyright() },
+        static_properties: [
+            Version: String { get: AboutFerroDialog::version },
+            IsDevelopmentBuild: bool { get: AboutFerroDialog::is_development_build },
+            Copyright: String { get: AboutFerroDialog::copyright },
         ],
         methods: [
             fn Button_OnClick(Option<BoxedValue>, Rc<dyn IRoutedEventArgs>) =>
