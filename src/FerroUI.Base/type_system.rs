@@ -291,6 +291,26 @@ impl TypeInfo {
         }
     }
 
+    /// Declares the public Rust paths of classes: pairs of a class and the
+    /// path another crate names it by (`"ferroui_controls::Border"`). The
+    /// declaring module ([`module_path`](Self::module_path)) is often
+    /// private, so the path cannot be derived from it; a crate records the
+    /// paths of its type table in its `register_types()`. The emitter of
+    /// Rust source reads them; nothing else does.
+    pub fn register_rust_paths(paths: &[(&'static TypeInfo, &'static str)]) {
+        let mut registry = write_registry();
+        for &(type_, path) in paths {
+            registry.rust_paths.insert(type_ as *const TypeInfo as usize, path);
+        }
+    }
+
+    /// The public Rust path of the class
+    /// ([`register_rust_paths`](Self::register_rust_paths)), if its crate
+    /// recorded one.
+    pub fn rust_path(&'static self) -> Option<&'static str> {
+        read_registry().rust_paths.get(&(self as *const TypeInfo as usize)).copied()
+    }
+
     /// Finds a known type by namespace and name.
     pub fn find(namespace: &str, name: &str) -> Option<&'static TypeInfo> {
         let registry = read_registry();
@@ -374,6 +394,8 @@ struct TypeRegistry {
     by_name: HashMap<&'static str, Vec<&'static TypeInfo>>,
     by_handle: HashMap<TypeId, (&'static TypeInfo, bool)>,
     namespaces: Vec<(&'static str, &'static str)>,
+    /// The public Rust paths of classes, by the address of their type.
+    rust_paths: HashMap<usize, &'static str>,
 }
 
 impl TypeRegistry {

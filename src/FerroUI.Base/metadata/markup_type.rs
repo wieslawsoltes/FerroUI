@@ -449,6 +449,13 @@ pub struct MarkupConstructor {
     pub parameter_info: &'static [MarkupParameter],
     /// Creates the instance from the arguments.
     pub invoke: MarkupInvoke,
+    /// The callable of the declaration as source text (`stringify!` of what
+    /// follows `=>`, for example `Thickness::new`), for the emitter of Rust
+    /// source. The text is relative to the declaring module; the emitter
+    /// uses it only when it has the form `<TypeName>::<function>` with the
+    /// name of the declared type, which it prints as
+    /// `<public path of the type>::<function>(arguments..)`.
+    pub emit: Option<&'static str>,
 }
 
 /// A property that is not a registered property: a plain property with a
@@ -540,6 +547,12 @@ pub struct MarkupEnumMember {
     pub value: i64,
     /// The member as a value of the enumeration type.
     pub get: fn() -> BoxedValue,
+    /// The identifier of the Rust variant of a plain enumeration (the member
+    /// name unless the declaration renames it), for the emitter of Rust
+    /// source: the member is `<public path of the type>::<rust_variant>`.
+    /// `None` for the members of a set of flags (their constants are
+    /// arbitrary expressions).
+    pub rust_variant: Option<&'static str>,
 }
 
 /// States that a type is an instantiation of a generic type
@@ -627,6 +640,12 @@ pub struct MarkupType {
     /// properties of the type are read once.
     pub notify_property_changed:
         Option<fn(&dyn crate::AnyValue) -> Option<&dyn crate::data::model::INotifyPropertyChanged>>,
+    /// The public Rust path of the type as another crate names it
+    /// (`ferroui_base::Thickness`), when the declaration states it. Most
+    /// types state it through the table of their crate instead
+    /// ([`MarkupType::register_rust_paths`]); read both with
+    /// [`MarkupType::rust_path`].
+    pub rust_path: Option<&'static str>,
 }
 
 impl MarkupType {
@@ -658,6 +677,35 @@ impl MarkupType {
             enum_from_value: None,
             attributes: &[],
             notify_property_changed: None,
+            rust_path: None,
+        }
+    }
+
+    /// Declares the public Rust paths of types that are not classes of the
+    /// object model (enumerations, value types): pairs of the Rust type (as
+    /// its value type) and the path another crate names it by
+    /// (`"ferroui_base::layout::HorizontalAlignment"`). Called from the
+    /// `register_types()` of a crate. The emitter of Rust source reads the
+    /// table; nothing else does.
+    pub fn register_rust_paths(paths: &[(TypeOf, &'static str)]) {
+        let mut table = rust_paths().write().unwrap_or_else(|e| e.into_inner());
+        for (handle, path) in paths {
+            table.insert(handle().id(), path);
+        }
+    }
+
+    /// The public Rust path registered for the Rust type `handle`
+    /// ([`register_rust_paths`](Self::register_rust_paths)).
+    pub fn rust_path_of_handle(handle: TypeId) -> Option<&'static str> {
+        rust_paths().read().unwrap_or_else(|e| e.into_inner()).get(&handle).copied()
+    }
+
+    /// The public Rust path of the type: the one its declaration states,
+    /// else the one registered for its untyped handle.
+    pub fn rust_path(&self) -> Option<&'static str> {
+        match self.rust_path {
+            Some(path) => Some(path),
+            None => Self::rust_path_of_handle(self.handle()?.id()),
         }
     }
 
@@ -864,6 +912,11 @@ impl MarkupRegistry {
             self.by_nullable_handle.entry(nullable().id()).or_insert(type_);
         }
     }
+}
+
+fn rust_paths() -> &'static RwLock<HashMap<TypeId, &'static str>> {
+    static PATHS: OnceLock<RwLock<HashMap<TypeId, &'static str>>> = OnceLock::new();
+    PATHS.get_or_init(Default::default)
 }
 
 fn registry() -> &'static RwLock<MarkupRegistry> {

@@ -222,6 +222,9 @@ macro_rules! ferro_markup_enum {
                             name: ::std::stringify!($member),
                             value: $crate::__ferro_markup_enum_variant!($type_, $member $(, $variant)?) as i64,
                             get: || ::std::rc::Rc::new($crate::__ferro_markup_enum_variant!($type_, $member $(, $variant)?)),
+                            rust_variant: ::std::option::Option::Some(
+                                $crate::__ferro_markup_enum_variant_name!($member $(, $variant)?),
+                            ),
                         },)*
                     ];
                     markup.enum_from_value = ::std::option::Option::Some(|value| {
@@ -261,6 +264,7 @@ macro_rules! ferro_markup_enum {
                             name: ::std::stringify!($member),
                             value: $value.bits() as i64,
                             get: || ::std::rc::Rc::new($value),
+                            rust_variant: ::std::option::Option::None,
                         },)*
                     ];
                     markup.enum_from_value = ::std::option::Option::Some(|value| {
@@ -525,6 +529,7 @@ macro_rules! __ferro_markup_constructor {
                     $try_ ($new)($(arguments.next::<$parameter>()?),*)
                 )
             },
+            emit: ::std::option::Option::Some(::std::stringify!($new)),
         }
     };
     ($try_:tt $new:tt [$($parameter:ty,)*] [$($info:expr,)*]
@@ -574,6 +579,18 @@ macro_rules! __ferro_markup_enum_variant {
     };
     ($type_:ident, $member:ident, $variant:ident) => {
         $type_::$variant
+    };
+}
+
+/// The identifier of the Rust variant of an enumeration member, as text.
+#[doc(hidden)]
+#[macro_export]
+macro_rules! __ferro_markup_enum_variant_name {
+    ($member:ident) => {
+        ::std::stringify!($member)
+    };
+    ($member:ident, $variant:ident) => {
+        ::std::stringify!($variant)
     };
 }
 
