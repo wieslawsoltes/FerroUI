@@ -9,4 +9,7 @@ const runtime = await createRuntime();
 // The script side resolves the exports of the framework through the module.
 FerroExports.attach(runtime);
 
+// For the behaviour tests (`catalogState`) and for inspection from the console.
+globalThis.controlCatalog = runtime;
+
 runtime.runMain(globalThis.location.href);
