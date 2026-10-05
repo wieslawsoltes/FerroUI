@@ -111,3 +111,21 @@ jobs:
           -p ferroui-browser
       - name: Check the examples of the browser crate
         run: cargo check --locked --target wasm32-unknown-emscripten -p ferroui-browser --examples
+      - name: Cache the wasm-bindgen command-line tool
+        id: wasm-bindgen-cache
+        uses: actions/cache@v4
+        with:
+          path: ~/wasm-bindgen
+          key: wasm-bindgen-${{ runner.os }}-${{ hashFiles('Cargo.toml') }}
+      - name: Install the wasm-bindgen command-line tool
+        if: steps.wasm-bindgen-cache.outputs.cache-hit != 'true'
+        run: |
+          version="$(sed -n 's/^wasm-bindgen = "=\(.*\)"$/\1/p' Cargo.toml)"
+          cargo install wasm-bindgen-cli --version "$version" --locked --root ~/wasm-bindgen
+      - name: Build the themed view site
+        run: |
+          echo "$HOME/wasm-bindgen/bin" >> "$GITHUB_PATH"
+          export PATH="$HOME/wasm-bindgen/bin:$PATH"
+          scripts/build-browser.sh themed_view
+      - name: Behaviour tests in headless Chrome
+        run: node scripts/browser/tests/themed_view.test.mjs
