@@ -1220,6 +1220,7 @@ fn custom_visual_draws_through_its_handler() {
         messages: RefCell<Vec<i32>>,
         frames: Cell<i32>,
         clip_contains: Cell<Option<bool>>,
+        size: Cell<Option<Vector>>,
     }
 
     impl ICompositionCustomVisualHandler for Handler {
@@ -1246,6 +1247,7 @@ fn custom_visual_draws_through_its_handler() {
         fn on_render(&self, drawing_context: &mut ImmediateDrawingContext<'_>) {
             self.clip_contains.set(Some(self.base.render_clip_contains(Point::new(1.0, 1.0))));
             let size = self.base.effective_size();
+            self.size.set(Some(size));
             drawing_context.fill_rectangle(
                 &ImmutableSolidColorBrush::new(Colors::GREEN),
                 Rect::new(0.0, 0.0, size.x, size.y),
@@ -1266,7 +1268,7 @@ fn custom_visual_draws_through_its_handler() {
     s.run_jobs();
 
     assert_eq!(*handler.messages.borrow(), [1, 2]);
-    assert_eq!(handler.base.effective_size(), Vector::new(20.0, 10.0));
+    assert_eq!(handler.size.get(), Some(Vector::new(20.0, 10.0)));
     assert_eq!(1, log.count("DrawRectangle Green"), "{:?}", log.entries());
     assert_eq!(handler.clip_contains.get(), Some(true));
 
@@ -1281,5 +1283,8 @@ fn custom_visual_draws_through_its_handler() {
     let result = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
         handler.base.render_clip_contains(Point::new(1.0, 1.0))
     }));
+    assert!(result.is_err());
+    // The other APIs are only available while the compositor renders.
+    let result = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| handler.base.effective_size()));
     assert!(result.is_err());
 }

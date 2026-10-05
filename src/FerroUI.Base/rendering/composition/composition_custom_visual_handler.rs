@@ -75,12 +75,12 @@ impl CompositionCustomVisualHandler {
         }
     }
 
-    /// `VerifyAccess`: the handler must be attached. Upstream also checks
-    /// that the caller is on the render thread; the server compositor runs
-    /// on the thread of its compositor here, so there is nothing more to
-    /// check.
-    fn verify_access(&self) -> Rc<ServerCompositionVisual> {
-        self.host()
+    /// `VerifyAccess`: the handler must be attached, and its compositor
+    /// must be rendering (`_host.Compositor.VerifyAccess()`).
+    fn verify_access(&self) -> (Rc<ServerCompositionVisual>, Rc<super::server::ServerCompositor>) {
+        let host = self.host();
+        let compositor = super::server::ServerCompositor::verify_access_of(host.compositor().as_ref());
+        (host, compositor)
     }
 
     fn verify_in_render(&self) {
@@ -92,12 +92,12 @@ impl CompositionCustomVisualHandler {
 
     /// The size of the visual.
     pub fn effective_size(&self) -> Vector {
-        self.verify_access().size()
+        self.verify_access().0.size()
     }
 
     /// The time of the server compositor.
     pub fn composition_now(&self) -> Duration {
-        self.verify_access().compositor().map(|c| c.server_now()).unwrap_or_default()
+        self.verify_access().1.server_now()
     }
 
     pub(crate) fn attach(&self, visual: Weak<ServerCompositionVisual>) {
@@ -106,18 +106,18 @@ impl CompositionCustomVisualHandler {
 
     /// Asks for the visual to be redrawn.
     pub fn invalidate(&self) {
-        self.verify_access().invalidate_content();
+        self.verify_access().0.invalidate_content();
     }
 
     /// Asks for an area of the visual to be redrawn.
     pub fn invalidate_rect(&self, rc: Rect) {
-        self.verify_access().add_extra_dirty_rect(LtrbRect::from_rect(rc));
+        self.verify_access().0.add_extra_dirty_rect(LtrbRect::from_rect(rc));
     }
 
     /// Asks for [`ICompositionCustomVisualHandler::on_animation_frame_update`]
     /// to be called on the next frame.
     pub fn register_for_next_animation_frame_update(&self) {
-        let host = self.verify_access();
+        let (host, _) = self.verify_access();
         super::server::ServerCompositionCustomVisual::handler_register_for_next_animation_frame_update(&host);
     }
 
