@@ -185,6 +185,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "ferroui-fonts-inter"
+version = "0.1.0"
+dependencies = [
+ "ferroui-base",
+ "ferroui-controls",
+ "ferroui-skia",
+]
+
+[[package]]
 name = "ferroui-harfbuzz"
 version = "0.1.0"
 dependencies = [
@@ -248,12 +257,21 @@ dependencies = [
 ]
 
 [[package]]
+name = "ferroui-opengl"
+version = "0.1.0"
+dependencies = [
+ "ferroui-base",
+ "paste",
+]
+
+[[package]]
 name = "ferroui-skia"
 version = "0.1.0"
 dependencies = [
  "ferroui-base",
  "ferroui-controls",
  "ferroui-harfbuzz",
+ "ferroui-opengl",
  "skia-safe",
 ]
 

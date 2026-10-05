@@ -471,11 +471,11 @@ impl std::fmt::Debug for Dispatcher {
 
 /// The implementation used until the platform installs its own one.
 fn default_dispatcher_impl() -> Rc<dyn IDispatcherImpl> {
-    #[cfg(not(all(target_family = "wasm", target_os = "unknown")))]
+    #[cfg(not(target_family = "wasm"))]
     {
         Rc::new(crate::platform::ManagedDispatcherImpl::new(None))
     }
-    #[cfg(all(target_family = "wasm", target_os = "unknown"))]
+    #[cfg(target_family = "wasm")]
     {
         // No clock and no blocking primitives: queue work until the platform
         // implementation is installed, which then receives the pending

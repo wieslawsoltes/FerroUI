@@ -44,7 +44,7 @@ impl DefaultRenderTimer {
     ///
     /// `frames_per_second` is the number of frames per second at which the
     /// loop should run.
-    #[cfg(not(all(target_family = "wasm", target_os = "unknown")))]
+    #[cfg(not(target_family = "wasm"))]
     pub fn new(frames_per_second: i32) -> Self {
         Self::with_impl(frames_per_second, Box::new(standard_timer::StandardTimerImpl))
     }
@@ -99,7 +99,7 @@ impl IRenderTimer for DefaultRenderTimer {
     }
 }
 
-#[cfg(not(all(target_family = "wasm", target_os = "unknown")))]
+#[cfg(not(target_family = "wasm"))]
 mod standard_timer {
     use std::sync::{Arc, Condvar, Mutex, OnceLock, PoisonError};
     use std::thread;
@@ -261,7 +261,7 @@ mod tests {
         assert_eq!(recorded.starts.load(Ordering::SeqCst), 2);
     }
 
-    #[cfg(not(all(target_family = "wasm", target_os = "unknown")))]
+    #[cfg(not(target_family = "wasm"))]
     #[test]
     fn standard_timer_ticks_in_the_background_until_stopped() {
         let timer = DefaultRenderTimer::new(500);

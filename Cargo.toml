@@ -9,8 +9,10 @@ members = [
     "src/FerroUI.MicroCom",
     "src/FerroUI.Native",
     "src/FerroUI.Desktop",
+    "src/FerroUI.Fonts.Inter",
     "src/FerroUI.Themes.Simple",
     "src/FerroUI.Themes.Fluent",
+    "src/FerroUI.OpenGL",
     "src/Skia/FerroUI.Skia",
     "src/HarfBuzz/FerroUI.HarfBuzz",
     "src/tools/MicroCom.CodeGenerator",
@@ -38,14 +40,16 @@ xamlx = { path = "external/XamlX/src/XamlX" }
 ferroui-microcom = { path = "src/FerroUI.MicroCom" }
 ferroui-native = { path = "src/FerroUI.Native" }
 ferroui-desktop = { path = "src/FerroUI.Desktop" }
+ferroui-fonts-inter = { path = "src/FerroUI.Fonts.Inter" }
 ferroui-themes-simple = { path = "src/FerroUI.Themes.Simple" }
 ferroui-themes-fluent = { path = "src/FerroUI.Themes.Fluent" }
+ferroui-opengl = { path = "src/FerroUI.OpenGL" }
 ferroui-skia = { path = "src/Skia/FerroUI.Skia" }
 ferroui-harfbuzz = { path = "src/HarfBuzz/FerroUI.HarfBuzz" }
 bitflags = "2"
 paste = "1"
 cc = "1"
-skia-safe = { version = "0.153", features = ["graphite", "metal"] }
+skia-safe = { version = "0.153" }
 roxmltree = "0.20"
 harfbuzz-sys = { version = "0.8", default-features = false, features = ["bundled"] }
 rust_decimal = { version = "1.43", default-features = false }

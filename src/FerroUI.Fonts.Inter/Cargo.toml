@@ -1,0 +1,19 @@
+[package]
+name = "ferroui-fonts-inter"
+description = "The Inter font family as an embedded font collection of FerroUI"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+
+[lib]
+path = "lib.rs"
+
+[dependencies]
+ferroui-base.workspace = true
+ferroui-controls.workspace = true
+
+[dev-dependencies]
+# The font manager that reads the embedded fonts in the tests.
+ferroui-skia.workspace = true

@@ -7,13 +7,13 @@ Generated from upstream commit `17350180c33b063f0e98abbfd19aa3cae63f5d56`. Back 
 | | |
 |---|---|
 | Upstream | `src/Avalonia.OpenGL` |
-| FerroUI | `src/FerroUI.OpenGL` (not created yet) |
+| FerroUI | `src/FerroUI.OpenGL` (exists) |
 | Crate | `ferroui-opengl` |
 | Phase / priority | 2 - rendering backends / P2 |
-| Files | 0/39 (0.0%) |
-| Types | 0/63 (0.0%) |
-| Members | 0/639 (0.0%) |
-| Contracts (interfaces) | 0/18 |
+| Files | 12/39 (30.8%) |
+| Types | 16/63 (25.4%) |
+| Members | 226/639 (35.4%) |
+| Contracts (interfaces) | 6/18 |
 | Property registrations | 0/0 |
 | Routed events | 0/0 |
 
@@ -29,36 +29,62 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 | `Avalonia.OpenGL.ICompositionGlTexture` | public | `Composition/ICompositionGlTexture.cs` | 0/3 | missing |
 | `Avalonia.OpenGL.ICompositionGlTextureLease` | public | `Composition/ICompositionGlTexture.cs` | 0/2 | missing |
 | `Avalonia.OpenGL.ICompositionImportableOpenGlSharedTexture` | public | `IOpenGlTextureSharingRenderInterfaceContextFeature.cs` | 0/3 | missing |
-| `Avalonia.OpenGL.IGlContext` | public | `IGlContext.cs` | 0/8 | missing |
+| `Avalonia.OpenGL.IGlContext` | public | `IGlContext.cs` | 8/8 | present |
 | `Avalonia.OpenGL.IGlContextExternalObjectsFeature` | public | `IGlContextExternalObjectsFeature.cs` | 0/13 | missing |
 | `Avalonia.OpenGL.IGlExportableExternalImageTexture` | public | `IGlContextExternalObjectsFeature.cs` | 0/1 | missing |
 | `Avalonia.OpenGL.IGlExportableExternalSemaphore` | public | `IGlContextExternalObjectsFeature.cs` | 0/1 | missing |
 | `Avalonia.OpenGL.IGlExternalImageTexture` | public | `IGlContextExternalObjectsFeature.cs` | 0/6 | missing |
 | `Avalonia.OpenGL.IGlExternalSemaphore` | public | `IGlContextExternalObjectsFeature.cs` | 0/4 | missing |
-| `Avalonia.OpenGL.IGlPlatformSurfaceRenderTargetFactory` | public | `IGlContext.cs` | 0/2 | missing |
+| `Avalonia.OpenGL.IGlPlatformSurfaceRenderTargetFactory` | public | `IGlContext.cs` | 2/2 | present |
 | `Avalonia.OpenGL.IOpenGlTextureSharingRenderInterfaceContextFeature` | public | `IOpenGlTextureSharingRenderInterfaceContextFeature.cs` | 0/3 | missing |
-| `Avalonia.OpenGL.IPlatformGraphicsOpenGlContextFactory` | public | `IPlatformGraphicsOpenGlContextFactory.cs` | 0/1 | missing |
-| `Avalonia.OpenGL.Surfaces.IGlPlatformSurface` | public | `Surfaces/IGlPlatformSurface.cs` | 0/1 | missing |
-| `Avalonia.OpenGL.Surfaces.IGlPlatformSurfaceRenderTarget` | public | `Surfaces/IGlPlatformSurfaceRenderTarget.cs` | 0/1 | missing |
-| `Avalonia.OpenGL.Surfaces.IGlPlatformSurfaceRenderingSession` | public | `Surfaces/IGlPlatformSurfaceRenderingSession.cs` | 0/4 | missing |
+| `Avalonia.OpenGL.IPlatformGraphicsOpenGlContextFactory` | public | `IPlatformGraphicsOpenGlContextFactory.cs` | 1/1 | present |
+| `Avalonia.OpenGL.Surfaces.IGlPlatformSurface` | public | `Surfaces/IGlPlatformSurface.cs` | 1/1 | present |
+| `Avalonia.OpenGL.Surfaces.IGlPlatformSurfaceRenderTarget` | public | `Surfaces/IGlPlatformSurfaceRenderTarget.cs` | 1/1 | present |
+| `Avalonia.OpenGL.Surfaces.IGlPlatformSurfaceRenderingSession` | public | `Surfaces/IGlPlatformSurfaceRenderingSession.cs` | 4/4 | present |
 
 ## Files
 
-### `(project root)` - files 0/11, types 0/20, members 0/258
+### `(project root)` - files 9/11, types 13/20, members 220/258
 
 | Upstream file | Rust file | Status | Types | Members | Notes |
 |---|---|---|---|---|---|
-| `GlBasicInfoInterface.cs` | `gl_basic_info_interface.rs` | missing | 0/1 | 0/9 |  |
-| `GlConsts.cs` | `gl_consts.rs` | missing | 0/1 | 0/84 |  |
-| `GlEntryPointAttribute.cs` | `gl_entry_point_attribute.rs` | missing | 0/2 | 0/6 |  |
-| `GlErrors.cs` | `gl_errors.rs` | missing | 0/1 | 0/9 |  |
-| `GlInterface.cs` | `gl_interface.rs` | missing | 0/2 | 0/94 |  |
-| `GlVersion.cs` | `gl_version.rs` | missing | 0/2 | 0/8 |  |
-| `IGlContext.cs` | `i_gl_context.rs` | missing | 0/2 | 0/10 |  |
+| `GlBasicInfoInterface.cs` | `gl_basic_info_interface.rs` | present | 1/1 | 9/9 |  |
+| `GlConsts.cs` | `gl_consts.rs` | present | 1/1 | 84/84 |  |
+| `GlEntryPointAttribute.cs` | `gl_entry_point_attribute.rs` | partial | 2/2 | 2/6 |  |
+| `GlErrors.cs` | `gl_errors.rs` | present | 1/1 | 9/9 |  |
+| `GlInterface.cs` | `gl_interface.rs` | present | 2/2 | 94/94 |  |
+| `GlVersion.cs` | `gl_version.rs` | partial | 2/2 | 7/8 |  |
+| `IGlContext.cs` | `i_gl_context.rs` | present | 2/2 | 10/10 |  |
 | `IGlContextExternalObjectsFeature.cs` | `i_gl_context_external_objects_feature.rs` | missing | 0/5 | 0/25 |  |
 | `IOpenGlTextureSharingRenderInterfaceContextFeature.cs` | `i_open_gl_texture_sharing_render_interface_context_feature.rs` | missing | 0/2 | 0/6 |  |
-| `IPlatformGraphicsOpenGlContextFactory.cs` | `i_platform_graphics_open_gl_context_factory.rs` | missing | 0/1 | 0/1 |  |
-| `OpenGlException.cs` | `open_gl_exception.rs` | missing | 0/1 | 0/6 |  |
+| `IPlatformGraphicsOpenGlContextFactory.cs` | `i_platform_graphics_open_gl_context_factory.rs` | present | 1/1 | 1/1 |  |
+| `OpenGlException.cs` | `open_gl_exception.rs` | partial | 1/1 | 4/6 |  |
+
+<details><summary><code>GlEntryPointAttribute.cs</code> - 4 missing</summary>
+
+- `GlMinVersionEntryPoint` (class): 2 missing
+  - `GlMinVersionEntryPoint(string entry, int minVersionMajor, int minVersionMinor)`
+  - `GlMinVersionEntryPoint(string entry, int minVersionMajor, int minVersionMinor, GlProfileType profile)`
+- `GlExtensionEntryPoint` (class): 2 missing
+  - `GlExtensionEntryPoint(string entry, string extension)`
+  - `GlExtensionEntryPoint(string entry, string extension, GlProfileType profile)`
+
+</details>
+
+<details><summary><code>GlVersion.cs</code> - 1 missing</summary>
+
+- `GlVersion` (record struct): 1 missing
+  - `GlVersion(GlProfileType type, int major, int minor, bool isCompatibilityProfile)` *(1 of 2 constructors found)*
+
+</details>
+
+<details><summary><code>OpenGlException.cs</code> - 2 missing</summary>
+
+- `OpenGlException` (class): 2 missing
+  - `static OpenGlException GetFormattedException(string funcName, int errorCode)` *(2 of 3 overloads found)*
+  - `static OpenGlException GetFormattedEglException(string funcName, int errorCode)`
+
+</details>
 
 ### `Composition` - files 0/6, types 0/10, members 0/53
 
@@ -105,10 +131,19 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 |---|---|---|---|---|---|
 | `ExternalObjectsOpenGlExtensionFeature.cs` | `features/external_objects_open_gl_extension_feature.rs` | missing | 0/2 | 0/25 |  |
 
-### `Surfaces` - files 0/3, types 0/3, members 0/6
+### `Surfaces` - files 3/3, types 3/3, members 6/6
 
 | Upstream file | Rust file | Status | Types | Members | Notes |
 |---|---|---|---|---|---|
-| `IGlPlatformSurface.cs` | `surfaces/i_gl_platform_surface.rs` | missing | 0/1 | 0/1 |  |
-| `IGlPlatformSurfaceRenderTarget.cs` | `surfaces/i_gl_platform_surface_render_target.rs` | missing | 0/1 | 0/1 |  |
-| `IGlPlatformSurfaceRenderingSession.cs` | `surfaces/i_gl_platform_surface_rendering_session.rs` | missing | 0/1 | 0/4 |  |
+| `IGlPlatformSurface.cs` | `surfaces/i_gl_platform_surface.rs` | present | 1/1 | 1/1 |  |
+| `IGlPlatformSurfaceRenderTarget.cs` | `surfaces/i_gl_platform_surface_render_target.rs` | present | 1/1 | 1/1 |  |
+| `IGlPlatformSurfaceRenderingSession.cs` | `surfaces/i_gl_platform_surface_rendering_session.rs` | present | 1/1 | 4/4 |  |
+
+## Rust-only files
+
+Rust sources of this crate that no upstream file maps to. Give each a reason in `docs/porting/data/path-overrides.toml` (`[[rust_only]]`), or map upstream files to it (`[[map]]`).
+
+| Rust file | Reason | Types defined |
+|---|---|---|
+| `entry_points.rs` | **unmapped** | `GetProcAddress` |
+| `testing.rs` | **unmapped** | `FakeGl`, `State` |

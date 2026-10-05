@@ -4,9 +4,13 @@
 //! and surfaces. Its Skia GPU context is exposed through [`ISkiaGrContext`],
 //! which hides whether Skia runs on Graphite or Ganesh.
 
+#[cfg(ferro_skia_ganesh_gl)]
+pub mod ganesh;
+#[cfg(target_vendor = "apple")]
 pub mod graphite;
 #[cfg(target_vendor = "apple")]
 pub mod metal;
+pub mod open_gl;
 
 mod i_skia_gpu;
 mod i_skia_gpu_render_session;

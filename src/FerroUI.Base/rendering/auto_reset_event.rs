@@ -1,5 +1,5 @@
 // Blocking waits do not exist on bare WebAssembly.
-#![cfg(not(all(target_family = "wasm", target_os = "unknown")))]
+#![cfg(not(target_family = "wasm"))]
 
 use std::sync::{Condvar, Mutex, PoisonError};
 use std::time::Duration;

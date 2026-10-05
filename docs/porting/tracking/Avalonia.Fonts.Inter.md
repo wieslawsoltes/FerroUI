@@ -7,24 +7,24 @@ Generated from upstream commit `17350180c33b063f0e98abbfd19aa3cae63f5d56`. Back 
 | | |
 |---|---|
 | Upstream | `src/Avalonia.Fonts.Inter` |
-| FerroUI | `src/FerroUI.Fonts.Inter` (not created yet) |
+| FerroUI | `src/FerroUI.Fonts.Inter` (exists) |
 | Crate | `ferroui-fonts-inter` |
 | Phase / priority | 3 - browser / P2 |
-| Files | 0/2 (0.0%), 1 not applicable |
-| Types | 0/2 (0.0%) |
-| Members | 0/2 (0.0%) |
+| Files | 2/2 (100.0%), 1 not applicable |
+| Types | 2/2 (100.0%) |
+| Members | 2/2 (100.0%) |
 | Contracts (interfaces) | 0/0 |
 | Property registrations | 0/0 |
 | Routed events | 0/0 |
 
 ## Files
 
-### `(project root)` - files 0/2, types 0/2, members 0/2
+### `(project root)` - files 2/2, types 2/2, members 2/2
 
 | Upstream file | Rust file | Status | Types | Members | Notes |
 |---|---|---|---|---|---|
-| `AppBuilderExtension.cs` | `app_builder_extension.rs` | missing | 0/1 | 0/1 |  |
-| `InterFontCollection.cs` | `inter_font_collection.rs` | missing | 0/1 | 0/1 |  |
+| `AppBuilderExtension.cs` | `app_builder_extension.rs` | present | 1/1 | 1/1 |  |
+| `InterFontCollection.cs` | `inter_font_collection.rs` | present | 1/1 | 1/1 |  |
 
 ### `Properties` - files 0/0, types 0/0, members 0/0
 
@@ -32,17 +32,25 @@ Generated from upstream commit `17350180c33b063f0e98abbfd19aa3cae63f5d56`. Back 
 |---|---|---|---|---|---|
 | `AssemblyInfo.cs` | - | n/a | - | - | no non-private types (assembly attributes, global usings or file-local helpers) |
 
-## Other files: fonts - 0/6
+## Other files: fonts - 6/6
 
 <details><summary>File list</summary>
 
 | Upstream file | FerroUI file | Status |
 |---|---|---|
-| `Assets/Inter-Bold.ttf` | `Assets/Inter-Bold.ttf` | missing |
-| `Assets/Inter-Light.ttf` | `Assets/Inter-Light.ttf` | missing |
-| `Assets/Inter-Medium.ttf` | `Assets/Inter-Medium.ttf` | missing |
-| `Assets/Inter-Regular.ttf` | `Assets/Inter-Regular.ttf` | missing |
-| `Assets/Inter-SemiBold.ttf` | `Assets/Inter-SemiBold.ttf` | missing |
-| `Assets/Inter-Thin.ttf` | `Assets/Inter-Thin.ttf` | missing |
+| `Assets/Inter-Bold.ttf` | `Assets/Inter-Bold.ttf` | present |
+| `Assets/Inter-Light.ttf` | `Assets/Inter-Light.ttf` | present |
+| `Assets/Inter-Medium.ttf` | `Assets/Inter-Medium.ttf` | present |
+| `Assets/Inter-Regular.ttf` | `Assets/Inter-Regular.ttf` | present |
+| `Assets/Inter-SemiBold.ttf` | `Assets/Inter-SemiBold.ttf` | present |
+| `Assets/Inter-Thin.ttf` | `Assets/Inter-Thin.ttf` | present |
 
 </details>
+
+## Rust-only files
+
+Rust sources of this crate that no upstream file maps to. Give each a reason in `docs/porting/data/path-overrides.toml` (`[[rust_only]]`), or map upstream files to it (`[[map]]`).
+
+| Rust file | Reason | Types defined |
+|---|---|---|
+| `assets.rs` | **unmapped** |  |

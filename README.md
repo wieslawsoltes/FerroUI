@@ -140,6 +140,8 @@ The layout follows the upstream project so that files can be compared side by si
 | `external/XamlX` | `xamlx` | XAML compiler front end |
 | `src/Skia/FerroUI.Skia` | `ferroui-skia` | Skia render backend |
 | `src/HarfBuzz/FerroUI.HarfBuzz` | `ferroui-harfbuzz` | HarfBuzz text shaping backend |
+| `src/FerroUI.OpenGL` | `ferroui-opengl` | OpenGL contracts used by the GL render path |
+| `src/FerroUI.Fonts.Inter` | `ferroui-fonts-inter` | Embedded Inter font collection |
 | `src/FerroUI.Native`, `native/FerroUI.Native` | `ferroui-native` | macOS platform backend and its native library |
 | `src/FerroUI.MicroCom` | `ferroui-microcom` | COM-style interop runtime used by the native backend |
 | `src/FerroUI.Desktop` | `ferroui-desktop` | Desktop entry point and platform detection |

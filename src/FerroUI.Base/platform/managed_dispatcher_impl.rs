@@ -1,6 +1,6 @@
 // The managed implementation needs a monotonic clock and a blocking wait,
 // neither of which exists on bare WebAssembly.
-#![cfg(not(all(target_family = "wasm", target_os = "unknown")))]
+#![cfg(not(target_family = "wasm"))]
 
 use std::rc::Rc;
 use std::sync::{Arc, Condvar, Mutex, MutexGuard, PoisonError};

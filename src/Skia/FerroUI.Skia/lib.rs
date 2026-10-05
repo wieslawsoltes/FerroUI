@@ -5,8 +5,9 @@
 //! targets (software framebuffers and GPU surfaces).
 //!
 //! GPU rendering goes through the [`gpu::ISkiaGpu`] abstraction. The Metal
-//! implementation ([`gpu::metal::SkiaMetalGpu`]) runs on Skia's Graphite
-//! backend.
+//! implementation (`gpu::metal::SkiaMetalGpu`, Apple platforms) runs on
+//! Skia's Graphite backend, the OpenGL one (`gpu::open_gl::GlSkiaGpu`, the
+//! browser) on Ganesh.
 
 pub mod gpu;
 pub mod helpers;

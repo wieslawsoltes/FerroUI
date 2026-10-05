@@ -26,6 +26,7 @@ use crate::skia_typeface::SkiaTypeface;
 use ferroui_base::media::text_formatting::GlyphInfo;
 use ferroui_base::media::{GlyphRun, GlyphTypeface};
 use ferroui_base::platform::IGlyphRunImpl;
+use ferroui_opengl::IGlContext;
 use skia_safe::{ColorType, FontHinting, PathBuilder};
 use std::fs::File;
 use std::io::{self, Read};
@@ -60,10 +61,32 @@ impl PlatformRenderInterface {
             return skia_gpu;
         }
 
+        if let Some(gl) = features.try_get::<dyn IGlContext>() {
+            return Self::create_gl_gpu(gl, self.max_resource_bytes, self.use_stencil_buffers);
+        }
+
         if let Some(metal) = features.try_get::<dyn IMetalDevice>() {
             return Self::create_metal_gpu(metal, self.max_resource_bytes, self.use_stencil_buffers);
         }
 
+        panic!("Graphics context of type is not supported");
+    }
+
+    #[cfg(ferro_skia_ganesh_gl)]
+    fn create_gl_gpu(
+        gl: Rc<dyn IGlContext>,
+        max_resource_bytes: Option<i64>,
+        use_stencil_buffers: Option<bool>,
+    ) -> Rc<dyn ISkiaGpu> {
+        crate::gpu::open_gl::GlSkiaGpu::new(gl, max_resource_bytes, use_stencil_buffers)
+    }
+
+    #[cfg(not(ferro_skia_ganesh_gl))]
+    fn create_gl_gpu(
+        _gl: Rc<dyn IGlContext>,
+        _max_resource_bytes: Option<i64>,
+        _use_stencil_buffers: Option<bool>,
+    ) -> Rc<dyn ISkiaGpu> {
         panic!("Graphics context of type is not supported");
     }
 

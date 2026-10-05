@@ -1,6 +1,6 @@
 // The timer owns a thread and sleeps on it; neither exists on bare
 // WebAssembly.
-#![cfg(not(all(target_family = "wasm", target_os = "unknown")))]
+#![cfg(not(target_family = "wasm"))]
 
 use std::sync::atomic::{AtomicBool, AtomicI32, Ordering};
 use std::sync::{Arc, Mutex, PoisonError};

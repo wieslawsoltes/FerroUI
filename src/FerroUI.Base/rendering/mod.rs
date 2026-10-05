@@ -26,7 +26,7 @@ pub use z_index_comparer::ZIndexComparer;
 pub use managed_hit_tester::ManagedHitTester;
 
 // ---- render loop / render timers / context manager ----
-#[cfg(not(all(target_family = "wasm", target_os = "unknown")))]
+#[cfg(not(target_family = "wasm"))]
 mod auto_reset_event;
 mod default_render_timer;
 mod i_render_loop;
@@ -38,10 +38,10 @@ mod platform_render_interface_context_manager;
 mod render_loop;
 mod renderer_debug_overlays;
 mod renderer_diagnostics;
-#[cfg(not(all(target_family = "wasm", target_os = "unknown")))]
+#[cfg(not(target_family = "wasm"))]
 mod sleep_loop_render_timer;
 mod swapchain_base;
-#[cfg(not(all(target_family = "wasm", target_os = "unknown")))]
+#[cfg(not(target_family = "wasm"))]
 mod thread_proxy_render_timer;
 mod ui_thread_render_timer;
 
@@ -55,9 +55,9 @@ pub use platform_render_interface_context_manager::PlatformRenderInterfaceContex
 pub use render_loop::{DefaultRenderLoop, RenderLoop};
 pub use renderer_debug_overlays::RendererDebugOverlays;
 pub use renderer_diagnostics::RendererDiagnostics;
-#[cfg(not(all(target_family = "wasm", target_os = "unknown")))]
+#[cfg(not(target_family = "wasm"))]
 pub use sleep_loop_render_timer::SleepLoopRenderTimer;
 pub use swapchain_base::{ISwapchainImage, SwapchainBase, SwapchainImageFactory, SwapchainImagePresentStatus};
-#[cfg(not(all(target_family = "wasm", target_os = "unknown")))]
+#[cfg(not(target_family = "wasm"))]
 pub use thread_proxy_render_timer::ThreadProxyRenderTimer;
 pub use ui_thread_render_timer::UiThreadRenderTimer;

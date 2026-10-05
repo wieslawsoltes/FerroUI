@@ -1,6 +1,6 @@
 # Browser platform: how to target the browser from FerroUI
 
-Status: analysis and plan, no code yet. Upstream reference: Avalonia `main` at `17350180c3` (2026-10-01), `src/Browser/Avalonia.Browser` (86 tracked files, about 7,000 lines of C# and TypeScript) and `samples/ControlCatalog.Browser`. External facts were checked on 2026-10-04; each is tagged **[V]** (verified against the crate, repository or docs) or **[U]** (not verified, see section 13).
+Status: design verified by the feasibility spike of 2026-10-05 (section 13); implementation in progress. Upstream reference: Avalonia `main` at `17350180c3` (2026-10-01), `src/Browser/Avalonia.Browser` (86 tracked files, about 7,000 lines of C# and TypeScript) and `samples/ControlCatalog.Browser`. External facts were checked on 2026-10-04; each is tagged **[V]** (verified against the crate, repository or docs), **[M]** (measured on 2026-10-05 in the feasibility spike, see section 13) or **[U]** (not verified, see section 13).
 
 ## 1. Recommendation summary
 
@@ -31,10 +31,10 @@ Build the browser backend as `src/Browser/FerroUI.Browser`, a single-threaded ba
 
 | Dependency | `wasm32-unknown-emscripten` | `wasm32-unknown-unknown` |
 |---|---|---|
-| `skia-safe` 0.153.x | Supported; needs emsdk 5.0 or newer, `EMSDK` set, `EMCC_CFLAGS="-s ERROR_ON_UNDEFINED_SYMBOLS=0"`, `MAX_WEBGL_VERSION=2` for WebGL. Listed among targets with prebuilt binaries. **[V]** (rust-skia README). Feature set of the prebuilt binaries **[U]**. | Explicitly unsupported by rust-skia ("fundamentally incompatible with linking C code"). **[V]** |
-| Skia GPU in the browser | Ganesh over WebGL (the `gl` feature). **[V]** that the README documents WebGL. Graphite on WebGPU (Dawn) through `skia-safe` on this target: **[U]**, assume unavailable. | n/a |
-| `harfbuzz-sys` 0.8 `bundled` | Build script compiles `harfbuzz/src/harfbuzz.cc` with the `cc` crate, with no WASM-specific handling. **[V]** (build.rs). Expected to work under `em++`, actual build **[U]**. | No C++ toolchain or libc for this target through `cc`; would need wasi-sdk plus manual sysroot work. Treat as unsupported. **[U]** (not attempted) |
-| `wasm-bindgen` / `web-sys` | Supported since 0.2.115 (March 2026) with Emscripten 6.0.10 or newer; binary crate required; `-Cpanic=abort`; documented as "still being smoothed out". **[V]** (wasm-bindgen guide) | First-class. **[V]** |
+| `skia-safe` 0.153.x | Supported; needs emsdk 5.0 or newer, `EMSDK` set, `EMCC_CFLAGS="-s ERROR_ON_UNDEFINED_SYMBOLS=0"`, `MAX_WEBGL_VERSION=2` for WebGL. Listed among targets with prebuilt binaries. **[V]** (rust-skia README). The `gl` feature resolves to the prebuilt binary `wasm32-unknown-emscripten-ganesh-gl-jpegd-jpege-pdf` (`libskia.a` 13.4 MB): Ganesh with the WebGL interface, raster, FreeType with the empty custom font manager, PNG/JPEG/GIF/BMP/ICO decoders, PNG and JPEG encoders, path ops, image filters, SVG; no WebP, no text layout module, no ICU. That covers everything `FerroUI.Skia` uses. It must be linked with `em++`. **[M]** | Explicitly unsupported by rust-skia ("fundamentally incompatible with linking C code"). **[V]** |
+| Skia GPU in the browser | Ganesh over WebGL (the `gl` feature). **[V]** that the README documents WebGL; drawing through a WebGL2 context registered with Emscripten's `GL` object works **[M]** (Chrome). Graphite on this target: no prebuilt binary carries it, and the build falls back to compiling Skia from source, which fails at dependency sync **[M]**; unavailable. | n/a |
+| `harfbuzz-sys` 0.8 `bundled` | Build script compiles `harfbuzz/src/harfbuzz.cc` with the `cc` crate, with no WASM-specific handling. **[V]** (build.rs). Builds under `em++` and runs (HarfBuzz 8.4.0). **[M]** | No C++ toolchain or libc for this target through `cc`; would need wasi-sdk plus manual sysroot work. Treat as unsupported. **[U]** (not attempted) |
+| `wasm-bindgen` / `web-sys` | Supported since 0.2.115 (March 2026) with Emscripten 6.0.10 or newer; binary crate required; documented as "still being smoothed out". **[V]** (wasm-bindgen guide). Works with crate and command-line tool 0.2.129 on Emscripten 6.0.10: `-sWASM_BINDGEN` makes `emcc` run the `wasm-bindgen` executable from `PATH`, whose version must equal the crate's. Module-file imports, strings, byte slices, opaque `JsValue` handles and exports were exercised. `-Cpanic=abort`, which the guide asks for, does **not** build with stable Rust 1.90 on this target (`the crate core requires panic strategy unwind`); the default `unwind` works, including `catch_unwind`. `-sINVOKE_RUN=0` is needed, otherwise `main` runs twice. **[M]** | First-class. **[V]** |
 | `wgpu` | Not working today: issue #10274 (open) and PR #10515 (open, 2026-10-02) that routes Emscripten through the web-sys backend. **[V]** | First-class WebGPU and WebGL2 backends. **[V]** (general knowledge of the crate; versions not re-checked) |
 | `vello` (classic) | Blocked on `wgpu` above. | Works on WebGPU only (compute shaders). **[V]** |
 | `vello_gpu` (was `vello_hybrid`) / `vello_cpu` | **[U]** | `vello_gpu` has a native WebGL2 backend and a wgpu backend without compute shaders; `vello_cpu` is described as the most mature. **[V]** (Vello README). MSRV 1.89. **[V]** |
@@ -45,9 +45,11 @@ Reasons for the order:
 
 1. FerroUI's renderer and shaper today are Skia and HarfBuzz. Only Emscripten builds them. Choosing `wasm32-unknown-unknown` first would make the browser port wait for a renderer that does not exist yet, and would give up render-test parity with desktop.
 2. `wasm32-unknown-unknown` has the better toolchain (trunk, mature `wasm-bindgen`, `wgpu`). It becomes worthwhile exactly when the Vello backend and a pure-Rust shaper land, and those are useful on desktop too.
-3. Both targets can share one browser crate because `wasm-bindgen` now covers both. This is the one new and still-experimental piece of the plan; section 5 gives the fallback.
+3. Both targets can share one browser crate because `wasm-bindgen` now covers both. This was the one new and still-experimental piece of the plan; the spike confirmed it **[M]**, so the fallback of section 5 is not needed.
 
-Toolchain consequences: Emscripten 6.0.10 or newer is the floor (set by `wasm-bindgen`, above rust-skia's 5.0 floor). Whether rust-skia's prebuilt binaries link cleanly under that exact emsdk is **[U]**; if not, Skia must be built from source in CI (slow, cache it). `-Cpanic=abort` is mandatory, so the core must not rely on `catch_unwind`.
+Toolchain consequences: Emscripten 6.0.10 or newer is the floor (set by `wasm-bindgen`, above rust-skia's 5.0 floor). rust-skia's prebuilt binaries link cleanly under emsdk 6.0.10 **[M]**, so Skia is never built from source: CI downloads a 15 MB archive. The panic strategy stays `unwind` (the only one that builds with the pinned toolchain), so the `catch_unwind` uses of the core keep working in the browser.
+
+Pinned toolchain **[M]**: Emscripten 6.0.10, Rust 1.90.0 with the `wasm32-unknown-emscripten` target, `skia-safe` 0.153.3, `harfbuzz-sys` 0.8.0, `wasm-bindgen` crate and command-line tool 0.2.129.
 
 ## 4. Renderer (question 2)
 
@@ -58,14 +60,14 @@ Toolchain consequences: Emscripten 6.0.10 or newer is the floor (set by `wasm-bi
 | Availability to FerroUI | Backend exists (`FerroUI.Skia`) | Backend planned, not written |
 | Coverage of the drawing-context contract | Complete: path ops, stroking and widening, hit testing, image filters, blur and box shadow, blend modes, opacity masks, layers, bitmap decode/encode, render-target bitmaps | Fills, strokes, gradients, images, clips, blends are covered. Path boolean ops, geometry widening and containment tests, blur and filter effects, bitmap codecs and readback need extra crates or own code (`kurbo`, `image`). Per-feature status **[U]** |
 | Text quality | Same rasteriser as desktop, hinting and LCD/greyscale options | Outline rendering, no hinting by default; small UI text is visibly softer. **[U]** for the current release |
-| Binary size | Large. CanvasKit-class builds are several MB of WASM before compression. **[U]** for our feature set; measure in Phase 1 | Smaller, pure Rust, benefits from LTO and `wasm-opt`. **[U]**, measure |
+| Binary size | Large. Skia (Ganesh and raster) with HarfBuzz and one embedded font links to 4.6 MB of WASM, 1.9 MB with gzip, before any framework code **[M]** | Smaller, pure Rust, benefits from LTO and `wasm-opt`. **[U]**, measure |
 | Start-up | Synchronous context creation | WebGPU adapter and device requests are asynchronous; start-up needs a continuation |
 | Reach | WebGL2 is available everywhere; raster fallback always works | WebGPU: Chrome/Edge desktop, Safari 26, Firefox 141+ on Windows and 145+ on Apple Silicon; Firefox on Linux and Android not shipped, Chrome on Linux limited. **[U]** (secondary sources). So the WebGL2 path is not optional |
 | API stability | Stable | Churning: `vello_hybrid` was renamed `vello_gpu` in August 2026 **[U]** (secondary source); README says it is "intended to become the primary renderer" |
 
 Constraints this puts on `FerroUI.Skia`:
 
-- The browser needs **Ganesh on GL**. Desktop currently enables only `graphite` and `metal`. The GPU abstraction in `FerroUI.Skia` (upstream `ISkiaGpu`, `GlSkiaGpu`, `IGlPlatformSurface`) must stay generic over Ganesh and Graphite, and the `ganesh` and `gl` features must be selectable per target.
+- The browser needs **Ganesh on GL**. Desktop enables only `graphite` and `metal`. The GPU abstraction in `FerroUI.Skia` (upstream `ISkiaGpu`, `GlSkiaGpu`, `IGlPlatformSurface`) stays generic over Ganesh and Graphite, and the Skia features are selected per target in the manifest of `FerroUI.Skia`. No published Skia binary carries Graphite and Ganesh together (checked for macOS: the `graphite`+`metal`+`gl` combination does not exist **[M]**), so the Ganesh files of `FerroUI.Skia` compile only where the build has Ganesh (the browser); the OpenGL contracts (`FerroUI.OpenGL`) are free of such conditions and are tested on desktop.
 - A framebuffer surface path (upstream `IFramebufferPlatformSurface`, `RetainedFramebuffer`) is required for the raster fallback.
 - A "graphics not ready yet" state is required (upstream `IPlatformGraphicsReadyStateFeature`): the compositor may exist before the render target does.
 
@@ -84,7 +86,7 @@ Rules:
 3. No `web-sys` or `js-sys` type appears outside `interop/` and the two render-target files. This is what makes the fallback mechanical.
 4. JS-to-Rust calls are synchronous and return their result directly. Upstream returns `Task<bool>` from key handlers and calls `preventDefault` in a `.then`; do not copy that (see section 14).
 
-**Fallback** if `wasm-bindgen` on Emscripten proves unusable in the Phase 1 spike: keep the TypeScript unchanged, replace `interop/*.rs` bindings with `extern "C"` imports resolved by an Emscripten `--js-library` and an integer handle table on the JS side. Rule 2 keeps this a contained change.
+**Fallback** (not needed: `wasm-bindgen` on Emscripten works, section 13), had `wasm-bindgen` on Emscripten proved unusable: keep the TypeScript unchanged, replace `interop/*.rs` bindings with `extern "C"` imports resolved by an Emscripten `--js-library` and an integer handle table on the JS side. Rule 2 keeps this a contained change.
 
 | Upstream JS module | Purpose | FerroUI counterpart |
 |---|---|---|
@@ -205,12 +207,12 @@ samples/ControlCatalog.Browser/
   wwwroot/index.html, app.css, main.js
 ```
 
-Workspace changes when implementation starts: add the three crates as members; make `skia-safe` features target-specific (`graphite`+`metal` on macOS, `ganesh`+`gl` on Emscripten); gate `FerroUI.Native` and `FerroUI.Desktop` out of WASM builds; raise `rust-version` only if the Vello configuration is enabled (Vello needs 1.89, the workspace is at 1.86).
+Workspace changes: the crates above as members, plus `src/FerroUI.OpenGL` (the OpenGL contracts, upstream `Avalonia.OpenGL`, which the Ganesh path of `FerroUI.Skia` and the WebGL render target implement); `skia-safe` features per target in the manifest of `FerroUI.Skia` (`graphite`+`metal` on Apple targets, `gl` on Emscripten); `FerroUI.Native` and `FerroUI.Desktop` are never built for the WASM target (the browser build selects its package).
 
 Tooling:
 
 - **Emscripten configuration**: plain `cargo build --target wasm32-unknown-emscripten` plus a repository script (`scripts/build-browser.sh` or an `xtask`) that runs esbuild, builds, and assembles `wwwroot` + `.js` + `.wasm` into a `dist` directory served by any static server. No trunk and no wasm-pack (wasm-pack has an open request for this target; trunk support **[U]**).
-- Link flags (in `.cargo/config.toml` for the target): `-Cpanic=abort`, `-Crelocation-model=static`, `-sWASM_BINDGEN`, `-sMODULARIZE`, `-sEXPORT_ES6`, `-sMAX_WEBGL_VERSION=2`, `-sALLOW_MEMORY_GROWTH=1`, `-sEXPORTED_RUNTIME_METHODS=GL` (the JS side must reach Emscripten's `GL` object), and `EMCC_CFLAGS="-s ERROR_ON_UNDEFINED_SYMBOLS=0"` as rust-skia requires. Exact working set **[U]** until the spike.
+- Link settings (in `.cargo/config.toml` for the target) **[M]**: `linker = "em++"` (Skia needs the C++ runtime), `-sWASM_BINDGEN`, `-sMODULARIZE`, `-sEXPORT_ES6`, `-sMAX_WEBGL_VERSION=2`, `-sALLOW_MEMORY_GROWTH=1`, `-sEXPORTED_RUNTIME_METHODS=GL,HEAPU8` (the JS side must reach Emscripten's `GL` object and the module memory), `-sINVOKE_RUN=0` (otherwise `main` runs twice), and `EMCC_CFLAGS="-s ERROR_ON_UNDEFINED_SYMBOLS=0"` as rust-skia requires. No `-Cpanic=abort` and no `-Crelocation-model=static`. `emcc` writes the JS snippets of `wasm-bindgen` next to `deps/<name>.js`, so the site is assembled from the `deps` directory.
 - **`wasm32-unknown-unknown` configuration**: trunk, with the same `webapp` bundle.
 - TypeScript: keep upstream's esbuild script and ESLint configuration; three bundles as upstream. Asset fingerprinting and import maps are not needed initially.
 
@@ -219,7 +221,7 @@ Phases:
 | Phase | Content | Exit criterion |
 |---|---|---|
 | 0 | Core constraints of section 12 applied in ongoing core and desktop work | No new violations; CI job `cargo check --target wasm32-unknown-emscripten` for `FerroUI.Base` and `FerroUI.Controls` |
-| 1a | Toolchain spike: `skia-safe` (`gl`) + `harfbuzz-sys` + `wasm-bindgen` linked under emsdk 6.0.10+, drawing one rectangle and one shaped text run with Skia raster into a 2D canvas | Works in Chrome, Firefox, Safari; size and start-up measured; binding approach confirmed or switched to the fallback |
+| 1a | Toolchain spike: `skia-safe` (`gl`) + `harfbuzz-sys` + `wasm-bindgen` linked under emsdk 6.0.10+, drawing one rectangle and one shaped text run with Skia raster into a 2D canvas | Done 2026-10-05 in Chrome (WebGL2 and raster); size and start-up measured; binding approach confirmed. Firefox and Safari are still to be checked |
 | 1b | **MVP**: `start_browser_app`, single-view lifetime, `FerroView`, `BrowserTopLevelImpl`, dispatcher, `requestAnimationFrame` render timer, canvas surface with resize and DPR, software and WebGL2 render targets, embedded default font, mouse pointer input, stub services | **A window-equivalent top-level in a `<div>` shows a basic control (a button with text inside a border), laid out and rendered through the normal compositor path, re-rendering correctly on resize and zoom, and reacting to hover and click** |
 | 2 | Keyboard, wheel, touch, pen, pointer capture, cursors, text input and IME, text clipboard, theme setting, overlay popups verified (tooltip, flyout, combo box) | A text box is usable including IME; popups work |
 | 3 | Rich clipboard, drag and drop, storage provider, launcher, screens, insets, input pane, navigation, activation, font fetch, multiple views, ControlCatalog sample | ControlCatalog runs |
@@ -230,7 +232,7 @@ Phases:
 1. **No blocking loop in the core.** The run loop belongs to the lifetime and platform, behind a separate, optional controlled-dispatcher contract. Setup must be callable without running.
 2. **No blocking waits.** No nested dispatcher frames, no synchronous invoke-and-wait, no condition variables or channels with blocking receive, no `block_on`, in `FerroUI.Base` or `FerroUI.Controls`. Modal behaviour must be expressible with completions.
 3. **Asynchronous platform services are completion-based** (clipboard, storage, launcher, screen details, font loading, graphics device creation). Decide the one completion type now, without an async-runtime dependency.
-4. **Time comes from the platform.** Use the dispatcher's `now` and the render-timer tick timestamp. `std::time::Instant::now()` and `SystemTime::now()` panic on `wasm32-unknown-unknown`; keep them out of shared code even though Emscripten supports them.
+4. **Time comes from the platform.** Use the dispatcher's `now` and the render-timer tick timestamp. `std::time::Instant::now()` and `SystemTime::now()` panic on `wasm32-unknown-unknown`; keep them out of shared code even though Emscripten supports them (**[M]**: both work there, `std::fs` works against an in-memory file system, and `std::thread` spawning fails with `Unsupported`).
 5. **No threads assumed.** No `std::thread::spawn`, no background render thread requirement, no timers implemented with sleeping threads. The compositor must run with commit and render on one thread. `UiStatic` and `thread_local!` are fine on both targets.
 6. **`Rc` is right; do not add `Send`/`Sync` bounds to platform contracts.** JS handles (`JsValue`) are neither. Contracts that upstream documents as callable from any thread (the render-timer tick setter) should not force `Send` in the trait.
 7. **No `std::fs`, `std::env`, `std::process`, `std::net` in shared paths.** Assets and fonts are bytes behind the asset-loader contract; file-path overloads belong to desktop-only code. Logging sinks must be pluggable (browser console).
@@ -239,22 +241,34 @@ Phases:
 10. **Platform handles are not always integers.** The handle abstraction must be able to carry an opaque platform object.
 11. **Renderer abstraction stays Ganesh-capable** and keeps a framebuffer path and a not-ready state (section 4). Do not let Graphite-only assumptions leak above `FerroUI.Skia`.
 12. **Font manager is dynamic and path-free** (section 9).
-13. **No reliance on unwinding** (`-Cpanic=abort`): no `catch_unwind` for control flow; destructors must not be the only place where essential state is restored after a panic.
+13. **No reliance on unwinding for control flow.** The Emscripten configuration builds with `unwind` (the only strategy the pinned toolchain supports there, section 3) and `catch_unwind` works, but `wasm32-unknown-unknown` configurations are commonly built with `abort`: no `catch_unwind` for control flow; destructors must not be the only place where essential state is restored after a panic.
 14. **32-bit `usize`.** Collection indices, hashes and pointer-sized casts must not assume 64 bits; keep 64-bit timestamps and ids explicitly `u64`/`i64`.
 15. **Dependency hygiene.** Crates used by `FerroUI.Base` and `FerroUI.Controls` must build on both WASM targets; platform-specific crates are added under `cfg(target_...)`. Anything using `getrandom` needs its browser backend selected in the application crate.
 16. **Size discipline.** Avoid large generic instantiations and `std::fmt`-heavy paths in hot generic code; WASM size is a product feature.
 
-## 13. Claims not verified
+## 13. Verification status
 
-- That `harfbuzz-sys` `bundled` actually builds and links on `wasm32-unknown-emscripten` (only the build script was read).
-- That rust-skia's prebuilt `wasm32-unknown-emscripten` binaries cover the needed feature set (`gl`, text layout) and link under emsdk 6.0.10+, which `wasm-bindgen` requires.
-- Whether `skia-safe` offers Graphite on WebGPU (Dawn) on Emscripten. Assumed not.
-- That `skia-safe`, `harfbuzz-sys` and `wasm-bindgen` link together in one Emscripten binary, and the exact flag set in section 11.
-- Whether all of `web-sys` is usable on the Emscripten target; one secondary source claims gaps.
+### Verified by the feasibility spike (2026-10-05)
+
+Measured on macOS arm64 with Emscripten 6.0.10, Rust 1.90.0, `skia-safe` 0.153.3, `harfbuzz-sys` 0.8.0, `wasm-bindgen` 0.2.129. Browser evidence is from **headless Google Chrome 154 only** (ANGLE on Metal).
+
+- `skia-safe` with the `gl` feature builds for `wasm32-unknown-emscripten` from rust-skia's prebuilt binary (first build 1.5 minutes including the download); feature set as listed in section 3.
+- `harfbuzz-sys` `bundled` builds under `em++` and shapes text.
+- `wasm-bindgen` works on the target with the corrections of section 3: panic strategy `unwind`, `-sINVOKE_RUN=0`, matching command-line tool on `PATH`, linker `em++`.
+- `skia-safe`, `harfbuzz-sys` and `wasm-bindgen` link into one module with the settings of section 11. A page that creates a WebGL2 context, registers it with the module's `GL` object and has Skia (Ganesh) draw shapes and a HarfBuzz-shaped glyph run renders correctly; so does the raster path blitted with `putImageData` from a view over the module memory. The module is 4.6 MB (1.9 MB with gzip) and instantiates in about 36 ms from a local server.
+- A typeface can be created from bytes with Skia's font manager on the target; there is no default typeface, as section 9 assumes.
+- The core crates (`FerroUI.Base`, `FerroUI.Controls`, the markup crates and the run-time loader, both themes, `FerroUI.HarfBuzz`, the ControlCatalog library) compile for the target unchanged. `FerroUI.Skia` needs its Skia features per target.
+- No published Skia binary combines Graphite and Ganesh; with unsupported feature combinations the build of `skia-bindings` silently falls back to compiling Skia from source (and currently fails there). Feature resolution must be checked with `cargo tree -e features` before building for a new target.
+
+### Still not verified
+
+- Firefox, Safari and mobile browsers; WebGL1; the `failIfMajorPerformanceCaveat` fallback to the raster path.
+- Whether all of `web-sys`, `js-sys` and `wasm-bindgen-futures` are usable on the Emscripten target (the boundary rules of section 5 keep them out of the port).
+- Whether a newer Rust toolchain or a rebuilt standard library allows `-Cpanic=abort` on the target, and what it would save.
+- Size and start-up of the full framework in the browser, and the speed of the run-time XAML loader there.
 - `vello_gpu` and `vello_cpu` behaviour on Emscripten; the `vello_hybrid` to `vello_gpu` rename date and versions (secondary source; only the existence and description of `vello_gpu` were confirmed in the README).
 - Vello feature gaps against the drawing-context contract and its current text-rendering quality.
 - WebGPU availability per browser and OS (secondary sources, not vendor documentation).
-- Binary size and start-up numbers for either renderer.
 - What default typeface, if any, the SkiaSharp WASM binary embeds, and how upstream apps get text without registering a font.
 - trunk support for `wasm32-unknown-emscripten`.
 - Rust standard-library requirements for WASM threads on either target (not investigated further because threads are rejected).

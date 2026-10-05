@@ -2261,6 +2261,7 @@ Rust sources of this crate that no upstream file maps to. Give each a reason in 
 | `markup_types/contracts.rs` | **unmapped** | `AddChildOf` |
 | `markup_types/converters.rs` | **unmapped** |  |
 | `markup_types/enums.rs` | **unmapped** |  |
+| `markup_types/lists.rs` | **unmapped** |  |
 | `markup_types/plain.rs` | **unmapped** | `FerroListOf` |
 | `markup_types/values.rs` | **unmapped** |  |
 | `metadata/pseudo_classes_attribute.rs` | **unmapped** | `PseudoClassesAttribute` |

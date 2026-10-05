@@ -1,0 +1,15 @@
+[package]
+name = "ferroui-opengl"
+description = "The OpenGL platform contracts of FerroUI: contexts, surfaces and the entry points the framework itself uses"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+
+[lib]
+path = "lib.rs"
+
+[dependencies]
+ferroui-base.workspace = true
+paste.workspace = true

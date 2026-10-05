@@ -504,17 +504,17 @@
    "scope": "in",
    "detail": "full",
    "files": [
-    1060,
+    1062,
     1293,
     0
    ],
    "types": [
-    1319,
+    1321,
     1720,
     0
    ],
    "members": [
-    9281,
+    9294,
     12036,
     31
    ],
@@ -536,7 +536,7 @@
     "const": 332,
     "derive": 64,
     "field": 548,
-    "fn": 5873,
+    "fn": 5886,
     "free fn": 10,
     "free item": 16,
     "getter fn": 4,
@@ -2850,6 +2850,9 @@
     "Platform/Internal/AssetDescriptor.cs": [
      "platform/internal/asset_descriptor.rs"
     ],
+    "Platform/Internal/UnmanagedBlob.cs": [
+     "platform/internal/unmanaged_blob.rs"
+    ],
     "Platform/LtrbRect.cs": [
      "platform/ltrb_rect.rs"
     ],
@@ -2867,6 +2870,9 @@
     ],
     "Platform/PlatformHandle.cs": [
      "platform/platform_handle.rs"
+    ],
+    "Platform/RetainedFramebuffer.cs": [
+     "platform/retained_framebuffer.rs"
     ],
     "Platform/StandardAssetLoader.cs": [
      "platform/standard_asset_loader.rs"
@@ -5572,6 +5578,7 @@
     "markup_types/contracts.rs",
     "markup_types/converters.rs",
     "markup_types/enums.rs",
+    "markup_types/lists.rs",
     "markup_types/plain.rs",
     "markup_types/values.rs",
     "metadata/pseudo_classes_attribute.rs",
@@ -5795,17 +5802,17 @@
    "scope": "in",
    "detail": "full",
    "files": [
-    0,
+    2,
     2,
     0
    ],
    "types": [
-    0,
+    2,
     2,
     0
    ],
    "members": [
-    0,
+    2,
     2,
     0
    ],
@@ -5822,9 +5829,20 @@
     0
    ],
    "notApplicableFiles": 1,
-   "matchKinds": {},
-   "presentFiles": {},
-   "rustOnly": []
+   "matchKinds": {
+    "fn": 2
+   },
+   "presentFiles": {
+    "AppBuilderExtension.cs": [
+     "app_builder_extension.rs"
+    ],
+    "InterFontCollection.cs": [
+     "inter_font_collection.rs"
+    ]
+   },
+   "rustOnly": [
+    "assets.rs"
+   ]
   },
   {
    "name": "Avalonia.FreeDesktop",
@@ -6159,22 +6177,22 @@
    "scope": "in",
    "detail": "full",
    "files": [
-    0,
+    12,
     39,
     0
    ],
    "types": [
-    0,
+    16,
     63,
     0
    ],
    "members": [
-    0,
+    226,
     639,
     0
    ],
    "interfaces": [
-    0,
+    6,
     18
    ],
    "propertyRegistrations": [
@@ -6186,9 +6204,55 @@
     0
    ],
    "notApplicableFiles": 0,
-   "matchKinds": {},
-   "presentFiles": {},
-   "rustOnly": []
+   "matchKinds": {
+    "fn": 61,
+    "free fn": 68,
+    "free item": 84,
+    "overload fn": 2,
+    "variant": 11
+   },
+   "presentFiles": {
+    "GlBasicInfoInterface.cs": [
+     "gl_basic_info_interface.rs"
+    ],
+    "GlConsts.cs": [
+     "gl_consts.rs"
+    ],
+    "GlEntryPointAttribute.cs": [
+     "gl_entry_point_attribute.rs"
+    ],
+    "GlErrors.cs": [
+     "gl_errors.rs"
+    ],
+    "GlInterface.cs": [
+     "gl_interface.rs"
+    ],
+    "GlVersion.cs": [
+     "gl_version.rs"
+    ],
+    "IGlContext.cs": [
+     "i_gl_context.rs"
+    ],
+    "IPlatformGraphicsOpenGlContextFactory.cs": [
+     "i_platform_graphics_open_gl_context_factory.rs"
+    ],
+    "OpenGlException.cs": [
+     "open_gl_exception.rs"
+    ],
+    "Surfaces/IGlPlatformSurface.cs": [
+     "surfaces/i_gl_platform_surface.rs"
+    ],
+    "Surfaces/IGlPlatformSurfaceRenderTarget.cs": [
+     "surfaces/i_gl_platform_surface_render_target.rs"
+    ],
+    "Surfaces/IGlPlatformSurfaceRenderingSession.cs": [
+     "surfaces/i_gl_platform_surface_rendering_session.rs"
+    ]
+   },
+   "rustOnly": [
+    "entry_points.rs",
+    "testing.rs"
+   ]
   },
   {
    "name": "Avalonia.Remote.Protocol",
@@ -7247,22 +7311,22 @@
    "scope": "in",
    "detail": "full",
    "files": [
-    43,
+    47,
     54,
     0
    ],
    "types": [
-    45,
+    49,
     66,
     0
    ],
    "members": [
-    304,
+    329,
     451,
     0
    ],
    "interfaces": [
-    5,
+    6,
     10
    ],
    "propertyRegistrations": [
@@ -7276,7 +7340,7 @@
    "notApplicableFiles": 0,
    "matchKinds": {
     "field": 28,
-    "fn": 230,
+    "fn": 255,
     "free fn": 33,
     "free item": 1,
     "overload fn": 10,
@@ -7324,6 +7388,18 @@
     ],
     "Gpu/Metal/SkiaMetalGpu.cs": [
      "gpu/metal/skia_metal_gpu.rs"
+    ],
+    "Gpu/OpenGl/FboSkiaSurface.cs": [
+     "gpu/open_gl/fbo_skia_surface.rs"
+    ],
+    "Gpu/OpenGl/GlRenderTarget.cs": [
+     "gpu/open_gl/gl_render_target.rs"
+    ],
+    "Gpu/OpenGl/GlSkiaGpu.cs": [
+     "gpu/open_gl/gl_skia_gpu.rs"
+    ],
+    "Gpu/OpenGl/IGlSkiaSpecificOptionsFeature.cs": [
+     "gpu/open_gl/i_gl_skia_specific_options_feature.rs"
     ],
     "Gpu/SkiaGpuRenderTarget.cs": [
      "gpu/skia_gpu_render_target.rs"
@@ -7414,6 +7490,7 @@
     ]
    },
    "rustOnly": [
+    "gpu/ganesh/ganesh_gr_context.rs",
     "gpu/graphite/graphite_gr_context.rs",
     "gpu/i_skia_gr_context.rs",
     "gpu/metal/tests.rs",

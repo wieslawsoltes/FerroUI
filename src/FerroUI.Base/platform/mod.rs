@@ -16,6 +16,7 @@ mod i_platform_threading_interface;
 mod i_render_target;
 mod ltrb_rect;
 mod pixel_format;
+mod retained_framebuffer;
 mod managed_dispatcher_impl;
 mod system_navigation_manager_impl;
 
@@ -38,8 +39,9 @@ pub use i_render_target::{
 pub use system_navigation_manager_impl::ISystemNavigationManagerImpl;
 pub use ltrb_rect::{LtrbPixelRect, LtrbRect};
 pub use pixel_format::{PixelFormat, PixelFormats};
+pub use retained_framebuffer::RetainedFramebuffer;
 pub use i_platform_threading_interface::{IPlatformThreadingInterface, PlatformTimerHandle};
-#[cfg(not(all(target_family = "wasm", target_os = "unknown")))]
+#[cfg(not(target_family = "wasm"))]
 pub use managed_dispatcher_impl::{IManagedDispatcherInputProvider, ManagedDispatcherImpl};
 
 // --- geometry contracts ---

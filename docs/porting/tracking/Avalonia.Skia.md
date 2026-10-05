@@ -10,10 +10,10 @@ Generated from upstream commit `17350180c33b063f0e98abbfd19aa3cae63f5d56`. Back 
 | FerroUI | `src/Skia/FerroUI.Skia` (exists) |
 | Crate | `ferroui-skia` |
 | Phase / priority | 1 - rendering / P0 |
-| Files | 43/54 (79.6%) |
-| Types | 45/66 (68.2%) |
-| Members | 304/451 (67.4%) |
-| Contracts (interfaces) | 5/10 |
+| Files | 47/54 (87.0%) |
+| Types | 49/66 (74.2%) |
+| Members | 329/451 (72.9%) |
+| Contracts (interfaces) | 6/10 |
 | Property registrations | 0/0 |
 | Routed events | 0/0 |
 
@@ -25,7 +25,7 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 |---|---|---|---|---|
 | `Avalonia.Skia.IDrawableBitmapImpl` | internal | `IDrawableBitmapImpl.cs` | 1/1 | present |
 | `Avalonia.Skia.IGlSkiaFboProvider` | internal | `Gpu/OpenGl/GlSkiaExternalObjectsFeature.cs` | 0/1 | missing |
-| `Avalonia.Skia.IGlSkiaSpecificOptionsFeature` | public | `Gpu/OpenGl/IGlSkiaSpecificOptionsFeature.cs` | 0/1 | missing |
+| `Avalonia.Skia.IGlSkiaSpecificOptionsFeature` | public | `Gpu/OpenGl/IGlSkiaSpecificOptionsFeature.cs` | 1/1 | present |
 | `Avalonia.Skia.ISkiaGpu` | internal | `Gpu/ISkiaGpu.cs` | 5/5 | present |
 | `Avalonia.Skia.ISkiaGpuRenderSession` | public | `Gpu/ISkiaGpuRenderSession.cs` | 4/4 | present |
 | `Avalonia.Skia.ISkiaGpuRenderTarget` | public | `Gpu/ISkiaGpuRenderTarget.cs` | 2/2 | present |
@@ -214,16 +214,23 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 | `SkiaMetalExternalObjectsFeature.cs` | `gpu/metal/skia_metal_external_objects_feature.rs` | missing | 0/1 | 0/9 |  |
 | `SkiaMetalGpu.cs` | `gpu/metal/skia_metal_gpu.rs` | present | 3/3 | 21/21 |  |
 
-### `Gpu/OpenGl` - files 0/6, types 0/9, members 0/55
+### `Gpu/OpenGl` - files 4/6, types 4/9, members 25/55
 
 | Upstream file | Rust file | Status | Types | Members | Notes |
 |---|---|---|---|---|---|
-| `FboSkiaSurface.cs` | `gpu/open_gl/fbo_skia_surface.rs` | missing | 0/1 | 0/5 |  |
-| `GlRenderTarget.cs` | `gpu/open_gl/gl_render_target.rs` | missing | 0/1 | 0/4 |  |
+| `FboSkiaSurface.cs` | `gpu/open_gl/fbo_skia_surface.rs` | present | 1/1 | 5/5 |  |
+| `GlRenderTarget.cs` | `gpu/open_gl/gl_render_target.rs` | present | 1/1 | 4/4 |  |
 | `GlSkiaExternalObjectsFeature.cs` | `gpu/open_gl/gl_skia_external_objects_feature.rs` | missing | 0/4 | 0/22 |  |
-| `GlSkiaGpu.cs` | `gpu/open_gl/gl_skia_gpu.rs` | missing | 0/1 | 0/16 |  |
+| `GlSkiaGpu.cs` | `gpu/open_gl/gl_skia_gpu.rs` | partial | 1/1 | 15/16 |  |
 | `GlSkiaSharedTextureForComposition.cs` | `gpu/open_gl/gl_skia_shared_texture_for_composition.rs` | missing | 0/1 | 0/7 |  |
-| `IGlSkiaSpecificOptionsFeature.cs` | `gpu/open_gl/i_gl_skia_specific_options_feature.rs` | missing | 0/1 | 0/1 |  |
+| `IGlSkiaSpecificOptionsFeature.cs` | `gpu/open_gl/i_gl_skia_specific_options_feature.rs` | present | 1/1 | 1/1 |  |
+
+<details><summary><code>GlSkiaGpu.cs</code> - 1 missing</summary>
+
+- `GlSkiaGpu` (class): 1 missing
+  - `ICompositionImportableOpenGlSharedTexture CreateSharedTextureForComposition(IGlContext context, PixelSize s...`
+
+</details>
 
 ### `Gpu/Vulkan` - files 0/3, types 0/4, members 0/31
 
@@ -268,6 +275,7 @@ Rust sources of this crate that no upstream file maps to. Give each a reason in 
 
 | Rust file | Reason | Types defined |
 |---|---|---|
+| `gpu/ganesh/ganesh_gr_context.rs` | **unmapped** | `GaneshGrContext` |
 | `gpu/graphite/graphite_gr_context.rs` | **unmapped** | `GraphiteGrContext`, `GraphiteState` |
 | `gpu/i_skia_gr_context.rs` | **unmapped** | `ISkiaGrContext`, `SkiaGpuBackend` |
 | `gpu/metal/tests.rs` | **unmapped** | `Id`, `Sel`, `TestMetalDevice`, `TextureRenderTarget`, `TextureSession`, `TextureSurface` |

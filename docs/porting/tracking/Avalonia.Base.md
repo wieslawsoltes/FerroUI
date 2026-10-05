@@ -10,9 +10,9 @@ Generated from upstream commit `17350180c33b063f0e98abbfd19aa3cae63f5d56`. Back 
 | FerroUI | `src/FerroUI.Base` (exists) |
 | Crate | `ferroui-base` |
 | Phase / priority | 0 - core / P0 |
-| Files | 1060/1293 (82.0%), 6 not applicable |
-| Types | 1319/1720 (76.7%) |
-| Members | 9281/12036 (31 waived) (77.3%) |
+| Files | 1062/1293 (82.1%), 6 not applicable |
+| Types | 1321/1720 (76.8%) |
+| Members | 9294/12036 (31 waived) (77.4%) |
 | Contracts (interfaces) | 211/264 |
 | Property registrations | 224/239 |
 | Routed events | 41/41 |
@@ -3271,7 +3271,7 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 | `XmlnsDefinitionAttribute.cs` | `metadata/xmlns_definition_attribute.rs` | missing | 0/1 | 0/3 |  |
 | `XmlnsPrefixAttribute.cs` | `metadata/xmlns_prefix_attribute.rs` | missing | 0/1 | 0/3 |  |
 
-### `Platform` - files 38/51, types 60/83, members 356/451 (1 waived)
+### `Platform` - files 39/51, types 61/83, members 364/451 (1 waived)
 
 | Upstream file | Rust file | Status | Types | Members | Notes |
 |---|---|---|---|---|---|
@@ -3319,7 +3319,7 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 | `PlatformGraphicsExternalMemory.cs` | `platform/platform_graphics_external_memory.rs` | missing | 0/7 | 0/33 |  |
 | `PlatformHandle.cs` | `platform/platform_handle.rs` | present | 1/1 | 9/9 |  |
 | `RenderTargetProperties.cs` | `platform/render_target_properties.rs` | missing (types found elsewhere) | 3/3 | 11/11 | types found in `platform/i_render_target.rs` (add to path-overrides.toml) |
-| `RetainedFramebuffer.cs` | `platform/retained_framebuffer.rs` | missing | 0/1 | 0/9 |  |
+| `RetainedFramebuffer.cs` | `platform/retained_framebuffer.rs` | partial | 1/1 | 8/9 |  |
 | `StandardAssetLoader.cs` | `platform/standard_asset_loader.rs` | partial | 1/1 | 10/11 |  |
 | `StandardRuntimePlatform.cs` | `platform/standard_runtime_platform.rs` | present | 1/1 | 1/1 |  |
 | `StandardRuntimePlatformServices.cs` | `platform/standard_runtime_platform_services.rs` | present | 1/1 | 1/1 |  |
@@ -3387,6 +3387,13 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 
 </details>
 
+<details><summary><code>RetainedFramebuffer.cs</code> - 1 missing</summary>
+
+- `RetainedFramebuffer` (class): 1 missing
+  - `RetainedFramebuffer(PixelSize size, PixelFormat format, AlphaFormat alphaFormat, int rowBytes)` *(1 of 2 constructors found)*
+
+</details>
+
 <details><summary><code>StandardAssetLoader.cs</code> - 1 missing</summary>
 
 - `StandardAssetLoader` (class): 1 missing
@@ -3394,7 +3401,7 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 
 </details>
 
-### `Platform/Internal` - files 3/6, types 5/10, members 15/44
+### `Platform/Internal` - files 4/6, types 6/10, members 20/44
 
 | Upstream file | Rust file | Status | Types | Members | Notes |
 |---|---|---|---|---|---|
@@ -3403,7 +3410,7 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 | `AssetDescriptor.cs` | `platform/internal/asset_descriptor.rs` | partial | 1/3 | 2/8 |  |
 | `Constants.cs` | `platform/internal/constants.rs` | missing | 0/1 | 0/1 |  |
 | `SlicedStream.cs` | `platform/internal/sliced_stream.rs` | missing | 0/1 | 0/13 |  |
-| `UnmanagedBlob.cs` | `platform/internal/unmanaged_blob.rs` | missing | 0/1 | 0/7 |  |
+| `UnmanagedBlob.cs` | `platform/internal/unmanaged_blob.rs` | partial | 1/1 | 5/7 |  |
 
 <details><summary><code>AssemblyDescriptor.cs</code> - 2 missing</summary>
 
@@ -3418,6 +3425,14 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 
 - `AssemblyResourceDescriptor` (class, internal): **type missing** (3 members)
 - `AvaloniaResourceDescriptor` (class, internal): **type missing** (3 members)
+
+</details>
+
+<details><summary><code>UnmanagedBlob.cs</code> - 2 missing</summary>
+
+- `UnmanagedBlob` (class): 2 missing
+  - `static bool SuppressFinalizerWarning { get; set; }`
+  - `~UnmanagedBlob()` *(protected)*
 
 </details>
 

@@ -13,7 +13,18 @@ path = "lib.rs"
 [dependencies]
 ferroui-base.workspace = true
 ferroui-controls.workspace = true
+ferroui-opengl.workspace = true
 skia-safe.workspace = true
 
 [dev-dependencies]
 ferroui-harfbuzz.workspace = true
+
+# The GPU back end of Skia is chosen per target, because the published Skia
+# binaries carry one of them: Graphite on Metal for Apple platforms, Ganesh on
+# WebGL for the browser. Raster is always present. `build.rs` mirrors the
+# second table as the `ferro_skia_ganesh_gl` configuration.
+[target.'cfg(target_vendor = "apple")'.dependencies]
+skia-safe = { workspace = true, features = ["graphite", "metal"] }
+
+[target.'cfg(target_os = "emscripten")'.dependencies]
+skia-safe = { workspace = true, features = ["gl"] }
