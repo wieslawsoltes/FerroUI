@@ -13,7 +13,9 @@
 
 #![cfg_attr(target_os = "emscripten", no_main)]
 
-use ferroui_base::media::FontManagerOptions;
+use ferroui_base::input::{DataTransferExtensions, DragDrop, DragDropEffects};
+use ferroui_base::media::immutable::ImmutableSolidColorBrush;
+use ferroui_base::media::{Color, FontManagerOptions};
 use ferroui_base::platform::storage::{
     FilePickerFileType, FilePickerFileTypes, FilePickerOpenOptions, FilePickerSaveOptions, FolderPickerOpenOptions,
     IStorageFile, IStorageFolder, IStorageItem, IStorageProvider, WellKnownFolder,
@@ -22,7 +24,8 @@ use ferroui_base::threading::Dispatcher;
 use ferroui_base::{ferro_class, ferro_impl_classes, instantiate, FerroObjectImpl, Ref, Thickness};
 use ferroui_browser::{BrowserAppBuilder, BrowserPlatformOptions};
 use ferroui_controls::{
-    AppBuilder, Application, ApplicationImpl, ApplicationImplExt, Control, NewApplication, TextBlock, TopLevel,
+    AppBuilder, Application, ApplicationImpl, ApplicationImplExt, Border, Control, NewApplication, TextBlock,
+    TopLevel,
 };
 use ferroui_fonts_inter::AppBuilderExtension;
 use std::cell::RefCell;
@@ -64,7 +67,20 @@ impl ApplicationImpl for App {
             let text = TextBlock::new();
             text.set_text(Some("Storage"));
             text.set_margin(Thickness::uniform(16.0));
-            let view: Ref<Control> = text.upcast();
+            // The whole view is a drop target for files.
+            let view = Border::new();
+            view.set_background(Some(Rc::new(ImmutableSolidColorBrush::new(Color::from_rgb(0xff, 0xff, 0xff)))));
+            view.set_child(Some(text.upcast()));
+            DragDrop::set_allow_drop(&view, true);
+            DragDrop::add_drag_over_handler(&view, |_, e| {
+                e.set_drag_effects(e.drag_effects() & DragDropEffects::COPY);
+            });
+            DragDrop::add_drop_handler(&view, |_, e| {
+                let files = e.data_transfer().try_get_files().unwrap_or_default();
+                start("drop".to_string(), read_dropped(files));
+                e.set_drag_effects(e.drag_effects() & DragDropEffects::COPY);
+            });
+            let view: Ref<Control> = view.upcast();
             MAIN_VIEW.with(|main_view| *main_view.borrow_mut() = Some(view.clone()));
             single_view.set_main_view(Some(view));
         }
@@ -107,6 +123,16 @@ async fn pick_file(provider: &Rc<dyn IStorageProvider>, multiple: bool) -> Resul
     options.set_allow_multiple(multiple);
     options.set_file_type_filter(Some(text_types()));
     provider.open_file_picker_async(options).await.map_err(|e| e.to_string())
+}
+
+/// The names and contents of dropped files.
+async fn read_dropped(files: Vec<Rc<dyn IStorageItem>>) -> Result<String, String> {
+    let mut contents = Vec::new();
+    for item in &files {
+        let file = item.clone().as_storage_file().ok_or("a dropped item is not a file")?;
+        contents.push(read_text(&file).await?);
+    }
+    Ok(format!("count={};names={};content={}", files.len(), names(&files), contents.join("|")))
 }
 
 fn names(items: &[Rc<dyn IStorageItem>]) -> String {

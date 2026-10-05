@@ -198,6 +198,18 @@ check("a well-known folder is a start location of the pickers", async (page) => 
     expect((await page.calls()).pop().startIn, "documents", "start location");
 });
 
+check("a file dropped on the view is a storage file the application reads", async (page) => {
+    const file = path.join(fs.mkdtempSync(path.join(os.tmpdir(), "ferroui-drop-")), "dropped.txt");
+    fs.writeFileSync(file, "dropped content");
+    const data = { items: [], files: [file], dragOperationsMask: 1 };
+    await page.send("Input.dispatchDragEvent", { type: "dragEnter", x: 100, y: 100, data });
+    await page.send("Input.dispatchDragEvent", { type: "dragOver", x: 100, y: 100, data });
+    await page.send("Input.dispatchDragEvent", { type: "drop", x: 100, y: 100, data });
+    await page.waitFor(`storageView.storageViewResult("drop") !== ""`, 30000);
+    const line = await page.evaluate(`storageView.storageViewResult("drop")`);
+    expect(line, "count=1;names=dropped.txt;content=dropped content", "dropped files");
+});
+
 check("with the polyfill preferred, the open picker reads a file chosen in a file input", async (page) => {
     const file = path.join(fs.mkdtempSync(path.join(os.tmpdir(), "ferroui-storage-")), "upload.txt");
     fs.writeFileSync(file, "from disk");
