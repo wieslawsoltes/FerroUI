@@ -19,6 +19,12 @@
 //! output goes to the standard output of the module (the console log of the
 //! page), as the console trace listener of the managed original writes it.
 //!
+//! Addition of the port, for the behaviour tests of the site
+//! (`scripts/browser/tests/control_catalog.test.mjs`): the export
+//! [`catalog_state`] reports what the view shows, so that the tests can find
+//! the controls they drive with real pointer and key events and check the
+//! effect.
+//!
 //! Not ported, because the browser backend does not have them yet: the
 //! option `PreferFileDialogPolyfill` of the query string (the storage
 //! provider of the backend, `BrowserPlatformOptions.PreferFileDialogPolyfill`)
@@ -29,13 +35,16 @@
 
 #![cfg_attr(target_os = "emscripten", no_main)]
 
-use control_catalog::App;
+use control_catalog::view_models::MainWindowViewModel;
+use control_catalog::{App, MainView};
 use ferroui_base::logging::LogEventLevel;
 use ferroui_base::media::FontManagerOptions;
+use ferroui_base::metadata::from_markup_value;
 use ferroui_base::rendering::RendererDebugOverlays;
 use ferroui_base::threading::Dispatcher;
+use ferroui_base::{Point, Ref, Visual};
 use ferroui_browser::{BrowserAppBuilder, BrowserPlatformOptions, BrowserRenderingMode};
-use ferroui_controls::{AppBuilder, Application};
+use ferroui_controls::{AppBuilder, Application, Button, NavigationPage, TextBlock, TextBox, TopLevel};
 use ferroui_fonts_inter::AppBuilderExtension;
 use std::rc::Rc;
 use wasm_bindgen::prelude::*;
@@ -61,6 +70,112 @@ pub fn run_main(href: &str) {
             top_level.renderer_diagnostics().set_debug_overlays(RendererDebugOverlays::FPS);
         }
     });
+}
+
+/// The top level of the application, once it has started.
+fn top_level() -> Option<Ref<TopLevel>> {
+    Application::current()?
+        .application_lifetime()?
+        .as_single_top_level_application_lifetime()?
+        .top_level()
+}
+
+/// The state of the view as JSON, for the behaviour tests that drive the
+/// page (`scripts/browser/tests`): whether the drawer is open, the header of
+/// the current page, whether the navigation page of the main view is running
+/// a navigation (it ignores another one until it has finished), the focused
+/// element (its class, and its text when it is a text box) and every visible
+/// text block, text box and button with its class, its name, its text (of a
+/// text block or a text box), its bounds in the coordinates of the view (CSS
+/// pixels of the canvas) and whether the pointer reaches it at its centre
+/// (`hit`: no other element covers it there). Not a port.
+#[wasm_bindgen(js_name = catalogState)]
+pub fn catalog_state() -> String {
+    let Some(top_level) = top_level() else { return "null".to_string() };
+    let view = top_level.get_visual_descendants().find_map(|visual| visual.cast::<MainView>());
+    let page = view
+        .as_ref()
+        .and_then(|view| from_markup_value::<Rc<MainWindowViewModel>>(&view.data_context()))
+        .and_then(|view_model| view_model.current_page_item())
+        .map(|item| item.header());
+    let navigating = view
+        .as_ref()
+        .and_then(|view| view.get_visual_descendants().find_map(|visual| visual.cast::<NavigationPage>()))
+        .is_some_and(|navigation| navigation.is_navigating());
+
+    let focused = top_level.focus_manager().get_focused_element();
+    let focus = match &focused {
+        Some(element) => format!(
+            "{{\"type\":{},\"text\":{}}}",
+            json_string(element.get_type().name()),
+            element.cast::<TextBox>().and_then(|text_box| text_box.text()).map_or("null".to_string(), |text| json_string(&text)),
+        ),
+        None => "null".to_string(),
+    };
+
+    let viewport = top_level.bounds();
+    let mut elements = Vec::new();
+    for visual in top_level.get_visual_descendants() {
+        let text = if let Some(text_block) = visual.cast::<TextBlock>() {
+            text_block.text()
+        } else if let Some(text_box) = visual.cast::<TextBox>() {
+            text_box.text()
+        } else if visual.cast::<Button>().is_some() {
+            None
+        } else {
+            continue;
+        };
+        let size = visual.bounds();
+        if !visual.is_effectively_visible() || size.width <= 0.0 || size.height <= 0.0 {
+            continue;
+        }
+        let Some(origin) = visual.translate_point(Point::new(0.0, 0.0), &top_level) else { continue };
+        if origin.x >= viewport.width || origin.y >= viewport.height || origin.x + size.width <= 0.0 || origin.y + size.height <= 0.0 {
+            continue;
+        }
+        // The topmost element at the centre is this one, one inside it, or one it is inside of.
+        let centre = Point::new(origin.x + size.width / 2.0, origin.y + size.height / 2.0);
+        let hit = top_level.input_hit_test_with(centre, false).is_some_and(|hit| {
+            let hit: &Visual = &hit;
+            std::ptr::eq(hit, &*visual) || hit.is_visual_ancestor_of(&visual) || visual.is_visual_ancestor_of(hit)
+        });
+        elements.push(format!(
+            "{{\"type\":{},\"name\":{},\"text\":{},\"hit\":{hit},\"x\":{:.1},\"y\":{:.1},\"width\":{:.1},\"height\":{:.1}}}",
+            json_string(visual.get_type().name()),
+            visual.name().map_or("null".to_string(), |name| json_string(&name)),
+            text.map_or("null".to_string(), |text| json_string(&text)),
+            origin.x,
+            origin.y,
+            size.width,
+            size.height,
+        ));
+    }
+
+    format!(
+        "{{\"drawerOpen\":{},\"page\":{},\"navigating\":{navigating},\"focus\":{focus},\"elements\":[{}]}}",
+        view.map_or("null".to_string(), |view| view.is_open().to_string()),
+        page.map_or("null".to_string(), |page| json_string(&page)),
+        elements.join(","),
+    )
+}
+
+/// `text` as a JSON string literal.
+fn json_string(text: &str) -> String {
+    let mut literal = String::with_capacity(text.len() + 2);
+    literal.push('"');
+    for character in text.chars() {
+        match character {
+            '"' => literal.push_str("\\\""),
+            '\\' => literal.push_str("\\\\"),
+            '\n' => literal.push_str("\\n"),
+            '\r' => literal.push_str("\\r"),
+            '\t' => literal.push_str("\\t"),
+            control if (control as u32) < 0x20 => literal.push_str(&format!("\\u{:04x}", control as u32)),
+            other => literal.push(other),
+        }
+    }
+    literal.push('"');
+    literal
 }
 
 /// The application builder of the catalog.
@@ -152,6 +267,12 @@ fn main() {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    // Not from upstream: the probe of the behaviour tests is an addition of the port.
+    #[test]
+    fn json_strings_are_escaped() {
+        assert_eq!(r#""a \"b\" \\ c\nd\u0001""#, json_string("a \"b\" \\ c\nd\u{1}"));
+    }
 
     #[test]
     fn rendering_modes_are_read_from_the_query_string_in_order() {
