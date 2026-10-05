@@ -286,12 +286,17 @@ Measured on macOS arm64 with Emscripten 6.0.10, Rust 1.90.0, `skia-safe` 0.153.3
 | Location | Observation | FerroUI action |
 |---|---|---|
 | `timer.ts` / `TimerHelper.cs` | The animation-frame callback calls the export without the timestamp although the managed side takes a `double` | Pass the timestamp |
-| `input.ts` key handlers | Handlers return a promise and call `preventDefault` in `.then`; `keydown` prevents default unless the event was handled while a clipboard read is pending, `keyup` prevents default when **not** handled. In effect almost every key's default action is suppressed while the host has focus | Return `bool` synchronously; define an explicit policy for which browser shortcuts pass through |
-| `input.ts` pointer unsubscription | Removes `pointerover` instead of `pointermove`; the `beforeinput` listener is never removed | Fix |
-| `BrowserInputHandler.OnWheel` | Fixed divisor 50, `deltaMode` ignored | Honour `deltaMode` |
+| `input.ts` key handlers | Handlers return a promise and call `preventDefault` in `.then`; `keydown` prevents default unless the event was handled while a clipboard read is pending, `keyup` prevents default when **not** handled. In effect almost every key's default action is suppressed while the host has focus | Fixed: the exports answer synchronously and `shouldPreventDefault` decides while the event is dispatched. Keys of a composition and dead keys are the browser's; a handled key is prevented; an unhandled key keeps its default action when it is a Ctrl/Meta/Alt combination, a function key or Tab, and is prevented otherwise (characters, Space, arrows, paging keys, Backspace). `scripts/browser/tests/themed_view.test.mjs` holds the test matrix |
+| `input.ts` pointer unsubscription | Removes `pointerover` instead of `pointermove`; the `beforeinput` listener is never removed | Fixed; the subscription is ended when the top-level is disposed |
+| `BrowserInputHandler.OnWheel` | Fixed divisor 50, `deltaMode` ignored | Fixed: `deltaMode` is passed. Pixels are divided by 50 (the scroll presenter scrolls 50 units per delta of 1); lines by 3 (a delta of 1 is one wheel notch in the Windows and X11 backends, and a notch is three lines); a page is the size of the view divided by 50 |
 | `softwareRenderTarget.ts` | A premultiplied framebuffer is passed to `putImageData`, which expects straight alpha; translucent pixels over page content come out wrong | Fixed: the frame is converted to straight alpha into a retained buffer before it is put on the canvas (opaque and transparent pixels are copied unchanged); `webapp/tests/software-blit.test.mjs` checks the composited pixels in headless Chrome |
-| `BrowserTopLevelImpl` | `PointToScreen` is the identity; `LostFocus` is never raised; `Dispose` does not unsubscribe input | Fix in Phase 2/3 |
-| `BrowserInputHandler.OnPointerMove` | The coalesced-points loop steps the index by the item size while bounding by point count | Re-derive rather than transliterate |
+| `BrowserTopLevelImpl` | `PointToScreen` is the identity; `LostFocus` is never raised; `Dispose` does not unsubscribe input | `LostFocus` is raised and input is unsubscribed (below); the screen coordinates come with the screens |
+| `input.ts` `getModifiers` | The barrel button of a pen is detected by comparing the **event type** (`"pointerdown"`, ...) with `"pen"`, so it is never reported and the button counts as the right mouse button | Fixed: the pointer type decides; tested with synthetic pen and mouse events |
+| Focus leaving the view (not in the original) | The framework is never told that the page moved the keyboard focus away | The host reports `focusout` when another element of the same document takes the focus, or nothing does while the document still has the focus (a click on the page). A plain `focusout`/`blur` is not used: it also fires when the window or the tab is deactivated, and the browser restores the focused element afterwards without telling anyone, so the view keeps its focused control then. While the loss is reported the text input method does not give the focus back to the host, and the hidden input element is not a tab stop (`tabIndex = -1`), so Tab leaves the view in one step |
+| `BrowserInputHandler.OnKeyDown` | Every unhandled key whose `key` is one character is raised as text, whatever the modifiers: Ctrl+R types "r" (and counts as handled) | Fixed: with Meta, or Control without Alt, the key is a command and no text; Shift, Alt and AltGr (Control with Alt) still produce characters |
+| `BrowserTextInputMethod` focus calls | `SetCursorRect` and showing the input element focus the hidden input element unconditionally | Not while the page reports that the focus left the view: a text box that moves its cursor as it loses the focus would take the focus back from the element the user went to |
+| Key events without `code` or `key` | The exports take non-null strings | `code` and `key` are optional across the boundary (some virtual keyboards and autofill send such events): an unknown key, no text |
+| `BrowserInputHandler.OnPointerMove` | The coalesced-points loop steps the index by the item size while bounding by point count | Fixed: every coalesced point but the last (the event itself) becomes an intermediate point |
 | `stream.ts` `write` | The copy fallback writes the original span, not the copy | Rewritten anyway |
 | Threaded mode | Reaches into non-public runtime APIs | Not ported |
 
@@ -404,7 +409,39 @@ Phase key: 1 = MVP, 2 = input, 3 = services, 4 = late, – = not ported. Rust pa
 | `wwwroot/main.js` | Runtime bootstrap | `main.js` importing the generated module | 1 |
 | `EmbedSample.Browser.cs`, `wwwroot/embed.js` | Native control host demo (iframe, DOM button) | `embed_sample_browser.rs`, `embed.js` | 4 |
 
-## 16. Sources
+## 16. State and handover (2026-10-05)
+
+Done and in the repository: the toolchain spike (B0), core enablement (B1), the backend skeleton (B2) and input (B3: pointer, wheel, keyboard, text input and IME, input pane, focus, cursors). In progress on branches: the ControlCatalog host (B7), the Pages workflow (B8) and the first size pass (B9a).
+
+### Working on the browser platform from a fresh machine
+
+```
+scripts/browser/setup.sh                 # emsdk 6.0.10, Rust 1.90.0 + wasm32-unknown-emscripten, wasm-bindgen CLI (pins in the script and Cargo.toml)
+source .tools/env.sh
+scripts/build-browser.sh themed_view     # npm ci, type check, lint, bundle, release build, site in target/browser/themed_view
+node scripts/browser/tests/themed_view.test.mjs                               # behaviour and key matrix, headless Chrome
+node scripts/browser/capture.mjs target/browser/themed_view out.png [--query "?RenderingMode=Software2D"] [--scale 2]
+(cd src/Browser/FerroUI.Browser/webapp && npm run test:pixels)                # software blit, straight alpha
+cargo test -p ferroui-browser            # desktop unit tests of the backend (no browser needed)
+cargo check --locked --target wasm32-unknown-emscripten -p ferroui-browser --examples
+```
+
+`scripts/browser/harness.mjs` is the test library: it serves a site, drives Chrome or Chromium over the DevTools protocol (real mouse, wheel and key events), reads pixels and evaluates expressions. It finds the browser through `CHROME`, the usual install paths and Playwright's directories. The example exports `themedViewState()` (a line of `name=value` pairs) and the host page exposes the module as `globalThis.themedView`; give a new example the same kind of hook rather than testing through pixels alone.
+
+Rules that keep the boundary sound (section 5): imports by `raw_module = "./ferroui.js"` with `js_namespace`/`js_name`, typed getters on `extern` types, flat exports `<Class>_<Method>` listed in `ferroExports.ts` (every name on both sides), no `js-sys`/`web-sys`/closures, synchronous answers. Before building for a new target or feature set run `cargo tree -e features` on `ferroui-skia`: an unpublished Skia feature combination silently starts a source build.
+
+### Remaining stages
+
+| Stage | Upstream files | What is known |
+|---|---|---|
+| B4 services | `ClipboardImpl.cs`, `BrowserClipboardDataTransfer*.cs`, `BrowserDragDataTransfer*.cs`, `BrowserDataFormatHelper.cs`, `BrowserDataTransferHelper.cs`, `BrowserInsetsManager.cs`, `BrowserScreens.cs`, `BrowserSystemNavigationManager.cs`, `Storage/BrowserLauncher.cs`, `Interop/NavigationHelper.cs`, `Interop/ScreenHelper.cs`; `screens.ts`, `navigationHelper.ts`, the clipboard and drag functions of `input.ts` | Clipboard and screen details are promise-based: the first asynchronous calls across the boundary. Decide the completion mechanism once (a request id plus a completion export, section 5 rule 2) and unit-test it natively behind a private trait as the dispatcher and text input method do. `InputHelper.initializeBackgroundHandlers` is an empty shell waiting for the paste fallback. `DomHelper_ScreensChanged` was removed from `ferroExports.ts` until its export exists. `dom.ts` already has the safe-area properties (`--ferro-sa*`) and fullscreen functions; their imports are not declared in Rust yet. `BrowserTopLevelImpl::try_get_feature` answers only what exists: add each feature with its stage. `point_to_screen` is still the identity (section 14) |
+| B5 storage | `Storage/BrowserStorageProvider.cs`, `BlobReadableStream.cs`, `WriteableStream.cs`, `Interop/StorageHelper.cs`, `Interop/StreamHelper.cs`; `storage.ts`, `storage/*.ts`, `stream.ts` | A second, lazily imported bundle (`storage.js`) with the `native-file-system-adapter` polyfill pinned to the commit upstream uses (record it in NOTICE). `stream.ts` has to read and write the module memory through `FerroExports.runtime.HEAPU8`, created per call (the memory is replaced when it grows); upstream's copy fallback writes the wrong buffer (section 14). The storage contracts of the core are future-based; `file_io` is compiled out on `wasm32` |
+| B6 native control host, service worker | `BrowserNativeControlHost.cs`, `Interop/NativeControlHostHelper.cs`, `nativeControlHost.ts`, `avalonia-sw.ts`, `EmbedSample.Browser.cs` | The host element (`nativeHost`) is created by `createFerroHost` and already held by the top-level. `JsObjectControlHandle` exists. The service worker has to be served from the root of the site and is marked unstable upstream |
+| B9b cross-browser | - | Only Chrome 154 (headless, ANGLE on Metal) has run anything. Unverified: Firefox, Safari/WebKit, mobile, WebGL1, the `failIfMajorPerformanceCaveat` fallback to the software path, `ResizeObserver` without `devicePixelContentBoxSize` (Safari), `scheduler.postTask` fallbacks, IME on real input methods, touch and pen hardware. The harness speaks the Chrome DevTools protocol only |
+
+Known gaps inside the finished stages are listed in the stage READMEs of the deliveries and in section 14; the largest are drag and drop and clipboard keys (B4), and that nothing but headless Chrome has been driven.
+
+## 17. Sources
 
 - rust-skia README (Emscripten support, prebuilt targets): https://github.com/rust-skia/rust-skia
 - skia-safe on crates.io (0.153.3, 2026-09-04): https://crates.io/crates/skia-safe

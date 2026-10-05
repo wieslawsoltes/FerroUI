@@ -56,6 +56,13 @@ impl BrowserWindowingPlatform {
         }
     }
 
+    /// Sets the keyboard device of the platform without registering the
+    /// platform, for the tests of the input handler.
+    #[cfg(test)]
+    pub(crate) fn set_keyboard_for_unit_tests(keyboard: Option<Rc<KeyboardDevice>>) {
+        KEYBOARD.with(|slot| *slot.borrow_mut() = keyboard);
+    }
+
     /// Registers the services of the platform with the current service
     /// locator and installs the dispatcher of the browser.
     pub fn register() {

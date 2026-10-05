@@ -24,12 +24,23 @@ use ferroui_controls::{
 };
 use ferroui_fonts_inter::AppBuilderExtension;
 use ferroui_themes_fluent::FluentTheme;
-use std::cell::RefCell;
+use std::cell::{Cell, RefCell};
 use std::rc::Rc;
 use wasm_bindgen::prelude::*;
 
+/// The controls of the view whose state the behaviour tests read.
+struct Controls {
+    button: Ref<Button>,
+    check_box: Ref<CheckBox>,
+    text_box: Ref<TextBox>,
+    slider: Ref<Slider>,
+    list_box: Ref<ListBox>,
+    clicks: Rc<Cell<u32>>,
+}
+
 thread_local! {
     static THEME_VARIANT: RefCell<Option<String>> = const { RefCell::new(None) };
+    static CONTROLS: RefCell<Option<Controls>> = const { RefCell::new(None) };
 }
 
 #[repr(C)]
@@ -80,6 +91,11 @@ fn create_main_view() -> Ref<Control> {
 
     let button = Button::new();
     button.set_content(text("Button"));
+    let clicks = Rc::new(Cell::new(0));
+    button.click({
+        let clicks = clicks.clone();
+        move |_, _| clicks.set(clicks.get() + 1)
+    });
 
     let check_box = CheckBox::new();
     check_box.set_content(text("Check box"));
@@ -111,14 +127,59 @@ fn create_main_view() -> Ref<Control> {
     panel.set_spacing(10.0);
     panel.set_margin(Thickness::uniform(16.0));
     panel.children().add(title);
-    panel.children().add(button);
-    panel.children().add(check_box);
-    panel.children().add(text_box);
-    panel.children().add(slider);
+    panel.children().add(button.clone());
+    panel.children().add(check_box.clone());
+    panel.children().add(text_box.clone());
+    panel.children().add(slider.clone());
     panel.children().add(progress_bar);
-    panel.children().add(list_box);
+    panel.children().add(list_box.clone());
+
+    CONTROLS.with(|controls| {
+        *controls.borrow_mut() = Some(Controls {
+            button: button.clone(),
+            check_box: check_box.clone(),
+            text_box: text_box.clone(),
+            slider: slider.clone(),
+            list_box: list_box.clone(),
+            clicks,
+        })
+    });
 
     panel.upcast()
+}
+
+/// The state of the controls as a line of `name=value` pairs, for the
+/// behaviour tests that drive the page (`scripts/browser/tests`).
+#[wasm_bindgen(js_name = themedViewState)]
+pub fn themed_view_state() -> String {
+    CONTROLS.with(|controls| {
+        let controls = controls.borrow();
+        let Some(c) = controls.as_ref() else { return String::new() };
+        let focus = if c.text_box.is_focused() {
+            "text_box"
+        } else if c.button.is_focused() {
+            "button"
+        } else if c.check_box.is_focused() {
+            "check_box"
+        } else if c.slider.is_focused() {
+            "slider"
+        } else if c.list_box.is_focused() {
+            "list_box"
+        } else {
+            "other"
+        };
+        format!(
+            "clicks={};checked={:?};text={};caret={};slider={};selected={};focus={};button_over={}",
+            c.clicks.get(),
+            c.check_box.is_checked(),
+            c.text_box.text().unwrap_or_default(),
+            c.text_box.caret_index(),
+            c.slider.value(),
+            c.list_box.selected_index(),
+            focus,
+            c.button.is_pointer_over(),
+        )
+    })
 }
 
 /// The value of `name` in a query string (`?a=1&b=2`), ignoring the case of

@@ -74,6 +74,9 @@ export class FerroDOM {
         const inputElement = document.createElement("input");
         inputElement.id = `inputElement${containerId}`;
         inputElement.classList.add("ferroui-input-element");
+        // Not in the original: the element takes the focus only when the framework gives it, so
+        // that Tab leaves the view in one step instead of stopping on a hidden element.
+        inputElement.tabIndex = -1;
         inputElement.autocapitalize = "none";
         inputElement.type = "text";
         inputElement.spellcheck = false;
