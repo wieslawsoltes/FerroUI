@@ -60,8 +60,9 @@ Some ported files derive from sources that the upstream project took from third 
 - Silverlight Toolkit, Microsoft Public License (Ms-PL): the `AutoCompleteBox` sources and the selection adapters under `src/FerroUI.Controls/` (see `src/FerroUI.Controls/NOTICE.md`). Ms-PL requires that source distributions of those portions stay under Ms-PL.
 - WPF and WinUI (MIT, .NET Foundation / Microsoft Corporation): see `src/FerroUI.Controls/NOTICE.md` and the file headers in `src/FerroUI.Base/media/`.
 - Inter typeface (SIL Open Font License 1.1): the font files embedded by `src/FerroUI.Fonts.Inter` (see `src/FerroUI.Fonts.Inter/NOTICE.md`).
+- Roboto typeface (Apache License 2.0, Copyright 2011 Google Inc.): the font file of the about dialog embedded by `src/FerroUI.Dialogs` (see `src/FerroUI.Dialogs/NOTICE.md`).
 - wayland-protocols (MIT-style): popup positioner documentation and flag names, see `src/FerroUI.Controls/NOTICE.md`.
 
 ## Third-party crates
 
-Rust dependencies are used under their own licenses as declared in their crate metadata; they are not vendored in this repository. Direct dependencies: `skia-safe` (MIT), `harfbuzz-sys` (MIT), `bitflags`, `paste`, `cc`, `roxmltree`, `time` (MIT OR Apache-2.0) and `rust_decimal` (MIT).
+Rust dependencies are used under their own licenses as declared in their crate metadata; they are not vendored in this repository. Direct dependencies: `skia-safe` (MIT), `harfbuzz-sys` (MIT), `bitflags`, `paste`, `cc`, `roxmltree`, `time` (MIT OR Apache-2.0), `rust_decimal` (MIT) and `sysinfo` (MIT).
