@@ -2,8 +2,6 @@ use super::IFerroListItemValidator;
 use crate::data::model::{CollectionChange, Event, INotifyCollectionChanged, INotifyPropertyChanged};
 use crate::utilities::{HandlerList, WeakEventSender};
 use std::cell::{Cell, RefCell};
-use std::collections::HashSet;
-use std::hash::Hash;
 use std::rc::{Rc, Weak};
 
 /// Describes the action that caused a collection changed notification.
@@ -678,15 +676,17 @@ impl<T: Clone + PartialEq> FerroList<T> {
             None => false,
         }
     }
-}
 
-impl<T: Clone + Eq + Hash> FerroList<T> {
     /// Removes multiple items from the collection.
     ///
     /// Each run of adjacent items that are removed is notified as one
     /// removal, from the end of the list to its start.
     pub fn remove_all(&self, items: impl IntoIterator<Item = T>) {
-        let h_items: HashSet<T> = items.into_iter().collect();
+        // The original collects the items into a hash set. Every managed
+        // object can be hashed; Rust item types need not be, so the set is not
+        // ported and membership is a linear search by equality, which keeps
+        // the behaviour without a `Hash` bound.
+        let h_items: Vec<T> = items.into_iter().collect();
         let mut counter = 0;
 
         let mut i = self.count();
