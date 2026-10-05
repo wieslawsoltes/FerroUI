@@ -1751,6 +1751,47 @@ fn build_grid_definitions_elements_xaml_untyped(
     ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
 }
 
+/// Generated from `grid_definitions_text.xaml`.
+pub fn build_grid_definitions_text_xaml(
+    service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
+) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::Grid>, ::ferroui_markup_xaml::XamlLoadException> {
+    // grid_definitions_text.xaml(1,2) Grid
+    let grid_0 = ::ferroui_controls::Grid::new();
+    let name_scope = rt::name_scope_of(service_provider.as_ref());
+    grid_0.begin_init();
+    // grid_definitions_text.xaml(1,2) RowDefinitions
+    <::ferroui_controls::FerroListOf<::ferroui_base::Ref<::ferroui_controls::RowDefinition>>>::__markup_set_Capacity(&rt::cast(::ferroui_controls::RowDefinitions::__markup_new_0()), 2_i32).map_err(|error| rt::at(rt::TARGET_INVOCATION_EXCEPTION, error, 1, 97))?;
+    // grid_definitions_text.xaml(1,97) RowDefinition
+    let row_definition_0 = ::ferroui_controls::RowDefinition::__markup_new_1(::ferroui_controls::GridLength::__markup_new_2(0.0_f64, ::ferroui_controls::GridUnitType::Auto));
+    ::ferroui_controls::RowDefinitions::__markup_Add_0(&::ferroui_controls::RowDefinitions::__markup_new_0(), ::core::clone::Clone::clone(&row_definition_0));
+    // grid_definitions_text.xaml(1,97) RowDefinition
+    let row_definition_1 = ::ferroui_controls::RowDefinition::__markup_new_1(::ferroui_controls::GridLength::__markup_new_2(1.0_f64, ::ferroui_controls::GridUnitType::Star));
+    ::ferroui_controls::RowDefinitions::__markup_Add_0(&::ferroui_controls::RowDefinitions::__markup_new_0(), ::core::clone::Clone::clone(&row_definition_1));
+    ::ferroui_controls::Grid::__markup_set_RowDefinitions(&::core::clone::Clone::clone(&grid_0), ::ferroui_controls::RowDefinitions::__markup_new_0());
+    // grid_definitions_text.xaml(1,2) ColumnDefinitions
+    <::ferroui_controls::FerroListOf<::ferroui_base::Ref<::ferroui_controls::ColumnDefinition>>>::__markup_set_Capacity(&rt::cast(::ferroui_controls::ColumnDefinitions::__markup_new_0()), 3_i32).map_err(|error| rt::at(rt::TARGET_INVOCATION_EXCEPTION, error, 1, 121))?;
+    // grid_definitions_text.xaml(1,121) ColumnDefinition
+    let column_definition_0 = ::ferroui_controls::ColumnDefinition::__markup_new_1(::ferroui_controls::GridLength::__markup_new_2(1.0_f64, ::ferroui_controls::GridUnitType::Star));
+    ::ferroui_controls::ColumnDefinitions::__markup_Add_0(&::ferroui_controls::ColumnDefinitions::__markup_new_0(), ::core::clone::Clone::clone(&column_definition_0));
+    // grid_definitions_text.xaml(1,121) ColumnDefinition
+    let column_definition_1 = ::ferroui_controls::ColumnDefinition::__markup_new_1(::ferroui_controls::GridLength::__markup_new_2(2.0_f64, ::ferroui_controls::GridUnitType::Star));
+    ::ferroui_controls::ColumnDefinitions::__markup_Add_0(&::ferroui_controls::ColumnDefinitions::__markup_new_0(), ::core::clone::Clone::clone(&column_definition_1));
+    // grid_definitions_text.xaml(1,121) ColumnDefinition
+    let column_definition_2 = ::ferroui_controls::ColumnDefinition::__markup_new_1(::ferroui_controls::GridLength::__markup_new_2(40.0_f64, ::ferroui_controls::GridUnitType::Pixel));
+    ::ferroui_controls::ColumnDefinitions::__markup_Add_0(&::ferroui_controls::ColumnDefinitions::__markup_new_0(), ::core::clone::Clone::clone(&column_definition_2));
+    ::ferroui_controls::Grid::__markup_set_ColumnDefinitions(&::core::clone::Clone::clone(&grid_0), ::ferroui_controls::ColumnDefinitions::__markup_new_0());
+    grid_0.try_end_init().map_err(|error| rt::at(rt::TARGET_INVOCATION_EXCEPTION, error, 1, 2))?;
+    rt::complete_root_name_scope(::core::option::Option::Some(&grid_0), name_scope.as_ref(), 1, 2)?;
+    ::core::result::Result::Ok(grid_0)
+}
+
+fn build_grid_definitions_text_xaml_untyped(
+    service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
+) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadException> {
+    let root = build_grid_definitions_text_xaml(service_provider)?;
+    ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
+}
+
 /// Generated from `canvas_children.xaml`.
 pub fn build_canvas_children_xaml(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
@@ -2204,6 +2245,7 @@ pub const DOCUMENTS: &[(&str, BuildDocument)] = &[
     ("multiline_duplicate_name.xaml", build_multiline_duplicate_name_xaml_untyped as BuildDocument),
     ("end_init_failure.xaml", build_end_init_failure_xaml_untyped as BuildDocument),
     ("grid_definitions_elements.xaml", build_grid_definitions_elements_xaml_untyped as BuildDocument),
+    ("grid_definitions_text.xaml", build_grid_definitions_text_xaml_untyped as BuildDocument),
     ("canvas_children.xaml", build_canvas_children_xaml_untyped as BuildDocument),
     ("dock_panel_children.xaml", build_dock_panel_children_xaml_untyped as BuildDocument),
     ("nested_panels.xaml", build_nested_panels_xaml_untyped as BuildDocument),

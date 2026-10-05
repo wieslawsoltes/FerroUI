@@ -9,7 +9,7 @@ use std::collections::HashMap;
 use std::fmt;
 use std::rc::Rc;
 
-use ferroui_base::metadata::{property_accessors, MarkupType};
+use ferroui_base::metadata::{property_accessors, rust_path_of_type, MarkupType, PropertyAccessor};
 use ferroui_base::{BoxedValue, FerroProperty, StyledElement, TypeInfo};
 use xamlx::ast::XamlAstExtensions as _;
 use xamlx::ast::XamlAstNodeExtensions as _;
@@ -169,21 +169,26 @@ impl IXamlAstVisitor for NeedsParentStack {
 }
 
 /// The Rust expression that yields the definition of a registered property:
-/// a call of an accessor recorded by the declaration macros
-/// ([`property_accessors`]) on a type with a public Rust path. Every
-/// recorded accessor returns the identical definition; the first one in the
-/// order of [`property_accessors`] (the type the property was resolved on
-/// and its base types, then the type that registered it and its base
-/// types) whose type has a public Rust path is taken, so the choice depends
-/// only on the declarations, never on what ran earlier on the thread.
+/// a call of a public accessor recorded by the declaration macros
+/// ([`property_accessors`]), by the public Rust path of the type whose
+/// `impl` block declares it ([`rust_path_of_type`]). Every recorded accessor
+/// returns the identical definition; the first one in the order of
+/// [`property_accessors`] (the type the property was resolved on and its
+/// base types, then the type that registered it and its base types) that
+/// generated code can call is taken, so the choice depends only on the
+/// declarations, never on what ran earlier on the thread.
 fn property_definition(property: &'static FerroProperty, preferred: Option<&'static TypeInfo>) -> Result<String, String> {
     let accessors = property_accessors(property, preferred);
-    let chosen = accessors
-        .iter()
-        .find_map(|accessor| accessor.owner.rust_path().map(|path| format!("{}::{}()", absolute(path), accessor.name)));
+    let chosen = accessors.iter().find_map(|accessor: &PropertyAccessor| {
+        accessor
+            .public
+            .then(|| rust_path_of_type(accessor.impl_type))
+            .flatten()
+            .map(|path| format!("{}::{}()", absolute(path), accessor.name))
+    });
     chosen.ok_or_else(|| match accessors.is_empty() {
         true => format!("no accessor of the property {} is recorded", property.name()),
-        false => format!("no accessor of the property {} is declared by a type with a public Rust path", property.name()),
+        false => format!("no accessor of the property {} is public and declared by a type with a public Rust path", property.name()),
     })
 }
 
@@ -1021,9 +1026,11 @@ impl Emitter<'_> {
         let path = markup
             .rust_path()
             .ok_or_else(|| unsupported(node, format!("no public Rust path is recorded for {}", runtime.full_name())))?;
-        Ok(match markup.rust_path_is_trait() {
-            true => format!("<dyn {}>", absolute(path)),
-            false => absolute(path),
+        // A generic instantiation is qualified (`<::path::List<T>>::f`).
+        Ok(match (markup.rust_path_is_trait(), path.contains('<')) {
+            (true, _) => format!("<dyn {}>", absolute(path)),
+            (false, true) => format!("<{}>", absolute(path)),
+            (false, false) => absolute(path),
         })
     }
 

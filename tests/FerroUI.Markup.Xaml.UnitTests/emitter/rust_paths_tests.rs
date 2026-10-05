@@ -43,8 +43,42 @@ fn check_file() -> String {
             "        (<{dyn_}::{path} as ::ferroui_base::metadata::MarkupTyped>::MARKUP, {path:?}, {is_trait}),\n"
         ));
     }
+    text.push_str("    ]\n}\n\n");
+    text.push_str("/// The recorded accessors of registered properties, called by their public path.\n");
+    text.push_str("pub fn property_accessors() -> Vec<(&'static ::ferroui_base::FerroProperty, &'static str)> {\n    vec![\n");
+    for (accessor, path) in accessor_paths() {
+        text.push_str(&format!(
+            "        (::ferroui_base::Registrable::as_registered_property(::{path}()), {:?}),\n",
+            format!("{path}")
+        ));
+        let _ = accessor;
+    }
     text.push_str("    ]\n}\n");
     text
+}
+
+/// Every registered property of every class with a public Rust path, by the public path
+/// of each of its recorded accessors (`ferroui_controls::Border::background_property`),
+/// sorted.
+fn accessor_paths() -> Vec<(&'static ferroui_base::FerroProperty, String)> {
+    use ferroui_base::metadata::{property_accessors, rust_path_of_type};
+    use ferroui_base::FerroPropertyRegistry;
+
+    let registry = FerroPropertyRegistry::instance();
+    let mut result: Vec<(&'static ferroui_base::FerroProperty, String)> = Vec::new();
+    for (class, _) in TypeInfo::all_rust_paths() {
+        for property in registry.get_registered(class).iter().chain(registry.get_registered_attached(class).iter()) {
+            for accessor in property_accessors(property, Some(class)) {
+                let Some(owner) = rust_path_of_type(accessor.impl_type).filter(|_| accessor.public) else { continue };
+                let path = format!("{owner}::{}", accessor.name);
+                if !result.iter().any(|(_, known)| *known == path) {
+                    result.push((*property, path));
+                }
+            }
+        }
+    }
+    result.sort_by(|a, b| a.1.cmp(&b.1));
+    result
 }
 
 #[test]
@@ -77,6 +111,72 @@ fn recorded_paths_name_the_registered_types() {
         assert_eq!(markup.rust_path(), Some(*path), "{path} names {}", markup.full_name());
         assert_eq!(markup.rust_path_is_trait(), *is_trait, "{path} names a trait: {is_trait}");
     }
-    println!("{} classes and {} markup types have a public Rust path", classes.len(), types.len());
-    assert!(!classes.is_empty() && !types.is_empty());
+    let accessors = rust_paths_check::property_accessors();
+    let recorded = accessor_paths();
+    for (property, path) in &accessors {
+        let found = recorded.iter().any(|(known, known_path)| std::ptr::eq(*known, *property) && known_path == path);
+        assert!(found, "{path} is a recorded accessor of {}", property.name());
+    }
+    println!(
+        "{} classes and {} markup types have a public Rust path; {} property accessors",
+        classes.len(),
+        types.len(),
+        accessors.len()
+    );
+    assert!(!classes.is_empty() && !types.is_empty() && !accessors.is_empty());
+}
+
+/// Every registered property (styled, attached, direct) of every class with a public
+/// Rust path has an accessor the declaration macros recorded, and every property with a
+/// public accessor can be named through the public path of the type that declares the
+/// accessor. A property whose accessors are all non-public (an internal property of the
+/// managed original) cannot be named by generated code; those are listed.
+#[test]
+fn every_registered_property_has_a_recorded_accessor() {
+    use ferroui_base::metadata::{property_accessors, rust_path_of_type};
+    use ferroui_base::FerroPropertyRegistry;
+
+    let _base = xaml_test_base();
+    let registry = FerroPropertyRegistry::instance();
+    // Each property with the first class it is registered on, the type its accessors are
+    // looked up from.
+    let mut properties: Vec<(&'static ferroui_base::FerroProperty, &'static TypeInfo)> = Vec::new();
+    for (class, _) in TypeInfo::all_rust_paths() {
+        for property in registry.get_registered(class).iter().chain(registry.get_registered_attached(class).iter()) {
+            if !properties.iter().any(|(known, _)| std::ptr::eq(*known, *property)) {
+                properties.push((property, class));
+            }
+        }
+    }
+    let name = |property: &'static ferroui_base::FerroProperty| format!("{}.{}", property.owner_type().full_name(), property.name());
+    let mut unrecorded: Vec<String> = properties
+        .iter()
+        .filter(|(property, class)| property_accessors(property, Some(class)).is_empty())
+        .map(|(property, _)| name(property))
+        .collect();
+    let mut unnamed: Vec<String> = Vec::new();
+    let mut internal: Vec<String> = Vec::new();
+    for &(property, class) in &properties {
+        let accessors = property_accessors(property, Some(class));
+        if accessors.is_empty() {
+            continue;
+        }
+        let public: Vec<_> = accessors.iter().filter(|accessor| accessor.public).collect();
+        if public.is_empty() {
+            internal.push(name(property));
+        } else if !public.iter().any(|accessor| rust_path_of_type(accessor.impl_type).is_some()) {
+            unnamed.push(name(property));
+        }
+    }
+    unrecorded.sort();
+    unnamed.sort();
+    internal.sort();
+    println!(
+        "{} registered properties; {} with only non-public accessors: {}",
+        properties.len(),
+        internal.len(),
+        internal.join(", ")
+    );
+    assert!(unrecorded.is_empty(), "registered properties without a recorded accessor:\n{}", unrecorded.join("\n"));
+    assert!(unnamed.is_empty(), "public accessors of types without a public Rust path:\n{}", unnamed.join("\n"));
 }

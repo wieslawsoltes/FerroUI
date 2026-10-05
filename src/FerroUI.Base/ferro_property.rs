@@ -627,10 +627,12 @@ impl<T: PropertyValue> StyledPropertyOptions<T> {
 #[doc(hidden)]
 #[macro_export]
 macro_rules! __record_property_accessor {
-    ($owner:ident, $name:ident, $property:expr) => {
+    ($owner:ident, $vis:vis, $name:ident, $property:expr) => {
         $crate::metadata::record_property_accessor(
             <$owner as $crate::StaticType>::TYPE,
+            ::std::any::TypeId::of::<Self>(),
             ::std::stringify!($name),
+            ::std::stringify!($vis),
             $crate::Registrable::as_registered_property($property),
         )
     };
@@ -642,7 +644,7 @@ macro_rules! __record_property_accessor {
 #[doc(hidden)]
 #[macro_export]
 macro_rules! __record_property_accessor {
-    ($owner:ident, $name:ident, $property:expr) => {};
+    ($owner:ident, $vis:vis, $name:ident, $property:expr) => {};
 }
 
 /// Declares the accessor of a single property definition.
@@ -700,7 +702,7 @@ macro_rules! ferro_property {
                         ::std::option::Option::None => {
                             let property: &'static $ty = $body;
                             CELL.set(::std::option::Option::Some(property));
-                            $crate::__record_property_accessor!($owner, $name, property);
+                            $crate::__record_property_accessor!($owner, $vis, $name, property);
                             property
                         }
                     }
