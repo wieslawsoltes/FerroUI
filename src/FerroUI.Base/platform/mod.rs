@@ -115,7 +115,7 @@ pub use standard_runtime_platform::StandardRuntimePlatform;
 pub use standard_runtime_platform_services::StandardRuntimePlatformServices;
 pub use i_drawing_context_impl_with_effects::IDrawingContextImplWithEffects;
 pub use i_drawing_context_with_acrylic_like_support::IDrawingContextWithAcrylicLikeSupport;
-pub use internal::{register_assets, register_manifest_resources};
+pub use internal::{register_asset_bundle, register_assets, register_manifest_resources, ASSET_BUNDLE_MAGIC};
 pub use standard_asset_loader::StandardAssetLoader;
 
 // --- font and text contracts ---
