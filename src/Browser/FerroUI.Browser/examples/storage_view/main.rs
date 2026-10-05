@@ -188,7 +188,16 @@ async fn scenario(name: String, argument: String) -> Result<String, String> {
             let length: usize = argument.parse().map_err(|_| "the argument is the length")?;
             Ok(format!("length={};equal={}", content.len(), content == pattern(length)))
         }
-        "folder" => {
+        "write_then_read" => {
+            // Writes the first picked file through the synchronous stream, drops it and reads the
+            // first (`same`) or the second (`other`) picked file.
+            let files = pick_file(&provider, true).await?;
+            let written = files.first().ok_or("no file")?;
+            write_bytes(written, &[b"written"]).await?;
+            let read = if argument == "same" { written } else { files.get(1).ok_or("no second file")? };
+            Ok(format!("content={}", read_text(read).await?))
+        }
+                "folder" => {
             let folders =
                 provider.open_folder_picker_async(FolderPickerOpenOptions::new()).await.map_err(|e| e.to_string())?;
             let folder = folders.first().ok_or("no folder")?;

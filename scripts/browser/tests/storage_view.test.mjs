@@ -56,7 +56,7 @@ async function start({ query = "", stubs = true } = {}) {
     await page.waitForView(200);
     if (stubs) { await page.evaluate(STUBS); }
     // Runs a scenario and resolves to its outcome as an object of name/value pairs.
-    page.scenario = async (name, argument = "", { timeout = 30000, userGesture = false } = {}) => {
+    page.scenario = async (name, argument = "", { timeout = 30000, userGesture = false, failing = false } = {}) => {
         const call = `storageView.storageViewRun(${JSON.stringify(name)}, ${JSON.stringify(argument)})`;
         await page.send("Runtime.evaluate", { expression: call, userGesture });
         await page.waitFor(`storageView.storageViewResult(${JSON.stringify(name)}) !== ""`, timeout);
@@ -64,7 +64,7 @@ async function start({ query = "", stubs = true } = {}) {
         const result = Object.fromEntries(line.split(";").map((pair) => {
             const i = pair.indexOf("="); return [pair.slice(0, i), pair.slice(i + 1)];
         }));
-        assert(result.error === undefined, `scenario ${name} failed: ${line}`);
+        assert(failing || result.error === undefined, `scenario ${name} failed: ${line}`);
         return result;
     };
     page.calls = async () => JSON.parse(await page.evaluate("JSON.stringify(pickerCalls)"));
@@ -129,6 +129,37 @@ check("a large file written while the module memory grows reads back unchanged",
     expect(result.length, String(length), "length read back"); expect(result.equal, "true", "content read back");
     const size = await page.evaluate("opfsHandle('saved.txt').then((h) => h.getFile()).then((f) => f.size)");
     expect(size, length, "size of the file");
+});
+
+// A file handle over input.txt whose writable stream writes nothing and whose close fails
+// (`close: "fail"`) or never settles (`close: "hang"`).
+const FAULTY_HANDLE = (close) => `(async () => {
+    const real = await opfsHandle("input.txt");
+    const handle = {
+        kind: "file", name: "faulty.txt",
+        getFile: () => real.getFile(),
+        isSameEntry: async (other) => other === handle,
+        createWritable: async () => ({
+            write: async () => {},
+            close: () => ${JSON.stringify(close)} === "fail" ? Promise.reject(new Error("The disk is full")) : new Promise(() => {})
+        })
+    };
+    pickerResult.open = [handle, real];
+})()`;
+
+check("a file written through the synchronous stream reads back its new content", async (page) => {
+    expect((await page.scenario("write_then_read", "same")).content, "written", "content read after the write");
+});
+
+check("a failed close of a written file is reported by the next opening of that file", async (page) => {
+    await page.evaluate(FAULTY_HANDLE("fail"));
+    const result = await page.scenario("write_then_read", "same", { failing: true });
+    assert((result.error ?? "").includes("The disk is full"), `expected the failed close, got ${JSON.stringify(result)}`);
+});
+
+check("a close that never settles does not keep other files from opening", async (page) => {
+    await page.evaluate(FAULTY_HANDLE("hang"));
+    expect((await page.scenario("write_then_read", "other")).content, "first file", "content of the other file");
 });
 
 check("a folder creates, lists, finds and deletes its items", async (page) => {
