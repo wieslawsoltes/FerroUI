@@ -1,0 +1,21 @@
+[package]
+name = "xamlx"
+description = "Rust port of the backend-independent part of XamlX (XAML compiler library)"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+autotests = false
+autobenches = false
+autoexamples = false
+
+[lib]
+path = "lib.rs"
+
+[features]
+# Exposes the in-memory fake type system (`xamlx::testing`) to dependent crates.
+testing = []
+
+[dependencies]
+roxmltree = { workspace = true }
