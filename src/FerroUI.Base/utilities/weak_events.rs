@@ -1,17 +1,115 @@
+use super::{EventArgs, WeakEvent, WeakEventArgs};
+use crate::data::model::{CollectionChange, INotifyCollectionChanged, INotifyPropertyChanged};
 use crate::input::ICommand;
 use crate::reactive::IDisposable;
-use crate::{ObjectType, Ref};
+use crate::{FerroObject, FerroPropertyChangedEventArgs, ObjectType, Ref};
+use std::any::Any;
 use std::cell::RefCell;
 use std::rc::{Rc, Weak};
 
-/// Events that are subscribed to weakly: the subscription does not keep
-/// the subscriber alive, and it does not outlive the subscriber either.
+impl WeakEventArgs for CollectionChange {
+    type Args<'a> = CollectionChange;
+}
+
+impl WeakEventArgs for FerroPropertyChangedEventArgs<'static> {
+    type Args<'a> = FerroPropertyChangedEventArgs<'a>;
+}
+
+/// The weak events of the framework's notification contracts.
+///
+/// Each event is a per-thread static, as everything the event refers to
+/// belongs to one thread; an accessor returns the event of the calling
+/// thread.
 pub struct WeakEvents;
 
+thread_local! {
+    static COLLECTION_CHANGED: Rc<WeakEvent<Rc<dyn INotifyCollectionChanged>, CollectionChange>> =
+        WeakEvent::<Rc<dyn INotifyCollectionChanged>, CollectionChange>::register_returning_unsubscribe(|c, s| {
+            // The handler belongs to the collection, so it refers to it weakly.
+            let sender = Rc::downgrade(c);
+            let handler = c.collection_changed().add(Rc::new(move |e: &CollectionChange| {
+                let c = sender.upgrade();
+                s(c.as_ref().map(|c| c as &dyn Any), e)
+            }));
+            let c = Rc::downgrade(c);
+            Box::new(move || {
+                if let Some(c) = c.upgrade() {
+                    c.collection_changed().remove(handler);
+                }
+            })
+        });
+
+    static THREAD_SAFE_PROPERTY_CHANGED: Rc<WeakEvent<Rc<dyn INotifyPropertyChanged>, str>> =
+        WeakEvent::<Rc<dyn INotifyPropertyChanged>, str>::register_returning_unsubscribe(|s, h| {
+            let sender = Rc::downgrade(s);
+            let handler = s.property_changed().add(Rc::new(move |e: &str| {
+                let s = sender.upgrade();
+                h(s.as_ref().map(|s| s as &dyn Any), e)
+            }));
+            let s = Rc::downgrade(s);
+            Box::new(move || {
+                if let Some(s) = s.upgrade() {
+                    s.property_changed().remove(handler);
+                }
+            })
+        });
+
+    static FERRO_PROPERTY_CHANGED: Rc<WeakEvent<Ref<FerroObject>, FerroPropertyChangedEventArgs<'static>>> =
+        WeakEvent::<Ref<FerroObject>, FerroPropertyChangedEventArgs<'static>>::register_returning_unsubscribe(
+            |s, h| {
+                let sender = s.downgrade();
+                let handler = s.property_changed(move |e: &FerroPropertyChangedEventArgs<'_>| {
+                    let s = sender.upgrade();
+                    h(s.as_ref().map(|s| s as &dyn Any), e)
+                });
+                Box::new(move || handler.dispose())
+            },
+        );
+
+    static COMMAND_CAN_EXECUTE_CHANGED: Rc<WeakEvent<Rc<dyn ICommand>, EventArgs>> =
+        WeakEvent::<Rc<dyn ICommand>, EventArgs>::register_returning_unsubscribe(|s, h| {
+            let sender = Rc::downgrade(s);
+            let handler = s.can_execute_changed(Rc::new(move || {
+                if let Some(s) = sender.upgrade() {
+                    h(Some(&s as &dyn Any), &EventArgs::EMPTY)
+                }
+            }));
+            Box::new(move || handler.dispose())
+        });
+}
+
 impl WeakEvents {
+    /// Represents CollectionChanged event from [`INotifyCollectionChanged`]
+    pub fn collection_changed() -> Rc<WeakEvent<Rc<dyn INotifyCollectionChanged>, CollectionChange>> {
+        COLLECTION_CHANGED.with(Rc::clone)
+    }
+
+    /// Represents PropertyChanged event from [`INotifyPropertyChanged`] with
+    /// auto-dispatching to the UI thread.
+    ///
+    /// A model object is bound to the thread it was created on (it is held
+    /// through `Rc`), so its notifications are raised on that thread and are
+    /// forwarded there directly.
+    pub fn thread_safe_property_changed() -> Rc<WeakEvent<Rc<dyn INotifyPropertyChanged>, str>> {
+        THREAD_SAFE_PROPERTY_CHANGED.with(Rc::clone)
+    }
+
+    /// Represents PropertyChanged event from [`FerroObject`]
+    pub fn ferro_property_changed() -> Rc<WeakEvent<Ref<FerroObject>, FerroPropertyChangedEventArgs<'static>>> {
+        FERRO_PROPERTY_CHANGED.with(Rc::clone)
+    }
+
+    /// Represents CanExecuteChanged event from [`ICommand`]
+    pub fn command_can_execute_changed() -> Rc<WeakEvent<Rc<dyn ICommand>, EventArgs>> {
+        COMMAND_CAN_EXECUTE_CHANGED.with(Rc::clone)
+    }
+
     /// Subscribes `subscriber` to the "can execute changed" event of
     /// `command`. `handler` is called with the subscriber each time the
     /// event is raised.
+    ///
+    /// Not in the original: the command sources (button, menu item, split
+    /// button, native menu item) subscribe through this handle-based form.
     ///
     /// The subscriber keeps the returned handle (normally in a field). The
     /// subscription ends when the handle is disposed, when the handle is
@@ -19,7 +117,7 @@ impl WeakEvents {
     /// elsewhere, the first time the event is raised after the subscriber
     /// is gone. The command never holds a strong reference to the
     /// subscriber.
-    pub fn command_can_execute_changed<T: ObjectType>(
+    pub fn subscribe_command_can_execute_changed<T: ObjectType>(
         command: &Rc<dyn ICommand>,
         subscriber: &Ref<T>,
         handler: fn(&T),
@@ -130,7 +228,7 @@ mod tests {
         let as_command: Rc<dyn ICommand> = command.clone();
         let subscriber = KeyBinding::new();
 
-        let _subscription = WeakEvents::command_can_execute_changed(&as_command, &subscriber, on_event);
+        let _subscription = WeakEvents::subscribe_command_can_execute_changed(&as_command, &subscriber, on_event);
         command.raise();
         command.raise();
 
@@ -145,7 +243,7 @@ mod tests {
         let subscriber = KeyBinding::new();
         let weak = subscriber.downgrade();
 
-        let _subscription = WeakEvents::command_can_execute_changed(&as_command, &subscriber, on_event);
+        let _subscription = WeakEvents::subscribe_command_can_execute_changed(&as_command, &subscriber, on_event);
         drop(subscriber);
 
         assert!(weak.upgrade().is_none());
@@ -157,7 +255,7 @@ mod tests {
         let as_command: Rc<dyn ICommand> = command.clone();
         let subscriber = KeyBinding::new();
 
-        let subscription = WeakEvents::command_can_execute_changed(&as_command, &subscriber, on_event);
+        let subscription = WeakEvents::subscribe_command_can_execute_changed(&as_command, &subscriber, on_event);
         assert_eq!(1, command.subscription_count());
         drop(subscription);
 
@@ -170,7 +268,7 @@ mod tests {
         let as_command: Rc<dyn ICommand> = command.clone();
         let subscriber = KeyBinding::new();
 
-        let subscription = WeakEvents::command_can_execute_changed(&as_command, &subscriber, on_event);
+        let subscription = WeakEvents::subscribe_command_can_execute_changed(&as_command, &subscriber, on_event);
         subscription.dispose();
         subscription.dispose();
 
@@ -185,7 +283,7 @@ mod tests {
         let subscriber = KeyBinding::new();
 
         // The handle is kept alive by someone other than the subscriber.
-        let subscription = WeakEvents::command_can_execute_changed(&as_command, &subscriber, on_event);
+        let subscription = WeakEvents::subscribe_command_can_execute_changed(&as_command, &subscriber, on_event);
         drop(subscriber);
         assert_eq!(1, command.subscription_count());
 
