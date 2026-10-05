@@ -94,6 +94,12 @@ export class FerroExports {
         });
     }
 
+    public static get NavigationHelper() {
+        return FerroExports.group("NavigationHelper", {
+            OnBackRequested: "NavigationHelper_OnBackRequested"
+        });
+    }
+
     public static get CompletionHelper() {
         return FerroExports.group("CompletionHelper", {
             OnResolved: "CompletionHelper_OnResolved",
