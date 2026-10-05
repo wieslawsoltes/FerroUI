@@ -63,7 +63,8 @@ pub fn compile_documents(
 /// The generated file of an assembly: the build function of every eligible
 /// document, the table `DOCUMENTS` (document name, untyped build function),
 /// `try_load` (the `CompiledXamlLoader` of the assembly: the document whose
-/// URI is `<root_uri><name>`, compared without regard to case) and
+/// URI is `<root_uri><name>`, compared without regard to case; a failed build
+/// is its error, as it is the error of the run-time loader) and
 /// `register_compiled_xaml()`.
 ///
 /// `root_uri` ends with `/` (`ferres://MyApp/`). The text is deterministic:
@@ -127,22 +128,23 @@ pub fn generate_file(
     source.push_str("];\n");
     source.push('\n');
     source.push_str("/// The loader of the compiled markup of the assembly: builds the document with the URI\n");
-    source.push_str("/// `uri` (compared without regard to case), `None` if this file has no such document.\n");
-    source.push_str("/// The loader type has no error channel: a document that fails to build panics with\n");
-    source.push_str("/// the message of the load error.\n");
+    source.push_str("/// `uri` (compared without regard to case); `Ok(None)` if this file has no such document,\n");
+    source.push_str("/// the load error of the build if it fails.\n");
     source.push_str("pub fn try_load(\n");
-    source.push_str("    service_provider: Option<&::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,\n");
+    source.push_str("    service_provider: ::core::option::Option<&::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,\n");
     source.push_str("    uri: &str,\n");
-    source.push_str(") -> Option<::ferroui_base::BoxedValue> {\n");
-    source.push_str("    let name = uri.get(..ROOT_URI.len()).filter(|root| root.eq_ignore_ascii_case(ROOT_URI)).map(|_| &uri[ROOT_URI.len()..])?;\n");
-    source.push_str("    let (_, build) = DOCUMENTS.iter().find(|(document, _)| document.eq_ignore_ascii_case(name))?;\n");
+    source.push_str(") -> ::core::result::Result<::core::option::Option<::ferroui_base::BoxedValue>, ::ferroui_markup_xaml::XamlLoadException> {\n");
+    source.push_str("    let name = match uri.get(..ROOT_URI.len()) {\n");
+    source.push_str("        ::core::option::Option::Some(root) if root.eq_ignore_ascii_case(ROOT_URI) => &uri[ROOT_URI.len()..],\n");
+    source.push_str("        _ => return ::core::result::Result::Ok(::core::option::Option::None),\n");
+    source.push_str("    };\n");
+    source.push_str("    let ::core::option::Option::Some((_, build)) = DOCUMENTS.iter().find(|(document, _)| document.eq_ignore_ascii_case(name)) else {\n");
+    source.push_str("        return ::core::result::Result::Ok(::core::option::Option::None);\n");
+    source.push_str("    };\n");
     source.push_str("    let provider = ::ferroui_markup_xaml::xaml_il::runtime::XamlIlRuntimeHelpers::create_root_service_provider_v3(\n");
     source.push_str("        service_provider.cloned(),\n");
     source.push_str("    );\n");
-    source.push_str("    match build(Some(provider)) {\n");
-    source.push_str("        Ok(root) => Some(root),\n");
-    source.push_str("        Err(error) => panic!(\"{}\", error.message()),\n");
-    source.push_str("    }\n");
+    source.push_str("    build(::core::option::Option::Some(provider)).map(::core::option::Option::Some)\n");
     source.push_str("}\n");
     source.push('\n');
     source.push_str("/// Registers the documents of this file as the compiled markup of the assembly.\n");

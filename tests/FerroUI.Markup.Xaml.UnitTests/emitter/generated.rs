@@ -1400,22 +1400,23 @@ pub const DOCUMENTS: &[(&str, BuildDocument)] = &[
 ];
 
 /// The loader of the compiled markup of the assembly: builds the document with the URI
-/// `uri` (compared without regard to case), `None` if this file has no such document.
-/// The loader type has no error channel: a document that fails to build panics with
-/// the message of the load error.
+/// `uri` (compared without regard to case); `Ok(None)` if this file has no such document,
+/// the load error of the build if it fails.
 pub fn try_load(
-    service_provider: Option<&::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
+    service_provider: ::core::option::Option<&::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
     uri: &str,
-) -> Option<::ferroui_base::BoxedValue> {
-    let name = uri.get(..ROOT_URI.len()).filter(|root| root.eq_ignore_ascii_case(ROOT_URI)).map(|_| &uri[ROOT_URI.len()..])?;
-    let (_, build) = DOCUMENTS.iter().find(|(document, _)| document.eq_ignore_ascii_case(name))?;
+) -> ::core::result::Result<::core::option::Option<::ferroui_base::BoxedValue>, ::ferroui_markup_xaml::XamlLoadException> {
+    let name = match uri.get(..ROOT_URI.len()) {
+        ::core::option::Option::Some(root) if root.eq_ignore_ascii_case(ROOT_URI) => &uri[ROOT_URI.len()..],
+        _ => return ::core::result::Result::Ok(::core::option::Option::None),
+    };
+    let ::core::option::Option::Some((_, build)) = DOCUMENTS.iter().find(|(document, _)| document.eq_ignore_ascii_case(name)) else {
+        return ::core::result::Result::Ok(::core::option::Option::None);
+    };
     let provider = ::ferroui_markup_xaml::xaml_il::runtime::XamlIlRuntimeHelpers::create_root_service_provider_v3(
         service_provider.cloned(),
     );
-    match build(Some(provider)) {
-        Ok(root) => Some(root),
-        Err(error) => panic!("{}", error.message()),
-    }
+    build(::core::option::Option::Some(provider)).map(::core::option::Option::Some)
 }
 
 /// Registers the documents of this file as the compiled markup of the assembly.

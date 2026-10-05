@@ -32,20 +32,22 @@ thread_local! {
     static REENTRANT: RefCell<Option<Rc<ResourceInclude>>> = const { RefCell::new(None) };
 }
 
-fn compiled_resources(sp: Option<&Rc<dyn IServiceProvider>>, uri: &str) -> Option<BoxedValue> {
+fn compiled_resources(sp: Option<&Rc<dyn IServiceProvider>>, uri: &str) -> Result<Option<BoxedValue>, XamlLoadException> {
     LOADS.with(|loads| loads.set(loads.get() + 1));
     SEEN_PROVIDER.with(|seen| seen.set(sp.is_some()));
-    let name = uri.strip_prefix("ferres://includes.resources/")?;
+    let Some(name) = uri.strip_prefix("ferres://includes.resources/") else {
+        return Ok(None);
+    };
     if !name.ends_with(".xaml") {
-        return None;
+        return Ok(None);
     }
     let dictionary = ResourceDictionary::new();
     dictionary.add("source", Some(boxed(name.to_string())));
-    Some(boxed(dictionary))
+    Ok(Some(boxed(dictionary)))
 }
 
-fn compiled_styles(_sp: Option<&Rc<dyn IServiceProvider>>, uri: &str) -> Option<BoxedValue> {
-    match uri {
+fn compiled_styles(_sp: Option<&Rc<dyn IServiceProvider>>, uri: &str) -> Result<Option<BoxedValue>, XamlLoadException> {
+    Ok(match uri {
         "ferres://includes.styles/Style.xaml" => {
             let style = Style::new();
             style.resources().add("styled", Some(boxed("from style".to_string())));
@@ -54,14 +56,14 @@ fn compiled_styles(_sp: Option<&Rc<dyn IServiceProvider>>, uri: &str) -> Option<
         "ferres://includes.styles/Styles.xaml" => Some(boxed(Styles::new())),
         "ferres://includes.styles/NotAStyle.xaml" => Some(boxed(5i32)),
         _ => None,
-    }
+    })
 }
 
-fn compiled_reentrant(_sp: Option<&Rc<dyn IServiceProvider>>, _uri: &str) -> Option<BoxedValue> {
+fn compiled_reentrant(_sp: Option<&Rc<dyn IServiceProvider>>, _uri: &str) -> Result<Option<BoxedValue>, XamlLoadException> {
     // While it is loading, an include answers no resource lookups.
     let include = REENTRANT.with(|include| include.borrow().clone()).unwrap();
     assert!(include.try_get_resource(&key("any"), None).is_none());
-    Some(boxed(ResourceDictionary::new()))
+    Ok(Some(boxed(ResourceDictionary::new())))
 }
 
 #[test]
@@ -435,11 +437,25 @@ fn includes_are_constructed_and_loaded_through_their_metadata() {
     scope.dispose();
 }
 
+/// Not from upstream (the exception of a generated `TryLoad` propagates there): a compiled
+/// document that fails to build is an error of the load, not a missing document.
+#[test]
+fn a_compiled_document_that_fails_to_build_is_an_error_of_the_load() {
+    let scope = TestAssetLoader::new().install();
+    FerroXamlLoader::register_compiled_xaml("includes.failing", |_, _| {
+        Err(XamlLoadException::with_message("The document failed to build"))
+    });
+    let error = FerroXamlLoader::load(&uri("ferres://includes.failing/A.xaml"), None).unwrap_err();
+    assert_eq!(error.message(), "The document failed to build");
+    assert!(FerroXamlLoader::unregister_compiled_xaml("includes.failing"));
+    scope.dispose();
+}
+
 #[test]
 fn a_registration_can_be_replaced_and_removed() {
     let scope = TestAssetLoader::new().install();
     FerroXamlLoader::register_compiled_xaml("includes.replace", compiled_styles);
-    FerroXamlLoader::register_compiled_xaml("includes.replace", |_, _| Some(boxed(1i32)));
+    FerroXamlLoader::register_compiled_xaml("includes.replace", |_, _| Ok(Some(boxed(1i32))));
     let loaded = FerroXamlLoader::load(&uri("ferres://includes.replace/A.xaml"), None).unwrap();
     assert_eq!(loaded.downcast_ref::<i32>(), Some(&1));
 
