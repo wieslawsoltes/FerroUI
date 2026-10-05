@@ -10,10 +10,10 @@ Generated from upstream commit `17350180c33b063f0e98abbfd19aa3cae63f5d56`. Back 
 | FerroUI | `src/FerroUI.Base` (exists) |
 | Crate | `ferroui-base` |
 | Phase / priority | 0 - core / P0 |
-| Files | 1062/1293 (82.1%), 6 not applicable |
-| Types | 1321/1720 (76.8%) |
-| Members | 9294/12036 (31 waived) (77.4%) |
-| Contracts (interfaces) | 211/264 |
+| Files | 1077/1286 (83.7%), 13 not applicable |
+| Types | 1338/1709 (78.3%) |
+| Members | 9364/11739 (34 waived) (80.0%) |
+| Contracts (interfaces) | 217/263 |
 | Property registrations | 224/239 |
 | Routed events | 41/41 |
 
@@ -33,12 +33,12 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 | `Avalonia.Animation.IPageTransition` | public | `Animation/IPageTransition.cs` | 1/1 | present |
 | `Avalonia.Animation.IProgressPageTransition` | public | `Animation/IProgressPageTransition.cs` | 2/2 | present |
 | `Avalonia.Animation.ITransition` | public | `Animation/ITransition.cs` | 2/2 | present |
-| `Avalonia.Collections.IAvaloniaDictionary<TKey, TValue>` | public | `Collections/IAvaloniaDictionary.cs` | 0/0 | missing |
-| `Avalonia.Collections.IAvaloniaList<T>` | public | `Collections/IAvaloniaList.cs` | 0/8 | missing |
-| `Avalonia.Collections.IAvaloniaListItemValidator<T>` | internal | `Collections/IAvaloniaListItemValidator.cs` | 0/1 | missing |
-| `Avalonia.Collections.IAvaloniaReadOnlyDictionary<TKey, TValue>` | public | `Collections/IAvaloniaReadOnlyDictionary.cs` | 0/0 | missing |
-| `Avalonia.Collections.IAvaloniaReadOnlyList<T>` | public | `Collections/IAvaloniaReadOnlyList.cs` | 0/0 | missing |
-| `Avalonia.Collections.Pooled.IReadOnlyPooledList<T>` | internal | `Collections/Pooled/IReadOnlyPooledList.cs` | 0/1 | missing |
+| `Avalonia.Collections.IAvaloniaDictionary<TKey, TValue>` | public | `Collections/IAvaloniaDictionary.cs` | 0/0 | present |
+| `Avalonia.Collections.IAvaloniaList<T>` | public | `Collections/IAvaloniaList.cs` | 6/8 (2 waived) | present |
+| `Avalonia.Collections.IAvaloniaListItemValidator<T>` | internal | `Collections/IAvaloniaListItemValidator.cs` | 1/1 | present |
+| `Avalonia.Collections.IAvaloniaReadOnlyDictionary<TKey, TValue>` | public | `Collections/IAvaloniaReadOnlyDictionary.cs` | 0/0 | present |
+| `Avalonia.Collections.IAvaloniaReadOnlyList<T>` | public | `Collections/IAvaloniaReadOnlyList.cs` | 0/0 | present |
+| `Avalonia.Collections.Pooled.IReadOnlyPooledList<T>` | internal | `Collections/Pooled/IReadOnlyPooledList.cs` | 0/1 | n/a |
 | `Avalonia.Controls.IClassesChangedListener` | internal | `Controls/IClassesChangedListener.cs` | 0/1 | missing |
 | `Avalonia.Controls.IDeferredContent` | public | `Controls/IDeferredContent.cs` | 1/1 | present |
 | `Avalonia.Controls.INameScope` | public | `Controls/INameScope.cs` | 5/5 | present |
@@ -283,7 +283,7 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 | `Avalonia.Threading.IDispatcherImplWithExplicitBackgroundProcessing` | public | `Threading/IDispatcherImpl.cs` | 2/2 | present |
 | `Avalonia.Threading.IDispatcherImplWithPendingInput` | public | `Threading/IDispatcherImpl.cs` | 2/2 | present |
 | `Avalonia.Utilities.IRef<T>` | internal | `Utilities/Ref.cs` | 0/5 | missing |
-| `Avalonia.Utilities.IWeakEventSubscriber<TEventArgs>` | public | `Utilities/IWeakEventSubscriber.cs` | 0/1 | missing |
+| `Avalonia.Utilities.IWeakEventSubscriber<TEventArgs>` | public | `Utilities/IWeakEventSubscriber.cs` | 1/1 | present |
 | `Avalonia.Utilities.NonPumpingLockHelper.IHelperImpl` | public | `Utilities/NonPumpingLockHelper.cs` | 0/1 | missing |
 | `Avalonia.VisualTree.IHostedVisualTreeRoot` | internal | `VisualTree/IHostedVisualTreeRoot.cs` | 1/1 | present |
 | `Avalonia.VisualTree.IVisualWithRoundRectClip` | internal | `VisualTree/IVisualWithRoundRectClip.cs` | 0/1 | missing |
@@ -912,21 +912,21 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 | `BounceEaseUtils.cs` | `animation/utils/bounce_ease_utils.rs` | present | 1/1 | 1/1 |  |
 | `EasingUtils.cs` | `animation/utils/easing_utils.rs` | present | 1/1 | 1/1 |  |
 
-### `Collections` - files 2/11, types 4/14, members 58/111
+### `Collections` - files 10/11, types 12/14, members 79/111 (2 waived)
 
 | Upstream file | Rust file | Status | Types | Members | Notes |
 |---|---|---|---|---|---|
 | `AvaloniaDictionary.cs` | `collections/ferro_dictionary.rs` | partial | 1/1 | 26/34 |  |
-| `AvaloniaDictionaryExtensions.cs` | `collections/ferro_dictionary_extensions.rs` | missing | 0/1 | 0/1 |  |
-| `AvaloniaList.cs` | `collections/ferro_list.rs` | partial | 2/4 | 32/59 |  |
+| `AvaloniaDictionaryExtensions.cs` | `collections/ferro_dictionary_extensions.rs` | present | 1/1 | 1/1 |  |
+| `AvaloniaList.cs` | `collections/ferro_list.rs` | partial | 2/4 | 39/59 |  |
 | `AvaloniaListConverter.cs` | `collections/ferro_list_converter.rs` | missing (types found elsewhere) | 1/1 | 0/2 | types found in `markup_types/well_known.rs` (add to path-overrides.toml) |
-| `AvaloniaListExtensions.cs` | `collections/ferro_list_extensions.rs` | missing | 0/1 | 0/3 |  |
-| `IAvaloniaDictionary.cs` | `collections/i_ferro_dictionary.rs` | missing | 0/1 | 0/0 |  |
-| `IAvaloniaList.cs` | `collections/i_ferro_list.rs` | missing | 0/1 | 0/8 |  |
-| `IAvaloniaListItemValidator.cs` | `collections/i_ferro_list_item_validator.rs` | missing | 0/1 | 0/1 |  |
-| `IAvaloniaReadOnlyDictionary.cs` | `collections/i_ferro_read_only_dictionary.rs` | missing | 0/1 | 0/0 |  |
-| `IAvaloniaReadOnlyList.cs` | `collections/i_ferro_read_only_list.rs` | missing | 0/1 | 0/0 |  |
-| `NotifyCollectionChangedExtensions.cs` | `collections/notify_collection_changed_extensions.rs` | missing | 0/1 | 0/3 |  |
+| `AvaloniaListExtensions.cs` | `collections/ferro_list_extensions.rs` | present | 1/1 | 3/3 |  |
+| `IAvaloniaDictionary.cs` | `collections/i_ferro_dictionary.rs` | present | 1/1 | 0/0 |  |
+| `IAvaloniaList.cs` | `collections/i_ferro_list.rs` | present | 1/1 | 6/8 (2 waived) |  |
+| `IAvaloniaListItemValidator.cs` | `collections/i_ferro_list_item_validator.rs` | present | 1/1 | 1/1 |  |
+| `IAvaloniaReadOnlyDictionary.cs` | `collections/i_ferro_read_only_dictionary.rs` | present | 1/1 | 0/0 |  |
+| `IAvaloniaReadOnlyList.cs` | `collections/i_ferro_read_only_list.rs` | present | 1/1 | 0/0 |  |
+| `NotifyCollectionChangedExtensions.cs` | `collections/notify_collection_changed_extensions.rs` | present | 1/1 | 3/3 |  |
 
 <details><summary><code>AvaloniaDictionary.cs</code> - 8 missing</summary>
 
@@ -942,13 +942,10 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 
 </details>
 
-<details><summary><code>AvaloniaList.cs</code> - 29 missing</summary>
+<details><summary><code>AvaloniaList.cs</code> - 22 missing</summary>
 
-- `AvaloniaList<T>` (class): 19 missing
+- `AvaloniaList<T>` (class): 12 missing
   - `AvaloniaList(params T[] items)` *(3 of 4 constructors found)*
-  - `event PropertyChangedEventHandler? PropertyChanged`
-  - `Action<T>? Validate { get; set; }` *(getter `validate` found, setter `set_validate` missing)*
-  - `IAvaloniaListItemValidator<T>? Validator { get; set; }` *(internal)*
   - `List<T> Inner { get; set; }` *(private protected)*
   - `virtual void OnMutating()` *(private protected)*
   - `bool IList.IsFixedSize { get; }` *(explicit)*
@@ -956,13 +953,9 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
   - `bool ICollection.IsSynchronized { get; }` *(explicit)*
   - `object ICollection.SyncRoot { get; }` *(explicit)*
   - `bool ICollection<T>.IsReadOnly { get; }` *(explicit)*
-  - `void CopyTo(T[] array, int arrayIndex)`
   - `IEnumerator<T> IEnumerable<T>.GetEnumerator()` *(explicit)*
   - `IEnumerator IEnumerable.GetEnumerator()` *(explicit)*
   - `Enumerator GetEnumerator()`
-  - `IEnumerable<T> GetRange(int index, int count)`
-  - `void EnsureCapacity(int capacity)`
-  - `void ICollection.CopyTo(Array array, int index)` *(explicit)*
   - `Delegate[]? INotifyCollectionChangedDebug.GetCollectionChangedSubscribers()` *(explicit)*
 - `AvaloniaList<T>.Enumerator` (struct, public): **type missing** (6 members)
 - `EventArgsCache` (class, internal): **type missing** (2 members)
@@ -977,17 +970,17 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 
 </details>
 
-### `Collections/Pooled` - files 0/7, types 0/11, members 0/297
+### `Collections/Pooled` - files 0/0, types 0/0, members 0/0
 
 | Upstream file | Rust file | Status | Types | Members | Notes |
 |---|---|---|---|---|---|
-| `ClearMode.cs` | `collections/pooled/clear_mode.rs` | missing | 0/1 | 0/3 |  |
-| `ICollectionDebugView.cs` | `collections/pooled/i_collection_debug_view.rs` | missing | 0/1 | 0/2 |  |
-| `IReadOnlyPooledList.cs` | `collections/pooled/i_read_only_pooled_list.rs` | missing | 0/1 | 0/1 |  |
-| `PooledList.cs` | `collections/pooled/pooled_list.rs` | missing | 0/2 | 0/105 |  |
-| `PooledStack.cs` | `collections/pooled/pooled_stack.rs` | missing | 0/2 | 0/48 |  |
-| `StackDebugView.cs` | `collections/pooled/stack_debug_view.rs` | missing | 0/1 | 0/2 |  |
-| `ThrowHelper.cs` | `collections/pooled/throw_helper.rs` | missing | 0/3 | 0/136 |  |
+| `ClearMode.cs` | - | n/a | - | - | not-applicable: ArrayPool-backed List&lt;T&gt;/Stack&lt;T&gt; (Collections.Pooled) that avoid garbage-collected allocations: Vec&lt;T&gt; (porting guide, Types table); WeakHashList keeps a pool of the lists it returns |
+| `ICollectionDebugView.cs` | - | n/a | - | - | not-applicable: ArrayPool-backed List&lt;T&gt;/Stack&lt;T&gt; (Collections.Pooled) that avoid garbage-collected allocations: Vec&lt;T&gt; (porting guide, Types table); WeakHashList keeps a pool of the lists it returns |
+| `IReadOnlyPooledList.cs` | - | n/a | - | - | not-applicable: ArrayPool-backed List&lt;T&gt;/Stack&lt;T&gt; (Collections.Pooled) that avoid garbage-collected allocations: Vec&lt;T&gt; (porting guide, Types table); WeakHashList keeps a pool of the lists it returns |
+| `PooledList.cs` | - | n/a | - | - | not-applicable: ArrayPool-backed List&lt;T&gt;/Stack&lt;T&gt; (Collections.Pooled) that avoid garbage-collected allocations: Vec&lt;T&gt; (porting guide, Types table); WeakHashList keeps a pool of the lists it returns |
+| `PooledStack.cs` | - | n/a | - | - | not-applicable: ArrayPool-backed List&lt;T&gt;/Stack&lt;T&gt; (Collections.Pooled) that avoid garbage-collected allocations: Vec&lt;T&gt; (porting guide, Types table); WeakHashList keeps a pool of the lists it returns |
+| `StackDebugView.cs` | - | n/a | - | - | not-applicable: ArrayPool-backed List&lt;T&gt;/Stack&lt;T&gt; (Collections.Pooled) that avoid garbage-collected allocations: Vec&lt;T&gt; (porting guide, Types table); WeakHashList keeps a pool of the lists it returns |
+| `ThrowHelper.cs` | - | n/a | - | - | not-applicable: ArrayPool-backed List&lt;T&gt;/Stack&lt;T&gt; (Collections.Pooled) that avoid garbage-collected allocations: Vec&lt;T&gt; (porting guide, Types table); WeakHashList keeps a pool of the lists it returns |
 
 ### `Compatibility` - files 0/0, types 0/0, members 0/0
 
@@ -2236,7 +2229,7 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 | `LogicalExtensions.cs` | `logical_tree/logical_extensions.rs` | missing | 0/1 | 0/11 |  |
 | `LogicalTreeAttachmentEventArgs.cs` | `logical_tree/logical_tree_attachment_event_args.rs` | present | 1/1 | 4/4 |  |
 
-### `Media` - files 160/165, types 169/184, members 1638/1768 (4 waived)
+### `Media` - files 160/165, types 169/184, members 1649/1768 (4 waived)
 
 | Upstream file | Rust file | Status | Types | Members | Notes |
 |---|---|---|---|---|---|
@@ -2251,7 +2244,7 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 | `BitmapCache.cs` | `media/bitmap_cache.rs` | present | 1/1 | 8/8 |  |
 | `BoxShadow.cs` | `media/box_shadow.rs` | partial | 1/1 | 13/15 (1 waived) |  |
 | `BoxShadows.cs` | `media/box_shadows.rs` | partial | 1/2 | 13/17 (1 waived) |  |
-| `Brush.cs` | `media/brush.rs` | partial | 1/1 | 19/21 |  |
+| `Brush.cs` | `media/brush.rs` | partial | 1/1 | 20/21 |  |
 | `BrushConverter.cs` | `media/brush_converter.rs` | missing | 0/1 | 0/2 |  |
 | `BrushExtensions.cs` | `media/brush_extensions.rs` | partial | 1/1 | 1/3 |  |
 | `BrushMappingMode.cs` | `media/brush_mapping_mode.rs` | present | 1/1 | 2/2 |  |
@@ -2264,7 +2257,7 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 | `ConicGradientBrush.cs` | `media/conic_gradient_brush.rs` | present | 1/1 | 7/7 |  |
 | `DashStyle.cs` | `media/dash_style.rs` | partial | 1/1 | 13/15 |  |
 | `Drawing.cs` | `media/drawing.rs` | present | 1/1 | 7/7 |  |
-| `DrawingBrush.cs` | `media/drawing_brush.rs` | partial | 1/1 | 5/9 |  |
+| `DrawingBrush.cs` | `media/drawing_brush.rs` | partial | 1/1 | 8/9 |  |
 | `DrawingCollection.cs` | `media/drawing_collection.rs` | partial | 0/1 | 0/2 |  |
 | `DrawingContext.cs` | `media/drawing_context.rs` | partial | 2/2 | 47/51 |  |
 | `DrawingGroup.cs` | `media/drawing_group.rs` | present | 1/1 | 19/19 |  |
@@ -2333,7 +2326,7 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 | `ITextShaperTypeface.cs` | `media/i_text_shaper_typeface.rs` | present | 1/1 | 0/0 |  |
 | `ITileBrush.cs` | `media/i_tile_brush.rs` | present | 1/1 | 6/6 |  |
 | `ITransform.cs` | `media/i_transform.rs` | present | 1/1 | 1/1 |  |
-| `ImageBrush.cs` | `media/image_brush.rs` | partial | 1/1 | 4/7 |  |
+| `ImageBrush.cs` | `media/image_brush.rs` | partial | 1/1 | 6/7 |  |
 | `ImageDrawing.cs` | `media/image_drawing.rs` | present | 1/1 | 6/6 |  |
 | `ImmediateDrawingContext.cs` | `media/immediate_drawing_context.rs` | partial | 2/3 | 26/31 |  |
 | `ImmutableExperimentalAcrylicMaterial.cs` | `media/immutable_experimental_acrylic_material.rs` | present | 1/1 | 12/12 |  |
@@ -2396,7 +2389,7 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 | `TextTrailingTrimming.cs` | `media/text_trailing_trimming.rs` | present | 1/1 | 3/3 |  |
 | `TextTrimming.cs` | `media/text_trimming.rs` | present | 1/1 | 9/9 |  |
 | `TextWrapping.cs` | `media/text_wrapping.rs` | present | 1/1 | 3/3 |  |
-| `TileBrush.cs` | `media/tile_brush.rs` | partial | 2/2 | 18/19 |  |
+| `TileBrush.cs` | `media/tile_brush.rs` | present | 2/2 | 19/19 |  |
 | `Transform.cs` | `media/transform.rs` | partial | 1/1 | 10/12 |  |
 | `TransformConverter.cs` | `media/transform_converter.rs` | missing | 0/1 | 0/2 |  |
 | `TransformExtensions.cs` | `media/transform_extensions.rs` | present | 1/1 | 1/1 |  |
@@ -2404,7 +2397,7 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 | `TranslateTransform.cs` | `media/translate_transform.rs` | partial | 1/1 | 7/8 |  |
 | `Typeface.cs` | `media/typeface.rs` | present | 1/1 | 14/14 |  |
 | `UnicodeRange.cs` | `media/unicode_range.rs` | present | 2/2 | 13/13 |  |
-| `VisualBrush.cs` | `media/visual_brush.rs` | partial | 1/1 | 4/9 |  |
+| `VisualBrush.cs` | `media/visual_brush.rs` | partial | 1/1 | 8/9 |  |
 
 <details><summary><code>BoxShadow.cs</code> - 1 missing</summary>
 
@@ -2422,10 +2415,9 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 
 </details>
 
-<details><summary><code>Brush.cs</code> - 2 missing</summary>
+<details><summary><code>Brush.cs</code> - 1 missing</summary>
 
-- `Brush` (class): 2 missing
-  - `bool IsOnCompositor(Compositor c)` *(private protected)*
+- `Brush` (class): 1 missing
   - `SimpleServerObject? ICompositorSerializable.TryGetServer(Compositor c)` *(explicit)*
 
 </details>
@@ -2453,13 +2445,10 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 
 </details>
 
-<details><summary><code>DrawingBrush.cs</code> - 4 missing</summary>
+<details><summary><code>DrawingBrush.cs</code> - 1 missing</summary>
 
-- `DrawingBrush` (class): 4 missing
+- `DrawingBrush` (class): 1 missing
   - `DrawingBrush(Drawing visual)` *(1 of 2 constructors found)*
-  - `override Func<Compositor, ServerCompositionSimpleBrush> Factory { get; }` *(internal)*
-  - `override void OnUnreferencedFromCompositor(Compositor c)` *(protected)*
-  - `override void SerializeChanges(Compositor c, BatchStreamWriter writer)` *(private protected)*
 
 </details>
 
@@ -2579,12 +2568,10 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 
 </details>
 
-<details><summary><code>ImageBrush.cs</code> - 3 missing</summary>
+<details><summary><code>ImageBrush.cs</code> - 1 missing</summary>
 
-- `ImageBrush` (class): 3 missing
+- `ImageBrush` (class): 1 missing
   - `ImageBrush(IImageBrushSource? source)` *(1 of 2 constructors found)*
-  - `override Func<Compositor, ServerCompositionSimpleBrush> Factory { get; }` *(internal)*
-  - `override void SerializeChanges(Compositor c, BatchStreamWriter writer)` *(private protected)*
 
 </details>
 
@@ -2752,13 +2739,6 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 
 </details>
 
-<details><summary><code>TileBrush.cs</code> - 1 missing</summary>
-
-- `TileBrush` (class): 1 missing
-  - `override void SerializeChanges(Compositor c, BatchStreamWriter writer)` *(private protected)*
-
-</details>
-
 <details><summary><code>Transform.cs</code> - 2 missing</summary>
 
 - `Transform` (class): 2 missing
@@ -2780,14 +2760,10 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 
 </details>
 
-<details><summary><code>VisualBrush.cs</code> - 5 missing</summary>
+<details><summary><code>VisualBrush.cs</code> - 1 missing</summary>
 
-- `VisualBrush` (class): 5 missing
+- `VisualBrush` (class): 1 missing
   - `VisualBrush(Visual visual)` *(1 of 2 constructors found)*
-  - `override Func<Compositor, ServerCompositionSimpleBrush> Factory { get; }` *(internal)*
-  - `override void OnUnreferencedFromCompositor(Compositor c)` *(protected)*
-  - `override void SerializeChanges(Compositor c, BatchStreamWriter writer)` *(private protected)*
-  - `override void OnPropertyChanged(AvaloniaPropertyChangedEventArgs change)` *(protected)*
 
 </details>
 
@@ -4073,15 +4049,15 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 
 </details>
 
-### `Rendering/Composition/Brushes` - files 0/5, types 1/20, members 4/32
+### `Rendering/Composition/Brushes` - files 2/5, types 1/20, members 4/32
 
 | Upstream file | Rust file | Status | Types | Members | Notes |
 |---|---|---|---|---|---|
 | `CompositionBrush.cs` | `rendering/composition/brushes/composition_brush.rs` | missing | 0/6 | 0/8 |  |
 | `ServerCompositionBrush.cs` | `rendering/composition/brushes/server_composition_brush.rs` | missing | 0/6 | 0/9 |  |
 | `ServerSimpleCompositionBrush.cs` | `rendering/composition/brushes/server_simple_composition_brush.rs` | missing (types found elsewhere) | 1/6 | 4/6 | types found in `rendering/composition/server/server_composition_simple_brush.rs` (add to path-overrides.toml) |
-| `ServerSimpleContentBrush.cs` | `rendering/composition/brushes/server_simple_content_brush.rs` | missing | 0/1 | 0/4 |  |
-| `ServerSimpleImageBrush.cs` | `rendering/composition/brushes/server_simple_image_brush.rs` | missing | 0/1 | 0/5 |  |
+| `ServerSimpleContentBrush.cs` | `rendering/composition/brushes/server_simple_content_brush.rs` | partial | 0/1 | 0/4 |  |
+| `ServerSimpleImageBrush.cs` | `rendering/composition/brushes/server_simple_image_brush.rs` | partial | 0/1 | 0/5 |  |
 
 <details><summary><code>ServerSimpleCompositionBrush.cs</code> - 7 missing</summary>
 
@@ -4093,12 +4069,24 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 
 </details>
 
-### `Rendering/Composition/Drawing` - files 16/21, types 21/45, members 168/302
+<details><summary><code>ServerSimpleContentBrush.cs</code> - 5 missing</summary>
+
+- `ServerCompositionSimpleContentBrush` (class, internal): **type missing** (4 members)
+
+</details>
+
+<details><summary><code>ServerSimpleImageBrush.cs</code> - 6 missing</summary>
+
+- `ServerCompositionSimpleImageBrush` (class, internal): **type missing** (5 members)
+
+</details>
+
+### `Rendering/Composition/Drawing` - files 17/21, types 23/45, members 183/302
 
 | Upstream file | Rust file | Status | Types | Members | Notes |
 |---|---|---|---|---|---|
 | `CompositionRenderData.cs` | `rendering/composition/drawing/composition_render_data.rs` | partial | 1/1 | 7/8 |  |
-| `CompositionRenderDataSceneBrushContent.cs` | `rendering/composition/drawing/composition_render_data_scene_brush_content.rs` | missing | 0/2 | 0/15 |  |
+| `CompositionRenderDataSceneBrushContent.cs` | `rendering/composition/drawing/composition_render_data_scene_brush_content.rs` | present | 2/2 | 15/15 |  |
 | `CompositorResourceHelpers.cs` | `rendering/composition/drawing/compositor_resource_helpers.rs` | present | 2/2 | 14/14 |  |
 | `ICompositionRenderResource.cs` | `rendering/composition/drawing/i_composition_render_resource.rs` | present | 2/2 | 3/3 |  |
 | `IRenderDataGeometry.cs` | `rendering/composition/drawing/i_render_data_geometry.rs` | present | 1/1 | 1/1 |  |
@@ -4890,7 +4878,7 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 
 </details>
 
-### `Utilities` - files 16/46, types 21/74, members 146/489
+### `Utilities` - files 20/46, types 28/74, members 169/489 (1 waived)
 
 | Upstream file | Rust file | Status | Types | Members | Notes |
 |---|---|---|---|---|---|
@@ -4907,7 +4895,7 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 | `DisposableLock.cs` | `utilities/disposable_lock.rs` | missing | 0/1 | 0/2 |  |
 | `FrugalList.cs` | `utilities/frugal_list.rs` | missing | 0/11 | 0/139 |  |
 | `HashCode.cs` | - | n/a | - | - | no non-private types (assembly attributes, global usings or file-local helpers) |
-| `IWeakEventSubscriber.cs` | `utilities/i_weak_event_subscriber.rs` | missing | 0/3 | 0/5 |  |
+| `IWeakEventSubscriber.cs` | `utilities/i_weak_event_subscriber.rs` | present | 3/3 | 5/5 |  |
 | `IdentifierParser.cs` | `utilities/identifier_parser.rs` | partial | 0/1 | 0/3 |  |
 | `ImmutableReadOnlyListStructEnumerator.cs` | `utilities/immutable_read_only_list_struct_enumerator.rs` | missing | 0/1 | 0/6 |  |
 | `KeywordParser.cs` | `utilities/keyword_parser.rs` | partial | 0/1 | 0/2 |  |
@@ -4937,10 +4925,10 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 | `UriExtensions.cs` | `utilities/uri_extensions.rs` | partial | 1/1 | 7/8 |  |
 | `ValueSingleOrList.cs` | `utilities/value_single_or_list.rs` | missing | 0/1 | 0/6 |  |
 | `ValueSpan.cs` | `utilities/value_span.rs` | present | 1/1 | 4/4 |  |
-| `WeakEvent.cs` | `utilities/weak_event.rs` | missing | 0/2 | 0/7 |  |
-| `WeakEventHandlerManager.cs` | `utilities/weak_event_handler_manager.rs` | missing | 0/1 | 0/2 |  |
-| `WeakEvents.cs` | `utilities/weak_events.rs` | partial | 1/1 | 1/4 |  |
-| `WeakHashList.cs` | `utilities/weak_hash_list.rs` | missing | 0/1 | 0/8 |  |
+| `WeakEvent.cs` | `utilities/weak_event.rs` | partial | 2/2 | 6/7 |  |
+| `WeakEventHandlerManager.cs` | `utilities/weak_event_handler_manager.rs` | present | 1/1 | 2/2 |  |
+| `WeakEvents.cs` | `utilities/weak_events.rs` | present | 1/1 | 3/4 (1 waived) |  |
+| `WeakHashList.cs` | `utilities/weak_hash_list.rs` | present | 1/1 | 8/8 |  |
 
 <details><summary><code>ArrayBuilder.cs</code> - 1 missing</summary>
 
@@ -5049,12 +5037,10 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 
 </details>
 
-<details><summary><code>WeakEvents.cs</code> - 3 missing</summary>
+<details><summary><code>WeakEvent.cs</code> - 1 missing</summary>
 
-- `WeakEvents` (class): 3 missing
-  - `static readonly WeakEvent<INotifyCollectionChanged, NotifyCollectionChangedEventArgs> CollectionChanged`
-  - `static readonly WeakEvent<INotifyPropertyChanged, PropertyChangedEventArgs> ThreadSafePropertyChanged`
-  - `static readonly WeakEvent<AvaloniaObject, AvaloniaPropertyChangedEventArgs> AvaloniaPropertyChanged`
+- `WeakEvent<TSender, TEventArgs>` (class): 1 missing
+  - `WeakEvent(Func<TSender, EventHandler<TEventArgs>, Action> subscribe)` *(internal; 1 of 2 constructors found)*
 
 </details>
 
@@ -5145,6 +5131,7 @@ Rust sources of this crate that no upstream file maps to. Give each a reason in 
 | `metadata/markup_assembly.rs` | **unmapped** | `MarkupAssembly`, `XmlnsDefinition`, `XmlnsPrefix` |
 | `metadata/markup_macros.rs` | **unmapped** |  |
 | `metadata/markup_type.rs` | **unmapped** | `MarkupArguments`, `MarkupAttribute`, `MarkupAttributeValue`, `MarkupConstructor`, `MarkupDelegate`, `MarkupDelegateMethod`, `MarkupEnumMember`, `MarkupEvent`, `MarkupField`, `MarkupGeneric`, `MarkupIndexer`, `MarkupInvoke`, ... (23 total) |
+| `metadata/property_accessors.rs` | **unmapped** | `PropertyAccessor` |
 | `metadata/service_provider.rs` | **unmapped** | `EmptyServiceProvider`, `IServiceProvider` |
 | `metadata/typed_path.rs` | **unmapped** | `TypedPathElement`, `TypedPathFallback`, `TypedPathGetter`, `TypedPathNotifying`, `TypedPathProbe`, `TypedPathSetter`, `TypedPathShared` |
 | `numerics/matrix3x2.rs` | **unmapped** | `Matrix3x2` |

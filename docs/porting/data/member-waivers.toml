@@ -29,6 +29,18 @@ reason = "System.Numerics interop, not applicable"
 member = "GetHashCode"
 reason = "Rust: `Hash` is derived where the type can be hashed; float-based value types are not `Eq`/`Hash`"
 
+[[waive]]
+project = "Avalonia.Base"
+type = "Avalonia.Collections.IAvaloniaList*"
+member = "new *"
+reason = "re-declaration of a member of IAvaloniaReadOnlyList<T>/IList<T>: the Rust trait inherits `count`/`get` from IFerroReadOnlyList and declares `set`"
+
+[[waive]]
+project = "Avalonia.Base"
+type = "Avalonia.Utilities.WeakEvents"
+member = "AvaloniaPropertyChanged"
+reason = "ported as `WeakEvents::ferro_property_changed` (rule 2 of the porting guide; the scanner does not rename members)"
+
 # Aliases: Rust functions that implement an upstream member under a name the default rule
 # (`DoIt` -> `do_it` / `do_it_*`) cannot derive.
 #

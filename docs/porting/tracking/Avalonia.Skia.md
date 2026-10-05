@@ -276,9 +276,9 @@ Rust sources of this crate that no upstream file maps to. Give each a reason in 
 | Rust file | Reason | Types defined |
 |---|---|---|
 | `gpu/ganesh/ganesh_gr_context.rs` | the Ganesh implementation of the backend-neutral GPU context (the binding has separate Ganesh and Graphite context types) | `GaneshGrContext` |
-| `gpu/graphite/graphite_gr_context.rs` | **unmapped** | `GraphiteGrContext`, `GraphiteState` |
+| `gpu/graphite/graphite_gr_context.rs` | **unmapped** | `GraphiteGrContext`, `GraphiteState`, `UploadedImage` |
 | `gpu/i_skia_gr_context.rs` | **unmapped** | `ISkiaGrContext`, `SkiaGpuBackend` |
-| `gpu/metal/tests.rs` | **unmapped** | `Id`, `Sel`, `TestMetalDevice`, `TextureRenderTarget`, `TextureSession`, `TextureSurface` |
+| `gpu/metal/tests.rs` | **unmapped** | `GraphiteTarget`, `Id`, `LogSink`, `Sel`, `TestMetalDevice`, `TextureRenderTarget`, `TextureSession`, `TextureSurface` |
 | `i_skia_api_lease_feature.rs` | **unmapped** | `ISkiaApiLease`, `ISkiaApiLeaseFeature`, `ISkiaPlatformGraphicsApiLease` |
 | `locked_framebuffer.rs` | **unmapped** | `LockedFramebuffer` |
 | `metal/i_metal_device.rs` | **unmapped** | `IMetalDevice`, `IMetalPlatformSurface`, `IMetalPlatformSurfaceRenderTarget`, `IMetalPlatformSurfaceRenderingSession` |
