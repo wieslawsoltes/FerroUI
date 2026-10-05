@@ -519,6 +519,8 @@ ferro_markup_type!(class ThemeVariant {
             },
     ],
     properties: [
+        // The key is any object in the managed original.
+        Key: Option<crate::BoxedValue> { get: |variant: &ThemeVariant| super::plain::resource_key_value(variant.key()) },
         InheritVariant: Option<ThemeVariant> { get: ThemeVariant::inherit_variant },
     ],
     static_properties: [

@@ -105,7 +105,6 @@ fn gap_c103_binding_to_a_plain_property_of_a_named_element() {
 }
 
 #[test]
-#[ignore = "gap C104: the commands of a CommandBar cannot be added from markup"]
 fn gap_c104_command_bar_commands_from_markup() {
     let _app = start_application();
     let xaml = format!(

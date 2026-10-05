@@ -234,7 +234,17 @@ pub(crate) fn define_core_types(system: &Rc<RuntimeTypeSystem>) {
     );
     define(SYSTEM, "Delegate", Class, &[], handles![MarkupDelegate, Option<MarkupDelegate>], Box::new(|_| {}));
     plain(SYSTEM, "MulticastDelegate", Class, Some("System.Delegate"));
-    plain(SYSTEM, "Exception", Class, None);
+    define(
+        SYSTEM,
+        "Exception",
+        Class,
+        &[],
+        handles![ferroui_base::data::BindingError, Option<ferroui_base::data::BindingError>],
+        Box::new(|b| {
+            // One source: the metadata the base crate declares for its error type.
+            let _ = b.project_metadata(SYSTEM, "Exception");
+        }),
+    );
     for name in ["InvalidCastException", "NotSupportedException", "NullReferenceException"] {
         define(
             SYSTEM,

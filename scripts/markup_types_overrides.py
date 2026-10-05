@@ -263,6 +263,16 @@ CONTROLS = {
     # The accessors of the design-time properties that are not plain attached-property
     # accessors, in the declaration order of the managed original (overloads are tried
     # in that order).
+    'DataValidationErrors': {
+        'methods': [
+            """static fn SetError(Ref<Control>, Option<ferroui_base::data::BindingError>) =>
+                |control: Ref<Control>, error: Option<ferroui_base::data::BindingError>| {
+                    DataValidationErrors::set_error(&control, error.as_ref())
+                }""",
+        ],
+        'note': """// `SetError` has no getter and no registered property in the managed original either: markup sees it as the
+// attached property `DataValidationErrors.Error`.""",
+    },
     'Design': {
         'methods': [
             """static fn SetDataContext(Rc<dyn IDataTemplate>, Option<BoxedValue>) =>

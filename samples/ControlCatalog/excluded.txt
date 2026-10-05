@@ -16,22 +16,12 @@ MainView.xaml | missing: DrawerPage, FlexPanel, Flex
 MainWindow.xaml | missing: Win32Properties, DrawerPage (the base class of MainView); gap C002: NativeMenuItem.Click from markup
 Pages/HomePage.xaml | missing: DrawerPage (MainView, named by a binding of Controls/SectionControl.xaml)
 Pages/CursorPage.xaml | gap C004: the item type of a view-model list is not known to a compiled binding of an item template
-Pages/SectionPage.xaml | missing: DrawerPage (MainView, named by a binding of Controls/SectionControl.xaml)
 Pages/SettingsPage.xaml | gap C005: ThemeVariant.Key is not declared for markup (a compiled binding path); under the unit test application {x:Static local:App.CurrentTheme} also needs the application of the catalog
 Pages/TreeViewPage.xaml | gap C004: the item type of a view-model list is not known to a compiled binding of an item template
 Pages/WrapPanelPage.xaml | gap C004: the item type of a view-model list is not known to a compiled binding of an item template
 TransparentStyles.xaml | missing: DrawerPage (MainView, named by a selector), TabbedPage
 
 # --- Controls, Converter, Pages/CommandBar, Pages/TextBox, Pages/Gestures, Pages/ContentPage (group A) ---
-Pages/CommandBar/CommandBarCustomizationPage.xaml | gap C104: the commands of a CommandBar cannot be added from markup; gap K-geometry-text
-Pages/CommandBar/CommandBarDynamicOverflowPage.xaml | gap C104: the commands of a CommandBar cannot be added from markup; gap K-geometry-text
-Pages/CommandBar/CommandBarEventsPage.xaml | gap C104: the commands of a CommandBar cannot be added from markup; gap K-geometry-text
-Pages/CommandBar/CommandBarFirstLookPage.xaml | gap C104: the commands of a CommandBar cannot be added from markup; gap K-geometry-text
-Pages/CommandBar/CommandBarKeyboardPage.xaml | gap C104: the commands of a CommandBar cannot be added from markup; gap K-geometry-text
-Pages/CommandBar/CommandBarLabelPositionPage.xaml | gap C104: the commands of a CommandBar cannot be added from markup; gap K-geometry-text
-Pages/CommandBar/CommandBarOverflowPage.xaml | gap C104: the commands of a CommandBar cannot be added from markup; gap K-geometry-text
-Pages/CommandBar/CommandBarTogglePage.xaml | gap C104: the commands of a CommandBar cannot be added from markup; gap K-geometry-text
-Pages/CommandBarPage.xaml | page: gap C104, gap K-geometry-text: none of its samples (Pages/CommandBar/*) loads (the page itself shows)
 Pages/ContentPage/ContentPagePerformancePage.xaml | code-behind: NavigationPerformanceMonitorHelper and NavigationDemoHelper (Pages/NavigationPage, not ported; the helper measures the managed heap: GC.GetTotalMemory, GC.Collect)
 Pages/GesturePage.xaml | code-behind: NavigationDemoHelper.CreateGalleryHomePage (Pages/NavigationPage, not ported)
 Pages/Gestures/GesturePullPage.xaml | code-behind: Compositor.CreateVector3KeyFrameAnimation, Compositor.CreateImplicitAnimationCollection, CompositionVisual.ImplicitAnimations, LogicalExtensions.FindLogicalDescendantOfType
@@ -51,7 +41,6 @@ Views/CustomNotificationView.xaml | missing: NotificationCard
 
 # --- the other pages directly under Pages/ (group C) ---
 Pages/AutoCompleteBoxPage.xaml | code-behind: LogicalExtensions.GetLogicalDescendants (the document also needs gaps C302, C303, C310, C311)
-Pages/ButtonSpinnerPage.xaml | gap C302: DataValidationErrors.Error is not declared for markup (then C303: System.Exception cannot be created)
 Pages/CalendarDatePickerPage.xaml | missing: CalendarDatePicker
 Pages/CalendarPage.xaml | missing: Calendar
 Pages/CarouselPage.xaml | code-behind: ControlCatalog.Pages.Transitions (CardStackPageTransition, WaveRevealPageTransition: custom page transitions deriving from PageSlide) is not ported
@@ -118,15 +107,8 @@ Pages/DrawerPage/ModernMyTripsView.xaml | pending: the class of the document is 
 Pages/DrawerPage/ModernProfileView.xaml | pending: the class of the document is not ported yet
 Pages/DrawerPage/ModernSettingsView.xaml | pending: the class of the document is not ported yet
 Pages/NavigationDemoPage.xaml | pending: the class of the document is not ported yet
-Pages/NavigationPage/CurvedHeaderHomeScrollView.xaml | gap C400: the text of ImageBrush.Source is converted to an IImage, which is not accepted as an IImageBrushSource
-Pages/NavigationPage/CurvedHeaderProfileScrollView.xaml | gap C400: the text of ImageBrush.Source is converted to an IImage, which is not accepted as an IImageBrushSource
 Pages/NavigationPage/FerroFlixAppPage.xaml | missing: DrawerPage
-Pages/NavigationPage/FerroFlixDetailView.xaml | gap C400: the text of ImageBrush.Source is converted to an IImage, which is not accepted as an IImageBrushSource
-Pages/NavigationPage/FerroFlixHomeView.xaml | gap C400: the text of ImageBrush.Source is converted to an IImage, which is not accepted as an IImageBrushSource
-Pages/NavigationPage/FerroFlixSearchView.xaml | gap C400: the text of ImageBrush.Source is converted to an IImage, which is not accepted as an IImageBrushSource
 Pages/NavigationPage/LAvenirAppPage.xaml | missing: DrawerPage
-Pages/NavigationPage/LAvenirMenuView.xaml | gap C400: the text of ImageBrush.Source is converted to an IImage, which is not accepted as an IImageBrushSource
-Pages/NavigationPage/LAvenirReservationsView.xaml | missing: Calendar
 Pages/NavigationPage/NavigationPageAppearancePage.xaml | pending: the class of the document is not ported yet
 Pages/NavigationPage/NavigationPageAttachedMethodsPage.xaml | pending: the class of the document is not ported yet
 Pages/NavigationPage/NavigationPageBackButtonPage.xaml | pending: the class of the document is not ported yet
@@ -146,13 +128,7 @@ Pages/NavigationPage/NavigationPageTitlePage.xaml | pending: the class of the do
 Pages/NavigationPage/NavigationPageToolbarPage.xaml | pending: the class of the document is not ported yet
 Pages/NavigationPage/NavigationPageTransitionsPage.xaml | pending: the class of the document is not ported yet
 Pages/NavigationPage/PulseAppPage.xaml | pending: the class of the document is not ported yet
-Pages/NavigationPage/PulseHomeView.xaml | gap C400: the text of ImageBrush.Source is converted to an IImage, which is not accepted as an IImageBrushSource
-Pages/NavigationPage/PulseProfileView.xaml | gap C400: the text of ImageBrush.Source is converted to an IImage, which is not accepted as an IImageBrushSource
-Pages/NavigationPage/PulseWorkoutDetailView.xaml | gap C400: the text of ImageBrush.Source is converted to an IImage, which is not accepted as an IImageBrushSource
 Pages/NavigationPage/RetroGamingAppPage.xaml | pending: the class of the document is not ported yet
-Pages/NavigationPage/RetroGamingGamesView.xaml | gap C400: the text of ImageBrush.Source is converted to an IImage, which is not accepted as an IImageBrushSource
-Pages/NavigationPage/RetroGamingHomeView.xaml | gap C400: the text of ImageBrush.Source is converted to an IImage, which is not accepted as an IImageBrushSource
-Pages/NavigationPage/RetroGamingProfileView.xaml | gap C400: the text of ImageBrush.Source is converted to an IImage, which is not accepted as an IImageBrushSource
 Pages/PipsPager/PipsPagerCarouselPage.xaml | missing: PipsPager
 Pages/PipsPager/PipsPagerCustomButtonThemesPage.xaml | missing: PipsPager
 Pages/PipsPager/PipsPagerCustomColorsPage.xaml | missing: PipsPager

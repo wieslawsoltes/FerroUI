@@ -11,6 +11,7 @@ mod gaps;
 mod gaps_a;
 mod gaps_b;
 mod gaps_c;
+mod gaps_d;
 mod support;
 mod survey;
 mod view_models;

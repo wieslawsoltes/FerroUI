@@ -64,7 +64,6 @@ fn gap_c004_item_type_of_a_view_model_list_for_compiled_bindings() {
 }
 
 #[test]
-#[ignore = "gap C005: ThemeVariant.Key is not declared for markup"]
 fn gap_c005_theme_variant_key_in_a_compiled_binding() {
     let _app = start_catalog_application();
     let xaml = format!("<TextBlock {XMLNS} x:DataType='ThemeVariant' Text='{{Binding Key}}' />");

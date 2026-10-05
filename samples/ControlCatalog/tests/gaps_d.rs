@@ -10,7 +10,6 @@ use ferroui_controls::Border;
 const XMLNS: &str = "xmlns='https://github.com/ferroui' xmlns:x='http://schemas.microsoft.com/winfx/2006/xaml'";
 
 #[test]
-#[ignore = "gap C400: the text of ImageBrush.Source is converted to an IImage, which is not accepted as an IImageBrushSource"]
 fn gap_c400_image_brush_source_from_text() {
     let _app = start_catalog_application();
     let border = from_markup_value::<Ref<Border>>(&Some(load_text(&format!(

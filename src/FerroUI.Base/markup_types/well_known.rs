@@ -245,11 +245,26 @@ ferro_markup_type!(class dyn IRoutedEventArgs as "RoutedEventArgs" {
     ],
 });
 
+// System: the errors of bindings and data validation stand for exceptions.
+
+ferro_markup_type!(class crate::data::BindingError as "Exception" {
+    namespace: "System",
+    handles: [crate::data::BindingError, Option<crate::data::BindingError>],
+    constructors: [
+        () => || crate::data::BindingError::message("Exception of type 'System.Exception' was thrown."),
+        (String) => |message: String| crate::data::BindingError::message(message),
+    ],
+    properties: [
+        Message: String { get: |error: &crate::data::BindingError| error.to_string() },
+    ],
+});
+
 // FerroUI.Media.Imaging
 
 ferro_markup_type!(class Bitmap {
     namespace: "FerroUI.Media.Imaging",
     handles: [Rc<Bitmap>, Option<Rc<Bitmap>>],
+    interfaces: [Rc<dyn crate::media::IImage>, Rc<dyn crate::media::IImageBrushSource>],
 });
 
 // FerroUI.Media.Immutable
@@ -402,6 +417,7 @@ ferro_markup_type!(class FerroListConverter<Option<BoxedValue>> as "FerroListCon
 
 /// The types declared in this file.
 pub(super) const TYPES: &[&MarkupType] = &[
+    <crate::data::BindingError as MarkupTyped>::MARKUP,
     <UnsetValueType as MarkupTyped>::MARKUP,
     <FerroObjectExtensionsClass as MarkupTyped>::MARKUP,
     <ClassBindingManager as MarkupTyped>::MARKUP,
@@ -433,6 +449,11 @@ pub(super) const TYPES: &[&MarkupType] = &[
 /// Registers what the untyped value conversions need to know about the
 /// types declared in this file.
 pub(super) fn register_value_types() {
+    ValueTypes::register_nullable::<crate::data::BindingError>();
+    // A bitmap is an image and a source of image brushes.
+    ValueTypes::register_nullable::<Rc<Bitmap>>();
+    ValueTypes::register_cast::<Rc<Bitmap>, Rc<dyn crate::media::IImage>>(|bitmap| bitmap.clone());
+    ValueTypes::register_cast::<Rc<Bitmap>, Rc<dyn crate::media::IImageBrushSource>>(|bitmap| bitmap.clone());
     ValueTypes::register_nullable::<UnsetValueType>();
     ValueTypes::register_nullable::<EventArgs>();
     ValueTypes::register_nullable::<CancelEventArgs>();

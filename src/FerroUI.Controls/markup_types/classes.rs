@@ -242,9 +242,17 @@ ferro_class_info!(Control {
     },
 });
 
+// `SetError` has no getter and no registered property in the managed original either: markup sees it as the
+// attached property `DataValidationErrors.Error`.
 ferro_class_info!(DataValidationErrors {
     markup: {
         namespace: "FerroUI.Controls",
+        methods: [
+            static fn SetError(Ref<Control>, Option<ferroui_base::data::BindingError>) =>
+                |control: Ref<Control>, error: Option<ferroui_base::data::BindingError>| {
+                    DataValidationErrors::set_error(&control, error.as_ref())
+                },
+        ],
         attributes: [PseudoClasses(":error")],
     },
 });

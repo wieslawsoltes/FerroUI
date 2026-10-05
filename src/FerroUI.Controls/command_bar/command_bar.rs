@@ -281,6 +281,16 @@ ferro_class_info!(CommandBar {
     markup: {
         content: PrimaryCommands,
         properties: [
+            // The lists of commands exist as soon as they are asked for (the getters of
+            // the managed original create them), so markup adds children to them.
+            PrimaryCommands: CommandBarElementList {
+                get: CommandBar::primary_commands,
+                set: |bar: &Ref<CommandBar>, value: CommandBarElementList| bar.set_primary_commands(Some(value))
+            },
+            SecondaryCommands: CommandBarElementList {
+                get: CommandBar::secondary_commands,
+                set: |bar: &Ref<CommandBar>, value: CommandBarElementList| bar.set_secondary_commands(Some(value))
+            },
             VisiblePrimaryCommands: CommandBarElementCollection { get: CommandBar::visible_primary_commands },
             OverflowItems: CommandBarElementCollection { get: CommandBar::overflow_items },
         ],

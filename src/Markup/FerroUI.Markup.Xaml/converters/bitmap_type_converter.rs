@@ -50,15 +50,17 @@ impl TypeConverter for BitmapTypeConverter {
         source_type.is_string()
     }
 
-    /// The bitmap as an image handle (`Rc<dyn IImage>`), the form image
-    /// properties hold.
+    /// The bitmap as its own handle (`Rc<Bitmap>`), which casts to the image handle
+    /// (`Rc<dyn IImage>`) image properties hold and to the source of an image brush
+    /// (`Rc<dyn IImageBrushSource>`), as the bitmap class of the managed original
+    /// implements both.
     fn convert_from(
         &self,
         context: Option<&Rc<dyn ITypeDescriptorContext>>,
         _culture: Option<&CultureInfo>,
         value: Option<&BoxedValue>,
     ) -> Result<Option<BoxedValue>, XamlLoadException> {
-        let bitmap: Rc<dyn IImage> = Rc::new(Self::load(context, text_of(value)?)?);
+        let bitmap: Rc<Bitmap> = Rc::new(Self::load(context, text_of(value)?)?);
         Ok(Some(Rc::new(bitmap)))
     }
 }

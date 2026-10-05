@@ -393,3 +393,11 @@ impl IImageBrushSource for Bitmap {
         Some(&self.platform_impl)
     }
 }
+
+/// Bitmaps compare by identity (reference equality), so that their handles can be
+/// held in untyped values.
+impl PartialEq for Bitmap {
+    fn eq(&self, other: &Self) -> bool {
+        std::ptr::eq(self, other)
+    }
+}

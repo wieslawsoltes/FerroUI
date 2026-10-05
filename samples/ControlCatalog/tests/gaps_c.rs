@@ -36,7 +36,6 @@ fn gap_c301_method_name_for_a_delegate_property() {
 }
 
 #[test]
-#[ignore = "gap C302: DataValidationErrors.Error (the static SetError/GetError pair) is not declared for markup"]
 fn gap_c302_data_validation_errors_error_property() {
     let _app = start_application();
     let button = from_markup_value::<Ref<Button>>(&Some(load_text(&format!(
@@ -49,7 +48,6 @@ fn gap_c302_data_validation_errors_error_property() {
 }
 
 #[test]
-#[ignore = "gap C303: System.Exception has no parameterless constructor in the markup type system"]
 fn gap_c303_system_exception_element() {
     let _app = start_application();
     let panel = from_markup_value::<Ref<Panel>>(&Some(load_text(&format!(

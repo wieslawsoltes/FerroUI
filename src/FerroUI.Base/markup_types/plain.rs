@@ -52,6 +52,16 @@ pub(super) fn resource_key(key: Option<BoxedValue>) -> Result<ResourceKey, Strin
     }
 }
 
+/// The key of a resource as the object it is in the managed original: the text of a
+/// string key, the type of a type key, the key itself otherwise.
+pub(super) fn resource_key_value(key: &ResourceKey) -> Option<BoxedValue> {
+    Some(match key {
+        ResourceKey::String(text) => Rc::new(text.to_string()),
+        ResourceKey::Type(type_) => Rc::new(*type_),
+        ResourceKey::Object(_) => Rc::new(key.clone()),
+    })
+}
+
 /// An untyped value as a value of exactly the type of `property`, as the
 /// property system takes it. Only assignable values are accepted: converting
 /// (parsing, numeric conversion) is the business of the caller.

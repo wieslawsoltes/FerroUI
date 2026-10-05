@@ -215,6 +215,28 @@ ferro_markup_type!(class FerroListOf<Ref<TrayIcon>> as "FerroList`1" {
     methods: [fn Add(Ref<TrayIcon>) => |list: &FerroList<Ref<TrayIcon>>, item: Ref<TrayIcon>| list.add(item)],
 });
 
+// The commands of a command bar.
+ferro_markup_type!(interface dyn crate::ICommandBarElement as "ICommandBarElement" {
+    namespace: "FerroUI.Controls",
+    handles: [Rc<dyn crate::ICommandBarElement>, Option<Rc<dyn crate::ICommandBarElement>>],
+});
+
+ferro_markup_type!(class FerroListOf<Rc<dyn crate::ICommandBarElement>> as "FerroList`1" {
+    namespace: "FerroUI.Collections",
+    handles: [FerroList<Rc<dyn crate::ICommandBarElement>>, Option<FerroList<Rc<dyn crate::ICommandBarElement>>>],
+    this: FerroList<Rc<dyn crate::ICommandBarElement>>,
+    generic: "FerroList`1" [Rc<dyn crate::ICommandBarElement>],
+    constructors: [() => FerroList::<Rc<dyn crate::ICommandBarElement>>::new],
+    properties: [
+        Capacity: i32 { get: list_capacity, try_set: set_list_capacity },
+        Count: i32 { get: |list: &FerroList<Rc<dyn crate::ICommandBarElement>>| list.count() as i32 },
+    ],
+    methods: [
+        fn Add(Rc<dyn crate::ICommandBarElement>) =>
+            |list: &FerroList<Rc<dyn crate::ICommandBarElement>>, item: Rc<dyn crate::ICommandBarElement>| list.add(item),
+    ],
+});
+
 // The items of a native menu.
 ferro_markup_type!(class FerroListOf<Ref<NativeMenuItemBase>> as "FerroList`1" {
     namespace: "FerroUI.Collections",
@@ -234,6 +256,8 @@ ferro_markup_type!(class FerroListOf<Ref<NativeMenuItemBase>> as "FerroList`1" {
 
 /// The types declared in this file.
 pub(super) const TYPES: &[&MarkupType] = &[
+    <dyn crate::ICommandBarElement as MarkupTyped>::MARKUP,
+    <FerroListOf<Rc<dyn crate::ICommandBarElement>> as MarkupTyped>::MARKUP,
     <Controls as MarkupTyped>::MARKUP,
     <RowDefinitions as MarkupTyped>::MARKUP,
     <ColumnDefinitions as MarkupTyped>::MARKUP,
@@ -254,6 +278,8 @@ pub(super) const TYPES: &[&MarkupType] = &[
 /// Registers the nullable forms of the types that can be held in untyped
 /// values with the untyped value conversions of the current thread.
 pub(super) fn register_value_types() {
+    ValueTypes::register_nullable::<Rc<dyn crate::ICommandBarElement>>();
+    ValueTypes::register_nullable::<FerroList<Rc<dyn crate::ICommandBarElement>>>();
     ValueTypes::register_nullable::<Controls>();
     ValueTypes::register_nullable::<RowDefinitions>();
     ValueTypes::register_nullable::<ColumnDefinitions>();
