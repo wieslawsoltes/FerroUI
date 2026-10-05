@@ -1872,23 +1872,28 @@ fn synchronization_context_post_and_send() {
     let done = CancellationTokenSource::new();
     let finish = done.clone();
     let c = context.clone();
+    let posted = Arc::new(Mutex::new(None));
+    let p = posted.clone();
     let worker = thread::spawn(move || {
         let ran = Arc::new(Mutex::new(None));
         let r = ran.clone();
         c.send(move || *r.lock().unwrap() = Some((thread::current().id(), current_priority())));
-        let r = ran.clone();
+        // `send` has returned, so its job has run. Read what it recorded
+        // before posting: the posted job runs on the dispatcher thread
+        // concurrently with the rest of this closure.
+        let sent = *ran.lock().unwrap();
         c.post(move || {
-            r.lock().unwrap().take();
+            *p.lock().unwrap() = Some((thread::current().id(), current_priority()));
             finish.cancel();
         });
-        let seen = *ran.lock().unwrap();
-        seen
+        sent
     });
     let timeout = cancel_after(Duration::from_secs(10));
     let stop = timeout.clone();
     done.token().register(move || stop.cancel());
     t.ui_thread.main_loop(&timeout.token());
     assert_eq!(worker.join().unwrap(), Some((ui_thread_id, DispatcherPriority::BACKGROUND)));
+    assert_eq!(*posted.lock().unwrap(), Some((ui_thread_id, DispatcherPriority::BACKGROUND)));
 }
 
 #[test]
