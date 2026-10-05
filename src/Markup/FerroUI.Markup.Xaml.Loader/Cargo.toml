@@ -18,6 +18,10 @@ default = ["runtime"]
 # The run-time back end: the run-time type system, the AST interpreter (`ferroui_markup_xaml_loader::runtime`)
 # and the run-time XAML loader built on the XAML runtime library.
 runtime = ["dep:ferroui-markup-xaml"]
+# The emitter of Rust source (`ferroui_markup_xaml_loader::rust_emitter`): the build-time back end of the
+# compiler. It needs the accessor table of registered properties, which only this feature turns on in the
+# base crate; applications that load markup at run time do not pay for it.
+emitter = ["runtime", "ferroui-base/compiler-metadata"]
 # Exposes the test framework fixture (`ferroui_markup_xaml_loader::testing`) to dependent crates.
 testing = []
 
@@ -29,3 +33,8 @@ ferroui-base = { workspace = true }
 # The XAML runtime library the run-time loader integrates with (service contracts, runtime helpers, loader
 # documents). Only with the `runtime` feature: the compiler extensions build without it.
 ferroui-markup-xaml = { workspace = true, optional = true }
+
+[dev-dependencies]
+# The unit tests of the emitter of Rust source run with the crate's own tests (`rust_emitter` is built
+# for them with the `runtime` feature), which needs the accessor table of the base crate.
+ferroui-base = { workspace = true, features = ["compiler-metadata"] }

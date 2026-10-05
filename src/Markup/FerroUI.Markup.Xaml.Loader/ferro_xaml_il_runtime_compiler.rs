@@ -226,6 +226,7 @@ impl FerroXamlIlRuntimeCompiler {
     /// transformed root node with the configuration and the type system of the transform:
     /// the input of the emitter of Rust source ([`crate::rust_emitter`]). Nothing is
     /// built and nothing is cached.
+    #[cfg(any(feature = "emitter", test))]
     pub(crate) fn transform_document(
         xaml: &str,
         name: &str,
