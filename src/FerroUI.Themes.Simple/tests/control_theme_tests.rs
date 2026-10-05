@@ -60,10 +60,11 @@ fn should_define_control_theme_for_built_in_templated_controls() {
     // WindowDrawnDecorations is the only StyleElement that is not Control but has ControlTheme
     templated_controls.push(WindowDrawnDecorations::TYPE);
     for type_ in TypeInfo::registered_types() {
-        // Resolve all public non-abstract TemplatedControls of the controls assembly.
+        // Resolve all public non-abstract TemplatedControls of the controls and the dialogs
+        // assemblies.
         // Technically, any StyledElement can have a control theme,
         // but templated control are ones that won't work without one.
-        if !type_.module_path().starts_with("ferroui_controls")
+        if !(type_.module_path().starts_with("ferroui_controls") || type_.module_path().starts_with("ferroui_dialogs"))
             || type_.module_path().contains("::testing")
             || !TemplatedControl::TYPE.is_assignable_from(type_)
             || type_.default_constructor().is_none()

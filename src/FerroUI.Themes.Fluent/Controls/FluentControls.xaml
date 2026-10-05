@@ -78,6 +78,7 @@
                 <MergeResourceInclude Source="ferres://FerroUI.Themes.Fluent/Controls/DropDownButton.xaml" />
                 <MergeResourceInclude Source="ferres://FerroUI.Themes.Fluent/Controls/EmbeddableControlRoot.xaml" />
                 <MergeResourceInclude Source="ferres://FerroUI.Themes.Fluent/Controls/Slider.xaml" />
+                <MergeResourceInclude Source="ferres://FerroUI.Themes.Fluent/Controls/ManagedFileChooser.xaml" />
                 <MergeResourceInclude Source="ferres://FerroUI.Themes.Fluent/Controls/SelectableTextBlock.xaml"/>
                 <MergeResourceInclude Source="ferres://FerroUI.Themes.Fluent/Controls/RefreshContainer.xaml" />
                 <MergeResourceInclude Source="ferres://FerroUI.Themes.Fluent/Controls/RefreshVisualizer.xaml" />

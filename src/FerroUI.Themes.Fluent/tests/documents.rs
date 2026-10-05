@@ -132,7 +132,7 @@ document_tests! {
     controls_label => "/Controls/Label.xaml";
     controls_list_box => "/Controls/ListBox.xaml";
     controls_list_box_item => "/Controls/ListBoxItem.xaml";
-    controls_managed_file_chooser => "/Controls/ManagedFileChooser.xaml", ignore = "not ported: FerroUI.Dialogs (ManagedFileChooser, ManagedFileChooserOverwritePrompt, ChildFitter, converters)";
+    controls_managed_file_chooser => "/Controls/ManagedFileChooser.xaml";
     controls_menu => "/Controls/Menu.xaml";
     controls_menu_flyout_presenter => "/Controls/MenuFlyoutPresenter.xaml";
     controls_menu_item => "/Controls/MenuItem.xaml";
