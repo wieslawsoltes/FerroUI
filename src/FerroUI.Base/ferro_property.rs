@@ -333,6 +333,29 @@ impl FerroProperty {
         self.property_type_name
     }
 
+    // The errors of the typed property routes. They only depend on the
+    // property, so they are compiled once instead of once per value type.
+
+    /// The message of a value that is not of the value type of the property.
+    #[cold]
+    pub(crate) fn invalid_value_message(&self) -> String {
+        format!("Invalid value for property '{}': expected {}.", self.name(), self.property_type_name())
+    }
+
+    /// Panics for a value that is not of the value type of the property.
+    #[cold]
+    #[track_caller]
+    pub(crate) fn invalid_value_type(&self) -> ! {
+        panic!("Invalid value for property '{}': expected {}.", self.name(), self.property_type_name())
+    }
+
+    /// Panics for a value that the validation of the property rejects.
+    #[cold]
+    #[track_caller]
+    pub(crate) fn value_not_valid(&self) -> ! {
+        panic!("the value is not valid for property '{}'", self.name())
+    }
+
     /// The class that registered the property.
     #[inline]
     pub fn owner_type(&self) -> &'static TypeInfo {

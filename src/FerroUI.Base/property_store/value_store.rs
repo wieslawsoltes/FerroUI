@@ -250,7 +250,7 @@ impl ValueStore {
         priority: BindingPriority,
     ) -> Option<Rc<dyn IDisposable>> {
         if !property.is_valid(&value) {
-            panic!("the value is not valid for property '{}'", property.name());
+            property.value_not_valid();
         }
 
         if priority != BindingPriority::LocalValue {
