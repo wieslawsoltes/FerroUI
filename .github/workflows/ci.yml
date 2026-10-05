@@ -1,0 +1,46 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+env:
+  CARGO_TERM_COLOR: always
+  CARGO_INCREMENTAL: 0
+  RUST_BACKTRACE: 1
+
+jobs:
+  conventions:
+    name: Source conventions
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Upstream project name stays out of the sources
+        run: |
+          if grep -rIli -E "avalonia|axaml|avares|\bavn" \
+              src external tests samples native Cargo.toml --exclude=NOTICE.md; then
+            echo "::error::the files above name the upstream project; only docs/, scripts/ and NOTICE.md may"
+            exit 1
+          fi
+
+  macos:
+    name: Build and test (macOS)
+    runs-on: macos-15
+    timeout-minutes: 180
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+      - name: Check
+        run: cargo check --workspace --all-targets --locked
+      - name: Test
+        run: cargo test --workspace --locked --no-fail-fast
