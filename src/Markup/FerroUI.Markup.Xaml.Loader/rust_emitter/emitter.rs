@@ -638,8 +638,10 @@ impl Emitter<'_> {
         }
         self.manipulation(&init.manipulation().as_node(), target)?;
         if supports_initialize {
+            // The interpreter calls `EndInit` as a member of the contract: its failure is the
+            // exception that wraps the exception of the member.
             self.line(format!(
-                "{}.try_end_init().map_err(|error| rt::at(error, {}, {}))?;",
+                "{}.try_end_init().map_err(|error| rt::at(rt::TARGET_INVOCATION_EXCEPTION, error, {}, {}))?;",
                 target.expr,
                 node.line(),
                 node.position()

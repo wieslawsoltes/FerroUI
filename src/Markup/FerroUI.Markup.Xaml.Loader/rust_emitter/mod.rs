@@ -17,7 +17,7 @@
 //!     border_0.begin_init();
 //!     // border.xaml(1,2) Padding
 //!     border_0.set_value(::ferroui_controls::Decorator::padding_property(), ::ferroui_base::Thickness::new(1.0_f64, ..));
-//!     border_0.try_end_init().map_err(|error| rt::at(error, 1, 2))?;
+//!     border_0.try_end_init().map_err(|error| rt::at(rt::TARGET_INVOCATION_EXCEPTION, error, 1, 2))?;
 //!     rt::complete_root_name_scope(Some(&border_0), name_scope.as_ref(), 1, 2)?;
 //!     Ok(border_0)
 //! }
@@ -26,7 +26,8 @@
 //! `rt` is `ferroui_markup_xaml::xaml_il::runtime::compiled`: the steps
 //! whose failure is a load error (name registration, the scope of the root,
 //! the position of an error) and the conversion of a value to `object`,
-//! shared with the run-time loader so that both fail and convert alike.
+//! shared with the run-time loader so that both fail (with the same message
+//! and exception type) and convert alike.
 //!
 //! rustc type-checks every call: a value whose Rust type cannot be stated
 //! exactly is never emitted. A document that contains anything outside the
