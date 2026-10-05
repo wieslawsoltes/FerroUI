@@ -64,6 +64,10 @@ time = { version = "0.3", default-features = false }
 # The mounted volumes of the managed file chooser.
 sysinfo = { version = "0.37", default-features = false, features = ["disk"] }
 
+# Whole-program optimisation in one code generation unit: the executables are
+# 10 to 14 % smaller than with thin LTO over four units and start no slower
+# (see scripts/perf-report.py); a full release build takes about twice as long
+# and its link step needs about 6 GB of memory.
 [profile.release]
-lto = "thin"
-codegen-units = 4
+lto = "fat"
+codegen-units = 1
