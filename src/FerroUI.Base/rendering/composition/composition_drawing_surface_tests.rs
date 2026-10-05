@@ -206,3 +206,63 @@ fn update_before_dispose_in_separate_batches_should_dispose_snapshot_with_the_su
 
     assert!(snapshot.is_disposed.get());
 }
+
+/// Not from upstream: an update queued after the dispose of the surface has
+/// been processed by an earlier batch still reaches the disposed server
+/// surface, which disposes the snapshot; the id of the surface is not
+/// handed to another object meanwhile.
+#[test]
+fn update_after_dispose_in_an_earlier_batch_should_dispose_snapshot() {
+    let services = TestCompositor::new();
+    let compositor = &services.compositor;
+
+    let feature = Rc::new(FakeExternalObjectsFeature::default());
+    let imported = import(&services, &feature);
+
+    services.run_jobs();
+
+    let surface = compositor.create_drawing_surface();
+    services.run_jobs();
+
+    surface.dispose();
+    services.run_jobs();
+
+    // An object created after the dispose must not get the id of the
+    // surface while the surface is alive.
+    let other = compositor.create_drawing_surface();
+    assert_ne!(ICompositionObject::server(&**other), ICompositionObject::server(&**surface));
+
+    let update = surface.update_async(&*imported);
+    services.run_jobs();
+    assert!(update.is_completed_successfully(), "{:?}", update.exception().map(|e| e.to_string()));
+
+    let snapshot = feature.image.last_snapshot.borrow().clone();
+    let snapshot = snapshot.expect("a snapshot was taken");
+    assert!(snapshot.is_disposed.get());
+    assert!(services.server::<server::ServerCompositionDrawingSurface>(ICompositionObject::server(&**other)).bitmap_ref().is_none());
+}
+
+/// Not from upstream: dropping a disposed surface releases its server
+/// object, and the id can then be reused.
+#[test]
+fn dropping_a_disposed_surface_releases_its_server_object() {
+    let services = TestCompositor::new();
+    let compositor = &services.compositor;
+    services.run_jobs();
+    let baseline = compositor.server().object_count();
+
+    let surface = compositor.create_drawing_surface();
+    services.run_jobs();
+    assert_eq!(baseline + 1, compositor.server().object_count());
+
+    surface.dispose();
+    services.run_jobs();
+    // The disposed server object is kept while the surface is alive.
+    assert_eq!(baseline + 1, compositor.server().object_count());
+
+    drop(surface);
+    // The release rides on a later batch.
+    let _other = compositor.create_drawing_surface();
+    services.run_jobs();
+    assert_eq!(baseline + 1, compositor.server().object_count());
+}

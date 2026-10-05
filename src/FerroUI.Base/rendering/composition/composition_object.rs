@@ -12,14 +12,20 @@ use std::rc::Rc;
 /// implementing [`ICompositorSerializable`] through it, and forwarding the
 /// animation members to the functions of this module.
 ///
-/// The server-side counterpart is known by id. When the object is dropped
-/// without having been disposed, its counterpart is disposed with the next
-/// batch: this stands in for the garbage collector, which reclaims a server
-/// object upstream once the UI-thread object is unreachable.
+/// The server-side counterpart is known by id. Disposing the object
+/// disposes its counterpart with the next batch, which keeps it under its id
+/// while this object is alive: upstream the UI-thread object holds its
+/// server object, so jobs and animations that name it after the disposal
+/// still reach it, and the id cannot be reused meanwhile. When the object is
+/// dropped, its counterpart is disposed (if it was not) and released with a
+/// later batch: this stands in for the garbage collector, which reclaims a
+/// server object upstream once the UI-thread object is unreachable.
 pub struct CompositionObject {
     compositor: Rc<Compositor>,
     server: Option<ServerObjectId>,
     is_disposed: Cell<bool>,
+    /// Whether the server side has been released by other means.
+    is_released: Cell<bool>,
     registered_for_serialization: Cell<bool>,
     pending_animations: PendingAnimations,
     implicit_animations: RefCell<Option<Rc<ImplicitAnimationCollection>>>,
@@ -31,6 +37,7 @@ impl CompositionObject {
             compositor: compositor.clone(),
             server,
             is_disposed: Cell::new(false),
+            is_released: Cell::new(false),
             registered_for_serialization: Cell::new(false),
             pending_animations: PendingAnimations::new(),
             implicit_animations: RefCell::new(None),
@@ -92,16 +99,17 @@ impl CompositionObject {
     pub fn dispose(&self) {
         if !self.is_disposed.get() {
             if let Some(server) = self.server {
-                self.compositor.dispose_on_next_batch(server);
+                self.compositor.dispose_and_keep_on_next_batch(server);
             }
         }
         self.is_disposed.set(true);
     }
 
     /// Marks the object disposed without queueing the disposal of its
-    /// server side: it has been disposed by other means.
+    /// server side: it has been disposed and released by other means.
     pub(crate) fn mark_disposed(&self) {
         self.is_disposed.set(true);
+        self.is_released.set(true);
     }
 
     /// Queues the object for serialization. `this` yields the handle of the
@@ -147,8 +155,13 @@ impl CompositionObject {
 
 impl Drop for CompositionObject {
     fn drop(&mut self) {
-        if !self.is_disposed.get() {
-            if let Some(server) = self.server {
+        if self.is_released.get() {
+            return;
+        }
+        if let Some(server) = self.server {
+            if self.is_disposed.get() {
+                self.compositor.release_with_a_later_batch(server);
+            } else {
                 self.compositor.dispose_with_a_later_batch(server);
             }
         }
