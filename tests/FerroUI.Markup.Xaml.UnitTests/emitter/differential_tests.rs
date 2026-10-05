@@ -14,9 +14,12 @@ use ferroui_base::controls::{INameScope, NameScope};
 use ferroui_base::data::core::ValueTypes;
 use ferroui_base::metadata::IServiceProvider;
 use ferroui_base::{BoxedValue, FerroObject, FerroProperty, FerroPropertyRegistry, Ref, StyledElement};
+use ferroui_markup_xaml::xaml_il::runtime::compiled::CompiledLoadError;
 use ferroui_markup_xaml::xaml_il::runtime::XamlIlRuntimeHelpers;
-use ferroui_markup_xaml::RuntimeXamlLoaderConfiguration;
+use ferroui_markup_xaml::{RuntimeXamlLoaderConfiguration, XamlLoadException};
+use ferroui_markup_xaml_loader::runtime::framework::XamlMemberException;
 use ferroui_markup_xaml_loader::rust_emitter::{generate_file, GeneratedFile};
+use xamlx::exceptions::XamlError;
 
 use super::corpus::{DOCUMENTS, EXPECTED_ELIGIBLE, EXPECTED_NOT_ELIGIBLE};
 use super::generated;
@@ -132,11 +135,32 @@ fn first_difference(interpreted: &str, generated: &str) -> String {
     }
 }
 
-fn build_generated(name: &str) -> Option<Result<BoxedValue, String>> {
+/// The type name of the exception a failed load reports: the type of the error of the
+/// compiler the run-time loader wraps (`XamlError::type_name`, a failed member being a
+/// `TargetInvocationException` that wraps a [`XamlMemberException`]), or the type a step of
+/// generated code names ([`CompiledLoadError`]). `None` for an error without either.
+fn exception_type(error: &XamlLoadException) -> Option<&'static str> {
+    let inner = error.inner_exception()?;
+    if let Some(error) = inner.downcast_ref::<XamlError>() {
+        return Some(error.type_name());
+    }
+    if inner.downcast_ref::<XamlMemberException>().is_some() {
+        return Some("TargetInvocationException");
+    }
+    inner.downcast_ref::<CompiledLoadError>().map(CompiledLoadError::type_name)
+}
+
+/// A failed load as the harness compares it: the exception type and the message, which
+/// carries the position.
+fn failure(error: &XamlLoadException) -> String {
+    format!("<error {}: {}>\n", exception_type(error).unwrap_or("<no exception type>"), error.message())
+}
+
+fn build_generated(name: &str) -> Option<Result<BoxedValue, XamlLoadException>> {
     let (_, build) = generated::DOCUMENTS.iter().find(|(document, _)| *document == name)?;
     // What the run-time loader gives `Build`: a root service provider with a fresh name scope.
     let provider: Rc<dyn IServiceProvider> = XamlIlRuntimeHelpers::create_root_service_provider_v3(None);
-    Some(build(Some(provider)).map_err(|error| error.message().to_string()))
+    Some(build(Some(provider)))
 }
 
 #[test]
@@ -237,14 +261,15 @@ fn both_back_ends_build_equal_object_trees() {
             println!("not eligible  {name}");
             continue;
         };
-        // A failed load is compared by its message, which carries the position.
+        // A failed load is compared by its exception type and its message, which carries
+        // the position.
         let interpreted = match try_load(xaml) {
             Ok(root) => dump_root(&root),
-            Err(error) => format!("<error: {}>\n", error.message()),
+            Err(error) => failure(&error),
         };
         let generated = match built {
             Ok(root) => dump_root(&root),
-            Err(error) => format!("<error: {error}>\n"),
+            Err(error) => failure(&error),
         };
         if interpreted == generated {
             matches += 1;
@@ -258,6 +283,21 @@ fn both_back_ends_build_equal_object_trees() {
     println!("{matches} match, {} mismatch, {not_eligible} not eligible", mismatches.len());
     assert!(mismatches.is_empty(), "the back ends differ:\n{}", mismatches.join("\n"));
     assert!(matches > 0 || generated::DOCUMENTS.is_empty(), "no document was compared");
+}
+
+/// Not from upstream. A failed build of generated code reports the exception type the
+/// run-time loader reports, not only its message: a duplicate name is the
+/// `ArgumentException` of the name scope in both back ends.
+#[test]
+fn a_failed_build_reports_the_exception_type_of_the_run_time_loader() {
+    let _base = xaml_test_base();
+    let name = "duplicate_name.xaml";
+    let (_, xaml) = DOCUMENTS.iter().find(|(document, _)| *document == name).expect("a corpus document");
+    let interpreted = try_load(xaml).err().expect("the run-time loader fails");
+    let generated = build_generated(name).expect("the document is generated").err().expect("the generated build fails");
+    assert_eq!(exception_type(&interpreted), Some("ArgumentException"));
+    assert_eq!(exception_type(&generated), Some("ArgumentException"));
+    assert_eq!(failure(&generated), failure(&interpreted));
 }
 
 #[test]
