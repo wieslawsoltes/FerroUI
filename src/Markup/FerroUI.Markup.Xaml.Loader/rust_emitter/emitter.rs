@@ -5,17 +5,20 @@
 //! [`UnsupportedNode`]; nothing approximate is written.
 
 use std::any::TypeId;
+use std::collections::HashMap;
 use std::fmt;
 use std::rc::Rc;
 
-use ferroui_base::metadata::MarkupType;
-use ferroui_base::{BoxedValue, FerroObject, StaticType, StyledElement, TypeInfo};
+use ferroui_base::metadata::{property_accessors, MarkupType};
+use ferroui_base::{BoxedValue, FerroProperty, StyledElement, TypeInfo};
 use xamlx::ast::XamlAstExtensions as _;
 use xamlx::ast::XamlAstNodeExtensions as _;
 use xamlx::ast::{
-    visit_node, IXamlAstNode, IXamlAstValueNode, IXamlAstVisitor, XamlAstNewClrObjectNode, XamlAstTextNode,
-    XamlConstantNode, XamlDirectCallPropertySetter, XamlManipulationGroupNode, XamlNullExtensionNode,
+    visit_node, IXamlAstNode, IXamlAstValueNode, IXamlAstVisitor, XamlAstCompilerLocalNode,
+    XamlAstImperativeValueManipulation, XamlAstLocalInitializationNodeEmitter, XamlAstManipulationImperativeNode,
+    XamlAstNewClrObjectNode, XamlAstTextNode, XamlConstantNode, XamlDirectCallPropertySetter, XamlManipulationGroupNode, XamlNullExtensionNode,
     XamlObjectInitializationNode, XamlPropertyAssignmentNode, XamlStaticExtensionNode, XamlStaticMember,
+    XamlValueNodeWithBeginInit,
 };
 use xamlx::exceptions::{XamlError, XamlResult};
 use xamlx::transform::TransformerConfiguration;
@@ -24,7 +27,7 @@ use xamlx::type_system::{IXamlConstructor, IXamlType, XamlValue};
 use crate::compiler_extensions::ast_nodes::{FerroXamlIlGridLengthAstNode, FerroXamlIlVectorLikeConstantAstNode};
 use crate::compiler_extensions::transformers::{FerroNameScopeRegistrationXamlIlNode, HandleRootObjectScopeNode};
 use crate::compiler_extensions::XamlIlFerroPropertyHelper;
-use crate::runtime::interpreter::single_setter;
+use crate::runtime::interpreter::{numeric_constant, single_setter};
 use crate::runtime::type_system::{
     RuntimeConstructor, RuntimeField, RuntimeFieldValue, RuntimeInvoker, RuntimeMethod, RuntimeType,
 };
@@ -70,7 +73,7 @@ fn failed(node: &Rc<dyn IXamlAstNode>, error: XamlError) -> UnsupportedNode {
 #[derive(Clone, Copy)]
 enum Kind {
     /// The expression has exactly the Rust type `id`; `nullable` is the
-    /// `TypeId` of `Option<that type>`.
+    /// `TypeId` of `Option<that type>` when the type has a nullable form.
     Exact { id: TypeId, nullable: Option<TypeId> },
     /// The expression is a local holding `Ref<class>`.
     Class(&'static TypeInfo),
@@ -87,15 +90,18 @@ fn exact<T: 'static>(expr: String) -> Typed {
     Typed { expr, kind: Kind::Exact { id: TypeId::of::<T>(), nullable: Some(TypeId::of::<Option<T>>()) } }
 }
 
-/// `snake_case` of a member name of the managed original, as the port
-/// names its Rust members (the rule of `scripts/generate_markup_types.py`):
-/// a word starts at an upper-case letter that follows a lower-case letter
-/// or a digit, and at the last upper-case letter of a run that is followed
-/// by a lower-case letter.
-pub(crate) fn snake_case(name: &str) -> String {
+/// `snake_case` of a class name, for the names of locals only (the names
+/// of Rust items always come from metadata): a word starts at an upper-case
+/// letter that follows a lower-case letter or a digit, and at the last
+/// upper-case letter of a run that is followed by a lower-case letter.
+fn snake_case(name: &str) -> String {
     let characters: Vec<char> = name.chars().collect();
     let mut result = String::with_capacity(name.len() + 4);
     for (index, &current) in characters.iter().enumerate() {
+        if !current.is_ascii_alphanumeric() {
+            result.push('_');
+            continue;
+        }
         if index > 0 && current.is_ascii_uppercase() {
             let previous = characters[index - 1];
             let next_is_lower = characters.get(index + 1).is_some_and(|next| next.is_ascii_lowercase());
@@ -109,6 +115,16 @@ pub(crate) fn snake_case(name: &str) -> String {
     result
 }
 
+/// A public Rust path from the registries as an absolute path
+/// (`::ferroui_controls::Border`), which no item of the including module can
+/// shadow.
+fn absolute(path: &str) -> String {
+    match path.starts_with("::") {
+        true => path.to_string(),
+        false => format!("::{path}"),
+    }
+}
+
 fn is_identifier(text: &str) -> bool {
     let mut characters = text.chars();
     match characters.next() {
@@ -118,8 +134,22 @@ fn is_identifier(text: &str) -> bool {
     characters.all(|c| c.is_ascii_alphanumeric() || c == '_')
 }
 
-fn f64_literal(value: f64) -> Option<String> {
-    value.is_finite().then(|| format!("{value:?}_f64"))
+fn f64_literal(value: f64) -> String {
+    match value {
+        _ if value.is_nan() => "::core::primitive::f64::NAN".to_string(),
+        f64::INFINITY => "::core::primitive::f64::INFINITY".to_string(),
+        f64::NEG_INFINITY => "::core::primitive::f64::NEG_INFINITY".to_string(),
+        _ => format!("{value:?}_f64"),
+    }
+}
+
+fn f32_literal(value: f32) -> String {
+    match value {
+        _ if value.is_nan() => "::core::primitive::f32::NAN".to_string(),
+        f32::INFINITY => "::core::primitive::f32::INFINITY".to_string(),
+        f32::NEG_INFINITY => "::core::primitive::f32::NEG_INFINITY".to_string(),
+        _ => format!("{value:?}_f32"),
+    }
 }
 
 fn runtime_type(type_: &Rc<dyn IXamlType>) -> Option<&RuntimeType> {
@@ -142,15 +172,56 @@ impl IXamlAstVisitor for NeedsParentStack {
     fn pop(&mut self) {}
 }
 
+/// The Rust expression that yields the definition of a registered property:
+/// a call of an accessor recorded by the declaration macros
+/// ([`property_accessors`]) on a type with a public Rust path. Every
+/// recorded accessor returns the identical definition; the one declared by
+/// `preferred` (the type the property was resolved on) is taken when it
+/// exists.
+fn property_definition(property: &'static FerroProperty, preferred: Option<&'static TypeInfo>) -> Result<String, String> {
+    let accessors = property_accessors(property);
+    let chosen = preferred
+        .and_then(|preferred| accessors.iter().find(|accessor| std::ptr::eq(accessor.owner, preferred)))
+        .into_iter()
+        .chain(accessors.iter())
+        .find_map(|accessor| accessor.owner.rust_path().map(|path| format!("{}::{}()", absolute(path), accessor.name)));
+    chosen.ok_or_else(|| match accessors.is_empty() {
+        true => format!("no accessor of the property {} is recorded", property.name()),
+        false => format!("no accessor of the property {} is declared by a type with a public Rust path", property.name()),
+    })
+}
+
 struct Emitter<'a> {
     configuration: &'a TransformerConfiguration,
+    document_name: &'a str,
     lines: Vec<String>,
-    locals: usize,
+    /// The number of locals named after each class.
+    local_names: HashMap<String, usize>,
+    /// The compiler locals initialised so far, by the address of their node.
+    compiler_locals: HashMap<usize, (String, Kind)>,
+}
+
+fn node_address<T: ?Sized>(node: &Rc<T>) -> usize {
+    Rc::as_ptr(node) as *const () as usize
 }
 
 impl Emitter<'_> {
     fn line(&mut self, text: String) {
         self.lines.push(format!("    {text}"));
+    }
+
+    /// The position marker of 9.3.6: `// <document>(line,position) <what>`.
+    fn marker(&mut self, node: &Rc<dyn IXamlAstNode>, what: &str) {
+        let document = self.document_name.replace(['\r', '\n'], " ");
+        self.line(format!("// {document}({},{}) {what}", node.line(), node.position()));
+    }
+
+    fn local_for(&mut self, class: &'static TypeInfo) -> String {
+        let base = snake_case(class.name());
+        let counter = self.local_names.entry(base.clone()).or_insert(0);
+        let name = format!("{base}_{counter}");
+        *counter += 1;
+        name
     }
 
     // --- values -------------------------------------------------------------
@@ -172,6 +243,20 @@ impl Emitter<'_> {
         if let Some(n) = node.cast::<XamlAstNewClrObjectNode>() {
             return self.new_object(node, &n);
         }
+        if let Some(n) = node.cast::<XamlValueNodeWithBeginInit>() {
+            return self.value_with_begin_init(node, &n);
+        }
+        if let Some(n) = node.cast::<XamlAstLocalInitializationNodeEmitter>() {
+            return self.local_initialization(node, &n);
+        }
+        if node.is::<XamlAstCompilerLocalNode>() {
+            let (expr, kind) = self
+                .compiler_locals
+                .get(&node_address(node))
+                .cloned()
+                .ok_or_else(|| unsupported(node, "a compiler local that is read before it is initialised"))?;
+            return Ok(Typed { expr, kind });
+        }
         if let Some(n) = node.cast::<XamlAstTextNode>() {
             return Ok(exact::<String>(format!("String::from({})", rust_string_literal(&n.text()))));
         }
@@ -188,7 +273,7 @@ impl Emitter<'_> {
         if let Some(n) = node.cast::<FerroXamlIlVectorLikeConstantAstNode>() {
             let mut arguments = Vec::with_capacity(n.values().len());
             for value in n.values() {
-                arguments.push(f64_literal(*value).ok_or_else(|| unsupported(node, "a number that is not finite"))?);
+                arguments.push(f64_literal(*value));
             }
             return self.constructor_call(node, n.constructor(), &arguments);
         }
@@ -201,7 +286,7 @@ impl Emitter<'_> {
                 .cloned()
                 .ok_or_else(|| unsupported(node, "the grid length constructor doesn't take a unit"))?;
             let grid_length = n.grid_length();
-            let value = f64_literal(grid_length.value).ok_or_else(|| unsupported(node, "a number that is not finite"))?;
+            let value = f64_literal(grid_length.value);
             let unit = self.enum_member(node, &unit_type, i64::from(grid_length.grid_unit_type as i32))?;
             return self.constructor_call(node, &constructor, &[value, unit.expr]);
         }
@@ -229,39 +314,107 @@ impl Emitter<'_> {
         let path = class
             .rust_path()
             .ok_or_else(|| unsupported(node, format!("no public Rust path is recorded for {}", type_.full_name())))?;
-        let local = format!("v{}", self.locals);
-        self.locals += 1;
-        self.line(format!("let {local} = {path}::new();"));
+        let local = self.local_for(class);
+        self.marker(node, class.name());
+        self.line(format!("let {local} = {}::new();", absolute(path)));
         Ok(Typed { expr: local, kind: Kind::Class(class) })
+    }
+
+    /// A value whose `BeginInit` runs as soon as it is created (an object
+    /// that is usable during its initialisation: the consumer attaches it
+    /// before it is populated).
+    fn value_with_begin_init(&mut self, node: &Rc<dyn IXamlAstNode>, n: &Rc<XamlValueNodeWithBeginInit>) -> EmitResult<Typed> {
+        let value = n.base.value();
+        let type_ = value.type_().get_clr_type().map_err(|e| failed(node, e))?;
+        let created = self.value(&value.as_node())?;
+        if self.supports_initialize(&type_) {
+            self.styled_class(node, &created)?;
+            self.line(format!("{}.begin_init();", created.expr));
+        }
+        Ok(created)
+    }
+
+    /// The initialisation of a compiler local: the value, kept in a Rust
+    /// local the reads of the compiler local name. The interpreter converts
+    /// the value to the type of the local, which for an object of a class is
+    /// the object itself.
+    fn local_initialization(
+        &mut self,
+        node: &Rc<dyn IXamlAstNode>,
+        n: &Rc<XamlAstLocalInitializationNodeEmitter>,
+    ) -> EmitResult<Typed> {
+        let local = n.local();
+        let value = self.value(&n.base.value().as_node())?;
+        let Kind::Class(class) = value.kind else {
+            return Err(unsupported(node, "a compiler local that does not hold an object of the object model"));
+        };
+        let local_class = runtime_type(&local.type_)
+            .and_then(RuntimeType::type_info)
+            .ok_or_else(|| unsupported(node, format!("a compiler local of type {}", local.type_.full_name())))?;
+        if !local_class.is_assignable_from(class) {
+            return Err(unsupported(node, format!("a compiler local of type {}", local.type_.full_name())));
+        }
+        self.compiler_locals.insert(node_address(&local), (value.expr.clone(), value.kind));
+        Ok(value)
     }
 
     /// A compile-time constant: what `constant_value` loads for it.
     fn constant(&mut self, node: &Rc<dyn IXamlAstNode>, type_: &Rc<dyn IXamlType>, constant: &XamlValue) -> EmitResult<Typed> {
+        if let XamlValue::String(text) = constant {
+            return Ok(exact::<String>(format!("String::from({})", rust_string_literal(text))));
+        }
+        if matches!(constant, XamlValue::Null) {
+            return Ok(Typed { expr: "None".to_string(), kind: Kind::Null });
+        }
+        let (integer, float) =
+            numeric_constant(constant).ok_or_else(|| unsupported(node, format!("the constant {constant:?}")))?;
         if type_.is_enum() {
-            let value = match constant {
-                XamlValue::Int32(v) => i64::from(*v),
-                XamlValue::Int64(v) => *v,
-                _ => return Err(unsupported(node, "an enumeration constant that is not an integer")),
-            };
+            let value = i64::try_from(integer)
+                .map_err(|_| unsupported(node, format!("{integer} is not a value of {}", type_.full_name())))?;
             return self.enum_member(node, type_, value);
         }
-        if type_.namespace().as_deref() != Some("System") {
-            return Err(unsupported(node, format!("a constant of type {}", type_.full_name())));
+        let out_of_range = || unsupported(node, format!("{integer} is out of the range of {}", type_.full_name()));
+        macro_rules! integer {
+            ($type_:ty, $suffix:literal) => {
+                Ok(exact::<$type_>(format!("{}{}", <$type_>::try_from(integer).map_err(|_| out_of_range())?, $suffix)))
+            };
         }
-        let name = type_.name();
-        match (name.as_str(), constant) {
-            ("String", XamlValue::String(text)) => {
-                Ok(exact::<String>(format!("String::from({})", rust_string_literal(text))))
+        if type_.namespace().as_deref() == Some("System") {
+            match type_.name().as_str() {
+                "Boolean" => return Ok(exact::<bool>(format!("{}", integer != 0))),
+                "Char" => {
+                    let character = u32::try_from(integer).ok().and_then(char::from_u32).ok_or_else(out_of_range)?;
+                    return Ok(exact::<char>(format!("{character:?}")));
+                }
+                "SByte" => return integer!(i8, "_i8"),
+                "Byte" => return integer!(u8, "_u8"),
+                "Int16" => return integer!(i16, "_i16"),
+                "UInt16" => return integer!(u16, "_u16"),
+                "Int32" => return integer!(i32, "_i32"),
+                "UInt32" => return integer!(u32, "_u32"),
+                "Int64" => return integer!(i64, "_i64"),
+                "UInt64" => return integer!(u64, "_u64"),
+                "Single" => return Ok(exact::<f32>(f32_literal(float as f32))),
+                "Double" => return Ok(exact::<f64>(f64_literal(float))),
+                _ => {}
             }
-            ("Double", XamlValue::Double(v)) => match f64_literal(*v) {
-                Some(literal) => Ok(exact::<f64>(literal)),
-                None => Err(unsupported(node, "a number that is not finite")),
-            },
-            ("Boolean", XamlValue::Boolean(v)) => Ok(exact::<bool>(format!("{v}"))),
-            ("Int32", XamlValue::Int32(v)) => Ok(exact::<i32>(format!("{v}_i32"))),
-            ("Int64", XamlValue::Int64(v)) => Ok(exact::<i64>(format!("{v}_i64"))),
-            _ => Err(unsupported(node, format!("a constant of type {}", type_.full_name()))),
         }
+        // The constant is typed as something else (`System.Object`): its own kind decides.
+        Ok(match constant {
+            XamlValue::Boolean(v) => exact::<bool>(format!("{v}")),
+            XamlValue::Char(v) => exact::<char>(format!("{v:?}")),
+            XamlValue::SByte(v) => exact::<i8>(format!("{v}_i8")),
+            XamlValue::Byte(v) => exact::<u8>(format!("{v}_u8")),
+            XamlValue::Int16(v) => exact::<i16>(format!("{v}_i16")),
+            XamlValue::UInt16(v) => exact::<u16>(format!("{v}_u16")),
+            XamlValue::Int32(v) => exact::<i32>(format!("{v}_i32")),
+            XamlValue::UInt32(v) => exact::<u32>(format!("{v}_u32")),
+            XamlValue::Int64(v) => exact::<i64>(format!("{v}_i64")),
+            XamlValue::UInt64(v) => exact::<u64>(format!("{v}_u64")),
+            XamlValue::Single(v) => exact::<f32>(f32_literal(*v)),
+            XamlValue::Double(v) => exact::<f64>(f64_literal(*v)),
+            _ => return Err(unsupported(node, format!("the constant {constant:?} as a value of {}", type_.full_name()))),
+        })
     }
 
     /// The member of a plain enumeration with the numeric value `value`, as
@@ -286,7 +439,7 @@ impl Emitter<'_> {
             .ok_or_else(|| unsupported(node, format!("no public Rust path is recorded for {}", markup.full_name())))?;
         let id = markup.handle().ok_or_else(|| unsupported(node, "the enumeration has no value type"))?.id();
         let nullable = markup.nullable.map(|nullable| nullable().id());
-        Ok(Typed { expr: format!("{path}::{variant}"), kind: Kind::Exact { id, nullable } })
+        Ok(Typed { expr: format!("{}::{variant}", absolute(path)), kind: Kind::Exact { id, nullable } })
     }
 
     /// `{x:Static Type.Member}` naming a member of a plain enumeration.
@@ -368,13 +521,15 @@ impl Emitter<'_> {
         let id = markup.handle().ok_or_else(|| unsupported(node, "the type has no value type"))?.id();
         let nullable = markup.nullable.map(|nullable| nullable().id());
         Ok(Typed {
-            expr: format!("{path}::{function}({})", arguments.join(", ")),
+            expr: format!("{}::{function}({})", absolute(path), arguments.join(", ")),
             kind: Kind::Exact { id, nullable },
         })
     }
 
     /// The expression as a value of exactly the Rust type `target` (the
-    /// value type of a registered property). `None`: it cannot be stated.
+    /// value type of a registered property), with the conversion the
+    /// run-time loader applies to the argument of the property's setter
+    /// (`to_exact`). `None`: it cannot be stated.
     fn coerce(&self, value: &Typed, target: TypeId) -> Option<String> {
         let object = TypeId::of::<Option<BoxedValue>>();
         match value.kind {
@@ -384,14 +539,14 @@ impl Emitter<'_> {
                 } else if nullable == Some(target) {
                     Some(format!("Some({})", value.expr))
                 } else if target == object {
-                    Some(format!("Some(std::rc::Rc::new({}) as ferroui_base::BoxedValue)", value.expr))
+                    Some(format!("rt::to_object({})", value.expr))
                 } else {
                     None
                 }
             }
             Kind::Class(class) => {
                 if target == object {
-                    return Some(format!("Some(std::rc::Rc::new({}.clone()) as ferroui_base::BoxedValue)", value.expr));
+                    return Some(format!("rt::to_object({}.clone())", value.expr));
                 }
                 let (declared, nullable) = TypeInfo::find_by_handle(target)?;
                 if !declared.is_assignable_from(class) {
@@ -400,7 +555,7 @@ impl Emitter<'_> {
                 let handle = if std::ptr::eq(declared, class) {
                     format!("{}.clone()", value.expr)
                 } else {
-                    format!("{}.clone().upcast::<{}>()", value.expr, declared.rust_path()?)
+                    format!("{}.clone().upcast::<{}>()", value.expr, absolute(declared.rust_path()?))
                 };
                 Some(if nullable { format!("Some({handle})") } else { handle })
             }
@@ -431,6 +586,15 @@ impl Emitter<'_> {
         if node.is::<HandleRootObjectScopeNode>() {
             return self.root_object_scope(node, target);
         }
+        if let Some(n) = node.cast::<XamlAstManipulationImperativeNode>() {
+            // The value this node is "supposed" to manipulate is discarded.
+            let imperative = n.imperative().as_node();
+            let Some(manipulation) = imperative.cast::<XamlAstImperativeValueManipulation>() else {
+                return Err(unsupported(&imperative, "no emitter for this imperative node"));
+            };
+            let value = self.value(&manipulation.value().as_node())?;
+            return self.manipulation(&manipulation.manipulation().as_node(), &value);
+        }
         if let Some(n) = node.cast::<FerroNameScopeRegistrationXamlIlNode>() {
             return self.name_scope_registration(node, &n, target);
         }
@@ -444,6 +608,17 @@ impl Emitter<'_> {
         }
     }
 
+    /// Whether `BeginInit` / `EndInit` are called on a value of the type:
+    /// the type is assignable to the initialisation contract of the
+    /// language.
+    fn supports_initialize(&self, type_: &Rc<dyn IXamlType>) -> bool {
+        self.configuration
+            .type_mappings
+            .support_initialize
+            .as_ref()
+            .is_some_and(|support_initialize| support_initialize.is_assignable_from(&**type_))
+    }
+
     /// `BeginInit`, the manipulation, `EndInit` (the parent stack is never
     /// needed: a document that needs it is not eligible).
     fn object_initialization(
@@ -453,12 +628,7 @@ impl Emitter<'_> {
         target: &Typed,
     ) -> EmitResult<()> {
         let type_ = init.type_.borrow().clone();
-        let supports_initialize = self
-            .configuration
-            .type_mappings
-            .support_initialize
-            .as_ref()
-            .is_some_and(|support_initialize| support_initialize.is_assignable_from(&*type_));
+        let supports_initialize = self.supports_initialize(&type_);
         if supports_initialize {
             // The contract is the one of the styled element; nothing else implements it by a known path.
             self.styled_class(node, target)?;
@@ -469,15 +639,19 @@ impl Emitter<'_> {
         self.manipulation(&init.manipulation().as_node(), target)?;
         if supports_initialize {
             self.line(format!(
-                "{}.try_end_init().map_err(|error| ferroui_markup_xaml::XamlLoadException::with_message(error.to_string()))?;",
-                target.expr
+                "{}.try_end_init().map_err(|error| rt::at(error, {}, {}))?;",
+                target.expr,
+                node.line(),
+                node.position()
             ));
         }
         Ok(())
     }
 
-    /// An assignment of a registered (styled or attached) property through
-    /// its plain accessor: `target.set_value(Owner::name_property(), value)`.
+    /// An assignment of a registered (styled, attached or direct) property
+    /// through the accessor the type system projects for it:
+    /// `target.set_value(Owner::name_property(), value)`, or
+    /// `target.set_direct_value(..)` for a direct property.
     fn property_assignment(
         &mut self,
         node: &Rc<dyn IXamlAstNode>,
@@ -518,21 +692,19 @@ impl Emitter<'_> {
         if !is_plain_accessor {
             return Err(unsupported(node, format!("{property_name}: the setter is a declared member")));
         }
-        if property.is_direct() || property.is_read_only() {
-            return Err(unsupported(node, format!("{property_name}: a direct property")));
+        if property.is_read_only() {
+            return Err(unsupported(node, format!("{property_name}: a read-only property")));
         }
+        self.styled_class(node, target)?;
         let declaring_type = field.declaring_type();
-        let owner = runtime_type(&declaring_type)
-            .and_then(RuntimeType::type_info)
-            .and_then(TypeInfo::rust_path)
-            .ok_or_else(|| {
-                unsupported(node, format!("no public Rust path is recorded for {}", declaring_type.full_name()))
-            })?;
+        let definition = property_definition(property, runtime_type(&declaring_type).and_then(RuntimeType::type_info))
+            .map_err(|reason| unsupported(node, format!("{property_name}: {reason}")))?;
         let values = assignment.values.borrow().clone();
         let [value_node] = values.as_slice() else {
             return Err(unsupported(node, format!("{property_name}: an assignment with {} values", values.len())));
         };
         let value_node = value_node.as_node();
+        self.marker(node, &property_name);
         let value = self.value(&value_node)?;
         let typed = self.coerce(&value, property.property_type()).ok_or_else(|| {
             unsupported(
@@ -540,28 +712,26 @@ impl Emitter<'_> {
                 format!("{property_name}: the value cannot be stated as `{}`", property.property_type_name()),
             )
         })?;
-        self.line(format!(
-            "{}.set_value({owner}::{}_property(), {typed});",
-            target.expr,
-            snake_case(property.name())
-        ));
+        let call = if property.is_direct() { "set_direct_value" } else { "set_value" };
+        self.line(format!("{}.{call}({definition}, {typed});", target.expr));
         Ok(())
     }
 
     /// `if (root is StyledElement s) NameScope.SetNameScope(s, scope); scope.Complete();`.
     fn root_object_scope(&mut self, node: &Rc<dyn IXamlAstNode>, target: &Typed) -> EmitResult<()> {
-        self.styled_class(node, target)?;
+        let Kind::Class(class) = target.kind else {
+            return Err(unsupported(node, "the root object is not an object of the object model"));
+        };
+        // The exact class of the root is known, so is whether it is a styled element.
+        let root = match StyledElement::TYPE.is_assignable_from(class) {
+            true => format!("Some(&{})", target.expr),
+            false => "None".to_string(),
+        };
         self.line(format!(
-            "ferroui_base::controls::NameScope::set_name_scope(&{}, name_scope.clone().map(ferroui_base::controls::NameScopeRef));",
-            target.expr
+            "rt::complete_root_name_scope({root}, name_scope.as_ref(), {}, {})?;",
+            node.line(),
+            node.position()
         ));
-        self.line("match &name_scope {".to_string());
-        self.line("    Some(scope) => ferroui_base::controls::INameScope::complete(&**scope),".to_string());
-        self.line(
-            "    None => return Err(ferroui_markup_xaml::XamlLoadException::with_message(\"The runtime context has no name scope to complete\")),"
-                .to_string(),
-        );
-        self.line("}".to_string());
         Ok(())
     }
 
@@ -572,26 +742,21 @@ impl Emitter<'_> {
         registration: &Rc<FerroNameScopeRegistrationXamlIlNode>,
         target: &Typed,
     ) -> EmitResult<()> {
-        let class = self.styled_class(node, target)?;
-        if std::ptr::eq(class, FerroObject::TYPE) {
-            return Err(unsupported(node, "the target is the object base class"));
+        if !matches!(target.kind, Kind::Class(_)) {
+            return Err(unsupported(node, "the target is not an object of the object model"));
         }
         let name = registration
             .name()
             .cast::<XamlAstTextNode>()
             .ok_or_else(|| unsupported(node, "a name that is not text"))?
             .text();
-        self.line("match &name_scope {".to_string());
         self.line(format!(
-            "    Some(scope) => ferroui_base::controls::INameScope::try_register(&**scope, {}, {}.clone().upcast::<ferroui_base::FerroObject>()).map_err(|error| ferroui_markup_xaml::XamlLoadException::with_message(error.to_string()))?,",
+            "rt::register_name(name_scope.as_ref(), {}, {}.clone().upcast::<::ferroui_base::FerroObject>(), {}, {})?;",
             rust_string_literal(&name),
-            target.expr
+            target.expr,
+            node.line(),
+            node.position()
         ));
-        self.line(
-            "    None => return Err(ferroui_markup_xaml::XamlLoadException::with_message(\"The runtime context has no name scope to register a name in\")),"
-                .to_string(),
-        );
-        self.line("}".to_string());
         Ok(())
     }
 }
@@ -602,15 +767,17 @@ impl Emitter<'_> {
 ///
 /// ```ignore
 /// pub fn <function_name>(
-///     service_provider: Option<std::rc::Rc<dyn ferroui_base::metadata::IServiceProvider>>,
-/// ) -> Result<ferroui_base::Ref<RootClass>, ferroui_markup_xaml::XamlLoadException>
+///     service_provider: Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
+/// ) -> Result<::ferroui_base::Ref<RootClass>, ::ferroui_markup_xaml::XamlLoadException>
 /// ```
 ///
 /// `service_provider` is the parent service provider of the context (the
 /// caller passes `XamlIlRuntimeHelpers::create_root_service_provider_v3(..)`,
-/// as the run-time loader does). `document_name` goes into the header
-/// comment. `Err` means the document is not eligible; nothing is written
-/// for it.
+/// as the run-time loader does). The function refers to the helpers of
+/// compiled markup as `rt` (`use ::ferroui_markup_xaml::xaml_il::runtime::compiled as rt;`
+/// in the including module). `document_name` goes into the header comment
+/// and the position markers. `Err` means the document is not eligible;
+/// nothing is written for it.
 pub fn emit_document(
     root: &Rc<dyn IXamlAstNode>,
     configuration: &TransformerConfiguration,
@@ -631,7 +798,7 @@ pub fn emit_document(
         return Err(unsupported(&root_value, "the root object is not created with a constructor"));
     }
 
-    let mut emitter = Emitter { configuration, lines: Vec::new(), locals: 0 };
+    let mut emitter = Emitter { configuration, document_name, lines: Vec::new(), local_names: HashMap::new(), compiler_locals: HashMap::new() };
     // `Build`: the root object, then `Populate` with a context of its own, whose name
     // scope field is filled from the parent service provider.
     let created = emitter.value(&root_value)?;
@@ -641,21 +808,17 @@ pub fn emit_document(
     let root_path = root_class
         .rust_path()
         .ok_or_else(|| unsupported(&root_value, "no public Rust path is recorded for the root class"))?;
-    emitter.line("let name_scope = match &service_provider {".to_string());
-    emitter.line(
-        "    Some(provider) => ferroui_markup_xaml::ServiceProviderExtensions::get_name_scope(&**provider),".to_string(),
-    );
-    emitter.line("    None => None,".to_string());
-    emitter.line("};".to_string());
+    emitter.line("let name_scope = rt::name_scope_of(service_provider.as_ref());".to_string());
     emitter.manipulation(&manipulation.as_node(), &created)?;
     emitter.line(format!("Ok({})", created.expr));
 
     let mut source = String::new();
     source.push_str(&format!("/// Generated from `{}`.\n", document_name.replace('`', "'").replace(['\r', '\n'], " ")));
     source.push_str(&format!("pub fn {function_name}(\n"));
-    source.push_str("    service_provider: Option<std::rc::Rc<dyn ferroui_base::metadata::IServiceProvider>>,\n");
+    source.push_str("    service_provider: Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,\n");
     source.push_str(&format!(
-        ") -> Result<ferroui_base::Ref<{root_path}>, ferroui_markup_xaml::XamlLoadException> {{\n"
+        ") -> Result<::ferroui_base::Ref<{}>, ::ferroui_markup_xaml::XamlLoadException> {{\n",
+        absolute(root_path)
     ));
     for line in &emitter.lines {
         source.push_str(line);
@@ -670,21 +833,23 @@ mod tests {
     use super::*;
 
     #[test]
-    fn member_names_become_snake_case() {
-        assert_eq!(snake_case("Padding"), "padding");
-        assert_eq!(snake_case("HorizontalAlignment"), "horizontal_alignment");
-        assert_eq!(snake_case("IsVisible"), "is_visible");
-        assert_eq!(snake_case("ZIndex"), "z_index");
+    fn class_names_become_local_names() {
+        assert_eq!(snake_case("Border"), "border");
+        assert_eq!(snake_case("StackPanel"), "stack_panel");
         assert_eq!(snake_case("UIElement"), "ui_element");
-        assert_eq!(snake_case("Row2Span"), "row2_span");
+        assert_eq!(snake_case("FerroList`1"), "ferro_list_1");
     }
 
     #[test]
     fn numbers_are_typed_literals() {
-        assert_eq!(f64_literal(100.0).as_deref(), Some("100.0_f64"));
-        assert_eq!(f64_literal(-0.5).as_deref(), Some("-0.5_f64"));
-        assert_eq!(f64_literal(f64::NAN), None);
-        assert_eq!(f64_literal(f64::INFINITY), None);
+        assert_eq!(f64_literal(100.0), "100.0_f64");
+        assert_eq!(f64_literal(-0.5), "-0.5_f64");
+        assert_eq!(f64_literal(1e300), "1e300_f64");
+        assert_eq!(f64_literal(f64::NAN), "::core::primitive::f64::NAN");
+        assert_eq!(f64_literal(f64::INFINITY), "::core::primitive::f64::INFINITY");
+        assert_eq!(f64_literal(f64::NEG_INFINITY), "::core::primitive::f64::NEG_INFINITY");
+        assert_eq!(f32_literal(0.25), "0.25_f32");
+        assert_eq!(f32_literal(f32::NEG_INFINITY), "::core::primitive::f32::NEG_INFINITY");
     }
 
     #[test]

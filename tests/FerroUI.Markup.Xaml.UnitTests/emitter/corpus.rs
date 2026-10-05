@@ -4,8 +4,11 @@
 //! eligible ones). `EXPECTED_ELIGIBLE` lists the documents that must be eligible (a
 //! regression of the emitter's coverage fails the harness); `EXPECTED_NOT_ELIGIBLE`
 //! the ones that must not be (bindings, styles with selectors, templates, resources,
-//! collection adds and direct properties are outside this increment). A document in
-//! neither list is only reported.
+//! collection adds, declared members and types without a recorded Rust path are outside
+//! this increment). A document in neither list is only reported. A document whose load
+//! fails is compared by the message of the error (`duplicate_name.xaml`). A document whose
+//! load panics (a value a validator rejects) cannot be in the corpus: the harness does not
+//! catch panics.
 
 /// `(name, xaml)`: the name is the path of the document below the root URI.
 pub const DOCUMENTS: &[(&str, &str)] = &[
@@ -49,6 +52,29 @@ pub const DOCUMENTS: &[(&str, &str)] = &[
     ("control_template.xaml", "<Button xmlns='https://github.com/ferroui' xmlns:x='http://schemas.microsoft.com/winfx/2006/xaml'><Button.Template><ControlTemplate><Border/></ControlTemplate></Button.Template></Button>"),
     ("brush_from_text.xaml", "<Border xmlns='https://github.com/ferroui' xmlns:x='http://schemas.microsoft.com/winfx/2006/xaml' Background='Red'></Border>"),
     ("resources.xaml", "<Border xmlns='https://github.com/ferroui' xmlns:x='http://schemas.microsoft.com/winfx/2006/xaml'><Border.Resources><x:Double x:Key='Size'>4</x:Double></Border.Resources></Border>"),
+    ("text_block_font_style_weight.xaml", "<TextBlock xmlns='https://github.com/ferroui' xmlns:x='http://schemas.microsoft.com/winfx/2006/xaml' FontStyle='Italic' FontWeight='Bold' FontStretch='Condensed'></TextBlock>"),
+    ("text_block_text_layout.xaml", "<TextBlock xmlns='https://github.com/ferroui' xmlns:x='http://schemas.microsoft.com/winfx/2006/xaml' TextAlignment='Right' TextWrapping='Wrap' MaxLines='3' LineHeight='18.5' LetterSpacing='0.5'></TextBlock>"),
+    ("text_block_padding_font.xaml", "<TextBlock xmlns='https://github.com/ferroui' xmlns:x='http://schemas.microsoft.com/winfx/2006/xaml' Padding='1,2' FontSize='11.5' BaselineOffset='2'></TextBlock>"),
+    ("text_block_unicode_text.xaml", "<TextBlock xmlns='https://github.com/ferroui' xmlns:x='http://schemas.microsoft.com/winfx/2006/xaml' Text='caf\u{e9} \u{1f600} tab&#9;end'></TextBlock>"),
+    ("text_block_multiline_text.xaml", "<TextBlock xmlns='https://github.com/ferroui' xmlns:x='http://schemas.microsoft.com/winfx/2006/xaml' Text='first&#10;second'></TextBlock>"),
+    ("border_exponent_numbers.xaml", "<Border xmlns='https://github.com/ferroui' xmlns:x='http://schemas.microsoft.com/winfx/2006/xaml' Opacity='1e-3' Width='1.5E2'></Border>"),
+    ("border_negative_margin.xaml", "<Border xmlns='https://github.com/ferroui' xmlns:x='http://schemas.microsoft.com/winfx/2006/xaml' Margin='-4,0,-2.5,1'></Border>"),
+    ("border_auto_size.xaml", "<Border xmlns='https://github.com/ferroui' xmlns:x='http://schemas.microsoft.com/winfx/2006/xaml' Width='NaN' MaxWidth='Infinity' MinHeight='0'></Border>"),
+    ("content_control_alignment.xaml", "<ContentControl xmlns='https://github.com/ferroui' xmlns:x='http://schemas.microsoft.com/winfx/2006/xaml' HorizontalContentAlignment='Stretch' VerticalContentAlignment='Center'></ContentControl>"),
+    ("content_control_element.xaml", "<ContentControl xmlns='https://github.com/ferroui' xmlns:x='http://schemas.microsoft.com/winfx/2006/xaml'><Border Padding='2'/></ContentControl>"),
+    ("button_content_element.xaml", "<Button xmlns='https://github.com/ferroui' xmlns:x='http://schemas.microsoft.com/winfx/2006/xaml'><TextBlock Text='Inner'/></Button>"),
+    ("button_content_property_element.xaml", "<Button xmlns='https://github.com/ferroui' xmlns:x='http://schemas.microsoft.com/winfx/2006/xaml'><Button.Content><Border Width='3'/></Button.Content></Button>"),
+    ("content_tag_null.xaml", "<ContentControl xmlns='https://github.com/ferroui' xmlns:x='http://schemas.microsoft.com/winfx/2006/xaml' Tag='{x:Null}' Content='{x:Null}'></ContentControl>"),
+    ("content_x_static_enum.xaml", "<ContentControl xmlns='https://github.com/ferroui' xmlns:x='http://schemas.microsoft.com/winfx/2006/xaml' Content='{x:Static Dock.Bottom}'></ContentControl>"),
+    ("attached_dock_x_static.xaml", "<Border xmlns='https://github.com/ferroui' xmlns:x='http://schemas.microsoft.com/winfx/2006/xaml'><TextBlock DockPanel.Dock='{x:Static Dock.Left}'/></Border>"),
+    ("attached_grid_spans.xaml", "<Border xmlns='https://github.com/ferroui' xmlns:x='http://schemas.microsoft.com/winfx/2006/xaml'><Border Grid.RowSpan='2' Grid.ColumnSpan='3' Grid.IsSharedSizeScope='True'/></Border>"),
+    ("named_nested_elements.xaml", "<Border xmlns='https://github.com/ferroui' xmlns:x='http://schemas.microsoft.com/winfx/2006/xaml' x:Name='outer'><Border Name='middle'><TextBlock x:Name='inner' Text='x'/></Border></Border>"),
+    ("named_content.xaml", "<UserControl xmlns='https://github.com/ferroui' xmlns:x='http://schemas.microsoft.com/winfx/2006/xaml' Name='host'><Border x:Name='content'/></UserControl>"),
+    ("duplicate_name.xaml", "<Border xmlns='https://github.com/ferroui' xmlns:x='http://schemas.microsoft.com/winfx/2006/xaml' Name='same'><Border Name='same'/></Border>"),
+    ("name_and_x_name.xaml", "<Border xmlns='https://github.com/ferroui' xmlns:x='http://schemas.microsoft.com/winfx/2006/xaml' Name='a'><TextBlock x:Name='b' Tag='t'/></Border>"),
+    ("deep_nesting.xaml", "<Border xmlns='https://github.com/ferroui' xmlns:x='http://schemas.microsoft.com/winfx/2006/xaml'><Decorator><Border><Viewbox><Border><TextBlock Text='deep'/></Border></Viewbox></Border></Decorator></Border>"),
+    ("layout_transform_control.xaml", "<LayoutTransformControl xmlns='https://github.com/ferroui' xmlns:x='http://schemas.microsoft.com/winfx/2006/xaml'><Border/></LayoutTransformControl>"),
+    ("user_control_properties.xaml", "<UserControl xmlns='https://github.com/ferroui' xmlns:x='http://schemas.microsoft.com/winfx/2006/xaml' Width='320' Height='200' Padding='5' Opacity='0.9'><TextBlock Text='Body' Margin='2'/></UserControl>"),
 ];
 
 /// The documents that must be eligible for emission.
@@ -72,18 +98,52 @@ pub const EXPECTED_ELIGIBLE: &[&str] = &[
     "border_child_with_text.xaml",
     "border_nested.xaml",
     "text_block_text.xaml",
+    "text_block_empty_text.xaml",
+    "text_block_font_size.xaml",
     "stack_panel_properties.xaml",
     "dock_panel_last_child_fill.xaml",
+    "button_content_text.xaml",
+    "user_control_content_element.xaml",
+    "control_tag.xaml",
+    "attached_grid_position.xaml",
+    "attached_dock.xaml",
+    "x_null_child.xaml",
+    "x_static_enum.xaml",
     "border_many_properties.xaml",
+    "named_element.xaml",
+    "name_property.xaml",
+    "text_block_unicode_text.xaml",
+    "text_block_multiline_text.xaml",
+    "border_exponent_numbers.xaml",
+    "border_negative_margin.xaml",
+    "border_auto_size.xaml",
+    "content_control_alignment.xaml",
+    "content_control_element.xaml",
+    "button_content_element.xaml",
+    "button_content_property_element.xaml",
+    "content_tag_null.xaml",
+    "content_x_static_enum.xaml",
+    "attached_dock_x_static.xaml",
+    "attached_grid_spans.xaml",
+    "named_nested_elements.xaml",
+    "named_content.xaml",
+    "duplicate_name.xaml",
+    "name_and_x_name.xaml",
+    "user_control_properties.xaml",
 ];
 
 /// The documents that must not be eligible for emission.
 pub const EXPECTED_NOT_ELIGIBLE: &[&str] = &[
+    "attached_canvas_left.xaml",
     "panel_children.xaml",
-    "named_element.xaml",
-    "name_property.xaml",
     "binding.xaml",
     "style_with_selector.xaml",
     "control_template.xaml",
+    "brush_from_text.xaml",
     "resources.xaml",
+    "text_block_font_style_weight.xaml",
+    "text_block_text_layout.xaml",
+    "text_block_padding_font.xaml",
+    "deep_nesting.xaml",
+    "layout_transform_control.xaml",
 ];

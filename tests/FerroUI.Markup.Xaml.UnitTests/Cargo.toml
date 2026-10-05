@@ -19,5 +19,5 @@ ferroui-base = { workspace = true, features = ["testing"] }
 ferroui-controls = { workspace = true, features = ["testing"] }
 ferroui-markup = { workspace = true }
 ferroui-markup-xaml = { workspace = true }
-ferroui-markup-xaml-loader = { workspace = true, features = ["runtime"] }
+ferroui-markup-xaml-loader = { workspace = true, features = ["runtime", "testing"] }
 xamlx = { workspace = true }
