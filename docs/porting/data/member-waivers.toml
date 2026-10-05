@@ -1,0 +1,81 @@
+# Types and members that are intentionally not ported, and name aliases. Read by scripts/port-status/port_status.py.
+# A waiver only applies to an item the scanner did not find; waived items are listed in the
+# tracking pages with the reason and are excluded from the percentages.
+#
+# [[waive]]
+#   project = upstream project name; omit to match in every project
+#   type    = glob on the upstream full type name (`Avalonia.Point`, `Avalonia.Media.*`); omit for any type
+#   member  = glob on the member name or on its signature text; omit to waive the whole type
+#   reason  = shown in the tracking pages
+
+[[waive]]
+project = "Avalonia.Base"
+member = "*Matrix4x4*"
+reason = "System.Numerics interop, not applicable"
+
+[[waive]]
+project = "Avalonia.Base"
+type = "Avalonia.Vector*"
+member = "*Vector2*"
+reason = "System.Numerics interop, not applicable"
+
+[[waive]]
+project = "Avalonia.Base"
+type = "Avalonia.Vector3D"
+member = "*Vector3 *"
+reason = "System.Numerics interop, not applicable"
+
+[[waive]]
+member = "GetHashCode"
+reason = "Rust: `Hash` is derived where the type can be hashed; float-based value types are not `Eq`/`Hash`"
+
+# Aliases: Rust functions that implement an upstream member under a name the default rule
+# (`DoIt` -> `do_it` / `do_it_*`) cannot derive.
+#
+# [[alias]]
+#   project = upstream project name; omit to match in every project
+#   type    = glob on the upstream full type name
+#   member  = upstream member name
+#   rust    = list of Rust fn names on the mapped type; each one stands for one overload
+
+[[alias]]
+project = "Avalonia.Base"
+type = "Avalonia.Media.Color"
+member = "ToHsl"
+rust = ["rgb_to_hsl", "normalized_rgb_to_hsl"]
+
+[[alias]]
+project = "Avalonia.Base"
+type = "Avalonia.Media.Color"
+member = "ToHsv"
+rust = ["rgb_to_hsv", "normalized_rgb_to_hsv"]
+
+[[alias]]
+project = "Avalonia.Base"
+type = "Avalonia.AvaloniaObject"
+member = "ClearValue"
+rust = ["clear_direct_value"]
+
+[[alias]]
+project = "Avalonia.Base"
+type = "Avalonia.AvaloniaObject"
+member = "GetValue"
+rust = ["get_direct_value"]
+
+[[alias]]
+project = "Avalonia.Base"
+type = "Avalonia.AvaloniaObject"
+member = "SetValue"
+rust = ["set_direct_value"]
+
+[[alias]]
+project = "Avalonia.Base"
+type = "Avalonia.AvaloniaObject"
+member = "RaisePropertyChanged"
+rust = ["raise_direct_property_changed"]
+
+[[alias]]
+project = "Avalonia.Base"
+type = "Avalonia.PropertyStore.ValueStore"
+member = "AddBinding"
+rust = ["add_direct_binding"]

@@ -1,0 +1,138 @@
+# Exceptions to the default upstream-file -> Rust-file rule of docs/porting/PORTING-GUIDE.md.
+# Read by scripts/port-status/port_status.py. Regenerate the tracking documents after editing:
+#   scripts/port-status/run.sh
+#
+# Default rule (no entry needed):
+#   src/Avalonia.Base/Media/SolidColorBrush.cs -> src/FerroUI.Base/media/solid_color_brush.rs
+#   AvaloniaProperty`1.cs                      -> ferro_property.rs      (generic arity merged)
+#   Dispatcher.Queue.cs                        -> dispatcher_queue.rs, else dispatcher.rs (partial class)
+#   IValueEntry.cs                             -> i_value_entry.rs, else value_entry.rs when that file declares the trait
+#
+# [[map]]
+#   project  = upstream project name (as in TRACKING.md); omit to match in every project
+#   upstream = list of upstream files relative to the project directory; `*` wildcards allowed (they also match `/`)
+#   kind     = "merged"          several upstream files share one Rust file
+#              "renamed"         same content, different Rust path
+#              "replaced"        a different Rust design takes its place; members are waived unless members = "scan"
+#              "not-applicable"  nothing to port; excluded from the totals (no `rust` key)
+#   rust     = Rust file relative to the project's FerroUI directory (or a list of files)
+#   types    = optional table: upstream type name -> Rust type name, when the type was renamed in the merge
+#   members  = "scan" (default for merged/renamed) or "waive" (default for replaced/not-applicable)
+#   reason   = shown in the tracking pages
+#
+# [[rust_only]]
+#   path   = Rust file relative to the repository root (`*` wildcards allowed)
+#   reason = why it has no upstream counterpart
+
+# ---------------------------------------------------------------- Avalonia.Base
+
+[[map]]
+project = "Avalonia.Base"
+upstream = ["AvaloniaPropertyMetadata.cs", "StyledPropertyMetadata`1.cs", "DirectPropertyMetadata`1.cs"]
+kind = "merged"
+rust = "ferro_property_metadata.rs"
+reason = "the three metadata classes share one file"
+
+[[map]]
+project = "Avalonia.Base"
+upstream = ["AttachedProperty.cs"]
+kind = "merged"
+rust = "styled_property.rs"
+reason = "AttachedProperty<T> is a thin wrapper over StyledProperty<T>"
+
+[[map]]
+project = "Avalonia.Base"
+upstream = ["DirectPropertyBase.cs"]
+kind = "merged"
+rust = "direct_property.rs"
+reason = "DirectPropertyBase<T> lives next to DirectProperty<TOwner, T>"
+
+[[map]]
+project = "Avalonia.Base"
+upstream = ["PropertyStore/TypedBindingEntry.cs", "PropertyStore/SourceUntypedBindingEntry.cs", "PropertyStore/BindingEntryBase.cs"]
+kind = "merged"
+rust = "property_store/binding_entry.rs"
+types = { TypedBindingEntry = "BindingEntry", SourceUntypedBindingEntry = "BindingEntry", BindingEntryBase = "BindingEntry" }
+reason = "one generic BindingEntry<T> with a BindingSource enum replaces the base class and its typed/untyped subclasses"
+
+[[map]]
+project = "Avalonia.Base"
+upstream = [
+    "PropertyStore/LocalValueBindingObserver.cs",
+    "PropertyStore/LocalValueBindingObserverBase.cs",
+    "PropertyStore/DirectBindingObserver.cs",
+    "PropertyStore/DirectUntypedBindingObserver.cs",
+]
+kind = "merged"
+rust = "property_store/local_value_binding_observer.rs"
+types = { LocalValueBindingObserverBase = "LocalValueBindingObserver", DirectUntypedBindingObserver = "DirectBindingObserver" }
+reason = "local-value and direct-property binding observers (typed and untyped) share one file"
+
+[[map]]
+project = "Avalonia.Base"
+upstream = ["PropertyStore/ImmediateValueEntry.cs"]
+kind = "merged"
+rust = "property_store/immediate_value_frame.rs"
+reason = "the entry lives next to the frame that owns it"
+
+[[map]]
+project = "Avalonia.Base"
+upstream = ["Controls/IPseudoClasses.cs"]
+kind = "merged"
+rust = "controls/classes.rs"
+reason = "the trait lives next to its only implementation"
+
+[[map]]
+project = "Avalonia.Base"
+upstream = ["Data/Optional.cs"]
+kind = "not-applicable"
+reason = "Optional<T> is Rust `Option<T>` (porting guide, Types table)"
+
+[[rust_only]]
+path = "src/FerroUI.Base/type_system.rs"
+reason = "object model runtime (Ref/WeakRef handles, TypeInfo, class macros): replaces the CLR type system, virtual dispatch and GC references"
+
+[[rust_only]]
+path = "src/FerroUI.Base/utilities/handler_list.rs"
+reason = "storage for C# `event` handlers (multicast delegates have no Rust equivalent; porting guide, Types table)"
+
+# ------------------------------------------------------------ Avalonia.MicroCom
+
+[[map]]
+project = "Avalonia.MicroCom"
+upstream = ["CallbackBase.cs"]
+kind = "replaced"
+rust = "com_object.rs"
+types = { CallbackBase = "ComObject" }
+reason = "ComObject<T> (reference-counted COM callable wrapper) takes the place of the managed/native dual-reference callback base class"
+
+[[rust_only]]
+path = "src/FerroUI.MicroCom/*.rs"
+reason = "port of the MicroCom.Runtime package, which upstream consumes as a NuGet binary"
+
+# ------------------------------------------------------------------------ XamlX
+# Decisions recorded in docs/porting/xaml.md, sections 1.2 and 6.1.
+
+[[map]]
+project = "XamlX"
+upstream = ["IL/*"]
+kind = "not-applicable"
+reason = "IL backend: replaced by the Rust emitter and interpreter backends, runtime context becomes plain runtime structs (docs/porting/xaml.md 1.2)"
+
+[[map]]
+project = "XamlX"
+upstream = ["Extensions/*", "Compatibility/*"]
+kind = "not-applicable"
+reason = ".NET polyfills (docs/porting/xaml.md 6.1)"
+
+[[rust_only]]
+path = "external/XamlX/src/XamlX/extensions/query_interface.rs"
+reason = "dynamic interface queries on AST nodes: replaces C# `is`/`as` casts to backend-generic interfaces"
+
+# ------------------------------------------------ Avalonia.Native (native sources)
+
+[[map]]
+project = "Avalonia.Native (native sources)"
+upstream = ["inc/avalonia-native.h"]
+kind = "not-applicable"
+reason = "generated header: produced at build time from frn.idl by microcom-codegen (scripts/sync-native.sh)"
