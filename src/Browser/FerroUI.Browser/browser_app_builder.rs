@@ -46,6 +46,12 @@ pub struct BrowserPlatformOptions {
     /// The rendering modes with fallbacks. The first element has the
     /// highest priority.
     pub rendering_mode: Vec<BrowserRenderingMode>,
+
+    /// The file dialogs use the `native-file-system-adapter` polyfill. If
+    /// the native implementation is available, by default it is used. This
+    /// property forces the polyfill to be always used. For more details, see
+    /// https://github.com/jimmywarting/native-file-system-adapter#a-note-when-downloading-with-the-polyfilled-version.
+    pub prefer_file_dialog_polyfill: bool,
 }
 
 impl Default for BrowserPlatformOptions {
@@ -56,6 +62,7 @@ impl Default for BrowserPlatformOptions {
                 BrowserRenderingMode::WebGL1,
                 BrowserRenderingMode::Software2D,
             ],
+            prefer_file_dialog_polyfill: false,
         }
     }
 }
