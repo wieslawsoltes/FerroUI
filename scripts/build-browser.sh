@@ -11,13 +11,16 @@
 # the root of the site, which its scope and the save picker polyfill need) and the WebAssembly module
 # with its script. Serve the directory with any static web server.
 #
+# The module is built with the `browser` profile of the workspace (optimised for size, see
+# docs/porting/browser-platform.md, section 18), or with the `dev` profile with --debug.
+#
 # Needs: the Emscripten SDK activated in the shell (emsdk 6.0.10: `source emsdk_env.sh`), the Rust
 # target wasm32-unknown-emscripten, the wasm-bindgen command-line tool of the version of the
 # wasm-bindgen crate on PATH, node and npm. See docs/porting/browser-platform.md.
 set -euo pipefail
 
 APPLICATION=""
-PROFILE="release"
+PROFILE="browser"
 OUT=""
 while [ $# -gt 0 ]; do
   case "$1" in
@@ -106,7 +109,7 @@ echo "== script module"
 
 echo "== WebAssembly module ($PROFILE)"
 FLAGS=()
-[ "$PROFILE" = "release" ] && FLAGS+=(--release)
+[ "$PROFILE" = "browser" ] && FLAGS+=(--profile browser)
 (cd "$ROOT" && cargo build --locked --target wasm32-unknown-emscripten "${CARGO_SELECTION[@]}" "${FLAGS[@]}")
 
 echo "== site"
