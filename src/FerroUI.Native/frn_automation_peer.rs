@@ -63,6 +63,16 @@ thread_local! {
     /// native accessibility element holds the wrapper of its peer for its
     /// whole life, so a peer that has a node always maps to the same
     /// wrapper, and with it to the same node.
+    ///
+    /// Once native code has set a node, the wrapper is part of a reference
+    /// cycle, as in the reference: the wrapper holds its node, the node holds
+    /// its element strongly (`FrnAutomationNode` in `FrnAutomationNode.h`)
+    /// and the element holds the wrapper (`FrnAccessibilityElement` in
+    /// `automation.mm`). Such a wrapper is therefore never dropped and its
+    /// node never disposed; the native window holds the wrapper of its root
+    /// peer the same way, which keeps the peers of the whole tree alive after
+    /// the window is closed. The reference has the same cycle through the
+    /// object the managed runtime hands to native code.
     static WRAPPERS: RefCell<HashMap<usize, Weak<FrnAutomationPeer>>> = RefCell::new(HashMap::new());
 }
 
@@ -174,6 +184,10 @@ impl Drop for FrnAutomationPeer {
                 }
             }
         });
+        // The finalizer of the reference. Only a wrapper whose node was never
+        // set, or was set by something other than a native element, gets
+        // here: an element keeps the wrapper of its node alive (see
+        // `WRAPPERS`).
         if let Some(node) = self.node.get_mut().take() {
             node.dispose();
         }
@@ -226,6 +240,12 @@ impl IFrnAutomationPeerImpl for FrnAutomationPeer {
             if self.node.borrow().is_some() {
                 panic!("The FrnAutomationPeer already has a node.");
             }
+            // A counted reference, as in the reference. The element that owns
+            // the node deletes it in its `dealloc` without regard to its
+            // reference count (`automation.mm`), so the pointer would dangle
+            // if the element were ever deallocated while the wrapper lives;
+            // the reference cycle described at `WRAPPERS` keeps that from
+            // happening, in the reference as here.
             *self.node.borrow_mut() = node.map(ComPtr::from_ref);
         })
     }
@@ -887,19 +907,28 @@ mod tests {
     #[test]
     fn hit_test_result_moves_up_to_a_control_element() {
         let _scope = test_scope();
-        let button = Button::new();
+        let panel = Panel::new();
+        let decorator = Border::new();
         let inner = Border::new();
-        button.set_content(Some(Control::boxed(inner.clone())));
+        decorator.set_child(inner.clone());
+        panel.children().add(decorator.clone());
         AutomationProperties::set_is_control_element_override(&inner, Some(false));
+        AutomationProperties::set_is_control_element_override(&decorator, Some(false));
 
+        // Neither border is a control element: the walk passes both and stops
+        // at the panel.
         let result = control_element_for_hit_test(Some(peer_of(&inner)));
+        assert_eq!(result, Some(peer_of(&panel)));
 
-        // The border is not a control element; without a template it has no
-        // parent peer, so it is the answer itself.
-        assert_eq!(result, Some(peer_of(&inner)));
+        // A control element is the answer itself.
+        let result = control_element_for_hit_test(Some(peer_of(&panel)));
+        assert_eq!(result, Some(peer_of(&panel)));
 
-        let result = control_element_for_hit_test(Some(peer_of(&button)));
-        assert_eq!(result, Some(peer_of(&button)));
+        // Without a control element above it, the walk ends at the top.
+        AutomationProperties::set_is_control_element_override(&panel, Some(false));
+        let result = control_element_for_hit_test(Some(peer_of(&inner)));
+        assert_eq!(result, Some(peer_of(&panel)));
+
         assert!(control_element_for_hit_test(None).is_none());
     }
 }
