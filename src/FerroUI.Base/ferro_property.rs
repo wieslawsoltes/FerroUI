@@ -675,6 +675,11 @@ macro_rules! ferro_property {
                         ::std::option::Option::None => {
                             let property: &'static $ty = $body;
                             CELL.set(::std::option::Option::Some(property));
+                            $crate::metadata::record_property_accessor(
+                                <$owner as $crate::StaticType>::TYPE,
+                                ::std::stringify!($name),
+                                $crate::Registrable::as_registered_property(property),
+                            );
                             property
                         }
                     }
