@@ -13,7 +13,6 @@ import { CompletionHelper } from "./ferroui/completionHelper";
 import { ScreenHelper } from "./ferroui/screens";
 import { NavigationHelper } from "./ferroui/navigationHelper";
 import { StreamHelper } from "./ferroui/stream";
-import { PromiseHelper } from "./ferroui/promiseHelper";
 
 function getModuleUrl(): string {
     return import.meta.url;
@@ -50,7 +49,6 @@ export {
     ScreenHelper,
     NavigationHelper,
     StreamHelper,
-    PromiseHelper,
     StorageModule,
     getModuleUrl,
     resolveModuleUrl,

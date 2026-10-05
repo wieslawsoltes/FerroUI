@@ -1,4 +1,4 @@
-use crate::interop::promise_helper::{JsError, JsTask};
+use crate::interop::completion_helper::{PromiseError, PromiseFuture};
 use crate::interop::{storage_helper, stream_helper, JsObject};
 use ferroui_base::logging::{LogArea, LogEventLevel, Logger};
 use ferroui_base::threading::Dispatcher;
@@ -38,7 +38,7 @@ pub struct WriteableStream {
 #[derive(Default)]
 struct Requests {
     pending: usize,
-    error: Option<JsError>,
+    error: Option<PromiseError>,
     wakers: Vec<Waker>,
 }
 
@@ -105,7 +105,7 @@ impl WriteableStream {
         task.await.map(|_| ()).map_err(io::Error::from)
     }
 
-    fn write_internal(&mut self, buffer: &[u8]) -> io::Result<JsTask> {
+    fn write_internal(&mut self, buffer: &[u8]) -> io::Result<PromiseFuture<JsObject>> {
         let js_reference = self.js_reference()?;
         let task = stream_helper::write_async(js_reference, buffer);
         self.position += buffer.len() as u64;
@@ -133,7 +133,7 @@ impl WriteableStream {
 
     /// Counts a request nobody waits for and records its failure, for the
     /// next call to report.
-    fn observe(&self, task: JsTask) {
+    fn observe(&self, task: PromiseFuture<JsObject>) {
         self.requests.borrow_mut().pending += 1;
         let requests = self.requests.clone();
         Dispatcher::ui_thread().to_task_scheduler().start_local(async move {
@@ -245,7 +245,7 @@ impl Drop for WriteableStream {
 #[derive(Default)]
 struct CloseState {
     settled: bool,
-    error: Option<JsError>,
+    error: Option<PromiseError>,
     wakers: Vec<Waker>,
 }
 
@@ -255,7 +255,7 @@ struct PendingClose {
 }
 
 impl PendingClose {
-    fn settle(self: &Rc<Self>, error: Option<JsError>) {
+    fn settle(self: &Rc<Self>, error: Option<PromiseError>) {
         let wakers = {
             let mut state = self.state.borrow_mut();
             state.settled = true;
@@ -282,7 +282,7 @@ impl PendingClose {
     }
 
     /// Takes the failure of the settled close, which is then reported.
-    fn take_error(self: &Rc<Self>) -> Option<JsError> {
+    fn take_error(self: &Rc<Self>) -> Option<PromiseError> {
         let error = self.state.borrow_mut().error.take();
         PENDING_CLOSES.with(|closes| closes.borrow_mut().retain(|close| !Rc::ptr_eq(close, self)));
         error
@@ -361,9 +361,9 @@ mod tests {
         assert_eq!(counter.0.load(Ordering::SeqCst), 1);
         assert_eq!(waiting.as_mut().poll(&mut context), Poll::Ready(()));
 
-        failed.settle(Some(JsError::new("The disk is full")));
+        failed.settle(Some(PromiseError::new("", "The disk is full")));
         assert_eq!(PENDING_CLOSES.with(|closes| closes.borrow().len()), 1, "only the failed close is kept");
-        assert_eq!(failed.take_error(), Some(JsError::new("The disk is full")));
+        assert_eq!(failed.take_error(), Some(PromiseError::new("", "The disk is full")));
         assert_eq!(PENDING_CLOSES.with(|closes| closes.borrow().len()), 0, "a reported failure is dropped");
     }
 

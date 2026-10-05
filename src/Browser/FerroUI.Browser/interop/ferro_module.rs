@@ -1,4 +1,4 @@
-use super::promise_helper::{JsError, JsTask};
+use super::completion_helper::{await_promise, PromiseError};
 use wasm_bindgen::prelude::*;
 
 /// The name the main script module is imported by, relative to the script
@@ -22,6 +22,6 @@ extern "C" {
 /// Imports the storage bundle unless it is already imported. The functions
 /// of [`storage_helper`](super::storage_helper) that live in that bundle
 /// may only be called once this has completed.
-pub async fn import_storage() -> Result<(), JsError> {
-    JsTask::new(import_storage_raw()).await.map(|_| ())
+pub async fn import_storage() -> Result<(), PromiseError> {
+    await_promise(&import_storage_raw()).await.map(|_| ())
 }

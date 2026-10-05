@@ -5,9 +5,9 @@
 //! [`ferro_module::import_storage`](super::ferro_module::import_storage);
 //! they are reached through `StorageModule.module` of the main module and
 //! may only be called once that import has completed. The asynchronous
-//! ones return their promise, awaited with a [`JsTask`].
+//! ones return their promise, awaited with a [`PromiseFuture`].
 
-use super::promise_helper::JsTask;
+use super::completion_helper::{await_promise, PromiseFuture};
 use super::{non_null, JsObject};
 use wasm_bindgen::prelude::*;
 
@@ -141,8 +141,8 @@ fn optional(value: Option<&JsObject>) -> JsObject {
     value.cloned().unwrap_or(JsObject::UNDEFINED)
 }
 
-pub fn select_folder_dialog(start_in: Option<&JsObject>, prefer_polyfill: bool) -> JsTask {
-    JsTask::new(select_folder_dialog_raw(&optional(start_in), prefer_polyfill))
+pub fn select_folder_dialog(start_in: Option<&JsObject>, prefer_polyfill: bool) -> PromiseFuture<JsObject> {
+    await_promise(&select_folder_dialog_raw(&optional(start_in), prefer_polyfill))
 }
 
 pub fn open_file_dialog(
@@ -151,8 +151,8 @@ pub fn open_file_dialog(
     types: Option<Vec<JsObject>>,
     exclude_accept_all_option: bool,
     prefer_polyfill: bool,
-) -> JsTask {
-    JsTask::new(open_file_dialog_raw(&optional(start_in), multiple, types, exclude_accept_all_option, prefer_polyfill))
+) -> PromiseFuture<JsObject> {
+    await_promise(&open_file_dialog_raw(&optional(start_in), multiple, types, exclude_accept_all_option, prefer_polyfill))
 }
 
 pub fn save_file_dialog(
@@ -161,8 +161,8 @@ pub fn save_file_dialog(
     types: Option<Vec<JsObject>>,
     exclude_accept_all_option: bool,
     prefer_polyfill: bool,
-) -> JsTask {
-    JsTask::new(save_file_dialog_raw(
+) -> PromiseFuture<JsObject> {
+    await_promise(&save_file_dialog_raw(
         &optional(start_in),
         suggested_name,
         types,
@@ -171,28 +171,28 @@ pub fn save_file_dialog(
     ))
 }
 
-pub fn open_bookmark(key: &str) -> JsTask {
-    JsTask::new(open_bookmark_raw(key))
+pub fn open_bookmark(key: &str) -> PromiseFuture<JsObject> {
+    await_promise(&open_bookmark_raw(key))
 }
 
-pub fn save_bookmark(item: &JsObject) -> JsTask {
-    JsTask::new(save_bookmark_raw(item))
+pub fn save_bookmark(item: &JsObject) -> PromiseFuture<JsObject> {
+    await_promise(&save_bookmark_raw(item))
 }
 
-pub fn delete_bookmark(item: &JsObject) -> JsTask {
-    JsTask::new(delete_bookmark_raw(item))
+pub fn delete_bookmark(item: &JsObject) -> PromiseFuture<JsObject> {
+    await_promise(&delete_bookmark_raw(item))
 }
 
-pub fn get_properties(item: &JsObject) -> JsTask {
-    JsTask::new(get_properties_raw(item))
+pub fn get_properties(item: &JsObject) -> PromiseFuture<JsObject> {
+    await_promise(&get_properties_raw(item))
 }
 
-pub fn open_write(item: &JsObject) -> JsTask {
-    JsTask::new(open_write_raw(item))
+pub fn open_write(item: &JsObject) -> PromiseFuture<JsObject> {
+    await_promise(&open_write_raw(item))
 }
 
-pub fn open_read(item: &JsObject) -> JsTask {
-    JsTask::new(open_read_raw(item))
+pub fn open_read(item: &JsObject) -> PromiseFuture<JsObject> {
+    await_promise(&open_read_raw(item))
 }
 
 pub fn storage_item_from_handle(handle: &JsObject) -> Option<JsObject> {
@@ -203,34 +203,34 @@ pub fn get_items_iterator(item: &JsObject) -> Option<ItemsIterator> {
     non_null(get_items_iterator_raw(item)).map(JsCast::unchecked_into)
 }
 
-pub fn delete_async(file_handle: &JsObject) -> JsTask {
-    JsTask::new(delete_async_raw(file_handle))
+pub fn delete_async(file_handle: &JsObject) -> PromiseFuture<JsObject> {
+    await_promise(&delete_async_raw(file_handle))
 }
 
-pub fn move_async(file_handle: &JsObject, destination_folder: &JsObject) -> JsTask {
-    JsTask::new(move_async_raw(file_handle, destination_folder))
+pub fn move_async(file_handle: &JsObject, destination_folder: &JsObject) -> PromiseFuture<JsObject> {
+    await_promise(&move_async_raw(file_handle, destination_folder))
 }
 
-pub fn create_file(folder_handle: &JsObject, name: &str) -> JsTask {
-    JsTask::new(create_file_raw(folder_handle, name))
+pub fn create_file(folder_handle: &JsObject, name: &str) -> PromiseFuture<JsObject> {
+    await_promise(&create_file_raw(folder_handle, name))
 }
 
 /// Whether both storage items are the same entry of the file system;
 /// resolves to a boolean.
-pub fn is_same_entry(item: &JsObject, other: &JsObject) -> JsTask {
-    JsTask::new(is_same_entry_raw(item, other))
+pub fn is_same_entry(item: &JsObject, other: &JsObject) -> PromiseFuture<JsObject> {
+    await_promise(&is_same_entry_raw(item, other))
 }
 
-pub fn create_folder(folder_handle: &JsObject, name: &str) -> JsTask {
-    JsTask::new(create_folder_raw(folder_handle, name))
+pub fn create_folder(folder_handle: &JsObject, name: &str) -> PromiseFuture<JsObject> {
+    await_promise(&create_folder_raw(folder_handle, name))
 }
 
-pub fn get_file(folder_handle: &JsObject, name: &str) -> JsTask {
-    JsTask::new(get_file_raw(folder_handle, name))
+pub fn get_file(folder_handle: &JsObject, name: &str) -> PromiseFuture<JsObject> {
+    await_promise(&get_file_raw(folder_handle, name))
 }
 
-pub fn get_folder(folder_handle: &JsObject, name: &str) -> JsTask {
-    JsTask::new(get_folder_raw(folder_handle, name))
+pub fn get_folder(folder_handle: &JsObject, name: &str) -> PromiseFuture<JsObject> {
+    await_promise(&get_folder_raw(folder_handle, name))
 }
 
 /// The `kind` of a storage item or handle: `"file"` or `"directory"`.
@@ -245,8 +245,8 @@ pub fn name_of(item: &JsObject) -> Option<String> {
 
 impl ItemsIterator {
     /// The next entry of the directory.
-    pub fn next(&self) -> JsTask {
-        JsTask::new(self.next_raw())
+    pub fn next(&self) -> PromiseFuture<JsObject> {
+        await_promise(&self.next_raw())
     }
 }
 

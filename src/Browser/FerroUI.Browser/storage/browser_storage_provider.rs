@@ -1,7 +1,7 @@
 use super::blob_readable_stream::BlobReadableStream;
 use super::writeable_stream::{settle_pending_closes, WriteableStream};
 use crate::browser_app_builder::BrowserPlatformOptions;
-use crate::interop::promise_helper::JsError;
+use crate::interop::completion_helper::PromiseError;
 use crate::interop::storage_helper::{self, StorageItemProperties};
 use crate::interop::{ferro_module, non_null, JsObject};
 use ferroui_base::animation::TimeSpan;
@@ -41,11 +41,11 @@ fn ready<T: 'static>(value: T) -> LocalBoxFuture<T> {
     Box::pin(std::future::ready(value))
 }
 
-fn is_cancel(error: &JsError) -> bool {
+fn is_cancel(error: &PromiseError) -> bool {
     error.message().contains(PICKER_CANCEL_MESSAGE)
 }
 
-fn denied(error: JsError) -> io::Error {
+fn denied(error: PromiseError) -> io::Error {
     if error.message() == NO_PERMISSIONS_MESSAGE {
         io::Error::new(io::ErrorKind::PermissionDenied, "User denied permissions to open the file")
     } else {
@@ -583,7 +583,7 @@ impl JsStorageFolder {
         this
     }
 
-    fn should_supress_error_on_file_access(error: &JsError) -> bool {
+    fn should_supress_error_on_file_access(error: &PromiseError) -> bool {
         error.message() == NO_PERMISSIONS_MESSAGE
             || error.message().contains(TYPE_MISSMATCH_MESSAGE)
             || error.message().contains(FILE_FOLDER_NOT_FOUND_MESSAGE)
@@ -719,14 +719,14 @@ mod tests {
 
     #[test]
     fn picker_cancel_and_permission_messages_are_recognised() {
-        assert!(is_cancel(&JsError::new("The user aborted a request.")));
-        assert!(!is_cancel(&JsError::new("Permissions denied")));
-        assert_eq!(denied(JsError::new("Permissions denied")).kind(), io::ErrorKind::PermissionDenied);
-        assert_eq!(denied(JsError::new("other")).kind(), io::ErrorKind::Other);
-        assert!(JsStorageFolder::should_supress_error_on_file_access(&JsError::new(
+        assert!(is_cancel(&PromiseError::new("AbortError", "The user aborted a request.")));
+        assert!(!is_cancel(&PromiseError::new("", "Permissions denied")));
+        assert_eq!(denied(PromiseError::new("", "Permissions denied")).kind(), io::ErrorKind::PermissionDenied);
+        assert_eq!(denied(PromiseError::new("", "other")).kind(), io::ErrorKind::Other);
+        assert!(JsStorageFolder::should_supress_error_on_file_access(&PromiseError::new("", 
             "A requested file or directory could not be found at the time an operation was processed."
         )));
-        assert!(!JsStorageFolder::should_supress_error_on_file_access(&JsError::new("other")));
+        assert!(!JsStorageFolder::should_supress_error_on_file_access(&PromiseError::new("", "other")));
     }
 
     #[test]
