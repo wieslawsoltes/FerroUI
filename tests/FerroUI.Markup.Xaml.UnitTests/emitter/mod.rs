@@ -37,4 +37,6 @@ pub mod rust_paths_check;
 #[cfg(test)]
 mod differential_tests;
 #[cfg(test)]
+mod repository_documents;
+#[cfg(test)]
 mod rust_paths_tests;
