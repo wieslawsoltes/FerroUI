@@ -136,6 +136,11 @@ impl ServerObjectAnimations {
                 animation: animation.clone(),
             }));
         }
+        // The instance names the objects it works with by id; they are
+        // resolved here, on the server, before it is initialized.
+        if let Some(compositor) = self.compositor.upgrade() {
+            animation.resolve(&compositor);
+        }
         animation.initialize(committed_at, current_value, property);
         if is_active {
             animation.activate();
