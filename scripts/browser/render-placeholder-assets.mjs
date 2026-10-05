@@ -13,7 +13,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { launchChrome } from "./chrome.mjs";
+import { open } from "./harness.mjs";
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..", "..");
 const out = path.join(root, "samples", "ControlCatalog", "PlaceholderAssets");
@@ -44,19 +44,18 @@ const images = [
 // The sizes of the application icon, each a PNG image inside the icon file.
 const iconSizes = [16, 32, 48, 256];
 
-const chrome = await launchChrome({ width: 1000, height: 700 });
-const page = await chrome.openPage();
-await page.send("Page.enable");
+fs.mkdirSync(out, { recursive: true });
+// The page of the harness serves the output directory; every picture is drawn from a data address.
+const page = await open(out, { width: 1000, height: 700 });
 await page.send("Emulation.setDefaultBackgroundColorOverride", { color: { r: 0, g: 0, b: 0, a: 0 } });
 
 async function render(content, width, height) {
     const html = `<!doctype html><html><body style="margin:0;background:transparent">${content}</body></html>`;
     await page.send("Page.navigate", { url: `data:text/html;base64,${Buffer.from(html).toString("base64")}` });
     await page.waitFor("document.readyState === 'complete'", 10000);
-    return page.screenshot({ x: 0, y: 0, width, height });
+    return (await page.screenshot(undefined, { x: 0, y: 0, width, height })).png;
 }
 
-fs.mkdirSync(out, { recursive: true });
 try {
     for (const [file, width, height, content] of images) {
         fs.writeFileSync(path.join(out, file), await render(content, width, height));
@@ -84,6 +83,5 @@ try {
     fs.writeFileSync(path.join(out, "icon.ico"), Buffer.concat([header, ...entries.map(([, png]) => png)]));
     console.log(`icon.ico ${iconSizes.join(", ")}`);
 } finally {
-    page.close();
-    await chrome.close();
+    await page.close();
 }

@@ -48,13 +48,13 @@ jobs:
   browser:
     name: Check (browser, wasm32-unknown-emscripten)
     runs-on: ubuntu-latest
-    timeout-minutes: 90
+    timeout-minutes: 150
     steps:
       - uses: actions/checkout@v4
       - uses: ./.github/actions/browser-toolchain
         with:
+          # Shared with the Pages workflow, which builds the same site.
           cache-key: browser
-          wasm-bindgen: "true"
       - name: Script module (type check, lint, bundle, pixel test)
         working-directory: src/Browser/FerroUI.Browser/webapp
         run: |
@@ -86,22 +86,10 @@ jobs:
         run: scripts/build-browser.sh storage_view
       - name: Storage behaviour tests in headless Chrome
         run: node scripts/browser/tests/storage_view.test.mjs
-
-  browser-site:
-    name: ControlCatalog in the browser (headless Chrome)
-    runs-on: ubuntu-latest
-    timeout-minutes: 120
-    steps:
-      - uses: actions/checkout@v4
-      - uses: ./.github/actions/browser-toolchain
-        with:
-          # Shared with the Pages workflow, which builds the same site.
-          cache-key: browser-site
-          wasm-bindgen: "true"
-      - name: Build the site
+      - name: Build the ControlCatalog site
         run: scripts/build-browser.sh control-catalog-browser
-      - name: Test the site (WebGL2 and 2D canvas, resize, console)
-        run: node scripts/browser/test-site.mjs target/browser/control-catalog-browser --screenshot target/browser/screenshots/control-catalog.png
+      - name: ControlCatalog tests in headless Chrome (rendering, resize, console, drawer, navigation, click, typing)
+        run: node scripts/browser/tests/control_catalog.test.mjs --screenshot target/browser/screenshots/control-catalog.png
       - name: Sizes of the published modules
         run: node scripts/browser/module-sizes.mjs target/browser/control-catalog-browser >> "$GITHUB_STEP_SUMMARY"
       - name: Keep the screenshot
