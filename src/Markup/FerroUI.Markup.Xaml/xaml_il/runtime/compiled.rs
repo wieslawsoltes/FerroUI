@@ -1,0 +1,119 @@
+//! The helpers that Rust source generated from markup calls (the emitter of
+//! the ahead-of-time compiler, docs/porting/xaml.md, section 9.9 item R3).
+//!
+//! Not a port of an upstream file: upstream's compiler emits IL that calls
+//! the members of the framework and the runtime helpers directly and lets
+//! their exceptions propagate. Generated Rust has an error channel instead
+//! ([`XamlLoadException`]); these helpers perform the steps of the run-time
+//! loader whose failure is a load error, with the same messages, so that a
+//! document built by generated code fails exactly where and as the run-time
+//! loader fails.
+
+use std::fmt::Display;
+use std::rc::Rc;
+
+use ferroui_base::controls::{INameScope, NameScope, NameScopeError, NameScopeRef};
+use ferroui_base::data::core::{ValueType, ValueTypes};
+use ferroui_base::metadata::{IServiceProvider, MarkupValue};
+use ferroui_base::{BoxedValue, FerroObject, Ref, StyledElement, TypeInfo};
+
+use crate::{ServiceProviderExtensions, XamlLoadException};
+
+/// The load error of a failure at the position `line`, `position` of the
+/// document, with the message the run-time loader gives a failure of the
+/// node it was evaluating: the message of the load exception of the
+/// compiler (the message followed by `Line <line>, position <position>.`
+/// unless both are 0), then the position in parentheses.
+pub fn at(message: impl Display, line: i32, position: i32) -> XamlLoadException {
+    let message = match (line, position) {
+        (0, 0) => message.to_string(),
+        _ => format!("{message} Line {line}, position {position}."),
+    };
+    XamlLoadException::with_message(format!("{message} (line {line} position {position})"))
+}
+
+/// The name scope field of the context of a document
+/// (`FerroXamlIlContextNameScopeField`): the name scope of the parent
+/// service provider, `None` when it has none.
+pub fn name_scope_of(parent: Option<&Rc<dyn IServiceProvider>>) -> Option<Rc<dyn INameScope>> {
+    parent.and_then(|parent| parent.get_name_scope())
+}
+
+/// `context.FerroNameScope.Register(name, element)`: registers `element`
+/// under `name` in the name scope of the context. A missing scope, a
+/// completed scope and a duplicate name are load errors at the position of
+/// the registration.
+pub fn register_name(
+    scope: Option<&Rc<dyn INameScope>>,
+    name: &str,
+    element: Ref<FerroObject>,
+    line: i32,
+    position: i32,
+) -> Result<(), XamlLoadException> {
+    let scope = scope.ok_or_else(|| at("The runtime context has no name scope to register a name in", line, position))?;
+    scope.try_register(name, element).map_err(|error: NameScopeError| at(error, line, position))
+}
+
+/// The handling of the scope of the root object of a document: when the
+/// root is a styled element its name scope becomes `scope`, then the scope
+/// is completed. A context without a name scope is a load error at the
+/// position of the root object, after the name scope of the root was
+/// cleared.
+pub fn complete_root_name_scope(
+    root: Option<&StyledElement>,
+    scope: Option<&Rc<dyn INameScope>>,
+    line: i32,
+    position: i32,
+) -> Result<(), XamlLoadException> {
+    if let Some(root) = root {
+        NameScope::set_name_scope(root, scope.cloned().map(NameScopeRef));
+    }
+    let scope = scope.ok_or_else(|| at("The runtime context has no name scope to complete", line, position))?;
+    scope.complete();
+    Ok(())
+}
+
+/// The form in which an object of the object model is handed to an UNTYPED
+/// target (a property of type `object`: content, a tag, an item, a setter
+/// value). The framework's convention for controls held in untyped values
+/// is the handle of the control base class (`Ref<Control>`), whatever the
+/// class of the control; other objects are held in the handle of their own
+/// class. `None` if `value` already is in that form (or is no object).
+///
+/// The run-time loader converts the arguments of untyped members with it;
+/// generated code reaches it through [`to_object`].
+pub fn untyped_object_form(value: &BoxedValue) -> Option<BoxedValue> {
+    thread_local! {
+        static CONTROL: std::cell::OnceCell<Option<(&'static TypeInfo, ValueType)>> =
+            const { std::cell::OnceCell::new() };
+    }
+    let object = ValueTypes::as_object(&**value)?;
+    let control = CONTROL.with(|control| {
+        *control.get_or_init(|| {
+            let type_info = TypeInfo::find("FerroUI.Controls", "Control")?;
+            Some((type_info, ValueType::new(type_info.handle()?, type_info.name())))
+        })
+    });
+    let (control_type, control_handle) = control?;
+    if !control_type.is_assignable_from(object.get_type()) || value.value_type_id() == control_handle.id() {
+        return None;
+    }
+    let root: BoxedValue = Rc::new(object);
+    ValueTypes::try_convert_registered(&root, control_handle)
+}
+
+/// `value` as the value of a member of type `object` (`System.Object`):
+/// boxed, an object of the object model in its untyped form
+/// ([`untyped_object_form`]), then cast to the untyped value, which is what
+/// a member typed `object` receives from the run-time loader.
+pub fn to_object<T: PartialEq + 'static>(value: T) -> MarkupValue {
+    let boxed: BoxedValue = Rc::new(value);
+    let boxed = untyped_object_form(&boxed).unwrap_or(boxed);
+    if let Some(untyped) = boxed.downcast_ref::<Option<BoxedValue>>() {
+        return untyped.clone();
+    }
+    match ValueTypes::try_cast(&boxed, ValueType::of::<Option<BoxedValue>>()) {
+        Some(untyped) => untyped.downcast_ref::<Option<BoxedValue>>().cloned().flatten(),
+        None => Some(boxed),
+    }
+}
