@@ -11,6 +11,8 @@ rustflags = [
   # An ES module with a factory function as its default export.
   "-Clink-arg=-sMODULARIZE",
   "-Clink-arg=-sEXPORT_ES6",
+  # The module runs in the main thread of a web page; the script leaves out Node.js and worker support.
+  "-Clink-arg=-sENVIRONMENT=web",
   "-Clink-arg=-sALLOW_MEMORY_GROWTH=1",
   # The default stack of 64 KB is far too small for layout and markup loading.
   "-Clink-arg=-sSTACK_SIZE=8MB",
