@@ -59,7 +59,7 @@ ferro_class_info!(PipsPager {
     },
 });
 
-ferro_impl_classes!(PipsPager: StyledElementImpl, VisualImpl, LayoutableImpl, InteractiveImpl, ControlImpl);
+ferro_impl_classes!(PipsPager: StyledElementImpl, VisualImpl, LayoutableImpl, InteractiveImpl);
 
 impl FerroObjectImpl for PipsPager {
     fn constructed(this: &Self) {
@@ -152,8 +152,12 @@ impl TemplatedControlImpl for PipsPager {
         this.update_pseudo_classes();
         this.update_pager_size();
     }
+}
 
-    // AUTOMATION-SEAM: OnCreateAutomationPeer -> PipsPagerAutomationPeer (automation pass)
+impl ControlImpl for PipsPager {
+    fn on_create_automation_peer(this: &Self) -> Ref<crate::automation::peers::AutomationPeer> {
+        crate::automation::peers::PipsPagerAutomationPeer::new(this).upcast()
+    }
 }
 
 impl InputElementImpl for PipsPager {

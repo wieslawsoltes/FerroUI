@@ -1,11 +1,13 @@
 //! Port of `ViewModels/TableViewPageViewModel.cs`.
 
+use ferroui_base::collections::FerroList;
 use ferroui_base::data::model::{BindableList, Event, INotifyPropertyChanged};
 use ferroui_base::ferro_markup_type;
-use ferroui_controls::ItemsSource;
 use mini_mvvm::ViewModelBase;
 use std::cell::{Cell, RefCell};
 use std::rc::Rc;
+
+ferroui_controls::ferro_markup_list!(pub CountryList: Rc<Country>);
 
 /// The countries of the table: name, region, population, area (square
 /// miles) and GDP.
@@ -274,8 +276,9 @@ ferro_markup_type!(class TableViewPageViewModel {
     handles: [TableViewPageViewModel, Rc<TableViewPageViewModel>, Option<Rc<TableViewPageViewModel>>],
     constructors: [() => TableViewPageViewModel::new],
     properties: [
-        // A list a binding delivers to an items source property.
-        Countries: ItemsSource { get: |this: &Rc<TableViewPageViewModel>| ItemsSource::from(this.countries()) },
+        Countries: FerroList<Rc<Country>> {
+            get: |this: &Rc<TableViewPageViewModel>| this.countries().items().clone()
+        },
     ],
     notify_property_changed: TableViewPageViewModel,
 });

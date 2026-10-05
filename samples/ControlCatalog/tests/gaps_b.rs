@@ -103,3 +103,48 @@ fn gap_c204_menu_under_the_simple_theme() {
     assert!(menu.is_attached_to_visual_tree());
     window.close();
 }
+
+#[test]
+#[ignore = "gap C207: a compiled binding does not stream (`^`) an ObservableValue"]
+fn gap_c207_compiled_stream_binding_of_an_observable() {
+    let _app = start_catalog_application();
+    // `Pages/ListBoxPage.xaml`: the selection mode is an `IObservable<SelectionMode>` of the view
+    // model, streamed by a compiled binding.
+    let xaml = format!(
+        "<ListBox {XMLNS} xmlns:viewModels='using:ControlCatalog.ViewModels' \
+           x:DataType='viewModels:ListBoxPageViewModel' SelectionMode='{{Binding SelectionMode^}}'/>"
+    );
+    if let Err(error) = try_load_text(&xaml, None, None) {
+        panic!("{}", describe(&error));
+    }
+}
+
+#[test]
+#[ignore = "gap C208: FontFamily.Name is not declared for markup"]
+fn gap_c208_font_family_name_in_a_compiled_binding() {
+    let _app = start_catalog_application();
+    // `Pages/ComboBoxPage.xaml`: the item template of the font families shows their names.
+    let xaml = format!("<TextBlock {XMLNS} x:DataType='FontFamily' Text='{{Binding Name}}' />");
+    if let Err(error) = try_load_text(&xaml, None, None) {
+        panic!("{}", describe(&error));
+    }
+}
+
+#[test]
+#[ignore = "gap C209: TextBox.Cut, Copy, Paste and Clear are not declared as methods for markup"]
+fn gap_c209_text_box_methods_as_commands() {
+    let _app = start_catalog_application();
+    // `Pages/ContextFlyoutPage.xaml`: the buttons of the flyout of a text box bind its methods as
+    // commands.
+    let xaml = format!(
+        "<TextBox {XMLNS}><TextBox.Tag><StackPanel>\
+           <Button Command='{{Binding $parent[TextBox].Cut}}' IsEnabled='{{Binding $parent[TextBox].CanCut}}' />\
+           <Button Command='{{Binding $parent[TextBox].Copy}}' IsEnabled='{{Binding $parent[TextBox].CanCopy}}' />\
+           <Button Command='{{Binding $parent[TextBox].Paste}}' IsEnabled='{{Binding $parent[TextBox].CanPaste}}' />\
+           <Button Command='{{Binding $parent[TextBox].Clear}}' />\
+         </StackPanel></TextBox.Tag></TextBox>"
+    );
+    if let Err(error) = try_load_text(&xaml, None, None) {
+        panic!("{}", describe(&error));
+    }
+}

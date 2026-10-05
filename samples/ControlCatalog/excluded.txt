@@ -8,84 +8,59 @@
 #   pending: <text>          the class of the document is not ported yet
 #   harness: <text>          the document loads in the application but not under the unit test application
 #
-# Keep the sections; lines are sorted by path within a section.
+# Keep the sections; lines are sorted by path within a section. `GAPS.md` explains each open entry.
 
 # --- root, Models, MainWindowViewModel, shell pages (coordinator) ---
-App.xaml | missing: the assembly FerroUI.Controls.ColorPicker; gap C003: NativeMenuItem.Icon from text
-MainWindow.xaml | missing: Win32Properties; gap C003: NativeMenuItem.Icon from text
+App.xaml | missing: the assembly FerroUI.Controls.ColorPicker
+MainWindow.xaml | missing: Win32Properties
 Pages/SettingsPage.xaml | harness: {x:Static local:App.CurrentTheme} needs the application of the catalog as the current application (the page is offered by the application)
 
 # --- Controls, Converter, Pages/CommandBar, Pages/TextBox, Pages/Gestures, Pages/ContentPage (group A) ---
 Pages/ContentPage/ContentPagePerformancePage.xaml | code-behind: NavigationPerformanceMonitorHelper and NavigationDemoHelper (Pages/NavigationPage, not ported; the helper measures the managed heap: GC.GetTotalMemory, GC.Collect)
 Pages/Gestures/GesturePullPage.xaml | code-behind: Compositor.CreateVector3KeyFrameAnimation, Compositor.CreateImplicitAnimationCollection, CompositionVisual.ImplicitAnimations, LogicalExtensions.FindLogicalDescendantOfType
 Pages/Gestures/GestureSwipePage.xaml | code-behind: Compositor.CreateVector3KeyFrameAnimation, Compositor.CreateImplicitAnimationCollection, CompositionVisual.ImplicitAnimations
-Pages/TextBox/TextBoxValidationPage.xaml | gap C102: DataValidationException is not declared for markup; gap C302: DataValidationErrors.Error
+Pages/TextBox/TextBoxValidationPage.xaml | gap C102: DataValidationException is not declared for markup
 
 # --- ViewModels, Models, Views and the pages of the view models (group B) ---
-Pages/ComboBoxPage.xaml | gap C201: System.Collections.ArrayList is not a markup type; gap C302: DataValidationErrors.Error is not declared for markup
-Pages/ContextFlyoutPage.xaml | gap C203: a handler with plain event arguments is not accepted for PopupFlyoutBase.Opening
-Pages/ListBoxPage.xaml | gap C200: a type cast with a namespace prefix in the path of a reflection binding is not resolved
+Pages/ComboBoxPage.xaml | gap C201: System.Collections.ArrayList is not a markup type; gap C208: FontFamily.Name is not declared for markup
+Pages/ContextFlyoutPage.xaml | gap C203: a handler with plain event arguments is not accepted for PopupFlyoutBase.Opening; gap C209: TextBox.Cut, Copy, Paste and Clear are not declared as methods for markup
+Pages/ListBoxPage.xaml | gap C207: a compiled binding does not stream (`^`) an ObservableValue
 Pages/PlatformInfoPage.xaml | gap C202: OnPlatform as an element with On children does not load
 
 # --- the other pages directly under Pages/ (group C) ---
-Pages/AutoCompleteBoxPage.xaml | code-behind: LogicalExtensions.GetLogicalDescendants (the document also needs gaps C302, C303, C310, C311)
-Pages/ClipboardPage.xaml | code-behind: WindowNotificationManager
+Pages/AutoCompleteBoxPage.xaml | code-behind: LogicalExtensions.GetLogicalDescendants (the document also needs gap C310)
+Pages/ClipboardPage.xaml | code-behind: DataFormat.File and ClipboardExtensions.TryGetFilesAsync (storage items as clipboard data are not ported)
 Pages/ColorPickerPage.xaml | missing: ColorPicker, ColorPreviewer, ColorSlider, ColorSpectrum, ColorView, FlatHalfColorPalette
-Pages/CompositionPage.xaml | missing: TabbedPage
-Pages/DialogsPage.xaml | code-behind: ManagedStorageProvider (the managed dialogs library)
+Pages/CompositionPage.xaml | code-behind: Compositor.CreateExpressionAnimation, CreateColorKeyFrameAnimation, CreateVector3KeyFrameAnimation, CreateAnimationGroup, CompositionObject.ImplicitAnimations, CompositionCustomVisual
+Pages/DialogsPage.xaml | code-behind: ManagedStorageProvider (the managed dialogs library; the document also needs gap C305)
 Pages/DragAndDropPage.xaml | code-behind: DialogsPage.ReadTextFromFile (DialogsPage is not ported: ManagedStorageProvider)
 Pages/FlyoutsPage.xaml | gap C301: a method name is not accepted for a property of a delegate type (CustomPopupPlacementCallback)
 Pages/FocusPage.xaml | gap C305: System.Collections.Generic.List`1 with x:TypeArguments is not a type of the markup type system
-Pages/NumericUpDownPage.xaml | code-behind: CultureInfo.GetCultures(CultureTypes.SpecificCultures) (the document also needs K-resolvebyname, C302, C303)
+Pages/NumericUpDownPage.xaml | code-behind: CultureInfo.GetCultures(CultureTypes.SpecificCultures)
 Pages/OpenGl/OpenGlInteropPage.xaml | code-behind: OpenGL library (GlInterface, IGlContext), composition GPU interop (ICompositionGpuInterop, CompositionDrawingSurface)
 Pages/OpenGl/OpenGlLeasePage.xaml | code-behind: OpenGL library (GlInterface), CompositionCustomVisualHandler, ISkiaSharpApiLeaseFeature
 Pages/OpenGlPage.xaml | code-behind: OpenGL library (OpenGlControlBase, GlInterface), Compositor.CreateCompositionVisualSnapshot
-Pages/SliderPage.xaml | gap C306: Slider.Ticks is not converted from text (also C302, C303)
+Pages/SliderPage.xaml | gap C306: Slider.Ticks is not converted from text
 Pages/ToolTipPage.xaml | gap C301: a method name is not accepted for a property of a delegate type (CustomPopupPlacementCallback)
 Pages/ViewboxPage.xaml | gap C309: System.Collections.ArrayList is not a type of the markup type system
 Pages/WindowCustomizationsPage.xaml | missing: Win32Properties (MainWindowViewModel.Win32WindowCornerPreferences / Win32WindowCornerPreference are not ported)
-# --- the demo pages and the page sample directories (not started: NavigationPage, DrawerPage, TabbedPage, CarouselPage, PipsPager) ---
+
+# --- the demo pages and the page sample directories ---
 Pages/CarouselPage/CareCompanionAppPage.xaml | pending: the class of the document is not ported yet
 Pages/CarouselPage/CarouselPagePerformancePage.xaml | code-behind: NavigationPerformanceMonitorHelper (measures the managed heap: GC.GetTotalMemory, GC.Collect)
 Pages/ConnectedAnimationDemoPage.xaml | pending: the class of the document is not ported yet
 Pages/DrawerPage/DrawerPagePerformancePage.xaml | code-behind: NavigationPerformanceMonitorHelper (measures the managed heap: GC.GetTotalMemory, GC.Collect)
 Pages/NavigationDemoPage.xaml | pending: the class of the document is not ported yet
-Pages/NavigationPage/FerroFlixAppPage.xaml | missing: DrawerPage
-Pages/NavigationPage/LAvenirAppPage.xaml | missing: DrawerPage
+Pages/NavigationPage/FerroFlixAppPage.xaml | pending: the class of the document is not ported yet
+Pages/NavigationPage/LAvenirAppPage.xaml | pending: the class of the document is not ported yet
 Pages/NavigationPage/NavigationPageCurvedHeaderPage.xaml | pending: the class of the document is not ported yet
 Pages/NavigationPage/NavigationPageInteractiveHeaderPage.xaml | pending: the class of the document is not ported yet
 Pages/NavigationPage/NavigationPageMvvmPage.xaml | pending: the class of the document is not ported yet
 Pages/NavigationPage/NavigationPagePassDataPage.xaml | pending: the class of the document is not ported yet
-Pages/NavigationPage/NavigationPagePerformancePage.xaml | pending: the class of the document is not ported yet
+Pages/NavigationPage/NavigationPagePerformancePage.xaml | code-behind: NavigationPerformanceMonitorHelper (measures the managed heap: GC.GetTotalMemory, GC.Collect)
 Pages/NavigationPage/NavigationPageScrollAwarePage.xaml | pending: the class of the document is not ported yet
 Pages/NavigationPage/NavigationPageTransitionsPage.xaml | pending: the class of the document is not ported yet
 Pages/NavigationPage/PulseAppPage.xaml | pending: the class of the document is not ported yet
 Pages/NavigationPage/RetroGamingAppPage.xaml | pending: the class of the document is not ported yet
-Pages/TabbedPage/TabbedPagePerformancePage.xaml | code-behind: NavigationPerformanceMonitorHelper (measures the managed heap: GC.GetTotalMemory, GC.Collect)
-Pages/NavigationPage/NavigationPageBackButtonPage.xaml | pending: the class is not finished (OnPushGuarded)
-Pages/NavigationPage/NavigationPageTransitionsPage.xaml | pending: Pages/NavigationPage/Transitions/*.cs are not ported
-Pages/CalendarPage.xaml | gap C009: Calendar.WeekNumberRule is not converted from text (CalendarWeekRule has no markup metadata)
 Pages/RefreshContainerPage.xaml | gap C305: a System.Collections.Generic.List created in markup is not accepted by ItemsControl.ItemsSource
-Pages/TableViewPage.xaml | gap C010: the columns of a TableView cannot be added from markup
-Pages/CarouselPage/CarouselPageCustomizationPage.xaml | gap C011: the pages of a TabbedPage / CarouselPage (MultiPage.Pages) cannot be added from markup
-Pages/CarouselPage/CarouselPageFirstLookPage.xaml | gap C011: the pages of a TabbedPage / CarouselPage (MultiPage.Pages) cannot be added from markup
-Pages/CarouselPage/CarouselPageGesturePage.xaml | gap C011: the pages of a TabbedPage / CarouselPage (MultiPage.Pages) cannot be added from markup
-Pages/CarouselPage/CarouselPageSelectionPage.xaml | gap C011: the pages of a TabbedPage / CarouselPage (MultiPage.Pages) cannot be added from markup
-Pages/CarouselPage/CarouselPageTransitionsPage.xaml | gap C011: the pages of a TabbedPage / CarouselPage (MultiPage.Pages) cannot be added from markup
-Pages/CarouselPage/SanctuaryMainPage.xaml | gap C011: the pages of a TabbedPage / CarouselPage (MultiPage.Pages) cannot be added from markup
-Pages/CarouselPage/SanctuaryShowcasePage.xaml | gap C011: the pages of a TabbedPage / CarouselPage (MultiPage.Pages) cannot be added from markup
-Pages/PointersPage.xaml | gap C011: the pages of a TabbedPage / CarouselPage (MultiPage.Pages) cannot be added from markup
-Pages/ScrollViewerPage.xaml | gap C011: the pages of a TabbedPage / CarouselPage (MultiPage.Pages) cannot be added from markup
-Pages/TabbedPage/TabbedPageCollectionPage.xaml | gap C011: the pages of a TabbedPage / CarouselPage (MultiPage.Pages) cannot be added from markup
-Pages/TabbedPage/TabbedPageCustomTabBarPage.xaml | gap C011: the pages of a TabbedPage / CarouselPage (MultiPage.Pages) cannot be added from markup
-Pages/TabbedPage/TabbedPageCustomizationPage.xaml | gap C011: the pages of a TabbedPage / CarouselPage (MultiPage.Pages) cannot be added from markup
-Pages/TabbedPage/TabbedPageDisabledTabsPage.xaml | gap C011: the pages of a TabbedPage / CarouselPage (MultiPage.Pages) cannot be added from markup
-Pages/TabbedPage/TabbedPageFabPage.xaml | gap C011: the pages of a TabbedPage / CarouselPage (MultiPage.Pages) cannot be added from markup
-Pages/TabbedPage/TabbedPageFirstLookPage.xaml | gap C011: the pages of a TabbedPage / CarouselPage (MultiPage.Pages) cannot be added from markup
-Pages/TabbedPage/TabbedPageFluidNavPage.xaml | gap C011: the pages of a TabbedPage / CarouselPage (MultiPage.Pages) cannot be added from markup
-Pages/TabbedPage/TabbedPageGesturePage.xaml | gap C011: the pages of a TabbedPage / CarouselPage (MultiPage.Pages) cannot be added from markup
-Pages/TabbedPage/TabbedPageKeyboardPage.xaml | gap C011: the pages of a TabbedPage / CarouselPage (MultiPage.Pages) cannot be added from markup
-Pages/TabbedPage/TabbedPagePlacementPage.xaml | gap C011: the pages of a TabbedPage / CarouselPage (MultiPage.Pages) cannot be added from markup
-Pages/TabbedPage/TabbedPageProgrammaticPage.xaml | gap C011: the pages of a TabbedPage / CarouselPage (MultiPage.Pages) cannot be added from markup
-Pages/TabbedPage/TabbedPageTransitionsPage.xaml | gap C011: the pages of a TabbedPage / CarouselPage (MultiPage.Pages) cannot be added from markup
-Pages/TabbedPage/TabbedPageWithNavigationPage.xaml | gap C011: the pages of a TabbedPage / CarouselPage (MultiPage.Pages) cannot be added from markup
+Pages/TabbedPage/TabbedPagePerformancePage.xaml | code-behind: NavigationPerformanceMonitorHelper (measures the managed heap: GC.GetTotalMemory, GC.Collect)

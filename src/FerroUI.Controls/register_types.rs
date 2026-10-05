@@ -17,6 +17,7 @@ use ferroui_base::{StaticType, TypeInfo};
 /// declaring module.
 const NAMESPACES: &[(&str, &str)] = &[
     ("ferroui_controls", "FerroUI.Controls"),
+    ("ferroui_controls::animation", "FerroUI.Animation"),
     ("ferroui_controls::app_builder", "FerroUI"),
     ("ferroui_controls::application", "FerroUI"),
     ("ferroui_controls::application_lifetimes", "FerroUI.Controls.ApplicationLifetimes"),
@@ -223,6 +224,9 @@ const VALUE_RUST_PATHS: &[(ferroui_base::metadata::TypeOf, &str)] = value_paths!
 types![TYPES, RUST_PATHS;
     // FerroUI
     crate::application::Application,
+    // FerroUI.Animation
+    crate::animation::ConnectedAnimationProxy,
+    crate::animation::ConnectedAnimationService,
     // FerroUI.Automation
     crate::automation::AutomationProperties,
     // FerroUI.Automation.Peers
@@ -238,6 +242,7 @@ types![TYPES, RUST_PATHS;
     crate::automation::peers::ContentPageAutomationPeer,
     crate::automation::peers::ControlAutomationPeer,
     crate::automation::peers::DatePickerAutomationPeer,
+    crate::automation::peers::DrawerPageAutomationPeer,
     crate::automation::peers::ItemsControlAutomationPeer,
     crate::automation::peers::ListBoxAutomationPeer,
     crate::automation::peers::ListItemAutomationPeer,
@@ -246,6 +251,7 @@ types![TYPES, RUST_PATHS;
     crate::automation::peers::NavigationPageAutomationPeer,
     crate::automation::peers::NoneAutomationPeer,
     crate::automation::peers::NumericUpDownAutomationPeer,
+    crate::automation::peers::PipsPagerAutomationPeer,
     crate::automation::peers::PopupAutomationPeer,
     crate::automation::peers::PopupRootAutomationPeer,
     crate::automation::peers::RangeBaseAutomationPeer,

@@ -173,7 +173,6 @@ fn sample_section_shows_its_code_and_options_under_its_theme() {
 }
 
 #[test]
-#[ignore = "gap C101 / gap C103: the bindings of the theme of SampleGalleryPage"]
 fn sample_gallery_page_shows_a_card_per_sample_under_its_theme() {
     let _app = start_catalog_application();
     let page = SampleGalleryPage::new();

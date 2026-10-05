@@ -36,11 +36,6 @@ pub const APP_DOCUMENT_REMOVALS: &[DocumentRemoval] = &[
         start: "<StyleInclude x:Key=\"ColorPickerSimple\"",
         end: "/>",
     },
-    DocumentRemoval {
-        waits_for: "gap C003: NativeMenuItem.Icon cannot be assigned from text",
-        start: "<NativeMenuItem Icon=\"/Assets/icon.ico\" Header=\"Restore Defaults\"",
-        end: "/>",
-    },
 ];
 
 /// The rooted asset path of the dictionary `App.xaml` merges.
@@ -83,11 +78,6 @@ pub const MAIN_WINDOW_REMOVALS: &[DocumentRemoval] = &[
         waits_for: "missing: Win32Properties",
         start: "Win32Properties.WindowCornerPreference=\"{Binding Win32WindowCornerPreference}\"",
         end: "\"",
-    },
-    DocumentRemoval {
-        waits_for: "gap C003: NativeMenuItem.Icon cannot be assigned from text (two items of the menu)",
-        start: "<NativeMenu.Menu>",
-        end: "</NativeMenu.Menu>",
     },
 ];
 

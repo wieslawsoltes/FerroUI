@@ -1,6 +1,7 @@
 //! FerroUI controls library: the control base classes, panels, templating
 //! and the windowing platform contracts.
 
+pub mod animation;
 pub mod application_lifetimes;
 pub mod automation;
 pub mod chrome;

@@ -14,6 +14,7 @@
 // Obsolete members of the managed original are declared too (with `[Obsolete]`).
 #![allow(deprecated)]
 
+use crate::animation::*;
 use crate::application_lifetimes::IApplicationLifetime;
 use crate::automation::peers::*;
 use crate::chrome::*;
@@ -23,6 +24,8 @@ use crate::pull_to_refresh::*;
 use crate::templates::{DataTemplates, IDataTemplate, ITemplateOf};
 use crate::primitives::*;
 use crate::*;
+use ferroui_base::animation::easings::Easing;
+use ferroui_base::animation::TimeSpan;
 use ferroui_base::collections::FerroList;
 use ferroui_base::controls::{Classes, IResourceDictionary, ResourceDictionary, ResourcesChangedEventArgs};
 use ferroui_base::data::core::ValueTypes;
@@ -75,6 +78,18 @@ ferro_class_info!(Application {
                     handler.invoke(&[into_markup_value(sender.upgrade()), into_markup_value(EventArgs::EMPTY)]);
                 })
             },
+        ],
+    },
+});
+
+// FerroUI.Animation
+
+ferro_class_info!(ConnectedAnimationService {
+    markup: {
+        namespace: "FerroUI.Animation",
+        properties: [
+            DefaultDuration: TimeSpan { get: ConnectedAnimationService::default_duration, set: ConnectedAnimationService::set_default_duration },
+            DefaultEasingFunction: Option<Easing> { get: ConnectedAnimationService::default_easing_function, set: ConnectedAnimationService::set_default_easing_function },
         ],
     },
 });
