@@ -14,6 +14,7 @@ pub mod ferro_module;
 pub mod input_helper;
 pub mod navigation_helper;
 pub mod screen_helper;
+pub mod promise_helper;
 pub mod timer_helper;
 
 /// An object of the web page, held by the framework without looking inside.
