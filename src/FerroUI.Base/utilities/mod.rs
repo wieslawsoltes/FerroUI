@@ -1,6 +1,7 @@
 //! Internal and public helper types.
 
 mod boolean_boxes;
+mod byte_size_helper;
 mod handler_list;
 mod i_weak_event_subscriber;
 mod weak_event;
@@ -10,6 +11,7 @@ mod weak_hash_list;
 mod synchronous_completion_async_result;
 
 pub use boolean_boxes::BooleanBoxes;
+pub use byte_size_helper::ByteSizeHelper;
 pub use handler_list::HandlerList;
 pub use i_weak_event_subscriber::{
     IWeakEventSubscriber, TargetWeakEventSubscriber, WeakEventSubscriber, WeakEventSubscriberHandler,
