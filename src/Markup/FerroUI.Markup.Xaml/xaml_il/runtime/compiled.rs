@@ -9,14 +9,32 @@
 //! document built by generated code fails exactly where and as the run-time
 //! loader fails.
 
+use std::any::{Any, TypeId};
+use std::collections::HashMap;
 use std::fmt::Display;
 use std::rc::Rc;
 
 use ferroui_base::controls::{INameScope, NameScope, NameScopeError, NameScopeRef};
 use ferroui_base::data::core::{ValueType, ValueTypes};
-use ferroui_base::metadata::{from_markup_value, into_markup_value, IServiceProvider, MarkupInvokeError, MarkupValue};
-use ferroui_base::{BoxedValue, FerroObject, Ref, StyledElement, TypeInfo};
+use ferroui_base::metadata::{
+    from_markup_value, into_markup_value, service, IServiceProvider, MarkupInvokeError, MarkupValue,
+};
+use ferroui_base::utilities::Uri;
+use ferroui_base::data::core::{
+    BoxedPropertyGetter, BoxedPropertySetter, ClrPropertyInfo, FalliblePropertyGetter, IPropertyInfo, PropertySetter,
+};
+use ferroui_base::data::core::plugins::PropertyAccessorFactory;
+use ferroui_base::data::{BindingBase, BindingError, BindingPriority, CompiledBindingPathBuilder};
+use ferroui_base::metadata::{MarkupInvoke, MarkupProperty, MarkupType};
+use ferroui_base::AnyValue;
+use ferroui_base::{BoxedValue, FerroObject, FerroProperty, Ref, StyledElement, TypeInfo, UnsetValueType};
 
+use super::{
+    DeferredContent, DeferredContentBuilder, FerroXamlIlXmlNamespaceInfo, FrameworkContextServices,
+    IFerroXamlIlXmlNamespaceInfoProvider, IStaticServiceProvider, IXamlIlContextServices, XamlIlContext,
+    XamlIlContextDefinition, XamlIlRuntimeHelpers, XmlNamespaces,
+};
+use crate::markup_extensions::compiled_bindings::PropertyInfoAccessorFactory;
 use crate::{ServiceProviderExtensions, XamlLoadException};
 
 /// The exception a step of generated code failed with: the type name of the
@@ -108,6 +126,115 @@ pub fn uri_equals(uri: &str, root: &str, name: &str) -> bool {
     }
 }
 
+/// `target.Bind(property, binding)`: what the binding setter of a registered
+/// property does. `value` is viewed through the binding contract as the
+/// run-time loader views it (in its untyped form, [`to_value`]); a value that
+/// is no binding is the loader's error at `line`, `position` (the position of
+/// the value).
+pub fn bind<V: PartialEq + 'static>(
+    target: &Ref<FerroObject>,
+    property: &'static FerroProperty,
+    value: V,
+    line: i32,
+    position: i32,
+) -> Result<(), XamlLoadException> {
+    let value = to_value(value);
+    let binding = from_markup_value::<Rc<dyn BindingBase>>(&value).ok_or_else(|| match &value {
+        None => at("NullReferenceException", "The binding is null", line, position),
+        Some(value) => at(
+            "InvalidCastException",
+            format!("Unable to cast object of type '{}' to type 'FerroUI.Data.BindingBase'.", value.type_name()),
+            line,
+            position,
+        ),
+    })?;
+    let _ = target.bind_binding(property, &*binding);
+    Ok(())
+}
+
+/// `value` boxed as it is (the boxing of a value the run-time loader makes
+/// without a conversion).
+pub fn boxed<T: PartialEq + 'static>(value: T) -> MarkupValue {
+    Some(Rc::new(value))
+}
+
+/// The canonical handle of a class of the object model (`Ref<T>`): the type
+/// a run-time type check of generated code names a class by.
+pub fn class_handle(class: &'static TypeInfo) -> ValueType {
+    let handle = class.handle().unwrap_or_else(|| panic!("{} has no handle", class.full_name()));
+    ValueType::new(handle, class.name())
+}
+
+/// The canonical handle of a markup type (its first handle): the type a
+/// run-time type check of generated code names a markup type by.
+pub fn markup_handle(markup: &'static MarkupType) -> ValueType {
+    let handle = markup.handles.first().unwrap_or_else(|| panic!("{} has no handle", markup.full_name()));
+    handle()
+}
+
+/// `value is T` for the type with the handle `target` (the `isinst` check
+/// the run-time choice of a property setter makes): `value` is not null and
+/// its run-time type (the class of an object, else the type of the value) is
+/// assignable to `target`.
+///
+/// The run-time loader asks its type system, which projects the same
+/// metadata ([`TypeInfo`] for classes, the contracts and bases a markup type
+/// declares); generated code asks the assignability of the untyped value
+/// conversions ([`ValueTypes::is_assignable`]), which the declarations of
+/// that metadata register.
+pub fn is_instance(value: &MarkupValue, target: ValueType) -> bool {
+    let Some(value) = value else { return false };
+    if let Some(object) = ValueTypes::as_object(&**value) {
+        let class = object.get_type();
+        if let Some((target_class, false)) = TypeInfo::find_by_handle(target.id()) {
+            return target_class.is_assignable_from(class);
+        }
+        return match class.handle() {
+            Some(handle) => ValueTypes::is_assignable(ValueType::new(handle, class.name()), target),
+            None => false,
+        };
+    }
+    ValueTypes::is_assignable(ValueType::of_value(&**value), target)
+}
+
+/// The value `value` as the Rust type `T` a member declares, with the
+/// conversion of the run-time loader (`to_exact`: the value as it is, the
+/// assignability casts of the untyped value conversions, null converted to
+/// the null of `T`). A value that does not convert is the loader's error for
+/// the argument `index` of `member` at `line`, `position`.
+pub fn exact<T: Clone + 'static>(
+    value: MarkupValue,
+    member: &str,
+    index: usize,
+    line: i32,
+    position: i32,
+) -> Result<T, XamlLoadException> {
+    let target = ValueType::of::<T>();
+    let value = match (&value, target.is_object()) {
+        (Some(boxed), true) => untyped_object_form(boxed).map(Some).unwrap_or(value),
+        _ => value,
+    };
+    let converted = match &value {
+        Some(boxed) if boxed.value_type_id() == target.id() => Some(boxed.clone()),
+        Some(boxed) => ValueTypes::try_cast(boxed, target),
+        None => ValueTypes::try_convert(None, target).flatten(),
+    };
+    match converted.as_ref().and_then(|converted| converted.downcast_ref::<T>()) {
+        Some(converted) => Ok(converted.clone()),
+        None => {
+            let error = MarkupInvokeError::Argument {
+                index,
+                expected: target.name(),
+                actual: match &value {
+                    Some(value) => value.type_name().to_string(),
+                    None => "null".to_string(),
+                },
+            };
+            Err(at("InvalidCastException", format!("{member}: {error}"), line, position))
+        }
+    }
+}
+
 /// The type name of the exception a member call of generated code that
 /// fails with an error of its own is reported as: the run-time loader
 /// reports the failure of a member it invokes (`EndInit`, a setter) as the
@@ -119,6 +246,389 @@ pub const TARGET_INVOCATION_EXCEPTION: &str = "TargetInvocationException";
 /// service provider, `None` when it has none.
 pub fn name_scope_of(parent: Option<&Rc<dyn IServiceProvider>>) -> Option<Rc<dyn INameScope>> {
     parent.and_then(|parent| parent.get_name_scope())
+}
+
+/// `target.SetValue(property, FerroProperty.UnsetValue, BindingPriority.LocalValue)`:
+/// what the unset-value setter of a registered property does.
+pub fn unset_value(target: &Ref<FerroObject>, property: &'static FerroProperty) {
+    let _ = target.set_value_untyped(property, &UnsetValueType, BindingPriority::LocalValue);
+}
+
+/// The full name of the run-time type of a value, as the error of a property
+/// assignment names it: the class of an object, else the markup type of the
+/// value, else the Rust type.
+fn runtime_type_name(value: &BoxedValue) -> String {
+    if let Some(object) = ValueTypes::as_object(&**value) {
+        return object.get_type().full_name();
+    }
+    match MarkupType::find_by_handle(value.value_type_id()) {
+        Some(markup) => markup.full_name(),
+        None => value.type_name().to_string(),
+    }
+}
+
+/// `castclass` of a value of type `object` to the reference type with the
+/// handle `target` (named `target_name`): the conversion the run-time loader
+/// applies where a value of type `object` is expected as another reference
+/// type. Null passes; an instance of the type is held in the handle of its
+/// run-time class; anything else is the loader's error.
+pub fn cast_checked(
+    value: MarkupValue,
+    target: ValueType,
+    target_name: &str,
+    line: i32,
+    position: i32,
+) -> Result<MarkupValue, XamlLoadException> {
+    let Some(boxed) = &value else { return Ok(None) };
+    if is_instance(&value, target) {
+        return Ok(Some(normalize_object(boxed.clone())));
+    }
+    Err(at(
+        "InvalidCastException",
+        format!("Unable to cast object of type '{}' to type '{target_name}'.", runtime_type_name(boxed)),
+        line,
+        position,
+    ))
+}
+
+/// The error of a property assignment whose setter is chosen at run time
+/// when no setter takes the value: `value` null (no setter allows null) or
+/// of a type none of them takes.
+pub fn no_setter(property: &str, value: &MarkupValue, line: i32, position: i32) -> XamlLoadException {
+    match value {
+        None => at("NullReferenceException", format!("No setter of property {property} accepts null"), line, position),
+        Some(value) => at(
+            "InvalidCastException",
+            format!("No setter of property {property} accepts a value of type '{}'", runtime_type_name(value)),
+            line,
+            position,
+        ),
+    }
+}
+
+/// The definition of a registered property as the property itself (the
+/// value of the static field that holds it).
+pub fn property(property: &'static FerroProperty) -> &'static FerroProperty {
+    property
+}
+
+/// A registered property as a value (the descriptor of the provide-value
+/// target property): its definition, as the run-time loader boxes it.
+pub fn property_value(property: &'static FerroProperty) -> MarkupValue {
+    boxed(property)
+}
+
+/// The metadata of a class of the object model.
+///
+/// # Panics
+/// Panics if the class has none: the emitter names only classes whose
+/// metadata it found.
+pub fn class_markup(class: &'static TypeInfo) -> &'static MarkupType {
+    MarkupType::find_by_type_info(class).unwrap_or_else(|| panic!("{} has no metadata", class.full_name()))
+}
+
+/// The description of the plain (declared) property `name` of the markup
+/// type `markup` (`XamlIlClrPropertyInfoEmitter`): what the provide-value
+/// target property of a markup extension is for a property that is not a
+/// registered one. Its accessors invoke the accessors of the declaration as
+/// the run-time loader invokes them (an object passed untyped in the
+/// framework's untyped form, an object returned in the handle of its
+/// run-time class, a failure named by the accessor); `property_type` is the
+/// handle of the type of the property; a getter of a `System.Boolean`
+/// property (`cached_boxed_boolean`) returns the shared boxes.
+///
+/// # Panics
+/// Panics if `markup` declares no such property: the emitter writes the
+/// call only for a declared property.
+pub fn clr_property_info(
+    markup: &'static MarkupType,
+    name: &str,
+    is_static: bool,
+    property_type: ValueType,
+    cached_boxed_boolean: bool,
+) -> Rc<dyn IPropertyInfo> {
+    let declared = match is_static {
+        true => markup.static_properties.iter().find(|property| property.name == name),
+        false => markup.find_property(name),
+    };
+    let declared = declared.unwrap_or_else(|| panic!("{} declares no property {name}", markup.full_name()));
+    let accessors = Rc::new(DeclaredAccessors {
+        owner: markup.full_name(),
+        property: declared,
+        is_static,
+        cached_boxed_boolean,
+    });
+    let getter: Option<FalliblePropertyGetter> = declared.get.is_some().then(|| {
+        let accessors = accessors.clone();
+        Rc::new(move |target: &dyn AnyValue| accessors.get(|| owner_handle(target))) as FalliblePropertyGetter
+    });
+    let setter: Option<PropertySetter> = declared.set.is_some().then(|| {
+        let accessors = accessors.clone();
+        Rc::new(move |target: &dyn AnyValue, value: Option<&BoxedValue>| accessors.set(|| owner_handle(target), value))
+            as PropertySetter
+    });
+    let boxed_getter: Option<BoxedPropertyGetter> = declared.get.is_some().then(|| {
+        let accessors = accessors.clone();
+        Rc::new(move |target: &BoxedValue| accessors.get(|| Ok(Some(target.clone())))) as BoxedPropertyGetter
+    });
+    let boxed_setter: Option<BoxedPropertySetter> = declared.set.is_some().then(|| {
+        let accessors = accessors.clone();
+        Rc::new(move |target: &BoxedValue, value: Option<&BoxedValue>| accessors.set(|| Ok(Some(target.clone())), value))
+            as BoxedPropertySetter
+    });
+    Rc::new(
+        ClrPropertyInfo::new_fallible(name, getter, setter, property_type).with_boxed_accessors(boxed_getter, boxed_setter),
+    )
+}
+
+/// The element of a compiled binding path for the plain (declared) property
+/// `name` of `markup` (`builder.Property(info, accessorFactory[, acceptsNull])`):
+/// when the path is typed (`typed`, a path that is this single property), the
+/// typed element the declaration of the property generates, if it has one;
+/// otherwise the element over [`clr_property_info`] with the accessor
+/// factory that follows property change notifications.
+#[allow(clippy::too_many_arguments)]
+pub fn path_property(
+    builder: &CompiledBindingPathBuilder,
+    markup: &'static MarkupType,
+    name: &str,
+    is_static: bool,
+    property_type: ValueType,
+    cached_boxed_boolean: bool,
+    accepts_null: bool,
+    typed: bool,
+) -> CompiledBindingPathBuilder {
+    if typed {
+        let declared = match is_static {
+            true => None,
+            false => markup.find_property(name),
+        };
+        if let Some(typed) = declared.and_then(|property| property.typed_path_element) {
+            if let Some(builder) = typed(builder, accepts_null) {
+                return builder;
+            }
+        }
+    }
+    let info = clr_property_info(markup, name, is_static, property_type, cached_boxed_boolean);
+    let factory: PropertyAccessorFactory = Rc::new(PropertyInfoAccessorFactory::create_inpc_property_accessor);
+    match accepts_null {
+        true => builder.property_with(info, factory, true),
+        false => builder.property(info, factory),
+    }
+}
+
+/// The name scope of an element name in a binding path: the name scope field
+/// of the context; none is the loader's error.
+pub fn path_name_scope(scope: Option<&Rc<dyn INameScope>>, line: i32, position: i32) -> Result<NameScopeRef, XamlLoadException> {
+    scope
+        .cloned()
+        .map(NameScopeRef)
+        .ok_or_else(|| at("ArgumentNullException", "Value cannot be null. (Parameter 'nameScope')", line, position))
+}
+
+/// The accessors of a declared property, invoked as the run-time loader
+/// invokes the accessor methods it projects from the declaration.
+struct DeclaredAccessors {
+    owner: String,
+    property: &'static MarkupProperty,
+    is_static: bool,
+    cached_boxed_boolean: bool,
+}
+
+impl DeclaredAccessors {
+    fn invoke(
+        &self,
+        accessor: &str,
+        invoke: MarkupInvoke,
+        owner: impl FnOnce() -> Result<MarkupValue, BindingError>,
+        value: Option<Option<&BoxedValue>>,
+    ) -> Result<MarkupValue, BindingError> {
+        let mut arguments = Vec::with_capacity(2);
+        if !self.is_static {
+            arguments.push(owner()?);
+        }
+        if let Some(value) = value {
+            // An object passed to a property of type `object` is handed over in the untyped form.
+            let value = match value {
+                Some(value) if (self.property.type_)().is_object() => untyped_object_form(value).or(Some(value.clone())),
+                other => other.cloned(),
+            };
+            arguments.push(value);
+        }
+        let result = invoke(&arguments).map_err(|error| {
+            let error = match error {
+                MarkupInvokeError::Failed(message) => {
+                    MarkupInvokeError::Failed(format!("{}.{accessor}_{}: {message}", self.owner, self.property.name))
+                }
+                other => other,
+            };
+            BindingError::message(error.to_string())
+        })?;
+        Ok(result.map(normalize_object))
+    }
+
+    fn get(&self, owner: impl FnOnce() -> Result<MarkupValue, BindingError>) -> Result<Option<BoxedValue>, BindingError> {
+        let get = self
+            .property
+            .get
+            .ok_or_else(|| BindingError::message(format!("Property {} doesn't have a getter", self.property.name)))?;
+        let value = self.invoke("get", get, owner, None)?;
+        if self.cached_boxed_boolean {
+            if let Some(value) = value.as_ref().and_then(|value| value.downcast_ref::<bool>()) {
+                return Ok(Some(ferroui_base::utilities::BooleanBoxes::box_(*value)));
+            }
+        }
+        Ok(value)
+    }
+
+    fn set(&self, owner: impl FnOnce() -> Result<MarkupValue, BindingError>, value: Option<&BoxedValue>) -> Result<(), BindingError> {
+        let set = self
+            .property
+            .set
+            .ok_or_else(|| BindingError::message(format!("Property {} doesn't have a setter", self.property.name)))?;
+        self.invoke("set", set, owner, Some(value)).map(|_| ())
+    }
+}
+
+/// The owner of a property in the form invokers take it: an object of the
+/// object model in the handle of its run-time class.
+fn owner_handle(target: &dyn AnyValue) -> Result<MarkupValue, BindingError> {
+    match ValueTypes::as_object(target).and_then(box_object) {
+        Some(handle) => Ok(Some(handle)),
+        None => Err(BindingError::message(format!(
+            "A property of '{}' cannot be read through metadata: the value is not an object of the object model",
+            target.type_name()
+        ))),
+    }
+}
+
+/// The context as the service provider handed to user code (markup
+/// extensions, constructors that take a service provider).
+pub fn service_provider(context: &Rc<XamlIlContext>) -> Rc<dyn IServiceProvider> {
+    context.clone()
+}
+
+/// The XML namespaces of a document as the compiler resolved them: for each
+/// prefix (empty for the default namespace) the dotted namespaces and
+/// assemblies it maps to (the namespace information the run-time loader
+/// computes from the parsed document).
+pub type XmlNamespaceTable = &'static [(&'static str, &'static [(&'static str, &'static str)])];
+
+/// The definition of the context of the framework language: every service
+/// of the context is mapped (the transformer configuration of the language
+/// sets every mapping; the emitter checks that the configuration it compiles
+/// with describes this definition).
+pub const FRAMEWORK_CONTEXT: XamlIlContextDefinition = XamlIlContextDefinition {
+    root_object_provider: true,
+    parent_stack_provider: true,
+    type_descriptor_context: true,
+    provide_value_target: true,
+    uri_context_provider: true,
+    xml_namespace_info_provider: true,
+};
+
+/// The namespace information of a compiled document, as a static provider
+/// of its contexts.
+struct CompiledXmlNamespaceInfo {
+    table: XmlNamespaceTable,
+}
+
+impl IFerroXamlIlXmlNamespaceInfoProvider for CompiledXmlNamespaceInfo {
+    fn xml_namespaces(&self) -> XmlNamespaces {
+        let mut namespaces = HashMap::with_capacity(self.table.len());
+        for (prefix, infos) in self.table {
+            let infos = infos
+                .iter()
+                .map(|(clr_namespace, clr_assembly_name)| FerroXamlIlXmlNamespaceInfo::with(clr_namespace, clr_assembly_name))
+                .collect();
+            namespaces.insert(prefix.to_string(), infos);
+        }
+        Rc::new(namespaces)
+    }
+}
+
+impl IStaticServiceProvider for CompiledXmlNamespaceInfo {
+    fn get_static_service(&self, service_type: TypeId) -> Option<Rc<dyn Any>> {
+        service(service_type, || {
+            Rc::new(CompiledXmlNamespaceInfo { table: self.table }) as Rc<dyn IFerroXamlIlXmlNamespaceInfoProvider>
+        })
+    }
+}
+
+/// The context factory of a compiled document: the context of the framework
+/// language with `parent` as its parent service provider, the document's
+/// base URI and namespace information, the name scope field filled from
+/// `parent`, and last the inner service provider
+/// (`XamlIlRuntimeHelpers.CreateInnerServiceProviderV1`): what the run-time
+/// loader's context factory does for a `Populate` or a deferred build.
+pub fn create_context(
+    parent: Option<Rc<dyn IServiceProvider>>,
+    base_uri: Option<&str>,
+    namespaces: XmlNamespaceTable,
+) -> Rc<XamlIlContext> {
+    let static_providers: Rc<[Rc<dyn IStaticServiceProvider>]> =
+        Rc::new([Rc::new(CompiledXmlNamespaceInfo { table: namespaces }) as Rc<dyn IStaticServiceProvider>]);
+    // The emitter writes the URI of the document, which is absolute.
+    let base_uri = base_uri.and_then(|uri| Uri::absolute(uri).ok());
+    let context =
+        XamlIlContext::new(FRAMEWORK_CONTEXT, Rc::new(FrameworkContextServices), parent, static_providers, base_uri);
+    context.initialize_name_scope_field();
+    let inner = XamlIlRuntimeHelpers::create_inner_service_provider_v1(context.service_provider_below_inner());
+    context.set_inner_service_provider(Some(inner));
+    context
+}
+
+/// The context of a build of deferred content (a template, a deferred
+/// resource) called with `service_provider`: [`create_context`] chained to
+/// it, with the root object of `service_provider` as its root object, as
+/// the run-time loader's build of deferred content creates it.
+pub fn deferred_context(
+    service_provider: &Rc<dyn IServiceProvider>,
+    base_uri: Option<&str>,
+    namespaces: XmlNamespaceTable,
+) -> Rc<XamlIlContext> {
+    let context = create_context(Some(service_provider.clone()), base_uri, namespaces);
+    if let Some(root) = FrameworkContextServices.get_parent_root_object(service_provider) {
+        context.set_root_object(root);
+    }
+    context
+}
+
+/// The build function of deferred content written as a closure: it builds
+/// the content anew on every call; a failure is the error of the
+/// instantiation.
+pub fn deferred_builder(
+    build: impl Fn(&Rc<dyn IServiceProvider>) -> Result<MarkupValue, XamlLoadException> + 'static,
+) -> DeferredContentBuilder {
+    DeferredContentBuilder::try_new(build)
+}
+
+/// `XamlIlRuntimeHelpers.DeferredTransformationFactoryV3<T>(builder, context)`:
+/// the deferred content of `builder` whose result is of the type with the
+/// handle `result_type` (the "any value" type when the language gives no type
+/// argument), capturing the resource nodes, the root object and the name
+/// scope of `context`.
+pub fn deferred_content(
+    result_type: ValueType,
+    context: &Rc<XamlIlContext>,
+    builder: DeferredContentBuilder,
+) -> Result<Rc<DeferredContent>, XamlLoadException> {
+    XamlIlRuntimeHelpers::try_deferred_transformation_factory_for(result_type, builder, &service_provider(context))
+        .map_err(|error| at("InvalidOperationException", error.message(), 0, 0))
+}
+
+/// The context of `Populate` of a root object: [`create_context`], with the
+/// root object and the intermediate root object set to `root`.
+pub fn populate_context(
+    parent: Option<Rc<dyn IServiceProvider>>,
+    base_uri: Option<&str>,
+    namespaces: XmlNamespaceTable,
+    root: MarkupValue,
+) -> Rc<XamlIlContext> {
+    let context = create_context(parent, base_uri, namespaces);
+    context.set_root_object(root.clone());
+    context.set_intermediate_root_object(root);
+    context
 }
 
 /// `context.FerroNameScope.Register(name, element)`: registers `element`
@@ -233,6 +743,13 @@ pub fn box_object(object: Ref<FerroObject>) -> Option<BoxedValue> {
         return Some(root);
     }
     ValueTypes::try_convert_registered(&root, ValueType::new(handle, type_info.name()))
+}
+
+/// `value` as the run-time loader holds the value of a node: boxed, in its
+/// untyped form ([`to_untyped`]), an object in the handle of its run-time
+/// class.
+pub fn to_value<T: PartialEq + 'static>(value: T) -> MarkupValue {
+    to_untyped(Rc::new(value))
 }
 
 /// The untyped (canonical) form of a value held in a typed box: null or the
