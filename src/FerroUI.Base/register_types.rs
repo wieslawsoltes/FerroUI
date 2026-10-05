@@ -69,9 +69,17 @@ pub static ASSEMBLY: MarkupAssembly = MarkupAssembly {
     metadata: &[],
 };
 
+/// The type table and, from the same list, the public Rust path of every
+/// entry: an entry is written as the crate-relative PUBLIC path of the type
+/// (`crate::media::SolidColorBrush`), so `"ferroui_base::media::SolidColorBrush"`
+/// is the path another crate (and generated Rust source) names it by.
 macro_rules! types {
-    ($($type_:ty),* $(,)?) => {
-        &[$(<$type_ as StaticType>::TYPE),*]
+    ($types:ident, $paths:ident; $(crate :: $($segment:ident)::+),* $(,)?) => {
+        const $types: &[&TypeInfo] = &[$(<crate::$($segment)::+ as StaticType>::TYPE),*];
+        const $paths: &[(&TypeInfo, &str)] = &[$((
+            <crate::$($segment)::+ as StaticType>::TYPE,
+            concat!("ferroui_base" $(, "::", stringify!($segment))+),
+        )),*];
     };
 }
 
@@ -83,12 +91,41 @@ pub fn register_types() {
     ONCE.call_once(|| {
         TypeInfo::register_namespaces(NAMESPACES);
         TypeInfo::register_all(TYPES);
+        TypeInfo::register_rust_paths(RUST_PATHS);
+        crate::metadata::MarkupType::register_rust_paths(VALUE_RUST_PATHS);
         MarkupAssembly::register(&ASSEMBLY);
         crate::markup_types::register();
     });
 }
 
-const TYPES: &[&TypeInfo] = types![
+/// The public Rust paths of enumerations and value types of this crate, for
+/// the emitter of Rust source ([`MarkupType::register_rust_paths`]): each
+/// entry is the crate-relative PUBLIC path of the type, checked by the
+/// compiler, and `"ferroui_base::<the same path>"` is recorded for it.
+///
+/// INTERIM, hand-kept list: it holds the types the emitter's test corpus
+/// uses. The source scanner of the build tool (docs/porting/xaml.md, 9.5)
+/// replaces it with the complete list.
+macro_rules! value_paths {
+    ($(crate :: $($segment:ident)::+),* $(,)?) => {
+        &[$((
+            || crate::data::core::ValueType::of::<crate::$($segment)::+>(),
+            concat!("ferroui_base" $(, "::", stringify!($segment))+),
+        )),*]
+    };
+}
+
+const VALUE_RUST_PATHS: &[(crate::metadata::TypeOf, &str)] = value_paths![
+    crate::CornerRadius,
+    crate::Thickness,
+    crate::layout::HorizontalAlignment,
+    crate::layout::Orientation,
+    crate::layout::VerticalAlignment,
+    crate::media::TextAlignment,
+    crate::media::TextWrapping,
+];
+
+types![TYPES, RUST_PATHS;
     // FerroUI
     crate::FerroObject,
     crate::StyledElement,

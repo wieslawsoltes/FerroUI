@@ -412,6 +412,17 @@ impl RuntimeDocumentTypeBuilderProvider {
         *self.body.borrow_mut() = Some(body);
     }
 
+    /// The transformed root node of the document and the configuration it was
+    /// transformed with: what the emitter of Rust source (the second back end)
+    /// reads. `None` until the group has been transformed.
+    pub(crate) fn transformed_root(
+        &self,
+    ) -> Option<(Rc<dyn IXamlAstNode>, Rc<xamlx::transform::TransformerConfiguration>)> {
+        let body = self.body.borrow();
+        let body = body.as_ref()?;
+        Some((body.root.clone(), body.interpreter.configuration.clone()))
+    }
+
     /// `Populate(serviceProvider, target)`.
     pub fn populate(&self, service_provider: Option<Rc<dyn IServiceProvider>>, target: &MarkupValue) -> XamlResult<()> {
         run_populate(&self.body, service_provider, target)

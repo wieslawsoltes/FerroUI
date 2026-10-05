@@ -101,9 +101,17 @@ pub static ASSEMBLY: MarkupAssembly = MarkupAssembly {
     metadata: &[],
 };
 
+/// The type table and, from the same list, the public Rust path of every
+/// entry: an entry is written as the crate-relative PUBLIC path of the type
+/// (`crate::media::SolidColorBrush`), so `"ferroui_controls::media::SolidColorBrush"`
+/// is the path another crate (and generated Rust source) names it by.
 macro_rules! types {
-    ($($type_:ty),* $(,)?) => {
-        &[$(<$type_ as StaticType>::TYPE),*]
+    ($types:ident, $paths:ident; $(crate :: $($segment:ident)::+),* $(,)?) => {
+        const $types: &[&TypeInfo] = &[$(<crate::$($segment)::+ as StaticType>::TYPE),*];
+        const $paths: &[(&TypeInfo, &str)] = &[$((
+            <crate::$($segment)::+ as StaticType>::TYPE,
+            concat!("ferroui_controls" $(, "::", stringify!($segment))+),
+        )),*];
     };
 }
 
@@ -117,12 +125,103 @@ pub fn register_types() {
         ferroui_base::register_types();
         TypeInfo::register_namespaces(NAMESPACES);
         TypeInfo::register_all(TYPES);
+        // Only the entries whose path is public as written; see `PUBLIC_MODULES`.
+        let public: Vec<(&'static TypeInfo, &'static str)> =
+            RUST_PATHS.iter().copied().filter(|(_, path)| is_public_path(path)).collect();
+        TypeInfo::register_rust_paths(&public);
+        TypeInfo::register_rust_paths(ROOT_RUST_PATHS);
+        ferroui_base::metadata::MarkupType::register_rust_paths(VALUE_RUST_PATHS);
         MarkupAssembly::register(&ASSEMBLY);
         crate::markup_types::register();
     });
 }
 
-const TYPES: &[&TypeInfo] = types![
+/// The public modules of this crate (the `pub mod` lines of `lib.rs`). An
+/// entry of the type table is written as the path of the DECLARING module,
+/// which for most controls is private (`crate::border::Border`, re-exported
+/// as `ferroui_controls::Border`): only an entry `crate::<public module>::<Type>`
+/// or `crate::<Type>` is a path another crate can name, and only those are
+/// recorded as Rust paths. INTERIM: the source scanner of the build tool
+/// (docs/porting/xaml.md, 9.5) reads the re-exports instead.
+const PUBLIC_MODULES: &[&str] = &[
+    "application_lifetimes",
+    "automation",
+    "chrome",
+    "command_bar",
+    "converters",
+    "date_time_pickers",
+    "diagnostics",
+    "documents",
+    "embedding",
+    "flex_panel",
+    "generators",
+    "metadata",
+    "mixins",
+    "notifications",
+    "numeric_up_down",
+    "page",
+    "platform",
+    "presentation_source",
+    "presenters",
+    "primitives",
+    "pull_to_refresh",
+    "selection",
+    "shapes",
+    "templates",
+    "testing",
+    "utils",
+];
+
+fn is_public_path(path: &str) -> bool {
+    let Some(relative) = path.strip_prefix("ferroui_controls::") else {
+        return false;
+    };
+    let segments: Vec<&str> = relative.split("::").collect();
+    match segments.as_slice() {
+        [_type] => true,
+        [module, _type] => PUBLIC_MODULES.contains(module),
+        _ => false,
+    }
+}
+
+/// Classes of private modules by their re-export at the root of the crate
+/// (`pub use border::Border;` in `lib.rs`), for the emitter of Rust source.
+/// INTERIM, hand-kept list: the classes the emitter's test corpus uses.
+macro_rules! root_paths {
+    ($($type_:ident),* $(,)?) => {
+        &[$((<crate::$type_ as StaticType>::TYPE, concat!("ferroui_controls::", stringify!($type_)))),*]
+    };
+}
+
+const ROOT_RUST_PATHS: &[(&TypeInfo, &str)] = root_paths![
+    Border, Button, Canvas, ContentControl, Control, Decorator, DockPanel, Grid, Panel, StackPanel, TextBlock,
+    UserControl,
+];
+
+/// The public Rust paths of enumerations and value types of this crate, for
+/// the emitter of Rust source ([`MarkupType::register_rust_paths`]): each
+/// entry is the crate-relative PUBLIC path of the type, checked by the
+/// compiler, and `"ferroui_controls::<the same path>"` is recorded for it.
+///
+/// INTERIM, hand-kept list: it holds the types the emitter's test corpus
+/// uses. The source scanner of the build tool (docs/porting/xaml.md, 9.5)
+/// replaces it with the complete list.
+macro_rules! value_paths {
+    ($(crate :: $($segment:ident)::+),* $(,)?) => {
+        &[$((
+            || ferroui_base::data::core::ValueType::of::<crate::$($segment)::+>(),
+            concat!("ferroui_controls" $(, "::", stringify!($segment))+),
+        )),*]
+    };
+}
+
+const VALUE_RUST_PATHS: &[(ferroui_base::metadata::TypeOf, &str)] = value_paths![
+    crate::Dock,
+    crate::GridLength,
+    crate::GridUnitType,
+];
+
+types![TYPES, RUST_PATHS;
     // FerroUI
     crate::application::Application,
     // FerroUI.Animation

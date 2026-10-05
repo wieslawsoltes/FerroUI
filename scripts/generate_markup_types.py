@@ -647,7 +647,9 @@ def registered_classes(crate):
     whole = read(os.path.join(SRC, crate, "register_types.rs"))
     table = whole[whole.index("const NAMESPACES") : whole.index("];", whole.index("const NAMESPACES"))]
     modules = sorted(re.findall(r'\("(?:\w+)((?:::\w+)*)",\s*"([\w.]+)"\)', table), key=lambda entry: -len(entry[0]))
-    text = whole[whole.index("const TYPES") :]
+    # The list is the body of `types![TYPES, RUST_PATHS; ..]` (formerly `const TYPES: .. = types![..]`).
+    start = whole.index("types![TYPES") if "types![TYPES" in whole else whole.index("const TYPES")
+    text = whole[start:]
     result, namespace = [], None
     for line in text.split("\n"):
         m = re.match(r"\s*// (FerroUI[\w.]*)\s*$", line)
