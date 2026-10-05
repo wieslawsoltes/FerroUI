@@ -431,9 +431,17 @@ check("the back navigation of the browser is a back request of the view", async 
     const length = await page.evaluate("history.length");
     await page.evaluate("(history.back(), true)");
     await page.waitForService("back_requests", "1");
-    await sleep(300);
+    // The handler returns to the entry it pushed; that navigation is not another back request.
+    await sleep(1000);
+    assert((await page.services()).back_requests === "1", `one back navigation was reported ${(await page.services()).back_requests} times`);
     assert(await page.evaluate("location.pathname") === "/index.html", "the page went back");
     assert(await page.evaluate("history.length") === length, "the history grew");
+
+    // The next back navigation is a request again.
+    await page.evaluate("(history.back(), true)");
+    await page.waitForService("back_requests", "2");
+    await sleep(1000);
+    assert((await page.services()).back_requests === "2", `the second back navigation was reported as ${(await page.services()).back_requests}`);
 });
 
 await run(checks);
