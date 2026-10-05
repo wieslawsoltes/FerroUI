@@ -147,26 +147,41 @@ macro_rules! ferro_markup_type {
     (@kind static) => { $crate::metadata::MarkupTypeKind::Static };
 
     (@this $kind:ident implied_dyn $m:ident, $this:ty) => {};
-    (@parse_type implied_dyn $m:ident, $type_:ty, $this:ty) => {
-        $m.parse_type = ::std::option::Option::Some(|| $crate::data::core::ValueType::of::<::std::rc::Rc<$type_>>());
-    };
-    (@parse_type $form:ident $m:ident, $type_:ty, $this:ty) => {
-        $m.parse_type = ::std::option::Option::Some(|| $crate::data::core::ValueType::of::<$this>());
-    };
-
-    // The typed functions of the members, as associated functions of the type.
-    (@fns implied_dyn $type_:ty, $this:ty; $($body:tt)*) => {
-        impl $type_ {
-            $crate::__ferro_markup_fns!($this, ::std::rc::Rc<$type_>; $($body)*);
-        }
-    };
-    (@fns $form:ident $type_:ty, $this:ty; $($body:tt)*) => {
-        impl $type_ {
-            $crate::__ferro_markup_fns!($this, $this; $($body)*);
-        }
-    };
     (@this $kind:ident $form:ident $m:ident, $this:ty) => {
         $m.this = ::std::option::Option::Some(|| $crate::data::core::ValueType::of::<$this>());
+    };
+
+    // The typed functions of the members, as associated functions of the type, and
+    // the value type of the type: what a constructor and `Parse` return. It is the
+    // instance type when the declaration states `this:`, else the first of its
+    // `handles:` (the untyped form), else the declared type (`Rc<dyn Trait>` for a
+    // contract).
+    (@fns explicit $type_:ty, $this:ty; $($body:tt)*) => {
+        $crate::ferro_markup_type!(@fns_impl $type_, $this, $this; $($body)*);
+    };
+    (@fns $form:ident $type_:ty, $this:ty; $($body:tt)*) => {
+        $crate::ferro_markup_type!(@fns_value $form $type_, $this, [$($body)*] $($body)*);
+    };
+    (@fns_value $form:ident $type_:ty, $this:ty, [$($all:tt)*] handles: [$first:ty $(, $more:ty)* $(,)?] $($rest:tt)*) => {
+        $crate::ferro_markup_type!(@fns_impl $type_, $this, $first; $($all)*);
+    };
+    (@fns_value $form:ident $type_:ty, $this:ty, [$($all:tt)*] $next:tt $($rest:tt)*) => {
+        $crate::ferro_markup_type!(@fns_value $form $type_, $this, [$($all)*] $($rest)*);
+    };
+    (@fns_value implied_dyn $type_:ty, $this:ty, [$($all:tt)*]) => {
+        $crate::ferro_markup_type!(@fns_impl $type_, $this, ::std::rc::Rc<$type_>; $($all)*);
+    };
+    (@fns_value $form:ident $type_:ty, $this:ty, [$($all:tt)*]) => {
+        $crate::ferro_markup_type!(@fns_impl $type_, $this, $this; $($all)*);
+    };
+    (@fns_impl $type_:ty, $this:ty, $value:ty; $($body:tt)*) => {
+        impl $type_ {
+            /// The value type of the type (`MarkupType::value`).
+            #[doc(hidden)]
+            pub const __MARKUP_VALUE: $crate::metadata::TypeOf = || $crate::data::core::ValueType::of::<$value>();
+
+            $crate::__ferro_markup_fns!($this, $value; $($body)*);
+        }
     };
 
     (@build $kind:ident $type_:ty, $name:expr, $this:ty, $form:ident, { $($body:tt)* }) => {
@@ -183,7 +198,7 @@ macro_rules! ferro_markup_type {
                     );
                     $crate::ferro_markup_type!(@nullable $kind markup, $type_);
                     $crate::ferro_markup_type!(@this $kind $form markup, $this);
-                    $crate::ferro_markup_type!(@parse_type $form markup, $type_, $this);
+                    markup.value = ::std::option::Option::Some(<$type_>::__MARKUP_VALUE);
                     $crate::__ferro_markup_items!(markup, $this; $($body)*);
                     markup
                 };
@@ -373,7 +388,7 @@ macro_rules! __ferro_markup_items {
     };
 
     ($m:ident, $this:ty; constructors: [$($constructors:tt)*] $(, $($rest:tt)*)?) => {
-        $m.constructors = $crate::__ferro_markup_constructors!([] $($constructors)*);
+        $m.constructors = $crate::__ferro_markup_pool!(constructors { [] $($constructors)* });
         $crate::__ferro_markup_items!($m, $this; $($($rest)*)?);
     };
 
@@ -529,17 +544,17 @@ macro_rules! __ferro_markup_events {
 #[doc(hidden)]
 #[macro_export]
 macro_rules! __ferro_markup_constructors {
-    ([$($done:expr,)*]) => {
+    ([$($pool:ident)*] [$($done:expr,)*]) => {
         &[$($done),*]
     };
-    ([$($done:expr,)*] ($($parameters:tt)*) => $new:expr $(, $($rest:tt)*)?) => {
-        $crate::__ferro_markup_constructors!([$($done,)*
-            $crate::__ferro_markup_constructor!([] ($new) [] [] $($parameters)*),
+    ([$index:ident $($pool:ident)*] [$($done:expr,)*] ($($parameters:tt)*) => $new:expr $(, $($rest:tt)*)?) => {
+        $crate::__ferro_markup_constructors!([$($pool)*] [$($done,)*
+            $crate::__ferro_markup_constructor!($index [] ($new) [] [] $($parameters)*),
         ] $($($rest)*)?)
     };
-    ([$($done:expr,)*] try ($($parameters:tt)*) => $new:expr $(, $($rest:tt)*)?) => {
-        $crate::__ferro_markup_constructors!([$($done,)*
-            $crate::__ferro_markup_constructor!([try] ($new) [] [] $($parameters)*),
+    ([$index:ident $($pool:ident)*] [$($done:expr,)*] try ($($parameters:tt)*) => $new:expr $(, $($rest:tt)*)?) => {
+        $crate::__ferro_markup_constructors!([$($pool)*] [$($done,)*
+            $crate::__ferro_markup_constructor!($index [try] ($new) [] [] $($parameters)*),
         ] $($($rest)*)?)
     };
 }
@@ -551,7 +566,7 @@ macro_rules! __ferro_markup_constructors {
 #[doc(hidden)]
 #[macro_export]
 macro_rules! __ferro_markup_constructor {
-    ($try_:tt ($new:expr) [$($parameter:ty,)*] [$($info:expr,)*]) => {
+    ($index:ident $try_:tt ($new:expr) [$($parameter:ty,)*] [$($info:expr,)*]) => {
         $crate::metadata::MarkupConstructor {
             parameters: &[$(|| $crate::data::core::ValueType::of::<$parameter>()),*],
             parameter_info: &[$($info),*],
@@ -565,23 +580,26 @@ macro_rules! __ferro_markup_constructor {
                     $try_ ($new)($(arguments.next::<$parameter>()?),*)
                 )
             },
-            emit: ::std::option::Option::Some(::std::stringify!($new)),
+            emit: ::std::option::Option::Some($crate::metadata::MarkupEmit {
+                function: ::std::concat!("__markup_new", ::std::stringify!($index)),
+                fallible: $crate::__ferro_markup_is_try!($try_),
+            }),
         }
     };
-    ($try_:tt $new:tt [$($parameter:ty,)*] [$($info:expr,)*]
+    ($index:ident $try_:tt $new:tt [$($parameter:ty,)*] [$($info:expr,)*]
         $name:ident : $type_:ty [$($attributes:tt)*] $(, $($rest:tt)*)?
     ) => {
-        $crate::__ferro_markup_constructor!($try_ $new [$($parameter,)* $type_,] [$($info,)*
+        $crate::__ferro_markup_constructor!($index $try_ $new [$($parameter,)* $type_,] [$($info,)*
             $crate::metadata::MarkupParameter {
                 name: ::std::option::Option::Some(::std::stringify!($name)),
                 attributes: $crate::__ferro_markup_attributes!([] $($attributes)*),
             },
         ] $($($rest)*)?)
     };
-    ($try_:tt $new:tt [$($parameter:ty,)*] [$($info:expr,)*]
+    ($index:ident $try_:tt $new:tt [$($parameter:ty,)*] [$($info:expr,)*]
         $name:ident : $type_:ty $(, $($rest:tt)*)?
     ) => {
-        $crate::__ferro_markup_constructor!($try_ $new [$($parameter,)* $type_,] [$($info,)*
+        $crate::__ferro_markup_constructor!($index $try_ $new [$($parameter,)* $type_,] [$($info,)*
             $crate::metadata::MarkupParameter {
                 name: ::std::option::Option::Some(::std::stringify!($name)),
                 attributes: &[],
@@ -589,8 +607,8 @@ macro_rules! __ferro_markup_constructor {
         ] $($($rest)*)?)
     };
     // The positional form: all parameters are types.
-    ($try_:tt $new:tt [] [] $($type_:ty),+ $(,)?) => {
-        $crate::__ferro_markup_constructor!($try_ $new [$($type_,)+] [])
+    ($index:ident $try_:tt $new:tt [] [] $($type_:ty),+ $(,)?) => {
+        $crate::__ferro_markup_constructor!($index $try_ $new [$($type_,)+] [])
     };
 }
 
@@ -1062,6 +1080,12 @@ macro_rules! __ferro_markup_pool {
     (method_fns { $($arguments:tt)* }) => {
         $crate::__ferro_markup_method_fns!([_0 _1 _2 _3 _4 _5 _6 _7 _8 _9 _10 _11 _12 _13 _14 _15 _16 _17 _18 _19 _20 _21 _22 _23 _24 _25 _26 _27 _28 _29 _30 _31 _32 _33 _34 _35 _36 _37 _38 _39 _40 _41 _42 _43 _44 _45 _46 _47 _48 _49 _50 _51 _52 _53 _54 _55 _56 _57 _58 _59 _60 _61 _62 _63 _64 _65 _66 _67 _68 _69 _70 _71 _72 _73 _74 _75 _76 _77 _78 _79 _80 _81 _82 _83 _84 _85 _86 _87 _88 _89 _90 _91 _92 _93 _94 _95 _96 _97 _98 _99 _100 _101 _102 _103 _104 _105 _106 _107 _108 _109 _110 _111 _112 _113 _114 _115 _116 _117 _118 _119 _120 _121 _122 _123 _124 _125 _126 _127 _128 _129 _130 _131 _132 _133 _134 _135 _136 _137 _138 _139 _140 _141 _142 _143 _144 _145 _146 _147 _148 _149 _150 _151 _152 _153 _154 _155 _156 _157 _158 _159] $($arguments)*);
     };
+    (constructors { $($arguments:tt)* }) => {
+        $crate::__ferro_markup_constructors!([_0 _1 _2 _3 _4 _5 _6 _7 _8 _9 _10 _11 _12 _13 _14 _15 _16 _17 _18 _19 _20 _21 _22 _23 _24 _25 _26 _27 _28 _29 _30 _31 _32 _33 _34 _35 _36 _37 _38 _39 _40 _41 _42 _43 _44 _45 _46 _47 _48 _49 _50 _51 _52 _53 _54 _55 _56 _57 _58 _59 _60 _61 _62 _63 _64 _65 _66 _67 _68 _69 _70 _71 _72 _73 _74 _75 _76 _77 _78 _79 _80 _81 _82 _83 _84 _85 _86 _87 _88 _89 _90 _91 _92 _93 _94 _95 _96 _97 _98 _99 _100 _101 _102 _103 _104 _105 _106 _107 _108 _109 _110 _111 _112 _113 _114 _115 _116 _117 _118 _119 _120 _121 _122 _123 _124 _125 _126 _127 _128 _129 _130 _131 _132 _133 _134 _135 _136 _137 _138 _139 _140 _141 _142 _143 _144 _145 _146 _147 _148 _149 _150 _151 _152 _153 _154 _155 _156 _157 _158 _159] $($arguments)*)
+    };
+    (constructor_fns { $($arguments:tt)* }) => {
+        $crate::__ferro_markup_constructor_fns!([_0 _1 _2 _3 _4 _5 _6 _7 _8 _9 _10 _11 _12 _13 _14 _15 _16 _17 _18 _19 _20 _21 _22 _23 _24 _25 _26 _27 _28 _29 _30 _31 _32 _33 _34 _35 _36 _37 _38 _39 _40 _41 _42 _43 _44 _45 _46 _47 _48 _49 _50 _51 _52 _53 _54 _55 _56 _57 _58 _59 _60 _61 _62 _63 _64 _65 _66 _67 _68 _69 _70 _71 _72 _73 _74 _75 _76 _77 _78 _79 _80 _81 _82 _83 _84 _85 _86 _87 _88 _89 _90 _91 _92 _93 _94 _95 _96 _97 _98 _99 _100 _101 _102 _103 _104 _105 _106 _107 _108 _109 _110 _111 _112 _113 _114 _115 _116 _117 _118 _119 _120 _121 _122 _123 _124 _125 _126 _127 _128 _129 _130 _131 _132 _133 _134 _135 _136 _137 _138 _139 _140 _141 _142 _143 _144 _145 _146 _147 _148 _149 _150 _151 _152 _153 _154 _155 _156 _157 _158 _159] $($arguments)*);
+    };
 }
 
 /// Whether a member is declared with `try`.
@@ -1173,6 +1197,7 @@ macro_rules! __ferro_markup_fns {
         $crate::__ferro_markup_fns!($this, $value; $($($rest)*)?);
     };
     ($this:ty, $value:ty; constructors: [$($constructors:tt)*] $(, $($rest:tt)*)?) => {
+        $crate::__ferro_markup_pool!(constructor_fns { $value; $($constructors)* });
         $crate::__ferro_markup_fns!($this, $value; $($($rest)*)?);
     };
     ($this:ty, $value:ty; parse: $parse:expr $(, $($rest:tt)*)?) => {
@@ -1359,6 +1384,50 @@ macro_rules! __ferro_markup_method_fn {
                 $crate::__ferro_markup_fn_body!($try_ ($($return_)?) ($call)($($argument),*))
             }
         }
+    };
+}
+
+/// The typed functions of `constructors: [..]` (see `MarkupEmit`), in
+/// declaration order: the same order and pool of indices as
+/// [`__ferro_markup_constructors!`]. `value` is the type a constructor returns.
+#[doc(hidden)]
+#[macro_export]
+macro_rules! __ferro_markup_constructor_fns {
+    ([$($pool:ident)*] $value:ty;) => {};
+    ([$index:ident $($pool:ident)*] $value:ty; ($($parameters:tt)*) => $new:expr $(, $($rest:tt)*)?) => {
+        $crate::__ferro_markup_constructor_fn!($index [] $value; ($new) [] $($parameters)*);
+        $crate::__ferro_markup_constructor_fns!([$($pool)*] $value; $($($rest)*)?);
+    };
+    ([$index:ident $($pool:ident)*] $value:ty; try ($($parameters:tt)*) => $new:expr $(, $($rest:tt)*)?) => {
+        $crate::__ferro_markup_constructor_fn!($index [try] $value; ($new) [] $($parameters)*);
+        $crate::__ferro_markup_constructor_fns!([$($pool)*] $value; $($($rest)*)?);
+    };
+}
+
+/// The typed function of one constructor: its parameter types are
+/// collected from the positional or the named form, then the function is
+/// written as a static method `new` returning `value`.
+#[doc(hidden)]
+#[macro_export]
+macro_rules! __ferro_markup_constructor_fn {
+    ($index:ident $try_:tt $value:ty; ($new:expr) [$($parameter:ty,)*]) => {
+        $crate::__ferro_markup_method_fn!(
+            $index [static] $try_ $value; new ($value) ($new) []
+            [a0 a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13 a14 a15] ($($parameter),*)
+        );
+    };
+    ($index:ident $try_:tt $value:ty; $new:tt [$($parameter:ty,)*]
+        $name:ident : $type_:ty [$($attributes:tt)*] $(, $($rest:tt)*)?
+    ) => {
+        $crate::__ferro_markup_constructor_fn!($index $try_ $value; $new [$($parameter,)* $type_,] $($($rest)*)?);
+    };
+    ($index:ident $try_:tt $value:ty; $new:tt [$($parameter:ty,)*]
+        $name:ident : $type_:ty $(, $($rest:tt)*)?
+    ) => {
+        $crate::__ferro_markup_constructor_fn!($index $try_ $value; $new [$($parameter,)* $type_,] $($($rest)*)?);
+    };
+    ($index:ident $try_:tt $value:ty; $new:tt [] $($type_:ty),+ $(,)?) => {
+        $crate::__ferro_markup_constructor_fn!($index $try_ $value; $new [$($type_,)+]);
     };
 }
 

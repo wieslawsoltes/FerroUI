@@ -14,7 +14,7 @@ use std::rc::Rc;
 
 use ferroui_base::controls::{INameScope, NameScope, NameScopeError, NameScopeRef};
 use ferroui_base::data::core::{ValueType, ValueTypes};
-use ferroui_base::metadata::{from_markup_value, IServiceProvider, MarkupInvokeError, MarkupValue};
+use ferroui_base::metadata::{from_markup_value, into_markup_value, IServiceProvider, MarkupInvokeError, MarkupValue};
 use ferroui_base::{BoxedValue, FerroObject, Ref, StyledElement, TypeInfo};
 
 use crate::{ServiceProviderExtensions, XamlLoadException};
@@ -264,4 +264,24 @@ pub fn argument<T: Clone + 'static, V: PartialEq + 'static>(
         };
         at("InvalidCastException", format!("{member}: {error}"), line, position)
     })
+}
+
+/// `value` as the value of a member that declares the Rust type `T`, through
+/// the assignability casts of the untyped value conversions (an interface
+/// handle, a registered cast, a nullable form): the conversion the run-time
+/// loader applies to the argument (`to_exact` of the value as the loader
+/// holds it, [`into_markup_value`]). The emitter writes it only where
+/// [`ValueTypes::is_assignable`] holds for the two types, which is exactly
+/// when the cast succeeds.
+pub fn cast<T: Clone + 'static, V: PartialEq + 'static>(value: V) -> T {
+    let target = ValueType::of::<T>();
+    let converted = match into_markup_value(value) {
+        Some(boxed) if boxed.value_type_id() == target.id() => Some(boxed),
+        Some(boxed) => ValueTypes::try_cast(&boxed, target),
+        None => ValueTypes::try_convert(None, target).flatten(),
+    };
+    match converted.as_ref().and_then(|converted| converted.downcast_ref::<T>()) {
+        Some(value) => value.clone(),
+        None => panic!("{} is not assignable from the value (the emitter checked that it is)", target.name()),
+    }
 }

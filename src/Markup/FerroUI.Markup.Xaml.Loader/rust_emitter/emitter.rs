@@ -26,7 +26,9 @@ use xamlx::transform::transformers::AdderSetter;
 use xamlx::transform::TransformerConfiguration;
 use xamlx::type_system::{IXamlConstructor, IXamlType, XamlValue};
 
-use crate::compiler_extensions::ast_nodes::{FerroXamlIlGridLengthAstNode, FerroXamlIlVectorLikeConstantAstNode};
+use crate::compiler_extensions::ast_nodes::{
+    FerroXamlIlFerroListConstantAstNode, FerroXamlIlGridLengthAstNode, FerroXamlIlVectorLikeConstantAstNode,
+};
 use crate::compiler_extensions::transformers::{FerroNameScopeRegistrationXamlIlNode, HandleRootObjectScopeNode};
 use crate::compiler_extensions::XamlIlFerroPropertyHelper;
 use crate::runtime::interpreter::{numeric_constant, single_setter};
@@ -127,14 +129,6 @@ fn absolute(path: &str) -> String {
     }
 }
 
-fn is_identifier(text: &str) -> bool {
-    let mut characters = text.chars();
-    match characters.next() {
-        Some(first) if first.is_ascii_alphabetic() || first == '_' => {}
-        _ => return false,
-    }
-    characters.all(|c| c.is_ascii_alphanumeric() || c == '_')
-}
 
 fn f64_literal(value: f64) -> String {
     match value {
@@ -279,11 +273,11 @@ impl Emitter<'_> {
             return self.static_member(node, &n);
         }
         if let Some(n) = node.cast::<FerroXamlIlVectorLikeConstantAstNode>() {
-            let mut arguments = Vec::with_capacity(n.values().len());
-            for value in n.values() {
-                arguments.push(f64_literal(*value));
-            }
+            let arguments: Vec<Typed> = n.values().iter().map(|value| exact::<f64>(f64_literal(*value))).collect();
             return self.constructor_call(node, n.constructor(), &arguments);
+        }
+        if let Some(n) = node.cast::<FerroXamlIlFerroListConstantAstNode>() {
+            return self.list_constant(node, &n);
         }
         if let Some(n) = node.cast::<FerroXamlIlGridLengthAstNode>() {
             let types = n.types().clone();
@@ -294,23 +288,45 @@ impl Emitter<'_> {
                 .cloned()
                 .ok_or_else(|| unsupported(node, "the grid length constructor doesn't take a unit"))?;
             let grid_length = n.grid_length();
-            let value = f64_literal(grid_length.value);
+            let value = exact::<f64>(f64_literal(grid_length.value));
             let unit = self.enum_member(node, &unit_type, i64::from(grid_length.grid_unit_type as i32))?;
-            return self.constructor_call(node, &constructor, &[value, unit.expr]);
+            return self.constructor_call(node, &constructor, &[value, unit]);
         }
         Err(unsupported(node, "no emitter for this value node"))
     }
 
     /// `new T()` of a class of the object model with its default constructor.
     fn new_object(&mut self, node: &Rc<dyn IXamlAstNode>, n: &Rc<XamlAstNewClrObjectNode>) -> EmitResult<Typed> {
+        let type_ = n.type_.borrow().get_clr_type().map_err(|e| failed(node, e))?;
+        let is_declared = n.constructor.as_any().downcast_ref::<RuntimeConstructor>().is_some_and(|c| c.declared.is_some());
+        if is_declared {
+            // A constructor of metadata (with or without arguments): the arguments in order,
+            // then the typed function.
+            let values = n.arguments.borrow().clone();
+            let mut arguments = Vec::with_capacity(values.len());
+            for value in &values {
+                arguments.push(self.value(&value.as_node())?);
+            }
+            return self.constructor_call(node, &n.constructor, &arguments);
+        }
         if !n.arguments.borrow().is_empty() {
             return Err(unsupported(node, "constructor arguments"));
         }
-        let type_ = n.type_.borrow().get_clr_type().map_err(|e| failed(node, e))?;
-        let class = runtime_type(&type_)
+        self.default_object(node, &type_, &n.constructor)
+    }
+
+    /// `new T()` of a class of the object model through its default
+    /// constructor (`T::new()`).
+    fn default_object(
+        &mut self,
+        node: &Rc<dyn IXamlAstNode>,
+        type_: &Rc<dyn IXamlType>,
+        constructor: &Rc<dyn IXamlConstructor>,
+    ) -> EmitResult<Typed> {
+        let class = runtime_type(type_)
             .and_then(RuntimeType::type_info)
             .ok_or_else(|| unsupported(node, format!("{} is not a class of the object model", type_.full_name())))?;
-        let is_default_constructor = n.constructor.as_any().downcast_ref::<RuntimeConstructor>().is_some_and(|c| {
+        let is_default_constructor = constructor.as_any().downcast_ref::<RuntimeConstructor>().is_some_and(|c| {
             c.parameters.is_empty() && matches!(c.invoker, RuntimeInvoker::Dynamic(_))
         });
         if !is_default_constructor || class.default_constructor().is_none() {
@@ -364,6 +380,38 @@ impl Emitter<'_> {
         }
         self.compiler_locals.insert(node_address(&local), (value.expr.clone(), value.kind));
         Ok(value)
+    }
+
+    /// A list from text (`"*,Auto"` for the column definitions of a grid):
+    /// the list, its capacity, then each element added in order, as the
+    /// interpreter's `list_constant` builds it.
+    fn list_constant(&mut self, node: &Rc<dyn IXamlAstNode>, n: &Rc<FerroXamlIlFerroListConstantAstNode>) -> EmitResult<Typed> {
+        let list_type = IXamlAstValueNode::type_(&**n).get_clr_type().map_err(|e| failed(node, e))?;
+        let constructor = n.constructor().clone();
+        let is_declared = constructor.as_any().downcast_ref::<RuntimeConstructor>().is_some_and(|c| c.declared.is_some());
+        let list = match is_declared {
+            true => self.constructor_call(node, &constructor, &[])?,
+            false => self.default_object(node, &list_type, &constructor)?,
+        };
+        let set_capacity = n
+            .list_set_capacity_method()
+            .as_any()
+            .downcast_ref::<RuntimeMethod>()
+            .ok_or_else(|| unsupported(node, "the capacity setter is not a method of the run-time type system"))?;
+        let capacity = i32::try_from(n.values().len()).unwrap_or(i32::MAX);
+        let call = self.declared_call(node, set_capacity, &[Typed { expr: list.expr.clone(), kind: list.kind }, exact::<i32>(format!("{capacity}_i32"))])?;
+        self.line(format!("{call};"));
+        let add = n
+            .list_add_method()
+            .as_any()
+            .downcast_ref::<RuntimeMethod>()
+            .ok_or_else(|| unsupported(node, "the adder is not a method of the run-time type system"))?;
+        for value in n.values() {
+            let element = self.value(&value.as_node())?;
+            let call = self.declared_call(node, add, &[Typed { expr: list.expr.clone(), kind: list.kind }, element])?;
+            self.line(format!("{call};"));
+        }
+        Ok(list)
     }
 
     /// A compile-time constant: what `constant_value` loads for it.
@@ -479,13 +527,14 @@ impl Emitter<'_> {
         self.enum_variant(node, markup, variant)
     }
 
-    /// A call of a declared constructor of a value type, through the source
-    /// text of its declaration.
+    /// A call of a declared constructor through the typed function the
+    /// declaration generated for it, with the arguments stated as the
+    /// declared parameter types. An object of a class is kept in a local.
     fn constructor_call(
         &mut self,
         node: &Rc<dyn IXamlAstNode>,
         constructor: &Rc<dyn IXamlConstructor>,
-        arguments: &[String],
+        arguments: &[Typed],
     ) -> EmitResult<Typed> {
         let runtime = constructor
             .as_any()
@@ -495,43 +544,39 @@ impl Emitter<'_> {
             .declaring_type
             .upgrade()
             .ok_or_else(|| unsupported(node, "the declaring type of the constructor is gone"))?;
-        let markup = declaring
-            .markup()
-            .ok_or_else(|| unsupported(node, format!("{} has no metadata", declaring.full_name())))?;
+        let declared = runtime
+            .declared
+            .ok_or_else(|| unsupported(node, format!("a constructor of {} that metadata does not declare", declaring.full_name())))?;
+        let emit = declared
+            .emit
+            .ok_or_else(|| unsupported(node, format!("the constructor of {} has no typed function", declaring.full_name())))?;
+        let owner = self.type_path(node, &declaring)?;
         if runtime.parameter_handles.len() != arguments.len() {
             return Err(unsupported(node, "the constructor doesn't take the arguments of the node"));
         }
-        // The declared constructor with the Rust parameter types of the projected one.
-        let declared: Vec<_> = markup
-            .constructors
-            .iter()
-            .filter(|declared| {
-                declared.parameters.len() == runtime.parameter_handles.len()
-                    && declared
-                        .parameters
-                        .iter()
-                        .zip(&runtime.parameter_handles)
-                        .all(|(declared, projected)| projected.is_some_and(|handle| handle.id() == declared().id()))
-            })
-            .collect();
-        let [declared] = declared.as_slice() else {
-            return Err(unsupported(node, format!("no single declared constructor of {} matches", markup.full_name())));
-        };
-        let text = declared.emit.ok_or_else(|| unsupported(node, "the constructor has no source text"))?;
-        // Only `<TypeName>::<function>`: the type is known, everything else is relative to the declaring module.
-        let function = match text.split_once("::") {
-            Some((owner, function)) if owner.trim() == markup.name && is_identifier(function.trim()) => function.trim(),
-            _ => return Err(unsupported(node, format!("the constructor is declared as `{text}`"))),
-        };
-        let path = markup
-            .rust_path()
-            .ok_or_else(|| unsupported(node, format!("no public Rust path is recorded for {}", markup.full_name())))?;
-        let id = markup.handle().ok_or_else(|| unsupported(node, "the type has no value type"))?.id();
-        let nullable = markup.nullable.map(|nullable| nullable().id());
-        Ok(Typed {
-            expr: format!("{}::{function}({})", absolute(path), arguments.join(", ")),
-            kind: Kind::Exact { id, nullable },
-        })
+        let mut texts = Vec::with_capacity(arguments.len());
+        for (index, (argument, handle)) in arguments.iter().zip(&runtime.parameter_handles).enumerate() {
+            let handle = handle.ok_or_else(|| unsupported(node, format!("argument {index} of the constructor has no Rust type")))?;
+            texts.push(self.coerce(argument, handle.id()).ok_or_else(|| {
+                unsupported(node, format!("argument {index} of the constructor cannot be stated as `{}`", handle.name()))
+            })?);
+        }
+        let value = declaring
+            .markup()
+            .and_then(|markup| markup.value)
+            .ok_or_else(|| unsupported(node, format!("the value type of {} is not known", declaring.full_name())))?;
+        let mut call = format!("{owner}::{}({})", emit.function, texts.join(", "));
+        if emit.fallible {
+            call.push_str(&format!(".map_err(|error| rt::at(rt::TARGET_INVOCATION_EXCEPTION, error, {}, {}))?", node.line(), node.position()));
+        }
+        let kind = self.kind_of(value().id());
+        if let Kind::Class(class) = kind {
+            let local = self.local_for(class);
+            self.marker(node, class.name());
+            self.line(format!("let {local} = {call};"));
+            return Ok(Typed { expr: local, kind });
+        }
+        Ok(Typed { expr: call, kind })
     }
 
     /// The expression as a value of exactly the Rust type `target` (the
@@ -539,6 +584,24 @@ impl Emitter<'_> {
     /// run-time loader applies to the argument of the property's setter
     /// (`to_exact`). `None`: it cannot be stated.
     fn coerce(&self, value: &Typed, target: TypeId) -> Option<String> {
+        self.coerce_static(value, target).or_else(|| self.coerce_registered(value, target))
+    }
+
+    /// A conversion through the assignability casts of the untyped value
+    /// conversions (an interface handle, a registered cast), where
+    /// `ValueTypes::is_assignable` proves it exists: `rt::cast(value)`, which
+    /// performs the very cast of the run-time loader.
+    fn coerce_registered(&self, value: &Typed, target: TypeId) -> Option<String> {
+        use ferroui_base::data::core::{ValueType, ValueTypes};
+        let (from, expr) = match value.kind {
+            Kind::Exact { id, .. } => (id, value.expr.clone()),
+            Kind::Class(class) => (class.handle()?, format!("{}.clone()", value.expr)),
+            Kind::Null => return None,
+        };
+        ValueTypes::is_assignable(ValueType::new(from, ""), ValueType::new(target, "")).then(|| format!("rt::cast({expr})"))
+    }
+
+    fn coerce_static(&self, value: &Typed, target: TypeId) -> Option<String> {
         let object = TypeId::of::<Option<BoxedValue>>();
         match value.kind {
             Kind::Exact { id, nullable } => {
@@ -904,7 +967,7 @@ impl Emitter<'_> {
         let returned = match method.declared() {
             Some(DeclaredMember::Getter(property)) | Some(DeclaredMember::StaticGetter(property)) => Some((property.type_)()),
             Some(DeclaredMember::Method(declared)) => declared.return_type.map(|return_type| return_type()),
-            Some(DeclaredMember::Parse(markup)) => markup.parse_type.map(|parse_type| parse_type()),
+            Some(DeclaredMember::Parse(markup)) => markup.value.map(|value| value()),
             _ => None,
         };
         returned
@@ -933,26 +996,31 @@ impl Emitter<'_> {
     }
 
     /// The path the associated functions of the declaring type of `method`
-    /// are called by: the public path of the class or the markup type
-    /// (`<dyn ::path::Trait>` for a contract).
+    /// are called by.
     fn owner_path(&self, node: &Rc<dyn IXamlAstNode>, method: &RuntimeMethod) -> EmitResult<String> {
-        let runtime = method
+        let declaring = method
             .declaring_type
             .upgrade()
             .ok_or_else(|| unsupported(node, format!("{}: the declaring type is gone", method.name)))?;
-        let declaring: Rc<dyn IXamlType> = runtime.clone();
+        self.type_path(node, &declaring)
+    }
+
+    /// The path the associated functions of a type are called by: the
+    /// public path of the class or the markup type (`<dyn ::path::Trait>` for
+    /// a contract).
+    fn type_path(&self, node: &Rc<dyn IXamlAstNode>, runtime: &Rc<RuntimeType>) -> EmitResult<String> {
         if let Some(class) = runtime.type_info() {
             return class
                 .rust_path()
                 .map(absolute)
-                .ok_or_else(|| unsupported(node, format!("no public Rust path is recorded for {}", declaring.full_name())));
+                .ok_or_else(|| unsupported(node, format!("no public Rust path is recorded for {}", runtime.full_name())));
         }
         let markup = runtime
             .markup()
-            .ok_or_else(|| unsupported(node, format!("{} has no metadata", declaring.full_name())))?;
+            .ok_or_else(|| unsupported(node, format!("{} has no metadata", runtime.full_name())))?;
         let path = markup
             .rust_path()
-            .ok_or_else(|| unsupported(node, format!("no public Rust path is recorded for {}", declaring.full_name())))?;
+            .ok_or_else(|| unsupported(node, format!("no public Rust path is recorded for {}", runtime.full_name())))?;
         Ok(match markup.rust_path_is_trait() {
             true => format!("<dyn {}>", absolute(path)),
             false => absolute(path),
@@ -1142,14 +1210,5 @@ mod tests {
         assert_eq!(f64_literal(f64::NEG_INFINITY), "::core::primitive::f64::NEG_INFINITY");
         assert_eq!(f32_literal(0.25), "0.25_f32");
         assert_eq!(f32_literal(f32::NEG_INFINITY), "::core::primitive::f32::NEG_INFINITY");
-    }
-
-    #[test]
-    fn identifiers_are_recognised() {
-        assert!(is_identifier("new"));
-        assert!(is_identifier("from_pixels"));
-        assert!(!is_identifier(""));
-        assert!(!is_identifier("a::b"));
-        assert!(!is_identifier("1a"));
     }
 }
