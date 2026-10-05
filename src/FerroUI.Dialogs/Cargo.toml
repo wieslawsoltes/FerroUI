@@ -1,0 +1,32 @@
+[package]
+name = "ferroui-dialogs"
+description = "The managed dialogs of FerroUI: the managed file chooser, the managed storage provider and the about dialog"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+build = "build.rs"
+
+# Unit tests live next to the code (`tests/` modules of the library), not as
+# integration test targets.
+autotests = false
+autobenches = false
+autoexamples = false
+
+[lib]
+path = "lib.rs"
+
+[dependencies]
+ferroui-base = { workspace = true }
+ferroui-controls = { workspace = true }
+ferroui-markup-xaml = { workspace = true }
+# The document of the about dialog is loaded through the run-time XAML loader until the build-time
+# compiler exists; the dependency goes away with it (the library then only needs the runtime library).
+ferroui-markup-xaml-loader = { workspace = true, features = ["runtime"] }
+# The mounted volumes of the file system (the drive list of the .NET base library).
+sysinfo = { workspace = true }
+
+[dev-dependencies]
+ferroui-base = { workspace = true, features = ["testing"] }
+ferroui-controls = { workspace = true, features = ["testing"] }

@@ -11,6 +11,7 @@ members = [
     "src/FerroUI.Desktop",
     "src/Browser/FerroUI.Browser",
     "src/FerroUI.Fonts.Inter",
+    "src/FerroUI.Dialogs",
     "src/FerroUI.Themes.Simple",
     "src/FerroUI.Themes.Fluent",
     "src/FerroUI.OpenGL",
@@ -43,6 +44,7 @@ ferroui-native = { path = "src/FerroUI.Native" }
 ferroui-desktop = { path = "src/FerroUI.Desktop" }
 ferroui-browser = { path = "src/Browser/FerroUI.Browser" }
 ferroui-fonts-inter = { path = "src/FerroUI.Fonts.Inter" }
+ferroui-dialogs = { path = "src/FerroUI.Dialogs" }
 ferroui-themes-simple = { path = "src/FerroUI.Themes.Simple" }
 ferroui-themes-fluent = { path = "src/FerroUI.Themes.Fluent" }
 ferroui-opengl = { path = "src/FerroUI.OpenGL" }
@@ -58,6 +60,8 @@ roxmltree = "0.20"
 harfbuzz-sys = { version = "0.8", default-features = false, features = ["bundled"] }
 rust_decimal = { version = "1.43", default-features = false }
 time = { version = "0.3", default-features = false }
+# The mounted volumes of the managed file chooser.
+sysinfo = { version = "0.37", default-features = false, features = ["disk"] }
 
 [profile.release]
 lto = "thin"
