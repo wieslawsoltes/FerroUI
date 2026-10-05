@@ -1,5 +1,6 @@
 use super::{DataFormat, DataFormatOf, DataTransferItemExtensions, IDataTransfer, IDataTransferItem};
 use crate::media::imaging::Bitmap;
+use crate::platform::storage::IStorageItem;
 use std::rc::Rc;
 
 /// The items of a data transfer that support a format, in order.
@@ -78,6 +79,21 @@ pub trait DataTransferExtensions: IDataTransfer {
     /// [`DataFormat::bitmap`], the first matching one will be returned.
     fn try_get_bitmap(&self) -> Option<Rc<Bitmap>> {
         self.try_get_value(&DataFormat::bitmap())
+    }
+
+    /// Returns a file (or folder), if available, from the data transfer.
+    ///
+    /// See [`DataFormat::file`].
+    fn try_get_file(&self) -> Option<Rc<dyn IStorageItem>> {
+        self.try_get_value(&DataFormat::file())
+    }
+
+    /// Returns the files (or folders), if available, from the data
+    /// transfer.
+    ///
+    /// See [`DataFormat::file`].
+    fn try_get_files(&self) -> Option<Vec<Rc<dyn IStorageItem>>> {
+        self.try_get_values(&DataFormat::file())
     }
 }
 

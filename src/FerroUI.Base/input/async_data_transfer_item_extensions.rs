@@ -1,6 +1,7 @@
 use super::platform::ClipboardError;
 use super::{DataFormat, DataFormatOf, IAsyncDataTransferItem, LocalBoxFuture};
 use crate::media::imaging::Bitmap;
+use crate::platform::storage::IStorageItem;
 use std::rc::Rc;
 
 /// Contains extension methods for [`IAsyncDataTransferItem`].
@@ -35,6 +36,13 @@ pub trait AsyncDataTransferItemExtensions: IAsyncDataTransferItem {
     /// Returns a bitmap, if available, from the item.
     fn try_get_bitmap_async(&self) -> LocalBoxFuture<Result<Option<Rc<Bitmap>>, ClipboardError>> {
         self.try_get_value_async(&DataFormat::bitmap())
+    }
+
+    /// Returns a file (or folder), if available, from the item.
+    ///
+    /// See [`DataFormat::file`].
+    fn try_get_file_async(&self) -> LocalBoxFuture<Result<Option<Rc<dyn IStorageItem>>, ClipboardError>> {
+        self.try_get_value_async(&DataFormat::file())
     }
 }
 
