@@ -4,9 +4,11 @@ use crate::browser_data_format_helper::{is_text_format, to_data_format};
 use crate::interop::completion_helper::PromiseError;
 use crate::interop::input_helper::{self, ReadableDataValueContent};
 use crate::interop::JsObject;
+use crate::storage::JsStorageFile;
 use ferroui_base::input::platform::ClipboardError;
 use ferroui_base::input::{DataFormat, LocalBoxFuture};
 use ferroui_base::media::imaging::Bitmap;
+use ferroui_base::platform::storage::IStorageItem;
 use std::any::Any;
 use std::rc::Rc;
 
@@ -97,6 +99,7 @@ pub(crate) fn get_readable_item_formats(readable_data_item: &dyn IReadableDataIt
 /// The value of a format from the value read from an item.
 ///
 /// The value type follows the format: `String` for the text format,
+/// `Rc<dyn IStorageItem>` for the file format (a file of the page),
 /// `Rc<Bitmap>` for the bitmap format, `String` for the formats whose name
 /// on the page is a `text/*` media type and `Rc<[u8]>` for the others.
 /// The original decides by the data type of the requested format, which the
@@ -113,17 +116,27 @@ pub(crate) fn try_get_value(
         return Ok(None);
     };
 
-    // The file data format and the storage files of the page (`JSStorageFile` of the original)
-    // are not ported yet: a file read from an item has no value.
-    if let ReadableDataValueContent::File(_) = data {
-        return Ok(None);
-    }
+    // A file is the storage item of the page the script side wrapped it into.
+    let data = match data {
+        ReadableDataValueContent::File(item) => {
+            let file: Rc<dyn IStorageItem> = JsStorageFile::new(item);
+            if DataFormat::file() == *format {
+                return Ok(Some(Rc::new(file)));
+            }
+            return Ok(None);
+        }
+        data => data,
+    };
 
     if DataFormat::text() == *format {
         return Ok(match data {
             ReadableDataValueContent::String(text) => Some(Rc::new(text)),
             _ => None,
         });
+    }
+
+    if DataFormat::file() == *format {
+        return Ok(None);
     }
 
     if DataFormat::bitmap() == *format {

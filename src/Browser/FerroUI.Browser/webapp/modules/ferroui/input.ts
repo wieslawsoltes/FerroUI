@@ -1,5 +1,6 @@
 import { CaretHelper } from "./caretHelper";
 import { FerroExports } from "./ferroExports";
+import { StorageItem } from "../storage/storageItem";
 
 enum RawInputModifiers {
     None = 0,
@@ -66,8 +67,6 @@ type ReadableDataItem = {
     format?: string;
 };
 
-// The "file" value is the File of the page. The original wraps it into a storage item of its
-// storage module, which is not ported yet; the framework does not read it until then.
 type ReadableDataValue = {
     type: "string";
     value: string;
@@ -76,7 +75,7 @@ type ReadableDataValue = {
     value: Uint8Array;
 } | {
     type: "file";
-    value: File;
+    value: StorageItem;
 };
 
 export class InputHelper {
@@ -281,7 +280,7 @@ export class InputHelper {
                         }
 
                         const file = dataTransferItem.getAsFile();
-                        return file == null ? null : { type: "file", value: file };
+                        return file == null ? null : { type: "file", value: StorageItem.createFromFile(file) };
                     }
 
                     default:
@@ -341,7 +340,7 @@ export class InputHelper {
                 }
 
                 const file = dataTransferItem.getAsFile();
-                return file == null ? null : { type: "file", value: file };
+                return file == null ? null : { type: "file", value: StorageItem.createFromFile(file) };
             }
 
             default:
