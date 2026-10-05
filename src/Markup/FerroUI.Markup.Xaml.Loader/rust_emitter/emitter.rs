@@ -258,10 +258,10 @@ impl Emitter<'_> {
             return Ok(Typed { expr, kind });
         }
         if let Some(n) = node.cast::<XamlAstTextNode>() {
-            return Ok(exact::<String>(format!("String::from({})", rust_string_literal(&n.text()))));
+            return Ok(exact::<String>(format!("::std::string::String::from({})", rust_string_literal(&n.text()))));
         }
         if node.is::<XamlNullExtensionNode>() {
-            return Ok(Typed { expr: "None".to_string(), kind: Kind::Null });
+            return Ok(Typed { expr: "::core::option::Option::None".to_string(), kind: Kind::Null });
         }
         if let Some(n) = node.cast::<XamlConstantNode>() {
             let type_ = IXamlAstValueNode::type_(&*n).get_clr_type().map_err(|e| failed(node, e))?;
@@ -361,10 +361,10 @@ impl Emitter<'_> {
     /// A compile-time constant: what `constant_value` loads for it.
     fn constant(&mut self, node: &Rc<dyn IXamlAstNode>, type_: &Rc<dyn IXamlType>, constant: &XamlValue) -> EmitResult<Typed> {
         if let XamlValue::String(text) = constant {
-            return Ok(exact::<String>(format!("String::from({})", rust_string_literal(text))));
+            return Ok(exact::<String>(format!("::std::string::String::from({})", rust_string_literal(text))));
         }
         if matches!(constant, XamlValue::Null) {
-            return Ok(Typed { expr: "None".to_string(), kind: Kind::Null });
+            return Ok(Typed { expr: "::core::option::Option::None".to_string(), kind: Kind::Null });
         }
         let (integer, float) =
             numeric_constant(constant).ok_or_else(|| unsupported(node, format!("the constant {constant:?}")))?;
@@ -537,7 +537,7 @@ impl Emitter<'_> {
                 if target == id {
                     Some(value.expr.clone())
                 } else if nullable == Some(target) {
-                    Some(format!("Some({})", value.expr))
+                    Some(format!("::core::option::Option::Some({})", value.expr))
                 } else if target == object {
                     Some(format!("rt::to_object({})", value.expr))
                 } else {
@@ -546,23 +546,23 @@ impl Emitter<'_> {
             }
             Kind::Class(class) => {
                 if target == object {
-                    return Some(format!("rt::to_object({}.clone())", value.expr));
+                    return Some(format!("rt::to_object(::core::clone::Clone::clone(&{}))", value.expr));
                 }
                 let (declared, nullable) = TypeInfo::find_by_handle(target)?;
                 if !declared.is_assignable_from(class) {
                     return None;
                 }
                 let handle = if std::ptr::eq(declared, class) {
-                    format!("{}.clone()", value.expr)
+                    format!("::core::clone::Clone::clone(&{})", value.expr)
                 } else {
-                    format!("{}.clone().upcast::<{}>()", value.expr, absolute(declared.rust_path()?))
+                    format!("::core::clone::Clone::clone(&{}).upcast::<{}>()", value.expr, absolute(declared.rust_path()?))
                 };
-                Some(if nullable { format!("Some({handle})") } else { handle })
+                Some(if nullable { format!("::core::option::Option::Some({handle})") } else { handle })
             }
             Kind::Null => {
                 let is_nullable_class = TypeInfo::find_by_handle(target).is_some_and(|(_, nullable)| nullable);
                 (is_nullable_class || target == object || target == TypeId::of::<Option<String>>())
-                    .then(|| "None".to_string())
+                    .then(|| "::core::option::Option::None".to_string())
             }
         }
     }
@@ -726,8 +726,8 @@ impl Emitter<'_> {
         };
         // The exact class of the root is known, so is whether it is a styled element.
         let root = match StyledElement::TYPE.is_assignable_from(class) {
-            true => format!("Some(&{})", target.expr),
-            false => "None".to_string(),
+            true => format!("::core::option::Option::Some(&{})", target.expr),
+            false => "::core::option::Option::None".to_string(),
         };
         self.line(format!(
             "rt::complete_root_name_scope({root}, name_scope.as_ref(), {}, {})?;",
@@ -753,7 +753,7 @@ impl Emitter<'_> {
             .ok_or_else(|| unsupported(node, "a name that is not text"))?
             .text();
         self.line(format!(
-            "rt::register_name(name_scope.as_ref(), {}, {}.clone().upcast::<::ferroui_base::FerroObject>(), {}, {})?;",
+            "rt::register_name(name_scope.as_ref(), {}, ::core::clone::Clone::clone(&{}).upcast::<::ferroui_base::FerroObject>(), {}, {})?;",
             rust_string_literal(&name),
             target.expr,
             node.line(),
@@ -812,14 +812,14 @@ pub fn emit_document(
         .ok_or_else(|| unsupported(&root_value, "no public Rust path is recorded for the root class"))?;
     emitter.line("let name_scope = rt::name_scope_of(service_provider.as_ref());".to_string());
     emitter.manipulation(&manipulation.as_node(), &created)?;
-    emitter.line(format!("Ok({})", created.expr));
+    emitter.line(format!("::core::result::Result::Ok({})", created.expr));
 
     let mut source = String::new();
     source.push_str(&format!("/// Generated from `{}`.\n", document_name.replace('`', "'").replace(['\r', '\n'], " ")));
     source.push_str(&format!("pub fn {function_name}(\n"));
-    source.push_str("    service_provider: Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,\n");
+    source.push_str("    service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,\n");
     source.push_str(&format!(
-        ") -> Result<::ferroui_base::Ref<{}>, ::ferroui_markup_xaml::XamlLoadException> {{\n",
+        ") -> ::core::result::Result<::ferroui_base::Ref<{}>, ::ferroui_markup_xaml::XamlLoadException> {{\n",
         absolute(root_path)
     ));
     for line in &emitter.lines {
