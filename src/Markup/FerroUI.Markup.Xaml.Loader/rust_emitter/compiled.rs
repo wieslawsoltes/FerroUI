@@ -41,14 +41,30 @@ pub struct GeneratedFile {
 /// Parses, transforms and emits each document (`(name, xaml)`) on its own,
 /// with the configuration of the run-time loader. A document that fails to
 /// transform or contains an unsupported node is reported with the reason;
-/// the others are not affected.
+/// the others are not affected. A document whose generated functions would
+/// have the name of a function generated for an earlier document (names
+/// that differ only in case or in characters that are not letters or
+/// digits, or a name that ends in `_untyped`) is reported as well, instead
+/// of becoming a duplicate definition rustc rejects.
 pub fn compile_documents(
     documents: &[(&str, &str)],
     configuration: &RuntimeXamlLoaderConfiguration,
 ) -> Vec<CompiledDocument> {
     let mut compiled = Vec::with_capacity(documents.len());
+    // The items of the file each document defines, with the document that defines them.
+    let mut items: Vec<(String, &str)> = Vec::with_capacity(documents.len() * 2);
     for (name, xaml) in documents {
         let function_name = function_name_of(name);
+        let defined = [function_name.clone(), untyped_function_name(&function_name)];
+        let collision = defined
+            .iter()
+            .find_map(|item| items.iter().find(|(known, _)| known == item).map(|(_, other)| (item.clone(), *other)));
+        items.extend(defined.into_iter().map(|item| (item, *name)));
+        if let Some((item, other)) = collision {
+            let reason = format!("the generated function `{item}` would also be defined for the document `{other}`; rename one of them");
+            compiled.push(CompiledDocument { name: name.to_string(), function_name, source: Err(reason) });
+            continue;
+        }
         let source = match FerroXamlIlRuntimeCompiler::transform_document(xaml, name, configuration) {
             Ok((root, transformer_configuration, _type_system)) => {
                 emit_document(&root, &transformer_configuration, &function_name, name).map_err(|e| e.to_string())
@@ -102,16 +118,16 @@ pub fn generate_file(
                 source.push('\n');
                 source.push_str(function);
                 source.push('\n');
-                source.push_str(&format!("fn {}_untyped(\n", document.function_name));
+                source.push_str(&format!("fn {}(\n", untyped_function_name(&document.function_name)));
                 source.push_str("    service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,\n");
                 source.push_str(") -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadException> {\n");
                 source.push_str(&format!("    let root = {}(service_provider)?;\n", document.function_name));
                 source.push_str("    ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)\n");
                 source.push_str("}\n");
                 table.push(format!(
-                    "    ({}, {}_untyped as BuildDocument),\n",
+                    "    ({}, {} as BuildDocument),\n",
                     rust_string_literal(&document.name),
-                    document.function_name
+                    untyped_function_name(&document.function_name)
                 ));
                 report.push((document.name.clone(), None));
             }
@@ -154,6 +170,11 @@ pub fn generate_file(
     GeneratedFile { source, documents: report }
 }
 
+/// The name of the untyped build function that wraps the build function `function_name`.
+fn untyped_function_name(function_name: &str) -> String {
+    format!("{function_name}_untyped")
+}
+
 /// The transformed tree of one document as text (the AST dump of
 /// [`crate::testing::objects::dump_tree`]): what the emitter walks, for diagnosing
 /// why a document is not eligible. With the `testing` feature.
@@ -162,4 +183,44 @@ pub fn transformed_tree(name: &str, xaml: &str, configuration: &RuntimeXamlLoade
     FerroXamlIlRuntimeCompiler::transform_document(xaml, name, configuration)
         .map(|(root, _, _)| crate::testing::objects::dump_tree(&root))
         .map_err(|error| error.message())
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn reason(compiled: &[CompiledDocument], name: &str) -> Option<String> {
+        compiled.iter().find(|document| document.name == name).and_then(|document| document.source.clone().err())
+    }
+
+    /// Not from upstream: documents whose build functions would have the same name are
+    /// reported as a diagnostic of the later document, not left to rustc.
+    #[test]
+    fn colliding_function_names_are_reported() {
+        let xaml = "<Border xmlns='https://github.com/ferroui'/>";
+        let documents = [
+            ("a-b.xaml", xaml),
+            ("a_b.xaml", xaml),
+            ("Case.xaml", xaml),
+            ("case.xaml", xaml),
+            ("x.xaml", xaml),
+            ("x.xaml_untyped", xaml),
+        ];
+        let compiled = compile_documents(&documents, &RuntimeXamlLoaderConfiguration::new());
+        for (name, other, item) in [
+            ("a_b.xaml", "a-b.xaml", "build_a_b_xaml"),
+            ("case.xaml", "Case.xaml", "build_case_xaml"),
+            ("x.xaml_untyped", "x.xaml", "build_x_xaml_untyped"),
+        ] {
+            let reason = reason(&compiled, name).unwrap_or_else(|| panic!("{name} is not reported"));
+            assert_eq!(
+                reason,
+                format!("the generated function `{item}` would also be defined for the document `{other}`; rename one of them")
+            );
+        }
+        for name in ["a-b.xaml", "Case.xaml", "x.xaml"] {
+            let reason = reason(&compiled, name).unwrap_or_default();
+            assert!(!reason.contains("would also be defined"), "{name}: {reason}");
+        }
+    }
 }
