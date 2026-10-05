@@ -26,3 +26,9 @@ path = "examples/raw_window.rs"
 [[example]]
 name = "platform_window"
 path = "examples/platform_window.rs"
+
+# Creates a window, which AppKit only allows on the main thread.
+[[test]]
+name = "accessibility_tree"
+path = "tests/accessibility_tree.rs"
+harness = false
