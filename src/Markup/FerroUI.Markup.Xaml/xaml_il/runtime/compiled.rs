@@ -248,6 +248,31 @@ pub fn name_scope_of(parent: Option<&Rc<dyn IServiceProvider>>) -> Option<Rc<dyn
     parent.and_then(|parent| parent.get_name_scope())
 }
 
+/// The value of `Setter.Value` as the run-time loader passes it to the
+/// setter: converted to the exact type of the property the setter already
+/// names (managed code assigns an instance of that type already; here the
+/// untyped value is brought to the property's Rust type with the
+/// assignability casts of the untyped value conversions). A value that is
+/// not of the type of the property (a binding, the unset marker, a template
+/// the setter instantiates), and any value of a setter without its property,
+/// is passed as it is.
+pub fn setter_value(setter: &ferroui_base::styling::Setter, value: MarkupValue) -> MarkupValue {
+    let (Some(boxed), Some(property)) = (&value, setter.property()) else { return value };
+    let target = ValueType::new(property.property_type(), property.property_type_name());
+    let boxed = match target.is_object() {
+        true => untyped_object_form(boxed).unwrap_or_else(|| boxed.clone()),
+        false => boxed.clone(),
+    };
+    let converted = match boxed.value_type_id() == target.id() {
+        true => Some(boxed),
+        false => ValueTypes::try_cast(&boxed, target),
+    };
+    match converted {
+        Some(converted) => Some(converted),
+        None => value,
+    }
+}
+
 /// `target.SetValue(property, FerroProperty.UnsetValue, BindingPriority.LocalValue)`:
 /// what the unset-value setter of a registered property does.
 pub fn unset_value(target: &Ref<FerroObject>, property: &'static FerroProperty) {

@@ -156,6 +156,11 @@ struct Registry {
     casts: IdMap<(TypeId, TypeId), ConvertFn>,
     /// `Option<T>` → the type of the value it unwraps to.
     nullable_inner: IdMap<TypeId, ValueType>,
+    /// `ElementRef<T>` and `Option<ElementRef<T>>` → the class `T` and
+    /// whether the type is the nullable form: how the emitter of Rust source
+    /// names the type.
+    #[cfg(feature = "compiler-metadata")]
+    element_refs: IdMap<TypeId, (&'static TypeInfo, bool)>,
     /// Conversions applied to borrowed untyped values when a property is
     /// set with a value that is not of its exact type.
     any_conversions: IdMap<(TypeId, TypeId), AnyConvertFn>,
@@ -420,6 +425,11 @@ impl ValueTypes {
         use crate::ElementRef;
 
         Self::register_nullable::<ElementRef<T>>();
+        #[cfg(feature = "compiler-metadata")]
+        with_registry(|r| {
+            r.element_refs.insert(TypeId::of::<ElementRef<T>>(), (T::TYPE, false));
+            r.element_refs.insert(TypeId::of::<Option<ElementRef<T>>>(), (T::TYPE, true));
+        });
         Self::register_cast::<Ref<T>, ElementRef<T>>(|o| ElementRef::of(o));
         Self::register_cast::<Ref<T>, Option<ElementRef<T>>>(|o| Some(ElementRef::of(o)));
         Self::register_cast::<Option<Ref<T>>, Option<ElementRef<T>>>(|o| ElementRef::from_nullable(o.clone()));
@@ -610,6 +620,16 @@ impl ValueTypes {
             r.reference_handles.get(&handle).and_then(|object| r.casts.get(&(handle, *object)).cloned())
         })?;
         cast(value)
+    }
+
+    /// The class `T` of a registered element reference type
+    /// ([`register_element_ref`](Self::register_element_ref)) with the id
+    /// `id` (`ElementRef<T>`, or `Option<ElementRef<T>>`, the nullable form),
+    /// and whether it is the nullable form. For the emitter of Rust source,
+    /// which names the type by the class.
+    #[cfg(feature = "compiler-metadata")]
+    pub fn element_ref_class(id: TypeId) -> Option<(&'static TypeInfo, bool)> {
+        with_registry(|r| r.element_refs.get(&id).copied())
     }
 
     /// Views a value as an object of the class hierarchy, if it is a
