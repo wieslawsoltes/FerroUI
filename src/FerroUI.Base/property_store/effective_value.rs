@@ -313,6 +313,14 @@ impl<T: PropertyValue> EffectiveValue<T> {
     }
 }
 
+/// Panics for an untyped local value that is not of the value type of the
+/// property (compiled once, not per value type).
+#[cold]
+#[track_caller]
+fn invalid_value_type(property: &FerroProperty) -> ! {
+    panic!("invalid value type for property '{}'", property.name())
+}
+
 /// Downcasts an untyped effective value to its typed form.
 #[inline]
 pub(crate) fn cast_effective_value<T: PropertyValue>(value: &dyn EffectiveValueDyn) -> &EffectiveValue<T> {
@@ -419,7 +427,7 @@ impl<T: PropertyValue> EffectiveValueDyn for EffectiveValue<T> {
     fn set_local_value_and_raise_untyped(&self, owner: &FerroObject, value: &dyn Any) {
         let value = value
             .downcast_ref::<T>()
-            .unwrap_or_else(|| panic!("invalid value type for property '{}'", self.property.name()))
+            .unwrap_or_else(|| invalid_value_type(self.property))
             .clone();
         self.set_local_value_and_raise(owner, value);
     }

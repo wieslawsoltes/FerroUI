@@ -93,12 +93,9 @@ impl<T: PropertyValue> DirectPropertyBase<T> {
     }
 
 
+    #[track_caller]
     fn invalid_value(&self) -> ! {
-        panic!(
-            "Invalid value for property '{}': expected {}.",
-            self.name(),
-            self.property_type_name()
-        )
+        self.base.invalid_value_type()
     }
 }
 

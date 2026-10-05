@@ -206,11 +206,7 @@ impl<T: PropertyValue> StyledProperty<T> {
         } else if let Some(v) = Self::convert_untyped(value) {
             BindingValue::new(v)
         } else {
-            BindingValue::binding_error(crate::data::BindingError::message(format!(
-                "Invalid value for property '{}': expected {}.",
-                self.name(),
-                self.property_type_name()
-            )))
+            BindingValue::binding_error(crate::data::BindingError::message(self.invalid_value_message()))
         }
     }
 }
@@ -263,11 +259,7 @@ impl<T: PropertyValue> PropertyRoutes for StyledProperty<T> {
         } else if let Some(v) = Self::convert_untyped(value) {
             o.set_value_with_priority(this, v, priority)
         } else {
-            panic!(
-                "Invalid value for property '{}': expected {}.",
-                self.name(),
-                self.property_type_name()
-            );
+            self.invalid_value_type();
         }
     }
 
@@ -281,11 +273,7 @@ impl<T: PropertyValue> PropertyRoutes for StyledProperty<T> {
         } else if let Some(v) = Self::convert_untyped(value) {
             o.set_current_value(this, v);
         } else {
-            panic!(
-                "Invalid value for property '{}': expected {}.",
-                self.name(),
-                self.property_type_name()
-            );
+            self.invalid_value_type();
         }
     }
 
