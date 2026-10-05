@@ -175,19 +175,6 @@ fn invoke_error(error: MarkupInvokeError, what: &str, line_info: &dyn IXamlLineI
     }
 }
 
-/// The context as the service provider its inner service provider is built
-/// on, without keeping the context alive. A context that is gone provides
-/// nothing.
-struct WeakContextServiceProvider(std::rc::Weak<RuntimeContext>);
-
-impl IServiceProvider for WeakContextServiceProvider {
-    fn get_service(&self, service_type: std::any::TypeId) -> Option<Rc<dyn std::any::Any>> {
-        // Only the services below the inner provider: asking the context itself
-        // would ask the inner provider again.
-        self.0.upgrade()?.get_service_below_inner(service_type)
-    }
-}
-
 /// What a document adds to the contexts created for it (its base URI and
 /// its static providers: the namespace information provider, if the
 /// language maps one) and what the interpreter decided once about its
@@ -278,7 +265,7 @@ impl Interpreter {
     /// contracts. Add evaluators to the lists, then share the interpreter
     /// with `Rc::new`.
     pub fn new(configuration: Rc<TransformerConfiguration>, type_system: Rc<RuntimeTypeSystem>) -> Self {
-        let definition = RuntimeContextDefinition::new(&configuration);
+        let definition = super::runtime_context::context_definition(&configuration);
         Self {
             configuration,
             type_system,
@@ -343,7 +330,7 @@ impl Interpreter {
             let mut eval = EvalContext::new(self, None, RuntimeDocument::empty(), 0);
             // The inner provider is owned by the context and is given the context it is
             // built on: a strong reference would be a cycle nothing collects.
-            let provider: Rc<dyn IServiceProvider> = Rc::new(WeakContextServiceProvider(Rc::downgrade(&context)));
+            let provider: Rc<dyn IServiceProvider> = context.service_provider_below_inner();
             let provider: MarkupValue = Some(Rc::new(provider));
             let inner = eval.call_method(factory, &[provider], line_info)?;
             let inner = match &inner {
