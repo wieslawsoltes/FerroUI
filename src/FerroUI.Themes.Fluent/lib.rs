@@ -16,6 +16,7 @@
 //! application.styles().add(FluentTheme::new().as_style());
 //! ```
 
+#[path = "Accents/mod.rs"]
 pub mod accents;
 mod assets;
 mod color_palette_resources;

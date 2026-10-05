@@ -53,15 +53,18 @@ const profile = fs.mkdtempSync(path.join(os.tmpdir(), "ferroui-pixels-"));
 const chrome = spawn(candidates[0], ["--headless=new", "--no-first-run", "--no-sandbox", "--force-device-scale-factor=1",
     "--force-color-profile=srgb", `--user-data-dir=${profile}`, "--remote-debugging-port=0", "--window-size=200,100", "about:blank"],
 { stdio: ["ignore", "ignore", "pipe"] });
+let chromeErrors = "";
+chrome.stderr.on("data", (chunk) => { chromeErrors = (chromeErrors + chunk).slice(-4000); });
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 const finish = async (code) => { chrome.kill(); server.close(); await sleep(200); fs.rmSync(profile, { recursive: true, force: true }); process.exit(code); };
 
 let debugPort;
-for (let i = 0; i < 100 && !debugPort; i++) {
+// A cold runner can take well over ten seconds to start the browser.
+for (let i = 0; i < 600 && !debugPort; i++) {
     await sleep(100);
     try { debugPort = fs.readFileSync(path.join(profile, "DevToolsActivePort"), "utf8").split("\n")[0]; } catch { }
 }
-if (!debugPort) { console.error("Chrome did not start"); await finish(2); }
+if (!debugPort) { console.error(`Chrome did not start within 60 s\n${chromeErrors}`); await finish(2); }
 let pageTarget;
 for (let i = 0; i < 50 && !pageTarget; i++) {
     await sleep(100);
