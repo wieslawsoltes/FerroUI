@@ -182,7 +182,7 @@ control_tests! {
     button_spinner => "ButtonSpinner";
     calendar => "Calendar";
     calendar_button => "CalendarButton";
-    calendar_date_picker => "CalendarDatePicker", ignore = "gap G20: the static member System.DateTime.Today is not known to markup (CalendarDatePicker.xaml is left out)";
+    calendar_date_picker => "CalendarDatePicker";
     calendar_day_button => "CalendarDayButton";
     calendar_item => "CalendarItem";
     carousel => "Carousel";
@@ -251,7 +251,7 @@ control_tests! {
     transitioning_content_control => "TransitioningContentControl";
     tree_view => "TreeView";
     tree_view_item => "TreeViewItem";
-    window_notification_manager => "WindowNotificationManager", ignore = "gap G21: the contract INotification has no markup metadata (DataType of a data template) (WindowNotificationManager.xaml is left out)";
+    window_notification_manager => "WindowNotificationManager";
 }
 
 /// The window itself is themed: its template is applied when it is shown

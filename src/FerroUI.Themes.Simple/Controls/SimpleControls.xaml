@@ -43,6 +43,7 @@
         <MergeResourceInclude Source="ferres://FerroUI.Themes.Simple/Controls/PipsPager.xaml" />
         <MergeResourceInclude Source="ferres://FerroUI.Themes.Simple/Controls/PopupRoot.xaml" />
         <MergeResourceInclude Source="ferres://FerroUI.Themes.Simple/Controls/OverlayPopupHost.xaml" />
+        <MergeResourceInclude Source="ferres://FerroUI.Themes.Simple/Controls/WindowNotificationManager.xaml" />
         <MergeResourceInclude Source="ferres://FerroUI.Themes.Simple/Controls/EmbeddableControlRoot.xaml" />
         <MergeResourceInclude Source="ferres://FerroUI.Themes.Simple/Controls/TransitioningContentControl.xaml" />
         <MergeResourceInclude Source="ferres://FerroUI.Themes.Simple/Controls/TreeView.xaml" />
@@ -56,6 +57,7 @@
         <MergeResourceInclude Source="ferres://FerroUI.Themes.Simple/Controls/CalendarDayButton.xaml" />
         <MergeResourceInclude Source="ferres://FerroUI.Themes.Simple/Controls/CalendarItem.xaml" />
         <MergeResourceInclude Source="ferres://FerroUI.Themes.Simple/Controls/Calendar.xaml" />
+        <MergeResourceInclude Source="ferres://FerroUI.Themes.Simple/Controls/CalendarDatePicker.xaml" />
         <MergeResourceInclude Source="ferres://FerroUI.Themes.Simple/Controls/Slider.xaml" />
         <MergeResourceInclude Source="ferres://FerroUI.Themes.Simple/Controls/NotificationCard.xaml" />
         <MergeResourceInclude Source="ferres://FerroUI.Themes.Simple/Controls/NumericUpDown.xaml" />

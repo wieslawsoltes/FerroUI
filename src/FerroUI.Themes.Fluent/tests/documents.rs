@@ -104,7 +104,7 @@ document_tests! {
     controls_button_spinner => "/Controls/ButtonSpinner.xaml";
     controls_calendar => "/Controls/Calendar.xaml";
     controls_calendar_button => "/Controls/CalendarButton.xaml";
-    controls_calendar_date_picker => "/Controls/CalendarDatePicker.xaml", ignore = "gap G20: the static member System.DateTime.Today is not known to markup";
+    controls_calendar_date_picker => "/Controls/CalendarDatePicker.xaml";
     controls_calendar_day_button => "/Controls/CalendarDayButton.xaml";
     controls_calendar_item => "/Controls/CalendarItem.xaml";
     controls_carousel => "/Controls/Carousel.xaml";
@@ -177,7 +177,7 @@ document_tests! {
     controls_tree_view_item => "/Controls/TreeViewItem.xaml";
     controls_window => "/Controls/Window.xaml";
     controls_window_drawn_decorations => "/Controls/WindowDrawnDecorations.xaml";
-    controls_window_notification_manager => "/Controls/WindowNotificationManager.xaml", ignore = "gap G21: the contract INotification has no markup metadata (DataType of a data template)";
+    controls_window_notification_manager => "/Controls/WindowNotificationManager.xaml";
     density_styles_compact => "/DensityStyles/Compact.xaml";
     fluent_theme => "/FluentTheme.xaml";
     strings_invariant_resources => "/Strings/InvariantResources.xaml";

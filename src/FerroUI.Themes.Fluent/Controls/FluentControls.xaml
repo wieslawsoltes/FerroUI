@@ -21,6 +21,7 @@
                 <MergeResourceInclude Source="ferres://FerroUI.Themes.Fluent/Controls/ButtonSpinner.xaml" />
                 <MergeResourceInclude Source="ferres://FerroUI.Themes.Fluent/Controls/Calendar.xaml" />
                 <MergeResourceInclude Source="ferres://FerroUI.Themes.Fluent/Controls/CalendarButton.xaml" />
+                <MergeResourceInclude Source="ferres://FerroUI.Themes.Fluent/Controls/CalendarDatePicker.xaml" />
                 <MergeResourceInclude Source="ferres://FerroUI.Themes.Fluent/Controls/CalendarDayButton.xaml" />
                 <MergeResourceInclude Source="ferres://FerroUI.Themes.Fluent/Controls/CalendarItem.xaml" />
                 <MergeResourceInclude Source="ferres://FerroUI.Themes.Fluent/Controls/Carousel.xaml" />
@@ -64,6 +65,7 @@
                 <MergeResourceInclude Source="ferres://FerroUI.Themes.Fluent/Controls/TransitioningContentControl.xaml" />
                 <MergeResourceInclude Source="ferres://FerroUI.Themes.Fluent/Controls/TreeView.xaml" />
                 <MergeResourceInclude Source="ferres://FerroUI.Themes.Fluent/Controls/TreeViewItem.xaml" />
+                <MergeResourceInclude Source="ferres://FerroUI.Themes.Fluent/Controls/WindowNotificationManager.xaml" />
                 <MergeResourceInclude Source="ferres://FerroUI.Themes.Fluent/Controls/Window.xaml" />
                 <MergeResourceInclude Source="ferres://FerroUI.Themes.Fluent/Controls/WindowDrawnDecorations.xaml" />
                 <MergeResourceInclude Source="ferres://FerroUI.Themes.Fluent/Controls/ComboBox.xaml" />

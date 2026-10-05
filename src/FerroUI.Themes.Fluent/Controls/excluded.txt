@@ -4,7 +4,3 @@
 #
 # Controls (or types the theme names) that are not ported:
 ManagedFileChooser.xaml | FerroUI.Dialogs (ManagedFileChooser, ManagedFileChooserOverwritePrompt, ChildFitter, converters)
-#
-# Ported controls whose document does not load yet (see the gap tests of the Simple theme crate):
-CalendarDatePicker.xaml | gap G20: the static member System.DateTime.Today is not known to markup
-WindowNotificationManager.xaml | gap G21: the contract INotification has no markup metadata (DataType of a data template)
