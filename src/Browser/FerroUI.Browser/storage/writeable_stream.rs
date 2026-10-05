@@ -2,8 +2,11 @@ use crate::interop::promise_helper::{JsError, JsTask};
 use crate::interop::{stream_helper, JsObject};
 use ferroui_base::threading::Dispatcher;
 use std::cell::RefCell;
+use std::future::Future;
 use std::io::{self, Seek, SeekFrom, Write};
+use std::pin::Pin;
 use std::rc::Rc;
+use std::task::{Context, Poll, Waker};
 
 /// Loose wrapper implementation of a stream on top of the File System
 /// Access API's `FileSystemWritableFileStream`.
@@ -15,7 +18,9 @@ use std::rc::Rc;
 /// queues them in order, and the first failure is reported by the next
 /// call to `write` or `flush`. Dropping the stream closes it, which commits
 /// the file once the queued writes are done; await
-/// [`close_async`](Self::close_async) to know when that happened.
+/// [`close_async`](Self::close_async) to know when that happened. The
+/// storage items wait for such closes before they open a file or read its
+/// properties (see [`closes_settled`]).
 pub struct WriteableStream {
     js_reference: Option<JsObject>,
     // Unfortunately we can't read current length/position, so we need to keep it on this side
@@ -164,9 +169,62 @@ fn seek_target(position: SeekFrom, current: u64, length: u64) -> io::Result<u64>
 impl Drop for WriteableStream {
     fn drop(&mut self) {
         if let Some(js_reference) = self.js_reference.take() {
-            // Upstream's `Dispose`: close without waiting.
-            drop(stream_helper::close_async(&js_reference));
+            // Upstream's `Dispose`: close without waiting. The close is counted until it settles.
+            let close = stream_helper::close_async(&js_reference);
+            PENDING_CLOSES.with(|pending| pending.borrow_mut().count += 1);
+            Dispatcher::ui_thread().to_task_scheduler().start_local(async move {
+                let _ = close.await;
+                close_settled();
+            });
         }
+    }
+}
+
+/// Closes of dropped streams that have not settled yet.
+#[derive(Default)]
+struct PendingCloses {
+    count: usize,
+    wakers: Vec<Waker>,
+}
+
+thread_local! {
+    static PENDING_CLOSES: RefCell<PendingCloses> = RefCell::new(PendingCloses::default());
+}
+
+fn close_settled() {
+    let wakers = PENDING_CLOSES.with(|pending| {
+        let mut pending = pending.borrow_mut();
+        pending.count -= 1;
+        if pending.count == 0 {
+            std::mem::take(&mut pending.wakers)
+        } else {
+            Vec::new()
+        }
+    });
+    wakers.into_iter().for_each(Waker::wake);
+}
+
+/// Resolves once no stream dropped so far is still closing: a file written
+/// through the synchronous [`Write`] has its content committed then.
+pub(crate) fn closes_settled() -> impl Future<Output = ()> {
+    ClosesSettled
+}
+
+struct ClosesSettled;
+
+impl Future for ClosesSettled {
+    type Output = ();
+
+    fn poll(self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<()> {
+        PENDING_CLOSES.with(|pending| {
+            let mut pending = pending.borrow_mut();
+            if pending.count == 0 {
+                Poll::Ready(())
+            } else {
+                pending.wakers.push(cx.waker().clone());
+                Poll::Pending
+            }
+        })
     }
 }
 
@@ -175,6 +233,34 @@ mod tests {
     // Not from upstream (upstream has no tests of the browser streams): the position arithmetic,
     // which needs no page.
     use super::*;
+
+    #[test]
+    fn closes_settled_waits_for_every_pending_close() {
+        use std::sync::atomic::{AtomicUsize, Ordering};
+        use std::sync::Arc;
+        use std::task::Wake;
+
+        struct CountingWaker(AtomicUsize);
+        impl Wake for CountingWaker {
+            fn wake(self: Arc<Self>) {
+                self.0.fetch_add(1, Ordering::SeqCst);
+            }
+        }
+        let counter = Arc::new(CountingWaker(AtomicUsize::new(0)));
+        let waker = Waker::from(counter.clone());
+        let mut context = Context::from_waker(&waker);
+
+        assert_eq!(Pin::new(&mut closes_settled()).poll(&mut context), Poll::Ready(()));
+
+        PENDING_CLOSES.with(|pending| pending.borrow_mut().count += 2);
+        let mut settled = closes_settled();
+        assert_eq!(Pin::new(&mut settled).poll(&mut context), Poll::Pending);
+        close_settled();
+        assert_eq!(counter.0.load(Ordering::SeqCst), 0);
+        close_settled();
+        assert_eq!(counter.0.load(Ordering::SeqCst), 1);
+        assert_eq!(Pin::new(&mut settled).poll(&mut context), Poll::Ready(()));
+    }
 
     #[test]
     fn seek_target_is_relative_to_each_origin() {
