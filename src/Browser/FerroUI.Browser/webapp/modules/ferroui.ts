@@ -12,6 +12,7 @@ import { FerroExports } from "./ferroui/ferroExports";
 import { CompletionHelper } from "./ferroui/completionHelper";
 import { ScreenHelper } from "./ferroui/screens";
 import { NavigationHelper } from "./ferroui/navigationHelper";
+import { PromiseHelper } from "./ferroui/promiseHelper";
 
 export {
     Caniuse,
@@ -27,5 +28,6 @@ export {
     FerroExports,
     CompletionHelper,
     ScreenHelper,
-    NavigationHelper
+    NavigationHelper,
+    PromiseHelper
 };
