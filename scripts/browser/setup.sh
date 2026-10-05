@@ -8,7 +8,8 @@
 # Installs: the Emscripten SDK (pinned version, from github.com/emscripten-core/emsdk), the Rust
 # target wasm32-unknown-emscripten for the pinned Rust toolchain, and the wasm-bindgen command-line
 # tool of the version the workspace uses (from crates.io). The pins are explained in
-# docs/porting/browser-platform.md, section 3; change them there and here together.
+# docs/porting/browser-platform.md, section 3; change them there and here together. CI installs the
+# toolchain with this script too (.github/actions/browser-toolchain), reading the pins from it.
 set -euo pipefail
 
 EMSDK_VERSION="6.0.10"
@@ -46,6 +47,8 @@ cat > "$TOOLS/env.sh" <<ENV
 source "$TOOLS/emsdk/emsdk_env.sh" >/dev/null 2>&1
 export PATH="$TOOLS/bin:\$PATH"
 export RUSTUP_TOOLCHAIN="$RUST_VERSION"
+# Skia's prebuilt binaries leave symbols to the linker of the application.
+export EMCC_CFLAGS="-s ERROR_ON_UNDEFINED_SYMBOLS=0"
 ENV
 
 # shellcheck disable=SC1091

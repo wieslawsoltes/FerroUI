@@ -1,7 +1,7 @@
 // Drives a built browser site in headless Chrome over the DevTools protocol: serves the site
 // directory, opens the page, sends real input events and reads back pixels and page state.
 // No dependencies beyond Node 22+ and a Chrome or Chromium binary (CHROME=<path> overrides the
-// search). Used by capture.mjs and by the behaviour tests under scripts/browser/tests.
+// search). Used by capture.mjs and by the tests under scripts/browser/tests.
 import http from "node:http";
 import fs from "node:fs";
 import os from "node:os";
@@ -116,7 +116,10 @@ export async function open(siteDirectory, { query = "", width = 460, height = 52
     const server = await serve(siteDirectory);
     const profile = fs.mkdtempSync(path.join(os.tmpdir(), "ferroui-browser-"));
     const chrome = spawn(findChrome(), [
-        "--headless=new", "--no-first-run", "--no-sandbox", `--user-data-dir=${profile}`, "--remote-debugging-port=0",
+        "--headless=new", "--no-first-run", "--no-default-browser-check", "--no-sandbox", "--hide-scrollbars",
+        // WebGL through the software rasteriser where there is no GPU (CI runners, containers).
+        "--enable-unsafe-swiftshader", "--use-angle=swiftshader",
+        `--user-data-dir=${profile}`, "--remote-debugging-port=0",
         `--window-size=${width},${height}`, `--force-device-scale-factor=${scale}`, "--force-color-profile=srgb",
         ...chromeArgs, "about:blank"], { stdio: ["ignore", "ignore", "pipe"] });
     let chromeErrors = "";
@@ -137,20 +140,30 @@ export async function open(siteDirectory, { query = "", width = 460, height = 52
     const socket = new WebSocket(target.webSocketDebuggerUrl);
     await new Promise((resolve) => socket.addEventListener("open", resolve));
 
-    let id = 0; const pending = new Map(); const log = []; const navigations = [];
+    // `log` holds every console message, uncaught exception and browser log entry; `errors` the ones
+    // that are errors (console.error and console.assert, uncaught exceptions, failed loads).
+    let id = 0; const pending = new Map(); const log = []; const errors = []; const navigations = [];
     socket.addEventListener("message", (event) => {
         const message = JSON.parse(event.data);
         if (message.id && pending.has(message.id)) { pending.get(message.id)(message.result ?? { error: message.error }); pending.delete(message.id); return; }
         if (message.method === "Runtime.consoleAPICalled") {
-            log.push(`[console.${message.params.type}] ` + message.params.args.map((a) => a.value ?? a.description ?? "").join(" "));
+            const line = `[console.${message.params.type}] ` + message.params.args.map((a) => a.value ?? a.description ?? "").join(" ");
+            log.push(line);
+            if (message.params.type === "error" || message.params.type === "assert") { errors.push(line); }
         } else if (message.method === "Runtime.exceptionThrown") {
-            log.push("[exception] " + (message.params.exceptionDetails.exception?.description ?? message.params.exceptionDetails.text));
+            const line = "[exception] " + (message.params.exceptionDetails.exception?.description ?? message.params.exceptionDetails.text);
+            log.push(line); errors.push(line);
+        } else if (message.method === "Log.entryAdded") {
+            const entry = message.params.entry;
+            const line = `[log.${entry.level}] ${entry.text}${entry.url ? ` (${entry.url})` : ""}`;
+            log.push(line);
+            if (entry.level === "error") { errors.push(line); }
         } else if (message.method === "Page.frameNavigated" && !message.params.frame.parentId) {
             navigations.push(message.params.frame.url);
         }
     });
     const send = (method, params = {}) => new Promise((resolve) => { pending.set(++id, resolve); socket.send(JSON.stringify({ id, method, params })); });
-    await send("Runtime.enable"); await send("Page.enable");
+    await send("Runtime.enable"); await send("Log.enable"); await send("Page.enable");
     // A fixed viewport. With a scale factor other than 1 the override would report unscaled device
     // pixels to the page, so the window size and the real scale factor of the browser are used.
     if (scale === 1) { await send("Emulation.setDeviceMetricsOverride", { width, height, deviceScaleFactor: 1, mobile: false }); }
@@ -176,6 +189,7 @@ export async function open(siteDirectory, { query = "", width = 460, height = 52
     const page = {
         url,
         log,
+        errors,
         navigations,
         send,
         browserSend,
@@ -205,11 +219,17 @@ export async function open(siteDirectory, { query = "", width = 460, height = 52
             await page.waitFor("document.querySelector('canvas') && (document.querySelector('.ferroui-splash') === null || document.querySelector('.ferroui-splash').classList.contains('splash-close'))");
             await sleep(settle);
         },
-        async screenshot(file) {
-            const shot = await send("Page.captureScreenshot", { format: "png" });
+        // Sets the size of the viewport in CSS pixels (the device scale factor stays that of the browser).
+        async resize(newWidth, newHeight) {
+            await send("Emulation.setDeviceMetricsOverride", { width: newWidth, height: newHeight, deviceScaleFactor: 0, mobile: false });
+        },
+        // A screenshot of the viewport, or of `clip` ({ x, y, width, height } in CSS pixels) of it,
+        // written to `file` when one is given and returned decoded (with the PNG bytes as `png`).
+        async screenshot(file, clip) {
+            const shot = await send("Page.captureScreenshot", clip ? { format: "png", clip: { ...clip, scale: 1 } } : { format: "png" });
             const buffer = Buffer.from(shot.data, "base64");
             if (file) { fs.mkdirSync(path.dirname(path.resolve(file)), { recursive: true }); fs.writeFileSync(file, buffer); }
-            return decodePng(buffer);
+            return { ...decodePng(buffer), png: buffer };
         },
         async mouseMove(x, y) { await send("Input.dispatchMouseEvent", { type: "mouseMoved", x, y, pointerType: "mouse" }); },
         async mouseDown(x, y, button = "left") { await send("Input.dispatchMouseEvent", { type: "mousePressed", x, y, button, buttons: 1, clickCount: 1, pointerType: "mouse" }); },

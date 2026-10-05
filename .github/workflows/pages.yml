@@ -60,15 +60,14 @@ jobs:
       - uses: ./.github/actions/browser-toolchain
         if: steps.pages.outputs.enabled == 'true'
         with:
-          # Shared with the browser-site job of the CI workflow, which builds the same site.
-          cache-key: browser-site
-          wasm-bindgen: "true"
+          # Shared with the browser job of the CI workflow, which builds the same site.
+          cache-key: browser
       - name: Build the site
         if: steps.pages.outputs.enabled == 'true'
         run: scripts/build-browser.sh control-catalog-browser
       - name: Test the site before publishing it
         if: steps.pages.outputs.enabled == 'true'
-        run: node scripts/browser/test-site.mjs target/browser/control-catalog-browser
+        run: node scripts/browser/tests/control_catalog.test.mjs target/browser/control-catalog-browser
       - name: Sizes of the published modules, within the budget
         if: steps.pages.outputs.enabled == 'true'
         run: >
