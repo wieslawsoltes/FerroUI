@@ -1,10 +1,10 @@
 use crate::rendering::composition::expressions::{
-    ExpressionVariant, IExpressionObject, IExpressionParameterCollection,
+    ExpressionObjectKey, ExpressionVariant, IExpressionObject, IExpressionParameterCollection,
 };
-use crate::rendering::composition::server::{IAnimatedServerObject, ServerCompositor, ServerExpressionObject, ServerObjectId};
+use crate::rendering::composition::server::{IAnimatedServerObject, ServerCompositor, ServerObjectId};
 use std::cell::OnceCell;
 use std::collections::HashMap;
-use std::rc::Rc;
+use std::rc::{Rc, Weak};
 
 /// A snapshot of properties used by an animation
 ///
@@ -22,7 +22,43 @@ pub enum PropertySetSnapshotObject {
     PropertySet(Rc<PropertySetSnapshot>),
     /// A composition object, by the id of its server object; the server
     /// object once resolved.
-    Server(ServerObjectId, OnceCell<ServerExpressionObject>),
+    Server(ServerObjectId, OnceCell<SnapshotServerObject>),
+}
+
+/// The server object a reference parameter refers to, held weakly.
+///
+/// Upstream the snapshot holds the server object, and the garbage collector
+/// reclaims two animations that refer to each other's targets. Here the
+/// animations of an object hold its instances, and an instance holds its
+/// parameters, so a strong reference would form a cycle between two such
+/// objects; the snapshot holds the object weakly, as the instance holds its
+/// target. The object outlives its disposal while its composition object is
+/// alive, so the reference goes dead only once nothing refers to the object
+/// any more; a dead reference is read as a parameter without an object.
+pub struct SnapshotServerObject(Weak<dyn IAnimatedServerObject>);
+
+impl SnapshotServerObject {
+    /// The server object, while it is alive.
+    pub fn upgrade(&self) -> Option<Rc<dyn IAnimatedServerObject>> {
+        self.0.upgrade()
+    }
+
+    fn is_alive(&self) -> bool {
+        self.0.strong_count() > 0
+    }
+}
+
+impl IExpressionObject for SnapshotServerObject {
+    fn get_property(&self, name: &str) -> ExpressionVariant {
+        match self.0.upgrade() {
+            Some(object) => object.server_object().get_property(name),
+            None => ExpressionVariant::default(),
+        }
+    }
+
+    fn key(&self) -> ExpressionObjectKey {
+        ExpressionObjectKey(Weak::as_ptr(&self.0) as *const () as usize)
+    }
 }
 
 /// One value of a [`PropertySetSnapshot`]: a variant or an object.
@@ -57,7 +93,9 @@ impl PropertySetSnapshot {
     pub fn get_object_parameter(&self, name: &str) -> Option<&dyn IExpressionObject> {
         match self.dic.get(name)?.object.as_ref()? {
             PropertySetSnapshotObject::PropertySet(snapshot) => Some(&**snapshot as &dyn IExpressionObject),
-            PropertySetSnapshotObject::Server(_, resolved) => resolved.get().map(|o| o as &dyn IExpressionObject),
+            PropertySetSnapshotObject::Server(_, resolved) => {
+                resolved.get().filter(|o| o.is_alive()).map(|o| o as &dyn IExpressionObject)
+            }
         }
     }
 
@@ -66,7 +104,7 @@ impl PropertySetSnapshot {
     pub fn get_server_object_parameter(&self, name: &str) -> Option<Rc<dyn IAnimatedServerObject>> {
         match self.dic.get(name)?.object.as_ref()? {
             PropertySetSnapshotObject::PropertySet(_) => None,
-            PropertySetSnapshotObject::Server(_, resolved) => resolved.get().map(|o| o.0.clone()),
+            PropertySetSnapshotObject::Server(_, resolved) => resolved.get().and_then(SnapshotServerObject::upgrade),
         }
     }
 
@@ -92,7 +130,7 @@ impl PropertySetSnapshot {
                         continue;
                     }
                     if let Some(object) = compositor.get_animated_object(*id) {
-                        let _ = resolved.set(ServerExpressionObject(object));
+                        let _ = resolved.set(SnapshotServerObject(Rc::downgrade(&object)));
                     }
                 }
                 None => {}

@@ -36,7 +36,7 @@ pub use key_frame_animation::{
 };
 pub use key_frame_animation_instance::KeyFrameAnimationInstance;
 pub use key_frames::{IKeyFrames, KeyFrame, KeyFrames, ServerKeyFrame};
-pub use property_set_snapshot::{PropertySetSnapshot, PropertySetSnapshotObject, PropertySetSnapshotValue};
+pub use property_set_snapshot::{PropertySetSnapshot, PropertySetSnapshotObject, PropertySetSnapshotValue, SnapshotServerObject};
 
 #[cfg(test)]
 mod composition_animation_tests;
