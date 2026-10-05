@@ -2,12 +2,16 @@
 
 use ferroui_base::input::ICommand;
 use ferroui_base::reactive::{Disposable, IDisposable};
-use ferroui_base::threading::{Dispatcher, DispatcherPriority, DispatcherTask, FerroSynchronizationContext};
+use ferroui_base::threading::{
+    Dispatcher, DispatcherPriority, DispatcherTask, DispatcherTimer, FerroSynchronizationContext,
+};
 use ferroui_base::BoxedValue;
 use std::cell::{Cell, RefCell};
 use std::future::Future;
 use std::pin::Pin;
 use std::rc::{Rc, Weak};
+use std::task::{Context, Poll, Waker};
+use std::time::Duration;
 
 /// Starts `future` the way calling an asynchronous method does:
 /// synchronously up to its first pending await, then resumed through the
@@ -23,6 +27,51 @@ pub fn start_async<T: 'static>(future: impl Future<Output = T> + 'static) -> Dis
         FerroSynchronizationContext::with_dispatcher(&Dispatcher::current_dispatcher(), DispatcherPriority::NORMAL)
     });
     context.to_task_scheduler().start_local(future)
+}
+
+/// The state of a [`Delay`]: whether its time has passed, and who waits.
+#[derive(Default)]
+struct DelayState {
+    elapsed: Cell<bool>,
+    waker: RefCell<Option<Waker>>,
+}
+
+/// The future [`delay`] returns.
+pub struct Delay(Rc<DelayState>);
+
+impl Future for Delay {
+    type Output = ();
+
+    fn poll(self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<()> {
+        if self.0.elapsed.get() {
+            Poll::Ready(())
+        } else {
+            *self.0.waker.borrow_mut() = Some(cx.waker().clone());
+            Poll::Pending
+        }
+    }
+}
+
+/// `Task.Delay(duration)` for the asynchronous methods of the samples:
+/// completes when a dispatcher timer of `duration` has ticked.
+///
+/// # Panics
+/// Panics when called from a thread other than the dispatcher thread.
+pub fn delay(duration: Duration) -> Delay {
+    let state = Rc::new(DelayState::default());
+    let timer_state = state.clone();
+    DispatcherTimer::run_once(
+        move || {
+            timer_state.elapsed.set(true);
+            let waker = timer_state.waker.borrow_mut().take();
+            if let Some(waker) = waker {
+                waker.wake();
+            }
+        },
+        duration,
+        DispatcherPriority::DEFAULT,
+    );
+    Delay(state)
 }
 
 /// The task of an asynchronous command callback (`Task`).

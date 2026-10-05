@@ -4,54 +4,11 @@ use ferroui_base::animation::easings::{CubicEaseOut, Easing};
 use ferroui_base::animation::{IPageTransition, IProgressPageTransition, PageSlide, PageTransitionItem, SlideAxis, TimeSpan};
 use ferroui_base::media::{Geometry, RectangleGeometry, StreamGeometry};
 use ferroui_base::platform::IGeometryContext;
-use ferroui_base::threading::{CancellationToken, DispatcherPriority, DispatcherTask, DispatcherTimer};
+use ferroui_base::threading::{CancellationToken, DispatcherTask};
 use ferroui_base::{Point, Rect, Ref, Size, Visual};
-use mini_mvvm::start_async;
+use mini_mvvm::{delay, start_async};
 use std::cell::{Cell, RefCell};
-use std::future::Future;
-use std::pin::Pin;
-use std::rc::Rc;
-use std::task::{Context, Poll, Waker};
 use std::time::{Duration, Instant};
-
-#[derive(Default)]
-struct DelayState {
-    elapsed: Cell<bool>,
-    waker: RefCell<Option<Waker>>,
-}
-
-/// `Task.Delay(duration)`: completes when a dispatcher timer of `duration` has ticked.
-struct Delay(Rc<DelayState>);
-
-impl Future for Delay {
-    type Output = ();
-
-    fn poll(self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<()> {
-        if self.0.elapsed.get() {
-            Poll::Ready(())
-        } else {
-            *self.0.waker.borrow_mut() = Some(cx.waker().clone());
-            Poll::Pending
-        }
-    }
-}
-
-fn delay(duration: Duration) -> Delay {
-    let state = Rc::new(DelayState::default());
-    let timer_state = state.clone();
-    DispatcherTimer::run_once(
-        move || {
-            timer_state.elapsed.set(true);
-            let waker = timer_state.waker.borrow_mut().take();
-            if let Some(waker) = waker {
-                waker.wake();
-            }
-        },
-        duration,
-        DispatcherPriority::DEFAULT,
-    );
-    Delay(state)
-}
 
 /// Transitions between two pages using a wave clip that reveals the next page.
 ///

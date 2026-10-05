@@ -8,59 +8,14 @@ use ferroui_base::collections::FerroList;
 use ferroui_base::data::core::ValueTypes;
 use ferroui_base::layout::{HorizontalAlignment, VerticalAlignment};
 use ferroui_base::media::{FontWeight, TextAlignment, TextWrapping};
-use ferroui_base::threading::{DispatcherPriority, DispatcherTimer};
 use ferroui_controls::{
     CheckBox, ContentPage, Control, ItemsControl, ItemsSource, NavigationPage, ScrollViewer, StackPanel, TextBlock,
     UserControl,
 };
-use mini_mvvm::start_async;
-use std::cell::{Cell, RefCell};
-use std::future::Future;
-use std::pin::Pin;
+use mini_mvvm::{delay, start_async};
+use std::cell::Cell;
 use std::rc::Rc;
-use std::task::{Context, Poll, Waker};
 use std::time::Duration;
-
-/// The state of a [`Delay`]: whether its time has passed, and who waits.
-#[derive(Default)]
-struct DelayState {
-    elapsed: Cell<bool>,
-    waker: RefCell<Option<Waker>>,
-}
-
-/// `Task.Delay(duration)`: completes when a dispatcher timer of `duration`
-/// has ticked.
-struct Delay(Rc<DelayState>);
-
-impl Future for Delay {
-    type Output = ();
-
-    fn poll(self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<()> {
-        if self.0.elapsed.get() {
-            Poll::Ready(())
-        } else {
-            *self.0.waker.borrow_mut() = Some(cx.waker().clone());
-            Poll::Pending
-        }
-    }
-}
-
-fn delay(duration: Duration) -> Delay {
-    let state = Rc::new(DelayState::default());
-    let timer_state = state.clone();
-    DispatcherTimer::run_once(
-        move || {
-            timer_state.elapsed.set(true);
-            let waker = timer_state.waker.borrow_mut().take();
-            if let Some(waker) = waker {
-                waker.wake();
-            }
-        },
-        duration,
-        DispatcherPriority::DEFAULT,
-    );
-    Delay(state)
-}
 
 #[repr(C)]
 pub struct ContentPageEventsPage {

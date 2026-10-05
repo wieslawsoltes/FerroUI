@@ -8,7 +8,6 @@ use ferroui_base::interactivity::{IRoutedEventArgs, InteractiveImpl, RoutedEvent
 use ferroui_base::layout::LayoutableImpl;
 use ferroui_base::metadata::from_markup_value;
 use ferroui_base::styling::ThemeVariant;
-use ferroui_base::threading::{DispatcherPriority, DispatcherTimer};
 use ferroui_base::utilities::Uri;
 use ferroui_base::{
     ferro_class, ferro_class_info, ferro_impl_classes, instantiate, BoxedValue, FerroObjectImpl, Ref, StyledElementImpl,
@@ -18,12 +17,9 @@ use ferroui_controls::primitives::TemplatedControlImpl;
 use ferroui_controls::{
     Application, Control, ControlImpl, DrawerPage, NavigationPage, PageImpl, SplitViewDisplayMode, TopLevel,
 };
-use mini_mvvm::start_async;
+use mini_mvvm::{delay, start_async};
 use std::cell::{Cell, RefCell};
-use std::future::Future;
-use std::pin::Pin;
 use std::rc::Rc;
-use std::task::{Context, Poll, Waker};
 use std::time::Duration;
 
 const WIDE_BREAKPOINT: f64 = 1008.0;
@@ -249,42 +245,3 @@ impl MainView {
     }
 }
 
-#[derive(Default)]
-struct DelayState {
-    elapsed: Cell<bool>,
-    waker: RefCell<Option<Waker>>,
-}
-
-/// `Task.Delay(duration)`: completes when a dispatcher timer of `duration`
-/// has ticked.
-struct Delay(Rc<DelayState>);
-
-impl Future for Delay {
-    type Output = ();
-
-    fn poll(self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<()> {
-        if self.0.elapsed.get() {
-            Poll::Ready(())
-        } else {
-            *self.0.waker.borrow_mut() = Some(cx.waker().clone());
-            Poll::Pending
-        }
-    }
-}
-
-fn delay(duration: Duration) -> Delay {
-    let state = Rc::new(DelayState::default());
-    let timer_state = state.clone();
-    DispatcherTimer::run_once(
-        move || {
-            timer_state.elapsed.set(true);
-            let waker = timer_state.waker.borrow_mut().take();
-            if let Some(waker) = waker {
-                waker.wake();
-            }
-        },
-        duration,
-        DispatcherPriority::DEFAULT,
-    );
-    Delay(state)
-}
