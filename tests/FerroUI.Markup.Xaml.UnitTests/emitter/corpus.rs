@@ -3,12 +3,11 @@
 //! `DOCUMENTS` is the input of the emitter (`generated.rs` is its output for the
 //! eligible ones). `EXPECTED_ELIGIBLE` lists the documents that must be eligible (a
 //! regression of the emitter's coverage fails the harness); `EXPECTED_NOT_ELIGIBLE`
-//! the ones that must not be (styles with selectors, templates, collection adds, declared
-//! members and types without a recorded Rust path are outside this increment). A document
-//! in neither list is only reported. A document whose load fails is compared by the
-//! exception type and the message of the error (`duplicate_name.xaml`,
-//! `multiline_duplicate_name.xaml`, `end_init_failure.xaml`, whose control fails in
-//! `EndInit`, `static_resource_missing.xaml`). A document whose
+//! the ones that must not be (none today; types without a recorded Rust path and anything
+//! the emitter does not cover would be). A document in neither list is only reported. A
+//! document whose load fails is compared by the exception type and the message of the error
+//! (`duplicate_name.xaml`, `multiline_duplicate_name.xaml`, `end_init_failure.xaml`, whose
+//! control fails in `EndInit`, `static_resource_missing.xaml`). A document whose
 //! load panics (a value a validator rejects) cannot be in the corpus: the harness does not
 //! catch panics.
 
@@ -122,6 +121,9 @@ pub const DOCUMENTS: &[(&str, &str)] = &[
     ("control_template_parts.xaml", "<Button xmlns='https://github.com/ferroui' xmlns:x='http://schemas.microsoft.com/winfx/2006/xaml' Background='Red'><Button.Template><ControlTemplate><Border Name='PART_Border' Background='{TemplateBinding Background}'><ContentPresenter Name='PART_ContentPresenter' Content='{TemplateBinding Content}'/></Border></ControlTemplate></Button.Template></Button>"),
     ("data_template.xaml", "<ItemsControl xmlns='https://github.com/ferroui' xmlns:x='http://schemas.microsoft.com/winfx/2006/xaml'><ItemsControl.ItemTemplate><DataTemplate><TextBlock Text='{Binding}'/></DataTemplate></ItemsControl.ItemTemplate></ItemsControl>"),
     ("control_theme_template.xaml", "<Border xmlns='https://github.com/ferroui' xmlns:x='http://schemas.microsoft.com/winfx/2006/xaml'><Border.Resources><ControlTheme x:Key='Theme' TargetType='Button'><Setter Property='Template'><ControlTemplate><Border Name='PART_Root'><ContentPresenter Content='{TemplateBinding Content}'/></Border></ControlTemplate></Setter></ControlTheme></Border.Resources></Border>"),
+    ("style_selectors.xaml", "<Border xmlns='https://github.com/ferroui' xmlns:x='http://schemas.microsoft.com/winfx/2006/xaml' Name='Root'><Border.Styles><Style Selector='Button.primary:pointerover'><Setter Property='Opacity' Value='0.5'/></Style><Style Selector='#Root > TextBlock'><Setter Property='Opacity' Value='0.5'/></Style><Style Selector='StackPanel Border'><Setter Property='Opacity' Value='0.5'/></Style><Style Selector='Button /template/ ContentPresenter'><Setter Property='Opacity' Value='0.5'/></Style><Style Selector='TextBlock:not(.muted)'><Setter Property='Opacity' Value='0.5'/></Style><Style Selector='ListBoxItem:nth-child(2n+1)'><Setter Property='Opacity' Value='0.5'/></Style><Style Selector='TextBlock[IsVisible=True]'><Setter Property='Opacity' Value='0.5'/></Style><Style Selector='Border[(Grid.Row)=1]'><Setter Property='Opacity' Value='0.5'/></Style><Style Selector='TextBlock, Border.card'><Setter Property='Opacity' Value='0.5'/></Style><Style Selector=':is(Control)'><Setter Property='Opacity' Value='0.5'/></Style></Border.Styles></Border>"),
+    ("style_nested.xaml", "<Border xmlns='https://github.com/ferroui' xmlns:x='http://schemas.microsoft.com/winfx/2006/xaml'><Border.Styles><Style Selector='Button'><Setter Property='Opacity' Value='0.25'/><Style Selector='^:pressed'><Setter Property='Opacity' Value='0.75'/></Style><Style Selector='^ /template/ ContentPresenter'><Setter Property='Margin' Value='2'/></Style></Style></Border.Styles></Border>"),
+    ("style_resources.xaml", "<Border xmlns='https://github.com/ferroui' xmlns:x='http://schemas.microsoft.com/winfx/2006/xaml'><Border.Resources><SolidColorBrush x:Key='Accent' Color='Blue'/></Border.Resources><Border.Styles><Style Selector='Border.accent'><Setter Property='Background' Value='{StaticResource Accent}'/><Setter Property='BorderBrush' Value='{DynamicResource Accent}'/></Style></Border.Styles></Border>"),
 ];
 
 /// The documents that must be eligible for emission.
@@ -231,9 +233,11 @@ pub const EXPECTED_ELIGIBLE: &[&str] = &[
     "control_template_parts.xaml",
     "data_template.xaml",
     "control_theme_template.xaml",
+    "style_with_selector.xaml",
+    "style_selectors.xaml",
+    "style_nested.xaml",
+    "style_resources.xaml",
 ];
 
 /// The documents that must not be eligible for emission.
-pub const EXPECTED_NOT_ELIGIBLE: &[&str] = &[
-    "style_with_selector.xaml",
-];
+pub const EXPECTED_NOT_ELIGIBLE: &[&str] = &[];
