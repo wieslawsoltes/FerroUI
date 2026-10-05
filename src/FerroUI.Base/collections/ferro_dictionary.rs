@@ -1,8 +1,9 @@
+use super::ferro_list::raise_collection_changed;
 use super::{CollectionChangedHandler, NotifyCollectionChangedAction, NotifyCollectionChangedEventArgs};
 use crate::data::core::INDEXER_NAME;
 use crate::data::model::{CollectionChange, Event, INotifyCollectionChanged, INotifyPropertyChanged};
 use crate::utilities::{HandlerList, WeakEventSender};
-use std::cell::RefCell;
+use std::cell::{Cell, RefCell};
 use std::collections::HashMap;
 use std::fmt::Display;
 use std::hash::Hash;
@@ -76,7 +77,9 @@ struct FerroDictionaryData<K, V> {
     inner: RefCell<Inner<K, V>>,
     collection_changed: HandlerList<CollectionChangedHandler<(K, V)>>,
     /// The untyped form of the collection changed event
-    /// ([`INotifyCollectionChanged`]), raised after the typed handlers.
+    /// ([`INotifyCollectionChanged`]). Its handlers share their tokens with
+    /// the typed ones, so that one change runs all of them in subscription
+    /// order, as the single event of the original.
     untyped_collection_changed: Event<CollectionChange>,
     property_changed: Event<str>,
 }
@@ -148,10 +151,11 @@ impl<K: Eq + Hash + Clone + Display, V: Clone> FerroDictionary<K, V> {
 
     /// Creates an empty dictionary with room for `capacity` entries.
     pub fn with_capacity(capacity: usize) -> Self {
+        let ids = Rc::new(Cell::new(1));
         Self(Rc::new(FerroDictionaryData {
             inner: RefCell::new(Inner::with_capacity(capacity)),
-            collection_changed: HandlerList::new(),
-            untyped_collection_changed: Event::new(),
+            collection_changed: HandlerList::with_shared_ids(ids.clone()),
+            untyped_collection_changed: Event::with_shared_ids(ids),
             property_changed: Event::new(),
         }))
     }
@@ -319,16 +323,7 @@ impl<K: Eq + Hash + Clone + Display, V: Clone> FerroDictionary<K, V> {
     fn raise_collection_changed(&self, action: NotifyCollectionChangedAction, new_items: &[(K, V)], old_items: &[(K, V)]) {
         // Entries of a dictionary have no position.
         let e = NotifyCollectionChangedEventArgs { action, new_items, old_items, new_starting_index: -1, old_starting_index: -1 };
-        for (_, handler) in self.0.collection_changed.snapshot().iter() {
-            handler(&e);
-        }
-        self.0.untyped_collection_changed.raise(&CollectionChange {
-            action,
-            new_starting_index: -1,
-            new_count: new_items.len(),
-            old_starting_index: -1,
-            old_count: old_items.len(),
-        });
+        raise_collection_changed(&self.0.collection_changed, &self.0.untyped_collection_changed, &e);
     }
 }
 
