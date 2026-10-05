@@ -54,8 +54,14 @@ pub mod server;
 pub mod transport;
 
 mod composition_cache_mode;
+mod composition_custom_visual;
+mod composition_custom_visual_handler;
 mod composition_draw_list_visual;
+mod composition_drawing_surface;
+mod composition_external_memory;
+mod composition_interop;
 mod composition_experimental_acrylic_visual;
+mod composition_gradient_stop;
 mod composition_object;
 mod composition_options;
 mod composition_property_set;
@@ -78,8 +84,24 @@ mod i_compositor_serializable;
 mod matrix_utils;
 
 pub use composition_cache_mode::{CompositionBitmapCache, CompositionCacheMode};
+pub use composition_custom_visual::CompositionCustomVisual;
+pub use composition_custom_visual_handler::{CompositionCustomVisualHandler, ICompositionCustomVisualHandler};
+pub use composition_drawing_surface::CompositionDrawingSurface;
+pub use composition_external_memory::{
+    CompositionGpuImportedImageSynchronizationCapabilities, ICompositionGpuImportedObject, ICompositionGpuInterop,
+    ICompositionImportableSharedGpuContextImage, ICompositionImportableSharedGpuContextObject,
+    ICompositionImportableSharedGpuContextSemaphore, ICompositionImportedGpuImage, ICompositionImportedGpuSemaphore,
+};
+pub use composition_interop::{
+    CompositionGpuImportedObjectBase, CompositionImportedGpuImage, CompositionImportedGpuSemaphore, CompositionInterop,
+};
 pub use composition_draw_list_visual::{CompositionDrawListVisual, ICompositionDrawListVisualExtension};
+pub use brushes::{
+    CompositionBrush, CompositionConicGradientBrush, CompositionGradientBrush, CompositionLinearGradientBrush,
+    CompositionRadialGradientBrush, CompositionSolidColorBrush,
+};
 pub use composition_experimental_acrylic_visual::CompositionExperimentalAcrylicVisual;
+pub use composition_gradient_stop::CompositionGradientStop;
 pub use composition_object::{AsCompositionObject, CompositionObject, ICompositionObjectAnimations};
 pub use composition_options::CompositionOptions;
 pub use composition_property_set::{CompositionGetValueStatus, CompositionPropertySet};
@@ -94,7 +116,7 @@ pub use server::RenderSurfaces;
 pub use visual::CompositionVisual;
 pub use visual_collection::CompositionVisualCollection;
 pub use composition_transparency_level::CompositionTransparencyLevel;
-pub use compositor::{Compositor, ICompositorScheduler};
+pub use compositor::{Compositor, ICompositorScheduler, ServerJobTask};
 pub use enums::{CompositionBlendMode, CompositionGradientExtendMode, CompositionStretch, CompositionTileMode};
 pub use i_composition_object_host::{ICompositionObject, ICompositionObjectHost, PendingAnimations};
 pub use i_composition_target_debug_events::ICompositionTargetDebugEvents;

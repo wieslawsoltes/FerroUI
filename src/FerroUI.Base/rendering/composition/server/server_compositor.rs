@@ -75,6 +75,7 @@ pub struct ServerCompositor {
     batches: Rc<BatchQueue>,
     objects: RefCell<Vec<Option<Rc<dyn IServerObject>>>>,
     received_job_queue: RefCell<VecDeque<ServerJob>>,
+    disposed_in_batch: RefCell<Vec<ServerObjectId>>,
     received_post_target_job_queue: RefCell<VecDeque<ServerJob>>,
     last_batch_id: Cell<i64>,
     clock: CompositorClock,
@@ -111,6 +112,7 @@ impl ServerCompositor {
             batches,
             objects: RefCell::new(Vec::new()),
             received_job_queue: RefCell::new(VecDeque::new()),
+            disposed_in_batch: RefCell::new(Vec::new()),
             received_post_target_job_queue: RefCell::new(VecDeque::new()),
             last_batch_id: Cell::new(0),
             clock,
@@ -241,12 +243,12 @@ impl ServerCompositor {
                 while !stream.is_object_eof() {
                     match stream.read_object() {
                         BatchObject::Marker(BatchMarker::CreateStart) => self.read_create_jobs(&mut stream),
-                        BatchObject::Marker(BatchMarker::RenderThreadJobsStart) => Self::read_server_jobs(
+                        BatchObject::Marker(BatchMarker::RenderThreadJobsStart) => self.read_server_jobs(
                             &mut stream,
                             &self.received_job_queue,
                             BatchMarker::RenderThreadJobsEnd,
                         ),
-                        BatchObject::Marker(BatchMarker::RenderThreadPostTargetJobsStart) => Self::read_server_jobs(
+                        BatchObject::Marker(BatchMarker::RenderThreadPostTargetJobsStart) => self.read_server_jobs(
                             &mut stream,
                             &self.received_post_target_job_queue,
                             BatchMarker::RenderThreadPostTargetJobsEnd,
@@ -276,6 +278,12 @@ impl ServerCompositor {
                     }
                 }
             }
+            // The objects the batch disposed leave the table once the whole
+            // batch has been read: its jobs, which follow the dispose list,
+            // resolve them.
+            for id in std::mem::take(&mut *self.disposed_in_batch.borrow_mut()) {
+                self.remove_object(id);
+            }
             self.batches.return_data(std::mem::take(&mut batch.changes));
             self.last_batch_id.set(batch.batch.sequence_id());
             self.to_notify_processed.borrow_mut().push(batch.batch);
@@ -304,11 +312,20 @@ impl ServerCompositor {
         }
     }
 
-    fn read_server_jobs(reader: &mut BatchStreamReader<'_>, queue: &RefCell<VecDeque<ServerJob>>, end: BatchMarker) {
+    fn read_server_jobs(&self, reader: &mut BatchStreamReader<'_>, queue: &RefCell<VecDeque<ServerJob>>, end: BatchMarker) {
         loop {
             match reader.read_object() {
                 BatchObject::Marker(marker) if marker == end => break,
                 BatchObject::Job(job) => queue.borrow_mut().push_back(job),
+                BatchObject::ServerObject(id) => {
+                    let target = self.get_object(id);
+                    match reader.read_object() {
+                        BatchObject::ObjectJob(job) => {
+                            queue.borrow_mut().push_back(Box::new(move |compositor| job(compositor, target)))
+                        }
+                        _ => panic!("a server object in the job list of a batch is not followed by its job"),
+                    }
+                }
                 _ => panic!("unexpected item in the job list of a batch"),
             }
         }
@@ -318,8 +335,9 @@ impl ServerCompositor {
         let mut count = reader.read::<i32>();
         while count > 0 {
             if let Some(id) = reader.read_server_object() {
-                if let Some(object) = self.remove_object(id) {
+                if let Some(object) = self.get_object(id) {
                     object.dispose();
+                    self.disposed_in_batch.borrow_mut().push(id);
                 }
             }
             count -= 1;

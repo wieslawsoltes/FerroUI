@@ -1,6 +1,6 @@
 use super::server::{BatchQueue, CompositorClock, ServerCompositor, ServerObjectId};
 use super::transport::{
-    BatchMarker, BatchObject, BatchStreamWriter, CommittedBatch, CompositionBatch, ServerJob, ServerObjectFactory,
+    BatchMarker, BatchObject, BatchStreamWriter, CommittedBatch, CompositionBatch, ServerJob, ServerObjectFactory, ServerObjectJob,
 };
 use super::{CompositionOptions, ICompositorSerializable};
 use crate::animation::easings::{IEasing, SplineEasing};
@@ -58,8 +58,8 @@ pub struct Compositor {
     next_server_object_id: Cell<u32>,
     free_server_object_ids: RefCell<Vec<u32>>,
     pending_batch: Arc<Mutex<Option<Arc<CompositionBatch>>>>,
-    pending_server_compositor_jobs: RefCell<Vec<ServerJob>>,
-    pending_server_compositor_post_target_jobs: RefCell<Vec<ServerJob>>,
+    pending_server_compositor_jobs: RefCell<Vec<PendingServerJob>>,
+    pending_server_compositor_post_target_jobs: RefCell<Vec<PendingServerJob>>,
     scheduler: Weak<dyn ICompositorScheduler>,
     dispatcher: Arc<Dispatcher>,
     after_commit: HandlerList<dyn Fn()>,
@@ -398,7 +398,7 @@ impl Compositor {
 
     fn serialize_server_jobs(
         writer: &mut BatchStreamWriter<'_>,
-        list: &RefCell<Vec<ServerJob>>,
+        list: &RefCell<Vec<PendingServerJob>>,
         start_marker: BatchMarker,
         end_marker: BatchMarker,
     ) {
@@ -406,7 +406,13 @@ impl Compositor {
         if !jobs.is_empty() {
             writer.write_marker(start_marker);
             for job in jobs {
-                writer.write_object(BatchObject::Job(job));
+                match job {
+                    PendingServerJob::Job(job) => writer.write_object(BatchObject::Job(job)),
+                    PendingServerJob::ObjectJob(target, job) => {
+                        writer.write_server_object(Some(target));
+                        writer.write_object(BatchObject::ObjectJob(job));
+                    }
+                }
             }
             writer.write_marker(end_marker);
         }
@@ -508,8 +514,87 @@ impl Compositor {
         } else {
             &self.pending_server_compositor_jobs
         };
-        list.borrow_mut().push(Box::new(job));
+        list.borrow_mut().push(PendingServerJob::Job(Box::new(job)));
         self.request_commit_async();
+    }
+
+    /// Posts a job that runs on the render thread with the next batch and
+    /// receives the server object `target` (`None` when it does not
+    /// exist). Upstream a job holds the server object itself; this job
+    /// names it, and the object is resolved when the batch is read, so the
+    /// job reaches an object that the same batch disposes.
+    pub fn post_server_object_job(
+        &self,
+        target: ServerObjectId,
+        job: impl FnOnce(&ServerCompositor, Option<Rc<dyn IServerObject>>) + 'static,
+        post_target: bool,
+    ) {
+        self.dispatcher.verify_access();
+        let list = if post_target {
+            &self.pending_server_compositor_post_target_jobs
+        } else {
+            &self.pending_server_compositor_jobs
+        };
+        list.borrow_mut().push(PendingServerJob::ObjectJob(target, Box::new(job)));
+        self.request_commit_async();
+    }
+
+    /// [`invoke_server_job_async`](Self::invoke_server_job_async) with a job
+    /// that receives the server object `target`; see
+    /// [`post_server_object_job`](Self::post_server_object_job).
+    pub fn invoke_server_object_job_async<T: 'static>(
+        &self,
+        target: ServerObjectId,
+        job: impl FnOnce(&ServerCompositor, Option<Rc<dyn IServerObject>>) -> Result<T, Rc<dyn std::error::Error>>
+            + 'static,
+        post_target: bool,
+    ) -> ServerJobTask<T> {
+        let task = ServerJobTask::new();
+        let completion = task.clone();
+        self.post_server_object_job(
+            target,
+            move |compositor, object| match job(compositor, object) {
+                Ok(result) => completion.set_result(result),
+                Err(error) => completion.set_exception(error),
+            },
+            post_target,
+        );
+        task
+    }
+
+    /// Runs `job` on the render thread with the next batch and returns a
+    /// task that completes with its result (`InvokeServerJobAsync`). A job
+    /// that fails faults the task with its error.
+    pub fn invoke_server_job_async<T: 'static>(
+        &self,
+        job: impl FnOnce(&ServerCompositor) -> Result<T, Rc<dyn std::error::Error>> + 'static,
+        post_target: bool,
+    ) -> ServerJobTask<T> {
+        let task = ServerJobTask::new();
+        let completion = task.clone();
+        self.post_server_job(
+            move |compositor| match job(compositor) {
+                Ok(result) => completion.set_result(result),
+                Err(error) => completion.set_exception(error),
+            },
+            post_target,
+        );
+        task
+    }
+
+    /// The interop with GPU objects created outside of the framework, when
+    /// the render interface supports it (`TryGetCompositionGpuInterop`).
+    ///
+    /// Upstream the answer is awaited from the render thread; the server
+    /// compositor runs on this thread, so it is given directly.
+    pub fn try_get_composition_gpu_interop(&self) -> Option<Rc<dyn super::ICompositionGpuInterop>> {
+        let feature = self.try_get_render_interface_feature(std::any::TypeId::of::<
+            dyn crate::platform::IExternalObjectsRenderInterfaceContextFeature,
+        >())?;
+        let external_objects = feature
+            .downcast_ref::<Rc<dyn crate::platform::IExternalObjectsRenderInterfaceContextFeature>>()?
+            .clone();
+        Some(super::CompositionInterop::new(&self.this(), external_objects))
     }
 
     /// Attempts to query for a feature from the platform render interface.
@@ -549,5 +634,111 @@ impl Drop for Compositor {
                 compositors.remove(&key);
             }
         });
+    }
+}
+
+/// A job waiting for the next batch.
+enum PendingServerJob {
+    Job(ServerJob),
+    ObjectJob(ServerObjectId, ServerObjectJob),
+}
+
+/// The outcome of a job run on the render thread: what
+/// [`Compositor::invoke_server_job_async`] returns (a task upstream).
+///
+/// The handle is shared by its clones; the job completes it once.
+pub struct ServerJobTask<T> {
+    state: Rc<RefCell<ServerJobTaskState<T>>>,
+}
+
+enum ServerJobTaskState<T> {
+    Running(Vec<Box<dyn FnOnce()>>),
+    RanToCompletion(Option<T>),
+    Faulted(Rc<dyn std::error::Error>),
+}
+
+impl<T> Clone for ServerJobTask<T> {
+    fn clone(&self) -> Self {
+        Self { state: self.state.clone() }
+    }
+}
+
+impl<T: 'static> ServerJobTask<T> {
+    pub(crate) fn new() -> Self {
+        Self { state: Rc::new(RefCell::new(ServerJobTaskState::Running(Vec::new()))) }
+    }
+
+    /// A task that has completed with `result`.
+    pub fn from_result(result: T) -> Self {
+        Self { state: Rc::new(RefCell::new(ServerJobTaskState::RanToCompletion(Some(result)))) }
+    }
+
+    fn complete(&self, state: ServerJobTaskState<T>) {
+        let continuations = {
+            let mut current = self.state.borrow_mut();
+            if !matches!(*current, ServerJobTaskState::Running(_)) {
+                return;
+            }
+            match std::mem::replace(&mut *current, state) {
+                ServerJobTaskState::Running(continuations) => continuations,
+                _ => Vec::new(),
+            }
+        };
+        for continuation in continuations {
+            continuation();
+        }
+    }
+
+    pub(crate) fn set_result(&self, result: T) {
+        self.complete(ServerJobTaskState::RanToCompletion(Some(result)))
+    }
+
+    pub(crate) fn set_exception(&self, error: Rc<dyn std::error::Error>) {
+        self.complete(ServerJobTaskState::Faulted(error))
+    }
+
+    /// Whether the job has run.
+    pub fn is_completed(&self) -> bool {
+        !matches!(*self.state.borrow(), ServerJobTaskState::Running(_))
+    }
+
+    /// Whether the job has run without an error.
+    pub fn is_completed_successfully(&self) -> bool {
+        matches!(*self.state.borrow(), ServerJobTaskState::RanToCompletion(_))
+    }
+
+    /// Whether the job failed.
+    pub fn is_faulted(&self) -> bool {
+        matches!(*self.state.borrow(), ServerJobTaskState::Faulted(_))
+    }
+
+    /// The error of a failed job.
+    pub fn exception(&self) -> Option<Rc<dyn std::error::Error>> {
+        match &*self.state.borrow() {
+            ServerJobTaskState::Faulted(error) => Some(error.clone()),
+            _ => None,
+        }
+    }
+
+    /// Takes the result of a job that ran to completion: `None` while it
+    /// runs, and once taken; the error of a failed job.
+    pub fn take_result(&self) -> Option<Result<T, Rc<dyn std::error::Error>>> {
+        match &mut *self.state.borrow_mut() {
+            ServerJobTaskState::Running(_) => None,
+            ServerJobTaskState::RanToCompletion(result) => result.take().map(Ok),
+            ServerJobTaskState::Faulted(error) => Some(Err(error.clone())),
+        }
+    }
+
+    /// Runs `continuation` once the job has run; right away if it has.
+    pub fn on_completed(&self, continuation: impl FnOnce() + 'static) {
+        {
+            let mut state = self.state.borrow_mut();
+            if let ServerJobTaskState::Running(continuations) = &mut *state {
+                continuations.push(Box::new(continuation));
+                return;
+            }
+        }
+        continuation();
     }
 }
