@@ -7,7 +7,7 @@ use crate::{controls, converter, models, pages, view_models, views};
 use ferroui_base::data::core::ValueTypes;
 use ferroui_base::metadata::{IServiceProvider, MarkupAssembly, MarkupType};
 use ferroui_base::{BoxedValue, TypeInfo};
-use ferroui_markup_xaml::FerroXamlLoader;
+use ferroui_markup_xaml::{FerroXamlLoader, XamlLoadException};
 use std::rc::Rc;
 
 /// The dotted namespaces of the modules of this crate. A type belongs to
@@ -100,6 +100,6 @@ fn register_value_types() {
 ///
 /// This is the table the XAML compiler generates per crate; it is written
 /// by hand (the entries of [`XamlClass`]) until the compiler exists.
-fn try_load(_service_provider: Option<&Rc<dyn IServiceProvider>>, uri: &str) -> Option<BoxedValue> {
-    classes().find(|class| uri.eq_ignore_ascii_case(&class.document_uri())).map(|class| (class.create)())
+fn try_load(_service_provider: Option<&Rc<dyn IServiceProvider>>, uri: &str) -> Result<Option<BoxedValue>, XamlLoadException> {
+    Ok(classes().find(|class| uri.eq_ignore_ascii_case(&class.document_uri())).map(|class| (class.create)()))
 }
