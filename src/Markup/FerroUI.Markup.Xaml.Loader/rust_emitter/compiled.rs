@@ -34,25 +34,40 @@ pub struct CompiledDocument {
 pub struct GeneratedFile {
     /// The complete text of the file.
     pub source: String,
+    /// The position map of the file (docs/porting/xaml.md, 9.3.6), JSON: for
+    /// every range of generated lines that a position marker heads, the
+    /// document and the line and position of the node the lines emit
+    /// ([`position_map`]).
+    pub position_map: String,
     /// For every document, in order: its name and, when it is not eligible, why.
     pub documents: Vec<(String, Option<String>)>,
 }
 
-/// Parses, transforms and emits each document (`(name, xaml)`) on its own,
-/// with the configuration of the run-time loader. A document that fails to
-/// transform or contains an unsupported node is reported with the reason;
-/// the others are not affected. A document whose generated functions would
-/// have the name of a function generated for an earlier document (names
-/// that differ only in case or in characters that are not letters or
-/// digits, or a name that ends in `_untyped`) is reported as well, instead
-/// of becoming a duplicate definition rustc rejects.
+/// Parses, transforms and emits the documents (`(name, xaml)`) of an assembly
+/// with the configuration of the run-time loader. The documents are
+/// transformed as ONE group, as upstream's build transforms the documents of
+/// an assembly and the run-time loader a group of documents: the group
+/// transformers see every document, so includes between them are resolved.
+/// With `root_uri` (`ferres://MyApp/`) the base URI of a document is the
+/// root URI followed by its name, the URI it is loaded by.
+///
+/// A document whose generated functions would have the name of a function
+/// generated for an earlier document (names that differ only in case or in
+/// characters that are not letters or digits, or a name that ends in
+/// `_untyped`) is reported instead of becoming a duplicate definition rustc
+/// rejects, and is left out of the group. A group that does not transform
+/// makes every document of it not eligible, with the error; a document with
+/// an unsupported node is reported with the node, and the others are not
+/// affected.
 pub fn compile_documents(
     documents: &[(&str, &str)],
+    root_uri: Option<&str>,
     configuration: &RuntimeXamlLoaderConfiguration,
 ) -> Vec<CompiledDocument> {
-    let mut compiled = Vec::with_capacity(documents.len());
+    let mut compiled: Vec<CompiledDocument> = Vec::with_capacity(documents.len());
     // The items of the file each document defines, with the document that defines them.
     let mut items: Vec<(String, &str)> = Vec::with_capacity(documents.len() * 2);
+    let mut group: Vec<(usize, &str, &str, Option<String>)> = Vec::with_capacity(documents.len());
     for (name, xaml) in documents {
         let function_name = function_name_of(name);
         let defined = [function_name.clone(), untyped_function_name(&function_name)];
@@ -65,13 +80,27 @@ pub fn compile_documents(
             compiled.push(CompiledDocument { name: name.to_string(), function_name, source: Err(reason) });
             continue;
         }
-        let source = match FerroXamlIlRuntimeCompiler::transform_document(xaml, name, configuration) {
-            Ok((root, transformer_configuration, _type_system)) => {
-                emit_document(&root, &transformer_configuration, &function_name, name).map_err(|e| e.to_string())
+        group.push((compiled.len(), name, xaml, root_uri.map(|root| format!("{root}{name}"))));
+        compiled.push(CompiledDocument { name: name.to_string(), function_name, source: Err(String::new()) });
+    }
+    let sources: Vec<(&str, &str, Option<String>)> =
+        group.iter().map(|(_, name, xaml, base_uri)| (*name, *xaml, base_uri.clone())).collect();
+    if sources.is_empty() {
+        return compiled;
+    }
+    match FerroXamlIlRuntimeCompiler::transform_documents(&sources, configuration) {
+        Ok((roots, transformer_configuration, _type_system)) => {
+            for ((index, name, _, _), root) in group.iter().zip(&roots) {
+                let document = &mut compiled[*index];
+                document.source = emit_document(root, &transformer_configuration, &document.function_name, name)
+                    .map_err(|e| e.to_string());
             }
-            Err(error) => Err(format!("the document does not transform: {}", error.message())),
-        };
-        compiled.push(CompiledDocument { name: name.to_string(), function_name, source });
+        }
+        Err(error) => {
+            for (index, _, _, _) in &group {
+                compiled[*index].source = Err(format!("the group of documents does not transform: {}", error.message()));
+            }
+        }
     }
     compiled
 }
@@ -79,7 +108,8 @@ pub fn compile_documents(
 /// The generated file of an assembly: the build function of every eligible
 /// document, the table `DOCUMENTS` (document name, untyped build function),
 /// `try_load` (the `CompiledXamlLoader` of the assembly: the document whose
-/// URI is `<root_uri><name>`, compared without regard to case; a failed build
+/// URI is `<root_uri><name>`, compared without regard to case as upstream's
+/// `string.Equals(.., StringComparison.OrdinalIgnoreCase)` compares it; a failed build
 /// is its error, as it is the error of the run-time loader) and
 /// `register_compiled_xaml()`.
 ///
@@ -91,7 +121,7 @@ pub fn generate_file(
     documents: &[(&str, &str)],
     configuration: &RuntimeXamlLoaderConfiguration,
 ) -> GeneratedFile {
-    let compiled = compile_documents(documents, configuration);
+    let compiled = compile_documents(documents, Some(root_uri), configuration);
     let mut source = String::new();
     source.push_str("// @generated by the Rust emitter of ferroui-markup-xaml-loader (rust_emitter::generate_file).\n");
     source.push_str("// Do not edit: regenerate it (see the header of the module that includes this file).\n");
@@ -144,17 +174,14 @@ pub fn generate_file(
     source.push_str("];\n");
     source.push('\n');
     source.push_str("/// The loader of the compiled markup of the assembly: builds the document with the URI\n");
-    source.push_str("/// `uri` (compared without regard to case); `Ok(None)` if this file has no such document,\n");
+    source.push_str("/// `uri` (compared as upstream's `OrdinalIgnoreCase`, `rt::uri_equals`); `Ok(None)` if this\n");
+    source.push_str("/// file has no such document,\n");
     source.push_str("/// the load error of the build if it fails.\n");
     source.push_str("pub fn try_load(\n");
     source.push_str("    service_provider: ::core::option::Option<&::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,\n");
     source.push_str("    uri: &str,\n");
     source.push_str(") -> ::core::result::Result<::core::option::Option<::ferroui_base::BoxedValue>, ::ferroui_markup_xaml::XamlLoadException> {\n");
-    source.push_str("    let name = match uri.get(..ROOT_URI.len()) {\n");
-    source.push_str("        ::core::option::Option::Some(root) if root.eq_ignore_ascii_case(ROOT_URI) => &uri[ROOT_URI.len()..],\n");
-    source.push_str("        _ => return ::core::result::Result::Ok(::core::option::Option::None),\n");
-    source.push_str("    };\n");
-    source.push_str("    let ::core::option::Option::Some((_, build)) = ::core::iter::Iterator::find(&mut DOCUMENTS.iter(), |(document, _)| document.eq_ignore_ascii_case(name)) else {\n");
+    source.push_str("    let ::core::option::Option::Some((_, build)) = ::core::iter::Iterator::find(&mut DOCUMENTS.iter(), |(document, _)| rt::uri_equals(uri, ROOT_URI, document)) else {\n");
     source.push_str("        return ::core::result::Result::Ok(::core::option::Option::None);\n");
     source.push_str("    };\n");
     source.push_str("    let provider = ::ferroui_markup_xaml::xaml_il::runtime::XamlIlRuntimeHelpers::create_root_service_provider_v3(\n");
@@ -167,7 +194,94 @@ pub fn generate_file(
     source.push_str("pub fn register_compiled_xaml() {\n");
     source.push_str("    ::ferroui_markup_xaml::FerroXamlLoader::register_compiled_xaml(ASSEMBLY_NAME, try_load);\n");
     source.push_str("}\n");
-    GeneratedFile { source, documents: report }
+    let names: Vec<(String, String)> = compiled
+        .iter()
+        .filter(|document| document.source.is_ok())
+        .map(|document| (document.function_name.clone(), document.name.clone()))
+        .collect();
+    let position_map = position_map(&source, &names);
+    GeneratedFile { source, position_map, documents: report }
+}
+
+/// The position map of a generated file (docs/porting/xaml.md, 9.3.6): the
+/// link from a line of generated Rust (where rustc reports an error) back to
+/// the XAML node it was emitted for. `functions` are the build functions of
+/// the file with their documents. Inside a build function every position
+/// marker the emitter writes (`// <document>(<line>,<position>) <what>`)
+/// heads the lines up to the next marker or the end of the function; each
+/// such range is one entry:
+///
+/// ```text
+/// {"file_lines": [first, last], "document": "name.xaml", "line": 3, "position": 7}
+/// ```
+///
+/// Generated lines are counted from 1. The text is deterministic.
+pub fn position_map(source: &str, functions: &[(String, String)]) -> String {
+    let mut entries: Vec<String> = Vec::new();
+    let mut document: Option<&str> = None;
+    // (first line, document line, document position) of the open range.
+    let mut open: Option<(usize, i32, i32)> = None;
+    let close = |entries: &mut Vec<String>, open: &mut Option<(usize, i32, i32)>, document: &str, last: usize| {
+        if let Some((first, line, position)) = open.take() {
+            entries.push(format!(
+                "    {{\"file_lines\": [{first}, {last}], \"document\": {}, \"line\": {line}, \"position\": {position}}}",
+                json_string(document)
+            ));
+        }
+    };
+    for (index, text) in source.lines().enumerate() {
+        let number = index + 1;
+        if let Some(name) = functions.iter().find_map(|(function, name)| {
+            text.strip_prefix("pub fn ").and_then(|rest| rest.strip_prefix(function.as_str())).filter(|rest| rest.starts_with('(')).map(|_| name)
+        }) {
+            document = Some(name);
+            continue;
+        }
+        let Some(current) = document else { continue };
+        if text == "}" {
+            close(&mut entries, &mut open, current, number - 1);
+            document = None;
+            continue;
+        }
+        let marker = current.replace(['\r', '\n'], " ");
+        if let Some(rest) = text.trim_start().strip_prefix("// ").and_then(|rest| rest.strip_prefix(marker.as_str())) {
+            let position = rest
+                .strip_prefix('(')
+                .and_then(|rest| rest.split_once(')'))
+                .and_then(|(numbers, _)| numbers.split_once(','))
+                .and_then(|(line, position)| Some((line.parse::<i32>().ok()?, position.parse::<i32>().ok()?)));
+            if let Some((line, position)) = position {
+                close(&mut entries, &mut open, current, number - 1);
+                open = Some((number, line, position));
+            }
+        }
+    }
+    let mut map = String::from("{\n  \"entries\": [\n");
+    map.push_str(&entries.join(",\n"));
+    if !entries.is_empty() {
+        map.push('\n');
+    }
+    map.push_str("  ]\n}\n");
+    map
+}
+
+/// `text` as a JSON string literal.
+fn json_string(text: &str) -> String {
+    let mut literal = String::with_capacity(text.len() + 2);
+    literal.push('"');
+    for character in text.chars() {
+        match character {
+            '"' => literal.push_str("\\\""),
+            '\\' => literal.push_str("\\\\"),
+            '\n' => literal.push_str("\\n"),
+            '\r' => literal.push_str("\\r"),
+            '\t' => literal.push_str("\\t"),
+            c if (c as u32) < 0x20 => literal.push_str(&format!("\\u{:04x}", c as u32)),
+            c => literal.push(c),
+        }
+    }
+    literal.push('"');
+    literal
 }
 
 /// The name of the untyped build function that wraps the build function `function_name`.
@@ -206,7 +320,7 @@ mod tests {
             ("x.xaml", xaml),
             ("x.xaml_untyped", xaml),
         ];
-        let compiled = compile_documents(&documents, &RuntimeXamlLoaderConfiguration::new());
+        let compiled = compile_documents(&documents, None, &RuntimeXamlLoaderConfiguration::new());
         for (name, other, item) in [
             ("a_b.xaml", "a-b.xaml", "build_a_b_xaml"),
             ("case.xaml", "Case.xaml", "build_case_xaml"),

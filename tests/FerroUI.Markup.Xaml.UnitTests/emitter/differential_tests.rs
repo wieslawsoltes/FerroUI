@@ -30,6 +30,9 @@ use crate::support::loader::{describe, try_load};
 /// The path of the checked-in output of the emitter.
 const GENERATED_PATH: &str = concat!(env!("CARGO_MANIFEST_DIR"), "/emitter/generated.rs");
 
+/// The path of the checked-in position map of `generated.rs` (docs/porting/xaml.md, 9.3.6).
+const POSITION_MAP_PATH: &str = concat!(env!("CARGO_MANIFEST_DIR"), "/emitter/generated.map.json");
+
 /// What the emitter writes for the corpus today.
 fn generate() -> GeneratedFile {
     generate_file(generated::ASSEMBLY_NAME, generated::ROOT_URI, DOCUMENTS, &RuntimeXamlLoaderConfiguration::new())
@@ -293,6 +296,12 @@ fn generated_output_is_up_to_date() {
             first_difference(checked_in, &file.source)
         );
     }
+    let map = include_str!("generated.map.json");
+    assert!(
+        file.position_map == map,
+        "emitter/generated.map.json is not the position map of the emitter's output ({}); regenerate it as above",
+        first_difference(map, &file.position_map)
+    );
 }
 
 /// Rewrites `emitter/generated.rs` with the emitter's output for the corpus.
@@ -308,6 +317,7 @@ fn regenerate_emitter_output() {
         }
     }
     std::fs::write(GENERATED_PATH, file.source).expect("emitter/generated.rs can be written");
+    std::fs::write(POSITION_MAP_PATH, file.position_map).expect("emitter/generated.map.json can be written");
 }
 
 /// Not from upstream. The emitter's output depends only on the documents and
@@ -561,4 +571,30 @@ fn a_list_built_from_text_is_one_list() {
     let grid = ValueTypes::as_object(&*built).and_then(|object| object.cast::<Grid>()).expect("the root is a grid");
     assert_eq!(grid.row_definitions().count(), 2);
     assert_eq!(grid.column_definitions().count(), 3);
+}
+
+/// Not from upstream. The position map leads from a generated line back to the XAML node it
+/// was emitted for: the line that creates the `TextBlock` of `multiline_document.xaml` (on
+/// line 5 of the document) is in a range of that document's line 5.
+#[test]
+fn the_position_map_leads_back_to_the_document() {
+    let source = include_str!("generated.rs");
+    let map = include_str!("generated.map.json");
+    let (index, _) = source
+        .lines()
+        .enumerate()
+        .skip_while(|(_, line)| !line.starts_with("pub fn build_multiline_document_xaml("))
+        .find(|(_, line)| line.contains("::ferroui_controls::TextBlock::new()"))
+        .expect("the generated build function of multiline_document.xaml creates a TextBlock");
+    let number = index + 1;
+    let entry = map
+        .lines()
+        .filter(|line| line.contains("\"document\": \"multiline_document.xaml\""))
+        .find(|line| {
+            let range = line.split("[").nth(1).and_then(|rest| rest.split(']').next()).unwrap_or_default();
+            let (first, last) = range.split_once(", ").unwrap_or_default();
+            first.parse::<usize>().is_ok_and(|first| first <= number) && last.parse::<usize>().is_ok_and(|last| number <= last)
+        })
+        .expect("the line is in a range of the map");
+    assert!(entry.contains("\"line\": 5,"), "{entry}");
 }

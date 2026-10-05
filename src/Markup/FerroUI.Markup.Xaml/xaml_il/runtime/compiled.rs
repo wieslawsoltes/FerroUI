@@ -83,6 +83,31 @@ pub fn at(type_name: &'static str, message: impl Display, line: i32, position: i
     )
 }
 
+/// Whether `uri` is the URI `root` followed by `name`, compared as upstream's
+/// generated loader compares a requested URI with the URI of a document:
+/// `string.Equals(uri, documentUri, StringComparison.OrdinalIgnoreCase)`, an
+/// ordinal comparison of the characters after their simple (one character to
+/// one character) upper-case mapping, for every script, not only ASCII.
+pub fn uri_equals(uri: &str, root: &str, name: &str) -> bool {
+    fn fold(character: char) -> char {
+        let mut upper = character.to_uppercase();
+        match (upper.next(), upper.next()) {
+            (Some(single), None) => single,
+            // A mapping to several characters (`ß` -> `SS`) is not a simple mapping.
+            _ => character,
+        }
+    }
+    let mut expected = root.chars().chain(name.chars());
+    let mut actual = uri.chars();
+    loop {
+        match (actual.next(), expected.next()) {
+            (None, None) => return true,
+            (Some(a), Some(b)) if a == b || fold(a) == fold(b) => {}
+            _ => return false,
+        }
+    }
+}
+
 /// The type name of the exception a member call of generated code that
 /// fails with an error of its own is reported as: the run-time loader
 /// reports the failure of a member it invokes (`EndInit`, a setter) as the
@@ -284,5 +309,26 @@ pub fn cast<T: Clone + 'static, V: PartialEq + 'static>(value: V, line: i32, pos
     match converted.as_ref().and_then(|converted| converted.downcast_ref::<T>()) {
         Some(value) => Ok(value.clone()),
         None => Err(at("InvalidCastException", format!("Unable to cast the value to {}.", target.name()), line, position)),
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::uri_equals;
+
+    /// Not from upstream: the comparison of `string.Equals(.., StringComparison.OrdinalIgnoreCase)`.
+    #[test]
+    fn uris_are_compared_as_ordinal_ignore_case() {
+        let root = "ferres://App/";
+        assert!(uri_equals("ferres://App/Views/Main.xaml", root, "Views/Main.xaml"));
+        assert!(uri_equals("FERRES://APP/VIEWS/MAIN.XAML", root, "Views/Main.xaml"));
+        // Not only ASCII: every character by its simple upper-case mapping.
+        assert!(uri_equals("ferres://App/Caf\u{c9}.xaml", root, "Caf\u{e9}.xaml"));
+        assert!(uri_equals("ferres://App/\u{3a3}.xaml", root, "\u{3c3}.xaml"));
+        // A mapping to several characters is not a simple mapping.
+        assert!(!uri_equals("ferres://App/SS.xaml", root, "\u{df}.xaml"));
+        assert!(!uri_equals("ferres://App/Views/Main.xaml", root, "Views/Main.xam"));
+        assert!(!uri_equals("ferres://App/Views/Main.xam", root, "Views/Main.xaml"));
+        assert!(!uri_equals("ferres://Other/Views/Main.xaml", root, "Views/Main.xaml"));
     }
 }
