@@ -7,9 +7,8 @@ const NS_PASTEBOARD_TYPE_STRING: &str = "public.utf8-plain-text";
 const NS_PASTEBOARD_TYPE_PNG: &str = "public.png";
 const APP_PREFIX: &str = "net.ferroui.app.uti.";
 
-// The file format ("public.file-url") is not mapped yet: storage items are
-// not ported, so there is no file data format. A file URL on the pasteboard
-// is seen as a platform format.
+// The file format ("public.file-url") is not mapped to the file data format
+// yet: a file URL on the pasteboard is seen as a platform format.
 
 /// The data formats of a list of native formats.
 pub(crate) fn to_data_formats(
