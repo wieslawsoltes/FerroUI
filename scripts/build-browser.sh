@@ -1,12 +1,14 @@
 #!/bin/bash
 # Builds a browser application and assembles its site.
 #
-#   scripts/build-browser.sh <example> [--debug] [--out <directory>]
+#   scripts/build-browser.sh <example> [--debug | --profile <name>] [--out <directory>]
 #
 # <example> is an example of the browser crate (src/Browser/FerroUI.Browser/examples/<example>,
 # with its host page in wwwroot/). The site is written to target/browser/<example> (or --out):
 # the host page, the script module of the platform (ferroui.js, built from webapp/ with esbuild)
 # and the WebAssembly module with its script. Serve the directory with any static web server.
+# The module is built with the cargo profile `browser` (the release profile optimised for size, see
+# docs/porting/browser-size.md); --debug builds the dev profile, --profile any other profile.
 #
 # Needs: the Emscripten SDK activated in the shell (emsdk 6.0.10: `source emsdk_env.sh`), the Rust
 # target wasm32-unknown-emscripten, the wasm-bindgen command-line tool of the version of the
@@ -14,11 +16,12 @@
 set -euo pipefail
 
 EXAMPLE=""
-PROFILE="release"
+PROFILE="browser"
 OUT=""
 while [ $# -gt 0 ]; do
   case "$1" in
-    --debug) PROFILE="debug";;
+    --debug) PROFILE="dev";;
+    --profile) shift; PROFILE="$1";;
     --out) shift; OUT="$1";;
     -*) echo "unknown option: $1" >&2; exit 2;;
     *) EXAMPLE="$1";;
@@ -26,7 +29,7 @@ while [ $# -gt 0 ]; do
   shift
 done
 if [ -z "$EXAMPLE" ]; then
-  echo "usage: scripts/build-browser.sh <example> [--debug] [--out <directory>]" >&2
+  echo "usage: scripts/build-browser.sh <example> [--debug | --profile <name>] [--out <directory>]" >&2
   exit 2
 fi
 
@@ -84,12 +87,19 @@ echo "== script module"
 (cd "$CRATE/webapp" && npm ci --no-audit --no-fund && npm run typecheck && npm run lint && npm run build)
 
 echo "== WebAssembly module ($PROFILE)"
-FLAGS=()
-[ "$PROFILE" = "release" ] && FLAGS+=(--release)
-(cd "$ROOT" && cargo build --target wasm32-unknown-emscripten -p ferroui-browser --example "$EXAMPLE" "${FLAGS[@]}")
+# rustc has emcc link at -Oz for opt-level "z". At -Os and -Oz Emscripten leaves out the cache of
+# getWasmTableEntry, so that every call that can unwind (invoke_* in the script) looks the function
+# up with wasmTable.get, which delays the first frame of themed_view by a third. The browser
+# profile links at -O2 instead (the last -O flag wins); wasm-opt -Oz runs on the module afterwards.
+LINK_ARGS=()
+[ "$PROFILE" = "browser" ] && LINK_ARGS=(-- -Clink-arg=-O2)
+(cd "$ROOT" && cargo rustc --target wasm32-unknown-emscripten -p ferroui-browser --example "$EXAMPLE" --profile "$PROFILE" "${LINK_ARGS[@]}")
 
 echo "== site"
-BUILT="$TARGET_DIR/wasm32-unknown-emscripten/$PROFILE/examples"
+# The dev profile builds into debug/, every other profile into the directory of its name.
+PROFILE_DIR="$PROFILE"
+[ "$PROFILE" = "dev" ] && PROFILE_DIR="debug"
+BUILT="$TARGET_DIR/wasm32-unknown-emscripten/$PROFILE_DIR/examples"
 rm -rf -- "$OUT"
 mkdir -p "$OUT"
 cp -R "$WWWROOT"/. "$OUT"/

@@ -62,3 +62,19 @@ time = { version = "0.3", default-features = false }
 [profile.release]
 lto = "thin"
 codegen-units = 4
+
+# The browser build (scripts/build-browser.sh): the release profile, optimised for the size of the
+# WebAssembly module. See docs/porting/browser-size.md for the measurements behind each setting.
+[profile.browser]
+inherits = "release"
+opt-level = "z"
+# The XAML front end and run-time loader compile the theme documents before the first frame: at
+# opt-level "z" the first frame of themed_view comes 3 s later, for 1.1 MB less code.
+[profile.browser.package.xamlx]
+opt-level = 3
+[profile.browser.package.ferroui-markup-xaml-loader]
+opt-level = 3
+[profile.browser.package.ferroui-markup-xaml]
+opt-level = 3
+[profile.browser.package.roxmltree]
+opt-level = 3
