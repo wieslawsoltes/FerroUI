@@ -1,6 +1,7 @@
 require("esbuild").build({
     entryPoints: [
-        "./modules/ferroui.ts"
+        "./modules/ferroui.ts",
+        "./modules/storage.ts"
     ],
     outdir: "../dist",
     bundle: true,
