@@ -21,7 +21,7 @@ use std::rc::Rc;
 
 use ferroui_base::data::core::{ValueType, ValueTypes};
 use ferroui_base::metadata::{IServiceProvider, MarkupType, MarkupValue};
-use ferroui_base::{BoxedValue, FerroObject, Ref, TypeInfo};
+use ferroui_base::{BoxedValue, TypeInfo};
 use xamlx::exceptions::XamlResult;
 use xamlx::type_system::IXamlType;
 
@@ -194,43 +194,9 @@ impl<'a> PartialEq for dyn ITypeDescriptorContext + 'a {
     }
 }
 
-/// Holds an object in the handle of its run-time class (`Ref<Button>` for a
-/// button held as `Ref<Control>`), the form in which the assignability
-/// casts of the untyped value conversions accept it for every base class
-/// and interface. Other values are returned unchanged.
-pub fn normalize_object(value: BoxedValue) -> BoxedValue {
-    let Some(object) = ValueTypes::as_object(&*value).or_else(|| object_behind_contract(&value)) else {
-        return value;
-    };
-    let type_info = object.get_type();
-    match type_info.handle() {
-        Some(handle) if handle != value.value_type_id() => box_object(object).unwrap_or(value),
-        _ => value,
-    }
-}
-
-/// Boxes an object in the handle of its run-time class.
-pub fn box_object(object: Ref<FerroObject>) -> Option<BoxedValue> {
-    let type_info = object.get_type();
-    let handle = type_info.handle()?;
-    let root: BoxedValue = Rc::new(object);
-    if handle == root.value_type_id() {
-        return Some(root);
-    }
-    ValueTypes::try_convert_registered(&root, ValueType::new(handle, type_info.name()))
-}
-
-/// The untyped (canonical) form of a value held in a typed box: null or the
-/// contents of a nullable, the object itself for a reference type.
-pub fn to_untyped(value: BoxedValue) -> MarkupValue {
-    match ValueTypes::try_cast(&value, ValueType::object()) {
-        Some(untyped) => match untyped.downcast_ref::<Option<BoxedValue>>() {
-            Some(untyped) => untyped.clone().map(normalize_object),
-            None => Some(value),
-        },
-        None => Some(value),
-    }
-}
+/// The untyped forms of values, shared with generated code: the conventions
+/// of the runtime library ([`compiled`](ferroui_markup_xaml::xaml_il::runtime::compiled)).
+pub use ferroui_markup_xaml::xaml_il::runtime::compiled::{box_object, normalize_object, to_untyped};
 
 /// The arrays bindings index into ([`BindableArray`](ferroui_base::data::model::BindableArray)),
 /// by the Rust types that hold them, with the Rust type of their elements.
@@ -345,18 +311,3 @@ impl fmt::Debug for RuntimeArray {
 /// [`compiled::untyped_object_form`]: ferroui_markup_xaml::xaml_il::runtime::compiled::untyped_object_form
 pub use ferroui_markup_xaml::xaml_il::runtime::compiled::untyped_object_form;
 
-/// The object of the object model behind a contract handle, for the
-/// contracts of the base library that can tell (a property typed with the
-/// contract returns its object through the contract handle, and the members
-/// of the class of the object must be callable on it, as on the reference
-/// of the managed original).
-fn object_behind_contract(value: &BoxedValue) -> Option<Ref<FerroObject>> {
-    use ferroui_base::controls::{IResourceDictionary, IResourceProvider};
-    if let Some(dictionary) = value.downcast_ref::<Rc<dyn IResourceDictionary>>() {
-        return dictionary.as_object().map(|object| object.to_ref());
-    }
-    if let Some(provider) = value.downcast_ref::<Rc<dyn IResourceProvider>>() {
-        return provider.as_object().map(|object| object.to_ref());
-    }
-    None
-}

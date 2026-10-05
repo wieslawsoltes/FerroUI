@@ -592,12 +592,77 @@ pub struct RuntimeMethod {
     pub(crate) generic_parameters: Vec<Rc<RuntimeType>>,
     /// The type arguments of a constructed generic method.
     pub(crate) generic_arguments: Vec<Rc<dyn IXamlType>>,
+    /// The member of markup metadata the method is the projection of.
+    pub(crate) declared: Option<DeclaredMember>,
+}
+
+/// The member of markup metadata a [`RuntimeMethod`] is the projection of:
+/// what the emitter of Rust source calls through the typed function the
+/// declaration generated ([`MarkupEmit`](ferroui_base::metadata::MarkupEmit)).
+#[derive(Clone, Copy)]
+pub enum DeclaredMember {
+    /// The getter of an instance property.
+    Getter(&'static ferroui_base::metadata::MarkupProperty),
+    /// The setter of an instance property.
+    Setter(&'static ferroui_base::metadata::MarkupProperty),
+    /// The getter of a static property.
+    StaticGetter(&'static ferroui_base::metadata::MarkupProperty),
+    /// The setter of a static property.
+    StaticSetter(&'static ferroui_base::metadata::MarkupProperty),
+    /// A method.
+    Method(&'static ferroui_base::metadata::MarkupMethod),
+    /// The `Parse(string)` of the type (`parse:`).
+    Parse(&'static MarkupType),
+}
+
+impl DeclaredMember {
+    /// The typed function of the member, if the declaration generated one.
+    pub fn emit(&self) -> Option<ferroui_base::metadata::MarkupEmit> {
+        match self {
+            Self::Getter(property) | Self::StaticGetter(property) => property.emit_get,
+            Self::Setter(property) | Self::StaticSetter(property) => property.emit_set,
+            Self::Method(method) => method.emit,
+            Self::Parse(markup) => markup.parse_type.map(|_| ferroui_base::metadata::MarkupEmit {
+                function: "__markup_parse",
+                fallible: true,
+            }),
+        }
+    }
 }
 
 impl RuntimeMethod {
     /// The invoker of the method.
     pub fn invoker(&self) -> &RuntimeInvoker {
         &self.invoker
+    }
+
+    /// The member of markup metadata the method is the projection of.
+    pub fn declared(&self) -> Option<DeclaredMember> {
+        self.declared
+    }
+
+    /// The method as the projection of the declared member `declared`.
+    pub(crate) fn with_declared(self: Rc<Self>, declared: DeclaredMember) -> Rc<Self> {
+        let mut method = Rc::try_unwrap(self).unwrap_or_else(|shared| shared.copy());
+        method.declared = Some(declared);
+        Rc::new(method)
+    }
+
+    fn copy(&self) -> Self {
+        Self {
+            system: self.system.clone(),
+            name: self.name.clone(),
+            declaring_type: self.declaring_type.clone(),
+            is_static: self.is_static,
+            return_type: self.return_type.clone(),
+            parameters: self.parameters.clone(),
+            parameter_handles: self.parameter_handles.clone(),
+            invoker: self.invoker.clone(),
+            attributes: self.attributes.clone(),
+            generic_parameters: self.generic_parameters.clone(),
+            generic_arguments: self.generic_arguments.clone(),
+            declared: self.declared,
+        }
     }
 
     /// Whether the method has an invoker of its own (it is not abstract).
@@ -697,6 +762,7 @@ impl RuntimeMethod {
             attributes: self.attributes.clone(),
             generic_parameters: self.generic_parameters.clone(),
             generic_arguments: self.generic_arguments.clone(),
+            declared: self.declared,
         })
     }
 
@@ -845,6 +911,7 @@ impl IXamlMethod for RuntimeMethod {
             attributes: self.attributes.clone(),
             generic_parameters: self.generic_parameters.clone(),
             generic_arguments: type_arguments.to_vec(),
+            declared: self.declared,
         }))
     }
     fn custom_attributes(&self) -> Vec<Rc<dyn IXamlCustomAttribute>> {

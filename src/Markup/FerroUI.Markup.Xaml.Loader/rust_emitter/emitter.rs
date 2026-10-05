@@ -17,10 +17,12 @@ use xamlx::ast::{
     visit_node, IXamlAstNode, IXamlAstValueNode, IXamlAstVisitor, XamlAstCompilerLocalNode,
     XamlAstImperativeValueManipulation, XamlAstLocalInitializationNodeEmitter, XamlAstManipulationImperativeNode,
     XamlAstNewClrObjectNode, XamlAstTextNode, XamlConstantNode, XamlDirectCallPropertySetter, XamlManipulationGroupNode, XamlNullExtensionNode,
-    XamlObjectInitializationNode, XamlPropertyAssignmentNode, XamlStaticExtensionNode, XamlStaticMember,
+    XamlNoReturnMethodCallNode, XamlObjectInitializationNode, XamlPropertyAssignmentNode, XamlStaticExtensionNode,
+    XamlStaticMember, XamlStaticOrTargetedReturnMethodCallNode, XamlWrappedMethod,
     XamlValueNodeWithBeginInit,
 };
 use xamlx::exceptions::{XamlError, XamlResult};
+use xamlx::transform::transformers::AdderSetter;
 use xamlx::transform::TransformerConfiguration;
 use xamlx::type_system::{IXamlConstructor, IXamlType, XamlValue};
 
@@ -29,7 +31,7 @@ use crate::compiler_extensions::transformers::{FerroNameScopeRegistrationXamlIlN
 use crate::compiler_extensions::XamlIlFerroPropertyHelper;
 use crate::runtime::interpreter::{numeric_constant, single_setter};
 use crate::runtime::type_system::{
-    RuntimeConstructor, RuntimeField, RuntimeFieldValue, RuntimeInvoker, RuntimeMethod, RuntimeType,
+    DeclaredMember, RuntimeConstructor, RuntimeField, RuntimeFieldValue, RuntimeInvoker, RuntimeMethod, RuntimeType,
 };
 
 use super::source::rust_string_literal;
@@ -217,8 +219,11 @@ impl Emitter<'_> {
     }
 
     fn local_for(&mut self, class: &'static TypeInfo) -> String {
-        let base = snake_case(class.name());
-        let counter = self.local_names.entry(base.clone()).or_insert(0);
+        self.local_named(&snake_case(class.name()))
+    }
+
+    fn local_named(&mut self, base: &str) -> String {
+        let counter = self.local_names.entry(base.to_string()).or_insert(0);
         let name = format!("{base}_{counter}");
         *counter += 1;
         name
@@ -259,6 +264,9 @@ impl Emitter<'_> {
         }
         if let Some(n) = node.cast::<XamlAstTextNode>() {
             return Ok(exact::<String>(format!("::std::string::String::from({})", rust_string_literal(&n.text()))));
+        }
+        if node.is::<XamlStaticOrTargetedReturnMethodCallNode>() {
+            return self.method_call_value(node);
         }
         if node.is::<XamlNullExtensionNode>() {
             return Ok(Typed { expr: "::core::option::Option::None".to_string(), kind: Kind::Null });
@@ -586,6 +594,11 @@ impl Emitter<'_> {
         if node.is::<HandleRootObjectScopeNode>() {
             return self.root_object_scope(node, target);
         }
+        if node.is::<XamlNoReturnMethodCallNode>() {
+            let (call, _) = self.method_call(node, Some(target))?;
+            self.line(format!("{call};"));
+            return Ok(());
+        }
         if let Some(n) = node.cast::<XamlAstManipulationImperativeNode>() {
             // The value this node is "supposed" to manipulate is discarded.
             let imperative = n.imperative().as_node();
@@ -664,6 +677,9 @@ impl Emitter<'_> {
         let setter = single_setter(node, assignment)
             .map_err(|e| failed(node, e))?
             .ok_or_else(|| unsupported(node, format!("{property_name}: the setter is chosen at run time")))?;
+        if let Some(adder) = setter.as_any().downcast_ref::<AdderSetter>() {
+            return self.adder_assignment(node, assignment, adder, target);
+        }
         let direct = setter
             .as_any()
             .downcast_ref::<XamlDirectCallPropertySetter>()
@@ -673,6 +689,9 @@ impl Emitter<'_> {
             .as_any()
             .downcast_ref::<RuntimeMethod>()
             .ok_or_else(|| unsupported(node, format!("{property_name}: the setter is not a method of the run-time type system")))?;
+        if runtime.declared().is_some() {
+            return self.declared_setter_assignment(node, assignment, runtime, target);
+        }
         let field = XamlIlFerroPropertyHelper::try_get_ferro_property_field(&assignment.property)
             .ok_or_else(|| unsupported(node, format!("{property_name}: not a registered property")))?;
         let property = field
@@ -697,7 +716,10 @@ impl Emitter<'_> {
         if property.is_read_only() {
             return Err(unsupported(node, format!("{property_name}: a read-only property")));
         }
-        self.styled_class(node, target)?;
+        // Every class of the object model is a `FerroObject`, the owner of the property store.
+        if !matches!(target.kind, Kind::Class(_)) {
+            return Err(unsupported(node, format!("{property_name}: the target is not an object of the object model")));
+        }
         let declaring_type = field.declaring_type();
         let definition = property_definition(property, runtime_type(&declaring_type).and_then(RuntimeType::type_info))
             .map_err(|reason| unsupported(node, format!("{property_name}: {reason}")))?;
@@ -717,6 +739,274 @@ impl Emitter<'_> {
         let call = if property.is_direct() { "set_direct_value" } else { "set_value" };
         self.line(format!("{}.{call}({definition}, {typed});", target.expr));
         Ok(())
+    }
+
+    /// The kind of a value of the Rust type `id` held in a local: an object
+    /// of a class, or a value of exactly that type (with the nullable form
+    /// of a value type with metadata).
+    fn kind_of(&self, id: TypeId) -> Kind {
+        if let Some((class, false)) = TypeInfo::find_by_handle(id) {
+            return Kind::Class(class);
+        }
+        let nullable = MarkupType::find_by_handle(id).and_then(|markup| markup.nullable).map(|nullable| nullable().id());
+        Kind::Exact { id, nullable }
+    }
+
+    /// A method call node (`XamlStaticOrTargetedReturnMethodCallNode`, or
+    /// `XamlNoReturnMethodCallNode` on `target`): the arguments in order,
+    /// then the call of the declared member. Returns the call and the Rust
+    /// type it yields.
+    fn method_call(&mut self, node: &Rc<dyn IXamlAstNode>, target: Option<&Typed>) -> EmitResult<(String, Option<TypeId>)> {
+        let call = node.as_method_call_base_node().ok_or_else(|| unsupported(node, "not a method call"))?;
+        let wrapped = call.method.borrow().clone();
+        let method = wrapped
+            .as_any()
+            .downcast_ref::<XamlWrappedMethod>()
+            .map(|wrapped| wrapped.method().clone())
+            .ok_or_else(|| unsupported(node, "a method call with argument casts"))?;
+        let runtime = method
+            .as_any()
+            .downcast_ref::<RuntimeMethod>()
+            .ok_or_else(|| unsupported(node, "a method that is not a method of the run-time type system"))?;
+        let mut arguments = Vec::new();
+        if let Some(target) = target {
+            arguments.push(Typed { expr: target.expr.clone(), kind: target.kind });
+        }
+        let values = call.arguments.borrow().clone();
+        for value in &values {
+            arguments.push(self.value(&value.as_node())?);
+        }
+        let text = self.declared_call(node, runtime, &arguments)?;
+        let returned = match target {
+            Some(_) => None,
+            None => Some(self.declared_return(node, runtime)?),
+        };
+        Ok((text, returned))
+    }
+
+    /// A method call that yields a value, kept in a local.
+    fn method_call_value(&mut self, node: &Rc<dyn IXamlAstNode>) -> EmitResult<Typed> {
+        let (call, returned) = self.method_call(node, None)?;
+        let returned = returned.ok_or_else(|| unsupported(node, "a method call that yields nothing"))?;
+        let local = self.local_named("value");
+        self.line(format!("let {local} = {call};"));
+        Ok(Typed { expr: local, kind: self.kind_of(returned) })
+    }
+
+    /// The values of a property assignment, evaluated in order.
+    fn assignment_values(&mut self, node: &Rc<dyn IXamlAstNode>, assignment: &XamlPropertyAssignmentNode) -> EmitResult<Vec<Typed>> {
+        let values = assignment.values.borrow().clone();
+        if values.is_empty() {
+            return Err(unsupported(node, "an assignment without values"));
+        }
+        let mut typed = Vec::with_capacity(values.len());
+        for value in &values {
+            typed.push(self.value(&value.as_node())?);
+        }
+        Ok(typed)
+    }
+
+    /// An assignment through a declared accessor: the setter of a plain
+    /// property (`this.Name = value`) or a static accessor of an attached
+    /// property (`Owner.SetName(target, value)`), called with the target
+    /// followed by the values, as the interpreter calls the method of the
+    /// setter.
+    fn declared_setter_assignment(
+        &mut self,
+        node: &Rc<dyn IXamlAstNode>,
+        assignment: &Rc<XamlPropertyAssignmentNode>,
+        method: &RuntimeMethod,
+        target: &Typed,
+    ) -> EmitResult<()> {
+        let property_name = assignment.property.name();
+        self.marker(node, &property_name);
+        let mut arguments = vec![Typed { expr: target.expr.clone(), kind: target.kind }];
+        arguments.extend(self.assignment_values(node, assignment)?);
+        let call = self.declared_call(node, method, &arguments)?;
+        self.line(format!("{call};"));
+        Ok(())
+    }
+
+    /// An assignment through the adder of a collection property: the
+    /// collection is read with the getter first, then the values are
+    /// evaluated and added (`AdderSetter`).
+    fn adder_assignment(
+        &mut self,
+        node: &Rc<dyn IXamlAstNode>,
+        assignment: &Rc<XamlPropertyAssignmentNode>,
+        adder: &AdderSetter,
+        target: &Typed,
+    ) -> EmitResult<()> {
+        let property_name = assignment.property.name();
+        let getter = adder
+            .getter()
+            .as_any()
+            .downcast_ref::<RuntimeMethod>()
+            .ok_or_else(|| unsupported(node, format!("{property_name}: the getter is not a method of the run-time type system")))?;
+        let add = adder
+            .adder()
+            .as_any()
+            .downcast_ref::<RuntimeMethod>()
+            .ok_or_else(|| unsupported(node, format!("{property_name}: the adder is not a method of the run-time type system")))?;
+        self.marker(node, &property_name);
+        let (call, collection_type) = match getter.declared() {
+            Some(_) => {
+                let collection_type = self.declared_return(node, getter)?;
+                (self.declared_call(node, getter, std::slice::from_ref(target))?, collection_type)
+            }
+            None => self.registered_getter(node, assignment, getter, target)?,
+        };
+        let local = self.local_named(&format!("{}_collection", snake_case(&property_name)));
+        self.line(format!("let {local} = {call};"));
+        let collection = Typed { expr: local, kind: self.kind_of(collection_type) };
+        let mut arguments = vec![collection];
+        arguments.extend(self.assignment_values(node, assignment)?);
+        let call = self.declared_call(node, add, &arguments)?;
+        self.line(format!("{call};"));
+        Ok(())
+    }
+
+    /// The read of a registered property through the getter the type system
+    /// projects for it (`get_value_untyped(property)` in the interpreter):
+    /// `target.get_value(..)`, or `target.get_direct_value(..)` for a direct
+    /// property. Returns the call and the value type of the property.
+    fn registered_getter(
+        &self,
+        node: &Rc<dyn IXamlAstNode>,
+        assignment: &XamlPropertyAssignmentNode,
+        getter: &RuntimeMethod,
+        target: &Typed,
+    ) -> EmitResult<(String, TypeId)> {
+        let property_name = assignment.property.name();
+        let field = XamlIlFerroPropertyHelper::try_get_ferro_property_field(&assignment.property)
+            .ok_or_else(|| unsupported(node, format!("{property_name}: the getter is neither declared nor registered")))?;
+        let property = field
+            .as_any()
+            .downcast_ref::<RuntimeField>()
+            .and_then(RuntimeField::ferro_property)
+            .ok_or_else(|| unsupported(node, format!("{property_name}: not a registered property")))?;
+        let is_plain_getter = matches!(getter.invoker, RuntimeInvoker::Dynamic(_))
+            && !getter.is_static
+            && getter.name == format!("get_{}", property.name())
+            && getter.parameters.is_empty();
+        if !is_plain_getter || !matches!(target.kind, Kind::Class(_)) {
+            return Err(unsupported(node, format!("{property_name}: the getter is not the accessor of the registered property")));
+        }
+        let declaring_type = field.declaring_type();
+        let definition = property_definition(property, runtime_type(&declaring_type).and_then(RuntimeType::type_info))
+            .map_err(|reason| unsupported(node, format!("{property_name}: {reason}")))?;
+        let call = if property.is_direct() { "get_direct_value" } else { "get_value" };
+        Ok((format!("{}.{call}({definition})", target.expr), property.property_type()))
+    }
+
+    /// The Rust type a declared getter or method returns.
+    fn declared_return(&self, node: &Rc<dyn IXamlAstNode>, method: &RuntimeMethod) -> EmitResult<TypeId> {
+        let returned = match method.declared() {
+            Some(DeclaredMember::Getter(property)) | Some(DeclaredMember::StaticGetter(property)) => Some((property.type_)()),
+            Some(DeclaredMember::Method(declared)) => declared.return_type.map(|return_type| return_type()),
+            Some(DeclaredMember::Parse(markup)) => markup.parse_type.map(|parse_type| parse_type()),
+            _ => None,
+        };
+        returned
+            .map(|handle| handle.id())
+            .ok_or_else(|| unsupported(node, format!("{}: the member returns no declared value", method.name)))
+    }
+
+    /// The instance of an instance member, from a value of another Rust
+    /// type (a nullable collection read from a property): converted at run
+    /// time as the run-time loader converts it (`rt::argument`), with the
+    /// loader's error for a value that does not convert. `None` for an
+    /// argument that is not the instance.
+    fn instance_argument(&self, node: &Rc<dyn IXamlAstNode>, method: &RuntimeMethod, index: usize, argument: &Typed) -> Option<String> {
+        if index != 0 || method.is_static || !matches!(argument.kind, Kind::Exact { .. }) {
+            return None;
+        }
+        let declaring = method.declaring_type.upgrade()?;
+        let member = format!("{}.{}", declaring.full_name(), method.name);
+        Some(format!(
+            "rt::argument({}.clone(), {}, 0, {}, {})?",
+            argument.expr,
+            rust_string_literal(&member),
+            node.line(),
+            node.position()
+        ))
+    }
+
+    /// The path the associated functions of the declaring type of `method`
+    /// are called by: the public path of the class or the markup type
+    /// (`<dyn ::path::Trait>` for a contract).
+    fn owner_path(&self, node: &Rc<dyn IXamlAstNode>, method: &RuntimeMethod) -> EmitResult<String> {
+        let runtime = method
+            .declaring_type
+            .upgrade()
+            .ok_or_else(|| unsupported(node, format!("{}: the declaring type is gone", method.name)))?;
+        let declaring: Rc<dyn IXamlType> = runtime.clone();
+        if let Some(class) = runtime.type_info() {
+            return class
+                .rust_path()
+                .map(absolute)
+                .ok_or_else(|| unsupported(node, format!("no public Rust path is recorded for {}", declaring.full_name())));
+        }
+        let markup = runtime
+            .markup()
+            .ok_or_else(|| unsupported(node, format!("{} has no metadata", declaring.full_name())))?;
+        let path = markup
+            .rust_path()
+            .ok_or_else(|| unsupported(node, format!("no public Rust path is recorded for {}", declaring.full_name())))?;
+        Ok(match markup.rust_path_is_trait() {
+            true => format!("<dyn {}>", absolute(path)),
+            false => absolute(path),
+        })
+    }
+
+    /// A call of the typed function of the declared member `method`
+    /// ([`DeclaredMember`]) with `arguments` (the instance first for an
+    /// instance member), each stated as the Rust type the member declares,
+    /// with the failure of a fallible member as a load error at `node`.
+    fn declared_call(&self, node: &Rc<dyn IXamlAstNode>, method: &RuntimeMethod, arguments: &[Typed]) -> EmitResult<String> {
+        let name = &method.name;
+        let declared = method.declared().ok_or_else(|| unsupported(node, format!("{name}: not a declared member")))?;
+        let emit = declared.emit().ok_or_else(|| unsupported(node, format!("{name}: the declaration has no typed function")))?;
+        let owner = self.owner_path(node, method)?;
+        let mut parameters: Vec<TypeId> = Vec::with_capacity(arguments.len());
+        if !method.is_static {
+            let this = method
+                .declaring_type
+                .upgrade()
+                .and_then(|declaring| declaring.markup())
+                .and_then(|markup| markup.this)
+                .ok_or_else(|| unsupported(node, format!("{name}: the instance type of the declaration is not known")))?;
+            parameters.push(this().id());
+        }
+        for handle in &method.parameter_handles {
+            let handle = handle.ok_or_else(|| unsupported(node, format!("{name}: a parameter without a Rust type")))?;
+            parameters.push(handle.id());
+        }
+        if parameters.len() != arguments.len() {
+            return Err(unsupported(node, format!("{name}: {} arguments for {} parameters", arguments.len(), parameters.len())));
+        }
+        let mut texts = Vec::with_capacity(arguments.len());
+        for (index, (argument, parameter)) in arguments.iter().zip(&parameters).enumerate() {
+            let text = match self.coerce(argument, *parameter) {
+                Some(text) => text,
+                None => self.instance_argument(node, method, index, argument).ok_or_else(|| {
+                    unsupported(node, format!("{name}: argument {index} cannot be stated as the declared type"))
+                })?,
+            };
+            // The instance is passed by reference: a local of exactly the declared type as it is.
+            let is_instance = index == 0 && !method.is_static;
+            texts.push(match (is_instance, text.strip_suffix(".clone()")) {
+                (true, Some(local)) if local == argument.expr => format!("&{local}"),
+                (true, _) if text == argument.expr => format!("&{text}"),
+                (true, _) => format!("&{text}"),
+                (false, _) => text,
+            });
+        }
+        let mut call = format!("{owner}::{}({})", emit.function, texts.join(", "));
+        if emit.fallible {
+            call.push_str(&format!(".map_err(|error| rt::at(rt::TARGET_INVOCATION_EXCEPTION, error, {}, {}))?", node.line(), node.position()));
+        }
+        Ok(call)
     }
 
     /// `if (root is StyledElement s) NameScope.SetNameScope(s, scope); scope.Complete();`.
