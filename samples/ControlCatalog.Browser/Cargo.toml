@@ -1,0 +1,33 @@
+[package]
+name = "control-catalog-browser"
+description = "The browser entry point of the ControlCatalog sample of FerroUI"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+publish = false
+autotests = false
+autobenches = false
+autoexamples = false
+
+# A binary: the Emscripten target links wasm-bindgen exports only into executables. The host page
+# creates the module and calls `runMain`; `scripts/build-browser.sh control-catalog-browser`
+# assembles the site.
+[[bin]]
+name = "control-catalog-browser"
+path = "program.rs"
+
+[dependencies]
+ferroui-base = { workspace = true }
+ferroui-controls = { workspace = true }
+ferroui-browser = { workspace = true }
+ferroui-fonts-inter = { workspace = true }
+control-catalog = { path = "../ControlCatalog" }
+wasm-bindgen = { workspace = true }
+
+# The published site carries neutral placeholder artwork instead of the upstream brand assets of the
+# sample (see `samples/ControlCatalog/PlaceholderAssets`). Only the browser build selects it, so that
+# workspace builds for the host keep the sample as it is.
+[target.'cfg(target_os = "emscripten")'.dependencies]
+control-catalog = { path = "../ControlCatalog", features = ["placeholder-branding"] }

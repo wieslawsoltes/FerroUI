@@ -23,6 +23,7 @@ members = [
     "samples/MiniMvvm",
     "samples/ControlCatalog",
     "samples/ControlCatalog.Desktop",
+    "samples/ControlCatalog.Browser",
 ]
 
 [workspace.package]
