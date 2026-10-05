@@ -617,7 +617,7 @@ pub enum DeclaredMember {
 
 impl DeclaredMember {
     /// The typed function of the member, if the declaration generated one.
-    #[cfg(feature = "emitter")]
+    #[cfg(any(feature = "emitter", test))]
     pub fn emit(&self) -> Option<ferroui_base::metadata::MarkupEmit> {
         match self {
             Self::Getter(property) | Self::StaticGetter(property) => property.emit_get,
