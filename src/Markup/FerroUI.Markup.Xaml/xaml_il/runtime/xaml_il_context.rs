@@ -21,12 +21,13 @@ use std::cell::RefCell;
 use std::collections::HashMap;
 use std::rc::{Rc, Weak};
 
+use ferroui_base::controls::INameScope;
 use ferroui_base::metadata::{service, IServiceProvider, MarkupValue};
 use ferroui_base::utilities::Uri;
 use ferroui_base::BoxedValue;
 
 use crate::converters::ITypeDescriptorContext;
-use crate::{IProvideValueTarget, IRootObjectProvider, IUriContext};
+use crate::{IProvideValueTarget, IRootObjectProvider, IUriContext, ServiceProviderExtensions};
 
 use super::{IFerroXamlIlEagerParentStackProvider, IFerroXamlIlParentStackProvider, XamlIlRuntimeHelpers};
 
@@ -437,5 +438,25 @@ impl IXamlIlContextServices for FrameworkContextServices {
         parent
             .get_service_of::<Rc<dyn IFerroXamlIlParentStackProvider>>()
             .map(|provider| provider.parents().into_iter().map(Some).collect())
+    }
+}
+
+/// The name scope field the framework language adds to the context
+/// (`FerroXamlIlContextNameScopeField`): filled in the constructor of the
+/// context from the parent service provider; null when the parent has no
+/// name scope.
+pub struct FerroXamlIlContextNameScopeField(pub Option<Rc<dyn INameScope>>);
+
+impl XamlIlContext {
+    /// Fills the name scope field from the parent service provider: what the
+    /// constructor of the context class of the framework language does.
+    pub fn initialize_name_scope_field(&self) {
+        let scope = self.parent_service_provider().and_then(|parent| parent.get_name_scope());
+        self.set_extension(Rc::new(FerroXamlIlContextNameScopeField(scope)));
+    }
+
+    /// The value of the name scope field; `None` before it is filled.
+    pub fn name_scope_field(&self) -> Option<Rc<dyn INameScope>> {
+        self.extension::<FerroXamlIlContextNameScopeField>().and_then(|field| field.0.clone())
     }
 }
