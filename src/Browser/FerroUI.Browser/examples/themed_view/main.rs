@@ -3,9 +3,10 @@
 //!
 //! The application adds the Fluent theme to its styles and shows, as the
 //! main view of the single-view lifetime, a stack panel of a text block, a
-//! button, a check box, a text box, a slider, a progress bar and a list box
-//! that is too small for its items, so that it shows a scroll bar. It is the
-//! page counterpart of the `themed_window` example of the themes.
+//! button, a check box, a text box, a slider, a progress bar, a list box
+//! that is too small for its items, so that it shows a scroll bar, and a
+//! target that accepts text dropped on it. It is the page counterpart of the
+//! `themed_window` example of the themes.
 //!
 //! Build and assemble the site with `scripts/build-browser.sh themed_view`
 //! and serve `target/browser/themed_view` with any static web server. The
@@ -14,13 +15,20 @@
 
 #![cfg_attr(target_os = "emscripten", no_main)]
 
-use ferroui_base::media::FontManagerOptions;
+use ferroui_base::input::platform::ClipboardExtensions;
+use ferroui_base::input::{DataTransferExtensions, DragDrop, DragDropEffects};
+use ferroui_base::layout::HorizontalAlignment;
+use ferroui_base::media::immutable::ImmutableSolidColorBrush;
+use ferroui_base::media::{Color, FontManagerOptions};
 use ferroui_base::styling::ThemeVariant;
+use ferroui_base::threading::Dispatcher;
+use ferroui_base::utilities::{Uri, UriKind};
 use ferroui_base::{ferro_class, ferro_impl_classes, instantiate, BoxedValue, FerroObjectImpl, Ref, Thickness};
+use ferroui_browser::interop::navigation_helper;
 use ferroui_browser::{BrowserAppBuilder, BrowserPlatformOptions, BrowserRenderingMode};
 use ferroui_controls::{
-    AppBuilder, Application, ApplicationImpl, ApplicationImplExt, Button, CheckBox, Control, ListBox, NewApplication,
-    ProgressBar, Slider, StackPanel, TextBlock, TextBox,
+    AppBuilder, Application, ApplicationImpl, ApplicationImplExt, Border, Button, CheckBox, Control, ListBox,
+    NewApplication, ProgressBar, Slider, StackPanel, TextBlock, TextBox, TopLevel,
 };
 use ferroui_fonts_inter::AppBuilderExtension;
 use ferroui_themes_fluent::FluentTheme;
@@ -35,12 +43,30 @@ struct Controls {
     text_box: Ref<TextBox>,
     slider: Ref<Slider>,
     list_box: Ref<ListBox>,
+    drop_target: Ref<Border>,
     clicks: Rc<Cell<u32>>,
+}
+
+/// What the services of the platform answered, for the behaviour tests.
+#[derive(Default)]
+struct Services {
+    dropped: Option<String>,
+    drag_overs: u32,
+    clipboard: Option<String>,
+    screen_details: Option<bool>,
+    launched: Option<bool>,
+    back_requests: u32,
+    safe_area_changes: u32,
 }
 
 thread_local! {
     static THEME_VARIANT: RefCell<Option<String>> = const { RefCell::new(None) };
     static CONTROLS: RefCell<Option<Controls>> = const { RefCell::new(None) };
+    static SERVICES: RefCell<Services> = RefCell::new(Services::default());
+}
+
+fn with_services(f: impl FnOnce(&mut Services)) {
+    SERVICES.with(|services| f(&mut services.borrow_mut()));
 }
 
 #[repr(C)]
@@ -123,6 +149,26 @@ fn create_main_view() -> Ref<Control> {
     // Smaller than its items: the scroll viewer of the list shows its scroll bar.
     list_box.set_height(96.0);
 
+    let drop_label = TextBlock::new();
+    drop_label.set_text(Some("Drop text here"));
+    let drop_target = Border::new();
+    drop_target.set_background(Some(Rc::new(ImmutableSolidColorBrush::new(Color::from_rgb(0xdd, 0xe6, 0xf5)))));
+    drop_target.set_padding(Thickness::uniform(8.0));
+    drop_target.set_width(160.0);
+    drop_target.set_height(36.0);
+    drop_target.set_horizontal_alignment(HorizontalAlignment::Left);
+    drop_target.set_child(Some(drop_label.upcast()));
+    DragDrop::set_allow_drop(&drop_target, true);
+    DragDrop::add_drag_over_handler(&drop_target, |_, e| {
+        with_services(|services| services.drag_overs += 1);
+        e.set_drag_effects(e.drag_effects() & DragDropEffects::COPY);
+    });
+    DragDrop::add_drop_handler(&drop_target, |_, e| {
+        let text = e.data_transfer().try_get_text();
+        with_services(|services| services.dropped = text);
+        e.set_drag_effects(e.drag_effects() & DragDropEffects::COPY);
+    });
+
     let panel = StackPanel::new();
     panel.set_spacing(10.0);
     panel.set_margin(Thickness::uniform(16.0));
@@ -133,6 +179,7 @@ fn create_main_view() -> Ref<Control> {
     panel.children().add(slider.clone());
     panel.children().add(progress_bar);
     panel.children().add(list_box.clone());
+    panel.children().add(drop_target.clone());
 
     CONTROLS.with(|controls| {
         *controls.borrow_mut() = Some(Controls {
@@ -141,6 +188,7 @@ fn create_main_view() -> Ref<Control> {
             text_box: text_box.clone(),
             slider: slider.clone(),
             list_box: list_box.clone(),
+            drop_target: drop_target.clone(),
             clicks,
         })
     });
@@ -180,6 +228,133 @@ pub fn themed_view_state() -> String {
             c.button.is_pointer_over(),
         )
     })
+}
+
+/// The top-level of the view.
+fn top_level() -> Option<Ref<TopLevel>> {
+    CONTROLS.with(|controls| {
+        controls.borrow().as_ref().and_then(|c| TopLevel::get_top_level(Some(&c.button)))
+    })
+}
+
+/// What the services of the platform report, as a line of `name=value`
+/// pairs: the screens, the safe area, the drop target and the answers of
+/// the asynchronous services started by the functions below.
+#[wasm_bindgen(js_name = themedViewServices)]
+pub fn themed_view_services() -> String {
+    let Some(top_level) = top_level() else { return String::new() };
+    let mut line = Vec::new();
+
+    if let Some(screens) = top_level.screens() {
+        line.push(format!("screens={}", screens.screen_count()));
+        if let Some(screen) = screens.screen_from_top_level(&top_level) {
+            let bounds = screen.bounds();
+            let working_area = screen.working_area();
+            line.push(format!("bounds={},{},{},{}", bounds.x, bounds.y, bounds.width, bounds.height));
+            line.push(format!(
+                "working_area={},{},{},{}",
+                working_area.x, working_area.y, working_area.width, working_area.height
+            ));
+            line.push(format!("scaling={}", screen.scaling()));
+            line.push(format!("primary={}", screen.is_primary()));
+            line.push(format!("orientation={:?}", screen.current_orientation()));
+        }
+    }
+
+    if let Some(insets) = top_level.insets_manager() {
+        let padding = insets.safe_area_padding();
+        line.push(format!("safe_area={},{},{},{}", padding.left, padding.top, padding.right, padding.bottom));
+        line.push(format!("system_bar_visible={:?}", insets.is_system_bar_visible()));
+    }
+
+    CONTROLS.with(|controls| {
+        if let Some(c) = controls.borrow().as_ref() {
+            // The drop target, in the coordinates of the view.
+            if let Some(point) =
+                c.drop_target.translate_point(ferroui_base::Point::new(80.0, 18.0), &top_level)
+            {
+                line.push(format!("drop_target={},{}", point.x.round(), point.y.round()));
+            }
+        }
+    });
+
+    SERVICES.with(|services| {
+        let services = services.borrow();
+        line.push(format!("dropped={:?}", services.dropped));
+        line.push(format!("drag_overs={}", services.drag_overs));
+        line.push(format!("clipboard={:?}", services.clipboard));
+        line.push(format!("screen_details={:?}", services.screen_details));
+        line.push(format!("launched={:?}", services.launched));
+        line.push(format!("back_requests={}", services.back_requests));
+        line.push(format!("safe_area_changes={}", services.safe_area_changes));
+    });
+
+    line.join(";")
+}
+
+/// Reads the text on the clipboard through the clipboard of the top-level;
+/// the answer is reported by [`themed_view_services`] (`clipboard=`).
+#[wasm_bindgen(js_name = themedViewReadClipboard)]
+pub fn themed_view_read_clipboard() {
+    let Some(clipboard) = top_level().and_then(|top_level| top_level.clipboard()) else { return };
+    with_services(|services| services.clipboard = None);
+    drop(Dispatcher::ui_thread().to_task_scheduler().start_local(async move {
+        let text = match clipboard.try_get_text_async().await {
+            Ok(text) => format!("ok:{}", text.unwrap_or_default()),
+            Err(error) => format!("error:{:?}", error.kind()),
+        };
+        with_services(|services| services.clipboard = Some(text));
+    }));
+}
+
+/// Writes text to the clipboard through the clipboard of the top-level.
+#[wasm_bindgen(js_name = themedViewWriteClipboard)]
+pub fn themed_view_write_clipboard(text: &str) {
+    let Some(clipboard) = top_level().and_then(|top_level| top_level.clipboard()) else { return };
+    let text = text.to_string();
+    with_services(|services| services.clipboard = None);
+    drop(Dispatcher::ui_thread().to_task_scheduler().start_local(async move {
+        let result = match clipboard.set_text_async(Some(&text)).await {
+            Ok(()) => "written".to_string(),
+            Err(error) => format!("error:{:?}", error.kind()),
+        };
+        with_services(|services| services.clipboard = Some(result));
+    }));
+}
+
+/// Asks for the details of all screens; the answer is reported by
+/// [`themed_view_services`] (`screen_details=`).
+#[wasm_bindgen(js_name = themedViewRequestScreenDetails)]
+pub fn themed_view_request_screen_details() {
+    let Some(screens) = top_level().and_then(|top_level| top_level.screens()) else { return };
+    drop(Dispatcher::ui_thread().to_task_scheduler().start_local(async move {
+        let granted = screens.request_screen_details().await;
+        with_services(|services| services.screen_details = Some(granted));
+    }));
+}
+
+/// Opens a URI with the launcher of the top-level; the answer is reported
+/// by [`themed_view_services`] (`launched=`).
+#[wasm_bindgen(js_name = themedViewLaunch)]
+pub fn themed_view_launch(uri: &str) {
+    let Some(launcher) = top_level().map(|top_level| top_level.launcher()) else { return };
+    let Ok(uri) = Uri::new(uri, UriKind::RelativeOrAbsolute) else { return };
+    drop(Dispatcher::ui_thread().to_task_scheduler().start_local(async move {
+        let launched = launcher.launch_uri_async(&uri).await;
+        with_services(|services| services.launched = Some(launched));
+    }));
+}
+
+/// Makes the back navigation of the browser a back request of the view,
+/// which the view handles and counts (`back_requests=`).
+#[wasm_bindgen(js_name = themedViewInstallBackHandler)]
+pub fn themed_view_install_back_handler() {
+    let Some(top_level) = top_level() else { return };
+    top_level.back_requested(|_, e| {
+        with_services(|services| services.back_requests += 1);
+        e.set_handled(true);
+    });
+    navigation_helper::add_back_handler();
 }
 
 /// The value of `name` in a query string (`?a=1&b=2`), ignoring the case of
@@ -222,6 +397,12 @@ pub fn run_main(query: &str) {
             ..Default::default()
         }))
         .start_browser_app("out", Some(options));
+
+    // Counts the changes of the safe area the insets manager reports (`safe_area_changes=`).
+    if let Some(insets) = top_level().and_then(|top_level| top_level.insets_manager()) {
+        let subscription = insets.safe_area_changed(Rc::new(|_| with_services(|services| services.safe_area_changes += 1)));
+        std::mem::forget(subscription);
+    }
 }
 
 /// The example only does something in a web page; elsewhere it builds so

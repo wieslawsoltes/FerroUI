@@ -157,11 +157,34 @@ export async function open(siteDirectory, { query = "", width = 460, height = 52
     const url = `http://127.0.0.1:${server.address().port}/index.html${query}`;
     await send("Page.navigate", { url });
 
+    // The browser target, for the commands the page target does not take (permissions).
+    let browserSocket;
+    const browserPending = new Map(); let browserId = 0;
+    const browserSend = async (method, params = {}) => {
+        if (!browserSocket) {
+            const version = await (await fetch(`http://127.0.0.1:${debugPort}/json/version`)).json();
+            browserSocket = new WebSocket(version.webSocketDebuggerUrl);
+            await new Promise((resolve) => browserSocket.addEventListener("open", resolve));
+            browserSocket.addEventListener("message", (event) => {
+                const message = JSON.parse(event.data);
+                if (message.id && browserPending.has(message.id)) { browserPending.get(message.id)(message.result ?? { error: message.error }); browserPending.delete(message.id); }
+            });
+        }
+        return new Promise((resolve) => { browserPending.set(++browserId, resolve); browserSocket.send(JSON.stringify({ id: browserId, method, params })); });
+    };
+
     const page = {
         url,
         log,
         navigations,
         send,
+        browserSend,
+        // Sets a permission of the page ("clipboard-read", "window-management", ...) to "granted",
+        // "denied" or "prompt".
+        async setPermission(name, setting) {
+            const result = await browserSend("Browser.setPermission", { permission: { name }, setting, origin: new URL(url).origin });
+            if (result.error) { throw new Error(`Browser.setPermission ${name}: ${result.error.message}`); }
+        },
         // Evaluates an expression in the page and returns its JSON-serialisable value.
         async evaluate(expression) {
             const result = await send("Runtime.evaluate", { expression, returnByValue: true, awaitPromise: true });
@@ -193,19 +216,20 @@ export async function open(siteDirectory, { query = "", width = 460, height = 52
         async mouseUp(x, y, button = "left") { await send("Input.dispatchMouseEvent", { type: "mouseReleased", x, y, button, buttons: 0, clickCount: 1, pointerType: "mouse" }); },
         async click(x, y) { await page.mouseMove(x, y); await page.mouseDown(x, y); await page.mouseUp(x, y); await sleep(150); },
         async wheel(x, y, deltaX, deltaY) { await send("Input.dispatchMouseEvent", { type: "mouseWheel", x, y, deltaX, deltaY, pointerType: "mouse" }); await sleep(150); },
-        // Presses a named key (see KEYS) or a single character, with optional modifiers ["ctrl", "shift", ...].
-        async press(name, modifiers = []) {
+        // Presses a named key (see KEYS) or a single character, with optional modifiers ["ctrl", "shift", ...]
+        // and editing commands the browser runs as the default action of the key ({ commands: ["paste"] }).
+        async press(name, modifiers = [], { commands } = {}) {
             const key = KEYS[name] ?? { key: name, code: /^[a-z]$/i.test(name) ? `Key${name.toUpperCase()}` : "", keyCode: name.toUpperCase().charCodeAt(0), text: name };
             const mask = modifiers.reduce((m, modifier) => m | MODIFIERS[modifier], 0);
             const command = mask & (MODIFIERS.ctrl | MODIFIERS.meta);
             const base = { key: key.key, code: key.code, windowsVirtualKeyCode: key.keyCode, nativeVirtualKeyCode: key.keyCode, modifiers: mask };
-            await send("Input.dispatchKeyEvent", { type: key.text && !command ? "keyDown" : "rawKeyDown", ...base, ...(key.text && !command ? { text: key.text } : {}) });
+            await send("Input.dispatchKeyEvent", { type: key.text && !command ? "keyDown" : "rawKeyDown", ...base, ...(key.text && !command ? { text: key.text } : {}), ...(commands ? { commands } : {}) });
             await send("Input.dispatchKeyEvent", { type: "keyUp", ...base });
             await sleep(80);
         },
         async type(text) { for (const character of text) { await page.press(character); } },
         async close() {
-            socket.close(); chrome.kill(); server.close();
+            socket.close(); browserSocket?.close(); chrome.kill(); server.close();
             await sleep(200);
             fs.rmSync(profile, { recursive: true, force: true });
         }
