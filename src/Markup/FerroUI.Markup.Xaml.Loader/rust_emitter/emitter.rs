@@ -130,6 +130,25 @@ fn absolute(path: &str) -> String {
 }
 
 
+/// `expr` as an owned value: a local is cloned (it may be used again), any other
+/// expression is a temporary and is moved.
+fn owned(expr: &str) -> String {
+    match is_identifier(expr) {
+        true => format!("::core::clone::Clone::clone(&{expr})"),
+        false => expr.to_string(),
+    }
+}
+
+/// Whether `text` is a plain identifier (the name of a local).
+fn is_identifier(text: &str) -> bool {
+    let mut characters = text.chars();
+    match characters.next() {
+        Some(first) if first.is_ascii_alphabetic() || first == '_' => {}
+        _ => return false,
+    }
+    characters.all(|c| c.is_ascii_alphanumeric() || c == '_')
+}
+
 fn f64_literal(value: f64) -> String {
     match value {
         _ if value.is_nan() => "::core::primitive::f64::NAN".to_string(),
@@ -200,6 +219,8 @@ struct Emitter<'a> {
     local_names: HashMap<String, usize>,
     /// The compiler locals initialised so far, by the address of their node.
     compiler_locals: HashMap<usize, (String, Kind)>,
+    /// The position of the node being emitted: where a failed conversion is reported.
+    position: std::cell::Cell<(i32, i32)>,
 }
 
 fn node_address<T: ?Sized>(node: &Rc<T>) -> usize {
@@ -221,6 +242,17 @@ impl Emitter<'_> {
         self.local_named(&snake_case(class.name()))
     }
 
+    /// `value` held in a local: the expression is evaluated exactly once, here, and every use
+    /// of the result names the local. A value that already is a local is returned as it is.
+    fn bind(&mut self, value: &Typed, base: &str) -> Typed {
+        if is_identifier(&value.expr) {
+            return Typed { expr: value.expr.clone(), kind: value.kind };
+        }
+        let local = self.local_named(base);
+        self.line(format!("let {local} = {};", value.expr));
+        Typed { expr: local, kind: value.kind }
+    }
+
     fn local_named(&mut self, base: &str) -> String {
         let counter = self.local_names.entry(base.to_string()).or_insert(0);
         let name = format!("{base}_{counter}");
@@ -239,7 +271,10 @@ impl Emitter<'_> {
                     .cast::<XamlManipulationGroupNode>()
                     .is_some_and(|inner| inner.children.borrow().is_empty());
                 if !empty {
+                    // The value is evaluated once; the manipulation and the consumer use it.
+                    let created = self.bind(&created, "value");
                     self.manipulation(&manipulation.as_node(), &created)?;
+                    return Ok(created);
                 }
             }
             return Ok(created);
@@ -398,6 +433,9 @@ impl Emitter<'_> {
             true => self.constructor_call(node, &constructor, &[])?,
             false => self.default_object(node, &list_type, &constructor)?,
         };
+        // The list is created once (`newobj`, then `dup` for each call): it is held in a local
+        // that the capacity, every `Add` and the consumer use.
+        let list = self.bind(&list, &snake_case(&list_type.name()));
         let set_capacity = n
             .list_set_capacity_method()
             .as_any()
@@ -562,6 +600,7 @@ impl Emitter<'_> {
         let mut texts = Vec::with_capacity(arguments.len());
         for (index, (argument, handle)) in arguments.iter().zip(&runtime.parameter_handles).enumerate() {
             let handle = handle.ok_or_else(|| unsupported(node, format!("argument {index} of the constructor has no Rust type")))?;
+            self.position.set((node.line(), node.position()));
             texts.push(self.coerce(argument, handle.id()).ok_or_else(|| {
                 unsupported(node, format!("argument {index} of the constructor cannot be stated as `{}`", handle.name()))
             })?);
@@ -603,21 +642,52 @@ impl Emitter<'_> {
             Kind::Class(class) => (class.handle()?, format!("{}.clone()", value.expr)),
             Kind::Null => return None,
         };
-        ValueTypes::is_assignable(ValueType::new(from, ""), ValueType::new(target, "")).then(|| format!("rt::cast({expr})"))
+        ValueTypes::is_assignable(ValueType::new(from, ""), ValueType::new(target, ""))
+            .then(|| format!("rt::cast({expr}, {}, {})?", self.position.get().0, self.position.get().1))
+    }
+
+    /// A value of the type with markup metadata `from` as the handle of a contract
+    /// (`Rc<dyn Trait>`, or its nullable form) that the declaration of `from` (or of one of
+    /// its base types) lists among its interfaces: an unsizing coercion rustc checks.
+    fn coerce_to_contract(&self, from: TypeId, owned: &str, target: TypeId) -> Option<String> {
+        let source = MarkupType::find_by_handle(from)?;
+        let contract = MarkupType::find_by_handle(target)?;
+        let handle = contract.handle()?.id();
+        let nullable = match target {
+            _ if target == handle => false,
+            _ if contract.handles.get(1).is_some_and(|second| second().id() == target) => true,
+            _ => return None,
+        };
+        if !contract.rust_path_is_trait() {
+            return None;
+        }
+        let path = absolute(contract.rust_path()?);
+        let mut current = Some(source);
+        let mut declared = false;
+        while let Some(type_) = current {
+            declared |= type_.interfaces.iter().any(|interface| interface().id() == handle);
+            current = type_.base_type();
+        }
+        if !declared {
+            return None;
+        }
+        let coerced = format!("{{ let value: ::std::rc::Rc<dyn {path}> = {owned}; value }}");
+        Some(if nullable { format!("::core::option::Option::Some({coerced})") } else { coerced })
     }
 
     fn coerce_static(&self, value: &Typed, target: TypeId) -> Option<String> {
         let object = TypeId::of::<Option<BoxedValue>>();
         match value.kind {
             Kind::Exact { id, nullable } => {
+                let owned = owned(&value.expr);
                 if target == id {
-                    Some(value.expr.clone())
+                    Some(owned)
                 } else if nullable == Some(target) {
-                    Some(format!("::core::option::Option::Some({})", value.expr))
+                    Some(format!("::core::option::Option::Some({owned})"))
                 } else if target == object {
-                    Some(format!("rt::to_object({})", value.expr))
+                    Some(format!("rt::to_object({owned})"))
                 } else {
-                    None
+                    self.coerce_to_contract(id, &owned, target)
                 }
             }
             Kind::Class(class) => {
@@ -798,6 +868,7 @@ impl Emitter<'_> {
         let value_node = value_node.as_node();
         self.marker(node, &property_name);
         let value = self.value(&value_node)?;
+        self.position.set((node.line(), node.position()));
         let typed = self.coerce(&value, property.property_type()).ok_or_else(|| {
             unsupported(
                 &value_node,
@@ -985,6 +1056,42 @@ impl Emitter<'_> {
     /// time as the run-time loader converts it (`rt::argument`), with the
     /// loader's error for a value that does not convert. `None` for an
     /// argument that is not the instance.
+    /// The instance of a member that takes `&This` (`target`), by reference and without a
+    /// copy where the Rust types allow it: a local of the declared type itself; an object
+    /// as a handle of the declaring base class (`Ref::upcast_ref`); a value whose
+    /// declaration names the declared type as its base, by deref coercion
+    /// (`&RowDefinitions` as `&FerroList<Ref<RowDefinition>>`).
+    fn receiver(&self, argument: &Typed, target: TypeId) -> Option<String> {
+        if !is_identifier(&argument.expr) {
+            return None;
+        }
+        match argument.kind {
+            Kind::Class(class) => {
+                let (declared, false) = TypeInfo::find_by_handle(target)? else { return None };
+                if std::ptr::eq(declared, class) {
+                    return Some(format!("&{}", argument.expr));
+                }
+                declared.is_assignable_from(class).then(|| {
+                    declared.rust_path().map(|path| format!("{}.upcast_ref::<{}>()", argument.expr, absolute(path)))
+                })?
+            }
+            Kind::Exact { id, .. } => {
+                if id == target {
+                    return Some(format!("&{}", argument.expr));
+                }
+                let mut current = MarkupType::find_by_handle(id)?.base_type();
+                while let Some(type_) = current {
+                    if type_.handle().is_some_and(|handle| handle.id() == target) {
+                        return Some(format!("&{}", argument.expr));
+                    }
+                    current = type_.base_type();
+                }
+                None
+            }
+            Kind::Null => None,
+        }
+    }
+
     fn instance_argument(&self, node: &Rc<dyn IXamlAstNode>, method: &RuntimeMethod, index: usize, argument: &Typed) -> Option<String> {
         if index != 0 || method.is_static || !matches!(argument.kind, Kind::Exact { .. }) {
             return None;
@@ -1039,6 +1146,7 @@ impl Emitter<'_> {
     /// instance member), each stated as the Rust type the member declares,
     /// with the failure of a fallible member as a load error at `node`.
     fn declared_call(&self, node: &Rc<dyn IXamlAstNode>, method: &RuntimeMethod, arguments: &[Typed]) -> EmitResult<String> {
+        self.position.set((node.line(), node.position()));
         let name = &method.name;
         let declared = method.declared().ok_or_else(|| unsupported(node, format!("{name}: not a declared member")))?;
         let emit = declared.emit().ok_or_else(|| unsupported(node, format!("{name}: the declaration has no typed function")))?;
@@ -1062,6 +1170,12 @@ impl Emitter<'_> {
         }
         let mut texts = Vec::with_capacity(arguments.len());
         for (index, (argument, parameter)) in arguments.iter().zip(&parameters).enumerate() {
+            if index == 0 && !method.is_static {
+                if let Some(receiver) = self.receiver(argument, *parameter) {
+                    texts.push(receiver);
+                    continue;
+                }
+            }
             let text = match self.coerce(argument, *parameter) {
                 Some(text) => text,
                 None => self.instance_argument(node, method, index, argument).ok_or_else(|| {
@@ -1165,7 +1279,7 @@ pub fn emit_document(
         return Err(unsupported(&root_value, "the root object is not created with a constructor"));
     }
 
-    let mut emitter = Emitter { configuration, document_name, lines: Vec::new(), local_names: HashMap::new(), compiler_locals: HashMap::new() };
+    let mut emitter = Emitter { configuration, document_name, lines: Vec::new(), local_names: HashMap::new(), compiler_locals: HashMap::new(), position: std::cell::Cell::new((0, 0)) };
     // `Build`: the root object, then `Populate` with a context of its own, whose name
     // scope field is filled from the parent service provider.
     let created = emitter.value(&root_value)?;
