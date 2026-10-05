@@ -9,7 +9,7 @@
 //! adds. The concrete classes are typed handles around the same `Rc`
 //! (`CompositionDrawListVisual`, `CompositionSolidColorVisual`, ...).
 
-use super::animations::{ICompositionAnimation, ICompositionAnimationBase};
+use super::animations::{ICompositionAnimation, ICompositionAnimationBase, ImplicitAnimationCollection};
 use super::composition_draw_list_visual::DrawListData;
 use super::composition_object::ICompositionObjectAnimations;
 use super::drawing::brush_get_server_resource;
@@ -26,7 +26,7 @@ use super::server::{
 };
 use super::transport::{BatchStreamWriter, IRegisterForSerialization};
 use super::{
-    CompositionBitmapCache, CompositionObject, CompositionTarget, CompositionVisualCollection, Compositor,
+    AsCompositionObject, CompositionBitmapCache, CompositionObject, CompositionTarget, CompositionVisualCollection, Compositor,
     ICompositionObject, ICompositionObjectHost, ICompositorSerializable, PendingAnimations,
 };
 use crate::media::{BrushExtensions, Geometry, IBrush, IImmutableEffect, IntersectionResult, RenderOptions, TextOptions};
@@ -162,6 +162,15 @@ impl CompositionVisual {
     /// The embedded `CompositionObject`.
     pub fn object(&self) -> &CompositionObject {
         &self.object
+    }
+
+    /// The collection of implicit animations attached to this object.
+    pub fn implicit_animations(&self) -> Option<Rc<ImplicitAnimationCollection>> {
+        self.object.implicit_animations()
+    }
+
+    pub fn set_implicit_animations(&self, value: Option<Rc<ImplicitAnimationCollection>>) {
+        self.object.set_implicit_animations(value)
     }
 
     /// The id of the server-side visual.
@@ -376,9 +385,8 @@ impl ICompositionObjectHost for CompositionVisual {
         self.object.pending_animations()
     }
 
-    fn implicit_animation(&self, _property_name: &str) -> Option<Rc<dyn ICompositionAnimationBase>> {
-        // Implicit animation collections arrive with the animation engine.
-        None
+    fn implicit_animation(&self, property_name: &str) -> Option<Rc<dyn ICompositionAnimationBase>> {
+        self.object.implicit_animation(property_name)
     }
 
     fn start_animation_group(
@@ -420,6 +428,21 @@ impl ICompositionObjectAnimations for CompositionVisual {
 
     fn composition_object(&self) -> &CompositionObject {
         &self.object
+    }
+}
+
+impl AsCompositionObject for CompositionVisual {
+    fn as_composition_object(&self) -> &CompositionObject {
+        &self.object
+    }
+
+    fn composition_type_name(&self) -> &'static str {
+        match &self.kind {
+            CompositionVisualKind::Container(_) => "CompositionContainerVisual",
+            CompositionVisualKind::DrawList(_) => "CompositionDrawListVisual",
+            CompositionVisualKind::SolidColor(_) => "CompositionSolidColorVisual",
+            CompositionVisualKind::Surface(_) => "CompositionSurfaceVisual",
+        }
     }
 }
 

@@ -3,14 +3,17 @@
 //! The only cache mode is the bitmap cache, so the abstract class is an
 //! alias of it.
 
-use super::animations::ICompositionAnimationBase;
+use super::animations::{ICompositionAnimation, ICompositionAnimationBase, ImplicitAnimationCollection};
 use super::expressions::ExpressionVariant;
-use super::generated::{CompositionBitmapCacheHooks, CompositionBitmapCacheProps, CompositionCacheModeHooks};
-use super::server::{ServerCompositionBitmapCache, ServerObjectId};
+use super::generated::{
+    CompositionBitmapCacheHooks, CompositionBitmapCacheProps, CompositionCacheModeHooks,
+    ServerCompositionBitmapCacheProps,
+};
+use super::server::{CompositionProperty, ServerCompositionBitmapCache, ServerObjectId};
 use super::transport::{BatchStreamWriter, IRegisterForSerialization};
 use super::{
-    CompositionObject, Compositor, ICompositionObject, ICompositionObjectHost, ICompositorSerializable,
-    PendingAnimations,
+    AsCompositionObject, CompositionObject, Compositor, ICompositionObject, ICompositionObjectAnimations,
+    ICompositionObjectHost, ICompositorSerializable, PendingAnimations,
 };
 use std::any::Any;
 use std::rc::{Rc, Weak};
@@ -39,6 +42,20 @@ impl CompositionBitmapCache {
 
     pub fn compositor(&self) -> &Rc<Compositor> {
         self.object.compositor()
+    }
+
+    /// The embedded `CompositionObject`.
+    pub fn object(&self) -> &CompositionObject {
+        &self.object
+    }
+
+    /// The collection of implicit animations attached to this object.
+    pub fn implicit_animations(&self) -> Option<Rc<ImplicitAnimationCollection>> {
+        self.object.implicit_animations()
+    }
+
+    pub fn set_implicit_animations(&self, value: Option<Rc<ImplicitAnimationCollection>>) {
+        self.object.set_implicit_animations(value)
     }
 
     pub fn render_at_scale(&self) -> f64 {
@@ -85,17 +102,46 @@ impl ICompositionObjectHost for CompositionBitmapCache {
         self.object.pending_animations()
     }
 
-    fn implicit_animation(&self, _property_name: &str) -> Option<Rc<dyn ICompositionAnimationBase>> {
-        None
+    fn implicit_animation(&self, property_name: &str) -> Option<Rc<dyn ICompositionAnimationBase>> {
+        self.object.implicit_animation(property_name)
     }
 
     fn start_animation_group(
         &self,
-        _grp: &Rc<dyn ICompositionAnimationBase>,
-        _target: &str,
-        _final_value: ExpressionVariant,
+        grp: &Rc<dyn ICompositionAnimationBase>,
+        target: &str,
+        final_value: ExpressionVariant,
     ) -> bool {
-        false
+        self.start_animation_group_for(&**grp, target, final_value)
+    }
+}
+
+impl ICompositionObjectAnimations for CompositionBitmapCache {
+    fn try_start_animation(
+        &self,
+        property_name: &str,
+        animation: &dyn ICompositionAnimation,
+        final_value: Option<ExpressionVariant>,
+    ) -> bool {
+        self.props.start_animation(self, property_name, animation, final_value)
+    }
+
+    fn get_composition_property(&self, property_name: &str) -> Option<&'static CompositionProperty> {
+        ServerCompositionBitmapCacheProps::get_composition_property(property_name)
+    }
+
+    fn composition_object(&self) -> &CompositionObject {
+        &self.object
+    }
+}
+
+impl AsCompositionObject for CompositionBitmapCache {
+    fn as_composition_object(&self) -> &CompositionObject {
+        &self.object
+    }
+
+    fn composition_type_name(&self) -> &'static str {
+        "CompositionBitmapCache"
     }
 }
 

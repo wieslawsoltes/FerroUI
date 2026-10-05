@@ -3,7 +3,7 @@ use super::{
     ServerValueChange,
 };
 use crate::rendering::composition::animations::IAnimationInstance;
-use crate::rendering::composition::expressions::ExpressionVariant;
+use crate::rendering::composition::expressions::{ExpressionObjectKey, ExpressionVariant, IExpressionObject};
 use crate::media::{IBrush, IPen, ITransform};
 use crate::rendering::composition::drawing::IRenderDataGeometry;
 use crate::rendering::composition::transport::BatchStreamReader;
@@ -112,6 +112,23 @@ pub trait IAnimatedServerObject: IServerObject + IServerAnimatedPropertyHost {
 
     /// The object as the base contract (an explicit upcast).
     fn as_server_object_dyn(&self) -> &dyn IServerObject;
+}
+
+/// An animatable server object as an expression reads it: the target of an
+/// animation, or an object an animation refers to through a reference
+/// parameter (upstream passes the `ServerObject` itself, which implements
+/// `IExpressionObject`).
+#[derive(Clone)]
+pub struct ServerExpressionObject(pub Rc<dyn IAnimatedServerObject>);
+
+impl IExpressionObject for ServerExpressionObject {
+    fn get_property(&self, name: &str) -> ExpressionVariant {
+        self.0.server_object().get_property(name)
+    }
+
+    fn key(&self) -> ExpressionObjectKey {
+        ExpressionObjectKey(Rc::as_ptr(&self.0) as *const () as usize)
+    }
 }
 
 /// Server-side `CompositionObject` counterpart. Is responsible for

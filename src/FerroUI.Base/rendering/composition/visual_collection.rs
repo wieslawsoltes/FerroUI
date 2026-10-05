@@ -1,11 +1,11 @@
 use super::generated::{CompositionVisualCollectionHooks, CompositionVisualCollectionProps};
-use super::server::ServerObjectId;
+use super::server::{CompositionProperty, ServerObjectId};
 use super::transport::{BatchStreamWriter, IRegisterForSerialization};
 use super::{
-    CompositionObject, CompositionVisual, Compositor, ICompositionObject, ICompositionObjectHost,
+    AsCompositionObject, CompositionObject, ICompositionObjectAnimations, CompositionVisual, Compositor, ICompositionObject, ICompositionObjectHost,
     ICompositorSerializable, PendingAnimations,
 };
-use crate::rendering::composition::animations::ICompositionAnimationBase;
+use crate::rendering::composition::animations::{ICompositionAnimation, ICompositionAnimationBase};
 use crate::rendering::composition::expressions::ExpressionVariant;
 use std::any::Any;
 use std::rc::{Rc, Weak};
@@ -177,17 +177,49 @@ impl ICompositionObjectHost for CompositionVisualCollection {
         self.object.pending_animations()
     }
 
-    fn implicit_animation(&self, _property_name: &str) -> Option<Rc<dyn ICompositionAnimationBase>> {
-        None
+    fn implicit_animation(&self, property_name: &str) -> Option<Rc<dyn ICompositionAnimationBase>> {
+        self.object.implicit_animation(property_name)
     }
 
     fn start_animation_group(
         &self,
-        _grp: &Rc<dyn ICompositionAnimationBase>,
-        _target: &str,
-        _final_value: ExpressionVariant,
+        grp: &Rc<dyn ICompositionAnimationBase>,
+        target: &str,
+        final_value: ExpressionVariant,
+    ) -> bool {
+        self.start_animation_group_for(&**grp, target, final_value)
+    }
+}
+
+/// The class has no animated property: upstream does not override
+/// `StartAnimation`, whose base implementation rejects every property.
+impl ICompositionObjectAnimations for CompositionVisualCollection {
+    fn try_start_animation(
+        &self,
+        _property_name: &str,
+        _animation: &dyn ICompositionAnimation,
+        _final_value: Option<ExpressionVariant>,
     ) -> bool {
         false
+    }
+
+    fn get_composition_property(&self, property_name: &str) -> Option<&'static CompositionProperty> {
+        let _ = property_name;
+        None
+    }
+
+    fn composition_object(&self) -> &CompositionObject {
+        &self.object
+    }
+}
+
+impl AsCompositionObject for CompositionVisualCollection {
+    fn as_composition_object(&self) -> &CompositionObject {
+        &self.object
+    }
+
+    fn composition_type_name(&self) -> &'static str {
+        "CompositionVisualCollection"
     }
 }
 

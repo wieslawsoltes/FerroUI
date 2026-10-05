@@ -58,6 +58,7 @@ mod composition_draw_list_visual;
 mod composition_experimental_acrylic_visual;
 mod composition_object;
 mod composition_options;
+mod composition_property_set;
 mod composition_solid_color_visual;
 mod composition_surface;
 mod composition_surface_visual;
@@ -79,8 +80,9 @@ mod matrix_utils;
 pub use composition_cache_mode::{CompositionBitmapCache, CompositionCacheMode};
 pub use composition_draw_list_visual::{CompositionDrawListVisual, ICompositionDrawListVisualExtension};
 pub use composition_experimental_acrylic_visual::CompositionExperimentalAcrylicVisual;
-pub use composition_object::{CompositionObject, ICompositionObjectAnimations};
+pub use composition_object::{AsCompositionObject, CompositionObject, ICompositionObjectAnimations};
 pub use composition_options::CompositionOptions;
+pub use composition_property_set::{CompositionGetValueStatus, CompositionPropertySet};
 pub use composition_solid_color_visual::CompositionSolidColorVisual;
 pub use composition_surface::CompositionSurface;
 pub use composition_surface_visual::CompositionSurfaceVisual;
@@ -98,6 +100,13 @@ pub use i_composition_object_host::{ICompositionObject, ICompositionObjectHost, 
 pub use i_composition_target_debug_events::ICompositionTargetDebugEvents;
 pub use i_compositor_serializable::ICompositorSerializable;
 pub use matrix_utils::MatrixUtils;
+// The key frame animation classes are generated into the namespace of the
+// compositor upstream.
+pub use animations::{
+    BooleanKeyFrameAnimation, ColorKeyFrameAnimation, DoubleKeyFrameAnimation, QuaternionKeyFrameAnimation,
+    RelativePointKeyFrameAnimation, RelativeScalarKeyFrameAnimation, ScalarKeyFrameAnimation, Vector2KeyFrameAnimation,
+    Vector3DKeyFrameAnimation, Vector3KeyFrameAnimation, Vector4KeyFrameAnimation, VectorKeyFrameAnimation,
+};
 
 #[cfg(test)]
 mod compositor_tests;
