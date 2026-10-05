@@ -2,7 +2,7 @@
 //! the storage backed by the local file system (not available in the
 //! browser).
 
-pub(crate) mod path;
+pub mod path;
 mod storage_bookmark_helper;
 mod storage_provider_helpers;
 

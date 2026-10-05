@@ -2,7 +2,7 @@
 //! of the path class of the .NET base library (no file-system access).
 
 /// Whether the character separates directories on the current platform.
-pub(crate) fn is_directory_separator(c: char) -> bool {
+pub fn is_directory_separator(c: char) -> bool {
     c == '/' || (cfg!(windows) && c == '\\')
 }
 
@@ -13,7 +13,7 @@ fn is_directory_or_volume_separator(c: char) -> bool {
 }
 
 /// The file name and extension of a path (`Path.GetFileName`).
-pub(crate) fn get_file_name(path: &str) -> &str {
+pub fn get_file_name(path: &str) -> &str {
     match path.rfind(is_directory_or_volume_separator) {
         Some(index) => &path[index + 1..],
         None => path,
@@ -36,7 +36,7 @@ fn extension_start(path: &str) -> Option<usize> {
 
 /// The extension of a path including the period, or an empty string
 /// (`Path.GetExtension`).
-pub(crate) fn get_extension(path: &str) -> &str {
+pub fn get_extension(path: &str) -> &str {
     match extension_start(path) {
         Some(index) if index != path.len() - 1 => &path[index..],
         _ => "",
@@ -44,13 +44,13 @@ pub(crate) fn get_extension(path: &str) -> &str {
 }
 
 /// Whether the path has an extension (`Path.HasExtension`).
-pub(crate) fn has_extension(path: &str) -> bool {
+pub fn has_extension(path: &str) -> bool {
     extension_start(path).is_some_and(|index| index != path.len() - 1)
 }
 
 /// Changes the extension of a path; `None` removes it
 /// (`Path.ChangeExtension`).
-pub(crate) fn change_extension(path: &str, extension: Option<&str>) -> String {
+pub fn change_extension(path: &str, extension: Option<&str>) -> String {
     if path.is_empty() {
         return String::new();
     }
@@ -85,7 +85,7 @@ fn get_root_length(path: &str) -> usize {
 
 /// The directory part of a path, or `None` when the path is empty or is a
 /// root (`Path.GetDirectoryName`). Separators are not normalized.
-pub(crate) fn get_directory_name(path: &str) -> Option<&str> {
+pub fn get_directory_name(path: &str) -> Option<&str> {
     if path.is_empty() {
         return None;
     }
