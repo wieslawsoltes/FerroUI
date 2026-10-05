@@ -77,12 +77,15 @@ impl AnimationInstanceBase {
 
     /// See [`IAnimationInstance::resolve`]: resolves the target and the
     /// objects of the reference parameters on `compositor`.
+    ///
+    /// Upstream the instance holds its target. The target is the object
+    /// whose batch changes carry the instance, so its id names it here; an
+    /// id that names no animatable object leaves the instance without a
+    /// target, which it then treats as gone.
     pub fn resolve(&self, compositor: &Rc<ServerCompositor>) {
         *self.compositor.borrow_mut() = Rc::downgrade(compositor);
-        let Some(target) = compositor.get_animated_object(self.target_object) else {
-            panic!("the target {:?} of an animation is not an animatable server object", self.target_object);
-        };
-        *self.target.borrow_mut() = Some(Rc::downgrade(&target));
+        *self.target.borrow_mut() =
+            compositor.get_animated_object(self.target_object).map(|target| Rc::downgrade(&target));
         self.parameters.resolve(compositor);
     }
 
