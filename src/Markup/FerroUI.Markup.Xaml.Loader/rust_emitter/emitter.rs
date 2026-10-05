@@ -20,6 +20,7 @@ use xamlx::ast::{
     XamlAstNewClrObjectNode, XamlAstTextNode, XamlConstantNode, XamlDirectCallPropertySetter, XamlManipulationGroupNode, XamlNullExtensionNode,
     XamlMarkupExtensionNode, XamlNoReturnMethodCallNode, XamlObjectInitializationNode, XamlPropertyAssignmentNode, XamlStaticExtensionNode,
     XamlStaticMember, XamlStaticOrTargetedReturnMethodCallNode, XamlTypeExtensionNode, XamlWrappedMethod, XamlDeferredContentNode,
+    XamlDeferredContentInitializeIntermediateRootNode,
     XamlValueNodeWithBeginInit,
 };
 use xamlx::exceptions::{XamlError, XamlResult};
@@ -35,7 +36,7 @@ use crate::compiler_extensions::transformers::{
     OptionsMarkupExtensionMethod, ResourceAdderSetter, XamlIlDirectCallPropertySetter,
 };
 use crate::compiler_extensions::{
-    BindingSetter, UnsetValueSetter, XamlIlBindingPathElementNode, XamlIlBindingPathNode, XamlIlFerroPropertyFieldNode,
+    BindingSetter, BindingWithPrioritySetter, SetValueWithPrioritySetter, UnsetValueSetter, XamlIlBindingPathElementNode, XamlIlBindingPathNode, XamlIlFerroPropertyFieldNode,
     XamlIlFerroPropertyHelper, XamlIlFerroPropertyNode, XamlIlProvideValueTargetProperty,
 };
 use crate::runtime::interpreter::{context_definition, numeric_constant, plan_setters, RuntimeDocument};
@@ -455,6 +456,20 @@ impl Emitter<'_> {
         }
         if let Some(n) = node.cast::<XamlDeferredContentNode>() {
             return self.deferred_content(node, &n);
+        }
+        if let Some(n) = node.cast::<XamlDeferredContentInitializeIntermediateRootNode>() {
+            // The root of the deferred content: created, then the intermediate root of the context.
+            let value = self.value(&n.value().as_node())?;
+            let untyped = match value.kind {
+                Kind::Class(_) => format!("rt::to_value({}.clone())", value.expr),
+                Kind::Exact { .. } => format!("rt::to_value({})", value.expr),
+                Kind::Null | Kind::SystemType { .. } => {
+                    return Err(unsupported(node, "an intermediate root that is not an object"));
+                }
+            };
+            self.uses_context = true;
+            self.line(format!("context.set_intermediate_root_object({untyped});"));
+            return Ok(value);
         }
         if let Some(n) = node.cast::<XamlIlBindingPathNode>() {
             return self.binding_path(node, &n);
@@ -1085,7 +1100,7 @@ impl Emitter<'_> {
         // The value of an unset-value assignment is not evaluated at all.
         if setter.as_any().is::<UnsetValueSetter>() {
             self.marker(node, &format!("{property_name} (unset)"));
-            let statement = self.setter_statement(node, assignment, &setter, target, &SetterValues::None)?;
+            let statement = self.setter_statement(node, assignment, &setter, target, &SetterValues::None, None)?;
             self.line(statement);
             return Ok(());
         }
@@ -1095,17 +1110,55 @@ impl Emitter<'_> {
             }
         }
         let values = assignment.values.borrow().clone();
+        // `(priority, value)`: a binding with a priority does not evaluate the priority at all;
+        // a value with a priority evaluates the value, then the priority.
+        if let [priority_node, value_node] = values.as_slice() {
+            let value_node = value_node.as_node();
+            let priority_node = priority_node.as_node();
+            let with_priority = setter.as_any().is::<SetValueWithPrioritySetter>();
+            if !with_priority && !setter.as_any().is::<BindingWithPrioritySetter>() {
+                return Err(unsupported(node, format!("{property_name}: an assignment with 2 values")));
+            }
+            self.setter_statement(node, assignment, &setter, target, &SetterValues::Checked, Some(""))?;
+            self.marker(node, &property_name);
+            let value = self.value(&value_node)?;
+            let priority = match with_priority {
+                true => Some(self.priority_value(&priority_node)?),
+                false => None,
+            };
+            let statement = self.setter_statement(
+                node,
+                assignment,
+                &setter,
+                target,
+                &SetterValues::Typed(&value, &value_node),
+                priority.as_deref(),
+            )?;
+            self.line(statement);
+            return Ok(());
+        }
         let [value_node] = values.as_slice() else {
             return Err(unsupported(node, format!("{property_name}: an assignment with {} values", values.len())));
         };
         let value_node = value_node.as_node();
         // What is not supported is known before anything is written.
-        self.setter_statement(node, assignment, &setter, target, &SetterValues::Checked)?;
+        self.setter_statement(node, assignment, &setter, target, &SetterValues::Checked, None)?;
         self.marker(node, &property_name);
         let value = self.value(&value_node)?;
-        let statement = self.setter_statement(node, assignment, &setter, target, &SetterValues::Typed(&value, &value_node))?;
+        let statement = self.setter_statement(node, assignment, &setter, target, &SetterValues::Typed(&value, &value_node), None)?;
         self.line(statement);
         Ok(())
+    }
+
+    /// The priority of an assignment with a priority, held in a local.
+    fn priority_value(&mut self, node: &Rc<dyn IXamlAstNode>) -> EmitResult<String> {
+        let priority = self.value(node)?;
+        let text = self
+            .coerce(&priority, TypeId::of::<ferroui_base::data::BindingPriority>())
+            .ok_or_else(|| unsupported(node, "a priority that is not a binding priority"))?;
+        let local = self.local_named("priority");
+        self.line(format!("let {local} = {text};"));
+        Ok(local)
     }
 
     /// The statement a property setter performs with the value (`values`):
@@ -1120,6 +1173,7 @@ impl Emitter<'_> {
         setter: &Rc<dyn IXamlPropertySetter>,
         target: &Typed,
         values: &SetterValues<'_>,
+        priority: Option<&str>,
     ) -> EmitResult<String> {
         let property_name = assignment.property.name();
         // The setters of registered properties act on the property store of an object.
@@ -1133,9 +1187,43 @@ impl Emitter<'_> {
             let definition = self.registered_definition(node, &property_name, &unset.ferro_property())?;
             return Ok(format!("rt::unset_value(&{}.clone().upcast::<::ferroui_base::FerroObject>(), {definition});", target.expr));
         }
-        if let Some(binding) = any.downcast_ref::<BindingSetter>() {
+        let binding_field = match (any.downcast_ref::<BindingSetter>(), any.downcast_ref::<BindingWithPrioritySetter>()) {
+            (Some(binding), _) => Some(binding.ferro_property()),
+            // The priority is discarded: a binding decides its own priority.
+            (None, Some(binding)) => Some(binding.ferro_property()),
+            (None, None) => None,
+        };
+        if let Some(set) = any.downcast_ref::<SetValueWithPrioritySetter>() {
             object_target()?;
-            let definition = self.registered_definition(node, &property_name, &binding.ferro_property())?;
+            let field = set.ferro_property();
+            let definition = self.registered_definition(node, &property_name, &field)?;
+            let property = field
+                .as_any()
+                .downcast_ref::<RuntimeField>()
+                .and_then(RuntimeField::ferro_property)
+                .ok_or_else(|| unsupported(node, format!("{property_name}: not a registered property")))?;
+            if property.is_direct() {
+                return Err(unsupported(node, format!("{property_name}: a direct property set with a priority")));
+            }
+            let value = match values {
+                SetterValues::Typed(value, value_node) => self.coerce(value, property.property_type()).ok_or_else(|| {
+                    unsupported(
+                        value_node,
+                        format!("{property_name}: the value cannot be stated as `{}`", property.property_type_name()),
+                    )
+                })?,
+                SetterValues::Untyped(local, value_node) => {
+                    untyped_argument(local, &format!("{}.{}", property.owner_type().name(), property.name()), 1, value_node)
+                }
+                SetterValues::Checked => return Ok(String::new()),
+                SetterValues::None => return Err(unsupported(node, format!("{property_name}: a setter without its value"))),
+            };
+            let priority = priority.ok_or_else(|| unsupported(node, format!("{property_name}: a priority setter without a priority")))?;
+            return Ok(format!("{}.set_value_with_priority({definition}, {value}, {priority});", target.expr));
+        }
+        if let Some(binding_field) = binding_field {
+            object_target()?;
+            let definition = self.registered_definition(node, &property_name, &binding_field)?;
             let (value, line, position) = match values {
                 SetterValues::Typed(value, value_node) => {
                     let expr = match value.kind {
@@ -1275,10 +1363,20 @@ impl Emitter<'_> {
     ) -> EmitResult<()> {
         let property_name = assignment.property.name();
         let values = assignment.values.borrow().clone();
-        let ([value_node], [dynamic_type]) = (values.as_slice(), value_types) else {
-            return Err(unsupported(node, format!("{property_name}: a choice at run time among setters of {} values", values.len())));
+        // One value, or a priority and a value (the setters with a priority).
+        let (priority_node, value_node, dynamic_type) = match (values.as_slice(), value_types) {
+            ([value_node], [dynamic_type]) => (None, value_node.as_node(), dynamic_type.clone()),
+            ([priority_node, value_node], [_, dynamic_type]) => {
+                (Some(priority_node.as_node()), value_node.as_node(), dynamic_type.clone())
+            }
+            _ => {
+                return Err(unsupported(
+                    node,
+                    format!("{property_name}: a choice at run time among setters of {} values", values.len()),
+                ));
+            }
         };
-        let value_node = value_node.as_node();
+        let dynamic_type = &dynamic_type;
         // The branches, decided before anything is written.
         let mut branches: Vec<(Option<String>, Rc<dyn IXamlPropertySetter>)> = Vec::with_capacity(setters.len());
         let mut first_allowing_null: Option<Rc<dyn IXamlPropertySetter>> = None;
@@ -1303,10 +1401,16 @@ impl Emitter<'_> {
             } else {
                 None
             };
-            self.setter_statement(node, assignment, setter, target, &SetterValues::Checked)?;
+            let checked_priority = priority_node.as_ref().map(|_| "");
+            self.setter_statement(node, assignment, setter, target, &SetterValues::Checked, checked_priority)?;
             branches.push((condition, setter.clone()));
         }
         self.marker(node, &format!("{property_name} (setter chosen at run time)"));
+        // Every value is evaluated, in order, before the choice.
+        let priority = match &priority_node {
+            Some(priority_node) => Some(self.priority_value(priority_node)?),
+            None => None,
+        };
         let value = self.value(&value_node)?;
         self.position.set((node.line(), node.position()));
         let local = self.local_named("value");
@@ -1322,7 +1426,7 @@ impl Emitter<'_> {
         let mut lines: Vec<String> = Vec::new();
         let mut closed = false;
         for (index, (condition, setter)) in branches.iter().enumerate() {
-            let statement = self.setter_statement(node, assignment, setter, target, &SetterValues::Untyped(&local, &value_node))?;
+            let statement = self.setter_statement(node, assignment, setter, target, &SetterValues::Untyped(&local, &value_node), priority.as_deref())?;
             match (condition, index) {
                 (Some(condition), 0) => lines.push(format!("if {} {{", condition.replace("{value}", &local))),
                 (Some(condition), _) => lines.push(format!("}} else if {} {{", condition.replace("{value}", &local))),
@@ -1337,7 +1441,7 @@ impl Emitter<'_> {
         }
         if !closed {
             if let Some(setter) = &first_allowing_null {
-                let statement = self.setter_statement(node, assignment, setter, target, &SetterValues::Untyped(&local, &value_node))?;
+                let statement = self.setter_statement(node, assignment, setter, target, &SetterValues::Untyped(&local, &value_node), priority.as_deref())?;
                 lines.push(format!("}} else if {local}.is_none() {{"));
                 lines.push(format!("    {statement}"));
             }

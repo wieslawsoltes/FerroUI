@@ -119,6 +119,9 @@ pub const DOCUMENTS: &[(&str, &str)] = &[
     ("on_platform_without_default.xaml", "<StackPanel xmlns='https://github.com/ferroui' xmlns:x='http://schemas.microsoft.com/winfx/2006/xaml'><Border HorizontalAlignment='{OnPlatform Android=Left}'/><Border Width='{OnPlatform Android=10}'/></StackPanel>"),
     ("font_family.xaml", "<StackPanel xmlns='https://github.com/ferroui' xmlns:x='http://schemas.microsoft.com/winfx/2006/xaml'><TextBlock FontFamily='Arial'/><TextBlock FontFamily='Arial, Consolas'/></StackPanel>"),
     ("flags_value.xaml", "<Border xmlns='https://github.com/ferroui' xmlns:x='http://schemas.microsoft.com/winfx/2006/xaml' xmlns:c='using:FerroUI.Controls.Converters'><Border.Resources><c:CornerRadiusFilterConverter x:Key='Filter' Filter='TopLeft, BottomRight'/></Border.Resources></Border>"),
+    ("control_template_parts.xaml", "<Button xmlns='https://github.com/ferroui' xmlns:x='http://schemas.microsoft.com/winfx/2006/xaml' Background='Red'><Button.Template><ControlTemplate><Border Name='PART_Border' Background='{TemplateBinding Background}'><ContentPresenter Name='PART_ContentPresenter' Content='{TemplateBinding Content}'/></Border></ControlTemplate></Button.Template></Button>"),
+    ("data_template.xaml", "<ItemsControl xmlns='https://github.com/ferroui' xmlns:x='http://schemas.microsoft.com/winfx/2006/xaml'><ItemsControl.ItemTemplate><DataTemplate><TextBlock Text='{Binding}'/></DataTemplate></ItemsControl.ItemTemplate></ItemsControl>"),
+    ("control_theme_template.xaml", "<Border xmlns='https://github.com/ferroui' xmlns:x='http://schemas.microsoft.com/winfx/2006/xaml'><Border.Resources><ControlTheme x:Key='Theme' TargetType='Button'><Setter Property='Template'><ControlTemplate><Border Name='PART_Root'><ContentPresenter Content='{TemplateBinding Content}'/></Border></ControlTemplate></Setter></ControlTheme></Border.Resources></Border>"),
 ];
 
 /// The documents that must be eligible for emission.
@@ -224,10 +227,13 @@ pub const EXPECTED_ELIGIBLE: &[&str] = &[
     "on_platform_without_default.xaml",
     "font_family.xaml",
     "flags_value.xaml",
+    "control_template.xaml",
+    "control_template_parts.xaml",
+    "data_template.xaml",
+    "control_theme_template.xaml",
 ];
 
 /// The documents that must not be eligible for emission.
 pub const EXPECTED_NOT_ELIGIBLE: &[&str] = &[
     "style_with_selector.xaml",
-    "control_template.xaml",
 ];

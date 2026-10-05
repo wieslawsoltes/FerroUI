@@ -61,6 +61,9 @@ fn display(value: &BoxedValue) -> String {
     if let Some(handle) = value.downcast_ref::<ferroui_base::data::core::ValueType>() {
         return format!("typeof({})", handle.name());
     }
+    if let Some(template) = value.downcast_ref::<Rc<dyn ferroui_controls::templates::IControlTemplate>>() {
+        return display_control_template(template);
+    }
     if let Some(transitions) = value.downcast_ref::<ferroui_base::animation::Transitions>() {
         let items: Vec<String> = transitions.to_vec().iter().map(|transition| transition.debug_display()).collect();
         return format!("[{}]", items.join(", "));
@@ -124,6 +127,19 @@ fn display_declared(value: &BoxedValue) -> Option<String> {
     }
     properties.sort();
     Some(format!("{} {{{}}}", markup.full_name(), properties.join(", ")))
+}
+
+/// A control template in display form: the tree it builds for a new
+/// templated control (the dump of the result, its lines joined), with the
+/// names its name scope finds.
+fn display_control_template(template: &Rc<dyn ferroui_controls::templates::IControlTemplate>) -> String {
+    let owner = ferroui_controls::ContentControl::new().upcast::<ferroui_controls::primitives::TemplatedControl>();
+    let Some(result) = template.build(&owner) else { return "<template building nothing>".to_string() };
+    let (control, scope) = result.deconstruct();
+    let mut output = String::new();
+    dump(&control.upcast::<FerroObject>(), Some(&scope.0), 0, &mut output);
+    let lines: Vec<&str> = output.lines().map(str::trim).collect();
+    format!("<template {}>", lines.join(" | "))
 }
 
 /// A control theme in display form: its target type, the target type of
