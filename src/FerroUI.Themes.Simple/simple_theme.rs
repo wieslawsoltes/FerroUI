@@ -4,9 +4,8 @@
 use crate::register_types::register_types;
 use ferroui_base::metadata::IServiceProvider;
 use ferroui_base::styling::{styles_as_style, IStyle, Styles};
-use ferroui_base::{ferro_class, ferro_class_info, ferro_impl_classes, instantiate, BoxedValue, FerroObjectImpl, Ref};
+use ferroui_base::{ferro_class, ferro_class_info, ferro_impl_classes, instantiate, FerroObjectImpl, Ref};
 use ferroui_markup_xaml::XamlLoadException;
-use ferroui_markup_xaml_loader::FerroRuntimeXamlLoader;
 use std::rc::Rc;
 
 /// The Simple theme: the styles and resources of `SimpleTheme.xaml`.
@@ -62,18 +61,12 @@ impl SimpleTheme {
 
     /// Populates `this` from the document of the class: what the XAML
     /// compiler generates for a class with compiled markup (the populate
-    /// method the load call of the constructor is rewritten to).
-    ///
-    /// Until the compiler exists the document registered for the class
-    /// (`register_types()`) is loaded at run time. The loader loads it as a
-    /// group with every document it includes, so the group transformers
-    /// link the documents to each other exactly as the compiler links the
-    /// documents of a project (merged resource includes are merged into the
-    /// including dictionary, style includes become the styles of the
-    /// included document).
+    /// method the load call of the constructor is rewritten to). The
+    /// compiled markup (`compiled_xaml.rs`) is the document compiled with
+    /// every document it includes as one group, exactly as the run-time
+    /// loader loads it.
     fn load(sp: Option<Rc<dyn IServiceProvider>>, this: &Ref<Self>) -> Result<(), XamlLoadException> {
         register_types();
-        let instance: BoxedValue = Rc::new(this.clone());
-        FerroRuntimeXamlLoader::load_object(&instance, sp.as_ref())
+        crate::compiled_xaml::populate(sp, this)
     }
 }

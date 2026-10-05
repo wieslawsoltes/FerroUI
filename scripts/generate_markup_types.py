@@ -82,7 +82,14 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SRC = os.path.join(ROOT, "src")
 CRATES = ["FerroUI.Base", "FerroUI.Controls"]
 # The crates whose registered types get a table of public Rust paths (`rust_paths.rs`).
-RUST_PATH_CRATES = ["FerroUI.Base", "FerroUI.Controls", os.path.join("Markup", "FerroUI.Markup.Xaml"), "FerroUI.Dialogs"]
+RUST_PATH_CRATES = [
+    "FerroUI.Base",
+    "FerroUI.Controls",
+    os.path.join("Markup", "FerroUI.Markup.Xaml"),
+    "FerroUI.Dialogs",
+    "FerroUI.Themes.Simple",
+    "FerroUI.Themes.Fluent",
+]
 UPSTREAM_PROJECTS = {"FerroUI.Base": "Avalonia.Base", "FerroUI.Controls": "Avalonia.Controls"}
 OVERRIDES = os.path.join(ROOT, "scripts", "markup_types_overrides.py")
 
