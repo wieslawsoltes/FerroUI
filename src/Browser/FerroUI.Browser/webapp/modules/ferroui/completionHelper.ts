@@ -8,12 +8,36 @@ export class CompletionHelper {
     public static track(promise: unknown, requestId: number): void {
         Promise.resolve(promise).then(
             (value: unknown) => {
-                FerroExports.CompletionHelper?.OnResolved(requestId, value);
+                CompletionHelper.exports(requestId)?.OnResolved(requestId, value);
             },
             (reason: unknown) => {
-                const name = reason instanceof Error ? reason.name : "";
-                const message = reason instanceof Error ? reason.message : String(reason);
-                FerroExports.CompletionHelper?.OnRejected(requestId, name, message);
+                CompletionHelper.exports(requestId)?.OnRejected(
+                    requestId, CompletionHelper.errorName(reason), CompletionHelper.errorMessage(reason));
             });
+    }
+
+    // The completion exports; without them the request can never complete, which is reported.
+    private static exports(requestId: number) {
+        const exports = FerroExports.CompletionHelper;
+        if (!exports?.OnResolved || !exports?.OnRejected) {
+            console.error(`The promise of request ${requestId} settled, but the module exports no CompletionHelper completions: the request never completes.`);
+            return undefined;
+        }
+        return exports;
+    }
+
+    // A DOMException is not an Error in every browser; both carry a name and a message.
+    private static errorName(reason: unknown): string {
+        if (reason instanceof Error || reason instanceof DOMException) {
+            return reason.name;
+        }
+        return "";
+    }
+
+    private static errorMessage(reason: unknown): string {
+        if (reason instanceof Error || reason instanceof DOMException) {
+            return reason.message;
+        }
+        return String(reason);
     }
 }
