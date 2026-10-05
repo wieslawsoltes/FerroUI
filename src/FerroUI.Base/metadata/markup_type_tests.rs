@@ -502,6 +502,18 @@ ferro_class_info!(MetaPanel {
             fn Add(Ref<FerroObject>) => MetaPanel::add,
             fn OnClick(i32) -> i32 => MetaPanel::on_click,
         ],
+        indexers: [
+            (i32) -> i32 {
+                get: |p: &Ref<MetaPanel>, offset: i32| p.clicks.get() + offset,
+                set: |p: &Ref<MetaPanel>, offset: i32, value: i32| p.clicks.set(value - offset),
+            },
+        ],
+        events: [
+            Clicked() => |p: &Ref<MetaPanel>, handler: MarkupDelegate| {
+                handler.invoke(&[]);
+                p.clicks.set(p.clicks.get() + 100);
+            },
+        ],
         attributes: [TemplatePart("PART_Header", type(Ref<MetaPanel>), IsRequired = true)],
     },
     interfaces: [Rc<dyn IMetaNamed>],
@@ -611,6 +623,36 @@ fn class_members_are_invoked_on_base_handles_of_objects_of_the_class() {
     let plain = MetaPlain::new();
     let object: Ref<FerroObject> = FerroObject::to_ref(Upcast::<FerroObject>::upcast(&*plain));
     let error = (title.get.unwrap())(&[Some(Rc::new(object))]).unwrap_err();
+    assert!(matches!(error, MarkupInvokeError::Argument { index: 0, .. }), "{error:?}");
+}
+
+#[test]
+fn class_members_are_invoked_on_an_object_held_through_a_base_handle() {
+    let markup = MetaPanel::TYPE.markup().unwrap();
+    let panel = MetaDerivedPanel::new();
+    // The receiver as a binding holds it: the root object handle.
+    let instance: MarkupValue = Some(Rc::new(FerroObject::to_ref(&panel)) as BoxedValue);
+
+    let title = markup.find_property("Title").unwrap();
+    (title.set.unwrap())(&[instance.clone(), boxed("t".to_string())]).unwrap();
+    assert_eq!(panel.title(), "t");
+    assert_eq!(unbox::<String>(&(title.get.unwrap())(&[instance.clone()]).unwrap()), "t");
+
+    let on_click = markup.find_methods("OnClick").next().unwrap();
+    assert_eq!(unbox::<i32>(&(on_click.invoke)(&[instance.clone(), boxed(2i32)]).unwrap()), 2);
+
+    // Indexers and events take the receiver the same way.
+    let indexer = markup.find_indexer(1).unwrap();
+    (indexer.set.unwrap())(&[instance.clone(), boxed(1i32), boxed(10i32)]).unwrap();
+    assert_eq!(unbox::<i32>(&(indexer.get.unwrap())(&[instance.clone(), boxed(0i32)]).unwrap()), 9);
+    let clicked = markup.find_event("Clicked").unwrap();
+    (clicked.add)(&[instance, boxed(MarkupDelegate::new(|_| None))]).unwrap();
+    assert_eq!(unbox::<i32>(&(indexer.get.unwrap())(&[Some(Rc::new(FerroObject::to_ref(&panel)) as BoxedValue), boxed(0i32)]).unwrap()), 109);
+
+    // An object of an unrelated class held through the root handle is rejected.
+    let plain = MetaPlain::new();
+    let unrelated: MarkupValue = Some(Rc::new(FerroObject::to_ref(&plain)) as BoxedValue);
+    let error = (title.get.unwrap())(&[unrelated]).unwrap_err();
     assert!(matches!(error, MarkupInvokeError::Argument { index: 0, .. }), "{error:?}");
 }
 
