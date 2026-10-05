@@ -80,10 +80,10 @@ impl INotifyPropertyChanged for ManagedFileChooserFilterViewModel {
 
 impl ManagedFileChooserFilterViewModel {
     pub fn new(filter: &FilePickerFileType) -> Rc<Self> {
-        Self::with_index(filter, 0)
+        Self::new_with_index(filter, 0)
     }
 
-    pub fn with_index(filter: &FilePickerFileType, index: i32) -> Rc<Self> {
+    pub fn new_with_index(filter: &FilePickerFileType, index: i32) -> Rc<Self> {
         let name = filter.name().to_string();
         let filter_patterns = filter.patterns();
 
@@ -145,7 +145,7 @@ mod tests {
             Some(patterns) => file_type.with_patterns(patterns),
             None => file_type,
         };
-        ManagedFileChooserFilterViewModel::with_index(&file_type, 3)
+        ManagedFileChooserFilterViewModel::new_with_index(&file_type, 3)
     }
 
     #[test]
