@@ -430,6 +430,26 @@ def main():
     for family, size in std_families.most_common(20):
         print(f"| {family} | {size:,} | {mb(size)} |")
 
+    # The crate in the path of every Rust function: with fat LTO all Rust code comes from one object.
+    path_crates = collections.Counter()
+    path_counts = collections.Counter()
+    for size, name, group in attributed:
+        if group.startswith("rust:") or (group.startswith("not attributed") and ("::" in name or "$LT$" in name)):
+            head = head_path(rust_name(name) if ("$LT$" in name or ".." in name) else name)
+            crate = re.split(r"::|<", head)[0] if head else "?"
+            if not re.match(r"^[a-z_][a-z0-9_]*$", crate):
+                crate = "core (primitive types)"
+            if group.startswith("not attributed"):
+                crate += " (not attributed)"
+            path_crates[crate] += size
+            path_counts[crate] += 1
+    print("\n### Rust code by the crate in the function path\n")
+    print("A generic function counts for the crate that defines it, whatever crate instantiates it.\n")
+    print("| Crate | Functions | Bytes | MB |")
+    print("|---|---:|---:|---:|")
+    for crate, size in path_crates.most_common(25):
+        print(f"| {crate} | {path_counts[crate]:,} | {size:,} | {mb(size)} |")
+
     if any("{closure#" in name or "::<" in name for name, _ in functions[:20000]):
         families = collections.Counter()
         family_counts = collections.Counter()
