@@ -54,6 +54,8 @@ mod ferro_native_render_timer;
 #[cfg(target_os = "macos")]
 mod ferro_native_text_input_method;
 #[cfg(target_os = "macos")]
+mod frn_automation_peer;
+#[cfg(target_os = "macos")]
 mod frn_dispatcher;
 #[cfg(target_os = "macos")]
 mod frn_menu;
