@@ -300,9 +300,12 @@ impl ICompositionGpuImportedObject for CompositionImportedGpuImage {
     }
 
     fn dispose_async(&self) -> ServerJobTask<()> {
-        let this = self.this.clone();
+        // The job holds the object, as upstream it captures `this`: the
+        // imported object is released even when the last other reference
+        // is dropped before the job runs.
+        let this = self.this.upgrade();
         self.base.dispose_async(move || {
-            if let Some(this) = this.upgrade() {
+            if let Some(this) = this {
                 this.dispose();
             }
         })
@@ -388,9 +391,12 @@ impl ICompositionGpuImportedObject for CompositionImportedGpuSemaphore {
     }
 
     fn dispose_async(&self) -> ServerJobTask<()> {
-        let this = self.this.clone();
+        // The job holds the object, as upstream it captures `this`: the
+        // imported object is released even when the last other reference
+        // is dropped before the job runs.
+        let this = self.this.upgrade();
         self.base.dispose_async(move || {
-            if let Some(this) = this.upgrade() {
+            if let Some(this) = this {
                 this.dispose();
             }
         })
