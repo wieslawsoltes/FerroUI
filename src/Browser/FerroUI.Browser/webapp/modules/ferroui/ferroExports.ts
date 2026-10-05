@@ -69,7 +69,8 @@ export class FerroExports {
         return FerroExports.group("DomHelper", {
             DarkModeChanged: "DomHelper_DarkModeChanged",
             DocumentVisibilityChanged: "DomHelper_DocumentVisibilityChanged",
-            LanguageChanged: "DomHelper_LanguageChanged"
+            LanguageChanged: "DomHelper_LanguageChanged",
+            ScreensChanged: "DomHelper_ScreensChanged"
         });
     }
 

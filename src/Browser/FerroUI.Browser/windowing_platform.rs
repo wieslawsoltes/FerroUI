@@ -1,6 +1,7 @@
 use crate::browser_activatable_lifetime::BrowserActivatableLifetime;
 use crate::browser_platform_settings::BrowserPlatformSettings;
 use crate::browser_runtime_platform::BrowserRuntimePlatform;
+use crate::browser_screens::BrowserScreens;
 use crate::browser_single_threaded_dispatcher_impl::BrowserSingleThreadedDispatcherImpl;
 use crate::cursor::CssCursorFactory;
 use crate::interop::JsObject;
@@ -12,7 +13,7 @@ use ferroui_base::threading::Dispatcher;
 use ferroui_base::FerroLocator;
 use ferroui_controls::application_lifetimes::IActivatableLifetime;
 use ferroui_controls::platform::{
-    IPlatformIconLoader, ITopLevelImpl, ITrayIconImpl, IWindowImpl, IWindowingPlatform,
+    IPlatformIconLoader, IScreenImpl, ITopLevelImpl, ITrayIconImpl, IWindowImpl, IWindowingPlatform,
 };
 use std::cell::RefCell;
 use std::collections::HashMap;
@@ -86,6 +87,11 @@ impl BrowserWindowingPlatform {
             // With their concrete types, for the callbacks of the page: they
             // only go to the services of this backend.
             .bind_to_self(platform_settings)
+            // Created on first use, as the screens subscribe to the changes of the page.
+            .bind::<dyn IScreenImpl>()
+            .to_func(|| Some(BrowserScreens::instance() as Rc<dyn IScreenImpl>))
+            .bind::<BrowserScreens>()
+            .to_func(|| Some(BrowserScreens::instance()))
             .bind::<dyn IWindowingPlatform>()
             .to_constant(instance)
             .bind::<dyn IPlatformIconLoader>()
