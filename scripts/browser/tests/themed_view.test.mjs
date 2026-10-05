@@ -3,8 +3,9 @@
 //   scripts/build-browser.sh themed_view
 //   node scripts/browser/tests/themed_view.test.mjs [<site directory>]     default: target/browser/themed_view
 //
-// The page is driven with real mouse, wheel and key events; the state of the controls is read
-// through the `themedViewState` export of the example, the page through the DOM.
+// The page is driven with real mouse, wheel, key and drag events; the state of the controls is read
+// through the `themedViewState` export of the example, what the services of the platform answered
+// through `themedViewServices`, and the page through the DOM.
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { open, run, assert, sleep } from "../harness.mjs";
@@ -24,6 +25,20 @@ async function start(query = "") {
     // Records, after the handlers of the view ran, whether each key kept its default action.
     await page.evaluate(`(globalThis.keys = [], document.addEventListener("keydown", (e) => { keys.push({ key: e.key, prevented: e.defaultPrevented }); if (globalThis.keepPage) { e.preventDefault(); } }), true)`);
     page.lastKey = async () => await page.evaluate("JSON.stringify(keys[keys.length - 1])").then(JSON.parse);
+    page.services = async () => Object.fromEntries((await page.evaluate("themedView.themedViewServices()")).split(";").map((pair) => {
+        const i = pair.indexOf("="); return [pair.slice(0, i), pair.slice(i + 1)];
+    }));
+    // Waits until a value the services report is the expected one.
+    page.waitForService = async (name, expected, timeout = 10000) => {
+        const end = Date.now() + timeout;
+        let services;
+        while (Date.now() < end) {
+            services = await page.services();
+            if (services[name] === expected) { return services; }
+            await sleep(100);
+        }
+        throw new Error(`${name} is ${services?.[name]}, expected ${expected}; services: ${JSON.stringify(services)}`);
+    };
     return page;
 }
 
@@ -272,5 +287,151 @@ check("input works with the software render target too", async (page) => {
     const state = await page.state();
     assert(state.clicks === "1" && state.text === "Text boxq", JSON.stringify(state));
 }, "?RenderingMode=Software2D");
+
+// --- services (stage B4) -------------------------------------------------------------------------
+
+// The asynchronous Clipboard API needs the permissions and a focused document.
+async function withClipboard(page) {
+    await page.send("Emulation.setFocusEmulationEnabled", { enabled: true });
+    await page.setPermission("clipboard-read", "granted");
+    await page.setPermission("clipboard-write", "granted");
+}
+
+check("text is copied from a text box to the clipboard and pasted into it", async (page) => {
+    await withClipboard(page);
+    await page.click(...TEXT_BOX);
+    await page.press("a", ["ctrl"]);
+    await page.press("c", ["ctrl"]);
+    assert((await page.lastKey()).prevented, "ctrl+c kept the copy of the browser");
+    await page.waitFor(`navigator.clipboard.readText().then((text) => text === "Text box")`, 10000);
+
+    await page.evaluate(`navigator.clipboard.writeText(" pasted").then(() => true)`);
+    await page.press("End");
+    await page.press("v", ["ctrl"]);
+    await page.waitFor(`themedView.themedViewState().includes("text=Text box pasted;")`, 10000);
+
+    // Cut: the selection leaves the text box for the clipboard.
+    await page.press("a", ["ctrl"]);
+    await page.press("x", ["ctrl"]);
+    await page.waitFor(`themedView.themedViewState().includes("text=;")`, 10000);
+    await page.waitFor(`navigator.clipboard.readText().then((text) => text === "Text box pasted")`, 10000);
+});
+
+check("the clipboard of the top-level reads and writes the clipboard of the page", async (page) => {
+    await withClipboard(page);
+    await page.click(...TEXT_BOX);
+    await page.evaluate(`navigator.clipboard.writeText("from the page").then(() => true)`);
+    await page.evaluate("themedView.themedViewReadClipboard()");
+    await page.waitForService("clipboard", `Some("ok:from the page")`);
+
+    await page.evaluate(`themedView.themedViewWriteClipboard("from the view")`);
+    await page.waitForService("clipboard", `Some("written")`);
+    assert(await page.evaluate("navigator.clipboard.readText()") === "from the view", "the page does not see the text of the view");
+
+    // Several formats of one item: the HTML of the page is a format of the item next to the text.
+    await page.evaluate(`navigator.clipboard.write([new ClipboardItem({
+        "text/plain": new Blob(["plain"], { type: "text/plain" }),
+        "text/html": new Blob(["<b>html</b>"], { type: "text/html" }) })]).then(() => true)`);
+    await page.evaluate("themedView.themedViewReadClipboard()");
+    await page.waitForService("clipboard", `Some("ok:plain")`);
+});
+
+check("a read the page does not allow is reported as access denied", async (page) => {
+    await page.send("Emulation.setFocusEmulationEnabled", { enabled: true });
+    await page.setPermission("clipboard-read", "denied");
+    await page.click(...TEXT_BOX);
+    await page.evaluate("themedView.themedViewReadClipboard()");
+    await page.waitForService("clipboard", `Some("error:AccessDenied")`);
+});
+
+check("without the asynchronous clipboard API a paste goes through the paste event", async (page) => {
+    await withClipboard(page);
+    await page.evaluate(`navigator.clipboard.writeText("fallback").then(() => true)`);
+    // A browser without read and readText (Firefox before 127).
+    await page.evaluate(`(Object.defineProperty(navigator.clipboard, "read", { value: undefined }),
+        Object.defineProperty(navigator.clipboard, "readText", { value: undefined }), true)`);
+    await page.click(...TEXT_BOX);
+    await page.press("End");
+    await page.press("v", ["ctrl"], { commands: ["paste"] });
+    const key = await page.lastKey();
+    assert(!key.prevented, "the key of the paste was prevented, so the browser could not paste");
+    await page.waitFor(`themedView.themedViewState().includes("text=Text boxfallback;")`, 10000);
+
+    // Without a paste event the read ends when the key is released.
+    await page.evaluate("themedView.themedViewReadClipboard()");
+    await page.press("Shift");
+    await page.waitForService("clipboard", `Some("error:Other")`);
+});
+
+check("text dropped on a drop target is delivered with its effect", async (page) => {
+    const [x, y] = (await page.services()).drop_target.split(",").map(Number);
+    const data = { items: [{ mimeType: "text/plain", data: "dropped text" }], dragOperationsMask: 1 };
+    await page.send("Input.dispatchDragEvent", { type: "dragEnter", x, y, data });
+    await page.send("Input.dispatchDragEvent", { type: "dragOver", x, y, data });
+    await page.send("Input.dispatchDragEvent", { type: "drop", x, y, data });
+    const services = await page.waitForService("dropped", `Some("dropped text")`);
+    assert(Number(services.drag_overs) >= 1, `the drop target saw no drag over: ${JSON.stringify(services)}`);
+
+    // Outside the drop target nothing accepts the data.
+    const [ex, ey] = BUTTON;
+    await page.send("Input.dispatchDragEvent", { type: "dragEnter", x: ex, y: ey, data: { ...data, items: [{ mimeType: "text/plain", data: "elsewhere" }] } });
+    await page.send("Input.dispatchDragEvent", { type: "drop", x: ex, y: ey, data: { ...data, items: [{ mimeType: "text/plain", data: "elsewhere" }] } });
+    await sleep(300);
+    assert((await page.services()).dropped === `Some("dropped text")`, "a drop outside the target was delivered to it");
+});
+
+check("the screen of the view and the safe area are reported", async (page) => {
+    const screen = await page.evaluate("JSON.stringify([screen.width, screen.height, screen.availLeft, screen.availTop, screen.availWidth, screen.availHeight, devicePixelRatio])").then(JSON.parse);
+    let services = await page.services();
+    assert(services.screens === "1", `screens: ${services.screens}`);
+    assert(services.bounds === `${screen[2]},${screen[3]},${screen[0]},${screen[1]}`, `bounds ${services.bounds}, screen ${screen}`);
+    assert(services.working_area === `${screen[2]},${screen[3]},${screen[4]},${screen[5]}`, `working area ${services.working_area}, screen ${screen}`);
+    assert(services.scaling === String(screen[6]), `scaling ${services.scaling}`);
+    assert(services.primary === "true", `primary ${services.primary}`);
+    assert(services.orientation === "Landscape" || services.orientation === "Portrait", `orientation ${services.orientation}`);
+    assert(services.safe_area === "0,0,0,0", `safe area ${services.safe_area}`);
+    assert(services.system_bar_visible === "Some(false)", `full screen ${services.system_bar_visible}`);
+
+    // A device with insets (the variables are what the page sets from env(safe-area-inset-*)); a resize reports the change.
+    const changes = Number(services.safe_area_changes);
+    await page.evaluate(`(["--ferro-sal:1px", "--ferro-sat:2px", "--ferro-sar:3px", "--ferro-sab:4px"].forEach((pair) => {
+        const [name, value] = pair.split(":"); document.documentElement.style.setProperty(name, value); }), true)`);
+    await page.send("Emulation.setDeviceMetricsOverride", { width: 440, height: 500, deviceScaleFactor: 1, mobile: false });
+    await page.waitFor(`themedView.themedViewServices().includes("safe_area=1,2,3,4")`, 10000);
+    services = await page.services();
+    assert(Number(services.safe_area_changes) > changes, `no safe area change was reported: ${services.safe_area_changes}`);
+});
+
+check("the details of all screens are requested through the permission of the page", async (page) => {
+    await page.setPermission("window-management", "granted");
+    await page.evaluate("themedView.themedViewRequestScreenDetails()");
+    const services = await page.waitForService("screen_details", "Some(true)");
+    assert(Number(services.screens) >= 1, `screens: ${services.screens}`);
+    assert(services.primary === "true", `primary ${services.primary}`);
+});
+
+check("the launcher opens absolute URIs in a new browsing context", async (page) => {
+    await page.evaluate(`(globalThis.opened = [], window.open = (uri, target) => (opened.push([uri, target]), {}), true)`);
+    await page.evaluate(`themedView.themedViewLaunch("https://example.com/a?b=c")`);
+    await page.waitForService("launched", "Some(true)");
+    assert(await page.evaluate("JSON.stringify(opened)") === JSON.stringify([["https://example.com/a?b=c", "_blank"]]), await page.evaluate("JSON.stringify(opened)"));
+
+    // A relative URI is not opened; a blocked pop-up is reported.
+    await page.evaluate(`themedView.themedViewLaunch("docs/index.html")`);
+    await page.waitForService("launched", "Some(false)");
+    await page.evaluate(`(window.open = () => null, opened.length = 0, true)`);
+    await page.evaluate(`themedView.themedViewLaunch("https://example.com/b")`);
+    await page.waitForService("launched", "Some(false)");
+});
+
+check("the back navigation of the browser is a back request of the view", async (page) => {
+    await page.evaluate("themedView.themedViewInstallBackHandler()");
+    const length = await page.evaluate("history.length");
+    await page.evaluate("(history.back(), true)");
+    await page.waitForService("back_requests", "1");
+    await sleep(300);
+    assert(await page.evaluate("location.pathname") === "/index.html", "the page went back");
+    assert(await page.evaluate("history.length") === length, "the history grew");
+});
 
 await run(checks);
