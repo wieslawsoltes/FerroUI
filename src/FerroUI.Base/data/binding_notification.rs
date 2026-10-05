@@ -206,20 +206,14 @@ impl BindingNotification {
     pub(crate) fn to_binding_value<T: Clone + 'static>(&self, target_type: &str) -> crate::data::BindingValue<T> {
         use crate::data::BindingValue;
 
-        let error = self.error();
-        let error_type = self.error_type();
+        // Only the downcast and the construction of the result depend on
+        // `T`; the rest is shared by every instantiation.
+        let (error, error_type, value) = match self.binding_value_parts() {
+            Ok(parts) => parts,
+            Err((error, BindingErrorType::DataValidationError)) => return BindingValue::data_validation_error(error),
+            Err((error, _)) => return BindingValue::binding_error(error),
+        };
 
-        // As in the reference, a notification without an error always counts
-        // as carrying a value, even when its value is the unset marker.
-        if !self.has_value() && error_type != BindingErrorType::None {
-            let error = error.unwrap_or_else(|| BindingError::message("Binding notification has no error."));
-            return match error_type {
-                BindingErrorType::DataValidationError => BindingValue::data_validation_error(error),
-                _ => BindingValue::binding_error(error),
-            };
-        }
-
-        let value = self.value();
         let typed = value.as_ref().and_then(|value| value.downcast_ref::<T>().cloned());
 
         match typed {
@@ -230,17 +224,39 @@ impl BindingNotification {
                 }
                 _ => BindingValue::new(typed),
             },
-            None => {
-                let e = BindingError::message(format!(
-                    "Unable to convert object '{}' to type '{target_type}'.",
-                    if value.is_some() { "(object)" } else { "(null)" }
-                ));
-                let error = match error {
-                    Some(error) => BindingError::new(AggregateError::new(vec![error, e])),
-                    None => e,
-                };
-                BindingValue::binding_error(error)
-            }
+            None => BindingValue::binding_error(Self::conversion_error(error, value.is_some(), target_type)),
+        }
+    }
+
+    /// The error, the error type and the value of the notification, or the
+    /// error a notification without a value stands for.
+    #[allow(clippy::type_complexity)]
+    fn binding_value_parts(
+        &self,
+    ) -> Result<(Option<BindingError>, BindingErrorType, Option<BoxedValue>), (BindingError, BindingErrorType)> {
+        let error = self.error();
+        let error_type = self.error_type();
+
+        // As in the reference, a notification without an error always counts
+        // as carrying a value, even when its value is the unset marker.
+        if !self.has_value() && error_type != BindingErrorType::None {
+            let error = error.unwrap_or_else(|| BindingError::message("Binding notification has no error."));
+            return Err((error, error_type));
+        }
+
+        Ok((error, error_type, self.value()))
+    }
+
+    /// The error of a notification whose value is not of the type asked
+    /// for, aggregated with the error of the notification if it has one.
+    fn conversion_error(error: Option<BindingError>, has_value: bool, target_type: &str) -> BindingError {
+        let e = BindingError::message(format!(
+            "Unable to convert object '{}' to type '{target_type}'.",
+            if has_value { "(object)" } else { "(null)" }
+        ));
+        match error {
+            Some(error) => BindingError::new(AggregateError::new(vec![error, e])),
+            None => e,
         }
     }
 
