@@ -1,4 +1,3 @@
-use crate::interop::promise_helper::JsError;
 use crate::interop::{stream_helper, JsObject};
 use std::io::{self, Read, Seek, SeekFrom};
 
@@ -18,6 +17,11 @@ pub struct BlobReadableStream {
 
 fn disposed() -> io::Error {
     io::Error::other("Cannot access a disposed object. Object name: 'BlobReadableStream'.")
+}
+
+/// Upstream's `EndOfStreamException`.
+fn end_of_stream() -> io::Error {
+    io::Error::new(io::ErrorKind::UnexpectedEof, "Failed to read the requested number of bytes from the stream.")
 }
 
 impl BlobReadableStream {
@@ -69,10 +73,7 @@ impl BlobReadableStream {
 
     fn complete_read(&mut self, bytes_read: &[u8], num_bytes_to_read: usize, buffer: &mut [u8]) -> io::Result<usize> {
         if bytes_read.len() != num_bytes_to_read {
-            return Err(io::Error::new(
-                io::ErrorKind::UnexpectedEof,
-                "Failed to read the requested number of bytes from the stream.",
-            ));
+            return Err(end_of_stream());
         }
 
         self.position += bytes_read.len() as u64;
@@ -82,23 +83,23 @@ impl BlobReadableStream {
     }
 
     /// Reads the whole blob into memory, after which the stream can be read
-    /// synchronously through [`Read`].
-    pub async fn load_async(&mut self) -> Result<(), JsError> {
+    /// synchronously through [`Read`]. Fails as [`read_async`](Self::read_async)
+    /// does when the blob yields fewer bytes than its length.
+    pub async fn load_async(&mut self) -> io::Result<()> {
         if self.content.is_some() {
             return Ok(());
         }
-        let Some(js_reference) = self.js_reference.clone() else {
-            return Ok(());
-        };
+        let js_reference = self.js_reference()?.clone();
         let content = stream_helper::slice_async(&js_reference, 0, self.length as usize).await?;
-        self.set_content(content);
-        Ok(())
+        self.set_content(content)
     }
 
-    fn set_content(&mut self, content: Vec<u8>) {
-        // The blob is immutable; a shorter result can only mean the read failed half way.
-        self.length = content.len() as u64;
+    fn set_content(&mut self, content: Vec<u8>) -> io::Result<()> {
+        if content.len() as u64 != self.length {
+            return Err(end_of_stream());
+        }
         self.content = Some(content);
+        Ok(())
     }
 
     /// Releases the blob.
@@ -149,7 +150,7 @@ mod tests {
     fn stream(content: Option<&[u8]>, length: u64) -> BlobReadableStream {
         let mut stream = BlobReadableStream::with_length(JsObject::NULL, length);
         if let Some(content) = content {
-            stream.set_content(content.to_vec());
+            stream.set_content(content.to_vec()).unwrap();
         }
         stream
     }
@@ -194,6 +195,15 @@ mod tests {
         assert_eq!(error.kind(), io::ErrorKind::UnexpectedEof);
         assert_eq!(stream.complete_read(b"abcd", 4, &mut buffer).unwrap(), 4);
         assert_eq!(stream.position(), 4);
+    }
+
+    #[test]
+    fn content_shorter_than_the_blob_is_an_end_of_stream_error() {
+        let mut stream = stream(None, 10);
+        let error = stream.set_content(b"abc".to_vec()).unwrap_err();
+        assert_eq!(error.kind(), io::ErrorKind::UnexpectedEof);
+        assert_eq!(stream.length(), 10);
+        assert!(stream.read(&mut [0; 1]).is_err(), "nothing was loaded");
     }
 
     #[test]
