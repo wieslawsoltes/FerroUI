@@ -91,4 +91,11 @@ export class FerroExports {
             OnSizeChanged: "CanvasHelper_OnSizeChanged"
         });
     }
+
+    public static get CompletionHelper() {
+        return FerroExports.group("CompletionHelper", {
+            OnResolved: "CompletionHelper_OnResolved",
+            OnRejected: "CompletionHelper_OnRejected"
+        });
+    }
 }
