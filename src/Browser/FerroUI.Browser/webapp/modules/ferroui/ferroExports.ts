@@ -60,7 +60,8 @@ export class FerroExports {
             OnPointerCancel: "InputHelper_OnPointerCancel",
             OnWheel: "InputHelper_OnWheel",
             OnKeyboardGeometryChange: "InputHelper_OnKeyboardGeometryChange",
-            OnLostFocus: "InputHelper_OnLostFocus"
+            OnLostFocus: "InputHelper_OnLostFocus",
+            OnDragDrop: "InputHelper_OnDragDrop"
         });
     }
 

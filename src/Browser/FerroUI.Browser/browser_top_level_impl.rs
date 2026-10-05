@@ -1,10 +1,12 @@
 use crate::browser_app_builder::BrowserPlatformOptions;
 use crate::browser_input_handler::{BrowserInputHandler, IInputTopLevel};
+use crate::clipboard_impl::ClipboardImpl;
 use crate::cursor::CssCursor;
 use crate::interop::{dom_helper, input_helper, JsObject};
 use crate::js_object_control_handle::JsObjectControlHandle;
 use crate::rendering::RenderTargetBrowserSurface;
 use crate::windowing_platform::BrowserWindowingPlatform;
+use ferroui_base::input::platform::{Clipboard, IClipboard};
 use ferroui_base::input::raw::IRawInputEventArgs;
 use ferroui_base::input::text_input::ITextInputMethodImpl;
 use ferroui_base::input::IInputRoot;
@@ -36,6 +38,7 @@ pub struct BrowserTopLevelImpl {
     #[allow(dead_code)] // the native control host attaches to this
     native_control_host: JsObject,
     input_handler: Rc<BrowserInputHandler>,
+    clipboard: Rc<Clipboard>,
     current_cursor: RefCell<String>,
     surface: RefCell<Option<Rc<RenderTargetBrowserSurface>>>,
     top_level_id: i32,
@@ -93,6 +96,7 @@ impl BrowserTopLevelImpl {
                 container,
                 native_control_host,
                 input_handler,
+                clipboard: Clipboard::new(Rc::new(ClipboardImpl::new())),
                 current_cursor: RefCell::new(CssCursor::DEFAULT.to_string()),
                 surface: RefCell::new(Some(surface)),
                 top_level_id,
@@ -220,6 +224,11 @@ impl IOptionalFeatureProvider for BrowserTopLevelImpl {
         if feature_type == TypeId::of::<dyn IScreenImpl>() {
             let service = FerroLocator::current().get_service::<dyn IScreenImpl>()?;
             return Some(Rc::new(service));
+        }
+
+        if feature_type == TypeId::of::<dyn IClipboard>() {
+            let clipboard: Rc<dyn IClipboard> = self.clipboard.clone();
+            return Some(Rc::new(clipboard));
         }
 
         if feature_type == TypeId::of::<dyn IInputPane>() {
