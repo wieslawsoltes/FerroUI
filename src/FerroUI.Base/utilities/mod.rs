@@ -3,11 +3,13 @@
 mod boolean_boxes;
 mod handler_list;
 mod weak_events;
+mod weak_hash_list;
 mod synchronous_completion_async_result;
 
 pub use boolean_boxes::BooleanBoxes;
 pub use handler_list::HandlerList;
 pub use weak_events::WeakEvents;
+pub use weak_hash_list::WeakHashList;
 pub use synchronous_completion_async_result::{
     SynchronousCompletionAsyncResult, SynchronousCompletionAsyncResultSource,
 };
