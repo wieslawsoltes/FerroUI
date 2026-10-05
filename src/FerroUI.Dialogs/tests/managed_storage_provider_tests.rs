@@ -184,3 +184,102 @@ fn without_parent_or_windows_a_content_root_cannot_be_shown() {
     assert_eq!(Some(true), *failed.borrow());
     let _ = std::fs::remove_dir_all(&root);
 }
+
+/// Saving to an existing file shows the overwrite prompt in a flyout of the
+/// chooser; returns the dialog window, the prompt (captured when its file
+/// name is set) and where the result of the picker lands.
+fn save_over_existing_file(
+    root: &std::path::Path,
+    folder: Rc<dyn IStorageFolder>,
+) -> (Ref<Window>, Ref<crate::ManagedFileChooserOverwritePrompt>, Rc<RefCell<Option<Option<String>>>>) {
+    use crate::ManagedFileChooserOverwritePrompt;
+    use ferroui_base::platform::storage::{FilePickerSaveOptions, IStorageFile};
+
+    std::fs::write(root.join("existing.txt"), b"old").unwrap();
+    let parent = Window::new();
+    WindowBase::show(&parent);
+
+    let dialog: Rc<RefCell<Option<Ref<Window>>>> = Rc::new(RefCell::new(None));
+    let mut options = ManagedFileDialogOptions::new();
+    {
+        let dialog = dialog.clone();
+        options.set_content_root_factory(Some(Rc::new(move || {
+            let window = Window::new();
+            *dialog.borrow_mut() = Some(window.clone());
+            window.upcast::<ContentControl>()
+        })));
+    }
+    let parent_top_level: Ref<TopLevel> = parent.clone().upcast();
+    let provider = ManagedStorageProvider::new(Some(&parent_top_level), Some(options));
+
+    let prompt: Rc<RefCell<Option<Ref<ManagedFileChooserOverwritePrompt>>>> = Rc::new(RefCell::new(None));
+    let capture = {
+        let prompt = prompt.clone();
+        ManagedFileChooserOverwritePrompt::file_name_property()
+            .changed()
+            .add_class_handler::<ManagedFileChooserOverwritePrompt>(move |sender, _| {
+                *prompt.borrow_mut() = Some(sender.to_ref());
+            })
+    };
+
+    let mut save_options = FilePickerSaveOptions::new();
+    save_options.set_suggested_start_location(Some(folder));
+    let picked = provider.save_file_picker_async(save_options);
+    let result = Rc::new(RefCell::new(None));
+    {
+        let sink = result.clone();
+        Dispatcher::ui_thread().invoke_async_task_local(move || async move {
+            let file = picked.await.expect("the picker shows");
+            *sink.borrow_mut() = Some(file.map(|file| {
+                let item: &dyn IStorageItem = &*(file as Rc<dyn IStorageFile>);
+                item.try_get_local_path().unwrap()
+            }));
+        });
+    }
+    Dispatcher::ui_thread().run_jobs(None);
+
+    let window = dialog.borrow().clone().expect("the dialog window");
+    let model = model_of(&window);
+    model.set_file_name(Some("existing.txt".to_string()));
+    model.ok();
+    Dispatcher::ui_thread().run_jobs(None);
+    capture.dispose();
+
+    let prompt = prompt.borrow().clone().expect("the overwrite prompt is shown");
+    assert_eq!("existing.txt", prompt.file_name());
+    assert!(window.is_visible());
+    assert!(result.borrow().is_none());
+    (window, prompt, result)
+}
+
+#[test]
+fn confirming_the_overwrite_prompt_completes_with_the_existing_file() {
+    let _app = start();
+    let (root, folder) = temp_folder("overwrite-confirm");
+
+    let (window, prompt, result) = save_over_existing_file(&root, folder);
+    prompt.confirm();
+    Dispatcher::ui_thread().run_jobs(None);
+
+    assert!(!window.is_visible());
+    assert_eq!(Some(Some(root.join("existing.txt").to_string_lossy().into_owned())), *result.borrow());
+    let _ = std::fs::remove_dir_all(&root);
+}
+
+#[test]
+fn declining_the_overwrite_prompt_keeps_the_chooser_open() {
+    let _app = start();
+    let (root, folder) = temp_folder("overwrite-decline");
+
+    let (window, prompt, result) = save_over_existing_file(&root, folder);
+    prompt.cancel();
+    Dispatcher::ui_thread().run_jobs(None);
+
+    assert!(window.is_visible());
+    assert!(result.borrow().is_none());
+
+    window.close();
+    Dispatcher::ui_thread().run_jobs(None);
+    assert_eq!(Some(None), *result.borrow());
+    let _ = std::fs::remove_dir_all(&root);
+}
