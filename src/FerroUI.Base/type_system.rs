@@ -1216,6 +1216,7 @@ macro_rules! ferro_class_info {
                         <$name>::__INTERFACES
                     };
                     markup.this = ::std::option::Option::Some(|| $crate::data::core::ValueType::of::<$crate::Ref<$name>>());
+                    markup.value = ::std::option::Option::Some(|| $crate::data::core::ValueType::of::<$crate::Ref<$name>>());
                     $crate::__ferro_markup_items!(markup, $crate::Ref<$name>; $($body)*);
                     markup
                 };

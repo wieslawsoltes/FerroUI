@@ -130,6 +130,7 @@ pub const EXPECTED_ELIGIBLE: &[&str] = &[
     "panel_children.xaml",
     "named_element.xaml",
     "name_property.xaml",
+    "brush_from_text.xaml",
     "text_block_font_style_weight.xaml",
     "text_block_text_layout.xaml",
     "text_block_padding_font.xaml",
@@ -174,7 +175,6 @@ pub const EXPECTED_NOT_ELIGIBLE: &[&str] = &[
     "binding.xaml",
     "style_with_selector.xaml",
     "control_template.xaml",
-    "brush_from_text.xaml",
     "resources.xaml",
     "grid_definitions_text.xaml",
 ];

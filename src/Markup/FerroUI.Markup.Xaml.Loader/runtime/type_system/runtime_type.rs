@@ -622,10 +622,7 @@ impl DeclaredMember {
             Self::Getter(property) | Self::StaticGetter(property) => property.emit_get,
             Self::Setter(property) | Self::StaticSetter(property) => property.emit_set,
             Self::Method(method) => method.emit,
-            Self::Parse(markup) => markup.parse_type.map(|_| ferroui_base::metadata::MarkupEmit {
-                function: "__markup_parse",
-                fallible: true,
-            }),
+            Self::Parse(_) => Some(ferroui_base::metadata::MarkupEmit { function: "__markup_parse", fallible: true }),
         }
     }
 }
@@ -966,6 +963,8 @@ pub struct RuntimeConstructor {
     /// The custom attributes of the parameters (by index; a missing entry is a parameter
     /// without attributes).
     pub(crate) parameter_attributes: Vec<Vec<Rc<dyn IXamlCustomAttribute>>>,
+    /// The constructor of markup metadata this constructor is the projection of.
+    pub(crate) declared: Option<&'static ferroui_base::metadata::MarkupConstructor>,
 }
 
 /// A parameter of a projected constructor.
@@ -1019,6 +1018,7 @@ impl RuntimeConstructor {
             invoker: self.invoker.clone(),
             is_public: self.is_public,
             parameter_attributes: self.parameter_attributes.clone(),
+            declared: self.declared,
         })
     }
 }
