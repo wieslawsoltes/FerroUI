@@ -1,3 +1,5 @@
+use crate::browser_data_transfer_helper::{IReadableDataItems, JsReadableDataItems};
+use crate::browser_drag_data_transfer::BrowserDragDataTransfer;
 use crate::browser_input_pane::BrowserInputPane;
 use crate::browser_mouse_device::{BrowserMouseDevice, ContainerPointerCapture, IPointerCapture};
 use crate::browser_text_input_method::BrowserTextInputMethod;
@@ -5,14 +7,14 @@ use crate::interop::{input_helper, JsObject};
 use crate::key_interop;
 use crate::windowing_platform::BrowserWindowingPlatform;
 use ferroui_base::input::raw::{
-    IRawInputEventArgs, RawKeyEventArgs, RawKeyEventType, RawMouseWheelEventArgs, RawPointerEventArgs,
+    IDragDropDevice, IRawInputEventArgs, RawDragEvent, RawDragEventType, RawKeyEventArgs, RawKeyEventType, RawMouseWheelEventArgs, RawPointerEventArgs,
     RawPointerEventType, RawPointerPoint, RawTextInputEventArgs, RawTouchEventArgs,
 };
 use ferroui_base::input::{
-    IInputDevice, IInputRoot, IntermediatePoints, KeyDeviceType, MouseDevice, PenDevice, RawInputModifiers,
+    DragDropEffects, IDataTransfer, IInputDevice, IInputRoot, IntermediatePoints, KeyDeviceType, MouseDevice, PenDevice, RawInputModifiers,
     TouchDevice,
 };
-use ferroui_base::{Point, Size, Vector};
+use ferroui_base::{FerroLocator, LocatorExtensions, Point, Size, Vector};
 use std::cell::{Cell, LazyCell, RefCell};
 use std::rc::{Rc, Weak};
 use std::time::Instant;
@@ -448,6 +450,124 @@ impl BrowserInputHandler {
         )
     }
 
+    /// A drag operation of the page entered, moved over, left or dropped on
+    /// the element of the top-level. `data_transfer` is the data transfer of
+    /// the event and `items` its items as readable data items.
+    pub fn on_drag_event(
+        &self,
+        type_: &str,
+        offset_x: f64,
+        offset_y: f64,
+        modifiers: i32,
+        data_transfer: &JsObject,
+        items: JsObject,
+    ) -> bool {
+        let effect_allowed = input_helper::get_effect_allowed(data_transfer);
+        let (handled, drop_effect) = self.on_drag_event_core(
+            type_,
+            offset_x,
+            offset_y,
+            modifiers,
+            effect_allowed.as_deref().unwrap_or("none"),
+            JsReadableDataItems::new(items),
+        );
+        if let Some(drop_effect) = drop_effect {
+            input_helper::set_drop_effect(data_transfer, &Self::drop_effect_name(drop_effect));
+        }
+        handled
+    }
+
+    /// See [`on_drag_event`](Self::on_drag_event): whether the event was
+    /// handled, and the effect to show when the event was raised.
+    pub(crate) fn on_drag_event_core(
+        &self,
+        type_: &str,
+        offset_x: f64,
+        offset_y: f64,
+        modifiers: i32,
+        effect_allowed_str: &str,
+        items: Rc<dyn IReadableDataItems>,
+    ) -> (bool, Option<DragDropEffects>) {
+        let event_type = match type_ {
+            "dragenter" => RawDragEventType::DragEnter,
+            "dragover" => RawDragEventType::DragOver,
+            "dragleave" => RawDragEventType::DragLeave,
+            "drop" => RawDragEventType::Drop,
+            _ => return (false, None),
+        };
+
+        // The original imports its storage module here, so that a dropped file can be read. The
+        // storage module and the storage files are not ported yet; a dropped file has no value
+        // (see BrowserDataTransferHelper).
+
+        let position = Point::new(offset_x, offset_y);
+
+        let effect_allowed_str = effect_allowed_str.to_ascii_lowercase();
+        let mut effect_allowed = DragDropEffects::NONE;
+
+        if effect_allowed_str.contains("copy") {
+            effect_allowed |= DragDropEffects::COPY;
+        }
+
+        if effect_allowed_str.contains("link") {
+            effect_allowed |= DragDropEffects::LINK;
+        }
+
+        if effect_allowed_str.contains("move") {
+            effect_allowed |= DragDropEffects::MOVE;
+        }
+
+        if effect_allowed_str == "all" || effect_allowed_str == "uninitialized" {
+            effect_allowed |= DragDropEffects::MOVE | DragDropEffects::COPY | DragDropEffects::LINK;
+        }
+
+        if effect_allowed == DragDropEffects::NONE {
+            return (false, None);
+        }
+
+        let data_transfer: Rc<dyn IDataTransfer> = BrowserDragDataTransfer::new(items);
+        let Some(drop_effect) = self.raw_drag_event(
+            event_type,
+            position,
+            Self::to_raw_input_modifiers(modifiers),
+            data_transfer,
+            effect_allowed,
+        ) else {
+            return (false, None);
+        };
+
+        // Note, due to complications of JS interop, we ignore this return value.
+        // And instead assume, that event is handled for any "drop" and "drag-over" stages.
+        let handled = matches!(event_type, RawDragEventType::Drop | RawDragEventType::DragOver)
+            && drop_effect != DragDropEffects::NONE;
+        (handled, Some(drop_effect))
+    }
+
+    /// The name of drag effects as the original writes them to the page:
+    /// the name of the enumeration value in lower case, so that a
+    /// combination of effects (`"copy, move"`) is not a value the page
+    /// accepts and leaves the effect unchanged.
+    fn drop_effect_name(effects: DragDropEffects) -> String {
+        if effects == DragDropEffects::NONE {
+            return "none".to_string();
+        }
+
+        let mut names = Vec::new();
+        for (flag, name) in
+            [(DragDropEffects::COPY, "copy"), (DragDropEffects::MOVE, "move"), (DragDropEffects::LINK, "link")]
+        {
+            if effects.contains(flag) {
+                names.push(name.to_string());
+            }
+        }
+        let unknown = effects.bits() & !(DragDropEffects::COPY | DragDropEffects::MOVE | DragDropEffects::LINK).bits();
+        if unknown != 0 {
+            // The original writes the number of a value with bits it has no name for.
+            return effects.bits().to_string();
+        }
+        names.join(", ")
+    }
+
     /// A key went down. `code` and `key` are the values of the event of the
     /// page; a missing one (some virtual keyboards and autofill send key
     /// events without them) is an unknown key.
@@ -553,6 +673,24 @@ impl BrowserInputHandler {
         }
 
         false
+    }
+
+    /// Raises a raw drag event; the effects the target accepted, or `None`
+    /// when there is no input root to raise it for.
+    fn raw_drag_event(
+        &self,
+        event_type: RawDragEventType,
+        position: Point,
+        modifiers: RawInputModifiers,
+        data_transfer: Rc<dyn IDataTransfer>,
+        drop_effect: DragDropEffects,
+    ) -> Option<DragDropEffects> {
+        let device = FerroLocator::current().get_required_service::<dyn IDragDropDevice>();
+        let input_root = self.input_root()?;
+        let event_args =
+            Rc::new(RawDragEvent::new(device, event_type, input_root, position, data_transfer, drop_effect, modifiers));
+        self.schedule_input(event_args.clone());
+        Some(event_args.effects())
     }
 
     fn raw_keyboard_event(
@@ -668,6 +806,8 @@ mod tests {
         points: RefCell<Vec<Option<Vec<RawPointerPoint>>>>,
         handle: Cell<bool>,
         read_points: Cell<bool>,
+        /// The effects a drop target accepts, set on the drag events.
+        drag_effects: Cell<Option<DragDropEffects>>,
         page_size: Size,
     }
 
@@ -675,6 +815,9 @@ mod tests {
         fn dispatch_input(&self, args: Rc<dyn IRawInputEventArgs>) {
             if self.handle.get() {
                 args.set_handled(true);
+            }
+            if let (Some(effects), Some(drag)) = (self.drag_effects.get(), args.downcast_ref::<RawDragEvent>()) {
+                drag.set_effects(effects);
             }
             if self.read_points.get() {
                 let points = args
@@ -760,6 +903,7 @@ mod tests {
                 points: RefCell::new(Vec::new()),
                 handle: Cell::new(false),
                 read_points: Cell::new(false),
+                drag_effects: Cell::new(None),
                 page_size: Size::new(800.0, 600.0),
             });
             let page = Rc::new(PageLog::default());
@@ -1417,5 +1561,157 @@ mod tests {
 
         assert!(!fixture.handler.text_input_method().is_composing());
         assert!(fixture.handler.input_pane().on_geometry_change(0.0, 0.0, 0.0, 0.0));
+    }
+
+    // --- drag and drop ------------------------------------------------------
+
+    /// The drag-and-drop device of the application, bound for the duration
+    /// of a test.
+    struct DragDropScope(Rc<dyn ferroui_base::reactive::IDisposable>);
+
+    impl DragDropScope {
+        fn new() -> Self {
+            let scope = FerroLocator::enter_scope();
+            FerroLocator::current_mutable()
+                .bind::<dyn IDragDropDevice>()
+                .to_constant(ferroui_base::input::DragDropDevice::instance() as Rc<dyn IDragDropDevice>);
+            Self(scope)
+        }
+    }
+
+    impl Drop for DragDropScope {
+        fn drop(&mut self) {
+            self.0.dispose();
+        }
+    }
+
+    fn text_items(text: &'static str) -> Rc<dyn IReadableDataItems> {
+        use crate::browser_data_transfer_helper::tests::{FakeReadableDataItem, FakeReadableDataItems, FakeValue};
+        Rc::new(FakeReadableDataItems(vec![FakeReadableDataItem::new(
+            &["text/plain"],
+            &[("text/plain", FakeValue::String(text))],
+        )]))
+    }
+
+    fn drag_event(fixture: &Fixture, index: usize) -> Rc<dyn IRawInputEventArgs> {
+        let event = fixture.event(index);
+        assert!(event.downcast_ref::<RawDragEvent>().is_some(), "a drag event");
+        event
+    }
+
+    #[test]
+    fn the_drag_events_of_the_page_are_raw_drag_events() {
+        let _scope = Dispatcher::unit_test_scope();
+        let _drag_drop = DragDropScope::new();
+        let fixture = Fixture::new();
+
+        for (type_, expected) in [
+            ("dragenter", RawDragEventType::DragEnter),
+            ("dragover", RawDragEventType::DragOver),
+            ("dragleave", RawDragEventType::DragLeave),
+            ("drop", RawDragEventType::Drop),
+        ] {
+            fixture.handler.on_drag_event_core(type_, 10.0, 20.0, 2, "copy", text_items("a"));
+            let event = drag_event(&fixture, fixture.event_count() - 1);
+            let drag = event.downcast_ref::<RawDragEvent>().unwrap();
+            assert_eq!(expected, drag.type_());
+            assert_eq!(Point::new(10.0, 20.0), drag.location());
+            assert_eq!(ferroui_base::input::KeyModifiers::CONTROL, drag.key_modifiers());
+        }
+        assert_eq!(4, fixture.event_count());
+
+        assert_eq!((false, None), fixture.handler.on_drag_event_core("drag", 0.0, 0.0, 0, "copy", text_items("a")));
+        assert_eq!(4, fixture.event_count());
+    }
+
+    #[test]
+    fn the_allowed_effects_are_read_from_the_effect_the_page_allows() {
+        let _scope = Dispatcher::unit_test_scope();
+        let _drag_drop = DragDropScope::new();
+        let fixture = Fixture::new();
+
+        let all = DragDropEffects::COPY | DragDropEffects::MOVE | DragDropEffects::LINK;
+        for (effect_allowed, expected) in [
+            ("copy", DragDropEffects::COPY),
+            ("copyLink", DragDropEffects::COPY | DragDropEffects::LINK),
+            ("copyMove", DragDropEffects::COPY | DragDropEffects::MOVE),
+            ("linkMove", DragDropEffects::LINK | DragDropEffects::MOVE),
+            ("move", DragDropEffects::MOVE),
+            ("all", all),
+            ("uninitialized", all),
+            ("ALL", all),
+        ] {
+            let (_, effect) = fixture.handler.on_drag_event_core("dragenter", 0.0, 0.0, 0, effect_allowed, text_items("a"));
+            assert_eq!(Some(expected), effect, "{effect_allowed}");
+        }
+
+        let count = fixture.event_count();
+        assert_eq!((false, None), fixture.handler.on_drag_event_core("dragover", 0.0, 0.0, 0, "none", text_items("a")));
+        assert_eq!(count, fixture.event_count());
+    }
+
+    #[test]
+    fn a_drag_over_or_a_drop_is_handled_when_the_target_accepts_an_effect() {
+        let _scope = Dispatcher::unit_test_scope();
+        let _drag_drop = DragDropScope::new();
+        let fixture = Fixture::new();
+
+        fixture.top_level.drag_effects.set(Some(DragDropEffects::COPY));
+        assert_eq!(
+            (true, Some(DragDropEffects::COPY)),
+            fixture.handler.on_drag_event_core("dragover", 0.0, 0.0, 0, "all", text_items("a"))
+        );
+        assert_eq!(
+            (true, Some(DragDropEffects::COPY)),
+            fixture.handler.on_drag_event_core("drop", 0.0, 0.0, 0, "all", text_items("a"))
+        );
+        assert_eq!(
+            (false, Some(DragDropEffects::COPY)),
+            fixture.handler.on_drag_event_core("dragenter", 0.0, 0.0, 0, "all", text_items("a"))
+        );
+
+        fixture.top_level.drag_effects.set(Some(DragDropEffects::NONE));
+        assert_eq!(
+            (false, Some(DragDropEffects::NONE)),
+            fixture.handler.on_drag_event_core("drop", 0.0, 0.0, 0, "all", text_items("a"))
+        );
+    }
+
+    #[test]
+    fn the_dropped_text_is_read_from_the_items_of_the_page() {
+        use ferroui_base::input::{DataFormat, DataTransferExtensions};
+
+        let _scope = Dispatcher::unit_test_scope();
+        let _drag_drop = DragDropScope::new();
+        let fixture = Fixture::new();
+
+        fixture.handler.on_drag_event_core("drop", 0.0, 0.0, 0, "copy", text_items("dropped"));
+        let event = drag_event(&fixture, 0);
+        let data_transfer = event.downcast_ref::<RawDragEvent>().unwrap().data_transfer().clone();
+        assert!(data_transfer.formats().iter().any(|format| DataFormat::text() == *format));
+        assert_eq!(Some("dropped".to_string()), data_transfer.try_get_text());
+    }
+
+    #[test]
+    fn without_an_input_root_a_drag_raises_nothing() {
+        let _scope = Dispatcher::unit_test_scope();
+        let _drag_drop = DragDropScope::new();
+        let fixture = Fixture::without_root();
+
+        assert_eq!((false, None), fixture.handler.on_drag_event_core("drop", 0.0, 0.0, 0, "copy", text_items("a")));
+        assert_eq!(0, fixture.event_count());
+    }
+
+    #[test]
+    fn the_drop_effect_is_the_lower_case_name_of_the_effects() {
+        assert_eq!("none", BrowserInputHandler::drop_effect_name(DragDropEffects::NONE));
+        assert_eq!("copy", BrowserInputHandler::drop_effect_name(DragDropEffects::COPY));
+        assert_eq!("move", BrowserInputHandler::drop_effect_name(DragDropEffects::MOVE));
+        assert_eq!("link", BrowserInputHandler::drop_effect_name(DragDropEffects::LINK));
+        assert_eq!(
+            "copy, move, link",
+            BrowserInputHandler::drop_effect_name(DragDropEffects::COPY | DragDropEffects::MOVE | DragDropEffects::LINK)
+        );
+        assert_eq!("9", BrowserInputHandler::drop_effect_name(DragDropEffects::from_bits_retain(9)));
     }
 }
