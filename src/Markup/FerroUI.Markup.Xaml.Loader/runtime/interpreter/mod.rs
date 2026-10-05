@@ -24,7 +24,7 @@ pub use interpreter::{
     RuntimeDocument,
 };
 pub use runtime_context::{
-    namespace_info_static_provider, IRuntimeContextServices, IStaticServiceProvider, RuntimeContext,
+    context_definition, namespace_info_static_provider, IRuntimeContextServices, IStaticServiceProvider, RuntimeContext,
     RuntimeContextDefinition, RuntimeContextService, XamlXmlNamespaceInfo, XmlNamespaceInfoProvider,
 };
 pub use services::DefaultRuntimeContextServices;
