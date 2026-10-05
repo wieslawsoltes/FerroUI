@@ -373,3 +373,72 @@ fn orientation_is_a_direct_property_that_raises_changes() {
         ]
     );
 }
+
+/// Not from upstream: over a compositing renderer, the loaded content of
+/// the visualizer gets the implicit animations of its composition visual,
+/// and a refresh starts the endless rotation of the content on the server.
+#[test]
+fn content_animations_run_on_the_compositor() {
+    use crate::testing::{CompositorTestServices, MockWindowingPlatform, TestServices};
+    use crate::Window;
+    use ferroui_base::rendering::composition::server::{
+        IAnimatedServerObject, ServerCompositionVisual, ServerObjectAnimations,
+    };
+    use ferroui_base::rendering::composition::ElementComposition;
+
+    let services = CompositorTestServices::start(TestServices::styled_window());
+    let visualizer = RefreshVisualizer::new();
+    visualizer.set_template(Some(refresh_visualizer_template()));
+    let content = Border::new();
+    content.set_width(20.0);
+    content.set_height(20.0);
+    visualizer.set_content(Some(Control::boxed(content.clone())));
+    let host = Border::new();
+    host.set_child(Some(visualizer.clone().upcast()));
+
+    let window_impl = MockWindowingPlatform::create_window_mock();
+    services.setup(&window_impl);
+    let window = Window::with_impl(window_impl);
+    window.set_content(Some(Control::boxed(host.clone())));
+    window.show();
+    services.run_jobs();
+
+    let provider = RefreshInfoProvider::new(
+        PullDirection::TopToBottom,
+        Some(Size::new(100.0, 100.0)),
+        ElementComposition::get_element_visual(&host),
+    );
+    visualizer.set_refresh_info_provider(Some(provider.clone()));
+    services.run_jobs();
+
+    let content_visual = ElementComposition::get_element_visual(&content).expect("the content is composited");
+    let implicit = content_visual.implicit_animations().expect("the loaded content has implicit animations");
+    assert_eq!(implicit.keys(), ["RotationAngle", "Offset", "Scale", "Opacity"]);
+
+    // A deferral keeps the visualizer refreshing.
+    let deferral = Rc::new(RefCell::new(None));
+    {
+        let deferral = deferral.clone();
+        visualizer.refresh_requested(move |_, e| *deferral.borrow_mut() = Some(e.get_deferral()));
+    }
+    visualizer.request_refresh();
+    assert_eq!(visualizer.refresh_visualizer_state(), RefreshVisualizerState::Refreshing);
+    assert!(content_visual.object().pending_animations().count() >= 1);
+    services.run_jobs();
+
+    let server = services
+        .compositor()
+        .server()
+        .get::<ServerCompositionVisual>(content_visual.server())
+        .expect("the server visual exists");
+    let animations: Option<Rc<ServerObjectAnimations>> = server.server_object().animations();
+    assert!(animations.is_some());
+    // The rotation runs forever: the server clock keeps ticking.
+    assert!(services.compositor().server().animations().need_next_tick());
+
+    if let Some(deferral) = deferral.borrow_mut().take() {
+        deferral.complete();
+    }
+    assert_eq!(visualizer.refresh_visualizer_state(), RefreshVisualizerState::Idle);
+    window.close();
+}

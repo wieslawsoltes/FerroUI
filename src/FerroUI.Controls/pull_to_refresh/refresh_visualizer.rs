@@ -6,7 +6,12 @@ use ferroui_base::interactivity::{Interactive, InteractiveImpl, RoutedEvent, Rou
 use ferroui_base::layout::{HorizontalAlignment, LayoutableImpl, VerticalAlignment};
 use ferroui_base::media::TranslateTransform;
 use ferroui_base::reactive::{IDisposable, ObservableExt};
-use ferroui_base::rendering::composition::{CompositionVisual, ElementComposition};
+use ferroui_base::animation::easings::{Easing, LinearEasing};
+use ferroui_base::numerics::Vector3;
+use ferroui_base::rendering::composition::animations::{AnimationIterationBehavior, AnimationStopBehavior};
+use ferroui_base::rendering::composition::{
+    CompositionVisual, ElementComposition, ICompositionObjectAnimations, ScalarKeyFrameAnimation,
+};
 use ferroui_base::{
     ferro_class, ferro_impl_classes, ferro_property, ferro_routed_event, instantiate, BoxedValue, DirectProperty,
     FerroObject, FerroObjectExtensions, FerroObjectImpl, FerroObjectImplExt, FerroProperty, FerroPropertyChangedEventArgs, Ref,
@@ -15,6 +20,7 @@ use ferroui_base::{
 use std::cell::{Cell, RefCell};
 use std::f64::consts::PI;
 use std::rc::Rc;
+use std::time::Duration;
 
 const MINIMUM_INDICATOR_OPACITY: f32 = 0.4;
 
@@ -38,6 +44,7 @@ pub struct RefreshVisualizer {
     starting_rotation_angle: Cell<f32>,
     interaction_ratio: Cell<f64>,
     played: Cell<bool>,
+    rotate_animation: RefCell<Option<Rc<ScalarKeyFrameAnimation>>>,
 }
 
 ferro_class!(RefreshVisualizer: ContentControl);
@@ -211,6 +218,7 @@ impl RefreshVisualizer {
             starting_rotation_angle: Cell::new(0.0),
             interaction_ratio: Cell::new(0.0),
             played: Cell::new(false),
+            rotate_animation: RefCell::new(None),
         }
     }
 
@@ -284,21 +292,36 @@ impl RefreshVisualizer {
 
         let Some(composition) = ElementComposition::get_element_visual(&content) else { return };
 
+        let compositor = composition.compositor().clone();
         composition.set_opacity(0.0);
 
-        // COMPOSITION-SEAM: upstream `OnContentLoaded` (RefreshVisualizer.cs
-        // lines 158-184) gives the composition visual of the content an
-        // implicit animation collection
-        // (`Compositor.CreateImplicitAnimationCollection`,
-        // `CompositionObject.ImplicitAnimations`) with four key frame
-        // animations, each with the single expression key frame
-        // (1.0, "this.FinalValue", linear easing):
-        //   "RotationAngle" -> `ScalarKeyFrameAnimation`, 100 ms
-        //   "Offset"        -> `Vector3KeyFrameAnimation`, 150 ms
-        //   "Scale"         -> `Vector3KeyFrameAnimation`, 100 ms
-        //   "Opacity"       -> `ScalarKeyFrameAnimation`, 100 ms
-        // Key frame animations and implicit animation collections are not
-        // ported yet, so the values `update_content` sets apply at once.
+        let smooth_rotation_animation = compositor.create_scalar_key_frame_animation();
+        smooth_rotation_animation.set_target(Some("RotationAngle".to_owned()));
+        smooth_rotation_animation.insert_expression_key_frame(1.0, "this.FinalValue", Some(Easing::new(LinearEasing::new())));
+        smooth_rotation_animation.set_duration(Duration::from_millis(100));
+
+        let opacity_animation = compositor.create_scalar_key_frame_animation();
+        opacity_animation.set_target(Some("Opacity".to_owned()));
+        opacity_animation.insert_expression_key_frame(1.0, "this.FinalValue", Some(Easing::new(LinearEasing::new())));
+        opacity_animation.set_duration(Duration::from_millis(100));
+
+        let offset_animation = compositor.create_vector3_key_frame_animation();
+        offset_animation.set_target(Some("Offset".to_owned()));
+        offset_animation.insert_expression_key_frame(1.0, "this.FinalValue", Some(Easing::new(LinearEasing::new())));
+        offset_animation.set_duration(Duration::from_millis(150));
+
+        let scale_animation = compositor.create_vector3_key_frame_animation();
+        scale_animation.set_target(Some("Scale".to_owned()));
+        scale_animation.insert_expression_key_frame(1.0, "this.FinalValue", Some(Easing::new(LinearEasing::new())));
+        scale_animation.set_duration(Duration::from_millis(100));
+
+        let animation = compositor.create_implicit_animation_collection();
+        animation.set("RotationAngle", smooth_rotation_animation);
+        animation.set("Offset", offset_animation);
+        animation.set("Scale", scale_animation);
+        animation.set("Opacity", opacity_animation);
+
+        composition.set_implicit_animations(Some(animation));
 
         self.update_content();
     }
@@ -326,12 +349,9 @@ impl RefreshVisualizer {
         match self.refresh_visualizer_state() {
             RefreshVisualizerState::Idle => {
                 self.played.set(false);
-                // COMPOSITION-SEAM: upstream (RefreshVisualizer.cs lines
-                // 211-215) ends the endless rotation started in the
-                // Refreshing state here: `_rotateAnimation.IterationBehavior
-                // = AnimationIterationBehavior.Count; _rotateAnimation =
-                // null`. There is no rotation animation to end until key
-                // frame animations are ported.
+                if let Some(rotate_animation) = self.rotate_animation.take() {
+                    rotate_animation.set_iteration_behavior(AnimationIterationBehavior::Count);
+                }
 
                 content_visual.set_opacity(MINIMUM_INDICATOR_OPACITY);
                 content_visual.set_rotation_angle(starting_rotation_angle);
@@ -359,25 +379,30 @@ impl RefreshVisualizer {
 
                 if !self.played.get() {
                     self.played.set(true);
-                    // COMPOSITION-SEAM: upstream (RefreshVisualizer.cs lines
-                    // 246-252) plays a pulse on the content visual here: a
-                    // `Vector3KeyFrameAnimation` with target "Scale", the
-                    // key frames (0.5, (1.5, 1.5, 1)) and (1.0, (1, 1, 1)),
-                    // a duration of 0.3 s, started with
-                    // `contentVisual.StartAnimation("Scale", ..)`. Key frame
-                    // animations are not ported yet.
+                    let scale_animation = content_visual.compositor().create_vector3_key_frame_animation();
+                    scale_animation.set_target(Some("Scale".to_owned()));
+                    scale_animation.insert_key_frame(0.5, Vector3::new(1.5, 1.5, 1.0));
+                    scale_animation.insert_key_frame(1.0, Vector3::new(1.0, 1.0, 1.0));
+                    scale_animation.set_duration(Duration::from_secs_f64(0.3));
+
+                    content_visual.start_animation("Scale", &*scale_animation);
                 }
             }
             RefreshVisualizerState::Refreshing => {
-                // COMPOSITION-SEAM: upstream (RefreshVisualizer.cs lines
-                // 256-264) starts the endless rotation of the content
-                // visual here and keeps it in `_rotateAnimation`: a
-                // `ScalarKeyFrameAnimation` with target "RotationAngle",
-                // the linear key frames (0, starting angle) and
-                // (1, starting angle + 2 pi), `IterationBehavior = Forever`,
-                // `StopBehavior = LeaveCurrentValue`, a duration of 0.5 s,
-                // started with `contentVisual.StartAnimation("RotationAngle",
-                // ..)`. Key frame animations are not ported yet.
+                let rotate_animation = content_visual.compositor().create_scalar_key_frame_animation();
+                rotate_animation.set_target(Some("RotationAngle".to_owned()));
+                rotate_animation.insert_key_frame_with_easing(0.0, starting_rotation_angle, Rc::new(LinearEasing::new()));
+                rotate_animation.insert_key_frame_with_easing(
+                    1.0,
+                    starting_rotation_angle + (2.0 * PI) as f32,
+                    Rc::new(LinearEasing::new()),
+                );
+                rotate_animation.set_iteration_behavior(AnimationIterationBehavior::Forever);
+                rotate_animation.set_stop_behavior(AnimationStopBehavior::LeaveCurrentValue);
+                rotate_animation.set_duration(Duration::from_secs_f64(0.5));
+
+                content_visual.start_animation("RotationAngle", &*rotate_animation);
+                *self.rotate_animation.borrow_mut() = Some(rotate_animation);
                 content_visual.set_opacity(1.0);
                 // Upstream computes a translation ratio here that it never
                 // uses.
