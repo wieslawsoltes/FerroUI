@@ -3,7 +3,7 @@ name: Performance
 # Stripped size and warm start-up time of hello_window, themed_window and
 # control-catalog-desktop on macOS (scripts/perf-report.py). Run by hand; the
 # table goes to the job summary. With a baseline, both refs are built and
-# measured in the same job, one after the other, and the summary compares them.
+# measured in the same job, and the summary compares them.
 
 on:
   workflow_dispatch:
@@ -80,30 +80,43 @@ jobs:
             echo "launches; the first launch of each new executable is listed separately."
             echo
           } >> "$GITHUB_STEP_SUMMARY"
-      # Both checkouts build into one target directory, so the second build
-      # reuses the dependencies the first one compiled. RUSTFLAGS is only set
+      # Both refs are built before anything is launched, each into its own
+      # target directory, so that the launches of the two run one after the
+      # other on a machine that no build keeps busy. RUSTFLAGS is only set
       # when given (set at all, even empty, it replaces the flags of
       # .cargo/config.toml), and only for the ref, so that a baseline of the
       # same ref measures the effect of the flags.
+      - name: Build the baseline
+        if: inputs.baseline != ''
+        env:
+          CARGO_TARGET_DIR: ${{ github.workspace }}/target-baseline
+        run: python3 measured/scripts/perf-report.py --source baseline --size-only
+      - name: Build the ref
+        env:
+          CARGO_TARGET_DIR: ${{ github.workspace }}/target-measured
+          EXTRA_RUSTFLAGS: ${{ inputs.rustflags }}
+        run: |
+          if [ -n "$EXTRA_RUSTFLAGS" ]; then export RUSTFLAGS="$EXTRA_RUSTFLAGS"; fi
+          python3 measured/scripts/perf-report.py --source measured --size-only
       - name: Measure the baseline
         if: inputs.baseline != ''
         env:
-          CARGO_TARGET_DIR: ${{ github.workspace }}/target
+          CARGO_TARGET_DIR: ${{ github.workspace }}/target-baseline
           RUNS: ${{ inputs.runs }}
-        run: |
-          python3 measured/scripts/perf-report.py --source baseline --runs "$RUNS" \
-            --save baseline.json --markdown "$GITHUB_STEP_SUMMARY" --title "Baseline"
+        run: >
+          python3 measured/scripts/perf-report.py --source baseline --no-build --runs "$RUNS"
+          --save baseline.json --markdown "$GITHUB_STEP_SUMMARY" --title "Baseline"
       - name: Measure the ref
         env:
-          CARGO_TARGET_DIR: ${{ github.workspace }}/target
-          EXTRA_RUSTFLAGS: ${{ inputs.rustflags }}
+          CARGO_TARGET_DIR: ${{ github.workspace }}/target-measured
           RUNS: ${{ inputs.runs }}
           HAS_BASELINE: ${{ inputs.baseline != '' }}
         run: |
-          if [ -n "$EXTRA_RUSTFLAGS" ]; then export RUSTFLAGS="$EXTRA_RUSTFLAGS"; fi
-          set -- --source measured --runs "$RUNS" --save measured.json --markdown "$GITHUB_STEP_SUMMARY" --title "Measured"
+          set -- --source measured --no-build --runs "$RUNS" --save measured.json --markdown "$GITHUB_STEP_SUMMARY" --title "Measured"
           if [ "$HAS_BASELINE" = "true" ]; then
-            set -- "$@" --check baseline.json
+            # Start-up times are noisy on shared runners: a slower median is
+            # reported in the comparison, not turned into a failed job.
+            set -- "$@" --check baseline.json --no-fail
           fi
           python3 measured/scripts/perf-report.py "$@"
       - name: Keep the numbers
