@@ -16,6 +16,7 @@ mod lavenir_profile_view;
 mod lavenir_reservations_view;
 mod navigation_page_appearance_page;
 mod navigation_page_attached_methods_page;
+mod navigation_page_back_button_page;
 mod navigation_page_events_page;
 mod navigation_page_first_look_page;
 mod navigation_page_gesture_page;
@@ -47,6 +48,7 @@ pub use lavenir_profile_view::LAvenirProfileView;
 pub use lavenir_reservations_view::LAvenirReservationsView;
 pub use navigation_page_appearance_page::NavigationPageAppearancePage;
 pub use navigation_page_attached_methods_page::NavigationPageAttachedMethodsPage;
+pub use navigation_page_back_button_page::NavigationPageBackButtonPage;
 pub use navigation_page_events_page::NavigationPageEventsPage;
 pub use navigation_page_first_look_page::NavigationPageFirstLookPage;
 pub use navigation_page_gesture_page::NavigationPageGesturePage;
@@ -79,6 +81,7 @@ pub(crate) const TYPES: &[&TypeInfo] = &[
     LAvenirReservationsView::TYPE,
     NavigationPageAppearancePage::TYPE,
     NavigationPageAttachedMethodsPage::TYPE,
+    NavigationPageBackButtonPage::TYPE,
     NavigationPageEventsPage::TYPE,
     NavigationPageFirstLookPage::TYPE,
     NavigationPageGesturePage::TYPE,
@@ -112,6 +115,7 @@ pub(crate) const CLASSES: &[&XamlClass] = &[
     &LAvenirReservationsView::XAML_CLASS,
     &NavigationPageAppearancePage::XAML_CLASS,
     &NavigationPageAttachedMethodsPage::XAML_CLASS,
+    &NavigationPageBackButtonPage::XAML_CLASS,
     &NavigationPageEventsPage::XAML_CLASS,
     &NavigationPageFirstLookPage::XAML_CLASS,
     &NavigationPageGesturePage::XAML_CLASS,
