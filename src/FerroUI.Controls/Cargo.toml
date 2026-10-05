@@ -1,0 +1,22 @@
+[package]
+name = "ferroui-controls"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+
+[lib]
+path = "lib.rs"
+
+[dependencies]
+ferroui-base.workspace = true
+bitflags.workspace = true
+
+[features]
+# Test doubles (mock windowing platform, unit-test application) for the tests
+# of this crate and of the crates built on it.
+testing = ["ferroui-base/testing"]
+
+[dev-dependencies]
+ferroui-base = { workspace = true, features = ["testing"] }

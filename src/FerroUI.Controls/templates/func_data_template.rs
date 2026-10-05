@@ -1,0 +1,150 @@
+use super::{FuncTemplateWithParam, IDataTemplate, IRecyclingDataTemplate, ITemplateWithParam};
+use crate::primitives::AccessText;
+use crate::{Control, TextBlock};
+use ferroui_base::controls::NameScopeRef;
+use ferroui_base::data::core::ValueTypes;
+use ferroui_base::data::BindingPriority;
+use ferroui_base::{AnyValue, BoxedValue, FerroObject, FerroObjectExtensions, Ref, StyledElement};
+use std::rc::Rc;
+
+/// Builds a control for a piece of data.
+///
+/// The typed constructors ([`for_type`](Self::for_type) and friends) take
+/// the place of the generic class of the same name: they match data whose
+/// boxed value holds exactly `T`.
+pub struct FuncDataTemplate {
+    base: FuncTemplateWithParam<Option<BoxedValue>, Option<Ref<Control>>>,
+    match_: Box<dyn Fn(Option<&BoxedValue>) -> bool>,
+    supports_recycling: bool,
+}
+
+thread_local! {
+    static DEFAULT: Rc<FuncDataTemplate> = FuncDataTemplate::new(
+        |_| true,
+        |data, _| {
+            data.as_ref().map(|_| {
+                let result = TextBlock::new();
+                bind_text_to_data_context(&result);
+                result.upcast()
+            })
+        },
+        true,
+    );
+    static ACCESS: Rc<FuncDataTemplate> = FuncDataTemplate::new(
+        |data| data.is_some(),
+        |data, _| {
+            data.as_ref().map(|_| {
+                let result = AccessText::new();
+                bind_text_to_data_context(&result);
+                result.upcast()
+            })
+        },
+        true,
+    );
+}
+
+/// Binds the text of a text block to the string form of its data context.
+fn bind_text_to_data_context(text_block: &TextBlock) {
+    let object: &FerroObject = text_block;
+    text_block.bind(
+        TextBlock::text_property(),
+        FerroObjectExtensions::get_observable_with(object, StyledElement::data_context_property(), |x: Option<BoxedValue>| {
+            x.map(|x| ValueTypes::to_display_string(Some(&x)))
+        }),
+        BindingPriority::LocalValue,
+    );
+}
+
+impl FuncDataTemplate {
+    /// The default data template used in the case where no matching data
+    /// template is found.
+    pub fn default_template() -> Rc<FuncDataTemplate> {
+        DEFAULT.with(Rc::clone)
+    }
+
+    /// The implementation of [`default_template`](Self::default_template)
+    /// for data that displays an access key.
+    pub fn access() -> Rc<FuncDataTemplate> {
+        ACCESS.with(Rc::clone)
+    }
+
+    /// Creates a data template.
+    ///
+    /// `match_` determines whether the data template matches the specified
+    /// data and `build` returns a control when supplied with data matching
+    /// the template and the name scope of the built content.
+    pub fn new(
+        match_: impl Fn(Option<&BoxedValue>) -> bool + 'static,
+        build: impl Fn(&Option<BoxedValue>, &NameScopeRef) -> Option<Ref<Control>> + 'static,
+        supports_recycling: bool,
+    ) -> Rc<Self> {
+        Rc::new(Self { base: FuncTemplateWithParam::new(build), match_: Box::new(match_), supports_recycling })
+    }
+
+    /// Creates a data template that matches data of type `T`.
+    pub fn for_type<T: 'static>(
+        build: impl Fn(&T, &NameScopeRef) -> Option<Ref<Control>> + 'static,
+        supports_recycling: bool,
+    ) -> Rc<Self> {
+        Self::new(|data| Self::cast::<T>(data).is_some(), Self::cast_build(build), supports_recycling)
+    }
+
+    /// Creates a data template that matches data of type `T` accepted by
+    /// `match_`.
+    pub fn for_type_with_match<T: 'static>(
+        match_: impl Fn(&T) -> bool + 'static,
+        build: impl Fn(&T, &NameScopeRef) -> Option<Ref<Control>> + 'static,
+        supports_recycling: bool,
+    ) -> Rc<Self> {
+        Self::new(
+            move |data| Self::cast::<T>(data).is_some_and(&match_),
+            Self::cast_build(build),
+            supports_recycling,
+        )
+    }
+
+    fn cast<T: 'static>(data: Option<&BoxedValue>) -> Option<&T> {
+        data.and_then(|data| {
+            let value: &dyn AnyValue = &**data;
+            value.downcast_ref::<T>()
+        })
+    }
+
+    fn cast_build<T: 'static>(
+        build: impl Fn(&T, &NameScopeRef) -> Option<Ref<Control>> + 'static,
+    ) -> impl Fn(&Option<BoxedValue>, &NameScopeRef) -> Option<Ref<Control>> + 'static {
+        move |data, scope| match Self::cast::<T>(data.as_ref()) {
+            Some(data) => build(data, scope),
+            None => panic!("The data passed to the data template is not of type {}.", std::any::type_name::<T>()),
+        }
+    }
+}
+
+impl ITemplateWithParam<Option<BoxedValue>, Option<Ref<Control>>> for FuncDataTemplate {
+    fn build(&self, param: &Option<BoxedValue>) -> Option<Ref<Control>> {
+        self.base.build(param)
+    }
+}
+
+impl IDataTemplate for FuncDataTemplate {
+    fn as_any(&self) -> Option<&dyn std::any::Any> {
+        Some(self)
+    }
+
+    fn match_(&self, data: Option<&BoxedValue>) -> bool {
+        (self.match_)(data)
+    }
+
+    fn as_recycling_data_template(&self) -> Option<&dyn IRecyclingDataTemplate> {
+        Some(self)
+    }
+}
+
+impl IRecyclingDataTemplate for FuncDataTemplate {
+    fn build_with_existing(&self, data: Option<&BoxedValue>, existing: Option<Ref<Control>>) -> Option<Ref<Control>> {
+        match existing {
+            Some(existing) if self.supports_recycling => Some(existing),
+            _ => self.base.build(&data.cloned()),
+        }
+    }
+}

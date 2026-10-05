@@ -1,0 +1,42 @@
+//! Application lifetime types.
+
+mod shutdown_requested_event_args;
+
+pub use shutdown_requested_event_args::ShutdownRequestedEventArgs;
+
+mod activatable_lifetime_base;
+mod activated_event_args;
+mod activation_kind;
+mod controlled_application_lifetime_exit_event_args;
+mod file_activated_event_args;
+mod i_activatable_application_lifetime;
+mod i_activity_application_lifetime;
+mod i_application_lifetime;
+mod i_controlled_application_lifetime;
+mod i_setup_application_lifetime;
+mod i_single_top_level_application_lifetime;
+mod i_single_view_application_lifetime;
+mod protocol_activated_event_args;
+mod startup_event_args;
+
+pub use activatable_lifetime_base::ActivatableLifetimeBase;
+pub use activated_event_args::ActivatedEventArgs;
+pub use activation_kind::ActivationKind;
+pub use controlled_application_lifetime_exit_event_args::ControlledApplicationLifetimeExitEventArgs;
+pub use file_activated_event_args::FileActivatedEventArgs;
+pub use i_activatable_application_lifetime::IActivatableLifetime;
+pub use i_activity_application_lifetime::IActivityApplicationLifetime;
+pub use i_application_lifetime::IApplicationLifetime;
+pub use i_controlled_application_lifetime::IControlledApplicationLifetime;
+pub use i_setup_application_lifetime::ISetupApplicationLifetime;
+pub use i_single_top_level_application_lifetime::ISingleTopLevelApplicationLifetime;
+pub use i_single_view_application_lifetime::ISingleViewApplicationLifetime;
+pub use protocol_activated_event_args::ProtocolActivatedEventArgs;
+pub use startup_event_args::ControlledApplicationLifetimeStartupEventArgs;
+
+mod classic_desktop_style_application_lifetime;
+mod i_classic_desktop_style_application_lifetime;
+pub use classic_desktop_style_application_lifetime::ClassicDesktopStyleApplicationLifetime;
+pub use i_classic_desktop_style_application_lifetime::IClassicDesktopStyleApplicationLifetime;
+#[cfg(test)]
+mod classic_desktop_style_application_lifetime_tests;
