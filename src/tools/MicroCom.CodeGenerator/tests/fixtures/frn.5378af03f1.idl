@@ -1,0 +1,1373 @@
+@clr-namespace FerroUI.Native.Interop
+@clr-access internal
+@clr-map bool int
+@clr-map u_int64_t ulong
+@clr-map uint64_t ulong
+@clr-map int64_t long
+@clr-map long IntPtr
+@cpp-preamble @@
+#pragma once
+#include "com.h"
+#include "stddef.h"
+@@
+
+enum FrnKey
+{
+    FrnKeyNone = 0,
+    FrnKeyCancel = 1,
+    FrnKeyBack = 2,
+    FrnKeyTab = 3,
+    FrnKeyLineFeed = 4,
+    FrnKeyClear = 5,
+    FrnKeyReturn = 6,
+    FrnKeyEnter = 6,
+    FrnKeyPause = 7,
+    FrnKeyCapsLock = 8,
+    FrnKeyCapital = 8,
+    FrnKeyHangulMode = 9,
+    FrnKeyKanaMode = 9,
+    FrnKeyJunjaMode = 10,
+    FrnKeyFinalMode = 11,
+    FrnKeyKanjiMode = 12,
+    FrnKeyHanjaMode = 12,
+    FrnKeyEscape = 13,
+    FrnKeyImeConvert = 14,
+    FrnKeyImeNonConvert = 15,
+    FrnKeyImeAccept = 16,
+    FrnKeyImeModeChange = 17,
+    FrnKeySpace = 18,
+    FrnKeyPageUp = 19,
+    FrnKeyPrior = 19,
+    FrnKeyPageDown = 20,
+    FrnKeyNext = 20,
+    FrnKeyEnd = 21,
+    FrnKeyHome = 22,
+    FrnKeyLeft = 23,
+    FrnKeyUp = 24,
+    FrnKeyRight = 25,
+    FrnKeyDown = 26,
+    FrnKeySelect = 27,
+    FrnKeyPrint = 28,
+    FrnKeyExecute = 29,
+    FrnKeySnapshot = 30,
+    FrnKeyPrintScreen = 30,
+    FrnKeyInsert = 31,
+    FrnKeyDelete = 32,
+    FrnKeyHelp = 33,
+    FrnKeyD0 = 34,
+    FrnKeyD1 = 35,
+    FrnKeyD2 = 36,
+    FrnKeyD3 = 37,
+    FrnKeyD4 = 38,
+    FrnKeyD5 = 39,
+    FrnKeyD6 = 40,
+    FrnKeyD7 = 41,
+    FrnKeyD8 = 42,
+    FrnKeyD9 = 43,
+    FrnKeyA = 44,
+    FrnKeyB = 45,
+    FrnKeyC = 46,
+    FrnKeyD = 47,
+    FrnKeyE = 48,
+    FrnKeyF = 49,
+    FrnKeyG = 50,
+    FrnKeyH = 51,
+    FrnKeyI = 52,
+    FrnKeyJ = 53,
+    FrnKeyK = 54,
+    FrnKeyL = 55,
+    FrnKeyM = 56,
+    FrnKeyN = 57,
+    FrnKeyO = 58,
+    FrnKeyP = 59,
+    FrnKeyQ = 60,
+    FrnKeyR = 61,
+    FrnKeyS = 62,
+    FrnKeyT = 63,
+    FrnKeyU = 64,
+    FrnKeyV = 65,
+    FrnKeyW = 66,
+    FrnKeyX = 67,
+    FrnKeyY = 68,
+    FrnKeyZ = 69,
+    FrnKeyLWin = 70,
+    FrnKeyRWin = 71,
+    FrnKeyApps = 72,
+    FrnKeySleep = 73,
+    FrnKeyNumPad0 = 74,
+    FrnKeyNumPad1 = 75,
+    FrnKeyNumPad2 = 76,
+    FrnKeyNumPad3 = 77,
+    FrnKeyNumPad4 = 78,
+    FrnKeyNumPad5 = 79,
+    FrnKeyNumPad6 = 80,
+    FrnKeyNumPad7 = 81,
+    FrnKeyNumPad8 = 82,
+    FrnKeyNumPad9 = 83,
+    FrnKeyMultiply = 84,
+    FrnKeyAdd = 85,
+    FrnKeySeparator = 86,
+    FrnKeySubtract = 87,
+    FrnKeyDecimal = 88,
+    FrnKeyDivide = 89,
+    FrnKeyF1 = 90,
+    FrnKeyF2 = 91,
+    FrnKeyF3 = 92,
+    FrnKeyF4 = 93,
+    FrnKeyF5 = 94,
+    FrnKeyF6 = 95,
+    FrnKeyF7 = 96,
+    FrnKeyF8 = 97,
+    FrnKeyF9 = 98,
+    FrnKeyF10 = 99,
+    FrnKeyF11 = 100,
+    FrnKeyF12 = 101,
+    FrnKeyF13 = 102,
+    FrnKeyF14 = 103,
+    FrnKeyF15 = 104,
+    FrnKeyF16 = 105,
+    FrnKeyF17 = 106,
+    FrnKeyF18 = 107,
+    FrnKeyF19 = 108,
+    FrnKeyF20 = 109,
+    FrnKeyF21 = 110,
+    FrnKeyF22 = 111,
+    FrnKeyF23 = 112,
+    FrnKeyF24 = 113,
+    FrnKeyNumLock = 114,
+    FrnKeyScroll = 115,
+    FrnKeyLeftShift = 116,
+    FrnKeyRightShift = 117,
+    FrnKeyLeftCtrl = 118,
+    FrnKeyRightCtrl = 119,
+    FrnKeyLeftAlt = 120,
+    FrnKeyRightAlt = 121,
+    FrnKeyBrowserBack = 122,
+    FrnKeyBrowserForward = 123,
+    FrnKeyBrowserRefresh = 124,
+    FrnKeyBrowserStop = 125,
+    FrnKeyBrowserSearch = 126,
+    FrnKeyBrowserFavorites = 127,
+    FrnKeyBrowserHome = 128,
+    FrnKeyVolumeMute = 129,
+    FrnKeyVolumeDown = 130,
+    FrnKeyVolumeUp = 131,
+    FrnKeyMediaNextTrack = 132,
+    FrnKeyMediaPreviousTrack = 133,
+    FrnKeyMediaStop = 134,
+    FrnKeyMediaPlayPause = 135,
+    FrnKeyLaunchMail = 136,
+    FrnKeySelectMedia = 137,
+    FrnKeyLaunchApplication1 = 138,
+    FrnKeyLaunchApplication2 = 139,
+    FrnKeyOemSemicolon = 140,
+    FrnKeyOem1 = 140,
+    FrnKeyOemPlus = 141,
+    FrnKeyOemComma = 142,
+    FrnKeyOemMinus = 143,
+    FrnKeyOemPeriod = 144,
+    FrnKeyOemQuestion = 145,
+    FrnKeyOem2 = 145,
+    FrnKeyOemTilde = 146,
+    FrnKeyOem3 = 146,
+    FrnKeyAbntC1 = 147,
+    FrnKeyAbntC2 = 148,
+    FrnKeyOemOpenBrackets = 149,
+    FrnKeyOem4 = 149,
+    FrnKeyOemPipe = 150,
+    FrnKeyOem5 = 150,
+    FrnKeyOemCloseBrackets = 151,
+    FrnKeyOem6 = 151,
+    FrnKeyOemQuotes = 152,
+    FrnKeyOem7 = 152,
+    FrnKeyOem8 = 153,
+    FrnKeyOemBackslash = 154,
+    FrnKeyOem102 = 154,
+    FrnKeyImeProcessed = 155,
+    FrnKeySystem = 156,
+    FrnKeyOemAttn = 157,
+    FrnKeyDbeAlphanumeric = 157,
+    FrnKeyOemFinish = 158,
+    FrnKeyDbeKatakana = 158,
+    FrnKeyDbeHiragana = 159,
+    FrnKeyOemCopy = 159,
+    FrnKeyDbeSbcsChar = 160,
+    FrnKeyOemAuto = 160,
+    FrnKeyDbeDbcsChar = 161,
+    FrnKeyOemEnlw = 161,
+    FrnKeyOemBackTab = 162,
+    FrnKeyDbeRoman = 162,
+    FrnKeyDbeNoRoman = 163,
+    FrnKeyAttn = 163,
+    FrnKeyCrSel = 164,
+    FrnKeyDbeEnterWordRegisterMode = 164,
+    FrnKeyExSel = 165,
+    FrnKeyDbeEnterImeConfigureMode = 165,
+    FrnKeyEraseEof = 166,
+    FrnKeyDbeFlushString = 166,
+    FrnKeyPlay = 167,
+    FrnKeyDbeCodeInput = 167,
+    FrnKeyDbeNoCodeInput = 168,
+    FrnKeyZoom = 168,
+    FrnKeyNoName = 169,
+    FrnKeyDbeDetermineString = 169,
+    FrnKeyDbeEnterDialogConversionMode = 170,
+    FrnKeyPa1 = 170,
+    FrnKeyOemClear = 171,
+    FrnKeyDeadCharProcessed = 172,
+    FrnKeyFnLeftArrow = 10001,
+    FrnKeyFnRightArrow = 10002,
+    FrnKeyFnUpArrow = 10003,
+    FrnKeyFnDownArrow = 10004,
+};
+
+enum FrnPhysicalKey
+{
+    FrnPhysicalKeyNone = 0,
+    FrnPhysicalKeyBackquote = 1,
+    FrnPhysicalKeyBackslash = 2,
+    FrnPhysicalKeyBracketLeft = 3,
+    FrnPhysicalKeyBracketRight = 4,
+    FrnPhysicalKeyComma = 5,
+    FrnPhysicalKeyDigit0 = 6,
+    FrnPhysicalKeyDigit1 = 7,
+    FrnPhysicalKeyDigit2 = 8,
+    FrnPhysicalKeyDigit3 = 9,
+    FrnPhysicalKeyDigit4 = 10,
+    FrnPhysicalKeyDigit5 = 11,
+    FrnPhysicalKeyDigit6 = 12,
+    FrnPhysicalKeyDigit7 = 13,
+    FrnPhysicalKeyDigit8 = 14,
+    FrnPhysicalKeyDigit9 = 15,
+    FrnPhysicalKeyEqual = 16,
+    FrnPhysicalKeyIntlBackslash = 17,
+    FrnPhysicalKeyIntlRo = 18,
+    FrnPhysicalKeyIntlYen = 19,
+    FrnPhysicalKeyA = 20,
+    FrnPhysicalKeyB = 21,
+    FrnPhysicalKeyC = 22,
+    FrnPhysicalKeyD = 23,
+    FrnPhysicalKeyE = 24,
+    FrnPhysicalKeyF = 25,
+    FrnPhysicalKeyG = 26,
+    FrnPhysicalKeyH = 27,
+    FrnPhysicalKeyI = 28,
+    FrnPhysicalKeyJ = 29,
+    FrnPhysicalKeyK = 30,
+    FrnPhysicalKeyL = 31,
+    FrnPhysicalKeyM = 32,
+    FrnPhysicalKeyN = 33,
+    FrnPhysicalKeyO = 34,
+    FrnPhysicalKeyP = 35,
+    FrnPhysicalKeyQ = 36,
+    FrnPhysicalKeyR = 37,
+    FrnPhysicalKeyS = 38,
+    FrnPhysicalKeyT = 39,
+    FrnPhysicalKeyU = 40,
+    FrnPhysicalKeyV = 41,
+    FrnPhysicalKeyW = 42,
+    FrnPhysicalKeyX = 43,
+    FrnPhysicalKeyY = 44,
+    FrnPhysicalKeyZ = 45,
+    FrnPhysicalKeyMinus = 46,
+    FrnPhysicalKeyPeriod = 47,
+    FrnPhysicalKeyQuote = 48,
+    FrnPhysicalKeySemicolon = 49,
+    FrnPhysicalKeySlash = 50,
+    FrnPhysicalKeyAltLeft = 51,
+    FrnPhysicalKeyAltRight = 52,
+    FrnPhysicalKeyBackspace = 53,
+    FrnPhysicalKeyCapsLock = 54,
+    FrnPhysicalKeyContextMenu = 55,
+    FrnPhysicalKeyControlLeft = 56,
+    FrnPhysicalKeyControlRight = 57,
+    FrnPhysicalKeyEnter = 58,
+    FrnPhysicalKeyMetaLeft = 59,
+    FrnPhysicalKeyMetaRight = 60,
+    FrnPhysicalKeyShiftLeft = 61,
+    FrnPhysicalKeyShiftRight = 62,
+    FrnPhysicalKeySpace = 63,
+    FrnPhysicalKeyTab = 64,
+    FrnPhysicalKeyConvert = 65,
+    FrnPhysicalKeyKanaMode = 66,
+    FrnPhysicalKeyLang1 = 67,
+    FrnPhysicalKeyLang2 = 68,
+    FrnPhysicalKeyLang3 = 69,
+    FrnPhysicalKeyLang4 = 70,
+    FrnPhysicalKeyLang5 = 71,
+    FrnPhysicalKeyNonConvert = 72,
+    FrnPhysicalKeyDelete = 73,
+    FrnPhysicalKeyEnd = 74,
+    FrnPhysicalKeyHelp = 75,
+    FrnPhysicalKeyHome = 76,
+    FrnPhysicalKeyInsert = 77,
+    FrnPhysicalKeyPageDown = 78,
+    FrnPhysicalKeyPageUp = 79,
+    FrnPhysicalKeyArrowDown = 80,
+    FrnPhysicalKeyArrowLeft = 81,
+    FrnPhysicalKeyArrowRight = 82,
+    FrnPhysicalKeyArrowUp = 83,
+    FrnPhysicalKeyNumLock = 84,
+    FrnPhysicalKeyNumPad0 = 85,
+    FrnPhysicalKeyNumPad1 = 86,
+    FrnPhysicalKeyNumPad2 = 87,
+    FrnPhysicalKeyNumPad3 = 88,
+    FrnPhysicalKeyNumPad4 = 89,
+    FrnPhysicalKeyNumPad5 = 90,
+    FrnPhysicalKeyNumPad6 = 91,
+    FrnPhysicalKeyNumPad7 = 92,
+    FrnPhysicalKeyNumPad8 = 93,
+    FrnPhysicalKeyNumPad9 = 94,
+    FrnPhysicalKeyNumPadAdd = 95,
+    FrnPhysicalKeyNumPadClear = 96,
+    FrnPhysicalKeyNumPadComma = 97,
+    FrnPhysicalKeyNumPadDecimal = 98,
+    FrnPhysicalKeyNumPadDivide = 99,
+    FrnPhysicalKeyNumPadEnter = 100,
+    FrnPhysicalKeyNumPadEqual = 101,
+    FrnPhysicalKeyNumPadMultiply = 102,
+    FrnPhysicalKeyNumPadParenLeft = 103,
+    FrnPhysicalKeyNumPadParenRight = 104,
+    FrnPhysicalKeyNumPadSubtract = 105,
+    FrnPhysicalKeyEscape = 106,
+    FrnPhysicalKeyF1 = 107,
+    FrnPhysicalKeyF2 = 108,
+    FrnPhysicalKeyF3 = 109,
+    FrnPhysicalKeyF4 = 110,
+    FrnPhysicalKeyF5 = 111,
+    FrnPhysicalKeyF6 = 112,
+    FrnPhysicalKeyF7 = 113,
+    FrnPhysicalKeyF8 = 114,
+    FrnPhysicalKeyF9 = 115,
+    FrnPhysicalKeyF10 = 116,
+    FrnPhysicalKeyF11 = 117,
+    FrnPhysicalKeyF12 = 118,
+    FrnPhysicalKeyF13 = 119,
+    FrnPhysicalKeyF14 = 120,
+    FrnPhysicalKeyF15 = 121,
+    FrnPhysicalKeyF16 = 122,
+    FrnPhysicalKeyF17 = 123,
+    FrnPhysicalKeyF18 = 124,
+    FrnPhysicalKeyF19 = 125,
+    FrnPhysicalKeyF20 = 126,
+    FrnPhysicalKeyF21 = 127,
+    FrnPhysicalKeyF22 = 128,
+    FrnPhysicalKeyF23 = 129,
+    FrnPhysicalKeyF24 = 130,
+    FrnPhysicalKeyPrintScreen = 131,
+    FrnPhysicalKeyScrollLock = 132,
+    FrnPhysicalKeyPause = 133,
+    FrnPhysicalKeyBrowserBack = 134,
+    FrnPhysicalKeyBrowserFavorites = 135,
+    FrnPhysicalKeyBrowserForward = 136,
+    FrnPhysicalKeyBrowserHome = 137,
+    FrnPhysicalKeyBrowserRefresh = 138,
+    FrnPhysicalKeyBrowserSearch = 139,
+    FrnPhysicalKeyBrowserStop = 140,
+    FrnPhysicalKeyEject = 141,
+    FrnPhysicalKeyLaunchApp1 = 142,
+    FrnPhysicalKeyLaunchApp2 = 143,
+    FrnPhysicalKeyLaunchMail = 144,
+    FrnPhysicalKeyMediaPlayPause = 145,
+    FrnPhysicalKeyMediaSelect = 146,
+    FrnPhysicalKeyMediaStop = 147,
+    FrnPhysicalKeyMediaTrackNext = 148,
+    FrnPhysicalKeyMediaTrackPrevious = 149,
+    FrnPhysicalKeyPower = 150,
+    FrnPhysicalKeySleep = 151,
+    FrnPhysicalKeyAudioVolumeDown = 152,
+    FrnPhysicalKeyAudioVolumeMute = 153,
+    FrnPhysicalKeyAudioVolumeUp = 154,
+    FrnPhysicalKeyWakeUp = 155,
+    FrnPhysicalKeyAgain = 156,
+    FrnPhysicalKeyCopy = 157,
+    FrnPhysicalKeyCut = 158,
+    FrnPhysicalKeyFind = 159,
+    FrnPhysicalKeyOpen = 160,
+    FrnPhysicalKeyPaste = 161,
+    FrnPhysicalKeyProps = 162,
+    FrnPhysicalKeySelect = 163,
+    FrnPhysicalKeyUndo = 164
+}
+
+enum SystemDecorations
+{
+    SystemDecorationsNone = 0,
+    SystemDecorationsBorderOnly = 1,
+    SystemDecorationsFull = 2,
+}
+
+enum FrnAutomationProperty
+{
+    AutomationPeer_AutomationId,
+    AutomationPeer_BoundingRectangle,
+    AutomationPeer_ClassName,
+    AutomationPeer_Name,
+    RangeValueProvider_Value,
+    ValueProvider_Value,
+    ToggleProvider_ToggleState,
+    ExpandCollapseProvider_ExpandCollapseState,
+    SelectionItemProvider_IsSelected,
+    SelectionProvider_Selection,
+}
+
+struct FrnSize
+{
+    double Width, Height;
+}
+
+struct FrnPixelSize
+{
+    int Width, Height;
+}
+
+struct FrnRect
+{
+    double X, Y, Width, Height;
+}
+
+struct FrnVector
+{
+    double X, Y;
+}
+
+struct FrnPoint
+{
+    double X, Y;
+}
+
+enum FrnScreenOrientation
+{
+    UnknownOrientation,
+    Landscape,
+    Portrait,
+    LandscapeFlipped,
+    PortraitFlipped
+}
+
+struct FrnScreen
+{
+    FrnRect Bounds;
+    FrnRect WorkingArea;
+    float Scaling;
+    bool IsPrimary;
+    FrnScreenOrientation Orientation;
+}
+
+enum FrnPixelFormat
+{
+    kFrnRgb565,
+    kFrnRgba8888,
+    kFrnBgra8888
+}
+
+struct FrnFramebuffer
+{
+    void* Data;
+    int Width;
+    int Height;
+    int Stride;
+    FrnVector Dpi;
+    FrnPixelFormat PixelFormat;
+}
+
+struct FrnColor
+{
+    byte Alpha;
+    byte Red;
+    byte Green;
+    byte Blue;
+}
+
+enum FrnRawMouseEventType
+{
+    LeaveWindow,
+    LeftButtonDown,
+    LeftButtonUp,
+    RightButtonDown,
+    RightButtonUp,
+    MiddleButtonDown,
+    MiddleButtonUp,
+    XButton1Down,
+    XButton1Up,
+    XButton2Down,
+    XButton2Up,
+    Move,
+    Wheel,
+    NonClientLeftButtonDown,
+    TouchBegin,
+    TouchUpdate,
+    TouchEnd,
+    TouchCancel,
+    Magnify,
+    Rotate,
+    Swipe,
+}
+
+enum FrnRawKeyEventType
+{
+    KeyDown,
+    KeyUp
+}
+
+enum FrnInputModifiers
+{
+    FrnInputModifiersNone = 0,
+    Alt = 1,
+    Control = 2,
+    Shift = 4,
+    Windows = 8,
+    LeftMouseButton = 16,
+    RightMouseButton = 32,
+    MiddleMouseButton = 64,
+    XButton1MouseButton = 128,
+    XButton2MouseButton = 256
+}
+
+[class-enum]
+enum FrnDragDropEffects
+{
+    None = 0,
+    Copy = 1,
+    Move = 2,
+    Link = 4,
+}
+
+[class-enum]
+enum FrnDragEventType
+{
+    Enter,
+    Over,
+    Leave,
+    Drop
+}
+
+enum FrnWindowState
+{
+    Normal,
+    Minimized,
+    Maximized,
+    FullScreen,
+}
+
+enum FrnStandardCursorType
+{
+    CursorArrow,
+    CursorIbeam,
+    CursorWait,
+    CursorCross,
+    CursorUpArrow,
+    CursorSizeWestEast,
+    CursorSizeNorthSouth,
+    CursorSizeAll,
+    CursorNo,
+    CursorHand,
+    CursorAppStarting,
+    CursorHelp,
+    CursorTopSide,
+    CursorBottomSize,
+    CursorLeftSide,
+    CursorRightSide,
+    CursorTopLeftCorner,
+    CursorTopRightCorner,
+    CursorBottomLeftCorner,
+    CursorBottomRightCorner,
+    CursorDragMove,
+    CursorDragCopy,
+    CursorDragLink,
+    CursorNone
+}
+
+enum FrnWindowEdge
+{
+    WindowEdgeNorthWest,
+    WindowEdgeNorth,
+    WindowEdgeNorthEast,
+    WindowEdgeWest,
+    WindowEdgeEast,
+    WindowEdgeSouthWest,
+    WindowEdgeSouth,
+    WindowEdgeSouthEast
+}
+
+enum FrnMenuItemToggleType
+{
+    None,
+    CheckMark,
+    Radio
+}
+
+enum FrnPlatformResizeReason
+{
+    ResizeUnspecified,
+    ResizeUser,
+    ResizeApplication,
+    ResizeLayout,
+    ResizeDpiChange,
+}
+
+enum FrnAutomationControlType
+{
+    AutomationNone,
+    AutomationButton,
+    AutomationCalendar,
+    AutomationCheckBox,
+    AutomationComboBox,
+    AutomationComboBoxItem,
+    AutomationEdit,
+    AutomationHyperlink,
+    AutomationImage,
+    AutomationListItem,
+    AutomationList,
+    AutomationMenu,
+    AutomationMenuBar,
+    AutomationMenuItem,
+    AutomationProgressBar,
+    AutomationRadioButton,
+    AutomationScrollBar,
+    AutomationSlider,
+    AutomationSpinner,
+    AutomationStatusBar,
+    AutomationTab,
+    AutomationTabItem,
+    AutomationText,
+    AutomationToolBar,
+    AutomationToolTip,
+    AutomationTree,
+    AutomationTreeItem,
+    AutomationCustom,
+    AutomationGroup,
+    AutomationThumb,
+    AutomationDataGrid,
+    AutomationDataItem,
+    AutomationDocument,
+    AutomationSplitButton,
+    AutomationWindow,
+    AutomationPane,
+    AutomationHeader,
+    AutomationHeaderItem,
+    AutomationTable,
+    AutomationTitleBar,
+    AutomationSeparator,
+    AutomationExpander,
+}
+
+enum FrnLandmarkType
+{
+    LandmarkNone = -1,
+    LandmarkBanner,
+    LandmarkComplementary,
+    LandmarkContentInfo,
+    LandmarkRegion,
+    LandmarkForm,
+    LandmarkMain,
+    LandmarkNavigation,
+    LandmarkSearch,
+}
+
+enum FrnWindowTransparencyMode
+{
+    Opaque,
+    Transparent,
+    Blur
+}
+
+enum FrnPlatformThemeVariant
+{
+    Light,
+    Dark,
+    HighContrastLight,
+    HighContrastDark,
+}
+
+enum FrnPointerDeviceType
+{
+    Mouse,
+    Pen,
+}
+
+enum FrnLiveSetting
+{
+    LiveSettingOff,
+    LiveSettingPolite,
+    LiveSettingAssertive,
+}
+
+[uuid(809c652e-7396-11d2-9771-00a0c9b4d50c)]
+interface IFerroNativeFactory : IUnknown
+{
+     HRESULT Initialize(IFrnGCHandleDeallocatorCallback* deallocator, IFrnApplicationEvents* appCb,
+        IFrnDispatcher* dispatcher);
+     IFrnMacOptions* GetMacOptions();
+     HRESULT CreateTopLevel(IFrnTopLevelEvents* cb, IFrnTopLevel** ppv);
+     HRESULT CreateWindow(IFrnWindowEvents* cb, IFrnWindow** ppv);
+     HRESULT CreatePopup(IFrnWindowEvents* cb, IFrnPopup** ppv);
+     HRESULT CreatePlatformThreadingInterface(IFrnPlatformThreadingInterface** ppv);
+     HRESULT CreateStorageProvider(IFrnStorageProvider** ppv);
+     HRESULT CreateScreens(IFrnScreenEvents* cb, IFrnScreens** ppv);
+     HRESULT CreateClipboard(IFrnClipboard** ppv);
+     HRESULT CreateCursorFactory(IFrnCursorFactory** ppv);
+     HRESULT ObtainGlDisplay(IFrnGlDisplay** ppv);
+     HRESULT ObtainMetalDisplay(IFrnMetalDisplay** ppv);
+     HRESULT SetAppMenu(IFrnMenu* menu);
+     HRESULT SetServicesMenu(IFrnMenu* menu);
+     HRESULT CreateMenu(IFrnMenuEvents* cb, IFrnMenu** ppv);
+     HRESULT CreateMenuItem(IFrnMenuItem** ppv);
+     HRESULT CreateMenuItemSeparator(IFrnMenuItem** ppv);
+     HRESULT CreateTrayIcon(IFrnTrayIcon** ppv);
+     HRESULT CreateApplicationCommands(IFrnApplicationCommands** ppv);
+     HRESULT CreatePlatformSettings(IFrnPlatformSettings** ppv);
+     HRESULT CreatePlatformBehaviorInhibition(IFrnPlatformBehaviorInhibition** ppv);
+     HRESULT CreatePlatformRenderTimer(IFrnPlatformRenderTimer** ppv);
+     HRESULT ImportMTLSharedEvent([intptr]void* idMtlSharedEvent, IFrnMTLSharedEvent** ppv);
+     HRESULT CreateMemoryManagementHelper(IFrnNativeObjectsMemoryManagement** ppv);
+     HRESULT SetDockMenu(IFrnMenu* menu);
+}
+
+[uuid(233e094f-9b9f-44a3-9a6e-6948bbdd9fb1)]
+interface IFrnString : IUnknown
+{
+     HRESULT Pointer(void**retOut);
+     HRESULT Length(int*ret);
+}
+
+[uuid(e8cccd3e-e6dc-430a-a0b9-2ce7d7922de6)]
+interface IFrnTopLevel : IUnknown
+{
+     HRESULT GetClientSize(FrnSize*ret);
+     HRESULT GetScaling(double*ret);
+     
+     HRESULT Invalidate();
+     
+     HRESULT PointToClient(FrnPoint point, FrnPoint*ret);
+     HRESULT PointToScreen(FrnPoint point, FrnPoint*ret);
+     
+     HRESULT SetCursor(IFrnCursor* cursor);
+     HRESULT CreateGlRenderTarget(IFrnGlContext* context, IFrnGlSurfaceRenderTarget** ret);
+     HRESULT CreateSoftwareRenderTarget(IFrnSoftwareRenderTarget** ret);
+     HRESULT CreateMetalRenderTarget(IFrnMetalDevice* device, IFrnMetalRenderTarget** ret);
+     
+     HRESULT ObtainNSViewHandle([intptr]void** retOut);
+     HRESULT ObtainNSViewHandleRetained([intptr]void** retOut);
+     
+     HRESULT CreateNativeControlHost(IFrnNativeControlHost** retOut);
+     
+     HRESULT GetInputMethod(IFrnTextInputMethod **ppv);
+     HRESULT SetTransparencyMode(FrnWindowTransparencyMode mode);
+     
+     HRESULT GetCurrentDisplayId(uint* ret);
+
+     HRESULT BeginDragAndDropOperation(
+             FrnDragDropEffects effects,
+             FrnPoint point,
+             IFrnClipboardDataSource* source,
+             IFrnDndResultCallback* callback,
+             [intptr]void* sourceHandle);
+}
+
+[uuid(e5aca675-02b7-4129-aa79-d6e417210bda), cpp-virtual-inherits]
+interface IFrnWindowBase : IFrnTopLevel
+{
+     HRESULT GetFrameSize(FrnSize*result);
+     HRESULT SetFrameThemeVariant(FrnPlatformThemeVariant mode);
+     HRESULT SetParent(IFrnWindowBase* parent);
+     HRESULT Show(bool activate, bool isDialog);
+     HRESULT Hide();
+     HRESULT Close();
+     HRESULT Activate(); 
+     HRESULT SetMinMaxSize(FrnSize minSize, FrnSize maxSize);
+     HRESULT Resize(double width, double height, FrnPlatformResizeReason reason);
+     HRESULT BeginMoveDrag();
+     HRESULT BeginResizeDrag(FrnWindowEdge edge);
+     HRESULT GetPosition(FrnPoint*ret);
+     HRESULT SetPosition(FrnPoint point);
+     HRESULT SetTopMost(bool value);
+     HRESULT SetMainMenu(IFrnMenu* menu);
+     HRESULT ObtainNSWindowHandle([intptr]void** retOut);
+     HRESULT ObtainNSWindowHandleRetained([intptr]void** retOut);
+}
+
+[uuid(83e588f3-6981-4e48-9ea0-e1e569f79a91), cpp-virtual-inherits]
+interface IFrnPopup : IFrnWindowBase
+{
+    
+}
+
+[uuid(cab661de-49d6-4ead-b59c-eac9b2b6c28d), cpp-virtual-inherits]
+interface IFrnWindow : IFrnWindowBase
+{
+     HRESULT SetEnabled(bool enable);
+     HRESULT SetCanResize(bool value);
+     HRESULT SetCanMinimize(bool value);
+     HRESULT SetCanMaximize(bool value);
+     HRESULT SetDecorations(SystemDecorations value);
+     HRESULT SetTitle(char* utf8Title);
+     HRESULT SetTitleBarColor(FrnColor color);
+     HRESULT SetWindowState(FrnWindowState state);
+     HRESULT GetWindowState(FrnWindowState*ret);
+     HRESULT TakeFocusFromChildren();
+     HRESULT SetExtendClientArea(bool enable);
+     HRESULT GetExtendTitleBarHeight(double*ret);
+     HRESULT SetExtendTitleBarHeight(double value);
+     HRESULT GetWindowZOrder(long*ret);
+}
+
+[uuid(fda9c1b3-69e0-43d7-9459-8cc97cb41f6a)]
+interface IFrnTopLevelEvents : IUnknown
+{
+    void Closed();
+
+    HRESULT Paint();
+    void Resized([const] FrnSize& size, FrnPlatformResizeReason reason);
+    void RawMouseEvent(FrnRawMouseEventType type,
+                                    FrnPointerDeviceType deviceType,
+                                    u_int64_t timeStamp,
+                                    FrnInputModifiers modifiers,
+                                    FrnPoint point,
+                                    FrnVector delta,
+                                    float pressure,
+                                    float xTilt,
+                                    float yTilt
+                                    );
+    bool RawKeyEvent(FrnRawKeyEventType type, u_int64_t timeStamp, FrnInputModifiers modifiers,
+                          FrnKey key, FrnPhysicalKey physicalKey, [const] char* keySymbol);
+    bool RawTextInputEvent(u_int64_t timeStamp, [const] char* text);
+    void ScalingChanged(double scaling);
+    void RunRenderPriorityJobs();
+    void LostFocus();
+    
+    IFrnAutomationPeer* GetAutomationPeer();
+    
+    
+    FrnDragDropEffects DragEvent(FrnDragEventType type, FrnPoint position,
+                                         FrnInputModifiers modifiers, FrnDragDropEffects effects,
+                                         IFrnClipboard* clipboard, [intptr]void* dataTransferHandle);
+}
+
+[uuid(939b6599-40a8-4710-a4c8-5d72d8f174fb)]
+interface IFrnWindowBaseEvents : IFrnTopLevelEvents
+{
+     void Activated();
+     void Deactivated();
+     void PositionChanged(FrnPoint position);
+}
+
+[uuid(1ae178ee-1fcc-447f-b6dd-b7bb727f934c)]
+interface IFrnWindowEvents : IFrnWindowBaseEvents
+{
+    /**
+     * Closing Event
+     * Called when the user presses the OS window close button.
+     * return true to allow the close, return false to prevent close.
+     */
+     bool Closing();
+    
+     void WindowStateChanged(FrnWindowState state);
+    
+     void GotInputWhenDisabled();
+}
+
+[uuid(f2079145-a2d9-42b8-a85e-2732e3c2b055)]
+interface IFrnTextInputMethodClient : IUnknown
+{
+    void SetPreeditText(char* preeditText);
+    void SelectInSurroundingText(int start, int length);
+}
+
+[uuid(1382a29f-e260-4c7a-b83f-c99fc72e27c2)]
+interface IFrnTextInputMethod : IUnknown
+{
+    HRESULT SetClient(IFrnTextInputMethodClient* client);
+    void Reset();
+    void SetCursorRect(FrnRect rect);
+    void SetSurroundingText(char* text, int anchorOffset, int cursorOffset);
+}
+
+[uuid(e34ae0f8-18b4-48a3-b09d-2e6b19a3cf5e)]
+interface IFrnMacOptions : IUnknown
+{
+     HRESULT SetShowInDock(int show);
+     HRESULT SetApplicationTitle(char* utf8string);
+     HRESULT SetDisableSetProcessName(int disable);
+     HRESULT SetDisableAppDelegate(int disable);
+}
+
+[uuid(04c1b049-1f43-418a-9159-cae627ec1367)]
+interface IFrnActionCallback : IUnknown
+{
+     void Run();
+}
+
+[uuid(6df4d2db-0b80-4f59-ad88-0baa5e21eb14)]
+interface IFrnPlatformThreadingInterfaceEvents : IUnknown
+{
+     void Signaled();
+     void Timer();
+     void ReadyForBackgroundProcessing();
+}
+
+[uuid(97330f88-c22b-4a8e-a130-201520091b01)]
+interface IFrnLoopCancellation : IUnknown
+{
+     void Cancel();
+}
+
+[uuid(fbc06f3d-7860-42df-83fd-53c4b02dd9c3)]
+interface IFrnPlatformThreadingInterface : IUnknown
+{
+     bool GetCurrentThreadIsLoopThread();
+     void SetEvents(IFrnPlatformThreadingInterfaceEvents* cb);
+     IFrnLoopCancellation* CreateLoopCancellation();
+     void RunLoop(IFrnLoopCancellation* cancel);
+     void Signal();
+     void UpdateTimer(int ms);
+     void RequestBackgroundProcessing();
+}
+
+[uuid(6c621a6e-e4c1-4ae3-9749-83eeeffa09b6)]
+interface IFrnSystemDialogEvents : IUnknown
+{
+     void OnCompleted(IFrnStringArray*array);
+     void OnCompletedWithFilter(IFrnStringArray*array, int selectedFilterIndex);
+}
+
+[uuid(4d7a47db-a944-4061-abe7-62cb6aa0ffd5)]
+interface IFrnStorageProvider : IUnknown
+{
+     void SelectFolderDialog(IFrnTopLevel* parentTopLevel,
+                             IFrnSystemDialogEvents* events,
+                             bool allowMultiple,
+                             [const] char* title,
+                             [const] char* initialPath);
+
+     void OpenFileDialog(IFrnTopLevel* parentTopLevel,
+                                 IFrnSystemDialogEvents* events,
+                                 bool allowMultiple,
+                                 [const] char* title,
+                                 [const] char* initialDirectory,
+                                 [const] char* initialFile,
+                                 IFrnFilePickerFileTypes* filters);
+
+     void SaveFileDialog(IFrnTopLevel* parentTopLevel,
+                                 IFrnSystemDialogEvents* events,
+                                 [const] char* title,
+                                 [const] char* initialDirectory,
+                                 [const] char* initialFile,
+                                 IFrnFilePickerFileTypes* filters);
+
+     HRESULT SaveBookmarkToBytes(IFrnString*fileUri, void**err, IFrnString**ppv);
+     HRESULT ReadBookmarkFromBytes(void* ptr, int len, IFrnString**ppv);
+
+     void ReleaseBookmark(IFrnString*fileUri);
+
+     bool OpenSecurityScope(IFrnString*fileUri);
+     void CloseSecurityScope(IFrnString*fileUri);
+
+     HRESULT TryResolveFileReferenceUri(IFrnString* fileUri, IFrnString** ret);
+}
+
+[uuid(4d7ab7db-a111-406f-abeb-11cb6aa033d5)]
+interface IFrnFilePickerFileTypes : IUnknown
+{
+    int GetCount(); 
+    bool IsDefaultType(int index);
+    bool IsAnyType(int index);
+    IFrnString* GetName(int index);
+    HRESULT GetPatterns(int index, IFrnStringArray**ppv);
+    HRESULT GetExtensions(int index, IFrnStringArray**ppv);
+    HRESULT GetMimeTypes(int index, IFrnStringArray**ppv);
+    HRESULT GetAppleUniformTypeIdentifiers(int index, IFrnStringArray**ppv);
+}
+
+[uuid(424b1bd4-a111-4987-bfd0-9d642154b1b3)]
+interface IFrnScreenEvents : IUnknown
+{
+    HRESULT OnChanged();
+}
+
+[uuid(9a52bc7a-d8c7-4230-8d34-704a0b70a933)]
+interface IFrnScreens : IUnknown
+{
+     HRESULT GetScreenIds(uint* ptrFirstResult, int* ret);
+     HRESULT GetScreen(uint screenId, void** localizedName, FrnScreen* ret);
+}
+
+[uuid(792b1bd4-76cc-46ea-bfd0-9d642154b1b3)]
+interface IFrnClipboard : IUnknown
+{
+    HRESULT GetFormats(int64_t changeCount, IFrnStringArray** ret);
+    HRESULT GetItemCount(int64_t changeCount, int* ret);
+    HRESULT GetItemFormats(int index, int64_t changeCount, IFrnStringArray** ret);
+    HRESULT GetItemValueAsString(int index, int64_t changeCount, [const] char* format, IFrnString** ret);
+    HRESULT GetItemValueAsBytes(int index, int64_t changeCount, [const] char* format, IFrnString** ret);
+    HRESULT Clear(int64_t* ret);
+    HRESULT GetChangeCount(int64_t* ret);
+    HRESULT SetData(IFrnClipboardDataSource* dataSource);
+    bool IsTextFormat([const] char* format);
+}
+
+[uuid(10b39f02-efcb-428b-bee5-a0b012c1fb7d)]
+interface IFrnClipboardDataSource : IUnknown
+{
+    int GetItemCount();
+    HRESULT GetItem(int index, IFrnClipboardDataItem**ppv);
+}
+
+[uuid(e40f36d9-69f4-45fd-9ca2-6e64e80feb6d)]
+interface IFrnClipboardDataItem : IUnknown
+{
+    HRESULT ProvideFormats(IFrnStringArray** ppv);
+    HRESULT GetValue([const] char* format, IFrnClipboardDataValue** ppv);
+}
+
+[uuid(e97f24f6-1c84-4d95-8ffe-5b2c72e016ed)]
+interface IFrnClipboardDataValue : IUnknown
+{
+    bool IsString();
+    IFrnString* AsString();
+    long GetByteLength();
+    void CopyBytesTo(void* buffer);
+}
+
+[uuid(3f998545-f027-4d4d-bd2a-1a80926d984e)]
+interface IFrnCursor : IUnknown
+{
+}
+
+[uuid(51ecfb12-c427-4757-a2c9-1596bfce53ef)]
+interface IFrnCursorFactory : IUnknown
+{
+     HRESULT GetCursor(FrnStandardCursorType cursorType, IFrnCursor** retOut);
+     HRESULT CreateCustomCursor (void* bitmapData, size_t length, FrnPixelSize hotPixel, IFrnCursor** retOut);
+}
+
+[uuid(931062d2-5bc8-4062-8588-83dd8deb99c2)]
+interface IFrnSoftwareRenderTarget : IUnknown
+{
+     HRESULT SetFrame(FrnFramebuffer* fb);
+}
+
+
+[uuid(60452465-8616-40af-bc00-042e69828ce7)]
+interface IFrnGlDisplay : IUnknown
+{
+     HRESULT CreateContext(IFrnGlContext* share, IFrnGlContext**ppv);
+     void LegacyClearCurrentContext();
+     HRESULT WrapContext([intptr]void* native, IFrnGlContext**ppv);
+     [intptr]void* GetProcAddress(char* proc);
+}
+
+[uuid(78c5711e-2a98-40d2-bac4-0cc9a49dc4f3)]
+interface IFrnGlContext : IUnknown
+{
+     HRESULT MakeCurrent(IUnknown** ppv);
+     HRESULT LegacyMakeCurrent();
+     int GetSampleCount();
+     int GetStencilSize();
+     [intptr]void* GetNativeHandle();
+     int texImageIOSurface2D(int target, int internal_format,
+     						int width, int height, int format, int type, [intptr]void* ioSurface, int plane);
+     bool GetIOKitRegistryId(uint64_t* value);
+}
+
+[uuid(931062d2-5bc8-4062-8588-83dd8deb99c2)]
+interface IFrnGlSurfaceRenderTarget : IUnknown
+{
+     HRESULT BeginDrawing(IFrnGlSurfaceRenderingSession** ret);
+}
+
+[uuid(e625b406-f04c-484e-946a-4abd2c6015ad)]
+interface IFrnGlSurfaceRenderingSession : IUnknown
+{
+     HRESULT GetPixelSize(FrnPixelSize* ret);
+     HRESULT GetScaling(double* ret);
+}
+
+[uuid(da291767-4db3-4598-893d-09ecaa23893f)]
+interface IFrnMetalDisplay : IUnknown
+{
+    HRESULT CreateDevice(IFrnMetalDevice** ret);
+}
+
+[uuid(969fa914-b74a-4c9f-8725-5160dc63579e)]
+interface IFrnMetalDevice : IUnknown
+{
+    [intptr]void* GetDevice();
+    [intptr]void* GetQueue();
+    bool GetIOKitRegistryId(uint64_t* value);
+    HRESULT ImportIOSurface([intptr]void* handle, FrnPixelFormat pixelFormat, IFrnMetalTexture** ppv);
+    HRESULT ImportSharedEvent([intptr]void*mtlSharedEventInstance, IFrnMTLSharedEvent**ppv);
+    HRESULT SubmitWait(IFrnMTLSharedEvent* ev, uint64_t value);
+    HRESULT SubmitSignal(IFrnMTLSharedEvent* ev, uint64_t value);
+}
+
+[uuid(f1306b71-eca0-426e-8700-105192693b1a)]
+interface IFrnMetalRenderTarget : IUnknown
+{
+    HRESULT BeginDrawing(IFrnMetalRenderingSession** ret);
+}
+
+[uuid(a1f4fcde-9152-48bd-bf8a-b1b651134a69)]
+interface IFrnMTLSharedEvent : IUnknown
+{
+    [intptr]void* GetNativeHandle();
+    bool Wait(uint64_t value, uint64_t timeoutMS);
+    void SetSignaledValue(uint64_t value);
+    uint64_t GetSignaledValue();
+}
+
+[uuid(722aad20-a87b-4ce5-b50f-f05cfa4cda39)]
+interface IFrnMetalTexture
+{
+    [intptr]void* GetNativeHandle();
+    int GetWidth();
+    int GetHeight();
+    int GetSampleCount();
+}
+
+[uuid(74027aa2-5262-45a5-a74a-5a53373dcc17)]
+interface IFrnNativeObjectsMemoryManagement
+{
+    void RetainNSObject([intptr] void* obj);
+    void ReleaseNSObject([intptr] void* obj);
+    uint64_t GetRetainCountForNSObject([intptr] void* obj);
+    void RetainCFObject([intptr] void* obj);
+    void ReleaseCFObject([intptr] void* obj);
+    int64_t GetRetainCountForCFObject([intptr] void* obj);
+}
+    
+[uuid(e625b406-f04c-484e-946a-4abd2c6015ad)]
+interface IFrnMetalRenderingSession : IUnknown
+{
+     HRESULT GetPixelSize(FrnPixelSize* ret);
+     double GetScaling();
+     [intptr]void* GetTexture();
+}
+
+[uuid(60992d19-38f0-4141-a0a9-76ac303801f3)]
+interface IFrnTrayIcon : IUnknown
+{
+    HRESULT SetIcon(void* data, size_t length);
+    HRESULT SetMenu(IFrnMenu* menu);
+    HRESULT SetIsVisible(bool isVisible);
+    HRESULT SetToolTipText(char* text);
+    HRESULT SetIsTemplateIcon(bool text);
+}
+
+[uuid(a7724dc1-cf6b-4fa8-9d23-228bf2593edc)]
+interface IFrnMenu : IUnknown
+{
+     HRESULT InsertItem(int index, IFrnMenuItem* item);
+     HRESULT RemoveItem(IFrnMenuItem* item);
+     HRESULT SetTitle(char* utf8String);
+     HRESULT Clear();
+}
+
+[uuid(59e0586d-bd1c-4b85-9882-80d448b0fed9)]
+interface IFrnPredicateCallback : IUnknown
+{
+     bool Evaluate();
+}
+
+[uuid(f890219a-1720-4cd5-9a26-cd95fccbf53c)]
+interface IFrnMenuItem : IUnknown
+{
+     HRESULT SetSubMenu(IFrnMenu* menu);
+     HRESULT SetTitle(char* utf8String);
+     HRESULT SetToolTip(char* utf8String);
+     HRESULT SetGesture(FrnKey key, FrnInputModifiers modifiers);
+     HRESULT SetAction(IFrnPredicateCallback* predicate, IFrnActionCallback* callback);
+     HRESULT SetIsChecked(bool isChecked);
+     HRESULT SetIsVisible(bool isVisible);
+     HRESULT SetToggleType(FrnMenuItemToggleType toggleType);
+     HRESULT SetIcon(void* data, size_t length);
+}
+
+[uuid(0af7df53-7632-42f4-a650-0992c361b477)]
+interface IFrnMenuEvents : IUnknown
+{
+     void NeedsUpdate();
+     void Opening();
+     void Closed();
+}
+
+[uuid(5142bb41-66ab-49e7-bb37-cd079c000f27)]
+interface IFrnStringArray : IUnknown
+{
+     uint GetCount();
+     HRESULT Get(uint index, IFrnString**ppv);
+}
+
+[uuid(a13d2382-3b3a-4d1c-9b27-8f34653d3f01)]
+interface IFrnDndResultCallback : IUnknown
+{
+     void OnDragAndDropComplete(FrnDragDropEffects effecct);
+}
+
+[uuid(f07c608e-52e9-422d-836e-c70f6e9b80f5)]
+interface IFrnGCHandleDeallocatorCallback : IUnknown
+{
+     void FreeGCHandle([intptr]void* handle);
+}
+
+[uuid(96688589-5dc7-41ec-9ce3-d481942454ee)]
+interface IFrnDispatcher : IUnknown
+{
+    void Post(IFrnActionCallback* cb);
+}
+
+[uuid(91c7f677-f26b-4ff3-93cc-cf15aa966ffa)]
+interface IFrnNativeControlHost : IUnknown
+{
+     HRESULT CreateDefaultChild([intptr]void* parent, [intptr]void** retOut);
+     IFrnNativeControlHostTopLevelAttachment* CreateAttachment();
+     void DestroyDefaultChild([intptr]void* child);
+}
+
+[uuid(14a9e164-1aae-4271-bb78-7b5230999b52)]
+interface IFrnNativeControlHostTopLevelAttachment : IUnknown
+{
+     [intptr]void* GetParentHandle();
+     HRESULT InitializeWithChildHandle([intptr]void* child);
+     HRESULT AttachTo(IFrnNativeControlHost* host);
+     void ShowInBounds(float x, float y, float width, float height);
+     void HideWithSize(float width, float height);
+     void ReleaseChild();
+}
+
+[uuid(6575b5af-f27a-4609-866c-f1f014c20f79)]
+interface IFrnApplicationEvents : IUnknown
+{
+     void FilesOpened (IFrnStringArray* args);
+     void UrlsOpened (IFrnStringArray* urls);
+     bool TryShutdown();
+     void OnReopen ();
+     void OnHide ();
+     void OnUnhide ();
+     void OnActivate();
+     void OnDeactivate();
+}
+
+[uuid(b4284791-055b-4313-8c2e-50f0a8c72ce9)]
+interface IFrnApplicationCommands : IUnknown
+{
+    HRESULT UnhideApp();
+    HRESULT HideApp();
+    HRESULT ShowAll();
+    HRESULT HideOthers();
+}
+
+[uuid(b87016f3-7eec-41de-b385-07844c268dc4)]
+interface IFrnAutomationPeer : IUnknown
+{
+     IFrnAutomationNode* GetNode();
+     void SetNode(IFrnAutomationNode* node);
+
+     IFrnString* GetAcceleratorKey();
+     IFrnString* GetAccessKey();
+     FrnAutomationControlType GetAutomationControlType();
+     IFrnString* GetAutomationId();
+     FrnRect GetBoundingRectangle();
+     IFrnAutomationPeerArray* GetChildren();
+     IFrnString* GetClassName();
+     IFrnAutomationPeer* GetLabeledBy();
+     IFrnString* GetName();
+     IFrnAutomationPeer* GetParent();
+     IFrnAutomationPeer* GetVisualRoot();
+     bool HasKeyboardFocus();
+     bool IsContentElement();
+     bool IsControlElement();
+     bool IsEnabled();
+     bool IsKeyboardFocusable();
+     void SetFocus();
+     bool ShowContextMenu();
+
+     IFrnAutomationPeer* GetRootPeer();
+     
+     bool IsInteropPeer();
+     [intptr]void* InteropPeer_GetNativeControlHandle();
+          
+     bool IsRootProvider();
+     IFrnWindowBase* RootProvider_GetWindow();
+     IFrnAutomationPeer* RootProvider_GetFocus();
+     IFrnAutomationPeer* RootProvider_GetPeerFromPoint(FrnPoint point);
+
+     bool IsEmbeddedRootProvider();
+     IFrnAutomationPeer* EmbeddedRootProvider_GetFocus();
+     IFrnAutomationPeer* EmbeddedRootProvider_GetPeerFromPoint(FrnPoint point);
+
+     bool IsExpandCollapseProvider();
+     bool ExpandCollapseProvider_GetIsExpanded();
+     bool ExpandCollapseProvider_GetShowsMenu();
+     void ExpandCollapseProvider_Expand();
+     void ExpandCollapseProvider_Collapse();
+     
+     bool IsInvokeProvider();
+     void InvokeProvider_Invoke();
+     
+     bool IsRangeValueProvider();
+     double RangeValueProvider_GetValue();
+     double RangeValueProvider_GetMinimum();
+     double RangeValueProvider_GetMaximum();
+     double RangeValueProvider_GetSmallChange();
+     double RangeValueProvider_GetLargeChange();
+     void RangeValueProvider_SetValue(double value);
+     
+     bool IsSelectionItemProvider();
+     bool SelectionItemProvider_IsSelected();
+     
+     bool IsToggleProvider();
+     int ToggleProvider_GetToggleState();
+     void ToggleProvider_Toggle();
+     
+     bool IsValueProvider();
+     IFrnString* ValueProvider_GetValue();
+     void ValueProvider_SetValue([const] char* value);
+
+     IFrnString* GetHelpText();
+     IFrnString* GetPlaceholderText();
+
+     FrnLandmarkType GetLandmarkType();
+     int GetHeadingLevel();
+
+     FrnLiveSetting GetLiveSetting();
+}
+
+[uuid(b00af5da-78af-4b33-bfff-4ce13a6239a9)]
+interface IFrnAutomationPeerArray : IUnknown
+{
+     uint GetCount();
+     HRESULT Get(uint index, IFrnAutomationPeer**ppv);
+}
+
+[uuid(004dc40b-e435-49dc-bac5-6272ee35382a)]
+interface IFrnAutomationNode : IUnknown
+{
+    void Dispose();
+    void ChildrenChanged();
+    void PropertyChanged(FrnAutomationProperty property);
+    void FocusChanged();
+}
+
+[uuid(d1f009cc-9d2d-493b-845d-90d2c104baae)]
+interface IFrnPlatformSettings : IUnknown
+{
+    FrnPlatformThemeVariant GetPlatformTheme();
+    uint GetAccentColor();
+    void RegisterColorsChange(IFrnActionCallback* callback);
+}
+
+[uuid(12edf00d-5803-4d3f-9947-b4840e5e9372)]
+interface IFrnPlatformBehaviorInhibition : IUnknown
+{
+    void SetInhibitAppSleep(bool inhibitAppSleep, char* reason);
+}
+
+[uuid(22edf20d-5803-2d3f-9247-b4842e5e9322)]
+interface IFrnPlatformRenderTimer : IUnknown
+{
+    int RegisterTick(IFrnActionCallback* callback);
+    void Start();
+    void Stop();
+    bool RunsInBackground();
+}

@@ -1,0 +1,20 @@
+[package]
+name = "microcom-codegen"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+
+[lib]
+path = "lib.rs"
+
+[[bin]]
+name = "microcom-codegen"
+path = "main.rs"
+
+[[test]]
+name = "cpp_header"
+path = "tests/cpp_header.rs"
+
+[dependencies]
