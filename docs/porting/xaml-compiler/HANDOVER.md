@@ -13,7 +13,12 @@
   `emitter::repository_documents::measure_theme_documents`.
 - Everything E2 adds exists only with the `compiler-metadata` feature of the base crate (section
   7, "Cost"); a default build carries none of it.
-- Stage E3 is next (section 7). Nothing is half-done in the working tree.
+- Stage E3 is DONE on branch `xaml-compiler-e3` (pull request #17, against `xaml-compiler-e2`,
+  linear, rebased on `xaml-compiler-e2`). Corpus: 100 of 102 documents eligible, all 100 match the
+  run-time loader; the two that are not eligible need E4 (a style with a selector, a control
+  template). Theme documents: 10 of 163 eligible; 143 stop at templates
+  (`XamlDeferredContentInitializeIntermediateRootNode`, E4), see section 8.
+- Stage E4 is next (section 8). Nothing is half-done in the working tree of E3.
 
 Design documents in the repository: `docs/porting/xaml.md`, sections 9 (emitter design: call forms
 A/B/C, build integration, code-behind), 9.5 (source scanner), 9.12 (the 14 rulings), 9.13, and
@@ -412,3 +417,56 @@ Next, E3 (stack it on `xaml-compiler-e2`):
 Members still without a typed function (form C would be needed, or a macro extension): events,
 fields, indexers, and declarations of types that are not local to the declaring crate (none
 exist today: every declaration compiled with the generated `impl`).
+
+## 8. What stage E3 delivered, and the next steps
+
+E3 (branch `xaml-compiler-e3`):
+
+- The context moved into the runtime library: `ferroui_markup_xaml::xaml_il::runtime::XamlIlContext`
+  (with its definition, the service contracts, the name scope field and `FrameworkContextServices`);
+  the loader re-exports it as `RuntimeContext`. Generated build functions create it with
+  `rt::populate_context` (base URI of the document, its namespace information as a shared constant
+  `XML_NAMESPACES_<n>`, name scope field, inner service provider) and push and pop the parent stack
+  exactly where the interpreter does (`ParentStackNodes`, the decision of `ParentStackVisitor`).
+  The emitter checks that the configuration describes `rt::FRAMEWORK_CONTEXT`.
+- Markup extensions: the extension object, the provide-value target property set around the call
+  (registered property definition, `rt::clr_property_info` for a plain property, else the name),
+  `ProvideValue` through its typed function with `rt::service_provider(&context)`. Options
+  extensions (`OnPlatform`, `OnFormFactor`) as a labeled block over the branches.
+- Setters: the binding setter (`rt::bind`), the unset-value setter, the framework's `Setter.Value`
+  setter, assignments whose setter is chosen at run time (the plan of the interpreter, unrolled:
+  `rt::is_instance` per setter, the null fallback, `rt::no_setter`), and the checked cast of an
+  `object` value to a declared setter (`rt::cast_checked`).
+- Resources: the resource adder setter, `EnsureCapacityNode`, deferred content as a closure
+  (`rt::deferred_builder`, `rt::deferred_context`, `rt::deferred_content` = `DeferredTransformationFactoryV3`).
+- `x:Type` (`Kind::SystemType`, written in the representation the destination declares),
+  `x:Static` of static properties and of metadata fields (new typed function `__markup_field_<Name>`,
+  `MarkupField::emit`), property nodes and fields (`rt::property`), font families, flags values
+  (new typed function `__markup_flags` of `ferro_markup_enum!(flags ..)`).
+- Compiled binding paths (`XamlIlBindingPathNode`): one builder call per element; plain properties
+  through `rt::path_property` (the typed element of the declaration when the path is typed, else the
+  property info). Indexers, methods and commands in paths stay not eligible.
+- A value with a manipulation that is not an object is held in a local (this was a real bug of E2:
+  the manipulation acted on fresh copies). The differential dump shows nullable values by content,
+  type values, resources, transitions, control themes with their setters, enumeration values and
+  the declared properties of plain values.
+
+The new typed functions (`__markup_field_<Name>`, `__markup_flags`) and `MarkupField::emit` exist
+only with the `compiler-metadata` feature, like everything E2 added. Generated code names prelude
+items by their full paths, as E2 does.
+
+Run-time checks of generated code use the cast registry (`ValueTypes::is_assignable`) where the
+interpreter asks its type system (`RuntimeTypeSystem::is_instance`); both derive from the same
+declarations. This is a documented seam; the differential corpus covers the cases the framework has.
+
+Next, E4 (stack it on `xaml-compiler-e3`):
+
+1. Templates: `XamlDeferredContentInitializeIntermediateRootNode` (131 theme documents stop there):
+   the deferred body already exists; add the intermediate root (`set_intermediate_root_object`) and
+   the template customisation of the language (control templates, data templates).
+2. Selectors and styles (`XamlIlTypeSelector`, `XamlIlStringSelector`, `XamlIlPropertyEqualsSelector`,
+   ...: `runtime/framework/nodes.rs` `selector`), style includes and merged resource includes
+   (calls of the build functions of the other documents of the group).
+3. Load the themes from compiled output and stop linking the loader in `themed_window`; re-run
+   `emitter::repository_documents::measure_theme_documents` and the load-time measurements
+   (`tests::load_time` of both theme crates).
