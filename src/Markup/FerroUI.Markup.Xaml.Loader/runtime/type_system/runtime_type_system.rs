@@ -1457,7 +1457,7 @@ impl RuntimeTypeSystem {
                 )
             });
             let mut attributes = declared_attributes;
-            if property.assign_binding() {
+            if property.assign_binding() && !attributes.iter().any(|a| a.type_().name() == "AssignBindingAttribute") {
                 attributes.push(self.marker_attribute(attributes::ASSIGN_BINDING));
             }
             if markup.and_then(|m| m.content_property) == Some(property.name()) {

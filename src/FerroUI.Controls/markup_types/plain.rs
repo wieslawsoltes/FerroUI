@@ -5,7 +5,7 @@
 
 use crate::documents::{Inline, InlineCollection};
 use crate::templates::{DataTemplates, IDataTemplate};
-use crate::NativeMenuItemBase;
+use crate::{NativeMenuItemBase, Page, TableViewColumn};
 use ferroui_base::collections::FerroList;
 use crate::{
     ColumnDefinition, ColumnDefinitions, Control, Controls, ItemCollection, RowDefinition, RowDefinitions, TrayIcon,
@@ -254,6 +254,34 @@ ferro_markup_type!(class FerroListOf<Ref<NativeMenuItemBase>> as "FerroList`1" {
     ],
 });
 
+// The pages of a multi page (`MultiPage.Pages`).
+ferro_markup_type!(class FerroListOf<Ref<Page>> as "FerroList`1" {
+    namespace: "FerroUI.Collections",
+    handles: [FerroList<Ref<Page>>, Option<FerroList<Ref<Page>>>],
+    this: FerroList<Ref<Page>>,
+    generic: "FerroList`1" [Ref<Page>],
+    constructors: [() => FerroList::<Ref<Page>>::new],
+    properties: [
+        Capacity: i32 { get: list_capacity, try_set: set_list_capacity },
+        Count: i32 { get: |list: &FerroList<Ref<Page>>| list.count() as i32 },
+    ],
+    methods: [fn Add(Ref<Page>) => |list: &FerroList<Ref<Page>>, item: Ref<Page>| list.add(item)],
+});
+
+// The columns of a table view (`TableView.Columns`).
+ferro_markup_type!(class FerroListOf<Ref<TableViewColumn>> as "FerroList`1" {
+    namespace: "FerroUI.Collections",
+    handles: [FerroList<Ref<TableViewColumn>>, Option<FerroList<Ref<TableViewColumn>>>],
+    this: FerroList<Ref<TableViewColumn>>,
+    generic: "FerroList`1" [Ref<TableViewColumn>],
+    constructors: [() => FerroList::<Ref<TableViewColumn>>::new],
+    properties: [
+        Capacity: i32 { get: list_capacity, try_set: set_list_capacity },
+        Count: i32 { get: |list: &FerroList<Ref<TableViewColumn>>| list.count() as i32 },
+    ],
+    methods: [fn Add(Ref<TableViewColumn>) => |list: &FerroList<Ref<TableViewColumn>>, item: Ref<TableViewColumn>| list.add(item)],
+});
+
 /// The types declared in this file.
 pub(super) const TYPES: &[&MarkupType] = &[
     <dyn crate::ICommandBarElement as MarkupTyped>::MARKUP,
@@ -273,6 +301,8 @@ pub(super) const TYPES: &[&MarkupType] = &[
     <FerroListOf<Ref<RowDefinition>> as MarkupTyped>::MARKUP,
     <FerroListOf<Ref<ColumnDefinition>> as MarkupTyped>::MARKUP,
     <FerroListOf<Ref<NativeMenuItemBase>> as MarkupTyped>::MARKUP,
+    <FerroListOf<Ref<Page>> as MarkupTyped>::MARKUP,
+    <FerroListOf<Ref<TableViewColumn>> as MarkupTyped>::MARKUP,
 ];
 
 /// Registers the nullable forms of the types that can be held in untyped
@@ -292,6 +322,8 @@ pub(super) fn register_value_types() {
     ValueTypes::register_nullable::<FerroList<Ref<RowDefinition>>>();
     ValueTypes::register_nullable::<FerroList<Ref<ColumnDefinition>>>();
     ValueTypes::register_nullable::<FerroList<Ref<NativeMenuItemBase>>>();
+    ValueTypes::register_nullable::<FerroList<Ref<Page>>>();
+    ValueTypes::register_nullable::<FerroList<Ref<TableViewColumn>>>();
     ValueTypes::register_nullable::<Rc<WindowIcon>>();
     // A named collection is the list it derives from: the same list, so that the members
     // of the list (`Capacity`) are reached through the collection.

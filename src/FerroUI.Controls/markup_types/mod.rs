@@ -11,6 +11,7 @@
 //! the managed original has and that is missing here is either not ported
 //! or cannot be expressed with the current interface of its type.
 
+use crate::assigned_binding::AssignedBinding;
 use ferroui_base::data::core::ValueTypes;
 use ferroui_base::metadata::MarkupType;
 
@@ -35,6 +36,11 @@ pub(crate) fn register() {
     for types in TYPE_LISTS {
         MarkupType::register_all(types);
     }
+    // A binding a property holds as its value is a binding: the wrapper is one more handle of
+    // the binding type, so that a property of that type is a property of binding type.
+    let binding = <dyn ferroui_base::data::BindingBase as ferroui_base::metadata::MarkupTyped>::MARKUP;
+    MarkupType::register_handle::<AssignedBinding>(binding);
+    MarkupType::register_handle::<Option<AssignedBinding>>(binding);
     ValueTypes::register_global(register_value_types);
     lists::PipsList::register();
 }
@@ -50,4 +56,19 @@ fn register_value_types() {
     plain::register_value_types();
     classes::register_value_types();
     converters::register_value_types();
+    register_assigned_binding();
+}
+
+/// The casts between a binding and the value of a property that is assigned a binding.
+fn register_assigned_binding() {
+    use ferroui_base::data::{BindingBase, CompiledBinding, MultiBinding, ReflectionBinding, TemplateBinding};
+    use std::rc::Rc;
+
+    ValueTypes::register_nullable::<AssignedBinding>();
+    ValueTypes::register_cast::<Rc<dyn BindingBase>, AssignedBinding>(|binding| AssignedBinding::new(binding.clone()));
+    ValueTypes::register_cast::<Rc<CompiledBinding>, AssignedBinding>(|binding| AssignedBinding::new(binding.clone()));
+    ValueTypes::register_cast::<Rc<ReflectionBinding>, AssignedBinding>(|binding| AssignedBinding::new(binding.clone()));
+    ValueTypes::register_cast::<Rc<MultiBinding>, AssignedBinding>(|binding| AssignedBinding::new(binding.clone()));
+    ValueTypes::register_cast::<Rc<TemplateBinding>, AssignedBinding>(|binding| AssignedBinding::new(binding.clone()));
+    ValueTypes::register_cast::<AssignedBinding, Rc<dyn BindingBase>>(|binding| binding.0.clone());
 }

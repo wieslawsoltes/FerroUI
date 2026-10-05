@@ -91,7 +91,7 @@ XMLNS_NAMESPACES = {
 }
 ENUM_EXTRA = {
     "RoutingStrategies", "PlatformThemeVariant", "ResetBehavior", "Corners", "FormFactorType", "WellKnownFolder",
-    "DayOfWeek", "DateTimeKind", "NumberStyles",
+    "DayOfWeek", "DateTimeKind", "NumberStyles", "CalendarWeekRule",
 }
 ENUM_NAMESPACE = {
     "RelativeUnit": "FerroUI",
@@ -103,6 +103,7 @@ ENUM_NAMESPACE = {
     "DayOfWeek": "System",
     "DateTimeKind": "System",
     "NumberStyles": "System.Globalization",
+    "CalendarWeekRule": "System.Globalization",
 }
 ENUM_RENAMED = {"RelativeSourceMode": {"Self": "SelfMode"}}
 FLAG_CONSTANTS = {"XButton1MouseButton": "X_BUTTON_1_MOUSE_BUTTON", "XButton2MouseButton": "X_BUTTON_2_MOUSE_BUTTON"}
@@ -128,7 +129,7 @@ use crate::platform::storage::WellKnownFolder;
 use crate::platform::{FormFactorType, PlatformThemeVariant};
 use crate::rendering::*;
 use crate::styling::*;
-use crate::utilities::{DateTimeKind, DayOfWeek, UriKind};
+use crate::utilities::{CalendarWeekRule, DateTimeKind, DayOfWeek, UriKind};
 use crate::RelativeUnit;
 """,
     "FerroUI.Controls": """use crate::automation::peers::*;
@@ -739,7 +740,7 @@ def generate_classes(sources, crate, overrides, report, known_event_arguments, k
                             name, value_type, name, snake(property_))
                     properties.append("%s: %s {\n                %s\n            }" % (property_, value_type, accessors))
                     declared.add(property_)
-                attributes = [a for a in p["attributes"] if re.match(PROPERTY_ATTRIBUTES, a.replace("Metadata.", ""))]
+                attributes = [a for a in p["attributes"] if re.match(PROPERTY_ATTRIBUTES + r"|AssignBinding\b", a.replace("Metadata.", ""))]
                 if not attributes:
                     continue
                 if snake(property_) not in rust_properties:

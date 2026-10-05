@@ -43,7 +43,6 @@ fn gap_c002_native_menu_item_click_handler() {
 }
 
 #[test]
-#[ignore = "gap C003: NativeMenuItem.Icon cannot be assigned from text"]
 fn gap_c003_native_menu_item_icon_from_text() {
     let _app = start_catalog_application();
     let xaml = format!("<NativeMenu {XMLNS}><NativeMenuItem Icon='/Assets/github_icon.png' Header='Recent' /></NativeMenu>");
@@ -86,7 +85,6 @@ fn gap_c009_calendar_week_rule_from_text() {
 }
 
 #[test]
-#[ignore = "gap C010: the columns of a TableView cannot be added from markup"]
 fn gap_c010_table_view_columns_from_markup() {
     let _app = start_catalog_application();
     let xaml = format!(
@@ -108,7 +106,6 @@ fn gap_c006_visual_brush_is_a_composition_render_resource() {
 }
 
 #[test]
-#[ignore = "gap C011: the pages of a TabbedPage / CarouselPage (MultiPage.Pages) cannot be added from markup"]
 fn gap_c011_multi_page_pages_from_markup() {
     let _app = start_catalog_application();
     for xaml in [

@@ -240,7 +240,18 @@ pub fn from_markup_value<T: Clone + 'static>(value: &MarkupValue) -> Option<T> {
                 let any: &dyn Any = boxed;
                 return any.downcast_ref::<T>().cloned();
             }
-            let cast = ValueTypes::try_cast(boxed, ValueType::of::<T>())?;
+            if let Some(cast) = ValueTypes::try_cast(boxed, ValueType::of::<T>()) {
+                return cast.downcast_ref::<T>().cloned();
+            }
+            // A handle of a base class whose object is an instance of the class `T` names:
+            // an untyped call checks its arguments against the run-time class of the object
+            // (a binding reads a member of the class of the element it found through a
+            // handle of `Control` or of the root class).
+            let object = ValueTypes::as_object(&**boxed)?;
+            let cast = match ValueTypes::from_object(target, object.clone()) {
+                Some(cast) => cast,
+                None => ValueTypes::try_convert_registered(&(Rc::new(object) as BoxedValue), ValueType::of::<T>())?,
+            };
             cast.downcast_ref::<T>().cloned()
         }
         None => {
@@ -757,6 +768,18 @@ impl MarkupType {
         for type_ in types {
             registry.insert(type_);
         }
+    }
+
+    /// Registers the Rust type `H` as one more handle of the registered type `type_`: a
+    /// type of another crate whose values are values of `type_` (a wrapper a property
+    /// holds the value in), next to the [`handles`](Self::handles) the declaration lists.
+    /// The crate that declares `H` also registers the casts between `H` and the handles
+    /// of the type ([`ValueTypes::register_cast`]). A handle that is already known keeps
+    /// its type.
+    pub fn register_handle<H: 'static>(type_: &'static MarkupType) {
+        let mut registry = registry().write().unwrap_or_else(|e| e.into_inner());
+        registry.insert(type_);
+        registry.by_handle.entry(TypeId::of::<H>()).or_insert(type_);
     }
 
     /// Finds a registered type by namespace and name.

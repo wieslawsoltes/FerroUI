@@ -355,3 +355,77 @@ fn g21_notification_contract_as_data_type() {
     let _base = xaml_test_base();
     resource(&dictionary("<DataTemplate x:Key='t' DataType='INotification'><TextBlock /></DataTemplate>", ""), "t");
 }
+
+// --- The gaps of the catalog closed with stage 2b-10 -----------------------------
+
+/// `Calendar.WeekNumberRule` takes the name of a member of the week rule enumeration.
+#[test]
+fn c009_calendar_week_rule_from_text() {
+    use ferroui_base::utilities::CalendarWeekRule;
+    use ferroui_controls::Calendar;
+
+    let _base = xaml_test_base();
+    let calendar = load_as::<Ref<Calendar>>(&format!("<Calendar {NS} WeekNumberRule='FirstFourDayWeek' />"));
+    assert_eq!(calendar.week_number_rule(), CalendarWeekRule::FirstFourDayWeek);
+    let calendar = load_as::<Ref<Calendar>>(&format!("<Calendar {NS} WeekNumberRule='FirstFullWeek' />"));
+    assert_eq!(calendar.week_number_rule(), CalendarWeekRule::FirstFullWeek);
+}
+
+/// The pages of a multi page are added to its `Pages` list, the content property.
+#[test]
+fn c011_multi_page_pages_from_markup() {
+    use ferroui_controls::{CarouselPage, TabbedPage};
+
+    let _base = xaml_test_base();
+    let tabbed = load_as::<Ref<TabbedPage>>(&format!(
+        "<TabbedPage {NS}><ContentPage Header='One' /><ContentPage Header='Two' /></TabbedPage>"
+    ));
+    assert_eq!(tabbed.pages().map(|pages| pages.count()), Some(2));
+    let carousel = load_as::<Ref<CarouselPage>>(&format!(
+        "<CarouselPage {NS}><CarouselPage.Pages><ContentPage Header='One' /></CarouselPage.Pages></CarouselPage>"
+    ));
+    assert_eq!(carousel.pages().map(|pages| pages.count()), Some(1));
+}
+
+/// The columns of a table view are added to its `Columns` list.
+#[test]
+fn c010_table_view_columns_from_markup() {
+    use ferroui_controls::TableView;
+
+    let _base = xaml_test_base();
+    let table = load_as::<Ref<TableView>>(&format!(
+        "<TableView {NS}><TableView.Columns><TableViewColumn Header='Country' Width='2*' />\
+         <TableViewColumn Header='Capital' /></TableView.Columns></TableView>"
+    ));
+    assert_eq!(table.columns().count(), 2);
+}
+
+/// A binding given for a property of binding type marked as one that is assigned a binding
+/// becomes the value of the property: it is not applied to the property (C311).
+#[test]
+fn c311_bindings_are_assigned_to_properties_of_binding_type() {
+    use ferroui_controls::primitives::TextSearch;
+    use ferroui_controls::{AutoCompleteBox, ComboBox, ListBox, TableView};
+
+    let _base = xaml_test_base();
+    let table = load_as::<Ref<TableView>>(&format!(
+        "<TableView {NS}><TableView.Columns><TableViewColumn Header='Country' Binding='{{Binding Name}}' />\
+         <TableViewColumn Header='Capital' /></TableView.Columns></TableView>"
+    ));
+    assert!(table.columns().get(0).binding().is_some());
+    assert!(table.columns().get(1).binding().is_none());
+
+    let auto_complete = load_as::<Ref<AutoCompleteBox>>(&format!(
+        "<AutoCompleteBox {NS} ValueMemberBinding='{{Binding Capital}}' />"
+    ));
+    assert!(auto_complete.value_member_binding().is_some());
+
+    let list = load_as::<Ref<ListBox>>(&format!("<ListBox {NS} DisplayMemberBinding='{{Binding Name}}' />"));
+    assert!(list.display_member_binding().is_some());
+
+    let combo = load_as::<Ref<ComboBox>>(&format!(
+        "<ComboBox {NS} SelectedValueBinding='{{Binding Id}}' TextSearch.TextBinding='{{Binding Name}}' />"
+    ));
+    assert!(combo.selected_value_binding().is_some());
+    assert!(TextSearch::get_text_binding(&combo).is_some());
+}

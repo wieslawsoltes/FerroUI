@@ -584,6 +584,36 @@ fn class_members_are_invoked_on_handles_of_derived_classes() {
     assert!(matches!(error, MarkupInvokeError::Argument { index: 0, .. }), "{error:?}");
 }
 
+/// An untyped call checks the instance against the run-time class of the object, as a
+/// reflected call does: a handle of a base class whose object is of the class of the
+/// member is accepted (a binding has the element it found as a handle of the root class).
+#[test]
+fn class_members_are_invoked_on_base_handles_of_objects_of_the_class() {
+    let markup = MetaPanel::TYPE.markup().unwrap();
+    let panel = MetaPanel::new();
+    panel.set_title("t".to_string());
+    let object: Ref<FerroObject> = FerroObject::to_ref(Upcast::<FerroObject>::upcast(&*panel));
+    let instance: MarkupValue = Some(Rc::new(object));
+
+    let title = markup.find_property("Title").unwrap();
+    assert_eq!(unbox::<String>(&(title.get.unwrap())(&[instance.clone()]).unwrap()), "t");
+    let on_click = markup.find_methods("OnClick").next().unwrap();
+    assert_eq!(unbox::<i32>(&(on_click.invoke)(&[instance.clone(), boxed(2i32)]).unwrap()), 2);
+    assert!(from_markup_value::<Option<Ref<MetaPanel>>>(&instance).is_some_and(|panel| panel.is_some()));
+
+    // The object of a derived class through the root handle, for a member of the base class.
+    let derived = MetaDerivedPanel::new();
+    let object: Ref<FerroObject> = FerroObject::to_ref(Upcast::<FerroObject>::upcast(&*derived));
+    (title.set.unwrap())(&[Some(Rc::new(object)), boxed("d".to_string())]).unwrap();
+    assert_eq!(derived.title(), "d");
+
+    // A base handle of an object of another class is still rejected.
+    let plain = MetaPlain::new();
+    let object: Ref<FerroObject> = FerroObject::to_ref(Upcast::<FerroObject>::upcast(&*plain));
+    let error = (title.get.unwrap())(&[Some(Rc::new(object))]).unwrap_err();
+    assert!(matches!(error, MarkupInvokeError::Argument { index: 0, .. }), "{error:?}");
+}
+
 #[test]
 fn class_constructor_with_arguments_returns_the_handle() {
     let markup = MetaPanel::TYPE.markup().unwrap();

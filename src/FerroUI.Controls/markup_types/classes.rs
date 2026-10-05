@@ -369,7 +369,7 @@ ferro_class_info!(ItemsControl {
             Items: ItemCollection { get: ItemsControl::items },
         ],
         property_attributes: [
-            DisplayMemberBinding: [InheritDataTypeFromItems("ItemsSource")],
+            DisplayMemberBinding: [AssignBinding, InheritDataTypeFromItems("ItemsSource")],
             ItemTemplate: [InheritDataTypeFromItems("ItemsSource")],
         ],
         events: [
@@ -1340,7 +1340,7 @@ ferro_class_info!(SelectingItemsControl {
     markup: {
         namespace: "FerroUI.Controls.Primitives",
         property_attributes: [
-            SelectedValueBinding: [InheritDataTypeFromItems("ItemsSource")],
+            SelectedValueBinding: [AssignBinding, InheritDataTypeFromItems("ItemsSource")],
         ],
         fields: [
             IsSelectedChangedEvent: RoutedEvent<RoutedEventArgs> => || *SelectingItemsControl::is_selected_changed_event(),

@@ -391,6 +391,12 @@ impl AttributeResolver {
             get("FerroUI.Media.IImageBrushSource")?,
             get("FerroUI.Markup.Xaml.Converters.BitmapTypeConverter")?,
         );
+        // Not in the upstream list: the contract of bitmap-valued properties
+        // (`NativeMenuItem.Icon`) takes text through the same converter. A type system that
+        // does not know the contract (a reduced test model) simply has no mapping for it.
+        if let Some(bitmap_contract) = type_system.find_type("FerroUI.Media.Imaging.IBitmap") {
+            add_type(bitmap_contract, get("FerroUI.Markup.Xaml.Converters.BitmapTypeConverter")?);
+        }
         add_type(
             well_known_types
                 .i_list_of_t

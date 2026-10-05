@@ -3,7 +3,7 @@ use crate::utils::BindingEvaluator;
 use crate::{ContentControl, Control};
 use ferroui_base::data::core::ValueTypes;
 use ferroui_base::{
-    ferro_property, AnyValue, AttachedProperty, BoxedValue, FerroObject, FerroProperty, Ref,
+    ferro_property, AnyValue, AttachedProperty, BoxedValue, FerroObject, FerroProperty, Ref, StyledPropertyOptions,
 };
 
 /// Allows to customize text searching in selecting items controls.
@@ -27,7 +27,10 @@ ferroui_base::ferro_properties! { impl TextSearch {
         /// The binding will be applied to each item during text search in
         /// selecting items controls (such as a combo box).
         pub fn text_binding_property() -> AttachedProperty<Option<AssignedBinding>> {
-            FerroProperty::register_attached::<TextSearch, FerroObject, _>("TextBinding", None)
+            FerroProperty::register_attached_with::<TextSearch, FerroObject, _>(
+                "TextBinding",
+                StyledPropertyOptions::new(None).assign_binding(true),
+            )
         }
     );
 } }

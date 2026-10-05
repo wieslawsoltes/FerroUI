@@ -22,7 +22,7 @@ use crate::platform::storage::WellKnownFolder;
 use crate::platform::{FormFactorType, PlatformThemeVariant};
 use crate::rendering::*;
 use crate::styling::*;
-use crate::utilities::{DateTimeKind, DayOfWeek, UriKind};
+use crate::utilities::{CalendarWeekRule, DateTimeKind, DayOfWeek, UriKind};
 use crate::RelativeUnit;
 
 // FerroUI
@@ -393,6 +393,14 @@ ferro_markup_enum!(
 );
 ferro_markup_enum!(UriKind { RelativeOrAbsolute, Absolute, Relative }, { namespace: "System" });
 
+// System.Globalization
+ferro_markup_enum!(
+    CalendarWeekRule {
+        FirstDay, FirstFullWeek, FirstFourDayWeek,
+    },
+    { namespace: "System.Globalization" }
+);
+
 /// The enumerations declared in this file.
 pub(super) const TYPES: &[&MarkupType] = &[
     <RelativeUnit as MarkupTyped>::MARKUP,
@@ -480,6 +488,7 @@ pub(super) const TYPES: &[&MarkupType] = &[
     <DateTimeKind as MarkupTyped>::MARKUP,
     <DayOfWeek as MarkupTyped>::MARKUP,
     <UriKind as MarkupTyped>::MARKUP,
+    <CalendarWeekRule as MarkupTyped>::MARKUP,
 ];
 
 /// Registers the nullable form of each enumeration with the untyped value
@@ -570,4 +579,5 @@ pub(super) fn register_value_types() {
     ValueTypes::register_nullable::<DateTimeKind>();
     ValueTypes::register_nullable::<DayOfWeek>();
     ValueTypes::register_nullable::<UriKind>();
+    ValueTypes::register_nullable::<CalendarWeekRule>();
 }

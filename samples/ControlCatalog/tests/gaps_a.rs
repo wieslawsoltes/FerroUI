@@ -72,7 +72,6 @@ fn gap_c102_data_validation_exception_in_markup() {
 }
 
 #[test]
-#[ignore = "gap C103: a plain property of a class is not read through a handle of a base class"]
 fn gap_c103_plain_property_of_a_class_through_a_base_handle() {
     let _app = start_application();
     let page = SampleGalleryPage::new();
@@ -90,7 +89,6 @@ fn gap_c103_plain_property_of_a_class_through_a_base_handle() {
 }
 
 #[test]
-#[ignore = "gap C103: a plain property of a class is not read through a handle of a base class"]
 fn gap_c103_binding_to_a_plain_property_of_a_named_element() {
     let _app = start_application();
     let xaml = format!(
