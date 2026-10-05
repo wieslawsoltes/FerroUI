@@ -479,7 +479,8 @@ fn geometry_hit_test_reports_the_intersection() {
     stream.draw_rectangle(b(&brush()), None, None, rect(0.0, 0.0, 10.0, 10.0), &BoxShadows::default());
     let inside = RectangleGeometry::with_rect(Rect::new(2.0, 2.0, 2.0, 2.0)).upcast();
     let outside = RectangleGeometry::with_rect(Rect::new(50.0, 50.0, 2.0, 2.0)).upcast();
-    assert_eq!(stream.hit_test_geometry(&inside), IntersectionResult::FullyInside);
+    // The hit test geometry lies inside the rectangle, which fully contains it.
+    assert_eq!(stream.hit_test_geometry(&inside), IntersectionResult::FullyContains);
     assert_eq!(stream.hit_test_geometry(&outside), IntersectionResult::Empty);
     scope.dispose();
 }
