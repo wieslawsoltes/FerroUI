@@ -82,6 +82,9 @@ extern "C" {
     #[wasm_bindgen(js_namespace = ["StorageModule", "module", "StorageItem"], js_name = createFile)]
     fn create_file_raw(folder_handle: &JsObject, name: &str) -> JsObject;
 
+    #[wasm_bindgen(js_namespace = ["StorageModule", "module", "StorageItem"], js_name = isSameEntry)]
+    fn is_same_entry_raw(item: &JsObject, other: &JsObject) -> JsObject;
+
     #[wasm_bindgen(js_namespace = ["StorageModule", "module", "StorageItem"], js_name = createFolder)]
     fn create_folder_raw(folder_handle: &JsObject, name: &str) -> JsObject;
 
@@ -210,6 +213,12 @@ pub fn move_async(file_handle: &JsObject, destination_folder: &JsObject) -> JsTa
 
 pub fn create_file(folder_handle: &JsObject, name: &str) -> JsTask {
     JsTask::new(create_file_raw(folder_handle, name))
+}
+
+/// Whether both storage items are the same entry of the file system;
+/// resolves to a boolean.
+pub fn is_same_entry(item: &JsObject, other: &JsObject) -> JsTask {
+    JsTask::new(is_same_entry_raw(item, other))
 }
 
 pub fn create_folder(folder_handle: &JsObject, name: &str) -> JsTask {
