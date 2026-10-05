@@ -1,0 +1,223 @@
+use super::animations::{ICompositionAnimation, ICompositionAnimationBase};
+use super::expressions::ExpressionVariant;
+use super::server::{CompositionProperty, ServerObjectId};
+use super::{Compositor, ICompositorSerializable, PendingAnimations};
+use std::cell::Cell;
+use std::rc::Rc;
+
+/// The part every composition object embeds: what upstream's abstract
+/// `CompositionObject` holds.
+///
+/// A class "derives" from `CompositionObject` by embedding this value,
+/// implementing [`ICompositorSerializable`] through it, and forwarding the
+/// animation members to the functions of this module.
+///
+/// The server-side counterpart is known by id. When the object is dropped
+/// without having been disposed, its counterpart is disposed with the next
+/// batch: this stands in for the garbage collector, which reclaims a server
+/// object upstream once the UI-thread object is unreachable.
+pub struct CompositionObject {
+    compositor: Rc<Compositor>,
+    server: Option<ServerObjectId>,
+    is_disposed: Cell<bool>,
+    registered_for_serialization: Cell<bool>,
+    pending_animations: PendingAnimations,
+}
+
+impl CompositionObject {
+    pub fn new(compositor: &Rc<Compositor>, server: Option<ServerObjectId>) -> Self {
+        Self {
+            compositor: compositor.clone(),
+            server,
+            is_disposed: Cell::new(false),
+            registered_for_serialization: Cell::new(false),
+            pending_animations: PendingAnimations::new(),
+        }
+    }
+
+    pub fn compositor(&self) -> &Rc<Compositor> {
+        &self.compositor
+    }
+
+    /// The id of the server-side counterpart, if the object has one.
+    pub fn server(&self) -> Option<ServerObjectId> {
+        self.server
+    }
+
+    /// The id of the server-side counterpart. Panics if there is none.
+    pub fn required_server(&self) -> ServerObjectId {
+        match self.server {
+            Some(server) => server,
+            None => panic!("There is no server-side counterpart for this object"),
+        }
+    }
+
+    /// `ICompositorSerializable.TryGetServer`. A disposed object has no
+    /// counterpart any more, so its pending changes are not written.
+    pub fn try_get_server(&self, c: &Compositor) -> Option<ServerObjectId> {
+        debug_assert!(std::ptr::eq(c, &*self.compositor));
+        if self.is_disposed.get() {
+            return None;
+        }
+        Some(self.required_server())
+    }
+
+    pub fn is_disposed(&self) -> bool {
+        self.is_disposed.get()
+    }
+
+    pub fn pending_animations(&self) -> &PendingAnimations {
+        &self.pending_animations
+    }
+
+    pub fn dispose(&self) {
+        if !self.is_disposed.get() {
+            if let Some(server) = self.server {
+                self.compositor.dispose_on_next_batch(server);
+            }
+        }
+        self.is_disposed.set(true);
+    }
+
+    /// Marks the object disposed without queueing the disposal of its
+    /// server side: it has been disposed by other means.
+    pub(crate) fn mark_disposed(&self) {
+        self.is_disposed.set(true);
+    }
+
+    /// Queues the object for serialization. `this` yields the handle of the
+    /// object that embeds this part.
+    pub fn register_for_serialization(&self, this: impl FnOnce() -> Option<Rc<dyn ICompositorSerializable>>) {
+        if self.server.is_none() {
+            panic!("The object doesn't have an associated server counterpart");
+        }
+        if self.registered_for_serialization.get() || self.is_disposed.get() {
+            return;
+        }
+        if let Some(this) = this() {
+            self.registered_for_serialization.set(true);
+            self.compositor.register_for_serialization(this);
+        }
+    }
+
+    /// The head of `ICompositorSerializable.SerializeChanges`: the object
+    /// may be registered again from now on.
+    pub fn begin_serialize_changes(&self, c: &Compositor) {
+        debug_assert!(std::ptr::eq(c, &*self.compositor));
+        self.registered_for_serialization.set(false);
+    }
+
+    /// `StopAnimation`: removes the animation of a property on the server.
+    /// `property` is the composition property the class resolved from the
+    /// property name. The server object is reached through a job of the
+    /// next batch.
+    pub fn stop_animation(&self, property: &'static CompositionProperty) {
+        let Some(server) = self.server else { return };
+        self.compositor.post_server_job(
+            move |compositor| {
+                if let Some(object) = compositor.get_animated_object(server) {
+                    if let Some(animations) = object.server_object().animations() {
+                        animations.remove_animation_for_property(property);
+                    }
+                }
+            },
+            false,
+        );
+    }
+}
+
+impl Drop for CompositionObject {
+    fn drop(&mut self) {
+        if !self.is_disposed.get() {
+            if let Some(server) = self.server {
+                self.compositor.dispose_with_a_later_batch(server);
+            }
+        }
+    }
+}
+
+/// The animation members of `CompositionObject`, written against the class
+/// that embeds one.
+///
+/// Animation groups and implicit animation collections arrive with the
+/// animation engine; until then a group can only be a single animation.
+pub trait ICompositionObjectAnimations {
+    /// `StartAnimation(propertyName, animation, finalValue)` of the class:
+    /// returns `false` for a property the class does not know.
+    fn try_start_animation(
+        &self,
+        property_name: &str,
+        animation: &dyn ICompositionAnimation,
+        final_value: Option<ExpressionVariant>,
+    ) -> bool;
+
+    /// The composition property with the given name.
+    fn get_composition_property(&self, property_name: &str) -> Option<&'static CompositionProperty>;
+
+    /// The embedded `CompositionObject`.
+    fn composition_object(&self) -> &CompositionObject;
+
+    /// Connects an animation with the named property of the object and
+    /// starts the animation.
+    fn start_animation(&self, property_name: &str, animation: &dyn ICompositionAnimation) {
+        self.start_animation_with_final_value(property_name, animation, None)
+    }
+
+    fn start_animation_with_final_value(
+        &self,
+        property_name: &str,
+        animation: &dyn ICompositionAnimation,
+        final_value: Option<ExpressionVariant>,
+    ) {
+        if !self.try_start_animation(property_name, animation, final_value) {
+            panic!("Unknown property {property_name}");
+        }
+    }
+
+    /// Disconnects an animation from the named property and stops it.
+    fn stop_animation(&self, property_name: &str) {
+        let Some(property) = self.get_composition_property(property_name) else {
+            panic!("Unknown property {property_name}");
+        };
+        self.composition_object().stop_animation(property);
+    }
+
+    /// Starts an animation group: each animation on its target property.
+    fn start_animation_group(&self, grp: &dyn ICompositionAnimationBase) {
+        if let Some(animation) = grp.as_composition_animation() {
+            let Some(target) = animation.target() else { panic!("Animation Target can't be null") };
+            self.start_animation(&target, animation);
+        }
+    }
+
+    /// Starts an animation or an animation group triggered by the change
+    /// of property `target` to `final_value`. Returns whether one of the
+    /// animations targets that property.
+    fn start_animation_group_for(
+        &self,
+        grp: &dyn ICompositionAnimationBase,
+        target: &str,
+        final_value: ExpressionVariant,
+    ) -> bool {
+        let Some(animation) = grp.as_composition_animation() else {
+            panic!("the animation is neither an animation nor a group of animations");
+        };
+        let Some(animation_target) = animation.target() else { panic!("Animation Target can't be null") };
+        if animation_target == target {
+            self.start_animation_with_final_value(&animation_target, animation, Some(final_value));
+            true
+        } else {
+            self.start_animation(&animation_target, animation);
+            false
+        }
+    }
+
+    /// Stops an animation group.
+    fn stop_animation_group(&self, grp: &dyn ICompositionAnimationBase) {
+        if let Some(animation) = grp.as_composition_animation() {
+            let Some(target) = animation.target() else { panic!("Animation Target can't be null") };
+            self.stop_animation(&target);
+        }
+    }
+}
+
