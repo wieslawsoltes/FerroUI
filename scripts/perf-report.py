@@ -4,7 +4,9 @@
 Builds `hello_window`, `themed_window` and `control-catalog-desktop` with the
 release profile, then prints for each the size of the stripped executable and
 the time from process start to the first window (median of several warm
-launches, with the load average of the machine before and after them). With
+launches, with the load average of the machine before and after them; all
+applications are built first, the launches wait for the load of the machine
+to settle and go round the applications). With
 `--check <file>` the numbers are compared with a stored baseline and the
 script fails when one regressed by more than the tolerance; `--save <file>`
 stores the numbers as a baseline; `--markdown <file>` appends the table (and
@@ -119,40 +121,73 @@ def time_to_marker(command, marker, exit_ms):
     return None if killed.is_set() else elapsed
 
 
-def measure(runs, exit_ms, do_build, size_only):
+def settle(max_seconds, threshold):
+    """Waits (at most `max_seconds`) until the one-minute load average is below `threshold`."""
+    if not hasattr(os, "getloadavg"):
+        return
+    deadline = time.monotonic() + max_seconds
+    if os.getloadavg()[0] > threshold:
+        print(f"waiting for the load average ({os.getloadavg()[0]:.2f}) to drop below {threshold}", flush=True)
+    while os.getloadavg()[0] > threshold and time.monotonic() < deadline:
+        time.sleep(5)
+
+
+def measure(runs, exit_ms, do_build, size_only, settle_seconds, settle_load):
     results = {}
+    launches = []
     with tempfile.TemporaryDirectory(prefix="ferroui-perf-") as directory:
-        for name, cargo_arguments, relative_path, arguments, marker in APPLICATIONS:
-            if do_build:
-                build(cargo_arguments)
+        # Everything is built before anything is launched, so that no launch
+        # runs on a machine that is still busy with a build.
+        if do_build:
+            built = []
+            for _, cargo_arguments, _, _, _ in APPLICATIONS:
+                if cargo_arguments not in built:
+                    build(cargo_arguments)
+                    built.append(cargo_arguments)
+        for name, _, relative_path, arguments, marker in APPLICATIONS:
             executable = os.path.join(target_directory(), "release", relative_path)
             if not os.path.exists(executable):
                 sys.exit(f"{executable} does not exist; run without --no-build")
             stripped = stripped_copy(executable, directory)
-            row = {"size_bytes": os.path.getsize(stripped)}
-            if not size_only:
-                load_before = load_average()
-                # The first launch of a new executable pays for the validation of its code signature.
-                cold = time_to_marker([stripped] + arguments, marker, exit_ms)
-                times = []
-                for _ in range(runs):
-                    elapsed = time_to_marker([stripped] + arguments, marker, exit_ms)
-                    if elapsed is not None:
-                        times.append(elapsed)
-                    time.sleep(0.2)
-                if len(times) < runs:
-                    sys.exit(f"{name}: the line /{marker}/ was printed in {len(times)} of {runs} launches")
-                row.update(
-                    {
-                        "startup_ms": round(statistics.median(times), 1),
-                        "startup_min_ms": round(min(times), 1),
-                        "startup_max_ms": round(max(times), 1),
-                        "runs": runs,
-                        "first_launch_ms": None if cold is None else round(cold, 1),
-                        "load_average": [load_before, load_average()],
-                    }
-                )
-            results[name] = row
+            results[name] = {"size_bytes": os.path.getsize(stripped)}
+            launches.append((name, [stripped] + arguments, marker))
+        if size_only:
+            return results
+
+        settle(settle_seconds, settle_load)
+        load_before = load_average()
+        # The first launch of a new executable pays for the validation of its
+        # code signature; it is measured once per file and kept apart.
+        first = {}
+        launched = set()
+        for name, command, marker in launches:
+            elapsed = time_to_marker(command, marker, exit_ms)
+            first[name] = None if command[0] in launched or elapsed is None else round(elapsed, 1)
+            launched.add(command[0])
+            time.sleep(0.2)
+        # The warm launches go round the applications, so that a change of
+        # the load of the machine affects all of them alike.
+        times = {name: [] for name, _, _ in launches}
+        for _ in range(runs):
+            for name, command, marker in launches:
+                elapsed = time_to_marker(command, marker, exit_ms)
+                if elapsed is not None:
+                    times[name].append(elapsed)
+                time.sleep(0.2)
+        load_after = load_average()
+        for name, _, marker in launches:
+            if len(times[name]) < runs:
+                sys.exit(f"{name}: the line /{marker}/ was printed in {len(times[name])} of {runs} launches")
+            results[name].update(
+                {
+                    "startup_ms": round(statistics.median(times[name]), 1),
+                    "startup_min_ms": round(min(times[name]), 1),
+                    "startup_max_ms": round(max(times[name]), 1),
+                    "runs": runs,
+                    "first_launch_ms": first[name],
+                    "load_average": [load_before, load_after],
+                }
+            )
     return results
 
 
@@ -257,6 +292,9 @@ def main():
     parser.add_argument("--check", metavar="FILE", help="compare with a stored baseline")
     parser.add_argument("--markdown", metavar="FILE", help="append the table (and the comparison) as Markdown")
     parser.add_argument("--title", default="Size and startup", help="heading of the Markdown table")
+    parser.add_argument("--settle-seconds", type=int, default=300, help="longest wait for the load to settle (default 300)")
+    parser.add_argument("--settle-load", type=float, default=1.5, help="load average to wait for before launching (default 1.5)")
+    parser.add_argument("--no-fail", action="store_true", help="report regressions without failing")
     parser.add_argument("--size-tolerance", type=float, default=1.0, help="allowed growth of a size in percent (default 1)")
     parser.add_argument("--time-tolerance", type=float, default=15.0, help="allowed growth of a time in percent (default 15)")
     options = parser.parse_args()
@@ -266,7 +304,9 @@ def main():
         global ROOT
         ROOT = os.path.abspath(options.source)
 
-    results = measure(options.runs, options.exit_ms, not options.no_build, options.size_only)
+    results = measure(
+        options.runs, options.exit_ms, not options.no_build, options.size_only, options.settle_seconds, options.settle_load
+    )
     print_table(results)
     machine = describe_machine()
     print(machine)
@@ -288,7 +328,7 @@ def main():
     if options.markdown:
         with open(options.markdown, "a") as file:
             file.write("\n".join(markdown) + "\n")
-    if failed:
+    if failed and not options.no_fail:
         sys.exit(1)
 
 
