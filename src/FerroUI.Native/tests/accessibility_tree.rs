@@ -305,18 +305,30 @@ mod macos {
                 "the parent chain of the button leads to the view of the window",
             );
             if let Some(e) = button_element {
-                checks.check(objc::responds_to(e.object, "accessibilityPerformPress"), "the button can be pressed");
-                objc::send_bool(e.object, "accessibilityPerformPress");
+                let can_press = objc::responds_to(e.object, "accessibilityPerformPress");
+                checks.check(can_press, "the button can be pressed");
+                if can_press {
+                    objc::send_bool(e.object, "accessibilityPerformPress");
+                }
             }
             checks.check(clicks.get() == 1, "pressing the button element clicks the button");
 
             let check_box_element = find(&elements, "AXCheckBox", "Remember");
             checks.check(check_box_element.is_some(), "the check box is in the tree as AXCheckBox titled Remember");
             if let Some(e) = check_box_element {
-                let value = |object: Id| objc::send_i32(objc::send_id(object, "accessibilityValue"), "intValue");
-                checks.check(value(e.object) == 0, "the check box reports that it is unchecked");
-                objc::send_bool(e.object, "accessibilityPerformPress");
-                checks.check(value(e.object) == 1, "pressing the check box element checks it");
+                let usable = objc::responds_to(e.object, "accessibilityValue")
+                    && objc::responds_to(e.object, "accessibilityPerformPress");
+                checks.check(usable, "the check box reports a value and can be pressed");
+                if usable {
+                    // `None` when the element reports no value object.
+                    let value = |object: Id| {
+                        let value = objc::send_id(object, "accessibilityValue");
+                        objc::responds_to(value, "intValue").then(|| objc::send_i32(value, "intValue"))
+                    };
+                    checks.check(value(e.object) == Some(0), "the check box reports that it is unchecked");
+                    objc::send_bool(e.object, "accessibilityPerformPress");
+                    checks.check(value(e.object) == Some(1), "pressing the check box element checks it");
+                }
             }
             checks.check(check_box.is_checked() == Some(true), "the check box is checked");
         });
