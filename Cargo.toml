@@ -1,0 +1,56 @@
+[workspace]
+resolver = "2"
+members = [
+    "src/FerroUI.Base",
+    "src/FerroUI.Controls",
+    "src/Markup/FerroUI.Markup",
+    "src/Markup/FerroUI.Markup.Xaml",
+    "src/Markup/FerroUI.Markup.Xaml.Loader",
+    "src/FerroUI.MicroCom",
+    "src/FerroUI.Native",
+    "src/FerroUI.Desktop",
+    "src/FerroUI.Themes.Simple",
+    "src/FerroUI.Themes.Fluent",
+    "src/Skia/FerroUI.Skia",
+    "src/HarfBuzz/FerroUI.HarfBuzz",
+    "src/tools/MicroCom.CodeGenerator",
+    "external/XamlX/src/XamlX",
+    "tests/FerroUI.Markup.Xaml.UnitTests",
+    "samples/MiniMvvm",
+    "samples/ControlCatalog",
+    "samples/ControlCatalog.Desktop",
+]
+
+[workspace.package]
+version = "0.1.0"
+edition = "2021"
+rust-version = "1.89"
+license = "MIT"
+repository = "https://github.com/wieslawsoltes/FerroUI"
+
+[workspace.dependencies]
+ferroui-base = { path = "src/FerroUI.Base" }
+ferroui-controls = { path = "src/FerroUI.Controls" }
+ferroui-markup = { path = "src/Markup/FerroUI.Markup" }
+ferroui-markup-xaml = { path = "src/Markup/FerroUI.Markup.Xaml" }
+ferroui-markup-xaml-loader = { path = "src/Markup/FerroUI.Markup.Xaml.Loader" }
+xamlx = { path = "external/XamlX/src/XamlX" }
+ferroui-microcom = { path = "src/FerroUI.MicroCom" }
+ferroui-native = { path = "src/FerroUI.Native" }
+ferroui-desktop = { path = "src/FerroUI.Desktop" }
+ferroui-themes-simple = { path = "src/FerroUI.Themes.Simple" }
+ferroui-themes-fluent = { path = "src/FerroUI.Themes.Fluent" }
+ferroui-skia = { path = "src/Skia/FerroUI.Skia" }
+ferroui-harfbuzz = { path = "src/HarfBuzz/FerroUI.HarfBuzz" }
+bitflags = "2"
+paste = "1"
+cc = "1"
+skia-safe = { version = "0.153", features = ["graphite", "metal"] }
+roxmltree = "0.20"
+harfbuzz-sys = { version = "0.8", default-features = false, features = ["bundled"] }
+rust_decimal = { version = "1.43", default-features = false }
+time = { version = "0.3", default-features = false }
+
+[profile.release]
+lto = "thin"
+codegen-units = 4
