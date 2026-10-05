@@ -15,6 +15,15 @@
 //! published browser site shows in place of the brand assets of the
 //! upstream project.
 //!
+//! With the feature `separate-assets` the assets other than the markup
+//! documents are not embedded: they are written to the asset bundle
+//! `$OUT_DIR/browser-site/control-catalog.assets` (the format of
+//! `ferroui_base::platform::register_asset_bundle`), which
+//! `scripts/build-browser.sh` puts in the site and the host page passes to
+//! the module before the application starts. The WebAssembly module then
+//! carries the code and the documents, and the 24 MB of pictures and fonts
+//! are a file of their own.
+//!
 //! `$OUT_DIR/document_tests.rs` holds one test per document (it loads
 //! through the run-time loader) and one per document with a class (the
 //! class constructs, loads its document and is shown in a window); a test
@@ -35,6 +44,27 @@ const PLACEHOLDER_DIRECTORY: &str = "PlaceholderAssets";
 
 /// Directories of the crate that hold no assets.
 const SKIPPED_DIRECTORIES: &[&str] = &["target", "tests", "examples", PLACEHOLDER_DIRECTORY];
+
+/// The name of the assembly of the sample (`ASSEMBLY.name` of
+/// `register_types.rs`): the crate name of the assets of the bundle.
+const ASSEMBLY_NAME: &str = "ControlCatalog";
+
+/// The first bytes of an asset bundle
+/// (`ferroui_base::platform::ASSET_BUNDLE_MAGIC`).
+const ASSET_BUNDLE_MAGIC: &[u8; 8] = b"FUIASSB1";
+
+/// Adds the asset `content` with the rooted path `asset_path` to an asset
+/// bundle (`ferroui_base::platform::register_asset_bundle`).
+fn add_to_bundle(bundle: &mut Vec<u8>, asset_path: &str, content: &[u8]) {
+    for text in [ASSEMBLY_NAME, asset_path] {
+        let length = u16::try_from(text.len()).unwrap_or_else(|_| panic!("{text} is too long for an asset bundle"));
+        bundle.extend_from_slice(&length.to_le_bytes());
+        bundle.extend_from_slice(text.as_bytes());
+    }
+    let length = u32::try_from(content.len()).unwrap_or_else(|_| panic!("{asset_path} is too large for an asset bundle"));
+    bundle.extend_from_slice(&length.to_le_bytes());
+    bundle.extend_from_slice(content);
+}
 
 /// Files that are assets whatever their directory.
 const ASSET_FILES: &[&str] = &["Pages/teapot.bin"];
@@ -192,13 +222,28 @@ fn main() {
         substitute_placeholder_geometries(&root, &out_dir, &mut assets);
     }
 
+    let separate_assets = env::var_os("CARGO_FEATURE_SEPARATE_ASSETS").is_some();
+    let mut bundle = ASSET_BUNDLE_MAGIC.to_vec();
     let mut text = String::from("pub(crate) static ASSETS: &[(&str, &[u8])] = &[\n");
     for (asset_path, path) in &assets {
         let path = path.canonicalize().unwrap_or_else(|e| panic!("cannot resolve {}: {e}", path.display()));
         println!("cargo::rerun-if-changed={}", path.display());
+        if separate_assets && !asset_path.ends_with(".xaml") {
+            let content = fs::read(&path).unwrap_or_else(|e| panic!("cannot read {}: {e}", path.display()));
+            add_to_bundle(&mut bundle, asset_path, &content);
+            continue;
+        }
         writeln!(text, "    ({asset_path:?}, include_bytes!({:?})),", path.display().to_string()).expect("write");
     }
     text.push_str("];\n");
+    if separate_assets {
+        let site = out_dir.join("browser-site");
+        fs::create_dir_all(&site).unwrap_or_else(|e| panic!("cannot create {}: {e}", site.display()));
+        let out = site.join("control-catalog.assets");
+        if fs::read(&out).ok() != Some(bundle.clone()) {
+            fs::write(&out, &bundle).unwrap_or_else(|e| panic!("cannot write {}: {e}", out.display()));
+        }
+    }
 
     // The documents that do not load yet: `<file> | [page:] <reason>` per line.
     let excluded_path = root.join(EXCLUDED_LIST);
