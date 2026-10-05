@@ -18,6 +18,9 @@ comparing the two:
                                                          events, type attributes, attributes of registered
                                                          properties
     named-values  markup_types/named_values.rs (Base)    the static values of `Colors` and `Brushes`
+    rust-paths    rust_paths.rs (Base, Controls,         the shortest public Rust path of every registered class
+                  Markup.Xaml)                           and markup type, for the emitter of Rust source
+                                                         (scripts/rust_paths.py)
 
 Everything else in `markup_types/` (mod.rs, values.rs, contracts.rs,
 plain.rs, the tests) is written by hand and never touched by this script.
@@ -38,7 +41,7 @@ Options:
     --check        do not write; exit with status 1 and name the stale files
                    (with a line-count summary of the difference) if a
                    generated file differs from what would be generated
-    --target T     only `enums`, `classes` or `named-values` (repeatable)
+    --target T     only `enums`, `classes`, `named-values` or `rust-paths` (repeatable)
     --report       also print what was left out and why (members that are not
                    ported, events whose arguments cannot be held in an untyped
                    value, plain properties that need a hand-written override)
@@ -72,9 +75,14 @@ import os
 import re
 import sys
 
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import rust_paths  # noqa: E402
+
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SRC = os.path.join(ROOT, "src")
 CRATES = ["FerroUI.Base", "FerroUI.Controls"]
+# The crates whose registered types get a table of public Rust paths (`rust_paths.rs`).
+RUST_PATH_CRATES = ["FerroUI.Base", "FerroUI.Controls", os.path.join("Markup", "FerroUI.Markup.Xaml")]
 UPSTREAM_PROJECTS = {"FerroUI.Base": "Avalonia.Base", "FerroUI.Controls": "Avalonia.Controls"}
 OVERRIDES = os.path.join(ROOT, "scripts", "markup_types_overrides.py")
 
@@ -647,9 +655,7 @@ def registered_classes(crate):
     whole = read(os.path.join(SRC, crate, "register_types.rs"))
     table = whole[whole.index("const NAMESPACES") : whole.index("];", whole.index("const NAMESPACES"))]
     modules = sorted(re.findall(r'\("(?:\w+)((?:::\w+)*)",\s*"([\w.]+)"\)', table), key=lambda entry: -len(entry[0]))
-    # The list is the body of `types![TYPES, RUST_PATHS; ..]` (formerly `const TYPES: .. = types![..]`).
-    start = whole.index("types![TYPES") if "types![TYPES" in whole else whole.index("const TYPES")
-    text = whole[start:]
+    text = whole[whole.index("const TYPES") :]
     result, namespace = [], None
     for line in text.split("\n"):
         m = re.match(r"\s*// (FerroUI[\w.]*)\s*$", line)
@@ -1163,14 +1169,14 @@ def main():
     parser.add_argument("--upstream", default=default_upstream)
     parser.add_argument("--check", action="store_true")
     parser.add_argument("--report", action="store_true")
-    parser.add_argument("--target", action="append", choices=["enums", "classes", "named-values"])
+    parser.add_argument("--target", action="append", choices=["enums", "classes", "named-values", "rust-paths"])
     args = parser.parse_args()
 
     upstream = os.path.join(args.upstream, "src")
     if not os.path.isdir(os.path.join(upstream, "Avalonia.Base")):
         print("no upstream checkout at %s (pass --upstream or set FERROUI_UPSTREAM)" % args.upstream)
         return 2
-    targets = args.target or ["enums", "classes", "named-values"]
+    targets = args.target or ["enums", "classes", "named-values", "rust-paths"]
     sources = Sources(upstream)
     overrides = load_overrides()
     report, files = [], {}
@@ -1185,6 +1191,12 @@ def main():
             files[os.path.join(directory, "classes.rs")] = generate_classes(sources, crate, overrides[crate], report, known_event_arguments, known_event_classes)
     if "named-values" in targets:
         files[os.path.join(SRC, "FerroUI.Base", "markup_types", "named_values.rs")] = generate_named_values(sources, report)
+    if "rust-paths" in targets:
+        for crate in RUST_PATH_CRATES:
+            macro = "crate::ferro_rust_paths" if crate == "FerroUI.Base" else "ferroui_base::ferro_rust_paths"
+            text, missing = rust_paths.rust_paths_file(os.path.join(SRC, crate), HEADER, macro)
+            files[os.path.join(SRC, crate, "rust_paths.rs")] = text
+            report.extend("%s: %s" % (crate, line) for line in missing)
 
     stale = []
     for path in sorted(files):

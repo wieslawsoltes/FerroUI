@@ -51,6 +51,7 @@ mod pixel_vector;
 mod point;
 mod rect;
 mod register_types;
+mod rust_paths;
 mod relative_point;
 mod relative_rect;
 mod relative_scalar;

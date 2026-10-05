@@ -640,12 +640,6 @@ pub struct MarkupType {
     /// properties of the type are read once.
     pub notify_property_changed:
         Option<fn(&dyn crate::AnyValue) -> Option<&dyn crate::data::model::INotifyPropertyChanged>>,
-    /// The public Rust path of the type as another crate names it
-    /// (`ferroui_base::Thickness`), when the declaration states it. Most
-    /// types state it through the table of their crate instead
-    /// ([`MarkupType::register_rust_paths`]); read both with
-    /// [`MarkupType::rust_path`].
-    pub rust_path: Option<&'static str>,
 }
 
 impl MarkupType {
@@ -677,36 +671,43 @@ impl MarkupType {
             enum_from_value: None,
             attributes: &[],
             notify_property_changed: None,
-            rust_path: None,
         }
     }
 
-    /// Declares the public Rust paths of types that are not classes of the
-    /// object model (enumerations, value types): pairs of the Rust type (as
-    /// its value type) and the path another crate names it by
-    /// (`"ferroui_base::layout::HorizontalAlignment"`). Called from the
-    /// `register_types()` of a crate. The emitter of Rust source reads the
-    /// table; nothing else does.
-    pub fn register_rust_paths(paths: &[(TypeOf, &'static str)]) {
+    /// Declares the public Rust paths of markup types: the metadata of a
+    /// type, the path another crate names the type by
+    /// (`"ferroui_base::layout::HorizontalAlignment"`) and whether the path
+    /// names a trait (a contract, whose values are `Rc<dyn Trait>`). Called
+    /// from the `register_types()` of a crate with the table of its
+    /// generated `rust_paths.rs` ([`ferro_rust_paths!`](crate::ferro_rust_paths)).
+    /// The emitter of Rust source reads the table; nothing else does.
+    pub fn register_rust_paths(paths: &[(&'static MarkupType, &'static str, bool)]) {
         let mut table = rust_paths().write().unwrap_or_else(|e| e.into_inner());
-        for (handle, path) in paths {
-            table.insert(handle().id(), path);
+        for &(markup, path, is_trait) in paths {
+            table.insert(markup as *const MarkupType as usize, (markup, path, is_trait));
         }
     }
 
-    /// The public Rust path registered for the Rust type `handle`
-    /// ([`register_rust_paths`](Self::register_rust_paths)).
-    pub fn rust_path_of_handle(handle: TypeId) -> Option<&'static str> {
-        rust_paths().read().unwrap_or_else(|e| e.into_inner()).get(&handle).copied()
+    /// The public Rust path of the type
+    /// ([`register_rust_paths`](Self::register_rust_paths)), if its crate
+    /// recorded one; for a contract, the path of the trait.
+    pub fn rust_path(&'static self) -> Option<&'static str> {
+        self.rust_path_entry().map(|entry| entry.1)
     }
 
-    /// The public Rust path of the type: the one its declaration states,
-    /// else the one registered for its untyped handle.
-    pub fn rust_path(&self) -> Option<&'static str> {
-        match self.rust_path {
-            Some(path) => Some(path),
-            None => Self::rust_path_of_handle(self.handle()?.id()),
-        }
+    /// Whether the recorded public Rust path names a trait.
+    pub fn rust_path_is_trait(&'static self) -> bool {
+        self.rust_path_entry().is_some_and(|entry| entry.2)
+    }
+
+    fn rust_path_entry(&'static self) -> Option<(&'static MarkupType, &'static str, bool)> {
+        rust_paths().read().unwrap_or_else(|e| e.into_inner()).get(&(self as *const MarkupType as usize)).copied()
+    }
+
+    /// Every markup type with a registered public Rust path, with the path
+    /// and whether it names a trait, in no particular order.
+    pub fn all_rust_paths() -> Vec<(&'static MarkupType, &'static str, bool)> {
+        rust_paths().read().unwrap_or_else(|e| e.into_inner()).values().copied().collect()
     }
 
     /// The dotted, markup-facing namespace of the type.
@@ -914,8 +915,8 @@ impl MarkupRegistry {
     }
 }
 
-fn rust_paths() -> &'static RwLock<HashMap<TypeId, &'static str>> {
-    static PATHS: OnceLock<RwLock<HashMap<TypeId, &'static str>>> = OnceLock::new();
+fn rust_paths() -> &'static RwLock<HashMap<usize, (&'static MarkupType, &'static str, bool)>> {
+    static PATHS: OnceLock<RwLock<HashMap<usize, (&'static MarkupType, &'static str, bool)>>> = OnceLock::new();
     PATHS.get_or_init(Default::default)
 }
 

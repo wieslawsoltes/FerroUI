@@ -133,6 +133,8 @@ pub const EXPECTED_ELIGIBLE: &[&str] = &[
     "named_content.xaml",
     "duplicate_name.xaml",
     "name_and_x_name.xaml",
+    "deep_nesting.xaml",
+    "layout_transform_control.xaml",
     "user_control_properties.xaml",
     "multiline_document.xaml",
     "multiline_duplicate_name.xaml",
@@ -151,6 +153,4 @@ pub const EXPECTED_NOT_ELIGIBLE: &[&str] = &[
     "text_block_font_style_weight.xaml",
     "text_block_text_layout.xaml",
     "text_block_padding_font.xaml",
-    "deep_nesting.xaml",
-    "layout_transform_control.xaml",
 ];
