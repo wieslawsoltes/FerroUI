@@ -5,6 +5,9 @@ name: Pages
 # One-time setting: Settings, Pages, Build and deployment, Source "GitHub Actions". Until it is set the
 # workflow reports that Pages is not enabled and ends without building or deploying, so it does not fail.
 #
+# The site is published only while its WebAssembly module stays within the size budget below
+# (PUBLISHED_MODULE_GZIP_BUDGET_MB, with gzip): above it the build job fails before anything is uploaded.
+#
 # The site is the output of `scripts/build-browser.sh control-catalog-browser`, uploaded as it is: GitHub
 # Pages compresses responses itself (gzip, negotiated with Accept-Encoding) and does not serve
 # precompressed files, so none are written.
@@ -25,6 +28,8 @@ concurrency:
   cancel-in-progress: false
 
 env:
+  # The size budget of the published WebAssembly module, in megabytes (1,000,000 bytes) with gzip.
+  PUBLISHED_MODULE_GZIP_BUDGET_MB: 12
   CARGO_TERM_COLOR: always
   CARGO_INCREMENTAL: 0
 
@@ -64,9 +69,11 @@ jobs:
       - name: Test the site before publishing it
         if: steps.pages.outputs.enabled == 'true'
         run: node scripts/browser/test-site.mjs target/browser/control-catalog-browser
-      - name: Sizes of the published modules
+      - name: Sizes of the published modules, within the budget
         if: steps.pages.outputs.enabled == 'true'
-        run: node scripts/browser/module-sizes.mjs target/browser/control-catalog-browser >> "$GITHUB_STEP_SUMMARY"
+        run: >
+          node scripts/browser/module-sizes.mjs target/browser/control-catalog-browser
+          --gzip-budget-mb "$PUBLISHED_MODULE_GZIP_BUDGET_MB" | tee -a "$GITHUB_STEP_SUMMARY"
       - uses: actions/configure-pages@v5
         if: steps.pages.outputs.enabled == 'true'
       - uses: actions/upload-pages-artifact@v3
