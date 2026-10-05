@@ -160,9 +160,7 @@ pub fn register_types() {
         ferroui_controls::register_types();
         TypeInfo::register_namespaces(NAMESPACES);
         TypeInfo::register_all(TYPES);
-        TypeInfo::register_rust_paths(crate::rust_paths::CLASS_RUST_PATHS);
-        ferroui_base::metadata::register_type_rust_paths(crate::rust_paths::TYPE_RUST_PATHS);
-        MarkupType::register_rust_paths(crate::rust_paths::MARKUP_RUST_PATHS);
+        crate::rust_paths::register_rust_paths();
         MarkupType::register_all(MARKUP_TYPES);
         MarkupAssembly::register(&ASSEMBLY);
         ValueTypes::register_global(register_value_types);
