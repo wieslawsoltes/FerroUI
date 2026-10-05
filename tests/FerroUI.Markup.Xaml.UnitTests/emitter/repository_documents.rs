@@ -33,6 +33,9 @@ fn documents_under(directory: &Path, found: &mut Vec<PathBuf>) {
 fn measure_theme_documents() {
     let _base = xaml_test_base();
     let root = Path::new(env!("CARGO_MANIFEST_DIR")).join("../..");
+    // The documents name types of the theme crates.
+    ferroui_themes_simple::register_types();
+    ferroui_themes_fluent::register_types();
     // Each theme is an assembly: its documents are compiled as one group, by their URIs.
     let mut compiled = Vec::new();
     for (theme, assembly) in [("src/FerroUI.Themes.Simple", "FerroUI.Themes.Simple"), ("src/FerroUI.Themes.Fluent", "FerroUI.Themes.Fluent")] {
@@ -46,7 +49,28 @@ fn measure_theme_documents() {
                 (name, std::fs::read_to_string(path).unwrap_or_default())
             })
             .collect();
-        let documents: Vec<(&str, &str)> = texts.iter().map(|(name, text)| (name.as_str(), text.as_str())).collect();
+        // A document with `x:Class` is the markup of a class (code-behind documents are stage
+        // E5): it is counted, not compiled.
+        let class_documents = texts.iter().filter(|(_, text)| text.contains("x:Class=")).count();
+        // The documents the theme itself leaves out (`Controls/excluded.txt`: they name types
+        // that are not ported).
+        let excluded_list = std::fs::read_to_string(theme_root.join("Controls/excluded.txt")).unwrap_or_default();
+        let excluded: Vec<String> = excluded_list
+            .lines()
+            .filter(|line| !line.trim_start().starts_with('#'))
+            .filter_map(|line| line.split('|').next())
+            .map(|file| format!("Controls/{}", file.trim()))
+            .filter(|file| file != "Controls/")
+            .collect();
+        println!(
+            "{assembly}: {class_documents} document(s) with x:Class and {} excluded by the theme left out",
+            excluded.len()
+        );
+        let documents: Vec<(&str, &str)> = texts
+            .iter()
+            .filter(|(name, text)| !text.contains("x:Class=") && !excluded.contains(name))
+            .map(|(name, text)| (name.as_str(), text.as_str()))
+            .collect();
         let root_uri = format!("ferres://{assembly}/");
         compiled.extend(compile_documents(&documents, Some(&root_uri), &RuntimeXamlLoaderConfiguration::new()));
     }

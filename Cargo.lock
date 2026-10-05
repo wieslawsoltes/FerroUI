@@ -258,6 +258,8 @@ dependencies = [
  "ferroui-markup",
  "ferroui-markup-xaml",
  "ferroui-markup-xaml-loader",
+ "ferroui-themes-fluent",
+ "ferroui-themes-simple",
  "xamlx",
 ]
 
