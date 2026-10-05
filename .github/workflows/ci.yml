@@ -129,3 +129,7 @@ jobs:
           scripts/build-browser.sh themed_view
       - name: Behaviour tests in headless Chrome
         run: node scripts/browser/tests/themed_view.test.mjs
+      - name: Build the storage view site
+        run: scripts/build-browser.sh storage_view
+      - name: Storage behaviour tests in headless Chrome
+        run: node scripts/browser/tests/storage_view.test.mjs
