@@ -2,6 +2,7 @@ use super::{IStorageFile, IStorageFolder, IStorageItemWithFileSystemInfo, Storag
 use crate::input::LocalBoxFuture;
 use crate::reactive::IDisposable;
 use crate::utilities::Uri;
+use std::any::Any;
 use std::rc::Rc;
 
 /// Manipulates storage items (files and folders) and their contents, and
@@ -64,6 +65,13 @@ pub trait IStorageItem: IDisposable {
     /// The item as one that is backed by an entry of the local file
     /// system, if it is one.
     fn as_storage_item_with_file_system_info(&self) -> Option<&dyn IStorageItemWithFileSystemInfo> {
+        None
+    }
+
+    /// The item as its concrete type, for a storage provider that
+    /// recognises its own items (C# `item as JSStorageItem`). `None` unless
+    /// the implementation opts in.
+    fn as_any(&self) -> Option<&dyn Any> {
         None
     }
 }
