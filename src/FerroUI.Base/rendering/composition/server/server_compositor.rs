@@ -543,6 +543,34 @@ impl ServerCompositor {
 
     // --- rendering ----------------------------------------------------------
 
+    /// Whether the caller may access the objects of the compositor: whether
+    /// the compositor is rendering a frame. Upstream the frame is rendered
+    /// under the compositor lock by the thread that holds it.
+    pub fn check_access(&self) -> bool {
+        self.ui_thread_is_inside_render.get()
+    }
+
+    /// Panics when the caller may not access the objects of the compositor
+    /// (see [`check_access`](Self::check_access)).
+    pub fn verify_access(&self) {
+        if !self.check_access() {
+            panic!("This object can be only accessed under compositor lock");
+        }
+    }
+
+    /// [`verify_access`](Self::verify_access) of a compositor that may be
+    /// gone: no frame of a compositor that is gone is being rendered.
+    /// Returns the compositor.
+    pub fn verify_access_of(compositor: Option<&Rc<ServerCompositor>>) -> Rc<ServerCompositor> {
+        match compositor {
+            Some(compositor) => {
+                compositor.verify_access();
+                compositor.clone()
+            }
+            None => panic!("This object can be only accessed under compositor lock"),
+        }
+    }
+
     /// Runs one frame: applies the pending batches, runs the global passes
     /// and the queued jobs. Returns whether another tick is needed even if
     /// nothing else wakes the render loop up.
