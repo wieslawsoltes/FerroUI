@@ -306,7 +306,10 @@ check("text is copied from a text box to the clipboard and pasted into it", asyn
     await page.waitFor(`navigator.clipboard.readText().then((text) => text === "Text box")`, 10000);
 
     await page.evaluate(`navigator.clipboard.writeText(" pasted").then(() => true)`);
-    await page.press("End");
+    // A click after the end of the text ends the selection there (away from the first click, which
+    // would make it a double click that selects a word).
+    await page.click(TEXT_BOX[0] + 160, TEXT_BOX[1]);
+    assert((await page.state()).caret === "8", `the click did not put the caret at the end: ${JSON.stringify(await page.state())}`);
     await page.press("v", ["ctrl"]);
     await page.waitFor(`themedView.themedViewState().includes("text=Text box pasted;")`, 10000);
 
@@ -398,8 +401,7 @@ check("the screen of the view and the safe area are reported", async (page) => {
         const [name, value] = pair.split(":"); document.documentElement.style.setProperty(name, value); }), true)`);
     await page.send("Emulation.setDeviceMetricsOverride", { width: 440, height: 500, deviceScaleFactor: 1, mobile: false });
     await page.waitFor(`themedView.themedViewServices().includes("safe_area=1,2,3,4")`, 10000);
-    services = await page.services();
-    assert(Number(services.safe_area_changes) > changes, `no safe area change was reported: ${services.safe_area_changes}`);
+    await page.waitFor(`Number(themedView.themedViewServices().match(/safe_area_changes=(\\d+)/)[1]) > ${changes}`, 10000);
 });
 
 check("the details of all screens are requested through the permission of the page", async (page) => {
