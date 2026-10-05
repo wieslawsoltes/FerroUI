@@ -300,6 +300,42 @@ fn a_failed_build_reports_the_exception_type_of_the_run_time_loader() {
     assert_eq!(failure(&generated), failure(&interpreted));
 }
 
+/// Both back ends' failure of the corpus document `name`, which must fail.
+fn failures_of(name: &str) -> (XamlLoadException, XamlLoadException) {
+    let (_, xaml) = DOCUMENTS.iter().find(|(document, _)| *document == name).expect("a corpus document");
+    let interpreted = try_load(xaml).err().expect("the run-time loader fails");
+    let generated = build_generated(name).expect("the document is generated").err().expect("the generated build fails");
+    (interpreted, generated)
+}
+
+/// Not from upstream. An error below the first line of a document carries its line in
+/// both back ends: the second `x:Name='same'` is on line 4.
+#[test]
+fn a_failure_below_the_first_line_reports_its_line() {
+    let _base = xaml_test_base();
+    let (interpreted, generated) = failures_of("multiline_duplicate_name.xaml");
+    assert_eq!(failure(&generated), failure(&interpreted));
+    assert!(generated.message().contains("Line 4, position"), "{}", generated.message());
+    assert!(generated.message().ends_with(")") && generated.message().contains("(line 4 position"), "{}", generated.message());
+}
+
+/// Not from upstream. A control whose `EndInit` fails fails the build where the
+/// run-time loader fails, as the exception that wraps the failure of the member, at the
+/// position of the control (line 3).
+#[test]
+fn a_failed_end_init_is_the_error_of_the_run_time_loader() {
+    let _base = xaml_test_base();
+    let (interpreted, generated) = failures_of("end_init_failure.xaml");
+    assert_eq!(exception_type(&generated), Some("TargetInvocationException"));
+    assert_eq!(failure(&generated), failure(&interpreted));
+    assert!(
+        generated.message().starts_with("Duplicate setter encountered for property 'Tag' in 'FailingEndInit'."),
+        "{}",
+        generated.message()
+    );
+    assert!(generated.message().contains("(line 3 position"), "{}", generated.message());
+}
+
 #[test]
 fn compiled_documents_are_registered_by_uri() {
     use ferroui_base::platform::{AssetAssembly, IAssetLoader, StandardAssetLoader};
