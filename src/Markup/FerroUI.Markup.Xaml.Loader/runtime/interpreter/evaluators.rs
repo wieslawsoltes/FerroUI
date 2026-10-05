@@ -564,7 +564,9 @@ fn object_initialization(
     Ok(EvalResult::void())
 }
 
-fn numeric_constant(constant: &XamlValue) -> Option<(i128, f64)> {
+/// The integer and the floating-point reading of a numeric constant; the emitter of Rust
+/// source reads constants the same way.
+pub(crate) fn numeric_constant(constant: &XamlValue) -> Option<(i128, f64)> {
     Some(match constant {
         XamlValue::Boolean(v) => (i128::from(*v), f64::from(u8::from(*v))),
         XamlValue::Char(v) => (i128::from(u32::from(*v)), f64::from(u32::from(*v))),

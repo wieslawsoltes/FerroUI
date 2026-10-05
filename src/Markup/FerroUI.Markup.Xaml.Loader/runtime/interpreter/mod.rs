@@ -14,7 +14,7 @@ mod runtime_context;
 pub mod services;
 
 pub use evaluators::{constant_value, AssignmentPlan, StandardNodeEvaluator};
-pub(crate) use evaluators::single_setter;
+pub(crate) use evaluators::{numeric_constant, single_setter};
 pub use interpreter::{
     runtime_error, EvalContext, EvalResult, IXamlAstEvaluableNode, IXamlConstructorEvaluator,
     IXamlEvaluablePropertySetter,
