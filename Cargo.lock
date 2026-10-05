@@ -103,6 +103,7 @@ version = "0.1.0"
 dependencies = [
  "ferroui-base",
  "ferroui-controls",
+ "ferroui-dialogs",
  "ferroui-harfbuzz",
  "ferroui-markup",
  "ferroui-markup-xaml",
@@ -285,6 +286,7 @@ dependencies = [
  "cc",
  "ferroui-base",
  "ferroui-controls",
+ "ferroui-dialogs",
  "ferroui-harfbuzz",
  "ferroui-microcom",
  "ferroui-skia",
@@ -316,6 +318,7 @@ version = "0.1.0"
 dependencies = [
  "ferroui-base",
  "ferroui-controls",
+ "ferroui-dialogs",
  "ferroui-markup-xaml",
  "ferroui-markup-xaml-loader",
 ]
@@ -327,6 +330,7 @@ dependencies = [
  "ferroui-base",
  "ferroui-controls",
  "ferroui-desktop",
+ "ferroui-dialogs",
  "ferroui-markup-xaml",
  "ferroui-markup-xaml-loader",
  "ferroui-themes-fluent",

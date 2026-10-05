@@ -3,8 +3,7 @@
 //! `main_window_view_model_page_list.rs`.
 //!
 //! Not ported, because what they name does not exist in the framework yet:
-//! `AboutCommand` (the about dialog of the dialogs assembly), the
-//! `[Required]` validation attribute of `ValidatedDateExample` (data
+//! the `[Required]` validation attribute of `ValidatedDateExample` (data
 //! annotations), `Win32WindowCornerPreferences` and
 //! `Win32WindowCornerPreference` (`Win32Properties`).
 
@@ -21,6 +20,7 @@ use ferroui_base::utilities::DateTime;
 use ferroui_base::{ferro_markup_type, Ref, Thickness};
 use ferroui_controls::chrome::TitleBarDecorations;
 use ferroui_controls::{Application, INavigation, ItemsSource, SplitViewDisplayMode};
+use ferroui_dialogs::AboutFerroDialog;
 use mini_mvvm::{start_async, MiniCommand, ViewModelBase};
 use std::cell::{Cell, OnceCell, RefCell};
 use std::rc::{Rc, Weak};
@@ -52,6 +52,7 @@ pub struct MainWindowViewModel {
     display_mode: Cell<SplitViewDisplayMode>,
     query: RefCell<Option<String>>,
     validated_date_example: Cell<Option<DateTime>>,
+    about_command: Rc<MiniCommand>,
     exit_command: Rc<MiniCommand>,
     navigate_to_page_command: Rc<MiniCommand>,
     settings_command: Rc<MiniCommand>,
@@ -81,6 +82,16 @@ impl MainWindowViewModel {
         let (page_sections, unavailable_pages) = page_sections();
 
         let this = Rc::new_cyclic(|this: &Weak<MainWindowViewModel>| {
+            let about_command = MiniCommand::create_from_task(|| async {
+                let dialog = AboutFerroDialog::new();
+
+                let lifetime = Application::current().and_then(|app| app.application_lifetime());
+                let main_window =
+                    lifetime.as_ref().and_then(|l| l.as_classic_desktop_style_application_lifetime()).and_then(|d| d.main_window());
+                if let Some(main_window) = main_window {
+                    let _ = dialog.show_dialog(&main_window).await;
+                }
+            });
             let exit_command = MiniCommand::create(|| {
                 let lifetime = Application::current().and_then(|app| app.application_lifetime());
                 if let Some(desktop) = lifetime.as_ref().and_then(|l| l.as_classic_desktop_style_application_lifetime()) {
@@ -165,6 +176,7 @@ impl MainWindowViewModel {
                 display_mode: Cell::new(SplitViewDisplayMode::default()),
                 query: RefCell::new(Some(String::new())),
                 validated_date_example: Cell::new(None),
+                about_command,
                 exit_command,
                 navigate_to_page_command,
                 settings_command,
@@ -394,6 +406,10 @@ impl MainWindowViewModel {
         self.base.raise_property_changed("TitleBarDecorations");
     }
 
+    pub fn about_command(&self) -> Rc<MiniCommand> {
+        self.about_command.clone()
+    }
+
     pub fn exit_command(&self) -> Rc<MiniCommand> {
         self.exit_command.clone()
     }
@@ -575,6 +591,7 @@ ferro_markup_type!(class MainWindowViewModel {
             get: |this: &Vm| this.validated_date_example(),
             set: |this: &Vm, value: Option<DateTime>| this.set_validated_date_example(value)
         },
+        AboutCommand: Rc<dyn ICommand> { get: |this: &Vm| -> Rc<dyn ICommand> { this.about_command() } },
         ExitCommand: Rc<dyn ICommand> { get: |this: &Vm| -> Rc<dyn ICommand> { this.exit_command() } },
         NavigateToPageCommand: Rc<dyn ICommand> {
             get: |this: &Vm| -> Rc<dyn ICommand> { this.navigate_to_page_command() }
