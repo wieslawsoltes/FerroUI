@@ -270,6 +270,14 @@ class Crate:
             for name, (visibility, kind) in module.items.items():
                 names[name] = (visibility, ("item", (key, name)))
             self.namespaces[key] = names
+        self.crate_root = os.path.dirname(lib)
+        # The names each module imports from other crates (`use std::rc::Rc;`):
+        # name -> the absolute path.
+        self.externals = {}
+        for key, module in self.modules.items():
+            for visibility, segments, alias in module.uses:
+                if alias != "*" and segments[0] not in ("crate", "self", "super") and segments[0] not in module.children:
+                    self.externals.setdefault(key, {})[alias] = segments
         globbed = set()
         changed = True
         while changed:
@@ -350,6 +358,88 @@ class Crate:
         return best
 
 
+PRELUDE = {
+    "Option": "::std::option::Option",
+    "String": "::std::string::String",
+    "Vec": "::std::vec::Vec",
+    "Box": "::std::boxed::Box",
+}
+PRIMITIVES = {
+    "bool", "char", "i8", "i16", "i32", "i64", "i128", "isize", "u8", "u16", "u32", "u64", "u128", "usize", "f32",
+    "f64", "str",
+}
+
+
+def render_type(crate, public, key, text, crate_name):
+    """The Rust type `text`, as written in the module `key`, with every path made
+    absolute: (the text for the crate itself, with `crate::` for its items; the text
+    for other crates, with `::crate_name::`). None if a path does not resolve to a
+    public item."""
+    tokens = re.findall(r"::|[<>,&()\[\];]|'static|\w+", text)
+    inner, outer = [], []
+    i = 0
+    while i < len(tokens):
+        token = tokens[i]
+        if re.match(r"^\w+$", token) and token not in ("dyn", "mut") or token == "::":
+            segments = []
+            if token == "::":
+                i += 1
+            while i < len(tokens) and re.match(r"^\w+$", tokens[i]):
+                segments.append(tokens[i])
+                if i + 1 < len(tokens) and tokens[i + 1] == "::" and i + 2 < len(tokens) and re.match(r"^\w+$", tokens[i + 2]):
+                    i += 2
+                else:
+                    i += 1
+                    break
+            rendered = render_path(crate, public, key, segments)
+            if rendered is None:
+                return None
+            inner.append(rendered[0])
+            outer.append(rendered[1].replace("crate::", "::%s::" % crate_name, 1) if rendered[1].startswith("crate::") else rendered[1])
+            continue
+        inner.append(token + (" " if token == "dyn" else ""))
+        outer.append(token + (" " if token == "dyn" else ""))
+        i += 1
+    return "".join(inner), "".join(outer)
+
+
+def render_path(crate, public, key, segments):
+    if len(segments) == 1 and segments[0] in PRIMITIVES:
+        return segments[0], segments[0]
+    target = crate.resolve(key, segments)
+    if target is not None:
+        if target[0] != "item" or target[1] not in public:
+            return None
+        path = "crate::" + "::".join(public[target[1]])
+        return path, path
+    external = crate.externals.get(key, {}).get(segments[0])
+    if external is not None:
+        path = "::" + "::".join(external + segments[1:])
+        return path, path
+    if len(segments) == 1 and segments[0] in PRELUDE:
+        return PRELUDE[segments[0]], PRELUDE[segments[0]]
+    return None
+
+
+def markup_entries(text):
+    """The types `T` of the entries `<T as MarkupTyped>::MARKUP` of a type list, with
+    balanced generic arguments."""
+    entries = []
+    for m in re.finditer(r"\s+as\s+MarkupTyped\s*>::MARKUP", text):
+        depth = 0
+        k = m.start() - 1
+        while k >= 0:
+            if text[k] == ">":
+                depth += 1
+            elif text[k] == "<":
+                if depth == 0:
+                    break
+                depth -= 1
+            k -= 1
+        entries.append(text[k + 1 : m.start()].strip())
+    return entries
+
+
 def source_files(crate_root):
     for current, directories, files in os.walk(crate_root):
         directories.sort()
@@ -380,8 +470,11 @@ def registered_types(crate_root, crate):
         lists = re.findall(r"const \w*TYPES\s*:\s*&\[&MarkupType\]\s*=\s*&\[(.*?)\];", text, re.S)
         lists += re.findall(r"const \w*TYPES\s*:\s*&\[&MarkupType\]\s*=\s*markup_types!\[(.*?)\];", text, re.S)
         for entries in lists:
-            for entry in re.findall(r"<\s*((?:dyn\s+)?[\w:]+)\s+as\s+MarkupTyped\s*>::MARKUP", entries):
-                result.append(entry_of(crate, key, entry, os.path.relpath(file, crate_root)))
+            for entry in markup_entries(entries):
+                if "<" in entry:
+                    result.append(("generic", entry, os.path.relpath(file, crate_root), key))
+                else:
+                    result.append(entry_of(crate, key, entry, os.path.relpath(file, crate_root)))
             if "MarkupTyped" not in entries:
                 for entry in re.findall(r"(?:^|,)\s*((?:dyn\s+)?[\w:]+)\s*(?=,|$)", entries.strip()):
                     result.append(entry_of(crate, key, entry, os.path.relpath(file, crate_root)))
@@ -399,9 +492,17 @@ def rust_paths(crate_root):
     types, sorted, and what has none."""
     crate = Crate(crate_root)
     public = crate.public_paths()
-    found = {"class": set(), "type": set(), "contract": set()}
+    found = {"class": set(), "type": set(), "contract": set(), "generic": set()}
     report = []
+    crate_name = crate_name_of(crate_root)
     for kind, text, file, target in registered_types(crate_root, crate):
+        if kind == "generic":
+            rendered = render_type(crate, public, target, text, crate_name)
+            if rendered is None:
+                report.append("%s: generic type %s does not name only public types" % (file, text))
+            else:
+                found["generic"].add(rendered)
+            continue
         if target is None or target[0] != "item":
             report.append("%s: %s %s is not an item this script can resolve" % (file, kind, text))
             continue
@@ -410,11 +511,18 @@ def rust_paths(crate_root):
             report.append("%s: %s %s has no public path" % (file, kind, text))
             continue
         found[kind].add("crate::" + "::".join(path))
-    return sorted(found["class"]), sorted(found["type"]), sorted(found["contract"]), report
+    return sorted(found["class"]), sorted(found["type"]), sorted(found["contract"]), sorted(found["generic"]), report
+
+
+def crate_name_of(crate_root):
+    """The name of the crate (`package.name` of its manifest, `-` as `_`)."""
+    with open(os.path.join(crate_root, "Cargo.toml"), encoding="utf-8") as f:
+        name = re.search(r'^name\s*=\s*"([^"]+)"', f.read(), re.M).group(1)
+    return name.replace("-", "_")
 
 
 def rust_paths_file(crate_root, header, macro):
-    classes, types, contracts, report = rust_paths(crate_root)
+    classes, types, contracts, generics, report = rust_paths(crate_root)
 
     def listing(paths):
         return "".join("        %s,\n" % path for path in paths)
@@ -429,6 +537,8 @@ def rust_paths_file(crate_root, header, macro):
         "    classes: [\n" + listing(classes) + "    ],\n"
         "    types: [\n" + listing(types) + "    ],\n"
         "    contracts: [\n" + listing(contracts) + "    ],\n"
+        "    generics: [\n" + "".join("        (%s, %s),\n" % (inner, '"' + outer.lstrip(":") + '"') for inner, outer in generics if not inner.startswith("dyn ")) + "    ],\n"
+        "    generic_contracts: [\n" + "".join("        (%s, %s),\n" % (inner[4:], '"' + outer[4:].lstrip(":") + '"') for inner, outer in generics if inner.startswith("dyn ")) + "    ],\n"
         "}\n"
     )
     return text, report

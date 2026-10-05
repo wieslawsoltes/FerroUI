@@ -61,4 +61,8 @@ ferroui_base::ferro_rust_paths! {
         crate::xamlx_runtime::IXamlParentStackProviderV1,
         crate::xamlx_runtime::IXamlXmlNamespaceInfoProviderV1,
     ],
+    generics: [
+    ],
+    generic_contracts: [
+    ],
 }

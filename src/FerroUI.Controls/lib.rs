@@ -41,6 +41,8 @@ mod pixel_point_event_args;
 mod placement_mode;
 mod platform_inhibition_type;
 mod register_types;
+#[doc(hidden)]
+pub use markup_types::{AddChildOf, FerroListOf};
 mod rust_paths;
 mod relative_panel;
 mod request_bring_into_view_event_args;
