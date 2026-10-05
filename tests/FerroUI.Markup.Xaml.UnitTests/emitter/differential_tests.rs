@@ -145,10 +145,22 @@ fn display_control_template(template: &Rc<dyn ferroui_controls::templates::ICont
 /// A control theme in display form: its target type, the target type of
 /// the theme it is based on, and its setters (property and value).
 fn display_control_theme(theme: &Ref<ferroui_base::styling::ControlTheme>) -> String {
-    use ferroui_base::styling::{Setter, SetterValue};
     let type_name = |class: Option<&'static ferroui_base::TypeInfo>| class.map(|class| class.full_name()).unwrap_or_default();
-    let mut setters = Vec::new();
-    for setter in theme.setters().to_vec() {
+    let setters = display_setters(&theme.setters().to_vec());
+    format!(
+        "<ControlTheme {} based on {} [{}]>",
+        type_name(theme.target_type()),
+        theme.based_on().map(|based_on| type_name(based_on.target_type())).unwrap_or_else(|| "nothing".to_string()),
+        setters
+    )
+}
+
+/// The setters of a style or control theme in display form: property and
+/// value, a template built.
+fn display_setters(setters: &[Rc<dyn ferroui_base::styling::SetterBase>]) -> String {
+    use ferroui_base::styling::{Setter, SetterValue};
+    let mut shown = Vec::new();
+    for setter in setters {
         let text = match setter.as_any().and_then(|any| any.downcast_ref::<Setter>()) {
             Some(setter) => {
                 let property = setter.property().map(|property| property.name().to_string()).unwrap_or_default();
@@ -172,14 +184,34 @@ fn display_control_theme(theme: &Ref<ferroui_base::styling::ControlTheme>) -> St
             }
             None => unreadable("a setter that is not a Setter"),
         };
-        setters.push(text);
+        shown.push(text);
     }
-    format!(
-        "<ControlTheme {} based on {} [{}]>",
-        type_name(theme.target_type()),
-        theme.based_on().map(|based_on| type_name(based_on.target_type())).unwrap_or_else(|| "nothing".to_string()),
-        setters.join(", ")
-    )
+    shown.join(", ")
+}
+
+/// The styles of an element in display form: each style's selector and
+/// setters, its nested styles after it.
+fn display_styles(styles: &Ref<ferroui_base::styling::Styles>, output: &mut String, pad: &str) {
+    for index in 0..styles.count() {
+        let style = styles.get(index);
+        let Some(object) = style.as_object() else {
+            output.push_str(&format!("{pad}  style <not an object>\n"));
+            continue;
+        };
+        match object.to_ref().cast::<ferroui_base::styling::Style>() {
+            Some(style) => {
+                let selector = style.selector().map(|selector| selector.to_string()).unwrap_or_else(|| "none".to_string());
+                output.push_str(&format!("{pad}  style {selector} [{}]\n", display_setters(&style.setters().to_vec())));
+                for child in style.children().snapshot().iter() {
+                    if let Some(child) = child.as_object().and_then(|object| object.to_ref().cast::<ferroui_base::styling::Style>()) {
+                        let selector = child.selector().map(|selector| selector.to_string()).unwrap_or_else(|| "none".to_string());
+                        output.push_str(&format!("{pad}    nested style {selector} [{}]\n", display_setters(&child.setters().to_vec())));
+                    }
+                }
+            }
+            None => output.push_str(&format!("{pad}  style <{}>\n", object.get_type().full_name())),
+        }
+    }
 }
 
 /// The canonical dump of an object tree: the full name of the class and,
@@ -276,6 +308,9 @@ fn dump(object: &Ref<FerroObject>, root_scope: Option<&Rc<dyn INameScope>>, inde
                 let value = value.as_ref().map(display).unwrap_or_else(|| "null".to_string());
                 output.push_str(&format!("{pad}  resource {key} = {value}\n"));
             }
+        }
+        if styled.is_styles_initialized() {
+            display_styles(&styled.styles(), output, &pad);
         }
         if let Some(scope) = NameScope::get_name_scope(styled) {
             output.push_str(&format!("{pad}  has a name scope, completed: {}\n", scope.0.is_completed()));

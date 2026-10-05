@@ -32,8 +32,11 @@ use crate::compiler_extensions::ast_nodes::{
     FerroXamlIlFerroListConstantAstNode, FerroXamlIlFontFamilyAstNode, FerroXamlIlGridLengthAstNode, FerroXamlIlVectorLikeConstantAstNode,
 };
 use crate::compiler_extensions::transformers::{
-    EnsureCapacityNode, FerroNameScopeRegistrationXamlIlNode, FerroXamlIlWellKnownTypesExtensions, HandleRootObjectScopeNode,
-    OptionsMarkupExtensionMethod, ResourceAdderSetter, XamlIlDirectCallPropertySetter,
+    CombinatorSelectorType, EnsureCapacityNode, FerroNameScopeRegistrationXamlIlNode, FerroXamlIlWellKnownTypesExtensions,
+    HandleRootObjectScopeNode, OptionsMarkupExtensionMethod, ResourceAdderSetter, XamlIlAttachedPropertyEqualsSelector,
+    XamlIlCombinatorSelector, XamlIlDirectCallPropertySetter, XamlIlNestingSelector, XamlIlNotSelector,
+    XamlIlNthChildSelector, XamlIlNthChildSelectorType, XamlIlOrSelectorNode, XamlIlPropertyEqualsSelector,
+    XamlIlSelectorInitialNode, XamlIlSelectorNode, XamlIlStringSelector, XamlIlStringSelectorType, XamlIlTypeSelector,
 };
 use crate::compiler_extensions::{
     BindingSetter, BindingWithPrioritySetter, SetValueWithPrioritySetter, UnsetValueSetter, XamlIlBindingPathElementNode, XamlIlBindingPathNode, XamlIlFerroPropertyFieldNode,
@@ -473,6 +476,18 @@ impl Emitter<'_> {
         }
         if let Some(n) = node.cast::<XamlIlBindingPathNode>() {
             return self.binding_path(node, &n);
+        }
+        if node.cast::<dyn XamlIlSelectorNode>().is_some() {
+            return Ok(match self.selector(node)? {
+                Some(local) => Typed {
+                    expr: format!("{local}.clone()"),
+                    kind: Kind::Exact {
+                        id: TypeId::of::<ferroui_base::styling::Selector>(),
+                        nullable: Some(TypeId::of::<Option<ferroui_base::styling::Selector>>()),
+                    },
+                },
+                None => Typed { expr: "::core::option::Option::None".to_string(), kind: Kind::Null },
+            });
         }
         if let Some(n) = node.cast::<FerroXamlIlFontFamilyAstNode>() {
             // `new FontFamily(context.BaseUri, text)`.
@@ -1754,6 +1769,128 @@ impl Emitter<'_> {
         self.line("    builder.build()".to_string());
         self.line("};".to_string());
         Ok(Typed { expr: format!("{local}.clone()"), kind: self.kind_of(TypeId::of::<CompiledBindingPath>()) })
+    }
+
+    /// A selector (`XamlIlSelectorNode`): the selector before it, then the
+    /// builder of the styling system the node calls (`Selectors::*`), as the
+    /// interpreter's `selector` builds it. Returns the local holding the
+    /// selector, `None` for the start of a chain.
+    fn selector(&mut self, node: &Rc<dyn IXamlAstNode>) -> EmitResult<Option<String>> {
+        const SELECTORS: &str = "::ferroui_base::styling::Selectors";
+        if node.is::<XamlIlSelectorInitialNode>() {
+            return Ok(None);
+        }
+        let previous = |emitter: &mut Self, previous: &Option<Rc<dyn XamlIlSelectorNode>>| -> EmitResult<String> {
+            Ok(match previous {
+                Some(previous) => match emitter.selector(&previous.clone().as_node())? {
+                    Some(local) => format!("::core::option::Option::Some({local})"),
+                    None => "::core::option::Option::None".to_string(),
+                },
+                None => "::core::option::Option::None".to_string(),
+            })
+        };
+        let class_of = |type_: &Rc<dyn IXamlType>| -> EmitResult<String> {
+            let class = runtime_type(type_)
+                .and_then(RuntimeType::type_info)
+                .ok_or_else(|| unsupported(node, format!("{} is not a class of the object model: it cannot be used as a control type", type_.get_full_name())))?;
+            let path = class
+                .rust_path()
+                .ok_or_else(|| unsupported(node, format!("no public Rust path is recorded for {}", class.full_name())))?;
+            Ok(format!("<{} as ::ferroui_base::StaticType>::TYPE", absolute(path)))
+        };
+        let call = if let Some(n) = node.cast::<XamlIlTypeSelector>() {
+            let previous = previous(self, &n.base.previous)?;
+            let class = class_of(&n.target_type)?;
+            match n.concrete {
+                true => format!("{SELECTORS}::of_type_info({previous}, {class})"),
+                false => format!("{SELECTORS}::is_type_info({previous}, {class})"),
+            }
+        } else if let Some(n) = node.cast::<XamlIlStringSelector>() {
+            let previous = previous(self, &n.base.previous)?;
+            let text = rust_string_literal(&n.string());
+            match n.selector_type {
+                XamlIlStringSelectorType::Class => format!("{SELECTORS}::class({previous}, {text})"),
+                XamlIlStringSelectorType::Name => format!("{SELECTORS}::name({previous}, {text})"),
+            }
+        } else if let Some(n) = node.cast::<XamlIlCombinatorSelector>() {
+            let previous = previous(self, &n.base.previous)?;
+            match n.selector_type {
+                CombinatorSelectorType::Child => format!("{SELECTORS}::child({previous})"),
+                CombinatorSelectorType::Descendant => format!("{SELECTORS}::descendant({previous})"),
+                CombinatorSelectorType::Template => format!("{SELECTORS}::template({previous})"),
+            }
+        } else if let Some(n) = node.cast::<XamlIlNotSelector>() {
+            let previous = previous(self, &n.base.previous)?;
+            let argument = self
+                .selector(&n.argument.clone().as_node())?
+                .ok_or_else(|| unsupported(node, "a not selector without an argument"))?;
+            format!("{SELECTORS}::not({previous}, {argument})")
+        } else if let Some(n) = node.cast::<XamlIlNthChildSelector>() {
+            let previous = previous(self, &n.base.previous)?;
+            match n.selector_type {
+                XamlIlNthChildSelectorType::NthChild => format!("{SELECTORS}::nth_child({previous}, {}, {})", n.step, n.offset),
+                XamlIlNthChildSelectorType::NthLastChild => {
+                    format!("{SELECTORS}::nth_last_child({previous}, {}, {})", n.step, n.offset)
+                }
+            }
+        } else if let Some(n) = node.cast::<XamlIlPropertyEqualsSelector>() {
+            let previous = previous(self, &n.base.previous)?;
+            let field = n.resolve_ferro_property_field().map_err(|e| failed(node, e))?;
+            self.property_equals(node, previous, &field, &n.value())?
+        } else if let Some(n) = node.cast::<XamlIlAttachedPropertyEqualsSelector>() {
+            let previous = previous(self, &n.base.previous)?;
+            self.property_equals(node, previous, &n.property_filed(), &n.value())?
+        } else if let Some(n) = node.cast::<XamlIlOrSelectorNode>() {
+            let alternatives = n.selectors();
+            match alternatives.as_slice() {
+                [] => return Err(unsupported(node, "an or selector without alternatives")),
+                [only] => return self.selector(&only.clone().as_node()),
+                _ => {
+                    let mut list = Vec::with_capacity(alternatives.len());
+                    for alternative in &alternatives {
+                        list.push(
+                            self.selector(&alternative.clone().as_node())?
+                                .ok_or_else(|| unsupported(node, "an alternative of an or selector that is empty"))?,
+                        );
+                    }
+                    format!("{SELECTORS}::or([{}])", list.join(", "))
+                }
+            }
+        } else if let Some(n) = node.cast::<XamlIlNestingSelector>() {
+            let previous = previous(self, &n.base.previous)?;
+            format!("{SELECTORS}::nesting({previous})")
+        } else {
+            return Err(unsupported(node, "no emitter for this selector node"));
+        };
+        let local = self.local_named("selector");
+        self.line(format!("let {local} = {call};"));
+        Ok(Some(local))
+    }
+
+    /// `Selectors::property_equals_untyped(previous, property, value)`: the
+    /// value evaluated as an object, then held as exactly the type of the
+    /// property.
+    fn property_equals(
+        &mut self,
+        node: &Rc<dyn IXamlAstNode>,
+        previous: String,
+        field: &Rc<dyn IXamlField>,
+        value: &Rc<dyn IXamlAstValueNode>,
+    ) -> EmitResult<String> {
+        let definition = self.registered_definition(node, &field.name(), field)?;
+        let property = field
+            .as_any()
+            .downcast_ref::<RuntimeField>()
+            .and_then(RuntimeField::ferro_property)
+            .ok_or_else(|| unsupported(node, format!("{}: not a registered property", field.name())))?;
+        let value_node = value.clone().as_node();
+        let value = self.value(&value_node)?;
+        let typed = self.coerce(&value, property.property_type()).ok_or_else(|| {
+            unsupported(&value_node, format!("{}: the value cannot be stated as `{}`", property.name(), property.property_type_name()))
+        })?;
+        Ok(format!(
+            "::ferroui_base::styling::Selectors::property_equals_untyped({previous}, rt::property({definition}), ::std::rc::Rc::new({typed}))"
+        ))
     }
 
     /// The builder call of one element of a binding path (`builder` is the
