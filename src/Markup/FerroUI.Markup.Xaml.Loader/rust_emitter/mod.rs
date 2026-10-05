@@ -61,6 +61,14 @@
 //! | the definition of a registered property | a public accessor the declaration macro recorded for it, by the path of the type whose `impl` declares it (`ferroui_base::metadata::property_accessors`, `rust_path_of_type`; feature `compiler-metadata` of the base crate, which the `emitter` feature of this crate enables), the first in declaration order |
 //! | a conversion without a static form (an interface handle, a registered cast) | `rt::cast`, the loader's own cast, where `ValueTypes::is_assignable` proves it exists |
 //!
+//! Everything the emitter reads beyond the run-time metadata (the path
+//! tables, the names of the typed functions, the instance and value types
+//! of declarations) and the typed functions themselves exist only with the
+//! `compiler-metadata` feature of the base crate (`metadata::CompilerMetadata`,
+//! `__ferro_compiler_metadata!`): a default build carries none of it. Generated
+//! code calls the typed functions, so a crate that compiles generated code
+//! enables the feature.
+//!
 //! The emitter never resolves a member by name itself: the member is the one
 //! the transformers put into the AST, and the Rust type of every value is
 //! compared (by `TypeId`) with the value type of the registered property it

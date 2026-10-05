@@ -32,16 +32,13 @@
 //! an accessor nor carry the table.
 
 use std::any::TypeId;
-#[cfg(feature = "compiler-metadata")]
 use std::cell::RefCell;
 use std::collections::HashMap;
 use std::sync::{OnceLock, RwLock};
 
-#[cfg(feature = "compiler-metadata")]
 use crate::{FerroProperty, TypeInfo};
 
 /// An accessor of a property definition.
-#[cfg(feature = "compiler-metadata")]
 #[derive(Clone, Copy, Debug)]
 pub struct PropertyAccessor {
     /// The type whose static initialisation registers the property (the
@@ -56,7 +53,6 @@ pub struct PropertyAccessor {
     pub public: bool,
 }
 
-#[cfg(feature = "compiler-metadata")]
 thread_local! {
     /// The accessors each type declares, by the address of its runtime type,
     /// in declaration order, with the definition each returns.
@@ -64,7 +60,6 @@ thread_local! {
         RefCell::new(HashMap::new());
 }
 
-#[cfg(feature = "compiler-metadata")]
 fn key(type_: &'static TypeInfo) -> usize {
     type_ as *const TypeInfo as usize
 }
@@ -75,7 +70,6 @@ fn key(type_: &'static TypeInfo) -> usize {
 /// declaration macros when the accessor first runs on a thread, which is the
 /// registration of the properties of `owner`; recording the same accessor
 /// again has no effect.
-#[cfg(feature = "compiler-metadata")]
 pub fn record_property_accessor(
     owner: &'static TypeInfo,
     impl_type: TypeId,
@@ -96,7 +90,6 @@ pub fn record_property_accessor(
 /// definition each returns. The type is initialised first, so the list is
 /// complete. A type without a static initialisation of its own registers
 /// nothing and declares no accessor this table can know of.
-#[cfg(feature = "compiler-metadata")]
 pub fn declared_property_accessors(type_: &'static TypeInfo) -> Vec<(PropertyAccessor, &'static FerroProperty)> {
     if !type_.has_class_init() {
         return Vec::new();
@@ -111,7 +104,6 @@ pub fn declared_property_accessors(type_: &'static TypeInfo) -> Vec<(PropertyAcc
 /// the type that registered the property and its base types. Within a type
 /// the order is the declaration order. Accessors declared for other types
 /// (an `add_owner` in an unrelated class) are not listed.
-#[cfg(feature = "compiler-metadata")]
 pub fn property_accessors(property: &'static FerroProperty, preferred: Option<&'static TypeInfo>) -> Vec<PropertyAccessor> {
     let mut types: Vec<&'static TypeInfo> = Vec::new();
     for start in preferred.into_iter().chain(std::iter::once(property.owner_type())) {

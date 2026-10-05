@@ -185,7 +185,7 @@ macro_rules! ferro_markup_type {
     };
 
     (@build $kind:ident $type_:ty, $name:expr, $this:ty, $form:ident, { $($body:tt)* }) => {
-        $crate::ferro_markup_type!(@fns $form $type_, $this; $($body)*);
+        $crate::__ferro_compiler_metadata!($crate::ferro_markup_type!(@fns $form $type_, $this; $($body)*););
 
         impl $crate::metadata::MarkupTyped for $type_ {
             const MARKUP: &'static $crate::metadata::MarkupType = {
@@ -197,8 +197,10 @@ macro_rules! ferro_markup_type {
                         ::std::module_path!(),
                     );
                     $crate::ferro_markup_type!(@nullable $kind markup, $type_);
-                    $crate::ferro_markup_type!(@this $kind $form markup, $this);
-                    markup.value = ::std::option::Option::Some(<$type_>::__MARKUP_VALUE);
+                    $crate::__ferro_compiler_metadata!(
+                        $crate::ferro_markup_type!(@this $kind $form markup, $this);
+                        markup.value = ::std::option::Option::Some(<$type_>::__MARKUP_VALUE);
+                    );
                     $crate::__ferro_markup_items!(markup, $this; $($body)*);
                     markup
                 };
@@ -421,8 +423,8 @@ macro_rules! __ferro_markup_items {
                 typed_path_element: $crate::__ferro_markup_typed_path!(
                     $this, $type_, ::std::stringify!($name); [] [] $($accessors)*
                 ),
-                emit_get: $crate::__ferro_markup_emit_accessor!(get $name; $($accessors)*),
-                emit_set: $crate::__ferro_markup_emit_accessor!(set $name; $($accessors)*),
+                emit_get: $crate::__ferro_compiler_metadata!(@value $crate::__ferro_markup_emit_accessor!(get $name; $($accessors)*)),
+                emit_set: $crate::__ferro_compiler_metadata!(@value $crate::__ferro_markup_emit_accessor!(set $name; $($accessors)*)),
             },)*
         ];
         $crate::__ferro_markup_items!($m, $this; $($($rest)*)?);
@@ -490,8 +492,8 @@ macro_rules! __ferro_markup_items {
                 set: $crate::__ferro_markup_static_setter!($type_; $($accessors)*),
                 attributes: $crate::__ferro_markup_attributes!([] $($($attributes)*)?),
                 typed_path_element: ::std::option::Option::None,
-                emit_get: $crate::__ferro_markup_emit_accessor!(static_get $name; $($accessors)*),
-                emit_set: $crate::__ferro_markup_emit_accessor!(static_set $name; $($accessors)*),
+                emit_get: $crate::__ferro_compiler_metadata!(@value $crate::__ferro_markup_emit_accessor!(static_get $name; $($accessors)*)),
+                emit_set: $crate::__ferro_compiler_metadata!(@value $crate::__ferro_markup_emit_accessor!(static_set $name; $($accessors)*)),
             },)*
         ];
         $crate::__ferro_markup_items!($m, $this; $($($rest)*)?);
@@ -580,10 +582,10 @@ macro_rules! __ferro_markup_constructor {
                     $try_ ($new)($(arguments.next::<$parameter>()?),*)
                 )
             },
-            emit: ::std::option::Option::Some($crate::metadata::MarkupEmit {
+            emit: $crate::__ferro_compiler_metadata!(@value ::std::option::Option::Some($crate::metadata::MarkupEmit {
                 function: ::std::concat!("__markup_new", ::std::stringify!($index)),
                 fallible: $crate::__ferro_markup_is_try!($try_),
-            }),
+            })),
         }
     };
     ($index:ident $try_:tt $new:tt [$($parameter:ty,)*] [$($info:expr,)*]
@@ -1480,10 +1482,10 @@ macro_rules! __ferro_markup_method {
                 )
             },
             attributes: $crate::__ferro_markup_attributes!([] $($attributes)*),
-            emit: ::std::option::Option::Some($crate::metadata::MarkupEmit {
+            emit: $crate::__ferro_compiler_metadata!(@value ::std::option::Option::Some($crate::metadata::MarkupEmit {
                 function: ::std::concat!("__markup_", ::std::stringify!($name), ::std::stringify!($index)),
                 fallible: $crate::__ferro_markup_is_try!($try_),
-            }),
+            })),
         }
     };
     ($index:ident $this:ty; [static] $try_:tt $name:ident ($($parameter:ty),*) ($($return_:ty)?) ($call:expr) [$($attributes:tt)*]) => {
@@ -1503,10 +1505,10 @@ macro_rules! __ferro_markup_method {
                 )
             },
             attributes: $crate::__ferro_markup_attributes!([] $($attributes)*),
-            emit: ::std::option::Option::Some($crate::metadata::MarkupEmit {
+            emit: $crate::__ferro_compiler_metadata!(@value ::std::option::Option::Some($crate::metadata::MarkupEmit {
                 function: ::std::concat!("__markup_", ::std::stringify!($name), ::std::stringify!($index)),
                 fallible: $crate::__ferro_markup_is_try!($try_),
-            }),
+            })),
         }
     };
 }
@@ -1784,6 +1786,7 @@ macro_rules! __ferro_markup_attribute_properties {
 /// registered type. The crate passes both tables to
 /// [`TypeInfo::register_rust_paths`](crate::TypeInfo::register_rust_paths)
 /// and [`MarkupType::register_rust_paths`](super::MarkupType::register_rust_paths).
+#[cfg(feature = "compiler-metadata")]
 #[macro_export]
 macro_rules! ferro_rust_paths {
     (
@@ -1830,5 +1833,53 @@ macro_rules! ferro_rust_paths {
             $((<$generic as $crate::metadata::MarkupTyped>::MARKUP, $generic_path, false),)*
             $((<dyn $generic_contract as $crate::metadata::MarkupTyped>::MARKUP, $generic_contract_path, true),)*
         ];
+
+        /// Records the public Rust paths of this crate for the emitter of Rust source.
+        pub(crate) fn register_rust_paths() {
+            $crate::TypeInfo::register_rust_paths(CLASS_RUST_PATHS);
+            $crate::metadata::register_type_rust_paths(TYPE_RUST_PATHS);
+            $crate::metadata::MarkupType::register_rust_paths(MARKUP_RUST_PATHS);
+        }
     };
+}
+
+/// Without the `compiler-metadata` feature: `register_rust_paths()` records
+/// nothing and the tables do not exist (see the other definition).
+#[cfg(not(feature = "compiler-metadata"))]
+#[macro_export]
+macro_rules! ferro_rust_paths {
+    ($($tokens:tt)*) => {
+        /// Records the public Rust paths of this crate: nothing without the
+        /// `compiler-metadata` feature of the base crate.
+        pub(crate) fn register_rust_paths() {}
+    };
+}
+
+/// The tokens with the `compiler-metadata` feature of this crate, nothing
+/// without it: what only the emitter of Rust source uses (the typed
+/// functions of declared members, the metadata that names them). `@value
+/// expr` is the value of a [`CompilerMetadata`](crate::metadata::CompilerMetadata)
+/// slot: `expr` with the feature, the zero-sized stand-in without it.
+#[cfg(feature = "compiler-metadata")]
+#[doc(hidden)]
+#[macro_export]
+macro_rules! __ferro_compiler_metadata {
+    (@value $value:expr) => {
+        $value
+    };
+    ($($tokens:tt)*) => {
+        $($tokens)*
+    };
+}
+
+/// Without the `compiler-metadata` feature: nothing (see the other
+/// definition).
+#[cfg(not(feature = "compiler-metadata"))]
+#[doc(hidden)]
+#[macro_export]
+macro_rules! __ferro_compiler_metadata {
+    (@value $value:expr) => {
+        $crate::metadata::NotRecorded::new()
+    };
+    ($($tokens:tt)*) => {};
 }

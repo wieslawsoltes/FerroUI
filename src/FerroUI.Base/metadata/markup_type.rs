@@ -452,7 +452,7 @@ pub struct MarkupConstructor {
     /// The typed function the declaration generated for the constructor
     /// (see [`MarkupEmit`]): `__markup_new_<n>(a0: A, ..) -> T`, where `T` is
     /// the value type of the declared type ([`MarkupType::value`]).
-    pub emit: Option<MarkupEmit>,
+    pub emit: CompilerMetadata<Option<MarkupEmit>>,
 }
 
 /// A property that is not a registered property: a plain property with a
@@ -480,8 +480,57 @@ pub struct MarkupProperty {
     /// The typed accessor functions the declaration generated for the
     /// getter and the setter (see [`MarkupEmit`]); `None` for an accessor
     /// that is not declared.
-    pub emit_get: Option<MarkupEmit>,
-    pub emit_set: Option<MarkupEmit>,
+    pub emit_get: CompilerMetadata<Option<MarkupEmit>>,
+    pub emit_set: CompilerMetadata<Option<MarkupEmit>>,
+}
+
+/// What only the emitter of Rust source reads (the typed functions of
+/// [`MarkupEmit`], the instance and value types of a declaration): the value
+/// itself with the `compiler-metadata` feature, a zero-sized [`NotRecorded`]
+/// without it, so that shipped applications carry neither the data nor the
+/// code the declaration macros would generate for it.
+#[cfg(feature = "compiler-metadata")]
+pub type CompilerMetadata<T> = T;
+
+/// What only the emitter of Rust source reads; see the other definition.
+#[cfg(not(feature = "compiler-metadata"))]
+pub type CompilerMetadata<T> = NotRecorded<T>;
+
+/// The zero-sized stand-in of [`CompilerMetadata`] without the
+/// `compiler-metadata` feature: nothing is recorded.
+pub struct NotRecorded<T>(std::marker::PhantomData<fn() -> T>);
+
+impl<T> NotRecorded<T> {
+    /// Nothing.
+    pub const fn new() -> Self {
+        Self(std::marker::PhantomData)
+    }
+}
+
+impl<T> Clone for NotRecorded<T> {
+    fn clone(&self) -> Self {
+        *self
+    }
+}
+
+impl<T> Copy for NotRecorded<T> {}
+
+impl<T> fmt::Debug for NotRecorded<T> {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.write_str("NotRecorded")
+    }
+}
+
+/// The value of a [`CompilerMetadata`] slot a declaration leaves empty.
+#[cfg(feature = "compiler-metadata")]
+pub const fn not_recorded<T>() -> CompilerMetadata<Option<T>> {
+    None
+}
+
+/// The value of a [`CompilerMetadata`] slot a declaration leaves empty.
+#[cfg(not(feature = "compiler-metadata"))]
+pub const fn not_recorded<T>() -> CompilerMetadata<Option<T>> {
+    NotRecorded::new()
 }
 
 /// A typed function the declaration forms generate for a declared member,
@@ -542,7 +591,7 @@ pub struct MarkupMethod {
     pub attributes: &'static [MarkupAttribute],
     /// The typed function the declaration generated for the method (see
     /// [`MarkupEmit`]).
-    pub emit: Option<MarkupEmit>,
+    pub emit: CompilerMetadata<Option<MarkupEmit>>,
 }
 
 /// A static field of the managed original: a `static readonly` field or a
@@ -674,13 +723,13 @@ pub struct MarkupType {
     /// The Rust type instance members receive (`&This`): the `this:` of the
     /// declaration, else the declared type (`Ref<Class>` for a class). The
     /// typed functions of the instance members ([`MarkupEmit`]) take it.
-    pub this: Option<TypeOf>,
+    pub this: CompilerMetadata<Option<TypeOf>>,
     /// The Rust type of a value of the type as its constructors and its
     /// `Parse` return it, and so their typed functions ([`MarkupEmit`]):
     /// the instance type when the declaration states `this:`, else the
     /// first of its handles, else the declared type (`Rc<dyn Trait>` for a
     /// contract). `Ref<Class>` for a class.
-    pub value: Option<TypeOf>,
+    pub value: CompilerMetadata<Option<TypeOf>>,
 }
 
 impl MarkupType {
@@ -712,11 +761,12 @@ impl MarkupType {
             enum_from_value: None,
             attributes: &[],
             notify_property_changed: None,
-            this: None,
-            value: None,
+            this: not_recorded(),
+            value: not_recorded(),
         }
     }
 
+    #[cfg(feature = "compiler-metadata")]
     /// Declares the public Rust paths of markup types: the metadata of a
     /// type, the path another crate names the type by
     /// (`"ferroui_base::layout::HorizontalAlignment"`) and whether the path
@@ -731,6 +781,7 @@ impl MarkupType {
         }
     }
 
+    #[cfg(feature = "compiler-metadata")]
     /// The public Rust path of the type
     /// ([`register_rust_paths`](Self::register_rust_paths)), if its crate
     /// recorded one; for a contract, the path of the trait.
@@ -738,15 +789,18 @@ impl MarkupType {
         self.rust_path_entry().map(|entry| entry.1)
     }
 
+    #[cfg(feature = "compiler-metadata")]
     /// Whether the recorded public Rust path names a trait.
     pub fn rust_path_is_trait(&'static self) -> bool {
         self.rust_path_entry().is_some_and(|entry| entry.2)
     }
 
+    #[cfg(feature = "compiler-metadata")]
     fn rust_path_entry(&'static self) -> Option<(&'static MarkupType, &'static str, bool)> {
         rust_paths().read().unwrap_or_else(|e| e.into_inner()).get(&(self as *const MarkupType as usize)).copied()
     }
 
+    #[cfg(feature = "compiler-metadata")]
     /// Every markup type with a registered public Rust path, with the path
     /// and whether it names a trait, in no particular order.
     pub fn all_rust_paths() -> Vec<(&'static MarkupType, &'static str, bool)> {
@@ -958,6 +1012,7 @@ impl MarkupRegistry {
     }
 }
 
+#[cfg(feature = "compiler-metadata")]
 fn rust_paths() -> &'static RwLock<HashMap<usize, (&'static MarkupType, &'static str, bool)>> {
     static PATHS: OnceLock<RwLock<HashMap<usize, (&'static MarkupType, &'static str, bool)>>> = OnceLock::new();
     PATHS.get_or_init(Default::default)
