@@ -212,8 +212,8 @@ Workspace changes: the crates above as members, plus `src/FerroUI.OpenGL` (the O
 Tooling:
 
 - **Emscripten configuration**: plain `cargo build --target wasm32-unknown-emscripten` plus a repository script (`scripts/build-browser.sh` or an `xtask`) that runs esbuild, builds, and assembles `wwwroot` + `.js` + `.wasm` into a `dist` directory served by any static server. No trunk and no wasm-pack (wasm-pack has an open request for this target; trunk support **[U]**).
-- Link settings (in `.cargo/config.toml` for the target) **[M]**: `linker = "em++"` (Skia needs the C++ runtime), `-sWASM_BINDGEN`, `-sMODULARIZE`, `-sEXPORT_ES6`, `-sMAX_WEBGL_VERSION=2`, `-sALLOW_MEMORY_GROWTH=1`, `-sEXPORTED_RUNTIME_METHODS=GL,HEAPU8` (the JS side must reach Emscripten's `GL` object and the module memory), `-sINVOKE_RUN=0` (the host page starts the application; without it `main` also runs twice), `-sSTACK_SIZE=8MB` (the default stack of 64 KB is too small for layout and markup loading), `-sGL_ENABLE_GET_PROC_ADDRESS=1` (the OpenGL entry points of a context are resolved by name), and `EMCC_CFLAGS="-s ERROR_ON_UNDEFINED_SYMBOLS=0"` as rust-skia requires. No `-Cpanic=abort` and no `-Crelocation-model=static`. The backend imports its script module by a relative specifier, so there are no `wasm-bindgen` snippets to copy: `scripts/build-browser.sh <application>` assembles the site from the host page, `ferroui.js` and the `.js`/`.wasm` pair of the application: an example of the browser crate (`target/wasm32-unknown-emscripten/<profile>/examples/`) or a binary package of the workspace with its host page in the `wwwroot/` of the package (`target/wasm32-unknown-emscripten/<profile>/`, where the module of a binary is named after the target with `-` replaced by `_`).
-- **Browser scripts** (`scripts/browser/`): `setup.sh` installs the pinned toolchain (locally and, through the composite action `.github/actions/browser-toolchain`, in CI); `harness.mjs` serves a site and drives headless Chrome over the DevTools protocol (real pointer, wheel and key events, resize, screenshots, the console and the error log); the tests under `tests/` use it: `themed_view.test.mjs` (the input matrix and the services of the backend), `storage_view.test.mjs` (the storage provider) and `control_catalog.test.mjs` (the ControlCatalog site: start-up, WebGL2 and 2D-canvas rendering, resize, console errors, no upstream brand asset, and the drawer, navigation, a button click and typing into a text box driven with real events; run by the `browser` job of CI and before every Pages deployment); `capture.mjs` takes a screenshot of a site; `module-sizes.mjs` prints the raw, gzip and brotli sizes of the files of a site (and, with `--github-output`, the sizes of its WebAssembly module as step outputs); `render-placeholder-assets.mjs` draws the placeholder artwork of the published catalog.
+- Link settings (in `.cargo/config.toml` for the target) **[M]**: `linker = "em++"` (Skia needs the C++ runtime), `-sWASM_BINDGEN`, `-sMODULARIZE`, `-sEXPORT_ES6`, `-sENVIRONMENT=web` (the script of the module leaves out Node.js and worker support), `-sMAX_WEBGL_VERSION=2`, `-sALLOW_MEMORY_GROWTH=1`, `-sEXPORTED_RUNTIME_METHODS=GL,HEAPU8` (the JS side must reach Emscripten's `GL` object and the module memory), `-sINVOKE_RUN=0` (the host page starts the application; without it `main` also runs twice), `-sSTACK_SIZE=8MB` (the default stack of 64 KB is too small for layout and markup loading), `-sGL_ENABLE_GET_PROC_ADDRESS=1` (the OpenGL entry points of a context are resolved by name), `--js-library=src/Browser/FerroUI.Browser/emscripten/wasm_table_mirror.js` (keeps the cache of function table lookups in size-optimised links, see section 18), and `EMCC_CFLAGS="-s ERROR_ON_UNDEFINED_SYMBOLS=0"` as rust-skia requires. No `-Cpanic=abort` and no `-Crelocation-model=static`. The backend imports its script module by a relative specifier, so there are no `wasm-bindgen` snippets to copy: `scripts/build-browser.sh <application>` assembles the site from the host page, `ferroui.js` and the `.js`/`.wasm` pair of the application: an example of the browser crate (`target/wasm32-unknown-emscripten/<profile>/examples/`) or a binary package of the workspace with its host page in the `wwwroot/` of the package (`target/wasm32-unknown-emscripten/<profile>/`, where the module of a binary is named after the target with `-` replaced by `_`), built with the `browser` profile of the workspace (section 18), plus the files that build scripts of the application leave in `$OUT_DIR/browser-site/` (asset bundles).
+- **Browser scripts** (`scripts/browser/`): `setup.sh` installs the pinned toolchain (locally and, through the composite action `.github/actions/browser-toolchain`, in CI); `harness.mjs` serves a site and drives headless Chrome over the DevTools protocol (real pointer, wheel and key events, resize, screenshots, the console and the error log); the tests under `tests/` use it: `themed_view.test.mjs` (the input matrix and the services of the backend), `storage_view.test.mjs` (the storage provider) and `control_catalog.test.mjs` (the ControlCatalog site: start-up, WebGL2 and 2D-canvas rendering, resize, console errors, no upstream brand asset, and the drawer, navigation, a button click and typing into a text box driven with real events; run by the `browser` job of CI and before every Pages deployment); `capture.mjs` takes a screenshot of a site; `first-frame.mjs` measures the time from navigation to the first frame of a site (module downloaded, first draw, frame on screen, splash screen closed) over several loads with a fresh profile each, and can write a CPU profile; `wasm-size-report.py` attributes the bytes of a WebAssembly module to sections, embedded files, crates and generic families (section 18); `module-sizes.mjs` prints the raw, gzip and brotli sizes of the files of a site (and, with `--github-output`, the sizes of its WebAssembly module as step outputs); `render-placeholder-assets.mjs` draws the placeholder artwork of the published catalog.
 - **Publication**: `.github/workflows/pages.yml` builds the ControlCatalog site, tests it and deploys it to GitHub Pages on pushes to `main` and on manual runs. It deploys only while the WebAssembly module stays within the gzip budget `PUBLISHED_MODULE_GZIP_BUDGET_MB` of the workflow (12 MB for now); above it the size budget step of the deploy job fails before the deployment, and the raw and gzip sizes are in the summaries of the run. Only `main` is deployed (a manual run from another branch builds and tests only), and only the deploy job has `pages: write` and `id-token: write`. Every action of the workflows is pinned to a commit. The toolchain steps are shared with CI through the composite action `.github/actions/browser-toolchain`. GitHub Pages compresses responses itself (gzip, including `application/wasm`; no brotli was offered for `Accept-Encoding: br, gzip` when measured on 2026-10-05) and does not serve precompressed files, so the site carries none.
 - **`wasm32-unknown-unknown` configuration**: trunk, with the same `webapp` bundle.
 - TypeScript: keep upstream's esbuild script and ESLint configuration; three bundles as upstream. Asset fingerprinting and import maps are not needed initially.
@@ -268,7 +268,7 @@ Measured on macOS arm64 with Emscripten 6.0.10, Rust 1.90.0, `skia-safe` 0.153.3
 - The application does not start when the module is instantiated: the host page creates the module, hands it to the script side (`FerroExports.attach(runtime)`) and then calls the exported entry point. Every export is therefore resolved before the first callback fires.
 - The `themed_view` example of `FerroUI.Browser` (Fluent theme, embedded Inter font, run-time XAML loader) renders correctly in headless Chrome 154 through WebGL2 (Skia Ganesh), through the 2D-canvas path (`?RenderingMode=Software2D`), with the dark variant at a device scale factor of 2, and re-lays out when its host element is resized. The page is up within a few seconds from a local server.
 - Additional link settings: `-sSTACK_SIZE=8MB` (the default 64 KB stack is too small) and `-sGL_ENABLE_GET_PROC_ADDRESS=1` (the OpenGL entry points of the context are resolved by name).
-- Size of that example, release profile of the workspace, not optimised for size: 48.7 MB of WASM, 10.2 MB with gzip. Reducing it (size optimisation, `wasm-opt`, the build-time XAML compiler instead of the run-time loader) is open.
+- Size of that example, release profile of the workspace, not optimised for size: 48.7 MB of WASM, 10.2 MB with gzip. Section 18 reduces it to 25.9 MB, 8.3 MB with gzip (`main` of 2026-10-06).
 
 ### Verified with the ControlCatalog host (2026-10-05)
 
@@ -277,14 +277,14 @@ Measured on Linux x86_64 with Emscripten 6.0.10, Rust 1.90.0 and `wasm-bindgen` 
 - `samples/ControlCatalog.Browser` (crate `control-catalog-browser`) starts the catalog with the Fluent theme in the single-view lifetime; `scripts/browser/tests/control_catalog.test.mjs` passes for `?RenderingMode=WebGL2` (the canvas has a WebGL2 context) and `?RenderingMode=Software2D` (a 2D context): the application is up 8 to 9 s after navigation from a local server, the main view is drawn, it is laid out again when the page grows from 1024x700 to 1440x900 and shrinks to 800x600, and nothing is logged as an error (`images/control_catalog_browser.png`). SwiftShader satisfies `failIfMajorPerformanceCaveat` when Chrome runs with `--use-angle=swiftshader --enable-unsafe-swiftshader`, which the harness passes.
 - Input in the catalog, with real pointer and key events (`control_catalog.test.mjs`): the toggle button opens the drawer of the main view at 600 pixels (overlay mode); the drawer reaches the pages Basic Input, Buttons, CheckBox, Text and TextBox, each showing its content; a click on the first button of the Buttons page raises its `Click`; text typed into the text box of the TextBox "First Look" sample, and Backspace, change its text and the caption bound to it. The host exports `catalogState()` (JSON: the drawer, the current page, whether the navigation page is navigating, the focus, and the visible text blocks, text boxes and buttons with their bounds and whether the pointer reaches them), and the host page exposes the module as `globalThis.controlCatalog`. The navigation page ignores a navigation while it runs one (as upstream), so the test waits for a navigation to end before the next click.
 - The catalog logs the binding warnings of the gap the desktop host shows too (`$parent[MainView].ViewModel`, plain properties of a class through a base handle; see `CRITICAL-PATH.md`, item 23a); they go to the console log, as the console trace listener of the managed original writes them.
-- Size, release profile of the workspace, not optimised for size: 84.8 MB of WASM, 32.2 MB with gzip at level 9, 26.4 MB with brotli at quality 11; the script of the module 195 kB (39 kB gzip). A Pages deployment needs the module within 12 MB with gzip; the branch `browser-size` reduces it.
+- Size, release profile of the workspace, not optimised for size: 84.8 MB of WASM, 32.2 MB with gzip at level 9, 26.4 MB with brotli at quality 11; the script of the module 195 kB (39 kB gzip). A Pages deployment needs the module within 12 MB with gzip; section 18 reduces it to 31.9 MB, 9.5 MB with gzip.
 
 ### Still not verified
 
 - Firefox, Safari and mobile browsers; WebGL1; the `failIfMajorPerformanceCaveat` fallback to the raster path.
 - Whether all of `web-sys`, `js-sys` and `wasm-bindgen-futures` are usable on the Emscripten target (the boundary rules of section 5 keep them out of the port).
 - Whether a newer Rust toolchain or a rebuilt standard library allows `-Cpanic=abort` on the target, and what it would save.
-- Size and start-up of the full framework in the browser, and the speed of the run-time XAML loader there.
+- Run-time speed (layout, rendering, input) of the size-optimised module after start-up; start-up and size are measured in section 18.
 - `vello_gpu` and `vello_cpu` behaviour on Emscripten; the `vello_hybrid` to `vello_gpu` rename date and versions (secondary source; only the existence and description of `vello_gpu` were confirmed in the README).
 - Vello feature gaps against the drawing-context contract and its current text-rendering quality.
 - WebGPU availability per browser and OS (secondary sources, not vendor documentation).
@@ -489,6 +489,123 @@ Known gaps inside the finished stages are listed in the stage READMEs of the del
 - HarfRust releases; rustybuzz archival: https://github.com/harfbuzz/harfrust/releases, https://github.com/harfbuzz/rustybuzz
 - Local Font Access API: https://developer.mozilla.org/en-US/docs/Web/API/Local_Font_Access_API
 - WebGPU overview: https://developer.chrome.com/docs/web-platform/webgpu/overview
+
+## 18. Module size (2026-10-05, measured again 2026-10-06)
+
+The ControlCatalog site is published only while its WebAssembly module is within a gzip budget of 12 MB. This section records what the modules are made of, what was changed to bring them down, and what each change saved. Everything here is **[M]**: measured on Linux with Rust 1.90.0, Emscripten 6.0.10 and wasm-bindgen 0.2.129. Sizes are in MB of 1,000,000 bytes; gzip is level 9 of Node's zlib, as `scripts/browser/module-sizes.mjs` of the Pages budget computes it (GitHub Pages compresses with gzip); the attribution tables use Python's zlib, which differs by less than 1 %. How it was measured: sizes of the files of a site with `scripts/browser/module-sizes.mjs`; the attribution with `scripts/browser/wasm-size-report.py`; start-up with `scripts/browser/first-frame.mjs` (headless Chromium 141 with WebGL on SwiftShader, local server, 4-core container, five loads per rendering mode with a fresh browser profile each; the figure is the time from navigation to the first frame on screen, WebGL2 / Software2D); behaviour with the tests of `scripts/browser/tests/`, which drive the page through `scripts/browser/harness.mjs`. The step-by-step measurements of 2026-10-05 were taken with the end-to-end test of the catalog host as it was then (the time from navigation until the splash screen closed and the view had its canvas, two loads per mode) and with a first-frame CPU profile; they are comparable with each other, not with the figures of 2026-10-06, which come from a different container.
+
+### What the module is made of
+
+`scripts/browser/wasm-size-report.py` attributes a module: section sizes, embedded files in the data section, and, for a module linked with its name section (`-C link-arg=--profiling-funcs`), the code by origin and by generic family. The `themed_view` example before this pass (release profile: thin LTO, 4 code generation units, opt-level 3; 49.41 MB, 10.46 MB gzip):
+
+| Part | MB | MB gzip (alone) |
+|---|---:|---:|
+| Code section | 44.07 | 8.35 |
+| of which Rust `ferroui_base` (property system, bindings, value type registry, metadata) | 24.48 | 2.61 |
+| of which Rust `core` (closures `FnOnce::call_once`, iterators, formatting) | 4.96 | 1.29 |
+| of which Rust `ferroui_controls` | 3.60 | 0.81 |
+| of which drop glue (`drop_in_place`) of all types | 1.85 | 0.15 |
+| of which XAML pipeline (`ferroui_markup_xaml_loader`, `xamlx`, `ferroui_markup_xaml`, `roxmltree`) | 2.50 | 0.60 |
+| of which Skia (Ganesh, raster, SkSL, FreeType) | 3.17 | 1.20 |
+| of which HarfBuzz | 0.50 | 0.15 |
+| of which image codecs and zlib (libjpeg-turbo, libpng, wuffs) | 0.32 | 0.09 |
+| of which C and C++ runtime (libc, libc++, Emscripten) and other C | 1.07 | 0.36 |
+| Data section | 4.99 | 1.77 |
+| of which the six Inter fonts | 1.88 | 0.92 |
+| of which embedded theme markup (Fluent) | 0.71 | 0.11 |
+| of which other constant data (strings, tables, panic locations, vtables) | 2.40 | 0.74 |
+| Element section (function table) | 0.26 | 0.21 |
+
+The "alone" column compresses the bytes of one row by themselves, so the rows do not add up to the gzip size of the section; it shows how much of a row is repetition.
+
+Largest generic families (release profile; instances, MB raw):
+
+| Family | Instances | MB | MB gzip (alone) |
+|---|---:|---:|---:|
+| closures `FnOnce::call_once` (value type registry conversions, markup metadata tables, class vtables) | 12,566 | 3.53 | 0.96 |
+| `drop_in_place<_>` | 4,437 | 1.85 | 0.15 |
+| `ValueTypes::register_object<T>` | 348 | 1.85 | 0.06 |
+| `BindingEntry<T>::set_value` | 257 | 1.01 | 0.11 |
+| typed observers `on_next` | 1,827 | 0.87 | 0.06 |
+| `StyledProperty<T>::from_untyped` | 257 | 0.75 | 0.07 |
+| `route_bind` of `StyledProperty<T>` / `DirectProperty<T>` | 316 | 0.73 | 0.03 |
+| `markup_types::register_value_types` of `ferroui_base` (one function: the generated by-name value type table) | 1 | 0.73 | 0.03 |
+| `MarkupArguments::next<T>` | 302 | 0.72 | 0.05 |
+| `register_class::init` (class registration, metadata) | 342 | 0.51 | 0.10 |
+
+What the measurement says:
+
+- **Monomorphised framework code is the raw size, but not the gzip size.** The property system is instantiated per value type (257 `StyledProperty<T>` routes, 348 handle types in the value type registry); each instance is a near copy of the others, so a family of 1.85 MB compresses to 0.06 MB. Outlining generic code therefore shrinks the raw module (download after decompression, compile time and memory of the browser) much more than the gzip transfer.
+- **The by-name metadata tables** (the value type registry with its conversion closures, the markup type tables and argument readers, class and property registration: 6.7 MB raw of code in the release build) are needed by both measured applications: `themed_view` and the catalog load their theme and page markup through the run-time XAML loader, which looks every type and member up by name. Gating them behind the loader saves nothing for these applications; it pays off once markup is compiled ahead of time (`xaml.md`) and an application no longer calls the crate-wide `register_types()`.
+- **Skia is 3.2 MB raw, 1.2 MB gzip**, and the linker already drops what the framework does not reference: no code of the PDF or SVG back ends is in the module; the JPEG and PNG encoders (0.13 MB) are, because bitmaps can be saved. Its feature set per target is fixed by the published binaries (section 3); a different feature set means a source build of Skia, which the project does not do.
+- **No ICU or similar data is linked.** The Unicode property tables of the text formatting code are the framework's own (`ferroui_base::media::text_formatting::unicode`, generated by `scripts/convert-unicode-tries.py`) and are part of the "other constant data" row.
+- **Panics and formatting** are small: the code of `core::fmt` and `alloc::fmt` is 0.08 MB raw and the panic machinery less than 0.01 MB; panic messages and locations are part of the 2.4 MB of other constant data. The cost of unwinding is elsewhere (next item).
+- **Exceptions cost speed, not only size.** Rust on the Emscripten target with the pinned toolchain unwinds with JavaScript exceptions: every call that may unwind goes through an `invoke_*` function in JavaScript. A CPU profile of the start-up of `themed_view` at opt-level "z" without the change below spent 6.6 s in `WebAssembly.Table.get`, 2.1 s in the table lookup function, 2.4 s in wasm-to-JavaScript transitions and 1.6 s in JavaScript-to-wasm transitions, against 6.4 s in WebAssembly code. WebAssembly exception handling for Rust on this target is an unstable option of rustc (`-Z emscripten-wasm-eh`) that the pinned stable toolchain does not offer; it was not tried.
+
+### Changes
+
+| Change | Where |
+|---|---|
+| Type-independent parts of generic functions compiled once: value type registry insertions, binding notification errors, markup value conversion, property registry, the error paths of the typed property routes. These are the patches of the desktop size pass (`desktop-performance.md`), which landed on `main` with it; the step-by-step measurements below include them as a step, the measurements of 2026-10-06 have them on both sides | `ferroui-base` (desktop size pass) |
+| Profile `browser`: `lto = "fat"`, `codegen-units = 1`, `opt-level = "z"`, with `opt-level = 3` for `xamlx`, `ferroui-markup-xaml-loader`, `ferroui-markup-xaml`, `ferroui-markup` and `roxmltree`; `scripts/build-browser.sh` builds with it. rustc passes the optimisation level to `em++`, which runs `wasm-opt -Oz` on the linked module; the module has no name section and no debug information, as before | `Cargo.toml`, `scripts/build-browser.sh` |
+| The function table lookup with its cache (`wasm_table_mirror.js`, linked with `--js-library`): Emscripten leaves the cache out of `-Os` and `-Oz` links, and every `invoke_*` looks its callee up. The library applies only to those links (`#if SHRINK_LEVEL > 0`): the dev profile keeps the runtime's own cache with its assertion. It is written against the runtime of the pinned Emscripten 6.0.10, in which the table entries are written only through `setWasmTableEntry` (replaced as well) and the table only grows for dynamic linking, which is not used | `src/Browser/FerroUI.Browser/emscripten/`, `.cargo/config.toml` |
+| `-sENVIRONMENT=web`: the script of the module is linked for web pages only | `.cargo/config.toml` |
+| Asset bundles: an application can ship assets as a file next to the module (`register_asset_bundle` of the asset registry, `registerAssetBundle` exported to the host page, `$OUT_DIR/browser-site/` of a build script copied into the site by `scripts/build-browser.sh`). The feature `separate-assets` of `control-catalog` writes its pictures and fonts (everything but the markup documents) to `control-catalog.assets`; the browser host enables it and its page fetches the bundle while the module compiles | `ferroui-base`, `ferroui-browser`, `control-catalog`, the catalog host |
+
+### Before and after on `main` of 2026-10-06
+
+Measured after the pass was rebased onto `main` at `18155e5`, which carries the catalog host (`samples/ControlCatalog.Browser`), the storage, services and dialogs of the browser backend, and the desktop size pass: the outlining patches, and a release profile with fat LTO in one code generation unit at opt-level 3. "Before" is `main` built with that release profile; "after" is this pass: the `browser` profile, and the catalog host with the feature `separate-assets` fetching `control-catalog.assets`. First frame: median and range of five loads with `first-frame.mjs`, WebGL2 / Software2D; for `themed_view` the medians of three such rounds.
+
+| Module | Before MB | Before MB gzip | After MB | After MB gzip | First frame before (s) | First frame after (s) |
+|---|---:|---:|---:|---:|---:|---:|
+| `themed_view.wasm` | 41.02 | 9.85 | **25.89** | **8.25** | 9.05 to 9.07 / 8.06 to 9.31 | 9.70 to 10.00 / 9.11 to 9.50 |
+| `control_catalog_browser.wasm` | 75.29 | 31.63 | **31.87** | **9.45** | 14.9 (13.5 to 16.0) / 13.3 (12.4 to 14.8) | 14.6 (14.2 to 15.7) / 14.2 (13.6 to 15.2) |
+| `control-catalog.assets` (new, next to the module) | | | 23.54 | 20.18 | | |
+| script of the module (`control-catalog-browser.js`) | 0.22 | 0.04 | 0.22 | 0.04 | | |
+| the catalog site as a whole (without source maps) | 75.57 | 31.70 | 55.69 | 29.69 | | |
+
+The catalog module is within the 12 MB budget with 2.55 MB to spare; on this base the `browser` profile takes 15.13 MB raw and 1.60 MB gzip off `themed_view`; of the 22.18 MB gzip the catalog module loses, 20.18 MB move into the asset bundle and about 2.0 MB come from the profile. Against this baseline the first frame of `themed_view` is 0.7 to 0.9 s (8 to 10 %) later: the release profile now has the same fat LTO and one code generation unit, so opt-level "z" outside the XAML pipeline is what remains, and the run-time loader also calls into the property system and the controls. The catalog differs by -0.3 s and +0.9 s, within the spread of its loads. The behaviour tests (`themed_view.test.mjs`, 26 checks; `control_catalog.test.mjs`, 7 checks, including that no file of the site, the bundle included, carries a brand asset that `PlaceholderAssets` replaces) pass on both builds.
+
+### Step by step (`themed_view`, `main` of 2026-10-05)
+
+The contribution of each change was measured on the earlier base (`main` at `58ad3cf`), one build per step:
+
+| Build | MB | MB gzip | Start-up (s) |
+|---|---:|---:|---:|
+| Before: release profile (thin LTO, 4 units, opt-level 3) | 49.41 | 10.46 | 7.7 to 8.6 / 6.8 to 7.4 |
+| Outlining patches, release profile | 44.47 | 10.05 | 7.8 to 8.2 / 6.5 to 7.3 |
+| Outlining, fat LTO, 1 unit, opt-level "s" everywhere | 33.74 | 8.41 | 11.5 / 9.9 to 10.3 |
+| Outlining, fat LTO, 1 unit, opt-level "z" everywhere | 26.21 | 7.79 | 15.6 to 17.0 / 15.3 to 16.2 |
+| the same with the table lookup cache (patched into the script of the module by hand for the measurement) | 26.21 | 7.79 | 11.9 / 10.7 to 11.0 |
+| Profile `browser` (opt-level 3 for the XAML pipeline) with the table lookup cache | 24.98 | 7.94 | 7.6 to 7.8 / 6.8 to 7.0 |
+
+What each change saved on this module: the outlining patches 4.94 MB raw and 0.41 MB gzip; the size profile a further 19.49 MB raw and 2.11 MB gzip (keeping the XAML pipeline at opt-level 3 costs 0.15 MB gzip of that and saves 1.23 MB raw); the table lookup cache nothing in size (about 150 bytes of script) and 3.5 to 5 s of start-up at opt-level "z". `-sENVIRONMENT=web` (taken over from an earlier attempt at this pass) changes only the script of the module (about 2 kB less). The rendered pixels are the same in every configuration (the colour counts of the end-to-end test are identical).
+
+### Step by step (ControlCatalog, `main` of 2026-10-05)
+
+| Build | Module MB | Module MB gzip | Other files of the site, MB gzip | Start-up (s) |
+|---|---:|---:|---:|---:|
+| Before: `browser-catalog` with `main` merged, release profile, assets embedded | 85.83 | 32.39 | 0.05 | 11.8 / 10.6 |
+| This pass merged, profile `browser`, assets embedded | 54.44 | 29.34 | 0.05 | not measured |
+| This pass merged, profile `browser`, pictures and fonts in `control-catalog.assets` | 30.98 | 9.15 | 20.23 (the bundle: 23.54 MB raw, 20.18 MB gzip) | 11.3 to 11.5 / 10.5 |
+
+What each change saved on this module: the outlining patches and the size profile together 31.39 MB raw and 3.05 MB gzip; the asset bundle moves 23.46 MB raw and 20.19 MB gzip out of the module into a file of its own.
+
+The site as a whole is still 29.7 MB with gzip (32.9 MB before, on `main` of 2026-10-06): the pictures (JPEG, already compressed) and fonts of the sample are 20.2 MB of it, and the bundle moves them out of the module without making them smaller. The page fetches the bundle while the module is compiled, so the start-up did not get longer; the application starts when both are there. The screenshots of the main view before and after are the same, except in the banner picture of the home page, whose pixels differ by up to 6 levels between two runs of the same build.
+
+### Trade-offs
+
+- **Start-up**: against the release profile of `main` of 2026-10-06 (fat LTO, one unit, opt-level 3) the first frame of `themed_view` is 0.7 to 0.9 s (8 to 10 %) later, the catalog's within noise. Against the earlier release profile (thin LTO, four units) no difference was measurable. Opt-level "z" for the whole module doubled the start-up of `themed_view` (7.5 s to 16 s); the table lookup cache and opt-level 3 for the XAML pipeline crates bring most of it back. Opt-level "s" was not adopted: it is larger than "z" and, without the remedies, also slower to start.
+- **Run-time speed** after start-up is not measured (no browser benchmark of layout and rendering exists). Code outside the XAML pipeline runs at opt-level "z", which inlines less than the release profile; the desktop measurements (`desktop-performance.md`) put the CPU cost of opt-level "s" at about 19 %.
+- **Build time**: fat LTO in one code generation unit serialises code generation. Full builds of `themed_view` with the `browser` profile took 11.5 to 17.7 minutes in this container (4 cores), a full build of the catalog 15 minutes, a rebuild of the catalog crate and its link 10 minutes; the release profile used on the desktop is unchanged.
+- **Memory of the page**: the asset bundle is copied once into the module memory (24 MB for the catalog) and its views stay registered for the life of the page, as embedded assets would.
+
+### Not done, and why
+
+- `panic = "abort"`: the framework relies on unwinding (`catch_unwind` in the render loop and the dispatcher, panics of dispatcher operations re-raised in their awaiters; see `desktop-performance.md`, P2 item 6), and the pinned toolchain builds the target only with `unwind` (section 3).
+- Splitting Skia features: forbidden by the binary-only Skia rule (section 3); the linker already drops the unused parts.
+- Compressing embedded resources inside the module: the fonts and markup are compressed by the transfer encoding already, and the pictures are JPEG and PNG; a second compression would cost a decompressor and start-up time for no transfer gain.
+- Further outlining of the property store (`BindingEntry<T>::set_value`, `EffectiveValue<T>`, `StyledProperty<T>::from_untyped`, about 4 MB raw): hot paths of a port of generic upstream code, each split needs the property system tests and keeps the borrow and re-entrancy order; it would shrink the raw module, while its gzip effect is small (the families compress to a few percent). Proposed as a follow-up together with one shared instantiation for reference-like value types (`desktop-performance.md`, items 10 and 11).
 
 ## Owner decision (2026-10-04)
 
