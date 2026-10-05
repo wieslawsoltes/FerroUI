@@ -696,6 +696,14 @@ impl ItemsSource {
     /// Lets bindings deliver a value of the collection type `S` to a
     /// property of type `Option<ItemsSource>` (or `ItemsSource`) on the
     /// current thread.
+    /// [`register_binding_conversion`](Self::register_binding_conversion) for a
+    /// collection type that converts with `convert` (a list handle that is delivered as
+    /// the shared list).
+    pub fn register_binding_conversion_with<S: 'static>(convert: fn(&S) -> ItemsSource) {
+        ValueTypes::register_conversion::<S, ItemsSource>(move |s| Some(convert(s)));
+        ValueTypes::register_conversion::<S, Option<ItemsSource>>(move |s| Some(Some(convert(s))));
+    }
+
     pub fn register_binding_conversion<S: Clone + Into<ItemsSource> + 'static>() {
         ValueTypes::register_conversion::<S, ItemsSource>(|s| Some(s.clone().into()));
         ValueTypes::register_conversion::<S, Option<ItemsSource>>(|s| Some(Some(s.clone().into())));

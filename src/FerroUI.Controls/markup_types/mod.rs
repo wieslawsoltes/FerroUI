@@ -18,6 +18,7 @@ mod classes;
 mod contracts;
 mod converters;
 mod enums;
+pub(crate) mod lists;
 mod plain;
 mod values;
 
@@ -35,6 +36,7 @@ pub(crate) fn register() {
         MarkupType::register_all(types);
     }
     ValueTypes::register_global(register_value_types);
+    lists::PipsList::register();
 }
 
 /// Registers what the untyped value conversions need to know about the

@@ -1,9 +1,7 @@
 use super::{PipsPagerSelectedIndexChangedEventArgs, PipsPagerTemplateSettings};
 use crate::automation::AutomationProperties;
 use crate::primitives::{TemplateAppliedEventArgs, TemplatedControl, TemplatedControlImpl, TemplatedControlImplExt};
-use crate::{Button, Control, ControlImpl, ItemsSource, ListBox, ScrollViewer, StackPanel};
-use ferroui_base::collections::FerroList;
-use ferroui_base::data::core::ValueTypes;
+use crate::{Button, Control, ControlImpl, ListBox, ScrollViewer, StackPanel};
 use ferroui_base::data::BindingMode;
 use ferroui_base::input::{InputElementImpl, InputElementImplExt, Key, KeyEventArgs};
 use ferroui_base::interactivity::{Interactive, InteractiveImpl, RoutedEvent, RoutedEventHandlerToken, RoutingStrategies};
@@ -262,13 +260,9 @@ impl PipsPager {
     );
 
     fn static_constructor() {
-        // XAML-SEAM: not in the reference class. A binding that delivers the pips of the template
-        // settings to an items source property (the binding of the control theme) needs the
-        // conversion of the list handle; upstream gets it from the type system.
-        ValueTypes::register_conversion::<FerroList<i32>, ItemsSource>(|pips| Some(Rc::new(pips.clone()).into()));
-        ValueTypes::register_conversion::<FerroList<i32>, Option<ItemsSource>>(|pips| {
-            Some(Some(Rc::new(pips.clone()).into()))
-        });
+        // The list of pips is a declared typed list (`ferro_markup_list!`): the binding of
+        // the control theme delivers it to an items source property.
+        crate::markup_types::lists::PipsList::register();
 
         Self::selected_page_index_property()
             .changed()
