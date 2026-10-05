@@ -71,3 +71,28 @@ sysinfo = { version = "0.37", default-features = false, features = ["disk"] }
 [profile.release]
 lto = "fat"
 codegen-units = 1
+
+# The WebAssembly module of the browser (scripts/build-browser.sh): optimised for size, because the
+# module is downloaded and compiled by every visitor (docs/porting/browser-platform.md, section 18).
+# The crates of the run-time XAML loader stay optimised for speed: at "z" the start-up of a themed
+# application took twice as long, because the theme markup is loaded through them.
+[profile.browser]
+inherits = "release"
+opt-level = "z"
+lto = "fat"
+codegen-units = 1
+
+[profile.browser.package.xamlx]
+opt-level = 3
+
+[profile.browser.package.ferroui-markup-xaml-loader]
+opt-level = 3
+
+[profile.browser.package.ferroui-markup-xaml]
+opt-level = 3
+
+[profile.browser.package.ferroui-markup]
+opt-level = 3
+
+[profile.browser.package.roxmltree]
+opt-level = 3
