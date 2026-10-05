@@ -60,6 +60,8 @@ impl BrowserInsetsManager {
 }
 
 impl IInsetsManager for BrowserInsetsManager {
+    // As the original, which answers whether the page is in full screen: the inverse of what the
+    // setter takes, which hides the bars by requesting full screen.
     fn is_system_bar_visible(&self) -> Option<bool> {
         Some(self.page.is_fullscreen())
     }
