@@ -71,47 +71,64 @@ fn generate() -> Vec<AnimationData> {
     ]
 }
 
-#[test]
-fn generic_check() {
+fn generic_check(data: AnimationData) {
     let fixture = Fixture::new();
     let compositor = &fixture.compositor;
-    for data in generate() {
-        let target = compositor.create_solid_color_visual();
-        fixture.run_jobs();
-        let ani = ScalarKeyFrameAnimation::new(compositor);
-        for (key, value) in &data.frames {
-            ani.insert_key_frame_with_easing(*key, *value, Rc::new(LinearEasing::new()));
-        }
-        ani.set_duration(Duration::from_secs(1));
-        let instance = ani.create_instance(target.server(), None);
-        instance.resolve(compositor.server());
-        instance.initialize(
-            Duration::ZERO,
-            data.starting_value.into(),
-            ServerCompositionVisualProps::id_of_rotation_angle_property(),
-        );
-        let mut current_value = ExpressionVariant::create(data.starting_value);
-        for (time, value) in &data.checks {
-            current_value = instance.evaluate(Duration::from_secs_f32(*time), current_value);
-            assert_eq!(current_value, ExpressionVariant::Double(*value as f64), "{} at {time}", data.name);
-        }
+    let target = compositor.create_solid_color_visual();
+    fixture.run_jobs();
+    let ani = ScalarKeyFrameAnimation::new(compositor);
+    for (key, value) in &data.frames {
+        ani.insert_key_frame_with_easing(*key, *value, Rc::new(LinearEasing::new()));
+    }
+    ani.set_duration(Duration::from_secs(1));
+    let instance = ani.create_instance(target.server(), None);
+    instance.resolve(compositor.server());
+    instance.initialize(
+        Duration::ZERO,
+        data.starting_value.into(),
+        ServerCompositionVisualProps::id_of_rotation_angle_property(),
+    );
+    let mut current_value = ExpressionVariant::create(data.starting_value);
+    for (time, value) in &data.checks {
+        current_value = instance.evaluate(Duration::from_secs_f32(*time), current_value);
+        assert_eq!(current_value, ExpressionVariant::Double(*value as f64), "{} at {time}", data.name);
     }
 }
 
-#[test]
-fn get_composition_property_returns_registered_properties() {
+/// The data row of [`generate`] at `index`.
+fn generated(index: usize) -> AnimationData {
+    generate().into_iter().nth(index).expect("the data row exists")
+}
+
+/// Declares one test per data row of a parameterized test.
+macro_rules! theory {
+    ($func:ident: $($name:ident($($arg:expr),* $(,)?));+ $(;)?) => {
+        $(
+            #[test]
+            fn $name() {
+                $func($($arg),*)
+            }
+        )+
+    };
+}
+
+theory!(generic_check: generic_check_1(generated(0)); generic_check_2(generated(1)));
+
+fn get_composition_property_returns_registered_properties(prop_name: &str) {
     let fixture = Fixture::new();
-    for prop_name in ["Color", "Offset"] {
-        let target = fixture.compositor.create_solid_color_visual();
-        fixture.run_jobs();
+    let target = fixture.compositor.create_solid_color_visual();
+    fixture.run_jobs();
 
-        let property = fixture.animated(&target).get_composition_property(prop_name);
+    let property = fixture.animated(&target).get_composition_property(prop_name);
 
-        let property = property.expect("the property is registered");
-        assert_eq!(prop_name, property.name());
-        assert!(property.get_variant().is_some());
-    }
+    let property = property.expect("the property is registered");
+    assert_eq!(prop_name, property.name());
+    assert!(property.get_variant().is_some());
 }
+
+theory!(get_composition_property_returns_registered_properties:
+    get_composition_property_returns_registered_properties_1("Color");
+    get_composition_property_returns_registered_properties_2("Offset"));
 
 #[test]
 fn expression_animation_operations_works_correctly() {
