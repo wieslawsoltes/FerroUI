@@ -91,6 +91,9 @@ pub const DOCUMENTS: &[(&str, &str)] = &[
     ("font_weight_number.xaml", "<TextBlock xmlns='https://github.com/ferroui' xmlns:x='http://schemas.microsoft.com/winfx/2006/xaml' FontWeight='600'></TextBlock>"),
     ("user_control_named_children.xaml", "<UserControl xmlns='https://github.com/ferroui' xmlns:x='http://schemas.microsoft.com/winfx/2006/xaml'><StackPanel x:Name='panel'><Border x:Name='first'/><Border Name='second'/></StackPanel></UserControl>"),
     ("panel_children_x_null_tag.xaml", "<StackPanel xmlns='https://github.com/ferroui' xmlns:x='http://schemas.microsoft.com/winfx/2006/xaml'><Border Tag='{x:Null}'/><Border Tag='3'/></StackPanel>"),
+    ("direct_selected_index.xaml", "<ListBox xmlns='https://github.com/ferroui' xmlns:x='http://schemas.microsoft.com/winfx/2006/xaml' SelectedIndex='-1'></ListBox>"),
+    ("direct_selected_item_null.xaml", "<ListBox xmlns='https://github.com/ferroui' xmlns:x='http://schemas.microsoft.com/winfx/2006/xaml' SelectedItem='{x:Null}'></ListBox>"),
+    ("direct_selected_item_text.xaml", "<ComboBox xmlns='https://github.com/ferroui' xmlns:x='http://schemas.microsoft.com/winfx/2006/xaml' SelectedItem='text'></ComboBox>"),
 ];
 
 /// The documents that must be eligible for emission.
@@ -169,6 +172,9 @@ pub const EXPECTED_ELIGIBLE: &[&str] = &[
     "font_weight_number.xaml",
     "user_control_named_children.xaml",
     "panel_children_x_null_tag.xaml",
+    "direct_selected_index.xaml",
+    "direct_selected_item_null.xaml",
+    "direct_selected_item_text.xaml",
 ];
 
 /// The documents that must not be eligible for emission.
