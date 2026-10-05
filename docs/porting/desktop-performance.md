@@ -1,4 +1,4 @@
-# FerroUI binary size and startup time: measurements (P1) and proposals (P2)
+# FerroUI binary size and startup time: measurements (P1), proposals (P2) and results (P3)
 
 Commit measured: `48507636f39523f8fd7dc74f7690ab1f1f9aff9f` (main).
 Machine: Apple M3 Pro (11 cores, 18 GB), macOS 26.6 (25G72), rustc 1.90.0, release profile
@@ -10,6 +10,8 @@ the load average never dropped below 4 (it is printed with each measurement). Ti
 of 7 or 9 warm launches; a difference below about 5 % between two configurations is noise.
 
 Everything in this report is **measured** unless a line says *estimated* or *not verified*.
+Sections 0 to 5 are the measurement pass on `main` at the commit above; section 6 is the
+optimisation pass that followed it, with the before and after numbers.
 
 ## 0. Method and tools
 
@@ -343,3 +345,134 @@ $L $T/cpu.sh x-fat1
 Raw outputs are kept next to the tools: `base/*.symsize.txt`, `base/startup-final.txt`,
 `p1/startup-buckets.txt`, `p1/startup-incl.txt`, `p1run.log`, `x-*/sizes.txt`, `x-*/startup.txt`,
 `x-v0/*.v0.txt`, `xqueue*.log`.
+
+## 6. Optimisation pass (P3): results
+
+Branch `desktop-perf`, rebased on `main` at `4bd90e8`. Every change below is one commit; the
+suites of the standing brief pass on the branch (section 6.5).
+
+### 6.1 Before and after (macOS, workflow `.github/workflows/perf.yml`)
+
+Workflow run 37379497054: `main` at `af7ce03` as the baseline, this branch at `17b8392` (its changes
+on top of `af7ce03`; the branch was rebased once more afterwards, without changes of its own) as
+the ref, both built in the same job on a GitHub `macos-15` runner
+(Apple M1, virtual, 3 CPUs, macOS 15.7.9, rustc 1.99.0). The launches started once the load
+average had dropped to 1.43; the two builds of each application were launched alternately, 15
+warm launches each. Start-up is the median from process start to the window-opened line
+(`Window opened`, in the catalog `App activated`); the range is the fastest and the slowest
+launch.
+
+| Application | Stripped size before | after | change | Start-up before (range) | after (range) | change |
+|---|---|---|---|---|---|---|
+| hello_window | 22.94 MB | 18.30 MB | -20.2 % | 124 ms (90 to 129) | 124 ms (96 to 140) | -0.5 % |
+| themed_window, Simple theme | 48.95 MB | 37.74 MB | -22.9 % | 381 ms (359 to 429) | 364 ms (352 to 416) | -4.5 % |
+| themed_window, Fluent theme | (same file) | | | 519 ms (481 to 591) | 497 ms (470 to 576) | -4.2 % |
+| control-catalog-desktop | 86.54 MB | 72.45 MB | -16.3 % | 1236 ms (1155 to 1379) | 1168 ms (1082 to 1343) | -5.5 % |
+
+Load average before and after the launches: 1.43 / 2.80.
+
+* **Size**: 16 to 23 % smaller. On the report's machine `main` measured 22.77 / 48.48 / 85.32 MB;
+  the runner builds with a newer rustc and a newer `main` and gets 22.94 / 48.95 / 86.54 MB.
+* **Warm start-up**: unchanged to slightly faster. Every median is equal or lower, by less than
+  the spread of the launches. That is what the report predicted: warm start-up is AppKit, Metal
+  and the run-time markup load, which this pass does not touch. The small gain is consistent with
+  the report's CPU proxy, which found fat LTO no slower and probably faster.
+* **First launch** of each new file: one launch per file, taken right after the first launch of
+  the other build of the same application, so it does not isolate the cost of validating the code
+  signature. The numbers are in the job summary and are not used here.
+* Two earlier runs measured the two refs one after the other instead of alternately (runs
+  37361719427 against `a321ad9` and 37368390723 against `af7ce03`, 9 launches each). The second gives
+  the same sizes as the table; the first, against the older `main`, gives changes of -20.3, -23.1
+  and -16.3 %. Their start-up medians moved by -2 to +25 % in no consistent direction: the second build was always launched later, on a busier runner. That is
+  why the workflow now alternates the launches.
+
+### 6.2 Effect of each change on size (Linux)
+
+Linux x86_64 build of the same three applications (rustc 1.97.0, 4 CPUs, `strip`), measured with
+`python3 scripts/perf-report.py --size-only`. The applications build on Linux but cannot open a
+window there (no windowing backend), so these are sizes only. Skia is not linked on Linux (it is
+only referenced from the macOS branch of `use_platform_detect`); the rows are the framework's own
+code, which is what the changes act on. Each row is measured on top of the previous one.
+
+| Change (commit) | hello_window | themed_window | control-catalog-desktop |
+|---|---|---|---|
+| `main` (`lto = "thin"`, `codegen-units = 4`) | 17.63 MB | 44.57 MB | 84.22 MB |
+| Release profile `lto = "fat"`, `codegen-units = 1` | 15.24 MB (-13.5 %) | 38.66 MB (-13.3 %) | 76.81 MB (-8.8 %) |
+| Value type registry: insertions in non-generic functions | 14.11 MB (-7.4 %) | 35.00 MB (-9.5 %) | 72.09 MB (-6.1 %) |
+| Type-independent parts of generic helpers out of line | 13.52 MB (-4.2 %) | 33.87 MB (-3.2 %) | 70.82 MB (-1.8 %) |
+| Error paths of the typed property routes compiled once | 13.41 MB (-0.8 %) | 33.69 MB (-0.5 %) | 70.62 MB (-0.3 %) |
+| **Total** | **-23.9 %** | **-24.4 %** | **-16.1 %** |
+
+The value type registry change is larger than the report expected: besides the insertions it takes
+the initialisation check of the per-thread table (`with_registry`: table creation, default
+registrations, deferred and process-wide registrations) out of every registration function, which
+the compiler had inlined into each of them. `ValueTypes::register_object<T>` alone went from 1.71 MB
+to 0.16 MB in themed_window (345 instantiations), and the generated `register_value_types`
+functions of the markup metadata from 1.19 MB together to 0.14 MB.
+
+The per-commit effect was not measured on macOS: a workflow run for the error-path commit alone was
+cancelled to free the runners for CI. Its effect on macOS is contained in the total of 6.1.
+
+### 6.3 Verification of the four changes taken over from the measurement pass
+
+| Change | Verification | Result |
+|---|---|---|
+| Release profile `lto = "fat"`, `codegen-units = 1` | Desktop: release builds of the three applications (Linux, macOS workflow), all suites. Browser (the profile is shared): `scripts/build-browser.sh themed_view` with the pinned toolchain (Emscripten 6.0.10, Rust 1.90.0, wasm-bindgen 0.2.129) on Linux, page loaded in headless Chromium (SwiftShader WebGL2): the themed view renders as before (title, button, check box, text box, slider, progress bar, list box) | Kept. Browser WASM at the same commit: 44.35 MB (9.94 MB gzip) with thin LTO and 4 units, 39.65 MB (9.42 MB gzip) with fat LTO; the release build takes 12.0 instead of 6.3 minutes on 4 CPUs. Desktop release build of the three applications: 27.5 instead of about 12 minutes on 4 CPUs; the link of the catalog was seen at 4.2 GB of resident memory |
+| Value type registry insertions | Read against the previous code: the same insertions in the same order; the only reordering is that `ValueType::of::<T>()` and `T::TYPE` are evaluated before the table is borrowed, and neither touches the table | Kept |
+| Generic helpers out of line (`BindingNotification::to_binding_value`, `FerroPropertyRegistry::register` / `register_attached`, `into_markup_value`, `MarkupArguments::next`) | Read against the previous code: same statements, same order, same messages; `property.as_direct()` is now evaluated before the registry is borrowed, and it does not touch the registry | Kept |
+| `scripts/perf-report.py` | Ran on Linux (`--size-only`) and on macOS through the workflow | Repaired: a launch that never exits is now killed after the smoke delay plus 60 s (it hung the script before); everything is built before anything is launched and the launches wait for the load average to drop (the first macOS run measured start-up straight after a 13 minute build at a load average of 10 to 15, and its start-up figures were noise); the warm launches go round the applications; with `--baseline-target` the baseline build is launched in the same invocation, alternating with the measured one in every round (two runs that measured the refs one after the other disagreed by up to 27 points on the same medians); the first launch is measured once per file (themed_window Simple and Fluent share one); the load average before and after is recorded with the numbers. Added `--size-only`, `--source`, `--baseline-target`, `--save-baseline`, `--markdown`, `--title` and `--no-fail` |
+
+### 6.4 The ranked proposals after this pass
+
+| # | Proposal | Status |
+|---|---|---|
+| 1 | Fat LTO, one code generation unit | Done (6.2) |
+| 2 | Type-independent parts of generic functions out of line | Done (6.2), and extended to the error paths of the typed property routes (`StyledProperty<T>::from_untyped`, `route_set_value`, `route_set_current_value`, `DirectPropertyBase<T>`, `EffectiveValue<T>::set_local_value_and_raise_untyped`, `BindingEntry<T>`, `ValueStore::set_value<T>`): the messages and panics move into non-generic `#[cold]` functions of `FerroProperty`; the text of every message is unchanged, panics carry `#[track_caller]` so they still report the route that raised them |
+| 5, 6 | Unwind tables, panic strategy | Not changed: the framework depends on unwinding (re-checked: `catch_unwind` in `rendering/render_loop.rs`, `threading/dispatcher_invoke.rs`, `FerroUI.Native/callback_base.rs` around every native callback, `FerroUI.Native/clipboard_impl.rs`; `resume_unwind` in `FerroUI.Native/dispatcher_impl.rs` and `clipboard_impl.rs`; `should_panic` and `catch_unwind` tests across the suites), so `panic = "abort"` stays ruled out. Measured instead: stable rustc accepts `-C force-unwind-tables=no` on `aarch64-apple-darwin`; it is what the report wanted from the unstable `-Z use-sync-unwind`. Functions that can unwind keep their unwind information (LLVM emits it for every function that is not `nounwind` or has a landing pad, whatever the attribute), but without the asynchronous epilogue CFI, so the compact encoding applies; `nounwind` functions without a landing pad get none (checked on the assembly of a small crate for `aarch64-apple-darwin`: the epilogue CFI disappears, a leaf function loses its CFI, a function calling `catch_unwind` keeps it). Panics and `catch_unwind` are therefore unaffected by construction; the suites were not run with the flag. What changes is diagnostics: a backtrace (`RUST_BACKTRACE`, the default panic hook) stops at a `nounwind` frame without unwind information, which can be the caller of a function that catches every panic. Effect on macOS (workflow run 37354274751, the branch before the error-path commit built with and without the flag; sizes only, its start-up figures predate the repaired script): hello_window 18.40 -> 17.66 MB (-4.0 %), themed_window 37.77 -> 36.04 MB (-4.6 %), control-catalog-desktop 72.48 -> 70.34 MB (-3.0 %). Applying it means `[target.aarch64-apple-darwin] rustflags = ["-C", "force-unwind-tables=no"]` in `.cargo/config.toml` (it then also applies to the tests, which exercise every catch site). Left to the owner because of the stated condition and the backtrace change |
+| 9 | Registration tables keep code alive | Not changed. In hello_window, which loads no markup, the markup tables of the classes it uses (`__MARKUP` closures, markup argument and value conversion) are 0.33 MB of code (Linux, fat LTO), referenced from the static `TypeInfo` of every class. They are not dead: untyped bindings resolve CLR-style members through them (`data/core/plugins/markup_members.rs`) and the value type registry parses text through a class's markup `parse` (`data/core/value_type.rs`), so registering them lazily from `register_types()` would change what a binding in an application without markup can do. The class and value type registration itself (`register_class::init`, `register_object<T>`) runs when a class is first used and is needed by bindings. What the run-time loader keeps alive in themed applications goes away with the ahead-of-time compiler, which this branch does not touch |
+| 10, 11 | Shared instantiation for reference-like value types; outlining inside the hot property store methods | Not attempted. After this pass the largest generic families in themed_window (Linux) are `BindingEntry<T>::set_value` (0.43 MB over 218 instantiations, about 2 kB each), `StyledProperty<T>::route_bind` (0.33 MB), `route_set_value` (0.16 MB) and the `EffectiveValue<T>` methods (0.1 to 0.2 MB each); what remains in them depends on `T` (clone, compare, drop of the value, construction of the typed entries), so a further reduction needs the type-erased design of item 10 rather than more outlining |
+| 12 | Lazy start-up work | Not changed; re-checked against upstream. The Skia font manager is created when the platform initialises, as upstream does (`FontManagerImpl` holds `SKFontManager.Default`); the family names are only enumerated when asked for (`get_installed_font_family_names`), as upstream. The catalog instantiates both themes in `App::initialize`, as the upstream sample does. The rest of the time to the first window is AppKit, the window server and Metal, and the run-time markup load, which the ahead-of-time compiler removes |
+| 3, 4, 7, 8, 13 | `opt-level = "s"`, symbol stripping in the profile, Skia features, asset compression | Unchanged verdicts of section 4.2 |
+
+### 6.5 Suites
+
+On Linux, on the branch rebased on `main` at `4bd90e8` (the suites were also run on the two
+earlier bases, `a321ad9` and `af7ce03`, with the same outcome; the error-path commit was run
+through the two property system suites on its own):
+
+```text
+cargo check --workspace --all-targets --locked                 ok
+cargo test -p ferroui-base --lib                               ok. 3831 passed; 0 failed; 0 ignored
+cargo test -p ferroui-controls --lib                           ok. 3919 passed; 0 failed; 0 ignored
+cargo test -p ferroui-markup -p ferroui-markup-xaml -p ferroui-markup-xaml-loader -p xamlx
+                                                               ok. 255 passed; ok. 185 passed;
+                                                               ok. 379 passed, 1 ignored; ok. 99 passed
+cargo test -p ferroui-markup-xaml-tests                        ok. 560 passed; 0 failed; 15 ignored
+cargo test -p ferroui-themes-fluent -p ferroui-themes-simple   ok. 193 passed, 1 ignored; ok. 196 passed, 2 ignored
+cargo test -p control-catalog -p mini-mvvm                     ok. 489 passed, 105 ignored; ok. 8 passed
+naming check (grep of the standing brief)                      no output
+python3 scripts/generate_markup_types.py --upstream <upstream at 1735018> --check
+                                                               generated files are up to date
+```
+
+The macOS job of CI runs the whole workspace on every push of the branch.
+
+### 6.6 Commands
+
+```sh
+# sizes of the Linux build (no window can open there)
+python3 scripts/perf-report.py --size-only
+# size and start-up on a desktop session (macOS), compared with a stored baseline
+python3 scripts/perf-report.py --save before.json
+python3 scripts/perf-report.py --check before.json
+# the fair comparison: build a second checkout first, then launch both builds alternately
+CARGO_TARGET_DIR=$PWD/../before-target python3 scripts/perf-report.py --source ../before --size-only
+python3 scripts/perf-report.py --baseline-target ../before-target
+# per-family code size of an unstripped Linux build (the analysis of 6.2 and 6.4)
+nm -S --size-sort -C target/release/examples/themed_window
+```
+
+On GitHub: Actions, workflow "Performance", "Run workflow" with `ref`, optionally `baseline` (a
+second ref built and measured in the same job), `runs` (at least 7) and `rustflags` (applied to
+the measured ref only, to measure a flag against the same ref without it). The tables go to the
+job summary and the numbers to the `perf-report` artifact.
