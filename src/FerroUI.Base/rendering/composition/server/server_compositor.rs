@@ -278,7 +278,7 @@ impl ServerCompositor {
                     }
                 }
             }
-            // The objects the batch disposed leave the table once the whole
+            // The objects the batch released leave the table once the whole
             // batch has been read: its jobs, which follow the dispose list,
             // resolve them.
             for id in std::mem::take(&mut *self.disposed_in_batch.borrow_mut()) {
@@ -334,10 +334,17 @@ impl ServerCompositor {
     fn read_dispose_jobs(&self, reader: &mut BatchStreamReader<'_>) {
         let mut count = reader.read::<i32>();
         while count > 0 {
-            if let Some(id) = reader.read_server_object() {
+            let id = reader.read_server_object();
+            let dispose = reader.read::<bool>();
+            let release = reader.read::<bool>();
+            if let Some(id) = id {
                 if let Some(object) = self.get_object(id) {
-                    object.dispose();
-                    self.disposed_in_batch.borrow_mut().push(id);
+                    if dispose {
+                        object.dispose();
+                    }
+                    if release {
+                        self.disposed_in_batch.borrow_mut().push(id);
+                    }
                 }
             }
             count -= 1;

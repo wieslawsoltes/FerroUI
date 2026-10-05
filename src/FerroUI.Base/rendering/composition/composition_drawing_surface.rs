@@ -42,6 +42,12 @@ impl CompositionDrawingSurface {
     }
 
     /// Runs `update` on the server surface on the render thread.
+    ///
+    /// The job names the surface by id. The id stays bound to the server
+    /// surface while this object is alive, disposed or not (see
+    /// [`CompositionObject`](super::CompositionObject)), so the job reaches
+    /// the surface as upstream, where it holds the server object itself; a
+    /// disposed surface disposes the new snapshot.
     fn invoke(
         &self,
         update: impl FnOnce(&ServerCompositionDrawingSurface) -> Result<(), Rc<dyn std::error::Error>> + 'static,
@@ -52,7 +58,7 @@ impl CompositionDrawingSurface {
                 let server = server.and_then(|server| server.into_any_rc().downcast::<ServerCompositionDrawingSurface>().ok());
                 match server {
                     Some(server) => update(&server),
-                    None => panic!("the server object of a drawing surface is not a drawing surface"),
+                    None => panic!("the server object of a live drawing surface is not a drawing surface"),
                 }
             },
             false,

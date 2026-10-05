@@ -48,7 +48,8 @@ pub enum BatchMarker {
     /// `Create` pairs.
     CreateStart,
     /// Followed by a count (value stream) and that many `ServerObject`s to
-    /// dispose.
+    /// dispose, each with two flags (value stream): whether to dispose the
+    /// object, and whether to release it (drop it from the object table).
     RenderThreadDisposeStart,
     RenderThreadJobsStart,
     RenderThreadJobsEnd,
