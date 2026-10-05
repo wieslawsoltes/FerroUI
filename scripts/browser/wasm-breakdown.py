@@ -267,6 +267,87 @@ def rust_family(crate, name):
     return parts[0].split("<")[0] if parts else "(root)"
 
 
+def strip_generics(text):
+    """The text without its generic arguments (balanced <...>), keeping qualified paths <X as Y>."""
+    out, depth = [], 0
+    for ch in text:
+        if ch == "<":
+            depth += 1
+        elif ch == ">":
+            depth -= 1
+        elif depth == 0:
+            out.append(ch)
+    return "".join(out)
+
+
+def head_path(name):
+    """The path of the item a function belongs to, without generic arguments: for <X as Y>::m the
+    path of X, for a closure the function it is in. Needs v0 symbol names (-Csymbol-mangling-version=v0)."""
+    name = re.sub(r" \(\.llvm\.\d+\)$", "", name).strip()
+    while name.startswith("<"):
+        depth = 0
+        for i, ch in enumerate(name):
+            depth += ch == "<"
+            depth -= ch == ">"
+            if depth == 0:
+                break
+        inner, rest = name[1:i], name[i + 1:]
+        # The self type of a qualified path: up to the top-level " as ".
+        depth = 0
+        cut = len(inner)
+        for j, ch in enumerate(inner):
+            depth += ch == "<"
+            depth -= ch == ">"
+            if depth == 0 and inner.startswith(" as ", j):
+                cut = j
+                break
+        self_type = inner[:cut].lstrip("&*").replace("mut ", "").replace("dyn ", "")
+        name = self_type + rest if not self_type.startswith("(") else rest.lstrip(":")
+        if not name:
+            return ""
+    return strip_generics(name)
+
+
+# Families of the framework code, by the path a function belongs to (first match wins).
+FAMILIES = [
+    ("markup metadata tables (markup_types: register_value_types and closures)", r"::markup_types::"),
+    ("class registration (register_types)", r"::register_types::|::register_types$"),
+    ("value type registry (ValueTypes, value_type)", r"::data::core::value_type"),
+    ("property store (values, bindings, observers)", r"ferroui_base::property_store::"),
+    ("property definitions and metadata", r"ferroui_base::(styled_property|direct_property|ferro_property|ferro_property_metadata|ferro_property_registry|attached_property|property_metadata)"),
+    ("class model (vtables, interfaces, casts)", r"build_vtable|__register_interfaces|ferroui_base::type_system::|::object_casts::"),
+    ("XAML loader: run-time type system", r"ferroui_markup_xaml_loader::runtime::type_system"),
+    ("XAML loader: interpreter", r"ferroui_markup_xaml_loader::runtime::interpreter"),
+    ("XAML loader: framework nodes", r"ferroui_markup_xaml_loader::runtime"),
+    ("XAML front end: transformers and compiler (loader crate)", r"ferroui_markup_xaml_loader::"),
+    ("XAML front end: XamlX core", r"^xamlx::"),
+    ("markup extensions and converters (ferroui_markup_xaml)", r"^ferroui_markup_xaml::"),
+    ("animation", r"::animation::"),
+    ("styling and themes", r"::styling::|ferroui_themes_"),
+    ("layout, controls and templates", r"^ferroui_controls::"),
+    ("text formatting and Unicode", r"::text_formatting::|::text_processing::"),
+    ("media, rendering and composition", r"ferroui_base::(media|rendering)::|^ferroui_skia::|^ferroui_harfbuzz::|^ferroui_opengl::"),
+    ("input and interactivity", r"ferroui_base::(input|interactivity)::"),
+    ("reactive (observables, disposables)", r"ferroui_base::reactive::"),
+    ("rest of ferroui_base", r"^ferroui_base::"),
+    ("browser platform and example", r"^ferroui_browser::|^themed_view::|^wasm_bindgen::"),
+    ("std drop glue", r"^core::ptr::drop_in_place"),
+    ("std formatting and panics", r"^core::(fmt|panicking)|^std::panicking|^alloc::fmt"),
+    ("std collections, Rc, iterators and the rest", r"^(core|alloc|std|hashbrown|panic_unwind|compiler_builtins)::|"
+     r"^(\[|&|for fn|__|fmodf?$|cbrtf?$|roundf?$|fmaf?$|type_id$)|^(str|bool|char|[iuf](8|16|32|64|128|size)|T)(::|$)"),
+]
+
+
+def family_of(name):
+    if "$LT$" in name or ".." in name:
+        name = rust_name(name)
+    head = head_path(name)
+    for label, pattern in FAMILIES:
+        if re.search(pattern, head):
+            return label
+    return "other crates: " + (head.split("::")[0] if head else "?")
+
+
 def mb(value):
     return f"{value / 1e6:.2f}"
 
@@ -348,6 +429,35 @@ def main():
     print("|---|---:|---:|")
     for family, size in std_families.most_common(20):
         print(f"| {family} | {size:,} | {mb(size)} |")
+
+    if any("{closure#" in name or "::<" in name for name, _ in functions[:20000]):
+        families = collections.Counter()
+        family_counts = collections.Counter()
+        hot = collections.Counter()
+        hot_counts = collections.Counter()
+        for size, name, group in attributed:
+            if not group.startswith("rust:"):
+                continue
+            label = family_of(name)
+            families[label] += size
+            family_counts[label] += 1
+            # Generic hot spots: the item a function belongs to, with how many instances it has.
+            key = re.sub(r"::(::)+", "::", head_path(rust_name(name) if "$LT$" in name else name)).rstrip(":")
+            if "<" in re.sub(r" \(\.llvm\.\d+\)$", "", name).split(" as ")[0] or "::<" in name:
+                hot[key] += size
+                hot_counts[key] += 1
+        rust_total = sum(families.values())
+        print("\n### Rust code by family (all crates)\n")
+        print(f"Rust code: {rust_total:,} bytes. A generic function counts where its path is, whatever crate instantiates it.\n")
+        print("| Family | Functions | Bytes | MB | Share of Rust code |")
+        print("|---|---:|---:|---:|---:|")
+        for label, size in families.most_common():
+            print(f"| {label} | {family_counts[label]:,} | {size:,} | {mb(size)} | {100 * size / rust_total:.1f}% |")
+        print("\n### Monomorphization hot spots (generic items by total size of their instances)\n")
+        print("| Item | Instances | Bytes | MB |")
+        print("|---|---:|---:|---:|")
+        for key, size in hot.most_common(top):
+            print(f"| `{key[:120]}` | {hot_counts[key]:,} | {size:,} | {mb(size)} |")
 
     print(f"\n### Largest {top} functions\n")
     print("| Bytes | Function | Crate or library |")

@@ -8,6 +8,7 @@
 //   --compare <file>        compare the page with a PNG written earlier; fails on any difference
 //   --expect-mode <type>    fail unless the first canvas context is of this type (webgl2, 2d)
 //   --encoding <br|gzip>    serve the precompressed .br or .gz file next to a file when it exists
+//   --cpu-profile <file>    write a CPU profile (.cpuprofile) of the last load, up to the first frame
 //   --json                  print the result as JSON
 //
 // The site (target/browser/<example> as scripts/build-browser.sh writes it) is served from a local
@@ -30,7 +31,7 @@ import { spawn } from "node:child_process";
 
 const args = process.argv.slice(2);
 const option = (name, fallback) => { const i = args.indexOf(name); return i >= 0 ? args[i + 1] : fallback; };
-const valued = new Set(["--query", "--runs", "--screenshot", "--compare", "--expect-mode", "--encoding"]);
+const valued = new Set(["--query", "--runs", "--screenshot", "--compare", "--expect-mode", "--encoding", "--cpu-profile"]);
 const site = args.find((a, i) => !a.startsWith("--") && !valued.has(args[i - 1]));
 if (!site || !fs.existsSync(path.join(site, "index.html"))) {
     console.error("usage: node scripts/browser/first-frame.mjs <site directory> [--query q] [--runs n] [--screenshot f] [--compare f] [--expect-mode t] [--encoding br|gzip] [--json]");
@@ -42,6 +43,7 @@ const screenshotFile = option("--screenshot");
 const compareFile = option("--compare");
 const expectMode = option("--expect-mode");
 const encoding = option("--encoding");
+const cpuProfileFile = option("--cpu-profile");
 const json = args.includes("--json");
 
 function findChrome() {
@@ -112,7 +114,7 @@ const instrumentation = `(() => {
 
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
-async function load(takeScreenshot) {
+async function load(takeScreenshot, profile_) {
     const profile = fs.mkdtempSync(path.join(os.tmpdir(), "ferroui-first-frame-"));
     const chrome = spawn(chromePath, ["--headless=new", "--no-first-run", "--no-default-browser-check", "--no-sandbox",
         "--use-angle=swiftshader", "--enable-unsafe-swiftshader", "--ignore-gpu-blocklist",
@@ -152,6 +154,11 @@ async function load(takeScreenshot) {
         await send("Runtime.enable"); await send("Page.enable");
         await send("Emulation.setDeviceMetricsOverride", { width: 800, height: 600, deviceScaleFactor: 1, mobile: false });
         await send("Page.addScriptToEvaluateOnNewDocument", { source: instrumentation });
+        if (profile_) {
+            await send("Profiler.enable");
+            await send("Profiler.setSamplingInterval", { interval: 1000 });
+            await send("Profiler.start");
+        }
         await send("Page.navigate", { url: `http://127.0.0.1:${port}/${query}` });
 
         let timing;
@@ -163,6 +170,7 @@ async function load(takeScreenshot) {
         }
         if (errors.length > 0) throw new Error(`the page reported errors:\n${errors.join("\n")}`);
         if (timing?.frame == null) throw new Error(`no frame within 60 s; console:\n${console_.join("\n")}`);
+        if (profile_) fs.writeFileSync(profile_, JSON.stringify((await send("Profiler.stop")).profile));
         const wasm = await evaluate(`JSON.stringify(performance.getEntriesByType("resource").filter((e) => e.name.endsWith(".wasm")).map((e) => ({ end: e.responseEnd, transfer: e.transferSize, body: e.decodedBodySize })))`);
         const result = { mode: timing.contexts[0], contexts: timing.contexts, wasm: JSON.parse(wasm)[0] ?? null,
             draw: timing.draw, frame: timing.frame, splash: timing.splash,
@@ -219,7 +227,7 @@ function decodePng(buffer) {
 const results = [];
 let exitCode = 0;
 try {
-    for (let i = 0; i < runs; i++) results.push(await load(i === runs - 1 && (screenshotFile || compareFile)));
+    for (let i = 0; i < runs; i++) results.push(await load(i === runs - 1 && (screenshotFile || compareFile), i === runs - 1 ? cpuProfileFile : undefined));
 } catch (e) {
     console.error(String(e.message ?? e));
     server.close();
