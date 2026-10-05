@@ -229,10 +229,20 @@ impl FerroPropertyRegistry {
     /// You won't usually want to call this method directly; use the
     /// `FerroProperty::register*` functions instead.
     pub fn register<P: Registrable>(&self, type_: &'static TypeInfo, property: &'static P) {
-        let base = property.as_registered_property();
+        self.register_core(type_, property.as_registered_property(), property.as_direct());
+    }
+
+    /// [`register`](Self::register) for a property of any kind (compiled
+    /// once, not per property type).
+    fn register_core(
+        &self,
+        type_: &'static TypeInfo,
+        base: &'static FerroProperty,
+        direct: Option<&'static dyn DirectPropertyDyn>,
+    ) {
         let mut inner = self.inner.borrow_mut();
         inner.registered.entry(key(type_)).or_default().entry(base.id()).or_insert(base);
-        if let Some(direct) = property.as_direct() {
+        if let Some(direct) = direct {
             inner.direct.entry(key(type_)).or_default().entry(base.id()).or_insert(direct);
             inner.direct_cache.clear();
         }
@@ -243,7 +253,12 @@ impl FerroPropertyRegistry {
 
     /// Registers an attached property on a host type.
     pub fn register_attached<P: Registrable>(&self, type_: &'static TypeInfo, property: &'static P) {
-        let base = property.as_registered_property();
+        self.register_attached_core(type_, property.as_registered_property());
+    }
+
+    /// [`register_attached`](Self::register_attached) for a property of
+    /// any value type (compiled once, not per property type).
+    fn register_attached_core(&self, type_: &'static TypeInfo, base: &'static FerroProperty) {
         assert!(base.is_attached(), "Cannot register a non-attached property as attached.");
         let mut inner = self.inner.borrow_mut();
         inner.attached.entry(key(type_)).or_default().entry(base.id()).or_insert(base);

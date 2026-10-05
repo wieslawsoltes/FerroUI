@@ -216,7 +216,12 @@ pub fn into_markup_value<T: PartialEq + 'static>(value: T) -> MarkupValue {
             return None;
         }
     }
-    let boxed: BoxedValue = Rc::new(value);
+    untyped_markup_value(Rc::new(value))
+}
+
+/// The untyped form of a boxed typed value (the part of
+/// [`into_markup_value`] that does not depend on the type of the value).
+fn untyped_markup_value(boxed: BoxedValue) -> MarkupValue {
     match ValueTypes::try_cast(&boxed, ValueType::of::<Option<BoxedValue>>()) {
         Some(untyped) => untyped.downcast_ref::<Option<BoxedValue>>().cloned().flatten(),
         None => Some(boxed),
@@ -287,14 +292,20 @@ impl<'a> MarkupArguments<'a> {
         let index = self.next;
         self.next += 1;
         let value = &self.arguments[index];
-        from_markup_value::<T>(value).ok_or_else(|| MarkupInvokeError::Argument {
+        from_markup_value::<T>(value).ok_or_else(|| Self::argument_error(index, std::any::type_name::<T>(), value))
+    }
+
+    /// The error of an argument that is not assignable to the type asked for.
+    #[cold]
+    fn argument_error(index: usize, expected: &'static str, value: &MarkupValue) -> MarkupInvokeError {
+        MarkupInvokeError::Argument {
             index,
-            expected: std::any::type_name::<T>(),
+            expected,
             actual: match value {
                 Some(value) => value.type_name().to_string(),
                 None => "null".to_string(),
             },
-        })
+        }
     }
 }
 
