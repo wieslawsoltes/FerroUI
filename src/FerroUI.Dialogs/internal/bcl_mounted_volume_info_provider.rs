@@ -21,6 +21,7 @@ impl DriveInfo {
     /// the mount table as the .NET base library does, but leaves out the
     /// mounts of virtual file systems (`proc`, `sysfs`, ...), which the
     /// managed list contains.
+    #[cfg(not(target_arch = "wasm32"))]
     fn get_drives() -> Vec<DriveInfo> {
         let disks = sysinfo::Disks::new_with_refreshed_list();
         disks
@@ -37,6 +38,13 @@ impl DriveInfo {
                 DriveInfo { root_directory, volume_label, total_size: disk.total_space() }
             })
             .collect()
+    }
+
+    /// The mounted volumes: none in the browser, which has no file system
+    /// of the operating system.
+    #[cfg(target_arch = "wasm32")]
+    fn get_drives() -> Vec<DriveInfo> {
+        Vec::new()
     }
 
     /// Whether the volume can be read (`IsReady`).
