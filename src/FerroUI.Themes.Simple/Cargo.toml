@@ -1,0 +1,38 @@
+[package]
+name = "ferroui-themes-simple"
+description = "The FerroUI Simple theme: control themes and resources for the control set, in light and dark variants"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+build = "build.rs"
+
+# Unit tests live next to the code (`tests/` modules of the library), not as
+# integration test targets.
+autotests = false
+autobenches = false
+autoexamples = false
+
+[lib]
+path = "lib.rs"
+
+[dependencies]
+ferroui-base = { workspace = true }
+ferroui-controls = { workspace = true }
+ferroui-markup-xaml = { workspace = true }
+# The documents of the theme are loaded through the run-time XAML loader until the build-time
+# compiler exists; the dependency goes away with it (the theme then only needs the runtime library).
+ferroui-markup-xaml-loader = { workspace = true, features = ["runtime"] }
+
+[dev-dependencies]
+ferroui-base = { workspace = true, features = ["testing"] }
+ferroui-controls = { workspace = true, features = ["testing"] }
+# The example starts a desktop application with a theme (the role of a sample application,
+# which references the desktop package and the themes; no library references another).
+ferroui-desktop = { workspace = true }
+ferroui-themes-fluent = { workspace = true }
+
+[[example]]
+name = "themed_window"
+path = "examples/themed_window.rs"

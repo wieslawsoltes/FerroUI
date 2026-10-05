@@ -1,0 +1,27 @@
+//! ferroui-themes-simple
+//!
+//! The Simple theme: the control themes of the control set and the
+//! resources they use, in a light and a dark variant.
+//!
+//! The theme is markup: `SimpleTheme.xaml` (the document of the
+//! [`SimpleTheme`] class), `Accents/Base.xaml` (colours and brushes of the
+//! variants), `Controls/SimpleControls.xaml` (the list of the control
+//! themes) and one document per control under `Controls/`. The documents
+//! are embedded in the crate as assets of the assembly
+//! `FerroUI.Themes.Simple` and addressable as
+//! `ferres://FerroUI.Themes.Simple/<path>`.
+//!
+//! ```ignore
+//! application.styles().add(SimpleTheme::new().upcast::<Styles>());
+//! ```
+
+mod assets;
+mod register_types;
+mod simple_theme;
+
+pub use assets::{excluded_documents, ExcludedDocument};
+pub use register_types::{register_types, ASSEMBLY};
+pub use simple_theme::SimpleTheme;
+
+#[cfg(test)]
+mod tests;

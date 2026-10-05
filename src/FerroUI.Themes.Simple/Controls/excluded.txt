@@ -1,0 +1,26 @@
+# Control theme documents that are embedded but not merged by SimpleControls.xaml yet:
+# `<file> | <what is missing>`. The conversion script drops their includes from
+# SimpleControls.xaml; remove a line here and run the script again to include a document.
+#
+# Controls (or types the theme names) that are not ported:
+Calendar.xaml | Calendar, CalendarItem
+CalendarButton.xaml | CalendarButton
+CalendarDatePicker.xaml | CalendarDatePicker, Calendar, System.DateTime
+CalendarDayButton.xaml | CalendarDayButton
+CalendarItem.xaml | CalendarItem
+CarouselPage.xaml | CarouselPage
+DatePicker.xaml | DatePicker, DatePickerPresenter, DateTimePickerPanel
+DrawerPage.xaml | DrawerPage
+ManagedFileChooser.xaml | FerroUI.Dialogs (ManagedFileChooser, ManagedFileChooserOverwritePrompt, ChildFitter, converters)
+NotificationCard.xaml | NotificationCard
+PipsPager.xaml | PipsPager
+RefreshContainer.xaml | RefreshContainer
+RefreshVisualizer.xaml | RefreshVisualizer
+TabbedPage.xaml | TabbedPage
+TableView.xaml | TableView, TableViewColumnHeadersPresenter
+TableViewCell.xaml | TableViewCell
+TableViewColumnHeader.xaml | TableViewColumnHeader
+TableViewRow.xaml | TableViewRow, TableViewCellsPresenter
+TextSelectionHandle.xaml | TextSelectionHandle
+TimePicker.xaml | TimePicker, TimePickerPresenter, DateTimePickerPanel
+WindowNotificationManager.xaml | WindowNotificationManager

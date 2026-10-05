@@ -1,0 +1,95 @@
+//! Embeds the markup documents of the theme as assets.
+//!
+//! The counterpart of the resource items of the upstream project file:
+//! every `.xaml` file under the crate directory, plus the string resources
+//! linked from the Fluent theme project as `Strings/InvariantResources.xaml`.
+//! The table is written to `$OUT_DIR/assets.rs` as `(rooted path, bytes)`
+//! pairs and registered with the asset loader by `register_types()`, next
+//! to the table of the documents `Controls/excluded.txt` leaves out of the
+//! theme.
+
+use std::env;
+use std::fmt::Write as _;
+use std::fs;
+use std::path::{Path, PathBuf};
+
+/// Files of other projects that are assets of this one: (path relative to
+/// the crate directory, rooted asset path).
+const LINKED: &[(&str, &str)] =
+    &[("../FerroUI.Themes.Fluent/Strings/InvariantResources.xaml", "/Strings/InvariantResources.xaml")];
+
+/// The list of the control theme documents that are embedded but not merged
+/// into the theme yet.
+const EXCLUDED_LIST: &str = "Controls/excluded.txt";
+
+/// Directories of the crate that hold no assets.
+const SKIPPED_DIRECTORIES: &[&str] = &["target", "tests", "examples"];
+
+fn collect(root: &Path, directory: &Path, found: &mut Vec<(String, PathBuf)>) {
+    println!("cargo::rerun-if-changed={}", directory.display());
+    let mut entries: Vec<PathBuf> = fs::read_dir(directory)
+        .unwrap_or_else(|e| panic!("cannot read {}: {e}", directory.display()))
+        .map(|entry| entry.expect("directory entry").path())
+        .collect();
+    entries.sort();
+
+    for path in entries {
+        let name = path.file_name().and_then(|name| name.to_str()).unwrap_or_default();
+        if path.is_dir() {
+            if !name.starts_with('.') && !(directory == root && SKIPPED_DIRECTORIES.contains(&name)) {
+                collect(root, &path, found);
+            }
+        } else if path.extension().is_some_and(|extension| extension == "xaml") {
+            let relative = path.strip_prefix(root).expect("a path under the crate directory");
+            let parts: Vec<String> = relative.components().map(|c| c.as_os_str().to_string_lossy().into_owned()).collect();
+            found.push((format!("/{}", parts.join("/")), path));
+        }
+    }
+}
+
+fn main() {
+    let root = PathBuf::from(env::var_os("CARGO_MANIFEST_DIR").expect("CARGO_MANIFEST_DIR"));
+    let out = PathBuf::from(env::var_os("OUT_DIR").expect("OUT_DIR")).join("assets.rs");
+
+    let mut assets = Vec::new();
+    collect(&root, &root, &mut assets);
+    for (relative, asset_path) in LINKED {
+        let path = root.join(relative);
+        println!("cargo::rerun-if-changed={}", path.display());
+        assets.push(((*asset_path).to_string(), path));
+    }
+    assets.sort();
+
+    let mut text = String::from("pub(crate) static ASSETS: &[(&str, &[u8])] = &[\n");
+    for (asset_path, path) in &assets {
+        let path = path.canonicalize().unwrap_or_else(|e| panic!("cannot resolve {}: {e}", path.display()));
+        println!("cargo::rerun-if-changed={}", path.display());
+        writeln!(text, "    ({asset_path:?}, include_bytes!({:?})),", path.display().to_string()).expect("write");
+    }
+    text.push_str("];\n");
+
+    // The control theme documents that are left out of the theme: `<file> | <missing types>` per line.
+    let excluded = root.join(EXCLUDED_LIST);
+    println!("cargo::rerun-if-changed={}", excluded.display());
+    text.push_str("pub(crate) static EXCLUDED: &[ExcludedDocument] = &[\n");
+    for line in fs::read_to_string(&excluded).unwrap_or_default().lines() {
+        let line = line.trim();
+        if line.is_empty() || line.starts_with('#') {
+            continue;
+        }
+        let (file, missing_types) = line.split_once('|').unwrap_or((line, ""));
+        let asset_path = format!("/Controls/{}", file.trim());
+        assert!(
+            assets.iter().any(|(path, _)| *path == asset_path),
+            "{EXCLUDED_LIST} names {asset_path}, which is not a document of the crate"
+        );
+        writeln!(text, "    ExcludedDocument {{ path: {asset_path:?}, missing_types: {:?} }},", missing_types.trim())
+            .expect("write");
+    }
+    text.push_str("];\n");
+
+    // Written only when it changed, so that the crate is not rebuilt for nothing.
+    if fs::read_to_string(&out).ok().as_deref() != Some(text.as_str()) {
+        fs::write(&out, text).unwrap_or_else(|e| panic!("cannot write {}: {e}", out.display()));
+    }
+}
