@@ -11,6 +11,6 @@ pub(crate) use assembly_descriptor::AssetMap;
 pub(crate) use assembly_descriptor::{AssemblyDescriptor, IAssemblyDescriptor};
 pub(crate) use assembly_descriptor_resolver::{AssemblyDescriptorResolver, IAssemblyDescriptorResolver};
 pub(crate) use asset_descriptor::{EmbeddedAssetDescriptor, IAssetDescriptor};
-pub use asset_registry::{register_assets, register_manifest_resources};
+pub use asset_registry::{register_asset_bundle, register_assets, register_manifest_resources, ASSET_BUNDLE_MAGIC};
 pub(crate) use asset_registry::{registered_assembly, registered_assembly_names, RegisteredAssembly};
 pub(crate) use unmanaged_blob::UnmanagedBlob;
