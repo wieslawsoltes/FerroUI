@@ -6,6 +6,7 @@ use ferroui_base::rendering::composition::ElementComposition;
 use ferroui_base::{Ref, Size, Visual, WeakRef};
 use std::cell::{Cell, RefCell};
 use std::rc::{Rc, Weak};
+use std::time::Duration;
 
 const MAX_SEARCH_DEPTH: i32 = 10;
 const INITIAL_OFFSET_THRESHOLD: f64 = 1.0;
@@ -241,18 +242,37 @@ impl ScrollViewerIRefreshInfoProviderAdapter {
     }
 
     pub fn set_animations(&self, refresh_visualizer: &RefreshVisualizer) {
-        // COMPOSITION-SEAM: upstream `SetAnimations`
-        // (ScrollViewerIRefreshInfoProviderAdapter.cs lines 172-207) gives the
-        // composition visual of the visualizer and the composition visual of
-        // the scroll viewer an implicit animation collection with one entry:
-        // "Offset" -> a `Vector3KeyFrameAnimation` with target "Offset", the
-        // expression key frame (1.0, "this.FinalValue") and a duration of
-        // 150 ms (`Compositor.CreateVector3KeyFrameAnimation`,
-        // `InsertExpressionKeyFrame`, `Compositor.CreateImplicitAnimationCollection`,
-        // `CompositionObject.ImplicitAnimations`). Key frame animations and
-        // implicit animation collections are not ported yet, so the offsets
-        // the visualizer sets take effect without the 150 ms ease.
-        let _ = refresh_visualizer;
+        let visualizer_composition = ElementComposition::get_element_visual(refresh_visualizer);
+        if let Some(visualizer_composition) = visualizer_composition {
+            let compositor = visualizer_composition.compositor().clone();
+
+            let offset_animation = compositor.create_vector3_key_frame_animation();
+            offset_animation.set_target(Some("Offset".to_owned()));
+            offset_animation.insert_expression_key_frame(1.0, "this.FinalValue", None);
+            offset_animation.set_duration(Duration::from_millis(150));
+
+            let animation = compositor.create_implicit_animation_collection();
+            animation.set("Offset", offset_animation);
+            visualizer_composition.set_implicit_animations(Some(animation));
+        }
+
+        let scroll_viewer = self.scroll_viewer.borrow().clone();
+        if let Some(scroll_viewer) = scroll_viewer {
+            let scoll_content_composition = ElementComposition::get_element_visual(&scroll_viewer);
+
+            if let Some(scoll_content_composition) = scoll_content_composition {
+                let compositor = scoll_content_composition.compositor().clone();
+
+                let offset_animation = compositor.create_vector3_key_frame_animation();
+                offset_animation.set_target(Some("Offset".to_owned()));
+                offset_animation.insert_expression_key_frame(1.0, "this.FinalValue", None);
+                offset_animation.set_duration(Duration::from_millis(150));
+
+                let animation = compositor.create_implicit_animation_collection();
+                animation.set("Offset", offset_animation);
+                scoll_content_composition.set_implicit_animations(Some(animation));
+            }
+        }
     }
 
     fn scroll_viewer_loaded(&self) {
