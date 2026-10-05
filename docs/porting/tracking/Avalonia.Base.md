@@ -5218,7 +5218,7 @@ Rust sources of this crate that no upstream file maps to. Give each a reason in 
 | `utilities/decimal_double_conversion_data.rs` | **unmapped** |  |
 | `utilities/event_args.rs` | **unmapped** | `EventArgs` |
 | `utilities/gregorian_calendar.rs` | **unmapped** | `GregorianCalendar`, `IsoWeek` |
-| `utilities/handler_list.rs` | storage for C# `event` handlers (multicast delegates have no Rust equivalent; porting guide, Types table) | `HandlerList`, `MakeMutOrClone` |
+| `utilities/handler_list.rs` | storage for C# `event` handlers (multicast delegates have no Rust equivalent; porting guide, Types table) | `HandlerIds`, `HandlerList`, `MakeMutOrClone` |
 | `utilities/i_culture_data_provider.rs` | **unmapped** | `ICultureDataProvider` |
 | `utilities/number_format.rs` | **unmapped** | `NumberBuffer`, `NumberParseError` |
 | `utilities/number_format_info.rs` | **unmapped** | `NumberFormatInfo` |
