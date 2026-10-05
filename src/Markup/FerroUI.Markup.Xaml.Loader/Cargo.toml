@@ -1,0 +1,31 @@
+[package]
+name = "ferroui-markup-xaml-loader"
+description = "The FerroUI XAML language definition and compiler extensions built on xamlx"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+autotests = false
+autobenches = false
+autoexamples = false
+
+[lib]
+path = "lib.rs"
+
+[features]
+default = ["runtime"]
+# The run-time back end: the run-time type system, the AST interpreter (`ferroui_markup_xaml_loader::runtime`)
+# and the run-time XAML loader built on the XAML runtime library.
+runtime = ["dep:ferroui-markup-xaml"]
+# Exposes the test framework fixture (`ferroui_markup_xaml_loader::testing`) to dependent crates.
+testing = []
+
+[dependencies]
+xamlx = { workspace = true, features = ["testing"] }
+ferroui-markup = { workspace = true }
+# Compile-time value parsers (`Thickness::parse`, `Color::try_parse`, `TimeSpan`, `Uri`, ...).
+ferroui-base = { workspace = true }
+# The XAML runtime library the run-time loader integrates with (service contracts, runtime helpers, loader
+# documents). Only with the `runtime` feature: the compiler extensions build without it.
+ferroui-markup-xaml = { workspace = true, optional = true }

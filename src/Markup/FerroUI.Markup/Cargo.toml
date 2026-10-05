@@ -1,0 +1,17 @@
+[package]
+name = "ferroui-markup"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+
+# Unit tests live in `tests/` as a module tree of the library (`mod tests;`),
+# not as integration test targets.
+autotests = false
+
+[lib]
+path = "lib.rs"
+
+[dependencies]
+ferroui-base.workspace = true

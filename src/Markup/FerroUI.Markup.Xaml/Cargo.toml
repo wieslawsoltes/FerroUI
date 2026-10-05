@@ -1,0 +1,26 @@
+[package]
+name = "ferroui-markup-xaml"
+description = "The FerroUI XAML runtime library: markup extensions, templates, includes, converters and the runtime helpers of compiled XAML"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+
+# Unit tests live next to the code (`*_tests.rs`, `mod tests`), not as
+# integration test targets.
+autotests = false
+autobenches = false
+autoexamples = false
+
+[lib]
+path = "lib.rs"
+
+[dependencies]
+ferroui-base = { workspace = true }
+ferroui-controls = { workspace = true }
+ferroui-markup = { workspace = true }
+
+[dev-dependencies]
+ferroui-base = { workspace = true, features = ["testing"] }
+ferroui-controls = { workspace = true, features = ["testing"] }
