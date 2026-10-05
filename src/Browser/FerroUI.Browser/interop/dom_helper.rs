@@ -1,6 +1,7 @@
 use super::{non_null, JsObject};
 use crate::browser_activatable_lifetime::BrowserActivatableLifetime;
 use crate::browser_platform_settings::BrowserPlatformSettings;
+use crate::browser_screens::BrowserScreens;
 use ferroui_base::{FerroLocator, LocatorExtensions};
 use wasm_bindgen::prelude::*;
 
@@ -93,5 +94,13 @@ pub fn document_visibility_changed(visibility_state: &str) {
 pub fn language_changed(language: Option<String>) {
     if let Some(settings) = platform_settings() {
         settings.on_preferred_language_changed(language.as_deref());
+    }
+}
+
+/// The screens of the page changed.
+#[wasm_bindgen(js_name = DomHelper_ScreensChanged)]
+pub fn screens_changed() {
+    if let Some(screens) = FerroLocator::current().get_service::<BrowserScreens>() {
+        screens.on_changed();
     }
 }
