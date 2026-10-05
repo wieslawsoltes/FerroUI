@@ -12,7 +12,10 @@ use super::hit_testing::{CompositionHitTestAabbTree, PointCompositionHitTester};
 use super::server::{ServerCompositionTarget, ServerCompositionVisual};
 use super::{CompositingRenderer, Compositor, ElementComposition, ICompositionTargetDebugEvents};
 use crate::layout::ILayoutRoot;
-use crate::media::{Brushes, DrawingContext, IBrush, MediaContext, RectangleGeometry};
+use crate::media::{
+    Brushes, DrawingBrush, DrawingContext, Geometry, GeometryDrawing, IBrush, MediaContext, RectangleGeometry, Stretch,
+    VisualBrush,
+};
 use crate::platform::LtrbRect;
 use crate::rendering::testing::{ManualRenderLoop, MockPlatformRenderInterface};
 use crate::rendering::{IHitTester, IPresentationSource, IRenderer};
@@ -948,4 +951,229 @@ fn geometry_hit_test_finds_intersecting_controls() {
     let nothing = RectangleGeometry::with_rect(Rect::new(300.0, 300.0, 10.0, 10.0)).upcast::<crate::media::Geometry>();
     assert!(s.renderer.hit_test_geometry(&nothing, &s.root, None).is_empty());
     assert!(s.renderer.hit_test_first_geometry(&nothing, &s.root, None).is_none());
+}
+
+// --- DrawingBrushPropagationTests -----------------------------------------------------
+
+fn drawing_brush_border(brush: &Ref<DrawingBrush>) -> Ref<TestBorder> {
+    let border = TestBorder::new();
+    border.set_background(Some(brush.into()));
+    border.set_bounds(Rect::new(30.0, 50.0, 20.0, 10.0));
+    border
+}
+
+fn rectangle_drawing(brush: Rc<dyn IBrush>, geometry: &Ref<RectangleGeometry>) -> Ref<GeometryDrawing> {
+    let drawing = GeometryDrawing::new();
+    drawing.set_brush(Some(brush));
+    drawing.set_geometry(geometry.clone().upcast::<Geometry>());
+    drawing
+}
+
+#[test]
+fn mutating_geometry_inside_drawing_brush_invalidates_consumer() {
+    let s = CompositorCanvas::new();
+
+    let geometry = RectangleGeometry::with_rect(Rect::new(0.0, 0.0, 20.0, 10.0));
+    let brush = DrawingBrush::with_drawing(&rectangle_drawing(Brushes::red(), &geometry));
+    s.canvas.add(&drawing_brush_border(&brush));
+    s.run_jobs();
+    s.events.rects.borrow_mut().clear();
+
+    geometry.set_rect(Rect::new(0.0, 0.0, 30.0, 15.0));
+
+    s.assert_rects(&[Rect::new(30.0, 50.0, 20.0, 10.0)]);
+}
+
+#[test]
+fn replacing_drawing_invalidates_consumer() {
+    let s = CompositorCanvas::new();
+
+    let brush = DrawingBrush::with_drawing(&rectangle_drawing(
+        Brushes::red(),
+        &RectangleGeometry::with_rect(Rect::new(0.0, 0.0, 20.0, 10.0)),
+    ));
+    s.canvas.add(&drawing_brush_border(&brush));
+    s.run_jobs();
+    s.events.rects.borrow_mut().clear();
+
+    brush.set_drawing(&rectangle_drawing(
+        Brushes::blue(),
+        &RectangleGeometry::with_rect(Rect::new(0.0, 0.0, 20.0, 10.0)),
+    ));
+
+    s.assert_rects(&[Rect::new(30.0, 50.0, 20.0, 10.0)]);
+}
+
+// --- scene brushes on a visual (not from upstream) --------------------------------------
+
+#[test]
+fn visual_brush_as_opacity_mask_is_a_server_side_scene_brush() {
+    let s = CompositorCanvas::new();
+    let log = s.render_interface.log().clone();
+
+    // The visual of the brush is not part of the tree.
+    let source = TestBorder::filled(0.0, 0.0, 8.0, 4.0);
+    let mask = VisualBrush::with_visual(&source.clone().upcast::<Visual>());
+    let border = TestBorder::filled(10.0, 10.0, 20.0, 20.0);
+    border.set_opacity_mask(Some((&mask).into()));
+    s.canvas.add(&border);
+    s.run_jobs();
+
+    let entries = log.entries();
+    let position = |prefix: &str| entries.iter().position(|e| e.starts_with(prefix)).unwrap_or_else(|| panic!("{prefix}: {entries:?}"));
+    let push_mask = position("PushOpacityMask brush");
+    let draw = position("DrawRectangle Red none 0, 0, 20, 20");
+    let pop_mask = position("PopOpacityMask");
+    assert!(push_mask < draw && draw < pop_mask, "{entries:?}");
+
+    // The mask of the server visual is the server-side counterpart of the
+    // brush, with the rendering of the visual as its content.
+    let content_of = |visual: &Ref<TestBorder>| {
+        let mask = s.server_visual(visual).opacity_mask_brush().expect("the server visual has a mask");
+        let content = mask.as_scene_brush().expect("a scene brush").create_content();
+        (mask, content)
+    };
+    let (server_mask, content) = content_of(&border);
+    let content = content.expect("the visual draws something");
+    assert_eq!(content.rect(), Rect::new(0.0, 0.0, 8.0, 4.0));
+    assert_eq!(server_mask.as_tile_brush().unwrap().stretch(), Stretch::Uniform);
+    let content_log = crate::rendering::testing::DrawingLog::new();
+    let mut context = crate::rendering::testing::MockDrawingContextImpl::new(content_log.clone());
+    context.log_transforms = false;
+    content.render(&mut context, None);
+    assert!(
+        content_log.entries().iter().any(|e| e == "DrawRectangle Red none 0, 0, 8, 4 shadows=0"),
+        "{:?}",
+        content_log.entries()
+    );
+
+    // A change of the brush records its content again and redraws what it
+    // masks.
+    s.events.rects.borrow_mut().clear();
+    source.set_bounds(Rect::new(0.0, 0.0, 6.0, 6.0));
+    mask.set_stretch(Stretch::Fill);
+    s.assert_rects(&[Rect::new(10.0, 10.0, 20.0, 20.0)]);
+    let (server_mask, content) = content_of(&border);
+    assert_eq!(server_mask.as_tile_brush().unwrap().stretch(), Stretch::Fill);
+    assert_eq!(content.expect("the visual draws something").rect(), Rect::new(0.0, 0.0, 6.0, 6.0));
+
+    // Without a visual the brush has no content.
+    mask.set_visual(None);
+    s.run_jobs();
+    assert!(content_of(&border).1.is_none());
+
+    // Removing the mask releases the brush on the compositor.
+    assert!(mask.is_on_compositor(&s.compositor));
+    border.set_opacity_mask(None);
+    s.run_jobs();
+    assert!(!mask.is_on_compositor(&s.compositor));
+    assert!(s.server_visual(&border).opacity_mask_brush().is_none());
+}
+
+#[test]
+fn visual_brush_as_background_is_drawn_through_its_server_side_counterpart() {
+    let s = CompositorCanvas::new();
+    let log = s.render_interface.log().clone();
+
+    let source = TestBorder::filled(0.0, 0.0, 8.0, 4.0);
+    let brush = VisualBrush::with_visual(&source.clone().upcast::<Visual>());
+    let border = TestBorder::new();
+    border.set_background(Some((&brush).into()));
+    border.set_bounds(Rect::new(30.0, 50.0, 20.0, 10.0));
+    s.canvas.add(&border);
+    s.run_jobs();
+    assert!(log.entries().iter().any(|e| e == "DrawRectangle brush none 0, 0, 20, 10 shadows=0"), "{:?}", log.entries());
+    assert!(brush.is_on_compositor(&s.compositor));
+
+    s.events.rects.borrow_mut().clear();
+    brush.set_opacity(0.5);
+    s.assert_rects(&[Rect::new(30.0, 50.0, 20.0, 10.0)]);
+
+    s.canvas.remove(&border);
+    s.run_jobs();
+    assert!(!brush.is_on_compositor(&s.compositor));
+}
+
+// --- serialization queue (not from upstream) ---------------------------------------------
+
+struct InertServerObject;
+
+impl super::server::IServerObject for InertServerObject {
+    fn as_any(&self) -> &dyn std::any::Any {
+        self
+    }
+
+    fn into_any_rc(self: Rc<Self>) -> Rc<dyn std::any::Any> {
+        self
+    }
+}
+
+type PrepareAction = Box<dyn FnOnce(&Compositor)>;
+
+/// Something a compositor serializes: counts how often, and may run an
+/// action when it is about to be serialized.
+struct SerializationProbe {
+    server: super::server::ServerObjectId,
+    serialized: Rc<Cell<u32>>,
+    on_prepare: RefCell<Option<PrepareAction>>,
+}
+
+impl SerializationProbe {
+    fn new(compositor: &Compositor, serialized: &Rc<Cell<u32>>, on_prepare: Option<PrepareAction>) -> Rc<Self> {
+        Rc::new(SerializationProbe {
+            server: compositor.create_server_object(|_, _| Rc::new(InertServerObject)),
+            serialized: serialized.clone(),
+            on_prepare: RefCell::new(on_prepare),
+        })
+    }
+}
+
+impl super::ICompositorSerializable for SerializationProbe {
+    fn try_get_server(&self, _c: &Compositor) -> Option<super::server::ServerObjectId> {
+        Some(self.server)
+    }
+
+    fn prepare_serialization(&self, c: &Compositor) {
+        let action = self.on_prepare.borrow_mut().take();
+        if let Some(action) = action {
+            action(c);
+        }
+    }
+
+    fn serialize_changes(&self, _c: &Compositor, _writer: &mut super::transport::BatchStreamWriter<'_>) {
+        self.serialized.set(self.serialized.get() + 1);
+    }
+}
+
+#[test]
+fn an_object_created_while_another_is_serialized_is_serialized_with_the_same_batch() {
+    let s = CompositorCanvas::new();
+    let (early, late) = (Rc::new(Cell::new(0)), Rc::new(Cell::new(0)));
+
+    // The queue holds the only reference to each of the first objects: they
+    // are released once they have been serialized. An object of the same
+    // type created after that, while a later object is serialized, is likely
+    // to be given the memory of one of them; it must not be taken for an
+    // object that is queued already.
+    for _ in 0..8 {
+        s.compositor.register_for_serialization(SerializationProbe::new(&s.compositor, &early, None));
+    }
+    let late_counter = late.clone();
+    let creating = SerializationProbe::new(
+        &s.compositor,
+        &early,
+        Some(Box::new(move |c: &Compositor| {
+            for _ in 0..8 {
+                c.register_for_serialization(SerializationProbe::new(c, &late_counter, None));
+            }
+        })),
+    );
+    s.compositor.register_for_serialization(creating);
+
+    s.compositor.commit();
+    assert_eq!(9, early.get());
+    assert_eq!(8, late.get());
+
+    // The batch is applied: the server objects were created before use.
+    s.run_jobs();
 }

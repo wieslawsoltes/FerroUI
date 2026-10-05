@@ -1,4 +1,7 @@
-use crate::media::{AlignmentX, AlignmentY, Brush, BrushImpl, Stretch, TileMode};
+use crate::media::{AlignmentX, AlignmentY, Brush, BrushImpl, BrushImplExt, Stretch, TileMode};
+use crate::rendering::composition::generated::ServerCompositionSimpleTileBrushProps;
+use crate::rendering::composition::transport::BatchStreamWriter;
+use crate::rendering::composition::Compositor;
 use crate::{ferro_class, ferro_impl_classes, ferro_property, FerroObjectImpl, FerroProperty, RelativeRect, StyledProperty};
 
 /// Base class for brushes which display repeating images.
@@ -8,7 +11,22 @@ pub struct TileBrush {
 }
 
 ferro_class!(TileBrush: Brush);
-ferro_impl_classes!(TileBrush: FerroObjectImpl, BrushImpl);
+ferro_impl_classes!(TileBrush: FerroObjectImpl);
+
+impl BrushImpl for TileBrush {
+    fn serialize_changes(this: &Self, c: &Compositor, writer: &mut BatchStreamWriter<'_>) {
+        Self::parent_serialize_changes(this, c, writer);
+        ServerCompositionSimpleTileBrushProps::serialize_all_changes(
+            writer,
+            this.alignment_x(),
+            this.alignment_y(),
+            this.destination_rect(),
+            this.source_rect(),
+            this.stretch(),
+            this.tile_mode(),
+        );
+    }
+}
 
 crate::ferro_properties! { impl TileBrush {
     ferro_property!(pub fn alignment_x_property() -> StyledProperty<AlignmentX> {

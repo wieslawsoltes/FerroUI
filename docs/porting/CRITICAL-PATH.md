@@ -17,7 +17,7 @@ Status: **done** (ported, tested, integrated), **partial** (integrated with list
 | 9 | Routed events, input, focus | `Interactivity/`, `Input/` | done | platform-side IME and drag-drop sources arrive with (18) |
 | 10 | Media object model | `Media/` | done | |
 | 11 | Imaging, effects, remaining media | `Media/Imaging`, `Media/Effects`, ... | done | |
-| 12 | Drawing context, render data, compositor, render loop, `MediaContext` | `Media/DrawingContext*.cs`, `Rendering/` | partial | first frame on screen through `CompositingRenderer` (2026-10-05); composition brushes, animation groups / implicit / expression animations, custom visuals, drawing surfaces, server-side mutable tile/image/visual brushes, the Controls-based compositor hit-test suite and the render-thread contract decision remain |
+| 12 | Drawing context, render data, compositor, render loop, `MediaContext` | `Media/DrawingContext*.cs`, `Rendering/` | partial | first frame on screen through `CompositingRenderer` (2026-10-05); server-side counterparts of the mutable image, visual and drawing brushes (fill, stroke, opacity mask) (2026-10-05); composition brushes (`CompositionBrush`, `ServerCompositionBrush`), animation groups / implicit / expression animations, custom visuals, drawing surfaces, the Controls-based compositor hit-test suite and the render-thread contract decision remain |
 | 13 | Fonts, text shaping contracts, text layout | `Media/Fonts`, `Media/TextFormatting` | done | |
 | 14 | Data binding | `Data/`, `Data/Core/`, `Avalonia.Markup` | done | |
 | 15 | Animation, transitions | `Animation/` | done | composition animations arrive with (12) |

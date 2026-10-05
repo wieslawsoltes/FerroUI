@@ -1,6 +1,9 @@
 use crate::media::immutable::ImmutableImageBrush;
 use crate::media::ref_adapter::RefAdapter;
-use crate::media::{BrushImpl, IImageBrushSource, IImmutableBrush, TileBrush};
+use crate::media::{BrushImpl, BrushImplExt, IImageBrushSource, IImmutableBrush, ServerBrushFactory, TileBrush};
+use crate::rendering::composition::server::ServerCompositionSimpleImageBrush;
+use crate::rendering::composition::transport::BatchStreamWriter;
+use crate::rendering::composition::Compositor;
 use crate::{ferro_class, ferro_impl_classes, ferro_property, instantiate, FerroObjectImpl, FerroProperty, Ref, StyledProperty};
 use std::rc::Rc;
 
@@ -12,7 +15,19 @@ pub struct ImageBrush {
 
 ferro_class!(ImageBrush: TileBrush);
 crate::ferro_class_info!(ImageBrush { new: ImageBrush::new });
-ferro_impl_classes!(ImageBrush: FerroObjectImpl, BrushImpl);
+ferro_impl_classes!(ImageBrush: FerroObjectImpl);
+
+impl BrushImpl for ImageBrush {
+    fn factory(_this: &Self) -> Option<ServerBrushFactory> {
+        Some(|c| ServerCompositionSimpleImageBrush::new(c))
+    }
+
+    fn serialize_changes(this: &Self, c: &Compositor, writer: &mut BatchStreamWriter<'_>) {
+        Self::parent_serialize_changes(this, c, writer);
+        let cloned_ref = this.source().and_then(|source| source.bitmap().map(|bitmap| bitmap.clone_ref()));
+        writer.write_value(cloned_ref);
+    }
+}
 
 crate::ferro_properties! { impl ImageBrush {
     ferro_property!(pub fn source_property() -> StyledProperty<Option<Rc<dyn IImageBrushSource>>> {

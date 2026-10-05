@@ -45,6 +45,7 @@
 //! with a UI-thread render timer.
 
 pub mod animations;
+pub mod brushes;
 pub mod drawing;
 pub mod expressions;
 pub mod generated;

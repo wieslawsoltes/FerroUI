@@ -163,6 +163,10 @@ impl VisualImpl for Control {
 
         this.on_unloaded_core();
     }
+
+    fn ensure_initialized_for_visual_brush(this: &Self) {
+        this.ensure_initialized();
+    }
 }
 
 impl InputElementImpl for Control {

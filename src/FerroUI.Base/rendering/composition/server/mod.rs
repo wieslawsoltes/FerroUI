@@ -50,7 +50,11 @@ pub use server_composition_simple_brush::{
     ServerCompositionSimpleLinearGradientBrush, ServerCompositionSimpleRadialGradientBrush,
     ServerCompositionSimpleSolidColorBrush, ServerCompositionSimpleTileBrush,
 };
+pub(crate) use server_composition_simple_brush::server_simple_brush;
 pub use server_composition_simple_geometry::ServerCompositionSimpleGeometry;
+// The server-side tile brushes live with the composition brushes, as
+// upstream; they belong to this namespace.
+pub use super::brushes::{ServerCompositionSimpleContentBrush, ServerCompositionSimpleImageBrush};
 pub use server_composition_simple_transform::ServerCompositionSimpleTransform;
 pub(crate) use server_compositor::OBJECT_END_MAGIC;
 pub use server_compositor::{BatchQueue, CompositorClock, ServerCompositor};

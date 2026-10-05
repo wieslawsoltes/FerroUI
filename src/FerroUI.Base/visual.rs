@@ -81,6 +81,10 @@ ferro_class! {
         /// The custom hit test of the visual against a geometry in its own
         /// coordinates; `None` when the visual has none.
         fn custom_hit_test_geometry(this, geometry: &Ref<crate::media::Geometry>) -> Option<crate::media::IntersectionResult>;
+        /// Ensures that the visual is ready to use as the visual in a
+        /// visual brush. (Upstream: the `IVisualBrushInitialize` interface;
+        /// a class implementing it overrides this.)
+        fn ensure_initialized_for_visual_brush(this);
         /// Creates the composition visual of the visual on `compositor`.
         fn create_composition_visual(this, compositor: &Rc<Compositor>) -> CompositionDrawListVisual;
         /// Releases the composition visual of the visual.
@@ -263,6 +267,8 @@ impl VisualImpl for Visual {
     ) -> Option<crate::media::IntersectionResult> {
         None
     }
+
+    fn ensure_initialized_for_visual_brush(_this: &Self) {}
 
     fn create_composition_visual(this: &Self, compositor: &Rc<Compositor>) -> CompositionDrawListVisual {
         CompositionDrawListVisual::new(compositor, this)

@@ -1,9 +1,9 @@
 use crate::media::ref_adapter::RefAdapter;
 use crate::media::{
-    Brush, Color, ConicGradientBrush, GradientBrush, GradientSpreadMethod, IConicGradientBrush, IGradientBrush,
+    Brush, Color, ConicGradientBrush, DrawingBrush, GradientBrush, GradientSpreadMethod, IConicGradientBrush, IGradientBrush,
     IGradientStop, IImageBrush, IImmutableBrush, ILinearGradientBrush, IMutableBrush, IRadialGradientBrush,
     ISceneBrush, ISolidColorBrush, ITileBrush, ITransform, ImageBrush, LinearGradientBrush, RadialGradientBrush,
-    SolidColorBrush, TileBrush,
+    SolidColorBrush, TileBrush, VisualBrush,
 };
 use crate::{FerroObject, ObjectType, Ref, RelativePoint, RelativeScalar, Upcast};
 use std::any::Any;
@@ -219,6 +219,14 @@ impl<T: ObjectType + Upcast<Brush>> IBrush for RefAdapter<T> {
         }
     }
 
+    fn as_scene_brush(&self) -> Option<&dyn ISceneBrush> {
+        if self.object().is::<VisualBrush>() || self.object().is::<DrawingBrush>() {
+            Some(self)
+        } else {
+            None
+        }
+    }
+
     fn as_mutable_brush(&self) -> Option<&dyn IMutableBrush> {
         if self.object().is::<SolidColorBrush>()
             || self.object().is::<GradientBrush>()
@@ -233,8 +241,8 @@ impl<T: ObjectType + Upcast<Brush>> IBrush for RefAdapter<T> {
     fn as_composition_render_resource(
         &self,
     ) -> Option<&dyn crate::rendering::composition::drawing::ICompositionRenderResource> {
-        // A brush class without a server-side counterpart is not a
-        // composition render resource.
+        // Every brush class that can be instantiated has a server-side
+        // counterpart; only the abstract classes have no factory.
         let brush = self.brush();
         brush.factory().map(|_| brush as &dyn crate::rendering::composition::drawing::ICompositionRenderResource)
     }

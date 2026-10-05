@@ -216,7 +216,7 @@ impl Compositor {
         })
     }
 
-    pub(super) fn this_handle(&self) -> Rc<Compositor> {
+    pub(crate) fn this_handle(&self) -> Rc<Compositor> {
         self.this()
     }
 
@@ -304,10 +304,20 @@ impl Compositor {
             // Objects serialize references to server objects, so the objects
             // created since the last commit come first.
             let mut objects_written = false;
+            // The set of queued objects knows an object by its address, so
+            // an object stays alive until the set is cleared: an object
+            // created while another one is serialized can then never get the
+            // address of one that was serialized (and released) before it,
+            // and be taken for queued.
+            let mut serialized: Vec<Rc<dyn ICompositorSerializable>> = Vec::new();
             loop {
                 self.write_pending_creations(&mut writer);
                 let Some(object) = self.object_serialization_queue.borrow_mut().pop_front() else { break };
                 if let Some(server_object) = object.try_get_server(self) {
+                    // Server objects the object creates for its changes
+                    // must exist before the changes are read.
+                    object.prepare_serialization(self);
+                    self.write_pending_creations(&mut writer);
                     writer.write_server_object(Some(server_object));
                     object.serialize_changes(self, &mut writer);
                     if cfg!(debug_assertions) {
@@ -316,9 +326,11 @@ impl Compositor {
                     }
                     objects_written = true;
                 }
+                serialized.push(object);
             }
             let _ = objects_written;
             self.object_serialization_hash_set.borrow_mut().clear();
+            drop(serialized);
 
             disposed = std::mem::take(&mut *self.dispose_on_next_batch.borrow_mut());
             if !disposed.is_empty() {

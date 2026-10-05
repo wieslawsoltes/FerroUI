@@ -87,8 +87,9 @@ impl ServerCompositionSimpleGradientBrush {
 ///
 /// `brush` is the path from `self` to the brush properties, `deserialize`
 /// the member that reads the changes of the whole class, `find` the lookup
-/// of generated property blocks, and the trailing items are the `as_*`
-/// members of `IBrush` the class answers.
+/// of generated property blocks, the optional `dispose` what the class
+/// releases before the base class is disposed, and the trailing items are
+/// the `as_*` members of `IBrush` the class answers.
 macro_rules! server_simple_brush {
     (
         $(#[$meta:meta])*
@@ -96,11 +97,13 @@ macro_rules! server_simple_brush {
         brush: |$b:ident| $brush:expr;
         deserialize: |$d:ident, $reader:ident, $committed_at:ident| $deserialize:expr;
         find: |$f:ident, $type_id:ident| $find:expr;
+        $(dispose: |$x:ident| $dispose:expr;)?
         as: { $($as_fn:ident -> $as_trait:path),* $(,)? }
     ) => {
         $(#[$meta])*
         pub struct $name {
             base: SimpleServerRenderResource,
+            this: Weak<$name>,
             $($field: $field_ty,)*
         }
 
@@ -108,8 +111,17 @@ macro_rules! server_simple_brush {
             pub fn new(compositor: &Rc<ServerCompositor>) -> Rc<$name> {
                 Rc::new_cyclic(|this| {
                     let this: Weak<$name> = this.clone();
-                    $name { base: SimpleServerRenderResource::new(compositor, this), $($field: $field_init,)* }
+                    $name {
+                        base: SimpleServerRenderResource::new(compositor, this.clone()),
+                        this,
+                        $($field: $field_init,)*
+                    }
                 })
+            }
+
+            /// The shared handle of the object, while it is alive.
+            pub fn to_rc(&self) -> Option<Rc<$name>> {
+                self.this.upgrade()
             }
 
             pub fn is_disposed(&self) -> bool {
@@ -138,6 +150,10 @@ macro_rules! server_simple_brush {
             }
 
             fn dispose(&self) {
+                $(
+                    let $x = self;
+                    $dispose;
+                )?
                 self.base.core().dispose();
             }
 
@@ -192,6 +208,8 @@ macro_rules! server_simple_brush {
         }
     };
 }
+
+pub(crate) use server_simple_brush;
 
 server_simple_brush! {
     /// The server-side counterpart of a mutable brush: the properties all

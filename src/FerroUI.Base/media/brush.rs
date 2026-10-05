@@ -32,8 +32,8 @@ pub type ServerBrushFactory = fn(&Rc<ServerCompositor>) -> Rc<dyn IServerObject>
 ferro_class! {
     Brush: Animatable, virtuals BrushImpl: FerroObjectImpl {
         /// The factory of the server-side counterpart of the brush. `None`
-        /// for a brush class that has no server-side counterpart: such a
-        /// brush is not a composition render resource.
+        /// for the abstract brush classes only: every brush class that can
+        /// be instantiated has a server-side counterpart.
         fn factory(this) -> Option<ServerBrushFactory>;
 
         /// Called when the brush got its counterpart on a compositor.
@@ -41,6 +41,11 @@ ferro_class! {
 
         /// Called when the brush lost its counterpart on a compositor.
         fn on_unreferenced_from_compositor(this, c: &Rc<Compositor>);
+
+        /// Creates the server objects the state of the brush refers to,
+        /// before the state is written for its counterpart on a compositor
+        /// (see [`ICompositorSerializable::prepare_serialization`]).
+        fn prepare_serialization(this, c: &Rc<Compositor>);
 
         /// Writes the state of the brush for its counterpart on a
         /// compositor.
@@ -99,6 +104,8 @@ impl BrushImpl for Brush {
         }
     }
 
+    fn prepare_serialization(_this: &Self, _c: &Rc<Compositor>) {}
+
     fn serialize_changes(this: &Self, c: &Compositor, writer: &mut BatchStreamWriter<'_>) {
         ServerCompositionSimpleBrushProps::serialize_all_changes(
             writer,
@@ -142,6 +149,10 @@ impl ICompositorSerializable for RefAdapter<Brush> {
 
     fn serialization_key(&self) -> *const () {
         RefAdapter::reference_id(self)
+    }
+
+    fn prepare_serialization(&self, c: &Compositor) {
+        self.0.prepare_serialization(&c.this_handle());
     }
 
     fn serialize_changes(&self, c: &Compositor, writer: &mut BatchStreamWriter<'_>) {
@@ -241,6 +252,11 @@ impl Brush {
             let serializable = self.as_compositor_serializable();
             self.resource.register_for_invalidation_on_all_compositors(&serializable);
         }
+    }
+
+    /// Whether the brush has a server-side counterpart on compositor `c`.
+    pub(crate) fn is_on_compositor(&self, c: &Compositor) -> bool {
+        self.resource.try_get_for_compositor(c).is_some()
     }
 
     /// Subscribes to invalidation of the brush: raised whenever a change

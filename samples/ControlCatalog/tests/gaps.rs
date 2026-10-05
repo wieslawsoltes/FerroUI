@@ -98,11 +98,11 @@ fn gap_c010_table_view_columns_from_markup() {
 }
 
 #[test]
-#[ignore = "gap C006: a VisualBrush is neither mutable, immutable nor a composition render resource"]
 fn gap_c006_visual_brush_is_a_composition_render_resource() {
     let _app = start_application();
     // The compositor converts an opacity mask that is not a render resource with
-    // `BrushExtensions::to_immutable`, which panics for a visual brush.
+    // `BrushExtensions::to_immutable`, which panics for a visual brush (fixed: a
+    // visual brush is a composition render resource).
     let brush: Rc<dyn IBrush> = VisualBrush::new().into();
     assert!(brush.as_composition_render_resource().is_some() || brush.as_mutable_brush().is_some());
 }

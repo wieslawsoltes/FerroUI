@@ -2,6 +2,7 @@
 //! and the operations on it (replay, bounds, hit testing).
 
 mod composition_render_data;
+mod composition_render_data_scene_brush_content;
 mod compositor_resource_helpers;
 mod i_composition_render_resource;
 mod i_render_data_geometry;
@@ -18,6 +19,9 @@ mod server_composition_simple_pen;
 mod server_resource_helper_extensions;
 
 pub use composition_render_data::CompositionRenderData;
+pub use composition_render_data_scene_brush_content::{
+    CompositionRenderDataSceneBrushContent, CompositionRenderDataSceneBrushContentProperties,
+};
 pub use compositor_resource_helpers::{CompositorRefCountableResource, CompositorResourceHolder};
 pub use i_composition_render_resource::ICompositionRenderResource;
 pub use i_render_data_geometry::IRenderDataGeometry;

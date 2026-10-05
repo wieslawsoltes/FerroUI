@@ -3,23 +3,28 @@
 //! and end-to-end tests through recorded render data.
 
 use super::*;
+use crate::media::imaging::Bitmap;
 use crate::media::immutable::{ImmutableDashStyle, ImmutableSolidColorBrush, ImmutableTransform};
 use crate::media::{
-    Brush, Color, Colors, CombinedGeometry, ConicGradientBrush, DashStyle, DrawingContext, EllipseGeometry, Geometry,
-    GeometryCombineMode, GeometryGroup, GradientBrush, GradientSpreadMethod, GradientStop, GradientStops, IBrush,
-    IPen, ITransform, ImageBrush, LinearGradientBrush, MediaCollection, MediaContext, Pen, PenLineCap, PenLineJoin,
-    RadialGradientBrush, RectangleGeometry, RotateTransform, SolidColorBrush, Transform, TranslateTransform,
+    AlignmentX, AlignmentY, Brush, Brushes, Color, Colors, CombinedGeometry, ConicGradientBrush, DashStyle,
+    DrawingBrush, DrawingContext, EllipseGeometry, Geometry, GeometryCombineMode, GeometryDrawing, GeometryGroup,
+    GradientBrush, GradientSpreadMethod, GradientStop, GradientStops, IBrush, IImageBrushSource, IPen,
+    ISceneBrushContent, ITransform, ImageBrush, LinearGradientBrush, MediaCollection, MediaContext, Pen, PenLineCap,
+    PenLineJoin, RadialGradientBrush, RectangleGeometry, RotateTransform, SolidColorBrush, Stretch, TileMode,
+    Transform, TranslateTransform, VisualBrush,
 };
 use crate::rendering::composition::server::{
     IServerObject, IServerRenderResource, IServerRenderResourceObserver, ServerCompositionSimpleConicGradientBrush,
-    ServerCompositionSimpleGeometry, ServerCompositionSimpleLinearGradientBrush,
-    ServerCompositionSimpleRadialGradientBrush, ServerCompositionSimpleSolidColorBrush,
-    ServerCompositionSimpleTransform, ServerObjectId,
+    ServerCompositionSimpleContentBrush, ServerCompositionSimpleGeometry, ServerCompositionSimpleImageBrush,
+    ServerCompositionSimpleLinearGradientBrush, ServerCompositionSimpleRadialGradientBrush,
+    ServerCompositionSimpleSolidColorBrush, ServerCompositionSimpleTransform, ServerObjectId,
 };
 use crate::rendering::composition::{Compositor, ICompositorSerializable};
-use crate::rendering::testing::{DrawingLog, ManualRenderLoop, MockDrawingContextImpl, MockPlatformRenderInterface};
+use crate::rendering::testing::{
+    DrawingLog, ManualRenderLoop, MockDrawingContextImpl, MockDrawingContextLayerImpl, MockPlatformRenderInterface,
+};
 use crate::threading::Dispatcher;
-use crate::{Matrix, Point, Rect, Ref, RelativePoint, RelativeScalar, RelativeUnit, Upcast};
+use crate::{Matrix, PixelSize, Point, Rect, Ref, RelativePoint, RelativeRect, RelativeScalar, RelativeUnit, Upcast};
 use std::cell::Cell;
 use std::rc::Rc;
 
@@ -443,6 +448,22 @@ fn conic_gradient_brush_relative_transform_should_reach_the_server() {
 }
 
 #[test]
+fn image_brush_relative_transform_should_reach_the_server() {
+    assert_brush_reaches_server(ImageBrush::new());
+}
+
+#[test]
+fn drawing_brush_relative_transform_should_reach_the_server() {
+    assert_brush_reaches_server(DrawingBrush::new());
+}
+
+// Not from upstream.
+#[test]
+fn visual_brush_relative_transform_should_reach_the_server() {
+    assert_brush_reaches_server(VisualBrush::new());
+}
+
+#[test]
 fn changing_relative_transform_raises_invalidated() {
     let target = SolidColorBrush::new();
     RenderResourceTestHelper::assert_resource_invalidation(brush_resource(&target), || {
@@ -619,13 +640,315 @@ fn pen_properties_reach_the_server_and_the_pen_observes_its_brush() {
 }
 
 #[test]
-fn brush_classes_without_a_server_counterpart_are_not_render_resources() {
-    let image: Rc<dyn IBrush> = ImageBrush::new().into();
-    assert!(image.as_composition_render_resource().is_none());
-    let solid: Rc<dyn IBrush> = SolidColorBrush::new().into();
-    assert!(solid.as_composition_render_resource().is_some());
+fn every_brush_class_is_a_render_resource() {
+    let brushes: [Rc<dyn IBrush>; 7] = [
+        SolidColorBrush::new().into(),
+        LinearGradientBrush::new().into(),
+        RadialGradientBrush::new().into(),
+        ConicGradientBrush::new().into(),
+        ImageBrush::new().into(),
+        VisualBrush::new().into(),
+        DrawingBrush::new().into(),
+    ];
+    for brush in &brushes {
+        assert!(brush.as_composition_render_resource().is_some());
+    }
     let immutable: Rc<dyn IBrush> = Rc::new(ImmutableSolidColorBrush::new(Colors::RED));
     assert!(immutable.as_composition_render_resource().is_none());
+
+    // The scene brushes are tile brushes with recorded content; they have
+    // no immutable form.
+    for scene in &brushes[5..] {
+        assert!(scene.as_scene_brush().is_some());
+        assert!(scene.as_tile_brush().is_some());
+        assert!(scene.as_image_brush().is_none());
+        assert!(scene.as_mutable_brush().is_none());
+    }
+    assert!(brushes[4].as_scene_brush().is_none());
+    assert!(brushes[4].as_mutable_brush().is_some());
+}
+
+// --- tile, image and scene brushes ------------------------------------------------------
+
+fn mock_bitmap(helper: &RenderResourceTestHelper) -> Rc<Bitmap> {
+    let log = helper.render_interface.log().clone();
+    Rc::new(Bitmap::from_impl(Rc::new(MockDrawingContextLayerImpl::new(log, PixelSize::new(4, 2)))))
+}
+
+fn same_bitmap(platform_bitmap: &Rc<dyn crate::platform::IBitmapImpl>, bitmap: &Bitmap) -> bool {
+    std::ptr::addr_eq(Rc::as_ptr(platform_bitmap), Rc::as_ptr(&bitmap.platform_impl().item()))
+}
+
+#[test]
+fn image_brush_properties_and_bitmap_reach_the_server() {
+    let helper = RenderResourceTestHelper::new();
+    let bitmap = mock_bitmap(&helper);
+    let source: Rc<dyn IImageBrushSource> = bitmap.clone();
+
+    let brush = ImageBrush::with_source(Some(source));
+    brush.set_alignment_x(AlignmentX::Left);
+    brush.set_alignment_y(AlignmentY::Bottom);
+    brush.set_destination_rect(RelativeRect::new(1.0, 2.0, 3.0, 4.0, RelativeUnit::Absolute));
+    brush.set_source_rect(RelativeRect::new(0.0, 0.0, 0.5, 0.5, RelativeUnit::Relative));
+    brush.set_stretch(Stretch::UniformToFill);
+    brush.set_tile_mode(TileMode::FlipX);
+    brush.set_opacity(0.5);
+    let resource = brush_resource(&brush);
+    helper.add_to_compositor(&resource);
+    assert_eq!(1, bitmap.platform_impl().ref_count());
+    helper.run_jobs();
+
+    let server = helper.server::<ServerCompositionSimpleImageBrush>(&resource);
+    let server_brush: &dyn IBrush = &*server;
+    assert_eq!(server_brush.opacity(), 0.5);
+    assert!(server_brush.as_solid_color_brush().is_none());
+    assert!(server_brush.as_scene_brush().is_none());
+    let tile = server_brush.as_tile_brush().expect("a tile brush");
+    assert_eq!(tile.alignment_x(), AlignmentX::Left);
+    assert_eq!(tile.alignment_y(), AlignmentY::Bottom);
+    assert_eq!(tile.destination_rect(), RelativeRect::new(1.0, 2.0, 3.0, 4.0, RelativeUnit::Absolute));
+    assert_eq!(tile.source_rect(), RelativeRect::new(0.0, 0.0, 0.5, 0.5, RelativeUnit::Relative));
+    assert_eq!(tile.stretch(), Stretch::UniformToFill);
+    assert_eq!(tile.tile_mode(), TileMode::FlipX);
+
+    // The server-side brush draws the platform bitmap through a reference
+    // of its own.
+    let image = server_brush.as_image_brush().expect("an image brush");
+    let drawn = image.source().expect("the brush is its own source").get_bitmap().expect("a bitmap");
+    assert!(same_bitmap(&drawn, &bitmap));
+    assert!(same_bitmap(&server.bitmap().unwrap(), &bitmap));
+    assert_eq!(2, bitmap.platform_impl().ref_count());
+
+    // Every change sends the bitmap again; the reference is replaced.
+    brush.set_tile_mode(TileMode::Tile);
+    helper.run_jobs();
+    assert_eq!(tile.tile_mode(), TileMode::Tile);
+    assert_eq!(2, bitmap.platform_impl().ref_count());
+
+    // Another bitmap, and none.
+    let other = mock_bitmap(&helper);
+    let other_source: Rc<dyn IImageBrushSource> = other.clone();
+    brush.set_source(Some(other_source));
+    helper.run_jobs();
+    assert_eq!(1, bitmap.platform_impl().ref_count());
+    assert_eq!(2, other.platform_impl().ref_count());
+    assert!(same_bitmap(&server.bitmap().unwrap(), &other));
+
+    brush.set_source(None);
+    helper.run_jobs();
+    assert_eq!(1, other.platform_impl().ref_count());
+    assert!(server.bitmap().is_none());
+    assert!(image.source().expect("the brush is its own source").get_bitmap().is_none());
+
+    // Disposing the server-side brush releases its reference.
+    let source: Rc<dyn IImageBrushSource> = bitmap.clone();
+    brush.set_source(Some(source));
+    helper.run_jobs();
+    assert_eq!(2, bitmap.platform_impl().ref_count());
+    (resource.release)(&helper.compositor);
+    helper.run_jobs();
+    assert!(server.is_disposed());
+    assert!(server.bitmap().is_none());
+    assert_eq!(1, bitmap.platform_impl().ref_count());
+}
+
+#[test]
+fn changing_tile_brush_properties_raises_invalidated() {
+    let target = ImageBrush::new();
+    RenderResourceTestHelper::assert_resource_invalidation(brush_resource(&target), || {
+        target.set_stretch(Stretch::Fill)
+    });
+
+    let helper = RenderResourceTestHelper::new();
+    let target = ImageBrush::new();
+    let source: Rc<dyn IImageBrushSource> = mock_bitmap(&helper);
+    helper.assert_invalidation(&brush_resource(&target), || target.set_source(Some(source)));
+}
+
+fn render_content(content: &dyn ISceneBrushContent) -> Vec<String> {
+    let log = DrawingLog::new();
+    let mut context = MockDrawingContextImpl::new(log.clone());
+    context.log_transforms = false;
+    content.render(&mut context, None);
+    log.entries()
+}
+
+fn server_content(brush: &ServerCompositionSimpleContentBrush) -> Option<Rc<dyn ISceneBrushContent>> {
+    IBrush::as_scene_brush(brush).expect("a scene brush").create_content()
+}
+
+#[test]
+fn drawing_brush_content_is_recorded_for_the_server_and_follows_changes() {
+    let helper = RenderResourceTestHelper::new();
+    let server = helper.compositor.server().clone();
+
+    let geometry = RectangleGeometry::with_rect(Rect::new(1.5, 2.5, 10.0, 20.0));
+    let fill = SolidColorBrush::with_color(Colors::RED);
+    let drawing = GeometryDrawing::new();
+    drawing.set_brush(Some((&fill).into()));
+    drawing.set_geometry(geometry.clone().upcast::<Geometry>());
+    let brush = DrawingBrush::with_drawing(&drawing);
+    brush.set_stretch(Stretch::Fill);
+    let handle: Rc<dyn IBrush> = (&brush).into();
+    let (resource, fill_resource, geometry_resource) =
+        (brush_resource(&brush), brush_resource(&fill), geometry_resource(&geometry));
+
+    let render_data = helper.record(|context| context.fill_rectangle(&handle, Rect::new(0.0, 0.0, 50.0, 50.0), 0.0));
+    helper.assert_exists_on_compositor(&resource, true);
+    // The content is recorded when the brush is serialized, not before.
+    helper.assert_exists_on_compositor(&fill_resource, false);
+    assert_eq!(server.object_count(), 0);
+    helper.run_jobs();
+    helper.assert_exists_on_compositor(&fill_resource, true);
+    helper.assert_exists_on_compositor(&geometry_resource, true);
+    // The render data that draws with the brush, the brush, the render data
+    // of its content, and the fill and the geometry the content draws with.
+    assert_eq!(server.object_count(), 5);
+    assert_eq!(helper.replay(&render_data), ["DrawRectangle brush none 0, 0, 50, 50 shadows=0"]);
+
+    let server_brush = helper.server::<ServerCompositionSimpleContentBrush>(&resource);
+    assert_eq!(IBrush::as_tile_brush(&*server_brush).unwrap().stretch(), Stretch::Fill);
+    assert!(IBrush::as_image_brush(&*server_brush).is_none());
+    let content = server_content(&server_brush).expect("the drawing draws something");
+    // The bounds of what was drawn, rounded outwards to whole units.
+    assert_eq!(content.rect(), Rect::new(1.0, 2.0, 11.0, 21.0));
+    assert!(content.use_scalable_rasterization());
+    assert_eq!(content.brush().stretch(), Stretch::Fill);
+    assert_eq!(render_content(&*content), ["DrawGeometry Red none 1.5, 2.5, 10, 20"]);
+
+    // Whatever draws with the brush is invalidated by a change of a
+    // resource of the content: the fill is observed by the render data of
+    // the content, that by the brush, and the brush by the render data that
+    // draws with it.
+    struct Observer(Cell<u32>);
+    impl IServerRenderResourceObserver for Observer {
+        fn dependency_queued_invalidate(&self, _sender: &dyn IServerRenderResource) {
+            self.0.set(self.0.get() + 1);
+        }
+    }
+    let observer = Rc::new(Observer(Cell::new(0)));
+    let as_observer: Rc<dyn IServerRenderResourceObserver> = observer.clone();
+    let server_data = server.get::<ServerCompositionRenderData>(render_data.server()).unwrap();
+    server_data.add_observer(&as_observer);
+    helper.run_jobs();
+    assert_eq!(observer.0.get(), 0);
+
+    // A change within a resource of the content reaches the server without
+    // recording the content again.
+    fill.set_color(Colors::BLUE);
+    assert!(!helper.is_invalidated(&resource));
+    helper.run_jobs();
+    assert!(observer.0.get() >= 1);
+    assert_eq!(server.object_count(), 5);
+    assert_eq!(render_content(&*content), ["DrawGeometry Blue none 1.5, 2.5, 10, 20"]);
+
+    let before = observer.0.get();
+    geometry.set_rect(Rect::new(0.0, 0.0, 30.0, 15.0));
+    helper.run_jobs();
+    assert!(observer.0.get() > before);
+    assert_eq!(content.rect(), Rect::new(0.0, 0.0, 30.0, 15.0));
+
+    // A structural change of the drawing records the content again: the
+    // brush gets new render data, and the old one is disposed with what
+    // only it referenced.
+    let old_content_data = content.clone();
+    let before = observer.0.get();
+    drawing.set_brush(Some(Brushes::lime()));
+    assert!(helper.is_invalidated(&resource));
+    helper.run_jobs();
+    assert!(observer.0.get() > before);
+    helper.assert_exists_on_compositor(&fill_resource, false);
+    helper.assert_exists_on_compositor(&geometry_resource, true);
+    assert_eq!(server.object_count(), 4);
+    let content = server_content(&server_brush).expect("the drawing draws something");
+    assert_eq!(render_content(&*content), ["DrawGeometry Lime none 0, 0, 30, 15"]);
+    // The content made before draws nothing anymore.
+    assert!(render_content(&*old_content_data).is_empty());
+
+    // A property of the brush is serialized without recording again.
+    brush.set_stretch(Stretch::None);
+    helper.run_jobs();
+    assert_eq!(server.object_count(), 4);
+    assert_eq!(IBrush::as_tile_brush(&*server_brush).unwrap().stretch(), Stretch::None);
+    assert_eq!(render_content(&*server_content(&server_brush).unwrap()), ["DrawGeometry Lime none 0, 0, 30, 15"]);
+
+    // Without a drawing there is no content.
+    brush.set_drawing(None);
+    helper.run_jobs();
+    assert!(server_content(&server_brush).is_none());
+    helper.assert_exists_on_compositor(&geometry_resource, false);
+    assert_eq!(server.object_count(), 2);
+
+    // Content again, and then the last use of the brush goes away: the
+    // brush releases the render data of its content.
+    brush.set_drawing(&drawing);
+    helper.run_jobs();
+    assert_eq!(server.object_count(), 4);
+    render_data.dispose();
+    helper.assert_exists_on_compositor(&resource, false);
+    helper.assert_exists_on_compositor(&geometry_resource, false);
+    helper.run_jobs();
+    assert_eq!(server.object_count(), 0);
+    assert!(server_brush.is_disposed());
+    assert!(server_content(&server_brush).is_none());
+
+    // A detached brush no longer registers for serialization.
+    drawing.set_brush(Some(Brushes::red()));
+    assert!(!helper.is_invalidated(&resource));
+}
+
+#[test]
+fn scene_brush_is_recorded_once_per_compositor_and_shared_by_its_uses() {
+    let helper = RenderResourceTestHelper::new();
+    let server = helper.compositor.server().clone();
+
+    let drawing = GeometryDrawing::new();
+    drawing.set_brush(Some(Brushes::red()));
+    drawing.set_geometry(RectangleGeometry::with_rect(Rect::new(0.0, 0.0, 4.0, 4.0)).upcast::<Geometry>());
+    let brush = DrawingBrush::with_drawing(&drawing);
+    let handle: Rc<dyn IBrush> = (&brush).into();
+    let resource = brush_resource(&brush);
+
+    // As a fill, as the brush of a pen, and as an opacity mask.
+    let pen = Pen::with_brush(Some(handle.clone()), 2.0);
+    let pen_handle: Rc<dyn IPen> = (&pen).into();
+    let blue: Rc<dyn IBrush> = Brushes::blue();
+    let first = helper.record(|context| context.fill_rectangle(&handle, Rect::new(0.0, 0.0, 5.0, 5.0), 0.0));
+    let second = helper.record(|context| {
+        context.draw_line(&pen_handle, Point::new(0.0, 0.0), Point::new(4.0, 0.0));
+        let state = context.push_opacity_mask(&handle, Rect::new(0.0, 0.0, 8.0, 8.0));
+        context.fill_rectangle(&blue, Rect::new(0.0, 0.0, 8.0, 8.0), 0.0);
+        context.pop(state);
+    });
+    helper.run_jobs();
+    // Two render data, the pen, the brush, the render data of its content
+    // and the geometry of the drawing.
+    assert_eq!(server.object_count(), 6);
+    assert_eq!(
+        helper.replay(&second),
+        [
+            "DrawLine brush@2 0, 0 4, 0",
+            "PushOpacityMask brush 0, 0, 8, 8",
+            "DrawRectangle Blue none 0, 0, 8, 8 shadows=0",
+            "PopOpacityMask",
+        ]
+    );
+    let server_brush = helper.server::<ServerCompositionSimpleContentBrush>(&resource);
+    let server_pen = helper.server::<ServerCompositionSimplePen>(&pen_resource(&pen));
+    let pen_brush = IPen::brush(&*server_pen).expect("the pen has a brush");
+    let content = pen_brush.as_scene_brush().expect("a scene brush").create_content().expect("content");
+    assert_eq!(render_content(&*content), ["DrawGeometry Red none 0, 0, 4, 4"]);
+
+    first.dispose();
+    helper.run_jobs();
+    assert!(!server_brush.is_disposed());
+    assert_eq!(server.object_count(), 5);
+
+    second.dispose();
+    helper.assert_exists_on_compositor(&resource, false);
+    helper.run_jobs();
+    assert!(server_brush.is_disposed());
+    assert_eq!(server.object_count(), 0);
 }
 
 // --- end to end through recorded render data ---------------------------------------------

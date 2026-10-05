@@ -1,22 +1,108 @@
 use crate::media::ref_adapter::RefAdapter;
-use crate::media::{DrawingContext, ISceneBrushContent, TileBrush};
-use crate::rendering::composition::drawing::RenderDataDrawingContext;
+use crate::media::{BrushImpl, BrushImplExt, DrawingContext, ISceneBrushContent, ServerBrushFactory, TileBrush};
+use crate::rendering::composition::drawing::{
+    CompositionRenderData, CompositionRenderDataSceneBrushContentProperties, RenderDataDrawingContext,
+};
+use crate::rendering::composition::server::ServerCompositionSimpleContentBrush;
+use crate::rendering::composition::transport::BatchStreamWriter;
+use crate::rendering::composition::Compositor;
 use crate::rendering::ImmediateRenderer;
 use crate::{
-    ferro_class, ferro_impl_classes, ferro_property, instantiate, FerroObjectImpl, FerroProperty, Nullable, Rect, Ref,
-    StyledProperty, Visual,
+    ferro_class, ferro_property, instantiate, FerroObjectImpl, FerroObjectImplExt, FerroProperty,
+    FerroPropertyChangedEventArgs, Nullable, Rect, Ref, StyledProperty, Visual,
 };
-use std::rc::Rc;
+use std::cell::{Cell, RefCell};
+use std::rc::{Rc, Weak};
+
+/// The content of the brush recorded for one compositor.
+struct RenderDataItem {
+    data: Rc<CompositionRenderData>,
+    rect: Rect,
+    is_dirty: Cell<bool>,
+}
+
+impl RenderDataItem {
+    fn dispose(&self) {
+        self.data.dispose();
+    }
+}
 
 /// Paints an area with a [`Visual`].
 #[repr(C)]
 pub struct VisualBrush {
     base: TileBrush,
+    /// The recorded content per compositor the brush is used with; `None`
+    /// for a compositor the content of which is empty.
+    render_data_dictionary: RefCell<Vec<(Weak<Compositor>, Option<Rc<RenderDataItem>>)>>,
 }
 
 ferro_class!(VisualBrush: TileBrush);
 crate::ferro_class_info!(VisualBrush { new: VisualBrush::new });
-ferro_impl_classes!(VisualBrush: FerroObjectImpl, crate::media::BrushImpl);
+
+impl FerroObjectImpl for VisualBrush {
+    fn on_property_changed(this: &Self, change: &FerroPropertyChangedEventArgs<'_>) {
+        // We are supposed to be only calling this when content is actually changed,
+        // but instead we are calling this on brush property change for backwards compatibility
+        this.invalidate_content();
+        Self::parent_on_property_changed(this, change);
+    }
+}
+
+impl BrushImpl for VisualBrush {
+    fn factory(_this: &Self) -> Option<ServerBrushFactory> {
+        Some(|c| ServerCompositionSimpleContentBrush::new(c))
+    }
+
+    fn on_unreferenced_from_compositor(this: &Self, c: &Rc<Compositor>) {
+        let removed = {
+            let mut dictionary = this.render_data_dictionary.borrow_mut();
+            dictionary.iter().position(|(key, _)| is_compositor(key, c)).map(|index| dictionary.remove(index).1)
+        };
+        if let Some(Some(content)) = removed {
+            content.dispose();
+        }
+        Self::parent_on_unreferenced_from_compositor(this, c);
+    }
+
+    /// The first half of the serialization of upstream: records the content
+    /// again when there is none or it is out of date. The render data is a
+    /// new server object, which has to be created before the changes of the
+    /// brush refer to it.
+    fn prepare_serialization(this: &Self, c: &Rc<Compositor>) {
+        Self::parent_prepare_serialization(this, c);
+        // Should always be true here, but just in case do this check
+        if this.is_on_compositor(c) {
+            let data = this.render_data(c);
+            if data.as_ref().is_none_or(|data| data.is_dirty.get()) {
+                let created = this.create_server_content(c);
+                // Dispose the old render list _after_ creating a new one to avoid unnecessary detach/attach
+                // sequence for referenced resources
+                if let Some(data) = data {
+                    data.dispose();
+                }
+
+                this.set_render_data(c, created);
+            }
+        }
+    }
+
+    fn serialize_changes(this: &Self, c: &Compositor, writer: &mut BatchStreamWriter<'_>) {
+        Self::parent_serialize_changes(this, c, writer);
+        let mut content = None;
+        // Should always be true here, but just in case do this check
+        if this.is_on_compositor(c) {
+            if let Some(data) = this.render_data(c) {
+                content = Some((data.data.server(), Some(data.rect), true));
+            }
+        }
+
+        CompositionRenderDataSceneBrushContentProperties::serialize(writer, content);
+    }
+}
+
+fn is_compositor(key: &Weak<Compositor>, c: &Compositor) -> bool {
+    std::ptr::eq(key.as_ptr(), c)
+}
 
 crate::ferro_properties! { impl VisualBrush {
     ferro_property!(pub fn visual_property() -> StyledProperty<Option<Ref<Visual>>> {
@@ -27,7 +113,7 @@ crate::ferro_properties! { impl VisualBrush {
 impl VisualBrush {
     /// Creates the class data.
     pub fn construct() -> Self {
-        Self { base: TileBrush::construct() }
+        Self { base: TileBrush::construct(), render_data_dictionary: RefCell::new(Vec::new()) }
     }
 
     pub fn new() -> Ref<Self> {
@@ -55,6 +141,8 @@ impl VisualBrush {
     pub fn create_content(&self) -> Option<Rc<dyn ISceneBrushContent>> {
         let visual = self.visual()?;
 
+        visual.ensure_initialized_for_visual_brush();
+
         let mut recorder = RenderDataDrawingContext::new(None);
         {
             let mut context = DrawingContext::new(&mut recorder);
@@ -67,6 +155,49 @@ impl VisualBrush {
         );
         recorder.reset();
         content.map(|content| content as Rc<dyn ISceneBrushContent>)
+    }
+
+    /// The content recorded for compositor `c`, if there is any.
+    fn render_data(&self, c: &Compositor) -> Option<Rc<RenderDataItem>> {
+        self.render_data_dictionary.borrow().iter().find(|(key, _)| is_compositor(key, c)).and_then(|(_, item)| item.clone())
+    }
+
+    fn set_render_data(&self, c: &Rc<Compositor>, item: Option<Rc<RenderDataItem>>) {
+        let mut dictionary = self.render_data_dictionary.borrow_mut();
+        match dictionary.iter_mut().find(|(key, _)| is_compositor(key, c)) {
+            Some(entry) => entry.1 = item,
+            None => dictionary.push((Rc::downgrade(c), item)),
+        }
+    }
+
+    fn invalidate_content(&self) {
+        for (_, item) in self.render_data_dictionary.borrow().iter() {
+            if let Some(item) = item {
+                item.is_dirty.set(true);
+            }
+        }
+        self.register_for_serialization();
+    }
+
+    fn create_server_content(&self, c: &Rc<Compositor>) -> Option<Rc<RenderDataItem>> {
+        let visual = self.visual()?;
+
+        visual.ensure_initialized_for_visual_brush();
+
+        let mut recorder = RenderDataDrawingContext::new(Some(c.clone()));
+        {
+            let mut context = DrawingContext::new(&mut recorder);
+            ImmediateRenderer::render(&mut context, &visual);
+        }
+        let render_data = recorder.get_render_results();
+        recorder.reset();
+        let render_data = render_data?;
+
+        Some(Rc::new(RenderDataItem {
+            data: render_data,
+            rect: Rect::from_size(visual.bounds().size()),
+            is_dirty: Cell::new(false),
+        }))
     }
 }
 
