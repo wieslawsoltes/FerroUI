@@ -17,7 +17,7 @@ use ::ferroui_markup_xaml::RuntimeXamlLoaderConfiguration;
 
 use crate::FerroXamlIlRuntimeCompiler;
 
-use super::emitter::emit_document;
+use super::emitter::{emit_document, namespace_table};
 use super::source::{function_name_of, rust_string_literal};
 
 /// The result of compiling one document.
@@ -28,6 +28,10 @@ pub struct CompiledDocument {
     pub function_name: String,
     /// The Rust source of the build function, or why the document is not eligible.
     pub source: Result<String, String>,
+    /// The constant the build function reads the namespace information of
+    /// the document from, and its value (`rt::XmlNamespaceTable`); documents
+    /// with the same information share the constant.
+    pub namespaces: Option<(String, String)>,
 }
 
 /// A generated file and what it holds.
@@ -77,23 +81,45 @@ pub fn compile_documents(
         items.extend(defined.into_iter().map(|item| (item, *name)));
         if let Some((item, other)) = collision {
             let reason = format!("the generated function `{item}` would also be defined for the document `{other}`; rename one of them");
-            compiled.push(CompiledDocument { name: name.to_string(), function_name, source: Err(reason) });
+            compiled.push(CompiledDocument { name: name.to_string(), function_name, source: Err(reason), namespaces: None });
             continue;
         }
         group.push((compiled.len(), name, xaml, root_uri.map(|root| format!("{root}{name}"))));
-        compiled.push(CompiledDocument { name: name.to_string(), function_name, source: Err(String::new()) });
+        compiled.push(CompiledDocument { name: name.to_string(), function_name, source: Err(String::new()), namespaces: None });
     }
-    let sources: Vec<(&str, &str, Option<String>)> =
-        group.iter().map(|(_, name, xaml, base_uri)| (*name, *xaml, base_uri.clone())).collect();
+    let sources: Vec<(&str, &str, Option<String>, Option<&'static ferroui_base::TypeInfo>)> =
+        group.iter().map(|(_, name, xaml, base_uri)| (*name, *xaml, base_uri.clone(), None)).collect();
     if sources.is_empty() {
         return compiled;
     }
     match FerroXamlIlRuntimeCompiler::transform_documents(&sources, configuration) {
-        Ok((roots, transformer_configuration, _type_system)) => {
-            for ((index, name, _, _), root) in group.iter().zip(&roots) {
+        Ok(transformed) => {
+            // The namespace information of the documents, one constant per distinct table.
+            let mut tables: Vec<String> = Vec::new();
+            for ((index, name, _, _), transformed) in group.iter().zip(&transformed) {
                 let document = &mut compiled[*index];
-                document.source = emit_document(root, &transformer_configuration, &document.function_name, name)
-                    .map_err(|e| e.to_string());
+                let Some(table) = namespace_table(&transformed.document) else {
+                    document.source = Err("the document has no namespace information".to_string());
+                    continue;
+                };
+                let table_index = match tables.iter().position(|known| *known == table) {
+                    Some(known) => known,
+                    None => {
+                        tables.push(table.clone());
+                        tables.len() - 1
+                    }
+                };
+                let constant = format!("XML_NAMESPACES_{table_index}");
+                document.source = emit_document(
+                    &transformed.root,
+                    &transformed.configuration,
+                    &transformed.document,
+                    &constant,
+                    &document.function_name,
+                    name,
+                )
+                .map_err(|e| e.to_string());
+                document.namespaces = Some((constant, table));
             }
         }
         Err(error) => {
@@ -139,6 +165,20 @@ pub fn generate_file(
     source.push_str("pub type BuildDocument = fn(\n");
     source.push_str("    ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,\n");
     source.push_str(") -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadException>;\n");
+
+    let mut constants: Vec<&(String, String)> = Vec::new();
+    for document in &compiled {
+        if let (Ok(_), Some(namespaces)) = (&document.source, &document.namespaces) {
+            if !constants.iter().any(|known| known.0 == namespaces.0) {
+                constants.push(namespaces);
+            }
+        }
+    }
+    for (constant, value) in constants {
+        source.push('\n');
+        source.push_str("/// The XML namespaces of documents of this file, as the compiler resolved them.\n");
+        source.push_str(&format!("const {constant}: rt::XmlNamespaceTable = {value};\n"));
+    }
 
     let mut report = Vec::with_capacity(compiled.len());
     let mut table = Vec::new();
@@ -294,8 +334,8 @@ fn untyped_function_name(function_name: &str) -> String {
 /// why a document is not eligible. With the `testing` feature.
 #[cfg(any(test, feature = "testing"))]
 pub fn transformed_tree(name: &str, xaml: &str, configuration: &RuntimeXamlLoaderConfiguration) -> Result<String, String> {
-    FerroXamlIlRuntimeCompiler::transform_document(xaml, name, configuration)
-        .map(|(root, _, _)| crate::testing::objects::dump_tree(&root))
+    FerroXamlIlRuntimeCompiler::transform_document(xaml, name, None, configuration)
+        .map(|transformed| crate::testing::objects::dump_tree(&transformed.root))
         .map_err(|error| error.message())
 }
 

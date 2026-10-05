@@ -38,12 +38,113 @@ fn generate() -> GeneratedFile {
     generate_file(generated::ASSEMBLY_NAME, generated::ROOT_URI, DOCUMENTS, &RuntimeXamlLoaderConfiguration::new())
 }
 
-/// A value in display form: an object of the object model as its class.
+/// A value in display form: in its untyped form (the contents of a nullable,
+/// `null` for none), an object of the object model as its class, a type
+/// reference as `typeof(<name>)`.
 fn display(value: &BoxedValue) -> String {
-    match ValueTypes::as_object(&**value) {
-        Some(inner) => format!("<{}>", inner.get_type().full_name()),
-        None => ValueTypes::to_display_string(Some(value)),
+    let Some(value) = ferroui_markup_xaml::xaml_il::runtime::compiled::to_untyped(value.clone()) else {
+        return "null".to_string();
+    };
+    if let Some(class) = value.downcast_ref::<&'static ferroui_base::TypeInfo>() {
+        return format!("typeof({})", class.full_name());
     }
+    if let Some(handle) = value.downcast_ref::<ferroui_base::data::core::ValueType>() {
+        return format!("typeof({})", handle.name());
+    }
+    if let Some(transitions) = value.downcast_ref::<ferroui_base::animation::Transitions>() {
+        let items: Vec<String> = transitions.to_vec().iter().map(|transition| transition.debug_display()).collect();
+        return format!("[{}]", items.join(", "));
+    }
+    match ValueTypes::as_object(&*value) {
+        Some(inner) => match inner.cast::<ferroui_base::styling::ControlTheme>() {
+            Some(theme) => display_control_theme(&theme),
+            None => format!("<{}>", inner.get_type().full_name()),
+        },
+        None => display_enum(&value)
+            .or_else(|| display_declared(&value))
+            .unwrap_or_else(|| ValueTypes::to_display_string(Some(&value))),
+    }
+}
+
+/// A value of an enumeration (or a set of flags) in display form: the
+/// integer value whose metadata conversion gives an equal value, among the
+/// members and their combinations.
+fn display_enum(value: &BoxedValue) -> Option<String> {
+    use ferroui_base::metadata::{MarkupType, MarkupTypeKind};
+    let markup = MarkupType::find_by_handle(value.value_type_id())?;
+    if markup.kind != MarkupTypeKind::Enum {
+        return None;
+    }
+    let from_value = markup.enum_from_value?;
+    let members: Vec<i64> = markup.enum_members.iter().map(|member| member.value).collect();
+    let mut candidates: Vec<i64> = members.clone();
+    if markup.is_flags && members.len() <= 16 {
+        for mask in 0u32..(1 << members.len()) {
+            let combined = (0..members.len()).filter(|bit| mask & (1 << bit) != 0).fold(0i64, |acc, bit| acc | members[bit]);
+            candidates.push(combined);
+        }
+    }
+    candidates
+        .into_iter()
+        .find(|candidate| from_value(*candidate).is_some_and(|converted| converted.any_value_eq(&**value)))
+        .map(|found| format!("{}({found})", markup.name))
+}
+
+/// A value of a plain (non-object) reference type with metadata in display
+/// form: its type and the values of its declared properties, by name, each
+/// in plain display form (one level).
+fn display_declared(value: &BoxedValue) -> Option<String> {
+    use ferroui_base::metadata::{MarkupType, MarkupTypeKind};
+    let markup = MarkupType::find_by_handle(value.value_type_id())?;
+    if markup.kind != MarkupTypeKind::Class || markup.properties.is_empty() {
+        return None;
+    }
+    let mut properties: Vec<String> = Vec::new();
+    for property in markup.properties {
+        let Some(get) = property.get else { continue };
+        let shown = match get(&[Some(value.clone())]) {
+            Ok(Some(read)) => match ValueTypes::as_object(&*read) {
+                Some(object) => format!("<{}>", object.get_type().full_name()),
+                None => display_enum(&read).unwrap_or_else(|| ValueTypes::to_display_string(Some(&read))),
+            },
+            Ok(None) => "null".to_string(),
+            Err(error) => format!("<error {error}>"),
+        };
+        properties.push(format!("{}={shown}", property.name));
+    }
+    properties.sort();
+    Some(format!("{} {{{}}}", markup.full_name(), properties.join(", ")))
+}
+
+/// A control theme in display form: its target type, the target type of
+/// the theme it is based on, and its setters (property and value).
+fn display_control_theme(theme: &Ref<ferroui_base::styling::ControlTheme>) -> String {
+    use ferroui_base::styling::{Setter, SetterValue};
+    let type_name = |class: Option<&'static ferroui_base::TypeInfo>| class.map(|class| class.full_name()).unwrap_or_default();
+    let mut setters = Vec::new();
+    for setter in theme.setters().to_vec() {
+        let text = match setter.as_any().and_then(|any| any.downcast_ref::<Setter>()) {
+            Some(setter) => {
+                let property = setter.property().map(|property| property.name().to_string()).unwrap_or_default();
+                let value = match setter.value() {
+                    None => "null".to_string(),
+                    Some(SetterValue::Value(value)) => display(&value),
+                    Some(SetterValue::Binding(_)) => "<observable>".to_string(),
+                    Some(SetterValue::BindingBase(_)) => "<binding>".to_string(),
+                    Some(SetterValue::Template(_)) => "<template>".to_string(),
+                };
+                format!("{property}={value}")
+            }
+            None => "<setter>".to_string(),
+        };
+        setters.push(text);
+    }
+    format!(
+        "<ControlTheme {} based on {} [{}]>",
+        type_name(theme.target_type()),
+        theme.based_on().map(|based_on| type_name(based_on.target_type())).unwrap_or_else(|| "nothing".to_string()),
+        setters.join(", ")
+    )
 }
 
 /// The canonical dump of an object tree: the full name of the class and,
@@ -54,9 +155,11 @@ fn display(value: &BoxedValue) -> String {
 /// getter, read through that getter; all of them sorted, with the value in
 /// display form (an object value is shown as its class) and, for a
 /// collection, its items, an object item dumped recursively; for a named
-/// element, whether the name scope of the root finds it under its name; for
-/// an element with a name scope of its own, whether that scope is completed;
-/// then the logical children of a styled element, recursively.
+/// element, whether the name scope of the root finds it under its name; the
+/// resources of the element (its own dictionary: key and value, a deferred
+/// value built); for an element with a name scope of its own, whether that
+/// scope is completed; then the logical children of a styled element,
+/// recursively.
 fn dump(object: &Ref<FerroObject>, root_scope: Option<&Rc<dyn INameScope>>, indent: usize, output: &mut String) {
     let pad = "  ".repeat(indent);
     let class = object.get_type();
@@ -110,12 +213,34 @@ fn dump(object: &Ref<FerroObject>, root_scope: Option<&Rc<dyn INameScope>>, inde
         output.push_str(line);
     }
 
+    // A resource dictionary that is not an element: its resources, as for an element.
+    if let Some(dictionary) = object.cast::<ferroui_base::controls::ResourceDictionary>() {
+        let mut keys = dictionary.keys();
+        keys.sort_by_key(|key| key.to_string());
+        for key in keys {
+            let value = dictionary.try_get_resource(&key, None).flatten();
+            let value = value.as_ref().map(display).unwrap_or_else(|| "null".to_string());
+            output.push_str(&format!("{pad}  resource {key} = {value}\n"));
+        }
+    }
     if let Some(styled) = &styled {
         if let Some(name) = styled.name() {
             let found = root_scope
                 .and_then(|scope| scope.find(&name))
                 .is_some_and(|found| std::ptr::eq(&*found, &**object));
             output.push_str(&format!("{pad}  named '{name}', found in the scope of the root: {found}\n"));
+        }
+        // The resources of the element itself, by key, each value as the element finds it
+        // (deferred content built).
+        if styled.has_resources() {
+            let resources = styled.resources();
+            let mut keys = resources.keys();
+            keys.sort_by_key(|key| key.to_string());
+            for key in keys {
+                let value = styled.try_get_resource(&key, None).flatten();
+                let value = value.as_ref().map(display).unwrap_or_else(|| "null".to_string());
+                output.push_str(&format!("{pad}  resource {key} = {value}\n"));
+            }
         }
         if let Some(scope) = NameScope::get_name_scope(styled) {
             output.push_str(&format!("{pad}  has a name scope, completed: {}\n", scope.0.is_completed()));
@@ -398,6 +523,10 @@ fn both_back_ends_build_equal_object_trees() {
             Ok(root) => dump_root(&root),
             Err(error) => failure(&error),
         };
+        // `FERROUI_EMITTER_DUMP=<name>` prints the dump of a document (diagnostic).
+        if std::env::var("FERROUI_EMITTER_DUMP").is_ok_and(|dumped| dumped == *name) {
+            println!("--- {name}, interpreter\n{interpreted}--- {name}, generated\n{generated}");
+        }
         if interpreted == generated {
             matches += 1;
             println!("match         {name}");

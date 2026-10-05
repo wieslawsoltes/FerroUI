@@ -1069,7 +1069,7 @@ impl RuntimeTypeSystem {
                 declaring_type: weak.clone(),
                 field_type: self.resolve((field.type_)()),
                 literal: None,
-                value: RuntimeFieldValue::Getter(field.get),
+                value: RuntimeFieldValue::Declared(field),
                 attributes: self.project_attributes(field.attributes),
             }));
         }

@@ -414,14 +414,15 @@ impl RuntimeDocumentTypeBuilderProvider {
 
     /// The transformed root node of the document and the configuration it was
     /// transformed with: what the emitter of Rust source (the second back end)
-    /// reads. `None` until the group has been transformed.
+    /// reads, with what the document adds to its contexts. `None` until the
+    /// group has been transformed.
     #[cfg(any(feature = "emitter", test))]
     pub(crate) fn transformed_root(
         &self,
-    ) -> Option<(Rc<dyn IXamlAstNode>, Rc<xamlx::transform::TransformerConfiguration>)> {
+    ) -> Option<(Rc<dyn IXamlAstNode>, Rc<xamlx::transform::TransformerConfiguration>, Rc<RuntimeDocument>)> {
         let body = self.body.borrow();
         let body = body.as_ref()?;
-        Some((body.root.clone(), body.interpreter.configuration.clone()))
+        Some((body.root.clone(), body.interpreter.configuration.clone(), body.document.clone()))
     }
 
     /// `Populate(serviceProvider, target)`.

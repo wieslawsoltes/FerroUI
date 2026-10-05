@@ -1159,8 +1159,8 @@ impl IXamlProperty for RuntimeProperty {
 /// How the value of a [`RuntimeField`] is obtained.
 #[derive(Clone)]
 pub enum RuntimeFieldValue {
-    /// The getter declared in metadata.
-    Getter(fn() -> MarkupValue),
+    /// The field declared in metadata (read with its getter).
+    Declared(&'static ferroui_base::metadata::MarkupField),
     /// The member of an enumeration, as a value of the enumeration.
     EnumMember(fn() -> BoxedValue),
     /// The definition of a registered property.
@@ -1185,7 +1185,7 @@ impl RuntimeField {
     /// The value of the field, in untyped form.
     pub fn get(&self) -> Result<MarkupValue, MarkupInvokeError> {
         match &self.value {
-            RuntimeFieldValue::Getter(get) => Ok(normalize_result(&self.system, get())),
+            RuntimeFieldValue::Declared(field) => Ok(normalize_result(&self.system, (field.get)())),
             RuntimeFieldValue::EnumMember(get) => Ok(Some(get())),
             RuntimeFieldValue::Property(property) => Ok(Some(Rc::new(*property))),
             RuntimeFieldValue::None => Err(MarkupInvokeError::Failed(format!(
