@@ -1,5 +1,4 @@
 use super::{FerroList, IFerroReadOnlyList};
-use std::hash::Hash;
 
 /// A notifying list.
 ///
@@ -50,7 +49,7 @@ pub trait IFerroList<T>: IFerroReadOnlyList<T> {
     fn remove_range(&self, index: usize, count: usize);
 }
 
-impl<T: Clone + Eq + Hash> IFerroList<T> for FerroList<T> {
+impl<T: Clone + PartialEq> IFerroList<T> for FerroList<T> {
     fn set(&self, index: usize, value: T) {
         FerroList::set(self, index, value)
     }
