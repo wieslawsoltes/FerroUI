@@ -7,11 +7,21 @@ export class PromiseHelper {
     public static track(promise: any, requestId: number): void {
         Promise.resolve(promise).then(
             value => {
-                FerroExports.PromiseHelper?.OnResolved(requestId, value);
+                PromiseHelper.exports(requestId)?.OnResolved(requestId, value);
             },
             error => {
-                FerroExports.PromiseHelper?.OnRejected(requestId, PromiseHelper.errorMessage(error));
+                PromiseHelper.exports(requestId)?.OnRejected(requestId, PromiseHelper.errorMessage(error));
             });
+    }
+
+    // The completion exports; without them the request can never complete, which is reported.
+    private static exports(requestId: number) {
+        const exports = FerroExports.PromiseHelper;
+        if (!exports?.OnResolved || !exports?.OnRejected) {
+            console.error(`The promise of request ${requestId} settled, but the module exports no PromiseHelper completions: the request never completes.`);
+            return undefined;
+        }
+        return exports;
     }
 
     private static errorMessage(error: any): string {
