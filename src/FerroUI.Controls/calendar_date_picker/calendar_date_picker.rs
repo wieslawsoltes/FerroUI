@@ -161,7 +161,7 @@ ferro_class_info!(CalendarDatePicker {
     },
 });
 
-ferro_impl_classes!(CalendarDatePicker: StyledElementImpl, VisualImpl, LayoutableImpl, InteractiveImpl, ControlImpl);
+ferro_impl_classes!(CalendarDatePicker: StyledElementImpl, VisualImpl, LayoutableImpl, InteractiveImpl);
 
 impl FerroObjectImpl for CalendarDatePicker {
     /// Initializes a new instance of the [`CalendarDatePicker`] class.
@@ -571,8 +571,12 @@ impl TemplatedControlImpl for CalendarDatePicker {
 
         this.update_pseudo_classes();
     }
+}
 
-    // AUTOMATION-SEAM: OnCreateAutomationPeer -> CalendarDatePickerAutomationPeer (automation pass)
+impl ControlImpl for CalendarDatePicker {
+    fn on_create_automation_peer(this: &Self) -> Ref<crate::automation::peers::AutomationPeer> {
+        crate::automation::peers::CalendarDatePickerAutomationPeer::new(this).upcast()
+    }
 }
 
 impl CalendarDatePickerImpl for CalendarDatePicker {

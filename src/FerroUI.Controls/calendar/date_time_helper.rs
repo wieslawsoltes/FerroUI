@@ -84,14 +84,14 @@ impl DateTimeHelper {
 
     /// Gets a localized string for the specified date using the year month
     /// pattern of the current culture.
-    #[allow(dead_code)] // AUTOMATION-SEAM: used by the automation peers of the calendar (automation pass)
+    #[allow(dead_code)] // the reference declares the member and calls it nowhere
     pub(crate) fn to_year_month_pattern_string(date: DateTime) -> String {
         let format = Self::get_current_date_format();
         date.to_string_format(format.year_month_pattern(), &format)
     }
 
     /// Gets a localized string for the year of the specified date.
-    #[allow(dead_code)] // AUTOMATION-SEAM: used by the automation peers of the calendar (automation pass)
+    #[allow(dead_code)] // the reference declares the member and calls it nowhere
     pub(crate) fn to_year_string(date: DateTime) -> String {
         Self::format_number(date.year())
     }

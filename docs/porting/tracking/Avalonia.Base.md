@@ -5224,6 +5224,7 @@ Rust sources of this crate that no upstream file maps to. Give each a reason in 
 | `utilities/read_only_memory.rs` | **unmapped** | `ReadOnlyMemory` |
 | `utilities/ref_countable.rs` | **unmapped** | `RefCountable`, `RefCounted`, `RefCounter` |
 | `utilities/test_culture_data_provider.rs` | **unmapped** | `TestCultureDataProvider` |
+| `utilities/text_info.rs` | **unmapped** | `TextInfo` |
 | `utilities/time_zone_info.rs` | **unmapped** | `LocalUtcOffsetProvider`, `TimeZoneInfo` |
 | `utilities/uri.rs` | **unmapped** | `Uri`, `UriFormatError`, `UriKind` |
 

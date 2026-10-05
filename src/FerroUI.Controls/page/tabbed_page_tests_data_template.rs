@@ -4,6 +4,7 @@
 
 use super::tabbed_page_tests::{header_of, hp, is_logical_child, logical_page_headers, pages_of};
 use super::{ContentPage, NavigationType, Page, PageList, TabPlacement, TabbedPage};
+use crate::automation::peers::TabbedPageAutomationPeer;
 use crate::mouse_test_helper::MouseTestHelper;
 use crate::presenters::ItemsPresenter;
 use crate::templates::{
@@ -170,14 +171,14 @@ fn non_list_items_source_selected_page_and_automation_name_are_resolved() {
 
     let selected_page = tp.selected_page().expect("a selected page");
     assert_eq!(header_of(&selected_page).as_deref(), Some("First"));
-    // AUTOMATION-SEAM: the name of the automation peer of the tabbed page is "Tab 1 of 2: First".
+    assert_eq!("Tab 1 of 2: First", TabbedPageAutomationPeer::new(tp).get_name());
 
     tp.set_selected_index(1);
     hosted.layout();
 
     let selected_page = tp.selected_page().expect("a selected page");
     assert_eq!(header_of(&selected_page).as_deref(), Some("Second"));
-    // AUTOMATION-SEAM: the name of the automation peer of the tabbed page is "Tab 2 of 2: Second".
+    assert_eq!("Tab 2 of 2: Second", TabbedPageAutomationPeer::new(tp).get_name());
 }
 
 #[test]

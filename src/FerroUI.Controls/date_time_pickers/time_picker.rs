@@ -91,8 +91,7 @@ ferro_impl_classes!(
     VisualImpl,
     LayoutableImpl,
     InteractiveImpl,
-    InputElementImpl,
-    ControlImpl
+    InputElementImpl
 );
 
 impl FerroObjectImpl for TimePicker {
@@ -216,7 +215,11 @@ impl TemplatedControlImpl for TimePicker {
     }
 }
 
-// AUTOMATION-SEAM: OnCreateAutomationPeer -> TimePickerAutomationPeer (automation pass)
+impl ControlImpl for TimePicker {
+    fn on_create_automation_peer(this: &Self) -> Ref<crate::automation::peers::AutomationPeer> {
+        crate::automation::peers::TimePickerAutomationPeer::new(this).upcast()
+    }
+}
 
 impl TimePickerImpl for TimePicker {
     fn on_selected_time_changed(this: &Self, old_time: Option<TimeSpan>, new_time: Option<TimeSpan>) {

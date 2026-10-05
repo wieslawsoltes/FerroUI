@@ -85,8 +85,7 @@ ferro_impl_classes!(
     VisualImpl,
     LayoutableImpl,
     InteractiveImpl,
-    InputElementImpl,
-    ControlImpl
+    InputElementImpl
 );
 
 impl FerroObjectImpl for DatePicker {
@@ -216,7 +215,11 @@ impl TemplatedControlImpl for DatePicker {
     }
 }
 
-// AUTOMATION-SEAM: OnCreateAutomationPeer -> DatePickerAutomationPeer (automation pass)
+impl ControlImpl for DatePicker {
+    fn on_create_automation_peer(this: &Self) -> Ref<crate::automation::peers::AutomationPeer> {
+        crate::automation::peers::DatePickerAutomationPeer::new(this).upcast()
+    }
+}
 
 impl DatePickerImpl for DatePicker {
     fn on_selected_date_changed(this: &Self, e: &DatePickerSelectedValueChangedEventArgs) {

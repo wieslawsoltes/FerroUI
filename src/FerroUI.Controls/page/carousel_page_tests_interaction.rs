@@ -14,6 +14,7 @@ use super::{
     CarouselPage, ContentPage, MultiPage, NavigatedFromEventArgs, NavigatedToEventArgs, Page, PageImpl, PageImplExt,
     PageList,
 };
+use crate::automation::AutomationProperties;
 use crate::mouse_test_helper::MouseTestHelper;
 use crate::presenters::{ItemsPresenter, ScrollContentPresenter};
 use crate::primitives::{ScrollBarVisibility, TemplatedControlImpl};
@@ -330,7 +331,7 @@ fn items_source_selected_page_is_resolved_after_layout() {
 
     let selected_page = hosted.cp.selected_page().expect("a selected page");
     assert_eq!(header_of(&selected_page).as_deref(), Some("First"));
-    // AUTOMATION-SEAM: the automation name of the carousel page is "Page 1 of 2: First".
+    assert_eq!(Some("Page 1 of 2: First"), AutomationProperties::get_name(&hosted.cp).as_deref());
 }
 
 #[test]
@@ -345,7 +346,7 @@ fn keyboard_navigation_uses_items_source_count() {
     assert_eq!(1, cp.selected_index());
     let selected_page = cp.selected_page().expect("a selected page");
     assert_eq!(header_of(&selected_page).as_deref(), Some("Second"));
-    // AUTOMATION-SEAM: the automation name of the carousel page is "Page 2 of 2: Second".
+    assert_eq!(Some("Page 2 of 2: Second"), AutomationProperties::get_name(cp).as_deref());
 }
 
 #[test]

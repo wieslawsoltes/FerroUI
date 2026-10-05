@@ -10,9 +10,9 @@ Generated from upstream commit `17350180c33b063f0e98abbfd19aa3cae63f5d56`. Back 
 | FerroUI | `src/FerroUI.Controls` (exists) |
 | Crate | `ferroui-controls` |
 | Phase / priority | 1 - controls / P0 |
-| Files | 493/538 (91.6%), 1 not applicable |
-| Types | 563/628 (89.6%) |
-| Members | 5642/6405 (1 waived) (88.1%) |
+| Files | 500/538 (92.9%), 1 not applicable |
+| Types | 570/628 (90.8%) |
+| Members | 5701/6405 (1 waived) (89.0%) |
 | Contracts (interfaces) | 81/83 |
 | Property registrations | 868/938 |
 | Routed events | 59/67 |
@@ -958,22 +958,22 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 | `TogglePatternIdentifiers.cs` | `automation/toggle_pattern_identifiers.rs` | present | 1/1 | 1/1 |  |
 | `ValuePatternIdentifiers.cs` | `automation/value_pattern_identifiers.rs` | present | 1/1 | 2/2 |  |
 
-### `Automation/Peers` - files 43/52, types 45/54, members 447/522
+### `Automation/Peers` - files 50/52, types 52/54, members 499/522
 
 | Upstream file | Rust file | Status | Types | Members | Notes |
 |---|---|---|---|---|---|
 | `AutoCompleteBoxAutomationPeer.cs` | `automation/peers/auto_complete_box_automation_peer.rs` | present | 1/1 | 11/11 |  |
 | `AutomationPeer.cs` | `automation/peers/automation_peer.rs` | present | 3/3 | 123/123 |  |
 | `ButtonAutomationPeer.cs` | `automation/peers/button_automation_peer.rs` | present | 1/1 | 7/7 |  |
-| `CalendarAutomationPeer.cs` | `automation/peers/calendar_automation_peer.rs` | missing | 0/1 | 0/10 |  |
-| `CalendarDatePickerAutomationPeer.cs` | `automation/peers/calendar_date_picker_automation_peer.rs` | missing | 0/1 | 0/14 |  |
-| `CalendarDayButtonAutomationPeer.cs` | `automation/peers/calendar_day_button_automation_peer.rs` | missing | 0/1 | 0/8 |  |
-| `CarouselPageAutomationPeer.cs` | `automation/peers/carousel_page_automation_peer.rs` | missing | 0/1 | 0/4 |  |
+| `CalendarAutomationPeer.cs` | `automation/peers/calendar_automation_peer.rs` | present | 1/1 | 10/10 |  |
+| `CalendarDatePickerAutomationPeer.cs` | `automation/peers/calendar_date_picker_automation_peer.rs` | present | 1/1 | 14/14 |  |
+| `CalendarDayButtonAutomationPeer.cs` | `automation/peers/calendar_day_button_automation_peer.rs` | present | 1/1 | 8/8 |  |
+| `CarouselPageAutomationPeer.cs` | `automation/peers/carousel_page_automation_peer.rs` | present | 1/1 | 4/4 |  |
 | `ComboBoxAutomationPeer.cs` | `automation/peers/combo_box_automation_peer.rs` | present | 1/1 | 12/12 |  |
 | `ContentControlAutomationPeer.cs` | `automation/peers/content_control_automation_peer.rs` | present | 1/1 | 7/7 |  |
 | `ContentPageAutomationPeer.cs` | `automation/peers/content_page_automation_peer.rs` | present | 1/1 | 4/4 |  |
 | `ControlAutomationPeer.cs` | `automation/peers/control_automation_peer.rs` | present | 1/1 | 41/41 |  |
-| `DatePickerAutomationPeer.cs` | `automation/peers/date_picker_automation_peer.rs` | missing | 0/1 | 0/6 |  |
+| `DatePickerAutomationPeer.cs` | `automation/peers/date_picker_automation_peer.rs` | present | 1/1 | 6/6 |  |
 | `DrawerPageAutomationPeer.cs` | `automation/peers/drawer_page_automation_peer.rs` | missing | 0/1 | 0/8 |  |
 | `EmbeddableControlRootAutomationPeer.cs` | `automation/peers/embeddable_control_root_automation_peer.rs` | partial | 1/1 | 6/7 |  |
 | `ExpanderAutomationPeer.cs` | `automation/peers/expander_automation_peer.rs` | present | 1/1 | 9/9 |  |
@@ -1000,11 +1000,11 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 | `SelectingItemsControlAutomationPeer.cs` | `automation/peers/selecting_items_control_automation_peer.rs` | present | 1/1 | 8/8 |  |
 | `SliderAutomationPeer.cs` | `automation/peers/slider_automation_peer.rs` | present | 1/1 | 3/3 |  |
 | `SplitButtonAutomationPeer.cs` | `automation/peers/split_button_automation_peer.rs` | partial | 1/1 | 10/11 |  |
-| `TabbedPageAutomationPeer.cs` | `automation/peers/tabbed_page_automation_peer.rs` | missing | 0/1 | 0/4 |  |
+| `TabbedPageAutomationPeer.cs` | `automation/peers/tabbed_page_automation_peer.rs` | present | 1/1 | 4/4 |  |
 | `TextBlockAutomationPeer.cs` | `automation/peers/text_block_automation_peer.rs` | present | 1/1 | 5/5 |  |
 | `TextBoxAutomationPeer.cs` | `automation/peers/text_box_automation_peer.rs` | present | 1/1 | 8/8 |  |
 | `ThumbAutomationPeer.cs` | `automation/peers/thumb_automation_peer.rs` | present | 1/1 | 3/3 |  |
-| `TimePickerAutomationPeer.cs` | `automation/peers/time_picker_automation_peer.rs` | missing | 0/1 | 0/6 |  |
+| `TimePickerAutomationPeer.cs` | `automation/peers/time_picker_automation_peer.rs` | present | 1/1 | 6/6 |  |
 | `ToggleButtonAutomationPeer.cs` | `automation/peers/toggle_button_automation_peer.rs` | present | 1/1 | 7/7 |  |
 | `ToggleSplitButtonAutomationPeer.cs` | `automation/peers/toggle_split_button_automation_peer.rs` | partial | 1/1 | 4/6 |  |
 | `ToolTipAutomationPeer.cs` | `automation/peers/tool_tip_automation_peer.rs` | present | 1/1 | 4/4 |  |
@@ -1062,37 +1062,29 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 | `IToggleProvider.cs` | `automation/provider/i_toggle_provider.rs` | present | 2/2 | 5/5 |  |
 | `IValueProvider.cs` | `automation/provider/i_value_provider.rs` | present | 1/1 | 3/3 |  |
 
-### `Calendar` - files 9/9, types 13/13, members 177/187
+### `Calendar` - files 9/9, types 13/13, members 179/187
 
 | Upstream file | Rust file | Status | Types | Members | Notes |
 |---|---|---|---|---|---|
-| `Calendar.cs` | `calendar/calendar.rs` | partial | 5/5 | 94/101 |  |
+| `Calendar.cs` | `calendar/calendar.rs` | partial | 5/5 | 95/101 |  |
 | `CalendarBlackoutDatesCollection.cs` | `calendar/calendar_blackout_dates_collection.rs` | present | 1/1 | 9/9 |  |
 | `CalendarButton.cs` | `calendar/calendar_button.rs` | present | 1/1 | 10/10 |  |
 | `CalendarDateRange.cs` | `calendar/calendar_date_range.rs` | present | 1/1 | 5/5 |  |
-| `CalendarDayButton.cs` | `calendar/calendar_day_button.rs` | partial | 1/1 | 14/15 |  |
+| `CalendarDayButton.cs` | `calendar/calendar_day_button.rs` | present | 1/1 | 15/15 |  |
 | `CalendarExtensions.cs` | `calendar/calendar_extensions.rs` | present | 1/1 | 1/1 |  |
 | `CalendarItem.cs` | `calendar/calendar_item.rs` | partial | 1/1 | 23/25 |  |
 | `DateTimeHelper.cs` | `calendar/date_time_helper.rs` | present | 1/1 | 14/14 |  |
 | `SelectedDatesCollection.cs` | `calendar/selected_dates_collection.rs` | present | 1/1 | 7/7 |  |
 
-<details><summary><code>Calendar.cs</code> - 7 missing</summary>
+<details><summary><code>Calendar.cs</code> - 6 missing</summary>
 
-- `Calendar` (class): 7 missing
+- `Calendar` (class): 6 missing
   - `Panel? Root { get; set; }` *(internal; getter `root` found, setter `set_root` missing)*
   - `Collection<DateTime> RemovedItems { get; set; }` *(internal; getter `removed_items` found, setter `set_removed_items` missing)*
   - `DateTime? LastSelectedDateInternal { get; set; }` *(internal; getter `last_selected_date_internal` found, setter `set_last_selected_date_internal` missing)*
   - `DateTime? HoverEndInternal { get; set; }` *(internal; getter `hover_end_internal` found, setter `set_hover_end_internal` missing)*
   - `bool HasFocusInternal { get; set; }` *(internal; getter `has_focus_internal` found, setter `set_has_focus_internal` missing)*
   - `static Calendar()` *(static)*
-  - `override AutomationPeer OnCreateAutomationPeer()` *(protected)*
-
-</details>
-
-<details><summary><code>CalendarDayButton.cs</code> - 1 missing</summary>
-
-- `CalendarDayButton` (class): 1 missing
-  - `override AutomationPeer OnCreateAutomationPeer()` *(protected)*
 
 </details>
 
@@ -1104,20 +1096,19 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 
 </details>
 
-### `CalendarDatePicker` - files 4/4, types 4/4, members 67/69
+### `CalendarDatePicker` - files 4/4, types 4/4, members 68/69
 
 | Upstream file | Rust file | Status | Types | Members | Notes |
 |---|---|---|---|---|---|
 | `CalendarDatePicker.Properties.cs` | `calendar_date_picker/calendar_date_picker.rs` | present | 1/1 | 43/43 | partial merged into main file |
-| `CalendarDatePicker.cs` | `calendar_date_picker/calendar_date_picker.rs` | partial | 1/1 | 17/19 |  |
+| `CalendarDatePicker.cs` | `calendar_date_picker/calendar_date_picker.rs` | partial | 1/1 | 18/19 |  |
 | `CalendarDatePickerDateValidationErrorEventArgs.cs` | `calendar_date_picker/calendar_date_picker_date_validation_error_event_args.rs` | present | 1/1 | 4/4 |  |
 | `CalendarDatePickerFormat.cs` | `calendar_date_picker/calendar_date_picker_format.rs` | present | 1/1 | 3/3 |  |
 
-<details><summary><code>CalendarDatePicker.cs</code> - 2 missing</summary>
+<details><summary><code>CalendarDatePicker.cs</code> - 1 missing</summary>
 
-- `CalendarDatePicker` (class): 2 missing
+- `CalendarDatePicker` (class): 1 missing
   - `static CalendarDatePicker()` *(static)*
-  - `override AutomationPeer OnCreateAutomationPeer()` *(protected)*
 
 </details>
 
@@ -1167,25 +1158,18 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 | `StringFormatConverter.cs` | `converters/string_format_converter.rs` | present | 1/1 | 1/1 |  |
 | `TreeViewItemIndentConverter.cs` | `converters/tree_view_item_indent_converter.rs` | present | 1/1 | 2/2 |  |
 
-### `DateTimePickers` - files 8/8, types 9/9, members 136/141
+### `DateTimePickers` - files 8/8, types 9/9, members 138/141
 
 | Upstream file | Rust file | Status | Types | Members | Notes |
 |---|---|---|---|---|---|
-| `DatePicker.cs` | `date_time_pickers/date_picker.rs` | partial | 1/1 | 26/27 |  |
+| `DatePicker.cs` | `date_time_pickers/date_picker.rs` | present | 1/1 | 27/27 |  |
 | `DatePickerPresenter.cs` | `date_time_pickers/date_picker_presenter.rs` | partial | 1/1 | 23/24 |  |
 | `DatePickerSelectedValueChangedEventArgs.cs` | `date_time_pickers/date_picker_selected_value_changed_event_args.rs` | present | 1/1 | 3/3 |  |
 | `DateTimePickerPanel.cs` | `date_time_pickers/date_time_picker_panel.rs` | partial | 2/2 | 43/44 |  |
 | `PickerPresenterBase.cs` | `date_time_pickers/picker_presenter_base.rs` | present | 1/1 | 4/4 |  |
-| `TimePicker.cs` | `date_time_pickers/time_picker.rs` | partial | 1/1 | 18/19 |  |
+| `TimePicker.cs` | `date_time_pickers/time_picker.rs` | present | 1/1 | 19/19 |  |
 | `TimePickerPresenter.cs` | `date_time_pickers/time_picker_presenter.rs` | partial | 1/1 | 16/17 |  |
 | `TimePickerSelectedValueChangedEventArgs.cs` | `date_time_pickers/time_picker_selected_value_changed_event_args.rs` | present | 1/1 | 3/3 |  |
-
-<details><summary><code>DatePicker.cs</code> - 1 missing</summary>
-
-- `DatePicker` (class): 1 missing
-  - `override AutomationPeer OnCreateAutomationPeer()` *(protected)*
-
-</details>
 
 <details><summary><code>DatePickerPresenter.cs</code> - 1 missing</summary>
 
@@ -1198,13 +1182,6 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 
 - `DateTimePickerPanel` (class): 1 missing
   - `static DateTimePickerPanel()` *(static)*
-
-</details>
-
-<details><summary><code>TimePicker.cs</code> - 1 missing</summary>
-
-- `TimePicker` (class): 1 missing
-  - `override AutomationPeer OnCreateAutomationPeer()` *(protected)*
 
 </details>
 
@@ -1437,12 +1414,12 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 
 </details>
 
-### `Page` - files 24/29, types 24/29, members 295/394
+### `Page` - files 24/29, types 24/29, members 297/394
 
 | Upstream file | Rust file | Status | Types | Members | Notes |
 |---|---|---|---|---|---|
 | `BarLayoutBehavior.cs` | `page/bar_layout_behavior.rs` | present | 1/1 | 2/2 |  |
-| `CarouselPage.cs` | `page/carousel_page.rs` | partial | 1/1 | 17/19 |  |
+| `CarouselPage.cs` | `page/carousel_page.rs` | partial | 1/1 | 18/19 |  |
 | `ContentPage.cs` | `page/content_page.rs` | partial | 1/1 | 19/20 |  |
 | `DefaultPageDataTemplate.cs` | `page/default_page_data_template.rs` | present | 1/1 | 3/3 |  |
 | `DrawerBehavior.cs` | `page/drawer_behavior.rs` | missing | 0/1 | 0/4 |  |
@@ -1469,13 +1446,12 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 | `SafeAreaPaddingExtensions.cs` | `page/safe_area_padding_extensions.rs` | present | 1/1 | 2/2 |  |
 | `SelectingMultiPage.cs` | `page/selecting_multi_page.rs` | present | 1/1 | 10/10 |  |
 | `TabPlacement.cs` | `page/tab_placement.rs` | present | 1/1 | 5/5 |  |
-| `TabbedPage.cs` | `page/tabbed_page.rs` | partial | 1/1 | 25/27 |  |
+| `TabbedPage.cs` | `page/tabbed_page.rs` | partial | 1/1 | 26/27 |  |
 
-<details><summary><code>CarouselPage.cs</code> - 2 missing</summary>
+<details><summary><code>CarouselPage.cs</code> - 1 missing</summary>
 
-- `CarouselPage` (class): 2 missing
+- `CarouselPage` (class): 1 missing
   - `static CarouselPage()` *(static)*
-  - `override AutomationPeer OnCreateAutomationPeer()` *(protected)*
 
 </details>
 
@@ -1536,11 +1512,10 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 
 </details>
 
-<details><summary><code>TabbedPage.cs</code> - 2 missing</summary>
+<details><summary><code>TabbedPage.cs</code> - 1 missing</summary>
 
-- `TabbedPage` (class): 2 missing
+- `TabbedPage` (class): 1 missing
   - `static TabbedPage()` *(static)*
-  - `override AutomationPeer OnCreateAutomationPeer()` *(protected)*
 
 </details>
 
@@ -2297,4 +2272,4 @@ Rust sources of this crate that no upstream file maps to. Give each a reason in 
 | `utils/masked_text_provider.rs` | **unmapped** | `CaseConversion`, `CharDescriptor`, `CharType`, `MaskSeparators`, `MaskedTextProvider`, `MaskedTextProviderError`, `MaskedTextResultHint` |
 | `window_decorations.rs` | **unmapped** | `WindowDecorations` |
 
-Tests, examples and build scripts (not scanned): `app_builder_tests.rs`, `application_lifetimes/classic_desktop_style_application_lifetime_tests.rs`, `application_tests.rs`, `auto_complete_box/auto_complete_box_tests.rs`, `automation/automation_properties_tests.rs`, `automation/peers/combo_box_automation_peer_tests.rs`, `automation/peers/complex_control_automation_peer_tests.rs`, `automation/peers/control_automation_peer_tests.rs`, `automation/peers/embeddable_control_root_automation_peer_tests.rs`, `automation/peers/foundation_automation_peer_tests.rs`, `automation/peers/items_automation_peer_tests.rs`, `automation/peers/menu_item_automation_peer_tests.rs`, `automation/peers/native_menu_bar_automation_peer_tests.rs`, `automation/peers/page_automation_peer_tests.rs`, `automation/peers/split_button_automation_peer_tests.rs`, `automation/peers/window_automation_peer_tests.rs`, `border_tests.rs`, `bring_into_view_tests.rs`, `button_flyout_tests.rs`, `button_tests.rs`, `button_text_tests.rs`, `calendar/calendar_tests.rs`, `calendar_date_picker/calendar_date_picker_tests.rs`, `canvas_tests.rs`, `carousel_tests.rs`, `combo_box_tests.rs`, `command_bar/command_bar_tests.rs`, `content_control_tests.rs`, `context_menu_tests.rs`, `control_focus_adorner_tests.rs`, `converters/converters_tests.rs`, `data_validation_errors_tests.rs`, `date_time_pickers/date_picker_tests.rs`, `date_time_pickers/time_picker_tests.rs`, `decorator_tests.rs`, `deferred_text_tests.rs`, `design_tests.rs`, `dock_panel_tests.rs`, `documents/inline_tests.rs`, `element_ref_tests.rs`, `expander_tests.rs`, `experimental_acrylic_border_tests.rs`, `flex_panel/flex_basis_tests.rs`, `flex_panel/flex_panel_tests.rs`, `flyouts/flyout_tests.rs`, `grid_length_tests.rs`, `grid_splitter_tests.rs`, `grid_tests.rs`, `hotkey_manager_tests.rs`, `image_tests.rs`, `items_control_tests.rs`, `items_source_view_tests.rs`, `label_tests.rs`, `label_text_tests.rs`, `layout_transform_control_tests.rs`, `list_box_tests.rs`, `list_box_virtualization_issue_tests.rs`, `loaded_tests.rs`, `markup_types/markup_types_tests.rs`, `masked_text_box_tests.rs`, `menu_item_tests.rs`, `mixins/pressed_mixin_tests.rs`, `native_menu_tests.rs`, `navigation_tests.rs`, `notifications/notifications_tests.rs`, `notifications/reversible_stack_panel_tests.rs`, `numeric_up_down/numeric_up_down_tests.rs`, `page/carousel_page_tests.rs`, `page/content_page_tests.rs`, `page/navigation_event_args_tests.rs`, `page/navigation_page_tests.rs`, `page/page_navigation_host_tests.rs`, `page/tabbed_page_tests.rs`, `panel_tests.rs`, `platform/default_menu_interaction_handler_tests.rs`, `platform/i_screen_impl_tests.rs`, `platform/input_pane_tests.rs`, `platform/platform_manager_tests.rs`, `platform_feedback_items_tests.rs`, `presentation_source/presentation_source_tests.rs`, `presenters/content_presenter_tests.rs`, `presenters/content_presenter_text_tests.rs`, `presenters/items_presenter_tests.rs`, `presenters/scroll_content_presenter_tests.rs`, `presenters/text_presenter_tests.rs`, `primitives/access_text_tests.rs`, `primitives/adorner_layer_composition_tests.rs`, `primitives/headered_content_control_tests.rs`, `primitives/headered_items_control_tests.rs`, `primitives/popup_positioning/managed_popup_positioner_tests.rs`, `primitives/popup_root_tests.rs`, `primitives/popup_tests.rs`, `primitives/range_base_tests.rs`, `primitives/scroll_bar_tests.rs`, `primitives/selecting_items_control_tests.rs`, `primitives/tab_strip_tests.rs`, `primitives/templated_control_tests.rs`, `primitives/templated_control_text_tests.rs`, `primitives/thumb_tests.rs`, `primitives/toggle_button_tests.rs`, `primitives/track_tests.rs`, `primitives/uniform_grid_tests.rs`, `primitives/visual_layer_manager_tests.rs`, `progress_bar_tests.rs`, `radio_button_tests.rs`, `reference_semantics_tests.rs`, `relative_panel_tests.rs`, `scroll_viewer_tests.rs`, `selectable_text_block_tests.rs`, `selection/internal_selection_model_tests.rs`, `shapes/ellipse_tests.rs`, `shapes/path_tests.rs`, `shapes/polygon_tests.rs`, `shapes/polyline_tests.rs`, `shapes/rectangle_tests.rs`, `shapes/shape_tests.rs`, `slider_tests.rs`, `split_button/split_button_tests.rs`, `split_view/split_view_tests.rs`, `stack_panel_tests.rs`, `storage_misc_tests.rs`, `tab_control_tests.rs`, `templates/templates_tests.rs`, `text_block_tests.rs`, `text_box_tests.rs`, `theme_variant_tests.rs`, `tick_bar_tests.rs`, `toggle_switch_tests.rs`, `tool_tip_tests.rs`, `top_level_tests.rs`, `transitioning_content_control_tests.rs`, `tray_icon_tests.rs`, `tree_view_bring_into_view_tests.rs`, `tree_view_tests.rs`, `user_control_tests.rs`, `utils/collection_changed_event_manager_tests.rs`, `viewbox_tests.rs`, `virtualizing_carousel_panel_tests.rs`, `virtualizing_stack_panel_tests.rs`, `window_base_tests.rs`, `window_decorations_tests.rs`, `window_tests.rs`, `wrap_panel_tests.rs`.
+Tests, examples and build scripts (not scanned): `app_builder_tests.rs`, `application_lifetimes/classic_desktop_style_application_lifetime_tests.rs`, `application_tests.rs`, `auto_complete_box/auto_complete_box_tests.rs`, `automation/automation_properties_tests.rs`, `automation/peers/calendar_day_button_automation_peer_tests.rs`, `automation/peers/combo_box_automation_peer_tests.rs`, `automation/peers/complex_control_automation_peer_tests.rs`, `automation/peers/control_automation_peer_tests.rs`, `automation/peers/embeddable_control_root_automation_peer_tests.rs`, `automation/peers/foundation_automation_peer_tests.rs`, `automation/peers/items_automation_peer_tests.rs`, `automation/peers/menu_item_automation_peer_tests.rs`, `automation/peers/native_menu_bar_automation_peer_tests.rs`, `automation/peers/page_automation_peer_tests.rs`, `automation/peers/split_button_automation_peer_tests.rs`, `automation/peers/window_automation_peer_tests.rs`, `border_tests.rs`, `bring_into_view_tests.rs`, `button_flyout_tests.rs`, `button_tests.rs`, `button_text_tests.rs`, `calendar/calendar_tests.rs`, `calendar_date_picker/calendar_date_picker_tests.rs`, `canvas_tests.rs`, `carousel_tests.rs`, `combo_box_tests.rs`, `command_bar/command_bar_tests.rs`, `content_control_tests.rs`, `context_menu_tests.rs`, `control_focus_adorner_tests.rs`, `converters/converters_tests.rs`, `data_validation_errors_tests.rs`, `date_time_pickers/date_picker_tests.rs`, `date_time_pickers/time_picker_tests.rs`, `decorator_tests.rs`, `deferred_text_tests.rs`, `design_tests.rs`, `dock_panel_tests.rs`, `documents/inline_tests.rs`, `element_ref_tests.rs`, `expander_tests.rs`, `experimental_acrylic_border_tests.rs`, `flex_panel/flex_basis_tests.rs`, `flex_panel/flex_panel_tests.rs`, `flyouts/flyout_tests.rs`, `grid_length_tests.rs`, `grid_splitter_tests.rs`, `grid_tests.rs`, `hotkey_manager_tests.rs`, `image_tests.rs`, `items_control_tests.rs`, `items_source_view_tests.rs`, `label_tests.rs`, `label_text_tests.rs`, `layout_transform_control_tests.rs`, `list_box_tests.rs`, `list_box_virtualization_issue_tests.rs`, `loaded_tests.rs`, `markup_types/markup_types_tests.rs`, `masked_text_box_tests.rs`, `menu_item_tests.rs`, `mixins/pressed_mixin_tests.rs`, `native_menu_tests.rs`, `navigation_tests.rs`, `notifications/notifications_tests.rs`, `notifications/reversible_stack_panel_tests.rs`, `numeric_up_down/numeric_up_down_tests.rs`, `page/carousel_page_tests.rs`, `page/content_page_tests.rs`, `page/navigation_event_args_tests.rs`, `page/navigation_page_tests.rs`, `page/page_navigation_host_tests.rs`, `page/tabbed_page_tests.rs`, `panel_tests.rs`, `platform/default_menu_interaction_handler_tests.rs`, `platform/i_screen_impl_tests.rs`, `platform/input_pane_tests.rs`, `platform/platform_manager_tests.rs`, `platform_feedback_items_tests.rs`, `presentation_source/presentation_source_tests.rs`, `presenters/content_presenter_tests.rs`, `presenters/content_presenter_text_tests.rs`, `presenters/items_presenter_tests.rs`, `presenters/scroll_content_presenter_tests.rs`, `presenters/text_presenter_tests.rs`, `primitives/access_text_tests.rs`, `primitives/adorner_layer_composition_tests.rs`, `primitives/headered_content_control_tests.rs`, `primitives/headered_items_control_tests.rs`, `primitives/popup_positioning/managed_popup_positioner_tests.rs`, `primitives/popup_root_tests.rs`, `primitives/popup_tests.rs`, `primitives/range_base_tests.rs`, `primitives/scroll_bar_tests.rs`, `primitives/selecting_items_control_tests.rs`, `primitives/tab_strip_tests.rs`, `primitives/templated_control_tests.rs`, `primitives/templated_control_text_tests.rs`, `primitives/thumb_tests.rs`, `primitives/toggle_button_tests.rs`, `primitives/track_tests.rs`, `primitives/uniform_grid_tests.rs`, `primitives/visual_layer_manager_tests.rs`, `progress_bar_tests.rs`, `radio_button_tests.rs`, `reference_semantics_tests.rs`, `relative_panel_tests.rs`, `scroll_viewer_tests.rs`, `selectable_text_block_tests.rs`, `selection/internal_selection_model_tests.rs`, `shapes/ellipse_tests.rs`, `shapes/path_tests.rs`, `shapes/polygon_tests.rs`, `shapes/polyline_tests.rs`, `shapes/rectangle_tests.rs`, `shapes/shape_tests.rs`, `slider_tests.rs`, `split_button/split_button_tests.rs`, `split_view/split_view_tests.rs`, `stack_panel_tests.rs`, `storage_misc_tests.rs`, `tab_control_tests.rs`, `templates/templates_tests.rs`, `text_block_tests.rs`, `text_box_tests.rs`, `theme_variant_tests.rs`, `tick_bar_tests.rs`, `toggle_switch_tests.rs`, `tool_tip_tests.rs`, `top_level_tests.rs`, `transitioning_content_control_tests.rs`, `tray_icon_tests.rs`, `tree_view_bring_into_view_tests.rs`, `tree_view_tests.rs`, `user_control_tests.rs`, `utils/collection_changed_event_manager_tests.rs`, `viewbox_tests.rs`, `virtualizing_carousel_panel_tests.rs`, `virtualizing_stack_panel_tests.rs`, `window_base_tests.rs`, `window_decorations_tests.rs`, `window_tests.rs`, `wrap_panel_tests.rs`.

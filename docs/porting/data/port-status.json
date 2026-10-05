@@ -3887,6 +3887,7 @@
     "utilities/read_only_memory.rs",
     "utilities/ref_countable.rs",
     "utilities/test_culture_data_provider.rs",
+    "utilities/text_info.rs",
     "utilities/time_zone_info.rs",
     "utilities/uri.rs"
    ]
@@ -3936,17 +3937,17 @@
    "scope": "in",
    "detail": "full",
    "files": [
-    493,
+    500,
     538,
     0
    ],
    "types": [
-    563,
+    570,
     628,
     0
    ],
    "members": [
-    5642,
+    5701,
     6405,
     1
    ],
@@ -3967,7 +3968,7 @@
     "const": 31,
     "derive": 2,
     "field": 29,
-    "fn": 5062,
+    "fn": 5121,
     "free item": 4,
     "overload fn": 75,
     "trait": 37,
@@ -4085,6 +4086,18 @@
     "Automation/Peers/ButtonAutomationPeer.cs": [
      "automation/peers/button_automation_peer.rs"
     ],
+    "Automation/Peers/CalendarAutomationPeer.cs": [
+     "automation/peers/calendar_automation_peer.rs"
+    ],
+    "Automation/Peers/CalendarDatePickerAutomationPeer.cs": [
+     "automation/peers/calendar_date_picker_automation_peer.rs"
+    ],
+    "Automation/Peers/CalendarDayButtonAutomationPeer.cs": [
+     "automation/peers/calendar_day_button_automation_peer.rs"
+    ],
+    "Automation/Peers/CarouselPageAutomationPeer.cs": [
+     "automation/peers/carousel_page_automation_peer.rs"
+    ],
     "Automation/Peers/ComboBoxAutomationPeer.cs": [
      "automation/peers/combo_box_automation_peer.rs"
     ],
@@ -4096,6 +4109,9 @@
     ],
     "Automation/Peers/ControlAutomationPeer.cs": [
      "automation/peers/control_automation_peer.rs"
+    ],
+    "Automation/Peers/DatePickerAutomationPeer.cs": [
+     "automation/peers/date_picker_automation_peer.rs"
     ],
     "Automation/Peers/EmbeddableControlRootAutomationPeer.cs": [
      "automation/peers/embeddable_control_root_automation_peer.rs"
@@ -4169,6 +4185,9 @@
     "Automation/Peers/SplitButtonAutomationPeer.cs": [
      "automation/peers/split_button_automation_peer.rs"
     ],
+    "Automation/Peers/TabbedPageAutomationPeer.cs": [
+     "automation/peers/tabbed_page_automation_peer.rs"
+    ],
     "Automation/Peers/TextBlockAutomationPeer.cs": [
      "automation/peers/text_block_automation_peer.rs"
     ],
@@ -4177,6 +4196,9 @@
     ],
     "Automation/Peers/ThumbAutomationPeer.cs": [
      "automation/peers/thumb_automation_peer.rs"
+    ],
+    "Automation/Peers/TimePickerAutomationPeer.cs": [
+     "automation/peers/time_picker_automation_peer.rs"
     ],
     "Automation/Peers/ToggleButtonAutomationPeer.cs": [
      "automation/peers/toggle_button_automation_peer.rs"

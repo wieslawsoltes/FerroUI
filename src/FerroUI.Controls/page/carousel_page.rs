@@ -2,6 +2,7 @@ use super::selecting_multi_page::same_page;
 use super::{
     MultiPage, MultiPageImpl, NavigationType, Page, PageImpl, PageList, SelectingMultiPage, SelectingMultiPageImpl,
 };
+use crate::automation::AutomationProperties;
 use crate::presenters::ContentPresenter;
 use crate::primitives::{SelectingItemsControl, TemplateAppliedEventArgs, TemplatedControlImpl, TemplatedControlImplExt};
 use crate::templates::{FuncTemplate, IDataTemplate, ITemplateOf};
@@ -10,6 +11,7 @@ use crate::{
     VirtualizingCarouselPanel,
 };
 use ferroui_base::animation::IPageTransition;
+use ferroui_base::data::core::ValueTypes;
 use ferroui_base::input::{
     InputElement, InputElementImpl, InputElementImplExt, Key, KeyEventArgs, PointerWheelEventArgs,
 };
@@ -53,7 +55,7 @@ ferro_class_info!(CarouselPage {
     },
 });
 
-ferro_impl_classes!(CarouselPage: LayoutableImpl, InteractiveImpl, ControlImpl, PageImpl);
+ferro_impl_classes!(CarouselPage: LayoutableImpl, InteractiveImpl, PageImpl);
 
 impl FerroObjectImpl for CarouselPage {
     fn constructed(this: &Self) {
@@ -258,7 +260,11 @@ impl SelectingMultiPageImpl for CarouselPage {
     }
 }
 
-// AUTOMATION-SEAM: OnCreateAutomationPeer -> CarouselPageAutomationPeer (automation pass)
+impl ControlImpl for CarouselPage {
+    fn on_create_automation_peer(this: &Self) -> Ref<crate::automation::peers::AutomationPeer> {
+        crate::automation::peers::CarouselPageAutomationPeer::new(this).upcast()
+    }
+}
 
 ferro_properties! {
     impl CarouselPage {
@@ -423,10 +429,21 @@ impl CarouselPage {
         }
     }
 
-    // AUTOMATION-SEAM: `UpdateAccessibilityName(int index, int pageCount, Page? page)` sets the automation
-    // name of the page to "Page {index + 1} of {pageCount}" (empty without pages), followed by ": {header}"
-    // when the page has a header (or to the header alone when there is no position). It is called at the two
-    // places marked in `update_selection` (automation pass).
+    fn update_accessibility_name(&self, index: i32, page_count: i32, page: Option<&Ref<Page>>) {
+        let header =
+            page.and_then(|page| page.header()).map(|header| ValueTypes::to_display_string(Some(&header)));
+        let position = if page_count > 0 { format!("Page {} of {}", index + 1, page_count) } else { String::new() };
+        let name = match header {
+            None => position,
+            Some(header) if header.is_empty() => position,
+            Some(header) if position.is_empty() => header,
+            Some(header) => format!("{position}: {header}"),
+        };
+        // CarouselPageAutomationPeer::get_name_core reads this via the base implementation, which returns
+        // the automation name when set. Position and header are encoded here rather than in the
+        // peer so that the name stays current without requiring the peer to re-query the carousel state.
+        AutomationProperties::set_name(self, Some(&name));
+    }
 
     fn is_right_to_left(&self) -> bool {
         self.flow_direction() == FlowDirection::RightToLeft
@@ -459,15 +476,16 @@ impl CarouselPage {
 
     fn update_selection(&self, index: i32, navigation_type: NavigationType) {
         let page = self.resolve_displayed_page_at_index(index);
+        let page_count = self.get_page_count();
 
         if page.is_none() && self.items_source().is_some() {
             self.store_selected_index(index);
-            // AUTOMATION-SEAM: UpdateAccessibilityName(index, pageCount, null)
+            self.update_accessibility_name(index, page_count, None);
             return;
         }
 
-        self.commit_selection(index, page, navigation_type);
-        // AUTOMATION-SEAM: UpdateAccessibilityName(index, pageCount, page)
+        self.commit_selection(index, page.clone(), navigation_type);
+        self.update_accessibility_name(index, page_count, page.as_ref());
     }
 
     fn resolve_displayed_page_at_index(&self, index: i32) -> Option<Ref<Page>> {

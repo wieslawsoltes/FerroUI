@@ -258,7 +258,7 @@ ferro_class_info!(Calendar {
     },
 });
 
-ferro_impl_classes!(Calendar: StyledElementImpl, VisualImpl, LayoutableImpl, InteractiveImpl, ControlImpl);
+ferro_impl_classes!(Calendar: StyledElementImpl, VisualImpl, LayoutableImpl, InteractiveImpl);
 
 impl FerroObjectImpl for Calendar {
     /// Initializes a new instance of the [`Calendar`] class.
@@ -372,8 +372,12 @@ impl TemplatedControlImpl for Calendar {
             }
         }
     }
+}
 
-    // AUTOMATION-SEAM: OnCreateAutomationPeer -> CalendarAutomationPeer (automation pass)
+impl ControlImpl for Calendar {
+    fn on_create_automation_peer(this: &Self) -> Ref<crate::automation::peers::AutomationPeer> {
+        crate::automation::peers::CalendarAutomationPeer::new(this).upcast()
+    }
 }
 
 ferro_properties! {

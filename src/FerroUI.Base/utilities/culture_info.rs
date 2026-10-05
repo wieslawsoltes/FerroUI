@@ -205,6 +205,14 @@ impl CultureInfo {
     pub fn calendar(&self) -> GregorianCalendar {
         GregorianCalendar
     }
+
+    /// The text conventions of the culture (C# `TextInfo`): the data the
+    /// registered [`ICultureDataProvider`](super::ICultureDataProvider) has
+    /// for the culture or the nearest of its parents, else the invariant
+    /// conventions.
+    pub fn text_info(&self) -> Rc<super::TextInfo> {
+        super::TextInfo::for_culture(self)
+    }
 }
 
 impl CultureInfo {

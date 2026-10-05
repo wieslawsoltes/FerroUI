@@ -7,7 +7,7 @@
 //! for, a culture uses the data of its parent and finally of the invariant
 //! culture.
 
-use super::{CultureInfo, DateTimeFormatInfo, NumberFormatInfo};
+use super::{CultureInfo, DateTimeFormatInfo, NumberFormatInfo, TextInfo};
 use crate::{FerroLocator, LocatorExtensions};
 use std::rc::Rc;
 
@@ -45,6 +45,15 @@ pub trait ICultureDataProvider: 'static {
     /// it (the parent culture is asked next, and the built-in invariant
     /// rules are used last).
     fn get_compare_rules(&self, culture_name: &str) -> Option<Rc<dyn super::ICompareRules>> {
+        let _ = culture_name;
+        None
+    }
+
+    // text conventions: added with the automation peer of the calendar (see `text_info.rs`)
+    /// The text conventions (the list separator) of the culture named
+    /// exactly `culture_name`, or `None` when the provider has no data for
+    /// it (the parent culture is asked next).
+    fn get_text_info(&self, culture_name: &str) -> Option<Rc<TextInfo>> {
         let _ = culture_name;
         None
     }

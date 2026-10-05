@@ -138,7 +138,7 @@ impl CalendarButton {
     }
 
     /// Gets the Calendar associated with this button.
-    #[allow(dead_code)] // AUTOMATION-SEAM: read by the automation peers of the calendar (automation pass)
+    #[allow(dead_code)] // the reference declares the getter and reads it nowhere
     pub(crate) fn owner(&self) -> Option<Ref<Calendar>> {
         self.owner.borrow().as_ref().and_then(WeakRef::upgrade)
     }

@@ -19,6 +19,7 @@ pub use calendar_button::CalendarButton;
 pub use calendar_date_range::CalendarDateRange;
 pub use calendar_day_button::CalendarDayButton;
 pub(crate) use calendar_extensions::CalendarExtensions;
+pub(crate) use calendar_item::date_of;
 pub use calendar_item::CalendarItem;
 pub(crate) use date_time_helper::DateTimeHelper;
 pub use selected_dates_collection::SelectedDatesCollection;

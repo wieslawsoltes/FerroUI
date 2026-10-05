@@ -72,6 +72,7 @@ mod gregorian_calendar;
 mod i_culture_data_provider;
 #[cfg(any(test, feature = "testing"))]
 mod test_culture_data_provider;
+mod text_info;
 mod time_zone_info;
 
 #[cfg(test)]
@@ -91,6 +92,7 @@ pub use gregorian_calendar::{GregorianCalendar, IsoWeek};
 pub use i_culture_data_provider::ICultureDataProvider;
 #[cfg(any(test, feature = "testing"))]
 pub use test_culture_data_provider::TestCultureDataProvider;
+pub use text_info::TextInfo;
 pub use time_zone_info::{LocalUtcOffsetProvider, TimeZoneInfo};
 
 // --- numbers ---

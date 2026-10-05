@@ -3,6 +3,12 @@
 mod auto_complete_box_automation_peer;
 mod automation_peer;
 mod button_automation_peer;
+mod calendar_automation_peer;
+mod calendar_date_picker_automation_peer;
+mod calendar_day_button_automation_peer;
+#[cfg(test)]
+mod calendar_day_button_automation_peer_tests;
+mod carousel_page_automation_peer;
 mod combo_box_automation_peer;
 #[cfg(test)]
 mod combo_box_automation_peer_tests;
@@ -13,6 +19,7 @@ mod content_page_automation_peer;
 mod control_automation_peer;
 #[cfg(test)]
 mod control_automation_peer_tests;
+mod date_picker_automation_peer;
 mod embeddable_control_root_automation_peer;
 #[cfg(test)]
 mod embeddable_control_root_automation_peer_tests;
@@ -51,9 +58,11 @@ mod slider_automation_peer;
 mod split_button_automation_peer;
 #[cfg(test)]
 mod split_button_automation_peer_tests;
+mod tabbed_page_automation_peer;
 mod text_block_automation_peer;
 mod text_box_automation_peer;
 mod thumb_automation_peer;
+mod time_picker_automation_peer;
 mod toggle_button_automation_peer;
 mod toggle_split_button_automation_peer;
 mod tool_tip_automation_peer;
@@ -72,12 +81,17 @@ pub use automation_peer::{
     AutomationPeerVTable,
 };
 pub use button_automation_peer::ButtonAutomationPeer;
+pub use calendar_automation_peer::CalendarAutomationPeer;
+pub use calendar_date_picker_automation_peer::CalendarDatePickerAutomationPeer;
+pub use calendar_day_button_automation_peer::CalendarDayButtonAutomationPeer;
+pub use carousel_page_automation_peer::CarouselPageAutomationPeer;
 pub use combo_box_automation_peer::ComboBoxAutomationPeer;
 pub use content_control_automation_peer::ContentControlAutomationPeer;
 pub use content_page_automation_peer::ContentPageAutomationPeer;
 pub use control_automation_peer::{
     ControlAutomationPeer, ControlAutomationPeerImpl, ControlAutomationPeerImplExt, ControlAutomationPeerVTable,
 };
+pub use date_picker_automation_peer::DatePickerAutomationPeer;
 pub use embeddable_control_root_automation_peer::EmbeddableControlRootAutomationPeer;
 pub use expander_automation_peer::ExpanderAutomationPeer;
 pub use image_automation_peer::ImageAutomationPeer;
@@ -114,11 +128,13 @@ pub use selecting_items_control_automation_peer::{
 };
 pub use slider_automation_peer::SliderAutomationPeer;
 pub use split_button_automation_peer::SplitButtonAutomationPeer;
+pub use tabbed_page_automation_peer::TabbedPageAutomationPeer;
 pub use text_block_automation_peer::TextBlockAutomationPeer;
 pub use text_box_automation_peer::{
     TextBoxAutomationPeer, TextBoxAutomationPeerImpl, TextBoxAutomationPeerImplExt, TextBoxAutomationPeerVTable,
 };
 pub use thumb_automation_peer::ThumbAutomationPeer;
+pub use time_picker_automation_peer::TimePickerAutomationPeer;
 pub use toggle_button_automation_peer::ToggleButtonAutomationPeer;
 pub use toggle_split_button_automation_peer::ToggleSplitButtonAutomationPeer;
 pub use tool_tip_automation_peer::ToolTipAutomationPeer;

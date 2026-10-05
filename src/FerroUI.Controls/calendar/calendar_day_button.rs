@@ -60,7 +60,6 @@ ferro_impl_classes!(
     VisualImpl,
     LayoutableImpl,
     InteractiveImpl,
-    ControlImpl,
     ContentControlImpl,
     ButtonImpl
 );
@@ -118,8 +117,12 @@ impl TemplatedControlImpl for CalendarDayButton {
     fn on_apply_template(this: &Self, _e: &TemplateAppliedEventArgs) {
         this.set_pseudo_classes();
     }
+}
 
-    // AUTOMATION-SEAM: OnCreateAutomationPeer -> CalendarDayButtonAutomationPeer (automation pass)
+impl ControlImpl for CalendarDayButton {
+    fn on_create_automation_peer(this: &Self) -> Ref<crate::automation::peers::AutomationPeer> {
+        crate::automation::peers::CalendarDayButtonAutomationPeer::new(this).upcast()
+    }
 }
 
 impl CalendarDayButton {
@@ -146,7 +149,6 @@ impl CalendarDayButton {
     }
 
     /// Gets the Calendar associated with this button.
-    #[allow(dead_code)] // AUTOMATION-SEAM: read by the automation peers of the calendar (automation pass)
     pub(crate) fn owner(&self) -> Option<Ref<Calendar>> {
         self.owner.borrow().as_ref().and_then(WeakRef::upgrade)
     }

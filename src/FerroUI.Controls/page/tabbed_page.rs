@@ -83,7 +83,7 @@ ferro_class_info!(TabbedPage {
     },
 });
 
-ferro_impl_classes!(TabbedPage: LayoutableImpl, InteractiveImpl, ControlImpl);
+ferro_impl_classes!(TabbedPage: LayoutableImpl, InteractiveImpl);
 
 impl FerroObjectImpl for TabbedPage {
     fn constructed(this: &Self) {
@@ -345,7 +345,11 @@ impl SelectingMultiPageImpl for TabbedPage {
     }
 }
 
-// AUTOMATION-SEAM: OnCreateAutomationPeer -> TabbedPageAutomationPeer (automation pass)
+impl ControlImpl for TabbedPage {
+    fn on_create_automation_peer(this: &Self) -> Ref<crate::automation::peers::AutomationPeer> {
+        crate::automation::peers::TabbedPageAutomationPeer::new(this).upcast()
+    }
+}
 
 ferro_properties! {
     impl TabbedPage {
