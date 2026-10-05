@@ -6,59 +6,15 @@ use crate::pages::navigation_demo_helper::{boxed_text, parse_color, value_text, 
 use ferroui_base::interactivity::{IRoutedEventArgs, Interactive, RoutedEventArgs};
 use ferroui_base::layout::{Orientation, VerticalAlignment};
 use ferroui_base::media::{Color, FontFamily, SolidColorBrush, TextWrapping};
-use ferroui_base::threading::{DispatcherPriority, DispatcherTimer};
 use ferroui_base::{ferro_class_info, instantiate, BoxedValue, Ref};
 use ferroui_controls::{
     CheckBox, ContentPage, Control, NavigationPage, NavigationType, Page, RadioButton, StackPanel, TextBlock, TextBox,
     UserControl,
 };
-use std::cell::{Cell, RefCell};
-use std::future::Future;
-use std::pin::Pin;
+use mini_mvvm::delay;
+use std::cell::Cell;
 use std::rc::Rc;
-use std::task::{Context, Poll, Waker};
 use std::time::Duration;
-
-/// The state of a [`Delay`]: whether its time has passed, and who waits.
-#[derive(Default)]
-struct DelayState {
-    elapsed: Cell<bool>,
-    waker: RefCell<Option<Waker>>,
-}
-
-/// `Task.Delay(duration)`: completes when a dispatcher timer of `duration`
-/// has ticked.
-struct Delay(Rc<DelayState>);
-
-impl Future for Delay {
-    type Output = ();
-
-    fn poll(self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<()> {
-        if self.0.elapsed.get() {
-            Poll::Ready(())
-        } else {
-            *self.0.waker.borrow_mut() = Some(cx.waker().clone());
-            Poll::Pending
-        }
-    }
-}
-
-fn delay(duration: Duration) -> Delay {
-    let state = Rc::new(DelayState::default());
-    let timer_state = state.clone();
-    DispatcherTimer::run_once(
-        move || {
-            timer_state.elapsed.set(true);
-            let waker = timer_state.waker.borrow_mut().take();
-            if let Some(waker) = waker {
-                waker.wake();
-            }
-        },
-        duration,
-        DispatcherPriority::DEFAULT,
-    );
-    Delay(state)
-}
 
 /// `$"{page?.Header}"`: the text of the header of a page, empty without a header.
 fn header_text(page: &Page) -> String {
