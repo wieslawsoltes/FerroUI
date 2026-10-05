@@ -7,41 +7,54 @@ Generated from upstream commit `17350180c33b063f0e98abbfd19aa3cae63f5d56`. Back 
 | | |
 |---|---|
 | Upstream | `src/Avalonia.Dialogs` |
-| FerroUI | `src/FerroUI.Dialogs` (not created yet) |
+| FerroUI | `src/FerroUI.Dialogs` (exists) |
 | Crate | `ferroui-dialogs` |
 | Phase / priority | 3 - extras / P3 |
-| Files | 0/17 (0.0%) |
-| Types | 0/18 (0.0%) |
-| Members | 0/94 (0.0%) |
+| Files | 17/17 (100.0%) |
+| Types | 18/18 (100.0%) |
+| Members | 94/94 (100.0%) |
 | Contracts (interfaces) | 0/0 |
-| Property registrations | 0/1 |
+| Property registrations | 1/1 |
 | Routed events | 0/0 |
 
 ## Files
 
-### `(project root)` - files 0/6, types 0/7, members 0/26
+### `(project root)` - files 6/6, types 7/7, members 26/26
 
 | Upstream file | Rust file | Status | Types | Members | Notes |
 |---|---|---|---|---|---|
-| `AboutAvaloniaDialog.xaml.cs` | `about_ferro_dialog_xaml.rs` | missing | 0/1 | 0/4 |  |
-| `ManagedFileChooser.cs` | `managed_file_chooser.rs` | missing | 0/1 | 0/3 |  |
-| `ManagedFileChooserOverwritePrompt.cs` | `managed_file_chooser_overwrite_prompt.rs` | missing | 0/1 | 0/5 |  |
-| `ManagedFileDialogExtensions.cs` | `managed_file_dialog_extensions.rs` | missing | 0/2 | 0/4 |  |
-| `ManagedFileDialogOptions.cs` | `managed_file_dialog_options.rs` | missing | 0/1 | 0/3 |  |
-| `ManagedStorageProvider.cs` | `managed_storage_provider.rs` | missing | 0/1 | 0/7 |  |
+| `AboutAvaloniaDialog.xaml.cs` | `about_ferro_dialog_xaml.rs` | present | 1/1 | 4/4 |  |
+| `ManagedFileChooser.cs` | `managed_file_chooser.rs` | present | 1/1 | 3/3 |  |
+| `ManagedFileChooserOverwritePrompt.cs` | `managed_file_chooser_overwrite_prompt.rs` | present | 1/1 | 5/5 |  |
+| `ManagedFileDialogExtensions.cs` | `managed_file_dialog_extensions.rs` | present | 2/2 | 4/4 |  |
+| `ManagedFileDialogOptions.cs` | `managed_file_dialog_options.rs` | present | 1/1 | 3/3 |  |
+| `ManagedStorageProvider.cs` | `managed_storage_provider.rs` | present | 1/1 | 7/7 |  |
 
-### `Internal` - files 0/11, types 0/11, members 0/68
+### `Internal` - files 11/11, types 11/11, members 68/68
 
 | Upstream file | Rust file | Status | Types | Members | Notes |
 |---|---|---|---|---|---|
-| `AvaloniaDialogsInternalViewModelBase.cs` | `internal/ferro_dialogs_internal_view_model_base.rs` | missing | 0/1 | 0/3 |  |
-| `BclMountedVolumeInfoProvider.cs` | `internal/bcl_mounted_volume_info_provider.rs` | missing | 0/1 | 0/1 |  |
-| `ChildFitter.cs` | `internal/child_fitter.rs` | missing | 0/1 | 0/2 |  |
-| `FileSizeStringConverter.cs` | `internal/file_size_string_converter.rs` | missing | 0/1 | 0/2 |  |
-| `ManagedFileChooserFilterViewModel.cs` | `internal/managed_file_chooser_filter_view_model.rs` | missing | 0/1 | 0/6 |  |
-| `ManagedFileChooserItemType.cs` | `internal/managed_file_chooser_item_type.rs` | missing | 0/1 | 0/3 |  |
-| `ManagedFileChooserItemViewModel.cs` | `internal/managed_file_chooser_item_view_model.rs` | missing | 0/1 | 0/9 |  |
-| `ManagedFileChooserNavigationItem.cs` | `internal/managed_file_chooser_navigation_item.rs` | missing | 0/1 | 0/3 |  |
-| `ManagedFileChooserSources.cs` | `internal/managed_file_chooser_sources.rs` | missing | 0/1 | 0/8 |  |
-| `ManagedFileChooserViewModel.cs` | `internal/managed_file_chooser_view_model.rs` | missing | 0/1 | 0/29 |  |
-| `ResourceSelectorConverter.cs` | `internal/resource_selector_converter.rs` | missing | 0/1 | 0/2 |  |
+| `AvaloniaDialogsInternalViewModelBase.cs` | `internal/ferro_dialogs_internal_view_model_base.rs` | present | 1/1 | 3/3 |  |
+| `BclMountedVolumeInfoProvider.cs` | `internal/bcl_mounted_volume_info_provider.rs` | present | 1/1 | 1/1 |  |
+| `ChildFitter.cs` | `internal/child_fitter.rs` | present | 1/1 | 2/2 |  |
+| `FileSizeStringConverter.cs` | `internal/file_size_string_converter.rs` | present | 1/1 | 2/2 |  |
+| `ManagedFileChooserFilterViewModel.cs` | `internal/managed_file_chooser_filter_view_model.rs` | present | 1/1 | 6/6 |  |
+| `ManagedFileChooserItemType.cs` | `internal/managed_file_chooser_item_type.rs` | present | 1/1 | 3/3 |  |
+| `ManagedFileChooserItemViewModel.cs` | `internal/managed_file_chooser_item_view_model.rs` | present | 1/1 | 9/9 |  |
+| `ManagedFileChooserNavigationItem.cs` | `internal/managed_file_chooser_navigation_item.rs` | present | 1/1 | 3/3 |  |
+| `ManagedFileChooserSources.cs` | `internal/managed_file_chooser_sources.rs` | present | 1/1 | 8/8 |  |
+| `ManagedFileChooserViewModel.cs` | `internal/managed_file_chooser_view_model.rs` | present | 1/1 | 29/29 |  |
+| `ResourceSelectorConverter.cs` | `internal/resource_selector_converter.rs` | present | 1/1 | 2/2 |  |
+
+## Rust-only files
+
+Rust sources of this crate that no upstream file maps to. Give each a reason in `docs/porting/data/path-overrides.toml` (`[[rust_only]]`), or map upstream files to it (`[[map]]`).
+
+| Rust file | Reason | Types defined |
+|---|---|---|
+| `assets.rs` | embeds the document of the about dialog and its font: the counterpart of the resource items of the upstream project file |  |
+| `markup.rs` | loads the document of the about dialog with the run-time loader until the XAML compiler generates InitializeComponent |  |
+| `register_types.rs` | the type table of the crate (porting guide, Classes): namespaces, classes, markup metadata, the document loader |  |
+| `task_completion_source.rs` | the TaskCompletionSource&lt;T&gt; of the base library the storage provider awaits windows, popups and flyouts with | `CompletionTask`, `State`, `TaskCompletionSource` |
+
+Tests, examples and build scripts (not scanned): `build.rs`, `tests/about_ferro_dialog_tests.rs`, `tests/managed_storage_provider_tests.rs`, `tests/mod.rs`, `tests/view_model_tests.rs`.

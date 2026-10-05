@@ -91,3 +91,9 @@ project = "Avalonia.Base"
 type = "Avalonia.PropertyStore.ValueStore"
 member = "AddBinding"
 rust = ["add_direct_binding"]
+
+[[alias]]
+project = "Avalonia.Dialogs"
+type = "Avalonia.Dialogs.Internal.ManagedFileChooserFilterViewModel"
+member = "Match"
+rust = ["is_match"]
