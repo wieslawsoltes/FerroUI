@@ -24,7 +24,10 @@ ferroui-markup-xaml = { workspace = true }
 # The document of the about dialog is loaded through the run-time XAML loader until the build-time
 # compiler exists; the dependency goes away with it (the library then only needs the runtime library).
 ferroui-markup-xaml-loader = { workspace = true, features = ["runtime"] }
-# The mounted volumes of the file system (the drive list of the .NET base library).
+
+[target.'cfg(not(target_arch = "wasm32"))'.dependencies]
+# The mounted volumes of the file system (the drive list of the .NET base library); the browser
+# has no mounted volumes.
 sysinfo = { workspace = true }
 
 [dev-dependencies]

@@ -101,7 +101,7 @@ impl ManagedFileChooserFilterViewModel {
     }
 
     /// The position of the file type in the list of the picker options.
-    pub(crate) fn index(&self) -> i32 {
+    pub fn index(&self) -> i32 {
         self.index
     }
 

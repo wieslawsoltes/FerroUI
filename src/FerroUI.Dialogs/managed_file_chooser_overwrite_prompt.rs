@@ -67,7 +67,7 @@ impl ManagedFileChooserOverwritePrompt {
     }
 
     /// Raised with the answer of the user: `true` to replace the file.
-    pub(crate) fn result(&self, handler: impl Fn(bool) + 'static) -> Rc<dyn IDisposable> {
+    pub fn result(&self, handler: impl Fn(bool) + 'static) -> Rc<dyn IDisposable> {
         let token = self.result.add(Rc::new(handler));
         let handlers = self.result.clone();
         Disposable::create(move || {
