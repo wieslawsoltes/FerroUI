@@ -9,6 +9,7 @@ import { WebRenderTarget } from "./ferroui/rendering/webRenderTarget";
 import { SoftwareRenderTarget } from "./ferroui/rendering/softwareRenderTarget";
 import { WebGlRenderTarget } from "./ferroui/rendering/webGlRenderTarget";
 import { FerroExports } from "./ferroui/ferroExports";
+import { CompletionHelper } from "./ferroui/completionHelper";
 
 export {
     Caniuse,
@@ -21,5 +22,6 @@ export {
     WebRenderTargetRegistry,
     SoftwareRenderTarget,
     WebGlRenderTarget,
-    FerroExports
+    FerroExports,
+    CompletionHelper
 };

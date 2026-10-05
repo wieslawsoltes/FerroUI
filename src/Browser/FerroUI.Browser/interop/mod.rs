@@ -8,6 +8,7 @@
 //! module and the render targets touches them except to pass them back.
 
 pub mod canvas_helper;
+pub mod completion_helper;
 pub mod dom_helper;
 pub mod ferro_module;
 pub mod input_helper;
