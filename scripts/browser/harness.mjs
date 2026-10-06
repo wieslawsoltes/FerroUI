@@ -52,6 +52,11 @@ export function serve(siteDirectory) {
     const server = http.createServer((request, response) => {
         let relative = decodeURIComponent(request.url.split("?")[0]);
         if (relative.endsWith("/")) { relative += "index.html"; }
+        // The browser asks for /favicon.ico on its own, at a moment of its choosing; a site
+        // without one answers "no content", so that the request is not a failed load in the log.
+        if (relative === "/favicon.ico" && !fs.existsSync(path.join(root, relative))) {
+            response.statusCode = 204; response.end(); return;
+        }
         const file = path.join(root, relative);
         if (!file.startsWith(root) || !fs.existsSync(file) || fs.statSync(file).isDirectory()) {
             response.statusCode = 404; response.end(); return;
