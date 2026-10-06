@@ -58,6 +58,14 @@ impl ValueStore {
         self.frames.borrow().clone()
     }
 
+    /// The frame at `index` (`_frames[i]`): the reevaluations read the frames
+    /// by index from the last, as the original, instead of copying the list
+    /// for every property they reevaluate. An index past the end panics, as
+    /// the original throws.
+    fn frame_at(&self, index: usize) -> Rc<dyn ValueFrame> {
+        self.frames.borrow()[index].clone()
+    }
+
     pub fn inheritance_ancestor(&self) -> Option<Ref<FerroObject>> {
         self.inheritance_ancestor.borrow().as_ref().and_then(WeakRef::upgrade)
     }
@@ -506,9 +514,9 @@ impl ValueStore {
                 return;
             }
         }
-        for child in owner.inheritance_children() {
-            child.values().on_inheritance_ancestor_changed(&child, ancestor);
-        }
+        owner.for_each_inheritance_child(|child| {
+            child.values().on_inheritance_ancestor_changed(child, ancestor);
+        });
     }
 
     pub fn on_inherited_effective_value_changed<T: PropertyValue>(
@@ -519,9 +527,9 @@ impl ValueStore {
         new_value: &T,
     ) {
         debug_assert!(property.inherits());
-        for child in owner.inheritance_children() {
-            child.values().on_ancestor_inherited_value_changed(&child, property, old_value, new_value);
-        }
+        owner.for_each_inheritance_child(|child| {
+            child.values().on_ancestor_inherited_value_changed(child, property, old_value, new_value);
+        });
     }
 
     pub fn on_inherited_effective_value_disposed<T: PropertyValue>(
@@ -572,9 +580,9 @@ impl ValueStore {
             notifying(owner, true);
         }
         owner.raise_property_changed(property, Some(old_value), new_value, BindingPriority::Inherited, true);
-        for child in owner.inheritance_children() {
-            child.values().on_ancestor_inherited_value_changed(&child, property, old_value, new_value);
-        }
+        owner.for_each_inheritance_child(|child| {
+            child.values().on_ancestor_inherited_value_changed(child, property, old_value, new_value);
+        });
         if let Some(notifying) = notifying {
             notifying(owner, false);
         }
@@ -744,9 +752,9 @@ impl ValueStore {
                 // Detach the self-marker first so the notification is not
                 // mistaken for "the owner is the ancestor".
                 *self.inheritance_ancestor.borrow_mut() = ancestor.as_ref().map(Ref::downgrade);
-                for child in owner.inheritance_children() {
-                    child.values().on_inheritance_ancestor_changed(&child, ancestor.as_ref());
-                }
+                owner.for_each_inheritance_child(|child| {
+                    child.values().on_inheritance_ancestor_changed(child, ancestor.as_ref());
+                });
             }
         }
         true
@@ -775,9 +783,9 @@ impl ValueStore {
         let raiser = old_value.or(new_value).expect("one of the values is set");
         raiser.raise_inherited_value_changed(owner, old_value, new_value);
 
-        for child in owner.inheritance_children() {
-            child.values().inherited_value_changed(&child, property, old_value, new_value);
-        }
+        owner.for_each_inheritance_child(|child| {
+            child.values().inherited_value_changed(child, property, old_value, new_value)
+        });
 
         if let Some(notifying) = notifying {
             notifying(owner, false);
@@ -810,8 +818,10 @@ impl ValueStore {
             }
 
             // Iterate the frames to get the effective value.
-            let frames = self.frames();
-            for frame in frames.iter().rev() {
+            let mut index = self.frames.borrow().len();
+            while index > 0 {
+                index -= 1;
+                let frame = self.frame_at(index);
                 let priority = frame.base().priority();
 
                 // Exit early if the current effective value has higher priority
@@ -898,8 +908,10 @@ impl ValueStore {
             }
 
             // Iterate the frames, setting and creating effective values.
-            let frames = self.frames();
-            for frame in frames.iter().rev() {
+            let mut index = self.frames.borrow().len();
+            while index > 0 {
+                index -= 1;
+                let frame = self.frame_at(index);
                 if !frame.is_active() {
                     continue;
                 }
