@@ -3,13 +3,19 @@ use super::{
     BringIntoViewRequest, EffectiveViewportChangedEventArgs, IBringIntoViewLayoutManager, ILayoutManager, ILayoutRoot,
     Layoutable,
 };
+use crate::animation::TimeSpan;
+use crate::logging::{LogArea, LogEventLevel, Logger};
 use crate::media::MediaContext;
+use crate::rendering::LayoutPassTiming;
+use crate::threading::Dispatcher;
 use crate::utilities::HandlerList;
 use crate::{Matrix, Rect, Ref, Size, Visual};
+use std::any::Any;
 use std::cell::{Cell, RefCell};
 use std::rc::{Rc, Weak};
+use std::time::Duration;
 
-const MAX_PASSES: u32 = 10;
+const MAX_PASSES: i32 = 10;
 
 struct EffectiveViewportChangedListener {
     listener: Ref<Layoutable>,
@@ -36,8 +42,9 @@ pub struct LayoutManager {
     queued: Cell<bool>,
     running: Cell<bool>,
     processing_bring_into_view_requests: Cell<bool>,
-    total_pass_count: Cell<u32>,
+    total_pass_count: Cell<i32>,
     layout_updated: HandlerList<dyn Fn()>,
+    layout_pass_timed: RefCell<Option<Rc<dyn Fn(LayoutPassTiming)>>>,
 }
 
 impl LayoutManager {
@@ -57,6 +64,7 @@ impl LayoutManager {
             processing_bring_into_view_requests: Cell::new(false),
             total_pass_count: Cell::new(0),
             layout_updated: HandlerList::new(),
+            layout_pass_timed: RefCell::new(None),
         })
     }
 
@@ -66,8 +74,19 @@ impl LayoutManager {
     }
 
     /// The number of layout passes executed so far.
-    pub fn total_pass_count(&self) -> u32 {
+    pub fn total_pass_count(&self) -> i32 {
         self.total_pass_count.get()
+    }
+
+    /// The callback that receives the timing of each layout pass (C#
+    /// `LayoutPassTimed`, internal), or `None`.
+    pub fn layout_pass_timed(&self) -> Option<Rc<dyn Fn(LayoutPassTiming)>> {
+        self.layout_pass_timed.borrow().clone()
+    }
+
+    /// Sets the callback that receives the timing of each layout pass.
+    pub fn set_layout_pass_timed(&self, value: Option<Rc<dyn Fn(LayoutPassTiming)>>) {
+        *self.layout_pass_timed.borrow_mut() = value;
     }
 
     /// The number of controls queued for measure. For tests.
@@ -94,6 +113,12 @@ impl LayoutManager {
             let root_visual = root.root_visual();
             std::ptr::eq(&*root_visual as *const Layoutable, control as *const Layoutable)
         })
+    }
+
+    /// C# `Stopwatch.GetTimestamp()`: the clock of the dispatcher of the
+    /// thread, in milliseconds.
+    fn get_timestamp() -> i64 {
+        Dispatcher::current_dispatcher().now()
     }
 
     fn execute_queued_layout_pass(&self) {
@@ -174,8 +199,9 @@ impl LayoutManager {
     }
 
     fn execute_measure_pass(&self) {
-        loop {
-            let Some(control) = self.to_measure.borrow_mut().dequeue() else { break };
+        while self.to_measure.borrow().count() > 0 {
+            let control = self.to_measure.borrow_mut().dequeue();
+
             if !control.is_measure_valid() {
                 Self::measure(&control);
             }
@@ -184,8 +210,9 @@ impl LayoutManager {
     }
 
     fn execute_arrange_pass(&self) {
-        loop {
-            let Some(control) = self.to_arrange.borrow_mut().dequeue() else { break };
+        while self.to_arrange.borrow().count() > 0 {
+            let control = self.to_arrange.borrow_mut().dequeue();
+
             if !control.is_arrange_valid() && Self::arrange(&control) == ArrangeResult::AncestorMeasureInvalid {
                 self.to_arrange_after_measure.borrow_mut().push(control);
             }
@@ -378,6 +405,23 @@ impl ILayoutManager for LayoutManager {
         }
 
         if !self.running.get() {
+            const TIMING_LOG_LEVEL: LogEventLevel = LogEventLevel::Information;
+            let capture_timing =
+                self.layout_pass_timed.borrow().is_some() || Logger::is_enabled(TIMING_LOG_LEVEL, LogArea::LAYOUT);
+            let mut starting_timestamp = 0;
+
+            if capture_timing {
+                if let Some(logger) = Logger::try_get(TIMING_LOG_LEVEL, LogArea::LAYOUT) {
+                    logger.log_with_values(
+                        Some(self as &dyn Any),
+                        "Started layout pass. To measure: {Measure} To arrange: {Arrange}",
+                        &[&self.to_measure.borrow().count(), &self.to_arrange.borrow().count()],
+                    );
+                }
+
+                starting_timestamp = Self::get_timestamp();
+            }
+
             self.to_measure.borrow_mut().begin_loop(MAX_PASSES);
             self.to_arrange.borrow_mut().begin_loop(MAX_PASSES);
 
@@ -405,6 +449,23 @@ impl ILayoutManager for LayoutManager {
 
             self.to_measure.borrow_mut().end_loop();
             self.to_arrange.borrow_mut().end_loop();
+
+            if capture_timing {
+                let elapsed =
+                    Duration::from_millis(Self::get_timestamp().saturating_sub(starting_timestamp).max(0) as u64);
+                let layout_pass_timed = self.layout_pass_timed.borrow().clone();
+                if let Some(layout_pass_timed) = layout_pass_timed {
+                    layout_pass_timed(LayoutPassTiming::new(self.total_pass_count.get(), elapsed));
+                }
+
+                if let Some(logger) = Logger::try_get(TIMING_LOG_LEVEL, LogArea::LAYOUT) {
+                    logger.log_with_values(
+                        Some(self as &dyn Any),
+                        "Layout pass finished in {Time}",
+                        &[&TimeSpan::from(elapsed)],
+                    );
+                }
+            }
         } else if self.processing_bring_into_view_requests.get() {
             // A layout pass forced while executing a bring-into-view request
             // is part of the enclosing pass: run inner passes inline, and let
@@ -466,8 +527,8 @@ impl ILayoutManager for LayoutManager {
 
     fn dispose(&self) {
         self.disposed.set(true);
-        self.to_measure.borrow_mut().clear();
-        self.to_arrange.borrow_mut().clear();
+        self.to_measure.borrow_mut().dispose();
+        self.to_arrange.borrow_mut().dispose();
         *self.bring_into_view_requests.borrow_mut() = None;
     }
 
