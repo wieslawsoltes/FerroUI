@@ -60,6 +60,41 @@ check("the pointer hovers and clicks a button", async (page) => {
     assert((await page.state()).button_over === "false", "the pointer left the button but it is still hovered");
 });
 
+// Rust panics unwind with the exceptions of the module (WebAssembly exception handling since Rust
+// 1.93): the `catch_unwind` of the dispatcher must catch them in the page as it does on the desktop.
+check("panics on the dispatcher are caught and passed on as on the desktop, and the view keeps working", async (page) => {
+    const panic = async (kind) => Object.fromEntries((await page.evaluate(`themedView.themedViewPanic("${kind}")`)).split(";").map((pair) => {
+        const i = pair.indexOf("="); return [pair.slice(0, i), pair.slice(i + 1)];
+    }));
+    const uncaught = () => page.errors.filter((line) => line.startsWith("[exception]"));
+
+    // `invoke_local`: the panic of the callback reaches the caller.
+    assert((await panic("invoke")).invoke === "an invoked callback panics", "the panic of an invoked callback did not reach its caller");
+
+    // A posted job: the dispatcher's handler sees the panic and handles it; the next job runs.
+    await panic("post");
+    await page.waitFor(`themedView.themedViewPanic("").includes("jobs_after=1")`, 10000);
+    let state = await panic("");
+    assert(state.handled === "a posted job panics (handled)", `the unhandled-exception handler saw: ${state.handled}`);
+    assert(uncaught().length === 0, `a handled panic reached the page:\n${uncaught().join("\n")}`);
+
+    // Left unhandled, the panic leaves the job loop for the page, as wasm-bindgen's `PanicError`.
+    await panic("unhandled");
+    const end = Date.now() + 10000;
+    while (uncaught().length === 0 && Date.now() < end) { await sleep(100); }
+    state = await panic("");
+    assert(state.handled === "a posted job panics (handled)|a posted job panics (unhandled)", `the unhandled-exception handler saw: ${state.handled}`);
+    assert(uncaught().length === 1 && uncaught()[0].includes("PanicError: a posted job panics (unhandled)"),
+        `expected one uncaught PanicError on the page, got:\n${uncaught().join("\n")}`);
+    // The jobs queued behind it wait for the next signal of the dispatcher (as before Rust 1.93).
+    await sleep(1000);
+    console.log(`      jobs run after the unhandled panic: ${(await panic("")).jobs_after - 1}`);
+
+    // The view still takes input.
+    await page.click(...BUTTON);
+    assert((await page.state()).clicks === "1", "the button did not take a click after the panics");
+});
+
 check("a click toggles the check box", async (page) => {
     assert((await page.state()).checked === "Some(true)", "the check box starts checked");
     await page.click(...CHECK_BOX);
