@@ -14,7 +14,7 @@ use ferroui_base::input::{
 use ferroui_base::interactivity::{IRoutedEventArgs, RoutedEventArgs, RoutedEventHandlerToken, RoutingStrategies};
 use ferroui_base::reactive::{IDisposable, ObservableExt};
 use ferroui_base::threading::{DispatcherPriority, DispatcherTimer};
-use ferroui_base::{ObjectType, Ref, StyledElement, Visual};
+use ferroui_base::{Ref, StyledElement, Visual};
 use std::cell::{Cell, RefCell};
 use std::rc::{Rc, Weak};
 use std::time::Duration;
@@ -434,7 +434,7 @@ impl DefaultMenuInteractionHandler {
                 let popup = e
                     .source()
                     .and_then(|source| source.cast::<StyledElement>())
-                    .and_then(|source| find_logical_ancestor_of_type::<Popup>(&source, false));
+                    .and_then(|source| source.find_logical_ancestor_of_type::<Popup>(false));
                 if item.is_top_level() && popup.is_none() {
                     self.close_menu(&item);
                 }
@@ -490,7 +490,7 @@ impl DefaultMenuInteractionHandler {
 
         if menu.is_open() {
             if let Some(control) = e.source().and_then(|source| source.cast::<StyledElement>()) {
-                if !is_logical_ancestor_of(&menu.element(), &control) {
+                if !menu.element().is_logical_ancestor_of(Some(&control)) {
                     menu.close();
                 }
             }
@@ -925,31 +925,3 @@ impl DefaultMenuInteractionHandler {
     }
 }
 
-/// Finds the first logical ancestor of `element` of type `T`, optionally
-/// starting at the element itself.
-pub(crate) fn find_logical_ancestor_of_type<T: ObjectType>(element: &Ref<StyledElement>, include_self: bool) -> Option<Ref<T>> {
-    let mut current = if include_self { Some(element.clone()) } else { element.parent() };
-
-    while let Some(logical) = current {
-        if let Some(result) = logical.clone().cast::<T>() {
-            return Some(result);
-        }
-        current = logical.parent();
-    }
-
-    None
-}
-
-/// Whether `logical` is a (strict) logical ancestor of `target`.
-pub(crate) fn is_logical_ancestor_of(logical: &StyledElement, target: &StyledElement) -> bool {
-    let mut current = target.parent();
-
-    while let Some(parent) = current {
-        if std::ptr::eq::<StyledElement>(&*parent, logical) {
-            return true;
-        }
-        current = parent.parent();
-    }
-
-    false
-}
