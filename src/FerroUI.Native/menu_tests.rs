@@ -507,12 +507,12 @@ fn the_application_menu_gets_the_default_and_the_standard_items() {
     assert_eq!(items[4].gesture.get(), (Key::H.value(), KeyModifiers::META.bits()));
     assert_eq!(items[5].gesture.get(), (Key::Q.value(), (KeyModifiers::META | KeyModifiers::ALT).bits()));
     assert_eq!(items[8].gesture.get(), (Key::Q.value(), KeyModifiers::META.bits()));
-    // Hide and Quit have handlers, so the system may activate them; the
-    // about item has none yet.
+    // About, Hide and Quit have handlers, so the system may activate them
+    // (the about item opens the about dialog).
     let enabled = |index: usize| items[index].action.borrow().as_ref().unwrap().0.evaluate();
+    assert!(enabled(0));
     assert!(enabled(4));
     assert!(enabled(8));
-    assert!(!enabled(0));
 }
 
 #[test]
