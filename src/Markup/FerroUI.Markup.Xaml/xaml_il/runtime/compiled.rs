@@ -241,6 +241,26 @@ pub fn exact<T: Clone + 'static>(
 /// exception that wraps the exception of the member.
 pub const TARGET_INVOCATION_EXCEPTION: &str = "TargetInvocationException";
 
+/// The result of a member generated code invoked, with its error as the
+/// load error the run-time loader reports for the failure of a member it
+/// invokes: the exception that wraps the exception of the member
+/// ([`TARGET_INVOCATION_EXCEPTION`]) at `line`, `position` ([`at`]). The
+/// error path is one function for every member, outside the generated
+/// code.
+#[inline]
+pub fn invoked<T, E: Display>(result: Result<T, E>, line: i32, position: i32) -> Result<T, XamlLoadException> {
+    match result {
+        Ok(value) => Ok(value),
+        Err(error) => Err(invocation_error(&error, line, position)),
+    }
+}
+
+#[cold]
+#[inline(never)]
+fn invocation_error(error: &dyn Display, line: i32, position: i32) -> XamlLoadException {
+    at(TARGET_INVOCATION_EXCEPTION, error, line, position)
+}
+
 /// The name scope field of the context of a document
 /// (`FerroXamlIlContextNameScopeField`): the name scope of the parent
 /// service provider, `None` when it has none.
