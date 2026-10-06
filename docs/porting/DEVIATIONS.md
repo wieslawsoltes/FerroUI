@@ -50,6 +50,7 @@ Other pages hold the entries of their own area, and this page does not repeat th
 |---|---|---|---|---|
 | `LogicalExtensions.GetLogicalChildren` returns the `LogicalChildren` collection itself; `GetLogicalSiblings` enumerates the parent's collection lazily. | `get_logical_children` and `get_logical_siblings` return a snapshot (`Rc<Vec<..>>`) of the collection. | Behaviour | As `get_visual_children` does. A change to the collection after the call is not seen through the result. | #32 |
 | `LogicalExtensions.IsLogicalAncestorOf(this ILogical? logical, ILogical? target)` accepts a null receiver and returns false. | `StyledElement::is_logical_ancestor_of(&self, target: Option<&StyledElement>)`. | Representation | The receiver of a Rust method cannot be null; the target stays optional. | #32 |
+| `ControlLocator.Track(ILogical, int ancestorLevel, Type?)`: a negative level makes `ElementAtOrDefault` return null. | `ControlLocator::track` takes `ancestor_level: usize`. | Representation | As `VisualLocator::track`; a negative level cannot be passed. | #36 |
 
 ### Property system (`src/FerroUI.Base/property_store/`, `src/FerroUI.Base/ferro_object.rs`)
 
@@ -86,3 +87,4 @@ Places where the port did work that upstream does not do, or did it differently,
 | `ValueStore` (`OnInheritanceAncestorChanged`, `OnInheritedEffectiveValueChanged`, `OnAncestorInheritedValueChanged` and the other inherited-value loops) indexes `GetInheritanceChildren()` in place. | Copied the inheritance children of every object a change passed through (`value_store.rs`). | #29 |
 | `ValueStore.ReevaluateEffectiveValue` and `ReevaluateEffectiveValues` index `_frames` from the last frame. | Copied the frame list for every reevaluation (`value_store.rs`). | #29 |
 | `IPseudoClasses.Remove` compares the name in place. | `Classes::remove_pseudo` allocated a `String` of the name for every call (`classes.rs`). | #29 |
+| `LogicalAncestorElementNode` subscribes to `ControlLocator.Track`, which finds the ancestor when it is subscribed whether or not the element is attached. | Followed the attachment events of the element itself and reported no ancestor while the element was not attached to a logical tree. | #36 |

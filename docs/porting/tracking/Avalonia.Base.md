@@ -10,9 +10,9 @@ Generated from upstream commit `17350180c33b063f0e98abbfd19aa3cae63f5d56`. Back 
 | FerroUI | `src/FerroUI.Base` (exists) |
 | Crate | `ferroui-base` |
 | Phase / priority | 0 - core / P0 |
-| Files | 1114/1286 (86.6%), 13 not applicable |
-| Types | 1422/1709 (83.2%) |
-| Members | 9814/11739 (32 waived) (83.8%) |
+| Files | 1115/1286 (86.7%), 13 not applicable |
+| Types | 1423/1709 (83.3%) |
+| Members | 9815/11739 (32 waived) (83.8%) |
 | Contracts (interfaces) | 235/263 |
 | Property registrations | 224/239 |
 | Routed events | 41/41 |
@@ -2116,12 +2116,12 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 
 </details>
 
-### `LogicalTree` - files 6/7, types 7/8, members 35/36
+### `LogicalTree` - files 7/7, types 8/8, members 36/36
 
 | Upstream file | Rust file | Status | Types | Members | Notes |
 |---|---|---|---|---|---|
 | `ChildIndexChangedEventArgs.cs` | `logical_tree/child_index_changed_event_args.rs` | present | 2/2 | 9/9 |  |
-| `ControlLocator.cs` | `logical_tree/control_locator.rs` | missing | 0/1 | 0/1 |  |
+| `ControlLocator.cs` | `logical_tree/control_locator.rs` | present | 1/1 | 1/1 |  |
 | `IChildIndexProvider.cs` | `logical_tree/i_child_index_provider.rs` | present | 1/1 | 3/3 |  |
 | `ILogical.cs` | `styled_element.rs` | present | 1/1 | 8/8 | replaced: both contracts are [NotClientImplementable] and StyledElement is their one implementation: the logical tree members (`parent`, `logical_children`, the attachment events and notifications) and the `is_logical_root` virtual are StyledElement's own |
 | `ILogicalRoot.cs` | `styled_element.rs` | present | 1/1 | 0/0 | replaced: both contracts are [NotClientImplementable] and StyledElement is their one implementation: the logical tree members (`parent`, `logical_children`, the attachment events and notifications) and the `is_logical_root` virtual are StyledElement's own |
