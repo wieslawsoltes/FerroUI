@@ -504,22 +504,22 @@
    "scope": "in",
    "detail": "full",
    "files": [
-    1107,
+    1111,
     1286,
     0
    ],
    "types": [
-    1414,
+    1419,
     1709,
     0
    ],
    "members": [
-    9746,
+    9794,
     11739,
     32
    ],
    "interfaces": [
-    232,
+    233,
     263
    ],
    "propertyRegistrations": [
@@ -536,13 +536,13 @@
     "const": 347,
     "derive": 64,
     "field": 613,
-    "fn": 6205,
+    "fn": 6241,
     "free fn": 10,
     "free item": 16,
     "getter fn": 4,
-    "overload fn": 275,
+    "overload fn": 284,
     "trait": 349,
-    "trait fn": 70,
+    "trait fn": 73,
     "variant": 1784
    },
    "presentFiles": {
@@ -3066,6 +3066,9 @@
     "Reactive/Disposable.cs": [
      "reactive/disposable.rs"
     ],
+    "Reactive/LightweightObservableBase.cs": [
+     "reactive/lightweight_observable_base.rs"
+    ],
     "Reactive/LightweightSubject.cs": [
      "reactive/lightweight_subject.rs"
     ],
@@ -3855,14 +3858,23 @@
     "Visual.cs": [
      "visual.rs"
     ],
+    "VisualExtensions.cs": [
+     "visual_tree/visual_extensions.rs"
+    ],
     "VisualTree/IHostedVisualTreeRoot.cs": [
      "visual_tree/i_hosted_visual_tree_root.rs"
+    ],
+    "VisualTree/IVisualWithRoundRectClip.cs": [
+     "visual.rs"
     ],
     "VisualTree/TransformedBounds.cs": [
      "visual_tree/transformed_bounds.rs"
     ],
     "VisualTree/VisualExtensions.cs": [
      "visual_tree/visual_extensions.rs"
+    ],
+    "VisualTree/VisualLocator.cs": [
+     "visual_tree/visual_locator.rs"
     ],
     "VisualTreeAttachmentEventArgs.cs": [
      "visual_tree_attachment_event_args.rs"
