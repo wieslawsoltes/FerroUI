@@ -12,7 +12,7 @@ Generated from upstream commit `17350180c33b063f0e98abbfd19aa3cae63f5d56`. Back 
 | Phase / priority | 1 - controls / P0 |
 | Files | 532/538 (98.9%), 1 not applicable |
 | Types | 606/628 (96.5%) |
-| Members | 6046/6405 (1 waived) (94.4%) |
+| Members | 6156/6405 (1 waived) (96.1%) |
 | Contracts (interfaces) | 81/83 |
 | Property registrations | 936/938 |
 | Routed events | 67/67 |
@@ -109,47 +109,47 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 
 ## Files
 
-### `(project root)` - files 146/147, types 171/178, members 2138/2293
+### `(project root)` - files 146/147, types 171/178, members 2195/2293
 
 | Upstream file | Rust file | Status | Types | Members | Notes |
 |---|---|---|---|---|---|
 | `AcrylicPlatformCompensationLevels.cs` | `acrylic_platform_compensation_levels.rs` | present | 1/1 | 4/4 |  |
 | `AppBuilder.cs` | `app_builder.rs` | partial | 1/2 | 30/32 |  |
 | `Application.cs` | `application.rs` | partial | 1/1 | 30/35 |  |
-| `Border.cs` | `border.rs` | partial | 1/1 | 18/19 |  |
+| `Border.cs` | `border.rs` | present | 1/1 | 19/19 |  |
 | `BorderVisual.cs` | `border_visual.rs` | partial | 1/1 | 2/3 |  |
-| `Button.cs` | `button.rs` | partial | 2/2 | 44/46 |  |
-| `ButtonSpinner.cs` | `button_spinner.rs` | partial | 2/2 | 16/17 |  |
-| `Canvas.cs` | `canvas.rs` | partial | 1/1 | 16/17 |  |
-| `Carousel.cs` | `carousel.rs` | partial | 1/1 | 16/17 |  |
-| `CheckBox.cs` | `check_box.rs` | partial | 1/1 | 0/1 |  |
-| `ColumnDefinition.cs` | `column_definition.rs` | partial | 1/1 | 11/14 |  |
+| `Button.cs` | `button.rs` | partial | 2/2 | 45/46 |  |
+| `ButtonSpinner.cs` | `button_spinner.rs` | present | 2/2 | 17/17 |  |
+| `Canvas.cs` | `canvas.rs` | present | 1/1 | 17/17 |  |
+| `Carousel.cs` | `carousel.rs` | present | 1/1 | 17/17 |  |
+| `CheckBox.cs` | `check_box.rs` | present | 1/1 | 1/1 |  |
+| `ColumnDefinition.cs` | `column_definition.rs` | partial | 1/1 | 12/14 |  |
 | `ColumnDefinitions.cs` | `column_definitions.rs` | present | 1/1 | 4/4 |  |
-| `ComboBox.cs` | `combo_box.rs` | partial | 1/1 | 40/41 |  |
-| `ComboBoxItem.cs` | `combo_box_item.rs` | partial | 1/1 | 1/2 |  |
+| `ComboBox.cs` | `combo_box.rs` | present | 1/1 | 41/41 |  |
+| `ComboBoxItem.cs` | `combo_box_item.rs` | present | 1/1 | 2/2 |  |
 | `ContainerClearingEventArgs.cs` | `container_clearing_event_args.rs` | present | 1/1 | 2/2 |  |
 | `ContainerIndexChangedEventArgs.cs` | `container_index_changed_event_args.rs` | present | 1/1 | 4/4 |  |
 | `ContainerPreparedEventArgs.cs` | `container_prepared_event_args.rs` | present | 1/1 | 3/3 |  |
-| `ContentControl.cs` | `content_control.rs` | partial | 1/1 | 14/16 |  |
-| `ContextMenu.cs` | `context_menu.rs` | partial | 1/1 | 30/32 |  |
+| `ContentControl.cs` | `content_control.rs` | partial | 1/1 | 15/16 |  |
+| `ContextMenu.cs` | `context_menu.rs` | partial | 1/1 | 31/32 |  |
 | `Control.cs` | `control.rs` | present | 1/1 | 39/39 |  |
 | `ControlExtensions.cs` | `control_extensions.rs` | partial | 0/1 | 0/5 |  |
 | `Controls.cs` | `controls.rs` | partial | 1/1 | 2/3 |  |
-| `DataValidationErrors.cs` | `data_validation_errors.rs` | partial | 1/1 | 14/15 |  |
-| `Decorator.cs` | `decorator.rs` | partial | 1/1 | 6/7 |  |
-| `DefinitionBase.cs` | `definition_base.rs` | partial | 3/3 | 38/39 |  |
+| `DataValidationErrors.cs` | `data_validation_errors.rs` | present | 1/1 | 15/15 |  |
+| `Decorator.cs` | `decorator.rs` | present | 1/1 | 7/7 |  |
+| `DefinitionBase.cs` | `definition_base.rs` | present | 3/3 | 39/39 |  |
 | `DefinitionList.cs` | `definition_list.rs` | partial | 1/1 | 3/4 |  |
 | `Design.cs` | `design.rs` | partial | 1/1 | 27/30 |  |
 | `DesktopApplicationExtensions.cs` | `desktop_application_extensions.rs` | partial | 0/1 | 0/4 |  |
-| `DockPanel.cs` | `dock_panel.rs` | partial | 2/2 | 15/16 |  |
+| `DockPanel.cs` | `dock_panel.rs` | present | 2/2 | 16/16 |  |
 | `DropDownButton.cs` | `drop_down_button.rs` | present | 1/1 | 1/1 |  |
 | `Expander.cs` | `expander.rs` | present | 2/2 | 26/26 |  |
-| `ExperimentalAcrylicBorder.cs` | `experimental_acrylic_border.rs` | partial | 1/1 | 10/11 |  |
-| `Grid.cs` | `grid.rs` | partial | 3/3 | 38/42 |  |
+| `ExperimentalAcrylicBorder.cs` | `experimental_acrylic_border.rs` | present | 1/1 | 11/11 |  |
+| `Grid.cs` | `grid.rs` | partial | 3/3 | 39/42 |  |
 | `GridLength.cs` | `grid_length.rs` | present | 2/2 | 20/20 |  |
 | `GridSplitter.cs` | `grid_splitter.rs` | present | 3/3 | 28/28 |  |
 | `GroupBox.cs` | `group_box.rs` | present | 1/1 | 0/0 |  |
-| `HotkeyManager.cs` | `hotkey_manager.rs` | partial | 1/1 | 3/4 |  |
+| `HotkeyManager.cs` | `hotkey_manager.rs` | present | 1/1 | 4/4 |  |
 | `HyperlinkButton.cs` | `hyperlink_button.rs` | present | 1/1 | 7/7 |  |
 | `IContentControl.cs` | `i_content_control.rs` | present | 1/1 | 4/4 |  |
 | `IGlobalDataTemplates.cs` | `i_global_data_templates.rs` | present | 1/1 | 0/0 |  |
@@ -163,95 +163,95 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 | `ISelectable.cs` | `i_selectable.rs` | present | 1/1 | 1/1 |  |
 | `IToolTipService.cs` | `i_tool_tip_service.rs` | present | 1/1 | 1/1 |  |
 | `IconElement.cs` | `icon_element.rs` | present | 1/1 | 0/0 |  |
-| `Image.cs` | `image.rs` | partial | 1/1 | 16/17 |  |
+| `Image.cs` | `image.rs` | present | 1/1 | 17/17 |  |
 | `InputPaneAwareBehavior.cs` | `input_pane_aware_behavior.rs` | present | 1/1 | 3/3 |  |
-| `InputPaneAwareDecorator.cs` | `input_pane_aware_decorator.rs` | partial | 1/1 | 7/8 |  |
+| `InputPaneAwareDecorator.cs` | `input_pane_aware_decorator.rs` | present | 1/1 | 8/8 |  |
 | `ItemCollection.cs` | `item_collection.rs` | partial | 1/1 | 13/14 |  |
 | `ItemsControl.cs` | `items_control.rs` | partial | 1/1 | 56/58 |  |
 | `ItemsSourceView.cs` | `items_source_view.rs` | partial | 2/2 | 29/43 |  |
-| `Label.cs` | `label.rs` | partial | 1/1 | 6/7 |  |
-| `LayoutTransformControl.cs` | `layout_transform_control.rs` | partial | 1/1 | 9/10 |  |
-| `ListBox.cs` | `list_box.rs` | partial | 1/1 | 12/16 |  |
-| `ListBoxItem.cs` | `list_box_item.rs` | partial | 1/1 | 7/8 |  |
+| `Label.cs` | `label.rs` | present | 1/1 | 7/7 |  |
+| `LayoutTransformControl.cs` | `layout_transform_control.rs` | present | 1/1 | 10/10 |  |
+| `ListBox.cs` | `list_box.rs` | partial | 1/1 | 13/16 |  |
+| `ListBoxItem.cs` | `list_box_item.rs` | present | 1/1 | 8/8 |  |
 | `LoggingExtensions.cs` | `logging_extensions.rs` | partial | 0/1 | 0/3 |  |
-| `MaskedTextBox.cs` | `masked_text_box.rs` | partial | 1/1 | 27/29 |  |
-| `Menu.cs` | `menu.rs` | partial | 1/1 | 6/8 |  |
-| `MenuBase.cs` | `menu_base.rs` | partial | 1/1 | 17/23 |  |
-| `MenuItem.cs` | `menu_item.rs` | partial | 1/1 | 57/65 |  |
+| `MaskedTextBox.cs` | `masked_text_box.rs` | partial | 1/1 | 28/29 |  |
+| `Menu.cs` | `menu.rs` | partial | 1/1 | 7/8 |  |
+| `MenuBase.cs` | `menu_base.rs` | partial | 1/1 | 18/23 |  |
+| `MenuItem.cs` | `menu_item.rs` | partial | 1/1 | 58/65 |  |
 | `MenuItemAccessKeyHandler.cs` | `menu_item_access_key_handler.rs` | partial | 1/1 | 1/2 |  |
 | `MenuItemToggleType.cs` | `menu_item_toggle_type.rs` | present | 1/1 | 3/3 |  |
-| `NativeControlHost.cs` | `native_control_host.rs` | partial | 1/1 | 8/9 |  |
+| `NativeControlHost.cs` | `native_control_host.rs` | present | 1/1 | 9/9 |  |
 | `NativeDock.cs` | `native_dock.rs` | present | 1/1 | 3/3 |  |
-| `NativeMenu.Export.cs` | `native_menu_export.rs` | partial | 1/1 | 5/6 |  |
+| `NativeMenu.Export.cs` | `native_menu_export.rs` | present | 1/1 | 6/6 |  |
 | `NativeMenu.cs` | `native_menu.rs` | partial | 1/1 | 11/14 |  |
-| `NativeMenuBar.cs` | `native_menu_bar.rs` | partial | 1/1 | 4/5 |  |
+| `NativeMenuBar.cs` | `native_menu_bar.rs` | present | 1/1 | 5/5 |  |
 | `NativeMenuBarPresenter.cs` | `native_menu_bar_presenter.rs` | present | 1/1 | 3/3 |  |
 | `NativeMenuItem.cs` | `native_menu_item.rs` | partial | 1/1 | 28/29 |  |
 | `NativeMenuItemBase.cs` | `native_menu_item_base.rs` | present | 1/1 | 3/3 |  |
 | `NativeMenuItemSeparator.cs` | `native_menu_item_separator.rs` | present | 1/1 | 1/1 |  |
-| `Panel.cs` | `panel.rs` | partial | 1/1 | 11/14 |  |
+| `Panel.cs` | `panel.rs` | partial | 1/1 | 12/14 |  |
 | `PastingFromClipboardEventArgs.cs` | `pasting_from_clipboard_event_args.rs` | present | 1/1 | 2/2 |  |
-| `PathIcon.cs` | `path_icon.rs` | partial | 1/1 | 2/3 |  |
+| `PathIcon.cs` | `path_icon.rs` | present | 1/1 | 3/3 |  |
 | `PixelPointEventArgs.cs` | `pixel_point_event_args.rs` | present | 1/1 | 2/2 |  |
 | `PlacementMode.cs` | `placement_mode.rs` | present | 1/1 | 16/16 |  |
 | `PlatformInhibitionType.cs` | `platform_inhibition_type.rs` | present | 1/1 | 1/1 |  |
-| `ProgressBar.cs` | `progress_bar.rs` | partial | 2/2 | 32/33 |  |
+| `ProgressBar.cs` | `progress_bar.rs` | present | 2/2 | 33/33 |  |
 | `RadioButton.cs` | `radio_button.rs` | partial | 1/1 | 7/9 |  |
 | `RadioButtonGroupManager.cs` | `radio_button_group_manager.rs` | present | 2/2 | 7/7 |  |
-| `RelativePanel.AttachedProperties.cs` | `relative_panel.rs` | partial | 1/1 | 48/49 | partial merged into main file |
+| `RelativePanel.AttachedProperties.cs` | `relative_panel.rs` | present | 1/1 | 49/49 | partial merged into main file |
 | `RelativePanel.cs` | `relative_panel.rs` | partial | 1/2 | 3/5 |  |
 | `RepeatButton.cs` | `repeat_button.rs` | present | 1/1 | 9/9 |  |
 | `RequestBringIntoViewEventArgs.cs` | `request_bring_into_view_event_args.rs` | present | 1/1 | 2/2 |  |
 | `ResolveByNameAttribute.cs` | `resolve_by_name_attribute.rs` | missing | 0/1 | 0/0 |  |
-| `RowDefinition.cs` | `row_definition.rs` | partial | 1/1 | 11/14 |  |
+| `RowDefinition.cs` | `row_definition.rs` | partial | 1/1 | 12/14 |  |
 | `RowDefinitions.cs` | `row_definitions.rs` | present | 1/1 | 4/4 |  |
 | `Screens.cs` | `screens.rs` | present | 1/1 | 11/11 |  |
 | `ScrollChangedEventArgs.cs` | `scroll_changed_event_args.rs` | partial | 1/1 | 4/5 |  |
 | `ScrollViewer.cs` | `scroll_viewer.rs` | present | 1/1 | 89/89 |  |
-| `SelectableTextBlock.cs` | `selectable_text_block.rs` | partial | 1/1 | 26/27 |  |
+| `SelectableTextBlock.cs` | `selectable_text_block.rs` | present | 1/1 | 27/27 |  |
 | `SelectionChangedEventArgs.cs` | `selection_changed_event_args.rs` | present | 1/1 | 3/3 |  |
 | `SelectionMode.cs` | `selection_mode.rs` | present | 1/1 | 4/4 |  |
 | `Separator.cs` | `separator.rs` | present | 1/1 | 0/0 |  |
 | `ShutdownMode.cs` | `shutdown_mode.rs` | present | 1/1 | 3/3 |  |
 | `SizeChangedEventArgs.cs` | `size_changed_event_args.rs` | partial | 1/1 | 6/7 |  |
-| `Slider.cs` | `slider.rs` | partial | 2/2 | 25/26 |  |
-| `Spinner.cs` | `spinner.rs` | partial | 4/4 | 14/18 |  |
-| `StackPanel.cs` | `stack_panel.rs` | partial | 1/1 | 19/20 |  |
+| `Slider.cs` | `slider.rs` | present | 2/2 | 26/26 |  |
+| `Spinner.cs` | `spinner.rs` | partial | 4/4 | 15/18 |  |
+| `StackPanel.cs` | `stack_panel.rs` | present | 1/1 | 20/20 |  |
 | `SystemFontAppBuilderExtension.cs` | `system_font_app_builder_extension.rs` | partial | 0/1 | 0/1 |  |
-| `TabControl.cs` | `tab_control.rs` | partial | 1/1 | 32/33 |  |
-| `TabItem.cs` | `tab_item.rs` | partial | 1/1 | 17/18 |  |
+| `TabControl.cs` | `tab_control.rs` | present | 1/1 | 33/33 |  |
+| `TabItem.cs` | `tab_item.rs` | present | 1/1 | 18/18 |  |
 | `TableView.cs` | `table_view.rs` | present | 1/1 | 18/18 |  |
 | `TableViewCell.cs` | `table_view_cell.rs` | present | 1/1 | 3/3 |  |
 | `TableViewColumn.cs` | `table_view_column.rs` | present | 1/1 | 29/29 |  |
 | `TableViewColumnHeader.cs` | `table_view_column_header.rs` | present | 1/1 | 5/5 |  |
 | `TableViewRow.cs` | `table_view_row.rs` | present | 1/1 | 6/6 |  |
-| `TextBlock.cs` | `text_block.rs` | partial | 3/3 | 78/82 |  |
-| `TextBox.cs` | `text_box.rs` | partial | 1/1 | 123/127 |  |
+| `TextBlock.cs` | `text_block.rs` | partial | 3/3 | 79/82 |  |
+| `TextBox.cs` | `text_box.rs` | partial | 1/1 | 124/127 |  |
 | `TextBoxTextInputMethodClient.cs` | `text_box_text_input_method_client.rs` | present | 1/1 | 11/11 |  |
 | `TextChangedEventArgs.cs` | `text_changed_event_args.rs` | partial | 1/1 | 1/2 |  |
 | `TextChangingEventArgs.cs` | `text_changing_event_args.rs` | partial | 1/1 | 1/2 |  |
 | `ThemeVariantScope.cs` | `theme_variant_scope.rs` | present | 1/1 | 3/3 |  |
-| `TickBar.cs` | `tick_bar.rs` | partial | 2/2 | 23/24 |  |
-| `ToggleSwitch.cs` | `toggle_switch.rs` | partial | 1/1 | 15/16 |  |
-| `ToolTip.cs` | `tool_tip.rs` | partial | 1/1 | 46/47 |  |
+| `TickBar.cs` | `tick_bar.rs` | present | 2/2 | 24/24 |  |
+| `ToggleSwitch.cs` | `toggle_switch.rs` | present | 1/1 | 16/16 |  |
+| `ToolTip.cs` | `tool_tip.rs` | present | 1/1 | 47/47 |  |
 | `ToolTipService.cs` | `tool_tip_service.rs` | present | 1/1 | 3/3 |  |
-| `TopLevel.cs` | `top_level.rs` | partial | 1/1 | 68/70 |  |
+| `TopLevel.cs` | `top_level.rs` | partial | 1/1 | 69/70 |  |
 | `TopLevelHost.Decorations.cs` | `top_level_host_decorations.rs` | present | 1/1 | 3/3 |  |
 | `TopLevelHost.Peers.cs` | `top_level_host_peers.rs` | present | 1/1 | 2/2 |  |
-| `TopLevelHost.cs` | `top_level_host.rs` | partial | 1/1 | 5/6 |  |
+| `TopLevelHost.cs` | `top_level_host.rs` | present | 1/1 | 6/6 |  |
 | `TransitionCompletedEventArgs.cs` | `transition_completed_event_args.rs` | present | 1/1 | 4/4 |  |
 | `TransitioningContentControl.cs` | `transitioning_content_control.rs` | present | 1/1 | 10/10 |  |
-| `TrayIcon.cs` | `tray_icon.rs` | partial | 2/2 | 22/23 |  |
-| `TreeView.cs` | `tree_view.rs` | partial | 1/1 | 30/31 |  |
-| `TreeViewItem.cs` | `tree_view_item.rs` | partial | 1/1 | 24/25 |  |
+| `TrayIcon.cs` | `tray_icon.rs` | present | 2/2 | 23/23 |  |
+| `TreeView.cs` | `tree_view.rs` | present | 1/1 | 31/31 |  |
+| `TreeViewItem.cs` | `tree_view_item.rs` | present | 1/1 | 25/25 |  |
 | `UrlOpenedEventArgs.cs` | `url_opened_event_args.rs` | present | 1/1 | 2/2 |  |
 | `UserControl.cs` | `user_control.rs` | present | 1/1 | 1/1 |  |
-| `Viewbox.cs` | `viewbox.rs` | partial | 1/1 | 11/12 |  |
+| `Viewbox.cs` | `viewbox.rs` | present | 1/1 | 12/12 |  |
 | `VirtualizingCarouselPanel.cs` | `virtualizing_carousel_panel.rs` | partial | 1/1 | 28/29 |  |
 | `VirtualizingPanel.cs` | `virtualizing_panel.rs` | present | 1/1 | 19/19 |  |
-| `VirtualizingStackPanel.cs` | `virtualizing_stack_panel.rs` | partial | 1/1 | 31/32 |  |
-| `Window.cs` | `window.rs` | partial | 4/4 | 79/81 |  |
-| `WindowBase.cs` | `window_base.rs` | partial | 1/1 | 31/33 |  |
+| `VirtualizingStackPanel.cs` | `virtualizing_stack_panel.rs` | present | 1/1 | 32/32 |  |
+| `Window.cs` | `window.rs` | partial | 4/4 | 80/81 |  |
+| `WindowBase.cs` | `window_base.rs` | partial | 1/1 | 32/33 |  |
 | `WindowClosingEventArgs.cs` | `window_closing_event_args.rs` | present | 2/2 | 8/8 |  |
 | `WindowEdge.cs` | `window_edge.rs` | present | 1/1 | 8/8 |  |
 | `WindowIcon.cs` | `window_icon.rs` | present | 1/1 | 5/5 |  |
@@ -259,7 +259,7 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 | `WindowStartupLocation.cs` | `window_startup_location.rs` | present | 1/1 | 3/3 |  |
 | `WindowState.cs` | `window_state.rs` | present | 1/1 | 4/4 |  |
 | `WindowTransparencyLevel.cs` | `window_transparency_level.rs` | present | 2/2 | 7/7 |  |
-| `WrapPanel.cs` | `wrap_panel.rs` | partial | 2/2 | 21/22 |  |
+| `WrapPanel.cs` | `wrap_panel.rs` | present | 2/2 | 22/22 |  |
 
 <details><summary><code>AppBuilder.cs</code> - 3 missing</summary>
 
@@ -281,13 +281,6 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 
 </details>
 
-<details><summary><code>Border.cs</code> - 1 missing</summary>
-
-- `Border` (class): 1 missing
-  - `static Border()` *(static)*
-
-</details>
-
 <details><summary><code>BorderVisual.cs</code> - 1 missing</summary>
 
 - `CompositionBorderVisual` (class): 1 missing
@@ -295,78 +288,32 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 
 </details>
 
-<details><summary><code>Button.cs</code> - 2 missing</summary>
+<details><summary><code>Button.cs</code> - 1 missing</summary>
 
-- `Button` (class): 2 missing
-  - `static Button()` *(static)*
+- `Button` (class): 1 missing
   - `void IClickableControl.RaiseClick()` *(explicit)*
 
 </details>
 
-<details><summary><code>ButtonSpinner.cs</code> - 1 missing</summary>
+<details><summary><code>ColumnDefinition.cs</code> - 2 missing</summary>
 
-- `ButtonSpinner` (class): 1 missing
-  - `static ButtonSpinner()` *(static)*
-
-</details>
-
-<details><summary><code>Canvas.cs</code> - 1 missing</summary>
-
-- `Canvas` (class): 1 missing
-  - `static Canvas()` *(static)*
-
-</details>
-
-<details><summary><code>Carousel.cs</code> - 1 missing</summary>
-
-- `Carousel` (class): 1 missing
-  - `static Carousel()` *(static)*
-
-</details>
-
-<details><summary><code>CheckBox.cs</code> - 1 missing</summary>
-
-- `CheckBox` (class): 1 missing
-  - `static CheckBox()` *(static)*
-
-</details>
-
-<details><summary><code>ColumnDefinition.cs</code> - 3 missing</summary>
-
-- `ColumnDefinition` (class): 3 missing
-  - `static ColumnDefinition()` *(static)*
+- `ColumnDefinition` (class): 2 missing
   - `ColumnDefinition(double value, GridUnitType type)` *(1 of 3 constructors found)*
   - `ColumnDefinition(GridLength width)` *(1 of 3 constructors found)*
 
 </details>
 
-<details><summary><code>ComboBox.cs</code> - 1 missing</summary>
+<details><summary><code>ContentControl.cs</code> - 1 missing</summary>
 
-- `ComboBox` (class): 1 missing
-  - `static ComboBox()` *(static)*
-
-</details>
-
-<details><summary><code>ComboBoxItem.cs</code> - 1 missing</summary>
-
-- `ComboBoxItem` (class): 1 missing
-  - `static ComboBoxItem()` *(static)*
-
-</details>
-
-<details><summary><code>ContentControl.cs</code> - 2 missing</summary>
-
-- `ContentControl` (class): 2 missing
-  - `static ContentControl()` *(static)*
+- `ContentControl` (class): 1 missing
   - `override void BuildDebugDisplay(StringBuilder builder, bool includeContent)` *(internal)*
 
 </details>
 
-<details><summary><code>ContextMenu.cs</code> - 2 missing</summary>
+<details><summary><code>ContextMenu.cs</code> - 1 missing</summary>
 
-- `ContextMenu` (class): 2 missing
+- `ContextMenu` (class): 1 missing
   - `ContextMenu(IMenuInteractionHandler interactionHandler)` *(1 of 2 constructors found)*
-  - `static ContextMenu()` *(static)*
 
 </details>
 
@@ -380,27 +327,6 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 
 - `Controls` (class): 1 missing
   - `void IAvaloniaListItemValidator<Control>.Validate(Control item)` *(explicit)*
-
-</details>
-
-<details><summary><code>DataValidationErrors.cs</code> - 1 missing</summary>
-
-- `DataValidationErrors` (class): 1 missing
-  - `static DataValidationErrors()` *(static)*
-
-</details>
-
-<details><summary><code>Decorator.cs</code> - 1 missing</summary>
-
-- `Decorator` (class): 1 missing
-  - `static Decorator()` *(static)*
-
-</details>
-
-<details><summary><code>DefinitionBase.cs</code> - 1 missing</summary>
-
-- `DefinitionBase` (class): 1 missing
-  - `static DefinitionBase()` *(static)*
 
 </details>
 
@@ -426,49 +352,13 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 
 </details>
 
-<details><summary><code>DockPanel.cs</code> - 1 missing</summary>
+<details><summary><code>Grid.cs</code> - 3 missing</summary>
 
-- `DockPanel` (class): 1 missing
-  - `static DockPanel()` *(static)*
-
-</details>
-
-<details><summary><code>ExperimentalAcrylicBorder.cs</code> - 1 missing</summary>
-
-- `ExperimentalAcrylicBorder` (class): 1 missing
-  - `static ExperimentalAcrylicBorder()` *(static)*
-
-</details>
-
-<details><summary><code>Grid.cs</code> - 4 missing</summary>
-
-- `Grid` (class): 3 missing
-  - `static Grid()` *(static)*
+- `Grid` (class): 2 missing
   - `bool MeasureOverrideInProgress { get; set; }` *(internal; getter `measure_override_in_progress` found, setter `set_measure_override_in_progress` missing)*
   - `bool ArrangeOverrideInProgress { get; set; }` *(internal; getter `arrange_override_in_progress` found, setter `set_arrange_override_in_progress` missing)*
 - `Grid.GridLinesRenderer` (class): 1 missing
   - `static GridLinesRenderer()` *(static)*
-
-</details>
-
-<details><summary><code>HotkeyManager.cs</code> - 1 missing</summary>
-
-- `HotKeyManager` (class): 1 missing
-  - `static HotKeyManager()` *(static)*
-
-</details>
-
-<details><summary><code>Image.cs</code> - 1 missing</summary>
-
-- `Image` (class): 1 missing
-  - `static Image()` *(static)*
-
-</details>
-
-<details><summary><code>InputPaneAwareDecorator.cs</code> - 1 missing</summary>
-
-- `InputPaneAwareDecorator` (class): 1 missing
-  - `static InputPaneAwareDecorator()` *(static)*
 
 </details>
 
@@ -508,34 +398,12 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 
 </details>
 
-<details><summary><code>Label.cs</code> - 1 missing</summary>
+<details><summary><code>ListBox.cs</code> - 3 missing</summary>
 
-- `Label` (class): 1 missing
-  - `static Label()` *(static)*
-
-</details>
-
-<details><summary><code>LayoutTransformControl.cs</code> - 1 missing</summary>
-
-- `LayoutTransformControl` (class): 1 missing
-  - `static LayoutTransformControl()` *(static)*
-
-</details>
-
-<details><summary><code>ListBox.cs</code> - 4 missing</summary>
-
-- `ListBox` (class): 4 missing
-  - `static ListBox()` *(static)*
+- `ListBox` (class): 3 missing
   - `new IList? SelectedItems { get; set; }`
   - `new ISelectionModel Selection { get; set; }`
   - `new SelectionMode SelectionMode { get; set; }`
-
-</details>
-
-<details><summary><code>ListBoxItem.cs</code> - 1 missing</summary>
-
-- `ListBoxItem` (class): 1 missing
-  - `static ListBoxItem()` *(static)*
 
 </details>
 
@@ -545,27 +413,24 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 
 </details>
 
-<details><summary><code>MaskedTextBox.cs</code> - 2 missing</summary>
+<details><summary><code>MaskedTextBox.cs</code> - 1 missing</summary>
 
-- `MaskedTextBox` (class): 2 missing
-  - `static MaskedTextBox()` *(static)*
+- `MaskedTextBox` (class): 1 missing
   - `MaskedTextBox(MaskedTextProvider maskedTextProvider)` *(1 of 2 constructors found)*
 
 </details>
 
-<details><summary><code>Menu.cs</code> - 2 missing</summary>
+<details><summary><code>Menu.cs</code> - 1 missing</summary>
 
-- `Menu` (class): 2 missing
+- `Menu` (class): 1 missing
   - `Menu(IMenuInteractionHandler interactionHandler)` *(1 of 2 constructors found)*
-  - `static Menu()` *(static)*
 
 </details>
 
-<details><summary><code>MenuBase.cs</code> - 6 missing</summary>
+<details><summary><code>MenuBase.cs</code> - 5 missing</summary>
 
-- `MenuBase` (class): 6 missing
+- `MenuBase` (class): 5 missing
   - `MenuBase(IMenuInteractionHandler interactionHandler)` *(protected; 1 of 2 constructors found)*
-  - `static MenuBase()` *(static)*
   - `TopLevel? IMenu.TopLevel { get; }` *(explicit)*
   - `IMenuItem? IMenuElement.SelectedItem { get; set; }` *(explicit)*
   - `IEnumerable<IMenuItem> IMenuElement.SubItems { get; }` *(explicit)*
@@ -573,10 +438,9 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 
 </details>
 
-<details><summary><code>MenuItem.cs</code> - 8 missing</summary>
+<details><summary><code>MenuItem.cs</code> - 7 missing</summary>
 
-- `MenuItem` (class): 8 missing
-  - `static MenuItem()` *(static)*
+- `MenuItem` (class): 7 missing
   - `bool IMenuItem.IsPointerOverSubMenu { get; }` *(explicit)*
   - `IMenuElement? IMenuItem.Parent { get; }` *(explicit)*
   - `bool IMenuElement.MoveSelection(NavigationDirection direction, bool wrap)` *(explicit)*
@@ -594,33 +458,12 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 
 </details>
 
-<details><summary><code>NativeControlHost.cs</code> - 1 missing</summary>
-
-- `NativeControlHost` (class): 1 missing
-  - `static NativeControlHost()` *(static)*
-
-</details>
-
-<details><summary><code>NativeMenu.Export.cs</code> - 1 missing</summary>
-
-- `NativeMenu` (class) in `native_menu.rs`: 1 missing
-  - `static NativeMenu()` *(static)*
-
-</details>
-
 <details><summary><code>NativeMenu.cs</code> - 3 missing</summary>
 
 - `NativeMenu` (class): 3 missing
   - `void INativeMenuExporterEventsImplBridge.RaiseNeedsUpdate()` *(explicit)*
   - `void INativeMenuExporterEventsImplBridge.RaiseOpening()` *(explicit)*
   - `void INativeMenuExporterEventsImplBridge.RaiseClosed()` *(explicit)*
-
-</details>
-
-<details><summary><code>NativeMenuBar.cs</code> - 1 missing</summary>
-
-- `NativeMenuBar` (class): 1 missing
-  - `static NativeMenuBar()` *(static)*
 
 </details>
 
@@ -631,26 +474,11 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 
 </details>
 
-<details><summary><code>Panel.cs</code> - 3 missing</summary>
+<details><summary><code>Panel.cs</code> - 2 missing</summary>
 
-- `Panel` (class): 3 missing
-  - `static Panel()` *(static)*
+- `Panel` (class): 2 missing
   - `int IChildIndexProvider.GetChildIndex(ILogical child)` *(explicit)*
   - `bool IChildIndexProvider.TryGetTotalCount(out int count)` *(explicit)*
-
-</details>
-
-<details><summary><code>PathIcon.cs</code> - 1 missing</summary>
-
-- `PathIcon` (class): 1 missing
-  - `static PathIcon()` *(static)*
-
-</details>
-
-<details><summary><code>ProgressBar.cs</code> - 1 missing</summary>
-
-- `ProgressBar` (class): 1 missing
-  - `static ProgressBar()` *(static)*
 
 </details>
 
@@ -662,23 +490,15 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 
 </details>
 
-<details><summary><code>RelativePanel.AttachedProperties.cs</code> - 1 missing</summary>
-
-- `RelativePanel` (class): 1 missing
-  - `static RelativePanel()` *(static)*
-
-</details>
-
 <details><summary><code>RelativePanel.cs</code> - 3 missing</summary>
 
 - `Extensions` (class, internal): **type missing** (2 members)
 
 </details>
 
-<details><summary><code>RowDefinition.cs</code> - 3 missing</summary>
+<details><summary><code>RowDefinition.cs</code> - 2 missing</summary>
 
-- `RowDefinition` (class): 3 missing
-  - `static RowDefinition()` *(static)*
+- `RowDefinition` (class): 2 missing
   - `RowDefinition(double value, GridUnitType type)` *(1 of 3 constructors found)*
   - `RowDefinition(GridLength height)` *(1 of 3 constructors found)*
 
@@ -691,13 +511,6 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 
 </details>
 
-<details><summary><code>SelectableTextBlock.cs</code> - 1 missing</summary>
-
-- `SelectableTextBlock` (class): 1 missing
-  - `static SelectableTextBlock()` *(static)*
-
-</details>
-
 <details><summary><code>SizeChangedEventArgs.cs</code> - 1 missing</summary>
 
 - `SizeChangedEventArgs` (class): 1 missing
@@ -705,28 +518,12 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 
 </details>
 
-<details><summary><code>Slider.cs</code> - 1 missing</summary>
-
-- `Slider` (class): 1 missing
-  - `static Slider()` *(static)*
-
-</details>
-
-<details><summary><code>Spinner.cs</code> - 4 missing</summary>
+<details><summary><code>Spinner.cs</code> - 3 missing</summary>
 
 - `SpinEventArgs` (class): 3 missing
   - `SpinEventArgs(RoutedEvent? routedEvent, SpinDirection direction)` *(1 of 4 constructors found)*
   - `SpinEventArgs(SpinDirection direction, bool usingMouseWheel)` *(1 of 4 constructors found)*
   - `SpinEventArgs(RoutedEvent? routedEvent, SpinDirection direction, bool usingMouseWheel)` *(1 of 4 constructors found)*
-- `Spinner` (class): 1 missing
-  - `static Spinner()` *(static)*
-
-</details>
-
-<details><summary><code>StackPanel.cs</code> - 1 missing</summary>
-
-- `StackPanel` (class): 1 missing
-  - `static StackPanel()` *(static)*
 
 </details>
 
@@ -736,34 +533,18 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 
 </details>
 
-<details><summary><code>TabControl.cs</code> - 1 missing</summary>
+<details><summary><code>TextBlock.cs</code> - 3 missing</summary>
 
-- `TabControl` (class): 1 missing
-  - `static TabControl()` *(static)*
-
-</details>
-
-<details><summary><code>TabItem.cs</code> - 1 missing</summary>
-
-- `TabItem` (class): 1 missing
-  - `static TabItem()` *(static)*
-
-</details>
-
-<details><summary><code>TextBlock.cs</code> - 4 missing</summary>
-
-- `TextBlock` (class): 4 missing
-  - `static TextBlock()` *(static)*
+- `TextBlock` (class): 3 missing
   - `void IInlineHost.Invalidate()` *(explicit)*
   - `IAvaloniaList<Visual> IInlineHost.VisualChildren { get; }` *(explicit)*
   - `override void BuildDebugDisplay(StringBuilder builder, bool includeContent)` *(internal)*
 
 </details>
 
-<details><summary><code>TextBox.cs</code> - 4 missing</summary>
+<details><summary><code>TextBox.cs</code> - 3 missing</summary>
 
-- `TextBox` (class): 4 missing
-  - `static TextBox()` *(static)*
+- `TextBox` (class): 3 missing
   - `UndoRedoState UndoRedoHelper<UndoRedoState>.IUndoRedoHost.UndoRedoState { get; set; }` *(explicit)*
   - `void UndoRedoHelper<UndoRedoState>.IUndoRedoHost.OnUndoStackChanged()` *(explicit)*
   - `void UndoRedoHelper<UndoRedoState>.IUndoRedoHost.OnRedoStackChanged()` *(explicit)*
@@ -784,67 +565,10 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 
 </details>
 
-<details><summary><code>TickBar.cs</code> - 1 missing</summary>
+<details><summary><code>TopLevel.cs</code> - 1 missing</summary>
 
-- `TickBar` (class): 1 missing
-  - `static TickBar()` *(static)*
-
-</details>
-
-<details><summary><code>ToggleSwitch.cs</code> - 1 missing</summary>
-
-- `ToggleSwitch` (class): 1 missing
-  - `static ToggleSwitch()` *(static)*
-
-</details>
-
-<details><summary><code>ToolTip.cs</code> - 1 missing</summary>
-
-- `ToolTip` (class): 1 missing
-  - `static ToolTip()` *(static)*
-
-</details>
-
-<details><summary><code>TopLevel.cs</code> - 2 missing</summary>
-
-- `TopLevel` (class): 2 missing
-  - `static TopLevel()` *(static)*
+- `TopLevel` (class): 1 missing
   - `TopLevel(ITopLevelImpl impl, IAvaloniaDependencyResolver? dependencyResolver)` *(internal; 1 of 2 constructors found)*
-
-</details>
-
-<details><summary><code>TopLevelHost.cs</code> - 1 missing</summary>
-
-- `TopLevelHost` (class): 1 missing
-  - `static TopLevelHost()` *(static)*
-
-</details>
-
-<details><summary><code>TrayIcon.cs</code> - 1 missing</summary>
-
-- `TrayIcon` (class): 1 missing
-  - `static TrayIcon()` *(static)*
-
-</details>
-
-<details><summary><code>TreeView.cs</code> - 1 missing</summary>
-
-- `TreeView` (class): 1 missing
-  - `static TreeView()` *(static)*
-
-</details>
-
-<details><summary><code>TreeViewItem.cs</code> - 1 missing</summary>
-
-- `TreeViewItem` (class): 1 missing
-  - `static TreeViewItem()` *(static)*
-
-</details>
-
-<details><summary><code>Viewbox.cs</code> - 1 missing</summary>
-
-- `Viewbox` (class): 1 missing
-  - `static Viewbox()` *(static)*
 
 </details>
 
@@ -855,33 +579,17 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 
 </details>
 
-<details><summary><code>VirtualizingStackPanel.cs</code> - 1 missing</summary>
+<details><summary><code>Window.cs</code> - 1 missing</summary>
 
-- `VirtualizingStackPanel` (class): 1 missing
-  - `static VirtualizingStackPanel()` *(static)*
-
-</details>
-
-<details><summary><code>Window.cs</code> - 2 missing</summary>
-
-- `Window` (class): 2 missing
-  - `static Window()` *(static)*
+- `Window` (class): 1 missing
   - `Window(IWindowImpl impl)` *(1 of 2 constructors found)*
 
 </details>
 
-<details><summary><code>WindowBase.cs</code> - 2 missing</summary>
+<details><summary><code>WindowBase.cs</code> - 1 missing</summary>
 
-- `WindowBase` (class): 2 missing
-  - `static WindowBase()` *(static)*
+- `WindowBase` (class): 1 missing
   - `WindowBase(IWindowBaseImpl impl, IAvaloniaDependencyResolver? dependencyResolver)` *(1 of 2 constructors found)*
-
-</details>
-
-<details><summary><code>WrapPanel.cs</code> - 1 missing</summary>
-
-- `WrapPanel` (class): 1 missing
-  - `static WrapPanel()` *(static)*
 
 </details>
 
@@ -921,22 +629,15 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 
 </details>
 
-### `AutoCompleteBox` - files 5/5, types 7/7, members 100/101
+### `AutoCompleteBox` - files 5/5, types 7/7, members 101/101
 
 | Upstream file | Rust file | Status | Types | Members | Notes |
 |---|---|---|---|---|---|
 | `AutoCompleteBox.Properties.cs` | `auto_complete_box/auto_complete_box.rs` | present | 1/1 | 52/52 | partial merged into main file |
-| `AutoCompleteBox.cs` | `auto_complete_box/auto_complete_box.rs` | partial | 3/3 | 30/31 |  |
+| `AutoCompleteBox.cs` | `auto_complete_box/auto_complete_box.rs` | present | 3/3 | 31/31 |  |
 | `AutoCompleteFilterMode.cs` | `auto_complete_box/auto_complete_filter_mode.rs` | present | 1/1 | 14/14 |  |
 | `PopulatedEventArgs.cs` | `auto_complete_box/populated_event_args.rs` | present | 1/1 | 2/2 |  |
 | `PopulatingEventArgs.cs` | `auto_complete_box/populating_event_args.rs` | present | 1/1 | 2/2 |  |
-
-<details><summary><code>AutoCompleteBox.cs</code> - 1 missing</summary>
-
-- `AutoCompleteBox` (class): 1 missing
-  - `static AutoCompleteBox()` *(static)*
-
-</details>
 
 ### `Automation` - files 15/15, types 16/16, members 115/115
 
@@ -1062,11 +763,11 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 | `IToggleProvider.cs` | `automation/provider/i_toggle_provider.rs` | present | 2/2 | 5/5 |  |
 | `IValueProvider.cs` | `automation/provider/i_value_provider.rs` | present | 1/1 | 3/3 |  |
 
-### `Calendar` - files 9/9, types 13/13, members 179/187
+### `Calendar` - files 9/9, types 13/13, members 180/187
 
 | Upstream file | Rust file | Status | Types | Members | Notes |
 |---|---|---|---|---|---|
-| `Calendar.cs` | `calendar/calendar.rs` | partial | 5/5 | 95/101 |  |
+| `Calendar.cs` | `calendar/calendar.rs` | partial | 5/5 | 96/101 |  |
 | `CalendarBlackoutDatesCollection.cs` | `calendar/calendar_blackout_dates_collection.rs` | present | 1/1 | 9/9 |  |
 | `CalendarButton.cs` | `calendar/calendar_button.rs` | present | 1/1 | 10/10 |  |
 | `CalendarDateRange.cs` | `calendar/calendar_date_range.rs` | present | 1/1 | 5/5 |  |
@@ -1076,15 +777,14 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 | `DateTimeHelper.cs` | `calendar/date_time_helper.rs` | present | 1/1 | 14/14 |  |
 | `SelectedDatesCollection.cs` | `calendar/selected_dates_collection.rs` | present | 1/1 | 7/7 |  |
 
-<details><summary><code>Calendar.cs</code> - 6 missing</summary>
+<details><summary><code>Calendar.cs</code> - 5 missing</summary>
 
-- `Calendar` (class): 6 missing
+- `Calendar` (class): 5 missing
   - `Panel? Root { get; set; }` *(internal; getter `root` found, setter `set_root` missing)*
   - `Collection<DateTime> RemovedItems { get; set; }` *(internal; getter `removed_items` found, setter `set_removed_items` missing)*
   - `DateTime? LastSelectedDateInternal { get; set; }` *(internal; getter `last_selected_date_internal` found, setter `set_last_selected_date_internal` missing)*
   - `DateTime? HoverEndInternal { get; set; }` *(internal; getter `hover_end_internal` found, setter `set_hover_end_internal` missing)*
   - `bool HasFocusInternal { get; set; }` *(internal; getter `has_focus_internal` found, setter `set_has_focus_internal` missing)*
-  - `static Calendar()` *(static)*
 
 </details>
 
@@ -1096,23 +796,16 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 
 </details>
 
-### `CalendarDatePicker` - files 4/4, types 4/4, members 68/69
+### `CalendarDatePicker` - files 4/4, types 4/4, members 69/69
 
 | Upstream file | Rust file | Status | Types | Members | Notes |
 |---|---|---|---|---|---|
 | `CalendarDatePicker.Properties.cs` | `calendar_date_picker/calendar_date_picker.rs` | present | 1/1 | 43/43 | partial merged into main file |
-| `CalendarDatePicker.cs` | `calendar_date_picker/calendar_date_picker.rs` | partial | 1/1 | 18/19 |  |
+| `CalendarDatePicker.cs` | `calendar_date_picker/calendar_date_picker.rs` | present | 1/1 | 19/19 |  |
 | `CalendarDatePickerDateValidationErrorEventArgs.cs` | `calendar_date_picker/calendar_date_picker_date_validation_error_event_args.rs` | present | 1/1 | 4/4 |  |
 | `CalendarDatePickerFormat.cs` | `calendar_date_picker/calendar_date_picker_format.rs` | present | 1/1 | 3/3 |  |
 
-<details><summary><code>CalendarDatePicker.cs</code> - 1 missing</summary>
-
-- `CalendarDatePicker` (class): 1 missing
-  - `static CalendarDatePicker()` *(static)*
-
-</details>
-
-### `Chrome` - files 7/7, types 7/7, members 78/79
+### `Chrome` - files 7/7, types 7/7, members 79/79
 
 | Upstream file | Rust file | Status | Types | Members | Notes |
 |---|---|---|---|---|---|
@@ -1121,15 +814,8 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 | `ResizeGripLayer.cs` | `chrome/resize_grip_layer.rs` | present | 1/1 | 3/3 |  |
 | `TitleBarDecorations.cs` | `chrome/title_bar_decorations.rs` | present | 1/1 | 7/7 |  |
 | `WindowDecorationProperties.cs` | `chrome/window_decoration_properties.rs` | present | 1/1 | 3/3 |  |
-| `WindowDrawnDecorations.cs` | `chrome/window_drawn_decorations.rs` | partial | 1/1 | 55/56 |  |
+| `WindowDrawnDecorations.cs` | `chrome/window_drawn_decorations.rs` | present | 1/1 | 56/56 |  |
 | `WindowDrawnDecorationsContent.cs` | `chrome/window_drawn_decorations_content.rs` | present | 1/1 | 3/3 |  |
-
-<details><summary><code>WindowDrawnDecorations.cs</code> - 1 missing</summary>
-
-- `WindowDrawnDecorations` (class): 1 missing
-  - `static WindowDrawnDecorations()` *(static)*
-
-</details>
 
 ### `CommandBar` - files 7/7, types 7/7, members 78/78
 
@@ -1158,39 +844,18 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 | `StringFormatConverter.cs` | `converters/string_format_converter.rs` | present | 1/1 | 1/1 |  |
 | `TreeViewItemIndentConverter.cs` | `converters/tree_view_item_indent_converter.rs` | present | 1/1 | 2/2 |  |
 
-### `DateTimePickers` - files 8/8, types 9/9, members 138/141
+### `DateTimePickers` - files 8/8, types 9/9, members 141/141
 
 | Upstream file | Rust file | Status | Types | Members | Notes |
 |---|---|---|---|---|---|
 | `DatePicker.cs` | `date_time_pickers/date_picker.rs` | present | 1/1 | 27/27 |  |
-| `DatePickerPresenter.cs` | `date_time_pickers/date_picker_presenter.rs` | partial | 1/1 | 23/24 |  |
+| `DatePickerPresenter.cs` | `date_time_pickers/date_picker_presenter.rs` | present | 1/1 | 24/24 |  |
 | `DatePickerSelectedValueChangedEventArgs.cs` | `date_time_pickers/date_picker_selected_value_changed_event_args.rs` | present | 1/1 | 3/3 |  |
-| `DateTimePickerPanel.cs` | `date_time_pickers/date_time_picker_panel.rs` | partial | 2/2 | 43/44 |  |
+| `DateTimePickerPanel.cs` | `date_time_pickers/date_time_picker_panel.rs` | present | 2/2 | 44/44 |  |
 | `PickerPresenterBase.cs` | `date_time_pickers/picker_presenter_base.rs` | present | 1/1 | 4/4 |  |
 | `TimePicker.cs` | `date_time_pickers/time_picker.rs` | present | 1/1 | 19/19 |  |
-| `TimePickerPresenter.cs` | `date_time_pickers/time_picker_presenter.rs` | partial | 1/1 | 16/17 |  |
+| `TimePickerPresenter.cs` | `date_time_pickers/time_picker_presenter.rs` | present | 1/1 | 17/17 |  |
 | `TimePickerSelectedValueChangedEventArgs.cs` | `date_time_pickers/time_picker_selected_value_changed_event_args.rs` | present | 1/1 | 3/3 |  |
-
-<details><summary><code>DatePickerPresenter.cs</code> - 1 missing</summary>
-
-- `DatePickerPresenter` (class): 1 missing
-  - `static DatePickerPresenter()` *(static)*
-
-</details>
-
-<details><summary><code>DateTimePickerPanel.cs</code> - 1 missing</summary>
-
-- `DateTimePickerPanel` (class): 1 missing
-  - `static DateTimePickerPanel()` *(static)*
-
-</details>
-
-<details><summary><code>TimePickerPresenter.cs</code> - 1 missing</summary>
-
-- `TimePickerPresenter` (class): 1 missing
-  - `static TimePickerPresenter()` *(static)*
-
-</details>
 
 ### `Diagnostics` - files 2/2, types 2/2, members 3/3
 
@@ -1199,29 +864,22 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 | `IPopupHostProvider.cs` | `diagnostics/i_popup_host_provider.rs` | present | 1/1 | 2/2 |  |
 | `ToolTipDiagnostics.cs` | `diagnostics/tool_tip_diagnostics.rs` | present | 1/1 | 1/1 |  |
 
-### `Documents` - files 12/12, types 12/12, members 95/101
+### `Documents` - files 12/12, types 12/12, members 98/101
 
 | Upstream file | Rust file | Status | Types | Members | Notes |
 |---|---|---|---|---|---|
-| `Bold.cs` | `documents/bold.rs` | partial | 1/1 | 1/2 |  |
+| `Bold.cs` | `documents/bold.rs` | present | 1/1 | 2/2 |  |
 | `IInlineHost.cs` | `documents/i_inline_host.rs` | partial | 1/1 | 1/2 |  |
 | `Inline.cs` | `documents/inline.rs` | present | 1/1 | 11/11 |  |
 | `InlineCollection.cs` | `documents/inline_collection.rs` | present | 1/1 | 9/9 |  |
 | `InlineRun.cs` | `documents/inline_run.rs` | present | 1/1 | 6/6 |  |
 | `InlineUIContainer.cs` | `documents/inline_ui_container.rs` | partial | 1/1 | 8/9 |  |
-| `Italic.cs` | `documents/italic.rs` | partial | 1/1 | 1/2 |  |
+| `Italic.cs` | `documents/italic.rs` | present | 1/1 | 2/2 |  |
 | `LineBreak.cs` | `documents/line_break.rs` | present | 1/1 | 3/3 |  |
 | `Run.cs` | `documents/run.rs` | partial | 1/1 | 6/7 |  |
 | `Span.cs` | `documents/span.rs` | present | 1/1 | 11/11 |  |
 | `TextElement.cs` | `documents/text_element.rs` | present | 1/1 | 37/37 |  |
-| `Underline.cs` | `documents/underline.rs` | partial | 1/1 | 1/2 |  |
-
-<details><summary><code>Bold.cs</code> - 1 missing</summary>
-
-- `Bold` (class): 1 missing
-  - `static Bold()` *(static)*
-
-</details>
+| `Underline.cs` | `documents/underline.rs` | present | 1/1 | 2/2 |  |
 
 <details><summary><code>IInlineHost.cs</code> - 1 missing</summary>
 
@@ -1237,24 +895,10 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 
 </details>
 
-<details><summary><code>Italic.cs</code> - 1 missing</summary>
-
-- `Italic` (class): 1 missing
-  - `static Italic()` *(static)*
-
-</details>
-
 <details><summary><code>Run.cs</code> - 1 missing</summary>
 
 - `Run` (class): 1 missing
   - `Run(string? text)` *(1 of 2 constructors found)*
-
-</details>
-
-<details><summary><code>Underline.cs</code> - 1 missing</summary>
-
-- `Underline` (class): 1 missing
-  - `static Underline()` *(static)*
 
 </details>
 
@@ -1294,7 +938,7 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 
 </details>
 
-### `FlexPanel` - files 9/9, types 9/9, members 80/81
+### `FlexPanel` - files 9/9, types 9/9, members 81/81
 
 | Upstream file | Rust file | Status | Types | Members | Notes |
 |---|---|---|---|---|---|
@@ -1305,17 +949,10 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 | `FlexBasisKind.cs` | `flex_panel/flex_basis_kind.rs` | present | 1/1 | 3/3 |  |
 | `FlexDirection.cs` | `flex_panel/flex_direction.rs` | present | 1/1 | 4/4 |  |
 | `FlexJustifyContent.cs` | `flex_panel/flex_justify_content.rs` | present | 1/1 | 6/6 |  |
-| `FlexPanel.cs` | `flex_panel/flex_panel.rs` | partial | 1/1 | 17/18 |  |
+| `FlexPanel.cs` | `flex_panel/flex_panel.rs` | present | 1/1 | 18/18 |  |
 | `FlexWrap.cs` | `flex_panel/flex_wrap.rs` | present | 1/1 | 3/3 |  |
 
-<details><summary><code>FlexPanel.cs</code> - 1 missing</summary>
-
-- `FlexPanel` (class): 1 missing
-  - `static FlexPanel()` *(static)*
-
-</details>
-
-### `Flyouts` - files 7/7, types 7/7, members 79/83
+### `Flyouts` - files 7/7, types 7/7, members 80/83
 
 | Upstream file | Rust file | Status | Types | Members | Notes |
 |---|---|---|---|---|---|
@@ -1325,7 +962,7 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 | `FlyoutShowMode.cs` | `flyouts/flyout_show_mode.rs` | present | 1/1 | 3/3 |  |
 | `MenuFlyout.cs` | `flyouts/menu_flyout.rs` | present | 1/1 | 14/14 |  |
 | `MenuFlyoutPresenter.cs` | `flyouts/menu_flyout_presenter.rs` | partial | 1/1 | 4/5 |  |
-| `PopupFlyoutBase.cs` | `flyouts/popup_flyout_base.rs` | partial | 1/1 | 34/37 |  |
+| `PopupFlyoutBase.cs` | `flyouts/popup_flyout_base.rs` | partial | 1/1 | 35/37 |  |
 
 <details><summary><code>MenuFlyoutPresenter.cs</code> - 1 missing</summary>
 
@@ -1334,10 +971,9 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 
 </details>
 
-<details><summary><code>PopupFlyoutBase.cs</code> - 3 missing</summary>
+<details><summary><code>PopupFlyoutBase.cs</code> - 2 missing</summary>
 
-- `PopupFlyoutBase` (class): 3 missing
-  - `static PopupFlyoutBase()` *(static)*
+- `PopupFlyoutBase` (class): 2 missing
   - `IPopupHost? IPopupHostProvider.PopupHost { get; }` *(explicit)*
   - `event Action<IPopupHost?>? IPopupHostProvider.PopupHostChanged` *(explicit)*
 
@@ -1356,7 +992,7 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 | `PressedMixin.cs` | `mixins/pressed_mixin.rs` | present | 1/1 | 1/1 |  |
 | `SelectableMixin.cs` | `mixins/selectable_mixin.rs` | present | 1/1 | 1/1 |  |
 
-### `Notifications` - files 9/9, types 9/9, members 62/67
+### `Notifications` - files 9/9, types 9/9, members 65/67
 
 | Upstream file | Rust file | Status | Types | Members | Notes |
 |---|---|---|---|---|---|
@@ -1364,11 +1000,11 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 | `INotification.cs` | `notifications/i_notification.rs` | present | 1/1 | 6/6 |  |
 | `INotificationManager.cs` | `notifications/i_notification_manager.rs` | present | 1/1 | 3/3 |  |
 | `Notification.cs` | `notifications/notification.rs` | partial | 1/1 | 9/10 |  |
-| `NotificationCard.cs` | `notifications/notification_card.rs` | partial | 1/1 | 14/15 |  |
+| `NotificationCard.cs` | `notifications/notification_card.rs` | present | 1/1 | 15/15 |  |
 | `NotificationPosition.cs` | `notifications/notification_position.rs` | present | 1/1 | 6/6 |  |
 | `NotificationType.cs` | `notifications/notification_type.rs` | present | 1/1 | 4/4 |  |
-| `ReversibleStackPanel.cs` | `notifications/reversible_stack_panel.rs` | partial | 1/1 | 3/4 |  |
-| `WindowNotificationManager.cs` | `notifications/window_notification_manager.rs` | partial | 1/1 | 15/17 |  |
+| `ReversibleStackPanel.cs` | `notifications/reversible_stack_panel.rs` | present | 1/1 | 4/4 |  |
+| `WindowNotificationManager.cs` | `notifications/window_notification_manager.rs` | partial | 1/1 | 16/17 |  |
 
 <details><summary><code>Notification.cs</code> - 1 missing</summary>
 
@@ -1377,55 +1013,39 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 
 </details>
 
-<details><summary><code>NotificationCard.cs</code> - 1 missing</summary>
+<details><summary><code>WindowNotificationManager.cs</code> - 1 missing</summary>
 
-- `NotificationCard` (class): 1 missing
-  - `static NotificationCard()` *(static)*
-
-</details>
-
-<details><summary><code>ReversibleStackPanel.cs</code> - 1 missing</summary>
-
-- `ReversibleStackPanel` (class): 1 missing
-  - `static ReversibleStackPanel()` *(static)*
-
-</details>
-
-<details><summary><code>WindowNotificationManager.cs</code> - 2 missing</summary>
-
-- `WindowNotificationManager` (class): 2 missing
+- `WindowNotificationManager` (class): 1 missing
   - `WindowNotificationManager()` *(1 of 2 constructors found)*
-  - `static WindowNotificationManager()` *(static)*
 
 </details>
 
-### `NumericUpDown` - files 2/2, types 2/2, members 72/74
+### `NumericUpDown` - files 2/2, types 2/2, members 73/74
 
 | Upstream file | Rust file | Status | Types | Members | Notes |
 |---|---|---|---|---|---|
-| `NumericUpDown.cs` | `numeric_up_down/numeric_up_down.rs` | partial | 1/1 | 69/71 |  |
+| `NumericUpDown.cs` | `numeric_up_down/numeric_up_down.rs` | partial | 1/1 | 70/71 |  |
 | `NumericUpDownValueChangedEventArgs.cs` | `numeric_up_down/numeric_up_down_value_changed_event_args.rs` | present | 1/1 | 3/3 |  |
 
-<details><summary><code>NumericUpDown.cs</code> - 2 missing</summary>
+<details><summary><code>NumericUpDown.cs</code> - 1 missing</summary>
 
-- `NumericUpDown` (class): 2 missing
+- `NumericUpDown` (class): 1 missing
   - `decimal? Value { get; set; }` *(getter `value` found, setter `set_value` missing)*
-  - `static NumericUpDown()` *(static)*
 
 </details>
 
-### `Page` - files 29/29, types 29/29, members 383/394
+### `Page` - files 29/29, types 29/29, members 390/394
 
 | Upstream file | Rust file | Status | Types | Members | Notes |
 |---|---|---|---|---|---|
 | `BarLayoutBehavior.cs` | `page/bar_layout_behavior.rs` | present | 1/1 | 2/2 |  |
-| `CarouselPage.cs` | `page/carousel_page.rs` | partial | 1/1 | 18/19 |  |
-| `ContentPage.cs` | `page/content_page.rs` | partial | 1/1 | 19/20 |  |
+| `CarouselPage.cs` | `page/carousel_page.rs` | present | 1/1 | 19/19 |  |
+| `ContentPage.cs` | `page/content_page.rs` | present | 1/1 | 20/20 |  |
 | `DefaultPageDataTemplate.cs` | `page/default_page_data_template.rs` | present | 1/1 | 3/3 |  |
 | `DrawerBehavior.cs` | `page/drawer_behavior.rs` | present | 1/1 | 4/4 |  |
 | `DrawerClosingEventArgs.cs` | `page/drawer_closing_event_args.rs` | present | 1/1 | 2/2 |  |
 | `DrawerLayoutBehavior.cs` | `page/drawer_layout_behavior.rs` | present | 1/1 | 4/4 |  |
-| `DrawerPage.cs` | `page/drawer_page.rs` | partial | 1/1 | 71/72 |  |
+| `DrawerPage.cs` | `page/drawer_page.rs` | present | 1/1 | 72/72 |  |
 | `DrawerPlacement.cs` | `page/drawer_placement.rs` | present | 1/1 | 4/4 |  |
 | `INavigation.cs` | `page/i_navigation.rs` | present | 1/1 | 25/25 |  |
 | `ModalPoppedEventArgs.cs` | `page/modal_popped_event_args.rs` | present | 1/1 | 2/2 |  |
@@ -1435,39 +1055,18 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 | `NavigatedToEventArgs.cs` | `page/navigated_to_event_args.rs` | partial | 1/1 | 4/5 |  |
 | `NavigatingFromEventArgs.cs` | `page/navigating_from_event_args.rs` | partial | 1/1 | 5/6 |  |
 | `NavigationEventArgs.cs` | `page/navigation_event_args.rs` | partial | 1/1 | 4/5 |  |
-| `NavigationPage.cs` | `page/navigation_page.rs` | partial | 1/1 | 98/99 |  |
+| `NavigationPage.cs` | `page/navigation_page.rs` | present | 1/1 | 99/99 |  |
 | `NavigationType.cs` | `page/navigation_type.rs` | present | 1/1 | 8/8 |  |
-| `Page.cs` | `page/page.rs` | partial | 1/1 | 33/34 |  |
+| `Page.cs` | `page/page.rs` | present | 1/1 | 34/34 |  |
 | `PageInsertedEventArgs.cs` | `page/page_inserted_event_args.rs` | present | 1/1 | 3/3 |  |
 | `PageNavigationExtensions.cs` | `page/page_navigation_extensions.rs` | present | 1/1 | 0/0 |  |
-| `PageNavigationHost.cs` | `page/page_navigation_host.rs` | partial | 1/1 | 7/8 |  |
+| `PageNavigationHost.cs` | `page/page_navigation_host.rs` | present | 1/1 | 8/8 |  |
 | `PageRemovedEventArgs.cs` | `page/page_removed_event_args.rs` | present | 1/1 | 2/2 |  |
 | `PageSelectionChangedEventArgs.cs` | `page/page_selection_changed_event_args.rs` | present | 1/1 | 3/3 |  |
 | `SafeAreaPaddingExtensions.cs` | `page/safe_area_padding_extensions.rs` | present | 1/1 | 2/2 |  |
 | `SelectingMultiPage.cs` | `page/selecting_multi_page.rs` | present | 1/1 | 10/10 |  |
 | `TabPlacement.cs` | `page/tab_placement.rs` | present | 1/1 | 5/5 |  |
-| `TabbedPage.cs` | `page/tabbed_page.rs` | partial | 1/1 | 26/27 |  |
-
-<details><summary><code>CarouselPage.cs</code> - 1 missing</summary>
-
-- `CarouselPage` (class): 1 missing
-  - `static CarouselPage()` *(static)*
-
-</details>
-
-<details><summary><code>ContentPage.cs</code> - 1 missing</summary>
-
-- `ContentPage` (class): 1 missing
-  - `static ContentPage()` *(static)*
-
-</details>
-
-<details><summary><code>DrawerPage.cs</code> - 1 missing</summary>
-
-- `DrawerPage` (class): 1 missing
-  - `static DrawerPage()` *(static)*
-
-</details>
+| `TabbedPage.cs` | `page/tabbed_page.rs` | present | 1/1 | 27/27 |  |
 
 <details><summary><code>NavigatedFromEventArgs.cs</code> - 1 missing</summary>
 
@@ -1497,50 +1096,15 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 
 </details>
 
-<details><summary><code>NavigationPage.cs</code> - 1 missing</summary>
-
-- `NavigationPage` (class): 1 missing
-  - `static NavigationPage()` *(static)*
-
-</details>
-
-<details><summary><code>Page.cs</code> - 1 missing</summary>
-
-- `Page` (class): 1 missing
-  - `static Page()` *(static)*
-
-</details>
-
-<details><summary><code>PageNavigationHost.cs</code> - 1 missing</summary>
-
-- `PageNavigationHost` (class): 1 missing
-  - `static PageNavigationHost()` *(static)*
-
-</details>
-
-<details><summary><code>TabbedPage.cs</code> - 1 missing</summary>
-
-- `TabbedPage` (class): 1 missing
-  - `static TabbedPage()` *(static)*
-
-</details>
-
-### `PipsPager` - files 3/3, types 3/3, members 30/31
+### `PipsPager` - files 3/3, types 3/3, members 31/31
 
 | Upstream file | Rust file | Status | Types | Members | Notes |
 |---|---|---|---|---|---|
-| `PipsPager.cs` | `pips_pager/pips_pager.rs` | partial | 1/1 | 24/25 |  |
+| `PipsPager.cs` | `pips_pager/pips_pager.rs` | present | 1/1 | 25/25 |  |
 | `PipsPagerSelectedIndexChangedEventArgs.cs` | `pips_pager/pips_pager_selected_index_changed_event_args.rs` | present | 1/1 | 3/3 |  |
 | `PipsPagerTemplateSettings.cs` | `pips_pager/pips_pager_template_settings.rs` | present | 1/1 | 3/3 |  |
 
-<details><summary><code>PipsPager.cs</code> - 1 missing</summary>
-
-- `PipsPager` (class): 1 missing
-  - `static PipsPager()` *(static)*
-
-</details>
-
-### `Platform` - files 31/31, types 52/53, members 289/313 (1 waived)
+### `Platform` - files 31/31, types 52/53, members 291/313 (1 waived)
 
 | Upstream file | Rust file | Status | Types | Members | Notes |
 |---|---|---|---|---|---|
@@ -1566,7 +1130,7 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 | `IWindowingPlatform.cs` | `platform/i_windowing_platform.rs` | present | 1/1 | 5/5 |  |
 | `IX11OptionsToplevelImplFeature.cs` | `platform/i_x11_options_toplevel_impl_feature.rs` | present | 2/2 | 10/10 |  |
 | `InProcessDragSource.cs` | `platform/in_process_drag_source.rs` | present | 1/1 | 2/2 |  |
-| `MacOSProperties.cs` | `platform/mac_os_properties.rs` | partial | 1/1 | 3/4 |  |
+| `MacOSProperties.cs` | `platform/mac_os_properties.rs` | present | 1/1 | 4/4 |  |
 | `PlatformAllowedWindowActions.cs` | `platform/platform_allowed_window_actions.rs` | present | 1/1 | 5/5 |  |
 | `PlatformFeedback.cs` | `platform/platform_feedback.rs` | present | 2/2 | 4/4 |  |
 | `PlatformManager.cs` | `platform/platform_manager.rs` | present | 1/1 | 6/6 |  |
@@ -1574,7 +1138,7 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 | `Screen.cs` | `platform/screen.rs` | present | 2/2 | 20/20 |  |
 | `ScreenHelper.cs` | `platform/screen_helper.rs` | present | 1/1 | 3/3 |  |
 | `Win32Properties.cs` | `platform/win32_properties.rs` | partial | 4/5 | 18/29 |  |
-| `X11Properties.cs` | `platform/x11_properties.rs` | partial | 1/1 | 6/7 |  |
+| `X11Properties.cs` | `platform/x11_properties.rs` | present | 1/1 | 7/7 |  |
 
 <details><summary><code>DefaultMenuInteractionHandler.cs</code> - 1 missing</summary>
 
@@ -1612,23 +1176,9 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 
 </details>
 
-<details><summary><code>MacOSProperties.cs</code> - 1 missing</summary>
-
-- `MacOSProperties` (class): 1 missing
-  - `static MacOSProperties()` *(static)*
-
-</details>
-
 <details><summary><code>Win32Properties.cs</code> - 12 missing</summary>
 
 - `Win32Properties` (class, public): **type missing** (11 members)
-
-</details>
-
-<details><summary><code>X11Properties.cs</code> - 1 missing</summary>
-
-- `X11Properties` (class): 1 missing
-  - `static X11Properties()` *(static)*
 
 </details>
 
@@ -1650,92 +1200,76 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 | `PresentationSource.RenderRoot.cs` | `presentation_source/presentation_source_render_root.rs` | present | 1/1 | 10/10 |  |
 | `PresentationSource.cs` | `presentation_source/presentation_source.rs` | present | 1/1 | 11/11 |  |
 
-### `Presenters` - files 9/9, types 9/9, members 214/219
+### `Presenters` - files 9/9, types 9/9, members 217/219
 
 | Upstream file | Rust file | Status | Types | Members | Notes |
 |---|---|---|---|---|---|
-| `ContentPresenter.cs` | `presenters/content_presenter.rs` | partial | 1/1 | 61/63 |  |
+| `ContentPresenter.cs` | `presenters/content_presenter.rs` | partial | 1/1 | 62/63 |  |
 | `IContentPresenterHost.cs` | `presenters/i_content_presenter_host.rs` | present | 1/1 | 2/2 |  |
 | `ItemsPresenter.cs` | `presenters/items_presenter.rs` | present | 1/1 | 27/27 |  |
 | `PanelContainerGenerator.cs` | `presenters/panel_container_generator.rs` | present | 1/1 | 3/3 |  |
-| `ScrollContentPresenter.cs` | `presenters/scroll_content_presenter.rs` | partial | 1/1 | 33/34 |  |
+| `ScrollContentPresenter.cs` | `presenters/scroll_content_presenter.rs` | present | 1/1 | 34/34 |  |
 | `TableViewCellsPresenter.cs` | `presenters/table_view_cells_presenter.rs` | present | 1/1 | 7/7 |  |
 | `TableViewColumnHeadersPresenter.cs` | `presenters/table_view_column_headers_presenter.rs` | present | 1/1 | 7/7 |  |
 | `TableViewLayoutHelper.cs` | `presenters/table_view_layout_helper.rs` | present | 1/1 | 5/5 |  |
-| `TextPresenter.cs` | `presenters/text_presenter.rs` | partial | 1/1 | 69/71 |  |
+| `TextPresenter.cs` | `presenters/text_presenter.rs` | partial | 1/1 | 70/71 |  |
 
-<details><summary><code>ContentPresenter.cs</code> - 2 missing</summary>
+<details><summary><code>ContentPresenter.cs</code> - 1 missing</summary>
 
-- `ContentPresenter` (class): 2 missing
-  - `static ContentPresenter()` *(static)*
+- `ContentPresenter` (class): 1 missing
   - `override void BuildDebugDisplay(StringBuilder builder, bool includeContent)` *(internal)*
 
 </details>
 
-<details><summary><code>ScrollContentPresenter.cs</code> - 1 missing</summary>
+<details><summary><code>TextPresenter.cs</code> - 1 missing</summary>
 
-- `ScrollContentPresenter` (class): 1 missing
-  - `static ScrollContentPresenter()` *(static)*
-
-</details>
-
-<details><summary><code>TextPresenter.cs</code> - 2 missing</summary>
-
-- `TextPresenter` (class): 2 missing
-  - `static TextPresenter()` *(static)*
+- `TextPresenter` (class): 1 missing
   - `TextSelectionHandleCanvas? TextSelectionHandleCanvas { get; set; }` *(internal; getter `text_selection_handle_canvas` found, setter `set_text_selection_handle_canvas` missing)*
 
 </details>
 
-### `Primitives` - files 38/38, types 39/39, members 501/534
+### `Primitives` - files 38/38, types 39/39, members 517/534
 
 | Upstream file | Rust file | Status | Types | Members | Notes |
 |---|---|---|---|---|---|
-| `AccessText.cs` | `primitives/access_text.rs` | partial | 1/1 | 10/11 |  |
+| `AccessText.cs` | `primitives/access_text.rs` | present | 1/1 | 11/11 |  |
 | `AdornerHelper.cs` | `primitives/adorner_helper.rs` | present | 1/1 | 2/2 |  |
 | `AdornerLayer.cs` | `primitives/adorner_layer.rs` | partial | 1/1 | 15/16 |  |
-| `HeaderedContentControl.cs` | `primitives/headered_content_control.rs` | partial | 1/1 | 6/8 |  |
-| `HeaderedItemsControl.cs` | `primitives/headered_items_control.rs` | partial | 1/1 | 10/11 |  |
-| `HeaderedSelectingItemsControl.cs` | `primitives/headered_selecting_items_control.rs` | partial | 1/1 | 10/11 |  |
+| `HeaderedContentControl.cs` | `primitives/headered_content_control.rs` | partial | 1/1 | 7/8 |  |
+| `HeaderedItemsControl.cs` | `primitives/headered_items_control.rs` | present | 1/1 | 11/11 |  |
+| `HeaderedSelectingItemsControl.cs` | `primitives/headered_selecting_items_control.rs` | present | 1/1 | 11/11 |  |
 | `ILogicalScrollable.cs` | `primitives/i_logical_scrollable.rs` | partial | 1/1 | 7/9 |  |
 | `IPopupHost.cs` | `primitives/i_popup_host.rs` | present | 1/1 | 17/17 |  |
 | `IScrollSnapPointsInfo.cs` | `primitives/i_scroll_snap_points_info.rs` | present | 1/1 | 6/6 |  |
 | `ItemSelectionEventTriggers.cs` | `primitives/item_selection_event_triggers.rs` | present | 1/1 | 5/5 |  |
-| `LightDismissOverlayLayer.cs` | `primitives/light_dismiss_overlay_layer.rs` | partial | 1/1 | 4/5 |  |
+| `LightDismissOverlayLayer.cs` | `primitives/light_dismiss_overlay_layer.rs` | present | 1/1 | 5/5 |  |
 | `OverlayLayer.cs` | `primitives/overlay_layer.rs` | present | 1/1 | 7/7 |  |
-| `OverlayPopupHost.cs` | `primitives/overlay_popup_host.rs` | partial | 1/1 | 14/20 |  |
-| `Popup.cs` | `primitives/popup.rs` | partial | 1/1 | 61/63 |  |
+| `OverlayPopupHost.cs` | `primitives/overlay_popup_host.rs` | partial | 1/1 | 15/20 |  |
+| `Popup.cs` | `primitives/popup.rs` | partial | 1/1 | 62/63 |  |
 | `PopupOverlayLayer.cs` | `primitives/popup_overlay_layer.rs` | present | 1/1 | 5/5 |  |
-| `PopupRoot.cs` | `primitives/popup_root.rs` | partial | 1/1 | 20/22 |  |
+| `PopupRoot.cs` | `primitives/popup_root.rs` | partial | 1/1 | 21/22 |  |
 | `RangeBase.cs` | `primitives/range_base.rs` | partial | 1/1 | 15/16 |  |
 | `RangeBaseValueChangedEventArgs.cs` | `primitives/range_base_value_changed_event_args.rs` | present | 1/1 | 4/4 |  |
-| `ScrollBar.cs` | `primitives/scroll_bar.rs` | partial | 2/2 | 41/42 |  |
+| `ScrollBar.cs` | `primitives/scroll_bar.rs` | present | 2/2 | 42/42 |  |
 | `ScrollBarVisibility.cs` | `primitives/scroll_bar_visibility.rs` | present | 1/1 | 4/4 |  |
 | `ScrollEventType.cs` | `primitives/scroll_event_type.rs` | present | 1/1 | 6/6 |  |
-| `SelectingItemsControl.cs` | `primitives/selecting_items_control.rs` | partial | 1/1 | 51/54 |  |
+| `SelectingItemsControl.cs` | `primitives/selecting_items_control.rs` | partial | 1/1 | 52/54 |  |
 | `SelectionHandleType.cs` | `primitives/selection_handle_type.rs` | present | 1/1 | 3/3 |  |
 | `SnapPointsAlignment.cs` | `primitives/snap_points_alignment.rs` | present | 1/1 | 3/3 |  |
 | `SnapPointsType.cs` | `primitives/snap_points_type.rs` | present | 1/1 | 3/3 |  |
-| `TabStrip.cs` | `primitives/tab_strip.rs` | partial | 1/1 | 4/5 |  |
+| `TabStrip.cs` | `primitives/tab_strip.rs` | present | 1/1 | 5/5 |  |
 | `TabStripItem.cs` | `primitives/tab_strip_item.rs` | present | 1/1 | 1/1 |  |
 | `TemplateAppliedEventArgs.cs` | `primitives/template_applied_event_args.rs` | present | 1/1 | 2/2 |  |
-| `TemplatedControl.cs` | `primitives/templated_control.rs` | partial | 1/1 | 44/45 |  |
+| `TemplatedControl.cs` | `primitives/templated_control.rs` | present | 1/1 | 45/45 |  |
 | `TextSearch.cs` | `primitives/text_search.rs` | present | 1/1 | 7/7 |  |
 | `TextSelectionCanvas.cs` | `primitives/text_selection_canvas.rs` | partial | 1/1 | 8/9 |  |
-| `TextSelectionHandle.cs` | `primitives/text_selection_handle.rs` | partial | 1/1 | 19/20 |  |
+| `TextSelectionHandle.cs` | `primitives/text_selection_handle.rs` | present | 1/1 | 20/20 |  |
 | `TextSelectorLayer.cs` | `primitives/text_selector_layer.rs` | present | 1/1 | 7/7 |  |
-| `Thumb.cs` | `primitives/thumb.rs` | partial | 1/1 | 15/16 |  |
+| `Thumb.cs` | `primitives/thumb.rs` | present | 1/1 | 16/16 |  |
 | `ToggleButton.cs` | `primitives/toggle_button.rs` | partial | 1/1 | 12/13 |  |
-| `Track.cs` | `primitives/track.rs` | partial | 1/1 | 27/29 |  |
-| `UniformGrid.cs` | `primitives/uniform_grid.rs` | partial | 1/1 | 12/13 |  |
+| `Track.cs` | `primitives/track.rs` | partial | 1/1 | 28/29 |  |
+| `UniformGrid.cs` | `primitives/uniform_grid.rs` | present | 1/1 | 13/13 |  |
 | `VisualLayerManager.cs` | `primitives/visual_layer_manager.rs` | present | 1/1 | 14/14 |  |
-
-<details><summary><code>AccessText.cs</code> - 1 missing</summary>
-
-- `AccessText` (class): 1 missing
-  - `static AccessText()` *(static)*
-
-</details>
 
 <details><summary><code>AdornerLayer.cs</code> - 1 missing</summary>
 
@@ -1744,25 +1278,10 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 
 </details>
 
-<details><summary><code>HeaderedContentControl.cs</code> - 2 missing</summary>
+<details><summary><code>HeaderedContentControl.cs</code> - 1 missing</summary>
 
-- `HeaderedContentControl` (class): 2 missing
-  - `static HeaderedContentControl()` *(static)*
+- `HeaderedContentControl` (class): 1 missing
   - `override void BuildDebugDisplay(StringBuilder builder, bool includeContent)` *(internal)*
-
-</details>
-
-<details><summary><code>HeaderedItemsControl.cs</code> - 1 missing</summary>
-
-- `HeaderedItemsControl` (class): 1 missing
-  - `static HeaderedItemsControl()` *(static)*
-
-</details>
-
-<details><summary><code>HeaderedSelectingItemsControl.cs</code> - 1 missing</summary>
-
-- `HeaderedSelectingItemsControl` (class): 1 missing
-  - `static HeaderedSelectingItemsControl()` *(static)*
 
 </details>
 
@@ -1774,17 +1293,9 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 
 </details>
 
-<details><summary><code>LightDismissOverlayLayer.cs</code> - 1 missing</summary>
+<details><summary><code>OverlayPopupHost.cs</code> - 5 missing</summary>
 
-- `LightDismissOverlayLayer` (class): 1 missing
-  - `static LightDismissOverlayLayer()` *(static)*
-
-</details>
-
-<details><summary><code>OverlayPopupHost.cs</code> - 6 missing</summary>
-
-- `OverlayPopupHost` (class): 6 missing
-  - `static OverlayPopupHost()` *(static)*
+- `OverlayPopupHost` (class): 5 missing
   - `bool IPopupHost.Topmost { get; set; }` *(explicit)*
   - `IReadOnlyList<ManagedPopupPositionerScreenInfo> IManagedPopupPositionerPopup.Screens { get; }` *(explicit)*
   - `Rect IManagedPopupPositionerPopup.ParentClientAreaScreenGeometry { get; }` *(explicit)*
@@ -1793,18 +1304,16 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 
 </details>
 
-<details><summary><code>Popup.cs</code> - 2 missing</summary>
+<details><summary><code>Popup.cs</code> - 1 missing</summary>
 
-- `Popup` (class): 2 missing
-  - `static Popup()` *(static)*
+- `Popup` (class): 1 missing
   - `IPopupHost? IPopupHostProvider.PopupHost { get; }` *(explicit)*
 
 </details>
 
-<details><summary><code>PopupRoot.cs</code> - 2 missing</summary>
+<details><summary><code>PopupRoot.cs</code> - 1 missing</summary>
 
-- `PopupRoot` (class): 2 missing
-  - `static PopupRoot()` *(static)*
+- `PopupRoot` (class): 1 missing
   - `Visual IPopupHost.HostedVisualTreeRoot { get; }` *(explicit)*
 
 </details>
@@ -1816,33 +1325,11 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 
 </details>
 
-<details><summary><code>ScrollBar.cs</code> - 1 missing</summary>
+<details><summary><code>SelectingItemsControl.cs</code> - 2 missing</summary>
 
-- `ScrollBar` (class): 1 missing
-  - `static ScrollBar()` *(static)*
-
-</details>
-
-<details><summary><code>SelectingItemsControl.cs</code> - 3 missing</summary>
-
-- `SelectingItemsControl` (class): 3 missing
-  - `static SelectingItemsControl()` *(static)*
+- `SelectingItemsControl` (class): 2 missing
   - `override void EndInit()`
   - `new static SelectingItemsControl? ItemsControlFromItemContainer(Control container)`
-
-</details>
-
-<details><summary><code>TabStrip.cs</code> - 1 missing</summary>
-
-- `TabStrip` (class): 1 missing
-  - `static TabStrip()` *(static)*
-
-</details>
-
-<details><summary><code>TemplatedControl.cs</code> - 1 missing</summary>
-
-- `TemplatedControl` (class): 1 missing
-  - `static TemplatedControl()` *(static)*
 
 </details>
 
@@ -1853,20 +1340,6 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 
 </details>
 
-<details><summary><code>TextSelectionHandle.cs</code> - 1 missing</summary>
-
-- `TextSelectionHandle` (class): 1 missing
-  - `static TextSelectionHandle()` *(static)*
-
-</details>
-
-<details><summary><code>Thumb.cs</code> - 1 missing</summary>
-
-- `Thumb` (class): 1 missing
-  - `static Thumb()` *(static)*
-
-</details>
-
 <details><summary><code>ToggleButton.cs</code> - 1 missing</summary>
 
 - `ToggleButton` (class): 1 missing
@@ -1874,18 +1347,10 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 
 </details>
 
-<details><summary><code>Track.cs</code> - 2 missing</summary>
+<details><summary><code>Track.cs</code> - 1 missing</summary>
 
-- `Track` (class): 2 missing
-  - `static Track()` *(static)*
+- `Track` (class): 1 missing
   - `double Value { get; set; }` *(getter `value` found, setter `set_value` missing)*
-
-</details>
-
-<details><summary><code>UniformGrid.cs</code> - 1 missing</summary>
-
-- `UniformGrid` (class): 1 missing
-  - `static UniformGrid()` *(static)*
 
 </details>
 
@@ -2013,75 +1478,19 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 
 </details>
 
-### `Shapes` - files 9/9, types 9/9, members 69/77
+### `Shapes` - files 9/9, types 9/9, members 77/77
 
 | Upstream file | Rust file | Status | Types | Members | Notes |
 |---|---|---|---|---|---|
-| `Arc.cs` | `shapes/arc.rs` | partial | 1/1 | 5/6 |  |
-| `Ellipse.cs` | `shapes/ellipse.rs` | partial | 1/1 | 2/3 |  |
-| `Line.cs` | `shapes/line.rs` | partial | 1/1 | 5/6 |  |
-| `Path.cs` | `shapes/path.rs` | partial | 1/1 | 3/4 |  |
-| `Polygon.cs` | `shapes/polygon.rs` | partial | 1/1 | 6/7 |  |
-| `Polyline.cs` | `shapes/polyline.rs` | partial | 1/1 | 6/7 |  |
-| `Rectangle.cs` | `shapes/rectangle.rs` | partial | 1/1 | 6/7 |  |
-| `Sector.cs` | `shapes/sector.rs` | partial | 1/1 | 5/6 |  |
+| `Arc.cs` | `shapes/arc.rs` | present | 1/1 | 6/6 |  |
+| `Ellipse.cs` | `shapes/ellipse.rs` | present | 1/1 | 3/3 |  |
+| `Line.cs` | `shapes/line.rs` | present | 1/1 | 6/6 |  |
+| `Path.cs` | `shapes/path.rs` | present | 1/1 | 4/4 |  |
+| `Polygon.cs` | `shapes/polygon.rs` | present | 1/1 | 7/7 |  |
+| `Polyline.cs` | `shapes/polyline.rs` | present | 1/1 | 7/7 |  |
+| `Rectangle.cs` | `shapes/rectangle.rs` | present | 1/1 | 7/7 |  |
+| `Sector.cs` | `shapes/sector.rs` | present | 1/1 | 6/6 |  |
 | `Shape.cs` | `shapes/shape.rs` | present | 1/1 | 31/31 |  |
-
-<details><summary><code>Arc.cs</code> - 1 missing</summary>
-
-- `Arc` (class): 1 missing
-  - `static Arc()` *(static)*
-
-</details>
-
-<details><summary><code>Ellipse.cs</code> - 1 missing</summary>
-
-- `Ellipse` (class): 1 missing
-  - `static Ellipse()` *(static)*
-
-</details>
-
-<details><summary><code>Line.cs</code> - 1 missing</summary>
-
-- `Line` (class): 1 missing
-  - `static Line()` *(static)*
-
-</details>
-
-<details><summary><code>Path.cs</code> - 1 missing</summary>
-
-- `Path` (class): 1 missing
-  - `static Path()` *(static)*
-
-</details>
-
-<details><summary><code>Polygon.cs</code> - 1 missing</summary>
-
-- `Polygon` (class): 1 missing
-  - `static Polygon()` *(static)*
-
-</details>
-
-<details><summary><code>Polyline.cs</code> - 1 missing</summary>
-
-- `Polyline` (class): 1 missing
-  - `static Polyline()` *(static)*
-
-</details>
-
-<details><summary><code>Rectangle.cs</code> - 1 missing</summary>
-
-- `Rectangle` (class): 1 missing
-  - `static Rectangle()` *(static)*
-
-</details>
-
-<details><summary><code>Sector.cs</code> - 1 missing</summary>
-
-- `Sector` (class): 1 missing
-  - `static Sector()` *(static)*
-
-</details>
 
 ### `SplitButton` - files 2/2, types 2/2, members 49/50
 
@@ -2252,7 +1661,9 @@ Rust sources of this crate that no upstream file maps to. Give each a reason in 
 | `i_clickable_control.rs` | **unmapped** | `Adapter` |
 | `i_command_source.rs` | **unmapped** | `Adapter` |
 | `items_source.rs` | **unmapped** | `IItemsList`, `ItemsChangedEventArgs`, `ItemsChangedHandler`, `ItemsSource`, `ItemsView`, `ItemsViewIter`, `ItemsViewSource`, `TypedItems`, `TypedItemsSource` |
-| `layoutable_tests_effective_viewport_changed.rs` | **unmapped** |  |
+| `layout_test_control.rs` | **unmapped** | `LayoutOverride`, `LayoutTestControl`, `LayoutTestRoot` |
+| `layoutable_tests_effective_viewport_changed.rs` | **unmapped** | `TestCanvas` |
+| `layoutable_tests_layout_rounding.rs` | **unmapped** | `TestLayoutable` |
 | `list_box_tests_multiple.rs` | **unmapped** | `ReceivedArgs` |
 | `list_box_tests_single.rs` | **unmapped** | `TestStackOverflowViewModel` |
 | `markup_types/classes.rs` | **unmapped** | `RoutedEventOf` |
@@ -2318,4 +1729,4 @@ Rust sources of this crate that no upstream file maps to. Give each a reason in 
 | `utils/masked_text_provider.rs` | **unmapped** | `CaseConversion`, `CharDescriptor`, `CharType`, `MaskSeparators`, `MaskedTextProvider`, `MaskedTextProviderError`, `MaskedTextResultHint` |
 | `window_decorations.rs` | **unmapped** | `WindowDecorations` |
 
-Tests, examples and build scripts (not scanned): `animation/connected_animation_tests.rs`, `app_builder_tests.rs`, `application_lifetimes/classic_desktop_style_application_lifetime_tests.rs`, `application_tests.rs`, `auto_complete_box/auto_complete_box_tests.rs`, `automation/automation_properties_tests.rs`, `automation/peers/calendar_day_button_automation_peer_tests.rs`, `automation/peers/combo_box_automation_peer_tests.rs`, `automation/peers/complex_control_automation_peer_tests.rs`, `automation/peers/control_automation_peer_tests.rs`, `automation/peers/embeddable_control_root_automation_peer_tests.rs`, `automation/peers/foundation_automation_peer_tests.rs`, `automation/peers/items_automation_peer_tests.rs`, `automation/peers/menu_item_automation_peer_tests.rs`, `automation/peers/native_menu_bar_automation_peer_tests.rs`, `automation/peers/page_automation_peer_tests.rs`, `automation/peers/split_button_automation_peer_tests.rs`, `automation/peers/window_automation_peer_tests.rs`, `border_tests.rs`, `bring_into_view_tests.rs`, `button_flyout_tests.rs`, `button_tests.rs`, `button_text_tests.rs`, `calendar/calendar_tests.rs`, `calendar_date_picker/calendar_date_picker_tests.rs`, `canvas_tests.rs`, `carousel_tests.rs`, `combo_box_tests.rs`, `command_bar/command_bar_tests.rs`, `compositor_hit_testing_tests.rs`, `content_control_tests.rs`, `context_menu_tests.rs`, `control_focus_adorner_tests.rs`, `converters/converters_tests.rs`, `data_validation_errors_tests.rs`, `date_time_pickers/date_picker_tests.rs`, `date_time_pickers/time_picker_tests.rs`, `decorator_tests.rs`, `deferred_text_tests.rs`, `design_tests.rs`, `dock_panel_tests.rs`, `documents/inline_tests.rs`, `element_ref_tests.rs`, `expander_tests.rs`, `experimental_acrylic_border_tests.rs`, `flex_panel/flex_basis_tests.rs`, `flex_panel/flex_panel_tests.rs`, `flyouts/flyout_tests.rs`, `grid_length_tests.rs`, `grid_splitter_tests.rs`, `grid_tests.rs`, `hotkey_manager_tests.rs`, `image_tests.rs`, `items_control_tests.rs`, `items_source_view_tests.rs`, `label_tests.rs`, `label_text_tests.rs`, `layout_transform_control_tests.rs`, `list_box_tests.rs`, `list_box_virtualization_issue_tests.rs`, `loaded_tests.rs`, `markup_types/markup_types_tests.rs`, `masked_text_box_tests.rs`, `menu_item_tests.rs`, `mixins/pressed_mixin_tests.rs`, `native_menu_tests.rs`, `navigation_tests.rs`, `notifications/notifications_tests.rs`, `notifications/reversible_stack_panel_tests.rs`, `numeric_up_down/numeric_up_down_tests.rs`, `page/carousel_page_tests.rs`, `page/content_page_tests.rs`, `page/drawer_page_tests.rs`, `page/navigation_event_args_tests.rs`, `page/navigation_page_tests.rs`, `page/page_navigation_host_tests.rs`, `page/tabbed_page_tests.rs`, `panel_tests.rs`, `pips_pager/pips_pager_tests.rs`, `platform/default_menu_interaction_handler_tests.rs`, `platform/i_screen_impl_tests.rs`, `platform/input_pane_tests.rs`, `platform/platform_manager_tests.rs`, `platform_feedback_items_tests.rs`, `presentation_source/presentation_source_tests.rs`, `presenters/content_presenter_tests.rs`, `presenters/content_presenter_text_tests.rs`, `presenters/items_presenter_tests.rs`, `presenters/scroll_content_presenter_tests.rs`, `presenters/table_view_layout_helper_tests.rs`, `presenters/text_presenter_tests.rs`, `primitives/access_text_tests.rs`, `primitives/adorner_layer_composition_tests.rs`, `primitives/headered_content_control_tests.rs`, `primitives/headered_items_control_tests.rs`, `primitives/popup_positioning/managed_popup_positioner_tests.rs`, `primitives/popup_root_tests.rs`, `primitives/popup_tests.rs`, `primitives/range_base_tests.rs`, `primitives/scroll_bar_tests.rs`, `primitives/selecting_items_control_tests.rs`, `primitives/tab_strip_tests.rs`, `primitives/templated_control_tests.rs`, `primitives/templated_control_text_tests.rs`, `primitives/text_selection_canvas_tests.rs`, `primitives/thumb_tests.rs`, `primitives/toggle_button_tests.rs`, `primitives/track_tests.rs`, `primitives/uniform_grid_tests.rs`, `primitives/visual_layer_manager_tests.rs`, `progress_bar_tests.rs`, `pull_to_refresh/refresh_container_tests.rs`, `pull_to_refresh/refresh_info_provider_tests.rs`, `pull_to_refresh/refresh_visualizer_tests.rs`, `pull_to_refresh/scroll_viewer_i_refresh_info_provider_adapter_tests.rs`, `pull_to_refresh/scrollable_pull_gesture_recognizer_tests.rs`, `radio_button_tests.rs`, `reference_semantics_tests.rs`, `relative_panel_tests.rs`, `scroll_viewer_tests.rs`, `selectable_text_block_tests.rs`, `selection/internal_selection_model_tests.rs`, `shapes/ellipse_tests.rs`, `shapes/path_tests.rs`, `shapes/polygon_tests.rs`, `shapes/polyline_tests.rs`, `shapes/rectangle_tests.rs`, `shapes/shape_tests.rs`, `slider_tests.rs`, `split_button/split_button_tests.rs`, `split_view/split_view_tests.rs`, `stack_panel_tests.rs`, `storage_misc_tests.rs`, `tab_control_tests.rs`, `table_view_column_header_tests.rs`, `table_view_tests.rs`, `templates/templates_tests.rs`, `text_block_tests.rs`, `text_box_tests.rs`, `theme_variant_tests.rs`, `tick_bar_tests.rs`, `toggle_switch_tests.rs`, `tool_tip_tests.rs`, `top_level_tests.rs`, `transitioning_content_control_tests.rs`, `tray_icon_tests.rs`, `tree_view_bring_into_view_tests.rs`, `tree_view_tests.rs`, `user_control_tests.rs`, `utils/collection_changed_event_manager_tests.rs`, `viewbox_tests.rs`, `virtualizing_carousel_panel_tests.rs`, `virtualizing_stack_panel_tests.rs`, `window_base_tests.rs`, `window_decorations_tests.rs`, `window_tests.rs`, `wrap_panel_tests.rs`.
+Tests, examples and build scripts (not scanned): `animation/connected_animation_tests.rs`, `app_builder_tests.rs`, `application_lifetimes/classic_desktop_style_application_lifetime_tests.rs`, `application_tests.rs`, `arrange_tests.rs`, `auto_complete_box/auto_complete_box_tests.rs`, `automation/automation_properties_tests.rs`, `automation/peers/calendar_day_button_automation_peer_tests.rs`, `automation/peers/combo_box_automation_peer_tests.rs`, `automation/peers/complex_control_automation_peer_tests.rs`, `automation/peers/control_automation_peer_tests.rs`, `automation/peers/embeddable_control_root_automation_peer_tests.rs`, `automation/peers/foundation_automation_peer_tests.rs`, `automation/peers/items_automation_peer_tests.rs`, `automation/peers/menu_item_automation_peer_tests.rs`, `automation/peers/native_menu_bar_automation_peer_tests.rs`, `automation/peers/page_automation_peer_tests.rs`, `automation/peers/split_button_automation_peer_tests.rs`, `automation/peers/window_automation_peer_tests.rs`, `border_tests.rs`, `bring_into_view_tests.rs`, `button_flyout_tests.rs`, `button_tests.rs`, `button_text_tests.rs`, `calendar/calendar_tests.rs`, `calendar_date_picker/calendar_date_picker_tests.rs`, `canvas_tests.rs`, `carousel_tests.rs`, `combo_box_tests.rs`, `command_bar/command_bar_tests.rs`, `compositor_hit_testing_tests.rs`, `content_control_tests.rs`, `context_menu_tests.rs`, `control_focus_adorner_tests.rs`, `converters/converters_tests.rs`, `data_validation_errors_tests.rs`, `date_time_pickers/date_picker_tests.rs`, `date_time_pickers/time_picker_tests.rs`, `decorator_tests.rs`, `deferred_text_tests.rs`, `design_tests.rs`, `dock_panel_tests.rs`, `documents/inline_tests.rs`, `element_ref_tests.rs`, `expander_tests.rs`, `experimental_acrylic_border_tests.rs`, `flex_panel/flex_basis_tests.rs`, `flex_panel/flex_panel_tests.rs`, `flyouts/flyout_tests.rs`, `grid_length_tests.rs`, `grid_splitter_tests.rs`, `grid_tests.rs`, `hotkey_manager_tests.rs`, `image_tests.rs`, `items_control_tests.rs`, `items_source_view_tests.rs`, `label_tests.rs`, `label_text_tests.rs`, `layout_manager_tests.rs`, `layout_transform_control_tests.rs`, `layoutable_tests.rs`, `list_box_tests.rs`, `list_box_virtualization_issue_tests.rs`, `loaded_tests.rs`, `markup_types/markup_types_tests.rs`, `masked_text_box_tests.rs`, `measure_tests.rs`, `menu_item_tests.rs`, `mixins/pressed_mixin_tests.rs`, `native_menu_tests.rs`, `navigation_tests.rs`, `notifications/notifications_tests.rs`, `notifications/reversible_stack_panel_tests.rs`, `numeric_up_down/numeric_up_down_tests.rs`, `page/carousel_page_tests.rs`, `page/content_page_tests.rs`, `page/drawer_page_tests.rs`, `page/navigation_event_args_tests.rs`, `page/navigation_page_tests.rs`, `page/page_navigation_host_tests.rs`, `page/tabbed_page_tests.rs`, `panel_tests.rs`, `pips_pager/pips_pager_tests.rs`, `platform/default_menu_interaction_handler_tests.rs`, `platform/i_screen_impl_tests.rs`, `platform/input_pane_tests.rs`, `platform/platform_manager_tests.rs`, `platform_feedback_items_tests.rs`, `presentation_source/presentation_source_tests.rs`, `presenters/content_presenter_tests.rs`, `presenters/content_presenter_text_tests.rs`, `presenters/items_presenter_tests.rs`, `presenters/scroll_content_presenter_tests.rs`, `presenters/table_view_layout_helper_tests.rs`, `presenters/text_presenter_tests.rs`, `primitives/access_text_tests.rs`, `primitives/adorner_layer_composition_tests.rs`, `primitives/headered_content_control_tests.rs`, `primitives/headered_items_control_tests.rs`, `primitives/popup_positioning/managed_popup_positioner_tests.rs`, `primitives/popup_root_tests.rs`, `primitives/popup_tests.rs`, `primitives/range_base_tests.rs`, `primitives/scroll_bar_tests.rs`, `primitives/selecting_items_control_tests.rs`, `primitives/tab_strip_tests.rs`, `primitives/templated_control_tests.rs`, `primitives/templated_control_text_tests.rs`, `primitives/text_selection_canvas_tests.rs`, `primitives/thumb_tests.rs`, `primitives/toggle_button_tests.rs`, `primitives/track_tests.rs`, `primitives/uniform_grid_tests.rs`, `primitives/visual_layer_manager_tests.rs`, `progress_bar_tests.rs`, `pull_to_refresh/refresh_container_tests.rs`, `pull_to_refresh/refresh_info_provider_tests.rs`, `pull_to_refresh/refresh_visualizer_tests.rs`, `pull_to_refresh/scroll_viewer_i_refresh_info_provider_adapter_tests.rs`, `pull_to_refresh/scrollable_pull_gesture_recognizer_tests.rs`, `radio_button_tests.rs`, `reference_semantics_tests.rs`, `relative_panel_tests.rs`, `scroll_viewer_tests.rs`, `selectable_text_block_tests.rs`, `selection/internal_selection_model_tests.rs`, `shapes/ellipse_tests.rs`, `shapes/path_tests.rs`, `shapes/polygon_tests.rs`, `shapes/polyline_tests.rs`, `shapes/rectangle_tests.rs`, `shapes/shape_tests.rs`, `slider_tests.rs`, `split_button/split_button_tests.rs`, `split_view/split_view_tests.rs`, `stack_panel_tests.rs`, `storage_misc_tests.rs`, `tab_control_tests.rs`, `table_view_column_header_tests.rs`, `table_view_tests.rs`, `templates/templates_tests.rs`, `text_block_tests.rs`, `text_box_tests.rs`, `theme_variant_tests.rs`, `tick_bar_tests.rs`, `toggle_switch_tests.rs`, `tool_tip_tests.rs`, `top_level_tests.rs`, `transitioning_content_control_tests.rs`, `tray_icon_tests.rs`, `tree_view_bring_into_view_tests.rs`, `tree_view_tests.rs`, `user_control_tests.rs`, `utils/collection_changed_event_manager_tests.rs`, `viewbox_tests.rs`, `virtualizing_carousel_panel_tests.rs`, `virtualizing_stack_panel_tests.rs`, `window_base_tests.rs`, `window_decorations_tests.rs`, `window_tests.rs`, `wrap_panel_tests.rs`.

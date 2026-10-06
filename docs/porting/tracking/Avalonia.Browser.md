@@ -10,16 +10,16 @@ Generated from upstream commit `17350180c33b063f0e98abbfd19aa3cae63f5d56`. Back 
 | FerroUI | `src/Browser/FerroUI.Browser` (exists) |
 | Crate | `ferroui-browser` |
 | Phase / priority | 3 - browser / P2 |
-| Files | 47/49 (95.9%), 3 not applicable |
-| Types | 52/61 (85.2%) |
-| Members | 295/426 (69.2%) |
+| Files | 49/49 (100.0%), 3 not applicable |
+| Types | 53/61 (86.9%) |
+| Members | 302/426 (70.9%) |
 | Contracts (interfaces) | 0/0 |
 | Property registrations | 0/0 |
 | Routed events | 0/0 |
 
 ## Files
 
-### `(project root)` - files 27/28, types 31/35, members 151/177
+### `(project root)` - files 28/28, types 32/35, members 156/177
 
 | Upstream file | Rust file | Status | Types | Members | Notes |
 |---|---|---|---|---|---|
@@ -36,7 +36,7 @@ Generated from upstream commit `17350180c33b063f0e98abbfd19aa3cae63f5d56`. Back 
 | `BrowserInputPane.cs` | `browser_input_pane.rs` | present | 1/1 | 1/1 |  |
 | `BrowserInsetsManager.cs` | `browser_insets_manager.rs` | present | 1/1 | 5/5 |  |
 | `BrowserMouseDevice.cs` | `browser_mouse_device.rs` | partial | 1/2 | 2/4 |  |
-| `BrowserNativeControlHost.cs` | `browser_native_control_host.rs` | missing | 0/1 | 0/5 |  |
+| `BrowserNativeControlHost.cs` | `browser_native_control_host.rs` | present | 1/1 | 5/5 |  |
 | `BrowserPlatformSettings.cs` | `browser_platform_settings.rs` | present | 1/1 | 6/6 |  |
 | `BrowserRuntimePlatform.cs` | `browser_runtime_platform.rs` | present | 2/2 | 3/3 |  |
 | `BrowserScreens.cs` | `browser_screens.rs` | partial | 2/2 | 10/11 |  |
@@ -122,34 +122,32 @@ Generated from upstream commit `17350180c33b063f0e98abbfd19aa3cae63f5d56`. Back 
 
 </details>
 
-### `Interop` - files 9/10, types 9/11, members 57/123
+### `Interop` - files 10/10, types 9/11, members 59/123
 
 | Upstream file | Rust file | Status | Types | Members | Notes |
 |---|---|---|---|---|---|
-| `AvaloniaModule.cs` | `interop/ferro_module.rs` | partial | 1/1 | 2/10 | renamed: the module is named after the framework; it is imported statically, so the asynchronous import and path resolution members have no counterpart |
+| `AvaloniaModule.cs` | `interop/ferro_module.rs` | partial | 1/1 | 4/10 | renamed: the module is named after the framework; it is imported statically, so the asynchronous import and path resolution members have no counterpart |
 | `CanvasHelper.cs` | `interop/canvas_helper.rs` | partial | 1/2 | 1/9 |  |
 | `DomHelper.cs` | `interop/dom_helper.rs` | partial | 1/1 | 7/15 |  |
 | `GeneralHelpers.cs` | - | n/a | - | - | not-applicable: reflective access to script objects: replaced by typed property getters in interop/ |
 | `InputHelper.cs` | `interop/input_helper.rs` | partial | 1/1 | 19/37 |  |
 | `JsCallbackHelper.cs` | - | n/a | - | - | not-applicable: restores the synchronisation context of the managed runtime in callbacks: no equivalent concept |
-| `NativeControlHostHelper.cs` | `interop/native_control_host_helper.rs` | missing | 0/1 | 0/7 |  |
+| `NativeControlHostHelper.cs` | `interop/native_control_host_helper.rs` | partial | 0/1 | 0/7 |  |
 | `NavigationHelper.cs` | `interop/navigation_helper.rs` | partial | 1/1 | 1/3 |  |
 | `ScreenHelper.cs` | `interop/screen_helper.rs` | partial | 1/1 | 2/11 |  |
 | `StorageHelper.cs` | `interop/storage_helper.rs` | partial | 1/1 | 17/22 |  |
 | `StreamHelper.cs` | `interop/stream_helper.rs` | present | 1/1 | 6/6 |  |
 | `TimerHelper.cs` | `interop/timer_helper.rs` | partial | 1/1 | 2/3 |  |
 
-<details><summary><code>AvaloniaModule.cs</code> - 8 missing</summary>
+<details><summary><code>AvaloniaModule.cs</code> - 6 missing</summary>
 
-- `AvaloniaModule` (class) (ported as module-level items): 8 missing
+- `AvaloniaModule` (class) (ported as module-level items): 6 missing
   - `static Task ImportMainToWorkerContext()`
   - `const string StorageModuleName`
   - `const string AssetsBasePath`
   - `static Task ImportMain()`
-  - `static string ResolveServiceWorkerPath()`
   - `static bool IsMobile()`
   - `static bool IsTv()`
-  - `static void RegisterServiceWorker(string path, string? scope)`
 
 </details>
 
@@ -197,6 +195,12 @@ Generated from upstream commit `17350180c33b063f0e98abbfd19aa3cae63f5d56`. Back 
   - `static void AddStringToWriteableClipboardItem(JSObject item, string format, string value)`
   - `static void AddBytesToWriteableClipboardItem(JSObject item, string format, [JSMarshalAs<JSType.MemoryView>]...`
   - `static string[] GetReadableDataItemFormats(JSObject item)`
+
+</details>
+
+<details><summary><code>NativeControlHostHelper.cs</code> - 8 missing</summary>
+
+- `NativeControlHostHelper` (class, internal): **type missing** (7 members)
 
 </details>
 
@@ -366,6 +370,7 @@ Rust sources of this crate that no upstream file maps to. Give each a reason in 
 
 | Rust file | Reason | Types defined |
 |---|---|---|
+| `asset_bundle.rs` | **unmapped** |  |
 | `interop/completion_helper.rs` | **unmapped** | `Completions`, `IPromiseTracker`, `PagePromiseTracker`, `PendingRequest`, `PromiseError`, `PromiseFuture`, `PromiseOutcome` |
 
 Tests, examples and build scripts (not scanned): `examples/storage_view/main.rs`, `examples/themed_view/main.rs`.
