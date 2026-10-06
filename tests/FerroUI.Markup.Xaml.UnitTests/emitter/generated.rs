@@ -2632,6 +2632,8 @@ pub fn build_static_resource_local_xaml(
             solid_color_brush_0.set_value(::ferroui_base::media::SolidColorBrush::color_property(), ::core::clone::Clone::clone(&value_0));
             ::core::result::Result::Ok(rt::to_value(solid_color_brush_0.clone()))
         }),
+        1,
+        118,
     )?;
     ::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&rt::argument(dictionary_0.clone(), "FerroUI.Controls.ResourceDictionary.AddDeferred", 0, 1, 118)?, rt::to_object(::std::string::String::from("Accent")), { let value = ::core::clone::Clone::clone(&deferred_0); let value: ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent> = value; value }).map_err(|error| rt::at(rt::TARGET_INVOCATION_EXCEPTION, error, 1, 118))?;
     // static_resource_local.xaml(1,182) Child
@@ -2697,6 +2699,8 @@ pub fn build_dynamic_resource_local_xaml(
             solid_color_brush_0.set_value(::ferroui_base::media::SolidColorBrush::color_property(), ::core::clone::Clone::clone(&value_0));
             ::core::result::Result::Ok(rt::to_value(solid_color_brush_0.clone()))
         }),
+        1,
+        118,
     )?;
     ::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&rt::argument(dictionary_0.clone(), "FerroUI.Controls.ResourceDictionary.AddDeferred", 0, 1, 118)?, rt::to_object(::std::string::String::from("Accent")), { let value = ::core::clone::Clone::clone(&deferred_0); let value: ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent> = value; value }).map_err(|error| rt::at(rt::TARGET_INVOCATION_EXCEPTION, error, 1, 118))?;
     // dynamic_resource_local.xaml(1,182) Child
@@ -2850,6 +2854,8 @@ pub fn build_resources_many_xaml(
             solid_color_brush_0.set_value(::ferroui_base::media::SolidColorBrush::color_property(), ::core::clone::Clone::clone(&value_0));
             ::core::result::Result::Ok(rt::to_value(solid_color_brush_0.clone()))
         }),
+        1,
+        182,
     )?;
     ::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&rt::argument(dictionary_2.clone(), "FerroUI.Controls.ResourceDictionary.AddDeferred", 0, 1, 182)?, rt::to_object(::std::string::String::from("C")), { let value = ::core::clone::Clone::clone(&deferred_0); let value: ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent> = value; value }).map_err(|error| rt::at(rt::TARGET_INVOCATION_EXCEPTION, error, 1, 182))?;
     border_0.try_end_init().map_err(|error| rt::at(rt::TARGET_INVOCATION_EXCEPTION, error, 1, 2))?;
@@ -2892,6 +2898,8 @@ pub fn build_resource_dictionary_root_xaml(
             solid_color_brush_0.set_value(::ferroui_base::media::SolidColorBrush::color_property(), ::core::clone::Clone::clone(&value_0));
             ::core::result::Result::Ok(rt::to_value(solid_color_brush_0.clone()))
         }),
+        1,
+        144,
     )?;
     ::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::to_object(::std::string::String::from("B")), { let value = ::core::clone::Clone::clone(&deferred_0); let value: ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent> = value; value }).map_err(|error| rt::at(rt::TARGET_INVOCATION_EXCEPTION, error, 1, 144))?;
     // resource_dictionary_root.xaml(1,205) Content (resource)
@@ -2969,6 +2977,8 @@ pub fn build_control_theme_resources_xaml(
             solid_color_brush_0.set_value(::ferroui_base::media::SolidColorBrush::color_property(), ::core::clone::Clone::clone(&value_0));
             ::core::result::Result::Ok(rt::to_value(solid_color_brush_0.clone()))
         }),
+        1,
+        118,
     )?;
     ::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&rt::argument(dictionary_0.clone(), "FerroUI.Controls.ResourceDictionary.AddDeferred", 0, 1, 118)?, rt::to_object(::std::string::String::from("Accent")), { let value = ::core::clone::Clone::clone(&deferred_0); let value: ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent> = value; value }).map_err(|error| rt::at(rt::TARGET_INVOCATION_EXCEPTION, error, 1, 118))?;
     // control_theme_resources.xaml(1,163) Resources (resource)
@@ -2991,6 +3001,8 @@ pub fn build_control_theme_resources_xaml(
             ::ferroui_base::styling::StyleBase::__markup_Add_0(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(::core::clone::Clone::clone(&value_1), 1, 210)?);
             ::core::result::Result::Ok(rt::to_value(control_theme_0.clone()))
         }),
+        1,
+        163,
     )?;
     ::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&rt::argument(dictionary_1.clone(), "FerroUI.Controls.ResourceDictionary.AddDeferred", 0, 1, 163)?, rt::to_object(::std::string::String::from("Base")), { let value = ::core::clone::Clone::clone(&deferred_1); let value: ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent> = value; value }).map_err(|error| rt::at(rt::TARGET_INVOCATION_EXCEPTION, error, 1, 163))?;
     // control_theme_resources.xaml(1,265) Resources (resource)
@@ -3043,6 +3055,8 @@ pub fn build_control_theme_resources_xaml(
             context.pop_parent();
             ::core::result::Result::Ok(rt::to_value(control_theme_1.clone()))
         }),
+        1,
+        265,
     )?;
     ::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&rt::argument(dictionary_2.clone(), "FerroUI.Controls.ResourceDictionary.AddDeferred", 0, 1, 265)?, rt::to_object(::std::string::String::from("Derived")), { let value = ::core::clone::Clone::clone(&deferred_2); let value: ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent> = value; value }).map_err(|error| rt::at(rt::TARGET_INVOCATION_EXCEPTION, error, 1, 265))?;
     context.pop_parent();
@@ -3483,6 +3497,8 @@ pub fn build_flags_value_xaml(
             ::ferroui_controls::converters::CornerRadiusFilterConverter::__markup_set_Filter(&value_0, ::ferroui_controls::converters::Corners::__markup_flags(9_i64));
             ::core::result::Result::Ok(rt::to_value(value_0))
         }),
+        1,
+        162,
     )?;
     ::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&rt::argument(dictionary_0.clone(), "FerroUI.Controls.ResourceDictionary.AddDeferred", 0, 1, 162)?, rt::to_object(::std::string::String::from("Filter")), { let value = ::core::clone::Clone::clone(&deferred_0); let value: ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent> = value; value }).map_err(|error| rt::at(rt::TARGET_INVOCATION_EXCEPTION, error, 1, 162))?;
     border_0.try_end_init().map_err(|error| rt::at(rt::TARGET_INVOCATION_EXCEPTION, error, 1, 2))?;

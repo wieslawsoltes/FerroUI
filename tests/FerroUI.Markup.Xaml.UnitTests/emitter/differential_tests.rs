@@ -139,13 +139,22 @@ fn display_control_theme(theme: &Ref<ferroui_base::styling::ControlTheme>) -> St
                 let value = match setter.value() {
                     None => "null".to_string(),
                     Some(SetterValue::Value(value)) => display(&value),
-                    Some(SetterValue::Binding(_)) => "<observable>".to_string(),
-                    Some(SetterValue::BindingBase(_)) => "<binding>".to_string(),
-                    Some(SetterValue::Template(_)) => "<template>".to_string(),
+                    Some(SetterValue::Binding(_)) => unreadable("an observable setter value"),
+                    Some(SetterValue::BindingBase(binding)) => {
+                        use ferroui_markup_xaml::markup_extensions::DynamicResourceExtension;
+                        match binding.as_any().and_then(|any| any.downcast_ref::<DynamicResourceExtension>()) {
+                            Some(dynamic) => match dynamic.resource_key() {
+                                Some(key) => format!("{{DynamicResource {}}}", display(&key)),
+                                None => "{DynamicResource}".to_string(),
+                            },
+                            None => unreadable("a binding setter value"),
+                        }
+                    }
+                    Some(SetterValue::Template(_)) => unreadable("a template setter value"),
                 };
                 format!("{property}={value}")
             }
-            None => "<setter>".to_string(),
+            None => unreadable("a setter that is not a Setter"),
         };
         setters.push(text);
     }
@@ -317,7 +326,11 @@ fn collection_items(value: &BoxedValue) -> Option<Result<Vec<Option<BoxedValue>>
     use ferroui_controls::templates::{DataTemplates, IDataTemplate};
     use ferroui_controls::{ColumnDefinition, ColumnDefinitions, Control, Controls, ItemCollection, RowDefinition, RowDefinitions};
 
-    let markup = match ValueTypes::as_object(&**value) {
+    // A nullable collection: its contents (`null` is not a collection). The nullable form is
+    // removed before the type is asked whether it declares `Add`, so a collection held in an
+    // `Option` of its type is enumerated like any other.
+    let value = ferroui_markup_xaml::xaml_il::runtime::compiled::to_untyped(value.clone())?;
+    let markup = match ValueTypes::as_object(&*value) {
         Some(object) => object.get_type().markup(),
         None => MarkupType::find_by_handle(value.value_type_id()),
     };
@@ -334,8 +347,6 @@ fn collection_items(value: &BoxedValue) -> Option<Result<Vec<Option<BoxedValue>>
             None => Err("a resource provider that is not an object".to_string()),
         }
     }
-    // A nullable collection: its contents (`null` is not a collection).
-    let value = ferroui_markup_xaml::xaml_il::runtime::compiled::to_untyped(value.clone())?;
     let any = &*value;
     if let Some(list) = any.downcast_ref::<Controls>() {
         return Some(Ok(objects(list.to_vec())));
