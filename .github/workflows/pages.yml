@@ -18,10 +18,9 @@ on:
     branches: [main]
   workflow_dispatch:
 
+# Read-only by default; the jobs state what they need on top.
 permissions:
   contents: read
-  pages: write
-  id-token: write
 
 # One deployment at a time; a newer run waits for the running one instead of cancelling it.
 concurrency:
@@ -39,6 +38,10 @@ jobs:
     name: Build the site
     runs-on: ubuntu-latest
     timeout-minutes: 120
+    # The Pages API (is Pages enabled?) and configure-pages read the Pages settings.
+    permissions:
+      contents: read
+      pages: read
     outputs:
       enabled: ${{ steps.pages.outputs.enabled }}
       wasm-raw-bytes: ${{ steps.sizes.outputs.wasm_raw_bytes }}
@@ -87,9 +90,14 @@ jobs:
   deploy:
     name: Deploy
     needs: build
-    if: needs.build.outputs.enabled == 'true'
+    # Only main is published: a manual run from another branch builds and tests the site but does not deploy it.
+    if: github.ref == 'refs/heads/main' && needs.build.outputs.enabled == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 20
+    # Only the deployment writes to Pages, with the OIDC token deploy-pages needs.
+    permissions:
+      pages: write
+      id-token: write
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
