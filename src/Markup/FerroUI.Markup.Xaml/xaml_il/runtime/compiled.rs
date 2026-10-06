@@ -612,9 +612,11 @@ pub fn deferred_content(
     result_type: ValueType,
     context: &Rc<XamlIlContext>,
     builder: DeferredContentBuilder,
+    line: i32,
+    position: i32,
 ) -> Result<Rc<DeferredContent>, XamlLoadException> {
     XamlIlRuntimeHelpers::try_deferred_transformation_factory_for(result_type, builder, &service_provider(context))
-        .map_err(|error| at("InvalidOperationException", error.message(), 0, 0))
+        .map_err(|error| at("InvalidOperationException", error.message(), line, position))
 }
 
 /// The context of `Populate` of a root object: [`create_context`], with the

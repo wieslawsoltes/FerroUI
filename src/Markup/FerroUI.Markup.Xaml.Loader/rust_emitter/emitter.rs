@@ -1489,6 +1489,8 @@ impl Emitter<'_> {
         }
         self.line(format!("        ::core::result::Result::Ok({returned})"));
         self.line("    }),".to_string());
+        self.line(format!("    {},", node.line()));
+        self.line(format!("    {},", node.position()));
         self.line(")?;".to_string());
         Ok(Typed { expr: local, kind: Kind::Exact { id: TypeId::of::<Rc<DeferredContent>>(), nullable: None } })
     }
