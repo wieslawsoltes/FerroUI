@@ -1,6 +1,6 @@
 use super::server_resource_helper_extensions::{
-    brush_get_server, brush_render_resource, geometry_get_server, geometry_render_resource, pen_get_client,
-    pen_get_server, pen_render_resource,
+    brush_get_server, brush_render_resource, geometry_get_server, geometry_render_resource, is_immutable_brush,
+    is_immutable_pen, pen_get_client, pen_get_server, pen_render_resource,
 };
 use super::{CompositionRenderData, ICompositionRenderResource, ImmediateRenderDataSceneBrushContent, RenderDataStream};
 use crate::media::{
@@ -65,7 +65,10 @@ impl RenderDataDrawingContext {
 
     fn add_brush_resource(&mut self, brush: Option<&Rc<dyn IBrush>>) {
         let (Some(compositor), Some(brush)) = (&self.compositor, brush) else { return };
-        // Immutable brushes are referenced directly.
+        // Immutable brushes and composition brushes are referenced directly.
+        if is_immutable_brush(&**brush) || brush.as_composition_brush().is_some() {
+            return;
+        }
         let Some(resource) = brush_render_resource(&**brush) else { return };
         if !self.resources_hash_set.insert(Rc::as_ptr(brush) as *const () as usize) {
             return;
@@ -76,6 +79,9 @@ impl RenderDataDrawingContext {
 
     fn add_pen_resource(&mut self, pen: Option<&Rc<dyn IPen>>) {
         let (Some(compositor), Some(pen)) = (&self.compositor, pen) else { return };
+        if is_immutable_pen(&**pen) {
+            return;
+        }
         let Some(resource) = pen_render_resource(&**pen) else { return };
         if !self.resources_hash_set.insert(Rc::as_ptr(pen) as *const () as usize) {
             return;

@@ -84,6 +84,12 @@ pub trait IBrush: 'static {
         None
     }
 
+    /// The brush viewed as [`IImmutableBrush`], when it is one (the `is
+    /// IImmutableBrush` test of upstream).
+    fn as_immutable_brush(&self) -> Option<&dyn IImmutableBrush> {
+        None
+    }
+
     /// The composition render resource behind the object, if it is a
     /// mutable object with server-side counterparts on the compositors it
     /// is drawn with.

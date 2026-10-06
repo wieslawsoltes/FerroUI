@@ -47,6 +47,10 @@ impl ImmediateRenderDataSceneBrushContent {
 }
 
 impl IBrush for ImmediateRenderDataSceneBrushContent {
+    fn as_immutable_brush(&self) -> Option<&dyn IImmutableBrush> {
+        Some(self)
+    }
+
     fn opacity(&self) -> f64 {
         self.brush.opacity()
     }

@@ -1,5 +1,5 @@
 use super::{ICompositionRenderResource, IRenderDataGeometry, RenderDataResource};
-use crate::media::immutable::{ImmutablePen, ImmutableTransform};
+use crate::media::immutable::ImmutableTransform;
 use crate::media::{Geometry, IBrush, IPen, ITransform};
 use crate::platform::IGeometryImpl;
 use crate::rendering::composition::transport::BatchResource;
@@ -42,14 +42,19 @@ impl IRenderDataGeometry for ClientGeometry {
     }
 }
 
-fn is_immutable_brush(brush: &Rc<dyn IBrush>) -> bool {
-    brush.as_mutable_brush().is_none()
-        && brush.as_composition_render_resource().is_none()
-        && brush.as_composition_brush().is_none()
+/// `brush is IImmutableBrush`. A brush that states neither form (a brush
+/// type of an application that implements only the interface) is taken as
+/// immutable when it has no server-side form either.
+pub(crate) fn is_immutable_brush(brush: &dyn IBrush) -> bool {
+    brush.as_immutable_brush().is_some()
+        || (brush.as_mutable_brush().is_none()
+            && brush.as_composition_render_resource().is_none()
+            && brush.as_composition_brush().is_none())
 }
 
-fn is_immutable_pen(pen: &Rc<dyn IPen>) -> bool {
-    pen.as_any().is::<ImmutablePen>()
+/// `pen is ImmutablePen`.
+pub(crate) fn is_immutable_pen(pen: &dyn IPen) -> bool {
+    pen.as_immutable_pen().is_some()
 }
 
 fn not_compatible(what: &str) -> ! {
@@ -67,7 +72,7 @@ pub(crate) fn brush_get_server_resource(
     let Some(compositor) = compositor else {
         return Some(BatchResource::Value(brush.clone()));
     };
-    if is_immutable_brush(brush) {
+    if is_immutable_brush(&**brush) {
         return Some(BatchResource::Value(brush.clone()));
     }
     if let Some(resource) = brush_render_resource(&**brush) {
@@ -121,7 +126,7 @@ pub(crate) fn pen_get_server(pen: Option<&Rc<dyn IPen>>, compositor: Option<&Com
     let Some(compositor) = compositor else {
         return Some(RenderDataResource::Pen(pen.clone()));
     };
-    if is_immutable_pen(pen) {
+    if is_immutable_pen(&**pen) {
         return Some(RenderDataResource::Pen(pen.clone()));
     }
     match pen_render_resource(&**pen) {
@@ -136,7 +141,7 @@ pub(crate) fn pen_get_server(pen: Option<&Rc<dyn IPen>>, compositor: Option<&Com
 /// thread: the pen itself. A mutable pen is not sent to the server.
 pub(crate) fn pen_get_client(pen: Option<&Rc<dyn IPen>>, compositor: Option<&Compositor>) -> Option<RenderDataResource> {
     let pen = pen?;
-    if compositor.is_none() || is_immutable_pen(pen) {
+    if compositor.is_none() || is_immutable_pen(&**pen) {
         Some(RenderDataResource::Pen(pen.clone()))
     } else {
         Some(RenderDataResource::ClientPen(pen.clone()))
