@@ -384,6 +384,13 @@ struct Emitter<'a> {
     /// property a markup extension provides its value for is the one of the
     /// innermost (the interpreter's nearest parent assignment node).
     assignments: Vec<Rc<XamlPropertyAssignmentNode>>,
+    /// The name of the function being emitted: the build functions of its
+    /// deferred content are named after it.
+    function_name: &'a str,
+    /// The build functions of the deferred content of the document, in the
+    /// order their content appears in the document (a slot is reserved when
+    /// the content starts, so nested content follows the content around it).
+    deferred_functions: Vec<String>,
 }
 
 fn node_address<T: ?Sized>(node: &Rc<T>) -> usize {
@@ -1615,11 +1622,12 @@ impl Emitter<'_> {
     }
 
     /// Deferred content (`XamlDeferredContentNode`): the build function as a
-    /// closure that creates its own context (chained to the service provider
-    /// it is called with, the root object of that provider as its root) and
-    /// builds the value anew, given with the context of the declaration to
-    /// the deferred content customisation of the language
-    /// (`DeferredTransformationFactoryV3<T>`, `rt::deferred_content`).
+    /// function of its own (`<function>_deferred_<n>`, written after the
+    /// function of the document) that creates its own context (chained to
+    /// the service provider it is called with, the root object of that
+    /// provider as its root) and builds the value anew, given with the
+    /// context of the declaration to the deferred content customisation of
+    /// the language (`DeferredTransformationFactoryV3<T>`, `rt::defer`).
     fn deferred_content(&mut self, node: &Rc<dyn IXamlAstNode>, deferred: &Rc<XamlDeferredContentNode>) -> EmitResult<Typed> {
         let customization = deferred
             .deferred_content_customization()
@@ -1637,7 +1645,10 @@ impl Emitter<'_> {
             },
             None => object,
         };
-        // The body: a scope of its own (the interpreter evaluates it with a new evaluation).
+        // The body: a function of its own (the interpreter evaluates it with a new evaluation).
+        let slot = self.deferred_functions.len();
+        let function = format!("{}_deferred_{slot}", self.function_name);
+        self.deferred_functions.push(String::new());
         let outer_lines = std::mem::take(&mut self.lines);
         let outer_assignments = std::mem::take(&mut self.assignments);
         let outer_uses = (std::mem::take(&mut self.uses_context), std::mem::take(&mut self.uses_name_scope));
@@ -1648,29 +1659,42 @@ impl Emitter<'_> {
         (self.uses_context, self.uses_name_scope) = outer_uses;
         let returned = body?;
 
-        // The context of the declaration is given to the customisation.
-        self.uses_context = true;
+        let document = self.document_name.replace('`', "'").replace(['\r', '\n'], " ");
         let context_name = if uses_context { "context" } else { "_context" };
-        let local = self.local_named("deferred");
-        self.line(format!("let {local} = rt::deferred_content("));
-        self.line(format!("    {result_type},"));
-        self.line("    &context,".to_string());
-        self.line("    rt::deferred_builder(move |service_provider| {".to_string());
-        self.line(format!(
-            "        let {context_name} = rt::deferred_context(service_provider, {}, {});",
+        let mut text = String::new();
+        text.push_str(&format!(
+            "/// Builds the deferred content at `{document}({},{})` (a template or a deferred resource).\n",
+            node.line(),
+            node.position()
+        ));
+        text.push_str(&format!("fn {function}(\n"));
+        text.push_str("    service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,\n");
+        text.push_str(
+            ") -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {\n",
+        );
+        text.push_str(&format!(
+            "    let {context_name} = rt::deferred_context(service_provider, {}, {});\n",
             self.base_uri, self.namespaces
         ));
         if uses_name_scope {
-            self.line("        let name_scope = context.name_scope_field();".to_string());
+            text.push_str("    let name_scope = context.name_scope_field();\n");
         }
         for line in body_lines {
-            self.lines.push(format!("        {line}"));
+            text.push_str(&line);
+            text.push('\n');
         }
-        self.line(format!("        ::core::result::Result::Ok({returned})"));
-        self.line("    }),".to_string());
-        self.line(format!("    {},", node.line()));
-        self.line(format!("    {},", node.position()));
-        self.line(")?;".to_string());
+        text.push_str(&format!("    ::core::result::Result::Ok({returned})\n"));
+        text.push_str("}\n");
+        self.deferred_functions[slot] = text;
+
+        // The context of the declaration is given to the customisation.
+        self.uses_context = true;
+        let local = self.local_named("deferred");
+        self.line(format!(
+            "let {local} = rt::defer({result_type}, &context, {function}, {}, {})?;",
+            node.line(),
+            node.position()
+        ));
         Ok(Typed { expr: local, kind: Kind::Exact { id: TypeId::of::<Rc<DeferredContent>>(), nullable: None } })
     }
 
@@ -2863,6 +2887,8 @@ pub fn emit_function(
         assignments: Vec::new(),
         position: std::cell::Cell::new((0, 0)),
         documents,
+        function_name,
+        deferred_functions: Vec::new(),
     };
     // `Build`: the root object, then `Populate` with a context of its own (its name
     // scope field is filled from the parent service provider) whose root object is
@@ -2910,6 +2936,10 @@ pub fn emit_function(
         source.push('\n');
     }
     source.push_str("}\n");
+    for function in &emitter.deferred_functions {
+        source.push('\n');
+        source.push_str(function);
+    }
     Ok(source)
 }
 

@@ -1031,26 +1031,25 @@ pub fn build_control_template_xaml(
     // control_template.xaml(1,117) Template
     let value_0 = ::ferroui_markup_xaml::templates::ControlTemplate::__markup_new_0();
     // control_template.xaml(1,134) Content
-    let deferred_0 = rt::deferred_content(
-        rt::class_handle(<::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE),
-        &context,
-        rt::deferred_builder(move |service_provider| {
-            let context = rt::deferred_context(service_provider, ::core::option::Option::Some("ferres://FerroUI.Markup.Xaml.UnitTests/Emitter/control_template.xaml"), XML_NAMESPACES_0);
-            // control_template.xaml(1,134) Border
-            let border_0 = ::ferroui_controls::Border::new();
-            context.set_intermediate_root_object(rt::to_value(border_0.clone()));
-            border_0.begin_init();
-            border_0.try_end_init().map_err(|error| rt::at(rt::TARGET_INVOCATION_EXCEPTION, error, 1, 134))?;
-            ::core::result::Result::Ok(rt::to_value(border_0.clone()))
-        }),
-        1,
-        134,
-    )?;
+    let deferred_0 = rt::defer(rt::class_handle(<::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE), &context, build_control_template_xaml_deferred_0, 1, 134)?;
     ::ferroui_markup_xaml::templates::ControlTemplate::__markup_set_Content(&value_0, rt::to_object(::core::clone::Clone::clone(&deferred_0)));
     button_0.set_value(::ferroui_controls::primitives::TemplatedControl::template_property(), ::core::option::Option::Some({ let value = ::core::clone::Clone::clone(&value_0); let value: ::std::rc::Rc<dyn ::ferroui_controls::templates::IControlTemplate> = value; value }));
     button_0.try_end_init().map_err(|error| rt::at(rt::TARGET_INVOCATION_EXCEPTION, error, 1, 2))?;
     rt::complete_root_name_scope(::core::option::Option::Some(&button_0), name_scope.as_ref(), 1, 2)?;
     ::core::result::Result::Ok(button_0)
+}
+
+/// Builds the deferred content at `control_template.xaml(1,134)` (a template or a deferred resource).
+fn build_control_template_xaml_deferred_0(
+    service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+    let context = rt::deferred_context(service_provider, ::core::option::Option::Some("ferres://FerroUI.Markup.Xaml.UnitTests/Emitter/control_template.xaml"), XML_NAMESPACES_0);
+    // control_template.xaml(1,134) Border
+    let border_0 = ::ferroui_controls::Border::new();
+    context.set_intermediate_root_object(rt::to_value(border_0.clone()));
+    border_0.begin_init();
+    border_0.try_end_init().map_err(|error| rt::at(rt::TARGET_INVOCATION_EXCEPTION, error, 1, 134))?;
+    ::core::result::Result::Ok(rt::to_value(border_0.clone()))
 }
 
 fn build_control_template_xaml_untyped(
@@ -2697,21 +2696,7 @@ pub fn build_static_resource_local_xaml(
     context.push_parent(rt::to_value(border_0.clone()));
     // static_resource_local.xaml(1,118) Resources (resource)
     let dictionary_0 = ::ferroui_base::StyledElement::__markup_get_Resources(border_0.upcast_ref::<::ferroui_base::StyledElement>());
-    let deferred_0 = rt::deferred_content(
-        ::ferroui_base::data::core::ValueType::object(),
-        &context,
-        rt::deferred_builder(move |service_provider| {
-            let _context = rt::deferred_context(service_provider, ::core::option::Option::Some("ferres://FerroUI.Markup.Xaml.UnitTests/Emitter/static_resource_local.xaml"), XML_NAMESPACES_0);
-            // static_resource_local.xaml(1,118) SolidColorBrush
-            let solid_color_brush_0 = ::ferroui_base::media::SolidColorBrush::new();
-            // static_resource_local.xaml(1,118) Color
-            let value_0 = ::ferroui_base::media::Color::__markup_FromUInt32_2(4294901760_u32);
-            solid_color_brush_0.set_value(::ferroui_base::media::SolidColorBrush::color_property(), ::core::clone::Clone::clone(&value_0));
-            ::core::result::Result::Ok(rt::to_value(solid_color_brush_0.clone()))
-        }),
-        1,
-        118,
-    )?;
+    let deferred_0 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_static_resource_local_xaml_deferred_0, 1, 118)?;
     ::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&rt::argument(dictionary_0.clone(), "FerroUI.Controls.ResourceDictionary.AddDeferred", 0, 1, 118)?, rt::to_object(::std::string::String::from("Accent")), { let value = ::core::clone::Clone::clone(&deferred_0); let value: ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent> = value; value }).map_err(|error| rt::at(rt::TARGET_INVOCATION_EXCEPTION, error, 1, 118))?;
     // static_resource_local.xaml(1,182) Child
     // static_resource_local.xaml(1,182) Border
@@ -2745,6 +2730,19 @@ pub fn build_static_resource_local_xaml(
     ::core::result::Result::Ok(border_0)
 }
 
+/// Builds the deferred content at `static_resource_local.xaml(1,118)` (a template or a deferred resource).
+fn build_static_resource_local_xaml_deferred_0(
+    service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+    let _context = rt::deferred_context(service_provider, ::core::option::Option::Some("ferres://FerroUI.Markup.Xaml.UnitTests/Emitter/static_resource_local.xaml"), XML_NAMESPACES_0);
+    // static_resource_local.xaml(1,118) SolidColorBrush
+    let solid_color_brush_0 = ::ferroui_base::media::SolidColorBrush::new();
+    // static_resource_local.xaml(1,118) Color
+    let value_0 = ::ferroui_base::media::Color::__markup_FromUInt32_2(4294901760_u32);
+    solid_color_brush_0.set_value(::ferroui_base::media::SolidColorBrush::color_property(), ::core::clone::Clone::clone(&value_0));
+    ::core::result::Result::Ok(rt::to_value(solid_color_brush_0.clone()))
+}
+
 fn build_static_resource_local_xaml_untyped(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
 ) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadException> {
@@ -2764,21 +2762,7 @@ pub fn build_dynamic_resource_local_xaml(
     context.push_parent(rt::to_value(border_0.clone()));
     // dynamic_resource_local.xaml(1,118) Resources (resource)
     let dictionary_0 = ::ferroui_base::StyledElement::__markup_get_Resources(border_0.upcast_ref::<::ferroui_base::StyledElement>());
-    let deferred_0 = rt::deferred_content(
-        ::ferroui_base::data::core::ValueType::object(),
-        &context,
-        rt::deferred_builder(move |service_provider| {
-            let _context = rt::deferred_context(service_provider, ::core::option::Option::Some("ferres://FerroUI.Markup.Xaml.UnitTests/Emitter/dynamic_resource_local.xaml"), XML_NAMESPACES_0);
-            // dynamic_resource_local.xaml(1,118) SolidColorBrush
-            let solid_color_brush_0 = ::ferroui_base::media::SolidColorBrush::new();
-            // dynamic_resource_local.xaml(1,118) Color
-            let value_0 = ::ferroui_base::media::Color::__markup_FromUInt32_2(4294901760_u32);
-            solid_color_brush_0.set_value(::ferroui_base::media::SolidColorBrush::color_property(), ::core::clone::Clone::clone(&value_0));
-            ::core::result::Result::Ok(rt::to_value(solid_color_brush_0.clone()))
-        }),
-        1,
-        118,
-    )?;
+    let deferred_0 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_dynamic_resource_local_xaml_deferred_0, 1, 118)?;
     ::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&rt::argument(dictionary_0.clone(), "FerroUI.Controls.ResourceDictionary.AddDeferred", 0, 1, 118)?, rt::to_object(::std::string::String::from("Accent")), { let value = ::core::clone::Clone::clone(&deferred_0); let value: ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent> = value; value }).map_err(|error| rt::at(rt::TARGET_INVOCATION_EXCEPTION, error, 1, 118))?;
     // dynamic_resource_local.xaml(1,182) Child
     // dynamic_resource_local.xaml(1,182) Border
@@ -2799,6 +2783,19 @@ pub fn build_dynamic_resource_local_xaml(
     border_0.try_end_init().map_err(|error| rt::at(rt::TARGET_INVOCATION_EXCEPTION, error, 1, 2))?;
     rt::complete_root_name_scope(::core::option::Option::Some(&border_0), name_scope.as_ref(), 1, 2)?;
     ::core::result::Result::Ok(border_0)
+}
+
+/// Builds the deferred content at `dynamic_resource_local.xaml(1,118)` (a template or a deferred resource).
+fn build_dynamic_resource_local_xaml_deferred_0(
+    service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+    let _context = rt::deferred_context(service_provider, ::core::option::Option::Some("ferres://FerroUI.Markup.Xaml.UnitTests/Emitter/dynamic_resource_local.xaml"), XML_NAMESPACES_0);
+    // dynamic_resource_local.xaml(1,118) SolidColorBrush
+    let solid_color_brush_0 = ::ferroui_base::media::SolidColorBrush::new();
+    // dynamic_resource_local.xaml(1,118) Color
+    let value_0 = ::ferroui_base::media::Color::__markup_FromUInt32_2(4294901760_u32);
+    solid_color_brush_0.set_value(::ferroui_base::media::SolidColorBrush::color_property(), ::core::clone::Clone::clone(&value_0));
+    ::core::result::Result::Ok(rt::to_value(solid_color_brush_0.clone()))
 }
 
 fn build_dynamic_resource_local_xaml_untyped(
@@ -2919,25 +2916,24 @@ pub fn build_resources_many_xaml(
     <dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&dictionary_1, rt::to_object(::std::string::String::from("B")), rt::to_object(2.0_f64)).map_err(|error| rt::at(rt::TARGET_INVOCATION_EXCEPTION, error, 1, 169))?;
     // resources_many.xaml(1,182) Resources (resource)
     let dictionary_2 = ::ferroui_base::StyledElement::__markup_get_Resources(border_0.upcast_ref::<::ferroui_base::StyledElement>());
-    let deferred_0 = rt::deferred_content(
-        ::ferroui_base::data::core::ValueType::object(),
-        &context,
-        rt::deferred_builder(move |service_provider| {
-            let _context = rt::deferred_context(service_provider, ::core::option::Option::Some("ferres://FerroUI.Markup.Xaml.UnitTests/Emitter/resources_many.xaml"), XML_NAMESPACES_0);
-            // resources_many.xaml(1,182) SolidColorBrush
-            let solid_color_brush_0 = ::ferroui_base::media::SolidColorBrush::new();
-            // resources_many.xaml(1,182) Color
-            let value_0 = ::ferroui_base::media::Color::__markup_FromUInt32_2(4278190335_u32);
-            solid_color_brush_0.set_value(::ferroui_base::media::SolidColorBrush::color_property(), ::core::clone::Clone::clone(&value_0));
-            ::core::result::Result::Ok(rt::to_value(solid_color_brush_0.clone()))
-        }),
-        1,
-        182,
-    )?;
+    let deferred_0 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_resources_many_xaml_deferred_0, 1, 182)?;
     ::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&rt::argument(dictionary_2.clone(), "FerroUI.Controls.ResourceDictionary.AddDeferred", 0, 1, 182)?, rt::to_object(::std::string::String::from("C")), { let value = ::core::clone::Clone::clone(&deferred_0); let value: ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent> = value; value }).map_err(|error| rt::at(rt::TARGET_INVOCATION_EXCEPTION, error, 1, 182))?;
     border_0.try_end_init().map_err(|error| rt::at(rt::TARGET_INVOCATION_EXCEPTION, error, 1, 2))?;
     rt::complete_root_name_scope(::core::option::Option::Some(&border_0), name_scope.as_ref(), 1, 2)?;
     ::core::result::Result::Ok(border_0)
+}
+
+/// Builds the deferred content at `resources_many.xaml(1,182)` (a template or a deferred resource).
+fn build_resources_many_xaml_deferred_0(
+    service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+    let _context = rt::deferred_context(service_provider, ::core::option::Option::Some("ferres://FerroUI.Markup.Xaml.UnitTests/Emitter/resources_many.xaml"), XML_NAMESPACES_0);
+    // resources_many.xaml(1,182) SolidColorBrush
+    let solid_color_brush_0 = ::ferroui_base::media::SolidColorBrush::new();
+    // resources_many.xaml(1,182) Color
+    let value_0 = ::ferroui_base::media::Color::__markup_FromUInt32_2(4278190335_u32);
+    solid_color_brush_0.set_value(::ferroui_base::media::SolidColorBrush::color_property(), ::core::clone::Clone::clone(&value_0));
+    ::core::result::Result::Ok(rt::to_value(solid_color_brush_0.clone()))
 }
 
 fn build_resources_many_xaml_untyped(
@@ -2963,26 +2959,25 @@ pub fn build_resource_dictionary_root_xaml(
     // resource_dictionary_root.xaml(1,131) Content (resource)
     <dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 1, 131)?, rt::to_object(::std::string::String::from("A")), rt::to_object(1.0_f64)).map_err(|error| rt::at(rt::TARGET_INVOCATION_EXCEPTION, error, 1, 131))?;
     // resource_dictionary_root.xaml(1,144) Content (resource)
-    let deferred_0 = rt::deferred_content(
-        ::ferroui_base::data::core::ValueType::object(),
-        &context,
-        rt::deferred_builder(move |service_provider| {
-            let _context = rt::deferred_context(service_provider, ::core::option::Option::Some("ferres://FerroUI.Markup.Xaml.UnitTests/Emitter/resource_dictionary_root.xaml"), XML_NAMESPACES_0);
-            // resource_dictionary_root.xaml(1,144) SolidColorBrush
-            let solid_color_brush_0 = ::ferroui_base::media::SolidColorBrush::new();
-            // resource_dictionary_root.xaml(1,144) Color
-            let value_0 = ::ferroui_base::media::Color::__markup_FromUInt32_2(4278222848_u32);
-            solid_color_brush_0.set_value(::ferroui_base::media::SolidColorBrush::color_property(), ::core::clone::Clone::clone(&value_0));
-            ::core::result::Result::Ok(rt::to_value(solid_color_brush_0.clone()))
-        }),
-        1,
-        144,
-    )?;
+    let deferred_0 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_resource_dictionary_root_xaml_deferred_0, 1, 144)?;
     ::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::to_object(::std::string::String::from("B")), { let value = ::core::clone::Clone::clone(&deferred_0); let value: ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent> = value; value }).map_err(|error| rt::at(rt::TARGET_INVOCATION_EXCEPTION, error, 1, 144))?;
     // resource_dictionary_root.xaml(1,205) Content (resource)
     <dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 1, 205)?, rt::to_object(::std::string::String::from("C")), rt::to_object(::std::string::String::from("text"))).map_err(|error| rt::at(rt::TARGET_INVOCATION_EXCEPTION, error, 1, 205))?;
     rt::complete_root_name_scope(::core::option::Option::None, name_scope.as_ref(), 1, 2)?;
     ::core::result::Result::Ok(resource_dictionary_0)
+}
+
+/// Builds the deferred content at `resource_dictionary_root.xaml(1,144)` (a template or a deferred resource).
+fn build_resource_dictionary_root_xaml_deferred_0(
+    service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+    let _context = rt::deferred_context(service_provider, ::core::option::Option::Some("ferres://FerroUI.Markup.Xaml.UnitTests/Emitter/resource_dictionary_root.xaml"), XML_NAMESPACES_0);
+    // resource_dictionary_root.xaml(1,144) SolidColorBrush
+    let solid_color_brush_0 = ::ferroui_base::media::SolidColorBrush::new();
+    // resource_dictionary_root.xaml(1,144) Color
+    let value_0 = ::ferroui_base::media::Color::__markup_FromUInt32_2(4278222848_u32);
+    solid_color_brush_0.set_value(::ferroui_base::media::SolidColorBrush::color_property(), ::core::clone::Clone::clone(&value_0));
+    ::core::result::Result::Ok(rt::to_value(solid_color_brush_0.clone()))
 }
 
 fn build_resource_dictionary_root_xaml_untyped(
@@ -3042,104 +3037,101 @@ pub fn build_control_theme_resources_xaml(
     }
     // control_theme_resources.xaml(1,118) Resources (resource)
     let dictionary_0 = ::ferroui_base::StyledElement::__markup_get_Resources(border_0.upcast_ref::<::ferroui_base::StyledElement>());
-    let deferred_0 = rt::deferred_content(
-        ::ferroui_base::data::core::ValueType::object(),
-        &context,
-        rt::deferred_builder(move |service_provider| {
-            let _context = rt::deferred_context(service_provider, ::core::option::Option::Some("ferres://FerroUI.Markup.Xaml.UnitTests/Emitter/control_theme_resources.xaml"), XML_NAMESPACES_0);
-            // control_theme_resources.xaml(1,118) SolidColorBrush
-            let solid_color_brush_0 = ::ferroui_base::media::SolidColorBrush::new();
-            // control_theme_resources.xaml(1,118) Color
-            let value_0 = ::ferroui_base::media::Color::__markup_FromUInt32_2(4294901760_u32);
-            solid_color_brush_0.set_value(::ferroui_base::media::SolidColorBrush::color_property(), ::core::clone::Clone::clone(&value_0));
-            ::core::result::Result::Ok(rt::to_value(solid_color_brush_0.clone()))
-        }),
-        1,
-        118,
-    )?;
+    let deferred_0 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_control_theme_resources_xaml_deferred_0, 1, 118)?;
     ::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&rt::argument(dictionary_0.clone(), "FerroUI.Controls.ResourceDictionary.AddDeferred", 0, 1, 118)?, rt::to_object(::std::string::String::from("Accent")), { let value = ::core::clone::Clone::clone(&deferred_0); let value: ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent> = value; value }).map_err(|error| rt::at(rt::TARGET_INVOCATION_EXCEPTION, error, 1, 118))?;
     // control_theme_resources.xaml(1,163) Resources (resource)
     let dictionary_1 = ::ferroui_base::StyledElement::__markup_get_Resources(border_0.upcast_ref::<::ferroui_base::StyledElement>());
-    let deferred_1 = rt::deferred_content(
-        ::ferroui_base::data::core::ValueType::object(),
-        &context,
-        rt::deferred_builder(move |service_provider| {
-            let _context = rt::deferred_context(service_provider, ::core::option::Option::Some("ferres://FerroUI.Markup.Xaml.UnitTests/Emitter/control_theme_resources.xaml"), XML_NAMESPACES_0);
-            // control_theme_resources.xaml(1,163) ControlTheme
-            let control_theme_0 = ::ferroui_base::styling::ControlTheme::new();
-            // control_theme_resources.xaml(1,163) TargetType
-            ::ferroui_base::styling::ControlTheme::__markup_set_TargetType(&control_theme_0, ::core::option::Option::Some(<::ferroui_controls::Button as ::ferroui_base::StaticType>::TYPE));
-            // control_theme_resources.xaml(1,210) Content
-            let value_1 = ::ferroui_base::styling::Setter::__markup_new_0();
-            // control_theme_resources.xaml(1,217) Property
-            ::ferroui_base::styling::Setter::__markup_set_Property(&value_1, rt::cast(rt::property(::ferroui_base::Visual::opacity_property()), 1, 217)?);
-            // control_theme_resources.xaml(1,210) Value
-            ::ferroui_base::styling::Setter::__markup_set_Value(&value_1, rt::setter_value(&value_1, rt::to_object(0.5_f64)));
-            ::ferroui_base::styling::StyleBase::__markup_Add_0(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(::core::clone::Clone::clone(&value_1), 1, 210)?);
-            ::core::result::Result::Ok(rt::to_value(control_theme_0.clone()))
-        }),
-        1,
-        163,
-    )?;
+    let deferred_1 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_control_theme_resources_xaml_deferred_1, 1, 163)?;
     ::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&rt::argument(dictionary_1.clone(), "FerroUI.Controls.ResourceDictionary.AddDeferred", 0, 1, 163)?, rt::to_object(::std::string::String::from("Base")), { let value = ::core::clone::Clone::clone(&deferred_1); let value: ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent> = value; value }).map_err(|error| rt::at(rt::TARGET_INVOCATION_EXCEPTION, error, 1, 163))?;
     // control_theme_resources.xaml(1,265) Resources (resource)
     let dictionary_2 = ::ferroui_base::StyledElement::__markup_get_Resources(border_0.upcast_ref::<::ferroui_base::StyledElement>());
-    let deferred_2 = rt::deferred_content(
-        ::ferroui_base::data::core::ValueType::object(),
-        &context,
-        rt::deferred_builder(move |service_provider| {
-            let context = rt::deferred_context(service_provider, ::core::option::Option::Some("ferres://FerroUI.Markup.Xaml.UnitTests/Emitter/control_theme_resources.xaml"), XML_NAMESPACES_0);
-            // control_theme_resources.xaml(1,265) ControlTheme
-            let control_theme_1 = ::ferroui_base::styling::ControlTheme::new();
-            context.push_parent(rt::to_value(control_theme_1.clone()));
-            // control_theme_resources.xaml(1,265) TargetType
-            ::ferroui_base::styling::ControlTheme::__markup_set_TargetType(&control_theme_1, ::core::option::Option::Some(<::ferroui_controls::Button as ::ferroui_base::StaticType>::TYPE));
-            // control_theme_resources.xaml(1,314) BasedOn
-            let value_2 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("Base")));
-            let extension_0 = value_2;
-            context.set_target_property(rt::boxed(rt::clr_property_info(rt::class_markup(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), "BasedOn", false, rt::class_handle(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), false)));
-            let provided_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0(&extension_0, rt::service_provider(&context)).map_err(|error| rt::at(rt::TARGET_INVOCATION_EXCEPTION, error, 1, 314))?;
-            context.set_target_property(::core::option::Option::None);
-            ::ferroui_base::styling::ControlTheme::__markup_set_BasedOn(&control_theme_1, rt::exact(rt::cast_checked(provided_0, rt::class_handle(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), "FerroUI.Styling.ControlTheme", 1, 314)?, "FerroUI.Styling.ControlTheme.set_BasedOn", 0, 1, 314)?);
-            // control_theme_resources.xaml(1,347) Content
-            let value_3 = ::ferroui_base::styling::Setter::__markup_new_0();
-            context.push_parent(rt::to_value(value_3.clone()));
-            // control_theme_resources.xaml(1,354) Property
-            ::ferroui_base::styling::Setter::__markup_set_Property(&value_3, rt::cast(rt::property(::ferroui_controls::primitives::TemplatedControl::background_property()), 1, 354)?);
-            // control_theme_resources.xaml(1,376) Value
-            let value_4 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("Accent")));
-            let extension_1 = value_4;
-            context.set_target_property(rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)));
-            let provided_1 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0(&extension_1, rt::service_provider(&context)).map_err(|error| rt::at(rt::TARGET_INVOCATION_EXCEPTION, error, 1, 376))?;
-            context.set_target_property(::core::option::Option::None);
-            ::ferroui_base::styling::Setter::__markup_set_Value(&value_3, rt::setter_value(&value_3, ::core::clone::Clone::clone(&provided_1)));
-            context.pop_parent();
-            ::ferroui_base::styling::StyleBase::__markup_Add_0(control_theme_1.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(::core::clone::Clone::clone(&value_3), 1, 347)?);
-            // control_theme_resources.xaml(1,410) Content
-            let value_5 = ::ferroui_base::styling::Setter::__markup_new_0();
-            context.push_parent(rt::to_value(value_5.clone()));
-            // control_theme_resources.xaml(1,417) Property
-            ::ferroui_base::styling::Setter::__markup_set_Property(&value_5, rt::cast(rt::property(::ferroui_controls::primitives::TemplatedControl::foreground_property()), 1, 417)?);
-            // control_theme_resources.xaml(1,439) Value
-            let value_6 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("Accent")));
-            let extension_2 = value_6;
-            context.set_target_property(rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)));
-            let provided_2 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0(&extension_2, rt::service_provider(&context));
-            context.set_target_property(::core::option::Option::None);
-            ::ferroui_base::styling::Setter::__markup_set_Value(&value_5, rt::setter_value(&value_5, rt::to_object(::core::clone::Clone::clone(&provided_2))));
-            context.pop_parent();
-            ::ferroui_base::styling::StyleBase::__markup_Add_0(control_theme_1.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(::core::clone::Clone::clone(&value_5), 1, 410)?);
-            context.pop_parent();
-            ::core::result::Result::Ok(rt::to_value(control_theme_1.clone()))
-        }),
-        1,
-        265,
-    )?;
+    let deferred_2 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_control_theme_resources_xaml_deferred_2, 1, 265)?;
     ::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&rt::argument(dictionary_2.clone(), "FerroUI.Controls.ResourceDictionary.AddDeferred", 0, 1, 265)?, rt::to_object(::std::string::String::from("Derived")), { let value = ::core::clone::Clone::clone(&deferred_2); let value: ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent> = value; value }).map_err(|error| rt::at(rt::TARGET_INVOCATION_EXCEPTION, error, 1, 265))?;
     context.pop_parent();
     border_0.try_end_init().map_err(|error| rt::at(rt::TARGET_INVOCATION_EXCEPTION, error, 1, 2))?;
     rt::complete_root_name_scope(::core::option::Option::Some(&border_0), name_scope.as_ref(), 1, 2)?;
     ::core::result::Result::Ok(border_0)
+}
+
+/// Builds the deferred content at `control_theme_resources.xaml(1,118)` (a template or a deferred resource).
+fn build_control_theme_resources_xaml_deferred_0(
+    service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+    let _context = rt::deferred_context(service_provider, ::core::option::Option::Some("ferres://FerroUI.Markup.Xaml.UnitTests/Emitter/control_theme_resources.xaml"), XML_NAMESPACES_0);
+    // control_theme_resources.xaml(1,118) SolidColorBrush
+    let solid_color_brush_0 = ::ferroui_base::media::SolidColorBrush::new();
+    // control_theme_resources.xaml(1,118) Color
+    let value_0 = ::ferroui_base::media::Color::__markup_FromUInt32_2(4294901760_u32);
+    solid_color_brush_0.set_value(::ferroui_base::media::SolidColorBrush::color_property(), ::core::clone::Clone::clone(&value_0));
+    ::core::result::Result::Ok(rt::to_value(solid_color_brush_0.clone()))
+}
+
+/// Builds the deferred content at `control_theme_resources.xaml(1,163)` (a template or a deferred resource).
+fn build_control_theme_resources_xaml_deferred_1(
+    service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+    let _context = rt::deferred_context(service_provider, ::core::option::Option::Some("ferres://FerroUI.Markup.Xaml.UnitTests/Emitter/control_theme_resources.xaml"), XML_NAMESPACES_0);
+    // control_theme_resources.xaml(1,163) ControlTheme
+    let control_theme_0 = ::ferroui_base::styling::ControlTheme::new();
+    // control_theme_resources.xaml(1,163) TargetType
+    ::ferroui_base::styling::ControlTheme::__markup_set_TargetType(&control_theme_0, ::core::option::Option::Some(<::ferroui_controls::Button as ::ferroui_base::StaticType>::TYPE));
+    // control_theme_resources.xaml(1,210) Content
+    let value_1 = ::ferroui_base::styling::Setter::__markup_new_0();
+    // control_theme_resources.xaml(1,217) Property
+    ::ferroui_base::styling::Setter::__markup_set_Property(&value_1, rt::cast(rt::property(::ferroui_base::Visual::opacity_property()), 1, 217)?);
+    // control_theme_resources.xaml(1,210) Value
+    ::ferroui_base::styling::Setter::__markup_set_Value(&value_1, rt::setter_value(&value_1, rt::to_object(0.5_f64)));
+    ::ferroui_base::styling::StyleBase::__markup_Add_0(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(::core::clone::Clone::clone(&value_1), 1, 210)?);
+    ::core::result::Result::Ok(rt::to_value(control_theme_0.clone()))
+}
+
+/// Builds the deferred content at `control_theme_resources.xaml(1,265)` (a template or a deferred resource).
+fn build_control_theme_resources_xaml_deferred_2(
+    service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+    let context = rt::deferred_context(service_provider, ::core::option::Option::Some("ferres://FerroUI.Markup.Xaml.UnitTests/Emitter/control_theme_resources.xaml"), XML_NAMESPACES_0);
+    // control_theme_resources.xaml(1,265) ControlTheme
+    let control_theme_1 = ::ferroui_base::styling::ControlTheme::new();
+    context.push_parent(rt::to_value(control_theme_1.clone()));
+    // control_theme_resources.xaml(1,265) TargetType
+    ::ferroui_base::styling::ControlTheme::__markup_set_TargetType(&control_theme_1, ::core::option::Option::Some(<::ferroui_controls::Button as ::ferroui_base::StaticType>::TYPE));
+    // control_theme_resources.xaml(1,314) BasedOn
+    let value_2 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("Base")));
+    let extension_0 = value_2;
+    context.set_target_property(rt::boxed(rt::clr_property_info(rt::class_markup(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), "BasedOn", false, rt::class_handle(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), false)));
+    let provided_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0(&extension_0, rt::service_provider(&context)).map_err(|error| rt::at(rt::TARGET_INVOCATION_EXCEPTION, error, 1, 314))?;
+    context.set_target_property(::core::option::Option::None);
+    ::ferroui_base::styling::ControlTheme::__markup_set_BasedOn(&control_theme_1, rt::exact(rt::cast_checked(provided_0, rt::class_handle(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), "FerroUI.Styling.ControlTheme", 1, 314)?, "FerroUI.Styling.ControlTheme.set_BasedOn", 0, 1, 314)?);
+    // control_theme_resources.xaml(1,347) Content
+    let value_3 = ::ferroui_base::styling::Setter::__markup_new_0();
+    context.push_parent(rt::to_value(value_3.clone()));
+    // control_theme_resources.xaml(1,354) Property
+    ::ferroui_base::styling::Setter::__markup_set_Property(&value_3, rt::cast(rt::property(::ferroui_controls::primitives::TemplatedControl::background_property()), 1, 354)?);
+    // control_theme_resources.xaml(1,376) Value
+    let value_4 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("Accent")));
+    let extension_1 = value_4;
+    context.set_target_property(rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)));
+    let provided_1 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0(&extension_1, rt::service_provider(&context)).map_err(|error| rt::at(rt::TARGET_INVOCATION_EXCEPTION, error, 1, 376))?;
+    context.set_target_property(::core::option::Option::None);
+    ::ferroui_base::styling::Setter::__markup_set_Value(&value_3, rt::setter_value(&value_3, ::core::clone::Clone::clone(&provided_1)));
+    context.pop_parent();
+    ::ferroui_base::styling::StyleBase::__markup_Add_0(control_theme_1.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(::core::clone::Clone::clone(&value_3), 1, 347)?);
+    // control_theme_resources.xaml(1,410) Content
+    let value_5 = ::ferroui_base::styling::Setter::__markup_new_0();
+    context.push_parent(rt::to_value(value_5.clone()));
+    // control_theme_resources.xaml(1,417) Property
+    ::ferroui_base::styling::Setter::__markup_set_Property(&value_5, rt::cast(rt::property(::ferroui_controls::primitives::TemplatedControl::foreground_property()), 1, 417)?);
+    // control_theme_resources.xaml(1,439) Value
+    let value_6 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("Accent")));
+    let extension_2 = value_6;
+    context.set_target_property(rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)));
+    let provided_2 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0(&extension_2, rt::service_provider(&context));
+    context.set_target_property(::core::option::Option::None);
+    ::ferroui_base::styling::Setter::__markup_set_Value(&value_5, rt::setter_value(&value_5, rt::to_object(::core::clone::Clone::clone(&provided_2))));
+    context.pop_parent();
+    ::ferroui_base::styling::StyleBase::__markup_Add_0(control_theme_1.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(::core::clone::Clone::clone(&value_5), 1, 410)?);
+    context.pop_parent();
+    ::core::result::Result::Ok(rt::to_value(control_theme_1.clone()))
 }
 
 fn build_control_theme_resources_xaml_untyped(
@@ -3564,23 +3556,22 @@ pub fn build_flags_value_xaml(
     border_0.begin_init();
     // flags_value.xaml(1,162) Resources (resource)
     let dictionary_0 = ::ferroui_base::StyledElement::__markup_get_Resources(border_0.upcast_ref::<::ferroui_base::StyledElement>());
-    let deferred_0 = rt::deferred_content(
-        ::ferroui_base::data::core::ValueType::object(),
-        &context,
-        rt::deferred_builder(move |service_provider| {
-            let _context = rt::deferred_context(service_provider, ::core::option::Option::Some("ferres://FerroUI.Markup.Xaml.UnitTests/Emitter/flags_value.xaml"), XML_NAMESPACES_2);
-            let value_0 = ::ferroui_controls::converters::CornerRadiusFilterConverter::__markup_new_0();
-            // flags_value.xaml(1,162) Filter
-            ::ferroui_controls::converters::CornerRadiusFilterConverter::__markup_set_Filter(&value_0, ::ferroui_controls::converters::Corners::__markup_flags(9_i64));
-            ::core::result::Result::Ok(rt::to_value(value_0))
-        }),
-        1,
-        162,
-    )?;
+    let deferred_0 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_flags_value_xaml_deferred_0, 1, 162)?;
     ::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&rt::argument(dictionary_0.clone(), "FerroUI.Controls.ResourceDictionary.AddDeferred", 0, 1, 162)?, rt::to_object(::std::string::String::from("Filter")), { let value = ::core::clone::Clone::clone(&deferred_0); let value: ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent> = value; value }).map_err(|error| rt::at(rt::TARGET_INVOCATION_EXCEPTION, error, 1, 162))?;
     border_0.try_end_init().map_err(|error| rt::at(rt::TARGET_INVOCATION_EXCEPTION, error, 1, 2))?;
     rt::complete_root_name_scope(::core::option::Option::Some(&border_0), name_scope.as_ref(), 1, 2)?;
     ::core::result::Result::Ok(border_0)
+}
+
+/// Builds the deferred content at `flags_value.xaml(1,162)` (a template or a deferred resource).
+fn build_flags_value_xaml_deferred_0(
+    service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+    let _context = rt::deferred_context(service_provider, ::core::option::Option::Some("ferres://FerroUI.Markup.Xaml.UnitTests/Emitter/flags_value.xaml"), XML_NAMESPACES_2);
+    let value_0 = ::ferroui_controls::converters::CornerRadiusFilterConverter::__markup_new_0();
+    // flags_value.xaml(1,162) Filter
+    ::ferroui_controls::converters::CornerRadiusFilterConverter::__markup_set_Filter(&value_0, ::ferroui_controls::converters::Corners::__markup_flags(9_i64));
+    ::core::result::Result::Ok(rt::to_value(value_0))
 }
 
 fn build_flags_value_xaml_untyped(
@@ -3604,55 +3595,54 @@ pub fn build_control_template_parts_xaml(
     // control_template_parts.xaml(1,134) Template
     let value_0 = ::ferroui_markup_xaml::templates::ControlTemplate::__markup_new_0();
     // control_template_parts.xaml(1,151) Content
-    let deferred_0 = rt::deferred_content(
-        rt::class_handle(<::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE),
-        &context,
-        rt::deferred_builder(move |service_provider| {
-            let context = rt::deferred_context(service_provider, ::core::option::Option::Some("ferres://FerroUI.Markup.Xaml.UnitTests/Emitter/control_template_parts.xaml"), XML_NAMESPACES_0);
-            let name_scope = context.name_scope_field();
-            // control_template_parts.xaml(1,151) Border
-            let border_0 = ::ferroui_controls::Border::new();
-            context.set_intermediate_root_object(rt::to_value(border_0.clone()));
-            border_0.begin_init();
-            // control_template_parts.xaml(1,158) Name
-            border_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_Border")));
-            rt::register_name(name_scope.as_ref(), "PART_Border", ::core::clone::Clone::clone(&border_0).upcast::<::ferroui_base::FerroObject>(), 1, 158)?;
-            // control_template_parts.xaml(1,177) Background
-            let value_1 = ::ferroui_base::data::TemplateBinding::__markup_new_1(rt::property(::ferroui_controls::primitives::TemplatedControl::background_property()));
-            let extension_0 = value_1;
-            let provided_0 = ::ferroui_base::data::TemplateBinding::__markup_ProvideValue_0(&extension_0);
-            rt::bind(&border_0.clone().upcast::<::ferroui_base::FerroObject>(), ::ferroui_controls::Border::background_property(), provided_0, 1, 177)?;
-            // control_template_parts.xaml(1,220) Child
-            // control_template_parts.xaml(1,220) ContentPresenter
-            let content_presenter_0 = ::ferroui_controls::presenters::ContentPresenter::new();
-            content_presenter_0.begin_init();
-            border_0.set_value(::ferroui_controls::Decorator::child_property(), ::core::option::Option::Some(::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_controls::Control>()));
-            // control_template_parts.xaml(1,237) Name
-            content_presenter_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_ContentPresenter")));
-            rt::register_name(name_scope.as_ref(), "PART_ContentPresenter", ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_base::FerroObject>(), 1, 237)?;
-            // control_template_parts.xaml(1,266) Content (setter chosen at run time)
-            let priority_0 = ::ferroui_base::data::BindingPriority::Template;
-            let value_2 = ::ferroui_base::data::TemplateBinding::__markup_new_1(rt::property(::ferroui_controls::ContentControl::content_property()));
-            let extension_1 = value_2;
-            let provided_1 = ::ferroui_base::data::TemplateBinding::__markup_ProvideValue_0(&extension_1);
-            let value_3: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_1);
-            if value_3.is_some() {
-                rt::bind(&content_presenter_0.clone().upcast::<::ferroui_base::FerroObject>(), ::ferroui_controls::presenters::ContentPresenter::content_property(), value_3.clone(), 1, 266)?;
-            } else {
-                content_presenter_0.set_value_with_priority(::ferroui_controls::presenters::ContentPresenter::content_property(), rt::exact(value_3.clone(), "ContentControl.Content", 1, 1, 266)?, priority_0);
-            }
-            content_presenter_0.try_end_init().map_err(|error| rt::at(rt::TARGET_INVOCATION_EXCEPTION, error, 1, 220))?;
-            border_0.try_end_init().map_err(|error| rt::at(rt::TARGET_INVOCATION_EXCEPTION, error, 1, 151))?;
-            ::core::result::Result::Ok(rt::to_value(border_0.clone()))
-        }),
-        1,
-        151,
-    )?;
+    let deferred_0 = rt::defer(rt::class_handle(<::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE), &context, build_control_template_parts_xaml_deferred_0, 1, 151)?;
     ::ferroui_markup_xaml::templates::ControlTemplate::__markup_set_Content(&value_0, rt::to_object(::core::clone::Clone::clone(&deferred_0)));
     button_0.set_value(::ferroui_controls::primitives::TemplatedControl::template_property(), ::core::option::Option::Some({ let value = ::core::clone::Clone::clone(&value_0); let value: ::std::rc::Rc<dyn ::ferroui_controls::templates::IControlTemplate> = value; value }));
     button_0.try_end_init().map_err(|error| rt::at(rt::TARGET_INVOCATION_EXCEPTION, error, 1, 2))?;
     rt::complete_root_name_scope(::core::option::Option::Some(&button_0), name_scope.as_ref(), 1, 2)?;
     ::core::result::Result::Ok(button_0)
+}
+
+/// Builds the deferred content at `control_template_parts.xaml(1,151)` (a template or a deferred resource).
+fn build_control_template_parts_xaml_deferred_0(
+    service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+    let context = rt::deferred_context(service_provider, ::core::option::Option::Some("ferres://FerroUI.Markup.Xaml.UnitTests/Emitter/control_template_parts.xaml"), XML_NAMESPACES_0);
+    let name_scope = context.name_scope_field();
+    // control_template_parts.xaml(1,151) Border
+    let border_0 = ::ferroui_controls::Border::new();
+    context.set_intermediate_root_object(rt::to_value(border_0.clone()));
+    border_0.begin_init();
+    // control_template_parts.xaml(1,158) Name
+    border_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_Border")));
+    rt::register_name(name_scope.as_ref(), "PART_Border", ::core::clone::Clone::clone(&border_0).upcast::<::ferroui_base::FerroObject>(), 1, 158)?;
+    // control_template_parts.xaml(1,177) Background
+    let value_1 = ::ferroui_base::data::TemplateBinding::__markup_new_1(rt::property(::ferroui_controls::primitives::TemplatedControl::background_property()));
+    let extension_0 = value_1;
+    let provided_0 = ::ferroui_base::data::TemplateBinding::__markup_ProvideValue_0(&extension_0);
+    rt::bind(&border_0.clone().upcast::<::ferroui_base::FerroObject>(), ::ferroui_controls::Border::background_property(), provided_0, 1, 177)?;
+    // control_template_parts.xaml(1,220) Child
+    // control_template_parts.xaml(1,220) ContentPresenter
+    let content_presenter_0 = ::ferroui_controls::presenters::ContentPresenter::new();
+    content_presenter_0.begin_init();
+    border_0.set_value(::ferroui_controls::Decorator::child_property(), ::core::option::Option::Some(::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_controls::Control>()));
+    // control_template_parts.xaml(1,237) Name
+    content_presenter_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_ContentPresenter")));
+    rt::register_name(name_scope.as_ref(), "PART_ContentPresenter", ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_base::FerroObject>(), 1, 237)?;
+    // control_template_parts.xaml(1,266) Content (setter chosen at run time)
+    let priority_0 = ::ferroui_base::data::BindingPriority::Template;
+    let value_2 = ::ferroui_base::data::TemplateBinding::__markup_new_1(rt::property(::ferroui_controls::ContentControl::content_property()));
+    let extension_1 = value_2;
+    let provided_1 = ::ferroui_base::data::TemplateBinding::__markup_ProvideValue_0(&extension_1);
+    let value_3: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_1);
+    if value_3.is_some() {
+        rt::bind(&content_presenter_0.clone().upcast::<::ferroui_base::FerroObject>(), ::ferroui_controls::presenters::ContentPresenter::content_property(), value_3.clone(), 1, 266)?;
+    } else {
+        content_presenter_0.set_value_with_priority(::ferroui_controls::presenters::ContentPresenter::content_property(), rt::exact(value_3.clone(), "ContentControl.Content", 1, 1, 266)?, priority_0);
+    }
+    content_presenter_0.try_end_init().map_err(|error| rt::at(rt::TARGET_INVOCATION_EXCEPTION, error, 1, 220))?;
+    border_0.try_end_init().map_err(|error| rt::at(rt::TARGET_INVOCATION_EXCEPTION, error, 1, 151))?;
+    ::core::result::Result::Ok(rt::to_value(border_0.clone()))
 }
 
 fn build_control_template_parts_xaml_untyped(
@@ -3676,30 +3666,7 @@ pub fn build_data_template_xaml(
     let value_0 = ::ferroui_markup_xaml::templates::DataTemplate::__markup_new_0();
     context.push_parent(rt::to_value(value_0.clone()));
     // data_template.xaml(1,147) Content
-    let deferred_0 = rt::deferred_content(
-        rt::class_handle(<::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE),
-        &context,
-        rt::deferred_builder(move |service_provider| {
-            let context = rt::deferred_context(service_provider, ::core::option::Option::Some("ferres://FerroUI.Markup.Xaml.UnitTests/Emitter/data_template.xaml"), XML_NAMESPACES_0);
-            // data_template.xaml(1,147) TextBlock
-            let text_block_0 = ::ferroui_controls::TextBlock::new();
-            context.set_intermediate_root_object(rt::to_value(text_block_0.clone()));
-            text_block_0.begin_init();
-            context.push_parent(rt::to_value(text_block_0.clone()));
-            // data_template.xaml(1,157) Text
-            let value_1 = ::ferroui_markup_xaml::markup_extensions::ReflectionBindingExtension::__markup_new_0();
-            let extension_0 = value_1;
-            context.set_target_property(rt::property_value(::ferroui_controls::TextBlock::text_property()));
-            let provided_0 = ::ferroui_markup_xaml::markup_extensions::ReflectionBindingExtension::__markup_ProvideValue_0(&extension_0, rt::service_provider(&context));
-            context.set_target_property(::core::option::Option::None);
-            rt::bind(&text_block_0.clone().upcast::<::ferroui_base::FerroObject>(), ::ferroui_controls::TextBlock::text_property(), provided_0, 1, 157)?;
-            context.pop_parent();
-            text_block_0.try_end_init().map_err(|error| rt::at(rt::TARGET_INVOCATION_EXCEPTION, error, 1, 147))?;
-            ::core::result::Result::Ok(rt::to_value(text_block_0.clone()))
-        }),
-        1,
-        147,
-    )?;
+    let deferred_0 = rt::defer(rt::class_handle(<::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE), &context, build_data_template_xaml_deferred_0, 1, 147)?;
     ::ferroui_markup_xaml::templates::DataTemplate::__markup_set_Content(&value_0, rt::to_object(::core::clone::Clone::clone(&deferred_0)));
     context.pop_parent();
     items_control_0.set_value(::ferroui_controls::ItemsControl::item_template_property(), ::core::option::Option::Some({ let value = ::core::clone::Clone::clone(&value_0); let value: ::std::rc::Rc<dyn ::ferroui_controls::templates::IDataTemplate> = value; value }));
@@ -3707,6 +3674,28 @@ pub fn build_data_template_xaml(
     items_control_0.try_end_init().map_err(|error| rt::at(rt::TARGET_INVOCATION_EXCEPTION, error, 1, 2))?;
     rt::complete_root_name_scope(::core::option::Option::Some(&items_control_0), name_scope.as_ref(), 1, 2)?;
     ::core::result::Result::Ok(items_control_0)
+}
+
+/// Builds the deferred content at `data_template.xaml(1,147)` (a template or a deferred resource).
+fn build_data_template_xaml_deferred_0(
+    service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+    let context = rt::deferred_context(service_provider, ::core::option::Option::Some("ferres://FerroUI.Markup.Xaml.UnitTests/Emitter/data_template.xaml"), XML_NAMESPACES_0);
+    // data_template.xaml(1,147) TextBlock
+    let text_block_0 = ::ferroui_controls::TextBlock::new();
+    context.set_intermediate_root_object(rt::to_value(text_block_0.clone()));
+    text_block_0.begin_init();
+    context.push_parent(rt::to_value(text_block_0.clone()));
+    // data_template.xaml(1,157) Text
+    let value_1 = ::ferroui_markup_xaml::markup_extensions::ReflectionBindingExtension::__markup_new_0();
+    let extension_0 = value_1;
+    context.set_target_property(rt::property_value(::ferroui_controls::TextBlock::text_property()));
+    let provided_0 = ::ferroui_markup_xaml::markup_extensions::ReflectionBindingExtension::__markup_ProvideValue_0(&extension_0, rt::service_provider(&context));
+    context.set_target_property(::core::option::Option::None);
+    rt::bind(&text_block_0.clone().upcast::<::ferroui_base::FerroObject>(), ::ferroui_controls::TextBlock::text_property(), provided_0, 1, 157)?;
+    context.pop_parent();
+    text_block_0.try_end_init().map_err(|error| rt::at(rt::TARGET_INVOCATION_EXCEPTION, error, 1, 147))?;
+    ::core::result::Result::Ok(rt::to_value(text_block_0.clone()))
 }
 
 fn build_data_template_xaml_untyped(
@@ -3727,70 +3716,68 @@ pub fn build_control_theme_template_xaml(
     border_0.begin_init();
     // control_theme_template.xaml(1,118) Resources (resource)
     let dictionary_0 = ::ferroui_base::StyledElement::__markup_get_Resources(border_0.upcast_ref::<::ferroui_base::StyledElement>());
-    let deferred_1 = rt::deferred_content(
-        ::ferroui_base::data::core::ValueType::object(),
-        &context,
-        rt::deferred_builder(move |service_provider| {
-            let context = rt::deferred_context(service_provider, ::core::option::Option::Some("ferres://FerroUI.Markup.Xaml.UnitTests/Emitter/control_theme_template.xaml"), XML_NAMESPACES_0);
-            // control_theme_template.xaml(1,118) ControlTheme
-            let control_theme_0 = ::ferroui_base::styling::ControlTheme::new();
-            // control_theme_template.xaml(1,118) TargetType
-            ::ferroui_base::styling::ControlTheme::__markup_set_TargetType(&control_theme_0, ::core::option::Option::Some(<::ferroui_controls::Button as ::ferroui_base::StaticType>::TYPE));
-            // control_theme_template.xaml(1,166) Content
-            let value_0 = ::ferroui_base::styling::Setter::__markup_new_0();
-            // control_theme_template.xaml(1,173) Property
-            ::ferroui_base::styling::Setter::__markup_set_Property(&value_0, rt::cast(rt::property(::ferroui_controls::primitives::TemplatedControl::template_property()), 1, 173)?);
-            // control_theme_template.xaml(1,194) Value
-            let value_1 = ::ferroui_markup_xaml::templates::ControlTemplate::__markup_new_0();
-            // control_theme_template.xaml(1,211) Content
-            let deferred_0 = rt::deferred_content(
-                rt::class_handle(<::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE),
-                &context,
-                rt::deferred_builder(move |service_provider| {
-                    let context = rt::deferred_context(service_provider, ::core::option::Option::Some("ferres://FerroUI.Markup.Xaml.UnitTests/Emitter/control_theme_template.xaml"), XML_NAMESPACES_0);
-                    let name_scope = context.name_scope_field();
-                    // control_theme_template.xaml(1,211) Border
-                    let border_1 = ::ferroui_controls::Border::new();
-                    context.set_intermediate_root_object(rt::to_value(border_1.clone()));
-                    border_1.begin_init();
-                    // control_theme_template.xaml(1,218) Name
-                    border_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_Root")));
-                    rt::register_name(name_scope.as_ref(), "PART_Root", ::core::clone::Clone::clone(&border_1).upcast::<::ferroui_base::FerroObject>(), 1, 218)?;
-                    // control_theme_template.xaml(1,236) Child
-                    // control_theme_template.xaml(1,236) ContentPresenter
-                    let content_presenter_0 = ::ferroui_controls::presenters::ContentPresenter::new();
-                    content_presenter_0.begin_init();
-                    border_1.set_value(::ferroui_controls::Decorator::child_property(), ::core::option::Option::Some(::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_controls::Control>()));
-                    // control_theme_template.xaml(1,253) Content (setter chosen at run time)
-                    let priority_0 = ::ferroui_base::data::BindingPriority::Template;
-                    let value_2 = ::ferroui_base::data::TemplateBinding::__markup_new_1(rt::property(::ferroui_controls::ContentControl::content_property()));
-                    let extension_0 = value_2;
-                    let provided_0 = ::ferroui_base::data::TemplateBinding::__markup_ProvideValue_0(&extension_0);
-                    let value_3: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_0);
-                    if value_3.is_some() {
-                        rt::bind(&content_presenter_0.clone().upcast::<::ferroui_base::FerroObject>(), ::ferroui_controls::presenters::ContentPresenter::content_property(), value_3.clone(), 1, 253)?;
-                    } else {
-                        content_presenter_0.set_value_with_priority(::ferroui_controls::presenters::ContentPresenter::content_property(), rt::exact(value_3.clone(), "ContentControl.Content", 1, 1, 253)?, priority_0);
-                    }
-                    content_presenter_0.try_end_init().map_err(|error| rt::at(rt::TARGET_INVOCATION_EXCEPTION, error, 1, 236))?;
-                    border_1.try_end_init().map_err(|error| rt::at(rt::TARGET_INVOCATION_EXCEPTION, error, 1, 211))?;
-                    ::core::result::Result::Ok(rt::to_value(border_1.clone()))
-                }),
-                1,
-                211,
-            )?;
-            ::ferroui_markup_xaml::templates::ControlTemplate::__markup_set_Content(&value_1, rt::to_object(::core::clone::Clone::clone(&deferred_0)));
-            ::ferroui_base::styling::Setter::__markup_set_Value(&value_0, rt::setter_value(&value_0, rt::to_object(::core::clone::Clone::clone(&value_1))));
-            ::ferroui_base::styling::StyleBase::__markup_Add_0(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(::core::clone::Clone::clone(&value_0), 1, 166)?);
-            ::core::result::Result::Ok(rt::to_value(control_theme_0.clone()))
-        }),
-        1,
-        118,
-    )?;
+    let deferred_1 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_control_theme_template_xaml_deferred_0, 1, 118)?;
     ::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&rt::argument(dictionary_0.clone(), "FerroUI.Controls.ResourceDictionary.AddDeferred", 0, 1, 118)?, rt::to_object(::std::string::String::from("Theme")), { let value = ::core::clone::Clone::clone(&deferred_1); let value: ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent> = value; value }).map_err(|error| rt::at(rt::TARGET_INVOCATION_EXCEPTION, error, 1, 118))?;
     border_0.try_end_init().map_err(|error| rt::at(rt::TARGET_INVOCATION_EXCEPTION, error, 1, 2))?;
     rt::complete_root_name_scope(::core::option::Option::Some(&border_0), name_scope.as_ref(), 1, 2)?;
     ::core::result::Result::Ok(border_0)
+}
+
+/// Builds the deferred content at `control_theme_template.xaml(1,118)` (a template or a deferred resource).
+fn build_control_theme_template_xaml_deferred_0(
+    service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+    let context = rt::deferred_context(service_provider, ::core::option::Option::Some("ferres://FerroUI.Markup.Xaml.UnitTests/Emitter/control_theme_template.xaml"), XML_NAMESPACES_0);
+    // control_theme_template.xaml(1,118) ControlTheme
+    let control_theme_0 = ::ferroui_base::styling::ControlTheme::new();
+    // control_theme_template.xaml(1,118) TargetType
+    ::ferroui_base::styling::ControlTheme::__markup_set_TargetType(&control_theme_0, ::core::option::Option::Some(<::ferroui_controls::Button as ::ferroui_base::StaticType>::TYPE));
+    // control_theme_template.xaml(1,166) Content
+    let value_0 = ::ferroui_base::styling::Setter::__markup_new_0();
+    // control_theme_template.xaml(1,173) Property
+    ::ferroui_base::styling::Setter::__markup_set_Property(&value_0, rt::cast(rt::property(::ferroui_controls::primitives::TemplatedControl::template_property()), 1, 173)?);
+    // control_theme_template.xaml(1,194) Value
+    let value_1 = ::ferroui_markup_xaml::templates::ControlTemplate::__markup_new_0();
+    // control_theme_template.xaml(1,211) Content
+    let deferred_0 = rt::defer(rt::class_handle(<::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE), &context, build_control_theme_template_xaml_deferred_1, 1, 211)?;
+    ::ferroui_markup_xaml::templates::ControlTemplate::__markup_set_Content(&value_1, rt::to_object(::core::clone::Clone::clone(&deferred_0)));
+    ::ferroui_base::styling::Setter::__markup_set_Value(&value_0, rt::setter_value(&value_0, rt::to_object(::core::clone::Clone::clone(&value_1))));
+    ::ferroui_base::styling::StyleBase::__markup_Add_0(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(::core::clone::Clone::clone(&value_0), 1, 166)?);
+    ::core::result::Result::Ok(rt::to_value(control_theme_0.clone()))
+}
+
+/// Builds the deferred content at `control_theme_template.xaml(1,211)` (a template or a deferred resource).
+fn build_control_theme_template_xaml_deferred_1(
+    service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+    let context = rt::deferred_context(service_provider, ::core::option::Option::Some("ferres://FerroUI.Markup.Xaml.UnitTests/Emitter/control_theme_template.xaml"), XML_NAMESPACES_0);
+    let name_scope = context.name_scope_field();
+    // control_theme_template.xaml(1,211) Border
+    let border_1 = ::ferroui_controls::Border::new();
+    context.set_intermediate_root_object(rt::to_value(border_1.clone()));
+    border_1.begin_init();
+    // control_theme_template.xaml(1,218) Name
+    border_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_Root")));
+    rt::register_name(name_scope.as_ref(), "PART_Root", ::core::clone::Clone::clone(&border_1).upcast::<::ferroui_base::FerroObject>(), 1, 218)?;
+    // control_theme_template.xaml(1,236) Child
+    // control_theme_template.xaml(1,236) ContentPresenter
+    let content_presenter_0 = ::ferroui_controls::presenters::ContentPresenter::new();
+    content_presenter_0.begin_init();
+    border_1.set_value(::ferroui_controls::Decorator::child_property(), ::core::option::Option::Some(::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_controls::Control>()));
+    // control_theme_template.xaml(1,253) Content (setter chosen at run time)
+    let priority_0 = ::ferroui_base::data::BindingPriority::Template;
+    let value_2 = ::ferroui_base::data::TemplateBinding::__markup_new_1(rt::property(::ferroui_controls::ContentControl::content_property()));
+    let extension_0 = value_2;
+    let provided_0 = ::ferroui_base::data::TemplateBinding::__markup_ProvideValue_0(&extension_0);
+    let value_3: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_0);
+    if value_3.is_some() {
+        rt::bind(&content_presenter_0.clone().upcast::<::ferroui_base::FerroObject>(), ::ferroui_controls::presenters::ContentPresenter::content_property(), value_3.clone(), 1, 253)?;
+    } else {
+        content_presenter_0.set_value_with_priority(::ferroui_controls::presenters::ContentPresenter::content_property(), rt::exact(value_3.clone(), "ContentControl.Content", 1, 1, 253)?, priority_0);
+    }
+    content_presenter_0.try_end_init().map_err(|error| rt::at(rt::TARGET_INVOCATION_EXCEPTION, error, 1, 236))?;
+    border_1.try_end_init().map_err(|error| rt::at(rt::TARGET_INVOCATION_EXCEPTION, error, 1, 211))?;
+    ::core::result::Result::Ok(rt::to_value(border_1.clone()))
 }
 
 fn build_control_theme_template_xaml_untyped(
@@ -4069,21 +4056,7 @@ pub fn build_style_resources_xaml(
     context.push_parent(rt::to_value(border_0.clone()));
     // style_resources.xaml(1,118) Resources (resource)
     let dictionary_0 = ::ferroui_base::StyledElement::__markup_get_Resources(border_0.upcast_ref::<::ferroui_base::StyledElement>());
-    let deferred_0 = rt::deferred_content(
-        ::ferroui_base::data::core::ValueType::object(),
-        &context,
-        rt::deferred_builder(move |service_provider| {
-            let _context = rt::deferred_context(service_provider, ::core::option::Option::Some("ferres://FerroUI.Markup.Xaml.UnitTests/Emitter/style_resources.xaml"), XML_NAMESPACES_0);
-            // style_resources.xaml(1,118) SolidColorBrush
-            let solid_color_brush_0 = ::ferroui_base::media::SolidColorBrush::new();
-            // style_resources.xaml(1,118) Color
-            let value_0 = ::ferroui_base::media::Color::__markup_FromUInt32_2(4278190335_u32);
-            solid_color_brush_0.set_value(::ferroui_base::media::SolidColorBrush::color_property(), ::core::clone::Clone::clone(&value_0));
-            ::core::result::Result::Ok(rt::to_value(solid_color_brush_0.clone()))
-        }),
-        1,
-        118,
-    )?;
+    let deferred_0 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_style_resources_xaml_deferred_0, 1, 118)?;
     ::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&rt::argument(dictionary_0.clone(), "FerroUI.Controls.ResourceDictionary.AddDeferred", 0, 1, 118)?, rt::to_object(::std::string::String::from("Accent")), { let value = ::core::clone::Clone::clone(&deferred_0); let value: ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent> = value; value }).map_err(|error| rt::at(rt::TARGET_INVOCATION_EXCEPTION, error, 1, 118))?;
     // style_resources.xaml(1,198) Styles
     let styles_collection_0 = ::ferroui_base::StyledElement::__markup_get_Styles(border_0.upcast_ref::<::ferroui_base::StyledElement>());
@@ -4128,6 +4101,19 @@ pub fn build_style_resources_xaml(
     border_0.try_end_init().map_err(|error| rt::at(rt::TARGET_INVOCATION_EXCEPTION, error, 1, 2))?;
     rt::complete_root_name_scope(::core::option::Option::Some(&border_0), name_scope.as_ref(), 1, 2)?;
     ::core::result::Result::Ok(border_0)
+}
+
+/// Builds the deferred content at `style_resources.xaml(1,118)` (a template or a deferred resource).
+fn build_style_resources_xaml_deferred_0(
+    service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+    let _context = rt::deferred_context(service_provider, ::core::option::Option::Some("ferres://FerroUI.Markup.Xaml.UnitTests/Emitter/style_resources.xaml"), XML_NAMESPACES_0);
+    // style_resources.xaml(1,118) SolidColorBrush
+    let solid_color_brush_0 = ::ferroui_base::media::SolidColorBrush::new();
+    // style_resources.xaml(1,118) Color
+    let value_0 = ::ferroui_base::media::Color::__markup_FromUInt32_2(4278190335_u32);
+    solid_color_brush_0.set_value(::ferroui_base::media::SolidColorBrush::color_property(), ::core::clone::Clone::clone(&value_0));
+    ::core::result::Result::Ok(rt::to_value(solid_color_brush_0.clone()))
 }
 
 fn build_style_resources_xaml_untyped(
