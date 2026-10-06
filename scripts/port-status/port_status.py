@@ -483,8 +483,9 @@ def match_single(m: dict, uname: str, view: TypeView) -> tuple:
                     return ("present", f"fn `{view.fn_norm[norm(prefix + snake(w))]}`")
         return ("missing", "")
     if kind == "static ctor":
-        if "class_init" in t.fns or "static_init" in t.fns:
-            return ("present", "fn `class_init`")
+        for f in ("static_constructor", "class_init", "static_init"):
+            if f in t.fns:
+                return ("present", f"fn `{f}`")
         return ("missing", "")
     if kind == "finalizer":
         return ("present", "trait `Drop`") if view.has_trait("Drop") else ("missing", "")
