@@ -158,6 +158,10 @@ macro_rules! immutable_tile_brush_interfaces {
                 self.base.relative_transform()
             }
 
+            fn as_immutable_brush(&self) -> Option<&dyn $crate::media::IImmutableBrush> {
+                Some(self)
+            }
+
             fn as_any(&self) -> &dyn ::std::any::Any {
                 self
             }

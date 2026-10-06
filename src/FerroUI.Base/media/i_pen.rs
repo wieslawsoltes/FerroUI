@@ -31,6 +31,13 @@ pub trait IPen: 'static {
     /// The implementing value, for downcasts to [`ImmutablePen`].
     fn as_any(&self) -> &dyn Any;
 
+    /// The pen viewed as an [`ImmutablePen`], when it is one (the `is
+    /// ImmutablePen` test of upstream, which a class deriving from it
+    /// passes).
+    fn as_immutable_pen(&self) -> Option<&ImmutablePen> {
+        self.as_any().downcast_ref::<ImmutablePen>()
+    }
+
     /// The object behind the pen when it is a mutable [`Pen`].
     fn as_object(&self) -> Option<&FerroObject> {
         None
