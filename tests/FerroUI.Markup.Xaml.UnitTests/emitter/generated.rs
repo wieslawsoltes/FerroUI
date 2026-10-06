@@ -3368,6 +3368,61 @@ fn build_on_platform_xaml_untyped(
     ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
 }
 
+/// Generated from `on_platform_without_default.xaml`.
+pub fn build_on_platform_without_default_xaml(
+    service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
+) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::StackPanel>, ::ferroui_markup_xaml::XamlLoadException> {
+    // on_platform_without_default.xaml(1,2) StackPanel
+    let stack_panel_0 = ::ferroui_controls::StackPanel::new();
+    let context = rt::populate_context(service_provider, ::core::option::Option::Some("ferres://FerroUI.Markup.Xaml.UnitTests/Emitter/on_platform_without_default.xaml"), XML_NAMESPACES_0, rt::to_value(stack_panel_0.clone()));
+    let name_scope = context.name_scope_field();
+    stack_panel_0.begin_init();
+    // on_platform_without_default.xaml(1,104) Children
+    let children_collection_0 = ::ferroui_controls::Panel::__markup_get_Children(stack_panel_0.upcast_ref::<::ferroui_controls::Panel>());
+    // on_platform_without_default.xaml(1,104) Border
+    let border_0 = ::ferroui_controls::Border::new();
+    border_0.begin_init();
+    ::ferroui_controls::Controls::__markup_Add_0(&children_collection_0, ::core::clone::Clone::clone(&border_0).upcast::<::ferroui_controls::Control>());
+    // on_platform_without_default.xaml(1,104) HorizontalAlignment
+    let value_0 = ::ferroui_markup_xaml::markup_extensions::OnPlatformExtension::__markup_new_0();
+    let _extension_0 = value_0;
+    let provided_0 = 'provided_0: {
+        if ::ferroui_markup_xaml::markup_extensions::OnPlatformExtension::__markup_ShouldProvideOption_2(::std::string::String::from("ANDROID")) {
+            break 'provided_0 ::ferroui_base::layout::HorizontalAlignment::Left;
+        }
+        ::ferroui_base::layout::HorizontalAlignment::Stretch
+    };
+    border_0.set_value(::ferroui_base::layout::Layoutable::horizontal_alignment_property(), provided_0.clone());
+    border_0.try_end_init().map_err(|error| rt::at(rt::TARGET_INVOCATION_EXCEPTION, error, 1, 104))?;
+    // on_platform_without_default.xaml(1,161) Children
+    let children_collection_1 = ::ferroui_controls::Panel::__markup_get_Children(stack_panel_0.upcast_ref::<::ferroui_controls::Panel>());
+    // on_platform_without_default.xaml(1,161) Border
+    let border_1 = ::ferroui_controls::Border::new();
+    border_1.begin_init();
+    ::ferroui_controls::Controls::__markup_Add_0(&children_collection_1, ::core::clone::Clone::clone(&border_1).upcast::<::ferroui_controls::Control>());
+    // on_platform_without_default.xaml(1,161) Width
+    let value_1 = ::ferroui_markup_xaml::markup_extensions::OnPlatformExtension::__markup_new_0();
+    let _extension_1 = value_1;
+    let provided_1 = 'provided_1: {
+        if ::ferroui_markup_xaml::markup_extensions::OnPlatformExtension::__markup_ShouldProvideOption_2(::std::string::String::from("ANDROID")) {
+            break 'provided_1 10.0_f64;
+        }
+        0.0_f64
+    };
+    border_1.set_value(::ferroui_base::layout::Layoutable::width_property(), provided_1.clone());
+    border_1.try_end_init().map_err(|error| rt::at(rt::TARGET_INVOCATION_EXCEPTION, error, 1, 161))?;
+    stack_panel_0.try_end_init().map_err(|error| rt::at(rt::TARGET_INVOCATION_EXCEPTION, error, 1, 2))?;
+    rt::complete_root_name_scope(::core::option::Option::Some(&stack_panel_0), name_scope.as_ref(), 1, 2)?;
+    ::core::result::Result::Ok(stack_panel_0)
+}
+
+fn build_on_platform_without_default_xaml_untyped(
+    service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
+) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadException> {
+    let root = build_on_platform_without_default_xaml(service_provider)?;
+    ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
+}
+
 /// Generated from `font_family.xaml`.
 pub fn build_font_family_xaml(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
@@ -3542,6 +3597,7 @@ pub const DOCUMENTS: &[(&str, BuildDocument)] = &[
     ("compiled_binding_parent.xaml", build_compiled_binding_parent_xaml_untyped as BuildDocument),
     ("compiled_binding_plain_property.xaml", build_compiled_binding_plain_property_xaml_untyped as BuildDocument),
     ("on_platform.xaml", build_on_platform_xaml_untyped as BuildDocument),
+    ("on_platform_without_default.xaml", build_on_platform_without_default_xaml_untyped as BuildDocument),
     ("font_family.xaml", build_font_family_xaml_untyped as BuildDocument),
     ("flags_value.xaml", build_flags_value_xaml_untyped as BuildDocument),
 ];

@@ -461,6 +461,10 @@ def registered_types(crate_root, crate):
         result.append(("class", "::".join(segments), "register_types.rs", crate.resolve((), segments)))
     for name in re.findall(r"<\s*([\w:]+)\s+as\s+StaticType\s*>::TYPE", table):
         result.append(("class", name, "register_types.rs", crate.resolve(("register_types",), name.split("::"))))
+    # A class named through the imports of the registration (`Border::TYPE`).
+    for name in re.findall(r"(?<![\w:>])([A-Za-z_][\w:]*)::TYPE\b", table):
+        if name.split("::")[0] != "crate":
+            result.append(("class", name, "register_types.rs", crate.resolve(("register_types",), name.split("::"))))
     for file in source_files(crate_root):
         key = crate.module_of_file(file)
         if key is None:

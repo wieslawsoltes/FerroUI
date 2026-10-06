@@ -19,7 +19,7 @@ comparing the two:
                                                          properties
     named-values  markup_types/named_values.rs (Base)    the static values of `Colors` and `Brushes`
     rust-paths    rust_paths.rs (Base, Controls,         the shortest public Rust path of every registered class
-                  Markup.Xaml)                           and markup type, for the emitter of Rust source
+                  Markup.Xaml, Dialogs)                  and markup type, for the emitter of Rust source
                                                          (scripts/rust_paths.py)
 
 Everything else in `markup_types/` (mod.rs, values.rs, contracts.rs,
@@ -82,7 +82,7 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SRC = os.path.join(ROOT, "src")
 CRATES = ["FerroUI.Base", "FerroUI.Controls"]
 # The crates whose registered types get a table of public Rust paths (`rust_paths.rs`).
-RUST_PATH_CRATES = ["FerroUI.Base", "FerroUI.Controls", os.path.join("Markup", "FerroUI.Markup.Xaml")]
+RUST_PATH_CRATES = ["FerroUI.Base", "FerroUI.Controls", os.path.join("Markup", "FerroUI.Markup.Xaml"), "FerroUI.Dialogs"]
 UPSTREAM_PROJECTS = {"FerroUI.Base": "Avalonia.Base", "FerroUI.Controls": "Avalonia.Controls"}
 OVERRIDES = os.path.join(ROOT, "scripts", "markup_types_overrides.py")
 

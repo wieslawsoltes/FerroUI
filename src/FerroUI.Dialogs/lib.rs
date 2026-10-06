@@ -30,6 +30,7 @@ mod managed_file_dialog_options;
 mod managed_storage_provider;
 mod markup;
 mod register_types;
+mod rust_paths;
 #[cfg(not(target_arch = "wasm32"))]
 mod task_completion_source;
 
