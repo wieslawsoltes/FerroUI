@@ -317,6 +317,7 @@ dependencies = [
 name = "ferroui-skia"
 version = "0.1.0"
 dependencies = [
+ "cc",
  "ferroui-base",
  "ferroui-controls",
  "ferroui-harfbuzz",
