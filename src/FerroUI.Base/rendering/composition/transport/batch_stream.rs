@@ -10,8 +10,8 @@ use crate::rendering::composition::server::{ServerCompositor, ServerObjectId};
 use crate::rendering::composition::server::IServerObject;
 use crate::media::imaging::{BitmapBlendingMode, BitmapInterpolationMode};
 use crate::media::{
-    AlignmentX, AlignmentY, BaselinePixelAlignment, Color, EdgeMode, GradientSpreadMethod, PenLineCap, PenLineJoin,
-    RenderOptions, Stretch, TextHintingMode, TextOptions, TextRenderingMode, TileMode,
+    AlignmentX, AlignmentY, BaselinePixelAlignment, BoxShadow, Color, EdgeMode, GradientSpreadMethod, PenLineCap,
+    PenLineJoin, RenderOptions, Stretch, TextHintingMode, TextOptions, TextRenderingMode, TileMode,
 };
 use crate::numerics::{Matrix3x2, Matrix4x4, Quaternion, Vector2, Vector3, Vector4};
 use crate::rendering::composition::{
@@ -139,7 +139,12 @@ pub struct BatchValueReader<'a> {
     offset: &'a mut usize,
 }
 
-impl BatchValueReader<'_> {
+impl<'a> BatchValueReader<'a> {
+    /// A cursor over `data` that reads from, and advances, `offset`.
+    pub fn new(data: &'a [u8], offset: &'a mut usize) -> Self {
+        Self { data, offset }
+    }
+
     /// Takes the next `N` bytes. Panics at the end of the stream.
     pub fn take<const N: usize>(&mut self) -> [u8; N] {
         let end = *self.offset + N;
@@ -230,6 +235,10 @@ impl_batch_value_for_fields!(Vector3D { x: f64, y: f64, z: f64 } => Vector3D::ne
 impl_batch_value_for_fields!(RoundedRect {
     rect: Rect, radii_top_left: Vector, radii_top_right: Vector, radii_bottom_left: Vector, radii_bottom_right: Vector
 } => RoundedRect { rect, radii_top_left, radii_top_right, radii_bottom_left, radii_bottom_right });
+
+impl_batch_value_for_fields!(BoxShadow {
+    offset_x: f64, offset_y: f64, blur: f64, spread: f64, color: Color, is_inset: bool
+} => BoxShadow { offset_x, offset_y, blur, spread, color, is_inset });
 
 impl_batch_value_for_fields!(Vector2 { x: f32, y: f32 } => Vector2::new(x, y));
 impl_batch_value_for_fields!(Vector3 { x: f32, y: f32, z: f32 } => Vector3::new(x, y, z));
@@ -375,6 +384,12 @@ impl<'a> BatchStreamWriter<'a> {
         item.write_to(&mut self.output.structs);
     }
 
+    /// Writes raw bytes to the value stream (C# `Write(ReadOnlySpan<byte>)`).
+    #[inline]
+    pub fn write_bytes(&mut self, data: &[u8]) {
+        self.output.structs.extend_from_slice(data);
+    }
+
     /// Writes an object slot to the object stream.
     #[inline]
     pub fn write_object(&mut self, item: BatchObject) {
@@ -433,6 +448,18 @@ impl<'a> BatchStreamReader<'a> {
         let mut reader =
             BatchValueReader { data: &self.input.structs, offset: &mut self.input.struct_read_offset };
         T::read_from(&mut reader)
+    }
+
+    /// Fills `destination` with the next bytes of the value stream (C#
+    /// `Read(Span<byte>)`). Panics at the end of the stream.
+    pub fn read_bytes(&mut self, destination: &mut [u8]) {
+        let start = self.input.struct_read_offset;
+        let end = start + destination.len();
+        if end > self.input.structs.len() {
+            panic!("attempted to read past the end of the batch value stream");
+        }
+        destination.copy_from_slice(&self.input.structs[start..end]);
+        self.input.struct_read_offset = end;
     }
 
     /// Reads the next object slot. Panics at the end of the stream.

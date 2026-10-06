@@ -73,11 +73,22 @@ pub struct MockDrawingContextImpl {
     /// Whether the context reports acrylic support
     /// (`DrawRectangleWithMaterial <tint> <rect>`). Off by default.
     pub supports_acrylic: bool,
+    /// Whether pushed render options are recorded with their values
+    /// (`PushRenderOptions <text> <interpolation> <edge> <blending>
+    /// <full opacity>`) rather than as `PushRenderOptions`. Off by default.
+    pub log_render_options: bool,
 }
 
 impl MockDrawingContextImpl {
     pub fn new(log: DrawingLog) -> Self {
-        Self { log, transform: Matrix::IDENTITY, log_transforms: true, supports_effects: false, supports_acrylic: false }
+        Self {
+            log,
+            transform: Matrix::IDENTITY,
+            log_transforms: true,
+            supports_effects: false,
+            supports_acrylic: false,
+            log_render_options: false,
+        }
     }
 
     /// The log this context records to.
@@ -213,8 +224,19 @@ impl IDrawingContextImpl for MockDrawingContextImpl {
         self.log.push("PopGeometryClip");
     }
 
-    fn push_render_options(&mut self, _render_options: RenderOptions) {
-        self.log.push("PushRenderOptions");
+    fn push_render_options(&mut self, render_options: RenderOptions) {
+        if self.log_render_options {
+            self.log.push(format!(
+                "PushRenderOptions {:?} {:?} {:?} {:?} {:?}",
+                render_options.text_rendering_mode,
+                render_options.bitmap_interpolation_mode,
+                render_options.edge_mode,
+                render_options.bitmap_blending_mode,
+                render_options.requires_full_opacity_handling
+            ));
+        } else {
+            self.log.push("PushRenderOptions");
+        }
     }
 
     fn pop_render_options(&mut self) {

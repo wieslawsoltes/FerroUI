@@ -1,44 +1,21 @@
-//! The recorded form of what a visual draws.
-//!
-//! Upstream encodes the operations as a byte stream of opcodes followed by
-//! blitted payload structs (`RenderDataOpcode`, `RenderDataPayloads`,
-//! `RenderDataWriter`, `RenderDataReader`). Blitting structs needs `unsafe`
-//! in Rust, so the stream is a vector of the typed [`RenderDataOp`] instead:
-//! one element per opcode, the payload as the variant's fields, the box
-//! shadows of a rectangle inline. Positions ("opcode length") are element
-//! indices. Everything observable (scope elision by rewinding, depth
-//! tracking, resource interning, visiting order) is the same.
+//! The recorded form of what a visual draws: opcodes followed by their
+//! payloads in a byte buffer ([`RenderDataWriter`]), with the resources
+//! they refer to in a table.
 
-use super::{IRenderDataGeometry, IRenderDataVisitor, RenderDataResource, RenderDataResources};
-use crate::media::{BoxShadows, IBrush, IEffect, IPen, RenderOptions, TextOptions};
+use super::{
+    DrawBitmapPayload, DrawCustomPayload, DrawEllipsePayload, DrawGeometryPayload, DrawGlyphRunPayload,
+    DrawLinePayload, DrawRectanglePayload, IRenderDataGeometry, IRenderDataVisitor, PushClipPayload,
+    PushEffectPayload, PushGeometryClipPayload, PushOpacityMaskPayload, PushOpacityPayload,
+    PushRenderOptionsPayload, PushTextOptionsPayload, PushTransformPayload, RenderDataOpcode, RenderDataReader,
+    RenderDataResource, RenderDataResources, RenderDataWriter,
+};
+use crate::media::{BoxShadow, BoxShadows, IBrush, IEffect, IPen, RenderOptions, TextOptions};
 use crate::platform::{IBitmapImpl, IGlyphRunImpl};
 use crate::rendering::composition::server::{IServerObject, ServerObjectId};
 use crate::rendering::composition::transport::{BatchObject, BatchStreamReader, BatchStreamWriter};
 use crate::rendering::scene_graph::ICustomDrawOperation;
 use crate::{Matrix, Point, Rect, RoundedRect};
 use std::rc::Rc;
-
-/// One recorded drawing operation. Resources are referred to by handle
-/// into the stream's resource table.
-#[derive(Clone, Debug)]
-pub enum RenderDataOp {
-    DrawLine { server_pen: i32, client_pen: i32, p1: Point, p2: Point },
-    DrawRectangle { server_brush: i32, server_pen: i32, client_pen: i32, rect: RoundedRect, box_shadows: BoxShadows },
-    DrawEllipse { server_brush: i32, server_pen: i32, client_pen: i32, rect: Rect },
-    DrawGeometry { server_brush: i32, server_pen: i32, client_pen: i32, geometry: i32 },
-    DrawGlyphRun { server_brush: i32, glyph_run: i32 },
-    DrawBitmap { bitmap: i32, opacity: f64, source_rect: Rect, dest_rect: Rect },
-    DrawCustom { operation: i32 },
-    PushClip { clip: RoundedRect },
-    PushGeometryClip { geometry: i32 },
-    PushOpacity { opacity: f64 },
-    PushOpacityMask { brush: i32, bounds: Rect },
-    PushTransform { matrix: Matrix },
-    PushRenderOptions { options: RenderOptions },
-    PushTextOptions { options: TextOptions },
-    PushEffect { effect: i32, bounds: Rect },
-    Pop,
-}
 
 const TAG_NOT_SENT: u8 = 0;
 const TAG_BRUSH: u8 = 1;
@@ -56,7 +33,7 @@ const TAG_SERVER_GEOMETRY: u8 = 11;
 /// A recorded sequence of drawing operations with its resource table.
 #[derive(Default)]
 pub struct RenderDataStream {
-    pub(super) ops: Vec<RenderDataOp>,
+    writer: RenderDataWriter,
     pub(super) resources: RenderDataResources,
     depth: i32,
     max_depth: i32,
@@ -68,14 +45,14 @@ impl RenderDataStream {
     }
 
     /// The recorded operations.
-    pub fn opcodes(&self) -> &[RenderDataOp] {
-        &self.ops
+    pub fn opcodes(&self) -> &[u8] {
+        self.writer.written()
     }
 
-    /// The number of recorded operations: the position a later
+    /// The number of bytes recorded: the position a later
     /// [`rewind`](Self::rewind) can return to.
     pub fn opcode_length(&self) -> usize {
-        self.ops.len()
+        self.writer.length()
     }
 
     /// The current scope depth.
@@ -99,7 +76,7 @@ impl RenderDataStream {
     /// Drops everything recorded after position `length` and restores the
     /// scope depth.
     pub fn rewind(&mut self, length: usize, depth: i32) {
-        self.ops.truncate(length);
+        self.writer.rewind(length);
         self.depth = depth;
     }
 
@@ -127,13 +104,13 @@ impl RenderDataStream {
         p1: Point,
         p2: Point,
     ) {
-        let op = RenderDataOp::DrawLine {
+        let payload = DrawLinePayload {
             server_pen: self.resources.intern(server_pen),
             client_pen: self.resources.intern(client_pen),
             p1,
             p2,
         };
-        self.ops.push(op);
+        self.writer.write_payload(payload);
     }
 
     pub fn draw_rectangle(
@@ -144,14 +121,17 @@ impl RenderDataStream {
         rect: RoundedRect,
         box_shadows: &BoxShadows,
     ) {
-        let op = RenderDataOp::DrawRectangle {
+        let payload = DrawRectanglePayload {
             server_brush: self.resources.intern(server_brush),
             server_pen: self.resources.intern(server_pen),
             client_pen: self.resources.intern(client_pen),
             rect,
-            box_shadows: box_shadows.clone(),
+            box_shadow_count: box_shadows.count() as i32,
         };
-        self.ops.push(op);
+        self.writer.write_payload(payload);
+        for shadow in box_shadows.iter() {
+            self.writer.write(shadow);
+        }
     }
 
     pub fn draw_ellipse(
@@ -161,13 +141,13 @@ impl RenderDataStream {
         client_pen: Option<RenderDataResource>,
         rect: Rect,
     ) {
-        let op = RenderDataOp::DrawEllipse {
+        let payload = DrawEllipsePayload {
             server_brush: self.resources.intern(server_brush),
             server_pen: self.resources.intern(server_pen),
             client_pen: self.resources.intern(client_pen),
             rect,
         };
-        self.ops.push(op);
+        self.writer.write_payload(payload);
     }
 
     pub fn draw_geometry(
@@ -177,85 +157,102 @@ impl RenderDataStream {
         client_pen: Option<RenderDataResource>,
         geometry: Option<RenderDataResource>,
     ) {
-        let op = RenderDataOp::DrawGeometry {
+        let payload = DrawGeometryPayload {
             server_brush: self.resources.intern(server_brush),
             server_pen: self.resources.intern(server_pen),
             client_pen: self.resources.intern(client_pen),
             geometry: self.resources.intern(geometry),
         };
-        self.ops.push(op);
+        self.writer.write_payload(payload);
     }
 
-    pub fn draw_glyph_run(&mut self, server_brush: Option<RenderDataResource>, glyph_run: Option<Rc<dyn IGlyphRunImpl>>) {
-        let op = RenderDataOp::DrawGlyphRun {
+    /// Records a glyph run. The table entry is a new counted reference to
+    /// it (upstream's caller passes `PlatformImpl.Clone()`).
+    pub fn draw_glyph_run(
+        &mut self,
+        server_brush: Option<RenderDataResource>,
+        glyph_run: Option<Rc<dyn IGlyphRunImpl>>,
+    ) {
+        let glyph_run = glyph_run.map(|glyph_run| RenderDataResource::GlyphRun(Rc::new(glyph_run)));
+        let payload = DrawGlyphRunPayload {
             server_brush: self.resources.intern(server_brush),
-            glyph_run: self.resources.intern(glyph_run.map(RenderDataResource::GlyphRun)),
+            glyph_run: self.resources.intern(glyph_run),
         };
-        self.ops.push(op);
+        self.writer.write_payload(payload);
     }
 
-    pub fn draw_bitmap(&mut self, bitmap: Option<Rc<dyn IBitmapImpl>>, opacity: f64, source_rect: Rect, dest_rect: Rect) {
-        let op = RenderDataOp::DrawBitmap {
-            bitmap: self.resources.intern(bitmap.map(RenderDataResource::Bitmap)),
+    /// Records a bitmap. The table entry is a new counted reference to it
+    /// (upstream's caller passes `source.Clone()`).
+    pub fn draw_bitmap(
+        &mut self,
+        bitmap: Option<Rc<dyn IBitmapImpl>>,
+        opacity: f64,
+        source_rect: Rect,
+        dest_rect: Rect,
+    ) {
+        let bitmap = bitmap.map(|bitmap| RenderDataResource::Bitmap(Rc::new(bitmap)));
+        let payload = DrawBitmapPayload {
+            bitmap: self.resources.intern(bitmap),
             opacity,
             source_rect,
             dest_rect,
         };
-        self.ops.push(op);
+        self.writer.write_payload(payload);
     }
 
     pub fn draw_custom(&mut self, operation: Option<Rc<dyn ICustomDrawOperation>>) {
-        let op = RenderDataOp::DrawCustom {
+        let payload = DrawCustomPayload {
             operation: self.resources.intern(operation.map(RenderDataResource::CustomDrawOperation)),
         };
-        self.ops.push(op);
+        self.writer.write_payload(payload);
     }
 
     pub fn push_clip(&mut self, clip: RoundedRect) {
-        self.ops.push(RenderDataOp::PushClip { clip });
+        self.writer.write_payload(PushClipPayload { clip });
         self.enter_scope();
     }
 
     pub fn push_geometry_clip(&mut self, geometry: Option<RenderDataResource>) {
-        let op = RenderDataOp::PushGeometryClip { geometry: self.resources.intern(geometry) };
-        self.ops.push(op);
+        let payload = PushGeometryClipPayload { geometry: self.resources.intern(geometry) };
+        self.writer.write_payload(payload);
         self.enter_scope();
     }
 
     pub fn push_opacity(&mut self, opacity: f64) {
-        self.ops.push(RenderDataOp::PushOpacity { opacity });
+        self.writer.write_payload(PushOpacityPayload { opacity });
         self.enter_scope();
     }
 
     pub fn push_opacity_mask(&mut self, server_brush: Option<RenderDataResource>, bounds: Rect) {
-        let op = RenderDataOp::PushOpacityMask { brush: self.resources.intern(server_brush), bounds };
-        self.ops.push(op);
+        let payload = PushOpacityMaskPayload { brush: self.resources.intern(server_brush), bounds };
+        self.writer.write_payload(payload);
         self.enter_scope();
     }
 
     pub fn push_transform(&mut self, matrix: Matrix) {
-        self.ops.push(RenderDataOp::PushTransform { matrix });
+        self.writer.write_payload(PushTransformPayload { matrix });
         self.enter_scope();
     }
 
     pub fn push_render_options(&mut self, options: RenderOptions) {
-        self.ops.push(RenderDataOp::PushRenderOptions { options });
+        self.writer.write_payload(PushRenderOptionsPayload { options });
         self.enter_scope();
     }
 
     pub fn push_text_options(&mut self, text_options: TextOptions) {
-        self.ops.push(RenderDataOp::PushTextOptions { options: text_options });
+        self.writer.write_payload(PushTextOptionsPayload { options: text_options });
         self.enter_scope();
     }
 
     pub fn push_effect(&mut self, effect: Option<Rc<dyn IEffect>>, bounds: Rect) {
-        let op = RenderDataOp::PushEffect { effect: self.resources.intern(effect.map(RenderDataResource::Effect)), bounds };
-        self.ops.push(op);
+        let payload =
+            PushEffectPayload { effect: self.resources.intern(effect.map(RenderDataResource::Effect)), bounds };
+        self.writer.write_payload(payload);
         self.enter_scope();
     }
 
     pub fn pop(&mut self) {
-        self.ops.push(RenderDataOp::Pop);
+        self.writer.write_opcode(RenderDataOpcode::Pop);
         self.depth -= 1;
     }
 
@@ -314,10 +311,9 @@ impl RenderDataStream {
                 }
             }
         }
-        writer.write(self.ops.len() as i32);
-        if !self.ops.is_empty() {
-            writer.write_object(BatchObject::value(self.ops.clone()));
-        }
+        let opcodes = self.writer.written();
+        writer.write(opcodes.len() as i32);
+        writer.write_bytes(opcodes);
     }
 
     /// Reads a stream from a batch on the server. `resolve` maps the id of
@@ -372,9 +368,9 @@ impl RenderDataStream {
             };
             self.resources.append_deserialized(resource);
         }
-        let op_count = reader.read::<i32>();
-        if op_count > 0 {
-            self.ops = value::<Vec<RenderDataOp>>(reader);
+        let byte_count = reader.read::<i32>();
+        if byte_count > 0 {
+            reader.read_bytes(self.writer.reserve(byte_count as usize));
         }
     }
 
@@ -385,73 +381,118 @@ impl RenderDataStream {
     }
 
     /// Walks the recorded operations using a caller-provided scope stack,
-    /// which lets a caller that visits often reuse the allocation.
+    /// which lets a caller that visits often reuse the allocation (upstream
+    /// keeps the scopes on the stack).
     pub fn visit_with_scopes<V: IRenderDataVisitor>(&self, visitor: &mut V, scopes: &mut Vec<V::Scope>) {
         let resources = &self.resources;
-        for op in &self.ops {
-            if visitor.stop_visiting() {
-                break;
-            }
-            match op {
-                RenderDataOp::DrawLine { server_pen, client_pen, p1, p2 } => {
-                    visitor.on_draw_line(resources.pen(*server_pen), resources.pen(*client_pen), *p1, *p2)
+        let mut reader = RenderDataReader::new(self.writer.written());
+        while !visitor.stop_visiting() && !reader.is_at_end() {
+            match reader.peek::<RenderDataOpcode>() {
+                RenderDataOpcode::DrawLine => {
+                    let p = reader.read_payload::<DrawLinePayload>();
+                    visitor.on_draw_line(resources.pen(p.server_pen), resources.pen(p.client_pen), p.p1, p.p2);
                 }
-                RenderDataOp::DrawRectangle { server_brush, server_pen, client_pen, rect, box_shadows } => visitor
-                    .on_draw_rectangle(
-                        resources.brush(*server_brush),
-                        resources.pen(*server_pen),
-                        resources.pen(*client_pen),
-                        *rect,
-                        box_shadows,
-                    ),
-                RenderDataOp::DrawEllipse { server_brush, server_pen, client_pen, rect } => visitor.on_draw_ellipse(
-                    resources.brush(*server_brush),
-                    resources.pen(*server_pen),
-                    resources.pen(*client_pen),
-                    *rect,
-                ),
-                RenderDataOp::DrawGeometry { server_brush, server_pen, client_pen, geometry } => visitor
-                    .on_draw_geometry(
-                        resources.brush(*server_brush),
-                        resources.pen(*server_pen),
-                        resources.pen(*client_pen),
-                        resources.geometry_impl(*geometry).as_ref(),
-                    ),
-                RenderDataOp::DrawGlyphRun { server_brush, glyph_run } => {
-                    visitor.on_draw_glyph_run(resources.brush(*server_brush), resources.glyph_run(*glyph_run))
+                RenderDataOpcode::DrawRectangle => {
+                    let p = reader.read_payload::<DrawRectanglePayload>();
+                    let shadows = Self::read_box_shadows(&mut reader, p.box_shadow_count);
+                    visitor.on_draw_rectangle(
+                        resources.brush(p.server_brush),
+                        resources.pen(p.server_pen),
+                        resources.pen(p.client_pen),
+                        p.rect,
+                        &shadows,
+                    );
                 }
-                RenderDataOp::DrawBitmap { bitmap, opacity, source_rect, dest_rect } => {
-                    visitor.on_draw_bitmap(resources.bitmap(*bitmap), *opacity, *source_rect, *dest_rect)
+                RenderDataOpcode::DrawEllipse => {
+                    let p = reader.read_payload::<DrawEllipsePayload>();
+                    visitor.on_draw_ellipse(
+                        resources.brush(p.server_brush),
+                        resources.pen(p.server_pen),
+                        resources.pen(p.client_pen),
+                        p.rect,
+                    );
                 }
-                RenderDataOp::DrawCustom { operation } => {
-                    visitor.on_draw_custom(resources.custom_draw_operation(*operation))
+                RenderDataOpcode::DrawGeometry => {
+                    let p = reader.read_payload::<DrawGeometryPayload>();
+                    visitor.on_draw_geometry(
+                        resources.brush(p.server_brush),
+                        resources.pen(p.server_pen),
+                        resources.pen(p.client_pen),
+                        resources.geometry_impl(p.geometry).as_ref(),
+                    );
                 }
-                RenderDataOp::PushClip { clip } => scopes.push(visitor.on_push_clip(*clip)),
-                RenderDataOp::PushGeometryClip { geometry } => {
-                    scopes.push(visitor.on_push_geometry_clip(resources.geometry_impl(*geometry).as_ref()))
+                RenderDataOpcode::DrawGlyphRun => {
+                    let p = reader.read_payload::<DrawGlyphRunPayload>();
+                    visitor.on_draw_glyph_run(resources.brush(p.server_brush), resources.glyph_run(p.glyph_run));
                 }
-                RenderDataOp::PushOpacity { opacity } => scopes.push(visitor.on_push_opacity(*opacity)),
-                RenderDataOp::PushOpacityMask { brush, bounds } => {
-                    scopes.push(visitor.on_push_opacity_mask(resources.brush(*brush), *bounds))
+                RenderDataOpcode::DrawBitmap => {
+                    let p = reader.read_payload::<DrawBitmapPayload>();
+                    visitor.on_draw_bitmap(resources.bitmap(p.bitmap), p.opacity, p.source_rect, p.dest_rect);
                 }
-                RenderDataOp::PushTransform { matrix } => scopes.push(visitor.on_push_transform(*matrix)),
-                RenderDataOp::PushRenderOptions { options } => scopes.push(visitor.on_push_render_options(*options)),
-                RenderDataOp::PushTextOptions { options } => scopes.push(visitor.on_push_text_options(*options)),
-                RenderDataOp::PushEffect { effect, bounds } => {
-                    scopes.push(visitor.on_push_effect(resources.effect(*effect), *bounds))
+                RenderDataOpcode::DrawCustom => {
+                    let p = reader.read_payload::<DrawCustomPayload>();
+                    visitor.on_draw_custom(resources.custom_draw_operation(p.operation));
                 }
-                RenderDataOp::Pop => {
+                RenderDataOpcode::PushClip => {
+                    let p = reader.read_payload::<PushClipPayload>();
+                    scopes.push(visitor.on_push_clip(p.clip));
+                }
+                RenderDataOpcode::PushGeometryClip => {
+                    let p = reader.read_payload::<PushGeometryClipPayload>();
+                    scopes.push(visitor.on_push_geometry_clip(resources.geometry_impl(p.geometry).as_ref()));
+                }
+                RenderDataOpcode::PushOpacity => {
+                    let p = reader.read_payload::<PushOpacityPayload>();
+                    scopes.push(visitor.on_push_opacity(p.opacity));
+                }
+                RenderDataOpcode::PushOpacityMask => {
+                    let p = reader.read_payload::<PushOpacityMaskPayload>();
+                    scopes.push(visitor.on_push_opacity_mask(resources.brush(p.brush), p.bounds));
+                }
+                RenderDataOpcode::PushTransform => {
+                    let p = reader.read_payload::<PushTransformPayload>();
+                    scopes.push(visitor.on_push_transform(p.matrix));
+                }
+                RenderDataOpcode::PushRenderOptions => {
+                    let p = reader.read_payload::<PushRenderOptionsPayload>();
+                    scopes.push(visitor.on_push_render_options(p.options));
+                }
+                RenderDataOpcode::PushTextOptions => {
+                    let p = reader.read_payload::<PushTextOptionsPayload>();
+                    scopes.push(visitor.on_push_text_options(p.options));
+                }
+                RenderDataOpcode::PushEffect => {
+                    let p = reader.read_payload::<PushEffectPayload>();
+                    scopes.push(visitor.on_push_effect(resources.effect(p.effect), p.bounds));
+                }
+                RenderDataOpcode::Pop => {
+                    reader.read::<RenderDataOpcode>();
                     let scope = scopes.pop().expect("a pop without a matching push in render data");
                     visitor.on_pop(scope);
                 }
+                RenderDataOpcode::Invalid => panic!("render data holds an invalid opcode"),
             }
         }
         scopes.clear();
     }
 
+    fn read_box_shadows(reader: &mut RenderDataReader<'_>, count: i32) -> BoxShadows {
+        if count == 0 {
+            return BoxShadows::default();
+        }
+
+        let first = reader.read::<BoxShadow>();
+        if count == 1 {
+            return BoxShadows::new(first);
+        }
+
+        let rest: Vec<BoxShadow> = (1..count).map(|_| reader.read::<BoxShadow>()).collect();
+        BoxShadows::with_rest(first, &rest)
+    }
+
     /// Releases the stream.
     pub fn dispose(&mut self) {
-        self.ops = Vec::new();
+        self.writer.dispose();
         self.resources.dispose();
     }
 }
