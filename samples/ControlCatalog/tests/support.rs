@@ -8,7 +8,7 @@ use ferroui_base::metadata::from_markup_value;
 use ferroui_base::platform::IAssetLoader;
 use ferroui_base::styling::{IStyle, Styles};
 use ferroui_base::{BoxedValue, Ref};
-use ferroui_controls::testing::{TestServices, UnitTestApplication, UnitTestApplicationScope};
+use ferroui_controls::testing::{CompositorTestServices, TestServices, UnitTestApplication, UnitTestApplicationScope};
 use ferroui_controls::{Application, Control, Window};
 use ferroui_markup_xaml_loader::FerroRuntimeXamlLoader;
 use ferroui_themes_simple::SimpleTheme;
@@ -50,7 +50,33 @@ pub fn start_catalog_application_with(asset_loader: Option<Rc<dyn IAssetLoader>>
     }
     let scope = UnitTestApplication::start(services);
     FerroRuntimeXamlLoader::register();
+    merge_custom_themes();
+    scope
+}
 
+/// Starts the application of [`start_catalog_application`] under the Fluent
+/// theme (the theme the application of the sample starts with), with the
+/// top-levels rendering through a compositing renderer over a test
+/// compositor instead of the null renderer.
+pub fn start_catalog_compositor_application() -> CompositorTestServices {
+    register_types();
+    let services = TestServices::styled_window()
+        .with_render_interface(Rc::new(ferroui_skia::PlatformRenderInterface::new(None, None)))
+        .with_font_manager_impl(Rc::new(ferroui_skia::FontManagerImpl::new()))
+        .with_text_shaper_impl(Rc::new(ferroui_harfbuzz::HarfBuzzTextShaper::new()))
+        .with_global_clock(Rc::new(TestGlobalClock::default()))
+        .with_input_manager(Rc::new(ferroui_base::input::InputManager::new()))
+        .with_theme(|| ferroui_themes_fluent::FluentTheme::new().as_style());
+    let services = CompositorTestServices::start(services);
+    FerroRuntimeXamlLoader::register();
+    merge_custom_themes();
+    services
+}
+
+/// Merges the resources the application of the sample gives its pages
+/// (`CustomThemes.xaml`, which `App.xaml` merges) into the resources of the
+/// application.
+fn merge_custom_themes() {
     let application = Application::current().expect("the unit test application");
     let custom_themes = match try_load_document("/CustomThemes.xaml", None) {
         Ok(value) => value,
@@ -59,7 +85,6 @@ pub fn start_catalog_application_with(asset_loader: Option<Rc<dyn IAssetLoader>>
     let provider = from_markup_value::<Rc<dyn IResourceProvider>>(&Some(custom_themes))
         .expect("CustomThemes.xaml is a resource provider");
     application.resources().merged_dictionaries().add(provider);
-    scope
 }
 
 /// Loads markup text; a failure panics with the described error.

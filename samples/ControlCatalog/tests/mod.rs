@@ -13,6 +13,7 @@ mod gaps_a;
 mod gaps_b;
 mod gaps_c;
 mod gaps_d;
+mod frame_benchmark;
 mod page_assets;
 mod support;
 mod survey;
