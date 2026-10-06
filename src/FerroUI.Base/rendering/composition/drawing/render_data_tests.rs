@@ -1,20 +1,26 @@
+//! Tests of render data that are not from upstream: glyph runs and text
+//! options in the stream, recording through the drawing context, and the
+//! path of render data through a batch to the server. The upstream suites
+//! of the stream (`Rendering/SceneGraph/*Tests.cs`) are ported in
+//! `rendering/scene_graph/`.
+
 use super::*;
-use crate::media::immutable::{ImmutablePen, ImmutableSolidColorBrush};
+use crate::media::immutable::ImmutableSolidColorBrush;
 use crate::media::{
-    BoxShadow, BoxShadows, Colors, DrawingContext, IBrush, IPen, ImmediateDrawingContext, IntersectionResult,
+    BoxShadows, Colors, DrawingContext, IBrush, ImmediateDrawingContext, IntersectionResult,
     MediaContext, RectangleGeometry,
 };
 use crate::media::text_formatting::testing::{utf16, TextTestScope};
 use crate::media::{
     BaselinePixelAlignment, FormattedText, GlyphRun, TextHintingMode, TextOptions, TextRenderingMode, Typeface,
 };
-use crate::platform::{IDrawingContextImpl, IGeometryImpl, IGlyphRunImpl};
+use crate::platform::{IDrawingContextImpl, IGlyphRunImpl};
 use crate::rendering::composition::transport::{BatchStreamData, BatchStreamReader, BatchStreamWriter};
 use crate::rendering::composition::Compositor;
 use crate::rendering::scene_graph::ICustomDrawOperation;
 use crate::rendering::testing::recorded_opcodes;
 use crate::rendering::testing::{
-    DrawingLog, ManualRenderLoop, MockDrawingContextImpl, MockGeometryImpl, MockGlyphRunImpl,
+    DrawingLog, ManualRenderLoop, MockDrawingContextImpl, MockGlyphRunImpl,
     MockPlatformRenderInterface,
 };
 use crate::threading::Dispatcher;
@@ -26,16 +32,8 @@ fn brush() -> Rc<dyn IBrush> {
     Rc::new(ImmutableSolidColorBrush::new(Colors::RED))
 }
 
-fn pen(thickness: f64) -> Rc<dyn IPen> {
-    Rc::new(ImmutablePen::with_brush(Some(Rc::new(ImmutableSolidColorBrush::new(Colors::BLUE))), thickness))
-}
-
 fn b(brush: &Rc<dyn IBrush>) -> Option<RenderDataResource> {
     Some(RenderDataResource::Brush(brush.clone()))
-}
-
-fn p(pen: &Rc<dyn IPen>) -> Option<RenderDataResource> {
-    Some(RenderDataResource::Pen(pen.clone()))
 }
 
 fn rect(x: f64, y: f64, w: f64, h: f64) -> RoundedRect {
@@ -95,88 +93,6 @@ impl ICustomDrawOperation for TestOperation {
 // --- replay ---------------------------------------------------------------
 
 #[test]
-fn replay_forwards_line() {
-    let pen = pen(1.0);
-    let mut stream = RenderDataStream::new();
-    stream.draw_line(p(&pen), p(&pen), Point::new(1.0, 2.0), Point::new(3.0, 4.0));
-    assert_eq!(replay(&stream), ["DrawLine Blue@1 1, 2 3, 4"]);
-}
-
-#[test]
-fn replay_forwards_rectangle_with_box_shadows() {
-    let (brush, pen) = (brush(), pen(1.0));
-    let shadows = BoxShadows::with_rest(
-        BoxShadow { blur: 1.0, ..Default::default() },
-        &[BoxShadow { blur: 2.0, ..Default::default() }],
-    );
-    let mut stream = RenderDataStream::new();
-    stream.draw_rectangle(b(&brush), p(&pen), p(&pen), rect(0.0, 0.0, 10.0, 20.0), &shadows);
-    assert_eq!(replay(&stream), ["DrawRectangle Red Blue@1 0, 0, 10, 20 shadows=2"]);
-}
-
-#[test]
-fn replay_forwards_custom_operation() {
-    let operation = TestOperation::new(Rect::default());
-    let mut stream = RenderDataStream::new();
-    stream.draw_custom(Some(operation.clone()));
-    replay(&stream);
-    assert_eq!(operation.rendered.get(), 1);
-}
-
-#[test]
-fn replay_pop_dispatches_to_matching_pop_in_lifo_order() {
-    let mut stream = RenderDataStream::new();
-    stream.push_clip(rect(0.0, 0.0, 10.0, 10.0));
-    stream.push_opacity(0.5);
-    stream.pop();
-    stream.pop();
-    assert_eq!(replay(&stream), ["PushRoundedClip 0, 0, 10, 10", "PushOpacity 0.5", "PopOpacity", "PopClip"]);
-}
-
-#[test]
-fn replay_applies_and_restores_transform() {
-    let log = DrawingLog::new();
-    let mut context = MockDrawingContextImpl::new(log.clone());
-    let translation = Matrix::create_translation(5.0, 6.0);
-    let mut stream = RenderDataStream::new();
-    stream.push_transform(translation);
-    stream.draw_ellipse(b(&brush()), None, None, Rect::new(0.0, 0.0, 1.0, 1.0));
-    stream.pop();
-    stream.replay(&mut context);
-    use crate::platform::IDrawingContextImpl;
-    assert_eq!(context.transform(), Matrix::IDENTITY);
-    assert_eq!(log.entries()[0], format!("SetTransform {translation}"));
-    assert_eq!(log.entries()[2], format!("SetTransform {}", Matrix::IDENTITY));
-}
-
-#[test]
-fn replay_skips_opacity_one_push_and_null_geometry_clip() {
-    let mut stream = RenderDataStream::new();
-    stream.push_opacity(1.0);
-    stream.push_geometry_clip(None);
-    stream.pop();
-    stream.pop();
-    assert!(replay(&stream).is_empty());
-}
-
-#[test]
-fn replay_forwards_render_options() {
-    let mut stream = RenderDataStream::new();
-    stream.push_render_options(Default::default());
-    stream.pop();
-    assert_eq!(replay(&stream), ["PushRenderOptions", "PopRenderOptions"]);
-}
-
-#[test]
-fn replay_forwards_text_options() {
-    let options = TextOptions { text_rendering_mode: TextRenderingMode::Antialias, ..Default::default() };
-    let mut stream = RenderDataStream::new();
-    stream.push_text_options(options);
-    stream.pop();
-    assert_eq!(replay(&stream), ["PushTextOptions Antialias Unspecified Unspecified", "PopTextOptions"]);
-}
-
-#[test]
 fn replay_forwards_glyph_run_and_skips_a_missing_one() {
     let glyph_run: Rc<dyn IGlyphRunImpl> = MockGlyphRunImpl::new(Rect::new(1.0, 2.0, 30.0, 12.0));
     let mut stream = RenderDataStream::new();
@@ -190,31 +106,6 @@ fn replay_forwards_glyph_run_and_skips_a_missing_one() {
     stream.dispose_resources();
     stream.dispose();
     assert_eq!(Rc::strong_count(&glyph_run), 1);
-}
-
-#[test]
-fn dispose_resources_disposes_owned_resources() {
-    let operation = TestOperation::new(Rect::default());
-    let mut stream = RenderDataStream::new();
-    stream.draw_custom(Some(operation.clone()));
-    stream.dispose_resources();
-    stream.dispose();
-    assert_eq!(operation.disposed.get(), 1);
-}
-
-#[test]
-fn replay_handles_deeply_nested_scopes() {
-    let mut stream = RenderDataStream::new();
-    for _ in 0..200 {
-        stream.push_opacity(0.5);
-    }
-    stream.draw_ellipse(b(&brush()), None, None, Rect::new(0.0, 0.0, 1.0, 1.0));
-    for _ in 0..200 {
-        stream.pop();
-    }
-    assert_eq!(stream.max_depth(), 200);
-    let entries = replay(&stream);
-    assert_eq!(entries.iter().filter(|e| *e == "PopOpacity").count(), 200);
 }
 
 #[test]
@@ -232,77 +123,6 @@ fn resources_are_interned_by_reference() {
 }
 
 // --- bounds ---------------------------------------------------------------
-
-#[test]
-fn empty_stream_has_null_bounds() {
-    assert_eq!(RenderDataStream::new().calculate_bounds(), None);
-}
-
-#[test]
-fn filled_and_stroked_rectangle_bounds() {
-    let mut stream = RenderDataStream::new();
-    stream.draw_rectangle(b(&brush()), None, None, rect(10.0, 20.0, 30.0, 40.0), &BoxShadows::default());
-    assert_eq!(stream.calculate_bounds(), Some(Rect::new(10.0, 20.0, 30.0, 40.0)));
-
-    let pen = pen(4.0);
-    let mut stream = RenderDataStream::new();
-    stream.draw_rectangle(None, p(&pen), p(&pen), rect(10.0, 10.0, 20.0, 20.0), &BoxShadows::default());
-    assert_eq!(stream.calculate_bounds(), Some(Rect::new(8.0, 8.0, 24.0, 24.0)));
-}
-
-#[test]
-fn bounds_are_the_union_of_all_draws() {
-    let brush = brush();
-    let mut stream = RenderDataStream::new();
-    stream.draw_rectangle(b(&brush), None, None, rect(0.0, 0.0, 10.0, 10.0), &BoxShadows::default());
-    stream.draw_rectangle(b(&brush), None, None, rect(50.0, 50.0, 10.0, 10.0), &BoxShadows::default());
-    assert_eq!(stream.calculate_bounds(), Some(Rect::new(0.0, 0.0, 60.0, 60.0)));
-}
-
-#[test]
-fn stroked_ellipse_bitmap_and_custom_bounds() {
-    let pen = pen(2.0);
-    let mut stream = RenderDataStream::new();
-    stream.draw_ellipse(None, p(&pen), p(&pen), Rect::new(10.0, 10.0, 20.0, 20.0));
-    assert_eq!(stream.calculate_bounds(), Some(Rect::new(8.0, 8.0, 24.0, 24.0)));
-
-    let mut stream = RenderDataStream::new();
-    stream.draw_custom(Some(TestOperation::new(Rect::new(1.0, 2.0, 3.0, 4.0))));
-    assert_eq!(stream.calculate_bounds(), Some(Rect::new(1.0, 2.0, 3.0, 4.0)));
-}
-
-#[test]
-fn line_bounds_cover_the_segment() {
-    let pen = pen(2.0);
-    let mut stream = RenderDataStream::new();
-    stream.draw_line(p(&pen), p(&pen), Point::new(0.0, 0.0), Point::new(10.0, 0.0));
-    let bounds = stream.calculate_bounds().unwrap();
-    assert!(bounds.contains_rect(Rect::new(0.0, -0.5, 10.0, 1.0)));
-}
-
-#[test]
-fn transforms_compose_for_bounds_and_clips_do_not_restrict() {
-    let brush = brush();
-    let mut stream = RenderDataStream::new();
-    stream.push_transform(Matrix::create_translation(100.0, 0.0));
-    stream.push_transform(Matrix::create_scale(2.0, 2.0));
-    stream.push_clip(rect(0.0, 0.0, 1.0, 1.0));
-    stream.push_opacity(0.5);
-    stream.draw_rectangle(b(&brush), None, None, rect(0.0, 0.0, 10.0, 10.0), &BoxShadows::default());
-    stream.pop();
-    stream.pop();
-    stream.pop();
-    stream.pop();
-    assert_eq!(stream.calculate_bounds(), Some(Rect::new(100.0, 0.0, 20.0, 20.0)));
-}
-
-#[test]
-fn empty_push_scope_contributes_nothing() {
-    let mut stream = RenderDataStream::new();
-    stream.push_transform(Matrix::create_translation(100.0, 100.0));
-    stream.pop();
-    assert_eq!(stream.calculate_bounds(), None);
-}
 
 #[test]
 fn glyph_run_bounds_are_its_platform_bounds_inside_text_options_and_transforms() {
@@ -377,103 +197,6 @@ fn a_clip_restricts_the_hit_test_of_a_glyph_run_and_text_options_keep_it() {
 }
 
 #[test]
-fn filled_rectangle_is_hit_inside_and_missed_outside() {
-    let mut stream = RenderDataStream::new();
-    stream.draw_rectangle(b(&brush()), None, None, rect(0.0, 0.0, 10.0, 10.0), &BoxShadows::default());
-    assert!(stream.hit_test(Point::new(5.0, 5.0)));
-    assert!(!stream.hit_test(Point::new(15.0, 5.0)));
-}
-
-#[test]
-fn stroked_rectangle_is_hit_on_border_and_missed_in_hollow_center() {
-    let pen = pen(2.0);
-    let mut stream = RenderDataStream::new();
-    stream.draw_rectangle(None, p(&pen), p(&pen), rect(0.0, 0.0, 20.0, 20.0), &BoxShadows::default());
-    assert!(stream.hit_test(Point::new(0.5, 10.0)));
-    assert!(!stream.hit_test(Point::new(10.0, 10.0)));
-}
-
-#[test]
-fn line_is_hit_along_its_length() {
-    let pen = pen(2.0);
-    let mut stream = RenderDataStream::new();
-    stream.draw_line(p(&pen), p(&pen), Point::new(0.0, 0.0), Point::new(10.0, 10.0));
-    assert!(stream.hit_test(Point::new(5.0, 5.0)));
-    assert!(stream.hit_test(Point::new(5.0, 5.9)));
-    assert!(!stream.hit_test(Point::new(5.0, 8.0)));
-    assert!(!stream.hit_test(Point::new(20.0, 20.0)));
-}
-
-#[test]
-fn ellipse_hit_tests() {
-    let mut stream = RenderDataStream::new();
-    stream.draw_ellipse(b(&brush()), None, None, Rect::new(0.0, 0.0, 20.0, 10.0));
-    assert!(stream.hit_test(Point::new(10.0, 5.0)));
-    assert!(!stream.hit_test(Point::new(0.5, 0.5)));
-
-    let pen = pen(2.0);
-    let mut stream = RenderDataStream::new();
-    stream.draw_ellipse(None, p(&pen), p(&pen), Rect::new(0.0, 0.0, 20.0, 20.0));
-    assert!(stream.hit_test(Point::new(0.0, 10.0)));
-    assert!(!stream.hit_test(Point::new(10.0, 10.0)));
-}
-
-#[test]
-fn geometry_is_hit_via_fill_contains_and_clips_restrict() {
-    let geometry: Rc<dyn IGeometryImpl> = MockGeometryImpl::new(Rect::new(0.0, 0.0, 10.0, 10.0));
-    let mut stream = RenderDataStream::new();
-    stream.draw_geometry(b(&brush()), None, None, Some(RenderDataResource::GeometryImpl(geometry.clone())));
-    assert!(stream.hit_test(Point::new(5.0, 5.0)));
-    assert!(!stream.hit_test(Point::new(15.0, 5.0)));
-
-    let mut stream = RenderDataStream::new();
-    stream.push_clip(rect(0.0, 0.0, 5.0, 5.0));
-    stream.draw_rectangle(b(&brush()), None, None, rect(0.0, 0.0, 10.0, 10.0), &BoxShadows::default());
-    stream.pop();
-    assert!(stream.hit_test(Point::new(2.0, 2.0)));
-    assert!(!stream.hit_test(Point::new(7.0, 7.0)));
-
-    let mut stream = RenderDataStream::new();
-    stream.push_geometry_clip(Some(RenderDataResource::GeometryImpl(MockGeometryImpl::new(Rect::new(0.0, 0.0, 5.0, 5.0)))));
-    stream.draw_rectangle(b(&brush()), None, None, rect(0.0, 0.0, 10.0, 10.0), &BoxShadows::default());
-    stream.pop();
-    assert!(stream.hit_test(Point::new(2.0, 2.0)));
-    assert!(!stream.hit_test(Point::new(7.0, 7.0)));
-}
-
-#[test]
-fn transforms_map_hit_test_coordinates_and_state_is_restored() {
-    let brush = brush();
-    let mut stream = RenderDataStream::new();
-    stream.push_transform(Matrix::create_translation(100.0, 0.0));
-    stream.push_transform(Matrix::create_scale(2.0, 2.0));
-    stream.draw_rectangle(b(&brush), None, None, rect(0.0, 0.0, 10.0, 10.0), &BoxShadows::default());
-    stream.pop();
-    stream.pop();
-    stream.draw_rectangle(b(&brush), None, None, rect(0.0, 50.0, 10.0, 10.0), &BoxShadows::default());
-    assert!(stream.hit_test(Point::new(115.0, 15.0)));
-    assert!(!stream.hit_test(Point::new(5.0, 5.0)));
-    assert!(stream.hit_test(Point::new(5.0, 55.0)));
-}
-
-#[test]
-fn singular_transform_excludes_its_scope() {
-    let mut stream = RenderDataStream::new();
-    stream.push_transform(Matrix::create_scale(0.0, 0.0));
-    stream.draw_rectangle(b(&brush()), None, None, rect(0.0, 0.0, 10.0, 10.0), &BoxShadows::default());
-    stream.pop();
-    assert!(!stream.hit_test(Point::new(0.0, 0.0)));
-}
-
-#[test]
-fn custom_operation_hit_test_is_delegated() {
-    let mut stream = RenderDataStream::new();
-    stream.draw_custom(Some(TestOperation::new(Rect::new(0.0, 0.0, 4.0, 4.0))));
-    assert!(stream.hit_test(Point::new(1.0, 1.0)));
-    assert!(!stream.hit_test(Point::new(9.0, 9.0)));
-}
-
-#[test]
 fn geometry_hit_test_reports_the_intersection() {
     let (scope, _render_interface) = MockPlatformRenderInterface::install();
     let mut stream = RenderDataStream::new();
@@ -496,26 +219,6 @@ fn round_trip(stream: &RenderDataStream) -> RenderDataStream {
     result.deserialize_from(&mut reader, &|_| None);
     assert!(reader.is_object_eof() && reader.is_struct_eof());
     result
-}
-
-#[test]
-fn round_trip_preserves_bounds_hit_testing_and_resource_references() {
-    let (brush, pen) = (brush(), pen(2.0));
-    let mut stream = RenderDataStream::new();
-    stream.push_transform(Matrix::create_translation(10.0, 10.0));
-    stream.draw_rectangle(b(&brush), p(&pen), p(&pen), rect(0.0, 0.0, 10.0, 10.0), &BoxShadows::default());
-    stream.pop();
-
-    let copy = round_trip(&stream);
-    assert_eq!(copy.calculate_bounds(), stream.calculate_bounds());
-    assert!(copy.hit_test(Point::new(15.0, 15.0)));
-    assert!(!copy.hit_test(Point::new(50.0, 50.0)));
-    assert_eq!(copy.resource_count(), stream.resource_count());
-    match (copy.get_resource(0), stream.get_resource(0)) {
-        (Some(RenderDataResource::Brush(a)), Some(RenderDataResource::Brush(b))) => assert!(Rc::ptr_eq(a, b)),
-        _ => panic!("the brush did not survive the round trip"),
-    }
-    assert_eq!(replay(&copy), replay(&stream));
 }
 
 #[test]
@@ -543,14 +246,6 @@ fn round_trip_preserves_text_options_and_glyph_runs() {
         Some(RenderDataResource::GlyphRun(run)) => assert!(Rc::ptr_eq(&**run, &glyph_run)),
         _ => panic!("the glyph run did not survive the round trip"),
     }
-}
-
-#[test]
-fn round_trip_of_empty_stream_produces_empty_stream() {
-    let copy = round_trip(&RenderDataStream::new());
-    assert_eq!(copy.opcode_length(), 0);
-    assert_eq!(copy.resource_count(), 0);
-    assert_eq!(copy.calculate_bounds(), None);
 }
 
 // --- recording --------------------------------------------------------------
