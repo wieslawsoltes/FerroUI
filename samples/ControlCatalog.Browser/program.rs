@@ -27,23 +27,31 @@
 //! effect.
 //! The native control demo of the browser (`EmbedSampleWeb`) is in
 //! [`embed_sample_browser`].
+//!
+//! Addition of the port: the pictures and fonts of the catalog are asset
+//! bundles next to the module, split by the pages that use them; the host
+//! page registers the start-up bundle before it calls [`run_main`], and the
+//! catalog asks [`page_assets_browser::BrowserPageAssets`] for the bundles
+//! of a page before it creates the page.
 
 #![cfg_attr(target_os = "emscripten", no_main)]
 
 mod embed_sample_browser;
+mod page_assets_browser;
 
 use control_catalog::pages::EmbedSample;
 use control_catalog::view_models::MainWindowViewModel;
-use control_catalog::{App, MainView};
+use control_catalog::{App, MainView, PageAssets};
 use embed_sample_browser::EmbedSampleWeb;
+use page_assets_browser::BrowserPageAssets;
 use ferroui_base::logging::LogEventLevel;
-use ferroui_base::media::FontManagerOptions;
+use ferroui_base::media::{FontFamily, FontManager, FontManagerOptions, Typeface};
 use ferroui_base::metadata::from_markup_value;
 use ferroui_base::rendering::RendererDebugOverlays;
 use ferroui_base::threading::Dispatcher;
 use ferroui_base::{Point, Ref, Visual};
 use ferroui_browser::{BrowserAppBuilder, BrowserPlatformOptions, BrowserRenderingMode};
-use ferroui_controls::{AppBuilder, Application, Button, NavigationPage, TextBlock, TextBox, TopLevel};
+use ferroui_controls::{AppBuilder, Application, Button, Image, NavigationPage, TextBlock, TextBox, TopLevel};
 use ferroui_fonts_inter::AppBuilderExtension;
 use std::rc::Rc;
 use wasm_bindgen::prelude::*;
@@ -59,6 +67,7 @@ pub fn run_main(href: &str) {
         .log_to_text_writer(std::io::stdout(), LogEventLevel::Warning, &[])
         .after_setup(|_| {
             EmbedSample::set_implementation(Some(Rc::new(EmbedSampleWeb)));
+            PageAssets::set_implementation(Some(Rc::new(BrowserPageAssets)));
         })
         .start_browser_app("out", Some(options));
 
@@ -87,10 +96,13 @@ fn top_level() -> Option<Ref<TopLevel>> {
 /// the current page, whether the navigation page of the main view is running
 /// a navigation (it ignores another one until it has finished), the focused
 /// element (its class, and its text when it is a text box) and every visible
-/// text block, text box and button with its class, its name, its text (of a
-/// text block or a text box), its bounds in the coordinates of the view (CSS
-/// pixels of the canvas) and whether the pointer reaches it at its centre
-/// (`hit`: no other element covers it there). Not a port.
+/// text block, text box, button and image with its class, its name, its text
+/// (of a text block or a text box), its bounds in the coordinates of the view
+/// (CSS pixels of the canvas) and whether the pointer reaches it at its
+/// centre (`hit`: no other element covers it there); for a text block or a
+/// text box also the family of the typeface the font manager finds for its
+/// font family (`font`, `null` when it finds none), and for an image the
+/// size of its source (`source`, `null` without one). Not a port.
 #[wasm_bindgen(js_name = catalogState)]
 pub fn catalog_state() -> String {
     let Some(top_level) = top_level() else { return "null".to_string() };
@@ -117,13 +129,23 @@ pub fn catalog_state() -> String {
 
     let viewport = top_level.bounds();
     let mut elements = Vec::new();
+    let font_manager = FontManager::current();
+    let font = |family: FontFamily| {
+        font_manager
+            .try_get_glyph_typeface(&Typeface::new(family))
+            .map_or("null".to_string(), |typeface| json_string(typeface.family_name()))
+    };
     for visual in top_level.get_visual_descendants() {
-        let text = if let Some(text_block) = visual.cast::<TextBlock>() {
-            text_block.text()
+        let (text, extra) = if let Some(text_block) = visual.cast::<TextBlock>() {
+            (text_block.text(), format!(",\"font\":{}", font(text_block.font_family())))
         } else if let Some(text_box) = visual.cast::<TextBox>() {
-            text_box.text()
+            (text_box.text(), format!(",\"font\":{}", font(text_box.font_family())))
         } else if visual.cast::<Button>().is_some() {
-            None
+            (None, String::new())
+        } else if let Some(image) = visual.cast::<Image>() {
+            let source = image.source().map(|source| source.size());
+            let source = source.map_or("null".to_string(), |size| format!("{{\"width\":{:.1},\"height\":{:.1}}}", size.width, size.height));
+            (None, format!(",\"source\":{source}"))
         } else {
             continue;
         };
@@ -142,7 +164,7 @@ pub fn catalog_state() -> String {
             std::ptr::eq(hit, &*visual) || hit.is_visual_ancestor_of(&visual) || visual.is_visual_ancestor_of(hit)
         });
         elements.push(format!(
-            "{{\"type\":{},\"name\":{},\"text\":{},\"hit\":{hit},\"x\":{:.1},\"y\":{:.1},\"width\":{:.1},\"height\":{:.1}}}",
+            "{{\"type\":{},\"name\":{},\"text\":{},\"hit\":{hit},\"x\":{:.1},\"y\":{:.1},\"width\":{:.1},\"height\":{:.1}{extra}}}",
             json_string(visual.get_type().name()),
             visual.name().map_or("null".to_string(), |name| json_string(&name)),
             text.map_or("null".to_string(), |text| json_string(&text)),
