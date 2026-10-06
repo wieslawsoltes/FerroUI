@@ -45,7 +45,7 @@ The macOS job of the CI workflow is the authoritative full run. After opening th
 - Keep the licence header of an upstream file that has one, and list the file in the `NOTICE.md` of its crate.
 - New classes are registered in the crate's `register_types.rs`. A class whose upstream namespace differs from the default of its module goes under the matching `// FerroUI.…` section comment. Regenerate the markup metadata with `scripts/generate_markup_types.py` and commit the result.
 - Tests keep upstream's names in snake case and upstream's assertions. A test that is not from upstream says so in its header comment.
-- Before delivering, re-read every new or changed file line by line against its upstream counterpart and fix deviations. A deliberate deviation is listed in the pull request with its reason.
+- Before delivering, re-read every new or changed file line by line against its upstream counterpart and fix deviations. A deliberate deviation is listed in the pull request with its reason, recorded in `docs/porting/DEVIATIONS.md` (or in the area's own page that it names), and marked with a comment at its site in the code. A change that removes a divergence (for example an allocation or a copy that upstream does not make) moves or adds its row under "Corrected divergences".
 - Documentation, comments and commit messages are plain professional prose. No emojis. No attribution or co-author lines in commits.
 
 ## Delivery
