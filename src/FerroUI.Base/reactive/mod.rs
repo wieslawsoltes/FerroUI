@@ -6,6 +6,7 @@
 mod anonymous_observer;
 mod composite_disposable;
 mod disposable;
+mod lightweight_observable_base;
 mod lightweight_subject;
 mod observable;
 mod single_subscriber_observable_base;
@@ -13,6 +14,7 @@ mod single_subscriber_observable_base;
 pub use anonymous_observer::AnonymousObserver;
 pub use composite_disposable::CompositeDisposable;
 pub use disposable::{Disposable, IDisposable, SerialDisposable};
+pub use lightweight_observable_base::{LightweightObservable, LightweightObservableBase};
 pub use lightweight_subject::LightweightSubject;
 pub use observable::{Observable, ObservableExt};
 pub use single_subscriber_observable_base::SingleSubscriberObservableBase;
