@@ -73,6 +73,22 @@ reason = "the `clip_to_bounds_radius` virtual of Visual, which Border overrides,
 
 [[map]]
 project = "Avalonia.Base"
+upstream = ["LogicalTree/LogicalExtensions.cs"]
+kind = "merged"
+rust = "logical_tree/logical_extensions.rs"
+types = { LogicalExtensions = "StyledElement" }
+reason = "the extension methods are inherent methods of StyledElement, the one implementation of ILogical"
+
+[[map]]
+project = "Avalonia.Base"
+upstream = ["LogicalTree/ILogical.cs", "LogicalTree/ILogicalRoot.cs"]
+kind = "replaced"
+rust = "styled_element.rs"
+types = { ILogical = "StyledElement", ILogicalRoot = "StyledElement" }
+reason = "both contracts are [NotClientImplementable] and StyledElement is their one implementation: the logical tree members (`parent`, `logical_children`, the attachment events and notifications) and the `is_logical_root` virtual are StyledElement's own"
+
+[[map]]
+project = "Avalonia.Base"
 upstream = [
     "PropertyStore/LocalValueBindingObserver.cs",
     "PropertyStore/LocalValueBindingObserverBase.cs",
