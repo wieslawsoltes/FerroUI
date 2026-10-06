@@ -2,6 +2,7 @@
 """What a WebAssembly module of a browser application is made of.
 
     python3 scripts/browser/wasm-size-report.py <module.wasm> [--assets <directory>...] [--top <n>]
+        [--map <link map>] [--functions <n>] [--marginal] [--profile <file>]
 
 Prints, as Markdown tables:
 
@@ -9,16 +10,26 @@ Prints, as Markdown tables:
 - with --assets, the files below the given directories whose content is in the data section
   (embedded fonts, markup, pictures), by file extension;
 - when the module has a name section, the code by origin (Rust crate, Skia with FreeType and the
-  image codecs, HarfBuzz, the C and C++ runtime) and by symbol family (the function path with its
-  generic arguments erased, so that the instances of one generic function are counted together).
-  The gzip column of those tables compresses the function bodies of a row on their own: it shows
-  how well the row compresses, and the rows do not add up to the gzip size of the code section.
+  image codecs, HarfBuzz, the C and C++ runtime, the glue of wasm-bindgen) and by symbol family
+  (the function path with its generic arguments erased, so that the instances of one generic
+  function are counted together). The "gzip (alone)" column of those tables compresses the
+  function bodies of a row on their own: it shows how well the row compresses, and the rows do not
+  add up to the gzip size of the code section. With --marginal a second gzip column says how much
+  smaller the gzip of the whole code section gets without the row (what removing the row saves in
+  transfer; slow: one compression of the code section per row);
+- with --functions, the largest functions;
+- with --profile, a profile of the module written by `wasm-split --instrument` (binaryen; see
+  scripts/browser/first-frame.mjs --wasm-profile): how much of the code of each origin ran.
+
+C and C++ functions are attributed by their names. With --map, the link map of wasm-ld
+(`-C link-arg=-Wl,--Map=<file>`) names the archive each of them comes from, which is exact for
+the prebuilt Skia and HarfBuzz libraries and the runtime of Emscripten.
 
 A module built by scripts/build-browser.sh has no name section. Link one with the names kept, for
 example for the themed_view example:
 
     cargo rustc --profile browser --target wasm32-unknown-emscripten -p ferroui-browser \\
-        --example themed_view -- -C link-arg=--profiling-funcs
+        --example themed_view -- -C link-arg=--profiling-funcs [-C link-arg=-Wl,--Map=<file>]
 
 Function names are demangled with llvm-cxxfilt of the Emscripten SDK when it is on PATH.
 """
@@ -27,6 +38,7 @@ import gzip
 import os
 import re
 import shutil
+import struct
 import subprocess
 import sys
 
@@ -171,9 +183,51 @@ RUNTIME = re.compile(r"^(emscripten|__|_emscripten|std::|operator |dl|malloc|fre
                      r"_Unwind|__cxa|__cxx|stackSave|stackRestore|stackAlloc|setThrew|fflush|printf|vfprintf|"
                      r"fmt_|pop_arg|pad|out|qsort|wcrtomb|frexp|getenv|pthread)")
 GENERIC_PARAMETERS = {"T", "S", "F", "A", "M", "I", "V", "K", "dyn", "mut"}
+# The return type a demangled C++ name of a template function starts with.
+RETURN_TYPE = re.compile(r"^(?:void|bool|int|unsigned int|char|float|double|long|unsigned long|auto|decltype\(.*?\)) ")
+UNNAMED = re.compile(r"^function \d+$")
+# Archives of the link map, by the origin their functions are counted under.
+ARCHIVES = (("C++ Skia (with FreeType)", re.compile(r"libskia")),
+            ("C++ HarfBuzz", re.compile(r"harfbuzz")),
+            ("C/C++ runtime (libc, libc++, Emscripten)", re.compile(r"/sysroot/|emscripten|lib(c|c\+\+|c\+\+abi|compiler_rt|"
+                                                                    r"dlmalloc|emmalloc|GL|html5|stubs|sockets|noexit)[-.\w]*\.a")))
+
+
+def link_map(path):
+    """{symbol name: input file} of the functions of a link map of wasm-ld."""
+    inputs = {}
+    in_code = False
+    for line in open(path, encoding="utf-8", errors="replace"):
+        fields = line.split()
+        if len(fields) == 4 and fields[0] == "-" and re.fullmatch(r"[A-Z]+(\(.*\))?", fields[3]):  # a section
+            in_code = fields[3] == "CODE"
+            continue
+        if not in_code:
+            continue
+        match = re.match(r"\s*-\s+[0-9a-f]+\s+[0-9a-f]+\s+(.*):\((.*)\)\s*$", line)
+        if match:
+            inputs[match.group(2)] = match.group(1)
+    return inputs
+
+
+def archive_origin(name, raw_name, inputs):
+    """The origin of a C or C++ function by the archive the link map names, or None."""
+    source = inputs.get(raw_name) or inputs.get(re.sub(r"_\d+$", "", raw_name))
+    if source is None:
+        return None
+    for label, pattern in ARCHIVES:
+        if pattern.search(source):
+            if label.startswith("C++ Skia") and CODECS.match(name):
+                return "C image codecs and zlib"
+            return label
+    return "C/C++ other: " + os.path.basename(re.sub(r"\(.*\)$", "", source))
 
 
 def origin(kind, name):
+    if UNNAMED.match(name):
+        return "functions without an entry in the name section"
+    if "externref shim" in name or name.startswith(("__wbindgen", "__wbg_", "__externref")):
+        return "wasm-bindgen glue"
     if kind == "rust":
         if name.startswith("core::ptr::drop_in_place<"):
             inner = re.match(r"[(&*\[]*(?:mut |const |dyn )?<?([A-Za-z_]\w*)", name[len("core::ptr::drop_in_place<"):])
@@ -184,6 +238,7 @@ def origin(kind, name):
             trait = re.search(r" as ([A-Za-z_]\w*)::", name)
             crate = trait.group(1) if trait else crate
         return f"Rust {crate}"
+    name = RETURN_TYPE.sub("", name)
     if SKIA.match(name):
         return "C++ Skia (with FreeType)"
     if HARFBUZZ.match(name):
@@ -269,21 +324,59 @@ def main():
     imported = imported_function_count(data, by_id[2][0]) if 2 in by_id else 0
     names = function_names(data, *names_section)
     bodies = function_bodies(data, by_id[10][0])
-    readable_names = readable([names.get(imported + i, f"function {imported + i}") for i in range(len(bodies))])
+    raw_names = [names.get(imported + i, f"function {imported + i}") for i in range(len(bodies))]
+    readable_names = readable(raw_names)
+    inputs = link_map(args[args.index("--map") + 1]) if "--map" in args else {}
 
     groups = {"origin": collections.defaultdict(list), "family": collections.defaultdict(list)}
-    for (start, size), (kind, name) in zip(bodies, readable_names):
-        groups["origin"][origin(kind, name)].append((start, size))
+    origins = []
+    for (start, size), (kind, name), raw_name in zip(bodies, readable_names, raw_names):
+        label = (kind == "c" and archive_origin(name, raw_name, inputs)) or origin(kind, name)
+        origins.append(label)
+        groups["origin"][label].append((start, size))
         groups["family"][family(name)].append((start, size))
     total = sum(size for _, size in bodies)
+    marginal = "--marginal" in args
+    code = gzip_size(b"".join(data[s:s + n] for s, n in bodies)) if marginal else 0
     for title, key in (("Code by origin", "origin"), ("Code by symbol family", "family")):
         rows = sorted(groups[key].items(), key=lambda item: -sum(size for _, size in item[1]))[:top]
-        print(f"\n| {title} | Functions | MB | % of code | MB gzip (alone) |\n|---|---:|---:|---:|---:|")
+        extra = (" MB gzip saved without it |", "---:|") if marginal else ("", "")
+        print(f"\n| {title} | Functions | MB | % of code | MB gzip (alone) |{extra[0]}\n|---|---:|---:|---:|---:|{extra[1]}")
         for label, items in rows:
             size = sum(s for _, s in items)
             packed = gzip_size(b"".join(data[s:s + n] for s, n in items))
+            saved = ""
+            if marginal:
+                members = {s for s, _ in items}
+                saved = f" {mb(code - gzip_size(b''.join(data[s:s + n] for s, n in bodies if s not in members)))} |"
             label = label if len(label) <= 140 else label[:137] + "..."
-            print(f"| `{label}` | {len(items)} | {mb(size)} | {100 * size / total:.1f} | {mb(packed)} |")
+            print(f"| `{label}` | {len(items)} | {mb(size)} | {100 * size / total:.1f} | {mb(packed)} |{saved}")
+
+    if "--profile" in args:
+        profile = open(args[args.index("--profile") + 1], "rb").read()
+        # wasm-split's profile: an 8-byte hash of the module, then one 32-bit word per defined function,
+        # not zero when the function ran.
+        ran = [word != 0 for word in struct.unpack_from(f"<{(len(profile) - 8) // 4}I", profile, 8)]
+        if len(ran) != len(bodies):
+            sys.exit(f"the profile has {len(ran)} functions, the module {len(bodies)}: not a profile of this module")
+        rows = sorted(groups["origin"].items(), key=lambda item: -sum(size for _, size in item[1]))[:top]
+        index = {start: i for i, (start, _) in enumerate(bodies)}
+        ran_total = sum(size for (_, size), was_run in zip(bodies, ran) if was_run)
+        print(f"\nCode that ran in the profiled run: {sum(ran)} functions, {mb(ran_total)} MB ({100 * ran_total / total:.1f} %).\n")
+        print("| Code that ran, by origin | MB | of MB | % |\n|---|---:|---:|---:|")
+        for label, items in rows:
+            size = sum(s for _, s in items)
+            run = sum(n for s, n in items if ran[index[s]])
+            print(f"| `{label}` | {mb(run)} | {mb(size)} | {100 * run / size:.1f} |")
+
+    if "--functions" in args:
+        count = int(args[args.index("--functions") + 1])
+        largest = sorted(range(len(bodies)), key=lambda i: -bodies[i][1])[:count]
+        print("\n| Largest functions | Origin | kB |\n|---|---|---:|")
+        for i in largest:
+            name = readable_names[i][1]
+            name = name if len(name) <= 140 else name[:137] + "..."
+            print(f"| `{name}` | {origins[i]} | {bodies[i][1] / 1e3:.1f} |")
 
 
 if __name__ == "__main__":

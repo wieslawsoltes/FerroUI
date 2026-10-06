@@ -710,6 +710,161 @@ Compiled themes (stage E4, `xaml.md`) do the parse and transform at build time, 
 - **Not adopted:** a service worker cache of the module and the bundle. Within ten minutes the HTTP cache already serves repeat visits, and after that a revalidation costs one round trip per file. A service worker would save only those round trips, not the CPU time that dominates, and would add a second cache that has to be versioned against deployments.
 - **Not measured:** the first frame in the WebGL2 path spends about 0.2 s compiling shaders on SwiftShader; on a real GPU this differs.
 
+## 20. What the catalog module is made of after E4, and the plan to shrink it (2026-10-06)
+
+The published catalog module, with the themes loaded from compiled markup (stage E4 of the XAML compiler), is 43.84 MB raw and 11.30 MB with gzip -9 (GitHub Pages sends 11.59 MB: its gzip level is lower). This section attributes it, measures what a browser does with it at start-up, and ranks what would make it smaller and cheaper to compile, mobile first. Only the tools changed with it (see "Tools"); nothing in the module changed.
+
+How it was measured. The published module has no name section, and the fat-LTO link of the catalog needs about 15.5 GB of memory (`xaml-compiler/HANDOVER.md`, section 9), more than the 15 GB machine of this pass has without swap. The attribution therefore uses a second link of the same sources (`main` at `666587c`) with thin LTO in one code generation unit, the names kept and a link map: `CARGO_PROFILE_BROWSER_LTO=thin cargo rustc --profile browser --target wasm32-unknown-emscripten -p control-catalog-browser --bin control-catalog-browser -- -C link-arg=--profiling-funcs -C link-arg=-Wl,--Map=<file>`. Its code section is 36.92 MB against 36.36 MB of the published module and its data section 7.22 MB against 7.06 MB, so the shares below carry over within about 2 %. Attribution with `scripts/browser/wasm-size-report.py --map <file> --marginal --functions 50`. Compile times with Node 22.22 (V8 12.4) on the published module, one fresh process per measurement (`--no-wasm-native-module-cache-enabled`); start-up with `scripts/browser/first-frame.mjs` in headless Chromium 141 (SwiftShader WebGL2) on a 4-core container that other builds shared (load average 3 to 5): the absolute times are of this machine, not of a phone, and only their proportions are used. Sizes in MB of 1,000,000 bytes, gzip -9 unless stated. **[M]** marks a measurement, **[E]** an estimate with the reasoning next to it.
+
+### Composition
+
+| Origin (code section, 36.92 MB of the named link) | MB | MB gzip (alone) | MB gzip saved without it | Ran before the first frame |
+|---|---:|---:|---:|---:|
+| Rust `ferroui_base` | 8.78 | 1.70 | 1.71 | 18 % |
+| Rust `ferroui_themes_fluent` (generated `compiled_xaml.rs`) | 7.55 | 1.14 | 1.14 | 38 % |
+| Rust `ferroui_themes_simple` (generated `compiled_xaml.rs`) | 4.25 | 0.69 | 0.69 | 7 % |
+| C++ Skia with FreeType (`libskia_bindings` of the link map) | 3.38 | 1.27 | 1.29 | 33 % |
+| Rust `core` (closures, iterators, formatting) | 2.96 | 0.82 | 0.83 | 19 % |
+| functions without an entry in the name section | 2.18 | 0.49 | 0.51 | 28 % |
+| Rust `ferroui_controls` | 1.68 | 0.48 | 0.49 | 22 % |
+| Rust `ferroui_markup_xaml_loader` (run-time loader) | 1.57 | 0.39 | 0.39 | 87 % |
+| Rust `control_catalog` | 0.70 | 0.16 | 0.17 | 9 % |
+| drop glue of all types (`drop_in_place<_>` of every crate; not in the crate rows) | 0.61 | 0.10 | | |
+| C/C++ not attributed by the map | 0.47 | 0.17 | 0.18 | 20 % |
+| Rust `xamlx` | 0.40 | 0.12 | 0.12 | 90 % |
+| Rust `ferroui_markup_xaml` (runtime library, `rt` of generated code) | 0.34 | 0.08 | 0.09 | 64 % |
+| Rust `alloc`, `std`, `hashbrown` | 0.67 | 0.18 | 0.20 | |
+| C++ HarfBuzz | 0.31 | 0.11 | 0.12 | 32 % |
+| C image codecs and zlib (inside Skia's archive) | 0.31 | 0.09 | 0.09 | 9 % |
+| C/C++ runtime (libc, libc++, Emscripten) | 0.20 | 0.07 | 0.07 | |
+| Rust `ferroui_browser`, `ferroui_skia`, `skia_safe` | 0.30 | 0.10 | | |
+| Rust `roxmltree` | 0.05 | 0.02 | 0.02 | |
+| other Rust crates (`rust_decimal`, `time`, `unicode_normalization`, `tinyvec`, `wasm_bindgen`, ...) | 0.01 | | | |
+| wasm-bindgen glue in the module (externref shims) | < 0.01 | | | |
+
+| Other sections (published module) | MB | MB gzip |
+|---|---:|---:|
+| data | 7.06 | 2.13 |
+| of which the six Inter fonts (`ferroui-fonts-inter`) | 1.88 | 0.92 (file by file) |
+| of which the markup documents of the catalog (still loaded at run time) | 1.19 | 0.25 |
+| of which the markup documents of the Fluent and Simple themes (compiled, but still registered as assets) | 0.94 | 0.16 |
+| of which Roboto Light (`ferroui-dialogs`) | 0.17 | 0.09 |
+| of which other constant data: about 1.0 MB of text (type names 0.45, markup names 0.22, panic locations 0.07) and 2.0 MB of tables and vtables | 2.98 | |
+| element (function table) | 0.30 | 0.24 |
+| type, function, import | 0.12 | 0.04 |
+| script of the module (`control-catalog-browser.js`, not in the module) | 0.22 | 0.05 |
+
+**[M]** all rows. "Alone" compresses the bytes of a row by themselves; "saved without it" is the gzip of the whole code section minus the gzip of the code section without the row, which is what removing the row saves in transfer; the two agree within 0.02 MB for every row, so code of one origin compresses against itself, not against the rest. "Ran before the first frame" is the share of the row's bytes in functions that ran up to the first frame (instrumented module, see "Start-up"). The functions without a name entry are spread over all origins (neighbours of named Rust, Skia and HarfBuzz functions); their origin is unknown. Third-party Rust crates are 0.20 MB together (`hashbrown` 0.10, `roxmltree` 0.05, `skia_safe` 0.04, the rest 0.01), no code of Skia's PDF or SVG back ends is linked (the link map has no `SkPDF` symbol) and no ICU data is in the module, so the default features of `skia-safe` (`pdf`, `jpeg`, `embed-icudtl`, `binary-cache`) cost nothing; the dependency tree of the browser build (`cargo tree -e features`) has no `regex`, `serde`, `image` or similar crate.
+
+The largest functions are all generated: 47 of the 50 largest (6.2 MB together) are build functions of `compiled_xaml.rs`, led by `populate_fluenttheme_xaml` (1.38 MB in one function, the resource dictionary of the Fluent theme) and the closures of the control themes of `build_controls_fluentcontrols_xaml` and `build_controls_simplecontrols_xaml` (60 to 285 kB each). The three others are `RuntimeTypeSystem::...` of the loader (88 kB), Skia's `skcms_private::baseline::exec_stages` (85 kB) and libjpeg's `encode_mcu_huff` (59 kB).
+
+Largest generic families outside the generated code (instances; MB raw; MB gzip alone): `FnOnce::call_once` shims (18,000; 2.09; 0.62: 0.52 MB of them are the by-name markup invokers that call `MarkupArguments::next`, 0.49 MB class vtable shims), `drop_in_place<_>` (5,559; 0.61; 0.10), `MarkupArguments::next<T>` (437; 0.55; 0.05), `FnOnce::call_once{{vtable.shim}}` (9,095; 0.37; 0.07), `StyledProperty<T>::from_untyped` (220; 0.24; 0.03), typed observers `on_next` (1,570; 0.22; 0.03), `TypedBindingExpression<T>::write_source_value_to_target` (234; 0.22; 0.02), `Interactive::add_handler_as` closures (274; 0.20; 0.05), `coerce_value` (220; 0.17; 0.03), `BindingEntry<T>::set_value` (220; 0.15; 0.01), the value type registry closures (`register_conversion`, `register_cast`, `register_object`, `register_nullable`: about 0.47 MB over 5,000 instances). The generic helpers that generated code calls (`rt::cast`, `rt::to_object`, `rt::exact`, `rt::bind`, `rt::to_value`, `rt::deferred_builder`) are 0.11 MB in 2,583 instances: they are small, and the cost of generated code is at its call sites (next paragraph). **[M]**
+
+### Where the bytes of generated code go: exceptions
+
+Rust on this target unwinds with JavaScript exceptions (section 18). The linker rewrites every call that may unwind into a call of an imported `invoke_*` function, with the callee passed as a table index, and brackets it with stores and a load of the `__THREW__` flag in memory and a branch to the landing pad. The module makes 801,840 calls (29,486 of them indirect), and 328,493 of them are such `invoke_*` calls, with 110,917 landing pads (`__cxa_find_matching_catch_2`). In the generated theme code it is 167,892 of 214,064 calls: generated build functions hold many reference-counted locals, so nearly every call needs a cleanup path. **[M]** (instruction scan of the named module.)
+
+What that costs:
+
+- Size: the two `__THREW__ = 0` stores per call site (658,525), with the few loads and checks of the flag that a byte-pattern scan recognises, are 6.82 MB of the 36.92 MB code section (30.10 MB without them), but only 0.30 MB of its gzip (8.36 to 8.06 MB): the sequence is the same bytes everywhere. **[M]** With the load, the comparison and the table index the bookkeeping is about 41 bytes per call site (read from the disassembly of a generated function: 58 `invoke_*` calls, 174 accesses to the flag), so 10 to 13 MB raw in all. **[E]**
+- Start-up: every such call leaves WebAssembly for the script of the module and comes back through a table lookup. In CPU profiles of three loads up to the first frame (named module, means), the wasm-to-JavaScript and JavaScript-to-wasm transitions took 0.80 s, `getWasmTableEntry` 0.13 s and `invoke_*` with `stackSave` 0.05 s: about 1.0 s of the 2.85 to 3.20 s to the first frame, against 0.25 s in `ferroui_base` itself, 0.24 s in the run-time loader with `xamlx` and the runtime library, 0.09 s in Skia, and 0.26 s waiting for SwiftShader to compile shaders. **[M]** (The table lookup cache of section 18 is in place; without it the share was larger.)
+
+### Start-up: what runs, and what compiling costs
+
+Up to the first frame of the home page 19,573 of the 113,497 functions of the published module run, 10.17 MB of its 36.36 MB of code (28 %). **[M]** (`wasm-split --instrument` of binaryen on the published module, profile read after the first frame with `first-frame.mjs --wasm-profile`.) By origin (named module): 87 % of the loader and 90 % of `xamlx` run, the catalog loads its pages through them; 38 % of the Fluent theme code (the resource dictionary and the control themes the first page shows); 7 % of the Simple theme, which the catalog creates as upstream does but whose control themes stay deferred.
+
+Compiling the published module in V8 (Node 22.22, V8 12.4; this container): **[M]**
+
+| V8 configuration | Time |
+|---|---:|
+| Default: validation of the whole module, functions compiled lazily on their first call (Liftoff), hot ones later with TurboFan in the background | 0.13 to 0.23 s over two series (then each function on its first call) |
+| Lazy validation as well (`--wasm-lazy-validation`) | 0.05 to 0.11 s |
+| Every function with Liftoff up front, 4 threads (`--no-wasm-lazy-compilation`) | 0.94 to 1.10 s over two series |
+| The same on one thread | 1.58 to 1.76 s |
+| Every function with TurboFan up front, 4 threads | 15.6 to 22.2 s |
+
+What that means per engine:
+
+- **Chrome** compiles lazily: start-up pays the validation of the whole module plus Liftoff for each function the first time it runs, on the main thread. Liftoff of the 10.2 MB that run is about 0.45 s on one thread of this machine **[E]** (from the 1.6 s for 36.4 MB), several times that on a phone. TurboFan compiles hot functions in the background (dynamic tiering). **Code cache:** for a module of 128 kB or more compiled with `instantiateStreaming` (the script of the module does), Chrome stores the TurboFan code next to the HTTP cache entry once enough of it exists, and reuses it while the cached response stays valid; a `304 Not Modified` keeps it, a `200` replaces the resource and drops it, and a changed URL (also a query string) is a new entry. Liftoff code is not cached. **[V]** (v8.dev, "Code caching for WebAssembly developers"; "WebAssembly compilation pipeline".)
+- **Firefox** compiles every function with its baseline compiler while the module streams in, then with Ion in the background (tiered compilation), so start-up pays for all 36 MB of code, not only for what runs; caching of stream-compiled modules in the HTTP cache landed in Firefox 67 behind `javascript.options.wasm_caching` (bug 1487113). Whether it is on in current releases was not checked. **[V]** / **[U]**
+- **Safari** (JavaScriptCore) starts functions in its in-place interpreter (IPInt) and tiers hot ones up to BBQ and OMG, so it compiles little at start-up but runs the start-up code interpreted at first. **[V]** (WebKit blog, JetStream 3.) No persistent WebAssembly code cache is documented. **[U]**
+- **GitHub Pages** sends `cache-control: max-age=600`, `last-modified` and a weak `etag` made of the modification time and the size of the file (`W/"6ac5059b-29cff09"` for the module on 2026-10-06), and gzip only (no Brotli, also when the browser offers it). **[M]** (`curl -I`.) So a repeat visit within ten minutes uses the cached module without a request; after that it is revalidated, and a `304` keeps Chrome's code cache. Every deployment of the site gives every file a new modification time, hence a new ETag and a full download and recompile, even when the module did not change; the module's URL never changes, which is what the code cache needs. A content hash in the file name would not help on Pages (it cannot send `immutable`), so nothing is to be changed here.
+
+### Split module (`-sSPLIT_MODULE`, binaryen `wasm-split`): verdict
+
+Measured on the published module with the start-up profile above (`wasm-split --split --profile`): **[M]**
+
+| | MB | MB gzip | Compile (V8, lazy / eager Liftoff, 4 threads) |
+|---|---:|---:|---:|
+| Published module | 43.84 | 11.30 | 0.13 to 0.15 s / 0.94 to 1.00 s (same series as the next row) |
+| Primary module (the functions that ran up to the first frame, all data) | 21.69 | 5.79 | 0.08 to 0.09 s / 0.37 to 0.42 s |
+| Secondary module (the rest) | 27.07 | 6.57 | |
+| Both | 48.76 | 12.36 | |
+
+The split moves 5.5 MB of gzip off the download before the first frame and 0.6 s of eager baseline compilation off a Firefox-like start-up, and costs 4.9 MB raw and 1.06 MB gzip in total (the exports and imports between the two halves and the placeholder table entries). It is not worth doing with this build now:
+
+- **Loading the secondary module on the main thread is not possible synchronously.** The runtime of Emscripten 6.0.10 (`src/preamble.js`) replaces each moved function by a placeholder that calls `loadSplitModule`, by default `instantiateSync`: a synchronous read of the file (there is none on the web main thread: `readBinary` exists only in workers) and `new WebAssembly.Module` / `new WebAssembly.Instance`, which Chrome refuses on the main thread for modules over 8 MB (the secondary is 27 MB). The alternative of the runtime is JSPI (`-sJSPI`), where the placeholder suspends until the file is there; JSPI ships in Chrome 137, Firefox 153 (July 2026) and Safari 27 (September 2026), so older iOS and Android browsers are excluded. But under JSPI every export through which a moved function can be reached must be a promising export, which returns a promise: the boundary of this backend answers synchronously (an input handler says whether the event was handled, section 5), so that is a redesign of the boundary, not a build option. **[V]** (Emscripten source, `settings.js`; MDN browser compat data; Firefox 153 release notes.)
+- **Without JSPI** the host page would have to fetch and instantiate the secondary module asynchronously right after the primary one and keep the application from reaching any moved function until then. The profile covers one page in one rendering mode at one size; a function it missed (another page, Software2D, a resize, the first key press) would trap instead of running. That is a behaviour change, not an optimisation.
+- **The function table lookup cache** of section 18 (`wasm_table_mirror.js`) assumes that the table is only written through `setWasmTableEntry`; the secondary module writes its functions into the table with its element segment, so the cache would keep calling the placeholders. It would need invalidation on load.
+- **The build** would need an instrumented link, a profiling run in CI and a second `wasm-split` pass, on top of a fat-LTO link that already needs 15.5 GB.
+- **The first frame waits for the asset bundle anyway**: the host page fetches `control-catalog.assets` (23.54 MB, 20.18 MB gzip) and calls `runMain` only when both the module and the bundle are there (`wwwroot/main.js`). Halving the module's download moves the first frame only once the bundle is off that path (item 6 below).
+
+What a prototype would need: the `browser` link with `-sSPLIT_MODULE` (writes the instrumented module and `.orig`); a run with `first-frame.mjs --wasm-profile` over several pages and both rendering modes; `wasm-split --split --profile=<merged profiles> <module>.orig`; a host page that instantiates `<module>.deferred.wasm` asynchronously with `{primary: exports}` and provides `Module.loadSplitModule`; invalidation of the table cache; and a gate on input until the secondary module is in. Revisit if a later JSPI-compatible design of the boundary exists, or if the application's own lazy loading (pages) makes a natural split point.
+
+### The plan, ranked
+
+Ranked by what it does for a phone: bytes to compile and execute at start-up first, then transfer. "Upstream" says whether the behaviour stays as upstream's.
+
+| # | Change | Raw | Gzip | Compile and start-up | Risk | Upstream |
+|---|---|---:|---:|---|---|---|
+| 1 | **WebAssembly exception handling** instead of JavaScript exceptions: Rust `-Z emscripten-wasm-eh`, Emscripten `-fwasm-exceptions` (legacy instructions, the default of 6.0.10: Chrome 95, Firefox 100, Safari 15.2), the standard library rebuilt for it | -10 to -13 MB **[E]** (lower bound -6.8 MB **[M]**) | -0.3 to -0.6 MB **[E]** | Removes the JavaScript round trip of 328,493 call sites: about 1.0 s of 2.9 s to the first frame here **[M]**; every engine compiles a quarter to a third less code | Toolchain: the flag is unstable on the pinned 1.90.0 and on stable 1.97.0 (`rustc -Z help`), and the target's prebuilt standard library uses JavaScript exceptions, so it needs a nightly with `-Z build-std` or a stable release that adopts it; the link with Skia's prebuilt archive needs checking; `wasm_table_mirror.js` becomes unnecessary | Same unwinding semantics (`catch_unwind`, re-raised panics); a build change only |
+| 2 | **Shared `rt` helpers in generated code**: one call per setter (`Setter` with property and value added to its style: 2,890 in the two themes), per template binding (1,933), per markup extension value with its target property bookkeeping (1,675), per deferred content preamble (2,123); `#[inline(never)]` where LLVM still inlines | -2.5 to -3 MB **[E]** (about 55 bytes per call removed, 3 to 8 calls per pattern) | -0.4 MB **[E]** | 3.2 MB of theme code runs before the first frame **[M]**; proportionally less to compile; splitting `populate_fluenttheme_xaml` (1.38 MB, one function) shortens the single largest lazy compilation on the main thread | Emitter change with regenerated `compiled_xaml.rs`, drift tests and the differential harness; overlaps item 1 (fewer and cheaper call sites) | Same calls in the same order, inside the helper |
+| 3 | **Stage E5 for the catalog**: its 219 documents compiled, `x:Class` documents of the dialogs compiled, so neither links the run-time loader (upstream's catalog does not use `AvaloniaRuntimeXamlLoader`) | Removes the loader, `xamlx`, `roxmltree` and their drop glue (2.1 MB **[M]**) and the 1.19 MB of catalog documents; adds the catalog's generated code, about 13 MB at today's ratio of the themes (11.8 MB of code from 1.15 MB of markup) or about 9 MB after item 2: **net +6 to +10 MB** **[E]** | -0.8 MB removed, +1.3 to +2.0 MB added: **net +0.5 to +1.2 MB** **[E]** | Removes the run-time parse and transform: 0.24 s of wasm CPU to the first frame here plus their share of item 1's transitions **[M]**; on the desktop the themes' load went from 0.5 s to 2.5 ms with E4 | Large (stage E5); the module grows unless item 2 lands first | Upstream compiles the catalog |
+| 4 | **Compiled documents out of the embedded assets**, as upstream's compiler removes every compiled resource from the assembly (`res.Remove()` in `XamlCompilerTaskExecutor`) and answers loads by URI through the generated `!XamlLoader` | -0.94 MB now (themes), -2.13 MB with item 3 **[M]** | -0.16 / -0.41 MB **[M]** | None (data is not compiled) | Needs E5's loader table first: today an application can still `StyleInclude` a theme document by URI, which the run-time loader serves from these assets | Yes, once the loader table exists |
+| 5 | **Generic families**: outline the type-independent parts of `MarkupArguments::next<T>` (437 instances, 0.55 MB), the markup invoker shims (0.52 MB), `TypedBindingExpression<T>` and the observers, as the desktop pass did; the property store needs the type-erased design of `desktop-performance.md` item 10 | -0.5 to -1 MB **[E]** | < 0.1 MB **[E]** | Little: 18 % of `ferroui_base` runs at start-up | Hot paths; each split with the property system tests | Same statements, same order |
+| 6 | **The asset bundle on the start-up path** (not the module): the page waits for 20.18 MB of gzip of pictures and fonts (64 % of the site's transfer) before `runMain`. Per-page bundles fetched before a page is shown would take most of it off the first frame | 0 for the module | up to -20 MB before the first frame **[E]** (what the first page needs is not measured) | The largest single wait on a phone network | Asset access is synchronous (upstream `AssetLoader.Open`), so loading on demand needs a page-level await in the catalog, not in the framework; the catalog belongs to its worker | Sample-specific; the framework stays as upstream |
+| 7 | Split module | -5.5 MB gzip before the first frame, +1.06 MB in total | | See the verdict above | High | Not without a redesign of the boundary |
+| 8 | Inter fonts to the asset bundle | -1.88 MB module | -0.92 MB module, 0 for the site | None | Low | `Avalonia.Fonts.Inter` embeds them; only useful for the module's gzip budget |
+
+Measured and not worth doing:
+
+- **Post-link optimisation is converged.** `wasm-opt -Oz` once more on the published module: 43.80 MB (-0.04) and the same gzip; `--merge-similar-functions` alone makes it 0.06 MB larger. **[M]**
+- **Dependencies and features**: nothing unused is linked (see "Composition"); Skia's feature set is fixed by its prebuilt binaries (section 3).
+- **Generic `rt` helpers** of generated code: 0.11 MB for all their instances; outlining their error paths would save a few kB.
+- **Caching headers**: nothing to change on GitHub Pages (see "Start-up").
+
+Next steps in order: item 1 needs a toolchain decision by the owner (nightly with `build-std` for the browser build only, or waiting for a stable release) and then one measured build; item 2 is the next emitter task and should land before item 3; item 4 comes with E5's loader table; item 6 is the catalog's.
+
+### Tools
+
+- `scripts/browser/wasm-size-report.py`: `--map <link map>` attributes C and C++ functions by the archive the link map of wasm-ld names (Skia, HarfBuzz and the runtime exactly); `--marginal` adds the gzip saved without each row; `--functions <n>` lists the largest functions; `--profile <file>` shows how much of each origin ran in a profiled run; demangled C++ names with a return type are attributed, functions without a name entry and the externref shims of wasm-bindgen get rows of their own.
+- `scripts/browser/first-frame.mjs --wasm-profile <file>`: for a module instrumented with `wasm-split --instrument`, writes the profile of the functions that ran up to the first frame of the last load, the input of `wasm-split --split --profile` and of `wasm-size-report.py --profile`.
+
+Commands of this section:
+
+```
+source .tools/env.sh
+# named link with a link map (thin LTO: the fat-LTO link of the catalog needs about 15.5 GB)
+CARGO_PROFILE_BROWSER_LTO=thin cargo rustc --locked --profile browser --target wasm32-unknown-emscripten \
+    -p control-catalog-browser --bin control-catalog-browser -- \
+    -C link-arg=--profiling-funcs -C link-arg=-Wl,--Map=catalog.map
+python3 scripts/browser/wasm-size-report.py <module.wasm> --map catalog.map --marginal --functions 50 --top 40
+python3 scripts/browser/wasm-size-report.py <published module> --assets samples src     # embedded files
+# start-up profile: instrument, serve in place of the module, run to the first frame
+FEATURES="--enable-bulk-memory --enable-bulk-memory-opt --enable-sign-ext --enable-mutable-globals \
+    --enable-nontrapping-float-to-int --enable-reference-types --enable-multivalue --enable-call-indirect-overlong --enable-threads"
+wasm-split --instrument $FEATURES <module.wasm> -o <site>/control_catalog_browser.wasm
+node scripts/browser/first-frame.mjs <site> --runs 1 --wasm-profile startup.prof
+python3 scripts/browser/wasm-size-report.py <module.wasm> --profile startup.prof
+wasm-split --split $FEATURES --profile=startup.prof <module.wasm> -o1 primary.wasm -o2 secondary.wasm
+# compile time of one configuration (fresh process each time)
+node --no-wasm-native-module-cache-enabled [--no-wasm-lazy-compilation] [--wasm-num-compilation-tasks=1] compile.mjs <module.wasm>
+```
+
+`compile.mjs` is three lines: read the file, `await WebAssembly.compile(bytes)`, print the time. The instrumented and split modules need the feature flags above (the module uses atomics from Skia's archive and the bulk memory and reference types of Emscripten 6.0.10).
+
+Sources (checked 2026-10-06): V8, "WebAssembly compilation pipeline" (https://v8.dev/docs/wasm-compilation-pipeline) and "Code caching for WebAssembly developers" (https://v8.dev/blog/wasm-code-caching); Mozilla bug 1487113 (alt-data caching of stream-compiled modules); WebKit, "Introducing the JetStream 3 Benchmark Suite" (IPInt, BBQ, OMG); MDN browser-compat-data pull request 30552 (JSPI in Safari 27) and the Firefox 153 release notes (JSPI); Chromium's 8 MB limit on synchronous compilation on the main thread (`v8_initializer.cc`); Emscripten 6.0.10 `src/settings.js` (`SPLIT_MODULE`, `WASM_LEGACY_EXCEPTIONS`), `src/preamble.js` (`splitModuleProxyHandler`, `instantiateSync`), `tools/link.py` (`do_split_module`); upstream `src/Avalonia.Build.Tasks/XamlCompilerTaskExecutor.cs` (`res.Remove()`).
+
 ## Owner decision (2026-10-04)
 
 Proceed as recommended: `wasm32-unknown-emscripten` with the Skia backend first (Ganesh/WebGL2 and raster paths kept in `FerroUI.Skia` next to Graphite/Metal), Vello on `wasm32-unknown-unknown` second.

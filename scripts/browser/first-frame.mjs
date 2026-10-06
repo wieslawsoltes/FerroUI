@@ -13,6 +13,9 @@
 //                           latency in milliseconds (e.g. 50,40); serve compressed files (--encoding) so
 //                           that the transferred bytes are those of the published site
 //   --phases                also print the phases of each load (see below)
+//   --wasm-profile <file>   for a module instrumented with `wasm-split --instrument` (binaryen): write
+//                           the profile of the functions that ran up to the first frame of the last
+//                           load (input of `wasm-split --profile`, and of wasm-size-report.py --profile)
 //   --json                  print the result as JSON
 //
 // The site (target/browser/<example> as scripts/build-browser.sh writes it) is served from a local
@@ -40,10 +43,10 @@ import { spawn } from "node:child_process";
 
 const args = process.argv.slice(2);
 const option = (name, fallback) => { const i = args.indexOf(name); return i >= 0 ? args[i + 1] : fallback; };
-const valued = new Set(["--query", "--runs", "--screenshot", "--compare", "--expect-mode", "--encoding", "--cpu-profile", "--throttle"]);
+const valued = new Set(["--query", "--runs", "--screenshot", "--compare", "--expect-mode", "--encoding", "--cpu-profile", "--throttle", "--wasm-profile"]);
 const site = args.find((a, i) => !a.startsWith("--") && !valued.has(args[i - 1]));
 if (!site || !fs.existsSync(path.join(site, "index.html"))) {
-    console.error("usage: node scripts/browser/first-frame.mjs <site directory> [--query q] [--runs n] [--screenshot f] [--compare f] [--expect-mode t] [--encoding br|gzip] [--json]");
+    console.error("usage: node scripts/browser/first-frame.mjs <site directory> [--query q] [--runs n] [--screenshot f] [--compare f] [--expect-mode t] [--encoding br|gzip] [--cpu-profile f] [--wasm-profile f] [--json]");
     process.exit(2);
 }
 const query = option("--query", "");
@@ -53,6 +56,7 @@ const compareFile = option("--compare");
 const expectMode = option("--expect-mode");
 const encoding = option("--encoding");
 const cpuProfileFile = option("--cpu-profile");
+const wasmProfileFile = option("--wasm-profile");
 const json = args.includes("--json");
 const phases = args.includes("--phases");
 const throttle = option("--throttle")?.split(",").map(Number);
@@ -137,9 +141,35 @@ const instrumentation = `(() => {
     }).observe(document, { subtree: true, attributes: true, attributeFilter: ["class"] });
 })();`;
 
+// With --wasm-profile: keeps the instance of the module, whose profile is read after the first frame.
+const keepInstance = `(() => {
+    for (const name of ["instantiateStreaming", "instantiate"]) {
+        const original = WebAssembly[name];
+        WebAssembly[name] = async function (...a) {
+            const result = await original.apply(this, a);
+            globalThis.__ferroInstance = result.instance ?? result;
+            return result;
+        };
+    }
+})();`;
+
+// The profile of an instrumented module: its export __write_profile(address, size) writes it to the memory of the
+// module and returns its size; it is written to fresh pages at the end of the memory.
+const readWasmProfile = `(() => {
+    const exports = globalThis.__ferroInstance?.exports;
+    if (!exports?.__write_profile) return null;
+    const memory = Object.values(exports).find((value) => value instanceof WebAssembly.Memory);
+    const size = 16 * 1024 * 1024;
+    const address = memory.grow(size / 65536) * 65536;
+    const bytes = new Uint8Array(memory.buffer, address, exports.__write_profile(address, size));
+    let text = "";
+    for (let i = 0; i < bytes.length; i += 32768) text += String.fromCharCode.apply(null, bytes.subarray(i, i + 32768));
+    return btoa(text);
+})()`;
+
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
-async function load(takeScreenshot, profile_) {
+async function load(takeScreenshot, profile_, wasmProfile) {
     const profile = fs.mkdtempSync(path.join(os.tmpdir(), "ferroui-first-frame-"));
     const chrome = spawn(chromePath, ["--headless=new", "--no-first-run", "--no-default-browser-check", "--no-sandbox",
         "--use-angle=swiftshader", "--enable-unsafe-swiftshader", "--ignore-gpu-blocklist",
@@ -185,6 +215,7 @@ async function load(takeScreenshot, profile_) {
             await send("Network.emulateNetworkConditions", { offline: false, latency: throttle[1],
                 downloadThroughput: bytesPerSecond, uploadThroughput: bytesPerSecond });
         }
+        if (wasmProfile) await send("Page.addScriptToEvaluateOnNewDocument", { source: keepInstance });
         if (profile_) {
             await send("Profiler.enable");
             await send("Profiler.setSamplingInterval", { interval: 1000 });
@@ -202,6 +233,11 @@ async function load(takeScreenshot, profile_) {
         if (errors.length > 0) throw new Error(`the page reported errors:\n${errors.join("\n")}`);
         if (timing?.frame == null) throw new Error(`no frame within 60 s; console:\n${console_.join("\n")}`);
         if (profile_) fs.writeFileSync(profile_, JSON.stringify((await send("Profiler.stop")).profile));
+        if (wasmProfile) {
+            const profile = await evaluate(readWasmProfile);
+            if (!profile) throw new Error("the module has no __write_profile export: instrument it with `wasm-split --instrument`");
+            fs.writeFileSync(wasmProfile, Buffer.from(profile, "base64"));
+        }
         const wasm = await evaluate(`JSON.stringify(performance.getEntriesByType("resource").filter((e) => e.name.endsWith(".wasm")).map((e) => ({ end: e.responseEnd, transfer: e.transferSize, body: e.decodedBodySize })))`);
         const resources = JSON.parse(await evaluate(`JSON.stringify(Object.fromEntries([
             ["(document)", performance.getEntriesByType("navigation")[0]?.responseEnd],
@@ -264,7 +300,8 @@ function decodePng(buffer) {
 const results = [];
 let exitCode = 0;
 try {
-    for (let i = 0; i < runs; i++) results.push(await load(i === runs - 1 && (screenshotFile || compareFile), i === runs - 1 ? cpuProfileFile : undefined));
+    for (let i = 0; i < runs; i++) results.push(await load(i === runs - 1 && (screenshotFile || compareFile), i === runs - 1 ? cpuProfileFile : undefined,
+        i === runs - 1 ? wasmProfileFile : undefined));
 } catch (e) {
     console.error(String(e.message ?? e));
     server.close();
