@@ -24,6 +24,12 @@ function resolveModuleUrl(name: string): string {
     return meta.resolve ? meta.resolve(name) : new URL(name, import.meta.url).href;
 }
 
+async function registerServiceWorker(path: string, scope: string | undefined) {
+    if ("serviceWorker" in navigator) {
+        await globalThis.navigator.serviceWorker.register(path, scope ? { scope } : undefined);
+    }
+}
+
 // The storage bundle, imported on first use: it carries the file system polyfill. The framework
 // calls into it through StorageModule.module.
 const StorageModule: { module?: any } = {};
@@ -52,6 +58,7 @@ export {
     StreamHelper,
     NativeControlHost,
     StorageModule,
+    registerServiceWorker,
     getModuleUrl,
     resolveModuleUrl,
     importStorage

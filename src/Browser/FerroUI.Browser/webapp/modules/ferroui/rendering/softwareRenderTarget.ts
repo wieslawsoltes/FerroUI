@@ -4,9 +4,13 @@ import { WebRenderTarget } from "./webRenderTarget";
 export class SoftwareRenderTarget extends WebRenderTarget {
     private readonly context: CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D;
     constructor(canvas: HTMLCanvasElement | OffscreenCanvas) {
+        // The type is stated: the checker resolves getContext on the union of the canvas types
+        // differently depending on the order in which it meets the types of the program (the
+        // linter's program does not need the assertion, the type check of the service worker's does).
+        // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
         const context = canvas.getContext("2d", {
             alpha: true
-        });
+        }) as CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D | null;
         if (!context) {
             throw new Error("HTMLCanvasElement.getContext(2d) returned null.");
         }
