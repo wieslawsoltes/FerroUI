@@ -17,7 +17,6 @@ Pages/SettingsPage.xaml | harness: {x:Static local:App.CurrentTheme} needs the a
 
 # --- Controls, Converter, Pages/CommandBar, Pages/TextBox, Pages/Gestures, Pages/ContentPage (group A) ---
 Pages/ContentPage/ContentPagePerformancePage.xaml | code-behind: NavigationPerformanceMonitorHelper and NavigationDemoHelper (Pages/NavigationPage, not ported; the helper measures the managed heap: GC.GetTotalMemory, GC.Collect)
-Pages/Gestures/GesturePullPage.xaml | code-behind not ported
 Pages/TextBox/TextBoxValidationPage.xaml | gap C102: DataValidationException is not declared for markup
 
 # --- ViewModels, Models, Views and the pages of the view models (group B) ---
