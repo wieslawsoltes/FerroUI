@@ -94,7 +94,7 @@ impl CustomHitTestBorder {
 
 /// The upstream `CompositorTestServices` with a client size: an embeddable
 /// root rendered through the compositing renderer of the test compositor.
-struct CompositorTestServices {
+pub(crate) struct CompositorTestServices {
     // Declared first: dropped before the application of the harness.
     top_level: Ref<EmbeddableControlRoot>,
     renderer: Rc<dyn ITopLevelRenderer>,
@@ -102,7 +102,7 @@ struct CompositorTestServices {
 }
 
 impl CompositorTestServices {
-    fn new(size: Size) -> CompositorTestServices {
+    pub(crate) fn new(size: Size) -> CompositorTestServices {
         let services = testing::CompositorTestServices::start(TestServices::mock_platform_render_interface());
         let platform_impl = MockWindowImpl::bare(MockImplKind::TopLevel);
         platform_impl.client_size.set(size);
@@ -130,7 +130,7 @@ impl CompositorTestServices {
         self.services.compositor()
     }
 
-    fn set_content(&self, content: &Control) {
+    pub(crate) fn set_content(&self, content: &Control) {
         self.top_level.set_content(Some(Control::boxed(content.to_ref())));
     }
 
@@ -138,7 +138,7 @@ impl CompositorTestServices {
         self.renderer.as_any().downcast_ref::<CompositingRenderer>().expect("the top-level renders through composition")
     }
 
-    fn run_jobs(&self) {
+    pub(crate) fn run_jobs(&self) {
         self.services.run_jobs();
     }
 
