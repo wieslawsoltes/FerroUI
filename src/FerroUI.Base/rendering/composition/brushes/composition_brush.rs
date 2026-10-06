@@ -183,6 +183,12 @@ impl CompositionBrush {
         }
     }
 
+    /// The handle of the brush, from a reference to it (an `IBrush` seen as
+    /// a `CompositionBrush` through `IBrush::as_composition_brush`).
+    pub fn to_rc(&self) -> Rc<CompositionBrush> {
+        self.this.upgrade().expect("the brush is alive while it is used")
+    }
+
     /// The brush as an `IBrush` handle.
     pub fn as_brush(&self) -> Rc<dyn IBrush> {
         self.this.upgrade().expect("the brush is alive while it is used") as Rc<dyn IBrush>
