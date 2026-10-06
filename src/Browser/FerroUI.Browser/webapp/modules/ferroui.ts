@@ -13,6 +13,7 @@ import { CompletionHelper } from "./ferroui/completionHelper";
 import { ScreenHelper } from "./ferroui/screens";
 import { NavigationHelper } from "./ferroui/navigationHelper";
 import { StreamHelper } from "./ferroui/stream";
+import { NativeControlHost } from "./ferroui/nativeControlHost";
 
 function getModuleUrl(): string {
     return import.meta.url;
@@ -49,6 +50,7 @@ export {
     ScreenHelper,
     NavigationHelper,
     StreamHelper,
+    NativeControlHost,
     StorageModule,
     getModuleUrl,
     resolveModuleUrl,
