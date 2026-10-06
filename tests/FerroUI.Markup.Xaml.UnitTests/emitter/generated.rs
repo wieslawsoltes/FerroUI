@@ -2123,7 +2123,7 @@ pub fn build_text_block_inlines_xaml(
     // text_block_inlines.xaml(1,107) Text
     run_0.set_value(::ferroui_controls::documents::Run::text_property(), ::core::option::Option::Some(::std::string::String::from("a")));
     run_0.try_end_init().map_err(|error| rt::at(rt::TARGET_INVOCATION_EXCEPTION, error, 1, 103))?;
-    ::ferroui_controls::documents::InlineCollection::__markup_Add_0(&rt::argument(inlines_collection_0.clone(), "FerroUI.Controls.Documents.InlineCollection.Add", 0, 1, 103)?, ::core::clone::Clone::clone(&run_0).upcast::<::ferroui_controls::documents::Inline>());
+    ::ferroui_controls::documents::InlineCollection::__markup_Add_0(rt::instance(&inlines_collection_0, "FerroUI.Controls.Documents.InlineCollection.Add", 1, 103)?, ::core::clone::Clone::clone(&run_0).upcast::<::ferroui_controls::documents::Inline>());
     // text_block_inlines.xaml(1,118) Inlines
     let inlines_collection_1 = text_block_0.get_direct_value(::ferroui_controls::TextBlock::inlines_property());
     // text_block_inlines.xaml(1,118) Run
@@ -2135,14 +2135,14 @@ pub fn build_text_block_inlines_xaml(
     let value_0 = ::ferroui_base::media::FontWeight::__markup_parse(::std::string::String::from("Bold")).map_err(|error| rt::at(rt::TARGET_INVOCATION_EXCEPTION, error, 1, 131))?;
     ::ferroui_controls::documents::TextElement::__markup_set_FontWeight(run_1.upcast_ref::<::ferroui_controls::documents::TextElement>(), ::core::clone::Clone::clone(&value_0));
     run_1.try_end_init().map_err(|error| rt::at(rt::TARGET_INVOCATION_EXCEPTION, error, 1, 118))?;
-    ::ferroui_controls::documents::InlineCollection::__markup_Add_0(&rt::argument(inlines_collection_1.clone(), "FerroUI.Controls.Documents.InlineCollection.Add", 0, 1, 118)?, ::core::clone::Clone::clone(&run_1).upcast::<::ferroui_controls::documents::Inline>());
+    ::ferroui_controls::documents::InlineCollection::__markup_Add_0(rt::instance(&inlines_collection_1, "FerroUI.Controls.Documents.InlineCollection.Add", 1, 118)?, ::core::clone::Clone::clone(&run_1).upcast::<::ferroui_controls::documents::Inline>());
     // text_block_inlines.xaml(1,151) Inlines
     let inlines_collection_2 = text_block_0.get_direct_value(::ferroui_controls::TextBlock::inlines_property());
     // text_block_inlines.xaml(1,151) LineBreak
     let line_break_0 = ::ferroui_controls::documents::LineBreak::new();
     line_break_0.begin_init();
     line_break_0.try_end_init().map_err(|error| rt::at(rt::TARGET_INVOCATION_EXCEPTION, error, 1, 151))?;
-    ::ferroui_controls::documents::InlineCollection::__markup_Add_0(&rt::argument(inlines_collection_2.clone(), "FerroUI.Controls.Documents.InlineCollection.Add", 0, 1, 151)?, ::core::clone::Clone::clone(&line_break_0).upcast::<::ferroui_controls::documents::Inline>());
+    ::ferroui_controls::documents::InlineCollection::__markup_Add_0(rt::instance(&inlines_collection_2, "FerroUI.Controls.Documents.InlineCollection.Add", 1, 151)?, ::core::clone::Clone::clone(&line_break_0).upcast::<::ferroui_controls::documents::Inline>());
     text_block_0.try_end_init().map_err(|error| rt::at(rt::TARGET_INVOCATION_EXCEPTION, error, 1, 2))?;
     rt::complete_root_name_scope(::core::option::Option::Some(&text_block_0), name_scope.as_ref(), 1, 2)?;
     ::core::result::Result::Ok(text_block_0)
@@ -2166,7 +2166,7 @@ pub fn build_text_block_text_content_xaml(
     text_block_0.begin_init();
     // text_block_text_content.xaml(1,102) Inlines
     let inlines_collection_0 = text_block_0.get_direct_value(::ferroui_controls::TextBlock::inlines_property());
-    ::ferroui_controls::documents::InlineCollection::__markup_Add_1(&rt::argument(inlines_collection_0.clone(), "FerroUI.Controls.Documents.InlineCollection.Add", 0, 1, 102)?, ::std::string::String::from("plain text"));
+    ::ferroui_controls::documents::InlineCollection::__markup_Add_1(rt::instance(&inlines_collection_0, "FerroUI.Controls.Documents.InlineCollection.Add", 1, 102)?, ::std::string::String::from("plain text"));
     text_block_0.try_end_init().map_err(|error| rt::at(rt::TARGET_INVOCATION_EXCEPTION, error, 1, 2))?;
     rt::complete_root_name_scope(::core::option::Option::Some(&text_block_0), name_scope.as_ref(), 1, 2)?;
     ::core::result::Result::Ok(text_block_0)
