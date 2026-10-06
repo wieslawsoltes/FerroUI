@@ -1001,6 +1001,8 @@ Conversions between a node's type and the type its consumer expects are the case
 | base / interface → derived (checked) | `v.cast::<T>().ok_or_else(..)?` for classes, `rt::cast` otherwise |
 | `T` → `Option<Ref<T>>` property type | `Some(v)` |
 
+Where upstream's XamlIl emits a run-time cast (`castclass`, an unbox) whose success the static types already prove, generated Rust states the conversion statically, and rustc checks it: a registered property definition passed where its nullable form is declared is `Some(rt::property(..))`; a value passed to a contract that its declaration lists among its interfaces or names as a base is an unsizing coercion (`v as Rc<dyn Contract>`). The result is the same value the run-time cast produces, and the cast could not fail, so no error path is lost. This is a difference in the shape of the code only, not in behaviour. Any conversion the static types do not prove stays `rt::cast` with its position.
+
 The boxed form of an object pushed on the parent stack, stored as root object or passed as `object` is always `into_markup_value(x.clone())`, so that parents found by `ServiceProviderExtensions::get_first_parent` and resources compare exactly as they do under the interpreter.
 
 #### 9.3.2 Statements, locals, blocks
