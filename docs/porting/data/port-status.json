@@ -504,22 +504,22 @@
    "scope": "in",
    "detail": "full",
    "files": [
-    1103,
+    1107,
     1286,
     0
    ],
    "types": [
-    1395,
+    1414,
     1709,
     0
    ],
    "members": [
-    9679,
+    9746,
     11739,
     32
    ],
    "interfaces": [
-    231,
+    232,
     263
    ],
    "propertyRegistrations": [
@@ -533,17 +533,17 @@
    "notApplicableFiles": 13,
    "matchKinds": {
     "alias fn": 9,
-    "const": 346,
+    "const": 347,
     "derive": 64,
-    "field": 579,
-    "fn": 6190,
+    "field": 613,
+    "fn": 6205,
     "free fn": 10,
     "free item": 16,
     "getter fn": 4,
     "overload fn": 275,
     "trait": 349,
     "trait fn": 70,
-    "variant": 1767
+    "variant": 1784
    },
    "presentFiles": {
     "Animation/Animatable.cs": [
@@ -3216,6 +3216,15 @@
     "Rendering/Composition/Drawing/RenderDataDrawingContext.cs": [
      "rendering/composition/drawing/render_data_drawing_context.rs"
     ],
+    "Rendering/Composition/Drawing/RenderDataOpcode.cs": [
+     "rendering/composition/drawing/render_data_opcode.rs"
+    ],
+    "Rendering/Composition/Drawing/RenderDataPayloads.cs": [
+     "rendering/composition/drawing/render_data_payloads.rs"
+    ],
+    "Rendering/Composition/Drawing/RenderDataReader.cs": [
+     "rendering/composition/drawing/render_data_reader.rs"
+    ],
     "Rendering/Composition/Drawing/RenderDataResources.cs": [
      "rendering/composition/drawing/render_data_resources.rs"
     ],
@@ -3233,6 +3242,9 @@
     ],
     "Rendering/Composition/Drawing/RenderDataStream.cs": [
      "rendering/composition/drawing/render_data_stream.rs"
+    ],
+    "Rendering/Composition/Drawing/RenderDataWriter.cs": [
+     "rendering/composition/drawing/render_data_writer.rs"
     ],
     "Rendering/Composition/Drawing/ServerCompositionRenderData.cs": [
      "rendering/composition/drawing/server_composition_render_data.rs"
@@ -3986,6 +3998,7 @@
     "rendering/composition/test_compositor.rs",
     "rendering/i_hit_tester.rs",
     "rendering/managed_hit_tester.rs",
+    "rendering/scene_graph/scene_graph_test_support.rs",
     "rendering/testing/mock_drawing_context_impl.rs",
     "rendering/testing/mock_platform_render_interface.rs",
     "rust_paths.rs",
@@ -5744,6 +5757,7 @@
     "primitives/selecting_items_control_tests_multiple.rs",
     "primitives/selecting_items_control_tests_selected_value.rs",
     "register_types.rs",
+    "render_tests_culling.rs",
     "rust_paths.rs",
     "scroll_viewer_tests_i_logical_scrollable.rs",
     "selection/selection_model_tests_multiple.rs",
