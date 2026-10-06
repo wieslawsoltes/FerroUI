@@ -80,6 +80,10 @@ fn measure_theme_documents() {
         match &document.source {
             Ok(_) => eligible += 1,
             Err(reason) => {
+                // `FERROUI_EMITTER_REASONS=1` prints the reason of every document (diagnostic).
+                if std::env::var("FERROUI_EMITTER_REASONS").is_ok_and(|value| value == "1") {
+                    println!("not eligible  {}: {reason}", document.name);
+                }
                 // The kind of the first unsupported node and the reason, without positions and names.
                 let reason = reason.split(" (line").next().unwrap_or(reason);
                 let reason = reason.split(" Line ").next().unwrap_or(reason);
