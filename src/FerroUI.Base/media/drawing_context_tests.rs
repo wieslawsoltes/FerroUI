@@ -588,7 +588,8 @@ use crate::media::text_formatting::{TextLayout, TextLayoutOptions};
 use crate::media::{
     Brushes, FlowDirection, FormattedText, GlyphRun, TextHintingMode, TextOptions, TextRenderingMode, Typeface,
 };
-use crate::rendering::composition::drawing::RenderDataDrawingContext;
+use crate::rendering::composition::drawing::{RenderDataDrawingContext, RenderDataOpcode};
+use crate::rendering::testing::recorded_opcodes;
 
 fn black() -> Rc<dyn IBrush> {
     Brushes::black()
@@ -727,7 +728,10 @@ fn draw_text_is_recorded_and_replayed() {
         )
         .expect("something was drawn");
     // A transform scope around the glyph run.
-    assert_eq!(content.with_stream(|stream| stream.opcode_length()), Some(3));
+    assert_eq!(
+        content.with_stream(recorded_opcodes),
+        Some(vec![RenderDataOpcode::PushTransform, RenderDataOpcode::DrawGlyphRun, RenderDataOpcode::Pop])
+    );
     let replayed = content
         .with_stream(|stream| {
             let log = DrawingLog::new();

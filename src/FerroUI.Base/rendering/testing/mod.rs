@@ -14,6 +14,13 @@ pub use mock_platform_render_interface::{
     MockRenderTarget, MockStreamGeometryImpl,
 };
 
+use crate::media::BoxShadow;
+use crate::rendering::composition::drawing::{
+    DrawBitmapPayload, DrawCustomPayload, DrawEllipsePayload, DrawGeometryPayload, DrawGlyphRunPayload,
+    DrawLinePayload, DrawRectanglePayload, PushClipPayload, PushEffectPayload, PushGeometryClipPayload,
+    PushOpacityMaskPayload, PushOpacityPayload, PushRenderOptionsPayload, PushTextOptionsPayload, PushTransformPayload,
+    RenderDataOpcode, RenderDataReader, RenderDataStream,
+};
 use crate::rendering::{IRenderLoop, IRenderLoopTask};
 use std::sync::{Arc, Mutex};
 
@@ -56,4 +63,40 @@ impl IRenderLoop for ManualRenderLoop {
     }
 
     fn wakeup(&self) {}
+}
+
+/// The opcodes recorded in a stream, in order (decoded with the payload
+/// sizes, so that a test can state the operations it expects).
+pub fn recorded_opcodes(stream: &RenderDataStream) -> Vec<RenderDataOpcode> {
+    let mut reader = RenderDataReader::new(stream.opcodes());
+    let mut opcodes = Vec::new();
+    while !reader.is_at_end() {
+        let opcode = reader.peek::<RenderDataOpcode>();
+        match opcode {
+            RenderDataOpcode::DrawLine => drop(reader.read_payload::<DrawLinePayload>()),
+            RenderDataOpcode::DrawRectangle => {
+                let payload = reader.read_payload::<DrawRectanglePayload>();
+                for _ in 0..payload.box_shadow_count {
+                    reader.read::<BoxShadow>();
+                }
+            }
+            RenderDataOpcode::DrawEllipse => drop(reader.read_payload::<DrawEllipsePayload>()),
+            RenderDataOpcode::DrawGeometry => drop(reader.read_payload::<DrawGeometryPayload>()),
+            RenderDataOpcode::DrawGlyphRun => drop(reader.read_payload::<DrawGlyphRunPayload>()),
+            RenderDataOpcode::DrawBitmap => drop(reader.read_payload::<DrawBitmapPayload>()),
+            RenderDataOpcode::DrawCustom => drop(reader.read_payload::<DrawCustomPayload>()),
+            RenderDataOpcode::PushClip => drop(reader.read_payload::<PushClipPayload>()),
+            RenderDataOpcode::PushGeometryClip => drop(reader.read_payload::<PushGeometryClipPayload>()),
+            RenderDataOpcode::PushOpacity => drop(reader.read_payload::<PushOpacityPayload>()),
+            RenderDataOpcode::PushOpacityMask => drop(reader.read_payload::<PushOpacityMaskPayload>()),
+            RenderDataOpcode::PushTransform => drop(reader.read_payload::<PushTransformPayload>()),
+            RenderDataOpcode::PushRenderOptions => drop(reader.read_payload::<PushRenderOptionsPayload>()),
+            RenderDataOpcode::PushTextOptions => drop(reader.read_payload::<PushTextOptionsPayload>()),
+            RenderDataOpcode::PushEffect => drop(reader.read_payload::<PushEffectPayload>()),
+            RenderDataOpcode::Pop => drop(reader.read::<RenderDataOpcode>()),
+            RenderDataOpcode::Invalid => panic!("the stream holds an invalid opcode"),
+        }
+        opcodes.push(opcode);
+    }
+    opcodes
 }

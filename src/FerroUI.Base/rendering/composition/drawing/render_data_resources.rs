@@ -21,8 +21,14 @@ pub enum RenderDataResource {
     Pen(Rc<dyn IPen>),
     GeometryImpl(Rc<dyn IGeometryImpl>),
     Geometry(Rc<dyn IRenderDataGeometry>),
-    GlyphRun(Rc<dyn IGlyphRunImpl>),
-    Bitmap(Rc<dyn IBitmapImpl>),
+    /// A recorded glyph run: one counted reference (`IRef<IGlyphRunImpl>`
+    /// upstream), shared by the client render data and the server render
+    /// data it is sent to, so that the glyph run is held once until both
+    /// are released.
+    GlyphRun(Rc<Rc<dyn IGlyphRunImpl>>),
+    /// A recorded bitmap: one counted reference (`IRef<IBitmapImpl>`
+    /// upstream), shared as a glyph run is.
+    Bitmap(Rc<Rc<dyn IBitmapImpl>>),
     CustomDrawOperation(Rc<dyn ICustomDrawOperation>),
     Effect(Rc<dyn IEffect>),
     ServerBrush { server: ServerObjectId, client: Rc<dyn IBrush> },
@@ -150,14 +156,14 @@ impl RenderDataResources {
 
     pub fn glyph_run(&self, handle: i32) -> Option<&Rc<dyn IGlyphRunImpl>> {
         match self.get(handle)? {
-            RenderDataResource::GlyphRun(glyph_run) => Some(glyph_run),
+            RenderDataResource::GlyphRun(glyph_run) => Some(&**glyph_run),
             _ => panic!("the render data resource is not a glyph run"),
         }
     }
 
     pub fn bitmap(&self, handle: i32) -> Option<&Rc<dyn IBitmapImpl>> {
         match self.get(handle)? {
-            RenderDataResource::Bitmap(bitmap) => Some(bitmap),
+            RenderDataResource::Bitmap(bitmap) => Some(&**bitmap),
             _ => panic!("the render data resource is not a bitmap"),
         }
     }
