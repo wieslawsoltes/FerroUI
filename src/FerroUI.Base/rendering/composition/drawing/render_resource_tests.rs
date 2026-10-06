@@ -19,7 +19,8 @@ use crate::rendering::composition::server::{
     ServerCompositionSimpleLinearGradientBrush, ServerCompositionSimpleRadialGradientBrush,
     ServerCompositionSimpleSolidColorBrush, ServerCompositionSimpleTransform, ServerObjectId,
 };
-use crate::rendering::composition::{Compositor, ICompositorSerializable};
+use crate::rendering::composition::test_compositor::TestCompositor;
+use crate::rendering::composition::{CompositionBrush, Compositor, ICompositorSerializable};
 use crate::rendering::testing::{
     DrawingLog, ManualRenderLoop, MockDrawingContextImpl, MockDrawingContextLayerImpl, MockPlatformRenderInterface,
 };
@@ -317,71 +318,78 @@ fn pen_replacing_the_brush_moves_the_reference() {
 
 // --- GeometryRenderResourceTests ----------------------------------------------------
 
-#[test]
-fn geometry_changing_geometry_property_raises_invalidated() {
-    let helper = RenderResourceTestHelper::new();
-    let target = EllipseGeometry::with_rect(Rect::new(0.0, 0.0, 10.0, 10.0));
-    helper.assert_invalidation(&geometry_resource(&target), || target.set_rect(Rect::new(0.0, 0.0, 20.0, 20.0)));
-}
+/// Port of `Media/GeometryRenderResourceTests.cs`.
+mod geometry_render_resource_tests {
+    use super::*;
 
-#[test]
-fn geometry_changing_transform_raises_invalidated() {
-    let helper = RenderResourceTestHelper::new();
-    let target = EllipseGeometry::with_rect(Rect::new(0.0, 0.0, 10.0, 10.0));
-    helper.assert_invalidation(&geometry_resource(&target), || {
-        target.set_transform(TranslateTransform::with_offset(5.0, 5.0))
-    });
-}
+    #[test]
+    fn changing_geometry_property_raises_invalidated() {
+        let target = EllipseGeometry::with_rect(Rect::new(0.0, 0.0, 10.0, 10.0));
+        RenderResourceTestHelper::assert_resource_invalidation(geometry_resource(&target), || {
+            target.set_rect(Rect::new(0.0, 0.0, 20.0, 20.0))
+        });
+    }
 
-#[test]
-fn geometry_changing_transform_value_raises_invalidated() {
-    let helper = RenderResourceTestHelper::new();
-    let transform = TranslateTransform::with_offset(5.0, 5.0);
-    let target = EllipseGeometry::with_rect(Rect::new(0.0, 0.0, 10.0, 10.0));
-    target.set_transform(transform.clone());
-    helper.assert_invalidation(&geometry_resource(&target), || transform.set_x(10.0));
-}
+    #[test]
+    fn changing_transform_raises_invalidated() {
+        let target = EllipseGeometry::with_rect(Rect::new(0.0, 0.0, 10.0, 10.0));
+        RenderResourceTestHelper::assert_resource_invalidation(geometry_resource(&target), || {
+            target.set_transform(TranslateTransform::with_offset(5.0, 5.0))
+        });
+    }
 
-#[test]
-fn geometry_adding_child_to_geometry_group_raises_invalidated() {
-    let helper = RenderResourceTestHelper::new();
-    let target = GeometryGroup::new();
-    helper.assert_invalidation(&geometry_resource(&target), || {
-        target.children().add(EllipseGeometry::with_rect(Rect::new(0.0, 0.0, 10.0, 10.0)).upcast())
-    });
-}
+    #[test]
+    fn changing_transform_value_raises_invalidated() {
+        let transform = TranslateTransform::with_offset(5.0, 5.0);
+        let target = EllipseGeometry::with_rect(Rect::new(0.0, 0.0, 10.0, 10.0));
+        target.set_transform(transform.clone());
+        RenderResourceTestHelper::assert_resource_invalidation(geometry_resource(&target), || {
+            transform.set_x(10.0)
+        });
+    }
 
-#[test]
-fn geometry_changing_child_of_geometry_group_raises_invalidated() {
-    let helper = RenderResourceTestHelper::new();
-    let child = EllipseGeometry::with_rect(Rect::new(0.0, 0.0, 10.0, 10.0));
-    let target = GeometryGroup::new();
-    target.children().add(child.clone().upcast());
-    helper.assert_invalidation(&geometry_resource(&target), || child.set_rect(Rect::new(0.0, 0.0, 20.0, 20.0)));
-}
+    #[test]
+    fn adding_child_to_geometry_group_raises_invalidated() {
+        let target = GeometryGroup::new();
+        RenderResourceTestHelper::assert_resource_invalidation(geometry_resource(&target), || {
+            target.children().add(EllipseGeometry::with_rect(Rect::new(0.0, 0.0, 10.0, 10.0)).upcast())
+        });
+    }
 
-#[test]
-fn geometry_changing_geometry1_of_combined_geometry_raises_invalidated() {
-    let helper = RenderResourceTestHelper::new();
-    let geometry1 = EllipseGeometry::with_rect(Rect::new(0.0, 0.0, 10.0, 10.0));
-    let geometry2 = RectangleGeometry::with_rect(Rect::new(5.0, 5.0, 10.0, 10.0));
-    let target = CombinedGeometry::with_mode(
-        GeometryCombineMode::Union,
-        Some(geometry1.clone().upcast()),
-        Some(geometry2.upcast()),
-    );
-    helper.assert_invalidation(&geometry_resource(&target), || geometry1.set_rect(Rect::new(0.0, 0.0, 20.0, 20.0)));
-}
+    #[test]
+    fn changing_child_of_geometry_group_raises_invalidated() {
+        let child = EllipseGeometry::with_rect(Rect::new(0.0, 0.0, 10.0, 10.0));
+        let target = GeometryGroup::new();
+        target.children().add(child.clone().upcast());
+        RenderResourceTestHelper::assert_resource_invalidation(geometry_resource(&target), || {
+            child.set_rect(Rect::new(0.0, 0.0, 20.0, 20.0))
+        });
+    }
 
-#[test]
-fn geometry_changing_combine_mode_of_combined_geometry_raises_invalidated() {
-    let helper = RenderResourceTestHelper::new();
-    let geometry1 = EllipseGeometry::with_rect(Rect::new(0.0, 0.0, 10.0, 10.0));
-    let geometry2 = RectangleGeometry::with_rect(Rect::new(5.0, 5.0, 10.0, 10.0));
-    let target = CombinedGeometry::with_mode(GeometryCombineMode::Union, Some(geometry1.upcast()), Some(geometry2.upcast()));
-    helper.assert_invalidation(&geometry_resource(&target), || {
-        target.set_geometry_combine_mode(GeometryCombineMode::Intersect)
-    });
+    #[test]
+    fn changing_geometry1_of_combined_geometry_raises_invalidated() {
+        let geometry1 = EllipseGeometry::with_rect(Rect::new(0.0, 0.0, 10.0, 10.0));
+        let geometry2 = RectangleGeometry::with_rect(Rect::new(5.0, 5.0, 10.0, 10.0));
+        let target = CombinedGeometry::with_mode(
+            GeometryCombineMode::Union,
+            Some(geometry1.clone().upcast()),
+            Some(geometry2.upcast()),
+        );
+        RenderResourceTestHelper::assert_resource_invalidation(geometry_resource(&target), || {
+            geometry1.set_rect(Rect::new(0.0, 0.0, 20.0, 20.0))
+        });
+    }
+
+    #[test]
+    fn changing_combine_mode_of_combined_geometry_raises_invalidated() {
+        let geometry1 = EllipseGeometry::with_rect(Rect::new(0.0, 0.0, 10.0, 10.0));
+        let geometry2 = RectangleGeometry::with_rect(Rect::new(5.0, 5.0, 10.0, 10.0));
+        let target =
+            CombinedGeometry::with_mode(GeometryCombineMode::Union, Some(geometry1.upcast()), Some(geometry2.upcast()));
+        RenderResourceTestHelper::assert_resource_invalidation(geometry_resource(&target), || {
+            target.set_geometry_combine_mode(GeometryCombineMode::Intersect)
+        });
+    }
 }
 
 #[test]
@@ -425,6 +433,38 @@ fn with_red_stop<T: crate::ObjectType + Upcast<GradientBrush>>(brush: Ref<T>) ->
         .gradient_stops()
         .add(GradientStop::with_color_and_offset(Colors::RED, 0.0));
     brush
+}
+
+fn assert_composition_brush_reaches_server(factory: impl FnOnce(&Rc<Compositor>) -> Rc<CompositionBrush>) {
+    let services = TestCompositor::new();
+    let brush = factory(&services.compositor);
+
+    brush.set_relative_transform(Some(Rc::new(ImmutableTransform::new(test_matrix()))));
+    services.run_jobs();
+
+    let server = services.compositor.server().get_object(brush.server()).expect("the server object exists");
+    let server = server.as_brush().expect("a server-side brush");
+    assert_eq!(test_matrix(), server.relative_transform().expect("the relative transform").value());
+}
+
+#[test]
+fn composition_solid_color_brush_relative_transform_should_reach_the_server() {
+    assert_composition_brush_reaches_server(|c| Rc::clone(&c.create_solid_color_brush_with(Colors::RED)));
+}
+
+#[test]
+fn composition_linear_gradient_brush_relative_transform_should_reach_the_server() {
+    assert_composition_brush_reaches_server(|c| Rc::clone(&c.create_linear_gradient_brush()));
+}
+
+#[test]
+fn composition_radial_gradient_brush_relative_transform_should_reach_the_server() {
+    assert_composition_brush_reaches_server(|c| Rc::clone(&c.create_radial_gradient_brush()));
+}
+
+#[test]
+fn composition_conic_gradient_brush_relative_transform_should_reach_the_server() {
+    assert_composition_brush_reaches_server(|c| Rc::clone(&c.create_conic_gradient_brush()));
 }
 
 #[test]
