@@ -25,17 +25,17 @@
 //! [`catalog_state`] reports what the view shows, so that the tests can find
 //! the controls they drive with real pointer and key events and check the
 //! effect.
-//!
-//! Not ported, because the browser backend does not have it yet: the
-//! native control demo `EmbedSampleWeb` of `EmbedSample.Browser.cs`
-//! with its script `wwwroot/embed.js` (the native control host of the
-//! backend, `BrowserNativeControlHost`; until it exists the `EmbedSample`
-//! of the catalog shows the default control of the platform).
+//! The native control demo of the browser (`EmbedSampleWeb`) is in
+//! [`embed_sample_browser`].
 
 #![cfg_attr(target_os = "emscripten", no_main)]
 
+mod embed_sample_browser;
+
+use control_catalog::pages::EmbedSample;
 use control_catalog::view_models::MainWindowViewModel;
 use control_catalog::{App, MainView};
+use embed_sample_browser::EmbedSampleWeb;
 use ferroui_base::logging::LogEventLevel;
 use ferroui_base::media::FontManagerOptions;
 use ferroui_base::metadata::from_markup_value;
@@ -57,6 +57,9 @@ pub fn run_main(href: &str) {
 
     build_ferro_app()
         .log_to_text_writer(std::io::stdout(), LogEventLevel::Warning, &[])
+        .after_setup(|_| {
+            EmbedSample::set_implementation(Some(Rc::new(EmbedSampleWeb)));
+        })
         .start_browser_app("out", Some(options));
 
     let _ = Dispatcher::ui_thread().invoke_local(|| {
