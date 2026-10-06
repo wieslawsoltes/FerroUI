@@ -691,6 +691,12 @@ impl ValueTypes {
         f.and_then(|f| (f.1)(object))
     }
 
+    /// The type a registered nullable form holds: `T` for `Option<T>` and for
+    /// `Option<Rc<T>>`, `None` for any other type.
+    pub fn nullable_inner(type_: ValueType) -> Option<ValueType> {
+        with_registry(|r| r.nullable_inner.get(&type_.id()).copied())
+    }
+
     /// Whether `target` accepts null.
     pub fn accepts_null(target: ValueType) -> bool {
         target.is_object()

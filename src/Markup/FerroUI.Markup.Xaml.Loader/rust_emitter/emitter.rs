@@ -2194,16 +2194,35 @@ impl Emitter<'_> {
     }
 
     /// The instance of an instance member, from a value of another Rust
-    /// type (a nullable collection read from a property): converted at run
-    /// time as the run-time loader converts it (`rt::argument`), with the
-    /// loader's error for a value that does not convert. `None` for an
-    /// argument that is not the instance.
-    fn instance_argument(&self, node: &Rc<dyn IXamlAstNode>, method: &RuntimeMethod, index: usize, argument: &Typed) -> Option<String> {
-        if index != 0 || method.is_static || !matches!(argument.kind, Kind::Exact { .. }) {
+    /// type: borrowed from the nullable form of the declared type (a
+    /// nullable collection read from a property, `rt::instance`), else
+    /// converted at run time as the run-time loader converts it
+    /// (`rt::argument`); either with the loader's error for a value that
+    /// does not convert. `None` for an argument that is not the instance.
+    fn instance_argument(
+        &self,
+        node: &Rc<dyn IXamlAstNode>,
+        method: &RuntimeMethod,
+        index: usize,
+        argument: &Typed,
+        parameter: TypeId,
+    ) -> Option<String> {
+        let Kind::Exact { id, .. } = argument.kind else { return None };
+        if index != 0 || method.is_static {
             return None;
         }
+        use ferroui_base::data::core::{ValueType, ValueTypes};
         let declaring = method.declaring_type.upgrade()?;
         let member = format!("{}.{}", declaring.full_name(), method.name);
+        if ValueTypes::nullable_inner(ValueType::new(id, "")).is_some_and(|inner| inner.id() == parameter) {
+            return Some(format!(
+                "rt::instance(&{}, {}, {}, {})?",
+                argument.expr,
+                rust_string_literal(&member),
+                node.line(),
+                node.position()
+            ));
+        }
         Some(format!(
             "rt::argument({}.clone(), {}, 0, {}, {})?",
             argument.expr,
@@ -2283,13 +2302,15 @@ impl Emitter<'_> {
             }
             let text = match self.coerce(argument, *parameter) {
                 Some(text) => text,
-                None => self.instance_argument(node, method, index, argument).ok_or_else(|| {
+                None => self.instance_argument(node, method, index, argument, *parameter).ok_or_else(|| {
                     unsupported(node, format!("{name}: argument {index} cannot be stated as the declared type"))
                 })?,
             };
             // The instance is passed by reference: a local of exactly the declared type as it is.
             let is_instance = index == 0 && !method.is_static;
             texts.push(match (is_instance, text.strip_suffix(".clone()")) {
+                // Already a borrow of the instance.
+                (true, _) if text.starts_with("rt::instance(") => text,
                 (true, Some(local)) if local == argument.expr => format!("&{local}"),
                 (true, _) if text == argument.expr => format!("&{text}"),
                 (true, _) => format!("&{text}"),
