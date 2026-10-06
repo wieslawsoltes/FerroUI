@@ -9,7 +9,8 @@
 //! themes) and one document per control under `Controls/`. The documents
 //! are embedded in the crate as assets of the assembly
 //! `FerroUI.Themes.Simple` and addressable as
-//! `ferres://FerroUI.Themes.Simple/<path>`.
+//! `ferres://FerroUI.Themes.Simple/<path>`. With the feature `remove-compiled-documents`
+//! the compiled documents are not embedded (see `build.rs`).
 //!
 //! ```ignore
 //! application.styles().add(SimpleTheme::new().upcast::<Styles>());
