@@ -44,6 +44,13 @@ Other pages hold the entries of their own area, and this page does not repeat th
 |---|---|---|---|---|
 | `VisualLocator.Track(Visual, int ancestorLevel, Type?)`: a negative level makes `ElementAtOrDefault` return null. | `VisualLocator::track` takes `ancestor_level: usize`. | Representation | An unsigned level, as `VisualAncestorElementNode` already took; a negative level cannot be passed. | #27 |
 
+### Logical tree (`src/FerroUI.Base/logical_tree/`)
+
+| Upstream | Port | Kind | Why | Since |
+|---|---|---|---|---|
+| `LogicalExtensions.GetLogicalChildren` returns the `LogicalChildren` collection itself; `GetLogicalSiblings` enumerates the parent's collection lazily. | `get_logical_children` and `get_logical_siblings` return a snapshot (`Rc<Vec<..>>`) of the collection. | Behaviour | As `get_visual_children` does. A change to the collection after the call is not seen through the result. | #32 |
+| `LogicalExtensions.IsLogicalAncestorOf(this ILogical? logical, ILogical? target)` accepts a null receiver and returns false. | `StyledElement::is_logical_ancestor_of(&self, target: Option<&StyledElement>)`. | Representation | The receiver of a Rust method cannot be null; the target stays optional. | #32 |
+
 ### ControlCatalog sample (`samples/ControlCatalog/`)
 
 | Upstream | Port | Kind | Why | Since |

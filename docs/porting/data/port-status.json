@@ -504,22 +504,22 @@
    "scope": "in",
    "detail": "full",
    "files": [
-    1111,
+    1114,
     1286,
     0
    ],
    "types": [
-    1419,
+    1422,
     1709,
     0
    ],
    "members": [
-    9794,
+    9814,
     11739,
     32
    ],
    "interfaces": [
-    233,
+    235,
     263
    ],
    "propertyRegistrations": [
@@ -536,11 +536,11 @@
     "const": 347,
     "derive": 64,
     "field": 613,
-    "fn": 6241,
+    "fn": 6260,
     "free fn": 10,
     "free item": 16,
     "getter fn": 4,
-    "overload fn": 284,
+    "overload fn": 285,
     "trait": 349,
     "trait fn": 73,
     "variant": 1784
@@ -1778,6 +1778,15 @@
     ],
     "LogicalTree/IChildIndexProvider.cs": [
      "logical_tree/i_child_index_provider.rs"
+    ],
+    "LogicalTree/ILogical.cs": [
+     "styled_element.rs"
+    ],
+    "LogicalTree/ILogicalRoot.cs": [
+     "styled_element.rs"
+    ],
+    "LogicalTree/LogicalExtensions.cs": [
+     "logical_tree/logical_extensions.rs"
     ],
     "LogicalTree/LogicalTreeAttachmentEventArgs.cs": [
      "logical_tree/logical_tree_attachment_event_args.rs"
