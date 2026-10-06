@@ -55,6 +55,7 @@ Rust sources of this crate that no upstream file maps to. Give each a reason in 
 | `assets.rs` | embeds the document of the about dialog and its font: the counterpart of the resource items of the upstream project file |  |
 | `markup.rs` | loads the document of the about dialog with the run-time loader until the XAML compiler generates InitializeComponent |  |
 | `register_types.rs` | the type table of the crate (porting guide, Classes): namespaces, classes, markup metadata, the document loader |  |
+| `rust_paths.rs` | **unmapped** |  |
 | `task_completion_source.rs` | the TaskCompletionSource&lt;T&gt; of the base library the storage provider awaits windows, popups and flyouts with | `CompletionTask`, `State`, `TaskCompletionSource` |
 
 Tests, examples and build scripts (not scanned): `build.rs`, `tests/about_ferro_dialog_tests.rs`, `tests/managed_storage_provider_tests.rs`, `tests/mod.rs`, `tests/view_model_tests.rs`.

@@ -272,7 +272,8 @@ Rust sources of this crate that no upstream file maps to. Give each a reason in 
 | `register_types.rs` | **unmapped** |  |
 | `rust_paths.rs` | **unmapped** |  |
 | `test_support.rs` | **unmapped** | `LazyParents`, `TestAssetLoader`, `TestServiceProvider` |
-| `xaml_il/runtime/compiled.rs` | **unmapped** | `CompiledLoadError` |
+| `xaml_il/runtime/compiled.rs` | **unmapped** | `CompiledLoadError`, `CompiledXmlNamespaceInfo`, `DeclaredAccessors`, `NullableInstance`, `XmlNamespaceTable` |
+| `xaml_il/runtime/xaml_il_context.rs` | **unmapped** | `FerroXamlIlContextNameScopeField`, `FrameworkContextServices`, `IStaticServiceProvider`, `IXamlIlContextServices`, `WeakContextServiceProvider`, `XamlIlContext`, `XamlIlContextDefinition`, `XamlIlContextService` |
 | `xamlx_runtime.rs` | **unmapped** | `IXamlParentStackProviderV1`, `IXamlXmlNamespaceInfoProviderV1`, `XamlXmlNamespaceInfoV1` |
 
-Tests, examples and build scripts (not scanned): `converters/converters_tests.rs`, `data/dynamic_resource_expression_tests.rs`, `markup_extensions/compiled_bindings/property_info_accessor_factory_tests.rs`, `markup_extensions/markup_extensions_tests.rs`, `styling/includes_tests.rs`, `templates/templates_tests.rs`, `xaml_il/runtime/xaml_il_runtime_helpers_tests.rs`.
+Tests, examples and build scripts (not scanned): `converters/converters_tests.rs`, `data/dynamic_resource_expression_tests.rs`, `markup_extensions/compiled_bindings/property_info_accessor_factory_tests.rs`, `markup_extensions/markup_extensions_tests.rs`, `styling/includes_tests.rs`, `templates/templates_tests.rs`, `xaml_il/runtime/compiled_tests.rs`, `xaml_il/runtime/xaml_il_runtime_helpers_tests.rs`.
