@@ -5,6 +5,7 @@ use crate::markup::{describe, try_load_document, try_load_text, XamlClass};
 use crate::register_types;
 use ferroui_base::controls::IResourceProvider;
 use ferroui_base::metadata::from_markup_value;
+use ferroui_base::platform::IAssetLoader;
 use ferroui_base::styling::{IStyle, Styles};
 use ferroui_base::{BoxedValue, Ref};
 use ferroui_controls::testing::{TestServices, UnitTestApplication, UnitTestApplicationScope};
@@ -31,13 +32,22 @@ pub fn start_application() -> UnitTestApplicationScope {
 /// application of the sample gives its pages (`CustomThemes.xaml`, which
 /// `App.xaml` merges).
 pub fn start_catalog_application() -> UnitTestApplicationScope {
+    start_catalog_application_with(None)
+}
+
+/// [`start_catalog_application`] with another asset loader than the
+/// standard one.
+pub fn start_catalog_application_with(asset_loader: Option<Rc<dyn IAssetLoader>>) -> UnitTestApplicationScope {
     register_types();
-    let services = TestServices::styled_window()
+    let mut services = TestServices::styled_window()
         .with_render_interface(Rc::new(ferroui_skia::PlatformRenderInterface::new(None, None)))
         .with_font_manager_impl(Rc::new(ferroui_skia::FontManagerImpl::new()))
         .with_text_shaper_impl(Rc::new(ferroui_harfbuzz::HarfBuzzTextShaper::new()))
         .with_global_clock(Rc::new(TestGlobalClock::default()))
         .with_theme(|| SimpleTheme::new().as_style());
+    if let Some(asset_loader) = asset_loader {
+        services = services.with_asset_loader(asset_loader);
+    }
     let scope = UnitTestApplication::start(services);
     FerroRuntimeXamlLoader::register();
 
