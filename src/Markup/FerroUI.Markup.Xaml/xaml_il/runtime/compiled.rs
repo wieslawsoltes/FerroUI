@@ -619,15 +619,6 @@ pub fn deferred_context(
     context
 }
 
-/// The build function of deferred content written as a closure: it builds
-/// the content anew on every call; a failure is the error of the
-/// instantiation.
-pub fn deferred_builder(
-    build: impl Fn(&Rc<dyn IServiceProvider>) -> Result<MarkupValue, XamlLoadException> + 'static,
-) -> DeferredContentBuilder {
-    DeferredContentBuilder::try_new(build)
-}
-
 /// `XamlIlRuntimeHelpers.DeferredTransformationFactoryV3<T>(builder, context)`:
 /// the deferred content of `builder` whose result is of the type with the
 /// handle `result_type` (the "any value" type when the language gives no type
@@ -642,6 +633,25 @@ pub fn deferred_content(
 ) -> Result<Rc<DeferredContent>, XamlLoadException> {
     XamlIlRuntimeHelpers::try_deferred_transformation_factory_for(result_type, builder, &service_provider(context))
         .map_err(|error| at("InvalidOperationException", error.message(), line, position))
+}
+
+/// The build function of deferred content as generated code writes it: a
+/// function of its own per template or deferred resource, which creates its
+/// context ([`deferred_context`]) from the service provider it is called with
+/// and builds the content anew on every call.
+pub type DeferredBuild = fn(&Rc<dyn IServiceProvider>) -> Result<MarkupValue, XamlLoadException>;
+
+/// [`deferred_content`] of the build function `build`: every piece of
+/// deferred content of generated code goes through this one function (a
+/// function pointer, not a closure, so nothing is instantiated per template).
+pub fn defer(
+    result_type: ValueType,
+    context: &Rc<XamlIlContext>,
+    build: DeferredBuild,
+    line: i32,
+    position: i32,
+) -> Result<Rc<DeferredContent>, XamlLoadException> {
+    deferred_content(result_type, context, DeferredContentBuilder::try_new(build), line, position)
 }
 
 /// The context of `Populate` of a root object: [`create_context`], with the

@@ -224,7 +224,7 @@ All are ordinary classes with metadata plus `provide_value(&self, sp: &dyn Servi
 
 ### 3.4 Templates, styles, resources
 
-- **Deferred content** (`TemplateContent` properties): the AST's `XamlDeferredContentNode` becomes a Rust closure `Rc<dyn Fn(&dyn ServiceProvider) -> TemplateResult<T>>` on the build path and a captured AST subtree + interpreter on the runtime path. `DeferredTransformationFactoryV3` semantics (new name scope per instantiation, captured parent stack) port into `rt::deferred_content`.
+- **Deferred content** (`TemplateContent` properties): the AST's `XamlDeferredContentNode` becomes a free build function (`fn(&Rc<dyn IServiceProvider>) -> Result<MarkupValue, XamlLoadException>`, passed to `rt::defer`) on the build path and a captured AST subtree + interpreter on the runtime path. `DeferredTransformationFactoryV3` semantics (new name scope per instantiation, captured parent stack) port into `rt::deferred_content`.
 - `ControlTemplate`, `DataTemplate`, `TreeDataTemplate`, `ItemsPanelTemplate`, `FocusAdornerTemplate`, `Template` port as thin classes over `TemplateContent`.
 - **Selectors**: `SelectorGrammar` ports unchanged; `AvaloniaXamlIlSelectorTransformer` turns the syntax tree into typed nodes; the emitter writes builder calls (`Selectors::of_type(None, Button::TYPE).class("accent")`), the interpreter calls the same builders. Property selectors (`[IsEnabled=true]`) use the property-typed value conversion. Container queries (`ContainerQueryGrammar`, `AvaloniaXamlIlQueryTransformer`) likewise.
 - **Setters**: `AvaloniaXamlIlSetterTransformer` resolves `Property` against the style/template target type and converts `Value` with that property's type. Unchanged logic.
@@ -1413,7 +1413,7 @@ For applications, `export_metadata()` can generate the whole function (`$OUT_DIR
 | `XamlAstContextLocalNode` | context as service provider / type descriptor context | `sp.clone()` / `rt::type_descriptor_context(&ctx)` | `ITypeDescriptorContext` lives in `ferroui_markup_xaml::converters` |
 | `XamlAstRuntimeCastNode` | evaluate as object, checked cast | `rt::cast::<T>(&v)?` or `v.cast::<T>()` | — |
 | `XamlAstNeedsParentStackValueNode` | verify stack, evaluate | the inner expression (the verification is a build-time assertion) | — |
-| `XamlDeferredContentNode` | `DeferredContentFactory` + customisation method | `XamlIlRuntimeHelpers::deferred_transformation_factory_v3::<T>(DeferredContentBuilder::try_new(deferred_n), &sp)` and a free function `deferred_n` | captured outer locals are not allowed (upstream: closure type has no state); assert it |
+| `XamlDeferredContentNode` | `DeferredContentFactory` + customisation method | `rt::defer(<handle of T>, &context, <function>_deferred_<n>, line, position)?` and the free function `<function>_deferred_<n>` | captured outer locals are not possible: the body is a function of its own, rustc rejects a use of an outer local |
 | `XamlDeferredContentInitializeIntermediateRootNode` | evaluate, store as intermediate root | `let x = ..; ctx.set_intermediate_root_object(into_markup_value(x.clone()));` | — |
 | `XamlDirectCallPropertySetter` (setter) | call method with target + arguments | form A/B/C call | — |
 | `AdderSetter` (setter) | getter first, then arguments, then adder | `let c = <getter>(&t); <adder>(&c, v);` | `Add` overloads per item type |
