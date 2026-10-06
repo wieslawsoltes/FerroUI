@@ -399,6 +399,27 @@ impl FerroObject {
         self.inheritance_children.borrow_mut().retain(|c| !c.points_to(&child));
     }
 
+    /// Calls `f` for each inheritance child, by index over the count at the
+    /// start, as the original iterates `GetInheritanceChildren()`: no copy
+    /// of the children for every object a change propagates through. A child
+    /// that was dropped without being detached is skipped.
+    pub(crate) fn for_each_inheritance_child(&self, mut f: impl FnMut(&Ref<FerroObject>)) {
+        let count = self.inheritance_children.borrow().len();
+        for index in 0..count {
+            // Deviation (DEVIATIONS.md, Property system): upstream's
+            // `children[i]` throws past the end; here the list holds weak
+            // references and `inheritance_children` prunes dropped children,
+            // which can shorten it during the loop, so the loop stops instead.
+            let child = match self.inheritance_children.borrow().get(index) {
+                Some(child) => child.upgrade(),
+                None => break,
+            };
+            if let Some(child) = child {
+                f(&child);
+            }
+        }
+    }
+
     pub(crate) fn inheritance_children(&self) -> Vec<Ref<FerroObject>> {
         let mut children = self.inheritance_children.borrow_mut();
         if children.is_empty() {
