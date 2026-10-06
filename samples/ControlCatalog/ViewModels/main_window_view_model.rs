@@ -459,8 +459,9 @@ impl MainWindowViewModel {
         }
 
         if !this.is_current_page_item(&item) {
-            // Not in upstream: the host may have to fetch the assets of the page before the page can
-            // be created (see `PageAssets`). Of navigations asked for while one waits, the last wins.
+            // Deviation (browser-platform.md section 14): the host may have to fetch the assets of the
+            // page before the page can be created (see `PageAssets`). Of navigations asked for while one
+            // waits, the last wins.
             if let Some(assets) = PageAssets::ensure(&item.header()) {
                 if let Err(error) = assets.await {
                     println!("The assets of the page {} are not available: {error}", item.header());
