@@ -8,7 +8,9 @@
 // The pickers of the page are replaced by functions that hand out handles of the origin private file
 // system (installed before the storage bundle is first imported, which is when the polyfill looks for
 // the native pickers), except in the polyfill checks: there the polyfill shows its own file input, which
-// the test answers through the DevTools protocol, and saves through a download.
+// the test answers through the DevTools protocol, and saves through a download: a blob link without the
+// service worker of the platform, a response streamed by that worker when it is registered
+// (`?RegisterServiceWorker=true`).
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
@@ -238,5 +240,37 @@ check("with the polyfill preferred, the save picker downloads the written file",
     for (let i = 0; i < 100 && !(fs.existsSync(file) && fs.readFileSync(file, "utf8") === "Hello, storage"); i++) { await sleep(100); }
     expect(fs.existsSync(file) ? fs.readFileSync(file, "utf8") : null, "Hello, storage", "downloaded content");
 }, { query: "?PreferPolyfill=true", stubs: false });
+
+check("without the service worker none is registered, and the polyfill saves through a blob link", async (page) => {
+    expect(await page.evaluate("navigator.serviceWorker.getRegistration().then((r) => r === undefined)"), true, "no registration");
+    // The polyfill clicks a link that is not in the document: the clicks of links are recorded.
+    await page.evaluate(`(globalThis.links = [], ((click) => { HTMLAnchorElement.prototype.click = function () { links.push(this.href); return click.call(this); }; })(HTMLAnchorElement.prototype.click), true)`);
+    const downloads = fs.mkdtempSync(path.join(os.tmpdir(), "ferroui-downloads-"));
+    await page.send("Browser.setDownloadBehavior", { behavior: "allow", downloadPath: downloads });
+    expect((await page.scenario("save_write", "report")).saved, "report.txt", "saved file");
+    await page.waitFor("links.length > 0", 10000);
+    const links = JSON.parse(await page.evaluate("JSON.stringify(links)"));
+    assert(links.every((link) => link.startsWith("blob:")), `the download went through ${JSON.stringify(links)}`);
+}, { query: "?PreferPolyfill=true", stubs: false });
+
+check("the service worker is registered at the root of the site and streams the polyfill's download", async (page) => {
+    const registration = JSON.parse(await page.evaluate(`navigator.serviceWorker.ready.then((r) => JSON.stringify({
+        scope: r.scope, script: r.active && r.active.scriptURL, state: r.active && r.active.state }))`));
+    const origin = await page.evaluate("location.origin");
+    expect(registration.scope, `${origin}/`, "scope");
+    expect(registration.script, `${origin}/ferroui-sw.js`, "script");
+    expect(registration.state, "activated", "state");
+
+    const downloads = fs.mkdtempSync(path.join(os.tmpdir(), "ferroui-downloads-"));
+    await page.send("Browser.setDownloadBehavior", { behavior: "allow", downloadPath: downloads });
+    expect((await page.scenario("save_write", "report")).saved, "report.txt", "saved file");
+    const file = path.join(downloads, "report.txt");
+    for (let i = 0; i < 100 && !(fs.existsSync(file) && fs.readFileSync(file, "utf8") === "Hello, storage"); i++) { await sleep(100); }
+    expect(fs.existsSync(file) ? fs.readFileSync(file, "utf8") : null, "Hello, storage", "downloaded content");
+    // The polyfill took the path of the worker: it navigates a hidden frame to an address in the scope of the
+    // worker, which the site does not have (the server answers 404): the worker answered with the stream.
+    expect(await page.evaluate(`Array.from(document.querySelectorAll("iframe[hidden]")).map((f) => f.src).join()`), `${origin}/report.txt`, "download frame");
+    expect(await page.evaluate(`fetch("/report.txt").then((r) => r.status)`), 404, "status of the address on the server");
+}, { query: "?PreferPolyfill=true&RegisterServiceWorker=true", stubs: false });
 
 await run(checks);
