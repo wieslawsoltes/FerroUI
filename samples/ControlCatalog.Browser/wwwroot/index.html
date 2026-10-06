@@ -9,6 +9,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="icon" type="image/svg+xml" href="./favicon.svg" />
     <link rel="stylesheet" href="./app.css" />
+    <!-- Upstream's page has a preload element that the build fills with the boot resources of the
+         runtime. Here: the scripts main.js imports, the WebAssembly module (fetched by the script of
+         the module with credentials "same-origin", which `crossorigin` matches) and the asset bundle,
+         so that the downloads start with the page instead of after its scripts. -->
+    <link rel="modulepreload" href="./main.js" />
+    <link rel="modulepreload" href="./control-catalog-browser.js" />
+    <link rel="modulepreload" href="./ferroui.js" />
+    <link rel="preload" href="./control_catalog_browser.wasm" as="fetch" type="application/wasm" crossorigin />
+    <link rel="preload" href="./control-catalog.assets" as="fetch" crossorigin />
 </head>
 
 <body style="margin: 0; overflow: hidden">
