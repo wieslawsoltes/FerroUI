@@ -12,6 +12,7 @@ use crate::platform::{IDrawingContextImpl, IGeometryImpl, IGlyphRunImpl};
 use crate::rendering::composition::transport::{BatchStreamData, BatchStreamReader, BatchStreamWriter};
 use crate::rendering::composition::Compositor;
 use crate::rendering::scene_graph::ICustomDrawOperation;
+use crate::rendering::testing::recorded_opcodes;
 use crate::rendering::testing::{
     DrawingLog, ManualRenderLoop, MockDrawingContextImpl, MockGeometryImpl, MockGlyphRunImpl,
     MockPlatformRenderInterface,
@@ -539,7 +540,7 @@ fn round_trip_preserves_text_options_and_glyph_runs() {
     assert_eq!(copy.calculate_bounds(), Some(Rect::new(1.0, 2.0, 30.0, 12.0)));
     assert!(copy.hit_test(Point::new(5.0, 5.0)));
     match copy.get_resource(1) {
-        Some(RenderDataResource::GlyphRun(run)) => assert!(Rc::ptr_eq(run, &glyph_run)),
+        Some(RenderDataResource::GlyphRun(run)) => assert!(Rc::ptr_eq(&**run, &glyph_run)),
         _ => panic!("the glyph run did not survive the round trip"),
     }
 }
@@ -574,7 +575,10 @@ fn recording_elides_empty_scopes_and_no_op_pushes() {
     let content = recorder
         .get_immediate_scene_brush_content(tile_brush(), None, true)
         .expect("something was drawn");
-    assert_eq!(content.with_stream(RenderDataStream::opcode_length), Some(3));
+    assert_eq!(
+        content.with_stream(recorded_opcodes),
+        Some(vec![RenderDataOpcode::PushClip, RenderDataOpcode::DrawRectangle, RenderDataOpcode::Pop])
+    );
     assert_eq!(
         content.with_stream(replay).unwrap(),
         ["PushRoundedClip 0, 0, 10, 10", "DrawRectangle Red none 0, 0, 4, 4 shadows=0", "PopClip"]
@@ -620,7 +624,10 @@ fn recording_elides_empty_text_options_scopes_and_glyph_runs_without_foreground(
     let content = recorder
         .get_immediate_scene_brush_content(tile_brush(), None, true)
         .expect("something was drawn");
-    assert_eq!(content.with_stream(RenderDataStream::opcode_length), Some(3));
+    assert_eq!(
+        content.with_stream(recorded_opcodes),
+        Some(vec![RenderDataOpcode::PushTextOptions, RenderDataOpcode::DrawGlyphRun, RenderDataOpcode::Pop])
+    );
     assert_eq!(
         content.with_stream(replay).unwrap(),
         [
@@ -631,7 +638,7 @@ fn recording_elides_empty_text_options_scopes_and_glyph_runs_without_foreground(
     );
     // The recorded run is the platform glyph run of the glyph run.
     content.with_stream(|stream| match stream.get_resource(1) {
-        Some(RenderDataResource::GlyphRun(recorded)) => assert!(Rc::ptr_eq(recorded, &run.platform_impl())),
+        Some(RenderDataResource::GlyphRun(recorded)) => assert!(Rc::ptr_eq(&**recorded, &run.platform_impl())),
         _ => panic!("the glyph run was not recorded"),
     });
 }

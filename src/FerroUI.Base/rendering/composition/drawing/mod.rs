@@ -9,11 +9,15 @@ mod i_render_data_geometry;
 mod i_render_data_visitor;
 mod immediate_render_data_scene_brush_content;
 mod render_data_drawing_context;
+mod render_data_opcode;
+mod render_data_payloads;
+mod render_data_reader;
 mod render_data_resources;
 mod render_data_stream;
 mod render_data_stream_bounds;
 mod render_data_stream_hit_test;
 mod render_data_stream_replay;
+mod render_data_writer;
 mod server_composition_render_data;
 mod server_composition_simple_pen;
 mod server_resource_helper_extensions;
@@ -29,10 +33,19 @@ pub use i_render_data_visitor::IRenderDataVisitor;
 pub use immediate_render_data_scene_brush_content::ImmediateRenderDataSceneBrushContent;
 pub use render_data_drawing_context::RenderDataDrawingContext;
 pub use render_data_resources::{RenderDataResource, RenderDataResources, NULL_HANDLE};
-pub use render_data_stream::{RenderDataOp, RenderDataStream};
+pub use render_data_opcode::RenderDataOpcode;
+pub use render_data_payloads::{
+    DrawBitmapPayload, DrawCustomPayload, DrawEllipsePayload, DrawGeometryPayload, DrawGlyphRunPayload,
+    DrawLinePayload, DrawRectanglePayload, IRenderDataPayload, PushClipPayload, PushEffectPayload,
+    PushGeometryClipPayload, PushOpacityMaskPayload, PushOpacityPayload, PushRenderOptionsPayload,
+    PushTextOptionsPayload, PushTransformPayload,
+};
+pub use render_data_reader::RenderDataReader;
+pub use render_data_stream::RenderDataStream;
 pub use render_data_stream_bounds::{BoundsScope, BoundsVisitor};
 pub use render_data_stream_hit_test::{HitTestScope, HitTestVisitor};
 pub use render_data_stream_replay::{ReplayScope, ReplayVisitor};
+pub use render_data_writer::RenderDataWriter;
 pub use server_composition_render_data::ServerCompositionRenderData;
 pub(crate) use server_resource_helper_extensions::{brush_get_server_resource, transform_get_server};
 pub use server_composition_simple_pen::ServerCompositionSimplePen;
