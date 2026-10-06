@@ -346,6 +346,16 @@ fn direct_setter_method(setter: &Rc<dyn IXamlPropertySetter>) -> Option<&Runtime
     method.as_any().downcast_ref::<RuntimeMethod>()
 }
 
+/// The call `call` of a member; a `fallible` member's error is the load
+/// error of the run-time loader at `node` (`rt::invoked`: the exception that
+/// wraps the exception of an invoked member).
+fn invoked(call: String, fallible: bool, node: &Rc<dyn IXamlAstNode>) -> String {
+    match fallible {
+        true => format!("rt::invoked({call}, {}, {})?", node.line(), node.position()),
+        false => call,
+    }
+}
+
 /// The value held untyped in `local` as the argument `index` of `member`
 /// (`rt::exact`, its type inferred from where it goes).
 fn untyped_argument(local: &str, member: &str, index: usize, node: &Rc<dyn IXamlAstNode>) -> String {
@@ -926,10 +936,7 @@ impl Emitter<'_> {
         let value = metadata_of(&declaring)
             .and_then(|markup| markup.value)
             .ok_or_else(|| unsupported(node, format!("the value type of {} is not known", declaring.full_name())))?;
-        let mut call = format!("{owner}::{}({})", emit.function, texts.join(", "));
-        if emit.fallible {
-            call.push_str(&format!(".map_err(|error| rt::at(rt::TARGET_INVOCATION_EXCEPTION, error, {}, {}))?", node.line(), node.position()));
-        }
+        let call = invoked(format!("{owner}::{}({})", emit.function, texts.join(", ")), emit.fallible, node);
         let kind = self.kind_of(value().id());
         if let Kind::Class(class) = kind {
             let local = self.local_for(class);
@@ -1137,12 +1144,7 @@ impl Emitter<'_> {
         if supports_initialize {
             // The interpreter calls `EndInit` as a member of the contract: its failure is the
             // exception that wraps the exception of the member.
-            self.line(format!(
-                "{}.try_end_init().map_err(|error| rt::at(rt::TARGET_INVOCATION_EXCEPTION, error, {}, {}))?;",
-                target.expr,
-                node.line(),
-                node.position()
-            ));
+            self.line(format!("{};", invoked(format!("{}.try_end_init()", target.expr), true, node)));
         }
         Ok(())
     }
@@ -2679,11 +2681,7 @@ impl Emitter<'_> {
                 (false, _) => text,
             });
         }
-        let mut call = format!("{owner}::{}({})", emit.function, texts.join(", "));
-        if emit.fallible {
-            call.push_str(&format!(".map_err(|error| rt::at(rt::TARGET_INVOCATION_EXCEPTION, error, {}, {}))?", node.line(), node.position()));
-        }
-        Ok(call)
+        Ok(invoked(format!("{owner}::{}({})", emit.function, texts.join(", ")), emit.fallible, node))
     }
 
     /// `if (root is StyledElement s) NameScope.SetNameScope(s, scope); scope.Complete();`.

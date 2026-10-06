@@ -17,7 +17,7 @@
 //!     border_0.begin_init();
 //!     // border.xaml(1,2) Padding
 //!     border_0.set_value(::ferroui_controls::Decorator::padding_property(), ::ferroui_base::Thickness::new(1.0_f64, ..));
-//!     border_0.try_end_init().map_err(|error| rt::at(rt::TARGET_INVOCATION_EXCEPTION, error, 1, 2))?;
+//!     rt::invoked(border_0.try_end_init(), 1, 2)?;
 //!     rt::complete_root_name_scope(::core::option::Option::Some(&border_0), name_scope.as_ref(), 1, 2)?;
 //!     ::core::result::Result::Ok(border_0)
 //! }
