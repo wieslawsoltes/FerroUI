@@ -76,10 +76,14 @@ codegen-units = 1
 # module is downloaded and compiled by every visitor (docs/porting/browser-platform.md, section 18).
 # The crates of the run-time XAML loader stay optimised for speed: at "z" the start-up of a themed
 # application took twice as long, because the theme markup is loaded through them.
+# Thin LTO, one code generation unit per crate: fat LTO generates the code of the whole program
+# (the compiled theme markup included) as one LLVM module, which needed about 15.5 GB of memory;
+# thin LTO keeps one module per crate and needs about 8 GB, for 0.16 MB more with gzip
+# (docs/porting/browser-platform.md, section 18, "Build memory").
 [profile.browser]
 inherits = "release"
 opt-level = "z"
-lto = "fat"
+lto = "thin"
 codegen-units = 1
 
 [profile.browser.package.xamlx]
