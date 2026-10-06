@@ -3,21 +3,24 @@
 ## State (read this first; every worker updates it before stopping)
 
 - Stage E1 is DONE and merged into `main` (pull request #7).
-- Stage E2 is DONE on branch `xaml-compiler-e2` (pull request #9, against `main`, linear, rebased
-  on `main` after E1 merged). Corpus: 77 of 81 documents eligible, all 77 match the run-time
-  loader. The four that are not eligible need E3/E4 (a binding: parent stack; a style selector;
+- Stage E2 is DONE and merged into `main` (pull request #9). Corpus then: 77 of 81 documents
+  eligible, all 77 match the run-time loader. The four that are not eligible need E3/E4 (a binding: parent stack; a style selector;
   a control template: deferred content; resources). Theme documents: 0 of 163 eligible (each theme
   compiled as one group, without its `x:Class` document and the documents its `excluded.txt`
   leaves out): 146 are blocked first by the parent stack (E3), 14 by `Content` setters, 2 by
   `EnsureCapacityNode`, 1 by `x:Static` of a static property; measured by the ignored test
   `emitter::repository_documents::measure_theme_documents`.
-- Everything E2 adds exists only with the `compiler-metadata` feature of the base crate (section
-  7, "Cost"); a default build carries none of it.
-- Stage E3 is DONE on branch `xaml-compiler-e3` (pull request #17, against `xaml-compiler-e2`,
-  linear, rebased on `xaml-compiler-e2`). Corpus: 100 of 102 documents eligible, all 100 match the
-  run-time loader; the two that are not eligible need E4 (a style with a selector, a control
-  template). Theme documents: 10 of 163 eligible; 143 stop at templates
-  (`XamlDeferredContentInitializeIntermediateRootNode`, E4), see section 8.
+- Everything E2 and E3 add exists only with features of the base crate (section 7, "Cost", and
+  section 8): `markup-functions` expands the typed `__markup_*` functions generated code calls;
+  `compiler-metadata` (which enables it) adds what only the emitter reads. A default build carries
+  neither.
+- Stage E3 is DONE on branch `xaml-compiler-e3` (pull request #17, against `main`, linear).
+  Corpus: 101 of 103 documents eligible, all 101 match the run-time loader with no value the dump
+  cannot read; the two that are not eligible need E4 (a style with a selector, a control
+  template). Theme documents: 10 of 165 eligible (main added the file chooser documents); 147 stop
+  at templates (`XamlDeferredContentInitializeIntermediateRootNode`) and 8 at selectors, both E4,
+  see section 8. Not eligible within E3's scope: indexers, methods and methods as commands in
+  compiled binding paths (no theme document has one; section 8).
 - Stage E4 is next (section 8). Nothing is half-done in the working tree of E3.
 
 Design documents in the repository: `docs/porting/xaml.md`, sections 9 (emitter design: call forms
@@ -459,9 +462,44 @@ Run-time checks of generated code use the cast registry (`ValueTypes::is_assigna
 interpreter asks its type system (`RuntimeTypeSystem::is_instance`); both derive from the same
 declarations. This is a documented seam; the differential corpus covers the cases the framework has.
 
+E3 after the review of E2 (the same branch, rebased on `main` after E2 merged):
+
+- The differential dump marks a value it cannot read (a failed getter, a collection it cannot
+  enumerate) with `<unreadable: ..>`, and a dump that holds it is a mismatch, never a match
+  (`compare`, test `a_value_the_dump_cannot_read_fails_the_comparison`). The harness enumerates
+  every collection the corpus has: gesture recognizers, key bindings, transitions, inlines,
+  resource dictionaries (dumped as objects, with their merged and theme dictionaries) and the
+  nullable form of a collection.
+- The feature is split: `markup-functions` (the typed functions, `__ferro_markup_functions!`) and
+  `compiler-metadata = ["markup-functions"]` (the names, `MarkupType::this` / `value`, the paths,
+  the property accessors). Measured on a release build of the corpus output (`generated.rs`, every
+  document built once): 41,514,824 bytes with `markup-functions`, 41,999,160 with
+  `compiler-metadata` (484,336 bytes more, the emitter names and paths); without either it does
+  not compile.
+- The instance of a member held in the nullable form of its declared type is borrowed
+  (`rt::instance`, `ValueTypes::nullable_inner`) instead of cloned into `rt::argument`.
+- An options extension with no default and no branch taken is `default(T)`: the zero member of an
+  enumeration, zero of a primitive type (`on_platform_without_default.xaml`).
+- The dialogs crate records its public Rust paths (`scripts/rust_paths.py` also reads a class
+  named through the imports of the registration, `Border::TYPE`).
+- Start-up and size, measured on Linux (release; the themes still load through the run-time
+  loader, so this is the baseline E4 is compared with): the Fluent theme loads in 604 to 646 ms the
+  first time and 23 to 25 ms the second (the transformed documents cached), the Simple theme in 365
+  to 386 ms and 6 to 7 ms (`tests::load_time` of the theme crates, three runs); the stripped
+  `themed_window` example is 46,008,896 bytes and holds no `__markup_` name. The size of the
+  `themed_view` browser module is the size of `themed_view.wasm` the browser job of CI lists
+  (`scripts/build-browser.sh`); this container has no Emscripten.
+
+Not done in E3, with the reason: an indexer, a method or a method as a command in a compiled
+binding path. The interpreter reaches them through the invokers of its type system (argument
+adaptation, virtual dispatch, the command trampolines), which the runtime library does not have;
+generated code needs either typed functions of indexers (E2 left indexers, events and fields
+without one) and delegates over the typed functions of methods, or those invokers moved into the
+runtime library as the context was. No theme document has one; application documents do (E5).
+
 Next, E4 (stack it on `xaml-compiler-e3`):
 
-1. Templates: `XamlDeferredContentInitializeIntermediateRootNode` (131 theme documents stop there):
+1. Templates: `XamlDeferredContentInitializeIntermediateRootNode` (147 theme documents stop there):
    the deferred body already exists; add the intermediate root (`set_intermediate_root_object`) and
    the template customisation of the language (control templates, data templates).
 2. Selectors and styles (`XamlIlTypeSelector`, `XamlIlStringSelector`, `XamlIlPropertyEqualsSelector`,
