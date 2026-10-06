@@ -2,6 +2,7 @@ mod control_templates;
 mod compiled_xaml_tests;
 mod control_theme_tests;
 mod documents;
+mod full_layout_tests;
 mod gaps;
 mod load_time;
 mod public_api_tests;
