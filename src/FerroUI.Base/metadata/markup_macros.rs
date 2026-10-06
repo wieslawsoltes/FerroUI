@@ -185,7 +185,7 @@ macro_rules! ferro_markup_type {
     };
 
     (@build $kind:ident $type_:ty, $name:expr, $this:ty, $form:ident, { $($body:tt)* }) => {
-        $crate::__ferro_compiler_metadata!($crate::ferro_markup_type!(@fns $form $type_, $this; $($body)*););
+        $crate::__ferro_markup_functions!($crate::ferro_markup_type!(@fns $form $type_, $this; $($body)*););
 
         impl $crate::metadata::MarkupTyped for $type_ {
             const MARKUP: &'static $crate::metadata::MarkupType = {
@@ -342,7 +342,7 @@ macro_rules! ferro_markup_enum {
             };
         }
 
-        $crate::__ferro_compiler_metadata!(impl $type_ {
+        $crate::__ferro_markup_functions!(impl $type_ {
             /// The typed function of a value of the flags from its integer value
             /// (see `MarkupEmit`): the members whose bits are all set, combined. The
             /// emitter of Rust source writes it for a value made of members only.
@@ -1891,9 +1891,30 @@ macro_rules! ferro_rust_paths {
     };
 }
 
+/// The tokens with the `markup-functions` feature of this crate (which
+/// `compiler-metadata` enables), nothing without it: the typed functions of
+/// declared members (`__markup_*`), which generated code calls.
+#[cfg(feature = "markup-functions")]
+#[doc(hidden)]
+#[macro_export]
+macro_rules! __ferro_markup_functions {
+    ($($tokens:tt)*) => {
+        $($tokens)*
+    };
+}
+
+/// Without the `markup-functions` feature: nothing (see the other
+/// definition).
+#[cfg(not(feature = "markup-functions"))]
+#[doc(hidden)]
+#[macro_export]
+macro_rules! __ferro_markup_functions {
+    ($($tokens:tt)*) => {};
+}
+
 /// The tokens with the `compiler-metadata` feature of this crate, nothing
-/// without it: what only the emitter of Rust source uses (the typed
-/// functions of declared members, the metadata that names them). `@value
+/// without it: what only the emitter of Rust source uses (the metadata that
+/// names the typed functions, the public Rust paths). `@value
 /// expr` is the value of a [`CompilerMetadata`](crate::metadata::CompilerMetadata)
 /// slot: `expr` with the feature, the zero-sized stand-in without it.
 #[cfg(feature = "compiler-metadata")]
