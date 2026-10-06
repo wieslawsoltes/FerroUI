@@ -10,14 +10,21 @@ const assets = fetch("./control-catalog.assets").then((response) => {
     if (!response.ok) throw new Error(`control-catalog.assets: ${response.status} ${response.statusText}`);
     return response.arrayBuffer();
 });
+// The steps of the start-up are marked on the performance timeline of the page
+// (scripts/browser/first-frame.mjs --phases reports them).
 const runtime = await createRuntime();
+performance.mark("module instantiated");
 
 // The script side resolves the exports of the framework through the module.
 FerroExports.attach(runtime);
 
-runtime.registerAssetBundle(new Uint8Array(await assets));
+const bundle = new Uint8Array(await assets);
+performance.mark("asset bundle downloaded");
+runtime.registerAssetBundle(bundle);
 
 // For the behaviour tests (`catalogState`) and for inspection from the console.
 globalThis.controlCatalog = runtime;
 
+performance.mark("runMain start");
 runtime.runMain(globalThis.location.href);
+performance.mark("runMain end");

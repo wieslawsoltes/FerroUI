@@ -12,6 +12,7 @@
 //   context of the mode, the main view is drawn (the canvas is not blank), the view is laid out again
 //   when the page is made larger (the area the larger size adds is drawn) and smaller, and nothing is
 //   logged as an error (console errors, uncaught exceptions, failed loads);
+// - the module and the asset bundle are downloaded once each, through the preloads of the host page;
 // - input, driven with real pointer and key events: the navigation drawer opens from its toggle
 //   button, three pages are reached through the drawer and show their content, a click on a button
 //   has its effect, and text typed into a text box becomes its text;
@@ -221,6 +222,19 @@ async function navigate(page, text, header = text) {
         // The title bar of the navigation page shows the header of the page.
         && s.elements.some((e) => e.type === "TextBlock" && e.text === header && e.hit && e.y < 48 && e.x >= DRAWER_EDGE));
 }
+
+check("the module and the asset bundle are downloaded once, through the preloads of the page", async (page) => {
+    // A preload that does not match the request of the script (another name, other credentials) is
+    // not used, and the file is downloaded a second time.
+    const requests = JSON.parse(await page.evaluate(`JSON.stringify(performance.getEntriesByType("resource")
+        .map((e) => ({ file: new URL(e.name).pathname.split("/").pop(), initiator: e.initiatorType })))`));
+    for (const file of ["control_catalog_browser.wasm", "control-catalog.assets"]) {
+        const found = requests.filter((r) => r.file === file);
+        assert(found.length === 1 && found[0].initiator === "link",
+            `${file} was requested ${found.length} times (${found.map((r) => r.initiator).join(", ")}), expected once by its preload`);
+    }
+    assert(!page.log.some((line) => /preload/i.test(line)), `the browser reported a preload problem:\n${page.log.filter((line) => /preload/i.test(line)).join("\n")}`);
+});
 
 check("the navigation drawer opens from its toggle button", async (page) => {
     let state = await page.until("the drawer is closed", (s) => s.drawerOpen === false);
