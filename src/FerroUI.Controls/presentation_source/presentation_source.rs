@@ -1,3 +1,4 @@
+use super::presentation_source_layout::LayoutDiagnosticBridge;
 use super::renderer_factory::{create_renderer, ITopLevelRenderer};
 use crate::platform::ITopLevelImpl;
 use ferroui_base::input::{Cursor, FocusManager, IInputManager, IInputRoot, InputElement, PointerOverPreProcessor};
@@ -36,6 +37,7 @@ pub struct PresentationSource {
 
     // Layout
     pub(super) layout_manager: Rc<LayoutManager>,
+    pub(super) layout_diagnostic_bridge: RefCell<Option<LayoutDiagnosticBridge>>,
 
     // Render root
     pub(super) renderer: OnceCell<Rc<dyn ITopLevelRenderer>>,
@@ -77,6 +79,7 @@ impl PresentationSource {
                 cursor_element: RefCell::new(None),
                 cursor_element_subscription: RefCell::new(None),
                 layout_manager: Self::create_layout_manager(layout_root),
+                layout_diagnostic_bridge: RefCell::new(None),
                 renderer: OnceCell::new(),
                 scene_invalidated_subscription: RefCell::new(None),
                 hit_tester_override: RefCell::new(None),
@@ -123,6 +126,7 @@ impl PresentationSource {
         if source.renderer.set(renderer).is_err() {
             unreachable!("the renderer is created once");
         }
+        source.create_layout_diagnostic_bridge();
 
         source.set_root_visual(Some(root_visual));
         source
@@ -197,6 +201,9 @@ impl PresentationSource {
             subscription.dispose();
         }
 
+        if let Some(bridge) = self.layout_diagnostic_bridge.borrow_mut().take() {
+            bridge.dispose();
+        }
         ferroui_base::layout::ILayoutManager::dispose(&*self.layout_manager);
         if let Some(subscription) = self.scene_invalidated_subscription.borrow_mut().take() {
             subscription.dispose();

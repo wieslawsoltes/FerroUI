@@ -193,7 +193,7 @@ impl LayoutableImpl for Layoutable {
         this.apply_template();
 
         let min_max = MinMax::new(this);
-        let constrained_size = LayoutHelper::apply_min_max(min_max, available_size.deflate(margin));
+        let constrained_size = LayoutHelper::apply_layout_constraints_min_max(min_max, available_size.deflate(margin));
 
         let mut container_sizing = ContainerSizing::Normal;
         if let Some(query_provider) = Container::get_query_provider(this) {
@@ -306,7 +306,7 @@ impl LayoutableImpl for Layoutable {
             size = size.with_height(size.height.min(desired_size.height - margin.top - margin.bottom));
         }
 
-        size = LayoutHelper::apply_min_max(MinMax::new(this), size);
+        size = LayoutHelper::apply_layout_constraints_min_max(MinMax::new(this), size);
 
         if use_layout_rounding {
             size = LayoutHelper::round_layout_size_up(size, scale);

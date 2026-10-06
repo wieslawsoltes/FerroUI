@@ -54,6 +54,7 @@ use ferroui_base::media::{Brushes, IBrush, TextWrapping};
 use ferroui_base::platform::IPlatformRenderInterface;
 use ferroui_base::reactive::ObservableExt;
 use ferroui_base::threading::Dispatcher;
+use ferroui_base::logging::LogArea;
 use ferroui_base::{
     ferro_class, ferro_impl_classes, ferro_model, ferro_property, instantiate, BoxedValue, FerroObjectExtensions,
     FerroLocator, FerroObjectImpl, FerroObjectImplExt, IntoRef, LocatorExtensions, Point, Ref, Size,
@@ -1451,8 +1452,14 @@ pub(crate) const EXPECTED_CLIPBOARD_EXCEPTIONS: [ClipboardErrorKind; 4] = [
 pub(crate) fn record_log_messages() -> (Rc<RefCell<Vec<String>>>, Rc<dyn IDisposable>) {
     let messages: Rc<RefCell<Vec<String>>> = Rc::new(RefCell::new(Vec::new()));
     let recorded = messages.clone();
-    let sink = TestLogSink::start(move |_, _, _, message_template, _| {
-        recorded.borrow_mut().push(message_template.to_owned());
+    // The upstream tests flush the callbacks posted to their synchronization
+    // context; here the dispatcher runs its jobs, among them the queued
+    // layout pass, whose timing messages (area `Layout`, level
+    // `Information`) are not part of what the tests observe.
+    let sink = TestLogSink::start(move |_, area, _, message_template, _| {
+        if area != LogArea::LAYOUT {
+            recorded.borrow_mut().push(message_template.to_owned());
+        }
     });
     (messages, sink)
 }

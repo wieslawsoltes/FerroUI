@@ -238,3 +238,30 @@ fn cursor_should_follow_captured_element() {
     pointer.capture(None);
     assert!(same_cursor(&other2.cursor(), window_impl.cursor()));
 }
+
+/// Not from upstream: the layout diagnostic bridge passes the timing of each
+/// layout pass to the renderer diagnostics while the layout time graph is
+/// shown, and stops when it is hidden.
+#[test]
+fn layout_pass_timing_reaches_renderer_diagnostics_while_layout_time_graph_is_shown() {
+    use ferroui_base::layout::ILayoutManager;
+    use ferroui_base::rendering::RendererDebugOverlays;
+
+    let _app = UnitTestApplication::start(TestServices::styled_window());
+    let window = Window::new();
+    window.show();
+    let diagnostics = window.renderer_diagnostics();
+    let layout_manager = window.layout_manager();
+
+    assert!(layout_manager.layout_pass_timed().is_none());
+
+    diagnostics.set_debug_overlays(RendererDebugOverlays::LAYOUT_TIME_GRAPH);
+    assert!(layout_manager.layout_pass_timed().is_some());
+
+    window.invalidate_measure();
+    layout_manager.execute_layout_pass();
+    assert_eq!(layout_manager.total_pass_count(), diagnostics.last_layout_pass_timing().pass_counter);
+
+    diagnostics.set_debug_overlays(RendererDebugOverlays::NONE);
+    assert!(layout_manager.layout_pass_timed().is_none());
+}

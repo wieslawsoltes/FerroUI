@@ -13,10 +13,10 @@ impl LayoutHelper {
     /// Calculates a control's size based on its width, height, min-width,
     /// min-height, max-width and max-height.
     pub fn apply_layout_constraints(control: &Layoutable, constraints: Size) -> Size {
-        Self::apply_min_max(MinMax::new(control), constraints)
+        Self::apply_layout_constraints_min_max(MinMax::new(control), constraints)
     }
 
-    pub(crate) fn apply_min_max(min_max: MinMax, constraints: Size) -> Size {
+    pub(crate) fn apply_layout_constraints_min_max(min_max: MinMax, constraints: Size) -> Size {
         Size::new(
             MathUtilities::clamp(constraints.width, min_max.min_width, min_max.max_width),
             MathUtilities::clamp(constraints.height, min_max.min_height, min_max.max_height),
