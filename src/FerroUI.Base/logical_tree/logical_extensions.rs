@@ -89,6 +89,7 @@ impl StyledElement {
     }
 
     /// The logical children of the element.
+    // Deviation (DEVIATIONS.md, Logical tree): upstream returns the collection itself; this is a snapshot of it.
     pub fn get_logical_children(&self) -> Rc<Vec<Ref<StyledElement>>> {
         self.logical_children().snapshot()
     }
@@ -133,6 +134,7 @@ impl StyledElement {
 
     /// The children of the logical parent of the element, including the
     /// element itself; empty when the element has no logical parent.
+    // Deviation (DEVIATIONS.md, Logical tree): upstream enumerates the parent's children lazily; this is a snapshot.
     pub fn get_logical_siblings(&self) -> Rc<Vec<Ref<StyledElement>>> {
         match self.parent() {
             Some(parent) => parent.logical_children().snapshot(),
@@ -141,6 +143,7 @@ impl StyledElement {
     }
 
     /// Whether the element is a logical ancestor of `target`.
+    // Deviation (DEVIATIONS.md, Logical tree): upstream also accepts a null receiver (and returns false).
     pub fn is_logical_ancestor_of(&self, target: Option<&StyledElement>) -> bool {
         let mut current = target.and_then(StyledElement::parent);
 
