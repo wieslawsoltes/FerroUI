@@ -1,6 +1,7 @@
 use crate::browser_app_builder::BrowserPlatformOptions;
 use crate::browser_input_handler::{BrowserInputHandler, IInputTopLevel};
 use crate::browser_insets_manager::BrowserInsetsManager;
+use crate::browser_native_control_host::BrowserNativeControlHost;
 use crate::clipboard_impl::ClipboardImpl;
 use crate::cursor::CssCursor;
 use crate::interop::{dom_helper, input_helper, JsObject};
@@ -20,7 +21,8 @@ use ferroui_base::reactive::IDisposable;
 use ferroui_base::rendering::composition::Compositor;
 use ferroui_base::{FerroLocator, LocatorExtensions, PixelPoint, Point, Rect, Size};
 use ferroui_controls::platform::{
-    IInputPane, IInsetsManager, IPlatformHandle, IPopupImpl, IScreenImpl, ITopLevelImpl, PlatformThemeVariant,
+    IInputPane, IInsetsManager, INativeControlHostImpl, IPlatformHandle, IPopupImpl, IScreenImpl, ITopLevelImpl,
+    PlatformThemeVariant,
 };
 use ferroui_controls::{AcrylicPlatformCompensationLevels, WindowResizeReason, WindowTransparencyLevel};
 use std::any::{Any, TypeId};
@@ -39,8 +41,7 @@ type Callback<T> = RefCell<Option<Rc<T>>>;
 /// The top-level of a view: a canvas inside an element of the page.
 pub struct BrowserTopLevelImpl {
     container: JsObject,
-    #[allow(dead_code)] // the native control host attaches to this
-    native_control_host: JsObject,
+    native_control_host: Rc<dyn INativeControlHostImpl>,
     input_handler: Rc<BrowserInputHandler>,
     insets_manager: Rc<BrowserInsetsManager>,
     clipboard: Rc<Clipboard>,
@@ -100,7 +101,7 @@ impl BrowserTopLevelImpl {
             Self {
                 handle: Rc::new(JsObjectControlHandle::new(container.clone())),
                 container,
-                native_control_host,
+                native_control_host: BrowserNativeControlHost::new(native_control_host),
                 input_handler,
                 insets_manager: Rc::new(BrowserInsetsManager::new()),
                 clipboard: Clipboard::new(Rc::new(ClipboardImpl::new())),
@@ -237,6 +238,10 @@ impl IOptionalFeatureProvider for BrowserTopLevelImpl {
         if feature_type == TypeId::of::<dyn IScreenImpl>() {
             let service = FerroLocator::current().get_service::<dyn IScreenImpl>()?;
             return Some(Rc::new(service));
+        }
+
+        if feature_type == TypeId::of::<dyn INativeControlHostImpl>() {
+            return Some(Rc::new(self.native_control_host.clone()));
         }
 
         if feature_type == TypeId::of::<dyn IInsetsManager>() {

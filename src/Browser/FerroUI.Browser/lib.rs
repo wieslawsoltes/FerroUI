@@ -29,6 +29,7 @@ mod browser_input_handler;
 mod browser_insets_manager;
 mod browser_input_pane;
 mod browser_mouse_device;
+mod browser_native_control_host;
 mod browser_platform_settings;
 mod browser_runtime_platform;
 mod browser_screens;
