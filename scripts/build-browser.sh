@@ -7,8 +7,9 @@
 # <application>, with its host page in wwwroot/) or a binary package of the workspace with its host
 # page in the wwwroot/ directory of the package (control-catalog-browser). The site is written to
 # target/browser/<application> (or --out): the host page, the script modules of the platform
-# (ferroui.js and storage.js, built from webapp/ with esbuild) and the WebAssembly module with its
-# script. Serve the directory with any static web server.
+# (ferroui.js and storage.js, built from webapp/ with esbuild), the service worker (ferroui-sw.js, at
+# the root of the site, which its scope and the save picker polyfill need) and the WebAssembly module
+# with its script. Serve the directory with any static web server.
 #
 # Needs: the Emscripten SDK activated in the shell (emsdk 6.0.10: `source emsdk_env.sh`), the Rust
 # target wasm32-unknown-emscripten, the wasm-bindgen command-line tool of the version of the
@@ -121,6 +122,10 @@ mkdir -p "$OUT"
 cp -R "$WWWROOT"/. "$OUT"/
 # The main script module, and the storage bundle it imports on first use from the same directory.
 cp "$CRATE/dist/ferroui.js" "$CRATE/dist/ferroui.js.map" "$CRATE/dist/storage.js" "$CRATE/dist/storage.js.map" "$OUT"/
+# The service worker, registered by the application with `register_ferro_service_worker`. It is
+# scoped to its own directory and found by the polyfill through the address of the document, so it
+# has to sit at the root of the site, next to the host page.
+cp "$CRATE/dist/ferroui-sw.js" "$CRATE/dist/ferroui-sw.js.map" "$OUT"/
 cp "$BUILT/$APPLICATION.js" "$BUILT/$WASM" "$OUT"/
 ls -la "$OUT"
 echo "site written to $OUT"

@@ -47,6 +47,20 @@ pub struct BrowserPlatformOptions {
     /// highest priority.
     pub rendering_mode: Vec<BrowserRenderingMode>,
 
+    /// Defines if the service worker used by FerroUI should be registered.
+    /// If registered, service worker can work as a save file picker fallback
+    /// on the browsers that don't support native implementation. For more
+    /// details, see
+    /// https://github.com/jimmywarting/native-file-system-adapter#a-note-when-downloading-with-the-polyfilled-version.
+    ///
+    /// Unstable: this property might not work reliably.
+    pub register_ferro_service_worker: bool,
+
+    /// If [`register_ferro_service_worker`](Self::register_ferro_service_worker)
+    /// is enabled, it is possible to redefine scope for the worker. By
+    /// default, current domain root is used as a scope.
+    pub ferro_service_worker_scope: Option<String>,
+
     /// The file dialogs use the `native-file-system-adapter` polyfill. If
     /// the native implementation is available, by default it is used. This
     /// property forces the polyfill to be always used. For more details, see
@@ -62,6 +76,8 @@ impl Default for BrowserPlatformOptions {
                 BrowserRenderingMode::WebGL1,
                 BrowserRenderingMode::Software2D,
             ],
+            register_ferro_service_worker: false,
+            ferro_service_worker_scope: None,
             prefer_file_dialog_polyfill: false,
         }
     }
