@@ -504,19 +504,19 @@
    "scope": "in",
    "detail": "full",
    "files": [
-    1102,
+    1103,
     1286,
     0
    ],
    "types": [
-    1394,
+    1395,
     1709,
     0
    ],
    "members": [
-    9652,
+    9679,
     11739,
-    31
+    32
    ],
    "interfaces": [
     231,
@@ -536,12 +536,12 @@
     "const": 346,
     "derive": 64,
     "field": 579,
-    "fn": 6166,
+    "fn": 6190,
     "free fn": 10,
     "free item": 16,
     "getter fn": 4,
-    "overload fn": 274,
-    "trait": 347,
+    "overload fn": 275,
+    "trait": 349,
     "trait fn": 70,
     "variant": 1767
    },
@@ -1736,6 +1736,9 @@
     ],
     "Layout/LayoutHelper.cs": [
      "layout/layout_helper.rs"
+    ],
+    "Layout/LayoutInformation.cs": [
+     "layout/layout_information.rs"
     ],
     "Layout/LayoutManager.cs": [
      "layout/layout_manager.rs"
@@ -4076,7 +4079,7 @@
     0
    ],
    "members": [
-    6046,
+    6156,
     6405,
     1
    ],
@@ -4097,7 +4100,7 @@
     "const": 33,
     "derive": 2,
     "field": 29,
-    "fn": 5442,
+    "fn": 5552,
     "free item": 4,
     "overload fn": 76,
     "trait": 37,
@@ -5709,7 +5712,9 @@
     "i_clickable_control.rs",
     "i_command_source.rs",
     "items_source.rs",
+    "layout_test_control.rs",
     "layoutable_tests_effective_viewport_changed.rs",
+    "layoutable_tests_layout_rounding.rs",
     "list_box_tests_multiple.rs",
     "list_box_tests_single.rs",
     "markup_types/classes.rs",
@@ -5995,6 +6000,7 @@
     "assets.rs",
     "markup.rs",
     "register_types.rs",
+    "rust_paths.rs",
     "task_completion_source.rs"
    ]
   },
@@ -6557,7 +6563,9 @@
    },
    "rustOnly": [
     "assets.rs",
-    "register_types.rs"
+    "compiled_xaml.rs",
+    "register_types.rs",
+    "rust_paths.rs"
    ]
   },
   {
@@ -6604,7 +6612,9 @@
    },
    "rustOnly": [
     "assets.rs",
-    "register_types.rs"
+    "compiled_xaml.rs",
+    "register_types.rs",
+    "rust_paths.rs"
    ]
   },
   {
@@ -6728,17 +6738,17 @@
    "scope": "in",
    "detail": "full",
    "files": [
-    47,
+    49,
     49,
     0
    ],
    "types": [
-    52,
+    53,
     61,
     0
    ],
    "members": [
-    295,
+    302,
     426,
     0
    ],
@@ -6758,10 +6768,10 @@
    "matchKinds": {
     "const": 1,
     "field": 3,
-    "fn": 209,
-    "free fn": 68,
+    "fn": 213,
+    "free fn": 70,
     "free item": 7,
-    "overload fn": 3,
+    "overload fn": 4,
     "trait": 1,
     "variant": 3
    },
@@ -6805,6 +6815,9 @@
     "BrowserMouseDevice.cs": [
      "browser_mouse_device.rs"
     ],
+    "BrowserNativeControlHost.cs": [
+     "browser_native_control_host.rs"
+    ],
     "BrowserPlatformSettings.cs": [
      "browser_platform_settings.rs"
     ],
@@ -6846,6 +6859,9 @@
     ],
     "Interop/InputHelper.cs": [
      "interop/input_helper.rs"
+    ],
+    "Interop/NativeControlHostHelper.cs": [
+     "interop/native_control_host_helper.rs"
     ],
     "Interop/NavigationHelper.cs": [
      "interop/navigation_helper.rs"
@@ -6909,6 +6925,7 @@
     ]
    },
    "rustOnly": [
+    "asset_bundle.rs",
     "interop/completion_helper.rs"
    ]
   },
@@ -7400,6 +7417,7 @@
     "rust_paths.rs",
     "test_support.rs",
     "xaml_il/runtime/compiled.rs",
+    "xaml_il/runtime/xaml_il_context.rs",
     "xamlx_runtime.rs"
    ]
   },

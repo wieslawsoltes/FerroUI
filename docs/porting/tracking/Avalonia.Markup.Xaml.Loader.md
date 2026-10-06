@@ -387,12 +387,12 @@ Rust sources of this crate that no upstream file maps to. Give each a reason in 
 | `runtime/framework/helpers.rs` | **unmapped** |  |
 | `runtime/framework/methods.rs` | **unmapped** | `DeferredTransformationFactoryMethod`, `DocumentBody`, `DocumentBuildMethod`, `DocumentMethodSignature`, `DocumentPopulateMethod`, `FrameworkMethodEvaluator`, `NoLineInfo`, `RuntimeDocumentTypeBuilderProvider`, `XamlMemberException` |
 | `runtime/framework/nodes.rs` | **unmapped** | `FrameworkNodeEvaluator` |
-| `runtime/framework/services.rs` | **unmapped** | `FerroNameScopeField`, `FerroRuntimeContextServices`, `NamespaceInfoProvider` |
+| `runtime/framework/services.rs` | **unmapped** | `FerroRuntimeContextServices`, `NamespaceInfoProvider` |
 | `runtime/framework/setters.rs` | **unmapped** | `FrameworkSetterEvaluator`, `NoLineInfo` |
 | `runtime/framework/tests.rs` | **unmapped** |  |
 | `runtime/interpreter/evaluators.rs` | **unmapped** | `AssignmentPlan`, `StandardNodeEvaluator` |
-| `runtime/interpreter/interpreter.rs` | **unmapped** | `EvalContext`, `EvalResult`, `IXamlAstEvaluableNode`, `IXamlConstructorEvaluator`, `IXamlEvaluablePropertySetter`, `IXamlEvaluableWrappedMethod`, `IXamlMethodEvaluator`, `IXamlNodeEvaluator`, `IXamlSetterEvaluator`, `IXamlWrappedMethodEvaluator`, `Interpreter`, `ParentStackCache`, ... (17 total) |
-| `runtime/interpreter/runtime_context.rs` | **unmapped** | `IRuntimeContextServices`, `IStaticServiceProvider`, `NamespaceInfoStaticProvider`, `RuntimeContext`, `RuntimeContextDefinition`, `RuntimeContextService`, `XamlXmlNamespaceInfo`, `XmlNamespaceInfoProvider` |
+| `runtime/interpreter/interpreter.rs` | **unmapped** | `EvalContext`, `EvalResult`, `IXamlAstEvaluableNode`, `IXamlConstructorEvaluator`, `IXamlEvaluablePropertySetter`, `IXamlEvaluableWrappedMethod`, `IXamlMethodEvaluator`, `IXamlNodeEvaluator`, `IXamlSetterEvaluator`, `IXamlWrappedMethodEvaluator`, `Interpreter`, `ParentStackCache`, ... (16 total) |
+| `runtime/interpreter/runtime_context.rs` | **unmapped** | `IRuntimeContextServices`, `NamespaceInfoStaticProvider`, `XamlXmlNamespaceInfo`, `XmlNamespaceInfoProvider` |
 | `runtime/interpreter/services.rs` | **unmapped** | `DefaultRuntimeContextServices`, `IProvideValueTarget`, `IRootObjectProvider`, `IUriContext`, `IXamlParentStackProvider`, `IXamlXmlNamespaceInfoProvider` |
 | `runtime/type_system/core_types.rs` | **unmapped** |  |
 | `runtime/type_system/list_converter.rs` | **unmapped** | `RuntimeListConverter` |
@@ -403,7 +403,7 @@ Rust sources of this crate that no upstream file maps to. Give each a reason in 
 | `runtime/type_system/values.rs` | **unmapped** | `ArrayForm`, `DeferredContentFactory`, `ITypeDescriptorContext`, `RuntimeArray`, `RuntimeTypeValue` |
 | `runtime/value_parser.rs` | **unmapped** | `RuntimeCompileTimeValueParser` |
 | `rust_emitter/compiled.rs` | **unmapped** | `CompiledDocument`, `GeneratedFile` |
-| `rust_emitter/emitter.rs` | **unmapped** | `EmitResult`, `Emitter`, `Kind`, `NeedsParentStack`, `Typed`, `UnsupportedNode` |
+| `rust_emitter/emitter.rs` | **unmapped** | `DocumentFunctions`, `EmitResult`, `Emitter`, `Kind`, `ParentStackNodes`, `SetterValues`, `Typed`, `UnsupportedNode` |
 | `rust_emitter/source.rs` | **unmapped** |  |
 | `testing/bindings.rs` | **unmapped** | `BindingsPipelineOptions`, `NodeCollector` |
 | `testing/objects.rs` | **unmapped** | `Collector`, `Dumper` |

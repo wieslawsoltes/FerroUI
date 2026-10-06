@@ -153,6 +153,8 @@ Rust sources of this crate that no upstream file maps to. Give each a reason in 
 | Rust file | Reason | Types defined |
 |---|---|---|
 | `assets.rs` | **unmapped** | `ExcludedDocument` |
+| `compiled_xaml.rs` | **unmapped** |  |
 | `register_types.rs` | **unmapped** |  |
+| `rust_paths.rs` | **unmapped** |  |
 
-Tests, examples and build scripts (not scanned): `build.rs`, `tests/control_templates.rs`, `tests/control_theme_tests.rs`, `tests/documents.rs`, `tests/fluent_theme_tests.rs`, `tests/gaps.rs`, `tests/mod.rs`, `tests/public_api_tests.rs`, `tests/resource_dictionary_tests.rs`, `tests/support.rs`, `tests/theme_class_tests.rs`.
+Tests, examples and build scripts (not scanned): `build.rs`, `tests/compiled_xaml_tests.rs`, `tests/control_templates.rs`, `tests/control_theme_tests.rs`, `tests/documents.rs`, `tests/fluent_theme_tests.rs`, `tests/gaps.rs`, `tests/load_time.rs`, `tests/mod.rs`, `tests/public_api_tests.rs`, `tests/resource_dictionary_tests.rs`, `tests/support.rs`, `tests/theme_class_tests.rs`.

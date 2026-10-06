@@ -10,9 +10,9 @@ Generated from upstream commit `17350180c33b063f0e98abbfd19aa3cae63f5d56`. Back 
 | FerroUI | `src/FerroUI.Base` (exists) |
 | Crate | `ferroui-base` |
 | Phase / priority | 0 - core / P0 |
-| Files | 1102/1286 (85.7%), 13 not applicable |
-| Types | 1394/1709 (81.6%) |
-| Members | 9652/11739 (31 waived) (82.4%) |
+| Files | 1103/1286 (85.8%), 13 not applicable |
+| Types | 1395/1709 (81.6%) |
+| Members | 9679/11739 (32 waived) (82.7%) |
 | Contracts (interfaces) | 231/263 |
 | Property registrations | 224/239 |
 | Routed events | 41/41 |
@@ -290,7 +290,7 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 
 ## Files
 
-### `(project root)` - files 40/59, types 48/67, members 801/942 (16 waived)
+### `(project root)` - files 40/59, types 48/67, members 803/942 (16 waived)
 
 | Upstream file | Rust file | Status | Types | Members | Notes |
 |---|---|---|---|---|---|
@@ -308,7 +308,7 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 | `AvaloniaPropertyRegistry.cs` | `ferro_property_registry.rs` | partial | 1/1 | 16/18 |  |
 | `AvaloniaProperty`1.cs` | `ferro_property.rs` | partial | 1/1 | 3/6 | generic arity merged |
 | `ClassBindingManager.cs` | `class_binding_manager.rs` | present | 1/1 | 3/3 |  |
-| `CombinedGeometry.cs` | `combined_geometry.rs` | partial | 2/2 | 14/18 |  |
+| `CombinedGeometry.cs` | `combined_geometry.rs` | partial | 2/2 | 15/18 |  |
 | `CornerRadius.cs` | `corner_radius.rs` | partial | 1/1 | 13/15 (1 waived) |  |
 | `DirectProperty.cs` | `direct_property.rs` | partial | 1/1 | 6/10 |  |
 | `DirectPropertyBase.cs` | `direct_property.rs` | partial | 1/1 | 17/20 | merged: DirectPropertyBase&lt;T&gt; lives next to DirectProperty&lt;TOwner, T&gt; |
@@ -350,7 +350,7 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 | `Vector.cs` | `vector.rs` | present | 1/1 | 47/49 (2 waived) |  |
 | `Vector3D.cs` | `vector3d.rs` | present | 1/1 | 26/27 (1 waived) |  |
 | `Visual.Composition.cs` | `visual.rs` | present | 1/1 | 7/7 | partial merged into main file |
-| `Visual.cs` | `visual.rs` | partial | 1/1 | 58/61 |  |
+| `Visual.cs` | `visual.rs` | partial | 1/1 | 59/61 |  |
 | `VisualExtensions.cs` | `visual_extensions.rs` | missing | 0/1 | 0/4 |  |
 | `VisualTreeAttachmentEventArgs.cs` | `visual_tree_attachment_event_args.rs` | partial | 1/1 | 3/6 |  |
 
@@ -444,10 +444,9 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 
 </details>
 
-<details><summary><code>CombinedGeometry.cs</code> - 4 missing</summary>
+<details><summary><code>CombinedGeometry.cs</code> - 3 missing</summary>
 
-- `CombinedGeometry` (class): 4 missing
-  - `static CombinedGeometry()` *(static)*
+- `CombinedGeometry` (class): 3 missing
   - `CombinedGeometry(Geometry geometry1, Geometry geometry2)` *(1 of 4 constructors found)*
   - `CombinedGeometry(GeometryCombineMode combineMode, Geometry? geometry1, Geometry? geometry2)` *(1 of 4 constructors found)*
   - `CombinedGeometry(GeometryCombineMode combineMode, Geometry? geometry1, Geometry? geometry2, Transform? tran...` *(1 of 4 constructors found)*
@@ -522,10 +521,9 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 
 </details>
 
-<details><summary><code>Visual.cs</code> - 3 missing</summary>
+<details><summary><code>Visual.cs</code> - 2 missing</summary>
 
-- `Visual` (class): 3 missing
-  - `static Visual()` *(static)*
+- `Visual` (class): 2 missing
   - `SafeEnumerableAvaloniaList<Visual> TypedVisualChildren { get; }` *(internal)*
   - `void IAvaloniaListItemValidator<Visual>.Validate(Visual item)` *(explicit)*
 
@@ -1646,7 +1644,7 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 
 </details>
 
-### `Input` - files 88/90, types 109/115, members 1088/1136
+### `Input` - files 88/90, types 109/115, members 1091/1136
 
 | Upstream file | Rust file | Status | Types | Members | Notes |
 |---|---|---|---|---|---|
@@ -1674,8 +1672,8 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 | `FocusChangedEventArgs.cs` | `input/focus_changed_event_args.rs` | present | 1/1 | 5/5 |  |
 | `FocusChangingEventArgs.cs` | `input/focus_changing_event_args.rs` | present | 1/1 | 9/9 |  |
 | `FocusHelpers.cs` | `input/focus_helpers.rs` | present | 1/1 | 7/7 |  |
-| `FocusManager.cs` | `input/focus_manager.rs` | partial | 1/1 | 19/20 |  |
-| `Gestures.cs` | `input/gestures.rs` | partial | 1/1 | 4/5 |  |
+| `FocusManager.cs` | `input/focus_manager.rs` | present | 1/1 | 20/20 |  |
+| `Gestures.cs` | `input/gestures.rs` | present | 1/1 | 5/5 |  |
 | `HoldingRoutedEventArgs.cs` | `input/holding_routed_event_args.rs` | present | 2/2 | 8/8 |  |
 | `IAccessKeyHandler.cs` | `input/i_access_key_handler.rs` | present | 1/1 | 4/4 |  |
 | `IAsyncDataTransfer.cs` | `input/i_async_data_transfer.rs` | present | 1/1 | 2/2 |  |
@@ -1702,7 +1700,7 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 | `IPointer.cs` | `input/i_pointer.rs` | present | 2/2 | 8/8 |  |
 | `IPointerDevice.cs` | `input/i_pointer_device.rs` | present | 1/1 | 1/1 |  |
 | `InputElement.Gestures.cs` | `input/input_element_gestures.rs` | present | 1/1 | 38/38 |  |
-| `InputElement.cs` | `input/input_element.rs` | partial | 1/1 | 92/93 |  |
+| `InputElement.cs` | `input/input_element.rs` | present | 1/1 | 93/93 |  |
 | `InputExtensions.cs` | `input/input_extensions.rs` | partial | 0/1 | 0/9 |  |
 | `InputManager.cs` | `input/input_manager.rs` | present | 1/1 | 6/6 |  |
 | `InputMethod.cs` | `input/input_method.rs` | present | 1/1 | 6/6 |  |
@@ -1771,20 +1769,6 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 
 </details>
 
-<details><summary><code>FocusManager.cs</code> - 1 missing</summary>
-
-- `FocusManager` (class): 1 missing
-  - `static FocusManager()` *(static)*
-
-</details>
-
-<details><summary><code>Gestures.cs</code> - 1 missing</summary>
-
-- `Gestures` (class): 1 missing
-  - `static Gestures()` *(static)*
-
-</details>
-
 <details><summary><code>IInputElement.cs</code> - 15 missing</summary>
 
 - `IInputElement` (interface): 15 missing
@@ -1803,13 +1787,6 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
   - `void AddHandler(RoutedEvent routedEvent, Delegate handler, RoutingStrategies routes = RoutingStrategies.Dir...`
   - `void RemoveHandler(RoutedEvent routedEvent, Delegate handler)`
   - `void RaiseEvent(RoutedEventArgs e)`
-
-</details>
-
-<details><summary><code>InputElement.cs</code> - 1 missing</summary>
-
-- `InputElement` (class): 1 missing
-  - `static InputElement()` *(static)*
 
 </details>
 
@@ -2102,60 +2079,23 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 
 </details>
 
-### `Layout` - files 12/13, types 14/15, members 114/123
+### `Layout` - files 13/13, types 15/15, members 122/123 (1 waived)
 
 | Upstream file | Rust file | Status | Types | Members | Notes |
 |---|---|---|---|---|---|
-| `BringIntoViewRequest.cs` | `layout/bring_into_view_request.rs` | partial | 1/1 | 2/3 |  |
+| `BringIntoViewRequest.cs` | `layout/bring_into_view_request.rs` | present | 1/1 | 2/3 (1 waived) |  |
 | `EffectiveViewportChangedEventArgs.cs` | `layout/effective_viewport_changed_event_args.rs` | present | 1/1 | 2/2 |  |
 | `IBringIntoViewLayoutManager.cs` | `layout/i_bring_into_view_layout_manager.rs` | present | 1/1 | 2/2 |  |
 | `ILayoutManager.cs` | `layout/i_layout_manager.rs` | present | 1/1 | 7/7 |  |
 | `ILayoutRoot.cs` | `layout/i_layout_root.rs` | present | 1/1 | 3/3 |  |
 | `LayoutExtensions.cs` | `layout/layout_extensions.rs` | present | 1/1 | 1/1 |  |
-| `LayoutHelper.cs` | `layout/layout_helper.rs` | partial | 1/1 | 14/15 |  |
-| `LayoutInformation.cs` | `layout/layout_information.rs` | missing | 0/1 | 0/2 |  |
-| `LayoutManager.cs` | `layout/layout_manager.rs` | partial | 1/1 | 12/13 |  |
-| `LayoutQueue.cs` | `layout/layout_queue.rs` | partial | 1/1 | 6/9 |  |
-| `Layoutable.cs` | `layout/layoutable.rs` | partial | 3/3 | 58/59 |  |
+| `LayoutHelper.cs` | `layout/layout_helper.rs` | present | 1/1 | 15/15 |  |
+| `LayoutInformation.cs` | `layout/layout_information.rs` | present | 1/1 | 2/2 |  |
+| `LayoutManager.cs` | `layout/layout_manager.rs` | present | 1/1 | 13/13 |  |
+| `LayoutQueue.cs` | `layout/layout_queue.rs` | present | 1/1 | 9/9 |  |
+| `Layoutable.cs` | `layout/layoutable.rs` | present | 3/3 | 59/59 |  |
 | `MinMax.cs` | `layout/min_max.rs` | present | 1/1 | 5/5 |  |
 | `Orientation.cs` | `layout/orientation.rs` | present | 1/1 | 2/2 |  |
-
-<details><summary><code>BringIntoViewRequest.cs</code> - 1 missing</summary>
-
-- `BringIntoViewRequest` (class): 1 missing
-  - `BringIntoViewRequest(Layoutable target)`
-
-</details>
-
-<details><summary><code>LayoutHelper.cs</code> - 1 missing</summary>
-
-- `LayoutHelper` (class): 1 missing
-  - `static Size ApplyLayoutConstraints(MinMax minMax, Size constraints)` *(internal; 1 of 2 overloads found)*
-
-</details>
-
-<details><summary><code>LayoutManager.cs</code> - 1 missing</summary>
-
-- `LayoutManager` (class): 1 missing
-  - `Action<LayoutPassTiming>? LayoutPassTimed { get; set; }` *(internal)*
-
-</details>
-
-<details><summary><code>LayoutQueue.cs</code> - 3 missing</summary>
-
-- `LayoutQueue<T>` (class): 3 missing
-  - `IEnumerator<T> GetEnumerator()`
-  - `IEnumerator IEnumerable.GetEnumerator()` *(explicit)*
-  - `void Dispose()`
-
-</details>
-
-<details><summary><code>Layoutable.cs</code> - 1 missing</summary>
-
-- `Layoutable` (class): 1 missing
-  - `static Layoutable()` *(static)*
-
-</details>
 
 ### `Logging` - files 6/6, types 6/6, members 38/44
 
@@ -2198,7 +2138,7 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 | `LogicalExtensions.cs` | `logical_tree/logical_extensions.rs` | missing | 0/1 | 0/11 |  |
 | `LogicalTreeAttachmentEventArgs.cs` | `logical_tree/logical_tree_attachment_event_args.rs` | present | 1/1 | 4/4 |  |
 
-### `Media` - files 160/165, types 169/184, members 1649/1768 (4 waived)
+### `Media` - files 160/165, types 169/184, members 1658/1768 (4 waived)
 
 | Upstream file | Rust file | Status | Types | Members | Notes |
 |---|---|---|---|---|---|
@@ -2224,7 +2164,7 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 | `Colors.cs` | `media/colors.rs` | present | 1/1 | 141/141 |  |
 | `CompositeFontFamilyKey.cs` | `media/composite_font_family_key.rs` | present | 1/1 | 2/2 |  |
 | `ConicGradientBrush.cs` | `media/conic_gradient_brush.rs` | present | 1/1 | 7/7 |  |
-| `DashStyle.cs` | `media/dash_style.rs` | partial | 1/1 | 13/15 |  |
+| `DashStyle.cs` | `media/dash_style.rs` | partial | 1/1 | 14/15 |  |
 | `Drawing.cs` | `media/drawing.rs` | present | 1/1 | 7/7 |  |
 | `DrawingBrush.cs` | `media/drawing_brush.rs` | partial | 1/1 | 8/9 |  |
 | `DrawingCollection.cs` | `media/drawing_collection.rs` | partial | 0/1 | 0/2 |  |
@@ -2232,8 +2172,8 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 | `DrawingGroup.cs` | `media/drawing_group.rs` | present | 1/1 | 19/19 |  |
 | `DrawingImage.cs` | `media/drawing_image.rs` | partial | 1/1 | 10/11 |  |
 | `EdgeMode.cs` | `media/edge_mode.rs` | present | 1/1 | 3/3 |  |
-| `EllipseGeometry.cs` | `media/ellipse_geometry.rs` | partial | 1/1 | 11/13 |  |
-| `ExperimentalAcrylicMaterial.cs` | `media/experimental_acrylic_material.rs` | partial | 1/1 | 17/19 |  |
+| `EllipseGeometry.cs` | `media/ellipse_geometry.rs` | partial | 1/1 | 12/13 |  |
+| `ExperimentalAcrylicMaterial.cs` | `media/experimental_acrylic_material.rs` | partial | 1/1 | 18/19 |  |
 | `FillRule.cs` | `media/fill_rule.rs` | present | 1/1 | 2/2 |  |
 | `FlowDirection.cs` | `media/flow_direction.rs` | present | 1/1 | 2/2 |  |
 | `FontFallback.cs` | `media/font_fallback.rs` | present | 1/1 | 2/2 |  |
@@ -2250,7 +2190,7 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 | `FontVariationSettings.cs` | `media/font_variation_settings.rs` | present | 2/2 | 14/14 |  |
 | `FontWeight.cs` | `media/font_weight.rs` | present | 1/1 | 18/18 |  |
 | `FormattedText.cs` | `media/formatted_text.rs` | partial | 1/1 | 46/47 |  |
-| `Geometry.cs` | `media/geometry.rs` | partial | 1/2 | 25/31 |  |
+| `Geometry.cs` | `media/geometry.rs` | partial | 1/2 | 26/31 |  |
 | `GeometryBuilder.cs` | `media/geometry_builder.rs` | present | 2/2 | 16/16 |  |
 | `GeometryCollection.cs` | `media/geometry_collection.rs` | present | 1/1 | 3/3 |  |
 | `GeometryDrawing.cs` | `media/geometry_drawing.rs` | present | 1/1 | 8/8 |  |
@@ -2303,7 +2243,7 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 | `ImmutableGeometryImpl.cs` | `media/immutable_geometry_impl.rs` | missing | 0/1 | 0/13 |  |
 | `IntersectionResult.cs` | `media/intersection_result.rs` | present | 1/1 | 5/5 |  |
 | `KnownColors.cs` | `media/known_colors.rs` | partial | 2/2 | 147/149 |  |
-| `LineGeometry.cs` | `media/line_geometry.rs` | partial | 1/1 | 7/9 |  |
+| `LineGeometry.cs` | `media/line_geometry.rs` | partial | 1/1 | 8/9 |  |
 | `LineSegment.cs` | `media/line_segment.rs` | present | 1/1 | 4/4 |  |
 | `LinearGradientBrush.cs` | `media/linear_gradient_brush.rs` | present | 1/1 | 7/7 |  |
 | `MaterialExtensions.cs` | `media/material_extensions.rs` | present | 1/1 | 1/1 |  |
@@ -2313,8 +2253,8 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 | `MediaContext.cs` | `media/media_context.rs` | present | 1/1 | 5/5 |  |
 | `MediaExtensions.cs` | `media/media_extensions.rs` | present | 1/1 | 2/2 |  |
 | `NormalizedVariationPosition.cs` | `media/normalized_variation_position.rs` | partial | 2/2 | 13/14 |  |
-| `PathFigure.cs` | `media/path_figure.rs` | partial | 1/1 | 12/13 |  |
-| `PathGeometry.cs` | `media/path_geometry.rs` | partial | 1/1 | 8/9 |  |
+| `PathFigure.cs` | `media/path_figure.rs` | present | 1/1 | 13/13 |  |
+| `PathGeometry.cs` | `media/path_geometry.rs` | present | 1/1 | 9/9 |  |
 | `PathGeometryCollections.cs` | `media/path_geometry_collections.rs` | partial | 0/2 | 0/4 |  |
 | `PathMarkupParser.cs` | `media/path_markup_parser.rs` | present | 1/1 | 4/4 |  |
 | `PathSegment.cs` | `media/path_segment.rs` | present | 1/1 | 3/3 |  |
@@ -2325,11 +2265,11 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 | `PlatformGeometry.cs` | `media/platform_geometry.rs` | present | 1/1 | 3/3 |  |
 | `PolyBezierSegment.cs` | `media/poly_bezier_segment.rs` | partial | 1/1 | 5/6 |  |
 | `PolyLineSegment.cs` | `media/poly_line_segment.rs` | partial | 1/1 | 5/6 |  |
-| `PolylineGeometry.cs` | `media/polyline_geometry.rs` | partial | 1/1 | 8/11 |  |
+| `PolylineGeometry.cs` | `media/polyline_geometry.rs` | partial | 1/1 | 9/11 |  |
 | `PreciseEllipticArcHelper.cs` | `media/precise_elliptic_arc_helper.rs` | partial | 2/2 | 40/41 |  |
 | `QuadraticBezierSegment .cs` | `media/quadratic_bezier_segment.rs` | present | 1/1 | 6/6 |  |
 | `RadialGradientBrush.cs` | `media/radial_gradient_brush.rs` | present | 1/1 | 11/11 |  |
-| `RectangleGeometry.cs` | `media/rectangle_geometry.rs` | partial | 1/1 | 9/12 |  |
+| `RectangleGeometry.cs` | `media/rectangle_geometry.rs` | partial | 1/1 | 10/12 |  |
 | `RenderOptions.cs` | `media/render_options.rs` | present | 1/1 | 16/16 |  |
 | `RotateTransform.cs` | `media/rotate_transform.rs` | partial | 1/1 | 8/10 |  |
 | `ScaleTransform.cs` | `media/scale_transform.rs` | partial | 1/1 | 7/8 |  |
@@ -2406,11 +2346,10 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 
 </details>
 
-<details><summary><code>DashStyle.cs</code> - 2 missing</summary>
+<details><summary><code>DashStyle.cs</code> - 1 missing</summary>
 
-- `DashStyle` (class): 2 missing
+- `DashStyle` (class): 1 missing
   - `DashStyle(IEnumerable<double>? dashes, double offset)` *(1 of 2 constructors found)*
-  - `static DashStyle()` *(static)*
 
 </details>
 
@@ -2445,18 +2384,16 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 
 </details>
 
-<details><summary><code>EllipseGeometry.cs</code> - 2 missing</summary>
+<details><summary><code>EllipseGeometry.cs</code> - 1 missing</summary>
 
-- `EllipseGeometry` (class): 2 missing
-  - `static EllipseGeometry()` *(static)*
+- `EllipseGeometry` (class): 1 missing
   - `EllipseGeometry(Rect rect)` *(1 of 2 constructors found)*
 
 </details>
 
-<details><summary><code>ExperimentalAcrylicMaterial.cs</code> - 2 missing</summary>
+<details><summary><code>ExperimentalAcrylicMaterial.cs</code> - 1 missing</summary>
 
-- `ExperimentalAcrylicMaterial` (class): 2 missing
-  - `static ExperimentalAcrylicMaterial()` *(static)*
+- `ExperimentalAcrylicMaterial` (class): 1 missing
   - `Color IExperimentalAcrylicMaterial.MaterialColor { get; }` *(explicit)*
 
 </details>
@@ -2481,10 +2418,9 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 
 </details>
 
-<details><summary><code>Geometry.cs</code> - 7 missing</summary>
+<details><summary><code>Geometry.cs</code> - 6 missing</summary>
 
-- `Geometry` (class): 4 missing
-  - `static Geometry()` *(static)*
+- `Geometry` (class): 3 missing
   - `Geometry(IGeometryImpl? platformImpl)` *(private protected; 1 of 2 constructors found)*
   - `SimpleServerObject? ICompositorSerializable.TryGetServer(Compositor c)` *(explicit)*
   - `void ICompositorSerializable.SerializeChanges(Compositor c, BatchStreamWriter writer)` *(explicit)*
@@ -2563,10 +2499,9 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 
 </details>
 
-<details><summary><code>LineGeometry.cs</code> - 2 missing</summary>
+<details><summary><code>LineGeometry.cs</code> - 1 missing</summary>
 
-- `LineGeometry` (class): 2 missing
-  - `static LineGeometry()` *(static)*
+- `LineGeometry` (class): 1 missing
   - `LineGeometry(Point startPoint, Point endPoint)` *(1 of 2 constructors found)*
 
 </details>
@@ -2582,20 +2517,6 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 
 - `NormalizedVariationPosition` (struct): 1 missing
   - `static NormalizedVariationPosition FromCoordinates(ReadOnlySpan<NormalizedVariationCoordinate> normalizedCo...` *(1 of 2 overloads found)*
-
-</details>
-
-<details><summary><code>PathFigure.cs</code> - 1 missing</summary>
-
-- `PathFigure` (class): 1 missing
-  - `static PathFigure()` *(static)*
-
-</details>
-
-<details><summary><code>PathGeometry.cs</code> - 1 missing</summary>
-
-- `PathGeometry` (class): 1 missing
-  - `static PathGeometry()` *(static)*
 
 </details>
 
@@ -2637,10 +2558,9 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 
 </details>
 
-<details><summary><code>PolylineGeometry.cs</code> - 3 missing</summary>
+<details><summary><code>PolylineGeometry.cs</code> - 2 missing</summary>
 
-- `PolylineGeometry` (class): 3 missing
-  - `static PolylineGeometry()` *(static)*
+- `PolylineGeometry` (class): 2 missing
   - `PolylineGeometry(IEnumerable<Point> points, bool isFilled)` *(1 of 3 constructors found)*
   - `PolylineGeometry(IEnumerable<Point> points, bool isFilled, FillRule fillRule)` *(1 of 3 constructors found)*
 
@@ -2653,10 +2573,9 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 
 </details>
 
-<details><summary><code>RectangleGeometry.cs</code> - 3 missing</summary>
+<details><summary><code>RectangleGeometry.cs</code> - 2 missing</summary>
 
-- `RectangleGeometry` (class): 3 missing
-  - `static RectangleGeometry()` *(static)*
+- `RectangleGeometry` (class): 2 missing
   - `RectangleGeometry(Rect rect)` *(1 of 3 constructors found)*
   - `RectangleGeometry(Rect rect, double radiusX, double radiusY)` *(1 of 3 constructors found)*
 
@@ -2736,12 +2655,12 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 
 </details>
 
-### `Media/Effects` - files 6/10, types 18/21, members 62/76
+### `Media/Effects` - files 6/10, types 18/21, members 66/76
 
 | Upstream file | Rust file | Status | Types | Members | Notes |
 |---|---|---|---|---|---|
-| `BlurEffect.cs` | `media/effects/blur_effect.rs` | partial | 1/1 | 3/4 |  |
-| `DropShadowEffect.cs` | `media/effects/drop_shadow_effect.rs` | partial | 3/3 | 18/21 |  |
+| `BlurEffect.cs` | `media/effects/blur_effect.rs` | present | 1/1 | 4/4 |  |
+| `DropShadowEffect.cs` | `media/effects/drop_shadow_effect.rs` | present | 3/3 | 21/21 |  |
 | `Effect.cs` | `media/effects/effect.rs` | partial | 1/1 | 5/6 |  |
 | `EffectAnimator.cs` | `media/effects/effect_animator.rs` | missing (types found elsewhere) | 3/4 | 5/8 | types found in `animation/animators/effect_animator.rs` (add to path-overrides.toml) |
 | `EffectConverter.cs` | `media/effects/effect_converter.rs` | missing | 0/1 | 0/2 |  |
@@ -2750,24 +2669,6 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 | `IBlurEffect.cs` | `media/effects/i_blur_effect.rs` | partial | 2/2 | 4/5 |  |
 | `IDropShadowEffect.cs` | `media/effects/i_drop_shadow_effect.rs` | partial | 4/4 | 23/25 |  |
 | `IEffect.cs` | `media/effects/i_effect.rs` | present | 3/3 | 1/1 |  |
-
-<details><summary><code>BlurEffect.cs</code> - 1 missing</summary>
-
-- `BlurEffect` (class): 1 missing
-  - `static BlurEffect()` *(static)*
-
-</details>
-
-<details><summary><code>DropShadowEffect.cs</code> - 3 missing</summary>
-
-- `DropShadowEffectBase` (class): 1 missing
-  - `static DropShadowEffectBase()` *(static)*
-- `DropShadowEffect` (class): 1 missing
-  - `static DropShadowEffect()` *(static)*
-- `DropShadowDirectionEffect` (class): 1 missing
-  - `static DropShadowDirectionEffect()` *(static)*
-
-</details>
 
 <details><summary><code>Effect.cs</code> - 1 missing</summary>
 
@@ -2947,7 +2848,7 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 | `NameRecord.cs` | `media/fonts/tables/name/name_record.rs` | present | 1/1 | 8/8 |  |
 | `NameTable.cs` | `media/fonts/tables/name/name_table.rs` | present | 1/1 | 12/12 |  |
 
-### `Media/Imaging` - files 14/14, types 49/49, members 175/183
+### `Media/Imaging` - files 14/14, types 49/49, members 176/183
 
 | Upstream file | Rust file | Status | Types | Members | Notes |
 |---|---|---|---|---|---|
@@ -2956,7 +2857,7 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 | `BitmapEncoderOptions.cs` | `media/imaging/bitmap_encoder_options.rs` | present | 1/1 | 1/1 |  |
 | `BitmapInterpolationMode.cs` | `media/imaging/bitmap_interpolation_mode.rs` | present | 1/1 | 5/5 |  |
 | `BitmapMemory.cs` | `media/imaging/bitmap_memory.rs` | partial | 1/1 | 7/9 |  |
-| `CroppedBitmap.cs` | `media/imaging/cropped_bitmap.rs` | partial | 1/1 | 9/11 |  |
+| `CroppedBitmap.cs` | `media/imaging/cropped_bitmap.rs` | partial | 1/1 | 10/11 |  |
 | `IBitmap.cs` | `media/imaging/i_bitmap.rs` | present | 1/1 | 4/4 |  |
 | `JpegBitmapEncoderOptions.cs` | `media/imaging/jpeg_bitmap_encoder_options.rs` | present | 1/1 | 2/2 |  |
 | `PixelFormatReaders.cs` | `media/imaging/pixel_format_readers.rs` | present | 19/19 | 44/44 |  |
@@ -2983,10 +2884,9 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 
 </details>
 
-<details><summary><code>CroppedBitmap.cs</code> - 2 missing</summary>
+<details><summary><code>CroppedBitmap.cs</code> - 1 missing</summary>
 
-- `CroppedBitmap` (class): 2 missing
-  - `static CroppedBitmap()` *(static)*
+- `CroppedBitmap` (class): 1 missing
   - `CroppedBitmap(IImage source, PixelRect sourceRect)` *(1 of 2 constructors found)*
 
 </details>
@@ -5268,4 +5168,4 @@ Rust sources of this crate that no upstream file maps to. Give each a reason in 
 | `utilities/time_zone_info.rs` | **unmapped** | `LocalUtcOffsetProvider`, `TimeZoneInfo` |
 | `utilities/uri.rs` | **unmapped** | `Uri`, `UriFormatError`, `UriKind` |
 
-Tests, examples and build scripts (not scanned): `animation/tests/animatable_tests.rs`, `animation/tests/animation_iteration_tests.rs`, `animation/tests/brush_transition_tests.rs`, `animation/tests/effect_tests.rs`, `animation/tests/key_spline_tests.rs`, `animation/tests/mod.rs`, `animation/tests/page_transition_tests.rs`, `animation/tests/spring_tests.rs`, `animation/tests/style_animation_tests.rs`, `animation/tests/transitions_tests.rs`, `controls/resource_tests.rs`, `data/converters/composite_format_tests.rs`, `data/core/plugins/markup_members_tests.rs`, `diagnostics/diagnostics_tests.rs`, `ferro_object_tests.rs`, `input/data_transfer_tests.rs`, `input/input_tests.rs`, `interactivity/interactive_tests.rs`, `markup_types/markup_types_tests.rs`, `media/drawing_context_tests.rs`, `media/font_manager_tests.rs`, `media/fonts/font_collection_tests.rs`, `media/fonts/tables/cmap/cmap_table_tests.rs`, `media/fonts/tables/glyf/glyf_table_contour_walk_tests.rs`, `media/fonts/tables/glyf/glyf_table_point_matching_tests.rs`, `media/fonts/tables/glyf/glyf_table_tests.rs`, `media/formatted_text_tests.rs`, `media/glyph_typeface_tests.rs`, `media/imaging/imaging_tests.rs`, `media/media_context_tests.rs`, `media/text_formatting/shaped_buffer_tests.rs`, `media/text_formatting/split_text_runs_tests.rs`, `media/text_formatting/text_characters_tests.rs`, `media/text_formatting/text_collapsing_bidi_tests.rs`, `media/text_formatting/text_formatter_tests.rs`, `media/text_formatting/text_formatter_wrap_characterization_tests.rs`, `media/text_formatting/text_layout_tests.rs`, `media/text_formatting/text_line_tests.rs`, `media/text_formatting/text_run_cache_tests.rs`, `media/text_formatting/unicode/bidi_algorithm_tests.rs`, `media/text_formatting/unicode/bidi_class_tests.rs`, `media/text_formatting/unicode/codepoint_has_script_extension_tests.rs`, `media/text_formatting/unicode/codepoint_tests.rs`, `media/text_formatting/unicode/grapheme_break_class_trie_generator_tests.rs`, `media/text_formatting/unicode/line_break_enumerator_tests.rs`, `media/text_formatting/unicode/property_value_alias_helper_tests.rs`, `media/text_formatting/unicode/sentence_break_enumerator_tests.rs`, `media/text_formatting/unicode/unicode_data_tests.rs`, `media/text_formatting/unicode/unicode_trie_tests.rs`, `media/text_formatting/unicode/utf16_utils_tests.rs`, `media/text_formatting/unicode/word_break_enumerator_tests.rs`, `metadata/markup_type_tests.rs`, `platform/storage/file_io/bcl_storage_tests.rs`, `platform/storage/file_io/storage_provider_helper_tests.rs`, `platform/storage/storage_tests.rs`, `rendering/composition/animations/composition_animation_tests.rs`, `rendering/composition/brushes/composition_brush_tests.rs`, `rendering/composition/composition_drawing_surface_tests.rs`, `rendering/composition/compositor_tests.rs`, `rendering/composition/drawing/render_data_stream_hit_test.rs`, `rendering/composition/drawing/render_data_tests.rs`, `rendering/composition/drawing/render_resource_tests.rs`, `rendering/composition/expressions/expression_tests.rs`, `rendering/i_custom_hit_test.rs`, `styling/container_tests.rs`, `styling/selector_tests.rs`, `styling/style_tests.rs`, `tests/attached_property_tests.rs`, `tests/binding_default_value_converter_tests.rs`, `tests/binding_expression_observer_indexer_tests.rs`, `tests/binding_expression_tests_attached_property.rs`, `tests/binding_expression_tests_data_validation.rs`, `tests/binding_expression_tests_ferro_property.rs`, `tests/binding_expression_tests_get_value.rs`, `tests/binding_expression_tests_indexer.rs`, `tests/binding_expression_tests_mode.rs`, `tests/binding_expression_tests_negation.rs`, `tests/binding_expression_tests_observable.rs`, `tests/binding_expression_tests_property.rs`, `tests/binding_expression_tests_set_value.rs`, `tests/binding_expression_tests_task.rs`, `tests/binding_expression_tests_update_source_trigger.rs`, `tests/binding_model_tests.rs`, `tests/binding_null_conditional_tests.rs`, `tests/binding_operations_tests.rs`, `tests/binding_plugin_tests.rs`, `tests/binding_setter_tests.rs`, `tests/binding_test_support.rs`, `tests/binding_typed_expression_tests.rs`, `tests/class_registration_tests.rs`, `tests/compiled_binding_tests_create.rs`, `tests/direct_property_tests.rs`, `tests/ferro_object_tests_add_owner.rs`, `tests/ferro_object_tests_attached.rs`, `tests/ferro_object_tests_binding.rs`, `tests/ferro_object_tests_binding_two_way.rs`, `tests/ferro_object_tests_coercion.rs`, `tests/ferro_object_tests_data_validation.rs`, `tests/ferro_object_tests_direct.rs`, `tests/ferro_object_tests_get_observable.rs`, `tests/ferro_object_tests_get_value.rs`, `tests/ferro_object_tests_inheritance.rs`, `tests/ferro_object_tests_metadata.rs`, `tests/ferro_object_tests_on_property_changed.rs`, `tests/ferro_object_tests_reentrancy.rs`, `tests/ferro_object_tests_set_current_value.rs`, `tests/ferro_object_tests_set_value.rs`, `tests/ferro_object_tests_validation.rs`, `tests/ferro_property_registry_tests.rs`, `tests/ferro_property_tests.rs`, `tests/mod.rs`, `tests/property_registration_tests.rs`, `tests/property_store/frame_priority_extensions_tests.rs`, `tests/property_store/mod.rs`, `tests/property_store/value_store_tests_frames.rs`, `tests/property_store/value_store_tests_inheritance.rs`, `tests/reference_semantics_tests.rs`, `tests/styled_property_tests.rs`, `threading/dispatcher_priority_queue_tests.rs`, `threading/dispatcher_tests.rs`, `tree_tests.rs`, `utilities/date_time_net_tests.rs`, `utilities/date_time_tests.rs`, `utilities/number_format_net_tests.rs`, `visual_render_tests.rs`.
+Tests, examples and build scripts (not scanned): `animation/tests/animatable_tests.rs`, `animation/tests/animation_iteration_tests.rs`, `animation/tests/brush_transition_tests.rs`, `animation/tests/effect_tests.rs`, `animation/tests/key_spline_tests.rs`, `animation/tests/mod.rs`, `animation/tests/page_transition_tests.rs`, `animation/tests/spring_tests.rs`, `animation/tests/style_animation_tests.rs`, `animation/tests/transitions_tests.rs`, `controls/resource_tests.rs`, `data/converters/composite_format_tests.rs`, `data/core/plugins/markup_members_tests.rs`, `diagnostics/diagnostics_tests.rs`, `ferro_object_tests.rs`, `input/data_transfer_tests.rs`, `input/input_tests.rs`, `interactivity/interactive_tests.rs`, `layout/layout_helper_tests.rs`, `layout/layout_queue_tests.rs`, `markup_types/markup_types_tests.rs`, `media/drawing_context_tests.rs`, `media/font_manager_tests.rs`, `media/fonts/font_collection_tests.rs`, `media/fonts/tables/cmap/cmap_table_tests.rs`, `media/fonts/tables/glyf/glyf_table_contour_walk_tests.rs`, `media/fonts/tables/glyf/glyf_table_point_matching_tests.rs`, `media/fonts/tables/glyf/glyf_table_tests.rs`, `media/formatted_text_tests.rs`, `media/glyph_typeface_tests.rs`, `media/imaging/imaging_tests.rs`, `media/media_context_tests.rs`, `media/text_formatting/shaped_buffer_tests.rs`, `media/text_formatting/split_text_runs_tests.rs`, `media/text_formatting/text_characters_tests.rs`, `media/text_formatting/text_collapsing_bidi_tests.rs`, `media/text_formatting/text_formatter_tests.rs`, `media/text_formatting/text_formatter_wrap_characterization_tests.rs`, `media/text_formatting/text_layout_tests.rs`, `media/text_formatting/text_line_tests.rs`, `media/text_formatting/text_run_cache_tests.rs`, `media/text_formatting/unicode/bidi_algorithm_tests.rs`, `media/text_formatting/unicode/bidi_class_tests.rs`, `media/text_formatting/unicode/codepoint_has_script_extension_tests.rs`, `media/text_formatting/unicode/codepoint_tests.rs`, `media/text_formatting/unicode/grapheme_break_class_trie_generator_tests.rs`, `media/text_formatting/unicode/line_break_enumerator_tests.rs`, `media/text_formatting/unicode/property_value_alias_helper_tests.rs`, `media/text_formatting/unicode/sentence_break_enumerator_tests.rs`, `media/text_formatting/unicode/unicode_data_tests.rs`, `media/text_formatting/unicode/unicode_trie_tests.rs`, `media/text_formatting/unicode/utf16_utils_tests.rs`, `media/text_formatting/unicode/word_break_enumerator_tests.rs`, `metadata/markup_type_tests.rs`, `platform/storage/file_io/bcl_storage_tests.rs`, `platform/storage/file_io/storage_provider_helper_tests.rs`, `platform/storage/storage_tests.rs`, `rendering/composition/animations/composition_animation_tests.rs`, `rendering/composition/brushes/composition_brush_tests.rs`, `rendering/composition/composition_drawing_surface_tests.rs`, `rendering/composition/compositor_tests.rs`, `rendering/composition/drawing/render_data_stream_hit_test.rs`, `rendering/composition/drawing/render_data_tests.rs`, `rendering/composition/drawing/render_resource_tests.rs`, `rendering/composition/expressions/expression_tests.rs`, `rendering/i_custom_hit_test.rs`, `styling/container_tests.rs`, `styling/selector_tests.rs`, `styling/style_tests.rs`, `tests/attached_property_tests.rs`, `tests/binding_default_value_converter_tests.rs`, `tests/binding_expression_observer_indexer_tests.rs`, `tests/binding_expression_tests_attached_property.rs`, `tests/binding_expression_tests_data_validation.rs`, `tests/binding_expression_tests_ferro_property.rs`, `tests/binding_expression_tests_get_value.rs`, `tests/binding_expression_tests_indexer.rs`, `tests/binding_expression_tests_mode.rs`, `tests/binding_expression_tests_negation.rs`, `tests/binding_expression_tests_observable.rs`, `tests/binding_expression_tests_property.rs`, `tests/binding_expression_tests_set_value.rs`, `tests/binding_expression_tests_task.rs`, `tests/binding_expression_tests_update_source_trigger.rs`, `tests/binding_model_tests.rs`, `tests/binding_null_conditional_tests.rs`, `tests/binding_operations_tests.rs`, `tests/binding_plugin_tests.rs`, `tests/binding_setter_tests.rs`, `tests/binding_test_support.rs`, `tests/binding_typed_expression_tests.rs`, `tests/class_registration_tests.rs`, `tests/compiled_binding_tests_create.rs`, `tests/direct_property_tests.rs`, `tests/ferro_object_tests_add_owner.rs`, `tests/ferro_object_tests_attached.rs`, `tests/ferro_object_tests_binding.rs`, `tests/ferro_object_tests_binding_two_way.rs`, `tests/ferro_object_tests_coercion.rs`, `tests/ferro_object_tests_data_validation.rs`, `tests/ferro_object_tests_direct.rs`, `tests/ferro_object_tests_get_observable.rs`, `tests/ferro_object_tests_get_value.rs`, `tests/ferro_object_tests_inheritance.rs`, `tests/ferro_object_tests_metadata.rs`, `tests/ferro_object_tests_on_property_changed.rs`, `tests/ferro_object_tests_reentrancy.rs`, `tests/ferro_object_tests_set_current_value.rs`, `tests/ferro_object_tests_set_value.rs`, `tests/ferro_object_tests_validation.rs`, `tests/ferro_property_registry_tests.rs`, `tests/ferro_property_tests.rs`, `tests/mod.rs`, `tests/property_registration_tests.rs`, `tests/property_store/frame_priority_extensions_tests.rs`, `tests/property_store/mod.rs`, `tests/property_store/value_store_tests_frames.rs`, `tests/property_store/value_store_tests_inheritance.rs`, `tests/reference_semantics_tests.rs`, `tests/styled_property_tests.rs`, `threading/dispatcher_priority_queue_tests.rs`, `threading/dispatcher_tests.rs`, `tree_tests.rs`, `utilities/date_time_net_tests.rs`, `utilities/date_time_tests.rs`, `utilities/number_format_net_tests.rs`, `visual_render_tests.rs`.
