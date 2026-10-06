@@ -11,7 +11,8 @@
 //!
 //! The query string selects the rendering modes, in order of preference and
 //! separated by `;`: `?RenderingMode=Software2D`,
-//! `?RenderingMode=WebGL2;Software2D`.
+//! `?RenderingMode=WebGL2;Software2D`, and whether the file dialogs use the
+//! polyfill: `?PreferFileDialogPolyfill=true`.
 //!
 //! Additions of the port: the application registers the embedded Inter font
 //! and makes it the default family, because the browser has no system
@@ -25,10 +26,8 @@
 //! the controls they drive with real pointer and key events and check the
 //! effect.
 //!
-//! Not ported, because the browser backend does not have them yet: the
-//! option `PreferFileDialogPolyfill` of the query string (the storage
-//! provider of the backend, `BrowserPlatformOptions.PreferFileDialogPolyfill`)
-//! and the native control demo `EmbedSampleWeb` of `EmbedSample.Browser.cs`
+//! Not ported, because the browser backend does not have it yet: the
+//! native control demo `EmbedSampleWeb` of `EmbedSample.Browser.cs`
 //! with its script `wwwroot/embed.js` (the native control host of the
 //! backend, `BrowserNativeControlHost`; until it exists the `EmbedSample`
 //! of the catalog shows the default control of the platform).
@@ -228,12 +227,29 @@ fn decode_query_component(value: &str) -> String {
     String::from_utf8_lossy(&decoded).into_owned()
 }
 
+/// `bool.TryParse(value)`: `true` or `false` in any case, with surrounding
+/// white space; `None` for anything else.
+fn parse_bool(value: &str) -> Option<bool> {
+    let value = value.trim();
+    if value.eq_ignore_ascii_case("true") {
+        Some(true)
+    } else if value.eq_ignore_ascii_case("false") {
+        Some(false)
+    } else {
+        None
+    }
+}
+
 /// `ParseArgs(args)`: the options of the platform from the query string of
 /// the address in `args[0]`; `None` when an option has an invalid value.
 fn parse_args(args: &[&str]) -> Option<BrowserPlatformOptions> {
     let query = args.first().and_then(|uri| query_of(uri)).filter(|query| !query.is_empty()).unwrap_or_default();
 
     let mut options = BrowserPlatformOptions::default();
+
+    if let Some(prefer_dialogs_polyfill) = query_value(query, "PreferFileDialogPolyfill").and_then(|value| parse_bool(&value)) {
+        options.prefer_file_dialog_polyfill = prefer_dialogs_polyfill;
+    }
 
     if let Some(rendering_mode_pairs) = query_value(query, "RenderingMode") {
         let mut modes = Vec::new();
@@ -252,6 +268,7 @@ fn parse_args(args: &[&str]) -> Option<BrowserPlatformOptions> {
         options.rendering_mode = modes;
     }
 
+    println!("DemoBrowserPlatformOptions.PreferFileDialogPolyfill: {}", if options.prefer_file_dialog_polyfill { "True" } else { "False" });
     let rendering_mode: Vec<&str> = options.rendering_mode.iter().map(|mode| mode.name()).collect();
     println!("DemoBrowserPlatformOptions.RenderingMode: {}", rendering_mode.join(";"));
     Some(options)
@@ -298,6 +315,15 @@ mod tests {
     #[test]
     fn a_relative_address_is_not_read() {
         assert_eq!(Some(BrowserPlatformOptions::default()), parse_args(&["index.html?RenderingMode=Software2D"]));
+    }
+
+    #[test]
+    fn the_file_dialog_polyfill_is_read_from_the_query_string() {
+        assert!(parse_args(&["http://localhost/?PreferFileDialogPolyfill=True"]).unwrap().prefer_file_dialog_polyfill);
+        assert!(parse_args(&["http://localhost/?preferfiledialogpolyfill=%20true%20"]).unwrap().prefer_file_dialog_polyfill);
+        assert!(!parse_args(&["http://localhost/?PreferFileDialogPolyfill=false"]).unwrap().prefer_file_dialog_polyfill);
+        // A value bool.TryParse rejects keeps the default.
+        assert!(!parse_args(&["http://localhost/?PreferFileDialogPolyfill=yes"]).unwrap().prefer_file_dialog_polyfill);
     }
 
     #[test]
