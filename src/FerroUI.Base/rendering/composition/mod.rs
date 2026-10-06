@@ -135,4 +135,4 @@ mod compositor_tests;
 #[cfg(test)]
 mod composition_drawing_surface_tests;
 #[cfg(test)]
-mod test_compositor;
+pub(crate) mod test_compositor;
