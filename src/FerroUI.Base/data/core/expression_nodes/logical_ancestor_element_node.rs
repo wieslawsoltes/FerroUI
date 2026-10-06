@@ -1,7 +1,8 @@
 use super::{ExpressionNode, NodeState, SourceNode};
 use crate::data::core::ValueTypes;
 use crate::data::BindingError;
-use crate::reactive::IDisposable;
+use crate::logical_tree::ControlLocator;
+use crate::reactive::{IDisposable, ObservableExt};
 use crate::{BoxedValue, FerroObject, Ref, StyledElement, TypeInfo};
 use std::cell::RefCell;
 use std::rc::{Rc, Weak};
@@ -26,26 +27,6 @@ impl LogicalAncestorElementNode {
             ancestor_level,
             subscription: RefCell::new(None),
         })
-    }
-
-    /// The tracked ancestor: found only while the element is attached to the
-    /// logical tree.
-    fn get_result(&self, relative_to: &StyledElement) -> Option<Ref<StyledElement>> {
-        if !relative_to.is_attached_to_logical_tree() {
-            return None;
-        }
-        let mut level = 0;
-        let mut current = relative_to.parent();
-        while let Some(ancestor) = current {
-            if self.ancestor_type.is_none_or(|t| t.is_assignable_from(ancestor.get_type())) {
-                if level == self.ancestor_level {
-                    return Some(ancestor);
-                }
-                level += 1;
-            }
-            current = ancestor.parent();
-        }
-        None
     }
 
     fn tracked_control_changed(&self, control: Option<Ref<StyledElement>>) {
@@ -113,24 +94,14 @@ impl ExpressionNode for LogicalAncestorElementNode {
         }
         let logical = source.and_then(|s| ValueTypes::as_object(&**s)).and_then(|o| o.cast::<StyledElement>());
         if let Some(logical) = logical {
+            let locator = ControlLocator::track(&logical, self.ancestor_level, self.ancestor_type);
             let weak = self.this.clone();
-            let weak_logical = logical.downgrade();
-            let attached = logical.attached_to_logical_tree(move |_| {
-                if let (Some(this), Some(logical)) = (weak.upgrade(), weak_logical.upgrade()) {
-                    this.tracked_control_changed(this.get_result(&logical));
-                }
-            });
-            let weak = self.this.clone();
-            let detached = logical.detached_from_logical_tree(move |_| {
+            let subscription = locator.subscribe_fn(move |control| {
                 if let Some(this) = weak.upgrade() {
-                    this.tracked_control_changed(None);
+                    this.tracked_control_changed(control);
                 }
             });
-            self.subscription.replace(Some(crate::reactive::Disposable::create(move || {
-                attached.dispose();
-                detached.dispose();
-            })));
-            self.tracked_control_changed(self.get_result(&logical));
+            self.subscription.replace(Some(subscription));
         }
     }
 
