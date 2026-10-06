@@ -33,6 +33,16 @@ const GENERATED_PATH: &str = concat!(env!("CARGO_MANIFEST_DIR"), "/emitter/gener
 /// The path of the checked-in position map of `generated.rs` (docs/porting/xaml.md, 9.3.6).
 const POSITION_MAP_PATH: &str = concat!(env!("CARGO_MANIFEST_DIR"), "/emitter/generated.map.json");
 
+/// The marker of a value the dump cannot read (a failed getter, a collection the harness
+/// cannot enumerate). A dump that holds it never compares as equal, even to an equal dump:
+/// what the marker hides may differ.
+const UNREADABLE: &str = "<unreadable: ";
+
+/// A value the dump cannot read, in display form: [`UNREADABLE`] and why.
+fn unreadable(why: impl std::fmt::Display) -> String {
+    format!("{UNREADABLE}{why}>")
+}
+
 /// What the emitter writes for the corpus today.
 fn generate() -> GeneratedFile {
     generate_file(generated::ASSEMBLY_NAME, generated::ROOT_URI, DOCUMENTS, &RuntimeXamlLoaderConfiguration::new())
@@ -108,7 +118,7 @@ fn display_declared(value: &BoxedValue) -> Option<String> {
                 None => display_enum(&read).unwrap_or_else(|| ValueTypes::to_display_string(Some(&read))),
             },
             Ok(None) => "null".to_string(),
-            Err(error) => format!("<error {error}>"),
+            Err(error) => unreadable(format_args!("error {error}")),
         };
         properties.push(format!("{}={shown}", property.name));
     }
@@ -202,7 +212,7 @@ fn dump(object: &Ref<FerroObject>, root_scope: Option<&Rc<dyn INameScope>>, inde
                     Some(value) => display_value(&value, indent + 1),
                     None => "null".to_string(),
                 },
-                Err(error) => format!("<error: {error}>"),
+                Err(error) => unreadable(format_args!("error {error}")),
             };
             lines.push(format!("{pad}  plain {}.{} = {value}\n", type_.name(), property.name));
         }
@@ -260,7 +270,7 @@ fn display_value(value: &BoxedValue, indent: usize) -> String {
     };
     let items = match items {
         Ok(items) => items,
-        Err(error) => return format!("{shown} <{error}>"),
+        Err(error) => return format!("{shown} {}", unreadable(error)),
     };
     let pad = "  ".repeat(indent + 1);
     let mut text = format!("{shown} with {} items", items.len());
@@ -296,8 +306,12 @@ fn declares_add(markup: Option<&'static MarkupType>) -> bool {
 /// so that a difference in the contents of such a collection can never compare as equal.
 /// `None` for any other value.
 fn collection_items(value: &BoxedValue) -> Option<Result<Vec<Option<BoxedValue>>, String>> {
-    use ferroui_base::collections::FerroList;
-    use ferroui_base::controls::Classes;
+    use ferroui_base::animation::Transitions;
+    use ferroui_base::collections::{FerroDictionary, FerroList};
+    use ferroui_base::controls::{Classes, IResourceDictionary, IResourceProvider, IThemeVariantProvider};
+    use ferroui_base::input::gesture_recognizers::{GestureRecognizer, GestureRecognizerCollection};
+    use ferroui_base::input::KeyBinding;
+    use ferroui_base::styling::ThemeVariant;
     use ferroui_base::styling::Styles;
     use ferroui_controls::documents::{Inline, InlineCollection};
     use ferroui_controls::templates::{DataTemplates, IDataTemplate};
@@ -313,7 +327,16 @@ fn collection_items(value: &BoxedValue) -> Option<Result<Vec<Option<BoxedValue>>
     fn objects<T: ferroui_base::ObjectType>(items: Vec<Ref<T>>) -> Vec<Option<BoxedValue>> {
         items.into_iter().map(|item| Some(Rc::new(item.upcast::<FerroObject>()) as BoxedValue)).collect()
     }
-    let any = &**value;
+    /// A resource provider as an item: the object it is (dumped recursively).
+    fn provider(provider: &dyn IResourceProvider) -> Result<Option<BoxedValue>, String> {
+        match provider.as_object() {
+            Some(object) => Ok(Some(Rc::new(object.to_ref()) as BoxedValue)),
+            None => Err("a resource provider that is not an object".to_string()),
+        }
+    }
+    // A nullable collection: its contents (`null` is not a collection).
+    let value = ferroui_markup_xaml::xaml_il::runtime::compiled::to_untyped(value.clone())?;
+    let any = &*value;
     if let Some(list) = any.downcast_ref::<Controls>() {
         return Some(Ok(objects(list.to_vec())));
     }
@@ -341,6 +364,41 @@ fn collection_items(value: &BoxedValue) -> Option<Result<Vec<Option<BoxedValue>>
     if let Some(templates) = any.downcast_ref::<DataTemplates>() {
         let items: Vec<Rc<dyn IDataTemplate>> = templates.to_vec();
         return Some(Ok(items.into_iter().map(|item| Some(Rc::new(item) as BoxedValue)).collect()));
+    }
+    if let Some(list) = any.downcast_ref::<GestureRecognizerCollection>() {
+        return Some(Ok(objects::<GestureRecognizer>(list.to_vec())));
+    }
+    if let Some(list) = any.downcast_ref::<FerroList<Ref<KeyBinding>>>() {
+        return Some(Ok(objects(list.to_vec())));
+    }
+    if let Some(transitions) = any.downcast_ref::<Transitions>() {
+        let items = transitions.to_vec().iter().map(|transition| Some(Rc::new(transition.debug_display()) as BoxedValue)).collect();
+        return Some(Ok(items));
+    }
+    if let Some(list) = any.downcast_ref::<FerroList<Rc<dyn IResourceProvider>>>() {
+        return Some(list.to_vec().iter().map(|item| provider(&**item)).collect());
+    }
+    if let Some(dictionaries) = any.downcast_ref::<FerroDictionary<ThemeVariant, Rc<dyn IThemeVariantProvider>>>() {
+        // Each theme variant (by name) followed by its provider.
+        let mut entries = dictionaries.to_vec();
+        entries.sort_by_key(|(variant, _)| variant.to_string());
+        let mut items = Vec::new();
+        for (variant, dictionary) in entries {
+            items.push(Some(Rc::new(format!("theme variant {variant}")) as BoxedValue));
+            match provider(&*dictionary) {
+                Ok(item) => items.push(item),
+                Err(error) => return Some(Err(error)),
+            }
+        }
+        return Some(Ok(items));
+    }
+    if ValueTypes::as_object(any).is_some_and(|object| object.cast::<ferroui_base::controls::ResourceDictionary>().is_some()) {
+        // A resource dictionary: the dictionary itself, dumped as an object.
+        return Some(Ok(vec![Some(value.clone())]));
+    }
+    if let Some(dictionary) = any.downcast_ref::<Rc<dyn IResourceDictionary>>() {
+        // The dictionary itself, dumped as an object (its resources, merged and theme dictionaries).
+        return Some(provider(&**dictionary).map(|item| vec![item]));
     }
     if let Some(styles) = ValueTypes::as_object(any).and_then(|object| object.cast::<Styles>()) {
         return Some(Ok((0..styles.count()).map(|index| Some(Rc::new(styles.get(index)) as BoxedValue)).collect()));
@@ -377,6 +435,17 @@ fn first_difference(interpreted: &str, generated: &str) -> String {
                 )
             }
         }
+    }
+}
+
+/// The comparison of two dumps: `Ok` when they are equal and neither holds a value the dump
+/// cannot read ([`UNREADABLE`]), else what differs.
+fn compare(interpreted: &str, generated: &str) -> Result<(), String> {
+    let unread = [interpreted, generated].into_iter().find_map(|dump| dump.lines().find(|line| line.contains(UNREADABLE)));
+    match unread {
+        Some(line) => Err(format!("a value the dump cannot read: `{line}`")),
+        None if interpreted == generated => Ok(()),
+        None => Err(first_difference(interpreted, generated)),
     }
 }
 
@@ -527,18 +596,29 @@ fn both_back_ends_build_equal_object_trees() {
         if std::env::var("FERROUI_EMITTER_DUMP").is_ok_and(|dumped| dumped == *name) {
             println!("--- {name}, interpreter\n{interpreted}--- {name}, generated\n{generated}");
         }
-        if interpreted == generated {
-            matches += 1;
-            println!("match         {name}");
-        } else {
-            let difference = first_difference(&interpreted, &generated);
+        if let Err(difference) = compare(&interpreted, &generated) {
             println!("MISMATCH      {name}: {difference}");
             mismatches.push(format!("{name}: {difference}\n--- interpreter\n{interpreted}--- generated\n{generated}"));
+        } else {
+            matches += 1;
+            println!("match         {name}");
         }
     }
     println!("{matches} match, {} mismatch, {not_eligible} not eligible", mismatches.len());
     assert!(mismatches.is_empty(), "the back ends differ:\n{}", mismatches.join("\n"));
     assert!(matches > 0 || generated::DOCUMENTS.is_empty(), "no document was compared");
+}
+
+/// Not from upstream. Two dumps that hold a value the dump cannot read never compare as
+/// equal, even when the text is the same: what the marker hides may differ.
+#[test]
+fn a_value_the_dump_cannot_read_fails_the_comparison() {
+    let read = "FerroUI.Controls.Border\n  plain Border.Child = null\n";
+    assert_eq!(compare(read, read), Ok(()));
+    let unread = format!("FerroUI.Controls.Border\n  plain Border.Child = {}\n", unreadable("error"));
+    assert!(compare(&unread, &unread).is_err());
+    assert!(compare(read, &unread).is_err());
+    assert!(compare(&unread, read).is_err());
 }
 
 /// Not from upstream. A failed build of generated code reports the exception type the
