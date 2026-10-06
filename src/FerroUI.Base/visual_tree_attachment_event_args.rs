@@ -26,6 +26,13 @@ impl VisualTreeAttachmentEventArgs {
         self.attachment_point.as_ref()
     }
 
+    /// The parent that the visual's tree is being attached to or detached
+    /// from.
+    #[deprecated(note = "Use attachment_point")]
+    pub fn parent(&self) -> Option<&Ref<Visual>> {
+        self.attachment_point()
+    }
+
     /// The presentation source that the visual is being attached to or
     /// detached from.
     pub fn presentation_source(&self) -> &Rc<dyn IPresentationSource> {
@@ -33,13 +40,26 @@ impl VisualTreeAttachmentEventArgs {
     }
 
     /// The root visual of the tree.
+    #[deprecated(
+        note = "This was previously always returning TopLevel. This is no longer guaranteed. Use TopLevel::get_top_level(visual) if you need a TopLevel or root_visual if you are interested in the root of the visual tree."
+    )]
+    pub fn root(&self) -> &Ref<Visual> {
+        &self.root_visual
+    }
+
+    /// The root visual of the tree this visual is being attached to or
+    /// detached from: the root visual of the presentation source.
     pub fn root_visual(&self) -> &Ref<Visual> {
         &self.root_visual
     }
+
+    pub fn set_root_visual(&mut self, value: Ref<Visual>) {
+        self.root_visual = value;
+    }
 }
 
-/// The args are immutable: copies compare equal when they describe the same
-/// attachment (the same visuals and presentation source).
+/// Copies compare equal when they describe the same attachment (the same
+/// visuals and presentation source).
 impl PartialEq for VisualTreeAttachmentEventArgs {
     fn eq(&self, other: &Self) -> bool {
         self.attachment_point == other.attachment_point

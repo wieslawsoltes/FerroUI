@@ -1,4 +1,4 @@
-use super::{EffectiveViewportChangedEventArgs, ILayoutManager, ILayoutRoot, LayoutHelper, MinMax};
+use super::{EffectiveViewportChangedEventArgs, ILayoutManager, LayoutHelper, MinMax};
 use crate::reactive::{Disposable, IDisposable};
 use crate::styling::{Container, ContainerSizing};
 use crate::utilities::{HandlerList, MathUtilities};
@@ -595,16 +595,6 @@ impl Layoutable {
         if let Some(manager) = self.get_layout_manager() {
             manager.execute_layout_pass();
         }
-    }
-
-    /// The layout root of the tree the control is attached to.
-    pub fn get_layout_root(&self) -> Option<Rc<dyn ILayoutRoot>> {
-        self.presentation_source().map(|s| s.layout_root())
-    }
-
-    /// The layout manager of the tree the control is attached to.
-    pub fn get_layout_manager(&self) -> Option<Rc<dyn ILayoutManager>> {
-        self.get_layout_root().map(|r| r.layout_manager())
     }
 
     /// The width of the element.
