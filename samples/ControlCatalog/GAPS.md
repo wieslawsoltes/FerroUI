@@ -6,7 +6,7 @@ The documents of the sample that do not load yet, grouped by what they wait for.
 cargo test -p control-catalog -- --ignored gap_
 ```
 
-Status: 219 documents, 176 load and show their class; 43 are listed below.
+Status: 219 documents, 177 load and show their class; 42 are listed below.
 
 ## Gaps of the framework
 
@@ -41,7 +41,6 @@ One gap of the framework blocks no document of the list: C101, a reflection bind
 | Document | Missing API |
 |---|---|
 | `Pages/ClipboardPage.xaml` | `DataFormat.File` and `ClipboardExtensions.TryGetFilesAsync` (`AsyncDataTransferExtensions.TryGetFilesAsync`): storage items as clipboard data. The handlers `CopyFiles` and `PasteFiles` use them; the platform clipboard does not map the file format either (`FerroUI.Native/clipboard_data_format_helper.rs`). Everything else the page uses (`DataFormat.CreateBytesApplicationFormat`, `DataTransfer`, `TryGetInProcessDataAsync`, `WindowNotificationManager`, `DispatcherTimer`) exists. |
-| `Pages/Gestures/GesturePullPage.xaml` | its code-behind (`LogicalExtensions.FindLogicalDescendantOfType` and the composition key frame and implicit animations it uses are ported). |
 | `Pages/AutoCompleteBoxPage.xaml` | its code-behind (`LogicalExtensions.GetLogicalDescendants`, which it uses, is ported); the document also needs gap C310. |
 | `Pages/NumericUpDownPage.xaml` | `CultureInfo.GetCultures(CultureTypes.SpecificCultures)`. |
 | `Pages/DialogsPage.xaml` | The code-behind of the page is not ported yet (`ManagedStorageProvider` is available in `ferroui-dialogs`); the document also needs gap C305. |

@@ -7,21 +7,25 @@ use ferroui_base::TypeInfo;
 
 mod gesture_pinch_rotation_page;
 mod gesture_pinch_zoom_page;
+mod gesture_pull_page;
 mod gesture_swipe_page;
 
 pub use gesture_pinch_rotation_page::GesturePinchRotationPage;
 pub use gesture_pinch_zoom_page::GesturePinchZoomPage;
+pub use gesture_pull_page::GesturePullPage;
 pub use gesture_swipe_page::GestureSwipePage;
 
 pub(crate) const TYPES: &[&TypeInfo] = &[
     GesturePinchRotationPage::TYPE,
     GesturePinchZoomPage::TYPE,
+    GesturePullPage::TYPE,
     GestureSwipePage::TYPE,
 ];
 
 pub(crate) const CLASSES: &[&XamlClass] = &[
     &GesturePinchRotationPage::XAML_CLASS,
     &GesturePinchZoomPage::XAML_CLASS,
+    &GesturePullPage::XAML_CLASS,
     &GestureSwipePage::XAML_CLASS,
 ];
 
