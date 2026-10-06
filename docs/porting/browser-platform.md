@@ -333,6 +333,7 @@ Measured on Linux x86_64 with Emscripten 6.0.10, Rust 1.90.0 and `wasm-bindgen` 
 | `JSStorageItem.MoveAsync` / `DeleteAsync` after a write | A writable stream of the file that is still closing locks its handle, so a move or a delete right after a write fails (`NoModificationAllowedError`) | Fixed: a move or a delete first waits for the closes pending on the file, as an opening of the file does |
 | `BrowserPlatformOptions.RegisterAvaloniaServiceWorker`, `AvaloniaServiceWorkerScope` | Options of the service worker, marked unstable | `register_ferro_service_worker` and `ferro_service_worker_scope`; the worker is `ferroui-sw.js`, which `scripts/build-browser.sh` places at the root of the site (its scope is its directory, and the polyfill finds it with `getRegistration()` against the address of the document). Registration is not awaited, as the `void` import of the original; a failure is an unhandled rejection of the page |
 | `avalonia-sw.ts` `MessagePortSource` | Asks the page for the next chunk (`PULL`) only after it received one, and has no `pull`; the polyfill's writer waits for a first `PULL` before it writes anything, so a save through the worker never sends data and the download never starts (seen in headless Chromium: the frame of the download stays in navigation) | Fixed: `pull` asks for a chunk whenever the stream wants data, the first one included, and a received chunk is only enqueued (what the comment of the original describes). `storage_view.test.mjs` downloads a file through the worker |
+| `ControlCatalog.Browser` host: the resources of the sample (host-level difference, not a change of the framework) | The runtime downloads every resource of the sample's assembly (the 79 photographs and 5 fonts) with the other boot resources before `Main` runs, and `AssetLoader` opens them synchronously | The asset API and its semantics are unchanged (synchronous `AssetLoader`, `register_asset_bundle`; a bundle registered later is seen after `invalidate_assembly_cache_all`, as for any newly registered assembly). The catalog's build script splits the assets by the pages that use them (`samples/ControlCatalog/build/page_bundles.rs`: a scan of the documents and Rust files of the sample for asset paths, font-collection directories, file patterns and run-time joined file names, and of the classes and modules each source reaches from `App.xaml`, the main view and window, the start page, and each entry of the page list). `control-catalog.assets` holds what the start-up reaches and what no source names (reported as build warnings); one bundle per page or per set of pages holds the rest, so that no page downloads what it does not use, and an asset of 1 MB or more (the CJK font) has a bundle of its own; assets that only sources nothing reaches name (the demos of `NavigationDemoPage`, whose class is not ported) are in `control-catalog.unreached.assets`. `control-catalog.assets.json` lists the bundles by page header. The host page registers the start-up bundle and starts the application; before the catalog creates a page, `MainWindowViewModel.navigate_to_async` awaits the hook `control_catalog::PageAssets` (not in upstream, set only by the browser host; the desktop host sets none and embeds every asset), which fetches and registers the bundles of the page (`page-assets.js`, `page_assets_browser.rs`); of navigations asked for meanwhile the last one wins, and a page whose bundle cannot be fetched is not created. After the first frame the other bundles are fetched one at a time while the page is idle (`?PrefetchAssets=false` turns that off). Fonts: `ferres://ControlCatalog/Assets/Fonts#Family` loads every font of the directory into one font collection, created when a page first uses it and kept by the font manager, so every page that names the directory (TextBlock, TextBox) waits for the whole directory, the CJK font included; nothing at start-up names it and the font fallbacks of the catalog are empty, so deferring it changes no other page. `tests/asset_bundles.rs` checks that every page of the list, and every sample of its entry, opens only assets of the start-up bundle and of its own bundles; `control_catalog.test.mjs` checks the downloads, the pictures and the CJK glyphs in the browser. Sizes and start-up times: section 19 |
 | `EmbedSample.Browser.cs` | Imports `embed.js` on first use (`JSHost.ImportAsync`) and adds the button once the import completes | `embed.js` is imported statically with the module (the boundary has no run-time module import) and the button is added while the control is created |
 | Threaded mode | Reaches into non-public runtime APIs | Not ported |
 
@@ -707,8 +708,43 @@ Compiled themes (stage E4, `xaml.md`) do the parse and transform at build time, 
 - **Unwinding with JavaScript exceptions, about 60 % of the CPU time of the start-up.** Rust 1.93.0 switched `wasm32-unknown-emscripten` to WebAssembly exception handling by default (and 1.98.0 removes the JavaScript variant). Recommended next step: move the browser toolchain from 1.90.0 to a release from 1.93 on, link with `-fwasm-exceptions` and compile the C and C++ code of the module (HarfBuzz through `EMCC_CFLAGS`) with it as well. Check the prebuilt Skia library links with it, since Skia is never built from source. This removes the `invoke_*` functions, their transitions and the table lookup library of section 18, and probably makes the module smaller. Expected effect, not measured: most of the 4.6 s.
 - **Run-time theme loading, 7.1 s, about 90 % of it the run-time compilation.** Stage E4 (compiled themes). The theme loads also shrink with the exception change above, and so does the run-time loading of the catalog's own documents (`App.xaml` 0.6 s, the pages), which stays until the documents of the sample are compiled as well.
 - **The asset bundle, 20.2 MB transferred, is on the critical path.** At 50 Mbit/s it arrives 1.9 s after the module, and the application waits for it. It is not split into a start-up part and a deferred part, because the asset loader is synchronous, as upstream's is: a page created before a deferred part arrived would not find its pictures, and making the pages wait would change the catalog. Upstream does not defer them either: they are embedded resources of the sample's assembly, which the .NET runtime downloads with all other boot resources before `Main` runs. The start-up itself needs only `icon.ico` (from `App.xaml`) and the six PNG files of the home page; the 79 photographs (18.1 MB) and the fonts (5.3 MB, 4.5 MB of it one CJK font) belong to other pages. Reducing the bundle is part of the size work that follows.
+  Since done in the host of the sample, without changing the asset loader: see "Assets on demand" below.
 - **Not adopted:** a service worker cache of the module and the bundle. Within ten minutes the HTTP cache already serves repeat visits, and after that a revalidation costs one round trip per file. A service worker would save only those round trips, not the CPU time that dominates, and would add a second cache that has to be versioned against deployments.
 - **Not measured:** the first frame in the WebGL2 path spends about 0.2 s compiling shaders on SwiftShader; on a real GPU this differs.
+
+### Assets on demand (2026-10-06)
+
+The catalog's build script splits its assets by the pages that use them, and its browser host fetches the bundles of a page before the catalog creates the page (section 14, row `ControlCatalog.Browser` host). Bundles as written by `scripts/build-browser.sh control-catalog-browser` (`node scripts/browser/module-sizes.mjs` prints this table from `control-catalog.assets.json`):
+
+| Bundle | Raw | gzip -9 | Assets | Loaded for |
+|---|---:|---:|---:|---|
+| `control-catalog.assets` | 0.44 MB | 0.39 MB | 10 | start-up |
+| `control-catalog.ContainerQueryPage.assets` | 0.52 MB | 0.51 MB | 7 | Container Queries |
+| `control-catalog.CursorPage.assets` | 0.6 kB | 0.6 kB | 1 | Cursor |
+| `control-catalog.DrawerDemoPage.assets` | 0.36 MB | 0.35 MB | 9 | DrawerPage |
+| `control-catalog.WenQuanYiMicroHei-01.assets` | 4.51 MB | 2.05 MB | 1 | TextBox, TextBlock |
+| `control-catalog.shared.Fonts-SourceSansPro-Regular.assets` | 0.79 MB | 0.37 MB | 4 | TextBox, TextBlock |
+| `control-catalog.shared.ModernApp-gallery_alpine.assets` | 0.19 MB | 0.18 MB | 6 | CarouselPage, DrawerPage |
+| `control-catalog.shared.Sanctuary-main_deep_forest.assets` | 3.10 MB | 3.04 MB | 7 | PipsPager, CarouselPage |
+| `control-catalog.shared.delicate-arch-896885_640.assets` | 95.9 kB | 95.8 kB | 1 | 13 pages |
+| `control-catalog.shared.hirsch-899118_640.assets` | 0.22 MB | 0.22 MB | 1 | 8 pages |
+| `control-catalog.shared.maple-leaf-888807_640.assets` | 0.11 MB | 0.11 MB | 1 | 9 pages |
+| `control-catalog.unreached.assets` | 13.21 MB | 12.87 MB | 46 | no page (the demos of `NavigationDemoPage`, whose class is not ported; prefetched last) |
+| all 12 together | 23.54 MB | 20.18 MB | 94 | |
+
+The build reports two assets no source names, kept in the start-up bundle: `/Assets/CurvedHeader/avatar.jpg` and `/Pages/teapot.bin`.
+
+First frame, `first-frame.mjs --encoding gzip --phases --runs 3`, medians of three loads, two interleaved rounds; before is a site built from `main` at `fbb9418`, after is this change; both with the pinned toolchain (Rust 1.90.0, Emscripten 6.0.10, `wasm-bindgen` 0.2.129), headless Chromium with WebGL on SwiftShader, 4-core container, nothing else running:
+
+| | Before | After |
+|---|---:|---:|
+| unthrottled: start-up bundle downloaded | 197, 206 ms | 49, 55 ms |
+| unthrottled: first frame | 2,307, 2,426 ms | 2,271, 2,324 ms |
+| 50 Mbit/s, 40 ms: module downloaded | 3,926, 3,905 ms | 2,170, 2,167 ms |
+| 50 Mbit/s, 40 ms: `runMain` start | 5,441, 5,415 ms | 2,235, 2,237 ms |
+| 50 Mbit/s, 40 ms: first frame | **7,393, 7,335 ms** | **4,121, 4,184 ms** |
+
+Unthrottled, the start-up was bound by the CPU and the bundle arrived before the module, so nothing changes there. On the throttled network the module no longer shares the bandwidth with 20.2 MB of assets, and the application starts as soon as the module is instantiated: the first frame comes 3.2 s earlier.
 
 ## 20. What the catalog module is made of after E4, and the plan to shrink it (2026-10-06)
 
