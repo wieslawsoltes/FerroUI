@@ -21,7 +21,12 @@
   at templates (`XamlDeferredContentInitializeIntermediateRootNode`) and 8 at selectors, both E4,
   see section 8. Not eligible within E3's scope: indexers, methods and methods as commands in
   compiled binding paths (no theme document has one; section 8).
-- Stage E4 is next (section 8). Nothing is half-done in the working tree of E3.
+- Stage E4 is DONE on branch `xaml-compiler-e4-pr` (against `main`, linear). Both themes load from
+  compiled output (`compiled_xaml.rs` of each theme crate, drift-tested) and pass their suites;
+  the themes themselves no longer call the run-time loader (the dialogs crate main added since still
+  does, so `themed_window` still links it; section 9). Corpus: 109 of 109 documents eligible, all
+  match; theme documents: 165 of 165 eligible. See section 9 for the measurements.
+- Stage E5 is next (section 9). Nothing is half-done in the working tree of E4.
 
 Design documents in the repository: `docs/porting/xaml.md`, sections 9 (emitter design: call forms
 A/B/C, build integration, code-behind), 9.5 (source scanner), 9.12 (the 14 rulings), 9.13, and
@@ -508,3 +513,82 @@ Next, E4 (stack it on `xaml-compiler-e3`):
 3. Load the themes from compiled output and stop linking the loader in `themed_window`; re-run
    `emitter::repository_documents::measure_theme_documents` and the load-time measurements
    (`tests::load_time` of both theme crates).
+
+## 9. What stage E4 delivered, and the next steps
+
+E4 (branch `xaml-compiler-e4-pr`, the six commits of `xaml-compiler-e4` rebased on `main` after E3
+merged; the corpus output and the compiled themes regenerated with E3's emitter):
+
+- Templates: the intermediate root of deferred content (control templates, data templates) and the
+  setters with a priority (`BindingWithPrioritySetter`, `SetValueWithPrioritySetter`, alone and in
+  a choice of the setter at run time: `TemplateBinding`).
+- Selectors and styles: every selector node as the builder calls of the styling system the
+  interpreter makes (type, class, name, combinators, not, nth-child, property equals, or, nesting).
+- Groups of a class: `rust_emitter::generate_class_file(class)` compiles the document of a class
+  with every document it includes, as ONE group transformed exactly as the run-time loader loads it
+  (`FerroRuntimeXamlLoader::document_group`). The document of the class becomes `populate`, the
+  others build functions the include calls of the group call (`DocumentFunctions`,
+  `NewServiceProviderNode`, the `DocumentBuildMethod` calls); a document the group merged into
+  another one is not emitted. Generated code names its own crate as `crate::`.
+- `Setter.Value`: `rt::setter_value` converts the value to the type of the setter's property, as
+  the loader's `set_setter_value` does before it calls the setter (without it the Simple theme
+  failed `should_define_all_requested_template_parts`).
+- Element references (`Option<ElementRef<Control>>`, `PlacementTarget="Background"` of the Fluent
+  `ComboBox`): `ValueTypes::element_ref_class` (only with `compiler-metadata`) names the class, so
+  a run-time type check can name the type.
+- The themes: `compiled_xaml.rs` of `ferroui-themes-simple` and `ferroui-themes-fluent` (checked in,
+  `tests::compiled_xaml_tests::compiled_xaml_is_up_to_date`; rewrite with the ignored
+  `regenerate_compiled_xaml`). `SimpleTheme::load` and `FluentTheme::load` call
+  `compiled_xaml::populate`. The run-time loader is a dev-dependency only (it generates and checks
+  the file). The theme crates enable `ferroui-base/markup-functions` (generated code calls the
+  typed functions), not `compiler-metadata`: no shipped crate (themes, controls, dialogs, catalog,
+  browser) enables `compiler-metadata` in its normal dependencies (`cargo tree -e features`). They
+  have path tables (`rust_paths.rs`; `scripts/rust_paths.py` follows `#[path]` attributes and reads
+  `Class::TYPE` in type tables as well as in the registration).
+
+The run-time loader is still linked into `themed_window`: `ferroui-dialogs` (a normal dependency of
+both themes since main ported the dialogs) registers the document of `AboutFerroDialog` with the
+run-time loader and loads it through it (`markup.rs`). That is an `x:Class` document, which is E5.
+
+The example of the Simple theme crate is built with the dev-dependencies of the crate, and Cargo
+unifies their features: the loader's `emitter` feature (the drift test) turns `compiler-metadata`
+on for `themed_window` only. Measured below both ways.
+
+Measured on Linux (4 cores, 15 GB of memory). Native: release profile (fat LTO, prebuilt Skia),
+against `main` at the E3 merge (`df97eb9`). Browser: `scripts/build-browser.sh` with the `browser`
+profile main added since (opt-level "z", fat LTO), E4 rebased on `a85268a`; the `main` column of the
+browser rows is the measurement of `docs/porting/browser-platform.md` section 18 on that base (the
+release-profile `themed_view` of `main` measured here, 41.02 MB / 9.85 MB gzip, matches that
+section to the byte). Sizes in MB of 1,000,000 bytes; gzip is `scripts/browser/module-sizes.mjs`.
+
+| | `main` (run-time loader) | E4 (compiled) |
+|---|---:|---:|
+| Simple theme load, first / second (`tests::load_time`, three runs) | 317 to 373 ms / 6.2 to 7.4 ms | 1.2 to 2.1 ms / 0.45 to 0.70 ms |
+| Fluent theme load, first / second | 498 to 692 ms / 19.3 to 20.1 ms | 2.5 to 2.7 ms / 1.9 to 2.7 ms |
+| `themed_window`, stripped | 34,863,488 bytes | 52,122,464 bytes (+17.3 MB) |
+| the same, `compiler-metadata` off (loader dev-dependency without `emitter`) | | 51,587,040 bytes (+16.7 MB) |
+| `themed_view.wasm`, raw / gzip | 25.89 / 8.25 | 33.71 / 9.53 (33,712,346 / 9,532,486 bytes) |
+| `control_catalog_browser.wasm`, raw / gzip (the published module) | 31.87 / 9.45 | 43.85 / 11.42 (43,847,555 / 11,424,351 bytes) |
+
+Where the size goes (symbols of the unstripped native E4 binary): the build code of the themes is
+8.7 MB (Fluent 5.8 MB, Simple 2.9 MB); `compiler-metadata` against `markup-functions` is 0.5 MB; the
+loader and xamlx are 1.5 MB, linked through the dialogs crate in both columns. The rest of the
+growth is generic code the generated functions instantiate. Dropping `compiler-metadata` does not
+reduce the cost materially: it is the volume of generated code itself.
+
+Memory of the link: the fat-LTO link of `control_catalog_browser.wasm` peaks at about 15.5 GB (14.6
+GB of memory and 1 GB of swap here; without swap it was killed on this 15 GB machine, as was
+`themed_view` with the release profile); `themed_view` with the `browser` profile peaks at 13.3 GB.
+A runner with 16 GB is at the limit.
+
+The owner decided that the compiled themes go to the browser although the module grows: the Pages
+budget (`PUBLISHED_MODULE_GZIP_BUDGET_MB`) is raised from 12 to 14 MB in its own commit (11.42 MB
+measured, about 15 % headroom, rounded up). Size reduction comes after E4: outlining repeated
+sequences into `rt` helpers (a setter per call site, the deferred-content preamble),
+`#[inline(never)]` on deferred bodies, a per-package opt-level for the theme crates, and the memory
+of the link.
+
+Next, E5: build integration as section 9 of xaml.md designs it (build-script helper and include
+macro instead of checked-in files), code-behind and `x:Class` documents (the about dialog, so the
+dialogs crate stops linking the loader), event handlers, ControlCatalog on compiled XAML, and the
+size of generated code.
