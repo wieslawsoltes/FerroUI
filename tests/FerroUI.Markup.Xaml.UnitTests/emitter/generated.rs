@@ -968,7 +968,7 @@ pub fn build_binding_xaml(
     context.set_target_property(rt::property_value(::ferroui_controls::TextBlock::text_property()));
     let provided_0 = ::ferroui_markup_xaml::markup_extensions::ReflectionBindingExtension::__markup_ProvideValue_0(&reflection_binding_extension_0, rt::service_provider(&context));
     context.set_target_property(::core::option::Option::None);
-    rt::bind(&text_block_0.clone().upcast::<::ferroui_base::FerroObject>(), ::ferroui_controls::TextBlock::text_property(), provided_0, 1, 102)?;
+    rt::bind(text_block_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::TextBlock::text_property(), provided_0, 1, 102)?;
     context.pop_parent();
     rt::invoked(text_block_0.try_end_init(), 1, 2)?;
     rt::complete_root_name_scope(::core::option::Option::Some(&text_block_0), name_scope.as_ref(), 1, 2)?;
@@ -1001,10 +1001,10 @@ pub fn build_style_with_selector_xaml(
     // style_with_selector.xaml(1,143) Content
     let setter_0 = ::ferroui_base::styling::Setter::__markup_new_0();
     // style_with_selector.xaml(1,150) Property
-    ::ferroui_base::styling::Setter::__markup_set_Property(&setter_0, rt::cast(rt::property(::ferroui_base::Visual::opacity_property()), 1, 150)?);
+    ::ferroui_base::styling::Setter::__markup_set_Property(&setter_0, ::core::option::Option::Some(rt::property(::ferroui_base::Visual::opacity_property())));
     // style_with_selector.xaml(1,143) Value
     ::ferroui_base::styling::Setter::__markup_set_Value(&setter_0, rt::setter_value(&setter_0, rt::to_object(0.5_f64)));
-    ::ferroui_base::styling::StyleBase::__markup_Add_0(style_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(::core::clone::Clone::clone(&setter_0), 1, 143)?);
+    ::ferroui_base::styling::StyleBase::__markup_Add_0(style_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), ::core::clone::Clone::clone(&setter_0) as ::std::rc::Rc<dyn ::ferroui_base::styling::SetterBase>);
     rt::invoked(::ferroui_base::styling::Styles::__markup_Add_0(&styles_collection_0, rt::cast(style_0.clone(), 1, 115)?), 1, 115)?;
     rt::invoked(border_0.try_end_init(), 1, 2)?;
     rt::complete_root_name_scope(::core::option::Option::Some(&border_0), name_scope.as_ref(), 1, 2)?;
@@ -1032,7 +1032,7 @@ pub fn build_control_template_xaml(
     // control_template.xaml(1,134) Content
     let deferred_0 = rt::defer(rt::class_handle(<::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE), &context, build_control_template_xaml_deferred_0, 1, 134)?;
     ::ferroui_markup_xaml::templates::ControlTemplate::__markup_set_Content(&control_template_0, rt::to_object(::core::clone::Clone::clone(&deferred_0)));
-    button_0.set_value(::ferroui_controls::primitives::TemplatedControl::template_property(), ::core::option::Option::Some({ let value = ::core::clone::Clone::clone(&control_template_0); let value: ::std::rc::Rc<dyn ::ferroui_controls::templates::IControlTemplate> = value; value }));
+    button_0.set_value(::ferroui_controls::primitives::TemplatedControl::template_property(), ::core::option::Option::Some(::core::clone::Clone::clone(&control_template_0) as ::std::rc::Rc<dyn ::ferroui_controls::templates::IControlTemplate>));
     rt::invoked(button_0.try_end_init(), 1, 2)?;
     rt::complete_root_name_scope(::core::option::Option::Some(&button_0), name_scope.as_ref(), 1, 2)?;
     ::core::result::Result::Ok(button_0)
@@ -1068,7 +1068,7 @@ pub fn build_brush_from_text_xaml(
     let name_scope = context.name_scope_field();
     border_0.begin_init();
     // brush_from_text.xaml(1,2) Background
-    border_0.set_value(::ferroui_controls::Border::background_property(), ::core::option::Option::Some({ let value = ::ferroui_base::media::immutable::ImmutableSolidColorBrush::__markup_new_0(4294901760_u32); let value: ::std::rc::Rc<dyn ::ferroui_base::media::IBrush> = value; value }));
+    border_0.set_value(::ferroui_controls::Border::background_property(), ::core::option::Option::Some(::ferroui_base::media::immutable::ImmutableSolidColorBrush::__markup_new_0(4294901760_u32) as ::std::rc::Rc<dyn ::ferroui_base::media::IBrush>));
     rt::invoked(border_0.try_end_init(), 1, 2)?;
     rt::complete_root_name_scope(::core::option::Option::Some(&border_0), name_scope.as_ref(), 1, 2)?;
     ::core::result::Result::Ok(border_0)
@@ -2507,7 +2507,7 @@ pub fn build_binding_element_name_xaml(
     context.set_target_property(rt::property_value(::ferroui_controls::TextBlock::text_property()));
     let provided_0 = ::ferroui_markup_xaml::markup_extensions::ReflectionBindingExtension::__markup_ProvideValue_0(&reflection_binding_extension_0, rt::service_provider(&context));
     context.set_target_property(::core::option::Option::None);
-    rt::bind(&text_block_1.clone().upcast::<::ferroui_base::FerroObject>(), ::ferroui_controls::TextBlock::text_property(), provided_0, 1, 151)?;
+    rt::bind(text_block_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::TextBlock::text_property(), provided_0, 1, 151)?;
     context.pop_parent();
     rt::invoked(text_block_1.try_end_init(), 1, 141)?;
     context.pop_parent();
@@ -2547,7 +2547,7 @@ pub fn build_binding_data_context_xaml(
     context.set_target_property(rt::property_value(::ferroui_controls::TextBlock::text_property()));
     let provided_0 = ::ferroui_markup_xaml::markup_extensions::ReflectionBindingExtension::__markup_ProvideValue_0(&reflection_binding_extension_0, rt::service_provider(&context));
     context.set_target_property(::core::option::Option::None);
-    rt::bind(&text_block_0.clone().upcast::<::ferroui_base::FerroObject>(), ::ferroui_controls::TextBlock::text_property(), provided_0, 1, 134)?;
+    rt::bind(text_block_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::TextBlock::text_property(), provided_0, 1, 134)?;
     context.pop_parent();
     rt::invoked(text_block_0.try_end_init(), 1, 124)?;
     context.pop_parent();
@@ -2589,7 +2589,7 @@ pub fn build_binding_mode_xaml(
     context.set_target_property(rt::property_value(::ferroui_controls::TextBlock::text_property()));
     let provided_0 = ::ferroui_markup_xaml::markup_extensions::ReflectionBindingExtension::__markup_ProvideValue_0(&reflection_binding_extension_0, rt::service_provider(&context));
     context.set_target_property(::core::option::Option::None);
-    rt::bind(&text_block_0.clone().upcast::<::ferroui_base::FerroObject>(), ::ferroui_controls::TextBlock::text_property(), provided_0, 1, 134)?;
+    rt::bind(text_block_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::TextBlock::text_property(), provided_0, 1, 134)?;
     context.pop_parent();
     rt::invoked(text_block_0.try_end_init(), 1, 124)?;
     // binding_mode.xaml(1,166) Children
@@ -2610,7 +2610,7 @@ pub fn build_binding_mode_xaml(
     context.set_target_property(rt::property_value(::ferroui_controls::TextBlock::text_property()));
     let provided_1 = ::ferroui_markup_xaml::markup_extensions::ReflectionBindingExtension::__markup_ProvideValue_0(&reflection_binding_extension_1, rt::service_provider(&context));
     context.set_target_property(::core::option::Option::None);
-    rt::bind(&text_block_1.clone().upcast::<::ferroui_base::FerroObject>(), ::ferroui_controls::TextBlock::text_property(), provided_1, 1, 176)?;
+    rt::bind(text_block_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::TextBlock::text_property(), provided_1, 1, 176)?;
     context.pop_parent();
     rt::invoked(text_block_1.try_end_init(), 1, 166)?;
     context.pop_parent();
@@ -2641,7 +2641,7 @@ pub fn build_dynamic_resource_unresolved_xaml(
     context.set_target_property(rt::property_value(::ferroui_controls::Border::background_property()));
     let provided_0 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0(&dynamic_resource_extension_0, rt::service_provider(&context));
     context.set_target_property(::core::option::Option::None);
-    rt::bind(&border_0.clone().upcast::<::ferroui_base::FerroObject>(), ::ferroui_controls::Border::background_property(), provided_0, 1, 99)?;
+    rt::bind(border_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::Border::background_property(), provided_0, 1, 99)?;
     context.pop_parent();
     rt::invoked(border_0.try_end_init(), 1, 2)?;
     rt::complete_root_name_scope(::core::option::Option::Some(&border_0), name_scope.as_ref(), 1, 2)?;
@@ -2691,7 +2691,7 @@ pub fn build_static_resource_local_xaml(
     // static_resource_local.xaml(1,118) Resources (resource)
     let dictionary_0 = ::ferroui_base::StyledElement::__markup_get_Resources(border_0.upcast_ref::<::ferroui_base::StyledElement>());
     let deferred_0 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_static_resource_local_xaml_deferred_0, 1, 118)?;
-    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&rt::argument(dictionary_0.clone(), "FerroUI.Controls.ResourceDictionary.AddDeferred", 0, 1, 118)?, rt::to_object(::std::string::String::from("Accent")), { let value = ::core::clone::Clone::clone(&deferred_0); let value: ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent> = value; value }), 1, 118)?;
+    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&rt::argument(dictionary_0.clone(), "FerroUI.Controls.ResourceDictionary.AddDeferred", 0, 1, 118)?, rt::to_object(::std::string::String::from("Accent")), ::core::clone::Clone::clone(&deferred_0) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 1, 118)?;
     // static_resource_local.xaml(1,182) Child
     // static_resource_local.xaml(1,182) Border
     let border_1 = ::ferroui_controls::Border::new();
@@ -2705,9 +2705,9 @@ pub fn build_static_resource_local_xaml(
     context.set_target_property(::core::option::Option::None);
     let value_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_0);
     if rt::is_instance(&value_0, rt::markup_handle(<::ferroui_base::UnsetValueType as ::ferroui_base::metadata::MarkupTyped>::MARKUP)) {
-        rt::unset_value(&border_1.clone().upcast::<::ferroui_base::FerroObject>(), ::ferroui_controls::Border::background_property());
+        rt::unset_value(border_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::Border::background_property());
     } else if rt::is_instance(&value_0, rt::markup_handle(<dyn ::ferroui_base::data::BindingBase as ::ferroui_base::metadata::MarkupTyped>::MARKUP)) {
-        rt::bind(&border_1.clone().upcast::<::ferroui_base::FerroObject>(), ::ferroui_controls::Border::background_property(), value_0.clone(), 1, 189)?;
+        rt::bind(border_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::Border::background_property(), value_0.clone(), 1, 189)?;
     } else if rt::is_instance(&value_0, rt::markup_handle(<dyn ::ferroui_base::media::IBrush as ::ferroui_base::metadata::MarkupTyped>::MARKUP)) {
         border_1.set_value(::ferroui_controls::Border::background_property(), rt::exact(value_0.clone(), "FerroUI.Controls.Border.set_Background", 0, 1, 189)?);
     } else if value_0.is_none() {
@@ -2756,7 +2756,7 @@ pub fn build_dynamic_resource_local_xaml(
     // dynamic_resource_local.xaml(1,118) Resources (resource)
     let dictionary_0 = ::ferroui_base::StyledElement::__markup_get_Resources(border_0.upcast_ref::<::ferroui_base::StyledElement>());
     let deferred_0 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_dynamic_resource_local_xaml_deferred_0, 1, 118)?;
-    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&rt::argument(dictionary_0.clone(), "FerroUI.Controls.ResourceDictionary.AddDeferred", 0, 1, 118)?, rt::to_object(::std::string::String::from("Accent")), { let value = ::core::clone::Clone::clone(&deferred_0); let value: ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent> = value; value }), 1, 118)?;
+    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&rt::argument(dictionary_0.clone(), "FerroUI.Controls.ResourceDictionary.AddDeferred", 0, 1, 118)?, rt::to_object(::std::string::String::from("Accent")), ::core::clone::Clone::clone(&deferred_0) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 1, 118)?;
     // dynamic_resource_local.xaml(1,182) Child
     // dynamic_resource_local.xaml(1,182) Border
     let border_1 = ::ferroui_controls::Border::new();
@@ -2768,7 +2768,7 @@ pub fn build_dynamic_resource_local_xaml(
     context.set_target_property(rt::property_value(::ferroui_controls::Border::background_property()));
     let provided_0 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0(&dynamic_resource_extension_0, rt::service_provider(&context));
     context.set_target_property(::core::option::Option::None);
-    rt::bind(&border_1.clone().upcast::<::ferroui_base::FerroObject>(), ::ferroui_controls::Border::background_property(), provided_0, 1, 189)?;
+    rt::bind(border_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::Border::background_property(), provided_0, 1, 189)?;
     context.pop_parent();
     rt::invoked(border_1.try_end_init(), 1, 182)?;
     context.pop_parent();
@@ -2814,9 +2814,9 @@ pub fn build_static_resource_missing_xaml(
     context.set_target_property(::core::option::Option::None);
     let value_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_0);
     if rt::is_instance(&value_0, rt::markup_handle(<::ferroui_base::UnsetValueType as ::ferroui_base::metadata::MarkupTyped>::MARKUP)) {
-        rt::unset_value(&border_0.clone().upcast::<::ferroui_base::FerroObject>(), ::ferroui_controls::Border::background_property());
+        rt::unset_value(border_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::Border::background_property());
     } else if rt::is_instance(&value_0, rt::markup_handle(<dyn ::ferroui_base::data::BindingBase as ::ferroui_base::metadata::MarkupTyped>::MARKUP)) {
-        rt::bind(&border_0.clone().upcast::<::ferroui_base::FerroObject>(), ::ferroui_controls::Border::background_property(), value_0.clone(), 1, 99)?;
+        rt::bind(border_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::Border::background_property(), value_0.clone(), 1, 99)?;
     } else if rt::is_instance(&value_0, rt::markup_handle(<dyn ::ferroui_base::media::IBrush as ::ferroui_base::metadata::MarkupTyped>::MARKUP)) {
         border_0.set_value(::ferroui_controls::Border::background_property(), rt::exact(value_0.clone(), "FerroUI.Controls.Border.set_Background", 0, 1, 99)?);
     } else if value_0.is_none() {
@@ -2908,7 +2908,7 @@ pub fn build_resources_many_xaml(
     // resources_many.xaml(1,182) Resources (resource)
     let dictionary_2 = ::ferroui_base::StyledElement::__markup_get_Resources(border_0.upcast_ref::<::ferroui_base::StyledElement>());
     let deferred_0 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_resources_many_xaml_deferred_0, 1, 182)?;
-    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&rt::argument(dictionary_2.clone(), "FerroUI.Controls.ResourceDictionary.AddDeferred", 0, 1, 182)?, rt::to_object(::std::string::String::from("C")), { let value = ::core::clone::Clone::clone(&deferred_0); let value: ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent> = value; value }), 1, 182)?;
+    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&rt::argument(dictionary_2.clone(), "FerroUI.Controls.ResourceDictionary.AddDeferred", 0, 1, 182)?, rt::to_object(::std::string::String::from("C")), ::core::clone::Clone::clone(&deferred_0) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 1, 182)?;
     rt::invoked(border_0.try_end_init(), 1, 2)?;
     rt::complete_root_name_scope(::core::option::Option::Some(&border_0), name_scope.as_ref(), 1, 2)?;
     ::core::result::Result::Ok(border_0)
@@ -2951,7 +2951,7 @@ pub fn build_resource_dictionary_root_xaml(
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 1, 131)?, rt::to_object(::std::string::String::from("A")), rt::to_object(1.0_f64)), 1, 131)?;
     // resource_dictionary_root.xaml(1,144) Content (resource)
     let deferred_0 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_resource_dictionary_root_xaml_deferred_0, 1, 144)?;
-    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::to_object(::std::string::String::from("B")), { let value = ::core::clone::Clone::clone(&deferred_0); let value: ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent> = value; value }), 1, 144)?;
+    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::to_object(::std::string::String::from("B")), ::core::clone::Clone::clone(&deferred_0) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 1, 144)?;
     // resource_dictionary_root.xaml(1,205) Content (resource)
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 1, 205)?, rt::to_object(::std::string::String::from("C")), rt::to_object(::std::string::String::from("text"))), 1, 205)?;
     rt::complete_root_name_scope(::core::option::Option::None, name_scope.as_ref(), 1, 2)?;
@@ -2993,7 +2993,7 @@ pub fn build_transitions_xaml(
     // transitions.xaml(1,133) DoubleTransition
     let double_transition_0 = ::ferroui_base::animation::DoubleTransition::new();
     // transitions.xaml(1,133) Property
-    double_transition_0.set_direct_value(::ferroui_base::animation::TransitionBase::property_property(), rt::cast(rt::property(::ferroui_base::Visual::opacity_property()), 0, 0)?);
+    double_transition_0.set_direct_value(::ferroui_base::animation::TransitionBase::property_property(), ::core::option::Option::Some(rt::property(::ferroui_base::Visual::opacity_property())));
     // transitions.xaml(1,133) Duration
     let value_0 = ::ferroui_base::animation::TimeSpan::__markup_FromTicks_0(2000000_i64);
     double_transition_0.set_direct_value(::ferroui_base::animation::TransitionBase::duration_property(), ::core::clone::Clone::clone(&value_0));
@@ -3029,15 +3029,15 @@ pub fn build_control_theme_resources_xaml(
     // control_theme_resources.xaml(1,118) Resources (resource)
     let dictionary_0 = ::ferroui_base::StyledElement::__markup_get_Resources(border_0.upcast_ref::<::ferroui_base::StyledElement>());
     let deferred_0 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_control_theme_resources_xaml_deferred_0, 1, 118)?;
-    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&rt::argument(dictionary_0.clone(), "FerroUI.Controls.ResourceDictionary.AddDeferred", 0, 1, 118)?, rt::to_object(::std::string::String::from("Accent")), { let value = ::core::clone::Clone::clone(&deferred_0); let value: ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent> = value; value }), 1, 118)?;
+    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&rt::argument(dictionary_0.clone(), "FerroUI.Controls.ResourceDictionary.AddDeferred", 0, 1, 118)?, rt::to_object(::std::string::String::from("Accent")), ::core::clone::Clone::clone(&deferred_0) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 1, 118)?;
     // control_theme_resources.xaml(1,163) Resources (resource)
     let dictionary_1 = ::ferroui_base::StyledElement::__markup_get_Resources(border_0.upcast_ref::<::ferroui_base::StyledElement>());
     let deferred_1 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_control_theme_resources_xaml_deferred_1, 1, 163)?;
-    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&rt::argument(dictionary_1.clone(), "FerroUI.Controls.ResourceDictionary.AddDeferred", 0, 1, 163)?, rt::to_object(::std::string::String::from("Base")), { let value = ::core::clone::Clone::clone(&deferred_1); let value: ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent> = value; value }), 1, 163)?;
+    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&rt::argument(dictionary_1.clone(), "FerroUI.Controls.ResourceDictionary.AddDeferred", 0, 1, 163)?, rt::to_object(::std::string::String::from("Base")), ::core::clone::Clone::clone(&deferred_1) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 1, 163)?;
     // control_theme_resources.xaml(1,265) Resources (resource)
     let dictionary_2 = ::ferroui_base::StyledElement::__markup_get_Resources(border_0.upcast_ref::<::ferroui_base::StyledElement>());
     let deferred_2 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_control_theme_resources_xaml_deferred_2, 1, 265)?;
-    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&rt::argument(dictionary_2.clone(), "FerroUI.Controls.ResourceDictionary.AddDeferred", 0, 1, 265)?, rt::to_object(::std::string::String::from("Derived")), { let value = ::core::clone::Clone::clone(&deferred_2); let value: ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent> = value; value }), 1, 265)?;
+    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&rt::argument(dictionary_2.clone(), "FerroUI.Controls.ResourceDictionary.AddDeferred", 0, 1, 265)?, rt::to_object(::std::string::String::from("Derived")), ::core::clone::Clone::clone(&deferred_2) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 1, 265)?;
     context.pop_parent();
     rt::invoked(border_0.try_end_init(), 1, 2)?;
     rt::complete_root_name_scope(::core::option::Option::Some(&border_0), name_scope.as_ref(), 1, 2)?;
@@ -3069,10 +3069,10 @@ fn build_control_theme_resources_xaml_deferred_1(
     // control_theme_resources.xaml(1,210) Content
     let setter_0 = ::ferroui_base::styling::Setter::__markup_new_0();
     // control_theme_resources.xaml(1,217) Property
-    ::ferroui_base::styling::Setter::__markup_set_Property(&setter_0, rt::cast(rt::property(::ferroui_base::Visual::opacity_property()), 1, 217)?);
+    ::ferroui_base::styling::Setter::__markup_set_Property(&setter_0, ::core::option::Option::Some(rt::property(::ferroui_base::Visual::opacity_property())));
     // control_theme_resources.xaml(1,210) Value
     ::ferroui_base::styling::Setter::__markup_set_Value(&setter_0, rt::setter_value(&setter_0, rt::to_object(0.5_f64)));
-    ::ferroui_base::styling::StyleBase::__markup_Add_0(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(::core::clone::Clone::clone(&setter_0), 1, 210)?);
+    ::ferroui_base::styling::StyleBase::__markup_Add_0(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), ::core::clone::Clone::clone(&setter_0) as ::std::rc::Rc<dyn ::ferroui_base::styling::SetterBase>);
     ::core::result::Result::Ok(rt::to_value(control_theme_0.clone()))
 }
 
@@ -3096,7 +3096,7 @@ fn build_control_theme_resources_xaml_deferred_2(
     let setter_0 = ::ferroui_base::styling::Setter::__markup_new_0();
     context.push_parent(rt::to_value(setter_0.clone()));
     // control_theme_resources.xaml(1,354) Property
-    ::ferroui_base::styling::Setter::__markup_set_Property(&setter_0, rt::cast(rt::property(::ferroui_controls::primitives::TemplatedControl::background_property()), 1, 354)?);
+    ::ferroui_base::styling::Setter::__markup_set_Property(&setter_0, ::core::option::Option::Some(rt::property(::ferroui_controls::primitives::TemplatedControl::background_property())));
     // control_theme_resources.xaml(1,376) Value
     let static_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("Accent")));
     context.set_target_property(rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)));
@@ -3104,12 +3104,12 @@ fn build_control_theme_resources_xaml_deferred_2(
     context.set_target_property(::core::option::Option::None);
     ::ferroui_base::styling::Setter::__markup_set_Value(&setter_0, rt::setter_value(&setter_0, ::core::clone::Clone::clone(&provided_1)));
     context.pop_parent();
-    ::ferroui_base::styling::StyleBase::__markup_Add_0(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(::core::clone::Clone::clone(&setter_0), 1, 347)?);
+    ::ferroui_base::styling::StyleBase::__markup_Add_0(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), ::core::clone::Clone::clone(&setter_0) as ::std::rc::Rc<dyn ::ferroui_base::styling::SetterBase>);
     // control_theme_resources.xaml(1,410) Content
     let setter_1 = ::ferroui_base::styling::Setter::__markup_new_0();
     context.push_parent(rt::to_value(setter_1.clone()));
     // control_theme_resources.xaml(1,417) Property
-    ::ferroui_base::styling::Setter::__markup_set_Property(&setter_1, rt::cast(rt::property(::ferroui_controls::primitives::TemplatedControl::foreground_property()), 1, 417)?);
+    ::ferroui_base::styling::Setter::__markup_set_Property(&setter_1, ::core::option::Option::Some(rt::property(::ferroui_controls::primitives::TemplatedControl::foreground_property())));
     // control_theme_resources.xaml(1,439) Value
     let dynamic_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("Accent")));
     context.set_target_property(rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)));
@@ -3117,7 +3117,7 @@ fn build_control_theme_resources_xaml_deferred_2(
     context.set_target_property(::core::option::Option::None);
     ::ferroui_base::styling::Setter::__markup_set_Value(&setter_1, rt::setter_value(&setter_1, rt::to_object(::core::clone::Clone::clone(&provided_2))));
     context.pop_parent();
-    ::ferroui_base::styling::StyleBase::__markup_Add_0(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(::core::clone::Clone::clone(&setter_1), 1, 410)?);
+    ::ferroui_base::styling::StyleBase::__markup_Add_0(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), ::core::clone::Clone::clone(&setter_1) as ::std::rc::Rc<dyn ::ferroui_base::styling::SetterBase>);
     context.pop_parent();
     ::core::result::Result::Ok(rt::to_value(control_theme_0.clone()))
 }
@@ -3169,7 +3169,7 @@ pub fn build_compiled_binding_element_xaml(
     context.set_target_property(rt::property_value(::ferroui_controls::TextBlock::text_property()));
     let provided_0 = ::ferroui_markup_xaml::markup_extensions::CompiledBindingExtension::__markup_ProvideValue_0(&compiled_binding_extension_0, ::core::option::Option::Some(rt::service_provider(&context)));
     context.set_target_property(::core::option::Option::None);
-    rt::bind(&text_block_1.clone().upcast::<::ferroui_base::FerroObject>(), ::ferroui_controls::TextBlock::text_property(), provided_0, 1, 176)?;
+    rt::bind(text_block_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::TextBlock::text_property(), provided_0, 1, 176)?;
     context.pop_parent();
     rt::invoked(text_block_1.try_end_init(), 1, 166)?;
     context.pop_parent();
@@ -3220,7 +3220,7 @@ pub fn build_compiled_binding_data_type_xaml(
     context.set_target_property(rt::property_value(::ferroui_controls::TextBlock::text_property()));
     let provided_0 = ::ferroui_markup_xaml::markup_extensions::CompiledBindingExtension::__markup_ProvideValue_0(&compiled_binding_extension_0, ::core::option::Option::Some(rt::service_provider(&context)));
     context.set_target_property(::core::option::Option::None);
-    rt::bind(&text_block_1.clone().upcast::<::ferroui_base::FerroObject>(), ::ferroui_controls::TextBlock::text_property(), provided_0, 1, 213)?;
+    rt::bind(text_block_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::TextBlock::text_property(), provided_0, 1, 213)?;
     context.pop_parent();
     rt::invoked(text_block_1.try_end_init(), 1, 180)?;
     context.pop_parent();
@@ -3265,7 +3265,7 @@ pub fn build_compiled_binding_parent_xaml(
     context.set_target_property(rt::property_value(::ferroui_controls::TextBlock::text_property()));
     let provided_0 = ::ferroui_markup_xaml::markup_extensions::CompiledBindingExtension::__markup_ProvideValue_0(&compiled_binding_extension_0, ::core::option::Option::Some(rt::service_provider(&context)));
     context.set_target_property(::core::option::Option::None);
-    rt::bind(&text_block_0.clone().upcast::<::ferroui_base::FerroObject>(), ::ferroui_controls::TextBlock::text_property(), provided_0, 1, 118)?;
+    rt::bind(text_block_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::TextBlock::text_property(), provided_0, 1, 118)?;
     context.pop_parent();
     rt::invoked(text_block_0.try_end_init(), 1, 108)?;
     context.pop_parent();
@@ -3321,7 +3321,7 @@ pub fn build_compiled_binding_plain_property_xaml(
     context.set_target_property(rt::property_value(::ferroui_controls::TextBlock::text_property()));
     let provided_0 = ::ferroui_markup_xaml::markup_extensions::CompiledBindingExtension::__markup_ProvideValue_0(&compiled_binding_extension_0, ::core::option::Option::Some(rt::service_provider(&context)));
     context.set_target_property(::core::option::Option::None);
-    rt::bind(&text_block_0.clone().upcast::<::ferroui_base::FerroObject>(), ::ferroui_controls::TextBlock::text_property(), provided_0, 1, 300)?;
+    rt::bind(text_block_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::TextBlock::text_property(), provided_0, 1, 300)?;
     context.pop_parent();
     rt::invoked(text_block_0.try_end_init(), 1, 258)?;
     // compiled_binding_plain_property.xaml(1,333) Children
@@ -3343,7 +3343,7 @@ pub fn build_compiled_binding_plain_property_xaml(
     context.set_target_property(::core::option::Option::None);
     let value_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_1);
     if value_0.is_some() {
-        rt::bind(&text_block_1.clone().upcast::<::ferroui_base::FerroObject>(), ::ferroui_controls::Control::tag_property(), value_0.clone(), 1, 375)?;
+        rt::bind(text_block_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::Control::tag_property(), value_0.clone(), 1, 375)?;
     } else {
         text_block_1.set_value(::ferroui_controls::Control::tag_property(), rt::exact(value_0.clone(), "FerroUI.Controls.Control.set_Tag", 0, 1, 375)?);
     }
@@ -3540,7 +3540,7 @@ pub fn build_flags_value_xaml(
     // flags_value.xaml(1,162) Resources (resource)
     let dictionary_0 = ::ferroui_base::StyledElement::__markup_get_Resources(border_0.upcast_ref::<::ferroui_base::StyledElement>());
     let deferred_0 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_flags_value_xaml_deferred_0, 1, 162)?;
-    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&rt::argument(dictionary_0.clone(), "FerroUI.Controls.ResourceDictionary.AddDeferred", 0, 1, 162)?, rt::to_object(::std::string::String::from("Filter")), { let value = ::core::clone::Clone::clone(&deferred_0); let value: ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent> = value; value }), 1, 162)?;
+    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&rt::argument(dictionary_0.clone(), "FerroUI.Controls.ResourceDictionary.AddDeferred", 0, 1, 162)?, rt::to_object(::std::string::String::from("Filter")), ::core::clone::Clone::clone(&deferred_0) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 1, 162)?;
     rt::invoked(border_0.try_end_init(), 1, 2)?;
     rt::complete_root_name_scope(::core::option::Option::Some(&border_0), name_scope.as_ref(), 1, 2)?;
     ::core::result::Result::Ok(border_0)
@@ -3574,13 +3574,13 @@ pub fn build_control_template_parts_xaml(
     let name_scope = context.name_scope_field();
     button_0.begin_init();
     // control_template_parts.xaml(1,2) Background
-    button_0.set_value(::ferroui_controls::primitives::TemplatedControl::background_property(), ::core::option::Option::Some({ let value = ::ferroui_base::media::immutable::ImmutableSolidColorBrush::__markup_new_0(4294901760_u32); let value: ::std::rc::Rc<dyn ::ferroui_base::media::IBrush> = value; value }));
+    button_0.set_value(::ferroui_controls::primitives::TemplatedControl::background_property(), ::core::option::Option::Some(::ferroui_base::media::immutable::ImmutableSolidColorBrush::__markup_new_0(4294901760_u32) as ::std::rc::Rc<dyn ::ferroui_base::media::IBrush>));
     // control_template_parts.xaml(1,134) Template
     let control_template_0 = ::ferroui_markup_xaml::templates::ControlTemplate::__markup_new_0();
     // control_template_parts.xaml(1,151) Content
     let deferred_0 = rt::defer(rt::class_handle(<::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE), &context, build_control_template_parts_xaml_deferred_0, 1, 151)?;
     ::ferroui_markup_xaml::templates::ControlTemplate::__markup_set_Content(&control_template_0, rt::to_object(::core::clone::Clone::clone(&deferred_0)));
-    button_0.set_value(::ferroui_controls::primitives::TemplatedControl::template_property(), ::core::option::Option::Some({ let value = ::core::clone::Clone::clone(&control_template_0); let value: ::std::rc::Rc<dyn ::ferroui_controls::templates::IControlTemplate> = value; value }));
+    button_0.set_value(::ferroui_controls::primitives::TemplatedControl::template_property(), ::core::option::Option::Some(::core::clone::Clone::clone(&control_template_0) as ::std::rc::Rc<dyn ::ferroui_controls::templates::IControlTemplate>));
     rt::invoked(button_0.try_end_init(), 1, 2)?;
     rt::complete_root_name_scope(::core::option::Option::Some(&button_0), name_scope.as_ref(), 1, 2)?;
     ::core::result::Result::Ok(button_0)
@@ -3602,7 +3602,7 @@ fn build_control_template_parts_xaml_deferred_0(
     // control_template_parts.xaml(1,177) Background
     let template_binding_0 = ::ferroui_base::data::TemplateBinding::__markup_new_1(rt::property(::ferroui_controls::primitives::TemplatedControl::background_property()));
     let provided_0 = ::ferroui_base::data::TemplateBinding::__markup_ProvideValue_0(&template_binding_0);
-    rt::bind(&border_0.clone().upcast::<::ferroui_base::FerroObject>(), ::ferroui_controls::Border::background_property(), provided_0, 1, 177)?;
+    rt::bind(border_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::Border::background_property(), provided_0, 1, 177)?;
     // control_template_parts.xaml(1,220) Child
     // control_template_parts.xaml(1,220) ContentPresenter
     let content_presenter_0 = ::ferroui_controls::presenters::ContentPresenter::new();
@@ -3617,7 +3617,7 @@ fn build_control_template_parts_xaml_deferred_0(
     let provided_1 = ::ferroui_base::data::TemplateBinding::__markup_ProvideValue_0(&template_binding_1);
     let value_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_1);
     if value_0.is_some() {
-        rt::bind(&content_presenter_0.clone().upcast::<::ferroui_base::FerroObject>(), ::ferroui_controls::presenters::ContentPresenter::content_property(), value_0.clone(), 1, 266)?;
+        rt::bind(content_presenter_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::presenters::ContentPresenter::content_property(), value_0.clone(), 1, 266)?;
     } else {
         content_presenter_0.set_value_with_priority(::ferroui_controls::presenters::ContentPresenter::content_property(), rt::exact(value_0.clone(), "ContentControl.Content", 1, 1, 266)?, priority_0);
     }
@@ -3650,7 +3650,7 @@ pub fn build_data_template_xaml(
     let deferred_0 = rt::defer(rt::class_handle(<::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE), &context, build_data_template_xaml_deferred_0, 1, 147)?;
     ::ferroui_markup_xaml::templates::DataTemplate::__markup_set_Content(&data_template_0, rt::to_object(::core::clone::Clone::clone(&deferred_0)));
     context.pop_parent();
-    items_control_0.set_value(::ferroui_controls::ItemsControl::item_template_property(), ::core::option::Option::Some({ let value = ::core::clone::Clone::clone(&data_template_0); let value: ::std::rc::Rc<dyn ::ferroui_controls::templates::IDataTemplate> = value; value }));
+    items_control_0.set_value(::ferroui_controls::ItemsControl::item_template_property(), ::core::option::Option::Some(::core::clone::Clone::clone(&data_template_0) as ::std::rc::Rc<dyn ::ferroui_controls::templates::IDataTemplate>));
     context.pop_parent();
     rt::invoked(items_control_0.try_end_init(), 1, 2)?;
     rt::complete_root_name_scope(::core::option::Option::Some(&items_control_0), name_scope.as_ref(), 1, 2)?;
@@ -3672,7 +3672,7 @@ fn build_data_template_xaml_deferred_0(
     context.set_target_property(rt::property_value(::ferroui_controls::TextBlock::text_property()));
     let provided_0 = ::ferroui_markup_xaml::markup_extensions::ReflectionBindingExtension::__markup_ProvideValue_0(&reflection_binding_extension_0, rt::service_provider(&context));
     context.set_target_property(::core::option::Option::None);
-    rt::bind(&text_block_0.clone().upcast::<::ferroui_base::FerroObject>(), ::ferroui_controls::TextBlock::text_property(), provided_0, 1, 157)?;
+    rt::bind(text_block_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::TextBlock::text_property(), provided_0, 1, 157)?;
     context.pop_parent();
     rt::invoked(text_block_0.try_end_init(), 1, 147)?;
     ::core::result::Result::Ok(rt::to_value(text_block_0.clone()))
@@ -3697,7 +3697,7 @@ pub fn build_control_theme_template_xaml(
     // control_theme_template.xaml(1,118) Resources (resource)
     let dictionary_0 = ::ferroui_base::StyledElement::__markup_get_Resources(border_0.upcast_ref::<::ferroui_base::StyledElement>());
     let deferred_0 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_control_theme_template_xaml_deferred_0, 1, 118)?;
-    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&rt::argument(dictionary_0.clone(), "FerroUI.Controls.ResourceDictionary.AddDeferred", 0, 1, 118)?, rt::to_object(::std::string::String::from("Theme")), { let value = ::core::clone::Clone::clone(&deferred_0); let value: ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent> = value; value }), 1, 118)?;
+    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&rt::argument(dictionary_0.clone(), "FerroUI.Controls.ResourceDictionary.AddDeferred", 0, 1, 118)?, rt::to_object(::std::string::String::from("Theme")), ::core::clone::Clone::clone(&deferred_0) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 1, 118)?;
     rt::invoked(border_0.try_end_init(), 1, 2)?;
     rt::complete_root_name_scope(::core::option::Option::Some(&border_0), name_scope.as_ref(), 1, 2)?;
     ::core::result::Result::Ok(border_0)
@@ -3715,14 +3715,14 @@ fn build_control_theme_template_xaml_deferred_0(
     // control_theme_template.xaml(1,166) Content
     let setter_0 = ::ferroui_base::styling::Setter::__markup_new_0();
     // control_theme_template.xaml(1,173) Property
-    ::ferroui_base::styling::Setter::__markup_set_Property(&setter_0, rt::cast(rt::property(::ferroui_controls::primitives::TemplatedControl::template_property()), 1, 173)?);
+    ::ferroui_base::styling::Setter::__markup_set_Property(&setter_0, ::core::option::Option::Some(rt::property(::ferroui_controls::primitives::TemplatedControl::template_property())));
     // control_theme_template.xaml(1,194) Value
     let control_template_0 = ::ferroui_markup_xaml::templates::ControlTemplate::__markup_new_0();
     // control_theme_template.xaml(1,211) Content
     let deferred_0 = rt::defer(rt::class_handle(<::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE), &context, build_control_theme_template_xaml_deferred_1, 1, 211)?;
     ::ferroui_markup_xaml::templates::ControlTemplate::__markup_set_Content(&control_template_0, rt::to_object(::core::clone::Clone::clone(&deferred_0)));
     ::ferroui_base::styling::Setter::__markup_set_Value(&setter_0, rt::setter_value(&setter_0, rt::to_object(::core::clone::Clone::clone(&control_template_0))));
-    ::ferroui_base::styling::StyleBase::__markup_Add_0(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(::core::clone::Clone::clone(&setter_0), 1, 166)?);
+    ::ferroui_base::styling::StyleBase::__markup_Add_0(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), ::core::clone::Clone::clone(&setter_0) as ::std::rc::Rc<dyn ::ferroui_base::styling::SetterBase>);
     ::core::result::Result::Ok(rt::to_value(control_theme_0.clone()))
 }
 
@@ -3750,7 +3750,7 @@ fn build_control_theme_template_xaml_deferred_1(
     let provided_0 = ::ferroui_base::data::TemplateBinding::__markup_ProvideValue_0(&template_binding_0);
     let value_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_0);
     if value_0.is_some() {
-        rt::bind(&content_presenter_0.clone().upcast::<::ferroui_base::FerroObject>(), ::ferroui_controls::presenters::ContentPresenter::content_property(), value_0.clone(), 1, 253)?;
+        rt::bind(content_presenter_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::presenters::ContentPresenter::content_property(), value_0.clone(), 1, 253)?;
     } else {
         content_presenter_0.set_value_with_priority(::ferroui_controls::presenters::ContentPresenter::content_property(), rt::exact(value_0.clone(), "ContentControl.Content", 1, 1, 253)?, priority_0);
     }
@@ -3790,10 +3790,10 @@ pub fn build_style_selectors_xaml(
     // style_selectors.xaml(1,172) Content
     let setter_0 = ::ferroui_base::styling::Setter::__markup_new_0();
     // style_selectors.xaml(1,179) Property
-    ::ferroui_base::styling::Setter::__markup_set_Property(&setter_0, rt::cast(rt::property(::ferroui_base::Visual::opacity_property()), 1, 179)?);
+    ::ferroui_base::styling::Setter::__markup_set_Property(&setter_0, ::core::option::Option::Some(rt::property(::ferroui_base::Visual::opacity_property())));
     // style_selectors.xaml(1,172) Value
     ::ferroui_base::styling::Setter::__markup_set_Value(&setter_0, rt::setter_value(&setter_0, rt::to_object(0.5_f64)));
-    ::ferroui_base::styling::StyleBase::__markup_Add_0(style_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(::core::clone::Clone::clone(&setter_0), 1, 172)?);
+    ::ferroui_base::styling::StyleBase::__markup_Add_0(style_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), ::core::clone::Clone::clone(&setter_0) as ::std::rc::Rc<dyn ::ferroui_base::styling::SetterBase>);
     rt::invoked(::ferroui_base::styling::Styles::__markup_Add_0(&styles_collection_0, rt::cast(style_0.clone(), 1, 127)?), 1, 127)?;
     // style_selectors.xaml(1,220) Styles
     let styles_collection_1 = ::ferroui_base::StyledElement::__markup_get_Styles(border_0.upcast_ref::<::ferroui_base::StyledElement>());
@@ -3807,10 +3807,10 @@ pub fn build_style_selectors_xaml(
     // style_selectors.xaml(1,256) Content
     let setter_1 = ::ferroui_base::styling::Setter::__markup_new_0();
     // style_selectors.xaml(1,263) Property
-    ::ferroui_base::styling::Setter::__markup_set_Property(&setter_1, rt::cast(rt::property(::ferroui_base::Visual::opacity_property()), 1, 263)?);
+    ::ferroui_base::styling::Setter::__markup_set_Property(&setter_1, ::core::option::Option::Some(rt::property(::ferroui_base::Visual::opacity_property())));
     // style_selectors.xaml(1,256) Value
     ::ferroui_base::styling::Setter::__markup_set_Value(&setter_1, rt::setter_value(&setter_1, rt::to_object(0.5_f64)));
-    ::ferroui_base::styling::StyleBase::__markup_Add_0(style_1.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(::core::clone::Clone::clone(&setter_1), 1, 256)?);
+    ::ferroui_base::styling::StyleBase::__markup_Add_0(style_1.upcast_ref::<::ferroui_base::styling::StyleBase>(), ::core::clone::Clone::clone(&setter_1) as ::std::rc::Rc<dyn ::ferroui_base::styling::SetterBase>);
     rt::invoked(::ferroui_base::styling::Styles::__markup_Add_0(&styles_collection_1, rt::cast(style_1.clone(), 1, 220)?), 1, 220)?;
     // style_selectors.xaml(1,304) Styles
     let styles_collection_2 = ::ferroui_base::StyledElement::__markup_get_Styles(border_0.upcast_ref::<::ferroui_base::StyledElement>());
@@ -3824,10 +3824,10 @@ pub fn build_style_selectors_xaml(
     // style_selectors.xaml(1,340) Content
     let setter_2 = ::ferroui_base::styling::Setter::__markup_new_0();
     // style_selectors.xaml(1,347) Property
-    ::ferroui_base::styling::Setter::__markup_set_Property(&setter_2, rt::cast(rt::property(::ferroui_base::Visual::opacity_property()), 1, 347)?);
+    ::ferroui_base::styling::Setter::__markup_set_Property(&setter_2, ::core::option::Option::Some(rt::property(::ferroui_base::Visual::opacity_property())));
     // style_selectors.xaml(1,340) Value
     ::ferroui_base::styling::Setter::__markup_set_Value(&setter_2, rt::setter_value(&setter_2, rt::to_object(0.5_f64)));
-    ::ferroui_base::styling::StyleBase::__markup_Add_0(style_2.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(::core::clone::Clone::clone(&setter_2), 1, 340)?);
+    ::ferroui_base::styling::StyleBase::__markup_Add_0(style_2.upcast_ref::<::ferroui_base::styling::StyleBase>(), ::core::clone::Clone::clone(&setter_2) as ::std::rc::Rc<dyn ::ferroui_base::styling::SetterBase>);
     rt::invoked(::ferroui_base::styling::Styles::__markup_Add_0(&styles_collection_2, rt::cast(style_2.clone(), 1, 304)?), 1, 304)?;
     // style_selectors.xaml(1,388) Styles
     let styles_collection_3 = ::ferroui_base::StyledElement::__markup_get_Styles(border_0.upcast_ref::<::ferroui_base::StyledElement>());
@@ -3841,10 +3841,10 @@ pub fn build_style_selectors_xaml(
     // style_selectors.xaml(1,441) Content
     let setter_3 = ::ferroui_base::styling::Setter::__markup_new_0();
     // style_selectors.xaml(1,448) Property
-    ::ferroui_base::styling::Setter::__markup_set_Property(&setter_3, rt::cast(rt::property(::ferroui_base::Visual::opacity_property()), 1, 448)?);
+    ::ferroui_base::styling::Setter::__markup_set_Property(&setter_3, ::core::option::Option::Some(rt::property(::ferroui_base::Visual::opacity_property())));
     // style_selectors.xaml(1,441) Value
     ::ferroui_base::styling::Setter::__markup_set_Value(&setter_3, rt::setter_value(&setter_3, rt::to_object(0.5_f64)));
-    ::ferroui_base::styling::StyleBase::__markup_Add_0(style_3.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(::core::clone::Clone::clone(&setter_3), 1, 441)?);
+    ::ferroui_base::styling::StyleBase::__markup_Add_0(style_3.upcast_ref::<::ferroui_base::styling::StyleBase>(), ::core::clone::Clone::clone(&setter_3) as ::std::rc::Rc<dyn ::ferroui_base::styling::SetterBase>);
     rt::invoked(::ferroui_base::styling::Styles::__markup_Add_0(&styles_collection_3, rt::cast(style_3.clone(), 1, 388)?), 1, 388)?;
     // style_selectors.xaml(1,489) Styles
     let styles_collection_4 = ::ferroui_base::StyledElement::__markup_get_Styles(border_0.upcast_ref::<::ferroui_base::StyledElement>());
@@ -3858,10 +3858,10 @@ pub fn build_style_selectors_xaml(
     // style_selectors.xaml(1,529) Content
     let setter_4 = ::ferroui_base::styling::Setter::__markup_new_0();
     // style_selectors.xaml(1,536) Property
-    ::ferroui_base::styling::Setter::__markup_set_Property(&setter_4, rt::cast(rt::property(::ferroui_base::Visual::opacity_property()), 1, 536)?);
+    ::ferroui_base::styling::Setter::__markup_set_Property(&setter_4, ::core::option::Option::Some(rt::property(::ferroui_base::Visual::opacity_property())));
     // style_selectors.xaml(1,529) Value
     ::ferroui_base::styling::Setter::__markup_set_Value(&setter_4, rt::setter_value(&setter_4, rt::to_object(0.5_f64)));
-    ::ferroui_base::styling::StyleBase::__markup_Add_0(style_4.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(::core::clone::Clone::clone(&setter_4), 1, 529)?);
+    ::ferroui_base::styling::StyleBase::__markup_Add_0(style_4.upcast_ref::<::ferroui_base::styling::StyleBase>(), ::core::clone::Clone::clone(&setter_4) as ::std::rc::Rc<dyn ::ferroui_base::styling::SetterBase>);
     rt::invoked(::ferroui_base::styling::Styles::__markup_Add_0(&styles_collection_4, rt::cast(style_4.clone(), 1, 489)?), 1, 489)?;
     // style_selectors.xaml(1,577) Styles
     let styles_collection_5 = ::ferroui_base::StyledElement::__markup_get_Styles(border_0.upcast_ref::<::ferroui_base::StyledElement>());
@@ -3874,10 +3874,10 @@ pub fn build_style_selectors_xaml(
     // style_selectors.xaml(1,623) Content
     let setter_5 = ::ferroui_base::styling::Setter::__markup_new_0();
     // style_selectors.xaml(1,630) Property
-    ::ferroui_base::styling::Setter::__markup_set_Property(&setter_5, rt::cast(rt::property(::ferroui_base::Visual::opacity_property()), 1, 630)?);
+    ::ferroui_base::styling::Setter::__markup_set_Property(&setter_5, ::core::option::Option::Some(rt::property(::ferroui_base::Visual::opacity_property())));
     // style_selectors.xaml(1,623) Value
     ::ferroui_base::styling::Setter::__markup_set_Value(&setter_5, rt::setter_value(&setter_5, rt::to_object(0.5_f64)));
-    ::ferroui_base::styling::StyleBase::__markup_Add_0(style_5.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(::core::clone::Clone::clone(&setter_5), 1, 623)?);
+    ::ferroui_base::styling::StyleBase::__markup_Add_0(style_5.upcast_ref::<::ferroui_base::styling::StyleBase>(), ::core::clone::Clone::clone(&setter_5) as ::std::rc::Rc<dyn ::ferroui_base::styling::SetterBase>);
     rt::invoked(::ferroui_base::styling::Styles::__markup_Add_0(&styles_collection_5, rt::cast(style_5.clone(), 1, 577)?), 1, 577)?;
     // style_selectors.xaml(1,671) Styles
     let styles_collection_6 = ::ferroui_base::StyledElement::__markup_get_Styles(border_0.upcast_ref::<::ferroui_base::StyledElement>());
@@ -3890,10 +3890,10 @@ pub fn build_style_selectors_xaml(
     // style_selectors.xaml(1,715) Content
     let setter_6 = ::ferroui_base::styling::Setter::__markup_new_0();
     // style_selectors.xaml(1,722) Property
-    ::ferroui_base::styling::Setter::__markup_set_Property(&setter_6, rt::cast(rt::property(::ferroui_base::Visual::opacity_property()), 1, 722)?);
+    ::ferroui_base::styling::Setter::__markup_set_Property(&setter_6, ::core::option::Option::Some(rt::property(::ferroui_base::Visual::opacity_property())));
     // style_selectors.xaml(1,715) Value
     ::ferroui_base::styling::Setter::__markup_set_Value(&setter_6, rt::setter_value(&setter_6, rt::to_object(0.5_f64)));
-    ::ferroui_base::styling::StyleBase::__markup_Add_0(style_6.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(::core::clone::Clone::clone(&setter_6), 1, 715)?);
+    ::ferroui_base::styling::StyleBase::__markup_Add_0(style_6.upcast_ref::<::ferroui_base::styling::StyleBase>(), ::core::clone::Clone::clone(&setter_6) as ::std::rc::Rc<dyn ::ferroui_base::styling::SetterBase>);
     rt::invoked(::ferroui_base::styling::Styles::__markup_Add_0(&styles_collection_6, rt::cast(style_6.clone(), 1, 671)?), 1, 671)?;
     // style_selectors.xaml(1,763) Styles
     let styles_collection_7 = ::ferroui_base::StyledElement::__markup_get_Styles(border_0.upcast_ref::<::ferroui_base::StyledElement>());
@@ -3906,10 +3906,10 @@ pub fn build_style_selectors_xaml(
     // style_selectors.xaml(1,802) Content
     let setter_7 = ::ferroui_base::styling::Setter::__markup_new_0();
     // style_selectors.xaml(1,809) Property
-    ::ferroui_base::styling::Setter::__markup_set_Property(&setter_7, rt::cast(rt::property(::ferroui_base::Visual::opacity_property()), 1, 809)?);
+    ::ferroui_base::styling::Setter::__markup_set_Property(&setter_7, ::core::option::Option::Some(rt::property(::ferroui_base::Visual::opacity_property())));
     // style_selectors.xaml(1,802) Value
     ::ferroui_base::styling::Setter::__markup_set_Value(&setter_7, rt::setter_value(&setter_7, rt::to_object(0.5_f64)));
-    ::ferroui_base::styling::StyleBase::__markup_Add_0(style_7.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(::core::clone::Clone::clone(&setter_7), 1, 802)?);
+    ::ferroui_base::styling::StyleBase::__markup_Add_0(style_7.upcast_ref::<::ferroui_base::styling::StyleBase>(), ::core::clone::Clone::clone(&setter_7) as ::std::rc::Rc<dyn ::ferroui_base::styling::SetterBase>);
     rt::invoked(::ferroui_base::styling::Styles::__markup_Add_0(&styles_collection_7, rt::cast(style_7.clone(), 1, 763)?), 1, 763)?;
     // style_selectors.xaml(1,850) Styles
     let styles_collection_8 = ::ferroui_base::StyledElement::__markup_get_Styles(border_0.upcast_ref::<::ferroui_base::StyledElement>());
@@ -3924,10 +3924,10 @@ pub fn build_style_selectors_xaml(
     // style_selectors.xaml(1,891) Content
     let setter_8 = ::ferroui_base::styling::Setter::__markup_new_0();
     // style_selectors.xaml(1,898) Property
-    ::ferroui_base::styling::Setter::__markup_set_Property(&setter_8, rt::cast(rt::property(::ferroui_base::Visual::opacity_property()), 1, 898)?);
+    ::ferroui_base::styling::Setter::__markup_set_Property(&setter_8, ::core::option::Option::Some(rt::property(::ferroui_base::Visual::opacity_property())));
     // style_selectors.xaml(1,891) Value
     ::ferroui_base::styling::Setter::__markup_set_Value(&setter_8, rt::setter_value(&setter_8, rt::to_object(0.5_f64)));
-    ::ferroui_base::styling::StyleBase::__markup_Add_0(style_8.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(::core::clone::Clone::clone(&setter_8), 1, 891)?);
+    ::ferroui_base::styling::StyleBase::__markup_Add_0(style_8.upcast_ref::<::ferroui_base::styling::StyleBase>(), ::core::clone::Clone::clone(&setter_8) as ::std::rc::Rc<dyn ::ferroui_base::styling::SetterBase>);
     rt::invoked(::ferroui_base::styling::Styles::__markup_Add_0(&styles_collection_8, rt::cast(style_8.clone(), 1, 850)?), 1, 850)?;
     // style_selectors.xaml(1,939) Styles
     let styles_collection_9 = ::ferroui_base::StyledElement::__markup_get_Styles(border_0.upcast_ref::<::ferroui_base::StyledElement>());
@@ -3939,10 +3939,10 @@ pub fn build_style_selectors_xaml(
     // style_selectors.xaml(1,970) Content
     let setter_9 = ::ferroui_base::styling::Setter::__markup_new_0();
     // style_selectors.xaml(1,977) Property
-    ::ferroui_base::styling::Setter::__markup_set_Property(&setter_9, rt::cast(rt::property(::ferroui_base::Visual::opacity_property()), 1, 977)?);
+    ::ferroui_base::styling::Setter::__markup_set_Property(&setter_9, ::core::option::Option::Some(rt::property(::ferroui_base::Visual::opacity_property())));
     // style_selectors.xaml(1,970) Value
     ::ferroui_base::styling::Setter::__markup_set_Value(&setter_9, rt::setter_value(&setter_9, rt::to_object(0.5_f64)));
-    ::ferroui_base::styling::StyleBase::__markup_Add_0(style_9.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(::core::clone::Clone::clone(&setter_9), 1, 970)?);
+    ::ferroui_base::styling::StyleBase::__markup_Add_0(style_9.upcast_ref::<::ferroui_base::styling::StyleBase>(), ::core::clone::Clone::clone(&setter_9) as ::std::rc::Rc<dyn ::ferroui_base::styling::SetterBase>);
     rt::invoked(::ferroui_base::styling::Styles::__markup_Add_0(&styles_collection_9, rt::cast(style_9.clone(), 1, 939)?), 1, 939)?;
     rt::invoked(border_0.try_end_init(), 1, 2)?;
     rt::complete_root_name_scope(::core::option::Option::Some(&border_0), name_scope.as_ref(), 1, 2)?;
@@ -3975,10 +3975,10 @@ pub fn build_style_nested_xaml(
     // style_nested.xaml(1,140) Content
     let setter_0 = ::ferroui_base::styling::Setter::__markup_new_0();
     // style_nested.xaml(1,147) Property
-    ::ferroui_base::styling::Setter::__markup_set_Property(&setter_0, rt::cast(rt::property(::ferroui_base::Visual::opacity_property()), 1, 147)?);
+    ::ferroui_base::styling::Setter::__markup_set_Property(&setter_0, ::core::option::Option::Some(rt::property(::ferroui_base::Visual::opacity_property())));
     // style_nested.xaml(1,140) Value
     ::ferroui_base::styling::Setter::__markup_set_Value(&setter_0, rt::setter_value(&setter_0, rt::to_object(0.25_f64)));
-    ::ferroui_base::styling::StyleBase::__markup_Add_0(style_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(::core::clone::Clone::clone(&setter_0), 1, 140)?);
+    ::ferroui_base::styling::StyleBase::__markup_Add_0(style_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), ::core::clone::Clone::clone(&setter_0) as ::std::rc::Rc<dyn ::ferroui_base::styling::SetterBase>);
     // style_nested.xaml(1,181) Content
     // style_nested.xaml(1,181) Style
     let style_1 = ::ferroui_base::styling::Style::new();
@@ -3989,10 +3989,10 @@ pub fn build_style_nested_xaml(
     // style_nested.xaml(1,209) Content
     let setter_1 = ::ferroui_base::styling::Setter::__markup_new_0();
     // style_nested.xaml(1,216) Property
-    ::ferroui_base::styling::Setter::__markup_set_Property(&setter_1, rt::cast(rt::property(::ferroui_base::Visual::opacity_property()), 1, 216)?);
+    ::ferroui_base::styling::Setter::__markup_set_Property(&setter_1, ::core::option::Option::Some(rt::property(::ferroui_base::Visual::opacity_property())));
     // style_nested.xaml(1,209) Value
     ::ferroui_base::styling::Setter::__markup_set_Value(&setter_1, rt::setter_value(&setter_1, rt::to_object(0.75_f64)));
-    ::ferroui_base::styling::StyleBase::__markup_Add_0(style_1.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(::core::clone::Clone::clone(&setter_1), 1, 209)?);
+    ::ferroui_base::styling::StyleBase::__markup_Add_0(style_1.upcast_ref::<::ferroui_base::styling::StyleBase>(), ::core::clone::Clone::clone(&setter_1) as ::std::rc::Rc<dyn ::ferroui_base::styling::SetterBase>);
     ::ferroui_base::styling::StyleBase::__markup_Add_1(style_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(style_1.clone(), 1, 181)?);
     // style_nested.xaml(1,258) Content
     // style_nested.xaml(1,258) Style
@@ -4005,10 +4005,10 @@ pub fn build_style_nested_xaml(
     // style_nested.xaml(1,306) Content
     let setter_2 = ::ferroui_base::styling::Setter::__markup_new_0();
     // style_nested.xaml(1,313) Property
-    ::ferroui_base::styling::Setter::__markup_set_Property(&setter_2, rt::cast(rt::property(::ferroui_base::layout::Layoutable::margin_property()), 1, 313)?);
+    ::ferroui_base::styling::Setter::__markup_set_Property(&setter_2, ::core::option::Option::Some(rt::property(::ferroui_base::layout::Layoutable::margin_property())));
     // style_nested.xaml(1,306) Value
     ::ferroui_base::styling::Setter::__markup_set_Value(&setter_2, rt::setter_value(&setter_2, rt::to_object(::ferroui_base::Thickness::__markup_new_3(2.0_f64, 2.0_f64, 2.0_f64, 2.0_f64))));
-    ::ferroui_base::styling::StyleBase::__markup_Add_0(style_2.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(::core::clone::Clone::clone(&setter_2), 1, 306)?);
+    ::ferroui_base::styling::StyleBase::__markup_Add_0(style_2.upcast_ref::<::ferroui_base::styling::StyleBase>(), ::core::clone::Clone::clone(&setter_2) as ::std::rc::Rc<dyn ::ferroui_base::styling::SetterBase>);
     ::ferroui_base::styling::StyleBase::__markup_Add_1(style_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(style_2.clone(), 1, 258)?);
     rt::invoked(::ferroui_base::styling::Styles::__markup_Add_0(&styles_collection_0, rt::cast(style_0.clone(), 1, 115)?), 1, 115)?;
     rt::invoked(border_0.try_end_init(), 1, 2)?;
@@ -4036,7 +4036,7 @@ pub fn build_style_resources_xaml(
     // style_resources.xaml(1,118) Resources (resource)
     let dictionary_0 = ::ferroui_base::StyledElement::__markup_get_Resources(border_0.upcast_ref::<::ferroui_base::StyledElement>());
     let deferred_0 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_style_resources_xaml_deferred_0, 1, 118)?;
-    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&rt::argument(dictionary_0.clone(), "FerroUI.Controls.ResourceDictionary.AddDeferred", 0, 1, 118)?, rt::to_object(::std::string::String::from("Accent")), { let value = ::core::clone::Clone::clone(&deferred_0); let value: ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent> = value; value }), 1, 118)?;
+    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&rt::argument(dictionary_0.clone(), "FerroUI.Controls.ResourceDictionary.AddDeferred", 0, 1, 118)?, rt::to_object(::std::string::String::from("Accent")), ::core::clone::Clone::clone(&deferred_0) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 1, 118)?;
     // style_resources.xaml(1,198) Styles
     let styles_collection_0 = ::ferroui_base::StyledElement::__markup_get_Styles(border_0.upcast_ref::<::ferroui_base::StyledElement>());
     // style_resources.xaml(1,198) Style
@@ -4050,7 +4050,7 @@ pub fn build_style_resources_xaml(
     let setter_0 = ::ferroui_base::styling::Setter::__markup_new_0();
     context.push_parent(rt::to_value(setter_0.clone()));
     // style_resources.xaml(1,237) Property
-    ::ferroui_base::styling::Setter::__markup_set_Property(&setter_0, rt::cast(rt::property(::ferroui_controls::Border::background_property()), 1, 237)?);
+    ::ferroui_base::styling::Setter::__markup_set_Property(&setter_0, ::core::option::Option::Some(rt::property(::ferroui_controls::Border::background_property())));
     // style_resources.xaml(1,259) Value
     let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("Accent")));
     context.set_target_property(rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)));
@@ -4058,12 +4058,12 @@ pub fn build_style_resources_xaml(
     context.set_target_property(::core::option::Option::None);
     ::ferroui_base::styling::Setter::__markup_set_Value(&setter_0, rt::setter_value(&setter_0, ::core::clone::Clone::clone(&provided_0)));
     context.pop_parent();
-    ::ferroui_base::styling::StyleBase::__markup_Add_0(style_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(::core::clone::Clone::clone(&setter_0), 1, 230)?);
+    ::ferroui_base::styling::StyleBase::__markup_Add_0(style_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), ::core::clone::Clone::clone(&setter_0) as ::std::rc::Rc<dyn ::ferroui_base::styling::SetterBase>);
     // style_resources.xaml(1,293) Content
     let setter_1 = ::ferroui_base::styling::Setter::__markup_new_0();
     context.push_parent(rt::to_value(setter_1.clone()));
     // style_resources.xaml(1,300) Property
-    ::ferroui_base::styling::Setter::__markup_set_Property(&setter_1, rt::cast(rt::property(::ferroui_controls::Border::border_brush_property()), 1, 300)?);
+    ::ferroui_base::styling::Setter::__markup_set_Property(&setter_1, ::core::option::Option::Some(rt::property(::ferroui_controls::Border::border_brush_property())));
     // style_resources.xaml(1,323) Value
     let dynamic_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("Accent")));
     context.set_target_property(rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)));
@@ -4071,7 +4071,7 @@ pub fn build_style_resources_xaml(
     context.set_target_property(::core::option::Option::None);
     ::ferroui_base::styling::Setter::__markup_set_Value(&setter_1, rt::setter_value(&setter_1, rt::to_object(::core::clone::Clone::clone(&provided_1))));
     context.pop_parent();
-    ::ferroui_base::styling::StyleBase::__markup_Add_0(style_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(::core::clone::Clone::clone(&setter_1), 1, 293)?);
+    ::ferroui_base::styling::StyleBase::__markup_Add_0(style_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), ::core::clone::Clone::clone(&setter_1) as ::std::rc::Rc<dyn ::ferroui_base::styling::SetterBase>);
     context.pop_parent();
     rt::invoked(::ferroui_base::styling::Styles::__markup_Add_0(&styles_collection_0, rt::cast(style_0.clone(), 1, 198)?), 1, 198)?;
     context.pop_parent();
