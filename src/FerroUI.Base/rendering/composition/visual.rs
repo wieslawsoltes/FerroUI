@@ -353,8 +353,12 @@ impl CompositionVisualHooks for CompositionVisual {
     fn on_root_changed(&self) {
         // OnRootChangedCore of the container visual.
         let root = self.root();
-        for child in self.children.items() {
-            child.set_root(root.clone());
+        // By index, as the original enumerates the list: no copy of the
+        // children for every visual of a subtree that is attached or detached.
+        let mut index = 0;
+        while index < self.children.count() {
+            self.children.get(index).set_root(root.clone());
+            index += 1;
         }
     }
 
