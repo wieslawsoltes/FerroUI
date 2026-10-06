@@ -1034,7 +1034,7 @@ The typed `set_value` goes through the same property store path as the interpret
 
 #### 9.3.5 Errors
 
-- Generated `xaml_populate`, `build` and deferred builders return `Result<_, XamlLoadException>`. Fallible runtime calls are followed by `.map_err(|e| rt::at(e, SOURCE, line, col))?`, which attaches the position the interpreter attaches through `IXamlLineInfo`.
+- Generated `xaml_populate`, `build` and deferred builders return `Result<_, XamlLoadException>`. Fallible runtime calls carry the position the interpreter attaches through `IXamlLineInfo`: the `rt` helpers that can fail take the line and the position, and the call of a fallible member (a declared setter, method or constructor that returns a `Result`, and `EndInit`) is written `rt::invoked(<call>, line, position)?`, which reports the failure as the exception that wraps the exception of the member (`TargetInvocationException`), as the run-time loader does.
 - Calls that panic in the object model (duplicate name registration, validators) panic in generated code too, as they do under the interpreter.
 - `initialize_component()` has no error channel (it stands for a C# constructor body); it calls `rt::throw` **(new, the existing `pub(crate) fn throw` of the runtime library made public)**, which panics with the message.
 
