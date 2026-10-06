@@ -51,6 +51,12 @@ Other pages hold the entries of their own area, and this page does not repeat th
 | `LogicalExtensions.GetLogicalChildren` returns the `LogicalChildren` collection itself; `GetLogicalSiblings` enumerates the parent's collection lazily. | `get_logical_children` and `get_logical_siblings` return a snapshot (`Rc<Vec<..>>`) of the collection. | Behaviour | As `get_visual_children` does. A change to the collection after the call is not seen through the result. | #32 |
 | `LogicalExtensions.IsLogicalAncestorOf(this ILogical? logical, ILogical? target)` accepts a null receiver and returns false. | `StyledElement::is_logical_ancestor_of(&self, target: Option<&StyledElement>)`. | Representation | The receiver of a Rust method cannot be null; the target stays optional. | #32 |
 
+### Property system (`src/FerroUI.Base/property_store/`, `src/FerroUI.Base/ferro_object.rs`)
+
+| Upstream | Port | Kind | Why | Since |
+|---|---|---|---|---|
+| `ValueStore` propagates inherited values over `GetInheritanceChildren()` by index up to the count at the start; an index past the end throws. | `FerroObject::for_each_inheritance_child` stops at an index past the end, and skips a child that was dropped without being detached. | Behaviour | The port's list holds weak references, and `inheritance_children` prunes dropped children, which can shorten the list during the loop; upstream's list of strong references cannot shrink that way. | #29 |
+
 ### ControlCatalog sample (`samples/ControlCatalog/`)
 
 | Upstream | Port | Kind | Why | Since |
@@ -74,3 +80,9 @@ Places where the port did work that upstream does not do, or did it differently,
 | `RenderDataStream` records opcodes and payloads into a byte stream. | Recorded a `Vec<RenderDataOp>` of an enum. | #26 |
 | `VisualAncestorElementNode` subscribes to `VisualLocator.Track`. | Followed the attachment events of the element itself, and panicked with "Cannot find a Visual to get a visual ancestor." where upstream throws "Cannot find an ILogical to get a visual ancestor.". | #27 |
 | `GetLayoutRoot` and `GetLayoutManager` are extension methods of `Visual`. | Declared them on `Layoutable` only. | #27 |
+| `ServerCompositionVisual.ServerTreeWalker.Walk` reads `Children.List.Count` and allocates nothing. | Allocated an empty `Rc<Vec>` for every visual without a children collection, every frame (`walker.rs`). | #29 |
+| `CompositionTarget.HitTestChildren` and `HitTestFirstCore` index the children from `Children.Count - 1` down. | Copied the children of every visual entered into a new `Vec` (`composition_target.rs`). | #29 |
+| `CompositionContainerVisual.OnRootChangedCore` enumerates `Children` in place. | Copied the children of every visual of an attached or detached subtree (`visual.rs`). | #29 |
+| `ValueStore` (`OnInheritanceAncestorChanged`, `OnInheritedEffectiveValueChanged`, `OnAncestorInheritedValueChanged` and the other inherited-value loops) indexes `GetInheritanceChildren()` in place. | Copied the inheritance children of every object a change passed through (`value_store.rs`). | #29 |
+| `ValueStore.ReevaluateEffectiveValue` and `ReevaluateEffectiveValues` index `_frames` from the last frame. | Copied the frame list for every reevaluation (`value_store.rs`). | #29 |
+| `IPseudoClasses.Remove` compares the name in place. | `Classes::remove_pseudo` allocated a `String` of the name for every call (`classes.rs`). | #29 |
