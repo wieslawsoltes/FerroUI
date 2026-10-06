@@ -41,6 +41,7 @@ function load(name, reason) {
     if (!entry) {
         entry = { loaded: false };
         entry.promise = fetchBundle(name, reason).then((buffer) => {
+            // Deviation (browser-platform.md section 14): a page's bundle is registered on demand.
             runtime.registerPageAssetBundle(new Uint8Array(buffer));
             entry.loaded = true;
         }, (error) => {

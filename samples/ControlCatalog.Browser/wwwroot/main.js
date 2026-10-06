@@ -24,6 +24,7 @@ FerroExports.attach(runtime);
 
 const bundle = new Uint8Array(await startup);
 performance.mark("asset bundle downloaded");
+// Deviation (browser-platform.md section 14): only the start-up bundle is registered before the start.
 runtime.registerAssetBundle(bundle);
 pageAssets.attach(runtime, await manifest);
 

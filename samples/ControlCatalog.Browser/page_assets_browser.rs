@@ -44,6 +44,7 @@ impl IPageAssets for BrowserPageAssets {
 /// it finds the new assets (it keeps what an assembly had registered when
 /// it was first asked for it). Returns the number of assets, or throws with
 /// a description of the defect of the bundle.
+// Deviation (browser-platform.md section 14): bundles registered after the application started.
 #[wasm_bindgen(js_name = registerPageAssetBundle)]
 pub fn register_page_asset_bundle(bundle: Vec<u8>) -> Result<u32, String> {
     let count = ferroui_browser::register_asset_bundle(bundle)?;
