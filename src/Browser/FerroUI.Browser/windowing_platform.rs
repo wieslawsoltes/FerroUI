@@ -1,17 +1,18 @@
 use crate::browser_activatable_lifetime::BrowserActivatableLifetime;
+use crate::browser_app_builder::BrowserPlatformOptions;
 use crate::browser_platform_settings::BrowserPlatformSettings;
 use crate::browser_runtime_platform::BrowserRuntimePlatform;
 use crate::browser_screens::BrowserScreens;
 use crate::browser_system_navigation_manager::BrowserSystemNavigationManagerImpl;
 use crate::browser_single_threaded_dispatcher_impl::BrowserSingleThreadedDispatcherImpl;
 use crate::cursor::CssCursorFactory;
-use crate::interop::JsObject;
+use crate::interop::{ferro_module, JsObject};
 use crate::win_stubs::IconLoaderStub;
 use ferroui_base::input::platform::{KeyGestureFormatInfo, PlatformHotkeyConfiguration};
 use ferroui_base::input::{IKeyboardDevice, KeyboardDevice};
 use ferroui_base::platform::{ICursorFactory, IPlatformSettings, IRuntimePlatform, ISystemNavigationManagerImpl};
 use ferroui_base::threading::Dispatcher;
-use ferroui_base::FerroLocator;
+use ferroui_base::{FerroLocator, LocatorExtensions};
 use ferroui_controls::application_lifetimes::IActivatableLifetime;
 use ferroui_controls::platform::{
     IPlatformIconLoader, IScreenImpl, ITopLevelImpl, ITrayIconImpl, IWindowImpl, IWindowingPlatform,
@@ -108,6 +109,13 @@ impl BrowserWindowingPlatform {
             .bind_to_self(activatable_lifetime);
 
         Dispatcher::initialize_ui_thread_dispatcher(BrowserSingleThreadedDispatcherImpl::new());
+
+        if let Some(options) = FerroLocator::current().get_service::<BrowserPlatformOptions>() {
+            if options.register_ferro_service_worker {
+                let sw_path = ferro_module::resolve_service_worker_path();
+                ferro_module::register_service_worker(sw_path, options.ferro_service_worker_scope.as_deref());
+            }
+        }
     }
 }
 

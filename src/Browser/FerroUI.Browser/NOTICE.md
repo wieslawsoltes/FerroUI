@@ -36,5 +36,8 @@ Copyright (c) 2019 Jimmy Wärting), pinned in `webapp/package.json` to commit
 `d43ad841581c2cc3ce47bbd1e8f11950ebdff027`, the commit the upstream project pins. Its optional dependency
 `fetch-blob` (MIT) is installed with it and is not bundled.
 
+The service worker `webapp/modules/ferroui-sw.ts` (bundled as `ferroui-sw.js`) follows the upstream module, which
+is a TypeScript form of the worker of that polyfill (`example/sw.js`, MIT, Copyright (c) 2019 Jimmy Wärting).
+
 Build-time tools, not distributed with the crate: esbuild (MIT) and TypeScript (Apache-2.0), pinned in
 `webapp/package.json` and `webapp/package-lock.json`.

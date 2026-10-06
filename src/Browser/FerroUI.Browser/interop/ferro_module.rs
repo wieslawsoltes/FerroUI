@@ -17,6 +17,29 @@ extern "C" {
 
     #[wasm_bindgen(js_name = importStorage)]
     fn import_storage_raw() -> super::JsObject;
+
+    // Answers with a promise, which nobody waits for: a failed registration is reported by the
+    // browser as an unhandled rejection, as in the original.
+    #[wasm_bindgen(js_name = registerServiceWorker)]
+    fn register_service_worker_raw(path: &str, scope: Option<&str>) -> super::JsObject;
+}
+
+/// The path of the service worker script.
+///
+/// `serviceWorker.register` resolves the path against the document, not the
+/// script module, so it is relative to the page. The worker also has to sit
+/// at the root of the site: it is scoped to its own directory, and the save
+/// picker polyfill looks it up with `getRegistration()`, which matches
+/// against the address of the document.
+pub fn resolve_service_worker_path() -> &'static str {
+    "./ferroui-sw.js"
+}
+
+/// Registers the service worker at `path` with the browser, with `scope`
+/// or the default scope (the directory of the script). Nothing happens in
+/// a browser without service workers.
+pub fn register_service_worker(path: &str, scope: Option<&str>) {
+    drop(register_service_worker_raw(path, scope));
 }
 
 /// Imports the storage bundle unless it is already imported. The functions
