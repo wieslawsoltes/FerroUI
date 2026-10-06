@@ -1909,6 +1909,13 @@ impl Emitter<'_> {
             None if !return_type.is_value_type() || return_type.is_nullable() => self
                 .coerce(&Typed { expr: "::core::option::Option::None".to_string(), kind: Kind::Null }, return_handle.id())
                 .ok_or_else(|| unsupported(node, format!("the null of {}", return_type.get_fqn())))?,
+            // `default(T)` of a value type, as the interpreter states it (`default_value`): the
+            // constant 0 of an enumeration or of a primitive type.
+            None if return_type.is_enum() || return_type.namespace().as_deref() == Some("System") => {
+                let zero = self.constant(node, &return_type, &XamlValue::Int32(0))?;
+                self.coerce(&zero, return_handle.id())
+                    .ok_or_else(|| unsupported(node, format!("the default value of {}", return_type.get_fqn())))?
+            }
             None => return Err(unsupported(node, format!("the default value of {}", return_type.get_fqn()))),
         };
         self.line(format!("    {default}"));

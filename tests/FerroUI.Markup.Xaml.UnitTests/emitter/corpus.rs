@@ -114,6 +114,9 @@ pub const DOCUMENTS: &[(&str, &str)] = &[
     ("compiled_binding_parent.xaml", "<Border xmlns='https://github.com/ferroui' xmlns:x='http://schemas.microsoft.com/winfx/2006/xaml' Tag='t'><TextBlock Text='{CompiledBinding $parent[Border].Tag}'/></Border>"),
     ("compiled_binding_plain_property.xaml", "<StackPanel xmlns='https://github.com/ferroui' xmlns:x='http://schemas.microsoft.com/winfx/2006/xaml'><StackPanel.DataContext><ResourceDictionary><x:Double x:Key='A'>1</x:Double><x:Double x:Key='B'>2</x:Double></ResourceDictionary></StackPanel.DataContext><TextBlock x:DataType='ResourceDictionary' Text='{CompiledBinding Count}'/><TextBlock x:DataType='ResourceDictionary' Tag='{CompiledBinding Count}'/></StackPanel>"),
     ("on_platform.xaml", "<StackPanel xmlns='https://github.com/ferroui' xmlns:x='http://schemas.microsoft.com/winfx/2006/xaml'><TextBlock Text='{OnPlatform Linux=lin, Default=def}'/><TextBlock Text='{OnPlatform Windows=win, Default=def}'/><Border Opacity='{OnPlatform 0.5, Linux=0.25}'/></StackPanel>"),
+    // No branch is taken on a desktop test run and there is no default: `default(T)` of the
+    // property type (the zero member of an enumeration, zero of a number).
+    ("on_platform_without_default.xaml", "<StackPanel xmlns='https://github.com/ferroui' xmlns:x='http://schemas.microsoft.com/winfx/2006/xaml'><Border HorizontalAlignment='{OnPlatform Android=Left}'/><Border Width='{OnPlatform Android=10}'/></StackPanel>"),
     ("font_family.xaml", "<StackPanel xmlns='https://github.com/ferroui' xmlns:x='http://schemas.microsoft.com/winfx/2006/xaml'><TextBlock FontFamily='Arial'/><TextBlock FontFamily='Arial, Consolas'/></StackPanel>"),
     ("flags_value.xaml", "<Border xmlns='https://github.com/ferroui' xmlns:x='http://schemas.microsoft.com/winfx/2006/xaml' xmlns:c='using:FerroUI.Controls.Converters'><Border.Resources><c:CornerRadiusFilterConverter x:Key='Filter' Filter='TopLeft, BottomRight'/></Border.Resources></Border>"),
 ];
@@ -218,6 +221,7 @@ pub const EXPECTED_ELIGIBLE: &[&str] = &[
     "compiled_binding_parent.xaml",
     "compiled_binding_plain_property.xaml",
     "on_platform.xaml",
+    "on_platform_without_default.xaml",
     "font_family.xaml",
     "flags_value.xaml",
 ];

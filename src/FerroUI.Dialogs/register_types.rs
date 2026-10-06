@@ -63,6 +63,7 @@ pub fn register_types() {
         ferroui_markup_xaml::register_types();
         TypeInfo::register_namespaces(NAMESPACES);
         TypeInfo::register_all(TYPES);
+        crate::rust_paths::register_rust_paths();
         MarkupType::register_all(MARKUP_TYPES);
         ItemViewModelList::register();
         FilterViewModelList::register();
