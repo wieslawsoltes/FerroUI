@@ -10,7 +10,8 @@
 //! `Controls/FluentControls.xaml` (the list of the control themes) and one
 //! document per control under `Controls/`. The documents are embedded in
 //! the crate as assets of the assembly `FerroUI.Themes.Fluent` and
-//! addressable as `ferres://FerroUI.Themes.Fluent/<path>`.
+//! addressable as `ferres://FerroUI.Themes.Fluent/<path>`. With the feature `remove-compiled-documents`
+//! the compiled documents are not embedded (see `build.rs`).
 //!
 //! ```ignore
 //! application.styles().add(FluentTheme::new().as_style());

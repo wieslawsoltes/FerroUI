@@ -5,7 +5,8 @@
 //! The table is written to `$OUT_DIR/assets.rs` as `(rooted path, bytes)`
 //! pairs and registered with the asset loader by `register_types()`, next
 //! to the table of the documents `Controls/excluded.txt` leaves out of the
-//! theme.
+//! theme. With the feature `remove-compiled-documents`, only the
+//! documents that are left out of the theme (not compiled) are embedded.
 
 use std::env;
 use std::fmt::Write as _;
@@ -58,19 +59,11 @@ fn main() {
     }
     assets.sort();
 
-    let mut text = String::from("pub(crate) static ASSETS: &[(&str, &[u8])] = &[\n");
-    for (asset_path, path) in &assets {
-        let path = path.canonicalize().unwrap_or_else(|e| panic!("cannot resolve {}: {e}", path.display()));
-        println!("cargo::rerun-if-changed={}", path.display());
-        writeln!(text, "    ({asset_path:?}, include_bytes!({:?})),", path.display().to_string()).expect("write");
-    }
-    text.push_str("];\n");
-
     // The control theme documents that are left out of the theme: `<file> | <missing types>` per line.
-    let excluded = root.join(EXCLUDED_LIST);
-    println!("cargo::rerun-if-changed={}", excluded.display());
-    text.push_str("pub(crate) static EXCLUDED: &[ExcludedDocument] = &[\n");
-    for line in fs::read_to_string(&excluded).unwrap_or_default().lines() {
+    let excluded_list = root.join(EXCLUDED_LIST);
+    println!("cargo::rerun-if-changed={}", excluded_list.display());
+    let mut excluded = Vec::new();
+    for line in fs::read_to_string(&excluded_list).unwrap_or_default().lines() {
         let line = line.trim();
         if line.is_empty() || line.starts_with('#') {
             continue;
@@ -81,8 +74,28 @@ fn main() {
             assets.iter().any(|(path, _)| *path == asset_path),
             "{EXCLUDED_LIST} names {asset_path}, which is not a document of the crate"
         );
-        writeln!(text, "    ExcludedDocument {{ path: {asset_path:?}, missing_types: {:?} }},", missing_types.trim())
-            .expect("write");
+        excluded.push((asset_path, missing_types.trim().to_string()));
+    }
+
+    // With the feature `remove-compiled-documents`, the documents the compiled markup of the theme
+    // (`compiled_xaml.rs`) is generated from are not embedded: every document of the crate except
+    // the ones left out of the theme, which are not compiled. Upstream's compiler removes every
+    // compiled resource from the assembly (`res.Remove()` in `XamlCompilerTaskExecutor`).
+    if env::var_os("CARGO_FEATURE_REMOVE_COMPILED_DOCUMENTS").is_some() {
+        assets.retain(|(asset_path, _)| excluded.iter().any(|(path, _)| path == asset_path));
+    }
+
+    let mut text = String::from("pub(crate) static ASSETS: &[(&str, &[u8])] = &[\n");
+    for (asset_path, path) in &assets {
+        let path = path.canonicalize().unwrap_or_else(|e| panic!("cannot resolve {}: {e}", path.display()));
+        println!("cargo::rerun-if-changed={}", path.display());
+        writeln!(text, "    ({asset_path:?}, include_bytes!({:?})),", path.display().to_string()).expect("write");
+    }
+    text.push_str("];\n");
+
+    text.push_str("pub(crate) static EXCLUDED: &[ExcludedDocument] = &[\n");
+    for (asset_path, missing_types) in &excluded {
+        writeln!(text, "    ExcludedDocument {{ path: {asset_path:?}, missing_types: {missing_types:?} }},").expect("write");
     }
     text.push_str("];\n");
 
