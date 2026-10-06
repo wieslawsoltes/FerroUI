@@ -92,6 +92,7 @@ pub(crate) mod transitions;
 mod notifications_page;
 mod pips_pager_page;
 mod pointers_page;
+mod composition_page;
 mod refresh_container_page;
 mod scroll_viewer_page;
 mod tabbed_demo_page;
@@ -167,6 +168,7 @@ pub use platform_settings_page::PlatformSettingsPage;
 pub use pointer_canvas::PointerCanvas;
 pub use pointer_contacts_tab::PointerContactsTab;
 pub use pointers_page::PointersPage;
+pub use composition_page::{CompositionPage, CompositionPageColorItem};
 pub use progress_bar_page::ProgressBarPage;
 pub use radio_button_page::RadioButtonPage;
 pub use refresh_container_page::RefreshContainerPage;
@@ -217,12 +219,14 @@ pub(crate) const MARKUP_TYPES: &[&[&MarkupType]] = &[ROOT_MARKUP_TYPES, text_box
 pub(crate) fn register_value_types() {
     ferroui_base::data::core::ValueTypes::register_reference::<CarouselCardItem>();
     ferroui_base::data::core::ValueTypes::register_reference::<ScrollViewerPageViewModel>();
+    ferroui_base::data::core::ValueTypes::register_reference::<CompositionPageColorItem>();
 }
 
 /// The classes of the files directly under `Pages/`.
 const ROOT_TYPES: &[&TypeInfo] = &[
     ScrollViewerPage::TYPE,
     PointersPage::TYPE,
+    CompositionPage::TYPE,
     GesturePage::TYPE,
     CarouselPage::TYPE,
     CarouselDemoPage::TYPE,
@@ -296,6 +300,7 @@ const ROOT_TYPES: &[&TypeInfo] = &[
 const ROOT_CLASSES: &[&XamlClass] = &[
     &ScrollViewerPage::XAML_CLASS,
     &PointersPage::XAML_CLASS,
+    &CompositionPage::XAML_CLASS,
     &GesturePage::XAML_CLASS,
     &CarouselPage::XAML_CLASS,
     &CarouselDemoPage::XAML_CLASS,
@@ -362,4 +367,7 @@ const ROOT_CLASSES: &[&XamlClass] = &[
 ];
 
 const ROOT_MARKUP_TYPES: &[&MarkupType] =
-    &[<ScrollViewerPageViewModel as ferroui_base::metadata::MarkupTyped>::MARKUP];
+    &[
+        <ScrollViewerPageViewModel as ferroui_base::metadata::MarkupTyped>::MARKUP,
+        <CompositionPageColorItem as ferroui_base::metadata::MarkupTyped>::MARKUP,
+    ];

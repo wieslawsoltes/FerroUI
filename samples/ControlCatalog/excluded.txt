@@ -17,8 +17,7 @@ Pages/SettingsPage.xaml | harness: {x:Static local:App.CurrentTheme} needs the a
 
 # --- Controls, Converter, Pages/CommandBar, Pages/TextBox, Pages/Gestures, Pages/ContentPage (group A) ---
 Pages/ContentPage/ContentPagePerformancePage.xaml | code-behind: NavigationPerformanceMonitorHelper and NavigationDemoHelper (Pages/NavigationPage, not ported; the helper measures the managed heap: GC.GetTotalMemory, GC.Collect)
-Pages/Gestures/GesturePullPage.xaml | code-behind: Compositor.CreateVector3KeyFrameAnimation, Compositor.CreateImplicitAnimationCollection, CompositionVisual.ImplicitAnimations, LogicalExtensions.FindLogicalDescendantOfType
-Pages/Gestures/GestureSwipePage.xaml | code-behind: Compositor.CreateVector3KeyFrameAnimation, Compositor.CreateImplicitAnimationCollection, CompositionVisual.ImplicitAnimations
+Pages/Gestures/GesturePullPage.xaml | code-behind: LogicalExtensions.FindLogicalDescendantOfType
 Pages/TextBox/TextBoxValidationPage.xaml | gap C102: DataValidationException is not declared for markup
 
 # --- ViewModels, Models, Views and the pages of the view models (group B) ---
@@ -31,7 +30,6 @@ Pages/PlatformInfoPage.xaml | gap C202: OnPlatform as an element with On childre
 Pages/AutoCompleteBoxPage.xaml | code-behind: LogicalExtensions.GetLogicalDescendants (the document also needs gap C310)
 Pages/ClipboardPage.xaml | code-behind: DataFormat.File and ClipboardExtensions.TryGetFilesAsync (storage items as clipboard data are not ported)
 Pages/ColorPickerPage.xaml | missing: ColorPicker, ColorPreviewer, ColorSlider, ColorSpectrum, ColorView, FlatHalfColorPalette
-Pages/CompositionPage.xaml | code-behind: Compositor.CreateExpressionAnimation, CreateColorKeyFrameAnimation, CreateVector3KeyFrameAnimation, CreateAnimationGroup, CompositionObject.ImplicitAnimations, CompositionCustomVisual
 Pages/DialogsPage.xaml | code-behind: DialogsPage is not ported yet (ManagedStorageProvider is available in ferroui-dialogs); the document also needs gap C305
 Pages/DragAndDropPage.xaml | code-behind: DialogsPage.ReadTextFromFile (DialogsPage is not ported: ManagedStorageProvider)
 Pages/FlyoutsPage.xaml | gap C301: a method name is not accepted for a property of a delegate type (CustomPopupPlacementCallback)
