@@ -356,6 +356,15 @@ fn invoked(call: String, fallible: bool, node: &Rc<dyn IXamlAstNode>) -> String 
     }
 }
 
+/// A borrow of the expression `text`: a cast (`value as Rc<dyn Contract>`, see
+/// `coerce_to_contract`) is parenthesised, `&` binds tighter than `as`.
+fn borrowed(text: &str) -> String {
+    match text.contains(" as ") {
+        true => format!("&({text})"),
+        false => format!("&{text}"),
+    }
+}
+
 /// The value held untyped in `local` as the argument `index` of `member`
 /// (`rt::exact`, its type inferred from where it goes).
 fn untyped_argument(local: &str, member: &str, index: usize, node: &Rc<dyn IXamlAstNode>) -> String {
@@ -977,7 +986,8 @@ impl Emitter<'_> {
 
     /// A value of the type with markup metadata `from` as the handle of a contract
     /// (`Rc<dyn Trait>`, or its nullable form) that the declaration of `from` (or of one of
-    /// its base types) lists among its interfaces: an unsizing coercion rustc checks.
+    /// its base types) lists among its interfaces or names as a base: an unsizing coercion
+    /// rustc checks.
     fn coerce_to_contract(&self, from: TypeId, owned: &str, target: TypeId) -> Option<String> {
         let source = MarkupType::find_by_handle(from)?;
         let contract = MarkupType::find_by_handle(target)?;
@@ -995,14 +1005,18 @@ impl Emitter<'_> {
         let mut declared = false;
         while let Some(type_) = current {
             declared |= type_.interfaces.iter().any(|interface| interface().id() == handle);
+            // A contract the declaration names as its base (`Setter` of `SetterBase`).
+            declared |= !std::ptr::eq(type_, source) && std::ptr::eq(type_, contract);
             current = type_.base_type();
         }
         if !declared {
             return None;
         }
-        // The value is bound first: the expected type of a binding would otherwise choose
-        // the `Clone` implementation of the contract handle for a cloned local.
-        let coerced = format!("{{ let value = {owned}; let value: ::std::rc::Rc<dyn {path}> = value; value }}");
+        // A cast, not an expected type: an expected type would choose the `Clone`
+        // implementation of the contract handle for a cloned local.
+        // Unparenthesised: a coerced value is an argument or an initializer; a borrow of it
+        // adds the parentheses (`borrowed`).
+        let coerced = format!("{owned} as ::std::rc::Rc<dyn {path}>");
         Some(if nullable { format!("::core::option::Option::Some({coerced})") } else { coerced })
     }
 
@@ -1263,7 +1277,7 @@ impl Emitter<'_> {
         if let Some(unset) = any.downcast_ref::<UnsetValueSetter>() {
             object_target()?;
             let definition = self.registered_definition(node, &property_name, &unset.ferro_property())?;
-            return Ok(format!("rt::unset_value(&{}.clone().upcast::<::ferroui_base::FerroObject>(), {definition});", target.expr));
+            return Ok(format!("rt::unset_value({}.upcast_ref::<::ferroui_base::FerroObject>(), {definition});", target.expr));
         }
         let binding_field = match (any.downcast_ref::<BindingSetter>(), any.downcast_ref::<BindingWithPrioritySetter>()) {
             (Some(binding), _) => Some(binding.ferro_property()),
@@ -1317,7 +1331,7 @@ impl Emitter<'_> {
                 SetterValues::Checked | SetterValues::None => (String::new(), 0, 0),
             };
             return Ok(format!(
-                "rt::bind(&{}.clone().upcast::<::ferroui_base::FerroObject>(), {definition}, {value}, {line}, {position})?;",
+                "rt::bind({}.upcast_ref::<::ferroui_base::FerroObject>(), {definition}, {value}, {line}, {position})?;",
                 target.expr
             ));
         }
@@ -1728,10 +1742,9 @@ impl Emitter<'_> {
     /// property: the definition, as `&'static FerroProperty` (`rt::property`).
     fn property_field(&mut self, node: &Rc<dyn IXamlAstNode>, field: &Rc<dyn IXamlField>) -> EmitResult<Typed> {
         let definition = self.registered_definition(node, &field.name(), field)?;
-        Ok(Typed {
-            expr: format!("rt::property({definition})"),
-            kind: Kind::Exact { id: TypeId::of::<&'static FerroProperty>(), nullable: None },
-        })
+        // `Option<&'static FerroProperty>` (`Setter.Property`) takes it as `Some(..)`, the
+        // nullable wrapping the untyped value conversions perform.
+        Ok(exact::<&'static FerroProperty>(format!("rt::property({definition})")))
     }
 
     /// `EnsureCapacityNode`: the resources (the getter called on the target,
@@ -2687,7 +2700,7 @@ impl Emitter<'_> {
                 (true, _) if text.starts_with("rt::instance(") => text,
                 (true, Some(local)) if local == argument.expr => format!("&{local}"),
                 (true, _) if text == argument.expr => format!("&{text}"),
-                (true, _) => format!("&{text}"),
+                (true, _) => borrowed(&text),
                 (false, _) => text,
             });
         }
