@@ -285,6 +285,14 @@ mod layoutable_tests_layout_rounding;
 mod measure_tests;
 #[cfg(test)]
 mod render_tests_culling;
+#[cfg(test)]
+mod visual_extensions_get_transformed_bounds_tests;
+#[cfg(test)]
+mod visual_extensions_get_visuals_at_tests;
+#[cfg(test)]
+mod visual_extensions_tests;
+#[cfg(test)]
+mod visual_tests;
 
 #[cfg(test)]
 pub(crate) mod test_support;
@@ -342,7 +350,7 @@ pub mod testing;
 #[cfg(test)]
 mod app_builder_tests;
 #[cfg(test)]
-mod compositor_hit_testing_tests;
+pub(crate) mod compositor_hit_testing_tests;
 #[cfg(test)]
 mod application_tests;
 #[cfg(test)]

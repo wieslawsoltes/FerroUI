@@ -63,7 +63,7 @@ impl IRenderer for TestRenderer {
 pub struct TestSource {
     this: Weak<TestSource>,
     root: WeakRef<TestRoot>,
-    renderer: Rc<TestRenderer>,
+    renderer: RefCell<Rc<dyn IRenderer>>,
     focus_manager: Rc<FocusManager>,
     layout_manager: RefCell<Option<Rc<dyn ILayoutManager>>>,
     hit_tester: RefCell<Option<Rc<dyn IHitTester>>>,
@@ -75,7 +75,7 @@ impl TestSource {
         let source = Rc::new_cyclic(|this: &Weak<TestSource>| TestSource {
             this: this.clone(),
             root,
-            renderer: Rc::new(TestRenderer),
+            renderer: RefCell::new(Rc::new(TestRenderer)),
             focus_manager: FocusManager::new(),
             layout_manager: RefCell::new(None),
             hit_tester: RefCell::new(None),
@@ -100,7 +100,7 @@ impl IPresentationSource for TestSource {
         1.0
     }
     fn renderer(&self) -> Rc<dyn IRenderer> {
-        self.renderer.clone()
+        self.renderer.borrow().clone()
     }
     fn layout_root(&self) -> Rc<dyn ILayoutRoot> {
         self.this.upgrade().unwrap()
@@ -229,6 +229,20 @@ impl TestRoot {
         let root = Self::new();
         root.set_child(child.into_ref());
         root
+    }
+
+    /// The renderer of the root (`TestRoot.Renderer`); a renderer that
+    /// does nothing unless one is set.
+    pub fn renderer(&self) -> Rc<dyn IRenderer> {
+        self.source().renderer()
+    }
+
+    pub fn set_renderer(&self, value: Rc<dyn IRenderer>) {
+        *self.source().renderer.borrow_mut() = value;
+    }
+
+    fn source(&self) -> Rc<TestSource> {
+        self.source.borrow().clone().expect("the test root has a presentation source")
     }
 
     pub fn client_size(&self) -> Size {
