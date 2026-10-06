@@ -347,13 +347,14 @@ impl JsStorageItem {
     fn get_basic_properties_async(&self) -> LocalBoxFuture<ItemProperties> {
         let handle = self.file_handle();
         Box::pin(async move {
+            // The item may come from a data transfer, before the storage module was imported.
             let properties = match handle {
-                Some(handle) => {
+                Some(handle) if ferro_module::import_storage().await.is_ok() => {
                     // Failures of earlier writes are left for the next opening of the file.
                     let _ = settle_pending_closes(&handle, false).await;
                     storage_helper::get_properties(&handle).await.ok().and_then(non_null)
                 }
-                None => None,
+                _ => None,
             };
             let properties = properties.map(JsCast::unchecked_into::<StorageItemProperties>);
             let size = properties.as_ref().and_then(|p| p.size()).map(|size| size as i64);
@@ -377,6 +378,7 @@ impl JsStorageItem {
         }
         let handle = self.file_handle();
         Box::pin(async move {
+            ferro_module::import_storage().await.ok()?;
             let native_bookmark = storage_helper::save_bookmark(&handle?).await.ok()?.as_string()?;
             StorageBookmarkHelper::encode_bookmark(BROWSER_BOOKMARK_KEY, Some(&native_bookmark))
         })
@@ -389,7 +391,11 @@ impl JsStorageItem {
     fn delete_async(&self) -> LocalBoxFuture<io::Result<()>> {
         let handle = self.require_file_handle();
         Box::pin(async move {
-            storage_helper::delete_async(&handle?).await?;
+            ferro_module::import_storage().await?;
+            let handle = handle?;
+            // A writable stream of the file that is still closing locks it.
+            let _ = settle_pending_closes(&handle, false).await;
+            storage_helper::delete_async(&handle).await?;
             Ok(())
         })
     }
@@ -408,7 +414,12 @@ impl JsStorageItem {
         let destination_handle = folder.base.require_file_handle();
         let this = self.this.borrow().clone();
         Box::pin(async move {
-            let item_handle = storage_helper::move_async(&handle?, &destination_handle?).await?;
+            ferro_module::import_storage().await?;
+            let handle = handle?;
+            // A writable stream of the file that is still closing locks it: the browser refuses to
+            // move a locked handle.
+            let _ = settle_pending_closes(&handle, false).await;
+            let item_handle = storage_helper::move_async(&handle, &destination_handle?).await?;
             let Some(item_handle) = non_null(item_handle) else {
                 return Ok(None);
             };
@@ -427,6 +438,9 @@ impl JsStorageItem {
         let handle = self.file_handle();
         Box::pin(async move {
             if let Some(handle) = handle {
+                if ferro_module::import_storage().await.is_err() {
+                    return;
+                }
                 let _ = storage_helper::delete_bookmark(&handle).await;
             }
         })
@@ -519,6 +533,9 @@ impl JsStorageFile {
     /// the stream is returned: the stream of the contract is synchronous.
     pub async fn open_read_stream_async(&self) -> io::Result<BlobReadableStream> {
         let handle = self.base.require_file_handle()?;
+        // A file of a data transfer (a drop, a paste) can be read before the storage module that
+        // reads it was imported: the import started with the event is not awaited.
+        ferro_module::import_storage().await?;
         settle_pending_closes(&handle, true).await?;
         let blob = storage_helper::open_read(&handle).await.map_err(denied)?;
         let mut stream = BlobReadableStream::new(blob);
@@ -529,6 +546,7 @@ impl JsStorageFile {
     /// Opens the file for writing, truncated.
     pub async fn open_write_stream_async(&self) -> io::Result<WriteableStream> {
         let handle = self.base.require_file_handle()?;
+        ferro_module::import_storage().await?;
         settle_pending_closes(&handle, true).await?;
         let stream_writer = storage_helper::open_write(&handle).await.map_err(denied)?;
 
