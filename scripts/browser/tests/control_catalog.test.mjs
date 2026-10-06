@@ -14,7 +14,11 @@
 //   logged as an error (console errors, uncaught exceptions, failed loads);
 // - input, driven with real pointer and key events: the navigation drawer opens from its toggle
 //   button, three pages are reached through the drawer and show their content, a click on a button
-//   has its effect, and text typed into a text box becomes its text.
+//   has its effect, and text typed into a text box becomes its text;
+// - the native control demo (samples/ControlCatalog.Browser/embed_sample_browser.rs): the Native Embed
+//   page shows its two native controls, elements of the page over the view (a button of the page that
+//   counts the clicks it gets from real pointer events, and an iframe), and a check box of the page hides
+//   one of them.
 //
 // The view is read through the `catalogState` export of the host (samples/ControlCatalog.Browser),
 // which reports the drawer, the current page, the focus and the visible text with its bounds; the
@@ -282,5 +286,48 @@ check("text typed into a text box becomes its text", async (page) => {
     await page.find("Text: Ferro ", inContent);
     assert(page.errors.length === 0, `errors were logged:\n${page.errors.join("\n")}`);
 });
+
+check("the native controls of the Native Embed page are elements of the page over the view", async (page) => {
+    await navigate(page, "Window & Platform");
+    await page.clickElement(await page.find("Native Embed", inDrawer));
+    await page.until("the Native Embed page is shown", (s) => s.page === "Native Embed" && !s.navigating);
+    const controls = `JSON.stringify(Array.from(document.querySelector("#out .ferroui-native-host").children).map((e) => {
+        const r = e.getBoundingClientRect();
+        return { tag: e.tagName, display: e.style.display, src: e.src ?? null, text: e.innerText,
+            buttons: e.querySelectorAll("button").length, x: r.x, y: r.y, width: r.width, height: r.height };
+    }))`;
+    await page.waitFor(`JSON.parse(${controls}).filter((c) => c.display === "block").length === 2`, STATE_TIMEOUT);
+    // The native control host follows the bounds of its ancestors, not their render transforms (as
+    // upstream): the controls were placed while the page slid in, at the start of the slide, right of
+    // the view. A change of the bounds of the view places them again.
+    await page.resize(LARGER_SIZE.width - 40, LARGER_SIZE.height);
+    await page.waitFor(`JSON.parse(${controls}).every((c) => c.display === "block" && c.x + c.width <= ${LARGER_SIZE.width - 40} + 4)`, STATE_TIMEOUT);
+    const [first, second] = JSON.parse(await page.evaluate(controls)).sort((a, b) => (a.tag === "DIV" ? -1 : 1) - (b.tag === "DIV" ? -1 : 1));
+    // The first sample: the default native control of the platform with the button embed.js adds to it.
+    assert(first.tag === "DIV" && first.buttons === 1 && first.text === "Hello world", `first native control ${JSON.stringify(first)}`);
+    // The second: an iframe.
+    assert(second.tag === "IFRAME" && second.src === "https://www.youtube.com/embed/kZCIporjJ70", `second native control ${JSON.stringify(second)}`);
+    // Both lie over the content of the page, right of the drawer.
+    assert(first.x >= DRAWER_EDGE && second.x >= DRAWER_EDGE && first.width > 1 && second.width > 1, `native controls at ${JSON.stringify([first, second])}`);
+
+    // The button of the page gets real pointer events.
+    const button = JSON.parse(await page.evaluate(`JSON.stringify((r => ({ x: r.x + r.width / 2, y: r.y + r.height / 2 }))(document.querySelector("#out .ferroui-native-host button").getBoundingClientRect()))`));
+    await page.click(Math.round(button.x), Math.round(button.y));
+    await page.waitFor(`document.querySelector("#out .ferroui-native-host button").innerText === "Click count 1"`, STATE_TIMEOUT);
+    await page.click(Math.round(button.x), Math.round(button.y));
+    await page.waitFor(`document.querySelector("#out .ferroui-native-host button").innerText === "Click count 2"`, STATE_TIMEOUT);
+
+    // The check box above the first sample hides its native control.
+    const visible = (await page.state()).elements.filter((e) => e.text === "Visible" && inContent(e)).sort((a, b) => a.y - b.y || a.x - b.x)[0];
+    assert(visible, "no check box of the page");
+    await page.clickElement(visible);
+    await page.waitFor(`(e => e && e.style.display === "none")(Array.from(document.querySelector("#out .ferroui-native-host").children).find((e) => e.tagName === "DIV"))`, STATE_TIMEOUT);
+    assert(await page.evaluate(`Array.from(document.querySelector("#out .ferroui-native-host").children).find((e) => e.tagName === "IFRAME").style.display`) === "block",
+        "the native control of the other sample was hidden too");
+
+    // The iframe cannot reach its site from the test machine; that is not an error of the application.
+    const errors = page.errors.filter((line) => !line.includes("youtube"));
+    assert(errors.length === 0, `errors were logged:\n${errors.join("\n")}`);
+}, { size: LARGER_SIZE });
 
 await run(checks);
