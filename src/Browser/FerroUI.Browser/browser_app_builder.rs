@@ -58,7 +58,9 @@ pub struct BrowserPlatformOptions {
 
     /// If [`register_ferro_service_worker`](Self::register_ferro_service_worker)
     /// is enabled, it is possible to redefine scope for the worker. By
-    /// default, current domain root is used as a scope.
+    /// default the scope is the directory of the worker script, which is the
+    /// root of the site (the documentation of the original says the domain
+    /// root, which differs when the site is served from a subpath).
     pub ferro_service_worker_scope: Option<String>,
 
     /// The file dialogs use the `native-file-system-adapter` polyfill. If
