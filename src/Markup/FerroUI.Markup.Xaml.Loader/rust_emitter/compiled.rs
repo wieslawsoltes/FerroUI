@@ -58,7 +58,8 @@ pub struct GeneratedFile {
 /// A document whose generated functions would have the name of a function
 /// generated for an earlier document (names that differ only in case or in
 /// characters that are not letters or digits, or a name that ends in
-/// `_untyped`) is reported instead of becoming a duplicate definition rustc
+/// `_untyped` or `_deferred_<n>`, the names of the functions of its untyped
+/// build and of its deferred content) is reported instead of becoming a duplicate definition rustc
 /// rejects, and is left out of the group. A group that does not transform
 /// makes every document of it not eligible, with the error; a document with
 /// an unsupported node is reported with the node, and the others are not
@@ -77,7 +78,7 @@ pub fn compile_documents(
         let defined = [function_name.clone(), untyped_function_name(&function_name)];
         let collision = defined
             .iter()
-            .find_map(|item| items.iter().find(|(known, _)| known == item).map(|(_, other)| (item.clone(), *other)));
+            .find_map(|item| items.iter().find(|(known, _)| collides(known, item)).map(|(_, other)| (item.clone(), *other)));
         items.extend(defined.into_iter().map(|item| (item, *name)));
         if let Some((item, other)) = collision {
             let reason = format!("the generated function `{item}` would also be defined for the document `{other}`; rename one of them");
@@ -246,7 +247,9 @@ pub fn generate_file(
 /// The position map of a generated file (docs/porting/xaml.md, 9.3.6): the
 /// link from a line of generated Rust (where rustc reports an error) back to
 /// the XAML node it was emitted for. `functions` are the build functions of
-/// the file with their documents. Inside a build function every position
+/// the file with their documents; the build functions of their deferred
+/// content (`<function>_deferred_<n>`) belong to the same documents. Inside
+/// a build function every position
 /// marker the emitter writes (`// <document>(<line>,<position>) <what>`)
 /// heads the lines up to the next marker or the end of the function; each
 /// such range is one entry:
@@ -272,7 +275,12 @@ pub fn position_map(source: &str, functions: &[(String, String)]) -> String {
     for (index, text) in source.lines().enumerate() {
         let number = index + 1;
         if let Some(name) = functions.iter().find_map(|(function, name)| {
-            text.strip_prefix("pub fn ").and_then(|rest| rest.strip_prefix(function.as_str())).filter(|rest| rest.starts_with('(')).map(|_| name)
+            let build = text.strip_prefix("pub fn ").and_then(|rest| rest.strip_prefix(function.as_str()));
+            let deferred = || {
+                let rest = text.strip_prefix("fn ")?.strip_prefix(function.as_str())?.strip_prefix("_deferred_")?;
+                rest.trim_start_matches(|c: char| c.is_ascii_digit()).starts_with('(').then_some(rest)
+            };
+            build.filter(|rest| rest.starts_with('(')).or_else(deferred).map(|_| name)
         }) {
             document = Some(name);
             continue;
@@ -331,6 +339,19 @@ fn borrowed<'a>(
     documents: &'a [(String, String, Option<String>, Option<&'static ferroui_base::TypeInfo>)],
 ) -> Vec<(&'a str, &'a str, Option<String>, Option<&'static ferroui_base::TypeInfo>)> {
     documents.iter().map(|(name, xaml, base_uri, class)| (name.as_str(), xaml.as_str(), base_uri.clone(), *class)).collect()
+}
+
+/// Whether the items `a` and `b` of two documents would have the same name:
+/// the names are equal, or one is the build function of deferred content
+/// (`<function>_deferred_<n>`) of the other.
+fn collides(a: &str, b: &str) -> bool {
+    let is_deferred_of = |deferred: &str, function: &str| {
+        deferred
+            .strip_prefix(function)
+            .and_then(|rest| rest.strip_prefix("_deferred_"))
+            .is_some_and(|index| !index.is_empty() && index.chars().all(|c| c.is_ascii_digit()))
+    };
+    a == b || is_deferred_of(a, b) || is_deferred_of(b, a)
 }
 
 /// The name of the untyped build function that wraps the build function `function_name`.
@@ -521,12 +542,15 @@ mod tests {
             ("case.xaml", xaml),
             ("x.xaml", xaml),
             ("x.xaml_untyped", xaml),
+            ("y.xaml_deferred_0", xaml),
+            ("y.xaml", xaml),
         ];
         let compiled = compile_documents(&documents, None, &RuntimeXamlLoaderConfiguration::new());
         for (name, other, item) in [
             ("a_b.xaml", "a-b.xaml", "build_a_b_xaml"),
             ("case.xaml", "Case.xaml", "build_case_xaml"),
             ("x.xaml_untyped", "x.xaml", "build_x_xaml_untyped"),
+            ("y.xaml", "y.xaml_deferred_0", "build_y_xaml"),
         ] {
             let reason = reason(&compiled, name).unwrap_or_else(|| panic!("{name} is not reported"));
             assert_eq!(
@@ -534,7 +558,7 @@ mod tests {
                 format!("the generated function `{item}` would also be defined for the document `{other}`; rename one of them")
             );
         }
-        for name in ["a-b.xaml", "Case.xaml", "x.xaml"] {
+        for name in ["a-b.xaml", "Case.xaml", "x.xaml", "y.xaml_deferred_0"] {
             let reason = reason(&compiled, name).unwrap_or_default();
             assert!(!reason.contains("would also be defined"), "{name}: {reason}");
         }
