@@ -283,6 +283,8 @@ mod layoutable_tests_effective_viewport_changed;
 mod layoutable_tests_layout_rounding;
 #[cfg(test)]
 mod measure_tests;
+#[cfg(test)]
+mod render_tests_culling;
 
 #[cfg(test)]
 pub(crate) mod test_support;
