@@ -23,7 +23,7 @@ use ferroui_base::layout::HorizontalAlignment;
 use ferroui_base::media::immutable::ImmutableSolidColorBrush;
 use ferroui_base::media::{Color, FontManagerOptions};
 use ferroui_base::styling::ThemeVariant;
-use ferroui_base::threading::Dispatcher;
+use ferroui_base::threading::{Dispatcher, DispatcherPriority};
 use ferroui_base::utilities::{Uri, UriKind};
 use ferroui_base::{ferro_class, ferro_impl_classes, instantiate, BoxedValue, FerroObjectImpl, Ref, Thickness};
 use ferroui_browser::interop::navigation_helper;
@@ -401,6 +401,81 @@ pub fn themed_view_native_host(action: &str, width: f64, height: f64) {
             _ => {}
         }
     });
+}
+
+/// What the panics of [`themed_view_panic`] did.
+#[derive(Default)]
+struct Panics {
+    handler: bool,
+    handled: Vec<String>,
+    jobs_after: u32,
+    invoke: Option<String>,
+}
+
+thread_local! {
+    static PANICS: RefCell<Panics> = RefCell::new(Panics::default());
+}
+
+/// Panics on the dispatcher, for the behaviour tests: the framework must catch
+/// and pass them on in the page as it does on the desktop (the `catch_unwind`
+/// of the dispatcher's job loop and of `invoke`).
+///
+/// - `post`: a posted job panics; the `unhandled_exception` handler of the
+///   dispatcher sees the panic and marks it handled.
+/// - `unhandled`: a posted job panics and the handler leaves it unhandled, so
+///   the dispatcher raises it again out of its job loop, to the page.
+/// - `invoke`: a callback run with `invoke_local` panics; the panic reaches the
+///   caller, which catches it here.
+///
+/// Every kind but `invoke` then posts a job that counts itself, which shows
+/// that the dispatcher still runs jobs. Returns the state line:
+/// `handled=<messages, separated by |>;jobs_after=<count>;invoke=<message>`.
+#[wasm_bindgen(js_name = themedViewPanic)]
+pub fn themed_view_panic(kind: &str) -> String {
+    let dispatcher = Dispatcher::ui_thread();
+    if !PANICS.with(|panics| std::mem::replace(&mut panics.borrow_mut().handler, true)) {
+        let subscription = dispatcher.unhandled_exception(|args| {
+            let message = args.exception_message().unwrap_or("?").to_string();
+            if message.contains("handled") && !message.contains("unhandled") {
+                args.set_handled(true);
+            }
+            PANICS.with(|panics| panics.borrow_mut().handled.push(message));
+        });
+        std::mem::forget(subscription);
+    }
+
+    match kind {
+        "post" => dispatcher.post_local(|| panic!("a posted job panics (handled)"), DispatcherPriority::DEFAULT),
+        "unhandled" => dispatcher.post_local(|| panic!("a posted job panics (unhandled)"), DispatcherPriority::DEFAULT),
+        "invoke" => {
+            let result = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
+                dispatcher.invoke_local(|| -> u32 { panic!("an invoked callback panics") })
+            }));
+            let message = match result {
+                Ok(_) => "none".to_string(),
+                Err(payload) => payload
+                    .downcast_ref::<&str>()
+                    .map(|message| message.to_string())
+                    .or_else(|| payload.downcast_ref::<String>().cloned())
+                    .unwrap_or_else(|| "?".to_string()),
+            };
+            PANICS.with(|panics| panics.borrow_mut().invoke = Some(message));
+        }
+        _ => {}
+    }
+    if kind != "invoke" && !kind.is_empty() {
+        dispatcher.post_local(|| PANICS.with(|panics| panics.borrow_mut().jobs_after += 1), DispatcherPriority::DEFAULT);
+    }
+
+    PANICS.with(|panics| {
+        let panics = panics.borrow();
+        format!(
+            "handled={};jobs_after={};invoke={}",
+            panics.handled.join("|"),
+            panics.jobs_after,
+            panics.invoke.as_deref().unwrap_or("")
+        )
+    })
 }
 
 /// The value of `name` in a query string (`?a=1&b=2`), ignoring the case of
