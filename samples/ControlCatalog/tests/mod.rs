@@ -7,6 +7,7 @@
 //! `gaps` holds the minimal reproductions of the gaps of the framework the
 //! list names.
 
+mod asset_bundles;
 mod gaps;
 mod gaps_a;
 mod gaps_b;
