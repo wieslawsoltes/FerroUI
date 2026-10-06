@@ -270,7 +270,19 @@ mod label_tests;
 #[cfg(test)]
 pub(crate) mod test_support_shapes;
 #[cfg(test)]
+mod arrange_tests;
+#[cfg(test)]
+mod layout_manager_tests;
+#[cfg(test)]
+pub(crate) mod layout_test_control;
+#[cfg(test)]
+mod layoutable_tests;
+#[cfg(test)]
 mod layoutable_tests_effective_viewport_changed;
+#[cfg(test)]
+mod layoutable_tests_layout_rounding;
+#[cfg(test)]
+mod measure_tests;
 
 #[cfg(test)]
 pub(crate) mod test_support;
