@@ -20,12 +20,16 @@
 use ferroui_base::input::platform::ClipboardExtensions;
 use ferroui_base::input::{DataTransferExtensions, DragDrop, DragDropEffects};
 use ferroui_base::layout::HorizontalAlignment;
+use ferroui_base::media::imaging::{Bitmap, BitmapEncoderOptions, JpegBitmapEncoderOptions, PngBitmapEncoderOptions};
 use ferroui_base::media::immutable::ImmutableSolidColorBrush;
 use ferroui_base::media::{Color, FontManagerOptions};
 use ferroui_base::styling::ThemeVariant;
 use ferroui_base::threading::{Dispatcher, DispatcherPriority};
 use ferroui_base::utilities::{Uri, UriKind};
-use ferroui_base::{ferro_class, ferro_impl_classes, instantiate, BoxedValue, FerroObjectImpl, Ref, Thickness};
+use ferroui_base::platform::{AlphaFormat, PixelFormat};
+use ferroui_base::{
+    ferro_class, ferro_impl_classes, instantiate, BoxedValue, FerroObjectImpl, PixelSize, Ref, Thickness, Vector,
+};
 use ferroui_browser::interop::navigation_helper;
 use ferroui_browser::{BrowserAppBuilder, BrowserPlatformOptions, BrowserRenderingMode};
 use ferroui_controls::{
@@ -476,6 +480,53 @@ pub fn themed_view_panic(kind: &str) -> String {
             panics.invoke.as_deref().unwrap_or("")
         )
     })
+}
+
+/// Decodes damaged pictures, for the behaviour tests: libpng and libjpeg-turbo
+/// in Skia's prebuilt archive leave a decode that fails with `longjmp`, which
+/// in the browser goes through `emscripten/emscripten_sjlj.cpp` of
+/// `ferroui-skia`.
+///
+/// A 4 x 4 bitmap is saved as PNG and as JPEG and decoded three times: as
+/// saved, damaged (PNG: a byte of the header chunk changed, so its checksum
+/// fails; JPEG: an image height of 0 in the frame header) and as saved again.
+/// Returns `png=<result>,<result>,<result>;jpeg=...`, each result `ok` or
+/// `error`.
+#[wasm_bindgen(js_name = themedViewDecodeDamaged)]
+pub fn themed_view_decode_damaged() -> String {
+    let pixels = [0x80u8; 4 * 4 * 4];
+    let bitmap = Bitmap::from_pixels(
+        PixelFormat::RGBA8888,
+        AlphaFormat::Unpremul,
+        &pixels,
+        PixelSize::new(4, 4),
+        Vector::new(96.0, 96.0),
+        16,
+    );
+    let decode = |bytes: &[u8]| if Bitmap::from_stream(&mut &bytes[..]).is_ok() { "ok" } else { "error" };
+
+    let formats: [(&str, BitmapEncoderOptions, fn(&mut [u8])); 2] = [
+        ("png", PngBitmapEncoderOptions::DEFAULT.into(), |png| png[16] ^= 0x01),
+        ("jpeg", JpegBitmapEncoderOptions::DEFAULT.into(), |jpeg| {
+            // The frame header: FF C0, length, precision, height, width.
+            if let Some(at) = jpeg.windows(2).position(|marker| marker == [0xFF, 0xC0]) {
+                jpeg[at + 5] = 0;
+                jpeg[at + 6] = 0;
+            }
+        }),
+    ];
+    let mut results = Vec::new();
+    for (name, options, damage) in formats {
+        let mut saved = Vec::new();
+        if bitmap.save(&mut saved, &options).is_err() {
+            results.push(format!("{name}=not saved"));
+            continue;
+        }
+        let mut damaged = saved.clone();
+        damage(&mut damaged);
+        results.push(format!("{name}={},{},{}", decode(&saved), decode(&damaged), decode(&saved)));
+    }
+    results.join(";")
 }
 
 /// The value of `name` in a query string (`?a=1&b=2`), ignoring the case of

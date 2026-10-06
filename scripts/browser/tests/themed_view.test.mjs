@@ -62,6 +62,14 @@ check("the pointer hovers and clicks a button", async (page) => {
 
 // Rust panics unwind with the exceptions of the module (WebAssembly exception handling since Rust
 // 1.93): the `catch_unwind` of the dispatcher must catch them in the page as it does on the desktop.
+// libpng and libjpeg-turbo of Skia's prebuilt archive fail a decode with longjmp, which goes through
+// emscripten_sjlj.cpp of ferroui-skia: the decode fails cleanly and the next one works.
+check("a damaged PNG or JPEG fails to decode, and the decoders keep working", async (page) => {
+    const result = await page.evaluate("themedView.themedViewDecodeDamaged()");
+    assert(result === "png=ok,error,ok;jpeg=ok,error,ok", `decodes: ${result}`);
+    assert(page.errors.length === 0, `the page reported errors:\n${page.errors.join("\n")}`);
+});
+
 check("panics on the dispatcher are caught and passed on as on the desktop, and the view keeps working", async (page) => {
     const panic = async (kind) => Object.fromEntries((await page.evaluate(`themedView.themedViewPanic("${kind}")`)).split(";").map((pair) => {
         const i = pair.indexOf("="); return [pair.slice(0, i), pair.slice(i + 1)];
