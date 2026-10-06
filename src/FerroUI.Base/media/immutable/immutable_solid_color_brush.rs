@@ -91,6 +91,10 @@ impl fmt::Display for ImmutableSolidColorBrush {
 }
 
 impl IBrush for ImmutableSolidColorBrush {
+    fn as_immutable_brush(&self) -> Option<&dyn IImmutableBrush> {
+        Some(self)
+    }
+
     #[inline]
     fn opacity(&self) -> f64 {
         self.opacity
