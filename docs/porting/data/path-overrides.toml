@@ -102,6 +102,10 @@ reason = "object model runtime (Ref/WeakRef handles, TypeInfo, class macros): re
 path = "src/FerroUI.Base/utilities/handler_list.rs"
 reason = "storage for C# `event` handlers (multicast delegates have no Rust equivalent; porting guide, Types table)"
 
+[[rust_only]]
+path = "src/FerroUI.Base/rendering/scene_graph/scene_graph_test_support.rs"
+reason = "test doubles of the scene graph unit tests (the Moq mocks of `Rendering/SceneGraph/*Tests.cs`)"
+
 # ------------------------------------------------------------ Avalonia.MicroCom
 
 [[map]]

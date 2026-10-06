@@ -44,10 +44,10 @@ Percentages are `present / (total - waived)`. Member matching is by name with re
 
 | | Ported | Total | Waived | % |
 |---|---:|---:|---:|---:|
-| C# files | 1989 | 2363 | 0 | 84.2% |
-| Types | 2557 | 3276 | 0 | 78.1% |
-| Members | 18534 | 23849 | 44 | 77.9% |
-| Contracts (interfaces) | 384 | 464 | - | 82.8% |
+| C# files | 1993 | 2363 | 0 | 84.3% |
+| Types | 2576 | 3276 | 0 | 78.6% |
+| Members | 18601 | 23849 | 44 | 78.1% |
+| Contracts (interfaces) | 385 | 464 | - | 83.0% |
 | Property registrations | 1164 | 1233 | - | 94.4% |
 | Routed events | 108 | 108 | - | 100.0% |
 | Other files (native sources, XAML, TypeScript, fonts) | 243 | 268 | - | 90.7% |
@@ -62,7 +62,7 @@ The % column is member coverage (file coverage for plain file lists).
 |---|---|---|---|---:|---:|---:|---:|---|---|
 | [XamlX](tracking/XamlX.md) | `external/XamlX/src/XamlX` | `external/XamlX/src/XamlX` | `xamlx` | 61/62 | 171/175 | 703/865 (2 waived) | 81.5% | 2 - xaml + themes | P1 |
 | [Avalonia.Native (native sources)](tracking/Avalonia.Native_native_sources.md) | `native/Avalonia.Native` | `native/FerroUI.Native` | (Objective-C++ sources built by ferroui-native) | 62/62 | - | - | 100.0% | 1 - desktop (macOS) | P0 |
-| [Avalonia.Base](tracking/Avalonia.Base.md) | `src/Avalonia.Base` | `src/FerroUI.Base` | `ferroui-base` | 1103/1286 | 1395/1709 | 9679/11739 (32 waived) | 82.7% | 0 - core | P0 |
+| [Avalonia.Base](tracking/Avalonia.Base.md) | `src/Avalonia.Base` | `src/FerroUI.Base` | `ferroui-base` | 1107/1286 | 1414/1709 | 9746/11739 (32 waived) | 83.2% | 0 - core | P0 |
 | [Avalonia.Build.Tasks](tracking/Avalonia.Build.Tasks.md) | `src/Avalonia.Build.Tasks` | `src/FerroUI.Build.Tasks` | `ferroui-build` | 0/9 | 0/10 | 0/44 | 0.0% | 2 - xaml + themes | P1 |
 | [Avalonia.Controls](tracking/Avalonia.Controls.md) | `src/Avalonia.Controls` | `src/FerroUI.Controls` | `ferroui-controls` | 532/538 | 606/628 | 6156/6405 (1 waived) | 96.1% | 1 - controls | P0 |
 | [Avalonia.Controls.ColorPicker](tracking/Avalonia.Controls.ColorPicker.md) | `src/Avalonia.Controls.ColorPicker` | `src/FerroUI.Controls.ColorPicker` | `ferroui-controls-colorpicker` | 0/39 | 0/41 | 0/726 | 0.0% | 3 - extras | P2 |
@@ -326,7 +326,7 @@ FerroUI-only crates have no upstream source directory (for example the MicroCom 
 
 ## Rust-only files
 
-306 Rust source files have no upstream counterpart (291 without a recorded reason). They are listed at the end of each project page.
+308 Rust source files have no upstream counterpart (292 without a recorded reason). They are listed at the end of each project page.
 
 | Project | Rust file | Reason |
 |---|---|---|
@@ -460,6 +460,7 @@ FerroUI-only crates have no upstream source directory (for example the MicroCom 
 | [Avalonia.Base](tracking/Avalonia.Base.md) | `src/FerroUI.Base/rendering/composition/test_compositor.rs` | **unmapped** |
 | [Avalonia.Base](tracking/Avalonia.Base.md) | `src/FerroUI.Base/rendering/i_hit_tester.rs` | **unmapped** |
 | [Avalonia.Base](tracking/Avalonia.Base.md) | `src/FerroUI.Base/rendering/managed_hit_tester.rs` | **unmapped** |
+| [Avalonia.Base](tracking/Avalonia.Base.md) | `src/FerroUI.Base/rendering/scene_graph/scene_graph_test_support.rs` | test doubles of the scene graph unit tests (the Moq mocks of `Rendering/SceneGraph/*Tests.cs`) |
 | [Avalonia.Base](tracking/Avalonia.Base.md) | `src/FerroUI.Base/rendering/testing/mock_drawing_context_impl.rs` | **unmapped** |
 | [Avalonia.Base](tracking/Avalonia.Base.md) | `src/FerroUI.Base/rendering/testing/mock_platform_render_interface.rs` | **unmapped** |
 | [Avalonia.Base](tracking/Avalonia.Base.md) | `src/FerroUI.Base/rust_paths.rs` | **unmapped** |
@@ -535,6 +536,7 @@ FerroUI-only crates have no upstream source directory (for example the MicroCom 
 | [Avalonia.Controls](tracking/Avalonia.Controls.md) | `src/FerroUI.Controls/primitives/selecting_items_control_tests_multiple.rs` | **unmapped** |
 | [Avalonia.Controls](tracking/Avalonia.Controls.md) | `src/FerroUI.Controls/primitives/selecting_items_control_tests_selected_value.rs` | **unmapped** |
 | [Avalonia.Controls](tracking/Avalonia.Controls.md) | `src/FerroUI.Controls/register_types.rs` | **unmapped** |
+| [Avalonia.Controls](tracking/Avalonia.Controls.md) | `src/FerroUI.Controls/render_tests_culling.rs` | **unmapped** |
 | [Avalonia.Controls](tracking/Avalonia.Controls.md) | `src/FerroUI.Controls/rust_paths.rs` | **unmapped** |
 | [Avalonia.Controls](tracking/Avalonia.Controls.md) | `src/FerroUI.Controls/scroll_viewer_tests_i_logical_scrollable.rs` | **unmapped** |
 | [Avalonia.Controls](tracking/Avalonia.Controls.md) | `src/FerroUI.Controls/selection/selection_model_tests_multiple.rs` | **unmapped** |
