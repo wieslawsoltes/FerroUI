@@ -38,6 +38,19 @@ Other pages hold the entries of their own area, and this page does not repeat th
 | Each payload has a static `Opcode` field. | The associated const `IRenderDataPayload::OPCODE`. | Representation | The Rust form of a per-type constant. The tracking scanner does not match it, so `RenderDataPayloads.cs` shows 35/50 members. | #26 |
 | The batch stream is made of 64-byte pooled segments. | No pooled segments. | Representation | The port's batch stream never had them, so `Round_Trip_Spanning_Multiple_Stream_Segments` cannot cross a segment boundary (see the test's header). | #26 |
 
+### Visual tree (`src/FerroUI.Base/visual_tree/`)
+
+| Upstream | Port | Kind | Why | Since |
+|---|---|---|---|---|
+| `VisualLocator.Track(Visual, int ancestorLevel, Type?)`: a negative level makes `ElementAtOrDefault` return null. | `VisualLocator::track` takes `ancestor_level: usize`. | Representation | An unsigned level, as `VisualAncestorElementNode` already took; a negative level cannot be passed. | #27 |
+
+### ControlCatalog sample (`samples/ControlCatalog/`)
+
+| Upstream | Port | Kind | Why | Since |
+|---|---|---|---|---|
+| `CompositionPage.ButtonThreadSleep` calls `Thread.Sleep(5000)`. | `button_thread_sleep` in `Pages/composition_page.rs` calls `std::thread::sleep` for 5 s. | Behaviour | Ported as upstream has it: the button demonstrates a blocked UI thread. Recorded because the port otherwise rules out blocking waits on the UI thread. | #34 |
+| The messages of `CompositionPage.CustomVisualHandler` are four `static readonly object` instances compared by reference. | Four thread-local `Rc<dyn Any>` objects compared with `Rc::ptr_eq`. | Representation | `Rc` is not `Sync`, so it cannot be a `static`; one instance per thread compares the same way on the UI thread. | #34 |
+
 ### Tests and test support
 
 | Upstream | Port | Kind | Why | Since |
@@ -52,3 +65,5 @@ Places where the port did work that upstream does not do, or did it differently,
 | Upstream | What the port did | Corrected by |
 |---|---|---|
 | `RenderDataStream` records opcodes and payloads into a byte stream. | Recorded a `Vec<RenderDataOp>` of an enum. | #26 |
+| `VisualAncestorElementNode` subscribes to `VisualLocator.Track`. | Followed the attachment events of the element itself, and panicked with "Cannot find a Visual to get a visual ancestor." where upstream throws "Cannot find an ILogical to get a visual ancestor.". | #27 |
+| `GetLayoutRoot` and `GetLayoutManager` are extension methods of `Visual`. | Declared them on `Layoutable` only. | #27 |

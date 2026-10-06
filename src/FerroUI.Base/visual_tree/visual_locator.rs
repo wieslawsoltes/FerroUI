@@ -11,6 +11,8 @@ impl VisualLocator {
     /// ancestors of `ancestor_type`, when given) of `relative_to`, or `None`
     /// while `relative_to` is not attached to a visual tree. It publishes
     /// the ancestor again whenever `relative_to` is attached or detached.
+    // Deviation (DEVIATIONS.md, Visual tree): upstream takes an `int` level; a negative level
+    // cannot be passed here.
     pub fn track(
         relative_to: &Visual,
         ancestor_level: usize,
