@@ -520,7 +520,25 @@ export class InputHelper {
         element: HTMLInputElement,
         topLevelId: number
     ) {
+        // Not in the original, which takes the events of the native controls (elements in the
+        // native host of the view) as events of the view: with their coordinates, which are relative
+        // to the native control, and with the implicit capture of a press, which moves the release
+        // to the element of the view so that the native control never gets its click. Events whose
+        // target is inside a native control are left to it; while the view captures the pointer the
+        // target is the element of the view.
+        const isForNativeControl = (args: Event) => {
+            const target = args.target;
+            if (!(target instanceof Element) || target === element) {
+                return false;
+            }
+            const nativeHost = target.closest(".ferroui-native-host");
+            return nativeHost !== null && nativeHost !== target && element.contains(nativeHost);
+        };
+
         const pointerMoveHandler = (args: PointerEvent) => {
+            if (isForNativeControl(args)) {
+                return;
+            }
             FerroExports.InputHelper?.OnPointerMove(
                 topLevelId, args.pointerType, args.pointerId, args.offsetX, args.offsetY,
                 args.pressure, args.tiltX, args.tiltY, args.twist ?? 0, this.getModifiers(args), args);
@@ -528,6 +546,9 @@ export class InputHelper {
         };
 
         const pointerDownHandler = (args: PointerEvent) => {
+            if (isForNativeControl(args)) {
+                return;
+            }
             FerroExports.InputHelper?.OnPointerDown(
                 topLevelId, args.pointerType, args.pointerId, args.button, args.offsetX, args.offsetY,
                 args.pressure, args.tiltX, args.tiltY, args.twist ?? 0, this.getModifiers(args));
@@ -535,6 +556,9 @@ export class InputHelper {
         };
 
         const pointerUpHandler = (args: PointerEvent) => {
+            if (isForNativeControl(args)) {
+                return;
+            }
             FerroExports.InputHelper?.OnPointerUp(
                 topLevelId, args.pointerType, args.pointerId, args.button, args.offsetX, args.offsetY,
                 args.pressure, args.tiltX, args.tiltY, args.twist ?? 0, this.getModifiers(args));
@@ -542,6 +566,9 @@ export class InputHelper {
         };
 
         const pointerCancelHandler = (args: PointerEvent) => {
+            if (isForNativeControl(args)) {
+                return;
+            }
             FerroExports.InputHelper?.OnPointerCancel(
                 topLevelId, args.pointerType, args.pointerId, args.offsetX, args.offsetY,
                 args.pressure, args.tiltX, args.tiltY, args.twist ?? 0, this.getModifiers(args));
@@ -550,6 +577,9 @@ export class InputHelper {
         // Differs from the original, which does not pass the unit of the deltas: a browser reports
         // them in pixels, lines or pages (deltaMode), and the framework converts them.
         const wheelHandler = (args: WheelEvent) => {
+            if (isForNativeControl(args)) {
+                return;
+            }
             FerroExports.InputHelper?.OnWheel(
                 topLevelId, args.offsetX, args.offsetY, args.deltaX, args.deltaY, args.deltaMode, this.getModifiers(args));
             args.preventDefault();
