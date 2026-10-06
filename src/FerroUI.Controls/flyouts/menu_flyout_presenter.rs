@@ -1,4 +1,3 @@
-use crate::platform::default_menu_interaction_handler::find_logical_ancestor_of_type;
 use crate::platform::{DefaultMenuInteractionHandler, IMenuInteractionHandler};
 use crate::primitives::{Popup, SelectingItemsControlImpl, TemplatedControlImpl};
 use crate::{ControlImpl, ItemsControlImpl, MenuBase, MenuBaseImpl, MenuItem};
@@ -48,8 +47,7 @@ impl VisualImpl for MenuFlyoutPresenter {
 impl MenuBaseImpl for MenuFlyoutPresenter {
     fn close(this: &Self) {
         // The default menu interaction handler calls this
-        let element: Ref<StyledElement> = this.to_ref().upcast();
-        let host = find_logical_ancestor_of_type::<Popup>(&element, false);
+        let host = this.find_logical_ancestor_of_type::<Popup>(false);
         if let Some(host) = host {
             this.set_selected_index(-1);
             host.set_is_open(false);

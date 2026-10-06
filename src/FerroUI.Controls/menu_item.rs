@@ -9,7 +9,6 @@ use crate::i_selectable::{register_selectable, ISelectable};
 use crate::menu_item_access_key_handler::MenuItemAccessKeyHandler;
 use crate::metadata::{PseudoClassesAttribute, TemplatePartAttribute};
 use crate::mixins::{PressedMixin, SelectableMixin};
-use crate::platform::default_menu_interaction_handler::find_logical_ancestor_of_type;
 use crate::platform::{FeedbackType, IMenuInteractionHandler, PlatformFeedback};
 use crate::primitives::{
     HeaderedSelectingItemsControl, HeaderedSelectingItemsControlImpl, Popup, SelectingItemsControl,
@@ -848,8 +847,7 @@ impl MenuItem {
 
     /// The interaction handler of the menu the item is within.
     pub(crate) fn menu_interaction_handler(&self) -> Option<Rc<dyn IMenuInteractionHandler>> {
-        let this: Ref<StyledElement> = self.to_ref().upcast();
-        find_logical_ancestor_of_type::<MenuBase>(&this, false)
+        self.find_logical_ancestor_of_type::<MenuBase>(false)
             .or_else(|| self.find_ancestor_of_type::<MenuBase>(false))
             .map(|menu| menu.interaction_handler())
     }
