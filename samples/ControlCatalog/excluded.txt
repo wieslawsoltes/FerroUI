@@ -17,7 +17,7 @@ Pages/SettingsPage.xaml | harness: {x:Static local:App.CurrentTheme} needs the a
 
 # --- Controls, Converter, Pages/CommandBar, Pages/TextBox, Pages/Gestures, Pages/ContentPage (group A) ---
 Pages/ContentPage/ContentPagePerformancePage.xaml | code-behind: NavigationPerformanceMonitorHelper and NavigationDemoHelper (Pages/NavigationPage, not ported; the helper measures the managed heap: GC.GetTotalMemory, GC.Collect)
-Pages/Gestures/GesturePullPage.xaml | code-behind: LogicalExtensions.FindLogicalDescendantOfType
+Pages/Gestures/GesturePullPage.xaml | code-behind not ported
 Pages/TextBox/TextBoxValidationPage.xaml | gap C102: DataValidationException is not declared for markup
 
 # --- ViewModels, Models, Views and the pages of the view models (group B) ---
@@ -27,7 +27,7 @@ Pages/ListBoxPage.xaml | gap C207: a compiled binding does not stream (`^`) an O
 Pages/PlatformInfoPage.xaml | gap C202: OnPlatform as an element with On children does not load
 
 # --- the other pages directly under Pages/ (group C) ---
-Pages/AutoCompleteBoxPage.xaml | code-behind: LogicalExtensions.GetLogicalDescendants (the document also needs gap C310)
+Pages/AutoCompleteBoxPage.xaml | code-behind not ported (the document also needs gap C310)
 Pages/ClipboardPage.xaml | code-behind: DataFormat.File and ClipboardExtensions.TryGetFilesAsync (storage items as clipboard data are not ported)
 Pages/ColorPickerPage.xaml | missing: ColorPicker, ColorPreviewer, ColorSlider, ColorSpectrum, ColorView, FlatHalfColorPalette
 Pages/DialogsPage.xaml | code-behind: DialogsPage is not ported yet (ManagedStorageProvider is available in ferroui-dialogs); the document also needs gap C305

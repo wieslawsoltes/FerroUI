@@ -57,13 +57,6 @@ fn test_root(child: &Ref<CommandBar>) -> Ref<TestRoot> {
     root
 }
 
-fn collect_logical_descendants(element: &StyledElement, result: &mut Vec<Ref<StyledElement>>) {
-    for child in StyledElement::logical_children(element).to_vec() {
-        result.push(child.clone());
-        collect_logical_descendants(&child, result);
-    }
-}
-
 fn get_overflow_presenter(cb: &CommandBar) -> Ref<ItemsControl> {
     let popup = cb
         .get_visual_descendants()
@@ -71,10 +64,8 @@ fn get_overflow_presenter(cb: &CommandBar) -> Ref<ItemsControl> {
         .find(|popup| popup.name().as_deref() == Some("PART_OverflowPopup"))
         .expect("the command bar template has an overflow popup");
 
-    let mut descendants = Vec::new();
-    collect_logical_descendants(&popup, &mut descendants);
-    descendants
-        .into_iter()
+    popup
+        .get_logical_descendants()
         .filter_map(|element| element.cast::<ItemsControl>())
         .find(|items_control| items_control.name().as_deref() == Some("PART_OverflowPresenter"))
         .expect("the overflow popup has an overflow presenter")

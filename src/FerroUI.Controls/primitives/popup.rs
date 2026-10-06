@@ -24,7 +24,7 @@ use ferroui_base::utilities::HandlerList;
 use ferroui_base::{
     ferro_class, ferro_impl_classes, ferro_property, instantiate, AttachedProperty, DirectProperty,
     FerroObject, FerroObjectExtensions, FerroObjectImpl, FerroObjectImplExt, FerroProperty, FerroPropertyChangedEventArgs,
-    IFerroDependencyResolver, Matrix, Nullable, ObjectType, PixelPoint, Point, Rect, Ref, Size, StyledElement,
+    IFerroDependencyResolver, Matrix, Nullable, PixelPoint, Point, Rect, Ref, Size, StyledElement,
     StyledElementImpl, StyledElementImplExt, StyledProperty, Visual, VisualImpl, VisualImplExt,
     VisualTreeAttachmentEventArgs, WeakRef,
 };
@@ -92,7 +92,7 @@ impl FerroObjectImpl for Popup {
         {
             if property == Self::placement_target_property().as_property() {
                 let new_target = ElementRef::resolve(&change.get_new_value::<Option<ElementRef<Control>>>())
-                    .or_else(|| find_logical_ancestor_of_type::<Control>(this));
+                    .or_else(|| this.find_logical_ancestor_of_type::<Control>(false));
 
                 let Some(new_target) = new_target else {
                     this.close();
@@ -631,7 +631,7 @@ impl Popup {
         }
 
         let Some(placement_target) =
-            self.placement_target().or_else(|| find_logical_ancestor_of_type::<Control>(self))
+            self.placement_target().or_else(|| self.find_logical_ancestor_of_type::<Control>(false))
         else {
             self.is_open_requested.set(true);
             return;
@@ -1244,18 +1244,6 @@ impl Popup {
             opened_popups.remove(index);
         }
     }
-}
-
-/// The first logical ancestor of `element` that is a `T`.
-fn find_logical_ancestor_of_type<T: ObjectType>(element: &StyledElement) -> Option<Ref<T>> {
-    let mut parent = element.parent();
-    while let Some(current) = parent {
-        if let Some(result) = current.cast::<T>() {
-            return Some(result);
-        }
-        parent = current.parent();
-    }
-    None
 }
 
 fn window_manager_add_shadow_hint_changed(host: &Rc<dyn IPopupHost>, hint: bool) {

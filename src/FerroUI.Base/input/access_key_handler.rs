@@ -5,7 +5,7 @@ use crate::interactivity::{RoutedEvent, RoutedEventArgs, RoutingStrategies};
 use crate::reactive::IDisposable;
 use crate::{
     ferro_property, ferro_routed_event, ferro_routed_event_args, AttachedProperty, FerroProperty, Ref,
-    StyledElement, StyledPropertyOptions, Visual, WeakRef,
+    StyledPropertyOptions, Visual, WeakRef,
 };
 use std::cell::{Cell, RefCell};
 use std::collections::VecDeque;
@@ -459,17 +459,6 @@ impl AccessKeyHandler {
         }
     }
 
-    fn is_logical_ancestor_of(ancestor: &StyledElement, element: &StyledElement) -> bool {
-        let mut current = element.parent();
-        while let Some(parent) = current {
-            if std::ptr::eq::<StyledElement>(&*parent, ancestor) {
-                return true;
-            }
-            current = parent.parent();
-        }
-        false
-    }
-
     /// Sorts the list of targets according to logical ancestors in the
     /// hierarchy so that child elements, for example tab item content, are
     /// processed before the next parent item, i.e. the next tab item.
@@ -492,7 +481,7 @@ impl AccessKeyHandler {
             sorted.push(element.clone());
 
             // add all descendants of the element
-            sorted.extend(queue.iter().filter(|child| Self::is_logical_ancestor_of(&element, child)).cloned());
+            sorted.extend(queue.iter().filter(|child| element.is_logical_ancestor_of(Some(child))).cloned());
         }
 
         sorted
