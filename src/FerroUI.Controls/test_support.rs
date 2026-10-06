@@ -65,7 +65,7 @@ pub struct TestSource {
     root: WeakRef<TestRoot>,
     renderer: Rc<TestRenderer>,
     focus_manager: Rc<FocusManager>,
-    layout_manager: RefCell<Option<Rc<LayoutManager>>>,
+    layout_manager: RefCell<Option<Rc<dyn ILayoutManager>>>,
     hit_tester: RefCell<Option<Rc<dyn IHitTester>>>,
     platform_settings: RefCell<Option<Rc<dyn ferroui_base::platform::IPlatformSettings>>>,
 }
@@ -82,7 +82,8 @@ impl TestSource {
             platform_settings: RefCell::new(None),
         });
         let as_layout_root: Rc<dyn ILayoutRoot> = source.clone();
-        *source.layout_manager.borrow_mut() = Some(LayoutManager::new(Rc::downgrade(&as_layout_root)));
+        let layout_manager: Rc<dyn ILayoutManager> = LayoutManager::new(Rc::downgrade(&as_layout_root));
+        *source.layout_manager.borrow_mut() = Some(layout_manager);
         source
     }
 
@@ -210,13 +211,18 @@ impl LayoutableImpl for TestRoot {
 }
 
 impl TestRoot {
-    pub fn new() -> Ref<Self> {
-        instantiate(Self {
+    /// Field initialisation, for classes that derive from the test root.
+    pub fn construct() -> Self {
+        Self {
             base: Decorator::construct(),
             client_size: Cell::new(Size::new(1000.0, 1000.0)),
             layout_scaling: Cell::new(1.0),
             source: RefCell::new(None),
-        })
+        }
+    }
+
+    pub fn new() -> Ref<Self> {
+        instantiate(Self::construct())
     }
 
     pub fn with_child(child: impl IntoRef<Control>) -> Ref<Self> {
@@ -243,6 +249,12 @@ impl TestRoot {
 
     pub fn layout_manager(&self) -> Rc<dyn ILayoutManager> {
         self.source.borrow().as_ref().unwrap().layout_manager()
+    }
+
+    /// Replaces the layout manager of the root (the settable `LayoutManager`
+    /// of the upstream test root).
+    pub fn set_layout_manager(&self, value: Rc<dyn ILayoutManager>) {
+        *self.source.borrow().as_ref().unwrap().layout_manager.borrow_mut() = Some(value);
     }
 
     /// Sets the platform settings of the root (none by default): the
