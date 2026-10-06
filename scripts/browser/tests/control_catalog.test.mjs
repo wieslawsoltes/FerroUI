@@ -12,14 +12,20 @@
 //   context of the mode, the main view is drawn (the canvas is not blank), the view is laid out again
 //   when the page is made larger (the area the larger size adds is drawn) and smaller, and nothing is
 //   logged as an error (console errors, uncaught exceptions, failed loads);
-// - the module and the asset bundle are downloaded once each, through the preloads of the host page;
+// - the module, the start-up asset bundle and the list of the bundles are downloaded once each, through
+//   the preloads of the host page;
 // - input, driven with real pointer and key events: the navigation drawer opens from its toggle
 //   button, three pages are reached through the drawer and show their content, a click on a button
 //   has its effect, and text typed into a text box becomes its text;
 // - the native control demo (samples/ControlCatalog.Browser/embed_sample_browser.rs): the Native Embed
 //   page shows its two native controls, elements of the page over the view (a button of the page that
 //   counts the clicks it gets from real pointer events, and an iframe), and a check box of the page hides
-//   one of them.
+//   one of them;
+// - the asset bundles (samples/ControlCatalog.Browser/wwwroot/page-assets.js): the start-up downloads the
+//   start-up bundle only, and the bundles of the pages follow the first frame, each once; with that
+//   prefetch off (`?PrefetchAssets=false`), opening the Container Queries page downloads its bundle and its
+//   images have their bitmaps and are drawn, and the CJK sample of the TextBox page finds its font (the
+//   typeface the font manager resolves is WenQuanYi Micro Hei) and draws its glyphs.
 //
 // The view is read through the `catalogState` export of the host (samples/ControlCatalog.Browser),
 // which reports the drawer, the current page, the focus and the visible text with its bounds; the
@@ -55,8 +61,8 @@ const SMALLER_SIZE = { width: 800, height: 600 };
 const NARROW_SIZE = { width: 600, height: 700 };
 
 /** Opens the site in a page of `size` and waits until the application has started and drawn. */
-async function start({ mode = "WebGL2", size = FIRST_SIZE } = {}) {
-    const page = await open(site, { query: `?RenderingMode=${mode}`, width: size.width, height: size.height });
+async function start({ mode = "WebGL2", size = FIRST_SIZE, query = "" } = {}) {
+    const page = await open(site, { query: `?RenderingMode=${mode}${query}`, width: size.width, height: size.height });
     const started = Date.now();
     try {
         await page.waitFor(`(() => {
@@ -223,12 +229,12 @@ async function navigate(page, text, header = text) {
         && s.elements.some((e) => e.type === "TextBlock" && e.text === header && e.hit && e.y < 48 && e.x >= DRAWER_EDGE));
 }
 
-check("the module and the asset bundle are downloaded once, through the preloads of the page", async (page) => {
+check("the module, the start-up asset bundle and the list of the bundles are downloaded once, through the preloads of the page", async (page) => {
     // A preload that does not match the request of the script (another name, other credentials) is
     // not used, and the file is downloaded a second time.
     const requests = JSON.parse(await page.evaluate(`JSON.stringify(performance.getEntriesByType("resource")
         .map((e) => ({ file: new URL(e.name).pathname.split("/").pop(), initiator: e.initiatorType })))`));
-    for (const file of ["control_catalog_browser.wasm", "control-catalog.assets"]) {
+    for (const file of ["control_catalog_browser.wasm", "control-catalog.assets", "control-catalog.assets.json"]) {
         const found = requests.filter((r) => r.file === file);
         assert(found.length === 1 && found[0].initiator === "link",
             `${file} was requested ${found.length} times (${found.map((r) => r.initiator).join(", ")}), expected once by its preload`);
@@ -343,5 +349,104 @@ check("the native controls of the Native Embed page are elements of the page ove
     const errors = page.errors.filter((line) => !line.includes("youtube"));
     assert(errors.length === 0, `errors were logged:\n${errors.join("\n")}`);
 }, { size: LARGER_SIZE });
+
+// --- asset bundles ---------------------------------------------------------------------------------------
+
+const manifest = JSON.parse(fs.readFileSync(path.join(site, "control-catalog.assets.json"), "utf8"));
+/** The asset bundles the page requested: from resource timing, and from the log of page-assets.js (with the reason). */
+async function bundleRequests(page) {
+    return JSON.parse(await page.evaluate(`JSON.stringify({
+        resources: performance.getEntriesByType("resource").filter((e) => /\\.assets$/.test(new URL(e.name).pathname))
+            .map((e) => ({ name: new URL(e.name).pathname.split("/").pop(), start: e.startTime, end: e.responseEnd })),
+        requests: controlCatalogAssets.requests,
+        marks: Object.fromEntries(performance.getEntriesByType("mark").map((m) => [m.name, m.startTime])),
+    })`));
+}
+
+check("the start-up downloads the start-up bundle only; the other bundles follow the first frame, each once", async (page) => {
+    const names = Object.keys(manifest.bundles).filter((name) => name !== manifest.startup);
+    assert(names.length >= 3 && manifest.prefetch.length === names.length, `the manifest lists ${names.length} bundles besides the start-up bundle`);
+    await page.waitFor(`performance.getEntriesByType("mark").some((m) => m.name === "assets prefetched")`, 60_000);
+    const { resources, requests, marks } = await bundleRequests(page);
+    const firstFrame = marks["first frame"];
+    assert(firstFrame > 0, "no first frame mark");
+    const before = resources.filter((r) => r.start < firstFrame).map((r) => r.name);
+    assert(before.length === 1 && before[0] === manifest.startup, `downloaded before the first frame: ${before.join(", ")}`);
+    for (const name of [manifest.startup, ...names]) {
+        const count = resources.filter((r) => r.name === name).length;
+        assert(count === 1, `${name} was downloaded ${count} times`);
+    }
+    const prefetched = requests.filter((r) => r.reason === "prefetch");
+    assert(prefetched.length === names.length && prefetched.every((r) => r.start >= firstFrame),
+        `prefetched: ${JSON.stringify(prefetched)}, first frame at ${firstFrame}`);
+    const startupBytes = manifest.bundles[manifest.startup].bytes;
+    console.log(`      start-up bundle ${(startupBytes / 1e6).toFixed(2)} MB; first frame ${Math.round(firstFrame)} ms; ${names.length} bundles prefetched by ${Math.round(marks["assets prefetched"])} ms`);
+    assert(page.errors.length === 0, `errors were logged:\n${page.errors.join("\n")}`);
+});
+
+check("opening a page downloads its bundle and its images are drawn", async (page) => {
+    await sleep(1500);
+    let { resources } = await bundleRequests(page);
+    assert(resources.length === 1 && resources[0].name === manifest.startup, `downloaded without prefetching: ${resources.map((r) => r.name).join(", ")}`);
+    const expected = manifest.pages["Container Queries"];
+    assert(expected?.length > 0, "the manifest lists no bundle of the Container Queries page");
+
+    await navigate(page, "Layout");
+    ({ resources } = await bundleRequests(page));
+    assert(resources.length === 1, `opening the section page downloaded ${resources.map((r) => r.name).join(", ")}`);
+    await navigate(page, "Container Queries");
+    const { requests } = await bundleRequests(page);
+    const fetched = requests.filter((r) => r.reason === "page").map((r) => r.name).sort();
+    assert(JSON.stringify(fetched) === JSON.stringify([...expected].sort()), `the page fetched ${fetched.join(", ")}, expected ${expected.join(", ")}`);
+
+    const state = await page.until("the images of the page have their bitmaps",
+        (s) => s.elements.some((e) => e.type === "Image" && e.source && e.source.width > 0 && e.x >= DRAWER_EDGE && e.width > 40 && e.height > 40));
+    const image = state.elements.find((e) => e.type === "Image" && e.source && e.x >= DRAWER_EDGE && e.width > 40 && e.height > 40);
+    // A photograph has many colours; an empty image control has the one of the background.
+    const region = { x: Math.ceil(image.x), y: Math.ceil(image.y), width: Math.floor(image.width) - 1, height: Math.min(Math.floor(image.height) - 1, FIRST_SIZE.height - Math.ceil(image.y) - 1) };
+    let colours = 0;
+    for (const end = Date.now() + FRAME_TIMEOUT; Date.now() < end && colours < 64; await sleep(250)) {
+        colours = distinctColours(await page.screenshot(undefined, { x: 0, y: 0, ...FIRST_SIZE }), region);
+    }
+    assert(colours >= 64, `the image at ${JSON.stringify(region)} has ${colours} colours`);
+    console.log(`      ${fetched.join(", ")} fetched on navigation; the image at ${region.x},${region.y} shows ${colours} colours`);
+    assert(page.errors.length === 0, `errors were logged:\n${page.errors.join("\n")}`);
+}, { query: "&PrefetchAssets=false" });
+
+check("the CJK sample of the TextBox page finds its font and draws its glyphs", async (page) => {
+    await navigate(page, "Text");
+    await navigate(page, "TextBox");
+    const { requests } = await bundleRequests(page);
+    const fetched = requests.filter((r) => r.reason === "page").map((r) => r.name);
+    assert(manifest.pages.TextBox.every((name) => fetched.includes(name)), `the TextBox page fetched ${fetched.join(", ")}`);
+    await page.clickElement(await page.find("Fonts and Complex Scripts", inContent));
+    await page.until("the sample is shown", (s) => !s.navigating && s.elements.some((e) => e.text === "Complex scripts" || (e.type === "TextBox" && inContent(e))));
+    const isCjk = (e) => e.type === "TextBox" && e.text?.startsWith("计算机科学") && e.x >= DRAWER_EDGE;
+    let state = await page.state();
+    // The sample is the last one of the page: scroll down to it.
+    for (let i = 0; i < 40 && !state.elements.some((e) => isCjk(e) && e.y > 0 && e.y + 120 < LARGER_SIZE.height); i++) {
+        await page.wheel(Math.round((DRAWER_EDGE + LARGER_SIZE.width) / 2), Math.round(LARGER_SIZE.height / 2), 0, 240);
+        state = await page.state();
+    }
+    const box = state.elements.find(isCjk);
+    assert(box, `no CJK text box in view; the view shows: ${describe(state)}`);
+    assert(box.font === "WenQuanYi Micro Hei", `the CJK text box resolves the typeface ${JSON.stringify(box.font)}`);
+    await sleep(500);
+    // The glyphs: pixels that stand out from the background of the box (its most frequent colour).
+    const picture = await page.screenshot(undefined, { x: 0, y: 0, ...LARGER_SIZE });
+    const region = { x: Math.ceil(box.x) + 4, y: Math.max(0, Math.ceil(box.y) + 4), width: Math.min(Math.floor(box.width), 300) - 8, height: Math.min(80, LARGER_SIZE.height - Math.ceil(box.y) - 8) };
+    const pixels = [];
+    for (let y = region.y; y < region.y + region.height; y++) {
+        for (let x = region.x; x < region.x + region.width; x++) { pixels.push(picture.pixel(x, y)); }
+    }
+    const counts = new Map();
+    for (const pixel of pixels) { const key = pixel.slice(0, 3).join(","); counts.set(key, (counts.get(key) ?? 0) + 1); }
+    const background = [...counts.entries()].sort((a, b) => b[1] - a[1])[0][0].split(",").map(Number);
+    const luminance = ([r, g, b]) => 0.299 * r + 0.587 * g + 0.114 * b;
+    const ink = pixels.filter((pixel) => Math.abs(luminance(pixel) - luminance(background)) > 80).length;
+    assert(ink > 200, `the CJK text box at ${JSON.stringify(region)} has ${ink} pixels of glyphs`);
+    console.log(`      the CJK text box uses ${box.font}; ${ink} pixels of glyphs`);
+    assert(page.errors.length === 0, `errors were logged:\n${page.errors.join("\n")}`);
+}, { size: LARGER_SIZE, query: "&PrefetchAssets=false" });
 
 await run(checks);

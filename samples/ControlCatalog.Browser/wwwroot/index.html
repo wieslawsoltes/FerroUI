@@ -11,13 +11,16 @@
     <link rel="stylesheet" href="./app.css" />
     <!-- Upstream's page has a preload element that the build fills with the boot resources of the
          runtime. Here: the scripts main.js imports, the WebAssembly module (fetched by the script of
-         the module with credentials "same-origin", which `crossorigin` matches) and the asset bundle,
-         so that the downloads start with the page instead of after its scripts. -->
+         the module with credentials "same-origin", which `crossorigin` matches), the start-up asset
+         bundle and the list of the asset bundles, so that the downloads start with the page instead of
+         after its scripts. The asset bundles of the pages are fetched later (page-assets.js). -->
     <link rel="modulepreload" href="./main.js" />
     <link rel="modulepreload" href="./control-catalog-browser.js" />
     <link rel="modulepreload" href="./ferroui.js" />
+    <link rel="modulepreload" href="./page-assets.js" />
     <link rel="preload" href="./control_catalog_browser.wasm" as="fetch" type="application/wasm" crossorigin />
     <link rel="preload" href="./control-catalog.assets" as="fetch" crossorigin />
+    <link rel="preload" href="./control-catalog.assets.json" as="fetch" crossorigin />
 </head>
 
 <body style="margin: 0; overflow: hidden">
