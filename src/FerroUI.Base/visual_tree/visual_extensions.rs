@@ -2,12 +2,13 @@
 //! conversion and hit testing.
 //!
 //! This file ports both the visual tree extensions and the coordinate
-//! conversion extensions of the root namespace. Members that already exist
-//! on [`Visual`] itself (`visual_parent`, `presentation_source`,
-//! `visual_root`, `is_attached_to_visual_tree`) are not repeated here.
+//! conversion extensions of the root namespace, as inherent methods of
+//! [`Visual`].
 
 use super::TransformedBounds;
 use crate::input::IInputRoot;
+use crate::layout::{ILayoutManager, ILayoutRoot};
+use crate::rendering::IPresentationSource;
 use crate::media::{Geometry, GeometryHitTestResult};
 use crate::platform::IPlatformSettings;
 use crate::{Matrix, ObjectType, PixelPoint, Point, Rect, Ref, Visual};
@@ -429,6 +430,28 @@ impl Visual {
     /// Gets the visual parent of the visual, if it is of class `T`.
     pub fn get_visual_parent_of_type<T: ObjectType>(&self) -> Option<Ref<T>> {
         self.visual_parent().and_then(|parent| parent.downcast::<T>().ok())
+    }
+
+    /// The presentation source the visual is attached to.
+    pub fn get_presentation_source(&self) -> Option<Rc<dyn IPresentationSource>> {
+        self.presentation_source()
+    }
+
+    /// The root visual of the presentation source the visual is attached
+    /// to.
+    pub fn get_visual_root(&self) -> Option<Ref<Visual>> {
+        self.presentation_source().and_then(|source| source.root_visual())
+    }
+
+    /// The layout root of the tree the visual is attached to.
+    pub fn get_layout_root(&self) -> Option<Rc<dyn ILayoutRoot>> {
+        self.presentation_source().map(|source| source.layout_root())
+    }
+
+    /// The layout manager of the presentation source of the visual, or
+    /// `None` when the visual is not attached to a visual root.
+    pub fn get_layout_manager(&self) -> Option<Rc<dyn ILayoutManager>> {
+        self.presentation_source().map(|source| source.layout_root().layout_manager())
     }
 
     /// The input root of the tree the visual is attached to.
