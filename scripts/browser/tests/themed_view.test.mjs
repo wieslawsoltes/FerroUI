@@ -5,7 +5,8 @@
 //
 // The page is driven with real mouse, wheel, key and drag events; the state of the controls is read
 // through the `themedViewState` export of the example, what the services of the platform answered
-// through `themedViewServices`, and the page through the DOM.
+// through `themedViewServices`, and the page through the DOM. The native control host of the view is
+// changed through `themedViewNativeHost`, and its native control read in the DOM.
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { open, run, assert, sleep } from "../harness.mjs";
@@ -442,6 +443,84 @@ check("the back navigation of the browser is a back request of the view", async 
     await page.waitForService("back_requests", "2");
     await sleep(1000);
     assert((await page.services()).back_requests === "2", `the second back navigation was reported as ${(await page.services()).back_requests}`);
+});
+
+// The native control of the native control host: the elements in the element of the view that lies over
+// its canvas, with the inline style the host gives them.
+const NATIVE_CONTROLS = `JSON.stringify(Array.from(document.querySelector("#out .ferroui-native-host").children).map((e) => ({
+    tag: e.tagName, mark: e.dataset.mark ?? null, position: e.style.position, display: e.style.display,
+    left: e.style.left, top: e.style.top, width: e.style.width, height: e.style.height })))`;
+
+check("a native control is attached with its host, follows its bounds and visibility, and is detached with it", async (page) => {
+    const controls = async () => JSON.parse(await page.evaluate(NATIVE_CONTROLS));
+    const waitForControls = async (description, predicate) => {
+        const end = Date.now() + 10000;
+        let current;
+        while (Date.now() < end) {
+            current = await controls();
+            if (predicate(current)) { return current; }
+            await sleep(100);
+        }
+        throw new Error(`timed out waiting until ${description}; native controls: ${JSON.stringify(current)}, services: ${JSON.stringify(await page.services())}`);
+    };
+    const host = async () => (await page.services()).native_host?.split(",").map(Number);
+    assert((await controls()).length === 0, "the view starts with a native control");
+    assert((await page.services()).native_handle === "false", "the host has a native control before it is in the view");
+
+    // Attached: the default native control of the platform, an element of the page at the bounds of the host.
+    await page.evaluate(`(themedView.themedViewNativeHost("size", 120, 40), themedView.themedViewNativeHost("add", 0, 0), true)`);
+    let [control] = await waitForControls("the native control is shown", (c) => c.length === 1 && c[0].display === "block");
+    await page.waitForService("native_handle", "true");
+    let [x, y, width, height] = await host();
+    assert(width === 120 && height === 40, `the host is ${width} x ${height}`);
+    assert(control.tag === "DIV" && control.position === "absolute", `native control ${JSON.stringify(control)}`);
+    assert(control.left === `${x}px` && control.top === `${y}px` && control.width === "120px" && control.height === "40px",
+        `the native control is at ${JSON.stringify(control)}, the host at ${x},${y}`);
+    // It lies over the canvas: the page hit-tests it at its centre.
+    assert(await page.evaluate(`document.elementFromPoint(${x + 60}, ${y + 20}) === document.querySelector("#out .ferroui-native-host").firstElementChild`),
+        "the native control is not the element at its centre");
+
+    // Resized and moved with the host.
+    await page.evaluate(`(themedView.themedViewNativeHost("size", 200, 60), true)`);
+    [control] = await waitForControls("the native control has the new size", (c) => c[0]?.width === "200px" && c[0]?.height === "60px");
+    [x, y] = await host();
+    assert(control.left === `${x}px` && control.top === `${y}px`, `the resized native control is at ${JSON.stringify(control)}, the host at ${x},${y}`);
+    // The host is centred in the panel: a left margin moves it by half the margin.
+    await page.evaluate(`(themedView.themedViewNativeHost("margin", 30, 0), true)`);
+    [control] = await waitForControls("the native control moved with the host", (c) => c[0]?.left === `${x + 15}px`);
+    [x, y, width, height] = await host();
+    assert(control.left === `${x}px` && control.top === `${y}px` && width === 200 && height === 60,
+        `the native control is at ${JSON.stringify(control)}, the host at ${x},${y} (${width} x ${height})`);
+
+    // Hidden with the host, keeping its size, and shown again.
+    await page.evaluate(`(themedView.themedViewNativeHost("hide", 0, 0), true)`);
+    [control] = await waitForControls("the native control is hidden", (c) => c[0]?.display === "none");
+    assert(control.width === "200px" && control.height === "60px", `the hidden native control is ${control.width} x ${control.height}`);
+    await page.evaluate(`(themedView.themedViewNativeHost("show", 0, 0), true)`);
+    await waitForControls("the native control is shown again", (c) => c[0]?.display === "block" && c[0]?.left === `${x}px`);
+
+    // Detached from the page when the host leaves the view, then destroyed.
+    await page.evaluate(`(themedView.themedViewNativeHost("remove", 0, 0), true)`);
+    await waitForControls("the native control is detached", (c) => c.length === 0);
+    await page.waitForService("native_handle", "false");
+
+    // A host that comes back creates a new native control.
+    await page.evaluate(`(themedView.themedViewNativeHost("add", 0, 0), true)`);
+    await waitForControls("a new native control is shown", (c) => c.length === 1 && c[0].display === "block" && c[0].width === "200px");
+    await page.waitForService("native_handle", "true");
+    assert(page.errors.length === 0, `errors were logged:\n${page.errors.join("\n")}`);
+});
+
+check("a native control whose host is put back before it is destroyed keeps its element", async (page) => {
+    await page.evaluate(`(themedView.themedViewNativeHost("size", 100, 30), themedView.themedViewNativeHost("add", 0, 0), true)`);
+    await page.waitFor(`JSON.parse(${NATIVE_CONTROLS}).some((c) => c.display === "block")`, 10000);
+    await page.evaluate(`(document.querySelector("#out .ferroui-native-host").firstElementChild.dataset.mark = "first", true)`);
+    // Taken out and put back in one task: the destruction it queued finds the host in a view again.
+    await page.evaluate(`(themedView.themedViewNativeHost("remove", 0, 0), themedView.themedViewNativeHost("add", 0, 0), true)`);
+    await sleep(500);
+    const controls = JSON.parse(await page.evaluate(NATIVE_CONTROLS));
+    assert(controls.length === 1 && controls[0].mark === "first" && controls[0].display === "block", `native controls: ${JSON.stringify(controls)}`);
+    assert((await page.services()).native_handle === "true", "the native control was destroyed");
 });
 
 await run(checks);

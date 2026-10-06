@@ -6,7 +6,9 @@
 //! button, a check box, a text box, a slider, a progress bar, a list box
 //! that is too small for its items, so that it shows a scroll bar, and a
 //! target that accepts text dropped on it. It is the page counterpart of the
-//! `themed_window` example of the themes.
+//! `themed_window` example of the themes. On request of the behaviour tests
+//! (`themedViewNativeHost`) it also shows a native control host, whose
+//! native control is an element of the page.
 //!
 //! Build and assemble the site with `scripts/build-browser.sh themed_view`
 //! and serve `target/browser/themed_view` with any static web server. The
@@ -28,7 +30,7 @@ use ferroui_browser::interop::navigation_helper;
 use ferroui_browser::{BrowserAppBuilder, BrowserPlatformOptions, BrowserRenderingMode};
 use ferroui_controls::{
     AppBuilder, Application, ApplicationImpl, ApplicationImplExt, Border, Button, CheckBox, Control, ListBox,
-    NewApplication, ProgressBar, Slider, StackPanel, TextBlock, TextBox, TopLevel,
+    NativeControlHost, NewApplication, ProgressBar, Slider, StackPanel, TextBlock, TextBox, TopLevel,
 };
 use ferroui_fonts_inter::AppBuilderExtension;
 use ferroui_themes_fluent::FluentTheme;
@@ -44,6 +46,8 @@ struct Controls {
     slider: Ref<Slider>,
     list_box: Ref<ListBox>,
     drop_target: Ref<Border>,
+    panel: Ref<StackPanel>,
+    native_host: Ref<NativeControlHost>,
     clicks: Rc<Cell<u32>>,
 }
 
@@ -189,6 +193,8 @@ fn create_main_view() -> Ref<Control> {
             slider: slider.clone(),
             list_box: list_box.clone(),
             drop_target: drop_target.clone(),
+            panel: panel.clone(),
+            native_host: NativeControlHost::new(),
             clicks,
         })
     });
@@ -278,6 +284,18 @@ pub fn themed_view_services() -> String {
         }
     });
 
+    CONTROLS.with(|controls| {
+        if let Some(c) = controls.borrow().as_ref() {
+            // The native control host: whether it has a native control, and its bounds in the
+            // coordinates of the view while it is in the view.
+            line.push(format!("native_handle={}", c.native_host.native_control_handle().is_some()));
+            let size = c.native_host.bounds();
+            if let Some(origin) = c.native_host.translate_point(ferroui_base::Point::new(0.0, 0.0), &top_level) {
+                line.push(format!("native_host={},{},{},{}", origin.x, origin.y, size.width, size.height));
+            }
+        }
+    });
+
     SERVICES.with(|services| {
         let services = services.borrow();
         line.push(format!("dropped={:?}", services.dropped));
@@ -355,6 +373,34 @@ pub fn themed_view_install_back_handler() {
         e.set_handled(true);
     });
     navigation_helper::add_back_handler();
+}
+
+/// Changes the native control host of the view: `add` puts it into the
+/// panel below the title, `remove` takes it out, `size` sets its size to
+/// `width` x `height`, `margin` sets its left margin to `width`, and `hide`
+/// and `show` set its visibility. What the host then has is reported by
+/// [`themed_view_services`] (`native_handle=`, `native_host=`).
+#[wasm_bindgen(js_name = themedViewNativeHost)]
+pub fn themed_view_native_host(action: &str, width: f64, height: f64) {
+    CONTROLS.with(|controls| {
+        let controls = controls.borrow();
+        let Some(c) = controls.as_ref() else { return };
+        let host = &c.native_host;
+        match action {
+            "add" => c.panel.children().insert(1, host.clone().upcast::<Control>()),
+            "remove" => {
+                c.panel.children().remove(&host.clone().upcast::<Control>());
+            }
+            "size" => {
+                host.set_width(width);
+                host.set_height(height);
+            }
+            "margin" => host.set_margin(Thickness::new(width, 0.0, 0.0, 0.0)),
+            "hide" => host.set_is_visible(false),
+            "show" => host.set_is_visible(true),
+            _ => {}
+        }
+    });
 }
 
 /// The value of `name` in a query string (`?a=1&b=2`), ignoring the case of

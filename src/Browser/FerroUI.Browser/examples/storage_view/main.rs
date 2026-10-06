@@ -7,7 +7,9 @@
 //! with `storageViewResult`. The pickers are those of the page: the tests
 //! replace them with functions that return handles of the origin private
 //! file system, or let the `native-file-system-adapter` polyfill show its
-//! own (`?PreferPolyfill=true`).
+//! own (`?PreferPolyfill=true`). With `?RegisterServiceWorker=true` the
+//! platform registers its service worker, through which the polyfill
+//! streams a saved file to the download.
 //!
 //! Build and assemble the site with `scripts/build-browser.sh storage_view`.
 
@@ -360,6 +362,7 @@ fn query_value(query: &str, name: &str) -> Option<String> {
 pub fn run_main(query: &str) {
     let options = BrowserPlatformOptions {
         prefer_file_dialog_polyfill: query_value(query, "PreferPolyfill").is_some_and(|value| value == "true"),
+        register_ferro_service_worker: query_value(query, "RegisterServiceWorker").is_some_and(|value| value == "true"),
         ..Default::default()
     };
 
