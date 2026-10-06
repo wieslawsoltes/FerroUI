@@ -12,6 +12,8 @@
 # toolchain with this script too (.github/actions/browser-toolchain), reading the pins from it.
 set -euo pipefail
 
+# src/Browser/FerroUI.Browser/emscripten/wasm_table_mirror.js replaces two functions of the runtime of
+# this Emscripten version; check it against the new runtime when the version changes.
 EMSDK_VERSION="6.0.10"
 RUST_VERSION="1.90.0"
 

@@ -5,11 +5,19 @@
 // goes through an `invoke_*` function of the runtime, which looks the callee up in the function table
 // with `getWasmTableEntry`. Without the cache that lookup is a `WebAssembly.Table.get` per call, and in
 // a size-optimised module, where fewer calls are inlined, it was most of the start-up time of the
-// application. The cache is the one of the runtime's own optimised-for-speed builds (`wasmTableMirror`
-// of src/lib/libcore.js): the table is only written through `setWasmTableEntry`, which updates it.
-// Linked with `--js-library` (see .cargo/config.toml).
+// application. Linked with `--js-library` (see .cargo/config.toml).
+//
+// Written against the runtime of Emscripten 6.0.10, the version the browser toolchain pins
+// (scripts/browser/setup.sh): the cache is the one of the runtime's own optimised-for-speed builds
+// (`wasmTableMirror`, `$getWasmTableEntry` and `$setWasmTableEntry` of src/lib/libcore.js). In that
+// runtime the table entries are only written through `setWasmTableEntry`, which this file replaces
+// as well and which updates the cache; the table only grows (dynamic linking, not used here), which
+// appends entries the cache has not seen. Check both again when the pinned version changes.
+//
+// Builds that are not optimised for size (the dev profile links at -O0) keep the runtime's own cache,
+// with its assertion that the cache is up to date.
+#if SHRINK_LEVEL > 0
 addToLibrary({
-  $ferrouiWasmTableMirror__internal: true,
   $ferrouiWasmTableMirror: [],
 
   $setWasmTableEntry__internal: true,
@@ -30,3 +38,4 @@ addToLibrary({
     return func;
   },
 });
+#endif
