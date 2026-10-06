@@ -808,6 +808,41 @@ pub fn argument<T: Clone + 'static, V: PartialEq + 'static>(
     })
 }
 
+/// A nullable form (`Option<T>`, `Option<Rc<T>>`) the instance `T` of a member is borrowed
+/// from by [`instance`].
+pub trait NullableInstance<T> {
+    /// The instance, `None` for null.
+    fn instance(&self) -> Option<&T>;
+}
+
+impl<T> NullableInstance<T> for Option<T> {
+    fn instance(&self) -> Option<&T> {
+        self.as_ref()
+    }
+}
+
+impl<T> NullableInstance<T> for Option<Rc<T>> {
+    fn instance(&self) -> Option<&T> {
+        self.as_deref()
+    }
+}
+
+/// The instance of an instance member, borrowed from the nullable form `value` holds it in
+/// (a nullable collection read from a property), as [`argument`] converts it without a
+/// copy: a null instance is the load error the loader raises for the argument 0 of `member`
+/// (`Type.Member`) at `line`, `position`, an `InvalidCastException`.
+pub fn instance<'a, T: 'static>(
+    value: &'a impl NullableInstance<T>,
+    member: &str,
+    line: i32,
+    position: i32,
+) -> Result<&'a T, XamlLoadException> {
+    value.instance().ok_or_else(|| {
+        let error = MarkupInvokeError::Argument { index: 0, expected: std::any::type_name::<T>(), actual: "null".to_string() };
+        at("InvalidCastException", format!("{member}: {error}"), line, position)
+    })
+}
+
 /// `value` as the value of a member that declares the Rust type `T`, through
 /// the assignability casts of the untyped value conversions (a registered
 /// cast, a nullable form): the conversion the run-time loader applies to the
