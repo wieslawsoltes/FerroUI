@@ -451,8 +451,13 @@ impl Emitter<'_> {
                     .cast::<XamlManipulationGroupNode>()
                     .is_some_and(|inner| inner.children.borrow().is_empty());
                 if !empty {
-                    // The value is evaluated once; the manipulation and the consumer use it.
-                    let created = self.bind(&created, "value");
+                    // The value is evaluated once; the manipulation and the consumer use it. The
+                    // local is named after the type of the value (`setter_3`).
+                    let base = match group.value().type_().get_clr_type() {
+                        Ok(type_) => snake_case(&type_.name()),
+                        Err(_) => "value".to_string(),
+                    };
+                    let created = self.bind(&created, &base);
                     self.manipulation(&manipulation.as_node(), &created)?;
                     return Ok(created);
                 }
@@ -1653,10 +1658,14 @@ impl Emitter<'_> {
         self.deferred_functions.push(String::new());
         let outer_lines = std::mem::take(&mut self.lines);
         let outer_assignments = std::mem::take(&mut self.assignments);
+        // The locals of the function are numbered from zero, independently of the function
+        // around it.
+        let outer_names = std::mem::take(&mut self.local_names);
         let outer_uses = (std::mem::take(&mut self.uses_context), std::mem::take(&mut self.uses_name_scope));
         let body = self.deferred_body(deferred);
         let body_lines = std::mem::replace(&mut self.lines, outer_lines);
         self.assignments = outer_assignments;
+        self.local_names = outer_names;
         let (uses_context, uses_name_scope) = (self.uses_context || self.uses_name_scope, self.uses_name_scope);
         (self.uses_context, self.uses_name_scope) = outer_uses;
         let returned = body?;
@@ -2099,6 +2108,7 @@ impl Emitter<'_> {
         // The extension is held in a local: the context is set between creating and calling it.
         let value = match value.kind {
             Kind::Class(_) => value,
+            _ if is_identifier(&value.expr) => value,
             _ => {
                 let local = self.local_named("extension");
                 self.line(format!("let {local} = {};", value.expr));
