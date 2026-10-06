@@ -116,8 +116,9 @@ const KEYS = {
 };
 const MODIFIERS = { alt: 1, ctrl: 2, meta: 4, shift: 8 };
 
-// Opens `siteDirectory` (query appended to index.html) and resolves to the page driver.
-export async function open(siteDirectory, { query = "", width = 460, height = 520, scale = 1, chromeArgs = [] } = {}) {
+// Opens `siteDirectory` (query appended to index.html) and resolves to the page driver. `initScript`
+// is evaluated in the page before its own scripts.
+export async function open(siteDirectory, { query = "", width = 460, height = 520, scale = 1, chromeArgs = [], initScript } = {}) {
     const server = await serve(siteDirectory);
     const profile = fs.mkdtempSync(path.join(os.tmpdir(), "ferroui-browser-"));
     const chrome = spawn(findChrome(), [
@@ -172,6 +173,7 @@ export async function open(siteDirectory, { query = "", width = 460, height = 52
     // A fixed viewport. With a scale factor other than 1 the override would report unscaled device
     // pixels to the page, so the window size and the real scale factor of the browser are used.
     if (scale === 1) { await send("Emulation.setDeviceMetricsOverride", { width, height, deviceScaleFactor: 1, mobile: false }); }
+    if (initScript) { await send("Page.addScriptToEvaluateOnNewDocument", { source: initScript }); }
     const url = `http://127.0.0.1:${server.address().port}/index.html${query}`;
     await send("Page.navigate", { url });
 
