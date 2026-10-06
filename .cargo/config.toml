@@ -23,8 +23,4 @@ rustflags = [
   "-Clink-arg=-sEXPORTED_RUNTIME_METHODS=GL,HEAPU8",
   # The host page starts the application; nothing runs when the module is instantiated.
   "-Clink-arg=-sINVOKE_RUN=0",
-  # Keep the cache of the function table lookups in builds optimised for size: every call that may
-  # unwind goes through it (see the file). The path is relative to the workspace root, where cargo
-  # runs the compiler and the linker for the members of the workspace.
-  "-Clink-arg=--js-library=src/Browser/FerroUI.Browser/emscripten/wasm_table_mirror.js",
 ]
