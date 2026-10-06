@@ -213,7 +213,7 @@ Tooling:
 
 - **Emscripten configuration**: plain `cargo build --target wasm32-unknown-emscripten` plus a repository script (`scripts/build-browser.sh` or an `xtask`) that runs esbuild, builds, and assembles `wwwroot` + `.js` + `.wasm` into a `dist` directory served by any static server. No trunk and no wasm-pack (wasm-pack has an open request for this target; trunk support **[U]**).
 - Link settings (in `.cargo/config.toml` for the target) **[M]**: `linker = "em++"` (Skia needs the C++ runtime), `-sWASM_BINDGEN`, `-sMODULARIZE`, `-sEXPORT_ES6`, `-sENVIRONMENT=web` (the script of the module leaves out Node.js and worker support), `-sMAX_WEBGL_VERSION=2`, `-sALLOW_MEMORY_GROWTH=1`, `-sEXPORTED_RUNTIME_METHODS=GL,HEAPU8` (the JS side must reach Emscripten's `GL` object and the module memory), `-sINVOKE_RUN=0` (the host page starts the application; without it `main` also runs twice), `-sSTACK_SIZE=8MB` (the default stack of 64 KB is too small for layout and markup loading), `-sGL_ENABLE_GET_PROC_ADDRESS=1` (the OpenGL entry points of a context are resolved by name), `--js-library=src/Browser/FerroUI.Browser/emscripten/wasm_table_mirror.js` (keeps the cache of function table lookups in size-optimised links, see section 18), and `EMCC_CFLAGS="-s ERROR_ON_UNDEFINED_SYMBOLS=0"` as rust-skia requires. No `-Cpanic=abort` and no `-Crelocation-model=static`. The backend imports its script module by a relative specifier, so there are no `wasm-bindgen` snippets to copy: `scripts/build-browser.sh <application>` assembles the site from the host page, `ferroui.js` and the `.js`/`.wasm` pair of the application: an example of the browser crate (`target/wasm32-unknown-emscripten/<profile>/examples/`) or a binary package of the workspace with its host page in the `wwwroot/` of the package (`target/wasm32-unknown-emscripten/<profile>/`, where the module of a binary is named after the target with `-` replaced by `_`), built with the `browser` profile of the workspace (section 18), plus the files that build scripts of the application leave in `$OUT_DIR/browser-site/` (asset bundles).
-- **Browser scripts** (`scripts/browser/`): `setup.sh` installs the pinned toolchain (locally and, through the composite action `.github/actions/browser-toolchain`, in CI); `harness.mjs` serves a site and drives headless Chrome over the DevTools protocol (real pointer, wheel and key events, resize, screenshots, the console and the error log); the tests under `tests/` use it: `themed_view.test.mjs` (the input matrix and the services of the backend), `storage_view.test.mjs` (the storage provider) and `control_catalog.test.mjs` (the ControlCatalog site: start-up, WebGL2 and 2D-canvas rendering, resize, console errors, no upstream brand asset, and the drawer, navigation, a button click and typing into a text box driven with real events; run by the `browser` job of CI and before every Pages deployment); `capture.mjs` takes a screenshot of a site; `first-frame.mjs` measures the time from navigation to the first frame of a site (module downloaded, first draw, frame on screen, splash screen closed) over several loads with a fresh profile each, and can write a CPU profile; `wasm-size-report.py` attributes the bytes of a WebAssembly module to sections, embedded files, crates and generic families (section 18); `module-sizes.mjs` prints the raw, gzip and brotli sizes of the files of a site (and, with `--github-output`, the sizes of its WebAssembly module as step outputs); `render-placeholder-assets.mjs` draws the placeholder artwork of the published catalog.
+- **Browser scripts** (`scripts/browser/`): `setup.sh` installs the pinned toolchain (locally and, through the composite action `.github/actions/browser-toolchain`, in CI); `harness.mjs` serves a site and drives headless Chrome over the DevTools protocol (real pointer, wheel and key events, resize, screenshots, the console and the error log); the tests under `tests/` use it: `themed_view.test.mjs` (the input matrix and the services of the backend), `storage_view.test.mjs` (the storage provider) and `control_catalog.test.mjs` (the ControlCatalog site: start-up, WebGL2 and 2D-canvas rendering, resize, console errors, no upstream brand asset, and the drawer, navigation, a button click and typing into a text box driven with real events; run by the `browser` job of CI and before every Pages deployment); `capture.mjs` takes a screenshot of a site; `first-frame.mjs` measures the time from navigation to the first frame of a site (module downloaded, first draw, frame on screen, splash screen closed) over several loads with a fresh profile each, can write a CPU profile, emulate a network (`--throttle <Mbit/s>,<ms>`) and report the phases of a load (`--phases`: every file downloaded, module compiled and instantiated, the performance marks of the page; section 19); `wasm-size-report.py` attributes the bytes of a WebAssembly module to sections, embedded files, crates and generic families (section 18); `module-sizes.mjs` prints the raw, gzip and brotli sizes of the files of a site (and, with `--github-output`, the sizes of its WebAssembly module as step outputs); `render-placeholder-assets.mjs` draws the placeholder artwork of the published catalog.
 - **Publication**: `.github/workflows/pages.yml` builds the ControlCatalog site, tests it and deploys it to GitHub Pages on pushes to `main` and on manual runs. It deploys only while the WebAssembly module stays within the gzip budget `PUBLISHED_MODULE_GZIP_BUDGET_MB` of the workflow (14 MB: raised from 12 MB when the themes moved to compiled markup, stage E4 of the XAML compiler, which brought the catalog module to 11.42 MB with gzip; the budget is that size with about 15 % headroom, rounded up); above it the size budget step of the deploy job fails before the deployment, and the raw and gzip sizes are in the summaries of the run. Only `main` is deployed (a manual run from another branch builds and tests only), and only the deploy job has `pages: write` and `id-token: write`. Every action of the workflows is pinned to a commit. The toolchain steps are shared with CI through the composite action `.github/actions/browser-toolchain`. GitHub Pages compresses responses itself (gzip, including `application/wasm`; no brotli was offered for `Accept-Encoding: br, gzip` when measured on 2026-10-05) and does not serve precompressed files, so the site carries none.
 - **`wasm32-unknown-unknown` configuration**: trunk, with the same `webapp` bundle.
 - TypeScript: keep upstream's esbuild script and ESLint configuration; three bundles as upstream. Asset fingerprinting and import maps are not needed initially.
@@ -606,6 +606,86 @@ The site as a whole is still 29.7 MB with gzip (32.9 MB before, on `main` of 202
 - Splitting Skia features: forbidden by the binary-only Skia rule (section 3); the linker already drops the unused parts.
 - Compressing embedded resources inside the module: the fonts and markup are compressed by the transfer encoding already, and the pictures are JPEG and PNG; a second compression would cost a decompressor and start-up time for no transfer gain.
 - Further outlining of the property store (`BindingEntry<T>::set_value`, `EffectiveValue<T>`, `StyledProperty<T>::from_untyped`, about 4 MB raw): hot paths of a port of generic upstream code, each split needs the property system tests and keeps the borrow and re-entrancy order; it would shrink the raw module, while its gzip effect is small (the families compress to a few percent). Proposed as a follow-up together with one shared instantiation for reference-like value types (`desktop-performance.md`, items 10 and 11).
+
+## 19. Start-up time of the ControlCatalog site (2026-10-06)
+
+Measured **[M]** on the published site (`https://wieslawsoltes.github.io/FerroUI/`, deployed 2026-10-06 11:15 UTC from `main`), whose files were downloaded and served locally with `first-frame.mjs --encoding gzip` (the bytes GitHub Pages transfers), in headless Chromium 141 with WebGL on SwiftShader, 4-core container. Another build was running on the machine during most measurements, so absolute CPU times vary by about ±0.5 s between loads; the comparisons below were interleaved load by load.
+
+### What GitHub Pages serves
+
+| File | Raw MB | Transferred (gzip) MB | Headers |
+|---|---:|---:|---|
+| `control_catalog_browser.wasm` | 31.88 | 9.53 | `application/wasm`, `cache-control: max-age=600`, ETag |
+| `control-catalog.assets` | 23.54 | 20.20 | `application/octet-stream`, same caching |
+| scripts, page, styles | 0.29 | 0.07 | same caching |
+
+The media type of the module is right, and the script of the module compiles it with `WebAssembly.instantiateStreaming`; the compilation overlaps the download and is done 30 to 50 ms after the last byte (V8 compiles lazily, function by function, as they are first called). The module has no name section. Repeat visits within ten minutes come from the HTTP cache; after that each file is revalidated (a `304` for an unchanged file). Pages does not let the site set its own cache headers.
+
+### Where the time goes (before)
+
+Medians of three loads, milliseconds from the start of navigation:
+
+| Phase | Unthrottled | 50 Mbit/s, 40 ms |
+|---|---:|---:|
+| page, `main.js`, `ferroui.js`, script of the module downloaded | 52 | 176 |
+| module downloaded (streaming compilation running alongside) | 328 | 3,577 |
+| module compiled | 375 | 3,610 |
+| module instantiated | 419 | 3,649 |
+| asset bundle downloaded (the application waits for it) | 251 | 5,489 |
+| `runMain` (set-up, application initialisation, main view): about 7,700 ms | 428 to 8,129 | 5,500 to 13,200 |
+| first layout and render, first draw | 8,356 | 13,283 |
+| first frame on screen | **8,475** | **13,388** |
+
+The splash screen of the host page is part of the HTML and is painted before any script runs, as upstream's; it stays until the first frame.
+
+The 7.7 s inside `runMain`, from a CPU profile of the start-up (samples inside the window of `runMain`; `scripts/browser/first-frame.mjs --cpu-profile`):
+
+| Category | ms | Share |
+|---|---:|---:|
+| WebAssembly code | 3,017 | 39 % |
+| wasm-to-JavaScript and JavaScript-to-wasm transitions | 3,124 | 41 % |
+| the `invoke_*` functions of the runtime, the table lookup, `stackSave`/`stackRestore` | 1,457 | 19 % |
+| other (JavaScript, garbage collection, WebGL glue) | 103 | 1 % |
+
+The transitions and the `invoke_*` glue (4.58 s, 60 %) are the cost of unwinding with JavaScript exceptions (section 18): with Rust 1.90, the pinned toolchain, every call that may unwind out of a function with clean-up code leaves the module for an `invoke_*` function in JavaScript, which calls back into the module through the function table. The work itself is 3.0 s.
+
+By phase, from a CPU profile of the same code linked with its name section (`cargo rustc --profile browser -p control-catalog-browser --bin control-catalog-browser --target wasm32-unknown-emscripten -- -Clink-arg=--profiling-funcs`: the code section differs from the published one by 172 bytes), unthrottled, the module and the bundle served locally; wall clock from the start of navigation:
+
+| Phase | From (ms) | To (ms) | Wall ms |
+|---|---:|---:|---:|
+| module and bundle downloaded, module compiled and instantiated | 0 | 579 | 579 |
+| platform set-up and type registration | 585 | 641 | 56 |
+| `App.xaml` with `CustomThemes.xaml` (run-time loader) | 641 | 1,257 | 616 |
+| **`FluentTheme` (`App::resource("FluentTheme")`, a deferred resource, built through the run-time loader)** | 1,259 | 5,777 | **4,518** |
+| **`SimpleTheme` (`App::resource("SimpleTheme")`, likewise)** | 5,779 | 8,371 | **2,592** |
+| the rest of `runMain`, with the main view and the home page (`App::create_main_view_host`, 133 ms) | 8,371 | 8,628 | 257 |
+| first layout and render (0.2 s of it compiling WebGL shaders on SwiftShader) | 8,628 | 9,361 | 733 |
+| first frame on screen | | 9,476 | |
+
+So **loading the two themes at run time is 7.1 s of the 9.5 s to the first frame** on a fast network (75 %), and of the 8.0 s of `runMain` (88 %). Upstream builds both as well (`App.Initialize` reads both resources), but from compiled XAML. Inside the two loads, the samples split as follows:
+
+| Stage of the run-time loader | `FluentTheme` | `SimpleTheme` |
+|---|---:|---:|
+| parse | 2 % | 2 % |
+| transform (the XamlX transformer passes; mostly the tree walk of the visitors, `visit_node`, `visit`, `ContextXamlAstVisitor::visit`) | 89 % | 93 % |
+| build and populate the objects (`run_build`, `run_populate`) | 9 % | 4 % |
+
+Compiled themes (stage E4, `xaml.md`) do the parse and transform at build time, so they should remove about 90 % of these 7.1 s. The rest, building the style objects, remains as compiled code. The transform does not show a quadratic or redundant step: it is upstream's design of one pass over the tree per transformer, and each recursive visit pays the unwinding overhead above.
+
+### Changes
+
+| Change | Saved |
+|---|---|
+| The host page preloads `main.js`, the scripts it imports, the module and the asset bundle (`<link rel="modulepreload">`, `<link rel="preload" as="fetch" crossorigin>`), as upstream's page preloads the boot resources of its runtime. The downloads start with the page instead of after its scripts have been fetched and evaluated. `control_catalog.test.mjs` checks that each file is downloaded once, through its preload | 50 Mbit/s, 40 ms: the application starts 180 ms earlier (`runMain` start, median of three interleaved pairs: 5,485 to 5,305 ms); unthrottled: within noise |
+| `first-frame.mjs --throttle --phases`, and performance marks in `main.js` (module instantiated, asset bundle downloaded, `runMain` start and end) | measurement only |
+
+### What remains, and what to do about it
+
+- **Unwinding with JavaScript exceptions, about 60 % of the CPU time of the start-up.** Rust 1.93.0 switched `wasm32-unknown-emscripten` to WebAssembly exception handling by default (and 1.98.0 removes the JavaScript variant). Recommended next step: move the browser toolchain from 1.90.0 to a release from 1.93 on, link with `-fwasm-exceptions` and compile the C and C++ code of the module (HarfBuzz through `EMCC_CFLAGS`) with it as well. Check the prebuilt Skia library links with it, since Skia is never built from source. This removes the `invoke_*` functions, their transitions and the table lookup library of section 18, and probably makes the module smaller. Expected effect, not measured: most of the 4.6 s.
+- **Run-time theme loading, 7.1 s, about 90 % of it the run-time compilation.** Stage E4 (compiled themes). The theme loads also shrink with the exception change above, and so does the run-time loading of the catalog's own documents (`App.xaml` 0.6 s, the pages), which stays until the documents of the sample are compiled as well.
+- **The asset bundle, 20.2 MB transferred, is on the critical path.** At 50 Mbit/s it arrives 1.9 s after the module, and the application waits for it. It is not split into a start-up part and a deferred part, because the asset loader is synchronous, as upstream's is: a page created before a deferred part arrived would not find its pictures, and making the pages wait would change the catalog. Upstream does not defer them either: they are embedded resources of the sample's assembly, which the .NET runtime downloads with all other boot resources before `Main` runs. The start-up itself needs only `icon.ico` (from `App.xaml`) and the six PNG files of the home page; the 79 photographs (18.1 MB) and the fonts (5.3 MB, 4.5 MB of it one CJK font) belong to other pages. Reducing the bundle is part of the size work that follows.
+- **Not adopted:** a service worker cache of the module and the bundle. Within ten minutes the HTTP cache already serves repeat visits, and after that a revalidation costs one round trip per file. A service worker would save only those round trips, not the CPU time that dominates, and would add a second cache that has to be versioned against deployments.
+- **Not measured:** the first frame in the WebGL2 path spends about 0.2 s compiling shaders on SwiftShader; on a real GPU this differs.
 
 ## Owner decision (2026-10-04)
 
