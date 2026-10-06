@@ -1693,6 +1693,7 @@ Rust sources of this crate that no upstream file maps to. Give each a reason in 
 | `primitives/selecting_items_control_tests_multiple.rs` | **unmapped** | `ItemViewModel`, `ItemsViewModel`, `OldDataContextViewModel`, `Options`, `Target`, `TestContainer`, `TestSelector`, `TestSelectorWithContainers` |
 | `primitives/selecting_items_control_tests_selected_value.rs` | **unmapped** | `TestClass` |
 | `register_types.rs` | **unmapped** |  |
+| `render_tests_culling.rs` | **unmapped** | `TestControl` |
 | `rust_paths.rs` | **unmapped** |  |
 | `scroll_viewer_tests_i_logical_scrollable.rs` | **unmapped** |  |
 | `selection/selection_model_tests_multiple.rs` | **unmapped** | `ResettingList`, `Target` |

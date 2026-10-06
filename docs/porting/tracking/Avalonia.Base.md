@@ -10,10 +10,10 @@ Generated from upstream commit `17350180c33b063f0e98abbfd19aa3cae63f5d56`. Back 
 | FerroUI | `src/FerroUI.Base` (exists) |
 | Crate | `ferroui-base` |
 | Phase / priority | 0 - core / P0 |
-| Files | 1103/1286 (85.8%), 13 not applicable |
-| Types | 1395/1709 (81.6%) |
-| Members | 9679/11739 (32 waived) (82.7%) |
-| Contracts (interfaces) | 231/263 |
+| Files | 1107/1286 (86.1%), 13 not applicable |
+| Types | 1414/1709 (82.7%) |
+| Members | 9746/11739 (32 waived) (83.2%) |
+| Contracts (interfaces) | 232/263 |
 | Property registrations | 224/239 |
 | Routed events | 41/41 |
 
@@ -232,7 +232,7 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 | `Avalonia.Rendering.Composition.Drawing.ICompositionRenderResource` | internal | `Rendering/Composition/Drawing/ICompositionRenderResource.cs` | 2/2 | present |
 | `Avalonia.Rendering.Composition.Drawing.ICompositionRenderResource<T>` | internal | `Rendering/Composition/Drawing/ICompositionRenderResource.cs` | 1/1 | present |
 | `Avalonia.Rendering.Composition.Drawing.IRenderDataGeometry` | public | `Rendering/Composition/Drawing/IRenderDataGeometry.cs` | 1/1 | present |
-| `Avalonia.Rendering.Composition.Drawing.IRenderDataPayload<TSelf>` | internal | `Rendering/Composition/Drawing/RenderDataPayloads.cs` | 0/1 | missing |
+| `Avalonia.Rendering.Composition.Drawing.IRenderDataPayload<TSelf>` | internal | `Rendering/Composition/Drawing/RenderDataPayloads.cs` | 1/1 | present |
 | `Avalonia.Rendering.Composition.Drawing.IRenderDataVisitor<TScope>` | internal | `Rendering/Composition/Drawing/IRenderDataVisitor.cs` | 17/17 | present |
 | `Avalonia.Rendering.Composition.Expressions.IExpressionForeignFunctionInterface` | internal | `Rendering/Composition/Expressions/ExpressionEvaluationContext.cs` | 1/1 | present |
 | `Avalonia.Rendering.Composition.Expressions.IExpressionObject` | internal | `Rendering/Composition/Expressions/ExpressionEvaluationContext.cs` | 1/1 | present |
@@ -4000,7 +4000,7 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 
 </details>
 
-### `Rendering/Composition/Drawing` - files 17/21, types 23/45, members 183/302
+### `Rendering/Composition/Drawing` - files 21/21, types 42/45, members 250/302
 
 | Upstream file | Rust file | Status | Types | Members | Notes |
 |---|---|---|---|---|---|
@@ -4012,16 +4012,16 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 | `IRenderDataVisitor.cs` | `rendering/composition/drawing/i_render_data_visitor.rs` | present | 1/1 | 17/17 |  |
 | `ImmediateRenderDataSceneBrushContent.cs` | `rendering/composition/drawing/immediate_render_data_scene_brush_content.rs` | present | 1/1 | 10/10 |  |
 | `RenderDataDrawingContext.cs` | `rendering/composition/drawing/render_data_drawing_context.rs` | partial | 1/1 | 28/30 |  |
-| `RenderDataOpcode.cs` | `rendering/composition/drawing/render_data_opcode.rs` | missing | 0/1 | 0/17 |  |
-| `RenderDataPayloads.cs` | `rendering/composition/drawing/render_data_payloads.rs` | missing | 0/16 | 0/50 |  |
-| `RenderDataReader.cs` | `rendering/composition/drawing/render_data_reader.rs` | missing | 0/1 | 0/7 |  |
+| `RenderDataOpcode.cs` | `rendering/composition/drawing/render_data_opcode.rs` | present | 1/1 | 17/17 |  |
+| `RenderDataPayloads.cs` | `rendering/composition/drawing/render_data_payloads.rs` | partial | 16/16 | 35/50 |  |
+| `RenderDataReader.cs` | `rendering/composition/drawing/render_data_reader.rs` | present | 1/1 | 7/7 |  |
 | `RenderDataResources.cs` | `rendering/composition/drawing/render_data_resources.rs` | present | 1/1 | 6/6 |  |
 | `RenderDataStream.Bounds.cs` | `rendering/composition/drawing/render_data_stream_bounds.rs` | present | 3/3 | 23/23 |  |
 | `RenderDataStream.HitTest.cs` | `rendering/composition/drawing/render_data_stream.rs` | partial | 1/3 | 0/30 | partial merged into main file |
 | `RenderDataStream.Replay.cs` | `rendering/composition/drawing/render_data_stream_replay.rs` | present | 3/3 | 22/22 |  |
 | `RenderDataStream.Visit.cs` | `rendering/composition/drawing/render_data_stream.rs` | present | 1/1 | 1/1 | partial merged into main file |
 | `RenderDataStream.cs` | `rendering/composition/drawing/render_data_stream.rs` | present | 1/1 | 26/26 |  |
-| `RenderDataWriter.cs` | `rendering/composition/drawing/render_data_writer.rs` | missing | 0/1 | 0/8 |  |
+| `RenderDataWriter.cs` | `rendering/composition/drawing/render_data_writer.rs` | present | 1/1 | 8/8 |  |
 | `ServerCompositionRenderData.cs` | `rendering/composition/drawing/server_composition_render_data.rs` | present | 1/1 | 8/8 |  |
 | `ServerCompositionSimplePen.cs` | `rendering/composition/drawing/server_composition_simple_pen.rs` | present | 1/1 | 2/2 |  |
 | `ServerResourceHelperExtensions.cs` | `rendering/composition/drawing/server_resource_helper_extensions.rs` | partial | 0/1 | 0/4 |  |
@@ -4038,6 +4038,41 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 - `RenderDataDrawingContext` (class): 2 missing
   - `override void DrawGeometryCore(IBrush? brush, IPen? pen, Geometry geometry)` *(protected; 1 of 2 overloads found)*
   - `override void PushClipCore(Rect rect)` *(protected; 1 of 2 overloads found)*
+
+</details>
+
+<details><summary><code>RenderDataPayloads.cs</code> - 15 missing</summary>
+
+- `DrawLinePayload` (struct): 1 missing
+  - `static RenderDataOpcode Opcode { get; }`
+- `DrawRectanglePayload` (struct): 1 missing
+  - `static RenderDataOpcode Opcode { get; }`
+- `DrawEllipsePayload` (struct): 1 missing
+  - `static RenderDataOpcode Opcode { get; }`
+- `DrawGeometryPayload` (struct): 1 missing
+  - `static RenderDataOpcode Opcode { get; }`
+- `DrawGlyphRunPayload` (struct): 1 missing
+  - `static RenderDataOpcode Opcode { get; }`
+- `DrawBitmapPayload` (struct): 1 missing
+  - `static RenderDataOpcode Opcode { get; }`
+- `DrawCustomPayload` (struct): 1 missing
+  - `static RenderDataOpcode Opcode { get; }`
+- `PushClipPayload` (struct): 1 missing
+  - `static RenderDataOpcode Opcode { get; }`
+- `PushGeometryClipPayload` (struct): 1 missing
+  - `static RenderDataOpcode Opcode { get; }`
+- `PushOpacityPayload` (struct): 1 missing
+  - `static RenderDataOpcode Opcode { get; }`
+- `PushOpacityMaskPayload` (struct): 1 missing
+  - `static RenderDataOpcode Opcode { get; }`
+- `PushTransformPayload` (struct): 1 missing
+  - `static RenderDataOpcode Opcode { get; }`
+- `PushRenderOptionsPayload` (struct): 1 missing
+  - `static RenderDataOpcode Opcode { get; }`
+- `PushTextOptionsPayload` (struct): 1 missing
+  - `static RenderDataOpcode Opcode { get; }`
+- `PushEffectPayload` (struct): 1 missing
+  - `static RenderDataOpcode Opcode { get; }`
 
 </details>
 
@@ -5131,6 +5166,7 @@ Rust sources of this crate that no upstream file maps to. Give each a reason in 
 | `rendering/composition/test_compositor.rs` | **unmapped** | `TestCompositor` |
 | `rendering/i_hit_tester.rs` | **unmapped** | `IHitTester` |
 | `rendering/managed_hit_tester.rs` | **unmapped** | `ManagedHitTester` |
+| `rendering/scene_graph/scene_graph_test_support.rs` | test doubles of the scene graph unit tests (the Moq mocks of `Rendering/SceneGraph/*Tests.cs`) | `TestBitmapImpl`, `TestCustomOperation`, `TestGeometryImpl` |
 | `rendering/testing/mock_drawing_context_impl.rs` | **unmapped** | `DrawingLog`, `MockDrawingContextImpl`, `MockDrawingContextLayerImpl`, `MockRenderTargetBitmapImpl` |
 | `rendering/testing/mock_platform_render_interface.rs` | **unmapped** | `MockGeometryImpl`, `MockGlyphRunImpl`, `MockPlatformRenderInterface`, `MockPlatformRenderInterfaceContext`, `MockRegion`, `MockRenderTarget`, `MockStreamGeometryContext`, `MockStreamGeometryImpl` |
 | `rust_paths.rs` | **unmapped** |  |
@@ -5168,4 +5204,4 @@ Rust sources of this crate that no upstream file maps to. Give each a reason in 
 | `utilities/time_zone_info.rs` | **unmapped** | `LocalUtcOffsetProvider`, `TimeZoneInfo` |
 | `utilities/uri.rs` | **unmapped** | `Uri`, `UriFormatError`, `UriKind` |
 
-Tests, examples and build scripts (not scanned): `animation/tests/animatable_tests.rs`, `animation/tests/animation_iteration_tests.rs`, `animation/tests/brush_transition_tests.rs`, `animation/tests/effect_tests.rs`, `animation/tests/key_spline_tests.rs`, `animation/tests/mod.rs`, `animation/tests/page_transition_tests.rs`, `animation/tests/spring_tests.rs`, `animation/tests/style_animation_tests.rs`, `animation/tests/transitions_tests.rs`, `controls/resource_tests.rs`, `data/converters/composite_format_tests.rs`, `data/core/plugins/markup_members_tests.rs`, `diagnostics/diagnostics_tests.rs`, `ferro_object_tests.rs`, `input/data_transfer_tests.rs`, `input/input_tests.rs`, `interactivity/interactive_tests.rs`, `layout/layout_helper_tests.rs`, `layout/layout_queue_tests.rs`, `markup_types/markup_types_tests.rs`, `media/drawing_context_tests.rs`, `media/font_manager_tests.rs`, `media/fonts/font_collection_tests.rs`, `media/fonts/tables/cmap/cmap_table_tests.rs`, `media/fonts/tables/glyf/glyf_table_contour_walk_tests.rs`, `media/fonts/tables/glyf/glyf_table_point_matching_tests.rs`, `media/fonts/tables/glyf/glyf_table_tests.rs`, `media/formatted_text_tests.rs`, `media/glyph_typeface_tests.rs`, `media/imaging/imaging_tests.rs`, `media/media_context_tests.rs`, `media/text_formatting/shaped_buffer_tests.rs`, `media/text_formatting/split_text_runs_tests.rs`, `media/text_formatting/text_characters_tests.rs`, `media/text_formatting/text_collapsing_bidi_tests.rs`, `media/text_formatting/text_formatter_tests.rs`, `media/text_formatting/text_formatter_wrap_characterization_tests.rs`, `media/text_formatting/text_layout_tests.rs`, `media/text_formatting/text_line_tests.rs`, `media/text_formatting/text_run_cache_tests.rs`, `media/text_formatting/unicode/bidi_algorithm_tests.rs`, `media/text_formatting/unicode/bidi_class_tests.rs`, `media/text_formatting/unicode/codepoint_has_script_extension_tests.rs`, `media/text_formatting/unicode/codepoint_tests.rs`, `media/text_formatting/unicode/grapheme_break_class_trie_generator_tests.rs`, `media/text_formatting/unicode/line_break_enumerator_tests.rs`, `media/text_formatting/unicode/property_value_alias_helper_tests.rs`, `media/text_formatting/unicode/sentence_break_enumerator_tests.rs`, `media/text_formatting/unicode/unicode_data_tests.rs`, `media/text_formatting/unicode/unicode_trie_tests.rs`, `media/text_formatting/unicode/utf16_utils_tests.rs`, `media/text_formatting/unicode/word_break_enumerator_tests.rs`, `metadata/markup_type_tests.rs`, `platform/storage/file_io/bcl_storage_tests.rs`, `platform/storage/file_io/storage_provider_helper_tests.rs`, `platform/storage/storage_tests.rs`, `rendering/composition/animations/composition_animation_tests.rs`, `rendering/composition/brushes/composition_brush_tests.rs`, `rendering/composition/composition_drawing_surface_tests.rs`, `rendering/composition/compositor_tests.rs`, `rendering/composition/drawing/render_data_stream_hit_test.rs`, `rendering/composition/drawing/render_data_tests.rs`, `rendering/composition/drawing/render_resource_tests.rs`, `rendering/composition/expressions/expression_tests.rs`, `rendering/i_custom_hit_test.rs`, `styling/container_tests.rs`, `styling/selector_tests.rs`, `styling/style_tests.rs`, `tests/attached_property_tests.rs`, `tests/binding_default_value_converter_tests.rs`, `tests/binding_expression_observer_indexer_tests.rs`, `tests/binding_expression_tests_attached_property.rs`, `tests/binding_expression_tests_data_validation.rs`, `tests/binding_expression_tests_ferro_property.rs`, `tests/binding_expression_tests_get_value.rs`, `tests/binding_expression_tests_indexer.rs`, `tests/binding_expression_tests_mode.rs`, `tests/binding_expression_tests_negation.rs`, `tests/binding_expression_tests_observable.rs`, `tests/binding_expression_tests_property.rs`, `tests/binding_expression_tests_set_value.rs`, `tests/binding_expression_tests_task.rs`, `tests/binding_expression_tests_update_source_trigger.rs`, `tests/binding_model_tests.rs`, `tests/binding_null_conditional_tests.rs`, `tests/binding_operations_tests.rs`, `tests/binding_plugin_tests.rs`, `tests/binding_setter_tests.rs`, `tests/binding_test_support.rs`, `tests/binding_typed_expression_tests.rs`, `tests/class_registration_tests.rs`, `tests/compiled_binding_tests_create.rs`, `tests/direct_property_tests.rs`, `tests/ferro_object_tests_add_owner.rs`, `tests/ferro_object_tests_attached.rs`, `tests/ferro_object_tests_binding.rs`, `tests/ferro_object_tests_binding_two_way.rs`, `tests/ferro_object_tests_coercion.rs`, `tests/ferro_object_tests_data_validation.rs`, `tests/ferro_object_tests_direct.rs`, `tests/ferro_object_tests_get_observable.rs`, `tests/ferro_object_tests_get_value.rs`, `tests/ferro_object_tests_inheritance.rs`, `tests/ferro_object_tests_metadata.rs`, `tests/ferro_object_tests_on_property_changed.rs`, `tests/ferro_object_tests_reentrancy.rs`, `tests/ferro_object_tests_set_current_value.rs`, `tests/ferro_object_tests_set_value.rs`, `tests/ferro_object_tests_validation.rs`, `tests/ferro_property_registry_tests.rs`, `tests/ferro_property_tests.rs`, `tests/mod.rs`, `tests/property_registration_tests.rs`, `tests/property_store/frame_priority_extensions_tests.rs`, `tests/property_store/mod.rs`, `tests/property_store/value_store_tests_frames.rs`, `tests/property_store/value_store_tests_inheritance.rs`, `tests/reference_semantics_tests.rs`, `tests/styled_property_tests.rs`, `threading/dispatcher_priority_queue_tests.rs`, `threading/dispatcher_tests.rs`, `tree_tests.rs`, `utilities/date_time_net_tests.rs`, `utilities/date_time_tests.rs`, `utilities/number_format_net_tests.rs`, `visual_render_tests.rs`.
+Tests, examples and build scripts (not scanned): `animation/tests/animatable_tests.rs`, `animation/tests/animation_iteration_tests.rs`, `animation/tests/brush_transition_tests.rs`, `animation/tests/effect_tests.rs`, `animation/tests/key_spline_tests.rs`, `animation/tests/mod.rs`, `animation/tests/page_transition_tests.rs`, `animation/tests/spring_tests.rs`, `animation/tests/style_animation_tests.rs`, `animation/tests/transitions_tests.rs`, `controls/resource_tests.rs`, `data/converters/composite_format_tests.rs`, `data/core/plugins/markup_members_tests.rs`, `diagnostics/diagnostics_tests.rs`, `ferro_object_tests.rs`, `input/data_transfer_tests.rs`, `input/input_tests.rs`, `interactivity/interactive_tests.rs`, `layout/layout_helper_tests.rs`, `layout/layout_queue_tests.rs`, `markup_types/markup_types_tests.rs`, `media/drawing_context_tests.rs`, `media/font_manager_tests.rs`, `media/fonts/font_collection_tests.rs`, `media/fonts/tables/cmap/cmap_table_tests.rs`, `media/fonts/tables/glyf/glyf_table_contour_walk_tests.rs`, `media/fonts/tables/glyf/glyf_table_point_matching_tests.rs`, `media/fonts/tables/glyf/glyf_table_tests.rs`, `media/formatted_text_tests.rs`, `media/glyph_typeface_tests.rs`, `media/imaging/imaging_tests.rs`, `media/media_context_tests.rs`, `media/text_formatting/shaped_buffer_tests.rs`, `media/text_formatting/split_text_runs_tests.rs`, `media/text_formatting/text_characters_tests.rs`, `media/text_formatting/text_collapsing_bidi_tests.rs`, `media/text_formatting/text_formatter_tests.rs`, `media/text_formatting/text_formatter_wrap_characterization_tests.rs`, `media/text_formatting/text_layout_tests.rs`, `media/text_formatting/text_line_tests.rs`, `media/text_formatting/text_run_cache_tests.rs`, `media/text_formatting/unicode/bidi_algorithm_tests.rs`, `media/text_formatting/unicode/bidi_class_tests.rs`, `media/text_formatting/unicode/codepoint_has_script_extension_tests.rs`, `media/text_formatting/unicode/codepoint_tests.rs`, `media/text_formatting/unicode/grapheme_break_class_trie_generator_tests.rs`, `media/text_formatting/unicode/line_break_enumerator_tests.rs`, `media/text_formatting/unicode/property_value_alias_helper_tests.rs`, `media/text_formatting/unicode/sentence_break_enumerator_tests.rs`, `media/text_formatting/unicode/unicode_data_tests.rs`, `media/text_formatting/unicode/unicode_trie_tests.rs`, `media/text_formatting/unicode/utf16_utils_tests.rs`, `media/text_formatting/unicode/word_break_enumerator_tests.rs`, `metadata/markup_type_tests.rs`, `platform/storage/file_io/bcl_storage_tests.rs`, `platform/storage/file_io/storage_provider_helper_tests.rs`, `platform/storage/storage_tests.rs`, `rendering/composition/animations/composition_animation_tests.rs`, `rendering/composition/brushes/composition_brush_tests.rs`, `rendering/composition/composition_drawing_surface_tests.rs`, `rendering/composition/compositor_tests.rs`, `rendering/composition/drawing/render_data_stream_hit_test.rs`, `rendering/composition/drawing/render_data_tests.rs`, `rendering/composition/drawing/render_resource_tests.rs`, `rendering/composition/expressions/expression_tests.rs`, `rendering/i_custom_hit_test.rs`, `rendering/scene_graph/draw_operation_tests.rs`, `rendering/scene_graph/render_data_resources_tests.rs`, `rendering/scene_graph/render_data_stream_bounds_tests.rs`, `rendering/scene_graph/render_data_stream_effect_tests.rs`, `rendering/scene_graph/render_data_stream_ellipse_hit_test_tests.rs`, `rendering/scene_graph/render_data_stream_hit_test_tests.rs`, `rendering/scene_graph/render_data_stream_line_hit_test_tests.rs`, `rendering/scene_graph/render_data_stream_serialization_tests.rs`, `rendering/scene_graph/render_data_stream_tests.rs`, `rendering/scene_graph/render_data_writer_reader_tests.rs`, `styling/container_tests.rs`, `styling/selector_tests.rs`, `styling/style_tests.rs`, `tests/attached_property_tests.rs`, `tests/binding_default_value_converter_tests.rs`, `tests/binding_expression_observer_indexer_tests.rs`, `tests/binding_expression_tests_attached_property.rs`, `tests/binding_expression_tests_data_validation.rs`, `tests/binding_expression_tests_ferro_property.rs`, `tests/binding_expression_tests_get_value.rs`, `tests/binding_expression_tests_indexer.rs`, `tests/binding_expression_tests_mode.rs`, `tests/binding_expression_tests_negation.rs`, `tests/binding_expression_tests_observable.rs`, `tests/binding_expression_tests_property.rs`, `tests/binding_expression_tests_set_value.rs`, `tests/binding_expression_tests_task.rs`, `tests/binding_expression_tests_update_source_trigger.rs`, `tests/binding_model_tests.rs`, `tests/binding_null_conditional_tests.rs`, `tests/binding_operations_tests.rs`, `tests/binding_plugin_tests.rs`, `tests/binding_setter_tests.rs`, `tests/binding_test_support.rs`, `tests/binding_typed_expression_tests.rs`, `tests/class_registration_tests.rs`, `tests/compiled_binding_tests_create.rs`, `tests/direct_property_tests.rs`, `tests/ferro_object_tests_add_owner.rs`, `tests/ferro_object_tests_attached.rs`, `tests/ferro_object_tests_binding.rs`, `tests/ferro_object_tests_binding_two_way.rs`, `tests/ferro_object_tests_coercion.rs`, `tests/ferro_object_tests_data_validation.rs`, `tests/ferro_object_tests_direct.rs`, `tests/ferro_object_tests_get_observable.rs`, `tests/ferro_object_tests_get_value.rs`, `tests/ferro_object_tests_inheritance.rs`, `tests/ferro_object_tests_metadata.rs`, `tests/ferro_object_tests_on_property_changed.rs`, `tests/ferro_object_tests_reentrancy.rs`, `tests/ferro_object_tests_set_current_value.rs`, `tests/ferro_object_tests_set_value.rs`, `tests/ferro_object_tests_validation.rs`, `tests/ferro_property_registry_tests.rs`, `tests/ferro_property_tests.rs`, `tests/mod.rs`, `tests/property_registration_tests.rs`, `tests/property_store/frame_priority_extensions_tests.rs`, `tests/property_store/mod.rs`, `tests/property_store/value_store_tests_frames.rs`, `tests/property_store/value_store_tests_inheritance.rs`, `tests/reference_semantics_tests.rs`, `tests/styled_property_tests.rs`, `threading/dispatcher_priority_queue_tests.rs`, `threading/dispatcher_tests.rs`, `tree_tests.rs`, `utilities/date_time_net_tests.rs`, `utilities/date_time_tests.rs`, `utilities/number_format_net_tests.rs`, `visual_render_tests.rs`.
