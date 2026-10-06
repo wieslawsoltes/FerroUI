@@ -504,17 +504,17 @@
    "scope": "in",
    "detail": "full",
    "files": [
-    1114,
+    1115,
     1286,
     0
    ],
    "types": [
-    1422,
+    1423,
     1709,
     0
    ],
    "members": [
-    9814,
+    9815,
     11739,
     32
    ],
@@ -536,7 +536,7 @@
     "const": 347,
     "derive": 64,
     "field": 613,
-    "fn": 6260,
+    "fn": 6261,
     "free fn": 10,
     "free item": 16,
     "getter fn": 4,
@@ -1775,6 +1775,9 @@
     ],
     "LogicalTree/ChildIndexChangedEventArgs.cs": [
      "logical_tree/child_index_changed_event_args.rs"
+    ],
+    "LogicalTree/ControlLocator.cs": [
+     "logical_tree/control_locator.rs"
     ],
     "LogicalTree/IChildIndexProvider.cs": [
      "logical_tree/i_child_index_provider.rs"
