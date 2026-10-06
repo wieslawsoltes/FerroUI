@@ -272,7 +272,11 @@ impl IPseudoClasses for Classes {
     }
 
     fn remove_pseudo(&self, name: &str) -> bool {
-        if self.0.items.remove(&name.to_string()) {
+        // `FerroList::remove` of the name (the first equal item), without
+        // making a `String` of it for every call.
+        let index = self.0.items.snapshot().iter().position(|c| c == name);
+        if let Some(index) = index {
+            self.0.items.remove_at(index);
             self.notify_changed();
             true
         } else {
