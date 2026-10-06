@@ -57,6 +57,22 @@ reason = "one generic BindingEntry<T> with a BindingSource enum replaces the bas
 
 [[map]]
 project = "Avalonia.Base"
+upstream = ["VisualExtensions.cs", "VisualTree/VisualExtensions.cs"]
+kind = "merged"
+rust = "visual_tree/visual_extensions.rs"
+types = { VisualExtensions = "Visual" }
+reason = "the extension methods of both static classes are inherent methods of Visual"
+
+[[map]]
+project = "Avalonia.Base"
+upstream = ["VisualTree/IVisualWithRoundRectClip.cs"]
+kind = "replaced"
+rust = "visual.rs"
+types = { IVisualWithRoundRectClip = "Visual" }
+reason = "the `clip_to_bounds_radius` virtual of Visual, which Border overrides, takes the place of the `is IVisualWithRoundRectClip` test (porting guide: C# `is` on an interface becomes a virtual)"
+
+[[map]]
+project = "Avalonia.Base"
 upstream = [
     "PropertyStore/LocalValueBindingObserver.cs",
     "PropertyStore/LocalValueBindingObserverBase.cs",

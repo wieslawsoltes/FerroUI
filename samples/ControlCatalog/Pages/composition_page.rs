@@ -348,6 +348,8 @@ impl CompositionPage {
         });
     }
 
+    // Deviation (DEVIATIONS.md, ControlCatalog sample): blocks the UI thread, as upstream's
+    // `Thread.Sleep(5000)` does.
     fn button_thread_sleep(&self, _sender: &Option<BoxedValue>, _e: &RoutedEventArgs) {
         std::thread::sleep(Duration::from_millis(5000));
     }
@@ -576,6 +578,8 @@ impl CompositionPage {
 /// A message of the custom visual handler: the identity of the object is the message.
 struct HandlerMessage;
 
+// Deviation (DEVIATIONS.md, ControlCatalog sample): upstream's messages are `static readonly object`
+// instances; `Rc` cannot be a `static`, so they are thread-local.
 thread_local! {
     static STOP_MESSAGE: Rc<dyn Any> = Rc::new(HandlerMessage);
     static START_MESSAGE: Rc<dyn Any> = Rc::new(HandlerMessage);

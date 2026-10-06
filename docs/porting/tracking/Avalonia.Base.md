@@ -10,10 +10,10 @@ Generated from upstream commit `17350180c33b063f0e98abbfd19aa3cae63f5d56`. Back 
 | FerroUI | `src/FerroUI.Base` (exists) |
 | Crate | `ferroui-base` |
 | Phase / priority | 0 - core / P0 |
-| Files | 1107/1286 (86.1%), 13 not applicable |
-| Types | 1414/1709 (82.7%) |
-| Members | 9746/11739 (32 waived) (83.2%) |
-| Contracts (interfaces) | 232/263 |
+| Files | 1111/1286 (86.4%), 13 not applicable |
+| Types | 1419/1709 (83.0%) |
+| Members | 9794/11739 (32 waived) (83.7%) |
+| Contracts (interfaces) | 233/263 |
 | Property registrations | 224/239 |
 | Routed events | 41/41 |
 
@@ -286,11 +286,11 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 | `Avalonia.Utilities.IWeakEventSubscriber<TEventArgs>` | public | `Utilities/IWeakEventSubscriber.cs` | 1/1 | present |
 | `Avalonia.Utilities.NonPumpingLockHelper.IHelperImpl` | public | `Utilities/NonPumpingLockHelper.cs` | 0/1 | missing |
 | `Avalonia.VisualTree.IHostedVisualTreeRoot` | internal | `VisualTree/IHostedVisualTreeRoot.cs` | 1/1 | present |
-| `Avalonia.VisualTree.IVisualWithRoundRectClip` | internal | `VisualTree/IVisualWithRoundRectClip.cs` | 0/1 | missing |
+| `Avalonia.VisualTree.IVisualWithRoundRectClip` | internal | `VisualTree/IVisualWithRoundRectClip.cs` | 1/1 | present |
 
 ## Files
 
-### `(project root)` - files 40/59, types 48/67, members 803/942 (16 waived)
+### `(project root)` - files 41/59, types 49/67, members 810/942 (16 waived)
 
 | Upstream file | Rust file | Status | Types | Members | Notes |
 |---|---|---|---|---|---|
@@ -351,8 +351,8 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 | `Vector3D.cs` | `vector3d.rs` | present | 1/1 | 26/27 (1 waived) |  |
 | `Visual.Composition.cs` | `visual.rs` | present | 1/1 | 7/7 | partial merged into main file |
 | `Visual.cs` | `visual.rs` | partial | 1/1 | 59/61 |  |
-| `VisualExtensions.cs` | `visual_extensions.rs` | missing | 0/1 | 0/4 |  |
-| `VisualTreeAttachmentEventArgs.cs` | `visual_tree_attachment_event_args.rs` | partial | 1/1 | 3/6 |  |
+| `VisualExtensions.cs` | `visual_tree/visual_extensions.rs` | present | 1/1 | 4/4 | merged: the extension methods of both static classes are inherent methods of Visual |
+| `VisualTreeAttachmentEventArgs.cs` | `visual_tree_attachment_event_args.rs` | present | 1/1 | 6/6 |  |
 
 <details><summary><code>AvaloniaLocator.cs</code> - 2 missing</summary>
 
@@ -526,15 +526,6 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 - `Visual` (class): 2 missing
   - `SafeEnumerableAvaloniaList<Visual> TypedVisualChildren { get; }` *(internal)*
   - `void IAvaloniaListItemValidator<Visual>.Validate(Visual item)` *(explicit)*
-
-</details>
-
-<details><summary><code>VisualTreeAttachmentEventArgs.cs</code> - 3 missing</summary>
-
-- `VisualTreeAttachmentEventArgs` (class): 3 missing
-  - `Visual? Parent { get; }`
-  - `Visual Root { get; }`
-  - `Visual RootVisual { get; set; }` *(getter `root_visual` found, setter `set_root_visual` missing)*
 
 </details>
 
@@ -3599,7 +3590,7 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 
 </details>
 
-### `Reactive` - files 6/15, types 8/18, members 32/95
+### `Reactive` - files 7/15, types 9/18, members 40/95
 
 | Upstream file | Rust file | Status | Types | Members | Notes |
 |---|---|---|---|---|---|
@@ -3613,7 +3604,7 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 | `Disposable.cs` | `reactive/disposable.rs` | partial | 3/3 | 4/9 |  |
 | `DisposableMixin.cs` | `reactive/disposable_mixin.rs` | missing | 0/1 | 0/1 |  |
 | `IAvaloniaSubject.cs` | `reactive/i_ferro_subject.rs` | missing | 0/1 | 0/0 |  |
-| `LightweightObservableBase.cs` | `reactive/lightweight_observable_base.rs` | missing | 0/1 | 0/8 |  |
+| `LightweightObservableBase.cs` | `reactive/lightweight_observable_base.rs` | present | 1/1 | 8/8 |  |
 | `LightweightSubject.cs` | `reactive/lightweight_subject.rs` | partial | 1/1 | 3/5 |  |
 | `Observable.cs` | `reactive/observable.rs` | partial | 1/2 | 7/17 |  |
 | `SingleSubscriberObservableBase.cs` | `reactive/single_subscriber_observable_base.rs` | partial | 1/1 | 5/7 |  |
@@ -5015,21 +5006,15 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 
 </details>
 
-### `VisualTree` - files 3/5, types 2/5, members 11/45 (1 waived)
+### `VisualTree` - files 5/5, types 5/5, members 44/45 (1 waived)
 
 | Upstream file | Rust file | Status | Types | Members | Notes |
 |---|---|---|---|---|---|
 | `IHostedVisualTreeRoot.cs` | `visual_tree/i_hosted_visual_tree_root.rs` | present | 1/1 | 1/1 |  |
-| `IVisualWithRoundRectClip.cs` | `visual_tree/i_visual_with_round_rect_clip.rs` | missing | 0/1 | 0/1 |  |
+| `IVisualWithRoundRectClip.cs` | `visual.rs` | present | 1/1 | 1/1 | replaced: the `clip_to_bounds_radius` virtual of Visual, which Border overrides, takes the place of the `is IVisualWithRoundRectClip` test (porting guide: C# `is` on an interface becomes a virtual) |
 | `TransformedBounds.cs` | `visual_tree/transformed_bounds.rs` | present | 1/1 | 10/11 (1 waived) |  |
-| `VisualExtensions.cs` | `visual_tree/visual_extensions.rs` | partial | 0/1 | 0/31 |  |
-| `VisualLocator.cs` | `visual_tree/visual_locator.rs` | missing | 0/1 | 0/1 |  |
-
-<details><summary><code>VisualExtensions.cs</code> - 32 missing</summary>
-
-- `VisualExtensions` (class, public): **type missing** (31 members)
-
-</details>
+| `VisualExtensions.cs` | `visual_tree/visual_extensions.rs` | present | 1/1 | 31/31 | merged: the extension methods of both static classes are inherent methods of Visual |
+| `VisualLocator.cs` | `visual_tree/visual_locator.rs` | present | 1/1 | 1/1 |  |
 
 ## Rust-only files
 
