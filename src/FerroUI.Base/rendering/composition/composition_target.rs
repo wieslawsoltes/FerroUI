@@ -234,8 +234,13 @@ impl CompositionTarget {
             }
         }
 
-        for child in visual.children().items().iter().rev() {
-            self.hit_test_core::<H>(child, input, result, filter);
+        // By index, from the last child, as the original: no copy of the
+        // children of every visual the hit test enters.
+        let children = visual.children();
+        let mut index = children.count();
+        while index > 0 {
+            index -= 1;
+            self.hit_test_core::<H>(&children.get(index), input, result, filter);
         }
     }
 
@@ -332,8 +337,14 @@ impl CompositionTarget {
         }
 
         if !queried_indexed_children {
-            for child in visual.children().items().iter().rev() {
-                let (hit, intersection_result) = self.hit_test_first_core::<H>(child, &input, filter, result_filter);
+            // By index, from the last child, as the original: no copy of the
+            // children of every visual the hit test enters.
+            let children = visual.children();
+            let mut index = children.count();
+            while index > 0 {
+                index -= 1;
+                let child = children.get(index);
+                let (hit, intersection_result) = self.hit_test_first_core::<H>(&child, &input, filter, result_filter);
                 if hit.is_some() {
                     return (hit, intersection_result);
                 }

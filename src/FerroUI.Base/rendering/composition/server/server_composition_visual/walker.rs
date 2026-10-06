@@ -18,11 +18,11 @@ pub struct TreeWalkerFrame {
     current_index: usize,
 }
 
-fn children_of(visual: &ServerCompositionVisual) -> Rc<Vec<Rc<ServerCompositionVisual>>> {
-    match visual.children() {
-        Some(children) => children.list(),
-        None => Rc::new(Vec::new()),
-    }
+/// The children of a visual, `None` for a visual without a children
+/// collection (the original reads `Children.List.Count` of both alike, and
+/// nothing is allocated for such a visual).
+fn children_of(visual: &ServerCompositionVisual) -> Option<Rc<Vec<Rc<ServerCompositionVisual>>>> {
+    visual.children().map(|children| children.list())
 }
 
 pub(super) fn walk<V: IServerTreeVisitor>(visitor: &mut V, root: &Rc<ServerCompositionVisual>, pools: &CompositorPools) {
@@ -30,12 +30,14 @@ pub(super) fn walk<V: IServerTreeVisitor>(visitor: &mut V, root: &Rc<ServerCompo
 
     let visit_children = visitor.pre_subgraph(root);
     let mut container = root.clone();
-    let mut children = children_of(&container);
-    if !visit_children || children.is_empty() {
-        visitor.post_subgraph(root);
-        pools.tree_walker_frame_stack_pool.return_stack(frames);
-        return;
-    }
+    let mut children = match children_of(&container) {
+        Some(children) if visit_children && !children.is_empty() => children,
+        _ => {
+            visitor.post_subgraph(root);
+            pools.tree_walker_frame_stack_pool.return_stack(frames);
+            return;
+        }
+    };
 
     let mut current_index = 0usize;
 
@@ -53,8 +55,7 @@ pub(super) fn walk<V: IServerTreeVisitor>(visitor: &mut V, root: &Rc<ServerCompo
         let child = children[current_index].clone();
         let visit_children = visitor.pre_subgraph(&child);
         if visit_children {
-            let child_children = children_of(&child);
-            if !child_children.is_empty() {
+            if let Some(child_children) = children_of(&child).filter(|children| !children.is_empty()) {
                 // Go deeper
                 frames.push(TreeWalkerFrame { visual: container, children, current_index: current_index + 1 });
                 container = child;
