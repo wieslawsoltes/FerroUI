@@ -9,6 +9,10 @@
 //   --expect-mode <type>    fail unless the first canvas context is of this type (webgl2, 2d)
 //   --encoding <br|gzip>    serve the precompressed .br or .gz file next to a file when it exists
 //   --cpu-profile <file>    write a CPU profile (.cpuprofile) of the last load, up to the first frame
+//   --throttle <Mbps>,<ms>  emulate a network: download and upload bandwidth in Mbit/s and round-trip
+//                           latency in milliseconds (e.g. 50,40); serve compressed files (--encoding) so
+//                           that the transferred bytes are those of the published site
+//   --phases                also print the phases of each load (see below)
 //   --json                  print the result as JSON
 //
 // The site (target/browser/<example> as scripts/build-browser.sh writes it) is served from a local
@@ -18,6 +22,11 @@
 //   draw:   the first draw call of the framework (a WebGL draw call, or putImageData on a 2D canvas);
 //   frame:  the first animation frame after that draw call, when the drawn frame is on screen;
 //   splash: the moment the splash screen of the host page is closed.
+// With --phases, also: the end of the response of every file of the site (resource timing); when
+// WebAssembly.instantiateStreaming was called, when the module was compiled and when it was
+// instantiated (the call is replaced by compileStreaming and instantiate, which is what it does);
+// and the performance marks the page sets (the catalog host marks the start and end of the calls
+// into the module, see samples/ControlCatalog.Browser/wwwroot/main.js).
 // The browser is Chromium (CHROME, or the Playwright build under /opt/pw-browsers); WebGL runs on
 // SwiftShader. SwiftShader is a "major performance caveat", so the script lets a WebGL context be
 // created although the page asks for failIfMajorPerformanceCaveat; nothing else of the page is
@@ -31,7 +40,7 @@ import { spawn } from "node:child_process";
 
 const args = process.argv.slice(2);
 const option = (name, fallback) => { const i = args.indexOf(name); return i >= 0 ? args[i + 1] : fallback; };
-const valued = new Set(["--query", "--runs", "--screenshot", "--compare", "--expect-mode", "--encoding", "--cpu-profile"]);
+const valued = new Set(["--query", "--runs", "--screenshot", "--compare", "--expect-mode", "--encoding", "--cpu-profile", "--throttle"]);
 const site = args.find((a, i) => !a.startsWith("--") && !valued.has(args[i - 1]));
 if (!site || !fs.existsSync(path.join(site, "index.html"))) {
     console.error("usage: node scripts/browser/first-frame.mjs <site directory> [--query q] [--runs n] [--screenshot f] [--compare f] [--expect-mode t] [--encoding br|gzip] [--json]");
@@ -45,6 +54,12 @@ const expectMode = option("--expect-mode");
 const encoding = option("--encoding");
 const cpuProfileFile = option("--cpu-profile");
 const json = args.includes("--json");
+const phases = args.includes("--phases");
+const throttle = option("--throttle")?.split(",").map(Number);
+if (throttle && (throttle.length !== 2 || throttle.some((v) => !(v >= 0)))) {
+    console.error("--throttle takes <Mbit/s>,<latency ms>, e.g. 50,40");
+    process.exit(2);
+}
 
 function findChrome() {
     const candidates = [process.env.CHROME];
@@ -86,7 +101,17 @@ await new Promise((r) => server.listen(0, "127.0.0.1", r));
 const port = server.address().port;
 
 const instrumentation = `(() => {
-    const t = globalThis.__ferroTiming = { contexts: [], draw: null, frame: null, splash: null };
+    const t = globalThis.__ferroTiming = { contexts: [], draw: null, frame: null, splash: null,
+        compileStart: null, compiled: null, instantiated: null };
+    const wasm = WebAssembly;
+    wasm.instantiateStreaming = async function (source, imports) {
+        t.compileStart = performance.now();
+        const module = await wasm.compileStreaming(source);
+        t.compiled = performance.now();
+        const instance = await wasm.instantiate(module, imports);
+        t.instantiated = performance.now();
+        return { module, instance };
+    };
     const mark = () => {
         if (t.draw !== null) return;
         t.draw = performance.now();
@@ -154,6 +179,12 @@ async function load(takeScreenshot, profile_) {
         await send("Runtime.enable"); await send("Page.enable");
         await send("Emulation.setDeviceMetricsOverride", { width: 800, height: 600, deviceScaleFactor: 1, mobile: false });
         await send("Page.addScriptToEvaluateOnNewDocument", { source: instrumentation });
+        if (throttle) {
+            await send("Network.enable");
+            const bytesPerSecond = (throttle[0] * 1_000_000) / 8;
+            await send("Network.emulateNetworkConditions", { offline: false, latency: throttle[1],
+                downloadThroughput: bytesPerSecond, uploadThroughput: bytesPerSecond });
+        }
         if (profile_) {
             await send("Profiler.enable");
             await send("Profiler.setSamplingInterval", { interval: 1000 });
@@ -172,8 +203,14 @@ async function load(takeScreenshot, profile_) {
         if (timing?.frame == null) throw new Error(`no frame within 60 s; console:\n${console_.join("\n")}`);
         if (profile_) fs.writeFileSync(profile_, JSON.stringify((await send("Profiler.stop")).profile));
         const wasm = await evaluate(`JSON.stringify(performance.getEntriesByType("resource").filter((e) => e.name.endsWith(".wasm")).map((e) => ({ end: e.responseEnd, transfer: e.transferSize, body: e.decodedBodySize })))`);
+        const resources = JSON.parse(await evaluate(`JSON.stringify(Object.fromEntries([
+            ["(document)", performance.getEntriesByType("navigation")[0]?.responseEnd],
+            ...performance.getEntriesByType("resource").map((e) => [new URL(e.name).pathname.split("/").pop(), e.responseEnd])]))`));
+        const marks = JSON.parse(await evaluate(`JSON.stringify(Object.fromEntries(performance.getEntriesByType("mark").map((m) => [m.name, m.startTime])))`));
         const result = { mode: timing.contexts[0], contexts: timing.contexts, wasm: JSON.parse(wasm)[0] ?? null,
             draw: timing.draw, frame: timing.frame, splash: timing.splash,
+            phases: { ...resources, "compile start": timing.compileStart, compiled: timing.compiled,
+                instantiated: timing.instantiated, ...marks, "first draw": timing.draw, "first frame": timing.frame },
             streamingFailed: console_.some((l) => l.includes("wasm streaming compile failed")), console: console_ };
 
         if (takeScreenshot) {
@@ -240,7 +277,13 @@ const report = { site, query, runs, chromium: chromePath, served: Object.fromEnt
     streaming: !results.some((r) => r.streamingFailed) };
 const median = (key) => { const v = results.map(key).filter((x) => x != null).sort((a, b) => a - b); return v.length ? v[Math.floor(v.length / 2)] : null; };
 report.median = { wasm: median((r) => r.wasm?.end), draw: median((r) => r.draw), frame: median((r) => r.frame), splash: median((r) => r.splash) };
-report.loads = results.map((r) => ({ wasm: r.wasm?.end, draw: r.draw, frame: r.frame, splash: r.splash, mode: r.mode }));
+report.loads = results.map((r) => ({ wasm: r.wasm?.end, draw: r.draw, frame: r.frame, splash: r.splash, mode: r.mode,
+    ...(phases ? { phases: r.phases } : {}) }));
+if (phases) {
+    const names = [...new Set(results.flatMap((r) => Object.keys(r.phases)))].filter((n) => results.some((r) => r.phases[n] != null));
+    report.medianPhases = Object.fromEntries(names.map((n) => [n, median((r) => r.phases[n])]))
+}
+if (throttle) report.throttle = { mbps: throttle[0], latency: throttle[1] };
 
 if (expectMode && last.mode !== expectMode) {
     report.failure = `the page rendered with a ${last.mode} context, expected ${expectMode}`;
@@ -268,9 +311,13 @@ if (json) {
     console.log(JSON.stringify(report, null, 2));
 } else {
     const ms = (v) => (v == null ? "-" : `${Math.round(v)} ms`);
-    console.log(`${site}${query}: ${runs} loads, ${report.mode} context, streaming compilation ${report.streaming ? "used" : "FAILED"}, served ${JSON.stringify(report.served)}`);
+    console.log(`${site}${query}: ${runs} loads${throttle ? ` at ${throttle[0]} Mbit/s and ${throttle[1]} ms` : ""}, ${report.mode} context, streaming compilation ${report.streaming ? "used" : "FAILED"}, served ${JSON.stringify(report.served)}`);
     report.loads.forEach((l, i) => console.log(`  load ${i + 1}: wasm ${ms(l.wasm)}, first draw ${ms(l.draw)}, first frame ${ms(l.frame)}, splash closed ${ms(l.splash)}`));
     console.log(`  median: wasm ${ms(report.median.wasm)}, first draw ${ms(report.median.draw)}, first frame ${ms(report.median.frame)}, splash closed ${ms(report.median.splash)}`);
+    if (report.medianPhases) {
+        console.log("  phases (median of the loads, from the start of navigation):");
+        for (const [n, v] of Object.entries(report.medianPhases).sort((a, b) => a[1] - b[1])) console.log(`    ${ms(v).padStart(9)}  ${n}`);
+    }
     if (report.distinctColours != null) console.log(`  screenshot: ${report.distinctColours} colours${report.differingPixels != null ? `, ${report.differingPixels} pixels differ from ${compareFile}` : ""}`);
     if (report.failure) console.log(`FAIL ${report.failure}`);
 }
