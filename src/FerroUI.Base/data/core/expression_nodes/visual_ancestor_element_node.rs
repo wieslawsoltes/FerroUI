@@ -1,7 +1,8 @@
 use super::{ExpressionNode, NodeState, SourceNode};
 use crate::data::core::ValueTypes;
 use crate::data::BindingError;
-use crate::reactive::IDisposable;
+use crate::reactive::{IDisposable, ObservableExt};
+use crate::visual_tree::VisualLocator;
 use crate::{BoxedValue, FerroObject, Ref, Visual, TypeInfo};
 use std::cell::RefCell;
 use std::rc::{Rc, Weak};
@@ -26,26 +27,6 @@ impl VisualAncestorElementNode {
             ancestor_level,
             subscription: RefCell::new(None),
         })
-    }
-
-    /// The tracked ancestor: found only while the element is attached to the
-    /// visual tree.
-    fn get_result(&self, relative_to: &Visual) -> Option<Ref<Visual>> {
-        if !relative_to.is_attached_to_visual_tree() {
-            return None;
-        }
-        let mut level = 0;
-        let mut current = relative_to.visual_parent();
-        while let Some(ancestor) = current {
-            if self.ancestor_type.is_none_or(|t| t.is_assignable_from(ancestor.get_type())) {
-                if level == self.ancestor_level {
-                    return Some(ancestor);
-                }
-                level += 1;
-            }
-            current = ancestor.visual_parent();
-        }
-        None
     }
 
     fn tracked_control_changed(&self, control: Option<Ref<Visual>>) {
@@ -77,7 +58,7 @@ impl SourceNode for VisualAncestorElementNode {
                 return Some(Rc::new(anchor.clone()));
             }
         }
-        panic!("Cannot find a Visual to get a visual ancestor.");
+        panic!("Cannot find an ILogical to get a visual ancestor.");
     }
 
     fn should_log_errors(&self, _state: &NodeState, target: &FerroObject) -> bool {
@@ -111,26 +92,16 @@ impl ExpressionNode for VisualAncestorElementNode {
         if !self.state.validate_non_null_source(source) {
             return;
         }
-        let logical = source.and_then(|s| ValueTypes::as_object(&**s)).and_then(|o| o.cast::<Visual>());
-        if let Some(logical) = logical {
+        let visual = source.and_then(|s| ValueTypes::as_object(&**s)).and_then(|o| o.cast::<Visual>());
+        if let Some(visual) = visual {
+            let locator = VisualLocator::track(&visual, self.ancestor_level, self.ancestor_type);
             let weak = self.this.clone();
-            let weak_logical = logical.downgrade();
-            let attached = logical.attached_to_visual_tree(move |_| {
-                if let (Some(this), Some(logical)) = (weak.upgrade(), weak_logical.upgrade()) {
-                    this.tracked_control_changed(this.get_result(&logical));
-                }
-            });
-            let weak = self.this.clone();
-            let detached = logical.detached_from_visual_tree(move |_| {
+            let subscription = locator.subscribe_fn(move |control| {
                 if let Some(this) = weak.upgrade() {
-                    this.tracked_control_changed(None);
+                    this.tracked_control_changed(control);
                 }
             });
-            self.subscription.replace(Some(crate::reactive::Disposable::create(move || {
-                attached.dispose();
-                detached.dispose();
-            })));
-            self.tracked_control_changed(self.get_result(&logical));
+            self.subscription.replace(Some(subscription));
         }
     }
 
