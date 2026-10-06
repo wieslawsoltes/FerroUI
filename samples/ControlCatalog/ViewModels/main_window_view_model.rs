@@ -9,6 +9,7 @@
 
 use crate::icons::Icons;
 use crate::models::{HomeSection, PageItem};
+use crate::page_assets::PageAssets;
 use crate::pages::{HomePage, SettingsPage};
 use crate::view_models::main_window_view_model_page_list::{page_sections, UnavailablePage};
 use crate::view_models::SettingsViewModel;
@@ -48,6 +49,9 @@ pub struct MainWindowViewModel {
     decorations_theme: RefCell<Option<Ref<ControlTheme>>>,
     title_bar_decorations: Cell<TitleBarDecorations>,
     current_page_item: RefCell<Option<Rc<PageItem>>>,
+    /// The number of navigations asked for, so that one that waited for the assets of its page
+    /// can tell whether another one was asked for meanwhile (not in upstream).
+    navigation_request: Cell<u64>,
     is_drawer_opened: Cell<bool>,
     display_mode: Cell<SplitViewDisplayMode>,
     query: RefCell<Option<String>>,
@@ -172,6 +176,7 @@ impl MainWindowViewModel {
                 decorations_theme: RefCell::new(None),
                 title_bar_decorations: Cell::new(TitleBarDecorations::ALL),
                 current_page_item: RefCell::new(None),
+                navigation_request: Cell::new(0),
                 is_drawer_opened: Cell::new(true),
                 display_mode: Cell::new(SplitViewDisplayMode::default()),
                 query: RefCell::new(Some(String::new())),
@@ -443,6 +448,8 @@ impl MainWindowViewModel {
 
     async fn navigate_to_async(this: Rc<MainWindowViewModel>, item: Option<Rc<PageItem>>) {
         let (Some(item), Some(navigator)) = (item, this.navigator()) else { return };
+        let request = this.navigation_request.get().wrapping_add(1);
+        this.navigation_request.set(request);
 
         // A gallery may have pushed a sample on top of its page. Drop it first: replacing the top page
         // would leave the previous page below the new one, and the shell would show a back button that
@@ -452,6 +459,18 @@ impl MainWindowViewModel {
         }
 
         if !this.is_current_page_item(&item) {
+            // Not in upstream: the host may have to fetch the assets of the page before the page can
+            // be created (see `PageAssets`). Of navigations asked for while one waits, the last wins.
+            if let Some(assets) = PageAssets::ensure(&item.header()) {
+                if let Err(error) = assets.await {
+                    println!("The assets of the page {} are not available: {error}", item.header());
+                    return;
+                }
+                if this.navigation_request.get() != request {
+                    return;
+                }
+            }
+
             let page = item.create_page();
             this.set_current_page_item(Some(item.clone()));
 
