@@ -12,10 +12,12 @@
 # toolchain with this script too (.github/actions/browser-toolchain), reading the pins from it.
 set -euo pipefail
 
-# src/Browser/FerroUI.Browser/emscripten/wasm_table_mirror.js replaces two functions of the runtime of
-# this Emscripten version; check it against the new runtime when the version changes.
 EMSDK_VERSION="6.0.10"
-RUST_VERSION="1.90.0"
+# 1.93 or later: from 1.93 Rust unwinds with WebAssembly exceptions on wasm32-unknown-emscripten and
+# links with -fwasm-exceptions; 1.98 removed the JavaScript variant (docs/porting/browser-platform.md,
+# section 3). The browser build of ferroui-skia refuses older releases (src/Skia/FerroUI.Skia/build.rs).
+# The desktop builds use the stable toolchain of rustup and do not read this pin.
+RUST_VERSION="1.99.0"
 
 ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
 TOOLS="${1:-$ROOT/.tools}"

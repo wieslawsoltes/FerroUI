@@ -19,6 +19,10 @@ skia-safe.workspace = true
 [dev-dependencies]
 ferroui-harfbuzz.workspace = true
 
+# Compiles emscripten/emscripten_sjlj.cpp for the browser target (see build.rs).
+[build-dependencies]
+cc.workspace = true
+
 # The GPU back end of Skia is chosen per target, because the published Skia
 # binaries carry one of them: Graphite on Metal for Apple platforms, Ganesh on
 # WebGL for the browser. Raster is always present. `build.rs` mirrors the
