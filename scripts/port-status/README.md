@@ -45,7 +45,7 @@ Requirements: Python 3.11+ (standard library only); the .NET SDK only when the u
 | method `DoIt` | fn `do_it`; n-th overload: n-th of `do_it`, aliases, public `do_it_*` (names that belong to another upstream member are excluded); parameterless `GetFoo()` -> `foo()`; abstract / virtual members also match a fn of any trait declared in the same file |
 | `ToString`, `Equals`, `GetHashCode`, `CompareTo`, `Parse` / `TryParse`, `Clone`, `Dispose`, `GetEnumerator` | `Display`, `PartialEq`, `Hash`, `PartialOrd`, `FromStr`, `Clone`, `Drop`, `IntoIterator` (derive or impl), or the method by name |
 | constructors | `new` / `construct` (one constructor), `new_*`, `from_*`, `create`, `Default`, `From` impls, counted |
-| static constructor | `class_init` |
+| static constructor | `static_constructor` (or the older `class_init`) |
 | operators | `Add` / `Sub` / `Mul` / `Div` / `Neg` / `Not` / ... impls counted per operator; `==` / `!=` -> `PartialEq`; conversions -> `From` impl naming both types, or `to_x` / `from_x` / `as_x` |
 | event `Foo` | fn `foo`, `add_foo` |
 | indexer | `Index` impl, or `get` / `get_item` / `item` |
