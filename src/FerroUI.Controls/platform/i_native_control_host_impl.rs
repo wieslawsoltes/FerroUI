@@ -1,10 +1,15 @@
 use super::IPlatformHandle;
 use ferroui_base::reactive::IDisposable;
 use ferroui_base::{Rect, Size};
+use std::any::Any;
 use std::rc::Rc;
 
 /// Hosts native controls inside a top-level.
 pub trait INativeControlHostImpl {
+    /// Lets backends recover the concrete host type (C# `host is
+    /// BrowserNativeControlHost`).
+    fn as_any(&self) -> &dyn Any;
+
     /// Creates the default native child of `parent`.
     fn create_default_child(&self, parent: Rc<dyn IPlatformHandle>) -> Rc<dyn INativeControlHostDestroyableControlHandle>;
 
