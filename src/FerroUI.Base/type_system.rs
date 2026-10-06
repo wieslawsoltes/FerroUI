@@ -1213,7 +1213,7 @@ macro_rules! ferro_class_info {
 
     (@markup $name:ident { $($body:tt)* }) => {
         impl $name {
-            $crate::__ferro_compiler_metadata!($crate::__ferro_markup_fns!($crate::Ref<$name>, $crate::Ref<$name>; $($body)*););
+            $crate::__ferro_markup_functions!($crate::__ferro_markup_fns!($crate::Ref<$name>, $crate::Ref<$name>; $($body)*););
 
             #[doc(hidden)]
             pub const __MARKUP: ::std::option::Option<&'static $crate::metadata::MarkupType> = {
