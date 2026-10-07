@@ -4,9 +4,9 @@ This page is the hand-over point for the next working period: what was finished,
 
 ## State at the hand-over of 2026-10-07
 
-Merged this period, in order: #26, #34, #33, #31, #27, #32, #29, #30, #36, #35, #28, #37, #38, #40, #41, #39.
+Merged this period, in order: #26, #34, #33, #31, #27, #32, #29, #30, #36, #35, #28, #37, #38, #40, #41, #39, #42.
 
-- Browser: Rust 1.99.0 with WebAssembly exceptions (#30). The ControlCatalog site loads its pictures and fonts on demand, per page (#31). The theme documents are out of the catalog's module (#35). Catalog module 35.28 MB raw, 10.62 MB gzip -9; first frame about 1.2 s unthrottled.
+- Browser: Rust 1.99.0 with WebAssembly exceptions (#30). The ControlCatalog site loads its pictures and fonts on demand, per page (#31), as plain files copied byte for byte. Since #42 there are no packed bundles: 94 files under `assets/ControlCatalog/`, listed per page in `assets/ControlCatalog.json`, each registered on its own with `registerAsset`. The theme documents are out of the catalog's module (#35). Catalog module 35.28 MB raw, 10.62 MB gzip -9; first frame about 1.2 s unthrottled.
 - TableView and Buttons: the per-event cost was the JavaScript exception trampolines (removed by #30) and copies and allocations the port made and upstream does not (#29, recorded under "Corrected divergences" in `DEVIATIONS.md`). Measured after both: TableView 8.4 to 9.0 ms per scroll event (budget 8.3 ms), Buttons 2.4 to 3.1 ms. What remains in TableView is upstream's own cell rebuild on recycled rows.
 - XAML compiler: shared runtime helpers and split functions in generated code (#28, #39). The themed browser module is 1.9 % smaller raw. The generated code is deterministic: #39 fixed a hash-order bug, and the drift tests compare against committed output.
 - Deviation register: `DEVIATIONS.md` (#33). Every deliberate difference from upstream gets a row there, or in the area's own page, plus a comment at its site.
@@ -18,21 +18,20 @@ Each was asked to stop at a clean, tested state, open its pull request with a "C
 
 | Branch | Task | Brief |
 |---|---|---|
-| `browser-plain-assets` | The catalog's pictures and fonts as plain files in the site, fetched and registered one by one, instead of packed `.assets` bundles (owner's request). On-demand loading per page stays. | Task 1 below |
 | `xaml-e5-loader-table` | XAML compiler stage E5: loader table, includes across crates, then the catalog compiled | Task 2 below |
 | none | The core port stopped cleanly with nothing open: `core-port-11` was never pushed. Its next batches are listed in task 3. | Task 3 below |
 
 ## Next tasks, in order
 
-### 1. Catalog assets as plain files
+### 1. Catalog assets as plain files: follow-ups (optional)
 
-Finish what the `browser-plain-assets` pull request leaves, using its "Continuation" section. The goal:
-- The original files are copied byte for byte into the site under paths that mirror their asset paths.
-- A page's files are fetched before the catalog creates that page, and the rest are prefetched while idle.
-- The asset loader stays synchronous. A single "register one asset" entry point replaces the bundle format.
-- `register_asset_bundle`, `asset_bundle.rs` and the packing step are gone.
+The change itself is done (#42). Sizes did not change. Start-up makes 20 requests before the first frame instead of 11. The first frame came 30 to 100 ms later in every measured round. That is within the spread of single loads, but it went the same way every time. Left open:
 
-Measure the site size, the first frame (unthrottled and `--throttle 50,40`) and the number of start-up requests. Record the numbers in `browser-platform.md`. Do not reintroduce packing.
+- **Navigation cost:** measure navigation to DrawerPage (18 files, previously 5 bundles) or CarouselPage at `--throttle 50,40`, to put a number on the per-file request cost.
+- **First-frame difference:** look into the 30 to 100 ms, for example with a CPU profile comparing the 10 `registerAsset` calls with the earlier single bundle unpack.
+- **Stale tracking pages:** regenerate `Avalonia.Markup.Xaml.md` and `Avalonia.Markup.Xaml.Loader.md`. They are stale since the emitter work of #39 and would gain `Statement` and `DocumentInfo`.
+
+Do not reintroduce packing.
 
 ### 2. XAML compiler stage E5
 
