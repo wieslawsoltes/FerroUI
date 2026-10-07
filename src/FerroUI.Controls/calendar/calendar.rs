@@ -567,6 +567,10 @@ impl Calendar {
         self.root.borrow().clone()
     }
 
+    pub(crate) fn set_root(&self, value: Option<Ref<Panel>>) {
+        *self.root.borrow_mut() = value;
+    }
+
     pub(crate) fn month_control(&self) -> Option<Ref<CalendarItem>> {
         let root = self.root()?;
         if root.children().count() > 0 {
