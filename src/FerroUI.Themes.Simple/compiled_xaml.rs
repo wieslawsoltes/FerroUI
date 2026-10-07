@@ -34985,3 +34985,17 @@ fn build_controls_simplecontrols_xaml_deferred_287(
     rt::invoked(border_0.try_end_init(), 12, 10)?;
     ::core::result::Result::Ok(rt::to_value(border_0.clone()))
 }
+
+/// The loader of the compiled documents of this file (`!XamlLoader.TryLoad`): the object of the
+/// public document with the URI `uri` (compared as upstream's `OrdinalIgnoreCase`,
+/// `rt::uri_equals`); `Ok(None)` if this file has no such document, the load error of the build
+/// if it fails.
+pub fn try_load(
+    service_provider: ::core::option::Option<&::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
+    uri: &str,
+) -> ::core::result::Result<::core::option::Option<::ferroui_base::BoxedValue>, ::ferroui_markup_xaml::XamlLoadException> {
+    if rt::uri_equals(uri, "ferres://ferroui.themes.simple/SimpleTheme.xaml", "") {
+        return ::core::result::Result::Ok(::ferroui_base::metadata::into_markup_value(crate::SimpleTheme::with_service_provider(::core::option::Option::Some(::ferroui_markup_xaml::xaml_il::runtime::XamlIlRuntimeHelpers::create_root_service_provider_v3(service_provider.cloned())))));
+    }
+    ::core::result::Result::Ok(::core::option::Option::None)
+}

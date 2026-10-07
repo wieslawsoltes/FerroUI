@@ -397,16 +397,71 @@ pub fn transformed_class_group(class: &'static ferroui_base::TypeInfo) -> Result
         .collect())
 }
 
+/// The public constructor of a class that the loader table of its document
+/// creates the class with (`XamlCompilerTaskExecutor`: a public parameterless
+/// constructor, else a public constructor whose single parameter is the
+/// service provider). The name is the associated function of the class.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum ClassConstructor {
+    /// `new T()`: a function without parameters.
+    Parameterless(&'static str),
+    /// `new T(CreateRootServiceProviderV3(serviceProvider))`: a function that takes
+    /// `Option<Rc<dyn IServiceProvider>>`.
+    ServiceProvider(&'static str),
+}
+
+/// Whether the document `xaml` is public, from the `x:ClassModifier` directive of
+/// its root (`XamlCompilerTaskExecutor`): `Public` is public, `NotPublic` and
+/// `Internal` are not (compared without regard to case), a document without the
+/// directive is public. `Ok(None)` when the directive is absent.
+fn class_modifier_public(xaml: &str) -> Result<Option<bool>, String> {
+    use xamlx::ast::{XamlAstNodeExtensions, XamlAstObjectNode, XamlAstTextNode, XamlAstXmlDirective};
+    let parsed = xamlx::parsers::XDocumentXamlParser::parse(xaml, None).map_err(|e| e.message())?;
+    let root = parsed.root().map_err(|e| e.message())?;
+    let Some(root) = root.cast::<XamlAstObjectNode>() else {
+        return Ok(None);
+    };
+    let children = root.children.borrow();
+    let directive = children.iter().filter_map(|child| child.cast::<XamlAstXmlDirective>()).find(|directive| {
+        directive.namespace.borrow().as_deref() == Some(xamlx::xaml_namespaces::XamlNamespaces::XAML2006)
+            && *directive.name.borrow() == "ClassModifier"
+    });
+    let Some(directive) = directive else {
+        return Ok(None);
+    };
+    let text = directive
+        .values
+        .borrow()
+        .first()
+        .and_then(|value| value.cast::<XamlAstTextNode>())
+        .map(|text| text.text().trim().to_lowercase());
+    match text.as_deref() {
+        Some("public") => Ok(Some(true)),
+        // The XAML specification uses "Public" and "NotPublic", the WPF documentation "public" and "internal".
+        Some("notpublic") | Some("internal") => Ok(Some(false)),
+        _ => Err("Invalid value for x:ClassModifier. Expected value are: Public, NotPublic (internal).".to_string()),
+    }
+}
+
 /// The generated file of the documents of a class: the document registered
 /// for `class` (with `x:Class`) and every document it includes, transformed
 /// as one group exactly as the run-time loader loads them
 /// (`FerroRuntimeXamlLoader::load_object`), each emitted as a function: the
 /// document of the class as `populate`, which populates an existing
 /// instance, the others as build functions the include calls of the group
-/// call. The file is a module of the crate of the class (that crate is
-/// named `crate` in it). `Err` lists the documents that are not eligible,
-/// with the reasons: a class is compiled whole or not at all.
-pub fn generate_class_file(class: &'static ferroui_base::TypeInfo) -> Result<String, String> {
+/// call, and every public document (`x:ClassModifier`) with a build function
+/// even when the group merged it into another one. The file is a module of
+/// the crate of the class (that crate is named `crate` in it).
+///
+/// The file ends with `try_load`, the `CompiledXamlLoader` of the documents
+/// (upstream's `!XamlLoader.TryLoad`): a load by URI of
+/// the document of the class creates the class with `constructor`, a load of
+/// another public document calls its build function with a root service
+/// provider; a document that is not public has no entry, as upstream.
+///
+/// `Err` lists the documents that are not eligible, with the reasons: a class
+/// is compiled whole or not at all.
+pub fn generate_class_file(class: &'static ferroui_base::TypeInfo, constructor: ClassConstructor) -> Result<String, String> {
     let uri = crate::FerroRuntimeXamlLoader::class_document(class)
         .ok_or_else(|| format!("no document is registered for {}", class.full_name()))?;
     let group = crate::FerroRuntimeXamlLoader::document_group(&uri, &class.full_name()).map_err(|e| e.message().to_string())?;
@@ -420,9 +475,21 @@ pub fn generate_class_file(class: &'static ferroui_base::TypeInfo) -> Result<Str
     let transformed = FerroXamlIlRuntimeCompiler::transform_documents(&borrowed(&documents), &configuration)
         .map_err(|error| format!("the group does not transform: {}", error.message()))?;
 
+    // Whether each document is public. A class document follows its class, which has a
+    // public Rust path; the directive, if present, must agree, as upstream validates it.
+    let mut public = Vec::with_capacity(documents.len());
+    for (index, document) in documents.iter().enumerate() {
+        let modifier = class_modifier_public(&document.1).map_err(|reason| format!("{}: {reason}", document.0))?;
+        if index == 0 && modifier == Some(false) {
+            return Err(format!("{}: XAML file x:ClassModifier doesn't match the x:Class type modifiers.", document.0));
+        }
+        public.push(modifier.unwrap_or(true));
+    }
+
     // The functions of the documents, by their build methods.
     let mut functions = DocumentFunctions::default();
     let mut names = Vec::with_capacity(documents.len());
+    let mut has_build = vec![false; documents.len()];
     for (index, (document, transformed)) in documents.iter().zip(&transformed).enumerate() {
         let function_name = match index {
             0 => function_name_of(&document.0).replacen("build_", "populate_", 1),
@@ -431,18 +498,24 @@ pub fn generate_class_file(class: &'static ferroui_base::TypeInfo) -> Result<Str
         if index > 0 {
             if let (Some(build), Some(root_class)) = (&transformed.build, root_class_of(&transformed.root)) {
                 functions.insert(build, &function_name, root_class);
+                has_build[index] = true;
             }
         }
         names.push(function_name);
     }
 
-    // The document of the class, then the documents its calls reach (a document the group
-    // merged into another one is not called and not emitted).
+    // The document of the class, then the documents its calls reach and the public
+    // documents with a build function (the entries of the loader table). A document the
+    // group merged into another one that is not public is not called and not emitted, as
+    // upstream removes it without compiling it.
     let mut tables: Vec<String> = Vec::new();
     let mut sources = Vec::with_capacity(documents.len());
     let mut not_eligible = Vec::new();
     let mut emitted: Vec<usize> = Vec::new();
-    let mut pending = vec![0usize];
+    let loadable: Vec<usize> =
+        (1..documents.len()).filter(|index| public[*index] && has_build[*index]).collect();
+    let mut pending: Vec<usize> = loadable.iter().rev().copied().collect();
+    pending.push(0);
     while let Some(index) = pending.pop() {
         if emitted.contains(&index) {
             continue;
@@ -521,9 +594,55 @@ pub fn generate_class_file(class: &'static ferroui_base::TypeInfo) -> Result<Str
         source.push('\n');
         source.push_str(function);
     }
+    source.push('\n');
+    source.push_str(&loader_table(&documents, &names, &loadable, class_path, constructor));
     // The file is a module of the crate of the class: that crate is `crate` in it.
     let own_crate = class_path.trim_start_matches("::").split("::").next().unwrap_or_default();
     Ok(source.replace(&format!("::{own_crate}::"), "crate::"))
+}
+
+/// `try_load` of a class file: one entry per public document, in the order of the
+/// group, as `XamlCompilerTaskExecutor` writes `!XamlLoader.TryLoad`.
+#[allow(clippy::type_complexity)]
+fn loader_table(
+    documents: &[(String, String, Option<String>, Option<&'static ferroui_base::TypeInfo>)],
+    names: &[String],
+    loadable: &[usize],
+    class_path: &str,
+    constructor: ClassConstructor,
+) -> String {
+    let provider = "::ferroui_markup_xaml::xaml_il::runtime::XamlIlRuntimeHelpers::create_root_service_provider_v3(service_provider.cloned())";
+    let class_path = class_path.trim_start_matches("::");
+    let mut source = String::new();
+    source.push_str("/// The loader of the compiled documents of this file (`!XamlLoader.TryLoad`): the object of the\n");
+    source.push_str("/// public document with the URI `uri` (compared as upstream's `OrdinalIgnoreCase`,\n");
+    source.push_str("/// `rt::uri_equals`); `Ok(None)` if this file has no such document, the load error of the build\n");
+    source.push_str("/// if it fails.\n");
+    source.push_str("pub fn try_load(\n");
+    source.push_str("    service_provider: ::core::option::Option<&::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,\n");
+    source.push_str("    uri: &str,\n");
+    source.push_str(") -> ::core::result::Result<::core::option::Option<::ferroui_base::BoxedValue>, ::ferroui_markup_xaml::XamlLoadException> {\n");
+    for index in std::iter::once(0).chain(loadable.iter().copied()) {
+        let uri = documents[index].2.clone().unwrap_or_default();
+        source.push_str(&format!("    if rt::uri_equals(uri, {}, \"\") {{\n", rust_string_literal(&uri)));
+        let value = if index == 0 {
+            match constructor {
+                ClassConstructor::Parameterless(function) => format!("::{class_path}::{function}()"),
+                ClassConstructor::ServiceProvider(function) => {
+                    format!("::{class_path}::{function}(::core::option::Option::Some({provider}))")
+                }
+            }
+        } else {
+            format!("{}(::core::option::Option::Some({provider}))?", names[index])
+        };
+        source.push_str(&format!(
+            "        return ::core::result::Result::Ok(::ferroui_base::metadata::into_markup_value({value}));\n"
+        ));
+        source.push_str("    }\n");
+    }
+    source.push_str("    ::core::result::Result::Ok(::core::option::Option::None)\n");
+    source.push_str("}\n");
+    source
 }
 
 #[cfg(test)]
@@ -532,6 +651,23 @@ mod tests {
 
     fn reason(compiled: &[CompiledDocument], name: &str) -> Option<String> {
         compiled.iter().find(|document| document.name == name).and_then(|document| document.source.clone().err())
+    }
+
+    /// Not from upstream: `x:ClassModifier` as `XamlCompilerTaskExecutor` reads it.
+    #[test]
+    fn class_modifier_decides_whether_a_document_is_public() {
+        let document = |modifier: &str| {
+            format!("<ResourceDictionary xmlns='https://github.com/ferroui' xmlns:x='http://schemas.microsoft.com/winfx/2006/xaml'{modifier}/>")
+        };
+        assert_eq!(class_modifier_public(&document("")), Ok(None));
+        assert_eq!(class_modifier_public(&document(" x:ClassModifier='Public'")), Ok(Some(true)));
+        assert_eq!(class_modifier_public(&document(" x:ClassModifier=' public '")), Ok(Some(true)));
+        assert_eq!(class_modifier_public(&document(" x:ClassModifier='NotPublic'")), Ok(Some(false)));
+        assert_eq!(class_modifier_public(&document(" x:ClassModifier='internal'")), Ok(Some(false)));
+        assert_eq!(
+            class_modifier_public(&document(" x:ClassModifier='private'")),
+            Err("Invalid value for x:ClassModifier. Expected value are: Public, NotPublic (internal).".to_string())
+        );
     }
 
     /// Not from upstream: documents whose build functions would have the same name are

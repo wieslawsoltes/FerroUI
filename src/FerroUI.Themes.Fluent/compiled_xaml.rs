@@ -68961,3 +68961,17 @@ pub fn build_densitystyles_compact_xaml(
     rt::complete_root_name_scope(::core::option::Option::None, name_scope.as_ref(), 1, 3)?;
     ::core::result::Result::Ok(resource_dictionary_0)
 }
+
+/// The loader of the compiled documents of this file (`!XamlLoader.TryLoad`): the object of the
+/// public document with the URI `uri` (compared as upstream's `OrdinalIgnoreCase`,
+/// `rt::uri_equals`); `Ok(None)` if this file has no such document, the load error of the build
+/// if it fails.
+pub fn try_load(
+    service_provider: ::core::option::Option<&::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
+    uri: &str,
+) -> ::core::result::Result<::core::option::Option<::ferroui_base::BoxedValue>, ::ferroui_markup_xaml::XamlLoadException> {
+    if rt::uri_equals(uri, "ferres://ferroui.themes.fluent/FluentTheme.xaml", "") {
+        return ::core::result::Result::Ok(::ferroui_base::metadata::into_markup_value(crate::FluentTheme::with_service_provider(::core::option::Option::Some(::ferroui_markup_xaml::xaml_il::runtime::XamlIlRuntimeHelpers::create_root_service_provider_v3(service_provider.cloned())))));
+    }
+    ::core::result::Result::Ok(::core::option::Option::None)
+}

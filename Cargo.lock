@@ -125,8 +125,6 @@ dependencies = [
  "ferroui-browser",
  "ferroui-controls",
  "ferroui-fonts-inter",
- "ferroui-themes-fluent",
- "ferroui-themes-simple",
  "wasm-bindgen",
 ]
 
