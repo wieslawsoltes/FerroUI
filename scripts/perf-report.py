@@ -2,7 +2,8 @@
 """Binary size and startup time of the three reference applications.
 
 Builds `hello_window`, `themed_window` and `control-catalog-desktop` with the
-release profile, then prints for each the size of the stripped executable and
+release profile (or, with `--profile dist`, with the size-optimised profile
+the published numbers are measured with), then prints for each the size of the stripped executable and
 the time from process start to the first window (median of several warm
 launches, with the load average of the machine before and after them; all
 applications are built first, the launches wait for the load of the machine
@@ -21,6 +22,7 @@ for example to `$GITHUB_STEP_SUMMARY`.
     python3 scripts/perf-report.py --save target/perf-baseline.json
     python3 scripts/perf-report.py --check target/perf-baseline.json
     python3 scripts/perf-report.py --size-only
+    python3 scripts/perf-report.py --profile dist
     python3 scripts/perf-report.py --source ../baseline --size-only   # builds ../baseline
     python3 scripts/perf-report.py --baseline-target ../baseline/target
 
@@ -46,6 +48,9 @@ import time
 
 # The checkout that is built; `--source` selects another one.
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
+# The cargo profile that is built and measured; `--profile` selects another one.
+PROFILE = "release"
 
 # name, cargo arguments, path under the profile directory, arguments, line that marks the first window
 APPLICATIONS = [
@@ -73,7 +78,7 @@ def target_directory():
 
 
 def build(cargo_arguments):
-    command = ["cargo", "build", "--release", "--locked"] + cargo_arguments
+    command = ["cargo", "build", "--profile", PROFILE, "--locked"] + cargo_arguments
     print("$ " + " ".join(command), flush=True)
     subprocess.run(command, cwd=ROOT, check=True)
 
@@ -144,7 +149,7 @@ def locate(target, directory, label):
     os.makedirs(copies, exist_ok=True)
     found = {}
     for name, _, relative_path, arguments, marker in APPLICATIONS:
-        executable = os.path.join(target, "release", relative_path)
+        executable = os.path.join(target, PROFILE, relative_path)
         if not os.path.exists(executable):
             sys.exit(f"{executable} does not exist; build it first (or run without --no-build)")
         stripped = stripped_copy(executable, copies)
@@ -318,11 +323,18 @@ def describe_machine():
 
 
 def main():
+    global PROFILE, ROOT
     parser = argparse.ArgumentParser(description=__doc__.split("\n")[0])
     parser.add_argument("--runs", type=int, default=7, help="warm launches per application (default 7)")
     parser.add_argument("--exit-ms", type=int, default=1500, help="how long each launch stays open (default 1500)")
     parser.add_argument("--no-build", action="store_true", help="measure the executables that are already built")
     parser.add_argument("--source", metavar="DIR", help="build and measure this checkout (default: the one of the script)")
+    parser.add_argument(
+        "--profile",
+        default=PROFILE,
+        help="cargo profile to build and measure: release (default, set up for build time) or dist (whole-program "
+        "optimisation, the smallest executables); --baseline-target is read with the same profile",
+    )
     parser.add_argument("--size-only", action="store_true", help="measure the sizes only; launch nothing")
     parser.add_argument("--save", metavar="FILE", help="store the numbers as a baseline")
     parser.add_argument("--check", metavar="FILE", help="compare with a stored baseline")
@@ -343,8 +355,8 @@ def main():
     options = parser.parse_args()
     if options.runs < 1:
         parser.error("--runs must be at least 1")
+    PROFILE = options.profile
     if options.source:
-        global ROOT
         ROOT = os.path.abspath(options.source)
 
     measured = measure(

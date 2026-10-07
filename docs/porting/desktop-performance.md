@@ -476,3 +476,37 @@ On GitHub: Actions, workflow "Performance", "Run workflow" with `ref`, optionall
 second ref built and measured in the same job), `runs` (at least 7) and `rustflags` (applied to
 the measured ref only, to measure a flag against the same ref without it). The tables go to the
 job summary and the numbers to the `perf-report` artifact.
+
+## 7. Release profile for build time, `dist` profile for size (2026-10-07)
+
+The fat-LTO profile of section 6 makes every executable generate the code of the whole program on
+one core, so a release build of several applications costs one such link each. The default release
+profile is therefore set up for build time, and the profile of section 6 is kept under the name
+`dist`:
+
+| Profile | Settings | Use |
+|---|---|---|
+| `release` | `lto = "thin"`, sixteen code generation units (the default) | Day-to-day release builds: `cargo build --release` |
+| `dist` | `lto = "fat"`, `codegen-units = 1` | The executables that are shipped, and size measurements: `cargo build --profile dist`, `python3 scripts/perf-report.py --profile dist` |
+
+The `browser` profile sets its own `lto` and `codegen-units` and is not affected.
+
+Measured on the Apple M3 Pro (11 cores) at `1ab1127`, rustc 1.90.0, a clean build of the seven
+desktop executables (`cargo build --release --locked -p control-catalog-desktop -p ferroui-desktop
+-p ferroui-themes-simple -p ferroui-native --examples --bins`); the machine was shared with other
+work (load average 4 to 8 during the launches), start-up is the median of nine warm launches:
+
+| | `dist` (fat LTO, one unit) | `release` (thin LTO, sixteen units) | Change |
+|---|---:|---:|---:|
+| Clean build, wall time | 19 min 17 s | 4 min 52 s | -75 % |
+| hello_window, stripped | 38.13 MB | 47.87 MB | +25.5 % |
+| themed_window, stripped | 52.95 MB | 67.89 MB | +28.2 % |
+| control-catalog-desktop, stripped | 87.86 MB | 105.11 MB | +19.6 % |
+| hello_window, start-up | 171 ms | 157 ms | within noise |
+| themed_window (Simple / Fluent), start-up | 178 / 179 ms | 174 / 178 ms | within noise |
+| control-catalog-desktop, start-up | 331 ms | 330 ms | within noise |
+
+The sizes of the earlier sections are those of the `dist` profile. The workflow
+`.github/workflows/perf.yml` builds with the release profile of each ref, so a comparison of a ref
+before this change with one after it shows the difference of the profiles, not a regression of the
+code.
