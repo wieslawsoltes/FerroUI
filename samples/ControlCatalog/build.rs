@@ -7,13 +7,13 @@
 //! `register_types()`, next to the table of the documents `excluded.txt`
 //! lists.
 //!
-//! With the feature `placeholder-branding` an asset `Assets/<path>` that has
+//! With the feature `placeholder-branding` (on by default) an asset `Assets/<path>` that has
 //! a counterpart `PlaceholderAssets/<path>` is embedded with the content of
 //! the counterpart, and the path data of a `StreamGeometry` resource with
 //! the key `<key>` in a document is replaced by the content of
-//! `PlaceholderAssets/StreamGeometry/<key>.txt`: the neutral artwork the
-//! published browser site shows in place of the brand assets of the
-//! upstream project.
+//! `PlaceholderAssets/StreamGeometry/<key>.txt`: the artwork of this project,
+//! which the sample shows in place of the brand assets of the upstream
+//! project.
 //!
 //! With the feature `separate-assets` the assets other than the markup
 //! documents are not embedded: each is copied, byte for byte, to

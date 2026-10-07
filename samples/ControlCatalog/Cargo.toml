@@ -19,8 +19,10 @@ autoexamples = false
 path = "lib.rs"
 
 [features]
-# Embeds the neutral artwork of `PlaceholderAssets/` in place of the brand assets of the upstream
-# project (see `build.rs`); the browser host of the sample selects it for the published site.
+default = ["placeholder-branding"]
+# Embeds the artwork of this project (`PlaceholderAssets/`) in place of the brand assets of the
+# upstream project (see `build.rs`). On by default, for the desktop and the browser host alike;
+# without it the sample shows the assets of the upstream sample unchanged.
 placeholder-branding = []
 # The assets other than the markup documents are not embedded in the binary: the build script
 # copies them as plain files, with a list of the files each page needs, for the host to fetch and

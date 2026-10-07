@@ -11,9 +11,9 @@ This sample is a port of the ControlCatalog sample of the upstream project
   application icons `build/Assets/icon.ico`, `build/Assets/icon-32.png`) by
   `scripts/sync-control-catalog.sh`.
 - The files under `PlaceholderAssets/` are original artwork of this project, drawn by
-  `scripts/browser/render-placeholder-assets.mjs`: neutral stand-ins that the published browser site
-  embeds in place of the assets that carry the brand of the upstream project (feature
-  `placeholder-branding`, see `PlaceholderAssets/README.md`).
+  `scripts/browser/render-placeholder-assets.mjs`: the mark, word mark and banner of this project,
+  which the sample embeds in place of the assets that carry the brand of the upstream project
+  (feature `placeholder-branding`, on by default; see `PlaceholderAssets/README.md`).
 
 ## Assets with a licence of their own
 
