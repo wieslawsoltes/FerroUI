@@ -28,11 +28,12 @@
 //! The native control demo of the browser (`EmbedSampleWeb`) is in
 //! [`embed_sample_browser`].
 //!
-//! Addition of the port: the pictures and fonts of the catalog are asset
-//! bundles next to the module, split by the pages that use them; the host
-//! page registers the start-up bundle before it calls [`run_main`], and the
-//! catalog asks [`page_assets_browser::BrowserPageAssets`] for the bundles
-//! of a page before it creates the page.
+//! Addition of the port: the pictures and fonts of the catalog are plain
+//! files next to the module, one per asset, listed with the pages that use
+//! them; the host page registers the start-up files before it calls
+//! [`run_main`], and the catalog asks
+//! [`page_assets_browser::BrowserPageAssets`] for the files of a page before
+//! it creates the page.
 
 #![cfg_attr(target_os = "emscripten", no_main)]
 

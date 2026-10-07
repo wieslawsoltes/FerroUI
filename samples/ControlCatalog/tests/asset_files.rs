@@ -1,5 +1,5 @@
-//! Tests of the split of the assets into the bundles the browser host loads
-//! on demand (`build/page_bundles.rs`).
+//! Tests of the split of the asset files that the browser host fetches on
+//! demand (`build/page_files.rs`).
 //!
 //! Not ports: the split is an addition of the port.
 
@@ -67,14 +67,13 @@ impl IAssetLoader for RecordingAssetLoader {
         self.inner.invalidate_assembly_cache_all()
     }
 }
-/// Every asset of the catalog that a page of the page list opens while it is
-/// created and shown by the main view, or while one of the samples of its
-/// entry is created and shown, is in the start-up bundle or in a bundle of
-/// the page: the browser host registers no other bundle before it creates
-/// the page. (The demos a gallery page opens on a click are not created
-/// here.)
+/// Every asset file of the catalog that a page of the page list opens while
+/// it is created and shown by the main view, or while one of the samples of
+/// its entry is created and shown, is a start-up file or a file of the page:
+/// the browser host registers no other file before it creates the page.
+/// (The demos a gallery page opens on a click are not created here.)
 #[test]
-fn every_page_finds_its_assets_in_the_start_up_bundle_and_its_own_bundles() {
+fn every_page_opens_only_start_up_files_and_its_own_files() {
     let loader = Rc::new(RecordingAssetLoader { inner: StandardAssetLoader::new(None), opened: RefCell::new(BTreeSet::new()) });
     let _app = start_catalog_application_with(Some(loader.clone()));
     let view_model = MainWindowViewModel::new();
@@ -84,7 +83,7 @@ fn every_page_finds_its_assets_in_the_start_up_bundle_and_its_own_bundles() {
     };
     let at_start = opened_assets();
     let outside: Vec<&String> = at_start.iter().filter(|path| !STARTUP_ASSETS.contains(&path.as_str())).collect();
-    assert!(outside.is_empty(), "the start-up opens {outside:?}, which are not in the start-up bundle");
+    assert!(outside.is_empty(), "the start-up opens {outside:?}, which are not start-up files");
 
     let mut missing = Vec::new();
     let mut opened_by_pages = 0;
@@ -115,24 +114,43 @@ fn every_page_finds_its_assets_in_the_start_up_bundle_and_its_own_bundles() {
         }
     }
     assert!(opened_by_pages > 10, "the pages opened {opened_by_pages} assets: the recording does not work");
-    assert!(missing.is_empty(), "assets that pages open but that are in no bundle of the page:\n{}", missing.join("\n"));
+    assert!(missing.is_empty(), "files that pages open but that are not files of the page:\n{}", missing.join("\n"));
     window.close();
 }
 
-/// The split puts the photographs and fonts of the pages outside the
-/// start-up bundle, and the large CJK font in a bundle of the pages that
+/// The split leaves the photographs and fonts of the pages out of the
+/// start-up files, and makes the large CJK font a file of the pages that
 /// build the font collection of `Assets/Fonts`.
 #[test]
-fn the_start_up_bundle_has_only_what_the_start_up_needs() {
+fn the_start_up_files_are_only_what_the_start_up_needs() {
     for asset in ["/Assets/icon.ico", "/Assets/banner-bg.png", "/Assets/logo1.png"] {
-        assert!(STARTUP_ASSETS.contains(&asset), "{asset} is not in the start-up bundle");
+        assert!(STARTUP_ASSETS.contains(&asset), "{asset} is not a start-up file");
     }
     for asset in ["/Assets/Fonts/WenQuanYiMicroHei-01.ttf", "/Assets/image1.jpg", "/Assets/Sanctuary/main_hero.jpg"] {
-        assert!(!STARTUP_ASSETS.contains(&asset), "{asset} is in the start-up bundle");
+        assert!(!STARTUP_ASSETS.contains(&asset), "{asset} is a start-up file");
     }
     let pages_of = |asset: &str| -> Vec<&str> {
         PAGE_ASSETS.iter().filter(|(_, assets)| assets.contains(&asset)).map(|(page, _)| *page).collect()
     };
     assert_eq!(vec!["TextBlock", "TextBox"], pages_of("/Assets/Fonts/WenQuanYiMicroHei-01.ttf"));
     assert_eq!(vec!["Container Queries"], pages_of("/Assets/image1.jpg"));
+}
+
+/// The host page of the browser preloads exactly the start-up files, so
+/// that their downloads start with the page and no start-up file waits for
+/// the scripts.
+#[test]
+fn the_browser_host_page_preloads_the_start_up_files() {
+    let page = include_str!("../../ControlCatalog.Browser/wwwroot/index.html");
+    let prefix = format!("href=\"./assets/{}", crate::ASSEMBLY.name);
+    let mut preloaded: Vec<&str> = page
+        .match_indices(prefix.as_str())
+        .map(|(at, _)| {
+            let path = &page[at + prefix.len()..];
+            &path[..path.find('"').expect("a closing quote")]
+        })
+        .filter(|path| !path.ends_with(".json"))
+        .collect();
+    preloaded.sort_unstable();
+    assert_eq!(STARTUP_ASSETS, preloaded.as_slice());
 }

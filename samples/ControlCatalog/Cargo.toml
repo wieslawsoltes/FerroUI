@@ -22,9 +22,10 @@ path = "lib.rs"
 # Embeds the neutral artwork of `PlaceholderAssets/` in place of the brand assets of the upstream
 # project (see `build.rs`); the browser host of the sample selects it for the published site.
 placeholder-branding = []
-# The assets other than the markup documents go to a separate asset bundle instead of the binary
-# (see build.rs); the host of the application registers the bundle before the application starts.
-# For the browser, where the WebAssembly module is downloaded and has a size budget.
+# The assets other than the markup documents are not embedded in the binary: the build script
+# copies them as plain files, with a list of the files each page needs, for the host to fetch and
+# register (see build.rs). For the browser, where the WebAssembly module is downloaded and has a
+# size budget.
 separate-assets = []
 
 [dependencies]

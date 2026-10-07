@@ -28,8 +28,8 @@ wasm-bindgen = { workspace = true }
 
 # The published site carries neutral placeholder artwork instead of the upstream brand assets of the
 # sample (see `samples/ControlCatalog/PlaceholderAssets`). Only the browser build selects it, so that
-# workspace builds for the host keep the sample as it is. The pictures and fonts of the sample are a
-# separate asset bundle (`control-catalog.assets`, feature `separate-assets`) that the host page
+# workspace builds for the host keep the sample as it is. The pictures and fonts of the sample are
+# plain files of the site (`assets/ControlCatalog/`, feature `separate-assets`) that the host page
 # fetches next to the module, so that the module stays within its size budget. The themes are created
 # from their compiled markup, and nothing in the catalog loads a document of a theme by URI, so the
 # theme documents are not embedded (feature `remove-compiled-documents` of the theme crates).

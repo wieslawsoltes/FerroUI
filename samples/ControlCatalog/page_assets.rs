@@ -4,9 +4,9 @@
 //! Not a port: upstream's catalog finds every asset in its assembly. The
 //! desktop host embeds every asset in the binary and sets no hook. The
 //! browser host (`samples/ControlCatalog.Browser`) starts the application
-//! with the assets of the start-up only and fetches the asset bundle of a
-//! page when the catalog is about to create the page (see
-//! `build/page_bundles.rs`): the asset loader is synchronous, so what the
+//! with the asset files of the start-up only and fetches the asset files of
+//! a page when the catalog is about to create the page (see
+//! `build/page_files.rs`): the asset loader is synchronous, so what the
 //! document of a page names has to be registered before the page is built.
 
 use std::cell::RefCell;
