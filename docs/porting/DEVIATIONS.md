@@ -90,3 +90,4 @@ Places where the port did work that upstream does not do, or did it differently,
 | `ValueStore.ReevaluateEffectiveValue` and `ReevaluateEffectiveValues` index `_frames` from the last frame. | Copied the frame list for every reevaluation (`value_store.rs`). | #29 |
 | `IPseudoClasses.Remove` compares the name in place. | `Classes::remove_pseudo` allocated a `String` of the name for every call (`classes.rs`). | #29 |
 | `LogicalAncestorElementNode` subscribes to `ControlLocator.Track`, which finds the ancestor when it is subscribed whether or not the element is attached. | Followed the attachment events of the element itself and reported no ancestor while the element was not attached to a logical tree. | #36 |
+| `Classes.AddRange` adds every name of the argument that the collection does not hold yet, duplicates within the argument included. | `Classes::add_range` also dropped a name that appeared earlier in the same argument (`classes.rs`). | #PR |
