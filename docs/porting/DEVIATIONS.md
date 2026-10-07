@@ -65,6 +65,12 @@ Other pages hold the entries of their own area, and this page does not repeat th
 | `CompositionPage.ButtonThreadSleep` calls `Thread.Sleep(5000)`. | `button_thread_sleep` in `Pages/composition_page.rs` calls `std::thread::sleep` for 5 s. | Behaviour | Ported as upstream has it: the button demonstrates a blocked UI thread. Recorded because the port otherwise rules out blocking waits on the UI thread. | #34 |
 | The messages of `CompositionPage.CustomVisualHandler` are four `static readonly object` instances compared by reference. | Four thread-local `Rc<dyn Any>` objects compared with `Rc::ptr_eq`. | Representation | `Rc` is not `Sync`, so it cannot be a `static`; one instance per thread compares the same way on the UI thread. | #34 |
 
+### Templates (`src/FerroUI.Controls/templates/`)
+
+| Upstream | Port | Kind | Why | Since |
+|---|---|---|---|---|
+| `FuncDataTemplate<T>` matches with `TypeUtilities.CanCast<T>`: null data matches a reference type `T` (`string`, a control type), and a non-null `int` matches `T = int?`. | `FuncDataTemplate::for_type` and `for_type_with_match` match null only when `T` is a registered nullable form (`Option<i32>`), and a value only when its box holds exactly `T` (`func_data_template.rs`). | Behaviour | Rust types carry no null of their own; a null reference is `None` of the data, not a `String` or `Ref<..>`. No reason was recorded for not matching a value against its nullable form. A template for a reference type is not chosen for null content. | #39 |
+
 ### Tests and test support
 
 | Upstream | Port | Kind | Why | Since |
@@ -73,6 +79,7 @@ Other pages hold the entries of their own area, and this page does not repeat th
 | The clipboard tests of the text controls flush only posted sync-context callbacks. | They run every dispatcher job, including the queued layout pass, and their log recorder ignores `Layout`-area messages. | Test | Running the layout pass logs the new layout timing messages, which the recorder would otherwise count. | #25 |
 | The `TestRoot` of `Avalonia.UnitTests` has a settable `StylingParent` (the GlobalStyles and application-resource tests of `StyledElementTests` set it). | The `TestRoot` of `ferroui-controls` has none; `StylingRoot` in `styled_element_tests.rs`, a test root with a settable styling parent, takes its place. | Test | No reason recorded for the missing setter; the tests need only the setter. | #37 |
 | `StyledElementTests.Resources_Owner_Is_Set` verifies `AddOwner` on a `Mock<IResourceDictionary>`. | `Resources` takes a concrete `ResourceDictionary`, so the test uses `RecordingResourceDictionary`, a derived dictionary that records its owners from the `on_add_owner` hook. | Test | A mock of the interface cannot be assigned to the property. | #37 |
+| `ContentPresenterTests_Standalone` sets a `Mock<Control>` that also implements `IContentPresenterHost`, `IPresentationSource` and `ILogicalRoot` as the logical parent. | `MockHostParent`, a logical-root control registered as a content presenter host whose `register_content_presenter` returns false, and `MockParent`, a logical-root control (`content_presenter_tests_standalone.rs`). | Test | Moq has no counterpart; the tests do not use `IPresentationSource`. | #39 |
 
 ## Corrected divergences
 

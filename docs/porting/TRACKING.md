@@ -326,7 +326,7 @@ FerroUI-only crates have no upstream source directory (for example the MicroCom 
 
 ## Rust-only files
 
-310 Rust source files have no upstream counterpart (294 without a recorded reason). They are listed at the end of each project page.
+314 Rust source files have no upstream counterpart (298 without a recorded reason). They are listed at the end of each project page.
 
 | Project | Rust file | Reason |
 |---|---|---|
@@ -530,6 +530,10 @@ FerroUI-only crates have no upstream source directory (for example the MicroCom 
 | [Avalonia.Controls](tracking/Avalonia.Controls.md) | `src/FerroUI.Controls/platform/i_platform_handle.rs` | **unmapped** |
 | [Avalonia.Controls](tracking/Avalonia.Controls.md) | `src/FerroUI.Controls/platform/platform_handle.rs` | **unmapped** |
 | [Avalonia.Controls](tracking/Avalonia.Controls.md) | `src/FerroUI.Controls/presentation_source/renderer_factory.rs` | **unmapped** |
+| [Avalonia.Controls](tracking/Avalonia.Controls.md) | `src/FerroUI.Controls/presenters/content_presenter_tests_in_template.rs` | **unmapped** |
+| [Avalonia.Controls](tracking/Avalonia.Controls.md) | `src/FerroUI.Controls/presenters/content_presenter_tests_layout.rs` | **unmapped** |
+| [Avalonia.Controls](tracking/Avalonia.Controls.md) | `src/FerroUI.Controls/presenters/content_presenter_tests_standalone.rs` | **unmapped** |
+| [Avalonia.Controls](tracking/Avalonia.Controls.md) | `src/FerroUI.Controls/presenters/content_presenter_tests_unrooted.rs` | **unmapped** |
 | [Avalonia.Controls](tracking/Avalonia.Controls.md) | `src/FerroUI.Controls/presenters/scroll_content_presenter_tests_i_logical_scrollable.rs` | **unmapped** |
 | [Avalonia.Controls](tracking/Avalonia.Controls.md) | `src/FerroUI.Controls/primitives/popup_tests_items_control.rs` | **unmapped** |
 | [Avalonia.Controls](tracking/Avalonia.Controls.md) | `src/FerroUI.Controls/primitives/selecting_items_control_tests_auto_select.rs` | **unmapped** |
