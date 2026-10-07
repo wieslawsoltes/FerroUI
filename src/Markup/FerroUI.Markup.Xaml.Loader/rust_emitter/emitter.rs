@@ -356,6 +356,80 @@ fn invoked(call: String, fallible: bool, node: &Rc<dyn IXamlAstNode>) -> String 
     }
 }
 
+/// The statements of a setter added to a style (`<Setter Property=".." Value=".."/>` in a
+/// style or a control theme) as the shared helpers of `rt` write them: `lines` are the
+/// statements the emitter wrote for the setter, `call` is the call of `StyleBase.Add` with
+/// it. The helpers make the same calls of the typed functions in the same order
+/// (`Setter::__markup_new_0`, `context.push_parent` if the setter is on the parent stack,
+/// `Setter::__markup_set_Property`, the statements of the value, `Setter::__markup_set_Value`
+/// with `rt::setter_value`, `context.pop_parent`, `StyleBase::__markup_Add_0`):
+///
+/// - a value without statements of its own: `rt::add_setter(style, property, value)`;
+/// - otherwise `let setter = rt::new_setter(property)` before the statements of the value
+///   and `rt::add_setter_value(style, &setter, value)` after them, with
+///   `rt::new_setter_with_parent` and `rt::add_setter_value_with_parent` for a setter on the
+///   parent stack.
+///
+/// `None` (the statements are kept as they are) for any other shape: another constructor,
+/// another order of the members, a member call that can fail, a value that names the setter.
+fn fused_setter_add(lines: &[String], call: &str) -> Option<Vec<String>> {
+    use ferroui_base::metadata::MarkupTyped;
+    let setter = absolute(<ferroui_base::styling::Setter as MarkupTyped>::MARKUP.rust_path()?);
+    let style_base = absolute(ferroui_base::styling::StyleBase::TYPE.rust_path()?);
+    let setter_base = absolute(<dyn ferroui_base::styling::SetterBase as MarkupTyped>::MARKUP.rust_path()?);
+    let statements: Vec<&str> = lines.iter().map(|line| line.strip_prefix("    ").unwrap_or(line)).collect();
+    let (first, mut rest) = statements.split_first()?;
+    let local = first.strip_prefix("let ")?.strip_suffix(&format!(" = {setter}::__markup_new_0();"))?;
+    if !is_identifier(local) {
+        return None;
+    }
+    let style = call
+        .strip_prefix(&format!("{style_base}::__markup_Add_0("))?
+        .strip_suffix(&format!(", ::core::clone::Clone::clone(&{local}) as ::std::rc::Rc<dyn {setter_base}>)"))?;
+    if !is_plain_borrow(style) {
+        return None;
+    }
+    let push = format!("context.push_parent(rt::to_value({local}.clone()));");
+    let with_parent = rest.first() == Some(&push.as_str());
+    if with_parent {
+        rest = &rest[1..];
+        if rest.last() != Some(&"context.pop_parent();") {
+            return None;
+        }
+        rest = &rest[..rest.len() - 1];
+    }
+    // The marker of `Property`, its assignment, the marker of `Value`.
+    let [property_marker, set_property, value_marker, rest @ ..] = rest else { return None };
+    if !property_marker.starts_with("// ") || !value_marker.starts_with("// ") {
+        return None;
+    }
+    let property = set_property
+        .strip_prefix(&format!("{setter}::__markup_set_Property(&{local}, ::core::option::Option::Some("))?
+        .strip_suffix("));")?;
+    let (set_value, value_statements) = rest.split_last()?;
+    let value = set_value
+        .strip_prefix(&format!("{setter}::__markup_set_Value(&{local}, rt::setter_value(&{local}, "))?
+        .strip_suffix("));")?;
+    let names_local = |text: &str| {
+        text.split(|c: char| !(c.is_ascii_alphanumeric() || c == '_')).any(|word| word == local)
+    };
+    if names_local(property) || names_local(value) || value_statements.iter().any(|statement| names_local(statement)) {
+        return None;
+    }
+    let mut fused = Vec::with_capacity(value_statements.len() + 3);
+    if value_statements.is_empty() && !with_parent {
+        fused.push(format!("    rt::add_setter({style}, {property}, {value});"));
+        return Some(fused);
+    }
+    let suffix = if with_parent { "_with_parent" } else { "" };
+    let context = if with_parent { "&context, " } else { "" };
+    fused.push(format!("    let {local} = rt::new_setter{suffix}({context}{property});"));
+    fused.push(format!("    {value_marker}"));
+    fused.extend(value_statements.iter().map(|statement| format!("    {statement}")));
+    fused.push(format!("    rt::add_setter_value{suffix}({context}{style}, &{local}, {value});"));
+    Some(fused)
+}
+
 /// Whether `text` borrows a local without evaluating anything: `&local`, or
 /// `local.upcast_ref::<Base>()`.
 fn is_plain_borrow(text: &str) -> bool {
@@ -2431,6 +2505,7 @@ impl Emitter<'_> {
     ) -> EmitResult<()> {
         let property_name = assignment.property.name();
         self.marker(node, &property_name);
+        let start = self.lines.len();
         let mut arguments = vec![Typed { expr: target.expr.clone(), kind: target.kind }];
         arguments.extend(self.assignment_values(node, assignment)?);
         // The last value is converted to the parameter type of the setter, as the
@@ -2461,6 +2536,13 @@ impl Emitter<'_> {
             }
         }
         let call = self.declared_call(node, method, &arguments)?;
+        if self.member_name(method) == "FerroUI.Styling.StyleBase.Add" {
+            if let Some(fused) = fused_setter_add(&self.lines[start..], &call) {
+                self.lines.truncate(start);
+                self.lines.extend(fused);
+                return Ok(());
+            }
+        }
         self.line(format!("{call};"));
         Ok(())
     }
