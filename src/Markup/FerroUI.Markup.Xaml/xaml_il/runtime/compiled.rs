@@ -765,16 +765,21 @@ pub fn create_context(
     context
 }
 
+/// What every context of a compiled document is created with: the base URI
+/// of the document and its XML namespaces as the compiler resolved them.
+/// Generated code has one per document.
+pub struct DocumentInfo {
+    pub base_uri: Option<&'static str>,
+    pub namespaces: XmlNamespaceTable,
+}
+
 /// The context of a build of deferred content (a template, a deferred
-/// resource) called with `service_provider`: [`create_context`] chained to
-/// it, with the root object of `service_provider` as its root object, as
-/// the run-time loader's build of deferred content creates it.
-pub fn deferred_context(
-    service_provider: &Rc<dyn IServiceProvider>,
-    base_uri: Option<&str>,
-    namespaces: XmlNamespaceTable,
-) -> Rc<XamlIlContext> {
-    let context = create_context(Some(service_provider.clone()), base_uri, namespaces);
+/// resource) of `document` called with `service_provider`:
+/// [`create_context`] chained to it, with the root object of
+/// `service_provider` as its root object, as the run-time loader's build of
+/// deferred content creates it.
+pub fn deferred_context(service_provider: &Rc<dyn IServiceProvider>, document: &DocumentInfo) -> Rc<XamlIlContext> {
+    let context = create_context(Some(service_provider.clone()), document.base_uri, document.namespaces);
     if let Some(root) = FrameworkContextServices.get_parent_root_object(service_provider) {
         context.set_root_object(root);
     }
@@ -816,15 +821,11 @@ pub fn defer(
     deferred_content(result_type, context, DeferredContentBuilder::try_new(build), line, position)
 }
 
-/// The context of `Populate` of a root object: [`create_context`], with the
-/// root object and the intermediate root object set to `root`.
-pub fn populate_context(
-    parent: Option<Rc<dyn IServiceProvider>>,
-    base_uri: Option<&str>,
-    namespaces: XmlNamespaceTable,
-    root: MarkupValue,
-) -> Rc<XamlIlContext> {
-    let context = create_context(parent, base_uri, namespaces);
+/// The context of `Populate` of a root object of `document`:
+/// [`create_context`], with the root object and the intermediate root object
+/// set to `root`.
+pub fn populate_context(parent: Option<Rc<dyn IServiceProvider>>, document: &DocumentInfo, root: MarkupValue) -> Rc<XamlIlContext> {
+    let context = create_context(parent, document.base_uri, document.namespaces);
     context.set_root_object(root.clone());
     context.set_intermediate_root_object(root);
     context
