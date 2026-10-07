@@ -12,7 +12,7 @@ Generated from upstream commit `17350180c33b063f0e98abbfd19aa3cae63f5d56`. Back 
 | Phase / priority | 1 - controls / P0 |
 | Files | 532/538 (98.9%), 1 not applicable |
 | Types | 606/628 (96.5%) |
-| Members | 6156/6405 (1 waived) (96.1%) |
+| Members | 6158/6405 (1 waived) (96.2%) |
 | Contracts (interfaces) | 81/83 |
 | Property registrations | 936/938 |
 | Routed events | 67/67 |
@@ -763,24 +763,23 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 | `IToggleProvider.cs` | `automation/provider/i_toggle_provider.rs` | present | 2/2 | 5/5 |  |
 | `IValueProvider.cs` | `automation/provider/i_value_provider.rs` | present | 1/1 | 3/3 |  |
 
-### `Calendar` - files 9/9, types 13/13, members 180/187
+### `Calendar` - files 9/9, types 13/13, members 182/187
 
 | Upstream file | Rust file | Status | Types | Members | Notes |
 |---|---|---|---|---|---|
-| `Calendar.cs` | `calendar/calendar.rs` | partial | 5/5 | 96/101 |  |
+| `Calendar.cs` | `calendar/calendar.rs` | partial | 5/5 | 97/101 |  |
 | `CalendarBlackoutDatesCollection.cs` | `calendar/calendar_blackout_dates_collection.rs` | present | 1/1 | 9/9 |  |
 | `CalendarButton.cs` | `calendar/calendar_button.rs` | present | 1/1 | 10/10 |  |
 | `CalendarDateRange.cs` | `calendar/calendar_date_range.rs` | present | 1/1 | 5/5 |  |
 | `CalendarDayButton.cs` | `calendar/calendar_day_button.rs` | present | 1/1 | 15/15 |  |
 | `CalendarExtensions.cs` | `calendar/calendar_extensions.rs` | present | 1/1 | 1/1 |  |
-| `CalendarItem.cs` | `calendar/calendar_item.rs` | partial | 1/1 | 23/25 |  |
+| `CalendarItem.cs` | `calendar/calendar_item.rs` | partial | 1/1 | 24/25 |  |
 | `DateTimeHelper.cs` | `calendar/date_time_helper.rs` | present | 1/1 | 14/14 |  |
 | `SelectedDatesCollection.cs` | `calendar/selected_dates_collection.rs` | present | 1/1 | 7/7 |  |
 
-<details><summary><code>Calendar.cs</code> - 5 missing</summary>
+<details><summary><code>Calendar.cs</code> - 4 missing</summary>
 
-- `Calendar` (class): 5 missing
-  - `Panel? Root { get; set; }` *(internal; getter `root` found, setter `set_root` missing)*
+- `Calendar` (class): 4 missing
   - `Collection<DateTime> RemovedItems { get; set; }` *(internal; getter `removed_items` found, setter `set_removed_items` missing)*
   - `DateTime? LastSelectedDateInternal { get; set; }` *(internal; getter `last_selected_date_internal` found, setter `set_last_selected_date_internal` missing)*
   - `DateTime? HoverEndInternal { get; set; }` *(internal; getter `hover_end_internal` found, setter `set_hover_end_internal` missing)*
@@ -788,10 +787,9 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 
 </details>
 
-<details><summary><code>CalendarItem.cs</code> - 2 missing</summary>
+<details><summary><code>CalendarItem.cs</code> - 1 missing</summary>
 
-- `CalendarItem` (class): 2 missing
-  - `Grid? MonthView { get; set; }` *(internal; getter `month_view` found, setter `set_month_view` missing)*
+- `CalendarItem` (class): 1 missing
   - `Grid? YearView { get; set; }` *(internal; getter `year_view` found, setter `set_year_view` missing)*
 
 </details>
