@@ -1,6 +1,12 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64">
-  <rect width="64" height="64" rx="14" fill="#3c4a5e"/>
-  <rect x="19" y="14" width="8" height="36" rx="2" fill="#ffffff"/>
-  <rect x="19" y="14" width="27" height="8" rx="2" fill="#ffffff"/>
-  <rect x="19" y="29" width="20" height="7" rx="2" fill="#ffffff"/>
+  <defs>
+    <linearGradient id="ferro-mark" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#ffb347"/>
+      <stop offset="0.5" stop-color="#f4601f"/>
+      <stop offset="1" stop-color="#b3261e"/>
+    </linearGradient>
+  </defs>
+  <rect width="64" height="64" rx="15" fill="url(#ferro-mark)"/>
+  <path d="M18 16A2 2 0 0 1 20 14H47.5L42.5 23H27V29H40.5L36 37H27V48A2 2 0 0 1 25 50H20A2 2 0 0 1 18 48Z" fill="#ffffff"/>
+  <path d="M47 33Q47.9 39.1 54 40Q47.9 40.9 47 47Q46.1 40.9 40 40Q46.1 39.1 47 33Z" fill="#ffffff"/>
 </svg>

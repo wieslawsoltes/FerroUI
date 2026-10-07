@@ -26,9 +26,9 @@ ferroui-fonts-inter = { workspace = true }
 control-catalog = { path = "../ControlCatalog" }
 wasm-bindgen = { workspace = true }
 
-# The published site carries neutral placeholder artwork instead of the upstream brand assets of the
-# sample (see `samples/ControlCatalog/PlaceholderAssets`). Only the browser build selects it, so that
-# workspace builds for the host keep the sample as it is. The pictures and fonts of the sample are
+# The published site carries the artwork of this project instead of the upstream brand assets of the
+# sample (see `samples/ControlCatalog/PlaceholderAssets`); the feature is a default of the sample and
+# is named here so that the site cannot lose it. The pictures and fonts of the sample are
 # plain files of the site (`assets/ControlCatalog/`, feature `separate-assets`) that the host page
 # fetches next to the module, so that the module stays within its size budget.
 [target.'cfg(target_os = "emscripten")'.dependencies]
