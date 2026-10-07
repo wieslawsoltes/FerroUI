@@ -17,7 +17,6 @@ pub mod interop;
 pub mod rendering;
 pub mod storage;
 
-mod asset_bundle;
 mod browser_activatable_lifetime;
 mod browser_app_builder;
 mod browser_clipboard_data_transfer;
@@ -47,7 +46,6 @@ mod key_interop;
 mod win_stubs;
 mod windowing_platform;
 
-pub use asset_bundle::register_asset_bundle;
 pub use browser_activatable_lifetime::BrowserActivatableLifetime;
 pub use browser_app_builder::{BrowserAppBuilder, BrowserPlatformOptions, BrowserRenderingMode};
 pub use browser_input_handler::BrowserInputHandler;

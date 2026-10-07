@@ -370,7 +370,6 @@ Rust sources of this crate that no upstream file maps to. Give each a reason in 
 
 | Rust file | Reason | Types defined |
 |---|---|---|
-| `asset_bundle.rs` | **unmapped** |  |
 | `interop/completion_helper.rs` | **unmapped** | `Completions`, `IPromiseTracker`, `PagePromiseTracker`, `PendingRequest`, `PromiseError`, `PromiseFuture`, `PromiseOutcome` |
 
 Tests, examples and build scripts (not scanned): `examples/storage_view/main.rs`, `examples/themed_view/main.rs`.
