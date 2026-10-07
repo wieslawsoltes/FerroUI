@@ -10,7 +10,7 @@
 # (ferroui.js and storage.js, built from webapp/ with esbuild), the service worker (ferroui-sw.js, at
 # the root of the site, which its scope and the save picker polyfill need) and the WebAssembly module
 # with its script, plus the files that build scripts of the application leave for the site in
-# `$OUT_DIR/browser-site/` (asset bundles the host page downloads). Serve the directory with any
+# `$OUT_DIR/browser-site/` (asset files the host page downloads). Serve the directory with any
 # static web server.
 #
 # The module is built with the `browser` profile of the workspace (optimised for size, see
