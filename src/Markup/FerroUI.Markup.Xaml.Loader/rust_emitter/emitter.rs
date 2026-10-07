@@ -430,6 +430,11 @@ fn fused_setter_add(lines: &[String], call: &str) -> Option<Vec<String>> {
     Some(fused)
 }
 
+/// The arguments of `rt::clr_property_info` for `Setter.Value`, which
+/// `rt::setter_value_property()` passes.
+const SETTER_VALUE_PROPERTY_INFO_ARGUMENTS: &str =
+    "<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, \"Value\", false, ::ferroui_base::data::core::ValueType::object(), false";
+
 /// Whether `text` borrows a local without evaluating anything: `&local`, or
 /// `local.upcast_ref::<Base>()`.
 fn is_plain_borrow(text: &str) -> bool {
@@ -1903,7 +1908,13 @@ impl Emitter<'_> {
     /// as a value: `rt::clr_property_info` over the declaration of its
     /// accessors.
     fn clr_property_info(&self, node: &Rc<dyn IXamlAstNode>, property: &Rc<dyn IXamlProperty>) -> EmitResult<String> {
-        Ok(format!("rt::boxed(rt::clr_property_info({}))", self.property_info_arguments(node, property)?))
+        let arguments = self.property_info_arguments(node, property)?;
+        // `Setter.Value`, the target property of every markup extension that gives a setter its
+        // value: the same description, without its arguments at every use.
+        if arguments == SETTER_VALUE_PROPERTY_INFO_ARGUMENTS {
+            return Ok("rt::setter_value_property()".to_string());
+        }
+        Ok(format!("rt::boxed(rt::clr_property_info({arguments}))"))
     }
 
     /// The arguments that describe a plain property to the run-time helpers:

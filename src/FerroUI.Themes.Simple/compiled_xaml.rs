@@ -2508,25 +2508,25 @@ fn build_controls_simplecontrols_xaml_deferred_2(
     let setter_0 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::primitives::TemplatedControl::background_property()));
     // Controls/SimpleControls.xaml(6,35) Value
     let dynamic_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("ThemeControlMidBrush")));
-    let provided_0 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_0 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_0, rt::to_object(::core::clone::Clone::clone(&provided_0)));
     // Controls/SimpleControls.xaml(7,6) Content
     let setter_1 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::primitives::TemplatedControl::border_brush_property()));
     // Controls/SimpleControls.xaml(7,36) Value
     let dynamic_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("ThemeBorderLowBrush")));
-    let provided_1 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_1 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_1, rt::to_object(::core::clone::Clone::clone(&provided_1)));
     // Controls/SimpleControls.xaml(8,6) Content
     let setter_2 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::primitives::TemplatedControl::border_thickness_property()));
     // Controls/SimpleControls.xaml(8,40) Value
     let dynamic_resource_extension_2 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("ThemeBorderThickness")));
-    let provided_2 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_2, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_2 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_2, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_2, rt::to_object(::core::clone::Clone::clone(&provided_2)));
     // Controls/SimpleControls.xaml(9,6) Content
     let setter_3 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::primitives::TemplatedControl::foreground_property()));
     // Controls/SimpleControls.xaml(9,35) Value
     let dynamic_resource_extension_3 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("ThemeForegroundBrush")));
-    let provided_3 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_3, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_3 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_3, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_3, rt::to_object(::core::clone::Clone::clone(&provided_3)));
     // Controls/SimpleControls.xaml(10,6) Content
     rt::add_setter(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::property(::ferroui_controls::ContentControl::horizontal_content_alignment_property()), rt::to_object(::ferroui_base::layout::HorizontalAlignment::Center));
@@ -2569,7 +2569,7 @@ fn build_controls_simplecontrols_xaml_deferred_2(
     let setter_9 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::presenters::ContentPresenter::border_brush_property()));
     // Controls/SimpleControls.xaml(34,38) Value
     let dynamic_resource_extension_4 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("ThemeBorderMidBrush")));
-    let provided_4 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_4, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_4 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_4, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, style_1.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_9, rt::to_object(::core::clone::Clone::clone(&provided_4)));
     context.pop_parent();
     ::ferroui_base::styling::StyleBase::__markup_Add_1(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(style_1.clone(), 33, 6)?);
@@ -2588,7 +2588,7 @@ fn build_controls_simplecontrols_xaml_deferred_2(
     let setter_10 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::presenters::ContentPresenter::background_property()));
     // Controls/SimpleControls.xaml(37,37) Value
     let dynamic_resource_extension_5 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("ThemeControlHighBrush")));
-    let provided_5 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_5, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_5 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_5, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, style_2.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_10, rt::to_object(::core::clone::Clone::clone(&provided_5)));
     context.pop_parent();
     ::ferroui_base::styling::StyleBase::__markup_Add_1(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(style_2.clone(), 36, 6)?);
@@ -2604,7 +2604,7 @@ fn build_controls_simplecontrols_xaml_deferred_2(
     let setter_11 = rt::new_setter_with_parent(&context, rt::property(::ferroui_base::Visual::opacity_property()));
     // Controls/SimpleControls.xaml(40,34) Value
     let dynamic_resource_extension_6 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("ThemeDisabledOpacity")));
-    let provided_6 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_6, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_6 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_6, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, style_3.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_11, rt::to_object(::core::clone::Clone::clone(&provided_6)));
     context.pop_parent();
     ::ferroui_base::styling::StyleBase::__markup_Add_1(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(style_3.clone(), 39, 6)?);
@@ -2691,13 +2691,13 @@ fn build_controls_simplecontrols_xaml_deferred_4(
     let setter_1 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::primitives::TemplatedControl::border_brush_property()));
     // Controls/SimpleControls.xaml(7,36) Value
     let dynamic_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("ThemeBorderMidBrush")));
-    let provided_0 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_0 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_1, rt::to_object(::core::clone::Clone::clone(&provided_0)));
     // Controls/SimpleControls.xaml(8,6) Content
     let setter_2 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::primitives::TemplatedControl::border_thickness_property()));
     // Controls/SimpleControls.xaml(8,40) Value
     let dynamic_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("ThemeBorderThickness")));
-    let provided_1 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_1 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_2, rt::to_object(::core::clone::Clone::clone(&provided_1)));
     // Controls/SimpleControls.xaml(9,6) Content
     let setter_3 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::primitives::TemplatedControl::template_property()));
@@ -2736,7 +2736,7 @@ fn build_controls_simplecontrols_xaml_deferred_4(
     let setter_5 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::shapes::Shape::stroke_property()));
     // Controls/SimpleControls.xaml(49,33) Value
     let dynamic_resource_extension_2 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("ThemeBorderHighBrush")));
-    let provided_2 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_2, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_2 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_2, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, style_1.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_5, rt::to_object(::core::clone::Clone::clone(&provided_2)));
     context.pop_parent();
     ::ferroui_base::styling::StyleBase::__markup_Add_1(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(style_1.clone(), 48, 6)?);
@@ -2754,7 +2754,7 @@ fn build_controls_simplecontrols_xaml_deferred_4(
     let setter_6 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::shapes::Shape::fill_property()));
     // Controls/SimpleControls.xaml(52,31) Value
     let dynamic_resource_extension_3 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("HighlightBrush")));
-    let provided_3 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_3, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_3 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_3, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, style_2.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_6, rt::to_object(::core::clone::Clone::clone(&provided_3)));
     // Controls/SimpleControls.xaml(53,8) Content
     rt::add_setter(style_2.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::property(::ferroui_base::Visual::is_visible_property()), rt::to_object(::core::clone::Clone::clone(&false)));
@@ -2813,7 +2813,7 @@ fn build_controls_simplecontrols_xaml_deferred_4(
     let setter_11 = rt::new_setter_with_parent(&context, rt::property(::ferroui_base::Visual::opacity_property()));
     // Controls/SimpleControls.xaml(65,34) Value
     let dynamic_resource_extension_4 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("ThemeDisabledOpacity")));
-    let provided_4 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_4, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_4 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_4, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, style_6.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_11, rt::to_object(::core::clone::Clone::clone(&provided_4)));
     context.pop_parent();
     ::ferroui_base::styling::StyleBase::__markup_Add_1(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(style_6.clone(), 64, 6)?);
@@ -2986,25 +2986,25 @@ fn build_controls_simplecontrols_xaml_deferred_6(
     let setter_0 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::primitives::TemplatedControl::background_property()));
     // Controls/SimpleControls.xaml(6,35) Value
     let dynamic_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("ThemeControlMidBrush")));
-    let provided_0 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_0 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_0, rt::to_object(::core::clone::Clone::clone(&provided_0)));
     // Controls/SimpleControls.xaml(7,6) Content
     let setter_1 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::primitives::TemplatedControl::border_brush_property()));
     // Controls/SimpleControls.xaml(7,36) Value
     let dynamic_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("ThemeBorderLowBrush")));
-    let provided_1 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_1 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_1, rt::to_object(::core::clone::Clone::clone(&provided_1)));
     // Controls/SimpleControls.xaml(8,6) Content
     let setter_2 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::primitives::TemplatedControl::border_thickness_property()));
     // Controls/SimpleControls.xaml(8,40) Value
     let dynamic_resource_extension_2 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("ThemeBorderThickness")));
-    let provided_2 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_2, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_2 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_2, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_2, rt::to_object(::core::clone::Clone::clone(&provided_2)));
     // Controls/SimpleControls.xaml(9,6) Content
     let setter_3 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::primitives::TemplatedControl::foreground_property()));
     // Controls/SimpleControls.xaml(9,35) Value
     let dynamic_resource_extension_3 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("ThemeForegroundBrush")));
-    let provided_3 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_3, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_3 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_3, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_3, rt::to_object(::core::clone::Clone::clone(&provided_3)));
     // Controls/SimpleControls.xaml(10,6) Content
     rt::add_setter(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::property(::ferroui_controls::ContentControl::horizontal_content_alignment_property()), rt::to_object(::ferroui_base::layout::HorizontalAlignment::Center));
@@ -3035,7 +3035,7 @@ fn build_controls_simplecontrols_xaml_deferred_6(
     let setter_8 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::presenters::ContentPresenter::border_brush_property()));
     // Controls/SimpleControls.xaml(29,38) Value
     let dynamic_resource_extension_4 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("ThemeBorderMidBrush")));
-    let provided_4 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_4, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_4 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_4, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, style_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_8, rt::to_object(::core::clone::Clone::clone(&provided_4)));
     context.pop_parent();
     ::ferroui_base::styling::StyleBase::__markup_Add_1(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(style_0.clone(), 28, 6)?);
@@ -3051,7 +3051,7 @@ fn build_controls_simplecontrols_xaml_deferred_6(
     let setter_9 = rt::new_setter_with_parent(&context, rt::property(::ferroui_base::Visual::opacity_property()));
     // Controls/SimpleControls.xaml(32,34) Value
     let dynamic_resource_extension_5 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("ThemeDisabledOpacity")));
-    let provided_5 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_5, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_5 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_5, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, style_1.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_9, rt::to_object(::core::clone::Clone::clone(&provided_5)));
     context.pop_parent();
     ::ferroui_base::styling::StyleBase::__markup_Add_1(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(style_1.clone(), 31, 6)?);
@@ -3136,25 +3136,25 @@ fn build_controls_simplecontrols_xaml_deferred_8(
     let setter_0 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::primitives::TemplatedControl::background_property()));
     // Controls/SimpleControls.xaml(6,35) Value
     let dynamic_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("ThemeControlMidBrush")));
-    let provided_0 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_0 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_0, rt::to_object(::core::clone::Clone::clone(&provided_0)));
     // Controls/SimpleControls.xaml(7,6) Content
     let setter_1 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::primitives::TemplatedControl::border_brush_property()));
     // Controls/SimpleControls.xaml(7,36) Value
     let dynamic_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("ThemeBorderLowBrush")));
-    let provided_1 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_1 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_1, rt::to_object(::core::clone::Clone::clone(&provided_1)));
     // Controls/SimpleControls.xaml(8,6) Content
     let setter_2 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::primitives::TemplatedControl::border_thickness_property()));
     // Controls/SimpleControls.xaml(8,40) Value
     let dynamic_resource_extension_2 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("ThemeBorderThickness")));
-    let provided_2 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_2, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_2 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_2, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_2, rt::to_object(::core::clone::Clone::clone(&provided_2)));
     // Controls/SimpleControls.xaml(9,6) Content
     let setter_3 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::primitives::TemplatedControl::foreground_property()));
     // Controls/SimpleControls.xaml(9,35) Value
     let dynamic_resource_extension_3 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("ThemeForegroundBrush")));
-    let provided_3 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_3, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_3 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_3, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_3, rt::to_object(::core::clone::Clone::clone(&provided_3)));
     // Controls/SimpleControls.xaml(10,6) Content
     rt::add_setter(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::property(::ferroui_controls::primitives::TemplatedControl::padding_property()), rt::to_object(::ferroui_base::Thickness::__markup_new_3(4.0_f64, 4.0_f64, 4.0_f64, 4.0_f64)));
@@ -3197,13 +3197,13 @@ fn build_controls_simplecontrols_xaml_deferred_8(
     let setter_9 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::presenters::ContentPresenter::background_property()));
     // Controls/SimpleControls.xaml(34,37) Value
     let dynamic_resource_extension_4 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("ThemeControlHighBrush")));
-    let provided_4 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_4, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_4 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_4, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, style_1.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_9, rt::to_object(::core::clone::Clone::clone(&provided_4)));
     // Controls/SimpleControls.xaml(35,8) Content
     let setter_10 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::presenters::ContentPresenter::border_brush_property()));
     // Controls/SimpleControls.xaml(35,38) Value
     let dynamic_resource_extension_5 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("ThemeBorderMidBrush")));
-    let provided_5 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_5, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_5 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_5, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, style_1.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_10, rt::to_object(::core::clone::Clone::clone(&provided_5)));
     context.pop_parent();
     ::ferroui_base::styling::StyleBase::__markup_Add_1(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(style_1.clone(), 33, 6)?);
@@ -3222,7 +3222,7 @@ fn build_controls_simplecontrols_xaml_deferred_8(
     let setter_11 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::presenters::ContentPresenter::border_brush_property()));
     // Controls/SimpleControls.xaml(38,38) Value
     let dynamic_resource_extension_6 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("ThemeBorderMidBrush")));
-    let provided_6 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_6, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_6 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_6, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, style_2.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_11, rt::to_object(::core::clone::Clone::clone(&provided_6)));
     context.pop_parent();
     ::ferroui_base::styling::StyleBase::__markup_Add_1(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(style_2.clone(), 37, 6)?);
@@ -3241,7 +3241,7 @@ fn build_controls_simplecontrols_xaml_deferred_8(
     let setter_12 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::presenters::ContentPresenter::background_property()));
     // Controls/SimpleControls.xaml(41,37) Value
     let dynamic_resource_extension_7 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("ThemeControlHighBrush")));
-    let provided_7 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_7, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_7 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_7, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, style_3.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_12, rt::to_object(::core::clone::Clone::clone(&provided_7)));
     context.pop_parent();
     ::ferroui_base::styling::StyleBase::__markup_Add_1(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(style_3.clone(), 40, 6)?);
@@ -3257,7 +3257,7 @@ fn build_controls_simplecontrols_xaml_deferred_8(
     let setter_13 = rt::new_setter_with_parent(&context, rt::property(::ferroui_base::Visual::opacity_property()));
     // Controls/SimpleControls.xaml(44,34) Value
     let dynamic_resource_extension_8 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("ThemeDisabledOpacity")));
-    let provided_8 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_8, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_8 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_8, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, style_4.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_13, rt::to_object(::core::clone::Clone::clone(&provided_8)));
     context.pop_parent();
     ::ferroui_base::styling::StyleBase::__markup_Add_1(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(style_4.clone(), 43, 6)?);
@@ -3342,25 +3342,25 @@ fn build_controls_simplecontrols_xaml_deferred_10(
     let setter_0 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::primitives::TemplatedControl::background_property()));
     // Controls/SimpleControls.xaml(6,35) Value
     let dynamic_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("ThemeControlMidBrush")));
-    let provided_0 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_0 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_0, rt::to_object(::core::clone::Clone::clone(&provided_0)));
     // Controls/SimpleControls.xaml(7,6) Content
     let setter_1 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::primitives::TemplatedControl::border_brush_property()));
     // Controls/SimpleControls.xaml(7,36) Value
     let dynamic_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("ThemeBorderLowBrush")));
-    let provided_1 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_1 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_1, rt::to_object(::core::clone::Clone::clone(&provided_1)));
     // Controls/SimpleControls.xaml(8,6) Content
     let setter_2 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::primitives::TemplatedControl::border_thickness_property()));
     // Controls/SimpleControls.xaml(8,40) Value
     let dynamic_resource_extension_2 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("ThemeBorderThickness")));
-    let provided_2 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_2, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_2 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_2, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_2, rt::to_object(::core::clone::Clone::clone(&provided_2)));
     // Controls/SimpleControls.xaml(9,6) Content
     let setter_3 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::primitives::TemplatedControl::foreground_property()));
     // Controls/SimpleControls.xaml(9,35) Value
     let dynamic_resource_extension_3 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("ThemeForegroundBrush")));
-    let provided_3 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_3, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_3 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_3, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_3, rt::to_object(::core::clone::Clone::clone(&provided_3)));
     // Controls/SimpleControls.xaml(10,6) Content
     rt::add_setter(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::property(::ferroui_controls::ContentControl::horizontal_content_alignment_property()), rt::to_object(::ferroui_base::layout::HorizontalAlignment::Center));
@@ -3402,7 +3402,7 @@ fn build_controls_simplecontrols_xaml_deferred_10(
     let setter_9 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::primitives::TemplatedControl::foreground_property()));
     // Controls/SimpleControls.xaml(57,37) Value
     let dynamic_resource_extension_4 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("ThemeForegroundBrush")));
-    let provided_4 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_4, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_4 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_4, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, style_1.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_9, rt::to_object(::core::clone::Clone::clone(&provided_4)));
     // Controls/SimpleControls.xaml(58,8) Content
     let setter_10 = rt::new_setter(rt::property(::ferroui_controls::PathIcon::data_property()));
@@ -3426,7 +3426,7 @@ fn build_controls_simplecontrols_xaml_deferred_10(
     let setter_11 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::Border::border_brush_property()));
     // Controls/SimpleControls.xaml(62,38) Value
     let dynamic_resource_extension_5 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("ThemeBorderMidBrush")));
-    let provided_5 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_5, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_5 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_5, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, style_2.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_11, rt::to_object(::core::clone::Clone::clone(&provided_5)));
     context.pop_parent();
     ::ferroui_base::styling::StyleBase::__markup_Add_1(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(style_2.clone(), 61, 6)?);
@@ -3445,7 +3445,7 @@ fn build_controls_simplecontrols_xaml_deferred_10(
     let setter_12 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::Border::background_property()));
     // Controls/SimpleControls.xaml(66,37) Value
     let dynamic_resource_extension_6 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("ThemeControlHighBrush")));
-    let provided_6 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_6, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_6 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_6, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, style_3.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_12, rt::to_object(::core::clone::Clone::clone(&provided_6)));
     context.pop_parent();
     ::ferroui_base::styling::StyleBase::__markup_Add_1(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(style_3.clone(), 65, 6)?);
@@ -3461,7 +3461,7 @@ fn build_controls_simplecontrols_xaml_deferred_10(
     let setter_13 = rt::new_setter_with_parent(&context, rt::property(::ferroui_base::Visual::opacity_property()));
     // Controls/SimpleControls.xaml(70,34) Value
     let dynamic_resource_extension_7 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("ThemeDisabledOpacity")));
-    let provided_7 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_7, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_7 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_7, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, style_4.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_13, rt::to_object(::core::clone::Clone::clone(&provided_7)));
     context.pop_parent();
     ::ferroui_base::styling::StyleBase::__markup_Add_1(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(style_4.clone(), 69, 6)?);
@@ -3619,13 +3619,13 @@ fn build_controls_simplecontrols_xaml_deferred_12(
     let setter_1 = rt::new_setter_with_parent(&context, rt::property(::ferroui_base::layout::Layoutable::height_property()));
     // Controls/SimpleControls.xaml(7,31) Value
     let dynamic_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("IconElementThemeHeight")));
-    let provided_0 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_0 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_1, rt::to_object(::core::clone::Clone::clone(&provided_0)));
     // Controls/SimpleControls.xaml(8,6) Content
     let setter_2 = rt::new_setter_with_parent(&context, rt::property(::ferroui_base::layout::Layoutable::width_property()));
     // Controls/SimpleControls.xaml(8,30) Value
     let dynamic_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("IconElementThemeWidth")));
-    let provided_1 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_1 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_2, rt::to_object(::core::clone::Clone::clone(&provided_1)));
     // Controls/SimpleControls.xaml(9,6) Content
     let setter_3 = rt::new_setter(rt::property(::ferroui_controls::primitives::TemplatedControl::template_property()));
@@ -3701,7 +3701,7 @@ fn build_controls_simplecontrols_xaml_deferred_14(
     let setter_0 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::primitives::TemplatedControl::foreground_property()));
     // Controls/SimpleControls.xaml(6,35) Value
     let dynamic_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("ThemeForegroundBrush")));
-    let provided_0 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_0 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_0, rt::to_object(::core::clone::Clone::clone(&provided_0)));
     // Controls/SimpleControls.xaml(7,6) Content
     rt::add_setter(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::property(::ferroui_controls::primitives::TemplatedControl::background_property()), rt::to_object(::ferroui_base::media::immutable::ImmutableSolidColorBrush::__markup_new_0(16777215_u32)));
@@ -3709,13 +3709,13 @@ fn build_controls_simplecontrols_xaml_deferred_14(
     let setter_2 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::primitives::TemplatedControl::border_brush_property()));
     // Controls/SimpleControls.xaml(8,36) Value
     let dynamic_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("ThemeBorderMidBrush")));
-    let provided_1 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_1 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_2, rt::to_object(::core::clone::Clone::clone(&provided_1)));
     // Controls/SimpleControls.xaml(9,6) Content
     let setter_3 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::primitives::TemplatedControl::border_thickness_property()));
     // Controls/SimpleControls.xaml(9,40) Value
     let dynamic_resource_extension_2 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("ThemeBorderThickness")));
-    let provided_2 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_2, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_2 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_2, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_3, rt::to_object(::core::clone::Clone::clone(&provided_2)));
     // Controls/SimpleControls.xaml(10,6) Content
     rt::add_setter(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::property(::ferroui_controls::primitives::TemplatedControl::padding_property()), rt::to_object(::ferroui_base::Thickness::__markup_new_3(4.0_f64, 0.0_f64, 0.0_f64, 0.0_f64)));
@@ -3760,7 +3760,7 @@ fn build_controls_simplecontrols_xaml_deferred_14(
     let setter_9 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::Border::border_brush_property()));
     // Controls/SimpleControls.xaml(62,38) Value
     let dynamic_resource_extension_3 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("ThemeBorderHighBrush")));
-    let provided_3 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_3, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_3 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_3, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, style_1.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_9, rt::to_object(::core::clone::Clone::clone(&provided_3)));
     context.pop_parent();
     ::ferroui_base::styling::StyleBase::__markup_Add_1(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(style_1.clone(), 61, 6)?);
@@ -3829,7 +3829,7 @@ fn build_controls_simplecontrols_xaml_deferred_14(
     let setter_14 = rt::new_setter_with_parent(&context, rt::property(::ferroui_base::Visual::opacity_property()));
     // Controls/SimpleControls.xaml(77,34) Value
     let dynamic_resource_extension_4 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("ThemeDisabledOpacity")));
-    let provided_4 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_4, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_4 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_4, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, style_6.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_14, rt::to_object(::core::clone::Clone::clone(&provided_4)));
     context.pop_parent();
     ::ferroui_base::styling::StyleBase::__markup_Add_1(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(style_6.clone(), 76, 6)?);
@@ -4041,19 +4041,19 @@ fn build_controls_simplecontrols_xaml_deferred_16(
     let setter_0 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::primitives::TemplatedControl::background_property()));
     // Controls/SimpleControls.xaml(6,35) Value
     let dynamic_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("ThemeBackgroundBrush")));
-    let provided_0 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_0 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_0, rt::to_object(::core::clone::Clone::clone(&provided_0)));
     // Controls/SimpleControls.xaml(7,6) Content
     let setter_1 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::primitives::TemplatedControl::border_brush_property()));
     // Controls/SimpleControls.xaml(7,36) Value
     let dynamic_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("ThemeBorderMidBrush")));
-    let provided_1 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_1 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_1, rt::to_object(::core::clone::Clone::clone(&provided_1)));
     // Controls/SimpleControls.xaml(8,6) Content
     let setter_2 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::primitives::TemplatedControl::border_thickness_property()));
     // Controls/SimpleControls.xaml(8,40) Value
     let dynamic_resource_extension_2 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("ThemeBorderThickness")));
-    let provided_2 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_2, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_2 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_2, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_2, rt::to_object(::core::clone::Clone::clone(&provided_2)));
     // Controls/SimpleControls.xaml(9,6) Content
     rt::add_setter(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::property(::ferroui_controls::primitives::TemplatedControl::padding_property()), rt::to_object(::ferroui_base::Thickness::__markup_new_3(4.0_f64, 2.0_f64, 4.0_f64, 2.0_f64)));
@@ -4254,7 +4254,7 @@ fn build_controls_simplecontrols_xaml_deferred_20(
     let setter_5 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::presenters::ContentPresenter::background_property()));
     // Controls/SimpleControls.xaml(25,37) Value
     let dynamic_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("ThemeControlHighlightMidBrush")));
-    let provided_0 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_0 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, style_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_5, rt::to_object(::core::clone::Clone::clone(&provided_0)));
     context.pop_parent();
     ::ferroui_base::styling::StyleBase::__markup_Add_1(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(style_0.clone(), 24, 6)?);
@@ -4273,7 +4273,7 @@ fn build_controls_simplecontrols_xaml_deferred_20(
     let setter_6 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::presenters::ContentPresenter::background_property()));
     // Controls/SimpleControls.xaml(28,37) Value
     let dynamic_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("ThemeAccentBrush4")));
-    let provided_1 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_1 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, style_1.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_6, rt::to_object(::core::clone::Clone::clone(&provided_1)));
     context.pop_parent();
     ::ferroui_base::styling::StyleBase::__markup_Add_1(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(style_1.clone(), 27, 6)?);
@@ -4293,7 +4293,7 @@ fn build_controls_simplecontrols_xaml_deferred_20(
     let setter_7 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::presenters::ContentPresenter::background_property()));
     // Controls/SimpleControls.xaml(31,37) Value
     let dynamic_resource_extension_2 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("ThemeAccentBrush3")));
-    let provided_2 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_2, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_2 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_2, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, style_2.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_7, rt::to_object(::core::clone::Clone::clone(&provided_2)));
     context.pop_parent();
     ::ferroui_base::styling::StyleBase::__markup_Add_1(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(style_2.clone(), 30, 6)?);
@@ -4313,7 +4313,7 @@ fn build_controls_simplecontrols_xaml_deferred_20(
     let setter_8 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::presenters::ContentPresenter::background_property()));
     // Controls/SimpleControls.xaml(34,37) Value
     let dynamic_resource_extension_3 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("ThemeAccentBrush3")));
-    let provided_3 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_3, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_3 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_3, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, style_3.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_8, rt::to_object(::core::clone::Clone::clone(&provided_3)));
     context.pop_parent();
     ::ferroui_base::styling::StyleBase::__markup_Add_1(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(style_3.clone(), 33, 6)?);
@@ -4334,7 +4334,7 @@ fn build_controls_simplecontrols_xaml_deferred_20(
     let setter_9 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::presenters::ContentPresenter::background_property()));
     // Controls/SimpleControls.xaml(37,37) Value
     let dynamic_resource_extension_4 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("ThemeAccentBrush2")));
-    let provided_4 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_4, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_4 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_4, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, style_4.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_9, rt::to_object(::core::clone::Clone::clone(&provided_4)));
     context.pop_parent();
     ::ferroui_base::styling::StyleBase::__markup_Add_1(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(style_4.clone(), 36, 6)?);
@@ -4417,19 +4417,19 @@ fn build_controls_simplecontrols_xaml_deferred_22(
     let setter_1 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::primitives::TemplatedControl::foreground_property()));
     // Controls/SimpleControls.xaml(7,35) Value
     let dynamic_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("ThemeForegroundBrush")));
-    let provided_0 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_0 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_1, rt::to_object(::core::clone::Clone::clone(&provided_0)));
     // Controls/SimpleControls.xaml(8,6) Content
     let setter_2 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::primitives::TemplatedControl::border_brush_property()));
     // Controls/SimpleControls.xaml(8,36) Value
     let dynamic_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("ThemeBorderMidBrush")));
-    let provided_1 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_1 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_2, rt::to_object(::core::clone::Clone::clone(&provided_1)));
     // Controls/SimpleControls.xaml(9,6) Content
     let setter_3 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::primitives::TemplatedControl::border_thickness_property()));
     // Controls/SimpleControls.xaml(9,40) Value
     let dynamic_resource_extension_2 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("ThemeBorderThickness")));
-    let provided_2 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_2, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_2 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_2, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_3, rt::to_object(::core::clone::Clone::clone(&provided_2)));
     // Controls/SimpleControls.xaml(10,6) Content
     rt::add_setter(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::property(::ferroui_controls::ComboBox::horizontal_content_alignment_property()), rt::to_object(::ferroui_base::layout::HorizontalAlignment::Stretch));
@@ -4443,7 +4443,7 @@ fn build_controls_simplecontrols_xaml_deferred_22(
     let setter_8 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::ComboBox::placeholder_foreground_property()));
     // Controls/SimpleControls.xaml(14,46) Value
     let dynamic_resource_extension_3 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("ThemeForegroundBrush")));
-    let provided_3 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_3, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_3 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_3, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_8, rt::to_object(::core::clone::Clone::clone(&provided_3)));
     // Controls/SimpleControls.xaml(15,6) Content
     rt::add_setter(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::property(::ferroui_controls::ScrollViewer::horizontal_scroll_bar_visibility_property()), rt::to_object(::ferroui_controls::primitives::ScrollBarVisibility::Disabled));
@@ -4472,7 +4472,7 @@ fn build_controls_simplecontrols_xaml_deferred_22(
     let setter_11 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::Border::border_brush_property()));
     // Controls/SimpleControls.xaml(105,38) Value
     let dynamic_resource_extension_4 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("ThemeBorderHighBrush")));
-    let provided_4 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_4, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_4 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_4, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, style_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_11, rt::to_object(::core::clone::Clone::clone(&provided_4)));
     context.pop_parent();
     ::ferroui_base::styling::StyleBase::__markup_Add_1(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(style_0.clone(), 104, 6)?);
@@ -4491,7 +4491,7 @@ fn build_controls_simplecontrols_xaml_deferred_22(
     let setter_12 = rt::new_setter_with_parent(&context, rt::property(::ferroui_base::Visual::opacity_property()));
     // Controls/SimpleControls.xaml(109,34) Value
     let dynamic_resource_extension_5 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("ThemeDisabledOpacity")));
-    let provided_5 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_5, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_5 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_5, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, style_1.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_12, rt::to_object(::core::clone::Clone::clone(&provided_5)));
     context.pop_parent();
     ::ferroui_base::styling::StyleBase::__markup_Add_1(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(style_1.clone(), 108, 6)?);
@@ -4934,31 +4934,31 @@ fn build_controls_simplecontrols_xaml_deferred_26(
     let setter_0 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::primitives::TemplatedControl::font_family_property()));
     // Controls/SimpleControls.xaml(6,35) Value
     let dynamic_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("ContentControlThemeFontFamily")));
-    let provided_0 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_0 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_0, rt::to_object(::core::clone::Clone::clone(&provided_0)));
     // Controls/SimpleControls.xaml(7,6) Content
     let setter_1 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::primitives::TemplatedControl::background_property()));
     // Controls/SimpleControls.xaml(7,35) Value
     let dynamic_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("ThemeBackgroundBrush")));
-    let provided_1 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_1 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_1, rt::to_object(::core::clone::Clone::clone(&provided_1)));
     // Controls/SimpleControls.xaml(8,6) Content
     let setter_2 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::TopLevel::transparency_background_fallback_property()));
     // Controls/SimpleControls.xaml(8,55) Value
     let dynamic_resource_extension_2 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("HighlightForegroundColor")));
-    let provided_2 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_2, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_2 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_2, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_2, rt::to_object(::core::clone::Clone::clone(&provided_2)));
     // Controls/SimpleControls.xaml(9,6) Content
     let setter_3 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::primitives::TemplatedControl::foreground_property()));
     // Controls/SimpleControls.xaml(9,35) Value
     let dynamic_resource_extension_3 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("ThemeForegroundBrush")));
-    let provided_3 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_3, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_3 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_3, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_3, rt::to_object(::core::clone::Clone::clone(&provided_3)));
     // Controls/SimpleControls.xaml(10,6) Content
     let setter_4 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::primitives::TemplatedControl::font_size_property()));
     // Controls/SimpleControls.xaml(10,33) Value
     let dynamic_resource_extension_4 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("FontSizeNormal")));
-    let provided_4 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_4, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_4 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_4, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_4, rt::to_object(::core::clone::Clone::clone(&provided_4)));
     // Controls/SimpleControls.xaml(11,6) Content
     let setter_5 = rt::new_setter(rt::property(::ferroui_controls::primitives::TemplatedControl::template_property()));
@@ -5161,25 +5161,25 @@ fn build_controls_simplecontrols_xaml_deferred_30(
     let setter_0 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::primitives::TemplatedControl::background_property()));
     // Controls/SimpleControls.xaml(6,35) Value
     let dynamic_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("ThemeBackgroundBrush")));
-    let provided_0 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_0 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_0, rt::to_object(::core::clone::Clone::clone(&provided_0)));
     // Controls/SimpleControls.xaml(7,6) Content
     let setter_1 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::AutoCompleteBox::placeholder_foreground_property()));
     // Controls/SimpleControls.xaml(7,46) Value
     let dynamic_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("ThemeForegroundLowBrush")));
-    let provided_1 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_1 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_1, rt::to_object(::core::clone::Clone::clone(&provided_1)));
     // Controls/SimpleControls.xaml(8,6) Content
     let setter_2 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::primitives::TemplatedControl::border_brush_property()));
     // Controls/SimpleControls.xaml(8,36) Value
     let dynamic_resource_extension_2 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("ThemeBorderMidBrush")));
-    let provided_2 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_2, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_2 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_2, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_2, rt::to_object(::core::clone::Clone::clone(&provided_2)));
     // Controls/SimpleControls.xaml(9,6) Content
     let setter_3 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::primitives::TemplatedControl::border_thickness_property()));
     // Controls/SimpleControls.xaml(9,40) Value
     let dynamic_resource_extension_3 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("ThemeBorderThickness")));
-    let provided_3 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_3, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_3 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_3, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_3, rt::to_object(::core::clone::Clone::clone(&provided_3)));
     // Controls/SimpleControls.xaml(10,6) Content
     rt::add_setter(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::property(::ferroui_controls::primitives::TemplatedControl::padding_property()), rt::to_object(::ferroui_base::Thickness::__markup_new_3(4.0_f64, 4.0_f64, 4.0_f64, 4.0_f64)));
@@ -5541,7 +5541,7 @@ fn build_controls_simplecontrols_xaml_deferred_34(
     let setter_0 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::primitives::TemplatedControl::border_brush_property()));
     // Controls/SimpleControls.xaml(34,46) Value
     let dynamic_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("ErrorBrush")));
-    let provided_0 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_0 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, style_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_0, rt::to_object(::core::clone::Clone::clone(&provided_0)));
     context.pop_parent();
     rt::invoked(::ferroui_base::styling::Styles::__markup_Add_0(&styles_collection_0, rt::cast(style_0.clone(), 33, 14)?), 33, 14)?;
@@ -5598,13 +5598,13 @@ fn build_controls_simplecontrols_xaml_deferred_35(
     let setter_2 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::primitives::TemplatedControl::background_property()));
     // Controls/SimpleControls.xaml(8,35) Value
     let dynamic_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("ThemeBackgroundBrush")));
-    let provided_0 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_0 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_2, rt::to_object(::core::clone::Clone::clone(&provided_0)));
     // Controls/SimpleControls.xaml(9,6) Content
     let setter_3 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::primitives::TemplatedControl::border_brush_property()));
     // Controls/SimpleControls.xaml(9,36) Value
     let dynamic_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("ThemeBorderMidBrush")));
-    let provided_1 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_1 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_3, rt::to_object(::core::clone::Clone::clone(&provided_1)));
     // Controls/SimpleControls.xaml(10,6) Content
     rt::add_setter(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::property(::ferroui_controls::primitives::TemplatedControl::border_thickness_property()), rt::to_object(::ferroui_base::Thickness::__markup_new_3(1.0_f64, 1.0_f64, 1.0_f64, 1.0_f64)));
@@ -5728,13 +5728,13 @@ fn build_controls_simplecontrols_xaml_deferred_37(
     let setter_0 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::primitives::TemplatedControl::background_property()));
     // Controls/SimpleControls.xaml(6,35) Value
     let dynamic_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("ThemeBackgroundBrush")));
-    let provided_0 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_0 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_0, rt::to_object(::core::clone::Clone::clone(&provided_0)));
     // Controls/SimpleControls.xaml(7,6) Content
     let setter_1 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::primitives::TemplatedControl::border_brush_property()));
     // Controls/SimpleControls.xaml(7,36) Value
     let dynamic_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("ThemeBorderMidBrush")));
-    let provided_1 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_1 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_1, rt::to_object(::core::clone::Clone::clone(&provided_1)));
     // Controls/SimpleControls.xaml(8,6) Content
     rt::add_setter(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::property(::ferroui_controls::primitives::TemplatedControl::border_thickness_property()), rt::to_object(::ferroui_base::Thickness::__markup_new_3(1.0_f64, 1.0_f64, 1.0_f64, 1.0_f64)));
@@ -5864,7 +5864,7 @@ fn build_controls_simplecontrols_xaml_deferred_39(
     let setter_3 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::primitives::TemplatedControl::background_property()));
     // Controls/SimpleControls.xaml(9,35) Value
     let dynamic_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("ThemeControlMidBrush")));
-    let provided_0 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_0 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_3, rt::to_object(::core::clone::Clone::clone(&provided_0)));
     // Controls/SimpleControls.xaml(10,6) Content
     let setter_4 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::GridSplitter::preview_content_property()));
@@ -5956,7 +5956,7 @@ fn build_controls_simplecontrols_xaml_deferred_42(
     let setter_3 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::primitives::TemplatedControl::foreground_property()));
     // Controls/SimpleControls.xaml(17,35) Value
     let dynamic_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("ThemeAccentBrush")));
-    let provided_0 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_0 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_3, rt::to_object(::core::clone::Clone::clone(&provided_0)));
     // Controls/SimpleControls.xaml(18,6) Content
     rt::add_setter(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::property(::ferroui_controls::primitives::TemplatedControl::border_brush_property()), rt::to_object(::ferroui_base::media::immutable::ImmutableSolidColorBrush::__markup_new_0(16777215_u32)));
@@ -5964,7 +5964,7 @@ fn build_controls_simplecontrols_xaml_deferred_42(
     let setter_5 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::primitives::TemplatedControl::border_thickness_property()));
     // Controls/SimpleControls.xaml(19,40) Value
     let dynamic_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("ThemeBorderThickness")));
-    let provided_1 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_1 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_5, rt::to_object(::core::clone::Clone::clone(&provided_1)));
     // Controls/SimpleControls.xaml(20,6) Content
     rt::add_setter(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::property(::ferroui_controls::primitives::TemplatedControl::padding_property()), rt::to_object(::ferroui_base::Thickness::__markup_new_3(4.0_f64, 4.0_f64, 4.0_f64, 4.0_f64)));
@@ -6009,7 +6009,7 @@ fn build_controls_simplecontrols_xaml_deferred_42(
     let setter_12 = rt::new_setter_with_parent(&context, rt::property(::ferroui_base::Visual::opacity_property()));
     // Controls/SimpleControls.xaml(46,34) Value
     let dynamic_resource_extension_2 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("ThemeDisabledOpacity")));
-    let provided_2 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_2, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_2 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_2, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, style_1.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_12, rt::to_object(::core::clone::Clone::clone(&provided_2)));
     context.pop_parent();
     ::ferroui_base::styling::StyleBase::__markup_Add_1(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(style_1.clone(), 45, 6)?);
@@ -6028,7 +6028,7 @@ fn build_controls_simplecontrols_xaml_deferred_42(
     let setter_13 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::presenters::ContentPresenter::foreground_property()));
     // Controls/SimpleControls.xaml(50,37) Value
     let dynamic_resource_extension_3 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("HyperlinkVisitedBrush")));
-    let provided_3 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_3, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_3 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_3, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, style_2.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_13, rt::to_object(::core::clone::Clone::clone(&provided_3)));
     context.pop_parent();
     ::ferroui_base::styling::StyleBase::__markup_Add_1(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(style_2.clone(), 49, 6)?);
@@ -6206,7 +6206,7 @@ fn build_controls_simplecontrols_xaml_deferred_46(
     let setter_5 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::presenters::ContentPresenter::background_property()));
     // Controls/SimpleControls.xaml(26,37) Value
     let dynamic_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("ThemeControlHighlightMidBrush")));
-    let provided_0 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_0 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, style_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_5, rt::to_object(::core::clone::Clone::clone(&provided_0)));
     context.pop_parent();
     ::ferroui_base::styling::StyleBase::__markup_Add_1(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(style_0.clone(), 25, 6)?);
@@ -6224,7 +6224,7 @@ fn build_controls_simplecontrols_xaml_deferred_46(
     let setter_6 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::presenters::ContentPresenter::background_property()));
     // Controls/SimpleControls.xaml(30,37) Value
     let dynamic_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("ThemeAccentBrush4")));
-    let provided_1 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_1 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, style_1.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_6, rt::to_object(::core::clone::Clone::clone(&provided_1)));
     context.pop_parent();
     ::ferroui_base::styling::StyleBase::__markup_Add_1(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(style_1.clone(), 29, 6)?);
@@ -6243,7 +6243,7 @@ fn build_controls_simplecontrols_xaml_deferred_46(
     let setter_7 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::presenters::ContentPresenter::background_property()));
     // Controls/SimpleControls.xaml(34,37) Value
     let dynamic_resource_extension_2 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("ThemeAccentBrush3")));
-    let provided_2 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_2, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_2 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_2, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, style_2.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_7, rt::to_object(::core::clone::Clone::clone(&provided_2)));
     context.pop_parent();
     ::ferroui_base::styling::StyleBase::__markup_Add_1(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(style_2.clone(), 33, 6)?);
@@ -6262,7 +6262,7 @@ fn build_controls_simplecontrols_xaml_deferred_46(
     let setter_8 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::presenters::ContentPresenter::background_property()));
     // Controls/SimpleControls.xaml(38,37) Value
     let dynamic_resource_extension_3 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("ThemeAccentBrush3")));
-    let provided_3 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_3, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_3 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_3, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, style_3.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_8, rt::to_object(::core::clone::Clone::clone(&provided_3)));
     context.pop_parent();
     ::ferroui_base::styling::StyleBase::__markup_Add_1(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(style_3.clone(), 37, 6)?);
@@ -6282,7 +6282,7 @@ fn build_controls_simplecontrols_xaml_deferred_46(
     let setter_9 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::presenters::ContentPresenter::background_property()));
     // Controls/SimpleControls.xaml(42,37) Value
     let dynamic_resource_extension_4 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("ThemeAccentBrush2")));
-    let provided_4 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_4, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_4 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_4, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, style_4.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_9, rt::to_object(::core::clone::Clone::clone(&provided_4)));
     context.pop_parent();
     ::ferroui_base::styling::StyleBase::__markup_Add_1(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(style_4.clone(), 41, 6)?);
@@ -6363,19 +6363,19 @@ fn build_controls_simplecontrols_xaml_deferred_48(
     let setter_0 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::primitives::TemplatedControl::background_property()));
     // Controls/SimpleControls.xaml(6,35) Value
     let dynamic_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("ThemeBackgroundBrush")));
-    let provided_0 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_0 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_0, rt::to_object(::core::clone::Clone::clone(&provided_0)));
     // Controls/SimpleControls.xaml(7,6) Content
     let setter_1 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::primitives::TemplatedControl::border_brush_property()));
     // Controls/SimpleControls.xaml(7,36) Value
     let dynamic_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("ThemeBorderMidBrush")));
-    let provided_1 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_1 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_1, rt::to_object(::core::clone::Clone::clone(&provided_1)));
     // Controls/SimpleControls.xaml(8,6) Content
     let setter_2 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::primitives::TemplatedControl::border_thickness_property()));
     // Controls/SimpleControls.xaml(8,40) Value
     let dynamic_resource_extension_2 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("ThemeBorderThickness")));
-    let provided_2 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_2, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_2 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_2, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_2, rt::to_object(::core::clone::Clone::clone(&provided_2)));
     // Controls/SimpleControls.xaml(9,6) Content
     rt::add_setter(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::property(::ferroui_controls::primitives::TemplatedControl::padding_property()), rt::to_object(::ferroui_base::Thickness::__markup_new_3(4.0_f64, 4.0_f64, 4.0_f64, 4.0_f64)));
@@ -6408,7 +6408,7 @@ fn build_controls_simplecontrols_xaml_deferred_48(
     let setter_8 = rt::new_setter_with_parent(&context, rt::property(::ferroui_base::Visual::opacity_property()));
     // Controls/SimpleControls.xaml(37,34) Value
     let dynamic_resource_extension_3 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("ThemeDisabledOpacity")));
-    let provided_3 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_3, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_3 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_3, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, style_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_8, rt::to_object(::core::clone::Clone::clone(&provided_3)));
     context.pop_parent();
     ::ferroui_base::styling::StyleBase::__markup_Add_1(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(style_0.clone(), 36, 6)?);
@@ -6587,13 +6587,13 @@ fn build_controls_simplecontrols_xaml_deferred_53(
     let setter_2 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::primitives::TemplatedControl::font_size_property()));
     // Controls/SimpleControls.xaml(8,33) Value
     let dynamic_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("FontSizeLarge")));
-    let provided_0 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_0 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_2, rt::to_object(::core::clone::Clone::clone(&provided_0)));
     // Controls/SimpleControls.xaml(9,6) Content
     let setter_3 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::primitives::TemplatedControl::foreground_property()));
     // Controls/SimpleControls.xaml(9,35) Value
     let dynamic_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("ThemeForegroundLowBrush")));
-    let provided_1 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_1 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_3, rt::to_object(::core::clone::Clone::clone(&provided_1)));
     // Controls/SimpleControls.xaml(10,6) Content
     let setter_4 = rt::new_setter(rt::property(::ferroui_controls::primitives::TemplatedControl::template_property()));
@@ -6618,7 +6618,7 @@ fn build_controls_simplecontrols_xaml_deferred_53(
     let setter_5 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::presenters::ContentPresenter::foreground_property()));
     // Controls/SimpleControls.xaml(25,37) Value
     let dynamic_resource_extension_2 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("ThemeForegroundBrush")));
-    let provided_2 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_2, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_2 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_2, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, style_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_5, rt::to_object(::core::clone::Clone::clone(&provided_2)));
     context.pop_parent();
     ::ferroui_base::styling::StyleBase::__markup_Add_1(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(style_0.clone(), 24, 6)?);
@@ -6964,13 +6964,13 @@ fn build_controls_simplecontrols_xaml_deferred_57(
     let setter_1 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::primitives::TemplatedControl::font_size_property()));
     // Controls/SimpleControls.xaml(7,33) Value
     let dynamic_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("FontSizeLarge")));
-    let provided_0 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_0 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_1, rt::to_object(::core::clone::Clone::clone(&provided_0)));
     // Controls/SimpleControls.xaml(8,6) Content
     let setter_2 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::primitives::TemplatedControl::foreground_property()));
     // Controls/SimpleControls.xaml(8,35) Value
     let dynamic_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("ThemeForegroundLowBrush")));
-    let provided_1 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_1 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_2, rt::to_object(::core::clone::Clone::clone(&provided_1)));
     // Controls/SimpleControls.xaml(9,6) Content
     rt::add_setter(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::property(::ferroui_controls::ContentControl::horizontal_content_alignment_property()), rt::to_object(::ferroui_base::layout::HorizontalAlignment::Left));
@@ -7011,7 +7011,7 @@ fn build_controls_simplecontrols_xaml_deferred_57(
     let setter_7 = rt::new_setter_with_parent(&context, rt::property(::ferroui_base::Visual::opacity_property()));
     // Controls/SimpleControls.xaml(32,34) Value
     let dynamic_resource_extension_2 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("ThemeDisabledOpacity")));
-    let provided_2 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_2, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_2 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_2, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, style_1.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_7, rt::to_object(::core::clone::Clone::clone(&provided_2)));
     context.pop_parent();
     ::ferroui_base::styling::StyleBase::__markup_Add_1(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(style_1.clone(), 31, 6)?);
@@ -7030,7 +7030,7 @@ fn build_controls_simplecontrols_xaml_deferred_57(
     let setter_8 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::presenters::ContentPresenter::background_property()));
     // Controls/SimpleControls.xaml(35,37) Value
     let dynamic_resource_extension_3 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("ThemeControlHighlightMidBrush")));
-    let provided_3 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_3, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_3 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_3, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, style_2.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_8, rt::to_object(::core::clone::Clone::clone(&provided_3)));
     context.pop_parent();
     ::ferroui_base::styling::StyleBase::__markup_Add_1(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(style_2.clone(), 34, 6)?);
@@ -7049,7 +7049,7 @@ fn build_controls_simplecontrols_xaml_deferred_57(
     let setter_9 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::presenters::ContentPresenter::background_property()));
     // Controls/SimpleControls.xaml(38,37) Value
     let dynamic_resource_extension_4 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("ThemeAccentBrush4")));
-    let provided_4 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_4, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_4 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_4, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, style_3.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_9, rt::to_object(::core::clone::Clone::clone(&provided_4)));
     context.pop_parent();
     ::ferroui_base::styling::StyleBase::__markup_Add_1(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(style_3.clone(), 37, 6)?);
@@ -7069,7 +7069,7 @@ fn build_controls_simplecontrols_xaml_deferred_57(
     let setter_10 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::presenters::ContentPresenter::background_property()));
     // Controls/SimpleControls.xaml(41,37) Value
     let dynamic_resource_extension_5 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("ThemeAccentBrush3")));
-    let provided_5 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_5, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_5 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_5, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, style_4.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_10, rt::to_object(::core::clone::Clone::clone(&provided_5)));
     context.pop_parent();
     ::ferroui_base::styling::StyleBase::__markup_Add_1(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(style_4.clone(), 40, 6)?);
@@ -7089,7 +7089,7 @@ fn build_controls_simplecontrols_xaml_deferred_57(
     let setter_11 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::presenters::ContentPresenter::background_property()));
     // Controls/SimpleControls.xaml(44,37) Value
     let dynamic_resource_extension_6 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("ThemeAccentBrush3")));
-    let provided_6 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_6, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_6 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_6, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, style_5.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_11, rt::to_object(::core::clone::Clone::clone(&provided_6)));
     context.pop_parent();
     ::ferroui_base::styling::StyleBase::__markup_Add_1(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(style_5.clone(), 43, 6)?);
@@ -7110,7 +7110,7 @@ fn build_controls_simplecontrols_xaml_deferred_57(
     let setter_12 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::presenters::ContentPresenter::background_property()));
     // Controls/SimpleControls.xaml(47,37) Value
     let dynamic_resource_extension_7 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("ThemeAccentBrush2")));
-    let provided_7 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_7, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_7 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_7, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, style_6.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_12, rt::to_object(::core::clone::Clone::clone(&provided_7)));
     context.pop_parent();
     ::ferroui_base::styling::StyleBase::__markup_Add_1(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(style_6.clone(), 46, 6)?);
@@ -7201,7 +7201,7 @@ fn build_controls_simplecontrols_xaml_deferred_59(
     let setter_0 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::primitives::TemplatedControl::foreground_property()));
     // Controls/SimpleControls.xaml(9,35) Value
     let dynamic_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("ThemeForegroundBrush")));
-    let provided_0 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_0 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_0, rt::to_object(::core::clone::Clone::clone(&provided_0)));
     // Controls/SimpleControls.xaml(10,6) Content
     rt::add_setter(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::property(::ferroui_controls::primitives::TemplatedControl::background_property()), rt::to_object(::ferroui_base::media::immutable::ImmutableSolidColorBrush::__markup_new_0(16777215_u32)));
@@ -7215,13 +7215,13 @@ fn build_controls_simplecontrols_xaml_deferred_59(
     let setter_5 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::PipsPager::previous_button_theme_property()));
     // Controls/SimpleControls.xaml(14,44) Value
     let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::boxed(<::ferroui_controls::Button as ::ferroui_base::StaticType>::TYPE));
-    let provided_1 = rt::provide_value_invoked(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 14, 44)?;
+    let provided_1 = rt::provide_value_invoked(&context, rt::setter_value_property(), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 14, 44)?;
     rt::add_setter_value_with_parent(&context, control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_5, ::core::clone::Clone::clone(&provided_1));
     // Controls/SimpleControls.xaml(15,6) Content
     let setter_6 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::PipsPager::next_button_theme_property()));
     // Controls/SimpleControls.xaml(15,40) Value
     let static_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::boxed(<::ferroui_controls::Button as ::ferroui_base::StaticType>::TYPE));
-    let provided_2 = rt::provide_value_invoked(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &static_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 15, 40)?;
+    let provided_2 = rt::provide_value_invoked(&context, rt::setter_value_property(), &static_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 15, 40)?;
     rt::add_setter_value_with_parent(&context, control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_6, ::core::clone::Clone::clone(&provided_2));
     // Controls/SimpleControls.xaml(16,6) Content
     let setter_7 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::primitives::TemplatedControl::template_property()));
@@ -7541,7 +7541,7 @@ fn build_controls_simplecontrols_xaml_deferred_60(
     let setter_10 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::shapes::Shape::fill_property()));
     // Controls/SimpleControls.xaml(86,49) Value
     let dynamic_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("ThemeControlHighBrush")));
-    let provided_7 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_7 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, style_2.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_10, rt::to_object(::core::clone::Clone::clone(&provided_7)));
     context.pop_parent();
     rt::invoked(::ferroui_base::styling::Styles::__markup_Add_0(&styles_collection_2, rt::cast(style_2.clone(), 85, 22)?), 85, 22)?;
@@ -7561,7 +7561,7 @@ fn build_controls_simplecontrols_xaml_deferred_60(
     let setter_11 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::shapes::Shape::fill_property()));
     // Controls/SimpleControls.xaml(89,49) Value
     let dynamic_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("ThemeAccentBrush")));
-    let provided_8 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_8 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, style_3.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_11, rt::to_object(::core::clone::Clone::clone(&provided_8)));
     context.pop_parent();
     rt::invoked(::ferroui_base::styling::Styles::__markup_Add_0(&styles_collection_3, rt::cast(style_3.clone(), 88, 22)?), 88, 22)?;
@@ -7597,7 +7597,7 @@ fn build_controls_simplecontrols_xaml_deferred_60(
     let setter_14 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::shapes::Shape::fill_property()));
     // Controls/SimpleControls.xaml(97,49) Value
     let dynamic_resource_extension_2 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("ThemeAccentBrush2")));
-    let provided_9 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_2, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_9 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_2, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, style_5.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_14, rt::to_object(::core::clone::Clone::clone(&provided_9)));
     context.pop_parent();
     rt::invoked(::ferroui_base::styling::Styles::__markup_Add_0(&styles_collection_5, rt::cast(style_5.clone(), 96, 22)?), 96, 22)?;
@@ -7617,7 +7617,7 @@ fn build_controls_simplecontrols_xaml_deferred_60(
     let setter_15 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::shapes::Shape::fill_property()));
     // Controls/SimpleControls.xaml(100,49) Value
     let dynamic_resource_extension_3 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("ThemeAccentBrush3")));
-    let provided_10 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_3, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_10 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_3, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, style_6.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_15, rt::to_object(::core::clone::Clone::clone(&provided_10)));
     context.pop_parent();
     rt::invoked(::ferroui_base::styling::Styles::__markup_Add_0(&styles_collection_6, rt::cast(style_6.clone(), 99, 22)?), 99, 22)?;
@@ -7799,19 +7799,19 @@ fn build_controls_simplecontrols_xaml_deferred_63(
     let setter_2 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::primitives::TemplatedControl::foreground_property()));
     // Controls/SimpleControls.xaml(8,35) Value
     let dynamic_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("ThemeForegroundBrush")));
-    let provided_0 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_0 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_2, rt::to_object(::core::clone::Clone::clone(&provided_0)));
     // Controls/SimpleControls.xaml(9,6) Content
     let setter_3 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::primitives::TemplatedControl::font_size_property()));
     // Controls/SimpleControls.xaml(9,33) Value
     let dynamic_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("FontSizeNormal")));
-    let provided_1 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_1 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_3, rt::to_object(::core::clone::Clone::clone(&provided_1)));
     // Controls/SimpleControls.xaml(10,6) Content
     let setter_4 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::primitives::TemplatedControl::font_family_property()));
     // Controls/SimpleControls.xaml(10,35) Value
     let dynamic_resource_extension_2 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("ContentControlThemeFontFamily")));
-    let provided_2 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_2, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_2 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_2, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_4, rt::to_object(::core::clone::Clone::clone(&provided_2)));
     // Controls/SimpleControls.xaml(11,6) Content
     let setter_5 = rt::new_setter(rt::property(::ferroui_controls::primitives::TemplatedControl::font_weight_property()));
@@ -7929,19 +7929,19 @@ fn build_controls_simplecontrols_xaml_deferred_65(
     let setter_0 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::primitives::TemplatedControl::foreground_property()));
     // Controls/SimpleControls.xaml(6,35) Value
     let dynamic_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("ThemeForegroundBrush")));
-    let provided_0 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_0 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_0, rt::to_object(::core::clone::Clone::clone(&provided_0)));
     // Controls/SimpleControls.xaml(7,6) Content
     let setter_1 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::primitives::TemplatedControl::font_size_property()));
     // Controls/SimpleControls.xaml(7,33) Value
     let dynamic_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("FontSizeNormal")));
-    let provided_1 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_1 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_1, rt::to_object(::core::clone::Clone::clone(&provided_1)));
     // Controls/SimpleControls.xaml(8,6) Content
     let setter_2 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::primitives::TemplatedControl::font_family_property()));
     // Controls/SimpleControls.xaml(8,35) Value
     let dynamic_resource_extension_2 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("ContentControlThemeFontFamily")));
-    let provided_2 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_2, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_2 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_2, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_2, rt::to_object(::core::clone::Clone::clone(&provided_2)));
     // Controls/SimpleControls.xaml(9,6) Content
     let setter_3 = rt::new_setter(rt::property(::ferroui_controls::primitives::TemplatedControl::font_weight_property()));
@@ -8284,25 +8284,25 @@ fn build_controls_simplecontrols_xaml_deferred_71(
     let setter_0 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::primitives::TemplatedControl::foreground_property()));
     // Controls/SimpleControls.xaml(6,35) Value
     let dynamic_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("ThemeForegroundBrush")));
-    let provided_0 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_0 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_0, rt::to_object(::core::clone::Clone::clone(&provided_0)));
     // Controls/SimpleControls.xaml(7,6) Content
     let setter_1 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::primitives::TemplatedControl::background_property()));
     // Controls/SimpleControls.xaml(7,35) Value
     let dynamic_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("ThemeBackgroundBrush")));
-    let provided_1 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_1 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_1, rt::to_object(::core::clone::Clone::clone(&provided_1)));
     // Controls/SimpleControls.xaml(8,6) Content
     let setter_2 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::primitives::TemplatedControl::font_size_property()));
     // Controls/SimpleControls.xaml(8,33) Value
     let dynamic_resource_extension_2 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("FontSizeNormal")));
-    let provided_2 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_2, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_2 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_2, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_2, rt::to_object(::core::clone::Clone::clone(&provided_2)));
     // Controls/SimpleControls.xaml(9,6) Content
     let setter_3 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::primitives::TemplatedControl::font_family_property()));
     // Controls/SimpleControls.xaml(9,35) Value
     let dynamic_resource_extension_3 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("ContentControlThemeFontFamily")));
-    let provided_3 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_3, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_3 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_3, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_3, rt::to_object(::core::clone::Clone::clone(&provided_3)));
     // Controls/SimpleControls.xaml(10,6) Content
     let setter_4 = rt::new_setter(rt::property(::ferroui_controls::primitives::TemplatedControl::template_property()));
@@ -8524,13 +8524,13 @@ fn build_controls_simplecontrols_xaml_deferred_75(
     let setter_1 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::primitives::TemplatedControl::border_brush_property()));
     // Controls/SimpleControls.xaml(7,36) Value
     let dynamic_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("ThemeBorderMidBrush")));
-    let provided_0 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_0 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_1, rt::to_object(::core::clone::Clone::clone(&provided_0)));
     // Controls/SimpleControls.xaml(8,6) Content
     let setter_2 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::primitives::TemplatedControl::border_thickness_property()));
     // Controls/SimpleControls.xaml(8,40) Value
     let dynamic_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("ThemeBorderThickness")));
-    let provided_1 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_1 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_2, rt::to_object(::core::clone::Clone::clone(&provided_1)));
     // Controls/SimpleControls.xaml(9,6) Content
     rt::add_setter(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::property(::ferroui_controls::primitives::TemplatedControl::padding_property()), rt::to_object(::ferroui_base::Thickness::__markup_new_3(4.0_f64, 4.0_f64, 4.0_f64, 4.0_f64)));
@@ -8645,7 +8645,7 @@ fn build_controls_simplecontrols_xaml_deferred_77(
     let setter_1 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::primitives::TemplatedControl::background_property()));
     // Controls/SimpleControls.xaml(7,35) Value
     let dynamic_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("ThemeControlMidBrush")));
-    let provided_0 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_0 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_1, rt::to_object(::core::clone::Clone::clone(&provided_0)));
     // Controls/SimpleControls.xaml(8,6) Content
     rt::add_setter(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::property(::ferroui_base::layout::Layoutable::margin_property()), rt::to_object(::ferroui_base::Thickness::__markup_new_3(29.0_f64, 1.0_f64, 0.0_f64, 1.0_f64)));
@@ -8706,13 +8706,13 @@ fn build_controls_simplecontrols_xaml_deferred_79(
     let setter_0 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::primitives::TemplatedControl::background_property()));
     // Controls/SimpleControls.xaml(6,35) Value
     let dynamic_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("ThemeBackgroundBrush")));
-    let provided_0 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_0 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_0, rt::to_object(::core::clone::Clone::clone(&provided_0)));
     // Controls/SimpleControls.xaml(7,6) Content
     let setter_1 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::primitives::TemplatedControl::border_brush_property()));
     // Controls/SimpleControls.xaml(7,36) Value
     let dynamic_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("ThemeBorderMidBrush")));
-    let provided_1 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_1 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_1, rt::to_object(::core::clone::Clone::clone(&provided_1)));
     // Controls/SimpleControls.xaml(8,6) Content
     rt::add_setter(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::property(::ferroui_controls::primitives::TemplatedControl::border_thickness_property()), rt::to_object(::ferroui_base::Thickness::__markup_new_3(1.0_f64, 1.0_f64, 1.0_f64, 1.0_f64)));
@@ -8724,7 +8724,7 @@ fn build_controls_simplecontrols_xaml_deferred_79(
     let setter_5 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::TextBlock::font_size_property()));
     // Controls/SimpleControls.xaml(11,43) Value
     let dynamic_resource_extension_2 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("FontSizeNormal")));
-    let provided_2 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_2, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_2 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_2, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_5, rt::to_object(::core::clone::Clone::clone(&provided_2)));
     // Controls/SimpleControls.xaml(12,6) Content
     let setter_6 = rt::new_setter(rt::property(::ferroui_controls::TextBlock::font_weight_property()));
@@ -8833,19 +8833,19 @@ fn build_controls_simplecontrols_xaml_deferred_81(
     let setter_0 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::primitives::TemplatedControl::foreground_property()));
     // Controls/SimpleControls.xaml(13,35) Value
     let dynamic_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("ThemeForegroundBrush")));
-    let provided_0 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_0 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_0, rt::to_object(::core::clone::Clone::clone(&provided_0)));
     // Controls/SimpleControls.xaml(14,6) Content
     let setter_1 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::primitives::TemplatedControl::background_property()));
     // Controls/SimpleControls.xaml(14,35) Value
     let dynamic_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("ThemeAccentBrush2")));
-    let provided_1 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_1 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_1, rt::to_object(::core::clone::Clone::clone(&provided_1)));
     // Controls/SimpleControls.xaml(15,6) Content
     let setter_2 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::primitives::TemplatedControl::font_size_property()));
     // Controls/SimpleControls.xaml(15,33) Value
     let dynamic_resource_extension_2 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("FontSizeSmall")));
-    let provided_2 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_2, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_2 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_2, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_2, rt::to_object(::core::clone::Clone::clone(&provided_2)));
     // Controls/SimpleControls.xaml(16,6) Content
     rt::add_setter(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::property(::ferroui_controls::ContentControl::horizontal_content_alignment_property()), rt::to_object(::ferroui_base::layout::HorizontalAlignment::Center));
@@ -8921,7 +8921,7 @@ fn build_controls_simplecontrols_xaml_deferred_81(
     let setter_12 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::presenters::ContentPresenter::foreground_property()));
     // Controls/SimpleControls.xaml(67,37) Value
     let dynamic_resource_extension_3 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("ThemeForegroundLowBrush")));
-    let provided_3 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_3, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_3 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_3, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, style_3.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_12, rt::to_object(::core::clone::Clone::clone(&provided_3)));
     context.pop_parent();
     ::ferroui_base::styling::StyleBase::__markup_Add_1(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(style_3.clone(), 66, 6)?);
@@ -9080,19 +9080,19 @@ fn build_controls_simplecontrols_xaml_deferred_83(
     let setter_0 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::primitives::TemplatedControl::background_property()));
     // Controls/SimpleControls.xaml(13,35) Value
     let dynamic_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("ThemeAccentBrush2")));
-    let provided_0 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_0 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_0, rt::to_object(::core::clone::Clone::clone(&provided_0)));
     // Controls/SimpleControls.xaml(14,6) Content
     let setter_1 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::primitives::TemplatedControl::foreground_property()));
     // Controls/SimpleControls.xaml(14,35) Value
     let dynamic_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("ThemeForegroundBrush")));
-    let provided_1 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_1 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_1, rt::to_object(::core::clone::Clone::clone(&provided_1)));
     // Controls/SimpleControls.xaml(15,6) Content
     let setter_2 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::primitives::TemplatedControl::font_size_property()));
     // Controls/SimpleControls.xaml(15,33) Value
     let dynamic_resource_extension_2 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("FontSizeSmall")));
-    let provided_2 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_2, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_2 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_2, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_2, rt::to_object(::core::clone::Clone::clone(&provided_2)));
     // Controls/SimpleControls.xaml(16,6) Content
     rt::add_setter(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::property(::ferroui_controls::ContentControl::horizontal_content_alignment_property()), rt::to_object(::ferroui_base::layout::HorizontalAlignment::Center));
@@ -9220,7 +9220,7 @@ fn build_controls_simplecontrols_xaml_deferred_83(
     let setter_16 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::presenters::ContentPresenter::foreground_property()));
     // Controls/SimpleControls.xaml(96,37) Value
     let dynamic_resource_extension_3 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("ThemeForegroundLowBrush")));
-    let provided_3 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_3, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_3 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_3, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, style_7.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_16, rt::to_object(::core::clone::Clone::clone(&provided_3)));
     context.pop_parent();
     ::ferroui_base::styling::StyleBase::__markup_Add_1(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(style_7.clone(), 95, 6)?);
@@ -9239,7 +9239,7 @@ fn build_controls_simplecontrols_xaml_deferred_83(
     let setter_17 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::presenters::ContentPresenter::foreground_property()));
     // Controls/SimpleControls.xaml(99,37) Value
     let dynamic_resource_extension_4 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("ThemeControlLowBrush")));
-    let provided_4 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_4, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_4 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_4, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, style_8.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_17, rt::to_object(::core::clone::Clone::clone(&provided_4)));
     context.pop_parent();
     ::ferroui_base::styling::StyleBase::__markup_Add_1(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(style_8.clone(), 98, 6)?);
@@ -9682,7 +9682,7 @@ fn build_controls_simplecontrols_xaml_deferred_86(
     let setter_6 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::shapes::Shape::fill_property()));
     // Controls/SimpleControls.xaml(54,45) Value
     let dynamic_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("ThemeForegroundBrush")));
-    let provided_5 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_5 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, style_3.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_6, rt::to_object(::core::clone::Clone::clone(&provided_5)));
     context.pop_parent();
     rt::invoked(::ferroui_base::styling::Styles::__markup_Add_0(&styles_collection_3, rt::cast(style_3.clone(), 53, 20)?), 53, 20)?;
@@ -9702,7 +9702,7 @@ fn build_controls_simplecontrols_xaml_deferred_86(
     let setter_7 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::shapes::Shape::fill_property()));
     // Controls/SimpleControls.xaml(57,45) Value
     let dynamic_resource_extension_2 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("HighlightBrush")));
-    let provided_6 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_2, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_6 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_2, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, style_4.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_7, rt::to_object(::core::clone::Clone::clone(&provided_6)));
     context.pop_parent();
     rt::invoked(::ferroui_base::styling::Styles::__markup_Add_0(&styles_collection_4, rt::cast(style_4.clone(), 56, 20)?), 56, 20)?;
@@ -9720,7 +9720,7 @@ fn build_controls_simplecontrols_xaml_deferred_86(
     let setter_8 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::primitives::TemplatedControl::foreground_property()));
     // Controls/SimpleControls.xaml(61,51) Value
     let dynamic_resource_extension_3 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("HighlightBrush")));
-    let provided_7 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_3, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_7 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_3, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, style_5.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_8, rt::to_object(::core::clone::Clone::clone(&provided_7)));
     context.pop_parent();
     rt::invoked(::ferroui_base::styling::Styles::__markup_Add_0(&styles_collection_5, rt::cast(style_5.clone(), 60, 20)?), 60, 20)?;
@@ -10347,25 +10347,25 @@ fn build_controls_simplecontrols_xaml_deferred_88(
     let setter_0 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::primitives::TemplatedControl::border_thickness_property()));
     // Controls/SimpleControls.xaml(14,40) Value
     let dynamic_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("ThemeBorderThickness")));
-    let provided_0 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_0 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_0, rt::to_object(::core::clone::Clone::clone(&provided_0)));
     // Controls/SimpleControls.xaml(15,6) Content
     let setter_1 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::primitives::TemplatedControl::border_brush_property()));
     // Controls/SimpleControls.xaml(15,36) Value
     let dynamic_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("ThemeBorderHighBrush")));
-    let provided_1 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_1 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_1, rt::to_object(::core::clone::Clone::clone(&provided_1)));
     // Controls/SimpleControls.xaml(16,6) Content
     let setter_2 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::primitives::TemplatedControl::background_property()));
     // Controls/SimpleControls.xaml(16,35) Value
     let dynamic_resource_extension_2 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("ThemeBackgroundBrush")));
-    let provided_2 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_2, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_2 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_2, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_2, rt::to_object(::core::clone::Clone::clone(&provided_2)));
     // Controls/SimpleControls.xaml(17,6) Content
     let setter_3 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::Calendar::header_background_property()));
     // Controls/SimpleControls.xaml(17,41) Value
     let dynamic_resource_extension_3 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("ThemeAccentBrush2")));
-    let provided_3 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_3, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_3 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_3, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_3, rt::to_object(::core::clone::Clone::clone(&provided_3)));
     // Controls/SimpleControls.xaml(18,6) Content
     let setter_4 = rt::new_setter(rt::property(::ferroui_controls::primitives::TemplatedControl::template_property()));
@@ -10446,25 +10446,25 @@ fn build_controls_simplecontrols_xaml_deferred_90(
     let setter_0 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::primitives::TemplatedControl::background_property()));
     // Controls/SimpleControls.xaml(14,35) Value
     let dynamic_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("ThemeBackgroundBrush")));
-    let provided_0 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_0 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_0, rt::to_object(::core::clone::Clone::clone(&provided_0)));
     // Controls/SimpleControls.xaml(15,6) Content
     let setter_1 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::CalendarDatePicker::placeholder_foreground_property()));
     // Controls/SimpleControls.xaml(15,46) Value
     let dynamic_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("ThemeForegroundLowBrush")));
-    let provided_1 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_1 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_1, rt::to_object(::core::clone::Clone::clone(&provided_1)));
     // Controls/SimpleControls.xaml(16,6) Content
     let setter_2 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::primitives::TemplatedControl::border_brush_property()));
     // Controls/SimpleControls.xaml(16,36) Value
     let dynamic_resource_extension_2 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("ThemeBorderMidBrush")));
-    let provided_2 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_2, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_2 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_2, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_2, rt::to_object(::core::clone::Clone::clone(&provided_2)));
     // Controls/SimpleControls.xaml(17,6) Content
     let setter_3 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::primitives::TemplatedControl::border_thickness_property()));
     // Controls/SimpleControls.xaml(17,40) Value
     let dynamic_resource_extension_3 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("ThemeBorderThickness")));
-    let provided_3 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_3, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_3 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_3, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_3, rt::to_object(::core::clone::Clone::clone(&provided_3)));
     // Controls/SimpleControls.xaml(18,6) Content
     rt::add_setter(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::property(::ferroui_controls::primitives::TemplatedControl::padding_property()), rt::to_object(::ferroui_base::Thickness::__markup_new_3(4.0_f64, 4.0_f64, 4.0_f64, 4.0_f64)));
@@ -10493,7 +10493,7 @@ fn build_controls_simplecontrols_xaml_deferred_90(
     let setter_6 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::primitives::TemplatedControl::border_brush_property()));
     // Controls/SimpleControls.xaml(140,38) Value
     let dynamic_resource_extension_4 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("ThemeBorderHighBrush")));
-    let provided_4 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_4, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_4 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_4, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, style_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_6, rt::to_object(::core::clone::Clone::clone(&provided_4)));
     context.pop_parent();
     ::ferroui_base::styling::StyleBase::__markup_Add_1(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(style_0.clone(), 139, 6)?);
@@ -10589,7 +10589,7 @@ fn build_controls_simplecontrols_xaml_deferred_91(
     let setter_3 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::Border::background_property()));
     // Controls/SimpleControls.xaml(90,45) Value
     let dynamic_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("ThemeAccentBrush4")));
-    let provided_0 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_0 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, style_3.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_3, rt::to_object(::core::clone::Clone::clone(&provided_0)));
     context.pop_parent();
     rt::invoked(::ferroui_base::styling::Styles::__markup_Add_0(&styles_collection_3, rt::cast(style_3.clone(), 89, 14)?), 89, 14)?;
@@ -11021,7 +11021,7 @@ fn build_controls_simplecontrols_xaml_deferred_93(
     let setter_0 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::primitives::TemplatedControl::background_property()));
     // Controls/SimpleControls.xaml(6,35) Value
     let dynamic_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("NotificationCardBackgroundBrush")));
-    let provided_0 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_0 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_0, rt::to_object(::core::clone::Clone::clone(&provided_0)));
     // Controls/SimpleControls.xaml(7,6) Content
     rt::add_setter(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::property(::ferroui_base::layout::Layoutable::use_layout_rounding_property()), rt::to_object(::core::clone::Clone::clone(&true)));
@@ -11031,13 +11031,13 @@ fn build_controls_simplecontrols_xaml_deferred_93(
     let setter_3 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::primitives::TemplatedControl::font_size_property()));
     // Controls/SimpleControls.xaml(9,33) Value
     let dynamic_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("FontSizeLarge")));
-    let provided_1 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_1 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_3, rt::to_object(::core::clone::Clone::clone(&provided_1)));
     // Controls/SimpleControls.xaml(10,6) Content
     let setter_4 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::primitives::TemplatedControl::foreground_property()));
     // Controls/SimpleControls.xaml(10,35) Value
     let dynamic_resource_extension_2 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("NotificationCardForegroundBrush")));
-    let provided_2 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_2, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_2 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_2, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_4, rt::to_object(::core::clone::Clone::clone(&provided_2)));
     // Controls/SimpleControls.xaml(11,6) Content
     rt::add_setter(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::property(::ferroui_base::Visual::render_transform_origin_property()), rt::to_object(::ferroui_base::RelativePoint::__markup_new_1(0.5_f64, 0.75_f64, ::ferroui_base::RelativeUnit::Relative)));
@@ -11312,7 +11312,7 @@ fn build_controls_simplecontrols_xaml_deferred_93(
     let setter_24 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::primitives::TemplatedControl::background_property()));
     // Controls/SimpleControls.xaml(86,37) Value
     let dynamic_resource_extension_3 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("NotificationCardInformationBackgroundBrush")));
-    let provided_3 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_3, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_3 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_3, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, style_3.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_24, rt::to_object(::core::clone::Clone::clone(&provided_3)));
     context.pop_parent();
     ::ferroui_base::styling::StyleBase::__markup_Add_1(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(style_3.clone(), 85, 6)?);
@@ -11328,7 +11328,7 @@ fn build_controls_simplecontrols_xaml_deferred_93(
     let setter_25 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::primitives::TemplatedControl::background_property()));
     // Controls/SimpleControls.xaml(89,37) Value
     let dynamic_resource_extension_4 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("NotificationCardSuccessBackgroundBrush")));
-    let provided_4 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_4, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_4 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_4, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, style_4.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_25, rt::to_object(::core::clone::Clone::clone(&provided_4)));
     context.pop_parent();
     ::ferroui_base::styling::StyleBase::__markup_Add_1(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(style_4.clone(), 88, 6)?);
@@ -11344,7 +11344,7 @@ fn build_controls_simplecontrols_xaml_deferred_93(
     let setter_26 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::primitives::TemplatedControl::background_property()));
     // Controls/SimpleControls.xaml(92,37) Value
     let dynamic_resource_extension_5 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("NotificationCardWarningBackgroundBrush")));
-    let provided_5 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_5, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_5 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_5, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, style_5.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_26, rt::to_object(::core::clone::Clone::clone(&provided_5)));
     context.pop_parent();
     ::ferroui_base::styling::StyleBase::__markup_Add_1(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(style_5.clone(), 91, 6)?);
@@ -11360,7 +11360,7 @@ fn build_controls_simplecontrols_xaml_deferred_93(
     let setter_27 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::primitives::TemplatedControl::background_property()));
     // Controls/SimpleControls.xaml(95,37) Value
     let dynamic_resource_extension_6 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("NotificationCardErrorBackgroundBrush")));
-    let provided_6 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_6, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_6 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_6, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, style_6.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_27, rt::to_object(::core::clone::Clone::clone(&provided_6)));
     context.pop_parent();
     ::ferroui_base::styling::StyleBase::__markup_Add_1(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(style_6.clone(), 94, 6)?);
@@ -11443,25 +11443,25 @@ fn build_controls_simplecontrols_xaml_deferred_95(
     let setter_0 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::primitives::TemplatedControl::background_property()));
     // Controls/SimpleControls.xaml(6,35) Value
     let dynamic_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("ThemeBackgroundBrush")));
-    let provided_0 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_0 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_0, rt::to_object(::core::clone::Clone::clone(&provided_0)));
     // Controls/SimpleControls.xaml(7,6) Content
     let setter_1 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::NumericUpDown::placeholder_foreground_property()));
     // Controls/SimpleControls.xaml(7,46) Value
     let dynamic_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("ThemeForegroundLowBrush")));
-    let provided_1 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_1 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_1, rt::to_object(::core::clone::Clone::clone(&provided_1)));
     // Controls/SimpleControls.xaml(8,6) Content
     let setter_2 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::primitives::TemplatedControl::border_brush_property()));
     // Controls/SimpleControls.xaml(8,36) Value
     let dynamic_resource_extension_2 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("ThemeBorderMidBrush")));
-    let provided_2 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_2, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_2 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_2, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_2, rt::to_object(::core::clone::Clone::clone(&provided_2)));
     // Controls/SimpleControls.xaml(9,6) Content
     let setter_3 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::primitives::TemplatedControl::border_thickness_property()));
     // Controls/SimpleControls.xaml(9,40) Value
     let dynamic_resource_extension_3 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("ThemeBorderThickness")));
-    let provided_3 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_3, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_3 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_3, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_3, rt::to_object(::core::clone::Clone::clone(&provided_3)));
     // Controls/SimpleControls.xaml(10,6) Content
     rt::add_setter(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::property(::ferroui_controls::primitives::TemplatedControl::padding_property()), rt::to_object(::ferroui_base::Thickness::__markup_new_3(4.0_f64, 4.0_f64, 4.0_f64, 4.0_f64)));
@@ -11762,13 +11762,13 @@ fn build_controls_simplecontrols_xaml_deferred_99(
     let setter_3 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::primitives::TemplatedControl::background_property()));
     // Controls/SimpleControls.xaml(13,13) Value
     let dynamic_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("RefreshVisualizerBackground")));
-    let provided_0 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_0 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_3, rt::to_object(::core::clone::Clone::clone(&provided_0)));
     // Controls/SimpleControls.xaml(14,6) Content
     let setter_4 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::primitives::TemplatedControl::foreground_property()));
     // Controls/SimpleControls.xaml(15,13) Value
     let dynamic_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("RefreshVisualizerForeground")));
-    let provided_1 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_1 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_4, rt::to_object(::core::clone::Clone::clone(&provided_1)));
     // Controls/SimpleControls.xaml(16,6) Content
     let setter_5 = rt::new_setter(rt::property(::ferroui_controls::ContentControl::content_property()));
@@ -11855,7 +11855,7 @@ fn build_controls_simplecontrols_xaml_deferred_102(
     let setter_0 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::documents::TextElement::foreground_property()));
     // Controls/SimpleControls.xaml(6,47) Value
     let dynamic_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("ThemeForegroundBrush")));
-    let provided_0 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_0 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_0, rt::to_object(::core::clone::Clone::clone(&provided_0)));
     context.pop_parent();
     ::core::result::Result::Ok(rt::to_value(control_theme_0.clone()))
@@ -12073,13 +12073,13 @@ fn build_controls_simplecontrols_xaml_deferred_105(
     let setter_0 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::primitives::TemplatedControl::background_property()));
     // Controls/SimpleControls.xaml(13,35) Value
     let dynamic_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("ThemeBackgroundBrush")));
-    let provided_0 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_0 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_0, rt::to_object(::core::clone::Clone::clone(&provided_0)));
     // Controls/SimpleControls.xaml(14,6) Content
     let setter_1 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::primitives::TemplatedControl::foreground_property()));
     // Controls/SimpleControls.xaml(14,35) Value
     let dynamic_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("ThemeForegroundBrush")));
-    let provided_1 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_1 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_1, rt::to_object(::core::clone::Clone::clone(&provided_1)));
     // Controls/SimpleControls.xaml(15,6) Content
     let setter_2 = rt::new_setter(rt::property(::ferroui_controls::primitives::TemplatedControl::template_property()));
@@ -12207,7 +12207,7 @@ fn build_controls_simplecontrols_xaml_deferred_107(
     let setter_0 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::primitives::TemplatedControl::background_property()));
     // Controls/SimpleControls.xaml(18,35) Value
     let dynamic_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("ThemeBackgroundBrush")));
-    let provided_0 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_0 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_0, rt::to_object(::core::clone::Clone::clone(&provided_0)));
     // Controls/SimpleControls.xaml(19,6) Content
     let setter_1 = rt::new_setter(rt::property(::ferroui_controls::primitives::TemplatedControl::template_property()));
@@ -12298,7 +12298,7 @@ fn build_controls_simplecontrols_xaml_deferred_109(
     let setter_3 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::Border::border_brush_property()));
     // Controls/SimpleControls.xaml(81,38) Value
     let dynamic_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("ThemeBorderLowBrush")));
-    let provided_0 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_0 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, style_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_3, rt::to_object(::core::clone::Clone::clone(&provided_0)));
     context.pop_parent();
     ::ferroui_base::styling::StyleBase::__markup_Add_1(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(style_0.clone(), 80, 6)?);
@@ -12635,7 +12635,7 @@ fn build_controls_simplecontrols_xaml_deferred_115(
     let setter_2 = rt::new_setter_with_parent(&context, rt::property(::ferroui_base::StyledElement::theme_property()));
     // Controls/SimpleControls.xaml(157,34) Value
     let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("SimpleExpanderToggleButtonDownTheme")));
-    let provided_0 = rt::provide_value_invoked(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 157, 34)?;
+    let provided_0 = rt::provide_value_invoked(&context, rt::setter_value_property(), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 157, 34)?;
     rt::add_setter_value_with_parent(&context, style_1.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_2, ::core::clone::Clone::clone(&provided_0));
     context.pop_parent();
     ::ferroui_base::styling::StyleBase::__markup_Add_1(style_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(style_1.clone(), 156, 8)?);
@@ -12674,7 +12674,7 @@ fn build_controls_simplecontrols_xaml_deferred_115(
     let setter_4 = rt::new_setter_with_parent(&context, rt::property(::ferroui_base::StyledElement::theme_property()));
     // Controls/SimpleControls.xaml(189,34) Value
     let static_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("SimpleExpanderToggleButtonUpTheme")));
-    let provided_1 = rt::provide_value_invoked(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &static_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 189, 34)?;
+    let provided_1 = rt::provide_value_invoked(&context, rt::setter_value_property(), &static_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 189, 34)?;
     rt::add_setter_value_with_parent(&context, style_3.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_4, ::core::clone::Clone::clone(&provided_1));
     context.pop_parent();
     ::ferroui_base::styling::StyleBase::__markup_Add_1(style_2.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(style_3.clone(), 188, 8)?);
@@ -12713,7 +12713,7 @@ fn build_controls_simplecontrols_xaml_deferred_115(
     let setter_6 = rt::new_setter_with_parent(&context, rt::property(::ferroui_base::StyledElement::theme_property()));
     // Controls/SimpleControls.xaml(221,34) Value
     let static_resource_extension_2 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("SimpleExpanderToggleButtonRightTheme")));
-    let provided_2 = rt::provide_value_invoked(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &static_resource_extension_2, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 221, 34)?;
+    let provided_2 = rt::provide_value_invoked(&context, rt::setter_value_property(), &static_resource_extension_2, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 221, 34)?;
     rt::add_setter_value_with_parent(&context, style_5.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_6, ::core::clone::Clone::clone(&provided_2));
     context.pop_parent();
     ::ferroui_base::styling::StyleBase::__markup_Add_1(style_4.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(style_5.clone(), 220, 8)?);
@@ -12752,7 +12752,7 @@ fn build_controls_simplecontrols_xaml_deferred_115(
     let setter_8 = rt::new_setter_with_parent(&context, rt::property(::ferroui_base::StyledElement::theme_property()));
     // Controls/SimpleControls.xaml(253,34) Value
     let static_resource_extension_3 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("SimpleExpanderToggleButtonLeftTheme")));
-    let provided_3 = rt::provide_value_invoked(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &static_resource_extension_3, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 253, 34)?;
+    let provided_3 = rt::provide_value_invoked(&context, rt::setter_value_property(), &static_resource_extension_3, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 253, 34)?;
     rt::add_setter_value_with_parent(&context, style_7.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_8, ::core::clone::Clone::clone(&provided_3));
     context.pop_parent();
     ::ferroui_base::styling::StyleBase::__markup_Add_1(style_6.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(style_7.clone(), 252, 8)?);
@@ -13360,7 +13360,7 @@ fn build_controls_simplecontrols_xaml_deferred_120(
     let setter_0 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::primitives::TemplatedControl::foreground_property()));
     // Controls/SimpleControls.xaml(43,35) Value
     let dynamic_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("ThemeForegroundColor")));
-    let provided_0 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_0 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_0, rt::to_object(::core::clone::Clone::clone(&provided_0)));
     // Controls/SimpleControls.xaml(44,6) Content
     rt::add_setter(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::property(::ferroui_base::layout::Layoutable::horizontal_alignment_property()), rt::to_object(::ferroui_base::layout::HorizontalAlignment::Left));
@@ -13374,7 +13374,7 @@ fn build_controls_simplecontrols_xaml_deferred_120(
     let setter_5 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::primitives::TemplatedControl::font_size_property()));
     // Controls/SimpleControls.xaml(48,33) Value
     let dynamic_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("FontSizeNormal")));
-    let provided_1 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_1 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_5, rt::to_object(::core::clone::Clone::clone(&provided_1)));
     // Controls/SimpleControls.xaml(49,6) Content
     let setter_6 = rt::new_setter(rt::property(::ferroui_controls::ToggleSwitch::knob_transitions_property()));
@@ -13443,7 +13443,7 @@ fn build_controls_simplecontrols_xaml_deferred_120(
     let setter_10 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::Border::border_brush_property()));
     // Controls/SimpleControls.xaml(158,38) Value
     let dynamic_resource_extension_2 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("ThemeBorderHighColor")));
-    let provided_2 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_2, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_2 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_2, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, style_2.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_10, rt::to_object(::core::clone::Clone::clone(&provided_2)));
     // Controls/SimpleControls.xaml(159,8) Content
     rt::add_setter(style_2.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::property(::ferroui_controls::Border::background_property()), rt::to_object(::ferroui_base::media::immutable::ImmutableSolidColorBrush::__markup_new_0(16777215_u32)));
@@ -13464,7 +13464,7 @@ fn build_controls_simplecontrols_xaml_deferred_120(
     let setter_12 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::shapes::Shape::fill_property()));
     // Controls/SimpleControls.xaml(163,31) Value
     let dynamic_resource_extension_3 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("ThemeBorderHighColor")));
-    let provided_3 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_3, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_3 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_3, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, style_3.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_12, rt::to_object(::core::clone::Clone::clone(&provided_3)));
     context.pop_parent();
     ::ferroui_base::styling::StyleBase::__markup_Add_1(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(style_3.clone(), 162, 6)?);
@@ -13483,7 +13483,7 @@ fn build_controls_simplecontrols_xaml_deferred_120(
     let setter_13 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::shapes::Shape::fill_property()));
     // Controls/SimpleControls.xaml(167,31) Value
     let dynamic_resource_extension_4 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("HighlightForegroundColor")));
-    let provided_4 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_4, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_4 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_4, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, style_4.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_13, rt::to_object(::core::clone::Clone::clone(&provided_4)));
     context.pop_parent();
     ::ferroui_base::styling::StyleBase::__markup_Add_1(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(style_4.clone(), 166, 6)?);
@@ -13502,13 +13502,13 @@ fn build_controls_simplecontrols_xaml_deferred_120(
     let setter_14 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::Border::background_property()));
     // Controls/SimpleControls.xaml(171,37) Value
     let dynamic_resource_extension_5 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("ThemeAccentColor2")));
-    let provided_5 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_5, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_5 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_5, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, style_5.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_14, rt::to_object(::core::clone::Clone::clone(&provided_5)));
     // Controls/SimpleControls.xaml(172,8) Content
     let setter_15 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::Border::border_brush_property()));
     // Controls/SimpleControls.xaml(172,38) Value
     let dynamic_resource_extension_6 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("ThemeAccentColor2")));
-    let provided_6 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_6, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_6 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_6, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, style_5.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_15, rt::to_object(::core::clone::Clone::clone(&provided_6)));
     context.pop_parent();
     ::ferroui_base::styling::StyleBase::__markup_Add_1(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(style_5.clone(), 170, 6)?);
@@ -13540,13 +13540,13 @@ fn build_controls_simplecontrols_xaml_deferred_120(
     let setter_17 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::Border::border_brush_property()));
     // Controls/SimpleControls.xaml(181,38) Value
     let dynamic_resource_extension_7 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("ThemeBorderHighColor")));
-    let provided_7 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_7, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_7 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_7, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, style_7.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_17, rt::to_object(::core::clone::Clone::clone(&provided_7)));
     // Controls/SimpleControls.xaml(182,8) Content
     let setter_18 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::Border::background_property()));
     // Controls/SimpleControls.xaml(182,37) Value
     let dynamic_resource_extension_8 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("ThemeControlMidHighColor")));
-    let provided_8 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_8, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_8 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_8, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, style_7.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_18, rt::to_object(::core::clone::Clone::clone(&provided_8)));
     context.pop_parent();
     ::ferroui_base::styling::StyleBase::__markup_Add_1(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(style_7.clone(), 180, 6)?);
@@ -13565,13 +13565,13 @@ fn build_controls_simplecontrols_xaml_deferred_120(
     let setter_19 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::Border::background_property()));
     // Controls/SimpleControls.xaml(186,37) Value
     let dynamic_resource_extension_9 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("ThemeAccentColor3")));
-    let provided_9 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_9, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_9 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_9, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, style_8.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_19, rt::to_object(::core::clone::Clone::clone(&provided_9)));
     // Controls/SimpleControls.xaml(187,8) Content
     let setter_20 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::Border::border_brush_property()));
     // Controls/SimpleControls.xaml(187,38) Value
     let dynamic_resource_extension_10 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("ThemeAccentColor3")));
-    let provided_10 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_10, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_10 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_10, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, style_8.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_20, rt::to_object(::core::clone::Clone::clone(&provided_10)));
     context.pop_parent();
     ::ferroui_base::styling::StyleBase::__markup_Add_1(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(style_8.clone(), 185, 6)?);
@@ -13590,7 +13590,7 @@ fn build_controls_simplecontrols_xaml_deferred_120(
     let setter_21 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::shapes::Shape::fill_property()));
     // Controls/SimpleControls.xaml(191,31) Value
     let dynamic_resource_extension_11 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("ThemeBorderHighColor")));
-    let provided_11 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_11, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_11 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_11, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, style_9.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_21, rt::to_object(::core::clone::Clone::clone(&provided_11)));
     context.pop_parent();
     ::ferroui_base::styling::StyleBase::__markup_Add_1(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(style_9.clone(), 190, 6)?);
@@ -13609,7 +13609,7 @@ fn build_controls_simplecontrols_xaml_deferred_120(
     let setter_22 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::shapes::Shape::fill_property()));
     // Controls/SimpleControls.xaml(195,31) Value
     let dynamic_resource_extension_12 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("HighlightForegroundColor")));
-    let provided_12 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_12, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_12 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_12, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, style_10.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_22, rt::to_object(::core::clone::Clone::clone(&provided_12)));
     context.pop_parent();
     ::ferroui_base::styling::StyleBase::__markup_Add_1(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(style_10.clone(), 194, 6)?);
@@ -13638,7 +13638,7 @@ fn build_controls_simplecontrols_xaml_deferred_120(
     let setter_24 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::primitives::TemplatedControl::foreground_property()));
     // Controls/SimpleControls.xaml(204,37) Value
     let dynamic_resource_extension_13 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("ThemeForegroundLowColor")));
-    let provided_13 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_13, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_13 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_13, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, style_12.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_24, rt::to_object(::core::clone::Clone::clone(&provided_13)));
     context.pop_parent();
     ::ferroui_base::styling::StyleBase::__markup_Add_1(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(style_12.clone(), 203, 6)?);
@@ -13657,7 +13657,7 @@ fn build_controls_simplecontrols_xaml_deferred_120(
     let setter_25 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::Border::border_brush_property()));
     // Controls/SimpleControls.xaml(208,38) Value
     let dynamic_resource_extension_14 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("ThemeForegroundLowColor")));
-    let provided_14 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_14, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_14 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_14, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, style_13.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_25, rt::to_object(::core::clone::Clone::clone(&provided_14)));
     // Controls/SimpleControls.xaml(209,8) Content
     rt::add_setter(style_13.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::property(::ferroui_controls::Border::background_property()), rt::to_object(::ferroui_base::media::immutable::ImmutableSolidColorBrush::__markup_new_0(16777215_u32)));
@@ -13678,7 +13678,7 @@ fn build_controls_simplecontrols_xaml_deferred_120(
     let setter_27 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::shapes::Shape::fill_property()));
     // Controls/SimpleControls.xaml(213,31) Value
     let dynamic_resource_extension_15 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("ThemeForegroundLowColor")));
-    let provided_15 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_15, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_15 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_15, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, style_14.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_27, rt::to_object(::core::clone::Clone::clone(&provided_15)));
     context.pop_parent();
     ::ferroui_base::styling::StyleBase::__markup_Add_1(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(style_14.clone(), 212, 6)?);
@@ -13697,7 +13697,7 @@ fn build_controls_simplecontrols_xaml_deferred_120(
     let setter_28 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::shapes::Shape::fill_property()));
     // Controls/SimpleControls.xaml(217,31) Value
     let dynamic_resource_extension_16 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("HighlightForegroundColor")));
-    let provided_16 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_16, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_16 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_16, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, style_15.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_28, rt::to_object(::core::clone::Clone::clone(&provided_16)));
     context.pop_parent();
     ::ferroui_base::styling::StyleBase::__markup_Add_1(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(style_15.clone(), 216, 6)?);
@@ -13716,13 +13716,13 @@ fn build_controls_simplecontrols_xaml_deferred_120(
     let setter_29 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::Border::background_property()));
     // Controls/SimpleControls.xaml(221,37) Value
     let dynamic_resource_extension_17 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("ThemeForegroundLowColor")));
-    let provided_17 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_17, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_17 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_17, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, style_16.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_29, rt::to_object(::core::clone::Clone::clone(&provided_17)));
     // Controls/SimpleControls.xaml(222,8) Content
     let setter_30 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::Border::border_brush_property()));
     // Controls/SimpleControls.xaml(222,38) Value
     let dynamic_resource_extension_18 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("ThemeForegroundLowColor")));
-    let provided_18 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_18, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_18 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_18, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, style_16.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_30, rt::to_object(::core::clone::Clone::clone(&provided_18)));
     context.pop_parent();
     ::ferroui_base::styling::StyleBase::__markup_Add_1(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(style_16.clone(), 220, 6)?);
@@ -14329,13 +14329,13 @@ fn build_controls_simplecontrols_xaml_deferred_122(
     let setter_2 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::primitives::TemplatedControl::background_property()));
     // Controls/SimpleControls.xaml(11,37) Value
     let dynamic_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("ThemeControlMidBrush")));
-    let provided_1 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_1 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, style_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_2, rt::to_object(::core::clone::Clone::clone(&provided_1)));
     // Controls/SimpleControls.xaml(12,8) Content
     let setter_3 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::primitives::TemplatedControl::border_brush_property()));
     // Controls/SimpleControls.xaml(12,38) Value
     let dynamic_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("ThemeBorderMidBrush")));
-    let provided_2 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_2 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, style_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_3, rt::to_object(::core::clone::Clone::clone(&provided_2)));
     context.pop_parent();
     ::ferroui_base::styling::StyleBase::__markup_Add_1(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(style_0.clone(), 10, 6)?);
@@ -14359,13 +14359,13 @@ fn build_controls_simplecontrols_xaml_deferred_123(
     let setter_1 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::primitives::TemplatedControl::border_brush_property()));
     // Controls/SimpleControls.xaml(19,36) Value
     let dynamic_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("ThemeBorderMidBrush")));
-    let provided_0 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_0 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_1, rt::to_object(::core::clone::Clone::clone(&provided_0)));
     // Controls/SimpleControls.xaml(20,6) Content
     let setter_2 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::primitives::TemplatedControl::border_thickness_property()));
     // Controls/SimpleControls.xaml(20,40) Value
     let dynamic_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("ThemeBorderThickness")));
-    let provided_1 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_1 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_2, rt::to_object(::core::clone::Clone::clone(&provided_1)));
     // Controls/SimpleControls.xaml(21,6) Content
     rt::add_setter(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::property(::ferroui_controls::ContentControl::horizontal_content_alignment_property()), rt::to_object(::ferroui_base::layout::HorizontalAlignment::Stretch));
@@ -14418,7 +14418,7 @@ fn build_controls_simplecontrols_xaml_deferred_123(
     let setter_8 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::Border::border_brush_property()));
     // Controls/SimpleControls.xaml(83,38) Value
     let dynamic_resource_extension_2 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("ThemeBorderHighBrush")));
-    let provided_2 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_2, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_2 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_2, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, style_2.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_8, rt::to_object(::core::clone::Clone::clone(&provided_2)));
     context.pop_parent();
     ::ferroui_base::styling::StyleBase::__markup_Add_1(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(style_2.clone(), 82, 6)?);
@@ -14437,7 +14437,7 @@ fn build_controls_simplecontrols_xaml_deferred_123(
     let setter_9 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::Border::border_brush_property()));
     // Controls/SimpleControls.xaml(86,38) Value
     let dynamic_resource_extension_3 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("ThemeBorderHighBrush")));
-    let provided_3 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_3, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_3 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_3, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, style_3.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_9, rt::to_object(::core::clone::Clone::clone(&provided_3)));
     context.pop_parent();
     ::ferroui_base::styling::StyleBase::__markup_Add_1(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(style_3.clone(), 85, 6)?);
@@ -14456,7 +14456,7 @@ fn build_controls_simplecontrols_xaml_deferred_123(
     let setter_10 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::Border::border_brush_property()));
     // Controls/SimpleControls.xaml(89,38) Value
     let dynamic_resource_extension_4 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("ErrorBrush")));
-    let provided_4 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_4, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_4 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_4, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, style_4.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_10, rt::to_object(::core::clone::Clone::clone(&provided_4)));
     context.pop_parent();
     ::ferroui_base::styling::StyleBase::__markup_Add_1(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(style_4.clone(), 88, 6)?);
@@ -14756,31 +14756,31 @@ fn build_controls_simplecontrols_xaml_deferred_127(
     let setter_0 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::primitives::TemplatedControl::background_property()));
     // Controls/SimpleControls.xaml(12,35) Value
     let dynamic_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("CaptionButtonBackground")));
-    let provided_0 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_0 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_0, rt::to_object(::core::clone::Clone::clone(&provided_0)));
     // Controls/SimpleControls.xaml(13,6) Content
     let setter_1 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::primitives::TemplatedControl::border_brush_property()));
     // Controls/SimpleControls.xaml(13,36) Value
     let dynamic_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("CaptionButtonBorderBrush")));
-    let provided_1 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_1 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_1, rt::to_object(::core::clone::Clone::clone(&provided_1)));
     // Controls/SimpleControls.xaml(14,6) Content
     let setter_2 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::primitives::TemplatedControl::foreground_property()));
     // Controls/SimpleControls.xaml(14,35) Value
     let dynamic_resource_extension_2 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("CaptionButtonForeground")));
-    let provided_2 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_2, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_2 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_2, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_2, rt::to_object(::core::clone::Clone::clone(&provided_2)));
     // Controls/SimpleControls.xaml(15,6) Content
     let setter_3 = rt::new_setter_with_parent(&context, rt::property(::ferroui_base::layout::Layoutable::width_property()));
     // Controls/SimpleControls.xaml(15,30) Value
     let dynamic_resource_extension_3 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("CaptionButtonWidth")));
-    let provided_3 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_3, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_3 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_3, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_3, rt::to_object(::core::clone::Clone::clone(&provided_3)));
     // Controls/SimpleControls.xaml(16,6) Content
     let setter_4 = rt::new_setter_with_parent(&context, rt::property(::ferroui_base::layout::Layoutable::height_property()));
     // Controls/SimpleControls.xaml(16,31) Value
     let dynamic_resource_extension_4 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("CaptionButtonHeight")));
-    let provided_4 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_4, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_4 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_4, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_4, rt::to_object(::core::clone::Clone::clone(&provided_4)));
     // Controls/SimpleControls.xaml(17,6) Content
     rt::add_setter(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::property(::ferroui_base::layout::Layoutable::vertical_alignment_property()), rt::to_object(::ferroui_base::layout::VerticalAlignment::Stretch));
@@ -14918,7 +14918,7 @@ fn build_controls_simplecontrols_xaml_deferred_129(
     let setter_5 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::Border::box_shadow_property()));
     // Controls/SimpleControls.xaml(181,36) Value
     let dynamic_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("WindowDrawnDecorationsWindowBorderBoxShadow")));
-    let provided_1 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_1 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, style_1.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_5, rt::to_object(::core::clone::Clone::clone(&provided_1)));
     context.pop_parent();
     ::ferroui_base::styling::StyleBase::__markup_Add_1(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(style_1.clone(), 180, 6)?);
@@ -16239,49 +16239,49 @@ fn build_controls_simplecontrols_xaml_deferred_139(
     let setter_0 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::TextBox::caret_brush_property()));
     // Controls/SimpleControls.xaml(84,35) Value
     let dynamic_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("ThemeForegroundBrush")));
-    let provided_0 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_0 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_0, rt::to_object(::core::clone::Clone::clone(&provided_0)));
     // Controls/SimpleControls.xaml(85,6) Content
     let setter_1 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::primitives::TemplatedControl::background_property()));
     // Controls/SimpleControls.xaml(85,35) Value
     let dynamic_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("ThemeBackgroundBrush")));
-    let provided_1 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_1 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_1, rt::to_object(::core::clone::Clone::clone(&provided_1)));
     // Controls/SimpleControls.xaml(86,6) Content
     let setter_2 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::primitives::TemplatedControl::border_brush_property()));
     // Controls/SimpleControls.xaml(86,36) Value
     let dynamic_resource_extension_2 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("ThemeBorderMidBrush")));
-    let provided_2 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_2, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_2 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_2, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_2, rt::to_object(::core::clone::Clone::clone(&provided_2)));
     // Controls/SimpleControls.xaml(87,6) Content
     let setter_3 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::primitives::TemplatedControl::foreground_property()));
     // Controls/SimpleControls.xaml(87,35) Value
     let dynamic_resource_extension_3 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("ThemeForegroundBrush")));
-    let provided_3 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_3, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_3 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_3, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_3, rt::to_object(::core::clone::Clone::clone(&provided_3)));
     // Controls/SimpleControls.xaml(88,6) Content
     let setter_4 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::TextBox::placeholder_foreground_property()));
     // Controls/SimpleControls.xaml(88,46) Value
     let dynamic_resource_extension_4 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("ThemeForegroundLowBrush")));
-    let provided_4 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_4, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_4 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_4, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_4, rt::to_object(::core::clone::Clone::clone(&provided_4)));
     // Controls/SimpleControls.xaml(89,6) Content
     let setter_5 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::primitives::TemplatedControl::border_thickness_property()));
     // Controls/SimpleControls.xaml(89,40) Value
     let dynamic_resource_extension_5 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("ThemeBorderThickness")));
-    let provided_5 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_5, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_5 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_5, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_5, rt::to_object(::core::clone::Clone::clone(&provided_5)));
     // Controls/SimpleControls.xaml(90,6) Content
     let setter_6 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::TextBox::selection_brush_property()));
     // Controls/SimpleControls.xaml(90,39) Value
     let dynamic_resource_extension_6 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("HighlightBrush")));
-    let provided_6 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_6, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_6 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_6, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_6, rt::to_object(::core::clone::Clone::clone(&provided_6)));
     // Controls/SimpleControls.xaml(91,6) Content
     let setter_7 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::TextBox::selection_foreground_brush_property()));
     // Controls/SimpleControls.xaml(91,49) Value
     let dynamic_resource_extension_7 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("HighlightForegroundBrush")));
-    let provided_7 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_7, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_7 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_7, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_7, rt::to_object(::core::clone::Clone::clone(&provided_7)));
     // Controls/SimpleControls.xaml(92,6) Content
     rt::add_setter(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::property(::ferroui_controls::primitives::TemplatedControl::padding_property()), rt::to_object(::ferroui_base::Thickness::__markup_new_3(4.0_f64, 4.0_f64, 4.0_f64, 4.0_f64)));
@@ -16289,7 +16289,7 @@ fn build_controls_simplecontrols_xaml_deferred_139(
     let setter_9 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::Control::context_flyout_property()));
     // Controls/SimpleControls.xaml(93,38) Value
     let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("SimpleTextBoxContextFlyout")));
-    let provided_8 = rt::provide_value_invoked(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 93, 38)?;
+    let provided_8 = rt::provide_value_invoked(&context, rt::setter_value_property(), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 93, 38)?;
     rt::add_setter_value_with_parent(&context, control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_9, ::core::clone::Clone::clone(&provided_8));
     // Controls/SimpleControls.xaml(94,6) Content
     rt::add_setter(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::property(::ferroui_controls::ScrollViewer::is_scroll_chaining_enabled_property()), rt::to_object(::core::clone::Clone::clone(&true)));
@@ -16318,7 +16318,7 @@ fn build_controls_simplecontrols_xaml_deferred_139(
     let setter_12 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::Border::border_brush_property()));
     // Controls/SimpleControls.xaml(185,38) Value
     let dynamic_resource_extension_8 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("ThemeBorderHighBrush")));
-    let provided_9 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_8, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_9 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_8, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, style_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_12, rt::to_object(::core::clone::Clone::clone(&provided_9)));
     context.pop_parent();
     ::ferroui_base::styling::StyleBase::__markup_Add_1(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(style_0.clone(), 184, 6)?);
@@ -16337,7 +16337,7 @@ fn build_controls_simplecontrols_xaml_deferred_139(
     let setter_13 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::Border::border_brush_property()));
     // Controls/SimpleControls.xaml(188,38) Value
     let dynamic_resource_extension_9 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("ThemeBorderHighBrush")));
-    let provided_10 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_9, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_10 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_9, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, style_1.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_13, rt::to_object(::core::clone::Clone::clone(&provided_10)));
     context.pop_parent();
     ::ferroui_base::styling::StyleBase::__markup_Add_1(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(style_1.clone(), 187, 6)?);
@@ -16356,7 +16356,7 @@ fn build_controls_simplecontrols_xaml_deferred_139(
     let setter_14 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::Border::border_brush_property()));
     // Controls/SimpleControls.xaml(191,38) Value
     let dynamic_resource_extension_10 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("ErrorBrush")));
-    let provided_11 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_10, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_11 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_10, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, style_2.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_14, rt::to_object(::core::clone::Clone::clone(&provided_11)));
     context.pop_parent();
     ::ferroui_base::styling::StyleBase::__markup_Add_1(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(style_2.clone(), 190, 6)?);
@@ -16389,7 +16389,7 @@ fn build_controls_simplecontrols_xaml_deferred_139(
     let setter_16 = rt::new_setter_with_parent(&context, rt::property(::ferroui_base::Visual::opacity_property()));
     // Controls/SimpleControls.xaml(197,34) Value
     let dynamic_resource_extension_11 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("ThemeDisabledOpacity")));
-    let provided_12 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_11, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_12 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_11, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, style_4.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_16, rt::to_object(::core::clone::Clone::clone(&provided_12)));
     context.pop_parent();
     ::ferroui_base::styling::StyleBase::__markup_Add_1(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(style_4.clone(), 196, 6)?);
@@ -17002,7 +17002,7 @@ fn build_controls_simplecontrols_xaml_deferred_144(
     let setter_0 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::primitives::TemplatedControl::border_brush_property()));
     // Controls/SimpleControls.xaml(14,36) Value
     let dynamic_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("ThemeBorderMidBrush")));
-    let provided_0 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_0 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_0, rt::to_object(::core::clone::Clone::clone(&provided_0)));
     // Controls/SimpleControls.xaml(15,6) Content
     rt::add_setter(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::property(::ferroui_controls::primitives::TemplatedControl::border_thickness_property()), rt::to_object(::ferroui_base::Thickness::__markup_new_3(1.0_f64, 1.0_f64, 1.0_f64, 1.0_f64)));
@@ -17742,13 +17742,13 @@ fn build_controls_simplecontrols_xaml_deferred_148(
     let setter_1 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::Control::context_flyout_property()));
     // Controls/SimpleControls.xaml(35,40) Value
     let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("SimpleHorizontalScrollBarContextFlyout")));
-    let provided_0 = rt::provide_value_invoked(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 35, 40)?;
+    let provided_0 = rt::provide_value_invoked(&context, rt::setter_value_property(), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 35, 40)?;
     rt::add_setter_value_with_parent(&context, style_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_1, ::core::clone::Clone::clone(&provided_0));
     // Controls/SimpleControls.xaml(36,8) Content
     let setter_2 = rt::new_setter_with_parent(&context, rt::property(::ferroui_base::layout::Layoutable::height_property()));
     // Controls/SimpleControls.xaml(36,33) Value
     let dynamic_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("ScrollBarThickness")));
-    let provided_1 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_1 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, style_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_2, rt::to_object(::core::clone::Clone::clone(&provided_1)));
     // Controls/SimpleControls.xaml(37,8) Content
     let setter_3 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::primitives::TemplatedControl::template_property()));
@@ -17774,13 +17774,13 @@ fn build_controls_simplecontrols_xaml_deferred_148(
     let setter_4 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::Control::context_flyout_property()));
     // Controls/SimpleControls.xaml(92,40) Value
     let static_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("SimpleVerticalScrollBarContextFlyout")));
-    let provided_2 = rt::provide_value_invoked(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &static_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 92, 40)?;
+    let provided_2 = rt::provide_value_invoked(&context, rt::setter_value_property(), &static_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 92, 40)?;
     rt::add_setter_value_with_parent(&context, style_1.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_4, ::core::clone::Clone::clone(&provided_2));
     // Controls/SimpleControls.xaml(93,8) Content
     let setter_5 = rt::new_setter_with_parent(&context, rt::property(::ferroui_base::layout::Layoutable::width_property()));
     // Controls/SimpleControls.xaml(93,32) Value
     let dynamic_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("ScrollBarThickness")));
-    let provided_3 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_3 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, style_1.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_5, rt::to_object(::core::clone::Clone::clone(&provided_3)));
     // Controls/SimpleControls.xaml(94,8) Content
     let setter_6 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::primitives::TemplatedControl::template_property()));
@@ -17808,7 +17808,7 @@ fn build_controls_simplecontrols_xaml_deferred_148(
     let setter_7 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::primitives::TemplatedControl::background_property()));
     // Controls/SimpleControls.xaml(149,37) Value
     let dynamic_resource_extension_2 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("ThemeControlMidHighBrush")));
-    let provided_4 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_2, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_4 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_2, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, style_2.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_7, rt::to_object(::core::clone::Clone::clone(&provided_4)));
     // Controls/SimpleControls.xaml(150,8) Content
     let setter_8 = rt::new_setter(rt::property(::ferroui_controls::primitives::TemplatedControl::template_property()));
@@ -17835,7 +17835,7 @@ fn build_controls_simplecontrols_xaml_deferred_148(
     let setter_9 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::primitives::TemplatedControl::background_property()));
     // Controls/SimpleControls.xaml(159,37) Value
     let dynamic_resource_extension_3 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("ThemeControlHighBrush")));
-    let provided_5 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_3, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_5 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_3, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, style_3.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_9, rt::to_object(::core::clone::Clone::clone(&provided_5)));
     context.pop_parent();
     ::ferroui_base::styling::StyleBase::__markup_Add_1(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(style_3.clone(), 158, 6)?);
@@ -17854,7 +17854,7 @@ fn build_controls_simplecontrols_xaml_deferred_148(
     let setter_10 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::primitives::TemplatedControl::background_property()));
     // Controls/SimpleControls.xaml(162,37) Value
     let dynamic_resource_extension_4 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("ThemeControlVeryHighBrush")));
-    let provided_6 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_4, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_6 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_4, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, style_4.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_10, rt::to_object(::core::clone::Clone::clone(&provided_6)));
     context.pop_parent();
     ::ferroui_base::styling::StyleBase::__markup_Add_1(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(style_4.clone(), 161, 6)?);
@@ -17873,13 +17873,13 @@ fn build_controls_simplecontrols_xaml_deferred_148(
     let setter_11 = rt::new_setter_with_parent(&context, rt::property(::ferroui_base::layout::Layoutable::min_width_property()));
     // Controls/SimpleControls.xaml(165,35) Value
     let dynamic_resource_extension_5 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("ScrollBarThickness")));
-    let provided_7 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_5, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_7 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_5, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, style_5.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_11, rt::to_object(::core::clone::Clone::clone(&provided_7)));
     // Controls/SimpleControls.xaml(166,8) Content
     let setter_12 = rt::new_setter_with_parent(&context, rt::property(::ferroui_base::layout::Layoutable::height_property()));
     // Controls/SimpleControls.xaml(166,33) Value
     let dynamic_resource_extension_6 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("ScrollBarThumbThickness")));
-    let provided_8 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_6, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_8 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_6, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, style_5.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_12, rt::to_object(::core::clone::Clone::clone(&provided_8)));
     context.pop_parent();
     ::ferroui_base::styling::StyleBase::__markup_Add_1(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(style_5.clone(), 164, 6)?);
@@ -17898,13 +17898,13 @@ fn build_controls_simplecontrols_xaml_deferred_148(
     let setter_13 = rt::new_setter_with_parent(&context, rt::property(::ferroui_base::layout::Layoutable::min_height_property()));
     // Controls/SimpleControls.xaml(169,36) Value
     let dynamic_resource_extension_7 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("ScrollBarThickness")));
-    let provided_9 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_7, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_9 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_7, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, style_6.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_13, rt::to_object(::core::clone::Clone::clone(&provided_9)));
     // Controls/SimpleControls.xaml(170,8) Content
     let setter_14 = rt::new_setter_with_parent(&context, rt::property(::ferroui_base::layout::Layoutable::width_property()));
     // Controls/SimpleControls.xaml(170,32) Value
     let dynamic_resource_extension_8 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("ScrollBarThumbThickness")));
-    let provided_10 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_8, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_10 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_8, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, style_6.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_14, rt::to_object(::core::clone::Clone::clone(&provided_10)));
     context.pop_parent();
     ::ferroui_base::styling::StyleBase::__markup_Add_1(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(style_6.clone(), 168, 6)?);
@@ -17955,7 +17955,7 @@ fn build_controls_simplecontrols_xaml_deferred_148(
     let setter_18 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::shapes::Shape::fill_property()));
     // Controls/SimpleControls.xaml(185,31) Value
     let dynamic_resource_extension_9 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("ThemeForegroundLowBrush")));
-    let provided_11 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_9, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_11 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_9, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, style_9.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_18, rt::to_object(::core::clone::Clone::clone(&provided_11)));
     context.pop_parent();
     ::ferroui_base::styling::StyleBase::__markup_Add_1(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(style_9.clone(), 184, 6)?);
@@ -17975,7 +17975,7 @@ fn build_controls_simplecontrols_xaml_deferred_148(
     let setter_19 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::shapes::Shape::fill_property()));
     // Controls/SimpleControls.xaml(189,31) Value
     let dynamic_resource_extension_10 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("ThemeAccentBrush")));
-    let provided_12 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_10, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_12 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_10, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, style_10.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_19, rt::to_object(::core::clone::Clone::clone(&provided_12)));
     context.pop_parent();
     ::ferroui_base::styling::StyleBase::__markup_Add_1(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(style_10.clone(), 188, 6)?);
@@ -18696,7 +18696,7 @@ fn build_controls_simplecontrols_xaml_deferred_155(
     let setter_3 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::shapes::Shape::fill_property()));
     // Controls/SimpleControls.xaml(94,31) Value
     let dynamic_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("ThemeForegroundLowBrush")));
-    let provided_0 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_0 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, style_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_3, rt::to_object(::core::clone::Clone::clone(&provided_0)));
     context.pop_parent();
     ::ferroui_base::styling::StyleBase::__markup_Add_1(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(style_0.clone(), 93, 6)?);
@@ -18716,7 +18716,7 @@ fn build_controls_simplecontrols_xaml_deferred_155(
     let setter_4 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::shapes::Shape::fill_property()));
     // Controls/SimpleControls.xaml(98,31) Value
     let dynamic_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("ThemeAccentBrush")));
-    let provided_1 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_1 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, style_1.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_4, rt::to_object(::core::clone::Clone::clone(&provided_1)));
     context.pop_parent();
     ::ferroui_base::styling::StyleBase::__markup_Add_1(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(style_1.clone(), 97, 6)?);
@@ -19097,7 +19097,7 @@ fn build_controls_simplecontrols_xaml_deferred_159(
     let setter_4 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::Border::background_property()));
     // Controls/SimpleControls.xaml(81,37) Value
     let dynamic_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("ThemeControlHighlightMidBrush")));
-    let provided_0 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_0 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, style_1.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_4, rt::to_object(::core::clone::Clone::clone(&provided_0)));
     context.pop_parent();
     ::ferroui_base::styling::StyleBase::__markup_Add_1(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(style_1.clone(), 80, 6)?);
@@ -19116,7 +19116,7 @@ fn build_controls_simplecontrols_xaml_deferred_159(
     let setter_5 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::Border::background_property()));
     // Controls/SimpleControls.xaml(85,37) Value
     let dynamic_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("ThemeAccentBrush4")));
-    let provided_1 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_1 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, style_2.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_5, rt::to_object(::core::clone::Clone::clone(&provided_1)));
     context.pop_parent();
     ::ferroui_base::styling::StyleBase::__markup_Add_1(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(style_2.clone(), 84, 6)?);
@@ -19136,7 +19136,7 @@ fn build_controls_simplecontrols_xaml_deferred_159(
     let setter_6 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::Border::background_property()));
     // Controls/SimpleControls.xaml(89,37) Value
     let dynamic_resource_extension_2 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("ThemeAccentBrush3")));
-    let provided_2 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_2, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_2 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_2, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, style_3.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_6, rt::to_object(::core::clone::Clone::clone(&provided_2)));
     context.pop_parent();
     ::ferroui_base::styling::StyleBase::__markup_Add_1(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(style_3.clone(), 88, 6)?);
@@ -19156,7 +19156,7 @@ fn build_controls_simplecontrols_xaml_deferred_159(
     let setter_7 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::Border::background_property()));
     // Controls/SimpleControls.xaml(93,37) Value
     let dynamic_resource_extension_3 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("ThemeAccentBrush3")));
-    let provided_3 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_3, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_3 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_3, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, style_4.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_7, rt::to_object(::core::clone::Clone::clone(&provided_3)));
     context.pop_parent();
     ::ferroui_base::styling::StyleBase::__markup_Add_1(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(style_4.clone(), 92, 6)?);
@@ -19177,7 +19177,7 @@ fn build_controls_simplecontrols_xaml_deferred_159(
     let setter_8 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::Border::background_property()));
     // Controls/SimpleControls.xaml(97,37) Value
     let dynamic_resource_extension_4 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("ThemeAccentBrush2")));
-    let provided_4 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_4, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_4 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_4, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, style_5.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_8, rt::to_object(::core::clone::Clone::clone(&provided_4)));
     context.pop_parent();
     ::ferroui_base::styling::StyleBase::__markup_Add_1(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(style_5.clone(), 96, 6)?);
@@ -19417,13 +19417,13 @@ fn build_controls_simplecontrols_xaml_deferred_162(
     let setter_0 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::primitives::TemplatedControl::background_property()));
     // Controls/SimpleControls.xaml(21,35) Value
     let dynamic_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("ThemeAccentBrush4")));
-    let provided_0 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_0 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_0, rt::to_object(::core::clone::Clone::clone(&provided_0)));
     // Controls/SimpleControls.xaml(22,6) Content
     let setter_1 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::primitives::TemplatedControl::foreground_property()));
     // Controls/SimpleControls.xaml(22,35) Value
     let dynamic_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("ThemeAccentBrush")));
-    let provided_1 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_1 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_1, rt::to_object(::core::clone::Clone::clone(&provided_1)));
     // Controls/SimpleControls.xaml(23,6) Content
     let setter_2 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::primitives::TemplatedControl::template_property()));
@@ -19553,7 +19553,7 @@ fn build_controls_simplecontrols_xaml_deferred_162(
     ::ferroui_base::styling::Setter::__markup_set_Property(&setter_12, ::core::option::Option::Some(rt::property(::ferroui_base::media::TranslateTransform::x_property())));
     // Controls/SimpleControls.xaml(90,53) Value
     let reflection_binding_extension_0 = ::ferroui_markup_xaml::markup_extensions::ReflectionBindingExtension::__markup_new_1(::std::string::String::from("$parent[ProgressBar].TemplateSettings.IndeterminateStartingOffset"));
-    let provided_2 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &reflection_binding_extension_0, ::ferroui_markup_xaml::markup_extensions::ReflectionBindingExtension::__markup_ProvideValue_0);
+    let provided_2 = rt::provide_value(&context, rt::setter_value_property(), &reflection_binding_extension_0, ::ferroui_markup_xaml::markup_extensions::ReflectionBindingExtension::__markup_ProvideValue_0);
     ::ferroui_base::styling::Setter::__markup_set_Value(&setter_12, rt::setter_value(&setter_12, rt::to_object(::core::clone::Clone::clone(&provided_2))));
     context.pop_parent();
     <::ferroui_base::collections::FerroList<::std::rc::Rc<dyn ::ferroui_base::animation::IAnimationSetter>>>::__markup_Add_0(&setters_collection_0, ::core::clone::Clone::clone(&setter_12) as ::std::rc::Rc<dyn ::ferroui_base::animation::IAnimationSetter>);
@@ -19575,7 +19575,7 @@ fn build_controls_simplecontrols_xaml_deferred_162(
     ::ferroui_base::styling::Setter::__markup_set_Property(&setter_13, ::core::option::Option::Some(rt::property(::ferroui_base::media::TranslateTransform::x_property())));
     // Controls/SimpleControls.xaml(93,53) Value
     let reflection_binding_extension_1 = ::ferroui_markup_xaml::markup_extensions::ReflectionBindingExtension::__markup_new_1(::std::string::String::from("$parent[ProgressBar].TemplateSettings.IndeterminateEndingOffset"));
-    let provided_3 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &reflection_binding_extension_1, ::ferroui_markup_xaml::markup_extensions::ReflectionBindingExtension::__markup_ProvideValue_0);
+    let provided_3 = rt::provide_value(&context, rt::setter_value_property(), &reflection_binding_extension_1, ::ferroui_markup_xaml::markup_extensions::ReflectionBindingExtension::__markup_ProvideValue_0);
     ::ferroui_base::styling::Setter::__markup_set_Value(&setter_13, rt::setter_value(&setter_13, rt::to_object(::core::clone::Clone::clone(&provided_3))));
     context.pop_parent();
     <::ferroui_base::collections::FerroList<::std::rc::Rc<dyn ::ferroui_base::animation::IAnimationSetter>>>::__markup_Add_0(&setters_collection_1, ::core::clone::Clone::clone(&setter_13) as ::std::rc::Rc<dyn ::ferroui_base::animation::IAnimationSetter>);
@@ -19593,7 +19593,7 @@ fn build_controls_simplecontrols_xaml_deferred_162(
     let provided_4 = rt::provide_value_invoked(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::data::ReflectionBinding as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "RelativeSource", false, rt::markup_handle(<::ferroui_base::data::RelativeSource as ::ferroui_base::metadata::MarkupTyped>::MARKUP), false)), &relative_source_extension_0, ::ferroui_markup_xaml::markup_extensions::RelativeSourceExtension::__markup_ProvideValue_0, 97, 32)?;
     ::ferroui_base::data::ReflectionBinding::__markup_set_RelativeSource(&rt::cast(::core::clone::Clone::clone(&reflection_binding_extension_2), 97, 32)?, rt::cast(::core::clone::Clone::clone(&provided_4), 97, 32)?);
     context.pop_parent();
-    let provided_5 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &reflection_binding_extension_2, ::ferroui_markup_xaml::markup_extensions::ReflectionBindingExtension::__markup_ProvideValue_0);
+    let provided_5 = rt::provide_value(&context, rt::setter_value_property(), &reflection_binding_extension_2, ::ferroui_markup_xaml::markup_extensions::ReflectionBindingExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, style_5.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_14, rt::to_object(::core::clone::Clone::clone(&provided_5)));
     context.pop_parent();
     ::ferroui_base::styling::StyleBase::__markup_Add_1(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(style_5.clone(), 84, 6)?);
@@ -19639,7 +19639,7 @@ fn build_controls_simplecontrols_xaml_deferred_162(
     ::ferroui_base::styling::Setter::__markup_set_Property(&setter_15, ::core::option::Option::Some(rt::property(::ferroui_base::media::TranslateTransform::y_property())));
     // Controls/SimpleControls.xaml(105,53) Value
     let reflection_binding_extension_3 = ::ferroui_markup_xaml::markup_extensions::ReflectionBindingExtension::__markup_new_1(::std::string::String::from("$parent[ProgressBar].TemplateSettings.IndeterminateStartingOffset"));
-    let provided_6 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &reflection_binding_extension_3, ::ferroui_markup_xaml::markup_extensions::ReflectionBindingExtension::__markup_ProvideValue_0);
+    let provided_6 = rt::provide_value(&context, rt::setter_value_property(), &reflection_binding_extension_3, ::ferroui_markup_xaml::markup_extensions::ReflectionBindingExtension::__markup_ProvideValue_0);
     ::ferroui_base::styling::Setter::__markup_set_Value(&setter_15, rt::setter_value(&setter_15, rt::to_object(::core::clone::Clone::clone(&provided_6))));
     context.pop_parent();
     <::ferroui_base::collections::FerroList<::std::rc::Rc<dyn ::ferroui_base::animation::IAnimationSetter>>>::__markup_Add_0(&setters_collection_2, ::core::clone::Clone::clone(&setter_15) as ::std::rc::Rc<dyn ::ferroui_base::animation::IAnimationSetter>);
@@ -19661,7 +19661,7 @@ fn build_controls_simplecontrols_xaml_deferred_162(
     ::ferroui_base::styling::Setter::__markup_set_Property(&setter_16, ::core::option::Option::Some(rt::property(::ferroui_base::media::TranslateTransform::y_property())));
     // Controls/SimpleControls.xaml(108,53) Value
     let reflection_binding_extension_4 = ::ferroui_markup_xaml::markup_extensions::ReflectionBindingExtension::__markup_new_1(::std::string::String::from("$parent[ProgressBar].TemplateSettings.IndeterminateEndingOffset"));
-    let provided_7 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &reflection_binding_extension_4, ::ferroui_markup_xaml::markup_extensions::ReflectionBindingExtension::__markup_ProvideValue_0);
+    let provided_7 = rt::provide_value(&context, rt::setter_value_property(), &reflection_binding_extension_4, ::ferroui_markup_xaml::markup_extensions::ReflectionBindingExtension::__markup_ProvideValue_0);
     ::ferroui_base::styling::Setter::__markup_set_Value(&setter_16, rt::setter_value(&setter_16, rt::to_object(::core::clone::Clone::clone(&provided_7))));
     context.pop_parent();
     <::ferroui_base::collections::FerroList<::std::rc::Rc<dyn ::ferroui_base::animation::IAnimationSetter>>>::__markup_Add_0(&setters_collection_3, ::core::clone::Clone::clone(&setter_16) as ::std::rc::Rc<dyn ::ferroui_base::animation::IAnimationSetter>);
@@ -19679,7 +19679,7 @@ fn build_controls_simplecontrols_xaml_deferred_162(
     let provided_8 = rt::provide_value_invoked(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::data::ReflectionBinding as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "RelativeSource", false, rt::markup_handle(<::ferroui_base::data::RelativeSource as ::ferroui_base::metadata::MarkupTyped>::MARKUP), false)), &relative_source_extension_1, ::ferroui_markup_xaml::markup_extensions::RelativeSourceExtension::__markup_ProvideValue_0, 112, 33)?;
     ::ferroui_base::data::ReflectionBinding::__markup_set_RelativeSource(&rt::cast(::core::clone::Clone::clone(&reflection_binding_extension_5), 112, 33)?, rt::cast(::core::clone::Clone::clone(&provided_8), 112, 33)?);
     context.pop_parent();
-    let provided_9 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &reflection_binding_extension_5, ::ferroui_markup_xaml::markup_extensions::ReflectionBindingExtension::__markup_ProvideValue_0);
+    let provided_9 = rt::provide_value(&context, rt::setter_value_property(), &reflection_binding_extension_5, ::ferroui_markup_xaml::markup_extensions::ReflectionBindingExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, style_6.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_17, rt::to_object(::core::clone::Clone::clone(&provided_9)));
     context.pop_parent();
     ::ferroui_base::styling::StyleBase::__markup_Add_1(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(style_6.clone(), 99, 6)?);
@@ -19919,13 +19919,13 @@ fn build_controls_simplecontrols_xaml_deferred_164(
     let setter_4 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::Border::background_property()));
     // Controls/SimpleControls.xaml(51,37) Value
     let dynamic_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("ThemeAccentBrush4")));
-    let provided_0 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_0 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, style_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_4, rt::to_object(::core::clone::Clone::clone(&provided_0)));
     // Controls/SimpleControls.xaml(52,8) Content
     let setter_5 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::Border::border_brush_property()));
     // Controls/SimpleControls.xaml(52,38) Value
     let dynamic_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("ThemeAccentBrush")));
-    let provided_1 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_1 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, style_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_5, rt::to_object(::core::clone::Clone::clone(&provided_1)));
     context.pop_parent();
     ::ferroui_base::styling::StyleBase::__markup_Add_1(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(style_0.clone(), 50, 6)?);
@@ -19954,7 +19954,7 @@ fn build_controls_simplecontrols_xaml_deferred_164(
     let setter_7 = rt::new_setter_with_parent(&context, rt::property(::ferroui_base::Visual::opacity_property()));
     // Controls/SimpleControls.xaml(60,34) Value
     let dynamic_resource_extension_2 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("ThemeDisabledOpacity")));
-    let provided_2 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_2, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_2 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_2, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, style_2.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_7, rt::to_object(::core::clone::Clone::clone(&provided_2)));
     context.pop_parent();
     ::ferroui_base::styling::StyleBase::__markup_Add_1(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(style_2.clone(), 59, 6)?);
@@ -20168,7 +20168,7 @@ fn build_controls_simplecontrols_xaml_deferred_167(
     let setter_0 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::ItemsControl::item_container_theme_property()));
     // Controls/SimpleControls.xaml(66,43) Value
     let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("SimpleTopLevelMenuItem")));
-    let provided_0 = rt::provide_value_invoked(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 66, 43)?;
+    let provided_0 = rt::provide_value_invoked(&context, rt::setter_value_property(), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 66, 43)?;
     rt::add_setter_value_with_parent(&context, control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_0, ::core::clone::Clone::clone(&provided_0));
     // Controls/SimpleControls.xaml(67,6) Content
     let setter_1 = rt::new_setter(rt::property(::ferroui_controls::primitives::TemplatedControl::template_property()));
@@ -20298,13 +20298,13 @@ fn build_controls_simplecontrols_xaml_deferred_170(
     let setter_5 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::Border::background_property()));
     // Controls/SimpleControls.xaml(96,37) Value
     let dynamic_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("ThemeAccentBrush4")));
-    let provided_0 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_0 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, style_1.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_5, rt::to_object(::core::clone::Clone::clone(&provided_0)));
     // Controls/SimpleControls.xaml(97,8) Content
     let setter_6 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::Border::border_brush_property()));
     // Controls/SimpleControls.xaml(97,38) Value
     let dynamic_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("ThemeAccentBrush")));
-    let provided_1 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_1 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, style_1.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_6, rt::to_object(::core::clone::Clone::clone(&provided_1)));
     context.pop_parent();
     ::ferroui_base::styling::StyleBase::__markup_Add_1(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(style_1.clone(), 95, 6)?);
@@ -20333,7 +20333,7 @@ fn build_controls_simplecontrols_xaml_deferred_170(
     let setter_8 = rt::new_setter_with_parent(&context, rt::property(::ferroui_base::Visual::opacity_property()));
     // Controls/SimpleControls.xaml(105,34) Value
     let dynamic_resource_extension_2 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("ThemeDisabledOpacity")));
-    let provided_2 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_2, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_2 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_2, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, style_3.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_8, rt::to_object(::core::clone::Clone::clone(&provided_2)));
     context.pop_parent();
     ::ferroui_base::styling::StyleBase::__markup_Add_1(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(style_3.clone(), 104, 6)?);
@@ -20869,7 +20869,7 @@ fn build_controls_simplecontrols_xaml_deferred_176(
     let setter_2 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::primitives::TemplatedControl::foreground_property()));
     // Controls/SimpleControls.xaml(8,35) Value
     let dynamic_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("ThemeBorderLowBrush")));
-    let provided_0 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_0 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_2, rt::to_object(::core::clone::Clone::clone(&provided_0)));
     // Controls/SimpleControls.xaml(9,6) Content
     let setter_3 = rt::new_setter(rt::property(::ferroui_controls::primitives::TemplatedControl::template_property()));
@@ -21004,7 +21004,7 @@ fn build_controls_simplecontrols_xaml_deferred_178(
     let setter_10 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::Border::border_brush_property()));
     // Controls/SimpleControls.xaml(120,38) Value
     let dynamic_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("ThemeBorderLowBrush")));
-    let provided_3 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_3 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, style_3.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_10, rt::to_object(::core::clone::Clone::clone(&provided_3)));
     context.pop_parent();
     ::ferroui_base::styling::StyleBase::__markup_Add_1(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(style_3.clone(), 118, 6)?);
@@ -21038,7 +21038,7 @@ fn build_controls_simplecontrols_xaml_deferred_178(
     let setter_12 = rt::new_setter_with_parent(&context, rt::property(::ferroui_base::Visual::opacity_property()));
     // Controls/SimpleControls.xaml(126,34) Value
     let dynamic_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("ThemeDisabledOpacity")));
-    let provided_5 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_5 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, style_5.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_12, rt::to_object(::core::clone::Clone::clone(&provided_5)));
     context.pop_parent();
     ::ferroui_base::styling::StyleBase::__markup_Add_1(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(style_5.clone(), 125, 6)?);
@@ -21465,7 +21465,7 @@ fn build_controls_simplecontrols_xaml_deferred_183(
     let setter_0 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::primitives::TemplatedControl::padding_property()));
     // Controls/SimpleControls.xaml(32,32) Value
     let dynamic_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("DatePickerFlyoutPresenterItemPadding")));
-    let provided_1 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_1 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_0, rt::to_object(::core::clone::Clone::clone(&provided_1)));
     // Controls/SimpleControls.xaml(33,6) Content
     rt::add_setter(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::property(::ferroui_controls::ContentControl::vertical_content_alignment_property()), rt::to_object(::ferroui_base::layout::VerticalAlignment::Center));
@@ -21508,7 +21508,7 @@ fn build_controls_simplecontrols_xaml_deferred_183(
     let setter_6 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::presenters::ContentPresenter::foreground_property()));
     // Controls/SimpleControls.xaml(43,39) Value
     let dynamic_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("ThemeForegroundBrush")));
-    let provided_2 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_2 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, style_2.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_6, rt::to_object(::core::clone::Clone::clone(&provided_2)));
     context.pop_parent();
     ::ferroui_base::styling::StyleBase::__markup_Add_1(style_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(style_2.clone(), 41, 8)?);
@@ -21526,7 +21526,7 @@ fn build_controls_simplecontrols_xaml_deferred_183(
     let setter_7 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::primitives::TemplatedControl::padding_property()));
     // Controls/SimpleControls.xaml(47,34) Value
     let dynamic_resource_extension_2 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("DatePickerFlyoutPresenterMonthPadding")));
-    let provided_3 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_2, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_3 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_2, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, style_3.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_7, rt::to_object(::core::clone::Clone::clone(&provided_3)));
     // Controls/SimpleControls.xaml(48,8) Content
     rt::add_setter(style_3.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::property(::ferroui_controls::ContentControl::horizontal_content_alignment_property()), rt::to_object(::ferroui_base::layout::HorizontalAlignment::Left));
@@ -21550,7 +21550,7 @@ fn build_controls_simplecontrols_xaml_deferred_184(
     let setter_0 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::primitives::TemplatedControl::background_property()));
     // Controls/SimpleControls.xaml(55,35) Value
     let dynamic_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("ThemeControlTransparentBrush")));
-    let provided_0 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_0 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_0, rt::to_object(::core::clone::Clone::clone(&provided_0)));
     // Controls/SimpleControls.xaml(56,6) Content
     rt::add_setter(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::property(::ferroui_base::layout::Layoutable::height_property()), rt::to_object(22.0_f64));
@@ -21582,13 +21582,13 @@ fn build_controls_simplecontrols_xaml_deferred_184(
     let setter_5 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::presenters::ContentPresenter::border_brush_property()));
     // Controls/SimpleControls.xaml(83,38) Value
     let dynamic_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("ThemeControlHighBrush")));
-    let provided_1 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_1 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, style_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_5, rt::to_object(::core::clone::Clone::clone(&provided_1)));
     // Controls/SimpleControls.xaml(84,8) Content
     let setter_6 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::documents::TextElement::foreground_property()));
     // Controls/SimpleControls.xaml(84,49) Value
     let dynamic_resource_extension_2 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("ThemeForegroundBrush")));
-    let provided_2 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_2, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_2 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_2, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, style_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_6, rt::to_object(::core::clone::Clone::clone(&provided_2)));
     context.pop_parent();
     ::ferroui_base::styling::StyleBase::__markup_Add_1(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(style_0.clone(), 82, 6)?);
@@ -21621,13 +21621,13 @@ fn build_controls_simplecontrols_xaml_deferred_184(
     let setter_8 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::presenters::ContentPresenter::border_brush_property()));
     // Controls/SimpleControls.xaml(92,38) Value
     let dynamic_resource_extension_4 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("ThemeControlLowBrush")));
-    let provided_4 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_4, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_4 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_4, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, style_1.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_8, rt::to_object(::core::clone::Clone::clone(&provided_4)));
     // Controls/SimpleControls.xaml(93,8) Content
     let setter_9 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::documents::TextElement::foreground_property()));
     // Controls/SimpleControls.xaml(93,49) Value
     let dynamic_resource_extension_5 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("ThemeForegroundBrush")));
-    let provided_5 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_5, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_5 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_5, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, style_1.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_9, rt::to_object(::core::clone::Clone::clone(&provided_5)));
     context.pop_parent();
     ::ferroui_base::styling::StyleBase::__markup_Add_1(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(style_1.clone(), 87, 6)?);
@@ -21738,7 +21738,7 @@ fn build_controls_simplecontrols_xaml_deferred_186(
     let setter_4 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::primitives::TemplatedControl::background_property()));
     // Controls/SimpleControls.xaml(104,35) Value
     let dynamic_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("ThemeControlHighlightLowBrush")));
-    let provided_1 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_1 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_4, rt::to_object(::core::clone::Clone::clone(&provided_1)));
     // Controls/SimpleControls.xaml(105,6) Content
     rt::add_setter(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::property(::ferroui_base::Visual::is_visible_property()), rt::to_object(::core::clone::Clone::clone(&false)));
@@ -21828,7 +21828,7 @@ fn build_controls_simplecontrols_xaml_deferred_188(
     let setter_4 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::primitives::TemplatedControl::background_property()));
     // Controls/SimpleControls.xaml(127,35) Value
     let dynamic_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("ThemeControlHighlightLowBrush")));
-    let provided_1 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_1 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_4, rt::to_object(::core::clone::Clone::clone(&provided_1)));
     // Controls/SimpleControls.xaml(128,6) Content
     rt::add_setter(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::property(::ferroui_base::Visual::is_visible_property()), rt::to_object(::core::clone::Clone::clone(&false)));
@@ -21930,13 +21930,13 @@ fn build_controls_simplecontrols_xaml_deferred_190(
     let setter_2 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::presenters::ContentPresenter::border_brush_property()));
     // Controls/SimpleControls.xaml(62,38) Value
     let dynamic_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("ThemeControlHighBrush")));
-    let provided_0 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_0 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, style_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_2, rt::to_object(::core::clone::Clone::clone(&provided_0)));
     // Controls/SimpleControls.xaml(63,8) Content
     let setter_3 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::TextBlock::foreground_property()));
     // Controls/SimpleControls.xaml(63,47) Value
     let dynamic_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("ThemeForegroundBrush")));
-    let provided_1 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_1 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, style_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_3, rt::to_object(::core::clone::Clone::clone(&provided_1)));
     context.pop_parent();
     ::ferroui_base::styling::StyleBase::__markup_Add_1(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(style_0.clone(), 61, 6)?);
@@ -21955,7 +21955,7 @@ fn build_controls_simplecontrols_xaml_deferred_190(
     let setter_4 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::presenters::ContentPresenter::border_brush_property()));
     // Controls/SimpleControls.xaml(67,38) Value
     let dynamic_resource_extension_2 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("ThemeControlLowBrush")));
-    let provided_2 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_2, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_2 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_2, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, style_1.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_4, rt::to_object(::core::clone::Clone::clone(&provided_2)));
     // Controls/SimpleControls.xaml(68,8) Content
     let setter_5 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::presenters::ContentPresenter::background_property()));
@@ -21976,7 +21976,7 @@ fn build_controls_simplecontrols_xaml_deferred_190(
     let setter_6 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::TextBlock::foreground_property()));
     // Controls/SimpleControls.xaml(72,47) Value
     let dynamic_resource_extension_4 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("ThemeForegroundBrush")));
-    let provided_4 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_4, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_4 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_4, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, style_1.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_6, rt::to_object(::core::clone::Clone::clone(&provided_4)));
     context.pop_parent();
     ::ferroui_base::styling::StyleBase::__markup_Add_1(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(style_1.clone(), 66, 6)?);
@@ -21995,7 +21995,7 @@ fn build_controls_simplecontrols_xaml_deferred_190(
     let setter_7 = rt::new_setter_with_parent(&context, rt::property(::ferroui_base::Visual::opacity_property()));
     // Controls/SimpleControls.xaml(76,34) Value
     let dynamic_resource_extension_5 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("ThemeDisabledOpacity")));
-    let provided_5 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_5, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_5 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_5, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, style_2.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_7, rt::to_object(::core::clone::Clone::clone(&provided_5)));
     context.pop_parent();
     ::ferroui_base::styling::StyleBase::__markup_Add_1(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(style_2.clone(), 75, 6)?);
@@ -22070,25 +22070,25 @@ fn build_controls_simplecontrols_xaml_deferred_192(
     let setter_0 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::primitives::TemplatedControl::font_size_property()));
     // Controls/SimpleControls.xaml(82,33) Value
     let dynamic_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("FontSizeNormal")));
-    let provided_0 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_0 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_0, rt::to_object(::core::clone::Clone::clone(&provided_0)));
     // Controls/SimpleControls.xaml(83,6) Content
     let setter_1 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::primitives::TemplatedControl::foreground_property()));
     // Controls/SimpleControls.xaml(83,35) Value
     let dynamic_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("ThemeForegroundBrush")));
-    let provided_1 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_1 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_1, rt::to_object(::core::clone::Clone::clone(&provided_1)));
     // Controls/SimpleControls.xaml(84,6) Content
     let setter_2 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::primitives::TemplatedControl::background_property()));
     // Controls/SimpleControls.xaml(84,35) Value
     let dynamic_resource_extension_2 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("ThemeBackgroundBrush")));
-    let provided_2 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_2, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_2 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_2, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_2, rt::to_object(::core::clone::Clone::clone(&provided_2)));
     // Controls/SimpleControls.xaml(85,6) Content
     let setter_3 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::primitives::TemplatedControl::border_brush_property()));
     // Controls/SimpleControls.xaml(85,36) Value
     let dynamic_resource_extension_3 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("ThemeControlHighlightMidBrush")));
-    let provided_3 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_3, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_3 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_3, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_3, rt::to_object(::core::clone::Clone::clone(&provided_3)));
     // Controls/SimpleControls.xaml(86,6) Content
     rt::add_setter(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::property(::ferroui_controls::primitives::TemplatedControl::border_thickness_property()), rt::to_object(::ferroui_base::Thickness::__markup_new_3(1.0_f64, 1.0_f64, 1.0_f64, 1.0_f64)));
@@ -22120,7 +22120,7 @@ fn build_controls_simplecontrols_xaml_deferred_192(
     let setter_8 = rt::new_setter_with_parent(&context, rt::property(::ferroui_base::Visual::opacity_property()));
     // Controls/SimpleControls.xaml(158,34) Value
     let dynamic_resource_extension_4 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("ThemeDisabledOpacity")));
-    let provided_4 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_4, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_4 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_4, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, style_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_8, rt::to_object(::core::clone::Clone::clone(&provided_4)));
     context.pop_parent();
     ::ferroui_base::styling::StyleBase::__markup_Add_1(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(style_0.clone(), 157, 6)?);
@@ -22159,7 +22159,7 @@ fn build_controls_simplecontrols_xaml_deferred_192(
     let setter_10 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::TextBlock::foreground_property()));
     // Controls/SimpleControls.xaml(167,37) Value
     let dynamic_resource_extension_5 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("ThemeForegroundLowBrush")));
-    let provided_6 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_5, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_6 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_5, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, style_2.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_10, rt::to_object(::core::clone::Clone::clone(&provided_6)));
     context.pop_parent();
     ::ferroui_base::styling::StyleBase::__markup_Add_1(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(style_2.clone(), 166, 6)?);
@@ -22507,25 +22507,25 @@ fn build_controls_simplecontrols_xaml_deferred_194(
     let setter_4 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::primitives::TemplatedControl::font_size_property()));
     // Controls/SimpleControls.xaml(178,33) Value
     let dynamic_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("FontSizeNormal")));
-    let provided_0 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_0 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_4, rt::to_object(::core::clone::Clone::clone(&provided_0)));
     // Controls/SimpleControls.xaml(179,6) Content
     let setter_5 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::primitives::TemplatedControl::background_property()));
     // Controls/SimpleControls.xaml(179,35) Value
     let dynamic_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("ThemeBackgroundBrush")));
-    let provided_1 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_1 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_5, rt::to_object(::core::clone::Clone::clone(&provided_1)));
     // Controls/SimpleControls.xaml(180,6) Content
     let setter_6 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::primitives::TemplatedControl::border_brush_property()));
     // Controls/SimpleControls.xaml(180,36) Value
     let dynamic_resource_extension_2 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("ThemeBorderMidBrush")));
-    let provided_2 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_2, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_2 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_2, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_6, rt::to_object(::core::clone::Clone::clone(&provided_2)));
     // Controls/SimpleControls.xaml(181,6) Content
     let setter_7 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::primitives::TemplatedControl::border_thickness_property()));
     // Controls/SimpleControls.xaml(181,40) Value
     let dynamic_resource_extension_3 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("DateTimeFlyoutBorderThickness")));
-    let provided_3 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_3, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_3 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_3, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_7, rt::to_object(::core::clone::Clone::clone(&provided_3)));
     // Controls/SimpleControls.xaml(182,6) Content
     let setter_8 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::primitives::TemplatedControl::template_property()));
@@ -22642,7 +22642,7 @@ fn build_controls_simplecontrols_xaml_deferred_195(
     let setter_0 = rt::new_setter_with_parent(&context, rt::property(::ferroui_base::StyledElement::theme_property()));
     // Controls/SimpleControls.xaml(196,44) Value
     let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("SimpleDateTimePickerItem")));
-    let provided_5 = rt::provide_value_invoked(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 196, 44)?;
+    let provided_5 = rt::provide_value_invoked(&context, rt::setter_value_property(), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 196, 44)?;
     rt::add_setter_value_with_parent(&context, style_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_0, ::core::clone::Clone::clone(&provided_5));
     context.pop_parent();
     rt::invoked(::ferroui_base::styling::Styles::__markup_Add_0(&styles_collection_0, rt::cast(style_0.clone(), 195, 18)?), 195, 18)?;
@@ -23260,13 +23260,13 @@ fn build_controls_simplecontrols_xaml_deferred_196(
     let setter_2 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::presenters::ContentPresenter::border_brush_property()));
     // Controls/SimpleControls.xaml(61,38) Value
     let dynamic_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("ThemeControlHighBrush")));
-    let provided_0 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_0 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, style_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_2, rt::to_object(::core::clone::Clone::clone(&provided_0)));
     // Controls/SimpleControls.xaml(62,8) Content
     let setter_3 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::documents::TextElement::foreground_property()));
     // Controls/SimpleControls.xaml(62,49) Value
     let dynamic_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("ThemeForegroundBrush")));
-    let provided_1 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_1 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, style_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_3, rt::to_object(::core::clone::Clone::clone(&provided_1)));
     context.pop_parent();
     ::ferroui_base::styling::StyleBase::__markup_Add_1(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(style_0.clone(), 60, 6)?);
@@ -23300,13 +23300,13 @@ fn build_controls_simplecontrols_xaml_deferred_196(
     let setter_5 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::presenters::ContentPresenter::border_brush_property()));
     // Controls/SimpleControls.xaml(70,38) Value
     let dynamic_resource_extension_3 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("ThemeControlLowBrush")));
-    let provided_3 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_3, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_3 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_3, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, style_1.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_5, rt::to_object(::core::clone::Clone::clone(&provided_3)));
     // Controls/SimpleControls.xaml(71,8) Content
     let setter_6 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::documents::TextElement::foreground_property()));
     // Controls/SimpleControls.xaml(71,49) Value
     let dynamic_resource_extension_4 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("ThemeForegroundBrush")));
-    let provided_4 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_4, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_4 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_4, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, style_1.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_6, rt::to_object(::core::clone::Clone::clone(&provided_4)));
     context.pop_parent();
     ::ferroui_base::styling::StyleBase::__markup_Add_1(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(style_1.clone(), 65, 6)?);
@@ -23325,7 +23325,7 @@ fn build_controls_simplecontrols_xaml_deferred_196(
     let setter_7 = rt::new_setter_with_parent(&context, rt::property(::ferroui_base::Visual::opacity_property()));
     // Controls/SimpleControls.xaml(75,34) Value
     let dynamic_resource_extension_5 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("ThemeDisabledOpacity")));
-    let provided_5 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_5, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_5 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_5, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, style_2.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_7, rt::to_object(::core::clone::Clone::clone(&provided_5)));
     context.pop_parent();
     ::ferroui_base::styling::StyleBase::__markup_Add_1(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(style_2.clone(), 74, 6)?);
@@ -23400,31 +23400,31 @@ fn build_controls_simplecontrols_xaml_deferred_198(
     let setter_0 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::primitives::TemplatedControl::font_size_property()));
     // Controls/SimpleControls.xaml(81,33) Value
     let dynamic_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("FontSizeNormal")));
-    let provided_0 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_0 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_0, rt::to_object(::core::clone::Clone::clone(&provided_0)));
     // Controls/SimpleControls.xaml(82,6) Content
     let setter_1 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::primitives::TemplatedControl::foreground_property()));
     // Controls/SimpleControls.xaml(82,35) Value
     let dynamic_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("ThemeForegroundBrush")));
-    let provided_1 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_1 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_1, rt::to_object(::core::clone::Clone::clone(&provided_1)));
     // Controls/SimpleControls.xaml(83,6) Content
     let setter_2 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::primitives::TemplatedControl::background_property()));
     // Controls/SimpleControls.xaml(83,35) Value
     let dynamic_resource_extension_2 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("ThemeBackgroundBrush")));
-    let provided_2 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_2, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_2 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_2, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_2, rt::to_object(::core::clone::Clone::clone(&provided_2)));
     // Controls/SimpleControls.xaml(84,6) Content
     let setter_3 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::primitives::TemplatedControl::border_brush_property()));
     // Controls/SimpleControls.xaml(84,36) Value
     let dynamic_resource_extension_3 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("ThemeControlHighlightMidBrush")));
-    let provided_3 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_3, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_3 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_3, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_3, rt::to_object(::core::clone::Clone::clone(&provided_3)));
     // Controls/SimpleControls.xaml(85,6) Content
     let setter_4 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::primitives::TemplatedControl::border_thickness_property()));
     // Controls/SimpleControls.xaml(85,40) Value
     let dynamic_resource_extension_4 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("TimePickerBorderThemeThickness")));
-    let provided_4 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_4, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_4 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_4, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_4, rt::to_object(::core::clone::Clone::clone(&provided_4)));
     // Controls/SimpleControls.xaml(86,6) Content
     rt::add_setter(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::property(::ferroui_base::layout::Layoutable::horizontal_alignment_property()), rt::to_object(::ferroui_base::layout::HorizontalAlignment::Left));
@@ -23454,7 +23454,7 @@ fn build_controls_simplecontrols_xaml_deferred_198(
     let setter_8 = rt::new_setter_with_parent(&context, rt::property(::ferroui_base::Visual::opacity_property()));
     // Controls/SimpleControls.xaml(193,34) Value
     let dynamic_resource_extension_5 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("ThemeDisabledOpacity")));
-    let provided_5 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_5, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_5 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_5, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, style_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_8, rt::to_object(::core::clone::Clone::clone(&provided_5)));
     context.pop_parent();
     ::ferroui_base::styling::StyleBase::__markup_Add_1(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(style_0.clone(), 192, 6)?);
@@ -23493,7 +23493,7 @@ fn build_controls_simplecontrols_xaml_deferred_198(
     let setter_10 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::TextBlock::foreground_property()));
     // Controls/SimpleControls.xaml(201,37) Value
     let dynamic_resource_extension_6 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("ThemeForegroundLowBrush")));
-    let provided_7 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_6, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_7 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_6, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, style_2.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_10, rt::to_object(::core::clone::Clone::clone(&provided_7)));
     context.pop_parent();
     ::ferroui_base::styling::StyleBase::__markup_Add_1(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(style_2.clone(), 200, 6)?);
@@ -23958,19 +23958,19 @@ fn build_controls_simplecontrols_xaml_deferred_200(
     let setter_4 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::primitives::TemplatedControl::background_property()));
     // Controls/SimpleControls.xaml(211,35) Value
     let dynamic_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("ThemeBackgroundBrush")));
-    let provided_0 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_0 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_4, rt::to_object(::core::clone::Clone::clone(&provided_0)));
     // Controls/SimpleControls.xaml(212,6) Content
     let setter_5 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::primitives::TemplatedControl::border_brush_property()));
     // Controls/SimpleControls.xaml(212,36) Value
     let dynamic_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("ThemeBorderMidBrush")));
-    let provided_1 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_1 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_5, rt::to_object(::core::clone::Clone::clone(&provided_1)));
     // Controls/SimpleControls.xaml(213,6) Content
     let setter_6 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::primitives::TemplatedControl::border_thickness_property()));
     // Controls/SimpleControls.xaml(213,40) Value
     let dynamic_resource_extension_2 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("DateTimeFlyoutBorderThickness")));
-    let provided_2 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_2, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_2 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_2, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_6, rt::to_object(::core::clone::Clone::clone(&provided_2)));
     // Controls/SimpleControls.xaml(214,6) Content
     let setter_7 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::primitives::TemplatedControl::template_property()));
@@ -24087,7 +24087,7 @@ fn build_controls_simplecontrols_xaml_deferred_201(
     let setter_0 = rt::new_setter_with_parent(&context, rt::property(::ferroui_base::StyledElement::theme_property()));
     // Controls/SimpleControls.xaml(228,44) Value
     let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("SimpleDateTimePickerItem")));
-    let provided_5 = rt::provide_value_invoked(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 228, 44)?;
+    let provided_5 = rt::provide_value_invoked(&context, rt::setter_value_property(), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 228, 44)?;
     rt::add_setter_value_with_parent(&context, style_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_0, ::core::clone::Clone::clone(&provided_5));
     context.pop_parent();
     rt::invoked(::ferroui_base::styling::Styles::__markup_Add_0(&styles_collection_0, rt::cast(style_0.clone(), 227, 18)?), 227, 18)?;
@@ -24828,19 +24828,19 @@ fn build_controls_simplecontrols_xaml_deferred_203(
     let setter_0 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::SplitView::open_pane_length_property()));
     // Controls/SimpleControls.xaml(29,39) Value
     let dynamic_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("SplitViewOpenPaneThemeLength")));
-    let provided_0 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_0 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_0, rt::to_object(::core::clone::Clone::clone(&provided_0)));
     // Controls/SimpleControls.xaml(30,6) Content
     let setter_1 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::SplitView::compact_pane_length_property()));
     // Controls/SimpleControls.xaml(30,42) Value
     let dynamic_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("SplitViewCompactPaneThemeLength")));
-    let provided_1 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_1 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_1, rt::to_object(::core::clone::Clone::clone(&provided_1)));
     // Controls/SimpleControls.xaml(31,6) Content
     let setter_2 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::SplitView::pane_background_property()));
     // Controls/SimpleControls.xaml(31,39) Value
     let dynamic_resource_extension_2 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("ThemeControlHighlightLowBrush")));
-    let provided_2 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_2, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_2 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_2, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_2, rt::to_object(::core::clone::Clone::clone(&provided_2)));
     // Controls/SimpleControls.xaml(34,6) Content
     // Controls/SimpleControls.xaml(34,6) Style
@@ -24888,7 +24888,7 @@ fn build_controls_simplecontrols_xaml_deferred_203(
     // Controls/SimpleControls.xaml(69,15) Path
     ::ferroui_base::data::ReflectionBinding::__markup_set_Path(&rt::cast(::core::clone::Clone::clone(&reflection_binding_extension_0), 69, 15)?, ::std::string::String::from("TemplateSettings.ClosedPaneWidth"));
     context.pop_parent();
-    let provided_4 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &reflection_binding_extension_0, ::ferroui_markup_xaml::markup_extensions::ReflectionBindingExtension::__markup_ProvideValue_0);
+    let provided_4 = rt::provide_value(&context, rt::setter_value_property(), &reflection_binding_extension_0, ::ferroui_markup_xaml::markup_extensions::ReflectionBindingExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, style_1.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_4, rt::to_object(::core::clone::Clone::clone(&provided_4)));
     // Controls/SimpleControls.xaml(70,8) Content
     rt::add_setter(style_1.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::property(::ferroui_controls::Grid::column_span_property()), rt::to_object(2_i32));
@@ -24940,7 +24940,7 @@ fn build_controls_simplecontrols_xaml_deferred_203(
     // Controls/SimpleControls.xaml(83,15) Path
     ::ferroui_base::data::ReflectionBinding::__markup_set_Path(&rt::cast(::core::clone::Clone::clone(&reflection_binding_extension_1), 83, 15)?, ::std::string::String::from("TemplateSettings.ClosedPaneWidth"));
     context.pop_parent();
-    let provided_6 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &reflection_binding_extension_1, ::ferroui_markup_xaml::markup_extensions::ReflectionBindingExtension::__markup_ProvideValue_0);
+    let provided_6 = rt::provide_value(&context, rt::setter_value_property(), &reflection_binding_extension_1, ::ferroui_markup_xaml::markup_extensions::ReflectionBindingExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, style_3.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_11, rt::to_object(::core::clone::Clone::clone(&provided_6)));
     context.pop_parent();
     ::ferroui_base::styling::StyleBase::__markup_Add_1(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(style_3.clone(), 79, 6)?);
@@ -24988,7 +24988,7 @@ fn build_controls_simplecontrols_xaml_deferred_203(
     // Controls/SimpleControls.xaml(95,15) Path
     ::ferroui_base::data::ReflectionBinding::__markup_set_Path(&rt::cast(::core::clone::Clone::clone(&reflection_binding_extension_2), 95, 15)?, ::std::string::String::from("TemplateSettings.ClosedPaneWidth"));
     context.pop_parent();
-    let provided_8 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &reflection_binding_extension_2, ::ferroui_markup_xaml::markup_extensions::ReflectionBindingExtension::__markup_ProvideValue_0);
+    let provided_8 = rt::provide_value(&context, rt::setter_value_property(), &reflection_binding_extension_2, ::ferroui_markup_xaml::markup_extensions::ReflectionBindingExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, style_5.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_16, rt::to_object(::core::clone::Clone::clone(&provided_8)));
     context.pop_parent();
     ::ferroui_base::styling::StyleBase::__markup_Add_1(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(style_5.clone(), 91, 6)?);
@@ -25036,7 +25036,7 @@ fn build_controls_simplecontrols_xaml_deferred_203(
     // Controls/SimpleControls.xaml(107,15) Path
     ::ferroui_base::data::ReflectionBinding::__markup_set_Path(&rt::cast(::core::clone::Clone::clone(&reflection_binding_extension_3), 107, 15)?, ::std::string::String::from("TemplateSettings.ClosedPaneWidth"));
     context.pop_parent();
-    let provided_10 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &reflection_binding_extension_3, ::ferroui_markup_xaml::markup_extensions::ReflectionBindingExtension::__markup_ProvideValue_0);
+    let provided_10 = rt::provide_value(&context, rt::setter_value_property(), &reflection_binding_extension_3, ::ferroui_markup_xaml::markup_extensions::ReflectionBindingExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, style_7.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_21, rt::to_object(::core::clone::Clone::clone(&provided_10)));
     context.pop_parent();
     ::ferroui_base::styling::StyleBase::__markup_Add_1(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(style_7.clone(), 103, 6)?);
@@ -25102,7 +25102,7 @@ fn build_controls_simplecontrols_xaml_deferred_203(
     // Controls/SimpleControls.xaml(150,15) Path
     ::ferroui_base::data::ReflectionBinding::__markup_set_Path(&rt::cast(::core::clone::Clone::clone(&reflection_binding_extension_4), 150, 15)?, ::std::string::String::from("TemplateSettings.ClosedPaneWidth"));
     context.pop_parent();
-    let provided_12 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &reflection_binding_extension_4, ::ferroui_markup_xaml::markup_extensions::ReflectionBindingExtension::__markup_ProvideValue_0);
+    let provided_12 = rt::provide_value(&context, rt::setter_value_property(), &reflection_binding_extension_4, ::ferroui_markup_xaml::markup_extensions::ReflectionBindingExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, style_10.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_25, rt::to_object(::core::clone::Clone::clone(&provided_12)));
     // Controls/SimpleControls.xaml(151,8) Content
     rt::add_setter(style_10.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::property(::ferroui_controls::Grid::column_span_property()), rt::to_object(2_i32));
@@ -25154,7 +25154,7 @@ fn build_controls_simplecontrols_xaml_deferred_203(
     // Controls/SimpleControls.xaml(164,15) Path
     ::ferroui_base::data::ReflectionBinding::__markup_set_Path(&rt::cast(::core::clone::Clone::clone(&reflection_binding_extension_5), 164, 15)?, ::std::string::String::from("TemplateSettings.ClosedPaneWidth"));
     context.pop_parent();
-    let provided_14 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &reflection_binding_extension_5, ::ferroui_markup_xaml::markup_extensions::ReflectionBindingExtension::__markup_ProvideValue_0);
+    let provided_14 = rt::provide_value(&context, rt::setter_value_property(), &reflection_binding_extension_5, ::ferroui_markup_xaml::markup_extensions::ReflectionBindingExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, style_12.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_32, rt::to_object(::core::clone::Clone::clone(&provided_14)));
     context.pop_parent();
     ::ferroui_base::styling::StyleBase::__markup_Add_1(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(style_12.clone(), 160, 6)?);
@@ -25202,7 +25202,7 @@ fn build_controls_simplecontrols_xaml_deferred_203(
     // Controls/SimpleControls.xaml(176,15) Path
     ::ferroui_base::data::ReflectionBinding::__markup_set_Path(&rt::cast(::core::clone::Clone::clone(&reflection_binding_extension_6), 176, 15)?, ::std::string::String::from("TemplateSettings.ClosedPaneWidth"));
     context.pop_parent();
-    let provided_16 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &reflection_binding_extension_6, ::ferroui_markup_xaml::markup_extensions::ReflectionBindingExtension::__markup_ProvideValue_0);
+    let provided_16 = rt::provide_value(&context, rt::setter_value_property(), &reflection_binding_extension_6, ::ferroui_markup_xaml::markup_extensions::ReflectionBindingExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, style_14.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_37, rt::to_object(::core::clone::Clone::clone(&provided_16)));
     context.pop_parent();
     ::ferroui_base::styling::StyleBase::__markup_Add_1(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(style_14.clone(), 172, 6)?);
@@ -25250,7 +25250,7 @@ fn build_controls_simplecontrols_xaml_deferred_203(
     // Controls/SimpleControls.xaml(188,15) Path
     ::ferroui_base::data::ReflectionBinding::__markup_set_Path(&rt::cast(::core::clone::Clone::clone(&reflection_binding_extension_7), 188, 15)?, ::std::string::String::from("TemplateSettings.ClosedPaneWidth"));
     context.pop_parent();
-    let provided_18 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &reflection_binding_extension_7, ::ferroui_markup_xaml::markup_extensions::ReflectionBindingExtension::__markup_ProvideValue_0);
+    let provided_18 = rt::provide_value(&context, rt::setter_value_property(), &reflection_binding_extension_7, ::ferroui_markup_xaml::markup_extensions::ReflectionBindingExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, style_16.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_42, rt::to_object(::core::clone::Clone::clone(&provided_18)));
     context.pop_parent();
     ::ferroui_base::styling::StyleBase::__markup_Add_1(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(style_16.clone(), 184, 6)?);
@@ -25316,7 +25316,7 @@ fn build_controls_simplecontrols_xaml_deferred_203(
     // Controls/SimpleControls.xaml(233,15) Path
     ::ferroui_base::data::ReflectionBinding::__markup_set_Path(&rt::cast(::core::clone::Clone::clone(&reflection_binding_extension_8), 233, 15)?, ::std::string::String::from("TemplateSettings.ClosedPaneHeight"));
     context.pop_parent();
-    let provided_20 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &reflection_binding_extension_8, ::ferroui_markup_xaml::markup_extensions::ReflectionBindingExtension::__markup_ProvideValue_0);
+    let provided_20 = rt::provide_value(&context, rt::setter_value_property(), &reflection_binding_extension_8, ::ferroui_markup_xaml::markup_extensions::ReflectionBindingExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, style_19.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_46, rt::to_object(::core::clone::Clone::clone(&provided_20)));
     // Controls/SimpleControls.xaml(234,8) Content
     rt::add_setter(style_19.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::property(::ferroui_controls::Grid::row_span_property()), rt::to_object(1_i32));
@@ -25368,7 +25368,7 @@ fn build_controls_simplecontrols_xaml_deferred_203(
     // Controls/SimpleControls.xaml(247,15) Path
     ::ferroui_base::data::ReflectionBinding::__markup_set_Path(&rt::cast(::core::clone::Clone::clone(&reflection_binding_extension_9), 247, 15)?, ::std::string::String::from("TemplateSettings.ClosedPaneHeight"));
     context.pop_parent();
-    let provided_22 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &reflection_binding_extension_9, ::ferroui_markup_xaml::markup_extensions::ReflectionBindingExtension::__markup_ProvideValue_0);
+    let provided_22 = rt::provide_value(&context, rt::setter_value_property(), &reflection_binding_extension_9, ::ferroui_markup_xaml::markup_extensions::ReflectionBindingExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, style_21.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_53, rt::to_object(::core::clone::Clone::clone(&provided_22)));
     context.pop_parent();
     ::ferroui_base::styling::StyleBase::__markup_Add_1(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(style_21.clone(), 243, 6)?);
@@ -25416,7 +25416,7 @@ fn build_controls_simplecontrols_xaml_deferred_203(
     // Controls/SimpleControls.xaml(259,15) Path
     ::ferroui_base::data::ReflectionBinding::__markup_set_Path(&rt::cast(::core::clone::Clone::clone(&reflection_binding_extension_10), 259, 15)?, ::std::string::String::from("TemplateSettings.ClosedPaneHeight"));
     context.pop_parent();
-    let provided_24 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &reflection_binding_extension_10, ::ferroui_markup_xaml::markup_extensions::ReflectionBindingExtension::__markup_ProvideValue_0);
+    let provided_24 = rt::provide_value(&context, rt::setter_value_property(), &reflection_binding_extension_10, ::ferroui_markup_xaml::markup_extensions::ReflectionBindingExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, style_23.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_58, rt::to_object(::core::clone::Clone::clone(&provided_24)));
     context.pop_parent();
     ::ferroui_base::styling::StyleBase::__markup_Add_1(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(style_23.clone(), 255, 6)?);
@@ -25464,7 +25464,7 @@ fn build_controls_simplecontrols_xaml_deferred_203(
     // Controls/SimpleControls.xaml(271,15) Path
     ::ferroui_base::data::ReflectionBinding::__markup_set_Path(&rt::cast(::core::clone::Clone::clone(&reflection_binding_extension_11), 271, 15)?, ::std::string::String::from("TemplateSettings.ClosedPaneHeight"));
     context.pop_parent();
-    let provided_26 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &reflection_binding_extension_11, ::ferroui_markup_xaml::markup_extensions::ReflectionBindingExtension::__markup_ProvideValue_0);
+    let provided_26 = rt::provide_value(&context, rt::setter_value_property(), &reflection_binding_extension_11, ::ferroui_markup_xaml::markup_extensions::ReflectionBindingExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, style_25.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_63, rt::to_object(::core::clone::Clone::clone(&provided_26)));
     context.pop_parent();
     ::ferroui_base::styling::StyleBase::__markup_Add_1(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(style_25.clone(), 267, 6)?);
@@ -25530,7 +25530,7 @@ fn build_controls_simplecontrols_xaml_deferred_203(
     // Controls/SimpleControls.xaml(316,15) Path
     ::ferroui_base::data::ReflectionBinding::__markup_set_Path(&rt::cast(::core::clone::Clone::clone(&reflection_binding_extension_12), 316, 15)?, ::std::string::String::from("TemplateSettings.ClosedPaneHeight"));
     context.pop_parent();
-    let provided_28 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &reflection_binding_extension_12, ::ferroui_markup_xaml::markup_extensions::ReflectionBindingExtension::__markup_ProvideValue_0);
+    let provided_28 = rt::provide_value(&context, rt::setter_value_property(), &reflection_binding_extension_12, ::ferroui_markup_xaml::markup_extensions::ReflectionBindingExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, style_28.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_67, rt::to_object(::core::clone::Clone::clone(&provided_28)));
     // Controls/SimpleControls.xaml(317,8) Content
     rt::add_setter(style_28.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::property(::ferroui_controls::Grid::row_span_property()), rt::to_object(2_i32));
@@ -25582,7 +25582,7 @@ fn build_controls_simplecontrols_xaml_deferred_203(
     // Controls/SimpleControls.xaml(330,15) Path
     ::ferroui_base::data::ReflectionBinding::__markup_set_Path(&rt::cast(::core::clone::Clone::clone(&reflection_binding_extension_13), 330, 15)?, ::std::string::String::from("TemplateSettings.ClosedPaneHeight"));
     context.pop_parent();
-    let provided_30 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &reflection_binding_extension_13, ::ferroui_markup_xaml::markup_extensions::ReflectionBindingExtension::__markup_ProvideValue_0);
+    let provided_30 = rt::provide_value(&context, rt::setter_value_property(), &reflection_binding_extension_13, ::ferroui_markup_xaml::markup_extensions::ReflectionBindingExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, style_30.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_74, rt::to_object(::core::clone::Clone::clone(&provided_30)));
     context.pop_parent();
     ::ferroui_base::styling::StyleBase::__markup_Add_1(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(style_30.clone(), 326, 6)?);
@@ -25630,7 +25630,7 @@ fn build_controls_simplecontrols_xaml_deferred_203(
     // Controls/SimpleControls.xaml(342,15) Path
     ::ferroui_base::data::ReflectionBinding::__markup_set_Path(&rt::cast(::core::clone::Clone::clone(&reflection_binding_extension_14), 342, 15)?, ::std::string::String::from("TemplateSettings.ClosedPaneHeight"));
     context.pop_parent();
-    let provided_32 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &reflection_binding_extension_14, ::ferroui_markup_xaml::markup_extensions::ReflectionBindingExtension::__markup_ProvideValue_0);
+    let provided_32 = rt::provide_value(&context, rt::setter_value_property(), &reflection_binding_extension_14, ::ferroui_markup_xaml::markup_extensions::ReflectionBindingExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, style_32.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_79, rt::to_object(::core::clone::Clone::clone(&provided_32)));
     context.pop_parent();
     ::ferroui_base::styling::StyleBase::__markup_Add_1(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(style_32.clone(), 338, 6)?);
@@ -25678,7 +25678,7 @@ fn build_controls_simplecontrols_xaml_deferred_203(
     // Controls/SimpleControls.xaml(354,15) Path
     ::ferroui_base::data::ReflectionBinding::__markup_set_Path(&rt::cast(::core::clone::Clone::clone(&reflection_binding_extension_15), 354, 15)?, ::std::string::String::from("TemplateSettings.ClosedPaneHeight"));
     context.pop_parent();
-    let provided_34 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &reflection_binding_extension_15, ::ferroui_markup_xaml::markup_extensions::ReflectionBindingExtension::__markup_ProvideValue_0);
+    let provided_34 = rt::provide_value(&context, rt::setter_value_property(), &reflection_binding_extension_15, ::ferroui_markup_xaml::markup_extensions::ReflectionBindingExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, style_34.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_84, rt::to_object(::core::clone::Clone::clone(&provided_34)));
     context.pop_parent();
     ::ferroui_base::styling::StyleBase::__markup_Add_1(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(style_34.clone(), 350, 6)?);
@@ -25765,7 +25765,7 @@ fn build_controls_simplecontrols_xaml_deferred_203(
     // Controls/SimpleControls.xaml(370,32) Path
     ::ferroui_base::data::ReflectionBinding::__markup_set_Path(&rt::cast(::core::clone::Clone::clone(&reflection_binding_extension_16), 370, 32)?, ::std::string::String::from("OpenPaneLength"));
     context.pop_parent();
-    let provided_38 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &reflection_binding_extension_16, ::ferroui_markup_xaml::markup_extensions::ReflectionBindingExtension::__markup_ProvideValue_0);
+    let provided_38 = rt::provide_value(&context, rt::setter_value_property(), &reflection_binding_extension_16, ::ferroui_markup_xaml::markup_extensions::ReflectionBindingExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, style_36.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_88, rt::to_object(::core::clone::Clone::clone(&provided_38)));
     context.pop_parent();
     ::ferroui_base::styling::StyleBase::__markup_Add_1(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(style_36.clone(), 363, 6)?);
@@ -25836,7 +25836,7 @@ fn build_controls_simplecontrols_xaml_deferred_203(
     // Controls/SimpleControls.xaml(379,32) Path
     ::ferroui_base::data::ReflectionBinding::__markup_set_Path(&rt::cast(::core::clone::Clone::clone(&reflection_binding_extension_17), 379, 32)?, ::std::string::String::from("OpenPaneLength"));
     context.pop_parent();
-    let provided_42 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &reflection_binding_extension_17, ::ferroui_markup_xaml::markup_extensions::ReflectionBindingExtension::__markup_ProvideValue_0);
+    let provided_42 = rt::provide_value(&context, rt::setter_value_property(), &reflection_binding_extension_17, ::ferroui_markup_xaml::markup_extensions::ReflectionBindingExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, style_37.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_90, rt::to_object(::core::clone::Clone::clone(&provided_42)));
     context.pop_parent();
     ::ferroui_base::styling::StyleBase::__markup_Add_1(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(style_37.clone(), 372, 6)?);
@@ -25907,7 +25907,7 @@ fn build_controls_simplecontrols_xaml_deferred_203(
     // Controls/SimpleControls.xaml(390,15) Path
     ::ferroui_base::data::ReflectionBinding::__markup_set_Path(&rt::cast(::core::clone::Clone::clone(&reflection_binding_extension_18), 390, 15)?, ::std::string::String::from("TemplateSettings.ClosedPaneWidth"));
     context.pop_parent();
-    let provided_46 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &reflection_binding_extension_18, ::ferroui_markup_xaml::markup_extensions::ReflectionBindingExtension::__markup_ProvideValue_0);
+    let provided_46 = rt::provide_value(&context, rt::setter_value_property(), &reflection_binding_extension_18, ::ferroui_markup_xaml::markup_extensions::ReflectionBindingExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, style_38.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_92, rt::to_object(::core::clone::Clone::clone(&provided_46)));
     context.pop_parent();
     ::ferroui_base::styling::StyleBase::__markup_Add_1(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(style_38.clone(), 382, 6)?);
@@ -25978,7 +25978,7 @@ fn build_controls_simplecontrols_xaml_deferred_203(
     // Controls/SimpleControls.xaml(400,15) Path
     ::ferroui_base::data::ReflectionBinding::__markup_set_Path(&rt::cast(::core::clone::Clone::clone(&reflection_binding_extension_19), 400, 15)?, ::std::string::String::from("TemplateSettings.ClosedPaneWidth"));
     context.pop_parent();
-    let provided_50 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &reflection_binding_extension_19, ::ferroui_markup_xaml::markup_extensions::ReflectionBindingExtension::__markup_ProvideValue_0);
+    let provided_50 = rt::provide_value(&context, rt::setter_value_property(), &reflection_binding_extension_19, ::ferroui_markup_xaml::markup_extensions::ReflectionBindingExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, style_39.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_94, rt::to_object(::core::clone::Clone::clone(&provided_50)));
     context.pop_parent();
     ::ferroui_base::styling::StyleBase::__markup_Add_1(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(style_39.clone(), 392, 6)?);
@@ -26049,7 +26049,7 @@ fn build_controls_simplecontrols_xaml_deferred_203(
     // Controls/SimpleControls.xaml(411,33) Path
     ::ferroui_base::data::ReflectionBinding::__markup_set_Path(&rt::cast(::core::clone::Clone::clone(&reflection_binding_extension_20), 411, 33)?, ::std::string::String::from("OpenPaneLength"));
     context.pop_parent();
-    let provided_54 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &reflection_binding_extension_20, ::ferroui_markup_xaml::markup_extensions::ReflectionBindingExtension::__markup_ProvideValue_0);
+    let provided_54 = rt::provide_value(&context, rt::setter_value_property(), &reflection_binding_extension_20, ::ferroui_markup_xaml::markup_extensions::ReflectionBindingExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, style_40.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_96, rt::to_object(::core::clone::Clone::clone(&provided_54)));
     context.pop_parent();
     ::ferroui_base::styling::StyleBase::__markup_Add_1(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(style_40.clone(), 404, 6)?);
@@ -26120,7 +26120,7 @@ fn build_controls_simplecontrols_xaml_deferred_203(
     // Controls/SimpleControls.xaml(420,33) Path
     ::ferroui_base::data::ReflectionBinding::__markup_set_Path(&rt::cast(::core::clone::Clone::clone(&reflection_binding_extension_21), 420, 33)?, ::std::string::String::from("OpenPaneLength"));
     context.pop_parent();
-    let provided_58 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &reflection_binding_extension_21, ::ferroui_markup_xaml::markup_extensions::ReflectionBindingExtension::__markup_ProvideValue_0);
+    let provided_58 = rt::provide_value(&context, rt::setter_value_property(), &reflection_binding_extension_21, ::ferroui_markup_xaml::markup_extensions::ReflectionBindingExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, style_41.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_98, rt::to_object(::core::clone::Clone::clone(&provided_58)));
     context.pop_parent();
     ::ferroui_base::styling::StyleBase::__markup_Add_1(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(style_41.clone(), 413, 6)?);
@@ -26191,7 +26191,7 @@ fn build_controls_simplecontrols_xaml_deferred_203(
     // Controls/SimpleControls.xaml(431,15) Path
     ::ferroui_base::data::ReflectionBinding::__markup_set_Path(&rt::cast(::core::clone::Clone::clone(&reflection_binding_extension_22), 431, 15)?, ::std::string::String::from("TemplateSettings.ClosedPaneHeight"));
     context.pop_parent();
-    let provided_62 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &reflection_binding_extension_22, ::ferroui_markup_xaml::markup_extensions::ReflectionBindingExtension::__markup_ProvideValue_0);
+    let provided_62 = rt::provide_value(&context, rt::setter_value_property(), &reflection_binding_extension_22, ::ferroui_markup_xaml::markup_extensions::ReflectionBindingExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, style_42.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_100, rt::to_object(::core::clone::Clone::clone(&provided_62)));
     context.pop_parent();
     ::ferroui_base::styling::StyleBase::__markup_Add_1(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(style_42.clone(), 423, 6)?);
@@ -26262,7 +26262,7 @@ fn build_controls_simplecontrols_xaml_deferred_203(
     // Controls/SimpleControls.xaml(441,15) Path
     ::ferroui_base::data::ReflectionBinding::__markup_set_Path(&rt::cast(::core::clone::Clone::clone(&reflection_binding_extension_23), 441, 15)?, ::std::string::String::from("TemplateSettings.ClosedPaneHeight"));
     context.pop_parent();
-    let provided_66 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &reflection_binding_extension_23, ::ferroui_markup_xaml::markup_extensions::ReflectionBindingExtension::__markup_ProvideValue_0);
+    let provided_66 = rt::provide_value(&context, rt::setter_value_property(), &reflection_binding_extension_23, ::ferroui_markup_xaml::markup_extensions::ReflectionBindingExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, style_43.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_102, rt::to_object(::core::clone::Clone::clone(&provided_66)));
     context.pop_parent();
     ::ferroui_base::styling::StyleBase::__markup_Add_1(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(style_43.clone(), 433, 6)?);
@@ -27250,7 +27250,7 @@ fn build_controls_simplecontrols_xaml_deferred_211(
     let setter_0 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::primitives::TemplatedControl::background_property()));
     // Controls/SimpleControls.xaml(52,35) Value
     let dynamic_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("ThemeBackgroundBrush")));
-    let provided_0 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_0 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_0, rt::to_object(::core::clone::Clone::clone(&provided_0)));
     // Controls/SimpleControls.xaml(53,6) Content
     let setter_1 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::primitives::TemplatedControl::template_property()));
@@ -28731,19 +28731,19 @@ fn build_controls_simplecontrols_xaml_deferred_224(
     let setter_2 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::presenters::ContentPresenter::background_property()));
     // Controls/SimpleControls.xaml(51,37) Value
     let dynamic_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("ThemeControlMidColor")));
-    let provided_0 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_0 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, style_1.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_2, rt::to_object(::core::clone::Clone::clone(&provided_0)));
     // Controls/SimpleControls.xaml(52,8) Content
     let setter_3 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::presenters::ContentPresenter::border_brush_property()));
     // Controls/SimpleControls.xaml(52,38) Value
     let dynamic_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("ThemeBorderMidColor")));
-    let provided_1 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_1 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, style_1.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_3, rt::to_object(::core::clone::Clone::clone(&provided_1)));
     // Controls/SimpleControls.xaml(53,8) Content
     let setter_4 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::presenters::ContentPresenter::foreground_property()));
     // Controls/SimpleControls.xaml(53,37) Value
     let dynamic_resource_extension_2 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("ThemeForegroundColor")));
-    let provided_2 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_2, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_2 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_2, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, style_1.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_4, rt::to_object(::core::clone::Clone::clone(&provided_2)));
     context.pop_parent();
     ::ferroui_base::styling::StyleBase::__markup_Add_1(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(style_1.clone(), 50, 6)?);
@@ -28761,19 +28761,19 @@ fn build_controls_simplecontrols_xaml_deferred_224(
     let setter_5 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::presenters::ContentPresenter::background_property()));
     // Controls/SimpleControls.xaml(57,37) Value
     let dynamic_resource_extension_3 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("ThemeBorderHighColor")));
-    let provided_3 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_3, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_3 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_3, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, style_2.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_5, rt::to_object(::core::clone::Clone::clone(&provided_3)));
     // Controls/SimpleControls.xaml(58,8) Content
     let setter_6 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::presenters::ContentPresenter::border_brush_property()));
     // Controls/SimpleControls.xaml(58,38) Value
     let dynamic_resource_extension_4 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("ThemeBorderLowColor")));
-    let provided_4 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_4, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_4 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_4, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, style_2.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_6, rt::to_object(::core::clone::Clone::clone(&provided_4)));
     // Controls/SimpleControls.xaml(59,8) Content
     let setter_7 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::presenters::ContentPresenter::foreground_property()));
     // Controls/SimpleControls.xaml(59,37) Value
     let dynamic_resource_extension_5 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("ThemeForegroundColor")));
-    let provided_5 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_5, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_5 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_5, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, style_2.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_7, rt::to_object(::core::clone::Clone::clone(&provided_5)));
     context.pop_parent();
     ::ferroui_base::styling::StyleBase::__markup_Add_1(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(style_2.clone(), 56, 6)?);
@@ -28807,13 +28807,13 @@ fn build_controls_simplecontrols_xaml_deferred_224(
     let setter_9 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::presenters::ContentPresenter::border_brush_property()));
     // Controls/SimpleControls.xaml(67,38) Value
     let dynamic_resource_extension_8 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("ThemeBorderLowColor")));
-    let provided_8 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_8, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_8 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_8, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, style_3.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_9, rt::to_object(::core::clone::Clone::clone(&provided_8)));
     // Controls/SimpleControls.xaml(68,8) Content
     let setter_10 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::presenters::ContentPresenter::foreground_property()));
     // Controls/SimpleControls.xaml(68,37) Value
     let dynamic_resource_extension_9 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("ThemeForegroundColor")));
-    let provided_9 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_9, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_9 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_9, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, style_3.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_10, rt::to_object(::core::clone::Clone::clone(&provided_9)));
     context.pop_parent();
     ::ferroui_base::styling::StyleBase::__markup_Add_1(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(style_3.clone(), 62, 6)?);
@@ -28831,19 +28831,19 @@ fn build_controls_simplecontrols_xaml_deferred_224(
     let setter_11 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::presenters::ContentPresenter::background_property()));
     // Controls/SimpleControls.xaml(72,37) Value
     let dynamic_resource_extension_10 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("ThemeBorderHighColor")));
-    let provided_10 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_10, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_10 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_10, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, style_4.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_11, rt::to_object(::core::clone::Clone::clone(&provided_10)));
     // Controls/SimpleControls.xaml(73,8) Content
     let setter_12 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::presenters::ContentPresenter::border_brush_property()));
     // Controls/SimpleControls.xaml(73,38) Value
     let dynamic_resource_extension_11 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("ThemeBorderLowColor")));
-    let provided_11 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_11, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_11 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_11, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, style_4.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_12, rt::to_object(::core::clone::Clone::clone(&provided_11)));
     // Controls/SimpleControls.xaml(74,8) Content
     let setter_13 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::presenters::ContentPresenter::foreground_property()));
     // Controls/SimpleControls.xaml(74,37) Value
     let dynamic_resource_extension_12 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("ThemeForegroundColor")));
-    let provided_12 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_12, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_12 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_12, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, style_4.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_13, rt::to_object(::core::clone::Clone::clone(&provided_12)));
     context.pop_parent();
     ::ferroui_base::styling::StyleBase::__markup_Add_1(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(style_4.clone(), 71, 6)?);
@@ -28868,19 +28868,19 @@ fn build_controls_simplecontrols_xaml_deferred_224(
     let setter_14 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::presenters::ContentPresenter::background_property()));
     // Controls/SimpleControls.xaml(79,39) Value
     let dynamic_resource_extension_13 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("ThemeBorderHighColor")));
-    let provided_13 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_13, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_13 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_13, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, style_6.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_14, rt::to_object(::core::clone::Clone::clone(&provided_13)));
     // Controls/SimpleControls.xaml(80,10) Content
     let setter_15 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::presenters::ContentPresenter::border_brush_property()));
     // Controls/SimpleControls.xaml(80,40) Value
     let dynamic_resource_extension_14 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("ThemeBorderMidColor")));
-    let provided_14 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_14, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_14 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_14, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, style_6.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_15, rt::to_object(::core::clone::Clone::clone(&provided_14)));
     // Controls/SimpleControls.xaml(81,10) Content
     let setter_16 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::presenters::ContentPresenter::foreground_property()));
     // Controls/SimpleControls.xaml(81,39) Value
     let dynamic_resource_extension_15 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("ThemeForegroundColor")));
-    let provided_15 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_15, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_15 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_15, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, style_6.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_16, rt::to_object(::core::clone::Clone::clone(&provided_15)));
     context.pop_parent();
     ::ferroui_base::styling::StyleBase::__markup_Add_1(style_5.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(style_6.clone(), 78, 8)?);
@@ -28898,19 +28898,19 @@ fn build_controls_simplecontrols_xaml_deferred_224(
     let setter_17 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::presenters::ContentPresenter::background_property()));
     // Controls/SimpleControls.xaml(85,39) Value
     let dynamic_resource_extension_16 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("ThemeBorderHighColor")));
-    let provided_16 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_16, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_16 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_16, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, style_7.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_17, rt::to_object(::core::clone::Clone::clone(&provided_16)));
     // Controls/SimpleControls.xaml(86,10) Content
     let setter_18 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::presenters::ContentPresenter::border_brush_property()));
     // Controls/SimpleControls.xaml(86,40) Value
     let dynamic_resource_extension_17 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("ThemeBorderMidColor")));
-    let provided_17 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_17, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_17 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_17, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, style_7.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_18, rt::to_object(::core::clone::Clone::clone(&provided_17)));
     // Controls/SimpleControls.xaml(87,10) Content
     let setter_19 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::presenters::ContentPresenter::foreground_property()));
     // Controls/SimpleControls.xaml(87,39) Value
     let dynamic_resource_extension_18 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("ThemeForegroundColor")));
-    let provided_18 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_18, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_18 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_18, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, style_7.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_19, rt::to_object(::core::clone::Clone::clone(&provided_18)));
     context.pop_parent();
     ::ferroui_base::styling::StyleBase::__markup_Add_1(style_5.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(style_7.clone(), 84, 8)?);
@@ -28928,19 +28928,19 @@ fn build_controls_simplecontrols_xaml_deferred_224(
     let setter_20 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::presenters::ContentPresenter::background_property()));
     // Controls/SimpleControls.xaml(91,39) Value
     let dynamic_resource_extension_19 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("ThemeBorderHighColor")));
-    let provided_19 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_19, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_19 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_19, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, style_8.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_20, rt::to_object(::core::clone::Clone::clone(&provided_19)));
     // Controls/SimpleControls.xaml(92,10) Content
     let setter_21 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::presenters::ContentPresenter::border_brush_property()));
     // Controls/SimpleControls.xaml(92,40) Value
     let dynamic_resource_extension_20 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("ThemeControlHighColor")));
-    let provided_20 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_20, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_20 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_20, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, style_8.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_21, rt::to_object(::core::clone::Clone::clone(&provided_20)));
     // Controls/SimpleControls.xaml(93,10) Content
     let setter_22 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::presenters::ContentPresenter::foreground_property()));
     // Controls/SimpleControls.xaml(93,39) Value
     let dynamic_resource_extension_21 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("ThemeForegroundColor")));
-    let provided_21 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_21, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_21 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_21, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, style_8.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_22, rt::to_object(::core::clone::Clone::clone(&provided_21)));
     context.pop_parent();
     ::ferroui_base::styling::StyleBase::__markup_Add_1(style_5.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(style_8.clone(), 90, 8)?);
@@ -28990,7 +28990,7 @@ fn build_controls_simplecontrols_xaml_deferred_224(
     let setter_25 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::documents::TextElement::foreground_property()));
     // Controls/SimpleControls.xaml(105,51) Value
     let dynamic_resource_extension_26 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("ThemeForegroundColor")));
-    let provided_26 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_26, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_26 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_26, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, style_9.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_25, rt::to_object(::core::clone::Clone::clone(&provided_26)));
     context.pop_parent();
     ::ferroui_base::styling::StyleBase::__markup_Add_1(style_5.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(style_9.clone(), 96, 8)?);
@@ -29010,19 +29010,19 @@ fn build_controls_simplecontrols_xaml_deferred_224(
     let setter_26 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::presenters::ContentPresenter::background_property()));
     // Controls/SimpleControls.xaml(110,37) Value
     let dynamic_resource_extension_27 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("ThemeBorderHighColor")));
-    let provided_27 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_27, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_27 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_27, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, style_10.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_26, rt::to_object(::core::clone::Clone::clone(&provided_27)));
     // Controls/SimpleControls.xaml(111,8) Content
     let setter_27 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::presenters::ContentPresenter::border_brush_property()));
     // Controls/SimpleControls.xaml(111,38) Value
     let dynamic_resource_extension_28 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("ThemeControlHighColor")));
-    let provided_28 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_28, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_28 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_28, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, style_10.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_27, rt::to_object(::core::clone::Clone::clone(&provided_28)));
     // Controls/SimpleControls.xaml(112,8) Content
     let setter_28 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::presenters::ContentPresenter::foreground_property()));
     // Controls/SimpleControls.xaml(112,37) Value
     let dynamic_resource_extension_29 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("ThemeForegroundColor")));
-    let provided_29 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_29, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_29 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_29, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, style_10.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_28, rt::to_object(::core::clone::Clone::clone(&provided_29)));
     context.pop_parent();
     ::ferroui_base::styling::StyleBase::__markup_Add_1(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(style_10.clone(), 109, 6)?);
@@ -29103,31 +29103,31 @@ fn build_controls_simplecontrols_xaml_deferred_226(
     let setter_0 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::primitives::TemplatedControl::background_property()));
     // Controls/SimpleControls.xaml(117,35) Value
     let dynamic_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("ThemeControlMidColor")));
-    let provided_0 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_0 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_0, rt::to_object(::core::clone::Clone::clone(&provided_0)));
     // Controls/SimpleControls.xaml(118,6) Content
     let setter_1 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::primitives::TemplatedControl::foreground_property()));
     // Controls/SimpleControls.xaml(118,35) Value
     let dynamic_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("ThemeForegroundColor")));
-    let provided_1 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_1 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_1, rt::to_object(::core::clone::Clone::clone(&provided_1)));
     // Controls/SimpleControls.xaml(119,6) Content
     let setter_2 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::primitives::TemplatedControl::border_brush_property()));
     // Controls/SimpleControls.xaml(119,36) Value
     let dynamic_resource_extension_2 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("ThemeBorderLowColor")));
-    let provided_2 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_2, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_2 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_2, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_2, rt::to_object(::core::clone::Clone::clone(&provided_2)));
     // Controls/SimpleControls.xaml(120,6) Content
     let setter_3 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::primitives::TemplatedControl::border_thickness_property()));
     // Controls/SimpleControls.xaml(120,40) Value
     let dynamic_resource_extension_3 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("SplitButtonBorderThemeThickness")));
-    let provided_3 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_3, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_3 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_3, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_3, rt::to_object(::core::clone::Clone::clone(&provided_3)));
     // Controls/SimpleControls.xaml(121,6) Content
     let setter_4 = rt::new_setter_with_parent(&context, rt::property(::ferroui_base::layout::Layoutable::min_height_property()));
     // Controls/SimpleControls.xaml(121,34) Value
     let dynamic_resource_extension_4 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("SplitButtonMinHeight")));
-    let provided_4 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_4, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_4 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_4, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_4, rt::to_object(::core::clone::Clone::clone(&provided_4)));
     // Controls/SimpleControls.xaml(122,6) Content
     rt::add_setter(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::property(::ferroui_base::layout::Layoutable::horizontal_alignment_property()), rt::to_object(::ferroui_base::layout::HorizontalAlignment::Left));
@@ -29515,7 +29515,7 @@ fn build_controls_simplecontrols_xaml_deferred_228(
     let setter_0 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::SelectableTextBlock::selection_brush_property()));
     // Controls/SimpleControls.xaml(14,39) Value
     let dynamic_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("HighlightBrush")));
-    let provided_0 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_0 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_0, rt::to_object(::core::clone::Clone::clone(&provided_0)));
     // Controls/SimpleControls.xaml(16,6) Content
     // Controls/SimpleControls.xaml(16,6) Style
@@ -29534,7 +29534,7 @@ fn build_controls_simplecontrols_xaml_deferred_228(
     let setter_2 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::Control::context_flyout_property()));
     // Controls/SimpleControls.xaml(18,40) Value
     let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("SelectableTextBlockContextFlyout")));
-    let provided_1 = rt::provide_value_invoked(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 18, 40)?;
+    let provided_1 = rt::provide_value_invoked(&context, rt::setter_value_property(), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 18, 40)?;
     rt::add_setter_value_with_parent(&context, style_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_2, ::core::clone::Clone::clone(&provided_1));
     context.pop_parent();
     ::ferroui_base::styling::StyleBase::__markup_Add_1(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(style_0.clone(), 16, 6)?);
@@ -29713,7 +29713,7 @@ fn build_controls_simplecontrols_xaml_deferred_233(
     let setter_0 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::primitives::TemplatedControl::background_property()));
     // Controls/SimpleControls.xaml(65,13) Value
     let dynamic_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("HighlightBrush")));
-    let provided_0 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_0 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_0, rt::to_object(::core::clone::Clone::clone(&provided_0)));
     // Controls/SimpleControls.xaml(66,6) Content
     rt::add_setter(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::property(::ferroui_base::layout::Layoutable::horizontal_alignment_property()), rt::to_object(::ferroui_base::layout::HorizontalAlignment::Center));
@@ -29742,7 +29742,7 @@ fn build_controls_simplecontrols_xaml_deferred_233(
     let setter_3 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::Image::source_property()));
     // Controls/SimpleControls.xaml(90,33) Value
     let dynamic_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("TextCaretHandleDrawing")));
-    let provided_1 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_1 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, style_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_3, rt::to_object(::core::clone::Clone::clone(&provided_1)));
     context.pop_parent();
     ::ferroui_base::styling::StyleBase::__markup_Add_1(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(style_0.clone(), 89, 6)?);
@@ -29945,7 +29945,7 @@ fn build_controls_simplecontrols_xaml_deferred_235(
     let setter_9 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::Border::background_property()));
     // Controls/SimpleControls.xaml(62,37) Value
     let dynamic_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("ThemeControlMidHighBrush")));
-    let provided_0 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_0 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, style_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_9, rt::to_object(::core::clone::Clone::clone(&provided_0)));
     context.pop_parent();
     ::ferroui_base::styling::StyleBase::__markup_Add_1(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(style_0.clone(), 61, 6)?);
@@ -29964,7 +29964,7 @@ fn build_controls_simplecontrols_xaml_deferred_235(
     let setter_10 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::Border::background_property()));
     // Controls/SimpleControls.xaml(67,37) Value
     let dynamic_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("ThemeControlHighBrush")));
-    let provided_1 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_1 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, style_1.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_10, rt::to_object(::core::clone::Clone::clone(&provided_1)));
     context.pop_parent();
     ::ferroui_base::styling::StyleBase::__markup_Add_1(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(style_1.clone(), 66, 6)?);
@@ -30276,7 +30276,7 @@ fn build_controls_simplecontrols_xaml_deferred_237(
     let setter_9 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::Border::background_property()));
     // Controls/SimpleControls.xaml(158,37) Value
     let dynamic_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("ThemeControlMidHighBrush")));
-    let provided_0 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_0 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, style_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_9, rt::to_object(::core::clone::Clone::clone(&provided_0)));
     context.pop_parent();
     ::ferroui_base::styling::StyleBase::__markup_Add_1(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(style_0.clone(), 157, 6)?);
@@ -30295,7 +30295,7 @@ fn build_controls_simplecontrols_xaml_deferred_237(
     let setter_10 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::Border::background_property()));
     // Controls/SimpleControls.xaml(163,37) Value
     let dynamic_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("ThemeControlHighBrush")));
-    let provided_1 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_1 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, style_1.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_10, rt::to_object(::core::clone::Clone::clone(&provided_1)));
     context.pop_parent();
     ::ferroui_base::styling::StyleBase::__markup_Add_1(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(style_1.clone(), 162, 6)?);
@@ -30314,13 +30314,13 @@ fn build_controls_simplecontrols_xaml_deferred_237(
     let setter_11 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::Border::background_property()));
     // Controls/SimpleControls.xaml(168,37) Value
     let dynamic_resource_extension_2 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("ThemeControlHighBrush")));
-    let provided_2 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_2, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_2 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_2, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, style_2.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_11, rt::to_object(::core::clone::Clone::clone(&provided_2)));
     // Controls/SimpleControls.xaml(169,8) Content
     let setter_12 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::Border::border_brush_property()));
     // Controls/SimpleControls.xaml(169,38) Value
     let dynamic_resource_extension_3 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("ThemeBorderMidBrush")));
-    let provided_3 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_3, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_3 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_3, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, style_2.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_12, rt::to_object(::core::clone::Clone::clone(&provided_3)));
     context.pop_parent();
     ::ferroui_base::styling::StyleBase::__markup_Add_1(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(style_2.clone(), 167, 6)?);
@@ -30678,19 +30678,19 @@ fn build_controls_simplecontrols_xaml_deferred_241(
     let setter_1 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::primitives::TemplatedControl::background_property()));
     // Controls/SimpleControls.xaml(248,35) Value
     let dynamic_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("ThemeControlMidBrush")));
-    let provided_0 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_0 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_1, rt::to_object(::core::clone::Clone::clone(&provided_0)));
     // Controls/SimpleControls.xaml(249,6) Content
     let setter_2 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::primitives::TemplatedControl::border_brush_property()));
     // Controls/SimpleControls.xaml(249,36) Value
     let dynamic_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("ThemeBorderLowBrush")));
-    let provided_1 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_1 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_2, rt::to_object(::core::clone::Clone::clone(&provided_1)));
     // Controls/SimpleControls.xaml(250,6) Content
     let setter_3 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::primitives::TemplatedControl::border_thickness_property()));
     // Controls/SimpleControls.xaml(250,40) Value
     let dynamic_resource_extension_2 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("ThemeBorderThickness")));
-    let provided_2 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_2, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_2 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_2, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_3, rt::to_object(::core::clone::Clone::clone(&provided_2)));
     // Controls/SimpleControls.xaml(251,6) Content
     rt::add_setter(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::property(::ferroui_base::layout::Layoutable::min_height_property()), rt::to_object(48.0_f64));
@@ -31035,13 +31035,13 @@ fn build_controls_simplecontrols_xaml_deferred_246(
     let setter_0 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::primitives::TemplatedControl::background_property()));
     // Controls/SimpleControls.xaml(19,35) Value
     let dynamic_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("ThemeBackgroundBrush")));
-    let provided_0 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_0 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_0, rt::to_object(::core::clone::Clone::clone(&provided_0)));
     // Controls/SimpleControls.xaml(20,6) Content
     let setter_1 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::primitives::TemplatedControl::foreground_property()));
     // Controls/SimpleControls.xaml(20,35) Value
     let dynamic_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("ThemeForegroundBrush")));
-    let provided_1 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_1 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_1, rt::to_object(::core::clone::Clone::clone(&provided_1)));
     // Controls/SimpleControls.xaml(21,6) Content
     let setter_2 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::primitives::TemplatedControl::template_property()));
@@ -32251,7 +32251,7 @@ fn build_controls_simplecontrols_xaml_deferred_253(
     let setter_4 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::Border::background_property()));
     // Controls/SimpleControls.xaml(189,37) Value
     let dynamic_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("NavigationBarBackground")));
-    let provided_0 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_0 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, style_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_4, rt::to_object(::core::clone::Clone::clone(&provided_0)));
     context.pop_parent();
     ::ferroui_base::styling::StyleBase::__markup_Add_1(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(style_0.clone(), 188, 6)?);
@@ -32497,7 +32497,7 @@ fn build_controls_simplecontrols_xaml_deferred_254(
     let setter_2 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::presenters::ContentPresenter::background_property()));
     // Controls/SimpleControls.xaml(87,49) Value
     let dynamic_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("ThemeControlHighlightMidBrush")));
-    let provided_6 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_6 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, style_1.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_2, rt::to_object(::core::clone::Clone::clone(&provided_6)));
     context.pop_parent();
     rt::invoked(::ferroui_base::styling::Styles::__markup_Add_0(&styles_collection_1, rt::cast(style_1.clone(), 86, 18)?), 86, 18)?;
@@ -32518,7 +32518,7 @@ fn build_controls_simplecontrols_xaml_deferred_254(
     let setter_3 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::presenters::ContentPresenter::background_property()));
     // Controls/SimpleControls.xaml(90,49) Value
     let dynamic_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("ThemeControlHighlightLowBrush")));
-    let provided_7 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_7 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, style_2.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_3, rt::to_object(::core::clone::Clone::clone(&provided_7)));
     context.pop_parent();
     rt::invoked(::ferroui_base::styling::Styles::__markup_Add_0(&styles_collection_2, rt::cast(style_2.clone(), 89, 18)?), 89, 18)?;
@@ -32551,7 +32551,7 @@ fn build_controls_simplecontrols_xaml_deferred_254(
     let setter_5 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::presenters::ContentPresenter::border_brush_property()));
     // Controls/SimpleControls.xaml(96,50) Value
     let dynamic_resource_extension_2 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("ThemeBorderHighBrush")));
-    let provided_8 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_2, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_8 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_2, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, style_4.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_5, rt::to_object(::core::clone::Clone::clone(&provided_8)));
     // Controls/SimpleControls.xaml(97,20) Content
     rt::add_setter(style_4.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::property(::ferroui_controls::presenters::ContentPresenter::border_thickness_property()), rt::to_object(::ferroui_base::Thickness::__markup_new_3(2.0_f64, 2.0_f64, 2.0_f64, 2.0_f64)));
@@ -32606,7 +32606,7 @@ fn build_controls_simplecontrols_xaml_deferred_254(
     let setter_11 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::presenters::ContentPresenter::background_property()));
     // Controls/SimpleControls.xaml(108,49) Value
     let dynamic_resource_extension_3 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("ThemeControlHighlightMidBrush")));
-    let provided_9 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_3, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_9 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_3, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, style_7.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_11, rt::to_object(::core::clone::Clone::clone(&provided_9)));
     context.pop_parent();
     rt::invoked(::ferroui_base::styling::Styles::__markup_Add_0(&styles_collection_7, rt::cast(style_7.clone(), 107, 18)?), 107, 18)?;
@@ -32627,7 +32627,7 @@ fn build_controls_simplecontrols_xaml_deferred_254(
     let setter_12 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::presenters::ContentPresenter::background_property()));
     // Controls/SimpleControls.xaml(111,49) Value
     let dynamic_resource_extension_4 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("ThemeControlHighlightLowBrush")));
-    let provided_10 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_4, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_10 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_4, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, style_8.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_12, rt::to_object(::core::clone::Clone::clone(&provided_10)));
     context.pop_parent();
     rt::invoked(::ferroui_base::styling::Styles::__markup_Add_0(&styles_collection_8, rt::cast(style_8.clone(), 110, 18)?), 110, 18)?;
@@ -33116,31 +33116,31 @@ fn build_controls_simplecontrols_xaml_deferred_267(
     let setter_0 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::primitives::TemplatedControl::background_property()));
     // Controls/SimpleControls.xaml(57,35) Value
     let dynamic_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("TabbedPageTabStripBackground")));
-    let provided_0 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_0 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_0, rt::to_object(::core::clone::Clone::clone(&provided_0)));
     // Controls/SimpleControls.xaml(58,6) Content
     let setter_1 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::primitives::TemplatedControl::corner_radius_property()));
     // Controls/SimpleControls.xaml(58,37) Value
     let dynamic_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("TabbedPageTabStripCornerRadius")));
-    let provided_1 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_1 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_1, rt::to_object(::core::clone::Clone::clone(&provided_1)));
     // Controls/SimpleControls.xaml(59,6) Content
     let setter_2 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::primitives::TemplatedControl::border_brush_property()));
     // Controls/SimpleControls.xaml(59,36) Value
     let dynamic_resource_extension_2 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("TabbedPageTabStripBorderBrush")));
-    let provided_2 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_2, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_2 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_2, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_2, rt::to_object(::core::clone::Clone::clone(&provided_2)));
     // Controls/SimpleControls.xaml(60,6) Content
     let setter_3 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::primitives::TemplatedControl::border_thickness_property()));
     // Controls/SimpleControls.xaml(60,40) Value
     let dynamic_resource_extension_3 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("TabbedPageTabStripBorderThickness")));
-    let provided_3 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_3, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_3 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_3, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_3, rt::to_object(::core::clone::Clone::clone(&provided_3)));
     // Controls/SimpleControls.xaml(61,6) Content
     let setter_4 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::primitives::TemplatedControl::padding_property()));
     // Controls/SimpleControls.xaml(61,32) Value
     let dynamic_resource_extension_4 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("TabbedPageTabStripPadding")));
-    let provided_4 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_4, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_4 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_4, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_4, rt::to_object(::core::clone::Clone::clone(&provided_4)));
     // Controls/SimpleControls.xaml(62,6) Content
     let setter_5 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::primitives::TemplatedControl::template_property()));
@@ -33335,37 +33335,37 @@ fn build_controls_simplecontrols_xaml_deferred_270(
     let setter_2 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::primitives::TemplatedControl::background_property()));
     // Controls/SimpleControls.xaml(105,35) Value
     let dynamic_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("TabbedPageTabItemHeaderBackgroundUnselected")));
-    let provided_0 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_0 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_2, rt::to_object(::core::clone::Clone::clone(&provided_0)));
     // Controls/SimpleControls.xaml(106,6) Content
     let setter_3 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::primitives::TemplatedControl::foreground_property()));
     // Controls/SimpleControls.xaml(106,35) Value
     let dynamic_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("TabbedPageTabItemHeaderForegroundUnselected")));
-    let provided_1 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_1 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_3, rt::to_object(::core::clone::Clone::clone(&provided_1)));
     // Controls/SimpleControls.xaml(107,6) Content
     let setter_4 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::primitives::TemplatedControl::padding_property()));
     // Controls/SimpleControls.xaml(107,32) Value
     let dynamic_resource_extension_2 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("TabbedPageTabItemHeaderPadding")));
-    let provided_2 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_2, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_2 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_2, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_4, rt::to_object(::core::clone::Clone::clone(&provided_2)));
     // Controls/SimpleControls.xaml(108,6) Content
     let setter_5 = rt::new_setter_with_parent(&context, rt::property(::ferroui_base::layout::Layoutable::margin_property()));
     // Controls/SimpleControls.xaml(108,31) Value
     let dynamic_resource_extension_3 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("TabbedPageTabItemHeaderMargin")));
-    let provided_3 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_3, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_3 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_3, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_5, rt::to_object(::core::clone::Clone::clone(&provided_3)));
     // Controls/SimpleControls.xaml(109,6) Content
     let setter_6 = rt::new_setter_with_parent(&context, rt::property(::ferroui_base::layout::Layoutable::min_height_property()));
     // Controls/SimpleControls.xaml(109,34) Value
     let dynamic_resource_extension_4 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("TabbedPageTabItemHeaderMinHeight")));
-    let provided_4 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_4, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_4 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_4, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_6, rt::to_object(::core::clone::Clone::clone(&provided_4)));
     // Controls/SimpleControls.xaml(110,6) Content
     let setter_7 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::primitives::TemplatedControl::corner_radius_property()));
     // Controls/SimpleControls.xaml(110,37) Value
     let dynamic_resource_extension_5 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("TabbedPageTabItemHeaderCornerRadius")));
-    let provided_5 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_5, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_5 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_5, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_7, rt::to_object(::core::clone::Clone::clone(&provided_5)));
     // Controls/SimpleControls.xaml(111,6) Content
     rt::add_setter(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::property(::ferroui_controls::ContentControl::horizontal_content_alignment_property()), rt::to_object(::ferroui_base::layout::HorizontalAlignment::Center));
@@ -33403,13 +33403,13 @@ fn build_controls_simplecontrols_xaml_deferred_270(
     let setter_12 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::primitives::TemplatedControl::background_property()));
     // Controls/SimpleControls.xaml(166,37) Value
     let dynamic_resource_extension_6 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("TabbedPageTabItemHeaderBackgroundSelected")));
-    let provided_6 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_6, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_6 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_6, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, style_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_12, rt::to_object(::core::clone::Clone::clone(&provided_6)));
     // Controls/SimpleControls.xaml(167,8) Content
     let setter_13 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::primitives::TemplatedControl::foreground_property()));
     // Controls/SimpleControls.xaml(167,37) Value
     let dynamic_resource_extension_7 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("TabbedPageTabItemHeaderForegroundSelected")));
-    let provided_7 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_7, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_7 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_7, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, style_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_13, rt::to_object(::core::clone::Clone::clone(&provided_7)));
     context.pop_parent();
     ::ferroui_base::styling::StyleBase::__markup_Add_1(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(style_0.clone(), 165, 6)?);
@@ -33443,7 +33443,7 @@ fn build_controls_simplecontrols_xaml_deferred_270(
     let setter_16 = rt::new_setter_with_parent(&context, rt::property(::ferroui_base::layout::Layoutable::height_property()));
     // Controls/SimpleControls.xaml(176,33) Value
     let dynamic_resource_extension_8 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("TabbedPageTabItemHeaderPipeThickness")));
-    let provided_8 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_8, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_8 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_8, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, style_2.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_16, rt::to_object(::core::clone::Clone::clone(&provided_8)));
     context.pop_parent();
     ::ferroui_base::styling::StyleBase::__markup_Add_1(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(style_2.clone(), 174, 6)?);
@@ -33464,7 +33464,7 @@ fn build_controls_simplecontrols_xaml_deferred_270(
     let setter_18 = rt::new_setter_with_parent(&context, rt::property(::ferroui_base::layout::Layoutable::height_property()));
     // Controls/SimpleControls.xaml(180,33) Value
     let dynamic_resource_extension_9 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("TabbedPageTabItemHeaderPipeThickness")));
-    let provided_9 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_9, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_9 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_9, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, style_3.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_18, rt::to_object(::core::clone::Clone::clone(&provided_9)));
     context.pop_parent();
     ::ferroui_base::styling::StyleBase::__markup_Add_1(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(style_3.clone(), 178, 6)?);
@@ -33553,7 +33553,7 @@ fn build_controls_simplecontrols_xaml_deferred_270(
     let setter_25 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::Border::background_property()));
     // Controls/SimpleControls.xaml(215,37) Value
     let dynamic_resource_extension_10 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("TabbedPageTabItemHeaderBackgroundUnselectedPointerOver")));
-    let provided_10 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_10, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_10 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_10, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, style_8.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_25, rt::to_object(::core::clone::Clone::clone(&provided_10)));
     context.pop_parent();
     ::ferroui_base::styling::StyleBase::__markup_Add_1(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(style_8.clone(), 214, 6)?);
@@ -33573,7 +33573,7 @@ fn build_controls_simplecontrols_xaml_deferred_270(
     let setter_26 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::Border::background_property()));
     // Controls/SimpleControls.xaml(220,37) Value
     let dynamic_resource_extension_11 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("TabbedPageTabItemHeaderBackgroundSelectedPointerOver")));
-    let provided_11 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_11, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_11 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_11, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, style_9.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_26, rt::to_object(::core::clone::Clone::clone(&provided_11)));
     context.pop_parent();
     ::ferroui_base::styling::StyleBase::__markup_Add_1(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(style_9.clone(), 219, 6)?);
@@ -33592,7 +33592,7 @@ fn build_controls_simplecontrols_xaml_deferred_270(
     let setter_27 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::Border::background_property()));
     // Controls/SimpleControls.xaml(225,37) Value
     let dynamic_resource_extension_12 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("TabbedPageTabItemHeaderBackgroundUnselectedPressed")));
-    let provided_12 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_12, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_12 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_12, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, style_10.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_27, rt::to_object(::core::clone::Clone::clone(&provided_12)));
     context.pop_parent();
     ::ferroui_base::styling::StyleBase::__markup_Add_1(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(style_10.clone(), 224, 6)?);
@@ -33612,7 +33612,7 @@ fn build_controls_simplecontrols_xaml_deferred_270(
     let setter_28 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::Border::background_property()));
     // Controls/SimpleControls.xaml(230,37) Value
     let dynamic_resource_extension_13 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("TabbedPageTabItemHeaderBackgroundSelectedPressed")));
-    let provided_13 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_13, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_13 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_13, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, style_11.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_28, rt::to_object(::core::clone::Clone::clone(&provided_13)));
     context.pop_parent();
     ::ferroui_base::styling::StyleBase::__markup_Add_1(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(style_11.clone(), 229, 6)?);
@@ -33631,13 +33631,13 @@ fn build_controls_simplecontrols_xaml_deferred_270(
     let setter_29 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::Border::background_property()));
     // Controls/SimpleControls.xaml(235,37) Value
     let dynamic_resource_extension_14 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("TabbedPageTabItemHeaderBackgroundDisabled")));
-    let provided_14 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_14, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_14 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_14, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, style_12.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_29, rt::to_object(::core::clone::Clone::clone(&provided_14)));
     // Controls/SimpleControls.xaml(236,8) Content
     let setter_30 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::documents::TextElement::foreground_property()));
     // Controls/SimpleControls.xaml(236,49) Value
     let dynamic_resource_extension_15 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("TabbedPageTabItemHeaderForegroundDisabled")));
-    let provided_15 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_15, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_15 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_15, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, style_12.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_30, rt::to_object(::core::clone::Clone::clone(&provided_15)));
     context.pop_parent();
     ::ferroui_base::styling::StyleBase::__markup_Add_1(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(style_12.clone(), 234, 6)?);
@@ -33656,7 +33656,7 @@ fn build_controls_simplecontrols_xaml_deferred_270(
     let setter_31 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::Border::border_brush_property()));
     // Controls/SimpleControls.xaml(241,38) Value
     let dynamic_resource_extension_16 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("ThemeBorderHighBrush")));
-    let provided_16 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_16, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_16 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_16, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, style_13.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_31, rt::to_object(::core::clone::Clone::clone(&provided_16)));
     // Controls/SimpleControls.xaml(242,8) Content
     rt::add_setter(style_13.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::property(::ferroui_controls::Border::border_thickness_property()), rt::to_object(::ferroui_base::Thickness::__markup_new_3(2.0_f64, 2.0_f64, 2.0_f64, 2.0_f64)));
@@ -33979,7 +33979,7 @@ fn build_controls_simplecontrols_xaml_deferred_275(
     let setter_0 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::primitives::TemplatedControl::background_property()));
     // Controls/SimpleControls.xaml(247,35) Value
     let dynamic_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("ThemeBackgroundBrush")));
-    let provided_0 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_0 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_0, rt::to_object(::core::clone::Clone::clone(&provided_0)));
     // Controls/SimpleControls.xaml(248,6) Content
     let setter_1 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::primitives::TemplatedControl::template_property()));
@@ -34321,25 +34321,25 @@ fn build_controls_simplecontrols_xaml_deferred_279(
     let setter_0 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::primitives::TemplatedControl::foreground_property()));
     // Controls/SimpleControls.xaml(66,35) Value
     let dynamic_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("ThemeForegroundBrush")));
-    let provided_0 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_0 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_0, rt::to_object(::core::clone::Clone::clone(&provided_0)));
     // Controls/SimpleControls.xaml(67,6) Content
     let setter_1 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::primitives::TemplatedControl::background_property()));
     // Controls/SimpleControls.xaml(67,35) Value
     let dynamic_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("ThemeBackgroundBrush")));
-    let provided_1 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_1 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_1, rt::to_object(::core::clone::Clone::clone(&provided_1)));
     // Controls/SimpleControls.xaml(68,6) Content
     let setter_2 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::primitives::TemplatedControl::border_brush_property()));
     // Controls/SimpleControls.xaml(68,36) Value
     let dynamic_resource_extension_2 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("ThemeBorderMidBrush")));
-    let provided_2 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_2, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_2 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_2, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_2, rt::to_object(::core::clone::Clone::clone(&provided_2)));
     // Controls/SimpleControls.xaml(69,6) Content
     let setter_3 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::primitives::TemplatedControl::border_thickness_property()));
     // Controls/SimpleControls.xaml(69,40) Value
     let dynamic_resource_extension_3 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("ThemeBorderThickness")));
-    let provided_3 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_3, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_3 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_3, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_3, rt::to_object(::core::clone::Clone::clone(&provided_3)));
     // Controls/SimpleControls.xaml(70,6) Content
     rt::add_setter(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::property(::ferroui_controls::ScrollViewer::horizontal_scroll_bar_visibility_property()), rt::to_object(::ferroui_controls::primitives::ScrollBarVisibility::Auto));
@@ -34496,7 +34496,7 @@ fn build_controls_simplecontrols_xaml_deferred_281(
     let setter_0 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::primitives::TemplatedControl::padding_property()));
     // Controls/SimpleControls.xaml(8,32) Value
     let dynamic_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("TableViewCellPadding")));
-    let provided_0 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_0 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_0, rt::to_object(::core::clone::Clone::clone(&provided_0)));
     context.pop_parent();
     ::core::result::Result::Ok(rt::to_value(control_theme_0.clone()))
@@ -34573,7 +34573,7 @@ fn build_controls_simplecontrols_xaml_deferred_284(
     let setter_1 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::primitives::TemplatedControl::padding_property()));
     // Controls/SimpleControls.xaml(24,32) Value
     let dynamic_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("TableViewCellPadding")));
-    let provided_0 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_0 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_1, rt::to_object(::core::clone::Clone::clone(&provided_0)));
     // Controls/SimpleControls.xaml(25,6) Content
     rt::add_setter(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::property(::ferroui_controls::ContentControl::horizontal_content_alignment_property()), rt::to_object(::ferroui_base::layout::HorizontalAlignment::Left));
@@ -34733,7 +34733,7 @@ fn build_controls_simplecontrols_xaml_deferred_286(
     let setter_1 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::primitives::TemplatedControl::padding_property()));
     // Controls/SimpleControls.xaml(9,32) Value
     let dynamic_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("TableViewRowPadding")));
-    let provided_0 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_0 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_1, rt::to_object(::core::clone::Clone::clone(&provided_0)));
     // Controls/SimpleControls.xaml(10,6) Content
     let setter_2 = rt::new_setter(rt::property(::ferroui_controls::primitives::TemplatedControl::template_property()));
@@ -34758,7 +34758,7 @@ fn build_controls_simplecontrols_xaml_deferred_286(
     let setter_3 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::documents::TextElement::foreground_property()));
     // Controls/SimpleControls.xaml(27,49) Value
     let dynamic_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("ThemeForegroundLowBrush")));
-    let provided_1 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_1 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, style_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_3, rt::to_object(::core::clone::Clone::clone(&provided_1)));
     context.pop_parent();
     ::ferroui_base::styling::StyleBase::__markup_Add_1(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(style_0.clone(), 26, 6)?);
@@ -34777,13 +34777,13 @@ fn build_controls_simplecontrols_xaml_deferred_286(
     let setter_4 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::Border::background_property()));
     // Controls/SimpleControls.xaml(32,37) Value
     let dynamic_resource_extension_2 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("ThemeControlHighlightMidBrush")));
-    let provided_2 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_2, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_2 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_2, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, style_1.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_4, rt::to_object(::core::clone::Clone::clone(&provided_2)));
     // Controls/SimpleControls.xaml(33,8) Content
     let setter_5 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::documents::TextElement::foreground_property()));
     // Controls/SimpleControls.xaml(33,49) Value
     let dynamic_resource_extension_3 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("ThemeForegroundBrush")));
-    let provided_3 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_3, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_3 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_3, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, style_1.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_5, rt::to_object(::core::clone::Clone::clone(&provided_3)));
     context.pop_parent();
     ::ferroui_base::styling::StyleBase::__markup_Add_1(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(style_1.clone(), 31, 6)?);
@@ -34802,13 +34802,13 @@ fn build_controls_simplecontrols_xaml_deferred_286(
     let setter_6 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::Border::background_property()));
     // Controls/SimpleControls.xaml(38,37) Value
     let dynamic_resource_extension_4 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("ThemeControlHighlightHighBrush")));
-    let provided_4 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_4, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_4 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_4, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, style_2.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_6, rt::to_object(::core::clone::Clone::clone(&provided_4)));
     // Controls/SimpleControls.xaml(39,8) Content
     let setter_7 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::documents::TextElement::foreground_property()));
     // Controls/SimpleControls.xaml(39,49) Value
     let dynamic_resource_extension_5 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("ThemeForegroundBrush")));
-    let provided_5 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_5, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_5 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_5, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, style_2.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_7, rt::to_object(::core::clone::Clone::clone(&provided_5)));
     context.pop_parent();
     ::ferroui_base::styling::StyleBase::__markup_Add_1(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(style_2.clone(), 37, 6)?);
@@ -34834,13 +34834,13 @@ fn build_controls_simplecontrols_xaml_deferred_286(
     let setter_8 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::Border::background_property()));
     // Controls/SimpleControls.xaml(46,39) Value
     let dynamic_resource_extension_6 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("ThemeAccentBrush4")));
-    let provided_6 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_6, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_6 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_6, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, style_4.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_8, rt::to_object(::core::clone::Clone::clone(&provided_6)));
     // Controls/SimpleControls.xaml(47,10) Content
     let setter_9 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::documents::TextElement::foreground_property()));
     // Controls/SimpleControls.xaml(47,51) Value
     let dynamic_resource_extension_7 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("ThemeForegroundBrush")));
-    let provided_7 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_7, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_7 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_7, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, style_4.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_9, rt::to_object(::core::clone::Clone::clone(&provided_7)));
     context.pop_parent();
     ::ferroui_base::styling::StyleBase::__markup_Add_1(style_3.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(style_4.clone(), 45, 8)?);
@@ -34860,13 +34860,13 @@ fn build_controls_simplecontrols_xaml_deferred_286(
     let setter_10 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::Border::background_property()));
     // Controls/SimpleControls.xaml(52,39) Value
     let dynamic_resource_extension_8 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("ThemeAccentBrush4")));
-    let provided_8 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_8, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_8 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_8, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, style_5.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_10, rt::to_object(::core::clone::Clone::clone(&provided_8)));
     // Controls/SimpleControls.xaml(53,10) Content
     let setter_11 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::documents::TextElement::foreground_property()));
     // Controls/SimpleControls.xaml(53,51) Value
     let dynamic_resource_extension_9 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("ThemeForegroundBrush")));
-    let provided_9 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_9, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_9 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_9, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, style_5.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_11, rt::to_object(::core::clone::Clone::clone(&provided_9)));
     context.pop_parent();
     ::ferroui_base::styling::StyleBase::__markup_Add_1(style_3.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(style_5.clone(), 51, 8)?);
@@ -34885,13 +34885,13 @@ fn build_controls_simplecontrols_xaml_deferred_286(
     let setter_12 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::Border::background_property()));
     // Controls/SimpleControls.xaml(58,39) Value
     let dynamic_resource_extension_10 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("ThemeAccentBrush3")));
-    let provided_10 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_10, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_10 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_10, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, style_6.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_12, rt::to_object(::core::clone::Clone::clone(&provided_10)));
     // Controls/SimpleControls.xaml(59,10) Content
     let setter_13 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::documents::TextElement::foreground_property()));
     // Controls/SimpleControls.xaml(59,51) Value
     let dynamic_resource_extension_11 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("ThemeForegroundBrush")));
-    let provided_11 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_11, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_11 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_11, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, style_6.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_13, rt::to_object(::core::clone::Clone::clone(&provided_11)));
     context.pop_parent();
     ::ferroui_base::styling::StyleBase::__markup_Add_1(style_3.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(style_6.clone(), 57, 8)?);
@@ -34910,13 +34910,13 @@ fn build_controls_simplecontrols_xaml_deferred_286(
     let setter_14 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::Border::background_property()));
     // Controls/SimpleControls.xaml(64,39) Value
     let dynamic_resource_extension_12 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("ThemeAccentBrush2")));
-    let provided_12 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_12, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_12 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_12, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, style_7.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_14, rt::to_object(::core::clone::Clone::clone(&provided_12)));
     // Controls/SimpleControls.xaml(65,10) Content
     let setter_15 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::documents::TextElement::foreground_property()));
     // Controls/SimpleControls.xaml(65,51) Value
     let dynamic_resource_extension_13 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::to_object(::std::string::String::from("ThemeForegroundBrush")));
-    let provided_13 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Value", false, ::ferroui_base::data::core::ValueType::object(), false)), &dynamic_resource_extension_13, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_13 = rt::provide_value(&context, rt::setter_value_property(), &dynamic_resource_extension_13, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     rt::add_setter_value_with_parent(&context, style_7.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_15, rt::to_object(::core::clone::Clone::clone(&provided_13)));
     context.pop_parent();
     ::ferroui_base::styling::StyleBase::__markup_Add_1(style_3.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(style_7.clone(), 63, 8)?);

@@ -10,6 +10,7 @@
 //! loader fails.
 
 use std::any::{Any, TypeId};
+use std::cell::RefCell;
 use std::collections::HashMap;
 use std::fmt::Display;
 use std::rc::Rc;
@@ -432,10 +433,49 @@ pub fn class_markup(class: &'static TypeInfo) -> &'static MarkupType {
 /// handle of the type of the property; a getter of a `System.Boolean`
 /// property (`cached_boxed_boolean`) returns the shared boxes.
 ///
+/// There is one description per declared property and thread, created
+/// when it is first asked for, as upstream's compiler keeps one per property
+/// in a static field of the generated helper type of the assembly
+/// (`XamlIlClrPropertyInfoEmitter`, `<Type>.<Name>!Field`); `property_type`
+/// and `cached_boxed_boolean` follow from the declaration.
+///
 /// # Panics
 /// Panics if `markup` declares no such property: the emitter writes the
 /// call only for a declared property.
 pub fn clr_property_info(
+    markup: &'static MarkupType,
+    name: &'static str,
+    is_static: bool,
+    property_type: ValueType,
+    cached_boxed_boolean: bool,
+) -> Rc<dyn IPropertyInfo> {
+    thread_local! {
+        static INFOS: RefCell<HashMap<(usize, &'static str, bool), Rc<dyn IPropertyInfo>>> = RefCell::new(HashMap::new());
+    }
+    let key = (markup as *const MarkupType as usize, name, is_static);
+    if let Some(info) = INFOS.with(|infos| infos.borrow().get(&key).cloned()) {
+        return info;
+    }
+    let info = new_clr_property_info(markup, name, is_static, property_type, cached_boxed_boolean);
+    INFOS.with(|infos| infos.borrow_mut().insert(key, info.clone()));
+    info
+}
+
+/// The description of `Setter.Value` ([`clr_property_info`]) as a value:
+/// the provide-value target property of a markup extension that gives a
+/// setter its value.
+#[inline(never)]
+pub fn setter_value_property() -> MarkupValue {
+    boxed(clr_property_info(
+        <Setter as ferroui_base::metadata::MarkupTyped>::MARKUP,
+        "Value",
+        false,
+        ValueType::object(),
+        false,
+    ))
+}
+
+fn new_clr_property_info(
     markup: &'static MarkupType,
     name: &str,
     is_static: bool,
@@ -486,7 +526,7 @@ pub fn clr_property_info(
 pub fn path_property(
     builder: &CompiledBindingPathBuilder,
     markup: &'static MarkupType,
-    name: &str,
+    name: &'static str,
     is_static: bool,
     property_type: ValueType,
     cached_boxed_boolean: bool,
