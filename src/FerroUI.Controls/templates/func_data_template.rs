@@ -2,7 +2,7 @@ use super::{FuncTemplateWithParam, IDataTemplate, IRecyclingDataTemplate, ITempl
 use crate::primitives::AccessText;
 use crate::{Control, TextBlock};
 use ferroui_base::controls::NameScopeRef;
-use ferroui_base::data::core::ValueTypes;
+use ferroui_base::data::core::{ValueType, ValueTypes};
 use ferroui_base::data::BindingPriority;
 use ferroui_base::{AnyValue, BoxedValue, FerroObject, FerroObjectExtensions, Ref, StyledElement};
 use std::rc::Rc;
@@ -11,7 +11,7 @@ use std::rc::Rc;
 ///
 /// The typed constructors ([`for_type`](Self::for_type) and friends) take
 /// the place of the generic class of the same name: they match data whose
-/// boxed value holds exactly `T`.
+/// boxed value holds exactly `T`, and null data when `T` accepts null.
 pub struct FuncDataTemplate {
     base: FuncTemplateWithParam<Option<BoxedValue>, Option<Ref<Control>>>,
     match_: Box<dyn Fn(Option<&BoxedValue>) -> bool>,
@@ -86,7 +86,7 @@ impl FuncDataTemplate {
         build: impl Fn(&T, &NameScopeRef) -> Option<Ref<Control>> + 'static,
         supports_recycling: bool,
     ) -> Rc<Self> {
-        Self::new(|data| Self::cast::<T>(data).is_some(), Self::cast_build(build), supports_recycling)
+        Self::new(|data| Self::with_cast::<T, _>(data, |_| ()).is_some(), Self::cast_build(build), supports_recycling)
     }
 
     /// Creates a data template that matches data of type `T` accepted by
@@ -97,24 +97,36 @@ impl FuncDataTemplate {
         supports_recycling: bool,
     ) -> Rc<Self> {
         Self::new(
-            move |data| Self::cast::<T>(data).is_some_and(&match_),
+            move |data| Self::with_cast::<T, _>(data, &match_).unwrap_or(false),
             Self::cast_build(build),
             supports_recycling,
         )
     }
 
-    fn cast<T: 'static>(data: Option<&BoxedValue>) -> Option<&T> {
-        data.and_then(|data| {
-            let value: &dyn AnyValue = &**data;
-            value.downcast_ref::<T>()
-        })
+    // Deviation (DEVIATIONS.md, Templates): upstream `TypeUtilities.CanCast<T>` also accepts null
+    // for a reference type `T` and a non-null `T` for `T?`; here null is a `T` only for a
+    // registered nullable form, and a value is a `T` only when it holds exactly `T`.
+    /// Runs `f` with the data as a `T`, if it is one. Null data is a `T`
+    /// when `T` accepts null (a registered nullable form such as
+    /// `Option<i32>`): `f` then receives the null of `T`.
+    fn with_cast<T: 'static, R>(data: Option<&BoxedValue>, f: impl FnOnce(&T) -> R) -> Option<R> {
+        let null;
+        let data = match data {
+            Some(data) => data,
+            None => {
+                null = ValueTypes::null_value(ValueType::of::<T>())?;
+                &null
+            }
+        };
+        let value: &dyn AnyValue = &**data;
+        value.downcast_ref::<T>().map(f)
     }
 
     fn cast_build<T: 'static>(
         build: impl Fn(&T, &NameScopeRef) -> Option<Ref<Control>> + 'static,
     ) -> impl Fn(&Option<BoxedValue>, &NameScopeRef) -> Option<Ref<Control>> + 'static {
-        move |data, scope| match Self::cast::<T>(data.as_ref()) {
-            Some(data) => build(data, scope),
+        move |data, scope| match Self::with_cast::<T, _>(data.as_ref(), |data| build(data, scope)) {
+            Some(result) => result,
             None => panic!("The data passed to the data template is not of type {}.", std::any::type_name::<T>()),
         }
     }
