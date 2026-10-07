@@ -34,13 +34,16 @@ const XML_NAMESPACES_2: rt::XmlNamespaceTable = &[
     ("x", &[]),
 ];
 
+/// The base URI and the XML namespaces of `border_empty.xaml`.
+static BUILD_BORDER_EMPTY_XAML_DOCUMENT: rt::DocumentInfo = rt::DocumentInfo { base_uri: ::core::option::Option::Some("ferres://FerroUI.Markup.Xaml.UnitTests/Emitter/border_empty.xaml"), namespaces: XML_NAMESPACES_0 };
+
 /// Generated from `border_empty.xaml`.
 pub fn build_border_empty_xaml(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
 ) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::Border>, ::ferroui_markup_xaml::XamlLoadException> {
     // border_empty.xaml(1,2) Border
     let border_0 = ::ferroui_controls::Border::new();
-    let context = rt::populate_context(service_provider, ::core::option::Option::Some("ferres://FerroUI.Markup.Xaml.UnitTests/Emitter/border_empty.xaml"), XML_NAMESPACES_0, rt::to_value(border_0.clone()));
+    let context = rt::populate_context(service_provider, &BUILD_BORDER_EMPTY_XAML_DOCUMENT, rt::to_value(border_0.clone()));
     let name_scope = context.name_scope_field();
     border_0.begin_init();
     rt::invoked(border_0.try_end_init(), 1, 2)?;
@@ -55,13 +58,16 @@ fn build_border_empty_xaml_untyped(
     ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
 }
 
+/// The base URI and the XML namespaces of `border_padding.xaml`.
+static BUILD_BORDER_PADDING_XAML_DOCUMENT: rt::DocumentInfo = rt::DocumentInfo { base_uri: ::core::option::Option::Some("ferres://FerroUI.Markup.Xaml.UnitTests/Emitter/border_padding.xaml"), namespaces: XML_NAMESPACES_0 };
+
 /// Generated from `border_padding.xaml`.
 pub fn build_border_padding_xaml(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
 ) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::Border>, ::ferroui_markup_xaml::XamlLoadException> {
     // border_padding.xaml(1,2) Border
     let border_0 = ::ferroui_controls::Border::new();
-    let context = rt::populate_context(service_provider, ::core::option::Option::Some("ferres://FerroUI.Markup.Xaml.UnitTests/Emitter/border_padding.xaml"), XML_NAMESPACES_0, rt::to_value(border_0.clone()));
+    let context = rt::populate_context(service_provider, &BUILD_BORDER_PADDING_XAML_DOCUMENT, rt::to_value(border_0.clone()));
     let name_scope = context.name_scope_field();
     border_0.begin_init();
     // border_padding.xaml(1,2) Padding
@@ -78,13 +84,16 @@ fn build_border_padding_xaml_untyped(
     ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
 }
 
+/// The base URI and the XML namespaces of `border_padding_uniform.xaml`.
+static BUILD_BORDER_PADDING_UNIFORM_XAML_DOCUMENT: rt::DocumentInfo = rt::DocumentInfo { base_uri: ::core::option::Option::Some("ferres://FerroUI.Markup.Xaml.UnitTests/Emitter/border_padding_uniform.xaml"), namespaces: XML_NAMESPACES_0 };
+
 /// Generated from `border_padding_uniform.xaml`.
 pub fn build_border_padding_uniform_xaml(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
 ) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::Border>, ::ferroui_markup_xaml::XamlLoadException> {
     // border_padding_uniform.xaml(1,2) Border
     let border_0 = ::ferroui_controls::Border::new();
-    let context = rt::populate_context(service_provider, ::core::option::Option::Some("ferres://FerroUI.Markup.Xaml.UnitTests/Emitter/border_padding_uniform.xaml"), XML_NAMESPACES_0, rt::to_value(border_0.clone()));
+    let context = rt::populate_context(service_provider, &BUILD_BORDER_PADDING_UNIFORM_XAML_DOCUMENT, rt::to_value(border_0.clone()));
     let name_scope = context.name_scope_field();
     border_0.begin_init();
     // border_padding_uniform.xaml(1,2) Padding
@@ -101,13 +110,16 @@ fn build_border_padding_uniform_xaml_untyped(
     ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
 }
 
+/// The base URI and the XML namespaces of `border_thickness_and_radius.xaml`.
+static BUILD_BORDER_THICKNESS_AND_RADIUS_XAML_DOCUMENT: rt::DocumentInfo = rt::DocumentInfo { base_uri: ::core::option::Option::Some("ferres://FerroUI.Markup.Xaml.UnitTests/Emitter/border_thickness_and_radius.xaml"), namespaces: XML_NAMESPACES_0 };
+
 /// Generated from `border_thickness_and_radius.xaml`.
 pub fn build_border_thickness_and_radius_xaml(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
 ) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::Border>, ::ferroui_markup_xaml::XamlLoadException> {
     // border_thickness_and_radius.xaml(1,2) Border
     let border_0 = ::ferroui_controls::Border::new();
-    let context = rt::populate_context(service_provider, ::core::option::Option::Some("ferres://FerroUI.Markup.Xaml.UnitTests/Emitter/border_thickness_and_radius.xaml"), XML_NAMESPACES_0, rt::to_value(border_0.clone()));
+    let context = rt::populate_context(service_provider, &BUILD_BORDER_THICKNESS_AND_RADIUS_XAML_DOCUMENT, rt::to_value(border_0.clone()));
     let name_scope = context.name_scope_field();
     border_0.begin_init();
     // border_thickness_and_radius.xaml(1,2) BorderThickness
@@ -126,13 +138,16 @@ fn build_border_thickness_and_radius_xaml_untyped(
     ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
 }
 
+/// The base URI and the XML namespaces of `border_margin.xaml`.
+static BUILD_BORDER_MARGIN_XAML_DOCUMENT: rt::DocumentInfo = rt::DocumentInfo { base_uri: ::core::option::Option::Some("ferres://FerroUI.Markup.Xaml.UnitTests/Emitter/border_margin.xaml"), namespaces: XML_NAMESPACES_0 };
+
 /// Generated from `border_margin.xaml`.
 pub fn build_border_margin_xaml(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
 ) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::Border>, ::ferroui_markup_xaml::XamlLoadException> {
     // border_margin.xaml(1,2) Border
     let border_0 = ::ferroui_controls::Border::new();
-    let context = rt::populate_context(service_provider, ::core::option::Option::Some("ferres://FerroUI.Markup.Xaml.UnitTests/Emitter/border_margin.xaml"), XML_NAMESPACES_0, rt::to_value(border_0.clone()));
+    let context = rt::populate_context(service_provider, &BUILD_BORDER_MARGIN_XAML_DOCUMENT, rt::to_value(border_0.clone()));
     let name_scope = context.name_scope_field();
     border_0.begin_init();
     // border_margin.xaml(1,2) Margin
@@ -149,13 +164,16 @@ fn build_border_margin_xaml_untyped(
     ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
 }
 
+/// The base URI and the XML namespaces of `border_size.xaml`.
+static BUILD_BORDER_SIZE_XAML_DOCUMENT: rt::DocumentInfo = rt::DocumentInfo { base_uri: ::core::option::Option::Some("ferres://FerroUI.Markup.Xaml.UnitTests/Emitter/border_size.xaml"), namespaces: XML_NAMESPACES_0 };
+
 /// Generated from `border_size.xaml`.
 pub fn build_border_size_xaml(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
 ) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::Border>, ::ferroui_markup_xaml::XamlLoadException> {
     // border_size.xaml(1,2) Border
     let border_0 = ::ferroui_controls::Border::new();
-    let context = rt::populate_context(service_provider, ::core::option::Option::Some("ferres://FerroUI.Markup.Xaml.UnitTests/Emitter/border_size.xaml"), XML_NAMESPACES_0, rt::to_value(border_0.clone()));
+    let context = rt::populate_context(service_provider, &BUILD_BORDER_SIZE_XAML_DOCUMENT, rt::to_value(border_0.clone()));
     let name_scope = context.name_scope_field();
     border_0.begin_init();
     // border_size.xaml(1,2) Width
@@ -174,13 +192,16 @@ fn build_border_size_xaml_untyped(
     ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
 }
 
+/// The base URI and the XML namespaces of `border_min_width.xaml`.
+static BUILD_BORDER_MIN_WIDTH_XAML_DOCUMENT: rt::DocumentInfo = rt::DocumentInfo { base_uri: ::core::option::Option::Some("ferres://FerroUI.Markup.Xaml.UnitTests/Emitter/border_min_width.xaml"), namespaces: XML_NAMESPACES_0 };
+
 /// Generated from `border_min_width.xaml`.
 pub fn build_border_min_width_xaml(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
 ) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::Border>, ::ferroui_markup_xaml::XamlLoadException> {
     // border_min_width.xaml(1,2) Border
     let border_0 = ::ferroui_controls::Border::new();
-    let context = rt::populate_context(service_provider, ::core::option::Option::Some("ferres://FerroUI.Markup.Xaml.UnitTests/Emitter/border_min_width.xaml"), XML_NAMESPACES_0, rt::to_value(border_0.clone()));
+    let context = rt::populate_context(service_provider, &BUILD_BORDER_MIN_WIDTH_XAML_DOCUMENT, rt::to_value(border_0.clone()));
     let name_scope = context.name_scope_field();
     border_0.begin_init();
     // border_min_width.xaml(1,2) MinWidth
@@ -197,13 +218,16 @@ fn build_border_min_width_xaml_untyped(
     ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
 }
 
+/// The base URI and the XML namespaces of `border_opacity.xaml`.
+static BUILD_BORDER_OPACITY_XAML_DOCUMENT: rt::DocumentInfo = rt::DocumentInfo { base_uri: ::core::option::Option::Some("ferres://FerroUI.Markup.Xaml.UnitTests/Emitter/border_opacity.xaml"), namespaces: XML_NAMESPACES_0 };
+
 /// Generated from `border_opacity.xaml`.
 pub fn build_border_opacity_xaml(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
 ) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::Border>, ::ferroui_markup_xaml::XamlLoadException> {
     // border_opacity.xaml(1,2) Border
     let border_0 = ::ferroui_controls::Border::new();
-    let context = rt::populate_context(service_provider, ::core::option::Option::Some("ferres://FerroUI.Markup.Xaml.UnitTests/Emitter/border_opacity.xaml"), XML_NAMESPACES_0, rt::to_value(border_0.clone()));
+    let context = rt::populate_context(service_provider, &BUILD_BORDER_OPACITY_XAML_DOCUMENT, rt::to_value(border_0.clone()));
     let name_scope = context.name_scope_field();
     border_0.begin_init();
     // border_opacity.xaml(1,2) Opacity
@@ -220,13 +244,16 @@ fn build_border_opacity_xaml_untyped(
     ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
 }
 
+/// The base URI and the XML namespaces of `border_is_visible.xaml`.
+static BUILD_BORDER_IS_VISIBLE_XAML_DOCUMENT: rt::DocumentInfo = rt::DocumentInfo { base_uri: ::core::option::Option::Some("ferres://FerroUI.Markup.Xaml.UnitTests/Emitter/border_is_visible.xaml"), namespaces: XML_NAMESPACES_0 };
+
 /// Generated from `border_is_visible.xaml`.
 pub fn build_border_is_visible_xaml(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
 ) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::Border>, ::ferroui_markup_xaml::XamlLoadException> {
     // border_is_visible.xaml(1,2) Border
     let border_0 = ::ferroui_controls::Border::new();
-    let context = rt::populate_context(service_provider, ::core::option::Option::Some("ferres://FerroUI.Markup.Xaml.UnitTests/Emitter/border_is_visible.xaml"), XML_NAMESPACES_0, rt::to_value(border_0.clone()));
+    let context = rt::populate_context(service_provider, &BUILD_BORDER_IS_VISIBLE_XAML_DOCUMENT, rt::to_value(border_0.clone()));
     let name_scope = context.name_scope_field();
     border_0.begin_init();
     // border_is_visible.xaml(1,2) IsVisible
@@ -243,13 +270,16 @@ fn build_border_is_visible_xaml_untyped(
     ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
 }
 
+/// The base URI and the XML namespaces of `border_clip_to_bounds.xaml`.
+static BUILD_BORDER_CLIP_TO_BOUNDS_XAML_DOCUMENT: rt::DocumentInfo = rt::DocumentInfo { base_uri: ::core::option::Option::Some("ferres://FerroUI.Markup.Xaml.UnitTests/Emitter/border_clip_to_bounds.xaml"), namespaces: XML_NAMESPACES_0 };
+
 /// Generated from `border_clip_to_bounds.xaml`.
 pub fn build_border_clip_to_bounds_xaml(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
 ) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::Border>, ::ferroui_markup_xaml::XamlLoadException> {
     // border_clip_to_bounds.xaml(1,2) Border
     let border_0 = ::ferroui_controls::Border::new();
-    let context = rt::populate_context(service_provider, ::core::option::Option::Some("ferres://FerroUI.Markup.Xaml.UnitTests/Emitter/border_clip_to_bounds.xaml"), XML_NAMESPACES_0, rt::to_value(border_0.clone()));
+    let context = rt::populate_context(service_provider, &BUILD_BORDER_CLIP_TO_BOUNDS_XAML_DOCUMENT, rt::to_value(border_0.clone()));
     let name_scope = context.name_scope_field();
     border_0.begin_init();
     // border_clip_to_bounds.xaml(1,2) ClipToBounds
@@ -266,13 +296,16 @@ fn build_border_clip_to_bounds_xaml_untyped(
     ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
 }
 
+/// The base URI and the XML namespaces of `border_z_index.xaml`.
+static BUILD_BORDER_Z_INDEX_XAML_DOCUMENT: rt::DocumentInfo = rt::DocumentInfo { base_uri: ::core::option::Option::Some("ferres://FerroUI.Markup.Xaml.UnitTests/Emitter/border_z_index.xaml"), namespaces: XML_NAMESPACES_0 };
+
 /// Generated from `border_z_index.xaml`.
 pub fn build_border_z_index_xaml(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
 ) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::Border>, ::ferroui_markup_xaml::XamlLoadException> {
     // border_z_index.xaml(1,2) Border
     let border_0 = ::ferroui_controls::Border::new();
-    let context = rt::populate_context(service_provider, ::core::option::Option::Some("ferres://FerroUI.Markup.Xaml.UnitTests/Emitter/border_z_index.xaml"), XML_NAMESPACES_0, rt::to_value(border_0.clone()));
+    let context = rt::populate_context(service_provider, &BUILD_BORDER_Z_INDEX_XAML_DOCUMENT, rt::to_value(border_0.clone()));
     let name_scope = context.name_scope_field();
     border_0.begin_init();
     // border_z_index.xaml(1,2) ZIndex
@@ -289,13 +322,16 @@ fn build_border_z_index_xaml_untyped(
     ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
 }
 
+/// The base URI and the XML namespaces of `border_horizontal_alignment.xaml`.
+static BUILD_BORDER_HORIZONTAL_ALIGNMENT_XAML_DOCUMENT: rt::DocumentInfo = rt::DocumentInfo { base_uri: ::core::option::Option::Some("ferres://FerroUI.Markup.Xaml.UnitTests/Emitter/border_horizontal_alignment.xaml"), namespaces: XML_NAMESPACES_0 };
+
 /// Generated from `border_horizontal_alignment.xaml`.
 pub fn build_border_horizontal_alignment_xaml(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
 ) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::Border>, ::ferroui_markup_xaml::XamlLoadException> {
     // border_horizontal_alignment.xaml(1,2) Border
     let border_0 = ::ferroui_controls::Border::new();
-    let context = rt::populate_context(service_provider, ::core::option::Option::Some("ferres://FerroUI.Markup.Xaml.UnitTests/Emitter/border_horizontal_alignment.xaml"), XML_NAMESPACES_0, rt::to_value(border_0.clone()));
+    let context = rt::populate_context(service_provider, &BUILD_BORDER_HORIZONTAL_ALIGNMENT_XAML_DOCUMENT, rt::to_value(border_0.clone()));
     let name_scope = context.name_scope_field();
     border_0.begin_init();
     // border_horizontal_alignment.xaml(1,2) HorizontalAlignment
@@ -312,13 +348,16 @@ fn build_border_horizontal_alignment_xaml_untyped(
     ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
 }
 
+/// The base URI and the XML namespaces of `border_vertical_alignment.xaml`.
+static BUILD_BORDER_VERTICAL_ALIGNMENT_XAML_DOCUMENT: rt::DocumentInfo = rt::DocumentInfo { base_uri: ::core::option::Option::Some("ferres://FerroUI.Markup.Xaml.UnitTests/Emitter/border_vertical_alignment.xaml"), namespaces: XML_NAMESPACES_0 };
+
 /// Generated from `border_vertical_alignment.xaml`.
 pub fn build_border_vertical_alignment_xaml(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
 ) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::Border>, ::ferroui_markup_xaml::XamlLoadException> {
     // border_vertical_alignment.xaml(1,2) Border
     let border_0 = ::ferroui_controls::Border::new();
-    let context = rt::populate_context(service_provider, ::core::option::Option::Some("ferres://FerroUI.Markup.Xaml.UnitTests/Emitter/border_vertical_alignment.xaml"), XML_NAMESPACES_0, rt::to_value(border_0.clone()));
+    let context = rt::populate_context(service_provider, &BUILD_BORDER_VERTICAL_ALIGNMENT_XAML_DOCUMENT, rt::to_value(border_0.clone()));
     let name_scope = context.name_scope_field();
     border_0.begin_init();
     // border_vertical_alignment.xaml(1,2) VerticalAlignment
@@ -335,13 +374,16 @@ fn build_border_vertical_alignment_xaml_untyped(
     ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
 }
 
+/// The base URI and the XML namespaces of `border_layout_rounding.xaml`.
+static BUILD_BORDER_LAYOUT_ROUNDING_XAML_DOCUMENT: rt::DocumentInfo = rt::DocumentInfo { base_uri: ::core::option::Option::Some("ferres://FerroUI.Markup.Xaml.UnitTests/Emitter/border_layout_rounding.xaml"), namespaces: XML_NAMESPACES_0 };
+
 /// Generated from `border_layout_rounding.xaml`.
 pub fn build_border_layout_rounding_xaml(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
 ) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::Border>, ::ferroui_markup_xaml::XamlLoadException> {
     // border_layout_rounding.xaml(1,2) Border
     let border_0 = ::ferroui_controls::Border::new();
-    let context = rt::populate_context(service_provider, ::core::option::Option::Some("ferres://FerroUI.Markup.Xaml.UnitTests/Emitter/border_layout_rounding.xaml"), XML_NAMESPACES_0, rt::to_value(border_0.clone()));
+    let context = rt::populate_context(service_provider, &BUILD_BORDER_LAYOUT_ROUNDING_XAML_DOCUMENT, rt::to_value(border_0.clone()));
     let name_scope = context.name_scope_field();
     border_0.begin_init();
     // border_layout_rounding.xaml(1,2) UseLayoutRounding
@@ -358,13 +400,16 @@ fn build_border_layout_rounding_xaml_untyped(
     ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
 }
 
+/// The base URI and the XML namespaces of `border_input_flags.xaml`.
+static BUILD_BORDER_INPUT_FLAGS_XAML_DOCUMENT: rt::DocumentInfo = rt::DocumentInfo { base_uri: ::core::option::Option::Some("ferres://FerroUI.Markup.Xaml.UnitTests/Emitter/border_input_flags.xaml"), namespaces: XML_NAMESPACES_0 };
+
 /// Generated from `border_input_flags.xaml`.
 pub fn build_border_input_flags_xaml(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
 ) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::Border>, ::ferroui_markup_xaml::XamlLoadException> {
     // border_input_flags.xaml(1,2) Border
     let border_0 = ::ferroui_controls::Border::new();
-    let context = rt::populate_context(service_provider, ::core::option::Option::Some("ferres://FerroUI.Markup.Xaml.UnitTests/Emitter/border_input_flags.xaml"), XML_NAMESPACES_0, rt::to_value(border_0.clone()));
+    let context = rt::populate_context(service_provider, &BUILD_BORDER_INPUT_FLAGS_XAML_DOCUMENT, rt::to_value(border_0.clone()));
     let name_scope = context.name_scope_field();
     border_0.begin_init();
     // border_input_flags.xaml(1,2) IsEnabled
@@ -385,13 +430,16 @@ fn build_border_input_flags_xaml_untyped(
     ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
 }
 
+/// The base URI and the XML namespaces of `border_child.xaml`.
+static BUILD_BORDER_CHILD_XAML_DOCUMENT: rt::DocumentInfo = rt::DocumentInfo { base_uri: ::core::option::Option::Some("ferres://FerroUI.Markup.Xaml.UnitTests/Emitter/border_child.xaml"), namespaces: XML_NAMESPACES_0 };
+
 /// Generated from `border_child.xaml`.
 pub fn build_border_child_xaml(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
 ) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::Border>, ::ferroui_markup_xaml::XamlLoadException> {
     // border_child.xaml(1,2) Border
     let border_0 = ::ferroui_controls::Border::new();
-    let context = rt::populate_context(service_provider, ::core::option::Option::Some("ferres://FerroUI.Markup.Xaml.UnitTests/Emitter/border_child.xaml"), XML_NAMESPACES_0, rt::to_value(border_0.clone()));
+    let context = rt::populate_context(service_provider, &BUILD_BORDER_CHILD_XAML_DOCUMENT, rt::to_value(border_0.clone()));
     let name_scope = context.name_scope_field();
     border_0.begin_init();
     // border_child.xaml(1,100) Child
@@ -412,13 +460,16 @@ fn build_border_child_xaml_untyped(
     ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
 }
 
+/// The base URI and the XML namespaces of `border_child_with_text.xaml`.
+static BUILD_BORDER_CHILD_WITH_TEXT_XAML_DOCUMENT: rt::DocumentInfo = rt::DocumentInfo { base_uri: ::core::option::Option::Some("ferres://FerroUI.Markup.Xaml.UnitTests/Emitter/border_child_with_text.xaml"), namespaces: XML_NAMESPACES_0 };
+
 /// Generated from `border_child_with_text.xaml`.
 pub fn build_border_child_with_text_xaml(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
 ) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::Border>, ::ferroui_markup_xaml::XamlLoadException> {
     // border_child_with_text.xaml(1,2) Border
     let border_0 = ::ferroui_controls::Border::new();
-    let context = rt::populate_context(service_provider, ::core::option::Option::Some("ferres://FerroUI.Markup.Xaml.UnitTests/Emitter/border_child_with_text.xaml"), XML_NAMESPACES_0, rt::to_value(border_0.clone()));
+    let context = rt::populate_context(service_provider, &BUILD_BORDER_CHILD_WITH_TEXT_XAML_DOCUMENT, rt::to_value(border_0.clone()));
     let name_scope = context.name_scope_field();
     border_0.begin_init();
     // border_child_with_text.xaml(1,2) Padding
@@ -443,13 +494,16 @@ fn build_border_child_with_text_xaml_untyped(
     ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
 }
 
+/// The base URI and the XML namespaces of `border_nested.xaml`.
+static BUILD_BORDER_NESTED_XAML_DOCUMENT: rt::DocumentInfo = rt::DocumentInfo { base_uri: ::core::option::Option::Some("ferres://FerroUI.Markup.Xaml.UnitTests/Emitter/border_nested.xaml"), namespaces: XML_NAMESPACES_0 };
+
 /// Generated from `border_nested.xaml`.
 pub fn build_border_nested_xaml(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
 ) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::Border>, ::ferroui_markup_xaml::XamlLoadException> {
     // border_nested.xaml(1,2) Border
     let border_0 = ::ferroui_controls::Border::new();
-    let context = rt::populate_context(service_provider, ::core::option::Option::Some("ferres://FerroUI.Markup.Xaml.UnitTests/Emitter/border_nested.xaml"), XML_NAMESPACES_0, rt::to_value(border_0.clone()));
+    let context = rt::populate_context(service_provider, &BUILD_BORDER_NESTED_XAML_DOCUMENT, rt::to_value(border_0.clone()));
     let name_scope = context.name_scope_field();
     border_0.begin_init();
     // border_nested.xaml(1,100) Child
@@ -488,13 +542,16 @@ fn build_border_nested_xaml_untyped(
     ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
 }
 
+/// The base URI and the XML namespaces of `text_block_text.xaml`.
+static BUILD_TEXT_BLOCK_TEXT_XAML_DOCUMENT: rt::DocumentInfo = rt::DocumentInfo { base_uri: ::core::option::Option::Some("ferres://FerroUI.Markup.Xaml.UnitTests/Emitter/text_block_text.xaml"), namespaces: XML_NAMESPACES_0 };
+
 /// Generated from `text_block_text.xaml`.
 pub fn build_text_block_text_xaml(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
 ) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::TextBlock>, ::ferroui_markup_xaml::XamlLoadException> {
     // text_block_text.xaml(1,2) TextBlock
     let text_block_0 = ::ferroui_controls::TextBlock::new();
-    let context = rt::populate_context(service_provider, ::core::option::Option::Some("ferres://FerroUI.Markup.Xaml.UnitTests/Emitter/text_block_text.xaml"), XML_NAMESPACES_0, rt::to_value(text_block_0.clone()));
+    let context = rt::populate_context(service_provider, &BUILD_TEXT_BLOCK_TEXT_XAML_DOCUMENT, rt::to_value(text_block_0.clone()));
     let name_scope = context.name_scope_field();
     text_block_0.begin_init();
     // text_block_text.xaml(1,102) Text
@@ -511,13 +568,16 @@ fn build_text_block_text_xaml_untyped(
     ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
 }
 
+/// The base URI and the XML namespaces of `text_block_empty_text.xaml`.
+static BUILD_TEXT_BLOCK_EMPTY_TEXT_XAML_DOCUMENT: rt::DocumentInfo = rt::DocumentInfo { base_uri: ::core::option::Option::Some("ferres://FerroUI.Markup.Xaml.UnitTests/Emitter/text_block_empty_text.xaml"), namespaces: XML_NAMESPACES_0 };
+
 /// Generated from `text_block_empty_text.xaml`.
 pub fn build_text_block_empty_text_xaml(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
 ) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::TextBlock>, ::ferroui_markup_xaml::XamlLoadException> {
     // text_block_empty_text.xaml(1,2) TextBlock
     let text_block_0 = ::ferroui_controls::TextBlock::new();
-    let context = rt::populate_context(service_provider, ::core::option::Option::Some("ferres://FerroUI.Markup.Xaml.UnitTests/Emitter/text_block_empty_text.xaml"), XML_NAMESPACES_0, rt::to_value(text_block_0.clone()));
+    let context = rt::populate_context(service_provider, &BUILD_TEXT_BLOCK_EMPTY_TEXT_XAML_DOCUMENT, rt::to_value(text_block_0.clone()));
     let name_scope = context.name_scope_field();
     text_block_0.begin_init();
     // text_block_empty_text.xaml(1,102) Text
@@ -534,13 +594,16 @@ fn build_text_block_empty_text_xaml_untyped(
     ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
 }
 
+/// The base URI and the XML namespaces of `text_block_font_size.xaml`.
+static BUILD_TEXT_BLOCK_FONT_SIZE_XAML_DOCUMENT: rt::DocumentInfo = rt::DocumentInfo { base_uri: ::core::option::Option::Some("ferres://FerroUI.Markup.Xaml.UnitTests/Emitter/text_block_font_size.xaml"), namespaces: XML_NAMESPACES_0 };
+
 /// Generated from `text_block_font_size.xaml`.
 pub fn build_text_block_font_size_xaml(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
 ) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::TextBlock>, ::ferroui_markup_xaml::XamlLoadException> {
     // text_block_font_size.xaml(1,2) TextBlock
     let text_block_0 = ::ferroui_controls::TextBlock::new();
-    let context = rt::populate_context(service_provider, ::core::option::Option::Some("ferres://FerroUI.Markup.Xaml.UnitTests/Emitter/text_block_font_size.xaml"), XML_NAMESPACES_0, rt::to_value(text_block_0.clone()));
+    let context = rt::populate_context(service_provider, &BUILD_TEXT_BLOCK_FONT_SIZE_XAML_DOCUMENT, rt::to_value(text_block_0.clone()));
     let name_scope = context.name_scope_field();
     text_block_0.begin_init();
     // text_block_font_size.xaml(1,2) FontSize
@@ -557,13 +620,16 @@ fn build_text_block_font_size_xaml_untyped(
     ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
 }
 
+/// The base URI and the XML namespaces of `stack_panel_properties.xaml`.
+static BUILD_STACK_PANEL_PROPERTIES_XAML_DOCUMENT: rt::DocumentInfo = rt::DocumentInfo { base_uri: ::core::option::Option::Some("ferres://FerroUI.Markup.Xaml.UnitTests/Emitter/stack_panel_properties.xaml"), namespaces: XML_NAMESPACES_0 };
+
 /// Generated from `stack_panel_properties.xaml`.
 pub fn build_stack_panel_properties_xaml(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
 ) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::StackPanel>, ::ferroui_markup_xaml::XamlLoadException> {
     // stack_panel_properties.xaml(1,2) StackPanel
     let stack_panel_0 = ::ferroui_controls::StackPanel::new();
-    let context = rt::populate_context(service_provider, ::core::option::Option::Some("ferres://FerroUI.Markup.Xaml.UnitTests/Emitter/stack_panel_properties.xaml"), XML_NAMESPACES_0, rt::to_value(stack_panel_0.clone()));
+    let context = rt::populate_context(service_provider, &BUILD_STACK_PANEL_PROPERTIES_XAML_DOCUMENT, rt::to_value(stack_panel_0.clone()));
     let name_scope = context.name_scope_field();
     stack_panel_0.begin_init();
     // stack_panel_properties.xaml(1,2) Orientation
@@ -582,13 +648,16 @@ fn build_stack_panel_properties_xaml_untyped(
     ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
 }
 
+/// The base URI and the XML namespaces of `dock_panel_last_child_fill.xaml`.
+static BUILD_DOCK_PANEL_LAST_CHILD_FILL_XAML_DOCUMENT: rt::DocumentInfo = rt::DocumentInfo { base_uri: ::core::option::Option::Some("ferres://FerroUI.Markup.Xaml.UnitTests/Emitter/dock_panel_last_child_fill.xaml"), namespaces: XML_NAMESPACES_0 };
+
 /// Generated from `dock_panel_last_child_fill.xaml`.
 pub fn build_dock_panel_last_child_fill_xaml(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
 ) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::DockPanel>, ::ferroui_markup_xaml::XamlLoadException> {
     // dock_panel_last_child_fill.xaml(1,2) DockPanel
     let dock_panel_0 = ::ferroui_controls::DockPanel::new();
-    let context = rt::populate_context(service_provider, ::core::option::Option::Some("ferres://FerroUI.Markup.Xaml.UnitTests/Emitter/dock_panel_last_child_fill.xaml"), XML_NAMESPACES_0, rt::to_value(dock_panel_0.clone()));
+    let context = rt::populate_context(service_provider, &BUILD_DOCK_PANEL_LAST_CHILD_FILL_XAML_DOCUMENT, rt::to_value(dock_panel_0.clone()));
     let name_scope = context.name_scope_field();
     dock_panel_0.begin_init();
     // dock_panel_last_child_fill.xaml(1,2) LastChildFill
@@ -605,13 +674,16 @@ fn build_dock_panel_last_child_fill_xaml_untyped(
     ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
 }
 
+/// The base URI and the XML namespaces of `button_content_text.xaml`.
+static BUILD_BUTTON_CONTENT_TEXT_XAML_DOCUMENT: rt::DocumentInfo = rt::DocumentInfo { base_uri: ::core::option::Option::Some("ferres://FerroUI.Markup.Xaml.UnitTests/Emitter/button_content_text.xaml"), namespaces: XML_NAMESPACES_0 };
+
 /// Generated from `button_content_text.xaml`.
 pub fn build_button_content_text_xaml(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
 ) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::Button>, ::ferroui_markup_xaml::XamlLoadException> {
     // button_content_text.xaml(1,2) Button
     let button_0 = ::ferroui_controls::Button::new();
-    let context = rt::populate_context(service_provider, ::core::option::Option::Some("ferres://FerroUI.Markup.Xaml.UnitTests/Emitter/button_content_text.xaml"), XML_NAMESPACES_0, rt::to_value(button_0.clone()));
+    let context = rt::populate_context(service_provider, &BUILD_BUTTON_CONTENT_TEXT_XAML_DOCUMENT, rt::to_value(button_0.clone()));
     let name_scope = context.name_scope_field();
     button_0.begin_init();
     // button_content_text.xaml(1,99) Content
@@ -628,13 +700,16 @@ fn build_button_content_text_xaml_untyped(
     ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
 }
 
+/// The base URI and the XML namespaces of `user_control_content_element.xaml`.
+static BUILD_USER_CONTROL_CONTENT_ELEMENT_XAML_DOCUMENT: rt::DocumentInfo = rt::DocumentInfo { base_uri: ::core::option::Option::Some("ferres://FerroUI.Markup.Xaml.UnitTests/Emitter/user_control_content_element.xaml"), namespaces: XML_NAMESPACES_0 };
+
 /// Generated from `user_control_content_element.xaml`.
 pub fn build_user_control_content_element_xaml(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
 ) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::UserControl>, ::ferroui_markup_xaml::XamlLoadException> {
     // user_control_content_element.xaml(1,2) UserControl
     let user_control_0 = ::ferroui_controls::UserControl::new();
-    let context = rt::populate_context(service_provider, ::core::option::Option::Some("ferres://FerroUI.Markup.Xaml.UnitTests/Emitter/user_control_content_element.xaml"), XML_NAMESPACES_0, rt::to_value(user_control_0.clone()));
+    let context = rt::populate_context(service_provider, &BUILD_USER_CONTROL_CONTENT_ELEMENT_XAML_DOCUMENT, rt::to_value(user_control_0.clone()));
     let name_scope = context.name_scope_field();
     user_control_0.begin_init();
     // user_control_content_element.xaml(1,105) Content
@@ -657,13 +732,16 @@ fn build_user_control_content_element_xaml_untyped(
     ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
 }
 
+/// The base URI and the XML namespaces of `control_tag.xaml`.
+static BUILD_CONTROL_TAG_XAML_DOCUMENT: rt::DocumentInfo = rt::DocumentInfo { base_uri: ::core::option::Option::Some("ferres://FerroUI.Markup.Xaml.UnitTests/Emitter/control_tag.xaml"), namespaces: XML_NAMESPACES_0 };
+
 /// Generated from `control_tag.xaml`.
 pub fn build_control_tag_xaml(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
 ) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::Border>, ::ferroui_markup_xaml::XamlLoadException> {
     // control_tag.xaml(1,2) Border
     let border_0 = ::ferroui_controls::Border::new();
-    let context = rt::populate_context(service_provider, ::core::option::Option::Some("ferres://FerroUI.Markup.Xaml.UnitTests/Emitter/control_tag.xaml"), XML_NAMESPACES_0, rt::to_value(border_0.clone()));
+    let context = rt::populate_context(service_provider, &BUILD_CONTROL_TAG_XAML_DOCUMENT, rt::to_value(border_0.clone()));
     let name_scope = context.name_scope_field();
     border_0.begin_init();
     // control_tag.xaml(1,99) Tag
@@ -680,13 +758,16 @@ fn build_control_tag_xaml_untyped(
     ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
 }
 
+/// The base URI and the XML namespaces of `attached_grid_position.xaml`.
+static BUILD_ATTACHED_GRID_POSITION_XAML_DOCUMENT: rt::DocumentInfo = rt::DocumentInfo { base_uri: ::core::option::Option::Some("ferres://FerroUI.Markup.Xaml.UnitTests/Emitter/attached_grid_position.xaml"), namespaces: XML_NAMESPACES_0 };
+
 /// Generated from `attached_grid_position.xaml`.
 pub fn build_attached_grid_position_xaml(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
 ) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::Border>, ::ferroui_markup_xaml::XamlLoadException> {
     // attached_grid_position.xaml(1,2) Border
     let border_0 = ::ferroui_controls::Border::new();
-    let context = rt::populate_context(service_provider, ::core::option::Option::Some("ferres://FerroUI.Markup.Xaml.UnitTests/Emitter/attached_grid_position.xaml"), XML_NAMESPACES_0, rt::to_value(border_0.clone()));
+    let context = rt::populate_context(service_provider, &BUILD_ATTACHED_GRID_POSITION_XAML_DOCUMENT, rt::to_value(border_0.clone()));
     let name_scope = context.name_scope_field();
     border_0.begin_init();
     // attached_grid_position.xaml(1,100) Child
@@ -711,13 +792,16 @@ fn build_attached_grid_position_xaml_untyped(
     ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
 }
 
+/// The base URI and the XML namespaces of `attached_dock.xaml`.
+static BUILD_ATTACHED_DOCK_XAML_DOCUMENT: rt::DocumentInfo = rt::DocumentInfo { base_uri: ::core::option::Option::Some("ferres://FerroUI.Markup.Xaml.UnitTests/Emitter/attached_dock.xaml"), namespaces: XML_NAMESPACES_0 };
+
 /// Generated from `attached_dock.xaml`.
 pub fn build_attached_dock_xaml(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
 ) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::Border>, ::ferroui_markup_xaml::XamlLoadException> {
     // attached_dock.xaml(1,2) Border
     let border_0 = ::ferroui_controls::Border::new();
-    let context = rt::populate_context(service_provider, ::core::option::Option::Some("ferres://FerroUI.Markup.Xaml.UnitTests/Emitter/attached_dock.xaml"), XML_NAMESPACES_0, rt::to_value(border_0.clone()));
+    let context = rt::populate_context(service_provider, &BUILD_ATTACHED_DOCK_XAML_DOCUMENT, rt::to_value(border_0.clone()));
     let name_scope = context.name_scope_field();
     border_0.begin_init();
     // attached_dock.xaml(1,100) Child
@@ -740,13 +824,16 @@ fn build_attached_dock_xaml_untyped(
     ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
 }
 
+/// The base URI and the XML namespaces of `attached_canvas_left.xaml`.
+static BUILD_ATTACHED_CANVAS_LEFT_XAML_DOCUMENT: rt::DocumentInfo = rt::DocumentInfo { base_uri: ::core::option::Option::Some("ferres://FerroUI.Markup.Xaml.UnitTests/Emitter/attached_canvas_left.xaml"), namespaces: XML_NAMESPACES_0 };
+
 /// Generated from `attached_canvas_left.xaml`.
 pub fn build_attached_canvas_left_xaml(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
 ) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::Border>, ::ferroui_markup_xaml::XamlLoadException> {
     // attached_canvas_left.xaml(1,2) Border
     let border_0 = ::ferroui_controls::Border::new();
-    let context = rt::populate_context(service_provider, ::core::option::Option::Some("ferres://FerroUI.Markup.Xaml.UnitTests/Emitter/attached_canvas_left.xaml"), XML_NAMESPACES_0, rt::to_value(border_0.clone()));
+    let context = rt::populate_context(service_provider, &BUILD_ATTACHED_CANVAS_LEFT_XAML_DOCUMENT, rt::to_value(border_0.clone()));
     let name_scope = context.name_scope_field();
     border_0.begin_init();
     // attached_canvas_left.xaml(1,100) Child
@@ -769,13 +856,16 @@ fn build_attached_canvas_left_xaml_untyped(
     ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
 }
 
+/// The base URI and the XML namespaces of `x_null_child.xaml`.
+static BUILD_X_NULL_CHILD_XAML_DOCUMENT: rt::DocumentInfo = rt::DocumentInfo { base_uri: ::core::option::Option::Some("ferres://FerroUI.Markup.Xaml.UnitTests/Emitter/x_null_child.xaml"), namespaces: XML_NAMESPACES_0 };
+
 /// Generated from `x_null_child.xaml`.
 pub fn build_x_null_child_xaml(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
 ) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::Border>, ::ferroui_markup_xaml::XamlLoadException> {
     // x_null_child.xaml(1,2) Border
     let border_0 = ::ferroui_controls::Border::new();
-    let context = rt::populate_context(service_provider, ::core::option::Option::Some("ferres://FerroUI.Markup.Xaml.UnitTests/Emitter/x_null_child.xaml"), XML_NAMESPACES_0, rt::to_value(border_0.clone()));
+    let context = rt::populate_context(service_provider, &BUILD_X_NULL_CHILD_XAML_DOCUMENT, rt::to_value(border_0.clone()));
     let name_scope = context.name_scope_field();
     border_0.begin_init();
     // x_null_child.xaml(1,99) Child
@@ -792,13 +882,16 @@ fn build_x_null_child_xaml_untyped(
     ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
 }
 
+/// The base URI and the XML namespaces of `x_static_enum.xaml`.
+static BUILD_X_STATIC_ENUM_XAML_DOCUMENT: rt::DocumentInfo = rt::DocumentInfo { base_uri: ::core::option::Option::Some("ferres://FerroUI.Markup.Xaml.UnitTests/Emitter/x_static_enum.xaml"), namespaces: XML_NAMESPACES_0 };
+
 /// Generated from `x_static_enum.xaml`.
 pub fn build_x_static_enum_xaml(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
 ) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::Border>, ::ferroui_markup_xaml::XamlLoadException> {
     // x_static_enum.xaml(1,2) Border
     let border_0 = ::ferroui_controls::Border::new();
-    let context = rt::populate_context(service_provider, ::core::option::Option::Some("ferres://FerroUI.Markup.Xaml.UnitTests/Emitter/x_static_enum.xaml"), XML_NAMESPACES_0, rt::to_value(border_0.clone()));
+    let context = rt::populate_context(service_provider, &BUILD_X_STATIC_ENUM_XAML_DOCUMENT, rt::to_value(border_0.clone()));
     let name_scope = context.name_scope_field();
     border_0.begin_init();
     // x_static_enum.xaml(1,99) HorizontalAlignment
@@ -815,13 +908,16 @@ fn build_x_static_enum_xaml_untyped(
     ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
 }
 
+/// The base URI and the XML namespaces of `border_many_properties.xaml`.
+static BUILD_BORDER_MANY_PROPERTIES_XAML_DOCUMENT: rt::DocumentInfo = rt::DocumentInfo { base_uri: ::core::option::Option::Some("ferres://FerroUI.Markup.Xaml.UnitTests/Emitter/border_many_properties.xaml"), namespaces: XML_NAMESPACES_0 };
+
 /// Generated from `border_many_properties.xaml`.
 pub fn build_border_many_properties_xaml(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
 ) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::Border>, ::ferroui_markup_xaml::XamlLoadException> {
     // border_many_properties.xaml(1,2) Border
     let border_0 = ::ferroui_controls::Border::new();
-    let context = rt::populate_context(service_provider, ::core::option::Option::Some("ferres://FerroUI.Markup.Xaml.UnitTests/Emitter/border_many_properties.xaml"), XML_NAMESPACES_0, rt::to_value(border_0.clone()));
+    let context = rt::populate_context(service_provider, &BUILD_BORDER_MANY_PROPERTIES_XAML_DOCUMENT, rt::to_value(border_0.clone()));
     let name_scope = context.name_scope_field();
     border_0.begin_init();
     // border_many_properties.xaml(1,2) Width
@@ -862,13 +958,16 @@ fn build_border_many_properties_xaml_untyped(
     ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
 }
 
+/// The base URI and the XML namespaces of `panel_children.xaml`.
+static BUILD_PANEL_CHILDREN_XAML_DOCUMENT: rt::DocumentInfo = rt::DocumentInfo { base_uri: ::core::option::Option::Some("ferres://FerroUI.Markup.Xaml.UnitTests/Emitter/panel_children.xaml"), namespaces: XML_NAMESPACES_0 };
+
 /// Generated from `panel_children.xaml`.
 pub fn build_panel_children_xaml(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
 ) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::StackPanel>, ::ferroui_markup_xaml::XamlLoadException> {
     // panel_children.xaml(1,2) StackPanel
     let stack_panel_0 = ::ferroui_controls::StackPanel::new();
-    let context = rt::populate_context(service_provider, ::core::option::Option::Some("ferres://FerroUI.Markup.Xaml.UnitTests/Emitter/panel_children.xaml"), XML_NAMESPACES_0, rt::to_value(stack_panel_0.clone()));
+    let context = rt::populate_context(service_provider, &BUILD_PANEL_CHILDREN_XAML_DOCUMENT, rt::to_value(stack_panel_0.clone()));
     let name_scope = context.name_scope_field();
     stack_panel_0.begin_init();
     // panel_children.xaml(1,104) Children
@@ -899,13 +998,16 @@ fn build_panel_children_xaml_untyped(
     ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
 }
 
+/// The base URI and the XML namespaces of `named_element.xaml`.
+static BUILD_NAMED_ELEMENT_XAML_DOCUMENT: rt::DocumentInfo = rt::DocumentInfo { base_uri: ::core::option::Option::Some("ferres://FerroUI.Markup.Xaml.UnitTests/Emitter/named_element.xaml"), namespaces: XML_NAMESPACES_0 };
+
 /// Generated from `named_element.xaml`.
 pub fn build_named_element_xaml(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
 ) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::Border>, ::ferroui_markup_xaml::XamlLoadException> {
     // named_element.xaml(1,2) Border
     let border_0 = ::ferroui_controls::Border::new();
-    let context = rt::populate_context(service_provider, ::core::option::Option::Some("ferres://FerroUI.Markup.Xaml.UnitTests/Emitter/named_element.xaml"), XML_NAMESPACES_0, rt::to_value(border_0.clone()));
+    let context = rt::populate_context(service_provider, &BUILD_NAMED_ELEMENT_XAML_DOCUMENT, rt::to_value(border_0.clone()));
     let name_scope = context.name_scope_field();
     border_0.begin_init();
     // named_element.xaml(1,99) Name
@@ -923,13 +1025,16 @@ fn build_named_element_xaml_untyped(
     ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
 }
 
+/// The base URI and the XML namespaces of `name_property.xaml`.
+static BUILD_NAME_PROPERTY_XAML_DOCUMENT: rt::DocumentInfo = rt::DocumentInfo { base_uri: ::core::option::Option::Some("ferres://FerroUI.Markup.Xaml.UnitTests/Emitter/name_property.xaml"), namespaces: XML_NAMESPACES_0 };
+
 /// Generated from `name_property.xaml`.
 pub fn build_name_property_xaml(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
 ) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::Border>, ::ferroui_markup_xaml::XamlLoadException> {
     // name_property.xaml(1,2) Border
     let border_0 = ::ferroui_controls::Border::new();
-    let context = rt::populate_context(service_provider, ::core::option::Option::Some("ferres://FerroUI.Markup.Xaml.UnitTests/Emitter/name_property.xaml"), XML_NAMESPACES_0, rt::to_value(border_0.clone()));
+    let context = rt::populate_context(service_provider, &BUILD_NAME_PROPERTY_XAML_DOCUMENT, rt::to_value(border_0.clone()));
     let name_scope = context.name_scope_field();
     border_0.begin_init();
     // name_property.xaml(1,100) Child
@@ -953,13 +1058,16 @@ fn build_name_property_xaml_untyped(
     ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
 }
 
+/// The base URI and the XML namespaces of `binding.xaml`.
+static BUILD_BINDING_XAML_DOCUMENT: rt::DocumentInfo = rt::DocumentInfo { base_uri: ::core::option::Option::Some("ferres://FerroUI.Markup.Xaml.UnitTests/Emitter/binding.xaml"), namespaces: XML_NAMESPACES_0 };
+
 /// Generated from `binding.xaml`.
 pub fn build_binding_xaml(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
 ) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::TextBlock>, ::ferroui_markup_xaml::XamlLoadException> {
     // binding.xaml(1,2) TextBlock
     let text_block_0 = ::ferroui_controls::TextBlock::new();
-    let context = rt::populate_context(service_provider, ::core::option::Option::Some("ferres://FerroUI.Markup.Xaml.UnitTests/Emitter/binding.xaml"), XML_NAMESPACES_0, rt::to_value(text_block_0.clone()));
+    let context = rt::populate_context(service_provider, &BUILD_BINDING_XAML_DOCUMENT, rt::to_value(text_block_0.clone()));
     let name_scope = context.name_scope_field();
     text_block_0.begin_init();
     context.push_parent(rt::to_value(text_block_0.clone()));
@@ -980,13 +1088,16 @@ fn build_binding_xaml_untyped(
     ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
 }
 
+/// The base URI and the XML namespaces of `style_with_selector.xaml`.
+static BUILD_STYLE_WITH_SELECTOR_XAML_DOCUMENT: rt::DocumentInfo = rt::DocumentInfo { base_uri: ::core::option::Option::Some("ferres://FerroUI.Markup.Xaml.UnitTests/Emitter/style_with_selector.xaml"), namespaces: XML_NAMESPACES_0 };
+
 /// Generated from `style_with_selector.xaml`.
 pub fn build_style_with_selector_xaml(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
 ) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::Border>, ::ferroui_markup_xaml::XamlLoadException> {
     // style_with_selector.xaml(1,2) Border
     let border_0 = ::ferroui_controls::Border::new();
-    let context = rt::populate_context(service_provider, ::core::option::Option::Some("ferres://FerroUI.Markup.Xaml.UnitTests/Emitter/style_with_selector.xaml"), XML_NAMESPACES_0, rt::to_value(border_0.clone()));
+    let context = rt::populate_context(service_provider, &BUILD_STYLE_WITH_SELECTOR_XAML_DOCUMENT, rt::to_value(border_0.clone()));
     let name_scope = context.name_scope_field();
     border_0.begin_init();
     // style_with_selector.xaml(1,115) Styles
@@ -1011,13 +1122,16 @@ fn build_style_with_selector_xaml_untyped(
     ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
 }
 
+/// The base URI and the XML namespaces of `control_template.xaml`.
+static BUILD_CONTROL_TEMPLATE_XAML_DOCUMENT: rt::DocumentInfo = rt::DocumentInfo { base_uri: ::core::option::Option::Some("ferres://FerroUI.Markup.Xaml.UnitTests/Emitter/control_template.xaml"), namespaces: XML_NAMESPACES_0 };
+
 /// Generated from `control_template.xaml`.
 pub fn build_control_template_xaml(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
 ) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::Button>, ::ferroui_markup_xaml::XamlLoadException> {
     // control_template.xaml(1,2) Button
     let button_0 = ::ferroui_controls::Button::new();
-    let context = rt::populate_context(service_provider, ::core::option::Option::Some("ferres://FerroUI.Markup.Xaml.UnitTests/Emitter/control_template.xaml"), XML_NAMESPACES_0, rt::to_value(button_0.clone()));
+    let context = rt::populate_context(service_provider, &BUILD_CONTROL_TEMPLATE_XAML_DOCUMENT, rt::to_value(button_0.clone()));
     let name_scope = context.name_scope_field();
     button_0.begin_init();
     // control_template.xaml(1,117) Template
@@ -1035,7 +1149,7 @@ pub fn build_control_template_xaml(
 fn build_control_template_xaml_deferred_0(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
-    let context = rt::deferred_context(service_provider, ::core::option::Option::Some("ferres://FerroUI.Markup.Xaml.UnitTests/Emitter/control_template.xaml"), XML_NAMESPACES_0);
+    let context = rt::deferred_context(service_provider, &BUILD_CONTROL_TEMPLATE_XAML_DOCUMENT);
     // control_template.xaml(1,134) Border
     let border_0 = ::ferroui_controls::Border::new();
     context.set_intermediate_root_object(rt::to_value(border_0.clone()));
@@ -1051,13 +1165,16 @@ fn build_control_template_xaml_untyped(
     ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
 }
 
+/// The base URI and the XML namespaces of `brush_from_text.xaml`.
+static BUILD_BRUSH_FROM_TEXT_XAML_DOCUMENT: rt::DocumentInfo = rt::DocumentInfo { base_uri: ::core::option::Option::Some("ferres://FerroUI.Markup.Xaml.UnitTests/Emitter/brush_from_text.xaml"), namespaces: XML_NAMESPACES_0 };
+
 /// Generated from `brush_from_text.xaml`.
 pub fn build_brush_from_text_xaml(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
 ) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::Border>, ::ferroui_markup_xaml::XamlLoadException> {
     // brush_from_text.xaml(1,2) Border
     let border_0 = ::ferroui_controls::Border::new();
-    let context = rt::populate_context(service_provider, ::core::option::Option::Some("ferres://FerroUI.Markup.Xaml.UnitTests/Emitter/brush_from_text.xaml"), XML_NAMESPACES_0, rt::to_value(border_0.clone()));
+    let context = rt::populate_context(service_provider, &BUILD_BRUSH_FROM_TEXT_XAML_DOCUMENT, rt::to_value(border_0.clone()));
     let name_scope = context.name_scope_field();
     border_0.begin_init();
     // brush_from_text.xaml(1,2) Background
@@ -1074,13 +1191,16 @@ fn build_brush_from_text_xaml_untyped(
     ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
 }
 
+/// The base URI and the XML namespaces of `resources.xaml`.
+static BUILD_RESOURCES_XAML_DOCUMENT: rt::DocumentInfo = rt::DocumentInfo { base_uri: ::core::option::Option::Some("ferres://FerroUI.Markup.Xaml.UnitTests/Emitter/resources.xaml"), namespaces: XML_NAMESPACES_0 };
+
 /// Generated from `resources.xaml`.
 pub fn build_resources_xaml(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
 ) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::Border>, ::ferroui_markup_xaml::XamlLoadException> {
     // resources.xaml(1,2) Border
     let border_0 = ::ferroui_controls::Border::new();
-    let context = rt::populate_context(service_provider, ::core::option::Option::Some("ferres://FerroUI.Markup.Xaml.UnitTests/Emitter/resources.xaml"), XML_NAMESPACES_0, rt::to_value(border_0.clone()));
+    let context = rt::populate_context(service_provider, &BUILD_RESOURCES_XAML_DOCUMENT, rt::to_value(border_0.clone()));
     let name_scope = context.name_scope_field();
     border_0.begin_init();
     // resources.xaml(1,140) Resources (resource)
@@ -1098,13 +1218,16 @@ fn build_resources_xaml_untyped(
     ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
 }
 
+/// The base URI and the XML namespaces of `text_block_font_style_weight.xaml`.
+static BUILD_TEXT_BLOCK_FONT_STYLE_WEIGHT_XAML_DOCUMENT: rt::DocumentInfo = rt::DocumentInfo { base_uri: ::core::option::Option::Some("ferres://FerroUI.Markup.Xaml.UnitTests/Emitter/text_block_font_style_weight.xaml"), namespaces: XML_NAMESPACES_0 };
+
 /// Generated from `text_block_font_style_weight.xaml`.
 pub fn build_text_block_font_style_weight_xaml(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
 ) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::TextBlock>, ::ferroui_markup_xaml::XamlLoadException> {
     // text_block_font_style_weight.xaml(1,2) TextBlock
     let text_block_0 = ::ferroui_controls::TextBlock::new();
-    let context = rt::populate_context(service_provider, ::core::option::Option::Some("ferres://FerroUI.Markup.Xaml.UnitTests/Emitter/text_block_font_style_weight.xaml"), XML_NAMESPACES_0, rt::to_value(text_block_0.clone()));
+    let context = rt::populate_context(service_provider, &BUILD_TEXT_BLOCK_FONT_STYLE_WEIGHT_XAML_DOCUMENT, rt::to_value(text_block_0.clone()));
     let name_scope = context.name_scope_field();
     text_block_0.begin_init();
     // text_block_font_style_weight.xaml(1,2) FontStyle
@@ -1126,13 +1249,16 @@ fn build_text_block_font_style_weight_xaml_untyped(
     ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
 }
 
+/// The base URI and the XML namespaces of `text_block_text_layout.xaml`.
+static BUILD_TEXT_BLOCK_TEXT_LAYOUT_XAML_DOCUMENT: rt::DocumentInfo = rt::DocumentInfo { base_uri: ::core::option::Option::Some("ferres://FerroUI.Markup.Xaml.UnitTests/Emitter/text_block_text_layout.xaml"), namespaces: XML_NAMESPACES_0 };
+
 /// Generated from `text_block_text_layout.xaml`.
 pub fn build_text_block_text_layout_xaml(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
 ) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::TextBlock>, ::ferroui_markup_xaml::XamlLoadException> {
     // text_block_text_layout.xaml(1,2) TextBlock
     let text_block_0 = ::ferroui_controls::TextBlock::new();
-    let context = rt::populate_context(service_provider, ::core::option::Option::Some("ferres://FerroUI.Markup.Xaml.UnitTests/Emitter/text_block_text_layout.xaml"), XML_NAMESPACES_0, rt::to_value(text_block_0.clone()));
+    let context = rt::populate_context(service_provider, &BUILD_TEXT_BLOCK_TEXT_LAYOUT_XAML_DOCUMENT, rt::to_value(text_block_0.clone()));
     let name_scope = context.name_scope_field();
     text_block_0.begin_init();
     // text_block_text_layout.xaml(1,2) TextAlignment
@@ -1157,13 +1283,16 @@ fn build_text_block_text_layout_xaml_untyped(
     ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
 }
 
+/// The base URI and the XML namespaces of `text_block_padding_font.xaml`.
+static BUILD_TEXT_BLOCK_PADDING_FONT_XAML_DOCUMENT: rt::DocumentInfo = rt::DocumentInfo { base_uri: ::core::option::Option::Some("ferres://FerroUI.Markup.Xaml.UnitTests/Emitter/text_block_padding_font.xaml"), namespaces: XML_NAMESPACES_0 };
+
 /// Generated from `text_block_padding_font.xaml`.
 pub fn build_text_block_padding_font_xaml(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
 ) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::TextBlock>, ::ferroui_markup_xaml::XamlLoadException> {
     // text_block_padding_font.xaml(1,2) TextBlock
     let text_block_0 = ::ferroui_controls::TextBlock::new();
-    let context = rt::populate_context(service_provider, ::core::option::Option::Some("ferres://FerroUI.Markup.Xaml.UnitTests/Emitter/text_block_padding_font.xaml"), XML_NAMESPACES_0, rt::to_value(text_block_0.clone()));
+    let context = rt::populate_context(service_provider, &BUILD_TEXT_BLOCK_PADDING_FONT_XAML_DOCUMENT, rt::to_value(text_block_0.clone()));
     let name_scope = context.name_scope_field();
     text_block_0.begin_init();
     // text_block_padding_font.xaml(1,2) Padding
@@ -1184,13 +1313,16 @@ fn build_text_block_padding_font_xaml_untyped(
     ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
 }
 
+/// The base URI and the XML namespaces of `text_block_unicode_text.xaml`.
+static BUILD_TEXT_BLOCK_UNICODE_TEXT_XAML_DOCUMENT: rt::DocumentInfo = rt::DocumentInfo { base_uri: ::core::option::Option::Some("ferres://FerroUI.Markup.Xaml.UnitTests/Emitter/text_block_unicode_text.xaml"), namespaces: XML_NAMESPACES_0 };
+
 /// Generated from `text_block_unicode_text.xaml`.
 pub fn build_text_block_unicode_text_xaml(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
 ) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::TextBlock>, ::ferroui_markup_xaml::XamlLoadException> {
     // text_block_unicode_text.xaml(1,2) TextBlock
     let text_block_0 = ::ferroui_controls::TextBlock::new();
-    let context = rt::populate_context(service_provider, ::core::option::Option::Some("ferres://FerroUI.Markup.Xaml.UnitTests/Emitter/text_block_unicode_text.xaml"), XML_NAMESPACES_0, rt::to_value(text_block_0.clone()));
+    let context = rt::populate_context(service_provider, &BUILD_TEXT_BLOCK_UNICODE_TEXT_XAML_DOCUMENT, rt::to_value(text_block_0.clone()));
     let name_scope = context.name_scope_field();
     text_block_0.begin_init();
     // text_block_unicode_text.xaml(1,102) Text
@@ -1207,13 +1339,16 @@ fn build_text_block_unicode_text_xaml_untyped(
     ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
 }
 
+/// The base URI and the XML namespaces of `text_block_multiline_text.xaml`.
+static BUILD_TEXT_BLOCK_MULTILINE_TEXT_XAML_DOCUMENT: rt::DocumentInfo = rt::DocumentInfo { base_uri: ::core::option::Option::Some("ferres://FerroUI.Markup.Xaml.UnitTests/Emitter/text_block_multiline_text.xaml"), namespaces: XML_NAMESPACES_0 };
+
 /// Generated from `text_block_multiline_text.xaml`.
 pub fn build_text_block_multiline_text_xaml(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
 ) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::TextBlock>, ::ferroui_markup_xaml::XamlLoadException> {
     // text_block_multiline_text.xaml(1,2) TextBlock
     let text_block_0 = ::ferroui_controls::TextBlock::new();
-    let context = rt::populate_context(service_provider, ::core::option::Option::Some("ferres://FerroUI.Markup.Xaml.UnitTests/Emitter/text_block_multiline_text.xaml"), XML_NAMESPACES_0, rt::to_value(text_block_0.clone()));
+    let context = rt::populate_context(service_provider, &BUILD_TEXT_BLOCK_MULTILINE_TEXT_XAML_DOCUMENT, rt::to_value(text_block_0.clone()));
     let name_scope = context.name_scope_field();
     text_block_0.begin_init();
     // text_block_multiline_text.xaml(1,102) Text
@@ -1230,13 +1365,16 @@ fn build_text_block_multiline_text_xaml_untyped(
     ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
 }
 
+/// The base URI and the XML namespaces of `border_exponent_numbers.xaml`.
+static BUILD_BORDER_EXPONENT_NUMBERS_XAML_DOCUMENT: rt::DocumentInfo = rt::DocumentInfo { base_uri: ::core::option::Option::Some("ferres://FerroUI.Markup.Xaml.UnitTests/Emitter/border_exponent_numbers.xaml"), namespaces: XML_NAMESPACES_0 };
+
 /// Generated from `border_exponent_numbers.xaml`.
 pub fn build_border_exponent_numbers_xaml(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
 ) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::Border>, ::ferroui_markup_xaml::XamlLoadException> {
     // border_exponent_numbers.xaml(1,2) Border
     let border_0 = ::ferroui_controls::Border::new();
-    let context = rt::populate_context(service_provider, ::core::option::Option::Some("ferres://FerroUI.Markup.Xaml.UnitTests/Emitter/border_exponent_numbers.xaml"), XML_NAMESPACES_0, rt::to_value(border_0.clone()));
+    let context = rt::populate_context(service_provider, &BUILD_BORDER_EXPONENT_NUMBERS_XAML_DOCUMENT, rt::to_value(border_0.clone()));
     let name_scope = context.name_scope_field();
     border_0.begin_init();
     // border_exponent_numbers.xaml(1,2) Opacity
@@ -1255,13 +1393,16 @@ fn build_border_exponent_numbers_xaml_untyped(
     ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
 }
 
+/// The base URI and the XML namespaces of `border_negative_margin.xaml`.
+static BUILD_BORDER_NEGATIVE_MARGIN_XAML_DOCUMENT: rt::DocumentInfo = rt::DocumentInfo { base_uri: ::core::option::Option::Some("ferres://FerroUI.Markup.Xaml.UnitTests/Emitter/border_negative_margin.xaml"), namespaces: XML_NAMESPACES_0 };
+
 /// Generated from `border_negative_margin.xaml`.
 pub fn build_border_negative_margin_xaml(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
 ) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::Border>, ::ferroui_markup_xaml::XamlLoadException> {
     // border_negative_margin.xaml(1,2) Border
     let border_0 = ::ferroui_controls::Border::new();
-    let context = rt::populate_context(service_provider, ::core::option::Option::Some("ferres://FerroUI.Markup.Xaml.UnitTests/Emitter/border_negative_margin.xaml"), XML_NAMESPACES_0, rt::to_value(border_0.clone()));
+    let context = rt::populate_context(service_provider, &BUILD_BORDER_NEGATIVE_MARGIN_XAML_DOCUMENT, rt::to_value(border_0.clone()));
     let name_scope = context.name_scope_field();
     border_0.begin_init();
     // border_negative_margin.xaml(1,2) Margin
@@ -1278,13 +1419,16 @@ fn build_border_negative_margin_xaml_untyped(
     ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
 }
 
+/// The base URI and the XML namespaces of `border_auto_size.xaml`.
+static BUILD_BORDER_AUTO_SIZE_XAML_DOCUMENT: rt::DocumentInfo = rt::DocumentInfo { base_uri: ::core::option::Option::Some("ferres://FerroUI.Markup.Xaml.UnitTests/Emitter/border_auto_size.xaml"), namespaces: XML_NAMESPACES_0 };
+
 /// Generated from `border_auto_size.xaml`.
 pub fn build_border_auto_size_xaml(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
 ) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::Border>, ::ferroui_markup_xaml::XamlLoadException> {
     // border_auto_size.xaml(1,2) Border
     let border_0 = ::ferroui_controls::Border::new();
-    let context = rt::populate_context(service_provider, ::core::option::Option::Some("ferres://FerroUI.Markup.Xaml.UnitTests/Emitter/border_auto_size.xaml"), XML_NAMESPACES_0, rt::to_value(border_0.clone()));
+    let context = rt::populate_context(service_provider, &BUILD_BORDER_AUTO_SIZE_XAML_DOCUMENT, rt::to_value(border_0.clone()));
     let name_scope = context.name_scope_field();
     border_0.begin_init();
     // border_auto_size.xaml(1,2) Width
@@ -1305,13 +1449,16 @@ fn build_border_auto_size_xaml_untyped(
     ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
 }
 
+/// The base URI and the XML namespaces of `content_control_alignment.xaml`.
+static BUILD_CONTENT_CONTROL_ALIGNMENT_XAML_DOCUMENT: rt::DocumentInfo = rt::DocumentInfo { base_uri: ::core::option::Option::Some("ferres://FerroUI.Markup.Xaml.UnitTests/Emitter/content_control_alignment.xaml"), namespaces: XML_NAMESPACES_0 };
+
 /// Generated from `content_control_alignment.xaml`.
 pub fn build_content_control_alignment_xaml(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
 ) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::ContentControl>, ::ferroui_markup_xaml::XamlLoadException> {
     // content_control_alignment.xaml(1,2) ContentControl
     let content_control_0 = ::ferroui_controls::ContentControl::new();
-    let context = rt::populate_context(service_provider, ::core::option::Option::Some("ferres://FerroUI.Markup.Xaml.UnitTests/Emitter/content_control_alignment.xaml"), XML_NAMESPACES_0, rt::to_value(content_control_0.clone()));
+    let context = rt::populate_context(service_provider, &BUILD_CONTENT_CONTROL_ALIGNMENT_XAML_DOCUMENT, rt::to_value(content_control_0.clone()));
     let name_scope = context.name_scope_field();
     content_control_0.begin_init();
     // content_control_alignment.xaml(1,2) HorizontalContentAlignment
@@ -1330,13 +1477,16 @@ fn build_content_control_alignment_xaml_untyped(
     ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
 }
 
+/// The base URI and the XML namespaces of `content_control_element.xaml`.
+static BUILD_CONTENT_CONTROL_ELEMENT_XAML_DOCUMENT: rt::DocumentInfo = rt::DocumentInfo { base_uri: ::core::option::Option::Some("ferres://FerroUI.Markup.Xaml.UnitTests/Emitter/content_control_element.xaml"), namespaces: XML_NAMESPACES_0 };
+
 /// Generated from `content_control_element.xaml`.
 pub fn build_content_control_element_xaml(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
 ) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::ContentControl>, ::ferroui_markup_xaml::XamlLoadException> {
     // content_control_element.xaml(1,2) ContentControl
     let content_control_0 = ::ferroui_controls::ContentControl::new();
-    let context = rt::populate_context(service_provider, ::core::option::Option::Some("ferres://FerroUI.Markup.Xaml.UnitTests/Emitter/content_control_element.xaml"), XML_NAMESPACES_0, rt::to_value(content_control_0.clone()));
+    let context = rt::populate_context(service_provider, &BUILD_CONTENT_CONTROL_ELEMENT_XAML_DOCUMENT, rt::to_value(content_control_0.clone()));
     let name_scope = context.name_scope_field();
     content_control_0.begin_init();
     // content_control_element.xaml(1,108) Content
@@ -1359,13 +1509,16 @@ fn build_content_control_element_xaml_untyped(
     ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
 }
 
+/// The base URI and the XML namespaces of `button_content_element.xaml`.
+static BUILD_BUTTON_CONTENT_ELEMENT_XAML_DOCUMENT: rt::DocumentInfo = rt::DocumentInfo { base_uri: ::core::option::Option::Some("ferres://FerroUI.Markup.Xaml.UnitTests/Emitter/button_content_element.xaml"), namespaces: XML_NAMESPACES_0 };
+
 /// Generated from `button_content_element.xaml`.
 pub fn build_button_content_element_xaml(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
 ) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::Button>, ::ferroui_markup_xaml::XamlLoadException> {
     // button_content_element.xaml(1,2) Button
     let button_0 = ::ferroui_controls::Button::new();
-    let context = rt::populate_context(service_provider, ::core::option::Option::Some("ferres://FerroUI.Markup.Xaml.UnitTests/Emitter/button_content_element.xaml"), XML_NAMESPACES_0, rt::to_value(button_0.clone()));
+    let context = rt::populate_context(service_provider, &BUILD_BUTTON_CONTENT_ELEMENT_XAML_DOCUMENT, rt::to_value(button_0.clone()));
     let name_scope = context.name_scope_field();
     button_0.begin_init();
     // button_content_element.xaml(1,100) Content
@@ -1388,13 +1541,16 @@ fn build_button_content_element_xaml_untyped(
     ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
 }
 
+/// The base URI and the XML namespaces of `button_content_property_element.xaml`.
+static BUILD_BUTTON_CONTENT_PROPERTY_ELEMENT_XAML_DOCUMENT: rt::DocumentInfo = rt::DocumentInfo { base_uri: ::core::option::Option::Some("ferres://FerroUI.Markup.Xaml.UnitTests/Emitter/button_content_property_element.xaml"), namespaces: XML_NAMESPACES_0 };
+
 /// Generated from `button_content_property_element.xaml`.
 pub fn build_button_content_property_element_xaml(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
 ) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::Button>, ::ferroui_markup_xaml::XamlLoadException> {
     // button_content_property_element.xaml(1,2) Button
     let button_0 = ::ferroui_controls::Button::new();
-    let context = rt::populate_context(service_provider, ::core::option::Option::Some("ferres://FerroUI.Markup.Xaml.UnitTests/Emitter/button_content_property_element.xaml"), XML_NAMESPACES_0, rt::to_value(button_0.clone()));
+    let context = rt::populate_context(service_provider, &BUILD_BUTTON_CONTENT_PROPERTY_ELEMENT_XAML_DOCUMENT, rt::to_value(button_0.clone()));
     let name_scope = context.name_scope_field();
     button_0.begin_init();
     // button_content_property_element.xaml(1,116) Content
@@ -1417,13 +1573,16 @@ fn build_button_content_property_element_xaml_untyped(
     ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
 }
 
+/// The base URI and the XML namespaces of `content_tag_null.xaml`.
+static BUILD_CONTENT_TAG_NULL_XAML_DOCUMENT: rt::DocumentInfo = rt::DocumentInfo { base_uri: ::core::option::Option::Some("ferres://FerroUI.Markup.Xaml.UnitTests/Emitter/content_tag_null.xaml"), namespaces: XML_NAMESPACES_0 };
+
 /// Generated from `content_tag_null.xaml`.
 pub fn build_content_tag_null_xaml(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
 ) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::ContentControl>, ::ferroui_markup_xaml::XamlLoadException> {
     // content_tag_null.xaml(1,2) ContentControl
     let content_control_0 = ::ferroui_controls::ContentControl::new();
-    let context = rt::populate_context(service_provider, ::core::option::Option::Some("ferres://FerroUI.Markup.Xaml.UnitTests/Emitter/content_tag_null.xaml"), XML_NAMESPACES_0, rt::to_value(content_control_0.clone()));
+    let context = rt::populate_context(service_provider, &BUILD_CONTENT_TAG_NULL_XAML_DOCUMENT, rt::to_value(content_control_0.clone()));
     let name_scope = context.name_scope_field();
     content_control_0.begin_init();
     // content_tag_null.xaml(1,107) Tag
@@ -1442,13 +1601,16 @@ fn build_content_tag_null_xaml_untyped(
     ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
 }
 
+/// The base URI and the XML namespaces of `content_x_static_enum.xaml`.
+static BUILD_CONTENT_X_STATIC_ENUM_XAML_DOCUMENT: rt::DocumentInfo = rt::DocumentInfo { base_uri: ::core::option::Option::Some("ferres://FerroUI.Markup.Xaml.UnitTests/Emitter/content_x_static_enum.xaml"), namespaces: XML_NAMESPACES_0 };
+
 /// Generated from `content_x_static_enum.xaml`.
 pub fn build_content_x_static_enum_xaml(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
 ) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::ContentControl>, ::ferroui_markup_xaml::XamlLoadException> {
     // content_x_static_enum.xaml(1,2) ContentControl
     let content_control_0 = ::ferroui_controls::ContentControl::new();
-    let context = rt::populate_context(service_provider, ::core::option::Option::Some("ferres://FerroUI.Markup.Xaml.UnitTests/Emitter/content_x_static_enum.xaml"), XML_NAMESPACES_0, rt::to_value(content_control_0.clone()));
+    let context = rt::populate_context(service_provider, &BUILD_CONTENT_X_STATIC_ENUM_XAML_DOCUMENT, rt::to_value(content_control_0.clone()));
     let name_scope = context.name_scope_field();
     content_control_0.begin_init();
     // content_x_static_enum.xaml(1,107) Content
@@ -1465,13 +1627,16 @@ fn build_content_x_static_enum_xaml_untyped(
     ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
 }
 
+/// The base URI and the XML namespaces of `attached_dock_x_static.xaml`.
+static BUILD_ATTACHED_DOCK_X_STATIC_XAML_DOCUMENT: rt::DocumentInfo = rt::DocumentInfo { base_uri: ::core::option::Option::Some("ferres://FerroUI.Markup.Xaml.UnitTests/Emitter/attached_dock_x_static.xaml"), namespaces: XML_NAMESPACES_0 };
+
 /// Generated from `attached_dock_x_static.xaml`.
 pub fn build_attached_dock_x_static_xaml(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
 ) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::Border>, ::ferroui_markup_xaml::XamlLoadException> {
     // attached_dock_x_static.xaml(1,2) Border
     let border_0 = ::ferroui_controls::Border::new();
-    let context = rt::populate_context(service_provider, ::core::option::Option::Some("ferres://FerroUI.Markup.Xaml.UnitTests/Emitter/attached_dock_x_static.xaml"), XML_NAMESPACES_0, rt::to_value(border_0.clone()));
+    let context = rt::populate_context(service_provider, &BUILD_ATTACHED_DOCK_X_STATIC_XAML_DOCUMENT, rt::to_value(border_0.clone()));
     let name_scope = context.name_scope_field();
     border_0.begin_init();
     // attached_dock_x_static.xaml(1,100) Child
@@ -1494,13 +1659,16 @@ fn build_attached_dock_x_static_xaml_untyped(
     ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
 }
 
+/// The base URI and the XML namespaces of `attached_grid_spans.xaml`.
+static BUILD_ATTACHED_GRID_SPANS_XAML_DOCUMENT: rt::DocumentInfo = rt::DocumentInfo { base_uri: ::core::option::Option::Some("ferres://FerroUI.Markup.Xaml.UnitTests/Emitter/attached_grid_spans.xaml"), namespaces: XML_NAMESPACES_0 };
+
 /// Generated from `attached_grid_spans.xaml`.
 pub fn build_attached_grid_spans_xaml(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
 ) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::Border>, ::ferroui_markup_xaml::XamlLoadException> {
     // attached_grid_spans.xaml(1,2) Border
     let border_0 = ::ferroui_controls::Border::new();
-    let context = rt::populate_context(service_provider, ::core::option::Option::Some("ferres://FerroUI.Markup.Xaml.UnitTests/Emitter/attached_grid_spans.xaml"), XML_NAMESPACES_0, rt::to_value(border_0.clone()));
+    let context = rt::populate_context(service_provider, &BUILD_ATTACHED_GRID_SPANS_XAML_DOCUMENT, rt::to_value(border_0.clone()));
     let name_scope = context.name_scope_field();
     border_0.begin_init();
     // attached_grid_spans.xaml(1,100) Child
@@ -1527,13 +1695,16 @@ fn build_attached_grid_spans_xaml_untyped(
     ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
 }
 
+/// The base URI and the XML namespaces of `named_nested_elements.xaml`.
+static BUILD_NAMED_NESTED_ELEMENTS_XAML_DOCUMENT: rt::DocumentInfo = rt::DocumentInfo { base_uri: ::core::option::Option::Some("ferres://FerroUI.Markup.Xaml.UnitTests/Emitter/named_nested_elements.xaml"), namespaces: XML_NAMESPACES_0 };
+
 /// Generated from `named_nested_elements.xaml`.
 pub fn build_named_nested_elements_xaml(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
 ) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::Border>, ::ferroui_markup_xaml::XamlLoadException> {
     // named_nested_elements.xaml(1,2) Border
     let border_0 = ::ferroui_controls::Border::new();
-    let context = rt::populate_context(service_provider, ::core::option::Option::Some("ferres://FerroUI.Markup.Xaml.UnitTests/Emitter/named_nested_elements.xaml"), XML_NAMESPACES_0, rt::to_value(border_0.clone()));
+    let context = rt::populate_context(service_provider, &BUILD_NAMED_NESTED_ELEMENTS_XAML_DOCUMENT, rt::to_value(border_0.clone()));
     let name_scope = context.name_scope_field();
     border_0.begin_init();
     // named_nested_elements.xaml(1,99) Name
@@ -1571,13 +1742,16 @@ fn build_named_nested_elements_xaml_untyped(
     ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
 }
 
+/// The base URI and the XML namespaces of `named_content.xaml`.
+static BUILD_NAMED_CONTENT_XAML_DOCUMENT: rt::DocumentInfo = rt::DocumentInfo { base_uri: ::core::option::Option::Some("ferres://FerroUI.Markup.Xaml.UnitTests/Emitter/named_content.xaml"), namespaces: XML_NAMESPACES_0 };
+
 /// Generated from `named_content.xaml`.
 pub fn build_named_content_xaml(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
 ) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::UserControl>, ::ferroui_markup_xaml::XamlLoadException> {
     // named_content.xaml(1,2) UserControl
     let user_control_0 = ::ferroui_controls::UserControl::new();
-    let context = rt::populate_context(service_provider, ::core::option::Option::Some("ferres://FerroUI.Markup.Xaml.UnitTests/Emitter/named_content.xaml"), XML_NAMESPACES_0, rt::to_value(user_control_0.clone()));
+    let context = rt::populate_context(service_provider, &BUILD_NAMED_CONTENT_XAML_DOCUMENT, rt::to_value(user_control_0.clone()));
     let name_scope = context.name_scope_field();
     user_control_0.begin_init();
     // named_content.xaml(1,104) Name
@@ -1604,13 +1778,16 @@ fn build_named_content_xaml_untyped(
     ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
 }
 
+/// The base URI and the XML namespaces of `duplicate_name.xaml`.
+static BUILD_DUPLICATE_NAME_XAML_DOCUMENT: rt::DocumentInfo = rt::DocumentInfo { base_uri: ::core::option::Option::Some("ferres://FerroUI.Markup.Xaml.UnitTests/Emitter/duplicate_name.xaml"), namespaces: XML_NAMESPACES_0 };
+
 /// Generated from `duplicate_name.xaml`.
 pub fn build_duplicate_name_xaml(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
 ) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::Border>, ::ferroui_markup_xaml::XamlLoadException> {
     // duplicate_name.xaml(1,2) Border
     let border_0 = ::ferroui_controls::Border::new();
-    let context = rt::populate_context(service_provider, ::core::option::Option::Some("ferres://FerroUI.Markup.Xaml.UnitTests/Emitter/duplicate_name.xaml"), XML_NAMESPACES_0, rt::to_value(border_0.clone()));
+    let context = rt::populate_context(service_provider, &BUILD_DUPLICATE_NAME_XAML_DOCUMENT, rt::to_value(border_0.clone()));
     let name_scope = context.name_scope_field();
     border_0.begin_init();
     // duplicate_name.xaml(1,99) Name
@@ -1637,13 +1814,16 @@ fn build_duplicate_name_xaml_untyped(
     ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
 }
 
+/// The base URI and the XML namespaces of `name_and_x_name.xaml`.
+static BUILD_NAME_AND_X_NAME_XAML_DOCUMENT: rt::DocumentInfo = rt::DocumentInfo { base_uri: ::core::option::Option::Some("ferres://FerroUI.Markup.Xaml.UnitTests/Emitter/name_and_x_name.xaml"), namespaces: XML_NAMESPACES_0 };
+
 /// Generated from `name_and_x_name.xaml`.
 pub fn build_name_and_x_name_xaml(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
 ) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::Border>, ::ferroui_markup_xaml::XamlLoadException> {
     // name_and_x_name.xaml(1,2) Border
     let border_0 = ::ferroui_controls::Border::new();
-    let context = rt::populate_context(service_provider, ::core::option::Option::Some("ferres://FerroUI.Markup.Xaml.UnitTests/Emitter/name_and_x_name.xaml"), XML_NAMESPACES_0, rt::to_value(border_0.clone()));
+    let context = rt::populate_context(service_provider, &BUILD_NAME_AND_X_NAME_XAML_DOCUMENT, rt::to_value(border_0.clone()));
     let name_scope = context.name_scope_field();
     border_0.begin_init();
     // name_and_x_name.xaml(1,99) Name
@@ -1672,13 +1852,16 @@ fn build_name_and_x_name_xaml_untyped(
     ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
 }
 
+/// The base URI and the XML namespaces of `deep_nesting.xaml`.
+static BUILD_DEEP_NESTING_XAML_DOCUMENT: rt::DocumentInfo = rt::DocumentInfo { base_uri: ::core::option::Option::Some("ferres://FerroUI.Markup.Xaml.UnitTests/Emitter/deep_nesting.xaml"), namespaces: XML_NAMESPACES_0 };
+
 /// Generated from `deep_nesting.xaml`.
 pub fn build_deep_nesting_xaml(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
 ) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::Border>, ::ferroui_markup_xaml::XamlLoadException> {
     // deep_nesting.xaml(1,2) Border
     let border_0 = ::ferroui_controls::Border::new();
-    let context = rt::populate_context(service_provider, ::core::option::Option::Some("ferres://FerroUI.Markup.Xaml.UnitTests/Emitter/deep_nesting.xaml"), XML_NAMESPACES_0, rt::to_value(border_0.clone()));
+    let context = rt::populate_context(service_provider, &BUILD_DEEP_NESTING_XAML_DOCUMENT, rt::to_value(border_0.clone()));
     let name_scope = context.name_scope_field();
     border_0.begin_init();
     // deep_nesting.xaml(1,100) Child
@@ -1725,13 +1908,16 @@ fn build_deep_nesting_xaml_untyped(
     ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
 }
 
+/// The base URI and the XML namespaces of `layout_transform_control.xaml`.
+static BUILD_LAYOUT_TRANSFORM_CONTROL_XAML_DOCUMENT: rt::DocumentInfo = rt::DocumentInfo { base_uri: ::core::option::Option::Some("ferres://FerroUI.Markup.Xaml.UnitTests/Emitter/layout_transform_control.xaml"), namespaces: XML_NAMESPACES_0 };
+
 /// Generated from `layout_transform_control.xaml`.
 pub fn build_layout_transform_control_xaml(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
 ) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::LayoutTransformControl>, ::ferroui_markup_xaml::XamlLoadException> {
     // layout_transform_control.xaml(1,2) LayoutTransformControl
     let layout_transform_control_0 = ::ferroui_controls::LayoutTransformControl::new();
-    let context = rt::populate_context(service_provider, ::core::option::Option::Some("ferres://FerroUI.Markup.Xaml.UnitTests/Emitter/layout_transform_control.xaml"), XML_NAMESPACES_0, rt::to_value(layout_transform_control_0.clone()));
+    let context = rt::populate_context(service_provider, &BUILD_LAYOUT_TRANSFORM_CONTROL_XAML_DOCUMENT, rt::to_value(layout_transform_control_0.clone()));
     let name_scope = context.name_scope_field();
     layout_transform_control_0.begin_init();
     // layout_transform_control.xaml(1,116) Child
@@ -1752,13 +1938,16 @@ fn build_layout_transform_control_xaml_untyped(
     ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
 }
 
+/// The base URI and the XML namespaces of `user_control_properties.xaml`.
+static BUILD_USER_CONTROL_PROPERTIES_XAML_DOCUMENT: rt::DocumentInfo = rt::DocumentInfo { base_uri: ::core::option::Option::Some("ferres://FerroUI.Markup.Xaml.UnitTests/Emitter/user_control_properties.xaml"), namespaces: XML_NAMESPACES_0 };
+
 /// Generated from `user_control_properties.xaml`.
 pub fn build_user_control_properties_xaml(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
 ) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::UserControl>, ::ferroui_markup_xaml::XamlLoadException> {
     // user_control_properties.xaml(1,2) UserControl
     let user_control_0 = ::ferroui_controls::UserControl::new();
-    let context = rt::populate_context(service_provider, ::core::option::Option::Some("ferres://FerroUI.Markup.Xaml.UnitTests/Emitter/user_control_properties.xaml"), XML_NAMESPACES_0, rt::to_value(user_control_0.clone()));
+    let context = rt::populate_context(service_provider, &BUILD_USER_CONTROL_PROPERTIES_XAML_DOCUMENT, rt::to_value(user_control_0.clone()));
     let name_scope = context.name_scope_field();
     user_control_0.begin_init();
     // user_control_properties.xaml(1,2) Width
@@ -1791,13 +1980,16 @@ fn build_user_control_properties_xaml_untyped(
     ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
 }
 
+/// The base URI and the XML namespaces of `multiline_document.xaml`.
+static BUILD_MULTILINE_DOCUMENT_XAML_DOCUMENT: rt::DocumentInfo = rt::DocumentInfo { base_uri: ::core::option::Option::Some("ferres://FerroUI.Markup.Xaml.UnitTests/Emitter/multiline_document.xaml"), namespaces: XML_NAMESPACES_0 };
+
 /// Generated from `multiline_document.xaml`.
 pub fn build_multiline_document_xaml(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
 ) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::Border>, ::ferroui_markup_xaml::XamlLoadException> {
     // multiline_document.xaml(1,2) Border
     let border_0 = ::ferroui_controls::Border::new();
-    let context = rt::populate_context(service_provider, ::core::option::Option::Some("ferres://FerroUI.Markup.Xaml.UnitTests/Emitter/multiline_document.xaml"), XML_NAMESPACES_0, rt::to_value(border_0.clone()));
+    let context = rt::populate_context(service_provider, &BUILD_MULTILINE_DOCUMENT_XAML_DOCUMENT, rt::to_value(border_0.clone()));
     let name_scope = context.name_scope_field();
     border_0.begin_init();
     // multiline_document.xaml(1,2) Padding
@@ -1836,13 +2028,16 @@ fn build_multiline_document_xaml_untyped(
     ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
 }
 
+/// The base URI and the XML namespaces of `multiline_duplicate_name.xaml`.
+static BUILD_MULTILINE_DUPLICATE_NAME_XAML_DOCUMENT: rt::DocumentInfo = rt::DocumentInfo { base_uri: ::core::option::Option::Some("ferres://FerroUI.Markup.Xaml.UnitTests/Emitter/multiline_duplicate_name.xaml"), namespaces: XML_NAMESPACES_0 };
+
 /// Generated from `multiline_duplicate_name.xaml`.
 pub fn build_multiline_duplicate_name_xaml(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
 ) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::Border>, ::ferroui_markup_xaml::XamlLoadException> {
     // multiline_duplicate_name.xaml(1,2) Border
     let border_0 = ::ferroui_controls::Border::new();
-    let context = rt::populate_context(service_provider, ::core::option::Option::Some("ferres://FerroUI.Markup.Xaml.UnitTests/Emitter/multiline_duplicate_name.xaml"), XML_NAMESPACES_0, rt::to_value(border_0.clone()));
+    let context = rt::populate_context(service_provider, &BUILD_MULTILINE_DUPLICATE_NAME_XAML_DOCUMENT, rt::to_value(border_0.clone()));
     let name_scope = context.name_scope_field();
     border_0.begin_init();
     // multiline_duplicate_name.xaml(2,4) Child
@@ -1875,13 +2070,16 @@ fn build_multiline_duplicate_name_xaml_untyped(
     ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
 }
 
+/// The base URI and the XML namespaces of `end_init_failure.xaml`.
+static BUILD_END_INIT_FAILURE_XAML_DOCUMENT: rt::DocumentInfo = rt::DocumentInfo { base_uri: ::core::option::Option::Some("ferres://FerroUI.Markup.Xaml.UnitTests/Emitter/end_init_failure.xaml"), namespaces: XML_NAMESPACES_1 };
+
 /// Generated from `end_init_failure.xaml`.
 pub fn build_end_init_failure_xaml(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
 ) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::Border>, ::ferroui_markup_xaml::XamlLoadException> {
     // end_init_failure.xaml(1,2) Border
     let border_0 = ::ferroui_controls::Border::new();
-    let context = rt::populate_context(service_provider, ::core::option::Option::Some("ferres://FerroUI.Markup.Xaml.UnitTests/Emitter/end_init_failure.xaml"), XML_NAMESPACES_1, rt::to_value(border_0.clone()));
+    let context = rt::populate_context(service_provider, &BUILD_END_INIT_FAILURE_XAML_DOCUMENT, rt::to_value(border_0.clone()));
     let name_scope = context.name_scope_field();
     border_0.begin_init();
     // end_init_failure.xaml(3,4) Child
@@ -1904,13 +2102,16 @@ fn build_end_init_failure_xaml_untyped(
     ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
 }
 
+/// The base URI and the XML namespaces of `grid_definitions_elements.xaml`.
+static BUILD_GRID_DEFINITIONS_ELEMENTS_XAML_DOCUMENT: rt::DocumentInfo = rt::DocumentInfo { base_uri: ::core::option::Option::Some("ferres://FerroUI.Markup.Xaml.UnitTests/Emitter/grid_definitions_elements.xaml"), namespaces: XML_NAMESPACES_0 };
+
 /// Generated from `grid_definitions_elements.xaml`.
 pub fn build_grid_definitions_elements_xaml(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
 ) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::Grid>, ::ferroui_markup_xaml::XamlLoadException> {
     // grid_definitions_elements.xaml(1,2) Grid
     let grid_0 = ::ferroui_controls::Grid::new();
-    let context = rt::populate_context(service_provider, ::core::option::Option::Some("ferres://FerroUI.Markup.Xaml.UnitTests/Emitter/grid_definitions_elements.xaml"), XML_NAMESPACES_0, rt::to_value(grid_0.clone()));
+    let context = rt::populate_context(service_provider, &BUILD_GRID_DEFINITIONS_ELEMENTS_XAML_DOCUMENT, rt::to_value(grid_0.clone()));
     let name_scope = context.name_scope_field();
     grid_0.begin_init();
     // grid_definitions_elements.xaml(1,119) RowDefinitions
@@ -1955,13 +2156,16 @@ fn build_grid_definitions_elements_xaml_untyped(
     ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
 }
 
+/// The base URI and the XML namespaces of `grid_definitions_text.xaml`.
+static BUILD_GRID_DEFINITIONS_TEXT_XAML_DOCUMENT: rt::DocumentInfo = rt::DocumentInfo { base_uri: ::core::option::Option::Some("ferres://FerroUI.Markup.Xaml.UnitTests/Emitter/grid_definitions_text.xaml"), namespaces: XML_NAMESPACES_0 };
+
 /// Generated from `grid_definitions_text.xaml`.
 pub fn build_grid_definitions_text_xaml(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
 ) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::Grid>, ::ferroui_markup_xaml::XamlLoadException> {
     // grid_definitions_text.xaml(1,2) Grid
     let grid_0 = ::ferroui_controls::Grid::new();
-    let context = rt::populate_context(service_provider, ::core::option::Option::Some("ferres://FerroUI.Markup.Xaml.UnitTests/Emitter/grid_definitions_text.xaml"), XML_NAMESPACES_0, rt::to_value(grid_0.clone()));
+    let context = rt::populate_context(service_provider, &BUILD_GRID_DEFINITIONS_TEXT_XAML_DOCUMENT, rt::to_value(grid_0.clone()));
     let name_scope = context.name_scope_field();
     grid_0.begin_init();
     // grid_definitions_text.xaml(1,2) RowDefinitions
@@ -1999,13 +2203,16 @@ fn build_grid_definitions_text_xaml_untyped(
     ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
 }
 
+/// The base URI and the XML namespaces of `canvas_children.xaml`.
+static BUILD_CANVAS_CHILDREN_XAML_DOCUMENT: rt::DocumentInfo = rt::DocumentInfo { base_uri: ::core::option::Option::Some("ferres://FerroUI.Markup.Xaml.UnitTests/Emitter/canvas_children.xaml"), namespaces: XML_NAMESPACES_0 };
+
 /// Generated from `canvas_children.xaml`.
 pub fn build_canvas_children_xaml(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
 ) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::Canvas>, ::ferroui_markup_xaml::XamlLoadException> {
     // canvas_children.xaml(1,2) Canvas
     let canvas_0 = ::ferroui_controls::Canvas::new();
-    let context = rt::populate_context(service_provider, ::core::option::Option::Some("ferres://FerroUI.Markup.Xaml.UnitTests/Emitter/canvas_children.xaml"), XML_NAMESPACES_0, rt::to_value(canvas_0.clone()));
+    let context = rt::populate_context(service_provider, &BUILD_CANVAS_CHILDREN_XAML_DOCUMENT, rt::to_value(canvas_0.clone()));
     let name_scope = context.name_scope_field();
     canvas_0.begin_init();
     // canvas_children.xaml(1,100) Children
@@ -2044,13 +2251,16 @@ fn build_canvas_children_xaml_untyped(
     ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
 }
 
+/// The base URI and the XML namespaces of `dock_panel_children.xaml`.
+static BUILD_DOCK_PANEL_CHILDREN_XAML_DOCUMENT: rt::DocumentInfo = rt::DocumentInfo { base_uri: ::core::option::Option::Some("ferres://FerroUI.Markup.Xaml.UnitTests/Emitter/dock_panel_children.xaml"), namespaces: XML_NAMESPACES_0 };
+
 /// Generated from `dock_panel_children.xaml`.
 pub fn build_dock_panel_children_xaml(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
 ) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::DockPanel>, ::ferroui_markup_xaml::XamlLoadException> {
     // dock_panel_children.xaml(1,2) DockPanel
     let dock_panel_0 = ::ferroui_controls::DockPanel::new();
-    let context = rt::populate_context(service_provider, ::core::option::Option::Some("ferres://FerroUI.Markup.Xaml.UnitTests/Emitter/dock_panel_children.xaml"), XML_NAMESPACES_0, rt::to_value(dock_panel_0.clone()));
+    let context = rt::populate_context(service_provider, &BUILD_DOCK_PANEL_CHILDREN_XAML_DOCUMENT, rt::to_value(dock_panel_0.clone()));
     let name_scope = context.name_scope_field();
     dock_panel_0.begin_init();
     // dock_panel_children.xaml(1,103) Children
@@ -2085,13 +2295,16 @@ fn build_dock_panel_children_xaml_untyped(
     ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
 }
 
+/// The base URI and the XML namespaces of `nested_panels.xaml`.
+static BUILD_NESTED_PANELS_XAML_DOCUMENT: rt::DocumentInfo = rt::DocumentInfo { base_uri: ::core::option::Option::Some("ferres://FerroUI.Markup.Xaml.UnitTests/Emitter/nested_panels.xaml"), namespaces: XML_NAMESPACES_0 };
+
 /// Generated from `nested_panels.xaml`.
 pub fn build_nested_panels_xaml(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
 ) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::StackPanel>, ::ferroui_markup_xaml::XamlLoadException> {
     // nested_panels.xaml(1,2) StackPanel
     let stack_panel_0 = ::ferroui_controls::StackPanel::new();
-    let context = rt::populate_context(service_provider, ::core::option::Option::Some("ferres://FerroUI.Markup.Xaml.UnitTests/Emitter/nested_panels.xaml"), XML_NAMESPACES_0, rt::to_value(stack_panel_0.clone()));
+    let context = rt::populate_context(service_provider, &BUILD_NESTED_PANELS_XAML_DOCUMENT, rt::to_value(stack_panel_0.clone()));
     let name_scope = context.name_scope_field();
     stack_panel_0.begin_init();
     // nested_panels.xaml(1,2) Spacing
@@ -2147,13 +2360,16 @@ fn build_nested_panels_xaml_untyped(
     ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
 }
 
+/// The base URI and the XML namespaces of `classes_text.xaml`.
+static BUILD_CLASSES_TEXT_XAML_DOCUMENT: rt::DocumentInfo = rt::DocumentInfo { base_uri: ::core::option::Option::Some("ferres://FerroUI.Markup.Xaml.UnitTests/Emitter/classes_text.xaml"), namespaces: XML_NAMESPACES_0 };
+
 /// Generated from `classes_text.xaml`.
 pub fn build_classes_text_xaml(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
 ) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::Border>, ::ferroui_markup_xaml::XamlLoadException> {
     // classes_text.xaml(1,2) Border
     let border_0 = ::ferroui_controls::Border::new();
-    let context = rt::populate_context(service_provider, ::core::option::Option::Some("ferres://FerroUI.Markup.Xaml.UnitTests/Emitter/classes_text.xaml"), XML_NAMESPACES_0, rt::to_value(border_0.clone()));
+    let context = rt::populate_context(service_provider, &BUILD_CLASSES_TEXT_XAML_DOCUMENT, rt::to_value(border_0.clone()));
     let name_scope = context.name_scope_field();
     border_0.begin_init();
     // classes_text.xaml(1,2) Classes
@@ -2174,13 +2390,16 @@ fn build_classes_text_xaml_untyped(
     ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
 }
 
+/// The base URI and the XML namespaces of `text_block_inlines.xaml`.
+static BUILD_TEXT_BLOCK_INLINES_XAML_DOCUMENT: rt::DocumentInfo = rt::DocumentInfo { base_uri: ::core::option::Option::Some("ferres://FerroUI.Markup.Xaml.UnitTests/Emitter/text_block_inlines.xaml"), namespaces: XML_NAMESPACES_0 };
+
 /// Generated from `text_block_inlines.xaml`.
 pub fn build_text_block_inlines_xaml(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
 ) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::TextBlock>, ::ferroui_markup_xaml::XamlLoadException> {
     // text_block_inlines.xaml(1,2) TextBlock
     let text_block_0 = ::ferroui_controls::TextBlock::new();
-    let context = rt::populate_context(service_provider, ::core::option::Option::Some("ferres://FerroUI.Markup.Xaml.UnitTests/Emitter/text_block_inlines.xaml"), XML_NAMESPACES_0, rt::to_value(text_block_0.clone()));
+    let context = rt::populate_context(service_provider, &BUILD_TEXT_BLOCK_INLINES_XAML_DOCUMENT, rt::to_value(text_block_0.clone()));
     let name_scope = context.name_scope_field();
     text_block_0.begin_init();
     // text_block_inlines.xaml(1,103) Inlines
@@ -2223,13 +2442,16 @@ fn build_text_block_inlines_xaml_untyped(
     ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
 }
 
+/// The base URI and the XML namespaces of `text_block_text_content.xaml`.
+static BUILD_TEXT_BLOCK_TEXT_CONTENT_XAML_DOCUMENT: rt::DocumentInfo = rt::DocumentInfo { base_uri: ::core::option::Option::Some("ferres://FerroUI.Markup.Xaml.UnitTests/Emitter/text_block_text_content.xaml"), namespaces: XML_NAMESPACES_0 };
+
 /// Generated from `text_block_text_content.xaml`.
 pub fn build_text_block_text_content_xaml(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
 ) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::TextBlock>, ::ferroui_markup_xaml::XamlLoadException> {
     // text_block_text_content.xaml(1,2) TextBlock
     let text_block_0 = ::ferroui_controls::TextBlock::new();
-    let context = rt::populate_context(service_provider, ::core::option::Option::Some("ferres://FerroUI.Markup.Xaml.UnitTests/Emitter/text_block_text_content.xaml"), XML_NAMESPACES_0, rt::to_value(text_block_0.clone()));
+    let context = rt::populate_context(service_provider, &BUILD_TEXT_BLOCK_TEXT_CONTENT_XAML_DOCUMENT, rt::to_value(text_block_0.clone()));
     let name_scope = context.name_scope_field();
     text_block_0.begin_init();
     // text_block_text_content.xaml(1,102) Inlines
@@ -2247,13 +2469,16 @@ fn build_text_block_text_content_xaml_untyped(
     ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
 }
 
+/// The base URI and the XML namespaces of `items_control_items.xaml`.
+static BUILD_ITEMS_CONTROL_ITEMS_XAML_DOCUMENT: rt::DocumentInfo = rt::DocumentInfo { base_uri: ::core::option::Option::Some("ferres://FerroUI.Markup.Xaml.UnitTests/Emitter/items_control_items.xaml"), namespaces: XML_NAMESPACES_0 };
+
 /// Generated from `items_control_items.xaml`.
 pub fn build_items_control_items_xaml(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
 ) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::ItemsControl>, ::ferroui_markup_xaml::XamlLoadException> {
     // items_control_items.xaml(1,2) ItemsControl
     let items_control_0 = ::ferroui_controls::ItemsControl::new();
-    let context = rt::populate_context(service_provider, ::core::option::Option::Some("ferres://FerroUI.Markup.Xaml.UnitTests/Emitter/items_control_items.xaml"), XML_NAMESPACES_0, rt::to_value(items_control_0.clone()));
+    let context = rt::populate_context(service_provider, &BUILD_ITEMS_CONTROL_ITEMS_XAML_DOCUMENT, rt::to_value(items_control_0.clone()));
     let name_scope = context.name_scope_field();
     items_control_0.begin_init();
     // items_control_items.xaml(1,106) Items
@@ -2284,13 +2509,16 @@ fn build_items_control_items_xaml_untyped(
     ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
 }
 
+/// The base URI and the XML namespaces of `font_weight_number.xaml`.
+static BUILD_FONT_WEIGHT_NUMBER_XAML_DOCUMENT: rt::DocumentInfo = rt::DocumentInfo { base_uri: ::core::option::Option::Some("ferres://FerroUI.Markup.Xaml.UnitTests/Emitter/font_weight_number.xaml"), namespaces: XML_NAMESPACES_0 };
+
 /// Generated from `font_weight_number.xaml`.
 pub fn build_font_weight_number_xaml(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
 ) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::TextBlock>, ::ferroui_markup_xaml::XamlLoadException> {
     // font_weight_number.xaml(1,2) TextBlock
     let text_block_0 = ::ferroui_controls::TextBlock::new();
-    let context = rt::populate_context(service_provider, ::core::option::Option::Some("ferres://FerroUI.Markup.Xaml.UnitTests/Emitter/font_weight_number.xaml"), XML_NAMESPACES_0, rt::to_value(text_block_0.clone()));
+    let context = rt::populate_context(service_provider, &BUILD_FONT_WEIGHT_NUMBER_XAML_DOCUMENT, rt::to_value(text_block_0.clone()));
     let name_scope = context.name_scope_field();
     text_block_0.begin_init();
     // font_weight_number.xaml(1,2) FontWeight
@@ -2308,13 +2536,16 @@ fn build_font_weight_number_xaml_untyped(
     ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
 }
 
+/// The base URI and the XML namespaces of `user_control_named_children.xaml`.
+static BUILD_USER_CONTROL_NAMED_CHILDREN_XAML_DOCUMENT: rt::DocumentInfo = rt::DocumentInfo { base_uri: ::core::option::Option::Some("ferres://FerroUI.Markup.Xaml.UnitTests/Emitter/user_control_named_children.xaml"), namespaces: XML_NAMESPACES_0 };
+
 /// Generated from `user_control_named_children.xaml`.
 pub fn build_user_control_named_children_xaml(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
 ) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::UserControl>, ::ferroui_markup_xaml::XamlLoadException> {
     // user_control_named_children.xaml(1,2) UserControl
     let user_control_0 = ::ferroui_controls::UserControl::new();
-    let context = rt::populate_context(service_provider, ::core::option::Option::Some("ferres://FerroUI.Markup.Xaml.UnitTests/Emitter/user_control_named_children.xaml"), XML_NAMESPACES_0, rt::to_value(user_control_0.clone()));
+    let context = rt::populate_context(service_provider, &BUILD_USER_CONTROL_NAMED_CHILDREN_XAML_DOCUMENT, rt::to_value(user_control_0.clone()));
     let name_scope = context.name_scope_field();
     user_control_0.begin_init();
     // user_control_named_children.xaml(1,105) Content
@@ -2358,13 +2589,16 @@ fn build_user_control_named_children_xaml_untyped(
     ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
 }
 
+/// The base URI and the XML namespaces of `panel_children_x_null_tag.xaml`.
+static BUILD_PANEL_CHILDREN_X_NULL_TAG_XAML_DOCUMENT: rt::DocumentInfo = rt::DocumentInfo { base_uri: ::core::option::Option::Some("ferres://FerroUI.Markup.Xaml.UnitTests/Emitter/panel_children_x_null_tag.xaml"), namespaces: XML_NAMESPACES_0 };
+
 /// Generated from `panel_children_x_null_tag.xaml`.
 pub fn build_panel_children_x_null_tag_xaml(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
 ) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::StackPanel>, ::ferroui_markup_xaml::XamlLoadException> {
     // panel_children_x_null_tag.xaml(1,2) StackPanel
     let stack_panel_0 = ::ferroui_controls::StackPanel::new();
-    let context = rt::populate_context(service_provider, ::core::option::Option::Some("ferres://FerroUI.Markup.Xaml.UnitTests/Emitter/panel_children_x_null_tag.xaml"), XML_NAMESPACES_0, rt::to_value(stack_panel_0.clone()));
+    let context = rt::populate_context(service_provider, &BUILD_PANEL_CHILDREN_X_NULL_TAG_XAML_DOCUMENT, rt::to_value(stack_panel_0.clone()));
     let name_scope = context.name_scope_field();
     stack_panel_0.begin_init();
     // panel_children_x_null_tag.xaml(1,104) Children
@@ -2397,13 +2631,16 @@ fn build_panel_children_x_null_tag_xaml_untyped(
     ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
 }
 
+/// The base URI and the XML namespaces of `direct_selected_index.xaml`.
+static BUILD_DIRECT_SELECTED_INDEX_XAML_DOCUMENT: rt::DocumentInfo = rt::DocumentInfo { base_uri: ::core::option::Option::Some("ferres://FerroUI.Markup.Xaml.UnitTests/Emitter/direct_selected_index.xaml"), namespaces: XML_NAMESPACES_0 };
+
 /// Generated from `direct_selected_index.xaml`.
 pub fn build_direct_selected_index_xaml(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
 ) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::ListBox>, ::ferroui_markup_xaml::XamlLoadException> {
     // direct_selected_index.xaml(1,2) ListBox
     let list_box_0 = ::ferroui_controls::ListBox::new();
-    let context = rt::populate_context(service_provider, ::core::option::Option::Some("ferres://FerroUI.Markup.Xaml.UnitTests/Emitter/direct_selected_index.xaml"), XML_NAMESPACES_0, rt::to_value(list_box_0.clone()));
+    let context = rt::populate_context(service_provider, &BUILD_DIRECT_SELECTED_INDEX_XAML_DOCUMENT, rt::to_value(list_box_0.clone()));
     let name_scope = context.name_scope_field();
     list_box_0.begin_init();
     // direct_selected_index.xaml(1,2) SelectedIndex
@@ -2420,13 +2657,16 @@ fn build_direct_selected_index_xaml_untyped(
     ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
 }
 
+/// The base URI and the XML namespaces of `direct_selected_item_null.xaml`.
+static BUILD_DIRECT_SELECTED_ITEM_NULL_XAML_DOCUMENT: rt::DocumentInfo = rt::DocumentInfo { base_uri: ::core::option::Option::Some("ferres://FerroUI.Markup.Xaml.UnitTests/Emitter/direct_selected_item_null.xaml"), namespaces: XML_NAMESPACES_0 };
+
 /// Generated from `direct_selected_item_null.xaml`.
 pub fn build_direct_selected_item_null_xaml(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
 ) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::ListBox>, ::ferroui_markup_xaml::XamlLoadException> {
     // direct_selected_item_null.xaml(1,2) ListBox
     let list_box_0 = ::ferroui_controls::ListBox::new();
-    let context = rt::populate_context(service_provider, ::core::option::Option::Some("ferres://FerroUI.Markup.Xaml.UnitTests/Emitter/direct_selected_item_null.xaml"), XML_NAMESPACES_0, rt::to_value(list_box_0.clone()));
+    let context = rt::populate_context(service_provider, &BUILD_DIRECT_SELECTED_ITEM_NULL_XAML_DOCUMENT, rt::to_value(list_box_0.clone()));
     let name_scope = context.name_scope_field();
     list_box_0.begin_init();
     // direct_selected_item_null.xaml(1,100) SelectedItem
@@ -2443,13 +2683,16 @@ fn build_direct_selected_item_null_xaml_untyped(
     ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
 }
 
+/// The base URI and the XML namespaces of `direct_selected_item_text.xaml`.
+static BUILD_DIRECT_SELECTED_ITEM_TEXT_XAML_DOCUMENT: rt::DocumentInfo = rt::DocumentInfo { base_uri: ::core::option::Option::Some("ferres://FerroUI.Markup.Xaml.UnitTests/Emitter/direct_selected_item_text.xaml"), namespaces: XML_NAMESPACES_0 };
+
 /// Generated from `direct_selected_item_text.xaml`.
 pub fn build_direct_selected_item_text_xaml(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
 ) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::ComboBox>, ::ferroui_markup_xaml::XamlLoadException> {
     // direct_selected_item_text.xaml(1,2) ComboBox
     let combo_box_0 = ::ferroui_controls::ComboBox::new();
-    let context = rt::populate_context(service_provider, ::core::option::Option::Some("ferres://FerroUI.Markup.Xaml.UnitTests/Emitter/direct_selected_item_text.xaml"), XML_NAMESPACES_0, rt::to_value(combo_box_0.clone()));
+    let context = rt::populate_context(service_provider, &BUILD_DIRECT_SELECTED_ITEM_TEXT_XAML_DOCUMENT, rt::to_value(combo_box_0.clone()));
     let name_scope = context.name_scope_field();
     combo_box_0.begin_init();
     // direct_selected_item_text.xaml(1,101) SelectedItem
@@ -2466,13 +2709,16 @@ fn build_direct_selected_item_text_xaml_untyped(
     ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
 }
 
+/// The base URI and the XML namespaces of `binding_element_name.xaml`.
+static BUILD_BINDING_ELEMENT_NAME_XAML_DOCUMENT: rt::DocumentInfo = rt::DocumentInfo { base_uri: ::core::option::Option::Some("ferres://FerroUI.Markup.Xaml.UnitTests/Emitter/binding_element_name.xaml"), namespaces: XML_NAMESPACES_0 };
+
 /// Generated from `binding_element_name.xaml`.
 pub fn build_binding_element_name_xaml(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
 ) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::StackPanel>, ::ferroui_markup_xaml::XamlLoadException> {
     // binding_element_name.xaml(1,2) StackPanel
     let stack_panel_0 = ::ferroui_controls::StackPanel::new();
-    let context = rt::populate_context(service_provider, ::core::option::Option::Some("ferres://FerroUI.Markup.Xaml.UnitTests/Emitter/binding_element_name.xaml"), XML_NAMESPACES_0, rt::to_value(stack_panel_0.clone()));
+    let context = rt::populate_context(service_provider, &BUILD_BINDING_ELEMENT_NAME_XAML_DOCUMENT, rt::to_value(stack_panel_0.clone()));
     let name_scope = context.name_scope_field();
     stack_panel_0.begin_init();
     context.push_parent(rt::to_value(stack_panel_0.clone()));
@@ -2514,13 +2760,16 @@ fn build_binding_element_name_xaml_untyped(
     ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
 }
 
+/// The base URI and the XML namespaces of `binding_data_context.xaml`.
+static BUILD_BINDING_DATA_CONTEXT_XAML_DOCUMENT: rt::DocumentInfo = rt::DocumentInfo { base_uri: ::core::option::Option::Some("ferres://FerroUI.Markup.Xaml.UnitTests/Emitter/binding_data_context.xaml"), namespaces: XML_NAMESPACES_0 };
+
 /// Generated from `binding_data_context.xaml`.
 pub fn build_binding_data_context_xaml(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
 ) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::StackPanel>, ::ferroui_markup_xaml::XamlLoadException> {
     // binding_data_context.xaml(1,2) StackPanel
     let stack_panel_0 = ::ferroui_controls::StackPanel::new();
-    let context = rt::populate_context(service_provider, ::core::option::Option::Some("ferres://FerroUI.Markup.Xaml.UnitTests/Emitter/binding_data_context.xaml"), XML_NAMESPACES_0, rt::to_value(stack_panel_0.clone()));
+    let context = rt::populate_context(service_provider, &BUILD_BINDING_DATA_CONTEXT_XAML_DOCUMENT, rt::to_value(stack_panel_0.clone()));
     let name_scope = context.name_scope_field();
     stack_panel_0.begin_init();
     context.push_parent(rt::to_value(stack_panel_0.clone()));
@@ -2552,13 +2801,16 @@ fn build_binding_data_context_xaml_untyped(
     ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
 }
 
+/// The base URI and the XML namespaces of `binding_mode.xaml`.
+static BUILD_BINDING_MODE_XAML_DOCUMENT: rt::DocumentInfo = rt::DocumentInfo { base_uri: ::core::option::Option::Some("ferres://FerroUI.Markup.Xaml.UnitTests/Emitter/binding_mode.xaml"), namespaces: XML_NAMESPACES_0 };
+
 /// Generated from `binding_mode.xaml`.
 pub fn build_binding_mode_xaml(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
 ) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::StackPanel>, ::ferroui_markup_xaml::XamlLoadException> {
     // binding_mode.xaml(1,2) StackPanel
     let stack_panel_0 = ::ferroui_controls::StackPanel::new();
-    let context = rt::populate_context(service_provider, ::core::option::Option::Some("ferres://FerroUI.Markup.Xaml.UnitTests/Emitter/binding_mode.xaml"), XML_NAMESPACES_0, rt::to_value(stack_panel_0.clone()));
+    let context = rt::populate_context(service_provider, &BUILD_BINDING_MODE_XAML_DOCUMENT, rt::to_value(stack_panel_0.clone()));
     let name_scope = context.name_scope_field();
     stack_panel_0.begin_init();
     context.push_parent(rt::to_value(stack_panel_0.clone()));
@@ -2611,13 +2863,16 @@ fn build_binding_mode_xaml_untyped(
     ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
 }
 
+/// The base URI and the XML namespaces of `dynamic_resource_unresolved.xaml`.
+static BUILD_DYNAMIC_RESOURCE_UNRESOLVED_XAML_DOCUMENT: rt::DocumentInfo = rt::DocumentInfo { base_uri: ::core::option::Option::Some("ferres://FerroUI.Markup.Xaml.UnitTests/Emitter/dynamic_resource_unresolved.xaml"), namespaces: XML_NAMESPACES_0 };
+
 /// Generated from `dynamic_resource_unresolved.xaml`.
 pub fn build_dynamic_resource_unresolved_xaml(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
 ) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::Border>, ::ferroui_markup_xaml::XamlLoadException> {
     // dynamic_resource_unresolved.xaml(1,2) Border
     let border_0 = ::ferroui_controls::Border::new();
-    let context = rt::populate_context(service_provider, ::core::option::Option::Some("ferres://FerroUI.Markup.Xaml.UnitTests/Emitter/dynamic_resource_unresolved.xaml"), XML_NAMESPACES_0, rt::to_value(border_0.clone()));
+    let context = rt::populate_context(service_provider, &BUILD_DYNAMIC_RESOURCE_UNRESOLVED_XAML_DOCUMENT, rt::to_value(border_0.clone()));
     let name_scope = context.name_scope_field();
     border_0.begin_init();
     context.push_parent(rt::to_value(border_0.clone()));
@@ -2638,13 +2893,16 @@ fn build_dynamic_resource_unresolved_xaml_untyped(
     ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
 }
 
+/// The base URI and the XML namespaces of `type_extension.xaml`.
+static BUILD_TYPE_EXTENSION_XAML_DOCUMENT: rt::DocumentInfo = rt::DocumentInfo { base_uri: ::core::option::Option::Some("ferres://FerroUI.Markup.Xaml.UnitTests/Emitter/type_extension.xaml"), namespaces: XML_NAMESPACES_0 };
+
 /// Generated from `type_extension.xaml`.
 pub fn build_type_extension_xaml(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
 ) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::Border>, ::ferroui_markup_xaml::XamlLoadException> {
     // type_extension.xaml(1,2) Border
     let border_0 = ::ferroui_controls::Border::new();
-    let context = rt::populate_context(service_provider, ::core::option::Option::Some("ferres://FerroUI.Markup.Xaml.UnitTests/Emitter/type_extension.xaml"), XML_NAMESPACES_0, rt::to_value(border_0.clone()));
+    let context = rt::populate_context(service_provider, &BUILD_TYPE_EXTENSION_XAML_DOCUMENT, rt::to_value(border_0.clone()));
     let name_scope = context.name_scope_field();
     border_0.begin_init();
     // type_extension.xaml(1,99) Tag
@@ -2661,13 +2919,16 @@ fn build_type_extension_xaml_untyped(
     ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
 }
 
+/// The base URI and the XML namespaces of `static_resource_local.xaml`.
+static BUILD_STATIC_RESOURCE_LOCAL_XAML_DOCUMENT: rt::DocumentInfo = rt::DocumentInfo { base_uri: ::core::option::Option::Some("ferres://FerroUI.Markup.Xaml.UnitTests/Emitter/static_resource_local.xaml"), namespaces: XML_NAMESPACES_0 };
+
 /// Generated from `static_resource_local.xaml`.
 pub fn build_static_resource_local_xaml(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
 ) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::Border>, ::ferroui_markup_xaml::XamlLoadException> {
     // static_resource_local.xaml(1,2) Border
     let border_0 = ::ferroui_controls::Border::new();
-    let context = rt::populate_context(service_provider, ::core::option::Option::Some("ferres://FerroUI.Markup.Xaml.UnitTests/Emitter/static_resource_local.xaml"), XML_NAMESPACES_0, rt::to_value(border_0.clone()));
+    let context = rt::populate_context(service_provider, &BUILD_STATIC_RESOURCE_LOCAL_XAML_DOCUMENT, rt::to_value(border_0.clone()));
     let name_scope = context.name_scope_field();
     border_0.begin_init();
     context.push_parent(rt::to_value(border_0.clone()));
@@ -2708,7 +2969,7 @@ pub fn build_static_resource_local_xaml(
 fn build_static_resource_local_xaml_deferred_0(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
-    let _context = rt::deferred_context(service_provider, ::core::option::Option::Some("ferres://FerroUI.Markup.Xaml.UnitTests/Emitter/static_resource_local.xaml"), XML_NAMESPACES_0);
+    let _context = rt::deferred_context(service_provider, &BUILD_STATIC_RESOURCE_LOCAL_XAML_DOCUMENT);
     // static_resource_local.xaml(1,118) SolidColorBrush
     let solid_color_brush_0 = ::ferroui_base::media::SolidColorBrush::new();
     // static_resource_local.xaml(1,118) Color
@@ -2724,13 +2985,16 @@ fn build_static_resource_local_xaml_untyped(
     ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
 }
 
+/// The base URI and the XML namespaces of `dynamic_resource_local.xaml`.
+static BUILD_DYNAMIC_RESOURCE_LOCAL_XAML_DOCUMENT: rt::DocumentInfo = rt::DocumentInfo { base_uri: ::core::option::Option::Some("ferres://FerroUI.Markup.Xaml.UnitTests/Emitter/dynamic_resource_local.xaml"), namespaces: XML_NAMESPACES_0 };
+
 /// Generated from `dynamic_resource_local.xaml`.
 pub fn build_dynamic_resource_local_xaml(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
 ) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::Border>, ::ferroui_markup_xaml::XamlLoadException> {
     // dynamic_resource_local.xaml(1,2) Border
     let border_0 = ::ferroui_controls::Border::new();
-    let context = rt::populate_context(service_provider, ::core::option::Option::Some("ferres://FerroUI.Markup.Xaml.UnitTests/Emitter/dynamic_resource_local.xaml"), XML_NAMESPACES_0, rt::to_value(border_0.clone()));
+    let context = rt::populate_context(service_provider, &BUILD_DYNAMIC_RESOURCE_LOCAL_XAML_DOCUMENT, rt::to_value(border_0.clone()));
     let name_scope = context.name_scope_field();
     border_0.begin_init();
     context.push_parent(rt::to_value(border_0.clone()));
@@ -2760,7 +3024,7 @@ pub fn build_dynamic_resource_local_xaml(
 fn build_dynamic_resource_local_xaml_deferred_0(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
-    let _context = rt::deferred_context(service_provider, ::core::option::Option::Some("ferres://FerroUI.Markup.Xaml.UnitTests/Emitter/dynamic_resource_local.xaml"), XML_NAMESPACES_0);
+    let _context = rt::deferred_context(service_provider, &BUILD_DYNAMIC_RESOURCE_LOCAL_XAML_DOCUMENT);
     // dynamic_resource_local.xaml(1,118) SolidColorBrush
     let solid_color_brush_0 = ::ferroui_base::media::SolidColorBrush::new();
     // dynamic_resource_local.xaml(1,118) Color
@@ -2776,13 +3040,16 @@ fn build_dynamic_resource_local_xaml_untyped(
     ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
 }
 
+/// The base URI and the XML namespaces of `static_resource_missing.xaml`.
+static BUILD_STATIC_RESOURCE_MISSING_XAML_DOCUMENT: rt::DocumentInfo = rt::DocumentInfo { base_uri: ::core::option::Option::Some("ferres://FerroUI.Markup.Xaml.UnitTests/Emitter/static_resource_missing.xaml"), namespaces: XML_NAMESPACES_0 };
+
 /// Generated from `static_resource_missing.xaml`.
 pub fn build_static_resource_missing_xaml(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
 ) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::Border>, ::ferroui_markup_xaml::XamlLoadException> {
     // static_resource_missing.xaml(1,2) Border
     let border_0 = ::ferroui_controls::Border::new();
-    let context = rt::populate_context(service_provider, ::core::option::Option::Some("ferres://FerroUI.Markup.Xaml.UnitTests/Emitter/static_resource_missing.xaml"), XML_NAMESPACES_0, rt::to_value(border_0.clone()));
+    let context = rt::populate_context(service_provider, &BUILD_STATIC_RESOURCE_MISSING_XAML_DOCUMENT, rt::to_value(border_0.clone()));
     let name_scope = context.name_scope_field();
     border_0.begin_init();
     context.push_parent(rt::to_value(border_0.clone()));
@@ -2814,13 +3081,16 @@ fn build_static_resource_missing_xaml_untyped(
     ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
 }
 
+/// The base URI and the XML namespaces of `x_static_converter.xaml`.
+static BUILD_X_STATIC_CONVERTER_XAML_DOCUMENT: rt::DocumentInfo = rt::DocumentInfo { base_uri: ::core::option::Option::Some("ferres://FerroUI.Markup.Xaml.UnitTests/Emitter/x_static_converter.xaml"), namespaces: XML_NAMESPACES_0 };
+
 /// Generated from `x_static_converter.xaml`.
 pub fn build_x_static_converter_xaml(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
 ) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::TextBlock>, ::ferroui_markup_xaml::XamlLoadException> {
     // x_static_converter.xaml(1,2) TextBlock
     let text_block_0 = ::ferroui_controls::TextBlock::new();
-    let context = rt::populate_context(service_provider, ::core::option::Option::Some("ferres://FerroUI.Markup.Xaml.UnitTests/Emitter/x_static_converter.xaml"), XML_NAMESPACES_0, rt::to_value(text_block_0.clone()));
+    let context = rt::populate_context(service_provider, &BUILD_X_STATIC_CONVERTER_XAML_DOCUMENT, rt::to_value(text_block_0.clone()));
     let name_scope = context.name_scope_field();
     text_block_0.begin_init();
     // x_static_converter.xaml(1,102) Tag
@@ -2838,13 +3108,16 @@ fn build_x_static_converter_xaml_untyped(
     ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
 }
 
+/// The base URI and the XML namespaces of `x_static_text_trimming.xaml`.
+static BUILD_X_STATIC_TEXT_TRIMMING_XAML_DOCUMENT: rt::DocumentInfo = rt::DocumentInfo { base_uri: ::core::option::Option::Some("ferres://FerroUI.Markup.Xaml.UnitTests/Emitter/x_static_text_trimming.xaml"), namespaces: XML_NAMESPACES_0 };
+
 /// Generated from `x_static_text_trimming.xaml`.
 pub fn build_x_static_text_trimming_xaml(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
 ) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::TextBlock>, ::ferroui_markup_xaml::XamlLoadException> {
     // x_static_text_trimming.xaml(1,2) TextBlock
     let text_block_0 = ::ferroui_controls::TextBlock::new();
-    let context = rt::populate_context(service_provider, ::core::option::Option::Some("ferres://FerroUI.Markup.Xaml.UnitTests/Emitter/x_static_text_trimming.xaml"), XML_NAMESPACES_0, rt::to_value(text_block_0.clone()));
+    let context = rt::populate_context(service_provider, &BUILD_X_STATIC_TEXT_TRIMMING_XAML_DOCUMENT, rt::to_value(text_block_0.clone()));
     let name_scope = context.name_scope_field();
     text_block_0.begin_init();
     // x_static_text_trimming.xaml(1,102) TextTrimming
@@ -2862,13 +3135,16 @@ fn build_x_static_text_trimming_xaml_untyped(
     ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
 }
 
+/// The base URI and the XML namespaces of `resources_many.xaml`.
+static BUILD_RESOURCES_MANY_XAML_DOCUMENT: rt::DocumentInfo = rt::DocumentInfo { base_uri: ::core::option::Option::Some("ferres://FerroUI.Markup.Xaml.UnitTests/Emitter/resources_many.xaml"), namespaces: XML_NAMESPACES_0 };
+
 /// Generated from `resources_many.xaml`.
 pub fn build_resources_many_xaml(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
 ) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::Border>, ::ferroui_markup_xaml::XamlLoadException> {
     // resources_many.xaml(1,2) Border
     let border_0 = ::ferroui_controls::Border::new();
-    let context = rt::populate_context(service_provider, ::core::option::Option::Some("ferres://FerroUI.Markup.Xaml.UnitTests/Emitter/resources_many.xaml"), XML_NAMESPACES_0, rt::to_value(border_0.clone()));
+    let context = rt::populate_context(service_provider, &BUILD_RESOURCES_MANY_XAML_DOCUMENT, rt::to_value(border_0.clone()));
     let name_scope = context.name_scope_field();
     border_0.begin_init();
     let resources_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(::ferroui_base::StyledElement::__markup_get_Resources(border_0.upcast_ref::<::ferroui_base::StyledElement>()));
@@ -2895,7 +3171,7 @@ pub fn build_resources_many_xaml(
 fn build_resources_many_xaml_deferred_0(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
-    let _context = rt::deferred_context(service_provider, ::core::option::Option::Some("ferres://FerroUI.Markup.Xaml.UnitTests/Emitter/resources_many.xaml"), XML_NAMESPACES_0);
+    let _context = rt::deferred_context(service_provider, &BUILD_RESOURCES_MANY_XAML_DOCUMENT);
     // resources_many.xaml(1,182) SolidColorBrush
     let solid_color_brush_0 = ::ferroui_base::media::SolidColorBrush::new();
     // resources_many.xaml(1,182) Color
@@ -2911,13 +3187,16 @@ fn build_resources_many_xaml_untyped(
     ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
 }
 
+/// The base URI and the XML namespaces of `resource_dictionary_root.xaml`.
+static BUILD_RESOURCE_DICTIONARY_ROOT_XAML_DOCUMENT: rt::DocumentInfo = rt::DocumentInfo { base_uri: ::core::option::Option::Some("ferres://FerroUI.Markup.Xaml.UnitTests/Emitter/resource_dictionary_root.xaml"), namespaces: XML_NAMESPACES_0 };
+
 /// Generated from `resource_dictionary_root.xaml`.
 pub fn build_resource_dictionary_root_xaml(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
 ) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>, ::ferroui_markup_xaml::XamlLoadException> {
     // resource_dictionary_root.xaml(1,2) ResourceDictionary
     let resource_dictionary_0 = ::ferroui_base::controls::ResourceDictionary::new();
-    let context = rt::populate_context(service_provider, ::core::option::Option::Some("ferres://FerroUI.Markup.Xaml.UnitTests/Emitter/resource_dictionary_root.xaml"), XML_NAMESPACES_0, rt::to_value(resource_dictionary_0.clone()));
+    let context = rt::populate_context(service_provider, &BUILD_RESOURCE_DICTIONARY_ROOT_XAML_DOCUMENT, rt::to_value(resource_dictionary_0.clone()));
     let name_scope = context.name_scope_field();
     let resources_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(resource_dictionary_0.clone());
     if rt::is_instance(&resources_0, rt::class_handle(<::ferroui_base::controls::ResourceDictionary as ::ferroui_base::StaticType>::TYPE)) {
@@ -2939,7 +3218,7 @@ pub fn build_resource_dictionary_root_xaml(
 fn build_resource_dictionary_root_xaml_deferred_0(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
-    let _context = rt::deferred_context(service_provider, ::core::option::Option::Some("ferres://FerroUI.Markup.Xaml.UnitTests/Emitter/resource_dictionary_root.xaml"), XML_NAMESPACES_0);
+    let _context = rt::deferred_context(service_provider, &BUILD_RESOURCE_DICTIONARY_ROOT_XAML_DOCUMENT);
     // resource_dictionary_root.xaml(1,144) SolidColorBrush
     let solid_color_brush_0 = ::ferroui_base::media::SolidColorBrush::new();
     // resource_dictionary_root.xaml(1,144) Color
@@ -2955,13 +3234,16 @@ fn build_resource_dictionary_root_xaml_untyped(
     ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
 }
 
+/// The base URI and the XML namespaces of `transitions.xaml`.
+static BUILD_TRANSITIONS_XAML_DOCUMENT: rt::DocumentInfo = rt::DocumentInfo { base_uri: ::core::option::Option::Some("ferres://FerroUI.Markup.Xaml.UnitTests/Emitter/transitions.xaml"), namespaces: XML_NAMESPACES_0 };
+
 /// Generated from `transitions.xaml`.
 pub fn build_transitions_xaml(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
 ) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::Border>, ::ferroui_markup_xaml::XamlLoadException> {
     // transitions.xaml(1,2) Border
     let border_0 = ::ferroui_controls::Border::new();
-    let context = rt::populate_context(service_provider, ::core::option::Option::Some("ferres://FerroUI.Markup.Xaml.UnitTests/Emitter/transitions.xaml"), XML_NAMESPACES_0, rt::to_value(border_0.clone()));
+    let context = rt::populate_context(service_provider, &BUILD_TRANSITIONS_XAML_DOCUMENT, rt::to_value(border_0.clone()));
     let name_scope = context.name_scope_field();
     border_0.begin_init();
     // transitions.xaml(1,120) Transitions
@@ -2988,13 +3270,16 @@ fn build_transitions_xaml_untyped(
     ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
 }
 
+/// The base URI and the XML namespaces of `control_theme_resources.xaml`.
+static BUILD_CONTROL_THEME_RESOURCES_XAML_DOCUMENT: rt::DocumentInfo = rt::DocumentInfo { base_uri: ::core::option::Option::Some("ferres://FerroUI.Markup.Xaml.UnitTests/Emitter/control_theme_resources.xaml"), namespaces: XML_NAMESPACES_0 };
+
 /// Generated from `control_theme_resources.xaml`.
 pub fn build_control_theme_resources_xaml(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
 ) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::Border>, ::ferroui_markup_xaml::XamlLoadException> {
     // control_theme_resources.xaml(1,2) Border
     let border_0 = ::ferroui_controls::Border::new();
-    let context = rt::populate_context(service_provider, ::core::option::Option::Some("ferres://FerroUI.Markup.Xaml.UnitTests/Emitter/control_theme_resources.xaml"), XML_NAMESPACES_0, rt::to_value(border_0.clone()));
+    let context = rt::populate_context(service_provider, &BUILD_CONTROL_THEME_RESOURCES_XAML_DOCUMENT, rt::to_value(border_0.clone()));
     let name_scope = context.name_scope_field();
     border_0.begin_init();
     context.push_parent(rt::to_value(border_0.clone()));
@@ -3025,7 +3310,7 @@ pub fn build_control_theme_resources_xaml(
 fn build_control_theme_resources_xaml_deferred_0(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
-    let _context = rt::deferred_context(service_provider, ::core::option::Option::Some("ferres://FerroUI.Markup.Xaml.UnitTests/Emitter/control_theme_resources.xaml"), XML_NAMESPACES_0);
+    let _context = rt::deferred_context(service_provider, &BUILD_CONTROL_THEME_RESOURCES_XAML_DOCUMENT);
     // control_theme_resources.xaml(1,118) SolidColorBrush
     let solid_color_brush_0 = ::ferroui_base::media::SolidColorBrush::new();
     // control_theme_resources.xaml(1,118) Color
@@ -3038,7 +3323,7 @@ fn build_control_theme_resources_xaml_deferred_0(
 fn build_control_theme_resources_xaml_deferred_1(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
-    let _context = rt::deferred_context(service_provider, ::core::option::Option::Some("ferres://FerroUI.Markup.Xaml.UnitTests/Emitter/control_theme_resources.xaml"), XML_NAMESPACES_0);
+    let _context = rt::deferred_context(service_provider, &BUILD_CONTROL_THEME_RESOURCES_XAML_DOCUMENT);
     // control_theme_resources.xaml(1,163) ControlTheme
     let control_theme_0 = ::ferroui_base::styling::ControlTheme::new();
     // control_theme_resources.xaml(1,163) TargetType
@@ -3052,7 +3337,7 @@ fn build_control_theme_resources_xaml_deferred_1(
 fn build_control_theme_resources_xaml_deferred_2(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
-    let context = rt::deferred_context(service_provider, ::core::option::Option::Some("ferres://FerroUI.Markup.Xaml.UnitTests/Emitter/control_theme_resources.xaml"), XML_NAMESPACES_0);
+    let context = rt::deferred_context(service_provider, &BUILD_CONTROL_THEME_RESOURCES_XAML_DOCUMENT);
     // control_theme_resources.xaml(1,265) ControlTheme
     let control_theme_0 = ::ferroui_base::styling::ControlTheme::new();
     context.push_parent(rt::to_value(control_theme_0.clone()));
@@ -3085,13 +3370,16 @@ fn build_control_theme_resources_xaml_untyped(
     ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
 }
 
+/// The base URI and the XML namespaces of `compiled_binding_element.xaml`.
+static BUILD_COMPILED_BINDING_ELEMENT_XAML_DOCUMENT: rt::DocumentInfo = rt::DocumentInfo { base_uri: ::core::option::Option::Some("ferres://FerroUI.Markup.Xaml.UnitTests/Emitter/compiled_binding_element.xaml"), namespaces: XML_NAMESPACES_0 };
+
 /// Generated from `compiled_binding_element.xaml`.
 pub fn build_compiled_binding_element_xaml(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
 ) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::StackPanel>, ::ferroui_markup_xaml::XamlLoadException> {
     // compiled_binding_element.xaml(1,2) StackPanel
     let stack_panel_0 = ::ferroui_controls::StackPanel::new();
-    let context = rt::populate_context(service_provider, ::core::option::Option::Some("ferres://FerroUI.Markup.Xaml.UnitTests/Emitter/compiled_binding_element.xaml"), XML_NAMESPACES_0, rt::to_value(stack_panel_0.clone()));
+    let context = rt::populate_context(service_provider, &BUILD_COMPILED_BINDING_ELEMENT_XAML_DOCUMENT, rt::to_value(stack_panel_0.clone()));
     let name_scope = context.name_scope_field();
     stack_panel_0.begin_init();
     context.push_parent(rt::to_value(stack_panel_0.clone()));
@@ -3141,13 +3429,16 @@ fn build_compiled_binding_element_xaml_untyped(
     ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
 }
 
+/// The base URI and the XML namespaces of `compiled_binding_data_type.xaml`.
+static BUILD_COMPILED_BINDING_DATA_TYPE_XAML_DOCUMENT: rt::DocumentInfo = rt::DocumentInfo { base_uri: ::core::option::Option::Some("ferres://FerroUI.Markup.Xaml.UnitTests/Emitter/compiled_binding_data_type.xaml"), namespaces: XML_NAMESPACES_0 };
+
 /// Generated from `compiled_binding_data_type.xaml`.
 pub fn build_compiled_binding_data_type_xaml(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
 ) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::StackPanel>, ::ferroui_markup_xaml::XamlLoadException> {
     // compiled_binding_data_type.xaml(1,2) StackPanel
     let stack_panel_0 = ::ferroui_controls::StackPanel::new();
-    let context = rt::populate_context(service_provider, ::core::option::Option::Some("ferres://FerroUI.Markup.Xaml.UnitTests/Emitter/compiled_binding_data_type.xaml"), XML_NAMESPACES_0, rt::to_value(stack_panel_0.clone()));
+    let context = rt::populate_context(service_provider, &BUILD_COMPILED_BINDING_DATA_TYPE_XAML_DOCUMENT, rt::to_value(stack_panel_0.clone()));
     let name_scope = context.name_scope_field();
     stack_panel_0.begin_init();
     context.push_parent(rt::to_value(stack_panel_0.clone()));
@@ -3192,13 +3483,16 @@ fn build_compiled_binding_data_type_xaml_untyped(
     ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
 }
 
+/// The base URI and the XML namespaces of `compiled_binding_parent.xaml`.
+static BUILD_COMPILED_BINDING_PARENT_XAML_DOCUMENT: rt::DocumentInfo = rt::DocumentInfo { base_uri: ::core::option::Option::Some("ferres://FerroUI.Markup.Xaml.UnitTests/Emitter/compiled_binding_parent.xaml"), namespaces: XML_NAMESPACES_0 };
+
 /// Generated from `compiled_binding_parent.xaml`.
 pub fn build_compiled_binding_parent_xaml(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
 ) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::Border>, ::ferroui_markup_xaml::XamlLoadException> {
     // compiled_binding_parent.xaml(1,2) Border
     let border_0 = ::ferroui_controls::Border::new();
-    let context = rt::populate_context(service_provider, ::core::option::Option::Some("ferres://FerroUI.Markup.Xaml.UnitTests/Emitter/compiled_binding_parent.xaml"), XML_NAMESPACES_0, rt::to_value(border_0.clone()));
+    let context = rt::populate_context(service_provider, &BUILD_COMPILED_BINDING_PARENT_XAML_DOCUMENT, rt::to_value(border_0.clone()));
     let name_scope = context.name_scope_field();
     border_0.begin_init();
     context.push_parent(rt::to_value(border_0.clone()));
@@ -3237,13 +3531,16 @@ fn build_compiled_binding_parent_xaml_untyped(
     ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
 }
 
+/// The base URI and the XML namespaces of `compiled_binding_plain_property.xaml`.
+static BUILD_COMPILED_BINDING_PLAIN_PROPERTY_XAML_DOCUMENT: rt::DocumentInfo = rt::DocumentInfo { base_uri: ::core::option::Option::Some("ferres://FerroUI.Markup.Xaml.UnitTests/Emitter/compiled_binding_plain_property.xaml"), namespaces: XML_NAMESPACES_0 };
+
 /// Generated from `compiled_binding_plain_property.xaml`.
 pub fn build_compiled_binding_plain_property_xaml(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
 ) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::StackPanel>, ::ferroui_markup_xaml::XamlLoadException> {
     // compiled_binding_plain_property.xaml(1,2) StackPanel
     let stack_panel_0 = ::ferroui_controls::StackPanel::new();
-    let context = rt::populate_context(service_provider, ::core::option::Option::Some("ferres://FerroUI.Markup.Xaml.UnitTests/Emitter/compiled_binding_plain_property.xaml"), XML_NAMESPACES_0, rt::to_value(stack_panel_0.clone()));
+    let context = rt::populate_context(service_provider, &BUILD_COMPILED_BINDING_PLAIN_PROPERTY_XAML_DOCUMENT, rt::to_value(stack_panel_0.clone()));
     let name_scope = context.name_scope_field();
     stack_panel_0.begin_init();
     context.push_parent(rt::to_value(stack_panel_0.clone()));
@@ -3318,13 +3615,16 @@ fn build_compiled_binding_plain_property_xaml_untyped(
     ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
 }
 
+/// The base URI and the XML namespaces of `on_platform.xaml`.
+static BUILD_ON_PLATFORM_XAML_DOCUMENT: rt::DocumentInfo = rt::DocumentInfo { base_uri: ::core::option::Option::Some("ferres://FerroUI.Markup.Xaml.UnitTests/Emitter/on_platform.xaml"), namespaces: XML_NAMESPACES_0 };
+
 /// Generated from `on_platform.xaml`.
 pub fn build_on_platform_xaml(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
 ) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::StackPanel>, ::ferroui_markup_xaml::XamlLoadException> {
     // on_platform.xaml(1,2) StackPanel
     let stack_panel_0 = ::ferroui_controls::StackPanel::new();
-    let context = rt::populate_context(service_provider, ::core::option::Option::Some("ferres://FerroUI.Markup.Xaml.UnitTests/Emitter/on_platform.xaml"), XML_NAMESPACES_0, rt::to_value(stack_panel_0.clone()));
+    let context = rt::populate_context(service_provider, &BUILD_ON_PLATFORM_XAML_DOCUMENT, rt::to_value(stack_panel_0.clone()));
     let name_scope = context.name_scope_field();
     stack_panel_0.begin_init();
     // on_platform.xaml(1,104) Children
@@ -3390,13 +3690,16 @@ fn build_on_platform_xaml_untyped(
     ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
 }
 
+/// The base URI and the XML namespaces of `on_platform_without_default.xaml`.
+static BUILD_ON_PLATFORM_WITHOUT_DEFAULT_XAML_DOCUMENT: rt::DocumentInfo = rt::DocumentInfo { base_uri: ::core::option::Option::Some("ferres://FerroUI.Markup.Xaml.UnitTests/Emitter/on_platform_without_default.xaml"), namespaces: XML_NAMESPACES_0 };
+
 /// Generated from `on_platform_without_default.xaml`.
 pub fn build_on_platform_without_default_xaml(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
 ) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::StackPanel>, ::ferroui_markup_xaml::XamlLoadException> {
     // on_platform_without_default.xaml(1,2) StackPanel
     let stack_panel_0 = ::ferroui_controls::StackPanel::new();
-    let context = rt::populate_context(service_provider, ::core::option::Option::Some("ferres://FerroUI.Markup.Xaml.UnitTests/Emitter/on_platform_without_default.xaml"), XML_NAMESPACES_0, rt::to_value(stack_panel_0.clone()));
+    let context = rt::populate_context(service_provider, &BUILD_ON_PLATFORM_WITHOUT_DEFAULT_XAML_DOCUMENT, rt::to_value(stack_panel_0.clone()));
     let name_scope = context.name_scope_field();
     stack_panel_0.begin_init();
     // on_platform_without_default.xaml(1,104) Children
@@ -3445,13 +3748,16 @@ fn build_on_platform_without_default_xaml_untyped(
     ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
 }
 
+/// The base URI and the XML namespaces of `font_family.xaml`.
+static BUILD_FONT_FAMILY_XAML_DOCUMENT: rt::DocumentInfo = rt::DocumentInfo { base_uri: ::core::option::Option::Some("ferres://FerroUI.Markup.Xaml.UnitTests/Emitter/font_family.xaml"), namespaces: XML_NAMESPACES_0 };
+
 /// Generated from `font_family.xaml`.
 pub fn build_font_family_xaml(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
 ) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::StackPanel>, ::ferroui_markup_xaml::XamlLoadException> {
     // font_family.xaml(1,2) StackPanel
     let stack_panel_0 = ::ferroui_controls::StackPanel::new();
-    let context = rt::populate_context(service_provider, ::core::option::Option::Some("ferres://FerroUI.Markup.Xaml.UnitTests/Emitter/font_family.xaml"), XML_NAMESPACES_0, rt::to_value(stack_panel_0.clone()));
+    let context = rt::populate_context(service_provider, &BUILD_FONT_FAMILY_XAML_DOCUMENT, rt::to_value(stack_panel_0.clone()));
     let name_scope = context.name_scope_field();
     stack_panel_0.begin_init();
     // font_family.xaml(1,104) Children
@@ -3484,13 +3790,16 @@ fn build_font_family_xaml_untyped(
     ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
 }
 
+/// The base URI and the XML namespaces of `flags_value.xaml`.
+static BUILD_FLAGS_VALUE_XAML_DOCUMENT: rt::DocumentInfo = rt::DocumentInfo { base_uri: ::core::option::Option::Some("ferres://FerroUI.Markup.Xaml.UnitTests/Emitter/flags_value.xaml"), namespaces: XML_NAMESPACES_2 };
+
 /// Generated from `flags_value.xaml`.
 pub fn build_flags_value_xaml(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
 ) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::Border>, ::ferroui_markup_xaml::XamlLoadException> {
     // flags_value.xaml(1,2) Border
     let border_0 = ::ferroui_controls::Border::new();
-    let context = rt::populate_context(service_provider, ::core::option::Option::Some("ferres://FerroUI.Markup.Xaml.UnitTests/Emitter/flags_value.xaml"), XML_NAMESPACES_2, rt::to_value(border_0.clone()));
+    let context = rt::populate_context(service_provider, &BUILD_FLAGS_VALUE_XAML_DOCUMENT, rt::to_value(border_0.clone()));
     let name_scope = context.name_scope_field();
     border_0.begin_init();
     // flags_value.xaml(1,162) Resources (resource)
@@ -3506,7 +3815,7 @@ pub fn build_flags_value_xaml(
 fn build_flags_value_xaml_deferred_0(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
-    let _context = rt::deferred_context(service_provider, ::core::option::Option::Some("ferres://FerroUI.Markup.Xaml.UnitTests/Emitter/flags_value.xaml"), XML_NAMESPACES_2);
+    let _context = rt::deferred_context(service_provider, &BUILD_FLAGS_VALUE_XAML_DOCUMENT);
     let corner_radius_filter_converter_0 = ::ferroui_controls::converters::CornerRadiusFilterConverter::__markup_new_0();
     // flags_value.xaml(1,162) Filter
     ::ferroui_controls::converters::CornerRadiusFilterConverter::__markup_set_Filter(&corner_radius_filter_converter_0, ::ferroui_controls::converters::Corners::__markup_flags(9_i64));
@@ -3520,13 +3829,16 @@ fn build_flags_value_xaml_untyped(
     ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
 }
 
+/// The base URI and the XML namespaces of `control_template_parts.xaml`.
+static BUILD_CONTROL_TEMPLATE_PARTS_XAML_DOCUMENT: rt::DocumentInfo = rt::DocumentInfo { base_uri: ::core::option::Option::Some("ferres://FerroUI.Markup.Xaml.UnitTests/Emitter/control_template_parts.xaml"), namespaces: XML_NAMESPACES_0 };
+
 /// Generated from `control_template_parts.xaml`.
 pub fn build_control_template_parts_xaml(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
 ) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::Button>, ::ferroui_markup_xaml::XamlLoadException> {
     // control_template_parts.xaml(1,2) Button
     let button_0 = ::ferroui_controls::Button::new();
-    let context = rt::populate_context(service_provider, ::core::option::Option::Some("ferres://FerroUI.Markup.Xaml.UnitTests/Emitter/control_template_parts.xaml"), XML_NAMESPACES_0, rt::to_value(button_0.clone()));
+    let context = rt::populate_context(service_provider, &BUILD_CONTROL_TEMPLATE_PARTS_XAML_DOCUMENT, rt::to_value(button_0.clone()));
     let name_scope = context.name_scope_field();
     button_0.begin_init();
     // control_template_parts.xaml(1,2) Background
@@ -3546,7 +3858,7 @@ pub fn build_control_template_parts_xaml(
 fn build_control_template_parts_xaml_deferred_0(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
-    let context = rt::deferred_context(service_provider, ::core::option::Option::Some("ferres://FerroUI.Markup.Xaml.UnitTests/Emitter/control_template_parts.xaml"), XML_NAMESPACES_0);
+    let context = rt::deferred_context(service_provider, &BUILD_CONTROL_TEMPLATE_PARTS_XAML_DOCUMENT);
     let name_scope = context.name_scope_field();
     // control_template_parts.xaml(1,151) Border
     let border_0 = ::ferroui_controls::Border::new();
@@ -3589,13 +3901,16 @@ fn build_control_template_parts_xaml_untyped(
     ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
 }
 
+/// The base URI and the XML namespaces of `data_template.xaml`.
+static BUILD_DATA_TEMPLATE_XAML_DOCUMENT: rt::DocumentInfo = rt::DocumentInfo { base_uri: ::core::option::Option::Some("ferres://FerroUI.Markup.Xaml.UnitTests/Emitter/data_template.xaml"), namespaces: XML_NAMESPACES_0 };
+
 /// Generated from `data_template.xaml`.
 pub fn build_data_template_xaml(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
 ) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::ItemsControl>, ::ferroui_markup_xaml::XamlLoadException> {
     // data_template.xaml(1,2) ItemsControl
     let items_control_0 = ::ferroui_controls::ItemsControl::new();
-    let context = rt::populate_context(service_provider, ::core::option::Option::Some("ferres://FerroUI.Markup.Xaml.UnitTests/Emitter/data_template.xaml"), XML_NAMESPACES_0, rt::to_value(items_control_0.clone()));
+    let context = rt::populate_context(service_provider, &BUILD_DATA_TEMPLATE_XAML_DOCUMENT, rt::to_value(items_control_0.clone()));
     let name_scope = context.name_scope_field();
     items_control_0.begin_init();
     context.push_parent(rt::to_value(items_control_0.clone()));
@@ -3617,7 +3932,7 @@ pub fn build_data_template_xaml(
 fn build_data_template_xaml_deferred_0(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
-    let context = rt::deferred_context(service_provider, ::core::option::Option::Some("ferres://FerroUI.Markup.Xaml.UnitTests/Emitter/data_template.xaml"), XML_NAMESPACES_0);
+    let context = rt::deferred_context(service_provider, &BUILD_DATA_TEMPLATE_XAML_DOCUMENT);
     // data_template.xaml(1,147) TextBlock
     let text_block_0 = ::ferroui_controls::TextBlock::new();
     context.set_intermediate_root_object(rt::to_value(text_block_0.clone()));
@@ -3639,13 +3954,16 @@ fn build_data_template_xaml_untyped(
     ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
 }
 
+/// The base URI and the XML namespaces of `control_theme_template.xaml`.
+static BUILD_CONTROL_THEME_TEMPLATE_XAML_DOCUMENT: rt::DocumentInfo = rt::DocumentInfo { base_uri: ::core::option::Option::Some("ferres://FerroUI.Markup.Xaml.UnitTests/Emitter/control_theme_template.xaml"), namespaces: XML_NAMESPACES_0 };
+
 /// Generated from `control_theme_template.xaml`.
 pub fn build_control_theme_template_xaml(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
 ) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::Border>, ::ferroui_markup_xaml::XamlLoadException> {
     // control_theme_template.xaml(1,2) Border
     let border_0 = ::ferroui_controls::Border::new();
-    let context = rt::populate_context(service_provider, ::core::option::Option::Some("ferres://FerroUI.Markup.Xaml.UnitTests/Emitter/control_theme_template.xaml"), XML_NAMESPACES_0, rt::to_value(border_0.clone()));
+    let context = rt::populate_context(service_provider, &BUILD_CONTROL_THEME_TEMPLATE_XAML_DOCUMENT, rt::to_value(border_0.clone()));
     let name_scope = context.name_scope_field();
     border_0.begin_init();
     // control_theme_template.xaml(1,118) Resources (resource)
@@ -3661,7 +3979,7 @@ pub fn build_control_theme_template_xaml(
 fn build_control_theme_template_xaml_deferred_0(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
-    let context = rt::deferred_context(service_provider, ::core::option::Option::Some("ferres://FerroUI.Markup.Xaml.UnitTests/Emitter/control_theme_template.xaml"), XML_NAMESPACES_0);
+    let context = rt::deferred_context(service_provider, &BUILD_CONTROL_THEME_TEMPLATE_XAML_DOCUMENT);
     // control_theme_template.xaml(1,118) ControlTheme
     let control_theme_0 = ::ferroui_base::styling::ControlTheme::new();
     // control_theme_template.xaml(1,118) TargetType
@@ -3681,7 +3999,7 @@ fn build_control_theme_template_xaml_deferred_0(
 fn build_control_theme_template_xaml_deferred_1(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
-    let context = rt::deferred_context(service_provider, ::core::option::Option::Some("ferres://FerroUI.Markup.Xaml.UnitTests/Emitter/control_theme_template.xaml"), XML_NAMESPACES_0);
+    let context = rt::deferred_context(service_provider, &BUILD_CONTROL_THEME_TEMPLATE_XAML_DOCUMENT);
     let name_scope = context.name_scope_field();
     // control_theme_template.xaml(1,211) Border
     let border_0 = ::ferroui_controls::Border::new();
@@ -3717,13 +4035,16 @@ fn build_control_theme_template_xaml_untyped(
     ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
 }
 
+/// The base URI and the XML namespaces of `style_selectors.xaml`.
+static BUILD_STYLE_SELECTORS_XAML_DOCUMENT: rt::DocumentInfo = rt::DocumentInfo { base_uri: ::core::option::Option::Some("ferres://FerroUI.Markup.Xaml.UnitTests/Emitter/style_selectors.xaml"), namespaces: XML_NAMESPACES_0 };
+
 /// Generated from `style_selectors.xaml`.
 pub fn build_style_selectors_xaml(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
 ) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::Border>, ::ferroui_markup_xaml::XamlLoadException> {
     // style_selectors.xaml(1,2) Border
     let border_0 = ::ferroui_controls::Border::new();
-    let context = rt::populate_context(service_provider, ::core::option::Option::Some("ferres://FerroUI.Markup.Xaml.UnitTests/Emitter/style_selectors.xaml"), XML_NAMESPACES_0, rt::to_value(border_0.clone()));
+    let context = rt::populate_context(service_provider, &BUILD_STYLE_SELECTORS_XAML_DOCUMENT, rt::to_value(border_0.clone()));
     let name_scope = context.name_scope_field();
     border_0.begin_init();
     // style_selectors.xaml(1,99) Name
@@ -3857,13 +4178,16 @@ fn build_style_selectors_xaml_untyped(
     ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
 }
 
+/// The base URI and the XML namespaces of `style_nested.xaml`.
+static BUILD_STYLE_NESTED_XAML_DOCUMENT: rt::DocumentInfo = rt::DocumentInfo { base_uri: ::core::option::Option::Some("ferres://FerroUI.Markup.Xaml.UnitTests/Emitter/style_nested.xaml"), namespaces: XML_NAMESPACES_0 };
+
 /// Generated from `style_nested.xaml`.
 pub fn build_style_nested_xaml(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
 ) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::Border>, ::ferroui_markup_xaml::XamlLoadException> {
     // style_nested.xaml(1,2) Border
     let border_0 = ::ferroui_controls::Border::new();
-    let context = rt::populate_context(service_provider, ::core::option::Option::Some("ferres://FerroUI.Markup.Xaml.UnitTests/Emitter/style_nested.xaml"), XML_NAMESPACES_0, rt::to_value(border_0.clone()));
+    let context = rt::populate_context(service_provider, &BUILD_STYLE_NESTED_XAML_DOCUMENT, rt::to_value(border_0.clone()));
     let name_scope = context.name_scope_field();
     border_0.begin_init();
     // style_nested.xaml(1,115) Styles
@@ -3909,13 +4233,16 @@ fn build_style_nested_xaml_untyped(
     ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
 }
 
+/// The base URI and the XML namespaces of `style_resources.xaml`.
+static BUILD_STYLE_RESOURCES_XAML_DOCUMENT: rt::DocumentInfo = rt::DocumentInfo { base_uri: ::core::option::Option::Some("ferres://FerroUI.Markup.Xaml.UnitTests/Emitter/style_resources.xaml"), namespaces: XML_NAMESPACES_0 };
+
 /// Generated from `style_resources.xaml`.
 pub fn build_style_resources_xaml(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
 ) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::Border>, ::ferroui_markup_xaml::XamlLoadException> {
     // style_resources.xaml(1,2) Border
     let border_0 = ::ferroui_controls::Border::new();
-    let context = rt::populate_context(service_provider, ::core::option::Option::Some("ferres://FerroUI.Markup.Xaml.UnitTests/Emitter/style_resources.xaml"), XML_NAMESPACES_0, rt::to_value(border_0.clone()));
+    let context = rt::populate_context(service_provider, &BUILD_STYLE_RESOURCES_XAML_DOCUMENT, rt::to_value(border_0.clone()));
     let name_scope = context.name_scope_field();
     border_0.begin_init();
     context.push_parent(rt::to_value(border_0.clone()));
@@ -3956,7 +4283,7 @@ pub fn build_style_resources_xaml(
 fn build_style_resources_xaml_deferred_0(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
-    let _context = rt::deferred_context(service_provider, ::core::option::Option::Some("ferres://FerroUI.Markup.Xaml.UnitTests/Emitter/style_resources.xaml"), XML_NAMESPACES_0);
+    let _context = rt::deferred_context(service_provider, &BUILD_STYLE_RESOURCES_XAML_DOCUMENT);
     // style_resources.xaml(1,118) SolidColorBrush
     let solid_color_brush_0 = ::ferroui_base::media::SolidColorBrush::new();
     // style_resources.xaml(1,118) Color

@@ -481,10 +481,9 @@ struct Emitter<'a> {
     position: std::cell::Cell<(i32, i32)>,
     /// The nodes that need the parent stack, by address ([`ParentStackNodes`]).
     parent_stack_nodes: HashSet<usize>,
-    /// The base URI of the document (a Rust expression) and the constant of
-    /// its namespace information: what every context of the document gets.
-    base_uri: String,
-    namespaces: String,
+    /// The constant of the base URI and the namespace information of the
+    /// document (`rt::DocumentInfo`): what every context of the document gets.
+    document: String,
     /// Whether the statements written so far in the current scope (the
     /// build function, or the body of deferred content) use the context and
     /// the name scope.
@@ -1791,8 +1790,8 @@ impl Emitter<'_> {
             ") -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {\n",
         );
         text.push_str(&format!(
-            "    let {context_name} = rt::deferred_context(service_provider, {}, {});\n",
-            self.base_uri, self.namespaces
+            "    let {context_name} = rt::deferred_context(service_provider, &{});\n",
+            self.document
         ));
         if uses_name_scope {
             text.push_str("    let name_scope = context.name_scope_field();\n");
@@ -3037,6 +3036,7 @@ pub fn emit_function(
         Some(uri) => format!("::core::option::Option::Some({})", rust_string_literal(uri.original_string())),
         None => "::core::option::Option::None".to_string(),
     };
+    let document_constant = format!("{}_DOCUMENT", function_name.to_uppercase());
     let mut parent_stack = ParentStackNodes { nodes: HashSet::new(), parents: Vec::new() };
     visit_node(root, &mut parent_stack).map_err(|e| failed(root, e))?;
     let group = root
@@ -3055,8 +3055,7 @@ pub fn emit_function(
         local_names: HashMap::new(),
         compiler_locals: HashMap::new(),
         parent_stack_nodes: parent_stack.nodes,
-        base_uri: base_uri.clone(),
-        namespaces: namespaces.to_string(),
+        document: document_constant.clone(),
         uses_context: false,
         uses_name_scope: false,
         assignments: Vec::new(),
@@ -3082,7 +3081,7 @@ pub fn emit_function(
         .rust_path()
         .ok_or_else(|| unsupported(&root_value, "no public Rust path is recorded for the root class"))?;
     emitter.line(format!(
-        "let context = rt::populate_context(service_provider, {base_uri}, {namespaces}, rt::to_value({}.clone()));",
+        "let context = rt::populate_context(service_provider, &{document_constant}, rt::to_value({}.clone()));",
         created.expr
     ));
     emitter.line("let name_scope = context.name_scope_field();".to_string());
@@ -3093,7 +3092,13 @@ pub fn emit_function(
     }
 
     let mut source = String::new();
-    source.push_str(&format!("/// Generated from `{}`.\n", document_name.replace('`', "'").replace(['\r', '\n'], " ")));
+    let document_text = document_name.replace('`', "'").replace(['\r', '\n'], " ");
+    source.push_str(&format!("/// The base URI and the XML namespaces of `{document_text}`.\n"));
+    source.push_str(&format!(
+        "static {document_constant}: rt::DocumentInfo = rt::DocumentInfo {{ base_uri: {base_uri}, namespaces: {namespaces} }};\n"
+    ));
+    source.push('\n');
+    source.push_str(&format!("/// Generated from `{document_text}`.\n"));
     source.push_str(&format!("pub fn {function_name}(\n"));
     source.push_str("    service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,\n");
     match populate {
