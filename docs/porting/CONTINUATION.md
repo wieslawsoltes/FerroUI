@@ -20,7 +20,7 @@ Each was asked to stop at a clean, tested state, open its pull request with a "C
 |---|---|---|
 | `browser-plain-assets` | The catalog's pictures and fonts as plain files in the site, fetched and registered one by one, instead of packed `.assets` bundles (owner's request). On-demand loading per page stays. | Task 1 below |
 | `xaml-e5-loader-table` | XAML compiler stage E5: loader table, includes across crates, then the catalog compiled | Task 2 below |
-| `core-port-11` (if it exists) | Next batch of upstream test suites | Task 3 below |
+| none | The core port stopped cleanly with nothing open: `core-port-11` was never pushed. Its next batches are listed in task 3. | Task 3 below |
 
 ## Next tasks, in order
 
@@ -49,10 +49,21 @@ Regenerating output:
 
 ### 3. Core port: the remaining upstream suites
 
-Continue with the suites the core-port pull requests list as next. Each suite is an exact port under upstream's names, with framework fixes where a test exposes a difference. Known items:
+Each suite is an exact port under upstream's names, with framework fixes where a test exposes a difference. The counts are the upstream tests missing by name on `a382956`, from the name inventory of the core-port worker. In order:
 
-- **Blocked:** `ColorSpectrumAutomationPeerTests.cs` (6 tests). `ColorSpectrum` and its peer are not ported, because the color picker library has no crate yet.
-- `deferred_text_tests.rs` and `content_presenter_text_tests.rs` duplicate some ContentPresenter tests. Fold them into the exact ports of #40.
+1. `Media/ColorTests.cs`: 18 of 66 missing.
+   - Today the port has an inline `mod tests` in `src/FerroUI.Base/media/color.rs` (64 tests, some under names upstream does not use) and 2 tests each in `hsl_color.rs` and `hsv_color.rs`.
+   - Write an exact `media/color_tests.rs` and remove the inline duplicates.
+   - Fix any Color, HSL or HSV divergence the new tests expose.
+   - No blocker is known.
+2. `Input/InputElement_Focus.cs`: 21 of 46 missing. It is large (1,747 lines). Expect gaps in the focus manager.
+3. `Media/GlyphTypefaceTests.cs`: 26 of 42 missing. It may need font-table test assets.
+4. `Data/Core/Parsers/BindingExpressionVisitorTests.cs`: all 36 missing. Upstream walks LINQ expression trees, so this needs a design decision first: what in the Rust compiled-binding path parser stands for them. Expect a deviation entry, not a straight port.
+
+Also:
+
+- **Blocked:** `Automation/ColorSpectrumAutomationPeerTests.cs` (6 tests). `ColorSpectrum` and its peer are not ported, because the color picker library has no crate yet (`ColorSpectrum.cs` alone is about 1,740 lines).
+- `deferred_text_tests.rs` and `presenters/content_presenter_text_tests.rs` duplicate ContentPresenter tests that #40 ported exactly. Remove the duplicates.
 - **Templates:** the gaps against `TypeUtilities.CanCast<T>` that #40 recorded in `DEVIATIONS.md` (null data and reference types, `int` against `int?`).
 - **Layout** rows of `DEVIATIONS.md`:
   - `LayoutManager` does not call `Dispatcher.VerifyAccess()`. It can be ported now.
