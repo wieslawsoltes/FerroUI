@@ -27,6 +27,7 @@ use ferroui_base::data::core::plugins::PropertyAccessorFactory;
 use ferroui_base::data::{BindingBase, BindingError, BindingPriority, CompiledBindingPathBuilder};
 use ferroui_base::metadata::{MarkupInvoke, MarkupProperty, MarkupType};
 use ferroui_base::AnyValue;
+use ferroui_base::styling::{Setter, SetterBase, StyleBase};
 use ferroui_base::{BoxedValue, FerroObject, FerroProperty, Ref, StyledElement, TypeInfo, UnsetValueType};
 
 use super::{
@@ -291,6 +292,55 @@ pub fn setter_value(setter: &ferroui_base::styling::Setter, value: MarkupValue) 
         Some(converted) => Some(converted),
         None => value,
     }
+}
+
+/// A setter added to a style (`<Setter Property=".." Value=".."/>` in a style
+/// or a control theme): `new Setter()`, `Property` set to `property`,
+/// `Value` set to `value` ([`setter_value`]), then `style.Add(setter)`, the
+/// calls the statements of generated code make, through the same typed
+/// functions. `value` has no statements of its own; it is evaluated before
+/// the call (it reads nothing of the setter).
+#[inline(never)]
+pub fn add_setter(style: &Ref<StyleBase>, property: &'static FerroProperty, value: MarkupValue) {
+    let setter = new_setter(property);
+    add_setter_value(style, &setter, value);
+}
+
+/// The first half of [`add_setter`] for a value with statements of its own:
+/// `new Setter()` with `Property` set to `property`.
+#[inline(never)]
+pub fn new_setter(property: &'static FerroProperty) -> Rc<Setter> {
+    let setter = Setter::__markup_new_0();
+    Setter::__markup_set_Property(&setter, Some(property));
+    setter
+}
+
+/// The second half of [`add_setter`]: `Value` of `setter` set to `value`
+/// ([`setter_value`]), then `style.Add(setter)`.
+#[inline(never)]
+pub fn add_setter_value(style: &Ref<StyleBase>, setter: &Rc<Setter>, value: MarkupValue) {
+    Setter::__markup_set_Value(setter, setter_value(setter, value));
+    StyleBase::__markup_Add_0(style, setter.clone() as Rc<dyn SetterBase>);
+}
+
+/// [`new_setter`] of a setter that is on the parent stack of `context`
+/// while its members are set: pushed after it is created, before `Property`
+/// is set.
+#[inline(never)]
+pub fn new_setter_with_parent(context: &Rc<XamlIlContext>, property: &'static FerroProperty) -> Rc<Setter> {
+    let setter = Setter::__markup_new_0();
+    context.push_parent(to_value(setter.clone()));
+    Setter::__markup_set_Property(&setter, Some(property));
+    setter
+}
+
+/// [`add_setter_value`] of a setter on the parent stack of `context`:
+/// popped after `Value` is set, before it is added to `style`.
+#[inline(never)]
+pub fn add_setter_value_with_parent(context: &Rc<XamlIlContext>, style: &Ref<StyleBase>, setter: &Rc<Setter>, value: MarkupValue) {
+    Setter::__markup_set_Value(setter, setter_value(setter, value));
+    context.pop_parent();
+    StyleBase::__markup_Add_0(style, setter.clone() as Rc<dyn SetterBase>);
 }
 
 /// `target.SetValue(property, FerroProperty.UnsetValue, BindingPriority.LocalValue)`:

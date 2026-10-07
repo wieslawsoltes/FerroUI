@@ -17,7 +17,9 @@ autoexamples = false
 path = "lib.rs"
 
 [dependencies]
-ferroui-base = { workspace = true }
+# The runtime helpers of compiled XAML call the typed functions of the declared members, as
+# generated code does (`xaml_il::runtime::compiled::add_setter`).
+ferroui-base = { workspace = true, features = ["markup-functions"] }
 ferroui-controls = { workspace = true }
 ferroui-markup = { workspace = true }
 
