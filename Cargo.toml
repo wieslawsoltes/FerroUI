@@ -64,11 +64,19 @@ time = { version = "0.3", default-features = false }
 # The mounted volumes of the managed file chooser.
 sysinfo = { version = "0.37", default-features = false, features = ["disk"] }
 
-# Whole-program optimisation in one code generation unit: the executables are
-# 10 to 14 % smaller than with thin LTO over four units and start no slower
-# (see scripts/perf-report.py); a full release build takes about twice as long
-# and its link step needs about 6 GB of memory.
+# The default release build is the one that is built most often, so it is set up for build time:
+# thin LTO over the default sixteen code generation units, which generates code on all cores.
 [profile.release]
+lto = "thin"
+
+# The build that is shipped and measured (`cargo build --profile dist`, `scripts/perf-report.py
+# --profile dist`): whole-program optimisation in one code generation unit. The executables are
+# 10 to 14 % smaller than with thin LTO over four units and start no slower
+# (docs/porting/desktop-performance.md, section 6.2); the build takes about twice as long, because
+# every executable generates the code of the whole program on one core, and its link step needs
+# about 6 GB of memory.
+[profile.dist]
+inherits = "release"
 lto = "fat"
 codegen-units = 1
 
