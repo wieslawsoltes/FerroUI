@@ -10,6 +10,7 @@ Read before writing code:
 
 - `docs/porting/PORTING-GUIDE.md`: the class model macros, the naming and mapping rules, and the conventions every ported file follows.
 - `docs/porting/CRITICAL-PATH.md`: subsystem status and known gaps.
+- `docs/porting/CONTINUATION.md`: the state at the last hand-over, the tasks that come next and the decisions waiting for the owner.
 - The design document for your area, when there is one: `xaml.md` (markup pipeline and the ahead-of-time compiler), `browser-platform.md` (browser backend).
 
 ## Setup
