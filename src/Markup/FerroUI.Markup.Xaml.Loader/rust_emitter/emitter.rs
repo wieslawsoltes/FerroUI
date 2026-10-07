@@ -356,6 +356,20 @@ fn invoked(call: String, fallible: bool, node: &Rc<dyn IXamlAstNode>) -> String 
     }
 }
 
+/// Whether `text` borrows a local without evaluating anything: `&local`, or
+/// `local.upcast_ref::<Base>()`.
+fn is_plain_borrow(text: &str) -> bool {
+    if let Some(local) = text.strip_prefix('&') {
+        return is_identifier(local);
+    }
+    match text.split_once(".upcast_ref::<") {
+        Some((local, rest)) => {
+            is_identifier(local) && rest.strip_suffix(">()").is_some_and(|path| !path.contains(['(', ')']))
+        }
+        None => false,
+    }
+}
+
 /// A borrow of the expression `text`: a cast (`value as Rc<dyn Contract>`, see
 /// `coerce_to_contract`) is parenthesised, `&` binds tighter than `as`.
 fn borrowed(text: &str) -> String {
@@ -2142,24 +2156,62 @@ impl Emitter<'_> {
                 kind: Kind::Exact { id: provider, nullable: Some(nullable) },
             });
         }
-        if let (true, Some(property)) = (provide_value_target, &property) {
-            self.set_target_property(node, property)?;
-        }
-        let call = self.declared_call(node, method, &arguments)?;
+        let descriptor = match (provide_value_target, &property) {
+            (true, Some(property)) => Some(self.target_property_descriptor(node, property)?),
+            _ => None,
+        };
+        let (function, texts, fallible) = self.declared_call_parts(node, method, &arguments)?;
         let returned = self.declared_return(node, method)?;
         let local = self.local_named("provided");
-        self.line(format!("let {local} = {call};"));
-        if provide_value_target {
-            self.line("context.set_target_property(::core::option::Option::None);".to_string());
+        match descriptor {
+            // The extension is a local borrowed as it is and the service provider is the
+            // context: `rt::provide_value` sets the target property, calls ProvideValue and
+            // clears the target property, in that order (a failed ProvideValue leaves it set, as
+            // the statements it stands for do).
+            Some(descriptor)
+                if texts.len() == 2 && is_plain_borrow(&texts[0]) && texts[1] == "rt::service_provider(&context)" =>
+            {
+                self.uses_context = true;
+                let extension = &texts[0];
+                self.line(match fallible {
+                    true => format!(
+                        "let {local} = rt::provide_value_invoked(&context, {descriptor}, {extension}, {function}, {}, {})?;",
+                        node.line(),
+                        node.position()
+                    ),
+                    false => format!("let {local} = rt::provide_value(&context, {descriptor}, {extension}, {function});"),
+                });
+            }
+            descriptor => {
+                let cleared = descriptor.is_some();
+                if let Some(descriptor) = descriptor {
+                    self.uses_context = true;
+                    self.line(format!("context.set_target_property({descriptor});"));
+                }
+                let call = invoked(format!("{function}({})", texts.join(", ")), fallible, node);
+                self.line(format!("let {local} = {call};"));
+                if cleared {
+                    self.line("context.set_target_property(::core::option::Option::None);".to_string());
+                }
+            }
         }
         Ok(Typed { expr: local, kind: self.kind_of(returned) })
     }
 
     /// `context.ProvideTargetProperty = <descriptor>` for the property of
-    /// the innermost assignment: a registered property's definition, a plain
-    /// property's description, else its name.
+    /// the innermost assignment ([`Self::target_property_descriptor`]).
     fn set_target_property(&mut self, node: &Rc<dyn IXamlAstNode>, property: &Rc<xamlx::ast::XamlAstClrProperty>) -> EmitResult<()> {
-        let descriptor = match XamlIlFerroPropertyHelper::try_get_provide_value_target(property) {
+        let descriptor = self.target_property_descriptor(node, property)?;
+        self.uses_context = true;
+        self.line(format!("context.set_target_property({descriptor});"));
+        Ok(())
+    }
+
+    /// The provide-value target property for the property of the innermost
+    /// assignment: a registered property's definition, a plain property's
+    /// description, else its name.
+    fn target_property_descriptor(&self, node: &Rc<dyn IXamlAstNode>, property: &Rc<xamlx::ast::XamlAstClrProperty>) -> EmitResult<String> {
+        Ok(match XamlIlFerroPropertyHelper::try_get_provide_value_target(property) {
             Some(XamlIlProvideValueTargetProperty::FerroProperty(field)) => {
                 let registered = field
                     .as_any()
@@ -2173,10 +2225,7 @@ impl Emitter<'_> {
             }
             Some(XamlIlProvideValueTargetProperty::ClrProperty(clr)) => self.clr_property_info(node, &clr)?,
             None => format!("rt::boxed(::std::string::String::from({}))", rust_string_literal(&property.name())),
-        };
-        self.uses_context = true;
-        self.line(format!("context.set_target_property({descriptor});"));
-        Ok(())
+        })
     }
 
     /// A markup extension with options (`OnPlatform`, `OnFormFactor`: the
@@ -2657,6 +2706,18 @@ impl Emitter<'_> {
     /// instance member), each stated as the Rust type the member declares,
     /// with the failure of a fallible member as a load error at `node`.
     fn declared_call(&self, node: &Rc<dyn IXamlAstNode>, method: &RuntimeMethod, arguments: &[Typed]) -> EmitResult<String> {
+        let (function, texts, fallible) = self.declared_call_parts(node, method, arguments)?;
+        Ok(invoked(format!("{function}({})", texts.join(", ")), fallible, node))
+    }
+
+    /// The parts of [`Self::declared_call`]: the path of the typed function,
+    /// the argument texts and whether the member is fallible.
+    fn declared_call_parts(
+        &self,
+        node: &Rc<dyn IXamlAstNode>,
+        method: &RuntimeMethod,
+        arguments: &[Typed],
+    ) -> EmitResult<(String, Vec<String>, bool)> {
         self.position.set((node.line(), node.position()));
         let name = &method.name;
         let declared = method.declared().ok_or_else(|| unsupported(node, format!("{name}: not a declared member")))?;
@@ -2704,7 +2765,7 @@ impl Emitter<'_> {
                 (false, _) => text,
             });
         }
-        Ok(invoked(format!("{owner}::{}({})", emit.function, texts.join(", ")), emit.fallible, node))
+        Ok((format!("{owner}::{}", emit.function), texts, emit.fallible))
     }
 
     /// `if (root is StyledElement s) NameScope.SetNameScope(s, scope); scope.Complete();`.
