@@ -502,6 +502,10 @@ struct Emitter<'a> {
     /// order their content appears in the document (a slot is reserved when
     /// the content starts, so nested content follows the content around it).
     deferred_functions: Vec<String>,
+    /// The Rust types of the locals whose type the emitter states (`let` of
+    /// an object created with its default constructor): what a part of a
+    /// split function can be passed ([`split_into_parts`]).
+    local_types: HashMap<String, String>,
 }
 
 fn node_address<T: ?Sized>(node: &Rc<T>) -> usize {
@@ -760,6 +764,7 @@ impl Emitter<'_> {
         let local = self.local_for(class);
         self.marker(node, class.name());
         self.line(format!("let {local} = {}::new();", absolute(path)));
+        self.local_types.insert(local.clone(), format!("::ferroui_base::Ref<{}>", absolute(path)));
         Ok(Typed { expr: local, kind: Kind::Class(class) })
     }
 
@@ -3063,6 +3068,7 @@ pub fn emit_function(
         documents,
         function_name,
         deferred_functions: Vec::new(),
+        local_types: HashMap::new(),
     };
     // `Build`: the root object, then `Populate` with a context of its own (its name
     // scope field is filled from the parent service provider) whose root object is
@@ -3111,16 +3117,252 @@ pub fn emit_function(
             absolute(root_path)
         )),
     }
-    for line in &emitter.lines {
+    let mut local_types = std::mem::take(&mut emitter.local_types);
+    local_types.insert("context".to_string(), "::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>".to_string());
+    local_types.insert(
+        "name_scope".to_string(),
+        "::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::controls::INameScope>>".to_string(),
+    );
+    local_types.insert("root".to_string(), format!("::ferroui_base::Ref<{}>", absolute(root_path)));
+    let (body, parts) = split_into_parts(function_name, &document_text, &emitter.lines, &local_types);
+    for line in &body {
         source.push_str(line);
         source.push('\n');
     }
     source.push_str("}\n");
+    for part in &parts {
+        source.push('\n');
+        source.push_str(part);
+    }
     for function in &emitter.deferred_functions {
         source.push('\n');
         source.push_str(function);
     }
     Ok(source)
+}
+
+/// A function body with more top-level statements than this is split into
+/// parts ([`split_into_parts`]).
+const SPLIT_THRESHOLD: usize = 1024;
+
+/// The largest number of top-level statements of a part of a split function.
+const PART_STATEMENTS: usize = 256;
+
+/// A top-level statement of a function body: its lines (the position markers
+/// before it included), the local it declares (`let name`) with the type the
+/// `let` states, and the identifiers it names outside string literals and
+/// comments.
+struct Statement<'a> {
+    lines: &'a [String],
+    declares: Option<(String, Option<String>)>,
+    names: HashSet<String>,
+}
+
+/// The top-level statements of `lines` (the lines of a function body, each
+/// indented by four spaces): a statement ends where its braces are balanced
+/// at the end of a line that is not a comment.
+fn statements(lines: &[String]) -> Vec<Statement<'_>> {
+    let mut statements = Vec::new();
+    let mut start = 0;
+    let mut depth: i64 = 0;
+    for (index, line) in lines.iter().enumerate() {
+        let text = line.trim_start();
+        if text.starts_with("//") {
+            continue;
+        }
+        depth += brace_balance(text);
+        if depth == 0 {
+            let lines = &lines[start..=index];
+            let declares = lines.iter().map(|line| line.trim_start()).find(|line| !line.starts_with("//")).and_then(declared_local);
+            let mut names = HashSet::new();
+            for line in lines.iter().map(|line| line.trim_start()).filter(|line| !line.starts_with("//")) {
+                names.extend(identifiers(line));
+            }
+            statements.push(Statement { lines, declares, names });
+            start = index + 1;
+        }
+    }
+    if start < lines.len() {
+        statements.push(Statement { lines: &lines[start..], declares: None, names: HashSet::new() });
+    }
+    statements
+}
+
+/// The opening braces of a line of Rust minus its closing braces, outside
+/// string literals.
+fn brace_balance(text: &str) -> i64 {
+    let mut balance = 0;
+    let mut in_string = false;
+    let mut escaped = false;
+    for character in text.chars() {
+        match (in_string, character) {
+            (true, _) if escaped => escaped = false,
+            (true, '\\') => escaped = true,
+            (true, '"') => in_string = false,
+            (true, _) => {}
+            (false, '"') => in_string = true,
+            (false, '{') => balance += 1,
+            (false, '}') => balance -= 1,
+            (false, _) => {}
+        }
+    }
+    balance
+}
+
+/// `let name = ..` or `let name: Type = ..`: the name, and the type if the
+/// `let` states it.
+fn declared_local(text: &str) -> Option<(String, Option<String>)> {
+    let rest = text.strip_prefix("let ")?;
+    let end = rest.find(|c: char| !(c.is_ascii_alphanumeric() || c == '_')).unwrap_or(rest.len());
+    let (name, rest) = rest.split_at(end);
+    if !is_identifier(name) {
+        return None;
+    }
+    let stated = rest.strip_prefix(": ").and_then(|rest| rest.split_once(" = ")).map(|(type_, _)| type_.to_string());
+    Some((name.to_string(), stated))
+}
+
+/// The identifiers a line of Rust names as locals: words outside string
+/// literals that are not a segment of a path or a field or method name
+/// (preceded by `::` or `.`).
+fn identifiers(text: &str) -> Vec<String> {
+    let mut found = Vec::new();
+    let mut in_string = false;
+    let mut escaped = false;
+    let mut word = String::new();
+    let mut before_word = ' ';
+    let mut previous = ' ';
+    for character in text.chars().chain(std::iter::once(' ')) {
+        if in_string {
+            match character {
+                _ if escaped => escaped = false,
+                '\\' => escaped = true,
+                '"' => in_string = false,
+                _ => {}
+            }
+            previous = character;
+            continue;
+        }
+        if character.is_ascii_alphanumeric() || character == '_' {
+            if word.is_empty() {
+                before_word = previous;
+            }
+            word.push(character);
+        } else {
+            if !word.is_empty() && before_word != ':' && before_word != '.' && before_word != '\'' {
+                found.push(std::mem::take(&mut word));
+            }
+            word.clear();
+            if character == '"' {
+                in_string = true;
+            }
+        }
+        previous = character;
+    }
+    found
+}
+
+/// The body of a function (`lines`) with more than [`SPLIT_THRESHOLD`]
+/// top-level statements split into parts of at most [`PART_STATEMENTS`]:
+/// each part is a function `<function_name>_part_<n>` of its own, called
+/// where its statements were, with the locals of the body it uses passed
+/// to it (cloned handles). The statements run in the same order and fail
+/// with the same errors; only what is a local of which function changes.
+/// A statement stays in the body when it names a local whose Rust type is
+/// not known (`local_types`, or stated by its `let`); a part never declares
+/// a local that a later statement uses. Returns the body and the parts.
+fn split_into_parts(
+    function_name: &str,
+    document_text: &str,
+    lines: &[String],
+    local_types: &HashMap<String, String>,
+) -> (Vec<String>, Vec<String>) {
+    let statements = statements(lines);
+    if statements.len() <= SPLIT_THRESHOLD {
+        return (lines.to_vec(), Vec::new());
+    }
+    // The last statement that names each local declared at the top level.
+    let mut last_use: HashMap<&str, usize> = HashMap::new();
+    for (index, statement) in statements.iter().enumerate() {
+        for name in &statement.names {
+            last_use.insert(name.as_str(), index);
+        }
+    }
+    let mut types: HashMap<String, String> = local_types.clone();
+    let mut declared: HashSet<String> = ["context", "name_scope", "root"].iter().map(|name| name.to_string()).collect();
+    let mut body = Vec::new();
+    let mut parts = Vec::new();
+    let mut index = 0;
+    // The last statement (the result) always stays in the body.
+    let end = statements.len() - 1;
+    while index < end {
+        // The longest run from `index` that declares nothing used after it and names only
+        // locals of known type.
+        let mut best = None;
+        let mut escapes = 0;
+        let mut captured: Vec<String> = Vec::new();
+        let mut run_captured: Vec<String> = Vec::new();
+        let mut inner: HashSet<&str> = HashSet::new();
+        for last in index..end.min(index + PART_STATEMENTS) {
+            let statement = &statements[last];
+            let mut capturable = true;
+            for name in &statement.names {
+                if inner.contains(name.as_str()) || !declared.contains(name) {
+                    continue;
+                }
+                match types.contains_key(name) {
+                    true if !captured.contains(name) => captured.push(name.clone()),
+                    true => {}
+                    false => capturable = false,
+                }
+            }
+            if !capturable {
+                break;
+            }
+            if let Some((name, _)) = &statement.declares {
+                inner.insert(name.as_str());
+                escapes = escapes.max(last_use.get(name.as_str()).copied().unwrap_or(last));
+            }
+            if escapes <= last {
+                best = Some(last);
+                run_captured = captured.clone();
+            }
+        }
+        let Some(last) = best.filter(|last| last - index + 1 >= PART_STATEMENTS / 4) else {
+            let statement = &statements[index];
+            if let Some((name, stated)) = &statement.declares {
+                declared.insert(name.clone());
+                if let Some(stated) = stated {
+                    types.insert(name.clone(), stated.clone());
+                }
+            }
+            body.extend(statement.lines.iter().cloned());
+            index += 1;
+            continue;
+        };
+        let part_name = format!("{function_name}_part_{}", parts.len());
+        let mut part = String::new();
+        part.push_str(&format!("/// Part {} of `{function_name}` (`{document_text}`).\n", parts.len()));
+        part.push_str(&format!("fn {part_name}(\n"));
+        for name in &run_captured {
+            part.push_str(&format!("    {name}: {},\n", types[name]));
+        }
+        part.push_str(") -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadException> {\n");
+        for statement in &statements[index..=last] {
+            for line in statement.lines {
+                part.push_str(line);
+                part.push('\n');
+            }
+        }
+        part.push_str("    ::core::result::Result::Ok(())\n");
+        part.push_str("}\n");
+        let arguments: Vec<String> = run_captured.iter().map(|name| format!("{name}.clone()")).collect();
+        body.push(format!("    {part_name}({})?;", arguments.join(", ")));
+        parts.push(part);
+        index = last + 1;
+    }
+    body.extend(statements[end..].iter().flat_map(|statement| statement.lines.iter().cloned()));
+    (body, parts)
 }
 
 #[cfg(test)]
@@ -3145,5 +3387,90 @@ mod tests {
         assert_eq!(f64_literal(f64::NEG_INFINITY), "::core::primitive::f64::NEG_INFINITY");
         assert_eq!(f32_literal(0.25), "0.25_f32");
         assert_eq!(f32_literal(f32::NEG_INFINITY), "::core::primitive::f32::NEG_INFINITY");
+    }
+
+    fn body(statements: &[String]) -> Vec<String> {
+        statements.iter().flat_map(|statement| statement.lines().map(|line| format!("    {line}")).collect::<Vec<_>>()).collect()
+    }
+
+    fn known_types() -> HashMap<String, String> {
+        HashMap::from([
+            ("context".to_string(), "Context".to_string()),
+            ("dictionary_0".to_string(), "Dictionary".to_string()),
+        ])
+    }
+
+    #[test]
+    fn a_small_body_is_not_split() {
+        let lines = body(&["let dictionary_0 = Dictionary::new();".to_string(), "Ok(())".to_string()]);
+        let (split, parts) = split_into_parts("build_x", "x.xaml", &lines, &known_types());
+        assert_eq!(split, lines);
+        assert!(parts.is_empty());
+    }
+
+    #[test]
+    fn a_large_body_is_split_into_parts_in_order() {
+        let mut statements = vec!["let dictionary_0 = Dictionary::new();".to_string()];
+        for index in 0..SPLIT_THRESHOLD {
+            statements.push(format!("// x.xaml({index},1) Content (resource)\nlet deferred_{index} = rt::defer(&context, {index})?;"));
+            statements.push(format!("add(&dictionary_0, \"{{key {index}}}\", deferred_{index}.clone());"));
+        }
+        statements.push("::core::result::Result::Ok(dictionary_0)".to_string());
+        let lines = body(&statements);
+        let (split, parts) = split_into_parts("build_x", "x.xaml", &lines, &known_types());
+        assert_eq!(parts.len(), (2 * SPLIT_THRESHOLD).div_ceil(PART_STATEMENTS));
+        assert_eq!(split.first().map(String::as_str), Some("    let dictionary_0 = Dictionary::new();"));
+        assert_eq!(split.last().map(String::as_str), Some("    ::core::result::Result::Ok(dictionary_0)"));
+        for (index, call) in split[1..split.len() - 1].iter().enumerate() {
+            assert_eq!(call, &format!("    build_x_part_{index}(context.clone(), dictionary_0.clone())?;"));
+        }
+        assert!(parts[0].starts_with("/// Part 0 of `build_x` (`x.xaml`).\nfn build_x_part_0(\n    context: Context,\n    dictionary_0: Dictionary,\n)"));
+        // Every statement is in exactly one part, in the order of the body; a declaration and its use stay together.
+        let joined: String = parts.concat();
+        let mut position = 0;
+        for line in &lines[1..lines.len() - 1] {
+            position += joined[position..].find(line.as_str()).expect("the statement is in a part");
+        }
+        for part in &parts {
+            assert_eq!(part.matches("let deferred_").count(), part.matches("add(&dictionary_0").count());
+        }
+    }
+
+    #[test]
+    fn a_statement_that_names_a_local_of_unknown_type_stays_in_the_body() {
+        let mut statements = vec!["let value_0 = make();".to_string()];
+        for index in 0..=SPLIT_THRESHOLD {
+            statements.push(format!("use_value(&value_0, {index});"));
+        }
+        statements.push("Ok(())".to_string());
+        let lines = body(&statements);
+        let (split, parts) = split_into_parts("build_x", "x.xaml", &lines, &known_types());
+        assert!(parts.is_empty());
+        assert_eq!(split, lines);
+    }
+
+    #[test]
+    fn a_local_used_after_a_run_is_declared_in_the_body() {
+        // `let late` is used by the last statement: no part may declare it.
+        let mut statements = vec!["let late = Dictionary::new();".to_string()];
+        for index in 0..=SPLIT_THRESHOLD {
+            statements.push(format!("touch(&context, {index});"));
+        }
+        statements.push("Ok(late)".to_string());
+        let lines = body(&statements);
+        let (split, parts) = split_into_parts("build_x", "x.xaml", &lines, &known_types());
+        assert!(!parts.is_empty());
+        assert_eq!(split.first().map(String::as_str), Some("    let late = Dictionary::new();"));
+        assert!(parts.iter().all(|part| !part.contains("let late")));
+    }
+
+    #[test]
+    fn identifiers_skip_strings_paths_fields_and_labels() {
+        assert_eq!(
+            identifiers("let a = ::x::b(&c.d, \"e \\\" f\", 'g: { h });"),
+            vec!["let", "a", "c", "h"]
+        );
+        assert_eq!(brace_balance("if a { \"}\" "), 1);
+        assert_eq!(declared_local("let value_0: ::x::T = f();"), Some(("value_0".to_string(), Some("::x::T".to_string()))));
     }
 }

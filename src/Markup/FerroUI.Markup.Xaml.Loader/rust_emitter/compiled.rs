@@ -58,8 +58,9 @@ pub struct GeneratedFile {
 /// A document whose generated functions would have the name of a function
 /// generated for an earlier document (names that differ only in case or in
 /// characters that are not letters or digits, or a name that ends in
-/// `_untyped` or `_deferred_<n>`, the names of the functions of its untyped
-/// build and of its deferred content) is reported instead of becoming a duplicate definition rustc
+/// `_untyped`, `_deferred_<n>` or `_part_<n>`, the names of the functions of
+/// its untyped build, of its deferred content and of the parts of a split
+/// function) is reported instead of becoming a duplicate definition rustc
 /// rejects, and is left out of the group. A group that does not transform
 /// makes every document of it not eligible, with the error; a document with
 /// an unsupported node is reported with the node, and the others are not
@@ -248,7 +249,8 @@ pub fn generate_file(
 /// link from a line of generated Rust (where rustc reports an error) back to
 /// the XAML node it was emitted for. `functions` are the build functions of
 /// the file with their documents; the build functions of their deferred
-/// content (`<function>_deferred_<n>`) belong to the same documents. Inside
+/// content (`<function>_deferred_<n>`) and the parts of a split function
+/// (`<function>_part_<n>`) belong to the same documents. Inside
 /// a build function every position
 /// marker the emitter writes (`// <document>(<line>,<position>) <what>`)
 /// heads the lines up to the next marker or the end of the function; each
@@ -277,7 +279,8 @@ pub fn position_map(source: &str, functions: &[(String, String)]) -> String {
         if let Some(name) = functions.iter().find_map(|(function, name)| {
             let build = text.strip_prefix("pub fn ").and_then(|rest| rest.strip_prefix(function.as_str()));
             let deferred = || {
-                let rest = text.strip_prefix("fn ")?.strip_prefix(function.as_str())?.strip_prefix("_deferred_")?;
+                let rest = text.strip_prefix("fn ")?.strip_prefix(function.as_str())?;
+                let rest = rest.strip_prefix("_deferred_").or_else(|| rest.strip_prefix("_part_"))?;
                 rest.trim_start_matches(|c: char| c.is_ascii_digit()).starts_with('(').then_some(rest)
             };
             build.filter(|rest| rest.starts_with('(')).or_else(deferred).map(|_| name)
@@ -343,12 +346,13 @@ fn borrowed<'a>(
 
 /// Whether the items `a` and `b` of two documents would have the same name:
 /// the names are equal, or one is the build function of deferred content
-/// (`<function>_deferred_<n>`) of the other.
+/// (`<function>_deferred_<n>`) or a part of a split function
+/// (`<function>_part_<n>`) of the other.
 fn collides(a: &str, b: &str) -> bool {
     let is_deferred_of = |deferred: &str, function: &str| {
         deferred
             .strip_prefix(function)
-            .and_then(|rest| rest.strip_prefix("_deferred_"))
+            .and_then(|rest| rest.strip_prefix("_deferred_").or_else(|| rest.strip_prefix("_part_")))
             .is_some_and(|index| !index.is_empty() && index.chars().all(|c| c.is_ascii_digit()))
     };
     a == b || is_deferred_of(a, b) || is_deferred_of(b, a)

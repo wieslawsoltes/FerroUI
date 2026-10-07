@@ -76,6 +76,34 @@ pub fn populate_fluenttheme_xaml(
     let value_1 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Default();
     // FluentTheme.xaml(121,6) ResourceDictionary
     let resource_dictionary_1 = ::ferroui_base::controls::ResourceDictionary::new();
+    populate_fluenttheme_xaml_part_0(context.clone(), resource_dictionary_1.clone())?;
+    populate_fluenttheme_xaml_part_1(context.clone(), resource_dictionary_1.clone())?;
+    populate_fluenttheme_xaml_part_2(context.clone(), resource_dictionary_1.clone())?;
+    populate_fluenttheme_xaml_part_3(context.clone(), resource_dictionary_1.clone())?;
+    populate_fluenttheme_xaml_part_4(context.clone(), resource_dictionary_1.clone())?;
+    populate_fluenttheme_xaml_part_5(context.clone(), resource_dictionary_1.clone())?;
+    rt::invoked(<::ferroui_base::collections::FerroDictionary<::ferroui_base::styling::ThemeVariant,::std::rc::Rc<dyn ::ferroui_base::controls::IThemeVariantProvider>>>::__markup_Add_0(&theme_dictionaries_collection_0, ::core::clone::Clone::clone(&value_1), rt::cast(resource_dictionary_1.clone(), 121, 6)?), 121, 6)?;
+    // FluentTheme.xaml(282,6) ThemeDictionaries
+    let theme_dictionaries_collection_1 = ::ferroui_base::controls::ResourceDictionary::__markup_get_ThemeDictionaries(&resource_dictionary_0);
+    let value_9 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Dark();
+    // FluentTheme.xaml(282,6) ResourceDictionary
+    let resource_dictionary_2 = ::ferroui_base::controls::ResourceDictionary::new();
+    populate_fluenttheme_xaml_part_6(context.clone(), resource_dictionary_2.clone())?;
+    populate_fluenttheme_xaml_part_7(context.clone(), resource_dictionary_2.clone())?;
+    populate_fluenttheme_xaml_part_8(context.clone(), resource_dictionary_2.clone())?;
+    populate_fluenttheme_xaml_part_9(context.clone(), resource_dictionary_2.clone())?;
+    populate_fluenttheme_xaml_part_10(context.clone(), resource_dictionary_2.clone())?;
+    populate_fluenttheme_xaml_part_11(context.clone(), resource_dictionary_2.clone())?;
+    rt::invoked(<::ferroui_base::collections::FerroDictionary<::ferroui_base::styling::ThemeVariant,::std::rc::Rc<dyn ::ferroui_base::controls::IThemeVariantProvider>>>::__markup_Add_0(&theme_dictionaries_collection_1, ::core::clone::Clone::clone(&value_9), rt::cast(resource_dictionary_2.clone(), 282, 6)?), 282, 6)?;
+    populate_fluenttheme_xaml_part_12(context.clone(), resource_dictionary_0.clone(), root.clone(), name_scope.clone())?;
+    ::core::result::Result::Ok(())
+}
+
+/// Part 0 of `populate_fluenttheme_xaml` (`FluentTheme.xaml`).
+fn populate_fluenttheme_xaml_part_0(
+    context: ::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
+    resource_dictionary_1: ::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
+) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadException> {
     context.push_parent(rt::to_value(resource_dictionary_1.clone()));
     let resources_1: ::ferroui_base::metadata::MarkupValue = rt::to_value(resource_dictionary_1.clone());
     if rt::is_instance(&resources_1, rt::class_handle(<::ferroui_base::controls::ResourceDictionary as ::ferroui_base::StaticType>::TYPE)) {
@@ -462,6 +490,14 @@ pub fn populate_fluenttheme_xaml(
     // FluentTheme.xaml(21,8) Content (resource)
     let deferred_124 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, populate_fluenttheme_xaml_deferred_124, 21, 8)?;
     rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_1, rt::to_object(::std::string::String::from("ButtonBackgroundPointerOver")), ::core::clone::Clone::clone(&deferred_124) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 21, 8)?;
+    ::core::result::Result::Ok(())
+}
+
+/// Part 1 of `populate_fluenttheme_xaml` (`FluentTheme.xaml`).
+fn populate_fluenttheme_xaml_part_1(
+    context: ::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
+    resource_dictionary_1: ::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
+) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadException> {
     // FluentTheme.xaml(22,8) Content (resource)
     let deferred_125 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, populate_fluenttheme_xaml_deferred_125, 22, 8)?;
     rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_1, rt::to_object(::std::string::String::from("ButtonBackgroundPressed")), ::core::clone::Clone::clone(&deferred_125) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 22, 8)?;
@@ -849,6 +885,14 @@ pub fn populate_fluenttheme_xaml(
     // FluentTheme.xaml(191,8) Content (resource)
     let deferred_245 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, populate_fluenttheme_xaml_deferred_245, 191, 8)?;
     rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_1, rt::to_object(::std::string::String::from("ComboBoxDropDownGlyphForegroundFocusedPressed")), ::core::clone::Clone::clone(&deferred_245) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 191, 8)?;
+    ::core::result::Result::Ok(())
+}
+
+/// Part 2 of `populate_fluenttheme_xaml` (`FluentTheme.xaml`).
+fn populate_fluenttheme_xaml_part_2(
+    context: ::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
+    resource_dictionary_1: ::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
+) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadException> {
     // FluentTheme.xaml(193,8) Content (resource)
     let deferred_246 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, populate_fluenttheme_xaml_deferred_246, 193, 8)?;
     rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_1, rt::to_object(::std::string::String::from("ComboBoxDropDownBackground")), ::core::clone::Clone::clone(&deferred_246) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 193, 8)?;
@@ -1242,6 +1286,14 @@ pub fn populate_fluenttheme_xaml(
     // FluentTheme.xaml(382,8) Content (resource)
     let deferred_364 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, populate_fluenttheme_xaml_deferred_364, 382, 8)?;
     rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_1, rt::to_object(::std::string::String::from("CheckBoxCheckGlyphForegroundIndeterminatePressed")), ::core::clone::Clone::clone(&deferred_364) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 382, 8)?;
+    ::core::result::Result::Ok(())
+}
+
+/// Part 3 of `populate_fluenttheme_xaml` (`FluentTheme.xaml`).
+fn populate_fluenttheme_xaml_part_3(
+    context: ::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
+    resource_dictionary_1: ::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
+) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadException> {
     // FluentTheme.xaml(384,8) Content (resource)
     let deferred_365 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, populate_fluenttheme_xaml_deferred_365, 384, 8)?;
     rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_1, rt::to_object(::std::string::String::from("CheckBoxCheckGlyphForegroundIndeterminateDisabled")), ::core::clone::Clone::clone(&deferred_365) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 384, 8)?;
@@ -1629,6 +1681,14 @@ pub fn populate_fluenttheme_xaml(
     // FluentTheme.xaml(552,8) Content (resource)
     let deferred_485 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, populate_fluenttheme_xaml_deferred_485, 552, 8)?;
     rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_1, rt::to_object(::std::string::String::from("ToggleSwitchStrokeOffPointerOver")), ::core::clone::Clone::clone(&deferred_485) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 552, 8)?;
+    ::core::result::Result::Ok(())
+}
+
+/// Part 4 of `populate_fluenttheme_xaml` (`FluentTheme.xaml`).
+fn populate_fluenttheme_xaml_part_4(
+    context: ::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
+    resource_dictionary_1: ::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
+) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadException> {
     // FluentTheme.xaml(553,8) Content (resource)
     let deferred_486 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, populate_fluenttheme_xaml_deferred_486, 553, 8)?;
     rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_1, rt::to_object(::std::string::String::from("ToggleSwitchStrokeOffPressed")), ::core::clone::Clone::clone(&deferred_486) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 553, 8)?;
@@ -2016,6 +2076,14 @@ pub fn populate_fluenttheme_xaml(
     // FluentTheme.xaml(730,8) Content (resource)
     let deferred_607 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, populate_fluenttheme_xaml_deferred_607, 730, 8)?;
     rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_1, rt::to_object(::std::string::String::from("TreeViewItemForegroundSelectedPressed")), ::core::clone::Clone::clone(&deferred_607) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 730, 8)?;
+    ::core::result::Result::Ok(())
+}
+
+/// Part 5 of `populate_fluenttheme_xaml` (`FluentTheme.xaml`).
+fn populate_fluenttheme_xaml_part_5(
+    context: ::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
+    resource_dictionary_1: ::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
+) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadException> {
     // FluentTheme.xaml(732,8) Content (resource)
     let deferred_608 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, populate_fluenttheme_xaml_deferred_608, 732, 8)?;
     rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_1, rt::to_object(::std::string::String::from("TreeViewItemForegroundSelectedDisabled")), ::core::clone::Clone::clone(&deferred_608) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 732, 8)?;
@@ -2247,12 +2315,14 @@ pub fn populate_fluenttheme_xaml(
     let deferred_681 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, populate_fluenttheme_xaml_deferred_681, 850, 8)?;
     rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_1, rt::to_object(::std::string::String::from("TableViewRowForegroundSelectedPressed")), ::core::clone::Clone::clone(&deferred_681) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 850, 8)?;
     context.pop_parent();
-    rt::invoked(<::ferroui_base::collections::FerroDictionary<::ferroui_base::styling::ThemeVariant,::std::rc::Rc<dyn ::ferroui_base::controls::IThemeVariantProvider>>>::__markup_Add_0(&theme_dictionaries_collection_0, ::core::clone::Clone::clone(&value_1), rt::cast(resource_dictionary_1.clone(), 121, 6)?), 121, 6)?;
-    // FluentTheme.xaml(282,6) ThemeDictionaries
-    let theme_dictionaries_collection_1 = ::ferroui_base::controls::ResourceDictionary::__markup_get_ThemeDictionaries(&resource_dictionary_0);
-    let value_9 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Dark();
-    // FluentTheme.xaml(282,6) ResourceDictionary
-    let resource_dictionary_2 = ::ferroui_base::controls::ResourceDictionary::new();
+    ::core::result::Result::Ok(())
+}
+
+/// Part 6 of `populate_fluenttheme_xaml` (`FluentTheme.xaml`).
+fn populate_fluenttheme_xaml_part_6(
+    context: ::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
+    resource_dictionary_2: ::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
+) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadException> {
     context.push_parent(rt::to_value(resource_dictionary_2.clone()));
     let resources_2: ::ferroui_base::metadata::MarkupValue = rt::to_value(resource_dictionary_2.clone());
     if rt::is_instance(&resources_2, rt::class_handle(<::ferroui_base::controls::ResourceDictionary as ::ferroui_base::StaticType>::TYPE)) {
@@ -2639,6 +2709,14 @@ pub fn populate_fluenttheme_xaml(
     // FluentTheme.xaml(869,8) Content (resource)
     let deferred_805 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, populate_fluenttheme_xaml_deferred_805, 869, 8)?;
     rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_2, rt::to_object(::std::string::String::from("ButtonBackgroundPointerOver")), ::core::clone::Clone::clone(&deferred_805) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 869, 8)?;
+    ::core::result::Result::Ok(())
+}
+
+/// Part 7 of `populate_fluenttheme_xaml` (`FluentTheme.xaml`).
+fn populate_fluenttheme_xaml_part_7(
+    context: ::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
+    resource_dictionary_2: ::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
+) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadException> {
     // FluentTheme.xaml(870,8) Content (resource)
     let deferred_806 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, populate_fluenttheme_xaml_deferred_806, 870, 8)?;
     rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_2, rt::to_object(::std::string::String::from("ButtonBackgroundPressed")), ::core::clone::Clone::clone(&deferred_806) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 870, 8)?;
@@ -3026,6 +3104,14 @@ pub fn populate_fluenttheme_xaml(
     // FluentTheme.xaml(1040,8) Content (resource)
     let deferred_926 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, populate_fluenttheme_xaml_deferred_926, 1040, 8)?;
     rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_2, rt::to_object(::std::string::String::from("ComboBoxDropDownGlyphForegroundFocusedPressed")), ::core::clone::Clone::clone(&deferred_926) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 1040, 8)?;
+    ::core::result::Result::Ok(())
+}
+
+/// Part 8 of `populate_fluenttheme_xaml` (`FluentTheme.xaml`).
+fn populate_fluenttheme_xaml_part_8(
+    context: ::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
+    resource_dictionary_2: ::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
+) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadException> {
     // FluentTheme.xaml(1042,8) Content (resource)
     let deferred_927 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, populate_fluenttheme_xaml_deferred_927, 1042, 8)?;
     rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_2, rt::to_object(::std::string::String::from("ComboBoxDropDownBackground")), ::core::clone::Clone::clone(&deferred_927) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 1042, 8)?;
@@ -3419,6 +3505,14 @@ pub fn populate_fluenttheme_xaml(
     // FluentTheme.xaml(1233,8) Content (resource)
     let deferred_1045 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, populate_fluenttheme_xaml_deferred_1045, 1233, 8)?;
     rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_2, rt::to_object(::std::string::String::from("CheckBoxCheckGlyphForegroundIndeterminatePressed")), ::core::clone::Clone::clone(&deferred_1045) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 1233, 8)?;
+    ::core::result::Result::Ok(())
+}
+
+/// Part 9 of `populate_fluenttheme_xaml` (`FluentTheme.xaml`).
+fn populate_fluenttheme_xaml_part_9(
+    context: ::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
+    resource_dictionary_2: ::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
+) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadException> {
     // FluentTheme.xaml(1235,8) Content (resource)
     let deferred_1046 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, populate_fluenttheme_xaml_deferred_1046, 1235, 8)?;
     rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_2, rt::to_object(::std::string::String::from("CheckBoxCheckGlyphForegroundIndeterminateDisabled")), ::core::clone::Clone::clone(&deferred_1046) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 1235, 8)?;
@@ -3806,6 +3900,14 @@ pub fn populate_fluenttheme_xaml(
     // FluentTheme.xaml(1403,8) Content (resource)
     let deferred_1166 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, populate_fluenttheme_xaml_deferred_1166, 1403, 8)?;
     rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_2, rt::to_object(::std::string::String::from("ToggleSwitchStrokeOffPointerOver")), ::core::clone::Clone::clone(&deferred_1166) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 1403, 8)?;
+    ::core::result::Result::Ok(())
+}
+
+/// Part 10 of `populate_fluenttheme_xaml` (`FluentTheme.xaml`).
+fn populate_fluenttheme_xaml_part_10(
+    context: ::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
+    resource_dictionary_2: ::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
+) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadException> {
     // FluentTheme.xaml(1404,8) Content (resource)
     let deferred_1167 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, populate_fluenttheme_xaml_deferred_1167, 1404, 8)?;
     rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_2, rt::to_object(::std::string::String::from("ToggleSwitchStrokeOffPressed")), ::core::clone::Clone::clone(&deferred_1167) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 1404, 8)?;
@@ -4193,6 +4295,14 @@ pub fn populate_fluenttheme_xaml(
     // FluentTheme.xaml(1583,8) Content (resource)
     let deferred_1288 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, populate_fluenttheme_xaml_deferred_1288, 1583, 8)?;
     rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_2, rt::to_object(::std::string::String::from("TreeViewItemForegroundSelectedPressed")), ::core::clone::Clone::clone(&deferred_1288) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 1583, 8)?;
+    ::core::result::Result::Ok(())
+}
+
+/// Part 11 of `populate_fluenttheme_xaml` (`FluentTheme.xaml`).
+fn populate_fluenttheme_xaml_part_11(
+    context: ::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
+    resource_dictionary_2: ::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
+) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadException> {
     // FluentTheme.xaml(1585,8) Content (resource)
     let deferred_1289 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, populate_fluenttheme_xaml_deferred_1289, 1585, 8)?;
     rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_2, rt::to_object(::std::string::String::from("TreeViewItemForegroundSelectedDisabled")), ::core::clone::Clone::clone(&deferred_1289) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 1585, 8)?;
@@ -4424,7 +4534,16 @@ pub fn populate_fluenttheme_xaml(
     let deferred_1362 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, populate_fluenttheme_xaml_deferred_1362, 1702, 8)?;
     rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_2, rt::to_object(::std::string::String::from("TableViewRowForegroundSelectedPressed")), ::core::clone::Clone::clone(&deferred_1362) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 1702, 8)?;
     context.pop_parent();
-    rt::invoked(<::ferroui_base::collections::FerroDictionary<::ferroui_base::styling::ThemeVariant,::std::rc::Rc<dyn ::ferroui_base::controls::IThemeVariantProvider>>>::__markup_Add_0(&theme_dictionaries_collection_1, ::core::clone::Clone::clone(&value_9), rt::cast(resource_dictionary_2.clone(), 282, 6)?), 282, 6)?;
+    ::core::result::Result::Ok(())
+}
+
+/// Part 12 of `populate_fluenttheme_xaml` (`FluentTheme.xaml`).
+fn populate_fluenttheme_xaml_part_12(
+    context: ::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
+    resource_dictionary_0: ::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
+    root: ::ferroui_base::Ref<crate::FluentTheme>,
+    name_scope: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::controls::INameScope>>,
+) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadException> {
     // FluentTheme.xaml(6,53) Content (resource)
     let deferred_1363 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, populate_fluenttheme_xaml_deferred_1363, 6, 53)?;
     rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::to_object(::std::string::String::from("ContentControlThemeFontFamily")), ::core::clone::Clone::clone(&deferred_1363) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 6, 53)?;
