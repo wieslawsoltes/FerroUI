@@ -1,15 +1,20 @@
-//! Port of the reference `FoundationAutomationPeerTests` (the classes of
-//! the controls this library has).
+//! Port of `Automation/FoundationAutomationPeerTests.cs` of the controls
+//! unit tests.
 
 use super::{
-    AutomationControlType, AutomationPeer, ControlAutomationPeer, NumericUpDownAutomationPeer, ToolTipAutomationPeer,
+    AutomationControlType, AutomationPeer, CalendarDatePickerAutomationPeer, ControlAutomationPeer,
+    NumericUpDownAutomationPeer, ToolTipAutomationPeer,
 };
-use crate::automation::provider::IRangeValueProvider;
-use crate::automation::{AutomationPropertyChangedEventArgs, RangeValuePatternIdentifiers};
-use crate::test_support::test_scope;
+use crate::automation::provider::{IExpandCollapseProvider, IInvokeProvider, IRangeValueProvider, IValueProvider};
+use crate::automation::{
+    AutomationPropertyChangedEventArgs, ExpandCollapsePatternIdentifiers, ExpandCollapseState,
+    RangeValuePatternIdentifiers, ValuePatternIdentifiers,
+};
+use crate::calendar_date_picker::CalendarDatePicker;
+use crate::test_support::{string_of, test_scope};
 use crate::{Control, NumericUpDown, ToolTip};
 use ferroui_base::utilities::Decimal;
-use ferroui_base::{AnyValue, Ref};
+use ferroui_base::{AnyValue, BoxedValue, Ref};
 use std::cell::RefCell;
 use std::rc::Rc;
 
@@ -37,6 +42,149 @@ mod tool_tip_peer {
 
         assert_eq!(AutomationControlType::ToolTip, peer.get_automation_control_type());
         assert_eq!("ToolTip", peer.get_class_name());
+    }
+}
+
+mod calendar_date_picker_peer {
+    use super::*;
+
+    #[test]
+    fn creates_calendar_date_picker_automation_peer() {
+        let _scope = test_scope();
+        let control = CalendarDatePicker::new();
+        let peer = create_peer(&control);
+
+        assert!(std::ptr::eq(peer.get_type(), CalendarDatePickerAutomationPeer::TYPE));
+    }
+
+    #[test]
+    fn implements_i_invoke_and_i_value_providers() {
+        let _scope = test_scope();
+        let control = CalendarDatePicker::new();
+        let peer = create_peer(&control);
+
+        assert!(peer.get_provider::<dyn IInvokeProvider>().is_some());
+        assert!(peer.get_provider::<dyn IExpandCollapseProvider>().is_some());
+        assert!(peer.get_provider::<dyn IValueProvider>().is_some());
+    }
+
+    #[test]
+    fn has_button_control_type() {
+        let _scope = test_scope();
+        let control = CalendarDatePicker::new();
+        let peer = create_peer(&control).cast::<CalendarDatePickerAutomationPeer>().unwrap();
+
+        assert_eq!(AutomationControlType::Button, peer.get_automation_control_type());
+        assert_eq!("CalendarDatePicker", peer.get_class_name());
+    }
+
+    #[test]
+    fn invoke_opens_drop_down() {
+        let _scope = test_scope();
+        let control = CalendarDatePicker::new();
+        let peer = create_peer(&control).get_provider::<dyn IInvokeProvider>().unwrap();
+
+        peer.invoke().unwrap();
+
+        assert!(control.is_drop_down_open());
+    }
+
+    #[test]
+    fn expand_collapse_tracks_is_drop_down_open() {
+        let _scope = test_scope();
+        let control = CalendarDatePicker::new();
+        let peer = create_peer(&control).get_provider::<dyn IExpandCollapseProvider>().unwrap();
+
+        assert!(peer.shows_menu());
+        assert_eq!(ExpandCollapseState::Collapsed, peer.expand_collapse_state());
+
+        peer.expand().unwrap();
+        assert!(control.is_drop_down_open());
+        assert_eq!(ExpandCollapseState::Expanded, peer.expand_collapse_state());
+
+        peer.collapse().unwrap();
+        assert!(!control.is_drop_down_open());
+        assert_eq!(ExpandCollapseState::Collapsed, peer.expand_collapse_state());
+    }
+
+    #[test]
+    fn value_mirrors_owner_text() {
+        let _scope = test_scope();
+        let control = CalendarDatePicker::new();
+        control.set_text(Some("typed value"));
+        let peer = create_peer(&control).cast::<CalendarDatePickerAutomationPeer>().unwrap();
+
+        assert_eq!(Some("typed value".to_string()), peer.value());
+
+        control.set_text(Some("updated typed value"));
+
+        assert_eq!(Some("updated typed value".to_string()), peer.value());
+    }
+
+    #[test]
+    fn set_value_updates_text() {
+        let _scope = test_scope();
+        let control = CalendarDatePicker::new();
+        let peer = create_peer(&control).get_provider::<dyn IValueProvider>().unwrap();
+
+        assert!(!peer.is_read_only());
+
+        peer.set_value(Some("automation text")).unwrap();
+
+        assert_eq!(Some("automation text".to_string()), control.text());
+    }
+
+    #[test]
+    fn property_changed_raises_value_when_text_changes() {
+        let _scope = test_scope();
+        let control = CalendarDatePicker::new();
+        let peer = create_peer(&control).cast::<CalendarDatePickerAutomationPeer>().unwrap();
+        let changed: Rc<RefCell<Option<AutomationPropertyChangedEventArgs>>> = Rc::new(RefCell::new(None));
+
+        let sink = changed.clone();
+        peer.property_changed(move |e| {
+            if e.property() == ValuePatternIdentifiers::value_property() {
+                *sink.borrow_mut() = Some(e.clone());
+            }
+        });
+
+        control.set_text(Some("January"));
+
+        let changed = changed.borrow();
+        assert!(changed.is_some());
+        let changed = changed.as_ref().unwrap();
+        assert!(changed.property() == ValuePatternIdentifiers::value_property());
+        assert!(changed.old_value().is_none());
+        assert_eq!(Some("January".to_string()), changed.new_value().and_then(string_of));
+    }
+
+    #[test]
+    fn property_changed_raises_expand_collapse_state_when_drop_down_open_changes() {
+        let _scope = test_scope();
+        let control = CalendarDatePicker::new();
+        let peer = create_peer(&control).cast::<CalendarDatePickerAutomationPeer>().unwrap();
+        let changed: Rc<RefCell<Option<AutomationPropertyChangedEventArgs>>> = Rc::new(RefCell::new(None));
+
+        let sink = changed.clone();
+        peer.property_changed(move |e| {
+            if e.property() == ExpandCollapsePatternIdentifiers::expand_collapse_state_property() {
+                *sink.borrow_mut() = Some(e.clone());
+            }
+        });
+
+        control.set_is_drop_down_open(true);
+
+        let changed = changed.borrow();
+        assert!(changed.is_some());
+        let changed = changed.as_ref().unwrap();
+        assert!(changed.property() == ExpandCollapsePatternIdentifiers::expand_collapse_state_property());
+        assert_eq!(Some(ExpandCollapseState::Collapsed), state_of(changed.old_value()));
+        assert_eq!(Some(ExpandCollapseState::Expanded), state_of(changed.new_value()));
+    }
+
+    fn state_of(value: Option<&BoxedValue>) -> Option<ExpandCollapseState> {
+        let value: &dyn AnyValue = &**value?;
+        value.downcast_ref::<ExpandCollapseState>().copied()
     }
 }
 
