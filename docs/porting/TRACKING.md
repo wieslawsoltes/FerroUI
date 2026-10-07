@@ -46,7 +46,7 @@ Percentages are `present / (total - waived)`. Member matching is by name with re
 |---|---:|---:|---:|---:|
 | C# files | 2001 | 2363 | 0 | 84.7% |
 | Types | 2585 | 3276 | 0 | 78.9% |
-| Members | 18670 | 23849 | 44 | 78.4% |
+| Members | 18672 | 23849 | 44 | 78.4% |
 | Contracts (interfaces) | 388 | 464 | - | 83.6% |
 | Property registrations | 1164 | 1233 | - | 94.4% |
 | Routed events | 108 | 108 | - | 100.0% |
@@ -64,7 +64,7 @@ The % column is member coverage (file coverage for plain file lists).
 | [Avalonia.Native (native sources)](tracking/Avalonia.Native_native_sources.md) | `native/Avalonia.Native` | `native/FerroUI.Native` | (Objective-C++ sources built by ferroui-native) | 62/62 | - | - | 100.0% | 1 - desktop (macOS) | P0 |
 | [Avalonia.Base](tracking/Avalonia.Base.md) | `src/Avalonia.Base` | `src/FerroUI.Base` | `ferroui-base` | 1115/1286 | 1423/1709 | 9815/11739 (32 waived) | 83.8% | 0 - core | P0 |
 | [Avalonia.Build.Tasks](tracking/Avalonia.Build.Tasks.md) | `src/Avalonia.Build.Tasks` | `src/FerroUI.Build.Tasks` | `ferroui-build` | 0/9 | 0/10 | 0/44 | 0.0% | 2 - xaml + themes | P1 |
-| [Avalonia.Controls](tracking/Avalonia.Controls.md) | `src/Avalonia.Controls` | `src/FerroUI.Controls` | `ferroui-controls` | 532/538 | 606/628 | 6156/6405 (1 waived) | 96.1% | 1 - controls | P0 |
+| [Avalonia.Controls](tracking/Avalonia.Controls.md) | `src/Avalonia.Controls` | `src/FerroUI.Controls` | `ferroui-controls` | 532/538 | 606/628 | 6158/6405 (1 waived) | 96.2% | 1 - controls | P0 |
 | [Avalonia.Controls.ColorPicker](tracking/Avalonia.Controls.ColorPicker.md) | `src/Avalonia.Controls.ColorPicker` | `src/FerroUI.Controls.ColorPicker` | `ferroui-controls-colorpicker` | 0/39 | 0/41 | 0/726 | 0.0% | 3 - extras | P2 |
 | [Avalonia.DesignerSupport](tracking/Avalonia.DesignerSupport.md) | `src/Avalonia.DesignerSupport` | `src/FerroUI.DesignerSupport` | `ferroui-designer-support` | 0/9 | 0/18 | 0/176 | 0.0% | 4 - tooling | P3 |
 | [Avalonia.Desktop](tracking/Avalonia.Desktop.md) | `src/Avalonia.Desktop` | `src/FerroUI.Desktop` | `ferroui-desktop` | 1/1 | 1/1 | 1/1 | 100.0% | 1 - desktop (macOS) | P0 |

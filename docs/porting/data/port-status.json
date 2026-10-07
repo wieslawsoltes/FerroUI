@@ -4116,7 +4116,7 @@
     0
    ],
    "members": [
-    6156,
+    6158,
     6405,
     1
    ],
@@ -4137,7 +4137,7 @@
     "const": 33,
     "derive": 2,
     "field": 29,
-    "fn": 5552,
+    "fn": 5554,
     "free item": 4,
     "overload fn": 76,
     "trait": 37,
