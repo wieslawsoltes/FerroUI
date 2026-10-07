@@ -327,6 +327,10 @@ impl CalendarItem {
         self.month_view.borrow().clone()
     }
 
+    pub(crate) fn set_month_view(&self, value: Option<Ref<Grid>>) {
+        *self.month_view.borrow_mut() = value;
+    }
+
     /// Gets the Grid that hosts the content when in year or decade mode.
     pub(crate) fn year_view(&self) -> Option<Ref<Grid>> {
         self.year_view.borrow().clone()
