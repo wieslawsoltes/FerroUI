@@ -71,6 +71,8 @@ Other pages hold the entries of their own area, and this page does not repeat th
 |---|---|---|---|---|
 | Upstream's test setup supplies a font manager to `constraint_and_negative_margin`. | The `MockPlatformRenderInterface` of `ferroui-base` has none; the test adds `TextTestScope` to supply one. | Test | Not recorded in #25. | #25 |
 | The clipboard tests of the text controls flush only posted sync-context callbacks. | They run every dispatcher job, including the queued layout pass, and their log recorder ignores `Layout`-area messages. | Test | Running the layout pass logs the new layout timing messages, which the recorder would otherwise count. | #25 |
+| The `TestRoot` of `Avalonia.UnitTests` has a settable `StylingParent` (the GlobalStyles and application-resource tests of `StyledElementTests` set it). | The `TestRoot` of `ferroui-controls` has none; `StylingRoot` in `styled_element_tests.rs`, a test root with a settable styling parent, takes its place. | Test | No reason recorded for the missing setter; the tests need only the setter. | #37 |
+| `StyledElementTests.Resources_Owner_Is_Set` verifies `AddOwner` on a `Mock<IResourceDictionary>`. | `Resources` takes a concrete `ResourceDictionary`, so the test uses `RecordingResourceDictionary`, a derived dictionary that records its owners from the `on_add_owner` hook. | Test | A mock of the interface cannot be assigned to the property. | #37 |
 
 ## Corrected divergences
 
