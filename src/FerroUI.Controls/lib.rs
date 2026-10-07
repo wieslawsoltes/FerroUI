@@ -293,6 +293,12 @@ mod visual_extensions_get_visuals_at_tests;
 mod visual_extensions_tests;
 #[cfg(test)]
 mod visual_tests;
+#[cfg(test)]
+mod styled_element_tests;
+#[cfg(test)]
+mod styled_element_tests_theming;
+#[cfg(test)]
+mod styled_element_tests_resources;
 
 #[cfg(test)]
 pub(crate) mod test_support;
