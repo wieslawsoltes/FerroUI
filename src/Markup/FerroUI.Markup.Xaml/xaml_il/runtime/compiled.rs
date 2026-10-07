@@ -553,6 +553,58 @@ pub fn service_provider(context: &Rc<XamlIlContext>) -> Rc<dyn IServiceProvider>
     context.clone()
 }
 
+/// `ProvideValue` of a markup extension with the context as its service
+/// provider, as the run-time loader calls it: the provide-value target
+/// property of the context set to `target` (the property the value is
+/// provided for), `provide` called with `extension` and the context, then
+/// the target property cleared.
+///
+/// Generic only over the extension and the result; it is instantiated once
+/// per `ProvideValue` function, not per call site, and setting and clearing
+/// the target property are functions of their own.
+#[inline(never)]
+pub fn provide_value<E: ?Sized, R>(
+    context: &Rc<XamlIlContext>,
+    target: MarkupValue,
+    extension: &E,
+    provide: impl FnOnce(&E, Rc<dyn IServiceProvider>) -> R,
+) -> R {
+    let provided = provide(extension, target_service_provider(context, target));
+    clear_target_property(context);
+    provided
+}
+
+/// [`provide_value`] of a `ProvideValue` that fails with an error of its
+/// own: the error is the load error of a member the run-time loader invokes
+/// ([`invoked`]) at `line`, `position`, and the target property stays set,
+/// as it does when the run-time loader's call fails.
+#[inline(never)]
+pub fn provide_value_invoked<E: ?Sized, T, F: Display>(
+    context: &Rc<XamlIlContext>,
+    target: MarkupValue,
+    extension: &E,
+    provide: impl FnOnce(&E, Rc<dyn IServiceProvider>) -> Result<T, F>,
+    line: i32,
+    position: i32,
+) -> Result<T, XamlLoadException> {
+    let provided = invoked(provide(extension, target_service_provider(context, target)), line, position)?;
+    clear_target_property(context);
+    Ok(provided)
+}
+
+/// Sets the provide-value target property of `context` to `target` and
+/// returns the context as the service provider ([`provide_value`]).
+#[inline(never)]
+fn target_service_provider(context: &Rc<XamlIlContext>, target: MarkupValue) -> Rc<dyn IServiceProvider> {
+    context.set_target_property(target);
+    service_provider(context)
+}
+
+#[inline(never)]
+fn clear_target_property(context: &Rc<XamlIlContext>) {
+    context.set_target_property(None);
+}
+
 /// The XML namespaces of a document as the compiler resolved them: for each
 /// prefix (empty for the default namespace) the dotted namespaces and
 /// assemblies it maps to (the namespace information the run-time loader
