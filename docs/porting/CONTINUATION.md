@@ -18,7 +18,7 @@ Each was asked to stop at a clean, tested state, open its pull request with a "C
 
 | Branch | Task | Brief |
 |---|---|---|
-| `xaml-e5-loader-table` | XAML compiler stage E5: loader table, includes across crates, then the catalog compiled | Task 2 below |
+| `xaml-e5-loader-table` | #43, XAML compiler stage E5 step 1 (the loader table): complete and green, being rebased onto #42 for merge | Task 2 below |
 | none | The core port stopped cleanly with nothing open: `core-port-11` was never pushed. Its next batches are listed in task 3. | Task 3 below |
 
 ## Next tasks, in order
@@ -35,11 +35,29 @@ Do not reintroduce packing.
 
 ### 2. XAML compiler stage E5
 
-The stage-table row "E5 Includes and assets" in `xaml.md`, and items 3 and 4 of `browser-platform.md` section 20. In order:
+The stage-table row "E5 Includes and assets" in `xaml.md` (9.10.1), and items 3 and 4 of `browser-platform.md` section 20.
 
-1. **Loader table.** The generated code answers a load by URI of every compiled document, as upstream's `!XamlLoader` does. Compiled documents then leave the embedded assets for every application, not only the catalog's browser host. This removes the `remove-compiled-documents` feature of the theme crates and its deviation row in `browser-platform.md` section 14.
-2. **Includes across crates.** `StyleInclude`, `ResourceInclude` and `MergeResourceInclude` resolve the compiled documents of another crate at build time. The test is a fixture of two crates: a theme library and an application.
-3. **The catalog compiled.** Its 219 documents and the `x:Class` documents of the dialogs, so that neither links the run-time loader. The estimate is +6 to +10 MB raw and +0.5 to +1.2 MB gzip on the catalog module, against 0.24 s less CPU before the first frame. Measure a few pages first. The owner decides on the merge if the growth exceeds the estimate.
+**Done: step 1, the loader table (#43).**
+- The generated `compiled_xaml.rs` ends with `try_load`, the counterpart of upstream's `!XamlLoader.TryLoad`. It has one entry per public document, and `x:ClassModifier` is read as upstream reads it.
+- The themes register it, and their compiled documents are out of the embedded assets for every application.
+- The `remove-compiled-documents` feature is gone. Its deviation row moved to "Corrected divergences".
+- One seam is recorded in `xaml.md` 9.10.1: the caller of `generate_class_file` states the class constructor. Upstream picks it from the assembly; the port has no build-time type system of the crate yet.
+
+Remaining, in order. #43's "Continuation" section has the upstream files for each step.
+
+1. **Includes across crates.**
+   - `StyleInclude`, `ResourceInclude` and `MergeResourceInclude` resolve compiled documents of another crate at build time, through its `.xamlmeta` `documents[]` (`xaml.md` 9.7.3).
+   - Port upstream's `XamlIncludeGroupTransformer` and `XamlMergeResourceGroupTransformer`.
+   - The test is a two-crate fixture (theme library and application) running upstream's `ResourceIncludeTests`, `StyleIncludeTests` and `MergeResourceIncludeTests`.
+2. **Build integration.**
+   - `compile_xaml()` / `embed_assets()` (`xaml.md` 9.6) replace the checked-in `compiled_xaml.rs`, with `register()` (R8) and the generated `register_types` of 9.7.4.
+   - The constructor choice of the seam moves into the compiler.
+   - The `XamlIlTests` that load compiled documents of the test assembly can then be ported.
+3. **The catalog compiled.**
+   - Its 219 documents and the `x:Class` documents of `src/FerroUI.Dialogs`, so that neither links the run-time loader.
+   - The estimate is +6 to +10 MB raw and +0.5 to +1.2 MB gzip on the catalog module, against 0.24 s less CPU before the first frame.
+   - Measure a few pages first. If the growth exceeds the estimate, the owner decides on the merge.
+4. **Measure #43.** Measure `themed_view` and `control-catalog-browser` for #43's change (not measured yet) and add the table to section 20. `themed_view` is expected to lose the 168 theme documents, as the catalog did in #35.
 
 Regenerating output:
 - Corpus: `cargo test -p ferroui-markup-xaml-tests --lib emitter::differential_tests::regenerate_emitter_output -- --ignored --exact`.
