@@ -3151,11 +3151,12 @@ const PART_STATEMENTS: usize = 256;
 /// A top-level statement of a function body: its lines (the position markers
 /// before it included), the local it declares (`let name`) with the type the
 /// `let` states, and the identifiers it names outside string literals and
-/// comments.
+/// comments, in the order they first appear (the order of the parameters of a
+/// part, so the output does not depend on hashing).
 struct Statement<'a> {
     lines: &'a [String],
     declares: Option<(String, Option<String>)>,
-    names: HashSet<String>,
+    names: Vec<String>,
 }
 
 /// The top-level statements of `lines` (the lines of a function body, each
@@ -3174,16 +3175,20 @@ fn statements(lines: &[String]) -> Vec<Statement<'_>> {
         if depth == 0 {
             let lines = &lines[start..=index];
             let declares = lines.iter().map(|line| line.trim_start()).find(|line| !line.starts_with("//")).and_then(declared_local);
-            let mut names = HashSet::new();
+            let mut names: Vec<String> = Vec::new();
             for line in lines.iter().map(|line| line.trim_start()).filter(|line| !line.starts_with("//")) {
-                names.extend(identifiers(line));
+                for name in identifiers(line) {
+                    if !names.contains(&name) {
+                        names.push(name);
+                    }
+                }
             }
             statements.push(Statement { lines, declares, names });
             start = index + 1;
         }
     }
     if start < lines.len() {
-        statements.push(Statement { lines: &lines[start..], declares: None, names: HashSet::new() });
+        statements.push(Statement { lines: &lines[start..], declares: None, names: Vec::new() });
     }
     statements
 }
@@ -3462,6 +3467,25 @@ mod tests {
         assert!(!parts.is_empty());
         assert_eq!(split.first().map(String::as_str), Some("    let late = Dictionary::new();"));
         assert!(parts.iter().all(|part| !part.contains("let late")));
+    }
+
+    #[test]
+    fn the_parameters_of_a_part_follow_the_order_the_locals_first_appear() {
+        // Each statement names both captured locals; hashing must not decide their order.
+        for (first, second) in [("dictionary_0", "context"), ("context", "dictionary_0")] {
+            let mut statements = vec!["let dictionary_0 = Dictionary::new();".to_string()];
+            for index in 0..=SPLIT_THRESHOLD {
+                statements.push(format!("touch(&{first}, &{second}, {index});"));
+            }
+            statements.push("Ok(dictionary_0)".to_string());
+            let lines = body(&statements);
+            let (_, parts) = split_into_parts("build_x", "x.xaml", &lines, &known_types());
+            assert!(!parts.is_empty());
+            let expected = format!("fn build_x_part_0(\n    {first}: ");
+            assert!(parts[0].contains(&expected), "{}", parts[0]);
+            let second_parameter = format!("    {second}: ");
+            assert!(parts[0].find(&expected).unwrap() < parts[0].find(&second_parameter).unwrap());
+        }
     }
 
     #[test]
