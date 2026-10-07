@@ -5787,6 +5787,8 @@
     "selection/selection_model_tests_multiple.rs",
     "selection/selection_model_tests_single.rs",
     "size_to_content.rs",
+    "styled_element_tests_resources.rs",
+    "styled_element_tests_theming.rs",
     "templates/template_result.rs",
     "test_command.rs",
     "test_support.rs",
