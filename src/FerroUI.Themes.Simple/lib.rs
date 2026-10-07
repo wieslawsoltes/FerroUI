@@ -7,10 +7,11 @@
 //! [`SimpleTheme`] class), `Accents/Base.xaml` (colours and brushes of the
 //! variants), `Controls/SimpleControls.xaml` (the list of the control
 //! themes) and one document per control under `Controls/`. The documents
-//! are embedded in the crate as assets of the assembly
-//! `FerroUI.Themes.Simple` and addressable as
-//! `ferres://FerroUI.Themes.Simple/<path>`. With the feature `remove-compiled-documents`
-//! the compiled documents are not embedded (see `build.rs`).
+//! belong to the assembly `FerroUI.Themes.Simple`, with the URIs
+//! `ferres://FerroUI.Themes.Simple/<path>`. They are compiled into the crate,
+//! as upstream's compiler compiles them, and are not embedded as assets: a
+//! load by URI goes to the loader table of the compiled markup, which
+//! answers the public document `SimpleTheme.xaml` (see `build.rs`).
 //!
 //! ```ignore
 //! application.styles().add(SimpleTheme::new().upcast::<Styles>());

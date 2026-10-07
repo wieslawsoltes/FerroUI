@@ -30,13 +30,6 @@ wasm-bindgen = { workspace = true }
 # sample (see `samples/ControlCatalog/PlaceholderAssets`). Only the browser build selects it, so that
 # workspace builds for the host keep the sample as it is. The pictures and fonts of the sample are
 # plain files of the site (`assets/ControlCatalog/`, feature `separate-assets`) that the host page
-# fetches next to the module, so that the module stays within its size budget. The themes are created
-# from their compiled markup, and nothing in the catalog loads a document of a theme by URI, so the
-# theme documents are not embedded (feature `remove-compiled-documents` of the theme crates).
-# Deviation (browser-platform.md, section 14): upstream answers a load by URI of any compiled theme
-# document through its generated loader; the compiled loaders of the themes answer only the document
-# of the theme class, so without the embedded documents a load of another one fails.
+# fetches next to the module, so that the module stays within its size budget.
 [target.'cfg(target_os = "emscripten")'.dependencies]
 control-catalog = { path = "../ControlCatalog", features = ["placeholder-branding", "separate-assets"] }
-ferroui-themes-fluent = { workspace = true, features = ["remove-compiled-documents"] }
-ferroui-themes-simple = { workspace = true, features = ["remove-compiled-documents"] }

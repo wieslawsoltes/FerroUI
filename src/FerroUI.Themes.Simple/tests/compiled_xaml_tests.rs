@@ -9,7 +9,7 @@
 //! ```
 
 use ferroui_base::StaticType;
-use ferroui_markup_xaml_loader::rust_emitter::generate_class_file;
+use ferroui_markup_xaml_loader::rust_emitter::{generate_class_file, ClassConstructor};
 use ferroui_markup_xaml_loader::FerroRuntimeXamlLoader;
 
 use super::support::start_application;
@@ -22,7 +22,8 @@ fn generate() -> String {
     crate::register_types();
     // The emitter reads the documents of the class as the run-time loader does.
     FerroRuntimeXamlLoader::register_class_document(<SimpleTheme as StaticType>::TYPE, SimpleTheme::DOCUMENT_URI);
-    generate_class_file(<SimpleTheme as StaticType>::TYPE)
+    // Upstream's class has the one constructor `SimpleTheme(IServiceProvider? sp = null)`.
+    generate_class_file(<SimpleTheme as StaticType>::TYPE, ClassConstructor::ServiceProvider("with_service_provider"))
         .unwrap_or_else(|reasons| panic!("the documents of the theme are not eligible:\n{reasons}"))
 }
 

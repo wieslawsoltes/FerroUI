@@ -6,8 +6,11 @@
 //! The table is written to `$OUT_DIR/assets.rs` as `(rooted path, bytes)`
 //! pairs and registered with the asset loader by `register_types()`, next
 //! to the table of the documents `Controls/excluded.txt` leaves out of the
-//! theme. With the feature `remove-compiled-documents`, only the
-//! documents that are left out of the theme (not compiled) are embedded.
+//! theme. Only the documents that are left out of the theme (not
+//! compiled) are registered as assets: the compiled documents are answered
+//! by the loader table of the compiled markup, as upstream's compiler
+//! removes every compiled resource from the assembly. The table of every
+//! document (`DOCUMENTS`) exists for the tests of the crate alone.
 
 use std::env;
 use std::fmt::Write as _;
@@ -79,21 +82,27 @@ fn main() {
         excluded.push((asset_path, missing_types.trim().to_string()));
     }
 
-    // With the feature `remove-compiled-documents`, the documents the compiled markup of the theme
-    // (`compiled_xaml.rs`) is generated from are not embedded: every document of the crate except
-    // the ones left out of the theme, which are not compiled. Upstream's compiler removes every
-    // compiled resource from the assembly (`res.Remove()` in `XamlCompilerTaskExecutor`).
-    if env::var_os("CARGO_FEATURE_REMOVE_COMPILED_DOCUMENTS").is_some() {
-        assets.retain(|(asset_path, _)| excluded.iter().any(|(path, _)| path == asset_path));
-    }
+    // The documents the compiled markup of the theme (`compiled_xaml.rs`) is generated from are not
+    // registered: every document of the crate except the ones left out of the theme, which are not
+    // compiled. Upstream's compiler removes every compiled resource from the assembly (`res.Remove()`
+    // in `XamlCompilerTaskExecutor`) and answers a load by URI through the generated `!XamlLoader`
+    // (`try_load` of `compiled_xaml.rs`).
+    let compiled = |asset_path: &str| !excluded.iter().any(|(path, _)| path == asset_path);
 
     let mut text = String::from("pub(crate) static ASSETS: &[(&str, &[u8])] = &[\n");
+    let mut documents = String::from("#[cfg(test)]\npub(crate) static DOCUMENTS: &[(&str, &[u8])] = &[\n");
     for (asset_path, path) in &assets {
         let path = path.canonicalize().unwrap_or_else(|e| panic!("cannot resolve {}: {e}", path.display()));
         println!("cargo::rerun-if-changed={}", path.display());
-        writeln!(text, "    ({asset_path:?}, include_bytes!({:?})),", path.display().to_string()).expect("write");
+        let entry = format!("    ({asset_path:?}, include_bytes!({:?})),\n", path.display().to_string());
+        if !compiled(asset_path) {
+            text.push_str(&entry);
+        }
+        documents.push_str(&entry);
     }
     text.push_str("];\n");
+    documents.push_str("];\n");
+    text.push_str(&documents);
 
     text.push_str("pub(crate) static EXCLUDED: &[ExcludedDocument] = &[\n");
     for (asset_path, missing_types) in &excluded {
