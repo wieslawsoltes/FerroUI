@@ -94,6 +94,17 @@ opt-level = "z"
 lto = "thin"
 codegen-units = 1
 
+# The property system, styling, layout and the controls run on every frame that changes the view
+# (a scrolled list detaches, clears, prepares and attaches a container per row). At "z" that code is
+# barely inlined; at "s" scrolling the TableView page of the catalog takes about 20 % less processor
+# time, for 3.0 MB more of module (0.76 MB with gzip; docs/porting/browser-platform.md, section 18,
+# "Run-time speed of the framework crates").
+[profile.browser.package.ferroui-base]
+opt-level = "s"
+
+[profile.browser.package.ferroui-controls]
+opt-level = "s"
+
 [profile.browser.package.xamlx]
 opt-level = 3
 
