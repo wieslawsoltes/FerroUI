@@ -326,7 +326,7 @@ FerroUI-only crates have no upstream source directory (for example the MicroCom 
 
 ## Rust-only files
 
-314 Rust source files have no upstream counterpart (298 without a recorded reason). They are listed at the end of each project page.
+313 Rust source files have no upstream counterpart (297 without a recorded reason). They are listed at the end of each project page.
 
 | Project | Rust file | Reason |
 |---|---|---|
@@ -599,7 +599,6 @@ FerroUI-only crates have no upstream source directory (for example the MicroCom 
 | [Avalonia.Themes.Simple](tracking/Avalonia.Themes.Simple.md) | `src/FerroUI.Themes.Simple/compiled_xaml.rs` | **unmapped** |
 | [Avalonia.Themes.Simple](tracking/Avalonia.Themes.Simple.md) | `src/FerroUI.Themes.Simple/register_types.rs` | **unmapped** |
 | [Avalonia.Themes.Simple](tracking/Avalonia.Themes.Simple.md) | `src/FerroUI.Themes.Simple/rust_paths.rs` | **unmapped** |
-| [Avalonia.Browser](tracking/Avalonia.Browser.md) | `src/Browser/FerroUI.Browser/asset_bundle.rs` | **unmapped** |
 | [Avalonia.Browser](tracking/Avalonia.Browser.md) | `src/Browser/FerroUI.Browser/interop/completion_helper.rs` | **unmapped** |
 | [Avalonia.HarfBuzz](tracking/Avalonia.HarfBuzz.md) | `src/HarfBuzz/FerroUI.HarfBuzz/hb.rs` | **unmapped** |
 | [Avalonia.Markup](tracking/Avalonia.Markup.md) | `src/Markup/FerroUI.Markup/markup/parsers/property_parser.rs` | **unmapped** |

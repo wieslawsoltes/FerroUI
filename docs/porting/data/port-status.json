@@ -6969,7 +6969,6 @@
     ]
    },
    "rustOnly": [
-    "asset_bundle.rs",
     "interop/completion_helper.rs"
    ]
   },
