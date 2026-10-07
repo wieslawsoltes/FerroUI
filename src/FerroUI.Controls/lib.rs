@@ -308,6 +308,8 @@ mod border_tests;
 #[cfg(test)]
 mod canvas_tests;
 #[cfg(test)]
+mod classes_tests;
+#[cfg(test)]
 mod content_control_tests;
 #[cfg(test)]
 mod user_control_tests;
@@ -335,6 +337,8 @@ mod stack_panel_tests;
 mod viewbox_tests;
 #[cfg(test)]
 mod wrap_panel_tests;
+#[cfg(test)]
+mod name_scope_tests;
 #[cfg(test)]
 mod navigation_tests;
 
