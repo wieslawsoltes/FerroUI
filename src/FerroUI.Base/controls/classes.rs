@@ -125,7 +125,7 @@ impl Classes {
         for name in names {
             let name = name.as_ref();
             Self::panic_if_pseudoclass(name, "added");
-            if !self.contains(name) && !to_add.iter().any(|n| n == name) {
+            if !self.contains(name) {
                 to_add.push(name.to_string());
             }
         }
