@@ -9,7 +9,7 @@ use ferroui_base::controls::{NameScope, NameScopeRef};
 use ferroui_base::metadata::IServiceProvider;
 use ferroui_base::BoxedValue;
 
-use super::compiled::{create_context, populate_context, to_value, XmlNamespaceTable, FRAMEWORK_CONTEXT};
+use super::compiled::{create_context, populate_context, to_value, DocumentInfo, XmlNamespaceTable, FRAMEWORK_CONTEXT};
 use super::{IFerroXamlIlEagerParentStackProvider, IFerroXamlIlParentStackProvider, IFerroXamlIlXmlNamespaceInfoProvider};
 use crate::test_support::{boxed, TestServiceProvider};
 use crate::{IRootObjectProvider, IUriContext};
@@ -86,7 +86,7 @@ fn the_parent_stack_is_the_pushed_objects_then_the_parents_of_the_parent() {
 
 #[test]
 fn the_populate_context_has_the_root_object() {
-    let context = populate_context(None, None, NAMESPACES, to_value(7i32));
+    let context = populate_context(None, &DocumentInfo { base_uri: None, namespaces: NAMESPACES }, to_value(7i32));
     let provider: Rc<dyn IServiceProvider> = context;
     let root = provider.get_service_of::<Rc<dyn IRootObjectProvider>>().expect("a root object provider");
     assert_eq!(root.root_object().and_then(|root| root.downcast_ref::<i32>().copied()), Some(7));
