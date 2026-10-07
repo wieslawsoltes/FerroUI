@@ -7,7 +7,13 @@ pub use content_presenter::ContentPresenter;
 pub use i_content_presenter_host::{as_content_presenter_host, register_content_presenter_host, IContentPresenterHost};
 
 #[cfg(test)]
-mod content_presenter_tests;
+mod content_presenter_tests_in_template;
+#[cfg(test)]
+mod content_presenter_tests_layout;
+#[cfg(test)]
+mod content_presenter_tests_standalone;
+#[cfg(test)]
+mod content_presenter_tests_unrooted;
 
 mod scroll_content_presenter;
 pub use scroll_content_presenter::ScrollContentPresenter;
