@@ -1,8 +1,10 @@
 // Sizes of the files of a browser site: raw, with gzip and with brotli (both at their highest level),
-// as a Markdown table, with the sum of the asset bundles (`.assets` files) when there are several. When
-// the site has a list of its asset bundles (a `*.assets.json` file with `startup` and `bundles`, which
-// the build script of the ControlCatalog sample writes), a second table gives each bundle with its
-// sizes, its number of assets and the pages that wait for it.
+// as a Markdown table. When the site has a list of its asset files (a JSON file with `assembly`,
+// `directory`, `files`, `startup` and `pages`, which the build script of the ControlCatalog sample
+// writes to `assets/ControlCatalog.json`), the files of its directory are one row of the first table,
+// and a second table gives the asset files by what they are loaded for: the start-up, each page of the
+// list that has files of its own (a file several pages use counts for each of them), the files of the
+// pages each counted once, and the files no page waits for.
 //
 //   node scripts/browser/module-sizes.mjs <site directory> [--github-output <file>]
 //
@@ -25,23 +27,34 @@ if (!site || !fs.existsSync(site) || (githubOutput !== undefined && !githubOutpu
     process.exit(2);
 }
 
+/** Paths relative to the site, with `/`. */
 const files = fs.readdirSync(site, { recursive: true })
-    .map((name) => path.join(site, name))
-    .filter((file) => fs.statSync(file).isFile() && !file.endsWith(".map"))
-    .sort((a, b) => fs.statSync(b).size - fs.statSync(a).size);
+    .map((name) => name.split(path.sep).join("/"))
+    .filter((name) => fs.statSync(path.join(site, name)).isFile() && !name.endsWith(".map"))
+    .sort((a, b) => fs.statSync(path.join(site, b)).size - fs.statSync(path.join(site, a)).size);
 
 const megabytes = (bytes) => `${(bytes / 1_000_000).toFixed(2)} MB`;
 const size = (bytes) => bytes >= 100_000 ? megabytes(bytes) : `${(bytes / 1000).toFixed(1)} kB`;
 
+/** The lists of asset files of the site. */
+const manifests = [];
+for (const name of files.filter((name) => name.endsWith(".json"))) {
+    let manifest;
+    try { manifest = JSON.parse(fs.readFileSync(path.join(site, name), "utf8")); } catch { continue; }
+    if (typeof manifest?.directory !== "string" || typeof manifest.files !== "object" || !Array.isArray(manifest.startup)
+        || typeof manifest.pages !== "object") continue;
+    manifests.push({ name, manifest });
+}
+const assetDirectoryOf = (name) => manifests.map(({ manifest }) => manifest.directory).find((directory) => name.startsWith(`${directory}/`));
+
 console.log("| File | Raw | gzip -9 | brotli -11 |");
 console.log("|---|---:|---:|---:|");
 const total = [0, 0, 0];
-const bundles = [0, 0, 0];
-let bundleCount = 0;
+const assetDirectories = new Map();
 const wasm = [0, 0];
 const sizesOf = new Map();
-for (const file of files) {
-    const content = fs.readFileSync(file);
+for (const name of files) {
+    const content = fs.readFileSync(path.join(site, name));
     const sizes = [
         content.length,
         zlib.gzipSync(content, { level: 9 }).length,
@@ -53,28 +66,52 @@ for (const file of files) {
         }).length
     ];
     sizes.forEach((value, i) => { total[i] += value; });
-    sizesOf.set(path.relative(site, file), sizes);
-    if (file.endsWith(".wasm")) { wasm[0] += sizes[0]; wasm[1] += sizes[1]; }
-    if (file.endsWith(".assets")) { sizes.forEach((value, i) => { bundles[i] += value; }); bundleCount++; }
-    console.log(`| \`${path.relative(site, file)}\` | ${sizes.map(size).join(" | ")} |`);
+    sizesOf.set(name, sizes);
+    if (name.endsWith(".wasm")) { wasm[0] += sizes[0]; wasm[1] += sizes[1]; }
+    const directory = assetDirectoryOf(name);
+    if (directory === undefined) {
+        console.log(`| \`${name}\` | ${sizes.map(size).join(" | ")} |`);
+        continue;
+    }
+    const sum = assetDirectories.get(directory) ?? { count: 0, sizes: [0, 0, 0] };
+    sum.count++;
+    sizes.forEach((value, i) => { sum.sizes[i] += value; });
+    assetDirectories.set(directory, sum);
 }
-if (bundleCount > 1) console.log(`| the ${bundleCount} asset bundles together | ${bundles.map(size).join(" | ")} |`);
+for (const [directory, sum] of assetDirectories) {
+    console.log(`| \`${directory}/\` (${sum.count} asset files) | ${sum.sizes.map(size).join(" | ")} |`);
+}
 console.log(`| total (without source maps) | ${total.map(size).join(" | ")} |`);
 
-for (const [name] of [...sizesOf].filter(([name]) => name.endsWith(".assets.json"))) {
-    const manifest = JSON.parse(fs.readFileSync(path.join(site, name), "utf8"));
-    if (typeof manifest.startup !== "string" || typeof manifest.bundles !== "object") continue;
+for (const { name, manifest } of manifests) {
+    /** Raw and gzip size of the files of `assets` (rooted asset paths). */
+    const sum = (assets) => {
+        const result = [0, 0];
+        for (const asset of assets) {
+            const sizes = sizesOf.get(`${manifest.directory}${asset}`);
+            if (!sizes) throw new Error(`${name} lists ${asset}, which is not a file of the site`);
+            result[0] += sizes[0]; result[1] += sizes[1];
+        }
+        return result;
+    };
+    const row = (label, assets) => {
+        const [raw, gzip] = sum(assets);
+        console.log(`| ${label} | ${assets.length} | ${size(raw)} | ${size(gzip)} |`);
+    };
+    const ofPages = new Set(Object.values(manifest.pages).flat());
+    const unreached = Object.keys(manifest.files).filter((asset) => !manifest.startup.includes(asset) && !ofPages.has(asset));
+    const withFiles = Object.entries(manifest.pages).filter(([, assets]) => assets.length > 0)
+        .sort(([a, x], [b, y]) => sum(y)[0] - sum(x)[0] || a.localeCompare(b));
     console.log("");
-    console.log(`Asset bundles listed in \`${name}\`:`);
+    console.log(`Asset files listed in \`${name}\` (${Object.keys(manifest.pages).length} pages, ${withFiles.length} of them with files of their own):`);
     console.log("");
-    console.log("| Bundle | Raw | gzip -9 | Assets | Loaded for |");
-    console.log("|---|---:|---:|---:|---|");
-    for (const [bundle, entry] of Object.entries(manifest.bundles)) {
-        const sizes = sizesOf.get(bundle);
-        const pages = bundle === manifest.startup ? "start-up"
-            : entry.pages.length > 0 ? entry.pages.join(", ") : "no page (prefetched only)";
-        console.log(`| \`${bundle}\` | ${sizes ? size(sizes[0]) : "missing"} | ${sizes ? size(sizes[1]) : "missing"} | ${entry.assets.length} | ${pages} |`);
-    }
+    console.log("| Loaded for | Files | Raw | gzip -9 |");
+    console.log("|---|---:|---:|---:|");
+    row("start-up", manifest.startup);
+    for (const [page, assets] of withFiles) row(`page ${page}`, assets);
+    row("the files of the pages, each once", [...ofPages]);
+    if (unreached.length > 0) row("no page (prefetched only)", unreached);
+    row("all", Object.keys(manifest.files));
 }
 
 if (githubOutput !== undefined) {

@@ -1,11 +1,11 @@
-//! Which page of the catalog uses which asset, and the asset bundles that
-//! follow from it (part of the build script, see `build.rs`).
+//! Which page of the catalog uses which asset file (part of the build
+//! script, see `build.rs`).
 //!
 //! Not a port: the split of the assets is a matter of the browser host of
-//! the sample (`samples/ControlCatalog.Browser`), which downloads a bundle
-//! when the catalog is about to create a page that needs it. The asset
-//! loader stays synchronous, as upstream's: an asset a document names is
-//! opened while the document is built, so the bundles of a page have to be
+//! the sample (`samples/ControlCatalog.Browser`), which fetches the files of
+//! a page when the catalog is about to create the page. The asset loader
+//! stays synchronous, as upstream's: an asset a document names is opened
+//! while the document is built, so the files of a page have to be
 //! registered before the page is created.
 //!
 //! The sources of the crate (its documents and its Rust files, without
@@ -32,17 +32,15 @@
 //! only declare modules and tables of every type (`lib.rs`, `mod.rs`,
 //! `register_types.rs`, `assets.rs`) are not followed.
 //!
-//! The assets the start-up reaches, and the assets no source names (the
-//! scan cannot tell who uses them, so they are there from the start), make
-//! the start-up bundle. An asset a page reaches goes to the bundle of the
-//! set of pages that use it: one bundle per page for what one page uses, one
-//! shared bundle per set of pages for what several use, so that no page
-//! downloads an asset it does not use; an asset of [`LARGE_ASSET`] bytes or
-//! more has a bundle of its own. An asset that only sources name that
-//! neither the start-up nor a page reaches (documents whose class nothing
-//! creates, such as the demos of a page whose class is not ported yet) goes
-//! to [`UNREACHED_BUNDLE`], which no page waits for; the host fetches it in
-//! the background after the others.
+//! The start-up files are the assets the start-up reaches and the assets no
+//! source names (the scan cannot tell who uses them, so they are there from
+//! the start). The files of a page are the assets the page reaches that are
+//! not start-up files; a file several pages reach is listed for each of
+//! them and fetched once. An asset that only sources name that neither the
+//! start-up nor a page reaches (documents whose class nothing creates, such
+//! as the demos of a page whose class is not ported yet) is unreached: no
+//! page waits for it, and the host fetches it in the background after the
+//! others.
 
 use std::collections::{BTreeMap, BTreeSet, HashMap, HashSet, VecDeque};
 use std::fmt::Write as _;
@@ -63,16 +61,6 @@ const ASSET_URI_PREFIX: &str = "ferres://ControlCatalog/";
 /// Directories of the crate without sources of the application.
 const SKIPPED_DIRECTORIES: &[&str] = &["target", "tests", "examples", "build", "Assets", "PlaceholderAssets"];
 
-/// An asset of this many bytes or more gets a bundle of its own.
-pub const LARGE_ASSET: u64 = 1_000_000;
-
-/// The name of the start-up bundle.
-pub const STARTUP_BUNDLE: &str = "control-catalog.assets";
-
-/// The name of the bundle of the assets that only sources name that
-/// neither the start-up nor a page reaches.
-pub const UNREACHED_BUNDLE: &str = "control-catalog.unreached.assets";
-
 /// A document or a Rust file of the crate.
 struct Unit {
     /// The path relative to the crate directory, with `/`.
@@ -85,38 +73,26 @@ struct Unit {
 struct Page {
     /// The header of its entry (what the host is asked to load assets for).
     header: String,
-    /// The name of the document (`ButtonsPage`) or of the class.
-    name: String,
     roots: Vec<usize>,
-}
-
-/// An asset bundle loaded on demand.
-pub struct Bundle {
-    pub name: String,
-    /// Rooted asset paths.
-    pub assets: Vec<String>,
-    /// The headers of the pages that need it.
-    pub pages: Vec<String>,
 }
 
 /// The split of the assets.
 pub struct Plan {
-    /// The assets of the start-up bundle (rooted paths), the unattributed
-    /// ones included.
+    /// The start-up files (rooted asset paths), the unattributed ones
+    /// included.
     pub startup: Vec<String>,
     /// The assets no source names.
     pub unattributed: Vec<String>,
     /// The assets only sources name that neither the start-up nor a page
-    /// reaches (the bundle [`UNREACHED_BUNDLE`]).
+    /// reaches.
     pub unreached: Vec<String>,
     /// Those sources.
     pub unreached_sources: Vec<String>,
     /// Asset paths that a source names but that are no asset of the crate.
     pub unresolved: Vec<String>,
-    /// The bundles loaded on demand.
-    pub bundles: Vec<Bundle>,
-    /// The bundles of each page of the page list, by header.
-    pub page_bundles: BTreeMap<String, Vec<String>>,
+    /// The files of each page of the page list other than the start-up
+    /// files, by header.
+    pub pages: BTreeMap<String, Vec<String>>,
 }
 
 /// The split of `assets` (rooted paths of the non-document assets, with
@@ -179,7 +155,7 @@ pub fn plan(root: &Path, assets: &BTreeMap<String, u64>) -> Plan {
     for (unit, names) in units.iter().zip(&used) {
         assert!(
             !is_registry(&unit.path) || names.is_empty(),
-            "{} names assets ({names:?}) but is not followed by the scan of the asset bundles",
+            "{} names assets ({names:?}) but is not followed by the scan of the asset files",
             unit.path
         );
     }
@@ -243,42 +219,11 @@ pub fn plan(root: &Path, assets: &BTreeMap<String, u64>) -> Plan {
         .map(|(_, unit)| unit.path.clone())
         .collect();
 
-    // One bundle per set of pages, and one per large asset.
-    let mut groups: BTreeMap<(Option<String>, BTreeSet<usize>), Vec<String>> = BTreeMap::new();
+    let mut of_pages: BTreeMap<String, Vec<String>> = pages.iter().map(|page| (page.header.clone(), Vec::new())).collect();
     for (asset, pages_of) in &users {
-        let large = (assets[asset] >= LARGE_ASSET).then(|| asset.clone());
-        groups.entry((large, pages_of.clone())).or_default().push(asset.clone());
-    }
-    let mut bundles: Vec<Bundle> = groups
-        .into_iter()
-        .map(|((large, pages_of), mut members)| {
-            members.sort();
-            let name = if let Some(asset) = large {
-                format!("control-catalog.{}.assets", file_stem(&asset))
-            } else if pages_of.len() == 1 {
-                format!("control-catalog.{}.assets", pages[*pages_of.iter().next().expect("a page")].name)
-            } else {
-                let largest = members.iter().max_by_key(|asset| (assets[*asset], std::cmp::Reverse(*asset))).expect("an asset");
-                format!("control-catalog.shared.{}.assets", slug(largest))
-            };
-            Bundle { name, assets: members, pages: pages_of.iter().map(|&p| pages[p].header.clone()).collect() }
-        })
-        .collect();
-    if !unreached.is_empty() {
-        bundles.push(Bundle { name: UNREACHED_BUNDLE.to_string(), assets: unreached.clone(), pages: Vec::new() });
-    }
-    bundles.sort_by(|a, b| a.name.cmp(&b.name));
-    let mut names = HashSet::new();
-    for bundle in &bundles {
-        assert!(bundle.name != STARTUP_BUNDLE && names.insert(bundle.name.clone()), "two asset bundles are named {}", bundle.name);
-    }
-
-    let mut page_bundles = BTreeMap::new();
-    for page in &pages {
-        let mut of_page: Vec<String> =
-            bundles.iter().filter(|bundle| bundle.pages.contains(&page.header)).map(|bundle| bundle.name.clone()).collect();
-        of_page.sort();
-        page_bundles.insert(page.header.clone(), of_page);
+        for &p in pages_of {
+            of_pages.get_mut(&pages[p].header).expect("a page of the list").push(asset.clone());
+        }
     }
 
     Plan {
@@ -287,49 +232,33 @@ pub fn plan(root: &Path, assets: &BTreeMap<String, u64>) -> Plan {
         unreached,
         unreached_sources,
         unresolved: unresolved.into_iter().collect(),
-        bundles,
-        page_bundles,
+        pages: of_pages,
     }
 }
 
 impl Plan {
-    /// The manifest the browser host reads (`control-catalog.assets.json`):
-    /// the start-up bundle, every bundle with its size, assets and pages,
-    /// the bundles of each page by header, the order in which the host
-    /// fetches the bundles in the background (smallest first, so that the
-    /// most pages are ready soonest; [`UNREACHED_BUNDLE`] last), the
-    /// unattributed assets and the sources that name assets but that
-    /// nothing reaches.
-    pub fn manifest(&self, sizes: &BTreeMap<String, u64>) -> String {
-        let bytes = |assets: &[String]| assets.iter().map(|asset| sizes[asset]).sum::<u64>();
+    /// The manifest the browser host reads: the assembly of the assets and
+    /// the directory of the site that holds their files, the size of every
+    /// file, the start-up files, the files of each page by header, the order
+    /// in which the host fetches the other files in the background (the
+    /// files of pages, smallest first, so that the most pages are ready
+    /// soonest; the unreached files last), the unattributed assets and the
+    /// sources that name assets but that nothing reaches.
+    pub fn manifest(&self, assembly: &str, directory: &str, sizes: &BTreeMap<String, u64>) -> String {
         let list = |items: &[String]| items.iter().map(|item| json_string(item)).collect::<Vec<_>>().join(", ");
         let mut text = String::from("{\n");
-        writeln!(text, "  \"startup\": {},", json_string(STARTUP_BUNDLE)).expect("write");
-        text.push_str("  \"bundles\": {\n");
-        let mut entries = vec![format!(
-            "    {}: {{ \"bytes\": {}, \"pages\": [], \"assets\": [{}] }}",
-            json_string(STARTUP_BUNDLE),
-            bytes(&self.startup),
-            list(&self.startup)
-        )];
-        for bundle in &self.bundles {
-            entries.push(format!(
-                "    {}: {{ \"bytes\": {}, \"pages\": [{}], \"assets\": [{}] }}",
-                json_string(&bundle.name),
-                bytes(&bundle.assets),
-                list(&bundle.pages),
-                list(&bundle.assets)
-            ));
-        }
-        text.push_str(&entries.join(",\n"));
-        text.push_str("\n  },\n  \"pages\": {\n");
+        writeln!(text, "  \"assembly\": {},", json_string(assembly)).expect("write");
+        writeln!(text, "  \"directory\": {},", json_string(directory)).expect("write");
+        let files: Vec<String> = sizes.iter().map(|(asset, size)| format!("    {}: {size}", json_string(asset))).collect();
+        writeln!(text, "  \"files\": {{\n{}\n  }},", files.join(",\n")).expect("write");
+        writeln!(text, "  \"startup\": [{}],", list(&self.startup)).expect("write");
         let pages: Vec<String> =
-            self.page_bundles.iter().map(|(header, names)| format!("    {}: [{}]", json_string(header), list(names))).collect();
-        text.push_str(&pages.join(",\n"));
-        text.push_str("\n  },\n");
-        let mut prefetch: Vec<&Bundle> = self.bundles.iter().collect();
-        prefetch.sort_by_key(|bundle| (bundle.name == UNREACHED_BUNDLE, bytes(&bundle.assets), bundle.name.clone()));
-        let prefetch: Vec<String> = prefetch.into_iter().map(|bundle| bundle.name.clone()).collect();
+            self.pages.iter().map(|(header, assets)| format!("    {}: [{}]", json_string(header), list(assets))).collect();
+        writeln!(text, "  \"pages\": {{\n{}\n  }},", pages.join(",\n")).expect("write");
+        let of_pages: BTreeSet<&String> = self.pages.values().flatten().collect();
+        let mut prefetch: Vec<&String> = of_pages.iter().copied().chain(&self.unreached).collect();
+        prefetch.sort_by_key(|asset| (!of_pages.contains(asset), sizes[*asset], (*asset).clone()));
+        let prefetch: Vec<String> = prefetch.into_iter().cloned().collect();
         writeln!(text, "  \"prefetch\": [{}],", list(&prefetch)).expect("write");
         writeln!(text, "  \"unattributed\": [{}],", list(&self.unattributed)).expect("write");
         writeln!(text, "  \"unreached\": [{}]", list(&self.unreached_sources)).expect("write");
@@ -337,18 +266,15 @@ impl Plan {
         text
     }
 
-    /// The split as Rust tables, for the tests of the crate: the assets of
-    /// the start-up bundle and, per page header, the assets of the bundles
-    /// of the page.
+    /// The split as Rust tables, for the tests of the crate: the start-up
+    /// files and, per page header, the files of the page.
     pub fn rust_tables(&self) -> String {
         let mut text = String::from("pub(crate) static STARTUP_ASSETS: &[&str] = &[\n");
         for asset in &self.startup {
             writeln!(text, "    {asset:?},").expect("write");
         }
         text.push_str("];\npub(crate) static PAGE_ASSETS: &[(&str, &[&str])] = &[\n");
-        for (header, names) in &self.page_bundles {
-            let assets: Vec<&String> =
-                self.bundles.iter().filter(|bundle| names.contains(&bundle.name)).flat_map(|bundle| &bundle.assets).collect();
+        for (header, assets) in &self.pages {
             writeln!(text, "    ({header:?}, &{assets:?}),").expect("write");
         }
         text.push_str("];\n");
@@ -632,8 +558,7 @@ fn page_list(
                 let [document, header] = literals.as_slice() else { panic!("{PAGE_LIST}: an entry without a document and a header") };
                 let path = document.trim_start_matches('/');
                 let unit = *index.get(path).unwrap_or_else(|| panic!("{PAGE_LIST}: the document {document} does not exist"));
-                let name = path.rsplit('/').next().unwrap_or(path).trim_end_matches(".xaml").to_string();
-                Page { header: header.clone(), name, roots: class_units(unit) }
+                Page { header: header.clone(), roots: class_units(unit) }
             }
             "_page" => {
                 let span = &arguments[..arguments.find('"').unwrap_or_else(|| panic!("{PAGE_LIST}: add_page without a header"))];
@@ -642,7 +567,7 @@ fn page_list(
                     .last()
                     .unwrap_or_else(|| panic!("{PAGE_LIST}: add_page names no class of the crate"));
                 let header = string_literals(arguments, 1).remove(0);
-                Page { header, name: class.to_string(), roots: declared[class].clone() }
+                Page { header, roots: declared[class].clone() }
             }
             _ => continue,
         };
@@ -664,19 +589,6 @@ fn string_literals(text: &str, count: usize) -> Vec<String> {
         rest = &rest[start + 1 + length + 1..];
     }
     found
-}
-
-/// `/Assets/Fonts/WenQuanYiMicroHei-01.ttf` as `WenQuanYiMicroHei-01`.
-fn file_stem(asset: &str) -> &str {
-    let name = asset.rsplit('/').next().unwrap_or(asset);
-    name.rsplit_once('.').map_or(name, |(stem, _)| stem)
-}
-
-/// `/Assets/ModernApp/gallery_alpine.jpg` as `ModernApp-gallery_alpine`.
-fn slug(asset: &str) -> String {
-    let path = asset.trim_start_matches("/Assets/").trim_start_matches('/');
-    let path = path.rsplit_once('.').map_or(path, |(stem, _)| stem);
-    path.replace('/', "-")
 }
 
 fn json_string(text: &str) -> String {

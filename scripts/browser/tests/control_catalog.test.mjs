@@ -5,15 +5,15 @@
 //
 // The site directory defaults to target/browser/control-catalog-browser. The checks:
 //
-// - no file of the site carries a brand asset of the upstream project that
+// - no file of the site (the asset files included) carries a brand asset of the upstream project that
 //   samples/ControlCatalog/PlaceholderAssets replaces;
 // - once for WebGL2 (`?RenderingMode=WebGL2`) and once for the 2D canvas (`?RenderingMode=Software2D`):
 //   the application starts (the splash is closed and the view has a canvas), the canvas has the
 //   context of the mode, the main view is drawn (the canvas is not blank), the view is laid out again
 //   when the page is made larger (the area the larger size adds is drawn) and smaller, and nothing is
 //   logged as an error (console errors, uncaught exceptions, failed loads);
-// - the module, the start-up asset bundle and the list of the bundles are downloaded once each, through
-//   the preloads of the host page;
+// - the module, the list of the asset files and the start-up asset files are downloaded once each,
+//   through the preloads of the host page, and the page preloads no other asset file;
 // - input, driven with real pointer and key events: the navigation drawer opens from its toggle
 //   button, three pages are reached through the drawer and show their content, a click on a button
 //   has its effect, and text typed into a text box becomes its text;
@@ -21,11 +21,12 @@
 //   page shows its two native controls, elements of the page over the view (a button of the page that
 //   counts the clicks it gets from real pointer events, and an iframe), and a check box of the page hides
 //   one of them;
-// - the asset bundles (samples/ControlCatalog.Browser/wwwroot/page-assets.js): the start-up downloads the
-//   start-up bundle only, and the bundles of the pages follow the first frame, each once; with that
-//   prefetch off (`?PrefetchAssets=false`), opening the Container Queries page downloads its bundle and its
-//   images have their bitmaps and are drawn, and the CJK sample of the TextBox page finds its font (the
-//   typeface the font manager resolves is WenQuanYi Micro Hei) and draws its glyphs.
+// - the asset files (samples/ControlCatalog.Browser/wwwroot/page-assets.js): the start-up downloads the
+//   start-up files only, the files of the pages follow the first frame, every file is downloaded once,
+//   and nothing requests a bundle (`.assets`); with that prefetch off (`?PrefetchAssets=false`), opening
+//   the Container Queries page downloads exactly its files and its images have their bitmaps and are
+//   drawn, and the CJK sample of the TextBox page finds its font (the typeface the font manager resolves
+//   is WenQuanYi Micro Hei) and draws its glyphs.
 //
 // The view is read through the `catalogState` export of the host (samples/ControlCatalog.Browser),
 // which reports the drawer, the current page, the focus and the visible text with its bounds; the
@@ -49,6 +50,12 @@ if (!fs.existsSync(path.join(site, "index.html"))) {
     console.error(`no site at ${site}: build it with scripts/build-browser.sh control-catalog-browser`);
     process.exit(2);
 }
+
+// The list of the asset files of the site (samples/ControlCatalog/build/page_files.rs).
+const MANIFEST = "assets/ControlCatalog.json";
+const manifest = JSON.parse(fs.readFileSync(path.join(site, MANIFEST), "utf8"));
+/** The file of the site of the asset with the rooted path `asset`. */
+const fileOf = (asset) => `${manifest.directory}${asset}`;
 
 // Start-up includes compiling the WebAssembly module, which takes a while on a cold CI runner.
 const START_TIMEOUT = 180_000;
@@ -229,16 +236,18 @@ async function navigate(page, text, header = text) {
         && s.elements.some((e) => e.type === "TextBlock" && e.text === header && e.hit && e.y < 48 && e.x >= DRAWER_EDGE));
 }
 
-check("the module, the start-up asset bundle and the list of the bundles are downloaded once, through the preloads of the page", async (page) => {
+check("the module, the list of the asset files and the start-up files are downloaded once, through the preloads of the page", async (page) => {
     // A preload that does not match the request of the script (another name, other credentials) is
     // not used, and the file is downloaded a second time.
     const requests = JSON.parse(await page.evaluate(`JSON.stringify(performance.getEntriesByType("resource")
-        .map((e) => ({ file: new URL(e.name).pathname.split("/").pop(), initiator: e.initiatorType })))`));
-    for (const file of ["control_catalog_browser.wasm", "control-catalog.assets", "control-catalog.assets.json"]) {
+        .map((e) => ({ file: decodeURIComponent(new URL(e.name).pathname.slice(1)), initiator: e.initiatorType })))`));
+    for (const file of ["control_catalog_browser.wasm", MANIFEST, ...manifest.startup.map(fileOf)]) {
         const found = requests.filter((r) => r.file === file);
         assert(found.length === 1 && found[0].initiator === "link",
             `${file} was requested ${found.length} times (${found.map((r) => r.initiator).join(", ")}), expected once by its preload`);
     }
+    const preloaded = requests.filter((r) => r.initiator === "link" && r.file.startsWith(`${manifest.directory}/`)).map((r) => r.file);
+    assert(preloaded.length === manifest.startup.length, `the page preloads the asset files ${preloaded.join(", ")}, expected the start-up files`);
     assert(!page.log.some((line) => /preload/i.test(line)), `the browser reported a preload problem:\n${page.log.filter((line) => /preload/i.test(line)).join("\n")}`);
 });
 
@@ -350,53 +359,57 @@ check("the native controls of the Native Embed page are elements of the page ove
     assert(errors.length === 0, `errors were logged:\n${errors.join("\n")}`);
 }, { size: LARGER_SIZE });
 
-// --- asset bundles ---------------------------------------------------------------------------------------
+// --- asset files ---------------------------------------------------------------------------------------
 
-const manifest = JSON.parse(fs.readFileSync(path.join(site, "control-catalog.assets.json"), "utf8"));
-/** The asset bundles the page requested: from resource timing, and from the log of page-assets.js (with the reason). */
-async function bundleRequests(page) {
+/** The asset files the page requested: from resource timing (asset paths), and from the log of page-assets.js (with the reason). */
+async function fileRequests(page) {
     return JSON.parse(await page.evaluate(`JSON.stringify({
-        resources: performance.getEntriesByType("resource").filter((e) => /\\.assets$/.test(new URL(e.name).pathname))
-            .map((e) => ({ name: new URL(e.name).pathname.split("/").pop(), start: e.startTime, end: e.responseEnd })),
+        resources: performance.getEntriesByType("resource").map((e) => ({ path: decodeURIComponent(new URL(e.name).pathname), start: e.startTime, end: e.responseEnd }))
+            .filter((e) => e.path.startsWith("/${manifest.directory}/")).map((e) => ({ ...e, name: e.path.slice("/${manifest.directory}".length) })),
+        bundles: performance.getEntriesByType("resource").map((e) => new URL(e.name).pathname).filter((p) => p.endsWith(".assets")),
         requests: controlCatalogAssets.requests,
         marks: Object.fromEntries(performance.getEntriesByType("mark").map((m) => [m.name, m.startTime])),
     })`));
 }
 
-check("the start-up downloads the start-up bundle only; the other bundles follow the first frame, each once", async (page) => {
-    const names = Object.keys(manifest.bundles).filter((name) => name !== manifest.startup);
-    assert(names.length >= 3 && manifest.prefetch.length === names.length, `the manifest lists ${names.length} bundles besides the start-up bundle`);
-    await page.waitFor(`performance.getEntriesByType("mark").some((m) => m.name === "assets prefetched")`, 60_000);
-    const { resources, requests, marks } = await bundleRequests(page);
+check("the start-up downloads the start-up files only; the other files follow the first frame, each once", async (page) => {
+    const others = Object.keys(manifest.files).filter((asset) => !manifest.startup.includes(asset));
+    assert(others.length >= 20 && manifest.prefetch.length === others.length && new Set(manifest.prefetch).size === others.length,
+        `the manifest lists ${others.length} files besides the start-up files, and prefetches ${manifest.prefetch.length}`);
+    await page.waitFor(`performance.getEntriesByType("mark").some((m) => m.name === "assets prefetched")`, 120_000);
+    const { resources, bundles, requests, marks } = await fileRequests(page);
+    assert(bundles.length === 0, `asset bundles were requested: ${bundles.join(", ")}`);
     const firstFrame = marks["first frame"];
     assert(firstFrame > 0, "no first frame mark");
-    const before = resources.filter((r) => r.start < firstFrame).map((r) => r.name);
-    assert(before.length === 1 && before[0] === manifest.startup, `downloaded before the first frame: ${before.join(", ")}`);
-    for (const name of [manifest.startup, ...names]) {
-        const count = resources.filter((r) => r.name === name).length;
-        assert(count === 1, `${name} was downloaded ${count} times`);
-    }
+    const before = resources.filter((r) => r.start < firstFrame).map((r) => r.name).sort();
+    assert(JSON.stringify(before) === JSON.stringify([...manifest.startup].sort()), `downloaded before the first frame: ${before.join(", ")}`);
+    const counts = new Map();
+    for (const r of resources) counts.set(r.name, (counts.get(r.name) ?? 0) + 1);
+    const wrong = Object.keys(manifest.files).filter((asset) => counts.get(asset) !== 1).map((asset) => `${asset}: ${counts.get(asset) ?? 0}`);
+    assert(wrong.length === 0 && counts.size === Object.keys(manifest.files).length, `files not downloaded once: ${wrong.join(", ")}`);
     const prefetched = requests.filter((r) => r.reason === "prefetch");
-    assert(prefetched.length === names.length && prefetched.every((r) => r.start >= firstFrame),
-        `prefetched: ${JSON.stringify(prefetched)}, first frame at ${firstFrame}`);
-    const startupBytes = manifest.bundles[manifest.startup].bytes;
-    console.log(`      start-up bundle ${(startupBytes / 1e6).toFixed(2)} MB; first frame ${Math.round(firstFrame)} ms; ${names.length} bundles prefetched by ${Math.round(marks["assets prefetched"])} ms`);
+    assert(prefetched.length === others.length && prefetched.every((r) => r.start >= firstFrame),
+        `prefetched ${prefetched.length} files, first frame at ${firstFrame}`);
+    const startupBytes = manifest.startup.reduce((sum, asset) => sum + manifest.files[asset], 0);
+    console.log(`      ${manifest.startup.length} start-up files, ${(startupBytes / 1e6).toFixed(2)} MB; first frame ${Math.round(firstFrame)} ms; ${others.length} files prefetched by ${Math.round(marks["assets prefetched"])} ms`);
     assert(page.errors.length === 0, `errors were logged:\n${page.errors.join("\n")}`);
 });
 
-check("opening a page downloads its bundle and its images are drawn", async (page) => {
+check("opening a page downloads its files and its images are drawn", async (page) => {
     await sleep(1500);
-    let { resources } = await bundleRequests(page);
-    assert(resources.length === 1 && resources[0].name === manifest.startup, `downloaded without prefetching: ${resources.map((r) => r.name).join(", ")}`);
+    let { resources } = await fileRequests(page);
+    assert(resources.length === manifest.startup.length, `downloaded without prefetching: ${resources.map((r) => r.name).join(", ")}`);
     const expected = manifest.pages["Container Queries"];
-    assert(expected?.length > 0, "the manifest lists no bundle of the Container Queries page");
+    assert(expected?.length > 0, "the manifest lists no file of the Container Queries page");
 
     await navigate(page, "Layout");
-    ({ resources } = await bundleRequests(page));
-    assert(resources.length === 1, `opening the section page downloaded ${resources.map((r) => r.name).join(", ")}`);
+    ({ resources } = await fileRequests(page));
+    assert(resources.length === manifest.startup.length, `opening the section page downloaded ${resources.map((r) => r.name).join(", ")}`);
     await navigate(page, "Container Queries");
-    const { requests } = await bundleRequests(page);
+    const { requests, resources: after } = await fileRequests(page);
     const fetched = requests.filter((r) => r.reason === "page").map((r) => r.name).sort();
+    const downloaded = after.map((r) => r.name).filter((name) => !manifest.startup.includes(name)).sort();
+    assert(JSON.stringify(downloaded) === JSON.stringify(fetched), `the page downloaded ${downloaded.join(", ")}`);
     assert(JSON.stringify(fetched) === JSON.stringify([...expected].sort()), `the page fetched ${fetched.join(", ")}, expected ${expected.join(", ")}`);
 
     const state = await page.until("the images of the page have their bitmaps",
@@ -416,9 +429,10 @@ check("opening a page downloads its bundle and its images are drawn", async (pag
 check("the CJK sample of the TextBox page finds its font and draws its glyphs", async (page) => {
     await navigate(page, "Text");
     await navigate(page, "TextBox");
-    const { requests } = await bundleRequests(page);
+    const { requests } = await fileRequests(page);
     const fetched = requests.filter((r) => r.reason === "page").map((r) => r.name);
-    assert(manifest.pages.TextBox.every((name) => fetched.includes(name)), `the TextBox page fetched ${fetched.join(", ")}`);
+    assert(manifest.pages.TextBox.includes("/Assets/Fonts/WenQuanYiMicroHei-01.ttf") && manifest.pages.TextBox.every((name) => fetched.includes(name)),
+        `the TextBox page fetched ${fetched.join(", ")}`);
     await page.clickElement(await page.find("Fonts and Complex Scripts", inContent));
     await page.until("the sample is shown", (s) => !s.navigating && s.elements.some((e) => e.text === "Complex scripts" || (e.type === "TextBox" && inContent(e))));
     const isCjk = (e) => e.type === "TextBox" && e.text?.startsWith("计算机科学") && e.x >= DRAWER_EDGE;

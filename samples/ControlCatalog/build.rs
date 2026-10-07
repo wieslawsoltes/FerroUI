@@ -16,20 +16,19 @@
 //! upstream project.
 //!
 //! With the feature `separate-assets` the assets other than the markup
-//! documents are not embedded: they are written to asset bundles in
-//! `$OUT_DIR/browser-site/` (the format of
-//! `ferroui_base::platform::register_asset_bundle`), which
-//! `scripts/build-browser.sh` puts in the site. The WebAssembly module then
-//! carries the code and the documents, and the 24 MB of pictures and fonts
-//! are files of their own. The bundles follow the pages that use the assets
-//! (`build/page_bundles.rs`): `control-catalog.assets` holds what the
-//! start-up needs and what no source names (each such asset is reported as
-//! a warning of the build); the host page registers it before the
-//! application starts. The other bundles hold what one page, or
-//! one set of pages, needs; `control-catalog.assets.json` lists them with
-//! the pages that need them, and the host page fetches the bundles of a page
-//! before the catalog creates it. The split is also written as tables for
-//! the tests (`$OUT_DIR/page_assets.rs`), with or without the feature.
+//! documents are not embedded: each is copied, byte for byte, to
+//! `$OUT_DIR/browser-site/assets/ControlCatalog/<path>` (its rooted asset
+//! path below the directory of the assembly), which `scripts/build-browser.sh`
+//! puts in the site. The WebAssembly module then carries the code and the
+//! documents, and the 24 MB of pictures and fonts are plain files that the
+//! host fetches one by one and registers under their own URI. Which files
+//! the start-up and each page need follows from a scan of the sources
+//! (`build/page_files.rs`); `assets/ControlCatalog.json` lists them: the
+//! start-up files, which include what no source names (each such asset is
+//! reported as a warning of the build), and the files of each page, which
+//! the host page fetches before the catalog creates the page. The split is
+//! also written as tables for the tests (`$OUT_DIR/page_assets.rs`), with
+//! or without the feature.
 //!
 //! `$OUT_DIR/document_tests.rs` holds one test per document (it loads
 //! through the run-time loader) and one per document with a class (the
@@ -37,10 +36,10 @@
 //! of a document `excluded.txt` lists is ignored with the reason of the
 //! list.
 
-#[path = "build/page_bundles.rs"]
-mod page_bundles;
+#[path = "build/page_files.rs"]
+mod page_files;
 
-use std::collections::BTreeMap;
+use std::collections::{BTreeMap, BTreeSet};
 use std::env;
 use std::fmt::Write as _;
 use std::fs;
@@ -57,24 +56,39 @@ const PLACEHOLDER_DIRECTORY: &str = "PlaceholderAssets";
 const SKIPPED_DIRECTORIES: &[&str] = &["target", "tests", "examples", "build", PLACEHOLDER_DIRECTORY];
 
 /// The name of the assembly of the sample (`ASSEMBLY.name` of
-/// `register_types.rs`): the crate name of the assets of the bundle.
+/// `register_types.rs`): the authority of the URIs of its assets.
 const ASSEMBLY_NAME: &str = "ControlCatalog";
 
-/// The first bytes of an asset bundle
-/// (`ferroui_base::platform::ASSET_BUNDLE_MAGIC`).
-const ASSET_BUNDLE_MAGIC: &[u8; 8] = b"FUIASSB1";
+/// The directory of the browser site that holds the asset files, one
+/// directory per assembly, and the manifest of the files next to it.
+const SITE_ASSET_DIRECTORY: &str = "assets";
 
-/// Adds the asset `content` with the rooted path `asset_path` to an asset
-/// bundle (`ferroui_base::platform::register_asset_bundle`).
-fn add_to_bundle(bundle: &mut Vec<u8>, asset_path: &str, content: &[u8]) {
-    for text in [ASSEMBLY_NAME, asset_path] {
-        let length = u16::try_from(text.len()).unwrap_or_else(|_| panic!("{text} is too long for an asset bundle"));
-        bundle.extend_from_slice(&length.to_le_bytes());
-        bundle.extend_from_slice(text.as_bytes());
+/// Writes `content` to `path` unless it holds it already, so that the site
+/// keeps the modification times of what did not change.
+fn write_if_changed(path: &Path, content: &[u8]) {
+    if fs::read(path).ok().as_deref() != Some(content) {
+        fs::create_dir_all(path.parent().expect("a parent directory"))
+            .unwrap_or_else(|e| panic!("cannot create the directory of {}: {e}", path.display()));
+        fs::write(path, content).unwrap_or_else(|e| panic!("cannot write {}: {e}", path.display()));
     }
-    let length = u32::try_from(content.len()).unwrap_or_else(|_| panic!("{asset_path} is too large for an asset bundle"));
-    bundle.extend_from_slice(&length.to_le_bytes());
-    bundle.extend_from_slice(content);
+}
+
+/// Removes the files below `directory` that `keep` does not list, and the
+/// directories that are left empty: what an earlier build wrote for the
+/// site and this one no longer does.
+fn remove_stale(directory: &Path, keep: &BTreeSet<PathBuf>) {
+    let Ok(entries) = fs::read_dir(directory) else { return };
+    for entry in entries {
+        let path = entry.expect("directory entry").path();
+        if path.is_dir() {
+            remove_stale(&path, keep);
+            if fs::read_dir(&path).is_ok_and(|mut rest| rest.next().is_none()) {
+                fs::remove_dir(&path).unwrap_or_else(|e| panic!("cannot remove {}: {e}", path.display()));
+            }
+        } else if !keep.contains(&path) {
+            fs::remove_file(&path).unwrap_or_else(|e| panic!("cannot remove {}: {e}", path.display()));
+        }
+    }
 }
 
 /// Files that are assets whatever their directory.
@@ -233,7 +247,7 @@ fn main() {
         substitute_placeholder_geometries(&root, &out_dir, &mut assets);
     }
 
-    // The pages that use each asset, and the asset bundles that follow (see build/page_bundles.rs).
+    // The pages that use each asset (see build/page_files.rs).
     let sizes: BTreeMap<String, u64> = assets
         .iter()
         .filter(|(asset_path, _)| !asset_path.ends_with(".xaml"))
@@ -242,55 +256,38 @@ fn main() {
             (asset_path.clone(), size)
         })
         .collect();
-    let plan = page_bundles::plan(&root, &sizes);
+    let plan = page_files::plan(&root, &sizes);
 
     let separate_assets = env::var_os("CARGO_FEATURE_SEPARATE_ASSETS").is_some();
-    let mut bundles: BTreeMap<&str, Vec<u8>> = BTreeMap::new();
+    let site = out_dir.join("browser-site");
+    let asset_directory = format!("{SITE_ASSET_DIRECTORY}/{ASSEMBLY_NAME}");
+    let mut site_files = BTreeSet::new();
     let mut text = String::from("pub(crate) static ASSETS: &[(&str, &[u8])] = &[\n");
     for (asset_path, path) in &assets {
         let path = path.canonicalize().unwrap_or_else(|e| panic!("cannot resolve {}: {e}", path.display()));
         println!("cargo::rerun-if-changed={}", path.display());
         if separate_assets && !asset_path.ends_with(".xaml") {
-            let name = plan
-                .bundles
-                .iter()
-                .find(|bundle| bundle.assets.contains(asset_path))
-                .map_or(page_bundles::STARTUP_BUNDLE, |bundle| bundle.name.as_str());
-            let content = fs::read(&path).unwrap_or_else(|e| panic!("cannot read {}: {e}", path.display()));
-            add_to_bundle(bundles.entry(name).or_insert_with(|| ASSET_BUNDLE_MAGIC.to_vec()), asset_path, &content);
+            let out = site.join(&asset_directory).join(asset_path.trim_start_matches('/'));
+            write_if_changed(&out, &fs::read(&path).unwrap_or_else(|e| panic!("cannot read {}: {e}", path.display())));
+            site_files.insert(out);
             continue;
         }
         writeln!(text, "    ({asset_path:?}, include_bytes!({:?})),", path.display().to_string()).expect("write");
     }
     text.push_str("];\n");
     if separate_assets {
-        let site = out_dir.join("browser-site");
-        fs::create_dir_all(&site).unwrap_or_else(|e| panic!("cannot create {}: {e}", site.display()));
-        // Bundles of an earlier split that no longer exist.
-        for entry in fs::read_dir(&site).unwrap_or_else(|e| panic!("cannot read {}: {e}", site.display())) {
-            let file = entry.expect("directory entry").path();
-            let name = file.file_name().and_then(|name| name.to_str()).unwrap_or_default().to_string();
-            if name.starts_with("control-catalog.") && name.ends_with(".assets") && !bundles.contains_key(name.as_str()) {
-                fs::remove_file(&file).unwrap_or_else(|e| panic!("cannot remove {}: {e}", file.display()));
-            }
-        }
-        bundles.entry(page_bundles::STARTUP_BUNDLE).or_insert_with(|| ASSET_BUNDLE_MAGIC.to_vec());
-        let manifest = plan.manifest(&sizes).into_bytes();
-        for (name, content) in bundles.iter().map(|(name, content)| (*name, content)).chain([("control-catalog.assets.json", &manifest)]) {
-            let out = site.join(name);
-            if fs::read(&out).ok().as_ref() != Some(content) {
-                fs::write(&out, content).unwrap_or_else(|e| panic!("cannot write {}: {e}", out.display()));
-            }
-        }
+        let manifest = site.join(SITE_ASSET_DIRECTORY).join(format!("{ASSEMBLY_NAME}.json"));
+        write_if_changed(&manifest, plan.manifest(ASSEMBLY_NAME, &asset_directory, &sizes).as_bytes());
+        site_files.insert(manifest);
+        remove_stale(&site, &site_files);
         for asset in &plan.unattributed {
-            println!("cargo::warning=no source of the catalog names {asset}: it is in the start-up bundle {}", page_bundles::STARTUP_BUNDLE);
+            println!("cargo::warning=no source of the catalog names {asset}: it is a start-up file");
         }
         if !plan.unreached.is_empty() {
             println!(
-                "cargo::warning={} assets are named only by sources that neither the start-up nor a page reaches ({}): they are in {}",
+                "cargo::warning={} assets are named only by sources that neither the start-up nor a page reaches ({}): no page waits for them",
                 plan.unreached.len(),
-                plan.unreached_sources.join(", "),
-                page_bundles::UNREACHED_BUNDLE
+                plan.unreached_sources.join(", ")
             );
         }
         for reference in &plan.unresolved {

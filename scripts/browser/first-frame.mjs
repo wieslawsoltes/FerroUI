@@ -24,7 +24,9 @@
 //   wasm:   the end of the response of the WebAssembly module (resource timing);
 //   draw:   the first draw call of the framework (a WebGL draw call, or putImageData on a 2D canvas);
 //   frame:  the first animation frame after that draw call, when the drawn frame is on screen;
-//   splash: the moment the splash screen of the host page is closed.
+//   splash: the moment the splash screen of the host page is closed;
+//   requests: the number of requests the page started before the first frame, the document included
+//             (resource timing).
 // With --phases, also: the end of the response of every file of the site (resource timing); when
 // WebAssembly.instantiateStreaming was called, when the module was compiled and when it was
 // instantiated (the call is replaced by compileStreaming and instantiate, which is what it does);
@@ -243,7 +245,8 @@ async function load(takeScreenshot, profile_, wasmProfile) {
             ["(document)", performance.getEntriesByType("navigation")[0]?.responseEnd],
             ...performance.getEntriesByType("resource").map((e) => [new URL(e.name).pathname.split("/").pop(), e.responseEnd])]))`));
         const marks = JSON.parse(await evaluate(`JSON.stringify(Object.fromEntries(performance.getEntriesByType("mark").map((m) => [m.name, m.startTime])))`));
-        const result = { mode: timing.contexts[0], contexts: timing.contexts, wasm: JSON.parse(wasm)[0] ?? null,
+        const requests = 1 + Number(await evaluate(`performance.getEntriesByType("resource").filter((e) => e.startTime < ${timing.frame}).length`));
+        const result = { requests, mode: timing.contexts[0], contexts: timing.contexts, wasm: JSON.parse(wasm)[0] ?? null,
             draw: timing.draw, frame: timing.frame, splash: timing.splash,
             phases: { ...resources, "compile start": timing.compileStart, compiled: timing.compiled,
                 instantiated: timing.instantiated, ...marks, "first draw": timing.draw, "first frame": timing.frame },
@@ -313,8 +316,9 @@ const last = results[results.length - 1];
 const report = { site, query, runs, chromium: chromePath, served: Object.fromEntries(served), mode: last.mode,
     streaming: !results.some((r) => r.streamingFailed) };
 const median = (key) => { const v = results.map(key).filter((x) => x != null).sort((a, b) => a - b); return v.length ? v[Math.floor(v.length / 2)] : null; };
-report.median = { wasm: median((r) => r.wasm?.end), draw: median((r) => r.draw), frame: median((r) => r.frame), splash: median((r) => r.splash) };
-report.loads = results.map((r) => ({ wasm: r.wasm?.end, draw: r.draw, frame: r.frame, splash: r.splash, mode: r.mode,
+report.median = { wasm: median((r) => r.wasm?.end), draw: median((r) => r.draw), frame: median((r) => r.frame), splash: median((r) => r.splash),
+    requests: median((r) => r.requests) };
+report.loads = results.map((r) => ({ wasm: r.wasm?.end, draw: r.draw, frame: r.frame, splash: r.splash, requests: r.requests, mode: r.mode,
     ...(phases ? { phases: r.phases } : {}) }));
 if (phases) {
     const names = [...new Set(results.flatMap((r) => Object.keys(r.phases)))].filter((n) => results.some((r) => r.phases[n] != null));
@@ -349,8 +353,8 @@ if (json) {
 } else {
     const ms = (v) => (v == null ? "-" : `${Math.round(v)} ms`);
     console.log(`${site}${query}: ${runs} loads${throttle ? ` at ${throttle[0]} Mbit/s and ${throttle[1]} ms` : ""}, ${report.mode} context, streaming compilation ${report.streaming ? "used" : "FAILED"}, served ${JSON.stringify(report.served)}`);
-    report.loads.forEach((l, i) => console.log(`  load ${i + 1}: wasm ${ms(l.wasm)}, first draw ${ms(l.draw)}, first frame ${ms(l.frame)}, splash closed ${ms(l.splash)}`));
-    console.log(`  median: wasm ${ms(report.median.wasm)}, first draw ${ms(report.median.draw)}, first frame ${ms(report.median.frame)}, splash closed ${ms(report.median.splash)}`);
+    report.loads.forEach((l, i) => console.log(`  load ${i + 1}: wasm ${ms(l.wasm)}, first draw ${ms(l.draw)}, first frame ${ms(l.frame)}, splash closed ${ms(l.splash)}, ${l.requests} requests before the first frame`));
+    console.log(`  median: wasm ${ms(report.median.wasm)}, first draw ${ms(report.median.draw)}, first frame ${ms(report.median.frame)}, splash closed ${ms(report.median.splash)}, ${report.median.requests} requests before the first frame`);
     if (report.medianPhases) {
         console.log("  phases (median of the loads, from the start of navigation):");
         for (const [n, v] of Object.entries(report.medianPhases).sort((a, b) => a[1] - b[1])) console.log(`    ${ms(v).padStart(9)}  ${n}`);
