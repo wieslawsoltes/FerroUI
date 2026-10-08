@@ -16,7 +16,7 @@ pub struct NullRenderer {
     scene_invalidated: HandlerList<dyn Fn(&SceneInvalidatedEventArgs)>,
     root: RefCell<Option<Ref<Visual>>>,
     transparency_level: Cell<CompositionTransparencyLevel>,
-    platform_specific_scene_info: RefCell<Option<Rc<dyn Any>>>,
+    platform_specific_scene_info: RefCell<Option<std::sync::Arc<dyn Any + Send + Sync>>>,
     is_started: Cell<bool>,
     is_disposed: Cell<bool>,
     resized: RefCell<Vec<Size>>,
@@ -74,7 +74,7 @@ impl NullRenderer {
         self.transparency_level.get()
     }
 
-    pub fn platform_specific_scene_info(&self) -> Option<Rc<dyn Any>> {
+    pub fn platform_specific_scene_info(&self) -> Option<std::sync::Arc<dyn Any + Send + Sync>> {
         self.platform_specific_scene_info.borrow().clone()
     }
 
@@ -162,7 +162,7 @@ impl ITopLevelRenderer for NullRenderer {
         self.transparency_level.set(level);
     }
 
-    fn set_platform_specific_scene_info(&self, info: Option<Rc<dyn Any>>) {
+    fn set_platform_specific_scene_info(&self, info: Option<std::sync::Arc<dyn Any + Send + Sync>>) {
         *self.platform_specific_scene_info.borrow_mut() = info;
     }
 

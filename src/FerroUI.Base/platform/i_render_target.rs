@@ -2,7 +2,6 @@ use super::IDrawingContextImpl;
 use crate::rendering::composition::CompositionTransparencyLevel;
 use crate::{PixelSize, Size};
 use std::any::Any;
-use std::rc::Rc;
 
 /// The readiness of a platform render target.
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
@@ -52,7 +51,7 @@ pub struct RenderTargetSceneInfo {
     /// The transparency level the scene is composed with.
     pub transparency_level: CompositionTransparencyLevel,
     /// Backend-specific information about the scene.
-    pub platform_specific_scene_info: Option<Rc<dyn Any>>,
+    pub platform_specific_scene_info: Option<std::sync::Arc<dyn Any + Send + Sync>>,
 }
 
 impl RenderTargetSceneInfo {

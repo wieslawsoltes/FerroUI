@@ -33,7 +33,7 @@ pub trait ITopLevelRenderer: IRenderer {
     fn set_transparency_level(&self, _level: CompositionTransparencyLevel) {}
 
     /// Sets the platform-specific scene info passed to the render target.
-    fn set_platform_specific_scene_info(&self, _info: Option<Rc<dyn Any>>) {}
+    fn set_platform_specific_scene_info(&self, _info: Option<std::sync::Arc<dyn Any + Send + Sync>>) {}
 
     /// The hit tester backed by the renderer's scene, if it has one. When
     /// `None` the presentation source hit tests the visual tree directly.
@@ -55,7 +55,7 @@ impl ITopLevelRenderer for CompositingRenderer {
         CompositingRenderer::set_transparency_level(self, level)
     }
 
-    fn set_platform_specific_scene_info(&self, info: Option<Rc<dyn Any>>) {
+    fn set_platform_specific_scene_info(&self, info: Option<std::sync::Arc<dyn Any + Send + Sync>>) {
         CompositingRenderer::set_platform_specific_scene_info(self, info)
     }
 

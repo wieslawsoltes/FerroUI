@@ -178,7 +178,7 @@ impl ServerCompositionTarget {
         self.props.transparency_level()
     }
 
-    pub fn platform_specific_scene_info(&self) -> Option<Rc<dyn Any>> {
+    pub fn platform_specific_scene_info(&self) -> Option<std::sync::Arc<dyn Any + Send + Sync>> {
         self.props.platform_specific_scene_info()
     }
 

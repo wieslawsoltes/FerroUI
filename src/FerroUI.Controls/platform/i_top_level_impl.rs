@@ -84,18 +84,18 @@ pub trait ITopLevelImpl: IOptionalFeatureProvider + IDisposable {
 
     /// Gets the platform-specific scene info, which is passed to the render
     /// target of the toplevel.
-    fn platform_specific_scene_info(&self) -> Option<Rc<dyn Any>> {
+    fn platform_specific_scene_info(&self) -> Option<std::sync::Arc<dyn Any + Send + Sync>> {
         None
     }
 
     /// Gets the method called when the platform-specific scene info
     /// changes.
-    fn platform_specific_scene_info_changed(&self) -> Option<Rc<dyn Fn(Option<Rc<dyn Any>>)>> {
+    fn platform_specific_scene_info_changed(&self) -> Option<Rc<dyn Fn(Option<std::sync::Arc<dyn Any + Send + Sync>>)>> {
         None
     }
 
     /// Sets a method called when the platform-specific scene info changes.
-    fn set_platform_specific_scene_info_changed(&self, _value: Option<Rc<dyn Fn(Option<Rc<dyn Any>>)>>) {}
+    fn set_platform_specific_scene_info_changed(&self, _value: Option<Rc<dyn Fn(Option<std::sync::Arc<dyn Any + Send + Sync>>)>>) {}
 
     /// Sets the input root for the toplevel.
     fn set_input_root(&self, input_root: Rc<dyn IInputRoot>);

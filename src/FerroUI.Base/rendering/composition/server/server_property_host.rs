@@ -112,7 +112,7 @@ pub fn resolve_resource<T: ?Sized + 'static>(
 }
 
 /// Reads a resource reference from a batch and resolves it.
-pub fn read_resource<T: ?Sized + 'static>(
+pub fn read_resource<T: ?Sized + crate::rendering::composition::transport::BatchResourceValue>(
     reader: &mut BatchStreamReader<'_>,
     compositor: Option<&Rc<ServerCompositor>>,
     cast: fn(Rc<dyn IServerObject>) -> Option<Rc<T>>,

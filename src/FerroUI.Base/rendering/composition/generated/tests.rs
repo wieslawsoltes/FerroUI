@@ -643,12 +643,12 @@ fn object_references_cross_by_id() {
     assert!(server.take_log().contains(&"root_changed".to_string()));
 
     // A payload crosses as it is.
-    let info: Rc<dyn Any> = Rc::new(42i32);
+    let info: std::sync::Arc<dyn Any + Send + Sync> = std::sync::Arc::new(42i32);
     target.props.set_platform_specific_scene_info(&*target, Some(info.clone()));
     target.props.set_root(&*target, None);
     fixture.run();
     assert!(server.props.root().is_none());
-    assert!(Rc::ptr_eq(&server.props.platform_specific_scene_info().unwrap(), &info));
+    assert!(std::sync::Arc::ptr_eq(&server.props.platform_specific_scene_info().unwrap(), &info));
 }
 
 #[test]
@@ -705,7 +705,8 @@ fn other_value_types_round_trip() {
     assert_eq!(server.props.size(), Vector::new(3.0, 4.0));
     assert!(server.props.adorner_is_clipped());
     let mask = server.props.opacity_mask_brush().expect("the brush crossed");
-    assert!(std::ptr::addr_eq(Rc::as_ptr(&mask.value), Rc::as_ptr(&brush)));
+    // What crosses is the shared form of the brush, which the brush keeps.
+    assert_eq!(mask.value.reference_id(), IBrush::reference_id(&brush.to_shared().unwrap()));
     assert!(mask.resource.is_none());
 }
 
