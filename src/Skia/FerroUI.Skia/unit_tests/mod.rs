@@ -11,6 +11,7 @@
 
 mod combined_geometry_impl_tests;
 mod drawing_context_impl_tests;
+mod hit_testing;
 mod media;
 mod test_font_manager;
 
