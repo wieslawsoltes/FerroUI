@@ -36,6 +36,10 @@ Copyright (c) 2019 Jimmy Wärting), pinned in `webapp/package.json` to commit
 `d43ad841581c2cc3ce47bbd1e8f11950ebdff027`, the commit the upstream project pins. Its optional dependency
 `fetch-blob` (MIT) is installed with it and is not bundled.
 
+`webapp/modules/storage/downloadFileHandle.ts` (bundled into `storage.js`) is a TypeScript form of
+`src/adapters/downloader.js` of that polyfill (MIT, Copyright (c) 2019 Jimmy Wärting), changed in when it
+starts the download.
+
 The service worker `webapp/modules/ferroui-sw.ts` (bundled as `ferroui-sw.js`) follows the upstream module, which
 is a TypeScript form of the worker of that polyfill (`example/sw.js`, MIT, Copyright (c) 2019 Jimmy Wärting).
 Its second part, the response headers of cross-origin isolation that it adds when it is registered with
