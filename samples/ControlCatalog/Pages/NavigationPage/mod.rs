@@ -22,6 +22,7 @@ mod navigation_page_first_look_page;
 mod navigation_page_gesture_page;
 mod navigation_page_modal_page;
 mod navigation_page_modal_transitions_page;
+mod navigation_page_scroll_aware_page;
 mod navigation_page_stack_page;
 mod navigation_page_title_page;
 mod navigation_page_toolbar_page;
@@ -54,6 +55,7 @@ pub use navigation_page_first_look_page::NavigationPageFirstLookPage;
 pub use navigation_page_gesture_page::NavigationPageGesturePage;
 pub use navigation_page_modal_page::NavigationPageModalPage;
 pub use navigation_page_modal_transitions_page::NavigationPageModalTransitionsPage;
+pub use navigation_page_scroll_aware_page::NavigationPageScrollAwarePage;
 pub use navigation_page_stack_page::NavigationPageStackPage;
 pub use navigation_page_title_page::NavigationPageTitlePage;
 pub use navigation_page_toolbar_page::NavigationPageToolbarPage;
@@ -87,6 +89,7 @@ pub(crate) const TYPES: &[&TypeInfo] = &[
     NavigationPageGesturePage::TYPE,
     NavigationPageModalPage::TYPE,
     NavigationPageModalTransitionsPage::TYPE,
+    NavigationPageScrollAwarePage::TYPE,
     NavigationPageStackPage::TYPE,
     NavigationPageTitlePage::TYPE,
     NavigationPageToolbarPage::TYPE,
@@ -121,6 +124,7 @@ pub(crate) const CLASSES: &[&XamlClass] = &[
     &NavigationPageGesturePage::XAML_CLASS,
     &NavigationPageModalPage::XAML_CLASS,
     &NavigationPageModalTransitionsPage::XAML_CLASS,
+    &NavigationPageScrollAwarePage::XAML_CLASS,
     &NavigationPageStackPage::XAML_CLASS,
     &NavigationPageTitlePage::XAML_CLASS,
     &NavigationPageToolbarPage::XAML_CLASS,
