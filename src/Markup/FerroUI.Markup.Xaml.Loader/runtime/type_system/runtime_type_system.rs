@@ -656,7 +656,7 @@ impl RuntimeTypeSystem {
             // An array bindings index into: `T[]` of its element type.
             self.resolve(element).make_array_type(1).ok()
         } else {
-            self.resolve_optional_reference(handle)
+            self.resolve_optional_reference(handle).or_else(|| self.resolve_untyped_stream(handle))
         };
         match found {
             Some(found) => {
@@ -677,6 +677,25 @@ impl RuntimeTypeSystem {
         })?;
         let type_ = self.runtime_type_of_markup(markup);
         type_.add_handle(handle);
+        Some(type_)
+    }
+
+    /// An observable or a task held as a value (what a binding path streams with `^`) for
+    /// which no metadata declares the instantiation with the type of its items: the values
+    /// are held untyped, so it is `IObservable<object>` or `Task<object>`.
+    fn resolve_untyped_stream(&self, handle: ValueType) -> Option<Rc<dyn IXamlType>> {
+        use ferroui_base::data::core::plugins::{ObservableValue, TaskValue};
+        let definition = if handle.is::<ObservableValue>() || handle.is::<Option<ObservableValue>>() {
+            "System.IObservable`1"
+        } else if handle.is::<TaskValue>() || handle.is::<Option<TaskValue>>() {
+            "System.Threading.Tasks.Task`1"
+        } else {
+            return None;
+        };
+        let type_ = self.find_type(definition)?.make_generic_type(&[self.get("System.Object")]).ok()?;
+        if let Some(runtime) = type_.as_any().downcast_ref::<RuntimeType>() {
+            runtime.add_handle(handle);
+        }
         Some(type_)
     }
 

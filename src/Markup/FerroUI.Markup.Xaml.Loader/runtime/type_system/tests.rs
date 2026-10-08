@@ -4,6 +4,7 @@
 
 use std::rc::Rc;
 
+use ferroui_base::data::core::plugins::{ObservableValue, TaskValue};
 use ferroui_base::data::core::{ValueType, ValueTypes};
 use ferroui_base::media::{Color, SolidColorBrush};
 use ferroui_base::metadata::{from_markup_value, IServiceProvider, MarkupValue};
@@ -60,6 +61,16 @@ fn runtime_library_types_are_complete_and_mapped_to_rust_types() {
         resolve(ValueType::of::<DeferredContentFactory>()),
         "System.Func`2[System.IServiceProvider,System.Object]"
     );
+
+    // An observable and a task held as values, where no metadata declares the type of their
+    // items: what a compiled binding path streams (`Property^`).
+    assert_eq!(resolve(ValueType::of::<ObservableValue>()), "System.IObservable`1[System.Object]");
+    assert_eq!(resolve(ValueType::of::<Option<ObservableValue>>()), "System.IObservable`1[System.Object]");
+    assert_eq!(resolve(ValueType::of::<TaskValue>()), "System.Threading.Tasks.Task`1[System.Object]");
+    let observable = ts.resolve(ValueType::of::<ObservableValue>());
+    let definition = ts.find_type("System.IObservable`1").expect("the definition");
+    assert!(observable.generic_type_definition().is_some_and(|d| d.equals(&*definition)));
+    assert!(observable.generic_arguments()[0].equals(&*known.object));
 
     let nullable = ts.resolve(ValueType::of::<Option<i32>>());
     assert!(nullable.is_value_type() && nullable.is_nullable());

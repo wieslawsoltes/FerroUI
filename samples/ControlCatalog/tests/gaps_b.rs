@@ -103,7 +103,6 @@ fn gap_c204_menu_under_the_simple_theme() {
 }
 
 #[test]
-#[ignore = "gap C207: a compiled binding does not stream (`^`) an ObservableValue"]
 fn gap_c207_compiled_stream_binding_of_an_observable() {
     let _app = start_catalog_application();
     // `Pages/ListBoxPage.xaml`: the selection mode is an `IObservable<SelectionMode>` of the view
