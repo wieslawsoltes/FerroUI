@@ -46,8 +46,7 @@ use crate::support_bindings::*;
 // --- test types -------------------------------------------------------------
 //
 // What the declarations cannot state today (see the report of the port):
-// * static properties: declared as static values (`fields:`);
-// * the culture argument of value converters.
+// * static properties: declared as static values (`fields:`).
 
 /// The text of an untyped value in an interpolated string (`$"{value}"`):
 /// null is empty.
@@ -179,11 +178,9 @@ impl IValueConverter for AppendConverter {
         value: Option<&BoxedValue>,
         _target_type: ValueType,
         parameter: Option<&BoxedValue>,
-        _culture: &CultureInfo,
+        culture: &CultureInfo,
     ) -> Result<Option<BoxedValue>, BindingError> {
-        // Not ported: the culture (third part of the text): `IValueConverter::convert` has no
-        // culture argument (base).
-        let text = format!("{}+{}+", display(&value.cloned()), display(&parameter.cloned()));
+        let text = format!("{}+{}+{}", display(&value.cloned()), display(&parameter.cloned()), culture);
         Ok(Some(Rc::new(text)))
     }
 
@@ -2915,8 +2912,47 @@ fn supports_parent_in_path_with_type_and_level_filter() {
     assert_eq!(Some("p1"), text_block.text().as_deref());
 }
 
-// Not ported: SupportConverterWithParameter: the converter must observe the culture: `IValueConverter::convert` has no culture argument (base)
-// Not ported: SupportConverterWithCulture: the converter must observe the culture: `IValueConverter::convert` has no culture argument and bindings have no `ConverterCulture` (base)
+#[test]
+fn support_converter_with_parameter() {
+    let _app = styled_window_application();
+    let xaml = r#"
+<Window xmlns='https://github.com/ferroui'
+        xmlns:x='http://schemas.microsoft.com/winfx/2006/xaml'
+        xmlns:local='clr-namespace:FerroUI.Markup.Xaml.UnitTests.MarkupExtensions;assembly=FerroUI.Markup.Xaml.UnitTests'
+        x:DataType='local:TestDataContext' x:CompileBindings='True'>
+    <TextBlock Name='textBlock' Text='{Binding StringProperty, Converter={x:Static local:AppendConverter.Instance}, ConverterParameter=Bar}'/>
+</Window>"#;
+
+    let window: Ref<Window> = load_as(xaml);
+    let text_block = window.get_control::<TextBlock>("textBlock");
+
+    let data_context = TestDataContext::new();
+    data_context.set_string_property(Some("Foo".to_string()));
+    window.set_data_context(Some(data_context));
+
+    assert_eq!(Some(format!("Foo+Bar+{}", CultureInfo::current_culture())), text_block.text());
+}
+
+#[test]
+fn support_converter_with_culture() {
+    let _app = styled_window_application();
+    let xaml = r#"
+<Window xmlns='https://github.com/ferroui'
+        xmlns:x='http://schemas.microsoft.com/winfx/2006/xaml'
+        xmlns:local='clr-namespace:FerroUI.Markup.Xaml.UnitTests.MarkupExtensions;assembly=FerroUI.Markup.Xaml.UnitTests'
+        x:DataType='local:TestDataContext' x:CompileBindings='True'>
+    <TextBlock Name='textBlock' Text='{Binding StringProperty, Converter={x:Static local:AppendConverter.Instance}, ConverterCulture=ar-SA}'/>
+</Window>"#;
+
+    let window: Ref<Window> = load_as(xaml);
+    let text_block = window.get_control::<TextBlock>("textBlock");
+
+    let data_context = TestDataContext::new();
+    data_context.set_string_property(Some("Foo".to_string()));
+    window.set_data_context(Some(data_context));
+
+    assert_eq!(Some("Foo++ar-SA"), text_block.text().as_deref());
+}
 
 /// `Assert.Equal(expected, value)` for an untyped value that must be the
 /// shared object `expected` (reference equality).

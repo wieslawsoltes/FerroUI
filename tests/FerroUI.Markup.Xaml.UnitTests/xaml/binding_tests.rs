@@ -4,7 +4,10 @@ use std::cell::{Cell, RefCell};
 use std::rc::Rc;
 
 use ferroui_base::data::core::plugins::ObservableValue;
-use ferroui_base::data::core::ValueTypes;
+use ferroui_base::data::converters::IValueConverter;
+use ferroui_base::data::core::{ValueType, ValueTypes};
+use ferroui_base::data::BindingError;
+use ferroui_base::utilities::CultureInfo;
 use ferroui_base::metadata::MarkupTyped;
 use ferroui_base::reactive::IObservable;
 use ferroui_base::{ferro_markup_type, BoxedValue, Ref};
@@ -101,15 +104,61 @@ ferro_markup_type!(class WindowViewModel as "BindingTests+WindowViewModel" {
     ],
 });
 
+/// `BindingTests.CultureAppender`: joins the value and the culture with `+`.
+pub struct CultureAppender;
+
+crate::test_identity_eq!(CultureAppender);
+
+impl CultureAppender {
+    /// `CultureAppender.Instance`.
+    pub fn instance() -> Rc<dyn IValueConverter> {
+        thread_local! {
+            static INSTANCE: Rc<CultureAppender> = Rc::new(CultureAppender);
+        }
+        INSTANCE.with(|instance| -> Rc<dyn IValueConverter> { instance.clone() })
+    }
+}
+
+impl IValueConverter for CultureAppender {
+    fn convert(
+        &self,
+        value: Option<&BoxedValue>,
+        _target_type: ValueType,
+        _parameter: Option<&BoxedValue>,
+        culture: &CultureInfo,
+    ) -> Result<Option<BoxedValue>, BindingError> {
+        Ok(Some(Rc::new(format!("{}+{}", ValueTypes::to_display_string(value), culture))))
+    }
+
+    fn convert_back(
+        &self,
+        _value: Option<&BoxedValue>,
+        _target_type: ValueType,
+        _parameter: Option<&BoxedValue>,
+        _culture: &CultureInfo,
+    ) -> Result<Option<BoxedValue>, BindingError> {
+        Err(BindingError::message("The method or operation is not implemented."))
+    }
+}
+
+ferro_markup_type!(class CultureAppender as "BindingTests+CultureAppender" {
+    this: Rc<CultureAppender>,
+    handles: [CultureAppender, Rc<CultureAppender>, Option<Rc<CultureAppender>>],
+    interfaces: [Rc<dyn IValueConverter>],
+    fields: [Instance: Rc<dyn IValueConverter> => CultureAppender::instance],
+});
+
 /// The test types of this file.
 pub(crate) const MODULE: TypeModule = TypeModule {
     types: &[],
     markup_types: &[
+        <CultureAppender as MarkupTyped>::MARKUP,
         <AnonymousFoo as MarkupTyped>::MARKUP,
         <AnonymousObservable as MarkupTyped>::MARKUP,
         <WindowViewModel as MarkupTyped>::MARKUP,
     ],
     value_types: || {
+        ValueTypes::register_reference::<CultureAppender>();
         ValueTypes::register_reference::<AnonymousFoo>();
         ValueTypes::register_reference::<AnonymousObservable>();
         ValueTypes::register_reference::<WindowViewModel>();
@@ -575,6 +624,24 @@ fn double_negating_object_returns_correct_value_when_bound_to_bool() {
         let expected = negated.map(|negated| !negated).unwrap_or(false);
         assert_eq!(window.is_visible(), expected, "row {row}");
     }
+}
+
+#[test]
+fn converter_culture_can_be_specified_by_ietf_language_tag() {
+    let _app = styled_window_application();
+    let xaml = r#"
+<Window xmlns='https://github.com/ferroui'
+        xmlns:x='http://schemas.microsoft.com/winfx/2006/xaml'
+        xmlns:local='clr-namespace:FerroUI.Markup.Xaml.UnitTests.Xaml;assembly=FerroUI.Markup.Xaml.UnitTests'>
+  <TextBlock Name='textBlock' Text='{Binding Greeting1, Converter={x:Static local:BindingTests+CultureAppender.Instance}, ConverterCulture=ar-SA}'/>
+</Window>"#;
+    let window: Ref<Window> = load_as(xaml);
+    let text_block = object_of::<TextBlock>(&window.content());
+
+    window.set_data_context(Some(WindowViewModel::new()));
+    window.apply_template();
+
+    assert_eq!(Some("Hello+ar-SA"), text_block.text().as_deref());
 }
 
 #[test]

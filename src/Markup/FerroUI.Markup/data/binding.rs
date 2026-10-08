@@ -1,3 +1,4 @@
+use ferroui_base::utilities::CultureInfo;
 use ferroui_base::controls::INameScope;
 use ferroui_base::data::converters::IValueConverter;
 use ferroui_base::data::core::parsers::TypeResolver;
@@ -69,6 +70,7 @@ macro_rules! chaining_setters {
 
 chaining_setters! {
     with_converter_value => set_converter: Option<Rc<dyn IValueConverter>>,
+    with_converter_culture => set_converter_culture: Option<CultureInfo>,
     with_converter_parameter => set_converter_parameter: Option<BoxedValue>,
     with_delay => set_delay: i32,
     with_element_name => set_element_name: Option<String>,
