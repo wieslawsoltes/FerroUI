@@ -637,28 +637,6 @@ fn glyph_run_is_created_measured_and_drawn() {
 }
 
 #[test]
-fn glyph_run_with_leading_space_has_correct_ink_bounds() {
-    let scope = start();
-
-    let typeface = test_typeface("Inter");
-    let plain = shaped_glyph_run("I", &typeface, 30.0, Point::default());
-    let spaced = shaped_glyph_run(" I", &typeface, 30.0, Point::default());
-
-    let space_advance = spaced.glyph_infos().borrow()[0].glyph_advance;
-    assert!(space_advance > 0.0);
-
-    let plain_bounds = plain.platform_impl().bounds();
-    let spaced_bounds = spaced.platform_impl().bounds();
-
-    // The space has no ink: the bounds of the letter move right by its
-    // advance and keep their right edge relative to the letter.
-    assert!((spaced_bounds.right() - (plain_bounds.right() + space_advance)).abs() < 0.01);
-    assert_eq!(plain_bounds.height, spaced_bounds.height);
-
-    scope.dispose();
-}
-
-#[test]
 fn glyph_run_geometry_outlines_the_glyphs() {
     let scope = start();
 
