@@ -20,8 +20,11 @@ use crate::{LocaleCollection, ASSEMBLY};
 /// The `.xamlmeta` files of the crates whose documents the documents include, relative
 /// to the directory of this crate: what build integration reads from
 /// `DEP_<CRATE>_XAML_XAMLMETA` (docs/porting/xaml.md, 9.6.3).
-pub(crate) const DEPENDENCIES: &[&str] =
-    &["../Theme/compiled_xaml.xamlmeta", "../../../src/FerroUI.Themes.Simple/compiled_xaml.xamlmeta"];
+pub(crate) const DEPENDENCIES: &[&str] = &[
+    "../Theme/compiled_xaml.xamlmeta",
+    "../../../src/FerroUI.Themes.Simple/compiled_xaml.xamlmeta",
+    "../../../src/FerroUI.Themes.Fluent/compiled_xaml.xamlmeta",
+];
 
 /// The compiled markup of the dependencies.
 pub(crate) fn dependencies() -> Vec<XamlMetadata> {
@@ -93,7 +96,7 @@ fn compiled_xaml_is_up_to_date() {
 fn compiled_xaml_metadata_reads_its_dependencies() {
     let read = XamlMetadata::read(concat!(env!("CARGO_MANIFEST_DIR"), "/compiled_xaml.xamlmeta")).expect("the files can be read");
     let names: Vec<&str> = read.iter().map(|model| model.name.as_str()).collect();
-    assert_eq!(names, [ASSEMBLY.name, "Tests", "FerroUI.Themes.Simple"]);
+    assert_eq!(names, [ASSEMBLY.name, "Tests", "FerroUI.Themes.Simple", "FerroUI.Themes.Fluent"]);
 }
 
 #[test]

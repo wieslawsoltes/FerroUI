@@ -1060,6 +1060,7 @@ dependencies = [
  "ferroui-controls",
  "ferroui-markup-xaml",
  "ferroui-markup-xaml-loader",
+ "ferroui-themes-fluent",
  "ferroui-themes-simple",
  "xaml-include-fixture-theme",
 ]

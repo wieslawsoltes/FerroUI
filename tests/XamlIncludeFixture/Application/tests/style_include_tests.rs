@@ -10,7 +10,9 @@
 //! group there. `StyleInclude_Should_Be_Replaced_With_Direct_Call` includes the
 //! class document of the Simple theme, compiled into a creation of its class.
 //! `Style_Inside_Resources_Should_Produce_Warning` compiles its document in the
-//! test to read the warning of the compiler.
+//! test to read the warning of the compiler. Not from upstream:
+//! `fluent_theme_is_included_across_crates` and
+//! `a_document_of_another_crate_that_is_not_public_is_not_included`.
 
 use std::any::{Any, TypeId};
 use std::cell::RefCell;
@@ -32,6 +34,7 @@ use ferroui_markup_xaml::{
     ServiceProviderExtensions,
 };
 use ferroui_markup_xaml_loader::rust_emitter::compile_documents;
+use ferroui_themes_fluent::FluentTheme;
 use ferroui_themes_simple::SimpleTheme;
 use xaml_include_fixture_theme::StyleWithServiceProvider;
 
@@ -151,6 +154,42 @@ fn style_include_should_be_replaced_with_direct_call() {
     let control = build(compiled_xaml::build_styleinclude_should_be_replaced_with_direct_call_xaml);
     assert_style_is_type::<SimpleTheme>(&control.styles().get(0));
     assert_style_is_type::<SimpleTheme>(&control.styles().get(1));
+}
+
+/// Not from upstream: the class document of the Fluent theme, included from another
+/// crate, is created with its class, as the Simple theme's is.
+#[test]
+fn fluent_theme_is_included_across_crates() {
+    let _base = xaml_test_base();
+    let _app = UnitTestApplication::start(TestServices::styled_window());
+
+    let control = build(compiled_xaml::build_fluent_theme_is_included_across_crates_xaml);
+    assert_style_is_type::<FluentTheme>(&control.styles().get(0));
+}
+
+/// Not from upstream: a document of the Fluent theme that is not public
+/// (`x:ClassModifier="internal"`) cannot be included from another crate: upstream's
+/// diagnostic.
+#[test]
+fn a_document_of_another_crate_that_is_not_public_is_not_included() {
+    let _base = xaml_test_base();
+    let documents = [(
+        "Internal.xaml",
+        "
+<ContentControl xmlns='https://github.com/ferroui'>
+    <ContentControl.Styles>
+        <StyleInclude Source='ferres://FerroUI.Themes.Fluent/Controls/FluentControls.xaml'/>
+    </ContentControl.Styles>
+</ContentControl>",
+    )];
+    let compiled = compile_documents(&documents, Some(&root_uri()), &RuntimeXamlLoaderConfiguration::new(), &dependencies());
+    let reason = compiled[0].source.clone().expect_err("the document does not compile");
+    assert!(
+        reason.contains(
+            "Unable to resolve XAML resource \"ferres://ferroui.themes.fluent/Controls/FluentControls.xaml\" in the \"ferroui.themes.fluent\" assembly. Make sure this file exists and is public."
+        ),
+        "{reason}"
+    );
 }
 
 #[test]

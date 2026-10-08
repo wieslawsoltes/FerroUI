@@ -121,6 +121,16 @@ pub const DOCUMENTS: &[(&str, &str)] = &[
     </ContentControl.Styles>
 </ContentControl>",
     ),
+    // Not from upstream: the class document of the Fluent theme, included from another crate.
+    (
+        "Fluent_Theme_Is_Included_Across_Crates.xaml",
+        "
+<ContentControl xmlns='https://github.com/ferroui'>
+    <ContentControl.Styles>
+        <StyleInclude Source='ferres://FerroUI.Themes.Fluent/FluentTheme.xaml'/>
+    </ContentControl.Styles>
+</ContentControl>",
+    ),
     // StyleIncludeTests.Style_Inside_Resources_Should_Produce_Warning
     ("Style_Inside_Resources_Should_Produce_Warning.xaml", STYLE_INSIDE_RESOURCES_SHOULD_PRODUCE_WARNING),
 ];

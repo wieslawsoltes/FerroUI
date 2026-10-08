@@ -1,8 +1,8 @@
 //! Test fixture of the XAML compiler (docs/porting/xaml.md, 9.7.3 and 9.10.1,
 //! stage E5): an application, the assembly `アセンブリ`, whose compiled
 //! documents include documents of other crates with compiled markup (the
-//! crate `xaml-include-fixture-theme`, the assembly `Tests`, and the Simple
-//! theme), as upstream's build links an include of a document of a
+//! crate `xaml-include-fixture-theme`, the assembly `Tests`, and the Simple and
+//! Fluent themes), as upstream's build links an include of a document of a
 //! referenced assembly. Not a port of an upstream project: the tests of the
 //! crate are upstream's `ResourceIncludeTests`, `StyleIncludeTests` and
 //! `MergeResourceIncludeTests`, run against compiled documents.
@@ -60,6 +60,7 @@ pub fn register_types() {
         ferroui_markup_xaml::register_types();
         xaml_include_fixture_theme::register_types();
         ferroui_themes_simple::register_types();
+        ferroui_themes_fluent::register_types();
         TypeInfo::register_namespaces(NAMESPACES);
         TypeInfo::register_all(TYPES);
         MarkupAssembly::register(&ASSEMBLY);
