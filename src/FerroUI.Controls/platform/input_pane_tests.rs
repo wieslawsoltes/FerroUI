@@ -245,6 +245,10 @@ struct StepEasing {
 }
 
 impl IEasing for StepEasing {
+    fn to_shared(&self) -> std::sync::Arc<ferroui_base::animation::easings::SharedEasing> {
+        std::sync::Arc::new(StepEasing { is_easing_class: self.is_easing_class })
+    }
+
     fn ease(&self, _progress: f64) -> f64 {
         1.0
     }

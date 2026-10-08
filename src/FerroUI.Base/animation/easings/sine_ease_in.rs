@@ -12,6 +12,10 @@ impl SineEaseIn {
 }
 
 impl IEasing for SineEaseIn {
+    fn to_shared(&self) -> std::sync::Arc<crate::animation::easings::SharedEasing> {
+        std::sync::Arc::new(*self)
+    }
+
     fn ease(&self, progress: f64) -> f64 {
         ((progress - 1.0) * EasingUtils::HALFPI).sin() + 1.0
     }

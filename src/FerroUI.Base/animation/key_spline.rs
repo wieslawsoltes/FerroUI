@@ -266,3 +266,130 @@ impl KeySpline {
         }
     }
 }
+
+/// The curve of a [`KeySpline`] with fixed control points, as a plain value.
+///
+/// A key spline is an object of the UI thread; a spline easing that a key
+/// frame animation of the compositor uses is evaluated on the render thread
+/// with this solver. It is the same algorithm, with the same search state
+/// (the parameter of the most recent progress is the next first guess).
+#[derive(Clone, Copy, Debug)]
+pub struct KeySplineSolver {
+    is_specified: bool,
+    parameter: f64,
+    bx: f64,
+    cx: f64,
+    cx_bx: f64,
+    three_cx: f64,
+    by: f64,
+    cy: f64,
+}
+
+impl KeySplineSolver {
+    /// Creates the solver of the curve with the given control points.
+    pub fn new(x1: f64, y1: f64, x2: f64, y2: f64) -> Self {
+        let bx = 3.0 * x1;
+        let cx = 3.0 * x2;
+        Self {
+            // This curve would have no effect on the progress.
+            is_specified: !(x1 == 0.0 && y1 == 0.0 && x2 == 1.0 && y2 == 1.0),
+            parameter: 0.0,
+            bx,
+            cx,
+            cx_bx: 2.0 * (cx - bx),
+            three_cx: 3.0 - cx,
+            by: 3.0 * y1,
+            cy: 3.0 * y2,
+        }
+    }
+
+    /// Calculates the spline progress from a linear progress.
+    pub fn get_spline_progress(&mut self, linear_progress: f64) -> f64 {
+        if !self.is_specified {
+            linear_progress
+        } else {
+            self.set_parameter_from_x(linear_progress);
+
+            KeySpline::get_bezier_value(self.by, self.cy, self.parameter)
+        }
+    }
+
+    fn get_x_and_dx(&self, t: f64) -> (f64, f64) {
+        let s = 1.0 - t;
+        let t2 = t * t;
+        let s2 = s * s;
+
+        let x = self.bx * t * s2 + self.cx * t2 * s + t2 * t;
+        let dx = self.bx * s2 + self.cx_bx * s * t + self.three_cx * t2;
+        (x, dx)
+    }
+
+    fn set_parameter_from_x(&mut self, time: f64) {
+        let mut bottom = 0.0;
+        let mut top = 1.0;
+
+        if time == 0.0 {
+            self.parameter = 0.0;
+        } else if time == 1.0 {
+            self.parameter = 1.0;
+        } else {
+            let mut parameter = self.parameter;
+
+            while top - bottom > FUZZ {
+                let (x, dx) = self.get_x_and_dx(parameter);
+                let absdx = dx.abs();
+
+                if x > time {
+                    top = parameter;
+                } else {
+                    bottom = parameter;
+                }
+
+                if (x - time).abs() < ACCURACY * absdx {
+                    break;
+                }
+
+                if absdx > FUZZ {
+                    let next = parameter - (x - time) / dx;
+
+                    if next >= top {
+                        parameter = (parameter + top) / 2.0;
+                    } else if next <= bottom {
+                        parameter = (parameter + bottom) / 2.0;
+                    } else {
+                        parameter = next;
+                    }
+                } else {
+                    parameter = (bottom + top) / 2.0;
+                }
+            }
+
+            self.parameter = parameter;
+        }
+    }
+}
+
+#[cfg(test)]
+mod solver_tests {
+    // Not from upstream.
+    use super::*;
+
+    #[test]
+    fn the_solver_follows_the_key_spline() {
+        for (x1, y1, x2, y2) in [(0.25, 0.1, 0.25, 1.0), (0.42, 0.0, 0.58, 1.0), (0.0, 0.0, 1.0, 1.0), (0.1, 0.9, 0.9, 0.1)]
+        {
+            let spline = KeySpline::with_points(x1, y1, x2, y2);
+            let mut solver = KeySplineSolver::new(x1, y1, x2, y2);
+
+            for step in 0..=100 {
+                let progress = f64::from(step) / 100.0;
+                assert_eq!(spline.get_spline_progress(progress), solver.get_spline_progress(progress));
+            }
+            // Backwards as well: the search starts from the last parameter.
+            for step in (0..=100).rev() {
+                let progress = f64::from(step) / 100.0;
+                assert_eq!(spline.get_spline_progress(progress), solver.get_spline_progress(progress));
+            }
+        }
+    }
+}

@@ -88,6 +88,10 @@ impl Easing {
 }
 
 impl IEasing for Easing {
+    fn to_shared(&self) -> std::sync::Arc<crate::animation::easings::SharedEasing> {
+        self.0.to_shared()
+    }
+
     #[inline]
     fn ease(&self, progress: f64) -> f64 {
         self.0.ease(progress)

@@ -11,6 +11,10 @@ impl CubicEaseIn {
 }
 
 impl IEasing for CubicEaseIn {
+    fn to_shared(&self) -> std::sync::Arc<crate::animation::easings::SharedEasing> {
+        std::sync::Arc::new(*self)
+    }
+
     fn ease(&self, progress: f64) -> f64 {
         progress * progress * progress
     }

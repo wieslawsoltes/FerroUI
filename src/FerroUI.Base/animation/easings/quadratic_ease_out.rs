@@ -11,6 +11,10 @@ impl QuadraticEaseOut {
 }
 
 impl IEasing for QuadraticEaseOut {
+    fn to_shared(&self) -> std::sync::Arc<crate::animation::easings::SharedEasing> {
+        std::sync::Arc::new(*self)
+    }
+
     fn ease(&self, progress: f64) -> f64 {
         -(progress * (progress - 2.0))
     }
