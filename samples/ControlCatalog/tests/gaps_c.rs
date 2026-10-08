@@ -87,7 +87,6 @@ fn gap_c305_generic_list_element() {
 }
 
 #[test]
-#[ignore = "gap C306: Slider.Ticks is not converted from text"]
 fn gap_c306_slider_ticks_from_text() {
     let _app = start_application();
     let slider = from_markup_value::<Ref<Slider>>(&Some(load_text(&format!(

@@ -588,10 +588,36 @@ fn the_lists_of_this_crate_have_a_capacity_reached_through_the_named_collections
         ValueType::of::<crate::ColumnDefinitions>(),
         ValueType::of::<InlineCollection>(),
         ValueType::of::<crate::templates::DataTemplates>(),
+        ValueType::of::<TickList>(),
     ] {
         let base = (MarkupType::find_by_handle(named.id()).unwrap().base.unwrap())();
         assert!(ValueTypes::is_assignable(named, base), "{named} -> {base}");
     }
+}
+
+#[test]
+fn a_tick_list_is_filled_through_the_list_of_numbers_it_derives_from() {
+    use ferroui_base::media::MediaCollection;
+
+    crate::register_types();
+    let ticks = <TickList as MarkupTyped>::MARKUP;
+    let base = (ticks.base.unwrap())();
+    assert_eq!(base, ValueType::of::<MediaCollection<f64>>());
+    assert!(ValueTypes::is_assignable(ValueType::of::<TickList>(), base));
+
+    // What the loader does for `Ticks="0,20,25"`: the constructor of the tick list, then
+    // the members of the list of numbers with the tick list as the instance.
+    let list = MarkupType::find_by_handle(base.id()).unwrap();
+    let instance = (ticks.constructors[0].invoke)(&[]).unwrap();
+    (list.find_property("Capacity").unwrap().set.unwrap())(&[instance.clone(), boxed(3i32)]).unwrap();
+    let add = list.find_methods("Add").next().unwrap();
+    for tick in [0.0f64, 20.0, 25.0] {
+        (add.invoke)(&[instance.clone(), boxed(tick)]).unwrap();
+    }
+    let ticks = unbox::<TickList>(&instance);
+    assert_eq!(ticks.to_vec(), [0.0, 20.0, 25.0]);
+    // The value of a `Ticks` property.
+    assert!(unbox::<Option<TickList>>(&instance) == Some(ticks));
 }
 
 #[test]

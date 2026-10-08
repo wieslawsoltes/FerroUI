@@ -44,6 +44,12 @@ impl TickList {
         result.add_range(ticks);
         result
     }
+
+    /// The underlying list.
+    #[inline]
+    pub fn list(&self) -> &Rc<FerroList<f64>> {
+        &self.0
+    }
 }
 
 impl Deref for TickList {
