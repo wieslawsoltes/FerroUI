@@ -433,10 +433,6 @@ Built with `scripts/build-browser.sh render_worker_clear --threads` and run with
 
 Status: written, **the modules not built**. No cargo and no browser build was run. What was run, with the tools installed in the main checkout: the type check, the linter and the bundle of `webapp/` (clean); `webapp/tests/software-blit.test.mjs` in headless Chrome (passes); and `thread_spawn.test.mjs` against a copy of the `thread_spawn` site of the B2.1 validation in which `ferroui-sw.js` and `ferroui-threads.js` were replaced by the new ones and `ferroui-coi-sw.js` removed (its 3 checks pass: the merged worker isolates the page). The module of that copy was linked with the old flags, so nothing below about the link, about `wasmMemory` on a real module, or about `storage_view` has been seen to run. **[R]** marks what was read in Emscripten 6.0.10 (`.tools/emsdk/upstream/emscripten`) and **[G]** what was read in the script of the threaded `themed_view` of the B2.1 validation (`target/browser-threads/themed_view/themed_view.js`).
 
-## B2.3: pacing, software frames, resize, and the wait (written, not validated)
-
-Status: written on 2026-10-08, **not built and not run**. The branch was written without cargo, without the browser build and without a browser; the session that validates it builds it first. What could be checked without a build: the Rust files parse (the formatter reads them, and at a width of 120 it changes nothing in them), the script modules pass the type check of `webapp/` with the tools of the main checkout (the only errors are the missing package of the storage bundle, as in B2.1), and the page script and the test parse. Nothing below marked **[R]** has been seen to run: it was read in the sources of Emscripten 6.0.10 (`.tools/emsdk/upstream/emscripten`).
-
 ### What was written
 
 | Piece | Where | What it is |
@@ -513,6 +509,14 @@ Nothing written for this step had to change. Built and run in headless Chrome:
 - The type check, the linter and the pixel test of `webapp/` pass, the pixel test with a grown and with a shared memory; the host tests of the browser crate pass (171).
 - The fixed memory of the threaded build (512 MB by default) was granted in every run. The measured peak of the catalog, which section 5 asks for, is still to be taken (B2.7).
 
+## B2.3: pacing, software frames, resize, and the wait (written, not validated)
+
+Status: written on 2026-10-08, **not built and not run**. The branch was written without cargo, without the browser build and without a browser; the session that validates it builds it first. What could be checked without a build: the Rust files parse (the formatter reads them, and at a width of 120 it changes nothing in them), the script modules pass the type check of `webapp/` with the tools of the main checkout (the only errors are the missing package of the storage bundle, as in B2.1), and the page script and the test parse. Nothing below marked **[R]** has been seen to run: it was read in the sources of Emscripten 6.0.10 (`.tools/emsdk/upstream/emscripten`).
+
+### What was written
+
+| Piece | Where | What it is |
+|---|---|---|
 | Calls between threads | `interop/thread_proxy.rs` (new) | `current_thread()` (`pthread_self`, 0 without threads) and, inside the crate, `run_on_thread(thread, work)`: a boxed `FnOnce() + Send` queued for another thread with `emscripten_proxy_async` on a queue of the platform's own (`em_proxying_queue_create`, made on first use, never destroyed). Guarded by `all(target_os = "emscripten", target_feature = "atomics")`; any other build has one thread, id 0, and queues nothing. The two `unsafe` blocks are the calls and the box that crosses as a pointer |
 | The shared surface object | `rendering/browser_surface_shared.rs` (new), exported as `rendering::BrowserSurfaceShared` | Section 4's object: the target id, the size in device pixels and the scaling, the kind of the target, a disposed flag; `is_ready`, `uses_contexts`, and `size_getter()`, the function the existing render targets ask at the start of a frame. **All atomics and no lock**, which is a change against section 4 ("the size and scaling under one small lock"): the two are read as one value through a version counter that is odd during a write, so that the thread of the page never meets a lock here. Host tests include a writer and a reader on two threads |
 | Size changes without a top-level | `interop/canvas_helper.rs` | `add_size_changed` / `remove_size_changed`: `CanvasHelper_OnSizeChanged` also reaches subscribers of its thread, with the id the canvas was created with. The example has no top-level; in B2.5 the top-level writes the shared object itself and this may go again |
