@@ -1,4 +1,4 @@
-// Behaviour tests of steps B2.1 and B2.3 of the render worker on the render_worker_clear example,
+// Behaviour tests of steps B2.1, B2.3 and B2.5 of the render worker on the render_worker_clear example,
 // in headless Chrome: a canvas whose control is transferred to a thread of the module is drawn to
 // there, without the compositor. The page is cross-origin isolated either by the headers of the
 // server or by the service worker of the threaded mode.
@@ -11,6 +11,9 @@
 // B2.3: the software mode; a frame loop on the thread that goes on while the page is busy; the
 // size of the canvas crossing to the thread; the wake-up of the page from the thread; and the
 // thread of the page waiting for a frame, with and without a frame out of turn.
+// B2.5: the thread is the render worker of the browser backend, and it draws through the render
+// surface of the backend, which it finds by the id of the render target (every check); a canvas
+// created before the thread has reported itself is kept back by the script and still drawn to.
 //
 // The page writes the state of the example (`renderWorkerClearState`, a line of `name=value` pairs)
 // into the element `result` and the frame counter the thread wakes it with into `frames`; the
@@ -27,6 +30,7 @@ const site = process.argv[2] ?? path.join(process.env.CARGO_TARGET_DIR ?? path.j
 const RESULT = "document.getElementById('result')?.textContent ?? ''";
 const STATE = "renderWorkerClear.renderWorkerClearState()";
 const FRAMES = "renderWorkerClear.renderWorkerClearFrames()";
+const HELD_BACK = "renderWorkerClear.renderWorkerClearHeldBack()";
 const WAKE_UPS = "Number(/wakeups=(\\d+)/.exec(document.getElementById('frames').textContent)[1])";
 const REPORTED = "Number(/frames=(\\d+)/.exec(document.getElementById('frames').textContent)[1])";
 const WORKERS = "navigator.serviceWorker.getRegistrations().then((registrations) => registrations.length)";
@@ -251,6 +255,17 @@ await run([
             const state = await expectFirstFrame(page, { kind: "software" });
             assert(hasMarker(state), "the software frame has no square");
             await expectFrameInCanvas(page);
+            assert(page.errors.length === 0, `errors in the page:\n${page.errors.join("\n")}`);
+        } finally { await page.close(); }
+    }],
+    ["a canvas created before the thread has reported itself is kept back and then drawn to", async () => {
+        const page = await open(site, { isolated: true, width: 320, height: 200, query: "?Early=true" });
+        try {
+            const state = await expectFirstFrame(page);
+            await expectFrameInCanvas(page, { marker: hasMarker(state) });
+            // Whether the page really was ahead of the thread is a race the page nearly always
+            // wins (it creates the canvas in the call that started the thread); it is recorded.
+            measured(`the script kept the canvas back: ${await page.evaluate(HELD_BACK)}`);
             assert(page.errors.length === 0, `errors in the page:\n${page.errors.join("\n")}`);
         } finally { await page.close(); }
     }],
