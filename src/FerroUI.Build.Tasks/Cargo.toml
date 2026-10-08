@@ -21,3 +21,9 @@ ferroui-markup-xaml = { workspace = true }
 # The compiler: the transform (against the run-time type system, which is why the build script that
 # calls this crate links the crates of the types its documents name) and the emitter of Rust source.
 ferroui-markup-xaml-loader = { workspace = true, features = ["runtime", "emitter"] }
+# The source scanner (docs/porting/xaml.md, 9.5.1): `syn` reads a source file into items, the
+# bodies of the declaration macros are read from their tokens. `span-locations` gives the tokens
+# the lines the diagnostics of the scanner name; `quote` prints the types of function signatures.
+proc-macro2 = { version = "1", default-features = false, features = ["span-locations"] }
+quote = { version = "1", default-features = false }
+syn = { version = "2", default-features = false, features = ["full", "parsing", "printing", "visit"] }

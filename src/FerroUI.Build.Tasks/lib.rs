@@ -69,6 +69,23 @@
 //! This crate itself links the compiler and the base crate only, never the
 //! controls.
 //!
+//! # The build-time type model
+//!
+//! The way out of both consequences is xaml.md 9.5: the types read from the
+//! sources instead of the process. Its first stage is here and [`Build`] does
+//! not use it yet:
+//!
+//! - [`model`]: the type model of a crate (`AssemblyModel`, `TypeModel`,
+//!   `MemberModel`, `RegisteredModel`) and its file, the `.xamlmeta` of format
+//!   2, which keeps the documents of format 1 where the compiler reads them;
+//! - [`scanner`]: the source scanner, which fills the model from the
+//!   declaration macros of the sources of a crate (`scan_crate`), linking
+//!   nothing.
+//!
+//! What is missing between the model and [`Build`] is the type system over
+//! the model (`ModelTypeSystem`, xaml.md 9.5.5) and the call forms of 9.5.3;
+//! xaml.md 9.10.1 has the stages.
+//!
 //! # A crate with checked-in compiled markup
 //!
 //! A crate that keeps all of its compiled markup checked in (the two themes)
@@ -83,6 +100,7 @@
 
 mod json;
 pub mod model;
+pub mod scanner;
 
 use std::env;
 use std::fs;
