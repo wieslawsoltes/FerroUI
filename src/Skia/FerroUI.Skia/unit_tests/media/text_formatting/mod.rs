@@ -11,6 +11,7 @@ mod text_formatter_tests;
 mod text_formatter_wrap_characterization_tests;
 mod text_layout_tests;
 mod text_run_cache_tests;
+mod text_shaper_tests;
 
 pub(crate) use multi_buffer_text_source::MultiBufferTextSource;
 pub(crate) use single_buffer_text_source::SingleBufferTextSource;
