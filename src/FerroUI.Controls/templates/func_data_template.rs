@@ -10,8 +10,8 @@ use std::rc::Rc;
 /// Builds a control for a piece of data.
 ///
 /// The typed constructors ([`for_type`](Self::for_type) and friends) take
-/// the place of the generic class of the same name: they match data whose
-/// boxed value holds exactly `T`, and null data when `T` accepts null.
+/// the place of the generic class of the same name: they match data that can
+/// be cast to `T`, and null data when `T` accepts null.
 pub struct FuncDataTemplate {
     base: FuncTemplateWithParam<Option<BoxedValue>, Option<Ref<Control>>>,
     match_: Box<dyn Fn(Option<&BoxedValue>) -> bool>,
@@ -103,23 +103,43 @@ impl FuncDataTemplate {
         )
     }
 
-    // Deviation (DEVIATIONS.md, Templates): upstream `TypeUtilities.CanCast<T>` also accepts null
-    // for a reference type `T` and a non-null `T` for `T?`; here null is a `T` only for a
-    // registered nullable form, and a value is a `T` only when it holds exactly `T`.
-    /// Runs `f` with the data as a `T`, if it is one. Null data is a `T`
-    /// when `T` accepts null (a registered nullable form such as
-    /// `Option<i32>`): `f` then receives the null of `T`.
+    /// Runs `f` with the data as a `T`, if it can be cast to one (C#
+    /// `TypeUtilities.CanCast<T>` and the cast `(T)o`): data whose box holds
+    /// a `T`, or a value `is T` (a value of the type a nullable `T` holds,
+    /// a handle of a base class or of the class of the object, an interface
+    /// handle), or null when `T` accepts null.
+    //
+    // Deviation (DEVIATIONS.md, Templates): a Rust type has no null of its
+    // own, so null data is a `T` only for a nullable form (`Option<String>`,
+    // `Option<Ref<Control>>`), not for `String` or `Ref<Control>`.
     fn with_cast<T: 'static, R>(data: Option<&BoxedValue>, f: impl FnOnce(&T) -> R) -> Option<R> {
-        let null;
+        let target = ValueType::of::<T>();
+        let cast;
         let data = match data {
-            Some(data) => data,
+            Some(data) => {
+                let value: &dyn AnyValue = &**data;
+                if let Some(value) = value.downcast_ref::<T>() {
+                    return Some(f(value));
+                }
+                cast = Self::cast_value(data, target)?;
+                &cast
+            }
             None => {
-                null = ValueTypes::null_value(ValueType::of::<T>())?;
-                &null
+                cast = ValueTypes::null_value(target)?;
+                &cast
             }
         };
         let value: &dyn AnyValue = &**data;
         value.downcast_ref::<T>().map(f)
+    }
+
+    /// C# `value is T` for a value whose box does not hold exactly `T`: the
+    /// assignability casts, then the class of the object behind a handle.
+    fn cast_value(value: &BoxedValue, target: ValueType) -> Option<BoxedValue> {
+        ValueTypes::try_cast(value, target).or_else(|| {
+            let object: BoxedValue = Rc::new(ValueTypes::as_object(&**value)?);
+            ValueTypes::try_convert_registered(&object, target)
+        })
     }
 
     fn cast_build<T: 'static>(
