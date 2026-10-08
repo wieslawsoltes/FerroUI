@@ -60,15 +60,19 @@ self.addEventListener("activate", event /* ExtendableEvent */ => {
 
 // This should be called once per download
 // Each event has a dataChannel that the data will be piped through
+//
+// The page navigates the frame of the download when the stream asks for its first chunk
+// (storage/downloadFileHandle.ts), and takes that request as the word that the address is known
+// here. So the address is recorded before the stream is made.
 globalThis.addEventListener("message", evt => {
     const data = evt.data;
     if (data.url && data.readablePort) {
+        const map = (self as any).map;
+        map.set(data.url, data);
         data.rs = new ReadableStream(
             new MessagePortSource(evt.data.readablePort),
             new CountQueuingStrategy({ highWaterMark: 4 })
         );
-        const map = (self as any).map;
-        map.set(data.url, data);
     }
 });
 

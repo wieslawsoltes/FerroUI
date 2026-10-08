@@ -1,6 +1,7 @@
 import { ferrouiDb, fileBookmarksStore } from "./indexedDb";
 import { StorageItem, StorageItems } from "./storageItem";
 import { showOpenFilePicker, showDirectoryPicker, showSaveFilePicker, FileSystemFileHandle } from "native-file-system-adapter";
+import { DownloadFileHandle } from "./downloadFileHandle";
 
 declare global {
     type WellKnownDirectory = "desktop" | "documents" | "downloads" | "music" | "pictures" | "videos";
@@ -9,6 +10,9 @@ declare global {
         accept: Record<string, string | string[]>;
     }
 }
+
+// Looked up when the bundle is loaded, which is when the polyfill looks for the native pickers.
+const nativeSaveFilePicker = (globalThis as any).showSaveFilePicker;
 
 export class StorageProvider {
     public static async selectFolderDialog(
@@ -52,7 +56,12 @@ export class StorageProvider {
             _preferPolyfill: preferPolyfill
         };
 
-        const handle = await showSaveFilePicker(options);
+        // Without the native picker (or when the polyfill is preferred) the polyfill returns a handle
+        // that saves through a download. That handle is the port's own (downloadFileHandle.ts): the
+        // polyfill's starts the download before the service worker is known to have the stream.
+        const handle = nativeSaveFilePicker && !preferPolyfill
+            ? await showSaveFilePicker(options)
+            : new FileSystemFileHandle(new DownloadFileHandle(options.suggestedName));
         return StorageItem.createFromHandle(handle);
     }
 
