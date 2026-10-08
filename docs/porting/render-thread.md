@@ -180,6 +180,16 @@ What the render-thread mode does **not** have yet, each a panic or an absent ans
 - Nothing chooses the mode: `Compositor::new` (the one applications get) still creates the dispatcher-thread mode. The option and the default are R4 and R5.
 - The synchronous points (resize, first show) and the render timer's thread are R4.
 
+### R4 in progress
+
+What the survey of R4 found: the render loop and its timers are ported and already tick in the background where the platform does (the display link of the native backend, the sleep loop, the thread proxy); the dispatcher-thread mode is what marshals those ticks to the UI thread. R4 is therefore the waits and the choice of the mode, not a new loop.
+
+| Step | Content | State |
+|---|---|---|
+| R4.1 | The synchronous wait of the media context (`SyncWaitCompositorBatch`): in the render-thread mode a synchronous commit blocks on the `Processed` or `Rendered` completion of the batch (`BatchCompletion::wait`) where the dispatcher-thread mode renders on the spot. The condition is upstream's (`UseUiThreadForSynchronousCommits` false and a background loop) and the mode of the compositor. | Done; `render_thread_tests.rs` commits synchronously against a render thread that ticks. |
+| R4.2 | `NonPumpingLockHelper` around the waits, as upstream. | Open: to check what the port has. |
+| R4.3 | The option that chooses the mode and where `Compositor::new` reads it. | Open; depends on R5 for a window to render. |
+
 ### Scope of R3, surveyed
 
 What the UI side asks the server compositor for directly today (outside `rendering/composition/server/`, tests aside). Each becomes a member of the handle the compositor keeps, a job, or a readback:

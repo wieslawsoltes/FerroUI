@@ -386,11 +386,20 @@ impl MediaContext {
         self.sync_wait_compositor_batch(compositor, &batch, wait_full_render);
     }
 
-    fn sync_wait_compositor_batch(&self, compositor: &Rc<Compositor>, _batch: &Arc<CompositionBatch>, _wait_full_render: bool) {
-        // The server compositor runs on this thread (see the threading
-        // notes of the composition module): rendering it here is what
-        // applies the batch, in every render loop configuration.
-        compositor.server().render();
+    fn sync_wait_compositor_batch(&self, compositor: &Rc<Compositor>, batch: &Arc<CompositionBatch>, wait_full_render: bool) {
+        // The reference tests `UseUiThreadForSynchronousCommits: false` and
+        // `Loop.RunsInBackground: true`. Here a background loop does not by
+        // itself put the server compositor on its thread (the
+        // dispatcher-thread mode marshals the tick to this thread), so the
+        // mode of the compositor is part of the test.
+        if !compositor.use_ui_thread_for_synchronous_commits()
+            && compositor.render_loop().runs_in_background()
+            && compositor.renders_on_render_thread()
+        {
+            if wait_full_render { batch.rendered() } else { batch.processed() }.wait();
+        } else {
+            compositor.server().render();
+        }
     }
 
     /// Commits the compositor of a composition target right away and

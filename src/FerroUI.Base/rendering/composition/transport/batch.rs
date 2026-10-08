@@ -1,6 +1,6 @@
 use super::BatchStreamData;
 use std::sync::atomic::{AtomicI64, Ordering};
-use std::sync::{Arc, Mutex};
+use std::sync::{Arc, Condvar, Mutex};
 use std::time::Duration;
 
 static NEXT_SEQUENCE_ID: AtomicI64 = AtomicI64::new(1);
@@ -12,6 +12,7 @@ type Continuation = Box<dyn FnOnce() + Send>;
 #[derive(Default)]
 pub struct BatchCompletion {
     state: Mutex<CompletionState>,
+    completed: Condvar,
 }
 
 #[derive(Default)]
@@ -40,6 +41,15 @@ impl BatchCompletion {
         continuation();
     }
 
+    /// Blocks until the completion is set (`Task.Wait`): how the UI thread
+    /// waits for the render thread at the synchronous points.
+    pub fn wait(&self) {
+        let mut state = self.state.lock().unwrap_or_else(|e| e.into_inner());
+        while !state.completed {
+            state = self.completed.wait(state).unwrap_or_else(|e| e.into_inner());
+        }
+    }
+
     pub(crate) fn try_set(&self) {
         let continuations = {
             let mut state = self.state.lock().unwrap_or_else(|e| e.into_inner());
@@ -49,6 +59,7 @@ impl BatchCompletion {
             state.completed = true;
             std::mem::take(&mut state.continuations)
         };
+        self.completed.notify_all();
         for continuation in continuations {
             continuation();
         }

@@ -28,11 +28,18 @@ use std::sync::{Arc, Mutex};
 #[derive(Default)]
 pub struct ManualRenderLoop {
     tasks: Mutex<Vec<Arc<dyn IRenderLoopTask>>>,
+    runs_in_background: bool,
 }
 
 impl ManualRenderLoop {
     pub fn new() -> Arc<ManualRenderLoop> {
         Arc::new(ManualRenderLoop::default())
+    }
+
+    /// A loop that a test ticks from a thread of its own: it reports that it
+    /// runs in the background.
+    pub fn background() -> Arc<ManualRenderLoop> {
+        Arc::new(ManualRenderLoop { tasks: Mutex::default(), runs_in_background: true })
     }
 
     /// Runs every registered task once, on the calling thread.
@@ -59,7 +66,7 @@ impl IRenderLoop for ManualRenderLoop {
     }
 
     fn runs_in_background(&self) -> bool {
-        false
+        self.runs_in_background
     }
 
     fn wakeup(&self) {}
