@@ -88,7 +88,7 @@ fn binary_search_cluster(glyph_infos: &[GlyphInfo], cluster: i32, ascending: boo
 /// single size, and with a single rendering style.
 pub struct GlyphRun {
     glyph_typeface: Rc<GlyphTypeface>,
-    platform_impl: RefCell<Option<Rc<dyn IGlyphRunImpl>>>,
+    platform_impl: RefCell<Option<std::sync::Arc<dyn IGlyphRunImpl>>>,
     font_rendering_em_size: Cell<f64>,
     bidi_level: Cell<i32>,
     glyph_run_metrics: Cell<Option<GlyphRunMetrics>>,
@@ -158,7 +158,7 @@ impl GlyphRun {
 
     /// Creates a glyph run that only wraps platform resources.
     #[allow(dead_code)] // used by the rendering pipeline (glyph run references)
-    pub(crate) fn from_platform_impl(platform_impl: Rc<dyn IGlyphRunImpl>) -> Rc<Self> {
+    pub(crate) fn from_platform_impl(platform_impl: std::sync::Arc<dyn IGlyphRunImpl>) -> Rc<Self> {
         let baseline_origin = platform_impl.baseline_origin();
 
         Rc::new(Self {
@@ -306,7 +306,7 @@ impl GlyphRun {
     }
 
     /// The platform implementation of the glyph run.
-    pub fn platform_impl(&self) -> Rc<dyn IGlyphRunImpl> {
+    pub fn platform_impl(&self) -> std::sync::Arc<dyn IGlyphRunImpl> {
         if let Some(platform_impl) = self.platform_impl.borrow().as_ref() {
             return platform_impl.clone();
         }
@@ -880,7 +880,7 @@ impl GlyphRun {
         self.glyph_run_metrics.set(None);
     }
 
-    fn create_glyph_run_impl(&self) -> Rc<dyn IGlyphRunImpl> {
+    fn create_glyph_run_impl(&self) -> std::sync::Arc<dyn IGlyphRunImpl> {
         let platform_impl = {
             let list = self.glyph_infos.borrow();
             let glyph_infos = list.borrow();

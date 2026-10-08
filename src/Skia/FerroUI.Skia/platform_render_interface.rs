@@ -181,8 +181,8 @@ impl IPlatformRenderInterface for PlatformRenderInterface {
         font_rendering_em_size: f64,
         glyph_infos: &[GlyphInfo],
         baseline_origin: Point,
-    ) -> Rc<dyn IGlyphRunImpl> {
-        Rc::new(GlyphRunImpl::new(glyph_typeface, font_rendering_em_size, glyph_infos, baseline_origin))
+    ) -> std::sync::Arc<dyn IGlyphRunImpl> {
+        std::sync::Arc::new(GlyphRunImpl::new(glyph_typeface, font_rendering_em_size, glyph_infos, baseline_origin))
     }
 
     fn create_render_target_bitmap(&self, size: PixelSize, dpi: Vector) -> Rc<dyn IRenderTargetBitmapImpl> {

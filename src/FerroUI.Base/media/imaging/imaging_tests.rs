@@ -248,7 +248,7 @@ impl IPlatformRenderInterface for MockBackend {
         _font_rendering_em_size: f64,
         _glyph_infos: &[crate::media::text_formatting::GlyphInfo],
         _baseline_origin: Point,
-    ) -> Rc<dyn crate::platform::IGlyphRunImpl> {
+    ) -> std::sync::Arc<dyn crate::platform::IGlyphRunImpl> {
         unimplemented!()
     }
 

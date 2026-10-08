@@ -16,7 +16,7 @@ pub struct DiagnosticGlyphRun {
     /// [`IGlyphRunImpl::bounds`].
     pub bounds: Rect,
     /// The platform glyph run that gets drawn.
-    pub platform_impl: Rc<dyn IGlyphRunImpl>,
+    pub platform_impl: std::sync::Arc<dyn IGlyphRunImpl>,
 }
 
 /// The seam between [`DiagnosticTextRenderer`] and the text stack.
@@ -187,7 +187,7 @@ pub(crate) mod tests {
         fn create_glyph_run(&self, character: char) -> DiagnosticGlyphRun {
             self.requested.borrow_mut().push(character);
             let bounds = if character == '|' { Rect::new(0.0, 0.0, 3.0, 14.0) } else { Rect::new(0.0, 0.0, 6.0, 10.0) };
-            DiagnosticGlyphRun { bounds, platform_impl: Rc::new(MockGlyphRunImpl(character)) }
+            DiagnosticGlyphRun { bounds, platform_impl: std::sync::Arc::new(MockGlyphRunImpl(character)) }
         }
     }
 

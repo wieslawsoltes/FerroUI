@@ -33,7 +33,7 @@
 //! the compositor's dispatcher. Running the server on a dedicated render
 //! thread is blocked by one thing outside this module: the platform
 //! resource handles carried by batches (`std::sync::Arc<dyn IGeometryImpl>`,
-//! `Rc<dyn IBitmapImpl>`, `Rc<dyn IGlyphRunImpl>`, immutable brushes and
+//! `Rc<dyn IBitmapImpl>`, `std::sync::Arc<dyn IGlyphRunImpl>`, immutable brushes and
 //! pens) are `Rc`-based and so are the render contracts the server draws
 //! with. Once those are shareable across threads, the remaining steps are
 //! local: require `Send` on the `Job`, `Create` and `Value` payloads of

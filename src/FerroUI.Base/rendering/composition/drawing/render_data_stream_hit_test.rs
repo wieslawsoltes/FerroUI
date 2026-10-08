@@ -172,7 +172,7 @@ impl IRenderDataVisitor for HitTestVisitor {
         }
     }
 
-    fn on_draw_glyph_run(&mut self, _server_brush: Option<&dyn IBrush>, glyph_run: Option<&Rc<dyn IGlyphRunImpl>>) {
+    fn on_draw_glyph_run(&mut self, _server_brush: Option<&dyn IBrush>, glyph_run: Option<&std::sync::Arc<dyn IGlyphRunImpl>>) {
         let Some(glyph_run) = glyph_run else { return };
         if !self.live {
             return;

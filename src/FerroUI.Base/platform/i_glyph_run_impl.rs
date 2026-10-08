@@ -1,7 +1,7 @@
 use crate::{Point, Rect};
 
 /// Actual implementation of a glyph run that stores platform dependent resources.
-pub trait IGlyphRunImpl {
+pub trait IGlyphRunImpl: Send + Sync + 'static {
     /// Gets the em size used for rendering the glyph run.
     fn font_rendering_em_size(&self) -> f64;
 

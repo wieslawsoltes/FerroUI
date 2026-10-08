@@ -171,7 +171,7 @@ impl RenderDataStream {
     pub fn draw_glyph_run(
         &mut self,
         server_brush: Option<RenderDataResource>,
-        glyph_run: Option<Rc<dyn IGlyphRunImpl>>,
+        glyph_run: Option<std::sync::Arc<dyn IGlyphRunImpl>>,
     ) {
         let glyph_run = glyph_run.map(|glyph_run| RenderDataResource::GlyphRun(Rc::new(glyph_run)));
         let payload = DrawGlyphRunPayload {

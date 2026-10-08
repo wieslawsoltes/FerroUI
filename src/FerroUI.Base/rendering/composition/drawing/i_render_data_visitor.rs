@@ -36,7 +36,7 @@ pub trait IRenderDataVisitor {
         client_pen: Option<&dyn IPen>,
         geometry: Option<&Arc<dyn IGeometryImpl>>,
     );
-    fn on_draw_glyph_run(&mut self, server_brush: Option<&dyn IBrush>, glyph_run: Option<&Rc<dyn IGlyphRunImpl>>);
+    fn on_draw_glyph_run(&mut self, server_brush: Option<&dyn IBrush>, glyph_run: Option<&std::sync::Arc<dyn IGlyphRunImpl>>);
     fn on_draw_bitmap(&mut self, bitmap: Option<&Rc<dyn IBitmapImpl>>, opacity: f64, source_rect: Rect, dest_rect: Rect);
     fn on_draw_custom(&mut self, operation: Option<&Rc<dyn ICustomDrawOperation>>);
 

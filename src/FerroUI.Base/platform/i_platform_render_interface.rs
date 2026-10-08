@@ -55,7 +55,7 @@ pub trait IPlatformRenderInterface: 'static {
         font_rendering_em_size: f64,
         glyph_infos: &[crate::media::text_formatting::GlyphInfo],
         baseline_origin: Point,
-    ) -> Rc<dyn super::IGlyphRunImpl>;
+    ) -> std::sync::Arc<dyn super::IGlyphRunImpl>;
 
     /// Creates a render target bitmap.
     ///

@@ -384,7 +384,7 @@ pub(crate) mod tests {
             _: f64,
             _: &[crate::media::text_formatting::GlyphInfo],
             _: Point,
-        ) -> Rc<dyn crate::platform::IGlyphRunImpl> {
+        ) -> std::sync::Arc<dyn crate::platform::IGlyphRunImpl> {
             unimplemented!()
         }
         fn create_ellipse_geometry(&self, _: Rect) -> Arc<dyn IGeometryImpl> {
