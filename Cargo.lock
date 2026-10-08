@@ -1091,6 +1091,7 @@ name = "xaml-include-fixture-application"
 version = "0.1.0"
 dependencies = [
  "ferroui-base",
+ "ferroui-build",
  "ferroui-controls",
  "ferroui-markup-xaml",
  "ferroui-markup-xaml-loader",
@@ -1104,6 +1105,7 @@ name = "xaml-include-fixture-theme"
 version = "0.1.0"
 dependencies = [
  "ferroui-base",
+ "ferroui-build",
  "ferroui-controls",
  "ferroui-markup-xaml",
  "ferroui-markup-xaml-loader",

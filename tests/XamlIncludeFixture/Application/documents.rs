@@ -10,6 +10,10 @@
 //! `documents.rs`), the include names it there.
 //!
 //! The texts are upstream's, with the namespace and the scheme of the port.
+//! `LocaleCollection`, a type of upstream's test assembly, is a type of the crate
+//! `xaml-include-fixture-theme`: the build script of this crate compiles the
+//! documents, and a build script cannot link the types of the crate it builds
+//! (docs/porting/xaml.md, 9.6.1).
 
 /// The documents compiled into `compiled_xaml.rs`, by their path below `ferres://アセンブリ/`.
 pub const DOCUMENTS: &[(&str, &str)] = &[
@@ -36,7 +40,7 @@ pub const DOCUMENTS: &[(&str, &str)] = &[
         "
 <ResourceDictionary xmlns='https://github.com/ferroui'
                     xmlns:x='http://schemas.microsoft.com/winfx/2006/xaml'
-                    xmlns:local='clr-namespace:XamlIncludeFixture.Application;assembly=\u{30a2}\u{30bb}\u{30f3}\u{30d6}\u{30ea}'>
+                    xmlns:local='clr-namespace:XamlIncludeFixture.Theme;assembly=Tests'>
     <ResourceDictionary.MergedDictionaries>
         <local:LocaleCollection>
             <ResourceInclude Source='ferres://Tests/Demo/en-us.xaml' x:Key='English' />

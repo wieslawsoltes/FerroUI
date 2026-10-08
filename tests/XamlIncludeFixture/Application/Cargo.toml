@@ -7,6 +7,10 @@ rust-version.workspace = true
 license.workspace = true
 repository.workspace = true
 publish = false
+build = "build.rs"
+# The build script hands the path of the `.xamlmeta` of the crate to the build scripts of the crates
+# that depend on this one (docs/porting/xaml.md, 9.6.3).
+links = "xaml_include_fixture_application_xaml"
 autotests = false
 autobenches = false
 autoexamples = false
@@ -19,7 +23,18 @@ path = "lib.rs"
 ferroui-base = { workspace = true, features = ["markup-functions"] }
 ferroui-controls = { workspace = true }
 ferroui-markup-xaml = { workspace = true }
-# The crates whose compiled documents the documents of this crate include.
+# The crates whose compiled documents the documents of this crate include. The build script reads
+# the `.xamlmeta` of each from `DEP_<CRATE>_XAML_XAMLMETA`.
+xaml-include-fixture-theme = { path = "../Theme" }
+ferroui-themes-simple = { workspace = true }
+ferroui-themes-fluent = { workspace = true }
+
+[build-dependencies]
+# The build script compiles the documents of the crate (`build.rs`). The compiler reads the types the
+# documents name from the registries of the process, so the script links the crates that declare them.
+ferroui-build = { workspace = true }
+ferroui-base = { workspace = true }
+ferroui-controls = { workspace = true, features = ["testing"] }
 xaml-include-fixture-theme = { path = "../Theme" }
 ferroui-themes-simple = { workspace = true }
 ferroui-themes-fluent = { workspace = true }
@@ -27,6 +42,6 @@ ferroui-themes-fluent = { workspace = true }
 [dev-dependencies]
 ferroui-base = { workspace = true, features = ["testing"] }
 ferroui-controls = { workspace = true, features = ["testing"] }
-# The emitter generates the compiled markup of the crate and checks it (`tests/compiled_xaml_tests.rs`); the
-# tests of the diagnostics compile documents in the test.
+# The emitter checks the output of the build script (`tests/compiled_xaml_tests.rs`); the tests of the
+# diagnostics compile documents in the test.
 ferroui-markup-xaml-loader = { workspace = true, features = ["runtime", "testing", "emitter"] }

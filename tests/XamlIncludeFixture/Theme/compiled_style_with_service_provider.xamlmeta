@@ -1,0 +1,15 @@
+{
+  "name": "Tests",
+  "crate_name": "xaml_include_fixture_theme",
+  "documents": [
+    {
+      "uri": "ferres://tests/Xaml/StyleWithServiceProvider.xaml",
+      "root_type": "XamlIncludeFixture.Theme.StyleWithServiceProvider",
+      "class_rust_path": "::xaml_include_fixture_theme::StyleWithServiceProvider",
+      "build_path": null,
+      "populate_path": "::xaml_include_fixture_theme::compiled_style_with_service_provider::populate",
+      "public": true
+    }
+  ],
+  "dependencies": []
+}
