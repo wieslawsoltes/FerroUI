@@ -24,9 +24,10 @@
 # spawn threads: the nightly toolchain that `scripts/browser/setup.sh --threads` installs, a standard
 # library rebuilt with atomics (-Zbuild-std) and the pthread options of Emscripten. The build goes to
 # its own target directory (target/threads) and the site to target/browser-threads/<application>, so
-# that neither replaces the output of a build without the option. The site also gets the two files
-# of scripts/browser/threads/ (the check for cross-origin isolation and the service worker that
-# provides it on a host that cannot set headers). Variables of the mode:
+# that neither replaces the output of a build without the option. The site also gets two files of
+# scripts/browser/threads/ (the check for cross-origin isolation and the service worker that
+# provides it on a host that cannot set headers); the other two are linked into the script of the
+# module, for the web workers that run its threads. Variables of the mode:
 #   FERROUI_BROWSER_THREAD_POOL_SIZE   web workers created before the application starts (default 2);
 #                                      a thread beyond the pool cannot start until the main thread
 #                                      returns to the browser
@@ -169,7 +170,15 @@ if [ -n "$THREADS" ]; then
   # link. What that costs: in those four objects a `thread_local` is a plain global and the guard of
   # a local static is not atomic. They are thin forwarding functions; the proper fix is to compile
   # them here with -pthread (their sources are in the skia-bindings crate) or binaries built so.
-  FLAGS+=(--config "target.wasm32-unknown-emscripten.rustflags=[\"-Ctarget-feature=+atomics,+bulk-memory\", \"-Clink-arg=-pthread\", \"-Clink-arg=-Wl,--no-check-features\", \"-Clink-arg=-sPTHREAD_POOL_SIZE=$THREAD_POOL_SIZE\", \"-Clink-arg=-sENVIRONMENT=web,worker\"]")
+  # PThread joins the exported runtime methods of the file (the setting given later replaces the
+  # earlier one): the script side finds the web worker of a thread in its table when it transfers
+  # a canvas to the thread that renders (WebRenderTargetRegistry.create).
+  # The two scripts of scripts/browser/threads/ that are linked into the script of the module make
+  # a web worker that runs a thread attach its own copy of ferroui.js to its own module, and start
+  # the wasm-bindgen glue there (docs/porting/browser-render-worker.md, "B2.1"). The paths go into
+  # a TOML string as they are: a repository path with a quote or a backslash in it would break it.
+  THREADS_DIR="$ROOT/scripts/browser/threads"
+  FLAGS+=(--config "target.wasm32-unknown-emscripten.rustflags=[\"-Ctarget-feature=+atomics,+bulk-memory\", \"-Clink-arg=-pthread\", \"-Clink-arg=-Wl,--no-check-features\", \"-Clink-arg=-sPTHREAD_POOL_SIZE=$THREAD_POOL_SIZE\", \"-Clink-arg=-sENVIRONMENT=web,worker\", \"-Clink-arg=-sEXPORTED_RUNTIME_METHODS=GL,HEAPU8,PThread\", \"-Clink-arg=--extern-pre-js=$THREADS_DIR/ferroui-worker-import.js\", \"-Clink-arg=--post-js=$THREADS_DIR/ferroui-worker-attach.js\"]")
 fi
 # The messages of the build name the output directories of the build scripts.
 MESSAGES="$(mktemp)"

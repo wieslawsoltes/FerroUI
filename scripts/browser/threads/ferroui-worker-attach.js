@@ -1,0 +1,39 @@
+// Linked into the script of a module built with threads (`scripts/build-browser.sh --threads`,
+// emcc's --post-js): the end of the factory function of the module. It only acts in a web worker
+// that runs a thread (a pthread), where nobody else can do the two things below; in the page it
+// does nothing, and the host page attaches the module as before. Everything here runs while the
+// script of the module is evaluated in the worker, before the worker takes its first message, so
+// it is in place before the start function of any thread runs.
+//
+// It uses names of the script emcc generates: `ENVIRONMENT_IS_PTHREAD`, `Module` and `PThread`
+// (Emscripten), `___wbindgen_start` (the receiving name of an export the wasm-bindgen tool adds)
+// and `__ferroui_FerroExports` (ferroui-worker-import.js). Read in Emscripten 6.0.10 and
+// wasm-bindgen 0.2.129; see docs/porting/browser-render-worker.md, "B2.1".
+if (ENVIRONMENT_IS_PTHREAD) {
+  // 1. The script side of the platform finds the module through `FerroExports.attach`, which the
+  // host page calls for the module of the page. The worker has its own copy of ferroui.js and
+  // its own `Module` (its own `GL`, its own exports, its own view of the shared memory): they are
+  // attached to each other here. The properties of `Module` are filled in later, when the worker
+  // is sent the WebAssembly module; ferroui.js reads them at each use.
+  __ferroui_FerroExports.attach(Module);
+
+  // 2. The wasm-bindgen glue keeps the script objects that Rust holds in a table of the
+  // WebAssembly instance, and every worker has an instance of its own. The table gets its fixed
+  // entries (undefined, null, true, false) from the start function of the glue, which Emscripten
+  // runs with the initialisers of the runtime, and those do not run in a thread. Without it the
+  // first objects handed to Rust in the worker would take the places of the fixed entries. It is
+  // run once per worker, after the thread-local storage of the first thread of the worker is set
+  // up and before the start function of that thread.
+  var ferrouiThreadInitTLS = PThread.threadInitTLS;
+  var ferrouiBindgenStarted = false;
+  PThread.threadInitTLS = () => {
+    ferrouiThreadInitTLS();
+    if (!ferrouiBindgenStarted) {
+      ferrouiBindgenStarted = true;
+      // A module without script objects in Rust has no such function.
+      if (typeof ___wbindgen_start == 'function') {
+        ___wbindgen_start();
+      }
+    }
+  };
+}
