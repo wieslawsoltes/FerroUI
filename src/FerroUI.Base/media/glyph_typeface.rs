@@ -20,9 +20,10 @@ use crate::media::{
     FontMetrics, FontSimulations, FontStretch, FontStyle, FontWeight, GlyphBounds, GlyphMetrics, IFontMemory,
     IPlatformTypeface, ITextShaperTypeface, UnicodeRange, UnicodeRangeSegment,
 };
-use crate::platform::ITextShaperImpl;
+use crate::media::immutable_geometry_impl::ImmutableGeometryImpl;
+use crate::platform::{self, IGeometryImpl, ITextShaperImpl};
 use crate::utilities::CultureInfo;
-use crate::{FerroLocator, LocatorExtensions};
+use crate::{FerroLocator, LocatorExtensions, Matrix};
 
 /// LCID of the invariant culture as stored in name records.
 const INVARIANT_LCID: u16 = 0x007F;
@@ -693,6 +694,43 @@ impl GlyphTypeface {
     #[allow(dead_code)] // used by glyph outline building
     pub(crate) fn glyf_table(&self) -> Option<&GlyfTable> {
         self.glyf_table.as_ref()
+    }
+
+    /// Retrieves the vector outline geometry for the specified glyph, in font design-unit space.
+    ///
+    /// Returns `None` when the glyph ID is out of range, the font has no `glyf` table
+    /// (e.g. CFF / CFF2), or the glyph data cannot be parsed (malformed font, cyclic composite,
+    /// depth limit exceeded). The outline is in font design units (Y-up): apply the
+    /// `em_size / design_em_height` scale, the Y-flip, and the glyph position yourself, via
+    /// `IGeometryImpl::with_transform` or a drawing-context transform. Variable-font axis
+    /// configuration is taken from the typeface instance itself.
+    ///
+    /// The result is an immutable outline: safe to cache and share, and drawable via the
+    /// `draw_geometry` overload that takes a platform geometry. It is the lightweight
+    /// platform geometry rather than a `Geometry` object so it can be cached and used on the
+    /// hot path; do not mutate it.
+    pub fn get_glyph_outline(&self, glyph_index: u16) -> Option<Rc<dyn IGeometryImpl>> {
+        if i32::from(glyph_index) >= self.glyph_count() {
+            return None;
+        }
+
+        let glyf_table = self.glyf_table.as_ref()?;
+
+        let geometry = platform::render_interface().create_stream_geometry();
+
+        let mut ctx = geometry.open();
+
+        // Build the outline in font design-unit space (identity transform); callers apply
+        // the scale / position. Wrapped so the shared, cacheable result is immutable.
+        let built = glyf_table.try_build_glyph_geometry(i32::from(glyph_index), Matrix::IDENTITY, &mut *ctx);
+
+        ctx.dispose();
+
+        if built {
+            return Some(Rc::new(ImmutableGeometryImpl::new(geometry)));
+        }
+
+        None
     }
 
     /// Releases the platform typeface. Idempotent.

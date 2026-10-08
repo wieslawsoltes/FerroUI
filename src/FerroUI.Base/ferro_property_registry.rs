@@ -64,6 +64,44 @@ impl FerroPropertyRegistry {
         self.inner.borrow().properties.values().copied().collect()
     }
 
+    /// Unregisters the properties of the given types: removes the metadata
+    /// every registered, attached and direct property holds for each type,
+    /// and the property lists cached for it.
+    ///
+    /// Returns whether the types were unregistered. (The managed original
+    /// returns false when unregistering throws; nothing fails here.)
+    pub fn unregister_by_module(&self, types: impl IntoIterator<Item = &'static TypeInfo>) -> bool {
+        for type_ in types {
+            // The properties are collected first: removing metadata does not
+            // call back into the registry, but the registry is not borrowed
+            // while code of a property runs.
+            let properties: Vec<&'static FerroProperty> = {
+                let inner = self.inner.borrow();
+                let registered = inner.registered.values().flat_map(|properties| properties.values().copied());
+                let attached = inner.attached.values().flat_map(|properties| properties.values().copied());
+                let direct = inner.direct.values().flat_map(|properties| {
+                    properties.values().map(|property| {
+                        let property: &'static dyn DirectPropertyDyn = *property;
+                        property.as_property()
+                    })
+                });
+                let properties: Vec<&'static FerroProperty> = registered.chain(attached).chain(direct).collect();
+                properties
+            };
+            for property in properties {
+                property.unregister(type_);
+            }
+
+            let mut inner = self.inner.borrow_mut();
+            inner.registered_cache.remove(&key(type_));
+            inner.attached_cache.remove(&key(type_));
+            inner.direct_cache.remove(&key(type_));
+            inner.inherited_cache.remove(&key(type_));
+        }
+
+        true
+    }
+
     /// Gets all non-attached properties registered on a type (and its bases).
     pub fn get_registered(&self, type_: &'static TypeInfo) -> PropertyList {
         if let Some(result) = self.inner.borrow().registered_cache.get(&key(type_)) {

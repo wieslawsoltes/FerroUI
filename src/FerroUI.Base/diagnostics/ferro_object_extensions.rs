@@ -2,7 +2,7 @@
 //! `FerroObject.GetDiagnosticInternal` and `ValueStore.GetDiagnostic` it
 //! is built on).
 
-use super::FerroPropertyValue;
+use super::{FerroPropertyValue, ValueStoreDiagnostic};
 use crate::data::BindingPriority;
 use crate::{FerroObject, FerroProperty};
 
@@ -12,6 +12,10 @@ pub trait FerroObjectDiagnosticExtensions {
     /// [`FerroPropertyValue`] that can be used to diagnose the state of the
     /// property on the object.
     fn get_diagnostic(&self, property: &'static FerroProperty) -> FerroPropertyValue;
+
+    /// Gets a [`ValueStoreDiagnostic`]: the frames of values that are
+    /// applied to the object.
+    fn get_value_store_diagnostic(&self) -> ValueStoreDiagnostic;
 }
 
 impl FerroObjectDiagnosticExtensions for FerroObject {
@@ -43,5 +47,9 @@ impl FerroObjectDiagnosticExtensions for FerroObject {
         };
 
         FerroPropertyValue::new(property, value, priority, None, overridden)
+    }
+
+    fn get_value_store_diagnostic(&self) -> ValueStoreDiagnostic {
+        self.values().get_store_diagnostic()
     }
 }

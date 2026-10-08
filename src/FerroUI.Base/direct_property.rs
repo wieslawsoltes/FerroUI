@@ -89,9 +89,18 @@ impl<T: PropertyValue> DirectPropertyBase<T> {
 
     /// Overrides the metadata for the property on class `TOwner`.
     pub fn override_metadata<TOwner: ObjectType>(&self, metadata: DirectPropertyMetadata<T>) {
-        self.metadata.override_metadata(self.name(), TOwner::TYPE, metadata);
+        self.override_metadata_for(TOwner::TYPE, metadata);
     }
 
+    /// Overrides the metadata for the property on the specified type.
+    pub fn override_metadata_for(&self, type_: &'static TypeInfo, metadata: DirectPropertyMetadata<T>) {
+        self.metadata.override_metadata(self.name(), type_, metadata);
+    }
+
+    /// Removes the metadata registered for the specified type.
+    pub fn unregister(&self, type_: &'static TypeInfo) {
+        self.metadata.unregister(type_);
+    }
 
     #[track_caller]
     fn invalid_value(&self) -> ! {
@@ -177,6 +186,10 @@ impl<T: PropertyValue> PropertyRoutes for DirectPropertyBase<T> {
         let metadata = self.get_metadata(type_);
         let base: &FerroPropertyMetadata = &metadata;
         base.clone()
+    }
+
+    fn route_unregister(&'static self, type_: &'static TypeInfo) {
+        self.unregister(type_)
     }
 
     fn route_is_valid_value(&'static self, value: &dyn Any) -> bool {

@@ -35,9 +35,20 @@ impl BindingChainException {
         self.expression.as_deref()
     }
 
+    /// Sets the expression that could not be evaluated (the protected setter of `Expression`).
+    pub fn set_expression(&mut self, value: Option<String>) {
+        self.expression = value;
+    }
+
     /// The point in the expression at which the error occurred.
     pub fn expression_error_point(&self) -> Option<&str> {
         self.expression_error_point.as_deref()
+    }
+
+    /// Sets the point in the expression at which the error occurred (the protected setter of
+    /// `ExpressionErrorPoint`).
+    pub fn set_expression_error_point(&mut self, value: Option<String>) {
+        self.expression_error_point = value;
     }
 
     /// The full message, including the expression and error point.

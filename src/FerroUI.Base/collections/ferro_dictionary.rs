@@ -287,6 +287,20 @@ impl<K: Eq + Hash + Clone + Display, V: Clone> FerroDictionary<K, V> {
         self.0.inner.borrow().to_vec()
     }
 
+    /// Copies the entries, in enumeration order, to `array`, starting at
+    /// `array_index` (`CopyTo`).
+    ///
+    /// # Panics
+    /// Panics if `array` is too small, as the managed original throws.
+    pub fn copy_to(&self, array: &mut [(K, V)], array_index: usize) {
+        let entries = self.to_vec();
+        assert!(
+            array_index <= array.len() && array.len() - array_index >= entries.len(),
+            "Destination array is not long enough to copy all the items in the collection. Check array index and length."
+        );
+        array[array_index..array_index + entries.len()].clone_from_slice(&entries);
+    }
+
     /// Calls `f` for each entry of a copy of the dictionary.
     pub fn for_each(&self, mut f: impl FnMut(&K, &V)) {
         for (key, value) in self.to_vec() {
@@ -556,5 +570,30 @@ mod tests {
         assert!(!target.contains_key(&s("b")));
         assert!(target.contains(&s("d"), &4));
         assert_eq!(None, target.try_get_value(&s("b")));
+    }
+
+    // Not upstream: `CopyTo` has no test there.
+    #[test]
+    fn copy_to_copies_the_entries_in_enumeration_order() {
+        let target = FerroDictionary::<String, i32>::new();
+        target.add(s("a"), 1);
+        target.add(s("b"), 2);
+        let mut array = vec![(s(""), 0); 3];
+
+        target.copy_to(&mut array, 1);
+
+        assert_eq!(vec![(s(""), 0), (s("a"), 1), (s("b"), 2)], array);
+    }
+
+    // Not upstream: the argument check of `CopyTo`.
+    #[test]
+    #[should_panic(expected = "Destination array is not long enough")]
+    fn copy_to_panics_when_the_array_is_too_small() {
+        let target = FerroDictionary::<String, i32>::new();
+        target.add(s("a"), 1);
+        target.add(s("b"), 2);
+        let mut array = vec![(s(""), 0); 2];
+
+        target.copy_to(&mut array, 1);
     }
 }

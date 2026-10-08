@@ -968,3 +968,22 @@ fn this_operator_binds_one_time() {
 
     assert_eq!("first", target2.get_value(Class1::foo_property()));
 }
+
+/// Not from upstream, which covers `ToBinding` through the setter and
+/// multi-binding tests: an observable bound as a binding delivers its
+/// values to the property.
+#[test]
+fn to_binding_binds_values_of_observable() {
+    let target = Class1::new();
+    let source = Subject::<String>::behavior(s("initial"));
+    let property = Class1::foo_property();
+
+    let binding = to_binding(source.observable());
+    let _expression = target.bind_binding(property.as_property(), &*binding);
+
+    assert_eq!("initial", target.get_value(property));
+
+    source.on_next(s("second"));
+
+    assert_eq!("second", target.get_value(property));
+}

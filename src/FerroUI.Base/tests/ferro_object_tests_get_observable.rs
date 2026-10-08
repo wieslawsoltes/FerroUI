@@ -112,6 +112,29 @@ fn get_binding_observable_returns_binding_values() {
     assert_eq!(vec![bv("foodefault"), bv("newvalue")], values.get());
 }
 
+/// Not from upstream, which has no test of the untyped overload with a
+/// converter.
+#[test]
+fn get_binding_observable_untyped_with_converter_returns_converted_binding_values() {
+    let target = Class1::new();
+    let values: Recorder<crate::data::BindingValue<usize>> = Recorder::new();
+
+    let v = values.clone();
+    let subscription = target
+        .get_binding_observable_untyped_with(Class1::foo_property().as_property(), |x| {
+            x.downcast_ref::<String>().map_or(0, String::len)
+        })
+        .subscribe_fn(move |x| v.push(x));
+    target.set_value(Class1::foo_property(), s("newvalue"));
+    subscription.dispose();
+    target.set_value(Class1::foo_property(), s("ignored"));
+
+    assert_eq!(
+        vec![crate::data::BindingValue::new("foodefault".len()), crate::data::BindingValue::new("newvalue".len())],
+        values.get()
+    );
+}
+
 #[test]
 fn get_property_changed_observable_fires_only_for_the_property_and_supports_class_handlers() {
     let target = Class2::new();

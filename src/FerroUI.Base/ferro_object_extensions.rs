@@ -1,14 +1,42 @@
 //! Extension members for [`FerroObject`]: observables over property values
 //! and property-kind-agnostic access to typed properties.
 
-use crate::data::{BindingPriority, BindingValue};
-use crate::reactive::{Disposable, IDisposable, IObservable, IObserver};
+use crate::data::core::{UntypedObservableBindingExpression, ValueTypes};
+use crate::data::{BindingBase, BindingExpressionBase, BindingPriority, BindingValue};
+use crate::reactive::{Disposable, IDisposable, IObservable, IObserver, ObservableExt};
 use crate::{
     AttachedProperty, BoxedValue, DirectProperty, DirectPropertyBase, FerroObject, FerroProperty,
     FerroPropertyChangedEventArgs, ObjectType, PropertyValue, StyledProperty, WeakRef,
 };
 use std::cell::{Cell, RefCell};
 use std::rc::{Rc, Weak};
+
+/// Converts an observable to a binding (`source.ToBinding()`).
+///
+/// The values of the observable are delivered untyped: a nullable value
+/// (`Option<T>`) as null or the value it holds.
+pub fn to_binding<T: PropertyValue>(source: Rc<dyn IObservable<T>>) -> Rc<dyn BindingBase> {
+    Rc::new(BindingAdaptor { source: source.select(|x| ValueTypes::normalize(Rc::new(x))) })
+}
+
+/// The binding [`to_binding`] returns: its instances read the values of the
+/// observable with local value priority.
+struct BindingAdaptor {
+    source: Rc<dyn IObservable<Option<BoxedValue>>>,
+}
+
+impl BindingBase for BindingAdaptor {
+    fn create_instance(
+        &self,
+        _target: &FerroObject,
+        _target_property: Option<&'static FerroProperty>,
+        _anchor: Option<&crate::Ref<FerroObject>>,
+    ) -> Rc<dyn BindingExpressionBase> {
+        let expression: Rc<dyn BindingExpressionBase> =
+            UntypedObservableBindingExpression::new(self.source.clone(), BindingPriority::LocalValue);
+        expression
+    }
+}
 
 /// A property with a statically known value type: a styled, attached or
 /// direct property.
@@ -229,6 +257,14 @@ pub trait FerroObjectExtensions {
         property: &'static FerroProperty,
     ) -> Rc<dyn IObservable<BindingValue<BoxedValue>>>;
 
+    /// Gets an observable of untyped binding values for a property,
+    /// projecting each value with `converter`.
+    fn get_binding_observable_untyped_with<TResult: PropertyValue>(
+        &self,
+        property: &'static FerroProperty,
+        converter: impl Fn(BoxedValue) -> TResult + 'static,
+    ) -> Rc<dyn IObservable<BindingValue<TResult>>>;
+
     /// Gets an observable that listens for property changed events of a
     /// property on this object. It fires each time the property changes and
     /// does not fire with the current value on subscription.
@@ -342,6 +378,20 @@ impl FerroObjectExtensions for FerroObject {
             self,
             property,
             move |o| BindingValue::new(o.get_value_untyped(property)),
+            |a, b| a == b,
+            false,
+        )
+    }
+
+    fn get_binding_observable_untyped_with<TResult: PropertyValue>(
+        &self,
+        property: &'static FerroProperty,
+        converter: impl Fn(BoxedValue) -> TResult + 'static,
+    ) -> Rc<dyn IObservable<BindingValue<TResult>>> {
+        PropertyObservable::create(
+            self,
+            property,
+            move |o| BindingValue::new(converter(o.get_value_untyped(property))),
             |a, b| a == b,
             false,
         )

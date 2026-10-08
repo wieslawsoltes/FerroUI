@@ -62,6 +62,13 @@ impl<T> ArrayBuilder<T> {
         &self.data[start..start + length]
     }
 
+    /// The first `length` items (the original's `AsSlice(length)`; its
+    /// `AsSlice()` is [`as_span`](Self::as_span)).
+    #[inline]
+    pub fn as_slice_to(&self, length: usize) -> &[T] {
+        &self.data[..length]
+    }
+
     /// `length` items starting at `start`, mutably.
     #[inline]
     pub fn as_slice_mut(&mut self, start: usize, length: usize) -> &mut [T] {

@@ -4,6 +4,10 @@ use super::{
     FramePriority, FrameType, ImmediateValueFrame, IValueEntry, LocalValueBindingObserver, ValueFrame,
 };
 use crate::data::core::SinkRef;
+use crate::diagnostics::{
+    IValueFrameDiagnostic, LocalValueFrameDiagnostic, StyleValueFrameDiagnostic, ValueEntryDiagnostic,
+    ValueFrameDiagnostic, ValueStoreDiagnostic,
+};
 use crate::data::{BindingExpressionBase, BindingPriority, BindingValueType};
 use crate::reactive::IDisposable;
 use crate::{DirectPropertyBase, FerroObject, FerroProperty, PropertyValue, Ref, StyledProperty, WeakRef};
@@ -1013,6 +1017,35 @@ impl ValueStore {
     pub fn get_effective_value(&self, property: &FerroProperty) -> Option<EffectiveValueRef> {
         let values = self.effective_values.borrow();
         Self::find(&values, property.id()).map(|index| values[index].1.clone())
+    }
+
+    /// The diagnostic of the store: its effective values of local value
+    /// priority as one frame, followed by a diagnostic of each frame.
+    pub fn get_store_diagnostic(&self) -> ValueStoreDiagnostic {
+        let mut frames: Vec<Rc<dyn IValueFrameDiagnostic>> = Vec::new();
+
+        let effective_values: Vec<EffectiveValueRef> =
+            self.effective_values.borrow().iter().map(|(_, value)| value.clone()).collect();
+        let mut effective_local_values = Vec::with_capacity(effective_values.len());
+        for effective_value in effective_values {
+            if effective_value.priority() == BindingPriority::LocalValue {
+                effective_local_values
+                    .push(ValueEntryDiagnostic::new(effective_value.property(), Some(effective_value.boxed_value())));
+            }
+        }
+
+        if !effective_local_values.is_empty() {
+            frames.push(Rc::new(LocalValueFrameDiagnostic::new(effective_local_values)));
+        }
+
+        for frame in self.frames() {
+            match StyleValueFrameDiagnostic::new(&frame) {
+                Some(style_frame) => frames.push(Rc::new(style_frame)),
+                None => frames.push(Rc::new(ValueFrameDiagnostic::new(frame))),
+            }
+        }
+
+        ValueStoreDiagnostic::new(frames)
     }
 
     fn set_local_value_binding(&self, property: &FerroProperty, binding: Rc<dyn IDisposable>) {

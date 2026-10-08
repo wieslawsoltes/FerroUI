@@ -8,6 +8,7 @@ mod immutable_linear_gradient_brush;
 mod immutable_pen;
 mod immutable_radial_gradient_brush;
 mod immutable_solid_color_brush;
+mod immutable_text_decoration;
 mod immutable_transform;
 
 pub use immutable_conic_gradient_brush::ImmutableConicGradientBrush;
@@ -18,6 +19,7 @@ pub use immutable_linear_gradient_brush::ImmutableLinearGradientBrush;
 pub use immutable_pen::ImmutablePen;
 pub use immutable_radial_gradient_brush::ImmutableRadialGradientBrush;
 pub use immutable_solid_color_brush::ImmutableSolidColorBrush;
+pub use immutable_text_decoration::ImmutableTextDecoration;
 pub use immutable_transform::ImmutableTransform;
 
 // --- tile brushes ---

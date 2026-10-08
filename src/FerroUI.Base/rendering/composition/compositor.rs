@@ -1,10 +1,11 @@
-use super::server::{BatchQueue, CompositorClock, ServerCompositor, ServerObjectId};
+use super::server::{BatchQueue, CompositorClock, ServerCompositionVisual, ServerCompositor, ServerObjectId};
 use super::transport::{
     BatchMarker, BatchObject, BatchStreamWriter, CommittedBatch, CompositionBatch, ServerJob, ServerObjectFactory, ServerObjectJob,
 };
-use super::{CompositionOptions, ICompositorSerializable};
+use super::{CompositionOptions, CompositionVisual, ICompositorSerializable};
 use crate::animation::easings::{IEasing, SplineEasing};
 use crate::animation::KeySpline;
+use crate::media::imaging::Bitmap;
 use crate::platform::IPlatformGraphics;
 use crate::reactive::{Disposable, IDisposable};
 use crate::rendering::composition::server::IServerObject;
@@ -613,6 +614,41 @@ impl Compositor {
         task
     }
 
+    /// Renders a visual and its children into a new bitmap, on the render
+    /// thread with the next batch, after the composition targets are
+    /// rendered (`CreateCompositionVisualSnapshot`).
+    ///
+    /// The task is faulted with a [`CompositionVisualSnapshotError`] when
+    /// the visual belongs to another compositor or is not attached to a
+    /// composition target (`InvalidOperationException` upstream, which the
+    /// asynchronous method also reports through its task).
+    pub fn create_composition_visual_snapshot(&self, visual: &CompositionVisual, scaling: f64) -> ServerJobTask<Bitmap> {
+        if !Rc::ptr_eq(visual.compositor(), &self.this()) {
+            return ServerJobTask::from_exception(Rc::new(CompositionVisualSnapshotError(
+                "the visual belongs to another compositor",
+            )));
+        }
+        if visual.root().is_none() {
+            return ServerJobTask::from_exception(Rc::new(CompositionVisualSnapshotError(
+                "the visual is not attached to a composition target",
+            )));
+        }
+        // The job names the server visual by id, as the other jobs of an object do: the id
+        // stays bound to the server visual while the visual is alive.
+        let server = visual.server();
+        self.invoke_server_job_async(
+            move |compositor| match compositor.get::<ServerCompositionVisual>(server) {
+                Some(visual) => Ok(Bitmap::from_impl(compositor.create_composition_visual_snapshot(&visual, scaling, true))),
+                None => {
+                    let error: Rc<dyn std::error::Error> =
+                        Rc::new(CompositionVisualSnapshotError("the server visual no longer exists"));
+                    Err(error)
+                }
+            },
+            true,
+        )
+    }
+
     /// The interop with GPU objects created outside of the framework, when
     /// the render interface supports it (`TryGetCompositionGpuInterop`).
     ///
@@ -677,6 +713,19 @@ struct PendingDisposal {
     release: bool,
 }
 
+/// The error of a snapshot that cannot be taken (`InvalidOperationException`):
+/// see [`Compositor::create_composition_visual_snapshot`].
+#[derive(Clone, Debug)]
+pub struct CompositionVisualSnapshotError(&'static str);
+
+impl std::fmt::Display for CompositionVisualSnapshotError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.write_str(self.0)
+    }
+}
+
+impl std::error::Error for CompositionVisualSnapshotError {}
+
 /// A job waiting for the next batch.
 enum PendingServerJob {
     Job(ServerJob),
@@ -711,6 +760,11 @@ impl<T: 'static> ServerJobTask<T> {
     /// A task that has completed with `result`.
     pub fn from_result(result: T) -> Self {
         Self { state: Rc::new(RefCell::new(ServerJobTaskState::RanToCompletion(Some(result)))) }
+    }
+
+    /// A task that has failed with `error`.
+    pub fn from_exception(error: Rc<dyn std::error::Error>) -> Self {
+        Self { state: Rc::new(RefCell::new(ServerJobTaskState::Faulted(error))) }
     }
 
     fn complete(&self, state: ServerJobTaskState<T>) {

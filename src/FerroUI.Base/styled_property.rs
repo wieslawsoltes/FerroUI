@@ -153,7 +153,12 @@ impl<T: PropertyValue> StyledProperty<T> {
 
     /// Overrides the default value for the property on class `TOwner`.
     pub fn override_default_value<TOwner: ObjectType>(&self, default_value: T) {
-        self.override_metadata::<TOwner>(StyledPropertyMetadata::new(Some(default_value)));
+        self.override_default_value_for(TOwner::TYPE, default_value);
+    }
+
+    /// Overrides the default value for the property on the specified type.
+    pub fn override_default_value_for(&self, type_: &'static TypeInfo, default_value: T) {
+        self.override_metadata_for(type_, StyledPropertyMetadata::new(Some(default_value)));
     }
 
     /// Overrides the metadata for the property on class `TOwner`.
@@ -294,6 +299,10 @@ impl<T: PropertyValue> PropertyRoutes for StyledProperty<T> {
         let metadata = self.get_metadata(type_);
         let base: &FerroPropertyMetadata = &metadata;
         base.clone()
+    }
+
+    fn route_unregister(&'static self, type_: &'static TypeInfo) {
+        self.unregister(type_)
     }
 
     fn route_is_valid_value(&'static self, value: &dyn Any) -> bool {

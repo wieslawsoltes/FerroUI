@@ -116,7 +116,7 @@ pub use server::RenderSurfaces;
 pub use visual::CompositionVisual;
 pub use visual_collection::CompositionVisualCollection;
 pub use composition_transparency_level::CompositionTransparencyLevel;
-pub use compositor::{Compositor, ICompositorScheduler, ServerJobTask};
+pub use compositor::{CompositionVisualSnapshotError, Compositor, ICompositorScheduler, ServerJobTask};
 pub use enums::{CompositionBlendMode, CompositionGradientExtendMode, CompositionStretch, CompositionTileMode};
 pub use i_composition_object_host::{ICompositionObject, ICompositionObjectHost, PendingAnimations};
 pub use i_composition_target_debug_events::ICompositionTargetDebugEvents;

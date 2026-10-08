@@ -40,3 +40,41 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 ```
+
+## RichTextKit
+
+- File: `binary_search_extension.rs` (ported from Avalonia `src/Avalonia.Base/Utilities/BinarySearchExtension.cs`, which is copied from <https://github.com/toptensoftware/RichTextKit>)
+- License: Apache License, Version 2.0
+
+Upstream file header, unabridged:
+
+```
+RichTextKit
+Copyright © 2019-2020 Topten Software. All Rights Reserved.
+
+Licensed under the Apache License, Version 2.0 (the "License"); you may
+not use this product except in compliance with the License. You may obtain
+a copy of the License at
+
+https://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+License for the specific language governing permissions and limitations
+under the License.
+Copied from: https://github.com/toptensoftware/RichTextKit
+```
+
+## SixLabors.Fonts
+
+- File: `mapped_array_slice.rs` (ported from Avalonia `src/Avalonia.Base/Utilities/MappedArraySlice.cs`)
+- License: Apache License, Version 2.0
+
+Upstream file header, unabridged:
+
+```
+Copyright (c) Six Labors.
+Licensed under the Apache License, Version 2.0.
+Ported from: https://github.com/SixLabors/Fonts/
+```

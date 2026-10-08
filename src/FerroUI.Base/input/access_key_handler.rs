@@ -220,6 +220,18 @@ impl AccessKeyHandler {
         *self.owner.borrow_mut() = Some(owner.downgrade());
     }
 
+    /// Sets the owner of the handler as [`IAccessKeyHandler::set_owner`] does, with the key
+    /// and pointer handlers attached, and then runs `on_set_owner`: the `OnSetOwner` virtual
+    /// of the class, which does nothing in this class and which a handler built on this one
+    /// overrides (the handler of a menu item attaches its text input handler there).
+    ///
+    /// This method can only be called once.
+    pub fn set_owner_with(&self, owner: &Element, on_set_owner: impl FnOnce(&Element)) {
+        IAccessKeyHandler::set_owner(self, owner);
+
+        on_set_owner(owner);
+    }
+
     fn set_show_access_keys(target: &Visual, value: bool) {
         target.set_value(Self::show_access_key_property(), value)
     }
