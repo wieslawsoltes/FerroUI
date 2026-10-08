@@ -392,6 +392,34 @@ Not changed by this: the headless platform (its render timer belongs to the UI t
 
 What was known to be open when the default was switched, by the owner's decision: interaction by hand (live resize, scrolling, popups, closing a window while it renders) was not exercised; the frame time of both modes was not measured yet; the handle of the platform graphics and the features of the render interface are as the audit of R5.5 left them.
 
+### Frame time, both modes
+
+What the render-thread mode is for, the UI thread being free while a frame is drawn, is what the measurements under R5.4 do not show. The frame benchmark of the catalog (`samples/ControlCatalog/tests/frame_benchmark.rs`) measures it: `frame_benchmark_table_view_scrolling_render_thread` builds the table view page in a window over the mock window implementation and a raster surface, scrolls the table by 20 pixels a frame (300 frames after a sweep that is not measured), and does so twice, each time in an application of its own: with the compositor of the test services (dispatcher-thread mode) and with a compositor created by `Compositor::with_render_thread` with `use_ui_thread_for_synchronous_commits` set, as the macOS platform creates it, over a render loop that a thread of the benchmark ticks.
+
+```sh
+cargo test -p control-catalog --release --lib frame_benchmark_table_view_scrolling_render_thread -- --ignored --nocapture --test-threads=1
+```
+
+Per frame and per mode it records:
+
+- **UI thread**: the time the UI thread is busy from the input (the offset is set) until it has nothing left to do for the frame: layout, the recording of the render data, the commit, the jobs the frame posts back, and in the dispatcher-thread mode the rendering. The time it waits for the render thread without work is not counted.
+- **Frame completion**: from the input until the batch that holds its changes has been rendered (the `rendered` completion of the batch, stamped by the thread that renders it).
+- **Render thread** (render-thread mode): the time inside the ticks of the frame.
+
+Pacing: as in the other frame benchmarks no frame waits for a display. A frame starts when the one before it is complete, and the render thread ticks when the compositor wakes its loop for a committed batch; only the ticks the server compositor asks for without a commit come at 60 a second. The numbers are the cost of a frame in each mode, without the wait for the next tick of a display, which is the same in both. The first frame of the window is a frame of the UI thread in either mode (the render thread of the benchmark starts after the window is shown), so the render target of the raster surface is created there, as the software render target of a native window is.
+
+The benchmark asserts that every scroll step reaches the surface before the next one is made, in both modes; in the dispatcher-thread mode the surface receives exactly one frame per step, in the render-thread mode at least one.
+
+Numbers: **still to be taken.** One release build, both modes in the same run, on a quiet machine:
+
+| Measure, ms per frame (median, mean, p95, max) | Dispatcher-thread mode | Render-thread mode |
+|---|---|---|
+| UI thread | to be measured | to be measured |
+| Frame completion | to be measured | to be measured |
+| Render thread | not applicable | to be measured |
+
+What the numbers cannot show: the surface is a raster framebuffer, so the share of the rendering in a frame is not the one of a window on Metal, and there is no presentation. The same measurement in a real window is the entry of `desktop-performance.md` that R5.4 lists as not done.
+
 ### Scope of R3, surveyed
 
 What the UI side asks the server compositor for directly today (outside `rendering/composition/server/`, tests aside). Each becomes a member of the handle the compositor keeps, a job, or a readback:
