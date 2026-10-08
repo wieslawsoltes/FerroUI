@@ -159,6 +159,7 @@ The layout follows the upstream project so that files can be compared side by si
 - [Tracking](docs/porting/TRACKING.md): generated per-file, per-type and per-member status.
 - [XAML design](docs/porting/xaml.md): the markup pipeline, the run-time loader and the planned ahead-of-time compiler.
 - [Browser platform design](docs/porting/browser-platform.md).
+- [Browser render worker design](docs/porting/browser-render-worker.md): stage B2 of the render thread, rendering from a worker in the browser.
 
 ## Contributing
 
