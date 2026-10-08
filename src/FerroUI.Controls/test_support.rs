@@ -9,7 +9,7 @@ use ferroui_base::reactive::{Disposable, IDisposable};
 use ferroui_base::rendering::{
     IHitTester, IPresentationSource, IRenderer, ManagedHitTester, RendererDiagnostics, SceneInvalidatedEventArgs,
 };
-use std::any::{Any, TypeId};
+use std::any::TypeId;
 use ferroui_base::media::text_formatting::testing::TextTestScope;
 use ferroui_base::threading::{Dispatcher, UnitTestDispatcherScope};
 use ferroui_base::*;
@@ -47,7 +47,7 @@ impl IRenderer for TestRenderer {
     fn scene_invalidated(&self, _handler: Rc<dyn Fn(&SceneInvalidatedEventArgs)>) -> Rc<dyn IDisposable> {
         Disposable::empty()
     }
-    fn try_get_render_interface_feature(&self, _feature_type: TypeId) -> Option<Rc<dyn Any>> {
+    fn try_get_render_interface_feature(&self, _feature_type: TypeId) -> Option<ferroui_base::rendering::composition::RenderInterfaceFeature> {
         None
     }
     fn add_dirty(&self, _visual: &Visual) {}

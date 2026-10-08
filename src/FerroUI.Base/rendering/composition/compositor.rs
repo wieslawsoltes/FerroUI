@@ -943,13 +943,13 @@ impl Compositor {
     ///
     /// Upstream the answer is awaited from a job of the render thread; here
     /// this thread enters the compositor lock and gives it directly. The
-    /// feature is an object of the server side: it is taken, handed to the
-    /// interop and let go inside the lock, and the interop keeps it there.
+    /// feature is an object of the server side: its handle is cloned from
+    /// the map of features and handed to the interop inside the lock, and
+    /// the interop keeps it there.
     pub fn try_get_composition_gpu_interop(&self) -> Option<Rc<dyn super::ICompositionGpuInterop>> {
-        self.server.with(|_| {
-            let feature = self.try_get_render_interface_feature(std::any::TypeId::of::<
-                dyn crate::platform::IExternalObjectsRenderInterfaceContextFeature,
-            >())?;
+        self.dispatcher.verify_access();
+        let feature_type = std::any::TypeId::of::<dyn crate::platform::IExternalObjectsRenderInterfaceContextFeature>();
+        self.with_render_interface_feature(feature_type, |_, feature| {
             let external_objects = feature
                 .downcast_ref::<Rc<dyn crate::platform::IExternalObjectsRenderInterfaceContextFeature>>()?
                 .clone();
@@ -959,6 +959,7 @@ impl Compositor {
                 super::CompositionInterop::try_new(&self.this(), external_objects)?;
             Some(interop)
         })
+        .flatten()
     }
 
     /// Attempts to query for a feature from the platform render interface.
@@ -973,14 +974,39 @@ impl Compositor {
     /// cache (`InvokeServerJobAsync(Server.RT_GetRenderInterfaceFeatures)`),
     /// so that a later call has the answer. This thread never creates the
     /// backend context there.
-    pub fn try_get_render_interface_feature(&self, feature_type: std::any::TypeId) -> Option<Rc<dyn std::any::Any>> {
+    ///
+    /// Upstream hands out the feature object itself, which the two threads
+    /// then share. Here the feature is an `Rc` of the server side, so what
+    /// is handed out is a [`RenderInterfaceFeature`](super::RenderInterfaceFeature):
+    /// a handle to the same feature that stays inside the compositor lock
+    /// and lends the feature there. It keeps the feature alive as the
+    /// object upstream does.
+    pub fn try_get_render_interface_feature(&self, feature_type: std::any::TypeId) -> Option<super::RenderInterfaceFeature> {
         self.dispatcher.verify_access();
+        // The handle is cloned from the map and bound to the lock inside
+        // the lock: no count of the server side is touched outside it.
+        self.with_render_interface_feature(feature_type, |server, feature| {
+            super::RenderInterfaceFeature::new(self.bind_to_lock(server, feature.clone()))
+        })
+    }
+
+    /// Runs `f` inside the compositor lock with the feature of the render
+    /// interface registered under `feature_type`, as the map of features
+    /// holds it; `None` without one, see
+    /// [`try_get_render_interface_feature`](Self::try_get_render_interface_feature).
+    fn with_render_interface_feature<R>(
+        &self,
+        feature_type: std::any::TypeId,
+        f: impl FnOnce(&ServerCompositor, &Rc<dyn std::any::Any>) -> R,
+    ) -> Option<R> {
         if self.is_confined_to_render_thread() {
             let cached = self.server.with(|server| {
-                server.at_try_get_cached_render_interface_features().map(|features| features.get(&feature_type).cloned())
+                server
+                    .at_try_get_cached_render_interface_features()
+                    .map(|features| features.get(&feature_type).map(|feature| f(server, feature)))
             });
             return match cached {
-                Some(feature) => feature,
+                Some(result) => result,
                 None => {
                     self.request_render_interface_features();
                     None
@@ -988,16 +1014,15 @@ impl Compositor {
             };
         }
         // The features are objects of the server side: they are read under
-        // the lock. What is handed out are the public features of the render
-        // interface, which a backend makes for callers on this thread.
+        // the lock.
         self.server.with(|server| {
             if let Some(features) = server.at_try_get_cached_render_interface_features() {
-                return features.get(&feature_type).cloned();
+                return features.get(&feature_type).map(|feature| f(server, feature));
             }
             if !server.render_interface().is_ready() {
                 return None;
             }
-            server.rt_get_render_interface_features().get(&feature_type).cloned()
+            server.rt_get_render_interface_features().get(&feature_type).map(|feature| f(server, feature))
         })
     }
 

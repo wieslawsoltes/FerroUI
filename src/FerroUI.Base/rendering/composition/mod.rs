@@ -82,6 +82,7 @@ mod i_composition_object_host;
 mod i_composition_target_debug_events;
 mod i_compositor_serializable;
 mod matrix_utils;
+mod render_interface_feature;
 
 pub use composition_cache_mode::{CompositionBitmapCache, CompositionCacheMode};
 pub use composition_custom_visual::CompositionCustomVisual;
@@ -124,6 +125,7 @@ pub use i_composition_object_host::{ICompositionObject, ICompositionObjectHost, 
 pub use i_composition_target_debug_events::ICompositionTargetDebugEvents;
 pub use i_compositor_serializable::ICompositorSerializable;
 pub use matrix_utils::MatrixUtils;
+pub use render_interface_feature::RenderInterfaceFeature;
 // The key frame animation classes are generated into the namespace of the
 // compositor upstream.
 pub use animations::{

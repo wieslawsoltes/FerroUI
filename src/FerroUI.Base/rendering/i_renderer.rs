@@ -1,8 +1,8 @@
-use super::composition::Compositor;
+use super::composition::{Compositor, RenderInterfaceFeature};
 use super::{RendererDiagnostics, SceneInvalidatedEventArgs};
 use crate::reactive::IDisposable;
 use crate::{Rect, Size, Visual};
-use std::any::{Any, TypeId};
+use std::any::TypeId;
 use std::rc::Rc;
 
 /// Defines the interface for a renderer.
@@ -42,9 +42,11 @@ pub trait IRenderer {
     /// Attempts to query for a feature from the platform render interface.
     ///
     /// Upstream this is asynchronous because the render interface lives on
-    /// the render thread; the server compositor currently runs on the
-    /// renderer's thread, so the answer is available immediately.
-    fn try_get_render_interface_feature(&self, feature_type: TypeId) -> Option<Rc<dyn Any>>;
+    /// the render thread; here the answer is given at once, from inside the
+    /// compositor lock (see `Compositor::try_get_render_interface_feature`).
+    /// The feature is an object of the server side: what is handed out
+    /// lends it inside the lock.
+    fn try_get_render_interface_feature(&self, feature_type: TypeId) -> Option<RenderInterfaceFeature>;
 
     /// The compositor of the renderer, if it renders through one
     /// (upstream: the `IRendererWithCompositor` interface).
