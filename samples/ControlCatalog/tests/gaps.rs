@@ -169,11 +169,10 @@ fn the_color_picker_page_shows_with_the_styles_of_the_library() {
     assert!(color_views.iter().all(|view| view.template().is_some() && view.visual_children_count() == 1));
 }
 
-/// The table of the elements removed from `MainWindow.xaml` matches the
-/// document, and the subset loads into a main window whose content is the
-/// real main view (TEMPORARY, see `temporary.rs`).
+/// `MainWindow.xaml` loads whole into a main window whose content is the
+/// real main view.
 #[test]
-fn the_subset_of_the_main_window_document_loads() {
+fn the_main_window_document_loads() {
     let _app = start_catalog_application();
     let window = crate::MainWindow::new();
     let panel = window.content().and_then(|content| Control::from_boxed(&content)).expect("the root panel");

@@ -12,11 +12,10 @@
 
 # --- root, Models, MainWindowViewModel, shell pages (coordinator) ---
 App.xaml | harness: the tray icon of the document loads its icon through the icon loader of the platform, which the unit test application does not have (tests/gaps.rs loads the document with a test icon loader)
-MainWindow.xaml | missing: Win32Properties
 Pages/SettingsPage.xaml | harness: {x:Static local:App.CurrentTheme} needs the application of the catalog as the current application (the page is offered by the application)
 
 # --- Controls, Converter, Pages/CommandBar, Pages/TextBox, Pages/Gestures, Pages/ContentPage (group A) ---
-Pages/ContentPage/ContentPagePerformancePage.xaml | code-behind: NavigationPerformanceMonitorHelper and NavigationDemoHelper (Pages/NavigationPage, not ported; the helper measures the managed heap: GC.GetTotalMemory, GC.Collect)
+Pages/ContentPage/ContentPagePerformancePage.xaml | code-behind: NavigationPerformanceMonitorHelper (measures the managed heap: GC.GetTotalMemory, GC.Collect)
 Pages/TextBox/TextBoxValidationPage.xaml | gap C102: DataValidationException is not declared for markup
 
 # --- ViewModels, Models, Views and the pages of the view models (group B) ---
@@ -37,7 +36,6 @@ Pages/OpenGlPage.xaml | code-behind: OpenGL library (OpenGlControlBase, GlInterf
 Pages/SliderPage.xaml | gap C306: Slider.Ticks is not converted from text
 Pages/ToolTipPage.xaml | gap C301: a method name is not accepted for a property of a delegate type (CustomPopupPlacementCallback)
 Pages/ViewboxPage.xaml | gap C309: System.Collections.ArrayList is not a type of the markup type system
-Pages/WindowCustomizationsPage.xaml | missing: Win32Properties (MainWindowViewModel.Win32WindowCornerPreferences / Win32WindowCornerPreference are not ported)
 
 # --- the demo pages and the page sample directories ---
 Pages/CarouselPage/CarouselPagePerformancePage.xaml | code-behind: NavigationPerformanceMonitorHelper (measures the managed heap: GC.GetTotalMemory, GC.Collect)

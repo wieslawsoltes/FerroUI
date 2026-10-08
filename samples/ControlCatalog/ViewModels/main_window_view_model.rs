@@ -2,10 +2,9 @@
 //! other part of the partial class) is in
 //! `main_window_view_model_page_list.rs`.
 //!
-//! Not ported, because what they name does not exist in the framework yet:
+//! Not ported, because what it names does not exist in the framework yet:
 //! the `[Required]` validation attribute of `ValidatedDateExample` (data
-//! annotations), `Win32WindowCornerPreferences` and
-//! `Win32WindowCornerPreference` (`Win32Properties`).
+//! annotations).
 
 use crate::icons::Icons;
 use crate::models::{HomeSection, PageItem};
@@ -20,6 +19,7 @@ use ferroui_base::styling::ControlTheme;
 use ferroui_base::utilities::DateTime;
 use ferroui_base::{ferro_markup_type, Ref, Thickness};
 use ferroui_controls::chrome::TitleBarDecorations;
+use ferroui_controls::platform::WindowCornerPreference;
 use ferroui_controls::{Application, INavigation, ItemsSource, SplitViewDisplayMode};
 use ferroui_dialogs::AboutFerroDialog;
 use mini_mvvm::{start_async, MiniCommand, ViewModelBase};
@@ -56,6 +56,7 @@ pub struct MainWindowViewModel {
     display_mode: Cell<SplitViewDisplayMode>,
     query: RefCell<Option<String>>,
     validated_date_example: Cell<Option<DateTime>>,
+    win32_window_corner_preference: Cell<WindowCornerPreference>,
     about_command: Rc<MiniCommand>,
     exit_command: Rc<MiniCommand>,
     navigate_to_page_command: Rc<MiniCommand>,
@@ -181,6 +182,7 @@ impl MainWindowViewModel {
                 display_mode: Cell::new(SplitViewDisplayMode::default()),
                 query: RefCell::new(Some(String::new())),
                 validated_date_example: Cell::new(None),
+                win32_window_corner_preference: Cell::new(WindowCornerPreference::Default),
                 about_command,
                 exit_command,
                 navigate_to_page_command,
@@ -440,6 +442,22 @@ impl MainWindowViewModel {
         self.base.raise_and_set_if_changed_cell(&self.validated_date_example, value, "ValidatedDateExample");
     }
 
+    pub fn win32_window_corner_preferences(&self) -> &'static [WindowCornerPreference] {
+        &WIN32_WINDOW_CORNER_PREFERENCES
+    }
+
+    pub fn win32_window_corner_preference(&self) -> WindowCornerPreference {
+        self.win32_window_corner_preference.get()
+    }
+
+    pub fn set_win32_window_corner_preference(&self, value: WindowCornerPreference) {
+        self.base.raise_and_set_if_changed_cell(
+            &self.win32_window_corner_preference,
+            value,
+            "Win32WindowCornerPreference",
+        );
+    }
+
     pub fn navigate_to_item(&self, item: &Rc<PageItem>) {
         if let Some(this) = self.this.upgrade() {
             drop(start_async(Self::navigate_to_async(this, Some(item.clone()))));
@@ -528,6 +546,15 @@ impl MainWindowViewModel {
     }
 }
 
+/// The values of `WindowCornerPreference`, in the order of their declaration
+/// (`Enum.GetValues<Win32Properties.WindowCornerPreference>()`).
+const WIN32_WINDOW_CORNER_PREFERENCES: [WindowCornerPreference; 4] = [
+    WindowCornerPreference::Default,
+    WindowCornerPreference::DoNotRound,
+    WindowCornerPreference::Round,
+    WindowCornerPreference::RoundSmall,
+];
+
 type Vm = Rc<MainWindowViewModel>;
 
 ferro_markup_type!(class MainWindowViewModel {
@@ -610,6 +637,14 @@ ferro_markup_type!(class MainWindowViewModel {
         ValidatedDateExample: Option<DateTime> {
             get: |this: &Vm| this.validated_date_example(),
             set: |this: &Vm, value: Option<DateTime>| this.set_validated_date_example(value)
+        },
+        // A list a binding delivers to an items source property.
+        Win32WindowCornerPreferences: ItemsSource {
+            get: |this: &Vm| ItemsSource::from_values(this.win32_window_corner_preferences().iter().copied())
+        },
+        Win32WindowCornerPreference: WindowCornerPreference {
+            get: |this: &Vm| this.win32_window_corner_preference(),
+            set: |this: &Vm, value: WindowCornerPreference| this.set_win32_window_corner_preference(value)
         },
         AboutCommand: Rc<dyn ICommand> { get: |this: &Vm| -> Rc<dyn ICommand> { this.about_command() } },
         ExitCommand: Rc<dyn ICommand> { get: |this: &Vm| -> Rc<dyn ICommand> { this.exit_command() } },

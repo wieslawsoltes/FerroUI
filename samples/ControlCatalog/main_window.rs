@@ -63,16 +63,7 @@ impl MainWindow {
 
     pub fn new() -> Ref<Self> {
         let this = instantiate(Self::construct());
-        // TEMPORARY: while `MainWindow.xaml` is listed in `excluded.txt` the subset of it that
-        // loads is loaded instead.
-        if crate::excluded(Self::DOCUMENT_PATH).is_some() {
-            let root: BoxedValue = std::rc::Rc::new(this.clone());
-            if let Err(error) = crate::temporary::load_main_window_subset(root) {
-                panic!("{}: {}", Self::DOCUMENT_PATH, crate::markup::describe(&error));
-            }
-        } else {
-            this.initialize_component();
-        }
+        this.initialize_component();
 
         let recent_menu = NativeMenu::get_menu(&this)
             .and_then(|menu| menu.items().get(0).cast::<NativeMenuItem>())
