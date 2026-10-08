@@ -85,13 +85,19 @@ Each stage is a pull request that builds and passes on its own; the single-threa
 | R4 | The render loop on the timer's thread; synchronous commit, resize and first-show waits; the dispatcher-thread mode kept behind the option. | The compositor suites pass in both modes. |
 | R5 | macOS: Graphite/Metal context and the software framebuffer on the render thread; the Metal device lock; render-thread naming and priority as upstream. Default switched to the render thread on the desktop. | `themed_window` and the catalog run with rendering off the UI thread; start-up and scroll numbers of `desktop-performance.md` re-measured; a stress run (resize, theme switch, scrolling) shows no stale or torn frame. |
 | B0 | Browser feasibility: the three checks of section 4. | Each is answered with a measurement, recorded here. |
-| B1 | The browser toolchain and site for threads (headers or service worker, build flags, the non-threaded fallback). Written, not built yet: see "B1 written" below. | A two-thread page of the port's own module runs on the published host. |
+| B1 | The browser toolchain and site for threads (headers or service worker, build flags, the non-threaded fallback). Written; the test page is built and passes, the port's module is not built in this mode yet: see "B1 validated" below. | A two-thread page of the port's own module runs on the published host. |
 | B2 | The threaded browser backend: render worker, `OffscreenCanvas`, the event grouper queue, the blocking dispatcher. | `themed_view` and the catalog render from the worker; the browser tests pass in both modes. |
 | B3 | Measurements: first frame and scrolling, threaded against not. | The table is in `browser-platform.md`. |
 
 Order: R1 to R5 in sequence; B0 in parallel with R1, since it only measures.
 
-### B1 written, not built yet (2026-10-08)
+### B1 validated for the test page (2026-10-08)
+
+Built and run on the development Mac with the nightly that the feasibility check used (`FERROUI_BROWSER_NIGHTLY=nightly`, which is 1.93.0-nightly of 2025-10-31 there): `scripts/build-browser.sh thread_spawn --threads` builds, and `scripts/browser/tests/thread_spawn.test.mjs` passes its three checks: a spawned thread sends its value back in a page isolated by the headers of the server; without the headers the service worker isolates the page after one reload; a page that cannot be isolated says so. One fault found and fixed: the service worker rebuilt a response without a body (a 204 or a 304) with a body, which is an error. The build without `--threads` is unchanged (`themed_view` builds and passes its 30 checks).
+
+Not validated: the nightly date pinned in `setup.sh` (it was not installed; the pin is the agent's reasoning about which nightly can build the port's module, not a tested fact), the port's own module with Skia in the threaded mode (`themed_view --threads`), and the service worker on the published host.
+
+### B1 as written (2026-10-08)
 
 The toolchain and the site for threads exist as an opt-in that leaves the default build as it was; `browser-platform.md`, section 21, is the description. Nothing of it has been built or run: the branch was written without a build, and the first build decides what of it stands.
 
