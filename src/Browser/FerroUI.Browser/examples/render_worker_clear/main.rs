@@ -1,17 +1,21 @@
-//! Frames from a worker, without the compositor: steps B2.1 and B2.3 of
-//! `docs/porting/browser-render-worker.md`
+//! Frames from a worker, without the compositor: steps B2.1, B2.3 and B2.5
+//! of `docs/porting/browser-render-worker.md`
 //! (`scripts/build-browser.sh render_worker_clear --threads`).
 //!
-//! The page starts a thread (`renderWorkerClearStart`). The thread makes its
+//! The page starts the render thread of the browser backend
+//! (`renderWorkerClearStart`, `RenderWorker::start`). The thread makes its
 //! worker take transferred canvases (the worker handler of the render target
 //! registry of the script side), publishes its id and returns to the event
-//! loop of its worker without ending. The page then creates a canvas surface
-//! with that id (`renderWorkerClearCreateSurface`): the script transfers the
-//! control of the canvas to the worker, the worker creates the render target
-//! and reports it, and the thread wraps the target as the browser backend
-//! does and draws a frame: one colour, and a square of another colour at a
-//! fixed place in device pixels, so that a capture tells a frame of the
-//! right size from a stretched one.
+//! loop of its worker without ending. The page creates a canvas surface for
+//! that thread (`renderWorkerClearCreateSurface`), once the thread has
+//! reported itself or, with `?Early=true`, at once: the script transfers the
+//! control of the canvas to the worker (a canvas created early is held back
+//! until the thread has reported itself), the worker creates the render
+//! target and reports it, and the thread finds the canvas by the id of the
+//! target, resolves the render surface of the browser backend on itself and
+//! draws a frame: one colour, and a square of another colour at a fixed
+//! place in device pixels, so that a capture tells a frame of the right size
+//! from a stretched one.
 //!
 //! What the page chooses (the query parameters of the host page):
 //!
@@ -28,7 +32,12 @@
 //!
 //! - the size of the canvas, from the observer of the canvas element on the
 //!   thread of the page to the thread that draws, through a
-//!   `BrowserSurfaceShared`;
+//!   `BrowserSurfaceShared`, which the thread of the page creates and
+//!   registers under the id of the render target and the other thread finds
+//!   there;
+//! - that the render target exists and its kind, published in the same
+//!   object by the render thread of the backend when its worker reports the
+//!   target;
 //! - a wake-up of the thread of the page after each frame, through the
 //!   signal handle of the browser dispatcher. The page is told the frame
 //!   counter from the dispatcher's signal, not from a timer;
@@ -50,7 +59,7 @@
 
 #![cfg_attr(target_os = "emscripten", no_main)]
 
-use ferroui_base::platform::surfaces::IFramebufferRenderTarget;
+use ferroui_base::platform::surfaces::{IFramebufferRenderTarget, IPlatformRenderSurface};
 use ferroui_base::platform::RenderTargetSceneInfo;
 use ferroui_base::rendering::composition::CompositionTransparencyLevel;
 use ferroui_base::rendering::IRenderTimer;
@@ -61,7 +70,8 @@ use ferroui_browser::interop::canvas_helper::{
 };
 use ferroui_browser::interop::thread_proxy::current_thread;
 use ferroui_browser::rendering::{
-    get_render_target, initialize_worker, BrowserRenderTarget, BrowserRenderTimer, BrowserSurfaceShared,
+    get_render_target, BrowserRenderSurface, BrowserRenderTimer, BrowserSurfaceShared, RenderWorker,
+    PENDING_RENDER_THREAD,
 };
 use ferroui_browser::{BrowserRenderingMode, BrowserSingleThreadedDispatcherImpl};
 use ferroui_opengl::gl_consts;
@@ -94,13 +104,14 @@ const MARKER_SIZE: i32 = 30;
 /// there is none, and no top-level ever has this id.
 const NO_TOP_LEVEL: i32 = 0;
 
-// The stages of the example, in the order they are reached.
+// The stages of the example, in the order they are reached. Whether the
+// render thread has reported itself is not a stage: the render worker of
+// the backend knows.
 const IDLE: i32 = 0;
-const STARTING: i32 = 1;
-const WORKER_READY: i32 = 2;
-const SURFACE_CREATED: i32 = 3;
-const DONE: i32 = 4;
-const FAILED: i32 = 5;
+const STARTED: i32 = 1;
+const SURFACE_CREATED: i32 = 2;
+const DONE: i32 = 3;
+const FAILED: i32 = 4;
 
 // What the two threads share. Everything is an atomic, is written once, or
 // is a piece of the browser backend made for two threads. The frame signal
@@ -108,15 +119,14 @@ const FAILED: i32 = 5;
 static STAGE: AtomicI32 = AtomicI32::new(IDLE);
 /// The thread that called `renderWorkerClearStart`.
 static MAIN_THREAD: AtomicUsize = AtomicUsize::new(0);
-/// The thread that takes the canvas; 0 until it has installed its handler.
-static WORKER_THREAD: AtomicUsize = AtomicUsize::new(0);
+/// Whether the canvas was created before the render thread had reported
+/// itself, so that the script held it back.
+static HELD_BACK: AtomicBool = AtomicBool::new(false);
 /// The rendering mode the page asked for (a `BrowserRenderingMode`), or 0
 /// for WebGL 2 with WebGL 1 as the second choice.
 static REQUESTED_MODE: AtomicI32 = AtomicI32::new(0);
 /// Whether the thread runs a frame loop.
 static ANIMATED: AtomicBool = AtomicBool::new(false);
-/// The size and the scaling of the canvas, and the kind of its target.
-static SHARED: OnceLock<Arc<BrowserSurfaceShared>> = OnceLock::new();
 /// The render timer, started on the thread that draws.
 static TIMER: OnceLock<Arc<BrowserRenderTimer>> = OnceLock::new();
 /// The wake-up of the dispatcher of the thread of the page.
@@ -168,16 +178,22 @@ enum Painter {
     Software { render_target: Rc<dyn IFramebufferRenderTarget> },
 }
 
-/// What the worker thread keeps for as long as it lives: the render target
-/// and what draws to it belong to that thread.
+/// What the worker thread keeps for as long as it lives: what it shares
+/// with the thread of the page about the canvas, found by the id of the
+/// render target, and what draws to the canvas, which belongs to this
+/// thread. The render target itself is kept by the table of the thread.
 struct Canvas {
-    _target: Arc<dyn BrowserRenderTarget>,
+    shared: Arc<BrowserSurfaceShared>,
     painter: Painter,
 }
 
 thread_local! {
     /// The canvas surface, on the thread of the page.
     static SURFACE: RefCell<Option<CanvasSurface>> = const { RefCell::new(None) };
+    /// The size and the scaling of the canvas and the kind of its target, as
+    /// the thread of the page holds it. The registry of the backend holds it
+    /// weakly; this is what keeps it.
+    static SHARED: RefCell<Option<Arc<BrowserSurfaceShared>>> = const { RefCell::new(None) };
     /// The dispatcher backend of the thread of the page.
     static DISPATCHER: RefCell<Option<Rc<BrowserSingleThreadedDispatcherImpl>>> = const { RefCell::new(None) };
     /// The object of the page that is told the frame counter.
@@ -188,35 +204,10 @@ thread_local! {
     static CANVAS: RefCell<Option<Canvas>> = const { RefCell::new(None) };
 }
 
-#[cfg(target_os = "emscripten")]
-mod native {
-    extern "C" {
-        fn emscripten_runtime_keepalive_push();
-    }
-
-    /// Keeps the calling thread when its start function returns: the thread
-    /// does not exit, and its worker goes on receiving messages and calls.
-    pub fn keep_thread_alive() {
-        // SAFETY: the function takes no argument; it increments a counter of
-        // the script of the calling thread.
-        unsafe { emscripten_runtime_keepalive_push() }
-    }
-}
-
-#[cfg(not(target_os = "emscripten"))]
-mod native {
-    /// There are no workers outside a web page.
-    pub fn keep_thread_alive() {}
-}
-
 fn fail(message: String) {
     // The first failure is the one that is reported.
     let _ = FAILURE.set(message);
     STAGE.store(FAILED, Ordering::SeqCst);
-}
-
-fn shared() -> &'static Arc<BrowserSurfaceShared> {
-    SHARED.get_or_init(BrowserSurfaceShared::new)
 }
 
 /// The render timer: one that ticks in the background, so setting its
@@ -244,7 +235,7 @@ fn frame_color(frame: u32) -> [u8; 3] {
 /// The outcome is read with [`render_worker_clear_state`].
 #[wasm_bindgen(js_name = renderWorkerClearStart)]
 pub fn render_worker_clear_start(width: i32, height: i32, scaling: f64, mode: i32, animated: bool, reporter: JsValue) {
-    if STAGE.compare_exchange(IDLE, STARTING, Ordering::SeqCst, Ordering::SeqCst).is_err() {
+    if STAGE.compare_exchange(IDLE, STARTED, Ordering::SeqCst, Ordering::SeqCst).is_err() {
         return;
     }
     MAIN_THREAD.store(current_thread(), Ordering::SeqCst);
@@ -254,10 +245,16 @@ pub fn render_worker_clear_start(width: i32, height: i32, scaling: f64, mode: i3
     // The size crosses to the other thread through the shared state: first
     // what the page measured, then what the observer of the canvas reports.
     // The subscription lasts as long as the page; its token is not kept.
-    shared().set_size(PixelSize::new(width, height), scaling);
+    let shared = BrowserSurfaceShared::new();
+    shared.set_size(PixelSize::new(width, height), scaling);
+    SHARED.with(|kept| *kept.borrow_mut() = Some(shared));
     add_size_changed(Rc::new(|top_level_id, pixel_width, pixel_height, dpr| {
         if top_level_id == NO_TOP_LEVEL {
-            shared().on_size_changed(pixel_width, pixel_height, dpr);
+            SHARED.with(|shared| {
+                if let Some(shared) = shared.borrow().as_ref() {
+                    shared.on_size_changed(pixel_width, pixel_height, dpr);
+                }
+            });
         }
     }));
 
@@ -272,33 +269,38 @@ pub fn render_worker_clear_start(width: i32, height: i32, scaling: f64, mode: i3
         REPORTER.with(|kept| *kept.borrow_mut() = Some(reporter.unchecked_into::<Reporter>()));
     }
 
-    let spawned = std::thread::Builder::new().name("render_worker_clear".to_string()).spawn(move || {
-        // The subscription lasts as long as the thread; its token is not kept.
-        add_render_target_registered(Rc::new(on_render_target_registered));
-        initialize_worker();
-        // The start function returns below, and the thread has to go on: the
-        // canvas arrives as a message to its worker, and so do its frames.
-        native::keep_thread_alive();
-        if animated {
-            let timer = timer();
-            timer.set_tick(Some(Arc::new(|_time: Duration| draw_next_frame())));
-            timer.start_on_this_thread();
-        }
-        WORKER_THREAD.store(current_thread(), Ordering::SeqCst);
-        let _ = STAGE.compare_exchange(STARTING, WORKER_READY, Ordering::SeqCst, Ordering::SeqCst);
-    });
-    // The handle is dropped: the thread is detached and nothing joins it.
-    if let Err(error) = spawned {
+    // The render thread of the backend: it installs the handler of the
+    // registry of its worker, publishes the kind of each target the worker
+    // reports, keeps itself alive and reports itself. With a frame loop it
+    // also starts the timer of the example on itself.
+    let frame_loop = animated.then(|| timer().clone());
+    let started = RenderWorker::start(
+        frame_loop,
+        Some(Box::new(move || {
+            // After the subscription of the backend, so that the kind of a
+            // reported target is published when the example hears of it.
+            // The subscription lasts as long as the thread; its token is
+            // not kept.
+            add_render_target_registered(Rc::new(on_render_target_registered));
+            if animated {
+                timer().set_tick(Some(Arc::new(|_time: Duration| draw_next_frame())));
+            }
+        })),
+    );
+    if let Err(error) = started {
         fail(format!("the thread could not start: {error}"));
     }
 }
 
-/// Creates the canvas in `container` and hands it to the worker thread.
-/// Returns the id of the render target, or 0 when the thread is not ready.
+/// Creates the canvas in `container` and hands it to the worker thread: at
+/// once when the thread has reported itself; before that the script keeps
+/// the canvas back and posts it when the thread has. Returns the id of the
+/// render target, or 0 when no thread was started or the canvas exists
+/// already.
 #[wasm_bindgen(js_name = renderWorkerClearCreateSurface)]
 pub fn render_worker_clear_create_surface(container: JsValue) -> i32 {
     // Before the canvas is created: the worker may report the target at once.
-    if STAGE.compare_exchange(WORKER_READY, SURFACE_CREATED, Ordering::SeqCst, Ordering::SeqCst).is_err() {
+    if STAGE.compare_exchange(STARTED, SURFACE_CREATED, Ordering::SeqCst, Ordering::SeqCst).is_err() {
         return 0;
     }
     let requested = REQUESTED_MODE.load(Ordering::SeqCst);
@@ -307,35 +309,80 @@ pub fn render_worker_clear_create_surface(container: JsValue) -> i32 {
     } else {
         vec![requested]
     };
-    let thread = WORKER_THREAD.load(Ordering::SeqCst) as i32;
+    // The id of the render thread, or the id that makes the script keep the
+    // canvas back until the thread has reported itself.
+    let thread = RenderWorker::canvas_thread_id();
+    HELD_BACK.store(thread == PENDING_RENDER_THREAD, Ordering::SeqCst);
     // No top-level: the size changes the script reports reach the subscriber
     // of `renderWorkerClearStart`.
     let surface = CanvasSurface::create_render_target_surface(&container, &modes, NO_TOP_LEVEL, thread);
     let target_id = surface.target_id();
-    shared().set_target_id(target_id);
+    // The other thread finds the shared state by the id from here on.
+    SHARED.with(|shared| {
+        if let Some(shared) = shared.borrow().as_ref() {
+            shared.register(target_id);
+        }
+    });
     SURFACE.with(|kept| *kept.borrow_mut() = Some(surface));
+    // The worker may have reported the target before the line above, and
+    // the other thread then found no canvas under the id: it is asked to
+    // look again. When the thread has not reported itself yet nothing is
+    // queued, and nothing has to be: the canvas is posted to it later.
+    RenderWorker::post(move || begin_drawing(target_id));
     target_id
 }
 
+/// Whether the script held the canvas back because it was created before
+/// the render thread had reported itself.
+#[wasm_bindgen(js_name = renderWorkerClearHeldBack)]
+pub fn render_worker_clear_held_back() -> bool {
+    HELD_BACK.load(Ordering::SeqCst)
+}
+
 /// Runs on the worker thread when its worker has created the render target
-/// of the transferred canvas: the thread wraps the target and draws the
-/// first frame.
+/// of the transferred canvas. The render worker of the backend has heard of
+/// it first and published the kind of the target where both threads read
+/// it.
 fn on_render_target_registered(target_id: i32, kind: i32) {
     TARGET_ID.store(target_id, Ordering::SeqCst);
     TARGET_KIND.store(kind, Ordering::SeqCst);
-    shared().set_target_kind(kind);
+    begin_drawing(target_id);
+}
+
+/// Runs on the worker thread, when the target was reported and when the
+/// thread of the page has registered the canvas; whichever comes second
+/// finds both. The thread resolves the render surface of the backend on
+/// itself, creates what draws to it, and draws the first frame.
+fn begin_drawing(target_id: i32) {
+    if CANVAS.with(|canvas| canvas.borrow().is_some()) {
+        return;
+    }
+    // Not registered yet: the thread of the page asks again when it is.
+    let Some(shared) = BrowserSurfaceShared::find(target_id) else { return };
+    // Not reported yet: the report comes here again.
+    if !shared.has_target() {
+        return;
+    }
+    let kind = shared.target_kind();
     let software_asked = REQUESTED_MODE.load(Ordering::SeqCst) == BrowserRenderingMode::Software2D as i32;
     if kind != RENDER_TARGET_KIND_WEB_GL && !software_asked {
         fail("the worker created a software render target, not a WebGL one".to_string());
         return;
     }
-    // The target asks for the size at the start of each frame and sets the
-    // size of the canvas, which only this thread can do.
-    let Some(target) = get_render_target(target_id, shared().size_getter()) else {
+    // The render target of this thread: wrapped here, kept in its table.
+    let Some(target) = get_render_target(target_id) else {
         fail(format!("the registry of the worker has no render target {target_id}"));
         return;
     };
-    let surface = target.as_render_surface();
+    // The surface as the compositor is handed it. It holds the shared state
+    // only; what it creates below asks that state for the size at the start
+    // of each frame and sets the size of the canvas, which only this thread
+    // can do.
+    let surface = BrowserRenderSurface::new(shared.clone());
+    if !surface.is_ready() {
+        fail("the render surface is not ready although its target was reported".to_string());
+        return;
+    }
     let painter = if kind == RENDER_TARGET_KIND_WEB_GL {
         let context = target
             .platform_graphics_context()
@@ -359,7 +406,7 @@ fn on_render_target_registered(target_id: i32, kind: i32) {
         };
         Painter::Software { render_target: framebuffer_surface.create_framebuffer_render_target() }
     };
-    CANVAS.with(|canvas| *canvas.borrow_mut() = Some(Canvas { _target: target, painter }));
+    CANVAS.with(|canvas| *canvas.borrow_mut() = Some(Canvas { shared, painter }));
 
     draw_next_frame();
     if FRAMES.load(Ordering::SeqCst) == 0 {
@@ -427,7 +474,7 @@ fn draw_next_frame() {
 fn draw(canvas: &Canvas) -> bool {
     // The size as the thread of the page last wrote it. A canvas without a
     // size cannot be drawn to.
-    let (size, scaling) = shared().size();
+    let (size, scaling) = canvas.shared.size();
     if size.width <= 0 || size.height <= 0 {
         return false;
     }
@@ -556,7 +603,8 @@ pub fn render_worker_clear_wait_for_frame(out_of_turn: bool, timeout_ms: u32) ->
 /// The state as a line of `name=value` pairs: `atomics` (whether the module
 /// was built with threads), `state` (`idle`, `starting`, `worker_ready`,
 /// `surface_created`, `done` or `failed`), from `worker_ready` on the
-/// `thread` that takes the canvas, and with `done` the `target`, its `kind`,
+/// `thread` that takes the canvas (0 in `surface_created` while the thread
+/// has not reported itself), and with `done` the `target`, its `kind`,
 /// the major version of OpenGL ES (`gl`, 0 for a software target), the
 /// first error of OpenGL after a frame (`gl_error`), the `size` and the
 /// `color` of the last frame, whether it ran on a thread other than the one
@@ -565,11 +613,11 @@ pub fn render_worker_clear_wait_for_frame(out_of_turn: bool, timeout_ms: u32) ->
 #[wasm_bindgen(js_name = renderWorkerClearState)]
 pub fn render_worker_clear_state() -> String {
     let atomics = cfg!(target_feature = "atomics");
-    let thread = WORKER_THREAD.load(Ordering::SeqCst);
+    let thread = RenderWorker::thread_id();
     match STAGE.load(Ordering::SeqCst) {
         IDLE => format!("atomics={atomics} state=idle"),
-        STARTING => format!("atomics={atomics} state=starting"),
-        WORKER_READY => format!("atomics={atomics} state=worker_ready thread={thread}"),
+        STARTED if thread == 0 => format!("atomics={atomics} state=starting"),
+        STARTED => format!("atomics={atomics} state=worker_ready thread={thread}"),
         SURFACE_CREATED => format!("atomics={atomics} state=surface_created thread={thread}"),
         DONE => {
             let drawn_on = DRAWN_ON.load(Ordering::SeqCst);

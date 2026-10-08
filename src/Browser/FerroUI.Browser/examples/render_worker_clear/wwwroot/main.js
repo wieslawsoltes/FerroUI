@@ -12,12 +12,15 @@ const wait = document.getElementById("wait");
 //   ?Frames=true                              a frame loop on the thread, a new colour each frame
 //   ?Wait=OutOfTurn|NextFrame                 the experiment: once the loop runs, the thread of the page
 //                                             waits for a frame, with or without asking for one out of turn
+//   ?Early=true                               the canvas is created right after the thread was started,
+//                                             before it has reported itself: the script keeps it back
 //   ?ThreadsServiceWorker=false               see below
 const query = new URLSearchParams(globalThis.location.search);
 const MODES = { Software2D: 1, WebGL1: 2, WebGL2: 3 };
 const mode = MODES[query.get("RenderingMode")] ?? 0;
 const animated = query.get("Frames") === "true";
 const waitFor = query.get("Wait");
+const early = query.get("Early") === "true";
 // How long the thread of the page waits at most in the experiment, and after how many frames the
 // experiment of the query runs.
 const WAIT_TIMEOUT = 2000;
@@ -67,6 +70,12 @@ if (threads === null) {
         // the thread sets it on the transferred canvas before each frame.
         const scale = globalThis.devicePixelRatio;
         runtime.renderWorkerClearStart(Math.round(view.clientWidth * scale), Math.round(view.clientHeight * scale), scale, mode, animated, reporter);
+        if (early) {
+            // The thread was started in this very call and cannot have told the page of itself:
+            // the control of the canvas is transferred now, and the canvas is posted to the worker
+            // when the thread has reported itself.
+            runtime.renderWorkerClearCreateSurface(view);
+        }
         // The main thread does not wait for the thread: until the first frame it asks again from
         // a timer.
         const poll = () => {
