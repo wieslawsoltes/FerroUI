@@ -5,6 +5,7 @@ mod custom_font_collection_tests;
 mod custom_font_manager_impl;
 mod embedded_font_collection_tests;
 mod font_collection_tests;
+mod font_collection_try_match_character_tests;
 mod glyph_run_tests;
 mod glyph_typeface_shaping_tests;
 mod immutable_bitmap_tests;
