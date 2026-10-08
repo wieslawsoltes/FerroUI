@@ -502,6 +502,8 @@ cargo check --locked --target wasm32-unknown-emscripten -p ferroui-browser --exa
 
 The opt-in threaded build (`setup.sh --threads`, `build-browser.sh <application> --threads`, `thread_spawn.test.mjs`) and the site with both modules (`build-browser.sh <application> --both`, `site_loader.test.mjs`) are described in section 21; the commands above are not affected by them.
 
+The opt-in threaded build (`setup.sh --threads`, `build-browser.sh <application> --threads`, `thread_spawn.test.mjs`) is described in section 21; the commands above are not affected by it. It is the one build that does not link the published Skia binaries as they are: its bindings shim is compiled on the machine (`scripts/browser/skia-threads-shim.sh`), and `node scripts/browser/wasm-features.mjs <archive or module>...` prints what the objects of an archive were compiled with.
+
 `scripts/browser/harness.mjs` is the test library: it serves a site, drives Chrome or Chromium over the DevTools protocol (real mouse, wheel and key events), reads pixels and evaluates expressions. It finds the browser through `CHROME`, the usual install paths and Playwright's directories. The example exports `themedViewState()` (a line of `name=value` pairs) and the host page exposes the module as `globalThis.themedView`; the ControlCatalog host exports `catalogState()` and exposes `globalThis.controlCatalog`; give a new application the same kind of hook rather than testing through pixels alone.
 
 Rules that keep the boundary sound (section 5): imports by `raw_module = "./ferroui.js"` with `js_namespace`/`js_name`, typed getters on `extern` types, flat exports `<Class>_<Method>` listed in `ferroExports.ts` (every name on both sides), no `js-sys`/`web-sys`/closures, synchronous answers. Before building for a new target or feature set run `cargo tree -e features` on `ferroui-skia`: an unpublished Skia feature combination silently starts a source build.
@@ -981,6 +983,7 @@ Section 6 decided against threads for the first backend, and the default build i
 |---|---|---|
 | A nightly Rust toolchain with `rust-src` | The standard library that ships with a toolchain is compiled without atomics, and the linker refuses it in a module with shared memory (`render-thread.md`, stage B0). It has to be rebuilt with `-Zbuild-std=std,panic_unwind`, which only a nightly accepts | `RUST_NIGHTLY` in `scripts/browser/setup.sh`, installed by `setup.sh --threads` |
 | `-C target-feature=+atomics,+bulk-memory` for all Rust code, `-pthread` for all C and C++ code and for the link | Every object of a shared-memory link has to be compiled with threads. Skia's prebuilt objects already are (B0); HarfBuzz and the setjmp bridge of `ferroui-skia` are compiled by build scripts and get the option through `EMCC_CFLAGS` | `scripts/build-browser.sh --threads` |
+| Skia binaries whose bindings shim is compiled with `-pthread` | The `skia-bindings` crate compiles nothing for this target: it downloads Skia and its C++ shim (`libskia-bindings.a`) in one archive, and the published shim is compiled without atomics, so the flags of the row above never reach it. The published archive is copied with the shim compiled again, and the crate reads the copy through `SKIA_BINARIES_URL` (`browser-render-worker.md`, "Skia shim") | `scripts/browser/skia-threads-shim.sh`, run by `setup.sh --threads`; the result is in `.tools/skia-threads/` |
 | `-sPTHREAD_POOL_SIZE=<n>` | A thread is a web worker, and a worker only starts when the main thread returns to the browser. The pool is created before the application starts, so that `std::thread::spawn` gives a running thread at once. The size is fixed at build time: `FERROUI_BROWSER_THREAD_POOL_SIZE`, default 2 (a render thread and one spare) | the same |
 | `-sENVIRONMENT=web,worker` | The script of the module is also what each worker loads; the default build leaves worker support out | the same |
 | A cross-origin isolated page | Shared memory (`SharedArrayBuffer`) exists only in a page served with `Cross-Origin-Opener-Policy: same-origin` and `Cross-Origin-Embedder-Policy: require-corp` (or `credentialless`) | the server, or the service worker `ferroui-sw.js?coi=1` (below) |
@@ -990,8 +993,8 @@ The nightly is pinned to `nightly-2026-07-01`. The measurement of B0 used the ni
 ### Commands
 
 ```
-scripts/browser/setup.sh --threads       # as without the option, plus the nightly with rust-src and the target
-source .tools/env.sh                     # unchanged: the build script selects the nightly itself
+scripts/browser/setup.sh --threads       # as without the option, plus the nightly with rust-src and the target, and the Skia binaries of the mode
+source .tools/env.sh                     # unchanged: the build script selects the nightly and the Skia binaries itself
 scripts/build-browser.sh thread_spawn --threads          # site in target/browser-threads/thread_spawn
 node scripts/browser/tests/thread_spawn.test.mjs         # headless Chrome: headers, service worker, message
 node scripts/browser/serve.mjs target/browser-threads/thread_spawn --isolated   # by hand: http://127.0.0.1:8080/
@@ -1042,6 +1045,7 @@ A module built with threads cannot start at all in a page that is not cross-orig
 5. **Memory growth with threads.** Settled in B2.2 (`browser-render-worker.md`, "B2.2"): the script side of the platform reads the memory through `FerroExports.heapU8()`, a view made from the memory object at each use, and the threaded build is linked with a memory that does not grow (`FERROUI_BROWSER_THREAD_MEMORY_MB`), because the wasm-bindgen glue writes through a view it does not renew.
 6. **Module size and start-up.** The pool workers each compile or receive the module before the application starts. Measured in section 22: the module with threads is not larger, and the first frame is 20 to 25 ms later with a GPU.
 7. **Browsers other than Chrome.** As everywhere in this document (section 16, B9b).
+8. **The Skia binaries of the mode** (2026-10-09). `scripts/browser/skia-threads-shim.sh` was written without being run: its downloads, `gn gen` on a Skia source without its third-party checkouts, the compile of the shim and the link without `--no-check-features` are listed with their doubts in `browser-render-worker.md`, "Skia shim". `setup.sh --threads` now also needs `python3` and network access to crates.io, github.com and chrome-infra-packages.appspot.com.
 
 ## 22. Rendering from a worker: measurements (B3) (2026-10-09)
 
