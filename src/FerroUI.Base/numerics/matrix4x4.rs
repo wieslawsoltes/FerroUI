@@ -7,7 +7,12 @@ use super::single::InvariantF32;
 use super::{Matrix3x2, Quaternion, Vector3};
 
 /// A 4x4 matrix (a three-dimensional transform).
+///
+/// The layout is the one of the reference runtime and is relied on when the
+/// value is passed to a graphics API by address: sixteen consecutive singles
+/// in row order (`m11` to `m14`, then the second, third and fourth row).
 #[derive(Clone, Copy, Debug, PartialEq, Default)]
+#[repr(C)]
 pub struct Matrix4x4 {
     /// The first element of the first row.
     pub m11: f32,
@@ -163,6 +168,113 @@ impl Matrix4x4 {
     pub fn create_from_yaw_pitch_roll(yaw: f32, pitch: f32, roll: f32) -> Matrix4x4 {
         let q = Quaternion::create_from_yaw_pitch_roll(yaw, pitch, roll);
         Matrix4x4::create_from_quaternion(q)
+    }
+
+    /// Creates a view matrix: a camera at `camera_position` that looks at
+    /// `camera_target`, with `camera_up_vector` as the direction that is up
+    /// from the camera's point of view (right-handed).
+    ///
+    /// As in the reference runtime, nothing is validated: a target at the
+    /// position of the camera, or an up vector parallel to the direction of
+    /// view, gives NaN components.
+    pub fn create_look_at(camera_position: Vector3, camera_target: Vector3, camera_up_vector: Vector3) -> Matrix4x4 {
+        let zaxis = Vector3::normalize(camera_position - camera_target);
+        let xaxis = Vector3::normalize(Vector3::cross(camera_up_vector, zaxis));
+        let yaxis = Vector3::cross(zaxis, xaxis);
+
+        // [  xaxis.x  yaxis.x  zaxis.x  0 ]
+        // [  xaxis.y  yaxis.y  zaxis.y  0 ]
+        // [  xaxis.z  yaxis.z  zaxis.z  0 ]
+        // [ -xaxis.p -yaxis.p -zaxis.p  1 ]   (`.p`: the dot product with the position)
+        Matrix4x4::new(
+            xaxis.x,
+            yaxis.x,
+            zaxis.x,
+            0.0,
+            xaxis.y,
+            yaxis.y,
+            zaxis.y,
+            0.0,
+            xaxis.z,
+            yaxis.z,
+            zaxis.z,
+            0.0,
+            -Vector3::dot(xaxis, camera_position),
+            -Vector3::dot(yaxis, camera_position),
+            -Vector3::dot(zaxis, camera_position),
+            1.0,
+        )
+    }
+
+    /// Creates a perspective projection matrix based on a field of view,
+    /// aspect ratio, and near and far view plane distances (right-handed,
+    /// with a depth range of zero to one).
+    ///
+    /// `field_of_view` is the field of view in the y direction, in radians.
+    /// A far plane at positive infinity is accepted and gives the limit of
+    /// the matrix (`m33` is -1 and `m43` is `-near_plane_distance`).
+    ///
+    /// # Panics
+    /// Panics where the reference runtime throws an
+    /// `ArgumentOutOfRangeException`: when `field_of_view` is less than or
+    /// equal to zero or greater than or equal to pi, when
+    /// `near_plane_distance` or `far_plane_distance` is less than or equal to
+    /// zero, and when `near_plane_distance` is greater than or equal to
+    /// `far_plane_distance`.
+    pub fn create_perspective_field_of_view(
+        field_of_view: f32,
+        aspect_ratio: f32,
+        near_plane_distance: f32,
+        far_plane_distance: f32,
+    ) -> Matrix4x4 {
+        // The comparisons are the ones of the reference runtime: a NaN
+        // argument passes every one of them.
+        if field_of_view <= 0.0 {
+            panic!("field_of_view ('{field_of_view}') must be greater than '0'.");
+        }
+        if field_of_view >= std::f32::consts::PI {
+            panic!("field_of_view ('{field_of_view}') must be less than '{}'.", std::f32::consts::PI);
+        }
+        if near_plane_distance <= 0.0 {
+            panic!("near_plane_distance ('{near_plane_distance}') must be greater than '0'.");
+        }
+        if far_plane_distance <= 0.0 {
+            panic!("far_plane_distance ('{far_plane_distance}') must be greater than '0'.");
+        }
+        if near_plane_distance >= far_plane_distance {
+            panic!("near_plane_distance ('{near_plane_distance}') must be less than '{far_plane_distance}'.");
+        }
+
+        let height = 1.0 / (field_of_view * 0.5).tan();
+        let width = height / aspect_ratio;
+        let range = if far_plane_distance == f32::INFINITY {
+            -1.0
+        } else {
+            far_plane_distance / (near_plane_distance - far_plane_distance)
+        };
+
+        // [  w  0  0   0 ]
+        // [  0  h  0   0 ]
+        // [  0  0  r  -1 ]
+        // [  0  0  rn  0 ]   (`rn`: the range times the near plane distance)
+        Matrix4x4::new(
+            width,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            height,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            range,
+            -1.0,
+            0.0,
+            0.0,
+            range * near_plane_distance,
+            0.0,
+        )
     }
 
     /// Creates a matrix for rotating points around the X axis.

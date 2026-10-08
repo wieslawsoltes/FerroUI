@@ -8,7 +8,12 @@ use super::{Matrix4x4, Quaternion, Vector2};
 use crate::Vector3D;
 
 /// A vector with three single-precision components.
+///
+/// The layout is the one of the reference runtime and is relied on when the
+/// value is passed to a graphics API by address (as a vertex attribute, for
+/// example): three consecutive singles, `x`, `y`, `z`.
 #[derive(Clone, Copy, Debug, PartialEq, Default)]
+#[repr(C)]
 pub struct Vector3 {
     /// The X component of the vector.
     pub x: f32,
