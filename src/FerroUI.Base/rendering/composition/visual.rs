@@ -94,7 +94,7 @@ visual_value_properties! {
     /// Whether the adorner is clipped by the clips of the adorned visual
     /// and its ancestors.
     adorner_is_clipped / set_adorner_is_clipped: bool;
-    effect / set_effect: Option<Rc<dyn IImmutableEffect>>;
+    effect / set_effect: Option<std::sync::Arc<dyn IImmutableEffect>>;
     render_options / set_render_options: RenderOptions;
     text_options / set_text_options: TextOptions;
 }

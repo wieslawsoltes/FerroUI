@@ -174,7 +174,7 @@ pub trait CompositionVisualHooks: ICompositionObjectHost {
     fn on_opacity_mask_brush_changed(&self) {}
     fn on_opacity_mask_brush_changing(&self) {}
 
-    fn validate_effect_change(&self, _old_value: &Option<Rc<dyn IImmutableEffect>>, _new_value: &Option<Rc<dyn IImmutableEffect>>) {}
+    fn validate_effect_change(&self, _old_value: &Option<std::sync::Arc<dyn IImmutableEffect>>, _new_value: &Option<std::sync::Arc<dyn IImmutableEffect>>) {}
     fn on_effect_changed(&self) {}
     fn on_effect_changing(&self) {}
 
@@ -212,7 +212,7 @@ pub struct CompositionVisualProps {
     adorned_visual: RefCell<Option<Rc<dyn ICompositionObject>>>,
     adorner_is_clipped: Cell<bool>,
     opacity_mask_brush: RefCell<Option<BatchResource<dyn IBrush>>>,
-    effect: RefCell<Option<Rc<dyn IImmutableEffect>>>,
+    effect: RefCell<Option<std::sync::Arc<dyn IImmutableEffect>>>,
     render_options: Cell<RenderOptions>,
     text_options: Cell<TextOptions>,
     cache_mode: RefCell<Option<Rc<dyn ICompositionObject>>>,
@@ -916,12 +916,12 @@ impl CompositionVisualProps {
     }
 
     /// `Effect` (internal).
-    pub fn effect(&self) -> Option<Rc<dyn IImmutableEffect>> {
+    pub fn effect(&self) -> Option<std::sync::Arc<dyn IImmutableEffect>> {
         self.effect.borrow().clone()
     }
 
     /// Sets `Effect` (internal).
-    pub fn set_effect(&self, host: &dyn CompositionVisualHooks, value: Option<Rc<dyn IImmutableEffect>>) {
+    pub fn set_effect(&self, host: &dyn CompositionVisualHooks, value: Option<std::sync::Arc<dyn IImmutableEffect>>) {
         let mut changed = false;
         let old_value = self.effect.borrow().clone();
         if old_value.differs(&value) {
@@ -1268,7 +1268,7 @@ pub struct ServerCompositionVisualProps {
     adorned_visual: RefCell<Option<Rc<dyn IServerObject>>>,
     adorner_is_clipped: Cell<bool>,
     opacity_mask_brush: RefCell<Option<ServerResourceRef<dyn IBrush>>>,
-    effect: RefCell<Option<Rc<dyn IImmutableEffect>>>,
+    effect: RefCell<Option<std::sync::Arc<dyn IImmutableEffect>>>,
     render_options: Cell<RenderOptions>,
     text_options: Cell<TextOptions>,
     cache_mode: RefCell<Option<Rc<dyn IServerObject>>>,
@@ -1866,10 +1866,10 @@ impl ServerCompositionVisualProps {
     }
 
     /// The composition property of `Effect`.
-    pub fn id_of_effect_property() -> &'static CompositionPropertyOf<Option<Rc<dyn IImmutableEffect>>> {
-        static PROPERTY: OnceLock<CompositionPropertyOf<Option<Rc<dyn IImmutableEffect>>>> = OnceLock::new();
+    pub fn id_of_effect_property() -> &'static CompositionPropertyOf<Option<std::sync::Arc<dyn IImmutableEffect>>> {
+        static PROPERTY: OnceLock<CompositionPropertyOf<Option<std::sync::Arc<dyn IImmutableEffect>>>> = OnceLock::new();
         PROPERTY.get_or_init(|| {
-            CompositionProperty::register::<ServerCompositionVisualProps, Option<Rc<dyn IImmutableEffect>>>(
+            CompositionProperty::register::<ServerCompositionVisualProps, Option<std::sync::Arc<dyn IImmutableEffect>>>(
                 "Effect",
                 "ServerCompositionVisual",
                 |obj| props_of::<ServerCompositionVisualProps>(obj).effect.borrow().clone(),
@@ -1881,11 +1881,11 @@ impl ServerCompositionVisualProps {
     }
 
     /// `Effect`.
-    pub fn effect(&self) -> Option<Rc<dyn IImmutableEffect>> {
+    pub fn effect(&self) -> Option<std::sync::Arc<dyn IImmutableEffect>> {
         self.effect.borrow().clone()
     }
 
-    pub fn set_effect(&self, host: &dyn ServerCompositionVisualHooks, value: Option<Rc<dyn IImmutableEffect>>) {
+    pub fn set_effect(&self, host: &dyn ServerCompositionVisualHooks, value: Option<std::sync::Arc<dyn IImmutableEffect>>) {
         let old_value = self.effect.borrow().clone();
         let mut changed = false;
         if old_value.differs(&value) {
@@ -2233,7 +2233,7 @@ impl ServerCompositionVisualProps {
             self.set_opacity_mask_brush(host, value);
         }
         if changed.contains(CompositionVisualChangedFields::EFFECT) {
-            let value = reader.read_value::<Rc<dyn IImmutableEffect>>();
+            let value = reader.read_value::<std::sync::Arc<dyn IImmutableEffect>>();
             self.set_effect(host, value);
         }
         if changed.contains(CompositionVisualChangedFields::RENDER_OPTIONS) {

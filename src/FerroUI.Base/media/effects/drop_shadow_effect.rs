@@ -6,7 +6,6 @@ use crate::{
     ferro_class, ferro_property, instantiate, FerroObjectImpl, FerroProperty, Ref, StyledProperty,
 };
 use std::f64::consts::PI;
-use std::rc::Rc;
 
 /// The properties shared by the drop shadow effects.
 #[repr(C)]
@@ -132,8 +131,8 @@ impl DropShadowEffect {
     }
 
     /// Creates an immutable clone of the effect.
-    pub fn to_immutable(&self) -> Rc<dyn IImmutableEffect> {
-        Rc::new(ImmutableDropShadowEffect::new(
+    pub fn to_immutable(&self) -> std::sync::Arc<dyn IImmutableEffect> {
+        std::sync::Arc::new(ImmutableDropShadowEffect::new(
             self.offset_x(),
             self.offset_y(),
             self.blur_radius(),
@@ -214,8 +213,8 @@ impl DropShadowDirectionEffect {
     ///
     /// As in the reference implementation, the computed offsets are handed
     /// to the immutable effect as its direction and depth.
-    pub fn to_immutable(&self) -> Rc<dyn IImmutableEffect> {
-        Rc::new(ImmutableDropShadowDirectionEffect::new(
+    pub fn to_immutable(&self) -> std::sync::Arc<dyn IImmutableEffect> {
+        std::sync::Arc::new(ImmutableDropShadowDirectionEffect::new(
             self.offset_x(),
             self.offset_y(),
             self.blur_radius(),
@@ -227,6 +226,7 @@ impl DropShadowDirectionEffect {
 
 #[cfg(test)]
 mod tests {
+    use std::rc::Rc;
     // Not from upstream: there are no upstream unit tests for these classes.
     use super::*;
     use std::cell::Cell;
@@ -279,8 +279,11 @@ mod tests {
         shadow.set_opacity(0.5);
         assert!(!immutable.equals(Some(&*effect)));
         assert!(!immutable.equals(None));
-        let same = EffectExtensions::to_immutable(&(immutable.clone() as Rc<dyn IEffect>));
-        assert!(Rc::ptr_eq(&same, &immutable));
+        // An immutable effect converts to an equal one (a value in a handle
+        // of its own, where the original returns the same object).
+        let as_effect: Rc<dyn IEffect> = Rc::new(*immutable.as_any().downcast_ref::<ImmutableDropShadowEffect>().unwrap());
+        let same = EffectExtensions::to_immutable(&as_effect);
+        assert!(same.equals(Some(&*as_effect)));
 
         let direction = DropShadowDirectionEffect::new();
         direction.set_direction(0.0);

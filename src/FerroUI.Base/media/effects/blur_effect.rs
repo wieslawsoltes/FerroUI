@@ -2,7 +2,6 @@ use crate::media::effects::{Effect, IImmutableEffect, ImmutableBlurEffect};
 use crate::{
     ferro_class, ferro_property, instantiate, FerroObjectImpl, FerroProperty, Ref, StyledProperty,
 };
-use std::rc::Rc;
 
 /// An effect that blurs its content.
 #[repr(C)]
@@ -45,7 +44,7 @@ impl BlurEffect {
     }
 
     /// Creates an immutable clone of the effect.
-    pub fn to_immutable(&self) -> Rc<dyn IImmutableEffect> {
-        Rc::new(ImmutableBlurEffect::new(self.radius()))
+    pub fn to_immutable(&self) -> std::sync::Arc<dyn IImmutableEffect> {
+        std::sync::Arc::new(ImmutableBlurEffect::new(self.radius()))
     }
 }

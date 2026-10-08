@@ -3,7 +3,6 @@ use crate::media::{BoxShadows, IBrush, IEffect, IPen, RenderOptions, TextOptions
 use crate::platform::{IBitmapImpl, IGeometryImpl, IGlyphRunImpl};
 use crate::rendering::scene_graph::{ICustomDrawOperation, LineBoundsHelper};
 use crate::{Matrix, Point, Rect, RoundedRect, Thickness};
-use std::rc::Rc;
 use std::sync::Arc;
 
 /// The bounds accumulated outside of a scope, and how to map the bounds of
@@ -123,8 +122,8 @@ impl IRenderDataVisitor for BoundsVisitor {
         self.plain_scope()
     }
 
-    fn on_push_effect(&mut self, effect: Option<&Rc<dyn IEffect>>, _bounds: Rect) -> BoundsScope {
-        let padding = crate::media::EffectExtensions::get_effect_output_padding(effect.map(|e| &**e));
+    fn on_push_effect(&mut self, effect: Option<&std::sync::Arc<dyn crate::media::IImmutableEffect>>, _bounds: Rect) -> BoundsScope {
+        let padding = crate::media::EffectExtensions::get_effect_output_padding(effect.map(|e| &**e as &dyn IEffect));
         self.enter_child_scope(false, Matrix::default(), padding)
     }
 

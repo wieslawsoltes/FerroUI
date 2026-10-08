@@ -339,7 +339,7 @@ impl ServerCompositionVisual {
         self.props.base().opacity_mask_brush().map(|brush| brush.value)
     }
 
-    pub fn effect(&self) -> Option<Rc<dyn IImmutableEffect>> {
+    pub fn effect(&self) -> Option<std::sync::Arc<dyn IImmutableEffect>> {
         self.props.base().effect()
     }
 

@@ -6,7 +6,6 @@ use crate::media::{
 use crate::platform::{IBitmapImpl, IGeometryImpl, IGlyphRunImpl};
 use crate::rendering::scene_graph::ICustomDrawOperation;
 use crate::{Matrix, Point, Rect, Ref, RoundedRect};
-use std::rc::Rc;
 use std::sync::Arc;
 
 /// What a hit-tested push has to restore.
@@ -287,7 +286,7 @@ impl IRenderDataVisitor for HitTestVisitor {
         HitTestScope::new(self.live)
     }
 
-    fn on_push_effect(&mut self, _effect: Option<&Rc<dyn IEffect>>, _bounds: Rect) -> HitTestScope {
+    fn on_push_effect(&mut self, _effect: Option<&std::sync::Arc<dyn crate::media::IImmutableEffect>>, _bounds: Rect) -> HitTestScope {
         HitTestScope::new(self.live)
     }
 

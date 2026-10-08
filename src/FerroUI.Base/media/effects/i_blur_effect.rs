@@ -41,8 +41,8 @@ impl IEffect for ImmutableBlurEffect {
         Some(self)
     }
 
-    fn into_immutable_effect(self: Rc<Self>) -> Option<Rc<dyn IImmutableEffect>> {
-        Some(self)
+    fn into_immutable_effect(self: Rc<Self>) -> Option<std::sync::Arc<dyn IImmutableEffect>> {
+        Some(std::sync::Arc::new(*self))
     }
 }
 
