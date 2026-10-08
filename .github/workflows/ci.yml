@@ -34,6 +34,10 @@ jobs:
             echo "::error::the files above name the upstream project; only docs/, scripts/ and NOTICE.md may"
             exit 1
           fi
+      # The composition property blocks are written by a script: a change made to them by hand
+      # is lost at the next regeneration, so it has to be made in the script.
+      - name: Generated composition code is up to date
+        run: python3 scripts/generate_composition.py --check
 
   # Reduced for the time being (2026-10-08), to shorten the wait for a pull request while many are
   # in flight; the job took 22 minutes, 20 of them compiling. What is left out, and how to get it

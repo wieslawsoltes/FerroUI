@@ -5,6 +5,7 @@
 //! Schema attributes: internal.
 
 use bitflags::bitflags;
+use crate::rendering::composition::animations::AnimationInstanceFactory;
 use crate::rendering::composition::animations::ICompositionAnimation;
 use crate::rendering::composition::expressions::ExpressionVariant;
 use crate::rendering::composition::server::CompositionProperty;
@@ -433,7 +434,7 @@ impl ServerCompositionBitmapCacheProps {
         ServerCompositionBitmapCacheHooks::deserialize_changes_extra(host, reader);
         let changed = reader.read::<CompositionBitmapCacheChangedFields>();
         if changed.contains(CompositionBitmapCacheChangedFields::RENDER_AT_SCALE_ANIMATED) {
-            let Some(animation) = reader.read_value::<crate::rendering::composition::animations::AnimationInstanceFactory>().map(crate::rendering::composition::animations::AnimationInstanceFactory::create) else {
+            let Some(animation) = reader.read_value::<AnimationInstanceFactory>().map(AnimationInstanceFactory::create) else {
                 panic!("a batch starts an animation of `RenderAtScale` without an animation instance");
             };
             host.set_animated_value(
@@ -447,7 +448,7 @@ impl ServerCompositionBitmapCacheProps {
             self.set_render_at_scale(host, value);
         }
         if changed.contains(CompositionBitmapCacheChangedFields::SNAPS_TO_DEVICE_PIXELS_ANIMATED) {
-            let Some(animation) = reader.read_value::<crate::rendering::composition::animations::AnimationInstanceFactory>().map(crate::rendering::composition::animations::AnimationInstanceFactory::create) else {
+            let Some(animation) = reader.read_value::<AnimationInstanceFactory>().map(AnimationInstanceFactory::create) else {
                 panic!("a batch starts an animation of `SnapsToDevicePixels` without an animation instance");
             };
             host.set_animated_value(
@@ -461,7 +462,7 @@ impl ServerCompositionBitmapCacheProps {
             self.set_snaps_to_device_pixels(host, value);
         }
         if changed.contains(CompositionBitmapCacheChangedFields::ENABLE_CLEAR_TYPE_ANIMATED) {
-            let Some(animation) = reader.read_value::<crate::rendering::composition::animations::AnimationInstanceFactory>().map(crate::rendering::composition::animations::AnimationInstanceFactory::create) else {
+            let Some(animation) = reader.read_value::<AnimationInstanceFactory>().map(AnimationInstanceFactory::create) else {
                 panic!("a batch starts an animation of `EnableClearType` without an animation instance");
             };
             host.set_animated_value(

@@ -16,6 +16,7 @@ use crate::numerics::Quaternion;
 use crate::platform::IGeometryImpl;
 use crate::rendering::composition::ICompositionObject;
 use crate::rendering::composition::ICompositionObjectHost;
+use crate::rendering::composition::animations::AnimationInstanceFactory;
 use crate::rendering::composition::animations::ICompositionAnimation;
 use crate::rendering::composition::expressions::ExpressionVariant;
 use crate::rendering::composition::server::AsServerRenderResource;
@@ -173,7 +174,7 @@ pub trait CompositionVisualHooks: ICompositionObjectHost {
     fn on_opacity_mask_brush_changed(&self) {}
     fn on_opacity_mask_brush_changing(&self) {}
 
-    fn validate_effect_change(&self, _old_value: &Option<std::sync::Arc<dyn IImmutableEffect>>, _new_value: &Option<std::sync::Arc<dyn IImmutableEffect>>) {}
+    fn validate_effect_change(&self, _old_value: &Option<Arc<dyn IImmutableEffect>>, _new_value: &Option<Arc<dyn IImmutableEffect>>) {}
     fn on_effect_changed(&self) {}
     fn on_effect_changing(&self) {}
 
@@ -211,7 +212,7 @@ pub struct CompositionVisualProps {
     adorned_visual: RefCell<Option<Rc<dyn ICompositionObject>>>,
     adorner_is_clipped: Cell<bool>,
     opacity_mask_brush: RefCell<Option<BatchResource<dyn IBrush>>>,
-    effect: RefCell<Option<std::sync::Arc<dyn IImmutableEffect>>>,
+    effect: RefCell<Option<Arc<dyn IImmutableEffect>>>,
     render_options: Cell<RenderOptions>,
     text_options: Cell<TextOptions>,
     cache_mode: RefCell<Option<Rc<dyn ICompositionObject>>>,
@@ -915,12 +916,12 @@ impl CompositionVisualProps {
     }
 
     /// `Effect` (internal).
-    pub fn effect(&self) -> Option<std::sync::Arc<dyn IImmutableEffect>> {
+    pub fn effect(&self) -> Option<Arc<dyn IImmutableEffect>> {
         self.effect.borrow().clone()
     }
 
     /// Sets `Effect` (internal).
-    pub fn set_effect(&self, host: &dyn CompositionVisualHooks, value: Option<std::sync::Arc<dyn IImmutableEffect>>) {
+    pub fn set_effect(&self, host: &dyn CompositionVisualHooks, value: Option<Arc<dyn IImmutableEffect>>) {
         let mut changed = false;
         let old_value = self.effect.borrow().clone();
         if old_value.differs(&value) {
@@ -1267,7 +1268,7 @@ pub struct ServerCompositionVisualProps {
     adorned_visual: RefCell<Option<Rc<dyn IServerObject>>>,
     adorner_is_clipped: Cell<bool>,
     opacity_mask_brush: RefCell<Option<ServerResourceRef<dyn IBrush>>>,
-    effect: RefCell<Option<std::sync::Arc<dyn IImmutableEffect>>>,
+    effect: RefCell<Option<Arc<dyn IImmutableEffect>>>,
     render_options: Cell<RenderOptions>,
     text_options: Cell<TextOptions>,
     cache_mode: RefCell<Option<Rc<dyn IServerObject>>>,
@@ -1865,10 +1866,10 @@ impl ServerCompositionVisualProps {
     }
 
     /// The composition property of `Effect`.
-    pub fn id_of_effect_property() -> &'static CompositionPropertyOf<Option<std::sync::Arc<dyn IImmutableEffect>>> {
-        static PROPERTY: OnceLock<CompositionPropertyOf<Option<std::sync::Arc<dyn IImmutableEffect>>>> = OnceLock::new();
+    pub fn id_of_effect_property() -> &'static CompositionPropertyOf<Option<Arc<dyn IImmutableEffect>>> {
+        static PROPERTY: OnceLock<CompositionPropertyOf<Option<Arc<dyn IImmutableEffect>>>> = OnceLock::new();
         PROPERTY.get_or_init(|| {
-            CompositionProperty::register::<ServerCompositionVisualProps, Option<std::sync::Arc<dyn IImmutableEffect>>>(
+            CompositionProperty::register::<ServerCompositionVisualProps, Option<Arc<dyn IImmutableEffect>>>(
                 "Effect",
                 "ServerCompositionVisual",
                 |obj| props_of::<ServerCompositionVisualProps>(obj).effect.borrow().clone(),
@@ -1880,11 +1881,11 @@ impl ServerCompositionVisualProps {
     }
 
     /// `Effect`.
-    pub fn effect(&self) -> Option<std::sync::Arc<dyn IImmutableEffect>> {
+    pub fn effect(&self) -> Option<Arc<dyn IImmutableEffect>> {
         self.effect.borrow().clone()
     }
 
-    pub fn set_effect(&self, host: &dyn ServerCompositionVisualHooks, value: Option<std::sync::Arc<dyn IImmutableEffect>>) {
+    pub fn set_effect(&self, host: &dyn ServerCompositionVisualHooks, value: Option<Arc<dyn IImmutableEffect>>) {
         let old_value = self.effect.borrow().clone();
         let mut changed = false;
         if old_value.differs(&value) {
@@ -2048,7 +2049,7 @@ impl ServerCompositionVisualProps {
             self.set_parent(host, value);
         }
         if changed.contains(CompositionVisualChangedFields::VISIBLE_ANIMATED) {
-            let Some(animation) = reader.read_value::<crate::rendering::composition::animations::AnimationInstanceFactory>().map(crate::rendering::composition::animations::AnimationInstanceFactory::create) else {
+            let Some(animation) = reader.read_value::<AnimationInstanceFactory>().map(AnimationInstanceFactory::create) else {
                 panic!("a batch starts an animation of `Visible` without an animation instance");
             };
             host.set_animated_value(
@@ -2062,7 +2063,7 @@ impl ServerCompositionVisualProps {
             self.set_visible(host, value);
         }
         if changed.contains(CompositionVisualChangedFields::OPACITY_ANIMATED) {
-            let Some(animation) = reader.read_value::<crate::rendering::composition::animations::AnimationInstanceFactory>().map(crate::rendering::composition::animations::AnimationInstanceFactory::create) else {
+            let Some(animation) = reader.read_value::<AnimationInstanceFactory>().map(AnimationInstanceFactory::create) else {
                 panic!("a batch starts an animation of `Opacity` without an animation instance");
             };
             host.set_animated_value(
@@ -2080,7 +2081,7 @@ impl ServerCompositionVisualProps {
             self.set_clip(host, value);
         }
         if changed.contains(CompositionVisualChangedFields::CLIP_TO_BOUNDS_ANIMATED) {
-            let Some(animation) = reader.read_value::<crate::rendering::composition::animations::AnimationInstanceFactory>().map(crate::rendering::composition::animations::AnimationInstanceFactory::create) else {
+            let Some(animation) = reader.read_value::<AnimationInstanceFactory>().map(AnimationInstanceFactory::create) else {
                 panic!("a batch starts an animation of `ClipToBounds` without an animation instance");
             };
             host.set_animated_value(
@@ -2094,7 +2095,7 @@ impl ServerCompositionVisualProps {
             self.set_clip_to_bounds(host, value);
         }
         if changed.contains(CompositionVisualChangedFields::OFFSET_ANIMATED) {
-            let Some(animation) = reader.read_value::<crate::rendering::composition::animations::AnimationInstanceFactory>().map(crate::rendering::composition::animations::AnimationInstanceFactory::create) else {
+            let Some(animation) = reader.read_value::<AnimationInstanceFactory>().map(AnimationInstanceFactory::create) else {
                 panic!("a batch starts an animation of `Offset` without an animation instance");
             };
             host.set_animated_value(
@@ -2108,7 +2109,7 @@ impl ServerCompositionVisualProps {
             self.set_offset(host, value);
         }
         if changed.contains(CompositionVisualChangedFields::TRANSLATION_ANIMATED) {
-            let Some(animation) = reader.read_value::<crate::rendering::composition::animations::AnimationInstanceFactory>().map(crate::rendering::composition::animations::AnimationInstanceFactory::create) else {
+            let Some(animation) = reader.read_value::<AnimationInstanceFactory>().map(AnimationInstanceFactory::create) else {
                 panic!("a batch starts an animation of `Translation` without an animation instance");
             };
             host.set_animated_value(
@@ -2122,7 +2123,7 @@ impl ServerCompositionVisualProps {
             self.set_translation(host, value);
         }
         if changed.contains(CompositionVisualChangedFields::SIZE_ANIMATED) {
-            let Some(animation) = reader.read_value::<crate::rendering::composition::animations::AnimationInstanceFactory>().map(crate::rendering::composition::animations::AnimationInstanceFactory::create) else {
+            let Some(animation) = reader.read_value::<AnimationInstanceFactory>().map(AnimationInstanceFactory::create) else {
                 panic!("a batch starts an animation of `Size` without an animation instance");
             };
             host.set_animated_value(
@@ -2136,7 +2137,7 @@ impl ServerCompositionVisualProps {
             self.set_size(host, value);
         }
         if changed.contains(CompositionVisualChangedFields::ANCHOR_POINT_ANIMATED) {
-            let Some(animation) = reader.read_value::<crate::rendering::composition::animations::AnimationInstanceFactory>().map(crate::rendering::composition::animations::AnimationInstanceFactory::create) else {
+            let Some(animation) = reader.read_value::<AnimationInstanceFactory>().map(AnimationInstanceFactory::create) else {
                 panic!("a batch starts an animation of `AnchorPoint` without an animation instance");
             };
             host.set_animated_value(
@@ -2150,7 +2151,7 @@ impl ServerCompositionVisualProps {
             self.set_anchor_point(host, value);
         }
         if changed.contains(CompositionVisualChangedFields::CENTER_POINT_ANIMATED) {
-            let Some(animation) = reader.read_value::<crate::rendering::composition::animations::AnimationInstanceFactory>().map(crate::rendering::composition::animations::AnimationInstanceFactory::create) else {
+            let Some(animation) = reader.read_value::<AnimationInstanceFactory>().map(AnimationInstanceFactory::create) else {
                 panic!("a batch starts an animation of `CenterPoint` without an animation instance");
             };
             host.set_animated_value(
@@ -2164,7 +2165,7 @@ impl ServerCompositionVisualProps {
             self.set_center_point(host, value);
         }
         if changed.contains(CompositionVisualChangedFields::ROTATION_ANGLE_ANIMATED) {
-            let Some(animation) = reader.read_value::<crate::rendering::composition::animations::AnimationInstanceFactory>().map(crate::rendering::composition::animations::AnimationInstanceFactory::create) else {
+            let Some(animation) = reader.read_value::<AnimationInstanceFactory>().map(AnimationInstanceFactory::create) else {
                 panic!("a batch starts an animation of `RotationAngle` without an animation instance");
             };
             host.set_animated_value(
@@ -2178,7 +2179,7 @@ impl ServerCompositionVisualProps {
             self.set_rotation_angle(host, value);
         }
         if changed.contains(CompositionVisualChangedFields::ORIENTATION_ANIMATED) {
-            let Some(animation) = reader.read_value::<crate::rendering::composition::animations::AnimationInstanceFactory>().map(crate::rendering::composition::animations::AnimationInstanceFactory::create) else {
+            let Some(animation) = reader.read_value::<AnimationInstanceFactory>().map(AnimationInstanceFactory::create) else {
                 panic!("a batch starts an animation of `Orientation` without an animation instance");
             };
             host.set_animated_value(
@@ -2192,7 +2193,7 @@ impl ServerCompositionVisualProps {
             self.set_orientation(host, value);
         }
         if changed.contains(CompositionVisualChangedFields::SCALE_ANIMATED) {
-            let Some(animation) = reader.read_value::<crate::rendering::composition::animations::AnimationInstanceFactory>().map(crate::rendering::composition::animations::AnimationInstanceFactory::create) else {
+            let Some(animation) = reader.read_value::<AnimationInstanceFactory>().map(AnimationInstanceFactory::create) else {
                 panic!("a batch starts an animation of `Scale` without an animation instance");
             };
             host.set_animated_value(
@@ -2206,7 +2207,7 @@ impl ServerCompositionVisualProps {
             self.set_scale(host, value);
         }
         if changed.contains(CompositionVisualChangedFields::TRANSFORM_MATRIX_ANIMATED) {
-            let Some(animation) = reader.read_value::<crate::rendering::composition::animations::AnimationInstanceFactory>().map(crate::rendering::composition::animations::AnimationInstanceFactory::create) else {
+            let Some(animation) = reader.read_value::<AnimationInstanceFactory>().map(AnimationInstanceFactory::create) else {
                 panic!("a batch starts an animation of `TransformMatrix` without an animation instance");
             };
             host.set_animated_value(
@@ -2232,7 +2233,7 @@ impl ServerCompositionVisualProps {
             self.set_opacity_mask_brush(host, value);
         }
         if changed.contains(CompositionVisualChangedFields::EFFECT) {
-            let value = reader.read_value::<std::sync::Arc<dyn IImmutableEffect>>();
+            let value = reader.read_value::<Arc<dyn IImmutableEffect>>();
             self.set_effect(host, value);
         }
         if changed.contains(CompositionVisualChangedFields::RENDER_OPTIONS) {

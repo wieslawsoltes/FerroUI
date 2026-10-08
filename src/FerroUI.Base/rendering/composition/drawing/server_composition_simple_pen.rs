@@ -40,7 +40,7 @@ impl ServerCompositionSimplePen {
         self.props.set_brush(self, value)
     }
 
-    pub fn set_dash_style(&self, value: Option<Rc<ImmutableDashStyle>>) {
+    pub fn set_dash_style(&self, value: Option<std::sync::Arc<ImmutableDashStyle>>) {
         self.props.set_dash_style(self, value)
     }
 
@@ -111,7 +111,8 @@ impl IPen for ServerCompositionSimplePen {
     }
 
     fn dash_style(&self) -> Option<Rc<dyn IDashStyle>> {
-        self.props.dash_style().map(|style| style as Rc<dyn IDashStyle>)
+        // The contract hands out a handle of this thread to the shared value.
+        self.props.dash_style().map(|style| Rc::new((*style).clone()) as Rc<dyn IDashStyle>)
     }
 
     fn line_cap(&self) -> PenLineCap {
@@ -151,7 +152,7 @@ impl IPen for ServerCompositionSimplePen {
         Rc::new(ImmutablePen::new(
             brush,
             self.props.thickness(),
-            self.props.dash_style(),
+            self.props.dash_style().map(|style| Rc::new((*style).clone())),
             self.props.line_cap(),
             self.props.line_join(),
             self.props.miter_limit(),
