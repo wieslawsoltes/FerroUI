@@ -3,10 +3,11 @@
 
 use super::navigation_demo_helper::{Demo, NavigationDemoHelper};
 use super::{
-    TabbedPageCollectionPage, TabbedPageCustomTabBarPage, TabbedPageCustomizationPage, TabbedPageDataTemplatePage,
-    TabbedPageDisabledTabsPage, TabbedPageEventsPage, TabbedPageFabPage, TabbedPageFirstLookPage,
-    TabbedPageFluidNavPage, TabbedPageGesturePage, TabbedPageKeyboardPage, TabbedPagePlacementPage,
-    TabbedPageProgrammaticPage, TabbedPageTransitionsPage, TabbedPageWithDrawerPage, TabbedPageWithNavigationPage,
+    LAvenirAppPage, PulseAppPage, RetroGamingAppPage, TabbedPageCollectionPage, TabbedPageCustomTabBarPage,
+    TabbedPageCustomizationPage, TabbedPageDataTemplatePage, TabbedPageDisabledTabsPage, TabbedPageEventsPage,
+    TabbedPageFabPage, TabbedPageFirstLookPage, TabbedPageFluidNavPage, TabbedPageGesturePage, TabbedPageKeyboardPage,
+    TabbedPagePlacementPage, TabbedPageProgrammaticPage, TabbedPageTransitionsPage, TabbedPageWithDrawerPage,
+    TabbedPageWithNavigationPage,
 };
 use crate::markup::{content_page_class, xaml_class};
 use ferroui_base::interactivity::{Interactive, RoutedEventArgs};
@@ -15,10 +16,8 @@ use ferroui_controls::{ContentPage, NavigationPage};
 
 /// The registry of the samples of the page.
 ///
-/// Four entries of the original are not listed, because their pages are not ported:
-/// "Performance Monitor" of group "Performance" (`TabbedPagePerformancePage`) and the group
-/// "Showcases": "Pulse Fitness" (`PulseAppPage`), "L'Avenir Restaurant" (`LAvenirAppPage`) and
-/// "Retro Gaming" (`RetroGamingAppPage`), all three of the directory `Pages/NavigationPage`.
+/// The entry "Performance Monitor" of group "Performance" (`TabbedPagePerformancePage`) of the
+/// original is not listed, because its page is not ported.
 const DEMOS: &[Demo] = &[
     // Overview
     (
@@ -120,6 +119,25 @@ const DEMOS: &[Demo] = &[
         "With DrawerPage",
         "Combine TabbedPage with DrawerPage: a global navigation drawer sits over tabbed content.",
         || TabbedPageWithDrawerPage::new().upcast(),
+    ),
+    // Showcases
+    (
+        "Showcases",
+        "Pulse Fitness",
+        "Fitness app with bottom TabbedPage navigation, NavigationPage drill-down inside tabs, and workout detail screens.",
+        || PulseAppPage::new().upcast(),
+    ),
+    (
+        "Showcases",
+        "L'Avenir Restaurant",
+        "Restaurant app with DrawerPage root, NavigationPage detail, and TabbedPage bottom tabs for Menu, Reservations, and Profile.",
+        || LAvenirAppPage::new().upcast(),
+    ),
+    (
+        "Showcases",
+        "Retro Gaming",
+        "Arcade-style app with NavigationPage header, TabbedPage bottom tabs with CenteredTabPanel, and game detail push.",
+        || RetroGamingAppPage::new().upcast(),
     ),
 ];
 

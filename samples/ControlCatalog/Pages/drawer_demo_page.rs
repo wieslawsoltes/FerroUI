@@ -5,7 +5,7 @@ use super::navigation_demo_helper::{Demo, NavigationDemoHelper};
 use super::{
     ControlsGalleryAppPage, DrawerPageBreakpointPage, DrawerPageCompactPage, DrawerPageCustomFlyoutPage,
     DrawerPageCustomizationPage, DrawerPageEventsPage, DrawerPageFirstLookPage, DrawerPageNavigationPage,
-    DrawerPageRtlPage, DrawerPageTransitionsPage, EcoTrackerAppPage, ModernAppPage,
+    DrawerPageRtlPage, DrawerPageTransitionsPage, EcoTrackerAppPage, FerroFlixAppPage, LAvenirAppPage, ModernAppPage,
 };
 use crate::markup::{content_page_class, xaml_class};
 use ferroui_base::interactivity::{Interactive, RoutedEventArgs};
@@ -14,10 +14,8 @@ use ferroui_controls::{ContentPage, NavigationPage};
 
 /// The registry of the samples of the page.
 ///
-/// Three entries of the original are not listed, because their pages are not ported:
-/// "Performance Monitor" of group "Performance" (`DrawerPagePerformancePage`) and, of group
-/// "Showcases", the streaming app (`FerroFlixAppPage`) and "L'Avenir Restaurant"
-/// (`LAvenirAppPage`), both of the directory `Pages/NavigationPage`.
+/// The entry "Performance Monitor" of group "Performance" (`DrawerPagePerformancePage`) of the
+/// original is not listed, because its page is not ported.
 const DEMOS: &[Demo] = &[
     // Overview
     (
@@ -77,6 +75,18 @@ const DEMOS: &[Demo] = &[
         || DrawerPageTransitionsPage::new().upcast(),
     ),
     // Showcases
+    (
+        "Showcases",
+        "FerroFlix",
+        "Streaming app with DrawerPage wrapping NavigationPage. Hamburger auto-injected at root, back arrow on detail, and dark themed flyout menu.",
+        || FerroFlixAppPage::new().upcast(),
+    ),
+    (
+        "Showcases",
+        "L'Avenir Restaurant",
+        "Restaurant app with DrawerPage as the root container, NavigationPage for detail navigation, and TabbedPage bottom tabs for Menu, Reservations, and Profile.",
+        || LAvenirAppPage::new().upcast(),
+    ),
     (
         "Showcases",
         "EcoTracker",

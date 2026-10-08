@@ -5,6 +5,7 @@ use crate::markup::XamlClass;
 use ferroui_base::metadata::{MarkupType, MarkupTyped};
 use ferroui_base::TypeInfo;
 
+mod care_companion_app_page;
 mod carousel_customization_page;
 mod carousel_data_binding_page;
 mod carousel_gallery_app_page;
@@ -23,6 +24,7 @@ mod carousel_vertical_page;
 mod sanctuary_main_page;
 mod sanctuary_showcase_page;
 
+pub use care_companion_app_page::CareCompanionAppPage;
 pub use carousel_customization_page::CarouselCustomizationPage;
 pub use carousel_data_binding_page::{CarouselCardItem, CarouselDataBindingPage};
 pub use carousel_gallery_app_page::CarouselGalleryAppPage;
@@ -42,6 +44,7 @@ pub use sanctuary_main_page::SanctuaryMainPage;
 pub use sanctuary_showcase_page::SanctuaryShowcasePage;
 
 pub(crate) const TYPES: &[&TypeInfo] = &[
+    CareCompanionAppPage::TYPE,
     CarouselCustomizationPage::TYPE,
     CarouselDataBindingPage::TYPE,
     CarouselGalleryAppPage::TYPE,
@@ -62,6 +65,7 @@ pub(crate) const TYPES: &[&TypeInfo] = &[
 ];
 
 pub(crate) const CLASSES: &[&XamlClass] = &[
+    &CareCompanionAppPage::XAML_CLASS,
     &CarouselCustomizationPage::XAML_CLASS,
     &CarouselDataBindingPage::XAML_CLASS,
     &CarouselGalleryAppPage::XAML_CLASS,

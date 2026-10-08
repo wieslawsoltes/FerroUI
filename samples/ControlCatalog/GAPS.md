@@ -6,7 +6,7 @@ The documents of the sample that do not load yet, grouped by what they wait for.
 cargo test -p control-catalog -- --ignored gap_
 ```
 
-Status: 219 documents, 177 load and show their class; 42 are listed below.
+Status: 219 documents, 190 load and show their class; 29 are listed below.
 
 ## Gaps of the framework
 
@@ -54,11 +54,6 @@ One gap of the framework blocks no document of the list: C101, a reflection bind
 
 These documents load without their class (the survey test, `cargo test -p control-catalog -- --ignored survey`, with `CATALOG_SURVEY` set); their code-behind is sample work, not a framework gap:
 
-- `Pages/CarouselPage/CareCompanionAppPage.xaml`
-- `Pages/NavigationPage/FerroFlixAppPage.xaml`
-- `Pages/NavigationPage/LAvenirAppPage.xaml`
-- `Pages/NavigationPage/PulseAppPage.xaml`
-- `Pages/NavigationPage/RetroGamingAppPage.xaml`
 
 ## Test harness
 
