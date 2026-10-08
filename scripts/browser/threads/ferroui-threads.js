@@ -7,7 +7,11 @@
 //   import { ensureCrossOriginIsolated } from "./ferroui-threads.js";
 //   if (await ensureCrossOriginIsolated()) { const runtime = await createRuntime(); ... }
 //
-// The build copies this file and ferroui-coi-sw.js next to the host page.
+// The build copies this file next to the host page. The service worker is the one of the platform,
+// ferroui-sw.js (webapp/modules/ferroui-sw.ts), which every site has: registered with `?coi=1` it
+// also adds the headers that isolate the page. An application that sets
+// `register_ferro_service_worker` registers the same address in a threaded module, so that the two
+// registrations are one worker.
 
 // Set for the one reload that follows the registration of the service worker, so that a page that
 // is still not isolated after it shows the message instead of reloading for ever.
@@ -40,7 +44,7 @@ function showMessage(element, reason) {
 //
 // `serviceWorker` is the address of the worker script, relative to the page; null or `register:
 // false` leaves the worker out, for a site whose host sends the headers.
-export async function ensureCrossOriginIsolated({ serviceWorker = "./ferroui-coi-sw.js", register = true, element } = {}) {
+export async function ensureCrossOriginIsolated({ serviceWorker = "./ferroui-sw.js?coi=1", register = true, element } = {}) {
     if (globalThis.crossOriginIsolated) {
         flag((storage) => storage.removeItem(RELOADED));
         return true;
