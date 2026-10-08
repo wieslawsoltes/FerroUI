@@ -45,7 +45,7 @@ fn unreadable(why: impl std::fmt::Display) -> String {
 
 /// What the emitter writes for the corpus today.
 fn generate() -> GeneratedFile {
-    generate_file(generated::ASSEMBLY_NAME, generated::ROOT_URI, DOCUMENTS, &RuntimeXamlLoaderConfiguration::new())
+    generate_file(generated::ASSEMBLY_NAME, generated::ROOT_URI, DOCUMENTS, &RuntimeXamlLoaderConfiguration::new(), &[])
 }
 
 /// A value in display form: in its untyped form (the contents of a nullable,

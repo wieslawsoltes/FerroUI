@@ -177,7 +177,8 @@ impl FerroXamlIlRuntimeCompiler {
         let group = match cached {
             Some(group) => group,
             None => {
-                let group = Rc::new(Self::transform_group(&runtime_type_system, &sources, configuration)?);
+                let type_system = runtime_type_system.as_type_system();
+                let group = Rc::new(Self::transform_group(&runtime_type_system, type_system, &sources, configuration)?);
                 if let Some(key) = cache_key {
                     GROUPS.with(|groups| {
                         let mut groups = groups.borrow_mut();
@@ -236,7 +237,7 @@ impl FerroXamlIlRuntimeCompiler {
         configuration: &RuntimeXamlLoaderConfiguration,
     ) -> XamlResult<TransformedDocument> {
         let mut documents =
-            Self::transform_documents(&[(name, xaml, base_uri.map(str::to_string), None)], configuration)?;
+            Self::transform_documents(&[(name, xaml, base_uri.map(str::to_string), None)], configuration, &[])?;
         documents.pop().ok_or_else(|| XamlError::invalid_operation("The document was not transformed"))
     }
 
@@ -247,12 +248,23 @@ impl FerroXamlIlRuntimeCompiler {
     /// document, in order. A document with the class of its root instance (`x:Class`) is
     /// transformed to populate an instance of that class. Nothing is built and nothing is
     /// cached.
+    ///
+    /// `dependencies` are the compiled markup of other crates (their `.xamlmeta`): an
+    /// include of one of their documents is linked to its compiled form, as upstream's
+    /// build links it through the metadata of the referenced assembly
+    /// ([`crate::rust_emitter::XamlMetadata`]).
     #[cfg(any(feature = "emitter", test))]
     pub(crate) fn transform_documents(
         documents: &[(&str, &str, Option<String>, Option<&'static ferroui_base::TypeInfo>)],
         configuration: &RuntimeXamlLoaderConfiguration,
+        dependencies: &[crate::rust_emitter::XamlMetadata],
     ) -> XamlResult<Vec<TransformedDocument>> {
         let runtime_type_system = Self::type_system();
+        let type_system: Rc<dyn IXamlTypeSystem> = if dependencies.is_empty() {
+            runtime_type_system.as_type_system()
+        } else {
+            crate::rust_emitter::CompiledMarkupTypeSystem::new(runtime_type_system.as_type_system(), dependencies)?
+        };
         let sources: Vec<DocumentSource> = documents
             .iter()
             .map(|(name, xaml, base_uri, root_class)| DocumentSource {
@@ -262,7 +274,7 @@ impl FerroXamlIlRuntimeCompiler {
                 base_uri: base_uri.clone(),
             })
             .collect();
-        let group = Self::transform_group(&runtime_type_system, &sources, configuration)?;
+        let group = Self::transform_group(&runtime_type_system, type_system, &sources, configuration)?;
         let mut transformed = Vec::with_capacity(group.providers.len());
         for provider in &group.providers {
             let (root, configuration, document) =
@@ -273,14 +285,16 @@ impl FerroXamlIlRuntimeCompiler {
     }
 
     /// Parses and transforms the documents of a group and prepares their build and
-    /// populate methods: everything of `LoadGroup` up to running them.
+    /// populate methods: everything of `LoadGroup` up to running them. The transformers
+    /// see `type_system`: the run-time type system, or (for the emitter) the run-time
+    /// type system with the compiled markup of other crates.
     fn transform_group(
         runtime_type_system: &Rc<RuntimeTypeSystem>,
+        type_system: Rc<dyn IXamlTypeSystem>,
         sources: &[DocumentSource],
         configuration: &RuntimeXamlLoaderConfiguration,
     ) -> XamlResult<TransformedGroup> {
         let runtime_type_system = runtime_type_system.clone();
-        let type_system: Rc<dyn IXamlTypeSystem> = runtime_type_system.as_type_system();
 
         let (mut mappings, emit_mappings) = FerroXamlIlLanguage::configure(&type_system)?;
         framework::adapt_type_mappings(&mut mappings);

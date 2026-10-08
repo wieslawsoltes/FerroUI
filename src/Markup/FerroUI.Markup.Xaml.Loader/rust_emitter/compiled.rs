@@ -19,6 +19,7 @@ use crate::FerroXamlIlRuntimeCompiler;
 
 use super::emitter::{emit_document, emit_function, namespace_table, root_class_of, DocumentFunctions};
 use super::source::{function_name_of, rust_string_literal};
+use super::xaml_metadata::{DocumentModel, XamlMetadata};
 
 /// The result of compiling one document.
 pub struct CompiledDocument {
@@ -32,6 +33,12 @@ pub struct CompiledDocument {
     /// the document from, and its value (`rt::XmlNamespaceTable`); documents
     /// with the same information share the constant.
     pub namespaces: Option<(String, String)>,
+    /// The full name of the type of the root of the transformed document.
+    pub root_type: Option<String>,
+    /// Whether the document is public (`x:ClassModifier`; a document without the
+    /// directive is public): only a public document has an entry in the loader table
+    /// and a build function other crates can call.
+    pub public: bool,
 }
 
 /// A generated file and what it holds.
@@ -45,6 +52,39 @@ pub struct GeneratedFile {
     pub position_map: String,
     /// For every document, in order: its name and, when it is not eligible, why.
     pub documents: Vec<(String, Option<String>)>,
+    /// The assembly and the root URI of the documents.
+    assembly_name: String,
+    root_uri: String,
+    /// For every eligible document, in order: its name, the full name of its root type,
+    /// its build function and whether it is public.
+    compiled: Vec<(String, String, String, bool)>,
+}
+
+impl GeneratedFile {
+    /// The `.xamlmeta` of the file (docs/porting/xaml.md, 9.7.3): its compiled documents,
+    /// for crates that include them. `module_path` is the absolute path of the module the
+    /// file is the body of (`::my_crate::compiled_xaml`); `dependencies` are the
+    /// `.xamlmeta` files of the crates the documents include documents of, relative to
+    /// the file the metadata is written to.
+    pub fn metadata(&self, crate_name: &str, module_path: &str, dependencies: &[&str]) -> XamlMetadata {
+        XamlMetadata {
+            name: self.assembly_name.clone(),
+            crate_name: crate_name.to_string(),
+            documents: self
+                .compiled
+                .iter()
+                .map(|(name, root_type, function, public)| DocumentModel {
+                    uri: format!("{}{name}", self.root_uri),
+                    root_type: root_type.clone(),
+                    class_rust_path: None,
+                    build_path: Some(format!("{module_path}::{function}")),
+                    populate_path: None,
+                    public: *public,
+                })
+                .collect(),
+            dependencies: dependencies.iter().map(|path| path.to_string()).collect(),
+        }
+    }
 }
 
 /// Parses, transforms and emits the documents (`(name, xaml)`) of an assembly
@@ -65,10 +105,17 @@ pub struct GeneratedFile {
 /// makes every document of it not eligible, with the error; a document with
 /// an unsupported node is reported with the node, and the others are not
 /// affected.
+///
+/// `dependencies` are the compiled markup of the crates the documents may include
+/// documents of (their `.xamlmeta`, [`XamlMetadata::read`]): such an include calls the
+/// build function of the included document in its crate, or creates its class, as
+/// upstream links an include of a document of a referenced assembly (docs/porting/xaml.md,
+/// 9.7.3).
 pub fn compile_documents(
     documents: &[(&str, &str)],
     root_uri: Option<&str>,
     configuration: &RuntimeXamlLoaderConfiguration,
+    dependencies: &[XamlMetadata],
 ) -> Vec<CompiledDocument> {
     let mut compiled: Vec<CompiledDocument> = Vec::with_capacity(documents.len());
     // The items of the file each document defines, with the document that defines them.
@@ -83,18 +130,46 @@ pub fn compile_documents(
         items.extend(defined.into_iter().map(|item| (item, *name)));
         if let Some((item, other)) = collision {
             let reason = format!("the generated function `{item}` would also be defined for the document `{other}`; rename one of them");
-            compiled.push(CompiledDocument { name: name.to_string(), function_name, source: Err(reason), namespaces: None });
+            compiled.push(CompiledDocument {
+                name: name.to_string(),
+                function_name,
+                source: Err(reason),
+                namespaces: None,
+                root_type: None,
+                public: true,
+            });
             continue;
         }
+        let public = match class_modifier_public(xaml) {
+            Ok(public) => public.unwrap_or(true),
+            Err(reason) => {
+                compiled.push(CompiledDocument {
+                    name: name.to_string(),
+                    function_name,
+                    source: Err(reason),
+                    namespaces: None,
+                    root_type: None,
+                    public: true,
+                });
+                continue;
+            }
+        };
         group.push((compiled.len(), name, xaml, root_uri.map(|root| format!("{root}{name}"))));
-        compiled.push(CompiledDocument { name: name.to_string(), function_name, source: Err(String::new()), namespaces: None });
+        compiled.push(CompiledDocument {
+            name: name.to_string(),
+            function_name,
+            source: Err(String::new()),
+            namespaces: None,
+            root_type: None,
+            public,
+        });
     }
     let sources: Vec<(&str, &str, Option<String>, Option<&'static ferroui_base::TypeInfo>)> =
         group.iter().map(|(_, name, xaml, base_uri)| (*name, *xaml, base_uri.clone(), None)).collect();
     if sources.is_empty() {
         return compiled;
     }
-    match FerroXamlIlRuntimeCompiler::transform_documents(&sources, configuration) {
+    match FerroXamlIlRuntimeCompiler::transform_documents(&sources, configuration, dependencies) {
         Ok(transformed) => {
             // The namespace information of the documents, one constant per distinct table.
             let mut tables: Vec<String> = Vec::new();
@@ -112,6 +187,7 @@ pub fn compile_documents(
                     }
                 };
                 let constant = format!("XML_NAMESPACES_{table_index}");
+                document.root_type = root_type_name(&transformed.root);
                 document.source = emit_document(
                     &transformed.root,
                     &transformed.configuration,
@@ -120,6 +196,7 @@ pub fn compile_documents(
                     &document.function_name,
                     name,
                 )
+                .map(|source| if document.public { source } else { source.replacen("pub fn ", "pub(crate) fn ", 1) })
                 .map_err(|e| e.to_string());
                 document.namespaces = Some((constant, table));
             }
@@ -134,7 +211,9 @@ pub fn compile_documents(
 }
 
 /// The generated file of an assembly: the build function of every eligible
-/// document, the table `DOCUMENTS` (document name, untyped build function),
+/// document, the table `DOCUMENTS` (document name, untyped build function) of
+/// the public ones (`x:ClassModifier`; the build function of a document that
+/// is not public is `pub(crate)`, upstream's `XamlVisibility.Assembly`),
 /// `try_load` (the `CompiledXamlLoader` of the assembly: the document whose
 /// URI is `<root_uri><name>`, compared without regard to case as upstream's
 /// `string.Equals(.., StringComparison.OrdinalIgnoreCase)` compares it; a failed build
@@ -143,13 +222,16 @@ pub fn compile_documents(
 ///
 /// `root_uri` ends with `/` (`ferres://MyApp/`). The text is deterministic:
 /// the same documents give the same file.
+///
+/// `dependencies` as for [`compile_documents`].
 pub fn generate_file(
     assembly_name: &str,
     root_uri: &str,
     documents: &[(&str, &str)],
     configuration: &RuntimeXamlLoaderConfiguration,
+    dependencies: &[XamlMetadata],
 ) -> GeneratedFile {
-    let compiled = compile_documents(documents, Some(root_uri), configuration);
+    let compiled = compile_documents(documents, Some(root_uri), configuration, dependencies);
     let mut source = String::new();
     source.push_str("// @generated by the Rust emitter of ferroui-markup-xaml-loader (rust_emitter::generate_file).\n");
     source.push_str("// Do not edit: regenerate it (see the header of the module that includes this file).\n");
@@ -184,23 +266,32 @@ pub fn generate_file(
 
     let mut report = Vec::with_capacity(compiled.len());
     let mut table = Vec::new();
+    let mut exported = Vec::new();
     for document in &compiled {
         match &document.source {
             Ok(function) => {
+                exported.push((
+                    document.name.clone(),
+                    document.root_type.clone().unwrap_or_default(),
+                    document.function_name.clone(),
+                    document.public,
+                ));
                 source.push('\n');
                 source.push_str(function);
-                source.push('\n');
-                source.push_str(&format!("fn {}(\n", untyped_function_name(&document.function_name)));
-                source.push_str("    service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,\n");
-                source.push_str(") -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadException> {\n");
-                source.push_str(&format!("    let root = {}(service_provider)?;\n", document.function_name));
-                source.push_str("    ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)\n");
-                source.push_str("}\n");
-                table.push(format!(
-                    "    ({}, {} as BuildDocument),\n",
-                    rust_string_literal(&document.name),
-                    untyped_function_name(&document.function_name)
-                ));
+                if document.public {
+                    source.push('\n');
+                    source.push_str(&format!("fn {}(\n", untyped_function_name(&document.function_name)));
+                    source.push_str("    service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,\n");
+                    source.push_str(") -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadException> {\n");
+                    source.push_str(&format!("    let root = {}(service_provider)?;\n", document.function_name));
+                    source.push_str("    ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)\n");
+                    source.push_str("}\n");
+                    table.push(format!(
+                        "    ({}, {} as BuildDocument),\n",
+                        rust_string_literal(&document.name),
+                        untyped_function_name(&document.function_name)
+                    ));
+                }
                 report.push((document.name.clone(), None));
             }
             Err(reason) => report.push((document.name.clone(), Some(reason.clone()))),
@@ -208,7 +299,7 @@ pub fn generate_file(
     }
 
     source.push('\n');
-    source.push_str("/// The build function of every eligible document, by document name.\n");
+    source.push_str("/// The build function of every eligible public document, by document name.\n");
     source.push_str("pub const DOCUMENTS: &[(&str, BuildDocument)] = &[\n");
     for entry in &table {
         source.push_str(entry);
@@ -242,7 +333,21 @@ pub fn generate_file(
         .map(|document| (document.function_name.clone(), document.name.clone()))
         .collect();
     let position_map = position_map(&source, &names);
-    GeneratedFile { source, position_map, documents: report }
+    GeneratedFile {
+        source,
+        position_map,
+        documents: report,
+        assembly_name: assembly_name.to_string(),
+        root_uri: root_uri.to_string(),
+        compiled: exported,
+    }
+}
+
+/// The full name (`Namespace.Name`) of the type of the root of a transformed document.
+fn root_type_name(root: &std::rc::Rc<dyn xamlx::ast::IXamlAstNode>) -> Option<String> {
+    use xamlx::ast::{XamlAstExtensions, XamlAstNodeExtensions};
+    let value = root.cast::<dyn xamlx::ast::IXamlAstValueNode>()?;
+    value.type_().get_clr_type().ok().map(|type_| type_.full_name())
 }
 
 /// The position map of a generated file (docs/porting/xaml.md, 9.3.6): the
@@ -277,7 +382,10 @@ pub fn position_map(source: &str, functions: &[(String, String)]) -> String {
     for (index, text) in source.lines().enumerate() {
         let number = index + 1;
         if let Some(name) = functions.iter().find_map(|(function, name)| {
-            let build = text.strip_prefix("pub fn ").and_then(|rest| rest.strip_prefix(function.as_str()));
+            let build = text
+                .strip_prefix("pub fn ")
+                .or_else(|| text.strip_prefix("pub(crate) fn "))
+                .and_then(|rest| rest.strip_prefix(function.as_str()));
             let deferred = || {
                 let rest = text.strip_prefix("fn ")?.strip_prefix(function.as_str())?;
                 let rest = rest.strip_prefix("_deferred_").or_else(|| rest.strip_prefix("_part_"))?;
@@ -388,7 +496,7 @@ pub fn transformed_class_group(class: &'static ferroui_base::TypeInfo) -> Result
     }
     let mut configuration = RuntimeXamlLoaderConfiguration::new();
     configuration.local_assembly = group.assembly;
-    let transformed = FerroXamlIlRuntimeCompiler::transform_documents(&borrowed(&documents), &configuration)
+    let transformed = FerroXamlIlRuntimeCompiler::transform_documents(&borrowed(&documents), &configuration, &[])
         .map_err(|error| error.message())?;
     Ok(documents
         .iter()
@@ -459,12 +567,29 @@ fn class_modifier_public(xaml: &str) -> Result<Option<bool>, String> {
 /// another public document calls its build function with a root service
 /// provider; a document that is not public has no entry, as upstream.
 ///
+/// `module_path` is the absolute path of the module the file is the body of
+/// (`::my_crate::compiled_xaml`), for the `.xamlmeta` of the file
+/// ([`ClassFile::metadata`]). `dependencies` are the compiled markup of the
+/// crates the documents may include documents of, as for
+/// [`compile_documents`]: their documents are not part of the group.
+///
 /// `Err` lists the documents that are not eligible, with the reasons: a class
 /// is compiled whole or not at all.
-pub fn generate_class_file(class: &'static ferroui_base::TypeInfo, constructor: ClassConstructor) -> Result<String, String> {
+pub fn generate_class_file(
+    class: &'static ferroui_base::TypeInfo,
+    constructor: ClassConstructor,
+    module_path: &str,
+    dependencies: &[XamlMetadata],
+) -> Result<ClassFile, String> {
     let uri = crate::FerroRuntimeXamlLoader::class_document(class)
         .ok_or_else(|| format!("no document is registered for {}", class.full_name()))?;
-    let group = crate::FerroRuntimeXamlLoader::document_group(&uri, &class.full_name()).map_err(|e| e.message().to_string())?;
+    // A document of a crate with compiled markup is that crate's: the include calls it there.
+    let compiled_elsewhere = |uri: &ferroui_base::utilities::Uri| {
+        let assembly = uri.absolute_uri().split_once("://").and_then(|(_, rest)| rest.split('/').next()).unwrap_or_default();
+        dependencies.iter().any(|metadata| metadata.name.to_lowercase() == assembly.to_lowercase())
+    };
+    let group = crate::FerroRuntimeXamlLoader::document_group_without(&uri, &class.full_name(), &compiled_elsewhere)
+        .map_err(|e| e.message().to_string())?;
     let name_of = |uri: &ferroui_base::utilities::Uri| uri.absolute_path().trim_start_matches('/').to_string();
     let mut documents = vec![(name_of(&group.uri), group.text.clone(), Some(group.uri.to_string()), Some(class))];
     for (uri, text) in &group.included {
@@ -472,7 +597,7 @@ pub fn generate_class_file(class: &'static ferroui_base::TypeInfo, constructor: 
     }
     let mut configuration = RuntimeXamlLoaderConfiguration::new();
     configuration.local_assembly = group.assembly;
-    let transformed = FerroXamlIlRuntimeCompiler::transform_documents(&borrowed(&documents), &configuration)
+    let transformed = FerroXamlIlRuntimeCompiler::transform_documents(&borrowed(&documents), &configuration, dependencies)
         .map_err(|error| format!("the group does not transform: {}", error.message()))?;
 
     // Whether each document is public. A class document follows its class, which has a
@@ -598,7 +723,64 @@ pub fn generate_class_file(class: &'static ferroui_base::TypeInfo, constructor: 
     source.push_str(&loader_table(&documents, &names, &loadable, class_path, constructor));
     // The file is a module of the crate of the class: that crate is `crate` in it.
     let own_crate = class_path.trim_start_matches("::").split("::").next().unwrap_or_default();
-    Ok(source.replace(&format!("::{own_crate}::"), "crate::"))
+    let source = source.replace(&format!("::{own_crate}::"), "crate::");
+
+    // The emitted documents, as other crates see them: the class, and every other
+    // document with its build function.
+    let mut exported = Vec::with_capacity(emitted.len());
+    for index in std::iter::once(0).chain((1..documents.len()).filter(|index| emitted.contains(index))) {
+        let root_type = root_type_name(&transformed[index].root).unwrap_or_default();
+        let uri = documents[index].2.clone().unwrap_or_default();
+        exported.push(match index {
+            0 => DocumentModel {
+                uri,
+                root_type,
+                class_rust_path: Some(format!("::{}", class_path.trim_start_matches("::"))),
+                build_path: None,
+                populate_path: Some(format!("{module_path}::populate")),
+                public: true,
+            },
+            _ => DocumentModel {
+                uri,
+                root_type,
+                class_rust_path: None,
+                build_path: Some(format!("{module_path}::{}", names[index])),
+                populate_path: None,
+                public: public[index],
+            },
+        });
+    }
+    let assembly = configuration.local_assembly;
+    Ok(ClassFile {
+        source,
+        assembly_name: assembly.map_or_else(String::new, |assembly| assembly.name.to_string()),
+        crate_name: own_crate.to_string(),
+        documents: exported,
+    })
+}
+
+/// The generated file of the documents of a class ([`generate_class_file`]).
+pub struct ClassFile {
+    /// The complete text of the file.
+    pub source: String,
+    assembly_name: String,
+    crate_name: String,
+    documents: Vec<DocumentModel>,
+}
+
+impl ClassFile {
+    /// The `.xamlmeta` of the file (docs/porting/xaml.md, 9.7.3): its compiled documents,
+    /// for crates that include them. `dependencies` are the `.xamlmeta` files of the
+    /// crates the documents include documents of, relative to the file the metadata is
+    /// written to.
+    pub fn metadata(&self, dependencies: &[&str]) -> XamlMetadata {
+        XamlMetadata {
+            name: self.assembly_name.clone(),
+            crate_name: self.crate_name.clone(),
+            documents: self.documents.clone(),
+            dependencies: dependencies.iter().map(|path| path.to_string()).collect(),
+        }
+    }
 }
 
 /// `try_load` of a class file: one entry per public document, in the order of the
@@ -670,6 +852,72 @@ mod tests {
         );
     }
 
+    /// The compiled markup of a crate `Library` (assembly `Library`): a public style and
+    /// a style that is not public.
+    fn library() -> XamlMetadata {
+        let document = |name: &str, public: bool| DocumentModel {
+            uri: format!("ferres://library/{name}"),
+            root_type: "FerroUI.Styling.Style".to_string(),
+            class_rust_path: None,
+            build_path: Some(format!("::library::compiled_xaml::{}", function_name_of(name))),
+            populate_path: None,
+            public,
+        };
+        XamlMetadata {
+            name: "Library".to_string(),
+            crate_name: "library".to_string(),
+            documents: vec![document("Style.xaml", true), document("Internal/Style.xaml", false)],
+            dependencies: Vec::new(),
+        }
+    }
+
+    fn including(include: &str) -> String {
+        format!(
+            "<ContentControl xmlns='https://github.com/ferroui' xmlns:x='http://schemas.microsoft.com/winfx/2006/xaml'>\n\
+             <ContentControl.Resources>{include}</ContentControl.Resources>\n\
+             </ContentControl>"
+        )
+    }
+
+    /// Not from upstream: an include of a public document of another crate calls its
+    /// build function there (`FromMethod` over `Build:<path>` of `!FerroResources`).
+    #[test]
+    fn include_of_a_document_of_another_crate_calls_its_build_function() {
+        let xaml = including("<StyleInclude x:Key='Include' Source='ferres://Library/Style.xaml'/>");
+        let compiled = compile_documents(&[("Root.xaml", &xaml)], Some("ferres://App/"), &RuntimeXamlLoaderConfiguration::new(), &[library()]);
+        let source = compiled[0].source.clone().unwrap_or_else(|reason| panic!("not eligible: {reason}"));
+        assert!(source.contains("= ::library::compiled_xaml::build_style_xaml("), "{source}");
+        assert!(!source.contains("StyleInclude"), "{source}");
+    }
+
+    /// Not from upstream: the diagnostics of `XamlIncludeGroupTransformer` and
+    /// `XamlMergeResourceGroupTransformer` for documents of another crate.
+    #[test]
+    fn include_of_another_crate_reports_upstream_diagnostics() {
+        let reason = |xaml: &str| {
+            let compiled = compile_documents(&[("Root.xaml", xaml)], Some("ferres://App/"), &RuntimeXamlLoaderConfiguration::new(), &[library()]);
+            compiled[0].source.clone().expect_err("the include is an error")
+        };
+        // A document that is not public, and a document the crate does not have.
+        for path in ["Internal/Style.xaml", "Missing.xaml"] {
+            let error = reason(&including(&format!("<StyleInclude x:Key='Include' Source='ferres://Library/{path}'/>")));
+            assert!(
+                error.contains(&format!(
+                    "Unable to resolve XAML resource \"ferres://library/{path}\" in the \"library\" assembly. Make sure this file exists and is public."
+                )),
+                "{error}"
+            );
+        }
+        // Merging works within one compilation only.
+        let error = reason(
+            "<ResourceDictionary xmlns='https://github.com/ferroui' xmlns:x='http://schemas.microsoft.com/winfx/2006/xaml'>\
+             <ResourceDictionary.MergedDictionaries><MergeResourceInclude Source='ferres://Library/Style.xaml'/></ResourceDictionary.MergedDictionaries>\
+             <x:String x:Key='own'>1</x:String>\
+             </ResourceDictionary>",
+        );
+        assert!(error.contains("Node MergeResourceInclude is unable to resolve \"ferres://library/Style.xaml\" path."), "{error}");
+    }
+
     /// Not from upstream: documents whose build functions would have the same name are
     /// reported as a diagnostic of the later document, not left to rustc.
     #[test]
@@ -685,7 +933,7 @@ mod tests {
             ("y.xaml_deferred_0", xaml),
             ("y.xaml", xaml),
         ];
-        let compiled = compile_documents(&documents, None, &RuntimeXamlLoaderConfiguration::new());
+        let compiled = compile_documents(&documents, None, &RuntimeXamlLoaderConfiguration::new(), &[]);
         for (name, other, item) in [
             ("a_b.xaml", "a-b.xaml", "build_a_b_xaml"),
             ("case.xaml", "Case.xaml", "build_case_xaml"),

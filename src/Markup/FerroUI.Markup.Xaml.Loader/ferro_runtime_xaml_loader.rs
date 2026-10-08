@@ -100,7 +100,7 @@ impl FerroRuntimeXamlLoader {
             .map_err(|e| XamlLoadException::with_inner(format!("Unable to read the XAML document: {e}"), e))?;
         let mut included = Vec::new();
         let mut visited: Vec<String> = uri.iter().map(|uri| uri.absolute_uri().to_string()).collect();
-        collect_included_documents(&*asset_loader(), uri.as_ref(), &text, &mut visited, &mut included);
+        collect_included_documents(&*asset_loader(), uri.as_ref(), &text, &mut visited, &|_| false, &mut included);
 
         // The text was read: the document is given again, with the same properties.
         let stream: Box<dyn Read> = Box::new(Cursor::new(text.into_bytes()));
@@ -258,6 +258,19 @@ impl FerroRuntimeXamlLoader {
     /// asset loader has, and the assembly of the document: the group the
     /// document of a class is loaded (and compiled) as.
     pub fn document_group(uri_text: &str, type_name: &str) -> Result<DocumentGroup, XamlLoadException> {
+        Self::document_group_without(uri_text, type_name, &|_| false)
+    }
+
+    /// [`Self::document_group`] without the documents `skip` names, and without the
+    /// documents only they include: the compiler of a crate leaves the documents of
+    /// another crate with compiled markup to that crate (an include of one calls it
+    /// there).
+    #[cfg_attr(not(any(feature = "emitter", test)), allow(dead_code))]
+    pub(crate) fn document_group_without(
+        uri_text: &str,
+        type_name: &str,
+        skip: &dyn Fn(&Uri) -> bool,
+    ) -> Result<DocumentGroup, XamlLoadException> {
         let uri = Uri::new(uri_text, UriKind::Absolute).map_err(|e| {
             XamlLoadException::with_message(format!("The URI '{uri_text}' of the XAML document of {type_name} is invalid: {e}"))
         })?;
@@ -280,7 +293,7 @@ impl FerroRuntimeXamlLoader {
         // included objects), so that the populated instance is the one compiled markup
         // builds.
         let mut included = Vec::new();
-        collect_included_documents(&*assets, Some(&uri), &text, &mut vec![uri.absolute_uri().to_string()], &mut included);
+        collect_included_documents(&*assets, Some(&uri), &text, &mut vec![uri.absolute_uri().to_string()], skip, &mut included);
         Ok(DocumentGroup { uri, text, included, assembly: MarkupAssembly::find(assembly.name()) })
     }
 
@@ -419,6 +432,7 @@ fn collect_included_documents(
     uri: Option<&Uri>,
     xaml: &str,
     visited: &mut Vec<String>,
+    skip: &dyn Fn(&Uri) -> bool,
     documents: &mut Vec<(Uri, String)>,
 ) {
     for source in include_sources(xaml) {
@@ -430,7 +444,7 @@ fn collect_included_documents(
             (false, None) => continue,
         };
         let key = included.absolute_uri().to_string();
-        if visited.contains(&key) || !assets.exists(&included, None) {
+        if visited.contains(&key) || skip(&included) || !assets.exists(&included, None) {
             continue;
         }
         visited.push(key);
@@ -441,7 +455,7 @@ fn collect_included_documents(
         }
         let at = documents.len();
         documents.push((included.clone(), String::new()));
-        collect_included_documents(assets, Some(&included), &text, visited, documents);
+        collect_included_documents(assets, Some(&included), &text, visited, skip, documents);
         documents[at].1 = text;
     }
 }

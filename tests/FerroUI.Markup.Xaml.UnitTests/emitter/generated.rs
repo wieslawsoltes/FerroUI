@@ -4299,7 +4299,7 @@ fn build_style_resources_xaml_untyped(
     ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
 }
 
-/// The build function of every eligible document, by document name.
+/// The build function of every eligible public document, by document name.
 pub const DOCUMENTS: &[(&str, BuildDocument)] = &[
     ("border_empty.xaml", build_border_empty_xaml_untyped as BuildDocument),
     ("border_padding.xaml", build_border_padding_xaml_untyped as BuildDocument),

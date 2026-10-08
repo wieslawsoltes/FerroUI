@@ -86,11 +86,18 @@
 //! that later.
 
 mod compiled;
+mod compiled_resources;
 mod emitter;
 mod source;
+mod xaml_metadata;
 
-pub use compiled::{compile_documents, generate_class_file, generate_file, ClassConstructor, CompiledDocument, GeneratedFile};
+pub use compiled::{
+    compile_documents, generate_class_file, generate_file, ClassConstructor, ClassFile, CompiledDocument, GeneratedFile,
+};
 #[cfg(any(test, feature = "testing"))]
 pub use compiled::{transformed_class_group, transformed_tree};
+pub(crate) use compiled_resources::CompiledMarkupTypeSystem;
+pub use compiled_resources::CompiledDocumentBuildMethod;
 pub use emitter::{emit_document, UnsupportedNode};
+pub use xaml_metadata::{DocumentModel, XamlMetadata};
 pub use source::{function_name_of, rust_string_literal};
