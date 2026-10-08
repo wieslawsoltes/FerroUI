@@ -384,3 +384,14 @@ pub fn run_main(query: &str) {
 fn main() {
     println!("storage_view runs in a browser: build it with scripts/build-browser.sh storage_view");
 }
+
+/// Whether a point of the view is hit by input. A test waits for it before
+/// it sends input: with a render thread the first frame comes after the view
+/// exists, and the view is hit from what the last frame drew.
+#[wasm_bindgen(js_name = storageViewIsHit)]
+pub fn storage_view_is_hit(x: f64, y: f64) -> bool {
+    MAIN_VIEW
+        .with(|view| view.borrow().clone())
+        .and_then(|view| TopLevel::get_top_level(Some(&view)))
+        .is_some_and(|top_level| top_level.input_hit_test(ferroui_base::Point::new(x, y)).is_some())
+}

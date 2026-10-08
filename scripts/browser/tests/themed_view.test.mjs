@@ -802,13 +802,15 @@ if (threaded) {
         await sleep(500);
         const hidden = await page.rendering();
         // The view changes while the page is hidden: the thread of the page lays it out and commits
-        // (its timers still run, slowly), and the render thread, whose animation frames have stopped,
-        // draws nothing.
+        // (its timers still run, slowly). The animation frames of the render thread have stopped, so
+        // it has no frames of its own; it still makes the ticks the page asks for out of turn, since
+        // a commit the page waits for must be answered whether the page is visible or not. So the
+        // change is drawn once, not sixty times a second.
         await page.evaluate(`(themedView.themedViewNativeHost("size", 200, 60), true)`);
         await sleep(2500);
         const still = await page.rendering();
         measured(`frames while the page was hidden: ${Number(still.frames) - Number(hidden.frames)}, ticks: ${Number(still.ticks) - Number(hidden.ticks)}`);
-        assert(still.frames === hidden.frames, `the render thread drew ${Number(still.frames) - Number(hidden.frames)} frames of a hidden page`);
+        assert(Number(still.frames) - Number(hidden.frames) <= 3, `the render thread drew ${Number(still.frames) - Number(hidden.frames)} frames of a hidden page in 2.5 s`);
 
         await setHidden(page, false);
         const shown = await framesAfter(page, still.frames);

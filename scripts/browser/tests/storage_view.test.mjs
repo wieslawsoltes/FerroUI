@@ -232,6 +232,9 @@ check("a file dropped on the view is a storage file the application reads", asyn
     const file = path.join(fs.mkdtempSync(path.join(os.tmpdir(), "ferroui-drop-")), "dropped.txt");
     fs.writeFileSync(file, "dropped content");
     const data = { items: [], files: [file], dragOperationsMask: 1 };
+    // The view is hit from what its last frame drew, and a render thread draws the first frame
+    // after the view exists.
+    await page.waitFor("storageView.storageViewIsHit(100, 100)", 30000);
     await page.send("Input.dispatchDragEvent", { type: "dragEnter", x: 100, y: 100, data });
     await page.send("Input.dispatchDragEvent", { type: "dragOver", x: 100, y: 100, data });
     await page.send("Input.dispatchDragEvent", { type: "drop", x: 100, y: 100, data });
