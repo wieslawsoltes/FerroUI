@@ -38,6 +38,16 @@ impl<T: PropertyValue> Deref for DirectPropertyBase<T> {
 }
 
 impl<T: PropertyValue> DirectPropertyBase<T> {
+    /// Converts an untyped value of another type to the value type of the
+    /// property with the implicit conversions of the managed original
+    /// (`AvaloniaProperty<T>.TryConvert`, see
+    /// [`ValueTypes::try_convert_implicit`](crate::data::core::ValueTypes::try_convert_implicit)).
+    fn convert_untyped(value: &dyn Any) -> Option<T> {
+        let converted = crate::data::core::ValueTypes::try_convert_implicit(value, std::any::TypeId::of::<T>())?;
+        let converted: &dyn crate::AnyValue = &*converted;
+        converted.downcast_ref::<T>().cloned()
+    }
+
     /// The untyped base of the property.
     #[inline]
     pub fn as_property(&'static self) -> &'static FerroProperty {
@@ -145,6 +155,8 @@ impl<T: PropertyValue> PropertyRoutes for DirectPropertyBase<T> {
         } else if value.is::<DoNothingType>() {
         } else if let Some(v) = value.downcast_ref::<T>() {
             o.set_direct_value(this, v.clone());
+        } else if let Some(v) = Self::convert_untyped(value) {
+            o.set_direct_value(this, v);
         } else {
             self.invalid_value();
         }

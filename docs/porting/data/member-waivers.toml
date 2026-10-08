@@ -903,7 +903,7 @@ reason = "internal constructor that keeps the marker a singleton: `UnsetValueTyp
 project = "Avalonia.Base"
 type = "Avalonia.AvaloniaProperty*"
 member = "TryConvert"
-reason = "implicit conversion of an untyped value to the property type (`TypeUtilities.TryConvertImplicit`), used by the untyped set route of direct properties: the property system of the port does not convert untyped values (the ported test is `set_value_does_not_convert_to_nullable`); `route_set_value` takes a value of the property type, the unset and do-nothing markers and the registered element-reference conversions"
+reason = "exists as the private `convert_untyped` of `StyledProperty<T>` and `DirectPropertyBase<T>`, over `ValueTypes::try_convert_implicit`: the assignability casts (a value to its nullable form, handle and interface casts, element references) and the implicit numeric conversions of `TypeUtilities.TryConvertImplicit`; a user-defined implicit operator is stated with `ValueTypes::register_cast`"
 
 [[waive]]
 project = "Avalonia.Base"

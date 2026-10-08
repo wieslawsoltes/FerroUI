@@ -187,10 +187,11 @@ impl<T: PropertyValue> StyledProperty<T> {
     }
 
     /// Converts an untyped value of another type to the value type of the
-    /// property through the conversions registered for untyped property
-    /// access (a handle given to an element-reference property).
+    /// property with the implicit conversions of the managed original
+    /// (`AvaloniaProperty<T>.TryConvert`, see
+    /// [`ValueTypes::try_convert_implicit`](crate::data::core::ValueTypes::try_convert_implicit)).
     fn convert_untyped(value: &dyn Any) -> Option<T> {
-        let converted = crate::data::core::ValueTypes::try_convert_for_property(value, std::any::TypeId::of::<T>())?;
+        let converted = crate::data::core::ValueTypes::try_convert_implicit(value, std::any::TypeId::of::<T>())?;
         let converted: &dyn crate::AnyValue = &*converted;
         converted.downcast_ref::<T>().cloned()
     }

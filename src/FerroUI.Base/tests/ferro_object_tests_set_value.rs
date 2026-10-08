@@ -231,31 +231,41 @@ fn set_value_throws_exception_for_invalid_value_type() {
     });
 }
 
-// Upstream `SetValue_Of_Integer_On_Double_Property_Works` and
-// `SetValue_Can_Convert_To_Nullable`: untyped values are not converted in this
-// port, they must hold exactly the property's value type.
 #[test]
-fn set_value_of_integer_on_double_property_is_rejected() {
+fn set_value_of_integer_on_double_property_works() {
     let target = Class2::new();
 
-    assert_panics(|| {
-        target.set_value_untyped(Class2::flob_property(), &4, BindingPriority::LocalValue);
-    });
+    target.set_value_untyped(Class2::flob_property(), &4, BindingPriority::LocalValue);
 
-    target.set_value_untyped(Class2::flob_property(), &4.0, BindingPriority::LocalValue);
-    assert_eq!(4.0, target.get_value(Class2::flob_property()));
+    let value = target.get_value(Class2::flob_property());
+    assert_eq!(4.0, value);
+}
+
+/// The managed original finds the implicit operator of `ImplicitDouble` by
+/// reflection; a type of the port states it with `ValueTypes::register_cast`.
+#[test]
+fn set_value_respects_implicit_conversions() {
+    struct ImplicitDouble {
+        value: f64,
+    }
+    crate::data::core::ValueTypes::register_cast::<ImplicitDouble, f64>(|v| v.value);
+
+    let target = Class2::new();
+
+    target.set_value_untyped(Class2::flob_property(), &ImplicitDouble { value: 4.0 }, BindingPriority::LocalValue);
+
+    let value = target.get_value(Class2::flob_property());
+    assert_eq!(4.0, value);
 }
 
 #[test]
-fn set_value_does_not_convert_to_nullable() {
+fn set_value_can_convert_to_nullable() {
     let target = Class2::new();
 
-    assert_panics(|| {
-        target.set_value_untyped(Class2::fred_property(), &4.0, BindingPriority::LocalValue);
-    });
+    target.set_value_untyped(Class2::fred_property(), &4.0, BindingPriority::LocalValue);
 
-    target.set_value_untyped(Class2::fred_property(), &Some(4.0), BindingPriority::LocalValue);
-    assert_eq!(Some(4.0), target.get_value(Class2::fred_property()));
+    let value = target.get_value(Class2::fred_property());
+    assert_eq!(Some(4.0), value);
 }
 
 #[test]
