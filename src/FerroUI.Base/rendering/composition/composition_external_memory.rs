@@ -2,6 +2,7 @@ use super::ServerJobTask;
 use crate::platform::{IPlatformHandle, PlatformGraphicsDrmFormat, PlatformGraphicsExternalImageProperties};
 use bitflags::bitflags;
 use std::rc::Rc;
+use std::sync::Arc;
 
 /// The import of GPU objects created outside of the framework into the
 /// compositor.
@@ -34,7 +35,7 @@ pub trait ICompositionGpuInterop {
     /// If import operation fails, the caller is responsible for destroying the handle
     ///
     /// `image` is an image that belongs to the same GPU context or the same GPU context sharing group as one used by compositor
-    fn import_shared_image(&self, image: Rc<dyn ICompositionImportableSharedGpuContextImage>)
+    fn import_shared_image(&self, image: Arc<dyn ICompositionImportableSharedGpuContextImage>)
         -> Rc<dyn ICompositionImportedGpuImage>;
 
     /// Asynchronously imports a semaphore object. The returned object is immediately usable.
@@ -118,7 +119,16 @@ pub trait ICompositionImportableSharedGpuContextObject {
 }
 
 /// An GPU image descriptor obtained from a context from the same share group as one used by the compositor
-pub trait ICompositionImportableSharedGpuContextImage {
+///
+/// The image is shared between two threads, as upstream, where that is a
+/// convention: the thread of the caller makes it, keeps it and disposes it,
+/// and the thread that renders reads it during the import and may dispose it
+/// with the imported image. Here the type says so: what both threads read
+/// is a plain value or is behind a lock, and what belongs to the context of
+/// the caller (the context itself) is bound to its thread inside the
+/// implementation and is not touched from the other one.
+pub trait ICompositionImportableSharedGpuContextImage: Send + Sync {
+    /// Releases the image. Either thread may call it, more than once.
     fn dispose(&self);
 }
 

@@ -23,7 +23,6 @@ use crate::platform::{
     IPlatformRenderInterfaceImportedImage, IPlatformRenderInterfaceImportedSemaphore, PlatformGraphicsContextLostException,
     PlatformGraphicsDrmFormat, PlatformGraphicsExternalImageProperties, PlatformHandle,
 };
-use crate::utilities::ThreadBound;
 use std::cell::RefCell;
 use std::rc::Rc;
 use std::sync::Arc;
@@ -31,19 +30,6 @@ use std::sync::Arc;
 fn same_context(a: &Rc<dyn IPlatformRenderInterfaceContext>, b: &Rc<dyn IPlatformRenderInterfaceContext>) -> bool {
     std::ptr::addr_eq(Rc::as_ptr(a), Rc::as_ptr(b))
 }
-
-/// The error of an import that cannot run where it was sent
-/// (`InvalidOperationException`).
-#[derive(Clone, Debug)]
-pub struct GpuImportError(&'static str);
-
-impl std::fmt::Display for GpuImportError {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.write_str(self.0)
-    }
-}
-
-impl std::error::Error for GpuImportError {}
 
 /// The server part of the interop: the context of the render interface and
 /// its features. Objects of the server side, kept inside the compositor
@@ -145,10 +131,10 @@ impl ICompositionGpuInterop for CompositionInterop {
         CompositionImportedGpuImage::new(&self.compositor, server)
     }
 
-    fn import_shared_image(&self, image: Rc<dyn ICompositionImportableSharedGpuContextImage>) -> Rc<dyn ICompositionImportedGpuImage> {
-        // The image is an object of the caller, who keeps it: it stays bound
-        // to this thread (see `ImageSource::Shared`).
-        let source = ImageSource::Shared(ThreadBound::new(image));
+    fn import_shared_image(&self, image: Arc<dyn ICompositionImportableSharedGpuContextImage>) -> Rc<dyn ICompositionImportedGpuImage> {
+        // The image is shared with the caller, who keeps it (see
+        // `ImageSource::Shared`).
+        let source = ImageSource::Shared(image);
         let server = self.with_state(|server, state| {
             Arc::new(self.compositor.bind_to_lock(server, ServerImportedGpuImage::new(state, source)))
         });
@@ -235,13 +221,11 @@ impl ImportHandle {
 /// What an image is imported from.
 enum ImageSource {
     Handle(ImportHandle, PlatformGraphicsExternalImageProperties),
-    /// An image of a context that shares with the one of the compositor. It
-    /// is an object of the caller, who keeps a reference and disposes it, so
-    /// it cannot be given to the lock: it is imported where it was made,
-    /// which is where the server runs unless there is a render thread. A
-    /// render thread fails the import; importing there needs an image that
-    /// the two threads can share.
-    Shared(ThreadBound<Rc<dyn ICompositionImportableSharedGpuContextImage>>),
+    /// An image of a context that shares with the one of the compositor.
+    /// The caller keeps a reference and disposes it, and the render thread
+    /// reads it during the import, as upstream: the image is an object the
+    /// two threads share (`Send + Sync`), not one of the lock.
+    Shared(Arc<dyn ICompositionImportableSharedGpuContextImage>),
 }
 
 impl ImageSource {
@@ -251,14 +235,7 @@ impl ImageSource {
     ) -> Result<Rc<dyn IPlatformRenderInterfaceImportedImage>, ServerJobError> {
         match self {
             ImageSource::Handle(handle, properties) => Ok(feature.import_image(handle.platform_handle(), properties.clone())),
-            ImageSource::Shared(image) => {
-                if !image.is_on_thread() {
-                    return Err(Arc::new(GpuImportError(
-                        "an image of a shared GPU context is imported on the thread it was made on",
-                    )));
-                }
-                Ok(feature.import_shared_image(image.get().clone()))
-            }
+            ImageSource::Shared(image) => Ok(feature.import_shared_image(image.clone())),
         }
     }
 

@@ -113,7 +113,7 @@ impl IExternalObjectsRenderInterfaceContextFeature for FakeExternalObjectsFeatur
 
     fn import_shared_image(
         &self,
-        _image: Rc<dyn ICompositionImportableSharedGpuContextImage>,
+        _image: std::sync::Arc<dyn ICompositionImportableSharedGpuContextImage>,
     ) -> Rc<dyn IPlatformRenderInterfaceImportedImage> {
         self.image.clone()
     }
@@ -365,7 +365,7 @@ impl IExternalObjectsRenderInterfaceContextFeature for LoggingExternalObjectsFea
 
     fn import_shared_image(
         &self,
-        _image: Rc<dyn ICompositionImportableSharedGpuContextImage>,
+        _image: Arc<dyn ICompositionImportableSharedGpuContextImage>,
     ) -> Rc<dyn IPlatformRenderInterfaceImportedImage> {
         self.log.shared_imports.lock().unwrap().push(thread::current().id());
         Rc::new(LoggingImportedImage { log: self.log.clone() })
@@ -388,10 +388,36 @@ impl IExternalObjectsRenderInterfaceContextFeature for LoggingExternalObjectsFea
     }
 }
 
-struct FakeSharedImage;
+/// An image the two threads share, in the shape of a texture of a shared
+/// context: the identifier is a value either thread reads and the disposal
+/// clears; the part that stands for the context of the caller is bound to
+/// the thread that made the image.
+struct FakeSharedImage {
+    texture_id: std::sync::atomic::AtomicI32,
+    context: crate::utilities::ThreadBound<Rc<Cell<bool>>>,
+}
+
+impl FakeSharedImage {
+    fn new(texture_id: i32) -> Arc<FakeSharedImage> {
+        Arc::new(FakeSharedImage {
+            texture_id: std::sync::atomic::AtomicI32::new(texture_id),
+            context: crate::utilities::ThreadBound::new(Rc::new(Cell::new(false))),
+        })
+    }
+
+    fn texture_id(&self) -> i32 {
+        self.texture_id.load(std::sync::atomic::Ordering::SeqCst)
+    }
+}
 
 impl ICompositionImportableSharedGpuContextImage for FakeSharedImage {
-    fn dispose(&self) {}
+    fn dispose(&self) {
+        self.texture_id.store(0, std::sync::atomic::Ordering::SeqCst);
+        // The context is used only where it lives.
+        if self.context.is_on_thread() {
+            self.context.get().set(true);
+        }
+    }
 }
 
 /// A compositor in the render-thread mode, with the scopes it lives in.
@@ -545,18 +571,65 @@ fn an_update_with_a_disposed_image_fails_on_the_render_thread() {
 }
 
 #[test]
-fn an_image_of_a_shared_context_is_not_imported_by_the_render_thread() {
+fn an_image_of_a_shared_context_is_imported_on_the_render_thread() {
     let services = RenderThreadServices::new();
     let log = Arc::new(InteropLog::default());
     let interop = services.interop(&log);
 
-    // The image is an object of this thread that the caller keeps: the
-    // render thread fails the import instead of taking it.
-    let image: Rc<dyn ICompositionImportableSharedGpuContextImage> = Rc::new(FakeSharedImage);
+    // The image is shared: the caller keeps it, the render thread is handed
+    // it for the import.
+    let image = FakeSharedImage::new(11);
     let imported = interop.import_shared_image(image.clone());
-    services.run_jobs();
-    assert!(imported.import_completed().is_faulted());
+    assert!(!imported.import_completed().is_completed());
     assert!(log.shared_imports.lock().unwrap().is_empty());
+
+    let render_thread = services.run_jobs();
+    assert!(
+        imported.import_completed().is_completed_successfully(),
+        "{:?}",
+        imported.import_completed().exception().map(|e| e.to_string())
+    );
+    assert_eq!(vec![render_thread], *log.shared_imports.lock().unwrap());
+    // The import let go of its reference: the image is the caller's alone.
+    assert_eq!(1, Arc::strong_count(&image));
+    assert_eq!(11, image.texture_id());
+
+    // The imported image takes the same way as one of a handle.
+    let surface = services.compositor.create_drawing_surface();
+    let update = surface.update_async(&*imported);
+    let render_thread = services.run_jobs();
+    assert!(update.is_completed_successfully(), "{:?}", update.exception().map(|e| e.to_string()));
+    assert_eq!(vec![render_thread], *log.snapshots.lock().unwrap());
+
+    let disposed = imported.dispose_async();
+    let render_thread = services.run_jobs();
+    assert!(disposed.is_completed_successfully());
+    assert_eq!(vec![render_thread], *log.disposals.lock().unwrap());
+
+    // The caller disposes its image on its thread, where its context is.
+    image.dispose();
+    assert_eq!(0, image.texture_id());
+    assert!(image.context.get().get());
+}
+
+/// Not from upstream: an image the caller let go of before the import ran
+/// is released by the render thread, which does not touch the part bound to
+/// the thread of the caller.
+#[test]
+fn an_image_of_a_shared_context_dropped_by_the_caller_is_released_on_the_render_thread() {
+    let services = RenderThreadServices::new();
+    let log = Arc::new(InteropLog::default());
+    let interop = services.interop(&log);
+
+    let image = FakeSharedImage::new(3);
+    let context = image.context.get().clone();
+    let imported = interop.import_shared_image(image);
+    let render_thread = services.run_jobs();
+    assert!(imported.import_completed().is_completed_successfully());
+    assert_eq!(vec![render_thread], *log.shared_imports.lock().unwrap());
+    // The part of this thread was left alone: not used, and not dropped.
+    assert!(!context.get());
+    assert_eq!(2, Rc::strong_count(&context));
 }
 
 /// Not from upstream: where the server runs on the thread of the
@@ -568,7 +641,7 @@ fn an_image_of_a_shared_context_is_imported_on_the_thread_of_the_compositor() {
     let interop =
         CompositionInterop::new(&services.compositor, Rc::new(LoggingExternalObjectsFeature { log: log.clone() }));
 
-    let image: Rc<dyn ICompositionImportableSharedGpuContextImage> = Rc::new(FakeSharedImage);
+    let image = FakeSharedImage::new(5);
     let imported = interop.import_shared_image(image.clone());
     services.run_jobs();
     assert!(imported.import_completed().is_completed_successfully());

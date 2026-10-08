@@ -1,6 +1,7 @@
 use super::{IBitmapImpl, IPlatformHandle, PlatformGraphicsDrmFormat, PlatformGraphicsExternalImageProperties};
 use crate::rendering::composition::{CompositionGpuImportedImageSynchronizationCapabilities, ICompositionImportableSharedGpuContextImage};
 use std::rc::Rc;
+use std::sync::Arc;
 
 /// The import of GPU objects created outside of the framework into the
 /// render context: a feature of the render interface context.
@@ -24,9 +25,12 @@ pub trait IExternalObjectsRenderInterfaceContextFeature {
         properties: PlatformGraphicsExternalImageProperties,
     ) -> Rc<dyn IPlatformRenderInterfaceImportedImage>;
 
+    /// Imports an image of a context that shares with this one. The image
+    /// is shared with the thread that made it, which keeps it and disposes
+    /// it: this is called on the thread that renders.
     fn import_shared_image(
         &self,
-        image: Rc<dyn ICompositionImportableSharedGpuContextImage>,
+        image: Arc<dyn ICompositionImportableSharedGpuContextImage>,
     ) -> Rc<dyn IPlatformRenderInterfaceImportedImage>;
 
     fn import_semaphore(&self, handle: Rc<dyn IPlatformHandle>) -> Rc<dyn IPlatformRenderInterfaceImportedSemaphore>;
