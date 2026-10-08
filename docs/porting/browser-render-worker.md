@@ -499,3 +499,12 @@ The download of the polyfill is a navigation of a hidden frame to an address the
 6. **Both registrations being one** **[D]**: that `register` with the address and scope of the active worker neither installs a second worker nor makes the page lose its controller. The last assertions of the new check are there for this.
 7. **`-sALLOW_MEMORY_GROWTH=0` after the `=1` of the file**, replaced as the other repeated settings are; the warning Emscripten gives for threads with growth should be gone from the link.
 8. **A debug build** (`--debug --threads`): Emscripten's assertion that `updateMemoryViews` runs once per thread with a fixed memory, with the glue's wrapper around it. Read as satisfied; not run.
+
+### Validation (2026-10-08)
+
+Nothing written for this step had to change. Built and run in headless Chrome:
+
+- With threads: `storage_view` links and starts in a module with atomics for the first time and passes its 19 checks, among them the streamed save through the one service worker and, without the headers, one service worker that both isolates the page and streams the save; `thread_spawn` passes its 3 checks and `render_worker_clear` its 2 against the merged worker.
+- Without threads: `storage_view` passes its 18 checks and `themed_view` its 30.
+- The type check, the linter and the pixel test of `webapp/` pass, the pixel test with a grown and with a shared memory; the host tests of the browser crate pass (171).
+- The fixed memory of the threaded build (512 MB by default) was granted in every run. The measured peak of the catalog, which section 5 asks for, is still to be taken (B2.7).
