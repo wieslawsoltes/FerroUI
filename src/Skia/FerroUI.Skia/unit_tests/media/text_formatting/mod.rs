@@ -1,5 +1,6 @@
 //! Upstream's `Media/TextFormatting` folder of the Skia unit tests.
 
+mod empty_shaped_buffer_tests;
 mod multi_buffer_text_source;
 mod single_buffer_text_source;
 mod tables;
