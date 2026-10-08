@@ -32,7 +32,11 @@ One cloud worker per row, started from `main` with the brief named.
 | `core-port-12` | Color, focus and glyph typeface suites and the clean-ups of task 3 | `cloud-tasks/core-port-suites.md` |
 | `skia-test-suites` | The remaining suites of the Skia backend and the typeface hook (row 16) | `cloud-tasks/skia-test-suites.md` |
 
-Next in line when a worker is free: build integration of the XAML compiler (task 2, remaining step 2), the documents still on `samples/ControlCatalog/excluded.txt`, and design 09 of `performance/` (benchmarks and counters).
+Merged on 2026-10-08, done in the local session because they are macOS only: the native storage provider with file and URL activation and files on the clipboard (#50), and the native control host (#54). Both advance row 18 of `CRITICAL-PATH.md`; neither was exercised against AppKit beyond start-up (the pickers need a user, and nothing in the port hosts a native view yet).
+
+The four workers above are the last cloud workers: the owner decided on 2026-10-08 that all work is done locally once they have finished. See "How to run the next period".
+
+Next in line, locally, when a worker has finished: build integration of the XAML compiler (task 2, remaining step 2), the documents still on `samples/ControlCatalog/excluded.txt`, and design 09 of `performance/` (benchmarks and counters).
 
 ## In flight at the hand-over of 2026-10-07
 
@@ -123,7 +127,9 @@ Also:
 
 ## How to run the next period
 
-- One cloud session per task, created from `main`, with the task's brief as its first message and `CLOUD-WORKERS.md` as the standing brief. Sessions in one environment do not share a target directory, so they do not contaminate each other's builds.
-- Each session opens a draft pull request early, pushes often, rebases onto `main` before its final push, and marks the pull request ready when CI is green. Pull requests are merged with rebase merges.
+- All work is done in the local session (owner, 2026-10-08). No new cloud sessions are started; `CLOUD-WORKERS.md` and `cloud-tasks/` stay as the record of how the cloud workers were briefed, and their rules for an exact port, for tests and for delivery apply to local work unchanged.
+- Independent tasks may be split between local sub-agents, at most four at a time and never two on the same files. Each task gets its own branch from the current `origin/main` and its own pull request.
+- A pull request is merged with a rebase merge when its three checks are green (`Source conventions`, `Build and test (macOS)`, `Check (browser, wasm32-unknown-emscripten)`). The macOS job takes about 40 minutes.
 - When `ci.yml` does not start for a pull request, dispatch it by hand on the branch.
-- After a toolchain change on `main`, re-run `scripts/browser/setup.sh` before any browser build.
+- After a toolchain change on `main`, re-run `scripts/browser/setup.sh` before any browser build. The toolchain is installed under `.tools/`; `source .tools/env.sh` before `scripts/build-browser.sh`.
+- The generated tracking pages (`TRACKING.md`, `tracking/*.md`) are regenerated with `scripts/port-status/run.sh` in a pull request of their own when no other pull request is open, since every regeneration touches the same files.
