@@ -272,7 +272,7 @@ Rust sources of this crate that no upstream file maps to. Give each a reason in 
 | `register_types.rs` | **unmapped** |  |
 | `rust_paths.rs` | **unmapped** |  |
 | `test_support.rs` | **unmapped** | `LazyParents`, `TestAssetLoader`, `TestServiceProvider` |
-| `xaml_il/runtime/compiled.rs` | **unmapped** | `CompiledLoadError`, `CompiledXmlNamespaceInfo`, `DeclaredAccessors`, `DeferredBuild`, `NullableInstance`, `XmlNamespaceTable` |
+| `xaml_il/runtime/compiled.rs` | **unmapped** | `CompiledLoadError`, `CompiledXmlNamespaceInfo`, `DeclaredAccessors`, `DeferredBuild`, `DocumentInfo`, `NullableInstance`, `XmlNamespaceTable` |
 | `xaml_il/runtime/xaml_il_context.rs` | **unmapped** | `FerroXamlIlContextNameScopeField`, `FrameworkContextServices`, `IStaticServiceProvider`, `IXamlIlContextServices`, `WeakContextServiceProvider`, `XamlIlContext`, `XamlIlContextDefinition`, `XamlIlContextService` |
 | `xamlx_runtime.rs` | **unmapped** | `IXamlParentStackProviderV1`, `IXamlXmlNamespaceInfoProviderV1`, `XamlXmlNamespaceInfoV1` |
 

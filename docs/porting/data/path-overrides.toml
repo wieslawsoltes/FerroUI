@@ -266,3 +266,7 @@ project = "Avalonia.Browser"
 upstream = ["Interop/GeneralHelpers.cs"]
 kind = "not-applicable"
 reason = "reflective access to script objects: replaced by typed property getters in interop/"
+
+[[rust_only]]
+path = "src/Skia/FerroUI.Skia/unit_tests/*"
+reason = "the port of upstream's Skia unit test project (tests/Avalonia.Skia.UnitTests) and its test doubles, not of the library"

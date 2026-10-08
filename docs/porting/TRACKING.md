@@ -44,9 +44,9 @@ Percentages are `present / (total - waived)`. Member matching is by name with re
 
 | | Ported | Total | Waived | % |
 |---|---:|---:|---:|---:|
-| C# files | 2001 | 2363 | 0 | 84.7% |
-| Types | 2585 | 3276 | 0 | 78.9% |
-| Members | 18672 | 23849 | 44 | 78.4% |
+| C# files | 2006 | 2363 | 0 | 84.9% |
+| Types | 2595 | 3276 | 0 | 79.2% |
+| Members | 18736 | 23849 | 44 | 78.7% |
 | Contracts (interfaces) | 388 | 464 | - | 83.6% |
 | Property registrations | 1164 | 1233 | - | 94.4% |
 | Routed events | 108 | 108 | - | 100.0% |
@@ -72,7 +72,7 @@ The % column is member coverage (file coverage for plain file lists).
 | [Avalonia.Fonts.Inter](tracking/Avalonia.Fonts.Inter.md) | `src/Avalonia.Fonts.Inter` | `src/FerroUI.Fonts.Inter` | `ferroui-fonts-inter` | 2/2 | 2/2 | 2/2 | 100.0% | 3 - browser | P2 |
 | [Avalonia.Metal](tracking/Avalonia.Metal.md) | `src/Avalonia.Metal` | `src/FerroUI.Metal` | `ferroui-metal` | 0/2 | 0/7 | 0/21 | 0.0% | 1 - desktop (macOS) | P1 |
 | [Avalonia.MicroCom](tracking/Avalonia.MicroCom.md) | `src/Avalonia.MicroCom` | `src/FerroUI.MicroCom` | `ferroui-microcom` | 1/1 | 1/1 | 0/6 (6 waived) | - | 0 - core | P0 |
-| [Avalonia.Native](tracking/Avalonia.Native.md) | `src/Avalonia.Native` | `src/FerroUI.Native` | `ferroui-native` | 40/49 | 51/85 | 371/601 | 61.7% | 1 - desktop (macOS) | P0 |
+| [Avalonia.Native](tracking/Avalonia.Native.md) | `src/Avalonia.Native` | `src/FerroUI.Native` | `ferroui-native` | 45/49 | 61/85 | 435/601 | 72.4% | 1 - desktop (macOS) | P0 |
 | [Avalonia.OpenGL](tracking/Avalonia.OpenGL.md) | `src/Avalonia.OpenGL` | `src/FerroUI.OpenGL` | `ferroui-opengl` | 12/39 | 16/63 | 226/639 | 35.4% | 2 - rendering backends | P2 |
 | [Avalonia.Remote.Protocol](tracking/Avalonia.Remote.Protocol.md) | `src/Avalonia.Remote.Protocol` | `src/FerroUI.Remote.Protocol` | `ferroui-remote-protocol` | 0/14 | 0/55 | 0/202 (1 waived) | 0.0% | 4 - tooling | P3 |
 | [Avalonia.Themes.Fluent](tracking/Avalonia.Themes.Fluent.md) | `src/Avalonia.Themes.Fluent` | `src/FerroUI.Themes.Fluent` | `ferroui-themes-fluent` | 5/5 | 6/6 | 68/73 | 93.2% | 2 - xaml + themes | P1 |
@@ -321,12 +321,14 @@ Upstream unit tests are ported next to the code (`#[cfg(test)] mod tests` or `<f
 | `src/Skia/FerroUI.Skia` | `src/Skia/Avalonia.Skia` |
 | `src/tools/MicroCom.CodeGenerator` | none (FerroUI only) |
 | `tests/FerroUI.Markup.Xaml.UnitTests` | `tests/Avalonia.Markup.Xaml.UnitTests` (not tracked) |
+| `tests/XamlIncludeFixture/Application` | none (FerroUI only) |
+| `tests/XamlIncludeFixture/Theme` | none (FerroUI only) |
 
 FerroUI-only crates have no upstream source directory (for example the MicroCom code generator, which upstream consumes as a NuGet package).
 
 ## Rust-only files
 
-313 Rust source files have no upstream counterpart (297 without a recorded reason). They are listed at the end of each project page.
+320 Rust source files have no upstream counterpart (299 without a recorded reason). They are listed at the end of each project page.
 
 | Project | Rust file | Reason |
 |---|---|---|
@@ -630,8 +632,10 @@ FerroUI-only crates have no upstream source directory (for example the MicroCom 
 | [Avalonia.Markup.Xaml.Loader](tracking/Avalonia.Markup.Xaml.Loader.md) | `src/Markup/FerroUI.Markup.Xaml.Loader/runtime/type_system/values.rs` | **unmapped** |
 | [Avalonia.Markup.Xaml.Loader](tracking/Avalonia.Markup.Xaml.Loader.md) | `src/Markup/FerroUI.Markup.Xaml.Loader/runtime/value_parser.rs` | **unmapped** |
 | [Avalonia.Markup.Xaml.Loader](tracking/Avalonia.Markup.Xaml.Loader.md) | `src/Markup/FerroUI.Markup.Xaml.Loader/rust_emitter/compiled.rs` | **unmapped** |
+| [Avalonia.Markup.Xaml.Loader](tracking/Avalonia.Markup.Xaml.Loader.md) | `src/Markup/FerroUI.Markup.Xaml.Loader/rust_emitter/compiled_resources.rs` | **unmapped** |
 | [Avalonia.Markup.Xaml.Loader](tracking/Avalonia.Markup.Xaml.Loader.md) | `src/Markup/FerroUI.Markup.Xaml.Loader/rust_emitter/emitter.rs` | **unmapped** |
 | [Avalonia.Markup.Xaml.Loader](tracking/Avalonia.Markup.Xaml.Loader.md) | `src/Markup/FerroUI.Markup.Xaml.Loader/rust_emitter/source.rs` | **unmapped** |
+| [Avalonia.Markup.Xaml.Loader](tracking/Avalonia.Markup.Xaml.Loader.md) | `src/Markup/FerroUI.Markup.Xaml.Loader/rust_emitter/xaml_metadata.rs` | **unmapped** |
 | [Avalonia.Markup.Xaml.Loader](tracking/Avalonia.Markup.Xaml.Loader.md) | `src/Markup/FerroUI.Markup.Xaml.Loader/testing/bindings.rs` | **unmapped** |
 | [Avalonia.Markup.Xaml.Loader](tracking/Avalonia.Markup.Xaml.Loader.md) | `src/Markup/FerroUI.Markup.Xaml.Loader/testing/objects.rs` | **unmapped** |
 | [Avalonia.Markup.Xaml.Loader](tracking/Avalonia.Markup.Xaml.Loader.md) | `src/Markup/FerroUI.Markup.Xaml.Loader/testing/styles.rs` | **unmapped** |
@@ -643,3 +647,8 @@ FerroUI-only crates have no upstream source directory (for example the MicroCom 
 | [Avalonia.Skia](tracking/Avalonia.Skia.md) | `src/Skia/FerroUI.Skia/locked_framebuffer.rs` | **unmapped** |
 | [Avalonia.Skia](tracking/Avalonia.Skia.md) | `src/Skia/FerroUI.Skia/metal/i_metal_device.rs` | **unmapped** |
 | [Avalonia.Skia](tracking/Avalonia.Skia.md) | `src/Skia/FerroUI.Skia/tests.rs` | **unmapped** |
+| [Avalonia.Skia](tracking/Avalonia.Skia.md) | `src/Skia/FerroUI.Skia/unit_tests/hit_testing.rs` | the port of upstream's Skia unit test project (tests/Avalonia.Skia.UnitTests) and its test doubles, not of the library |
+| [Avalonia.Skia](tracking/Avalonia.Skia.md) | `src/Skia/FerroUI.Skia/unit_tests/media/custom_font_manager_impl.rs` | the port of upstream's Skia unit test project (tests/Avalonia.Skia.UnitTests) and its test doubles, not of the library |
+| [Avalonia.Skia](tracking/Avalonia.Skia.md) | `src/Skia/FerroUI.Skia/unit_tests/media/text_formatting/multi_buffer_text_source.rs` | the port of upstream's Skia unit test project (tests/Avalonia.Skia.UnitTests) and its test doubles, not of the library |
+| [Avalonia.Skia](tracking/Avalonia.Skia.md) | `src/Skia/FerroUI.Skia/unit_tests/media/text_formatting/single_buffer_text_source.rs` | the port of upstream's Skia unit test project (tests/Avalonia.Skia.UnitTests) and its test doubles, not of the library |
+| [Avalonia.Skia](tracking/Avalonia.Skia.md) | `src/Skia/FerroUI.Skia/unit_tests/test_font_manager.rs` | the port of upstream's Skia unit test project (tests/Avalonia.Skia.UnitTests) and its test doubles, not of the library |
