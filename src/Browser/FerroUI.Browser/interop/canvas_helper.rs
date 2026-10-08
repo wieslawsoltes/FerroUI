@@ -40,6 +40,14 @@ extern "C" {
     /// render target here: the worker creates it and reports it with
     /// [`on_render_target_registered`]. The thread must have called
     /// [`initialize_worker`](crate::rendering::initialize_worker) before.
+    ///
+    /// For the render thread of the page the id is
+    /// [`RenderWorker::canvas_thread_id`](crate::rendering::RenderWorker::canvas_thread_id),
+    /// which is
+    /// [`PENDING_RENDER_THREAD`](crate::rendering::PENDING_RENDER_THREAD)
+    /// while that thread has not reported itself: the script then transfers
+    /// the control of the canvas at once and posts it to the worker when the
+    /// thread has.
     #[wasm_bindgen(static_method_of = CanvasSurface, js_name = create)]
     pub fn create_render_target_surface(
         container: &JsObject,

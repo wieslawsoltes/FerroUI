@@ -159,8 +159,9 @@ impl BrowserTopLevelImpl {
     /// Writes the surfaces the top-level has now to the cell the renderer reads.
     ///
     /// The reference reads `Surfaces` of the top-level whenever the renderer creates its render
-    /// target, and the list changes: it is empty until the page has created the render target
-    /// and again once the top-level is disposed. The renderer cannot reach the top-level here
+    /// target, and the list changes: it is empty once the top-level is disposed. (Until the
+    /// render target of the canvas exists the list has the surface, which is not ready; the
+    /// reference has an empty list then.) The renderer cannot reach the top-level here
     /// (its function may be called by another thread), so the top-level publishes the list when
     /// it can have changed: when the renderer asks for the function, when the canvas changes
     /// its size, and when the top-level is disposed.
