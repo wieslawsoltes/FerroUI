@@ -16,7 +16,7 @@ use std::any::{Any, TypeId};
 use std::cell::{Cell, RefCell};
 use std::collections::{HashMap, HashSet, VecDeque};
 use std::rc::{Rc, Weak};
-use std::sync::Arc;
+use std::sync::{Arc, Mutex};
 use std::time::Duration;
 
 /// The source of the compositor clock: time elapsed since an arbitrary
@@ -28,57 +28,60 @@ pub type CompositorClock = Rc<dyn Fn() -> Duration>;
 /// The queue of committed batches: the one point where data passes from
 /// the UI-thread compositor to the server compositor.
 ///
-/// Both sides run on one thread today (see the threading notes in
-/// `rendering/composition/mod.rs`), so the queue is a `RefCell`. Moving the
-/// server to its own thread means making [`CommittedBatch`] `Send` and
-/// turning this into a mutex-protected queue; nothing else is shared.
+/// The UI thread enqueues and rents buffers, the render thread dequeues and
+/// returns them: both under a lock.
 #[derive(Default)]
 pub struct BatchQueue {
-    batches: RefCell<VecDeque<CommittedBatch>>,
+    batches: Mutex<VecDeque<CommittedBatch>>,
     /// Emptied stream buffers, returned by the server for reuse.
-    data_pool: RefCell<Vec<BatchStreamData>>,
+    data_pool: Mutex<Vec<BatchStreamData>>,
 }
 
 impl BatchQueue {
     pub(crate) fn enqueue(&self, batch: CommittedBatch) {
-        self.batches.borrow_mut().push_back(batch);
+        self.batches.lock().unwrap().push_back(batch);
     }
 
     fn dequeue(&self) -> Option<CommittedBatch> {
-        self.batches.borrow_mut().pop_front()
+        self.batches.lock().unwrap().pop_front()
     }
 
     /// Takes a stream buffer for a new batch.
     pub(crate) fn rent_data(&self) -> BatchStreamData {
-        self.data_pool.borrow_mut().pop().unwrap_or_default()
+        self.data_pool.lock().unwrap().pop().unwrap_or_default()
     }
 
     fn return_data(&self, mut data: BatchStreamData) {
         data.reset();
-        let mut pool = self.data_pool.borrow_mut();
+        let mut pool = self.data_pool.lock().unwrap();
         if pool.len() < 16 {
             pool.push(data);
         }
     }
 }
 
-const COMMIT_GRACE_TICKS: i32 = 10;
+/// The queue is what the two threads share.
+const _: fn() = || {
+    fn shared<T: Send + Sync>() {}
+    shared::<BatchQueue>();
+};
 
-/// Server-side counterpart of the compositor: owns the server objects,
-/// applies the batches committed by the UI thread and renders.
-///
+const COMMIT_GRACE_TICKS: i32 = 10;
 
 /// A job in the queues of the server compositor: a job of a batch, or one
 /// bound to the server object it was sent for. It never leaves the render
 /// thread, unlike the [`ServerJob`] of a batch.
 type RenderThreadJob = Box<dyn FnOnce(&ServerCompositor)>;
 
+/// Server-side counterpart of the compositor: owns the server objects,
+/// applies the batches committed by the UI thread and renders.
+///
 /// Confined to the render thread. UI-thread code interacts with it only by
 /// enqueueing batches (and by reading the clock and the readback indices,
 /// which are thread-safe values).
 pub struct ServerCompositor {
     this: Weak<ServerCompositor>,
-    batches: Rc<BatchQueue>,
+    batches: Arc<BatchQueue>,
     objects: RefCell<Vec<Option<Rc<dyn IServerObject>>>>,
     received_job_queue: RefCell<VecDeque<RenderThreadJob>>,
     disposed_in_batch: RefCell<Vec<ServerObjectId>>,
@@ -110,7 +113,7 @@ impl ServerCompositor {
     pub(crate) fn new(
         platform_graphics: Option<Rc<dyn IPlatformGraphics>>,
         options: CompositionOptions,
-        batches: Rc<BatchQueue>,
+        batches: Arc<BatchQueue>,
         clock: CompositorClock,
     ) -> Rc<ServerCompositor> {
         let compositor = Rc::new_cyclic(|this| ServerCompositor {

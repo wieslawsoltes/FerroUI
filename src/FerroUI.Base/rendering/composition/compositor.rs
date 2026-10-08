@@ -47,7 +47,7 @@ pub struct Compositor {
     loop_task: Arc<dyn IRenderLoopTask>,
     use_ui_thread_for_synchronous_commits: bool,
     server: Rc<ServerCompositor>,
-    batches: Rc<BatchQueue>,
+    batches: Arc<BatchQueue>,
     clock: CompositorClock,
     next_commit: RefCell<Option<Arc<CompositionBatch>>>,
     object_serialization_queue: RefCell<VecDeque<Rc<dyn ICompositorSerializable>>>,
@@ -140,7 +140,7 @@ impl Compositor {
             let origin = platform_impl.now();
             Rc::new(move || Duration::from_millis((platform_impl.now() - origin).max(0) as u64))
         });
-        let batches = Rc::new(BatchQueue::default());
+        let batches = Arc::new(BatchQueue::default());
         let server = ServerCompositor::new(gpu, options, batches.clone(), clock.clone());
         let key = NEXT_COMPOSITOR_KEY.fetch_add(1, Ordering::SeqCst);
         let loop_task: Arc<dyn IRenderLoopTask> = Arc::new(ServerCompositorLoopTask {
