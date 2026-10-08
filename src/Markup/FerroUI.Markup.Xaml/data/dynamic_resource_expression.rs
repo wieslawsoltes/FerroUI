@@ -69,6 +69,7 @@ impl DynamicResourceExpression {
         theme_variant: Option<ThemeVariant>,
         priority: BindingPriority,
     ) -> Rc<Self> {
+        ferroui_base::perf_count!(DynamicResourceExpressionsCreated);
         Rc::new_cyclic(|this: &Weak<DynamicResourceExpression>| Self {
             this: this.clone(),
             base: UntypedBindingExpressionBase::new(this.clone(), priority, None, false),

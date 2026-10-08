@@ -17,6 +17,9 @@ bitflags.workspace = true
 # Test doubles (mock windowing platform, unit-test application) for the tests
 # of this crate and of the crates built on it.
 testing = ["ferroui-base/testing"]
+# The performance counters of the base crate, which the counting sites of this crate (container
+# recycling, the child of a content presenter) count into.
+perf-counters = ["ferroui-base/perf-counters"]
 
 [dev-dependencies]
 ferroui-base = { workspace = true, features = ["testing"] }

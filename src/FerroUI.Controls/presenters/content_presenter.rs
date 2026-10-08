@@ -605,6 +605,7 @@ impl ContentPresenter {
 
         // Remove the old child if we're not recycling it.
         if new_child != old_child {
+            ferroui_base::perf_count!(ContentPresenterChildrenReplaced);
             if let Some(old_child) = &old_child {
                 self.visual_children().remove(&old_child.clone().upcast());
                 self.with_effective_logical_children(|logical_children| {
