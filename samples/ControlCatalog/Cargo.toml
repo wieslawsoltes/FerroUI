@@ -33,6 +33,8 @@ separate-assets = []
 [dependencies]
 ferroui-base = { workspace = true }
 ferroui-controls = { workspace = true }
+# The colour picker library (the colour picker page and the styles of App.xaml).
+ferroui-controls-color-picker = { workspace = true }
 # The about dialog.
 ferroui-dialogs = { workspace = true }
 ferroui-markup = { workspace = true }

@@ -6,7 +6,7 @@ The documents of the sample that do not load yet, grouped by what they wait for.
 cargo test -p control-catalog -- --ignored gap_
 ```
 
-Status: 219 documents, 192 load and show their class; 27 are listed below.
+Status: 219 documents, 193 load and show their class; 26 are listed below (one of them, `App.xaml`, loads in the application and in `tests/gaps.rs`).
 
 ## Gaps of the framework
 
@@ -31,9 +31,7 @@ One gap of the framework blocks no document of the list: C101, a reflection bind
 
 | Document | Missing |
 |---|---|
-| `App.xaml` | The assembly `FerroUI.Controls.ColorPicker`: its Fluent and Simple style documents (`ferres://FerroUI.Controls.ColorPicker/Themes/{Fluent,Simple}/...`). The application loads the rest of the document (`temporary.rs`). |
 | `MainWindow.xaml` | `Win32Properties` (the attached property `WindowCornerPreference`). The window loads the rest of the document (`temporary.rs`). |
-| `Pages/ColorPickerPage.xaml` | `ColorPicker`, `ColorPreviewer`, `ColorSlider`, `ColorSpectrum`, `ColorView`, `FlatHalfColorPalette` (the colour picker assembly). |
 | `Pages/WindowCustomizationsPage.xaml` | `Win32Properties`; `MainWindowViewModel.Win32WindowCornerPreferences` and `Win32WindowCornerPreference` wait for it. |
 
 ## Code-behind that needs framework API the port does not have
@@ -56,4 +54,5 @@ These documents load without their class (the survey test, `cargo test -p contro
 
 | Document | Why |
 |---|---|
+| `App.xaml` | The tray icon of the document loads its icon through the icon loader of the platform, which the unit test application does not have. The document loads in the application, with the styles of the colour picker library it includes; `gaps::the_application_document_loads` loads it with a test icon loader. |
 | `Pages/SettingsPage.xaml` | `{x:Static local:App.CurrentTheme}` needs the application of the catalog as the current application. The page loads in the application, which offers it; the unit test application is not that application. |

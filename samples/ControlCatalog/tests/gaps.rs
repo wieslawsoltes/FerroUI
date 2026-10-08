@@ -118,19 +118,55 @@ fn gap_c011_multi_page_pages_from_markup() {
     }
 }
 
-/// The table of the elements removed from `App.xaml` matches the document,
-/// and the subset loads into an application (TEMPORARY, see `temporary.rs`).
+/// The application loads its document, with the styles of the colour picker
+/// library it includes, in an application where nothing registered the
+/// run-time loader before (as in the browser and desktop hosts).
 #[test]
-fn the_subset_of_the_application_document_loads() {
+fn the_application_document_loads() {
     // The icon of a native menu item of the document is decoded as a bitmap.
-    let _app = start_catalog_application();
+    let _app = start_catalog_services(None);
     // The tray icon of the document loads its icon through the icon loader of the platform.
     let loader: Rc<dyn IPlatformIconLoader> = Rc::new(TestIconLoader);
     FerroLocator::current_mutable().bind::<dyn IPlatformIconLoader>().to_constant(loader);
-    let root: BoxedValue = Rc::new(instantiate(App::construct()));
-    if let Err(error) = crate::temporary::load_app_document_subset(root) {
-        panic!("{}", describe(&error));
+    instantiate(App::construct()).load_document();
+}
+
+/// The colour picker page shows its controls with the Simple styles of the
+/// colour picker library, included as `App.xaml` includes them.
+#[test]
+fn the_color_picker_page_shows_with_the_styles_of_the_library() {
+    use ferroui_base::metadata::from_markup_value;
+    use ferroui_base::styling::{IStyle, Styles};
+    use ferroui_controls::{Application, Window};
+    use ferroui_controls_color_picker::ColorView;
+
+    let _app = start_catalog_application();
+    let xaml = format!(
+        "<Styles {XMLNS}><StyleInclude Source='ferres://FerroUI.Controls.ColorPicker/Themes/Simple/Simple.xaml' /></Styles>"
+    );
+    let styles = match try_load_text(&xaml, None, None) {
+        Ok(styles) => from_markup_value::<ferroui_base::Ref<Styles>>(&Some(styles)).expect("a Styles"),
+        Err(error) => panic!("{}", describe(&error)),
+    };
+    let style: Rc<dyn IStyle> = styles.into();
+    Application::current().expect("the application").styles().add(style);
+
+    let page = crate::pages::ColorPickerPage::new();
+    let window = Window::new();
+    window.set_content(Some(Control::boxed(&page)));
+    window.show();
+
+    let mut pending = vec![page.upcast::<ferroui_base::Visual>()];
+    let mut color_views = Vec::new();
+    while let Some(visual) = pending.pop() {
+        if let Some(color_view) = visual.cast::<ColorView>() {
+            color_views.push(color_view);
+        }
+        pending.extend(visual.visual_children().snapshot().iter().cloned());
     }
+    // The ColorView and the three ColorPickers of the document, and the one the class adds.
+    assert_eq!(5, color_views.len());
+    assert!(color_views.iter().all(|view| view.template().is_some() && view.visual_children_count() == 1));
 }
 
 /// The table of the elements removed from `MainWindow.xaml` matches the

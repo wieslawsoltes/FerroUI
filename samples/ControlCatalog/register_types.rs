@@ -68,6 +68,7 @@ pub fn register_types() {
     ONCE.call_once(|| {
         ferroui_themes_simple::register_types();
         ferroui_themes_fluent::register_types();
+        ferroui_controls_color_picker::register_types();
         TypeInfo::register_namespaces(NAMESPACES);
         for type_ in types() {
             TypeInfo::register(type_);

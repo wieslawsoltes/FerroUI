@@ -38,6 +38,17 @@ pub fn start_catalog_application() -> UnitTestApplicationScope {
 /// [`start_catalog_application`] with another asset loader than the
 /// standard one.
 pub fn start_catalog_application_with(asset_loader: Option<Rc<dyn IAssetLoader>>) -> UnitTestApplicationScope {
+    let scope = start_catalog_services(asset_loader);
+    FerroRuntimeXamlLoader::register();
+    merge_custom_themes();
+    scope
+}
+
+/// Starts the unit test application of [`start_catalog_application_with`]
+/// without registering the run-time loader and without the resources of the
+/// application, as the application of the sample starts before it loads
+/// `App.xaml`.
+pub fn start_catalog_services(asset_loader: Option<Rc<dyn IAssetLoader>>) -> UnitTestApplicationScope {
     register_types();
     let mut services = TestServices::styled_window()
         .with_render_interface(Rc::new(ferroui_skia::PlatformRenderInterface::new(None, None)))
@@ -48,10 +59,7 @@ pub fn start_catalog_application_with(asset_loader: Option<Rc<dyn IAssetLoader>>
     if let Some(asset_loader) = asset_loader {
         services = services.with_asset_loader(asset_loader);
     }
-    let scope = UnitTestApplication::start(services);
-    FerroRuntimeXamlLoader::register();
-    merge_custom_themes();
-    scope
+    UnitTestApplication::start(services)
 }
 
 /// Starts the application of [`start_catalog_application`] under the Fluent

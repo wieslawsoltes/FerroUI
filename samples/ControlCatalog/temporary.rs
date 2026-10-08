@@ -2,17 +2,13 @@
 //! shell do not load. Nothing here is a port; every item names what it
 //! waits for and goes away with it.
 //!
-//! - [`load_app_document_subset`]: `App.xaml` without the elements that do
-//!   not load yet ([`APP_DOCUMENT_REMOVALS`]), used while `App.xaml` is
-//!   listed in `excluded.txt`.
-//! - [`load_main_window_subset`]: the same for `MainWindow.xaml`.
+//! - [`load_main_window_subset`]: `MainWindow.xaml` without the elements
+//!   that do not load yet ([`MAIN_WINDOW_REMOVALS`]).
 
-use crate::app::App;
-use crate::markup::try_load_text_group;
 use ferroui_base::BoxedValue;
 use ferroui_markup_xaml::XamlLoadException;
 
-/// An element of `App.xaml` that is removed from the subset that loads:
+/// An element of a document that is removed from the subset that loads:
 /// what it waits for, and the text from `start` up to and including `end`
 /// (each must occur exactly as written; whole lines are removed).
 pub struct DocumentRemoval {
@@ -23,23 +19,6 @@ pub struct DocumentRemoval {
     /// The last text of the element.
     pub end: &'static str,
 }
-
-/// The elements of `App.xaml` that do not load yet.
-pub const APP_DOCUMENT_REMOVALS: &[DocumentRemoval] = &[
-    DocumentRemoval {
-        waits_for: "missing: the assembly FerroUI.Controls.ColorPicker (its Fluent styles)",
-        start: "<StyleInclude x:Key=\"ColorPickerFluent\"",
-        end: "/>",
-    },
-    DocumentRemoval {
-        waits_for: "missing: the assembly FerroUI.Controls.ColorPicker (its Simple styles)",
-        start: "<StyleInclude x:Key=\"ColorPickerSimple\"",
-        end: "/>",
-    },
-];
-
-/// The rooted asset path of the dictionary `App.xaml` merges.
-pub const CUSTOM_THEMES_PATH: &str = "/CustomThemes.xaml";
 
 /// `xaml` without the elements of `removals`.
 ///
@@ -60,16 +39,6 @@ pub fn remove_elements(xaml: &str, removals: &[DocumentRemoval]) -> String {
         text.replace_range(line_start..line_end, "");
     }
     text
-}
-
-/// Populates the application `root` from the subset of `App.xaml` that
-/// loads, with the dictionary it includes.
-pub fn load_app_document_subset(root: BoxedValue) -> Result<(), XamlLoadException> {
-    let content = crate::assets::asset(App::DOCUMENT_PATH).expect("App.xaml is embedded");
-    let xaml = std::str::from_utf8(content).expect("App.xaml is UTF-8");
-    let subset = remove_elements(xaml, APP_DOCUMENT_REMOVALS);
-    let custom_themes = crate::markup::embedded_text(CUSTOM_THEMES_PATH)?;
-    try_load_text_group(&subset, App::DOCUMENT_PATH, Some(root), &[(CUSTOM_THEMES_PATH, custom_themes)]).map(|_| ())
 }
 
 /// The elements of `MainWindow.xaml` that do not load yet.
