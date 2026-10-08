@@ -96,25 +96,32 @@ Regenerating output:
 
 ### 3. Core port: the remaining upstream suites
 
-Each suite is an exact port under upstream's names, with framework fixes where a test exposes a difference. The counts are the upstream tests missing by name on `a382956`, from the name inventory of the core-port worker. In order:
+Each suite is an exact port under upstream's names, with framework fixes where a test exposes a difference.
 
-1. `Media/ColorTests.cs`: 18 of 66 missing.
-   - Today the port has an inline `mod tests` in `src/FerroUI.Base/media/color.rs` (64 tests, some under names upstream does not use) and 2 tests each in `hsl_color.rs` and `hsv_color.rs`.
-   - Write an exact `media/color_tests.rs` and remove the inline duplicates.
-   - Fix any Color, HSL or HSV divergence the new tests expose.
-   - No blocker is known.
-2. `Input/InputElement_Focus.cs`: 21 of 46 missing. It is large (1,747 lines). Expect gaps in the focus manager.
-3. `Media/GlyphTypefaceTests.cs`: 26 of 42 missing. It may need font-table test assets.
-4. `Data/Core/Parsers/BindingExpressionVisitorTests.cs`: all 36 missing. Upstream walks LINQ expression trees, so this needs a design decision first: what in the Rust compiled-binding path parser stands for them. Expect a deviation entry, not a straight port.
+**Done in #51 (`core-port-12`):**
+- `Media/ColorTests.cs`: 65 of 66 in `media/color_tests.rs` (the null-argument test has no counterpart); `Color`, `HslColor` and `HsvColor` take upstream's nullable format and ignored format provider.
+- `Input/InputElement_Focus.cs`: 46 of 46 in `input_element_focus_tests.rs` of `ferroui-controls`; the controls' test root is a focus scope, as upstream's.
+- `Media/GlyphTypefaceTests.cs`: 41 of 41 on font files (`src/FerroUI.Base/test_assets/fonts/`, licences in `src/FerroUI.Base/NOTICE.md`); two of upstream's fonts are replaced by fonts derived from WenQuanYi Micro Hei (`DEVIATIONS.md`, Tests).
+- The duplicated ContentPresenter text tests are gone; `FuncDataTemplate` matches as `TypeUtilities.CanCast<T>`; `LayoutManager` verifies access to the UI thread.
+- `Data/Core/Parsers/BindingExpressionVisitorTests.cs`: not ported; design note in `xaml.md` 3.6.1, decision below.
 
-Also:
+**Count on 2026-10-08.** Upstream test methods (`[Fact]`/`[Theory]`) of `tests/Avalonia.Base.UnitTests` and `tests/Avalonia.Controls.UnitTests` at the tracked commit, matched by name (snake case, underscores and case ignored, "Avalonia" read as "Ferro") against every function under `src/`. A test renamed in the port counts as missing, a name found anywhere counts as present.
 
-- **Blocked:** `Automation/ColorSpectrumAutomationPeerTests.cs` (6 tests). `ColorSpectrum` and its peer are not ported, because the color picker library has no crate yet (`ColorSpectrum.cs` alone is about 1,740 lines).
-- `deferred_text_tests.rs` and `presenters/content_presenter_text_tests.rs` duplicate ContentPresenter tests that #40 ported exactly. Remove the duplicates.
-- **Templates:** the gaps against `TypeUtilities.CanCast<T>` that #40 recorded in `DEVIATIONS.md` (null data and reference types, `int` against `int?`).
-- **Layout** rows of `DEVIATIONS.md`:
-  - `LayoutManager` does not call `Dispatcher.VerifyAccess()`. It can be ported now.
-  - The layout clock is in milliseconds.
+- `Avalonia.Base.UnitTests`: 2,357 tests, 394 missing in 92 files.
+- `Avalonia.Controls.UnitTests`: 3,060 tests, 105 missing in 29 files.
+
+**Test gaps by area** (missing / tests of the file). The order of work is the owner's queue in "Core first" below; each list here is the test side of the batch with the same area (font tables and `Media` go with batch 5, input and styling with batch 6, controls with batch 7).
+
+1. **Font tables** (Base, about 90). The real font files of #51 make them portable now. `Media/Fonts/Tables/HeadTableTests.cs` 13/13, `MaxpTableTests.cs` 11/11, `OS2TableTests.cs` 10/10, `LocaTableTests.cs` 6/8, `GlyfTableTests.cs` 1/13, `DecyclerTests.cs` 1/17; `Media/GlyphDrawingOptionsTests.cs` 14/14; `Media/FontManagerTryGetFontCollectionTests.cs` 11/17; `Media/Fonts/TestInfrastructure/SyntheticFontTests.cs` 5/11; `Media/Fonts/UnmanagedFontMemoryTests.cs` 3/4, `Bcp47ScriptResolverTests.cs` 3/4, `FontCollectionKeyTests.cs` 2/8, `FontFamilyLoaderTests.cs` 2/5, `FamilyNameCollectionTests.cs` 1/2, `FontFallbackScriptHintsTests.cs` 1/10, `FontFamilyKeyTests.cs` 1/3; `Media/GlyphRunTests.cs` 5/7; `Media/NormalizedVariationPositionTests.cs` 6/30; `Media/FontVariationSettingsTests.cs` 2/11; `Media/FontManagerTests.cs` 1/6. Upstream loads more font files from `tests/Avalonia.RenderTests/Assets`; check each licence before adding one, as #51 did.
+2. **Property system** (Base, about 60). `AvaloniaObjectTests_Binding.cs` 13/75, `_Threading.cs` 10/10, `_SetCurrentValue.cs` 5/23, `_Metadata.cs` 4/4, `_SetValue.cs` 4/28, `_MultiBinding.cs` 3/7, `_Coercion.cs` 1/19, `_Direct.cs` 1/42; `AvaloniaPropertyTests.cs` 1/14; `Utilities/AvaloniaPropertyDictionaryTests.cs` 19/19.
+3. **Styling** (Base, about 50). `Styling/SelectorTests_Multiple.cs` 9/11, `_Template.cs` 6/8, `_Or.cs` 4/9, `_Name.cs` 3/5, `_PropertyEquals.cs` 3/6, `_Class.cs` 2/9, `_NthChild.cs` 2/11, `_NthLastChild.cs` 2/11, `_OfType.cs` 2/4, `_Child.cs` 1/5, `_Descendent.cs` 1/6, `_Not.cs` 1/8; `StyleTests.cs` 6/37, `StylesTests.cs` 5/7, `SetterTests.cs` 2/18, `ContainerTests.cs` 1/5, `ResourceDictionaryTests.cs` 1/16; `ClassBindingManagerTests.cs` 2/2.
+4. **Input** (Base, about 45). `Input/AccessKeyHandlerTests.cs` 7/14, `GesturesTests.cs` 7/22, `KeyboardNavigationTests_XY.cs` 5/13, `PointerOverTests.cs` 5/12, `SwipeGestureRecognizerTests.cs` 5/6, `DataFormatTests.cs` 4/12, `KeyboardNavigationTests_Tab.cs` 3/36, `TouchDeviceTests.cs` 3/7, `MouseDeviceTests.cs` 2/8, `PlatformDataTransferItemTests.cs` 2/4; `Interactivity/RoutedEventRegistryTests.cs` 3/4; `FlowDirectionTests.cs` 3/3.
+5. **Utilities, collections, data, animation** (Base, about 70). `Utilities/ObjectPoolTests.cs` 13/13, `SafeEnumerableAvaloniaListTests.cs` 10/10, `SingleOrQueueTests.cs` 4/4, `StringSplitterTests.cs` 4/4, `InlineDictionaryTests.cs` 3/3, `AvaloniaResourcesIndexTests.cs` 2/2; `Collections/AvaloniaListTests.cs` 4/31, `AvaloniaDictionaryTests.cs` 1/13; `Data/Core/BindingExpressionTests.DataValidation.cs` 3/22, `.Property.cs` 2/14, `.SetValue.cs` 1/12; `Data/DefaultValueConverterTests.cs` 2/16, `ReflectionClrPropertyInfoTests.cs` 1/1; `Animation/` (`BrushTransitionTests.cs` 2/2, `KeySplineTests.cs` 2/10, `SpringTests.cs` 2/4, `StyleAnimationTests.cs` 2/2, `AnimationIterationTests.cs` 1/27); `DispatcherTests.cs` 2/21, `Logging/LoggingTests.cs` 2/2 and the files with one or two missing tests (`AssetLoaderTests.cs`, `Media/PathMarkupParserTests.cs`, `Media/PenTests.cs`, `Media/RelativeTransformBrushTests.cs` 2/8, `Media/TextFormatting/FormattingBufferHelperTests.cs` 2/8, `Platform/SlicedStreamTests.cs`, `Rendering/DrawingImagePropagationTests.cs`). `Media/ColorTests.cs` counts 1 missing: the null-argument test, which has no counterpart.
+6. **Controls** (about 100). `GridTests.cs` 32/81 (the shared-size tests), `DesignTests.cs` 9/9, `NavigationEventArgsTests.cs` 9/10, `HeadlessProbeTests.cs` 7/7, `Utils/SafeEnumerableHashSetTests.cs` 5/5, `NavigationPageTests.cs` 4/161, `ConnectedAnimationTests.cs` 3/57, and one or two in each of `BorderTests.cs`, `GridLengthTests.cs`, `GridSplitterTests.cs`, `Mixins/SelectableMixinTests.cs`, `Primitives/TemplatedControlTests.cs`, `Primitives/UniformGridTests.cs`, `TextBlockTests.cs`, `TextBoxTests.cs`, `ViewboxTests.cs`, `ContentControlTests.cs`, `InputElementGestureTests.cs`, `ItemsSourceViewTests.cs`, `ListBoxTests.cs`, `LoadedTests.cs`, `PanelTests.cs`, `Platform/ScreensTests.cs`, `ScrollViewerTests.cs`, `Selection/InternalSelectionModelTests.cs`, `TabControlTests.cs`, `Utils/AncestorFinderTests.cs`, `Utils/BindingEvaluatorTests.cs`.
+
+Not in the batches: `SourceGenerators/CrossThreadProxyGeneratorTests.cs` (12, a C# source generator), `Media/TextFormatting/HarfbuzzTextShaperTests.cs` (6, belongs to the HarfBuzz crate), `Data/Core/Plugins/DataAnnotationsValidationPluginTests.cs` (5, `System.ComponentModel.DataAnnotations` has no counterpart), `BindingExpressionVisitorTests.cs` (36, decision below) and `Automation/ColorSpectrumAutomationPeerTests.cs` (6, with the colour picker crate of branch `color-picker`). Some of the counted files may hold tests that the port has under other names; check each file before porting.
+
+Also: the layout clock is in milliseconds (`DEVIATIONS.md`, Layout). Found while porting the colour tests: the composite formatting of bindings (`data/converters/composite_format.rs`) does not format `Color`, `HslColor` and `HsvColor` with their format strings, as `string.Format` does for an `IFormattable` upstream (`{Binding Color, StringFormat={}{0:X}}`).
 
 ### 4. Remaining compositor pieces
 
@@ -127,6 +134,7 @@ Also:
 
 ## Decisions waiting for the owner
 
+- **Bindings from expression trees.** `CompiledBinding.Create<TIn, TOut>(Expression)` and `BindingExpressionVisitor` (36 tests) have no counterpart in the port. `xaml.md` 3.6.1 compares three options: no counterpart (recommended; the builder chain stands for the expression tree), a `binding_path!` macro, or a run-time expression model. The note maps each of the 36 tests to its counterpart: 27 have one in `CompiledBindingPathBuilder`.
 - **CI speed-up.** The earlier proposal for a faster CI run is still open.
 - **Stale branches.** Branches of merged pull requests can be deleted by hand.
 
