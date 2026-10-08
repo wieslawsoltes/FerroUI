@@ -881,6 +881,34 @@ fn the_well_known_members_work_through_metadata() {
     assert_eq!(unbox::<i32>(&(dictionary.find_property("Count").unwrap().get.unwrap())(&[instance]).unwrap()), 2);
 }
 
+#[test]
+fn a_data_validation_exception_is_an_exception_with_its_error_data() {
+    use crate::data::{BindingError, DataValidationException};
+
+    crate::register_types();
+    let type_ = MarkupType::find("FerroUI.Data", "DataValidationException").unwrap();
+    assert_eq!((type_.base.unwrap())(), ValueType::of::<BindingError>());
+    let constructor = type_.constructors.iter().find(|c| c.parameters.len() == 1).unwrap();
+    assert_eq!((constructor.parameters[0])(), ValueType::of::<Option<BoxedValue>>());
+
+    // `new DataValidationException(errorData)`, as `x:Arguments` passes the error data.
+    let exception = (constructor.invoke)(&[text("Enter a valid email address.")]).unwrap();
+    let data = (type_.find_property("ErrorData").unwrap().get.unwrap())(&[exception.clone()]).unwrap();
+    assert_eq!(unbox::<String>(&data), "Enter a valid email address.");
+
+    // It is an exception: the members of the base type take it, and a member that takes an
+    // exception receives the error that wraps it.
+    let message = MarkupType::find("System", "Exception").unwrap().find_property("Message").unwrap().get.unwrap();
+    assert_eq!(unbox::<String>(&message(&[exception.clone()]).unwrap()), "Enter a valid email address.");
+    let error = unbox::<Option<BindingError>>(&exception).expect("an error");
+    let wrapped = error.inner().downcast_ref::<DataValidationException>().expect("the exception");
+    assert!(wrapped.error_data().is_some_and(|data| data.downcast_ref::<String>().is_some()));
+
+    // Without error data the message is empty.
+    let empty = (constructor.invoke)(&[None]).unwrap();
+    assert_eq!(unbox::<String>(&message(&[empty]).unwrap()), "");
+}
+
 // Styling, bindings and the members that return handles.
 
 #[test]

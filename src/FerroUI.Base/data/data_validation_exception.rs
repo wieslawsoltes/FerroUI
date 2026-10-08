@@ -26,6 +26,14 @@ impl DataValidationException {
     }
 }
 
+/// Two errors are equal if they carry the same error data, so that the error
+/// can be held in an untyped value.
+impl PartialEq for DataValidationException {
+    fn eq(&self, other: &Self) -> bool {
+        ValueTypes::identity_equals(self.error_data.as_ref(), other.error_data.as_ref())
+    }
+}
+
 impl fmt::Debug for DataValidationException {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "DataValidationException({})", self.message)
