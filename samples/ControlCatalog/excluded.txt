@@ -45,7 +45,6 @@ Pages/WindowCustomizationsPage.xaml | missing: Win32Properties (MainWindowViewMo
 # --- the demo pages and the page sample directories ---
 Pages/CarouselPage/CareCompanionAppPage.xaml | pending: the class of the document is not ported yet
 Pages/CarouselPage/CarouselPagePerformancePage.xaml | code-behind: NavigationPerformanceMonitorHelper (measures the managed heap: GC.GetTotalMemory, GC.Collect)
-Pages/ConnectedAnimationDemoPage.xaml | pending: the class of the document is not ported yet
 Pages/DrawerPage/DrawerPagePerformancePage.xaml | code-behind: NavigationPerformanceMonitorHelper (measures the managed heap: GC.GetTotalMemory, GC.Collect)
 Pages/NavigationPage/FerroFlixAppPage.xaml | pending: the class of the document is not ported yet
 Pages/NavigationPage/LAvenirAppPage.xaml | pending: the class of the document is not ported yet

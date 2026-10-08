@@ -55,7 +55,6 @@ One gap of the framework blocks no document of the list: C101, a reflection bind
 These documents load without their class (the survey test, `cargo test -p control-catalog -- --ignored survey`, with `CATALOG_SURVEY` set); their code-behind is sample work, not a framework gap:
 
 - `Pages/CarouselPage/CareCompanionAppPage.xaml`
-- `Pages/ConnectedAnimationDemoPage.xaml`
 - `Pages/NavigationPage/FerroFlixAppPage.xaml`
 - `Pages/NavigationPage/LAvenirAppPage.xaml`
 - `Pages/NavigationPage/NavigationPageCurvedHeaderPage.xaml`
