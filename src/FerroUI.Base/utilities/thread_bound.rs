@@ -43,6 +43,18 @@ impl<T> ThreadBound<T> {
         assert!(self.is_on_thread(), "the value is bound to the thread that created it");
         &self.value
     }
+
+    /// Takes the value out.
+    ///
+    /// # Panics
+    ///
+    /// On a thread other than the one the value was created on.
+    pub fn into_inner(self) -> T {
+        assert!(self.is_on_thread(), "the value is bound to the thread that created it");
+        let mut this = ManuallyDrop::new(self);
+        // SAFETY: `this` is not dropped, so the value is taken exactly once.
+        unsafe { ManuallyDrop::take(&mut this.value) }
+    }
 }
 
 impl<T> Drop for ThreadBound<T> {

@@ -4,6 +4,7 @@ use crate::rendering::composition::{CompositionImportedGpuImage, CompositionImpo
 use crate::utilities::{RefCountable, RefCounted};
 use std::any::Any;
 use std::cell::{Cell, RefCell};
+use std::sync::Arc;
 use std::rc::{Rc, Weak};
 
 /// The error of an update that cannot proceed (`InvalidOperationException`).
@@ -18,10 +19,10 @@ impl std::fmt::Display for DrawingSurfaceUpdateError {
 
 impl std::error::Error for DrawingSurfaceUpdateError {}
 
-type UpdateResult = Result<(), Rc<dyn std::error::Error>>;
+type UpdateResult = Result<(), crate::rendering::composition::ServerJobError>;
 
-fn context_lost() -> Rc<dyn std::error::Error> {
-    Rc::new(PlatformGraphicsContextLostException)
+fn context_lost() -> crate::rendering::composition::ServerJobError {
+    Arc::new(PlatformGraphicsContextLostException)
 }
 
 /// The server-side counterpart of a
@@ -78,7 +79,7 @@ impl ServerCompositionDrawingSurface {
         // This should never happen, but check for it anyway to avoid a deadlock
         let import_completed = super::super::ICompositionGpuImportedObject::import_completed(image);
         if !import_completed.is_completed() {
-            return Err(Rc::new(DrawingSurfaceUpdateError("The import operation is not completed yet")));
+            return Err(std::sync::Arc::new(DrawingSurfaceUpdateError("The import operation is not completed yet")));
         }
 
         // Rethrow the import here exception

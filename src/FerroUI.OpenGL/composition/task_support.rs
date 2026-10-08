@@ -32,14 +32,14 @@ pub(crate) struct ServerJobTaskFuture<T> {
     registered: bool,
 }
 
-impl<T> ServerJobTaskFuture<T> {
+impl<T: Send + 'static> ServerJobTaskFuture<T> {
     pub(crate) fn new(task: ServerJobTask<T>) -> Self {
         Self { task, registered: false }
     }
 }
 
-impl<T: 'static> Future for ServerJobTaskFuture<T> {
-    type Output = Result<(), Rc<dyn Error>>;
+impl<T: Send + 'static> Future for ServerJobTaskFuture<T> {
+    type Output = Result<(), ferroui_base::rendering::composition::ServerJobError>;
 
     fn poll(mut self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Self::Output> {
         if self.task.is_completed() {

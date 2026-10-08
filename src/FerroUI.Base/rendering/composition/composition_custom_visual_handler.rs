@@ -28,7 +28,7 @@ pub trait ICompositionCustomVisualHandler: 'static {
     fn handler_base(&self) -> &CompositionCustomVisualHandler;
 
     /// A message sent with `CompositionCustomVisual::send_handler_message`.
-    fn on_message(&self, _message: Rc<dyn Any>) {}
+    fn on_message(&self, _message: std::sync::Arc<dyn Any + Send + Sync>) {}
 
     fn on_animation_frame_update(&self) {}
 

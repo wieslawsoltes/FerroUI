@@ -156,10 +156,15 @@ impl CompositionGpuImportedObjectBase {
     fn start_import(
         &self,
         handle: Option<Rc<dyn IExternalObjectsWrappedGpuHandle>>,
-        import: impl FnOnce() -> Result<(), Rc<dyn std::error::Error>> + 'static,
+        import: impl FnOnce() -> Result<(), crate::rendering::composition::ServerJobError> + 'static,
     ) {
+        // The import runs on the render thread with a handle made on this
+        // one: bound to this thread until the server has its own (see the
+        // drawing surface; stage R5).
+        let bound = crate::utilities::ThreadBound::new((handle, import));
         let task = self.compositor.invoke_server_job_async(
             move |_| {
+                let (handle, import) = bound.into_inner();
                 let result = import();
                 if let Some(handle) = handle {
                     handle.dispose();
@@ -199,10 +204,11 @@ impl CompositionGpuImportedObjectBase {
 
     fn dispose_async(&self, dispose: impl FnOnce() + 'static) -> ServerJobTask<()> {
         let import_completed = self.import_completed();
+        let dispose = crate::utilities::ThreadBound::new(dispose);
         self.compositor.invoke_server_job_async(
             move |_| {
                 if import_completed.is_completed_successfully() {
-                    dispose();
+                    (dispose.into_inner())();
                 }
                 Ok(())
             },
@@ -249,13 +255,13 @@ impl CompositionImportedGpuImage {
         self.this.upgrade().expect("the image is alive while it is used")
     }
 
-    fn import(&self) -> Result<(), Rc<dyn std::error::Error>> {
+    fn import(&self) -> Result<(), crate::rendering::composition::ServerJobError> {
         let server = self.base.compositor.server().clone();
         let current = server.render_interface().ensure_current();
         let result = (|| {
             // The original context was lost and the new one might have different capabilities
             if !self.base.is_current_context() {
-                return Err(Rc::new(PlatformGraphicsContextLostException) as Rc<dyn std::error::Error>);
+                return Err(std::sync::Arc::new(PlatformGraphicsContextLostException) as crate::rendering::composition::ServerJobError);
             }
             if let Some(importer) = self.importer.borrow_mut().take() {
                 *self.image.borrow_mut() = Some(importer());
