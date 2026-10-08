@@ -286,6 +286,16 @@ With the switch, on the development Mac: `platform_window` (software: render tar
 
 Checked since: a capture of the `themed_window` window is byte for byte the same in both modes, and the ControlCatalog selects every one of its 59 pages in the render-thread mode (`FERROUI_SMOKE_PAGES=150`) without a panic, as in the dispatcher-thread mode.
 
+Measured, one release build run in both modes (the switch is read at start-up), launched alternately, on the development Mac under load from other work (load average 35 to 42, so only the comparison counts):
+
+| Measure | Dispatcher-thread mode | Render-thread mode |
+|---|---|---|
+| `themed_window`, process start to `Window opened`, median of 15 (range) | 150 ms (147 to 165) | 155 ms (147 to 188) |
+| `control-catalog-desktop`, process start to `App activated`, median of 10 (range) | 385 ms (379 to 398) | 379 ms (375 to 389) |
+| catalog, 150 pages in 20 s, user + system CPU of three runs | 2.76, 2.95, 3.23 s | 2.73, 2.72, 2.80 s |
+
+Start-up is the same in both modes (the first frame is a frame of the UI thread in either). The total CPU of the page run is the same or slightly lower in the render-thread mode. What the mode is for, the UI thread being free while a frame is drawn, is not what these numbers show: that needs a frame time and input latency measurement during scrolling.
+
 Not done, and needed before the mode can be the default:
 
 - Interaction under load, by hand: live resize, scrolling in the catalog, theme switch, popups, closing a window while it renders.
