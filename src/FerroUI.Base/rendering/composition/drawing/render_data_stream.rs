@@ -266,13 +266,19 @@ impl RenderDataStream {
         for resource in self.resources.iter() {
             match resource {
                 RenderDataResource::ClientPen(_) | RenderDataResource::NotSent => writer.write(TAG_NOT_SENT),
+                // A brush or a pen sent by value is an immutable one: what
+                // crosses to the render thread is its shared form.
                 RenderDataResource::Brush(v) => {
                     writer.write(TAG_BRUSH);
-                    writer.write_object(BatchObject::value(v.clone()));
+                    let shared = crate::media::shared_brush_of(&**v)
+                        .unwrap_or_else(|| panic!("The brush is not compatible with composition"));
+                    writer.write_object(BatchObject::value(shared));
                 }
                 RenderDataResource::Pen(v) => {
                     writer.write(TAG_PEN);
-                    writer.write_object(BatchObject::value(v.clone()));
+                    let shared = crate::media::shared_pen_of(&**v)
+                        .unwrap_or_else(|| panic!("The pen is not compatible with composition"));
+                    writer.write_object(BatchObject::value(shared));
                 }
                 RenderDataResource::GeometryImpl(v) => {
                     writer.write(TAG_GEOMETRY_IMPL);
@@ -345,8 +351,8 @@ impl RenderDataStream {
         for _ in 0..resource_count {
             let resource = match reader.read::<u8>() {
                 TAG_NOT_SENT => RenderDataResource::NotSent,
-                TAG_BRUSH => RenderDataResource::Brush(value::<Rc<dyn IBrush>>(reader)),
-                TAG_PEN => RenderDataResource::Pen(value::<Rc<dyn IPen>>(reader)),
+                TAG_BRUSH => RenderDataResource::Brush(Rc::new(value::<crate::media::SharedBrush>(reader))),
+                TAG_PEN => RenderDataResource::Pen(Rc::new(value::<crate::media::SharedPen>(reader))),
                 TAG_GEOMETRY_IMPL => RenderDataResource::GeometryImpl(value(reader)),
                 TAG_GLYPH_RUN => RenderDataResource::GlyphRun(value(reader)),
                 TAG_BITMAP => RenderDataResource::Bitmap(value(reader)),

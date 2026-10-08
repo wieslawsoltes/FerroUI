@@ -47,11 +47,19 @@ fn round_trip_preserves_resource_references() {
 
     let result = round_trip(&source);
 
-    // `DrawRectangle(brush, null, ..)` once, with the very brush.
+    // `DrawRectangle(brush, null, ..)` once, with the very brush: what is
+    // received is the shared form of the brush, which the brush keeps, so
+    // its identity is the same on every round trip.
     assert_eq!(replay(&result), ["DrawRectangle Red none 0, 0, 10, 10 shadows=0"]);
-    match result.get_resource(0) {
-        Some(RenderDataResource::Brush(replayed)) => assert!(Rc::ptr_eq(replayed, &brush)),
-        _ => panic!("the brush did not survive the round trip"),
+    let shared = brush.to_shared().expect("an immutable brush has a shared form");
+    for result in [&result, &round_trip(&source)] {
+        match result.get_resource(0) {
+            Some(RenderDataResource::Brush(replayed)) => {
+                assert_eq!(IBrush::reference_id(&shared), replayed.reference_id());
+                assert!(replayed.equals(&shared));
+            }
+            _ => panic!("the brush did not survive the round trip"),
+        }
     }
 }
 
