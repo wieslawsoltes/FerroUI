@@ -22,6 +22,10 @@
 //! abstract members: a call is dispatched to the member of the same name the
 //! run-time type of the instance declares. `System.String` and arrays have
 //! `Length`.
+//!
+//! `List<T>` of an element type no metadata registers an instantiation for
+//! and `ArrayList` are the lists markup creates: their members are implemented
+//! by the type system over a run-time list ([`RuntimeList`]).
 
 mod core_types;
 mod list_converter;
@@ -40,7 +44,7 @@ pub use runtime_type_system::{
 pub use list_converter::RuntimeListConverter;
 pub use values::{
     box_object, normalize_object, register_bindable_array, to_untyped, DeferredContentFactory, ITypeDescriptorContext,
-    RuntimeArray, RuntimeTypeValue,
+    RuntimeArray, RuntimeList, RuntimeTypeValue,
 };
 
 /// Converts an untyped value to exactly the Rust type `target` with the

@@ -19,26 +19,22 @@ Pages/ContentPage/ContentPagePerformancePage.xaml | code-behind: NavigationPerfo
 Pages/TextBox/TextBoxValidationPage.xaml | gap C102: DataValidationException is not declared for markup
 
 # --- ViewModels, Models, Views and the pages of the view models (group B) ---
-Pages/ComboBoxPage.xaml | gap C201: System.Collections.ArrayList is not a markup type; gap C208: FontFamily.Name is not declared for markup
+Pages/ComboBoxPage.xaml | gap C208: FontFamily.Name is not declared for markup
 Pages/ContextFlyoutPage.xaml | gap C203: a handler with plain event arguments is not accepted for PopupFlyoutBase.Opening; gap C209: TextBox.Cut, Copy, Paste and Clear are not declared as methods for markup
 Pages/ListBoxPage.xaml | gap C207: a compiled binding does not stream (`^`) an ObservableValue
 Pages/PlatformInfoPage.xaml | gap C202: OnPlatform as an element with On children does not load
 
 # --- the other pages directly under Pages/ (group C) ---
 Pages/AutoCompleteBoxPage.xaml | code-behind not ported (the document also needs gap C310)
-Pages/DialogsPage.xaml | gap C305: System.Collections.Generic.List`1 with x:TypeArguments is not a type of the markup type system
 Pages/FlyoutsPage.xaml | gap C301: a method name is not accepted for a property of a delegate type (CustomPopupPlacementCallback)
-Pages/FocusPage.xaml | gap C305: System.Collections.Generic.List`1 with x:TypeArguments is not a type of the markup type system
 Pages/NumericUpDownPage.xaml | code-behind: CultureInfo.GetCultures(CultureTypes.SpecificCultures)
 Pages/OpenGl/OpenGlInteropPage.xaml | gap C312: the event FerroObject.PropertyChanged is not declared for markup (PropertyChanged="KnobsPropertyChanged" on GlPageKnobs)
 Pages/OpenGl/OpenGlLeasePage.xaml | gap C312: the event FerroObject.PropertyChanged is not declared for markup (PropertyChanged="KnobsPropertyChanged" on GlPageKnobs); code-behind: OpenGlFbo (Pages/OpenGl/OpenGlFbo.cs, not ported) wraps an OpenGL texture in a Ganesh surface (GRContext, GRBackendTexture, GRGlTextureInfo), and the Skia backend has Ganesh on OpenGL in browser builds only
 Pages/SliderPage.xaml | gap C306: Slider.Ticks is not converted from text
 Pages/ToolTipPage.xaml | gap C301: a method name is not accepted for a property of a delegate type (CustomPopupPlacementCallback)
-Pages/ViewboxPage.xaml | gap C309: System.Collections.ArrayList is not a type of the markup type system
 
 # --- the demo pages and the page sample directories ---
 Pages/CarouselPage/CarouselPagePerformancePage.xaml | code-behind: NavigationPerformanceMonitorHelper (measures the managed heap: GC.GetTotalMemory, GC.Collect)
 Pages/DrawerPage/DrawerPagePerformancePage.xaml | code-behind: NavigationPerformanceMonitorHelper (measures the managed heap: GC.GetTotalMemory, GC.Collect)
 Pages/NavigationPage/NavigationPagePerformancePage.xaml | code-behind: NavigationPerformanceMonitorHelper (measures the managed heap: GC.GetTotalMemory, GC.Collect)
-Pages/RefreshContainerPage.xaml | gap C305: a System.Collections.Generic.List created in markup is not accepted by ItemsControl.ItemsSource
 Pages/TabbedPage/TabbedPagePerformancePage.xaml | code-behind: NavigationPerformanceMonitorHelper (measures the managed heap: GC.GetTotalMemory, GC.Collect)

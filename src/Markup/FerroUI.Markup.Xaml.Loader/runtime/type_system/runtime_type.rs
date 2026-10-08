@@ -24,7 +24,7 @@ use xamlx::type_system::{
 };
 
 use super::runtime_type_system::RuntimeTypeSystem;
-use super::values::{normalize_object, RuntimeTypeValue, RuntimeArray};
+use super::values::{normalize_object, RuntimeArray, RuntimeList, RuntimeTypeValue};
 
 /// What kind of type a [`RuntimeType`] is.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
@@ -781,7 +781,8 @@ fn named(error: MarkupInvokeError, member: &str) -> MarkupInvokeError {
 }
 
 /// Converts the arguments that are not held in the Rust type the invoker
-/// declares: `System.Type` values. `None` if nothing needs converting.
+/// declares: `System.Type` values, arrays and lists created in markup. `None`
+/// if nothing needs converting.
 fn adapt_arguments(
     arguments: &[MarkupValue],
     handles: &[Option<ValueType>],
@@ -789,11 +790,16 @@ fn adapt_arguments(
 ) -> Result<Option<Vec<MarkupValue>>, MarkupInvokeError> {
     let type_value = TypeId::of::<RuntimeTypeValue>();
     let array = TypeId::of::<RuntimeArray>();
+    let list = TypeId::of::<RuntimeList>();
     let needs = |index: usize, value: &MarkupValue| -> bool {
         let Some(value) = value else { return false };
         let id = value.value_type_id();
         if index < offset {
             return false;
+        }
+        if id == list {
+            // A list is passed to a collection handle as the shared list of its items.
+            return matches!(handles.get(index - offset), Some(Some(handle)) if handle.id() != id && !handle.is_object());
         }
         if id != type_value && id != array {
             // An object passed to an untyped parameter is handed over in the
@@ -817,6 +823,13 @@ fn adapt_arguments(
         let (Some(value), Some(Some(handle))) = (value, handles.get(index - offset)) else { continue };
         if let Some(array) = value.downcast_ref::<RuntimeArray>() {
             adapted[index] = Some(array.to_declared(*handle).map_err(MarkupInvokeError::Failed)?);
+            continue;
+        }
+        if let Some(list) = value.downcast_ref::<RuntimeList>() {
+            // Without a registered cast the invoker reports the argument it cannot take.
+            if let Some(declared) = list.to_declared(*handle) {
+                adapted[index] = Some(declared);
+            }
             continue;
         }
         if let Some(object) = super::values::untyped_object_form(value) {
@@ -1337,6 +1350,11 @@ pub(crate) fn to_exact(value: &MarkupValue, target: ValueType, index: usize) -> 
     }
     if let Some(array) = value.as_ref().and_then(|v| v.downcast_ref::<RuntimeArray>()) {
         return array.to_declared(target).map_err(MarkupInvokeError::Failed);
+    }
+    // A list created in markup is passed to a collection handle as the shared list of its items.
+    let list = value.as_ref().and_then(|v| v.downcast_ref::<RuntimeList>());
+    if let Some(declared) = list.and_then(|list| list.to_declared(target)) {
+        return Ok(declared);
     }
     if target.is_object() {
         if let Some(object) = value.as_ref().and_then(super::values::untyped_object_form) {

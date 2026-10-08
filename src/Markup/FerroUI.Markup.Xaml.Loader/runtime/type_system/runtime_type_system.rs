@@ -158,7 +158,13 @@ impl RuntimeTypeSystem {
         let core = Rc::new(RuntimeAssembly {
             system: self.this.clone(),
             name: "System.Runtime".to_string(),
-            aliases: vec!["mscorlib", "netstandard", "System.Private.CoreLib"],
+            aliases: vec![
+                "mscorlib",
+                "netstandard",
+                "System.Private.CoreLib",
+                "System.Collections",
+                "System.Collections.NonGeneric",
+            ],
             crate_name: None,
             attributes: RefCell::new(Vec::new()),
         });
@@ -513,6 +519,31 @@ impl RuntimeTypeSystem {
         if let Some(found) = self.types.borrow().get(&key) {
             return Ok(found.clone());
         }
+        // The list of the runtime library is created by markup for every element type: an
+        // instantiation no metadata registers has the members of the run-time list.
+        if definition.key() == core_types::LIST_DEFINITION && arguments.len() == 1 {
+            let mut spec = RuntimeTypeSpec::new(
+                key,
+                &definition.namespace().unwrap_or_default(),
+                &definition.name(),
+                RuntimeTypeKind::Class,
+                RuntimeTypeOrigin::Synthetic,
+            );
+            spec.generic_definition = Some(definition.clone());
+            spec.generic_arguments = arguments.to_vec();
+            let system = self.this.clone();
+            let element_type = arguments[0].clone();
+            spec.init = Some(Box::new(move |type_: &Rc<RuntimeType>| {
+                let Some(system) = system.upgrade() else { return RuntimeMembers::default() };
+                let mut builder = MemberBuilder { system, type_: type_.clone(), members: RuntimeMembers::default(), projected: false };
+                core_types::list_members(&mut builder, Some(element_type));
+                builder.members
+            }));
+            let type_ = RuntimeType::create(&self.this, spec);
+            let assembly = definition.runtime_assembly().unwrap_or_else(|| self.core_assembly());
+            self.insert(&type_, &assembly);
+            return Ok(type_);
+        }
         if !self.instantiable.borrow().contains(definition.key()) {
             return Err(XamlError::type_system_exception(format!(
                 "The instantiation {}[{}] is not registered: the run-time type system only knows the instantiations of a generic type that declare markup metadata",
@@ -771,6 +802,17 @@ impl RuntimeTypeSystem {
         if let Some(array) = value.downcast_ref::<super::values::RuntimeArray>() {
             if let Ok(array_type) = array.element_type().make_array_type(1) {
                 return array_type;
+            }
+        }
+        if let Some(list) = value.downcast_ref::<super::values::RuntimeList>() {
+            let type_ = match list.element_type() {
+                Some(element_type) => self
+                    .find_type(core_types::LIST_DEFINITION)
+                    .and_then(|definition| definition.make_generic_type(std::slice::from_ref(element_type)).ok()),
+                None => self.find_type(core_types::ARRAY_LIST),
+            };
+            if let Some(type_) = type_ {
+                return type_;
             }
         }
         if let Some(found) = self.by_handle.borrow().get(&value.value_type_id()) {
