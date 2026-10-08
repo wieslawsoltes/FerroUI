@@ -62,23 +62,22 @@ impl ServerCompositionTarget {
     pub fn new(compositor: &Rc<ServerCompositor>, surfaces: RenderSurfaces, id: i64) -> Rc<ServerCompositionTarget> {
         let mut dirty_rects: Option<Rc<dyn IDirtyRectTracker>> = None;
         // Not the service locator: a target is created by the thread that
-        // applies the batch.
-        let platform_render = compositor.render_interface().platform_render_interface();
-        if let Some(platform_render) = platform_render {
+        // applies the batch. The render interface is lent for the call.
+        compositor.render_interface().with_platform_render_interface(|platform_render| {
             if platform_render.supports_regions() && compositor.options().use_region_dirty_rect_clipping == Some(true) {
                 let max_rects = compositor.options().max_dirty_rects.unwrap_or(8);
                 dirty_rects = Some(if max_rects <= 0 {
-                    Rc::new(RegionDirtyRectTracker::new(&*platform_render))
+                    Rc::new(RegionDirtyRectTracker::new(platform_render))
                 } else {
                     Rc::new(MultiDirtyRectTracker::new(
-                        &*platform_render,
+                        platform_render,
                         max_rects,
                         // WPF uses 50K, but that merges stuff rather aggressively
                         compositor.options().dirty_rect_merge_eagerness.unwrap_or(1000.0),
                     ))
                 });
             }
-        }
+        });
         let dirty_rects = dirty_rects.unwrap_or_else(|| Rc::new(SingleDirtyRectTracker::new()));
 
         Rc::new_cyclic(|this: &Weak<ServerCompositionTarget>| {

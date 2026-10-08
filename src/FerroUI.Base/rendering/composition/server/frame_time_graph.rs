@@ -11,7 +11,7 @@ const HEADER_PADDING: f64 = 2.0;
 
 /// Represents a simple time graph for diagnostics purpose, used to show layout and render times.
 pub struct FrameTimeGraph {
-    render_interface: Rc<dyn IPlatformRenderInterface>,
+    render_interface: GraphRenderInterface,
     border_brush: ImmutableSolidColorBrush,
     graph_pen: ImmutablePen,
     frame_values: RefCell<Box<[f64]>>,
@@ -24,6 +24,39 @@ pub struct FrameTimeGraph {
 
     start_frame_index: Cell<usize>,
     frame_count: Cell<usize>,
+}
+
+/// Where a graph gets the render interface from when it builds its
+/// geometry.
+pub enum GraphRenderInterface {
+    /// A handle of the calling thread.
+    Owned(Rc<dyn IPlatformRenderInterface>),
+    /// The render interface of a server compositor, lent by its context
+    /// manager for each call: a graph drawn by the render thread must not
+    /// hold a handle that is shared with the UI thread.
+    Compositor(std::rc::Weak<super::ServerCompositor>),
+}
+
+impl From<Rc<dyn IPlatformRenderInterface>> for GraphRenderInterface {
+    fn from(render_interface: Rc<dyn IPlatformRenderInterface>) -> Self {
+        GraphRenderInterface::Owned(render_interface)
+    }
+}
+
+impl GraphRenderInterface {
+    fn create_stream_geometry(&self) -> Arc<dyn IStreamGeometryImpl> {
+        match self {
+            GraphRenderInterface::Owned(render_interface) => render_interface.create_stream_geometry(),
+            GraphRenderInterface::Compositor(compositor) => compositor
+                .upgrade()
+                .and_then(|compositor| {
+                    compositor
+                        .render_interface()
+                        .with_platform_render_interface(|render_interface| render_interface.create_stream_geometry())
+                })
+                .expect("a time graph is drawn by a compositor that has a render interface"),
+        }
+    }
 }
 
 impl FrameTimeGraph {
@@ -53,7 +86,7 @@ impl FrameTimeGraph {
     /// Creates a graph that builds its geometry with `render_interface`
     /// instead of looking the render interface up in the service locator.
     pub fn with_render_interface(
-        render_interface: Rc<dyn IPlatformRenderInterface>,
+        render_interface: impl Into<GraphRenderInterface>,
         max_frames: i32,
         size: Size,
         default_max_y: f64,
@@ -66,7 +99,7 @@ impl FrameTimeGraph {
 
         let header_size = Size::new(size.width, text_renderer.get_max_height() + HEADER_PADDING * 2.0);
         Self {
-            render_interface,
+            render_interface: render_interface.into(),
             border_brush: ImmutableSolidColorBrush::from_uint32(0x80808080),
             graph_pen: ImmutablePen::with_brush(Some(Brushes::blue()), 1.0),
             frame_values: RefCell::new(vec![0.0; max_frames.max(0) as usize].into_boxed_slice()),
@@ -230,7 +263,7 @@ mod tests {
         // The mock glyphs are at most 14 high: the header is 18 high and
         // the graph area 360 x 46.
         let graph = FrameTimeGraph::with_render_interface(
-            platform.clone(),
+            platform.clone() as Rc<dyn IPlatformRenderInterface>,
             max_frames,
             Size::new(360.0, 64.0),
             20.0,
@@ -396,7 +429,7 @@ mod tests {
         let platform = Rc::new(MockRenderInterface::default());
         // 5 frames over 2.5: ratio 0.5, so x is 0.5, 1, 1.5, 2 -> 0, 1, 2, 2.
         let graph = FrameTimeGraph::with_render_interface(
-            platform.clone(),
+            platform.clone() as Rc<dyn IPlatformRenderInterface>,
             5,
             Size::new(2.5, 64.0),
             20.0,

@@ -39,7 +39,7 @@ impl CompositionTarget {
         // was created. It is looked up here, on the thread that has the
         // services, before a frame of the render thread needs it.
         compositor.with_server(|server| {
-            server.render_interface().platform_render_interface();
+            server.render_interface().capture_platform_render_interface();
         });
         let server =
             compositor.create_server_object(move |compositor, _| ServerCompositionTarget::new(compositor, surfaces, id));

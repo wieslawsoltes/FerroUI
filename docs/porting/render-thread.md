@@ -348,6 +348,17 @@ Upstream none of this needs an argument: the objects are garbage collected, a re
 5. **The lock of the device is redundant today**, so it has never been contended by two threads. Nothing to do until the external objects exist.
 6. **Not covered**: the EGL contexts and the GL Skia GPU (the render-thread mode is switched on by the macOS platform only), and behaviour under load, which needs the runs listed under R5.4.
 
+### R5.5 and R5.6 settled: what the audit found, and the interop objects
+
+The audit above (R5.5) found two faults in the earlier steps of R5, both fixed with it:
+
+- **The handle of the render interface was cloned by the render thread.** It is an `Rc` shared with the service locator of the UI thread. The context manager now lends it (`with_platform_render_interface`), and the UI thread looks it up (`capture_platform_render_interface`, when a composition target is created); the time graphs of the overlays ask the compositor for each use.
+- **The server graph could be released by the render thread**, outside the lock, when the compositor was dropped during a tick. `Compositor::drop` now releases the server compositor itself, under the lock, on its thread (`LockedServerCompositor::release`); a tick that still holds the loop task finds nothing to render.
+
+Left as the audit describes them: the handle of the platform graphics is sound only because the manager never clones it, and `try_get_render_interface_feature` hands a feature out of the lock (no backend has one on Metal yet).
+
+R5.6: the update of a drawing surface and the imports and disposals of the interop objects no longer capture anything of the UI thread. Their server parts are values confined to the compositor lock (`LockBound<T>`, in `compositor_lock.rs`, reached only with a reference to the server compositor it is bound to); the jobs capture the bound value and plain values. One capture is still bound to the UI thread: the image of `import_shared_image`, whose contract passes an `Rc` that the caller keeps; on a render thread that import fails its task instead of panicking.
+
 ### Scope of R3, surveyed
 
 What the UI side asks the server compositor for directly today (outside `rendering/composition/server/`, tests aside). Each becomes a member of the handle the compositor keeps, a job, or a readback:
