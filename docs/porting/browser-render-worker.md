@@ -642,7 +642,7 @@ The step built and passed its five checks without a change to what was written. 
 - The port's own proxying queue reaches the worker while the main thread waits, and the dispatcher is woken from the worker.
 - Open as before: Skia on the thread (B2.6), and browsers other than headless Chrome.
 
-## B2.5: the browser backend on the new objects, still on one thread (written, 2026-10-08)
+## B2.5: the browser backend on the new objects, still on one thread (written and validated, 2026-10-08)
 
 Status: written on 2026-10-08, **not built and not run**. No cargo, no browser build and no browser. What could be checked without a build: the Rust files parse (the formatter reads them), the script modules pass the type check of `webapp/` (the only errors are the missing package of the storage bundle, as before) and the linter for `modules/ferroui/rendering`, and the page script and the test parse. Everything here is **[M]** unless marked.
 
@@ -740,3 +740,12 @@ scripts/build-browser.sh storage_view --threads && node scripts/browser/tests/st
 ```
 
 Expected: 27 host tests of the browser crate more than before (the crate has 208 `#[test]` functions now); the three tests of the build without threads unchanged in number and result; `render_worker_clear.test.mjs` with six checks; `themed_view.test.mjs` against `target/browser-threads/themed_view` served isolated, 30 checks, as at the validation of B2.1 (a module with threads in which no worker is started renders on the page's thread, through the same objects).
+
+### Result of the validation of B2.5 (2026-10-08)
+
+The step built and passed without a change to what was written.
+
+- The host tests of the browser crate pass (208, 27 of them new).
+- Without threads, on the new objects: `themed_view` 30 checks, `storage_view` 18 checks, the pixel test of `webapp/`; the catalog is run by CI.
+- With threads: `render_worker_clear` passes its six checks on the objects of the crate (`RenderWorker`, the per-thread table, the shared surface), among them the new one, where the script did keep the canvas back until the thread had reported itself; `thread_spawn` 3 checks, `storage_view` 19, `themed_view` served isolated 30.
+- So B2.6 can switch the render worker on: start it before the render loop sets its tick, make the timer a background one, and create the compositor with `with_render_thread` and the flag false.
