@@ -641,3 +641,102 @@ The step built and passed its five checks without a change to what was written. 
 - Risk 5 (keeping the render thread alive on events) is closed: the thread answers queued calls and animation frames after its start function has returned.
 - The port's own proxying queue reaches the worker while the main thread waits, and the dispatcher is woken from the worker.
 - Open as before: Skia on the thread (B2.6), and browsers other than headless Chrome.
+
+## B2.5: the browser backend on the new objects, still on one thread (written, 2026-10-08)
+
+Status: written on 2026-10-08, **not built and not run**. No cargo, no browser build and no browser. What could be checked without a build: the Rust files parse (the formatter reads them), the script modules pass the type check of `webapp/` (the only errors are the missing package of the storage bundle, as before) and the linter for `modules/ferroui/rendering`, and the page script and the test parse. Everything here is **[M]** unless marked.
+
+### What was written
+
+| Piece | Where | What it is |
+|---|---|---|
+| The per-thread table of render targets | `rendering/web_render_target.rs` | A `thread_local!` map from target id to `BrowserRenderTarget`. `get_render_target(id)` answers from the table of the calling thread and, on a miss, asks the registry of that thread's script, wraps what it finds and keeps it; a thread whose script does not have the target gets `None` each time. `remove_render_target(id)` takes an entry out (for B2.7; nothing calls it yet). `BrowserRenderTarget` is an enum of the two kinds (`Rc<BrowserWebGlRenderTarget>`, `Rc<BrowserSoftwareRenderTarget>`) with `platform_graphics_context()` and `kind()` |
+| The render targets as objects of a thread | `rendering/browser_web_gl_render_target.rs`, `rendering/browser_software_render_target.rs` | Both lose their `ThreadBound`, their size function and the surface traits. They are `Rc` objects holding the script object (and, for WebGL, the `GlInfo` and the `WebGlContext`), and each creates its render target over an `Arc<BrowserSurfaceShared>` (`create_gl_render_target(shared)`, `create_framebuffer_render_target(shared)`); a frame reads the size there and sets the size of the canvas, as before. `WebGlContext` and `verify_access` are unchanged |
+| The render surface | `rendering/browser_render_surface.rs` (new), exported as `rendering::BrowserRenderSurface` | Section 4's object: an `Arc`, `Send + Sync`, holding only the `Arc<BrowserSurfaceShared>`. `is_ready` is "a thread published the target and the view is not disposed", from the atomics. `as_framebuffer_surface` and `try_get_surface_kind` answer by the kind of the render target **of the calling thread** (none while no target is published, and none on a thread that does not have it); the two `create_*_render_target` resolve that target and panic on a thread without it |
+| The registry of canvases by target id | `rendering/browser_surface_shared.rs` | `register(id)`, `unregister()`, `find(id)`, `report_target(id, kind)`: one map behind a `Mutex`, holding the canvases weakly. A report for an id that no canvas is registered with yet is kept and applied by `register`. `size_getter` and the `CanvasSize` type are gone (nothing asks a function for the size any more) |
+| The surface of a view | `rendering/render_target_browser_surface.rs` | `RenderTargetBrowserSurface` holds the `BrowserSurface`, the shared object and the `BrowserRenderSurface`. `new` registers the shared object under the target id and, when the canvas was created for no thread, publishes the kind of the target at once (this thread owns it). `on_size_changed` writes the shared object. `get_render_surfaces` is the one surface, from the start. `create` passes `RenderWorker::canvas_thread_id()` to the script (0 while nothing starts the worker). `dispose` unregisters |
+| The platform graphics | the same file | `BrowserPlatformGraphics { shared }`: no cell, no weak handle of itself. `is_ready` is `BrowserSurfaceShared::is_ready`, `uses_contexts` the published kind, `get_shared_context` the context of the render target of the calling thread. The ready state feature it hands out is a second object over the same shared state |
+| The render timer | `rendering/browser_render_timer.rs` | `set_tick` starts the loop only if the timer does not run in the background **and** no render worker exists (`RenderWorker::exists`, through the table of calls the tests replace). Without a worker nothing changed |
+| The render worker | `rendering/render_worker.rs` (new), exported as `rendering::RenderWorker` | Below |
+| `registerCanvas` held back | `webapp/modules/ferroui/rendering/webRenderTargetRegistry.ts`, `rendering/web_render_target.rs` (`PENDING_RENDER_THREAD`, `worker_started`) | Below |
+| The example | `examples/render_worker_clear` (`main.rs`, `wwwroot/main.js`) | Uses `RenderWorker::start` in place of its own thread, `pthread_self` and keep-alive; the shared surface is created by the page's thread, registered under the target id and found there by the other thread; the frames are drawn through `BrowserRenderSurface` (`try_get_gl_surface`, `as_framebuffer_surface`), that is, through the objects the compositor will be handed. New: `?Early=true` and the export `renderWorkerClearHeldBack()` |
+| The test of the example | `scripts/browser/tests/render_worker_clear.test.mjs` | One more check (six): with `?Early=true` the first frame arrives and is in the canvas; whether the script really held the canvas back is printed as a measurement |
+| Host tests | the `tests` modules of the files above | 27 new: the per-thread table (wrapped once, per thread, a miss asks again, removal); the registry by id (found while alive, a report from another thread, a report before the registration, unregistering); the render surface (not ready without a target, the kind seen by the thread that has the target and not by one that has none, a thread without the target cannot create a render target); the platform graphics (ready from what another thread published, software uses no context, the panics of upstream); the worker's state (no thread, pending, running; the announcement once and on the page's thread; a failed start); the timer with a worker. A software render target can be made on the host (its script object is `null` and is never called); a WebGL one cannot, so no host test has a WebGL target in its table |
+| Records | `DEVIATIONS.md` (the first three rows of the browser backend rewritten, two rows extended, three added), `browser-platform.md` (the file table) | |
+
+### The render worker
+
+`RenderWorker::start(timer, on_thread)` is called by the thread that creates the canvases and returns at once. The thread it starts:
+
+1. subscribes `RenderWorker::on_render_target_registered` to the reports of its registry (`add_render_target_registered`), which is `BrowserSurfaceShared::report_target`: the kind is published in the canvas registered under the id, or kept for it;
+2. calls `initialize_worker()`;
+3. keeps itself alive (`emscripten_runtime_keepalive_push`, the one `unsafe` of the file);
+4. runs `on_thread` (a caller's own subscriptions; the example sets the tick of its timer there);
+5. starts the timer it was given on itself (`start_on_this_thread`);
+6. stores its id (`RenderWorker::thread_id()`, `pthread_self` through `thread_proxy::current_thread`);
+7. queues a call for the thread that started it (`thread_proxy::run_on_thread`), which tells the registry of that thread's script that the worker takes canvases (`WebRenderTargetRegistry.workerStarted(id)`).
+
+`RenderWorker::exists()` is true from `start` on (it is what the timer asks); `canvas_thread_id()` is 0 without a worker, `PENDING_RENDER_THREAD` (-1) between `start` and step 6, and the id afterwards; `post(work)` queues a call for the thread. The functions exist in every build; without threads `start` answers with an error (`Unsupported`) and the rest answer "no worker". The thread-only code (the spawn, the subscription, the keep-alive) is behind `all(target_os = "emscripten", target_feature = "atomics")`.
+
+**What B2.6 has to do to switch it on**, and nothing else in these files: call `RenderWorker::start(Some(BrowserSharedRenderLoop::render_timer()), None)` in the platform set-up, before the first top-level and before the render loop is asked for; create that timer with `is_background` true when the worker was started (doubt 9 of B2.4: before the compositor is created); and create the compositor of `RenderTargetBrowserSurface::new` with `Compositor::with_render_thread(.., false, ..)` when `thread_id != 0`. The surface, the graphics, the size and the hold-back are already what that mode needs.
+
+Section 4 asked for two exports. `CanvasHelper_OnRenderTargetRegistered` exists since B2.1; the render worker is now its subscriber. `RenderWorker_OnStarted` did not become an export: nothing in script would call it. The worker's thread tells the page's thread through the proxying queue of B2.3, and what runs there calls a function of the script (an import). The size change needs no export of the worker either: `CanvasHelper_OnSizeChanged` arrives on the page's thread as before, `RenderTargetBrowserSurface::on_size_changed` writes the shared object, and the worker reads it at the start of the next frame.
+
+The render loop is not asked for a frame when a target is reported (section 4, step 3, said it would be): `BrowserRenderTimer` ticks with every animation frame of the worker for as long as it lives, and a composition target without a render target asks its surfaces again on each tick **[M]** (`server_composition_target.rs`, `server_compositor.rs`: a frame of a compositor whose graphics is not ready asks for the next tick).
+
+### `registerCanvas` held back
+
+`WebRenderTargetRegistry.create(pthreadId, ..)` has a third case. With `pthreadId === -1` and no worker announced yet, it transfers the control of the canvas at once (the canvas element has to be in its final state when `create` returns: the surface of the view reads its size and the observer is attached) and puts `{ id, canvas, modes }` on a list. `WebRenderTargetRegistry.workerStarted(pthreadId)` records the id and posts every held message to the worker of that thread. After that, -1 and the real id both post at once. A real id for a thread that was never announced posts at once, as since B2.1.
+
+Why the Rust side cannot simply pass the id: it is only known inside the thread (`pthread_self`), and the thread has not run when the first view is created in the same task as `start`. Why the announcement is safe against the order of things: the worker stores its id after it installed its handler, so a canvas that is created with the real id is never early; a canvas that read 0 for the id was created before the announcement ran on the same thread, so it is on the list when the announcement comes. If the queued call cannot be delivered (the queue could not be created), `canvas_thread_id()` makes the announcement itself the next time a canvas is created, which is on the right thread; canvases held back until then wait for that.
+
+Between the transfer and the report the surface is "simply not ready" (section 4): the shared object has no kind, so `BrowserPlatformGraphics::is_ready` and `BrowserRenderSurface::is_ready` are false on both threads.
+
+### What stays exactly as it was without threads, and the three places where the path differs
+
+`RenderWorker::canvas_thread_id()` is 0, so the script creates the target on the page's thread as before, and the table of that thread is the only one. What differs in the order of calls, none of it visible:
+
+- The render target is wrapped (and its `WebGlContext` made, which makes the context current once and restores the previous one) in `RenderTargetBrowserSurface::new`, where it used to be wrapped at the first question about the surfaces or the readiness, a little later in the same task.
+- `get_render_surfaces` has the surface from the start. Before, it was empty until the target existed, which without threads was never observable (the target exists when the canvas does).
+- `IPlatformRenderSurface::is_ready` of the surface is "published and not disposed"; the old targets answered the default `true`. Published is always true here.
+
+The disposed flag of the shared object is **not** set when a view is disposed. Setting it would make the graphics of that view's compositor "not ready", and a compositor that is not ready skips its jobs and its targets (`render_core`), which is not what happens today. The disposal order of section 4 (mark, dispose the composition target, `unregisterCanvas`, drop the table entry) is B2.7; the pieces for it exist (`dispose`, `unregister`, `remove_render_target`, `RenderWorker::post`).
+
+### What could not be verified without a build
+
+- Everything in Rust beyond parsing.
+- That the build without threads passes `themed_view.test.mjs` (30 checks), `storage_view.test.mjs` (18) and `control_catalog.test.mjs` unchanged: all three render through the rewritten surface, graphics and targets.
+- The hold-back in a browser: `transferControlToOffscreen` followed by a `postMessage` of the `OffscreenCanvas` in a later task; and that the observer of the canvas element reports sizes in between.
+- That a queued call reaches the main thread of the page when it was queued by a thread whose start function has not returned yet (the announcement is queued from inside the start function; B2.3 only queued from an event of the worker).
+
+### Doubts, most likely to bite first
+
+1. **Rust that was not compiled.** Likeliest: the two `impl` blocks of sub-traits on `BrowserRenderSurface` (`IFramebufferPlatformSurface`, `IGlPlatformSurface`) and the coercions to `Rc<dyn IGlPlatformSurface>` / `&dyn IFramebufferPlatformSurface`; the `thread_local!` holding a function pointer; `Option<Box<dyn FnOnce() + Send>>` arguments built in place; the example (imports, the `match` with a guard on `STARTED`); unused-import or dead-code warnings in one of the three builds (host, module without threads, module with threads), since `render_worker.rs` compiles different halves in each.
+2. **The same example on new objects.** `render_worker_clear` now draws through `BrowserRenderSurface` and finds its shared object by id. Its five old checks are the first evidence for the per-thread table and the registry on a real second thread. The first frame is drawn when both the report and the registration have happened; the page's thread asks the worker to look again after it registered (`RenderWorker::post`), because the report can win the race. If the first frame never comes in a check that passed before, this pairing is the place.
+3. **`?Early=true` may not exercise the hold-back.** The page creates the canvas in the call that started the thread; the thread could in principle report itself first (it runs in a worker of the pool at once). The test prints which it was and asserts only the frame.
+4. **The announcement from inside the start function** (above). If it is lost, a canvas that was held back is posted only when the next canvas is created, and `?Early=true` never draws.
+5. **The timer condition is read when the tick is set.** A render loop whose tick was set before `RenderWorker::start` has already started the loop on the page's thread; the worker then starts it nowhere (the timer is started once). B2.6 has to start the worker first.
+6. **A started worker with a compositor of the page's thread.** From `start` on, every new top-level transfers its canvas to the worker, while `RenderTargetBrowserSurface::new` still creates the compositor for the page's thread: such a view never becomes ready (the page's thread has no target) and shows nothing. Nothing in the platform starts the worker, so only a host application that calls `RenderWorker::start` itself and then creates a view can meet this before B2.6.
+7. **A lock on the page's thread.** The registry by id is behind a `Mutex`; the page's thread takes it when a view is created or closed, the worker when it reports a target. A collision is a spin of the page's thread for a map look-up. Section 4 asked for no lock in the shared object, and the per-frame state has none.
+8. **Kept reports are never dropped.** A target reported under an id that is never registered (a canvas created by code that does not use the registry) stays in the map of kept reports: an integer per such canvas. Ids are not reused by the script.
+9. **Doubt 3 of B2.4 is still open**: what is dropped when the server graph is released holds GL objects of Skia, and with several canvases one worker has several WebGL contexts. Nothing of the browser crate makes GL calls when it is dropped (`BrowserWebGlRenderTarget`, `WebGlContext` and the `GlInterface` hold handles and function pointers), so the question is Skia's context alone, for B2.6.
+10. **Doubt 5 of B2.4 was not read**: what the Skia context of the browser publishes as features of the render interface, and whether such a feature may leave the lock as an `Rc`. Nothing here depends on it; B2.6 does.
+11. **The tracking data** (`docs/porting/data/path-overrides.toml`) still maps upstream's `RenderWorker.cs` as not applicable, and the generated tracking page says so. The scanner was not run here; the entry and the waivers of the rendering files (`BrowserRenderTarget` is an enum now, the surface traits moved to `BrowserRenderSurface`) are for the session that runs it.
+
+### Validation
+
+```
+scripts/browser/setup.sh --threads && source .tools/env.sh
+cargo test -p ferroui-browser --lib
+cargo build -p ferroui-browser --examples
+(cd src/Browser/FerroUI.Browser/webapp && npm run typecheck && npm run lint && npm run test:pixels)
+scripts/build-browser.sh themed_view && node scripts/browser/tests/themed_view.test.mjs
+scripts/build-browser.sh storage_view && node scripts/browser/tests/storage_view.test.mjs
+scripts/build-browser.sh control-catalog-browser && node scripts/browser/tests/control_catalog.test.mjs
+scripts/build-browser.sh render_worker_clear --threads && node scripts/browser/tests/render_worker_clear.test.mjs
+scripts/build-browser.sh thread_spawn --threads && node scripts/browser/tests/thread_spawn.test.mjs
+scripts/build-browser.sh themed_view --threads
+scripts/build-browser.sh storage_view --threads && node scripts/browser/tests/storage_view.test.mjs target/browser-threads/storage_view
+```
+
+Expected: 27 host tests of the browser crate more than before (the crate has 208 `#[test]` functions now); the three tests of the build without threads unchanged in number and result; `render_worker_clear.test.mjs` with six checks; `themed_view.test.mjs` against `target/browser-threads/themed_view` served isolated, 30 checks, as at the validation of B2.1 (a module with threads in which no worker is started renders on the page's thread, through the same objects).
