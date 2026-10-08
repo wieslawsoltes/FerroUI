@@ -8,7 +8,7 @@ use std::collections::HashMap;
 use std::rc::Rc;
 
 use xamlx::ast::{
-    IXamlAstValueNode, XamlAstNodeExtensions, XamlAstTextNode,
+    IXamlAstValueNode, XamlAstNodeExtensions, XamlAstTextNode, XamlLoadMethodDelegateNode,
 };
 use xamlx::exceptions::{XamlError, XamlResult};
 use xamlx::extensions::query_node_interface;
@@ -232,7 +232,49 @@ impl FerroXamlIlLanguage {
             return Ok(Some(result));
         }
 
-        Ok(None)
+        Self::try_convert_method_delegate(context, &text_node, &text, type_)
+    }
+
+    /// The delegate of the method of the root object named `text`, for a delegate type, when
+    /// the method takes wider parameters than the delegate passes.
+    ///
+    /// Deviation (DEVIATIONS.md, Markup metadata and markup events): the upstream conversion
+    /// (`XamlTransformHelpers.TryConvertValue`, which runs after this one) finds the method by
+    /// the exact parameter types of `Invoke`. The arguments of an event are values here, not
+    /// objects of one class hierarchy, so a handler that upstream declares with the base class
+    /// of the arguments the event raises (`EventHandler` with `EventArgs e`, tested with
+    /// `e is CancelEventArgs`) declares them untyped. Such a method is accepted when no method
+    /// matches exactly: its parameters are assignable from the ones the delegate passes, as
+    /// the binding of a method to a delegate allows.
+    fn try_convert_method_delegate(
+        context: &AstTransformationContext,
+        node: &Rc<XamlAstTextNode>,
+        text: &str,
+        type_: &Rc<dyn IXamlType>,
+    ) -> XamlResult<Option<Rc<dyn IXamlAstValueNode>>> {
+        let delegate = context.configuration().well_known_types().delegate.clone();
+        if !delegate.is_assignable_from(&**type_) {
+            return Ok(None);
+        }
+        let Some(invoke) = type_.find_method(|m| m.name() == "Invoke") else {
+            return Ok(None);
+        };
+        // Without a root object the upstream conversion reports the error.
+        let Ok(root_object) = context.root_object() else {
+            return Ok(None);
+        };
+        let root_type = root_object.type_().get_clr_type()?;
+        let return_type = invoke.return_type();
+        let parameters = invoke.parameters();
+        if root_type.find_method_by_name(text, &*return_type, false, &parameters).is_some() {
+            return Ok(None);
+        }
+        let Some(handler) = root_type.find_method_by_name(text, &*return_type, true, &parameters) else {
+            return Ok(None);
+        };
+        let result: Rc<dyn IXamlAstValueNode> =
+            XamlLoadMethodDelegateNode::new(&**node, root_object, type_.clone(), handler);
+        Ok(Some(result))
     }
 
     /// [`FerroXamlIlLanguage::custom_value_converter`] as the configuration's value converter.

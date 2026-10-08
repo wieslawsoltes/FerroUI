@@ -126,3 +126,34 @@ fn exception_is_thrown_if_method_of_a_delegate_property_not_found() {
 
     assert!(try_load_with_root(xaml, None, boxed(host.clone())).is_err());
 }
+
+/// The handler of an event the managed original declares as `EventHandler` and raises with
+/// arguments of a derived class (`PopupFlyoutBase.Opening`, raised with `CancelEventArgs`):
+/// the handler takes the arguments untyped and receives the ones the event raises.
+#[test]
+fn handler_with_untyped_arguments_receives_the_arguments_the_event_raises() {
+    let _base = xaml_test_base();
+    let xaml = "<local:MyHost xmlns='https://github.com/ferroui' \
+        xmlns:local='clr-namespace:FerroUI.Markup.Xaml.UnitTests.Xaml;assembly=FerroUI.Markup.Xaml.UnitTests' \
+        Opening='OnOpening'/>";
+    let host = MyHost::new();
+
+    load_with_root(xaml, None, boxed(host.clone()));
+
+    assert!(host.raise_opening());
+    assert_eq!(host.openings(), 1);
+}
+
+#[test]
+fn handler_with_untyped_arguments_is_assigned_to_the_opening_of_a_flyout() {
+    let _base = xaml_test_base();
+    let xaml = "<Panel xmlns='https://github.com/ferroui'>\
+        <Button Name='button'><Button.Flyout><Flyout Opening='OnOpening'/></Button.Flyout></Button>\
+    </Panel>";
+    let host = MyHost::new();
+
+    load_with_root(xaml, None, boxed(host.clone()));
+
+    assert!(host.get_control::<Button>("button").flyout().is_some());
+    assert_eq!(host.openings(), 0);
+}

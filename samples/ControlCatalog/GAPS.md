@@ -13,7 +13,6 @@ Status: 219 documents, 196 load and show their class; 23 are listed below (one o
 | Gap | What is missing | Reproduction | Documents |
 |---|---|---|---|
 | C202 | `OnPlatform` written as an element with `On` children has no content property and is not accepted as the value of the property it is set on. | `gaps_b::gap_c202_on_platform_element_with_on_children` | `Pages/PlatformInfoPage.xaml` |
-| C203 | A handler whose second parameter is `EventArgs` is not accepted for `PopupFlyoutBase.Opening`, and the handler cannot reach the cancellable arguments the event passes. | `gaps_b::gap_c203_flyout_opening_handler` | `Pages/ContextFlyoutPage.xaml` |
 | C207 | A compiled binding does not stream (`^`) a property of type `IObservable<T>` (the view model declares it as `ObservableValue`): "Compiled bindings do not support stream bindings for objects of type ObservableValue". | `gaps_b::gap_c207_compiled_stream_binding_of_an_observable` | `Pages/ListBoxPage.xaml` |
 | C209 | The methods `TextBox.Cut`, `Copy`, `Paste` and `Clear` are not declared for markup, so they cannot be bound as commands (`{Binding $parent[TextBox].Cut}`). | `gaps_b::gap_c209_text_box_methods_as_commands` | `Pages/ContextFlyoutPage.xaml` |
 | C301 | A method name is not accepted for a property of a delegate type (`ToolTip.CustomPopupPlacementCallback`, `PopupFlyoutBase.CustomPopupPlacementCallback`). | `gaps_c::gap_c301_method_name_for_a_delegate_property` | `Pages/FlyoutsPage.xaml`, `Pages/ToolTipPage.xaml` |
