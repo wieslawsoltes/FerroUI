@@ -106,8 +106,11 @@ impl GlSkiaGpu {
 
 /// Renders to a surface that is not an OpenGL surface itself through the
 /// render target factory of the context.
+///
+/// It holds nothing but the shared handle of the surface, and lives for the creation of
+/// one render target on the thread that renders.
 struct SurfaceWrapper {
-    surface: Rc<dyn IPlatformRenderSurface>,
+    surface: std::sync::Arc<dyn IPlatformRenderSurface>,
 }
 
 impl IPlatformRenderSurface for SurfaceWrapper {
@@ -166,7 +169,7 @@ impl ISkiaGpu for GlSkiaGpu {
 
     fn try_create_render_target(
         &self,
-        surfaces: &[Rc<dyn IPlatformRenderSurface>],
+        surfaces: &[std::sync::Arc<dyn IPlatformRenderSurface>],
     ) -> Option<Rc<dyn ISkiaGpuRenderTarget>> {
         let custom_render_target_factory = self.render_target_factory();
         for surface in surfaces {
@@ -185,7 +188,7 @@ impl ISkiaGpu for GlSkiaGpu {
         None
     }
 
-    fn is_ready_to_create_render_target(&self, surfaces: &[Rc<dyn IPlatformRenderSurface>]) -> bool {
+    fn is_ready_to_create_render_target(&self, surfaces: &[std::sync::Arc<dyn IPlatformRenderSurface>]) -> bool {
         let custom_render_target_factory = self.render_target_factory();
         for surface in surfaces {
             if custom_render_target_factory

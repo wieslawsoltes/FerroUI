@@ -34,6 +34,7 @@ use ferroui_base::platform::{
 };
 use ferroui_base::reactive::IDisposable;
 use ferroui_base::threading::{Dispatcher, DispatcherPriority};
+use ferroui_base::utilities::ThreadBound;
 use ferroui_base::{FerroLocator, LocatorExtensions, PixelPoint, Point, Rect, Ref, Size, Vector, Visual};
 use ferroui_controls::automation::peers::{AutomationPeer, ControlAutomationPeer};
 use ferroui_controls::platform::{
@@ -46,7 +47,9 @@ use ferroui_microcom::{ComPtr, HResult};
 use std::any::{Any, TypeId};
 use std::cell::{Cell, RefCell};
 use std::ffi::{c_void, CStr};
-use std::rc::{Rc, Weak};
+use std::rc::Rc;
+use std::sync::atomic::{AtomicBool, Ordering};
+use std::sync::{Arc, Mutex, MutexGuard};
 
 /// The platform handle of a top-level of this backend.
 ///
@@ -148,10 +151,13 @@ pub(crate) trait TopLevelParent: 'static {
     }
 }
 
-/// The state and behaviour every top-level of this backend shares. It also
-/// is the software (framebuffer) render surface of the top-level.
+/// The state and behaviour every top-level of this backend shares.
+///
+/// Deviation (DEVIATIONS.md, Native backend): in the reference the top-level
+/// is its own software (framebuffer) render surface. Here that is
+/// [`TopLevelFramebufferSurface`]: a render surface is shared with the thread
+/// that renders, and the top-level is an object of the UI thread.
 pub struct TopLevelImpl {
-    weak_self: Weak<TopLevelImpl>,
     input_root: RefCell<Option<Rc<dyn IInputRoot>>>,
     native_control_host: RefCell<Option<Rc<NativeControlHostImpl>>>,
     platform_behavior_inhibition: RefCell<Option<Rc<PlatformBehaviorInhibition>>>,
@@ -171,7 +177,11 @@ pub struct TopLevelImpl {
 
     handle: RefCell<Option<Rc<MacOSTopLevelHandle>>>,
 
-    surfaces: RefCell<Option<Vec<Rc<dyn IPlatformRenderSurface>>>>,
+    /// The render surfaces, in a cell the thread that renders reads too
+    /// (`render_surfaces`): filled by `init`, emptied by `dispose`.
+    surfaces: SharedSurfaces,
+    metal_surface: RefCell<Option<Arc<MetalPlatformSurface>>>,
+    framebuffer_surface: RefCell<Option<Arc<TopLevelFramebufferSurface>>>,
 
     input: RefCell<Option<Rc<dyn Fn(Rc<dyn IRawInputEventArgs>)>>>,
     paint: RefCell<Option<Rc<dyn Fn(Rect)>>>,
@@ -185,8 +195,7 @@ pub struct TopLevelImpl {
 impl TopLevelImpl {
     pub(crate) fn new(factory: ComPtr<IFerroNativeFactory>) -> Rc<TopLevelImpl> {
         let locator = FerroLocator::current();
-        Rc::new_cyclic(|weak_self| TopLevelImpl {
-            weak_self: weak_self.clone(),
+        Rc::new(TopLevelImpl {
             input_root: RefCell::new(None),
             native_control_host: RefCell::new(None),
             platform_behavior_inhibition: RefCell::new(None),
@@ -200,7 +209,9 @@ impl TopLevelImpl {
             saved_scaling: Cell::new(0.0),
             transparency_level: Cell::new(WindowTransparencyLevel::none()),
             handle: RefCell::new(None),
-            surfaces: RefCell::new(None),
+            surfaces: Arc::new(Mutex::new(Vec::new())),
+            metal_surface: RefCell::new(None),
+            framebuffer_surface: RefCell::new(None),
             input: RefCell::new(None),
             paint: RefCell::new(None),
             resized: RefCell::new(None),
@@ -224,10 +235,22 @@ impl TopLevelImpl {
             .map(|native| Rc::new(PlatformBehaviorInhibition::new(native)));
 
         *self.input_method.borrow_mut() = Some(FerroNativeTextInputMethod::new(&native));
-        let metal_surface: Rc<dyn IPlatformRenderSurface> = MetalPlatformSurface::new(native);
-        let this: Rc<dyn IPlatformRenderSurface> =
-            self.weak_self.upgrade().expect("the top-level is alive while it is initialized");
-        *self.surfaces.borrow_mut() = Some(vec![metal_surface, this]);
+        let metal_surface = MetalPlatformSurface::new(native.clone());
+        let framebuffer_surface =
+            TopLevelFramebufferSurface::new(native, self.saved_logical_size.get(), self.saved_scaling.get());
+        *self.metal_surface.borrow_mut() = Some(metal_surface.clone());
+        *self.framebuffer_surface.borrow_mut() = Some(framebuffer_surface.clone());
+        let metal_surface: Arc<dyn IPlatformRenderSurface> = metal_surface;
+        let framebuffer_surface: Arc<dyn IPlatformRenderSurface> = framebuffer_surface;
+        *lock_shared(&self.surfaces) = vec![metal_surface, framebuffer_surface];
+    }
+
+    /// Hands the size and the scaling the top-level saved to its software
+    /// surface, which is what a frame of the thread that renders reads.
+    fn update_surface_metrics(&self) {
+        if let Some(surface) = self.framebuffer_surface.borrow().as_ref() {
+            surface.set_metrics(self.saved_logical_size.get(), self.saved_scaling.get());
+        }
     }
 
     /// The top-level of this backend that hosts `visual`, if any.
@@ -371,8 +394,22 @@ impl TopLevelImpl {
         self.saved_scaling.get()
     }
 
-    pub fn surfaces(&self) -> Vec<Rc<dyn IPlatformRenderSurface>> {
-        self.surfaces.borrow().clone().unwrap_or_default()
+    pub fn surfaces(&self) -> Vec<Arc<dyn IPlatformRenderSurface>> {
+        lock_shared(&self.surfaces).clone()
+    }
+
+    /// The surfaces as the thread that renders asks for them: the function
+    /// reads the cell the top-level publishes its surfaces in, and never
+    /// reaches the top-level itself.
+    ///
+    /// Deviation (DEVIATIONS.md, Native backend): `Surfaces` of the reference
+    /// keeps returning the surfaces of a disposed top-level, whose native
+    /// object then fails every call. Here the surfaces are gone once the
+    /// top-level is disposed: they gave their native top-level back on the
+    /// UI thread, and a render target can no longer be created for them.
+    pub fn render_surfaces(&self) -> Arc<dyn Fn() -> Vec<Arc<dyn IPlatformRenderSurface>> + Send + Sync> {
+        let surfaces = self.surfaces.clone();
+        Arc::new(move || lock_shared(&surfaces).clone())
     }
 
     pub fn transparency_level(&self) -> WindowTransparencyLevel {
@@ -661,6 +698,19 @@ impl TopLevelImpl {
     }
 
     pub(crate) fn dispose(&self) {
+        // The surfaces stop being handed out and give back the native
+        // top-level they hold, here on the UI thread: a surface that the
+        // thread that renders drops last cannot release it there.
+        lock_shared(&self.surfaces).clear();
+        let metal_surface = self.metal_surface.borrow_mut().take();
+        if let Some(metal_surface) = metal_surface {
+            metal_surface.close();
+        }
+        let framebuffer_surface = self.framebuffer_surface.borrow_mut().take();
+        if let Some(framebuffer_surface) = framebuffer_surface {
+            framebuffer_surface.close();
+        }
+
         let handle = self.handle.borrow_mut().take();
         drop(handle);
 
@@ -695,6 +745,7 @@ impl TopLevelImpl {
 
         let s = Size::new(size.width, size.height);
         self.saved_logical_size.set(s);
+        self.update_surface_metrics();
         let resized = self.resized.borrow().clone();
         if let Some(resized) = resized {
             resized(s, to_window_resize_reason(reason));
@@ -703,6 +754,7 @@ impl TopLevelImpl {
 
     fn on_scaling_changed(&self, scaling: f64) {
         self.saved_scaling.set(scaling);
+        self.update_surface_metrics();
         let scaling_changed = self.scaling_changed.borrow().clone();
         if let Some(scaling_changed) = scaling_changed {
             scaling_changed(scaling);
@@ -760,7 +812,126 @@ impl TopLevelImpl {
     callback_property!(lost_focus, set_lost_focus, lost_focus, dyn Fn());
 }
 
-impl IPlatformRenderSurface for TopLevelImpl {
+/// The cell a top-level publishes its render surfaces in.
+type SharedSurfaces = Arc<Mutex<Vec<Arc<dyn IPlatformRenderSurface>>>>;
+
+/// Locks a mutex of the surfaces. A panic of a frame (a failed native call)
+/// leaves nothing half-written behind these locks, so a poisoned lock is
+/// entered all the same.
+fn lock_shared<T>(mutex: &Mutex<T>) -> MutexGuard<'_, T> {
+    mutex.lock().unwrap_or_else(|e| e.into_inner())
+}
+
+/// The native top-level as a render surface holds it.
+///
+/// A render surface is shared with the thread that renders, and the native
+/// top-level (`IFrnTopLevel`) belongs to the UI thread: its members touch the
+/// view, the two that create a render target (`CreateSoftwareRenderTarget`,
+/// `CreateMetalRenderTarget` in `native/FerroUI.Native/src/OSX/TopLevelImpl.mm`)
+/// return `COR_E_INVALIDOPERATION` off the main thread, and the reference
+/// counts of the native objects are plain integers (`ComObject::AddRef` and
+/// `Release` in `native/FerroUI.Native/inc/comimpl.h`), so not even a
+/// reference may be taken or given back by another thread. The pointer is
+/// therefore bound to the UI thread: any other thread sees none.
+pub(crate) struct SurfaceTopLevel(ThreadBound<RefCell<Option<ComPtr<IFrnTopLevel>>>>);
+
+impl SurfaceTopLevel {
+    /// Binds the native top-level to the current thread, the UI thread.
+    pub(crate) fn new(native: ComPtr<IFrnTopLevel>) -> Self {
+        Self(ThreadBound::new(RefCell::new(Some(native))))
+    }
+
+    /// The native top-level; `None` on any thread but the UI thread and once
+    /// it is released.
+    pub(crate) fn get(&self) -> Option<ComPtr<IFrnTopLevel>> {
+        if !self.0.is_on_thread() {
+            return None;
+        }
+        self.0.get().borrow().clone()
+    }
+
+    /// Gives the reference back. Called on the UI thread by the top-level
+    /// when it is disposed: a surface dropped by another thread leaves what
+    /// is bound to the UI thread behind.
+    pub(crate) fn release(&self) {
+        if !self.0.is_on_thread() {
+            return;
+        }
+        let native = self.0.get().borrow_mut().take();
+        drop(native);
+    }
+}
+
+/// What the software surface of a top-level shares with its render targets:
+/// the part of the reference top-level a frame reads.
+struct FramebufferSurfaceState {
+    /// `_syncRoot` of the reference: held while a frame is handed to the
+    /// native render target and while a render target is released. Unlike
+    /// the lock of the reference it cannot be entered twice by one thread;
+    /// nothing under it calls back into the render target.
+    sync_root: Mutex<()>,
+    /// Whether the native top-level is alive (`Native != null` in the
+    /// reference); cleared when the top-level is disposed.
+    alive: AtomicBool,
+    /// `_savedLogicalSize` and `_savedScaling` of the top-level.
+    metrics: Mutex<(Size, f64)>,
+}
+
+impl FramebufferSurfaceState {
+    fn new(logical_size: Size, scaling: f64) -> Arc<Self> {
+        Arc::new(Self {
+            sync_root: Mutex::new(()),
+            alive: AtomicBool::new(true),
+            metrics: Mutex::new((logical_size, scaling)),
+        })
+    }
+}
+
+/// The software (framebuffer) render surface of a top-level.
+///
+/// The surface is shared with the thread that renders. The rule of the
+/// reference is kept: the render target is created on the UI thread only
+/// (the first show and every resize are rendered by the UI thread), and the
+/// frames of the render thread reuse it.
+pub struct TopLevelFramebufferSurface {
+    top_level: SurfaceTopLevel,
+    state: Arc<FramebufferSurfaceState>,
+}
+
+impl TopLevelFramebufferSurface {
+    pub(crate) fn new(native: ComPtr<IFrnTopLevel>, logical_size: Size, scaling: f64) -> Arc<Self> {
+        Arc::new(Self {
+            top_level: SurfaceTopLevel::new(native),
+            state: FramebufferSurfaceState::new(logical_size, scaling),
+        })
+    }
+
+    /// The size and the scaling the next frame is sized with.
+    pub(crate) fn set_metrics(&self, logical_size: Size, scaling: f64) {
+        *lock_shared(&self.state.metrics) = (logical_size, scaling);
+    }
+
+    /// The top-level is disposed: no frame is presented any more and the
+    /// native top-level is given back. Called on the UI thread.
+    pub(crate) fn close(&self) {
+        // Not under `sync_root`, as `Dispose` of the reference top-level: a
+        // frame that is being presented finishes.
+        self.state.alive.store(false, Ordering::Release);
+        self.top_level.release();
+    }
+}
+
+impl IPlatformRenderSurface for TopLevelFramebufferSurface {
+    /// Deviation (DEVIATIONS.md, Native backend): the reference throws
+    /// `RenderTargetNotReadyException` from `CreateFramebufferRenderTarget`
+    /// off the UI thread and the composition target catches it; here the
+    /// surface answers that it is not ready (off the UI thread, and once the
+    /// top-level is disposed), which the composition target treats the same
+    /// way, without a panic to catch.
+    fn is_ready(&self) -> bool {
+        self.top_level.get().is_some()
+    }
+
     fn as_framebuffer_surface(&self) -> Option<&dyn IFramebufferPlatformSurface> {
         Some(self)
     }
@@ -770,7 +941,7 @@ impl IPlatformRenderSurface for TopLevelImpl {
     }
 }
 
-impl IFramebufferPlatformSurface for TopLevelImpl {
+impl IFramebufferPlatformSurface for TopLevelFramebufferSurface {
     /// # Panics
     /// Panics when called off the UI thread or when the top-level has no
     /// native render target (it is closed): the render target is not ready.
@@ -779,34 +950,75 @@ impl IFramebufferPlatformSurface for TopLevelImpl {
             panic!("The render target is not ready.");
         }
 
-        let native_render_target = self.native().and_then(|native| native.create_software_render_target().check());
+        let native_render_target =
+            self.top_level.get().and_then(|native| native.create_software_render_target().check());
 
         let Some(native_render_target) = native_render_target else {
             panic!("The render target is not ready.");
         };
 
-        Rc::new(FramebufferRenderTarget {
-            parent: self.weak_self.upgrade().expect("the top-level is alive while it is borrowed"),
-            target: Rc::new(RefCell::new(Some(native_render_target))),
-        })
+        Rc::new(FramebufferRenderTarget::new(self.state.clone(), native_render_target))
     }
 }
 
+/// The native software render target, as the render target of a top-level
+/// owns it: the only reference to the native object.
+struct SoftwareRenderTargetPtr(ComPtr<IFrnSoftwareRenderTarget>);
+
+// SAFETY: the pointer may be used, and released, by a thread other than the
+// one that received it, because of what the native object is and of how it
+// is held here.
+//
+// The native object is `FrnSoftwareRenderTarget`
+// (`native/FerroUI.Native/src/OSX/rendertarget.mm`). Its one member,
+// `SetFrame`, forwards to `-[IOSurfaceRenderTarget setSwFrame:]`, which runs
+// under `@synchronized (lock)` and is written for both threads
+// (`getNextSurfaceInSafeContext` and `presentSurfaceInSafeContext` branch on
+// `[NSThread isMainThread]`; off the main thread the surface is queued and a
+// callback is posted to the main thread). Its destructor only lets go of the
+// Objective-C render target, whose retain count is atomic.
+//
+// What the native object does not make safe is its reference count:
+// `ComObject::AddRef` and `Release` (`native/FerroUI.Native/inc/comimpl.h`)
+// are plain increments, and `SetFrame` takes and returns a reference to
+// itself (`START_COM_CALL`). That is covered here: native code hands out a
+// new object with one reference (`CreateSoftwareRenderTarget` in
+// `rendertarget.mm`) and keeps none, this wrapper is not `Clone` and never
+// lends the `ComPtr`, and every use of it, the release included, happens
+// under `sync_root` of the surface (or by the last owner of the cell it
+// lives in). So no two threads ever touch the object, or its count, at the
+// same time. This is the discipline of the reference, which holds one proxy
+// for the native object and locks `_syncRoot` around `SetFrame` and
+// `Dispose`.
+//
+// `Sync` is not claimed: the wrapper is only reached through a mutex.
+unsafe impl Send for SoftwareRenderTargetPtr {}
+
 /// The software render target of a top-level.
+///
+/// It is created by a frame of the UI thread and locked by whichever thread
+/// renders a frame, so what it holds is shared and locked rather than kept
+/// in cells.
 struct FramebufferRenderTarget {
-    parent: Rc<TopLevelImpl>,
-    target: Rc<RefCell<Option<ComPtr<IFrnSoftwareRenderTarget>>>>,
+    parent: Arc<FramebufferSurfaceState>,
+    /// Guarded by `sync_root` of the parent, which is taken first.
+    target: Arc<Mutex<Option<SoftwareRenderTargetPtr>>>,
+}
+
+impl FramebufferRenderTarget {
+    fn new(parent: Arc<FramebufferSurfaceState>, target: ComPtr<IFrnSoftwareRenderTarget>) -> Self {
+        Self { parent, target: Arc::new(Mutex::new(Some(SoftwareRenderTargetPtr(target)))) }
+    }
 }
 
 impl IPlatformRenderSurfaceRenderTarget for FramebufferRenderTarget {}
 
 impl IFramebufferRenderTarget for FramebufferRenderTarget {
     fn lock(&self, _scene_info: &RenderTargetSceneInfo) -> (Rc<dyn ILockedFramebuffer>, FramebufferLockProperties) {
-        let Some(target) = self.target.borrow().clone() else {
+        if lock_shared(&self.target).is_none() {
             panic!("Cannot access a disposed object: FramebufferRenderTarget");
-        };
-        let size = self.parent.saved_logical_size.get();
-        let scaling = self.parent.saved_scaling.get();
+        }
+        let (size, scaling) = *lock_shared(&self.parent.metrics);
         let w = (size.width * scaling).max(1.0);
         let h = (size.height * scaling).max(1.0);
         let dpi = scaling * 96.0;
@@ -814,12 +1026,11 @@ impl IFramebufferRenderTarget for FramebufferRenderTarget {
         let parent = self.parent.clone();
         let current_target = self.target.clone();
         let framebuffer = DeferredFramebuffer::new(
-            target,
-            Box::new(move |cb: &mut dyn FnMut()| {
-                // Keeps the native top-level alive for the duration of the call.
-                if let Some(_native) = parent.native() {
-                    if current_target.borrow().is_some() {
-                        cb();
+            Box::new(move |cb: &mut dyn FnMut(&IFrnSoftwareRenderTarget)| {
+                let _sync_root = lock_shared(&parent.sync_root);
+                if parent.alive.load(Ordering::Acquire) {
+                    if let Some(target) = lock_shared(&current_target).as_ref() {
+                        cb(&*target.0);
                     }
                 }
             }),
@@ -835,7 +1046,8 @@ impl IFramebufferRenderTarget for FramebufferRenderTarget {
     }
 
     fn dispose(&self) {
-        let target = self.target.borrow_mut().take();
+        let _sync_root = lock_shared(&self.parent.sync_root);
+        let target = lock_shared(&self.target).take();
         drop(target);
     }
 }
@@ -1014,8 +1226,20 @@ macro_rules! impl_top_level_contract {
                 $crate::top_level_impl::TopLevelParent::top_level(self).render_scaling()
             }
 
-            fn surfaces(&self) -> Vec<std::rc::Rc<dyn ferroui_base::platform::surfaces::IPlatformRenderSurface>> {
+            fn surfaces(
+                &self,
+            ) -> Vec<std::sync::Arc<dyn ferroui_base::platform::surfaces::IPlatformRenderSurface>> {
                 $crate::top_level_impl::TopLevelParent::top_level(self).surfaces()
+            }
+
+            fn render_surfaces(
+                &self,
+            ) -> std::sync::Arc<
+                dyn Fn() -> Vec<std::sync::Arc<dyn ferroui_base::platform::surfaces::IPlatformRenderSurface>>
+                    + Send
+                    + Sync,
+            > {
+                $crate::top_level_impl::TopLevelParent::top_level(self).render_surfaces()
             }
 
             fn compositor(&self) -> Option<std::rc::Rc<ferroui_base::rendering::composition::Compositor>> {
@@ -1424,6 +1648,7 @@ mod tests {
         assert!(top_level.handle().is_none());
         assert_eq!(top_level.client_size(), Size::default());
         assert!(top_level.surfaces().is_empty());
+        assert!((top_level.render_surfaces())().is_empty());
         assert_eq!(top_level.point_to_client(PixelPoint::new(3, 4)), Point::default());
         assert_eq!(top_level.point_to_screen(Point::new(3.0, 4.0)), PixelPoint::default());
         assert_eq!(top_level.acrylic_compensation_levels(), AcrylicPlatformCompensationLevels::new(1.0, 0.0, 0.0));
@@ -1447,5 +1672,93 @@ mod tests {
         let root = ferroui_controls::Border::new();
         top_level.set_input_root(Rc::new(InputRoot { root: root.clone().upcast() }));
         assert_eq!(top_level.get_automation_peer(), Some(ControlAutomationPeer::create_peer_for_element(&root)));
+    }
+
+    // Not from upstream: the surfaces of a top-level are objects of their
+    // own, shared with the thread that renders.
+    #[test]
+    fn the_render_surfaces_are_shared_between_threads() {
+        fn assert_send_sync<T: Send + Sync>() {}
+        assert_send_sync::<TopLevelFramebufferSurface>();
+        assert_send_sync::<MetalPlatformSurface>();
+    }
+
+    struct CountingRenderTarget(Rc<Cell<u32>>);
+
+    impl IFrnSoftwareRenderTargetImpl for CountingRenderTarget {
+        fn set_frame(&self, _fb: *mut FrnFramebuffer) -> Result<(), HResult> {
+            self.0.set(self.0.get() + 1);
+            Ok(())
+        }
+    }
+
+    fn scene_info() -> RenderTargetSceneInfo {
+        RenderTargetSceneInfo::new(
+            ferroui_base::PixelSize::new(1, 1),
+            1.0,
+            ferroui_base::rendering::composition::CompositionTransparencyLevel::None,
+        )
+    }
+
+    // Not from upstream: the framebuffer render target sizes a frame with
+    // what the top-level saved in the surface.
+    #[test]
+    fn a_frame_is_sized_with_the_metrics_of_the_surface() {
+        let frames = Rc::new(Cell::new(0));
+        let state = FramebufferSurfaceState::new(Size::new(10.0, 5.0), 2.0);
+        let target = FramebufferRenderTarget::new(
+            state.clone(),
+            IFrnSoftwareRenderTarget::from_impl(CountingRenderTarget(frames.clone())),
+        );
+
+        let (framebuffer, properties) = target.lock(&scene_info());
+        assert_eq!(framebuffer.size(), ferroui_base::PixelSize::new(20, 10));
+        assert_eq!(framebuffer.dpi(), Vector::new(192.0, 192.0));
+        assert_eq!(properties, FramebufferLockProperties::default());
+        assert!(!target.retains_frame_contents());
+        assert_eq!(frames.get(), 0);
+        framebuffer.dispose();
+        assert_eq!(frames.get(), 1);
+
+        *lock_shared(&state.metrics) = (Size::new(0.0, 0.0), 1.0);
+        let (framebuffer, _) = target.lock(&scene_info());
+        assert_eq!(framebuffer.size(), ferroui_base::PixelSize::new(1, 1));
+        framebuffer.dispose();
+        assert_eq!(frames.get(), 2);
+    }
+
+    #[test]
+    fn a_frame_is_not_presented_once_the_top_level_is_gone_or_the_target_is_disposed() {
+        let frames = Rc::new(Cell::new(0));
+        let state = FramebufferSurfaceState::new(Size::new(4.0, 4.0), 1.0);
+        let target = FramebufferRenderTarget::new(
+            state.clone(),
+            IFrnSoftwareRenderTarget::from_impl(CountingRenderTarget(frames.clone())),
+        );
+
+        // The top-level is disposed while a frame is being drawn.
+        let (framebuffer, _) = target.lock(&scene_info());
+        state.alive.store(false, Ordering::Release);
+        framebuffer.dispose();
+        assert_eq!(frames.get(), 0);
+
+        // The render target is disposed while a frame is being drawn.
+        state.alive.store(true, Ordering::Release);
+        let (framebuffer, _) = target.lock(&scene_info());
+        target.dispose();
+        framebuffer.dispose();
+        assert_eq!(frames.get(), 0);
+    }
+
+    #[test]
+    #[should_panic(expected = "Cannot access a disposed object: FramebufferRenderTarget")]
+    fn a_disposed_framebuffer_render_target_cannot_be_locked() {
+        let state = FramebufferSurfaceState::new(Size::new(4.0, 4.0), 1.0);
+        let target = FramebufferRenderTarget::new(
+            state,
+            IFrnSoftwareRenderTarget::from_impl(CountingRenderTarget(Rc::new(Cell::new(0)))),
+        );
+        target.dispose();
+        let _ = target.lock(&scene_info());
     }
 }

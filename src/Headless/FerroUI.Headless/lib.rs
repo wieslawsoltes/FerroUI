@@ -22,6 +22,7 @@ mod headless_platform_stubs;
 mod headless_render_timer;
 mod headless_window_extensions;
 mod headless_window_impl;
+mod headless_window_surface;
 mod i_headless_touch_pointer;
 mod i_headless_window;
 

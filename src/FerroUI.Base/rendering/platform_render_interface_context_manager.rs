@@ -160,11 +160,11 @@ impl PlatformRenderInterfaceContextManager {
         }
     }
 
-    pub fn create_render_target(&self, surfaces: &[Rc<dyn IPlatformRenderSurface>]) -> Rc<dyn IRenderTarget> {
+    pub fn create_render_target(&self, surfaces: &[std::sync::Arc<dyn IPlatformRenderSurface>]) -> Rc<dyn IRenderTarget> {
         self.value().create_render_target(surfaces)
     }
 
-    pub fn is_ready_to_create_render_target(&self, surfaces: &[Rc<dyn IPlatformRenderSurface>]) -> bool {
+    pub fn is_ready_to_create_render_target(&self, surfaces: &[std::sync::Arc<dyn IPlatformRenderSurface>]) -> bool {
         let backend = self.backend.borrow().clone();
         match backend {
             None => self.is_ready(),
@@ -342,7 +342,7 @@ mod tests {
     }
 
     impl IPlatformRenderInterfaceContext for BackendContext {
-        fn create_render_target(&self, surfaces: &[Rc<dyn IPlatformRenderSurface>]) -> Rc<dyn IRenderTarget> {
+        fn create_render_target(&self, surfaces: &[std::sync::Arc<dyn IPlatformRenderSurface>]) -> Rc<dyn IRenderTarget> {
             record(&self.log, format!("backend{}.create_render_target({})", self.id, surfaces.len()));
             Rc::new(RenderTarget)
         }
@@ -364,7 +364,7 @@ mod tests {
             None
         }
 
-        fn is_ready_to_create_render_target(&self, _surfaces: &[Rc<dyn IPlatformRenderSurface>]) -> bool {
+        fn is_ready_to_create_render_target(&self, _surfaces: &[std::sync::Arc<dyn IPlatformRenderSurface>]) -> bool {
             self.ready_to_create_render_target.get()
         }
 

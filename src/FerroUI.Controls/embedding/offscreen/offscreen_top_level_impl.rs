@@ -18,7 +18,7 @@ use std::rc::Rc;
 /// This API is unstable.
 pub trait OffscreenTopLevelImplOverrides {
     /// The surfaces the top-level is rendered to.
-    fn surfaces(&self) -> Vec<Rc<dyn IPlatformRenderSurface>>;
+    fn surfaces(&self) -> Vec<std::sync::Arc<dyn IPlatformRenderSurface>>;
 
     /// The mouse device of the top-level.
     fn mouse_device(&self) -> Rc<dyn IMouseDevice>;
@@ -189,7 +189,7 @@ impl ITopLevelImpl for OffscreenTopLevelImplBase {
         self.scaling.get()
     }
 
-    fn surfaces(&self) -> Vec<Rc<dyn IPlatformRenderSurface>> {
+    fn surfaces(&self) -> Vec<std::sync::Arc<dyn IPlatformRenderSurface>> {
         self.overrides.surfaces()
     }
 

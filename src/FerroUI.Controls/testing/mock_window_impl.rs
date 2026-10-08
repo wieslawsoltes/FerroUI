@@ -95,7 +95,7 @@ pub struct MockWindowImpl {
     pub acrylic_compensation_levels: Cell<AcrylicPlatformCompensationLevels>,
     handle: RefCell<Option<Rc<dyn IPlatformHandle>>>,
     compositor: RefCell<Option<Rc<Compositor>>>,
-    surfaces: RefCell<Vec<Rc<dyn IPlatformRenderSurface>>>,
+    surfaces: RefCell<Vec<std::sync::Arc<dyn IPlatformRenderSurface>>>,
     input_root: RefCell<Option<Rc<dyn IInputRoot>>>,
     cursor: RefCell<Option<Rc<dyn ICursorImpl>>>,
     platform_specific_scene_info: RefCell<Option<std::sync::Arc<dyn Any + Send + Sync>>>,
@@ -352,7 +352,7 @@ impl MockWindowImpl {
         *self.compositor.borrow_mut() = compositor;
     }
 
-    pub fn setup_surfaces(&self, surfaces: Vec<Rc<dyn IPlatformRenderSurface>>) {
+    pub fn setup_surfaces(&self, surfaces: Vec<std::sync::Arc<dyn IPlatformRenderSurface>>) {
         *self.surfaces.borrow_mut() = surfaces;
     }
 
@@ -462,7 +462,7 @@ impl ITopLevelImpl for MockWindowImpl {
         self.render_scaling.get()
     }
 
-    fn surfaces(&self) -> Vec<Rc<dyn IPlatformRenderSurface>> {
+    fn surfaces(&self) -> Vec<std::sync::Arc<dyn IPlatformRenderSurface>> {
         self.surfaces.borrow().clone()
     }
 

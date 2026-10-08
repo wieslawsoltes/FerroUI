@@ -33,7 +33,7 @@ use skia_safe::gpu::graphite::mtl::backend_textures;
 use skia_safe::gpu::graphite::surfaces;
 use skia_safe::ColorType;
 use std::any::{Any, TypeId};
-use std::cell::{Cell, RefCell};
+use std::cell::RefCell;
 use std::ffi::{c_char, c_void};
 use std::rc::{Rc, Weak};
 
@@ -273,17 +273,21 @@ fn graphite_offscreen_render_target_draws_and_reads_back() {
 }
 
 /// A Metal surface that renders to a texture owned by the test.
+///
+/// A surface is shared between the threads: the texture is kept as the
+/// value of its handle, and the count of presentations is atomic.
+#[derive(Clone)]
 struct TextureSurface {
-    weak_self: Weak<TextureSurface>,
-    texture: Id,
+    texture: usize,
     size: PixelSize,
-    presented: Rc<Cell<u32>>,
+    presented: std::sync::Arc<std::sync::atomic::AtomicU32>,
 }
 
 impl IPlatformRenderSurface for TextureSurface {
     fn try_get_surface_kind(&self, kind: TypeId) -> Option<Rc<dyn Any>> {
         if kind == TypeId::of::<dyn IMetalPlatformSurface>() {
-            let surface: Rc<dyn IMetalPlatformSurface> = self.weak_self.upgrade()?;
+            // The view is a handle of the calling thread to the same surface.
+            let surface: Rc<dyn IMetalPlatformSurface> = Rc::new(self.clone());
             return Some(Rc::new(surface));
         }
         None
@@ -295,14 +299,14 @@ impl IPlatformRenderSurface for TextureSurface {
 
 impl IMetalPlatformSurface for TextureSurface {
     fn create_metal_render_target(&self, _device: Rc<dyn IMetalDevice>) -> Rc<dyn IMetalPlatformSurfaceRenderTarget> {
-        Rc::new(TextureRenderTarget { texture: self.texture, size: self.size, presented: self.presented.clone() })
+        Rc::new(TextureRenderTarget { texture: self.texture as Id, size: self.size, presented: self.presented.clone() })
     }
 }
 
 struct TextureRenderTarget {
     texture: Id,
     size: PixelSize,
-    presented: Rc<Cell<u32>>,
+    presented: std::sync::Arc<std::sync::atomic::AtomicU32>,
 }
 
 impl IPlatformRenderSurfaceRenderTarget for TextureRenderTarget {}
@@ -317,7 +321,7 @@ impl IMetalPlatformSurfaceRenderTarget for TextureRenderTarget {
 struct TextureSession {
     texture: Id,
     size: PixelSize,
-    presented: Rc<Cell<u32>>,
+    presented: std::sync::Arc<std::sync::atomic::AtomicU32>,
 }
 
 impl IMetalPlatformSurfaceRenderingSession for TextureSession {
@@ -334,7 +338,7 @@ impl IMetalPlatformSurfaceRenderingSession for TextureSession {
         false
     }
     fn dispose(&self) {
-        self.presented.set(self.presented.get() + 1);
+        self.presented.fetch_add(1, std::sync::atomic::Ordering::SeqCst);
     }
 }
 
@@ -350,13 +354,9 @@ fn graphite_renders_to_a_metal_surface_texture() {
     let texture = unsafe { create_texture(device.device, 32, 32) };
     assert!(!texture.is_null());
 
-    let presented = Rc::new(Cell::new(0));
-    let surface: Rc<dyn IPlatformRenderSurface> = Rc::new_cyclic(|weak_self| TextureSurface {
-        weak_self: weak_self.clone(),
-        texture,
-        size,
-        presented: presented.clone(),
-    });
+    let presented = std::sync::Arc::new(std::sync::atomic::AtomicU32::new(0));
+    let surface: std::sync::Arc<dyn IPlatformRenderSurface> =
+        std::sync::Arc::new(TextureSurface { texture: texture as usize, size, presented: presented.clone() });
 
     let gpu = super::SkiaMetalGpu::new(device.clone(), None, None);
     let gr_context = gpu.gr_context();
@@ -376,11 +376,11 @@ fn graphite_renders_to_a_metal_surface_texture() {
         &BoxShadows::default(),
     );
     drawing_context.pop_render_options();
-    assert_eq!(0, presented.get());
+    assert_eq!(0, presented.load(std::sync::atomic::Ordering::SeqCst));
     drawing_context.dispose();
 
     // Disposing the drawing context flushes to the GPU and ends the session.
-    assert_eq!(1, presented.get());
+    assert_eq!(1, presented.load(std::sync::atomic::Ordering::SeqCst));
 
     // Read the texture back through a second surface over it.
     // SAFETY: `texture` is alive until it is released below.

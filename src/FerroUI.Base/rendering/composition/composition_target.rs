@@ -35,12 +35,8 @@ pub struct CompositionTarget {
 impl CompositionTarget {
     pub(crate) fn new(compositor: &Rc<Compositor>, surfaces: RenderSurfaces) -> Rc<CompositionTarget> {
         let id = NEXT_ID.fetch_add(1, Ordering::SeqCst) + 1;
-        // The surfaces are objects of the window implementation, made on this
-        // thread: they are bound to it until each backend has a surface that
-        // the render thread may use (`docs/porting/render-thread.md`, R5, B2).
-        let surfaces = crate::utilities::ThreadBound::new(surfaces);
-        let server = compositor
-            .create_server_object(move |compositor, _| ServerCompositionTarget::new(compositor, surfaces.into_inner(), id));
+        let server =
+            compositor.create_server_object(move |compositor, _| ServerCompositionTarget::new(compositor, surfaces, id));
         let target = Rc::new_cyclic(|this: &Weak<CompositionTarget>| CompositionTarget {
             this: this.clone(),
             object: CompositionObject::new(compositor, Some(server)),

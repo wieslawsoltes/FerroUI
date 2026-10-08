@@ -4,6 +4,7 @@ use ferroui_base::platform::surfaces::IPlatformRenderSurface;
 use ferroui_base::platform::IPlatformGraphicsContext;
 use ferroui_base::reactive::IDisposable;
 use std::rc::Rc;
+use std::sync::Arc;
 
 /// An OpenGL context.
 ///
@@ -46,12 +47,12 @@ pub trait IGlContext: IPlatformGraphicsContext {
 /// returns an `Rc<dyn IGlPlatformSurfaceRenderTargetFactory>`.
 pub trait IGlPlatformSurfaceRenderTargetFactory {
     /// Whether the context can render to the surface.
-    fn can_render_to_surface(&self, context: &Rc<dyn IGlContext>, surface: &Rc<dyn IPlatformRenderSurface>) -> bool;
+    fn can_render_to_surface(&self, context: &Rc<dyn IGlContext>, surface: &Arc<dyn IPlatformRenderSurface>) -> bool;
 
     /// Creates the render target of the surface.
     fn create_render_target(
         &self,
         context: &Rc<dyn IGlContext>,
-        surface: &Rc<dyn IPlatformRenderSurface>,
+        surface: &Arc<dyn IPlatformRenderSurface>,
     ) -> Rc<dyn IGlPlatformSurfaceRenderTarget>;
 }

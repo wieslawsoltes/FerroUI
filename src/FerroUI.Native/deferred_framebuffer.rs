@@ -6,16 +6,21 @@ use crate::helpers::ComResultExt;
 use crate::interop::*;
 use ferroui_base::platform::{AlphaFormat, ILockedFramebuffer, PixelFormat};
 use ferroui_base::{PixelSize, Vector};
-use ferroui_microcom::ComPtr;
 use std::cell::RefCell;
 use std::ffi::c_void;
 
-/// Runs the given callback if the native top-level is still alive. (The
-/// reference signature also passes the top-level, which no caller uses.)
-pub(crate) type LockTopLevel = Box<dyn Fn(&mut dyn FnMut())>;
+/// Runs the given callback with the native render target if the native
+/// top-level is still alive and the render target is not disposed.
+///
+/// Deviation (DEVIATIONS.md, Native backend): the reference callback passes
+/// the native top-level, which no caller uses, and `DeferredFramebuffer`
+/// keeps the render target itself. Here the callback lends the render target
+/// under the lock of the surface, so that the framebuffer holds no reference
+/// of its own to it: the reference counts of the native objects are not
+/// atomic, and the render target is used by the thread that renders.
+pub(crate) type LockTopLevel = Box<dyn Fn(&mut dyn FnMut(&IFrnSoftwareRenderTarget))>;
 
 pub(crate) struct DeferredFramebuffer {
-    render_target: ComPtr<IFrnSoftwareRenderTarget>,
     lock_top_level: LockTopLevel,
     /// The pixel memory; `None` once the framebuffer is disposed.
     data: RefCell<Option<Box<[u8]>>>,
@@ -27,16 +32,9 @@ pub(crate) struct DeferredFramebuffer {
 }
 
 impl DeferredFramebuffer {
-    pub(crate) fn new(
-        render_target: ComPtr<IFrnSoftwareRenderTarget>,
-        lock_top_level: LockTopLevel,
-        width: i32,
-        height: i32,
-        dpi: Vector,
-    ) -> Self {
+    pub(crate) fn new(lock_top_level: LockTopLevel, width: i32, height: i32, dpi: Vector) -> Self {
         let length = width.max(0) as usize * height.max(0) as usize * 4;
         Self {
-            render_target,
             lock_top_level,
             data: RefCell::new(Some(vec![0u8; length].into_boxed_slice())),
             size: PixelSize::new(width, height),
@@ -89,7 +87,7 @@ impl ILockedFramebuffer for DeferredFramebuffer {
             return;
         };
 
-        (self.lock_top_level)(&mut || {
+        (self.lock_top_level)(&mut |render_target: &IFrnSoftwareRenderTarget| {
             let mut fb = FrnFramebuffer {
                 data: data.as_mut_ptr() as *mut c_void,
                 dpi: FrnVector { x: self.dpi.x, y: self.dpi.y },
@@ -102,7 +100,7 @@ impl ILockedFramebuffer for DeferredFramebuffer {
 
             // SAFETY: `fb` and the pixel memory it points at outlive the
             // call; the native side copies the pixels before returning.
-            unsafe { self.render_target.set_frame(&mut fb) }.check();
+            unsafe { render_target.set_frame(&mut fb) }.check();
         });
 
         // The pixel memory is freed here.
@@ -113,7 +111,7 @@ impl ILockedFramebuffer for DeferredFramebuffer {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use ferroui_microcom::HResult;
+    use ferroui_microcom::{ComPtr, HResult};
     use std::cell::Cell;
     use std::rc::Rc;
 
@@ -138,18 +136,17 @@ mod tests {
         }
     }
 
-    fn lock(alive: Rc<Cell<bool>>) -> LockTopLevel {
-        Box::new(move |cb| {
+    fn lock(render_target: ComPtr<IFrnSoftwareRenderTarget>, alive: Rc<Cell<bool>>) -> LockTopLevel {
+        Box::new(move |cb: &mut dyn FnMut(&IFrnSoftwareRenderTarget)| {
             if alive.get() {
-                cb();
+                cb(&*render_target);
             }
         })
     }
 
     fn framebuffer(frames: &Rc<Frames>, alive: &Rc<Cell<bool>>, width: i32, height: i32) -> DeferredFramebuffer {
         DeferredFramebuffer::new(
-            IFrnSoftwareRenderTarget::from_impl(FakeRenderTarget(frames.clone())),
-            lock(alive.clone()),
+            lock(IFrnSoftwareRenderTarget::from_impl(FakeRenderTarget(frames.clone())), alive.clone()),
             width,
             height,
             Vector::new(192.0, 192.0),

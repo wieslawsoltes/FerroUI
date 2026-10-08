@@ -235,7 +235,31 @@ A frame on the render thread has no service locator (it belongs to a thread here
 | The three kinds R2 bound to the UI thread in `ThreadBound`: the render surfaces of a target, the update closures of a drawing surface, the import and dispose closures of the interop objects | **Open.** A frame of the render thread panics on them. The surfaces are next: they are what a window needs. |
 | `Compositor::server()` callers outside tests: `composition_interop.rs` (three places) | **Open**, with the interop closures. |
 
-### R5.3, planned: render surfaces a frame of the render thread may use
+### R5.3 in progress: render surfaces a frame of the render thread may use
+
+State (branch `render-thread-r5-3`): the contract is done (`IPlatformRenderSurface: Send + Sync` in `Arc`; `RenderSurfaces` is `Send + Sync`; `ITopLevelImpl::render_surfaces` gives the function the rendering thread calls). Backends, each written by a sub-agent without a build and validated centrally:
+
+| Backend | State |
+|---|---|
+| OpenGL / EGL | Done. The surface info contract is `Send + Sync` in `Arc` (it has no implementor yet); the GL view of the surface is a handle of its own over the same info. |
+| Headless | Done. `HeadlessWindowSurface` holds the framebuffer format, size, scaling and the last frame under locks; the window reads through it. The last frame is kept as pixel memory, and the bitmap is made on the UI thread when it is asked for. |
+| Browser | Done for the contract: both render targets keep what belongs to the page's thread in `ThreadBound`; the top level publishes its live surfaces in a shared cell. Real cross-thread surfaces are stage B2. Compiles for `wasm32-unknown-emscripten`. |
+| Skia | Test surfaces converted; no change in the backend. |
+| Native (macOS) | Done for the software path. `TopLevelFramebufferSurface` is the surface of a top level; the framebuffer render target sits on its shared state with upstream's one lock around `SetFrame` and the release; a top level publishes its surfaces in a shared cell and empties it when it is disposed. Creating a render target stays a matter of the UI thread, as upstream: the surfaces answer "not ready" elsewhere, and the next frame of the UI thread creates it. The Metal surface satisfies the contract; **Metal frames on the render thread are not sound yet**, see below. |
+
+Found in the native library by this step (`native/FerroUI.Native/inc/comimpl.h`): **the reference counts of the native objects are not atomic** (`ComObject::AddRef` and `Release` are plain increments, and most methods take and return a reference to their object while they run). A native pointer may therefore not be cloned, released or called by two threads at once, whatever the method does inside. What that means per interface, from reading the native sources:
+
+| Native interface | From the render thread |
+|---|---|
+| Top level: creating a software or a Metal render target | UI thread only (the native code refuses elsewhere); kept. |
+| Software render target: `SetFrame`, release | Safe as the port uses it: the native method is guarded and written for both threads, and the port holds the only reference and serialises every use under the surface's lock. This is the one `unsafe impl Send` of the native backend. |
+| Metal render target, session, device | **Not safe**: no lock on the native side, the native side holds a second reference that the main thread releases, and the Rust wrappers clone their pointer on every call. |
+
+So before `Compositor::new` may choose the render-thread mode on macOS with Metal (the default rendering mode), the native reference counts have to become atomic (a change in `comimpl.h`, which the port owns), or the Metal objects have to be used under one lock on both sides. `MetalDevice::ensure_current` is where upstream takes the lock of the device; it is still empty here. That is R5.4.
+
+The plan as written before the work:
+
+#### The plan
 
 How upstream does it, read from the native backend: `TopLevelImpl.Surfaces` is called by the thread that renders and returns objects that thread then uses. For the GPU they are purpose-made objects over the native top level (`MetalPlatformSurface`, the GL surface), whose native side is callable from the render thread. For software rendering it is the top level itself, and `CreateFramebufferRenderTarget` throws `RenderTargetNotReady` unless it is called on the UI thread: the software render target of a window is created by a frame the UI thread renders (the first show and every resize are synchronous commits, and the platform sets `UseUiThreadForSynchronousCommits`), and the frames of the render thread reuse it.
 

@@ -35,12 +35,12 @@ const HEIGHT: f64 = 800.0;
 /// A window surface rendered to in memory, as the software surface of the
 /// browser is.
 struct RasterSurface {
-    frames: Rc<Cell<u32>>,
+    frames: std::sync::Arc<std::sync::atomic::AtomicU32>,
 }
 
 impl RasterSurface {
-    fn new() -> Rc<Self> {
-        Rc::new(Self { frames: Rc::new(Cell::new(0)) })
+    fn new() -> std::sync::Arc<Self> {
+        std::sync::Arc::new(Self { frames: std::sync::Arc::new(std::sync::atomic::AtomicU32::new(0)) })
     }
 }
 
@@ -62,7 +62,7 @@ impl IFramebufferPlatformSurface for RasterSurface {
 
 struct RasterTarget {
     framebuffer: RefCell<Option<Rc<RetainedFramebuffer>>>,
-    frames: Rc<Cell<u32>>,
+    frames: std::sync::Arc<std::sync::atomic::AtomicU32>,
 }
 
 impl IPlatformRenderSurfaceRenderTarget for RasterTarget {}
@@ -74,7 +74,9 @@ impl IFramebufferRenderTarget for RasterTarget {
         let framebuffer =
             framebuffer.get_or_insert_with(|| RetainedFramebuffer::new(size, PixelFormats::RGBA8888, AlphaFormat::Premul));
         let frames = self.frames.clone();
-        let locked = framebuffer.lock(Vector::new(96.0, 96.0), move |_| frames.set(frames.get() + 1));
+        let locked = framebuffer.lock(Vector::new(96.0, 96.0), move |_| {
+            frames.fetch_add(1, std::sync::atomic::Ordering::SeqCst);
+        });
         (locked, FramebufferLockProperties::default())
     }
 
@@ -91,7 +93,7 @@ struct Bench {
     services: CompositorTestServices,
     window_impl: Rc<MockWindowImpl>,
     window: Ref<Window>,
-    surface: Rc<RasterSurface>,
+    surface: std::sync::Arc<RasterSurface>,
     mouse: Rc<MouseDevice>,
     timestamp: Cell<u64>,
 }
@@ -102,7 +104,7 @@ impl Bench {
         let window_impl = MockWindowingPlatform::create_window_mock_with_size(WIDTH, HEIGHT);
         services.setup(&window_impl);
         let surface = RasterSurface::new();
-        window_impl.setup_surfaces(vec![surface.clone() as Rc<dyn IPlatformRenderSurface>]);
+        window_impl.setup_surfaces(vec![surface.clone() as std::sync::Arc<dyn IPlatformRenderSurface>]);
         let window = Window::with_impl(window_impl.clone());
         window.set_width(WIDTH);
         window.set_height(HEIGHT);
@@ -177,7 +179,7 @@ impl Bench {
     /// Runs `frames` frames, each after `before_frame(frame)`, and prints the
     /// times.
     fn measure(&self, name: &str, frames: usize, before_frame: impl Fn(usize)) -> Stats {
-        let rendered = self.surface.frames.get();
+        let rendered = self.surface.frames.load(std::sync::atomic::Ordering::SeqCst);
         let mut totals = Vec::with_capacity(frames);
         let mut jobs = Vec::with_capacity(frames);
         let mut renders = Vec::with_capacity(frames);
@@ -194,7 +196,7 @@ impl Bench {
         println!(
             "{name}: {frames} frames, {} rendered; ms per frame: median {:.3}, mean {:.3}, p95 {:.3}, max {:.3} \
              (input and layout median {:.3}, render median {:.3})",
-            self.surface.frames.get() - rendered,
+            self.surface.frames.load(std::sync::atomic::Ordering::SeqCst) - rendered,
             stats.median,
             stats.mean,
             stats.p95,
@@ -312,7 +314,7 @@ fn table_view_wheel_scrolling_renders_every_frame_and_reuses_its_rows() {
     let realized = table_view.get_realized_containers().len();
     assert!(realized > 0);
     let mut rows: Vec<*const Control> = Vec::new();
-    let rendered = bench.surface.frames.get();
+    let rendered = bench.surface.frames.load(std::sync::atomic::Ordering::SeqCst);
     for _ in 0..40 {
         bench.wheel(center, Vector::new(0.0, -0.4));
         bench.frame();
@@ -328,6 +330,6 @@ fn table_view_wheel_scrolling_renders_every_frame_and_reuses_its_rows() {
     // was rendered, and the rows that left the viewport were recycled into
     // the rows that entered it instead of new rows being created.
     assert_eq!(800.0, scroll_viewer.offset().y);
-    assert_eq!(40, bench.surface.frames.get() - rendered);
+    assert_eq!(40, bench.surface.frames.load(std::sync::atomic::Ordering::SeqCst) - rendered);
     assert!(rows.len() <= realized + 2, "{} rows for {realized} realized", rows.len());
 }

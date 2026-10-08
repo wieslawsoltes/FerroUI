@@ -1632,20 +1632,20 @@ fn render_interface_reports_its_capabilities() {
 
 /// A framebuffer in plain memory that records how it is used.
 struct MockFramebuffer {
-    pixels: Rc<RefCell<Vec<u8>>>,
+    pixels: std::sync::Arc<std::sync::Mutex<Vec<u8>>>,
     size: PixelSize,
     row_bytes: i32,
     format: PixelFormat,
     alpha_format: AlphaFormat,
-    disposed: Rc<Cell<u32>>,
+    disposed: std::sync::Arc<std::sync::atomic::AtomicU32>,
 }
 
 impl ILockedFramebuffer for MockFramebuffer {
     fn address(&self) -> *mut u8 {
-        self.pixels.borrow_mut().as_mut_ptr()
+        self.pixels.lock().unwrap().as_mut_ptr()
     }
     fn with_data(&self, access: &mut dyn FnMut(&mut [u8])) {
-        access(&mut self.pixels.borrow_mut());
+        access(&mut self.pixels.lock().unwrap());
     }
     fn size(&self) -> PixelSize {
         self.size
@@ -1663,38 +1663,38 @@ impl ILockedFramebuffer for MockFramebuffer {
         self.alpha_format
     }
     fn dispose(&self) {
-        self.disposed.set(self.disposed.get() + 1);
+        self.disposed.fetch_add(1, std::sync::atomic::Ordering::SeqCst);
     }
 }
 
 struct MockSurface {
-    pixels: Rc<RefCell<Vec<u8>>>,
+    pixels: std::sync::Arc<std::sync::Mutex<Vec<u8>>>,
     size: PixelSize,
     row_bytes: i32,
     format: PixelFormat,
     alpha_format: AlphaFormat,
-    disposed: Rc<Cell<u32>>,
+    disposed: std::sync::Arc<std::sync::atomic::AtomicU32>,
     retains: bool,
 }
 
 impl MockSurface {
-    fn new(width: i32, height: i32, format: PixelFormat, alpha_format: AlphaFormat) -> Rc<Self> {
+    fn new(width: i32, height: i32, format: PixelFormat, alpha_format: AlphaFormat) -> std::sync::Arc<Self> {
         // A stride larger than the minimum, as real framebuffers often have.
         let row_bytes = width * 4 + 8;
-        Rc::new(Self {
-            pixels: Rc::new(RefCell::new(vec![0u8; (row_bytes * height) as usize])),
+        std::sync::Arc::new(Self {
+            pixels: std::sync::Arc::new(std::sync::Mutex::new(vec![0u8; (row_bytes * height) as usize])),
             size: PixelSize::new(width, height),
             row_bytes,
             format,
             alpha_format,
-            disposed: Rc::new(Cell::new(0)),
+            disposed: std::sync::Arc::new(std::sync::atomic::AtomicU32::new(0)),
             retains: true,
         })
     }
 
     fn bytes(&self, x: i32, y: i32) -> [u8; 4] {
         let offset = (y * self.row_bytes + x * 4) as usize;
-        let pixels = self.pixels.borrow();
+        let pixels = self.pixels.lock().unwrap();
         [pixels[offset], pixels[offset + 1], pixels[offset + 2], pixels[offset + 3]]
     }
 }
@@ -1754,11 +1754,11 @@ fn framebuffer_render_target_writes_bgra() {
     context.push_render_options(aliased());
     context.draw_rectangle(Some(&solid(Colors::RED)), None, rect(2.0, 2.0, 4.0, 4.0), &no_shadows());
     context.pop_render_options();
-    assert_eq!(0, surface.disposed.get());
+    assert_eq!(0, surface.disposed.load(std::sync::atomic::Ordering::SeqCst));
     context.dispose();
 
     // The framebuffer is presented exactly once, when the context is disposed.
-    assert_eq!(1, surface.disposed.get());
+    assert_eq!(1, surface.disposed.load(std::sync::atomic::Ordering::SeqCst));
     assert_eq!([0, 0, 255, 255], surface.bytes(3, 3));
     assert_eq!([0, 0, 0, 0], surface.bytes(1, 1));
     assert_eq!([0, 0, 0, 0], surface.bytes(6, 6));
@@ -1769,7 +1769,7 @@ fn framebuffer_render_target_writes_bgra() {
     context.draw_rectangle(Some(&solid(Colors::BLUE)), None, rect(0.0, 0.0, 2.0, 2.0), &no_shadows());
     context.pop_render_options();
     context.dispose();
-    assert_eq!(2, surface.disposed.get());
+    assert_eq!(2, surface.disposed.load(std::sync::atomic::Ordering::SeqCst));
     assert_eq!([255, 0, 0, 255], surface.bytes(1, 1));
     // The previous frame is still there.
     assert_eq!([0, 0, 255, 255], surface.bytes(3, 3));
@@ -1802,7 +1802,7 @@ fn framebuffer_render_target_writes_unpremultiplied_pixels() {
     context.pop_render_options();
     context.dispose();
 
-    assert_eq!(1, surface.disposed.get());
+    assert_eq!(1, surface.disposed.load(std::sync::atomic::Ordering::SeqCst));
     // Unpremultiplied: full red with half alpha.
     let [b, g, r, a] = surface.bytes(3, 3);
     assert!((a as i32 - 127).abs() <= 1, "half alpha: {:?}", surface.bytes(3, 3));
@@ -1834,7 +1834,7 @@ fn software_context_creates_render_targets_for_framebuffer_surfaces() {
     assert!(context.max_offscreen_render_target_pixel_size().is_none());
 
     let surface = MockSurface::new(8, 8, PixelFormat::BGRA8888, AlphaFormat::Premul);
-    let surfaces: Vec<Rc<dyn IPlatformRenderSurface>> = vec![surface.clone()];
+    let surfaces: Vec<std::sync::Arc<dyn IPlatformRenderSurface>> = vec![surface.clone()];
     assert!(context.is_ready_to_create_render_target(&surfaces));
     assert!(!context.is_ready_to_create_render_target(&[]));
 
@@ -1870,11 +1870,11 @@ fn software_context_creates_render_targets_for_framebuffer_surfaces() {
 
 #[test]
 fn render_target_bitmap_is_a_framebuffer_surface() {
-    let bitmap = Rc::new(RenderTargetBitmapImpl::new(PixelSize::new(8, 8), DPI));
+    let bitmap = std::sync::Arc::new(RenderTargetBitmapImpl::new(PixelSize::new(8, 8), DPI));
     assert!(!bitmap.is_corrupted());
 
     let context = render_interface().create_backend_context(None);
-    let surfaces: Vec<Rc<dyn IPlatformRenderSurface>> = vec![bitmap.clone()];
+    let surfaces: Vec<std::sync::Arc<dyn IPlatformRenderSurface>> = vec![bitmap.clone()];
     let render_target = context.create_render_target(&surfaces);
     draw_red_square(&*render_target, PixelSize::new(8, 8));
 

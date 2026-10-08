@@ -133,7 +133,7 @@ pub use self::{
     platform_behavior_inhibition::PlatformBehaviorInhibition,
     popup_impl::PopupImpl,
     screen_impl::{NativeScreen, ScreenImpl},
-    top_level_impl::{MacOSTopLevelHandle, TopLevelImpl},
+    top_level_impl::{MacOSTopLevelHandle, TopLevelFramebufferSurface, TopLevelImpl},
     tray_icon_impl::TrayIconImpl,
     window_impl::WindowImpl,
     window_impl_base::WindowBaseImpl,

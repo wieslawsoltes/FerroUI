@@ -16,12 +16,12 @@ pub trait ISkiaGpu: IPlatformGraphicsContext {
     fn platform_graphics_context(&self) -> Option<Rc<dyn IPlatformGraphicsContext>>;
 
     /// Attempts to create a custom render target from the given surfaces.
-    fn try_create_render_target(&self, surfaces: &[Rc<dyn IPlatformRenderSurface>])
+    fn try_create_render_target(&self, surfaces: &[std::sync::Arc<dyn IPlatformRenderSurface>])
         -> Option<Rc<dyn ISkiaGpuRenderTarget>>;
 
     /// Whether a render target can be created from the given surfaces right
     /// now.
-    fn is_ready_to_create_render_target(&self, surfaces: &[Rc<dyn IPlatformRenderSurface>]) -> bool;
+    fn is_ready_to_create_render_target(&self, surfaces: &[std::sync::Arc<dyn IPlatformRenderSurface>]) -> bool;
 
     /// Creates an offscreen render target surface.
     ///

@@ -8,10 +8,12 @@ use ferroui_base::platform::{
     AlphaFormat, ILockedFramebuffer, IPlatformGraphicsContext, PixelFormats, RenderTargetSceneInfo,
     RetainedFramebuffer,
 };
+use ferroui_base::utilities::ThreadBound;
 use ferroui_base::Vector;
 use std::any::Any;
 use std::cell::RefCell;
-use std::rc::{Rc, Weak};
+use std::rc::Rc;
+use std::sync::Arc;
 use wasm_bindgen::prelude::*;
 
 #[wasm_bindgen(raw_module = "./ferroui.js")]
@@ -22,21 +24,45 @@ extern "C" {
 
 /// A canvas that is rendered to in memory: each frame is drawn into a
 /// retained framebuffer and copied to the 2D context of the canvas.
+///
+/// A render surface is shared between the thread of the user interface and
+/// the thread that renders, so the object is `Send + Sync`. The browser runs
+/// the compositor on its one thread, and everything the target holds belongs
+/// to that thread (the object of the script side and the size of the
+/// canvas): it is kept in a [`ThreadBound`], which only that thread can
+/// open. A render worker (stage B2 of `docs/porting/render-thread.md`) is
+/// where the target becomes an object that is really used across threads.
 pub struct BrowserSoftwareRenderTarget {
-    this: Weak<BrowserSoftwareRenderTarget>,
+    this: std::sync::Weak<BrowserSoftwareRenderTarget>,
+    state: ThreadBound<SoftwareRenderTargetState>,
+}
+
+/// What a software render target holds, all of it bound to the thread of
+/// the page.
+struct SoftwareRenderTargetState {
     js: JsObject,
     size_getter: CanvasSize,
 }
 
+// Not from upstream: the render surface contract requires a surface to be
+// shared between threads.
+const _: fn() = || {
+    fn assert_send_sync<T: Send + Sync>() {}
+    assert_send_sync::<BrowserSoftwareRenderTarget>();
+};
+
 impl BrowserSoftwareRenderTarget {
     /// Wraps the software render target of the script side.
-    pub fn new(js: JsObject, size_getter: CanvasSize) -> Rc<Self> {
-        Rc::new_cyclic(|this| Self { this: this.clone(), js, size_getter })
+    ///
+    /// The thread that calls this is the one the target stays bound to.
+    pub fn new(js: JsObject, size_getter: CanvasSize) -> Arc<Self> {
+        let state = ThreadBound::new(SoftwareRenderTargetState { js, size_getter });
+        Arc::new_cyclic(|this| Self { this: this.clone(), state })
     }
 
     fn blit(&self, fb: &RetainedFramebuffer) {
         let size = fb.size();
-        put_pixel_data(&self.js, fb.address() as usize as u32, size.width * size.height * 4, size.width, size.height);
+        put_pixel_data(&self.state.get().js, fb.address() as usize as u32, size.width * size.height * 4, size.width, size.height);
     }
 }
 
@@ -45,7 +71,7 @@ impl BrowserRenderTarget for BrowserSoftwareRenderTarget {
         None
     }
 
-    fn as_render_surface(&self) -> Rc<dyn IPlatformRenderSurface> {
+    fn as_render_surface(&self) -> Arc<dyn IPlatformRenderSurface> {
         self.this.upgrade().expect("the render target is alive")
     }
 }
@@ -70,7 +96,7 @@ impl IFramebufferPlatformSurface for BrowserSoftwareRenderTarget {
 }
 
 struct FramebufferRenderTarget {
-    parent: Rc<BrowserSoftwareRenderTarget>,
+    parent: Arc<BrowserSoftwareRenderTarget>,
     fb: RefCell<Option<Rc<RetainedFramebuffer>>>,
 }
 
@@ -79,8 +105,9 @@ impl IPlatformRenderSurfaceRenderTarget for FramebufferRenderTarget {}
 impl IFramebufferRenderTarget for FramebufferRenderTarget {
     fn lock(&self, _scene_info: &RenderTargetSceneInfo) -> (Rc<dyn ILockedFramebuffer>, FramebufferLockProperties) {
         let properties = FramebufferLockProperties::default();
-        let (size, scaling) = (self.parent.size_getter)();
-        update_size(&self.parent.js, size);
+        let state = self.parent.state.get();
+        let (size, scaling) = (state.size_getter)();
+        update_size(&state.js, size);
 
         let mut fb = self.fb.borrow_mut();
         if fb.as_ref().is_none_or(|fb| fb.size() != size) {
@@ -90,7 +117,7 @@ impl IFramebufferRenderTarget for FramebufferRenderTarget {
             *fb = Some(RetainedFramebuffer::new(size, PixelFormats::RGBA8888, AlphaFormat::Premul));
         }
 
-        let blit_target = Rc::downgrade(&self.parent);
+        let blit_target = Arc::downgrade(&self.parent);
         let locked = fb.as_ref().expect("the framebuffer was just created").lock(
             Vector::new(scaling * 96.0, scaling * 96.0),
             move |fb| {

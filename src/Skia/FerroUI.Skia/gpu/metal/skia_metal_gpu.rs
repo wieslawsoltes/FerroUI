@@ -98,7 +98,7 @@ impl ISkiaGpu for SkiaMetalGpu {
 
     fn try_create_render_target(
         &self,
-        surfaces: &[Rc<dyn IPlatformRenderSurface>],
+        surfaces: &[std::sync::Arc<dyn IPlatformRenderSurface>],
     ) -> Option<Rc<dyn ISkiaGpuRenderTarget>> {
         for surface in surfaces {
             if let Some(metal_surface) = try_get_metal_surface(&**surface) {
@@ -110,7 +110,7 @@ impl ISkiaGpu for SkiaMetalGpu {
         None
     }
 
-    fn is_ready_to_create_render_target(&self, surfaces: &[Rc<dyn IPlatformRenderSurface>]) -> bool {
+    fn is_ready_to_create_render_target(&self, surfaces: &[std::sync::Arc<dyn IPlatformRenderSurface>]) -> bool {
         for surface in surfaces {
             if try_get_metal_surface(&**surface).is_some() {
                 return surface.is_ready();

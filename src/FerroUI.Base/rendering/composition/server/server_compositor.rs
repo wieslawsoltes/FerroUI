@@ -488,14 +488,14 @@ impl ServerCompositor {
         }
     }
 
-    pub fn create_render_target(&self, surfaces: &[Rc<dyn IPlatformRenderSurface>]) -> Rc<dyn IRenderTarget> {
+    pub fn create_render_target(&self, surfaces: &[std::sync::Arc<dyn IPlatformRenderSurface>]) -> Rc<dyn IRenderTarget> {
         let current = self.render_interface.ensure_current();
         let target = self.render_interface.create_render_target(surfaces);
         current.dispose();
         target
     }
 
-    pub fn is_ready_to_create_render_target(&self, surfaces: &[Rc<dyn IPlatformRenderSurface>]) -> bool {
+    pub fn is_ready_to_create_render_target(&self, surfaces: &[std::sync::Arc<dyn IPlatformRenderSurface>]) -> bool {
         self.render_interface.is_ready_to_create_render_target(surfaces)
     }
 

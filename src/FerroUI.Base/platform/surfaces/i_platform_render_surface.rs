@@ -5,7 +5,7 @@ use std::any::Any;
 ///
 /// Backends recognise the surface kinds they support by downcasting through
 /// [`as_any`](Self::as_any) or the typed accessors.
-pub trait IPlatformRenderSurface {
+pub trait IPlatformRenderSurface: Send + Sync {
     /// Whether the surface is ready to be rendered to.
     fn is_ready(&self) -> bool {
         true

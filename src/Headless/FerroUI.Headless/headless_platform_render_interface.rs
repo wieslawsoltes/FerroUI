@@ -261,7 +261,7 @@ impl IOptionalFeatureProvider for HeadlessPlatformRenderInterface {
 }
 
 impl IPlatformRenderInterfaceContext for HeadlessPlatformRenderInterface {
-    fn create_render_target(&self, _surfaces: &[Rc<dyn IPlatformRenderSurface>]) -> Rc<dyn IRenderTarget> {
+    fn create_render_target(&self, _surfaces: &[std::sync::Arc<dyn IPlatformRenderSurface>]) -> Rc<dyn IRenderTarget> {
         Rc::new(HeadlessRenderTarget)
     }
 

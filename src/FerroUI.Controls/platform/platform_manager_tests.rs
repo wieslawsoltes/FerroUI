@@ -73,7 +73,7 @@ impl ITopLevelImpl for TestWindowImpl {
         1.0
     }
 
-    fn surfaces(&self) -> Vec<Rc<dyn IPlatformRenderSurface>> {
+    fn surfaces(&self) -> Vec<std::sync::Arc<dyn IPlatformRenderSurface>> {
         Vec::new()
     }
 
