@@ -174,7 +174,14 @@ pub struct TestRoot {
 }
 
 ferro_class!(TestRoot: Decorator);
-ferro_impl_classes!(TestRoot: VisualImpl, InteractiveImpl, InputElementImpl, ControlImpl);
+ferro_impl_classes!(TestRoot: VisualImpl, InteractiveImpl, ControlImpl);
+
+/// The root is a focus scope, as upstream's `TestRoot` (`IFocusScope`).
+impl InputElementImpl for TestRoot {
+    fn is_focus_scope(_this: &Self) -> bool {
+        true
+    }
+}
 
 impl FerroObjectImpl for TestRoot {
     fn constructed(this: &Self) {

@@ -296,6 +296,8 @@ mod visual_tests;
 #[cfg(test)]
 mod styled_element_tests;
 #[cfg(test)]
+mod input_element_focus_tests;
+#[cfg(test)]
 mod styled_element_tests_theming;
 #[cfg(test)]
 mod styled_element_tests_resources;
