@@ -147,8 +147,10 @@ impl FontManager {
     }
 
     /// The font backend.
-    #[allow(dead_code)] // internal accessor kept for parity; nothing outside of the tests uses it yet
-    pub(crate) fn platform_impl(&self) -> &Rc<dyn IFontManagerImpl> {
+    ///
+    /// Internal upstream, where the Skia unit tests see it; public here so
+    /// that the tests of the Skia crate reach it.
+    pub fn platform_impl(&self) -> &Rc<dyn IFontManagerImpl> {
         &self.platform_impl
     }
 
@@ -458,7 +460,10 @@ impl FontManager {
     }
 
     /// The typefaces of a font family; empty when the family is unknown.
-    pub(crate) fn get_family_typefaces(&self, font_family: &FontFamily) -> Vec<Typeface> {
+    ///
+    /// Internal upstream, where the Skia unit tests see it; public here so
+    /// that the tests of the Skia crate reach it.
+    pub fn get_family_typefaces(&self, font_family: &FontFamily) -> Vec<Typeface> {
         match font_family.key() {
             None => self.system_fonts().try_get_family_typefaces(font_family.name()),
             Some(key) => {

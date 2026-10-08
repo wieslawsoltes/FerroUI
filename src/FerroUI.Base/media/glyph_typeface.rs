@@ -284,7 +284,10 @@ impl GlyphTypeface {
 
     /// Creates a glyph typeface; a font whose tables cannot be read is logged
     /// and gives `None`.
-    pub(crate) fn try_create(
+    ///
+    /// Internal upstream, where the Skia unit tests see it; public here so
+    /// that the tests of the Skia crate reach it.
+    pub fn try_create(
         typeface: Rc<dyn IPlatformTypeface>,
         font_simulations: FontSimulations,
     ) -> Option<Rc<GlyphTypeface>> {
