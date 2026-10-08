@@ -40,7 +40,7 @@ impl EffectExtensions {
     /// Converts an effect to an immutable effect: the result of
     /// [`IMutableEffect::to_immutable`](crate::media::effects::IMutableEffect::to_immutable)
     /// if the effect is mutable, otherwise the effect itself.
-    pub fn to_immutable(effect: &Rc<dyn IEffect>) -> Rc<dyn IImmutableEffect> {
+    pub fn to_immutable(effect: &Rc<dyn IEffect>) -> std::sync::Arc<dyn IImmutableEffect> {
         if let Some(mutable) = effect.as_mutable_effect() {
             return mutable.to_immutable();
         }

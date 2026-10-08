@@ -2,7 +2,6 @@ use crate::media::{BoxShadows, IBrush, IEffect, IPen, RenderOptions, TextOptions
 use crate::platform::{IBitmapImpl, IGeometryImpl, IGlyphRunImpl};
 use crate::rendering::scene_graph::ICustomDrawOperation;
 use crate::{Matrix, Point, Rect, RoundedRect};
-use std::rc::Rc;
 use std::sync::Arc;
 
 /// Walks the operations of a render data stream. A push returns a scope
@@ -47,7 +46,7 @@ pub trait IRenderDataVisitor {
     fn on_push_transform(&mut self, matrix: Matrix) -> Self::Scope;
     fn on_push_render_options(&mut self, options: RenderOptions) -> Self::Scope;
     fn on_push_text_options(&mut self, options: TextOptions) -> Self::Scope;
-    fn on_push_effect(&mut self, effect: Option<&Rc<dyn IEffect>>, bounds: Rect) -> Self::Scope;
+    fn on_push_effect(&mut self, effect: Option<&std::sync::Arc<dyn crate::media::IImmutableEffect>>, bounds: Rect) -> Self::Scope;
 
     fn on_pop(&mut self, scope: Self::Scope);
 }

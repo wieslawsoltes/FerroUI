@@ -4,12 +4,11 @@ use crate::media::effects::{EffectExtensions, ImmutableBlurEffect};
 use crate::media::BoxShadows;
 use crate::rendering::composition::drawing::RenderDataStream;
 use crate::{Rect, RoundedRect};
-use std::rc::Rc;
 
 #[test]
 fn effect_inflates_child_bounds_by_padding() {
     let mut stream = RenderDataStream::new();
-    stream.push_effect(Some(Rc::new(ImmutableBlurEffect::new(5.0))), Rect::new(0.0, 0.0, 100.0, 100.0));
+    stream.push_effect(Some(std::sync::Arc::new(ImmutableBlurEffect::new(5.0))), Rect::new(0.0, 0.0, 100.0, 100.0));
     stream.draw_rectangle(
         None,
         None,
@@ -26,7 +25,7 @@ fn effect_inflates_child_bounds_by_padding() {
 #[test]
 fn empty_effect_scope_has_null_bounds() {
     let mut stream = RenderDataStream::new();
-    stream.push_effect(Some(Rc::new(ImmutableBlurEffect::new(5.0))), Rect::new(0.0, 0.0, 100.0, 100.0));
+    stream.push_effect(Some(std::sync::Arc::new(ImmutableBlurEffect::new(5.0))), Rect::new(0.0, 0.0, 100.0, 100.0));
     stream.pop();
     assert_eq!(None, stream.calculate_bounds());
 }

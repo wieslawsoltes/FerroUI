@@ -3,7 +3,6 @@ use crate::media::{BoxShadows, IBrush, IEffect, IPen, ImmediateDrawingContext, R
 use crate::platform::{IBitmapImpl, IDrawingContextImpl, IGeometryImpl, IGlyphRunImpl};
 use crate::rendering::scene_graph::ICustomDrawOperation;
 use crate::{Matrix, Point, Rect, RoundedRect};
-use std::rc::Rc;
 use std::sync::Arc;
 
 #[derive(Clone, Copy, PartialEq, Eq)]
@@ -149,7 +148,7 @@ impl IRenderDataVisitor for ReplayVisitor<'_> {
         ReplayScope::new(ReplayScopeKind::TextOptions, true)
     }
 
-    fn on_push_effect(&mut self, effect: Option<&Rc<dyn IEffect>>, bounds: Rect) -> ReplayScope {
+    fn on_push_effect(&mut self, effect: Option<&std::sync::Arc<dyn crate::media::IImmutableEffect>>, bounds: Rect) -> ReplayScope {
         let mut active = false;
         if let Some(effect) = effect {
             if let Some(effect_impl) = self.context.as_drawing_context_impl_with_effects() {

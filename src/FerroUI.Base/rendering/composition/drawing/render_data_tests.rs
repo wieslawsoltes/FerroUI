@@ -603,7 +603,7 @@ fn disposing_immediate_scene_brush_content_releases_the_custom_operations() {
 fn replaying_an_effect_uses_the_effect_support_of_the_platform_context() {
     use crate::media::effects::{IEffect, ImmutableBlurEffect};
 
-    let effect: Rc<dyn IEffect> = Rc::new(ImmutableBlurEffect::new(4.0));
+    let effect: std::sync::Arc<dyn crate::media::IImmutableEffect> = std::sync::Arc::new(ImmutableBlurEffect::new(4.0));
     let mut stream = RenderDataStream::new();
     stream.push_effect(Some(effect), Rect::new(0.0, 0.0, 10.0, 10.0));
     let red = brush();

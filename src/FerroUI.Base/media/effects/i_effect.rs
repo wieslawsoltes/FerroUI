@@ -48,8 +48,10 @@ pub trait IEffect: 'static {
         None
     }
 
-    /// The effect as an [`IImmutableEffect`] handle, when it is immutable.
-    fn into_immutable_effect(self: Rc<Self>) -> Option<Rc<dyn IImmutableEffect>> {
+    /// The effect as an [`IImmutableEffect`] handle, when it is immutable: a
+    /// copy in a handle that can be shared with the render thread (immutable
+    /// effects are values and compare structurally).
+    fn into_immutable_effect(self: Rc<Self>) -> Option<std::sync::Arc<dyn IImmutableEffect>> {
         None
     }
 
@@ -91,11 +93,11 @@ impl std::fmt::Debug for dyn IEffect {
 /// A mutable effect which can return an immutable clone of itself.
 pub trait IMutableEffect: IEffect {
     /// Creates an immutable clone of the effect.
-    fn to_immutable(&self) -> Rc<dyn IImmutableEffect>;
+    fn to_immutable(&self) -> std::sync::Arc<dyn IImmutableEffect>;
 }
 
 /// An immutable effect, which compares structurally.
-pub trait IImmutableEffect: IEffect {
+pub trait IImmutableEffect: IEffect + Send + Sync {
     /// Whether the effect has the same parameters as `other`.
     fn equals(&self, other: Option<&dyn IEffect>) -> bool;
 }
@@ -150,7 +152,7 @@ impl<T: ObjectType + Upcast<Effect>> IEffect for RefAdapter<T> {
 }
 
 impl<T: ObjectType + Upcast<Effect>> IMutableEffect for RefAdapter<T> {
-    fn to_immutable(&self) -> Rc<dyn IImmutableEffect> {
+    fn to_immutable(&self) -> std::sync::Arc<dyn IImmutableEffect> {
         let object = self.object();
         if let Some(blur) = object.downcast_ref::<BlurEffect>() {
             blur.to_immutable()

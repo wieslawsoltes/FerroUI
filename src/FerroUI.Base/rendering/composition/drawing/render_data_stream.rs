@@ -245,7 +245,7 @@ impl RenderDataStream {
         self.enter_scope();
     }
 
-    pub fn push_effect(&mut self, effect: Option<Rc<dyn IEffect>>, bounds: Rect) {
+    pub fn push_effect(&mut self, effect: Option<Arc<dyn crate::media::IImmutableEffect>>, bounds: Rect) {
         let payload =
             PushEffectPayload { effect: self.resources.intern(effect.map(RenderDataResource::Effect)), bounds };
         self.writer.write_payload(payload);

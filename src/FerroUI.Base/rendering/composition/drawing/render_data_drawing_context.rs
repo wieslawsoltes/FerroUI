@@ -381,7 +381,7 @@ impl IDrawingContextCore for RenderDataDrawingContext {
     fn push_effect_core(&mut self, effect: &Rc<dyn IEffect>, bounds: Rect) {
         let before = self.stream().opcode_length();
         let padding = EffectExtensions::get_effect_output_padding(Some(&**effect));
-        let effect = EffectExtensions::to_immutable(effect) as Rc<dyn IEffect>;
+        let effect = EffectExtensions::to_immutable(effect);
         self.stream().push_effect(Some(effect), bounds.inflate_thickness(padding));
         self.pushed_scope(before);
     }

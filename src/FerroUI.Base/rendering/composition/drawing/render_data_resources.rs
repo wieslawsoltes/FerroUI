@@ -31,7 +31,7 @@ pub enum RenderDataResource {
     /// upstream), shared as a glyph run is.
     Bitmap(Arc<Arc<crate::platform::SharedBitmapImpl>>),
     CustomDrawOperation(std::sync::Arc<dyn ICustomDrawOperation>),
-    Effect(Rc<dyn IEffect>),
+    Effect(Arc<dyn crate::media::IImmutableEffect>),
     ServerBrush { server: ServerObjectId, client: Rc<dyn IBrush> },
     ServerPen { server: ServerObjectId, client: Rc<dyn IPen> },
     ServerGeometry { server: ServerObjectId, client: Rc<dyn IRenderDataGeometry> },
@@ -70,7 +70,7 @@ impl RenderDataResource {
             RenderDataResource::GlyphRun(v) => (Kind::GlyphRun, Arc::as_ptr(v) as *const () as usize),
             RenderDataResource::Bitmap(v) => (Kind::Bitmap, Arc::as_ptr(v) as *const () as usize),
             RenderDataResource::CustomDrawOperation(v) => (Kind::Custom, Arc::as_ptr(v) as *const () as usize),
-            RenderDataResource::Effect(v) => (Kind::Effect, address(v)),
+            RenderDataResource::Effect(v) => (Kind::Effect, Arc::as_ptr(v) as *const () as usize),
             RenderDataResource::ServerBrush { server, .. }
             | RenderDataResource::ServerPen { server, .. }
             | RenderDataResource::ServerGeometry { server, .. } => (Kind::Server, server.index()),
@@ -176,7 +176,7 @@ impl RenderDataResources {
         }
     }
 
-    pub fn effect(&self, handle: i32) -> Option<&Rc<dyn IEffect>> {
+    pub fn effect(&self, handle: i32) -> Option<&Arc<dyn crate::media::IImmutableEffect>> {
         match self.get(handle)? {
             RenderDataResource::Effect(effect) => Some(effect),
             _ => panic!("the render data resource is not an effect"),
