@@ -11,6 +11,16 @@
 // the test answers through the DevTools protocol, and saves through a download: a blob link without the
 // service worker of the platform, a response streamed by that worker when it is registered
 // (`?RegisterServiceWorker=true`).
+//
+// The same checks run against a site built with threads, which is recognised by the file the build
+// adds to such a site (ferroui-threads.js) and served cross-origin isolated:
+//
+//   scripts/build-browser.sh storage_view --threads
+//   node scripts/browser/tests/storage_view.test.mjs target/browser-threads/storage_view
+//
+// Three things differ there: the memory of the module is fixed, so the large write does not grow it;
+// the service worker is registered as `ferroui-sw.js?coi=1`; and one more check opens the page
+// without the headers, where that one worker has to isolate the page and stream the download.
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
@@ -19,6 +29,9 @@ import { open, run, assert, sleep } from "../harness.mjs";
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..", "..", "..");
 const site = process.argv[2] ?? path.join(process.env.CARGO_TARGET_DIR ?? path.join(root, "target"), "browser", "storage_view");
+const threaded = fs.existsSync(path.join(site, "ferroui-threads.js"));
+// The address the service worker is registered with (interop/ferro_module.rs, ferroui-threads.js).
+const SERVICE_WORKER = threaded ? "ferroui-sw.js?coi=1" : "ferroui-sw.js";
 
 // Installs the pickers of the tests and a fresh origin private file system:
 // input.txt ("first file"), second.txt ("second file"), saved.txt (empty) and the folder work/.
@@ -53,8 +66,10 @@ const STUBS = `(async () => {
     return true;
 })()`;
 
-async function start({ query = "", stubs = true } = {}) {
-    const page = await open(site, { query, width: 320, height: 200 });
+// `isolated`: whether the server sends the headers of cross-origin isolation (default: to a threaded
+// site, which cannot start without them unless its service worker adds them).
+async function start({ query = "", stubs = true, isolated = threaded } = {}) {
+    const page = await open(site, { query, width: 320, height: 200, isolated });
     await page.waitForView(200);
     if (stubs) { await page.evaluate(STUBS); }
     // Runs a scenario and resolves to its outcome as an object of name/value pairs.
@@ -120,12 +135,25 @@ check("the save picker suggests the name with its extension and the written stre
     await page.waitFor(`opfsText("saved.txt").then((text) => text === "Hello, storage")`, 10000);
 });
 
-check("a large file written while the module memory grows reads back unchanged", async (page) => {
+// The size is read from the memory object, not from a view of the module: the object answers with
+// the current buffer whichever thread grew the memory.
+const MEMORY = "storageView.wasmMemory.buffer.byteLength";
+check(threaded
+    ? "a large file written through the fixed, shared memory of a threaded module reads back unchanged"
+    : "a large file written while the module memory grows reads back unchanged", async (page) => {
     const length = 3000000;
-    const memoryBefore = await page.evaluate("storageView.HEAPU8.buffer.byteLength");
+    expect(await page.evaluate("storageView.wasmMemory instanceof WebAssembly.Memory"), true, "the module exports its memory");
+    expect(await page.evaluate("Object.prototype.toString.call(storageView.wasmMemory.buffer)"),
+        threaded ? "[object SharedArrayBuffer]" : "[object ArrayBuffer]", "the buffer of the memory");
+    const memoryBefore = await page.evaluate(MEMORY);
     expect((await page.scenario("large", String(length), { timeout: 60000 })).written, String(length), "written");
-    const memoryAfter = await page.evaluate("storageView.HEAPU8.buffer.byteLength");
-    assert(memoryAfter > memoryBefore, `the module memory did not grow (${memoryBefore} bytes)`);
+    const memoryAfter = await page.evaluate(MEMORY);
+    if (threaded) {
+        // scripts/build-browser.sh links a threaded module with a memory that does not grow.
+        expect(memoryAfter, memoryBefore, "size of the fixed memory after the write");
+    } else {
+        assert(memoryAfter > memoryBefore, `the module memory did not grow (${memoryBefore} bytes)`);
+    }
     await page.evaluate("(async () => { pickerResult.open = [await opfsHandle('saved.txt')]; })()");
     const result = await page.scenario("read_large", String(length), { timeout: 60000 });
     expect(result.length, String(length), "length read back"); expect(result.equal, "true", "content read back");
@@ -253,13 +281,16 @@ check("without the service worker none is registered, and the polyfill saves thr
     assert(links.every((link) => link.startsWith("blob:")), `the download went through ${JSON.stringify(links)}`);
 }, { query: "?PreferPolyfill=true", stubs: false });
 
-check("the service worker is registered at the root of the site and streams the polyfill's download", async (page) => {
+// The worker of the platform is registered for the directory of the site, and a file saved through
+// the polyfill reaches the download as a response the worker streams.
+async function expectStreamedSave(page) {
     const registration = JSON.parse(await page.evaluate(`navigator.serviceWorker.ready.then((r) => JSON.stringify({
         scope: r.scope, script: r.active && r.active.scriptURL, state: r.active && r.active.state }))`));
     const origin = await page.evaluate("location.origin");
     expect(registration.scope, `${origin}/`, "scope");
-    expect(registration.script, `${origin}/ferroui-sw.js`, "script");
+    expect(registration.script, `${origin}/${SERVICE_WORKER}`, "script");
     expect(registration.state, "activated", "state");
+    expect(await page.evaluate("navigator.serviceWorker.getRegistrations().then((registrations) => registrations.length)"), 1, "registrations");
 
     const downloads = fs.mkdtempSync(path.join(os.tmpdir(), "ferroui-downloads-"));
     await page.send("Browser.setDownloadBehavior", { behavior: "allow", downloadPath: downloads });
@@ -271,6 +302,31 @@ check("the service worker is registered at the root of the site and streams the 
     // worker, which the site does not have (the server answers 404): the worker answered with the stream.
     expect(await page.evaluate(`Array.from(document.querySelectorAll("iframe[hidden]")).map((f) => f.src).join()`), `${origin}/report.txt`, "download frame");
     expect(await page.evaluate(`fetch("/report.txt").then((r) => r.status)`), 404, "status of the address on the server");
+}
+
+check("the service worker is registered at the root of the site and streams the polyfill's download", async (page) => {
+    await expectStreamedSave(page);
 }, { query: "?PreferPolyfill=true&RegisterServiceWorker=true", stubs: false });
+
+// A threaded site on a host that cannot send the headers (a static host): the host page registers
+// the service worker to isolate itself and reloads once, and the application registers the same
+// address. One worker has to do both jobs, or the second registration would take the isolation,
+// and with it the shared memory of the module, away.
+if (threaded) {
+    check("without the headers one service worker isolates the page and streams the polyfill's download", async (page) => {
+        expect(await page.evaluate("self.crossOriginIsolated"), true, "the page is cross-origin isolated");
+        expect(page.navigations.length, 2, `loads of the page (${page.navigations.join(", ")})`);
+        expect(await page.evaluate("navigator.serviceWorker.controller && navigator.serviceWorker.controller.scriptURL"),
+            `${await page.evaluate("location.origin")}/${SERVICE_WORKER}`, "the worker that controls the page");
+        await expectStreamedSave(page);
+        // The registration of the application did not replace the worker that isolates the page:
+        // a new load is still isolated, and the module starts again.
+        await page.evaluate("location.reload()");
+        await page.waitForView(200);
+        await page.waitFor("globalThis.storageView && storageView.storageViewResult");
+        expect(await page.evaluate("self.crossOriginIsolated"), true, "the page is cross-origin isolated after another load");
+        expect(await page.evaluate("navigator.serviceWorker.getRegistrations().then((registrations) => registrations.length)"), 1, "registrations after another load");
+    }, { query: "?PreferPolyfill=true&RegisterServiceWorker=true", stubs: false, isolated: false });
+}
 
 await run(checks);
