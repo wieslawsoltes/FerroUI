@@ -10,6 +10,7 @@ members = [
     "src/FerroUI.Native",
     "src/FerroUI.Desktop",
     "src/Browser/FerroUI.Browser",
+    "src/Headless/FerroUI.Headless",
     "src/FerroUI.Fonts.Inter",
     "src/FerroUI.Dialogs",
     "src/FerroUI.Themes.Simple",
@@ -46,6 +47,7 @@ ferroui-microcom = { path = "src/FerroUI.MicroCom" }
 ferroui-native = { path = "src/FerroUI.Native" }
 ferroui-desktop = { path = "src/FerroUI.Desktop" }
 ferroui-browser = { path = "src/Browser/FerroUI.Browser" }
+ferroui-headless = { path = "src/Headless/FerroUI.Headless" }
 ferroui-fonts-inter = { path = "src/FerroUI.Fonts.Inter" }
 ferroui-dialogs = { path = "src/FerroUI.Dialogs" }
 ferroui-themes-simple = { path = "src/FerroUI.Themes.Simple" }
