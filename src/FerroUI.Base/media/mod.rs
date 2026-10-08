@@ -1,6 +1,8 @@
 //! Colors, brushes, geometry, text and drawing.
 
 mod color;
+#[cfg(test)]
+mod color_tests;
 mod colors;
 mod drawing_context;
 #[cfg(test)]
