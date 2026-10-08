@@ -120,11 +120,1021 @@ upstream = ["Data/Optional.cs"]
 kind = "not-applicable"
 reason = "Optional<T> is Rust `Option<T>` (porting guide, Types table)"
 
+# Data (bindings). DEVIATIONS.md, "Bindings", explains the entries that replace reflection.
+
+[[map]]
+project = "Avalonia.Base"
+upstream = ["Data/AssignBindingAttribute.cs"]
+kind = "replaced"
+rust = "ferro_property.rs"
+reason = "an attribute read by the markup compiler: a registered property states it with `StyledPropertyOptions::assign_binding` (`FerroProperty::assign_binding`), a plain property with the `AssignBinding` attribute of its markup metadata (`metadata::attributes::ASSIGN_BINDING`)"
+
+[[map]]
+project = "Avalonia.Base"
+upstream = ["Data/Core/BindingError.cs"]
+kind = "renamed"
+rust = "data/core/binding_error.rs"
+types = { BindingError = "ExpressionError" }
+reason = "the error state of a binding expression is `ExpressionError`; `data::BindingError` is the error object itself (the `Exception` of the original)"
+
+[[map]]
+project = "Avalonia.Base"
+upstream = ["Data/Core/StreamBindingExtensions.cs"]
+kind = "not-applicable"
+reason = "markers for the `^` operator inside a LINQ expression tree (they throw when called); a path is built with `CompiledBindingPathBuilder::stream_task` / `stream_observable`"
+
+[[map]]
+project = "Avalonia.Base"
+upstream = ["Data/Core/Parsers/BindingExpressionVisitor.cs", "Data/Core/Parsers/BindingExpressionVisitorMembers.cs"]
+kind = "not-applicable"
+reason = "visits a LINQ expression tree (`Expression<Func<TIn, TOut>>`) to build a binding path; Rust has no expression trees, the path is written with `CompiledBindingPathBuilder` (DEVIATIONS.md, Bindings)"
+
+[[map]]
+project = "Avalonia.Base"
+upstream = ["Data/Core/ExpressionNodes/IPropertyAccessorNode.cs", "Data/Core/ExpressionNodes/ISettableNode.cs", "Data/Core/ExpressionNodes/SourceNode.cs"]
+kind = "merged"
+rust = "data/core/expression_nodes/expression_node.rs"
+reason = "the contracts of the nodes are declared next to `ExpressionNode`, which hands them out (`as_settable`, `as_property_accessor_node`, `as_source_node`)"
+
+[[map]]
+project = "Avalonia.Base"
+upstream = ["Data/Core/ExpressionNodes/ParentDataContextNode.cs", "Data/Core/ExpressionNodes/DataContextNodeBase.cs"]
+kind = "merged"
+rust = "data/core/expression_nodes/data_context_node.rs"
+types = { DataContextNodeBase = "DataContextNode" }
+reason = "the two data context nodes share one file; the `SelectSource` of their base class is the function `select_data_context_source` both call from `SourceNode::select_source`"
+
+[[map]]
+project = "Avalonia.Base"
+upstream = ["Data/Core/ExpressionNodes/Reflection/ReflectionIndexerNode.cs"]
+kind = "renamed"
+rust = "data/core/expression_nodes/reflection_indexer_node.rs"
+reason = "there is no `reflection` directory: the node resolves the indexer through the binding and markup metadata of the source"
+
+[[map]]
+project = "Avalonia.Base"
+upstream = ["Data/Core/ExpressionNodes/Reflection/ReflectionTypeCastNode.cs"]
+kind = "renamed"
+rust = "data/core/expression_nodes/type_cast_node.rs"
+types = { ReflectionTypeCastNode = "TypeCastNode" }
+reason = "the cast of a string path tests the value against a `CastTarget` (a class or a value type) instead of `Type.IsInstanceOfType`"
+
+[[map]]
+project = "Avalonia.Base"
+upstream = ["Data/Core/ExpressionNodes/Reflection/DynamicPluginPropertyAccessorNode.cs"]
+kind = "merged"
+rust = "data/core/expression_nodes/property_accessor_node.rs"
+types = { DynamicPluginPropertyAccessorNode = "PropertyAccessorNode" }
+reason = "`PropertyAccessorNode::new_dynamic`: without a fixed plugin the node asks the registered plugins (`BindingPlugins::property_accessors`) for the first one that matches the source"
+
+[[map]]
+project = "Avalonia.Base"
+upstream = ["Data/Core/ExpressionNodes/Reflection/DynamicPluginStreamNode.cs"]
+kind = "merged"
+rust = "data/core/expression_nodes/stream_node.rs"
+types = { DynamicPluginStreamNode = "StreamNode" }
+reason = "`StreamNode::new_dynamic`: without a fixed plugin the node asks the registered stream plugins for the first one that matches the source"
+
+[[map]]
+project = "Avalonia.Base"
+upstream = ["Data/Core/ExpressionNodes/Reflection/ExpressionTreeIndexerNode.cs"]
+kind = "not-applicable"
+reason = "an indexer node built from a LINQ `IndexExpression` and compiled delegates; an indexer of a compiled path is a property element (`CompiledBindingPathBuilder::indexer_property`, `list_item`, `dictionary_item`), one of a string path is `ReflectionIndexerNode`"
+
+[[map]]
+project = "Avalonia.Base"
+upstream = ["Data/Core/Plugins/IDataValidationPlugin.cs", "Data/Core/Plugins/IPropertyAccessorPlugin.cs"]
+kind = "merged"
+rust = "data/core/plugins/i_property_accessor.rs"
+reason = "the plugin contracts are declared next to the accessor contract they produce"
+
+[[map]]
+project = "Avalonia.Base"
+upstream = ["Data/Core/Plugins/ObservableStreamPlugin.cs", "Data/Core/Plugins/ObservableStreamPlugin`1.cs"]
+kind = "merged"
+rust = "data/core/plugins/i_stream_plugin.rs"
+reason = "one plugin for `ObservableValue` (an observable of untyped values), declared next to the stream plugin contract; the generic plugin has no separate form because the value is boxed when the observable is wrapped"
+
+[[map]]
+project = "Avalonia.Base"
+upstream = ["Data/Core/Plugins/ReflectionMethodAccessorPlugin.cs"]
+kind = "renamed"
+rust = "data/core/plugins/method_accessor_plugin.rs"
+types = { ReflectionMethodAccessorPlugin = "MethodAccessorPlugin" }
+reason = "the plugin that matches a method by name is `MethodAccessorPlugin`, which finds the method in the markup metadata (`markup_members::find_best_command_method`) or the binding metadata of the source instead of reflecting over its type"
+
+[[map]]
+project = "Avalonia.Base"
+upstream = ["Data/Core/Plugins/DataAnnotationsValidationPlugin.cs"]
+kind = "not-applicable"
+reason = "validates against the `System.ComponentModel.DataAnnotations` attributes of a property, read by reflection: Rust has no attributes on members and the port declares none for validation (DEVIATIONS.md, Bindings)"
+
+# Styling
+
+[[map]]
+project = "Avalonia.Base"
+upstream = ["Styling/PropertySetterInstance.cs"]
+kind = "not-applicable"
+reason = "no caller upstream: since the value store works on value frames, Setter.Instance returns the setter itself (a value entry), a PropertySetterTemplateInstance or one of the direct property instances, and nothing constructs PropertySetterInstance<T>"
+
+[[map]]
+project = "Avalonia.Base"
+upstream = ["Styling/ThemeVariantTypeConverter.cs"]
+kind = "replaced"
+rust = "styling/theme_variant.rs"
+types = { ThemeVariantTypeConverter = "ThemeVariant" }
+reason = "a TypeConverter that only converts from text: `FromStr for ThemeVariant`, which the markup metadata of the type names as its `parse` (porting guide, Text conversion)"
+
+# Platform
+
+[[map]]
+project = "Avalonia.Base"
+upstream = ["Platform/IReadableBitmapImpl.cs", "Platform/IRenderTargetBitmapImpl.cs", "Platform/IWriteableBitmapImpl.cs"]
+kind = "merged"
+rust = "platform/i_bitmap_impl.rs"
+reason = "the bitmap contracts that extend IBitmapImpl live next to it"
+
+[[map]]
+project = "Avalonia.Base"
+upstream = ["Platform/RenderTargetProperties.cs"]
+kind = "merged"
+rust = "platform/i_render_target.rs"
+reason = "the property records of a render target live next to IRenderTarget"
+
+[[map]]
+project = "Avalonia.Base"
+upstream = ["Platform/VisualQueryProvider.cs"]
+kind = "renamed"
+rust = "styling/visual_query_provider.rs"
+reason = "ported next to the container queries of Styling, its only users"
+
+[[map]]
+project = "Avalonia.Base"
+upstream = ["Platform/LockedFramebuffer.cs"]
+kind = "replaced"
+rust = "platform/retained_framebuffer.rs"
+types = { LockedFramebuffer = "RetainedLockedFramebuffer" }
+reason = "a locked framebuffer over a bare address cannot give safe access to its memory (`ILockedFramebuffer::with_data`), and unsafe code is not allowed in this crate: every owner of pixel memory implements ILockedFramebuffer over the memory it owns (RetainedLockedFramebuffer here, the deferred framebuffer of FerroUI.Native)"
+
+[[map]]
+project = "Avalonia.Base"
+upstream = ["Platform/Internal/Constants.cs"]
+kind = "not-applicable"
+reason = "the name of the manifest resource into which the build task packs the assets of an assembly: a crate registers each asset with the asset registry (platform/internal/asset_registry.rs), there is no packed resource to name"
+
+[[map]]
+project = "Avalonia.Base"
+upstream = ["Platform/Internal/SlicedStream.cs"]
+kind = "not-applicable"
+reason = "a Stream over one asset inside the packed manifest resource of an assembly: an embedded asset is a `&'static [u8]` of its own, read through `AssetStream`"
+
+[[map]]
+project = "Avalonia.Base"
+upstream = ["Platform/Internal/AssetDescriptor.cs"]
+kind = "merged"
+rust = "platform/internal/asset_descriptor.rs"
+types = { AssemblyResourceDescriptor = "EmbeddedAssetDescriptor", AvaloniaResourceDescriptor = "EmbeddedAssetDescriptor" }
+members = "waive"
+reason = "the two descriptors differ in where the bytes come from (a manifest resource by name, a slice of the packed resource); both kinds of asset are registered as embedded byte slices, described by EmbeddedAssetDescriptor"
+
+[[map]]
+project = "Avalonia.Base"
+upstream = ["Platform/Interop/Utf8Buffer.cs"]
+kind = "not-applicable"
+reason = "a SafeHandle over a pinned, null-terminated UTF-8 copy of a string for P/Invoke: `std::ffi::CString` in the crates that call native code"
+
+# Metadata: the attribute classes. An attribute on a type or member is a `MarkupAttribute`
+# (name, arguments, named arguments) in the markup metadata of that type, declared in the
+# `markup:` part of `ferro_class_info!` or in `ferro_markup_type!` (generated parts:
+# scripts/generate_markup_types.py); `metadata::attributes` holds the names.
+
+[[map]]
+project = "Avalonia.Base"
+upstream = ["Metadata/AmbientAttribute.cs"]
+kind = "not-applicable"
+reason = "no use upstream: nothing carries [Ambient] and nothing reads it (ambient lookups of the markup compiler go by type, as do the ones of the port)"
+
+[[map]]
+project = "Avalonia.Base"
+upstream = ["Metadata/AvaloniaListAttribute.cs"]
+kind = "replaced"
+rust = "metadata/markup_type.rs"
+reason = "the MarkupAttribute named `attributes::FERRO_LIST` in the `attributes:` of a type or the attribute list of a property; Separators and SplitOptions are its named arguments (`FerroList(Separators = [\",\", \" \"])`)"
+
+[[map]]
+project = "Avalonia.Base"
+upstream = ["Metadata/ConstructorArgumentAttribute.cs"]
+kind = "replaced"
+rust = "metadata/markup_type.rs"
+reason = "the MarkupAttribute named `attributes::CONSTRUCTOR_ARGUMENT` in the attribute list of a property; ArgumentName is its argument (`ConstructorArgument(\"name\")`)"
+
+[[map]]
+project = "Avalonia.Base"
+upstream = ["Metadata/ContentAttribute.cs"]
+kind = "replaced"
+rust = "metadata/markup_type.rs"
+reason = "`MarkupType::content_property`, stated with `content: Name` in the declaration of the type (`attributes::CONTENT` names the attribute for completeness)"
+
+[[map]]
+project = "Avalonia.Base"
+upstream = ["Metadata/ControlTemplateScopeAttribute.cs"]
+kind = "replaced"
+rust = "metadata/markup_type.rs"
+reason = "the MarkupAttribute named `attributes::CONTROL_TEMPLATE_SCOPE` in the `attributes:` of a type"
+
+[[map]]
+project = "Avalonia.Base"
+upstream = ["Metadata/DataTypeAttribute.cs"]
+kind = "replaced"
+rust = "metadata/markup_type.rs"
+reason = "the MarkupAttribute named `attributes::DATA_TYPE` in the attribute list of a property"
+
+[[map]]
+project = "Avalonia.Base"
+upstream = ["Metadata/DependsOnAttribute.cs"]
+kind = "replaced"
+rust = "metadata/markup_type.rs"
+reason = "the MarkupAttribute named `attributes::DEPENDS_ON` in the attribute list of a property or method; Name is its argument (`DependsOn(\"ContentTemplate\")`)"
+
+[[map]]
+project = "Avalonia.Base"
+upstream = ["Metadata/InheritDataTypeFromAttribute.cs"]
+kind = "replaced"
+rust = "metadata/markup_type.rs"
+reason = "the MarkupAttribute named `attributes::INHERIT_DATA_TYPE_FROM` on a constructor parameter or property; ScopeKind is its argument, the value of InheritDataTypeFromScopeKind as an integer literal (1 = Style, 2 = ControlTemplate), which the markup compiler compares with the scope kinds of its data type scopes"
+
+[[map]]
+project = "Avalonia.Base"
+upstream = ["Metadata/InheritDataTypeFromItemsAttribute.cs"]
+kind = "replaced"
+rust = "metadata/markup_type.rs"
+reason = "the MarkupAttribute named `attributes::INHERIT_DATA_TYPE_FROM_ITEMS` in the attribute list of a property; AncestorItemsProperty is its argument and AncestorType a named argument"
+
+[[map]]
+project = "Avalonia.Base"
+upstream = ["Metadata/MarkupExtensionOption.cs"]
+kind = "replaced"
+rust = "metadata/markup_type.rs"
+reason = "the MarkupAttributes named `attributes::MARKUP_EXTENSION_OPTION` (Value is its argument, Priority a named argument) and `attributes::MARKUP_EXTENSION_DEFAULT_OPTION` in the attribute list of a property of an option markup extension"
+
+[[map]]
+project = "Avalonia.Base"
+upstream = ["Metadata/NotClientImplementableAttribute.cs"]
+kind = "replaced"
+rust = "metadata/markup_type.rs"
+reason = "the MarkupAttribute named `attributes::NOT_CLIENT_IMPLEMENTABLE` in the `attributes:` of a type; the build-time analyzer that enforces it upstream has no counterpart"
+
+[[map]]
+project = "Avalonia.Base"
+upstream = ["Metadata/PrivateApiAttribute.cs"]
+kind = "replaced"
+rust = "metadata/markup_type.rs"
+reason = "the MarkupAttribute named `attributes::PRIVATE_API` in the `attributes:` of a type; in Rust code private API is `pub(crate)` or `#[doc(hidden)]`"
+
+[[map]]
+project = "Avalonia.Base"
+upstream = ["Metadata/TemplateContent.cs"]
+kind = "replaced"
+rust = "metadata/markup_type.rs"
+reason = "the MarkupAttribute named `attributes::TEMPLATE_CONTENT` in the attribute list of a property; TemplateResultType is a named argument (`type(T)`)"
+
+[[map]]
+project = "Avalonia.Base"
+upstream = ["Metadata/TrimSurroundingWhitespaceAttribute.cs"]
+kind = "replaced"
+rust = "metadata/markup_type.rs"
+reason = "the MarkupAttribute named `attributes::TRIM_SURROUNDING_WHITESPACE` in the `attributes:` of a type"
+
+[[map]]
+project = "Avalonia.Base"
+upstream = ["Metadata/UnstableAttribute.cs"]
+kind = "replaced"
+rust = "metadata/markup_type.rs"
+reason = "the MarkupAttribute named `attributes::UNSTABLE` on a type or member; Message is its argument. Nothing warns a Rust caller: the build-time analyzer behind the attribute has no counterpart"
+
+[[map]]
+project = "Avalonia.Base"
+upstream = ["Metadata/UsableDuringInitializationAttribute.cs"]
+kind = "replaced"
+rust = "metadata/markup_type.rs"
+reason = "the MarkupAttribute named `attributes::USABLE_DURING_INITIALIZATION` in the `attributes:` of a type"
+
+[[map]]
+project = "Avalonia.Base"
+upstream = ["Metadata/WhitespaceSignificantCollectionAttribute.cs"]
+kind = "replaced"
+rust = "metadata/markup_type.rs"
+reason = "the MarkupAttribute named `attributes::WHITESPACE_SIGNIFICANT_COLLECTION` in the `attributes:` of a collection type"
+
+[[map]]
+project = "Avalonia.Base"
+upstream = ["Metadata/XmlnsDefinitionAttribute.cs"]
+kind = "replaced"
+rust = "metadata/markup_assembly.rs"
+types = { XmlnsDefinitionAttribute = "XmlnsDefinition" }
+reason = "an assembly attribute: the struct `XmlnsDefinition { xml_namespace, namespace }` in `MarkupAssembly::xmlns_definitions`, which a crate declares once and registers from its `register_types()`"
+
+[[map]]
+project = "Avalonia.Base"
+upstream = ["Metadata/XmlnsPrefixAttribute.cs"]
+kind = "replaced"
+rust = "metadata/markup_assembly.rs"
+types = { XmlnsPrefixAttribute = "XmlnsPrefix" }
+reason = "an assembly attribute: the struct `XmlnsPrefix { xml_namespace, prefix }` in `MarkupAssembly::xmlns_prefixes`, which a crate declares once and registers from its `register_types()`"
+
+[[map]]
+project = "Avalonia.Base"
+upstream = ["Controls/Metadata/PseudoClassesAttribute.cs"]
+kind = "replaced"
+rust = "metadata/markup_type.rs"
+reason = "the MarkupAttribute named `attributes::PSEUDO_CLASSES` in the `attributes:` of a control type; the pseudo-classes are its arguments"
+
+[[map]]
+project = "Avalonia.Base"
+upstream = ["Controls/Metadata/TemplatePartAttribute.cs"]
+kind = "replaced"
+rust = "metadata/markup_type.rs"
+reason = "the MarkupAttribute named `attributes::TEMPLATE_PART` in the `attributes:` of a control type; Name and Type are its arguments and IsRequired a named argument (`TemplatePart(\"PART_Bar\", type(Ref<Border>), IsRequired = true)`)"
+
+# Reactive
+
+[[map]]
+project = "Avalonia.Base"
+upstream = ["Reactive/AvaloniaPropertyObservable.cs", "Reactive/AvaloniaPropertyBindingObservable.cs"]
+kind = "merged"
+rust = "ferro_object_extensions.rs"
+types = { AvaloniaPropertyObservable = "PropertyObservable", AvaloniaPropertyBindingObservable = "PropertyObservable" }
+members = "waive"
+reason = "the observables behind GetObservable and GetBindingObservable are one private struct next to the extension methods that create them: PropertyObservable<TResult> with a function that reads the value (plain, converted or as a BindingValue)"
+
+[[map]]
+project = "Avalonia.Base"
+upstream = ["Reactive/AvaloniaPropertyChangedObservable.cs"]
+kind = "merged"
+rust = "ferro_object_extensions.rs"
+types = { AvaloniaPropertyChangedObservable = "ObjectPropertyChangedObservable" }
+members = "waive"
+reason = "ported next to `get_property_changed_observable`, which returns it; change notifications borrow their values, so its subscribers are closures and it is not built on LightweightObservableBase"
+
+# Diagnostics
+
+[[map]]
+project = "Avalonia.Base"
+upstream = ["Diagnostics/Diagnostic.cs", "Diagnostics/Diagnostic.Activities.cs", "Diagnostics/Diagnostic.Metrics.cs"]
+kind = "not-applicable"
+reason = "a facade over System.Diagnostics.ActivitySource and System.Diagnostics.Metrics (Meter, Histogram, observable counters), the instrumentation API of the .NET runtime, switched on by an AppContext switch: Rust has no such API and the port takes no tracing or metrics dependency, so nothing stands for the activity source and the meter. The values behind the three counters are ported (Interactive::total_handlers_count, Visual::rooted_visual_children_count, DispatcherTimer::active_timers_count), and the names of the meters and tags are in diagnostics/diagnostic_consts.rs"
+
+[[map]]
+project = "Avalonia.Base"
+upstream = ["Diagnostics/Diagnostic.Consts.cs"]
+kind = "renamed"
+rust = "diagnostics/diagnostic_consts.rs"
+types = { Meters = "DiagnosticMeters", Tags = "DiagnosticTags" }
+reason = "the nested classes of the partial class Diagnostic are the unit structs DiagnosticMeters and DiagnosticTags; the meter names start with `ferroui.` (rule 2 of the porting guide)"
+
+[[map]]
+project = "Avalonia.Base"
+upstream = ["Diagnostics/DebugDisplayHelper.cs"]
+kind = "not-applicable"
+reason = "ported in the controls crate, next to the levels of BuildDebugDisplay it serves: `append_optional_value` and `append_optional_boxed_value` of `ferroui_controls::utils::debug_display` (the object model of the base crate has no description virtual; see the waivers of AvaloniaObject.BuildDebugDisplay)"
+
+[[map]]
+project = "Avalonia.Base"
+upstream = ["Diagnostics/IAvaloniaObjectDebug.cs", "Diagnostics/INotifyCollectionChangedDebug.cs"]
+kind = "not-applicable"
+reason = "hand the delegates of an event to tests, which inspect them: the handlers of the port are closures in a HandlerList, which have no identity; the diagnostic of the object is `property_changed_subscriber_count`"
+
+[[map]]
+project = "Avalonia.Base"
+upstream = ["Diagnostics/TrimmingMessages.cs"]
+kind = "not-applicable"
+reason = "the messages of the [RequiresUnreferencedCode], [RequiresDynamicCode] and [UnconditionalSuppressMessage] attributes for the .NET trimmer and native AOT compiler"
+
+[[map]]
+project = "Avalonia.Base"
+upstream = ["Diagnostics/AvaloniaObjectExtensions.cs"]
+kind = "renamed"
+rust = "diagnostics/ferro_object_extensions.rs"
+types = { AvaloniaObjectExtensions = "FerroObjectDiagnosticExtensions" }
+reason = "the static class of extension methods is the trait FerroObjectDiagnosticExtensions, implemented for FerroObject (the root namespace has an extension class of the same name)"
+
 [[map]]
 project = "Avalonia.Base"
 upstream = ["Collections/Pooled/*"]
 kind = "not-applicable"
 reason = "ArrayPool-backed List<T>/Stack<T> (Collections.Pooled) that avoid garbage-collected allocations: Vec<T> (porting guide, Types table); WeakHashList keeps a pool of the lists it returns"
+
+# Utilities
+
+[[map]]
+project = "Avalonia.Base"
+upstream = ["Utilities/Ref.cs"]
+kind = "renamed"
+rust = "utilities/ref_countable.rs"
+types = { IRef = "RefCounted" }
+reason = "IRef<T> has one implementation, the private class Ref<T>: the struct RefCounted<T> is both (`Ref` names the object handle of the class model)"
+
+[[map]]
+project = "Avalonia.Base"
+upstream = ["Utilities/IdentifierParser.cs"]
+kind = "merged"
+rust = ["utilities/identifier_parser.rs", "utilities/character_reader.rs"]
+types = { IdentifierParser = "CharacterReader" }
+reason = "the extension methods of the static class are inherent methods of CharacterReader, in an `impl` block of identifier_parser.rs"
+
+[[map]]
+project = "Avalonia.Base"
+upstream = ["Utilities/KeywordParser.cs"]
+kind = "merged"
+rust = ["utilities/keyword_parser.rs", "utilities/character_reader.rs"]
+types = { KeywordParser = "CharacterReader" }
+reason = "the extension methods of the static class are inherent methods of CharacterReader, in an `impl` block of keyword_parser.rs"
+
+[[map]]
+project = "Avalonia.Base"
+upstream = ["Utilities/StyleClassParser.cs"]
+kind = "merged"
+rust = ["utilities/style_class_parser.rs", "utilities/character_reader.rs"]
+types = { StyleClassParser = "CharacterReader" }
+reason = "the extension method of the static class is an inherent method of CharacterReader, in an `impl` block of style_class_parser.rs"
+
+[[map]]
+project = "Avalonia.Base"
+upstream = ["Utilities/StringSplitter.cs"]
+kind = "renamed"
+rust = "media/string_splitter.rs"
+reason = "ported next to its two callers (BoxShadow, BoxShadows) as the module function `split_respecting_brackets`; the upstream tests are in utilities/string_splitter_tests.rs"
+
+[[map]]
+project = "Avalonia.Base"
+upstream = ["Utilities/TypeUtilities.cs"]
+kind = "replaced"
+rust = "data/core/value_type.rs"
+types = { TypeUtilities = "ValueTypes" }
+reason = "conversions over System.Type by reflection (IConvertible, TypeDescriptor, op_Implicit/op_Explicit lookup): `ValueTypes` makes the conversions between the registered value types (`try_convert`, `try_cast`, `accepts_null`, `identity_equals`)"
+
+[[map]]
+project = "Avalonia.Base"
+upstream = ["Utilities/SafeEnumerableAvaloniaList.cs"]
+kind = "replaced"
+rust = "collections/ferro_list.rs"
+types = { SafeEnumerableAvaloniaList = "FerroList" }
+reason = "the copy-on-write-while-enumerated behaviour is the behaviour of every FerroList<T>: enumeration works on a snapshot (`snapshot`, `for_each`) and a mutation copies the storage only while a snapshot is alive"
+
+[[map]]
+project = "Avalonia.Base"
+upstream = ["Utilities/SafeEnumerableHashSet.cs"]
+kind = "replaced"
+rust = "utilities/handler_list.rs"
+types = { SafeEnumerableHashSet = "HandlerList" }
+reason = "its one user is the listener set of Classes; the listeners of the port are closures in a HandlerList, which is invoked on a snapshot that is copied only when the list changes"
+
+[[map]]
+project = "Avalonia.Base"
+upstream = ["Utilities/AvaloniaResourcesIndex.cs"]
+kind = "replaced"
+rust = "platform/internal/asset_registry.rs"
+reason = "reader and writer of the index of the one manifest resource into which the build task packs the assets of an assembly: a crate registers each embedded asset as a (path, bytes) pair, there is no packed resource to index"
+
+[[map]]
+project = "Avalonia.Base"
+upstream = ["Utilities/FrugalList.cs"]
+kind = "not-applicable"
+reason = "list storage tuned to the managed heap (one object with 1, 3 or 6 item fields before an array, to save an object and its header per list): Vec<T> allocates nothing until the first item and is one allocation; the callers (FontFamily, FamilyNameCollection, SpanVector) hold a Vec. FrugalObjectList has no caller upstream"
+
+[[map]]
+project = "Avalonia.Base"
+upstream = ["Utilities/ImmutableReadOnlyListStructEnumerator.cs"]
+kind = "not-applicable"
+reason = "allocation-free IEnumerator<T> over an IReadOnlyList<T>: std::slice::Iter (the callers ArraySlice, FamilyNameCollection and NameTable iterate a slice)"
+
+[[map]]
+project = "Avalonia.Base"
+upstream = ["Utilities/AsyncEnumerableHelper.cs"]
+kind = "not-applicable"
+reason = "wraps an IEnumerable<T> as IAsyncEnumerable<T> for `await foreach`; no caller upstream, and the port has no asynchronous enumeration (porting guide: async members return DispatcherTask)"
+
+[[map]]
+project = "Avalonia.Base"
+upstream = ["Utilities/DisposableLock.cs"]
+kind = "not-applicable"
+reason = "System.Threading.Monitor behind an IDisposable: the guard of std::sync::Mutex::lock/try_lock. Its callers are the Metal devices of Avalonia.Native and Avalonia.iOS; the ported one (FerroUI.Native metal.rs) is used on the UI thread only and takes no lock"
+
+[[map]]
+project = "Avalonia.Base"
+upstream = ["Utilities/NonPumpingLockHelper.cs"]
+kind = "not-applicable"
+reason = "installs a SynchronizationContext whose Wait override keeps the CLR from pumping Win32 messages while the UI thread waits on a lock (IHelperImpl is implemented by Avalonia.Win32 only): a Rust lock never pumps messages and there is no synchronization context to replace"
+
+[[map]]
+project = "Avalonia.Base"
+upstream = ["Utilities/StopwatchHelper.cs"]
+kind = "not-applicable"
+reason = "polyfill of Stopwatch.GetElapsedTime of .NET 7; the port reads no process clock in core paths (porting guide, rule 4): its callers take the time of the dispatcher (`Dispatcher::now`)"
+
+[[map]]
+project = "Avalonia.Base"
+upstream = ["Utilities/StringBuilderCache.cs"]
+kind = "not-applicable"
+reason = "per-thread cache of one StringBuilder, to save the builder object and its buffer when a string is built: a Rust `String` is its own builder and becomes the result without a copy, so no buffer is left to cache"
+
+[[map]]
+project = "Avalonia.Base"
+upstream = ["Utilities/ThrowHelper.cs"]
+kind = "not-applicable"
+reason = "polyfills of ArgumentNullException.ThrowIfNull (.NET 6) and ArgumentException.ThrowIfNullOrEmpty (.NET 8): a Rust reference or value cannot be null, and the empty-string checks of its one caller of ThrowIfNullOrEmpty (DataFormat) are made in place"
+
+[[map]]
+project = "Avalonia.Base"
+upstream = ["AvaloniaPropertyChangedExtensions.cs"]
+kind = "merged"
+rust = "ferro_property_changed_event_args.rs"
+types = { AvaloniaPropertyChangedExtensions = "FerroPropertyChangedEventArgs" }
+reason = "the typed accessors (`get_old_value`, `get_new_value`, `get_old_and_new_value`) are inherent methods of the one event arguments type"
+
+[[map]]
+project = "Avalonia.Base"
+upstream = ["AvaloniaPropertyExtensions.cs"]
+kind = "merged"
+rust = "media/i_affects_render.rs"
+reason = "`can_value_affect_render` is a function of the module of the contract it tests for; `Visual::affects_render` calls it with the value type of the property"
+
+[[map]]
+project = "Avalonia.Base"
+upstream = ["EnumExtensions.cs"]
+kind = "not-applicable"
+reason = "flag tests over enums of any size through unsafe reinterpretation: flag enums are `bitflags!` types, whose `contains` and `intersects` are `HasAllFlags` and `HasAnyFlag`"
+
+[[map]]
+project = "Avalonia.Base"
+upstream = ["GeneratedAttachedPropertyAttribute.cs", "GeneratedDirectPropertyAttribute.cs", "GeneratedStyledPropertyAttribute.cs"]
+kind = "not-applicable"
+reason = "markers read by the upstream source generator of property definitions (tools/Avalonia.Generators): properties are declared with `ferro_property!` / `ferro_properties!`, which take the same options as arguments"
+
+[[map]]
+project = "Avalonia.Base"
+upstream = ["IDescription.cs"]
+kind = "replaced"
+rust = "data/core/untyped_binding_expression_base.rs"
+types = { IDescription = "UntypedBindingExpression" }
+reason = "the description is a member of each contract that has one (`UntypedBindingExpression::description`, `IndexerDescriptor::description`, `TypedBindingExpression::description`); the `as IDescription` test of the property log is that member (porting guide: C# `is` on an interface becomes a virtual)"
+
+[[map]]
+project = "Avalonia.Base"
+upstream = ["IDirectPropertyAccessor.cs", "IStyledPropertyAccessor.cs"]
+kind = "replaced"
+rust = "ferro_property.rs"
+types = { IDirectPropertyAccessor = "PropertyRoutes", IStyledPropertyAccessor = "PropertyRoutes" }
+reason = "the internal untyped accessor contracts of the property kinds are the crate-internal `PropertyRoutes` trait, which `StyledProperty<T>` and `DirectPropertyBase<T>` implement (`route_get_value`, `route_set_value`, `route_get_default_value` for the default or unset value, `route_is_valid_value`); `is_read_only` and `owner` are members of the property"
+
+[[map]]
+project = "Avalonia.Base"
+upstream = ["IDirectPropertyMetadata.cs", "IStyledPropertyMetadata.cs"]
+kind = "replaced"
+rust = "ferro_property_metadata.rs"
+types = { IDirectPropertyMetadata = "DirectPropertyMetadata", IStyledPropertyMetadata = "StyledPropertyMetadata" }
+reason = "[NotClientImplementable] untyped views of the typed metadata: the typed metadata is reached through the typed property (`get_metadata`), the untyped default or unset value through `PropertyRoutes::route_get_default_value`, and `enable_data_validation` through the base metadata"
+
+[[map]]
+project = "Avalonia.Base"
+upstream = ["IOptionalFeatureProvider.cs"]
+kind = "renamed"
+rust = "platform/i_optional_feature_provider.rs"
+reason = "the contract lives with the platform contracts that implement it"
+
+[[map]]
+project = "Avalonia.Base"
+upstream = ["Points.cs"]
+kind = "renamed"
+rust = "media/points.rs"
+reason = "the point list lives with the geometries and segments that hold it"
+
+[[map]]
+project = "Avalonia.Base"
+upstream = ["StyledElementExtensions.cs"]
+kind = "merged"
+rust = "styled_element_extensions.rs"
+types = { StyledElementExtensions = "StyledElement" }
+reason = "the extension methods are inherent methods of StyledElement"
+
+[[map]]
+project = "Avalonia.Base"
+upstream = ["StyledPropertyNonGenericHelper.cs"]
+kind = "replaced"
+rust = "ferro_property.rs"
+types = { StyledPropertyNonGenericHelper = "FerroProperty" }
+reason = "the non-generic throw helpers of invalid values are `FerroProperty::invalid_value_message`, `invalid_value_type` and `value_not_valid`, compiled once for all value types"
+
+[[map]]
+project = "Avalonia.Base"
+upstream = ["PropertyStore/FramePriority.cs"]
+kind = "renamed"
+rust = "property_store/frame_priority.rs"
+types = { FramePriorityExtensions = "FramePriority" }
+reason = "the extension methods are inherent methods of FramePriority"
+
+[[map]]
+project = "Avalonia.Base"
+upstream = ["PropertyStore/AvaloniaPropertyDictionaryPool.cs"]
+kind = "not-applicable"
+reason = "pool of the dictionaries that hold the old and new inherited values while the inheritance parent changes: `ValueStore::set_inheritance_parent` collects them in a local `Vec`"
+
+[[map]]
+project = "Avalonia.Base"
+upstream = ["PropertyStore/BindingEntryBaseNonGenericHelper.cs"]
+kind = "replaced"
+rust = "property_store/binding_entry.rs"
+types = { BindingEntryBaseNonGenericHelper = "BindingEntry" }
+reason = "the `Creating` and `CreatingQuiet` sentinel disposables are variants of the private `Subscription` enum of the binding entry"
+
+[[map]]
+project = "Avalonia.Base"
+upstream = ["PropertyStore/PropertyNotifying.cs"]
+kind = "replaced"
+rust = "property_store/effective_value.rs"
+types = { PropertyNotifying = "EffectiveValue" }
+reason = "the disposable scope that calls the `Notifying` callback of the property before and after a change notification is written out at its call sites (`EffectiveValue::notify_value_changed` and the two inherited-value notifications of `ValueStore`)"
+
+[[map]]
+project = "Avalonia.Base"
+upstream = ["PropertyStore/UntypedValueUtils.cs"]
+kind = "replaced"
+rust = "styled_property.rs"
+types = { UntypedValueUtils = "StyledProperty" }
+reason = "`StyledProperty::from_untyped` converts the untyped value and `BindingEntry::convert_and_validate` validates it"
+
+[[map]]
+project = "Avalonia.Base"
+upstream = ["Threading/CulturePreservingExecutionContext.cs"]
+kind = "not-applicable"
+reason = "wraps the .NET ExecutionContext so that a culture set by a dispatcher callback survives it: there is no execution context and no thread culture to flow; `OperationCore::execute` runs the callback directly"
+
+[[map]]
+project = "Avalonia.Base"
+upstream = ["Threading/NonPumpingSyncContext.cs"]
+kind = "not-applicable"
+reason = "a .NET SynchronizationContext that redirects the wait of the runtime to `NonPumpingLockHelper.IHelperImpl` (only the Win32 backend binds one, for COM STA threads): blocking primitives never run a message pump here, see the type comment of `FerroSynchronizationContext`"
+
+[[map]]
+project = "Avalonia.Base"
+upstream = ["Rendering/Composition/ContainerVisual.cs"]
+kind = "merged"
+rust = ["rendering/composition/container_visual.rs", "rendering/composition/visual.rs"]
+types = { CompositionContainerVisual = "CompositionVisual" }
+reason = "every visual has children, so `CompositionContainerVisual` is an alias of `CompositionVisual` and its members are members of that class"
+
+[[map]]
+project = "Avalonia.Base"
+upstream = ["Rendering/Composition/CompositionTransform.cs"]
+kind = "merged"
+rust = "rendering/composition/server/server_composition_simple_transform.rs"
+reason = "the file only adds `ITransform` to the generated `ServerCompositionSimpleTransform`, which is implemented next to the class"
+
+[[map]]
+project = "Avalonia.Base"
+upstream = ["Rendering/Composition/Drawing/RenderDataStream.HitTest.cs"]
+kind = "merged"
+rust = "rendering/composition/drawing/render_data_stream.rs"
+members = "waive"
+reason = "ported member for member in `rendering/composition/drawing/render_data_stream_hit_test.rs` (`RenderDataStream::hit_test` and `hit_test_geometry`, `HitTestScope`, `HitTestVisitor` with its `IRenderDataVisitor` impl); the scanner does not read that file, because it takes a file name that ends in `_test.rs` for a test, so the members are waived here instead of counted"
+
+[[map]]
+project = "Avalonia.Base"
+upstream = ["Rendering/Composition/Server/SimpleServerObject.cs"]
+kind = "merged"
+rust = "rendering/composition/server/server_object.rs"
+types = { SimpleServerObject = "IServerObject" }
+reason = "the base class of the server objects is the trait `IServerObject` (`deserialize_changes`, `deserialize_changes_core`, `values_invalidated`), declared next to `ServerObject`"
+
+[[map]]
+project = "Avalonia.Base"
+upstream = ["Rendering/Composition/Server/ServerCompositionCacheMode.cs"]
+kind = "merged"
+rust = "rendering/composition/server/server_composition_bitmap_cache.rs"
+types = { ServerCompositionCacheMode = "ServerCompositionBitmapCache" }
+reason = "the bitmap cache is the only cache mode, so the members of the abstract class (the visuals attached to the mode) are members of `ServerCompositionBitmapCache`, and `ServerCompositionCacheMode` is an alias of it"
+
+[[map]]
+project = "Avalonia.Base"
+upstream = ["Rendering/Composition/Server/ServerCompositionSurface.cs"]
+kind = "merged"
+rust = "rendering/composition/server/server_composition_surface.rs"
+types = { ServerCompositionSurface = "IServerCompositionSurface" }
+reason = "the abstract class is the trait `IServerCompositionSurface` (`bitmap`, `changed`), implemented by `ServerCompositionDrawingSurface`"
+
+[[map]]
+project = "Avalonia.Base"
+upstream = ["Rendering/Composition/Server/ServerCompositionVisual/ServerCompositionVisual.cs"]
+kind = "renamed"
+rust = "rendering/composition/server/server_composition_visual/mod.rs"
+reason = "the main file of the partial class is the module file of its directory"
+
+[[map]]
+project = "Avalonia.Base"
+upstream = ["Rendering/Composition/Server/ServerCompositionVisual/ServerCompositionVisual.Act.cs"]
+kind = "renamed"
+rust = ["rendering/composition/server/server_composition_visual/act.rs", "rendering/composition/server/server_composition_visual/mod.rs"]
+reason = "the parts of the partial class are the files of the module `server_composition_visual`, named after the part"
+
+[[map]]
+project = "Avalonia.Base"
+upstream = ["Rendering/Composition/Server/ServerCompositionVisual/ServerCompositionVisual.Adorners.cs"]
+kind = "renamed"
+rust = ["rendering/composition/server/server_composition_visual/adorners.rs", "rendering/composition/server/server_composition_visual/mod.rs"]
+reason = "the parts of the partial class are the files of the module `server_composition_visual`, named after the part"
+
+[[map]]
+project = "Avalonia.Base"
+upstream = ["Rendering/Composition/Server/ServerCompositionVisual/ServerCompositionVisual.ComputedProperties.cs"]
+kind = "renamed"
+rust = ["rendering/composition/server/server_composition_visual/computed_properties.rs", "rendering/composition/server/server_composition_visual/mod.rs"]
+reason = "the parts of the partial class are the files of the module `server_composition_visual`, named after the part"
+
+[[map]]
+project = "Avalonia.Base"
+upstream = ["Rendering/Composition/Server/ServerCompositionVisual/ServerCompositionVisual.DirtyInputs.cs"]
+kind = "renamed"
+rust = ["rendering/composition/server/server_composition_visual/dirty_inputs.rs", "rendering/composition/server/server_composition_visual/mod.rs"]
+reason = "the parts of the partial class are the files of the module `server_composition_visual`, named after the part"
+
+[[map]]
+project = "Avalonia.Base"
+upstream = ["Rendering/Composition/Server/ServerCompositionVisual/ServerCompositionVisual.Readback.cs"]
+kind = "renamed"
+rust = ["rendering/composition/server/server_composition_visual/readback.rs", "rendering/composition/server/server_composition_visual/mod.rs"]
+types = { "ServerCompositionVisual.ReadbackData" = "ReadbackData" }
+reason = "the parts of the partial class are the files of the module `server_composition_visual`, named after the part"
+
+[[map]]
+project = "Avalonia.Base"
+upstream = ["Rendering/Composition/Server/ServerCompositionVisual/ServerCompositionVisual.Render.cs"]
+kind = "renamed"
+rust = ["rendering/composition/server/server_composition_visual/render.rs", "rendering/composition/server/server_composition_visual/mod.rs"]
+reason = "the parts of the partial class are the files of the module `server_composition_visual`, named after the part"
+
+[[map]]
+project = "Avalonia.Base"
+upstream = ["Rendering/Composition/Server/ServerCompositionVisual/ServerCompositionVisual.Update.cs"]
+kind = "renamed"
+rust = ["rendering/composition/server/server_composition_visual/update.rs", "rendering/composition/server/server_composition_visual/mod.rs"]
+reason = "the parts of the partial class are the files of the module `server_composition_visual`, named after the part"
+
+[[map]]
+project = "Avalonia.Base"
+upstream = ["Rendering/Composition/Server/ServerCompositionVisual/ServerCompositionVisual.Walker.cs"]
+kind = "renamed"
+rust = ["rendering/composition/server/server_composition_visual/walker.rs", "rendering/composition/server/server_composition_visual/mod.rs"]
+types = { "ServerCompositionVisual.TreeWalkerFrame" = "TreeWalkerFrame" }
+reason = "the parts of the partial class are the files of the module `server_composition_visual`, named after the part"
+
+[[map]]
+project = "Avalonia.Base"
+upstream = ["Rendering/Composition/Transport/BatchStreamDebugMarker.cs"]
+kind = "replaced"
+rust = "rendering/composition/transport/batch_stream.rs"
+reason = "the two debug markers written after the changes of an object are `BatchMarker::ObjectEnd` (instead of a marker object compared by reference) and the constant `OBJECT_END_MAGIC` of `server_compositor.rs` (instead of a GUID created at start-up)"
+
+[[map]]
+project = "Avalonia.Base"
+upstream = ["Collections/AvaloniaListConverter.cs"]
+kind = "merged"
+rust = "markup_types/well_known.rs"
+reason = "the converter is declared for the markup metadata only; a list is converted from text by the `parse` of its type"
+
+[[map]]
+project = "Avalonia.Base"
+upstream = ["Interactivity/InteractiveExtensions.cs"]
+kind = "merged"
+rust = "interactivity/interactive_extensions.rs"
+types = { InteractiveExtensions = "Interactive" }
+reason = "the extension methods are inherent methods of `Interactive`"
+
+[[map]]
+project = "Avalonia.Base"
+upstream = ["Rendering/IVisualBrushInitialize.cs"]
+kind = "replaced"
+rust = "visual.rs"
+reason = "interface tested with `is`: the virtual `ensure_initialized_for_visual_brush` of `Visual`, which a control overrides (porting guide: C# `is` on an interface becomes a virtual)"
+
+[[map]]
+project = "Avalonia.Base"
+upstream = ["Rendering/Composition/Brushes/ServerSimpleCompositionBrush.cs"]
+kind = "merged"
+rust = "rendering/composition/server/server_composition_simple_brush.rs"
+reason = "the hand-written parts of the generated mutable brushes are next to the classes"
+
+[[map]]
+project = "Avalonia.Base"
+upstream = ["Animation/Transitions.cs"]
+kind = "renamed"
+rust = "animation/transitions_collection.rs"
+reason = "`transitions` is the name of the module of the directory `Animation/Transitions`, so the collection class has the file `transitions_collection.rs`"
+
+[[map]]
+project = "Avalonia.Base"
+upstream = ["Animation/IterationCountTypeConverter.cs", "Animation/KeySplineTypeConverter.cs", "Animation/SpringTypeConverter.cs", "Animation/Easings/EasingTypeConverter.cs"]
+kind = "not-applicable"
+reason = "`TypeConverter` found by reflection through an attribute on the type it converts: the markup layer converts from text with the `parse` of that type (`IterationCount::parse`, `KeySpline::parse`, `Spring::parse`, `Easing::parse`)"
+
+[[map]]
+project = "Avalonia.Base"
+upstream = ["Animation/Animators/DecimalAnimator.cs"]
+kind = "not-applicable"
+reason = "animator of `System.Decimal`, a 128-bit decimal floating point type that Rust and the port do not have; no property of the framework has that type"
+
+[[map]]
+project = "Avalonia.Base"
+upstream = ["Controls/Metadata/PseudoClassesAttribute.cs", "Controls/Metadata/TemplatePartAttribute.cs", "Controls/Templates/ITemplateResult.cs", "Controls/Templates/TemplateResult.cs"]
+kind = "replaced"
+rust = "controls/mod.rs"
+reason = "ported in the crate of the controls, their only user, where the tracking of `Avalonia.Controls` does not look for them: `src/FerroUI.Controls/metadata/pseudo_classes_attribute.rs`, `metadata/template_part_attribute.rs` and `templates/template_result.rs` (`TemplateResult<T>`, which also stands for `ITemplateResult`)"
+
+[[map]]
+project = "Avalonia.Base"
+upstream = ["Controls/Primitives/IScrollable.cs"]
+kind = "renamed"
+rust = "input/i_scrollable.rs"
+reason = "the interface is declared next to the scroll gestures of the input layer, which use it"
+
+[[map]]
+project = "Avalonia.Base"
+upstream = ["Controls/IClassesChangedListener.cs"]
+kind = "replaced"
+rust = "controls/classes.rs"
+reason = "listener interface of the style activators: `Classes::add_listener` and `remove_listener` take the listener as a closure"
+
+[[map]]
+project = "Avalonia.Base"
+upstream = ["Controls/ISetInheritanceParent.cs"]
+kind = "replaced"
+rust = "ferro_object.rs"
+reason = "interface implemented explicitly by the one class `AvaloniaObject`: the method `FerroObject::set_inheritance_parent`"
+
+[[map]]
+project = "Avalonia.Base"
+upstream = ["Controls/ISetLogicalParent.cs"]
+kind = "replaced"
+rust = "styled_element.rs"
+reason = "interface implemented explicitly by the one class `StyledElement`: the method `StyledElement::set_parent`"
+
+[[map]]
+project = "Avalonia.Base"
+upstream = ["Controls/PseudoClassesExtensions.cs"]
+kind = "replaced"
+rust = "controls/classes.rs"
+reason = "the one extension method, `Set`, is the inherent method `set` of `dyn IPseudoClasses`, next to the trait"
+
+[[map]]
+project = "Avalonia.Base"
+upstream = ["Controls/ResourceNodeExtensions.cs"]
+kind = "replaced"
+rust = "controls/resource_node_extensions.rs"
+reason = "the extension methods are inherent methods of `dyn IResourceHost` (`find_resource`, `find_resource_for_theme`, `try_find_resource`) and of `ResourceHostRef` (`resource_observable`), and the free function `get_floating_resource_observable`; the overloads with a converter and with a theme are parameters of those"
+
+[[map]]
+project = "Avalonia.Native"
+upstream = ["AvaloniaNativeGlPlatformGraphics.cs", "GpuHandleWrapFeature.cs"]
+kind = "not-applicable"
+reason = "not ported for now (row 18 of CRITICAL-PATH.md): the desktop build of the Skia backend has Graphite on Metal and no Ganesh, so nothing could draw through the OpenGL platform graphics of the backend, and the external objects feature they carry is not ported in `ferroui-opengl` either"
+
+[[map]]
+project = "Avalonia.Native"
+upstream = ["IAvnMenuItem.cs"]
+kind = "merged"
+rust = "frn_menu_item.rs"
+types = { "__MicroComIAvnMenuItemProxy" = "FrnMenuItem", IAvnMenuItem = "FrnMenuItem" }
+reason = "the members the file adds to the generated proxy of the native menu item are members of `FrnMenuItem`, the struct that wraps the native item"
+
+[[map]]
+project = "Avalonia.Native"
+upstream = ["CallbackBase.cs"]
+kind = "replaced"
+rust = "callback_base.rs"
+reason = "base class of the objects native code calls: a callback body runs inside `callback_base::guard`, which hands a panic to the dispatcher implementation as the base class hands an exception, and the lifetime half is `ferroui_microcom::ComObject` (`Drop` is the destroyed notification)"
+
+[[map]]
+project = "Avalonia.Native"
+upstream = ["NativeOwned.cs"]
+kind = "replaced"
+rust = "callback_base.rs"
+reason = "base class of a COM object whose lifetime the native side owns: `ferroui_microcom::ComObject` drops the Rust value with the last native reference (`Drop` is `Destroyed`), and `callback_base::guard` hands a panic of a callback to the dispatcher implementation as `RaiseException` does"
+
+[[map]]
+project = "Avalonia.Headless"
+upstream = ["AvaloniaTestApplicationAttribute.cs", "HeadlessUnitTestIsolationAttribute.cs"]
+kind = "not-applicable"
+reason = "assembly attributes that tell the xUnit and NUnit integrations which application to build and how to isolate the tests of an assembly: there are no assembly attributes and no test framework integration; a test sets up its application with `AppBuilder` and `use_headless` (the `PerTest` isolation), as `tests.rs` of the crate does"
+
+[[map]]
+project = "Avalonia.Headless"
+upstream = ["HeadlessUnitTestSession.cs"]
+kind = "not-applicable"
+reason = "not ported for now: the session of the xUnit and NUnit integrations, which runs the tests of an assembly on a dispatcher thread of its own and finds the application through reflection (the assembly attribute, a `BuildAvaloniaApp` method); the test harness of cargo runs a test on a thread of its own, where the test sets up its application. A session that shares one application between tests (the `PerAssembly` isolation) has no counterpart and is an open decision"
+
+[[map]]
+project = "Avalonia.Headless.XUnit"
+upstream = ["*"]
+kind = "not-applicable"
+reason = "glue between the headless platform and the xUnit test framework (test attributes, test case runners): there is no such framework to integrate with; tests use the harness of cargo"
+
+[[map]]
+project = "Avalonia.Headless.NUnit"
+upstream = ["*"]
+kind = "not-applicable"
+reason = "glue between the headless platform and the NUnit test framework (test attributes, commands): there is no such framework to integrate with; tests use the harness of cargo"
+
+[[map]]
+project = "Avalonia.Headless.Vnc"
+upstream = ["*"]
+kind = "not-applicable"
+reason = "out of scope: a VNC server that shows the frames of a headless application, built on a .NET VNC library; nothing in the port depends on it"
+
+# Input (triage of 2026-10-08)
+
+[[map]]
+project = "Avalonia.Base"
+upstream = ["Input/DataFormats.cs", "Input/DataObject.cs"]
+kind = "not-applicable"
+reason = "empty classes marked `[Obsolete(.., error: true)]` and to be removed (`TODO13: remove`): no member, and no code can name them; `DataFormat` and `DataTransfer` are their successors and are ported"
+
+[[map]]
+project = "Avalonia.Base"
+upstream = ["Input/InputExtensions.cs"]
+kind = "merged"
+rust = "input/input_extensions.rs"
+types = { InputExtensions = "InputElement" }
+reason = "the extension methods on IInputElement are inherent methods of InputElement, the one implementation of the interface"
+
+[[map]]
+project = "Avalonia.Base"
+upstream = ["Input/PhysicalKeyExtensions.cs"]
+kind = "merged"
+rust = "input/physical_key_extensions.rs"
+types = { PhysicalKeyExtensions = "PhysicalKey" }
+reason = "the extension methods are inherent methods of PhysicalKey"
+
+[[map]]
+project = "Avalonia.Base"
+upstream = ["Input/Raw/RawInputHelpers.cs"]
+kind = "merged"
+rust = "input/raw/raw_input_helpers.rs"
+types = { RawInputHelpers = "RawInputModifiers" }
+reason = "the extension methods are inherent methods of the types they extend: `RawInputModifiers::to_key_modifiers` and `RawPointerEventType::to_update_kind`"
+
+# Media (triage of 2026-10-08)
+
+[[map]]
+project = "Avalonia.Base"
+upstream = ["Media/BrushConverter.cs"]
+kind = "replaced"
+rust = "media/brush.rs"
+types = { BrushConverter = "Brush" }
+reason = "a type converter that only parses: `Brush::parse`, which the type states as its conversion from text (`parse:`, porting guide, \"Text conversion\")"
+
+[[map]]
+project = "Avalonia.Base"
+upstream = ["Media/TransformConverter.cs"]
+kind = "replaced"
+rust = "media/transform.rs"
+types = { TransformConverter = "Transform" }
+reason = "a type converter that only parses: `Transform::parse`, which the type states as its conversion from text (`parse:`, porting guide, \"Text conversion\")"
+
+[[map]]
+project = "Avalonia.Base"
+upstream = ["Media/Effects/EffectConverter.cs"]
+kind = "replaced"
+rust = "media/effects/effect.rs"
+types = { EffectConverter = "Effect" }
+reason = "a type converter that only parses: `Effect::parse`, which the type states as its conversion from text (`parse:`, porting guide, \"Text conversion\")"
+
+[[map]]
+project = "Avalonia.Base"
+upstream = ["Media/Effects/EffectAnimator.cs"]
+kind = "renamed"
+rust = "animation/animators/effect_animator.rs"
+reason = "the animators of effects live with the other animators"
+
+[[map]]
+project = "Avalonia.Base"
+upstream = ["Media/Effects/EffectTransition.cs"]
+kind = "renamed"
+rust = "animation/transitions/effect_transition.rs"
+reason = "the class is in the namespace of the animations (`Avalonia.Animation`) and lives with the other transitions"
+
+[[map]]
+project = "Avalonia.Base"
+upstream = ["Media/Effects/EffectExtesions.cs"]
+kind = "renamed"
+rust = "media/effects/effect_extensions.rs"
+reason = "the file name of the original has a typing error; the class is `EffectExtensions` in both"
+
+[[map]]
+project = "Avalonia.Base"
+upstream = ["Media/Fonts/FontCollectionKeyExtensions.cs"]
+kind = "replaced"
+rust = "media/fonts/font_collection_key.rs"
+types = { FontCollectionKeyExtensions = "FontCollectionKey" }
+reason = "the three `ToFontCollectionKey` extension methods are the conversions `From<&Typeface>`, `From<&GlyphTypeface>` and `From<&dyn IPlatformTypeface>` of `FontCollectionKey`"
 
 [[rust_only]]
 path = "src/FerroUI.Base/type_system.rs"
@@ -137,6 +1147,38 @@ reason = "storage for C# `event` handlers (multicast delegates have no Rust equi
 [[rust_only]]
 path = "src/FerroUI.Base/rendering/scene_graph/scene_graph_test_support.rs"
 reason = "test doubles of the scene graph unit tests (the Moq mocks of `Rendering/SceneGraph/*Tests.cs`)"
+
+# ------------------------------------------------------------- Avalonia.Markup
+
+[[rust_only]]
+path = "src/Markup/FerroUI.Markup/markup/parsers/property_parser.rs"
+reason = "port of `Parsers/PropertyParser.cs` of Avalonia.Markup.Xaml: it lives next to the grammars that share its character reader"
+
+# -------------------------------------------------------- Avalonia.Markup.Xaml
+
+[[map]]
+project = "Avalonia.Markup.Xaml"
+upstream = ["Extensions.cs"]
+kind = "renamed"
+rust = "extensions.rs"
+types = { Extensions = "ServiceProviderExtensions" }
+reason = "the extension methods are the trait `ServiceProviderExtensions`, implemented for the service provider contract"
+
+# ------------------------------------------------- Avalonia.Markup.Xaml.Loader
+
+[[map]]
+project = "Avalonia.Markup.Xaml.Loader"
+upstream = ["CompilerDynamicDependencies.cs"]
+kind = "not-applicable"
+reason = "trimming annotation (`DynamicallyAccessedMembers`) for the reflection the IL loader does: no reflection, nothing to annotate"
+
+# ------------------------------------------------------------------------ XamlX (triage)
+
+[[map]]
+project = "XamlX"
+upstream = ["Diagnostics/TrimmingMessages.cs"]
+kind = "not-applicable"
+reason = "justification texts of the trimming attributes of the managed compiler: no trimming attributes"
 
 # ------------------------------------------------------------ Avalonia.MicroCom
 
@@ -219,6 +1261,94 @@ reason = "loads the document of the about dialog with the run-time loader until 
 path = "src/FerroUI.Dialogs/task_completion_source.rs"
 reason = "the TaskCompletionSource<T> of the base library the storage provider awaits windows, popups and flyouts with"
 
+# ---------------------------------------------------------------- Avalonia.Controls
+
+[[map]]
+project = "Avalonia.Controls"
+upstream = ["ControlExtensions.cs"]
+kind = "renamed"
+rust = "control_extensions.rs"
+types = { ControlExtensions = "Control" }
+reason = "an extension class: its methods are inherent methods of the type they extend (`impl Control`)"
+
+[[map]]
+project = "Avalonia.Controls"
+upstream = ["DesktopApplicationExtensions.cs"]
+kind = "renamed"
+rust = "desktop_application_extensions.rs"
+types = { DesktopApplicationExtensions = "Application" }
+reason = "an extension class: its methods are inherent methods of the type they extend (`impl Application`)"
+
+[[map]]
+project = "Avalonia.Controls"
+upstream = ["LoggingExtensions.cs"]
+kind = "renamed"
+rust = "logging_extensions.rs"
+types = { LoggingExtensions = "AppBuilder" }
+reason = "an extension class: its methods are inherent methods of the type they extend (`impl AppBuilder`)"
+
+[[map]]
+project = "Avalonia.Controls"
+upstream = ["SystemFontAppBuilderExtension.cs"]
+kind = "renamed"
+rust = "system_font_app_builder_extension.rs"
+types = { SystemFontAppBuilderExtension = "AppBuilder" }
+reason = "an extension class: its methods are inherent methods of the type they extend (`impl AppBuilder`)"
+
+[[map]]
+project = "Avalonia.Controls"
+upstream = ["ApplicationLifetimes/ClassicDesktopStyleApplicationLifetime.cs"]
+kind = "renamed"
+rust = "application_lifetimes/classic_desktop_style_application_lifetime.rs"
+types = { ClassicDesktopStyleApplicationLifetimeExtensions = "AppBuilder" }
+reason = "the extension class of the file is `impl AppBuilder` in the same file"
+
+[[map]]
+project = "Avalonia.Controls"
+upstream = ["Templates/DataTemplateExtensions.cs"]
+kind = "renamed"
+rust = "templates/data_template_extensions.rs"
+types = { DataTemplateExtensions = "Control" }
+reason = "an extension class: its methods are inherent methods of the type they extend (`impl Control`)"
+
+[[map]]
+project = "Avalonia.Controls"
+upstream = ["Templates/TemplateExtensions.cs"]
+kind = "renamed"
+rust = "templates/template_extensions.rs"
+types = { TemplateExtensions = "TemplatedControl" }
+reason = "an extension class: its methods are inherent methods of the type they extend (`impl TemplatedControl`)"
+
+[[map]]
+project = "Avalonia.Controls"
+upstream = ["Templates/ITemplate`1.cs"]
+kind = "renamed"
+rust = "templates/i_template.rs"
+types = { ITemplate = "ITemplateOf" }
+reason = "the untyped contract `ITemplate` is in the base crate; the typed form is the trait `ITemplateOf<TControl>` (`build_typed`)"
+
+[[map]]
+project = "Avalonia.Controls"
+upstream = ["Templates/ITemplate`2.cs"]
+kind = "renamed"
+rust = "templates/i_template.rs"
+types = { ITemplate = "ITemplateWithParam" }
+reason = "traits cannot be overloaded by arity: the template with a parameter is `ITemplateWithParam<TParam, TControl>`"
+
+[[map]]
+project = "Avalonia.Controls"
+upstream = ["Utils/IEnumerableUtils.cs"]
+kind = "replaced"
+rust = "items_source.rs"
+reason = "extension methods over the untyped `IEnumerable` of an items source; an items source is an `ItemsSource`, whose list contract `IItemsList` has `count`, `index_of` and `get_at`"
+
+[[map]]
+project = "Avalonia.Controls"
+upstream = ["ResolveByNameAttribute.cs"]
+kind = "replaced"
+rust = "markup_types/classes.rs"
+reason = "an attribute read by the markup compiler: a property states it in the `property_attributes` of its markup metadata (`metadata::attributes::RESOLVE_BY_NAME`)"
+
 # ----------------------------------------------------------- Avalonia.Browser
 
 [[map]]
@@ -240,7 +1370,24 @@ project = "Avalonia.Browser"
 upstream = ["JSObjectControlHandle.cs"]
 kind = "renamed"
 rust = "js_object_control_handle.rs"
+types = { JSObjectPlatformHandle = "JsObjectPlatformHandle", JSObjectControlHandle = "JsObjectControlHandle" }
 reason = "snake case of the acronym"
+
+[[map]]
+project = "Avalonia.Browser"
+upstream = ["Interop/CanvasHelper.cs"]
+kind = "renamed"
+rust = "interop/canvas_helper.rs"
+types = { GLInfo = "GlInfo" }
+reason = "Rust spelling of the acronym"
+
+[[map]]
+project = "Avalonia.Browser"
+upstream = ["Storage/BrowserStorageProvider.cs"]
+kind = "renamed"
+rust = "storage/browser_storage_provider.rs"
+types = { JSStorageItem = "JsStorageItem", JSStorageFile = "JsStorageFile", JSStorageFolder = "JsStorageFolder" }
+reason = "Rust spelling of the acronym"
 
 [[map]]
 project = "Avalonia.Browser"
