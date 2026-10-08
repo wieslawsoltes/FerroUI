@@ -1,0 +1,17 @@
+# The application the generated tests of a document start (`document_<name>` and `class_<name>`,
+# see `build.rs`): `<document> | <application>`. A document that is not listed has the tests of
+# `unit-test`; list a document only when it does not load under that application, with the reason
+# as a comment above its line.
+#
+#   unit-test   the unit test application of the framework with the test services of the catalog,
+#               the Simple theme and the resources of `CustomThemes.xaml`
+#               (`support::start_catalog_application`)
+#   catalog     the application of the catalog (`App`) as the current application, started as the
+#               application builder starts it but with the test services of the catalog: it loads
+#               `App.xaml` and applies the Fluent theme (`support::start_catalog_app`)
+#
+# Lines are sorted by path.
+
+# {x:Static local:App.CurrentTheme} reads the current application as the application of the
+# catalog, and the theme selection of the page sets the themes of that application.
+Pages/SettingsPage.xaml | catalog

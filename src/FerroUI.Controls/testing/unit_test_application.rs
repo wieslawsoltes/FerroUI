@@ -37,7 +37,18 @@ impl FerroObjectImpl for UnitTestApplication {
 
 impl ApplicationImpl for UnitTestApplication {
     fn register_services(this: &Self) {
-        let services = this.services();
+        this.services().register(this);
+    }
+}
+
+impl TestServices {
+    /// Registers the services with the current service locator as the
+    /// services of `this`, in place of the services its class registers,
+    /// and adds the theme to its styles: what a unit test application does
+    /// for itself, and [`UnitTestApplication::start_with`] for the
+    /// application it starts.
+    pub fn register(&self, this: &Application) {
+        let services = self;
         let locator = FerroLocator::current_mutable();
 
         bind(&locator, services.asset_loader.clone() as Option<Rc<dyn IAssetLoader>>);
@@ -140,13 +151,45 @@ impl UnitTestApplication {
     /// Disposing (or dropping) the returned scope runs the pending
     /// dispatcher jobs and restores the previous scope.
     pub fn start(services: TestServices) -> UnitTestApplicationScope {
+        Self::start_scope(|| {
+            let _ = UnitTestApplication::new(services);
+        })
+        .1
+    }
+
+    /// [`start`](Self::start) for an application class of its own: starts
+    /// the application `create` returns as the application of the test, for
+    /// the tests of what reads that application (a document that names a
+    /// static member of the application class of its sample).
+    ///
+    /// As the application builder does, the application is made the current
+    /// one, its services are registered and it is initialised
+    /// ([`ApplicationImpl::initialize`]); the services are `services`
+    /// ([`TestServices::register`]) instead of the ones its class registers.
+    /// The application has no lifetime, and the completion of the
+    /// initialisation of the framework is not notified: a test creates the
+    /// windows it needs.
+    pub fn start_with(services: TestServices, create: impl FnOnce() -> Ref<Application>) -> UnitTestApplicationScope {
+        let (application, scope) = Self::start_scope(|| {
+            let application = create();
+            Application::bind_current(application.clone());
+            services.register(&application);
+            application
+        });
+        application.initialize();
+        scope
+    }
+
+    /// Enters the scope of a unit test application and creates the
+    /// application in it with `create`.
+    fn start_scope<R>(create: impl FnOnce() -> R) -> (R, UnitTestApplicationScope) {
         let dispatcher = Dispatcher::unit_test_scope();
         Control::reset_loaded_queue_for_unit_tests();
         let scope = FerroLocator::enter_scope();
         let old_context = FerroSynchronizationContext::current();
-        let _ = UnitTestApplication::new(services);
+        let created = create();
         Dispatcher::reset_before_unit_tests();
-        UnitTestApplicationScope { state: RefCell::new(Some(ScopeState { scope, old_context, dispatcher })) }
+        (created, UnitTestApplicationScope { state: RefCell::new(Some(ScopeState { scope, old_context, dispatcher })) })
     }
 }
 
@@ -206,5 +249,45 @@ impl IDisposable for UnitTestApplicationScope {
 impl Drop for UnitTestApplicationScope {
     fn drop(&mut self) {
         UnitTestApplicationScope::dispose(self)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::testing::TestIconLoader;
+    use ferroui_base::{ferro_impl_classes, LocatorExtensions};
+    use std::cell::Cell;
+
+    /// An application class of its own, as the application of a sample.
+    #[repr(C)]
+    struct SampleApplication {
+        base: Application,
+        initialized_with_the_services: Cell<bool>,
+    }
+
+    ferro_class!(SampleApplication: Application);
+    ferro_impl_classes!(SampleApplication: FerroObjectImpl);
+
+    impl ApplicationImpl for SampleApplication {
+        fn initialize(this: &Self) {
+            let is_current = Application::current().and_then(|application| application.cast::<SampleApplication>()).is_some();
+            let has_services = FerroLocator::current().get_service::<dyn IPlatformIconLoader>().is_some();
+            this.initialized_with_the_services.set(is_current && has_services);
+        }
+    }
+
+    #[test]
+    fn an_application_class_starts_as_the_current_application_with_the_test_services() {
+        let services = TestServices::new().with_icon_loader(Rc::new(TestIconLoader));
+        let _app = UnitTestApplication::start_with(services, || {
+            instantiate(SampleApplication { base: Application::construct(), initialized_with_the_services: Cell::new(false) })
+                .upcast()
+        });
+
+        let application = Application::current().and_then(|application| application.cast::<SampleApplication>());
+        assert!(application.expect("the application of the test").initialized_with_the_services.get());
+        assert!(UnitTestApplication::current().is_none());
+        assert!(FerroLocator::current().get_service::<dyn IGlobalStyles>().is_some());
     }
 }

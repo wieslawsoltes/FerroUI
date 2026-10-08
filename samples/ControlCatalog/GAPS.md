@@ -6,7 +6,7 @@ The documents of the sample that do not load yet, grouped by what they wait for.
 cargo test -p control-catalog -- --ignored gap_
 ```
 
-Status: 219 documents, 217 load and show their class; 2 are listed below.
+Status: 219 documents, 218 load and show their class; 1 is listed below.
 
 ## Gaps of the framework
 
@@ -39,6 +39,9 @@ These documents load without their class (the survey test, `cargo test -p contro
 
 ## Test harness
 
-| Document | Why |
-|---|---|
-| `Pages/SettingsPage.xaml` | `{x:Static local:App.CurrentTheme}` needs the application of the catalog as the current application. The page loads in the application, which offers it; the unit test application is not that application. |
+No document is listed for the test harness. Two documents need more than the unit test application of the framework gives a test by default, and the harness provides it:
+
+| Document | What its generated tests need | How they get it |
+|---|---|---|
+| `App.xaml` | The tray icon of the document loads its icon through the icon loader of the platform. | The test services carry an icon loader (`TestServices::with_icon_loader`, `ferroui_controls::testing::TestIconLoader`; upstream's `TestServices` has none), and the test services of the catalog register it (`tests/support.rs`). |
+| `Pages/SettingsPage.xaml` | `{x:Static local:App.CurrentTheme}` reads the current application as the application of the catalog (upstream: `((App)Current!)._prevTheme`), and the theme selection of the page sets the themes of that application. | `test_applications.txt` names the application the generated tests of a document start. The page is listed with `catalog`: the application of the catalog (`App`) is started as the application of the test, with the test services in place of the services of a platform (`UnitTestApplication::start_with`, `support::start_catalog_app`); it loads `App.xaml` and applies the Fluent theme. Every other document has the default, the unit test application with the Simple theme and the resources of `CustomThemes.xaml`. |

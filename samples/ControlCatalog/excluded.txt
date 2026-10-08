@@ -6,12 +6,12 @@
 #   gap <id>: <text>         a gap of the framework; reproduced in tests/gaps*.rs
 #   code-behind: <text>      the class of the document needs framework API that does not exist
 #   pending: <text>          the class of the document is not ported yet
-#   harness: <text>          the document loads in the application but not under the unit test application
+#   harness: <text>          the document loads in the application but not under the application its
+#                            tests start (`test_applications.txt` names another one than the default)
 #
 # Keep the sections; lines are sorted by path within a section. `GAPS.md` explains each open entry.
 
 # --- root, Models, MainWindowViewModel, shell pages (coordinator) ---
-Pages/SettingsPage.xaml | harness: {x:Static local:App.CurrentTheme} needs the application of the catalog as the current application (the page is offered by the application)
 
 # --- Controls, Converter, Pages/CommandBar, Pages/TextBox, Pages/Gestures, Pages/ContentPage (group A) ---
 

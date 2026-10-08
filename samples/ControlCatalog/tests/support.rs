@@ -3,6 +3,7 @@
 
 use crate::markup::{describe, try_load_document, try_load_text, XamlClass};
 use crate::register_types;
+use crate::App;
 use ferroui_base::controls::IResourceProvider;
 use ferroui_base::metadata::from_markup_value;
 use ferroui_base::platform::IAssetLoader;
@@ -53,17 +54,57 @@ pub fn start_catalog_application_with(asset_loader: Option<Rc<dyn IAssetLoader>>
 /// `App.xaml`.
 pub fn start_catalog_services(asset_loader: Option<Rc<dyn IAssetLoader>>) -> UnitTestApplicationScope {
     register_types();
-    let mut services = TestServices::styled_window()
+    let mut services = catalog_services().with_theme(|| SimpleTheme::new().as_style());
+    if let Some(asset_loader) = asset_loader {
+        services = services.with_asset_loader(asset_loader);
+    }
+    UnitTestApplication::start(services)
+}
+
+/// The test services of the catalog: the services of a styled window with
+/// the Skia render interface and font manager and the HarfBuzz text shaper
+/// in place of the mock ones, a global clock that never ticks and the icon
+/// loader of tests. The theme is the one of the styled window.
+fn catalog_services() -> TestServices {
+    TestServices::styled_window()
         .with_render_interface(Rc::new(ferroui_skia::PlatformRenderInterface::new(None, None)))
         .with_font_manager_impl(Rc::new(ferroui_skia::FontManagerImpl::new()))
         .with_text_shaper_impl(Rc::new(ferroui_harfbuzz::HarfBuzzTextShaper::new()))
         .with_global_clock(Rc::new(TestGlobalClock::default()))
         .with_icon_loader(Rc::new(TestIconLoader))
-        .with_theme(|| SimpleTheme::new().as_style());
-    if let Some(asset_loader) = asset_loader {
-        services = services.with_asset_loader(asset_loader);
+}
+
+/// Starts the application of the catalog ([`App`]) as the application of
+/// the test, with the test services of the catalog in place of the services
+/// of a platform: the application loads `App.xaml` (which registers the
+/// run-time loader and merges `CustomThemes.xaml`) and applies the Fluent
+/// theme, as it does when the application builder starts it. For what
+/// reads the application class, as `{x:Static local:App.CurrentTheme}` does.
+pub fn start_catalog_app() -> UnitTestApplicationScope {
+    register_types();
+    // The themes are the ones of the application.
+    let mut services = catalog_services();
+    services.theme = None;
+    UnitTestApplication::start_with(services, || App::new().upcast())
+}
+
+/// The application the generated tests of a document start; see
+/// `test_applications.txt`.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum TestApplication {
+    /// [`start_catalog_application`].
+    UnitTest,
+    /// [`start_catalog_app`].
+    Catalog,
+}
+
+impl TestApplication {
+    fn start(self) -> UnitTestApplicationScope {
+        match self {
+            TestApplication::UnitTest => start_catalog_application(),
+            TestApplication::Catalog => start_catalog_app(),
+        }
     }
-    UnitTestApplication::start(services)
 }
 
 /// Starts the application of [`start_catalog_application`] under the Fluent
@@ -72,13 +113,8 @@ pub fn start_catalog_services(asset_loader: Option<Rc<dyn IAssetLoader>>) -> Uni
 /// compositor instead of the null renderer.
 pub fn start_catalog_compositor_application() -> CompositorTestServices {
     register_types();
-    let services = TestServices::styled_window()
-        .with_render_interface(Rc::new(ferroui_skia::PlatformRenderInterface::new(None, None)))
-        .with_font_manager_impl(Rc::new(ferroui_skia::FontManagerImpl::new()))
-        .with_text_shaper_impl(Rc::new(ferroui_harfbuzz::HarfBuzzTextShaper::new()))
-        .with_global_clock(Rc::new(TestGlobalClock::default()))
+    let services = catalog_services()
         .with_input_manager(Rc::new(ferroui_base::input::InputManager::new()))
-        .with_icon_loader(Rc::new(TestIconLoader))
         .with_theme(|| ferroui_themes_fluent::FluentTheme::new().as_style());
     let services = CompositorTestServices::start(services);
     FerroRuntimeXamlLoader::register();
@@ -112,9 +148,9 @@ pub fn load_text(xaml: &str) -> BoxedValue {
 
 /// The body of the generated test `document_<name>`: the document with the
 /// rooted asset path `path` loads through the run-time loader, into a new
-/// instance of its class when it names one.
-pub fn document_loads(path: &str) {
-    let _app = start_catalog_application();
+/// instance of its class when it names one, under `application`.
+pub fn document_loads(path: &str, application: TestApplication) {
+    let _app = application.start();
     let root = match crate::assets::documents().iter().find(|(document, _)| *document == path) {
         Some((_, Some(class_name))) => {
             let class = XamlClass::find(path)
@@ -131,9 +167,9 @@ pub fn document_loads(path: &str) {
 /// The body of the generated test `class_<name>`: the class of the document
 /// constructs (which loads the document) and can be shown: a control as the
 /// content of a window, a window on its own, styles as the styles of a
-/// window.
-pub fn class_constructs(path: &str) {
-    let _app = start_catalog_application();
+/// window, under `application`.
+pub fn class_constructs(path: &str, application: TestApplication) {
+    let _app = application.start();
     let class = XamlClass::find(path).unwrap_or_else(|| panic!("the class of {path} is not declared"));
     let value = Some((class.create)());
 
