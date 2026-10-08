@@ -138,6 +138,8 @@ Also: the layout clock is in milliseconds (`DEVIATIONS.md`, Layout). Found while
 - **Direct properties and untyped values.** Follow upstream: the untyped route of a direct property converts a value as `AvaloniaProperty<T>.TryConvert` does (the implicit conversions of `TypeUtilities.TryConvertImplicit`), written with the registered value conversions of `ValueTypes` rather than reflection. The ported test `set_value_does_not_convert_to_nullable`, which records the old behaviour, is checked against upstream's test of that name and corrected if the port's version asserts something upstream does not. Done in the validation phase, in the pull request of the property store batch.
 - **Build location.** Local builds and validation use `CARGO_TARGET_DIR=/Volumes/1TB-macOS/ferroui-target` (the internal disk is nearly full); build output that is no longer needed is deleted when a phase ends.
 - Render thread, R5: the server compositor is confined to a lock, as upstream on macOS (both threads render under it), not to the render thread. An `unsafe impl Send` under the server side is accepted for it.
+- Render thread: it is the default on the desktop from 2026-10-08 (`Compositor::new` follows the render loop; `FERROUI_RENDER_THREAD=0` is the way back).
+- Browser, stage B2: the UI thread stays on the browser's main thread and only rendering moves to a worker (`browser-render-worker.md`).
 
 ## Decisions waiting for the owner
 
