@@ -51,12 +51,10 @@
 //!
 //! The compiler transforms a document against the run-time type system: the
 //! types, properties and constructors the crates registered in the process
-//! (`register_types()` of each). The source scanner of xaml.md 9.5, which
-//! would read them from the sources, does not exist. A build script
-//! therefore takes the crates whose types its documents name as build
-//! dependencies and registers them before it calls [`Build::run`], and it
-//! starts whatever application services the transform of its documents
-//! needs. Two consequences:
+//! (`register_types()` of each). A build script therefore takes the crates
+//! whose types its documents name as build dependencies and registers them
+//! before it calls [`Build::run`], and it starts whatever application
+//! services the transform of its documents needs. Two consequences:
 //!
 //! - those crates are built for the host as well as for the target (once
 //!   more when the two differ or their features do);
@@ -82,6 +80,9 @@
 //! ```
 
 #![forbid(unsafe_code)]
+
+mod json;
+pub mod model;
 
 use std::env;
 use std::fs;
