@@ -509,7 +509,7 @@ Nothing written for this step had to change. Built and run in headless Chrome:
 - The type check, the linter and the pixel test of `webapp/` pass, the pixel test with a grown and with a shared memory; the host tests of the browser crate pass (171).
 - The fixed memory of the threaded build (512 MB by default) was granted in every run. The measured peak of the catalog, which section 5 asks for, is still to be taken (B2.7).
 
-## B2.3: pacing, software frames, resize, and the wait (written, not validated)
+## B2.3: pacing, software frames, resize, and the wait (written and validated, 2026-10-08)
 
 Status: written on 2026-10-08, **not built and not run**. The branch was written without cargo, without the browser build and without a browser; the session that validates it builds it first. What could be checked without a build: the Rust files parse (the formatter reads them, and at a width of 120 it changes nothing in them), the script modules pass the type check of `webapp/` with the tools of the main checkout (the only errors are the missing package of the storage bundle, as in B2.1), and the page script and the test parse. Nothing below marked **[R]** has been seen to run: it was read in the sources of Emscripten 6.0.10 (`.tools/emsdk/upstream/emscripten`).
 
@@ -551,18 +551,18 @@ How the example uses the pieces:
 
 The measurements are printed as `measured: ...` lines before the verdict of the check.
 
-### To be settled at validation
+### Settled at validation (2026-10-08, headless Chrome)
 
 | Question of the row | Where the answer appears | Status |
 |---|---|---|
-| Do a worker's animation frames run while the main thread is busy in script? | Check 4 and 5, `frames drawn while the thread of the page was busy for 200 ms` | To be settled at validation |
-| The duration of the wait with a frame out of turn | `wait for a frame with a frame out of turn: ended=... duration_ms=...` (five samples per mode) | To be settled at validation |
-| Does the wait end at all without a frame out of turn (do a worker's animation frames run while the main thread spins in the runtime)? | `wait for a frame without a frame out of turn (timeout 2000 ms): ended=...` (three samples per mode) | To be settled at validation |
-| Is the wait of section 3 bounded, or is "commit and do not wait" chosen? | The two lines above: bounded if the first ends in about a frame's work; the fallback if it times out | To be settled at validation |
-| Does the wake-up arrive, and how many per frame? | `wake-ups of the page: N for M frames` | To be settled at validation |
-| After a resize, the new size and no stretched content | The resize part of checks 4 and 5 | To be settled at validation |
-| The software mode shows the colour | Check 3 and 5 | To be settled at validation |
-| Which render target headless Chrome gives (WebGL 2 or 1), and so whether the square was checked for WebGL | `render target: webgl, OpenGL ES N, the frames have / do not have the square` | To be settled at validation |
+| Do a worker's animation frames run while the main thread is busy in script? | Check 4 and 5, `frames drawn while the thread of the page was busy for 200 ms` | Yes: 12 frames (WebGL) and 8 (software) drawn during the 200 ms |
+| The duration of the wait with a frame out of turn | `wait for a frame with a frame out of turn: ended=... duration_ms=...` (five samples per mode) | 0.2 to 0.8 ms, once 8.4 ms (the first sample, WebGL); software 0.3 to 0.6 ms |
+| Does the wait end at all without a frame out of turn (do a worker's animation frames run while the main thread spins in the runtime)? | `wait for a frame without a frame out of turn (timeout 2000 ms): ended=...` (three samples per mode) | Yes, every sample: 2.7, 13.9 and 14.4 ms (WebGL), 2.7, 14.2 and 14.8 ms (software): up to one frame interval |
+| Is the wait of section 3 bounded, or is "commit and do not wait" chosen? | The two lines above: bounded if the first ends in about a frame's work; the fallback if it times out | Bounded. The wait stays; the "commit and do not wait" fallback is not needed. With a frame out of turn it costs well under a millisecond |
+| Does the wake-up arrive, and how many per frame? | `wake-ups of the page: N for M frames` | It arrives: 23 wake-ups for 34 frames (WebGL), 27 for 34 (software): signals raised while one is pending are merged |
+| After a resize, the new size and no stretched content | The resize part of checks 4 and 5 | Passes in both modes |
+| The software mode shows the colour | Check 3 and 5 | Passes |
+| Which render target headless Chrome gives (WebGL 2 or 1), and so whether the square was checked for WebGL | `render target: webgl, OpenGL ES N, the frames have / do not have the square` | WebGL 2 (OpenGL ES 3); the square was checked |
 
 ### What could not be verified without a build
 
@@ -608,3 +608,12 @@ scripts/build-browser.sh themed_view --threads
 and `themed_view.test.mjs` against `target/browser-threads/themed_view`, served isolated as at the validation of B2.1 (the test file does not ask for isolation itself). The shared timer and the dispatcher of `themed_view` take the changed code paths in both builds: the timer is created with `false` and starts on `set_tick` as before, and the signal handle is only ever called on the thread of the dispatcher there.
 
 The page by hand, served isolated: `?Frames=true`, `?Frames=true&RenderingMode=Software2D`, `?Frames=true&Wait=OutOfTurn`, `?Frames=true&Wait=NextFrame` (the element `wait` shows the outcome after 30 frames).
+
+### Result of the validation (2026-10-08)
+
+The step built and passed its five checks without a change to what was written. What it settles for the stages after it:
+
+- Risk 2 of section 7 (waiting on the main thread) is closed in favour of the design: a worker's animation frames keep running both while the page's script is busy and while the main thread spins in the runtime, so a synchronous wait of the UI thread ends, and with a frame asked for out of turn it ends in under a millisecond.
+- Risk 5 (keeping the render thread alive on events) is closed: the thread answers queued calls and animation frames after its start function has returned.
+- The port's own proxying queue reaches the worker while the main thread waits, and the dispatcher is woken from the worker.
+- Open as before: Skia on the thread (B2.6), and browsers other than headless Chrome.
