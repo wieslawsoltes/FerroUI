@@ -966,3 +966,62 @@ fn resolve_expected_value_extension_with_property() {
     assert!(text_block.is_set(Visual::is_visible_property()));
     assert!(text_block.is_visible());
 }
+
+// --- Tests this port adds: upstream has none of the element form of `OnPlatform`. ---
+
+/// `OnPlatform` written as an element with `On` children, as the platform information page
+/// of the control catalog has it: the extension has no content property, the children are
+/// found through `IAddChild<On>`.
+#[test]
+fn on_platform_element_with_on_children() {
+    let _base = xaml_test_base();
+    let xaml = r#"
+<Border xmlns='https://github.com/ferroui'>
+    <Border.Background>
+        <OnPlatform Default='Gray'>
+            <On Options='macOS, Linux, Windows' Content='Green' />
+        </OnPlatform>
+    </Border.Background>
+</Border>"#;
+
+    let border: Ref<Border> = load_as(xaml);
+
+    let background = border.background().expect("the background is set");
+    let brush = background.as_solid_color_brush().expect("the background is an ISolidColorBrush");
+    let expected = if cfg!(any(target_os = "macos", target_os = "linux", target_os = "windows")) {
+        Colors::GREEN
+    } else {
+        Colors::GRAY
+    };
+    assert_eq!(expected, brush.color());
+}
+
+/// The same form with the branch as the content of `On`.
+#[test]
+fn on_platform_element_with_on_content_elements() {
+    let _base = xaml_test_base();
+    let xaml = r#"
+<Border xmlns='https://github.com/ferroui'>
+    <Border.Background>
+        <OnPlatform>
+            <OnPlatform.Default>
+                <SolidColorBrush Color='Gray' />
+            </OnPlatform.Default>
+            <On Options='macOS, Linux, Windows'>
+                <SolidColorBrush Color='Green' />
+            </On>
+        </OnPlatform>
+    </Border.Background>
+</Border>"#;
+
+    let border: Ref<Border> = load_as(xaml);
+
+    let background = border.background().expect("the background is set");
+    let brush = background.as_solid_color_brush().expect("the background is an ISolidColorBrush");
+    let expected = if cfg!(any(target_os = "macos", target_os = "linux", target_os = "windows")) {
+        Colors::GREEN
+    } else {
+        Colors::GRAY
+    };
+    assert_eq!(expected, brush.color());
+}

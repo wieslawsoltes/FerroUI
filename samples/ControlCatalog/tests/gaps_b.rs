@@ -56,7 +56,6 @@ fn gap_c201_array_list_in_markup() {
 }
 
 #[test]
-#[ignore = "gap C202: OnPlatform as an element with On children does not load"]
 fn gap_c202_on_platform_element_with_on_children() {
     let _app = start_application();
     // Upstream: the element form of the extension takes `On` children (its content) and
