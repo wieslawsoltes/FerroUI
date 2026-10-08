@@ -339,7 +339,7 @@ Loading and transforming (`ferro_xaml_il_runtime_compiler.rs`):
 - Run-time errors of members declared with the `try` forms surface as failed invocations with the
   member's message; tests compare messages with upstream's.
 
-Known open items outside the emitter (not started): converter culture; the remaining ignored tests
+Known open items outside the emitter (not started): the remaining ignored tests
 of the XAML test crate (most wait for the emitter); catalog gaps C101, C102, C201/C309
 (`ArrayList`), C202 (`OnPlatform` element syntax), C203, C301 (method name for a delegate
 property), C305 (`List<T>` with `x:TypeArguments`), C306 (`Slider.Ticks` from text), C310
