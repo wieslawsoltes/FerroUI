@@ -784,7 +784,7 @@ The catalog's browser host fetches the asset files of a page before the catalog 
 | no page (the demos of `NavigationDemoPage`, whose class is not ported; prefetched last) | 46 | 13.20 MB | 12.87 MB |
 | all | 94 | 23.53 MB | 20.19 MB |
 
-56 of the 74 pages of the list need no file beyond the start-up files. The build reports two assets no source names, kept with the start-up files: `/Assets/CurvedHeader/avatar.jpg` and `/Pages/teapot.bin`.
+56 of the 74 pages of the list need no file beyond the start-up files. The build reports the assets no source names, which are kept with the start-up files: `/Pages/teapot.bin`. `/Assets/CurvedHeader/avatar.jpg` was one of them until the curved header page of the NavigationPage samples, whose code names it, was ported; it is no start-up file any more.
 
 Bundles against plain files, both built from `main` at `b3de801` with the toolchain of `scripts/browser/setup.sh` (Rust 1.99.0, Emscripten 6.0.10, `wasm-bindgen` of the workspace); before is `main`, after is this change.
 

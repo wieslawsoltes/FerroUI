@@ -224,6 +224,8 @@ pub(crate) fn register_value_types() {
     ferroui_base::data::core::ValueTypes::register_reference::<CarouselCardItem>();
     ferroui_base::data::core::ValueTypes::register_reference::<ScrollViewerPageViewModel>();
     ferroui_base::data::core::ValueTypes::register_reference::<CompositionPageColorItem>();
+    ferroui_base::data::core::ValueTypes::register_reference::<NavigationPageMvvmShellViewModel>();
+    ferroui_base::data::core::ValueTypes::register_reference::<ProjectCardViewModel>();
 }
 
 /// The classes of the files directly under `Pages/`.
