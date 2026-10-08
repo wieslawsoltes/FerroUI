@@ -1,5 +1,5 @@
 use super::TestServices;
-use crate::platform::IWindowingPlatform;
+use crate::platform::{IPlatformIconLoader, IWindowingPlatform};
 use crate::{Application, ApplicationImpl, Control};
 use ferroui_base::animation::IGlobalClock;
 use ferroui_base::input::platform::PlatformHotkeyConfiguration;
@@ -67,6 +67,9 @@ impl ApplicationImpl for UnitTestApplication {
         bind(&locator, services.windowing_platform.clone() as Option<Rc<dyn IWindowingPlatform>>);
         if let Some(platform) = services.platform.clone() {
             locator.bind::<dyn ferroui_base::platform::IRuntimePlatform>().to_constant(platform);
+        }
+        if let Some(icon_loader) = services.icon_loader.clone() {
+            locator.bind::<dyn IPlatformIconLoader>().to_constant(icon_loader);
         }
         locator.bind_to_self_singleton::<PlatformHotkeyConfiguration>();
         let platform_settings: Rc<dyn IPlatformSettings> =

@@ -13,6 +13,7 @@ mod mock_window_impl;
 mod mock_windowing_platform;
 mod null_renderer;
 mod test_clipboard;
+mod test_icon_loader;
 mod test_log_sink;
 
 pub use mock_screen::{mock_screen, MockScreenImpl};
@@ -20,6 +21,7 @@ pub use mock_window_impl::{MockCall, MockImplKind, MockWindowImpl, SCREEN_SIZE};
 pub use mock_windowing_platform::MockWindowingPlatform;
 pub use null_renderer::NullRenderer;
 pub use test_clipboard::{TestClipboardFailure, TestClipboardImpl};
+pub use test_icon_loader::TestIconLoader;
 pub use test_log_sink::{LogCallback, TestLogSink};
 mod test_services_windowing;
 mod test_theme;

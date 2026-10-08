@@ -8,7 +8,9 @@ use ferroui_base::metadata::from_markup_value;
 use ferroui_base::platform::IAssetLoader;
 use ferroui_base::styling::{IStyle, Styles};
 use ferroui_base::{BoxedValue, Ref};
-use ferroui_controls::testing::{CompositorTestServices, TestServices, UnitTestApplication, UnitTestApplicationScope};
+use ferroui_controls::testing::{
+    CompositorTestServices, TestIconLoader, TestServices, UnitTestApplication, UnitTestApplicationScope,
+};
 use ferroui_controls::{Application, Control, Window};
 use ferroui_markup_xaml_loader::FerroRuntimeXamlLoader;
 use ferroui_themes_simple::SimpleTheme;
@@ -28,7 +30,8 @@ pub fn start_application() -> UnitTestApplicationScope {
 /// Starts a unit test application with the services of a styled window
 /// (with the Skia render interface and font manager and the HarfBuzz text
 /// shaper in place of the mock ones, so that bitmaps decode and text is
-/// laid out), the Simple theme as the theme of the application and the resources the
+/// laid out, and with the icon loader of tests, which loads the icon of the
+/// tray icon of `App.xaml`), the Simple theme as the theme of the application and the resources the
 /// application of the sample gives its pages (`CustomThemes.xaml`, which
 /// `App.xaml` merges).
 pub fn start_catalog_application() -> UnitTestApplicationScope {
@@ -55,6 +58,7 @@ pub fn start_catalog_services(asset_loader: Option<Rc<dyn IAssetLoader>>) -> Uni
         .with_font_manager_impl(Rc::new(ferroui_skia::FontManagerImpl::new()))
         .with_text_shaper_impl(Rc::new(ferroui_harfbuzz::HarfBuzzTextShaper::new()))
         .with_global_clock(Rc::new(TestGlobalClock::default()))
+        .with_icon_loader(Rc::new(TestIconLoader))
         .with_theme(|| SimpleTheme::new().as_style());
     if let Some(asset_loader) = asset_loader {
         services = services.with_asset_loader(asset_loader);
@@ -74,6 +78,7 @@ pub fn start_catalog_compositor_application() -> CompositorTestServices {
         .with_text_shaper_impl(Rc::new(ferroui_harfbuzz::HarfBuzzTextShaper::new()))
         .with_global_clock(Rc::new(TestGlobalClock::default()))
         .with_input_manager(Rc::new(ferroui_base::input::InputManager::new()))
+        .with_icon_loader(Rc::new(TestIconLoader))
         .with_theme(|| ferroui_themes_fluent::FluentTheme::new().as_style());
     let services = CompositorTestServices::start(services);
     FerroRuntimeXamlLoader::register();
