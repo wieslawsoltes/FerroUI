@@ -1,0 +1,239 @@
+{
+  "name": "Tests",
+  "crate_name": "xaml_include_fixture_theme",
+  "documents": [
+    {
+      "uri": "ferres://Tests/Resource.xaml",
+      "root_type": "FerroUI.Controls.ResourceDictionary",
+      "class_rust_path": null,
+      "build_path": "::xaml_include_fixture_theme::compiled_xaml::build_resource_xaml",
+      "populate_path": null,
+      "public": true
+    },
+    {
+      "uri": "ferres://Tests/Missing_ResourceKey_In_ResourceInclude_Does_Not_Cause_StackOverflow/Resource.xaml",
+      "root_type": "FerroUI.Controls.ResourceDictionary",
+      "class_rust_path": null,
+      "build_path": "::xaml_include_fixture_theme::compiled_xaml::build_missing_resourcekey_in_resourceinclude_does_not_cause_stackoverflow_resource_xaml",
+      "populate_path": null,
+      "public": true
+    },
+    {
+      "uri": "ferres://Tests/Demo/en-us.xaml",
+      "root_type": "FerroUI.Controls.ResourceDictionary",
+      "class_rust_path": null,
+      "build_path": "::xaml_include_fixture_theme::compiled_xaml::build_demo_en_us_xaml",
+      "populate_path": null,
+      "public": true
+    },
+    {
+      "uri": "ferres://Tests/Xaml/Style1.xaml",
+      "root_type": "FerroUI.Styling.Style",
+      "class_rust_path": null,
+      "build_path": "::xaml_include_fixture_theme::compiled_xaml::build_xaml_style1_xaml",
+      "populate_path": null,
+      "public": true
+    },
+    {
+      "uri": "ferres://Tests/Style.xaml",
+      "root_type": "FerroUI.Styling.Style",
+      "class_rust_path": null,
+      "build_path": "::xaml_include_fixture_theme::compiled_xaml::build_style_xaml",
+      "populate_path": null,
+      "public": true
+    },
+    {
+      "uri": "ferres://Tests/Subfolder/Style.xaml",
+      "root_type": "FerroUI.Styling.Style",
+      "class_rust_path": null,
+      "build_path": "::xaml_include_fixture_theme::compiled_xaml::build_subfolder_style_xaml",
+      "populate_path": null,
+      "public": true
+    },
+    {
+      "uri": "ferres://Tests/Subfolder/Folder/Root.xaml",
+      "root_type": "FerroUI.Controls.ContentControl",
+      "class_rust_path": null,
+      "build_path": "::xaml_include_fixture_theme::compiled_xaml::build_subfolder_folder_root_xaml",
+      "populate_path": null,
+      "public": true
+    },
+    {
+      "uri": "ferres://Tests/Folder/Root.xaml",
+      "root_type": "FerroUI.Controls.ContentControl",
+      "class_rust_path": null,
+      "build_path": "::xaml_include_fixture_theme::compiled_xaml::build_folder_root_xaml",
+      "populate_path": null,
+      "public": true
+    },
+    {
+      "uri": "ferres://Tests/Relative_StyleInclude_Is_Resolved_With_Two_Files/Folder/Style.xaml",
+      "root_type": "FerroUI.Styling.Style",
+      "class_rust_path": null,
+      "build_path": "::xaml_include_fixture_theme::compiled_xaml::build_relative_styleinclude_is_resolved_with_two_files_folder_style_xaml",
+      "populate_path": null,
+      "public": true
+    },
+    {
+      "uri": "ferres://Tests/Relative_StyleInclude_Is_Resolved_With_Two_Files/Folder/Root.xaml",
+      "root_type": "FerroUI.Controls.ContentControl",
+      "class_rust_path": null,
+      "build_path": "::xaml_include_fixture_theme::compiled_xaml::build_relative_styleinclude_is_resolved_with_two_files_folder_root_xaml",
+      "populate_path": null,
+      "public": true
+    },
+    {
+      "uri": "ferres://Tests/Relative_Dot_Syntax_StyleInclude_Is_Resolved_With_Two_Files/Folder/Style.xaml",
+      "root_type": "FerroUI.Styling.Style",
+      "class_rust_path": null,
+      "build_path": "::xaml_include_fixture_theme::compiled_xaml::build_relative_dot_syntax_styleinclude_is_resolved_with_two_files_folder_style_xaml",
+      "populate_path": null,
+      "public": true
+    },
+    {
+      "uri": "ferres://Tests/Relative_Dot_Syntax_StyleInclude_Is_Resolved_With_Two_Files/Folder/Root.xaml",
+      "root_type": "FerroUI.Controls.ContentControl",
+      "class_rust_path": null,
+      "build_path": "::xaml_include_fixture_theme::compiled_xaml::build_relative_dot_syntax_styleinclude_is_resolved_with_two_files_folder_root_xaml",
+      "populate_path": null,
+      "public": true
+    },
+    {
+      "uri": "ferres://Tests/Missing_ResourceKey_In_StyleInclude_Does_Not_Cause_StackOverflow/Style.xaml",
+      "root_type": "FerroUI.Styling.Style",
+      "class_rust_path": null,
+      "build_path": "::xaml_include_fixture_theme::compiled_xaml::build_missing_resourcekey_in_styleinclude_does_not_cause_stackoverflow_style_xaml",
+      "populate_path": null,
+      "public": true
+    },
+    {
+      "uri": "ferres://Tests/Resources.xaml",
+      "root_type": "FerroUI.Controls.ResourceDictionary",
+      "class_rust_path": null,
+      "build_path": "::xaml_include_fixture_theme::compiled_xaml::build_resources_xaml",
+      "populate_path": null,
+      "public": true
+    },
+    {
+      "uri": "ferres://Tests/MergeResourceInclude_Works_With_Single_Resource.xaml",
+      "root_type": "FerroUI.Controls.UserControl",
+      "class_rust_path": null,
+      "build_path": "::xaml_include_fixture_theme::compiled_xaml::build_mergeresourceinclude_works_with_single_resource_xaml",
+      "populate_path": null,
+      "public": true
+    },
+    {
+      "uri": "ferres://Tests/Resources1.xaml",
+      "root_type": "FerroUI.Controls.ResourceDictionary",
+      "class_rust_path": null,
+      "build_path": "::xaml_include_fixture_theme::compiled_xaml::build_resources1_xaml",
+      "populate_path": null,
+      "public": true
+    },
+    {
+      "uri": "ferres://Tests/Resources2.xaml",
+      "root_type": "FerroUI.Controls.ResourceDictionary",
+      "class_rust_path": null,
+      "build_path": "::xaml_include_fixture_theme::compiled_xaml::build_resources2_xaml",
+      "populate_path": null,
+      "public": true
+    },
+    {
+      "uri": "ferres://Tests/MergeResourceInclude_Is_Allowed_After_ResourceInclude.xaml",
+      "root_type": "FerroUI.Controls.ResourceDictionary",
+      "class_rust_path": null,
+      "build_path": "::xaml_include_fixture_theme::compiled_xaml::build_mergeresourceinclude_is_allowed_after_resourceinclude_xaml",
+      "populate_path": null,
+      "public": true
+    },
+    {
+      "uri": "ferres://Tests/MergeResourceInclude_Works_With_Multiple_Resources/Resources1.xaml",
+      "root_type": "FerroUI.Controls.ResourceDictionary",
+      "class_rust_path": null,
+      "build_path": "::xaml_include_fixture_theme::compiled_xaml::build_mergeresourceinclude_works_with_multiple_resources_resources1_xaml",
+      "populate_path": null,
+      "public": true
+    },
+    {
+      "uri": "ferres://Tests/MergeResourceInclude_Works_With_Multiple_Resources/Resources2.xaml",
+      "root_type": "FerroUI.Controls.ResourceDictionary",
+      "class_rust_path": null,
+      "build_path": "::xaml_include_fixture_theme::compiled_xaml::build_mergeresourceinclude_works_with_multiple_resources_resources2_xaml",
+      "populate_path": null,
+      "public": true
+    },
+    {
+      "uri": "ferres://Tests/MergeResourceInclude_Works_With_Multiple_Resources.xaml",
+      "root_type": "FerroUI.Controls.ResourceDictionary",
+      "class_rust_path": null,
+      "build_path": "::xaml_include_fixture_theme::compiled_xaml::build_mergeresourceinclude_works_with_multiple_resources_xaml",
+      "populate_path": null,
+      "public": true
+    },
+    {
+      "uri": "ferres://Tests/MergeResourceInclude_Works_With_Multiple_Resources/Resources1_2.xaml",
+      "root_type": "FerroUI.Controls.ResourceDictionary",
+      "class_rust_path": null,
+      "build_path": "::xaml_include_fixture_theme::compiled_xaml::build_mergeresourceinclude_works_with_multiple_resources_resources1_2_xaml",
+      "populate_path": null,
+      "public": true
+    },
+    {
+      "uri": "ferres://Tests/MergeResourceInclude_Works_With_ThemeDictionaries/Resources1.xaml",
+      "root_type": "FerroUI.Controls.ResourceDictionary",
+      "class_rust_path": null,
+      "build_path": "::xaml_include_fixture_theme::compiled_xaml::build_mergeresourceinclude_works_with_themedictionaries_resources1_xaml",
+      "populate_path": null,
+      "public": true
+    },
+    {
+      "uri": "ferres://Tests/MergeResourceInclude_Works_With_ThemeDictionaries/Resources2.xaml",
+      "root_type": "FerroUI.Controls.ResourceDictionary",
+      "class_rust_path": null,
+      "build_path": "::xaml_include_fixture_theme::compiled_xaml::build_mergeresourceinclude_works_with_themedictionaries_resources2_xaml",
+      "populate_path": null,
+      "public": true
+    },
+    {
+      "uri": "ferres://Tests/MergeResourceInclude_Works_With_ThemeDictionaries.xaml",
+      "root_type": "FerroUI.Controls.ResourceDictionary",
+      "class_rust_path": null,
+      "build_path": "::xaml_include_fixture_theme::compiled_xaml::build_mergeresourceinclude_works_with_themedictionaries_xaml",
+      "populate_path": null,
+      "public": true
+    },
+    {
+      "uri": "ferres://Tests/MergeResourceInclude_Fails_With_ThemeDictionaries_Duplicate_Resources/Resources1.xaml",
+      "root_type": "FerroUI.Controls.ResourceDictionary",
+      "class_rust_path": null,
+      "build_path": "::xaml_include_fixture_theme::compiled_xaml::build_mergeresourceinclude_fails_with_themedictionaries_duplicate_resources_resources1_xaml",
+      "populate_path": null,
+      "public": true
+    },
+    {
+      "uri": "ferres://Tests/MergeResourceInclude_Fails_With_ThemeDictionaries_Duplicate_Resources/Resources2.xaml",
+      "root_type": "FerroUI.Controls.ResourceDictionary",
+      "class_rust_path": null,
+      "build_path": "::xaml_include_fixture_theme::compiled_xaml::build_mergeresourceinclude_fails_with_themedictionaries_duplicate_resources_resources2_xaml",
+      "populate_path": null,
+      "public": true
+    },
+    {
+      "uri": "ferres://Tests/MergeResourceInclude_Fails_With_ThemeDictionaries_Duplicate_Resources.xaml",
+      "root_type": "FerroUI.Controls.ResourceDictionary",
+      "class_rust_path": null,
+      "build_path": "::xaml_include_fixture_theme::compiled_xaml::build_mergeresourceinclude_fails_with_themedictionaries_duplicate_resources_xaml",
+      "populate_path": null,
+      "public": true
+    },
+    {
+      "uri": "ferres://tests/Xaml/StyleWithServiceProvider.xaml",
+      "root_type": "XamlIncludeFixture.Theme.StyleWithServiceProvider",
+      "class_rust_path": "::xaml_include_fixture_theme::StyleWithServiceProvider",
+      "build_path": null,
+      "populate_path": "::xaml_include_fixture_theme::compiled_style_with_service_provider::populate",
+      "public": true
+    }
+  ],
+  "dependencies": []
+}

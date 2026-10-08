@@ -1,0 +1,31 @@
+[package]
+name = "xaml-include-fixture-application"
+description = "Test fixture of the XAML compiler: an application whose compiled documents include documents of other crates"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+publish = false
+autotests = false
+autobenches = false
+autoexamples = false
+
+[lib]
+path = "lib.rs"
+
+[dependencies]
+# The compiled markup of the crate calls the typed functions of the declared members.
+ferroui-base = { workspace = true, features = ["markup-functions"] }
+ferroui-controls = { workspace = true }
+ferroui-markup-xaml = { workspace = true }
+# The crates whose compiled documents the documents of this crate include.
+xaml-include-fixture-theme = { path = "../Theme" }
+ferroui-themes-simple = { workspace = true }
+
+[dev-dependencies]
+ferroui-base = { workspace = true, features = ["testing"] }
+ferroui-controls = { workspace = true, features = ["testing"] }
+# The emitter generates the compiled markup of the crate and checks it (`tests/compiled_xaml_tests.rs`); the
+# tests of the diagnostics compile documents in the test.
+ferroui-markup-xaml-loader = { workspace = true, features = ["runtime", "testing", "emitter"] }
