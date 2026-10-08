@@ -86,6 +86,12 @@ impl PlatformRenderInterfaceContextManager {
     }
 
     pub fn is_ready(&self) -> bool {
+        // A backend context that exists does not need the render interface
+        // again. Without one, a thread that cannot find the render interface
+        // (the render thread, before the UI thread has looked it up) waits.
+        if self.backend.borrow().is_none() && self.platform_render_interface().is_none() {
+            return false;
+        }
         self.ready_state_feature.as_ref().is_none_or(|feature| feature.is_ready())
     }
 

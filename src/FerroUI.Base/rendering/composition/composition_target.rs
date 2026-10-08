@@ -35,6 +35,12 @@ pub struct CompositionTarget {
 impl CompositionTarget {
     pub(crate) fn new(compositor: &Rc<Compositor>, surfaces: RenderSurfaces) -> Rc<CompositionTarget> {
         let id = NEXT_ID.fetch_add(1, Ordering::SeqCst) + 1;
+        // The render interface may have been registered after the compositor
+        // was created. It is looked up here, on the thread that has the
+        // services, before a frame of the render thread needs it.
+        compositor.with_server(|server| {
+            server.render_interface().platform_render_interface();
+        });
         let server =
             compositor.create_server_object(move |compositor, _| ServerCompositionTarget::new(compositor, surfaces, id));
         let target = Rc::new_cyclic(|this: &Weak<CompositionTarget>| CompositionTarget {

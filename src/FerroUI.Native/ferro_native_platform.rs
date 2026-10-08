@@ -269,7 +269,7 @@ impl FerroNativePlatform {
             .bind::<dyn IClipboard>()
             .to_constant(clipboard)
             .bind::<Arc<dyn IRenderLoop>>()
-            .to_constant(Rc::new(render_loop))
+            .to_constant(Rc::new(render_loop.clone()))
             .bind::<dyn IMountedVolumeInfoProvider>()
             .to_constant(Rc::new(MacOSMountedVolumeInfoProvider))
             .bind::<dyn IPlatformDragSource>()
@@ -360,7 +360,25 @@ impl FerroNativePlatform {
             locator.bind::<dyn IPlatformGraphics>().to_constant(platform_graphics.clone());
         }
 
-        let compositor = Compositor::new(platform_graphics, true);
+        // The render-thread mode, while it is being brought up: the thread of
+        // the render timer renders the frames, and this thread renders at the
+        // synchronous points, as the reference does on this platform. It is
+        // chosen with FERROUI_RENDER_THREAD=1 until it is the default
+        // (docs/porting/render-thread.md, stage R5).
+        let render_thread = std::env::var("FERROUI_RENDER_THREAD").is_ok_and(|value| value == "1");
+        let compositor = if render_thread && render_loop.runs_in_background() {
+            Compositor::with_render_thread(
+                render_loop.clone(),
+                platform_graphics,
+                true,
+                &ferroui_base::media::MediaContext::instance().scheduler(),
+                Dispatcher::ui_thread(),
+                None,
+                None,
+            )
+        } else {
+            Compositor::new(platform_graphics, true)
+        };
         COMPOSITOR.with(|slot| *slot.borrow_mut() = Some(compositor.clone()));
         locator.bind_to_self(compositor);
     }
