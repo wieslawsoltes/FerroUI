@@ -166,6 +166,21 @@ Start-up is unchanged. The CPU of the page run is about 0.1 to 0.2 s higher on a
 - The debug events of a target are `Arc` and `Send + Sync`.
 - **Left bound to the UI thread, in `ThreadBound`:** the render surfaces of a target, the update closures of a drawing surface, the import and dispose closures of the interop objects. A server on its own thread panics on their first use: this is the list of what R3 to R5 (and B2) have to make usable from the render thread.
 
+### Scope of R3, surveyed
+
+What the UI side asks the server compositor for directly today (outside `rendering/composition/server/`, tests aside). Each becomes a member of the handle the compositor keeps, a job, or a readback:
+
+| Where | What it reaches | Direction |
+|---|---|---|
+| `Compositor` itself | owns `Rc<ServerCompositor>`, hands it out with `server()`, and gives it the committed batches | The compositor keeps a handle: the queue of committed batches (thread-safe), the readback, and what the rows below need. The server compositor is created by, and stays on, the thread that renders. |
+| `container_visual.rs`, `composition_target.rs`, `visual.rs` | `server().readback()` (read revision, next read, the indices) | The readback is the structure that is shared between the threads by design upstream; it is reached through the handle. To check: that all of it is atomics or under its lock. |
+| `Compositor::try_get_render_interface_feature` | the cached features of the render interface, else the render interface itself when it is ready | As upstream: the cache is filled by the render thread and read by the UI thread; the direct path is only legal on the render thread. |
+| `composition_interop.rs` | the current context of the render interface, compared by identity and used by imports | Belongs with the interop closures that R2 bound to the UI thread; settled with the GPU contexts in R5. |
+| `media_context.rs` | `compositor.server().render()` | This is the dispatcher-thread mode: the UI thread renders. It stays, behind the option, and is the only caller that may hold the server compositor itself. |
+| 7 generated property blocks, `server_composition_brush.rs` | `host.server()`: the *id* of the server object, not the server compositor | No change. |
+
+47 files outside `server/` name a server type; most do so to create their server object inside a factory closure, which already runs on the render thread. The ones that hold a server object across calls are found by making `Compositor::server()` private.
+
 ### Scope of R2, as the compiler names it
 
 Requiring `Send` of `ServerJob`, `ServerObjectJob` and `ServerObjectFactory` (tried on top of R1) fails at these places in the base crate; each is a decision, not a rename:
