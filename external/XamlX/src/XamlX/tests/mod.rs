@@ -3,6 +3,7 @@
 
 #![allow(clippy::cloned_ref_to_slice_refs)]
 
+mod ast_tests;
 mod emit_tests;
 mod helpers;
 mod parser_tests;

@@ -30,3 +30,5 @@ mod expression_observer_builder_tests_method;
 mod expression_observer_builder_tests_negation;
 mod expression_observer_builder_tests_property;
 mod delayed_binding_tests;
+mod selector_parser_tests;
+mod container_query_parser_tests;
