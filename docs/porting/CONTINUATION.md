@@ -130,10 +130,30 @@ Also:
 - **CI speed-up.** The earlier proposal for a faster CI run is still open.
 - **Stale branches.** Branches of merged pull requests can be deleted by hand.
 
+## Core first (owner, 2026-10-08)
+
+The owner's order of 2026-10-08: finish the core port first, with all four local sub-agents on it, then continue with everything else (the ControlCatalog documents still excluded, the XAML compiler's build integration, the performance designs). The queue below comes from the tracking pages; the member counts are matched by name only, so every batch starts by sorting real gaps from false ones. For each gap the outcome is one of: ported exactly with its upstream tests; found under another name or place (an entry in `data/path-overrides.toml`); not applicable in Rust (an entry in `data/path-overrides.toml` or `data/member-waivers.toml` with a concrete reason).
+
+| # | Batch (`ferroui-base` unless stated) | Missing members | Branch | State |
+|---|---|---:|---|---|
+| 1 | `Utilities` | about 276 | `core-utilities` | being written |
+| 2 | `Data`: bindings, parsers, expression nodes, plugins, converters | about 180 | `core-data` | being written |
+| 3 | `PropertyStore` and the files of the crate root | about 190 | `core-property-store` | being written |
+| 4 | `Threading`, then `Rendering/Composition` | about 65 and 150 | `core-threading-composition` | being written |
+| 5 | `Media` | about 110 | | waits for `core-port-12` (pull request 51) |
+| 6 | `Input`, `Styling`, `Platform`, `Metadata`, `Reactive`, `Diagnostics` | about 350 | | queued (`Input` waits for pull request 51) |
+| 7 | `ferroui-controls`: the crate root, `Selection`, `Platform`, `Primitives`, the rest | about 250 | | queued |
+| 8 | The markup crates and the run-time loader | about 215 | | queued |
+| 9 | The Skia backend and the macOS backend: what is left after pull requests 50, 52 and 54 | about 45 and 230 | | queued |
+| 10 | The headless platform (test infrastructure; not started) | 251 | | queued |
+
+After the last batch: regenerate the tracking pages once (`scripts/port-status/run.sh`) and take the remaining gaps from them.
+
 ## How to run the next period
 
 - All work is done in the local session (owner, 2026-10-08). No new cloud sessions are started; `CLOUD-WORKERS.md` and `cloud-tasks/` stay as the record of how the cloud workers were briefed, and their rules for an exact port, for tests and for delivery apply to local work unchanged.
 - Independent tasks may be split between local sub-agents, at most four at a time and never two on the same files. Each task gets its own branch from the current `origin/main` and its own pull request.
+- Sub-agents write and commit without compiling (owner, 2026-10-08): four debug builds of the workspace at once filled the disk. A sub-agent checks every name it uses against the source, commits on its branch, and reports what it doubts will compile. The main session then builds and tests one branch at a time in the main checkout (`git checkout --detach <head>`), where the build cache already is, sends the exact compiler and test output back for fixes, and opens the pull request when the branch passes.
 - A pull request is merged with a rebase merge when its three checks are green (`Source conventions`, `Build and test (macOS)`, `Check (browser, wasm32-unknown-emscripten)`). The macOS job takes about 40 minutes.
 - When `ci.yml` does not start for a pull request, dispatch it by hand on the branch.
 - After a toolchain change on `main`, re-run `scripts/browser/setup.sh` before any browser build. The toolchain is installed under `.tools/`; `source .tools/env.sh` before `scripts/build-browser.sh`.
