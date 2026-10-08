@@ -30,3 +30,8 @@ path = "examples/themed_view/main.rs"
 [[example]]
 name = "storage_view"
 path = "examples/storage_view/main.rs"
+
+# A page of the threaded build (scripts/build-browser.sh render_worker_clear --threads).
+[[example]]
+name = "render_worker_clear"
+path = "examples/render_worker_clear/main.rs"
