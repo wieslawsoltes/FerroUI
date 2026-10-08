@@ -340,8 +340,8 @@ Loading and transforming (`ferro_xaml_il_runtime_compiler.rs`):
   member's message; tests compare messages with upstream's.
 
 Known open items outside the emitter (not started): the remaining ignored tests
-of the XAML test crate (most wait for the emitter); catalog gaps C101 and C310 (`TimeSpan`
-from text); C006/C007 belong to rendering.
+of the XAML test crate (most wait for the emitter); catalog gap C101; C006/C007 belong to
+rendering.
 
 ## 7. What stage E2 delivered, and the next steps
 

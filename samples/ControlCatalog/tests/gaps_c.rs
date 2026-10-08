@@ -132,14 +132,13 @@ fn gap_c309_array_list_element() {
 }
 
 #[test]
-#[ignore = "gap C310: AutoCompleteBox.MinimumPopulateDelay (TimeSpan) is not converted from text"]
 fn gap_c310_time_span_property_from_text() {
     let _app = start_application();
     let auto_complete_box = from_markup_value::<Ref<AutoCompleteBox>>(&Some(load_text(&format!(
         "<AutoCompleteBox {XMLNS} MinimumPopulateDelay='00:00:01'/>"
     ))))
     .expect("an auto complete box");
-    assert_eq!(auto_complete_box.minimum_populate_delay(), std::time::Duration::from_secs(1));
+    assert_eq!(auto_complete_box.minimum_populate_delay(), ferroui_base::animation::TimeSpan::from_seconds(1.0));
 }
 
 #[test]

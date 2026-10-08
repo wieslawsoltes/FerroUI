@@ -1,6 +1,7 @@
 use crate::documents::TextElement;
 use crate::primitives::{TextSelectionHandleCanvas, TextSelectorLayer};
 use crate::{Border, Control, ControlImpl, TextBlock, TextBox, TextBoxTextInputMethodClient};
+use ferroui_base::animation::TimeSpan;
 use ferroui_base::input::InputElementImpl;
 use ferroui_base::interactivity::InteractiveImpl;
 use ferroui_base::layout::{LayoutableImpl, VerticalAlignment};
@@ -24,7 +25,6 @@ use ferroui_base::{
 };
 use std::cell::{Cell, RefCell};
 use std::rc::{Rc, Weak};
-use std::time::Duration;
 
 /// The control that displays the text of a text box: the text, the
 /// selection, the pre-edit text of an input method and the caret.
@@ -406,7 +406,7 @@ ferroui_base::ferro_properties! { impl TextPresenter {
 
     ferro_property!(
         /// Defines the `CaretBlinkInterval` property.
-        pub fn caret_blink_interval_property() -> StyledProperty<Duration> {
+        pub fn caret_blink_interval_property() -> StyledProperty<TimeSpan> {
             TextBox::caret_blink_interval_property().add_owner::<TextPresenter>()
         }
     );
@@ -750,11 +750,11 @@ impl TextPresenter {
     }
 
     /// The caret blink rate.
-    pub fn caret_blink_interval(&self) -> Duration {
+    pub fn caret_blink_interval(&self) -> TimeSpan {
         self.get_value(Self::caret_blink_interval_property())
     }
 
-    pub fn set_caret_blink_interval(&self, value: Duration) {
+    pub fn set_caret_blink_interval(&self, value: TimeSpan) {
         self.set_value(Self::caret_blink_interval_property(), value)
     }
 
@@ -1174,9 +1174,10 @@ impl TextPresenter {
 
         let caret_blink_interval = self.caret_blink_interval();
 
-        if !caret_blink_interval.is_zero() {
+        if caret_blink_interval > TimeSpan::ZERO {
             let caret_timer = DispatcherTimer::new();
-            caret_timer.set_interval(caret_blink_interval);
+            // Positive here, so the interval is a duration.
+            caret_timer.set_interval(caret_blink_interval.to_duration().unwrap_or_default());
 
             // The handler is created once per timer: a tick allocates nothing.
             let weak = self.to_ref().downgrade();

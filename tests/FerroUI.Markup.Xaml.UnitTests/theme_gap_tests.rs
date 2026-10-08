@@ -429,3 +429,21 @@ fn c311_bindings_are_assigned_to_properties_of_binding_type() {
     assert!(combo.selected_value_binding().is_some());
     assert!(TextSearch::get_text_binding(&combo).is_some());
 }
+
+/// The delays and intervals of the controls are time spans, as in the managed original, so
+/// their text is converted as the text of a time span: its format, or a number of seconds (C310).
+#[test]
+fn c310_time_span_properties_of_controls_are_converted_from_text() {
+    use ferroui_base::animation::TimeSpan;
+    use ferroui_controls::{AutoCompleteBox, TextBox};
+
+    let _base = xaml_test_base();
+    let auto_complete =
+        load_as::<Ref<AutoCompleteBox>>(&format!("<AutoCompleteBox {NS} MinimumPopulateDelay='00:00:01' />"));
+    assert_eq!(auto_complete.minimum_populate_delay(), TimeSpan::from_seconds(1.0));
+
+    let text_box = load_as::<Ref<TextBox>>(&format!("<TextBox {NS} CaretBlinkInterval='0:0:0.15' />"));
+    assert_eq!(text_box.caret_blink_interval(), TimeSpan::from_milliseconds(150.0));
+    let text_box = load_as::<Ref<TextBox>>(&format!("<TextBox {NS} CaretBlinkInterval='0.25' />"));
+    assert_eq!(text_box.caret_blink_interval(), TimeSpan::from_milliseconds(250.0));
+}

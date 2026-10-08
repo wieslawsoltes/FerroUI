@@ -367,7 +367,7 @@ fn caret_timer_blinks_while_the_caret_is_shown() {
     assert_eq!(presenter.caret_index(), 1);
 
     // No blinking at all with an interval of zero.
-    presenter.set_caret_blink_interval(std::time::Duration::ZERO);
+    presenter.set_caret_blink_interval(ferroui_base::animation::TimeSpan::ZERO);
     presenter.show_caret();
     presenter.hide_caret();
 
