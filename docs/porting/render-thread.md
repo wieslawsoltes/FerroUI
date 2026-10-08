@@ -99,11 +99,13 @@ R1 is delivered one payload contract at a time; each step builds and passes on i
 |---|---|---|
 | R1.1 | `IGeometryImpl`, `IStreamGeometryImpl`, `ITransformedGeometryImpl` | Done: the contract requires `Send + Sync` and is held in `Arc` everywhere. The Skia geometries keep their paths behind a lock and hand out copies (a copy of a path shares its storage); the stroke cache and the path measure are under a lock; the headless stubs and the test geometries follow. |
 | R1.2 | `IGlyphRunImpl` | Done: `Send + Sync`, held in `Arc`. The text blob cache of the Skia glyph run is under a lock, and the closures of the two level cache are `Send`. |
-| R1.3 | `IBitmapImpl` and the contracts built on it | Open. The surface render target is a bitmap that owns GPU objects of the render thread, so the layer contract is decided here. |
+| R1.3 | `IBitmapImpl` and the contracts built on it | Done. A bitmap of the UI side is a `SharedBitmapImpl` (`dyn IBitmapImpl + Send + Sync`) held in `Arc`; `IWriteableBitmapImpl` and `IRenderTargetBitmapImpl` require `Send + Sync`; the counted reference (`RefCounted`) counts atomically. A layer of a drawing context stays an `Rc` on the render thread and is drawn by reference; where the original hands a layer to the UI thread (the snapshot of a visual), the layer gives a shared snapshot of its contents instead. In the Skia backend the pixels of a writeable bitmap and the image drawn from them are under one lock, and the render target a render target bitmap draws itself with is bound to the thread that created it (`ThreadBound`). |
 | R1.4 | Immutable brushes, pens, effects; custom draw operations | Open. |
 | R1.5 | `BatchObject::Value` requires `Send`; measurements | Open. |
 
 Found by R1.1 in the Skia backend: a path can be sent to another thread but not shared by reference, and a path measure can be neither. The geometries therefore never lend a path; the path measure is cached behind a lock in a wrapper that asserts it may move between threads (it owns its contours and has no thread affinity).
+
+Found by R1.3: a Skia bitmap cannot be sent to another thread either; it is held in a wrapper under a lock, like the path measure. `ThreadBound<T>` (`utilities/thread_bound.rs`) is the tool for a part of a shared resource that one thread owns: it panics when reached from another thread and leaks, rather than drops, when the resource dies there.
 
 ## 6. Risks
 

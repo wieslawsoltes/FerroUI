@@ -12,5 +12,5 @@ pub trait IPlatformIconLoader {
     fn load_icon_from_stream(&self, stream: &mut dyn io::Read) -> io::Result<Rc<dyn IWindowIconImpl>>;
 
     /// Creates an icon from a bitmap.
-    fn load_icon_from_bitmap(&self, bitmap: Rc<dyn IBitmapImpl>) -> Rc<dyn IWindowIconImpl>;
+    fn load_icon_from_bitmap(&self, bitmap: std::sync::Arc<ferroui_base::platform::SharedBitmapImpl>) -> Rc<dyn IWindowIconImpl>;
 }

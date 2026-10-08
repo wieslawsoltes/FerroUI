@@ -7,7 +7,6 @@ use crate::utilities::{RefCountable, RefCounted};
 use crate::{PixelRect, PixelSize, Rect, Size, Vector};
 use std::any::Any;
 use std::io::{Read, Write};
-use std::rc::Rc;
 
 /// Holds a bitmap image.
 ///
@@ -17,12 +16,12 @@ use std::rc::Rc;
 /// or through [`IBitmap`]/[`IImage`] handles.
 pub struct Bitmap {
     is_transcoded: bool,
-    platform_impl: RefCounted<dyn IBitmapImpl>,
+    platform_impl: RefCounted<crate::platform::SharedBitmapImpl>,
 }
 
 /// Wraps a platform bitmap in a counted reference that disposes it when the
 /// last reference is released.
-pub(crate) fn create_bitmap_ref(platform_impl: Rc<dyn IBitmapImpl>) -> RefCounted<dyn IBitmapImpl> {
+pub(crate) fn create_bitmap_ref(platform_impl: std::sync::Arc<crate::platform::SharedBitmapImpl>) -> RefCounted<crate::platform::SharedBitmapImpl> {
     let item = platform_impl.clone();
     RefCountable::create(platform_impl, move || item.dispose())
 }
@@ -77,12 +76,12 @@ impl Bitmap {
 
     /// Creates a bitmap sharing a platform bitmap: takes another reference
     /// to it.
-    pub fn from_ref(platform_impl: &RefCounted<dyn IBitmapImpl>) -> Bitmap {
+    pub fn from_ref(platform_impl: &RefCounted<crate::platform::SharedBitmapImpl>) -> Bitmap {
         Bitmap { is_transcoded: false, platform_impl: platform_impl.clone_ref() }
     }
 
     /// Creates a bitmap owning a platform bitmap.
-    pub fn from_impl(platform_impl: Rc<dyn IBitmapImpl>) -> Bitmap {
+    pub fn from_impl(platform_impl: std::sync::Arc<crate::platform::SharedBitmapImpl>) -> Bitmap {
         Bitmap { is_transcoded: false, platform_impl: create_bitmap_ref(platform_impl) }
     }
 
@@ -153,7 +152,7 @@ impl Bitmap {
     }
 
     /// The platform-specific bitmap implementation.
-    pub fn platform_impl(&self) -> &RefCounted<dyn IBitmapImpl> {
+    pub fn platform_impl(&self) -> &RefCounted<crate::platform::SharedBitmapImpl> {
         &self.platform_impl
     }
 
@@ -372,7 +371,7 @@ impl IBitmap for Bitmap {
         Bitmap::pixel_size(self)
     }
 
-    fn platform_impl(&self) -> &RefCounted<dyn IBitmapImpl> {
+    fn platform_impl(&self) -> &RefCounted<crate::platform::SharedBitmapImpl> {
         &self.platform_impl
     }
 
@@ -386,7 +385,7 @@ impl IBitmap for Bitmap {
 }
 
 impl IImageBrushSource for Bitmap {
-    fn bitmap(&self) -> Option<&RefCounted<dyn IBitmapImpl>> {
+    fn bitmap(&self) -> Option<&RefCounted<crate::platform::SharedBitmapImpl>> {
         if !self.platform_impl.is_alive() {
             return None;
         }

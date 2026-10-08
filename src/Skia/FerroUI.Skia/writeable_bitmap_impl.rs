@@ -1,7 +1,7 @@
 use crate::gpu::{drawable_image, needs_mipmaps, ISkiaGrContext};
 use crate::helpers::image_saving_helper;
 use crate::i_drawable_bitmap_impl::IDrawableBitmapImpl;
-use crate::immutable_bitmap::{decode_bitmap, decode_bitmap_to_size};
+use crate::immutable_bitmap::{decode_bitmap, decode_bitmap_to_size, SendBitmap};
 use crate::skia_platform::SkiaPlatform;
 use crate::skia_sharp_extensions::{
     to_alpha_format, to_pixel_format, to_pixel_format_opt, to_sk_alpha_type, to_sk_color_type_or_panic,
@@ -14,36 +14,43 @@ use ferroui_base::{PixelSize, Vector};
 use skia_safe::canvas::SrcRectConstraint;
 use skia_safe::{images, Bitmap, Canvas, Color, Data, Image, ImageInfo, Paint, Rect, SamplingOptions};
 use std::any::Any;
-use std::cell::{Cell, RefCell};
+use std::cell::RefCell;
 use std::io::{self, Read, Write};
-use std::rc::{Rc, Weak};
+use std::rc::Rc;
+use std::sync::atomic::{AtomicI32, Ordering};
+use std::sync::{Arc, Mutex, Weak};
 
 /// Skia based writeable bitmap.
+///
+/// The UI thread writes the pixels and the render thread draws them: the
+/// pixels and the image drawn from them are under one lock.
 pub struct WriteableBitmapImpl {
     weak_self: Weak<WriteableBitmapImpl>,
-    bitmap: RefCell<Option<Bitmap>>,
-    image: RefCell<Option<Image>>,
-    image_valid: Cell<bool>,
+    pixels: Mutex<Pixels>,
     dpi: Vector,
     pixel_size: PixelSize,
-    version: Cell<i32>,
+    version: AtomicI32,
+}
+
+struct Pixels {
+    bitmap: Option<SendBitmap>,
+    /// The snapshot the bitmap is drawn from, until the pixels change.
+    image: Option<Image>,
 }
 
 impl WriteableBitmapImpl {
-    fn from_bitmap(bitmap: Bitmap, pixel_size: PixelSize, dpi: Vector) -> Rc<Self> {
-        Rc::new_cyclic(|weak_self| Self {
+    fn from_bitmap(bitmap: Bitmap, pixel_size: PixelSize, dpi: Vector) -> Arc<Self> {
+        Arc::new_cyclic(|weak_self| Self {
             weak_self: weak_self.clone(),
-            bitmap: RefCell::new(Some(bitmap)),
-            image: RefCell::new(None),
-            image_valid: Cell::new(false),
+            pixels: Mutex::new(Pixels { bitmap: Some(SendBitmap(bitmap)), image: None }),
             dpi,
             pixel_size,
-            version: Cell::new(1),
+            version: AtomicI32::new(1),
         })
     }
 
     /// Creates a writeable bitmap from the given stream.
-    pub fn from_stream(stream: &mut dyn Read) -> io::Result<Rc<Self>> {
+    pub fn from_stream(stream: &mut dyn Read) -> io::Result<Arc<Self>> {
         let bitmap = decode_bitmap(stream)?;
         let pixel_size = PixelSize::new(bitmap.width(), bitmap.height());
 
@@ -57,7 +64,7 @@ impl WriteableBitmapImpl {
         decode_size: i32,
         horizontal: bool,
         interpolation_mode: BitmapInterpolationMode,
-    ) -> io::Result<Rc<Self>> {
+    ) -> io::Result<Arc<Self>> {
         let bitmap = decode_bitmap_to_size(stream, decode_size, horizontal, interpolation_mode)?;
         let pixel_size = PixelSize::new(bitmap.width(), bitmap.height());
 
@@ -70,7 +77,7 @@ impl WriteableBitmapImpl {
     /// # Panics
     /// Panics when the pixel format is unknown to Skia or the pixels cannot
     /// be allocated.
-    pub fn new(size: PixelSize, dpi: Vector, format: PixelFormat, alpha_format: AlphaFormat) -> Rc<Self> {
+    pub fn new(size: PixelSize, dpi: Vector, format: PixelFormat, alpha_format: AlphaFormat) -> Arc<Self> {
         let color_type = to_sk_color_type_or_panic(format);
         let alpha_type = to_sk_alpha_type(alpha_format);
 
@@ -86,19 +93,21 @@ impl WriteableBitmapImpl {
     }
 
     fn with_bitmap<R>(&self, f: impl FnOnce(&Bitmap) -> R) -> R {
-        let bitmap = self.bitmap.borrow();
-        f(bitmap.as_ref().expect("WriteableBitmapImpl has been disposed"))
+        let pixels = self.pixels.lock().unwrap();
+        f(pixels.bitmap.as_ref().expect("WriteableBitmapImpl has been disposed"))
+    }
+
+    fn snapshot_of(bitmap: &Bitmap) -> Image {
+        let pixmap = bitmap.pixmap();
+        let bytes = pixmap.bytes().unwrap_or(&[]);
+        images::raster_from_data(bitmap.info(), Data::new_copy(bytes), bitmap.row_bytes())
+            .unwrap_or_else(|| panic!("Unable to create an image from the bitmap pixels"))
     }
 
     /// Gets a snapshot of the bitmap: an image holding a copy of the current
     /// pixels.
     pub fn get_snapshot(&self) -> Image {
-        self.with_bitmap(|bitmap| {
-            let pixmap = bitmap.pixmap();
-            let bytes = pixmap.bytes().unwrap_or(&[]);
-            images::raster_from_data(bitmap.info(), Data::new_copy(bytes), bitmap.row_bytes())
-                .unwrap_or_else(|| panic!("Unable to create an image from the bitmap pixels"))
-        })
+        self.with_bitmap(Self::snapshot_of)
     }
 }
 
@@ -112,7 +121,7 @@ impl IBitmapImpl for WriteableBitmapImpl {
     }
 
     fn version(&self) -> i32 {
-        self.version.get()
+        self.version.load(Ordering::SeqCst)
     }
 
     fn save(&self, stream: &mut dyn Write, options: &BitmapEncoderOptions) -> io::Result<()> {
@@ -121,8 +130,9 @@ impl IBitmapImpl for WriteableBitmapImpl {
     }
 
     fn dispose(&self) {
-        self.image.borrow_mut().take();
-        self.bitmap.borrow_mut().take();
+        let mut pixels = self.pixels.lock().unwrap();
+        pixels.image.take();
+        pixels.bitmap.take();
     }
 
     fn as_any(&self) -> &dyn Any {
@@ -144,17 +154,20 @@ impl IDrawableBitmapImpl for WriteableBitmapImpl {
         sampling_options: SamplingOptions,
         paint: &Paint,
     ) {
-        if self.image.borrow().is_none() || !self.image_valid.get() {
-            // NOTE: this does a snapshot of the bitmap. If the canvas is not
-            // GPU-backed we might want to avoid that by force-sharing the
-            // pixel data with the bitmap, but that would require manual pixel
-            // buffer management.
-            let snapshot = self.get_snapshot();
-            *self.image.borrow_mut() = Some(snapshot);
-            self.image_valid.set(true);
-        }
+        let image = {
+            let mut pixels = self.pixels.lock().unwrap();
+            if pixels.image.is_none() {
+                // NOTE: this does a snapshot of the bitmap. If the canvas is
+                // not GPU-backed we might want to avoid that by force-sharing
+                // the pixel data with the bitmap, but that would require
+                // manual pixel buffer management.
+                let snapshot =
+                    Self::snapshot_of(pixels.bitmap.as_ref().expect("WriteableBitmapImpl has been disposed"));
+                pixels.image = Some(snapshot);
+            }
+            pixels.image.clone()
+        };
 
-        let image = self.image.borrow().clone();
         if let Some(image) = image {
             canvas.draw_image_rect_with_sampling_options(
                 drawable_image(gr_context, image, needs_mipmaps(&sampling_options)),
@@ -186,7 +199,7 @@ impl IWriteableBitmapImpl for WriteableBitmapImpl {}
 
 /// Framebuffer for a bitmap.
 struct BitmapFramebuffer {
-    parent: RefCell<Option<Rc<WriteableBitmapImpl>>>,
+    parent: RefCell<Option<Arc<WriteableBitmapImpl>>>,
 }
 
 impl BitmapFramebuffer {
@@ -231,11 +244,13 @@ impl ILockedFramebuffer for BitmapFramebuffer {
 
     fn dispose(&self) {
         if let Some(parent) = self.parent.borrow_mut().take() {
-            if let Some(bitmap) = parent.bitmap.borrow().as_ref() {
+            let mut pixels = parent.pixels.lock().unwrap();
+            if let Some(bitmap) = pixels.bitmap.as_ref() {
                 bitmap.notify_pixels_changed();
             }
-            parent.version.set(parent.version.get() + 1);
-            parent.image_valid.set(false);
+            parent.version.fetch_add(1, Ordering::SeqCst);
+            // The image is taken again from the new pixels when drawn.
+            pixels.image = None;
         }
     }
 }

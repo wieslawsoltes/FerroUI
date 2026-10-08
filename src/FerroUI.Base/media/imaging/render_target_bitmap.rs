@@ -7,7 +7,6 @@ use crate::{PixelSize, Rect, Ref, Size, Vector, Visual};
 use std::any::Any;
 use std::io::Write;
 use std::ops::Deref;
-use std::rc::Rc;
 
 /// A bitmap that holds the rendering of a visual.
 pub struct RenderTargetBitmap {
@@ -38,7 +37,7 @@ impl RenderTargetBitmap {
     }
 
     fn from_ref(platform_impl: RefCounted<dyn IRenderTargetBitmapImpl>) -> RenderTargetBitmap {
-        let base_impl: RefCounted<dyn IBitmapImpl> = platform_impl.clone_as(|item| item as Rc<dyn IBitmapImpl>);
+        let base_impl: RefCounted<crate::platform::SharedBitmapImpl> = platform_impl.clone_as(|item| item as std::sync::Arc<crate::platform::SharedBitmapImpl>);
         let base = Bitmap::from_ref(&base_impl);
         base_impl.dispose();
         RenderTargetBitmap { base, platform_impl }
@@ -56,7 +55,7 @@ impl RenderTargetBitmap {
         context.dispose();
     }
 
-    fn create_impl(size: PixelSize, dpi: Vector) -> Rc<dyn IRenderTargetBitmapImpl> {
+    fn create_impl(size: PixelSize, dpi: Vector) -> std::sync::Arc<dyn IRenderTargetBitmapImpl> {
         platform::render_interface().create_render_target_bitmap(size, dpi)
     }
 
@@ -117,7 +116,7 @@ impl IBitmap for RenderTargetBitmap {
         self.base.pixel_size()
     }
 
-    fn platform_impl(&self) -> &RefCounted<dyn IBitmapImpl> {
+    fn platform_impl(&self) -> &RefCounted<crate::platform::SharedBitmapImpl> {
         self.base.platform_impl()
     }
 
@@ -131,7 +130,7 @@ impl IBitmap for RenderTargetBitmap {
 }
 
 impl IImageBrushSource for RenderTargetBitmap {
-    fn bitmap(&self) -> Option<&RefCounted<dyn IBitmapImpl>> {
+    fn bitmap(&self) -> Option<&RefCounted<crate::platform::SharedBitmapImpl>> {
         IImageBrushSource::bitmap(&self.base)
     }
 }

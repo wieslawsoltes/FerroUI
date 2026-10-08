@@ -59,6 +59,11 @@ impl MockBitmap {
     }
 }
 
+// SAFETY: the tests create and use this mock on one thread; the impls only
+// satisfy the thread-safety bound of the bitmap contracts.
+unsafe impl Send for MockBitmap {}
+unsafe impl Sync for MockBitmap {}
+
 impl IBitmapImpl for MockBitmap {
     fn dpi(&self) -> Vector {
         self.dpi
@@ -209,21 +214,21 @@ impl IDrawingContextImpl for MockDrawingContext {
 /// bitmap it creates.
 #[derive(Default)]
 struct MockBackend {
-    created: RefCell<Vec<Rc<MockBitmap>>>,
+    created: RefCell<Vec<std::sync::Arc<MockBitmap>>>,
 }
 
 impl MockBackend {
-    fn create(&self, bitmap: MockBitmap) -> Rc<MockBitmap> {
-        let bitmap = Rc::new(bitmap);
+    fn create(&self, bitmap: MockBitmap) -> std::sync::Arc<MockBitmap> {
+        let bitmap = std::sync::Arc::new(bitmap);
         self.created.borrow_mut().push(bitmap.clone());
         bitmap
     }
 
-    fn last(&self) -> Rc<MockBitmap> {
+    fn last(&self) -> std::sync::Arc<MockBitmap> {
         self.created.borrow().last().expect("a bitmap was created").clone()
     }
 
-    fn decode(&self, stream: &mut dyn Read, size: Option<PixelSize>) -> std::io::Result<Rc<MockBitmap>> {
+    fn decode(&self, stream: &mut dyn Read, size: Option<PixelSize>) -> std::io::Result<std::sync::Arc<MockBitmap>> {
         // The "encoded" form is two bytes: width and height.
         let mut header = [0u8; 2];
         stream.read_exact(&mut header)?;
@@ -275,7 +280,7 @@ impl IPlatformRenderInterface for MockBackend {
     ) -> Arc<dyn IGeometryImpl> {
         unimplemented!()
     }
-    fn create_render_target_bitmap(&self, size: PixelSize, dpi: Vector) -> Rc<dyn IRenderTargetBitmapImpl> {
+    fn create_render_target_bitmap(&self, size: PixelSize, dpi: Vector) -> std::sync::Arc<dyn IRenderTargetBitmapImpl> {
         self.create(MockBitmap::new(size, dpi, Some(PixelFormats::RGBA8888), AlphaFormat::Premul))
     }
     fn create_writeable_bitmap(
@@ -284,13 +289,13 @@ impl IPlatformRenderInterface for MockBackend {
         dpi: Vector,
         format: PixelFormat,
         alpha_format: AlphaFormat,
-    ) -> Rc<dyn IWriteableBitmapImpl> {
+    ) -> std::sync::Arc<dyn IWriteableBitmapImpl> {
         self.create(MockBitmap::new(size, dpi, Some(format), alpha_format))
     }
-    fn load_bitmap_from_file(&self, file_name: &str) -> std::io::Result<Rc<dyn IBitmapImpl>> {
+    fn load_bitmap_from_file(&self, file_name: &str) -> std::io::Result<std::sync::Arc<crate::platform::SharedBitmapImpl>> {
         Err(std::io::Error::new(std::io::ErrorKind::NotFound, file_name.to_owned()))
     }
-    fn load_bitmap(&self, stream: &mut dyn Read) -> std::io::Result<Rc<dyn IBitmapImpl>> {
+    fn load_bitmap(&self, stream: &mut dyn Read) -> std::io::Result<std::sync::Arc<crate::platform::SharedBitmapImpl>> {
         Ok(self.decode(stream, None)?)
     }
     fn load_writeable_bitmap_to_width(
@@ -298,7 +303,7 @@ impl IPlatformRenderInterface for MockBackend {
         stream: &mut dyn Read,
         width: i32,
         _: BitmapInterpolationMode,
-    ) -> std::io::Result<Rc<dyn IWriteableBitmapImpl>> {
+    ) -> std::io::Result<std::sync::Arc<dyn IWriteableBitmapImpl>> {
         Ok(self.decode(stream, Some(PixelSize::new(width, 1)))?)
     }
     fn load_writeable_bitmap_to_height(
@@ -306,13 +311,13 @@ impl IPlatformRenderInterface for MockBackend {
         stream: &mut dyn Read,
         height: i32,
         _: BitmapInterpolationMode,
-    ) -> std::io::Result<Rc<dyn IWriteableBitmapImpl>> {
+    ) -> std::io::Result<std::sync::Arc<dyn IWriteableBitmapImpl>> {
         Ok(self.decode(stream, Some(PixelSize::new(1, height)))?)
     }
-    fn load_writeable_bitmap_from_file(&self, file_name: &str) -> std::io::Result<Rc<dyn IWriteableBitmapImpl>> {
+    fn load_writeable_bitmap_from_file(&self, file_name: &str) -> std::io::Result<std::sync::Arc<dyn IWriteableBitmapImpl>> {
         Err(std::io::Error::new(std::io::ErrorKind::NotFound, file_name.to_owned()))
     }
-    fn load_writeable_bitmap(&self, stream: &mut dyn Read) -> std::io::Result<Rc<dyn IWriteableBitmapImpl>> {
+    fn load_writeable_bitmap(&self, stream: &mut dyn Read) -> std::io::Result<std::sync::Arc<dyn IWriteableBitmapImpl>> {
         Ok(self.decode(stream, None)?)
     }
     fn load_bitmap_to_width(
@@ -320,7 +325,7 @@ impl IPlatformRenderInterface for MockBackend {
         stream: &mut dyn Read,
         width: i32,
         _: BitmapInterpolationMode,
-    ) -> std::io::Result<Rc<dyn IBitmapImpl>> {
+    ) -> std::io::Result<std::sync::Arc<crate::platform::SharedBitmapImpl>> {
         Ok(self.decode(stream, Some(PixelSize::new(width, 1)))?)
     }
     fn load_bitmap_to_height(
@@ -328,7 +333,7 @@ impl IPlatformRenderInterface for MockBackend {
         stream: &mut dyn Read,
         height: i32,
         _: BitmapInterpolationMode,
-    ) -> std::io::Result<Rc<dyn IBitmapImpl>> {
+    ) -> std::io::Result<std::sync::Arc<crate::platform::SharedBitmapImpl>> {
         Ok(self.decode(stream, Some(PixelSize::new(1, height)))?)
     }
     fn resize_bitmap(
@@ -336,7 +341,7 @@ impl IPlatformRenderInterface for MockBackend {
         bitmap_impl: &dyn IBitmapImpl,
         destination_size: PixelSize,
         _: BitmapInterpolationMode,
-    ) -> Rc<dyn IBitmapImpl> {
+    ) -> std::sync::Arc<crate::platform::SharedBitmapImpl> {
         self.create(MockBitmap::new(destination_size, bitmap_impl.dpi(), Some(PixelFormats::RGBA8888), AlphaFormat::Premul))
     }
     fn load_bitmap_from_pixels(
@@ -347,7 +352,7 @@ impl IPlatformRenderInterface for MockBackend {
         size: PixelSize,
         dpi: Vector,
         stride: i32,
-    ) -> Rc<dyn IBitmapImpl> {
+    ) -> std::sync::Arc<crate::platform::SharedBitmapImpl> {
         let bitmap = MockBitmap::new(size, dpi, Some(format), alpha_format);
         let row = ((size.width * format.bits_per_pixel() as i32 + 7) / 8) as usize;
         for y in 0..size.height {

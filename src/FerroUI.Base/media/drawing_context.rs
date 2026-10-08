@@ -91,7 +91,7 @@ pub trait IDrawingContextCore {
     fn draw_ellipse_core(&mut self, brush: Option<&Rc<dyn IBrush>>, pen: Option<&Rc<dyn IPen>>, rect: Rect);
 
     /// Draws a platform bitmap.
-    fn draw_bitmap(&mut self, source: &Rc<dyn IBitmapImpl>, opacity: f64, source_rect: Rect, dest_rect: Rect);
+    fn draw_bitmap(&mut self, source: &std::sync::Arc<crate::platform::SharedBitmapImpl>, opacity: f64, source_rect: Rect, dest_rect: Rect);
 
     /// Draws a custom drawing operation.
     fn custom(&mut self, custom: &Rc<dyn ICustomDrawOperation>);
@@ -246,7 +246,7 @@ impl<'a> DrawingContext<'a> {
     }
 
     /// Draws a platform bitmap.
-    pub fn draw_bitmap(&mut self, source: &Rc<dyn IBitmapImpl>, opacity: f64, source_rect: Rect, dest_rect: Rect) {
+    pub fn draw_bitmap(&mut self, source: &std::sync::Arc<crate::platform::SharedBitmapImpl>, opacity: f64, source_rect: Rect, dest_rect: Rect) {
         self.core().draw_bitmap(source, opacity, source_rect, dest_rect);
     }
 

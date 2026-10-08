@@ -5,7 +5,6 @@ use crate::media::BoxShadows;
 use crate::platform::IBitmapImpl;
 use crate::rendering::composition::drawing::RenderDataStream;
 use crate::{Matrix, Point, Rect};
-use std::rc::Rc;
 
 #[test]
 fn empty_stream_has_null_bounds() {
@@ -52,7 +51,7 @@ fn stroked_ellipse_bounds_are_inflated_by_thickness() {
 
 #[test]
 fn bitmap_bounds_are_the_destination_rect() {
-    let bitmap: Rc<dyn IBitmapImpl> = Rc::new(TestBitmapImpl);
+    let bitmap: std::sync::Arc<crate::platform::SharedBitmapImpl> = std::sync::Arc::new(TestBitmapImpl);
 
     let mut stream = RenderDataStream::new();
     stream.draw_bitmap(Some(bitmap), 1.0, Rect::new(0.0, 0.0, 10.0, 10.0), Rect::new(5.0, 5.0, 20.0, 20.0));

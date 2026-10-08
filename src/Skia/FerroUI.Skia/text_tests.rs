@@ -328,7 +328,7 @@ fn shaped_glyph_run(text: &str, typeface: &Typeface, em_size: f64, origin: Point
 }
 
 struct TextTarget {
-    bitmap: Rc<dyn IRenderTargetBitmapImpl>,
+    bitmap: std::sync::Arc<dyn IRenderTargetBitmapImpl>,
 }
 
 impl TextTarget {

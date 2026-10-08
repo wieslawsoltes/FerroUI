@@ -495,7 +495,7 @@ impl ServerCompositor {
         visual: &Rc<ServerCompositionVisual>,
         scaling: f64,
         render_children: bool,
-    ) -> Rc<dyn IBitmapImpl> {
+    ) -> std::sync::Arc<crate::platform::SharedBitmapImpl> {
         let current = self.render_interface.ensure_current();
         let size = visual.size();
         let pixel_size = PixelSize::from_size(Size::new(size.x, size.y), scaling);
@@ -513,14 +513,19 @@ impl ServerCompositor {
             canvas.dispose();
         }
 
-        let result: Rc<dyn IBitmapImpl> = match target.as_layer_with_render_context_affinity() {
+        let result: std::sync::Arc<crate::platform::SharedBitmapImpl> = match target.as_layer_with_render_context_affinity() {
             Some(affined) if affined.has_render_context_affinity() => {
                 let snapshot = affined.create_non_affined_snapshot();
                 target.dispose();
                 snapshot
             }
-            // We are returning the original target, so it is not disposed
-            _ => target,
+            // The original returns the target itself; a layer does not
+            // leave the render thread here, so its contents do.
+            _ => {
+                let snapshot = target.create_shared_snapshot();
+                target.dispose();
+                snapshot
+            }
         };
         current.dispose();
         result

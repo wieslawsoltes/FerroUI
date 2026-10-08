@@ -14,10 +14,10 @@ pub trait IImageBrush: ITileBrush {
 /// An image that can be the source of an [`IImageBrush`].
 pub trait IImageBrushSource: 'static {
     /// The counted reference to the platform bitmap, while it is alive.
-    fn bitmap(&self) -> Option<&RefCounted<dyn IBitmapImpl>>;
+    fn bitmap(&self) -> Option<&RefCounted<crate::platform::SharedBitmapImpl>>;
 
     /// The platform bitmap, while it is alive.
-    fn get_bitmap(&self) -> Option<Rc<dyn IBitmapImpl>> {
+    fn get_bitmap(&self) -> Option<std::sync::Arc<crate::platform::SharedBitmapImpl>> {
         self.bitmap().map(|bitmap| bitmap.item())
     }
 

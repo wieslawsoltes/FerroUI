@@ -32,6 +32,11 @@ pub trait IBitmapImpl {
     }
 }
 
+/// A bitmap shared between the UI thread and the render thread: what a
+/// bitmap object of the UI side holds and what a batch carries. (A layer of
+/// a drawing context is a bitmap too, but stays on the render thread.)
+pub type SharedBitmapImpl = dyn IBitmapImpl + Send + Sync;
+
 /// A bitmap whose pixels can be read.
 pub trait IReadableBitmapImpl: IBitmapImpl {
     /// The pixel format, if known.
@@ -45,11 +50,11 @@ pub trait IReadableBitmapImpl: IBitmapImpl {
 }
 
 /// Defines the platform-specific interface for a writeable bitmap.
-pub trait IWriteableBitmapImpl: IReadableBitmapImpl {}
+pub trait IWriteableBitmapImpl: IReadableBitmapImpl + Send + Sync {}
 
 /// Defines the platform-specific interface for a bitmap that can be drawn
 /// into.
-pub trait IRenderTargetBitmapImpl: IReadableBitmapImpl {
+pub trait IRenderTargetBitmapImpl: IReadableBitmapImpl + Send + Sync {
     /// Creates a drawing context that draws into the bitmap.
     fn create_drawing_context(&self) -> Box<dyn IDrawingContextImpl>;
 }

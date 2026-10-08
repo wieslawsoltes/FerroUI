@@ -39,9 +39,11 @@ mod uri;
 pub use uri::{Uri, UriFormatError, UriKind};
 
 mod ref_countable;
+mod thread_bound;
 mod uri_extensions;
 
 pub use ref_countable::{RefCountable, RefCounted};
+pub use thread_bound::ThreadBound;
 pub use uri_extensions::UriExtensions;
 
 mod cancel_event_args;

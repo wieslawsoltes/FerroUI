@@ -13,9 +13,9 @@ use skia_safe::{
     AlphaType, Bitmap, Canvas, Codec, ColorType, Data, Image, ImageInfo, Paint, Rect, SamplingOptions,
 };
 use std::any::Any;
-use std::cell::RefCell;
 use std::io::{self, Read, Write};
 use std::rc::Rc;
+use std::sync::Mutex;
 
 pub(crate) fn load_error() -> io::Error {
     io::Error::new(io::ErrorKind::InvalidData, "Unable to load bitmap from provided data")
@@ -114,11 +114,27 @@ pub(crate) fn decode_bitmap_to_size(
     Ok(bitmap)
 }
 
+/// A Skia bitmap held by an object that is shared between threads.
+pub(crate) struct SendBitmap(pub Bitmap);
+
+// SAFETY: a Skia bitmap owns its pixels through an atomically counted
+// reference and has no affinity to the thread that created it; its holders
+// keep it under a lock, so it is used by one thread at a time.
+unsafe impl Send for SendBitmap {}
+
+impl std::ops::Deref for SendBitmap {
+    type Target = Bitmap;
+
+    fn deref(&self) -> &Bitmap {
+        &self.0
+    }
+}
+
 /// Immutable Skia bitmap.
 pub struct ImmutableBitmap {
-    image: RefCell<Option<Image>>,
-    bitmap: RefCell<Option<Bitmap>>,
-    custom_image_dispose: RefCell<Option<Box<dyn FnOnce()>>>,
+    image: Mutex<Option<Image>>,
+    bitmap: Mutex<Option<SendBitmap>>,
+    custom_image_dispose: Mutex<Option<Box<dyn FnOnce() + Send>>>,
     dpi: Vector,
     pixel_size: PixelSize,
 }
@@ -130,9 +146,9 @@ impl ImmutableBitmap {
         let pixel_size = pixel_size.unwrap_or_else(|| PixelSize::new(image.width(), image.height()));
 
         Ok(Self {
-            image: RefCell::new(Some(image)),
-            bitmap: RefCell::new(Some(bitmap)),
-            custom_image_dispose: RefCell::new(None),
+            image: Mutex::new(Some(image)),
+            bitmap: Mutex::new(Some(SendBitmap(bitmap))),
+            custom_image_dispose: Mutex::new(None),
             dpi,
             pixel_size,
         })
@@ -146,13 +162,13 @@ impl ImmutableBitmap {
 
     /// Wraps a Skia image. `custom_image_dispose` replaces releasing the
     /// image when the bitmap is disposed.
-    pub fn from_image(image: Image, custom_image_dispose: Option<Box<dyn FnOnce()>>) -> Self {
+    pub fn from_image(image: Image, custom_image_dispose: Option<Box<dyn FnOnce() + Send>>) -> Self {
         let pixel_size = PixelSize::new(image.width(), image.height());
 
         Self {
-            image: RefCell::new(Some(image)),
-            bitmap: RefCell::new(None),
-            custom_image_dispose: RefCell::new(custom_image_dispose),
+            image: Mutex::new(Some(image)),
+            bitmap: Mutex::new(None),
+            custom_image_dispose: Mutex::new(custom_image_dispose),
             dpi: Vector::new(96.0, 96.0),
             pixel_size,
         }
@@ -255,7 +271,7 @@ impl ImmutableBitmap {
     /// # Panics
     /// Panics when the bitmap has been disposed.
     pub fn image(&self) -> Image {
-        self.image.borrow().clone().expect("ImmutableBitmap has been disposed")
+        self.image.lock().unwrap().clone().expect("ImmutableBitmap has been disposed")
     }
 }
 
@@ -277,12 +293,12 @@ impl IBitmapImpl for ImmutableBitmap {
     }
 
     fn dispose(&self) {
-        let image = self.image.borrow_mut().take();
-        if let Some(custom_image_dispose) = self.custom_image_dispose.borrow_mut().take() {
+        let image = self.image.lock().unwrap().take();
+        if let Some(custom_image_dispose) = self.custom_image_dispose.lock().unwrap().take() {
             custom_image_dispose();
         }
         drop(image);
-        self.bitmap.borrow_mut().take();
+        self.bitmap.lock().unwrap().take();
     }
 
     fn as_any(&self) -> &dyn Any {
@@ -316,15 +332,15 @@ impl IDrawableBitmapImpl for ImmutableBitmap {
 
 impl IReadableBitmapImpl for ImmutableBitmap {
     fn format(&self) -> Option<PixelFormat> {
-        self.bitmap.borrow().as_ref().and_then(|bitmap| to_pixel_format_opt(bitmap.color_type()))
+        self.bitmap.lock().unwrap().as_ref().and_then(|bitmap| to_pixel_format_opt(bitmap.color_type()))
     }
 
     fn alpha_format(&self) -> Option<AlphaFormat> {
-        self.bitmap.borrow().as_ref().map(|bitmap| to_alpha_format(bitmap.alpha_type()))
+        self.bitmap.lock().unwrap().as_ref().map(|bitmap| to_alpha_format(bitmap.alpha_type()))
     }
 
     fn lock(&self) -> Rc<dyn ILockedFramebuffer> {
-        let bitmap = self.bitmap.borrow();
+        let bitmap = self.bitmap.lock().unwrap();
         let bitmap = bitmap.as_ref().unwrap_or_else(|| panic!("A bitmap is needed for locking"));
 
         let format = to_pixel_format_opt(bitmap.color_type())

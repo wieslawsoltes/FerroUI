@@ -79,7 +79,7 @@ mod tests {
     struct MockSource;
 
     impl IImageBrushSource for MockSource {
-        fn bitmap(&self) -> Option<&RefCounted<dyn IBitmapImpl>> {
+        fn bitmap(&self) -> Option<&RefCounted<crate::platform::SharedBitmapImpl>> {
             None
         }
     }

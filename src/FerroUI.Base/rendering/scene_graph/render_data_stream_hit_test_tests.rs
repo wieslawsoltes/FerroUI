@@ -7,7 +7,6 @@ use crate::media::BoxShadows;
 use crate::platform::IBitmapImpl;
 use crate::rendering::composition::drawing::{RenderDataResource, RenderDataStream};
 use crate::{Matrix, Point, Rect};
-use std::rc::Rc;
 
 #[test]
 fn filled_rectangle_is_hit_inside_and_missed_outside() {
@@ -62,7 +61,7 @@ fn geometry_is_hit_via_fill_contains() {
 
 #[test]
 fn bitmap_is_hit_within_its_destination_rect() {
-    let bitmap: Rc<dyn IBitmapImpl> = Rc::new(TestBitmapImpl);
+    let bitmap: std::sync::Arc<crate::platform::SharedBitmapImpl> = std::sync::Arc::new(TestBitmapImpl);
 
     let mut stream = RenderDataStream::new();
     stream.draw_bitmap(Some(bitmap), 1.0, Rect::new(0.0, 0.0, 10.0, 10.0), Rect::new(20.0, 20.0, 30.0, 30.0));

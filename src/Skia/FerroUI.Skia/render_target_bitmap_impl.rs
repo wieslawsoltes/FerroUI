@@ -15,13 +15,17 @@ use ferroui_base::{PixelSize, Vector};
 use skia_safe::{Canvas, ColorType, Paint, Rect, SamplingOptions};
 use std::any::Any;
 use std::io::{self, Write};
+use ferroui_base::utilities::ThreadBound;
 use std::rc::Rc;
+use std::sync::Arc;
 
 /// A render target bitmap: a writeable bitmap that is drawn into through a
 /// framebuffer render target over its own pixels.
 pub struct RenderTargetBitmapImpl {
-    bitmap: Rc<WriteableBitmapImpl>,
-    render_target: FramebufferRenderTarget,
+    bitmap: Arc<WriteableBitmapImpl>,
+    /// The render target the bitmap is drawn into with, on the thread that
+    /// created the bitmap.
+    render_target: ThreadBound<FramebufferRenderTarget>,
 }
 
 impl RenderTargetBitmapImpl {
@@ -31,10 +35,10 @@ impl RenderTargetBitmapImpl {
         let bitmap = WriteableBitmapImpl::new(size, dpi, format, AlphaFormat::Premul);
         let render_target = FramebufferRenderTarget::from_render_target(Self::framebuffer_render_target(&bitmap), true);
 
-        Self { bitmap, render_target }
+        Self { bitmap, render_target: ThreadBound::new(render_target) }
     }
 
-    fn framebuffer_render_target(bitmap: &Rc<WriteableBitmapImpl>) -> Rc<dyn IFramebufferRenderTarget> {
+    fn framebuffer_render_target(bitmap: &Arc<WriteableBitmapImpl>) -> Rc<dyn IFramebufferRenderTarget> {
         let bitmap = bitmap.clone();
         Rc::new(FuncFramebufferRenderTarget::new(move || bitmap.lock()))
     }
@@ -64,7 +68,9 @@ impl IBitmapImpl for RenderTargetBitmapImpl {
     }
 
     fn dispose(&self) {
-        self.render_target.dispose();
+        if self.render_target.is_on_thread() {
+            self.render_target.get().dispose();
+        }
         self.bitmap.dispose();
     }
 
@@ -101,7 +107,7 @@ impl IRenderTargetBitmapImpl for RenderTargetBitmapImpl {
             CompositionTransparencyLevel::None,
         );
 
-        self.render_target.create_drawing_context(&scene_info).0
+        self.render_target.get().create_drawing_context(&scene_info).0
     }
 }
 

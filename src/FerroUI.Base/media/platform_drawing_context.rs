@@ -111,7 +111,7 @@ impl IDrawingContextCore for PlatformDrawingContext<'_> {
         self.platform_impl.get().draw_ellipse(brush.map(|b| &**b), pen.map(|p| &**p), rect);
     }
 
-    fn draw_bitmap(&mut self, source: &Rc<dyn IBitmapImpl>, opacity: f64, source_rect: Rect, dest_rect: Rect) {
+    fn draw_bitmap(&mut self, source: &std::sync::Arc<crate::platform::SharedBitmapImpl>, opacity: f64, source_rect: Rect, dest_rect: Rect) {
         self.platform_impl.get().draw_bitmap(&**source, opacity, source_rect, dest_rect);
     }
 

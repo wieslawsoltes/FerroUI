@@ -604,8 +604,8 @@ impl IPlatformRenderInterface for MockPlatformRenderInterface {
     ) -> Arc<dyn IGeometryImpl> {
         MockGeometryImpl::new(g1.bounds().union(g2.bounds()))
     }
-    fn create_render_target_bitmap(&self, size: PixelSize, dpi: Vector) -> Rc<dyn IRenderTargetBitmapImpl> {
-        Rc::new(MockRenderTargetBitmapImpl::new(self.log.clone(), size, dpi))
+    fn create_render_target_bitmap(&self, size: PixelSize, dpi: Vector) -> std::sync::Arc<dyn IRenderTargetBitmapImpl> {
+        std::sync::Arc::new(MockRenderTargetBitmapImpl::new(self.log.clone(), size, dpi))
     }
     fn create_writeable_bitmap(
         &self,
@@ -613,13 +613,13 @@ impl IPlatformRenderInterface for MockPlatformRenderInterface {
         _dpi: Vector,
         _format: PixelFormat,
         _alpha_format: AlphaFormat,
-    ) -> Rc<dyn IWriteableBitmapImpl> {
+    ) -> std::sync::Arc<dyn IWriteableBitmapImpl> {
         panic!("the mock render interface does not create writeable bitmaps")
     }
-    fn load_bitmap_from_file(&self, _file_name: &str) -> std::io::Result<Rc<dyn IBitmapImpl>> {
+    fn load_bitmap_from_file(&self, _file_name: &str) -> std::io::Result<std::sync::Arc<crate::platform::SharedBitmapImpl>> {
         unsupported()
     }
-    fn load_bitmap(&self, _stream: &mut dyn Read) -> std::io::Result<Rc<dyn IBitmapImpl>> {
+    fn load_bitmap(&self, _stream: &mut dyn Read) -> std::io::Result<std::sync::Arc<crate::platform::SharedBitmapImpl>> {
         unsupported()
     }
     fn load_writeable_bitmap_to_width(
@@ -627,7 +627,7 @@ impl IPlatformRenderInterface for MockPlatformRenderInterface {
         _stream: &mut dyn Read,
         _width: i32,
         _interpolation_mode: BitmapInterpolationMode,
-    ) -> std::io::Result<Rc<dyn IWriteableBitmapImpl>> {
+    ) -> std::io::Result<std::sync::Arc<dyn IWriteableBitmapImpl>> {
         unsupported()
     }
     fn load_writeable_bitmap_to_height(
@@ -635,13 +635,13 @@ impl IPlatformRenderInterface for MockPlatformRenderInterface {
         _stream: &mut dyn Read,
         _height: i32,
         _interpolation_mode: BitmapInterpolationMode,
-    ) -> std::io::Result<Rc<dyn IWriteableBitmapImpl>> {
+    ) -> std::io::Result<std::sync::Arc<dyn IWriteableBitmapImpl>> {
         unsupported()
     }
-    fn load_writeable_bitmap_from_file(&self, _file_name: &str) -> std::io::Result<Rc<dyn IWriteableBitmapImpl>> {
+    fn load_writeable_bitmap_from_file(&self, _file_name: &str) -> std::io::Result<std::sync::Arc<dyn IWriteableBitmapImpl>> {
         unsupported()
     }
-    fn load_writeable_bitmap(&self, _stream: &mut dyn Read) -> std::io::Result<Rc<dyn IWriteableBitmapImpl>> {
+    fn load_writeable_bitmap(&self, _stream: &mut dyn Read) -> std::io::Result<std::sync::Arc<dyn IWriteableBitmapImpl>> {
         unsupported()
     }
     fn load_bitmap_to_width(
@@ -649,7 +649,7 @@ impl IPlatformRenderInterface for MockPlatformRenderInterface {
         _stream: &mut dyn Read,
         _width: i32,
         _interpolation_mode: BitmapInterpolationMode,
-    ) -> std::io::Result<Rc<dyn IBitmapImpl>> {
+    ) -> std::io::Result<std::sync::Arc<crate::platform::SharedBitmapImpl>> {
         unsupported()
     }
     fn load_bitmap_to_height(
@@ -657,7 +657,7 @@ impl IPlatformRenderInterface for MockPlatformRenderInterface {
         _stream: &mut dyn Read,
         _height: i32,
         _interpolation_mode: BitmapInterpolationMode,
-    ) -> std::io::Result<Rc<dyn IBitmapImpl>> {
+    ) -> std::io::Result<std::sync::Arc<crate::platform::SharedBitmapImpl>> {
         unsupported()
     }
     fn resize_bitmap(
@@ -665,8 +665,8 @@ impl IPlatformRenderInterface for MockPlatformRenderInterface {
         _bitmap_impl: &dyn IBitmapImpl,
         destination_size: PixelSize,
         _interpolation_mode: BitmapInterpolationMode,
-    ) -> Rc<dyn IBitmapImpl> {
-        Rc::new(MockDrawingContextLayerImpl::new(self.log.clone(), destination_size))
+    ) -> std::sync::Arc<crate::platform::SharedBitmapImpl> {
+        std::sync::Arc::new(MockDrawingContextLayerImpl::new(self.log.clone(), destination_size))
     }
     fn load_bitmap_from_pixels(
         &self,
@@ -676,8 +676,8 @@ impl IPlatformRenderInterface for MockPlatformRenderInterface {
         size: PixelSize,
         _dpi: Vector,
         _stride: i32,
-    ) -> Rc<dyn IBitmapImpl> {
-        Rc::new(MockDrawingContextLayerImpl::new(self.log.clone(), size))
+    ) -> std::sync::Arc<crate::platform::SharedBitmapImpl> {
+        std::sync::Arc::new(MockDrawingContextLayerImpl::new(self.log.clone(), size))
     }
     fn create_backend_context(
         &self,

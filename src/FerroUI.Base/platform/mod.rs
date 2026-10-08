@@ -27,7 +27,7 @@ mod managed_dispatcher_impl;
 mod system_navigation_manager_impl;
 
 pub use alpha_format::AlphaFormat;
-pub use i_bitmap_impl::{IBitmapImpl, IReadableBitmapImpl, IRenderTargetBitmapImpl, IWriteableBitmapImpl};
+pub use i_bitmap_impl::{IBitmapImpl, IReadableBitmapImpl, IRenderTargetBitmapImpl, IWriteableBitmapImpl, SharedBitmapImpl};
 pub use i_drawing_context_impl::{
     IDrawingContextImpl, IDrawingContextLayerImpl, IDrawingContextLayerWithRenderContextAffinityImpl,
 };

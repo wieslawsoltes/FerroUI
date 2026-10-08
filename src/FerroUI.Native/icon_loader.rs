@@ -13,7 +13,7 @@ use std::rc::Rc;
 pub struct IconLoader;
 
 struct IconStub {
-    bitmap: Rc<dyn IBitmapImpl>,
+    bitmap: std::sync::Arc<ferroui_base::platform::SharedBitmapImpl>,
 }
 
 impl IWindowIconImpl for IconStub {
@@ -38,7 +38,7 @@ impl IPlatformIconLoader for IconLoader {
     /// # Panics
     /// Panics when the bitmap cannot be encoded or decoded again, where the
     /// reference implementation throws.
-    fn load_icon_from_bitmap(&self, bitmap: Rc<dyn IBitmapImpl>) -> Rc<dyn IWindowIconImpl> {
+    fn load_icon_from_bitmap(&self, bitmap: std::sync::Arc<ferroui_base::platform::SharedBitmapImpl>) -> Rc<dyn IWindowIconImpl> {
         let mut ms = Vec::new();
         if let Err(error) = bitmap.save(&mut ms, &BitmapEncoderOptions::Png(PngBitmapEncoderOptions::DEFAULT)) {
             panic!("Unable to save the icon bitmap: {error}");

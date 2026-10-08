@@ -6,13 +6,12 @@ use crate::platform::{
 };
 use crate::{Matrix, PixelSize, Rect, RoundedRect, Vector};
 use std::any::{Any, TypeId};
-use std::cell::RefCell;
 use std::rc::Rc;
 
 /// The shared record of what was drawn on mock drawing contexts, one line
 /// per call, in call order.
 #[derive(Clone, Default)]
-pub struct DrawingLog(Rc<RefCell<Vec<String>>>);
+pub struct DrawingLog(std::sync::Arc<std::sync::Mutex<Vec<String>>>);
 
 impl DrawingLog {
     pub fn new() -> Self {
@@ -21,26 +20,26 @@ impl DrawingLog {
 
     /// Appends an entry.
     pub fn push(&self, entry: impl Into<String>) {
-        self.0.borrow_mut().push(entry.into());
+        self.0.lock().unwrap().push(entry.into());
     }
 
     /// A copy of the entries recorded so far.
     pub fn entries(&self) -> Vec<String> {
-        self.0.borrow().clone()
+        self.0.lock().unwrap().clone()
     }
 
     /// Removes and returns the entries recorded so far.
     pub fn take(&self) -> Vec<String> {
-        std::mem::take(&mut *self.0.borrow_mut())
+        std::mem::take(&mut *self.0.lock().unwrap())
     }
 
     /// The number of entries starting with `prefix`.
     pub fn count(&self, prefix: &str) -> usize {
-        self.0.borrow().iter().filter(|e| e.starts_with(prefix)).count()
+        self.0.lock().unwrap().iter().filter(|e| e.starts_with(prefix)).count()
     }
 
     pub fn clear(&self) {
-        self.0.borrow_mut().clear();
+        self.0.lock().unwrap().clear();
     }
 }
 
@@ -359,6 +358,10 @@ impl IDrawingContextLayerImpl for MockDrawingContextLayerImpl {
 
     fn create_drawing_context(&self) -> Box<dyn IDrawingContextImpl> {
         Box::new(MockDrawingContextImpl::new(self.log.clone()))
+    }
+
+    fn create_shared_snapshot(&self) -> std::sync::Arc<crate::platform::SharedBitmapImpl> {
+        std::sync::Arc::new(MockRenderTargetBitmapImpl::new(self.log.clone(), self.size, Vector::new(96.0, 96.0)))
     }
 }
 

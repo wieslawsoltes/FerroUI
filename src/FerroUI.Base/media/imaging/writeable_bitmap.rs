@@ -43,7 +43,7 @@ impl WriteableBitmap {
         Self::from_impl(platform_impl, pixel_format_memory)
     }
 
-    fn from_impl(platform_impl: Rc<dyn IWriteableBitmapImpl>, pixel_format_memory: Option<BitmapMemory>) -> Self {
+    fn from_impl(platform_impl: std::sync::Arc<dyn IWriteableBitmapImpl>, pixel_format_memory: Option<BitmapMemory>) -> Self {
         Self {
             base: Bitmap::from_impl(platform_impl),
             pixel_format_memory: pixel_format_memory.map(|memory| Rc::new(RefCell::new(memory))),
@@ -160,7 +160,7 @@ impl WriteableBitmap {
         dpi: Vector,
         format: Option<PixelFormat>,
         alpha_format: Option<AlphaFormat>,
-    ) -> (Rc<dyn IWriteableBitmapImpl>, Option<BitmapMemory>) {
+    ) -> (std::sync::Arc<dyn IWriteableBitmapImpl>, Option<BitmapMemory>) {
         if size.width <= 0 || size.height <= 0 {
             panic!("Size should be >= (1,1)");
         }
@@ -189,7 +189,7 @@ impl WriteableBitmap {
 /// it is disposed, the pixels are converted into the platform bitmap.
 struct MemoryLockedFramebuffer {
     memory: Rc<RefCell<BitmapMemory>>,
-    platform_impl: Rc<dyn IBitmapImpl>,
+    platform_impl: std::sync::Arc<crate::platform::SharedBitmapImpl>,
     size: PixelSize,
     row_bytes: i32,
     dpi: Vector,
@@ -266,7 +266,7 @@ impl IBitmap for WriteableBitmap {
         self.base.pixel_size()
     }
 
-    fn platform_impl(&self) -> &RefCounted<dyn IBitmapImpl> {
+    fn platform_impl(&self) -> &RefCounted<crate::platform::SharedBitmapImpl> {
         self.base.platform_impl()
     }
 
@@ -280,7 +280,7 @@ impl IBitmap for WriteableBitmap {
 }
 
 impl IImageBrushSource for WriteableBitmap {
-    fn bitmap(&self) -> Option<&RefCounted<dyn IBitmapImpl>> {
+    fn bitmap(&self) -> Option<&RefCounted<crate::platform::SharedBitmapImpl>> {
         IImageBrushSource::bitmap(&self.base)
     }
 }

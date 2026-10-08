@@ -89,7 +89,7 @@ mod tests {
             Ok(Rc::new(TestIconImpl(data)))
         }
 
-        fn load_icon_from_bitmap(&self, _bitmap: Rc<dyn IBitmapImpl>) -> Rc<dyn IWindowIconImpl> {
+        fn load_icon_from_bitmap(&self, _bitmap: std::sync::Arc<ferroui_base::platform::SharedBitmapImpl>) -> Rc<dyn IWindowIconImpl> {
             Rc::new(TestIconImpl(b"bitmap".to_vec()))
         }
     }

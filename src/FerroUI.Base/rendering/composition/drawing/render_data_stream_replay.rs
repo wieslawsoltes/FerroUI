@@ -93,7 +93,7 @@ impl IRenderDataVisitor for ReplayVisitor<'_> {
         }
     }
 
-    fn on_draw_bitmap(&mut self, bitmap: Option<&Rc<dyn IBitmapImpl>>, opacity: f64, source_rect: Rect, dest_rect: Rect) {
+    fn on_draw_bitmap(&mut self, bitmap: Option<&std::sync::Arc<crate::platform::SharedBitmapImpl>>, opacity: f64, source_rect: Rect, dest_rect: Rect) {
         if let Some(bitmap) = bitmap {
             self.context.draw_bitmap(&**bitmap, opacity, source_rect, dest_rect);
         }

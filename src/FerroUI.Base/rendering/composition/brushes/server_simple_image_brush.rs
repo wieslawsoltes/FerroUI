@@ -25,11 +25,11 @@ use std::time::Duration;
 /// is an object of its own, replaced with every change of the brush, so
 /// that it can be handed out as a shared handle and can lend its reference.
 struct ServerImageBrushSource {
-    bitmap: Option<RefCounted<dyn IBitmapImpl>>,
+    bitmap: Option<RefCounted<crate::platform::SharedBitmapImpl>>,
 }
 
 impl IImageBrushSource for ServerImageBrushSource {
-    fn bitmap(&self) -> Option<&RefCounted<dyn IBitmapImpl>> {
+    fn bitmap(&self) -> Option<&RefCounted<crate::platform::SharedBitmapImpl>> {
         self.bitmap.as_ref().filter(|bitmap| bitmap.is_alive())
     }
 }
@@ -44,7 +44,7 @@ server_simple_brush! {
     deserialize: |d, reader, committed_at| {
         d.props.deserialize_changes_core(d, reader, committed_at);
         d.release_bitmap();
-        let bitmap = reader.read_value::<RefCounted<dyn IBitmapImpl>>();
+        let bitmap = reader.read_value::<RefCounted<crate::platform::SharedBitmapImpl>>();
         *d.source.borrow_mut() = Rc::new(ServerImageBrushSource { bitmap });
     };
     find: |f, type_id| f.props.find_props(type_id);
@@ -61,7 +61,7 @@ impl ServerCompositionSimpleImageBrush {
     }
 
     /// The platform bitmap the brush draws, while it has one.
-    pub fn bitmap(&self) -> Option<Rc<dyn IBitmapImpl>> {
+    pub fn bitmap(&self) -> Option<std::sync::Arc<crate::platform::SharedBitmapImpl>> {
         self.source.borrow().get_bitmap()
     }
 

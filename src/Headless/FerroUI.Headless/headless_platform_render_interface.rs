@@ -76,8 +76,8 @@ impl HeadlessPlatformRenderInterface {
 
 /// A bitmap of one device-independent pixel at 96 DPI: what the interface
 /// answers every request to load a bitmap with.
-fn one_pixel_bitmap() -> Rc<HeadlessBitmapStub> {
-    Rc::new(HeadlessBitmapStub::from_size(Size::new(1.0, 1.0), Vector::new(96.0, 96.0)))
+fn one_pixel_bitmap() -> Arc<HeadlessBitmapStub> {
+    Arc::new(HeadlessBitmapStub::from_size(Size::new(1.0, 1.0), Vector::new(96.0, 96.0)))
 }
 
 impl IPlatformRenderInterface for HeadlessPlatformRenderInterface {
@@ -150,8 +150,8 @@ impl IPlatformRenderInterface for HeadlessPlatformRenderInterface {
         HeadlessGeometryStub::new(g1.bounds().union(g2.bounds()))
     }
 
-    fn create_render_target_bitmap(&self, size: PixelSize, dpi: Vector) -> Rc<dyn IRenderTargetBitmapImpl> {
-        Rc::new(HeadlessBitmapStub::from_pixel_size(size, dpi))
+    fn create_render_target_bitmap(&self, size: PixelSize, dpi: Vector) -> std::sync::Arc<dyn IRenderTargetBitmapImpl> {
+        Arc::new(HeadlessBitmapStub::from_pixel_size(size, dpi))
     }
 
     fn create_writeable_bitmap(
@@ -160,15 +160,15 @@ impl IPlatformRenderInterface for HeadlessPlatformRenderInterface {
         dpi: Vector,
         _format: PixelFormat,
         _alpha_format: AlphaFormat,
-    ) -> Rc<dyn IWriteableBitmapImpl> {
-        Rc::new(HeadlessBitmapStub::from_pixel_size(size, dpi))
+    ) -> std::sync::Arc<dyn IWriteableBitmapImpl> {
+        Arc::new(HeadlessBitmapStub::from_pixel_size(size, dpi))
     }
 
-    fn load_bitmap_from_file(&self, _file_name: &str) -> std::io::Result<Rc<dyn IBitmapImpl>> {
+    fn load_bitmap_from_file(&self, _file_name: &str) -> std::io::Result<std::sync::Arc<ferroui_base::platform::SharedBitmapImpl>> {
         Ok(one_pixel_bitmap())
     }
 
-    fn load_bitmap(&self, _stream: &mut dyn Read) -> std::io::Result<Rc<dyn IBitmapImpl>> {
+    fn load_bitmap(&self, _stream: &mut dyn Read) -> std::io::Result<std::sync::Arc<ferroui_base::platform::SharedBitmapImpl>> {
         Ok(one_pixel_bitmap())
     }
 
@@ -177,7 +177,7 @@ impl IPlatformRenderInterface for HeadlessPlatformRenderInterface {
         _stream: &mut dyn Read,
         _width: i32,
         _interpolation_mode: BitmapInterpolationMode,
-    ) -> std::io::Result<Rc<dyn IWriteableBitmapImpl>> {
+    ) -> std::io::Result<std::sync::Arc<dyn IWriteableBitmapImpl>> {
         Ok(one_pixel_bitmap())
     }
 
@@ -186,15 +186,15 @@ impl IPlatformRenderInterface for HeadlessPlatformRenderInterface {
         _stream: &mut dyn Read,
         _height: i32,
         _interpolation_mode: BitmapInterpolationMode,
-    ) -> std::io::Result<Rc<dyn IWriteableBitmapImpl>> {
+    ) -> std::io::Result<std::sync::Arc<dyn IWriteableBitmapImpl>> {
         Ok(one_pixel_bitmap())
     }
 
-    fn load_writeable_bitmap_from_file(&self, _file_name: &str) -> std::io::Result<Rc<dyn IWriteableBitmapImpl>> {
+    fn load_writeable_bitmap_from_file(&self, _file_name: &str) -> std::io::Result<std::sync::Arc<dyn IWriteableBitmapImpl>> {
         Ok(one_pixel_bitmap())
     }
 
-    fn load_writeable_bitmap(&self, _stream: &mut dyn Read) -> std::io::Result<Rc<dyn IWriteableBitmapImpl>> {
+    fn load_writeable_bitmap(&self, _stream: &mut dyn Read) -> std::io::Result<std::sync::Arc<dyn IWriteableBitmapImpl>> {
         Ok(one_pixel_bitmap())
     }
 
@@ -206,7 +206,7 @@ impl IPlatformRenderInterface for HeadlessPlatformRenderInterface {
         _size: PixelSize,
         _dpi: Vector,
         _stride: i32,
-    ) -> Rc<dyn IBitmapImpl> {
+    ) -> std::sync::Arc<ferroui_base::platform::SharedBitmapImpl> {
         one_pixel_bitmap()
     }
 
@@ -215,9 +215,9 @@ impl IPlatformRenderInterface for HeadlessPlatformRenderInterface {
         _stream: &mut dyn Read,
         width: i32,
         _interpolation_mode: BitmapInterpolationMode,
-    ) -> std::io::Result<Rc<dyn IBitmapImpl>> {
+    ) -> std::io::Result<std::sync::Arc<ferroui_base::platform::SharedBitmapImpl>> {
         let width = f64::from(width);
-        Ok(Rc::new(HeadlessBitmapStub::from_size(Size::new(width, width), Vector::new(96.0, 96.0))))
+        Ok(Arc::new(HeadlessBitmapStub::from_size(Size::new(width, width), Vector::new(96.0, 96.0))))
     }
 
     fn load_bitmap_to_height(
@@ -225,9 +225,9 @@ impl IPlatformRenderInterface for HeadlessPlatformRenderInterface {
         _stream: &mut dyn Read,
         height: i32,
         _interpolation_mode: BitmapInterpolationMode,
-    ) -> std::io::Result<Rc<dyn IBitmapImpl>> {
+    ) -> std::io::Result<std::sync::Arc<ferroui_base::platform::SharedBitmapImpl>> {
         let height = f64::from(height);
-        Ok(Rc::new(HeadlessBitmapStub::from_size(Size::new(height, height), Vector::new(96.0, 96.0))))
+        Ok(Arc::new(HeadlessBitmapStub::from_size(Size::new(height, height), Vector::new(96.0, 96.0))))
     }
 
     fn resize_bitmap(
@@ -235,8 +235,8 @@ impl IPlatformRenderInterface for HeadlessPlatformRenderInterface {
         _bitmap_impl: &dyn IBitmapImpl,
         destination_size: PixelSize,
         _interpolation_mode: BitmapInterpolationMode,
-    ) -> Rc<dyn IBitmapImpl> {
-        Rc::new(HeadlessBitmapStub::from_pixel_size(destination_size, Vector::new(96.0, 96.0)))
+    ) -> std::sync::Arc<ferroui_base::platform::SharedBitmapImpl> {
+        Arc::new(HeadlessBitmapStub::from_pixel_size(destination_size, Vector::new(96.0, 96.0)))
     }
 
     fn build_glyph_run_geometry(&self, glyph_run: &GlyphRun) -> Arc<dyn IGeometryImpl> {
@@ -902,7 +902,7 @@ struct HeadlessBitmapStub {
     size: Size,
     dpi: Vector,
     pixel_size: PixelSize,
-    version: Cell<i32>,
+    version: std::sync::atomic::AtomicI32,
 }
 
 impl HeadlessBitmapStub {
@@ -912,12 +912,12 @@ impl HeadlessBitmapStub {
             size,
             dpi,
             pixel_size: PixelSize::new((pixel.width as i32).max(1), (pixel.height as i32).max(1)),
-            version: Cell::new(0),
+            version: std::sync::atomic::AtomicI32::new(0),
         }
     }
 
     fn from_pixel_size(size: PixelSize, dpi: Vector) -> HeadlessBitmapStub {
-        HeadlessBitmapStub { pixel_size: size, dpi, size: size.to_size_with_dpi_vector(dpi), version: Cell::new(0) }
+        HeadlessBitmapStub { pixel_size: size, dpi, size: size.to_size_with_dpi_vector(dpi), version: std::sync::atomic::AtomicI32::new(0) }
     }
 }
 
@@ -931,7 +931,7 @@ impl IBitmapImpl for HeadlessBitmapStub {
     }
 
     fn version(&self) -> i32 {
-        self.version.get()
+        self.version.load(std::sync::atomic::Ordering::SeqCst)
     }
 
     fn save(&self, _stream: &mut dyn Write, _options: &BitmapEncoderOptions) -> std::io::Result<()> {
@@ -959,7 +959,7 @@ impl IReadableBitmapImpl for HeadlessBitmapStub {
     }
 
     fn lock(&self) -> Rc<dyn ILockedFramebuffer> {
-        self.version.set(self.version.get() + 1);
+        self.version.fetch_add(1, std::sync::atomic::Ordering::SeqCst);
         let width = self.pixel_size.width.max(0) as usize;
         let height = self.pixel_size.height.max(0) as usize;
         Rc::new(HeadlessLockedFramebuffer {
@@ -993,6 +993,10 @@ impl IDrawingContextLayerImpl for HeadlessBitmapStub {
 
     fn create_drawing_context(&self) -> Box<dyn IDrawingContextImpl> {
         Box::new(HeadlessDrawingContextStub::new())
+    }
+
+    fn create_shared_snapshot(&self) -> Arc<ferroui_base::platform::SharedBitmapImpl> {
+        Arc::new(HeadlessBitmapStub::from_pixel_size(self.pixel_size, self.dpi))
     }
 }
 

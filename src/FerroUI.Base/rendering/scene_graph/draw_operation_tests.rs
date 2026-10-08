@@ -133,27 +133,27 @@ theory!(rectangle_bounds_are_snapped_to_pixels:
     rectangle_bounds_are_snapped_to_pixels_3(10.0, 10.0, 10.0, 10.0, 1.5, 1.5, 1.0, 14.0, 14.0, 17.0, 17.0));
 
 fn image_node_releases_reference_to_bitmap_on_dispose(dispose_before_commit: bool) {
-    let bitmap: Rc<dyn IBitmapImpl> = Rc::new(TestBitmapImpl);
+    let bitmap: std::sync::Arc<crate::platform::SharedBitmapImpl> = std::sync::Arc::new(TestBitmapImpl);
 
     let mut ctx = TestContext::new();
     ctx.draw(|c| c.draw_bitmap(&bitmap, 1.0, Rect::new(1.0, 1.0, 1.0, 1.0), Rect::new(1.0, 1.0, 1.0, 1.0)));
     let render_data = ctx.get_render_results().expect("something was drawn");
-    assert_eq!(2, Rc::strong_count(&bitmap));
+    assert_eq!(2, std::sync::Arc::strong_count(&bitmap));
     if dispose_before_commit {
         render_data.dispose();
-        assert_eq!(1, Rc::strong_count(&bitmap));
+        assert_eq!(1, std::sync::Arc::strong_count(&bitmap));
         ctx.force_render();
-        assert_eq!(1, Rc::strong_count(&bitmap));
+        assert_eq!(1, std::sync::Arc::strong_count(&bitmap));
     } else {
         ctx.force_render();
-        assert_eq!(2, Rc::strong_count(&bitmap));
+        assert_eq!(2, std::sync::Arc::strong_count(&bitmap));
 
         // Refs ownership is transferred to server-side render data
         render_data.dispose();
-        assert_eq!(2, Rc::strong_count(&bitmap));
+        assert_eq!(2, std::sync::Arc::strong_count(&bitmap));
 
         ctx.force_render();
-        assert_eq!(1, Rc::strong_count(&bitmap));
+        assert_eq!(1, std::sync::Arc::strong_count(&bitmap));
     }
 }
 

@@ -24,7 +24,7 @@ impl IPlatformIconLoader for IconLoaderStub {
         Ok(Rc::new(IconStub))
     }
 
-    fn load_icon_from_bitmap(&self, _bitmap: Rc<dyn IBitmapImpl>) -> Rc<dyn IWindowIconImpl> {
+    fn load_icon_from_bitmap(&self, _bitmap: std::sync::Arc<ferroui_base::platform::SharedBitmapImpl>) -> Rc<dyn IWindowIconImpl> {
         Rc::new(IconStub)
     }
 }
