@@ -1,7 +1,7 @@
 use super::{
     AutomationControlType, AutomationPeer, AutomationPeerImpl, ControlAutomationPeer, ControlAutomationPeerImpl,
 };
-use crate::automation::provider::{ISelectionProvider, IValueProvider, ProviderAdapter};
+use crate::automation::provider::{ISelectionProvider, IValueProvider, ProviderError, ProviderAdapter};
 use crate::automation::{ElementNotEnabledException, SelectionPatternIdentifiers, ValuePatternIdentifiers};
 use crate::calendar::{Calendar, CalendarSelectionMode};
 use crate::SelectionChangedEventArgs;
@@ -79,8 +79,8 @@ impl IValueProvider for ProviderAdapter<CalendarAutomationPeer> {
         self.0.value()
     }
 
-    fn set_value(&self, value: Option<&str>) -> Result<(), ElementNotEnabledException> {
-        self.0.set_value(value)
+    fn set_value(&self, value: Option<&str>) -> Result<(), ProviderError> {
+        self.0.set_value(value).map_err(Into::into)
     }
 }
 

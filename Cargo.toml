@@ -3,6 +3,7 @@ resolver = "2"
 members = [
     "src/FerroUI.Base",
     "src/FerroUI.Controls",
+    "src/FerroUI.Controls.ColorPicker",
     "src/Markup/FerroUI.Markup",
     "src/Markup/FerroUI.Markup.Xaml",
     "src/Markup/FerroUI.Markup.Xaml.Loader",
@@ -39,6 +40,7 @@ repository = "https://github.com/wieslawsoltes/FerroUI"
 [workspace.dependencies]
 ferroui-base = { path = "src/FerroUI.Base" }
 ferroui-controls = { path = "src/FerroUI.Controls" }
+ferroui-controls-color-picker = { path = "src/FerroUI.Controls.ColorPicker" }
 ferroui-markup = { path = "src/Markup/FerroUI.Markup" }
 ferroui-markup-xaml = { path = "src/Markup/FerroUI.Markup.Xaml" }
 ferroui-markup-xaml-loader = { path = "src/Markup/FerroUI.Markup.Xaml.Loader" }

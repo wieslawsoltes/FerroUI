@@ -1,7 +1,7 @@
 use super::{
     AutomationControlType, AutomationPeer, AutomationPeerImpl, ControlAutomationPeer, ControlAutomationPeerImpl,
 };
-use crate::automation::provider::{IExpandCollapseProvider, IInvokeProvider, IValueProvider, ProviderAdapter};
+use crate::automation::provider::{IExpandCollapseProvider, IInvokeProvider, IValueProvider, ProviderError, ProviderAdapter};
 use crate::automation::{
     ElementNotEnabledException, ExpandCollapsePatternIdentifiers, ExpandCollapseState, ValuePatternIdentifiers,
 };
@@ -104,8 +104,8 @@ impl IValueProvider for ProviderAdapter<CalendarDatePickerAutomationPeer> {
         self.0.value()
     }
 
-    fn set_value(&self, value: Option<&str>) -> Result<(), ElementNotEnabledException> {
-        self.0.set_value(value)
+    fn set_value(&self, value: Option<&str>) -> Result<(), ProviderError> {
+        self.0.set_value(value).map_err(Into::into)
     }
 }
 

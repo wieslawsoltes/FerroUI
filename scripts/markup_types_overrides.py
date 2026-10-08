@@ -2,7 +2,7 @@
 part of a class needs and the generator cannot derive from the sources.
 
 One entry per class (by Rust type name), for FerroUI.Base (`BASE`) and
-FerroUI.Controls (`CONTROLS`). Each value is a dictionary of optional parts;
+FerroUI.Controls (`CONTROLS`) and FerroUI.Controls.ColorPicker (`COLOR_PICKER`). Each value is a dictionary of optional parts;
 every list item is the Rust text of one item of the corresponding part of the
 declaration form (see "Markup metadata" in docs/porting/PORTING-GUIDE.md):
 
@@ -394,3 +394,5 @@ CONTROLS = {
         ],
     },
 }
+
+COLOR_PICKER = {}

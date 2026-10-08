@@ -536,7 +536,10 @@ impl IFrnAutomationPeerImpl for FrnAutomationPeer {
     fn value_provider_set_value(&self, value: Option<&CStr>) {
         crate::callback_base::guard((), || {
             let value = value.map(|value| value.to_string_lossy().into_owned());
-            raise_on_error(self.provider::<dyn IValueProvider>().set_value(value.as_deref()))
+            if let Err(e) = self.provider::<dyn IValueProvider>().set_value(value.as_deref()) {
+                // The value provider reports any error its setter throws in the reference.
+                crate::callback_base::raise_exception(Box::new(e));
+            }
         })
     }
 

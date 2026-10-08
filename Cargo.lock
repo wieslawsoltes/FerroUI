@@ -208,6 +208,14 @@ dependencies = [
 ]
 
 [[package]]
+name = "ferroui-controls-color-picker"
+version = "0.1.0"
+dependencies = [
+ "ferroui-base",
+ "ferroui-controls",
+]
+
+[[package]]
 name = "ferroui-desktop"
 version = "0.1.0"
 dependencies = [
