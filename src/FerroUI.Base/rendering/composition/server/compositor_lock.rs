@@ -11,8 +11,9 @@
 //! only hands it out inside the lock.
 
 use super::ServerCompositor;
+use std::mem::ManuallyDrop;
 use std::rc::Rc;
-use std::sync::{Condvar, Mutex};
+use std::sync::{Arc, Condvar, Mutex};
 use std::thread::{self, ThreadId};
 
 /// A lock that the thread holding it may enter again (`lock` in C#).
@@ -101,6 +102,84 @@ impl LockedServerCompositor {
     /// thread of the compositor is the only one that ever enters.
     pub(crate) fn same_thread(&self) -> &Rc<ServerCompositor> {
         &self.server
+    }
+}
+
+/// A value confined to the compositor lock: an object of the server side
+/// that is not part of the graph of the server compositor.
+///
+/// Upstream an object of the render interface (an imported GPU image, the
+/// feature that imports it, the context it belongs to) is created at the
+/// request of the UI thread, then used and disposed by jobs of the render
+/// thread; the garbage collector shares it. Here such an object is an `Rc`,
+/// so it is bound to the lock under which every job runs: the value is
+/// reached with the server compositor in hand, which a thread only has while
+/// it is inside the lock (or, in the mode without a second thread, while it
+/// is the one thread of the compositor), and it is dropped inside the lock.
+/// Unlike a `ThreadBound` it does not depend on the thread: both the render
+/// thread and the thread of the compositor reach it, one at a time.
+pub struct LockBound<T> {
+    value: ManuallyDrop<T>,
+    server: Arc<LockedServerCompositor>,
+}
+
+// SAFETY: the value is only reached through `get`, which asks for the server
+// compositor the value is bound to: a reference a thread has only inside
+// `LockedServerCompositor::with` (a job, or `Compositor::with_server`), or
+// from the same-thread accessor in the mode in which no second thread
+// enters. The value is dropped inside the lock too. So no two threads are in
+// the value at once, and every use is ordered by the lock.
+//
+// What the type cannot check is on the caller: every handle that shares
+// state with the value without synchronisation (a clone of an `Rc` inside
+// it, an `Rc` it was built from) must itself only be touched, cloned and
+// dropped inside the lock, which in practice means it lives in a `LockBound`
+// of the same compositor or in the graph of the server compositor. A caller
+// must not keep such a clone outside, clone one out of `get`, or bind a
+// value that still shares an `Rc` with an object of its own thread.
+unsafe impl<T> Send for LockBound<T> {}
+unsafe impl<T> Sync for LockBound<T> {}
+
+impl<T> LockBound<T> {
+    /// Binds `value` to the lock of `locked`. `server` is the proof that the
+    /// caller is inside the lock, where the value has to be put together
+    /// when it clones handles of the server side.
+    ///
+    /// # Panics
+    ///
+    /// When `server` is not the server compositor of `locked`.
+    pub(crate) fn new(locked: &Arc<LockedServerCompositor>, server: &ServerCompositor, value: T) -> Self {
+        let bound = Self { value: ManuallyDrop::new(value), server: locked.clone() };
+        bound.verify(server);
+        bound
+    }
+
+    fn verify(&self, server: &ServerCompositor) {
+        assert!(
+            std::ptr::eq(Rc::as_ptr(&self.server.server), server),
+            "the value is bound to the lock of another compositor"
+        );
+    }
+
+    /// The value, for a caller that is inside the compositor lock: `server`
+    /// is what a job receives and what `with` hands out.
+    ///
+    /// # Panics
+    ///
+    /// When `server` is not the server compositor the value is bound to.
+    pub fn get<'a>(&'a self, server: &'a ServerCompositor) -> &'a T {
+        self.verify(server);
+        &self.value
+    }
+}
+
+impl<T> Drop for LockBound<T> {
+    fn drop(&mut self) {
+        // The last handle may be dropped by either thread, outside a job:
+        // the value is released inside the lock.
+        let server = self.server.clone();
+        // SAFETY: the value is not used after this.
+        server.with(|_| unsafe { ManuallyDrop::drop(&mut self.value) });
     }
 }
 

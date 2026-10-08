@@ -1,6 +1,6 @@
 use super::{IServerCompositionSurface, IServerObject, ServerCompositor, ServerCompositionSurfaceChanged};
 use crate::platform::{IBitmapImpl, IPlatformRenderInterfaceContext, PlatformGraphicsContextLostException};
-use crate::rendering::composition::{CompositionImportedGpuImage, CompositionImportedGpuSemaphore};
+use crate::rendering::composition::{IServerGpuImportedObject, ServerImportedGpuImage, ServerImportedGpuSemaphore};
 use crate::utilities::{RefCountable, RefCounted};
 use std::any::Any;
 use std::cell::{Cell, RefCell};
@@ -70,23 +70,19 @@ impl ServerCompositionDrawingSurface {
         self.bitmap.borrow().as_ref().map(|bitmap| bitmap.clone_ref())
     }
 
-    fn perform_sanity_checks(&self, image: &CompositionImportedGpuImage) -> UpdateResult {
+    fn perform_sanity_checks(&self, image: &ServerImportedGpuImage) -> UpdateResult {
         // Failsafe to avoid consuming an image imported with a different context
-        if !image.is_usable() {
+        if !image.is_usable(&self.compositor()) {
             return Err(context_lost());
         }
 
-        // This should never happen, but check for it anyway to avoid a deadlock
-        let import_completed = super::super::ICompositionGpuImportedObject::import_completed(image);
-        if !import_completed.is_completed() {
-            return Err(std::sync::Arc::new(DrawingSurfaceUpdateError("The import operation is not completed yet")));
+        match image.base().import_result() {
+            // This should never happen, but check for it anyway to avoid a deadlock
+            None => Err(std::sync::Arc::new(DrawingSurfaceUpdateError("The import operation is not completed yet"))),
+            // Rethrow the import here exception
+            Some(Err(error)) => Err(error),
+            Some(Ok(())) => Ok(()),
         }
-
-        // Rethrow the import here exception
-        if let Some(error) = import_completed.exception() {
-            return Err(error);
-        }
-        Ok(())
     }
 
     fn update(&self, new_image: std::sync::Arc<crate::platform::SharedBitmapImpl>, context: Rc<dyn IPlatformRenderInterfaceContext>) {
@@ -115,7 +111,7 @@ impl ServerCompositionDrawingSurface {
         result
     }
 
-    pub fn update_with_automatic_sync(&self, image: &CompositionImportedGpuImage) -> UpdateResult {
+    pub fn update_with_automatic_sync(&self, image: &ServerImportedGpuImage) -> UpdateResult {
         self.with_current_context(|| {
             self.perform_sanity_checks(image)?;
             self.update(image.image().snapshot_with_automatic_sync(), image.context().clone());
@@ -125,7 +121,7 @@ impl ServerCompositionDrawingSurface {
 
     pub fn update_with_keyed_mutex(
         &self,
-        image: &CompositionImportedGpuImage,
+        image: &ServerImportedGpuImage,
         acquire_index: u32,
         release_index: u32,
     ) -> UpdateResult {
@@ -138,13 +134,14 @@ impl ServerCompositionDrawingSurface {
 
     pub fn update_with_semaphores(
         &self,
-        image: &CompositionImportedGpuImage,
-        wait: &CompositionImportedGpuSemaphore,
-        signal: &CompositionImportedGpuSemaphore,
+        image: &ServerImportedGpuImage,
+        wait: &ServerImportedGpuSemaphore,
+        signal: &ServerImportedGpuSemaphore,
     ) -> UpdateResult {
         self.with_current_context(|| {
             self.perform_sanity_checks(image)?;
-            if !wait.is_usable() || !signal.is_usable() {
+            let compositor = self.compositor();
+            if !wait.is_usable(&compositor) || !signal.is_usable(&compositor) {
                 return Err(context_lost());
             }
             self.update(
@@ -157,15 +154,16 @@ impl ServerCompositionDrawingSurface {
 
     pub fn update_with_timeline_semaphores(
         &self,
-        image: &CompositionImportedGpuImage,
-        wait: &CompositionImportedGpuSemaphore,
+        image: &ServerImportedGpuImage,
+        wait: &ServerImportedGpuSemaphore,
         wait_for_value: u64,
-        signal: &CompositionImportedGpuSemaphore,
+        signal: &ServerImportedGpuSemaphore,
         signal_value: u64,
     ) -> UpdateResult {
         self.with_current_context(|| {
             self.perform_sanity_checks(image)?;
-            if !wait.is_usable() || !signal.is_usable() {
+            let compositor = self.compositor();
+            if !wait.is_usable(&compositor) || !signal.is_usable(&compositor) {
                 return Err(context_lost());
             }
             self.update(
