@@ -12,7 +12,6 @@ Status: 219 documents, 196 load and show their class; 23 are listed below (one o
 
 | Gap | What is missing | Reproduction | Documents |
 |---|---|---|---|
-| C102 | `FerroUI.Data.DataValidationException` is not declared for markup (`<data:DataValidationException>` with `x:Arguments`). | `gaps_a::gap_c102_data_validation_exception_in_markup` | `Pages/TextBox/TextBoxValidationPage.xaml` |
 | C202 | `OnPlatform` written as an element with `On` children has no content property and is not accepted as the value of the property it is set on. | `gaps_b::gap_c202_on_platform_element_with_on_children` | `Pages/PlatformInfoPage.xaml` |
 | C203 | A handler whose second parameter is `EventArgs` is not accepted for `PopupFlyoutBase.Opening`, and the handler cannot reach the cancellable arguments the event passes. | `gaps_b::gap_c203_flyout_opening_handler` | `Pages/ContextFlyoutPage.xaml` |
 | C207 | A compiled binding does not stream (`^`) a property of type `IObservable<T>` (the view model declares it as `ObservableValue`): "Compiled bindings do not support stream bindings for objects of type ObservableValue". | `gaps_b::gap_c207_compiled_stream_binding_of_an_observable` | `Pages/ListBoxPage.xaml` |

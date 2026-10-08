@@ -61,7 +61,6 @@ fn gap_c101_reflection_binding_parent_of_prefixed_type() {
 }
 
 #[test]
-#[ignore = "gap C102: DataValidationException is not declared for markup"]
 fn gap_c102_data_validation_exception_in_markup() {
     let _app = start_application();
     load_text(&format!(

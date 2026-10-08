@@ -259,6 +259,22 @@ ferro_markup_type!(class crate::data::BindingError as "Exception" {
     ],
 });
 
+// FerroUI.Data
+
+// The exception that wraps the data of a validation error (`DataValidationException :
+// Exception`): markup creates one with the error data as the argument of its constructor.
+ferro_markup_type!(class crate::data::DataValidationException as "DataValidationException" {
+    namespace: "FerroUI.Data",
+    handles: [crate::data::DataValidationException, Option<crate::data::DataValidationException>],
+    base: crate::data::BindingError,
+    constructors: [(Option<BoxedValue>) => crate::data::DataValidationException::new],
+    properties: [
+        ErrorData: Option<BoxedValue> {
+            get: |error: &crate::data::DataValidationException| error.error_data().cloned()
+        },
+    ],
+});
+
 // FerroUI.Media.Imaging
 
 ferro_markup_type!(class Bitmap {
@@ -422,6 +438,7 @@ ferro_markup_type!(class FerroListConverter<Option<BoxedValue>> as "FerroListCon
 /// The types declared in this file.
 pub(super) const TYPES: &[&MarkupType] = &[
     <crate::data::BindingError as MarkupTyped>::MARKUP,
+    <crate::data::DataValidationException as MarkupTyped>::MARKUP,
     <UnsetValueType as MarkupTyped>::MARKUP,
     <FerroObjectExtensionsClass as MarkupTyped>::MARKUP,
     <ClassBindingManager as MarkupTyped>::MARKUP,
@@ -454,6 +471,11 @@ pub(super) const TYPES: &[&MarkupType] = &[
 /// types declared in this file.
 pub(super) fn register_value_types() {
     ValueTypes::register_nullable::<crate::data::BindingError>();
+    // A data validation exception is an exception: the error that wraps it.
+    ValueTypes::register_nullable::<crate::data::DataValidationException>();
+    ValueTypes::register_cast::<crate::data::DataValidationException, crate::data::BindingError>(|error| {
+        crate::data::BindingError::new(error.clone())
+    });
     // A bitmap is an image and a source of image brushes.
     ValueTypes::register_nullable::<Rc<Bitmap>>();
     ValueTypes::register_cast::<Rc<Bitmap>, Rc<dyn crate::media::IImage>>(|bitmap| bitmap.clone());
