@@ -5,6 +5,7 @@
 use crate::animation::easings::Easing;
 use crate::animation::{Cue, IterationCount, IterationType, TimeSpan};
 use crate::data::core::ValueTypes;
+use crate::data::CultureInfoIetfLanguageTagConverter;
 use crate::utilities::{CultureInfo, DateTime, DateTimeOffset, Decimal, NumberStyles};
 use crate::ferro_markup_type;
 use crate::input::{Cursor, Key, KeyGesture, KeyModifiers, StandardCursorType};
@@ -576,6 +577,21 @@ ferro_markup_type!(struct DateTimeOffset {
     constructors: [() => DateTimeOffset::default],
 });
 
+// The culture of the runtime library. Its conversion from text is the one of the converter
+// of the `ConverterCulture` property of the bindings: an IETF language tag.
+ferro_markup_type!(class CultureInfo {
+    namespace: "System.Globalization",
+    handles: [CultureInfo, Option<CultureInfo>],
+    parse: CultureInfoIetfLanguageTagConverter::convert_from,
+    static_properties: [
+        InvariantCulture: CultureInfo { get: CultureInfo::invariant_culture },
+        CurrentCulture: CultureInfo { get: CultureInfo::current_culture },
+    ],
+    properties: [
+        Name: String { get: |culture: &CultureInfo| culture.name().to_string() },
+    ],
+});
+
 ferro_markup_type!(class Uri {
     namespace: "System",
     handles: [Uri, Option<Uri>],
@@ -624,6 +640,7 @@ pub(super) const TYPES: &[&MarkupType] = &[
     <TimeSpan as MarkupTyped>::MARKUP,
     <DateTime as MarkupTyped>::MARKUP,
     <DateTimeOffset as MarkupTyped>::MARKUP,
+    <CultureInfo as MarkupTyped>::MARKUP,
     // Declared next to the types.
     <Decimal as MarkupTyped>::MARKUP,
     <NumberStyles as MarkupTyped>::MARKUP,
@@ -666,6 +683,7 @@ pub(super) fn register_value_types() {
     ValueTypes::register_nullable::<ThemeVariant>();
     ValueTypes::register_nullable::<TimeSpan>();
     ValueTypes::register_nullable::<Uri>();
+    ValueTypes::register_nullable::<CultureInfo>();
     ValueTypes::register_nullable::<Rc<Cursor>>();
 
     // The text of a value (its `ToString()` in the managed original, what a string format

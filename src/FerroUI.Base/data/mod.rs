@@ -14,6 +14,7 @@ mod binding_priority;
 mod binding_value;
 mod compiled_binding;
 mod compiled_binding_path;
+mod culture_info_ietf_language_tag_converter;
 mod data_validation_exception;
 mod indexer_binding;
 mod indexer_descriptor;
@@ -36,6 +37,7 @@ pub use compiled_binding::CompiledBinding;
 pub use compiled_binding_path::{
     CompiledBindingPath, CompiledBindingPathBuilder, CompiledBindingPathElement, CompiledBindingPathElementKind,
 };
+pub use culture_info_ietf_language_tag_converter::CultureInfoIetfLanguageTagConverter;
 pub use data_validation_exception::{AggregateException, DataValidationException};
 pub use indexer_binding::IndexerBinding;
 pub use indexer_descriptor::IndexerDescriptor;
