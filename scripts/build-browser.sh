@@ -23,7 +23,8 @@
 #
 # --threads (opt-in, docs/porting/browser-platform.md, "Threads (opt-in)") builds a module that can
 # spawn threads: the nightly toolchain that `scripts/browser/setup.sh --threads` installs, a standard
-# library rebuilt with atomics (-Zbuild-std) and the pthread options of Emscripten. The build goes to
+# library rebuilt with atomics (-Zbuild-std), the pthread options of Emscripten and the Skia binaries
+# with a bindings shim compiled for threads, which `setup.sh --threads` builds too. The build goes to
 # its own target directory (target/threads) and the site to target/browser-threads/<application>, so
 # that neither replaces the output of a build without the option. The site also gets one file of
 # scripts/browser/threads/, the check for cross-origin isolation (the service worker that provides
@@ -36,6 +37,13 @@
 #   FERROUI_BROWSER_THREAD_MEMORY_MB   the size of the memory of the module in megabytes (default
 #                                      512): all the application can ever allocate
 #   FERROUI_BROWSER_NIGHTLY            the nightly toolchain (default: the pin of setup.sh)
+#   FERROUI_BROWSER_SKIA_THREADS       the directory of the Skia binaries of the mode (default:
+#                                      skia-threads next to the Emscripten SDK, where setup.sh
+#                                      --threads writes them)
+#   FERROUI_BROWSER_SKIA_PUBLISHED_SHIM  set to 1 to link the published bindings shim of Skia, which
+#                                      is compiled without threads, with the linker's check of
+#                                      target features off: unsafe once two threads call Skia; only
+#                                      for finding out whether a fault comes from the shim built here
 #
 # --both builds the site without threads and the site with threads, each as without the option and
 # in its usual directory (--debug applies to both), and composes them into one site that carries
@@ -188,6 +196,34 @@ if [ -n "$THREADS" ]; then
   # module with shared memory.
   export CFLAGS_wasm32_unknown_emscripten="${CFLAGS_wasm32_unknown_emscripten:+$CFLAGS_wasm32_unknown_emscripten }-pthread"
   export CXXFLAGS_wasm32_unknown_emscripten="${CXXFLAGS_wasm32_unknown_emscripten:+$CXXFLAGS_wasm32_unknown_emscripten }-pthread"
+  # Those flags do not reach the bindings shim of Skia: the skia-bindings crate compiles nothing for
+  # this target, it downloads one archive with Skia (libskia.a, built with -pthread by Skia's own
+  # build) and the shim (libskia-bindings.a: bindings, gl, gpu, ganesh), and the published shim is
+  # compiled without atomics. In such an object the reference counts that inline code touches are not
+  # atomic, the guard of a local static is not thread-safe and a `thread_local` is one global for
+  # all threads, and the linker refuses the object in a module with shared memory. The crate is
+  # therefore pointed at a copy of the published archive in which the shim is compiled with -pthread
+  # (scripts/browser/skia-threads-shim.sh, run by `setup.sh --threads`), through the variable it
+  # reads for binaries from elsewhere; `{key}` is filled in by the crate with its revision, the
+  # target and the features, and names the one archive of the directory. An archive that is not
+  # there makes the crate build Skia from source, so the directory is checked here: it is named
+  # after the version of the crate, the features and the version of Emscripten.
+  # (docs/porting/browser-render-worker.md, "Skia shim".)
+  NO_CHECK_FEATURES=""
+  if [ "${FERROUI_BROWSER_SKIA_PUBLISHED_SHIM:-}" = "1" ]; then
+    echo "warning: linking the published Skia bindings shim, compiled without threads, with the check of target features off" >&2
+    # A piece of the list of flags below, as it is written there.
+    NO_CHECK_FEATURES='"-Clink-arg=-Wl,--no-check-features", '
+  else
+    SKIA_THREADS="${FERROUI_BROWSER_SKIA_THREADS:-${EMSDK:+$(dirname "$EMSDK")/skia-threads}}"
+    [ -n "$SKIA_THREADS" ] || { echo "EMSDK is not set: activate the Emscripten SDK first, or set FERROUI_BROWSER_SKIA_THREADS" >&2; exit 1; }
+    SKIA_THREADS="$SKIA_THREADS/$("$ROOT/scripts/browser/skia-threads-shim.sh" --id)"
+    if [ ! -f "$SKIA_THREADS/complete" ] || ! compgen -G "$SKIA_THREADS/skia-binaries-*.tar.gz" >/dev/null; then
+      echo "no Skia binaries with a bindings shim compiled for threads at $SKIA_THREADS: run scripts/browser/setup.sh --threads" >&2
+      exit 1
+    fi
+    export SKIA_BINARIES_URL="file://$SKIA_THREADS/skia-binaries-{key}.tar.gz"
+  fi
 fi
 
 echo "== script module"
@@ -203,12 +239,9 @@ if [ -n "$THREADS" ]; then
   # Added to the flags of the target in .cargo/config.toml (an array given with --config is appended
   # to the one of the file; RUSTFLAGS in the environment would replace it). The environment of the
   # file is "web" alone, and a thread is a web worker that loads the script of the module.
-  # --no-check-features: the prebuilt archive of the Skia bindings (libskia-bindings.a, four objects:
-  # bindings, gl, gpu, ganesh) is compiled without atomics, unlike libskia.a beside it, and the
-  # linker refuses such an object in a module with shared memory. The check is switched off for the
-  # link. What that costs: in those four objects a `thread_local` is a plain global and the guard of
-  # a local static is not atomic. They are thin forwarding functions; the proper fix is to compile
-  # them here with -pthread (their sources are in the skia-bindings crate) or binaries built so.
+  # The linker checks the target features of the objects: one compiled without atomics that uses
+  # thread-local storage is refused in a module with shared memory. The check stays on; it is
+  # switched off (--no-check-features) only with FERROUI_BROWSER_SKIA_PUBLISHED_SHIM=1, above.
   # PThread joins the exported runtime methods of the file (the setting given later replaces the
   # earlier one): the script side finds the web worker of a thread in its table when it transfers
   # a canvas to the thread that renders (WebRenderTargetRegistry.create).
@@ -225,7 +258,7 @@ if [ -n "$THREADS" ]; then
   # the wasm-bindgen glue there (docs/porting/browser-render-worker.md, "B2.1"). The paths go into
   # a TOML string as they are: a repository path with a quote or a backslash in it would break it.
   THREADS_DIR="$ROOT/scripts/browser/threads"
-  FLAGS+=(--config "target.wasm32-unknown-emscripten.rustflags=[\"-Ctarget-feature=+atomics,+bulk-memory\", \"-Clink-arg=-pthread\", \"-Clink-arg=-Wl,--no-check-features\", \"-Clink-arg=-sPTHREAD_POOL_SIZE=$THREAD_POOL_SIZE\", \"-Clink-arg=-sENVIRONMENT=web,worker\", \"-Clink-arg=-sEXPORTED_RUNTIME_METHODS=GL,HEAPU8,wasmMemory,PThread\", \"-Clink-arg=-sALLOW_MEMORY_GROWTH=0\", \"-Clink-arg=-sINITIAL_MEMORY=${THREAD_MEMORY_MB}MB\", \"-Clink-arg=--extern-pre-js=$THREADS_DIR/ferroui-worker-import.js\", \"-Clink-arg=--post-js=$THREADS_DIR/ferroui-worker-attach.js\"]")
+  FLAGS+=(--config "target.wasm32-unknown-emscripten.rustflags=[\"-Ctarget-feature=+atomics,+bulk-memory\", \"-Clink-arg=-pthread\", $NO_CHECK_FEATURES\"-Clink-arg=-sPTHREAD_POOL_SIZE=$THREAD_POOL_SIZE\", \"-Clink-arg=-sENVIRONMENT=web,worker\", \"-Clink-arg=-sEXPORTED_RUNTIME_METHODS=GL,HEAPU8,wasmMemory,PThread\", \"-Clink-arg=-sALLOW_MEMORY_GROWTH=0\", \"-Clink-arg=-sINITIAL_MEMORY=${THREAD_MEMORY_MB}MB\", \"-Clink-arg=--extern-pre-js=$THREADS_DIR/ferroui-worker-import.js\", \"-Clink-arg=--post-js=$THREADS_DIR/ferroui-worker-attach.js\"]")
 fi
 # The messages of the build name the output directories of the build scripts.
 MESSAGES="$(mktemp)"
@@ -241,6 +274,31 @@ BUILT="$BUILD_DIR/wasm32-unknown-emscripten/$PROFILE"
 WASM="$(sed -n 's/.*locateFile("\([^"]*\.wasm\)".*/\1/p; s/.*new URL("\([^"]*\.wasm\)".*/\1/p' "$BUILT/$APPLICATION.js" | head -n 1)"
 [ -n "$WASM" ] || WASM="$APPLICATION.wasm"
 [ -f "$BUILT/$WASM" ] || { echo "the script of the module loads $WASM, which the build did not write" >&2; exit 1; }
+# The threaded mode: every object that C and C++ code brought to the link (the static archives in
+# the directories the build scripts gave the linker: Skia, its bindings shim, HarfBuzz, the setjmp
+# bridge) has to be compiled with atomics and bulk memory, and the memory of the module has to be
+# shared. The linker only refuses an object without atomics when it uses thread-local storage; this
+# refuses all of them, and prints what each archive was compiled with.
+if [ -n "$THREADS" ] && [ -z "$NO_CHECK_FEATURES" ]; then
+  echo "== target features (threads)"
+  CHECKED=("$BUILT/$WASM")
+  while IFS= read -r ARCHIVE; do
+    CHECKED+=("$ARCHIVE")
+  done < <(node -e 'const fs = require("fs"), path = require("path");
+    const archives = new Set();
+    for (const line of fs.readFileSync(process.argv[1], "utf8").split("\n")) {
+      if (!line.startsWith("{")) continue;
+      const message = JSON.parse(line);
+      if (message.reason !== "build-script-executed") continue;
+      for (const linked of message.linked_paths ?? []) {
+        const directory = linked.replace(/^[a-z]+=/, "");
+        if (!fs.existsSync(directory)) continue;
+        for (const name of fs.readdirSync(directory)) if (name.endsWith(".a")) archives.add(path.join(directory, name));
+      }
+    }
+    for (const archive of archives) console.log(archive);' "$MESSAGES")
+  node "$ROOT/scripts/browser/wasm-features.mjs" --summary --require atomics,bulk-memory "${CHECKED[@]}"
+fi
 rm -rf -- "$OUT"
 mkdir -p "$OUT"
 cp -R "$WWWROOT"/. "$OUT"/
