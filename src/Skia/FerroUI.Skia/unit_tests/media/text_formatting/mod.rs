@@ -5,6 +5,7 @@ mod single_buffer_text_source;
 mod text_collapsing_bidi_tests;
 mod text_formatter_tests;
 mod text_formatter_wrap_characterization_tests;
+mod text_layout_tests;
 mod text_run_cache_tests;
 
 pub(crate) use multi_buffer_text_source::MultiBufferTextSource;
