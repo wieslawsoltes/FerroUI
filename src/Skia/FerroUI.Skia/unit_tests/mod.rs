@@ -16,6 +16,7 @@ mod media;
 mod render_bounds_tests;
 mod skia_options_tests;
 mod test_font_manager;
+mod two_level_cache_tests;
 
 pub(crate) use test_font_manager::TestFontManager;
 
