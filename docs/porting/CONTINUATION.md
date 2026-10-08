@@ -69,9 +69,15 @@ The stage-table row "E5 Includes and assets" in `xaml.md` (9.10.1), and items 3 
 - The include fixture is converted: its generated files are no longer checked in, except the document of the class `StyleWithServiceProvider`.
 - The limit: the compiler reads types from the registries of the process, so the build script links the crates its documents name, and it cannot link its own crate. A document that names a type of its own crate (every `x:Class` document) cannot be compiled by a build script. That is why the themes are not converted and why `LocaleCollection` moved from the fixture application to the fixture library.
 
+**Written: the build-time type system, first stage (branch `xaml-source-scanner`, on `xaml-e5-build-integration-v`; not validated by a build yet).** `xaml.md` 9.5.6 has it as built.
+- `ferroui-build` has the type model of a crate (`model.rs`: `AssemblyModel`, `TypeModel`, `MemberModel`, `RegisteredModel`) and its file: `.xamlmeta` of format 2, which keeps the documents of format 1 where the compiler reads them.
+- The source scanner (`scanner/`, `scan_crate`) fills the model from the declaration macros of a crate's sources, with `syn` on file level, linking nothing. What it does not read is a diagnostic with file and line (`FRN9xxx`).
+- A fixture source tree and a scan of the base and the controls crates as files test it. The second prints the coverage: `cargo test -p ferroui-build --lib real_crates -- --nocapture`.
+- `Build` and the emitter are unchanged; `HANDOVER.md` section 11 has the validation.
+
 Remaining, in order. #43's "Continuation" section has the upstream files for each step.
 
-1. **The build-time type system** (`xaml.md` 9.5: the source scanner, `MarkupModel`, `ModelTypeSystem<EmitBacking>`, `export_metadata()`).
+1. **The rest of the build-time type system** (`xaml.md` 9.10.1, "Remaining for E5", item 1: validate the scanner on the real crates, dependency models and `export_metadata()`, `ModelTypeSystem<EmitBacking>` with the drift test, the call forms, `compile_xaml()` on the model).
    - It removes the limit above: the build script compiles `x:Class` documents without linking anything.
    - Then: `include_xaml!` per class, the generated `register_types` of 9.7.4, the themes on the build script, diagnostics with codes and the cache (9.6.4, 9.6.5).
    - Until then a crate with `x:Class` documents uses the checked-in path (`generate_class_file` in a test). The two `XamlIlTests` classes with compiled markup (`XamlIlClassWithPrecompiledXaml`, `XamlIlClassWithCustomProperty`) can be compiled that way; today their constructors populate through the run-time loader; the two tests are ported and not ignored.

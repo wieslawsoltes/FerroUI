@@ -1260,6 +1260,58 @@ Design: an in-memory **`MarkupModel`** (the structs of 9.5.1, owned strings, typ
 
 Migration without destabilising the interpreter: (1) build `ModelTypeSystem` with `EmitBacking` first, extracting the tables of `core_types.rs` and `object_model.rs` into data both can read; (2) add the drift test: dump `RuntimeTypeSystem` and the scanned `ModelTypeSystem` through the `IXamlType` traits into a canonical text (types, members, parameter type names, attributes) and compare them for `ferroui-base`, `ferroui-controls`, `ferroui-markup-xaml`; this is the "scanner and registry agree" exit test of phase 0; (3) only then, optionally, re-seat the runtime type system on the model.
 
+#### 9.5.6 Implemented (2026-10-09): the model and the source scanner, first stage
+
+Written without a build (the validating session builds it; HANDOVER.md section 11 has the commands). In `ferroui-build` (`src/FerroUI.Build.Tasks`); the crate links neither the controls nor the themes, and the scanner links nothing of what it reads.
+
+**The model (`model.rs`).** The structs of 9.5.1, owned text only, with these differences from the listing there:
+
+| 9.5.1 | As built | Why |
+|---|---|---|
+| `RustType` = text | `RustType { text, unresolved[] }` | a path the scanner does not resolve stays as written and is listed, so that a reader of the model never takes a guessed path for a resolved one |
+| `TypeModel::rust_path` | `rust_path` (the declaring module and the name: the key of the type) and `public_path` (the shortest path another crate names it by) | generated code needs the public path, the handle table needs one spelling per type |
+| `has_parse` | `parse: Option<CallableModel>` | the callable is needed for the call form |
+| `properties[]` of `MemberModel` | `PropertyModel { value_type, getter, setter, attributes }` with `AccessorModel` per accessor; `static_properties[]`, `indexers[]` (a `PropertyModel` with parameters) next to it | a property has two callables, each with its own `try` |
+| `MemberModel::call: Path \| Invoker` | `callable: CallableModel { path as written, resolved }`, `typed_function` (the `__markup_*` function the declaration macro writes with `markup-functions`), `call: Option<CallForm>` | the scanner records what the choice of 9.5.3 needs and does not choose; `CallForm` is `Structural`, `Path`, `Invoker` |
+| `RegisteredModel { name, .. }` | `name: Option`, `registration: Declared \| AddedOwner \| Alias \| Unknown`, `source` (the accessor an added owner calls), `visibility`, `inherits` | the name of a property another crate declares is in that crate's model, not in the body of the accessor |
+| `enum_members[(name, rust_variant, value)]` | `EnumMemberModel { name, rust_variant, rust_value, value: Option }` | the value is known only when the crate declares the enumeration (or the `bitflags!` type) and the scanner can evaluate it |
+| not listed | `explicit_namespace`, `module`, `cfg[]`, `type_info`, `default_constructor`, `property_attributes`, `ParameterModel` (name, attributes) | read from the declarations; `module` and `explicit_namespace` are what `namespace` is computed from |
+
+**The file.** `.xamlmeta`, JSON (`json.rs`: a reader and a writer that keep integers, which the model has). Two formats, told apart by the member `"format"`: no such member is format 1, the file the emitter writes today (`rust_emitter::XamlMetadata`: `name`, `crate_name`, `documents`, `dependencies`); `"format": 2` is those four members unchanged plus the model. The reader of the compiler looks its four members up by name, so it reads a file of format 2 as the documents of the crate; `AssemblyModel::parse` reads both (a file of format 1 is a model without types), and refuses a format above 2. `AssemblyModel::metadata()` and `from_metadata()` convert to and from the compiler's `XamlMetadata`. A member with the default of its kind is left out of a file of format 2.
+
+**The scanner (`scanner/`).** `scan_crate(&ScanOptions) -> Scan { model, diagnostics, files, functions, statistics }`. It reads the files from the crate root along the `mod` declarations (`#[path]`, inline modules; `#[cfg(test)]` modules and items are left out, other `cfg` conditions are recorded on the type), parses each with `syn`, and reads the bodies of the declaration macros from their tokens (`declarations.rs`, the grammar of the macro definitions and of PORTING-GUIDE.md "Markup metadata").
+
+| Read | From | Gives |
+|---|---|---|
+| class, base, Rust path | `ferro_class!`, `ferro_static_type!`; `impl ObjectType` / `impl StaticType` written by hand (the root class) | `TypeModel` (a hand-written type has no base in the model) |
+| registered properties | `ferro_properties!` (all four forms: wrapped or direct accessors, `also [..]`, `fn part`), `ferro_property!` in an `impl` block or with `for Owner;` | kind and value type from the type of the accessor; name, owner, host from `FerroProperty::register*::<..>("Name", ..)` found anywhere in the body; `Other::accessor().add_owner*::<..>(..)`; an accessor whose body is another accessor (an alias); `.assign_binding(true)`, `.set_assign_binding(true)`, `.inherits(true)` |
+| class metadata | `ferro_class_info!`, any number per class, merged | `new`, `interfaces` (the `=> cast` form too), every part of `markup` |
+| other types | `ferro_markup_type!` (the four kinds, `dyn Trait as "Name"`, generic heads), `ferro_markup_enum!` (plain, `flags`, renamed members, the second group) | handles, `this`, `base`, members; `static X { type_info: X }` is merged into the static type |
+| enumeration values | `enum` items; `bitflags!` (integer literals, `<<`, `\|`, `Self::A.bits()`) | `EnumMemberModel::value` |
+| assembly, namespaces | `static _: MarkupAssembly = MarkupAssembly { .. }`, `const NAMESPACES` (in any file, usually `register_types.rs`) | literals, text constants of the crate, `FERRO_XML_NAMESPACE` and `MarkupAssembly::CREATE_SOURCE_INFO` of the base crate |
+| functions | `impl X { fn .. }`, `ferro_routed_event!` in an `impl` block | `Scan::functions`: owner, name, visibility, receiver, parameter and return types as written (for 9.5.3 form B and for the handlers of 9.4.4) |
+| public paths | `mod`, `pub use` (names, lists, globs), `pub` items | the shortest public path of each item, by the rule of `scripts/rust_paths.py`; the entries of `ferro_rust_paths!` are compared with it (`FRN9024` where they differ) |
+
+*Type text (9.5.2, step 1).* A path is resolved against the items of the module, its `use` items (an explicit import before a glob) and the glob imports of modules of the crate, followed through re-exports to the module that declares the item, and written absolute (`::ferroui_controls::border::Border`). A path into another crate is absolute as the `use` item spells it; it is not followed to the declaring module, which needs that crate's model. Primitive types and `String`, `Option`, `Vec`, `Box`, `Result` stay as they are. Not resolved, and kept as written with a `FRN9020` warning: a name that nothing of the module declares or imports (in a file with a glob import of another crate every such name may come from the glob), and a path whose unknown head is not the name of a crate.
+
+*Macros of the crate.* The scanner does not expand macros, with one exception: an invocation of a `macro_rules!` macro the crate defines, whose rule takes only identifiers, types, a visibility, literals and attributes, is expanded by substitution, and the types (`pub struct $name`) and declaration macros at the top level of the expansion are read. `ferro_transition_class!` and `ferro_markup_list!` have that form. A macro of the crate that declares through a declaration macro and is not expanded (a repetition in its rule) is a `FRN9012` warning.
+
+*Diagnostics (`FRN9xxx`, 9.6.5).* `FRN9001` a file is not read; `FRN9010` a declaration has a form the reader does not know (the declaration is not in the model); `FRN9011` a declaration macro is invoked where the scanner does not read (inside a function); `FRN9012` a macro of the crate is not expanded; `FRN9013` a runtime type or metadata written by hand; `FRN9020` an unresolved path; `FRN9021` an accessor or a registration that is not read; `FRN9022` a type declared twice; `FRN9023` a declaration names a type the scanner has no declaration of; `FRN9024` a stated public path differs; `FRN9030` the assembly or the namespace table. Every file reports, per declaration macro, how its invocations were met (read, failed, in a macro definition, in an unread position, in test code); their sum is the number of invocations in the text of the file, which is what the test of the real crates compares.
+
+**What the scanner cannot obtain from source**, and where it shows (the numbers are printed by the test `real_crates_are_scanned_without_skipping_a_declaration`; they are not in this document because the author did not run it):
+
+1. The name of a registered property whose accessor adds an owner to, or is an alias of, a property of another crate (`RegisteredModel::name` is nothing; `source` names the accessor). Summary line "registered properties: .. without a name".
+2. The declaring module of a type of another crate (the path is absolute as written, not canonical), so a base class or a handle of another crate is not yet linked to its `TypeModel`.
+3. Names behind a glob import of another crate (`use ferroui_base::*;`): unresolved. Summary lines "unresolved: `Name` in N type texts".
+4. What a macro of the crate declares when its rule repeats (`FRN9012`), and what a macro of another crate declares (`ferro_markup_list!` used outside the controls crate): the definition is not in the scanned sources.
+5. Values of enumeration members whose enumeration is declared in another crate or whose discriminant is not a literal; values of flags built from anything but literals, shifts and other constants. Summary line "enumeration members: .. without a value".
+6. Which types `register_types()` registers (the `TYPES` lists and `MarkupType::register_all`): the scanner reads every declaration, registered or not. The drift test of the next stage shows the difference.
+7. `cfg` conditions on single accessors and members inside a declaration (the conditions around the declaration are recorded).
+8. Hand-written `impl MarkupTyped` (`FRN9013`), and the base of a hand-written class.
+9. Anything a closure does: a callable that is not a path is recorded as an expression; its call form is C or the typed function.
+
+**Seams left for the next stages** (9.10.1): `MemberModel::call` / `AccessorModel::call` are nothing; `Scan::functions` and `CallableModel::resolved` are the inputs of the choice; `Scan::normalise(module, text)` resolves further type text (handler signatures); `AssemblyModel::dependencies` and `find_rust_type` are where dependency models attach; `Build` does not call the scanner.
+
 ### 9.6 Build integration
 
 #### 9.6.1 Entry points
@@ -1361,7 +1413,7 @@ Decision stands (section 1.1, decision 3): `build.rs` drives; `include_xaml!` / 
 
 Sections 9.6.1 to 9.6.6 assume the build-time type system of 9.5 (the source scanner, `ModelTypeSystem`). It does not exist: the emitter transforms against the run-time type system, that is, against the types the process registered. What is implemented is the build integration over that type system, and it reaches as far as that type system allows.
 
-**The crate.** `ferroui-build` (`src/FerroUI.Build.Tasks`), a build-dependency. It depends on the loader with the `runtime` and `emitter` features, on `ferroui-base` and on `ferroui-markup-xaml`; it does not depend on `ferroui-controls`. `syn` and `serde_json` are not used (no scanner; the `.xamlmeta` reader and writer are the emitter's own).
+**The crate.** `ferroui-build` (`src/FerroUI.Build.Tasks`), a build-dependency. It depends on the loader with the `runtime` and `emitter` features, on `ferroui-base` and on `ferroui-markup-xaml`; it does not depend on `ferroui-controls`. `serde_json` is not used (the `.xamlmeta` reader and writer are the emitter's own, and the model's `json.rs`). Since the scanner stage (9.5.6) the crate also depends on `syn` (`full`, `parsing`, `printing`, `visit`; no default features), `proc-macro2` (`span-locations`, for the lines of the scanner's diagnostics) and `quote`; `Build` itself does not use them.
 
 ```rust
 // build.rs
@@ -1663,9 +1715,18 @@ Not done, and why (9.6.8): a build script cannot compile a document that names a
 
 `XamlIlTests`: the two tests that create a class with compiled markup of the test assembly (`Parser_Should_Override_Precompiled_Xaml`, `Custom_Properties_Should_Work_With_XClass`) are ported and not ignored; the constructors of `XamlIlClassWithPrecompiledXaml` and `XamlIlClassWithCustomProperty` populate the instance through the run-time loader (`FerroXamlLoader::load_object`). Compiling the two documents is the checked-in path (`generate_class_file` in a test of the XAML test crate, as the fixture does for `StyleWithServiceProvider`), not the build script, for the reason above. It was not done in this step: the first generated file has to exist before the crate compiles, which takes a build.
 
+**E1 status (2026-10-09, the scanner, first stage).** Written, not built by its author: the model and its file (`.xamlmeta` format 2), and the source scanner (9.5.6). Tested by a fixture source tree (`src/FerroUI.Build.Tasks/tests/fixtures/scanner`, never compiled) with exact models, diagnostics and counts, and by a scan of `src/FerroUI.Base` and `src/FerroUI.Controls` as files that checks that no invocation of a declaration macro is skipped and prints the numbers of each scan. Not in this stage: `ModelTypeSystem`, the call forms, the manifest keys, and any change to `Build` or the emitter.
+
 Remaining for E5, in order:
 
-1. The scanner of 9.5 (`MarkupModel`, `ModelTypeSystem<EmitBacking>`, `export_metadata()`), so that the build script compiles the documents that name types of its own crate without linking anything; then `include_xaml!` per class, the generated `register_types`, the themes on the build script, and the diagnostics and the cache of 9.6.4 and 9.6.5. Before it, the two `XamlIlTests` documents and the dialogs can use the checked-in path.
+1. The rest of the build-time type system (9.5), in stages that each build and test on their own:
+   1. **Validate the scanner on the real crates.** Run the test of 9.5.6 and read its output: the `FRN9010` list is the list of forms the readers do not know (each is either a reader to extend or a declaration to rewrite), the unresolved paths are mostly names behind `use ferroui_base::*` (replace the glob by a list in those files, or resolve globs of dependencies in step 2), `FRN9024` shows where the scanner's public paths differ from `rust_paths.rs` (when none differ, the generated `rust_paths.rs` and `scripts/rust_paths.py` can go). Record the numbers in 9.5.6.
+   2. **Dependency models.** `export_metadata()`: `Build` scans the crate, writes the model into the `.xamlmeta` of format 2 (next to the documents it writes today) and reads the models of the dependencies (`AssemblyModel::parse`, the transport of 9.6.3 as it is). With them: canonical paths for types of other crates (each model's types by `rust_path` and by every public path: the scanner has the export table, the model needs it written out), the names of properties whose owner is added across crates, the values of enumerations of other crates, glob imports of other crates. Scan the framework crates in their `build.rs` (they need `links` and a build script; the themes have both).
+   3. **`ModelTypeSystem<EmitBacking>` (9.5.5)** in the loader, outside the `runtime` feature: `IXamlType` over `AssemblyModel` (the model moves to the loader or the loader takes it as a trait; `ferroui-build` already depends on the loader). 9.5.2 steps 2 to 4 (the handle table, the structural rules, opaque types), the projection rules of 9.5.5 shared with `runtime/type_system` (`core_types.rs`, `object_model.rs` as data). Exit test: the drift test, the dumps of `RuntimeTypeSystem` and of the scanned `ModelTypeSystem` equal for base, controls and markup-xaml.
+   4. **Call forms (9.5.3) and the emitter.** The scanner (or a pass over the model) fills `call`: A from the declaration, B when `CallableModel::resolved` names a `pub` function of `Scan::functions` with the declared signature, else the typed function (`typed_function`, today's form with `markup-functions`) or C. The emitter reads `EmitBacking` instead of `MarkupEmit` and the registered Rust paths.
+   5. **`compile_xaml()` on the model**: the build script stops linking the crates of its documents and compiles `x:Class` documents of its own crate; `[package.metadata.ferroui]` keys (a TOML reader, or the keys stay builder calls); then `include_xaml!` per class, the generated `register_types`, the themes on the build script, the diagnostics and the cache of 9.6.4 and 9.6.5.
+
+   Before step 5, the two `XamlIlTests` documents and the dialogs can use the checked-in path.
 2. The ControlCatalog: its documents and the `x:Class` documents of the dialogs compiled, so that neither links the run-time loader (browser-platform.md, section 20, item 3). Measure a few pages first against the estimate there (+6 to +10 MB raw, +0.5 to +1.2 MB gzip on the module); above it, the owner decides.
 
 #### 9.10.2 Test strategy
