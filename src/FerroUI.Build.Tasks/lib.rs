@@ -311,8 +311,8 @@ impl Build {
         // library; every other type is the build script's to register.
         ferroui_markup_xaml::register_types();
         MarkupAssembly::register(assembly);
-        // Makes the assembly known to the asset loader, which the compiler asks for the
-        // assembly of a URI.
+        // Makes the assembly known to the asset loader, as the `register_types()` of the
+        // crate does: the host of the emitter in the tests of a crate runs with it.
         ferroui_base::platform::register_assets(assembly.name, &[]);
         FerroRuntimeXamlLoader::register();
 
