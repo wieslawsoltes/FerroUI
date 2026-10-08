@@ -99,7 +99,7 @@ pub use i_text_source::ITextSource;
 pub use formatted_text_source::FormattedTextSource;
 pub(crate) use formatting_object_pool::FormattingObjectPool;
 pub use logical_text_run_enumerator::LogicalTextRunEnumerator;
-pub(crate) use inter_word_justification::InterWordJustification;
+pub use inter_word_justification::InterWordJustification;
 pub use justification_properties::JustificationProperties;
 pub use logical_direction::LogicalDirection;
 pub use shaped_buffer::ShapedBuffer;

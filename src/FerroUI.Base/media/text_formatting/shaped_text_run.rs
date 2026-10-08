@@ -52,8 +52,8 @@ impl ShapedTextRun {
     }
 
     /// Registers another owner of the run; every owner calls [`ShapedTextRun::dispose`] once.
-    #[allow(dead_code)] // upstream's form; the formatter holds runs as `Rc<dyn TextRun>` and uses `add_reference`
-    pub(crate) fn add_ref(self: &Rc<Self>) -> Rc<Self> {
+    // Internal upstream; public so the Skia unit tests reach it.
+    pub fn add_ref(self: &Rc<Self>) -> Rc<Self> {
         self.add_reference();
         self.clone()
     }
