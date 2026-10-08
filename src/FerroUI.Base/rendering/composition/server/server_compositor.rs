@@ -600,10 +600,11 @@ impl ServerCompositor {
         }
         let _reset = ResetFlag(&self.ui_thread_is_inside_render);
 
-        // While the server runs on a dispatcher thread, nothing may pump the
-        // dispatcher from inside a frame.
-        let dispatcher = Dispatcher::current_dispatcher();
-        let processing_disabled = dispatcher.disable_processing();
+        // While the UI thread renders, nothing may pump its dispatcher from
+        // inside the frame. A frame of the render thread leaves the
+        // dispatcher alone.
+        let dispatcher = Dispatcher::ui_thread();
+        let processing_disabled = dispatcher.check_access().then(|| dispatcher.disable_processing());
         let _notify = NotifyRendered(self);
         // Declared after `_notify`, so processing is enabled again before
         // the rendered notification runs.
@@ -685,10 +686,12 @@ impl Drop for NotifyRendered<'_> {
 
 /// Re-enables dispatcher processing when the frame ends, also when it
 /// unwinds: the handle only re-enables on `dispose`.
-struct EnableProcessing(crate::threading::DispatcherProcessingDisabled);
+struct EnableProcessing(Option<crate::threading::DispatcherProcessingDisabled>);
 
 impl Drop for EnableProcessing {
     fn drop(&mut self) {
-        crate::reactive::IDisposable::dispose(&self.0);
+        if let Some(disabled) = &self.0 {
+            crate::reactive::IDisposable::dispose(disabled);
+        }
     }
 }

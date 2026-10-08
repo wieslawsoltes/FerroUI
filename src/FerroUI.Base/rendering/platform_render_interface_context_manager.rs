@@ -22,6 +22,10 @@ pub struct PlatformRenderInterfaceContextManager {
     backend: RefCell<Option<Rc<dyn IPlatformRenderInterfaceContext>>>,
     gpu_context: RefCell<Option<OwnedDisposable<dyn IPlatformGraphicsContext>>>,
     ready_state_feature: Option<Rc<dyn IPlatformGraphicsReadyStateFeature>>,
+    /// The render interface of the platform, looked up where the manager is
+    /// created: the service locator belongs to a thread, and the context may
+    /// be created by another one (the render thread).
+    render_interface: RefCell<Option<Rc<dyn IPlatformRenderInterface>>>,
     context_disposed: HandlerList<dyn Fn()>,
     context_created: HandlerList<dyn Fn(&Rc<dyn IPlatformRenderInterfaceContext>)>,
 }
@@ -39,6 +43,7 @@ impl PlatformRenderInterfaceContextManager {
             backend: RefCell::new(None),
             gpu_context: RefCell::new(None),
             ready_state_feature,
+            render_interface: RefCell::new(FerroLocator::current().get_service::<dyn IPlatformRenderInterface>()),
             context_disposed: HandlerList::new(),
             context_created: HandlerList::new(),
         })
@@ -108,9 +113,14 @@ impl PlatformRenderInterfaceContextManager {
                 }
             }
 
-            let backend = FerroLocator::current()
-                .get_required_service::<dyn IPlatformRenderInterface>()
-                .create_backend_context(self.gpu_context());
+            // Registered after the manager was created: found on the thread
+            // that registered it.
+            let render_interface = self
+                .render_interface
+                .borrow_mut()
+                .get_or_insert_with(|| FerroLocator::current().get_required_service::<dyn IPlatformRenderInterface>())
+                .clone();
+            let backend = render_interface.create_backend_context(self.gpu_context());
             *self.backend.borrow_mut() = Some(backend.clone());
             for (_, handler) in self.context_created.snapshot().iter() {
                 handler(&backend);

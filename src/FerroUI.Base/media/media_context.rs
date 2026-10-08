@@ -398,7 +398,9 @@ impl MediaContext {
         {
             if wait_full_render { batch.rendered() } else { batch.processed() }.wait();
         } else {
-            compositor.server().render();
+            // This thread renders, under the compositor lock: the render
+            // thread, if there is one, waits its turn.
+            compositor.render_on_this_thread();
         }
     }
 
