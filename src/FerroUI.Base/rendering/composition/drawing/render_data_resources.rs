@@ -26,11 +26,11 @@ pub enum RenderDataResource {
     /// upstream), shared by the client render data and the server render
     /// data it is sent to, so that the glyph run is held once until both
     /// are released.
-    GlyphRun(Rc<std::sync::Arc<dyn IGlyphRunImpl>>),
+    GlyphRun(Arc<Arc<dyn IGlyphRunImpl>>),
     /// A recorded bitmap: one counted reference (`IRef<IBitmapImpl>`
     /// upstream), shared as a glyph run is.
-    Bitmap(Rc<std::sync::Arc<crate::platform::SharedBitmapImpl>>),
-    CustomDrawOperation(Rc<dyn ICustomDrawOperation>),
+    Bitmap(Arc<Arc<crate::platform::SharedBitmapImpl>>),
+    CustomDrawOperation(std::sync::Arc<dyn ICustomDrawOperation>),
     Effect(Rc<dyn IEffect>),
     ServerBrush { server: ServerObjectId, client: Rc<dyn IBrush> },
     ServerPen { server: ServerObjectId, client: Rc<dyn IPen> },
@@ -67,9 +67,9 @@ impl RenderDataResource {
             RenderDataResource::Pen(v) | RenderDataResource::ClientPen(v) => (Kind::Pen, address(v)),
             RenderDataResource::GeometryImpl(v) => (Kind::GeometryImpl, std::sync::Arc::as_ptr(v) as *const () as usize),
             RenderDataResource::Geometry(v) => (Kind::Geometry, address(v)),
-            RenderDataResource::GlyphRun(v) => (Kind::GlyphRun, address(v)),
-            RenderDataResource::Bitmap(v) => (Kind::Bitmap, address(v)),
-            RenderDataResource::CustomDrawOperation(v) => (Kind::Custom, address(v)),
+            RenderDataResource::GlyphRun(v) => (Kind::GlyphRun, Arc::as_ptr(v) as *const () as usize),
+            RenderDataResource::Bitmap(v) => (Kind::Bitmap, Arc::as_ptr(v) as *const () as usize),
+            RenderDataResource::CustomDrawOperation(v) => (Kind::Custom, Arc::as_ptr(v) as *const () as usize),
             RenderDataResource::Effect(v) => (Kind::Effect, address(v)),
             RenderDataResource::ServerBrush { server, .. }
             | RenderDataResource::ServerPen { server, .. }
@@ -169,7 +169,7 @@ impl RenderDataResources {
         }
     }
 
-    pub fn custom_draw_operation(&self, handle: i32) -> Option<&Rc<dyn ICustomDrawOperation>> {
+    pub fn custom_draw_operation(&self, handle: i32) -> Option<&std::sync::Arc<dyn ICustomDrawOperation>> {
         match self.get(handle)? {
             RenderDataResource::CustomDrawOperation(operation) => Some(operation),
             _ => panic!("the render data resource is not a custom draw operation"),

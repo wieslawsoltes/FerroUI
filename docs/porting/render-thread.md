@@ -100,8 +100,19 @@ R1 is delivered one payload contract at a time; each step builds and passes on i
 | R1.1 | `IGeometryImpl`, `IStreamGeometryImpl`, `ITransformedGeometryImpl` | Done: the contract requires `Send + Sync` and is held in `Arc` everywhere. The Skia geometries keep their paths behind a lock and hand out copies (a copy of a path shares its storage); the stroke cache and the path measure are under a lock; the headless stubs and the test geometries follow. |
 | R1.2 | `IGlyphRunImpl` | Done: `Send + Sync`, held in `Arc`. The text blob cache of the Skia glyph run is under a lock, and the closures of the two level cache are `Send`. |
 | R1.3 | `IBitmapImpl` and the contracts built on it | Done. A bitmap of the UI side is a `SharedBitmapImpl` (`dyn IBitmapImpl + Send + Sync`) held in `Arc`; `IWriteableBitmapImpl` and `IRenderTargetBitmapImpl` require `Send + Sync`; the counted reference (`RefCounted`) counts atomically. A layer of a drawing context stays an `Rc` on the render thread and is drawn by reference; where the original hands a layer to the UI thread (the snapshot of a visual), the layer gives a shared snapshot of its contents instead. In the Skia backend the pixels of a writeable bitmap and the image drawn from them are under one lock, and the render target a render target bitmap draws itself with is bound to the thread that created it (`ThreadBound`). |
-| R1.4 | Immutable brushes, pens, effects; custom draw operations | Open. |
-| R1.5 | `BatchObject::Value` requires `Send`; measurements | Open. |
+| R1.4a | Custom draw operations; the counted holders of render data; the geometry wrapper | Done: `ICustomDrawOperation: Send + Sync` in `Arc`; glyph runs and bitmaps of render data are held as `Arc<Arc<..>>`; a geometry wrapper is never sent by value. |
+| R1.4b | Effects, dash styles, and the shared form of immutable brushes and pens | Open. |
+| R1.4c | The values of `BatchResource<T>`: transforms, gradient stops, brushes of composition objects | Open. |
+| R1.4d | Animation instances (`Rc<dyn IAnimationInstance>` is sent by 30 property writers of the generated composition objects); the untyped value of the composition target | Open. An instance moves to the server and is owned there: it has to be `Send`, not shared. |
+| R1.5 | `BatchObject::Value` requires `Send`; measurements | Open. Switching the bound on locally is how the list above was found: after R1.4a the compiler names exactly the kinds of R1.4b to R1.4d. |
+
+Design of R1.4. With `BatchObject::Value(Box<dyn Any + Send>)` the compiler names what is left: the brush, pen and effect of render data, its geometry wrapper, custom draw operations, the two counted holders (glyph run, bitmap) and the values of `BatchResource<T>`.
+
+- A brush, pen or effect object stays an `Rc` on the UI thread, where mutable and immutable ones share one handle type and render data keeps them for hit testing. What is *sent* is the **shared form** of an immutable one: `to_shared()` returns an `Arc<dyn IBrush + Send + Sync>` (and likewise for pens and effects) with the same values, cached by the object so that sending the same brush again costs a count. The server table holds shared forms beside the server objects it resolves from ids; the drawing context takes `&dyn IBrush` either way.
+- The immutable types hold their parts in thread-safe form (gradient stops, dash style, transform, the counted bitmap of an image brush).
+- `ICustomDrawOperation` requires `Send + Sync` and is held in `Arc`: it is rendered on the render thread, as upstream documents.
+- The geometry wrapper of render data (`IRenderDataGeometry`) is never sent as a value: with a compositor a geometry is sent as the id of its server object.
+- The counted holders become `Arc<Arc<..>>`.
 
 Found by R1.1 in the Skia backend: a path can be sent to another thread but not shared by reference, and a path measure can be neither. The geometries therefore never lend a path; the path measure is cached behind a lock in a wrapper that asserts it may move between threads (it owns its contours and has no thread affinity).
 

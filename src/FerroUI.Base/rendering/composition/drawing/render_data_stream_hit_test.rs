@@ -205,7 +205,7 @@ impl IRenderDataVisitor for HitTestVisitor {
         }
     }
 
-    fn on_draw_custom(&mut self, operation: Option<&Rc<dyn ICustomDrawOperation>>) {
+    fn on_draw_custom(&mut self, operation: Option<&std::sync::Arc<dyn ICustomDrawOperation>>) {
         if !self.live {
             return;
         }

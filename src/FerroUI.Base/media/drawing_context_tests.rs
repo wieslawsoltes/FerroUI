@@ -162,7 +162,7 @@ fn rectangle_radii_are_clamped_to_half_the_size() {
         }
         fn draw_ellipse_core(&mut self, _: Option<&Rc<dyn IBrush>>, _: Option<&Rc<dyn IPen>>, _: Rect) {}
         fn draw_bitmap(&mut self, _: &std::sync::Arc<crate::platform::SharedBitmapImpl>, _: f64, _: Rect, _: Rect) {}
-        fn custom(&mut self, _: &Rc<dyn crate::rendering::scene_graph::ICustomDrawOperation>) {}
+        fn custom(&mut self, _: &std::sync::Arc<dyn crate::rendering::scene_graph::ICustomDrawOperation>) {}
         fn draw_glyph_run(&mut self, _: Option<&Rc<dyn IBrush>>, _: &Rc<crate::media::GlyphRun>) {}
         fn push_clip_core(&mut self, _: Rect) {}
         fn push_rounded_clip_core(&mut self, _: RoundedRect) {}

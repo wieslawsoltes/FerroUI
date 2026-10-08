@@ -91,7 +91,7 @@ impl IRenderDataVisitor for BoundsVisitor {
         self.union(Some(dest_rect));
     }
 
-    fn on_draw_custom(&mut self, operation: Option<&Rc<dyn ICustomDrawOperation>>) {
+    fn on_draw_custom(&mut self, operation: Option<&std::sync::Arc<dyn ICustomDrawOperation>>) {
         self.union(operation.map(|o| o.bounds()));
     }
 

@@ -302,7 +302,7 @@ impl IDrawingContextCore for RenderDataDrawingContext {
         self.stream().draw_bitmap(Some(source.clone()), opacity, source_rect, dest_rect);
     }
 
-    fn custom(&mut self, custom: &Rc<dyn ICustomDrawOperation>) {
+    fn custom(&mut self, custom: &std::sync::Arc<dyn ICustomDrawOperation>) {
         self.stream().draw_custom(Some(custom.clone()));
     }
 

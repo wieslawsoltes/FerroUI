@@ -38,7 +38,7 @@ pub trait IRenderDataVisitor {
     );
     fn on_draw_glyph_run(&mut self, server_brush: Option<&dyn IBrush>, glyph_run: Option<&std::sync::Arc<dyn IGlyphRunImpl>>);
     fn on_draw_bitmap(&mut self, bitmap: Option<&std::sync::Arc<crate::platform::SharedBitmapImpl>>, opacity: f64, source_rect: Rect, dest_rect: Rect);
-    fn on_draw_custom(&mut self, operation: Option<&Rc<dyn ICustomDrawOperation>>);
+    fn on_draw_custom(&mut self, operation: Option<&std::sync::Arc<dyn ICustomDrawOperation>>);
 
     fn on_push_clip(&mut self, clip: RoundedRect) -> Self::Scope;
     fn on_push_geometry_clip(&mut self, geometry: Option<&Arc<dyn IGeometryImpl>>) -> Self::Scope;

@@ -520,7 +520,7 @@ impl IDrawingContextCore for DrawingGroupDrawingContext {
         panic!("Drawing a bitmap into a DrawingGroup is not implemented.");
     }
 
-    fn custom(&mut self, _custom: &Rc<dyn ICustomDrawOperation>) {
+    fn custom(&mut self, _custom: &std::sync::Arc<dyn ICustomDrawOperation>) {
         panic!("Custom draw operations are not supported when drawing into a DrawingGroup.");
     }
 
@@ -864,7 +864,7 @@ mod tests {
         }
         fn draw_ellipse_core(&mut self, _: Option<&Rc<dyn IBrush>>, _: Option<&Rc<dyn IPen>>, _: Rect) {}
         fn draw_bitmap(&mut self, _: &std::sync::Arc<crate::platform::SharedBitmapImpl>, _: f64, _: Rect, _: Rect) {}
-        fn custom(&mut self, _: &Rc<dyn ICustomDrawOperation>) {}
+        fn custom(&mut self, _: &std::sync::Arc<dyn ICustomDrawOperation>) {}
         fn draw_glyph_run(&mut self, _: Option<&Rc<dyn IBrush>>, _: &Rc<GlyphRun>) {}
         fn push_clip_core(&mut self, _: Rect) {}
         fn push_rounded_clip_core(&mut self, _: RoundedRect) {}
