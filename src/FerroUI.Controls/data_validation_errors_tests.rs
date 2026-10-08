@@ -4,7 +4,7 @@
 //! that those tests do not reach.
 
 use crate::test_support::{string_of, test_scope};
-use crate::{Control, DataValidationErrors, ErrorConverter};
+use crate::{Control, DataValidationErrors, ErrorConverter, ItemsControl};
 use ferroui_base::data::{
     AggregateError, AggregateException, BindingChainException, BindingError, DataValidationException,
 };
@@ -42,6 +42,30 @@ fn setting_errors_sets_has_errors_and_pseudo_class() {
     assert!(!DataValidationErrors::get_has_errors(&target));
     assert!(!target.classes().contains(":error"));
     assert!(DataValidationErrors::get_errors(&target).is_none());
+}
+
+// The template of the errors shows them with an items control whose items are the errors
+// themselves (`ItemsSource="{Binding}"`, the errors being the data context).
+#[test]
+fn errors_are_the_items_of_an_items_control_bound_to_them() {
+    let _scope = test_scope();
+    crate::register_types();
+    let target = Control::new();
+    DataValidationErrors::set_errors(&target, strs(["foo", "bar"]));
+
+    let errors: BoxedValue = Rc::new(DataValidationErrors::get_errors(&target).expect("the errors"));
+    let items = ItemsControl::new();
+    items.set_data_context(Some(errors));
+    let _expression = items.bind_binding(
+        ItemsControl::items_source_property().as_property(),
+        &ferroui_base::data::ReflectionBinding::new("."),
+    );
+
+    let source = items.items_source().expect("the items source");
+    assert_eq!(2, source.count());
+    assert_eq!(Some("foo".to_string()), source.get_at(0).and_then(|error| string_of(&error)));
+    assert_eq!(Some("bar".to_string()), source.get_at(1).and_then(|error| string_of(&error)));
+    assert_eq!(2, items.item_count());
 }
 
 #[test]

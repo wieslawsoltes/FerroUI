@@ -8,7 +8,9 @@ use ferroui_base::metadata::from_markup_value;
 use ferroui_base::threading::Dispatcher;
 use ferroui_base::utilities::{CultureInfo, Decimal, TestCultureDataProvider};
 use ferroui_base::Ref;
-use ferroui_controls::{ComboBox, Control, NumericUpDown, Window};
+use ferroui_controls::{
+    Canvas, ComboBox, Control, DataValidationErrors, ItemsControl, NumericUpDown, ToolTip, Window,
+};
 use std::rc::Rc;
 
 fn show(page: &Ref<NumericUpDownPage>) -> Ref<Window> {
@@ -135,5 +137,34 @@ fn a_double_of_the_view_model_is_the_decimal_value_of_the_control() {
     double_up_down.set_numeric_value(None);
     run_jobs();
     assert_eq!(7.5, view_model.double_value());
+    window.close();
+}
+
+#[test]
+fn the_errors_of_a_control_are_the_items_of_the_items_control_of_their_template() {
+    let _app = start_catalog_application();
+    let page = NumericUpDownPage::new();
+    let window = show(&page);
+    // `<DataValidationErrors.Error>` of the document: the control has one error.
+    let up_down = page.get_control::<NumericUpDown>("ValidationUpDown");
+    assert!(DataValidationErrors::get_has_errors(&up_down));
+    assert_eq!(Some(1), DataValidationErrors::get_errors(&up_down).map(|errors| errors.len()));
+
+    // The template of the errors of the Simple theme is a mark whose tooltip lists the
+    // errors with an items control, `ItemsSource="{Binding}"` over the errors (the Fluent
+    // theme has the items control under the control itself).
+    let mark = up_down
+        .get_visual_descendants()
+        .filter_map(|visual| visual.cast::<Canvas>())
+        .find(|canvas| ToolTip::get_tip(canvas).is_some())
+        .expect("the mark of the errors");
+    ToolTip::set_is_open(&mark, true);
+    run_jobs();
+    let items =
+        from_markup_value::<Ref<ItemsControl>>(&ToolTip::get_tip(&mark)).expect("the items control of the tooltip");
+    assert_eq!(Some(1), items.items_source().map(|source| source.count()));
+    assert_eq!(1, items.item_count());
+
+    ToolTip::set_is_open(&mark, false);
     window.close();
 }
