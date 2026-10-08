@@ -7,6 +7,9 @@ rust-version.workspace = true
 license.workspace = true
 repository.workspace = true
 build = "build.rs"
+# The build script hands the path of `compiled_xaml.xamlmeta` to the build scripts of the crates that
+# depend on this one (`DEP_FERROUI_THEMES_FLUENT_XAML_XAMLMETA`; docs/porting/xaml.md, 9.6.3).
+links = "ferroui_themes_fluent_xaml"
 
 # Unit tests live next to the code (`tests/` modules of the library), not as
 # integration test targets.

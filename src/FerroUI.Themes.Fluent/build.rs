@@ -10,6 +10,12 @@
 //! by the loader table of the compiled markup, as upstream's compiler
 //! removes every compiled resource from the assembly. The table of every
 //! document (`DOCUMENTS`) exists for the tests of the crate alone.
+//!
+//! It also hands the description of the compiled markup of the theme
+//! (`compiled_xaml.xamlmeta`, checked in with `compiled_xaml.rs`) to the
+//! build scripts of the crates that depend on the theme, through the `links`
+//! key of the manifest: the compiler of such a crate links an include of a
+//! document of the theme through it (docs/porting/xaml.md, 9.6.3 and 9.7.3).
 
 use std::env;
 use std::fmt::Write as _;
@@ -51,6 +57,11 @@ fn collect(root: &Path, directory: &Path, found: &mut Vec<(String, PathBuf)>) {
 
 fn main() {
     let root = PathBuf::from(env::var_os("CARGO_MANIFEST_DIR").expect("CARGO_MANIFEST_DIR"));
+
+    // The compiled markup of the theme, for the crates that include its documents.
+    let metadata = root.join("compiled_xaml.xamlmeta");
+    println!("cargo::rerun-if-changed={}", metadata.display());
+    println!("cargo::metadata=xamlmeta={}", metadata.display());
     let out = PathBuf::from(env::var_os("OUT_DIR").expect("OUT_DIR")).join("assets.rs");
 
     let mut assets = Vec::new();
