@@ -301,7 +301,7 @@ impl CompositionVisual {
     pub fn try_get_valid_readback(&self) -> Option<ReadbackData> {
         let root = self.root()?;
 
-        let indices = self.compositor().server().readback().clone();
+        let indices = self.compositor().readback().clone();
         let readback = self.readback.get_readback(indices.read_revision())?;
 
         // CompositionVisual wasn't visible or wasn't even attached to the composition target during the lat frame

@@ -171,7 +171,7 @@ impl CompositionTarget {
         root: Option<&Rc<CompositionVisual>>,
         filter: VisualFilter<'_>,
     ) -> Option<Vec<(IntersectionResult, Rc<CompositionVisual>)>> {
-        self.compositor().server().readback().next_read();
+        self.compositor().readback().next_read();
         let root = match root {
             Some(root) => root.clone(),
             None => self.root()?,
@@ -299,7 +299,7 @@ impl CompositionTarget {
         filter: VisualFilter<'_>,
         result_filter: VisualFilter<'_>,
     ) -> (Option<Rc<CompositionVisual>>, IntersectionResult) {
-        self.compositor().server().readback().next_read();
+        self.compositor().readback().next_read();
         let none = (None, IntersectionResult::NotCalculated);
         let root = match root {
             Some(root) => root.clone(),
