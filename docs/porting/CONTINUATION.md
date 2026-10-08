@@ -13,7 +13,28 @@ Merged this period, in order: #26, #34, #33, #31, #27, #32, #29, #30, #36, #35, 
 - XAML compiler stage E5, step 1 (#43): the generated code answers a load by URI of every public compiled document, as upstream's `!XamlLoader` does. The themes' compiled documents are out of the embedded assets for every application.
 - Core port: the ContentPresenter suites as exact ports of upstream's four files (#40). The ComplexControl and Foundation automation peer suites complete (#41).
 
-## In flight at the hand-over
+## Since the hand-over (2026-10-07 and 2026-10-08)
+
+- **History.** The history of `main` was rewritten on 2026-10-07 so that every commit has the owner as its only author. Every hash from the 41st commit onward changed; hashes quoted in older documents and pull requests name commits that are no longer on `main`. Branch only from the current `origin/main`, and add no co-author or session lines to commits or pull requests.
+- **Release profile (#45).** `release` is thin LTO over the default code generation units, for build time. The former profile (fat LTO, one unit) is the profile `dist`: `cargo build --profile dist`, `scripts/perf-report.py --profile dist`.
+- **Artwork (#46).** The ControlCatalog shows the project's own mark, word mark and banner on the desktop too; the feature `placeholder-branding` of the sample is a default feature.
+- **Browser opt-level (#47).** `ferroui-base` and `ferroui-controls` are built at "s" in the `browser` profile: scrolling the TableView page takes about 20 % less processor time for 0.76 MB more with gzip. `scripts/browser/scroll-profile.mjs` measures it. This settles the owner decision on the browser opt-level.
+- **Performance designs (#48).** `docs/porting/performance/` holds the findings of a scrolling trace and nine improvement designs. The owner's rule for them: ported logic does not diverge from upstream.
+
+## In flight on 2026-10-08
+
+One cloud worker per row, started from `main` with the brief named.
+
+| Branch | Task | Brief |
+|---|---|---|
+| `xaml-e5-includes` | XAML compiler stage E5, includes across crates (task 2, remaining step 1) | `cloud-tasks/xaml-e5-includes.md` |
+| `color-picker` | The colour picker library, its themes, tests and catalog page | `cloud-tasks/color-picker.md` |
+| `core-port-12` | Color, focus and glyph typeface suites and the clean-ups of task 3 | `cloud-tasks/core-port-suites.md` |
+| `skia-test-suites` | The remaining suites of the Skia backend and the typeface hook (row 16) | `cloud-tasks/skia-test-suites.md` |
+
+Next in line when a worker is free: build integration of the XAML compiler (task 2, remaining step 2), the documents still on `samples/ControlCatalog/excluded.txt`, and design 09 of `performance/` (benchmarks and counters).
+
+## In flight at the hand-over of 2026-10-07
 
 Each task was asked to stop at a clean, tested state and to give its pull request a "Continuation" section. Those sections are folded into the tasks below. The pull requests have the full detail: #42 for task 1, #43 for task 2.
 
@@ -97,7 +118,6 @@ Also:
 
 ## Decisions waiting for the owner
 
-- **Browser opt-level.** A faster opt-level for the hot crates of the browser build would buy frame rate at the cost of module size. The size and first-frame figures for opt-level 3, "s" and "z" are in `browser-platform.md` section 18. The `browser` profile uses "z" outside the XAML pipeline.
 - **CI speed-up.** The earlier proposal for a faster CI run is still open.
 - **Stale branches.** Branches of merged pull requests can be deleted by hand.
 
