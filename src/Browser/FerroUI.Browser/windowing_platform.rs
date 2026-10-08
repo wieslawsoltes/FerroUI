@@ -7,6 +7,7 @@ use crate::browser_system_navigation_manager::BrowserSystemNavigationManagerImpl
 use crate::browser_single_threaded_dispatcher_impl::BrowserSingleThreadedDispatcherImpl;
 use crate::cursor::CssCursorFactory;
 use crate::interop::{ferro_module, JsObject};
+use crate::rendering::BrowserSharedRenderLoop;
 use crate::win_stubs::IconLoaderStub;
 use ferroui_base::input::platform::{KeyGestureFormatInfo, PlatformHotkeyConfiguration};
 use ferroui_base::input::{IKeyboardDevice, KeyboardDevice};
@@ -110,7 +111,18 @@ impl BrowserWindowingPlatform {
 
         Dispatcher::initialize_ui_thread_dispatcher(BrowserSingleThreadedDispatcherImpl::new());
 
-        if let Some(options) = FerroLocator::current().get_service::<BrowserPlatformOptions>() {
+        // The render thread of a module built with threads. Upstream starts
+        // its render worker before the platform is set up and waits for it;
+        // here it is started when the dispatcher exists (the thread wakes it
+        // up) and before anything asks for the render loop, and nobody
+        // waits: a view created before the thread has reported itself is
+        // not ready until it has. Without threads this does nothing.
+        let options = FerroLocator::current().get_service::<BrowserPlatformOptions>();
+        if options.as_ref().is_none_or(|options| options.render_thread) {
+            BrowserSharedRenderLoop::start_render_thread();
+        }
+
+        if let Some(options) = options {
             if options.register_ferro_service_worker {
                 let sw_path = ferro_module::resolve_service_worker_path();
                 ferro_module::register_service_worker(sw_path, options.ferro_service_worker_scope.as_deref());

@@ -27,9 +27,9 @@ use std::sync::Arc;
 ///
 /// There is one render thread for the life of the page; it never ends.
 ///
-/// The platform does not start it yet: stage B2.6 of
-/// `docs/porting/browser-render-worker.md` does. A module built without
-/// threads cannot start it at all.
+/// The platform starts it when it is registered, for the frame loop of the
+/// page ([`BrowserSharedRenderLoop::start_render_thread`](super::BrowserSharedRenderLoop::start_render_thread)).
+/// A module built without threads cannot start it at all.
 pub struct RenderWorker;
 
 /// What the threads of the module know about the render thread.

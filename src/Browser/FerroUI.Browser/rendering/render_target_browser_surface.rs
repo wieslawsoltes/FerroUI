@@ -49,15 +49,34 @@ impl RenderTargetBrowserSurface {
             }
         }
         let gpu: Rc<dyn IPlatformGraphics> = Rc::new(BrowserPlatformGraphics { shared: shared.clone() });
-        let compositor = Compositor::with_scheduler(
-            BrowserSharedRenderLoop::render_loop(),
-            Some(gpu),
-            false,
-            &MediaContext::instance().scheduler(),
-            Dispatcher::ui_thread(),
-            None,
-            None,
-        );
+        let compositor = if thread_id == 0 {
+            Compositor::with_scheduler(
+                BrowserSharedRenderLoop::render_loop(),
+                Some(gpu),
+                false,
+                &MediaContext::instance().scheduler(),
+                Dispatcher::ui_thread(),
+                None,
+                None,
+            )
+        } else {
+            // The canvas belongs to the render thread, and so does everything
+            // that draws to it: the compositor is confined to that thread
+            // (the render-thread mode, this thread never renders, a loop
+            // that runs in the background). This thread commits batches and
+            // waits for a frame at the synchronous points. Upstream creates
+            // one kind of compositor in both of its modes, with a timer that
+            // does not run in the background (see `DEVIATIONS.md`).
+            Compositor::with_render_thread(
+                BrowserSharedRenderLoop::render_loop(),
+                Some(gpu),
+                false,
+                &MediaContext::instance().scheduler(),
+                Dispatcher::ui_thread(),
+                None,
+                None,
+            )
+        };
 
         let render_surface = BrowserRenderSurface::new(shared.clone());
         let this = Rc::new(Self { base: BrowserSurface::new(js_surface, compositor), shared, render_surface });
@@ -71,11 +90,14 @@ impl RenderTargetBrowserSurface {
     /// `modes` the browser supports, and the surface over it.
     pub fn create(container: &JsObject, modes: &[BrowserRenderingMode], top_level_id: i32) -> Rc<Self> {
         let modes: Vec<i32> = modes.iter().map(|m| *m as i32).collect();
-        // 0 without a render thread: the render target is created and used
-        // on this thread. With one, the script transfers the control of the
-        // canvas to its worker, at once or when the thread has reported
-        // itself.
-        let thread_id = RenderWorker::canvas_thread_id();
+        // 0 while the render loop of the page ticks on this thread: the
+        // render target is created and used here. When it ticks on the
+        // render thread, the script transfers the control of the canvas to
+        // the worker of that thread, at once or when the thread has
+        // reported itself. A render thread that does not run the loop of
+        // the page (somebody else started it) gets no canvas of a view.
+        let thread_id =
+            if BrowserSharedRenderLoop::renders_on_render_thread() { RenderWorker::canvas_thread_id() } else { 0 };
         let js = CanvasSurface::create_render_target_surface(container, &modes, top_level_id, thread_id);
         Self::new(js, thread_id)
     }
