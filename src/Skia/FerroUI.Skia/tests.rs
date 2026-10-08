@@ -12,8 +12,8 @@ use ferroui_base::media::immutable::{
     ImmutablePen, ImmutableRadialGradientBrush, ImmutableSolidColorBrush,
 };
 use ferroui_base::media::{
-    BoxShadow, BoxShadows, Brushes, Color, Colors, EdgeMode, FillRule, GeometryCombineMode, GradientSpreadMethod,
-    IBrush, IPen, IntersectionResult, PathGeometry, PenLineCap, PenLineJoin, RenderOptions, SweepDirection,
+    BoxShadow, BoxShadows, Color, Colors, EdgeMode, FillRule, GeometryCombineMode, GradientSpreadMethod,
+    IBrush, IPen, IntersectionResult, PenLineCap, PenLineJoin, RenderOptions, SweepDirection,
 };
 use ferroui_base::platform::surfaces::{
     FramebufferLockProperties, FuncFramebufferRenderTarget, IFramebufferPlatformSurface, IFramebufferRenderTarget,
@@ -26,7 +26,7 @@ use ferroui_base::platform::{
 };
 use ferroui_base::rendering::composition::CompositionTransparencyLevel;
 use ferroui_base::{
-    CornerRadius, FerroLocator, LocatorExtensions, Matrix, PixelSize, Point, Rect, RelativePoint, RelativeUnit,
+    CornerRadius, FerroLocator, Matrix, PixelSize, Point, Rect, RelativePoint, RelativeUnit,
     RoundedRect, Size, Vector,
 };
 use std::any::{Any, TypeId};
@@ -1475,50 +1475,6 @@ fn geometries_of_another_backend_are_not_recognized() {
 
     let group = render_interface.create_geometry_group(FillRule::EvenOdd, &[ours.clone(), foreign]);
     assert_eq!(Rect::new(0.0, 0.0, 10.0, 10.0), group.bounds());
-}
-
-// RenderBoundsTests
-
-#[test]
-fn render_bounds_are_correctly_calculated() {
-    let scope = FerroLocator::enter_scope();
-    SkiaPlatform::initialize();
-    assert!(FerroLocator::current().get_service::<dyn IPlatformRenderInterface>().is_some());
-
-    #[allow(clippy::type_complexity)]
-    let cases: [(&str, PenLineCap, PenLineJoin, f64, f64, [f64; 4]); 4] = [
-        (
-            "M10 20 L 20 10 L 30 20",
-            PenLineCap::Round,
-            PenLineJoin::Miter,
-            2.0,
-            10.0,
-            [9.0, 8.585786819458008, 22.000001907348633, 12.414215087890625],
-        ),
-        ("M10 10 L 20 10", PenLineCap::Round, PenLineJoin::Miter, 2.0, 10.0, [9.0, 9.0, 12.0, 2.0]),
-        (
-            "M10 10 L 20 15 L 10 20",
-            PenLineCap::Flat,
-            PenLineJoin::Miter,
-            2.0,
-            20.0,
-            [9.552786827087402, 9.105572700500488, 12.683281898498535, 11.788853645324707],
-        ),
-        ("M0,0 A128,128 0 0 0 128,0", PenLineCap::Flat, PenLineJoin::Bevel, 0.0, 0.0, [0.0, 0.0, 128.0, 17.14875030517578]),
-    ];
-
-    for (path, cap, join, thickness, miter_limit, [x, y, width, height]) in cases {
-        let geo = PathGeometry::parse(path).unwrap();
-        let pen = ImmutablePen::new(Some(Brushes::black()), thickness, None, cap, join, miter_limit);
-        let bounds = geo.get_render_bounds(&pen);
-        let tolerance = 0.001;
-        assert!((bounds.x - x).abs() < tolerance, "{path}: x {} != {x}", bounds.x);
-        assert!((bounds.y - y).abs() < tolerance, "{path}: y {} != {y}", bounds.y);
-        assert!((bounds.width - width).abs() < tolerance, "{path}: width {} != {width}", bounds.width);
-        assert!((bounds.height - height).abs() < tolerance, "{path}: height {} != {height}", bounds.height);
-    }
-
-    scope.dispose();
 }
 
 // ---------------------------------------------------------------------------

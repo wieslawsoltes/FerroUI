@@ -13,6 +13,7 @@ mod combined_geometry_impl_tests;
 mod drawing_context_impl_tests;
 mod hit_testing;
 mod media;
+mod render_bounds_tests;
 mod test_font_manager;
 
 pub(crate) use test_font_manager::TestFontManager;
