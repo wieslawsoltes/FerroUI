@@ -4,6 +4,7 @@ mod bitmap_save_tests;
 mod custom_font_collection_tests;
 mod custom_font_manager_impl;
 mod embedded_font_collection_tests;
+mod font_collection_determinism_tests;
 mod font_collection_tests;
 mod font_collection_try_match_character_tests;
 mod glyph_run_tests;
