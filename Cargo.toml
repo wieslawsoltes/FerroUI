@@ -20,6 +20,8 @@ members = [
     "src/tools/MicroCom.CodeGenerator",
     "external/XamlX/src/XamlX",
     "tests/FerroUI.Markup.Xaml.UnitTests",
+    "tests/XamlIncludeFixture/Theme",
+    "tests/XamlIncludeFixture/Application",
     "samples/MiniMvvm",
     "samples/ControlCatalog",
     "samples/ControlCatalog.Desktop",
