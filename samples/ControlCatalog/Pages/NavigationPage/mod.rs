@@ -26,6 +26,7 @@ mod navigation_page_scroll_aware_page;
 mod navigation_page_stack_page;
 mod navigation_page_title_page;
 mod navigation_page_toolbar_page;
+mod navigation_page_transitions_page;
 mod pulse_home_view;
 mod pulse_login_view;
 mod pulse_profile_view;
@@ -37,6 +38,8 @@ mod retro_gaming_games_view;
 mod retro_gaming_home_view;
 mod retro_gaming_profile_view;
 mod retro_gaming_search_view;
+#[path = "Transitions/mod.rs"]
+mod transitions;
 
 pub use curved_header_home_scroll_view::CurvedHeaderHomeScrollView;
 pub use curved_header_profile_scroll_view::CurvedHeaderProfileScrollView;
@@ -59,6 +62,7 @@ pub use navigation_page_scroll_aware_page::NavigationPageScrollAwarePage;
 pub use navigation_page_stack_page::NavigationPageStackPage;
 pub use navigation_page_title_page::NavigationPageTitlePage;
 pub use navigation_page_toolbar_page::NavigationPageToolbarPage;
+pub use navigation_page_transitions_page::NavigationPageTransitionsPage;
 pub use pulse_home_view::PulseHomeView;
 pub use pulse_login_view::PulseLoginView;
 pub use pulse_profile_view::PulseProfileView;
@@ -70,6 +74,9 @@ pub use retro_gaming_games_view::RetroGamingGamesView;
 pub use retro_gaming_home_view::RetroGamingHomeView;
 pub use retro_gaming_profile_view::RetroGamingProfileView;
 pub use retro_gaming_search_view::RetroGamingSearchView;
+pub use transitions::{
+    CompositeTransition, FadeThroughTransition, PageSlideTransition, PageSlideTransitionAxis, ParallaxSlideTransition,
+};
 
 pub(crate) const TYPES: &[&TypeInfo] = &[
     CurvedHeaderHomeScrollView::TYPE,
@@ -93,6 +100,7 @@ pub(crate) const TYPES: &[&TypeInfo] = &[
     NavigationPageStackPage::TYPE,
     NavigationPageTitlePage::TYPE,
     NavigationPageToolbarPage::TYPE,
+    NavigationPageTransitionsPage::TYPE,
     PulseHomeView::TYPE,
     PulseLoginView::TYPE,
     PulseProfileView::TYPE,
@@ -128,6 +136,7 @@ pub(crate) const CLASSES: &[&XamlClass] = &[
     &NavigationPageStackPage::XAML_CLASS,
     &NavigationPageTitlePage::XAML_CLASS,
     &NavigationPageToolbarPage::XAML_CLASS,
+    &NavigationPageTransitionsPage::XAML_CLASS,
     &PulseHomeView::XAML_CLASS,
     &PulseLoginView::XAML_CLASS,
     &PulseProfileView::XAML_CLASS,
