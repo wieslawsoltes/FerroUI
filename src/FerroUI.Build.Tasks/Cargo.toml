@@ -1,0 +1,23 @@
+[package]
+name = "ferroui-build"
+description = "Build-script support of FerroUI: compiles the markup documents of a crate to Rust source and embeds its assets"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+autotests = false
+autobenches = false
+autoexamples = false
+
+[lib]
+path = "lib.rs"
+
+[dependencies]
+# `MarkupAssembly`, the asset registry.
+ferroui-base = { workspace = true }
+# The configuration of the loader and the registration of the runtime library.
+ferroui-markup-xaml = { workspace = true }
+# The compiler: the transform (against the run-time type system, which is why the build script that
+# calls this crate links the crates of the types its documents name) and the emitter of Rust source.
+ferroui-markup-xaml-loader = { workspace = true, features = ["runtime", "emitter"] }
