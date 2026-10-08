@@ -148,6 +148,7 @@ impl TextLayout {
         max_lines: i32,
         text_run_cache: Option<Rc<TextRunCache>>,
     ) -> Self {
+        crate::perf_count!(TextLayoutsCreated);
         let mut text_layout = Self {
             text_source,
             paragraph_properties,

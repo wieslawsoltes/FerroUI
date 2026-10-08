@@ -287,6 +287,7 @@ impl<TSource: PartialEq + 'static, TValue: PropertyValue> TypedBindingExpression
         mode: BindingMode,
         default_priority: BindingPriority,
     ) -> Rc<Self> {
+        crate::perf_count!(BindingExpressionsCreated);
         Rc::new_cyclic(|this| Self {
             this: this.clone(),
             property_info,
@@ -462,6 +463,7 @@ impl<TSource: PartialEq + 'static, TValue: PropertyValue> TypedBindingExpression
     }
 
     fn publish_value(&self) {
+        crate::perf_count!(BindingValuesPublished);
         // Flag that the source value is being pushed to the target so that
         // the resulting change notification isn't echoed straight back to the
         // source in two-way mode.

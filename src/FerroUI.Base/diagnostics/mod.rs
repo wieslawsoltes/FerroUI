@@ -6,6 +6,7 @@ mod ferro_object_extensions;
 mod ferro_property_value;
 mod i_value_frame_diagnostic;
 mod local_value_frame_diagnostic;
+pub mod perf_counters;
 mod style_value_frame_diagnostic;
 mod value_frame_diagnostic;
 mod value_store_diagnostic;
@@ -22,3 +23,5 @@ pub(crate) use value_frame_diagnostic::ValueFrameDiagnostic;
 
 #[cfg(test)]
 mod diagnostics_tests;
+#[cfg(all(test, feature = "perf-counters"))]
+mod perf_counters_tests;

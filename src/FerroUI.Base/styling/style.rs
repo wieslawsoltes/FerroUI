@@ -115,6 +115,7 @@ impl Style {
         let mut result = SelectorMatchResult::NeverThisType;
 
         if self.has_setters_or_animations() {
+            crate::perf_count!(StylesEvaluated);
             let parent = self.parent();
             let (match_, can_share) = {
                 let selector = self.selector.borrow();
@@ -152,6 +153,7 @@ impl Style {
             result = match_.result();
 
             if match_.is_match() {
+                crate::perf_count!(StylesMatched);
                 self.try_attach_instance(target, match_.into_activator(), type_, can_share)?;
             }
         }

@@ -111,6 +111,7 @@ impl ContainerQuery {
         let mut result = SelectorMatchResult::NeverThisType;
 
         if self.has_children() {
+            crate::perf_count!(StylesEvaluated);
             let parent = self.parent();
             let match_ = match self.query() {
                 Some(query) => query.match_(target, parent.as_deref(), true, self.name().as_deref()),
@@ -129,6 +130,7 @@ impl ContainerQuery {
             result = match_.result();
 
             if match_.is_match() {
+                crate::perf_count!(StylesMatched);
                 self.try_attach_instance(target, match_.into_activator(), type_, true)?;
             }
         }

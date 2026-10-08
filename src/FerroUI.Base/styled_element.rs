@@ -794,6 +794,7 @@ impl StyledElement {
         //   the logical tree
         // - That AttachedToLogicalTree signal travels down to the ListBoxItem
         if self.logical_root.borrow().is_none() {
+            crate::perf_count!(LogicalTreeAttachments);
             *self.logical_root.borrow_mut() = Some(e.root().downgrade());
             self.reevaluate_implicit_theme();
             self.apply_styling();
@@ -820,6 +821,7 @@ impl StyledElement {
 
     fn on_detached_from_logical_tree_core(&self, e: &LogicalTreeAttachmentEventArgs) {
         if self.logical_root.borrow().is_some() {
+            crate::perf_count!(LogicalTreeDetachments);
             *self.logical_root.borrow_mut() = None;
             self.invalidate_styles(false);
             self.on_detached_from_logical_tree(e);
@@ -871,6 +873,7 @@ impl StyledElement {
         // If the Theme property is not set, try to find a ControlTheme
         // resource with our StyleKey.
         if matches!(*self.implicit_theme.borrow(), ImplicitTheme::Unknown) {
+            crate::perf_count!(ImplicitThemeLookups);
             let key = ResourceKey::Type(self.style_key());
             let found = self.try_find_resource(&key, None).flatten().and_then(|value| {
                 let value: &dyn AnyValue = &*value;
@@ -932,6 +935,7 @@ impl StyledElement {
         if let Some(parent) = host.styling_parent() {
             self.apply_styles(&parent)?;
         }
+        crate::perf_count!(StyleHostsWalked);
 
         if host.is_styles_initialized() {
             let styles = host.styles().snapshot();

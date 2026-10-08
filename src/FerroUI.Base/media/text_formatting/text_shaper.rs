@@ -34,6 +34,7 @@ impl TextShaper {
 
     /// Shapes UTF-16 text.
     pub fn shape_text(&self, text: &ReadOnlyMemory<u16>, options: &TextShaperOptions) -> Rc<ShapedBuffer> {
+        crate::perf_count!(TextRunsShaped);
         self.platform_impl.shape_text(text, options)
     }
 

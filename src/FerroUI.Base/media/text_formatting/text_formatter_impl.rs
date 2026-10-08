@@ -1022,6 +1022,7 @@ impl TextFormatter for TextFormatterImpl {
         previous_line_break: Option<&Rc<TextLineBreak>>,
         text_run_cache: Option<&TextRunCache>,
     ) -> Option<Rc<dyn TextLine>> {
+        crate::perf_count!(TextLinesFormatted);
         let object_pool = FormattingObjectPool::instance();
         let font_manager = FontManager::current();
 
@@ -1048,6 +1049,7 @@ impl TextFormatter for TextFormatterImpl {
         // Try to use cached shaped runs to avoid redundant shaping/bidi processing.
         if let Some(text_run_cache) = text_run_cache {
             if let Some(cached) = text_run_cache.try_get_shaped_runs(first_text_source_index) {
+                crate::perf_count!(TextRunCacheHits);
                 return Some(Self::format_line_from_cache(
                     &cached,
                     first_text_source_index,
@@ -1077,6 +1079,7 @@ impl TextFormatter for TextFormatterImpl {
         // Store shaped runs in cache for reuse. The cache takes its own references;
         // the formatter keeps the fresh-from-shape references for the current line.
         if let Some(text_run_cache) = text_run_cache {
+            crate::perf_count!(TextRunCacheMisses);
             text_run_cache.add(
                 first_text_source_index,
                 CachedShapingResult::new(
