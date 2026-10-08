@@ -1082,12 +1082,35 @@ impl ValueTypes {
 /// (`TypeUtilities.ImplicitConversions`), for the numeric types of the port:
 /// each source type converts to the wider types listed for it, and every
 /// integer to the decimal. A floating point number does not convert to the
-/// decimal implicitly, nor the decimal to anything else. The character row
-/// of that table is not here: no ported property is set with a character
-/// through the untyped route.
+/// decimal implicitly, nor the decimal to anything else.
+///
+/// The character row of that table names the unsigned 16-bit integer, the
+/// 32-bit integers, the signed 64-bit integer, the floating point numbers
+/// and the decimal. `Convert.ChangeType` fails for a character and a
+/// floating point number or a decimal, and a conversion that fails is no
+/// conversion: a character converts to those four integer types. The
+/// boolean row names the boolean alone.
 fn implicit_numeric(value: &dyn std::any::Any, target: TypeId) -> Option<BoxedValue> {
     use crate::utilities::Decimal;
 
+    if let Some(v) = value.downcast_ref::<char>() {
+        let code = u32::from(*v);
+        // A character above the 16-bit range is no character of the managed
+        // original: it has no 16-bit form.
+        if target == TypeId::of::<u16>() {
+            return u16::try_from(code).ok().map(|code| Rc::new(code) as BoxedValue);
+        }
+        if target == TypeId::of::<i32>() {
+            return i32::try_from(code).ok().map(|code| Rc::new(code) as BoxedValue);
+        }
+        if target == TypeId::of::<u32>() {
+            return Some(Rc::new(code) as BoxedValue);
+        }
+        if target == TypeId::of::<i64>() {
+            return Some(Rc::new(i64::from(code)) as BoxedValue);
+        }
+        return None;
+    }
     if target == TypeId::of::<Decimal>() {
         macro_rules! integers {
             ($($from:ty),*) => {
@@ -1230,6 +1253,50 @@ impl NumericCast<f32> for f32 {
     }
 }
 
+/// The row and the column of the boolean in the table of the managed original
+/// (`TypeUtilities.Conversions` with `Convert.ChangeType`), for the integers
+/// and the floating point numbers: true is one and false is zero, and a
+/// number is true unless it is zero (not-a-number is true).
+macro_rules! boolean_conversions {
+    ($($ty:ty),*) => {
+        $(
+            ValueTypes::register_conversion::<bool, $ty>(|v| Some(u8::from(*v) as $ty));
+            ValueTypes::register_conversion::<bool, Option<$ty>>(|v| Some(Some(u8::from(*v) as $ty)));
+            ValueTypes::register_conversion::<$ty, bool>(|v| Some(*v != 0 as $ty));
+            ValueTypes::register_conversion::<$ty, Option<bool>>(|v| Some(Some(*v != 0 as $ty)));
+        )*
+    };
+}
+
+/// The row and the column of the character in that table: a character and
+/// an integer convert to each other when the code of the character is in the
+/// range of the integer, and the integer in the range of the 16-bit
+/// characters of the managed original (`Convert.ToChar` and its siblings
+/// fail for the others). A character and a boolean, a floating point number
+/// or a decimal do not convert.
+macro_rules! character_conversions {
+    ($($ty:ty),*) => {
+        $(
+            ValueTypes::register_conversion::<char, $ty>(|v| <$ty>::try_from(u32::from(*v)).ok());
+            ValueTypes::register_conversion::<char, Option<$ty>>(|v| <$ty>::try_from(u32::from(*v)).ok().map(Some));
+            ValueTypes::register_conversion::<$ty, char>(|v| u32::try_from(*v).ok().and_then(character_of_code));
+            ValueTypes::register_conversion::<$ty, Option<char>>(|v| {
+                u32::try_from(*v).ok().and_then(character_of_code).map(Some)
+            });
+        )*
+    };
+}
+
+/// The character of a 16-bit code.
+// Deviation (DEVIATIONS.md, Bindings): a code of the surrogate range, which the managed
+// original holds as a character, is no character here.
+fn character_of_code(code: u32) -> Option<char> {
+    if code > 0xFFFF {
+        return None;
+    }
+    char::from_u32(code)
+}
+
 macro_rules! primitive {
     ($($ty:ty),*) => {
         $(
@@ -1355,6 +1422,18 @@ fn register_defaults() {
     ValueTypes::register_nullable::<bool>();
     ValueTypes::register_parse::<bool>(parse_bool);
     ValueTypes::register_conversion::<String, Option<bool>>(|s| parse_bool(s).map(Some));
+    boolean_conversions!(i8, u8, i16, u16, i32, u32, i64, u64, f32, f64);
+    {
+        use crate::utilities::Decimal;
+
+        ValueTypes::register_conversion::<bool, Decimal>(|v| Some(if *v { Decimal::ONE } else { Decimal::ZERO }));
+        ValueTypes::register_conversion::<bool, Option<Decimal>>(|v| {
+            Some(Some(if *v { Decimal::ONE } else { Decimal::ZERO }))
+        });
+        ValueTypes::register_conversion::<Decimal, bool>(|v| Some(!v.is_zero()));
+        ValueTypes::register_conversion::<Decimal, Option<bool>>(|v| Some(Some(!v.is_zero())));
+    }
+    character_conversions!(i8, u8, i16, u16, i32, u32, i64, u64);
 
     ValueTypes::register_nullable::<String>();
     ValueTypes::register_conversion::<&'static str, String>(|s| Some((*s).to_string()));
@@ -1876,6 +1955,108 @@ mod tests {
     }
 
     #[test]
+    fn booleans_and_numbers_convert_to_each_other() {
+        use crate::utilities::Decimal;
+
+        // `Convert.ToInt32(bool)` and its siblings: true is one, false is zero.
+        macro_rules! from_boolean {
+            ($($one:expr, $zero:expr);* $(;)?) => {
+                $(
+                    assert_number_converts(true, $one);
+                    assert_number_converts(false, $zero);
+                )*
+            };
+        }
+        from_boolean!(
+            1i8, 0i8; 1u8, 0u8; 1i16, 0i16; 1u16, 0u16; 1i32, 0i32; 1u32, 0u32; 1i64, 0i64; 1u64, 0u64;
+            1f32, 0f32; 1f64, 0f64; Decimal::ONE, Decimal::ZERO;
+        );
+
+        // `Convert.ToBoolean(number)`: true unless the number is zero.
+        macro_rules! to_boolean {
+            ($($value:expr => $expected:expr),* $(,)?) => {
+                $( assert_number_converts($value, $expected); )*
+            };
+        }
+        to_boolean!(
+            0i8 => false, -1i8 => true, 0u8 => false, 2u8 => true, 0i16 => false, -3i16 => true,
+            0u16 => false, 4u16 => true, 0i32 => false, i32::MIN => true, 0u32 => false, 5u32 => true,
+            0i64 => false, i64::MAX => true, 0u64 => false, u64::MAX => true,
+            0f32 => false, 0.5f32 => true, 0f64 => false, -0f64 => false, -0.25f64 => true,
+            Decimal::ZERO => false, Decimal::from(-7) => true,
+        );
+        // Not-a-number and the infinities are not zero.
+        assert_eq!(convert_number::<f64, bool>(f64::NAN), Some(true));
+        assert_eq!(convert_number::<f64, Option<bool>>(f64::INFINITY), Some(Some(true)));
+        assert_eq!(convert_number::<f32, bool>(f32::NAN), Some(true));
+
+        // No cell of the table joins the boolean and the character.
+        assert_eq!(convert_number::<bool, char>(true), None);
+        assert_eq!(convert_number::<bool, Option<char>>(true), None);
+        assert_eq!(convert_number::<char, bool>('1'), None);
+        assert_eq!(convert_number::<char, Option<bool>>('1'), None);
+        // The text of a boolean, in both directions, is as before.
+        assert_eq!(convert_number::<bool, String>(true), Some("True".to_string()));
+        assert_eq!(convert_number::<String, bool>("false".to_string()), Some(false));
+    }
+
+    #[test]
+    fn characters_and_integers_convert_to_each_other() {
+        use crate::utilities::Decimal;
+
+        // In both directions for every integer type of the table.
+        macro_rules! codes {
+            ($($code:expr),*) => {
+                $(
+                    assert_number_converts('A', $code);
+                    assert_number_converts($code, 'A');
+                )*
+            };
+        }
+        codes!(65i8, 65u8, 65i16, 65u16, 65i32, 65u32, 65i64, 65u64);
+
+        // `Convert.ToSByte(char)` and its siblings fail outside the range of the integer.
+        assert_eq!(convert_number::<char, i8>('\u{e9}'), None);
+        assert_number_converts('\u{e9}', 0xE9u8);
+        assert_eq!(convert_number::<char, u8>('\u{100}'), None);
+        assert_eq!(convert_number::<char, Option<u8>>('\u{100}'), None);
+        assert_eq!(convert_number::<char, i16>('\u{8000}'), None);
+        assert_number_converts('\u{8000}', 0x8000u16);
+        assert_number_converts('\u{ffff}', 0xFFFFi32);
+        assert_number_converts('\u{ffff}', 0xFFFFu64);
+
+        // `Convert.ToChar(integer)` fails outside the range of the 16-bit characters.
+        assert_eq!(convert_number::<i8, char>(-1), None);
+        assert_eq!(convert_number::<i16, char>(-1), None);
+        assert_eq!(convert_number::<i32, char>(-1), None);
+        assert_eq!(convert_number::<i32, char>(0x1_0000), None);
+        assert_eq!(convert_number::<u32, Option<char>>(0x1_0000), None);
+        assert_eq!(convert_number::<i64, char>(i64::MAX), None);
+        assert_eq!(convert_number::<u64, char>(u64::MAX), None);
+        assert_number_converts(0xFFFFu16, '\u{ffff}');
+        assert_number_converts(0u8, '\0');
+        // A code of the surrogate range is no character here.
+        assert_eq!(convert_number::<u16, char>(0xD800), None);
+        // A character of more than 16 bits, which the managed original does not have, has
+        // no 16-bit code.
+        assert_eq!(convert_number::<char, u16>('\u{1F600}'), None);
+        assert_number_converts('\u{1F600}', 0x1F600u32);
+
+        // No cell of the table joins the character and the floating point numbers or
+        // the decimal.
+        assert_eq!(convert_number::<char, f32>('A'), None);
+        assert_eq!(convert_number::<char, f64>('A'), None);
+        assert_eq!(convert_number::<char, Option<f64>>('A'), None);
+        assert_eq!(convert_number::<char, Decimal>('A'), None);
+        assert_eq!(convert_number::<f32, char>(65.0), None);
+        assert_eq!(convert_number::<f64, char>(65.0), None);
+        assert_eq!(convert_number::<Decimal, char>(Decimal::from(65)), None);
+        // The text of a character, in both directions, is as before.
+        assert_eq!(convert_number::<char, String>('A'), Some("A".to_string()));
+        assert_eq!(convert_number::<String, char>("A".to_string()), Some('A'));
+    }
+
+    #[test]
     fn numbers_and_text_convert_to_each_other() {
         use crate::utilities::Decimal;
 
@@ -1938,5 +2119,39 @@ mod tests {
         assert!(implicit(&7.0f64, TypeId::of::<f32>()).is_none());
         assert!(implicit(&7i32, TypeId::of::<u32>()).is_none());
         assert!(implicit(&7.0f64, TypeId::of::<i32>()).is_none());
+    }
+
+    #[test]
+    fn the_implicit_conversions_of_a_character_and_of_a_boolean_are_those_of_the_table() {
+        use crate::utilities::Decimal;
+
+        let implicit = |value: &dyn std::any::Any, target: TypeId| ValueTypes::try_convert_implicit(value, target);
+
+        // A character converts to the integer types of its row.
+        assert!(implicit(&'A', TypeId::of::<u16>()).is_some_and(|v| v.downcast_ref::<u16>() == Some(&65)));
+        assert!(implicit(&'A', TypeId::of::<i32>()).is_some_and(|v| v.downcast_ref::<i32>() == Some(&65)));
+        assert!(implicit(&'A', TypeId::of::<u32>()).is_some_and(|v| v.downcast_ref::<u32>() == Some(&65)));
+        assert!(implicit(&'A', TypeId::of::<i64>()).is_some_and(|v| v.downcast_ref::<i64>() == Some(&65)));
+        // The row leaves the other integers out.
+        assert!(implicit(&'A', TypeId::of::<i8>()).is_none());
+        assert!(implicit(&'A', TypeId::of::<u8>()).is_none());
+        assert!(implicit(&'A', TypeId::of::<i16>()).is_none());
+        assert!(implicit(&'A', TypeId::of::<u64>()).is_none());
+        // It names the floating point numbers and the decimal, for which the conversion
+        // of the runtime fails.
+        assert!(implicit(&'A', TypeId::of::<f32>()).is_none());
+        assert!(implicit(&'A', TypeId::of::<f64>()).is_none());
+        assert!(implicit(&'A', TypeId::of::<Decimal>()).is_none());
+        assert!(implicit(&'A', TypeId::of::<bool>()).is_none());
+        // Nothing converts to a character implicitly.
+        assert!(implicit(&65u16, TypeId::of::<char>()).is_none());
+        assert!(implicit(&65i32, TypeId::of::<char>()).is_none());
+
+        // The row of the boolean names the boolean alone, and no row names it.
+        assert!(implicit(&true, TypeId::of::<i32>()).is_none());
+        assert!(implicit(&true, TypeId::of::<f64>()).is_none());
+        assert!(implicit(&true, TypeId::of::<Decimal>()).is_none());
+        assert!(implicit(&1i32, TypeId::of::<bool>()).is_none());
+        assert!(implicit(&1.0f64, TypeId::of::<bool>()).is_none());
     }
 }
