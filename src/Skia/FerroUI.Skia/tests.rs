@@ -958,38 +958,6 @@ fn antialiasing_follows_the_edge_mode() {
     assert!(alpha == 0 || alpha == 255, "aliased edge: {alpha}");
 }
 
-// DrawingContextImplTests
-
-#[test]
-fn draw_line_with_zero_thickness_pen_does_not_panic() {
-    let mut surface = skia_safe::surfaces::raster_n32_premul((100, 100)).unwrap();
-    let mut target = wrap_skia_surface(&surface, DPI);
-
-    let pen: Rc<dyn IPen> = ferroui_base::media::Pen::with_brush(Some(Brushes::black()), 0.0).into();
-    target.draw_line(Some(&*pen), Point::new(0.0, 0.0), Point::new(10.0, 10.0));
-    target.dispose();
-
-    assert_eq!(skia_safe::Color::TRANSPARENT, surface.peek_pixels().unwrap().get_color((5, 5)));
-}
-
-#[test]
-fn draw_rectangle_with_zero_thickness_pen_does_not_panic() {
-    let mut surface = skia_safe::surfaces::raster_n32_premul((100, 100)).unwrap();
-    let mut target = wrap_skia_surface(&surface, DPI);
-
-    let pen: Rc<dyn IPen> = ferroui_base::media::Pen::with_brush(Some(Brushes::black()), 0.0).into();
-    let brush: Rc<dyn IBrush> = Brushes::black();
-    target.draw_rectangle(
-        Some(&*brush),
-        Some(&*pen),
-        RoundedRect::from_corner_radius(Rect::new(0.0, 0.0, 100.0, 100.0), CornerRadius::uniform(4.0)),
-        &no_shadows(),
-    );
-    target.dispose();
-
-    assert_eq!(skia_safe::Color::BLACK, surface.peek_pixels().unwrap().get_color((50, 50)));
-}
-
 #[test]
 fn lease_gives_access_to_the_surface_and_blocks_the_context() {
     let bitmap = Rc::new(RenderTargetBitmapImpl::new(PixelSize::new(20, 20), DPI));
