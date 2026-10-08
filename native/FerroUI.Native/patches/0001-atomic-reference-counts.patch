@@ -1,0 +1,41 @@
+diff --git a/native/FerroUI.Native/inc/comimpl.h b/native/FerroUI.Native/inc/comimpl.h
+index a21b923..13733c9 100644
+--- a/native/FerroUI.Native/inc/comimpl.h
++++ b/native/FerroUI.Native/inc/comimpl.h
+@@ -4,6 +4,7 @@
+ #ifndef COMIMPL_H_INCLUDED
+ #define COMIMPL_H_INCLUDED
+ 
++#include <atomic>
+ #include <cstring>
+ #include <memory>
+ #include <utility>
+@@ -224,22 +225,22 @@ public:
+ class ComObject : public virtual IUnknown
+ {
+ private:
+-    unsigned int _refCount;
++    // Atomic: an object is referenced and released by the UI thread and by
++    // the render thread.
++    std::atomic<unsigned int> _refCount;
+     std::shared_ptr<ComObjectWeakRefToken> _weakRefs;
+ public:
+     
+     virtual ULONG AddRef()
+     {
+-        _refCount++;
+-        return _refCount;
++        return ++_refCount;
+     }
+     
+     
+     virtual ULONG Release()
+     {
+-        _refCount--;
+-        ULONG rv = _refCount;
+-        if(_refCount == 0)
++        ULONG rv = --_refCount;
++        if(rv == 0)
+             delete(this);
+         return rv;
+     }

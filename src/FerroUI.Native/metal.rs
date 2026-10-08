@@ -6,7 +6,7 @@ use crate::interop::*;
 use crate::top_level_impl::SurfaceTopLevel;
 use ferroui_base::platform::surfaces::{IPlatformRenderSurface, IPlatformRenderSurfaceRenderTarget};
 use ferroui_base::platform::{IOptionalFeatureProvider, IPlatformGraphics, IPlatformGraphicsContext};
-use ferroui_base::reactive::{Disposable, IDisposable};
+use ferroui_base::reactive::IDisposable;
 use ferroui_base::threading::Dispatcher;
 use ferroui_base::PixelSize;
 use ferroui_microcom::{ComPtr, HResult};
@@ -56,12 +56,17 @@ impl IPlatformGraphics for MetalPlatformGraphics {
 /// A Metal device and its command queue.
 pub struct MetalDevice {
     weak_self: std::rc::Weak<MetalDevice>,
+    sync_root: ferroui_base::utilities::DisposableLock,
     native: RefCell<Option<ComPtr<IFrnMetalDevice>>>,
 }
 
 impl MetalDevice {
     fn new(native: ComPtr<IFrnMetalDevice>) -> Rc<MetalDevice> {
-        Rc::new_cyclic(|weak_self| MetalDevice { weak_self: weak_self.clone(), native: RefCell::new(Some(native)) })
+        Rc::new_cyclic(|weak_self| MetalDevice {
+            weak_self: weak_self.clone(),
+            sync_root: ferroui_base::utilities::DisposableLock::new(),
+            native: RefCell::new(Some(native)),
+        })
     }
 
     /// The native device.
@@ -95,10 +100,10 @@ impl IPlatformGraphicsContext for MetalDevice {
         false
     }
 
-    /// The device is only used on the UI thread, so there is nothing to
-    /// lock or make current.
+    /// Takes the lock of the device: the UI thread and the render thread
+    /// both use it, one at a time.
     fn ensure_current(&self) -> Rc<dyn IDisposable> {
-        Disposable::empty()
+        self.sync_root.lock()
     }
 
     fn dispose(&self) {

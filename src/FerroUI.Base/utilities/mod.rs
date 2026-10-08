@@ -38,10 +38,12 @@ mod uri;
 
 pub use uri::{Uri, UriFormatError, UriKind};
 
+mod disposable_lock;
 mod ref_countable;
 mod thread_bound;
 mod uri_extensions;
 
+pub use disposable_lock::DisposableLock;
 pub use ref_countable::{RefCountable, RefCounted};
 pub use thread_bound::ThreadBound;
 pub use uri_extensions::UriExtensions;

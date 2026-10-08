@@ -616,12 +616,6 @@ reason = "wraps an IEnumerable<T> as IAsyncEnumerable<T> for `await foreach`; no
 
 [[map]]
 project = "Avalonia.Base"
-upstream = ["Utilities/DisposableLock.cs"]
-kind = "not-applicable"
-reason = "System.Threading.Monitor behind an IDisposable: the guard of std::sync::Mutex::lock/try_lock. Its callers are the Metal devices of Avalonia.Native and Avalonia.iOS; the ported one (FerroUI.Native metal.rs) is used on the UI thread only and takes no lock"
-
-[[map]]
-project = "Avalonia.Base"
 upstream = ["Utilities/NonPumpingLockHelper.cs"]
 kind = "not-applicable"
 reason = "installs a SynchronizationContext whose Wait override keeps the CLR from pumping Win32 messages while the UI thread waits on a lock (IHelperImpl is implemented by Avalonia.Win32 only): a Rust lock never pumps messages and there is no synchronization context to replace"
