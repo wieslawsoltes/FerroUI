@@ -16,6 +16,7 @@ Markers:
 
 - Upstream's threaded mode has three kinds of threads: the browser's main thread (the DOM and the script modules), a managed UI thread with a blocking dispatcher loop, and a render worker that owns the canvas through `OffscreenCanvas`. What carries DOM calls from the UI thread to the main thread, and DOM events back, is the .NET runtime, not code of the framework.
 - This port has no such carrier: a wasm-bindgen handle and every function of the script module belong to the thread they were made on. **The design therefore keeps the UI thread on the browser's main thread and moves only rendering to a worker.** This is a deviation from upstream and from the one-line description of B2 ("the event grouper queue, the blocking dispatcher"): neither is needed while the UI thread is the main thread. Moving the UI to a worker is left as a later, optional stage (section 6, "Not in B2").
+- **Decided by the owner on 2026-10-08: the UI thread stays on the browser's main thread and rendering moves to a worker**, as this page recommends. Running the UI on a worker, as upstream does, is not part of B2.
 - The compositor model is **strict confinement to the render thread** (`use_ui_thread_for_synchronous_commits` false, the wait of R4.1), not the lock model of the desktop: a WebGL context and a transferred canvas exist in one worker only.
 - The first step is a test page that transfers a canvas to a thread of the port's own module and clears it with WebGL through the port's GL interface, before the compositor is involved.
 
