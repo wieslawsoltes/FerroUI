@@ -51,7 +51,7 @@ impl CompositionVisual {
             return false;
         }
 
-        let read_revision = self.compositor().server().readback().read_revision();
+        let read_revision = self.compositor().readback().read_revision();
         let mut tree = self.hit_test_children.borrow_mut();
         let tree = tree.get_or_insert_with(|| CompositionHitTestAabbTree::new(self.children().clone()));
         tree.query::<H>(input, results, read_revision);
@@ -73,7 +73,7 @@ impl CompositionVisual {
             return None;
         }
 
-        let read_revision = self.compositor().server().readback().read_revision();
+        let read_revision = self.compositor().readback().read_revision();
         let mut tree = self.hit_test_children.borrow_mut();
         let tree = tree.get_or_insert_with(|| CompositionHitTestAabbTree::new(self.children().clone()));
         Some(tree.query_first::<H>(target, input, filter, result_filter, read_revision))

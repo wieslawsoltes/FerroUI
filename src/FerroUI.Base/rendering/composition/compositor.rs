@@ -47,6 +47,9 @@ pub struct Compositor {
     loop_task: Arc<dyn IRenderLoopTask>,
     use_ui_thread_for_synchronous_commits: bool,
     server: Rc<ServerCompositor>,
+    /// The readback of the server: what the two threads share besides the
+    /// queue of batches.
+    readback: Arc<super::server::ReadbackIndices>,
     batches: Arc<BatchQueue>,
     clock: CompositorClock,
     next_commit: RefCell<Option<Arc<CompositionBatch>>>,
@@ -155,6 +158,7 @@ impl Compositor {
             render_loop: render_loop.clone(),
             loop_task: loop_task.clone(),
             use_ui_thread_for_synchronous_commits,
+            readback: server.readback().clone(),
             server,
             batches,
             clock,
@@ -203,6 +207,11 @@ impl Compositor {
     /// the UI thread, and in tests.
     pub fn server(&self) -> &Rc<ServerCompositor> {
         &self.server
+    }
+
+    /// The readback indices the server writes and this side reads.
+    pub fn readback(&self) -> &Arc<super::server::ReadbackIndices> {
+        &self.readback
     }
 
     /// The dispatcher of the thread the compositor belongs to.
