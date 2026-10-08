@@ -49,15 +49,30 @@ impl PlatformRenderInterfaceContextManager {
         })
     }
 
-    /// The render interface of the platform, if one is registered: the one
-    /// found when the manager was created, so that the render thread, which
-    /// has no service locator of its own, gets the same answer.
-    pub fn platform_render_interface(&self) -> Option<Rc<dyn IPlatformRenderInterface>> {
+    /// Looks the render interface of the platform up in the service locator
+    /// of the calling thread, if it is not known yet. Called on the thread
+    /// that has the services (the UI thread), before a frame of another
+    /// thread needs the render interface.
+    pub fn capture_platform_render_interface(&self) {
         let mut render_interface = self.render_interface.borrow_mut();
         if render_interface.is_none() {
             *render_interface = FerroLocator::current().get_service::<dyn IPlatformRenderInterface>();
         }
-        render_interface.clone()
+    }
+
+    /// Whether the render interface of the platform is known.
+    pub fn has_platform_render_interface(&self) -> bool {
+        self.render_interface.borrow().is_some()
+    }
+
+    /// Runs `f` with the render interface of the platform, if it is known.
+    ///
+    /// The render interface is lent, not handed out: its handle is shared
+    /// with the service locator of the UI thread, whose count is not atomic,
+    /// so a frame of the render thread must neither clone nor release it.
+    pub fn with_platform_render_interface<R>(&self, f: impl FnOnce(&dyn IPlatformRenderInterface) -> R) -> Option<R> {
+        let render_interface = self.render_interface.borrow();
+        render_interface.as_deref().map(f)
     }
 
     /// Raised after a lost graphics context has been released.
@@ -89,7 +104,7 @@ impl PlatformRenderInterfaceContextManager {
         // A backend context that exists does not need the render interface
         // again. Without one, a thread that cannot find the render interface
         // (the render thread, before the UI thread has looked it up) waits.
-        if self.backend.borrow().is_none() && self.platform_render_interface().is_none() {
+        if self.backend.borrow().is_none() && !self.has_platform_render_interface() {
             return false;
         }
         self.ready_state_feature.as_ref().is_none_or(|feature| feature.is_ready())
@@ -130,14 +145,14 @@ impl PlatformRenderInterfaceContextManager {
                 }
             }
 
-            // Registered after the manager was created: found on the thread
-            // that registered it.
-            let render_interface = self
-                .render_interface
-                .borrow_mut()
-                .get_or_insert_with(|| FerroLocator::current().get_required_service::<dyn IPlatformRenderInterface>())
-                .clone();
-            let backend = render_interface.create_backend_context(self.gpu_context());
+            // Lent from the cell: see `with_platform_render_interface`.
+            let backend = {
+                let render_interface = self.render_interface.borrow();
+                match render_interface.as_deref() {
+                    Some(render_interface) => render_interface.create_backend_context(self.gpu_context()),
+                    None => panic!("Unable to locate the platform render interface."),
+                }
+            };
             *self.backend.borrow_mut() = Some(backend.clone());
             for (_, handler) in self.context_created.snapshot().iter() {
                 handler(&backend);

@@ -122,7 +122,8 @@ struct RenderThreadLoopTask {
 
 impl IRenderLoopTask for RenderThreadLoopTask {
     fn render(&self) -> bool {
-        self.server.with(|server| server.render())
+        // Nothing to render once the compositor is gone.
+        self.server.try_with(|server| server.render()).unwrap_or(false)
     }
 }
 
@@ -855,6 +856,10 @@ impl Compositor {
 impl Drop for Compositor {
     fn drop(&mut self) {
         self.render_loop.remove(&self.loop_task);
+        // The server compositor is released here, on the thread of the
+        // compositor: a tick in progress on the render thread may still hold
+        // the task, and with it the lock object, but not the graph.
+        self.server.release();
         let key = self.key;
         // The registry may already be gone when the thread is exiting.
         let _ = COMPOSITORS.try_with(|compositors| {

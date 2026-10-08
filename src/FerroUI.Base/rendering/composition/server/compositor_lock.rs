@@ -72,7 +72,9 @@ impl Drop for CompositorLockGuard<'_> {
 /// The server compositor behind its lock.
 pub struct LockedServerCompositor {
     lock: CompositorLock,
-    server: Rc<ServerCompositor>,
+    /// `None` once the compositor has released it. Only touched under
+    /// `lock` (or by the one thread of the dispatcher-thread mode).
+    server: std::cell::UnsafeCell<Option<Rc<ServerCompositor>>>,
 }
 
 // SAFETY: the server compositor and every object reachable from it are only
@@ -89,19 +91,71 @@ unsafe impl Sync for LockedServerCompositor {}
 
 impl LockedServerCompositor {
     pub(crate) fn new(server: Rc<ServerCompositor>) -> Self {
-        Self { lock: CompositorLock::new(), server }
+        Self { lock: CompositorLock::new(), server: std::cell::UnsafeCell::new(Some(server)) }
     }
 
     /// Runs `f` with the server compositor, under the lock.
+    ///
+    /// # Panics
+    ///
+    /// When the compositor has released the server compositor.
     pub fn with<R>(&self, f: impl FnOnce(&Rc<ServerCompositor>) -> R) -> R {
+        match self.try_with(f) {
+            Some(result) => result,
+            None => panic!("the server compositor has been released"),
+        }
+    }
+
+    /// Runs `f` with the server compositor, under the lock; `None` once the
+    /// compositor has released it.
+    pub fn try_with<R>(&self, f: impl FnOnce(&Rc<ServerCompositor>) -> R) -> Option<R> {
         let _guard = self.lock.enter();
-        f(&self.server)
+        // SAFETY: the cell is only read and written under the lock, which
+        // this thread holds. The handle taken here keeps the server
+        // compositor alive for the call if `f` releases it, and is dropped
+        // before the guard, under the lock.
+        let server = unsafe { (*self.server.get()).clone() }?;
+        Some(f(&server))
+    }
+
+    /// Whether `server` is the server compositor behind this lock. Called by
+    /// a thread that holds a reference to a server compositor, which it only
+    /// has inside the lock (or as the one thread of the dispatcher-thread
+    /// mode).
+    pub(crate) fn is_server(&self, server: &ServerCompositor) -> bool {
+        // SAFETY: see above; the cell is read by a thread that is inside the
+        // lock or is the only one.
+        unsafe { (*self.server.get()).as_ref() }.is_some_and(|own| std::ptr::eq(Rc::as_ptr(own), server))
+    }
+
+    /// Runs `f` under the lock, without the server compositor.
+    pub(crate) fn under_lock<R>(&self, f: impl FnOnce() -> R) -> R {
+        let _guard = self.lock.enter();
+        f()
+    }
+
+    /// Releases the server compositor, under the lock, on the calling
+    /// thread. The compositor does this when it is dropped: the graph holds
+    /// handles that it shares with objects of the UI thread (the render
+    /// interface, the platform graphics), so it is released there and not by
+    /// whichever thread drops the last handle to this object.
+    pub(crate) fn release(&self) {
+        let _guard = self.lock.enter();
+        // SAFETY: as in `try_with`.
+        let server = unsafe { (*self.server.get()).take() };
+        drop(server);
     }
 
     /// The server compositor without the lock: for the mode in which the
     /// thread of the compositor is the only one that ever enters.
     pub(crate) fn same_thread(&self) -> &Rc<ServerCompositor> {
-        &self.server
+        // SAFETY: in the dispatcher-thread mode one thread reads the cell and
+        // releases it (when the compositor is dropped, after which nothing
+        // calls this).
+        match unsafe { (*self.server.get()).as_ref() } {
+            Some(server) => server,
+            None => panic!("the server compositor has been released"),
+        }
     }
 }
 
@@ -156,7 +210,7 @@ impl<T> LockBound<T> {
 
     fn verify(&self, server: &ServerCompositor) {
         assert!(
-            std::ptr::eq(Rc::as_ptr(&self.server.server), server),
+            self.server.is_server(server),
             "the value is bound to the lock of another compositor"
         );
     }
@@ -179,7 +233,7 @@ impl<T> Drop for LockBound<T> {
         // the value is released inside the lock.
         let server = self.server.clone();
         // SAFETY: the value is not used after this.
-        server.with(|_| unsafe { ManuallyDrop::drop(&mut self.value) });
+        server.under_lock(|| unsafe { ManuallyDrop::drop(&mut self.value) });
     }
 }
 

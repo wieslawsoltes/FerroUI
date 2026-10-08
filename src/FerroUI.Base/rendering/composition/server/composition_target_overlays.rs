@@ -68,9 +68,11 @@ impl CompositionTargetOverlays {
 
     fn create_time_graph(&self, title: &str) -> Option<FrameTimeGraph> {
         let renderer = self.diagnostic_text_renderer()?;
-        let render_interface = self.compositor.upgrade()?.render_interface().platform_render_interface()?;
+        if !self.compositor.upgrade()?.render_interface().has_platform_render_interface() {
+            return None;
+        }
         Some(FrameTimeGraph::with_render_interface(
-            render_interface,
+            super::frame_time_graph::GraphRenderInterface::Compositor(self.compositor.clone()),
             360,
             Size::new(360.0, 64.0),
             1000.0 / 60.0,
