@@ -4,6 +4,7 @@
 
 use bitflags::bitflags;
 use crate::media::Color;
+use crate::rendering::composition::animations::AnimationInstanceFactory;
 use crate::rendering::composition::animations::ICompositionAnimation;
 use crate::rendering::composition::expressions::ExpressionVariant;
 use crate::rendering::composition::server::CompositionProperty;
@@ -249,7 +250,7 @@ impl ServerCompositionSolidColorVisualProps {
         ServerCompositionSolidColorVisualHooks::deserialize_changes_extra(host, reader);
         let changed = reader.read::<CompositionSolidColorVisualChangedFields>();
         if changed.contains(CompositionSolidColorVisualChangedFields::COLOR_ANIMATED) {
-            let Some(animation) = reader.read_value::<crate::rendering::composition::animations::AnimationInstanceFactory>().map(crate::rendering::composition::animations::AnimationInstanceFactory::create) else {
+            let Some(animation) = reader.read_value::<AnimationInstanceFactory>().map(AnimationInstanceFactory::create) else {
                 panic!("a batch starts an animation of `Color` without an animation instance");
             };
             host.set_animated_value(

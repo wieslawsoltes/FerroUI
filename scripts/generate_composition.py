@@ -211,8 +211,8 @@ TYPES = {
     ),
     "Avalonia.Platform.IGeometryImpl": (
         "payload",
-        "Rc<dyn IGeometryImpl>",
-        ["std::rc::Rc", "crate::platform::IGeometryImpl"],
+        "Arc<dyn IGeometryImpl>",
+        ["std::sync::Arc", "crate::platform::IGeometryImpl"],
     ),
     "Avalonia.Media.IImmutableBrush": (
         "payload",
@@ -221,15 +221,15 @@ TYPES = {
     ),
     "Avalonia.Media.IImmutableEffect": (
         "payload",
-        "Rc<dyn IImmutableEffect>",
-        ["std::rc::Rc", "crate::media::IImmutableEffect"],
+        "Arc<dyn IImmutableEffect>",
+        ["std::sync::Arc", "crate::media::IImmutableEffect"],
     ),
     "Avalonia.Media.Immutable.ImmutableDashStyle": (
         "payload",
-        "Rc<ImmutableDashStyle>",
-        ["std::rc::Rc", "crate::media::immutable::ImmutableDashStyle"],
+        "Arc<ImmutableDashStyle>",
+        ["std::sync::Arc", "crate::media::immutable::ImmutableDashStyle"],
     ),
-    "object": ("payload", "Rc<dyn Any>", ["std::rc::Rc", "std::any::Any"]),
+    "object": ("payload", "Arc<dyn Any + Send + Sync>", ["std::sync::Arc", "std::any::Any"]),
     "Avalonia.Media.ITransform": ("resource", "dyn ITransform", ["crate::media::ITransform"], "as_transform"),
     "Avalonia.Media.IBrush": ("resource", "dyn IBrush", ["crate::media::IBrush"], "as_brush"),
 }
@@ -1196,12 +1196,13 @@ class Generator:
             unit.use(COMPOSITION + "::server::read_server_object")
         if prop.animated:
             unit.use(
-                "std::rc::Rc",
-                COMPOSITION + "::animations::IAnimationInstance",
+                COMPOSITION + "::animations::AnimationInstanceFactory",
                 COMPOSITION + "::expressions::ExpressionVariant",
             )
             unit.emit("        if changed.contains(%s::%s_ANIMATED) {" % (changed_type, flag))
-            unit.emit("            let Some(animation) = reader.read_value::<Rc<dyn IAnimationInstance>>() else {")
+            # What a batch carries is the factory of the instance; the instance
+            # is created here, on the thread that runs it.
+            unit.emit("            let Some(animation) = reader.read_value::<AnimationInstanceFactory>().map(AnimationInstanceFactory::create) else {")
             unit.emit('                panic!("a batch starts an animation of `%s` without an animation instance");' % prop.name)
             unit.emit("            };")
             unit.emit("            host.set_animated_value(")

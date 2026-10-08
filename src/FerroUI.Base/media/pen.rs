@@ -393,7 +393,8 @@ impl ICompositorSerializable for RefAdapter<Pen> {
         ServerCompositionSimplePenProps::serialize_all_changes(
             writer,
             brush_get_server_resource(pen.brush().as_ref(), Some(c)),
-            pen.dash_style().map(|style| style.into_immutable_dash_style()),
+            // A dash style is sent as a value of its own in a shared handle.
+            pen.dash_style().map(|style| std::sync::Arc::new((*style.into_immutable_dash_style()).clone())),
             pen.line_cap(),
             pen.line_join(),
             pen.miter_limit(),

@@ -5,6 +5,7 @@
 use bitflags::bitflags;
 use crate::RelativePoint;
 use crate::rendering::composition::ICompositionObjectHost;
+use crate::rendering::composition::animations::AnimationInstanceFactory;
 use crate::rendering::composition::animations::ICompositionAnimation;
 use crate::rendering::composition::expressions::ExpressionVariant;
 use crate::rendering::composition::server::CompositionProperty;
@@ -332,7 +333,7 @@ impl ServerCompositionConicGradientBrushProps {
         ServerCompositionConicGradientBrushHooks::deserialize_changes_extra(host, reader);
         let changed = reader.read::<CompositionConicGradientBrushChangedFields>();
         if changed.contains(CompositionConicGradientBrushChangedFields::ANGLE_ANIMATED) {
-            let Some(animation) = reader.read_value::<crate::rendering::composition::animations::AnimationInstanceFactory>().map(crate::rendering::composition::animations::AnimationInstanceFactory::create) else {
+            let Some(animation) = reader.read_value::<AnimationInstanceFactory>().map(AnimationInstanceFactory::create) else {
                 panic!("a batch starts an animation of `Angle` without an animation instance");
             };
             host.set_animated_value(
@@ -346,7 +347,7 @@ impl ServerCompositionConicGradientBrushProps {
             self.set_angle(host, value);
         }
         if changed.contains(CompositionConicGradientBrushChangedFields::CENTER_ANIMATED) {
-            let Some(animation) = reader.read_value::<crate::rendering::composition::animations::AnimationInstanceFactory>().map(crate::rendering::composition::animations::AnimationInstanceFactory::create) else {
+            let Some(animation) = reader.read_value::<AnimationInstanceFactory>().map(AnimationInstanceFactory::create) else {
                 panic!("a batch starts an animation of `Center` without an animation instance");
             };
             host.set_animated_value(

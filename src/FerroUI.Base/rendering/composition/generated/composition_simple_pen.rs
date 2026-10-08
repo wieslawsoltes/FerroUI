@@ -28,7 +28,7 @@ use std::any::Any;
 use std::any::TypeId;
 use std::cell::Cell;
 use std::cell::RefCell;
-use std::rc::Rc;
+use std::sync::Arc;
 use std::sync::OnceLock;
 use std::time::Duration;
 
@@ -85,7 +85,7 @@ pub trait ServerCompositionSimplePenHooks: IServerPropertyHost {
 /// The server-side properties of `ServerCompositionSimplePen`.
 pub struct ServerCompositionSimplePenProps {
     brush: RefCell<Option<ServerResourceRef<dyn IBrush>>>,
-    dash_style: RefCell<Option<Rc<ImmutableDashStyle>>>,
+    dash_style: RefCell<Option<Arc<ImmutableDashStyle>>>,
     line_cap: Cell<PenLineCap>,
     line_join: Cell<PenLineJoin>,
     miter_limit: Cell<f64>,
@@ -163,10 +163,10 @@ impl ServerCompositionSimplePenProps {
     }
 
     /// The composition property of `DashStyle`.
-    pub fn id_of_dash_style_property() -> &'static CompositionPropertyOf<Option<Rc<ImmutableDashStyle>>> {
-        static PROPERTY: OnceLock<CompositionPropertyOf<Option<Rc<ImmutableDashStyle>>>> = OnceLock::new();
+    pub fn id_of_dash_style_property() -> &'static CompositionPropertyOf<Option<Arc<ImmutableDashStyle>>> {
+        static PROPERTY: OnceLock<CompositionPropertyOf<Option<Arc<ImmutableDashStyle>>>> = OnceLock::new();
         PROPERTY.get_or_init(|| {
-            CompositionProperty::register::<ServerCompositionSimplePenProps, Option<Rc<ImmutableDashStyle>>>(
+            CompositionProperty::register::<ServerCompositionSimplePenProps, Option<Arc<ImmutableDashStyle>>>(
                 "DashStyle",
                 "ServerCompositionSimplePen",
                 |obj| props_of::<ServerCompositionSimplePenProps>(obj).dash_style.borrow().clone(),
@@ -178,11 +178,11 @@ impl ServerCompositionSimplePenProps {
     }
 
     /// `DashStyle`.
-    pub fn dash_style(&self) -> Option<Rc<ImmutableDashStyle>> {
+    pub fn dash_style(&self) -> Option<Arc<ImmutableDashStyle>> {
         self.dash_style.borrow().clone()
     }
 
-    pub fn set_dash_style(&self, host: &dyn ServerCompositionSimplePenHooks, value: Option<Rc<ImmutableDashStyle>>) {
+    pub fn set_dash_style(&self, host: &dyn ServerCompositionSimplePenHooks, value: Option<Arc<ImmutableDashStyle>>) {
         let old_value = self.dash_style.borrow().clone();
         let mut changed = false;
         if old_value.differs(&value) {
@@ -383,8 +383,7 @@ impl ServerCompositionSimplePenProps {
             self.set_brush(host, value);
         }
         if changed.contains(CompositionSimplePenChangedFields::DASH_STYLE) {
-            // A dash style is sent by value; the handle is made here.
-            let value = reader.read_value::<ImmutableDashStyle>().map(Rc::new);
+            let value = reader.read_value::<Arc<ImmutableDashStyle>>();
             self.set_dash_style(host, value);
         }
         if changed.contains(CompositionSimplePenChangedFields::LINE_CAP) {
@@ -411,7 +410,7 @@ impl ServerCompositionSimplePenProps {
     pub fn serialize_all_changes(
         writer: &mut BatchStreamWriter<'_>,
         brush: Option<BatchResource<dyn IBrush>>,
-        dash_style: Option<Rc<ImmutableDashStyle>>,
+        dash_style: Option<Arc<ImmutableDashStyle>>,
         line_cap: PenLineCap,
         line_join: PenLineJoin,
         miter_limit: f64,
@@ -419,7 +418,7 @@ impl ServerCompositionSimplePenProps {
     ) {
         writer.write(CompositionSimplePenChangedFields::BRUSH | CompositionSimplePenChangedFields::DASH_STYLE | CompositionSimplePenChangedFields::LINE_CAP | CompositionSimplePenChangedFields::LINE_JOIN | CompositionSimplePenChangedFields::MITER_LIMIT | CompositionSimplePenChangedFields::THICKNESS);
         writer.write_resource(brush);
-        writer.write_value(dash_style.map(|dash_style| (*dash_style).clone()));
+        writer.write_value(dash_style);
         writer.write(line_cap);
         writer.write(line_join);
         writer.write(miter_limit);

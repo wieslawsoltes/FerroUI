@@ -6,6 +6,7 @@ use bitflags::bitflags;
 use crate::RelativePoint;
 use crate::media::ITransform;
 use crate::rendering::composition::ICompositionObjectHost;
+use crate::rendering::composition::animations::AnimationInstanceFactory;
 use crate::rendering::composition::animations::ICompositionAnimation;
 use crate::rendering::composition::expressions::ExpressionVariant;
 use crate::rendering::composition::server::AsServerRenderResource;
@@ -486,7 +487,7 @@ impl ServerCompositionBrushProps {
         ServerCompositionBrushHooks::deserialize_changes_extra(host, reader);
         let changed = reader.read::<CompositionBrushChangedFields>();
         if changed.contains(CompositionBrushChangedFields::OPACITY_ANIMATED) {
-            let Some(animation) = reader.read_value::<crate::rendering::composition::animations::AnimationInstanceFactory>().map(crate::rendering::composition::animations::AnimationInstanceFactory::create) else {
+            let Some(animation) = reader.read_value::<AnimationInstanceFactory>().map(AnimationInstanceFactory::create) else {
                 panic!("a batch starts an animation of `Opacity` without an animation instance");
             };
             host.set_animated_value(
