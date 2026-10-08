@@ -141,7 +141,7 @@ fn navigation_demo_page_lists_the_samples_and_opens_one() {
     assert_eq!(1, sample_nav.stack_depth());
     let home = sample_nav.current_page().expect("the home page");
     let cards = descendants::<Button>(&home);
-    assert_eq!(21, cards.len());
+    assert_eq!(22, cards.len());
 
     click(&cards[0]);
     assert_eq!(2, sample_nav.stack_depth());

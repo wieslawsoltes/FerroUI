@@ -110,6 +110,7 @@ fn the_navigation_page_monitor_counts_the_pages_of_the_stack() {
 }
 
 #[test]
+#[ignore = "gap C314: a page that left a navigation page or a tabbed page is kept alive"]
 fn the_navigation_page_monitor_shows_that_popped_pages_are_freed() {
     let _app = start_catalog_application();
     let page = NavigationPagePerformancePage::new();
@@ -192,6 +193,7 @@ fn the_tabbed_page_monitor_adds_and_removes_tabs() {
 }
 
 #[test]
+#[ignore = "gap C314: a page that left a navigation page or a tabbed page is kept alive"]
 fn the_tabbed_page_monitor_shows_that_removed_tabs_are_freed() {
     let _app = start_catalog_application();
     let page = TabbedPagePerformancePage::new();

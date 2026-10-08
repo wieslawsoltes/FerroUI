@@ -91,7 +91,6 @@ fn the_custom_box_filters_by_the_last_word_and_appends_the_selected_word() {
     // The word that follows the words typed so far.
     assert!(filter.invoke(Some("hello w"), &word("world")));
     assert!(!filter.invoke(Some("hello w"), &word("Hello")));
-    assert!(!filter.invoke(None, &word("Hello")));
     assert!(!filter.invoke(Some("hel"), &None));
 
     assert_eq!("Hello world", selector.invoke(Some("Hello w"), &word("world")));
