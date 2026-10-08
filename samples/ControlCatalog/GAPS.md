@@ -12,6 +12,13 @@ Status: 219 documents, 216 load and show their class; 3 are listed below (one of
 
 No gap of the framework blocks a document of the list. One gap is open: C101, a reflection binding (`x:CompileBindings="False"`) cannot resolve `$parent[prefix:Type]` for a type of a `using:` namespace (`gaps_a::gap_c101_reflection_binding_parent_of_prefixed_type`). The theme of `SampleGalleryPage` uses such paths with compiled bindings, which resolve them.
 
+Two gaps were found by pages that load, and block no document:
+
+| Gap | What is missing | Reproduction | Documents |
+|---|---|---|---|
+| C314 | A page that was popped from a `NavigationPage`, or whose tab was removed from a `TabbedPage`, is kept alive: something in the framework still holds a reference to it, so the live count of the performance monitor pages does not go down (6 live pages after popping to the root, 5 of 5 removed tabs alive). Upstream's pages show the count dropping after a collection. | `performance_pages::the_navigation_page_monitor_shows_that_popped_pages_are_freed`, `performance_pages::the_tabbed_page_monitor_shows_that_removed_tabs_are_freed` | `Pages/NavigationPage/NavigationPagePerformancePage.xaml`, `Pages/TabbedPage/TabbedPagePerformancePage.xaml` (both load) |
+| C315 | A binding does not convert a floating-point value of the source to a decimal property (`Value="{Binding DoubleValue}"` on `NumericUpDown`, whose value is a nullable decimal): the control keeps no value. Upstream converts between the numeric types. | `numeric_up_down_page::gap_c315_double_bound_to_the_decimal_value` | `Pages/NumericUpDownPage.xaml` (loads; its third control shows no value) |
+
 ## Code-behind that needs framework API the port does not have
 
 | Document | Missing API |
