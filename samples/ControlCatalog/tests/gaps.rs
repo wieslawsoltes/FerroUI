@@ -11,11 +11,8 @@ use super::support::*;
 use crate::markup::{describe, try_load_text};
 use crate::App;
 use ferroui_base::media::{IBrush, VisualBrush};
-use ferroui_base::platform::IBitmapImpl;
-use ferroui_base::{instantiate, BoxedValue, FerroLocator};
-use ferroui_controls::platform::{IPlatformIconLoader, IWindowIconImpl};
+use ferroui_base::{instantiate, BoxedValue};
 use ferroui_controls::{Control, Panel};
-use std::io;
 use std::rc::Rc;
 
 const XMLNS: &str = "xmlns='https://github.com/ferroui' xmlns:x='http://schemas.microsoft.com/winfx/2006/xaml'";
@@ -123,11 +120,9 @@ fn gap_c011_multi_page_pages_from_markup() {
 /// run-time loader before (as in the browser and desktop hosts).
 #[test]
 fn the_application_document_loads() {
-    // The icon of a native menu item of the document is decoded as a bitmap.
+    // The icon of a native menu item of the document is decoded as a bitmap, and its tray icon
+    // loads its icon through the icon loader of the test services.
     let _app = start_catalog_services(None);
-    // The tray icon of the document loads its icon through the icon loader of the platform.
-    let loader: Rc<dyn IPlatformIconLoader> = Rc::new(TestIconLoader);
-    FerroLocator::current_mutable().bind::<dyn IPlatformIconLoader>().to_constant(loader);
     instantiate(App::construct()).load_document();
 }
 
@@ -177,31 +172,4 @@ fn the_main_window_document_loads() {
     let window = crate::MainWindow::new();
     let panel = window.content().and_then(|content| Control::from_boxed(&content)).expect("the root panel");
     assert_eq!(1, panel.cast::<Panel>().expect("a panel").children().count());
-}
-
-struct TestIconImpl(Vec<u8>);
-
-impl IWindowIconImpl for TestIconImpl {
-    fn save(&self, output_stream: &mut dyn io::Write) -> io::Result<()> {
-        output_stream.write_all(&self.0)
-    }
-}
-
-/// An icon loader that keeps the bytes of the icon.
-struct TestIconLoader;
-
-impl IPlatformIconLoader for TestIconLoader {
-    fn load_icon_from_file(&self, file_name: &str) -> io::Result<Rc<dyn IWindowIconImpl>> {
-        Ok(Rc::new(TestIconImpl(file_name.as_bytes().to_vec())))
-    }
-
-    fn load_icon_from_stream(&self, stream: &mut dyn io::Read) -> io::Result<Rc<dyn IWindowIconImpl>> {
-        let mut data = Vec::new();
-        stream.read_to_end(&mut data)?;
-        Ok(Rc::new(TestIconImpl(data)))
-    }
-
-    fn load_icon_from_bitmap(&self, _bitmap: std::sync::Arc<ferroui_base::platform::SharedBitmapImpl>) -> Rc<dyn IWindowIconImpl> {
-        Rc::new(TestIconImpl(Vec::new()))
-    }
 }

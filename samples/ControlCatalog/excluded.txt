@@ -11,7 +11,6 @@
 # Keep the sections; lines are sorted by path within a section. `GAPS.md` explains each open entry.
 
 # --- root, Models, MainWindowViewModel, shell pages (coordinator) ---
-App.xaml | harness: the tray icon of the document loads its icon through the icon loader of the platform, which the unit test application does not have (tests/gaps.rs loads the document with a test icon loader)
 Pages/SettingsPage.xaml | harness: {x:Static local:App.CurrentTheme} needs the application of the catalog as the current application (the page is offered by the application)
 
 # --- Controls, Converter, Pages/CommandBar, Pages/TextBox, Pages/Gestures, Pages/ContentPage (group A) ---

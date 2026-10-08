@@ -1,4 +1,4 @@
-use crate::platform::{IWindowImpl, IWindowingPlatform};
+use crate::platform::{IPlatformIconLoader, IWindowImpl, IWindowingPlatform};
 use ferroui_base::animation::IGlobalClock;
 use ferroui_base::input::{
     IAccessKeyHandler, IInputManager, IKeyboardDevice, IKeyboardNavigationHandler, IMouseDevice, InputManager,
@@ -44,6 +44,11 @@ pub struct TestServices {
     /// The runtime platform; when none is given the locator keeps the one
     /// it has (none in a unit test).
     pub platform: Option<Rc<dyn ferroui_base::platform::IRuntimePlatform>>,
+    /// The loader of the icons of windows and tray icons (the test services
+    /// of the reference test suite have none: its tests load no icon); when
+    /// none is given the locator keeps the one it has (none in a unit test).
+    /// [`TestIconLoader`](super::TestIconLoader) is one.
+    pub icon_loader: Option<Rc<dyn IPlatformIconLoader>>,
 }
 
 impl TestServices {
@@ -184,6 +189,12 @@ impl TestServices {
     /// Replaces the windowing platform.
     pub fn with_windowing_platform(mut self, value: Rc<dyn IWindowingPlatform>) -> Self {
         self.windowing_platform = Some(value);
+        self
+    }
+
+    /// Replaces the icon loader.
+    pub fn with_icon_loader(mut self, value: Rc<dyn IPlatformIconLoader>) -> Self {
+        self.icon_loader = Some(value);
         self
     }
 }
