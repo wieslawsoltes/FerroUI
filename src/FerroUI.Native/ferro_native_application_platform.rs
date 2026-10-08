@@ -1,10 +1,16 @@
 use crate::ferro_native_platform::FerroNativePlatform;
 use crate::interop::*;
+use crate::frn_string::frn_string_array_to_vec;
 use crate::mac_os_activatable_lifetime::MacOSActivatableLifetime;
+use crate::storage_provider_api::StorageProviderApi;
+use ferroui_base::platform::storage::file_io::StorageProviderHelpers;
+use ferroui_base::platform::storage::IStorageItem;
 use ferroui_base::reactive::{Disposable, IDisposable};
-use ferroui_base::utilities::HandlerList;
+use ferroui_base::utilities::{HandlerList, Uri, UriKind};
 use ferroui_base::{FerroLocator, LocatorExtensions};
-use ferroui_controls::application_lifetimes::{ActivationKind, ShutdownRequestedEventArgs};
+use ferroui_controls::application_lifetimes::{
+    ActivationKind, FileActivatedEventArgs, ProtocolActivatedEventArgs, ShutdownRequestedEventArgs,
+};
 use ferroui_controls::platform::IPlatformLifetimeEventsImpl;
 use std::rc::{Rc, Weak};
 
@@ -59,14 +65,59 @@ fn activatable_lifetime() -> Option<Rc<MacOSActivatableLifetime>> {
     FerroLocator::current().get_service::<MacOSActivatableLifetime>()
 }
 
-// Files and URLs opened by the system are delivered as storage items,
-// through the storage provider; storage is not ported yet, so (as in the
-// reference implementation when no storage provider is registered) those
-// two events have no receiver.
-impl IFrnApplicationEventsImpl for FerroNativeApplicationPlatform {
-    fn files_opened(&self, _args: Option<&IFrnStringArray>) {}
+/// The storage API of this backend, if it is the registered storage
+/// provider factory.
+fn storage_api() -> Option<Rc<StorageProviderApi>> {
+    FerroLocator::current().get_service::<StorageProviderApi>()
+}
 
-    fn urls_opened(&self, _urls: Option<&IFrnStringArray>) {}
+impl IFrnApplicationEventsImpl for FerroNativeApplicationPlatform {
+    fn files_opened(&self, urls: Option<&IFrnStringArray>) {
+        crate::callback_base::guard((), || {
+            if let (Some(lifetime), Some(storage_api)) = (activatable_lifetime(), storage_api()) {
+                let file_paths = urls.map(frn_string_array_to_vec).unwrap_or_default();
+                let mut files: Vec<Rc<dyn IStorageItem>> = Vec::with_capacity(file_paths.len());
+                for file_path in &file_paths {
+                    if let Some(file) = StorageProviderHelpers::try_get_uri_from_file_path(file_path, false)
+                        .and_then(|file_uri| storage_api.try_get_storage_item(Some(&file_uri), false))
+                    {
+                        files.push(file.into_item());
+                    }
+                }
+
+                if !files.is_empty() {
+                    lifetime.on_activated_with(FileActivatedEventArgs::new(files).into());
+                }
+            }
+        })
+    }
+
+    fn urls_opened(&self, urls: Option<&IFrnStringArray>) {
+        crate::callback_base::guard((), || {
+            if let (Some(lifetime), Some(storage_api)) = (activatable_lifetime(), storage_api()) {
+                let mut files: Vec<Rc<dyn IStorageItem>> = Vec::new();
+                let mut uris: Vec<Uri> = Vec::new();
+                for url in urls.map(frn_string_array_to_vec).unwrap_or_default() {
+                    if let Some(uri) = Uri::try_create(&url, UriKind::RelativeOrAbsolute) {
+                        if uri.scheme() == "file" {
+                            if let Some(file) = storage_api.try_get_storage_item(Some(&uri), false) {
+                                files.push(file.into_item());
+                            }
+                        } else {
+                            uris.push(uri);
+                        }
+                    }
+                }
+
+                for uri in uris {
+                    lifetime.on_activated_with(ProtocolActivatedEventArgs::new(uri).into());
+                }
+                if !files.is_empty() {
+                    lifetime.on_activated_with(FileActivatedEventArgs::new(files).into());
+                }
+            }
+        })
+    }
 
     fn try_shutdown(&self, is_os_shutdown: bool) -> FrnShutdownReply {
         crate::callback_base::guard(FrnShutdownReply::ShutdownReplyTerminateNow, || {

@@ -3,7 +3,7 @@ use crate::animation::TimeSpan;
 use crate::platform::storage::{IStorageFolder, IStorageItem, StorageItemProperties};
 use crate::utilities::{DateTimeOffset, Uri, UriKind};
 use std::fs;
-use std::io::{self, Read, Write};
+use std::io;
 use std::path::{Path, PathBuf};
 use std::rc::Rc;
 use std::time::SystemTime;
@@ -240,12 +240,12 @@ impl BclStorageItem {
         }
     }
 
-    pub fn open_read_core(file_info: &Path) -> io::Result<Box<dyn Read>> {
-        Ok(Box::new(fs::File::open(file_info)?))
+    pub fn open_read_core(file_info: &Path) -> io::Result<fs::File> {
+        fs::File::open(file_info)
     }
 
-    pub fn open_write_core(file_info: &Path) -> io::Result<Box<dyn Write>> {
-        Ok(Box::new(fs::File::create(file_info)?))
+    pub fn open_write_core(file_info: &Path) -> io::Result<fs::File> {
+        fs::File::create(file_info)
     }
 
     /// The entries of a directory: the directories, then the files.

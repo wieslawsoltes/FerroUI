@@ -28,6 +28,11 @@ impl MacOSActivatableLifetime {
         self.base.on_activated_kind(kind);
     }
 
+    /// Raises the activated event with the given arguments.
+    pub fn on_activated_with(&self, event_args: ActivatedEventArgs) {
+        self.base.on_activated(event_args);
+    }
+
     /// Raises the deactivated event.
     pub fn on_deactivated(&self, kind: ActivationKind) {
         self.base.on_deactivated_kind(kind);

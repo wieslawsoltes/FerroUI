@@ -32,11 +32,13 @@ impl_bcl_storage_item!(BclStorageFile, as_storage_file: |this| Some(this), as_st
 
 impl IStorageFile for BclStorageFile {
     fn open_read_async(&self) -> LocalBoxFuture<std::io::Result<Box<dyn Read>>> {
-        Box::pin(std::future::ready(BclStorageItem::open_read_core(self.file_system_info().path())))
+        let stream = BclStorageItem::open_read_core(self.file_system_info().path());
+        Box::pin(std::future::ready(stream.map(|stream| Box::new(stream) as Box<dyn Read>)))
     }
 
     fn open_write_async(&self) -> LocalBoxFuture<std::io::Result<Box<dyn Write>>> {
-        Box::pin(std::future::ready(BclStorageItem::open_write_core(self.file_system_info().path())))
+        let stream = BclStorageItem::open_write_core(self.file_system_info().path());
+        Box::pin(std::future::ready(stream.map(|stream| Box::new(stream) as Box<dyn Write>)))
     }
 }
 
