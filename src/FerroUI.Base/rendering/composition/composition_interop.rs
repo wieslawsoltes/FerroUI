@@ -1,68 +1,132 @@
+//! The interop of a compositor with GPU objects made outside of the
+//! framework.
+//!
+//! Upstream one object serves both threads: the UI thread creates a
+//! `CompositionImportedGpuImage` and keeps it, jobs of the render thread
+//! import, use and dispose what is inside. Here each of these objects has
+//! two parts. The part the caller holds is an object of its thread. What the
+//! render thread works with (the context, the feature of the render
+//! interface, the imported object and the outcome of the import) is the
+//! server part, confined to the compositor lock in a [`LockBound`]: the
+//! jobs reach it there, and this thread enters the lock for the few things
+//! it reads from it.
+
+use super::server::{LockBound, ServerCompositor};
 use super::{
     CompositionGpuImportedImageSynchronizationCapabilities, Compositor, ICompositionGpuImportedObject,
     ICompositionGpuInterop, ICompositionImportableSharedGpuContextImage, ICompositionImportableSharedGpuContextSemaphore,
-    ICompositionImportedGpuImage, ICompositionImportedGpuSemaphore, ServerJobTask,
+    ICompositionImportedGpuImage, ICompositionImportedGpuSemaphore, ServerJobError, ServerJobTask,
 };
 use crate::platform::{
     IExternalObjectsHandleWrapRenderInterfaceContextFeature, IExternalObjectsRenderInterfaceContextFeature,
     IExternalObjectsWrappedGpuHandle, IPlatformHandle, IPlatformRenderInterfaceContext,
     IPlatformRenderInterfaceImportedImage, IPlatformRenderInterfaceImportedSemaphore, PlatformGraphicsContextLostException,
-    PlatformGraphicsDrmFormat, PlatformGraphicsExternalImageProperties,
+    PlatformGraphicsDrmFormat, PlatformGraphicsExternalImageProperties, PlatformHandle,
 };
-use std::cell::{OnceCell, RefCell};
-use std::rc::{Rc, Weak};
+use crate::utilities::ThreadBound;
+use std::cell::RefCell;
+use std::rc::Rc;
+use std::sync::Arc;
 
 fn same_context(a: &Rc<dyn IPlatformRenderInterfaceContext>, b: &Rc<dyn IPlatformRenderInterfaceContext>) -> bool {
     std::ptr::addr_eq(Rc::as_ptr(a), Rc::as_ptr(b))
+}
+
+/// The error of an import that cannot run where it was sent
+/// (`InvalidOperationException`).
+#[derive(Clone, Debug)]
+pub struct GpuImportError(&'static str);
+
+impl std::fmt::Display for GpuImportError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.write_str(self.0)
+    }
+}
+
+impl std::error::Error for GpuImportError {}
+
+/// The server part of the interop: the context of the render interface and
+/// its features. Objects of the server side, kept inside the compositor
+/// lock.
+struct InteropState {
+    context: Rc<dyn IPlatformRenderInterfaceContext>,
+    external_objects: Rc<dyn IExternalObjectsRenderInterfaceContextFeature>,
+    external_objects_with_handle_wrap: Option<Rc<dyn IExternalObjectsHandleWrapRenderInterfaceContextFeature>>,
+}
+
+impl InteropState {
+    fn imported_object_base(&self) -> ServerGpuImportedObjectBase {
+        ServerGpuImportedObjectBase {
+            context: self.context.clone(),
+            feature: self.external_objects.clone(),
+            import_result: RefCell::new(None),
+        }
+    }
 }
 
 /// The interop of a compositor with the GPU objects of its render
 /// interface context.
 pub struct CompositionInterop {
     compositor: Rc<Compositor>,
-    context: Rc<dyn IPlatformRenderInterfaceContext>,
-    external_objects: Rc<dyn IExternalObjectsRenderInterfaceContextFeature>,
-    external_objects_with_handle_wrap: Option<Rc<dyn IExternalObjectsHandleWrapRenderInterfaceContextFeature>>,
+    state: LockBound<InteropState>,
     device_luid: RefCell<Option<Vec<u8>>>,
     device_uuid: RefCell<Option<Vec<u8>>>,
 }
 
 impl CompositionInterop {
+    /// Creates the interop over a feature of the render interface.
+    ///
+    /// The feature is an object of the server side and is kept inside the
+    /// compositor lock from here on: a caller that is not inside the lock
+    /// hands it over whole, without keeping a clone. (Upstream the
+    /// constructor runs in a job of the render thread.)
     pub fn new(
         compositor: &Rc<Compositor>,
         external_objects: Rc<dyn IExternalObjectsRenderInterfaceContextFeature>,
     ) -> Rc<CompositionInterop> {
-        let context = compositor.server().render_interface().value();
-        let external_objects_with_handle_wrap = {
-            let features: &dyn crate::platform::IOptionalFeatureProvider = &*context;
-            features.try_get::<dyn IExternalObjectsHandleWrapRenderInterfaceContextFeature>()
-        };
-        Rc::new(CompositionInterop {
-            compositor: compositor.clone(),
-            device_luid: RefCell::new(external_objects.device_luid()),
-            device_uuid: RefCell::new(external_objects.device_uuid()),
-            context,
-            external_objects,
-            external_objects_with_handle_wrap,
+        compositor.with_server(|server| {
+            let context = server.render_interface().value();
+            let external_objects_with_handle_wrap = {
+                let features: &dyn crate::platform::IOptionalFeatureProvider = &*context;
+                features.try_get::<dyn IExternalObjectsHandleWrapRenderInterfaceContextFeature>()
+            };
+            Rc::new(CompositionInterop {
+                compositor: compositor.clone(),
+                device_luid: RefCell::new(external_objects.device_luid()),
+                device_uuid: RefCell::new(external_objects.device_uuid()),
+                state: compositor.bind_to_lock(
+                    server,
+                    InteropState { context, external_objects, external_objects_with_handle_wrap },
+                ),
+            })
+        })
+    }
+
+    /// Runs `f` with the server part, inside the compositor lock. Upstream
+    /// reads the feature from the UI thread as it is.
+    fn with_state<R>(&self, f: impl FnOnce(&ServerCompositor, &InteropState) -> R) -> R {
+        self.compositor.with_server(|server| {
+            let server: &ServerCompositor = server;
+            f(server, self.state.get(server))
         })
     }
 }
 
 impl ICompositionGpuInterop for CompositionInterop {
     fn supported_image_handle_types(&self) -> Vec<String> {
-        self.external_objects.supported_image_handle_types()
+        self.with_state(|_, state| state.external_objects.supported_image_handle_types())
     }
 
     fn supported_semaphore_types(&self) -> Vec<String> {
-        self.external_objects.supported_semaphore_types()
+        self.with_state(|_, state| state.external_objects.supported_semaphore_types())
     }
 
     fn supported_dma_buf_formats(&self) -> Option<Vec<PlatformGraphicsDrmFormat>> {
-        self.external_objects.supported_dma_buf_formats()
+        self.with_state(|_, state| state.external_objects.supported_dma_buf_formats())
     }
 
     fn get_synchronization_capabilities(&self, image_handle_type: &str) -> CompositionGpuImportedImageSynchronizationCapabilities {
-        self.external_objects.get_synchronization_capabilities(image_handle_type)
+        self.with_state(|_, state| state.external_objects.get_synchronization_capabilities(image_handle_type))
     }
 
     fn import_image(
@@ -70,37 +134,37 @@ impl ICompositionGpuInterop for CompositionInterop {
         handle: Rc<dyn IPlatformHandle>,
         properties: PlatformGraphicsExternalImageProperties,
     ) -> Rc<dyn ICompositionImportedGpuImage> {
-        let wrapped = self
-            .external_objects_with_handle_wrap
-            .as_ref()
-            .and_then(|wrap| wrap.wrap_image_handle_on_any_thread(&handle, properties.clone()));
-        let handle = wrapped.clone().map(|wrapped| wrapped.as_platform_handle()).unwrap_or(handle);
-        let external_objects = self.external_objects.clone();
-        CompositionImportedGpuImage::new(
-            &self.compositor,
-            self.context.clone(),
-            self.external_objects.clone(),
-            Box::new(move || external_objects.import_image(handle, properties)),
-            wrapped,
-        )
+        let server = self.with_state(|server, state| {
+            let wrapped = state
+                .external_objects_with_handle_wrap
+                .as_ref()
+                .and_then(|wrap| wrap.wrap_image_handle_on_any_thread(&handle, properties.clone()));
+            let source = ImageSource::Handle(ImportHandle::new(wrapped, &*handle), properties);
+            Arc::new(self.compositor.bind_to_lock(server, ServerImportedGpuImage::new(state, source)))
+        });
+        CompositionImportedGpuImage::new(&self.compositor, server)
     }
 
     fn import_shared_image(&self, image: Rc<dyn ICompositionImportableSharedGpuContextImage>) -> Rc<dyn ICompositionImportedGpuImage> {
-        let external_objects = self.external_objects.clone();
-        CompositionImportedGpuImage::new(
-            &self.compositor,
-            self.context.clone(),
-            self.external_objects.clone(),
-            Box::new(move || external_objects.import_shared_image(image)),
-            None,
-        )
+        // The image is an object of the caller, who keeps it: it stays bound
+        // to this thread (see `ImageSource::Shared`).
+        let source = ImageSource::Shared(ThreadBound::new(image));
+        let server = self.with_state(|server, state| {
+            Arc::new(self.compositor.bind_to_lock(server, ServerImportedGpuImage::new(state, source)))
+        });
+        CompositionImportedGpuImage::new(&self.compositor, server)
     }
 
     fn import_semaphore(&self, handle: Rc<dyn IPlatformHandle>) -> Rc<dyn ICompositionImportedGpuSemaphore> {
-        let wrapped =
-            self.external_objects_with_handle_wrap.as_ref().and_then(|wrap| wrap.wrap_semaphore_handle_on_any_thread(&handle));
-        let handle = wrapped.clone().map(|wrapped| wrapped.as_platform_handle()).unwrap_or(handle);
-        CompositionImportedGpuSemaphore::new(handle, &self.compositor, self.context.clone(), self.external_objects.clone(), wrapped)
+        let server = self.with_state(|server, state| {
+            let wrapped = state
+                .external_objects_with_handle_wrap
+                .as_ref()
+                .and_then(|wrap| wrap.wrap_semaphore_handle_on_any_thread(&handle));
+            let handle = ImportHandle::new(wrapped, &*handle);
+            Arc::new(self.compositor.bind_to_lock(server, ServerImportedGpuSemaphore::new(state, handle)))
+        });
+        CompositionImportedGpuSemaphore::new(&self.compositor, server)
     }
 
     /// Not supported (`NotSupportedException` upstream).
@@ -112,7 +176,7 @@ impl ICompositionGpuInterop for CompositionInterop {
     }
 
     fn is_lost(&self) -> bool {
-        self.context.is_lost()
+        self.with_state(|_, state| state.context.is_lost())
     }
 
     fn device_luid(&self) -> Option<Vec<u8>> {
@@ -132,54 +196,90 @@ impl ICompositionGpuInterop for CompositionInterop {
     }
 }
 
-/// What upstream's `CompositionGpuImportedObjectBase` holds: the
-/// compositor, the context and the feature the object was imported with,
-/// and the task of the import.
-pub struct CompositionGpuImportedObjectBase {
-    compositor: Rc<Compositor>,
-    context: Rc<dyn IPlatformRenderInterfaceContext>,
-    feature: Rc<dyn IExternalObjectsRenderInterfaceContextFeature>,
-    import_completed: OnceCell<ServerJobTask<()>>,
+/// The handle an object is imported from, as the render thread gets it.
+enum ImportHandle {
+    /// The handle the backend wrapped for the import. Made inside the
+    /// compositor lock and never handed to the caller: an object of the
+    /// server side.
+    Wrapped(Rc<dyn IExternalObjectsWrappedGpuHandle>),
+    /// A copy of the value and the descriptor of the caller's handle.
+    /// Upstream the render thread reads the caller's object; here that
+    /// object stays on its thread, and the backend is handed a
+    /// [`PlatformHandle`] with the same contents.
+    Copied(PlatformHandle),
 }
 
-impl CompositionGpuImportedObjectBase {
-    fn new(
-        compositor: &Rc<Compositor>,
-        context: Rc<dyn IPlatformRenderInterfaceContext>,
-        feature: Rc<dyn IExternalObjectsRenderInterfaceContextFeature>,
-    ) -> Self {
-        Self { compositor: compositor.clone(), context, feature, import_completed: OnceCell::new() }
+impl ImportHandle {
+    fn new(wrapped: Option<Rc<dyn IExternalObjectsWrappedGpuHandle>>, handle: &dyn IPlatformHandle) -> ImportHandle {
+        match wrapped {
+            Some(wrapped) => ImportHandle::Wrapped(wrapped),
+            None => ImportHandle::Copied(PlatformHandle::new(handle.handle(), handle.handle_descriptor())),
+        }
     }
 
-    /// Schedules the import on the render thread. A wrapped handle is
-    /// released once the import has run.
-    fn start_import(
+    fn platform_handle(&self) -> Rc<dyn IPlatformHandle> {
+        match self {
+            ImportHandle::Wrapped(wrapped) => wrapped.clone().as_platform_handle(),
+            ImportHandle::Copied(handle) => Rc::new(handle.clone()),
+        }
+    }
+
+    /// Releases a wrapped handle: once the import has run.
+    fn dispose(self) {
+        if let ImportHandle::Wrapped(wrapped) = self {
+            wrapped.dispose();
+        }
+    }
+}
+
+/// What an image is imported from.
+enum ImageSource {
+    Handle(ImportHandle, PlatformGraphicsExternalImageProperties),
+    /// An image of a context that shares with the one of the compositor. It
+    /// is an object of the caller, who keeps a reference and disposes it, so
+    /// it cannot be given to the lock: it is imported where it was made,
+    /// which is where the server runs unless there is a render thread. A
+    /// render thread fails the import; importing there needs an image that
+    /// the two threads can share.
+    Shared(ThreadBound<Rc<dyn ICompositionImportableSharedGpuContextImage>>),
+}
+
+impl ImageSource {
+    fn import(
         &self,
-        handle: Option<Rc<dyn IExternalObjectsWrappedGpuHandle>>,
-        import: impl FnOnce() -> Result<(), crate::rendering::composition::ServerJobError> + 'static,
-    ) {
-        // The import runs on the render thread with a handle made on this
-        // one: bound to this thread until the server has its own (see the
-        // drawing surface; stage R5).
-        let bound = crate::utilities::ThreadBound::new((handle, import));
-        let task = self.compositor.invoke_server_job_async(
-            move |_| {
-                let (handle, import) = bound.into_inner();
-                let result = import();
-                if let Some(handle) = handle {
-                    handle.dispose();
+        feature: &dyn IExternalObjectsRenderInterfaceContextFeature,
+    ) -> Result<Rc<dyn IPlatformRenderInterfaceImportedImage>, ServerJobError> {
+        match self {
+            ImageSource::Handle(handle, properties) => Ok(feature.import_image(handle.platform_handle(), properties.clone())),
+            ImageSource::Shared(image) => {
+                if !image.is_on_thread() {
+                    return Err(Arc::new(GpuImportError(
+                        "an image of a shared GPU context is imported on the thread it was made on",
+                    )));
                 }
-                result
-            },
-            false,
-        );
-        let _ = self.import_completed.set(task);
+                Ok(feature.import_shared_image(image.get().clone()))
+            }
+        }
     }
 
-    pub fn compositor(&self) -> &Rc<Compositor> {
-        &self.compositor
+    fn dispose(self) {
+        if let ImageSource::Handle(handle, _) = self {
+            handle.dispose();
+        }
     }
+}
 
+/// What the server part of every imported object holds: the context and the
+/// feature the object is imported with, and the outcome of the import.
+pub struct ServerGpuImportedObjectBase {
+    context: Rc<dyn IPlatformRenderInterfaceContext>,
+    feature: Rc<dyn IExternalObjectsRenderInterfaceContextFeature>,
+    /// The outcome of the import job, `None` until it has run: what the
+    /// status of `ImportCompleted` tells the jobs upstream.
+    import_result: RefCell<Option<Result<(), ServerJobError>>>,
+}
+
+impl ServerGpuImportedObjectBase {
     pub fn context(&self) -> &Rc<dyn IPlatformRenderInterfaceContext> {
         &self.context
     }
@@ -188,27 +288,84 @@ impl CompositionGpuImportedObjectBase {
         &self.feature
     }
 
-    pub fn import_completed(&self) -> ServerJobTask<()> {
-        self.import_completed.get().cloned().expect("the import is started by the constructor")
-    }
-
-    pub fn is_lost(&self) -> bool {
-        self.context.is_lost()
+    /// The outcome of the import, `None` until the import job has run.
+    pub fn import_result(&self) -> Option<Result<(), ServerJobError>> {
+        self.import_result.borrow().clone()
     }
 
     /// Whether the context of the server compositor is the one the object
     /// was imported with.
-    fn is_current_context(&self) -> bool {
-        same_context(&self.compositor.server().render_interface().value(), &self.context)
+    fn is_current_context(&self, server: &ServerCompositor) -> bool {
+        same_context(&server.render_interface().value(), &self.context)
+    }
+}
+
+/// The server part of an imported object: what the jobs of the render
+/// thread import, use and dispose.
+pub trait IServerGpuImportedObject: 'static {
+    fn base(&self) -> &ServerGpuImportedObjectBase;
+
+    /// Imports the object (`Import`).
+    fn import(&self, server: &ServerCompositor) -> Result<(), ServerJobError>;
+
+    /// Releases the imported object (`Dispose`).
+    fn dispose(&self);
+}
+
+/// What upstream's `CompositionGpuImportedObjectBase` holds on the side of
+/// the caller: the compositor, the task of the import and the handle of the
+/// server part.
+pub struct CompositionGpuImportedObjectBase<T: IServerGpuImportedObject> {
+    compositor: Rc<Compositor>,
+    server: Arc<LockBound<T>>,
+    import_completed: ServerJobTask<()>,
+}
+
+impl<T: IServerGpuImportedObject> CompositionGpuImportedObjectBase<T> {
+    /// Schedules the import on the render thread.
+    fn new(compositor: &Rc<Compositor>, server: Arc<LockBound<T>>) -> Self {
+        let object = server.clone();
+        let import_completed = compositor.invoke_server_job_async(
+            move |compositor| {
+                let object = object.get(compositor);
+                let result = object.import(compositor);
+                *object.base().import_result.borrow_mut() = Some(result.clone());
+                result
+            },
+            false,
+        );
+        Self { compositor: compositor.clone(), server, import_completed }
     }
 
-    fn dispose_async(&self, dispose: impl FnOnce() + 'static) -> ServerJobTask<()> {
-        let import_completed = self.import_completed();
-        let dispose = crate::utilities::ThreadBound::new(dispose);
+    pub fn compositor(&self) -> &Rc<Compositor> {
+        &self.compositor
+    }
+
+    /// The server part: for a job of the render thread to capture.
+    pub(crate) fn server(&self) -> Arc<LockBound<T>> {
+        self.server.clone()
+    }
+
+    pub fn import_completed(&self) -> ServerJobTask<()> {
+        self.import_completed.clone()
+    }
+
+    /// Upstream reads the context from the UI thread as it is; here this
+    /// thread enters the compositor lock for it.
+    pub fn is_lost(&self) -> bool {
+        self.compositor.with_server(|server| self.server.get(server).base().context.is_lost())
+    }
+
+    fn dispose_async(&self) -> ServerJobTask<()> {
+        // The job holds the server part, as upstream it captures `this`: the
+        // imported object is released even when the caller drops its object
+        // before the job runs.
+        let object = self.server.clone();
         self.compositor.invoke_server_job_async(
-            move |_| {
-                if import_completed.is_completed_successfully() {
-                    (dispose.into_inner())();
+            move |compositor| {
+                let object = object.get(compositor);
+                if matches!(object.base().import_result(), Some(Ok(()))) {
+                    object.dispose();
                 }
                 Ok(())
             },
@@ -217,59 +374,20 @@ impl CompositionGpuImportedObjectBase {
     }
 }
 
-type ImageImporter = Box<dyn FnOnce() -> Rc<dyn IPlatformRenderInterfaceImportedImage>>;
-
-/// A GPU image imported into the compositor.
-pub struct CompositionImportedGpuImage {
-    this: Weak<CompositionImportedGpuImage>,
-    base: CompositionGpuImportedObjectBase,
-    importer: RefCell<Option<ImageImporter>>,
+/// The server part of an imported GPU image.
+pub struct ServerImportedGpuImage {
+    base: ServerGpuImportedObjectBase,
+    source: RefCell<Option<ImageSource>>,
     image: RefCell<Option<Rc<dyn IPlatformRenderInterfaceImportedImage>>>,
 }
 
-impl CompositionImportedGpuImage {
-    fn new(
-        compositor: &Rc<Compositor>,
-        context: Rc<dyn IPlatformRenderInterfaceContext>,
-        feature: Rc<dyn IExternalObjectsRenderInterfaceContextFeature>,
-        importer: ImageImporter,
-        handle: Option<Rc<dyn IExternalObjectsWrappedGpuHandle>>,
-    ) -> Rc<CompositionImportedGpuImage> {
-        let image = Rc::new_cyclic(|this: &Weak<CompositionImportedGpuImage>| CompositionImportedGpuImage {
-            this: this.clone(),
-            base: CompositionGpuImportedObjectBase::new(compositor, context, feature),
-            importer: RefCell::new(Some(importer)),
+impl ServerImportedGpuImage {
+    fn new(state: &InteropState, source: ImageSource) -> ServerImportedGpuImage {
+        ServerImportedGpuImage {
+            base: state.imported_object_base(),
+            source: RefCell::new(Some(source)),
             image: RefCell::new(None),
-        });
-        let this = image.clone();
-        image.base.start_import(handle, move || this.import());
-        image
-    }
-
-    pub fn base(&self) -> &CompositionGpuImportedObjectBase {
-        &self.base
-    }
-
-    /// The handle of the image.
-    pub(crate) fn rc(&self) -> Rc<CompositionImportedGpuImage> {
-        self.this.upgrade().expect("the image is alive while it is used")
-    }
-
-    fn import(&self) -> Result<(), crate::rendering::composition::ServerJobError> {
-        let server = self.base.compositor.server().clone();
-        let current = server.render_interface().ensure_current();
-        let result = (|| {
-            // The original context was lost and the new one might have different capabilities
-            if !self.base.is_current_context() {
-                return Err(std::sync::Arc::new(PlatformGraphicsContextLostException) as crate::rendering::composition::ServerJobError);
-            }
-            if let Some(importer) = self.importer.borrow_mut().take() {
-                *self.image.borrow_mut() = Some(importer());
-            }
-            Ok(())
-        })();
-        current.dispose();
-        result
+        }
     }
 
     /// The imported image. Panics once the image has been disposed
@@ -285,14 +403,61 @@ impl CompositionImportedGpuImage {
         &self.base.context
     }
 
-    pub fn is_usable(&self) -> bool {
-        self.image.borrow().is_some() && self.base.is_current_context()
+    pub fn is_usable(&self, server: &ServerCompositor) -> bool {
+        self.image.borrow().is_some() && self.base.is_current_context(server)
+    }
+}
+
+impl IServerGpuImportedObject for ServerImportedGpuImage {
+    fn base(&self) -> &ServerGpuImportedObjectBase {
+        &self.base
     }
 
-    pub fn dispose(&self) {
+    fn import(&self, server: &ServerCompositor) -> Result<(), ServerJobError> {
+        let source = self.source.borrow_mut().take();
+        let current = server.render_interface().ensure_current();
+        let result = (|| {
+            // The original context was lost and the new one might have different capabilities
+            if !self.base.is_current_context(server) {
+                return Err(Arc::new(PlatformGraphicsContextLostException) as ServerJobError);
+            }
+            if let Some(source) = &source {
+                *self.image.borrow_mut() = Some(source.import(&*self.base.feature)?);
+            }
+            Ok(())
+        })();
+        current.dispose();
+        // A wrapped handle is released once the import has run.
+        if let Some(source) = source {
+            source.dispose();
+        }
+        result
+    }
+
+    fn dispose(&self) {
         if let Some(image) = self.image.borrow_mut().take() {
             image.dispose();
         }
+    }
+}
+
+/// A GPU image imported into the compositor.
+pub struct CompositionImportedGpuImage {
+    base: CompositionGpuImportedObjectBase<ServerImportedGpuImage>,
+}
+
+impl CompositionImportedGpuImage {
+    fn new(compositor: &Rc<Compositor>, server: Arc<LockBound<ServerImportedGpuImage>>) -> Rc<CompositionImportedGpuImage> {
+        Rc::new(CompositionImportedGpuImage { base: CompositionGpuImportedObjectBase::new(compositor, server) })
+    }
+
+    pub fn base(&self) -> &CompositionGpuImportedObjectBase<ServerImportedGpuImage> {
+        &self.base
+    }
+
+    /// The server part of the image: for a job of the render thread.
+    pub(crate) fn server(&self) -> Arc<LockBound<ServerImportedGpuImage>> {
+        self.base.server()
     }
 }
 
@@ -306,15 +471,7 @@ impl ICompositionGpuImportedObject for CompositionImportedGpuImage {
     }
 
     fn dispose_async(&self) -> ServerJobTask<()> {
-        // The job holds the object, as upstream it captures `this`: the
-        // imported object is released even when the last other reference
-        // is dropped before the job runs.
-        let this = self.this.upgrade();
-        self.base.dispose_async(move || {
-            if let Some(this) = this {
-                this.dispose();
-            }
-        })
+        self.base.dispose_async()
     }
 }
 
@@ -324,47 +481,20 @@ impl ICompositionImportedGpuImage for CompositionImportedGpuImage {
     }
 }
 
-/// A GPU semaphore imported into the compositor.
-pub struct CompositionImportedGpuSemaphore {
-    this: Weak<CompositionImportedGpuSemaphore>,
-    base: CompositionGpuImportedObjectBase,
-    handle: Rc<dyn IPlatformHandle>,
+/// The server part of an imported GPU semaphore.
+pub struct ServerImportedGpuSemaphore {
+    base: ServerGpuImportedObjectBase,
+    handle: RefCell<Option<ImportHandle>>,
     semaphore: RefCell<Option<Rc<dyn IPlatformRenderInterfaceImportedSemaphore>>>,
 }
 
-impl CompositionImportedGpuSemaphore {
-    fn new(
-        handle: Rc<dyn IPlatformHandle>,
-        compositor: &Rc<Compositor>,
-        context: Rc<dyn IPlatformRenderInterfaceContext>,
-        feature: Rc<dyn IExternalObjectsRenderInterfaceContextFeature>,
-        wrapped: Option<Rc<dyn IExternalObjectsWrappedGpuHandle>>,
-    ) -> Rc<CompositionImportedGpuSemaphore> {
-        let semaphore = Rc::new_cyclic(|this: &Weak<CompositionImportedGpuSemaphore>| CompositionImportedGpuSemaphore {
-            this: this.clone(),
-            base: CompositionGpuImportedObjectBase::new(compositor, context, feature),
-            handle,
+impl ServerImportedGpuSemaphore {
+    fn new(state: &InteropState, handle: ImportHandle) -> ServerImportedGpuSemaphore {
+        ServerImportedGpuSemaphore {
+            base: state.imported_object_base(),
+            handle: RefCell::new(Some(handle)),
             semaphore: RefCell::new(None),
-        });
-        let this = semaphore.clone();
-        semaphore.base.start_import(wrapped, move || {
-            this.import();
-            Ok(())
-        });
-        semaphore
-    }
-
-    pub fn base(&self) -> &CompositionGpuImportedObjectBase {
-        &self.base
-    }
-
-    /// The handle of the semaphore.
-    pub(crate) fn rc(&self) -> Rc<CompositionImportedGpuSemaphore> {
-        self.this.upgrade().expect("the semaphore is alive while it is used")
-    }
-
-    fn import(&self) {
-        *self.semaphore.borrow_mut() = Some(self.base.feature.import_semaphore(self.handle.clone()));
+        }
     }
 
     /// The imported semaphore. Panics once the semaphore has been disposed
@@ -376,14 +506,53 @@ impl CompositionImportedGpuSemaphore {
         }
     }
 
-    pub fn is_usable(&self) -> bool {
-        self.semaphore.borrow().is_some() && self.base.is_current_context()
+    pub fn is_usable(&self, server: &ServerCompositor) -> bool {
+        self.semaphore.borrow().is_some() && self.base.is_current_context(server)
+    }
+}
+
+impl IServerGpuImportedObject for ServerImportedGpuSemaphore {
+    fn base(&self) -> &ServerGpuImportedObjectBase {
+        &self.base
     }
 
-    pub fn dispose(&self) {
+    fn import(&self, _server: &ServerCompositor) -> Result<(), ServerJobError> {
+        let handle = self.handle.borrow_mut().take();
+        if let Some(handle) = handle {
+            *self.semaphore.borrow_mut() = Some(self.base.feature.import_semaphore(handle.platform_handle()));
+            // A wrapped handle is released once the import has run.
+            handle.dispose();
+        }
+        Ok(())
+    }
+
+    fn dispose(&self) {
         if let Some(semaphore) = self.semaphore.borrow_mut().take() {
             semaphore.dispose();
         }
+    }
+}
+
+/// A GPU semaphore imported into the compositor.
+pub struct CompositionImportedGpuSemaphore {
+    base: CompositionGpuImportedObjectBase<ServerImportedGpuSemaphore>,
+}
+
+impl CompositionImportedGpuSemaphore {
+    fn new(
+        compositor: &Rc<Compositor>,
+        server: Arc<LockBound<ServerImportedGpuSemaphore>>,
+    ) -> Rc<CompositionImportedGpuSemaphore> {
+        Rc::new(CompositionImportedGpuSemaphore { base: CompositionGpuImportedObjectBase::new(compositor, server) })
+    }
+
+    pub fn base(&self) -> &CompositionGpuImportedObjectBase<ServerImportedGpuSemaphore> {
+        &self.base
+    }
+
+    /// The server part of the semaphore: for a job of the render thread.
+    pub(crate) fn server(&self) -> Arc<LockBound<ServerImportedGpuSemaphore>> {
+        self.base.server()
     }
 }
 
@@ -397,15 +566,7 @@ impl ICompositionGpuImportedObject for CompositionImportedGpuSemaphore {
     }
 
     fn dispose_async(&self) -> ServerJobTask<()> {
-        // The job holds the object, as upstream it captures `this`: the
-        // imported object is released even when the last other reference
-        // is dropped before the job runs.
-        let this = self.this.upgrade();
-        self.base.dispose_async(move || {
-            if let Some(this) = this {
-                this.dispose();
-            }
-        })
+        self.base.dispose_async()
     }
 }
 

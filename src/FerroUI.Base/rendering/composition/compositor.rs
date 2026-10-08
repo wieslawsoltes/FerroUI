@@ -329,6 +329,14 @@ impl Compositor {
         self.server.with(f)
     }
 
+    /// Binds `value` to the compositor lock: an object of the server side
+    /// that this thread asks for and jobs of the render thread use (see
+    /// [`LockBound`](super::server::LockBound)). `server` is what
+    /// [`with_server`](Self::with_server) or a job hands out.
+    pub(crate) fn bind_to_lock<T>(&self, server: &ServerCompositor, value: T) -> super::server::LockBound<T> {
+        super::server::LockBound::new(&self.server, server, value)
+    }
+
     /// Renders a frame on this thread, under the compositor lock: what the
     /// synchronous points do (`Server.Render` upstream).
     pub fn render_on_this_thread(&self) -> bool {
@@ -794,16 +802,22 @@ impl Compositor {
     /// The interop with GPU objects created outside of the framework, when
     /// the render interface supports it (`TryGetCompositionGpuInterop`).
     ///
-    /// Upstream the answer is awaited from the render thread; the server
-    /// compositor runs on this thread, so it is given directly.
+    /// Upstream the answer is awaited from a job of the render thread; here
+    /// this thread enters the compositor lock and gives it directly. The
+    /// feature is an object of the server side: it is taken, handed to the
+    /// interop and let go inside the lock, and the interop keeps it there.
     pub fn try_get_composition_gpu_interop(&self) -> Option<Rc<dyn super::ICompositionGpuInterop>> {
-        let feature = self.try_get_render_interface_feature(std::any::TypeId::of::<
-            dyn crate::platform::IExternalObjectsRenderInterfaceContextFeature,
-        >())?;
-        let external_objects = feature
-            .downcast_ref::<Rc<dyn crate::platform::IExternalObjectsRenderInterfaceContextFeature>>()?
-            .clone();
-        Some(super::CompositionInterop::new(&self.this(), external_objects))
+        self.server.with(|_| {
+            let feature = self.try_get_render_interface_feature(std::any::TypeId::of::<
+                dyn crate::platform::IExternalObjectsRenderInterfaceContextFeature,
+            >())?;
+            let external_objects = feature
+                .downcast_ref::<Rc<dyn crate::platform::IExternalObjectsRenderInterfaceContextFeature>>()?
+                .clone();
+            let interop: Rc<dyn super::ICompositionGpuInterop> =
+                super::CompositionInterop::new(&self.this(), external_objects);
+            Some(interop)
+        })
     }
 
     /// Attempts to query for a feature from the platform render interface.

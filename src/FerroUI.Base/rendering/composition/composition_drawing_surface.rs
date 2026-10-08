@@ -1,9 +1,11 @@
-use super::server::{IServerObject, ServerCompositionDrawingSurface, ServerObjectId};
+use super::server::{IServerObject, LockBound, ServerCompositionDrawingSurface, ServerCompositor, ServerObjectId};
 use super::{
-    CompositionSurface, Compositor, ICompositionImportedGpuImage, ICompositionImportedGpuSemaphore, ServerJobTask,
+    CompositionSurface, Compositor, ICompositionImportedGpuImage, ICompositionImportedGpuSemaphore, ServerImportedGpuImage,
+    ServerImportedGpuSemaphore, ServerJobTask,
 };
 use std::ops::Deref;
 use std::rc::Rc;
+use std::sync::Arc;
 
 /// A composition surface whose content is set from imported GPU images.
 #[derive(Clone)]
@@ -17,16 +19,19 @@ impl Deref for CompositionDrawingSurface {
     }
 }
 
-fn imported_image(image: &dyn ICompositionImportedGpuImage) -> Rc<super::CompositionImportedGpuImage> {
+/// The server part of an imported image: what the job of an update takes
+/// to the render thread. The object of the caller stays on its thread.
+fn imported_image(image: &dyn ICompositionImportedGpuImage) -> Arc<LockBound<ServerImportedGpuImage>> {
     match image.as_imported_gpu_image() {
-        Some(image) => image.rc(),
+        Some(image) => image.server(),
         None => panic!("the image was not imported by a composition interop"),
     }
 }
 
-fn imported_semaphore(semaphore: &dyn ICompositionImportedGpuSemaphore) -> Rc<super::CompositionImportedGpuSemaphore> {
+/// The server part of an imported semaphore; see [`imported_image`].
+fn imported_semaphore(semaphore: &dyn ICompositionImportedGpuSemaphore) -> Arc<LockBound<ServerImportedGpuSemaphore>> {
     match semaphore.as_imported_gpu_semaphore() {
-        Some(semaphore) => semaphore.rc(),
+        Some(semaphore) => semaphore.server(),
         None => panic!("the semaphore was not imported by a composition interop"),
     }
 }
@@ -50,21 +55,19 @@ impl CompositionDrawingSurface {
     /// disposed surface disposes the new snapshot.
     fn invoke(
         &self,
-        update: impl FnOnce(&ServerCompositionDrawingSurface) -> Result<(), crate::rendering::composition::ServerJobError> + 'static,
+        update: impl FnOnce(&ServerCompositor, &ServerCompositionDrawingSurface) -> Result<(), crate::rendering::composition::ServerJobError>
+            + Send
+            + 'static,
     ) -> ServerJobTask<()> {
-        // The update runs on the render thread with the image and the
-        // synchronisation objects the caller made on this thread. Until the
-        // server has a thread of its own they are bound to this one; which of
-        // them the render thread may take is settled with the GPU contexts
-        // (`docs/porting/render-thread.md`, stage R5).
-        let update = crate::utilities::ThreadBound::new(update);
+        // What an update takes to the render thread are plain values and the
+        // server parts of the image and of the synchronisation objects,
+        // which are confined to the compositor lock the job runs under.
         self.compositor().invoke_server_object_job_async(
             self.server_id(),
-            move |_, server: Option<Rc<dyn IServerObject>>| {
-                let update = update.into_inner();
+            move |compositor, server: Option<Rc<dyn IServerObject>>| {
                 let server = server.and_then(|server| server.into_any_rc().downcast::<ServerCompositionDrawingSurface>().ok());
                 match server {
-                    Some(server) => update(&server),
+                    Some(server) => update(compositor, &server),
                     None => panic!("the server object of a live drawing surface is not a drawing surface"),
                 }
             },
@@ -85,7 +88,9 @@ impl CompositionDrawingSurface {
         release_index: u32,
     ) -> ServerJobTask<()> {
         let img = imported_image(image);
-        self.invoke(move |server| server.update_with_keyed_mutex(&img, acquire_index, release_index))
+        self.invoke(move |compositor, server| {
+            server.update_with_keyed_mutex(img.get(compositor), acquire_index, release_index)
+        })
     }
 
     /// Updates the surface contents using an imported memory image using a semaphore pair as the means of synchronization
@@ -102,7 +107,9 @@ impl CompositionDrawingSurface {
         let img = imported_image(image);
         let wait = imported_semaphore(wait_for_semaphore);
         let signal = imported_semaphore(signal_semaphore);
-        self.invoke(move |server| server.update_with_semaphores(&img, &wait, &signal))
+        self.invoke(move |compositor, server| {
+            server.update_with_semaphores(img.get(compositor), wait.get(compositor), signal.get(compositor))
+        })
     }
 
     /// Updates the surface contents using an imported memory image using a semaphore pair as the means of synchronization
@@ -121,8 +128,14 @@ impl CompositionDrawingSurface {
         let img = imported_image(image);
         let wait = imported_semaphore(wait_for_semaphore);
         let signal = imported_semaphore(signal_semaphore);
-        self.invoke(move |server| {
-            server.update_with_timeline_semaphores(&img, &wait, wait_for_value, &signal, signal_value)
+        self.invoke(move |compositor, server| {
+            server.update_with_timeline_semaphores(
+                img.get(compositor),
+                wait.get(compositor),
+                wait_for_value,
+                signal.get(compositor),
+                signal_value,
+            )
         })
     }
 
@@ -130,7 +143,7 @@ impl CompositionDrawingSurface {
     /// provided by the underlying platform
     pub fn update_async(&self, image: &dyn ICompositionImportedGpuImage) -> ServerJobTask<()> {
         let img = imported_image(image);
-        self.invoke(move |server| server.update_with_automatic_sync(&img))
+        self.invoke(move |compositor, server| server.update_with_automatic_sync(img.get(compositor)))
     }
 
     pub fn dispose(&self) {

@@ -8,7 +8,7 @@ mod compositor_lock;
 mod compositor_pools;
 mod drawing_context_proxy;
 
-pub use compositor_lock::{CompositorLock, CompositorLockGuard, LockedServerCompositor};
+pub use compositor_lock::{CompositorLock, CompositorLockGuard, LockBound, LockedServerCompositor};
 mod server_composition_bitmap_cache;
 mod server_composition_cache_mode;
 mod server_composition_container_visual;
