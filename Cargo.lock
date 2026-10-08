@@ -109,6 +109,7 @@ dependencies = [
  "ferroui-markup",
  "ferroui-markup-xaml",
  "ferroui-markup-xaml-loader",
+ "ferroui-opengl",
  "ferroui-skia",
  "ferroui-themes-fluent",
  "ferroui-themes-simple",
