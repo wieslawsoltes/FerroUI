@@ -683,6 +683,7 @@ pub fn markup_types() -> Vec<(&'static ::ferroui_base::metadata::MarkupType, &'s
         (<::ferroui_base::styling::ThemeVariant as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "ferroui_base::styling::ThemeVariant", false),
         (<::ferroui_base::utilities::CalendarWeekRule as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "ferroui_base::utilities::CalendarWeekRule", false),
         (<::ferroui_base::utilities::CancelEventArgs as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "ferroui_base::utilities::CancelEventArgs", false),
+        (<::ferroui_base::utilities::CultureInfo as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "ferroui_base::utilities::CultureInfo", false),
         (<::ferroui_base::utilities::DateTime as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "ferroui_base::utilities::DateTime", false),
         (<::ferroui_base::utilities::DateTimeKind as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "ferroui_base::utilities::DateTimeKind", false),
         (<::ferroui_base::utilities::DateTimeOffset as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "ferroui_base::utilities::DateTimeOffset", false),
