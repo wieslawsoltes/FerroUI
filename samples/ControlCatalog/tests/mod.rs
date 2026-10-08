@@ -8,6 +8,7 @@
 //! list names.
 
 mod asset_files;
+mod auto_complete_box_page;
 mod gaps;
 mod gaps_a;
 mod gaps_b;

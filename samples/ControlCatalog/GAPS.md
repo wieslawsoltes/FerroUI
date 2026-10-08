@@ -6,7 +6,7 @@ The documents of the sample that do not load yet, grouped by what they wait for.
 cargo test -p control-catalog -- --ignored gap_
 ```
 
-Status: 219 documents, 209 load and show their class; 10 are listed below (one of them, `App.xaml`, loads in the application and in `tests/gaps.rs`).
+Status: 219 documents, 210 load and show their class; 9 are listed below (one of them, `App.xaml`, loads in the application and in `tests/gaps.rs`).
 
 ## Gaps of the framework
 
@@ -16,7 +16,6 @@ No gap of the framework blocks a document of the list. One gap is open: C101, a 
 
 | Document | Missing API |
 |---|---|
-| `Pages/AutoCompleteBoxPage.xaml` | its code-behind, which is not ported yet (`LogicalExtensions.GetLogicalDescendants`, which it uses, is ported). |
 | `Pages/NumericUpDownPage.xaml` | `CultureInfo.GetCultures(CultureTypes.SpecificCultures)`. |
 | `Pages/OpenGl/OpenGlLeasePage.xaml` | `OpenGlFbo` (`Pages/OpenGl/OpenGlFbo.cs`, not ported): it wraps an OpenGL texture in a Ganesh surface (`GRContext.ResetContext` and `Flush`, `GRBackendTexture`, `GRGlTextureInfo`, `SKSurface.Create` over a backend texture). The Skia backend enables the `gl` feature of `skia-safe`, which has these types, for `target_os = "emscripten"` only (`src/Skia/FerroUI.Skia/Cargo.toml`; the desktop build is Graphite on Metal, and no published Skia binary has Graphite and Ganesh together), and `ISkiaGrContext` does not give the Ganesh context (`skia_safe::gpu::DirectContext`) to a lease. The page needs both, and a desktop platform whose leased graphics context is an `IGlContext`. |
 | `Pages/ContentPage/ContentPagePerformancePage.xaml`, `Pages/CarouselPage/CarouselPagePerformancePage.xaml`, `Pages/DrawerPage/DrawerPagePerformancePage.xaml`, `Pages/NavigationPage/NavigationPagePerformancePage.xaml`, `Pages/TabbedPage/TabbedPagePerformancePage.xaml` | `NavigationPerformanceMonitorHelper` measures the managed heap (`GC.GetTotalMemory`, `GC.Collect`), which has no counterpart. |

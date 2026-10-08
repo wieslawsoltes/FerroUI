@@ -8,6 +8,7 @@ use ferroui_base::TypeInfo;
 mod accelerator_page;
 mod acrylic_page;
 mod adorner_layer_page;
+mod auto_complete_box_page;
 mod bitmap_cache_page;
 mod border_page;
 mod button_spinner_page;
@@ -113,6 +114,7 @@ mod open_gl_interop_page;
 pub use accelerator_page::AcceleratorPage;
 pub use acrylic_page::AcrylicPage;
 pub use adorner_layer_page::AdornerLayerPage;
+pub use auto_complete_box_page::AutoCompleteBoxPage;
 pub use bitmap_cache_page::BitmapCachePage;
 pub use border_page::BorderPage;
 pub use button_spinner_page::ButtonSpinnerPage;
@@ -263,6 +265,7 @@ const ROOT_TYPES: &[&TypeInfo] = &[
     AcceleratorPage::TYPE,
     AcrylicPage::TYPE,
     AdornerLayerPage::TYPE,
+    AutoCompleteBoxPage::TYPE,
     BitmapCachePage::TYPE,
     BorderPage::TYPE,
     ButtonSpinnerPage::TYPE,
@@ -346,6 +349,7 @@ const ROOT_CLASSES: &[&XamlClass] = &[
     &AcceleratorPage::XAML_CLASS,
     &AcrylicPage::XAML_CLASS,
     &AdornerLayerPage::XAML_CLASS,
+    &AutoCompleteBoxPage::XAML_CLASS,
     &BitmapCachePage::XAML_CLASS,
     &BorderPage::XAML_CLASS,
     &ButtonSpinnerPage::XAML_CLASS,
