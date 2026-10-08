@@ -37,6 +37,13 @@
   system of `xaml.md` 9.5 (the scanner), which the rest of the build integration waits for, then
   the compiled catalog.
 
+- The build-time type system, first stage, is WRITTEN on branch `xaml-source-scanner` (on top of
+  `xaml-e5-build-integration-v`) and NOT BUILT by its author (section 11 has the commands): the
+  model and its `.xamlmeta` of format 2, and the source scanner (`xaml.md` 9.5.6). `Build` and the
+  emitter are untouched. Next: validate it on the real crates, then dependency models,
+  `ModelTypeSystem`, the call forms, `compile_xaml()` on the model (`xaml.md` 9.10.1, "Remaining
+  for E5", item 1).
+
 Design documents in the repository: `docs/porting/xaml.md`, sections 9 (emitter design: call forms
 A/B/C, build integration, code-behind), 9.5 (source scanner), 9.12 (the 14 rulings), 9.13, and
 decisions 1 to 27. Read section 9 before touching the emitter. `DRAFT-AUTHOR-REPORT.md` is the
@@ -656,3 +663,64 @@ test's: compare what `build.rs` registers with what `generate()` of the test reg
 library's test registers the types of the crate itself, which the build script cannot; a
 difference there means a document of `DOCUMENTS` depends on a type of the crate, and that document
 belongs on the checked-in path.
+
+## 11. What the scanner stage delivered (the model and the source scanner), and how to validate it
+
+Written without a build, like section 10. Read `xaml.md` 9.5.6 first: it has the model as built
+against the listing of 9.5.1, what the scanner reads, what it cannot obtain from source, and the
+seams.
+
+What exists, all in `src/FerroUI.Build.Tasks` (`ferroui-build`):
+
+- `json.rs`: the JSON value, reader and writer of the model (the compiler's reader is private to
+  it and drops numbers).
+- `model.rs`: `AssemblyModel`, `TypeModel`, `MemberModel`, `PropertyModel`, `AccessorModel`,
+  `RegisteredModel`, `EnumMemberModel`, `AttributeModel`, `RustType`, `CallableModel`, `CallForm`;
+  `to_json` / `parse` (formats 1 and 2), `metadata()` / `from_metadata()` to the compiler's
+  `XamlMetadata`.
+- `scanner/`: `mod.rs` (`scan_crate`, `Scan`, `Diagnostic`, `Statistics`, the assembly of the
+  model), `source.rs` (the files, `syn`, the expansion of simple macros of the crate),
+  `declarations.rs` (the readers of the declaration macros), `modules.rs` (the module tree, path
+  resolution, public paths), `tokens.rs` (cursor, type and expression readers, canonical text),
+  `tests.rs`.
+- `tests/fixtures/scanner`: a source tree that is read and never compiled. It is not a crate and
+  not a member of the workspace; `ferroui-build` has `autotests = false`.
+- Dependencies of `ferroui-build` only: `syn` 2 (`full`, `parsing`, `printing`, `visit`),
+  `proc-macro2` (`span-locations`), `quote`. All three were in `Cargo.lock` already (`syn 2.0.119`
+  next to `syn 3.0.6`); the entry of `ferroui-build` in `Cargo.lock` was edited by hand.
+
+`Build`, the emitter, the declaration macros and their uses are unchanged.
+
+Validation, in this order:
+
+1. `cargo build -p ferroui-build`. The first build of the scanner; `Cargo.lock` must not change
+   (`cargo build -p ferroui-build --locked`).
+2. `cargo test -p ferroui-build --lib json::` and `cargo test -p ferroui-build --lib model::`: the
+   file. `checked_in_metadata_of_the_themes_is_read` reads the two checked-in theme files.
+3. `cargo test -p ferroui-build --lib scanner::tokens` and `cargo test -p ferroui-build --lib scanner::modules`:
+   the readers of tokens and the path resolution, without files.
+4. `cargo test -p ferroui-build --lib scanner::tests:: -- --skip real_crates`: the fixture. The
+   expected lines of the diagnostics and the counts were computed by hand from the fixture files; a
+   difference there is as likely a wrong expectation as a wrong scanner, and the assertion prints
+   the diagnostics of the scan.
+5. `cargo test -p ferroui-build --lib real_crates -- --nocapture`: the base and the controls crates
+   as files. Read the output even when it passes: the summary of each scan, the list of what is not
+   read, and the models written to the temporary directory. If it fails on "the scanner skipped
+   invocations", each line names a file and both counts: either the scanner misses a position
+   (a macro inside something `source.rs` does not walk) or the text counter of the test misreads a
+   literal of that file (`code_of`).
+6. `cargo test -p ferroui-build --lib` and `cargo build --workspace`: nothing else depends on the
+   new modules, so the workspace is expected to be unaffected, apart from `proc-macro2` now being
+   built with `span-locations` for the host.
+
+What is most likely wrong, in the author's order:
+
+1. The fixture expectations of step 4 (line numbers, the callable counts of the statistics).
+2. `syn` details the author could not compile against (the fields of `ItemTraitAlias`,
+   `impl_token.span`, `Signature::receiver`, comparing `Ident` with `&str`).
+3. Borrows in `scanner/mod.rs` (closures that take `self` mutably inside iterator chains).
+4. The exact value types of step 5 (`Decorator.Child` as
+   `Option<::ferroui_base::Ref<::ferroui_controls::control::Control>>`): they depend on the scanner
+   following `use crate::{Control, ..}` through `pub use control::{Control, ..}` in `lib.rs`.
+5. Run time of step 5: an unknown name is looked up through every glob import of the crate; it is
+   bounded, not measured.
