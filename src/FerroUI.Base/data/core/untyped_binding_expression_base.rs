@@ -51,6 +51,7 @@ impl UntypedBindingExpressionBase {
         target_property: Option<&'static FerroProperty>,
         is_data_validation_enabled: bool,
     ) -> Self {
+        crate::perf_count!(BindingExpressionsCreated);
         Self {
             this,
             default_priority,
@@ -269,6 +270,7 @@ impl UntypedBindingExpressionBase {
         if !self.is_running() {
             return;
         }
+        crate::perf_count!(BindingValuesPublished);
 
         // When binding to the data context and the expression results in a
         // binding error, the expression produces null rather than the unset

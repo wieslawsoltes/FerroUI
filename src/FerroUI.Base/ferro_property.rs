@@ -219,6 +219,7 @@ impl PropertyChangedObservable {
         if self.handlers.is_empty() {
             return;
         }
+        crate::perf_count!(PropertyChangesWithPropertyHandlers);
         for (_, handler) in self.handlers.snapshot().iter() {
             handler(e);
         }

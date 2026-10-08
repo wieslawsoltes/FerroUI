@@ -415,6 +415,7 @@ impl ValueStore {
         if same {
             return;
         }
+        crate::perf_count!(InheritanceAncestorChanges);
 
         let mut values: Vec<OldNew> = Vec::new();
 
@@ -457,11 +458,13 @@ impl ValueStore {
         // Raise PropertyChanged events where necessary on this object and
         // inheritance children.
         for v in values {
+            crate::perf_count!(InheritedValuesCompared);
             let same = match (&v.old, &v.new) {
                 (Some(a), Some(b)) => std::ptr::addr_eq(Rc::as_ptr(a), Rc::as_ptr(b)),
                 _ => false,
             };
             if !same {
+                crate::perf_count!(InheritedValuesDiffering);
                 self.inherited_value_changed(owner, v.property, v.old.as_deref(), v.new.as_deref());
             }
         }
@@ -772,6 +775,7 @@ impl ValueStore {
         new_value: Option<&dyn EffectiveValueDyn>,
     ) {
         debug_assert!(old_value.is_some() || new_value.is_some());
+        crate::perf_count!(InheritedValueWalkVisits);
 
         // If the value is set locally, propagation ends here.
         if self.is_set(property) {

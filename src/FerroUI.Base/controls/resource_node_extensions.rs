@@ -38,12 +38,15 @@ impl dyn IResourceHost + '_ {
     /// Tries to find the specified resource by searching up the logical tree
     /// and then global styles.
     pub fn try_find_resource(&self, key: &ResourceKey, theme: Option<&ThemeVariant>) -> Option<ResourceValue> {
+        crate::perf_count!(ResourceLookups);
+        crate::perf_count!(ResourceHostsProbed);
         if let Some(value) = self.try_get_resource(key, theme) {
             return Some(value);
         }
 
         let mut current = self.as_style_host().and_then(|h| h.styling_parent());
         while let Some(host) = current {
+            crate::perf_count!(ResourceHostsProbed);
             if let Some(value) = host.try_get_resource(key, theme) {
                 return Some(value);
             }

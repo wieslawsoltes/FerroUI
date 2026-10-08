@@ -1124,6 +1124,7 @@ macro_rules! ferro_class {
                     $(#[$meta])*
                     #[inline]
                     pub fn $method(&self $(, $arg: $arg_ty)*) $(-> $ret)? {
+                        $crate::perf_count_virtual!(concat!(stringify!($name), "::", stringify!($method)));
                         let table = $crate::FerroObject::vtable_of::<$name>(self);
                         (table.$method)(self $(, $arg)*)
                     }

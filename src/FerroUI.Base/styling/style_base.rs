@@ -293,6 +293,7 @@ impl StyleBase {
         let instance = match shared {
             Some(instance) => instance,
             None => {
+                crate::perf_count!(StyleInstancesCreated);
                 can_share_instance &= activator.is_none();
 
                 let instance = StyleInstance::new(self.to_ref().downgrade(), activator, type_);
@@ -318,6 +319,7 @@ impl StyleBase {
             }
         };
 
+        crate::perf_count!(StyleInstancesAttached);
         target.values().add_frame(target, instance.clone());
         instance.apply_animations(target);
         Ok(instance)

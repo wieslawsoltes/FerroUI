@@ -333,17 +333,20 @@ impl FerroObject {
 
     #[inline]
     pub(crate) fn constructed(&self) {
+        crate::perf_count_virtual!("FerroObject::constructed");
         (self.vt().constructed)(self)
     }
 
     #[inline]
     pub(crate) fn on_property_changed_core(&self, change: &FerroPropertyChangedEventArgs<'_>) {
+        crate::perf_count_virtual!("FerroObject::on_property_changed_core");
         (self.vt().on_property_changed_core)(self, change)
     }
 
     /// Invokes the `on_property_changed` virtual member.
     #[inline]
     pub fn on_property_changed(&self, change: &FerroPropertyChangedEventArgs<'_>) {
+        crate::perf_count_virtual!("FerroObject::on_property_changed");
         (self.vt().on_property_changed)(self, change)
     }
 
@@ -354,6 +357,7 @@ impl FerroObject {
         state: BindingValueType,
         error: Option<BindingError>,
     ) {
+        crate::perf_count_virtual!("FerroObject::update_data_validation");
         (self.vt().update_data_validation)(self, property, state, error.as_ref())
     }
 
@@ -533,6 +537,7 @@ impl FerroObject {
         binding: &dyn BindingBase,
         anchor: Option<&Ref<FerroObject>>,
     ) -> Rc<dyn BindingExpressionBase> {
+        crate::perf_count!(BindingsInstanced);
         let expression = binding.create_instance(self, Some(property), anchor);
         self.values.add_binding_expression(self, property, expression)
     }
@@ -791,6 +796,7 @@ impl FerroObject {
         priority: BindingPriority,
         is_effective_value: bool,
     ) {
+        crate::perf_count!(PropertyChangesRaised);
         let e = FerroPropertyChangedEventArgs::new(
             self,
             property,
@@ -803,8 +809,10 @@ impl FerroObject {
         self.on_property_changed_core(&e);
 
         if is_effective_value {
+            crate::perf_count!(PropertyChangesEffective);
             property.notify_changed(&e);
             if !self.property_changed.is_empty() {
+                crate::perf_count!(PropertyChangesWithObjectListeners);
                 for (_, handler) in self.property_changed.snapshot().iter() {
                     handler(&e);
                 }

@@ -105,8 +105,10 @@ impl ControlTheme {
         let Some(target_type) = self.target_type.get() else {
             panic!("ControlTheme has no TargetType.");
         };
+        crate::perf_count!(ControlThemesEvaluated);
 
         if self.has_setters_or_animations() && target_type.is_assignable_from(target.style_key()) {
+            crate::perf_count!(ControlThemesMatched);
             self.try_attach_instance(target, None, type_, true)?;
             return Ok(SelectorMatchResult::AlwaysThisType);
         }

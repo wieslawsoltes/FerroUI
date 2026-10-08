@@ -35,6 +35,7 @@ impl TemplateBindingExpression {
         converter_parameter: Option<BoxedValue>,
         mode: BindingMode,
     ) -> Rc<Self> {
+        crate::perf_count!(TemplateBindingExpressionsCreated);
         Rc::new_cyclic(|this: &Weak<TemplateBindingExpression>| Self {
             this: this.clone(),
             base: UntypedBindingExpressionBase::new(this.clone(), BindingPriority::Template, None, false),

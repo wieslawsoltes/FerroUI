@@ -25,6 +25,11 @@ markup-functions = []
 # paths of types and the accessor functions of property definitions
 # (`metadata::property_accessors`). Applications do not enable it and pay nothing for it.
 compiler-metadata = ["markup-functions"]
+# The performance counters (`diagnostics::perf_counters`): property changes raised and listened
+# to, virtual calls by member, styles evaluated and matched, resource lookups, bindings and text
+# layouts created. For measuring only: without the feature the counting sites are no code and
+# no type has a field for them.
+perf-counters = []
 
 [dependencies]
 bitflags.workspace = true
