@@ -157,7 +157,7 @@ pub use expander_page::ExpanderPage;
 pub use flex_page::FlexPage;
 pub use flyouts_page::FlyoutsPage;
 pub use focus_page::FocusPage;
-pub use gestures::{GesturePinchRotationPage, GesturePinchZoomPage};
+pub use gestures::{GesturePinchRotationPage, GesturePinchZoomPage, GesturePullPage, GestureSwipePage};
 pub use headered_content_page::HeaderedContentPage;
 pub use home_page::HomePage;
 pub use image_page::ImagePage;
