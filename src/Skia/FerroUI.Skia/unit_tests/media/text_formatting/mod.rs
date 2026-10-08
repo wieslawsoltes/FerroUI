@@ -7,6 +7,7 @@ mod shaping_capability_fallback_tests;
 mod single_buffer_text_source;
 mod split_text_runs_tests;
 mod tables;
+mod text_characters_tests;
 mod text_collapsing_bidi_tests;
 mod text_formatter_tests;
 mod text_formatter_wrap_characterization_tests;
