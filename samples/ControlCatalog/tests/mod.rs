@@ -20,6 +20,7 @@ mod navigation_pages_a;
 mod numeric_up_down_page;
 mod open_gl_interop_page;
 mod page_assets;
+mod performance_pages;
 mod support;
 mod survey;
 mod view_models;

@@ -17,6 +17,7 @@ mod carousel_page_data_template_page;
 mod carousel_page_events_page;
 mod carousel_page_first_look_page;
 mod carousel_page_gesture_page;
+mod carousel_page_performance_page;
 mod carousel_page_selection_page;
 mod carousel_page_transitions_page;
 mod carousel_transitions_page;
@@ -36,6 +37,7 @@ pub use carousel_page_data_template_page::CarouselPageDataTemplatePage;
 pub use carousel_page_events_page::CarouselPageEventsPage;
 pub use carousel_page_first_look_page::CarouselPageFirstLookPage;
 pub use carousel_page_gesture_page::CarouselPageGesturePage;
+pub use carousel_page_performance_page::CarouselPagePerformancePage;
 pub use carousel_page_selection_page::CarouselPageSelectionPage;
 pub use carousel_page_transitions_page::CarouselPageTransitionsPage;
 pub use carousel_transitions_page::CarouselTransitionsPage;
@@ -56,6 +58,7 @@ pub(crate) const TYPES: &[&TypeInfo] = &[
     CarouselPageEventsPage::TYPE,
     CarouselPageFirstLookPage::TYPE,
     CarouselPageGesturePage::TYPE,
+    CarouselPagePerformancePage::TYPE,
     CarouselPageSelectionPage::TYPE,
     CarouselPageTransitionsPage::TYPE,
     CarouselTransitionsPage::TYPE,
@@ -77,6 +80,7 @@ pub(crate) const CLASSES: &[&XamlClass] = &[
     &CarouselPageEventsPage::XAML_CLASS,
     &CarouselPageFirstLookPage::XAML_CLASS,
     &CarouselPageGesturePage::XAML_CLASS,
+    &CarouselPagePerformancePage::XAML_CLASS,
     &CarouselPageSelectionPage::XAML_CLASS,
     &CarouselPageTransitionsPage::XAML_CLASS,
     &CarouselTransitionsPage::XAML_CLASS,

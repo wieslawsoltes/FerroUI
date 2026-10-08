@@ -21,6 +21,7 @@ mod tabbed_page_first_look_page;
 mod tabbed_page_fluid_nav_page;
 mod tabbed_page_gesture_page;
 mod tabbed_page_keyboard_page;
+mod tabbed_page_performance_page;
 mod tabbed_page_placement_page;
 mod tabbed_page_programmatic_page;
 mod tabbed_page_transitions_page;
@@ -41,6 +42,7 @@ pub use tabbed_page_first_look_page::TabbedPageFirstLookPage;
 pub use tabbed_page_fluid_nav_page::TabbedPageFluidNavPage;
 pub use tabbed_page_gesture_page::TabbedPageGesturePage;
 pub use tabbed_page_keyboard_page::TabbedPageKeyboardPage;
+pub use tabbed_page_performance_page::TabbedPagePerformancePage;
 pub use tabbed_page_placement_page::TabbedPagePlacementPage;
 pub use tabbed_page_programmatic_page::TabbedPageProgrammaticPage;
 pub use tabbed_page_transitions_page::TabbedPageTransitionsPage;
@@ -61,6 +63,7 @@ pub(crate) const TYPES: &[&TypeInfo] = &[
     TabbedPageFluidNavPage::TYPE,
     TabbedPageGesturePage::TYPE,
     TabbedPageKeyboardPage::TYPE,
+    TabbedPagePerformancePage::TYPE,
     TabbedPagePlacementPage::TYPE,
     TabbedPageProgrammaticPage::TYPE,
     TabbedPageTransitionsPage::TYPE,
@@ -80,6 +83,7 @@ pub(crate) const CLASSES: &[&XamlClass] = &[
     &TabbedPageFluidNavPage::XAML_CLASS,
     &TabbedPageGesturePage::XAML_CLASS,
     &TabbedPageKeyboardPage::XAML_CLASS,
+    &TabbedPagePerformancePage::XAML_CLASS,
     &TabbedPagePlacementPage::XAML_CLASS,
     &TabbedPageProgrammaticPage::XAML_CLASS,
     &TabbedPageTransitionsPage::XAML_CLASS,

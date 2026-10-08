@@ -6,8 +6,8 @@ use super::{
     LAvenirAppPage, PulseAppPage, RetroGamingAppPage, TabbedPageCollectionPage, TabbedPageCustomTabBarPage,
     TabbedPageCustomizationPage, TabbedPageDataTemplatePage, TabbedPageDisabledTabsPage, TabbedPageEventsPage,
     TabbedPageFabPage, TabbedPageFirstLookPage, TabbedPageFluidNavPage, TabbedPageGesturePage, TabbedPageKeyboardPage,
-    TabbedPagePlacementPage, TabbedPageProgrammaticPage, TabbedPageTransitionsPage, TabbedPageWithDrawerPage,
-    TabbedPageWithNavigationPage,
+    TabbedPagePerformancePage, TabbedPagePlacementPage, TabbedPageProgrammaticPage, TabbedPageTransitionsPage,
+    TabbedPageWithDrawerPage, TabbedPageWithNavigationPage,
 };
 use crate::markup::{content_page_class, xaml_class};
 use ferroui_base::interactivity::{Interactive, RoutedEventArgs};
@@ -16,8 +16,9 @@ use ferroui_controls::{ContentPage, NavigationPage};
 
 /// The registry of the samples of the page.
 ///
-/// The entry "Performance Monitor" of group "Performance" (`TabbedPagePerformancePage`) of the
-/// original is not listed, because its page is not ported.
+/// The description of the entry "Performance Monitor" differs from the original's, which
+/// promises the size of the managed heap and the effect of the garbage collector: the page
+/// reports what can be measured here (see `navigation_performance_monitor_helper.rs`).
 const DEMOS: &[Demo] = &[
     // Overview
     (
@@ -106,6 +107,13 @@ const DEMOS: &[Demo] = &[
         "Disabled Tabs",
         "IsTabEnabled attached property: disable individual tabs so they cannot be selected.",
         || TabbedPageDisabledTabsPage::new().upcast(),
+    ),
+    // Performance
+    (
+        "Performance",
+        "Performance Monitor",
+        "Track tab count and live page instances. Observe how pages are released after removing tabs.",
+        || TabbedPagePerformancePage::new().upcast(),
     ),
     // Composition
     (

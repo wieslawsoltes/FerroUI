@@ -13,6 +13,7 @@ mod drawer_page_customization_page;
 mod drawer_page_events_page;
 mod drawer_page_first_look_page;
 mod drawer_page_navigation_page;
+mod drawer_page_performance_page;
 mod drawer_page_rtl_page;
 mod drawer_page_transitions_page;
 mod eco_tracker_app_page;
@@ -34,6 +35,7 @@ pub use drawer_page_customization_page::DrawerPageCustomizationPage;
 pub use drawer_page_events_page::DrawerPageEventsPage;
 pub use drawer_page_first_look_page::DrawerPageFirstLookPage;
 pub use drawer_page_navigation_page::DrawerPageNavigationPage;
+pub use drawer_page_performance_page::DrawerPagePerformancePage;
 pub use drawer_page_rtl_page::DrawerPageRtlPage;
 pub use drawer_page_transitions_page::DrawerPageTransitionsPage;
 pub use eco_tracker_app_page::EcoTrackerAppPage;
@@ -56,6 +58,7 @@ pub(crate) const TYPES: &[&TypeInfo] = &[
     DrawerPageEventsPage::TYPE,
     DrawerPageFirstLookPage::TYPE,
     DrawerPageNavigationPage::TYPE,
+    DrawerPagePerformancePage::TYPE,
     DrawerPageRtlPage::TYPE,
     DrawerPageTransitionsPage::TYPE,
     EcoTrackerAppPage::TYPE,
@@ -79,6 +82,7 @@ pub(crate) const CLASSES: &[&XamlClass] = &[
     &DrawerPageEventsPage::XAML_CLASS,
     &DrawerPageFirstLookPage::XAML_CLASS,
     &DrawerPageNavigationPage::XAML_CLASS,
+    &DrawerPagePerformancePage::XAML_CLASS,
     &DrawerPageRtlPage::XAML_CLASS,
     &DrawerPageTransitionsPage::XAML_CLASS,
     &EcoTrackerAppPage::XAML_CLASS,
