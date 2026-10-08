@@ -22,6 +22,7 @@ use crate::rendering::composition::drawing::{
     RenderDataOpcode, RenderDataReader, RenderDataStream,
 };
 use crate::rendering::{IRenderLoop, IRenderLoopTask};
+use std::sync::atomic::{AtomicUsize, Ordering};
 use std::sync::{Arc, Mutex};
 
 /// A render loop that never ticks by itself: tests drive frames explicitly.
@@ -29,6 +30,7 @@ use std::sync::{Arc, Mutex};
 pub struct ManualRenderLoop {
     tasks: Mutex<Vec<Arc<dyn IRenderLoopTask>>>,
     runs_in_background: bool,
+    frames_out_of_turn: AtomicUsize,
 }
 
 impl ManualRenderLoop {
@@ -39,7 +41,7 @@ impl ManualRenderLoop {
     /// A loop that a test ticks from a thread of its own: it reports that it
     /// runs in the background.
     pub fn background() -> Arc<ManualRenderLoop> {
-        Arc::new(ManualRenderLoop { tasks: Mutex::default(), runs_in_background: true })
+        Arc::new(ManualRenderLoop { runs_in_background: true, ..ManualRenderLoop::default() })
     }
 
     /// Runs every registered task once, on the calling thread.
@@ -53,6 +55,12 @@ impl ManualRenderLoop {
     /// The number of registered tasks.
     pub fn task_count(&self) -> usize {
         self.tasks.lock().unwrap_or_else(|e| e.into_inner()).len()
+    }
+
+    /// How often a frame out of turn was asked for. The loop does not
+    /// render one: whoever ticks it does.
+    pub fn frames_requested_out_of_turn(&self) -> usize {
+        self.frames_out_of_turn.load(Ordering::SeqCst)
     }
 }
 
@@ -70,6 +78,10 @@ impl IRenderLoop for ManualRenderLoop {
     }
 
     fn wakeup(&self) {}
+
+    fn request_frame_out_of_turn(&self) {
+        self.frames_out_of_turn.fetch_add(1, Ordering::SeqCst);
+    }
 }
 
 /// The opcodes recorded in a stream, in order (decoded with the payload
