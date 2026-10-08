@@ -84,3 +84,5 @@ pub use writeable_bitmap_impl::WriteableBitmapImpl;
 mod tests;
 #[cfg(test)]
 mod text_tests;
+#[cfg(test)]
+mod unit_tests;

@@ -12,7 +12,7 @@ use ferroui_base::media::{
     RenderOptions, TextHintingMode, TextOptions, TextRenderingMode, Typeface,
 };
 use ferroui_base::platform::{
-    register_manifest_resources, IAssetLoader, IDrawingContextImpl, IFontManagerImpl,
+    IAssetLoader, IDrawingContextImpl, IFontManagerImpl,
     IPlatformRenderInterface, IRenderTargetBitmapImpl, PixelFormat, StandardAssetLoader,
 };
 use ferroui_base::reactive::IDisposable;
@@ -23,25 +23,12 @@ use std::io::Read;
 use std::rc::Rc;
 
 const FONTS: &str = "resm:FerroUI.Skia.UnitTests.Fonts?assembly=ferroui-skia";
+const ASSETS: &str = "resm:FerroUI.Skia.UnitTests.Assets?assembly=ferroui-skia";
 
 /// Starts a scope with the Skia render interface and font manager and the
 /// HarfBuzz text shaper registered; dispose the result to leave it.
 pub(crate) fn start() -> Rc<dyn IDisposable> {
-    register_manifest_resources(
-        "ferroui-skia",
-        &[
-            ("FerroUI.Skia.UnitTests.Fonts.CascadiaCode.ttf", include_bytes!("test_assets/fonts/CascadiaCode.ttf")),
-            ("FerroUI.Skia.UnitTests.Fonts.Inter-Regular.ttf", include_bytes!("test_assets/fonts/Inter-Regular.ttf")),
-            (
-                "FerroUI.Skia.UnitTests.Fonts.NotoSansArabic-Regular.ttf",
-                include_bytes!("test_assets/fonts/NotoSansArabic-Regular.ttf"),
-            ),
-            (
-                "FerroUI.Skia.UnitTests.Fonts.NotoSansHebrew-Regular.ttf",
-                include_bytes!("test_assets/fonts/NotoSansHebrew-Regular.ttf"),
-            ),
-        ],
-    );
+    crate::unit_tests::register_test_assets();
 
     let scope = FerroLocator::enter_scope();
 
@@ -59,7 +46,11 @@ pub(crate) fn utf16(text: &str) -> ReadOnlyMemory<u16> {
 }
 
 pub(crate) fn test_typeface(family: &str) -> Typeface {
-    Typeface::new(FontFamily::parse(&format!("{FONTS}#{family}")).unwrap())
+    // Cascadia Code is a font of the test project, the others are render
+    // test assets.
+    let source = if family == "Cascadia Code" { FONTS } else { ASSETS };
+
+    Typeface::new(FontFamily::parse(&format!("{source}#{family}")).unwrap())
 }
 
 
@@ -144,7 +135,7 @@ fn font_manager_creates_system_typefaces() {
 #[test]
 fn font_manager_creates_typefaces_from_streams() {
     let font_manager = FontManagerImpl::new();
-    let font_data: &[u8] = include_bytes!("test_assets/fonts/Inter-Regular.ttf");
+    let font_data: &[u8] = include_bytes!("test_assets/assets/Inter-Regular.ttf");
 
     let typeface = font_manager
         .try_create_glyph_typeface_from_stream(&mut &font_data[..], FontSimulations::Bold | FontSimulations::Oblique)

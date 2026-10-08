@@ -17,6 +17,8 @@ ferroui-opengl.workspace = true
 skia-safe.workspace = true
 
 [dev-dependencies]
+ferroui-controls = { workspace = true, features = ["testing"] }
+ferroui-fonts-inter.workspace = true
 ferroui-harfbuzz.workspace = true
 
 # Compiles emscripten/emscripten_sjlj.cpp for the browser target (see build.rs).
