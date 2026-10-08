@@ -3,6 +3,7 @@
 
 use crate::helpers::ComResultExt;
 use crate::interop::*;
+use crate::top_level_impl::SurfaceTopLevel;
 use ferroui_base::platform::surfaces::{IPlatformRenderSurface, IPlatformRenderSurfaceRenderTarget};
 use ferroui_base::platform::{IOptionalFeatureProvider, IPlatformGraphics, IPlatformGraphicsContext};
 use ferroui_base::reactive::{Disposable, IDisposable};
@@ -15,7 +16,8 @@ use ferroui_skia::metal::{
 use std::any::{Any, TypeId};
 use std::cell::RefCell;
 use std::ffi::c_void;
-use std::rc::{Rc, Weak};
+use std::rc::Rc;
+use std::sync::{Arc, Weak};
 
 /// The Metal platform graphics of the macOS backend.
 pub struct MetalPlatformGraphics {
@@ -53,7 +55,7 @@ impl IPlatformGraphics for MetalPlatformGraphics {
 
 /// A Metal device and its command queue.
 pub struct MetalDevice {
-    weak_self: Weak<MetalDevice>,
+    weak_self: std::rc::Weak<MetalDevice>,
     native: RefCell<Option<ComPtr<IFrnMetalDevice>>>,
 }
 
@@ -120,21 +122,50 @@ impl IMetalDevice for MetalDevice {
 }
 
 /// The Metal render surface of a top-level.
+///
+/// The surface is shared with the thread that renders
+/// (`IPlatformRenderSurface: Send + Sync`). What it holds of the native side
+/// is the native top-level, which only the UI thread may use (see
+/// `SurfaceTopLevel`): the render target is created on the UI thread, as in
+/// the reference, and the native side refuses anything else
+/// (`TopLevelImpl::CreateMetalRenderTarget` in
+/// `native/FerroUI.Native/src/OSX/TopLevelImpl.mm` returns
+/// `COR_E_INVALIDOPERATION` off the main thread).
 pub struct MetalPlatformSurface {
     weak_self: Weak<MetalPlatformSurface>,
-    top_level: ComPtr<IFrnTopLevel>,
+    top_level: SurfaceTopLevel,
 }
 
 impl MetalPlatformSurface {
-    pub(crate) fn new(top_level: ComPtr<IFrnTopLevel>) -> Rc<MetalPlatformSurface> {
-        Rc::new_cyclic(|weak_self| MetalPlatformSurface { weak_self: weak_self.clone(), top_level })
+    pub(crate) fn new(top_level: ComPtr<IFrnTopLevel>) -> Arc<MetalPlatformSurface> {
+        Arc::new_cyclic(|weak_self| MetalPlatformSurface {
+            weak_self: weak_self.clone(),
+            top_level: SurfaceTopLevel::new(top_level),
+        })
+    }
+
+    /// Releases the native top-level; called by the top-level when it is
+    /// disposed, on the UI thread.
+    pub(crate) fn close(&self) {
+        self.top_level.release();
     }
 }
 
 impl IPlatformRenderSurface for MetalPlatformSurface {
+    /// Deviation (DEVIATIONS.md, Native backend): the reference throws
+    /// `RenderTargetNotReadyException` from `CreateMetalRenderTarget` off the
+    /// UI thread and the composition target catches it; here the surface
+    /// answers that it is not ready, which the composition target treats the
+    /// same way, without a panic to catch.
+    fn is_ready(&self) -> bool {
+        self.top_level.get().is_some()
+    }
+
     fn try_get_surface_kind(&self, kind: TypeId) -> Option<Rc<dyn Any>> {
         if kind == TypeId::of::<dyn IMetalPlatformSurface>() {
-            let this: Rc<dyn IMetalPlatformSurface> = self.weak_self.upgrade()?;
+            // The contract hands out an `Rc`, and the surface lives in an
+            // `Arc`: the view forwards to the surface.
+            let this: Rc<dyn IMetalPlatformSurface> = Rc::new(MetalPlatformSurfaceView(self.weak_self.upgrade()?));
             return Some(Rc::new(this));
         }
         None
@@ -147,19 +178,48 @@ impl IPlatformRenderSurface for MetalPlatformSurface {
 
 impl IMetalPlatformSurface for MetalPlatformSurface {
     /// # Panics
-    /// Panics when called off the UI thread (the render target is not
-    /// ready) and when `device` is not a device of this backend.
+    /// Panics when called off the UI thread or when the top-level is
+    /// disposed (the render target is not ready) and when `device` is not a
+    /// device of this backend.
     fn create_metal_render_target(&self, device: Rc<dyn IMetalDevice>) -> Rc<dyn IMetalPlatformSurfaceRenderTarget> {
         if !Dispatcher::ui_thread().check_access() {
             panic!("The render target is not ready.");
         }
 
+        let Some(top_level) = self.top_level.get() else {
+            panic!("The render target is not ready.");
+        };
+
         let Some(dev) = device.as_any().downcast_ref::<MetalDevice>() else {
             panic!("The Metal device belongs to a different platform backend.");
         };
         let native_device = dev.native();
-        let target = self.top_level.create_metal_render_target(Some(&native_device)).check();
+        let target = top_level.create_metal_render_target(Some(&native_device)).check();
         Rc::new(MetalRenderTarget { native: RefCell::new(target) })
+    }
+}
+
+/// The Metal surface as the Metal contract hands it out
+/// (`Rc<dyn IMetalPlatformSurface>`); it forwards to the shared surface.
+struct MetalPlatformSurfaceView(Arc<MetalPlatformSurface>);
+
+impl IPlatformRenderSurface for MetalPlatformSurfaceView {
+    fn is_ready(&self) -> bool {
+        self.0.is_ready()
+    }
+
+    fn try_get_surface_kind(&self, kind: TypeId) -> Option<Rc<dyn Any>> {
+        self.0.try_get_surface_kind(kind)
+    }
+
+    fn as_any(&self) -> &dyn Any {
+        self.0.as_any()
+    }
+}
+
+impl IMetalPlatformSurface for MetalPlatformSurfaceView {
+    fn create_metal_render_target(&self, device: Rc<dyn IMetalDevice>) -> Rc<dyn IMetalPlatformSurfaceRenderTarget> {
+        self.0.create_metal_render_target(device)
     }
 }
 

@@ -24,7 +24,10 @@ use std::rc::{Rc, Weak};
 use std::time::Duration;
 
 /// Returns the current platform surfaces of a composition target.
-pub type RenderSurfaces = Rc<dyn Fn() -> Vec<Rc<dyn IPlatformRenderSurface>>>;
+///
+/// The thread that renders calls it and uses what it returns: the function
+/// and the surfaces are shared between the threads.
+pub type RenderSurfaces = std::sync::Arc<dyn Fn() -> Vec<std::sync::Arc<dyn IPlatformRenderSurface>> + Send + Sync>;
 
 /// Server-side counterpart of the `CompositionTarget`. That's the place
 /// where we update visual transforms, track dirty rects and actually do

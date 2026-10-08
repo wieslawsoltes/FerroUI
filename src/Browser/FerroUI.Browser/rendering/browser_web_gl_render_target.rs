@@ -4,6 +4,7 @@ use crate::interop::JsObject;
 use ferroui_base::platform::surfaces::{IPlatformRenderSurface, IPlatformRenderSurfaceRenderTarget};
 use ferroui_base::platform::{IOptionalFeatureProvider, IPlatformGraphicsContext, RenderTargetSceneInfo};
 use ferroui_base::reactive::{Disposable, IDisposable};
+use ferroui_base::utilities::ThreadBound;
 use ferroui_base::PixelSize;
 use ferroui_opengl::gl_consts;
 use ferroui_opengl::surfaces::{
@@ -15,6 +16,7 @@ use std::any::{Any, TypeId};
 use std::cell::Cell;
 use std::ffi::c_void;
 use std::rc::{Rc, Weak};
+use std::sync::Arc;
 use std::thread::{self, ThreadId};
 use wasm_bindgen::prelude::*;
 
@@ -55,17 +57,41 @@ extern "C" {
 }
 
 /// A canvas that is rendered to with WebGL.
+///
+/// A render surface is shared between the thread of the user interface and
+/// the thread that renders, so the object is `Send + Sync`. The browser runs
+/// the compositor on its one thread, and everything the target holds belongs
+/// to that thread (the object of the script side, the WebGL context, the
+/// size of the canvas): it is kept in a [`ThreadBound`], which only that
+/// thread can open. A render worker (stage B2 of
+/// `docs/porting/render-thread.md`) is where the target becomes an object
+/// that is really used across threads.
 pub struct BrowserWebGlRenderTarget {
-    this: Weak<BrowserWebGlRenderTarget>,
+    this: std::sync::Weak<BrowserWebGlRenderTarget>,
+    state: ThreadBound<WebGlRenderTargetState>,
+}
+
+/// What a WebGL render target holds, all of it bound to the thread of the
+/// page.
+struct WebGlRenderTargetState {
     js: JsObject,
     size_getter: CanvasSize,
     gl_info: GlInfo,
     gl_context: Rc<WebGlContext>,
 }
 
+// Not from upstream: the render surface contract requires a surface to be
+// shared between threads.
+const _: fn() = || {
+    fn assert_send_sync<T: Send + Sync>() {}
+    assert_send_sync::<BrowserWebGlRenderTarget>();
+};
+
 impl BrowserWebGlRenderTarget {
     /// Wraps the WebGL render target of the script side.
-    pub fn new(js: JsObject, size_getter: CanvasSize) -> Rc<Self> {
+    ///
+    /// The thread that calls this is the one the target stays bound to.
+    pub fn new(js: JsObject, size_getter: CanvasSize) -> Arc<Self> {
         let target = JsCast::unchecked_ref::<JsWebGlRenderTarget>(&js);
         let gl_info = GlInfo {
             context_id: target.context_handle(),
@@ -82,16 +108,20 @@ impl BrowserWebGlRenderTarget {
             gl_info.samples,
             gl_info.stencils,
         );
-        Rc::new_cyclic(|this| Self { this: this.clone(), js, size_getter, gl_info, gl_context })
+        let state = ThreadBound::new(WebGlRenderTargetState { js, size_getter, gl_info, gl_context });
+        Arc::new_cyclic(|this| Self { this: this.clone(), state })
     }
 
     /// The WebGL context of the canvas.
+    ///
+    /// # Panics
+    /// Panics on a thread other than the one the target was created on.
     pub fn gl_context(&self) -> Rc<WebGlContext> {
-        self.gl_context.clone()
+        self.state.get().gl_context.clone()
     }
 
     fn update_size(&self, size: PixelSize) {
-        update_size(&self.js, size);
+        update_size(&self.state.get().js, size);
     }
 }
 
@@ -129,20 +159,21 @@ impl IGlPlatformSurfaceRenderingSession for GlSession {
 }
 
 struct GlSurface {
-    target: Rc<BrowserWebGlRenderTarget>,
+    target: Arc<BrowserWebGlRenderTarget>,
 }
 
 impl IPlatformRenderSurfaceRenderTarget for GlSurface {}
 
 impl IGlPlatformSurfaceRenderTarget for GlSurface {
     fn begin_draw(&self, _scene_info: &RenderTargetSceneInfo) -> Rc<dyn IGlPlatformSurfaceRenderingSession> {
-        let (size, scaling) = (self.target.size_getter)();
+        let state = self.target.state.get();
+        let (size, scaling) = (state.size_getter)();
         self.target.update_size(size);
-        let restore_context = self.target.gl_context.ensure_current();
-        self.target.gl_context.gl_interface().bind_framebuffer(gl_consts::GL_FRAMEBUFFER, self.target.gl_info.fbo_id as i32);
+        let restore_context = state.gl_context.ensure_current();
+        state.gl_context.gl_interface().bind_framebuffer(gl_consts::GL_FRAMEBUFFER, state.gl_info.fbo_id as i32);
         Rc::new(GlSession {
             restore_context: Cell::new(Some(restore_context)),
-            context: self.target.gl_context.clone(),
+            context: state.gl_context.clone(),
             size,
             scaling,
         })
@@ -155,10 +186,10 @@ impl IGlPlatformSurfaceRenderTarget for GlSurface {
 
 impl BrowserRenderTarget for BrowserWebGlRenderTarget {
     fn platform_graphics_context(&self) -> Option<Rc<dyn IPlatformGraphicsContext>> {
-        Some(self.gl_context.clone())
+        Some(self.state.get().gl_context.clone())
     }
 
-    fn as_render_surface(&self) -> Rc<dyn IPlatformRenderSurface> {
+    fn as_render_surface(&self) -> Arc<dyn IPlatformRenderSurface> {
         self.this.upgrade().expect("the render target is alive")
     }
 }
@@ -166,7 +197,9 @@ impl BrowserRenderTarget for BrowserWebGlRenderTarget {
 impl IPlatformRenderSurface for BrowserWebGlRenderTarget {
     fn try_get_surface_kind(&self, kind: TypeId) -> Option<Rc<dyn Any>> {
         if kind == TypeId::of::<dyn IGlPlatformSurface>() {
-            let this: Rc<dyn IGlPlatformSurface> = self.this.upgrade()?;
+            // The surface kind is handed out in an `Rc`, and the target lives in an `Arc`: the
+            // view below holds the target and answers for it.
+            let this: Rc<dyn IGlPlatformSurface> = Rc::new(GlSurfaceView { target: self.this.upgrade()? });
             return Some(Rc::new(this));
         }
         None
@@ -180,6 +213,35 @@ impl IPlatformRenderSurface for BrowserWebGlRenderTarget {
 impl IGlPlatformSurface for BrowserWebGlRenderTarget {
     fn create_gl_render_target(&self, _context: &Rc<dyn IGlContext>) -> Rc<dyn IGlPlatformSurfaceRenderTarget> {
         Rc::new(GlSurface { target: self.this.upgrade().expect("the render target is alive") })
+    }
+}
+
+/// The render target as the OpenGL surface a render backend asks for.
+///
+/// Not from upstream, where the target is cast to the interface. It exists
+/// because the surface kind is handed out in an `Rc` while the target lives
+/// in an `Arc`.
+struct GlSurfaceView {
+    target: Arc<BrowserWebGlRenderTarget>,
+}
+
+impl IPlatformRenderSurface for GlSurfaceView {
+    fn is_ready(&self) -> bool {
+        (*self.target).is_ready()
+    }
+
+    fn try_get_surface_kind(&self, kind: TypeId) -> Option<Rc<dyn Any>> {
+        (*self.target).try_get_surface_kind(kind)
+    }
+
+    fn as_any(&self) -> &dyn Any {
+        (*self.target).as_any()
+    }
+}
+
+impl IGlPlatformSurface for GlSurfaceView {
+    fn create_gl_render_target(&self, context: &Rc<dyn IGlContext>) -> Rc<dyn IGlPlatformSurfaceRenderTarget> {
+        self.target.create_gl_render_target(context)
     }
 }
 

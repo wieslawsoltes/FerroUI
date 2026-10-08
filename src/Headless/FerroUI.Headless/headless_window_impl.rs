@@ -3,6 +3,7 @@
 
 use crate::ferro_headless_platform::{FerroHeadlessPlatform, FerroHeadlessPlatformOptions};
 use crate::headless_platform_stubs::HeadlessScreensStub;
+use crate::headless_window_surface::HeadlessWindowSurface;
 use crate::i_headless_window::IHeadlessWindow;
 use ferroui_base::input::platform::IClipboard;
 use ferroui_base::input::raw::{
@@ -14,14 +15,12 @@ use ferroui_base::input::{
     MouseDevice, PhysicalKey, Pointer, PointerPressedEventArgs, PointerType, RawInputModifiers, TouchDevice,
 };
 use ferroui_base::media::imaging::WriteableBitmap;
-use ferroui_base::platform::surfaces::{
-    FuncFramebufferRenderTarget, IFramebufferPlatformSurface, IFramebufferRenderTarget, IPlatformRenderSurface,
-};
-use ferroui_base::platform::{AlphaFormat, ICursorImpl, ILockedFramebuffer, IOptionalFeatureProvider, PixelFormat};
+use ferroui_base::platform::surfaces::IPlatformRenderSurface;
+use ferroui_base::platform::{ICursorImpl, IOptionalFeatureProvider};
 use ferroui_base::reactive::IDisposable;
 use ferroui_base::rendering::composition::Compositor;
 use ferroui_base::threading::{Dispatcher, DispatcherPriority};
-use ferroui_base::{FerroLocator, LocatorExtensions, PixelPoint, PixelSize, Point, Rect, Size, Thickness, Vector};
+use ferroui_base::{FerroLocator, LocatorExtensions, PixelPoint, Point, Rect, Size, Thickness, Vector};
 use ferroui_controls::platform::{
     IPlatformHandle, IPopupImpl, IScreenImpl, ITopLevelImpl, IWindowBaseImpl, IWindowIconImpl, IWindowImpl,
     PlatformHandle, PlatformRequestedDrawnDecoration, PlatformThemeVariant,
@@ -36,6 +35,7 @@ use ferroui_controls::{
 use std::any::{Any, TypeId};
 use std::cell::{Cell, RefCell};
 use std::rc::{Rc, Weak};
+use std::sync::Arc;
 use std::time::Instant;
 
 thread_local! {
@@ -69,16 +69,15 @@ pub(crate) struct HeadlessWindowImpl {
     screen: Rc<dyn IScreenImpl>,
     st: Instant,
     touch_device: Rc<TouchDevice>,
-    // Upstream guards the frame with a lock, since its render thread writes it: here the frame
-    // is written and read on the UI thread, where the server compositor runs.
-    last_rendered_frame: RefCell<Option<WriteableBitmap>>,
+    // What a frame uses of the window (the size and the scaling a framebuffer is created with,
+    // and the last rendered frame under its lock): upstream keeps it in the window, which is its
+    // own surface; here it is an object the thread that renders shares with the window.
+    surface: Arc<HeadlessWindowSurface>,
     options: FerroHeadlessPlatformOptions,
     popup_parent: Option<Rc<HeadlessWindowImpl>>,
     popup_positioner: RefCell<Option<Rc<dyn IPopupPositioner>>>,
     is_popup: bool,
 
-    client_size: Cell<Size>,
-    render_scaling: Cell<f64>,
     z_order: Cell<i32>,
     input_root: RefCell<Option<Rc<dyn IInputRoot>>>,
     mouse_device: Rc<MouseDevice>,
@@ -147,13 +146,11 @@ impl HeadlessWindowImpl {
             screen,
             st: Instant::now(),
             touch_device: TouchDevice::new(),
-            last_rendered_frame: RefCell::new(None),
+            surface: HeadlessWindowSurface::new(options.frame_buffer_format, Size::new(1024.0, 768.0), 1.0),
             options: options.clone(),
             popup_parent,
             popup_positioner: RefCell::new(None),
             is_popup,
-            client_size: Cell::new(Size::new(1024.0, 768.0)),
-            render_scaling: Cell::new(1.0),
             z_order: Cell::new(0),
             input_root: RefCell::new(None),
             mouse_device,
@@ -216,8 +213,8 @@ impl HeadlessWindowImpl {
 
     fn do_resize(&self, client_size: Size, reason: WindowResizeReason) {
         // Uncomment this check and experience a weird bug in layout engine
-        if self.client_size.get() != client_size {
-            self.client_size.set(client_size);
+        if self.surface.client_size() != client_size {
+            self.surface.set_client_size(client_size);
             if let Some(resized) = get(&self.resized) {
                 resized(client_size, reason);
             }
@@ -235,30 +232,6 @@ impl HeadlessWindowImpl {
             },
             DispatcherPriority::INPUT,
         );
-    }
-
-    fn lock(&self) -> Rc<dyn ILockedFramebuffer> {
-        let render_scaling = self.render_scaling.get();
-        let bmp = WriteableBitmap::new(
-            PixelSize::from_size(self.client_size.get(), render_scaling),
-            Vector::new(96.0, 96.0) * render_scaling,
-            Some(self.options.frame_buffer_format),
-            Some(AlphaFormat::Premul),
-        );
-        let fb = bmp.lock();
-        let weak = self.this.clone();
-        Rc::new(FramebufferProxy {
-            fb,
-            on_dispose: RefCell::new(Some(Box::new(move || {
-                if let Some(this) = weak.upgrade() {
-                    let old = this.last_rendered_frame.replace(Some(bmp));
-                    if let Some(old) = old {
-                        old.dispose();
-                    }
-                }
-            }))),
-            disposed: Cell::new(false),
-        })
     }
 
     fn timestamp(&self) -> u64 {
@@ -293,73 +266,6 @@ impl HeadlessWindowImpl {
     }
 }
 
-struct FramebufferProxy {
-    fb: Rc<dyn ILockedFramebuffer>,
-    on_dispose: RefCell<Option<Box<dyn FnOnce()>>>,
-    disposed: Cell<bool>,
-}
-
-impl ILockedFramebuffer for FramebufferProxy {
-    fn address(&self) -> *mut u8 {
-        self.fb.address()
-    }
-
-    fn with_data(&self, access: &mut dyn FnMut(&mut [u8])) {
-        self.fb.with_data(access)
-    }
-
-    fn size(&self) -> PixelSize {
-        self.fb.size()
-    }
-
-    fn row_bytes(&self) -> i32 {
-        self.fb.row_bytes()
-    }
-
-    fn dpi(&self) -> Vector {
-        self.fb.dpi()
-    }
-
-    fn format(&self) -> PixelFormat {
-        self.fb.format()
-    }
-
-    fn alpha_format(&self) -> AlphaFormat {
-        self.fb.alpha_format()
-    }
-
-    fn dispose(&self) {
-        if self.disposed.replace(true) {
-            return;
-        }
-        self.fb.dispose();
-        let on_dispose = self.on_dispose.borrow_mut().take();
-        if let Some(on_dispose) = on_dispose {
-            on_dispose();
-        }
-    }
-}
-
-impl IPlatformRenderSurface for HeadlessWindowImpl {
-    fn as_framebuffer_surface(&self) -> Option<&dyn IFramebufferPlatformSurface> {
-        Some(self)
-    }
-
-    fn as_any(&self) -> &dyn Any {
-        self
-    }
-}
-
-impl IFramebufferPlatformSurface for HeadlessWindowImpl {
-    fn create_framebuffer_render_target(&self) -> Rc<dyn IFramebufferRenderTarget> {
-        let weak = self.this.clone();
-        Rc::new(FuncFramebufferRenderTarget::new(move || match weak.upgrade() {
-            Some(this) => this.lock(),
-            None => panic!("Cannot access a disposed object: HeadlessWindowImpl"),
-        }))
-    }
-}
-
 impl IOptionalFeatureProvider for HeadlessWindowImpl {
     fn try_get_feature(&self, feature_type: TypeId) -> Option<Rc<dyn Any>> {
         if feature_type == TypeId::of::<dyn IClipboard>() {
@@ -381,16 +287,13 @@ impl IDisposable for HeadlessWindowImpl {
             closed();
         }
         self.touch_device.dispose();
-        let last_rendered_frame = self.last_rendered_frame.borrow_mut().take();
-        if let Some(last_rendered_frame) = last_rendered_frame {
-            last_rendered_frame.dispose();
-        }
+        self.surface.dispose_last_rendered_frame();
     }
 }
 
 impl ITopLevelImpl for HeadlessWindowImpl {
     fn desktop_scaling(&self) -> f64 {
-        self.render_scaling.get()
+        self.surface.render_scaling()
     }
 
     fn handle(&self) -> Option<Rc<dyn IPlatformHandle>> {
@@ -398,16 +301,27 @@ impl ITopLevelImpl for HeadlessWindowImpl {
     }
 
     fn client_size(&self) -> Size {
-        self.client_size.get()
+        self.surface.client_size()
     }
 
     fn render_scaling(&self) -> f64 {
-        self.render_scaling.get()
+        self.surface.render_scaling()
     }
 
-    fn surfaces(&self) -> Vec<Rc<dyn IPlatformRenderSurface>> {
-        let surface: Rc<dyn IPlatformRenderSurface> = self.rc();
+    fn surfaces(&self) -> Vec<Arc<dyn IPlatformRenderSurface>> {
+        let surface: Arc<dyn IPlatformRenderSurface> = self.surface.clone();
         vec![surface]
+    }
+
+    // As upstream, whose `Surfaces` is set once and never cleared, the surface is handed out
+    // for as long as someone asks: a frame rendered after the window is disposed is kept by
+    // the surface and released with it.
+    fn render_surfaces(&self) -> Arc<dyn Fn() -> Vec<Arc<dyn IPlatformRenderSurface>> + Send + Sync> {
+        let surface = self.surface.clone();
+        Arc::new(move || {
+            let surface: Arc<dyn IPlatformRenderSurface> = surface.clone();
+            vec![surface]
+        })
     }
 
     fn compositor(&self) -> Option<Rc<Compositor>> {
@@ -459,11 +373,11 @@ impl ITopLevelImpl for HeadlessWindowImpl {
     }
 
     fn point_to_client(&self, point: PixelPoint) -> Point {
-        (point - self.position.get()).to_point(self.render_scaling.get())
+        (point - self.position.get()).to_point(self.surface.render_scaling())
     }
 
     fn point_to_screen(&self, point: Point) -> PixelPoint {
-        PixelPoint::from_point(point, self.render_scaling.get()) + self.position.get()
+        PixelPoint::from_point(point, self.surface.render_scaling()) + self.position.get()
     }
 
     fn set_cursor(&self, _cursor: Option<Rc<dyn ICursorImpl>>) {}
@@ -684,7 +598,7 @@ impl IWindowImpl for HeadlessWindowImpl {
     fn begin_resize_drag(&self, _edge: WindowEdge, _e: &PointerPressedEventArgs) {}
 
     fn resize(&self, client_size: Size, reason: WindowResizeReason) {
-        if self.client_size.get() == client_size {
+        if self.surface.client_size() == client_size {
             return;
         }
 
@@ -732,20 +646,7 @@ impl IPopupImpl for HeadlessWindowImpl {
 
 impl IHeadlessWindow for HeadlessWindowImpl {
     fn get_last_rendered_frame(&self) -> Option<WriteableBitmap> {
-        let last_rendered_frame = self.last_rendered_frame.borrow();
-        let last_rendered_frame = last_rendered_frame.as_ref()?;
-
-        let locked_framebuffer = last_rendered_frame.lock();
-        let format = locked_framebuffer.format();
-        let size = locked_framebuffer.size();
-        let dpi = locked_framebuffer.dpi();
-        let row_bytes = locked_framebuffer.row_bytes();
-        let mut frame = None;
-        locked_framebuffer.with_data(&mut |data| {
-            frame = Some(WriteableBitmap::from_pixels(format, AlphaFormat::Opaque, data, size, dpi, row_bytes));
-        });
-        locked_framebuffer.dispose();
-        frame
+        self.surface.get_last_rendered_frame()
     }
 
     fn key_press(&self, key: Key, modifiers: RawInputModifiers, physical_key: PhysicalKey, key_symbol: Option<&str>) {
@@ -880,12 +781,12 @@ impl IHeadlessWindow for HeadlessWindowImpl {
             panic!("Scaling must be greater than zero. (Parameter 'scaling')");
         }
 
-        if self.render_scaling.get() == scaling {
+        if self.surface.render_scaling() == scaling {
             return;
         }
 
-        let old_scaled_size = self.client_size.get();
-        self.render_scaling.set(scaling);
+        let old_scaled_size = self.surface.client_size();
+        self.surface.set_render_scaling(scaling);
         if let Some(scaling_changed) = get(&self.scaling_changed) {
             scaling_changed(scaling);
         }

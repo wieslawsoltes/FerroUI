@@ -14,6 +14,7 @@ use ferroui_base::{PixelSize, Size};
 use std::any::{Any, TypeId};
 use std::cell::{Cell, RefCell};
 use std::rc::{Rc, Weak};
+use std::sync::Arc;
 
 /// The surface of a view that is rendered through a render target of the
 /// page (a WebGL context or a 2D canvas).
@@ -89,7 +90,7 @@ impl RenderTargetBrowserSurface {
 
     /// The surfaces a render backend can draw to: the render target, once
     /// the page has created it.
-    pub fn get_render_surfaces(&self) -> Vec<Rc<dyn IPlatformRenderSurface>> {
+    pub fn get_render_surfaces(&self) -> Vec<Arc<dyn IPlatformRenderSurface>> {
         match self.graphics.target() {
             Some(target) => vec![target.as_render_surface()],
             None => Vec::new(),
@@ -116,7 +117,7 @@ impl RenderTargetBrowserSurface {
 struct BrowserPlatformGraphics {
     this: Weak<BrowserPlatformGraphics>,
     target_id: i32,
-    target: RefCell<Option<Rc<dyn BrowserRenderTarget>>>,
+    target: RefCell<Option<Arc<dyn BrowserRenderTarget>>>,
     canvas_size: Cell<(PixelSize, f64)>,
 }
 
@@ -130,7 +131,7 @@ impl BrowserPlatformGraphics {
         })
     }
 
-    fn target(&self) -> Option<Rc<dyn BrowserRenderTarget>> {
+    fn target(&self) -> Option<Arc<dyn BrowserRenderTarget>> {
         if let Some(target) = self.target.borrow().clone() {
             return Some(target);
         }

@@ -43,7 +43,24 @@ pub trait ITopLevelImpl: IOptionalFeatureProvider + IDisposable {
     /// one of them to output. It should be enough to expose a native window
     /// handle surface and add support for a framebuffer (even if it's an
     /// emulated one) via the framebuffer platform surface.
-    fn surfaces(&self) -> Vec<Rc<dyn IPlatformRenderSurface>>;
+    fn surfaces(&self) -> Vec<std::sync::Arc<dyn IPlatformRenderSurface>>;
+
+    /// The surfaces as the thread that renders asks for them: the function
+    /// is called by that thread whenever the renderer (re)creates its
+    /// render target (the reference reads `Surfaces` of the top-level
+    /// there).
+    ///
+    /// A top-level is an object of the UI thread, so the function cannot
+    /// reach it. This default hands out the surfaces the top-level has now.
+    /// An implementation whose surfaces change, or that has to stop handing
+    /// them out when it is closed, keeps them in a shared cell and returns
+    /// a function that reads it.
+    fn render_surfaces(
+        &self,
+    ) -> std::sync::Arc<dyn Fn() -> Vec<std::sync::Arc<dyn IPlatformRenderSurface>> + Send + Sync> {
+        let surfaces = self.surfaces();
+        std::sync::Arc::new(move || surfaces.clone())
+    }
 
     /// Gets the compositor that is used for the toplevel, if the platform
     /// renders through one.

@@ -166,7 +166,7 @@ pub trait IPlatformRenderInterface: 'static {
 /// A render backend bound to a graphics context (or to software rendering).
 pub trait IPlatformRenderInterfaceContext: IOptionalFeatureProvider {
     /// Creates a render target for one of the given surfaces.
-    fn create_render_target(&self, surfaces: &[Rc<dyn IPlatformRenderSurface>]) -> Rc<dyn IRenderTarget>;
+    fn create_render_target(&self, surfaces: &[std::sync::Arc<dyn IPlatformRenderSurface>]) -> Rc<dyn IRenderTarget>;
 
     /// Creates an offscreen render target.
     fn create_offscreen_render_target(
@@ -189,7 +189,7 @@ pub trait IPlatformRenderInterfaceContext: IOptionalFeatureProvider {
     }
 
     /// Whether a render target can be created for the surfaces right now.
-    fn is_ready_to_create_render_target(&self, _surfaces: &[Rc<dyn IPlatformRenderSurface>]) -> bool {
+    fn is_ready_to_create_render_target(&self, _surfaces: &[std::sync::Arc<dyn IPlatformRenderSurface>]) -> bool {
         true
     }
 

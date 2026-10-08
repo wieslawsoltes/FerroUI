@@ -200,7 +200,7 @@ impl CompositorCanvas {
         });
         let as_source: Rc<dyn IPresentationSource> = source.clone();
         let weak: Weak<dyn IPresentationSource> = Rc::downgrade(&as_source);
-        let renderer = CompositingRenderer::with_weak_root(weak, &compositor, Rc::new(Vec::new));
+        let renderer = CompositingRenderer::with_weak_root(weak, &compositor, std::sync::Arc::new(Vec::new));
         *source.renderer.borrow_mut() = Some(renderer.clone());
 
         root.set_presentation_source_for_root_visual(Some(as_source));

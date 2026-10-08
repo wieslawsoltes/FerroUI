@@ -10,10 +10,17 @@ use ferroui_base::reactive::IDisposable;
 use ferroui_base::PixelSize;
 use std::any::{Any, TypeId};
 use std::cell::{Cell, RefCell};
-use std::rc::{Rc, Weak};
+use std::rc::Rc;
+use std::sync::Arc;
 
 /// The window an [`EglGlPlatformSurface`] renders to.
-pub trait IEglWindowGlPlatformSurfaceInfo {
+///
+/// The members are read by the thread that renders a frame, which is the render thread or
+/// the UI thread: when the render target is created and at the beginning of every frame.
+/// An implementor is therefore not the window object of the UI thread itself but what the
+/// window publishes of itself (the handle, the size and the scaling behind atomics or a
+/// lock).
+pub trait IEglWindowGlPlatformSurfaceInfo: Send + Sync {
     /// The native handle of the window.
     fn handle(&self) -> isize;
 
@@ -36,21 +43,27 @@ pub trait IEglWindowGlPlatformSurfaceInfoWithWaitPolicy: IEglWindowGlPlatformSur
 }
 
 /// A window that is rendered to through an EGL window surface.
+///
+/// The surface is shared between the threads; all it holds is the window, so it is the
+/// same surface wherever it is used. The render target it creates belongs to the thread
+/// that renders, with the context.
 pub struct EglGlPlatformSurface {
-    this: Weak<EglGlPlatformSurface>,
-    info: Rc<dyn IEglWindowGlPlatformSurfaceInfo>,
+    info: Arc<dyn IEglWindowGlPlatformSurfaceInfo>,
 }
 
 impl EglGlPlatformSurface {
-    pub fn new(info: Rc<dyn IEglWindowGlPlatformSurfaceInfo>) -> Rc<EglGlPlatformSurface> {
-        Rc::new_cyclic(|this| Self { this: this.clone(), info })
+    pub fn new(info: Arc<dyn IEglWindowGlPlatformSurfaceInfo>) -> Arc<EglGlPlatformSurface> {
+        Arc::new(Self { info })
     }
 }
 
 impl IPlatformRenderSurface for EglGlPlatformSurface {
     fn try_get_surface_kind(&self, kind: TypeId) -> Option<Rc<dyn Any>> {
         if kind == TypeId::of::<dyn IGlPlatformSurface>() {
-            let this: Rc<dyn IGlPlatformSurface> = self.this.upgrade()?;
+            // The view is a handle of the calling thread, the surface a handle shared
+            // between the threads: the view is a surface of its own over the same window,
+            // which is all the state of a surface.
+            let this: Rc<dyn IGlPlatformSurface> = Rc::new(Self { info: self.info.clone() });
             return Some(Rc::new(this));
         }
         None
@@ -83,14 +96,14 @@ impl IGlPlatformSurface for EglGlPlatformSurface {
 struct RenderTarget {
     base: EglPlatformSurfaceRenderTargetBase,
     gl_surface: RefCell<Option<Rc<EglSurface>>>,
-    info: Rc<dyn IEglWindowGlPlatformSurfaceInfo>,
+    info: Arc<dyn IEglWindowGlPlatformSurfaceInfo>,
     current_size: Cell<PixelSize>,
     handle: Cell<isize>,
     skip_waits: bool,
 }
 
 impl RenderTarget {
-    fn new(gl_surface: Rc<EglSurface>, context: Rc<EglContext>, info: Rc<dyn IEglWindowGlPlatformSurfaceInfo>) -> Self {
+    fn new(gl_surface: Rc<EglSurface>, context: Rc<EglContext>, info: Arc<dyn IEglWindowGlPlatformSurfaceInfo>) -> Self {
         let current_size = info.size();
         let handle = info.handle();
         let skip_waits = info.as_info_with_wait_policy().is_some_and(|info| info.skip_waits());
@@ -167,5 +180,51 @@ impl IGlPlatformSurfaceRenderTarget for RenderTarget {
 
     fn dispose(&self) {
         EglPlatformSurfaceRenderTarget::dispose(self)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    // Not from upstream.
+    use super::*;
+    use crate::surfaces::try_get_gl_surface;
+    use std::sync::atomic::{AtomicIsize, Ordering};
+
+    struct WindowInfo {
+        handle: AtomicIsize,
+    }
+
+    impl IEglWindowGlPlatformSurfaceInfo for WindowInfo {
+        fn handle(&self) -> isize {
+            self.handle.load(Ordering::Relaxed)
+        }
+
+        fn size(&self) -> PixelSize {
+            PixelSize::new(1, 1)
+        }
+
+        fn scaling(&self) -> f64 {
+            1.0
+        }
+    }
+
+    #[test]
+    fn the_surface_is_an_open_gl_surface_on_the_thread_that_renders() {
+        let info = Arc::new(WindowInfo { handle: AtomicIsize::new(1) });
+        let surface: Arc<dyn IPlatformRenderSurface> = EglGlPlatformSurface::new(info.clone());
+
+        assert!(try_get_gl_surface(&*surface).is_some());
+        assert!(surface.try_get_surface_kind(TypeId::of::<dyn IPlatformRenderSurface>()).is_none());
+
+        // The view of another thread is over the same window.
+        info.handle.store(2, Ordering::Relaxed);
+        let handle = std::thread::spawn(move || {
+            let view = try_get_gl_surface(&*surface).expect("the surface is an OpenGL surface");
+            let view = view.as_any().downcast_ref::<EglGlPlatformSurface>().expect("the view is an EGL surface");
+            view.info.handle()
+        })
+        .join()
+        .unwrap();
+        assert_eq!(2, handle);
     }
 }

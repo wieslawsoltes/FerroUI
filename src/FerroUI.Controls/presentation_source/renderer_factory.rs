@@ -20,7 +20,9 @@ use std::rc::Rc;
 
 /// Returns the current platform surfaces of a top-level; called by the
 /// renderer whenever it (re)creates its render target.
-pub type RenderSurfaces = Rc<dyn Fn() -> Vec<Rc<dyn IPlatformRenderSurface>>>;
+/// The thread that renders calls it: the function and the surfaces are
+/// shared between the threads.
+pub type RenderSurfaces = std::sync::Arc<dyn Fn() -> Vec<std::sync::Arc<dyn IPlatformRenderSurface>> + Send + Sync>;
 
 /// The renderer of a top-level: the renderer contract and the members of
 /// its composition target that the top-level layer sets.

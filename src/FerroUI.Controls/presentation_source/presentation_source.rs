@@ -111,12 +111,7 @@ impl PresentationSource {
         *source.pointer_over_pre_processor_subscription.borrow_mut() =
             source.input_manager.as_ref().map(|input_manager| input_manager.pre_process().subscribe(pointer_over_pre_processor));
 
-        let weak_impl = Rc::downgrade(&platform_impl);
-        let renderer = create_renderer(
-            source.clone(),
-            platform_impl.compositor(),
-            Rc::new(move || weak_impl.upgrade().map(|platform_impl| platform_impl.surfaces()).unwrap_or_default()),
-        );
+        let renderer = create_renderer(source.clone(), platform_impl.compositor(), platform_impl.render_surfaces());
         let weak = Rc::downgrade(&source);
         *source.scene_invalidated_subscription.borrow_mut() = Some(renderer.scene_invalidated(Rc::new(move |e| {
             if let Some(source) = weak.upgrade() {

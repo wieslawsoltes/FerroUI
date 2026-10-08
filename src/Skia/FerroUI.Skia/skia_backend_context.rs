@@ -46,7 +46,7 @@ impl IOptionalFeatureProvider for SkiaContext {
 }
 
 impl IPlatformRenderInterfaceContext for SkiaContext {
-    fn create_render_target(&self, surfaces: &[Rc<dyn IPlatformRenderSurface>]) -> Rc<dyn IRenderTarget> {
+    fn create_render_target(&self, surfaces: &[std::sync::Arc<dyn IPlatformRenderSurface>]) -> Rc<dyn IRenderTarget> {
         if let Some(gpu) = self.gpu() {
             if let Some(gpu_render_target) = gpu.try_create_render_target(surfaces) {
                 return Rc::new(SkiaGpuRenderTarget::new(gpu, gpu_render_target));
@@ -101,7 +101,7 @@ impl IPlatformRenderInterfaceContext for SkiaContext {
         self.max_offscreen_render_target_pixel_size
     }
 
-    fn is_ready_to_create_render_target(&self, surfaces: &[Rc<dyn IPlatformRenderSurface>]) -> bool {
+    fn is_ready_to_create_render_target(&self, surfaces: &[std::sync::Arc<dyn IPlatformRenderSurface>]) -> bool {
         if let Some(gpu) = self.gpu() {
             return gpu.is_ready_to_create_render_target(surfaces);
         }

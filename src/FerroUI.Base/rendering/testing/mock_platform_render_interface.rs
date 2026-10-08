@@ -469,7 +469,7 @@ impl IOptionalFeatureProvider for MockPlatformRenderInterfaceContext {
 }
 
 impl IPlatformRenderInterfaceContext for MockPlatformRenderInterfaceContext {
-    fn create_render_target(&self, _surfaces: &[Rc<dyn IPlatformRenderSurface>]) -> Rc<dyn IRenderTarget> {
+    fn create_render_target(&self, _surfaces: &[std::sync::Arc<dyn IPlatformRenderSurface>]) -> Rc<dyn IRenderTarget> {
         MockRenderTarget::new(self.log.clone())
     }
     fn create_offscreen_render_target(

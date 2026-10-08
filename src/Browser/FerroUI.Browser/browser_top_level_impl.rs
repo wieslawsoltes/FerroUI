@@ -29,6 +29,7 @@ use std::any::{Any, TypeId};
 use std::cell::{Cell, RefCell};
 use std::collections::HashMap;
 use std::rc::{Rc, Weak};
+use std::sync::{Arc, Mutex, PoisonError};
 
 thread_local! {
     static LAST_TOP_LEVEL_ID: Cell<i32> = const { Cell::new(0) };
@@ -48,6 +49,8 @@ pub struct BrowserTopLevelImpl {
     storage_provider: Rc<dyn IStorageProvider>,
     current_cursor: RefCell<String>,
     surface: RefCell<Option<Rc<RenderTargetBrowserSurface>>>,
+    /// The surfaces as the thread that renders reads them; see `publish_render_surfaces`.
+    render_surfaces: Arc<Mutex<Vec<Arc<dyn IPlatformRenderSurface>>>>,
     top_level_id: i32,
     compositor: Rc<Compositor>,
     handle: Rc<dyn IPlatformHandle>,
@@ -108,6 +111,7 @@ impl BrowserTopLevelImpl {
                 storage_provider: Rc::new(BrowserStorageProvider::new()),
                 current_cursor: RefCell::new(CssCursor::DEFAULT.to_string()),
                 surface: RefCell::new(Some(surface)),
+                render_surfaces: Arc::new(Mutex::new(Vec::new())),
                 top_level_id,
                 compositor,
                 acrylic_compensation_levels: AcrylicPlatformCompensationLevels::new(1.0, 1.0, 1.0),
@@ -152,7 +156,21 @@ impl BrowserTopLevelImpl {
         }
     }
 
+    /// Writes the surfaces the top-level has now to the cell the renderer reads.
+    ///
+    /// The reference reads `Surfaces` of the top-level whenever the renderer creates its render
+    /// target, and the list changes: it is empty until the page has created the render target
+    /// and again once the top-level is disposed. The renderer cannot reach the top-level here
+    /// (its function may be called by another thread), so the top-level publishes the list when
+    /// it can have changed: when the renderer asks for the function, when the canvas changes
+    /// its size, and when the top-level is disposed.
+    fn publish_render_surfaces(&self) {
+        let surfaces = ITopLevelImpl::surfaces(self);
+        *self.render_surfaces.lock().unwrap_or_else(PoisonError::into_inner) = surfaces;
+    }
+
     fn on_size_changed(&self) {
+        self.publish_render_surfaces();
         if let Some(surface) = self.surface() {
             let resized = self.resized.borrow().clone();
             if let Some(resized) = resized {
@@ -212,6 +230,8 @@ impl IDisposable for BrowserTopLevelImpl {
         if let Some(surface) = surface {
             surface.dispose();
         }
+        // The surface is gone: the renderer is handed no surfaces from here on.
+        self.publish_render_surfaces();
 
         // Differs from the original, which leaves the listeners of the element in place: a
         // disposed top-level no longer receives the input of the page.
@@ -285,8 +305,14 @@ impl ITopLevelImpl for BrowserTopLevelImpl {
         self.surface().map_or(1.0, |surface| surface.scaling())
     }
 
-    fn surfaces(&self) -> Vec<Rc<dyn IPlatformRenderSurface>> {
+    fn surfaces(&self) -> Vec<Arc<dyn IPlatformRenderSurface>> {
         self.surface().map_or_else(Vec::new, |surface| surface.get_render_surfaces())
+    }
+
+    fn render_surfaces(&self) -> Arc<dyn Fn() -> Vec<Arc<dyn IPlatformRenderSurface>> + Send + Sync> {
+        self.publish_render_surfaces();
+        let surfaces = self.render_surfaces.clone();
+        Arc::new(move || surfaces.lock().unwrap_or_else(PoisonError::into_inner).clone())
     }
 
     fn compositor(&self) -> Option<Rc<Compositor>> {

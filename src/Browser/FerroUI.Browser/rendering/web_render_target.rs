@@ -4,6 +4,7 @@ use ferroui_base::platform::surfaces::IPlatformRenderSurface;
 use ferroui_base::platform::IPlatformGraphicsContext;
 use ferroui_base::PixelSize;
 use std::rc::Rc;
+use std::sync::Arc;
 use wasm_bindgen::prelude::*;
 
 #[wasm_bindgen(raw_module = "./ferroui.js")]
@@ -32,14 +33,17 @@ pub trait BrowserRenderTarget {
     fn platform_graphics_context(&self) -> Option<Rc<dyn IPlatformGraphicsContext>>;
 
     /// The target as the render surface a render backend draws to.
-    fn as_render_surface(&self) -> Rc<dyn IPlatformRenderSurface>;
+    fn as_render_surface(&self) -> Arc<dyn IPlatformRenderSurface>;
 }
 
 /// The render target the script side created under `id`, when it exists.
 ///
+/// The target is also the render surface of the canvas, which is handed out
+/// in an `Arc`, so it is created in one.
+///
 /// # Panics
 /// Panics when the target is of a kind the framework does not know.
-pub fn get_render_target(id: i32, size_getter: CanvasSize) -> Option<Rc<dyn BrowserRenderTarget>> {
+pub fn get_render_target(id: i32, size_getter: CanvasSize) -> Option<Arc<dyn BrowserRenderTarget>> {
     let js = non_null(get_js_render_target(id))?;
     let type_ = JsCast::unchecked_ref::<JsRenderTarget>(&js).render_target_type();
     if type_ == "webgl" {

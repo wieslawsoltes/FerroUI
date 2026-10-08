@@ -706,7 +706,7 @@ struct TestOffscreenImpl {
 }
 
 impl crate::embedding::offscreen::OffscreenTopLevelImplOverrides for TestOffscreenImpl {
-    fn surfaces(&self) -> Vec<Rc<dyn ferroui_base::platform::surfaces::IPlatformRenderSurface>> {
+    fn surfaces(&self) -> Vec<std::sync::Arc<dyn ferroui_base::platform::surfaces::IPlatformRenderSurface>> {
         Vec::new()
     }
 
