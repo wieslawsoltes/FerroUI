@@ -1,0 +1,16 @@
+[package]
+name = "ferroui-headless"
+description = "The headless platform of FerroUI: windows without a screen, driven by simulated input, for tests"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+
+[lib]
+path = "lib.rs"
+
+[dependencies]
+ferroui-base.workspace = true
+ferroui-controls.workspace = true
+ferroui-harfbuzz.workspace = true

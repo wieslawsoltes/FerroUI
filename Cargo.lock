@@ -248,6 +248,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "ferroui-headless"
+version = "0.1.0"
+dependencies = [
+ "ferroui-base",
+ "ferroui-controls",
+ "ferroui-harfbuzz",
+]
+
+[[package]]
 name = "ferroui-markup"
 version = "0.1.0"
 dependencies = [
@@ -310,6 +319,7 @@ name = "ferroui-opengl"
 version = "0.1.0"
 dependencies = [
  "ferroui-base",
+ "ferroui-controls",
  "paste",
 ]
 
