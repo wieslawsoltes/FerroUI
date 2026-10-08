@@ -49,7 +49,16 @@ impl CompiledMarkupTypeSystem {
         for metadata in dependencies {
             // (name, return type, public, Rust path) of each method.
             let mut methods: Vec<(String, Rc<dyn IXamlType>, bool, String)> = Vec::new();
+            // The classes of the documents with `x:Class`, by the name upstream finds them by.
+            let mut classes: Vec<(String, Rc<dyn IXamlType>)> = Vec::new();
             for document in &metadata.documents {
+                if document.class_rust_path.is_some() {
+                    if let (Some(class), Some(name)) =
+                        (inner.find_type(&document.root_type), document_type_name(&document.uri))
+                    {
+                        classes.push((name, class));
+                    }
+                }
                 let Some(build_path) = &document.build_path else { continue };
                 let root_type = inner.find_type(&document.root_type).ok_or_else(|| {
                     XamlError::type_system_exception(format!(
@@ -68,6 +77,7 @@ impl CompiledMarkupTypeSystem {
             let assembly = Rc::new_cyclic(|assembly: &Weak<CompiledAssembly>| CompiledAssembly {
                 name: metadata.name.clone(),
                 inner: inner.find_assembly(&metadata.name),
+                classes,
                 resources: Rc::new_cyclic(|resources: &Weak<CompiledResourcesType>| CompiledResourcesType {
                     id: XamlTypeId::new_unique(),
                     assembly: assembly.clone(),
@@ -90,6 +100,17 @@ impl CompiledMarkupTypeSystem {
         }
         Ok(Rc::new(Self { inner, assemblies }))
     }
+}
+
+/// The full name of the type upstream's include transformer looks for a document by
+/// (`Path.GetFileNameWithoutExtension(assetPath.Replace('/', '.'))`, where the asset path
+/// is the URI without its scheme): `ferres://Tests/Folder/Theme.xaml` → `Tests.Folder.Theme`.
+fn document_type_name(uri: &str) -> Option<String> {
+    let dotted = uri.strip_prefix("ferres://")?.replace('/', ".");
+    Some(match dotted.rfind('.') {
+        Some(extension) => dotted[..extension].to_string(),
+        None => dotted,
+    })
 }
 
 /// The path of `uri` below the root of the assembly `assembly`, with its leading `/`
@@ -127,6 +148,9 @@ impl IXamlTypeSystem for CompiledMarkupTypeSystem {
 struct CompiledAssembly {
     name: String,
     inner: Option<Rc<dyn IXamlAssembly>>,
+    /// The classes of the documents with `x:Class`, by the full name named after the
+    /// path of the document.
+    classes: Vec<(String, Rc<dyn IXamlType>)>,
     resources: Rc<CompiledResourcesType>,
 }
 
@@ -141,7 +165,18 @@ impl IXamlAssembly for CompiledAssembly {
         if full_name == COMPILED_RESOURCES_TYPE_NAME {
             return Some(self.resources.clone());
         }
-        self.inner.as_ref().and_then(|inner| inner.find_type(full_name))
+        if let Some(found) = self.inner.as_ref().and_then(|inner| inner.find_type(full_name)) {
+            return Some(found);
+        }
+        // Deviation (xaml.md, 9.7.3): the host of a URI is lower case in the port (`Uri`),
+        // where upstream's registered resource URI parser keeps the case of the assembly
+        // name, so the name upstream looks the class of a document up by can differ from
+        // the class in case. The class of a compiled document is found by the URI of the
+        // document, compared without regard to case as the port compares document URIs.
+        self.classes
+            .iter()
+            .find(|(name, _)| name.to_lowercase() == full_name.to_lowercase())
+            .map(|(_, class)| class.clone())
     }
     fn equals(&self, other: &dyn IXamlAssembly) -> bool {
         match other.as_any().downcast_ref::<CompiledAssembly>() {
@@ -365,5 +400,11 @@ mod tests {
         assert_eq!(rooted_path("ferres://tests/Style.xaml", "Tests"), Some("/Style.xaml"));
         assert_eq!(rooted_path("ferres://Other/Style.xaml", "Tests"), None);
         assert_eq!(rooted_path("file:///Style.xaml", "Tests"), None);
+    }
+
+    #[test]
+    fn type_name_of_a_document() {
+        assert_eq!(super::document_type_name("ferres://Tests/Folder/Theme.xaml").as_deref(), Some("Tests.Folder.Theme"));
+        assert_eq!(super::document_type_name("ferres://Tests/Theme").as_deref(), Some("Tests"));
     }
 }

@@ -17,7 +17,7 @@ use ::ferroui_markup_xaml::RuntimeXamlLoaderConfiguration;
 
 use crate::FerroXamlIlRuntimeCompiler;
 
-use super::emitter::{emit_document, emit_function, namespace_table, root_class_of, DocumentFunctions};
+use super::emitter::{emit_function, namespace_table, root_class_of, DocumentFunctions};
 use super::source::{function_name_of, rust_string_literal};
 use super::xaml_metadata::{DocumentModel, XamlMetadata};
 
@@ -171,9 +171,24 @@ pub fn compile_documents(
     }
     match FerroXamlIlRuntimeCompiler::transform_documents(&sources, configuration, dependencies) {
         Ok(transformed) => {
+            // The build methods of the documents of the group, by their functions: what
+            // an include the group transformers linked calls.
+            let names: Vec<String> = group.iter().map(|(index, _, _, _)| compiled[*index].function_name.clone()).collect();
+            let functions_of_group = || {
+                let mut functions = DocumentFunctions::default();
+                for (name, transformed) in names.iter().zip(&transformed) {
+                    if let (Some(build), Some(root_class)) = (&transformed.build, root_class_of(&transformed.root)) {
+                        functions.insert(build, name, root_class);
+                    }
+                }
+                functions
+            };
+            // The functions each document calls.
+            let mut calls: Vec<(usize, Vec<String>)> = Vec::with_capacity(group.len());
             // The namespace information of the documents, one constant per distinct table.
             let mut tables: Vec<String> = Vec::new();
             for ((index, name, _, _), transformed) in group.iter().zip(&transformed) {
+                let functions = functions_of_group();
                 let document = &mut compiled[*index];
                 let Some(table) = namespace_table(&transformed.document) else {
                     document.source = Err("the document has no namespace information".to_string());
@@ -188,17 +203,40 @@ pub fn compile_documents(
                 };
                 let constant = format!("XML_NAMESPACES_{table_index}");
                 document.root_type = root_type_name(&transformed.root);
-                document.source = emit_document(
+                document.source = emit_function(
                     &transformed.root,
                     &transformed.configuration,
                     &transformed.document,
                     &constant,
                     &document.function_name,
                     name,
+                    &functions,
+                    None,
                 )
                 .map(|source| if document.public { source } else { source.replacen("pub fn ", "pub(crate) fn ", 1) })
                 .map_err(|e| e.to_string());
                 document.namespaces = Some((constant, table));
+                calls.push((*index, functions.called()));
+            }
+            // A document that calls the function of a document that is not eligible is not
+            // eligible either.
+            loop {
+                let failed: Vec<(usize, String)> = calls
+                    .iter()
+                    .filter(|(index, _)| compiled[*index].source.is_ok())
+                    .filter_map(|(index, called)| {
+                        called
+                            .iter()
+                            .find(|function| compiled.iter().any(|d| d.function_name == **function && d.source.is_err()))
+                            .map(|function| (*index, function.clone()))
+                    })
+                    .collect();
+                if failed.is_empty() {
+                    break;
+                }
+                for (index, function) in failed {
+                    compiled[index].source = Err(format!("it calls `{function}`, whose document is not eligible"));
+                }
             }
         }
         Err(error) => {

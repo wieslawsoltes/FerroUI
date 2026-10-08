@@ -24,16 +24,29 @@ pub fn rust_string_literal(text: &str) -> String {
 }
 
 /// The name of the build function of a document: `build_` followed by the
-/// document name in lower case with every character that is not an ASCII
-/// letter or digit replaced by `_` (`Views/Main.xaml` -> `build_views_main_xaml`).
+/// document name in lower case with every ASCII character that is not a
+/// letter or digit replaced by `_` and every other character by `u` and its
+/// code point in hexadecimal between underscores, a run of underscores
+/// written once, so that the name is a snake case identifier
+/// (`Views/Main.xaml` -> `build_views_main_xaml`, `スタイル.xaml` ->
+/// `build_u30b9_u30bf_u30a4_u30eb_xaml`).
 pub fn function_name_of(document_name: &str) -> String {
     let mut name = String::with_capacity(document_name.len() + 6);
     name.push_str("build_");
+    let push_separator = |name: &mut String| {
+        if !name.ends_with('_') {
+            name.push('_');
+        }
+    };
     for character in document_name.chars() {
         if character.is_ascii_alphanumeric() {
             name.push(character.to_ascii_lowercase());
+        } else if character.is_ascii() {
+            push_separator(&mut name);
         } else {
-            name.push('_');
+            push_separator(&mut name);
+            name.push_str(&format!("u{:x}", character as u32));
+            push_separator(&mut name);
         }
     }
     name
@@ -73,5 +86,7 @@ mod tests {
     fn function_names_are_identifiers() {
         assert_eq!(function_name_of("Views/Main.xaml"), "build_views_main_xaml");
         assert_eq!(function_name_of("border-padding"), "build_border_padding");
+        assert_eq!(function_name_of("Dot__Syntax/_Root.xaml"), "build_dot_syntax_root_xaml");
+        assert_eq!(function_name_of("\u{30b9}\u{30bf}\u{30a4}\u{30eb}.xaml"), "build_u30b9_u30bf_u30a4_u30eb_xaml");
     }
 }
