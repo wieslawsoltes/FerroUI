@@ -46,6 +46,7 @@ mod menu_page;
 mod native_embed_page;
 pub(crate) mod navigation_demo_helper;
 mod navigation_demo_page;
+mod open_gl_page;
 mod platform_info_page;
 mod platform_settings_page;
 mod pointer_canvas;
@@ -167,6 +168,7 @@ pub use list_box_page::ListBoxPage;
 pub use menu_page::MenuPage;
 pub use native_embed_page::{EmbedSample, INativeDemoControl, NativeEmbedPage};
 pub use navigation_demo_page::NavigationDemoPage;
+pub use open_gl_page::{OpenGlPage, OpenGlPageControl};
 pub use carousel_page_samples::*;
 pub use drawer_page::*;
 pub use gesture_page::GesturePage;
@@ -291,6 +293,8 @@ const ROOT_TYPES: &[&TypeInfo] = &[
     MenuPage::TYPE,
     NativeEmbedPage::TYPE,
     NavigationDemoPage::TYPE,
+    OpenGlPage::TYPE,
+    OpenGlPageControl::TYPE,
     PlatformInfoPage::TYPE,
     PlatformSettingsPage::TYPE,
     PointerCanvas::TYPE,
@@ -369,6 +373,7 @@ const ROOT_CLASSES: &[&XamlClass] = &[
     &MenuPage::XAML_CLASS,
     &NativeEmbedPage::XAML_CLASS,
     &NavigationDemoPage::XAML_CLASS,
+    &OpenGlPage::XAML_CLASS,
     &PlatformInfoPage::XAML_CLASS,
     &PlatformSettingsPage::XAML_CLASS,
     &ProgressBarPage::XAML_CLASS,
