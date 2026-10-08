@@ -110,10 +110,14 @@ pub struct ServerCompositor {
 }
 
 impl ServerCompositor {
+    /// Creates the server compositor on the thread that renders. The queue of
+    /// batches and the readback are what it shares with its compositor, which
+    /// creates them.
     pub(crate) fn new(
         platform_graphics: Option<Rc<dyn IPlatformGraphics>>,
         options: CompositionOptions,
         batches: Arc<BatchQueue>,
+        readback: Arc<ReadbackIndices>,
         clock: CompositorClock,
     ) -> Rc<ServerCompositor> {
         let compositor = Rc::new_cyclic(|this| ServerCompositor {
@@ -129,7 +133,7 @@ impl ServerCompositor {
             ui_thread_is_inside_render: Cell::new(false),
             render_interface: PlatformRenderInterfaceContextManager::new(platform_graphics),
             options,
-            readback: Arc::new(ReadbackIndices::new()),
+            readback,
             ticks_since_last_commit: Cell::new(0),
             to_notify_processed: RefCell::new(Vec::new()),
             to_notify_rendered: RefCell::new(Vec::new()),
