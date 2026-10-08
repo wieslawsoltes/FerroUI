@@ -1,11 +1,13 @@
 //! Port of `ViewModels/ComboBoxPageViewModel.cs`.
 
+use ferroui_base::collections::FerroList;
 use ferroui_base::data::model::{BindableList, Event, INotifyPropertyChanged};
 use ferroui_base::ferro_markup_type;
-use ferroui_controls::ItemsSource;
 use mini_mvvm::ViewModelBase;
 use std::cell::{Cell, RefCell};
 use std::rc::Rc;
+
+ferroui_controls::ferro_markup_list!(pub IdAndNameList: Rc<IdAndName>);
 
 /// The view model of the combo box page.
 pub struct ComboBoxPageViewModel {
@@ -102,8 +104,9 @@ ferro_markup_type!(class ComboBoxPageViewModel {
             get: |this: &Rc<ComboBoxPageViewModel>| this.selected_item(),
             set: |this: &Rc<ComboBoxPageViewModel>, value: Option<Rc<IdAndName>>| this.set_selected_item(value)
         },
-        // A list a binding delivers to an items source property.
-        Values: ItemsSource { get: |this: &Rc<ComboBoxPageViewModel>| ItemsSource::from(this.values()) },
+        // The list with its item type: the templates and the display member binding of the
+        // combo boxes bound to it take the data type of their bindings from it.
+        Values: FerroList<Rc<IdAndName>> { get: |this: &Rc<ComboBoxPageViewModel>| this.values().items().clone() },
     ],
     notify_property_changed: ComboBoxPageViewModel,
 });
@@ -186,6 +189,28 @@ mod tests {
         assert_eq!(Some("Id 3".to_string()), values[2].id());
         assert_eq!(Some("Name 3".to_string()), values[2].name());
         assert_eq!(Some("C".to_string()), values[2].search_text());
+    }
+
+    #[test]
+    fn the_values_are_declared_to_markup_with_their_item_type() {
+        use ferroui_base::data::core::ValueType;
+        use ferroui_base::metadata::{from_markup_value, into_markup_value, MarkupTyped};
+
+        let markup = <ComboBoxPageViewModel as MarkupTyped>::MARKUP;
+        let values = markup.find_property("Values").expect("Values");
+        assert_eq!((values.type_)(), ValueType::of::<FerroList<Rc<IdAndName>>>());
+
+        let list = <IdAndNameList as MarkupTyped>::MARKUP;
+        let generic = list.generic.expect("an instantiation");
+        assert_eq!(generic.definition, "FerroList`1");
+        assert_eq!((generic.arguments[0])(), ValueType::of::<Rc<IdAndName>>());
+        assert_eq!(list.handle(), Some((values.type_)()));
+
+        // The declared list is the list of the view model, not a copy.
+        let view_model = ComboBoxPageViewModel::new();
+        let read = (values.get.expect("a getter"))(&[into_markup_value(view_model.clone())]).expect("the values");
+        let read = from_markup_value::<FerroList<Rc<IdAndName>>>(&read).expect("the list");
+        assert!(read.ptr_eq(view_model.values().items()));
     }
 
     #[test]

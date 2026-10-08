@@ -341,8 +341,8 @@ Loading and transforming (`ferro_xaml_il_runtime_compiler.rs`):
 
 Known open items outside the emitter (not started): the remaining ignored tests
 of the XAML test crate (most wait for the emitter); catalog gaps C101, C209 (`TextBox.Cut`,
-`Copy`, `Paste` and `Clear` as markup methods), C310 (`TimeSpan` from text) and C313 (the
-item type of a collection of a view model); C006/C007 belong to rendering.
+`Copy`, `Paste` and `Clear` as markup methods) and C310 (`TimeSpan` from text); C006/C007
+belong to rendering.
 
 ## 7. What stage E2 delivered, and the next steps
 

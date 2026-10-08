@@ -18,7 +18,6 @@ Pages/SettingsPage.xaml | harness: {x:Static local:App.CurrentTheme} needs the a
 Pages/ContentPage/ContentPagePerformancePage.xaml | code-behind: NavigationPerformanceMonitorHelper (measures the managed heap: GC.GetTotalMemory, GC.Collect)
 
 # --- ViewModels, Models, Views and the pages of the view models (group B) ---
-Pages/ComboBoxPage.xaml | gap C313: the item type of a collection of a view model is not known to markup (a collection is declared as ItemsSource), so the bindings of an item template without x:DataType do not resolve
 Pages/ContextFlyoutPage.xaml | gap C209: TextBox.Cut, Copy, Paste and Clear are not declared as methods for markup
 
 # --- the other pages directly under Pages/ (group C) ---

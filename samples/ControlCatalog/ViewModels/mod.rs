@@ -157,6 +157,7 @@ pub(crate) fn debug_write_line(message: &str) {
 
 /// Makes the typed lists of the view models known to markup (`ferro_markup_list!`).
 pub(crate) fn register_lists() {
+    combo_box_page_view_model::IdAndNameList::register();
     cursor_page_view_model::StandardCursorList::register();
     table_view_page_view_model::CountryList::register();
     tree_view_page_view_model::NodeList::register();
