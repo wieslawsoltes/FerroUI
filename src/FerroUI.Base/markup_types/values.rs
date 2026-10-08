@@ -726,5 +726,6 @@ pub(super) fn register_value_types() {
     ValueTypes::register_nullable::<Decimal>();
     ValueTypes::register_nullable::<NumberStyles>();
     ValueTypes::register_display::<Uri>();
+    ValueTypes::register_display::<CultureInfo>();
     ValueTypes::register_display::<Rc<Cursor>>();
 }

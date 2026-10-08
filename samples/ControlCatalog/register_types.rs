@@ -79,6 +79,7 @@ pub fn register_types() {
         }
         ValueTypes::register_global(register_value_types);
         view_models::register_lists();
+        pages::register_lists();
         MarkupAssembly::register(&ASSEMBLY);
         crate::assets::register();
         FerroXamlLoader::register_compiled_xaml(ASSEMBLY.name, try_load);

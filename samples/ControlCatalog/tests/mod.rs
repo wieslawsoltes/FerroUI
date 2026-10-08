@@ -17,6 +17,7 @@ mod gaps_d;
 mod frame_benchmark;
 mod navigation_pages_b;
 mod navigation_pages_a;
+mod numeric_up_down_page;
 mod open_gl_interop_page;
 mod page_assets;
 mod support;

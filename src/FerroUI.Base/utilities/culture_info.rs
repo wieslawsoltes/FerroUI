@@ -8,7 +8,9 @@
 //! [`DateTimeFormatInfo`](super::DateTimeFormatInfo) for the cultures that
 //! have data of their own.
 
-use super::{DateTimeFormatInfo, GregorianCalendar, NumberFormatInfo};
+use super::{DateTimeFormatInfo, GregorianCalendar, ICultureDataProvider, NumberFormatInfo};
+use crate::{FerroLocator, LocatorExtensions};
+use bitflags::bitflags;
 use std::cell::RefCell;
 use std::fmt;
 use std::hash::{Hash, Hasher};
@@ -39,6 +41,24 @@ static KNOWN_CULTURES: &[(i32, &str)] = &[
     (0x0C0A, "es-ES"), (0x0C0C, "fr-CA"), (0x1004, "zh-SG"), (0x1009, "en-CA"), (0x100C, "fr-CH"),
     (0x1404, "zh-MO"),
 ];
+
+bitflags! {
+    /// The types of culture lists [`CultureInfo::get_cultures`] retrieves (C#
+    /// `CultureTypes`). The obsolete members of the managed enumeration are
+    /// not ported.
+    #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
+    pub struct CultureTypes: i32 {
+        /// Cultures that are associated with a language but are not specific
+        /// to a country or region. The invariant culture is listed with them.
+        const NEUTRAL_CULTURES = 0x1;
+        /// Cultures that are specific to a country or region.
+        const SPECIFIC_CULTURES = 0x2;
+        /// The cultures installed in the operating system.
+        const INSTALLED_WIN32_CULTURES = 0x4;
+        /// All cultures.
+        const ALL_CULTURES = 0x7;
+    }
+}
 
 thread_local! {
     static CURRENT_CULTURE: RefCell<CultureInfo> = RefCell::new(CultureInfo::invariant_culture());
@@ -137,6 +157,30 @@ impl CultureInfo {
             .iter()
             .find(|(known, _)| *known == lcid)
             .map(|(lcid, name)| CultureInfo { name: Rc::from(*name), lcid: *lcid, date_time_format: None, number_format: None })
+    }
+
+    /// The cultures of the given types (C# `GetCultures`).
+    ///
+    /// The managed runtime lists the cultures of its globalization library.
+    /// The base library has the data of the invariant culture only, so the
+    /// list is the one the registered
+    /// [`ICultureDataProvider`](super::ICultureDataProvider) gives
+    /// ([`get_culture_names`](super::ICultureDataProvider::get_culture_names)),
+    /// preceded by the invariant culture when the neutral cultures are asked
+    /// for. Without a provider the list is the invariant culture alone,
+    /// whatever the types: what the managed runtime returns in its invariant
+    /// globalization mode.
+    pub fn get_cultures(types: CultureTypes) -> Vec<CultureInfo> {
+        let Some(provider) = FerroLocator::current().get_service::<dyn ICultureDataProvider>() else {
+            return vec![Self::invariant_culture()];
+        };
+
+        let mut cultures = Vec::new();
+        if types.contains(CultureTypes::NEUTRAL_CULTURES) {
+            cultures.push(Self::invariant_culture());
+        }
+        cultures.extend(provider.get_culture_names(types).iter().map(|name| Self::get_culture_info(name)));
+        cultures
     }
 
     /// The language tag (C# `Name`); empty for the invariant culture.
@@ -295,6 +339,25 @@ mod tests {
         assert_eq!(CultureInfo::get_culture_info_by_lcid(0x0409).unwrap().name(), "en-US");
         assert!(CultureInfo::get_culture_info_by_lcid(0x7777).is_none());
         assert_eq!(CultureInfo::get_culture_info("EN-us"), CultureInfo::get_culture_info("en-US"));
+    }
+
+    #[test]
+    fn the_cultures_are_the_ones_of_the_provider() {
+        use crate::utilities::TestCultureDataProvider;
+
+        let _scope = FerroLocator::enter_scope();
+        let names = |types| CultureInfo::get_cultures(types).iter().map(|c| c.name().to_string()).collect::<Vec<_>>();
+
+        // Without a provider: the invariant culture, whatever the types.
+        assert_eq!(names(CultureTypes::SPECIFIC_CULTURES), [""]);
+        assert_eq!(names(CultureTypes::ALL_CULTURES), [""]);
+
+        TestCultureDataProvider::register();
+        assert_eq!(names(CultureTypes::SPECIFIC_CULTURES), ["en-GB", "en-US"]);
+        // The invariant culture is listed with the neutral ones.
+        assert_eq!(names(CultureTypes::NEUTRAL_CULTURES), ["", "en"]);
+        assert_eq!(names(CultureTypes::ALL_CULTURES), ["", "en", "en-GB", "en-US"]);
+        assert!(names(CultureTypes::INSTALLED_WIN32_CULTURES).is_empty());
     }
 
     #[test]
