@@ -4,6 +4,10 @@ This folder records what a scrolling trace of the ControlCatalog site showed, an
 document per improvement that follows from it. Nothing here is implemented yet, except where a design
 says so. Each design can be taken up on its own.
 
+Status: the native part of design 09 is written (the benchmark of recycling of the table view, with
+allocations per recycled row, and the counters behind the feature `perf-counters`); its numbers are
+still to be measured. The other designs are not started.
+
 Markers, as in the other performance documents: **[M]** measured, **[E]** estimated with the reasoning
 next to it, **[H]** a hypothesis that the design must verify before any code changes.
 
@@ -106,7 +110,7 @@ first step of each design (always a measurement) has been done.
 | [06](designs/06-text-layout.md) | Text layout: shaped runs and line metrics | text formatting, HarfBuzz backend | 3 to 6 % **[E]** | Low | Medium |
 | [07](designs/07-compositor-frame-cost.md) | Cost of a composed frame | composition, Skia backend | 3 to 8 % **[E]** | Medium | Medium |
 | [08](designs/08-build-settings.md) | Build settings of the browser module | `Cargo.toml`, the link | up to 6 % more **[M]** | Low | Small |
-| [09](designs/09-measurement.md) | Benchmarks and a regression gate | scripts, CI | none by itself | Low | Medium |
+| [09](designs/09-measurement.md) | Benchmarks and a regression gate (items 1 and 2 written) | scripts, CI, `diagnostics/perf_counters.rs`, the catalog tests | none by itself | Low | Medium |
 
 Design 09 comes first in time: every other design starts with a measurement it provides. The
 estimates do not add up; several designs shorten the same call chains.

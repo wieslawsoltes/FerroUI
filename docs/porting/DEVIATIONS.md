@@ -128,6 +128,12 @@ The port binds through compiled paths and through the metadata types declare, ne
 | `DataAnnotationsValidationPlugin` | None | See the register above. |
 | `MethodToCommandConverter` (compiled `Expression` lambdas over a `Delegate`) | `MethodToCommandConverter` over a `metadata::MarkupDelegate` (`converters/method_to_command_converter.rs`) | The delegate carries its method metadata, from which the `Can<Name>` companion and its `DependsOn` properties are read. |
 
+### Diagnostics (`src/FerroUI.Base/diagnostics/`)
+
+| Upstream | Port | Kind | Why | Since |
+|---|---|---|---|---|
+| No counterpart: upstream measures with the profilers and event counters of its runtime. | `diagnostics::perf_counters` (`perf_counters.rs`) and the feature `perf-counters` of `ferroui-base` (forwarded by `ferroui-controls`, `ferroui-markup-xaml` and `control-catalog`): per-thread counters of property changes raised and listened to, virtual calls by member, inheritance ancestor changes, styles and control themes evaluated and matched, resource lookups, bindings and binding expressions created, values published, text layouts created, text run cache hits and misses, containers recycled. The counting sites are the `perf_count!` and `perf_count_virtual!` invocations in the ported functions (the table of `docs/porting/performance/designs/09-measurement.md` lists them); `ferro_class!` counts the virtual calls. Each site is one added statement and changes no logic. Off by default: without the feature the macros expand to no code, the snapshot type has no size (constant assertions check both) and no type has a field for the counters in either configuration. | Addition | The performance designs start by counting the work per recycled row, and the port has no managed profiler to ask (`docs/porting/performance/designs/09-measurement.md`, item 2). | Performance design 09 |
+
 ### ControlCatalog sample (`samples/ControlCatalog/`)
 
 | Upstream | Port | Kind | Why | Since |
