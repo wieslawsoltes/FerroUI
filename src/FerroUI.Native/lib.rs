@@ -70,6 +70,7 @@ mod icon_loader;
 #[cfg(target_os = "macos")]
 mod mac_os_activatable_lifetime;
 
+#[cfg(target_os = "macos")]
 mod mac_os_mounted_volume_info_provider;
 #[cfg(target_os = "macos")]
 mod mac_os_native_menu_commands;
@@ -80,6 +81,7 @@ mod metal;
 #[cfg(target_os = "macos")]
 mod native_control_host_impl;
 
+#[cfg(target_os = "macos")]
 mod native_platform_settings;
 #[cfg(target_os = "macos")]
 mod platform_behavior_inhibition;
@@ -92,10 +94,13 @@ mod screen_impl;
 #[cfg(target_os = "macos")]
 mod storage_item;
 
+#[cfg(target_os = "macos")]
 mod storage_provider_api;
 
+#[cfg(target_os = "macos")]
 mod storage_provider_impl;
 
+#[cfg(target_os = "macos")]
 mod top_level_impl;
 #[cfg(target_os = "macos")]
 mod tray_icon_impl;
