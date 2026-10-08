@@ -10,9 +10,9 @@ Generated from upstream commit `17350180c33b063f0e98abbfd19aa3cae63f5d56`. Back 
 | FerroUI | `src/FerroUI.Native` (exists) |
 | Crate | `ferroui-native` |
 | Phase / priority | 1 - desktop (macOS) / P0 |
-| Files | 40/49 (81.6%) |
-| Types | 51/85 (60.0%) |
-| Members | 371/601 (61.7%) |
+| Files | 45/49 (91.8%) |
+| Types | 61/85 (71.8%) |
+| Members | 435/601 (72.4%) |
 | Contracts (interfaces) | 0/4 |
 | Property registrations | 1/1 |
 | Routed events | 0/0 |
@@ -30,7 +30,7 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 
 ## Files
 
-### `(project root)` - files 40/49, types 51/85, members 371/601
+### `(project root)` - files 45/49, types 61/85, members 435/601
 
 | Upstream file | Rust file | Status | Types | Members | Notes |
 |---|---|---|---|---|---|
@@ -65,21 +65,21 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 | `IAvnMenuItem.cs` | `i_frn_menu_item.rs` | missing | 0/2 | 0/4 |  |
 | `IconLoader.cs` | `icon_loader.rs` | present | 1/1 | 3/3 |  |
 | `MacOSActivatableLifetime.cs` | `mac_os_activatable_lifetime.rs` | present | 1/1 | 2/2 |  |
-| `MacOSMountedVolumeInfoProvider.cs` | `mac_os_mounted_volume_info_provider.rs` | missing | 0/2 | 0/4 |  |
+| `MacOSMountedVolumeInfoProvider.cs` | `mac_os_mounted_volume_info_provider.rs` | partial | 2/2 | 3/4 |  |
 | `MacOSNativeMenuCommands.cs` | `mac_os_native_menu_commands.rs` | present | 1/1 | 6/6 |  |
 | `MenuActionCallback.cs` | `menu_action_callback.rs` | present | 1/1 | 2/2 |  |
 | `Metal.cs` | `metal.rs` | partial | 5/6 | 22/33 |  |
-| `NativeControlHostImpl.cs` | `native_control_host_impl.rs` | missing | 0/1 | 0/6 |  |
+| `NativeControlHostImpl.cs` | `native_control_host_impl.rs` | present | 1/1 | 6/6 |  |
 | `NativeOwned.cs` | `native_owned.rs` | missing | 0/1 | 0/6 |  |
 | `NativePlatformSettings.cs` | `native_platform_settings.rs` | present | 1/1 | 4/4 |  |
 | `PlatformBehaviorInhibition.cs` | `platform_behavior_inhibition.rs` | present | 1/1 | 2/2 |  |
 | `PopupImpl.cs` | `popup_impl.rs` | partial | 1/1 | 7/8 |  |
 | `PredicateCallback.cs` | `predicate_callback.rs` | present | 1/1 | 2/2 |  |
 | `ScreenImpl.cs` | `screen_impl.rs` | partial | 1/2 | 7/9 |  |
-| `StorageItem.cs` | `storage_item.rs` | missing | 0/3 | 0/24 |  |
-| `StorageProviderApi.cs` | `storage_provider_api.rs` | missing | 0/3 | 0/26 |  |
-| `StorageProviderImpl.cs` | `storage_provider_impl.rs` | missing | 0/1 | 0/14 |  |
-| `TopLevelImpl.cs` | `top_level_impl.rs` | partial | 3/3 | 56/62 |  |
+| `StorageItem.cs` | `storage_item.rs` | partial | 3/3 | 17/24 |  |
+| `StorageProviderApi.cs` | `storage_provider_api.rs` | partial | 3/3 | 23/26 |  |
+| `StorageProviderImpl.cs` | `storage_provider_impl.rs` | present | 1/1 | 14/14 |  |
+| `TopLevelImpl.cs` | `top_level_impl.rs` | partial | 3/3 | 57/62 |  |
 | `TrayIconImpl.cs` | `tray_icon_impl.rs` | present | 1/1 | 8/8 |  |
 | `WindowImpl.cs` | `window_impl.rs` | partial | 1/1 | 31/32 |  |
 | `WindowImplBase.cs` | `window_impl_base.rs` | partial | 1/2 | 19/23 |  |
@@ -165,6 +165,13 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 
 </details>
 
+<details><summary><code>MacOSMountedVolumeInfoProvider.cs</code> - 1 missing</summary>
+
+- `MacOSMountedVolumeInfoListener` (class): 1 missing
+  - `virtual void Dispose(bool disposing)` *(protected; 1 of 2 overloads found)*
+
+</details>
+
 <details><summary><code>Metal.cs</code> - 12 missing</summary>
 
 - `MetalExternalObjectsFeature` (class, internal): **type missing** (9 members)
@@ -188,13 +195,36 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 
 </details>
 
-<details><summary><code>TopLevelImpl.cs</code> - 6 missing</summary>
+<details><summary><code>StorageItem.cs</code> - 7 missing</summary>
 
-- `TopLevelImpl` (class): 5 missing
+- `StorageItem` (class): 7 missing
+  - `Task<StorageItemProperties> GetBasicPropertiesAsync()`
+  - `bool CanBookmark { get; }`
+  - `Task<string?> SaveBookmarkAsync()`
+  - `Task ReleaseBookmarkAsync()`
+  - `Task<IStorageFolder?> GetParentAsync()`
+  - `Task DeleteAsync()`
+  - `Task<IStorageItem?> MoveAsync(IStorageFolder destination)`
+
+</details>
+
+<details><summary><code>StorageProviderApi.cs</code> - 3 missing</summary>
+
+- `StorageProviderApi` (class): 1 missing
+  - `void Dispose()`
+- `StorageProviderApi.FilePickerFileTypesWrapper` (class): 1 missing
+  - `override void Destroyed()` *(protected)*
+- `StorageProviderApi.SystemDialogEvents` (class): 1 missing
+  - `Task<(string[] Results, int? SelectedFilterIndex)> Task { get; }`
+
+</details>
+
+<details><summary><code>TopLevelImpl.cs</code> - 5 missing</summary>
+
+- `TopLevelImpl` (class): 4 missing
   - `Compositor Compositor { get; }`
   - `virtual void SetFrameThemeVariant(PlatformThemeVariant? themeVariant)`
   - `IMouseDevice? MouseDevice { get; }`
-  - `INativeControlHostImpl? NativeControlHost { get; }`
   - `virtual IPopupImpl? CreatePopup()`
 - `TopLevelImpl.TopLevelEvents` (class): 1 missing
   - `TopLevelEvents(TopLevelImpl parent)`

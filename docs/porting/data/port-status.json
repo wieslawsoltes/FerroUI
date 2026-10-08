@@ -6265,17 +6265,17 @@
    "scope": "in",
    "detail": "full",
    "files": [
-    40,
+    45,
     49,
     0
    ],
    "types": [
-    51,
+    61,
     85,
     0
    ],
    "members": [
-    371,
+    435,
     601,
     0
    ],
@@ -6294,9 +6294,9 @@
    "notApplicableFiles": 0,
    "matchKinds": {
     "field": 17,
-    "fn": 331,
-    "free fn": 5,
-    "overload fn": 9,
+    "fn": 393,
+    "free fn": 6,
+    "overload fn": 10,
     "trait": 1,
     "trait fn": 1,
     "variant": 7
@@ -6386,6 +6386,9 @@
     "MacOSActivatableLifetime.cs": [
      "mac_os_activatable_lifetime.rs"
     ],
+    "MacOSMountedVolumeInfoProvider.cs": [
+     "mac_os_mounted_volume_info_provider.rs"
+    ],
     "MacOSNativeMenuCommands.cs": [
      "mac_os_native_menu_commands.rs"
     ],
@@ -6394,6 +6397,9 @@
     ],
     "Metal.cs": [
      "metal.rs"
+    ],
+    "NativeControlHostImpl.cs": [
+     "native_control_host_impl.rs"
     ],
     "NativePlatformSettings.cs": [
      "native_platform_settings.rs"
@@ -6409,6 +6415,15 @@
     ],
     "ScreenImpl.cs": [
      "screen_impl.rs"
+    ],
+    "StorageItem.cs": [
+     "storage_item.rs"
+    ],
+    "StorageProviderApi.cs": [
+     "storage_provider_api.rs"
+    ],
+    "StorageProviderImpl.cs": [
+     "storage_provider_impl.rs"
     ],
     "TopLevelImpl.cs": [
      "top_level_impl.rs"
@@ -7723,8 +7738,10 @@
     "runtime/type_system/values.rs",
     "runtime/value_parser.rs",
     "rust_emitter/compiled.rs",
+    "rust_emitter/compiled_resources.rs",
     "rust_emitter/emitter.rs",
     "rust_emitter/source.rs",
+    "rust_emitter/xaml_metadata.rs",
     "testing/bindings.rs",
     "testing/objects.rs",
     "testing/styles.rs"
@@ -7766,11 +7783,11 @@
    "notApplicableFiles": 0,
    "matchKinds": {
     "field": 28,
-    "fn": 255,
+    "fn": 256,
     "free fn": 33,
     "free item": 1,
     "overload fn": 10,
-    "trait": 2
+    "trait": 1
    },
    "presentFiles": {
     "CombinedGeometryImpl.cs": [
@@ -7923,7 +7940,12 @@
     "i_skia_api_lease_feature.rs",
     "locked_framebuffer.rs",
     "metal/i_metal_device.rs",
-    "tests.rs"
+    "tests.rs",
+    "unit_tests/hit_testing.rs",
+    "unit_tests/media/custom_font_manager_impl.rs",
+    "unit_tests/media/text_formatting/multi_buffer_text_source.rs",
+    "unit_tests/media/text_formatting/single_buffer_text_source.rs",
+    "unit_tests/test_font_manager.rs"
    ]
   },
   {
