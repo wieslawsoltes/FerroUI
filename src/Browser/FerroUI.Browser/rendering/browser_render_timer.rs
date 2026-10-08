@@ -1,4 +1,4 @@
-use super::RenderWorker;
+use super::{RenderStatistics, RenderWorker};
 use crate::interop::thread_proxy::{self, RunOnThread};
 use crate::interop::timer_helper;
 use ferroui_base::rendering::{IRenderTimer, RenderTimerTick};
@@ -20,6 +20,9 @@ pub struct BrowserRenderTimer {
     thread: AtomicUsize,
     /// Whether a tick out of turn is on its way to that thread.
     out_of_turn_requested: AtomicBool,
+    /// Whether a tick out of turn was asked for before the timer was
+    /// started: the thread that starts it ticks once at once.
+    out_of_turn_before_start: AtomicBool,
     platform: TimerPlatform,
 }
 
@@ -33,6 +36,14 @@ struct TimerPlatform {
     current_thread: fn() -> usize,
     run_on_thread: RunOnThread,
     now: fn() -> f64,
+    /// The calls the runtime has carried from the calling thread to the
+    /// main thread so far, and the function of the last one
+    /// ([`thread_proxy::proxied_calls`]).
+    proxied_calls: fn() -> Option<u64>,
+    last_proxied_function: fn() -> Option<i64>,
+    /// Receives what a tick of a background timer cost
+    /// ([`RenderStatistics::tick_ended`]).
+    tick_ended: fn(Option<u64>, Option<i64>),
 }
 
 impl BrowserRenderTimer {
@@ -49,6 +60,9 @@ impl BrowserRenderTimer {
                 current_thread: thread_proxy::current_thread,
                 run_on_thread: thread_proxy::run_on_thread,
                 now: timer_helper::now,
+                proxied_calls: thread_proxy::proxied_calls,
+                last_proxied_function: thread_proxy::last_proxied_function,
+                tick_ended: RenderStatistics::tick_ended,
             },
         )
     }
@@ -61,6 +75,7 @@ impl BrowserRenderTimer {
             runs_in_background: is_background,
             thread: AtomicUsize::new(0),
             out_of_turn_requested: AtomicBool::new(false),
+            out_of_turn_before_start: AtomicBool::new(false),
             platform,
         })
     }
@@ -81,14 +96,39 @@ impl BrowserRenderTimer {
                 }
             }));
             (self.platform.run_animation_frames)();
+            // A tick that was asked for before the thread got here: whoever
+            // asked may be waiting for it, and the first animation frame of
+            // this thread may be a long way off (a page that is hidden has
+            // none).
+            if self.out_of_turn_before_start.swap(false, Ordering::SeqCst) {
+                self.render_frame_callback((self.platform.now)());
+            }
         }
     }
 
     fn render_frame_callback(&self, timestamp: f64) {
         let tick = self.tick.lock().unwrap_or_else(PoisonError::into_inner).clone();
-        if let Some(tick) = tick {
-            tick(Duration::from_secs_f64(timestamp.max(0.0) / 1000.0));
+        let Some(tick) = tick else { return };
+        let time = Duration::from_secs_f64(timestamp.max(0.0) / 1000.0);
+        if !self.runs_in_background {
+            tick(time);
+            return;
         }
+        // A tick of a render thread: what it asked of the main thread of
+        // the page is counted, for whoever wants to know that a frame does
+        // not depend on that thread.
+        let before = (self.platform.proxied_calls)();
+        tick(time);
+        let proxied = match (before, (self.platform.proxied_calls)()) {
+            (Some(before), Some(after)) => Some(after.saturating_sub(before)),
+            _ => None,
+        };
+        let last = if proxied.is_some_and(|proxied| proxied > 0) {
+            (self.platform.last_proxied_function)()
+        } else {
+            None
+        };
+        (self.platform.tick_ended)(proxied, last);
     }
 }
 
@@ -124,12 +164,30 @@ impl IRenderTimer for BrowserRenderTimer {
     /// timestamp of the tick is read from the clock of the animation frames
     /// of that thread.
     ///
+    /// A request made to a background timer that is not started yet is
+    /// kept: the thread that starts the timer ticks once when it does. (The
+    /// thread of the page asks before it waits for a frame, and the render
+    /// thread it started a moment ago may not have got that far.)
+    ///
     /// Does nothing when the caller is the thread that ticks (it cannot be
-    /// waiting for itself), while the timer is not started, while no
-    /// callback is set, and in a build without threads.
+    /// waiting for itself), while no callback is set, and in a build
+    /// without threads.
     fn request_tick_out_of_turn(&self) {
-        let thread = self.thread.load(Ordering::SeqCst);
-        if thread == 0 || thread == (self.platform.current_thread)() {
+        let mut thread = self.thread.load(Ordering::SeqCst);
+        if thread == 0 {
+            if !self.runs_in_background {
+                return;
+            }
+            self.out_of_turn_before_start.store(true, Ordering::SeqCst);
+            // The timer may have been started in between. Whichever of the
+            // two threads takes the flag makes the tick: the one that starts
+            // the timer on the spot, this one through the queue below.
+            thread = self.thread.load(Ordering::SeqCst);
+            if thread == 0 || !self.out_of_turn_before_start.swap(false, Ordering::SeqCst) {
+                return;
+            }
+        }
+        if thread == (self.platform.current_thread)() {
             return;
         }
         if self.tick.lock().unwrap_or_else(PoisonError::into_inner).is_none() {
@@ -160,7 +218,7 @@ impl IRenderTimer for BrowserRenderTimer {
 mod tests {
     use super::*;
     use crate::interop::thread_proxy::ThreadWork;
-    use std::cell::Cell;
+    use std::cell::{Cell, RefCell};
 
     thread_local! {
         /// The frame loops started on the thread of a test.
@@ -198,6 +256,29 @@ mod tests {
         true
     }
 
+    thread_local! {
+        /// What the script of the thread of a test says it has proxied.
+        static PROXIED: Cell<Option<u64>> = const { Cell::new(None) };
+        /// What the ticks of the thread of a test reported.
+        static TICKS: RefCell<Vec<(Option<u64>, Option<i64>)>> = const { RefCell::new(Vec::new()) };
+    }
+
+    fn proxied() -> Option<u64> {
+        PROXIED.with(|proxied| proxied.get())
+    }
+
+    fn function_seven() -> Option<i64> {
+        Some(7)
+    }
+
+    fn record_tick(proxied: Option<u64>, last: Option<i64>) {
+        TICKS.with(|ticks| ticks.borrow_mut().push((proxied, last)));
+    }
+
+    fn ticks() -> Vec<(Option<u64>, Option<i64>)> {
+        TICKS.with(|ticks| ticks.borrow().clone())
+    }
+
     fn platform(run_on_thread: RunOnThread) -> TimerPlatform {
         TimerPlatform {
             render_worker_exists: no_render_worker,
@@ -205,6 +286,9 @@ mod tests {
             current_thread: test_thread,
             run_on_thread,
             now: quarter_of_a_second,
+            proxied_calls: proxied,
+            last_proxied_function: function_seven,
+            tick_ended: record_tick,
         }
     }
 
@@ -229,6 +313,36 @@ mod tests {
 
         assert_eq!(1, frame_loops());
         assert_eq!(vec![Duration::from_millis(16), Duration::from_micros(1_500_500)], *seen.lock().unwrap());
+        // The ticks of the page are not measured.
+        assert!(ticks().is_empty());
+    }
+
+    #[test]
+    fn the_ticks_of_a_background_timer_report_what_they_asked_of_the_main_thread() {
+        let timer = BrowserRenderTimer::with_platform(true, platform(refuse));
+        // A tick that proxies two calls, one that proxies none, and one on
+        // a thread whose script stopped counting half way.
+        let step = Arc::new(Mutex::new(0));
+        let at = step.clone();
+        timer.set_tick(Some(Arc::new(move |_: Duration| {
+            let mut step = at.lock().unwrap();
+            *step += 1;
+            match *step {
+                1 => PROXIED.with(|proxied| proxied.set(Some(12))),
+                3 => PROXIED.with(|proxied| proxied.set(None)),
+                _ => {}
+            }
+        })));
+        timer.start_on_this_thread();
+
+        // No frame without a tick: nothing is reported.
+        assert!(ticks().is_empty());
+        PROXIED.with(|proxied| proxied.set(Some(10)));
+        timer_helper::js_export_on_animation_frame(16.0);
+        timer_helper::js_export_on_animation_frame(32.0);
+        timer_helper::js_export_on_animation_frame(48.0);
+
+        assert_eq!(vec![(Some(2), Some(7)), (Some(0), None), (None, None)], ticks());
     }
 
     #[test]
@@ -299,13 +413,10 @@ mod tests {
         let timer = BrowserRenderTimer::with_platform(true, platform(queue));
         let seen = Arc::new(Mutex::new(Vec::new()));
 
-        // Not started: there is no thread to ask.
         let log = seen.clone();
         timer.set_tick(Some(Arc::new(move |time| log.lock().unwrap().push(time))));
-        request_twice_from_another_thread(&timer);
-        assert!(take().is_empty());
-
         timer.start_on_this_thread();
+        assert!(seen.lock().unwrap().is_empty());
         // The thread that ticks does not ask itself.
         timer.request_tick_out_of_turn();
         assert!(take().is_empty());
@@ -331,6 +442,50 @@ mod tests {
         timer.set_tick(None);
         request_twice_from_another_thread(&timer);
         assert!(take().is_empty());
+    }
+
+    #[test]
+    fn a_tick_asked_for_before_the_start_is_made_by_the_thread_that_starts_the_timer() {
+        THREAD.with(|thread| thread.set(31));
+        let timer = BrowserRenderTimer::with_platform(true, platform(refuse));
+        let seen = Arc::new(Mutex::new(Vec::new()));
+        let log = seen.clone();
+        timer.set_tick(Some(Arc::new(move |time| log.lock().unwrap().push(time))));
+
+        // Not started: there is no thread to queue the tick for. Two
+        // requests are one.
+        std::thread::spawn({
+            let timer = timer.clone();
+            move || {
+                THREAD.with(|thread| thread.set(32));
+                timer.request_tick_out_of_turn();
+                timer.request_tick_out_of_turn();
+            }
+        })
+        .join()
+        .unwrap();
+        assert!(seen.lock().unwrap().is_empty());
+
+        timer.start_on_this_thread();
+        assert_eq!(vec![Duration::from_millis(250)], *seen.lock().unwrap());
+        // Once, and not again by a second start.
+        timer.start_on_this_thread();
+        assert_eq!(1, seen.lock().unwrap().len());
+    }
+
+    #[test]
+    fn a_timer_of_the_page_keeps_no_request_made_before_its_start() {
+        THREAD.with(|thread| thread.set(41));
+        let platform = TimerPlatform { render_worker_exists: a_render_worker, ..platform(refuse) };
+        let timer = BrowserRenderTimer::with_platform(false, platform);
+        let seen = Arc::new(Mutex::new(Vec::new()));
+        let log = seen.clone();
+        timer.set_tick(Some(Arc::new(move |time| log.lock().unwrap().push(time))));
+
+        timer.request_tick_out_of_turn();
+        timer.start_on_this_thread();
+
+        assert!(seen.lock().unwrap().is_empty());
     }
 
     #[test]

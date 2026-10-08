@@ -11,8 +11,49 @@
 //!
 //! The work only carries what is `Send`: no object of the page crosses.
 //!
+//! The runtime itself carries calls too, from any thread to the main thread:
+//! the functions of the C library that only the main thread can serve. Those
+//! make the calling thread wait; [`proxied_calls`] is their count.
+//!
 //! In a build without threads there is one thread, its id is 0 and no call
 //! is ever queued.
+
+use wasm_bindgen::prelude::*;
+
+#[wasm_bindgen(raw_module = "./ferroui.js")]
+extern "C" {
+    #[wasm_bindgen(js_namespace = FerroExports, js_name = proxiedCalls)]
+    fn js_proxied_calls() -> f64;
+
+    #[wasm_bindgen(js_namespace = FerroExports, js_name = lastProxiedFunction)]
+    fn js_last_proxied_function() -> f64;
+}
+
+/// How many calls the runtime has carried from the calling thread to the
+/// main thread of the page since the thread started: the calls of the C
+/// library that only the main thread can serve (a line on the console, a
+/// file, the environment), each of which makes the calling thread wait for
+/// the main thread. `None` when the script of the thread does not count them:
+/// on the main thread itself, and in a build without threads.
+///
+/// The calls of [`run_on_thread`] are not among them: they are queued and
+/// nobody waits for them.
+///
+/// Not from upstream. The count is kept by the script that is linked into a
+/// module built with threads (`scripts/browser/threads/ferroui-worker-attach.js`);
+/// it is how a render thread shows that a frame does not depend on the
+/// thread of the page (`docs/porting/browser-render-worker.md`, "B2.6").
+pub(crate) fn proxied_calls() -> Option<u64> {
+    let count = js_proxied_calls();
+    (count >= 0.0).then_some(count as u64)
+}
+
+/// The index of the function of the last call [`proxied_calls`] counted, in
+/// the table of the script of the module; `None` when there was none.
+pub(crate) fn last_proxied_function() -> Option<i64> {
+    let index = js_last_proxied_function();
+    (index >= 0.0).then_some(index as i64)
+}
 
 /// What is run on another thread.
 pub(crate) type ThreadWork = Box<dyn FnOnce() + Send>;

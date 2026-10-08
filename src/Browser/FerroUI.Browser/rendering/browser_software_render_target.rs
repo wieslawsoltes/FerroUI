@@ -1,6 +1,7 @@
 use super::web_render_target::update_size;
-use super::BrowserSurfaceShared;
-use crate::interop::JsObject;
+use super::{BrowserSurfaceShared, RenderStatistics};
+use crate::interop::canvas_helper::RENDER_TARGET_KIND_SOFTWARE;
+use crate::interop::{thread_proxy, JsObject};
 use ferroui_base::platform::surfaces::{
     FramebufferLockProperties, IFramebufferRenderTarget, IPlatformRenderSurfaceRenderTarget,
 };
@@ -54,6 +55,15 @@ impl BrowserSoftwareRenderTarget {
     fn blit(&self, fb: &RetainedFramebuffer) {
         let size = fb.size();
         put_pixel_data(&self.js, fb.address() as usize as u32, size.width * size.height * 4, size.width, size.height);
+        // Not from upstream: where frames are drawn is otherwise invisible
+        // to the thread of the page.
+        RenderStatistics::frame_presented(
+            thread_proxy::current_thread(),
+            RENDER_TARGET_KIND_SOFTWARE,
+            0,
+            size.width,
+            size.height,
+        );
     }
 }
 
