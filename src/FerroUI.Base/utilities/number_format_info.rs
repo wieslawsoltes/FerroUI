@@ -12,6 +12,7 @@
 
 use super::i_culture_data_provider::find_culture_data;
 use super::CultureInfo;
+use std::cell::Cell;
 use std::rc::Rc;
 
 thread_local! {
@@ -25,27 +26,27 @@ thread_local! {
 /// compares by identity.
 #[derive(Clone, Debug)]
 pub struct NumberFormatInfo {
-    currency_decimal_digits: i32,
+    currency_decimal_digits: Cell<i32>,
     currency_decimal_separator: String,
     currency_group_separator: String,
     currency_group_sizes: Vec<i32>,
-    currency_negative_pattern: i32,
-    currency_positive_pattern: i32,
+    currency_negative_pattern: Cell<i32>,
+    currency_positive_pattern: Cell<i32>,
     currency_symbol: String,
     nan_symbol: String,
     negative_infinity_symbol: String,
     negative_sign: String,
-    number_decimal_digits: i32,
+    number_decimal_digits: Cell<i32>,
     number_decimal_separator: String,
     number_group_separator: String,
     number_group_sizes: Vec<i32>,
-    number_negative_pattern: i32,
-    percent_decimal_digits: i32,
+    number_negative_pattern: Cell<i32>,
+    percent_decimal_digits: Cell<i32>,
     percent_decimal_separator: String,
     percent_group_separator: String,
     percent_group_sizes: Vec<i32>,
-    percent_negative_pattern: i32,
-    percent_positive_pattern: i32,
+    percent_negative_pattern: Cell<i32>,
+    percent_positive_pattern: Cell<i32>,
     percent_symbol: String,
     per_mille_symbol: String,
     positive_infinity_symbol: String,
@@ -100,25 +101,28 @@ macro_rules! number_properties {
                 $(#[$doc])*
                 #[inline]
                 pub fn $name(&self) -> i32 {
-                    self.$name
+                    self.$name.get()
                 }
 
                 $(#[$doc])*
                 ///
-                /// Panics when the value is out of range.
-                pub fn $set(&mut self, value: i32) {
+                /// Panics when the value is out of range. Takes a shared
+                /// reference, as the instance is shared through `Rc` where the
+                /// original passes the object around (markup sets the property
+                /// on the instance it created).
+                pub fn $set(&self, value: i32) {
                     assert!(
                         (0..=$max).contains(&value),
                         concat!($label, " must be between 0 and ", stringify!($max), ", inclusive.")
                     );
-                    self.$name = value;
+                    self.$name.set(value);
                 }
 
                 $(#[$doc])*
                 ///
                 /// Panics when the value is out of range.
                 #[inline]
-                pub fn $with(mut self, value: i32) -> Self {
+                pub fn $with(self, value: i32) -> Self {
                     self.$set(value);
                     self
                 }
@@ -234,27 +238,27 @@ impl NumberFormatInfo {
     /// `new NumberFormatInfo()`).
     pub fn new() -> NumberFormatInfo {
         NumberFormatInfo {
-            currency_decimal_digits: 2,
+            currency_decimal_digits: Cell::new(2),
             currency_decimal_separator: ".".to_string(),
             currency_group_separator: ",".to_string(),
             currency_group_sizes: vec![3],
-            currency_negative_pattern: 0,
-            currency_positive_pattern: 0,
+            currency_negative_pattern: Cell::new(0),
+            currency_positive_pattern: Cell::new(0),
             currency_symbol: "\u{00A4}".to_string(),
             nan_symbol: "NaN".to_string(),
             negative_infinity_symbol: "-Infinity".to_string(),
             negative_sign: "-".to_string(),
-            number_decimal_digits: 2,
+            number_decimal_digits: Cell::new(2),
             number_decimal_separator: ".".to_string(),
             number_group_separator: ",".to_string(),
             number_group_sizes: vec![3],
-            number_negative_pattern: 1,
-            percent_decimal_digits: 2,
+            number_negative_pattern: Cell::new(1),
+            percent_decimal_digits: Cell::new(2),
             percent_decimal_separator: ".".to_string(),
             percent_group_separator: ",".to_string(),
             percent_group_sizes: vec![3],
-            percent_negative_pattern: 0,
-            percent_positive_pattern: 0,
+            percent_negative_pattern: Cell::new(0),
+            percent_positive_pattern: Cell::new(0),
             percent_symbol: "%".to_string(),
             per_mille_symbol: "\u{2030}".to_string(),
             positive_infinity_symbol: "Infinity".to_string(),

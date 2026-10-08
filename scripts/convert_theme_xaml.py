@@ -6,6 +6,7 @@ The conversion is mechanical and changes names only:
 * the default XML namespace `https://github.com/avaloniaui` -> `https://github.com/ferroui`
 * the asset scheme `avares://` -> `ferres://`
 * the root namespace `Avalonia.` -> `FerroUI.` (type, namespace and assembly names)
+* the name as a word of a comment (`supported in Avalonia for`) -> `FerroUI`
 
 Everything else (resources, selectors, templates, setters, order, whitespace,
 byte order mark) is kept byte for byte. A file that still contains the
@@ -32,6 +33,7 @@ REPLACEMENTS = [
     (b"https://github.com/avaloniaui", b"https://github.com/ferroui"),
     (b"avares://", b"ferres://"),
     (b"Avalonia.", b"FerroUI."),
+    (b"Avalonia", b"FerroUI"),
 ]
 FORBIDDEN = re.compile(rb"avalonia|\bavn|axaml|avares", re.IGNORECASE)
 

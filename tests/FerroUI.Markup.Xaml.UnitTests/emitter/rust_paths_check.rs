@@ -689,6 +689,7 @@ pub fn markup_types() -> Vec<(&'static ::ferroui_base::metadata::MarkupType, &'s
         (<::ferroui_base::utilities::DayOfWeek as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "ferroui_base::utilities::DayOfWeek", false),
         (<::ferroui_base::utilities::Decimal as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "ferroui_base::utilities::Decimal", false),
         (<::ferroui_base::utilities::EventArgs as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "ferroui_base::utilities::EventArgs", false),
+        (<::ferroui_base::utilities::NumberFormatInfo as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "ferroui_base::utilities::NumberFormatInfo", false),
         (<::ferroui_base::utilities::NumberStyles as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "ferroui_base::utilities::NumberStyles", false),
         (<::ferroui_base::utilities::Uri as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "ferroui_base::utilities::Uri", false),
         (<::ferroui_base::utilities::UriKind as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "ferroui_base::utilities::UriKind", false),

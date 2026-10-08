@@ -8,9 +8,18 @@
 //! value converters of their control themes and the automation peer of the
 //! spectrum.
 //!
-//! Call [`register_types`] to make the types of the library known to markup.
+//! The control themes are not part of the base themes: an application
+//! includes the styles of the library for its theme, as upstream:
+//!
+//! ```xml
+//! <StyleInclude Source="ferres://FerroUI.Controls.ColorPicker/Themes/Fluent/Fluent.xaml" />
+//! ```
+//!
+//! The theme documents are embedded as assets of the assembly
+//! `FerroUI.Controls.ColorPicker`, registered by [`register_types`].
 
 mod alpha_component_position;
+mod assets;
 pub mod automation;
 mod color_changed_event_args;
 mod color_component;

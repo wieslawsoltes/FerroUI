@@ -349,6 +349,7 @@ crate::ferro_rust_paths! {
         crate::utilities::DayOfWeek,
         crate::utilities::Decimal,
         crate::utilities::EventArgs,
+        crate::utilities::NumberFormatInfo,
         crate::utilities::NumberStyles,
         crate::utilities::Uri,
         crate::utilities::UriKind,

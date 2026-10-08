@@ -1,11 +1,12 @@
 [package]
 name = "ferroui-controls-color-picker"
-description = "The colour picker library of FerroUI: ColorPicker, ColorView, ColorSpectrum, ColorSlider, ColorPreviewer, the colour palettes"
+description = "The colour picker library of FerroUI: ColorPicker, ColorView, ColorSpectrum, ColorSlider, ColorPreviewer, the colour palettes and their control themes"
 version.workspace = true
 edition.workspace = true
 rust-version.workspace = true
 license.workspace = true
 repository.workspace = true
+build = "build.rs"
 
 # Unit tests live next to the code (`tests/` modules of the library), not as
 # integration test targets.
@@ -23,3 +24,8 @@ ferroui-controls = { workspace = true }
 [dev-dependencies]
 ferroui-base = { workspace = true, features = ["testing"] }
 ferroui-controls = { workspace = true, features = ["testing"] }
+# The theme documents of the library are loaded through the run-time XAML loader in the tests.
+ferroui-markup-xaml = { workspace = true }
+ferroui-markup-xaml-loader = { workspace = true, features = ["runtime"] }
+ferroui-themes-fluent = { workspace = true }
+ferroui-themes-simple = { workspace = true }

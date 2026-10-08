@@ -1,5 +1,5 @@
 //! The type table of this crate: its namespaces, its classes, what it
-//! states about itself for markup.
+//! states about itself for markup and its embedded assets.
 
 use ferroui_base::metadata::{MarkupAssembly, XmlnsDefinition, FERRO_XML_NAMESPACE};
 use ferroui_base::{StaticType, TypeInfo};
@@ -53,8 +53,8 @@ const TYPES: &[&TypeInfo] = types![
     crate::color_spectrum::ColorSpectrum,
 ];
 
-/// Registers the namespaces, the types and the assembly of this crate (and
-/// of the crates it is built on). Cheap and idempotent.
+/// Registers the namespaces, the types, the assembly and the embedded
+/// assets of this crate (and of the crates it is built on). Cheap and idempotent.
 pub fn register_types() {
     static ONCE: std::sync::Once = std::sync::Once::new();
     ONCE.call_once(|| {
@@ -64,6 +64,7 @@ pub fn register_types() {
         crate::rust_paths::register_rust_paths();
         MarkupAssembly::register(&ASSEMBLY);
         crate::markup_types::register();
+        crate::assets::register();
     });
 }
 

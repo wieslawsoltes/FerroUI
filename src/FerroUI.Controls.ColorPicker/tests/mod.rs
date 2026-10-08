@@ -7,3 +7,4 @@
 mod color_helper_tests;
 mod controls_tests;
 mod palette_tests;
+mod theme_tests;
