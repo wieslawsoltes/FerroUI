@@ -245,12 +245,12 @@ impl IPlatformRenderInterface for HeadlessPlatformRenderInterface {
 
     fn create_glyph_run(
         &self,
-        glyph_typeface: &Rc<GlyphTypeface>,
+        _glyph_typeface: &Rc<GlyphTypeface>,
         font_rendering_em_size: f64,
         _glyph_infos: &[GlyphInfo],
         baseline_origin: Point,
-    ) -> Rc<dyn IGlyphRunImpl> {
-        Rc::new(HeadlessGlyphRunStub::new(glyph_typeface.clone(), font_rendering_em_size, baseline_origin))
+    ) -> std::sync::Arc<dyn IGlyphRunImpl> {
+        Arc::new(HeadlessGlyphRunStub::new(font_rendering_em_size, baseline_origin))
     }
 }
 
@@ -285,20 +285,17 @@ impl IPlatformRenderInterfaceContext for HeadlessPlatformRenderInterface {
     fn dispose(&self) {}
 }
 
+/// The glyph typeface the original keeps (a property nothing reads) is not
+/// kept: it belongs to the UI thread, and a glyph run is shared with the
+/// render thread.
 pub(crate) struct HeadlessGlyphRunStub {
-    glyph_typeface: Rc<GlyphTypeface>,
     font_rendering_em_size: f64,
     baseline_origin: Point,
 }
 
 impl HeadlessGlyphRunStub {
-    pub(crate) fn new(glyph_typeface: Rc<GlyphTypeface>, font_rendering_em_size: f64, baseline_origin: Point) -> Self {
-        Self { glyph_typeface, font_rendering_em_size, baseline_origin }
-    }
-
-    #[allow(dead_code)] // public property of the original, which nothing reads
-    pub(crate) fn glyph_typeface(&self) -> &Rc<GlyphTypeface> {
-        &self.glyph_typeface
+    pub(crate) fn new(font_rendering_em_size: f64, baseline_origin: Point) -> Self {
+        Self { font_rendering_em_size, baseline_origin }
     }
 }
 

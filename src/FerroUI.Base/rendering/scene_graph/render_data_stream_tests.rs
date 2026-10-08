@@ -150,7 +150,7 @@ fn replay_forwards_text_options() {
 #[test]
 fn dispose_resources_disposes_owned_resources() {
     let bitmap: Rc<dyn IBitmapImpl> = Rc::new(TestBitmapImpl);
-    let glyph_run: Rc<dyn IGlyphRunImpl> = MockGlyphRunImpl::new(Rect::default());
+    let glyph_run: std::sync::Arc<dyn IGlyphRunImpl> = MockGlyphRunImpl::new(Rect::default());
     let operation = TestCustomOperation::new();
 
     {
@@ -160,14 +160,14 @@ fn dispose_resources_disposes_owned_resources() {
         stream.draw_custom(Some(operation.clone()));
 
         assert_eq!(2, Rc::strong_count(&bitmap));
-        assert_eq!(2, Rc::strong_count(&glyph_run));
+        assert_eq!(2, std::sync::Arc::strong_count(&glyph_run));
 
         stream.dispose_resources();
         stream.dispose();
     }
 
     assert_eq!(1, Rc::strong_count(&bitmap));
-    assert_eq!(1, Rc::strong_count(&glyph_run));
+    assert_eq!(1, std::sync::Arc::strong_count(&glyph_run));
     assert_eq!(1, operation.dispose_count.get());
 }
 

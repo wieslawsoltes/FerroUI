@@ -531,8 +531,8 @@ pub struct MockGlyphRunImpl {
 impl MockGlyphRunImpl {
     /// A platform glyph run with the given bounds, an em size of 12 and its
     /// baseline origin at the top left of the bounds.
-    pub fn new(bounds: Rect) -> Rc<MockGlyphRunImpl> {
-        Rc::new(MockGlyphRunImpl { font_rendering_em_size: 12.0, baseline_origin: bounds.position(), bounds })
+    pub fn new(bounds: Rect) -> Arc<MockGlyphRunImpl> {
+        Arc::new(MockGlyphRunImpl { font_rendering_em_size: 12.0, baseline_origin: bounds.position(), bounds })
     }
 }
 
@@ -565,11 +565,11 @@ impl IPlatformRenderInterface for MockPlatformRenderInterface {
         font_rendering_em_size: f64,
         glyph_infos: &[crate::media::text_formatting::GlyphInfo],
         baseline_origin: Point,
-    ) -> Rc<dyn crate::platform::IGlyphRunImpl> {
+    ) -> std::sync::Arc<dyn crate::platform::IGlyphRunImpl> {
         let metrics = glyph_typeface.metrics();
         let scale = font_rendering_em_size / metrics.design_em_height as f64;
         let width: f64 = glyph_infos.iter().map(|glyph| glyph.glyph_advance).sum();
-        Rc::new(MockGlyphRunImpl {
+        std::sync::Arc::new(MockGlyphRunImpl {
             font_rendering_em_size,
             baseline_origin,
             bounds: Rect::new(

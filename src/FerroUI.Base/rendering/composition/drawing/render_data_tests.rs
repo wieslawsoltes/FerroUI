@@ -94,7 +94,7 @@ impl ICustomDrawOperation for TestOperation {
 
 #[test]
 fn replay_forwards_glyph_run_and_skips_a_missing_one() {
-    let glyph_run: Rc<dyn IGlyphRunImpl> = MockGlyphRunImpl::new(Rect::new(1.0, 2.0, 30.0, 12.0));
+    let glyph_run: std::sync::Arc<dyn IGlyphRunImpl> = MockGlyphRunImpl::new(Rect::new(1.0, 2.0, 30.0, 12.0));
     let mut stream = RenderDataStream::new();
     stream.draw_glyph_run(b(&brush()), Some(glyph_run.clone()));
     stream.draw_glyph_run(b(&brush()), None);
@@ -102,10 +102,10 @@ fn replay_forwards_glyph_run_and_skips_a_missing_one() {
 
     // The stream holds a reference to the platform glyph run until it is
     // disposed.
-    assert_eq!(Rc::strong_count(&glyph_run), 2);
+    assert_eq!(std::sync::Arc::strong_count(&glyph_run), 2);
     stream.dispose_resources();
     stream.dispose();
-    assert_eq!(Rc::strong_count(&glyph_run), 1);
+    assert_eq!(std::sync::Arc::strong_count(&glyph_run), 1);
 }
 
 #[test]
@@ -126,7 +126,7 @@ fn resources_are_interned_by_reference() {
 
 #[test]
 fn glyph_run_bounds_are_its_platform_bounds_inside_text_options_and_transforms() {
-    let glyph_run: Rc<dyn IGlyphRunImpl> = MockGlyphRunImpl::new(Rect::new(1.0, 2.0, 30.0, 12.0));
+    let glyph_run: std::sync::Arc<dyn IGlyphRunImpl> = MockGlyphRunImpl::new(Rect::new(1.0, 2.0, 30.0, 12.0));
     let mut stream = RenderDataStream::new();
     stream.draw_glyph_run(b(&brush()), Some(glyph_run.clone()));
     assert_eq!(stream.calculate_bounds(), Some(Rect::new(1.0, 2.0, 30.0, 12.0)));
@@ -156,7 +156,7 @@ fn glyph_run_bounds_are_its_platform_bounds_inside_text_options_and_transforms()
 
 #[test]
 fn glyph_run_is_hit_inside_its_bounds_also_inside_a_text_options_scope() {
-    let glyph_run: Rc<dyn IGlyphRunImpl> = MockGlyphRunImpl::new(Rect::new(10.0, 10.0, 30.0, 12.0));
+    let glyph_run: std::sync::Arc<dyn IGlyphRunImpl> = MockGlyphRunImpl::new(Rect::new(10.0, 10.0, 30.0, 12.0));
     let mut stream = RenderDataStream::new();
     stream.push_text_options(TextOptions::default());
     stream.draw_glyph_run(b(&brush()), Some(glyph_run.clone()));
@@ -185,7 +185,7 @@ fn glyph_run_is_hit_inside_its_bounds_also_inside_a_text_options_scope() {
 
 #[test]
 fn a_clip_restricts_the_hit_test_of_a_glyph_run_and_text_options_keep_it() {
-    let glyph_run: Rc<dyn IGlyphRunImpl> = MockGlyphRunImpl::new(Rect::new(0.0, 0.0, 30.0, 12.0));
+    let glyph_run: std::sync::Arc<dyn IGlyphRunImpl> = MockGlyphRunImpl::new(Rect::new(0.0, 0.0, 30.0, 12.0));
     let mut stream = RenderDataStream::new();
     stream.push_clip(rect(0.0, 0.0, 10.0, 12.0));
     stream.push_text_options(TextOptions::default());
@@ -223,7 +223,7 @@ fn round_trip(stream: &RenderDataStream) -> RenderDataStream {
 
 #[test]
 fn round_trip_preserves_text_options_and_glyph_runs() {
-    let glyph_run: Rc<dyn IGlyphRunImpl> = MockGlyphRunImpl::new(Rect::new(1.0, 2.0, 30.0, 12.0));
+    let glyph_run: std::sync::Arc<dyn IGlyphRunImpl> = MockGlyphRunImpl::new(Rect::new(1.0, 2.0, 30.0, 12.0));
     let options = TextOptions {
         text_rendering_mode: TextRenderingMode::Alias,
         text_hinting_mode: TextHintingMode::Strong,
@@ -243,7 +243,7 @@ fn round_trip_preserves_text_options_and_glyph_runs() {
     assert_eq!(copy.calculate_bounds(), Some(Rect::new(1.0, 2.0, 30.0, 12.0)));
     assert!(copy.hit_test(Point::new(5.0, 5.0)));
     match copy.get_resource(1) {
-        Some(RenderDataResource::GlyphRun(run)) => assert!(Rc::ptr_eq(&**run, &glyph_run)),
+        Some(RenderDataResource::GlyphRun(run)) => assert!(std::sync::Arc::ptr_eq(&**run, &glyph_run)),
         _ => panic!("the glyph run did not survive the round trip"),
     }
 }
@@ -333,7 +333,7 @@ fn recording_elides_empty_text_options_scopes_and_glyph_runs_without_foreground(
     );
     // The recorded run is the platform glyph run of the glyph run.
     content.with_stream(|stream| match stream.get_resource(1) {
-        Some(RenderDataResource::GlyphRun(recorded)) => assert!(Rc::ptr_eq(&**recorded, &run.platform_impl())),
+        Some(RenderDataResource::GlyphRun(recorded)) => assert!(std::sync::Arc::ptr_eq(&**recorded, &run.platform_impl())),
         _ => panic!("the glyph run was not recorded"),
     });
 }

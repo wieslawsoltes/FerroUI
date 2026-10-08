@@ -98,7 +98,7 @@ R1 is delivered one payload contract at a time; each step builds and passes on i
 | Step | Contract | State |
 |---|---|---|
 | R1.1 | `IGeometryImpl`, `IStreamGeometryImpl`, `ITransformedGeometryImpl` | Done: the contract requires `Send + Sync` and is held in `Arc` everywhere. The Skia geometries keep their paths behind a lock and hand out copies (a copy of a path shares its storage); the stroke cache and the path measure are under a lock; the headless stubs and the test geometries follow. |
-| R1.2 | `IGlyphRunImpl` | Open. |
+| R1.2 | `IGlyphRunImpl` | Done: `Send + Sync`, held in `Arc`. The text blob cache of the Skia glyph run is under a lock, and the closures of the two level cache are `Send`. |
 | R1.3 | `IBitmapImpl` and the contracts built on it | Open. The surface render target is a bitmap that owns GPU objects of the render thread, so the layer contract is decided here. |
 | R1.4 | Immutable brushes, pens, effects; custom draw operations | Open. |
 | R1.5 | `BatchObject::Value` requires `Send`; measurements | Open. |

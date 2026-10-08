@@ -87,7 +87,7 @@ impl IRenderDataVisitor for ReplayVisitor<'_> {
         }
     }
 
-    fn on_draw_glyph_run(&mut self, server_brush: Option<&dyn IBrush>, glyph_run: Option<&Rc<dyn IGlyphRunImpl>>) {
+    fn on_draw_glyph_run(&mut self, server_brush: Option<&dyn IBrush>, glyph_run: Option<&std::sync::Arc<dyn IGlyphRunImpl>>) {
         if let Some(glyph_run) = glyph_run {
             self.context.draw_glyph_run(server_brush, &**glyph_run);
         }

@@ -26,7 +26,7 @@ pub enum RenderDataResource {
     /// upstream), shared by the client render data and the server render
     /// data it is sent to, so that the glyph run is held once until both
     /// are released.
-    GlyphRun(Rc<Rc<dyn IGlyphRunImpl>>),
+    GlyphRun(Rc<std::sync::Arc<dyn IGlyphRunImpl>>),
     /// A recorded bitmap: one counted reference (`IRef<IBitmapImpl>`
     /// upstream), shared as a glyph run is.
     Bitmap(Rc<Rc<dyn IBitmapImpl>>),
@@ -155,7 +155,7 @@ impl RenderDataResources {
         }
     }
 
-    pub fn glyph_run(&self, handle: i32) -> Option<&Rc<dyn IGlyphRunImpl>> {
+    pub fn glyph_run(&self, handle: i32) -> Option<&std::sync::Arc<dyn IGlyphRunImpl>> {
         match self.get(handle)? {
             RenderDataResource::GlyphRun(glyph_run) => Some(&**glyph_run),
             _ => panic!("the render data resource is not a glyph run"),

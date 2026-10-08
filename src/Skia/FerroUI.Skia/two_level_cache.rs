@@ -1,8 +1,8 @@
 /// Compares cache keys.
-type KeyComparer<TKey> = Box<dyn Fn(&TKey, &TKey) -> bool>;
+type KeyComparer<TKey> = Box<dyn Fn(&TKey, &TKey) -> bool + Send>;
 
 /// Receives the values that leave the cache.
-type EvictionAction<TValue> = Box<dyn Fn(&TValue)>;
+type EvictionAction<TValue> = Box<dyn Fn(&TValue) + Send>;
 
 /// Provides a lightweight two-level cache for storing key-value pairs,
 /// supporting fast retrieval and optional eviction handling.

@@ -83,7 +83,7 @@ impl IRenderDataVisitor for BoundsVisitor {
         self.union(Some(geometry.map(|g| g.get_render_bounds(server_pen)).unwrap_or_default()));
     }
 
-    fn on_draw_glyph_run(&mut self, _server_brush: Option<&dyn IBrush>, glyph_run: Option<&Rc<dyn IGlyphRunImpl>>) {
+    fn on_draw_glyph_run(&mut self, _server_brush: Option<&dyn IBrush>, glyph_run: Option<&std::sync::Arc<dyn IGlyphRunImpl>>) {
         self.union(Some(glyph_run.map(|g| g.bounds()).unwrap_or_default()));
     }
 

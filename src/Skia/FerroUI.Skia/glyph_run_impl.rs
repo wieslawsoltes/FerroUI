@@ -10,7 +10,7 @@ use ferroui_base::{Point, Rect, Vector};
 use skia_safe::font::Edging;
 use skia_safe::{Font, FontHinting, TextBlob};
 use std::any::Any;
-use std::cell::RefCell;
+use std::sync::Mutex;
 
 /// How the font of a text blob is configured: the options the blob is
 /// built for.
@@ -60,7 +60,7 @@ pub struct GlyphRunImpl {
     glyph_positions: Vec<skia_safe::Point>,
     // A two level cache optimized for single-entry read, keyed by the font
     // configuration.
-    text_blob_cache: RefCell<TwoLevelCache<TextOptions, Option<TextBlob>>>,
+    text_blob_cache: Mutex<TwoLevelCache<TextOptions, Option<TextBlob>>>,
     font_rendering_em_size: f64,
     baseline_origin: Point,
     bounds: Rect,
@@ -142,7 +142,7 @@ impl GlyphRunImpl {
             font,
             glyph_indices,
             glyph_positions,
-            text_blob_cache: RefCell::new(TwoLevelCache::with_secondary_size(3)),
+            text_blob_cache: Mutex::new(TwoLevelCache::with_secondary_size(3)),
             font_rendering_em_size,
             baseline_origin,
             bounds: run_bounds.translate(Vector::new(baseline_origin.x, baseline_origin.y)),
@@ -165,7 +165,7 @@ impl GlyphRunImpl {
             };
         }
 
-        self.text_blob_cache.borrow_mut().get_or_add(text_options, |text_options| {
+        self.text_blob_cache.lock().unwrap().get_or_add(text_options, |text_options| {
             if self.glyph_indices.is_empty() {
                 return None;
             }
@@ -208,7 +208,7 @@ impl IGlyphRunImpl for GlyphRunImpl {
     }
 
     fn dispose(&self) {
-        self.text_blob_cache.borrow_mut().clear_and_dispose();
+        self.text_blob_cache.lock().unwrap().clear_and_dispose();
     }
 
     fn as_any(&self) -> &dyn Any {
