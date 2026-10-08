@@ -1,5 +1,8 @@
 //! The OpenGL pages of the catalog (namespace `ControlCatalog.Pages.OpenGl`):
 //! one module per upstream file.
+//!
+//! `open_gl_interop_page.rs` is not a module of this one: its class is in the
+//! namespace `ControlCatalog.Pages`, so `Pages/mod.rs` declares it.
 
 use crate::markup::XamlClass;
 use ferroui_base::TypeInfo;
