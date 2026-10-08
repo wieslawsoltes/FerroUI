@@ -16,12 +16,14 @@ use ferroui_base::threading::DispatcherTask;
 use ferroui_base::PixelSize;
 use std::cell::{Cell, RefCell};
 use std::rc::{Rc, Weak};
+use std::sync::Arc;
 
 /// What a texture is backed by: the two classes that derive from `CompositionGlTexture` in
 /// the original.
 enum TextureKind {
-    /// `SharedCompositionGlTexture`: a texture of the share group of the compositor.
-    Shared(Rc<dyn ICompositionImportableOpenGlSharedTexture>),
+    /// `SharedCompositionGlTexture`: a texture of the share group of the compositor. The
+    /// thread that renders reads it during the import: it is shared with that thread.
+    Shared(Arc<dyn ICompositionImportableOpenGlSharedTexture>),
     /// `ExternalImageCompositionGlTexture`: a texture whose image the compositor imports
     /// through a shared handle.
     ExternalImage(Rc<dyn IGlExportableExternalImageTexture>),
@@ -191,7 +193,7 @@ impl CompositionGlTexture {
     fn import(&self) -> Rc<dyn ICompositionImportedGpuImage> {
         match &self.kind {
             TextureKind::Shared(texture) => {
-                let image: Rc<dyn ICompositionImportableSharedGpuContextImage> = texture.clone();
+                let image: Arc<dyn ICompositionImportableSharedGpuContextImage> = texture.clone();
                 self.interop.import_shared_image(image)
             }
             TextureKind::ExternalImage(texture) => self.interop.import_image(texture.get_handle(), texture.properties()),

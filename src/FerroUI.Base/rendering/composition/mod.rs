@@ -94,7 +94,7 @@ pub use composition_external_memory::{
 };
 pub use composition_interop::{
     CompositionGpuImportedObjectBase, CompositionImportedGpuImage, CompositionImportedGpuSemaphore, CompositionInterop,
-    GpuImportError, IServerGpuImportedObject, ServerGpuImportedObjectBase, ServerImportedGpuImage,
+    IServerGpuImportedObject, ServerGpuImportedObjectBase, ServerImportedGpuImage,
     ServerImportedGpuSemaphore,
 };
 pub use composition_draw_list_visual::{CompositionDrawListVisual, ICompositionDrawListVisualExtension};
