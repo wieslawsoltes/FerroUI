@@ -198,7 +198,9 @@ class RustCrate:
                 if not fn.endswith(".rs"):
                     continue
                 comps = rel.split("/")
-                if AUX_DIRS & set(comps[:-1]) or fn == "build.rs" or fn.endswith("_tests.rs") or fn.endswith("_test.rs"):
+                # Test files are `<file>_tests.rs` (porting guide rule 1). A name that ends in `_test.rs` is not
+                # one: `render_data_stream_hit_test.rs` and `i_custom_hit_test.rs` are ported files.
+                if AUX_DIRS & set(comps[:-1]) or fn == "build.rs" or fn.endswith("_tests.rs"):
                     self.aux.append(rel)
                     continue
                 try:

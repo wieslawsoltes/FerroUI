@@ -89,6 +89,7 @@ RUST_PATH_CRATES = [
     "FerroUI.Dialogs",
     "FerroUI.Themes.Simple",
     "FerroUI.Themes.Fluent",
+    "FerroUI.OpenGL",
 ]
 UPSTREAM_PROJECTS = {"FerroUI.Base": "Avalonia.Base", "FerroUI.Controls": "Avalonia.Controls"}
 OVERRIDES = os.path.join(ROOT, "scripts", "markup_types_overrides.py")
