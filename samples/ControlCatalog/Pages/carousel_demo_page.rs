@@ -3,10 +3,11 @@
 
 use super::navigation_demo_helper::{Demo, NavigationDemoHelper};
 use super::{
-    CarouselCustomizationPage, CarouselDataBindingPage, CarouselGalleryAppPage, CarouselGesturesPage,
-    CarouselGettingStartedPage, CarouselMultiItemPage, CarouselPageCustomizationPage, CarouselPageDataTemplatePage,
-    CarouselPageEventsPage, CarouselPageFirstLookPage, CarouselPageGesturePage, CarouselPageSelectionPage,
-    CarouselPageTransitionsPage, CarouselTransitionsPage, CarouselVerticalPage, SanctuaryShowcasePage,
+    CareCompanionAppPage, CarouselCustomizationPage, CarouselDataBindingPage, CarouselGalleryAppPage,
+    CarouselGesturesPage, CarouselGettingStartedPage, CarouselMultiItemPage, CarouselPageCustomizationPage,
+    CarouselPageDataTemplatePage, CarouselPageEventsPage, CarouselPageFirstLookPage, CarouselPageGesturePage,
+    CarouselPageSelectionPage, CarouselPageTransitionsPage, CarouselTransitionsPage, CarouselVerticalPage,
+    SanctuaryShowcasePage,
 };
 use crate::markup::{content_page_class, xaml_class};
 use ferroui_base::interactivity::{Interactive, RoutedEventArgs};
@@ -15,9 +16,8 @@ use ferroui_controls::{ContentPage, NavigationPage};
 
 /// The registry of the samples of the page.
 ///
-/// Two entries of the original are not listed, because their pages are not ported:
-/// "Performance Monitor" of group "Performance" (`CarouselPagePerformancePage`) and
-/// "Care Companion" of group "Showcases" (`CareCompanionAppPage`).
+/// The entry "Performance Monitor" of group "Performance" (`CarouselPagePerformancePage`) of the
+/// original is not listed, because its page is not ported.
 const DEMOS: &[Demo] = &[
     // Overview
     (
@@ -71,6 +71,12 @@ const DEMOS: &[Demo] = &[
         "Sanctuary",
         "Travel discovery app with 3 full-screen immersive pages. Each page has a real background photo, gradient overlay, and themed content. Built as a 1:1 replica of a Stitch design.",
         || SanctuaryShowcasePage::new().upcast(),
+    ),
+    (
+        "Showcases",
+        "Care Companion",
+        "Healthcare onboarding with CarouselPage (3 pages), then a TabbedPage patient dashboard. Skip or complete onboarding to navigate to the dashboard via RemovePage.",
+        || CareCompanionAppPage::new().upcast(),
     ),
     // Carousel (ItemsControl) demos
     (

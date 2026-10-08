@@ -3,8 +3,9 @@
 
 use super::navigation_demo_helper::{Demo, NavigationDemoHelper};
 use super::{
-    PipsPagerCarouselPage, PipsPagerCustomButtonThemesPage, PipsPagerCustomColorsPage, PipsPagerCustomTemplatesPage,
-    PipsPagerEventsPage, PipsPagerGettingStartedPage, PipsPagerLargeCollectionPage, SanctuaryShowcasePage,
+    CareCompanionAppPage, PipsPagerCarouselPage, PipsPagerCustomButtonThemesPage, PipsPagerCustomColorsPage,
+    PipsPagerCustomTemplatesPage, PipsPagerEventsPage, PipsPagerGettingStartedPage, PipsPagerLargeCollectionPage,
+    SanctuaryShowcasePage,
 };
 use crate::markup::{content_page_class, xaml_class};
 use ferroui_base::interactivity::{Interactive, RoutedEventArgs};
@@ -12,10 +13,6 @@ use ferroui_base::{ferro_class_info, instantiate, Ref};
 use ferroui_controls::{ContentPage, NavigationPage};
 
 /// The registry of the samples of the page.
-///
-/// The entry "Care Companion" (group "Showcases") of the original is not
-/// listed: its page, `CareCompanionAppPage` (directory `Pages/CarouselPage`),
-/// is not ported.
 const DEMOS: &[Demo] = &[
     (
         "Getting Started",
@@ -58,6 +55,12 @@ const DEMOS: &[Demo] = &[
         "Custom Templates",
         "Override pip item templates to create squares, pills, numbers, or any custom shape.",
         || PipsPagerCustomTemplatesPage::new().upcast(),
+    ),
+    (
+        "Showcases",
+        "Care Companion",
+        "A health care onboarding flow using PipsPager as the page indicator for a CarouselPage.",
+        || CareCompanionAppPage::new().upcast(),
     ),
     (
         "Showcases",

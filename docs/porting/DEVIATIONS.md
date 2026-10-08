@@ -76,6 +76,7 @@ Other pages hold the entries of their own area, and this page does not repeat th
 |---|---|---|---|---|
 | `CompositionPage.ButtonThreadSleep` calls `Thread.Sleep(5000)`. | `button_thread_sleep` in `Pages/composition_page.rs` calls `std::thread::sleep` for 5 s. | Behaviour | Ported as upstream has it: the button demonstrates a blocked UI thread. Recorded because the port otherwise rules out blocking waits on the UI thread. | #34 |
 | The messages of `CompositionPage.CustomVisualHandler` are four `static readonly object` instances compared by reference. | Four thread-local `Rc<dyn Any>` objects compared with `Rc::ptr_eq`. | Representation | `Rc` is not `Sync`, so it cannot be a `static`; one instance per thread compares the same way on the UI thread. | #34 |
+| `CareCompanionAppPage.MakePipsPager` creates the two-way binding of `PipsPager.SelectedPageIndex` with `CompiledBinding.Create<TIn, TOut>(c => c.SelectedIndex, carousel, mode: BindingMode.TwoWay)`, which derives the path from an expression tree. | `make_pips_pager` in `Pages/CarouselPage/care_companion_app_page.rs` writes the path out with `CompiledBindingPathBuilder` (one element, the property `SelectingMultiPage.SelectedIndex`) and sets the source and the mode on the `CompiledBinding`. | Representation | Rust has no expression trees, so `CompiledBinding.Create` has no counterpart; the binding has the same source, path and mode. | #60 (no pull request yet) |
 
 ### Templates (`src/FerroUI.Controls/templates/`)
 
