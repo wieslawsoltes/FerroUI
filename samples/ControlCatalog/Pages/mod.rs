@@ -47,6 +47,7 @@ mod menu_page;
 mod native_embed_page;
 pub(crate) mod navigation_demo_helper;
 mod navigation_demo_page;
+mod numeric_up_down_page;
 mod open_gl_page;
 mod platform_info_page;
 mod platform_settings_page;
@@ -173,6 +174,7 @@ pub use list_box_page::ListBoxPage;
 pub use menu_page::MenuPage;
 pub use native_embed_page::{EmbedSample, INativeDemoControl, NativeEmbedPage};
 pub use navigation_demo_page::NavigationDemoPage;
+pub use numeric_up_down_page::{FormatObject, NumbersPageViewModel, NumericUpDownPage};
 pub use open_gl_interop_page::OpenGlInteropPage;
 pub use open_gl_page::{OpenGlPage, OpenGlPageControl};
 pub use carousel_page_samples::*;
@@ -242,6 +244,14 @@ pub(crate) fn register_value_types() {
     ferroui_base::data::core::ValueTypes::register_reference::<CompositionPageColorItem>();
     ferroui_base::data::core::ValueTypes::register_reference::<NavigationPageMvvmShellViewModel>();
     ferroui_base::data::core::ValueTypes::register_reference::<ProjectCardViewModel>();
+    ferroui_base::data::core::ValueTypes::register_reference::<NumbersPageViewModel>();
+    ferroui_base::data::core::ValueTypes::register_reference::<FormatObject>();
+}
+
+/// Makes the typed lists of the view models of this namespace known to markup
+/// (`ferro_markup_list!`).
+pub(crate) fn register_lists() {
+    numeric_up_down_page::FormatObjectList::register();
 }
 
 /// The classes of the files directly under `Pages/`.
@@ -300,6 +310,7 @@ const ROOT_TYPES: &[&TypeInfo] = &[
     MenuPage::TYPE,
     NativeEmbedPage::TYPE,
     NavigationDemoPage::TYPE,
+    NumericUpDownPage::TYPE,
     OpenGlInteropPage::TYPE,
     OpenGlPage::TYPE,
     OpenGlPageControl::TYPE,
@@ -382,6 +393,7 @@ const ROOT_CLASSES: &[&XamlClass] = &[
     &MenuPage::XAML_CLASS,
     &NativeEmbedPage::XAML_CLASS,
     &NavigationDemoPage::XAML_CLASS,
+    &NumericUpDownPage::XAML_CLASS,
     &OpenGlInteropPage::XAML_CLASS,
     &OpenGlPage::XAML_CLASS,
     &PlatformInfoPage::XAML_CLASS,
@@ -411,4 +423,6 @@ const ROOT_MARKUP_TYPES: &[&MarkupType] =
     &[
         <ScrollViewerPageViewModel as ferroui_base::metadata::MarkupTyped>::MARKUP,
         <CompositionPageColorItem as ferroui_base::metadata::MarkupTyped>::MARKUP,
+        <NumbersPageViewModel as ferroui_base::metadata::MarkupTyped>::MARKUP,
+        <FormatObject as ferroui_base::metadata::MarkupTyped>::MARKUP,
     ];

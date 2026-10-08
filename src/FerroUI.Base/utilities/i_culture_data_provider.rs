@@ -7,7 +7,7 @@
 //! for, a culture uses the data of its parent and finally of the invariant
 //! culture.
 
-use super::{CultureInfo, DateTimeFormatInfo, NumberFormatInfo, TextInfo};
+use super::{CultureInfo, CultureTypes, DateTimeFormatInfo, NumberFormatInfo, TextInfo};
 use crate::{FerroLocator, LocatorExtensions};
 use std::rc::Rc;
 
@@ -56,6 +56,16 @@ pub trait ICultureDataProvider: 'static {
     fn get_text_info(&self, culture_name: &str) -> Option<Rc<TextInfo>> {
         let _ = culture_name;
         None
+    }
+
+    // enumeration: added with the numeric up-down page of the control catalog (see `CultureInfo::get_cultures`)
+    /// The names of the cultures of the given types the provider has data
+    /// for, in the order they are listed in (the invariant culture, whose
+    /// name is empty, is not among them). A provider that does not enumerate
+    /// its cultures lists none.
+    fn get_culture_names(&self, types: CultureTypes) -> Vec<String> {
+        let _ = types;
+        Vec::new()
     }
 }
 

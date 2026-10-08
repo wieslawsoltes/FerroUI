@@ -1430,6 +1430,8 @@ fn value_types_have_the_text_of_the_managed_original() {
     assert_eq!(text_of(Rc::new(Thickness::new(1.0, 2.0, 3.0, 4.0))), Thickness::new(1.0, 2.0, 3.0, 4.0).to_string());
     assert_eq!(text_of(Rc::new(crate::Point::new(1.0, 2.0))), "1, 2");
     assert_eq!(text_of(Rc::new(crate::media::FontFamily::new("Arial"))), "Arial");
+    // A culture is its name.
+    assert_eq!(text_of(Rc::new(crate::utilities::CultureInfo::get_culture_info("en-GB"))), "en-GB");
     // An enumeration is the name of its member; a type without a text of its own is its name.
     assert_eq!(text_of(Rc::new(crate::media::FontStyle::Italic)), "Italic");
     assert_eq!(text_of(Rc::new(crate::media::GradientStops::new())), "FerroUI.Media.GradientStops");

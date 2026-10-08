@@ -6,7 +6,7 @@
 //! recorded output). Note the narrow no-break space (U+202F) before the
 //! designator in the time patterns of `en` and `en-US`.
 
-use super::{CalendarWeekRule, DateTimeFormatInfo, DayOfWeek, ICultureDataProvider, NumberFormatInfo};
+use super::{CalendarWeekRule, CultureTypes, DateTimeFormatInfo, DayOfWeek, ICultureDataProvider, NumberFormatInfo};
 use crate::FerroLocator;
 use std::rc::Rc;
 
@@ -102,5 +102,17 @@ impl ICultureDataProvider for TestCultureDataProvider {
         } else {
             None
         }
+    }
+
+    fn get_culture_names(&self, types: CultureTypes) -> Vec<String> {
+        let mut names = Vec::new();
+        if types.contains(CultureTypes::NEUTRAL_CULTURES) {
+            names.push("en".to_string());
+        }
+        if types.contains(CultureTypes::SPECIFIC_CULTURES) {
+            names.push("en-GB".to_string());
+            names.push("en-US".to_string());
+        }
+        names
     }
 }

@@ -69,7 +69,7 @@ mod value_span;
 
 pub use array_builder::ArrayBuilder;
 pub use array_slice::ArraySlice;
-pub use culture_info::CultureInfo;
+pub use culture_info::{CultureInfo, CultureTypes};
 mod compare_info;
 pub use compare_info::{CompareInfo, CompareOptions, ICompareRules, StringComparison};
 pub use read_only_memory::ReadOnlyMemory;
