@@ -112,3 +112,42 @@ fn the_server_compositor_is_released_on_its_thread() {
     to_thread.send(()).unwrap();
     handle.join().expect("the render thread released the server compositor");
 }
+
+#[test]
+fn a_synchronous_commit_waits_for_the_render_thread() {
+    let _dispatcher_scope = Dispatcher::unit_test_scope();
+    // A synchronous commit is skipped without a render interface (unit tests
+    // that set up no platform): this thread has one, as the other does.
+    let (_locator_scope, _render_interface) = MockPlatformRenderInterface::install();
+    let render_loop = ManualRenderLoop::background();
+    let compositor = Compositor::with_render_thread(
+        render_loop.clone(),
+        || None,
+        &MediaContext::instance().scheduler(),
+        Dispatcher::ui_thread(),
+        None,
+        None,
+    );
+
+    // The render thread ticks until it is told to stop.
+    let stop = std::sync::Arc::new(std::sync::atomic::AtomicBool::new(false));
+    let (thread_stop, thread_loop) = (stop.clone(), render_loop.clone());
+    let render_thread = thread::spawn(move || {
+        let (_locator_scope, _render_interface) = MockPlatformRenderInterface::install();
+        while !thread_stop.load(std::sync::atomic::Ordering::SeqCst) {
+            thread_loop.tick();
+            thread::sleep(std::time::Duration::from_millis(1));
+        }
+    });
+
+    let ran = std::sync::Arc::new(std::sync::atomic::AtomicBool::new(false));
+    let flag = ran.clone();
+    compositor.post_server_job(move |_| flag.store(true, std::sync::atomic::Ordering::SeqCst), false);
+
+    // Returns once the render thread has applied the batch and rendered.
+    MediaContext::instance().immediate_render_requested(&compositor);
+    assert!(ran.load(std::sync::atomic::Ordering::SeqCst));
+
+    stop.store(true, std::sync::atomic::Ordering::SeqCst);
+    render_thread.join().expect("the render thread ended");
+}
