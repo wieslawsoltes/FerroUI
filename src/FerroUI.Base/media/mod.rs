@@ -366,7 +366,7 @@ pub(crate) use text_none_trimming::TextNoneTrimming;
 pub use text_path_segment_ellipsis::TextPathSegmentEllipsis;
 pub use text_path_segment_trimming::TextPathSegmentTrimming;
 pub use text_trailing_trimming::TextTrailingTrimming;
-pub use text_trimming::TextTrimming;
+pub use text_trimming::{TextTrimming, DEFAULT_ELLIPSIS_CHAR};
 
 mod formatted_text;
 

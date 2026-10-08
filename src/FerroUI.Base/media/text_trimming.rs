@@ -26,7 +26,10 @@ impl PartialEq for dyn TextTrimming {
     }
 }
 
-pub(crate) const DEFAULT_ELLIPSIS_CHAR: &str = "\u{2026}";
+/// C# `TextTrimming.DefaultEllipsisChar`.
+///
+/// Internal upstream; public so that the Skia unit tests reach it.
+pub const DEFAULT_ELLIPSIS_CHAR: &str = "\u{2026}";
 
 struct Instances {
     none: Rc<dyn TextTrimming>,

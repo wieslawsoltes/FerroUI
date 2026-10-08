@@ -16,7 +16,9 @@ use crate::media::text_formatting::{TextLine, TextRun};
 /// text runs — a level-resolved table that maps each run back to its original
 /// logical position. If the line hasn't been finalized (or the line is not a
 /// `TextLineImpl`), it falls back to the raw [`TextLine::text_runs`] list.
-pub(crate) struct LogicalTextRunEnumerator<'a> {
+///
+/// Internal upstream; public so that the Skia unit tests reach it.
+pub struct LogicalTextRunEnumerator<'a> {
     text_runs: Option<Ref<'a, [Rc<dyn TextRun>]>>,
     indexed_text_runs: Option<Rc<[IndexedTextRun]>>,
     step: i32,
