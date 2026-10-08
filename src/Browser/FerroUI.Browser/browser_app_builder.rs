@@ -68,6 +68,17 @@ pub struct BrowserPlatformOptions {
     /// property forces the polyfill to be always used. For more details, see
     /// https://github.com/jimmywarting/native-file-system-adapter#a-note-when-downloading-with-the-polyfilled-version.
     pub prefer_file_dialog_polyfill: bool,
+
+    /// Whether a module built with threads renders on a render thread: the
+    /// compositor and the render backend then run in a worker that owns the
+    /// canvases of the views, and the thread of the page keeps the user
+    /// interface. `true` by default. With `false` such a module renders on
+    /// the thread of the page, as a module built without threads always
+    /// does; the option has no effect there.
+    ///
+    /// Not in the original, where a build with threads always renders on
+    /// its render worker.
+    pub render_thread: bool,
 }
 
 impl Default for BrowserPlatformOptions {
@@ -81,6 +92,7 @@ impl Default for BrowserPlatformOptions {
             register_ferro_service_worker: false,
             ferro_service_worker_scope: None,
             prefer_file_dialog_polyfill: false,
+            render_thread: true,
         }
     }
 }
@@ -174,6 +186,11 @@ mod tests {
             vec![BrowserRenderingMode::WebGL2, BrowserRenderingMode::WebGL1, BrowserRenderingMode::Software2D],
             BrowserPlatformOptions::default().rendering_mode
         );
+    }
+
+    #[test]
+    fn a_module_with_threads_renders_on_a_render_thread_unless_told_not_to() {
+        assert!(BrowserPlatformOptions::default().render_thread);
     }
 
     #[test]
