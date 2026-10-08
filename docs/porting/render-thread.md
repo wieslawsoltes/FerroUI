@@ -95,7 +95,12 @@ Order: R1 to R5 in sequence; B0 in parallel with R1, since it only measures.
 
 Built and run on the development Mac with the nightly that the feasibility check used (`FERROUI_BROWSER_NIGHTLY=nightly`, which is 1.93.0-nightly of 2025-10-31 there): `scripts/build-browser.sh thread_spawn --threads` builds, and `scripts/browser/tests/thread_spawn.test.mjs` passes its three checks: a spawned thread sends its value back in a page isolated by the headers of the server; without the headers the service worker isolates the page after one reload; a page that cannot be isolated says so. One fault found and fixed: the service worker rebuilt a response without a body (a 204 or a 304) with a body, which is an error. The build without `--threads` is unchanged (`themed_view` builds and passes its 30 checks).
 
-Not validated: the nightly date pinned in `setup.sh` (it was not installed; the pin is the agent's reasoning about which nightly can build the port's module, not a tested fact), the port's own module with Skia in the threaded mode (`themed_view --threads`), and the service worker on the published host.
+Validated since, with the pinned nightly (`nightly-2026-07-01`, which reports 1.98.0-nightly): the test page builds and passes; and **the port's own module links and runs in the threaded mode**: `scripts/build-browser.sh themed_view --threads` builds, and the 30 checks of `themed_view.test.mjs` pass against it when the site is served isolated (rendering is still done by the page's thread; the worker is B2). Two things had to be found for the link:
+
+- The nightly of the feasibility check (2025-10-31) unwinds with JavaScript exceptions, so Emscripten links its own `emscripten_longjmp`, which collides with the setjmp bridge of the Skia backend. The pinned nightly unwinds with WebAssembly exceptions, as the stable toolchain does.
+- The prebuilt archive of the Skia bindings (`libskia-bindings.a`: the objects `bindings`, `gl`, `gpu`, `ganesh`) is compiled without atomics, unlike `libskia.a` beside it, and the linker refuses it in a module with shared memory. The threaded link passes `--no-check-features`. In those four objects a `thread_local` is a plain global and the guard of a local static is not atomic; they are forwarding functions. The proper fix is to compile them in the build with `-pthread` (the sources are in the `skia-bindings` crate) or to get binaries built so; until then this is a known hazard of the threaded mode.
+
+Not validated: the service worker on the published host.
 
 ### B1 as written (2026-10-08)
 
