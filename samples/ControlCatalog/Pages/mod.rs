@@ -20,6 +20,7 @@ mod carousel_page;
 mod check_box_page;
 mod combo_box_page;
 mod command_bar_page;
+mod connected_animation_demo_page;
 mod container_query_page;
 mod content_demo_page;
 mod context_flyout_page;
@@ -126,6 +127,7 @@ pub use command_bar::{
     CommandBarTogglePage,
 };
 pub use command_bar_page::CommandBarPage;
+pub use connected_animation_demo_page::ConnectedAnimationDemoPage;
 pub use container_query_page::ContainerQueryPage;
 pub use content_demo_page::ContentDemoPage;
 pub use content_page::{
@@ -253,6 +255,7 @@ const ROOT_TYPES: &[&TypeInfo] = &[
     CheckBoxPage::TYPE,
     ComboBoxPage::TYPE,
     CommandBarPage::TYPE,
+    ConnectedAnimationDemoPage::TYPE,
     ContainerQueryPage::TYPE,
     ContentDemoPage::TYPE,
     ContextFlyoutPage::TYPE,
@@ -328,6 +331,7 @@ const ROOT_CLASSES: &[&XamlClass] = &[
     &CheckBoxPage::XAML_CLASS,
     &ComboBoxPage::XAML_CLASS,
     &CommandBarPage::XAML_CLASS,
+    &ConnectedAnimationDemoPage::XAML_CLASS,
     &ContainerQueryPage::XAML_CLASS,
     &ContentDemoPage::XAML_CLASS,
     &ContextFlyoutPage::XAML_CLASS,

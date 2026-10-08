@@ -1,8 +1,10 @@
 //! Tests of the scroll-aware and transitions samples of `NavigationPage` and of the navigation
-//! demo page. Not ports: the upstream sample has no tests.
+//! and connected animation demo pages. Not ports: the upstream sample has no tests.
 
 use super::support::*;
-use crate::pages::{NavigationDemoPage, NavigationPageScrollAwarePage, NavigationPageTransitionsPage};
+use crate::pages::{
+    ConnectedAnimationDemoPage, NavigationDemoPage, NavigationPageScrollAwarePage, NavigationPageTransitionsPage,
+};
 use ferroui_base::interactivity::RoutedEventArgs;
 use ferroui_base::media::TranslateTransform;
 use ferroui_base::threading::Dispatcher;
@@ -143,5 +145,19 @@ fn navigation_demo_page_lists_the_samples_and_opens_one() {
 
     click(&cards[0]);
     assert_eq!(2, sample_nav.stack_depth());
+    window.close();
+}
+
+#[test]
+fn connected_animation_demo_page_shows_an_empty_home_page() {
+    let _app = start_catalog_application();
+    let page = ConnectedAnimationDemoPage::new();
+    let window = show(&page.clone().upcast());
+
+    let sample_nav = page.get_control::<NavigationPage>("SampleNav");
+    assert_eq!(1, sample_nav.stack_depth());
+    let home = sample_nav.current_page().expect("the home page");
+    assert!(!NavigationPage::get_has_navigation_bar(&home));
+    assert!(descendants::<Button>(&home).is_empty());
     window.close();
 }
