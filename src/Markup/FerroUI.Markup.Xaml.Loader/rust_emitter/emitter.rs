@@ -39,6 +39,7 @@ use crate::compiler_extensions::transformers::{
     XamlIlCombinatorSelector, XamlIlDirectCallPropertySetter, XamlIlNestingSelector, XamlIlNotSelector,
     XamlIlNthChildSelector, XamlIlNthChildSelectorType, XamlIlOrSelectorNode, XamlIlPropertyEqualsSelector,
     XamlIlSelectorInitialNode, XamlIlSelectorNode, XamlIlStringSelector, XamlIlStringSelectorType, XamlIlTypeSelector,
+    XamlSourceInfoValueManipulation,
 };
 use crate::compiler_extensions::{
     BindingSetter, BindingWithPrioritySetter, SetValueWithPrioritySetter, UnsetValueSetter, XamlIlBindingPathElementNode, XamlIlBindingPathNode, XamlIlFerroPropertyFieldNode,
@@ -1208,7 +1209,37 @@ impl Emitter<'_> {
         if let Some(n) = node.cast::<EnsureCapacityNode>() {
             return self.ensure_capacity(node, &n, target);
         }
+        if let Some(n) = node.cast::<XamlSourceInfoValueManipulation>() {
+            // `XamlSourceInfo.SetXamlSourceInfo(target, new XamlSourceInfo(line, position, document))`.
+            let info = self.source_info(node, node.line(), node.position(), n.document.as_deref())?;
+            let setter = n
+                .types
+                .xaml_source_info_setter
+                .as_any()
+                .downcast_ref::<RuntimeMethod>()
+                .ok_or_else(|| unsupported(node, "SetXamlSourceInfo is not a method of the run-time type system"))?;
+            let call = self.declared_call(node, setter, &[Typed { expr: target.expr.clone(), kind: target.kind }, info])?;
+            self.line(format!("{call};"));
+            return Ok(());
+        }
         Err(unsupported(node, "no emitter for this manipulation node"))
+    }
+
+    /// `new XamlSourceInfo(line, position, document)` (the source information of the
+    /// node at `line`, `position` of the document named `document`).
+    fn source_info(&mut self, node: &Rc<dyn IXamlAstNode>, line: i32, position: i32, document: Option<&str>) -> EmitResult<Typed> {
+        let types = self.configuration.try_get_ferro_types().map_err(|e| failed(node, e))?;
+        let document = match document {
+            Some(document) => format!("::core::option::Option::Some(::std::string::String::from({}))", rust_string_literal(document)),
+            None => "::core::option::Option::None".to_string(),
+        };
+        let arguments = [
+            exact::<i32>(format!("{line}_i32")),
+            exact::<i32>(format!("{position}_i32")),
+            Typed { expr: document, kind: Kind::Exact { id: TypeId::of::<Option<String>>(), nullable: None } },
+        ];
+        let info = self.constructor_call(node, &types.xaml_source_info_constructor, &arguments)?;
+        Ok(self.bind(&info, "source_info"))
     }
 
     fn styled_class(&self, node: &Rc<dyn IXamlAstNode>, target: &Typed) -> EmitResult<&'static TypeInfo> {
@@ -1704,9 +1735,6 @@ impl Emitter<'_> {
         target: &Typed,
     ) -> EmitResult<()> {
         let property_name = assignment.property.name();
-        if setter.emit_source_info {
-            return Err(unsupported(node, format!("{property_name}: a resource with source information")));
-        }
         let adder = setter
             .adder
             .as_any()
@@ -1735,7 +1763,29 @@ impl Emitter<'_> {
         };
         let key = self.value(&key_node.as_node())?;
         let value = self.value(&value_node.as_node())?;
-        let call = self.declared_call(node, adder, &[dictionary, key, value])?;
+        if !setter.emit_source_info {
+            let call = self.declared_call(node, adder, &[dictionary, key, value])?;
+            self.line(format!("{call};"));
+            return Ok(());
+        }
+        // `XamlSourceInfo.SetXamlSourceInfo(dictionary, key, new XamlSourceInfo(..))` after the
+        // add, with the same dictionary and key.
+        let dictionary = self.bind(&dictionary, "dictionary");
+        let key = self.bind(&key, "key");
+        let call = self.declared_call(node, adder, &[
+            Typed { expr: dictionary.expr.clone(), kind: dictionary.kind },
+            Typed { expr: key.expr.clone(), kind: key.kind },
+            value,
+        ])?;
+        self.line(format!("{call};"));
+        let info = self.source_info(node, setter.line, setter.position, setter.document.as_deref())?;
+        let dictionary_setter = setter
+            .types
+            .xaml_source_info_dictionary_setter
+            .as_any()
+            .downcast_ref::<RuntimeMethod>()
+            .ok_or_else(|| unsupported(node, "SetXamlSourceInfo is not a method of the run-time type system"))?;
+        let call = self.declared_call(node, dictionary_setter, &[dictionary, key, info])?;
         self.line(format!("{call};"));
         Ok(())
     }
@@ -3068,7 +3118,13 @@ pub fn emit_function(
         .ok_or_else(|| unsupported(root, "the root is not a value with a manipulation"))?;
     let manipulation = group.manipulation().ok_or_else(|| unsupported(root, "the root has no manipulation"))?;
     let root_value = group.value().as_node();
-    if !root_value.is::<XamlAstNewClrObjectNode>() {
+    // The root object, or the root object with its source information (`CreateSourceInfo`).
+    let created_by_constructor = root_value.is::<XamlAstNewClrObjectNode>()
+        || root_value.as_value_with_manipulation_node().is_some_and(|value| {
+            value.value().as_node().is::<XamlAstNewClrObjectNode>()
+                && value.manipulation().is_some_and(|m| m.as_node().is::<XamlSourceInfoValueManipulation>())
+        });
+    if !created_by_constructor {
         return Err(unsupported(&root_value, "the root object is not created with a constructor"));
     }
 
