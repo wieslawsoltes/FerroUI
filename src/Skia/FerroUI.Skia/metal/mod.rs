@@ -5,8 +5,10 @@
 //! as raw pointers, exactly as the platform hands them out.
 
 mod i_metal_device;
+mod i_metal_external_objects_feature;
 
 pub use i_metal_device::{
     try_get_metal_surface, IMetalDevice, IMetalPlatformSurface, IMetalPlatformSurfaceRenderTarget,
     IMetalPlatformSurfaceRenderingSession,
 };
+pub use i_metal_external_objects_feature::{IMetalExternalObjectsFeature, IMetalExternalTexture, IMetalSharedEvent};
