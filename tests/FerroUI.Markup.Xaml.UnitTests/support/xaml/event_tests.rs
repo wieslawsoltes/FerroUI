@@ -9,8 +9,8 @@ use ferroui_base::layout::LayoutableImpl;
 use ferroui_base::metadata::{into_markup_value, MarkupDelegate};
 use ferroui_base::utilities::{CancelEventArgs, EventArgs};
 use ferroui_base::{
-    ferro_class, ferro_class_info, ferro_impl_classes, instantiate, BoxedValue, FerroObjectImpl, Ref, StyledElementImpl,
-    VisualImpl,
+    ferro_class, ferro_class_info, ferro_impl_classes, instantiate, BoxedValue, FerroObjectImpl,
+    OwnedFerroPropertyChangedEventArgs, Ref, StyledElementImpl, VisualImpl,
 };
 use ferroui_controls::primitives::popup_positioning::{CustomPopupPlacement, PopupAnchor};
 use ferroui_controls::primitives::TemplatedControlImpl;
@@ -171,6 +171,7 @@ pub struct MyHost {
     placements: Cell<u32>,
     opening: RefCell<Vec<MarkupDelegate>>,
     openings: Cell<u32>,
+    changed_properties: RefCell<Vec<String>>,
 }
 
 ferro_class!(MyHost: Panel);
@@ -197,6 +198,10 @@ ferro_class_info!(MyHost {
             // are the ones the event raises, whatever their class.
             fn OnOpening(Option<BoxedValue>, BoxedValue) =>
                 |this: &Ref<MyHost>, sender: Object, e: BoxedValue| this.on_opening(&sender, &e),
+            fn OnPropertyChanged(Option<BoxedValue>, OwnedFerroPropertyChangedEventArgs) =>
+                |this: &Ref<MyHost>, sender: Object, e: OwnedFerroPropertyChangedEventArgs| {
+                    this.on_property_changed(&sender, &e)
+                },
         ],
         events: [
             // `event EventHandler Opening`, raised with cancellable arguments.
@@ -214,6 +219,7 @@ impl MyHost {
             placements: Cell::new(0),
             opening: RefCell::new(Vec::new()),
             openings: Cell::new(0),
+            changed_properties: RefCell::new(Vec::new()),
         }
     }
 
@@ -246,6 +252,17 @@ impl MyHost {
     /// How many times the handler of `Opening` was called.
     pub fn openings(&self) -> u32 {
         self.openings.get()
+    }
+
+    /// The names of the properties whose changes the handler of `PropertyChanged` received.
+    pub fn changed_properties(&self) -> Vec<String> {
+        self.changed_properties.borrow().clone()
+    }
+
+    pub fn on_property_changed(&self, sender: &Object, e: &OwnedFerroPropertyChangedEventArgs) {
+        if sender.is_some() {
+            self.changed_properties.borrow_mut().push(e.property().name().to_string());
+        }
     }
 
     pub fn on_opening(&self, _sender: &Object, e: &BoxedValue) {

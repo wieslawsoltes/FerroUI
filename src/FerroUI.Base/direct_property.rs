@@ -222,6 +222,10 @@ impl<T: PropertyValue> PropertyRoutes for DirectPropertyBase<T> {
         }
     }
 
+    fn route_box_value(&'static self, value: &dyn Any) -> Option<BoxedValue> {
+        value.downcast_ref::<T>().map(|value| Rc::new(value.clone()) as BoxedValue)
+    }
+
     fn route_create_binding_entry(
         &'static self,
         _o: &FerroObject,
