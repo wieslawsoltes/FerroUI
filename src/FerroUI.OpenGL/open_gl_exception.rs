@@ -1,3 +1,4 @@
+use crate::egl::{EglErrors, EglInterface};
 use crate::{GlErrors, GlInterface};
 use std::fmt;
 
@@ -32,6 +33,22 @@ impl OpenGlException {
     /// the context behind `gl`.
     pub fn get_formatted_exception(func_name: &str, gl: &GlInterface) -> OpenGlException {
         Self::get_formatted_exception_for_code(func_name, gl.get_error())
+    }
+
+    /// The failure of the function `func_name`, with the pending error of
+    /// `egl`.
+    pub fn get_formatted_exception_for_egl(func_name: &str, egl: &EglInterface) -> OpenGlException {
+        Self::get_formatted_egl_exception(func_name, egl.get_error())
+    }
+
+    /// The failure of the function `func_name` with the given EGL error code.
+    pub fn get_formatted_egl_exception(func_name: &str, error_code: i32) -> OpenGlException {
+        // An error code without a name leaves the place of the name empty.
+        let error_name = EglErrors::from_code(error_code).map_or("", EglErrors::name);
+        OpenGlException::with_error_code(
+            format!("{func_name} failed with error {error_name} (0x{error_code:08X})"),
+            error_code,
+        )
     }
 
     /// The failure of the function `func_name` with the given OpenGL error
@@ -75,6 +92,15 @@ mod tests {
 
         assert_eq!("glBindTexture failed with error GL_INVALID_ENUM (0x00000500)", exception.message());
         assert_eq!(Some(0x500), exception.error_code());
+    }
+
+    #[test]
+    fn a_known_egl_code_is_named() {
+        let exception =
+            OpenGlException::get_formatted_egl_exception("eglCreateContext", crate::egl::egl_consts::EGL_BAD_MATCH);
+
+        assert_eq!("eglCreateContext failed with error EGL_BAD_MATCH (0x00003009)", exception.message());
+        assert_eq!(Some(0x3009), exception.error_code());
     }
 
     #[test]
