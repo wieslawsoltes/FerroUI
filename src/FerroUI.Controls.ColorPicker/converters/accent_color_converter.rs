@@ -1,3 +1,4 @@
+use ferroui_base::utilities::CultureInfo;
 use super::{as_solid_color_brush, solid_color_brush};
 use crate::helpers::round_digits;
 use ferroui_base::data::converters::{cast_value, IValueConverter};
@@ -49,6 +50,7 @@ impl IValueConverter for AccentColorConverter {
         value: Option<&BoxedValue>,
         _target_type: ValueType,
         parameter: Option<&BoxedValue>,
+        _culture: &CultureInfo,
     ) -> Result<Option<BoxedValue>, BindingError> {
         let mut rgb_color: Option<Color> = None;
         let mut hsv_color: Option<HsvColor> = None;
@@ -90,6 +92,7 @@ impl IValueConverter for AccentColorConverter {
         _value: Option<&BoxedValue>,
         _target_type: ValueType,
         _parameter: Option<&BoxedValue>,
+        _culture: &CultureInfo,
     ) -> Result<Option<BoxedValue>, BindingError> {
         Ok(Some(FerroProperty::unset_value()))
     }

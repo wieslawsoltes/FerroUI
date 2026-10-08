@@ -1,3 +1,4 @@
+use ferroui_base::utilities::CultureInfo;
 use super::{as_brush, solid_color_brush};
 use ferroui_base::data::converters::{cast_value, IValueConverter};
 use ferroui_base::data::core::ValueType;
@@ -23,6 +24,7 @@ impl IValueConverter for ToBrushConverter {
         value: Option<&BoxedValue>,
         _target_type: ValueType,
         _parameter: Option<&BoxedValue>,
+        _culture: &CultureInfo,
     ) -> Result<Option<BoxedValue>, BindingError> {
         if let Some(brush) = as_brush(value) {
             return Ok(Some(Rc::new(brush)));
@@ -42,6 +44,7 @@ impl IValueConverter for ToBrushConverter {
         _value: Option<&BoxedValue>,
         _target_type: ValueType,
         _parameter: Option<&BoxedValue>,
+        _culture: &CultureInfo,
     ) -> Result<Option<BoxedValue>, BindingError> {
         Ok(Some(FerroProperty::unset_value()))
     }
