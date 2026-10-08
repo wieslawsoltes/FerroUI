@@ -12,6 +12,7 @@ use crate::frn_automation_peer::FrnAutomationPeer;
 use crate::helpers::*;
 use crate::interop::*;
 use crate::metal::MetalPlatformSurface;
+use crate::native_control_host_impl::NativeControlHostImpl;
 use crate::platform_behavior_inhibition::PlatformBehaviorInhibition;
 use ferroui_base::input::platform::{IClipboard, PlatformDataTransfer};
 use ferroui_base::input::raw::{
@@ -35,7 +36,9 @@ use ferroui_base::reactive::IDisposable;
 use ferroui_base::threading::{Dispatcher, DispatcherPriority};
 use ferroui_base::{FerroLocator, LocatorExtensions, PixelPoint, Point, Rect, Ref, Size, Vector, Visual};
 use ferroui_controls::automation::peers::{AutomationPeer, ControlAutomationPeer};
-use ferroui_controls::platform::{IPlatformHandle, IPopupImpl, IScreenImpl, ITopLevelImpl, PlatformThemeVariant};
+use ferroui_controls::platform::{
+    INativeControlHostImpl, IPlatformHandle, IPopupImpl, IScreenImpl, ITopLevelImpl, PlatformThemeVariant,
+};
 use ferroui_controls::{
     AcrylicPlatformCompensationLevels, Control, TopLevel, WindowResizeReason, WindowTransparencyLevel,
 };
@@ -150,6 +153,7 @@ pub(crate) trait TopLevelParent: 'static {
 pub struct TopLevelImpl {
     weak_self: Weak<TopLevelImpl>,
     input_root: RefCell<Option<Rc<dyn IInputRoot>>>,
+    native_control_host: RefCell<Option<Rc<NativeControlHostImpl>>>,
     platform_behavior_inhibition: RefCell<Option<Rc<PlatformBehaviorInhibition>>>,
     input_method: RefCell<Option<Rc<FerroNativeTextInputMethod>>>,
 
@@ -184,6 +188,7 @@ impl TopLevelImpl {
         Rc::new_cyclic(|weak_self| TopLevelImpl {
             weak_self: weak_self.clone(),
             input_root: RefCell::new(None),
+            native_control_host: RefCell::new(None),
             platform_behavior_inhibition: RefCell::new(None),
             input_method: RefCell::new(None),
             mouse: MouseDevice::primary(),
@@ -211,6 +216,7 @@ impl TopLevelImpl {
         *self.handle.borrow_mut() = Some(handle);
         self.saved_logical_size.set(self.client_size());
         self.saved_scaling.set(native.get_scaling().check());
+        *self.native_control_host.borrow_mut() = Some(NativeControlHostImpl::new(native.create_native_control_host().check()));
         *self.platform_behavior_inhibition.borrow_mut() = self
             .factory
             .create_platform_behavior_inhibition()
@@ -626,6 +632,11 @@ impl TopLevelImpl {
             return Some(Rc::new(input_method));
         }
 
+        if feature_type == TypeId::of::<dyn INativeControlHostImpl>() {
+            let native_control_host: Rc<dyn INativeControlHostImpl> = self.native_control_host.borrow().clone()?;
+            return Some(Rc::new(native_control_host));
+        }
+
         if feature_type == TypeId::of::<dyn IClipboard>() {
             let clipboard = FerroLocator::current().get_required_service::<dyn IClipboard>();
             return Some(Rc::new(clipboard));
@@ -652,6 +663,18 @@ impl TopLevelImpl {
     pub(crate) fn dispose(&self) {
         let handle = self.handle.borrow_mut().take();
         drop(handle);
+
+        let native_control_host = self.native_control_host.borrow_mut().take();
+        if let Some(native_control_host) = native_control_host {
+            native_control_host.dispose();
+        }
+    }
+
+    /// The host of native controls of the top-level; `None` once it is
+    /// disposed.
+    pub fn native_control_host(&self) -> Option<Rc<dyn INativeControlHostImpl>> {
+        let native_control_host: Rc<dyn INativeControlHostImpl> = self.native_control_host.borrow().clone()?;
+        Some(native_control_host)
     }
 
     // --- the native events that only touch the shared state ---------------

@@ -78,6 +78,8 @@ mod menu_action_callback;
 #[cfg(target_os = "macos")]
 mod metal;
 #[cfg(target_os = "macos")]
+mod native_control_host_impl;
+
 mod native_platform_settings;
 #[cfg(target_os = "macos")]
 mod platform_behavior_inhibition;
