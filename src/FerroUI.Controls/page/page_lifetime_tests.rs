@@ -8,13 +8,14 @@
 //! theme here: what a theme adds to a page is not under test.
 
 use super::navigation_page_tests::{create_navigation_page, page_h, wait, ControllableTransition, Gate};
-use super::{ContentPage, NavigationPage, Page, TabbedPage};
+use super::{ContentPage, MultiPage, NavigationPage, Page, PageList, TabbedPage};
 use crate::presenters::ItemsPresenter;
 use crate::templates::{FuncControlTemplate, FuncTemplateNameScopeExtensions, IControlTemplate};
 use crate::test_support::{test_scope, TestRoot};
 use crate::{Border, Control, TabControl};
 use ferroui_base::threading::Dispatcher;
 use ferroui_base::{Ref, Size, WeakRef};
+use std::cell::RefCell;
 use std::rc::Rc;
 
 fn run_jobs() {
@@ -318,7 +319,6 @@ fn tabbed_page_removed_tab_that_was_not_selected_is_freed() {
 }
 
 #[test]
-#[ignore = "gap C316: the selected tab of a tabbed page stays alive when it is removed"]
 fn tabbed_page_removed_tab_that_was_selected_is_freed() {
     let _scope = test_scope();
     let first = page_with_content("A");
@@ -333,6 +333,64 @@ fn tabbed_page_removed_tab_that_was_selected_is_freed() {
 
     assert_eq!(1, pages.count());
     assert!(is_freed(&first));
+}
+
+#[test]
+fn tabbed_page_removed_tab_that_was_selected_in_the_middle_is_freed() {
+    let _scope = test_scope();
+    let tabs: Vec<Ref<ContentPage>> = (1..=3).map(|index| page_with_content(&format!("T{index}"))).collect();
+    let (tp, root) = create_hosted_tabbed_page(&tabs);
+    let pages = tp.pages().expect("the pages of the tabbed page");
+    tp.set_selected_index(1);
+    layout(&root);
+    assert!(tp.selected_page().is_some_and(|selected| selected.ptr_eq(&tabs[1])), "the second tab is selected");
+
+    pages.remove_at(1);
+    layout(&root);
+    let mut tabs = tabs;
+    let middle = release(tabs.remove(1));
+
+    assert_eq!(2, pages.count());
+    assert!(tp.selected_page().is_some_and(|selected| pages.snapshot().iter().any(|page| page.ptr_eq(&selected))));
+    assert!(is_freed(&middle));
+}
+
+#[test]
+fn tabbed_page_removing_the_selected_tab_selects_the_tab_that_takes_its_place() {
+    let _scope = test_scope();
+    let first = page_with_content("A");
+    let last = page_with_content("B");
+    let (tp, root) = create_hosted_tabbed_page(&[first.clone(), last.clone()]);
+    let pages = tp.pages().expect("the pages of the tabbed page");
+    assert!(tp.selected_page().is_some_and(|selected| selected.ptr_eq(&first)), "the first tab is selected");
+    let changes: Rc<RefCell<Vec<(Option<Ref<Page>>, Option<Ref<Page>>)>>> = Rc::default();
+    let received = changes.clone();
+    tp.selection_changed(move |_, e| received.borrow_mut().push((e.previous_page(), e.current_page())));
+
+    pages.remove_at(0);
+    layout(&root);
+
+    assert_eq!(0, tp.selected_index());
+    assert!(tp.selected_page().is_some_and(|selected| selected.ptr_eq(&last)));
+    assert!(tp.current_page().is_some_and(|current| current.ptr_eq(&last)));
+    let changes = changes.borrow();
+    assert_eq!(1, changes.len());
+    assert!(changes[0].0.as_ref().is_some_and(|previous| previous.ptr_eq(&first)));
+    assert!(changes[0].1.as_ref().is_some_and(|current| current.ptr_eq(&last)));
+}
+
+#[test]
+fn tabbed_page_cleared_tabs_leave_no_selected_page() {
+    let _scope = test_scope();
+    let tabs: Vec<Ref<ContentPage>> = (1..=3).map(|index| page_with_content(&format!("T{index}"))).collect();
+    let (tp, root) = create_hosted_tabbed_page(&tabs);
+
+    tp.pages().expect("the pages of the tabbed page").clear();
+    layout(&root);
+
+    assert_eq!(-1, tp.selected_index());
+    assert!(tp.selected_page().is_none());
+    assert!(tp.current_page().is_none());
 }
 
 #[test]
@@ -372,7 +430,6 @@ fn tabbed_page_tabs_removed_from_the_last_to_the_first_are_freed() {
 }
 
 #[test]
-#[ignore = "gap C316: the selected tab of a tabbed page stays alive when it is removed"]
 fn tabbed_page_cleared_tabs_are_freed() {
     let _scope = test_scope();
     let tabs: Vec<Ref<ContentPage>> = (1..=3).map(|index| page_with_content(&format!("T{index}"))).collect();
@@ -418,4 +475,65 @@ fn tabbed_page_frees_its_tabs_with_itself() {
     assert!(weak_tp.upgrade().is_none());
     assert!(is_freed(&first));
     assert!(is_freed(&last));
+}
+
+// --- the tab control of a tabbed page, alone ---
+
+/// A tab control with the template of the tab control of the tabbed pages
+/// above and the pages as its items, hosted in a root and laid out.
+fn create_hosted_tab_control(pages: &[Ref<ContentPage>]) -> (Ref<TabControl>, PageList, Ref<TestRoot>) {
+    let list = PageList::new();
+    for page in pages {
+        list.add(page.clone().upcast::<Page>());
+    }
+
+    let tc = TabControl::new();
+    tc.set_template(Some(FuncControlTemplate::for_type::<TabControl>(|_, scope| {
+        let presenter = ItemsPresenter::new();
+        presenter.set_name(Some("PART_ItemsPresenter".to_string()));
+        presenter.register_in_name_scope(&**scope).upcast()
+    })));
+    tc.set_items_source(Some(MultiPage::items_source_of(&list)));
+
+    let root = TestRoot::new();
+    root.set_client_size(Size::new(400.0, 300.0));
+    root.set_child(tc.clone());
+    root.execute_initial_layout_pass();
+    run_jobs();
+    (tc, list, root)
+}
+
+#[test]
+fn tab_control_removed_item_that_was_selected_is_freed() {
+    let _scope = test_scope();
+    let first = page_with_content("A");
+    let last = page_with_content("B");
+    let (tc, pages, root) = create_hosted_tab_control(&[first.clone(), last.clone()]);
+    assert_eq!(0, tc.selected_index());
+
+    pages.remove_at(0);
+    layout(&root);
+    let first = release(first);
+
+    assert_eq!(0, tc.selected_index());
+    assert!(is_freed(&first));
+}
+
+#[test]
+fn tab_control_cleared_items_are_freed() {
+    let _scope = test_scope();
+    let tabs: Vec<Ref<ContentPage>> = (1..=3).map(|index| page_with_content(&format!("T{index}"))).collect();
+    let (tc, pages, root) = create_hosted_tab_control(&tabs);
+    assert_eq!(0, tc.selected_index());
+
+    pages.clear();
+    layout(&root);
+    let tabs: Vec<WeakRef<ContentPage>> = tabs.into_iter().map(release).collect();
+
+    assert_eq!(-1, tc.selected_index());
+    assert!(tc.selected_item().is_none());
+    assert!(tc.selected_value().is_none());
+    assert!(tc.selected_content().is_none());
+    let alive = tabs.iter().filter(|page| !is_freed(page)).count();
+    assert_eq!(0, alive);
 }
