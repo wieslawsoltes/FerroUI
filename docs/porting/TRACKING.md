@@ -44,11 +44,11 @@ Percentages are `present / (total - waived)`. Member matching is by name with re
 
 | | Ported | Total | Waived | % |
 |---|---:|---:|---:|---:|
-| C# files | 2006 | 2363 | 0 | 84.9% |
-| Types | 2595 | 3276 | 0 | 79.2% |
-| Members | 18736 | 23849 | 44 | 78.7% |
-| Contracts (interfaces) | 388 | 464 | - | 83.6% |
-| Property registrations | 1164 | 1233 | - | 94.4% |
+| C# files | 2045 | 2363 | 0 | 86.5% |
+| Types | 2636 | 3276 | 0 | 80.5% |
+| Members | 19466 | 23849 | 44 | 81.8% |
+| Contracts (interfaces) | 389 | 464 | - | 83.8% |
+| Property registrations | 1216 | 1233 | - | 98.6% |
 | Routed events | 108 | 108 | - | 100.0% |
 | Other files (native sources, XAML, TypeScript, fonts) | 243 | 268 | - | 90.7% |
 
@@ -62,10 +62,10 @@ The % column is member coverage (file coverage for plain file lists).
 |---|---|---|---|---:|---:|---:|---:|---|---|
 | [XamlX](tracking/XamlX.md) | `external/XamlX/src/XamlX` | `external/XamlX/src/XamlX` | `xamlx` | 61/62 | 171/175 | 703/865 (2 waived) | 81.5% | 2 - xaml + themes | P1 |
 | [Avalonia.Native (native sources)](tracking/Avalonia.Native_native_sources.md) | `native/Avalonia.Native` | `native/FerroUI.Native` | (Objective-C++ sources built by ferroui-native) | 62/62 | - | - | 100.0% | 1 - desktop (macOS) | P0 |
-| [Avalonia.Base](tracking/Avalonia.Base.md) | `src/Avalonia.Base` | `src/FerroUI.Base` | `ferroui-base` | 1115/1286 | 1423/1709 | 9815/11739 (32 waived) | 83.8% | 0 - core | P0 |
+| [Avalonia.Base](tracking/Avalonia.Base.md) | `src/Avalonia.Base` | `src/FerroUI.Base` | `ferroui-base` | 1115/1286 | 1423/1709 | 9819/11739 (32 waived) | 83.9% | 0 - core | P0 |
 | [Avalonia.Build.Tasks](tracking/Avalonia.Build.Tasks.md) | `src/Avalonia.Build.Tasks` | `src/FerroUI.Build.Tasks` | `ferroui-build` | 0/9 | 0/10 | 0/44 | 0.0% | 2 - xaml + themes | P1 |
 | [Avalonia.Controls](tracking/Avalonia.Controls.md) | `src/Avalonia.Controls` | `src/FerroUI.Controls` | `ferroui-controls` | 532/538 | 606/628 | 6158/6405 (1 waived) | 96.2% | 1 - controls | P0 |
-| [Avalonia.Controls.ColorPicker](tracking/Avalonia.Controls.ColorPicker.md) | `src/Avalonia.Controls.ColorPicker` | `src/FerroUI.Controls.ColorPicker` | `ferroui-controls-colorpicker` | 0/39 | 0/41 | 0/726 | 0.0% | 3 - extras | P2 |
+| [Avalonia.Controls.ColorPicker](tracking/Avalonia.Controls.ColorPicker.md) | `src/Avalonia.Controls.ColorPicker` | `src/FerroUI.Controls.ColorPicker` | `ferroui-controls-color-picker` | 39/39 | 41/41 | 726/726 | 100.0% | 3 - extras | P2 |
 | [Avalonia.DesignerSupport](tracking/Avalonia.DesignerSupport.md) | `src/Avalonia.DesignerSupport` | `src/FerroUI.DesignerSupport` | `ferroui-designer-support` | 0/9 | 0/18 | 0/176 | 0.0% | 4 - tooling | P3 |
 | [Avalonia.Desktop](tracking/Avalonia.Desktop.md) | `src/Avalonia.Desktop` | `src/FerroUI.Desktop` | `ferroui-desktop` | 1/1 | 1/1 | 1/1 | 100.0% | 1 - desktop (macOS) | P0 |
 | [Avalonia.Dialogs](tracking/Avalonia.Dialogs.md) | `src/Avalonia.Dialogs` | `src/FerroUI.Dialogs` | `ferroui-dialogs` | 17/17 | 18/18 | 94/94 | 100.0% | 3 - extras | P3 |
@@ -133,7 +133,7 @@ Libraries.
 | `src/Avalonia.Base` | 1304 | `src/FerroUI.Base` | workspace member | [Avalonia.Base](tracking/Avalonia.Base.md) |
 | `src/Avalonia.Build.Tasks` | 10 | `src/FerroUI.Build.Tasks` | not created | [Avalonia.Build.Tasks](tracking/Avalonia.Build.Tasks.md) |
 | `src/Avalonia.Controls` | 539 | `src/FerroUI.Controls` | workspace member | [Avalonia.Controls](tracking/Avalonia.Controls.md) |
-| `src/Avalonia.Controls.ColorPicker` | 40 | `src/FerroUI.Controls.ColorPicker` | not created | [Avalonia.Controls.ColorPicker](tracking/Avalonia.Controls.ColorPicker.md) |
+| `src/Avalonia.Controls.ColorPicker` | 40 | `src/FerroUI.Controls.ColorPicker` | workspace member | [Avalonia.Controls.ColorPicker](tracking/Avalonia.Controls.ColorPicker.md) |
 | `src/Avalonia.DesignerSupport` | 9 | `src/FerroUI.DesignerSupport` | not created | [Avalonia.DesignerSupport](tracking/Avalonia.DesignerSupport.md) |
 | `src/Avalonia.Desktop` | 1 | `src/FerroUI.Desktop` | workspace member | [Avalonia.Desktop](tracking/Avalonia.Desktop.md) |
 | `src/Avalonia.Dialogs` | 17 | `src/FerroUI.Dialogs` | workspace member | [Avalonia.Dialogs](tracking/Avalonia.Dialogs.md) |
@@ -306,6 +306,7 @@ Upstream unit tests are ported next to the code (`#[cfg(test)] mod tests` or `<f
 | `src/Browser/FerroUI.Browser` | `src/Browser/Avalonia.Browser` |
 | `src/FerroUI.Base` | `src/Avalonia.Base` |
 | `src/FerroUI.Controls` | `src/Avalonia.Controls` |
+| `src/FerroUI.Controls.ColorPicker` | `src/Avalonia.Controls.ColorPicker` |
 | `src/FerroUI.Desktop` | `src/Avalonia.Desktop` |
 | `src/FerroUI.Dialogs` | `src/Avalonia.Dialogs` |
 | `src/FerroUI.Fonts.Inter` | `src/Avalonia.Fonts.Inter` |
@@ -328,7 +329,7 @@ FerroUI-only crates have no upstream source directory (for example the MicroCom 
 
 ## Rust-only files
 
-320 Rust source files have no upstream counterpart (299 without a recorded reason). They are listed at the end of each project page.
+327 Rust source files have no upstream counterpart (306 without a recorded reason). They are listed at the end of each project page.
 
 | Project | Rust file | Reason |
 |---|---|---|
@@ -580,6 +581,13 @@ FerroUI-only crates have no upstream source directory (for example the MicroCom 
 | [Avalonia.Controls](tracking/Avalonia.Controls.md) | `src/FerroUI.Controls/utils/debug_display.rs` | **unmapped** |
 | [Avalonia.Controls](tracking/Avalonia.Controls.md) | `src/FerroUI.Controls/utils/masked_text_provider.rs` | **unmapped** |
 | [Avalonia.Controls](tracking/Avalonia.Controls.md) | `src/FerroUI.Controls/window_decorations.rs` | **unmapped** |
+| [Avalonia.Controls.ColorPicker](tracking/Avalonia.Controls.ColorPicker.md) | `src/FerroUI.Controls.ColorPicker/assets.rs` | **unmapped** |
+| [Avalonia.Controls.ColorPicker](tracking/Avalonia.Controls.ColorPicker.md) | `src/FerroUI.Controls.ColorPicker/markup_types/classes.rs` | **unmapped** |
+| [Avalonia.Controls.ColorPicker](tracking/Avalonia.Controls.ColorPicker.md) | `src/FerroUI.Controls.ColorPicker/markup_types/converters.rs` | **unmapped** |
+| [Avalonia.Controls.ColorPicker](tracking/Avalonia.Controls.ColorPicker.md) | `src/FerroUI.Controls.ColorPicker/markup_types/enums.rs` | **unmapped** |
+| [Avalonia.Controls.ColorPicker](tracking/Avalonia.Controls.ColorPicker.md) | `src/FerroUI.Controls.ColorPicker/markup_types/palettes.rs` | **unmapped** |
+| [Avalonia.Controls.ColorPicker](tracking/Avalonia.Controls.ColorPicker.md) | `src/FerroUI.Controls.ColorPicker/register_types.rs` | **unmapped** |
+| [Avalonia.Controls.ColorPicker](tracking/Avalonia.Controls.ColorPicker.md) | `src/FerroUI.Controls.ColorPicker/rust_paths.rs` | **unmapped** |
 | [Avalonia.Dialogs](tracking/Avalonia.Dialogs.md) | `src/FerroUI.Dialogs/assets.rs` | embeds the document of the about dialog and its font: the counterpart of the resource items of the upstream project file |
 | [Avalonia.Dialogs](tracking/Avalonia.Dialogs.md) | `src/FerroUI.Dialogs/markup.rs` | loads the document of the about dialog with the run-time loader until the XAML compiler generates InitializeComponent |
 | [Avalonia.Dialogs](tracking/Avalonia.Dialogs.md) | `src/FerroUI.Dialogs/register_types.rs` | the type table of the crate (porting guide, Classes): namespaces, classes, markup metadata, the document loader |

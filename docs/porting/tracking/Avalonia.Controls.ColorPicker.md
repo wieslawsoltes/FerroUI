@@ -7,14 +7,14 @@ Generated from upstream commit `17350180c33b063f0e98abbfd19aa3cae63f5d56`. Back 
 | | |
 |---|---|
 | Upstream | `src/Avalonia.Controls.ColorPicker` |
-| FerroUI | `src/FerroUI.Controls.ColorPicker` (not created yet) |
-| Crate | `ferroui-controls-colorpicker` |
+| FerroUI | `src/FerroUI.Controls.ColorPicker` (exists) |
+| Crate | `ferroui-controls-color-picker` |
 | Phase / priority | 3 - extras / P2 |
-| Files | 0/39 (0.0%), 1 not applicable |
-| Types | 0/41 (0.0%) |
-| Members | 0/726 (0.0%) |
-| Contracts (interfaces) | 0/1 |
-| Property registrations | 0/52 |
+| Files | 39/39 (100.0%), 1 not applicable |
+| Types | 41/41 (100.0%) |
+| Members | 726/726 (100.0%) |
+| Contracts (interfaces) | 1/1 |
+| Property registrations | 52/52 |
 | Routed events | 0/0 |
 
 ## Contracts
@@ -23,101 +23,117 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 
 | Interface | Access | Upstream file | Members | Status |
 |---|---|---|---|---|
-| `Avalonia.Controls.IColorPalette` | public | `ColorPalettes/IColorPalette.cs` | 0/3 | missing |
+| `Avalonia.Controls.IColorPalette` | public | `ColorPalettes/IColorPalette.cs` | 3/3 | present |
 
 ## Files
 
-### `(project root)` - files 0/6, types 0/6, members 0/19
+### `(project root)` - files 6/6, types 6/6, members 19/19
 
 | Upstream file | Rust file | Status | Types | Members | Notes |
 |---|---|---|---|---|---|
-| `AlphaComponentPosition.cs` | `alpha_component_position.rs` | missing | 0/1 | 0/2 |  |
-| `ColorChangedEventArgs.cs` | `color_changed_event_args.rs` | missing | 0/1 | 0/3 |  |
-| `ColorComponent.cs` | `color_component.rs` | missing | 0/1 | 0/4 |  |
-| `ColorModel.cs` | `color_model.rs` | missing | 0/1 | 0/2 |  |
-| `HsvComponent.cs` | `hsv_component.rs` | missing | 0/1 | 0/4 |  |
-| `RgbComponent.cs` | `rgb_component.rs` | missing | 0/1 | 0/4 |  |
+| `AlphaComponentPosition.cs` | `alpha_component_position.rs` | present | 1/1 | 2/2 |  |
+| `ColorChangedEventArgs.cs` | `color_changed_event_args.rs` | present | 1/1 | 3/3 |  |
+| `ColorComponent.cs` | `color_component.rs` | present | 1/1 | 4/4 |  |
+| `ColorModel.cs` | `color_model.rs` | present | 1/1 | 2/2 |  |
+| `HsvComponent.cs` | `hsv_component.rs` | present | 1/1 | 4/4 |  |
+| `RgbComponent.cs` | `rgb_component.rs` | present | 1/1 | 4/4 |  |
 
-### `Automation/Peers` - files 0/1, types 0/1, members 0/7
-
-| Upstream file | Rust file | Status | Types | Members | Notes |
-|---|---|---|---|---|---|
-| `ColorSpectrumAutomationPeer.cs` | `automation/peers/color_spectrum_automation_peer.rs` | missing | 0/1 | 0/7 |  |
-
-### `ColorPalettes` - files 0/7, types 0/9, members 0/501
+### `Automation/Peers` - files 1/1, types 1/1, members 7/7
 
 | Upstream file | Rust file | Status | Types | Members | Notes |
 |---|---|---|---|---|---|
-| `FlatColorPalette.cs` | `color_palettes/flat_color_palette.rs` | missing | 0/2 | 0/224 |  |
-| `FlatHalfColorPalette.cs` | `color_palettes/flat_half_color_palette.rs` | missing | 0/1 | 0/4 |  |
-| `FluentColorPalette.cs` | `color_palettes/fluent_color_palette.rs` | missing | 0/1 | 0/3 |  |
-| `IColorPalette.cs` | `color_palettes/i_color_palette.rs` | missing | 0/1 | 0/3 |  |
-| `MaterialColorPalette.cs` | `color_palettes/material_color_palette.rs` | missing | 0/2 | 0/260 |  |
-| `MaterialHalfColorPalette.cs` | `color_palettes/material_half_color_palette.rs` | missing | 0/1 | 0/4 |  |
-| `SixteenColorPalette.cs` | `color_palettes/sixteen_color_palette.rs` | missing | 0/1 | 0/3 |  |
+| `ColorSpectrumAutomationPeer.cs` | `automation/peers/color_spectrum_automation_peer.rs` | present | 1/1 | 7/7 |  |
 
-### `ColorPicker` - files 0/1, types 0/1, members 0/9
+### `ColorPalettes` - files 7/7, types 9/9, members 501/501
 
 | Upstream file | Rust file | Status | Types | Members | Notes |
 |---|---|---|---|---|---|
-| `ColorPicker.cs` | `color_picker/color_picker.rs` | missing | 0/1 | 0/9 |  |
+| `FlatColorPalette.cs` | `color_palettes/flat_color_palette.rs` | present | 2/2 | 224/224 |  |
+| `FlatHalfColorPalette.cs` | `color_palettes/flat_half_color_palette.rs` | present | 1/1 | 4/4 |  |
+| `FluentColorPalette.cs` | `color_palettes/fluent_color_palette.rs` | present | 1/1 | 3/3 |  |
+| `IColorPalette.cs` | `color_palettes/i_color_palette.rs` | present | 1/1 | 3/3 |  |
+| `MaterialColorPalette.cs` | `color_palettes/material_color_palette.rs` | present | 2/2 | 260/260 |  |
+| `MaterialHalfColorPalette.cs` | `color_palettes/material_half_color_palette.rs` | present | 1/1 | 4/4 |  |
+| `SixteenColorPalette.cs` | `color_palettes/sixteen_color_palette.rs` | present | 1/1 | 3/3 |  |
 
-### `ColorPreviewer` - files 0/2, types 0/2, members 0/9
-
-| Upstream file | Rust file | Status | Types | Members | Notes |
-|---|---|---|---|---|---|
-| `ColorPreviewer.Properties.cs` | `color_previewer/color_previewer_properties.rs` | missing | 0/1 | 0/4 |  |
-| `ColorPreviewer.cs` | `color_previewer/color_previewer.rs` | missing | 0/1 | 0/5 |  |
-
-### `ColorSlider` - files 0/2, types 0/2, members 0/21
-
-| Upstream file | Rust file | Status | Types | Members | Notes |
-|---|---|---|---|---|---|
-| `ColorSlider.Properties.cs` | `color_slider/color_slider_properties.rs` | missing | 0/1 | 0/14 |  |
-| `ColorSlider.cs` | `color_slider/color_slider.rs` | missing | 0/1 | 0/7 |  |
-
-### `ColorSpectrum` - files 0/4, types 0/4, members 0/46
+### `ColorPicker` - files 1/1, types 1/1, members 9/9
 
 | Upstream file | Rust file | Status | Types | Members | Notes |
 |---|---|---|---|---|---|
-| `ColorSpectrum.Properties.cs` | `color_spectrum/color_spectrum_properties.rs` | missing | 0/1 | 0/22 |  |
-| `ColorSpectrum.cs` | `color_spectrum/color_spectrum.rs` | missing | 0/1 | 0/16 |  |
-| `ColorSpectrumComponents.cs` | `color_spectrum/color_spectrum_components.rs` | missing | 0/1 | 0/6 |  |
-| `ColorSpectrumShape.cs` | `color_spectrum/color_spectrum_shape.rs` | missing | 0/1 | 0/2 |  |
+| `ColorPicker.cs` | `color_picker/color_picker.rs` | present | 1/1 | 9/9 |  |
 
-### `ColorView` - files 0/3, types 0/3, members 0/68
+### `ColorPreviewer` - files 2/2, types 2/2, members 9/9
 
 | Upstream file | Rust file | Status | Types | Members | Notes |
 |---|---|---|---|---|---|
-| `ColorView.Properties.cs` | `color_view/color_view_properties.rs` | missing | 0/1 | 0/56 |  |
-| `ColorView.cs` | `color_view/color_view.rs` | missing | 0/1 | 0/9 |  |
-| `ColorViewTab.cs` | `color_view/color_view_tab.rs` | missing | 0/1 | 0/3 |  |
+| `ColorPreviewer.Properties.cs` | `color_previewer/color_previewer_properties.rs` | present | 1/1 | 4/4 |  |
+| `ColorPreviewer.cs` | `color_previewer/color_previewer.rs` | present | 1/1 | 5/5 |  |
 
-### `Converters` - files 0/7, types 0/7, members 0/21
-
-| Upstream file | Rust file | Status | Types | Members | Notes |
-|---|---|---|---|---|---|
-| `AccentColorConverter.cs` | `converters/accent_color_converter.rs` | missing | 0/1 | 0/4 |  |
-| `ColorToDisplayNameConverter.cs` | `converters/color_to_display_name_converter.rs` | missing | 0/1 | 0/2 |  |
-| `ColorToHexConverter.cs` | `converters/color_to_hex_converter.rs` | missing | 0/1 | 0/6 |  |
-| `ContrastBrushConverter.cs` | `converters/contrast_brush_converter.rs` | missing | 0/1 | 0/3 |  |
-| `DoNothingForNullConverter.cs` | `converters/do_nothing_for_null_converter.rs` | missing | 0/1 | 0/2 |  |
-| `ToBrushConverter.cs` | `converters/to_brush_converter.rs` | missing | 0/1 | 0/2 |  |
-| `ToColorConverter.cs` | `converters/to_color_converter.rs` | missing | 0/1 | 0/2 |  |
-
-### `Helpers` - files 0/6, types 0/6, members 0/25
+### `ColorSlider` - files 2/2, types 2/2, members 21/21
 
 | Upstream file | Rust file | Status | Types | Members | Notes |
 |---|---|---|---|---|---|
-| `ColorHelper.cs` | `helpers/color_helper.rs` | missing | 0/1 | 0/3 |  |
-| `ColorPickerHelpers.cs` | `helpers/color_picker_helpers.rs` | missing | 0/1 | 0/4 |  |
-| `Hsv.cs` | `helpers/hsv.rs` | missing | 0/1 | 0/7 |  |
-| `IncrementAmount.cs` | `helpers/increment_amount.rs` | missing | 0/1 | 0/2 |  |
-| `IncrementDirection.cs` | `helpers/increment_direction.rs` | missing | 0/1 | 0/2 |  |
-| `Rgb.cs` | `helpers/rgb.rs` | missing | 0/1 | 0/7 |  |
+| `ColorSlider.Properties.cs` | `color_slider/color_slider_properties.rs` | present | 1/1 | 14/14 |  |
+| `ColorSlider.cs` | `color_slider/color_slider.rs` | present | 1/1 | 7/7 |  |
+
+### `ColorSpectrum` - files 4/4, types 4/4, members 46/46
+
+| Upstream file | Rust file | Status | Types | Members | Notes |
+|---|---|---|---|---|---|
+| `ColorSpectrum.Properties.cs` | `color_spectrum/color_spectrum_properties.rs` | present | 1/1 | 22/22 |  |
+| `ColorSpectrum.cs` | `color_spectrum/color_spectrum.rs` | present | 1/1 | 16/16 |  |
+| `ColorSpectrumComponents.cs` | `color_spectrum/color_spectrum_components.rs` | present | 1/1 | 6/6 |  |
+| `ColorSpectrumShape.cs` | `color_spectrum/color_spectrum_shape.rs` | present | 1/1 | 2/2 |  |
+
+### `ColorView` - files 3/3, types 3/3, members 68/68
+
+| Upstream file | Rust file | Status | Types | Members | Notes |
+|---|---|---|---|---|---|
+| `ColorView.Properties.cs` | `color_view/color_view_properties.rs` | present | 1/1 | 56/56 |  |
+| `ColorView.cs` | `color_view/color_view.rs` | present | 1/1 | 9/9 |  |
+| `ColorViewTab.cs` | `color_view/color_view_tab.rs` | present | 1/1 | 3/3 |  |
+
+### `Converters` - files 7/7, types 7/7, members 21/21
+
+| Upstream file | Rust file | Status | Types | Members | Notes |
+|---|---|---|---|---|---|
+| `AccentColorConverter.cs` | `converters/accent_color_converter.rs` | present | 1/1 | 4/4 |  |
+| `ColorToDisplayNameConverter.cs` | `converters/color_to_display_name_converter.rs` | present | 1/1 | 2/2 |  |
+| `ColorToHexConverter.cs` | `converters/color_to_hex_converter.rs` | present | 1/1 | 6/6 |  |
+| `ContrastBrushConverter.cs` | `converters/contrast_brush_converter.rs` | present | 1/1 | 3/3 |  |
+| `DoNothingForNullConverter.cs` | `converters/do_nothing_for_null_converter.rs` | present | 1/1 | 2/2 |  |
+| `ToBrushConverter.cs` | `converters/to_brush_converter.rs` | present | 1/1 | 2/2 |  |
+| `ToColorConverter.cs` | `converters/to_color_converter.rs` | present | 1/1 | 2/2 |  |
+
+### `Helpers` - files 6/6, types 6/6, members 25/25
+
+| Upstream file | Rust file | Status | Types | Members | Notes |
+|---|---|---|---|---|---|
+| `ColorHelper.cs` | `helpers/color_helper.rs` | present | 1/1 | 3/3 |  |
+| `ColorPickerHelpers.cs` | `helpers/color_picker_helpers.rs` | present | 1/1 | 4/4 |  |
+| `Hsv.cs` | `helpers/hsv.rs` | present | 1/1 | 7/7 |  |
+| `IncrementAmount.cs` | `helpers/increment_amount.rs` | present | 1/1 | 2/2 |  |
+| `IncrementDirection.cs` | `helpers/increment_direction.rs` | present | 1/1 | 2/2 |  |
+| `Rgb.cs` | `helpers/rgb.rs` | present | 1/1 | 7/7 |  |
 
 ### `Properties` - files 0/0, types 0/0, members 0/0
 
 | Upstream file | Rust file | Status | Types | Members | Notes |
 |---|---|---|---|---|---|
 | `AssemblyInfo.cs` | - | n/a | - | - | no non-private types (assembly attributes, global usings or file-local helpers) |
+
+## Rust-only files
+
+Rust sources of this crate that no upstream file maps to. Give each a reason in `docs/porting/data/path-overrides.toml` (`[[rust_only]]`), or map upstream files to it (`[[map]]`).
+
+| Rust file | Reason | Types defined |
+|---|---|---|
+| `assets.rs` | **unmapped** |  |
+| `markup_types/classes.rs` | **unmapped** |  |
+| `markup_types/converters.rs` | **unmapped** |  |
+| `markup_types/enums.rs` | **unmapped** |  |
+| `markup_types/palettes.rs` | **unmapped** |  |
+| `register_types.rs` | **unmapped** |  |
+| `rust_paths.rs` | **unmapped** |  |
+
+Tests, examples and build scripts (not scanned): `automation/peers/color_spectrum_automation_peer_tests.rs`, `build.rs`, `converters/converters_tests.rs`, `markup_types/markup_types_tests.rs`, `tests/color_helper_tests.rs`, `tests/controls_tests.rs`, `tests/mod.rs`, `tests/palette_tests.rs`, `tests/theme_tests.rs`.

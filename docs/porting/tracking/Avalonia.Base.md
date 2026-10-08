@@ -12,7 +12,7 @@ Generated from upstream commit `17350180c33b063f0e98abbfd19aa3cae63f5d56`. Back 
 | Phase / priority | 0 - core / P0 |
 | Files | 1115/1286 (86.7%), 13 not applicable |
 | Types | 1423/1709 (83.3%) |
-| Members | 9815/11739 (32 waived) (83.8%) |
+| Members | 9819/11739 (32 waived) (83.9%) |
 | Contracts (interfaces) | 235/263 |
 | Property registrations | 224/239 |
 | Routed events | 41/41 |
@@ -1934,12 +1934,12 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 
 </details>
 
-### `Input/Platform` - files 16/16, types 16/16, members 99/104
+### `Input/Platform` - files 16/16, types 16/16, members 103/104
 
 | Upstream file | Rust file | Status | Types | Members | Notes |
 |---|---|---|---|---|---|
 | `Clipboard.cs` | `input/platform/clipboard.rs` | present | 1/1 | 6/6 |  |
-| `ClipboardExtensions.cs` | `input/platform/clipboard_extensions.rs` | partial | 1/1 | 9/13 |  |
+| `ClipboardExtensions.cs` | `input/platform/clipboard_extensions.rs` | present | 1/1 | 13/13 |  |
 | `ClipboardType.cs` | `input/platform/clipboard_type.rs` | present | 1/1 | 2/2 |  |
 | `IClipboard.cs` | `input/platform/i_clipboard.rs` | present | 1/1 | 5/5 |  |
 | `IClipboardImpl.cs` | `input/platform/i_clipboard_impl.rs` | present | 1/1 | 3/3 |  |
@@ -1954,16 +1954,6 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 | `PlatformDataTransfer.cs` | `input/platform/platform_data_transfer.rs` | present | 1/1 | 11/11 |  |
 | `PlatformDataTransferItem.cs` | `input/platform/platform_data_transfer_item.rs` | present | 1/1 | 9/9 |  |
 | `PlatformHotkeyConfiguration.cs` | `input/platform/platform_hotkey_configuration.rs` | present | 1/1 | 25/25 |  |
-
-<details><summary><code>ClipboardExtensions.cs</code> - 4 missing</summary>
-
-- `ClipboardExtensions` (class): 4 missing
-  - `static Task<IStorageItem?> TryGetFileAsync(this IClipboard clipboard)`
-  - `static Task<IStorageItem[]?> TryGetFilesAsync(this IClipboard clipboard)`
-  - `static Task SetFileAsync(this IClipboard clipboard, IStorageItem? file)`
-  - `static Task SetFilesAsync(this IClipboard clipboard, IEnumerable<IStorageItem>? files)`
-
-</details>
 
 <details><summary><code>KeyGestureFormatInfo.cs</code> - 1 missing</summary>
 

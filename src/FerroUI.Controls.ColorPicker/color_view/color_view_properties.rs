@@ -188,6 +188,7 @@ ferro_properties! { impl ColorView {
 
     ferro_property!(
         /// Defines the `PaletteColors` property.
+        // Deviation (DEVIATIONS.md, Colour picker): upstream types it `IEnumerable<Color>?`.
         pub fn palette_colors_property() -> StyledProperty<Option<FerroList<Color>>> {
             FerroProperty::register::<ColorView, _>("PaletteColors", None)
         }

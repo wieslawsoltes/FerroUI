@@ -258431,7 +258431,7 @@
    "path": "src/Avalonia.Controls.ColorPicker",
    "detail": "full",
    "scope": "in",
-   "crate": "ferroui-controls-colorpicker",
+   "crate": "ferroui-controls-color-picker",
    "phase": "3 - extras",
    "priority": "P2",
    "files": [
