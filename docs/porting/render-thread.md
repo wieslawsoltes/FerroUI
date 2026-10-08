@@ -410,13 +410,20 @@ Pacing: as in the other frame benchmarks no frame waits for a display. A frame s
 
 The benchmark asserts that every scroll step reaches the surface before the next one is made, in both modes; in the dispatcher-thread mode the surface receives exactly one frame per step, in the render-thread mode at least one.
 
-Numbers: **still to be taken.** One release build, both modes in the same run, on a quiet machine:
+Numbers, taken on 2026-10-08 on the development Mac, one release build, both modes in the same run. **The machine was heavily loaded by other work (load average 40 to 98)**, so the runs differ from each other and one of the four is an outlier; within a run the two modes are measured seconds apart. Median ms per frame (p95):
 
-| Measure, ms per frame (median, mean, p95, max) | Dispatcher-thread mode | Render-thread mode |
-|---|---|---|
-| UI thread | to be measured | to be measured |
-| Frame completion | to be measured | to be measured |
-| Render thread | not applicable | to be measured |
+| Run | UI thread, dispatcher-thread mode | UI thread, render-thread mode | Frame completion, dispatcher-thread mode | Frame completion, render-thread mode |
+|---|---|---|---|---|
+| 1 | 1.76 (2.55) | 0.50 (0.84) | 1.69 (2.54) | 1.38 (1.93) |
+| 2 (outlier) | 2.71 (5.99) | 1.63 (2.31) | 2.56 (5.78) | 4.29 (5.36) |
+| 3 | 1.86 (2.85) | 0.49 (0.82) | 1.75 (2.64) | 1.37 (1.83) |
+| 4 | 1.55 (2.58) | 0.36 (0.51) | 1.48 (2.32) | 1.14 (1.40) |
+
+In run 1 the render thread spent a median of 1.37 ms in the ticks of a frame, against 1.48 ms of rendering on the UI thread in the other mode.
+
+Reading: in the render-thread mode the UI thread is busy for about 0.4 to 0.5 ms of a scroll step instead of 1.6 to 1.9 ms (about a quarter), because the frame is drawn elsewhere; and a frame is complete somewhat sooner, because the UI thread's work and the drawing overlap less than they queue. Under load the completion can be later instead (run 2): the frame then waits for the render thread to be scheduled. To be repeated on a quiet machine before the numbers are quoted.
+
+One thing the benchmark showed about the dispatcher-thread mode: a scroll step is not always rendered by the first tick after it. A commit that is requested while the batch before it is pending is made one pass of the dispatcher later, so the benchmark pumps the frame until its batch is rendered (300 steps took 450 rendered frames).
 
 What the numbers cannot show: the surface is a raster framebuffer, so the share of the rendering in a frame is not the one of a window on Metal, and there is no presentation. The same measurement in a real window is the entry of `desktop-performance.md` that R5.4 lists as not done.
 
