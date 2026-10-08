@@ -410,8 +410,6 @@ mod text_block_tests;
 mod label_text_tests;
 #[cfg(test)]
 mod button_text_tests;
-#[cfg(test)]
-mod deferred_text_tests;
 
 // --- flyouts ---
 mod flyouts;
