@@ -750,7 +750,7 @@ The step built and passed without a change to what was written.
 - With threads: `render_worker_clear` passes its six checks on the objects of the crate (`RenderWorker`, the per-thread table, the shared surface), among them the new one, where the script did keep the canvas back until the thread had reported itself; `thread_spawn` 3 checks, `storage_view` 19, `themed_view` served isolated 30.
 - So B2.6 can switch the render worker on: start it before the render loop sets its tick, make the timer a background one, and create the compositor with `with_render_thread` and the flag false.
 
-## B2.6: the compositor on the worker (written, 2026-10-09)
+## B2.6: the compositor on the worker (written and validated, 2026-10-09)
 
 Status: written on 2026-10-09, **not built and not run**. No cargo, no browser build and no browser. What could be checked without a build: the Rust files parse (the formatter reads them), the script modules pass the type check of `webapp/` with the tools of the main checkout (the only errors are the missing package of the storage bundle, as before), and the scripts and the test parse (`node --check`). **[R]** marks what was read in Emscripten 6.0.10 (`.tools/emsdk/upstream/emscripten`) and **[G]** what was read in the script of the threaded `themed_view` of the B2.5 validation (`target/browser-threads/themed_view/themed_view.js`); everything else is **[M]** unless marked.
 
@@ -897,3 +897,24 @@ scripts/build-browser.sh thread_spawn --threads && node scripts/browser/tests/th
 Expected: 9 host tests of the browser crate more than before (217); the three tests of the build without threads unchanged in number and result (30, 18, the catalog); `themed_view.test.mjs` against the threaded site with 68 checks, printing as `measured:` the pixels that differ between the two modes, the ticks, frames and proxied calls, and how the page was hidden; `storage_view` threaded with its 19 checks, now drawn by the render thread; `render_worker_clear` (6) and `thread_spawn` (3) unchanged (the first uses `RenderWorker` and a background timer of its own, and now also reports its ticks to `RenderStatistics`).
 
 By hand, served isolated (`node scripts/browser/serve.mjs target/browser-threads/themed_view --isolated`): the page, `?RenderThread=false`, `?RenderingMode=Software2D`, `?RenderingMode=WebGL1`; `themedView.themedViewRendering()` in the console.
+
+### Result of the validation of B2.6 (2026-10-09)
+
+The step built on the first try; nothing in the platform had to change. Two checks were corrected, both about when a test may act, and both are things an application of the render-thread mode has to know:
+
+- **A hidden page.** The check expected no frame of a hidden page. The render thread drew one frame in 2.5 seconds for a change the page made while hidden: its own animation frames had stopped, but the tick the page asks for out of turn when it commits is made, as it must be (a commit the page waits for is answered whether the page is visible or not). The check now allows the few frames that were asked for, instead of none.
+- **Input before the first frame.** In `storage_view` a file dropped on the view right after the view existed was not delivered on the render thread, and was on one thread. A view is hit from what its last frame drew. On one thread the first frame is drawn inside the start of the application; with a render thread it is drawn a few milliseconds after the view exists, and input that arrives in between hits nothing. The check waits until the drop point is hit (`storageViewIsHit`, a new export of the example). The first frame came at the same time in both modes (about 2.6 s after navigation in a debug run here; the start of the module takes most of it).
+
+Measured in headless Chrome, `themed_view` built with threads (68 checks):
+
+| What | Result |
+|---|---|
+| The 30 checks of the example on the render thread, and again with `?RenderThread=false` | pass |
+| Frames drawn by another thread than the page's | yes, in WebGL2, WebGL1 and Software2D |
+| Calls proxied to the main thread during a frame | 0 |
+| Sampled pixels that differ between the render thread and one thread | 0 of 14950 in the default mode, in Software2D, in WebGL1 and in WebGL2; 0 of 15000 and 0 of 13300 after the two resizes, in WebGL2 and in Software2D |
+| A hidden page | 1 frame in 2.5 s (the one asked for out of turn), 11 ticks; drawn again when shown |
+
+Other examples with this step: `storage_view` with threads, now rendering from the worker, 19 checks (six runs; one run failed in the removal of the browser's profile directory by the harness, not in a check); `render_worker_clear` 6; `thread_spawn` 3; without threads `themed_view` 30 and `storage_view` 18; the host tests of the browser crate 217.
+
+Still open: the Skia bindings shim is linked without the atomics feature while two threads now call Skia (the fix is written on the branch `skia-shim-threads` and waits for validation); several canvases in one worker (B2.7); the catalog on the worker (B2.7); browsers other than headless Chrome.
