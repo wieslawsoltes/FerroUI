@@ -80,6 +80,20 @@ impl MetalDevice {
             None => panic!("Cannot access a disposed object: MetalDevice"),
         }
     }
+
+    /// Calls the native device where it is held, without taking a reference
+    /// of its own: for the getters, which neither take time nor release the
+    /// device.
+    ///
+    /// # Panics
+    /// Panics when the device is disposed.
+    #[track_caller]
+    fn with_native<R>(&self, f: impl FnOnce(&IFrnMetalDevice) -> R) -> R {
+        match self.native.borrow().as_ref() {
+            Some(native) => f(&**native),
+            None => panic!("Cannot access a disposed object: MetalDevice"),
+        }
+    }
 }
 
 impl IOptionalFeatureProvider for MetalDevice {
@@ -102,6 +116,11 @@ impl IPlatformGraphicsContext for MetalDevice {
 
     /// Takes the lock of the device: the UI thread and the render thread
     /// both use it, one at a time.
+    ///
+    /// The device lives in the graph of the server compositor, so every
+    /// caller already holds the compositor lock: the order is always the
+    /// compositor lock first, then this one. Something that used the device
+    /// outside the compositor would have to keep that order.
     fn ensure_current(&self) -> Rc<dyn IDisposable> {
         self.sync_root.lock()
     }
@@ -118,11 +137,11 @@ impl IPlatformGraphicsContext for MetalDevice {
 
 impl IMetalDevice for MetalDevice {
     fn device(&self) -> *mut c_void {
-        self.native().get_device()
+        self.with_native(|native| native.get_device())
     }
 
     fn command_queue(&self) -> *mut c_void {
-        self.native().get_queue()
+        self.with_native(|native| native.get_queue())
     }
 }
 
@@ -264,10 +283,16 @@ pub struct MetalDrawingSession {
 }
 
 impl MetalDrawingSession {
+    /// Calls the native session where it is held, without taking a reference
+    /// of its own: its members are getters, and releasing the session is
+    /// what presents the frame.
+    ///
+    /// # Panics
+    /// Panics when the session is disposed.
     #[track_caller]
-    fn session(&self) -> ComPtr<IFrnMetalRenderingSession> {
-        match self.session.borrow().clone() {
-            Some(session) => session,
+    fn with_session<R>(&self, f: impl FnOnce(&IFrnMetalRenderingSession) -> R) -> R {
+        match self.session.borrow().as_ref() {
+            Some(session) => f(&**session),
             None => panic!("Cannot access a disposed object: MetalDrawingSession"),
         }
     }
@@ -275,16 +300,16 @@ impl MetalDrawingSession {
 
 impl IMetalPlatformSurfaceRenderingSession for MetalDrawingSession {
     fn texture(&self) -> *mut c_void {
-        self.session().get_texture()
+        self.with_session(|session| session.get_texture())
     }
 
     fn size(&self) -> PixelSize {
-        let size = self.session().get_pixel_size().check();
+        let size = self.with_session(|session| session.get_pixel_size()).check();
         PixelSize::new(size.width, size.height)
     }
 
     fn scaling(&self) -> f64 {
-        self.session().get_scaling()
+        self.with_session(|session| session.get_scaling())
     }
 
     fn is_y_flipped(&self) -> bool {
