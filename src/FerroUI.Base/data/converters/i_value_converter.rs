@@ -1,5 +1,6 @@
 use crate::data::core::ValueType;
 use crate::data::BindingError;
+use crate::utilities::CultureInfo;
 use crate::BoxedValue;
 
 /// Converts a binding value.
@@ -13,9 +14,8 @@ use crate::BoxedValue;
 /// error. Returning `Err` is the equivalent of throwing from the converter:
 /// the binding logs the error and treats the value as unset.
 ///
-/// There is no culture argument: formatting and parsing are invariant.
-// Deviation (DEVIATIONS.md, Bindings): upstream passes the `CultureInfo` of the binding
-// (`ConverterCulture`) to `Convert` and `ConvertBack`.
+/// `culture` is the culture to use: the converter culture of the binding,
+/// or the current culture when the binding names none.
 pub trait IValueConverter {
     /// Converts a value on its way from the binding source to the target.
     fn convert(
@@ -23,6 +23,7 @@ pub trait IValueConverter {
         value: Option<&BoxedValue>,
         target_type: ValueType,
         parameter: Option<&BoxedValue>,
+        culture: &CultureInfo,
     ) -> Result<Option<BoxedValue>, BindingError>;
 
     /// Converts a value on its way from the binding target to the source.
@@ -31,6 +32,7 @@ pub trait IValueConverter {
         value: Option<&BoxedValue>,
         target_type: ValueType,
         parameter: Option<&BoxedValue>,
+        culture: &CultureInfo,
     ) -> Result<Option<BoxedValue>, BindingError>;
 }
 

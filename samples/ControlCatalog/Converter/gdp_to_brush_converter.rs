@@ -1,5 +1,6 @@
 //! Port of `Converter/GdpToBrushConverter.cs`.
 
+use ferroui_base::utilities::CultureInfo;
 use ferroui_base::data::converters::IValueConverter;
 use ferroui_base::data::core::ValueType;
 use ferroui_base::data::BindingError;
@@ -42,6 +43,7 @@ impl IValueConverter for GdpToBrushConverter {
         value: Option<&BoxedValue>,
         _target_type: ValueType,
         _parameter: Option<&BoxedValue>,
+        _culture: &CultureInfo,
     ) -> Result<Option<BoxedValue>, BindingError> {
         let Some(gdp) = value.and_then(|value| value.downcast_ref::<i32>()).copied() else {
             return Ok(Some(FerroProperty::unset_value()));
@@ -62,6 +64,7 @@ impl IValueConverter for GdpToBrushConverter {
         _value: Option<&BoxedValue>,
         _target_type: ValueType,
         _parameter: Option<&BoxedValue>,
+        _culture: &CultureInfo,
     ) -> Result<Option<BoxedValue>, BindingError> {
         Err(BindingError::message("Specified method is not supported."))
     }
@@ -84,7 +87,7 @@ mod tests {
     }
 
     fn brush(converter: &GdpToBrushConverter, gdp: i32) -> Rc<dyn IBrush> {
-        let value = converter.convert(Some(&boxed(gdp)), ValueType::of::<Rc<dyn IBrush>>(), None);
+        let value = converter.convert(Some(&boxed(gdp)), ValueType::of::<Rc<dyn IBrush>>(), None, &ferroui_base::utilities::CultureInfo::invariant_culture());
         value.ok().flatten().expect("a value").downcast_ref::<Rc<dyn IBrush>>().expect("a brush").clone()
     }
 
@@ -102,8 +105,8 @@ mod tests {
     fn a_value_that_is_not_an_integer_is_unset_and_the_way_back_is_not_supported() {
         let converter = GdpToBrushConverter::new();
         let target = ValueType::of::<Rc<dyn IBrush>>();
-        let value = converter.convert(Some(&boxed(1.0_f64)), target, None).ok().flatten().expect("a value");
+        let value = converter.convert(Some(&boxed(1.0_f64)), target, None, &ferroui_base::utilities::CultureInfo::invariant_culture()).ok().flatten().expect("a value");
         assert!(Rc::ptr_eq(&value, &FerroProperty::unset_value()));
-        assert!(converter.convert_back(Some(&boxed(1_i32)), target, None).is_err());
+        assert!(converter.convert_back(Some(&boxed(1_i32)), target, None, &ferroui_base::utilities::CultureInfo::invariant_culture()).is_err());
     }
 }

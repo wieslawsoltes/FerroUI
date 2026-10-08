@@ -47,7 +47,7 @@ mod tests {
     fn string_converters_is_null_or_empty_works() {
         for (input, expected) in [(Some("hello"), false), (Some(""), true), (None, true)] {
             let converter = StringConverters::is_null_or_empty();
-            let result = converter.convert(boxed(input).as_ref(), ValueType::of::<bool>(), None);
+            let result = converter.convert(boxed(input).as_ref(), ValueType::of::<bool>(), None, &crate::utilities::CultureInfo::current_culture());
             assert_eq!(as_bool(result), expected, "{input:?}");
         }
     }
@@ -56,7 +56,7 @@ mod tests {
     fn string_converters_is_not_null_or_empty_works() {
         for (input, expected) in [(Some("hello"), true), (Some(""), false), (None, false)] {
             let converter = StringConverters::is_not_null_or_empty();
-            let result = converter.convert(boxed(input).as_ref(), ValueType::of::<bool>(), None);
+            let result = converter.convert(boxed(input).as_ref(), ValueType::of::<bool>(), None, &crate::utilities::CultureInfo::current_culture());
             assert_eq!(as_bool(result), expected, "{input:?}");
         }
     }
@@ -67,7 +67,7 @@ mod tests {
     fn returns_unset_for_input_that_is_not_a_string() {
         let converter = StringConverters::is_null_or_empty();
         let input: BoxedValue = Rc::new(5i32);
-        let result = converter.convert(Some(&input), ValueType::of::<bool>(), None);
+        let result = converter.convert(Some(&input), ValueType::of::<bool>(), None, &crate::utilities::CultureInfo::current_culture());
         assert!(BindingOperations::is_unset(result.expect("no error").as_ref()));
     }
 
@@ -76,7 +76,7 @@ mod tests {
         let converter = StringConverters::is_null_or_empty();
         let literal: BoxedValue = Rc::new("hello");
         let nullable: BoxedValue = Rc::new(Option::<String>::None);
-        assert!(!as_bool(converter.convert(Some(&literal), ValueType::of::<bool>(), None)));
-        assert!(as_bool(converter.convert(Some(&nullable), ValueType::of::<bool>(), None)));
+        assert!(!as_bool(converter.convert(Some(&literal), ValueType::of::<bool>(), None, &crate::utilities::CultureInfo::current_culture())));
+        assert!(as_bool(converter.convert(Some(&nullable), ValueType::of::<bool>(), None, &crate::utilities::CultureInfo::current_culture())));
     }
 }

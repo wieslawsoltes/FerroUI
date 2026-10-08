@@ -783,7 +783,7 @@ fn menu_scroll_bar_should_be_visible_when_specified_visible() {
     ];
     let parameter: BoxedValue = Rc::new(String::from("0"));
     let result = converter
-        .convert(&args, ValueType::of::<ScrollBarVisibility>(), Some(&parameter))
+        .convert(&args, ValueType::of::<ScrollBarVisibility>(), Some(&parameter), &ferroui_base::utilities::CultureInfo::current_culture())
         .unwrap();
     assert_eq!(result.and_then(|result| result.downcast_ref::<bool>().copied()), Some(true));
 }

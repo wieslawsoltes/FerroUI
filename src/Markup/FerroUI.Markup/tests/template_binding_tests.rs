@@ -4,6 +4,7 @@
 //! child is created with its binding and then attached to the templated
 //! parent in the order in which a templated control applies its template.
 
+use ferroui_base::utilities::CultureInfo;
 use super::test_support::*;
 use ferroui_base::data::converters::{BoolConverters, IMultiValueConverter, IValueConverter, ObjectConverters};
 use ferroui_base::data::core::{ValueType, ValueTypes};
@@ -24,6 +25,7 @@ impl IValueConverter for PrefixConverter {
         value: Option<&BoxedValue>,
         _target_type: ValueType,
         parameter: Option<&BoxedValue>,
+        _culture: &CultureInfo,
     ) -> Result<Option<BoxedValue>, BindingError> {
         match (value, parameter) {
             (Some(value), Some(parameter)) => Ok(Some(boxed(to_text(parameter) + &to_text(value)))),
@@ -36,6 +38,7 @@ impl IValueConverter for PrefixConverter {
         value: Option<&BoxedValue>,
         _target_type: ValueType,
         parameter: Option<&BoxedValue>,
+        _culture: &CultureInfo,
     ) -> Result<Option<BoxedValue>, BindingError> {
         match (value, parameter) {
             (Some(value), Some(parameter)) => {
@@ -62,6 +65,7 @@ impl IMultiValueConverter for MultiConverter {
         values: &[Option<BoxedValue>],
         _target_type: ValueType,
         _parameter: Option<&BoxedValue>,
+        _culture: &CultureInfo,
     ) -> Result<Option<BoxedValue>, BindingError> {
         self.values.borrow_mut().extend(values.iter().cloned());
         Ok(values.first().cloned().flatten())

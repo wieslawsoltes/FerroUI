@@ -3,6 +3,7 @@
 //! two flavours the upstream fixture is parameterised over (a compiled path
 //! of typed accessors, and a string path resolved at run time).
 
+use crate::utilities::CultureInfo;
 use super::*;
 use crate::data::converters::IValueConverter;
 use crate::data::core::expression_nodes::{CastTarget, DataContextNode, ExpressionNode};
@@ -525,6 +526,7 @@ impl IValueConverter for PrefixConverter {
         value: Option<&BoxedValue>,
         target_type: ValueType,
         parameter: Option<&BoxedValue>,
+        _culture: &CultureInfo,
     ) -> Result<Option<BoxedValue>, BindingError> {
         if !is_string_type(target_type) {
             return Ok(value.cloned());
@@ -542,6 +544,7 @@ impl IValueConverter for PrefixConverter {
         value: Option<&BoxedValue>,
         target_type: ValueType,
         parameter: Option<&BoxedValue>,
+        _culture: &CultureInfo,
     ) -> Result<Option<BoxedValue>, BindingError> {
         let Some(prefix) = to_text(parameter).filter(|_| is_string_type(target_type)) else {
             return Ok(value.cloned());

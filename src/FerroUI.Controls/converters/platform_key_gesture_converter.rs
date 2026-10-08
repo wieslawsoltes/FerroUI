@@ -1,3 +1,4 @@
+use ferroui_base::utilities::CultureInfo;
 use ferroui_base::data::converters::{cast_value, IValueConverter};
 use ferroui_base::data::core::{ValueType, ValueTypes};
 use ferroui_base::data::BindingError;
@@ -28,6 +29,7 @@ impl IValueConverter for PlatformKeyGestureConverter {
         value: Option<&BoxedValue>,
         target_type: ValueType,
         _parameter: Option<&BoxedValue>,
+        _culture: &CultureInfo,
     ) -> Result<Option<BoxedValue>, BindingError> {
         if value.cloned().and_then(ValueTypes::normalize).is_none() {
             return Ok(None);
@@ -44,6 +46,7 @@ impl IValueConverter for PlatformKeyGestureConverter {
         _value: Option<&BoxedValue>,
         _target_type: ValueType,
         _parameter: Option<&BoxedValue>,
+        _culture: &CultureInfo,
     ) -> Result<Option<BoxedValue>, BindingError> {
         Err(BindingError::message("The method or operation is not implemented."))
     }

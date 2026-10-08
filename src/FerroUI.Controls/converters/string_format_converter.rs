@@ -1,3 +1,4 @@
+use ferroui_base::utilities::CultureInfo;
 use ferroui_base::data::converters::composite_format::format_values;
 use ferroui_base::data::converters::{cast_value, IMultiValueConverter};
 use ferroui_base::data::core::ValueType;
@@ -23,6 +24,7 @@ impl IMultiValueConverter for StringFormatConverter {
         values: &[Option<BoxedValue>],
         _target_type: ValueType,
         _parameter: Option<&BoxedValue>,
+        _culture: &CultureInfo,
     ) -> Result<Option<BoxedValue>, BindingError> {
         if let Some(format) = values.first().and_then(|v| cast_value::<String>(v.as_ref())) {
             return match format_values(&format, &values[1..]) {

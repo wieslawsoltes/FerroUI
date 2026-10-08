@@ -3,6 +3,7 @@
 //! Not ported here: `Should_Write_Indexed_Value_To_Source` (indexers are
 //! covered by the indexer suite).
 
+use crate::utilities::CultureInfo;
 use super::binding_test_support::*;
 use super::*;
 use crate::data::converters::IValueConverter;
@@ -55,6 +56,7 @@ impl IValueConverter for CaseConverter {
         value: Option<&BoxedValue>,
         _target_type: ValueType,
         _parameter: Option<&BoxedValue>,
+        _culture: &CultureInfo,
     ) -> Result<Option<BoxedValue>, BindingError> {
         Ok(to_text(value).map(|v| boxed(v.to_uppercase())))
     }
@@ -64,6 +66,7 @@ impl IValueConverter for CaseConverter {
         value: Option<&BoxedValue>,
         _target_type: ValueType,
         _parameter: Option<&BoxedValue>,
+        _culture: &CultureInfo,
     ) -> Result<Option<BoxedValue>, BindingError> {
         Ok(to_text(value).map(|v| boxed(v.to_lowercase())))
     }

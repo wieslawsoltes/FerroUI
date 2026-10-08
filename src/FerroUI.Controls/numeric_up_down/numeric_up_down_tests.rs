@@ -1,5 +1,6 @@
 //! Port of the reference `NumericUpDownTests`.
 
+use ferroui_base::utilities::CultureInfo;
 use crate::templates::{FuncControlTemplate, FuncTemplateNameScopeExtensions, IControlTemplate};
 use crate::testing::{TestServices, UnitTestApplication, UnitTestApplicationScope};
 use crate::{
@@ -159,6 +160,7 @@ impl IValueConverter for TestNumericUpDownValueConverter {
         value: Option<&BoxedValue>,
         _target_type: ValueType,
         _parameter: Option<&BoxedValue>,
+        _culture: &CultureInfo,
     ) -> Result<Option<BoxedValue>, BindingError> {
         let input = value.map(|value| ValueTypes::to_display_string(Some(value))).unwrap_or_default();
         let zero = || Ok(Some(Rc::new(Decimal::ZERO) as BoxedValue));
@@ -184,6 +186,7 @@ impl IValueConverter for TestNumericUpDownValueConverter {
         value: Option<&BoxedValue>,
         _target_type: ValueType,
         _parameter: Option<&BoxedValue>,
+        _culture: &CultureInfo,
     ) -> Result<Option<BoxedValue>, BindingError> {
         let Some(input_number) = value.and_then(|value| value.downcast_ref::<Decimal>()) else {
             return Ok(None);

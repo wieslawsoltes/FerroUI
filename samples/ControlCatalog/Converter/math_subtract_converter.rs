@@ -1,5 +1,6 @@
 //! Port of `Converter/MathSubtractConverter.cs`.
 
+use ferroui_base::utilities::CultureInfo;
 use ferroui_base::data::converters::IValueConverter;
 use ferroui_base::data::core::ValueType;
 use ferroui_base::data::BindingError;
@@ -33,6 +34,7 @@ impl IValueConverter for MathSubtractConverter {
         value: Option<&BoxedValue>,
         _target_type: ValueType,
         parameter: Option<&BoxedValue>,
+        _culture: &CultureInfo,
     ) -> Result<Option<BoxedValue>, BindingError> {
         let dv = value.and_then(|value| value.downcast_ref::<f64>());
         let dp = parameter.and_then(|parameter| parameter.downcast_ref::<f64>());
@@ -48,6 +50,7 @@ impl IValueConverter for MathSubtractConverter {
         _value: Option<&BoxedValue>,
         _target_type: ValueType,
         _parameter: Option<&BoxedValue>,
+        _culture: &CultureInfo,
     ) -> Result<Option<BoxedValue>, BindingError> {
         Err(BindingError::message("Specified method is not supported."))
     }
@@ -77,10 +80,10 @@ mod tests {
     fn subtracts_the_parameter_from_the_value() {
         let converter = MathSubtractConverter::new();
         let target = ValueType::of::<f64>();
-        assert_eq!(7.5, number(converter.convert(Some(&boxed(10.0_f64)), target, Some(&boxed(2.5_f64)))));
-        assert!(number(converter.convert(Some(&boxed(10.0_f64)), target, Some(&boxed(String::from("2.5"))))).is_nan());
-        assert!(number(converter.convert(Some(&boxed(10_i32)), target, Some(&boxed(2.5_f64)))).is_nan());
-        assert!(number(converter.convert(Some(&boxed(10.0_f64)), target, None)).is_nan());
-        assert!(converter.convert_back(Some(&boxed(1.0_f64)), target, None).is_err());
+        assert_eq!(7.5, number(converter.convert(Some(&boxed(10.0_f64)), target, Some(&boxed(2.5_f64)), &ferroui_base::utilities::CultureInfo::invariant_culture())));
+        assert!(number(converter.convert(Some(&boxed(10.0_f64)), target, Some(&boxed(String::from("2.5"))), &ferroui_base::utilities::CultureInfo::invariant_culture())).is_nan());
+        assert!(number(converter.convert(Some(&boxed(10_i32)), target, Some(&boxed(2.5_f64)), &ferroui_base::utilities::CultureInfo::invariant_culture())).is_nan());
+        assert!(number(converter.convert(Some(&boxed(10.0_f64)), target, None, &ferroui_base::utilities::CultureInfo::invariant_culture())).is_nan());
+        assert!(converter.convert_back(Some(&boxed(1.0_f64)), target, None, &ferroui_base::utilities::CultureInfo::invariant_culture()).is_err());
     }
 }

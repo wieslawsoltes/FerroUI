@@ -1,3 +1,4 @@
+use ferroui_base::utilities::CultureInfo;
 use crate::primitives::ScrollBarVisibility;
 use ferroui_base::data::converters::{cast_value, IMultiValueConverter};
 use ferroui_base::data::core::{ValueType, ValueTypes};
@@ -29,6 +30,7 @@ impl IMultiValueConverter for MenuScrollingVisibilityConverter {
         values: &[Option<BoxedValue>],
         _target_type: ValueType,
         parameter: Option<&BoxedValue>,
+        _culture: &CultureInfo,
     ) -> Result<Option<BoxedValue>, BindingError> {
         if parameter.cloned().and_then(ValueTypes::normalize).is_none() || values.len() != 4 {
             return Ok(Some(FerroProperty::unset_value()));

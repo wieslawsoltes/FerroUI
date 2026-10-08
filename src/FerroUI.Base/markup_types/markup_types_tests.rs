@@ -1342,7 +1342,7 @@ fn a_setter_is_an_animation_setter_and_the_converters_are_static_values() {
     let is_not_null = MarkupType::find("FerroUI.Data.Converters", "ObjectConverters").unwrap().find_field("IsNotNull").unwrap();
     assert_eq!((is_not_null.type_)(), ValueType::of::<Rc<dyn crate::data::converters::IValueConverter>>());
     let converter = unbox::<Rc<dyn crate::data::converters::IValueConverter>>(&(is_not_null.get)());
-    let converted = converter.convert(Some(&(Rc::new(1i32) as BoxedValue)), ValueType::of::<bool>(), None).unwrap();
+    let converted = converter.convert(Some(&(Rc::new(1i32) as BoxedValue)), ValueType::of::<bool>(), None, &crate::utilities::CultureInfo::invariant_culture()).unwrap();
     assert_eq!(unbox::<bool>(&converted), true);
 }
 

@@ -1,6 +1,7 @@
 //! Ported from the upstream `MarkupExtensions/CompiledBindingExtensionTests`:
 //! the test types of the file and its tests.
 
+use ferroui_base::utilities::CultureInfo;
 use std::cell::{Cell, RefCell};
 use std::collections::HashMap;
 use std::rc::{Rc, Weak};
@@ -178,6 +179,7 @@ impl IValueConverter for AppendConverter {
         value: Option<&BoxedValue>,
         _target_type: ValueType,
         parameter: Option<&BoxedValue>,
+        _culture: &CultureInfo,
     ) -> Result<Option<BoxedValue>, BindingError> {
         // Not ported: the culture (third part of the text): `IValueConverter::convert` has no
         // culture argument (base).
@@ -190,6 +192,7 @@ impl IValueConverter for AppendConverter {
         _value: Option<&BoxedValue>,
         _target_type: ValueType,
         _parameter: Option<&BoxedValue>,
+        _culture: &CultureInfo,
     ) -> Result<Option<BoxedValue>, BindingError> {
         Err(BindingError::message("The method or operation is not implemented."))
     }

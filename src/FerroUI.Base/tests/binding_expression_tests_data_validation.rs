@@ -5,6 +5,7 @@
 //! `Handles_Indei_And_DataAnnotations_On_Same_Class` (validation attributes
 //! are not available).
 
+use crate::utilities::CultureInfo;
 use super::binding_test_support::*;
 use super::*;
 use crate::data::converters::IValueConverter;
@@ -214,6 +215,7 @@ impl IValueConverter for InvalidIdConverter {
         value: Option<&BoxedValue>,
         _target_type: ValueType,
         _parameter: Option<&BoxedValue>,
+        _culture: &CultureInfo,
     ) -> Result<Option<BoxedValue>, BindingError> {
         Ok(value.cloned())
     }
@@ -223,6 +225,7 @@ impl IValueConverter for InvalidIdConverter {
         value: Option<&BoxedValue>,
         _target_type: ValueType,
         _parameter: Option<&BoxedValue>,
+        _culture: &CultureInfo,
     ) -> Result<Option<BoxedValue>, BindingError> {
         if let Some(i) = value.and_then(|v| v.downcast_ref::<i32>()) {
             return Ok(Some(boxed(*i)));
@@ -247,6 +250,7 @@ impl IValueConverter for FuncValueConverter {
         value: Option<&BoxedValue>,
         _target_type: ValueType,
         _parameter: Option<&BoxedValue>,
+        _culture: &CultureInfo,
     ) -> Result<Option<BoxedValue>, BindingError> {
         Ok(value.cloned())
     }
@@ -256,6 +260,7 @@ impl IValueConverter for FuncValueConverter {
         value: Option<&BoxedValue>,
         _target_type: ValueType,
         _parameter: Option<&BoxedValue>,
+        _culture: &CultureInfo,
     ) -> Result<Option<BoxedValue>, BindingError> {
         Ok((self.convert_back)(value))
     }

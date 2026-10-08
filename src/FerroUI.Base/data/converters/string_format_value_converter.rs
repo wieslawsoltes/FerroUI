@@ -1,7 +1,8 @@
-use super::composite_format::format_values;
+use super::composite_format::format_values_with;
 use super::IValueConverter;
 use crate::data::core::ValueType;
 use crate::data::BindingError;
+use crate::utilities::CultureInfo;
 use crate::BoxedValue;
 use std::rc::Rc;
 
@@ -39,17 +40,18 @@ impl IValueConverter for StringFormatValueConverter {
         value: Option<&BoxedValue>,
         target_type: ValueType,
         parameter: Option<&BoxedValue>,
+        culture: &CultureInfo,
     ) -> Result<Option<BoxedValue>, BindingError> {
         let converted = match &self.inner {
-            Some(inner) => inner.convert(value, target_type, parameter)?,
+            Some(inner) => inner.convert(value, target_type, parameter, culture)?,
             None => None,
         };
         let value = converted.or_else(|| value.cloned());
 
         let result = if self.format.contains('{') {
-            format_values(&self.format, &[value])
+            format_values_with(&self.format, &[value], culture)
         } else {
-            format_values(&format!("{{0:{}}}", self.format), &[value])
+            format_values_with(&format!("{{0:{}}}", self.format), &[value], culture)
         };
         match result {
             Ok(text) => Ok(Some(Rc::new(text))),
@@ -62,6 +64,7 @@ impl IValueConverter for StringFormatValueConverter {
         _value: Option<&BoxedValue>,
         _target_type: ValueType,
         _parameter: Option<&BoxedValue>,
+        _culture: &CultureInfo,
     ) -> Result<Option<BoxedValue>, BindingError> {
         Err(BindingError::message("Two way bindings are not supported with a string format"))
     }
@@ -80,7 +83,7 @@ mod tests {
     }
 
     fn convert(target: &StringFormatValueConverter, value: Option<&BoxedValue>) -> String {
-        let result = target.convert(value, ValueType::of::<String>(), None).expect("no error").expect("not null");
+        let result = target.convert(value, ValueType::of::<String>(), None, &crate::utilities::CultureInfo::invariant_culture()).expect("no error").expect("not null");
         result.downcast_ref::<String>().cloned().expect("a string")
     }
 
@@ -143,6 +146,7 @@ mod tests {
                 _value: Option<&BoxedValue>,
                 _target_type: ValueType,
                 _parameter: Option<&BoxedValue>,
+                _culture: &CultureInfo,
             ) -> Result<Option<BoxedValue>, BindingError> {
                 Err(BindingError::message("inner failed"))
             }
@@ -152,13 +156,14 @@ mod tests {
                 _value: Option<&BoxedValue>,
                 _target_type: ValueType,
                 _parameter: Option<&BoxedValue>,
+                _culture: &CultureInfo,
             ) -> Result<Option<BoxedValue>, BindingError> {
                 Err(BindingError::message("inner failed"))
             }
         }
         let target = StringFormatValueConverter::new("{0}", Some(Rc::new(Failing)));
 
-        let result = target.convert(Some(&boxed(1i32)), ValueType::of::<String>(), None);
+        let result = target.convert(Some(&boxed(1i32)), ValueType::of::<String>(), None, &crate::utilities::CultureInfo::invariant_culture());
 
         assert_eq!(result.expect_err("an error").to_string(), "inner failed");
     }
@@ -167,7 +172,7 @@ mod tests {
     fn invalid_format_is_an_error() {
         let target = StringFormatValueConverter::new("{1}", None);
 
-        let error = target.convert(Some(&boxed(1i32)), ValueType::of::<String>(), None).expect_err("an error");
+        let error = target.convert(Some(&boxed(1i32)), ValueType::of::<String>(), None, &crate::utilities::CultureInfo::invariant_culture()).expect_err("an error");
 
         assert_eq!(error.inner().downcast_ref::<FormatError>(), Some(&FormatError::IndexOutOfRange));
     }
@@ -176,7 +181,7 @@ mod tests {
     fn convert_back_is_not_supported() {
         let target = StringFormatValueConverter::new("{0}", None);
 
-        let result = target.convert_back(Some(&boxed(String::from("1"))), ValueType::of::<i32>(), None);
+        let result = target.convert_back(Some(&boxed(String::from("1"))), ValueType::of::<i32>(), None, &crate::utilities::CultureInfo::invariant_culture());
 
         assert_eq!(
             result.expect_err("an error").to_string(),

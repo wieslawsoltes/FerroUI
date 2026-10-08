@@ -1,7 +1,8 @@
-use super::composite_format::format_values;
+use super::composite_format::format_values_with;
 use super::IMultiValueConverter;
 use crate::data::core::ValueType;
 use crate::data::BindingError;
+use crate::utilities::CultureInfo;
 use crate::BoxedValue;
 use std::rc::Rc;
 
@@ -39,10 +40,13 @@ impl IMultiValueConverter for StringFormatMultiValueConverter {
         values: &[Option<BoxedValue>],
         target_type: ValueType,
         parameter: Option<&BoxedValue>,
+        culture: &CultureInfo,
     ) -> Result<Option<BoxedValue>, BindingError> {
         let result = match &self.inner {
-            None => format_values(&self.format, values),
-            Some(inner) => format_values(&self.format, &[inner.convert(values, target_type, parameter)?]),
+            None => format_values_with(&self.format, values, culture),
+            Some(inner) => {
+                format_values_with(&self.format, &[inner.convert(values, target_type, parameter, culture)?], culture)
+            }
         };
         match result {
             Ok(text) => Ok(Some(Rc::new(text))),
@@ -65,7 +69,7 @@ mod tests {
     }
 
     fn convert(target: &StringFormatMultiValueConverter, values: &[Option<BoxedValue>]) -> String {
-        let result = target.convert(values, ValueType::of::<String>(), None).expect("no error").expect("not null");
+        let result = target.convert(values, ValueType::of::<String>(), None, &crate::utilities::CultureInfo::invariant_culture()).expect("no error").expect("not null");
         result.downcast_ref::<String>().cloned().expect("a string")
     }
 
@@ -112,7 +116,7 @@ mod tests {
         assert_eq!(convert(&target, &[boxed(1i32), boxed(2i32), boxed(3i32)]), "Sum: 006");
 
         let target = StringFormatMultiValueConverter::new("{1}", Some(inner));
-        let error = target.convert(&[boxed(1i32), boxed(2i32)], ValueType::of::<String>(), None).expect_err("an error");
+        let error = target.convert(&[boxed(1i32), boxed(2i32)], ValueType::of::<String>(), None, &crate::utilities::CultureInfo::invariant_culture()).expect_err("an error");
         assert_eq!(error.inner().downcast_ref::<FormatError>(), Some(&FormatError::IndexOutOfRange));
     }
 
@@ -120,7 +124,7 @@ mod tests {
     fn missing_value_is_an_error() {
         let target = StringFormatMultiValueConverter::new("{0} {1}", None);
 
-        let error = target.convert(&[boxed(1i32)], ValueType::of::<String>(), None).expect_err("an error");
+        let error = target.convert(&[boxed(1i32)], ValueType::of::<String>(), None, &crate::utilities::CultureInfo::invariant_culture()).expect_err("an error");
 
         assert_eq!(error.inner().downcast_ref::<FormatError>(), Some(&FormatError::IndexOutOfRange));
     }

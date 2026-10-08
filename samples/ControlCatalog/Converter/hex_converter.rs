@@ -1,5 +1,6 @@
 //! Port of `Converter/HexConverter.cs`.
 
+use ferroui_base::utilities::CultureInfo;
 use ferroui_base::data::converters::IValueConverter;
 use ferroui_base::data::core::{ValueType, ValueTypes};
 use ferroui_base::data::BindingError;
@@ -34,6 +35,7 @@ impl IValueConverter for HexConverter {
         value: Option<&BoxedValue>,
         _target_type: ValueType,
         _parameter: Option<&BoxedValue>,
+        _culture: &CultureInfo,
     ) -> Result<Option<BoxedValue>, BindingError> {
         let Some(value) = value else {
             return Ok(Some(FerroProperty::unset_value()));
@@ -52,6 +54,7 @@ impl IValueConverter for HexConverter {
         value: Option<&BoxedValue>,
         _target_type: ValueType,
         _parameter: Option<&BoxedValue>,
+        _culture: &CultureInfo,
     ) -> Result<Option<BoxedValue>, BindingError> {
         // A number out of the range of an integer is the overflow the original catches.
         match value.and_then(|value| value.downcast_ref::<Decimal>()).and_then(truncate_to_i32) {
@@ -109,13 +112,13 @@ mod tests {
 
     fn convert(text: &str) -> Option<Decimal> {
         let converter = HexConverter::new();
-        let value = converter.convert(Some(&boxed(text.to_string())), ValueType::of::<Decimal>(), None);
+        let value = converter.convert(Some(&boxed(text.to_string())), ValueType::of::<Decimal>(), None, &ferroui_base::utilities::CultureInfo::invariant_culture());
         value.ok().flatten().expect("a value").downcast_ref::<Decimal>().copied()
     }
 
     fn convert_back(value: BoxedValue) -> Option<String> {
         let converter = HexConverter::new();
-        let value = converter.convert_back(Some(&value), ValueType::of::<String>(), None);
+        let value = converter.convert_back(Some(&value), ValueType::of::<String>(), None, &ferroui_base::utilities::CultureInfo::invariant_culture());
         value.ok().flatten().expect("a value").downcast_ref::<String>().cloned()
     }
 
@@ -129,7 +132,7 @@ mod tests {
         assert_eq!(None, convert("-1"));
         assert_eq!(None, convert(""));
         let converter = HexConverter::new();
-        let unset = converter.convert(None, ValueType::of::<Decimal>(), None).ok().flatten().expect("a value");
+        let unset = converter.convert(None, ValueType::of::<Decimal>(), None, &ferroui_base::utilities::CultureInfo::invariant_culture()).ok().flatten().expect("a value");
         assert!(Rc::ptr_eq(&unset, &FerroProperty::unset_value()));
     }
 
