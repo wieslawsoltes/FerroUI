@@ -618,3 +618,31 @@ fn add_owner_can_override_default_binding_mode() {
     assert_eq!(BindingMode::TwoWay, bar.get_metadata(Class1::TYPE).default_binding_mode());
     assert_eq!(BindingMode::OneWayToSource, bar.get_metadata(Class2::TYPE).default_binding_mode());
 }
+
+// Not from upstream: the untyped route of a direct property converts a value
+// implicitly, as `DirectPropertyBase<TValue>.RouteSetValue` does through
+// `TryConvert` (the styled route has upstream's tests in
+// `ferro_object_tests_set_value.rs`).
+#[test]
+fn set_value_untyped_converts_a_value_implicitly() {
+    let target = Class1::new();
+
+    // An integer on a double property.
+    target.set_value_untyped(Class1::double_value_property(), &4, BindingPriority::LocalValue);
+    assert_eq!(4.0, target.get_direct_value(Class1::double_value_property()));
+
+    // A value on a nullable property.
+    target.set_value_untyped(Class1::frank_property(), &s("newvalue"), BindingPriority::LocalValue);
+    assert_eq!(Some(s("newvalue")), target.get_direct_value(Class1::frank_property()));
+}
+
+// Not from upstream: a value that has no implicit conversion to the type of a
+// direct property is refused, as the managed original throws.
+#[test]
+fn set_value_untyped_refuses_a_value_without_an_implicit_conversion() {
+    let target = Class1::new();
+
+    assert_panics(|| {
+        target.set_value_untyped(Class1::baz_property(), &4.5, BindingPriority::LocalValue);
+    });
+}
