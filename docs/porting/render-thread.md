@@ -58,6 +58,17 @@ Upstream's browser backend has a threaded mode (`WasmEnableThreads`): the UI on 
 3. **Skia.** The browser build links prebuilt Skia objects (the project's rule: never build Skia from source). Emscripten requires every object of a `-pthread` link to be built with threads **[H]**; the published binaries are built without **[H]**. If both hold, the browser cannot have threads until rust-skia publishes a threaded Emscripten binary or the owner lifts the binary-only rule for this target. To verify: link `themed_view` with `-pthread` against the published binary.
 4. **The backend itself.** Port `RenderWorker`, the worker branch of `WebRenderTargetRegistry`, `BrowserWindowingPlatform.EventGrouperDispatchQueue` and the blocking dispatcher (`ManagedDispatcherImpl` on the UI worker), with `OffscreenCanvas` for WebGL2. This is the part that is ordinary porting once 1 to 3 hold.
 
+### Stage B0, measured on 2026-10-08
+
+| Check | Result |
+|---|---|
+| The pinned stable toolchain (Rust 1.99.0, Emscripten 6.0.10) | **[M]** A program that spawns a thread builds without thread flags and fails at run time (`spawn failed: Not supported`). With `-C target-feature=+atomics,+bulk-memory -C link-arg=-pthread` the link fails: `wasm-ld: --shared-memory is disallowed by panic_unwind ... because it was not compiled with 'atomics' or 'bulk-memory' features`. The standard library that ships with the stable toolchain cannot be used for a threaded build. |
+| A rebuilt standard library | **[M]** With a nightly toolchain (the 1.93.0 nightly of 2025-10-31 that is installed, with `rust-src`), `-Zbuild-std=std,panic_unwind`, the flags above, `-C linker=em++` and `-sPTHREAD_POOL_SIZE=2`, the same program builds and runs under Node: the spawned thread runs and is joined. A threaded build therefore needs a nightly toolchain and `-Zbuild-std` until the target ships a threaded standard library; the nightly has to be one with the WebAssembly exception handling that made the project pin 1.99.0 (section 3 of `browser-platform.md`). |
+| The prebuilt Skia objects | **[M]** The hypothesis of item 3 is wrong, in the port's favour. The first 40 objects of `libskia.a` of the published Emscripten binary (skia-bindings 0.153.3) all declare `+atomics` and `+bulk-memory` in their `target_features` section, so the linker accepts them in a shared-memory link. Not yet done: linking and running the port's own module with Skia on a thread (stage B1). |
+| Cross-origin isolation on the published host | Not measured yet. It needs a page on the host (GitHub Pages) with a service worker that adds the two headers, and a check of `crossOriginIsolated`; it is the first step of B1. |
+
+So the browser is not blocked by Skia. Its cost is the toolchain: a nightly compiler with a rebuilt standard library for the threaded build, next to the stable one for the build without threads, or one nightly for both.
+
 The non-threaded mode must keep working: a host without cross-origin isolation falls back to it, as upstream's does.
 
 Items 1 to 3 are feasibility checks of an hour or two each and are done first (stage B0); their outcome decides whether stages B1 to B3 can start or wait for a dependency. The desktop stages do not depend on them.
