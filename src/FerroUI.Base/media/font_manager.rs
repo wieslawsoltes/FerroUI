@@ -35,7 +35,10 @@ impl FontManager {
     pub const COMPOSITE_FONT_SCHEME: &'static str = "compositefont";
 
     /// The key of the system font collection (`fonts:SystemFonts`).
-    pub(crate) fn system_fonts_key() -> Uri {
+    ///
+    /// Internal upstream, where the Skia unit tests see it; public here so
+    /// that the tests of the Skia crate reach it.
+    pub fn system_fonts_key() -> Uri {
         thread_local! {
             static SYSTEM_FONTS_KEY: Uri = Uri::try_create("fonts:SystemFonts", UriKind::Absolute)
                 .expect("the system fonts key is an absolute uri");

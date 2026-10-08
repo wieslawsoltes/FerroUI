@@ -35,8 +35,9 @@ pub use font_collection_base::{
 pub use font_collection_key::FontCollectionKey;
 pub(crate) use font_fallback_script_hints::FontFallbackScriptHints;
 pub use font_family_key::FontFamilyKey;
-#[allow(unused_imports)] // kept for parity; only the font collections use it
-pub(crate) use font_family_loader::FontFamilyLoader;
+// Internal upstream, where the Skia unit tests see it; public here so that
+// the tests of the Skia crate reach it.
+pub use font_family_loader::FontFamilyLoader;
 pub use i_font_collection::IFontCollection;
 pub use open_type_tag::OpenTypeTag;
 pub use system_font_collection::SystemFontCollection;
