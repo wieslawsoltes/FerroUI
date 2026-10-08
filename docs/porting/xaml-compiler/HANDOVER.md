@@ -29,7 +29,13 @@
 - Stage E5 is next (section 9). Nothing is half-done in the working tree of E4.
 - Stage E5, steps 1 and 2 are DONE: the loader table (#43) and includes across crates through the
   `.xamlmeta` of each crate (#53, `xaml.md` 9.7.3 and the E5 status of 9.10.1; fixture
-  `tests/XamlIncludeFixture`). Next: build integration (`compile_xaml()`), then the compiled catalog.
+  `tests/XamlIncludeFixture`).
+- Stage E5, step 3 is WRITTEN on branch `xaml-e5-build-integration` and NOT BUILT by its author
+  (the session that validates it builds it; section 10 has the commands): build integration over
+  the run-time type system (`ferroui-build`, `xaml.md` 9.6.8). The include fixture generates its
+  compiled markup in `build.rs`; the themes keep theirs checked in. Next: the build-time type
+  system of `xaml.md` 9.5 (the scanner), which the rest of the build integration waits for, then
+  the compiled catalog.
 
 Design documents in the repository: `docs/porting/xaml.md`, sections 9 (emitter design: call forms
 A/B/C, build integration, code-behind), 9.5 (source scanner), 9.12 (the 14 rulings), 9.13, and
@@ -73,7 +79,9 @@ compromise that is not needed"):
 4. Generated sources of the test corpus are CHECKED IN and compiled into the test crate; a normal
    test fails when the emitter's output differs from the checked-in text (drift test); an ignored
    test regenerates the file. (Chosen over a build script: a build script that links the framework
-   doubles the build; the generated text is reviewable in a pull request.)
+   doubles the build; the generated text is reviewable in a pull request.) This still holds for the
+   corpus, the themes and every `x:Class` document. The build script of section 10 is the second
+   host of the emitter, used where its cost is confined to a fixture.
 5. The differential harness compiles the generated code for real and compares each document built
    both ways (run-time loader and generated function) by a canonical dump. "Syntax checked" is not
    coverage.
@@ -593,3 +601,58 @@ Next, E5: build integration as section 9 of xaml.md designs it (build-script hel
 macro instead of checked-in files), code-behind and `x:Class` documents (the about dialog, so the
 dialogs crate stops linking the loader), event handlers, ControlCatalog on compiled XAML, and the
 size of generated code.
+
+## 10. What E5 step 3 delivered (build integration), and how to validate it
+
+Written without a build, on the owner's rule that the orchestrating session builds. Read
+`xaml.md` 9.6.8 first: it has the table of what departs from the design of 9.6 and the reason the
+themes are not converted.
+
+What exists:
+
+- `src/FerroUI.Build.Tasks` (`ferroui-build`): `Build`, `XamlGroup`, `Outcome`, the free functions
+  `compile_xaml` and `embed_assets`. `Build::execute` returns the `cargo::` lines and the errors
+  without printing, for tests in process; `Build::run` prints them and exits with a failure.
+- `ferroui_markup_xaml::include_compiled_xaml!()`: includes `$OUT_DIR/xaml/mod.rs`.
+- `rust_emitter::generate_class_file` takes `Option<ClassConstructor>`; `None` is upstream's rule
+  (`ClassConstructor::of`). `ClassFile::warnings` is new.
+- `links` and the `cargo::metadata=xamlmeta=` line in both theme crates (their `build.rs`).
+- The fixture: `build.rs`, `assembly.rs` (included by `lib.rs` and `build.rs`) in both crates;
+  `rust_paths.rs` and `LocaleCollection` in the library.
+
+The crux, for whoever continues: the emitter's transform needs the types registered in the
+process. A test of a crate has them all. A build script has the ones of its build-dependencies and
+never the ones of its own crate. Everything the build script cannot do follows from that, and only
+the scanner of `xaml.md` 9.5 changes it.
+
+Generated files that are no longer checked in (deleted): `compiled_xaml.rs`,
+`compiled_xaml_source_info.rs` and `compiled_xaml.xamlmeta` of `tests/XamlIncludeFixture/Theme`
+and of `tests/XamlIncludeFixture/Application`. New checked-in generated file:
+`tests/XamlIncludeFixture/Theme/compiled_style_with_service_provider.xamlmeta` (written by hand
+from the entry of the deleted file). Changed by hand, expected to equal the emitter's output:
+`tests/XamlIncludeFixture/Theme/compiled_style_with_service_provider.rs`, one line (the loader
+table creates the class with `__markup_new_0`, the constructor the compiler now picks).
+
+Validation, in this order:
+
+1. `cargo build -p ferroui-build` and `cargo test -p ferroui-build --lib`.
+2. `cargo test -p ferroui-markup-xaml-loader --lib rust_emitter` (the emitter change).
+3. `cargo build -p xaml-include-fixture-theme`: the first run of a build script that links the
+   framework. If the script fails, its errors are the `cargo::error=` lines.
+4. `cargo test -p xaml-include-fixture-theme --lib tests::compiled_xaml_tests::regenerate_compiled_xaml -- --ignored`,
+   then `git diff tests/XamlIncludeFixture/Theme`: no difference is expected. Run it twice.
+5. `cargo test -p xaml-include-fixture-theme --lib`.
+6. `cargo test -p xaml-include-fixture-application --lib` (builds both themes for the build script).
+7. `cargo test -p ferroui-themes-simple --lib tests::compiled_xaml_tests` and the same for
+   `ferroui-themes-fluent`: the checked-in theme files must be unchanged (the themes state their
+   constructor). No regeneration is expected.
+8. `cargo build --workspace` and the suites of section 2, for the `links` keys and `Cargo.lock`
+   (edited by hand: the package `ferroui-build` and the two fixture entries).
+9. `scripts/build-browser.sh`, to confirm that the `links` key and the extra lines of the theme
+   build scripts do not change a `wasm32` build.
+
+If `build_script_output_is_the_emitters` fails, the build script's registries differ from the
+test's: compare what `build.rs` registers with what `generate()` of the test registers. The
+library's test registers the types of the crate itself, which the build script cannot; a
+difference there means a document of `DOCUMENTS` depends on a type of the crate, and that document
+belongs on the checked-in path.
