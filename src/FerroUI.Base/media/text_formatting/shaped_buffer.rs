@@ -650,7 +650,9 @@ impl ShapedBuffer {
     /// `[start_char, end_char)` relative to this buffer's text. Snaps both
     /// boundaries down to the largest cluster start at or before the given
     /// character offset.
-    pub(crate) fn get_char_range_width(&self, start_char: i32, end_char: i32) -> f64 {
+    ///
+    /// Internal upstream; public so that the Skia unit tests reach it.
+    pub fn get_char_range_width(&self, start_char: i32, end_char: i32) -> f64 {
         if end_char <= start_char {
             return 0.0;
         }

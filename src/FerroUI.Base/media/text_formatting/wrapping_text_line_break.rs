@@ -9,7 +9,9 @@ use crate::media::FlowDirection;
 /// Upstream models this as an internal subclass of `TextLineBreak`; here it is
 /// a `TextLineBreak` with remaining runs, created and consumed through these
 /// functions.
-pub(crate) struct WrappingTextLineBreak;
+///
+/// Internal upstream; public so that the Skia unit tests reach it.
+pub struct WrappingTextLineBreak;
 
 impl WrappingTextLineBreak {
     pub fn new(

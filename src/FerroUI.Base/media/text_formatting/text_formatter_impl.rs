@@ -26,7 +26,9 @@ thread_local! {
 }
 
 /// The text formatter.
-pub(crate) struct TextFormatterImpl;
+///
+/// Internal upstream; public so that the Skia unit tests reach it.
+pub struct TextFormatterImpl;
 
 impl TextFormatterImpl {
     pub fn new() -> Self {

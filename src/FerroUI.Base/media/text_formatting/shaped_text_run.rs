@@ -73,7 +73,9 @@ impl ShapedTextRun {
 
     /// Measures the number of characters that fit into available width when
     /// measuring from the end; returns the count and the width they take.
-    pub(crate) fn try_measure_characters_backwards(&self, available_width: f64) -> Option<(i32, f64)> {
+    ///
+    /// Internal upstream; public so that the Skia unit tests reach it.
+    pub fn try_measure_characters_backwards(&self, available_width: f64) -> Option<(i32, f64)> {
         let (length, width) = self.shaped_buffer.find_trailing_char_count_within_width(available_width);
 
         (length > 0).then_some((length, width))
