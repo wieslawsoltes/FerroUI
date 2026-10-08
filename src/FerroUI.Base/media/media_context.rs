@@ -396,6 +396,11 @@ impl MediaContext {
             && compositor.render_loop().runs_in_background()
             && compositor.renders_on_render_thread()
         {
+            // This thread blocks until the render thread has had a frame:
+            // a loop whose next tick is a display frame away, or would only
+            // come once this thread is back in its event loop, is asked for
+            // one out of turn.
+            compositor.render_loop().request_frame_out_of_turn();
             if wait_full_render { batch.rendered() } else { batch.processed() }.wait();
         } else {
             // This thread renders, under the compositor lock: the render

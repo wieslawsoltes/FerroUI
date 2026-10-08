@@ -205,6 +205,12 @@ impl IRenderLoop for DefaultRenderLoop {
             state.wakeup_pending = true;
         }
     }
+
+    fn request_frame_out_of_turn(&self) {
+        // The timer knows how to tick early, if it can; the tick itself goes
+        // through `timer_tick` like any other.
+        self.timer.request_tick_out_of_turn();
+    }
 }
 
 impl Drop for DefaultRenderLoop {
@@ -231,6 +237,7 @@ mod tests {
         tick: Mutex<Option<RenderTimerTick>>,
         set_count: AtomicI32,
         clear_count: AtomicI32,
+        out_of_turn_count: AtomicI32,
         runs_in_background: bool,
     }
 
@@ -262,6 +269,10 @@ mod tests {
 
         fn runs_in_background(&self) -> bool {
             self.runs_in_background
+        }
+
+        fn request_tick_out_of_turn(&self) {
+            self.out_of_turn_count.fetch_add(1, Ordering::SeqCst);
         }
     }
 
@@ -306,6 +317,18 @@ mod tests {
         let background = Arc::new(ManualRenderTimer { runs_in_background: true, ..Default::default() });
         assert!(RenderLoop::from_timer(background).runs_in_background());
         assert!(!RenderLoop::from_timer(Arc::new(ManualRenderTimer::default())).runs_in_background());
+    }
+
+    #[test]
+    fn a_frame_out_of_turn_is_asked_of_the_timer_and_not_rendered_by_the_caller() {
+        // Not from upstream.
+        let (_scope, timer, render_loop) = setup();
+        let task = Task::new(true);
+        render_loop.add(task.clone());
+
+        render_loop.request_frame_out_of_turn();
+        assert_eq!(timer.out_of_turn_count.load(Ordering::SeqCst), 1);
+        assert_eq!(task.renders(), 0);
     }
 
     #[test]

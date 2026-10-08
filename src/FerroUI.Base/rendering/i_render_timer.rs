@@ -25,4 +25,16 @@ pub trait IRenderTimer: Send + Sync {
 
     /// Indicates if the timer ticks on a non-UI thread.
     fn runs_in_background(&self) -> bool;
+
+    /// Asks for a tick out of turn: as soon as the thread that ticks can
+    /// produce one, without waiting for the next period of the timer (the
+    /// next frame of a display). Not from upstream.
+    ///
+    /// Called by a thread that is about to block until a frame has been
+    /// rendered. A timer whose next tick may be far away, or may depend on
+    /// the caller returning to its event loop, invokes the callback it was
+    /// given once on the thread it ticks on; it must not invoke it on the
+    /// calling thread, and does nothing while no callback is set. The
+    /// default does nothing: the caller then waits for the next tick.
+    fn request_tick_out_of_turn(&self) {}
 }
