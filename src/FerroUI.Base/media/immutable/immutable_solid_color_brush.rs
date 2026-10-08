@@ -15,6 +15,8 @@ pub struct ImmutableSolidColorBrush {
     transform: Option<Rc<dyn ITransform>>,
     transform_origin: RelativePoint,
     relative_transform: Option<Rc<dyn ITransform>>,
+    /// The form sent to the render thread, created on first use.
+    shared: std::sync::OnceLock<Option<crate::media::SharedBrush>>,
 }
 
 impl ImmutableSolidColorBrush {
@@ -41,6 +43,7 @@ impl ImmutableSolidColorBrush {
             transform: transform.map(|t| t as Rc<dyn ITransform>),
             transform_origin: RelativePoint::default(),
             relative_transform: relative_transform.map(|t| t as Rc<dyn ITransform>),
+            shared: std::sync::OnceLock::new(),
         }
     }
 
@@ -123,6 +126,10 @@ impl IBrush for ImmutableSolidColorBrush {
 
     fn into_immutable_brush(self: Rc<Self>) -> Option<Rc<dyn IImmutableBrush>> {
         Some(self)
+    }
+
+    fn to_shared(&self) -> Option<crate::media::SharedBrush> {
+        self.shared.get_or_init(|| crate::media::SharedBrush::from_brush(self)).clone()
     }
 
     fn equals(&self, other: &dyn IBrush) -> bool {

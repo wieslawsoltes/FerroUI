@@ -110,6 +110,13 @@ pub trait IBrush: 'static {
         None
     }
 
+    /// The form of the brush that is sent to the render thread, when the
+    /// type keeps one: see [`SharedBrush`](crate::media::SharedBrush). An
+    /// immutable brush creates it once, so its identity is stable.
+    fn to_shared(&self) -> Option<crate::media::SharedBrush> {
+        None
+    }
+
     /// The identity of the brush, used for reference equality.
     #[doc(hidden)]
     fn reference_id(&self) -> *const () {

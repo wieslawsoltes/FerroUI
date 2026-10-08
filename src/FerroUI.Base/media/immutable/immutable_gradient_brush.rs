@@ -12,6 +12,8 @@ pub struct ImmutableGradientBrush {
     transform_origin: RelativePoint,
     spread_method: GradientSpreadMethod,
     relative_transform: Option<Rc<dyn ITransform>>,
+    /// The form sent to the render thread, created on first use.
+    pub(crate) shared: std::sync::OnceLock<Option<crate::media::SharedBrush>>,
 }
 
 impl ImmutableGradientBrush {
@@ -32,6 +34,7 @@ impl ImmutableGradientBrush {
             transform_origin: transform_origin.unwrap_or(RelativePoint::TOP_LEFT),
             spread_method,
             relative_transform: relative_transform.map(|t| t as Rc<dyn ITransform>),
+            shared: std::sync::OnceLock::new(),
         }
     }
 
@@ -136,6 +139,10 @@ macro_rules! immutable_gradient_brush_interfaces {
                 self: ::std::rc::Rc<Self>,
             ) -> Option<::std::rc::Rc<dyn $crate::media::IImmutableBrush>> {
                 Some(self)
+            }
+
+            fn to_shared(&self) -> Option<$crate::media::SharedBrush> {
+                self.base.shared.get_or_init(|| $crate::media::SharedBrush::from_brush(self)).clone()
             }
         }
 

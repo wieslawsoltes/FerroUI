@@ -12,6 +12,8 @@ pub struct ImmutablePen {
     line_cap: PenLineCap,
     line_join: PenLineJoin,
     miter_limit: f64,
+    /// The form sent to the render thread, created on first use.
+    shared: std::sync::OnceLock<Option<crate::media::SharedPen>>,
 }
 
 impl ImmutablePen {
@@ -31,6 +33,7 @@ impl ImmutablePen {
             line_join,
             miter_limit,
             dash_style: dash_style.map(|d| d as Rc<dyn IDashStyle>),
+            shared: std::sync::OnceLock::new(),
         }
     }
 
@@ -118,6 +121,10 @@ impl IPen for ImmutablePen {
 
     fn into_immutable_pen(self: Rc<Self>) -> Rc<ImmutablePen> {
         self
+    }
+
+    fn to_shared(&self) -> Option<crate::media::SharedPen> {
+        self.shared.get_or_init(|| crate::media::SharedPen::from_pen(self)).clone()
     }
 
     fn equals(&self, other: &dyn IPen) -> bool {

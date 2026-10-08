@@ -55,6 +55,12 @@ pub trait IPen: 'static {
     /// Converts the pen to an immutable pen; an immutable pen returns itself.
     fn into_immutable_pen(self: Rc<Self>) -> Rc<ImmutablePen>;
 
+    /// The form of the pen that is sent to the render thread, when the
+    /// type keeps one: see [`SharedPen`](crate::media::SharedPen).
+    fn to_shared(&self) -> Option<crate::media::SharedPen> {
+        None
+    }
+
     /// The identity of the pen, used for reference equality.
     #[doc(hidden)]
     fn reference_id(&self) -> *const () {
