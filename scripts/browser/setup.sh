@@ -14,8 +14,11 @@
 #
 # --threads also installs the nightly Rust toolchain that `scripts/build-browser.sh --threads` builds
 # with, with the source of the standard library (the threaded build compiles it with atomics,
-# -Zbuild-std) and the target. Everything else, env.sh included, is the same with and without the
-# option: the build script selects the nightly itself and reads the pin from this file.
+# -Zbuild-std) and the target, and builds the Skia binaries of the threaded mode: the published
+# binaries with the bindings shim compiled again with threads (scripts/browser/skia-threads-shim.sh,
+# which says why; the result is kept in <tools directory>/skia-threads and built once, and it needs
+# python3 and about 200 MB of downloads). Everything else, env.sh included, is the same with and
+# without the option: the build script selects the nightly itself and reads the pin from this file.
 set -euo pipefail
 
 EMSDK_VERSION="6.0.10"
@@ -88,6 +91,10 @@ source "$TOOLS/env.sh"
 emcc --version | head -1
 wasm-bindgen --version
 rustc --version
+if [ -n "$THREADS" ]; then
+  echo "== Skia bindings shim compiled for threads"
+  "$ROOT/scripts/browser/skia-threads-shim.sh" "$TOOLS"
+fi
 echo
 echo "ready: source $TOOLS/env.sh"
 if [ -n "$THREADS" ]; then
