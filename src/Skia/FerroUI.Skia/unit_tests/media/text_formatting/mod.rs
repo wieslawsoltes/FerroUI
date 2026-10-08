@@ -2,6 +2,7 @@
 
 mod multi_buffer_text_source;
 mod single_buffer_text_source;
+mod tables;
 mod text_collapsing_bidi_tests;
 mod text_formatter_tests;
 mod text_formatter_wrap_characterization_tests;
