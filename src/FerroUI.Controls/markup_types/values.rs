@@ -8,6 +8,7 @@ use crate::{
 };
 use ferroui_base::data::core::ValueTypes;
 use ferroui_base::ferro_markup_type;
+use ferroui_base::media::MediaCollection;
 use ferroui_base::metadata::{MarkupType, MarkupTyped};
 
 ferro_markup_type!(struct GridLength {
@@ -77,11 +78,13 @@ ferro_markup_type!(struct AcrylicPlatformCompensationLevels {
     constructors: [() => AcrylicPlatformCompensationLevels::default, (f64, f64, f64) => AcrylicPlatformCompensationLevels::new],
 });
 
-// The list of numbers of the `Ticks` properties.
+// The list of numbers of the `Ticks` properties (the notifying list of `double` in the
+// managed original): it derives from the list of numbers, whose members fill it, so that
+// the text of a `Ticks` attribute (`"0,20,25"`) is the list of its numbers.
 ferro_markup_type!(class TickList {
     namespace: "FerroUI.Controls",
     handles: [TickList, Option<TickList>],
-    base: ferroui_base::media::MediaCollection<f64>,
+    base: MediaCollection<f64>,
     constructors: [() => TickList::new],
 });
 
@@ -102,6 +105,9 @@ pub(super) fn register_value_types() {
     ValueTypes::register_nullable::<WindowTransparencyLevelCollection>();
     ValueTypes::register_nullable::<AcrylicPlatformCompensationLevels>();
     ValueTypes::register_nullable::<TickList>();
+    // A tick list is the list of numbers it derives from: the same list, so that the
+    // members of the list (`Capacity`, `Add`) are reached through the tick list.
+    ValueTypes::register_cast::<TickList, MediaCollection<f64>>(|ticks| MediaCollection::from_list(ticks.list().clone()));
     // The text of a value (its `ToString()` in the managed original).
     ValueTypes::register_display::<GridLength>();
     ValueTypes::register_display::<WindowTransparencyLevel>();

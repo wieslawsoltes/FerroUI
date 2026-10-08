@@ -30,7 +30,6 @@ Pages/FlyoutsPage.xaml | gap C301: a method name is not accepted for a property 
 Pages/NumericUpDownPage.xaml | code-behind: CultureInfo.GetCultures(CultureTypes.SpecificCultures)
 Pages/OpenGl/OpenGlInteropPage.xaml | gap C312: the event FerroObject.PropertyChanged is not declared for markup (PropertyChanged="KnobsPropertyChanged" on GlPageKnobs)
 Pages/OpenGl/OpenGlLeasePage.xaml | gap C312: the event FerroObject.PropertyChanged is not declared for markup (PropertyChanged="KnobsPropertyChanged" on GlPageKnobs); code-behind: OpenGlFbo (Pages/OpenGl/OpenGlFbo.cs, not ported) wraps an OpenGL texture in a Ganesh surface (GRContext, GRBackendTexture, GRGlTextureInfo), and the Skia backend has Ganesh on OpenGL in browser builds only
-Pages/SliderPage.xaml | gap C306: Slider.Ticks is not converted from text
 Pages/ToolTipPage.xaml | gap C301: a method name is not accepted for a property of a delegate type (CustomPopupPlacementCallback)
 
 # --- the demo pages and the page sample directories ---
