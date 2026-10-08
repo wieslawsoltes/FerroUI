@@ -11,7 +11,7 @@ use crate::media::color::{split_components, strip_css_function, try_parse_double
 use crate::media::{Color, HsvColor};
 use crate::utilities::math_utilities::{self, MathUtilities};
 use crate::utilities::span_helpers::{try_parse_double, FixedF2, InvariantF64, NumberStyles};
-use crate::utilities::FormatError;
+use crate::utilities::{CultureInfo, FormatError};
 
 /// Defines a color using the hue/saturation/lightness (HSL) model.
 /// This uses a cylindrical-coordinate representation of a color.
@@ -46,6 +46,9 @@ fn round_to_int(value: f64) -> i32 {
 ///
 /// A hue that cannot be brought into range that way (infinite, or so large that
 /// subtracting 360 no longer changes it) is returned as is instead of looping forever.
+//
+// Deviation (DEVIATIONS.md, Colors): upstream's `while (hue >= 360.0) hue -= 360.0;`
+// and `while (hue < 0.0) hue += 360.0;` never end for such a hue.
 #[inline]
 fn wrap_hue(mut hue: f64) -> f64 {
     while hue >= 360.0 {
@@ -150,19 +153,25 @@ impl HslColor {
     /// - `X`, `x`, `H`, `R`, `r`, `R%`, `r%`: converted to RGB and formatted as such
     /// - `V`, `v`, `V%`, `v%`: converted to HSV and formatted as such
     ///
-    /// An empty format is the same as `to_string()`. Any other format is an error.
-    pub fn to_string_format(&self, format: &str) -> Result<String, FormatError> {
-        if format.is_empty() {
-            return Ok(self.to_string());
-        }
+    /// A null or empty format is the same as `to_string()`. Any other format is an
+    /// error. `format_provider` is ignored: color formatting is culture-invariant.
+    pub fn to_string_format(
+        &self,
+        format: Option<&str>,
+        format_provider: Option<&CultureInfo>,
+    ) -> Result<String, FormatError> {
+        let format = match format {
+            Some(format) if !format.is_empty() => format,
+            _ => return Ok(self.to_string()),
+        };
 
         match format {
-            "X" | "x" | "H" | "R" | "r" | "R%" | "r%" => self.to_rgb().to_string_format(format),
+            "X" | "x" | "H" | "R" | "r" | "R%" | "r%" => self.to_rgb().to_string_format(Some(format), format_provider),
             "L" => Ok(self.format_hsl_css(true)),
             "l" => Ok(self.format_hsl_css(false)),
             "L%" => Ok(self.format_hsl_percent_css(true)),
             "l%" => Ok(self.format_hsl_percent_css(false)),
-            "V" | "v" | "V%" | "v%" => self.to_hsv().to_string_format(format),
+            "V" | "v" | "V%" | "v%" => self.to_hsv().to_string_format(Some(format), format_provider),
             _ => Err(FormatError::from_string(format!(
                 "Format string '{format}' is not supported."
             ))),
@@ -354,9 +363,10 @@ impl fmt::Display for HslColor {
     }
 }
 
+// Not from upstream: clamping, display, parse errors and conversions of edge
+// values that the upstream suite (`color_tests.rs`) does not cover.
 #[cfg(test)]
 mod tests {
-    // The reference tests for this type live in the color test-suite (see `color.rs`).
     use super::*;
 
     #[test]

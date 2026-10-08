@@ -28,6 +28,13 @@ Other pages hold the entries of their own area, and this page does not repeat th
 | `LayoutManager.GetTimestamp` uses `Stopwatch.GetTimestamp()` (sub-millisecond ticks). | `get_timestamp` in `layout_manager.rs` reads `Dispatcher::current_dispatcher().now()`, which is in milliseconds. | Behaviour | The port times layout with the dispatcher's clock. Durations below 1 ms read as 0 in `LayoutPassTimed` and the layout time graph. | #25 |
 | `LayoutManager` calls `Dispatcher.UIThread.VerifyAccess()` in its public entry points. | Not called. | Missing | No reason was recorded. `Dispatcher::verify_access` exists (`threading/dispatcher.rs`), so this can be ported; until then a call from a wrong thread is not caught here. | before #25 |
 
+### Colors (`src/FerroUI.Base/media/color.rs`, `hsl_color.rs`, `hsv_color.rs`)
+
+| Upstream | Port | Kind | Why | Since |
+|---|---|---|---|---|
+| `HslColor.ToRgb`, `HslColor.ToHsv`, `HsvColor.ToRgb` and `HsvColor.ToHsl` bring the hue into range with `while (hue >= 360.0) hue -= 360.0;` and `while (hue < 0.0) hue += 360.0;`, which never end for an infinite hue or one so large that subtracting 360 does not change it. | `wrap_hue` stops when a step does not change the hue and goes on with the hue as it is. | Behaviour | A hang on a non-finite or huge hue becomes a result. Finite hues of ordinary magnitude convert as upstream. | before #51 |
+| `Color.Parse(string)` throws `ArgumentNullException` for null, and `TryParse(string?)` returns false for null. | `parse` and `try_parse` take `&str`, which cannot be null. | Representation | The non-nullable form of the string argument; `Parse_Throws_ArgumentNullException_For_Null_Input` and the null row of `TryParse_Returns_False_For_Invalid_Input` have no counterpart (`color_tests.rs`). | before #51 |
+
 ### Render data (`src/FerroUI.Base/rendering/composition/drawing/`)
 
 | Upstream | Port | Kind | Why | Since |
