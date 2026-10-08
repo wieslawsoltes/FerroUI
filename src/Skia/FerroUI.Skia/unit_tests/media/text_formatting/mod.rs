@@ -2,6 +2,7 @@
 
 mod multi_buffer_text_source;
 mod single_buffer_text_source;
+mod text_collapsing_bidi_tests;
 mod text_formatter_tests;
 
 pub(crate) use multi_buffer_text_source::MultiBufferTextSource;
