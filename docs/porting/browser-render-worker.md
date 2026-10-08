@@ -433,6 +433,10 @@ Built with `scripts/build-browser.sh render_worker_clear --threads` and run with
 
 Status: written, **the modules not built**. No cargo and no browser build was run. What was run, with the tools installed in the main checkout: the type check, the linter and the bundle of `webapp/` (clean); `webapp/tests/software-blit.test.mjs` in headless Chrome (passes); and `thread_spawn.test.mjs` against a copy of the `thread_spawn` site of the B2.1 validation in which `ferroui-sw.js` and `ferroui-threads.js` were replaced by the new ones and `ferroui-coi-sw.js` removed (its 3 checks pass: the merged worker isolates the page). The module of that copy was linked with the old flags, so nothing below about the link, about `wasmMemory` on a real module, or about `storage_view` has been seen to run. **[R]** marks what was read in Emscripten 6.0.10 (`.tools/emsdk/upstream/emscripten`) and **[G]** what was read in the script of the threaded `themed_view` of the B2.1 validation (`target/browser-threads/themed_view/themed_view.js`).
 
+## B2.3: pacing, software frames, resize, and the wait (written, not validated)
+
+Status: written on 2026-10-08, **not built and not run**. The branch was written without cargo, without the browser build and without a browser; the session that validates it builds it first. What could be checked without a build: the Rust files parse (the formatter reads them, and at a width of 120 it changes nothing in them), the script modules pass the type check of `webapp/` with the tools of the main checkout (the only errors are the missing package of the storage bundle, as in B2.1), and the page script and the test parse. Nothing below marked **[R]** has been seen to run: it was read in the sources of Emscripten 6.0.10 (`.tools/emsdk/upstream/emscripten`).
+
 ### What was written
 
 | Piece | Where | What it is |
@@ -508,3 +512,95 @@ Nothing written for this step had to change. Built and run in headless Chrome:
 - Without threads: `storage_view` passes its 18 checks and `themed_view` its 30.
 - The type check, the linter and the pixel test of `webapp/` pass, the pixel test with a grown and with a shared memory; the host tests of the browser crate pass (171).
 - The fixed memory of the threaded build (512 MB by default) was granted in every run. The measured peak of the catalog, which section 5 asks for, is still to be taken (B2.7).
+
+| Calls between threads | `interop/thread_proxy.rs` (new) | `current_thread()` (`pthread_self`, 0 without threads) and, inside the crate, `run_on_thread(thread, work)`: a boxed `FnOnce() + Send` queued for another thread with `emscripten_proxy_async` on a queue of the platform's own (`em_proxying_queue_create`, made on first use, never destroyed). Guarded by `all(target_os = "emscripten", target_feature = "atomics")`; any other build has one thread, id 0, and queues nothing. The two `unsafe` blocks are the calls and the box that crosses as a pointer |
+| The shared surface object | `rendering/browser_surface_shared.rs` (new), exported as `rendering::BrowserSurfaceShared` | Section 4's object: the target id, the size in device pixels and the scaling, the kind of the target, a disposed flag; `is_ready`, `uses_contexts`, and `size_getter()`, the function the existing render targets ask at the start of a frame. **All atomics and no lock**, which is a change against section 4 ("the size and scaling under one small lock"): the two are read as one value through a version counter that is odd during a write, so that the thread of the page never meets a lock here. Host tests include a writer and a reader on two threads |
+| Size changes without a top-level | `interop/canvas_helper.rs` | `add_size_changed` / `remove_size_changed`: `CanvasHelper_OnSizeChanged` also reaches subscribers of its thread, with the id the canvas was created with. The example has no top-level; in B2.5 the top-level writes the shared object itself and this may go again |
+| The render timer | `rendering/browser_render_timer.rs`, `interop/timer_helper.rs`, `webapp/modules/ferroui/timer.ts` | `set_tick` starts the loop only for a timer that does **not** run in the background; a background timer is started by the thread that renders (`start_on_this_thread`), which records that thread. `request_tick_out_of_turn` (the contract of B2.4) queues one tick for that thread through `run_on_thread`; requests before the tick has started are one; the timestamp is `TimerHelper.now()` (new in the script: `performance.now()`, the clock of the animation frames of that worker). It does nothing when the caller is the thread that ticks, before the start, without a callback, and without threads. The shared timer of the platform (`BrowserSharedRenderLoop`, `new(false)`) behaves as before |
+| The wake-up of the dispatcher | `browser_single_threaded_dispatcher_impl.rs` | The signal handle, on a thread without a dispatcher: an atomic flag (wake-ups before the thread has taken one are one) and a call queued for the thread of the dispatcher, recorded when the dispatcher is created. The call clears the flag and signals the dispatcher **on its own thread**, which posts its task as always. A change against section 3, which had the proxied function do what `OnSignaled` does: see "The two queues" below |
+| The example | `examples/render_worker_clear` | `renderWorkerClearStart(width, height, scaling, mode, animated, reporter)`, `renderWorkerClearCreateSurface(container)`, `renderWorkerClearState()`, and new `renderWorkerClearFrames()` and `renderWorkerClearWaitForFrame(outOfTurn, timeoutMs)`. Query parameters of the page: `RenderingMode=Software2D\|WebGL1\|WebGL2`, `Frames=true`, `Wait=OutOfTurn\|NextFrame`. The container of the canvas follows the window (62.5vw by 60vh: 200 x 120 in the test's window of 320 x 200) |
+| The test | `scripts/browser/tests/render_worker_clear.test.mjs` | Five checks (below) |
+| `DEVIATIONS.md` | Browser backend | Three rows: the timer, the wake-up, the shared object |
+
+How the example uses the pieces:
+
+- **Software frames.** With `RenderingMode=Software2D` the worker creates the software target; the thread takes the target's `IFramebufferRenderTarget` once and, per frame, locks it (the target sets the size of the canvas and keeps one `RetainedFramebuffer`, a new one when the size changed), fills the pixels through `with_data` and disposes the lock, which is `putPixelData` in the worker's script.
+- **The frame loop.** With `Frames=true` the thread sets the tick of a background `BrowserRenderTimer` and starts it on itself. Each tick draws a frame and counts it in an atomic. The colour is 32, 96, and 64 + (frame mod 96) with a loop, and 32, 96, 192 without one, so the two checks of B2.1 see what they saw.
+- **A square in every frame**, 30 device pixels wide, 20 from the left and the top edge, in 224, 160, 32. It is what tells a frame of the right size from a stretched one: a canvas that the browser scales has the square at another place. In software it is written with the pixels. With WebGL it is copied from a small framebuffer with `blit_framebuffer`, because the GL interface of the port has no scissor; a WebGL 1 context cannot do that, its frames have no square (`marker=false` in the state line) and the test then only checks the colour.
+- **The size.** The page gives the first size; the observer of the canvas **element** (unchanged script) reports every later one to `CanvasHelper_OnSizeChanged`, the subscriber writes it into the `BrowserSurfaceShared`, and the render target reads it through `size_getter()` at the start of the next frame and sets the size of the `OffscreenCanvas`.
+- **The wake-up.** The page's thread creates a `BrowserSingleThreadedDispatcherImpl`, listens to its `signaled` event and hands its signal handle to the other thread, which signals after each frame. The handler calls `reporter.frames(count, wakeUps)` of the page, which writes the element `frames`. The page polls only until the first frame, as in B2.1.
+- **The wait.** `renderWorkerClearWaitForFrame` takes a `Mutex`, optionally calls `request_tick_out_of_turn` on the timer, and waits on a `Condvar` with a timeout for the frame count to change; the other thread counts and notifies after each frame. On the thread of the page that wait is the busy loop of the runtime (next section).
+
+### The two queues, and what the main thread does while it waits
+
+- **[R]** A futex wait on the main browser thread is `futex_wait_main_browser_thread` (`system/lib/pthread/emscripten_futex_wait.c`): a loop that checks the timeout, calls `_emscripten_yield` and checks the value again. `_emscripten_yield` on the main thread runs `emscripten_main_thread_process_queued_calls`, which executes the **system** proxying queue (`library_pthread.c`). The header says of that queue that its work "may be processed at any time inside system functions" and must be "similar to a native signal handler" (`emscripten/proxying.h`).
+- **[R]** Work on any **other** queue reaches a thread through its mailbox: `emscripten_proxy_async` enqueues and notifies (`em_task_queue_send`, `emscripten_thread_mailbox_send`), with `Atomics.notify` when the target waits with `Atomics.waitAsync` and with a `checkMailbox` message otherwise (`libpthread.js`). Either way it runs from the event loop of the target, never inside its spin.
+- So the platform has **its own queue**, for both directions. A wake-up of the dispatcher that arrives while the main thread waits for a frame is delivered after the wait; it cannot run in the middle of the wait. And the function it runs only signals the dispatcher of its thread, which posts the usual task: the dispatcher's work stays a task of its own, with the priority it has today. The cost is one more hop than section 3 planned (queue, then `postTask`).
+- The frame out of turn goes the other way on the same queue. The worker is at its event loop between frames, so the request runs at once; whether the worker's event loop turns while the main thread spins is the same question as for its animation frames, with one difference: a notified `Atomics.waitAsync` and a message both need only the worker, not the page.
+- **[I]** Rust's `Mutex` and `Condvar` end in `emscripten_futex_wait` on this target, either directly (the futex implementation of the standard library) or through the C library. The second path calls `emscripten_check_blocking_allowed` (`pthread_cond_timedwait.c`), which in a build with the assertions of Emscripten warns once on the console, as an error, that the main thread blocks. The test records that line and does not fail on it.
+
+### The checks of the test
+
+1. and 2. The two checks of B2.1 (headers; service worker), with the state line of B2.3 (`... size=200x120 color=32,96,192 frames=1 marker=true`), the square, and, in the first, one wake-up that told the page of one frame.
+3. `?RenderingMode=Software2D`: `kind=software gl=0`, the colour from edge to edge and the square in the capture.
+4. `?Frames=true` (WebGL) and 5. `?Frames=true&RenderingMode=Software2D`, each: the first frame; the colour in the capture changes; **at least 3 frames are counted while a script loop keeps the main thread busy for 200 ms** (the counter is read from the atomic before and after, inside the same script call); the wake-up counter of the page grows by 5 and never exceeds the frames; the waits (five with a frame out of turn, three without, timeout 2000 ms each): asserted is that each call returns, within its timeout plus a second, and that frames go on afterwards; the window is resized to 480 x 300 and to 240 x 150, and each time the state reports `size=300x180` / `size=150x90`, the capture has the size of the window, the colour reaches the far corner of the canvas and the square is where it belongs.
+
+The measurements are printed as `measured: ...` lines before the verdict of the check.
+
+### To be settled at validation
+
+| Question of the row | Where the answer appears | Status |
+|---|---|---|
+| Do a worker's animation frames run while the main thread is busy in script? | Check 4 and 5, `frames drawn while the thread of the page was busy for 200 ms` | To be settled at validation |
+| The duration of the wait with a frame out of turn | `wait for a frame with a frame out of turn: ended=... duration_ms=...` (five samples per mode) | To be settled at validation |
+| Does the wait end at all without a frame out of turn (do a worker's animation frames run while the main thread spins in the runtime)? | `wait for a frame without a frame out of turn (timeout 2000 ms): ended=...` (three samples per mode) | To be settled at validation |
+| Is the wait of section 3 bounded, or is "commit and do not wait" chosen? | The two lines above: bounded if the first ends in about a frame's work; the fallback if it times out | To be settled at validation |
+| Does the wake-up arrive, and how many per frame? | `wake-ups of the page: N for M frames` | To be settled at validation |
+| After a resize, the new size and no stretched content | The resize part of checks 4 and 5 | To be settled at validation |
+| The software mode shows the colour | Check 3 and 5 | To be settled at validation |
+| Which render target headless Chrome gives (WebGL 2 or 1), and so whether the square was checked for WebGL | `render target: webgl, OpenGL ES N, the frames have / do not have the square` | To be settled at validation |
+
+### What could not be verified without a build
+
+- Everything in Rust beyond parsing: names, signatures and trait bounds were checked by reading, not by the compiler.
+- That `em_proxying_queue_create` and `emscripten_proxy_async` link from Rust with the declarations written here (`pthread_t` as `usize`, the C `bool` as `bool`), and that a queue made by one thread serves all.
+- Every behaviour in a browser: animation frames in the worker of a thread, the delivery of queued calls, `putImageData` on an `OffscreenCanvas` from the worker, the blit to the default framebuffer, the observer of an element whose canvas was transferred, and the spin of the main thread.
+
+### Left out, on purpose
+
+- The registry of shared surfaces by target id, and the worker looking its surface up there: the example has one surface in a static, created before the canvas so that the worker's report cannot arrive first. B2.5.
+- `rendering/render_worker.rs`: the thread is still started and kept alive by the example (B2.5). `current_thread` moved into the crate because the timer and the dispatcher need it.
+- The render targets still hold their state in `ThreadBound` and take a size function; `BrowserSurfaceShared` feeds that function. The render surface and the platform graphics over the shared object are B2.5.
+- No wait in the base library changed, and nothing times a wait out there.
+- `browser-platform.md` does not describe the new options of the example.
+
+### Doubts, most likely to bite first
+
+1. **Rust that was not compiled.** Likeliest: the example (closures coerced to `Rc<dyn Fn(())>` and to the tick type, the `Reporter` import without a module, method calls on trait objects), `OnceLock` statics over `Arc<BrowserRenderTimer>` and `Arc<dyn IDispatcherSignal>` (both have to be `Send + Sync`), unused-item warnings in the host build of the example, and the fn-pointer fields of the timer taking wasm-bindgen imports.
+2. **The `Reporter` import.** A type and a method imported by the example without `raw_module`; the crate only has imports with one. If the glue of the Emscripten mode refuses it, the report has to become an export the page calls from a callback of its own, or a function of `ferroui.js`.
+3. **Animation frames in a pthread worker.** `self.requestAnimationFrame` in the worker of a thread that returned to its event loop with the keep-alive counter; and whether Chrome paces them for a worker whose `OffscreenCanvas` came from a placeholder canvas. If there are none, the state stays at one frame and checks 4 and 5 fail at `frames > 10`.
+4. **The main thread's spin and the worker.** If the worker's frames need the main thread (the wait without a frame out of turn times out), that is a result. If the frame **out of turn** also times out, the request did not reach the worker or the worker could not present: then section 3's fallback applies.
+5. **The blit.** `glBlitFramebuffer` from a renderbuffer of `GL_RGBA8` to the default framebuffer of a WebGL 2 context with `antialias: false`; and that binding `GL_READ_FRAMEBUFFER` after the session bound the framebuffer of the canvas leaves the draw binding alone. A failure shows as `gl_error` in the state line and a missing square.
+6. **`set_size` on every frame.** Both targets set the width and the height of the canvas at the start of each frame, changed or not (as on the main thread today). For a 2D canvas that resets the context each time. It was not changed here; the capture between two frames could in principle catch a cleared canvas.
+7. **The software path and memory growth.** `putPixelData` in the worker reads `HEAPU8` of the worker's module; a growth by the main thread after the worker made its view is section 5's problem and B2.2's change (`FerroExports.heapU8()`), which this branch does not have.
+8. **The id of a thread that ended.** `run_on_thread` hands the runtime a thread descriptor; for a thread that has exited that is freed memory. The crate only passes the thread of the dispatcher and a render thread that is kept alive, and the function is not public; a render thread that can end needs the timer to forget it first.
+9. **A frame out of turn that is never run** (the worker gone) leaves the timer's request flag set, and later requests do nothing. Harmless while a render thread never ends.
+10. **Wake-ups against frames.** The check `wakeUps <= frames` assumes nothing else signals the dispatcher of the example. Nothing does today.
+11. **The first size.** The page computes it from `clientWidth` and the device pixel ratio; the observer then reports device pixels from `devicePixelContentBoxSize`. At a scale factor other than 1 the two can differ by a pixel, and the first frame is drawn at the first (the test runs at 1).
+12. **The service worker check** still expects `ferroui-coi-sw.js`; B2.2 merges the two workers and changes that line of this file too.
+
+### Validation
+
+```
+scripts/browser/setup.sh --threads && source .tools/env.sh
+cargo test -p ferroui-browser --lib
+scripts/build-browser.sh render_worker_clear --threads
+node scripts/browser/tests/render_worker_clear.test.mjs
+scripts/build-browser.sh thread_spawn --threads && node scripts/browser/tests/thread_spawn.test.mjs
+scripts/build-browser.sh themed_view && node scripts/browser/tests/themed_view.test.mjs
+scripts/build-browser.sh themed_view --threads
+```
+
+and `themed_view.test.mjs` against `target/browser-threads/themed_view`, served isolated as at the validation of B2.1 (the test file does not ask for isolation itself). The shared timer and the dispatcher of `themed_view` take the changed code paths in both builds: the timer is created with `false` and starts on `set_tick` as before, and the signal handle is only ever called on the thread of the dispatcher there.
+
+The page by hand, served isolated: `?Frames=true`, `?Frames=true&RenderingMode=Software2D`, `?Frames=true&Wait=OutOfTurn`, `?Frames=true&Wait=NextFrame` (the element `wait` shows the outcome after 30 frames).
