@@ -208,6 +208,9 @@ dependencies = [
  "ferroui-base",
  "ferroui-markup-xaml",
  "ferroui-markup-xaml-loader",
+ "proc-macro2",
+ "quote",
+ "syn 2.0.119",
 ]
 
 [[package]]
