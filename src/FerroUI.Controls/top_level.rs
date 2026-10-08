@@ -1297,7 +1297,7 @@ impl TopLevel {
         self.renderer().set_transparency_level(to_composition_transparency_level(transparency_level));
     }
 
-    fn handle_platform_specific_scene_info_changed(&self, scene_info: Option<Rc<dyn Any>>) {
+    fn handle_platform_specific_scene_info_changed(&self, scene_info: Option<std::sync::Arc<dyn Any + Send + Sync>>) {
         self.renderer().set_platform_specific_scene_info(scene_info);
     }
 

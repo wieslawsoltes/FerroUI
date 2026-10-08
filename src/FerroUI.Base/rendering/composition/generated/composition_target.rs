@@ -93,7 +93,7 @@ pub trait CompositionTargetHooks: ICompositionObjectHost {
     fn on_transparency_level_changed(&self) {}
     fn on_transparency_level_changing(&self) {}
 
-    fn validate_platform_specific_scene_info_change(&self, _old_value: &Option<Rc<dyn Any>>, _new_value: &Option<Rc<dyn Any>>) {}
+    fn validate_platform_specific_scene_info_change(&self, _old_value: &Option<std::sync::Arc<dyn Any + Send + Sync>>, _new_value: &Option<std::sync::Arc<dyn Any + Send + Sync>>) {}
     fn on_platform_specific_scene_info_changed(&self) {}
     fn on_platform_specific_scene_info_changing(&self) {}
 }
@@ -108,7 +108,7 @@ pub struct CompositionTargetProps {
     scaling: Cell<f64>,
     size: Cell<Size>,
     transparency_level: Cell<CompositionTransparencyLevel>,
-    platform_specific_scene_info: RefCell<Option<Rc<dyn Any>>>,
+    platform_specific_scene_info: RefCell<Option<std::sync::Arc<dyn Any + Send + Sync>>>,
 }
 
 impl Default for CompositionTargetProps {
@@ -322,12 +322,12 @@ impl CompositionTargetProps {
     }
 
     /// `PlatformSpecificSceneInfo`.
-    pub fn platform_specific_scene_info(&self) -> Option<Rc<dyn Any>> {
+    pub fn platform_specific_scene_info(&self) -> Option<std::sync::Arc<dyn Any + Send + Sync>> {
         self.platform_specific_scene_info.borrow().clone()
     }
 
     /// Sets `PlatformSpecificSceneInfo`.
-    pub fn set_platform_specific_scene_info(&self, host: &dyn CompositionTargetHooks, value: Option<Rc<dyn Any>>) {
+    pub fn set_platform_specific_scene_info(&self, host: &dyn CompositionTargetHooks, value: Option<std::sync::Arc<dyn Any + Send + Sync>>) {
         let mut changed = false;
         let old_value = self.platform_specific_scene_info.borrow().clone();
         if old_value.differs(&value) {
@@ -419,7 +419,7 @@ pub struct ServerCompositionTargetProps {
     scaling: Cell<f64>,
     size: Cell<Size>,
     transparency_level: Cell<CompositionTransparencyLevel>,
-    platform_specific_scene_info: RefCell<Option<Rc<dyn Any>>>,
+    platform_specific_scene_info: RefCell<Option<std::sync::Arc<dyn Any + Send + Sync>>>,
 }
 
 impl Default for ServerCompositionTargetProps {
@@ -741,10 +741,10 @@ impl ServerCompositionTargetProps {
     }
 
     /// The composition property of `PlatformSpecificSceneInfo`.
-    pub fn id_of_platform_specific_scene_info_property() -> &'static CompositionPropertyOf<Option<Rc<dyn Any>>> {
-        static PROPERTY: OnceLock<CompositionPropertyOf<Option<Rc<dyn Any>>>> = OnceLock::new();
+    pub fn id_of_platform_specific_scene_info_property() -> &'static CompositionPropertyOf<Option<std::sync::Arc<dyn Any + Send + Sync>>> {
+        static PROPERTY: OnceLock<CompositionPropertyOf<Option<std::sync::Arc<dyn Any + Send + Sync>>>> = OnceLock::new();
         PROPERTY.get_or_init(|| {
-            CompositionProperty::register::<ServerCompositionTargetProps, Option<Rc<dyn Any>>>(
+            CompositionProperty::register::<ServerCompositionTargetProps, Option<std::sync::Arc<dyn Any + Send + Sync>>>(
                 "PlatformSpecificSceneInfo",
                 "ServerCompositionTarget",
                 |obj| props_of::<ServerCompositionTargetProps>(obj).platform_specific_scene_info.borrow().clone(),
@@ -756,11 +756,11 @@ impl ServerCompositionTargetProps {
     }
 
     /// `PlatformSpecificSceneInfo`.
-    pub fn platform_specific_scene_info(&self) -> Option<Rc<dyn Any>> {
+    pub fn platform_specific_scene_info(&self) -> Option<std::sync::Arc<dyn Any + Send + Sync>> {
         self.platform_specific_scene_info.borrow().clone()
     }
 
-    pub fn set_platform_specific_scene_info(&self, host: &dyn ServerCompositionTargetHooks, value: Option<Rc<dyn Any>>) {
+    pub fn set_platform_specific_scene_info(&self, host: &dyn ServerCompositionTargetHooks, value: Option<std::sync::Arc<dyn Any + Send + Sync>>) {
         let old_value = self.platform_specific_scene_info.borrow().clone();
         let mut changed = false;
         if old_value.differs(&value) {
@@ -821,7 +821,7 @@ impl ServerCompositionTargetProps {
             self.set_transparency_level(host, value);
         }
         if changed.contains(CompositionTargetChangedFields::PLATFORM_SPECIFIC_SCENE_INFO) {
-            let value = reader.read_value::<Rc<dyn Any>>();
+            let value = reader.read_value::<std::sync::Arc<dyn Any + Send + Sync>>();
             self.set_platform_specific_scene_info(host, value);
         }
         ServerCompositionTargetHooks::on_fields_deserialized(host, changed);

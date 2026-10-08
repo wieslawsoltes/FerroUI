@@ -133,11 +133,11 @@ impl CompositionTarget {
         self.props.set_transparency_level(self, value);
     }
 
-    pub fn platform_specific_scene_info(&self) -> Option<Rc<dyn Any>> {
+    pub fn platform_specific_scene_info(&self) -> Option<std::sync::Arc<dyn Any + Send + Sync>> {
         self.props.platform_specific_scene_info()
     }
 
-    pub fn set_platform_specific_scene_info(&self, value: Option<Rc<dyn Any>>) {
+    pub fn set_platform_specific_scene_info(&self, value: Option<std::sync::Arc<dyn Any + Send + Sync>>) {
         self.props.set_platform_specific_scene_info(self, value);
     }
 

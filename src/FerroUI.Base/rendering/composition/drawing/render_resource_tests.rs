@@ -664,12 +664,13 @@ fn pen_properties_reach_the_server_and_the_pen_observes_its_brush() {
     helper.run_jobs();
     assert_eq!(server_pen.dash_style().unwrap().offset(), 5.0);
 
-    // An immutable brush is sent as it is; the mutable brush is released.
+    // An immutable brush is sent as it is (in its shared form, which has one
+    // identity for the life of the brush); the mutable brush is released.
     let immutable: Rc<dyn IBrush> = Rc::new(ImmutableSolidColorBrush::new(Colors::GREEN));
     pen.set_brush(Some(immutable.clone()));
     helper.assert_exists_on_compositor(&brush_resource(&brush), false);
     helper.run_jobs();
-    assert!(std::ptr::addr_eq(Rc::as_ptr(&server_pen.brush().unwrap()), Rc::as_ptr(&immutable)));
+    assert_eq!(server_pen.brush().unwrap().reference_id(), IBrush::reference_id(&immutable.to_shared().unwrap()));
     assert!(server_brush.is_disposed());
 
     // Releasing the pen disposes the server pen, which stops observing.

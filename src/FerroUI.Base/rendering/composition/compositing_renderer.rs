@@ -150,7 +150,7 @@ impl CompositingRenderer {
     }
 
     /// Sets the platform-specific scene info passed to the render target.
-    pub fn set_platform_specific_scene_info(&self, info: Option<Rc<dyn Any>>) {
+    pub fn set_platform_specific_scene_info(&self, info: Option<std::sync::Arc<dyn Any + Send + Sync>>) {
         self.composition_target.set_platform_specific_scene_info(info);
     }
 

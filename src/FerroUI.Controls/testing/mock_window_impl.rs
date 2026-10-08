@@ -98,13 +98,13 @@ pub struct MockWindowImpl {
     surfaces: RefCell<Vec<Rc<dyn IPlatformRenderSurface>>>,
     input_root: RefCell<Option<Rc<dyn IInputRoot>>>,
     cursor: RefCell<Option<Rc<dyn ICursorImpl>>>,
-    platform_specific_scene_info: RefCell<Option<Rc<dyn Any>>>,
+    platform_specific_scene_info: RefCell<Option<std::sync::Arc<dyn Any + Send + Sync>>>,
     input: Hook<dyn Fn(Rc<dyn IRawInputEventArgs>)>,
     paint: Hook<dyn Fn(Rect)>,
     resized: Hook<dyn Fn(Size, WindowResizeReason)>,
     scaling_changed: Hook<dyn Fn(f64)>,
     transparency_level_changed: Hook<dyn Fn(WindowTransparencyLevel)>,
-    platform_specific_scene_info_changed: Hook<dyn Fn(Option<Rc<dyn Any>>)>,
+    platform_specific_scene_info_changed: Hook<dyn Fn(Option<std::sync::Arc<dyn Any + Send + Sync>>)>,
     closed: Hook<dyn Fn()>,
     lost_focus: Hook<dyn Fn()>,
 
@@ -356,7 +356,7 @@ impl MockWindowImpl {
         *self.surfaces.borrow_mut() = surfaces;
     }
 
-    pub fn setup_platform_specific_scene_info(&self, info: Option<Rc<dyn Any>>) {
+    pub fn setup_platform_specific_scene_info(&self, info: Option<std::sync::Arc<dyn Any + Send + Sync>>) {
         *self.platform_specific_scene_info.borrow_mut() = info;
     }
 
@@ -510,15 +510,15 @@ impl ITopLevelImpl for MockWindowImpl {
         set(&self.transparency_level_changed, value)
     }
 
-    fn platform_specific_scene_info(&self) -> Option<Rc<dyn Any>> {
+    fn platform_specific_scene_info(&self) -> Option<std::sync::Arc<dyn Any + Send + Sync>> {
         self.platform_specific_scene_info.borrow().clone()
     }
 
-    fn platform_specific_scene_info_changed(&self) -> Option<Rc<dyn Fn(Option<Rc<dyn Any>>)>> {
+    fn platform_specific_scene_info_changed(&self) -> Option<Rc<dyn Fn(Option<std::sync::Arc<dyn Any + Send + Sync>>)>> {
         get(&self.platform_specific_scene_info_changed)
     }
 
-    fn set_platform_specific_scene_info_changed(&self, value: Option<Rc<dyn Fn(Option<Rc<dyn Any>>)>>) {
+    fn set_platform_specific_scene_info_changed(&self, value: Option<Rc<dyn Fn(Option<std::sync::Arc<dyn Any + Send + Sync>>)>>) {
         set(&self.platform_specific_scene_info_changed, value)
     }
 

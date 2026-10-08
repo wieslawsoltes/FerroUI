@@ -383,7 +383,8 @@ impl ServerCompositionSimplePenProps {
             self.set_brush(host, value);
         }
         if changed.contains(CompositionSimplePenChangedFields::DASH_STYLE) {
-            let value = reader.read_value::<Rc<ImmutableDashStyle>>();
+            // A dash style is sent by value; the handle is made here.
+            let value = reader.read_value::<ImmutableDashStyle>().map(Rc::new);
             self.set_dash_style(host, value);
         }
         if changed.contains(CompositionSimplePenChangedFields::LINE_CAP) {
@@ -418,7 +419,7 @@ impl ServerCompositionSimplePenProps {
     ) {
         writer.write(CompositionSimplePenChangedFields::BRUSH | CompositionSimplePenChangedFields::DASH_STYLE | CompositionSimplePenChangedFields::LINE_CAP | CompositionSimplePenChangedFields::LINE_JOIN | CompositionSimplePenChangedFields::MITER_LIMIT | CompositionSimplePenChangedFields::THICKNESS);
         writer.write_resource(brush);
-        writer.write_value(dash_style);
+        writer.write_value(dash_style.map(|dash_style| (*dash_style).clone()));
         writer.write(line_cap);
         writer.write(line_join);
         writer.write(miter_limit);

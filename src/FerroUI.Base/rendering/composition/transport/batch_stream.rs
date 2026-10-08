@@ -106,6 +106,59 @@ impl<T: ?Sized> Clone for BatchResource<T> {
     }
 }
 
+/// A resource type whose values are sent to the render thread.
+///
+/// A value of the UI thread is an `Rc` handle to an object whose own
+/// handles are `Rc` too, so what crosses is its wire form: the values,
+/// `Send`. The server makes a handle of its own from them.
+pub trait BatchResourceValue: 'static {
+    /// What is sent.
+    type Wire: Any + Send;
+
+    /// The wire form of a value.
+    fn to_wire(value: &Rc<Self>) -> Self::Wire;
+
+    /// A handle to the received value, made on the receiving thread.
+    fn from_wire(wire: Self::Wire) -> Rc<Self>;
+}
+
+impl BatchResourceValue for dyn crate::media::IBrush {
+    type Wire = crate::media::SharedBrush;
+
+    fn to_wire(value: &Rc<Self>) -> Self::Wire {
+        crate::media::shared_brush_of(&**value)
+            .unwrap_or_else(|| panic!("The brush is not compatible with composition"))
+    }
+
+    fn from_wire(wire: Self::Wire) -> Rc<Self> {
+        Rc::new(wire)
+    }
+}
+
+impl BatchResourceValue for dyn crate::media::ITransform {
+    type Wire = crate::Matrix;
+
+    fn to_wire(value: &Rc<Self>) -> Self::Wire {
+        value.value()
+    }
+
+    fn from_wire(wire: Self::Wire) -> Rc<Self> {
+        Rc::new(crate::media::immutable::ImmutableTransform::new(wire))
+    }
+}
+
+impl BatchResourceValue for dyn crate::media::IGradientStop {
+    type Wire = (f64, crate::media::Color);
+
+    fn to_wire(value: &Rc<Self>) -> Self::Wire {
+        (value.offset(), value.color())
+    }
+
+    fn from_wire((offset, color): Self::Wire) -> Rc<Self> {
+        Rc::new(crate::media::immutable::ImmutableGradientStop::new(offset, color))
+    }
+}
+
 /// The two streams of a batch.
 #[derive(Default)]
 pub struct BatchStreamData {
@@ -416,9 +469,9 @@ impl<'a> BatchStreamWriter<'a> {
 
     /// Writes a resource reference (or null) to the object stream.
     #[inline]
-    pub fn write_resource<T: ?Sized + 'static>(&mut self, item: Option<BatchResource<T>>) {
+    pub fn write_resource<T: ?Sized + BatchResourceValue>(&mut self, item: Option<BatchResource<T>>) {
         self.write_object(match item {
-            Some(BatchResource::Value(value)) => BatchObject::value(value),
+            Some(BatchResource::Value(value)) => BatchObject::value(T::to_wire(&value)),
             Some(BatchResource::Server(id)) => BatchObject::ServerObject(id),
             None => BatchObject::Null,
         });
@@ -492,14 +545,14 @@ impl<'a> BatchStreamReader<'a> {
         }
     }
 
-    /// Reads a resource reference (or null): a payload value `Rc<T>` or
-    /// the id of a server object.
-    pub fn read_resource<T: ?Sized + 'static>(&mut self) -> Option<BatchResource<T>> {
+    /// Reads a resource reference (or null): a payload value in its wire
+    /// form or the id of a server object.
+    pub fn read_resource<T: ?Sized + BatchResourceValue>(&mut self) -> Option<BatchResource<T>> {
         match self.read_object() {
             BatchObject::Null => None,
             BatchObject::ServerObject(id) => Some(BatchResource::Server(id)),
-            BatchObject::Value(value) => match value.downcast::<Rc<T>>() {
-                Ok(value) => Some(BatchResource::Value(*value)),
+            BatchObject::Value(value) => match value.downcast::<T::Wire>() {
+                Ok(value) => Some(BatchResource::Value(T::from_wire(*value))),
                 Err(_) => panic!("the batch object stream holds a value of another type here"),
             },
             _ => panic!("the batch object stream does not hold a resource reference here"),
