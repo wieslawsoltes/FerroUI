@@ -166,7 +166,7 @@ Start-up is unchanged. The CPU of the page run is about 0.1 to 0.2 s higher on a
 - The debug events of a target are `Arc` and `Send + Sync`.
 - **Left bound to the UI thread, in `ThreadBound`:** the render surfaces of a target, the update closures of a drawing surface, the import and dispose closures of the interop objects. A server on its own thread panics on their first use: this is the list of what R3 to R5 (and B2) have to make usable from the render thread.
 
-### R3 done: the server compositor on its own thread
+### R3 done: the server compositor on its own thread (superseded by R5.1 for where the server compositor lives)
 
 `Compositor::with_render_thread` creates a compositor whose server compositor is created by the first tick of the render loop, on the thread that ticks, from a `Send` factory, and is kept there in a thread-local registry by the key of the compositor. The compositor itself holds what the two threads share (the queue of committed batches under a lock, the readback indices) and no server object; `Compositor::server()` is the accessor of the dispatcher-thread mode and of the tests that run the server on their own thread. Dropping the compositor tells the render thread to release the server compositor at its next tick.
 
@@ -206,6 +206,19 @@ The render-thread mode of R3 confines the server compositor to one thread (threa
 **Decided by the owner on 2026-10-08: 1, the lock model.** It is the port of what upstream does on this platform, and the audit it needs is the continuation of R1 to R3. 2 stays what a platform gets where `UseUiThreadForSynchronousCommits` is false, and what the browser's worker needs.
 
 Either way R5 also needs, on the native backend: the platform graphics (`MetalPlatformGraphics`) and the render surfaces of a top level usable by the thread that renders (upstream creates the software render target on the UI thread only, and throws `RenderTargetNotReady` elsewhere; the port has the same check), and the lock of the Metal device.
+
+### R5.1 done: the compositor lock
+
+`rendering/composition/server/compositor_lock.rs`: `CompositorLock` (a lock its holder may enter again, as `lock` in C#) and `LockedServerCompositor`, which holds the server compositor and hands it out only inside the lock. It carries the one `unsafe impl Send` and `Sync` of the server side, with the invariant written next to it. The compositor holds it in both modes:
+
+- dispatcher-thread mode: as before, a tick is marshalled to the thread of the compositor; `Compositor::server()` reaches the server compositor without the lock, because no second thread enters;
+- render-thread mode (`Compositor::with_render_thread`): the thread that ticks the loop renders under the lock; the thread of the compositor enters with `with_server`, and renders itself at the synchronous points when `use_ui_thread_for_synchronous_commits` is set (`render_on_this_thread`), as upstream on macOS. `server()` panics in this mode.
+
+This replaces the thread-local server compositor of R3 (the server compositor is created with the compositor again). A frame disables the processing of the UI dispatcher only when the UI thread renders it, as upstream. The render interface of the platform is looked up when the context manager is created: the service locator belongs to a thread here, where upstream's is global.
+
+`render_thread_tests.rs`: the thread that ticks renders and a job result comes back; a synchronous commit waits for the render thread; with the flag set the UI thread renders it itself; and 200 rounds in which both threads render in turn, with every job checking that no other job is inside the server.
+
+Open for the rest of R5: the audit of what a frame reaches outside the lock when it runs on the render thread (the service locator and other thread-locals, the UI dispatcher, the objects R2 bound to the UI thread: surfaces, drawing surface updates, interop imports); the native backend's surfaces and Metal context; the option and `Compositor::new` choosing the mode.
 
 ### Scope of R3, surveyed
 

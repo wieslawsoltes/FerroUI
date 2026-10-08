@@ -46,16 +46,15 @@ pub struct Compositor {
     render_loop: Arc<dyn IRenderLoop>,
     loop_task: Arc<dyn IRenderLoopTask>,
     use_ui_thread_for_synchronous_commits: bool,
-    /// The server compositor, when it runs on the thread of this compositor
-    /// (the dispatcher-thread mode). In the render-thread mode it belongs to
-    /// the thread that ticks the render loop and is not reachable from here.
-    server: Option<Rc<ServerCompositor>>,
+    /// The server compositor, behind the compositor lock.
+    server: Arc<super::server::LockedServerCompositor>,
+    /// Whether the render loop renders on the thread that ticks it (the
+    /// render-thread mode); otherwise a tick is marshalled to the thread of
+    /// this compositor (the dispatcher-thread mode).
+    render_thread: bool,
     /// The readback of the server: what the two threads share besides the
     /// queue of batches.
     readback: Arc<super::server::ReadbackIndices>,
-    /// In the render-thread mode: cleared when this compositor is dropped,
-    /// which tells the render thread to release the server compositor.
-    render_thread_alive: Option<Arc<AtomicBool>>,
     batches: Arc<BatchQueue>,
     clock: CompositorClock,
     next_commit: RefCell<Option<Arc<CompositionBatch>>>,
@@ -115,56 +114,30 @@ impl IRenderLoopTask for ServerCompositorLoopTask {
 /// by both threads.
 pub type SharedCompositorClock = Arc<dyn Fn() -> Duration + Send + Sync>;
 
-thread_local! {
-    /// The server compositors of the render-thread mode that this thread
-    /// runs, by the key of their compositor.
-    static RENDER_THREAD_SERVERS: RefCell<HashMap<u64, Rc<ServerCompositor>>> = RefCell::new(HashMap::new());
-}
-
 /// The render loop task of a compositor in the render-thread mode: the
-/// server compositor is created by the first tick, on the thread that ticks,
-/// and stays there.
+/// thread that ticks renders, under the compositor lock.
 struct RenderThreadLoopTask {
-    key: u64,
-    create: Mutex<Option<Box<dyn FnOnce() -> Rc<ServerCompositor> + Send>>>,
-    /// Cleared when the compositor is dropped: the next tick releases the
-    /// server compositor.
-    alive: Arc<AtomicBool>,
+    server: Arc<super::server::LockedServerCompositor>,
 }
 
 impl IRenderLoopTask for RenderThreadLoopTask {
     fn render(&self) -> bool {
-        if !self.alive.load(Ordering::SeqCst) {
-            RENDER_THREAD_SERVERS.with(|servers| servers.borrow_mut().remove(&self.key));
-            return false;
-        }
-        let server = RENDER_THREAD_SERVERS.with(|servers| {
-            let mut servers = servers.borrow_mut();
-            if let Some(server) = servers.get(&self.key) {
-                return Some(server.clone());
-            }
-            let create = self.create.lock().unwrap().take()?;
-            let server = create();
-            servers.insert(self.key, server.clone());
-            Some(server)
-        });
-        match server {
-            Some(server) => server.render(),
-            // Created by a tick on another thread: this one does not own it.
-            None => false,
-        }
+        self.server.with(|server| server.render())
     }
 }
 
 impl Compositor {
-    /// Creates a compositor whose server compositor runs on the thread that
-    /// ticks `render_loop` (the render-thread mode).
+    /// Creates a compositor in the render-thread mode: the thread that ticks
+    /// `render_loop` renders the frames.
     ///
-    /// What the server needs from the platform is made on that thread:
-    /// `platform_graphics` is called there, once, before the first frame.
+    /// The server compositor is confined to the compositor lock, not to a
+    /// thread: with `use_ui_thread_for_synchronous_commits` the thread of
+    /// this compositor renders too, at the synchronous points (a resize, the
+    /// first show), as the reference does on platforms that ask for it.
     pub fn with_render_thread(
         render_loop: Arc<dyn IRenderLoop>,
-        platform_graphics: impl FnOnce() -> Option<Rc<dyn IPlatformGraphics>> + Send + 'static,
+        gpu: Option<Rc<dyn IPlatformGraphics>>,
+        use_ui_thread_for_synchronous_commits: bool,
         scheduler: &Rc<dyn ICompositorScheduler>,
         dispatcher: Arc<Dispatcher>,
         options: Option<CompositionOptions>,
@@ -173,25 +146,36 @@ impl Compositor {
         let options = options
             .or_else(|| FerroLocator::current().get_service::<CompositionOptions>().map(|o| *o))
             .unwrap_or_default();
+        // The clock is read by both threads.
         let clock = clock.unwrap_or_else(|| {
             let origin = std::time::Instant::now();
             Arc::new(move || origin.elapsed())
         });
+        let clock: CompositorClock = Rc::new(move || clock());
         let batches = Arc::new(BatchQueue::default());
         let readback = Arc::new(super::server::ReadbackIndices::new());
+        let server = Arc::new(super::server::LockedServerCompositor::new(ServerCompositor::new(
+            gpu,
+            options,
+            batches.clone(),
+            readback.clone(),
+            clock.clone(),
+        )));
         let key = NEXT_COMPOSITOR_KEY.fetch_add(1, Ordering::SeqCst);
-        let alive = Arc::new(AtomicBool::new(true));
-        let (server_batches, server_readback, server_clock) = (batches.clone(), readback.clone(), clock.clone());
-        let loop_task: Arc<dyn IRenderLoopTask> = Arc::new(RenderThreadLoopTask {
+        let loop_task: Arc<dyn IRenderLoopTask> = Arc::new(RenderThreadLoopTask { server: server.clone() });
+        Self::build(
+            render_loop,
+            loop_task,
+            use_ui_thread_for_synchronous_commits,
+            server,
+            true,
+            batches,
+            readback,
+            clock,
+            scheduler,
+            dispatcher,
             key,
-            create: Mutex::new(Some(Box::new(move || {
-                let clock: CompositorClock = Rc::new(move || server_clock());
-                ServerCompositor::new(platform_graphics(), options, server_batches, server_readback, clock)
-            }))),
-            alive: alive.clone(),
-        });
-        let ui_clock: CompositorClock = Rc::new(move || clock());
-        Self::build(render_loop, loop_task, false, None, batches, readback, ui_clock, scheduler, dispatcher, key, Some(alive))
+        )
     }
 
     /// Creates a compositor that renders on the render loop registered in
@@ -233,7 +217,13 @@ impl Compositor {
         });
         let batches = Arc::new(BatchQueue::default());
         let readback = Arc::new(super::server::ReadbackIndices::new());
-        let server = ServerCompositor::new(gpu, options, batches.clone(), readback.clone(), clock.clone());
+        let server = Arc::new(super::server::LockedServerCompositor::new(ServerCompositor::new(
+            gpu,
+            options,
+            batches.clone(),
+            readback.clone(),
+            clock.clone(),
+        )));
         let key = NEXT_COMPOSITOR_KEY.fetch_add(1, Ordering::SeqCst);
         let loop_task: Arc<dyn IRenderLoopTask> = Arc::new(ServerCompositorLoopTask {
             key,
@@ -245,14 +235,14 @@ impl Compositor {
             render_loop,
             loop_task,
             use_ui_thread_for_synchronous_commits,
-            Some(server),
+            server,
+            false,
             batches,
             readback,
             clock,
             scheduler,
             dispatcher,
             key,
-            None,
         )
     }
 
@@ -261,14 +251,14 @@ impl Compositor {
         render_loop: Arc<dyn IRenderLoop>,
         loop_task: Arc<dyn IRenderLoopTask>,
         use_ui_thread_for_synchronous_commits: bool,
-        server: Option<Rc<ServerCompositor>>,
+        server: Arc<super::server::LockedServerCompositor>,
+        render_thread: bool,
         batches: Arc<BatchQueue>,
         readback: Arc<super::server::ReadbackIndices>,
         clock: CompositorClock,
         scheduler: &Rc<dyn ICompositorScheduler>,
         dispatcher: Arc<Dispatcher>,
         key: u64,
-        render_thread_alive: Option<Arc<AtomicBool>>,
     ) -> Rc<Compositor> {
         let compositor = Rc::new_cyclic(|this| Compositor {
             this: this.clone(),
@@ -278,7 +268,7 @@ impl Compositor {
             use_ui_thread_for_synchronous_commits,
             readback,
             server,
-            render_thread_alive,
+            render_thread,
             batches,
             clock,
             next_commit: RefCell::new(None),
@@ -325,15 +315,30 @@ impl Compositor {
     /// code may only use it to drive a frame when the render loop runs on
     /// the UI thread, and in tests.
     pub fn server(&self) -> &Rc<ServerCompositor> {
-        self.server
-            .as_ref()
-            .expect("the server compositor runs on the render thread and is reached with jobs")
+        assert!(
+            !self.render_thread,
+            "in the render-thread mode the server compositor is reached under its lock: with_server"
+        );
+        self.server.same_thread()
     }
 
-    /// Whether the server compositor runs on the thread that ticks the
-    /// render loop, not on the thread of this compositor.
+    /// Runs `f` with the server compositor under the compositor lock: the
+    /// way in from this thread in either mode. What `f` gets must not leave
+    /// it.
+    pub fn with_server<R>(&self, f: impl FnOnce(&Rc<ServerCompositor>) -> R) -> R {
+        self.server.with(f)
+    }
+
+    /// Renders a frame on this thread, under the compositor lock: what the
+    /// synchronous points do (`Server.Render` upstream).
+    pub fn render_on_this_thread(&self) -> bool {
+        self.server.with(|server| server.render())
+    }
+
+    /// Whether the thread that ticks the render loop renders the frames,
+    /// not the thread of this compositor.
     pub fn renders_on_render_thread(&self) -> bool {
-        self.server.is_none()
+        self.render_thread
     }
 
     /// The readback indices the server writes and this side reads.
@@ -808,17 +813,18 @@ impl Compositor {
     /// asked directly.
     pub fn try_get_render_interface_feature(&self, feature_type: std::any::TypeId) -> Option<Rc<dyn std::any::Any>> {
         self.dispatcher.verify_access();
-        // In the render-thread mode the features are objects of the render
-        // thread (GPU contexts): they are not handed to this thread until the
-        // contexts are settled (`docs/porting/render-thread.md`, R5).
-        let server = self.server.as_ref()?;
-        if let Some(features) = server.at_try_get_cached_render_interface_features() {
-            return features.get(&feature_type).cloned();
-        }
-        if !server.render_interface().is_ready() {
-            return None;
-        }
-        server.rt_get_render_interface_features().get(&feature_type).cloned()
+        // The features are objects of the server side: they are read under
+        // the lock. What is handed out are the public features of the render
+        // interface, which a backend makes for callers on this thread.
+        self.server.with(|server| {
+            if let Some(features) = server.at_try_get_cached_render_interface_features() {
+                return features.get(&feature_type).cloned();
+            }
+            if !server.render_interface().is_ready() {
+                return None;
+            }
+            server.rt_get_render_interface_features().get(&feature_type).cloned()
+        })
     }
 
     /// Whether an object is queued for serialization (for unit tests).
@@ -834,14 +840,6 @@ impl Compositor {
 
 impl Drop for Compositor {
     fn drop(&mut self) {
-        if let Some(alive) = &self.render_thread_alive {
-            // The server compositor belongs to the render thread: the task
-            // stays in the loop for one more tick, which releases it there,
-            // and is inert afterwards.
-            alive.store(false, Ordering::SeqCst);
-            self.render_loop.wakeup();
-            return;
-        }
         self.render_loop.remove(&self.loop_task);
         let key = self.key;
         // The registry may already be gone when the thread is exiting.

@@ -1149,6 +1149,10 @@ path = "src/FerroUI.Base/rendering/composition/render_thread_tests.rs"
 reason = "Tests of the render-thread mode of the compositor: upstream has no test that runs the two threads"
 
 [[rust_only]]
+path = "src/FerroUI.Base/rendering/composition/server/compositor_lock.rs"
+reason = "The compositor lock as a type: upstream confines the server side to lock (_lock) by convention, here the lock holds the server compositor (render thread, stage R5)"
+
+[[rust_only]]
 path = "src/FerroUI.Base/type_system.rs"
 reason = "object model runtime (Ref/WeakRef handles, TypeInfo, class macros): replaces the CLR type system, virtual dispatch and GC references"
 

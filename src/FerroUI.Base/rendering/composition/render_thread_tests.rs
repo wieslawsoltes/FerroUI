@@ -1,6 +1,8 @@
-//! The render-thread mode of the compositor: the server compositor runs on
-//! the thread that ticks the render loop. Not from upstream, where the two
-//! threads are a property of the platform set-up and not of a test.
+//! The render-thread mode of the compositor: the thread that ticks the
+//! render loop renders, under the compositor lock, and the thread of the
+//! compositor renders too where a platform asks for it. Not from upstream,
+//! where the two threads are a property of the platform set-up and not of
+//! a test.
 
 use super::Compositor;
 use crate::media::MediaContext;
@@ -8,40 +10,65 @@ use crate::rendering::testing::{ManualRenderLoop, MockPlatformRenderInterface};
 use crate::threading::Dispatcher;
 use std::cell::Cell;
 use std::rc::Rc;
+use std::sync::atomic::{AtomicBool, AtomicUsize, Ordering};
+use std::sync::Arc;
 use std::thread;
 
-/// Ticks the loop once on a thread of its own, which has a render interface
-/// as the render thread of an application has.
-fn tick_on_another_thread(render_loop: &std::sync::Arc<ManualRenderLoop>, ticks: usize) -> thread::ThreadId {
-    let render_loop = render_loop.clone();
-    thread::spawn(move || {
-        let (_locator_scope, _render_interface) = MockPlatformRenderInterface::install();
-        for _ in 0..ticks {
-            render_loop.tick();
-        }
-        thread::current().id()
-    })
-    .join()
-    .expect("the render thread ran")
-}
-
-#[test]
-fn the_server_runs_on_the_thread_that_ticks_the_loop() {
-    let _dispatcher_scope = Dispatcher::unit_test_scope();
-    let render_loop = ManualRenderLoop::new();
-    let compositor = Compositor::with_render_thread(
+fn render_thread_compositor(
+    render_loop: &Arc<ManualRenderLoop>,
+    use_ui_thread_for_synchronous_commits: bool,
+) -> Rc<Compositor> {
+    Compositor::with_render_thread(
         render_loop.clone(),
-        || None,
+        None,
+        use_ui_thread_for_synchronous_commits,
         &MediaContext::instance().scheduler(),
         Dispatcher::ui_thread(),
         None,
         None,
-    );
+    )
+}
+
+/// A render thread that ticks the loop until it is stopped.
+struct RenderThread {
+    stop: Arc<AtomicBool>,
+    handle: Option<thread::JoinHandle<()>>,
+}
+
+impl RenderThread {
+    fn start(render_loop: &Arc<ManualRenderLoop>) -> RenderThread {
+        let stop = Arc::new(AtomicBool::new(false));
+        let (thread_stop, thread_loop) = (stop.clone(), render_loop.clone());
+        let handle = thread::spawn(move || {
+            while !thread_stop.load(Ordering::SeqCst) {
+                thread_loop.tick();
+                thread::yield_now();
+            }
+        });
+        RenderThread { stop, handle: Some(handle) }
+    }
+}
+
+impl Drop for RenderThread {
+    fn drop(&mut self) {
+        self.stop.store(true, Ordering::SeqCst);
+        if let Some(handle) = self.handle.take() {
+            let _ = handle.join();
+        }
+    }
+}
+
+#[test]
+fn the_thread_that_ticks_the_loop_renders() {
+    let _dispatcher_scope = Dispatcher::unit_test_scope();
+    let (_locator_scope, _render_interface) = MockPlatformRenderInterface::install();
+    let render_loop = ManualRenderLoop::new();
+    let compositor = render_thread_compositor(&render_loop, false);
     assert!(compositor.renders_on_render_thread());
     let ui_thread = thread::current().id();
 
     // Objects are created and changed on this thread; their server objects
-    // are created by the batch, on the other one.
+    // are created by the batch, by the thread that renders.
     let parent = compositor.create_container_visual();
     let child = compositor.create_solid_color_visual();
     parent.children().add((*child).clone());
@@ -56,7 +83,13 @@ fn the_server_runs_on_the_thread_that_ticks_the_loop() {
     Dispatcher::ui_thread().run_jobs(None);
     assert!(!task.is_completed());
 
-    let render_thread = tick_on_another_thread(&render_loop, 1);
+    let tick_loop = render_loop.clone();
+    let render_thread = thread::spawn(move || {
+        tick_loop.tick();
+        thread::current().id()
+    })
+    .join()
+    .expect("the render thread ran");
     assert_ne!(ui_thread, render_thread);
 
     // The job ran on the render thread and its result is here.
@@ -72,82 +105,73 @@ fn the_server_runs_on_the_thread_that_ticks_the_loop() {
 }
 
 #[test]
-fn the_server_compositor_is_released_on_its_thread() {
-    let _dispatcher_scope = Dispatcher::unit_test_scope();
-    let render_loop = ManualRenderLoop::new();
-    let compositor = Compositor::with_render_thread(
-        render_loop.clone(),
-        || None,
-        &MediaContext::instance().scheduler(),
-        Dispatcher::ui_thread(),
-        None,
-        None,
-    );
-    let dropped = std::sync::Arc::new(std::sync::atomic::AtomicBool::new(false));
-    let flag = dropped.clone();
-    compositor.post_server_job(
-        move |_| {
-            flag.store(true, std::sync::atomic::Ordering::SeqCst);
-        },
-        false,
-    );
-    Dispatcher::ui_thread().run_jobs(None);
-
-    // One render thread for the life of the server compositor: the tick
-    // that creates it and the tick that releases it.
-    let render_loop_for_thread = render_loop.clone();
-    let (to_thread, from_ui) = std::sync::mpsc::channel::<()>();
-    let (to_ui, from_thread) = std::sync::mpsc::channel::<()>();
-    let handle = thread::spawn(move || {
-        let (_locator_scope, _render_interface) = MockPlatformRenderInterface::install();
-        render_loop_for_thread.tick();
-        to_ui.send(()).unwrap();
-        from_ui.recv().unwrap();
-        render_loop_for_thread.tick();
-    });
-    from_thread.recv().unwrap();
-    assert!(dropped.load(std::sync::atomic::Ordering::SeqCst));
-
-    drop(compositor);
-    to_thread.send(()).unwrap();
-    handle.join().expect("the render thread released the server compositor");
-}
-
-#[test]
 fn a_synchronous_commit_waits_for_the_render_thread() {
     let _dispatcher_scope = Dispatcher::unit_test_scope();
-    // A synchronous commit is skipped without a render interface (unit tests
-    // that set up no platform): this thread has one, as the other does.
     let (_locator_scope, _render_interface) = MockPlatformRenderInterface::install();
     let render_loop = ManualRenderLoop::background();
-    let compositor = Compositor::with_render_thread(
-        render_loop.clone(),
-        || None,
-        &MediaContext::instance().scheduler(),
-        Dispatcher::ui_thread(),
-        None,
-        None,
-    );
+    let compositor = render_thread_compositor(&render_loop, false);
+    let ui_thread = thread::current().id();
+    let _render_thread = RenderThread::start(&render_loop);
 
-    // The render thread ticks until it is told to stop.
-    let stop = std::sync::Arc::new(std::sync::atomic::AtomicBool::new(false));
-    let (thread_stop, thread_loop) = (stop.clone(), render_loop.clone());
-    let render_thread = thread::spawn(move || {
-        let (_locator_scope, _render_interface) = MockPlatformRenderInterface::install();
-        while !thread_stop.load(std::sync::atomic::Ordering::SeqCst) {
-            thread_loop.tick();
-            thread::sleep(std::time::Duration::from_millis(1));
-        }
-    });
-
-    let ran = std::sync::Arc::new(std::sync::atomic::AtomicBool::new(false));
-    let flag = ran.clone();
-    compositor.post_server_job(move |_| flag.store(true, std::sync::atomic::Ordering::SeqCst), false);
+    let ran_on = Arc::new(std::sync::Mutex::new(None));
+    let slot = ran_on.clone();
+    compositor.post_server_job(move |_| *slot.lock().unwrap() = Some(thread::current().id()), false);
 
     // Returns once the render thread has applied the batch and rendered.
     MediaContext::instance().immediate_render_requested(&compositor);
-    assert!(ran.load(std::sync::atomic::Ordering::SeqCst));
+    let ran_on = ran_on.lock().unwrap().expect("the job ran before the commit returned");
+    assert_ne!(ui_thread, ran_on);
+}
 
-    stop.store(true, std::sync::atomic::Ordering::SeqCst);
-    render_thread.join().expect("the render thread ended");
+#[test]
+fn a_synchronous_commit_renders_on_the_ui_thread_where_the_platform_asks_for_it() {
+    let _dispatcher_scope = Dispatcher::unit_test_scope();
+    let (_locator_scope, _render_interface) = MockPlatformRenderInterface::install();
+    let render_loop = ManualRenderLoop::background();
+    // `UseUiThreadForSynchronousCommits`: what the native platform asks for.
+    let compositor = render_thread_compositor(&render_loop, true);
+    let ui_thread = thread::current().id();
+
+    let ran_on = Arc::new(std::sync::Mutex::new(None));
+    let slot = ran_on.clone();
+    compositor.post_server_job(move |_| *slot.lock().unwrap() = Some(thread::current().id()), false);
+
+    // No render thread is running: this thread renders the frame itself.
+    MediaContext::instance().immediate_render_requested(&compositor);
+    assert_eq!(Some(ui_thread), *ran_on.lock().unwrap());
+}
+
+#[test]
+fn both_threads_render_one_after_the_other() {
+    let _dispatcher_scope = Dispatcher::unit_test_scope();
+    let (_locator_scope, _render_interface) = MockPlatformRenderInterface::install();
+    let render_loop = ManualRenderLoop::background();
+    let compositor = render_thread_compositor(&render_loop, true);
+    let _render_thread = RenderThread::start(&render_loop);
+
+    // Every job checks that no other job is inside the server at the same
+    // time: the frames of the two threads exclude each other.
+    let inside = Arc::new(AtomicUsize::new(0));
+    let overlaps = Arc::new(AtomicUsize::new(0));
+    let ran = Arc::new(AtomicUsize::new(0));
+    const ROUNDS: usize = 200;
+    for _ in 0..ROUNDS {
+        let (inside, overlaps, ran) = (inside.clone(), overlaps.clone(), ran.clone());
+        compositor.post_server_job(
+            move |_| {
+                if inside.fetch_add(1, Ordering::SeqCst) != 0 {
+                    overlaps.fetch_add(1, Ordering::SeqCst);
+                }
+                thread::yield_now();
+                inside.fetch_sub(1, Ordering::SeqCst);
+                ran.fetch_add(1, Ordering::SeqCst);
+            },
+            false,
+        );
+        // Commits and renders on this thread while the render thread ticks.
+        MediaContext::instance().immediate_render_requested(&compositor);
+    }
+
+    assert_eq!(ROUNDS, ran.load(Ordering::SeqCst));
+    assert_eq!(0, overlaps.load(Ordering::SeqCst));
 }
