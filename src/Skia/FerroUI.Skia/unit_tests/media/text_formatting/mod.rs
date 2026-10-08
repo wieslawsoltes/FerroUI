@@ -5,6 +5,7 @@ mod multi_buffer_text_source;
 mod shaped_buffer_shared_storage_tests;
 mod shaping_capability_fallback_tests;
 mod single_buffer_text_source;
+mod split_text_runs_tests;
 mod tables;
 mod text_collapsing_bidi_tests;
 mod text_formatter_tests;
