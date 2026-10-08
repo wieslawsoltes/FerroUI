@@ -173,6 +173,18 @@ extern "system" fn delete_textures(count: i32, names: *const i32) {
     delete_names("glDeleteTextures", count, names);
 }
 
+extern "system" fn bind_texture(target: i32, texture: i32) {
+    record(format!("glBindTexture({target},{texture})"));
+}
+
+extern "system" fn tex_parameteri(target: i32, name: i32, value: i32) {
+    record(format!("glTexParameteri({target},{name},{value})"));
+}
+
+extern "system" fn egl_image_target_texture_2d_oes(target: i32, image: *mut c_void) {
+    record(format!("glEGLImageTargetTexture2DOES({target},{})", image as usize));
+}
+
 extern "system" fn gen_buffers(count: i32, res: *mut i32) {
     gen_names("glGenBuffers", count, res);
 }
@@ -297,6 +309,9 @@ fn resolve(name: &str) -> *const c_void {
         "glDeleteRenderbuffers" => delete_renderbuffers as extern "system" fn(i32, *const i32),
         "glGenTextures" => gen_textures as extern "system" fn(i32, *mut i32),
         "glDeleteTextures" => delete_textures as extern "system" fn(i32, *const i32),
+        "glBindTexture" => bind_texture as extern "system" fn(i32, i32),
+        "glTexParameteri" => tex_parameteri as extern "system" fn(i32, i32, i32),
+        "glEGLImageTargetTexture2DOES" => egl_image_target_texture_2d_oes as extern "system" fn(i32, *mut c_void),
         "glGenBuffers" => gen_buffers as extern "system" fn(i32, *mut i32),
         "glDeleteBuffers" => delete_buffers as extern "system" fn(i32, *const i32),
         "glGenVertexArrays" => gen_vertex_arrays as extern "system" fn(i32, *mut i32),

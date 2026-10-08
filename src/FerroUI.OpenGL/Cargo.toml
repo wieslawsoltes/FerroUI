@@ -12,4 +12,6 @@ path = "lib.rs"
 
 [dependencies]
 ferroui-base.workspace = true
+# The OpenGL control is a control: the upstream project references the controls project.
+ferroui-controls.workspace = true
 paste.workspace = true
