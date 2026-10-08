@@ -119,7 +119,6 @@ fn gap_c207_compiled_stream_binding_of_an_observable() {
 }
 
 #[test]
-#[ignore = "gap C208: FontFamily.Name is not declared for markup"]
 fn gap_c208_font_family_name_in_a_compiled_binding() {
     let _app = start_catalog_application();
     // `Pages/ComboBoxPage.xaml`: the item template of the font families shows their names.

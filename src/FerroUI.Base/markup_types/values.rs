@@ -384,6 +384,10 @@ ferro_markup_type!(class FontFamily {
         (Option<Uri>, String) => |base_uri: Option<Uri>, name: String| FontFamily::with_base_uri(base_uri.as_ref(), &name),
     ],
     static_properties: [Default: FontFamily { get: FontFamily::default_family }],
+    properties: [
+        // The primary family name.
+        Name: String { get: |family: &FontFamily| family.name().to_string() },
+    ],
 });
 
 ferro_markup_type!(class FontFeature {
