@@ -97,7 +97,8 @@ pub use glyph_info::GlyphInfo;
 pub use i_text_drawing_sink::ITextDrawingSink;
 pub use i_text_source::ITextSource;
 pub use formatted_text_source::FormattedTextSource;
-pub(crate) use formatting_object_pool::FormattingObjectPool;
+// Internal upstream; public so the Skia unit tests reach it.
+pub use formatting_object_pool::{FormattingObjectPool, ListPool, RentedList};
 pub use logical_text_run_enumerator::LogicalTextRunEnumerator;
 pub use inter_word_justification::InterWordJustification;
 pub use justification_properties::JustificationProperties;

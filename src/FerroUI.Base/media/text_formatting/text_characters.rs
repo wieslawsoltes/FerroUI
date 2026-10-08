@@ -54,7 +54,8 @@ impl TextCharacters {
     }
 
     /// Gets a list of [`UnshapedTextRun`].
-    pub(crate) fn get_shapeable_characters(
+    // Internal upstream; public so the Skia unit tests reach it.
+    pub fn get_shapeable_characters(
         &self,
         mut text: ReadOnlyMemory<u16>,
         bidi_level: i8,
@@ -331,7 +332,8 @@ impl TextCharacters {
     ///   when `false`, only the base scalar is tested.
     ///
     /// Returns the shapeable length, or `None` when it is zero.
-    pub(crate) fn try_get_shapeable_length(
+    // Internal upstream; public so the Skia unit tests reach it.
+    pub fn try_get_shapeable_length(
         text: &[u16],
         glyph_typeface: &GlyphTypeface,
         default_glyph_typeface: Option<&GlyphTypeface>,
