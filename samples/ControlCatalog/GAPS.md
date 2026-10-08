@@ -56,7 +56,6 @@ These documents load without their class (the survey test, `cargo test -p contro
 
 - `Pages/CarouselPage/CareCompanionAppPage.xaml`
 - `Pages/ConnectedAnimationDemoPage.xaml`
-- `Pages/NavigationDemoPage.xaml`
 - `Pages/NavigationPage/FerroFlixAppPage.xaml`
 - `Pages/NavigationPage/LAvenirAppPage.xaml`
 - `Pages/NavigationPage/NavigationPageCurvedHeaderPage.xaml`
