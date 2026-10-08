@@ -3,7 +3,11 @@ use crate::clipboard_read_session::ClipboardReadSession;
 use crate::frn_string::{frn_string_bytes, frn_string_to_string};
 use ferroui_base::input::platform::{ClipboardError, PlatformDataTransferItem, PlatformDataTransferItemImpl};
 use ferroui_base::input::DataFormat;
+use crate::storage_provider_api::{NativeStorageItem, StorageProviderApi};
 use ferroui_base::media::imaging::Bitmap;
+use ferroui_base::platform::storage::IStorageItem;
+use ferroui_base::utilities::{Uri, UriKind};
+use ferroui_base::{FerroLocator, LocatorExtensions};
 use std::any::Any;
 use std::rc::Rc;
 
@@ -30,6 +34,17 @@ fn utf16_string(bytes: &[u8]) -> String {
     s
 }
 
+fn try_get_file_path_uri(uri_string: Option<&str>, storage_api: &StorageProviderApi) -> Option<Uri> {
+    let uri = Uri::try_create(uri_string?, UriKind::Absolute).filter(|uri| uri.scheme() == "file")?;
+
+    // macOS may return a file reference URI (e.g. file:///.file/id=6571367.2773272/), convert it to a path URI.
+    if uri.absolute_path().starts_with("/.file/id=") {
+        storage_api.try_resolve_file_reference_uri(&uri)
+    } else {
+        Some(uri)
+    }
+}
+
 impl ClipboardDataTransferItem {
     pub(crate) fn new(session: Rc<ClipboardReadSession>, item_index: i32) -> Rc<PlatformDataTransferItem> {
         PlatformDataTransferItem::new(ClipboardDataTransferItem { session, item_index })
@@ -52,6 +67,20 @@ impl ClipboardDataTransferItem {
     fn try_get_string(&self, native_format: &str) -> Result<Option<String>, ClipboardError> {
         let text = self.session.get_item_value_as_string(self.item_index, native_format)?;
         Ok(text.and_then(|text| frn_string_to_string(&text)))
+    }
+
+    fn try_get_file(&self, native_format: &str) -> Result<Option<Rc<dyn IStorageItem>>, ClipboardError> {
+        let Some(storage_api) = FerroLocator::current().get_service::<StorageProviderApi>() else {
+            return Ok(None);
+        };
+
+        let uri_string = self.session.get_item_value_as_string(self.item_index, native_format)?;
+        let uri_string = uri_string.and_then(|uri_string| frn_string_to_string(&uri_string));
+        let Some(uri) = try_get_file_path_uri(uri_string.as_deref(), &storage_api) else {
+            return Ok(None);
+        };
+
+        Ok(storage_api.try_get_storage_item(Some(&uri), false).map(NativeStorageItem::into_item))
     }
 
     fn try_get_bytes(&self, native_format: &str) -> Result<Option<Rc<[u8]>>, ClipboardError> {
@@ -80,6 +109,10 @@ impl PlatformDataTransferItemImpl for ClipboardDataTransferItem {
 
         if DataFormat::text() == *format {
             return Ok(self.try_get_string(&native_format)?.map(|value| Rc::new(value) as Rc<dyn Any>));
+        }
+
+        if DataFormat::file() == *format {
+            return Ok(self.try_get_file(&native_format)?.map(|value| Rc::new(value) as Rc<dyn Any>));
         }
 
         if DataFormat::bitmap() == *format {

@@ -69,6 +69,8 @@ mod helpers;
 mod icon_loader;
 #[cfg(target_os = "macos")]
 mod mac_os_activatable_lifetime;
+
+mod mac_os_mounted_volume_info_provider;
 #[cfg(target_os = "macos")]
 mod mac_os_native_menu_commands;
 #[cfg(target_os = "macos")]
@@ -86,6 +88,12 @@ mod predicate_callback;
 #[cfg(target_os = "macos")]
 mod screen_impl;
 #[cfg(target_os = "macos")]
+mod storage_item;
+
+mod storage_provider_api;
+
+mod storage_provider_impl;
+
 mod top_level_impl;
 #[cfg(target_os = "macos")]
 mod tray_icon_impl;

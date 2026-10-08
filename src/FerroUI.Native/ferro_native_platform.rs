@@ -19,10 +19,12 @@ use crate::helpers::ComResultExt;
 use crate::icon_loader::IconLoader;
 use crate::interop::*;
 use crate::mac_os_activatable_lifetime::MacOSActivatableLifetime;
+use crate::mac_os_mounted_volume_info_provider::MacOSMountedVolumeInfoProvider;
 use crate::mac_os_native_menu_commands::MacOSNativeMenuCommands;
 use crate::metal::MetalPlatformGraphics;
 use crate::native_platform_settings::NativePlatformSettings;
 use crate::screen_impl::ScreenImpl;
+use crate::storage_provider_api::StorageProviderApi;
 use crate::tray_icon_impl::TrayIconImpl;
 use crate::window_impl::WindowImpl;
 use ferroui_base::input::platform::{
@@ -37,8 +39,8 @@ use ferroui_base::{FerroLocator, LocatorExtensions};
 use ferroui_controls::application_lifetimes::IActivatableLifetime;
 use ferroui_controls::Application;
 use ferroui_controls::platform::{
-    INativeApplicationCommands, IPlatformIconLoader, IPlatformLifetimeEventsImpl, IScreenImpl, ITopLevelImpl,
-    ITrayIconImpl, IWindowImpl, IWindowingPlatform,
+    IMountedVolumeInfoProvider, INativeApplicationCommands, IPlatformIconLoader, IPlatformLifetimeEventsImpl,
+    IScreenImpl, IStorageProviderFactory, ITopLevelImpl, ITrayIconImpl, IWindowImpl, IWindowingPlatform,
 };
 use ferroui_microcom::ComPtr;
 use std::cell::{Cell, RefCell};
@@ -268,6 +270,8 @@ impl FerroNativePlatform {
             .to_constant(clipboard)
             .bind::<Arc<dyn IRenderLoop>>()
             .to_constant(Rc::new(render_loop))
+            .bind::<dyn IMountedVolumeInfoProvider>()
+            .to_constant(Rc::new(MacOSMountedVolumeInfoProvider))
             .bind::<dyn IPlatformDragSource>()
             .to_constant(Rc::new(FerroNativeDragSource::new()))
             .bind::<dyn IPlatformLifetimeEventsImpl>()
@@ -279,6 +283,19 @@ impl FerroNativePlatform {
             // With its concrete type, for the application events of the
             // native side: they only go to the lifetime of this backend.
             .bind_to_self(activatable_lifetime);
+
+        let storage_provider_api = StorageProviderApi::new(
+            factory.create_storage_provider().check().expect("the native storage provider"),
+            options.app_sandbox_enabled,
+        );
+        let storage_provider_factory: Rc<dyn IStorageProviderFactory> = storage_provider_api.clone();
+        locator
+            .bind::<dyn IStorageProviderFactory>()
+            .to_constant(storage_provider_factory)
+            // With its concrete type, for the receivers of files of this
+            // backend (file activation, the clipboard): they ask for the
+            // storage API of this backend only.
+            .bind_to_self(storage_provider_api);
 
         let mut hotkeys =
             PlatformHotkeyConfiguration::with_modifiers(KeyModifiers::META, KeyModifiers::SHIFT, KeyModifiers::ALT);
