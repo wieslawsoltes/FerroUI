@@ -38,6 +38,8 @@ Copyright (c) 2019 Jimmy Wärting), pinned in `webapp/package.json` to commit
 
 The service worker `webapp/modules/ferroui-sw.ts` (bundled as `ferroui-sw.js`) follows the upstream module, which
 is a TypeScript form of the worker of that polyfill (`example/sw.js`, MIT, Copyright (c) 2019 Jimmy Wärting).
+Its second part, the response headers of cross-origin isolation that it adds when it is registered with
+`?coi=1`, is written for this project after the widely used pattern known as `coi-serviceworker`.
 
 Build-time tools, not distributed with the crate: esbuild (MIT) and TypeScript (Apache-2.0), pinned in
 `webapp/package.json` and `webapp/package-lock.json`.

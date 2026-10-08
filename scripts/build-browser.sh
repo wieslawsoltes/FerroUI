@@ -24,13 +24,16 @@
 # spawn threads: the nightly toolchain that `scripts/browser/setup.sh --threads` installs, a standard
 # library rebuilt with atomics (-Zbuild-std) and the pthread options of Emscripten. The build goes to
 # its own target directory (target/threads) and the site to target/browser-threads/<application>, so
-# that neither replaces the output of a build without the option. The site also gets two files of
-# scripts/browser/threads/ (the check for cross-origin isolation and the service worker that
-# provides it on a host that cannot set headers); the other two are linked into the script of the
-# module, for the web workers that run its threads. Variables of the mode:
+# that neither replaces the output of a build without the option. The site also gets one file of
+# scripts/browser/threads/, the check for cross-origin isolation (the service worker that provides
+# the isolation on a host that cannot set headers is the one every site has, ferroui-sw.js); the
+# other two are linked into the script of the module, for the web workers that run its threads. The
+# memory of such a module does not grow: it has the size below from the start. Variables of the mode:
 #   FERROUI_BROWSER_THREAD_POOL_SIZE   web workers created before the application starts (default 2);
 #                                      a thread beyond the pool cannot start until the main thread
 #                                      returns to the browser
+#   FERROUI_BROWSER_THREAD_MEMORY_MB   the size of the memory of the module in megabytes (default
+#                                      512): all the application can ever allocate
 #   FERROUI_BROWSER_NIGHTLY            the nightly toolchain (default: the pin of setup.sh)
 set -euo pipefail
 
@@ -66,6 +69,15 @@ if [ -n "$THREADS" ]; then
   case "$THREAD_POOL_SIZE" in
     ''|*[!0-9]*) echo "FERROUI_BROWSER_THREAD_POOL_SIZE is not a number: $THREAD_POOL_SIZE" >&2; exit 2;;
   esac
+  # Not measured yet: the default is a provisional size, to be replaced by the peak of the catalog
+  # with a margin (docs/porting/browser-render-worker.md, "B2.2"). The stack alone is 8 MB.
+  THREAD_MEMORY_MB="${FERROUI_BROWSER_THREAD_MEMORY_MB:-512}"
+  case "$THREAD_MEMORY_MB" in
+    ''|*[!0-9]*) echo "FERROUI_BROWSER_THREAD_MEMORY_MB is not a number: $THREAD_MEMORY_MB" >&2; exit 2;;
+  esac
+  if [ "$THREAD_MEMORY_MB" -lt 16 ] || [ "$THREAD_MEMORY_MB" -gt 2048 ]; then
+    echo "FERROUI_BROWSER_THREAD_MEMORY_MB is not between 16 and 2048: $THREAD_MEMORY_MB" >&2; exit 2
+  fi
   # The pin lives in setup.sh, next to the pin of the stable toolchain.
   NIGHTLY="${FERROUI_BROWSER_NIGHTLY:-$(sed -n 's/^RUST_NIGHTLY="\(.*\)"$/\1/p' "$ROOT/scripts/browser/setup.sh")}"
   [ -n "$NIGHTLY" ] || { echo "cannot read the nightly toolchain from scripts/browser/setup.sh" >&2; exit 1; }
@@ -173,12 +185,20 @@ if [ -n "$THREADS" ]; then
   # PThread joins the exported runtime methods of the file (the setting given later replaces the
   # earlier one): the script side finds the web worker of a thread in its table when it transfers
   # a canvas to the thread that renders (WebRenderTargetRegistry.create).
+  # The memory is fixed (-sALLOW_MEMORY_GROWTH=0 after the 1 of the file, and the whole size as
+  # -sINITIAL_MEMORY). A shared memory that grows leaves every other thread with views that end
+  # where the memory ended before. Emscripten's own script and the port's (FerroExports.heapU8)
+  # look for the new buffer at each use, but the wasm-bindgen glue keeps a DataView that it only
+  # replaces when Emscripten replaces its views, and writes through it without asking: after a
+  # growth by another thread such a write fails. That cannot be repaired from outside the glue, so
+  # the memory does not grow until the glue is right (docs/porting/browser-render-worker.md,
+  # section 5 and "B2.2"). The build without threads keeps its growing memory.
   # The two scripts of scripts/browser/threads/ that are linked into the script of the module make
   # a web worker that runs a thread attach its own copy of ferroui.js to its own module, and start
   # the wasm-bindgen glue there (docs/porting/browser-render-worker.md, "B2.1"). The paths go into
   # a TOML string as they are: a repository path with a quote or a backslash in it would break it.
   THREADS_DIR="$ROOT/scripts/browser/threads"
-  FLAGS+=(--config "target.wasm32-unknown-emscripten.rustflags=[\"-Ctarget-feature=+atomics,+bulk-memory\", \"-Clink-arg=-pthread\", \"-Clink-arg=-Wl,--no-check-features\", \"-Clink-arg=-sPTHREAD_POOL_SIZE=$THREAD_POOL_SIZE\", \"-Clink-arg=-sENVIRONMENT=web,worker\", \"-Clink-arg=-sEXPORTED_RUNTIME_METHODS=GL,HEAPU8,PThread\", \"-Clink-arg=--extern-pre-js=$THREADS_DIR/ferroui-worker-import.js\", \"-Clink-arg=--post-js=$THREADS_DIR/ferroui-worker-attach.js\"]")
+  FLAGS+=(--config "target.wasm32-unknown-emscripten.rustflags=[\"-Ctarget-feature=+atomics,+bulk-memory\", \"-Clink-arg=-pthread\", \"-Clink-arg=-Wl,--no-check-features\", \"-Clink-arg=-sPTHREAD_POOL_SIZE=$THREAD_POOL_SIZE\", \"-Clink-arg=-sENVIRONMENT=web,worker\", \"-Clink-arg=-sEXPORTED_RUNTIME_METHODS=GL,HEAPU8,wasmMemory,PThread\", \"-Clink-arg=-sALLOW_MEMORY_GROWTH=0\", \"-Clink-arg=-sINITIAL_MEMORY=${THREAD_MEMORY_MB}MB\", \"-Clink-arg=--extern-pre-js=$THREADS_DIR/ferroui-worker-import.js\", \"-Clink-arg=--post-js=$THREADS_DIR/ferroui-worker-attach.js\"]")
 fi
 # The messages of the build name the output directories of the build scripts.
 MESSAGES="$(mktemp)"
@@ -199,16 +219,17 @@ mkdir -p "$OUT"
 cp -R "$WWWROOT"/. "$OUT"/
 # The main script module, and the storage bundle it imports on first use from the same directory.
 cp "$CRATE/dist/ferroui.js" "$CRATE/dist/ferroui.js.map" "$CRATE/dist/storage.js" "$CRATE/dist/storage.js.map" "$OUT"/
-# The service worker, registered by the application with `register_ferro_service_worker`. It is
-# scoped to its own directory and found by the polyfill through the address of the document, so it
-# has to sit at the root of the site, next to the host page.
+# The service worker, registered by the application with `register_ferro_service_worker` and, in a
+# threaded site on a host that does not send the headers of cross-origin isolation, by the check
+# below (as `ferroui-sw.js?coi=1`, which makes it add them). It is scoped to its own directory and
+# found by the polyfill through the address of the document, so it has to sit at the root of the
+# site, next to the host page.
 cp "$CRATE/dist/ferroui-sw.js" "$CRATE/dist/ferroui-sw.js.map" "$OUT"/
 cp "$BUILT/$APPLICATION.js" "$BUILT/$WASM" "$OUT"/
 # The threaded mode: the check for cross-origin isolation, which a host page written for threads
-# imports before it creates the module, and the service worker the check registers on a host that
-# does not send the headers. The worker is scoped to its directory, like the one of the platform.
+# imports before it creates the module.
 if [ -n "$THREADS" ]; then
-  cp "$ROOT/scripts/browser/threads/ferroui-threads.js" "$ROOT/scripts/browser/threads/ferroui-coi-sw.js" "$OUT"/
+  cp "$ROOT/scripts/browser/threads/ferroui-threads.js" "$OUT"/
 fi
 # Files the build scripts of the application wrote for the site.
 node -e 'const fs = require("fs"), path = require("path");

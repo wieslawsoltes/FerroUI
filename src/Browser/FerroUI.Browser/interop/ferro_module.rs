@@ -31,8 +31,21 @@ extern "C" {
 /// at the root of the site: it is scoped to its own directory, and the save
 /// picker polyfill looks it up with `getRegistration()`, which matches
 /// against the address of the document.
+///
+/// A module built with threads registers the worker with `?coi=1`, which
+/// makes it also add the response headers of cross-origin isolation. It is
+/// the address the host page of such a site registers when its host does not
+/// send those headers (`ensureCrossOriginIsolated` of `ferroui-threads.js`).
+/// A scope has one service worker, and a registration with another address
+/// replaces the worker: with the plain address here the page would lose its
+/// isolation, and with it the shared memory of the module, at its next load.
+/// With the same address the second registration changes nothing.
 pub fn resolve_service_worker_path() -> &'static str {
-    "./ferroui-sw.js"
+    if cfg!(target_feature = "atomics") {
+        "./ferroui-sw.js?coi=1"
+    } else {
+        "./ferroui-sw.js"
+    }
 }
 
 /// Registers the service worker at `path` with the browser, with `scope`

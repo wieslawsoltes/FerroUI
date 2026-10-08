@@ -42,8 +42,8 @@ await run([
         try {
             await expectThreadResult(page);
             assert(await page.evaluate(WORKERS) === 1, "the service worker of the threaded mode is not registered");
-            assert(await page.evaluate("navigator.serviceWorker.controller?.scriptURL.endsWith('/ferroui-coi-sw.js')") === true,
-                "the page is not controlled by ferroui-coi-sw.js");
+            assert(await page.evaluate("navigator.serviceWorker.controller?.scriptURL.endsWith('/ferroui-sw.js?coi=1')") === true,
+                "the page is not controlled by ferroui-sw.js?coi=1");
             assert(page.navigations.length === 2, `the page was loaded ${page.navigations.length} times, not twice: ${page.navigations.join(", ")}`);
             assert(page.errors.length === 0, `errors in the page:\n${page.errors.join("\n")}`);
         } finally { await page.close(); }
