@@ -4,7 +4,7 @@
 //! compositor and the rendering of the frame).
 //!
 //! Not ports: the upstream sample has no tests. The benchmarks are ignored
-//! by default (the test that is not checks what they rely on); run them in
+//! by default (the tests that are not check what they rely on); run them in
 //! an optimised build:
 //!
 //! ```sh
@@ -58,15 +58,51 @@
 //! on a quiet machine, in the same build, and take the comparison rather
 //! than the absolute numbers: the surface is a raster framebuffer, not the
 //! GPU surface of a window.
+//!
+//! # The recycling benchmark
+//!
+//! `recycling_benchmark_table_view_scrolling` is the native benchmark of
+//! recycling of performance design 09
+//! (`docs/porting/performance/designs/09-measurement.md`): the table of the
+//! table view page, with the data of the page, is scrolled by a fixed
+//! sequence of offsets (20 pixels a step, then a viewport a step), and each
+//! step is measured as the layout pass alone: the offset is set and the
+//! layout manager of the window runs its pass, in which the rows that left
+//! the viewport are cleared, removed, prepared for the items that entered
+//! it and added again. The frame that follows a step (the jobs of the
+//! dispatcher, the commit and the rendering) runs after the measurement and
+//! is not part of it. Alone:
+//!
+//! ```sh
+//! cargo test -p control-catalog --release --lib recycling_benchmark -- --ignored --nocapture --test-threads=1
+//! ```
+//!
+//! It prints the time of the layout pass per step and per recycled row (the
+//! time of all the passes over the rows they realized). With the feature
+//! `count-allocations` (the counting allocator of `allocations.rs`) it
+//! prints the allocations and bytes of the passes per recycled row, and
+//! with the feature `perf-counters` the counters of the framework
+//! (`ferroui_base::diagnostics::perf_counters`) per recycled row:
+//!
+//! ```sh
+//! cargo test -p control-catalog --release --features count-allocations --lib recycling_benchmark -- --ignored --nocapture --test-threads=1
+//! cargo test -p control-catalog --release --features perf-counters --lib recycling_benchmark -- --ignored --nocapture --test-threads=1
+//! ```
+//!
+//! Take the times from a run without either feature: counting costs time,
+//! and the table of the virtual calls allocates.
 
+use super::allocations::{self, AllocationCounts};
 use super::support::*;
 use crate::pages::{ButtonsPage, TableViewPage};
+use ferroui_base::diagnostics::perf_counters::{self, PerfCounter, PerfCountersSnapshot};
 use ferroui_base::input::raw::{RawMouseWheelEventArgs, RawPointerEventArgs, RawPointerEventType};
 use ferroui_base::input::{IInputDevice, IInputRoot, MouseDevice, Pointer, PointerType, RawInputModifiers};
 use ferroui_base::platform::surfaces::{
     FramebufferLockProperties, IFramebufferPlatformSurface, IFramebufferRenderTarget, IPlatformRenderSurface,
     IPlatformRenderSurfaceRenderTarget,
 };
+use ferroui_base::layout::ILayoutManager;
 use ferroui_base::media::MediaContext;
 use ferroui_base::platform::{AlphaFormat, ILockedFramebuffer, PixelFormats, RenderTargetSceneInfo, RetainedFramebuffer};
 use ferroui_base::rendering::composition::transport::CompositionBatch;
@@ -782,6 +818,238 @@ fn frame_benchmark_table_view_scrolling_render_thread() {
         Stats::of(&dispatcher_thread.completions).median,
         Stats::of(&render_thread.completions).median,
     );
+}
+
+/// The steps of the recycling benchmark that scrolls 20 pixels a step, and
+/// the steps of the one that scrolls a viewport a step.
+const RECYCLING_STEPS: usize = 300;
+const RECYCLING_VIEWPORT_STEPS: usize = 120;
+
+/// What the steps of [`run_recycling`] measured.
+struct RecyclingRun {
+    steps: usize,
+    /// The rows realized by the steps: after the rows of the first viewport
+    /// each of them is a recycled row prepared for another item.
+    rows: u64,
+    /// The rows realized by the frames after the steps instead of by their
+    /// layout passes: none, when the layout pass is the whole of the
+    /// recycling.
+    rows_in_frames: u64,
+    /// The time of each step: the offset is set and the layout pass runs.
+    layouts: Vec<Duration>,
+    /// The time of the frame after each step (the jobs of the dispatcher,
+    /// the commit and the rendering), which is not part of `layouts`.
+    frames: Vec<Duration>,
+    /// What the steps allocated; zeros without the feature
+    /// `count-allocations`.
+    allocations: AllocationCounts,
+    /// What the steps counted; nothing without the feature `perf-counters`.
+    counters: PerfCountersSnapshot,
+}
+
+/// The indexes of the items whose rows are realized, in order.
+fn realized_indexes(table_view: &TableView) -> Vec<i32> {
+    let mut indexes: Vec<i32> = table_view
+        .get_realized_containers()
+        .iter()
+        .map(|container| table_view.index_from_container(container))
+        .filter(|index| *index >= 0)
+        .collect();
+    indexes.sort_unstable();
+    indexes
+}
+
+/// Scrolls the table `steps` times to `offset_at(step)` and measures, for
+/// each step, the layout pass alone: the offset is set and the layout
+/// manager of the window runs its pass, which recycles the rows that left
+/// the viewport into the rows that entered it. The frame that follows (the
+/// jobs of the dispatcher, the commit of the compositor, the rendering) is
+/// run after the measurement of the step and timed apart, so that the
+/// window is in the state a running application leaves it in before the
+/// next step.
+fn run_recycling(
+    bench: &Bench,
+    table_view: &TableView,
+    scroll_viewer: &ScrollViewer,
+    steps: usize,
+    offset_at: impl Fn(usize) -> f64,
+) -> RecyclingRun {
+    let layout_manager = bench.window.layout_manager();
+    let mut run = RecyclingRun {
+        steps,
+        rows: 0,
+        rows_in_frames: 0,
+        layouts: Vec::with_capacity(steps),
+        frames: Vec::with_capacity(steps),
+        allocations: AllocationCounts::default(),
+        counters: PerfCountersSnapshot::default(),
+    };
+    for step in 0..steps {
+        let y = offset_at(step);
+        assert_ne!(y, scroll_viewer.offset().y, "step {step} scrolls");
+        let realized_before = realized_indexes(table_view);
+
+        let counters_before = perf_counters::snapshot();
+        let allocations_before = allocations::snapshot();
+        let start = Instant::now();
+        scroll_viewer.set_offset(Vector::new(0.0, y));
+        layout_manager.execute_layout_pass();
+        let layout = start.elapsed();
+        let allocations_after = allocations::snapshot();
+        let counters_after = perf_counters::snapshot();
+
+        run.layouts.push(layout);
+        run.allocations.add(&allocations_after.since(&allocations_before));
+        run.counters = run.counters.plus(&counters_after.since(&counters_before));
+        let realized = realized_indexes(table_view);
+        run.rows += realized.iter().filter(|index| !realized_before.contains(index)).count() as u64;
+
+        let (jobs, render) = bench.frame();
+        run.frames.push(jobs + render);
+        let after_frame = realized_indexes(table_view);
+        run.rows_in_frames += after_frame.iter().filter(|index| !realized.contains(index)).count() as u64;
+    }
+    run
+}
+
+impl RecyclingRun {
+    fn print(&self, name: &str) {
+        let layouts = Stats::of(&self.layouts);
+        let total: Duration = self.layouts.iter().sum();
+        let rows = self.rows.max(1) as f64;
+        println!(
+            "{name}: {} steps, {} rows recycled; layout pass ms per step: median {:.3}, mean {:.3}, p95 {:.3}, max {:.3}; \
+             {:.1} us of layout per recycled row (the frame after a step, not counted: median {:.3} ms)",
+            self.steps,
+            self.rows,
+            layouts.median,
+            layouts.mean,
+            layouts.p95,
+            layouts.max,
+            total.as_secs_f64() * 1_000_000.0 / rows,
+            Stats::of(&self.frames).median,
+        );
+        if self.rows_in_frames > 0 {
+            println!(
+                "{name}: {} rows were realized by the frames after the steps, outside the measured layout passes",
+                self.rows_in_frames
+            );
+        }
+        if allocations::ENABLED {
+            println!(
+                "{name}: per recycled row {:.1} allocations, {:.1} reallocations, {:.0} bytes \
+                 ({} allocations, {} reallocations, {} bytes in the layout passes)",
+                self.allocations.allocations as f64 / rows,
+                self.allocations.reallocations as f64 / rows,
+                self.allocations.bytes as f64 / rows,
+                self.allocations.allocations,
+                self.allocations.reallocations,
+                self.allocations.bytes,
+            );
+        } else {
+            println!("{name}: allocations not counted (the feature `count-allocations` is off)");
+        }
+        if perf_counters::ENABLED {
+            println!(
+                "{name}: counters of the layout passes (the times above include the counting: take times from a run \
+                 without the feature)\n{}",
+                self.counters.report_per(self.rows, "recycled row")
+            );
+        } else {
+            println!("{name}: counters not compiled in (the feature `perf-counters` is off)");
+        }
+    }
+}
+
+/// The table view page shown in a window, with its table and the scroll
+/// viewer of the table.
+fn recycling_bench() -> (Bench, Ref<TableView>, Ref<ScrollViewer>) {
+    let bench = Bench::start(|| TableViewPage::new().upcast());
+    let table_view = descendants::<TableView>(&bench.window).into_iter().next().expect("the table view");
+    let (scroll_viewer, _) = scroll_viewer_of(&bench, &table_view);
+    (bench, table_view, scroll_viewer)
+}
+
+/// The offset of the table at a step of the benchmark that scrolls a
+/// viewport a step: `sweep` viewports down, then as many up, so that every
+/// step changes the offset and brings other rows into the viewport.
+fn viewport_offset_at(step: usize, sweep: usize, viewport: f64) -> f64 {
+    let position = (step + 1) % (2 * sweep);
+    let pages = if position <= sweep { position } else { 2 * sweep - position };
+    pages as f64 * viewport
+}
+
+/// The viewports the table can be scrolled down by from its start, and the
+/// height of a viewport in whole pixels.
+fn viewport_sweep(scroll_viewer: &ScrollViewer) -> (usize, f64) {
+    let viewport = scroll_viewer.viewport().height.floor();
+    assert!(viewport > 0.0, "the table has a viewport");
+    let sweep = ((scroll_viewer.extent().height - scroll_viewer.viewport().height) / viewport).floor() as usize;
+    assert!(sweep >= 1, "the table is longer than two viewports");
+    (sweep, viewport)
+}
+
+/// The native benchmark of recycling (performance design 09): the table of
+/// the table view page, with the data of the page, scrolled by a fixed
+/// sequence of offsets; the layout pass of each step is measured alone, per
+/// recycled row, with the allocations (feature `count-allocations`) and the
+/// counters of the framework (feature `perf-counters`) of the passes.
+#[test]
+#[ignore = "benchmark: run in an optimised build with --ignored --nocapture"]
+fn recycling_benchmark_table_view_scrolling() {
+    let (bench, table_view, scroll_viewer) = recycling_bench();
+
+    // A sweep down and up that is not measured: the rows of the pool exist
+    // and the caches are filled. It ends where it started.
+    run_recycling(&bench, &table_view, &scroll_viewer, 2 * SCROLL_SWEEP, scroll_offset_at);
+    assert_eq!(0.0, scroll_viewer.offset().y);
+
+    // 20 pixels a step, as the wheel scrolls: a step recycles a row or none.
+    let run = run_recycling(&bench, &table_view, &scroll_viewer, RECYCLING_STEPS, scroll_offset_at);
+    assert!(run.rows > 0, "the steps recycled rows");
+    run.print("recycling, table view, 20 px per step");
+
+    // Back to the start, then a viewport a step, as a drag of the scroll bar
+    // thumb scrolls: every step recycles the rows of a viewport.
+    scroll_viewer.set_offset(Vector::new(0.0, 0.0));
+    bench.frame();
+    let (sweep, viewport) = viewport_sweep(&scroll_viewer);
+    let offset_at = |step: usize| viewport_offset_at(step, sweep, viewport);
+    run_recycling(&bench, &table_view, &scroll_viewer, 2 * sweep, offset_at);
+    assert_eq!(0.0, scroll_viewer.offset().y);
+
+    let run = run_recycling(&bench, &table_view, &scroll_viewer, RECYCLING_VIEWPORT_STEPS, offset_at);
+    assert!(run.rows as usize >= RECYCLING_VIEWPORT_STEPS, "every step recycled rows");
+    run.print("recycling, table view, a viewport per step");
+}
+
+/// What the recycling benchmark relies on, in every build: a step of the
+/// offset recycles rows in the layout pass that follows it (not in the
+/// frame after it), into rows the table already has.
+#[test]
+fn table_view_offset_scrolling_recycles_its_rows_in_the_layout_pass() {
+    let (bench, table_view, scroll_viewer) = recycling_bench();
+    let realized = table_view.get_realized_containers().len();
+    assert!(realized > 0);
+
+    let (sweep, viewport) = viewport_sweep(&scroll_viewer);
+    let run = run_recycling(&bench, &table_view, &scroll_viewer, 2 * sweep, |step| viewport_offset_at(step, sweep, viewport));
+
+    // Every step scrolled by a viewport and brought rows into it, in its
+    // layout pass; the table has no more rows for it than before. The sweep
+    // ends where it started.
+    assert_eq!(0.0, scroll_viewer.offset().y);
+    assert_eq!(2 * sweep, run.layouts.len());
+    assert!(run.rows as usize >= 2 * sweep, "{} rows recycled in {} steps", run.rows, 2 * sweep);
+    assert_eq!(0, run.rows_in_frames);
+    assert!(table_view.get_realized_containers().len() <= realized + 2);
+    assert_eq!(allocations::ENABLED, run.allocations.allocations > 0);
+    assert_eq!(perf_counters::ENABLED, run.counters.get(PerfCounter::PropertyChangesRaised) > 0);
+    if perf_counters::ENABLED {
+        // The rows that entered the viewport were taken from the pool.
+        assert!(run.counters.get(PerfCounter::ContainersReused) > 0);
+        assert!(run.counters.get(PerfCounter::ContainersRecycled) > 0);
+    }
 }
 
 #[test]

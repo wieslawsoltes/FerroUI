@@ -9,6 +9,7 @@
 //! `gaps` holds the minimal reproductions of the gaps of the framework the
 //! list names.
 
+mod allocations;
 mod asset_files;
 mod auto_complete_box_page;
 mod gaps;
