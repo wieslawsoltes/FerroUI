@@ -549,7 +549,18 @@ impl Bench {
 
             match &self.render_thread {
                 None => {
-                    let (jobs, render) = self.frame();
+                    let (mut jobs, mut render) = self.frame();
+                    // A commit that was requested while the batch before it was
+                    // still pending is made one pass of the dispatcher later: the
+                    // frame is pumped until the batch of the input is rendered.
+                    for _ in 0..8 {
+                        if rendered_at.lock().unwrap_or_else(|e| e.into_inner()).is_some() {
+                            break;
+                        }
+                        let (more_jobs, more_render) = self.frame();
+                        jobs += more_jobs;
+                        render += more_render;
+                    }
                     times.ui.push(input + jobs + render);
                     times.commits.push(input + jobs);
                     times.renders.push(render);
@@ -740,10 +751,11 @@ fn table_view_offset_scrolling(mode: RenderMode) -> (FrameTimes, Stats) {
 #[test]
 #[ignore = "benchmark: run in an optimised build with --ignored --nocapture"]
 fn frame_benchmark_table_view_scrolling_render_thread() {
-    // The dispatcher-thread mode: each frame of the scenario is rendered,
-    // once, by the tick of the frame.
+    // The dispatcher-thread mode: each frame of the scenario is rendered by
+    // a tick of the frame (a step whose commit waits for the batch before
+    // it takes a second tick, which draws as well).
     let (dispatcher_thread, dispatcher_thread_ui) = table_view_offset_scrolling(RenderMode::DispatcherThread);
-    assert_eq!(SCROLL_FRAMES as u32, dispatcher_thread.rendered);
+    assert!(dispatcher_thread.rendered >= SCROLL_FRAMES as u32);
     assert_eq!(SCROLL_FRAMES, dispatcher_thread.frames_drawn);
 
     // The render-thread mode: every scroll step reached the surface before
