@@ -143,7 +143,6 @@ fn gap_c310_time_span_property_from_text() {
 }
 
 #[test]
-#[ignore = "gap C312: the event FerroObject.PropertyChanged is not declared for markup"]
 fn gap_c312_property_changed_event_in_markup() {
     let _app = start_application();
     // As `Pages/OpenGl/OpenGlInteropPage.xaml`: `<openGl:GlPageKnobs PropertyChanged="KnobsPropertyChanged"/>`.

@@ -116,6 +116,25 @@ fn gap_c207_compiled_stream_binding_of_an_observable() {
 }
 
 #[test]
+#[ignore = "gap C313: the item type of a collection of a view model is not known to markup"]
+fn gap_c313_item_type_of_a_collection_of_a_view_model() {
+    let _app = start_catalog_application();
+    // `Pages/ComboBoxPage.xaml`: the item template and the display member binding have no
+    // `x:DataType`; upstream takes the type of the items from the type of the collection the
+    // items source is bound to (`InheritDataTypeFromItems`).
+    let xaml = format!(
+        "<ComboBox {XMLNS} xmlns:viewModels='using:ControlCatalog.ViewModels' \
+           x:DataType='viewModels:ComboBoxPageViewModel' ItemsSource='{{Binding Values}}' \
+           DisplayMemberBinding='{{Binding Name}}'>\
+           <ComboBox.ItemTemplate><DataTemplate><TextBlock Text='{{Binding Id}}'/></DataTemplate></ComboBox.ItemTemplate>\
+         </ComboBox>"
+    );
+    if let Err(error) = try_load_text(&xaml, None, None) {
+        panic!("{}", describe(&error));
+    }
+}
+
+#[test]
 fn gap_c208_font_family_name_in_a_compiled_binding() {
     let _app = start_catalog_application();
     // `Pages/ComboBoxPage.xaml`: the item template of the font families shows their names.

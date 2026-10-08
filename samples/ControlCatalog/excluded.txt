@@ -18,17 +18,14 @@ Pages/SettingsPage.xaml | harness: {x:Static local:App.CurrentTheme} needs the a
 Pages/ContentPage/ContentPagePerformancePage.xaml | code-behind: NavigationPerformanceMonitorHelper (measures the managed heap: GC.GetTotalMemory, GC.Collect)
 
 # --- ViewModels, Models, Views and the pages of the view models (group B) ---
-Pages/ContextFlyoutPage.xaml | gap C203: a handler with plain event arguments is not accepted for PopupFlyoutBase.Opening; gap C209: TextBox.Cut, Copy, Paste and Clear are not declared as methods for markup
-Pages/ListBoxPage.xaml | gap C207: a compiled binding does not stream (`^`) an ObservableValue
-Pages/PlatformInfoPage.xaml | gap C202: OnPlatform as an element with On children does not load
+Pages/ComboBoxPage.xaml | gap C313: the item type of a collection of a view model is not known to markup (a collection is declared as ItemsSource), so the bindings of an item template without x:DataType do not resolve
+Pages/ContextFlyoutPage.xaml | gap C209: TextBox.Cut, Copy, Paste and Clear are not declared as methods for markup
 
 # --- the other pages directly under Pages/ (group C) ---
 Pages/AutoCompleteBoxPage.xaml | code-behind not ported (the document also needs gap C310)
-Pages/FlyoutsPage.xaml | gap C301: a method name is not accepted for a property of a delegate type (CustomPopupPlacementCallback)
 Pages/NumericUpDownPage.xaml | code-behind: CultureInfo.GetCultures(CultureTypes.SpecificCultures)
-Pages/OpenGl/OpenGlInteropPage.xaml | gap C312: the event FerroObject.PropertyChanged is not declared for markup (PropertyChanged="KnobsPropertyChanged" on GlPageKnobs)
-Pages/OpenGl/OpenGlLeasePage.xaml | gap C312: the event FerroObject.PropertyChanged is not declared for markup (PropertyChanged="KnobsPropertyChanged" on GlPageKnobs); code-behind: OpenGlFbo (Pages/OpenGl/OpenGlFbo.cs, not ported) wraps an OpenGL texture in a Ganesh surface (GRContext, GRBackendTexture, GRGlTextureInfo), and the Skia backend has Ganesh on OpenGL in browser builds only
-Pages/ToolTipPage.xaml | gap C301: a method name is not accepted for a property of a delegate type (CustomPopupPlacementCallback)
+Pages/OpenGl/OpenGlInteropPage.xaml | pending: the code-behind (OpenGlInteropPage.xaml.cs) is not ported yet; everything it uses is
+Pages/OpenGl/OpenGlLeasePage.xaml | code-behind: OpenGlFbo (Pages/OpenGl/OpenGlFbo.cs, not ported) wraps an OpenGL texture in a Ganesh surface (GRContext, GRBackendTexture, GRGlTextureInfo), and the Skia backend has Ganesh on OpenGL in browser builds only
 
 # --- the demo pages and the page sample directories ---
 Pages/CarouselPage/CarouselPagePerformancePage.xaml | code-behind: NavigationPerformanceMonitorHelper (measures the managed heap: GC.GetTotalMemory, GC.Collect)
