@@ -109,24 +109,3 @@ impl GeometryImpl for CombinedGeometryImpl {
 }
 
 impl_geometry_impl!(CombinedGeometryImpl);
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-    use skia_safe::PathBuilder;
-
-    #[test]
-    fn combining_fill_with_empty_stroke_returns_fill_bounds() {
-        let mut fill = PathBuilder::new();
-        fill.line_to((100.0, 0.0));
-        fill.line_to((100.0, 100.0));
-        fill.line_to((0.0, 100.0));
-        fill.close();
-
-        let stroke = Path::new();
-
-        let result = CombinedGeometryImpl::new(Some(stroke), FillPath::Separate(fill.detach()));
-
-        assert_eq!(Rect::new(0.0, 0.0, 100.0, 100.0), result.bounds());
-    }
-}

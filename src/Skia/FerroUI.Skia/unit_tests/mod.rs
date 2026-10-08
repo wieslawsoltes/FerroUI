@@ -9,6 +9,7 @@
 //! `Win32Theory` (skipped unless the tests run on Windows) are
 //! `#[cfg_attr(not(windows), ignore = "...")]` with upstream's message.
 
+mod combined_geometry_impl_tests;
 mod media;
 mod test_font_manager;
 
