@@ -273,6 +273,8 @@ impl IXamlAstGroupTransformer for XamlMergeResourceGroupTransformer {
                 .cloned();
             // A document outside of the compilation that can be loaded at run time: the
             // include stays in the merged dictionaries and loads as a `ResourceInclude`.
+            // Deviation (xaml.md, decision 22): upstream reports the error below; the
+            // run-time loader only, the emitter has no fallback.
             if target_document.is_none() && XamlRuntimeIncludeFallback::applies(context, &original_asset_path) {
                 runtime_includes.push(merge_source.assignment.clone());
                 continue;
@@ -299,13 +301,21 @@ impl IXamlAstGroupTransformer for XamlMergeResourceGroupTransformer {
                 );
             };
 
-            let root_group = target_document_manipulation
-                .and_then(|m| m.cast::<XamlManipulationGroupNode>())
-                .ok_or_else(|| {
+            // As upstream: a cast of the manipulation (a null one casts, and its children
+            // are then a null reference).
+            let root_group = match target_document_manipulation {
+                None => {
+                    return Err(XamlError::internal(
+                        "NullReferenceException",
+                        "Object reference not set to an instance of an object.",
+                    ))
+                }
+                Some(manipulation) => manipulation.cast::<XamlManipulationGroupNode>().ok_or_else(|| {
                     XamlError::invalid_cast(
                         "Unable to cast the root manipulation to type 'XamlManipulationGroupNode'.",
                     )
-                })?;
+                })?,
+            };
             let mut root_objects: Vec<Rc<XamlObjectInitializationNode>> = root_group
                 .children
                 .borrow()
