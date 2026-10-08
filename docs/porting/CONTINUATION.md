@@ -62,13 +62,20 @@ The stage-table row "E5 Includes and assets" in `xaml.md` (9.10.1), and items 3 
 - `generate_file` now links includes within its group, and the emitter writes source information (`CreateSourceInfo`).
 - Fixture: `tests/XamlIncludeFixture` (library `xaml-include-fixture-theme`, application `xaml-include-fixture-application`), running upstream's `ResourceIncludeTests`, `StyleIncludeTests` and `MergeResourceIncludeTests` against compiled documents.
 
+**Done: step 3, build integration over the run-time type system (branch `xaml-e5-build-integration`, not validated by a build yet).** `xaml.md` 9.6.8 has the design as built and the table of what departs from 9.6.
+- `ferroui-build` (`src/FerroUI.Build.Tasks`): `Build::from_env().assembly(..).embed_assets(..).compile_xaml().run()` for a crate's `build.rs`. It writes the generated modules, the asset table, the loader table and `register()` (R8) to `$OUT_DIR/xaml/`, writes `$OUT_DIR/<crate>.xamlmeta`, and prints the `cargo::` lines. `ferroui_markup_xaml::include_compiled_xaml!()` includes the result.
+- The `.xamlmeta` files travel through Cargo `links` metadata (`DEP_<CRATE>_XAML_XAMLMETA`). The themes export their checked-in file that way from their existing `build.rs`.
+- The constructor of a class is picked by the compiler (`generate_class_file(class, None, ..)`), as upstream picks it. The themes still state theirs, because their markup metadata declares a `new()` upstream's class does not have.
+- The include fixture is converted: its generated files are no longer checked in, except the document of the class `StyleWithServiceProvider`.
+- The limit: the compiler reads types from the registries of the process, so the build script links the crates its documents name, and it cannot link its own crate. A document that names a type of its own crate (every `x:Class` document) cannot be compiled by a build script. That is why the themes are not converted and why `LocaleCollection` moved from the fixture application to the fixture library.
+
 Remaining, in order. #43's "Continuation" section has the upstream files for each step.
 
-1. **Build integration.**
-   - `compile_xaml()` / `embed_assets()` (`xaml.md` 9.6) replace the checked-in `compiled_xaml.rs`, with `register()` (R8) and the generated `register_types` of 9.7.4.
-   - The constructor choice of the seam moves into the compiler.
-   - The `.xamlmeta` files travel through Cargo `links` metadata (`DEP_<CRATE>_XAML_XAMLMETA`, `xaml.md` 9.6.3); today each generator names the checked-in files of its dependencies (`DEPENDENCIES` in the fixture application's `tests/compiled_xaml_tests.rs`).
-   - The `XamlIlTests` that load compiled documents of the test assembly can then be ported.
+1. **The build-time type system** (`xaml.md` 9.5: the source scanner, `MarkupModel`, `ModelTypeSystem<EmitBacking>`, `export_metadata()`).
+   - It removes the limit above: the build script compiles `x:Class` documents without linking anything.
+   - Then: `include_xaml!` per class, the generated `register_types` of 9.7.4, the themes on the build script, diagnostics with codes and the cache (9.6.4, 9.6.5).
+   - Until then a crate with `x:Class` documents uses the checked-in path (`generate_class_file` in a test). The two `XamlIlTests` classes with compiled markup (`XamlIlClassWithPrecompiledXaml`, `XamlIlClassWithCustomProperty`) can be compiled that way; today their constructors populate through the run-time loader; the two tests are ported and not ignored.
+   - Small and independent: remove `new:` from the markup metadata of the two themes so that the compiler picks their constructor too (check with a build that `<FluentTheme/>` in markup goes through `FerroXamlIlConstructorServiceProviderTransformer`).
 2. **The catalog compiled.**
    - Its 219 documents and the `x:Class` documents of `src/FerroUI.Dialogs`, so that neither links the run-time loader.
    - The estimate is +6 to +10 MB raw and +0.5 to +1.2 MB gzip on the catalog module, against 0.24 s less CPU before the first frame.
@@ -78,7 +85,7 @@ Remaining, in order. #43's "Continuation" section has the upstream files for eac
 Regenerating output:
 - Corpus: `cargo test -p ferroui-markup-xaml-tests --lib emitter::differential_tests::regenerate_emitter_output -- --ignored --exact`.
 - Themes: `cargo test -p ferroui-themes-<fluent|simple> --lib tests::compiled_xaml_tests::regenerate_compiled_xaml -- --ignored`.
-- Include fixture (library first, the application reads its `.xamlmeta`): `cargo test -p xaml-include-fixture-<theme|application> --lib tests::compiled_xaml_tests::regenerate_compiled_xaml -- --ignored`.
+- Include fixture: the build script generates everything except the document of the library's class. That one: `cargo test -p xaml-include-fixture-theme --lib tests::compiled_xaml_tests::regenerate_compiled_xaml -- --ignored`. The application has no regeneration test; `cargo build -p xaml-include-fixture-application` regenerates its output, and `build_script_output_is_the_emitters` of each crate compares it with the emitter run in the tests.
 - Regenerate twice and diff before every push.
 
 ### 3. Core port: the remaining upstream suites

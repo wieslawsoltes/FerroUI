@@ -1357,6 +1357,60 @@ One `compile_xaml()` call is one group: all documents of the crate are parsed, t
 
 Decision stands (section 1.1, decision 3): `build.rs` drives; `include_xaml!` / `include_compiled_xaml!` are declarative one-liners.
 
+#### 9.6.8 Implemented (E5 step 3, 2026-10-08): the build script as a host of the emitter
+
+Sections 9.6.1 to 9.6.6 assume the build-time type system of 9.5 (the source scanner, `ModelTypeSystem`). It does not exist: the emitter transforms against the run-time type system, that is, against the types the process registered. What is implemented is the build integration over that type system, and it reaches as far as that type system allows.
+
+**The crate.** `ferroui-build` (`src/FerroUI.Build.Tasks`), a build-dependency. It depends on the loader with the `runtime` and `emitter` features, on `ferroui-base` and on `ferroui-markup-xaml`; it does not depend on `ferroui-controls`. `syn` and `serde_json` are not used (no scanner; the `.xamlmeta` reader and writer are the emitter's own).
+
+```rust
+// build.rs
+fn main() {
+    ferroui_controls::register_types();                  // the types the documents name; see "Type metadata"
+    ferroui_build::Build::from_env()                     // CARGO_MANIFEST_DIR, OUT_DIR, CARGO_PKG_NAME, DEP_*_XAMLMETA
+        .assembly(&ASSEMBLY)                             // the MarkupAssembly the crate registers
+        .embed_assets(&["Assets"])                       // every file below the directories
+        .compile_xaml()                                  // every *.xaml below the XAML root, one group
+        .run();                                          // writes the files, prints the cargo:: lines, fails once
+}
+// lib.rs
+ferroui_markup_xaml::include_compiled_xaml!();           // pub mod compiled_xaml, pub mod compiled_markup
+```
+
+| Design (9.6.1 to 9.6.6) | Implemented |
+|---|---|
+| `export_metadata()` scans `src/**/*.rs` | No scan. `run()` writes `$OUT_DIR/<crate>.xamlmeta` with `documents[]` and the absolute paths of the files of the direct dependencies, and prints `cargo::metadata=xamlmeta=<path>`. It also prints `cargo::rustc-env=FERROUI_XAMLMETA=<path>`, so the crate's own tests read the file. |
+| `[package.metadata.ferroui]` keys | Not read (no TOML reader in the build). The builder states them: `assembly`, `xaml_root`, `embed_assets`, `compile_group(XamlGroup)` with `create_source_info`. Diagnostics filtering (`warnings-as-errors`, `no-warn`) is not implemented. |
+| One file per document, `include_xaml!` per class | One file per group: `$OUT_DIR/xaml/<module>.rs` is the unchanged text of `rust_emitter::generate_file`, with `<module>.map.json`. `$OUT_DIR/xaml/mod.rs` declares the module of every group (`include!` of the file) and the module `compiled_markup`: `ASSETS`, `try_load` (the loader table of the crate: each table in turn) and `register()` (R8: `register_assets` and `register_compiled_xaml`). `include_compiled_xaml!()` includes `mod.rs` at the crate root. |
+| `assets.rs` | The asset table is `compiled_markup::ASSETS` in `mod.rs`: `(rooted path, include_bytes!)`. A document a group compiled is left out, as upstream removes a compiled resource (`res.Remove()`). |
+| Change tracking, cache | `rerun-if-changed` for `build.rs`, `Cargo.toml`, the XAML root and every asset directory, every file the script states with `input()`, every `.xamlmeta` read (the transitive ones too). Files are written only when their text changed. No cache: every run compiles every group. `rerun-if-changed=src` is not printed, because the sources are not read. |
+| Diagnostics | Every group is compiled before the build fails. A document that is not eligible is one `cargo::error=<document>: <reason>` line; the script exits with a failure once. No codes, no `xaml-diagnostics.json`, no `compile_error!` file. |
+| Group transformers | As designed: one group is one `generate_file` call (9.7.3). |
+| Generated `register_types` (9.7.4) | Not generated: it needs the scan. The crate writes `register_types()` and calls `compiled_markup::register()` in it. |
+
+**Type metadata (the limit).** A build script runs on the host and links what its `[build-dependencies]` name. The compiler reads types from the registries of the process, so:
+
+1. The build script takes the crates whose types its documents name as build-dependencies and calls their `register_types()` before `run()`. It also starts the application services the transform runs with (the fixture starts `UnitTestApplication`, as the generator tests did). `ferroui-build` itself registers the runtime library and the assembly of the crate.
+2. Those crates are built for the host. With the host equal to the target and equal features Cargo can share the units; otherwise the framework is built twice. This is the cost decision 10 and section 2.4 rejected linking for, and it is why the themes are not converted (below).
+3. A build script cannot link the crate it builds. A document that names a type of its own crate cannot be compiled by the build script: the document of a class of the crate (`x:Class`), or a document that uses a control or a view model of the crate. Such a document stays generated by a test and checked in (`generate_class_file`, drift-tested). `Build::loader(path)` puts the `try_load` of the checked-in file first in the loader table of the crate, and `Build::checked_in_metadata(path)` adds its documents to the `.xamlmeta` of the crate.
+
+Point 3 is the general obstacle: an application's documents are mostly `x:Class` documents. The build integration of 9.6 for them needs the scanner of 9.5 (E1 of 9.10.1), which is the next piece of work on this path, not a larger build script.
+
+**Transport of `.xamlmeta` (9.6.3), implemented as designed.** A crate with compiled markup has `links = "<crate>_xaml"` and prints `cargo::metadata=xamlmeta=<path>`; the build script of a direct dependent reads `DEP_<CRATE>_XAML_XAMLMETA`. `Build::from_env()` takes every `DEP_*_XAMLMETA` variable, in the order of the variable names, and reads the files they name transitively. A crate whose compiled markup is checked in exports its checked-in file the same way without `ferroui-build`: the two themes have the `links` key and print the line for `compiled_xaml.xamlmeta` in their existing `build.rs`.
+
+**The fixture (`tests/XamlIncludeFixture`).**
+
+- The library compiles its documents without a class (two groups: `compiled_xaml`, and `compiled_xaml_source_info` with `CreateSourceInfo`, which is `internal()`: not in the loader table, not in the `.xamlmeta`) in `build.rs`. The document of `StyleWithServiceProvider`, a class of the crate, stays checked in (`compiled_style_with_service_provider.rs` and `.xamlmeta`), joined through `loader()` and `checked_in_metadata()`.
+- The application compiles all of its documents in `build.rs`, with the `.xamlmeta` of the library and of both themes from `DEP_*`. Its build script links the three crates and registers their types. `LocaleCollection`, which a document of the application uses, moved to the library for point 3.
+- The documents are text constants of `documents.rs`, which both `lib.rs` and `build.rs` include; the assembly is `assembly.rs`, included by both.
+- The differential test of each crate (`build_script_output_is_the_emitters`) compares the files the build script wrote with the output of the emitter run in the test, where every type of the crate is registered. It checks that the build script's type environment gives the same text. The upstream include tests run against the modules of `OUT_DIR`.
+
+**Not converted: the two themes.** Their compiled markup stays checked in, for three reasons that were settled by reading and not by a build:
+
+1. The document of each theme is the document of a class of the crate (`FluentTheme`, `SimpleTheme`), and the group of the Fluent theme names further types of its crate (`ColorPaletteResources`, `SystemAccentColors`, `DensityStyle`). Point 3 applies to the whole group, because the documents of a theme are one group.
+2. A build script of a theme would link `ferroui-controls` and `ferroui-dialogs` for the host with `compiler-metadata`. The browser build (`wasm32`) would then build the framework for the host as well as for the target on every clean build.
+3. The checked-in files are what the size and start-up measurements of `browser-platform.md` were taken with, and their differential test already runs the emitter with every type registered.
+
 ### 9.7 Registration of compiled XAML
 
 #### 9.7.1 The per-crate table
@@ -1412,7 +1466,7 @@ Entry rules, as upstream: a document gets an entry when it is public (`x:ClassMo
 
 Implemented (E5 step 2, 2026-10-08), for the checked-in generated files of the interim integration (9.10.1):
 
-- The model is `rust_emitter::XamlMetadata` (`AssemblyModel` with `name`, `crate_name`, `documents[DocumentModel]` and `dependencies`, JSON). `GeneratedFile::metadata` and `ClassFile::metadata` write it next to the generated file (`compiled_xaml.xamlmeta`, drift-tested with it); `XamlMetadata::read` reads a file and, transitively, the files its `dependencies` name (relative to it). Until `export_metadata()` exists the generator of a dependent crate names the checked-in file of each dependency, where build integration will read `DEP_<CRATE>_XAML_XAMLMETA`.
+- The model is `rust_emitter::XamlMetadata` (`AssemblyModel` with `name`, `crate_name`, `documents[DocumentModel]` and `dependencies`, JSON). `GeneratedFile::metadata` and `ClassFile::metadata` write it next to the generated file (`compiled_xaml.xamlmeta`, drift-tested with it); `XamlMetadata::read` reads a file and, transitively, the files its `dependencies` name (relative to it, or absolute). Since E5 step 3 the file travels through Cargo `links` metadata (9.6.8): the build script of a dependent crate reads `DEP_<CRATE>_XAML_XAMLMETA`, also for the themes, whose file is still checked in.
 - `ModelTypeSystem` does not exist yet, so the type system is `CompiledMarkupTypeSystem`: the run-time type system the emitter already transforms with, plus, on the assembly of each dependency, the type `CompiledFerroXaml.!FerroResources` with one static `Build:<rooted path>` method per document of `documents[]` with a build function (public when the document is public, returning its root type, taking the service provider). `XamlIncludeGroupTransformer` finds it there exactly as upstream finds the method; the emitter calls the function the method stands for (`::other_crate::compiled_xaml::build_<document>(..)?`). A class document of another crate is found as upstream finds it, as the type named after the path of the document, and created with its class.
 - `compile_documents`, `generate_file` and `generate_class_file` take the dependencies; `generate_class_file` leaves the documents of a dependency out of its group (an include of one calls it in its crate). The emitter's transform has no run-time include fallback (decision 22): an include of a document of an assembly without `.xamlmeta` is upstream's error.
 - Deviation: the port's `Uri` lower-cases the host (the assembly name) where upstream's registered resource URI parser keeps its case, so the name upstream looks the class of a document up by (`Path.GetFileNameWithoutExtension(assetPath.Replace('/', '.'))`) can differ from the class in case. The class of a document listed in `documents[]` is found by that name compared without regard to case (`compiled_resources.rs`).
@@ -1601,9 +1655,17 @@ The fixture is `tests/XamlIncludeFixture`: the library `xaml-include-fixture-the
 
 Seam, unchanged from step 1: the constructor of a class is the one the markup metadata declares; the themes declare a parameterless constructor and one that takes the service provider, where upstream's class has one with an optional service provider, so an include of a theme's class document creates it with `new()`, where upstream passes the service provider.
 
+**E5 status (2026-10-08, step 3).** Done: build integration over the run-time type system (9.6.8). `ferroui-build` (`Build::from_env()`, `compile_xaml()`, `embed_assets()`, `run()`) compiles the documents of a crate in its build script, writes them to `OUT_DIR` with `register()` (R8) and the `.xamlmeta`, and the `.xamlmeta` travels through Cargo `links` metadata. The include fixture is converted (the library except the document of its class, the application whole); the themes export their checked-in `.xamlmeta` through `links` and are otherwise unchanged.
+
+The seam of step 1 is closed in the compiler: `generate_class_file(class, None, ..)` picks the constructor as `XamlCompilerTaskExecutor` does, from the constructors the type system projects for the class (`ClassConstructor::of`): a public parameterless constructor (`T::new()`), else a public constructor whose single parameter is the service provider (the typed function of the declared constructor, `T::__markup_new_<n>`); a class with neither has no entry and upstream's `XamlLoaderUnreachable` warning (`ClassFile::warnings`). The two themes still state the constructor (`Some(ClassConstructor::ServiceProvider("with_service_provider"))`): their markup metadata declares `new()` next to the constructor that takes the service provider, where upstream's class has the one constructor with an optional parameter, so the rule would pick `new()`. Removing `new:` from the metadata of the themes closes that, and needs a build to check that `<FluentTheme/>` in markup then goes through `FerroXamlIlConstructorServiceProviderTransformer`.
+
+Not done, and why (9.6.8): a build script cannot compile a document that names a type of its own crate, so `x:Class` documents stay generated by a test and checked in; the generated `register_types` of 9.7.4 needs the source scan. Both wait for the scanner and `ModelTypeSystem` of 9.5.
+
+`XamlIlTests`: the two tests that create a class with compiled markup of the test assembly (`Parser_Should_Override_Precompiled_Xaml`, `Custom_Properties_Should_Work_With_XClass`) are ported and not ignored; the constructors of `XamlIlClassWithPrecompiledXaml` and `XamlIlClassWithCustomProperty` populate the instance through the run-time loader (`FerroXamlLoader::load_object`). Compiling the two documents is the checked-in path (`generate_class_file` in a test of the XAML test crate, as the fixture does for `StyleWithServiceProvider`), not the build script, for the reason above. It was not done in this step: the first generated file has to exist before the crate compiles, which takes a build.
+
 Remaining for E5, in order:
 
-1. `compile_xaml()` / `embed_assets()` of 9.6 in place of the checked-in files, with `register()` (R8) and the generated `register_types` of 9.7.4. The `.xamlmeta` of each crate then travels through Cargo `links` metadata (9.6.3) instead of the checked-in paths the generators name, and the choice of the constructor moves into the compiler.
+1. The scanner of 9.5 (`MarkupModel`, `ModelTypeSystem<EmitBacking>`, `export_metadata()`), so that the build script compiles the documents that name types of its own crate without linking anything; then `include_xaml!` per class, the generated `register_types`, the themes on the build script, and the diagnostics and the cache of 9.6.4 and 9.6.5. Before it, the two `XamlIlTests` documents and the dialogs can use the checked-in path.
 2. The ControlCatalog: its documents and the `x:Class` documents of the dialogs compiled, so that neither links the run-time loader (browser-platform.md, section 20, item 3). Measure a few pages first against the estimate there (+6 to +10 MB raw, +0.5 to +1.2 MB gzip on the module); above it, the owner decides.
 
 #### 9.10.2 Test strategy
