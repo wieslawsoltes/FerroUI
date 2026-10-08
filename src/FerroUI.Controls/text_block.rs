@@ -1,3 +1,4 @@
+use crate::utils::debug_display::{append_optional_value, build_base_debug_display};
 use crate::documents::{EmbeddedControlRun, IInlineHost, Inline, InlineCollection, TextElement};
 use crate::{Border, Control, ControlImpl, Decorator};
 use ferroui_base::collections::FerroList;
@@ -1068,5 +1069,18 @@ impl ITextSource for InlinesTextSource {
         }
 
         Some(Rc::new(TextEndOfParagraph::new()))
+    }
+}
+
+impl TextBlock {
+    /// Appends the text that describes the text block in diagnostics: the base description
+    /// and, with the content, its text or the text of its inlines.
+    pub(crate) fn build_debug_display(&self, builder: &mut String, include_content: bool) {
+        build_base_debug_display(self, builder);
+
+        if include_content {
+            let text = self.text().or_else(|| self.inlines().and_then(|inlines| inlines.text()));
+            append_optional_value(builder, "Text", text.as_deref());
+        }
     }
 }

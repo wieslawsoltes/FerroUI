@@ -126,6 +126,7 @@ ferroui_base::ferro_rust_paths! {
         crate::VirtualizingCarouselPanel,
         crate::VirtualizingPanel,
         crate::VirtualizingStackPanel,
+        crate::Win32Properties,
         crate::Window,
         crate::WindowBase,
         crate::WindowNotificationManager,

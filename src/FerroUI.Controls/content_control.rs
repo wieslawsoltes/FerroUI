@@ -1,3 +1,4 @@
+use crate::utils::debug_display::{append_optional_boxed_value, build_base_debug_display};
 use crate::metadata::{PseudoClassesAttribute, TemplatePartAttribute};
 use crate::presenters::{register_content_presenter_host, ContentPresenter, IContentPresenterHost};
 use crate::primitives::{TemplatedControl, TemplatedControlImpl};
@@ -248,5 +249,17 @@ impl ContentControl {
 
     fn update_pseudo_classes(&self) {
         self.pseudo_classes().set(PC_EMPTY, self.content().is_none());
+    }
+}
+
+impl ContentControl {
+    /// Appends the text that describes the control in diagnostics: the base description and,
+    /// with the content, its content.
+    pub(crate) fn build_debug_display(&self, builder: &mut String, include_content: bool) {
+        build_base_debug_display(self, builder);
+
+        if include_content {
+            append_optional_boxed_value(builder, "Content", self.content().as_ref(), include_content);
+        }
     }
 }

@@ -592,6 +592,7 @@ pub use native_control_host::{
     NativeControlHost, NativeControlHostImpl, NativeControlHostImplExt, NativeControlHostVTable,
 };
 pub use platform::X11Properties;
+pub use platform::Win32Properties;
 pub use url_opened_event_args::UrlOpenedEventArgs;
 #[cfg(test)]
 mod storage_misc_tests;

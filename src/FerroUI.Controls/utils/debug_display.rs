@@ -7,7 +7,9 @@
 //! `build_debug_display` method of their own and [`build_debug_display`]
 //! dispatches to them for an object of an unknown class.
 
-use crate::{NativeMenuItem, TableViewColumn, TableViewColumnHeader};
+use crate::presenters::ContentPresenter;
+use crate::primitives::HeaderedContentControl;
+use crate::{ContentControl, NativeMenuItem, TableViewColumn, TableViewColumnHeader, TextBlock};
 use ferroui_base::data::core::ValueTypes;
 use ferroui_base::{BoxedValue, FerroObject, StyledElement};
 
@@ -20,6 +22,15 @@ pub(crate) fn build_debug_display(object: &FerroObject, builder: &mut String, in
         column.build_debug_display(builder, include_content);
     } else if let Some(header) = object.downcast_ref::<TableViewColumnHeader>() {
         header.build_debug_display(builder, include_content);
+    } else if let Some(control) = object.downcast_ref::<HeaderedContentControl>() {
+        // A derived class comes before its base class: the first match describes the object.
+        control.build_debug_display(builder, include_content);
+    } else if let Some(control) = object.downcast_ref::<ContentControl>() {
+        control.build_debug_display(builder, include_content);
+    } else if let Some(presenter) = object.downcast_ref::<ContentPresenter>() {
+        presenter.build_debug_display(builder, include_content);
+    } else if let Some(text_block) = object.downcast_ref::<TextBlock>() {
+        text_block.build_debug_display(builder, include_content);
     } else {
         build_base_debug_display(object, builder);
     }
@@ -115,5 +126,55 @@ fn append_text(builder: &mut String, value: &str) {
         builder.push('…');
     } else {
         builder.push_str(value);
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    // Not ports: the upstream project has no tests of the descriptions.
+    use super::*;
+    use crate::testing::{TestServices, UnitTestApplication};
+    use crate::Control;
+    use std::rc::Rc;
+
+    fn describe(object: &FerroObject, include_content: bool) -> String {
+        let mut builder = String::new();
+        build_debug_display(object, &mut builder, include_content);
+        builder
+    }
+
+    fn text(value: &str) -> Option<BoxedValue> {
+        Some(Rc::new(value.to_string()))
+    }
+
+    #[test]
+    fn content_controls_and_text_blocks_describe_their_content() {
+        let _app = UnitTestApplication::start(TestServices::styled_window());
+
+        let control = ContentControl::new();
+        control.set_content(text("first"));
+        assert_eq!("ContentControl", describe(&control, false));
+        assert_eq!("ContentControl (Content = first)", describe(&control, true));
+
+        let text_block = TextBlock::new();
+        assert_eq!("TextBlock", describe(&text_block, true));
+        text_block.set_text(Some("hello"));
+        assert_eq!("TextBlock", describe(&text_block, false));
+        assert_eq!("TextBlock (Text = hello)", describe(&text_block, true));
+
+        // An object as the content is described by its own description.
+        control.set_content(Some(Control::boxed(text_block)));
+        assert_eq!("ContentControl (Content = TextBlock (Text = hello))", describe(&control, true));
+
+        let headered = HeaderedContentControl::new();
+        headered.set_content(text("body"));
+        headered.set_header(text("title"));
+        assert_eq!("HeaderedContentControl", describe(&headered, false));
+        assert_eq!("HeaderedContentControl (Content = body, Header = title)", describe(&headered, true));
+
+        let presenter = ContentPresenter::new();
+        presenter.set_content(text("shown"));
+        assert_eq!("ContentPresenter", describe(&presenter, false));
+        assert_eq!("ContentPresenter (Content = shown)", describe(&presenter, true));
     }
 }

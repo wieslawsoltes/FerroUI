@@ -80,7 +80,7 @@ pub use platform_requested_drawn_decoration::PlatformRequestedDrawnDecoration;
 pub use screen::{Screen, ScreenOrientation};
 pub use screen_helper::ScreenHelper;
 pub use win32_properties::{
-    CustomWindowStylesCallback, CustomWndProcHookCallback, Win32HitTestValue, WindowCornerPreference,
+    CustomWindowStylesCallback, CustomWndProcHookCallback, Win32HitTestValue, Win32Properties, WindowCornerPreference,
 };
 
 #[cfg(test)]
