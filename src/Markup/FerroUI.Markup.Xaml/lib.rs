@@ -40,6 +40,19 @@ pub use runtime_xaml_loader_document::RuntimeXamlLoaderDocument;
 pub use xaml_load_exception::XamlLoadException;
 pub use xaml_types::{IProvideValueTarget, IRootObjectProvider, IUriContext, IXamlTypeResolver};
 
+/// Includes the compiled markup the build script of the crate generated
+/// (`ferroui_build::Build::run`, docs/porting/xaml.md 9.6.2), at the root of the
+/// crate: one public module per group of documents (`compiled_xaml` for the
+/// default group) and the module `compiled_markup` with the embedded assets
+/// (`ASSETS`), the loader table of the crate (`try_load`) and `register()`,
+/// which the `register_types()` of the crate calls.
+#[macro_export]
+macro_rules! include_compiled_xaml {
+    () => {
+        include!(concat!(env!("OUT_DIR"), "/xaml/mod.rs"));
+    };
+}
+
 /// Gives a shared plain type identity equality (the reference equality of a
 /// class instance), so that it can be held in untyped values.
 macro_rules! identity_eq {

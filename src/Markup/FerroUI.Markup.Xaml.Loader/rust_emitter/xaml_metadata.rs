@@ -11,14 +11,14 @@
 //! documents in this file, and the compiler of a dependent crate synthesises
 //! the same type from it ([`super::compiled_resources`]).
 //!
-//! # Interim transport
+//! # Transport
 //!
-//! The design hands the file to dependent crates through Cargo `links`
-//! metadata (`DEP_<CRATE>_XAML_XAMLMETA`, 9.6.3), written by
-//! `export_metadata()` of the build integration (9.6). Until that exists the
-//! file is checked in next to the generated `compiled_xaml.rs` of the crate
-//! (drift-tested with it), and the generator of a dependent crate names the
-//! checked-in file ([`XamlMetadata::read`]).
+//! The file reaches dependent crates through Cargo `links` metadata
+//! (`DEP_<CRATE>_XAML_XAMLMETA`, 9.6.3 and 9.6.8): a crate whose build script
+//! compiles its documents (`ferroui-build`) writes the file to `OUT_DIR`, and
+//! a crate whose compiled markup is checked in keeps the file next to its
+//! generated `compiled_xaml.rs` (drift-tested with it); the build script of
+//! either prints its path for the build scripts of the dependents.
 //!
 //! # Format
 //!
@@ -39,7 +39,7 @@
 //!       "public": true                                 x:ClassModifier
 //!     }
 //!   ],
-//!   "dependencies": ["../Other/compiled_xaml.xamlmeta"]   relative to this file
+//!   "dependencies": ["../Other/compiled_xaml.xamlmeta"]   relative to this file, or absolute
 //! }
 //! ```
 
@@ -75,7 +75,8 @@ pub struct XamlMetadata {
     /// The compiled documents, in the order of the compilation.
     pub documents: Vec<DocumentModel>,
     /// The `.xamlmeta` files of the crates this crate includes documents of, relative to
-    /// the directory of this file.
+    /// the directory of this file or absolute (the files of a build are in the `OUT_DIR`
+    /// of each crate).
     pub dependencies: Vec<String>,
 }
 
