@@ -227,6 +227,15 @@ BASE = {
                     property_value(property, value).map(|value| this.set_value_untyped(property, value.as_any(), priority))
                 }""",
         ],
+        'events': [
+            """// The arguments borrow the values of the change: the handler receives them held by value.
+            PropertyChanged(Option<BoxedValue>, OwnedFerroPropertyChangedEventArgs) => |this: &Ref<FerroObject>, handler: MarkupDelegate| {
+                let sender = this.downgrade();
+                this.property_changed(move |e: &FerroPropertyChangedEventArgs<'_>| {
+                    handler.invoke(&[into_markup_value(sender.upgrade()), into_markup_value(e.to_owned_args())]);
+                })
+            }""",
+        ],
     },
     'Styles': {
         'methods': [

@@ -10,6 +10,7 @@ use std::rc::Rc;
 use xamlx::ast::{
     IXamlAstValueNode, XamlAstNodeExtensions, XamlAstTextNode, XamlLoadMethodDelegateNode,
 };
+use xamlx::ast::XamlAstExtensions;
 use xamlx::exceptions::{XamlError, XamlResult};
 use xamlx::extensions::query_node_interface;
 use xamlx::transform::{
