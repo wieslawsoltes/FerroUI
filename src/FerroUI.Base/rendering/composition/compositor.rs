@@ -144,7 +144,8 @@ impl Compositor {
             Rc::new(move || Duration::from_millis((platform_impl.now() - origin).max(0) as u64))
         });
         let batches = Arc::new(BatchQueue::default());
-        let server = ServerCompositor::new(gpu, options, batches.clone(), clock.clone());
+        let readback = Arc::new(super::server::ReadbackIndices::new());
+        let server = ServerCompositor::new(gpu, options, batches.clone(), readback.clone(), clock.clone());
         let key = NEXT_COMPOSITOR_KEY.fetch_add(1, Ordering::SeqCst);
         let loop_task: Arc<dyn IRenderLoopTask> = Arc::new(ServerCompositorLoopTask {
             key,
@@ -158,7 +159,7 @@ impl Compositor {
             render_loop: render_loop.clone(),
             loop_task: loop_task.clone(),
             use_ui_thread_for_synchronous_commits,
-            readback: server.readback().clone(),
+            readback,
             server,
             batches,
             clock,
