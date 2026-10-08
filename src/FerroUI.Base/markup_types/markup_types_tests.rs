@@ -834,6 +834,14 @@ fn the_well_known_members_work_through_metadata() {
     let constructor = font.constructors.iter().find(|c| c.parameters.len() == 2).unwrap();
     let family = (constructor.invoke)(&[None, text("Arial")]).unwrap();
     assert_eq!(unbox::<crate::media::FontFamily>(&family), crate::media::FontFamily::new("Arial"));
+    // `FontFamily.Name`: the primary family name, what a binding with the font family as
+    // its data type reads.
+    let name = font.find_property("Name").expect("the property");
+    assert_eq!((name.type_)(), ValueType::of::<String>());
+    assert!(name.set.is_none());
+    assert_eq!(unbox::<String>(&(name.get.unwrap())(&[family.clone()]).unwrap()), "Arial");
+    let fallbacks = (font.parse.unwrap())(&[text("Courier New, Arial")]).unwrap();
+    assert_eq!(unbox::<String>(&(name.get.unwrap())(&[fallbacks]).unwrap()), "Courier New");
 
     let uri = find("System", "Uri");
     let constructor = uri.constructors.iter().find(|c| c.parameters.len() == 2).unwrap();

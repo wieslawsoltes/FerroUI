@@ -19,7 +19,6 @@ Pages/ContentPage/ContentPagePerformancePage.xaml | code-behind: NavigationPerfo
 Pages/TextBox/TextBoxValidationPage.xaml | gap C102: DataValidationException is not declared for markup
 
 # --- ViewModels, Models, Views and the pages of the view models (group B) ---
-Pages/ComboBoxPage.xaml | gap C208: FontFamily.Name is not declared for markup
 Pages/ContextFlyoutPage.xaml | gap C203: a handler with plain event arguments is not accepted for PopupFlyoutBase.Opening; gap C209: TextBox.Cut, Copy, Paste and Clear are not declared as methods for markup
 Pages/ListBoxPage.xaml | gap C207: a compiled binding does not stream (`^`) an ObservableValue
 Pages/PlatformInfoPage.xaml | gap C202: OnPlatform as an element with On children does not load
