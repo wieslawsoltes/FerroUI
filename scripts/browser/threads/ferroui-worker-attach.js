@@ -5,10 +5,11 @@
 // script of the module is evaluated in the worker, before the worker takes its first message, so
 // it is in place before the start function of any thread runs.
 //
-// It uses names of the script emcc generates: `ENVIRONMENT_IS_PTHREAD`, `Module`, `PThread` and
-// `wasmMemory` (Emscripten), `___wbindgen_start` (the receiving name of an export the wasm-bindgen
-// tool adds) and `__ferroui_FerroExports` (ferroui-worker-import.js). Read in Emscripten 6.0.10 and
-// wasm-bindgen 0.2.129; see docs/porting/browser-render-worker.md, "B2.1" and "B2.2".
+// It uses names of the script emcc generates: `ENVIRONMENT_IS_PTHREAD`, `Module`, `PThread`,
+// `wasmMemory` and `proxyToMainThread` (Emscripten), `___wbindgen_start` (the receiving name of an
+// export the wasm-bindgen tool adds) and `__ferroui_FerroExports` (ferroui-worker-import.js). Read
+// in Emscripten 6.0.10 and wasm-bindgen 0.2.129; see docs/porting/browser-render-worker.md, "B2.1",
+// "B2.2" and "B2.6".
 if (ENVIRONMENT_IS_PTHREAD) {
   // 0. The memory of the module is exported as `Module.wasmMemory`, and ferroui.js makes its views
   // of the memory from it (`FerroExports.heapU8`). The export is an assignment made while this
@@ -31,6 +32,24 @@ if (ENVIRONMENT_IS_PTHREAD) {
   // first objects handed to Rust in the worker would take the places of the fixed entries. It is
   // run once per worker, after the thread-local storage of the first thread of the worker is set
   // up and before the start function of that thread.
+  // 3. A function of the C library that only the main thread can serve (a write to the console, a
+  // file, the environment) is carried there by `proxyToMainThread`, and the thread waits for the
+  // answer. A render thread must not depend on the thread of the page while it draws a frame, so
+  // the calls of this worker are counted, with the index of the function of the last one
+  // (`proxiedFunctionTable` of this script); ferroui.js hands the two numbers to the framework
+  // (`FerroExports.proxiedCalls`, `FerroExports.lastProxiedFunction`). An EM_ASM block has no
+  // index: it is recorded as 0x7fffffff.
+  if (typeof proxyToMainThread == 'function') {
+    var ferrouiProxyToMainThread = proxyToMainThread;
+    Module['ferrouiProxiedCalls'] = 0;
+    Module['ferrouiLastProxiedFunction'] = -1;
+    proxyToMainThread = (funcIndex, emAsmAddr, ...rest) => {
+      Module['ferrouiProxiedCalls']++;
+      Module['ferrouiLastProxiedFunction'] = emAsmAddr ? 0x7fffffff : funcIndex;
+      return ferrouiProxyToMainThread(funcIndex, emAsmAddr, ...rest);
+    };
+  }
+
   var ferrouiThreadInitTLS = PThread.threadInitTLS;
   var ferrouiBindgenStarted = false;
   PThread.threadInitTLS = () => {

@@ -7,8 +7,9 @@
 //! Objects of the page are opaque [`JsObject`] handles; nothing outside this
 //! module and the render targets touches them except to pass them back.
 //!
-//! [`thread_proxy`] is the one file that does not talk to the script module:
-//! it crosses from one thread of the module to another.
+//! [`thread_proxy`] is the one file that is not about the script module: it
+//! crosses from one thread of the module to another, and asks the script
+//! only for what the runtime carried to the main thread.
 
 pub mod canvas_helper;
 pub mod completion_helper;

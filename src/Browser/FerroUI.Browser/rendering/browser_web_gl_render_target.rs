@@ -1,7 +1,7 @@
 use super::web_render_target::update_size;
-use super::BrowserSurfaceShared;
-use crate::interop::canvas_helper::GlInfo;
-use crate::interop::JsObject;
+use super::{BrowserSurfaceShared, RenderStatistics};
+use crate::interop::canvas_helper::{GlInfo, RENDER_TARGET_KIND_WEB_GL};
+use crate::interop::{thread_proxy, JsObject};
 use ferroui_base::platform::surfaces::IPlatformRenderSurfaceRenderTarget;
 use ferroui_base::platform::{IOptionalFeatureProvider, IPlatformGraphicsContext, RenderTargetSceneInfo};
 use ferroui_base::reactive::{Disposable, IDisposable};
@@ -141,6 +141,16 @@ impl IGlPlatformSurfaceRenderingSession for GlSession {
 
     fn dispose(&self) {
         if let Some(restore_context) = self.restore_context.take() {
+            // The frame is drawn: the backend has flushed it before it ends
+            // the session. Not from upstream: where frames are drawn is
+            // otherwise invisible to the thread of the page.
+            RenderStatistics::frame_presented(
+                thread_proxy::current_thread(),
+                RENDER_TARGET_KIND_WEB_GL,
+                self.context.version().major(),
+                self.size.width,
+                self.size.height,
+            );
             restore_context.dispose();
         }
     }

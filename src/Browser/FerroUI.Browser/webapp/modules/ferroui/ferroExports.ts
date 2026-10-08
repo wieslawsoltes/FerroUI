@@ -60,6 +60,23 @@ export class FerroExports {
         return heap;
     }
 
+    // Not in the original. How many calls the runtime has carried from the thread of this script
+    // to the main thread of the page (a call of the C library that only the main thread can serve),
+    // or -1 when they are not counted: the script of a module built with threads counts them in
+    // the worker of each thread (scripts/browser/threads/ferroui-worker-attach.js), nothing counts
+    // on the main thread or without threads.
+    public static proxiedCalls(): number {
+        const count: unknown = FerroExports.resolvedExports?.ferrouiProxiedCalls;
+        return typeof count === "number" ? count : -1;
+    }
+
+    // Not in the original. The index of the function of the last such call in the table of the
+    // script of the module (`proxiedFunctionTable`), or -1 when there was none.
+    public static lastProxiedFunction(): number {
+        const index: unknown = FerroExports.resolvedExports?.ferrouiLastProxiedFunction;
+        return typeof index === "number" ? index : -1;
+    }
+
     private static readonly groups: { [key: string]: any } = {};
 
     // The functions of one group, looked up once per attached module.
