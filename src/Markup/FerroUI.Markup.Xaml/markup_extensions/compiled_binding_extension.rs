@@ -44,6 +44,7 @@ impl CompiledBindingExtension {
         binding.set_path(self.path());
         binding.set_delay(self.delay());
         binding.set_converter(self.converter());
+        binding.set_converter_culture(self.converter_culture());
         binding.set_converter_parameter(self.converter_parameter());
         binding.set_target_null_value(self.target_null_value());
         binding.set_fallback_value(self.fallback_value());

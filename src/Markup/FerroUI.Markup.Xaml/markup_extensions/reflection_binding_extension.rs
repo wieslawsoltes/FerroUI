@@ -41,6 +41,7 @@ impl ReflectionBindingExtension {
         binding
             .set_type_resolver(Some(Rc::new(move |namespace, name| resolver_provider.resolve_type(namespace, name).ok())));
         binding.set_converter(self.converter());
+        binding.set_converter_culture(self.converter_culture());
         binding.set_converter_parameter(self.converter_parameter());
         binding.set_element_name(self.element_name());
         binding.set_fallback_value(self.fallback_value());
