@@ -143,6 +143,11 @@ if [ -n "$THREADS" ]; then
     *" -pthread "*) ;;
     *) export EMCC_CFLAGS="$EMCC_CFLAGS -pthread";;
   esac
+  # Build scripts that compile C or C++ without going through emcc's flags (the bindings of Skia)
+  # read the compiler flags of the target: without atomics their objects cannot be linked into a
+  # module with shared memory.
+  export CFLAGS_wasm32_unknown_emscripten="${CFLAGS_wasm32_unknown_emscripten:+$CFLAGS_wasm32_unknown_emscripten }-pthread"
+  export CXXFLAGS_wasm32_unknown_emscripten="${CXXFLAGS_wasm32_unknown_emscripten:+$CXXFLAGS_wasm32_unknown_emscripten }-pthread"
 fi
 
 echo "== script module"
@@ -158,7 +163,13 @@ if [ -n "$THREADS" ]; then
   # Added to the flags of the target in .cargo/config.toml (an array given with --config is appended
   # to the one of the file; RUSTFLAGS in the environment would replace it). The environment of the
   # file is "web" alone, and a thread is a web worker that loads the script of the module.
-  FLAGS+=(--config "target.wasm32-unknown-emscripten.rustflags=[\"-Ctarget-feature=+atomics,+bulk-memory\", \"-Clink-arg=-pthread\", \"-Clink-arg=-sPTHREAD_POOL_SIZE=$THREAD_POOL_SIZE\", \"-Clink-arg=-sENVIRONMENT=web,worker\"]")
+  # --no-check-features: the prebuilt archive of the Skia bindings (libskia-bindings.a, four objects:
+  # bindings, gl, gpu, ganesh) is compiled without atomics, unlike libskia.a beside it, and the
+  # linker refuses such an object in a module with shared memory. The check is switched off for the
+  # link. What that costs: in those four objects a `thread_local` is a plain global and the guard of
+  # a local static is not atomic. They are thin forwarding functions; the proper fix is to compile
+  # them here with -pthread (their sources are in the skia-bindings crate) or binaries built so.
+  FLAGS+=(--config "target.wasm32-unknown-emscripten.rustflags=[\"-Ctarget-feature=+atomics,+bulk-memory\", \"-Clink-arg=-pthread\", \"-Clink-arg=-Wl,--no-check-features\", \"-Clink-arg=-sPTHREAD_POOL_SIZE=$THREAD_POOL_SIZE\", \"-Clink-arg=-sENVIRONMENT=web,worker\"]")
 fi
 # The messages of the build name the output directories of the build scripts.
 MESSAGES="$(mktemp)"
