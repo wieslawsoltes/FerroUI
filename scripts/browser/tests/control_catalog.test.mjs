@@ -268,6 +268,12 @@ check("the navigation drawer opens from its toggle button", async (page) => {
 
 check("three pages are reached through the drawer and show their content", async (page) => {
     // Each section of the drawer opens the page of the section and shows the entries of its pages.
+    // The section lower in the drawer comes first: an open section above it pushes its entries
+    // out of the view at this height.
+    await navigate(page, "Text");
+    await navigate(page, "TextBox");
+    await page.find("First Look", inContent);
+
     await navigate(page, "Basic Input");
     await navigate(page, "Buttons");
     await page.find("Click the first button to raise Click.", inContent);
@@ -276,10 +282,6 @@ check("three pages are reached through the drawer and show their content", async
     await navigate(page, "CheckBox");
     await page.until("the check boxes of the page are shown", (s) => s.elements.filter((e) => e.type === "CheckBox" && inContent(e)).length >= 3);
     assert(!(await page.state()).elements.some((e) => e.text === "Click the first button to raise Click." && e.hit), "the previous page is still shown");
-
-    await navigate(page, "Text");
-    await navigate(page, "TextBox");
-    await page.find("First Look", inContent);
     assert(page.errors.length === 0, `errors were logged:\n${page.errors.join("\n")}`);
 });
 
