@@ -265,6 +265,43 @@ CompiledBindingPathBuilder::new()
 
 On the runtime path the same nodes evaluate to `ClrPropertyInfo` built from metadata `get`/`set` thunks.
 
+#### 3.6.1 Bindings from expression trees (`BindingExpressionVisitor`): design note
+
+Status: written for task 3 of `CONTINUATION.md` (core port, 2026-10-08). The decision is with the owner (`CONTINUATION.md`, "Decisions waiting for the owner"). Until then `Data/Core/Parsers/BindingExpressionVisitorTests.cs` (36 tests) is not ported.
+
+**What upstream does.** `CompiledBinding.Create<TIn, TOut>(Expression<Func<TIn, TOut>>, ...)` is the only caller of `BindingExpressionVisitor<TIn>.BuildPath`. The C# compiler turns a lambda such as `x => x.Child!.Items[0].Name` into a LINQ expression tree; the visitor walks it from the parameter outwards and calls `CompiledBindingPathBuilder` once per step: `Property` with reflection-built getter and setter for a member access, `Property` with an INPC or indexer accessor for `get_Item`, `ArrayElement` for an array index, `Property` over a registered property for `x[SomeProperty]`, `TypeCast` for `Convert`/`TypeAs` between reference types, `StreamTask`/`StreamObservable` for the `StreamBinding()` marker method, and `Not` for `!`. Any other node type throws `ExpressionParseException` ("Invalid expression type in binding expression: Add.", "Invalid method call ..."). The upstream binding expression tests (`BindingExpressionTests*.cs`) use the same entry point for their compiled flavour.
+
+**What stands for it in the port.** Rust has no expression trees: a closure `|x: &Vm| x.child().name()` is opaque, so nothing can walk it at run time. The port has the two halves the visitor connects, and no visitor:
+
+- `CompiledBindingPathBuilder` (`data/compiled_binding_path.rs`) is ported whole. The steps the visitor emits are its members: `property`/`typed_property`/`notifying_property` (member access), `indexer_property`, `list_item` and `dictionary_item` (`get_Item`), `array_element` (array index, any number of dimensions), `ferro_property` (`x[SomeProperty]`), `type_cast`/`type_cast_value` (casts), `stream_task`/`stream_observable` (`StreamBinding()`), `not` (`!`). `CompiledBindingPath::build_expression` turns the elements into the same expression nodes as upstream's `CompiledBindingPath.BuildExpression`, with the negations appended at the end.
+- The calls are written by whoever holds the syntax: the XAML compiler emits them for `{CompiledBinding}` (section 9.8.2, row `XamlIlBindingPathNode`), the run-time loader builds them from metadata, and the compiled flavour of the ported binding expression tests writes them by hand (`tests/binding_test_support.rs`, `Flavor::Compiled`), one builder chain for each upstream lambda.
+
+So the role of the expression tree is taken by the builder chain itself; the translation from source syntax to builder calls happens in the XAML compiler or in the hand-written chain, at build time, not at run time.
+
+**Options.**
+
+- **A. No counterpart (recommended).** `CompiledBinding.Create<TIn, TOut>(Expression)` and `BindingExpressionVisitor` stay unported and are recorded as **Missing** in `DEVIATIONS.md` (Bindings). Code builds a path with `CompiledBindingPathBuilder` and passes it to `CompiledBinding`. The 36 tests are not ported; the node shapes they assert are covered where the builder is (table below).
+- **B. A declarative macro.** `binding_path!(Vm => x.child.items[0].name)` would parse a restricted Rust expression grammar and expand to builder calls, using the typed accessors of markup metadata (`MarkupProperty::typed_path_element`) for member access. It is the closest analogue of the visitor (a syntax tree translated into builder calls), but it runs at compile time: the 8 tests that expect `ExpressionParseException` become compile errors, which need a compile-fail harness the workspace does not have, and the macro would be a second path grammar beside the XAML one. It adds API that no upstream caller in the port needs today: upstream calls `CompiledBinding.Create` from no framework code, only from applications and tests.
+- **C. A run-time expression model.** A small enum tree (`Member("Child")`, `Index(0)`, `Not(..)`) built by hand and walked by a ported visitor. It ports the visitor's control flow, but the tree would be written by hand exactly like the builder chain it replaces, so it adds a layer without adding a capability.
+
+**Counterparts of the 36 tests** under option A. "Builder" means the node shape is produced by the builder member named, through `CompiledBindingPath::build_expression`; "binding tests" names a ported suite that exercises the same shape end to end in its compiled flavour.
+
+| Upstream test | Counterpart |
+|---|---|
+| `BuildNodes_Should_Parse_Simple_Property`, `_Property_Chain`, `_Long_Property_Chain` | Builder `property`/`typed_property` per member, `PropertyAccessorNode` each; binding tests (`binding_expression_tests_*.rs`). |
+| `BuildNodes_Should_Parse_Indexer`, `_Chained_Indexers`, `_Property_After_Indexer` | Builder `list_item`, a `PropertyAccessorNode` with an indexer accessor, as upstream; `binding_expression_tests_indexer.rs`. |
+| `BuildNodes_Should_Parse_Indexer_With_String_Key`, `_With_Variable_Key` | Builder `dictionary_item`, a `PropertyAccessorNode`; a variable key is an ordinary argument. |
+| `BuildNodes_Should_Parse_Array_Index`, `_Multi_Dimensional_Array` | Builder `array_element(&[..])`, an `ArrayIndexerNode`. |
+| `BuildNodes_Should_Parse_AvaloniaProperty_Access`, `_In_Chain` | Builder `ferro_property` gives a `FerroPropertyAccessorNode`, not upstream's `PropertyAccessorNode` over a registered-property accessor; the value and change notification are the same. Not asserted anywhere. |
+| `BuildNodes_Should_Parse_Logical_Not`, `_Logical_Not_In_Chain`, `_Multiple_Logical_Not_Operators`, `_Logical_Not_After_StreamBinding` | Builder `not`, `LogicalNotNode` appended after the other nodes, as upstream; `binding_expression_tests_negation.rs`. |
+| `BuildNodes_Should_Parse_Task_StreamBinding`, `_Void_Task_StreamBinding`, `_Observable_StreamBinding`, `_StreamBinding_In_Property_Chain` | Builder `stream_task`/`stream_observable`, a `StreamNode`; `binding_expression_tests_task.rs` and `binding_expression_tests_observable.rs`. |
+| `BuildNodes_Should_Create_Node_For_Upcast`, `_Upcast_In_Property_Chain`, `_Downcast`, `_Downcast_In_Property_Chain`, `_Nodes_For_Casting_Through_Object`, `_Node_For_TypeAs_Operator` | Builder `type_cast::<T>()`/`type_cast_value`, a `FuncTransformNode` each. |
+| `BuildNodes_Should_Handle_Empty_Expression` | `CompiledBindingPath::new()`, no nodes. |
+| `BuildNodes_Should_Handle_Unary_Plus_Operator` | None: an artefact of the C# compiler, which drops unary plus from the tree. |
+| `BuildNodes_Should_Throw_For_Value_Type_Cast`, `_Addition_Operator`, `_Subtraction_Operator`, `_Multiplication_Operator`, `_Equality_Operator`, `_Conditional_Expression`, `_Method_Call_That_Is_Not_Indexer_Or_StreamBinding`, `_Unary_Minus_Operator` | None: the builder has no member for these, so they cannot be expressed. Under option B they would be compile errors. |
+
+Count: 27 tests have a builder counterpart (25 with the same node types, 2 with `FerroPropertyAccessorNode`); 9 have none (the 8 rejections, the value-type cast among them, and unary plus). Porting the node-shape assertions of the 27 as tests of `CompiledBindingPathBuilder` (under the upstream names, with the lambda in a comment) is possible under any option and is the cheapest way to keep the shapes pinned.
+
 ### 3.7 Reflection bindings without reflection
 
 `ReflectionBinding` (and `Binding` when not compiled) resolve each path segment at run time by: runtime type of the current value (`TypeInfo` for objects, `TypeId` lookup for boxed view models) to `XamlTypeMetadata`, property by name, `get`/`set` thunk. Change tracking uses the registered-property system or `NotifyPropertyChanged`. Consequences: the target types must have metadata and the app must enable `xaml-runtime`; a path segment on a type without metadata yields the same binding error upstream logs for a missing member. This is the main reason to make compiled bindings the default in new projects (upstream templates already do).

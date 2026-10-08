@@ -44,6 +44,12 @@ Other pages hold the entries of their own area, and this page does not repeat th
 | Each payload has a static `Opcode` field. | The associated const `IRenderDataPayload::OPCODE`. | Representation | The Rust form of a per-type constant. The tracking scanner does not match it, so `RenderDataPayloads.cs` shows 35/50 members. | #26 |
 | The batch stream is made of 64-byte pooled segments. | No pooled segments. | Representation | The port's batch stream never had them, so `Round_Trip_Spanning_Multiple_Stream_Segments` cannot cross a segment boundary (see the test's header). | #26 |
 
+### Bindings (`src/FerroUI.Base/data/`)
+
+| Upstream | Port | Kind | Why | Since |
+|---|---|---|---|---|
+| `CompiledBinding.Create<TIn, TOut>(Expression<Func<TIn, TOut>>, ...)` builds a compiled binding path from a LINQ expression tree through `BindingExpressionVisitor<TIn>`. | Not ported; a path is built with `CompiledBindingPathBuilder`. `BindingExpressionVisitorTests.cs` is not ported. | Missing | Rust has no expression trees. Design note and options in `xaml.md` 3.6.1; the decision is with the owner (`CONTINUATION.md`). | #51 |
+
 ### Visual tree (`src/FerroUI.Base/visual_tree/`)
 
 | Upstream | Port | Kind | Why | Since |
