@@ -227,6 +227,8 @@ fn data_context_is_inherited_through_logical_tree() {
 
 #[test]
 fn visual_tree_attachment_and_effective_visibility() {
+    // The layout manager verifies that it is called on the UI thread.
+    let _dispatcher = crate::threading::Dispatcher::unit_test_scope();
     let root = TestRoot::new();
     let child = Leaf::new(10.0, 10.0);
     add_child(&root, &child);
@@ -264,6 +266,8 @@ fn adding_visual_with_parent_panics() {
 
 #[test]
 fn layout_pass_measures_and_arranges_tree() {
+    // The layout manager verifies that it is called on the UI thread.
+    let _dispatcher = crate::threading::Dispatcher::unit_test_scope();
     let root = TestRoot::new();
     root.set_width(200.0);
     root.set_height(100.0);
@@ -319,6 +323,8 @@ fn invalidating_measure_queues_layout_pass_on_render() {
 
 #[test]
 fn layout_rounding_snaps_to_device_pixels() {
+    // The layout manager verifies that it is called on the UI thread.
+    let _dispatcher = crate::threading::Dispatcher::unit_test_scope();
     let root = TestRoot::new();
     let child = Leaf::new(10.3, 10.3);
     child.set_horizontal_alignment(HorizontalAlignment::Left);

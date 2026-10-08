@@ -1984,6 +1984,8 @@ fn input_hit_test_should_use_coordinates_relative_to_the_subtree_root() {
 
 #[test]
 fn input_hit_test_respects_visibility_hit_test_visibility_and_enabled_state() {
+    // The layout manager verifies that it is called on the UI thread.
+    let _dispatcher = crate::threading::Dispatcher::unit_test_scope();
     let tree = pointer_tree();
     let root = &tree.root.root;
 

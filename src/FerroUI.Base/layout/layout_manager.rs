@@ -366,6 +366,8 @@ impl ILayoutManager for LayoutManager {
     }
 
     fn invalidate_measure(&self, control: &Layoutable) {
+        Dispatcher::ui_thread().verify_access();
+
         if self.disposed.get() {
             return;
         }
@@ -383,6 +385,8 @@ impl ILayoutManager for LayoutManager {
     }
 
     fn invalidate_arrange(&self, control: &Layoutable) {
+        Dispatcher::ui_thread().verify_access();
+
         if self.disposed.get() {
             return;
         }
@@ -400,6 +404,8 @@ impl ILayoutManager for LayoutManager {
     }
 
     fn execute_layout_pass(&self) {
+        Dispatcher::ui_thread().verify_access();
+
         if self.disposed.get() {
             return;
         }
@@ -543,6 +549,8 @@ impl IBringIntoViewLayoutManager for LayoutManager {
     }
 
     fn enqueue_bring_into_view(&self, request: Rc<dyn BringIntoViewRequest>) {
+        Dispatcher::ui_thread().verify_access();
+
         if self.disposed.get() {
             return;
         }
