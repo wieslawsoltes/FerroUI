@@ -7,19 +7,51 @@
 // through the `themedViewState` export of the example, what the services of the platform answered
 // through `themedViewServices`, and the page through the DOM. The native control host of the view is
 // changed through `themedViewNativeHost`, and its native control read in the DOM.
+//
+// The same checks run against a site built with threads, which is recognised by the file the build
+// adds to such a site (ferroui-threads.js) and served cross-origin isolated:
+//
+//   scripts/build-browser.sh themed_view --threads
+//   node scripts/browser/tests/themed_view.test.mjs target/browser-threads/themed_view
+//
+// There the view is rendered by a render thread (docs/porting/browser-render-worker.md, "B2.6"), and
+// every check runs twice: on the render thread, and with `?RenderThread=false`, which keeps the same
+// module on the thread of the page. More checks follow, of what the render thread adds: which thread
+// drew the frames (the `themedViewRendering` export), the three rendering modes, a resize, a hidden
+// page, and what a frame asks of the main thread. Against a site built without threads the file runs
+// what it always ran.
+import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { open, run, assert, sleep } from "../harness.mjs";
+import { open, run, assert, sleep, near } from "../harness.mjs";
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..", "..", "..");
 const site = process.argv[2] ?? path.join(process.env.CARGO_TARGET_DIR ?? path.join(root, "target"), "browser", "themed_view");
+const threaded = fs.existsSync(path.join(site, "ferroui-threads.js"));
+// The parameter that keeps a module built with threads on the thread of the page.
+const ONE_THREAD = "RenderThread=false";
+const withParameter = (query, parameter) => query ? `${query}&${parameter}` : `?${parameter}`;
+const pairs = (line) => Object.fromEntries(line.split(";").map((pair) => {
+    const i = pair.indexOf("="); return [pair.slice(0, i), pair.slice(i + 1)];
+}));
 
 // Where the controls are in a 460 x 520 view (see docs/porting/images/themed_view_browser.png).
 const BUTTON = [46, 66]; const CHECK_BOX = [26, 107]; const TEXT_BOX = [230, 149]; const LIST = [200, 300]; const EMPTY = [300, 450];
 
 async function start(query = "") {
-    const page = await open(site, { query, width: 460, height: 520 });
+    const page = await open(site, { query, width: 460, height: 520, isolated: threaded });
     await page.waitForView();
+    // Where the frames of the view are rendered (the export exists in both builds).
+    page.rendering = async () => pairs(await page.evaluate("themedView.themedViewRendering()"));
+    // Whether a render thread draws the view: a module built with threads, unless the page keeps it
+    // on its own thread.
+    page.onRenderThread = threaded && !query.includes(ONE_THREAD);
+    if (threaded) {
+        // The splash is closed by the thread of the page; the first frame comes from the thread that
+        // renders, which with a render thread is another one and may be later.
+        await page.waitFor(`Number(/frames=(\\d+)/.exec(themedView.themedViewRendering())[1]) > 0`, 30000);
+        await sleep(300);
+    }
     page.state = async () => Object.fromEntries((await page.evaluate("themedView.themedViewState()")).split(";").map((pair) => {
         const i = pair.indexOf("="); return [pair.slice(0, i), pair.slice(i + 1)];
     }));
@@ -44,10 +76,16 @@ async function start(query = "") {
 }
 
 const checks = [];
-const check = (name, body, query = "") => checks.push([name, async () => {
+const register = (name, body, query) => checks.push([name, async () => {
     const page = await start(query);
     try { await body(page); } catch (error) { error.message += "\n" + page.log.slice(-5).join("\n"); throw error; } finally { await page.close(); }
 }]);
+// The checks that a site built with threads runs a second time, on one thread.
+const onOneThread = [];
+const check = (name, body, query = "") => {
+    register(name, body, query);
+    if (threaded) { onOneThread.push([`${name} (one thread)`, body, withParameter(query, ONE_THREAD)]); }
+};
 
 check("the pointer hovers and clicks a button", async (page) => {
     await page.mouseMove(...BUTTON); await sleep(200);
@@ -325,7 +363,14 @@ check("the barrel button of a pen is reported as such, the right button of a mou
 });
 
 check("input works with the software render target too", async (page) => {
-    assert(await page.evaluate(`!!document.querySelector("canvas").getContext("2d")`), "the canvas is not a 2D canvas");
+    if (page.onRenderThread) {
+        // The canvas of the page was transferred to the worker of the render thread, which has its
+        // 2D context: the page cannot ask the canvas, the thread that draws says what it draws to.
+        const rendering = await page.rendering();
+        assert(rendering.kind === "software", `the frames are not drawn in software: ${JSON.stringify(rendering)}`);
+    } else {
+        assert(await page.evaluate(`!!document.querySelector("canvas").getContext("2d")`), "the canvas is not a 2D canvas");
+    }
     await page.click(...BUTTON);
     await page.click(...TEXT_BOX); await page.press("End"); await page.type("q");
     const state = await page.state();
@@ -565,5 +610,211 @@ check("a native control whose host is put back before it is destroyed keeps its 
     assert(controls.length === 1 && controls[0].mark === "first" && controls[0].display === "block", `native controls: ${JSON.stringify(controls)}`);
     assert((await page.services()).native_handle === "true", "the native control was destroyed");
 });
+
+// --- the render thread (stage B2.6): a site built with threads only ------------------------------
+
+const measured = (text) => console.log(`      measured: ${text}`);
+
+// Waits until no frame has been drawn for a while and returns what the view reports then.
+async function settled(page, quiet = 400, timeout = 15000) {
+    const end = Date.now() + timeout;
+    let last = await page.rendering(); let since = Date.now();
+    while (Date.now() < end) {
+        await sleep(100);
+        const now = await page.rendering();
+        if (now.frames !== last.frames) { last = now; since = Date.now(); } else if (Date.now() - since >= quiet) { return now; }
+    }
+    throw new Error(`the view kept drawing frames for ${timeout} ms: ${JSON.stringify(last)}`);
+}
+
+// Waits until the view reports more than `frames` frames.
+async function framesAfter(page, frames, timeout = 10000) {
+    const end = Date.now() + timeout;
+    let rendering;
+    while (Date.now() < end) {
+        rendering = await page.rendering();
+        if (Number(rendering.frames) > Number(frames)) { return rendering; }
+        await sleep(50);
+    }
+    throw new Error(`no frame was drawn within ${timeout} ms: ${JSON.stringify(rendering)}`);
+}
+
+// What a render thread reports of a view it draws.
+function assertDrawnByRenderThread(rendering) {
+    assert(rendering.on_render_thread === "true", `the render loop of the page does not tick on a render thread: ${JSON.stringify(rendering)}`);
+    assert(Number(rendering.frames) > 0, `no frame was drawn: ${JSON.stringify(rendering)}`);
+    assert(rendering.render_thread !== "0" && rendering.page_thread !== "0", `the threads have no ids: ${JSON.stringify(rendering)}`);
+    assert(rendering.other_thread === "true" && rendering.frame_thread === rendering.render_thread && rendering.frame_thread !== rendering.page_thread,
+        `the frames were not drawn by the render thread: ${JSON.stringify(rendering)}`);
+}
+
+// How many of the pixels sampled on a grid differ between two captures of the same size.
+function differing(a, b, step = 4) {
+    assert(a.width === b.width && a.height === b.height, `the captures are ${a.width} x ${a.height} and ${b.width} x ${b.height}`);
+    let samples = 0; let different = 0;
+    for (let y = 1; y < a.height; y += step) {
+        for (let x = 1; x < a.width; x += step) { samples++; if (!near(a.pixel(x, y), b.pixel(x, y), 8)) { different++; } }
+    }
+    return { samples, different };
+}
+
+// How many different colours a capture has on a grid: a view that was drawn has many.
+function colours(capture, step = 4) {
+    const seen = new Set();
+    for (let y = 1; y < capture.height; y += step) { for (let x = 1; x < capture.width; x += step) { seen.add(capture.pixel(x, y).join()); } }
+    return seen.size;
+}
+
+// Opens the same page on one thread, brings it to the same state with `prepare`, and asserts that it
+// shows what `page`, which a render thread draws, shows.
+async function assertSameAsOnOneThread(page, query, prepare = async () => { }) {
+    const single = await start(withParameter(query, ONE_THREAD));
+    try {
+        await prepare(single);
+        const reference = await settled(single);
+        assert(reference.on_render_thread === "false" && reference.other_thread === "false",
+            `with ${ONE_THREAD} the frames were not drawn by the thread of the page: ${JSON.stringify(reference)}`);
+        const drawn = await page.screenshot(); const expected = await single.screenshot();
+        assert(colours(expected) > 20, `the page on one thread shows ${colours(expected)} colours: it was not drawn`);
+        const { samples, different } = differing(drawn, expected);
+        measured(`${different} of ${samples} sampled pixels differ between the render thread and one thread (${query || "default mode"})`);
+        assert(different <= samples / 200, `the render thread and the thread of the page drew different pictures: ${different} of ${samples} sampled pixels differ`);
+        assert(single.errors.length === 0, `the page on one thread reported errors:\n${single.errors.join("\n")}`);
+    } finally { await single.close(); }
+}
+
+// Hides the page or shows it again, as a tab that goes to the background does. Two ways are tried:
+// the window of the page is minimised, and a tab is opened in front of it.
+async function setHidden(page, hidden) {
+    const state = () => page.evaluate("document.visibilityState");
+    const reached = async (expected) => {
+        const end = Date.now() + 3000;
+        while (Date.now() < end) { if (await state() === expected) { return true; } await sleep(100); }
+        return false;
+    };
+    const targetId = (await page.send("Target.getTargetInfo")).targetInfo?.targetId;
+    const window = targetId ? await page.browserSend("Browser.getWindowForTarget", { targetId }) : {};
+    if (hidden) {
+        if (window.windowId !== undefined) {
+            await page.browserSend("Browser.setWindowBounds", { windowId: window.windowId, bounds: { windowState: "minimized" } });
+            if (await reached("hidden")) { page.hiddenBy = "the minimised window"; return; }
+            await page.browserSend("Browser.setWindowBounds", { windowId: window.windowId, bounds: { windowState: "normal" } });
+        }
+        const tab = await page.browserSend("Target.createTarget", { url: "about:blank", newWindow: false, background: false });
+        page.coveringTab = tab.targetId;
+        if (await reached("hidden")) { page.hiddenBy = "a tab in front of it"; return; }
+        throw new Error("the test could not hide the page: neither minimising its window nor opening a tab in front of it made document.visibilityState \"hidden\"");
+    }
+    if (page.coveringTab) { await page.browserSend("Target.closeTarget", { targetId: page.coveringTab }); page.coveringTab = undefined; }
+    if (targetId) { await page.browserSend("Target.activateTarget", { targetId }); }
+    if (window.windowId !== undefined) { await page.browserSend("Browser.setWindowBounds", { windowId: window.windowId, bounds: { windowState: "normal" } }); }
+    assert(await reached("visible"), "the page did not become visible again");
+}
+
+if (threaded) {
+    for (const [name, body, query] of onOneThread) { register(name, body, query); }
+
+    register("the frames of the view are drawn by a render thread, and a frame asks nothing of the main thread", async (page) => {
+        const rendering = await settled(page);
+        assertDrawnByRenderThread(rendering);
+        assert(rendering.kind === "webgl" && rendering.gl === "3", `the default mode did not give a WebGL 2 target: ${JSON.stringify(rendering)}`);
+        assert(rendering.size === "460x520", `the last frame is ${rendering.size}, the view 460x520`);
+        // The control of the canvas went to the worker of the render thread: the page cannot draw to it.
+        assert(await page.evaluate("(() => { try { document.querySelector('canvas').getContext('2d'); return false; } catch { return true; } })()") === true,
+            "the canvas of the page still gives out a context: its control was not transferred");
+        assert(colours(await page.screenshot()) > 20, "the capture of the page shows no view");
+
+        // Input reaches the view and its answer reaches the canvas: frames follow the pointer.
+        await page.mouseMove(...BUTTON);
+        const hovered = await framesAfter(page, rendering.frames);
+        assertDrawnByRenderThread(hovered);
+        await page.click(...BUTTON);
+        assert((await page.state()).clicks === "1", "the button did not take a click");
+
+        // What the ticks of the render thread made the main thread serve: a call of the C library
+        // that only the main thread has (a line on the console, a file). Each is a wait of the
+        // render thread for the thread of the page.
+        const after = await settled(page);
+        measured(`${after.ticks} ticks of the render thread, ${after.frames} frames, ${after.proxied} calls proxied to the main thread (function ${after.last_proxied})`);
+        assert(Number(after.ticks) > 0, `the frame loop of the render thread did not tick: ${JSON.stringify(after)}`);
+        assert(after.proxied !== "unknown", "the calls proxied to the main thread are not counted (ferroui-worker-attach.js)");
+        assert(after.proxied === "0", `the ticks of the render thread made ${after.proxied} calls to the main thread; the last one is function ${after.last_proxied} of proxiedFunctionTable in themed_view.js`);
+        assert(page.errors.length === 0, `the page reported errors:\n${page.errors.join("\n")}`);
+
+        await assertSameAsOnOneThread(page, "", async (single) => { await single.mouseMove(...BUTTON); await single.click(...BUTTON); });
+    }, "");
+
+    register("with RenderThread=false a module built with threads renders on the thread of the page", async (page) => {
+        const rendering = await settled(page);
+        assert(rendering.on_render_thread === "false" && rendering.render_thread === "0", `a render thread was started: ${JSON.stringify(rendering)}`);
+        assert(Number(rendering.frames) > 0 && rendering.other_thread === "false" && rendering.frame_thread === rendering.page_thread,
+            `the frames were not drawn by the thread of the page: ${JSON.stringify(rendering)}`);
+        assert(rendering.ticks === "0", `a frame loop of a render thread ticked: ${JSON.stringify(rendering)}`);
+        // The page kept its canvas: asking for a second kind of context answers null, it does not throw.
+        assert(await page.evaluate("document.querySelector('canvas').getContext('2d') === null"), "the canvas of the page is not the one that is drawn to");
+        assert(page.errors.length === 0, `the page reported errors:\n${page.errors.join("\n")}`);
+    }, `?${ONE_THREAD}`);
+
+    for (const [mode, kind, gl] of [["Software2D", "software", "0"], ["WebGL1", "webgl", "2"], ["WebGL2", "webgl", "3"]]) {
+        const query = `?RenderingMode=${mode}`;
+        register(`the render thread draws the view with ${mode}`, async (page) => {
+            const rendering = await settled(page);
+            assertDrawnByRenderThread(rendering);
+            assert(rendering.kind === kind && rendering.gl === gl, `expected ${kind} with OpenGL ES ${gl}: ${JSON.stringify(rendering)}`);
+            await page.click(...CHECK_BOX);
+            assert((await page.state()).checked === "Some(false)", "the check box did not toggle");
+            await settled(page);
+            assert(page.errors.length === 0, `the page reported errors:\n${page.errors.join("\n")}`);
+            await assertSameAsOnOneThread(page, query, async (single) => { await single.click(...CHECK_BOX); });
+        }, query);
+    }
+
+    for (const mode of ["WebGL2", "Software2D"]) {
+        const query = `?RenderingMode=${mode}`;
+        register(`a resize of the view is followed by the render thread (${mode})`, async (page) => {
+            const before = await settled(page);
+            for (const [width, height] of [[600, 400], [380, 560]]) {
+                await page.resize(width, height);
+                await page.waitFor(`themedView.themedViewRendering().includes("size=${width}x${height};")`, 10000);
+                const rendering = await settled(page);
+                assertDrawnByRenderThread(rendering);
+                assert(Number(rendering.frames) > Number(before.frames), "the resize drew no frame");
+                const capture = await page.screenshot();
+                assert(capture.width === width && capture.height === height, `the capture is ${capture.width} x ${capture.height} after a resize to ${width} x ${height}`);
+                await assertSameAsOnOneThread(page, query, async (single) => {
+                    await single.resize(width, height);
+                    await single.waitFor(`themedView.themedViewRendering().includes("size=${width}x${height};")`, 10000);
+                });
+            }
+            assert(page.errors.length === 0, `the page reported errors:\n${page.errors.join("\n")}`);
+        }, query);
+    }
+
+    register("a hidden page is not rendered, and is rendered again when it is shown", async (page) => {
+        // A change of the view draws frames while the page is visible.
+        let rendering = await settled(page);
+        await page.evaluate(`(themedView.themedViewNativeHost("size", 120, 40), themedView.themedViewNativeHost("add", 0, 0), true)`);
+        rendering = await framesAfter(page, rendering.frames);
+        rendering = await settled(page);
+
+        await setHidden(page, true);
+        measured(`the page was hidden by ${page.hiddenBy}`);
+        await sleep(500);
+        const hidden = await page.rendering();
+        // The view changes while the page is hidden: the thread of the page lays it out and commits
+        // (its timers still run, slowly), and the render thread, whose animation frames have stopped,
+        // draws nothing.
+        await page.evaluate(`(themedView.themedViewNativeHost("size", 200, 60), true)`);
+        await sleep(2500);
+        const still = await page.rendering();
+        measured(`frames while the page was hidden: ${Number(still.frames) - Number(hidden.frames)}, ticks: ${Number(still.ticks) - Number(hidden.ticks)}`);
+        assert(still.frames === hidden.frames, `the render thread drew ${Number(still.frames) - Number(hidden.frames)} frames of a hidden page`);
+
+        await setHidden(page, false);
+        const shown = await framesAfter(page, still.frames);
+        assertDrawnByRenderThread(shown);
+        assert(page.errors.length === 0, `the page reported errors:\n${page.errors.join("\n")}`);
+    }, "");
+}
 
 await run(checks);

@@ -14,6 +14,12 @@
 //! and serve `target/browser/themed_view` with any static web server. The
 //! query string selects the rendering mode and the theme variant:
 //! `?RenderingMode=Software2D`, `?ThemeVariant=dark`.
+//!
+//! Built with threads (`scripts/build-browser.sh themed_view --threads`,
+//! served cross-origin isolated) the view is rendered by a render thread:
+//! the compositor and Skia run in a worker that owns the canvas.
+//! `?RenderThread=false` keeps such a module on the thread of the page, for
+//! comparison. `themedViewRendering` reports which thread drew the frames.
 
 #![cfg_attr(target_os = "emscripten", no_main)]
 
@@ -30,7 +36,9 @@ use ferroui_base::platform::{AlphaFormat, PixelFormat};
 use ferroui_base::{
     ferro_class, ferro_impl_classes, instantiate, BoxedValue, FerroObjectImpl, PixelSize, Ref, Thickness, Vector,
 };
-use ferroui_browser::interop::navigation_helper;
+use ferroui_browser::interop::canvas_helper::{RENDER_TARGET_KIND_SOFTWARE, RENDER_TARGET_KIND_WEB_GL};
+use ferroui_browser::interop::{navigation_helper, thread_proxy};
+use ferroui_browser::rendering::{BrowserSharedRenderLoop, RenderStatistics, RenderWorker};
 use ferroui_browser::{BrowserAppBuilder, BrowserPlatformOptions, BrowserRenderingMode};
 use ferroui_controls::{
     AppBuilder, Application, ApplicationImpl, ApplicationImplExt, Border, Button, CheckBox, Control, ListBox,
@@ -529,6 +537,50 @@ pub fn themed_view_decode_damaged() -> String {
     results.join(";")
 }
 
+/// Where the frames of the view are rendered, as a line of `name=value`
+/// pairs, for the behaviour tests:
+///
+/// - `frames`: the frames drawn to the canvas so far;
+/// - `frame_thread`: the thread that drew the last one, and `page_thread`:
+///   the thread of the page, which makes this call (both 0 in a module
+///   built without threads); `other_thread`: whether they differ;
+/// - `render_thread`: the render thread of the platform, 0 without one, and
+///   `on_render_thread`: whether the render loop of the page ticks there;
+/// - `kind` (`webgl`, `software`, `none` before the first frame), `gl` (the
+///   major version of OpenGL ES: 2 for WebGL 1, 3 for WebGL 2, 0 in
+///   software) and `size` (device pixels) of the last frame;
+/// - `ticks`: the ticks of the frame loop of the render thread, and
+///   `proxied`: the calls those ticks made the main thread of the page
+///   serve (`unknown` when they are not counted), with `last_proxied`, the
+///   index of the function of the last one in the script of the module (-1
+///   for none).
+#[wasm_bindgen(js_name = themedViewRendering)]
+pub fn themed_view_rendering() -> String {
+    let statistics = RenderStatistics::current();
+    let page_thread = thread_proxy::current_thread();
+    let kind = match statistics.frame_kind {
+        RENDER_TARGET_KIND_WEB_GL => "webgl",
+        RENDER_TARGET_KIND_SOFTWARE => "software",
+        _ => "none",
+    };
+    format!(
+        "frames={};frame_thread={};page_thread={};other_thread={};render_thread={};on_render_thread={};kind={};gl={};size={}x{};ticks={};proxied={};last_proxied={}",
+        statistics.frames,
+        statistics.frame_thread,
+        page_thread,
+        statistics.frames > 0 && statistics.frame_thread != page_thread,
+        RenderWorker::thread_id(),
+        BrowserSharedRenderLoop::renders_on_render_thread(),
+        kind,
+        statistics.frame_gl_major_version,
+        statistics.frame_width,
+        statistics.frame_height,
+        statistics.ticks,
+        statistics.tick_proxied_calls.map_or_else(|| "unknown".to_string(), |calls| calls.to_string()),
+        statistics.last_proxied_function,
+    )
+}
+
 /// The value of `name` in a query string (`?a=1&b=2`), ignoring the case of
 /// the name.
 fn query_value(query: &str, name: &str) -> Option<String> {
@@ -551,6 +603,11 @@ fn parse_args(query: &str) -> BrowserPlatformOptions {
         if !modes.is_empty() {
             options.rendering_mode = modes;
         }
+    }
+    // A module built with threads renders on a render thread unless the page
+    // asks for one thread.
+    if query_value(query, "RenderThread").is_some_and(|value| value.eq_ignore_ascii_case("false")) {
+        options.render_thread = false;
     }
     options
 }
