@@ -20,7 +20,6 @@ fn child<T: ferroui_base::ObjectType>(panel: &Ref<Panel>, index: usize) -> Ref<T
 }
 
 #[test]
-#[ignore = "gap C301: a method name is not accepted for a property of a delegate type (CustomPopupPlacementCallback)"]
 fn gap_c301_method_name_for_a_delegate_property() {
     let _app = start_application();
     let xaml = format!(

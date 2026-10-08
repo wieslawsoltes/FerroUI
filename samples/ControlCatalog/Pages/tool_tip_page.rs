@@ -6,6 +6,7 @@ use ferroui_base::interactivity::{CancelRoutedEventArgs, IRoutedEventArgs};
 use ferroui_base::{ferro_class_info, instantiate, BoxedValue, Point, Ref};
 use ferroui_controls::primitives::popup_positioning::{CustomPopupPlacement, PopupAnchor, PopupGravity};
 use ferroui_controls::{ContentPage, Control, ToolTip};
+use std::cell::RefCell;
 use std::hash::{BuildHasher, Hasher};
 use std::rc::Rc;
 
@@ -23,6 +24,10 @@ ferro_class_info!(ToolTipPage {
                 |this: &Ref<ToolTipPage>, sender: Option<BoxedValue>, args: Rc<dyn IRoutedEventArgs>| {
                     let args = args.downcast_ref::<CancelRoutedEventArgs>().expect("the arguments of a tool tip opening event");
                     this.tool_tip_opening(&sender, args)
+                },
+            fn CustomPlacementCallback(Rc<RefCell<CustomPopupPlacement>>) =>
+                |this: &Ref<ToolTipPage>, placement: Rc<RefCell<CustomPopupPlacement>>| {
+                    this.custom_placement_callback(&mut placement.borrow_mut())
                 },
         ],
     },

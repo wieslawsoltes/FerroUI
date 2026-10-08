@@ -4,6 +4,10 @@
 //! A collection is a shared handle: the type itself is the handle.
 
 use crate::documents::{Inline, InlineCollection};
+use crate::primitives::popup_positioning::{
+    CustomPopupPlacement, PopupAnchor, PopupGravity, PopupPositionerConstraintAdjustment,
+};
+use crate::primitives::CustomPopupPlacementCallbackValue;
 use crate::templates::{DataTemplates, IDataTemplate};
 use crate::{NativeMenuItemBase, Page, TableViewColumn};
 use ferroui_base::collections::FerroList;
@@ -13,8 +17,9 @@ use crate::{
 };
 use ferroui_base::data::core::ValueTypes;
 use ferroui_base::ferro_markup_type;
-use ferroui_base::metadata::{MarkupType, MarkupTyped};
-use ferroui_base::{BoxedValue, Ref};
+use ferroui_base::metadata::{MarkupDelegate, MarkupType, MarkupTyped};
+use ferroui_base::{BoxedValue, Point, Rect, Ref, Size, Thickness, Visual};
+use std::cell::RefCell;
 use std::rc::Rc;
 
 /// `FerroList<T>.Capacity`.
@@ -128,6 +133,69 @@ ferro_markup_type!(class DataTemplates {
         },
     ],
 });
+
+// FerroUI.Controls.Primitives.PopupPositioning
+
+// The parameters of a custom placement as a method named in markup receives them: one shared
+// object, which the method changes (the record of the managed original is a reference type).
+ferro_markup_type!(class CustomPopupPlacement {
+    namespace: "FerroUI.Controls.Primitives.PopupPositioning",
+    handles: [Rc<RefCell<CustomPopupPlacement>>, Option<Rc<RefCell<CustomPopupPlacement>>>],
+    this: Rc<RefCell<CustomPopupPlacement>>,
+    properties: [
+        PopupSize: Size { get: |placement: &Rc<RefCell<CustomPopupPlacement>>| placement.borrow().popup_size() },
+        Deflate: Thickness { get: |placement: &Rc<RefCell<CustomPopupPlacement>>| placement.borrow().deflate() },
+        Target: Ref<Visual> { get: |placement: &Rc<RefCell<CustomPopupPlacement>>| placement.borrow().target() },
+        AnchorRectangle: Rect {
+            get: |placement: &Rc<RefCell<CustomPopupPlacement>>| placement.borrow().anchor_rectangle,
+            set: |placement: &Rc<RefCell<CustomPopupPlacement>>, value: Rect| placement.borrow_mut().anchor_rectangle = value
+        },
+        Anchor: PopupAnchor {
+            get: |placement: &Rc<RefCell<CustomPopupPlacement>>| placement.borrow().anchor(),
+            set: |placement: &Rc<RefCell<CustomPopupPlacement>>, value: PopupAnchor| placement.borrow_mut().set_anchor(value)
+        },
+        Gravity: PopupGravity {
+            get: |placement: &Rc<RefCell<CustomPopupPlacement>>| placement.borrow().gravity(),
+            set: |placement: &Rc<RefCell<CustomPopupPlacement>>, value: PopupGravity| placement.borrow_mut().set_gravity(value)
+        },
+        ConstraintAdjustment: PopupPositionerConstraintAdjustment {
+            get: |placement: &Rc<RefCell<CustomPopupPlacement>>| placement.borrow().constraint_adjustment,
+            set: |placement: &Rc<RefCell<CustomPopupPlacement>>, value: PopupPositionerConstraintAdjustment| {
+                placement.borrow_mut().constraint_adjustment = value
+            }
+        },
+        Offset: Point {
+            get: |placement: &Rc<RefCell<CustomPopupPlacement>>| placement.borrow().offset,
+            set: |placement: &Rc<RefCell<CustomPopupPlacement>>, value: Point| placement.borrow_mut().offset = value
+        },
+    ],
+});
+
+// The delegate type of the `CustomPopupPlacementCallback` properties: a delegate with one
+// `Invoke` method, so that markup accepts the name of a method of the root object with that
+// signature as the value of such a property.
+ferro_markup_type!(class CustomPopupPlacementCallbackValue as "CustomPopupPlacementCallback" {
+    namespace: "FerroUI.Controls.Primitives.PopupPositioning",
+    handles: [CustomPopupPlacementCallbackValue, Option<CustomPopupPlacementCallbackValue>],
+    base: MarkupDelegate,
+    methods: [
+        fn Invoke(Rc<RefCell<CustomPopupPlacement>>) =>
+            |callback: &CustomPopupPlacementCallbackValue, placement: Rc<RefCell<CustomPopupPlacement>>| {
+                (callback.0)(&mut placement.borrow_mut())
+            },
+    ],
+});
+
+/// The callback that calls a method named in markup: the method receives the parameters as
+/// one shared object, and what it leaves in them is the placement.
+fn custom_popup_placement_callback(method: &MarkupDelegate) -> CustomPopupPlacementCallbackValue {
+    let method = method.clone();
+    CustomPopupPlacementCallbackValue(Rc::new(move |placement: &mut CustomPopupPlacement| {
+        let shared = Rc::new(RefCell::new(placement.clone()));
+        method.invoke(&[Some(Rc::new(shared.clone()) as BoxedValue)]);
+        *placement = shared.borrow().clone();
+    }))
+}
 
 // FerroUI.Collections
 
@@ -296,6 +364,8 @@ pub(super) const TYPES: &[&MarkupType] = &[
     <WindowIcon as MarkupTyped>::MARKUP,
     <InlineCollection as MarkupTyped>::MARKUP,
     <DataTemplates as MarkupTyped>::MARKUP,
+    <CustomPopupPlacement as MarkupTyped>::MARKUP,
+    <CustomPopupPlacementCallbackValue as MarkupTyped>::MARKUP,
     <FerroListOf<Ref<Control>> as MarkupTyped>::MARKUP,
     <FerroListOf<Ref<Inline>> as MarkupTyped>::MARKUP,
     <FerroListOf<Rc<dyn IDataTemplate>> as MarkupTyped>::MARKUP,
@@ -326,6 +396,11 @@ pub(super) fn register_value_types() {
     ValueTypes::register_nullable::<FerroList<Ref<Page>>>();
     ValueTypes::register_nullable::<FerroList<Ref<TableViewColumn>>>();
     ValueTypes::register_nullable::<Rc<WindowIcon>>();
+    ValueTypes::register_nullable::<Rc<RefCell<CustomPopupPlacement>>>();
+    ValueTypes::register_nullable::<CustomPopupPlacementCallbackValue>();
+    // The delegate of a method named in markup is a callback: the value of a
+    // `CustomPopupPlacementCallback` property.
+    ValueTypes::register_cast::<MarkupDelegate, CustomPopupPlacementCallbackValue>(custom_popup_placement_callback);
     // A named collection is the list it derives from: the same list, so that the members
     // of the list (`Capacity`) are reached through the collection.
     // The collection handles of items controls: a property that holds one takes the handle
