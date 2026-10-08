@@ -1,3 +1,4 @@
+use super::RenderWorker;
 use crate::interop::thread_proxy::{self, RunOnThread};
 use crate::interop::timer_helper;
 use ferroui_base::rendering::{IRenderTimer, RenderTimerTick};
@@ -26,6 +27,8 @@ pub struct BrowserRenderTimer {
 /// tests.
 #[derive(Clone, Copy)]
 struct TimerPlatform {
+    /// Whether the page has a render thread.
+    render_worker_exists: fn() -> bool,
     run_animation_frames: fn(),
     current_thread: fn() -> usize,
     run_on_thread: RunOnThread,
@@ -41,6 +44,7 @@ impl BrowserRenderTimer {
         Self::with_platform(
             is_background,
             TimerPlatform {
+                render_worker_exists: RenderWorker::exists,
                 run_animation_frames: timer_helper::run_animation_frames,
                 current_thread: thread_proxy::current_thread,
                 run_on_thread: thread_proxy::run_on_thread,
@@ -95,12 +99,15 @@ impl IRenderTimer for BrowserRenderTimer {
 
     fn set_tick(&self, value: Option<RenderTimerTick>) {
         // Upstream starts the loop here unless the platform runs with
-        // threads, where only its render worker starts it. The condition
-        // here is the timer's own: one that ticks in the background is
+        // threads, where only its render worker starts it. Two conditions
+        // here. The timer's own: one that ticks in the background is
         // started by the thread that renders, and the thread that sets the
         // callback (the render loop does, on any thread) must not become
-        // the one that ticks.
-        if !self.runs_in_background {
+        // the one that ticks. And upstream's, as a fact of the page instead
+        // of the build: with a render thread no timer is started by its
+        // callback, so the frames of the page never drive a loop whose
+        // surfaces belong to the worker.
+        if !self.runs_in_background && !(self.platform.render_worker_exists)() {
             self.start_on_this_thread();
         }
 
@@ -183,8 +190,17 @@ mod tests {
         250.0
     }
 
+    fn no_render_worker() -> bool {
+        false
+    }
+
+    fn a_render_worker() -> bool {
+        true
+    }
+
     fn platform(run_on_thread: RunOnThread) -> TimerPlatform {
         TimerPlatform {
+            render_worker_exists: no_render_worker,
             run_animation_frames: count_frame_loop,
             current_thread: test_thread,
             run_on_thread,
@@ -229,6 +245,28 @@ mod tests {
         assert!(seen.lock().unwrap().is_empty());
 
         timer.start_on_this_thread();
+        timer.start_on_this_thread();
+        assert_eq!(1, frame_loops());
+        timer_helper::js_export_on_animation_frame(32.0);
+        assert_eq!(vec![Duration::from_millis(32)], *seen.lock().unwrap());
+    }
+
+    #[test]
+    fn with_a_render_worker_no_timer_is_started_by_its_tick() {
+        let platform = TimerPlatform { render_worker_exists: a_render_worker, ..platform(refuse) };
+        let timer = BrowserRenderTimer::with_platform(false, platform);
+        let seen = Arc::new(Mutex::new(Vec::new()));
+        assert!(!timer.runs_in_background());
+
+        let log = seen.clone();
+        timer.set_tick(Some(Arc::new(move |time| log.lock().unwrap().push(time))));
+        // The thread that set the tick is the one of the page; its frames
+        // do not reach the tick.
+        assert_eq!(0, frame_loops());
+        timer_helper::js_export_on_animation_frame(16.0);
+        assert!(seen.lock().unwrap().is_empty());
+
+        // The render worker starts it on its thread.
         timer.start_on_this_thread();
         assert_eq!(1, frame_loops());
         timer_helper::js_export_on_animation_frame(32.0);

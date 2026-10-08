@@ -1,15 +1,13 @@
-use super::web_render_target::{update_size, BrowserRenderTarget, CanvasSize};
+use super::web_render_target::update_size;
+use super::BrowserSurfaceShared;
 use crate::interop::canvas_helper::GlInfo;
 use crate::interop::JsObject;
-use ferroui_base::platform::surfaces::{IPlatformRenderSurface, IPlatformRenderSurfaceRenderTarget};
+use ferroui_base::platform::surfaces::IPlatformRenderSurfaceRenderTarget;
 use ferroui_base::platform::{IOptionalFeatureProvider, IPlatformGraphicsContext, RenderTargetSceneInfo};
 use ferroui_base::reactive::{Disposable, IDisposable};
-use ferroui_base::utilities::ThreadBound;
 use ferroui_base::PixelSize;
 use ferroui_opengl::gl_consts;
-use ferroui_opengl::surfaces::{
-    IGlPlatformSurface, IGlPlatformSurfaceRenderTarget, IGlPlatformSurfaceRenderingSession,
-};
+use ferroui_opengl::surfaces::{IGlPlatformSurfaceRenderTarget, IGlPlatformSurfaceRenderingSession};
 use ferroui_opengl::{GetProcAddress, GlInterface, GlProfileType, GlVersion, IGlContext, OpenGlException};
 use ferroui_skia::gpu::open_gl::IGlSkiaSpecificOptionsFeature;
 use std::any::{Any, TypeId};
@@ -56,42 +54,27 @@ extern "C" {
     fn make_context_current(context: i32) -> bool;
 }
 
-/// A canvas that is rendered to with WebGL.
+/// A canvas that is rendered to with WebGL, as the thread that draws to it
+/// holds it: the object of the script side of that thread, what the script
+/// knows about the WebGL context, and the context itself.
 ///
-/// A render surface is shared between the thread of the user interface and
-/// the thread that renders, so the object is `Send + Sync`. The browser runs
-/// the compositor on its one thread, and everything the target holds belongs
-/// to that thread (the object of the script side, the WebGL context, the
-/// size of the canvas): it is kept in a [`ThreadBound`], which only that
-/// thread can open. A render worker (stage B2 of
-/// `docs/porting/render-thread.md`) is where the target becomes an object
-/// that is really used across threads.
+/// Upstream's class is also the render surface of the canvas. Here the
+/// surface is [`BrowserRenderSurface`](super::BrowserRenderSurface), which
+/// both threads hold and which holds nothing of a thread; this object stays
+/// in the table of the thread that renders
+/// ([`get_render_target`](super::get_render_target)) and is what the surface
+/// resolves there.
 pub struct BrowserWebGlRenderTarget {
-    this: std::sync::Weak<BrowserWebGlRenderTarget>,
-    state: ThreadBound<WebGlRenderTargetState>,
-}
-
-/// What a WebGL render target holds, all of it bound to the thread of the
-/// page.
-struct WebGlRenderTargetState {
     js: JsObject,
-    size_getter: CanvasSize,
     gl_info: GlInfo,
     gl_context: Rc<WebGlContext>,
 }
 
-// Not from upstream: the render surface contract requires a surface to be
-// shared between threads.
-const _: fn() = || {
-    fn assert_send_sync<T: Send + Sync>() {}
-    assert_send_sync::<BrowserWebGlRenderTarget>();
-};
-
 impl BrowserWebGlRenderTarget {
     /// Wraps the WebGL render target of the script side.
     ///
-    /// The thread that calls this is the one the target stays bound to.
-    pub fn new(js: JsObject, size_getter: CanvasSize) -> Arc<Self> {
+    /// The thread that calls this is the one the target belongs to.
+    pub fn new(js: JsObject) -> Rc<Self> {
         let target = JsCast::unchecked_ref::<JsWebGlRenderTarget>(&js);
         let gl_info = GlInfo {
             context_id: target.context_handle(),
@@ -108,20 +91,25 @@ impl BrowserWebGlRenderTarget {
             gl_info.samples,
             gl_info.stencils,
         );
-        let state = ThreadBound::new(WebGlRenderTargetState { js, size_getter, gl_info, gl_context });
-        Arc::new_cyclic(|this| Self { this: this.clone(), state })
+        Rc::new(Self { js, gl_info, gl_context })
     }
 
     /// The WebGL context of the canvas.
-    ///
-    /// # Panics
-    /// Panics on a thread other than the one the target was created on.
     pub fn gl_context(&self) -> Rc<WebGlContext> {
-        self.state.get().gl_context.clone()
+        self.gl_context.clone()
+    }
+
+    /// Creates the OpenGL render target of the canvas. `shared` is where
+    /// each frame reads the size the canvas has to have.
+    pub fn create_gl_render_target(
+        self: &Rc<Self>,
+        shared: Arc<BrowserSurfaceShared>,
+    ) -> Rc<dyn IGlPlatformSurfaceRenderTarget> {
+        Rc::new(GlSurface { target: self.clone(), shared })
     }
 
     fn update_size(&self, size: PixelSize) {
-        update_size(&self.state.get().js, size);
+        update_size(&self.js, size);
     }
 }
 
@@ -159,21 +147,27 @@ impl IGlPlatformSurfaceRenderingSession for GlSession {
 }
 
 struct GlSurface {
-    target: Arc<BrowserWebGlRenderTarget>,
+    target: Rc<BrowserWebGlRenderTarget>,
+    shared: Arc<BrowserSurfaceShared>,
 }
 
 impl IPlatformRenderSurfaceRenderTarget for GlSurface {}
 
 impl IGlPlatformSurfaceRenderTarget for GlSurface {
     fn begin_draw(&self, _scene_info: &RenderTargetSceneInfo) -> Rc<dyn IGlPlatformSurfaceRenderingSession> {
-        let state = self.target.state.get();
-        let (size, scaling) = (state.size_getter)();
+        // The size as the thread of the user interface last wrote it. The
+        // canvas is given that size here, by the thread that draws to it:
+        // for a canvas that was transferred to a worker no other can.
+        let (size, scaling) = self.shared.size();
         self.target.update_size(size);
-        let restore_context = state.gl_context.ensure_current();
-        state.gl_context.gl_interface().bind_framebuffer(gl_consts::GL_FRAMEBUFFER, state.gl_info.fbo_id as i32);
+        let restore_context = self.target.gl_context.ensure_current();
+        self.target
+            .gl_context
+            .gl_interface()
+            .bind_framebuffer(gl_consts::GL_FRAMEBUFFER, self.target.gl_info.fbo_id as i32);
         Rc::new(GlSession {
             restore_context: Cell::new(Some(restore_context)),
-            context: state.gl_context.clone(),
+            context: self.target.gl_context.clone(),
             size,
             scaling,
         })
@@ -181,67 +175,6 @@ impl IGlPlatformSurfaceRenderTarget for GlSurface {
 
     fn dispose(&self) {
         // No-op
-    }
-}
-
-impl BrowserRenderTarget for BrowserWebGlRenderTarget {
-    fn platform_graphics_context(&self) -> Option<Rc<dyn IPlatformGraphicsContext>> {
-        Some(self.state.get().gl_context.clone())
-    }
-
-    fn as_render_surface(&self) -> Arc<dyn IPlatformRenderSurface> {
-        self.this.upgrade().expect("the render target is alive")
-    }
-}
-
-impl IPlatformRenderSurface for BrowserWebGlRenderTarget {
-    fn try_get_surface_kind(&self, kind: TypeId) -> Option<Rc<dyn Any>> {
-        if kind == TypeId::of::<dyn IGlPlatformSurface>() {
-            // The surface kind is handed out in an `Rc`, and the target lives in an `Arc`: the
-            // view below holds the target and answers for it.
-            let this: Rc<dyn IGlPlatformSurface> = Rc::new(GlSurfaceView { target: self.this.upgrade()? });
-            return Some(Rc::new(this));
-        }
-        None
-    }
-
-    fn as_any(&self) -> &dyn Any {
-        self
-    }
-}
-
-impl IGlPlatformSurface for BrowserWebGlRenderTarget {
-    fn create_gl_render_target(&self, _context: &Rc<dyn IGlContext>) -> Rc<dyn IGlPlatformSurfaceRenderTarget> {
-        Rc::new(GlSurface { target: self.this.upgrade().expect("the render target is alive") })
-    }
-}
-
-/// The render target as the OpenGL surface a render backend asks for.
-///
-/// Not from upstream, where the target is cast to the interface. It exists
-/// because the surface kind is handed out in an `Rc` while the target lives
-/// in an `Arc`.
-struct GlSurfaceView {
-    target: Arc<BrowserWebGlRenderTarget>,
-}
-
-impl IPlatformRenderSurface for GlSurfaceView {
-    fn is_ready(&self) -> bool {
-        (*self.target).is_ready()
-    }
-
-    fn try_get_surface_kind(&self, kind: TypeId) -> Option<Rc<dyn Any>> {
-        (*self.target).try_get_surface_kind(kind)
-    }
-
-    fn as_any(&self) -> &dyn Any {
-        (*self.target).as_any()
-    }
-}
-
-impl IGlPlatformSurface for GlSurfaceView {
-    fn create_gl_render_target(&self, context: &Rc<dyn IGlContext>) -> Rc<dyn IGlPlatformSurfaceRenderTarget> {
-        self.target.create_gl_render_target(context)
     }
 }
 
@@ -309,8 +242,9 @@ impl WebGlContext {
         // the signatures of OpenGL ES under the calling convention of the
         // target; anywhere else it returns null for every name, which the
         // contract allows (and construction then fails on the first required
-        // entry point). The context was just made current on this thread, the
-        // only one there is. The previous context is restored below: every
+        // entry point). The context was just made current on this thread,
+        // which is the one the context is used on from here on
+        // (`verify_access`). The previous context is restored below: every
         // later use of the interface happens inside `ensure_current`, which
         // `begin_draw` and the Skia GPU take before they call into it.
         let gl_interface = Rc::new(unsafe { GlInterface::new(version, get_proc_address) });

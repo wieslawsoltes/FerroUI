@@ -1,5 +1,5 @@
-use super::web_render_target::{get_render_target, BrowserRenderTarget};
-use super::{BrowserSharedRenderLoop, BrowserSurface};
+use super::web_render_target::get_render_target;
+use super::{BrowserRenderSurface, BrowserSharedRenderLoop, BrowserSurface, BrowserSurfaceShared, RenderWorker};
 use crate::browser_app_builder::BrowserRenderingMode;
 use crate::interop::canvas_helper::CanvasSurface;
 use crate::interop::JsObject;
@@ -12,22 +12,43 @@ use ferroui_base::rendering::composition::Compositor;
 use ferroui_base::threading::Dispatcher;
 use ferroui_base::{PixelSize, Size};
 use std::any::{Any, TypeId};
-use std::cell::{Cell, RefCell};
-use std::rc::{Rc, Weak};
+use std::rc::Rc;
 use std::sync::Arc;
 
 /// The surface of a view that is rendered through a render target of the
 /// page (a WebGL context or a 2D canvas).
+///
+/// The object belongs to the thread of the user interface. What the thread
+/// that renders needs of the canvas is in the two objects it shares with
+/// that thread: [`BrowserSurfaceShared`] (the id of the render target, the
+/// size, whether the target exists and its kind) and the
+/// [`BrowserRenderSurface`] over it, which is the surface the compositor
+/// draws to.
 pub struct RenderTargetBrowserSurface {
     base: BrowserSurface,
-    graphics: Rc<BrowserPlatformGraphics>,
+    shared: Arc<BrowserSurfaceShared>,
+    render_surface: Arc<BrowserRenderSurface>,
 }
 
 impl RenderTargetBrowserSurface {
-    fn new(js_surface: CanvasSurface) -> Rc<Self> {
+    /// `thread_id` is what the canvas was created with: 0 when this thread
+    /// kept the canvas and has its render target.
+    fn new(js_surface: CanvasSurface, thread_id: i32) -> Rc<Self> {
         let target_id = js_surface.target_id();
-        let graphics = BrowserPlatformGraphics::new(target_id);
-        let gpu: Rc<dyn IPlatformGraphics> = graphics.clone();
+        let shared = BrowserSurfaceShared::new();
+        // Known to every thread by the id from here on: the worker of a
+        // render thread reports the target under it, and may already have.
+        shared.register(target_id);
+        if thread_id == 0 {
+            // This thread owns the target, and its script created it with
+            // the canvas: it publishes that the target exists and its kind.
+            // Upstream asks its registry for the target at each frame; here
+            // the answer has to be where a second thread can read it.
+            if let Some(target) = get_render_target(target_id) {
+                shared.set_target_kind(target.kind());
+            }
+        }
+        let gpu: Rc<dyn IPlatformGraphics> = Rc::new(BrowserPlatformGraphics { shared: shared.clone() });
         let compositor = Compositor::with_scheduler(
             BrowserSharedRenderLoop::render_loop(),
             Some(gpu),
@@ -38,7 +59,8 @@ impl RenderTargetBrowserSurface {
             None,
         );
 
-        let this = Rc::new(Self { base: BrowserSurface::new(js_surface, compositor), graphics });
+        let render_surface = BrowserRenderSurface::new(shared.clone());
+        let this = Rc::new(Self { base: BrowserSurface::new(js_surface, compositor), shared, render_surface });
         if let Some((w, h, s)) = this.base.initial_size() {
             this.on_size_changed(w, h, s);
         }
@@ -49,9 +71,13 @@ impl RenderTargetBrowserSurface {
     /// `modes` the browser supports, and the surface over it.
     pub fn create(container: &JsObject, modes: &[BrowserRenderingMode], top_level_id: i32) -> Rc<Self> {
         let modes: Vec<i32> = modes.iter().map(|m| *m as i32).collect();
-        // No thread: the render target is created and used on this one.
-        let js = CanvasSurface::create_render_target_surface(container, &modes, top_level_id, 0);
-        Self::new(js)
+        // 0 without a render thread: the render target is created and used
+        // on this thread. With one, the script transfers the control of the
+        // canvas to its worker, at once or when the thread has reported
+        // itself.
+        let thread_id = RenderWorker::canvas_thread_id();
+        let js = CanvasSurface::create_render_target_surface(container, &modes, top_level_id, thread_id);
+        Self::new(js, thread_id)
     }
 
     /// The compositor that renders to the surface.
@@ -89,18 +115,25 @@ impl RenderTargetBrowserSurface {
         self.base.scaling_changed(handler)
     }
 
-    /// The surfaces a render backend can draw to: the render target, once
-    /// the page has created it.
+    /// The surfaces a render backend can draw to: the render surface of the
+    /// canvas. It is handed out from the start and is not ready until the
+    /// thread that owns the render target has published it (upstream hands
+    /// out nothing until then).
     pub fn get_render_surfaces(&self) -> Vec<Arc<dyn IPlatformRenderSurface>> {
-        match self.graphics.target() {
-            Some(target) => vec![target.as_render_surface()],
-            None => Vec::new(),
-        }
+        let surface: Arc<dyn IPlatformRenderSurface> = self.render_surface.clone();
+        vec![surface]
+    }
+
+    /// What the thread of the user interface and the thread that renders
+    /// share about the canvas.
+    pub fn shared(&self) -> &Arc<BrowserSurfaceShared> {
+        &self.shared
     }
 
     /// The canvas changed its size or its scaling.
     pub fn on_size_changed(&self, pixel_width: f64, pixel_height: f64, dpr: f64) {
-        self.graphics.canvas_size.set((PixelSize::new(pixel_width as i32, pixel_height as i32), dpr));
+        // Where the thread that renders reads it at the start of a frame.
+        self.shared.on_size_changed(pixel_width, pixel_height, dpr);
         self.base.on_size_changed(pixel_width, pixel_height, dpr);
     }
 
@@ -109,44 +142,28 @@ impl RenderTargetBrowserSurface {
     /// The compositor is not told: it leaves the render loop by itself when
     /// the top-level that holds it is released.
     pub fn dispose(&self) {
+        // A target reported under the id from here on belongs to no canvas.
+        self.shared.unregister();
         self.base.dispose();
     }
 }
 
-/// The platform graphics of one canvas: its render target, which may not
-/// exist yet when the compositor is created.
+/// The platform graphics of one canvas, whose render target may not exist
+/// yet when the compositor is created.
+///
+/// Upstream's object keeps the render target and the size of the canvas in
+/// fields of its own. This one is created by the thread of the user
+/// interface and asked by the thread that renders, so it holds only what
+/// the two share: whether it is ready and whether the target renders with a
+/// context are read from there, and the context is the one of the render
+/// target of the calling thread ([`get_render_target`]).
 struct BrowserPlatformGraphics {
-    this: Weak<BrowserPlatformGraphics>,
-    target_id: i32,
-    target: RefCell<Option<Arc<dyn BrowserRenderTarget>>>,
-    canvas_size: Cell<(PixelSize, f64)>,
+    shared: Arc<BrowserSurfaceShared>,
 }
 
 impl BrowserPlatformGraphics {
-    fn new(target_id: i32) -> Rc<Self> {
-        Rc::new_cyclic(|this| Self {
-            this: this.clone(),
-            target_id,
-            target: RefCell::new(None),
-            canvas_size: Cell::new((PixelSize::default(), 0.0)),
-        })
-    }
-
-    fn target(&self) -> Option<Arc<dyn BrowserRenderTarget>> {
-        if let Some(target) = self.target.borrow().clone() {
-            return Some(target);
-        }
-        let this = self.this.clone();
-        let target = get_render_target(
-            self.target_id,
-            Rc::new(move || this.upgrade().map_or((PixelSize::default(), 0.0), |this| this.canvas_size.get())),
-        );
-        *self.target.borrow_mut() = target.clone();
-        target
-    }
-
     fn uses_contexts(&self) -> bool {
-        self.target().expect("the render target exists").platform_graphics_context().is_some()
+        self.shared.uses_contexts().expect("the render target exists")
     }
 }
 
@@ -159,8 +176,10 @@ impl IPlatformGraphics for BrowserPlatformGraphics {
         panic!("Specified method is not supported.");
     }
 
+    /// Called by the thread that renders.
     fn get_shared_context(&self) -> Rc<dyn IPlatformGraphicsContext> {
-        match self.target().expect("the render target exists").platform_graphics_context() {
+        let target = get_render_target(self.shared.target_id()).expect("the render target exists");
+        match target.platform_graphics_context() {
             Some(context) => context,
             None => panic!(
                 "This platform graphics instance represents software rendering mode and cant create contexts, you are supposed to query IPlatformGraphicsReadyStateFeature to know this"
@@ -176,7 +195,10 @@ impl IPlatformGraphics for BrowserPlatformGraphics {
 impl IOptionalFeatureProvider for BrowserPlatformGraphics {
     fn try_get_feature(&self, feature_type: TypeId) -> Option<Rc<dyn Any>> {
         if feature_type == TypeId::of::<dyn IPlatformGraphicsReadyStateFeature>() {
-            let this: Rc<dyn IPlatformGraphicsReadyStateFeature> = self.this.upgrade()?;
+            // Upstream answers with the object itself. A second object over
+            // the same shared state is the same answer, and the feature then
+            // holds no handle of the platform graphics.
+            let this: Rc<dyn IPlatformGraphicsReadyStateFeature> = Rc::new(Self { shared: self.shared.clone() });
             return Some(Rc::new(this));
         }
         None
@@ -185,10 +207,93 @@ impl IOptionalFeatureProvider for BrowserPlatformGraphics {
 
 impl IPlatformGraphicsReadyStateFeature for BrowserPlatformGraphics {
     fn is_ready(&self) -> bool {
-        self.target().is_some() && self.canvas_size.get().0 != PixelSize::default()
+        self.shared.is_ready()
     }
 
     fn uses_contexts(&self) -> bool {
         BrowserPlatformGraphics::uses_contexts(self)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::interop::canvas_helper::{RENDER_TARGET_KIND_SOFTWARE, RENDER_TARGET_KIND_WEB_GL};
+    use crate::interop::JsObject;
+    use crate::rendering::web_render_target::{set_script_render_targets_for_unit_tests, BrowserRenderTarget};
+    use crate::rendering::BrowserSoftwareRenderTarget;
+
+    fn software_script(_id: i32) -> Option<BrowserRenderTarget> {
+        Some(BrowserRenderTarget::Software(BrowserSoftwareRenderTarget::new(JsObject::NULL)))
+    }
+
+    fn ready_state(graphics: &BrowserPlatformGraphics) -> Rc<dyn IPlatformGraphicsReadyStateFeature> {
+        let features: &dyn IOptionalFeatureProvider = graphics;
+        features.try_get::<dyn IPlatformGraphicsReadyStateFeature>().expect("the graphics has the feature")
+    }
+
+    #[test]
+    fn the_graphics_is_ready_when_a_thread_published_the_target_and_the_canvas_has_a_size() {
+        let shared = BrowserSurfaceShared::new();
+        let graphics = BrowserPlatformGraphics { shared: shared.clone() };
+        let feature = ready_state(&graphics);
+        assert!(!feature.is_ready());
+
+        shared.on_size_changed(300.0, 180.0, 1.5);
+        assert!(!feature.is_ready());
+
+        // Published by another thread, as the render thread does.
+        std::thread::spawn({
+            let shared = shared.clone();
+            move || shared.set_target_kind(RENDER_TARGET_KIND_WEB_GL)
+        })
+        .join()
+        .unwrap();
+        assert!(feature.is_ready());
+        assert!(feature.uses_contexts());
+        assert!(graphics.uses_shared_context());
+
+        shared.on_size_changed(0.0, 0.0, 1.5);
+        assert!(!feature.is_ready());
+    }
+
+    #[test]
+    fn a_software_target_uses_no_context() {
+        let shared = BrowserSurfaceShared::new();
+        shared.set_target_kind(RENDER_TARGET_KIND_SOFTWARE);
+        let graphics = BrowserPlatformGraphics { shared };
+
+        assert!(!ready_state(&graphics).uses_contexts());
+        assert!(!graphics.uses_shared_context());
+        let features: &dyn IOptionalFeatureProvider = &graphics;
+        assert!(features.try_get_feature(TypeId::of::<dyn IPlatformGraphics>()).is_none());
+    }
+
+    #[test]
+    #[should_panic(expected = "the render target exists")]
+    fn whether_contexts_are_used_is_not_known_before_the_target_exists() {
+        let graphics = BrowserPlatformGraphics { shared: BrowserSurfaceShared::new() };
+
+        graphics.uses_shared_context();
+    }
+
+    #[test]
+    #[should_panic(expected = "represents software rendering mode")]
+    fn a_software_target_has_no_shared_context() {
+        set_script_render_targets_for_unit_tests(software_script);
+        let shared = BrowserSurfaceShared::new();
+        shared.set_target_id(11);
+        shared.set_target_kind(RENDER_TARGET_KIND_SOFTWARE);
+        let graphics = BrowserPlatformGraphics { shared };
+
+        graphics.get_shared_context();
+    }
+
+    #[test]
+    #[should_panic(expected = "Specified method is not supported")]
+    fn the_graphics_creates_no_context() {
+        let graphics = BrowserPlatformGraphics { shared: BrowserSurfaceShared::new() };
+
+        graphics.create_context();
     }
 }
