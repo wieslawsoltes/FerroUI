@@ -19,8 +19,9 @@ rustflags = [
   "-Clink-arg=-sMAX_WEBGL_VERSION=2",
   # The entry points of the WebGL emulation are looked up by name.
   "-Clink-arg=-sGL_ENABLE_GET_PROC_ADDRESS=1",
-  # The script side registers WebGL contexts with `GL` and reads frames from the module memory.
-  "-Clink-arg=-sEXPORTED_RUNTIME_METHODS=GL,HEAPU8",
+  # The script side registers WebGL contexts with `GL` and reads frames and file data from the module
+  # memory, through views it makes from the memory object (`wasmMemory`; FerroExports.heapU8).
+  "-Clink-arg=-sEXPORTED_RUNTIME_METHODS=GL,HEAPU8,wasmMemory",
   # The host page starts the application; nothing runs when the module is instantiated.
   "-Clink-arg=-sINVOKE_RUN=0",
 ]

@@ -4,9 +4,11 @@ import { FerroExports } from "./ferroExports";
 // Methods of FileSystemWritableFileStream and Blob for the streams of the storage items.
 //
 // Bytes cross the boundary through the memory of the module: the framework passes the address and
-// length of its buffer and the data is copied out of or into FerroExports.runtime.HEAPU8. The view is
-// fetched on every call because the memory is replaced when it grows. A writable stream queues the
-// chunk until it is written, so the bytes are copied out of the module memory right away.
+// length of its buffer and the data is copied out of or into the view FerroExports.heapU8() returns.
+// The view is fetched on every call because the buffer of the memory is replaced when it grows. A
+// writable stream queues the chunk until it is written, and refuses a view over the shared memory of
+// a module with threads, so the bytes are copied out of the module memory right away (`slice` copies
+// into an ordinary buffer).
 export class StreamHelper {
     public static async seek(stream: FileSystemWritableFileStream, position: number): Promise<void> {
         return await stream.seek(position);
@@ -21,7 +23,7 @@ export class StreamHelper {
     }
 
     public static async write(stream: FileSystemWritableFileStream, pointer: number, count: number): Promise<void> {
-        const buffer = StreamHelper.heap().slice(pointer, pointer + count);
+        const buffer = FerroExports.heapU8().slice(pointer, pointer + count);
         return await stream.write(buffer);
     }
 
@@ -40,14 +42,6 @@ export class StreamHelper {
 
     // Copies `buffer` into the module memory at `pointer`; the framework reserved buffer.length bytes there.
     public static toMemoryView(buffer: Uint8Array, pointer: number): void {
-        StreamHelper.heap().set(buffer, pointer);
-    }
-
-    private static heap(): Uint8Array {
-        const heap = FerroExports.runtime?.HEAPU8;
-        if (!heap) {
-            throw new Error("The module is not attached");
-        }
-        return heap;
+        FerroExports.heapU8().set(buffer, pointer);
     }
 }

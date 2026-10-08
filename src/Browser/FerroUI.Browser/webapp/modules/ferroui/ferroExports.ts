@@ -1,5 +1,5 @@
 // The WebAssembly module of the application: the functions the framework exports to this script,
-// Emscripten's GL object and the module memory.
+// Emscripten's GL object and the module memory (`heapU8`).
 //
 // The host page creates the module, registers it here and only then runs the application:
 //
@@ -14,7 +14,9 @@
 // loaded into the worker (scripts/browser/threads/ferroui-worker-attach.js).
 export interface FerroRuntime {
     GL?: any;
-    HEAPU8: Uint8Array;
+    // The memory of the module (Emscripten's `wasmMemory`, a WebAssembly.Memory), read through
+    // `FerroExports.heapU8()`.
+    wasmMemory?: { readonly buffer: ArrayBufferLike };
     [name: string]: any;
 }
 
@@ -23,6 +25,7 @@ export class FerroExports {
 
     public static attach(runtime: FerroRuntime): void {
         FerroExports.resolvedExports = runtime;
+        FerroExports.heap = undefined;
         for (const key of Object.keys(FerroExports.groups)) {
             // eslint-disable-next-line @typescript-eslint/no-dynamic-delete
             delete FerroExports.groups[key];
@@ -31,6 +34,30 @@ export class FerroExports {
 
     public static get runtime(): FerroRuntime | undefined {
         return FerroExports.resolvedExports;
+    }
+
+    private static heap?: Uint8Array;
+
+    // The memory of the attached module as bytes. Call it at every use and do not keep the result:
+    // a view is only good for the buffer the memory has now. A memory that grows gets a new buffer.
+    // In a module without threads the old one is detached; in a module with threads the memory is
+    // shared and the old buffer stays as it is, ending where the memory ended before, also when
+    // another thread did the growing. Reading `buffer` of the memory object gives the current one
+    // in both cases, so the view is made anew whenever that is not the buffer it is over.
+    //
+    // The view may be over shared memory, which several interfaces of the browser refuse (ImageData,
+    // Blob, the write of a stream): hand them a copy (`slice` copies into an ordinary buffer).
+    public static heapU8(): Uint8Array {
+        const buffer = FerroExports.resolvedExports?.wasmMemory?.buffer;
+        if (!buffer) {
+            throw new Error("The module is not attached, or its memory is not exported");
+        }
+        let heap = FerroExports.heap;
+        if (heap?.buffer !== buffer) {
+            heap = new Uint8Array(buffer);
+            FerroExports.heap = heap;
+        }
+        return heap;
     }
 
     private static readonly groups: { [key: string]: any } = {};

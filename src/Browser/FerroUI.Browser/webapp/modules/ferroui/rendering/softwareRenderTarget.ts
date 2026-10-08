@@ -23,13 +23,10 @@ export class SoftwareRenderTarget extends WebRenderTarget {
     private straight?: Uint8ClampedArray<ArrayBuffer>;
 
     public putPixelData(pointer: number, length: number, width: number, height: number): void {
-        // The view is created per call: the module memory is replaced when it grows.
-        const heap8 = FerroExports.runtime?.HEAPU8;
-
-        let source: Uint8Array;
-        if (heap8?.buffer) {
-            source = new Uint8Array(heap8.buffer, pointer, length);
-        } else throw new Error("Unable to access the module memory");
+        // The view is fetched per call: the buffer of the module memory is replaced when it grows.
+        // In a module with threads it is over shared memory, which ImageData refuses: the pixels
+        // reach the canvas through `straight`, an ordinary array.
+        const source = FerroExports.heapU8().subarray(pointer, pointer + length);
 
         if (this.straight?.length !== length) {
             this.straight = new Uint8ClampedArray(new ArrayBuffer(length));

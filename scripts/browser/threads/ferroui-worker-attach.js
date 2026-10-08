@@ -1,15 +1,22 @@
 // Linked into the script of a module built with threads (`scripts/build-browser.sh --threads`,
 // emcc's --post-js): the end of the factory function of the module. It only acts in a web worker
-// that runs a thread (a pthread), where nobody else can do the two things below; in the page it
+// that runs a thread (a pthread), where nobody else can do the things below; in the page it
 // does nothing, and the host page attaches the module as before. Everything here runs while the
 // script of the module is evaluated in the worker, before the worker takes its first message, so
 // it is in place before the start function of any thread runs.
 //
-// It uses names of the script emcc generates: `ENVIRONMENT_IS_PTHREAD`, `Module` and `PThread`
-// (Emscripten), `___wbindgen_start` (the receiving name of an export the wasm-bindgen tool adds)
-// and `__ferroui_FerroExports` (ferroui-worker-import.js). Read in Emscripten 6.0.10 and
-// wasm-bindgen 0.2.129; see docs/porting/browser-render-worker.md, "B2.1".
+// It uses names of the script emcc generates: `ENVIRONMENT_IS_PTHREAD`, `Module`, `PThread` and
+// `wasmMemory` (Emscripten), `___wbindgen_start` (the receiving name of an export the wasm-bindgen
+// tool adds) and `__ferroui_FerroExports` (ferroui-worker-import.js). Read in Emscripten 6.0.10 and
+// wasm-bindgen 0.2.129; see docs/porting/browser-render-worker.md, "B2.1" and "B2.2".
 if (ENVIRONMENT_IS_PTHREAD) {
+  // 0. The memory of the module is exported as `Module.wasmMemory`, and ferroui.js makes its views
+  // of the memory from it (`FerroExports.heapU8`). The export is an assignment made while this
+  // script is evaluated, and in a worker the memory arrives later, with the message that loads the
+  // WebAssembly module: the property would stay undefined. It becomes a property that reads the
+  // variable at each use.
+  Object.defineProperty(Module, 'wasmMemory', { get: () => wasmMemory, enumerable: true, configurable: true });
+
   // 1. The script side of the platform finds the module through `FerroExports.attach`, which the
   // host page calls for the module of the page. The worker has its own copy of ferroui.js and
   // its own `Module` (its own `GL`, its own exports, its own view of the shared memory): they are
