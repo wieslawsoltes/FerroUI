@@ -793,6 +793,46 @@ fn the_collection_handle_of_items_controls_is_the_enumerable_of_the_runtime_libr
 }
 
 #[test]
+fn a_vector_of_untyped_values_converts_to_an_items_source() {
+    crate::register_types();
+    // The errors of a control are such a vector; a binding delivers it to the items source
+    // of the items control of their template.
+    let errors: Vec<BoxedValue> = vec![Rc::new("First".to_string()), Rc::new(2i32)];
+    let value: BoxedValue = Rc::new(errors);
+    for target in [ValueType::of::<crate::ItemsSource>(), ValueType::of::<Option<crate::ItemsSource>>()] {
+        let converted = ValueTypes::try_convert(Some(&value), target).flatten().expect("an items source");
+        assert_eq!(ValueType::of_value(&*converted), target);
+        assert!(ValueTypes::is_assignable(ValueType::of::<Vec<BoxedValue>>(), target));
+    }
+    let converted = ValueTypes::try_convert(Some(&value), ValueType::of::<Option<crate::ItemsSource>>()).flatten();
+    let source = converted
+        .and_then(|converted| converted.downcast_ref::<Option<crate::ItemsSource>>().cloned())
+        .flatten()
+        .expect("an items source");
+    assert_eq!(source.count(), 2);
+    let first = source.get_at(0).expect("the first item");
+    assert_eq!(first.downcast_ref::<String>().map(String::as_str), Some("First"));
+    let second = source.get_at(1).expect("the second item");
+    assert_eq!(second.downcast_ref::<i32>(), Some(&2));
+    // Markup assigns it the same way.
+    assert_eq!(unbox::<Option<crate::ItemsSource>>(&Some(value.clone())).expect("an items source").count(), 2);
+
+    // The vector whose items may be null.
+    let items: Vec<Option<BoxedValue>> = vec![None, Some(Rc::new(1i32))];
+    let value: BoxedValue = Rc::new(items);
+    let converted = ValueTypes::try_convert(Some(&value), ValueType::of::<Option<crate::ItemsSource>>()).flatten();
+    let source = converted
+        .and_then(|converted| converted.downcast_ref::<Option<crate::ItemsSource>>().cloned())
+        .flatten()
+        .expect("an items source");
+    assert_eq!(source.count(), 2);
+    assert!(source.get_at(0).is_none());
+    assert!(source.get_at(1).is_some());
+    let converted = ValueTypes::try_convert(Some(&value), ValueType::of::<crate::ItemsSource>()).flatten();
+    assert!(converted.is_some_and(|converted| converted.is::<crate::ItemsSource>()));
+}
+
+#[test]
 fn every_value_type_has_its_default_value_constructor() {
     for type_ in declared_types() {
         if type_.kind != MarkupTypeKind::Struct {

@@ -413,6 +413,21 @@ pub(super) fn register_value_types() {
     ValueTypes::register_cast::<Rc<FerroList<Option<BoxedValue>>>, crate::ItemsSource>(|list| {
         crate::ItemsSource::from(list.clone())
     });
+    // A vector of untyped values is an enumerable too (the errors of a control, an
+    // `IEnumerable<object>` in the managed original, which the template of the errors binds
+    // to the items of an items control): the handle holds the items of the vector. The
+    // conversions are what a binding delivers the vector with, to the handle and to its
+    // nullable form.
+    ValueTypes::register_cast::<Vec<BoxedValue>, crate::ItemsSource>(|items| crate::ItemsSource::from(items.clone()));
+    ValueTypes::register_conversion::<Vec<BoxedValue>, Option<crate::ItemsSource>>(|items| {
+        Some(Some(crate::ItemsSource::from(items.clone())))
+    });
+    ValueTypes::register_cast::<Vec<Option<BoxedValue>>, crate::ItemsSource>(|items| {
+        crate::ItemsSource::from(items.clone())
+    });
+    ValueTypes::register_conversion::<Vec<Option<BoxedValue>>, Option<crate::ItemsSource>>(|items| {
+        Some(Some(crate::ItemsSource::from(items.clone())))
+    });
     ValueTypes::register_nullable::<Rc<TrayIcons>>();
     ValueTypes::register_nullable::<FerroList<Ref<TrayIcon>>>();
     ValueTypes::register_cast::<Rc<TrayIcons>, FerroList<Ref<TrayIcon>>>(|c| (***c).clone());
