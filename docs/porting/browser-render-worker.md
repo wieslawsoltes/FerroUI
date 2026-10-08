@@ -507,6 +507,7 @@ Nothing written for this step had to change. Built and run in headless Chrome:
 - With threads: `storage_view` links and starts in a module with atomics for the first time and passes its 19 checks, among them the streamed save through the one service worker and, without the headers, one service worker that both isolates the page and streams the save; `thread_spawn` passes its 3 checks and `render_worker_clear` its 2 against the merged worker.
 - Without threads: `storage_view` passes its 18 checks and `themed_view` its 30.
 - The type check, the linter and the pixel test of `webapp/` pass, the pixel test with a grown and with a shared memory; the host tests of the browser crate pass (171).
+- Open: in the threaded build the check "the service worker is registered at the root of the site and streams the polyfill's download" of `storage_view.test.mjs` fails about one run in five (the streamed file is never downloaded; no error in the page). The build without threads passed the same check eight times out of eight, so the cause is in the path with the isolation headers; it is not found yet.
 - The fixed memory of the threaded build (512 MB by default) was granted in every run. The measured peak of the catalog, which section 5 asks for, is still to be taken (B2.7).
 
 ## B2.3: pacing, software frames, resize, and the wait (written and validated, 2026-10-08)
