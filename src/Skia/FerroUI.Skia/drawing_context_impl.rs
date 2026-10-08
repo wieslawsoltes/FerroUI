@@ -259,8 +259,12 @@ impl DrawingContextImpl {
             None
         };
 
+        // The options registered on this thread, else the ones the backend
+        // was initialized with (the render thread has no services).
         let use_opacity_save_layer = FerroLocator::current()
             .get_service::<SkiaOptions>()
+            .map(|options| *options)
+            .or_else(SkiaPlatform::options)
             .is_some_and(|options| options.use_opacity_save_layer);
 
         let mut context = Self {

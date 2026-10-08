@@ -106,6 +106,10 @@ pub struct ServerCompositor {
     pools: CompositorPools,
     animations: ServerCompositorAnimations,
     render_interface_feature_cache: RefCell<Option<Rc<HashMap<TypeId, Rc<dyn Any>>>>>,
+    /// The text renderer of the debug overlays. It is made from the default
+    /// typeface, which belongs to the thread of the font manager: see
+    /// [`diagnostic_text_renderer`](Self::diagnostic_text_renderer).
+    diagnostic_text_renderer: RefCell<Option<Rc<super::DiagnosticTextRenderer>>>,
     _context_subscriptions: RefCell<Vec<Rc<dyn IDisposable>>>,
 }
 
@@ -146,6 +150,7 @@ impl ServerCompositor {
             pools: CompositorPools::default(),
             animations: ServerCompositorAnimations::new(),
             render_interface_feature_cache: RefCell::new(None),
+            diagnostic_text_renderer: RefCell::new(None),
             _context_subscriptions: RefCell::new(Vec::new()),
         });
         let weak = Rc::downgrade(&compositor);
@@ -196,6 +201,26 @@ impl ServerCompositor {
 
     pub fn render_interface(&self) -> &Rc<PlatformRenderInterfaceContextManager> {
         &self.render_interface
+    }
+
+    /// The text renderer of the debug overlays, shared by the targets.
+    ///
+    /// It can only be created on a thread that has the font manager (the UI
+    /// thread; upstream's services are global and the first overlay creates
+    /// it wherever it is drawn). The compositor asks for it under the lock
+    /// when debug overlays are switched on; a frame of the render thread
+    /// uses what is there and draws no overlay text until then.
+    pub fn diagnostic_text_renderer(&self) -> Option<Rc<super::DiagnosticTextRenderer>> {
+        if self.diagnostic_text_renderer.borrow().is_none() {
+            // Absent in a unit test without a platform, and on a thread
+            // without services.
+            {
+                use crate::LocatorExtensions as _;
+                crate::FerroLocator::current().get_service::<dyn crate::platform::IFontManagerImpl>()?;
+            }
+            *self.diagnostic_text_renderer.borrow_mut() = Some(Rc::new(super::DiagnosticTextRenderer::create_default()));
+        }
+        self.diagnostic_text_renderer.borrow().clone()
     }
 
     pub fn options(&self) -> &CompositionOptions {

@@ -220,6 +220,21 @@ This replaces the thread-local server compositor of R3 (the server compositor is
 
 Open for the rest of R5: the audit of what a frame reaches outside the lock when it runs on the render thread (the service locator and other thread-locals, the UI dispatcher, the objects R2 bound to the UI thread: surfaces, drawing surface updates, interop imports); the native backend's surfaces and Metal context; the option and `Compositor::new` choosing the mode.
 
+### R5.2: what a frame reaches outside the lock
+
+A frame on the render thread has no service locator (it belongs to a thread here, where upstream's is global) and must not touch objects of the UI thread. Audit of `rendering/composition/server/`, `drawing/`, `brushes/` and the drawing path of the Skia backend:
+
+| Found | Settled |
+|---|---|
+| `PlatformRenderInterfaceContextManager` looks the render interface up when it creates the backend context | Done in R5.1: looked up when the manager is created; `platform_render_interface()` hands it to the rest of the server side. |
+| `ServerCompositionTarget::new` looks the render interface up for the dirty rect trackers (a target is created by the thread that applies the batch) | Done: asks the compositor's context manager. |
+| The debug overlays: the text renderer is made from the default typeface (font manager, typefaces: objects of the UI thread), and the time graphs look the render interface up | Done: one text renderer per server compositor, created under the lock on the UI thread when debug overlays are switched on (`CompositionTarget::set_debug_overlays`); the graphs take the render interface from the compositor. A frame of the render thread draws no overlay text until the renderer exists. Its glyph runs are shared resources since R1.2. |
+| Skia `DrawingContextImpl` reads `SkiaOptions` from the service locator for every context | Done: falls back to the options the backend was initialized with (`SkiaPlatform::options`). |
+| Skia paint, rounded rectangle and text blob builder caches are thread-local | No change: per-thread caches, as upstream's are thread-static. |
+| `ServerCompositor::render` and the UI dispatcher | Done in R5.1: only a frame of the UI thread disables its processing. |
+| The three kinds R2 bound to the UI thread in `ThreadBound`: the render surfaces of a target, the update closures of a drawing surface, the import and dispose closures of the interop objects | **Open.** A frame of the render thread panics on them. The surfaces are next: they are what a window needs. |
+| `Compositor::server()` callers outside tests: `composition_interop.rs` (three places) | **Open**, with the interop closures. |
+
 ### Scope of R3, surveyed
 
 What the UI side asks the server compositor for directly today (outside `rendering/composition/server/`, tests aside). Each becomes a member of the handle the compositor keeps, a job, or a readback:

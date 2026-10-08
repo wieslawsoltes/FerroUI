@@ -1,10 +1,10 @@
 use super::{DiagnosticTextRenderer, FpsCounter, FrameTimeGraph, ServerCompositionTarget};
 use crate::media::immutable::ImmutableSolidColorBrush;
 use crate::media::{BoxShadows, Colors};
-use crate::platform::{IDrawingContextImpl, IFontManagerImpl};
+use crate::platform::IDrawingContextImpl;
 use crate::rendering::{LayoutPassTiming, RendererDebugOverlays};
-use crate::{FerroLocator, LocatorExtensions, Matrix, Rect, RoundedRect, Size};
-use std::cell::{Cell, OnceCell, RefCell};
+use crate::{Matrix, Rect, RoundedRect, Size};
+use std::cell::{Cell, OnceCell};
 use std::rc::Rc;
 use std::time::Duration;
 
@@ -22,12 +22,14 @@ pub struct CompositionTargetOverlays {
     old_fps_counter_rect: Cell<Option<Rect>>,
     update_started: Cell<Duration>,
     debug_overlays: Cell<RendererDebugOverlays>,
-    diagnostic_text_renderer: RefCell<Option<Rc<DiagnosticTextRenderer>>>,
+    /// The compositor of the target: where the services of the overlays
+    /// come from.
+    compositor: std::rc::Weak<super::ServerCompositor>,
 }
 
 impl CompositionTargetOverlays {
-    pub fn new() -> Self {
-        Self::default()
+    pub fn new(compositor: &Rc<super::ServerCompositor>) -> Self {
+        Self { compositor: Rc::downgrade(compositor), ..Self::default() }
     }
 
     fn now(target: &ServerCompositionTarget) -> Duration {
@@ -57,12 +59,7 @@ impl CompositionTargetOverlays {
     }
 
     fn diagnostic_text_renderer(&self) -> Option<Rc<DiagnosticTextRenderer>> {
-        if self.diagnostic_text_renderer.borrow().is_none() {
-            // We are running in some unit test context
-            FerroLocator::current().get_service::<dyn IFontManagerImpl>()?;
-            *self.diagnostic_text_renderer.borrow_mut() = Some(Rc::new(DiagnosticTextRenderer::create_default()));
-        }
-        self.diagnostic_text_renderer.borrow().clone()
+        self.compositor.upgrade()?.diagnostic_text_renderer()
     }
 
     pub fn require_layer(&self) -> bool {
@@ -71,7 +68,15 @@ impl CompositionTargetOverlays {
 
     fn create_time_graph(&self, title: &str) -> Option<FrameTimeGraph> {
         let renderer = self.diagnostic_text_renderer()?;
-        Some(FrameTimeGraph::new(360, Size::new(360.0, 64.0), 1000.0 / 60.0, title, renderer))
+        let render_interface = self.compositor.upgrade()?.render_interface().platform_render_interface()?;
+        Some(FrameTimeGraph::with_render_interface(
+            render_interface,
+            360,
+            Size::new(360.0, 64.0),
+            1000.0 / 60.0,
+            title,
+            renderer,
+        ))
     }
 
     pub fn on_changed(&self, debug_overlays: RendererDebugOverlays) {
