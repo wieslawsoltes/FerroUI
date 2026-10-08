@@ -53,7 +53,6 @@ fn show_and_remove(control: Ref<Control>) -> Ref<Window> {
 }
 
 #[test]
-#[ignore = "gap C314: a dynamic resource keeps the element it is looked up from alive"]
 fn gap_c314_dynamic_resource_bound_to_an_element() {
     let _app = start_catalog_application();
     let border = Border::new();
@@ -68,7 +67,6 @@ fn gap_c314_dynamic_resource_bound_to_an_element() {
 }
 
 #[test]
-#[ignore = "gap C314: a dynamic resource keeps the element it is looked up from alive"]
 fn gap_c314_dynamic_resource_of_an_object_under_an_element() {
     let _app = start_catalog_application();
     let border = from_markup_value::<Ref<Border>>(&Some(load_text(&format!(
@@ -86,7 +84,6 @@ fn gap_c314_dynamic_resource_of_an_object_under_an_element() {
 }
 
 #[test]
-#[ignore = "gap C314: a dynamic resource keeps the element it is looked up from alive"]
 fn gap_c314_page_with_a_control_theme_that_left_the_tree() {
     let _app = start_catalog_application();
     let page = ContentPage::new();
