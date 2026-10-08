@@ -1,14 +1,14 @@
 //! Port of `Data/DynamicResourceExpression.cs`.
 
 use crate::converters::ColorToBrushConverter;
-use ferroui_base::controls::{IResourceProvider, ResourceHostRef, ResourceKey, ResourcesChangedEventArgs};
+use ferroui_base::controls::{IResourceProvider, ResourceHostRef, ResourceKey, ResourcesChangedEventArgs, WeakResourceHost};
 use ferroui_base::data::core::{Publish, UntypedBindingExpression, UntypedBindingExpressionBase, ValueType, ValueTypes};
 use ferroui_base::data::BindingPriority;
 use ferroui_base::logging::LogEventLevel;
 use ferroui_base::media::IBrush;
 use ferroui_base::reactive::IDisposable;
 use ferroui_base::styling::ThemeVariant;
-use ferroui_base::{BoxedValue, DoNothingType, FerroProperty, Ref, StyledElement, UnsetValueType};
+use ferroui_base::{BoxedValue, DoNothingType, FerroProperty, Ref, StyledElement, UnsetValueType, WeakRef};
 use ferroui_controls::Application;
 use std::cell::{Cell, RefCell};
 use std::rc::{Rc, Weak};
@@ -23,14 +23,37 @@ pub(crate) enum DynamicResourceAnchor {
     Host(ResourceHostRef),
 }
 
+/// The anchor as the expression keeps it. The managed original holds the
+/// element and the host themselves, which the collector makes harmless; here
+/// an element owns the expressions of its values, and an expression that held
+/// the element (or an element above it) would keep both alive, so they are
+/// held weakly. A resource provider is no element and stays held.
+enum HeldAnchor {
+    Element(WeakRef<StyledElement>),
+    Provider(Rc<dyn IResourceProvider>),
+    Host(WeakResourceHost),
+}
+
+impl From<DynamicResourceAnchor> for HeldAnchor {
+    fn from(anchor: DynamicResourceAnchor) -> Self {
+        match anchor {
+            DynamicResourceAnchor::Element(element) => HeldAnchor::Element(element.downgrade()),
+            DynamicResourceAnchor::Provider(provider) => HeldAnchor::Provider(provider),
+            DynamicResourceAnchor::Host(host) => HeldAnchor::Host(host.downgrade()),
+        }
+    }
+}
+
 /// The binding expression of a dynamic resource: publishes the resource and
 /// follows the resources and the theme variant of its host.
 pub(crate) struct DynamicResourceExpression {
     this: Weak<DynamicResourceExpression>,
     base: UntypedBindingExpressionBase,
     resource_key: ResourceKey,
-    anchor: Option<DynamicResourceAnchor>,
-    host: RefCell<Option<ResourceHostRef>>,
+    anchor: Option<HeldAnchor>,
+    /// Held weakly, as the anchor is: the host is most often the element
+    /// that owns this expression.
+    host: RefCell<Option<WeakResourceHost>>,
     provider: RefCell<Option<Rc<dyn IResourceProvider>>>,
     override_theme_variant: Cell<bool>,
     target_type_is_brush: Cell<bool>,
@@ -50,7 +73,7 @@ impl DynamicResourceExpression {
             this: this.clone(),
             base: UntypedBindingExpressionBase::new(this.clone(), priority, None, false),
             resource_key,
-            anchor,
+            anchor: anchor.map(HeldAnchor::from),
             host: RefCell::new(None),
             provider: RefCell::new(None),
             override_theme_variant: Cell::new(false),
@@ -71,17 +94,17 @@ impl DynamicResourceExpression {
         let host = self.try_get_resource_host();
         if host.is_none() {
             // The target is not an IResourceHost, so we need to find one from the anchor.
-            if let Some(DynamicResourceAnchor::Provider(provider)) = &self.anchor {
-                *self.host.borrow_mut() = provider.owner();
+            if let Some(HeldAnchor::Provider(provider)) = &self.anchor {
+                self.set_host(provider.owner());
                 *self.provider.borrow_mut() = Some(provider.clone());
                 self.override_theme_variant.set(self.theme_variant.borrow().is_some());
             }
         } else {
-            *self.host.borrow_mut() = host;
+            self.set_host(host);
         }
 
         // If we wouldn't find a host or provider then log an error: we can't do anything.
-        if self.host.borrow().is_none() && self.provider.borrow().is_none() {
+        if self.host().is_none() && self.provider.borrow().is_none() {
             self.log_error(
                 &format!(
                     "Unable to find IResourceHost or IResourceProvider from which to lookup DynamicResource {}.",
@@ -103,7 +126,7 @@ impl DynamicResourceExpression {
             }));
             *self.owner_changed_subscription.borrow_mut() = Some(subscription);
         }
-        let host = self.host.borrow().clone();
+        let host = self.host();
         self.subscribe(host.as_ref());
 
         // And publish the initial value.
@@ -126,7 +149,7 @@ impl DynamicResourceExpression {
     fn on_resource_provider_owner_changed(&self) {
         self.unsubscribe();
         let host = self.provider.borrow().as_ref().and_then(|provider| provider.owner());
-        *self.host.borrow_mut() = host.clone();
+        self.set_host(host.clone());
         self.subscribe(host.as_ref());
         self.publish_value();
     }
@@ -136,18 +159,14 @@ impl DynamicResourceExpression {
             return;
         }
 
-        let theme_variant = self
-            .host
-            .borrow()
-            .as_ref()
-            .and_then(|host| host.as_theme_variant_host().and_then(|host| host.actual_theme_variant()));
+        let theme_variant =
+            self.host().as_ref().and_then(|host| host.as_theme_variant_host().and_then(|host| host.actual_theme_variant()));
         *self.theme_variant.borrow_mut() = theme_variant;
         self.publish_value();
     }
 
     fn publish_value(&self) {
-        let host = self.host.borrow().clone();
-        let value = match host {
+        let value = match self.host() {
             Some(host) => {
                 let theme = self.theme_variant.borrow().clone();
                 let value =
@@ -205,10 +224,19 @@ impl DynamicResourceExpression {
         }
 
         match &self.anchor {
-            Some(DynamicResourceAnchor::Element(element)) => Some(ResourceHostRef::Element(element.clone())),
-            Some(DynamicResourceAnchor::Host(host)) => Some(host.clone()),
+            Some(HeldAnchor::Element(element)) => element.upgrade().map(ResourceHostRef::Element),
+            Some(HeldAnchor::Host(host)) => host.upgrade(),
             _ => None,
         }
+    }
+
+    /// The host the resource is looked up from, while it is alive.
+    fn host(&self) -> Option<ResourceHostRef> {
+        self.host.borrow().as_ref().and_then(WeakResourceHost::upgrade)
+    }
+
+    fn set_host(&self, host: Option<ResourceHostRef>) {
+        *self.host.borrow_mut() = host.as_ref().map(ResourceHostRef::downgrade);
     }
 
     fn subscribe(&self, host: Option<&ResourceHostRef>) {
