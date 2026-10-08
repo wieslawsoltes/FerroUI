@@ -1,44 +1,40 @@
-//! The compiled markup of the crate (`compiled_xaml.rs`,
-//! `compiled_xaml_source_info.rs`) is the output of the emitter of Rust source
-//! for the documents of [`crate::documents`], compiled with the `.xamlmeta` of
-//! the crates whose documents they include (docs/porting/xaml.md, 9.7.3);
-//! `compiled_xaml.xamlmeta` describes it in turn. Not a test of upstream.
+//! The compiled markup of the crate (the modules `compiled_xaml` and
+//! `compiled_xaml_source_info`) is the output of the emitter of Rust source for
+//! the documents of [`crate::documents`], compiled with the `.xamlmeta` of the
+//! crates whose documents they include (docs/porting/xaml.md, 9.6 and 9.7.3).
+//! Not a test of upstream.
 //!
-//! ```text
-//! cargo test -p xaml-include-fixture-application --lib tests::compiled_xaml_tests::regenerate_compiled_xaml -- --ignored
-//! ```
+//! The build script of the crate writes it to `OUT_DIR`. The test compares that
+//! output with the output of the emitter run here, in the tests of the crate:
+//! the two hosts register the same crates, and the comparison shows that the
+//! build script compiles the documents to the text a test compiles them to,
+//! which is how the output was produced while it was checked in.
 
-use ferroui_base::TypeInfo;
 use ferroui_controls::testing::{TestServices, UnitTestApplication};
 use ferroui_markup_xaml::RuntimeXamlLoaderConfiguration;
 use ferroui_markup_xaml_loader::rust_emitter::{generate_file, XamlMetadata};
 use ferroui_markup_xaml_loader::FerroRuntimeXamlLoader;
 
 use crate::documents::{DOCUMENTS, SOURCE_INFO_DOCUMENTS};
-use crate::{LocaleCollection, ASSEMBLY};
+use crate::ASSEMBLY;
 
-/// The `.xamlmeta` files of the crates whose documents the documents include, relative
-/// to the directory of this crate: what build integration reads from
-/// `DEP_<CRATE>_XAML_XAMLMETA` (docs/porting/xaml.md, 9.6.3).
-pub(crate) const DEPENDENCIES: &[&str] = &[
-    "../Theme/compiled_xaml.xamlmeta",
-    "../../../src/FerroUI.Themes.Simple/compiled_xaml.xamlmeta",
-    "../../../src/FerroUI.Themes.Fluent/compiled_xaml.xamlmeta",
+/// The output of the build script.
+const BUILT: &[(&str, &str)] = &[
+    ("compiled_xaml.rs", include_str!(concat!(env!("OUT_DIR"), "/xaml/compiled_xaml.rs"))),
+    ("compiled_xaml_source_info.rs", include_str!(concat!(env!("OUT_DIR"), "/xaml/compiled_xaml_source_info.rs"))),
 ];
+
+/// The `.xamlmeta` of the crate, which the build script wrote, and the files of the
+/// crates whose documents the documents include, which it names: the files Cargo
+/// handed to the build script as `DEP_<CRATE>_XAML_XAMLMETA` (docs/porting/xaml.md,
+/// 9.6.3).
+fn metadata() -> Vec<XamlMetadata> {
+    XamlMetadata::read(env!("FERROUI_XAMLMETA")).unwrap_or_else(|e| panic!("the .xamlmeta of the crate cannot be read: {e}"))
+}
 
 /// The compiled markup of the dependencies.
 pub(crate) fn dependencies() -> Vec<XamlMetadata> {
-    let mut models = Vec::new();
-    for path in DEPENDENCIES {
-        for model in XamlMetadata::read(format!("{}/{path}", env!("CARGO_MANIFEST_DIR")))
-            .unwrap_or_else(|e| panic!("the .xamlmeta of a dependency cannot be read: {e}"))
-        {
-            if !models.iter().any(|known: &XamlMetadata| known.name == model.name) {
-                models.push(model);
-            }
-        }
-    }
-    models
+    metadata().into_iter().skip(1).collect()
 }
 
 /// The root URI of the documents of the crate.
@@ -46,12 +42,12 @@ pub(crate) fn root_uri() -> String {
     format!("ferres://{}/", ASSEMBLY.name)
 }
 
-/// The generated files, by their path below the crate directory.
-fn generate() -> Vec<(&'static str, String)> {
+/// The files the build script writes, as the emitter generates them here, by name, and
+/// the `.xamlmeta` of the crate without the files of its dependencies.
+fn generate() -> (Vec<(&'static str, String)>, XamlMetadata) {
     let _app = UnitTestApplication::start(TestServices::styled_window());
     crate::register_types();
     FerroRuntimeXamlLoader::register();
-    TypeInfo::register_rust_paths(&[(LocaleCollection::TYPE, "xaml_include_fixture_application::LocaleCollection")]);
     let dependencies = dependencies();
 
     let mut configuration = RuntimeXamlLoaderConfiguration::new();
@@ -69,41 +65,39 @@ fn generate() -> Vec<(&'static str, String)> {
         .collect();
     assert!(not_eligible.is_empty(), "documents are not eligible:\n{}", not_eligible.join("\n"));
 
-    let metadata = file.metadata("xaml_include_fixture_application", "::xaml_include_fixture_application::compiled_xaml", DEPENDENCIES);
-    vec![
-        ("compiled_xaml.rs", file.source),
-        ("compiled_xaml_source_info.rs", source_info_file.source),
-        ("compiled_xaml.xamlmeta", metadata.to_json()),
-    ]
+    let metadata = file.metadata("xaml_include_fixture_application", "::xaml_include_fixture_application::compiled_xaml", &[]);
+    (vec![("compiled_xaml.rs", file.source), ("compiled_xaml_source_info.rs", source_info_file.source)], metadata)
 }
 
+/// The line of the first difference of two texts, for the message of a failure.
+fn first_difference(a: &str, b: &str) -> usize {
+    a.lines().zip(b.lines()).position(|(a, b)| a != b).unwrap_or_else(|| a.lines().count().min(b.lines().count())) + 1
+}
+
+/// The build script compiles the documents to the text the emitter gives here.
 #[test]
-fn compiled_xaml_is_up_to_date() {
-    for (path, generated) in generate() {
-        let checked_in = std::fs::read_to_string(format!("{}/{path}", env!("CARGO_MANIFEST_DIR")))
-            .unwrap_or_else(|e| panic!("{path} cannot be read: {e}"));
+fn build_script_output_is_the_emitters() {
+    let (generated, generated_metadata) = generate();
+    for ((name, built), (_, expected)) in BUILT.iter().zip(&generated) {
         assert!(
-            generated == checked_in,
-            "{path} is out of date; regenerate it with \
-             `cargo test -p xaml-include-fixture-application --lib tests::compiled_xaml_tests::regenerate_compiled_xaml -- --ignored`"
+            built == expected,
+            "{name} of the build script differs from the emitter's output in the tests (first difference at line {})",
+            first_difference(built, expected)
         );
     }
+    let built_metadata = metadata().remove(0);
+    assert_eq!(built_metadata.name, generated_metadata.name);
+    assert_eq!(built_metadata.crate_name, generated_metadata.crate_name);
+    assert_eq!(built_metadata.documents, generated_metadata.documents);
 }
 
 /// The `.xamlmeta` of the application lists the files of its dependencies, which are
-/// read with it.
+/// read with it: the files of the `DEP_<CRATE>_XAML_XAMLMETA` variables, in the order
+/// of the names of the variables.
 #[test]
 fn compiled_xaml_metadata_reads_its_dependencies() {
-    let read = XamlMetadata::read(concat!(env!("CARGO_MANIFEST_DIR"), "/compiled_xaml.xamlmeta")).expect("the files can be read");
+    let read = metadata();
     let names: Vec<&str> = read.iter().map(|model| model.name.as_str()).collect();
-    assert_eq!(names, [ASSEMBLY.name, "Tests", "FerroUI.Themes.Simple", "FerroUI.Themes.Fluent"]);
-}
-
-#[test]
-#[ignore = "writes the generated files; run it to regenerate the checked-in output"]
-fn regenerate_compiled_xaml() {
-    for (path, generated) in generate() {
-        std::fs::write(format!("{}/{path}", env!("CARGO_MANIFEST_DIR")), generated)
-            .unwrap_or_else(|e| panic!("{path} cannot be written: {e}"));
-    }
+    assert_eq!(names, [ASSEMBLY.name, "FerroUI.Themes.Fluent", "FerroUI.Themes.Simple", "Tests"]);
+    assert_eq!(read[0].dependencies.len(), 3);
 }

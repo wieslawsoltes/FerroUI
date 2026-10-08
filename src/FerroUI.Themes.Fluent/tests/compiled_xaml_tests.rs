@@ -25,10 +25,12 @@ fn generate() -> ClassFile {
     crate::register_types();
     // The emitter reads the documents of the class as the run-time loader does.
     FerroRuntimeXamlLoader::register_class_document(<FluentTheme as StaticType>::TYPE, FluentTheme::DOCUMENT_URI);
+    // The constructor is stated: the markup metadata of the theme declares `new()` next to the
+    // constructor that takes the service provider, so the compiler would pick `new()`.
     // Upstream's class has the one constructor `FluentTheme(IServiceProvider? sp = null)`.
     generate_class_file(
         <FluentTheme as StaticType>::TYPE,
-        ClassConstructor::ServiceProvider("with_service_provider"),
+        Some(ClassConstructor::ServiceProvider("with_service_provider")),
         "::ferroui_themes_fluent::compiled_xaml",
         &[],
     )

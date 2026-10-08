@@ -48,7 +48,7 @@ pub fn try_load(
     uri: &str,
 ) -> ::core::result::Result<::core::option::Option<::ferroui_base::BoxedValue>, ::ferroui_markup_xaml::XamlLoadException> {
     if rt::uri_equals(uri, "ferres://tests/Xaml/StyleWithServiceProvider.xaml", "") {
-        return ::core::result::Result::Ok(::ferroui_base::metadata::into_markup_value(crate::StyleWithServiceProvider::new(::core::option::Option::Some(::ferroui_markup_xaml::xaml_il::runtime::XamlIlRuntimeHelpers::create_root_service_provider_v3(service_provider.cloned())))));
+        return ::core::result::Result::Ok(::ferroui_base::metadata::into_markup_value(crate::StyleWithServiceProvider::__markup_new_0(::core::option::Option::Some(::ferroui_markup_xaml::xaml_il::runtime::XamlIlRuntimeHelpers::create_root_service_provider_v3(service_provider.cloned())))));
     }
     ::core::result::Result::Ok(::core::option::Option::None)
 }

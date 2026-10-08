@@ -3,15 +3,23 @@
 //! of the eligible documents with the table that registers them as the
 //! compiled markup of an assembly (docs/porting/xaml.md, 9.7).
 //!
-//! # Interim integration
+//! # Hosts of the emitter
 //!
 //! The host of the emitter links the framework (the transform runs against
-//! the run-time type system), so a build script would have to take the
-//! framework as a build dependency and compile it twice. Until the source
-//! scanner of section 9.5 exists, a crate keeps the generated file CHECKED
-//! IN: a test calls [`generate_file`] and compares the result with the file
-//! (and an ignored test rewrites it). The test crate of the XAML stack does
-//! exactly that (`tests/FerroUI.Markup.Xaml.UnitTests/emitter`).
+//! the run-time type system), so the types the documents name are the types
+//! the host registered. Two hosts exist (docs/porting/xaml.md, 9.6):
+//!
+//! - a build script (`ferroui-build`, `src/FerroUI.Build.Tasks`), which takes
+//!   the crates of those types as build dependencies and writes the file to
+//!   `OUT_DIR`. A build script cannot link the crate it builds, so this host
+//!   compiles the documents that name types of other crates only;
+//! - a test of the crate, which calls [`generate_file`] or
+//!   [`generate_class_file`] and compares the result with the CHECKED-IN
+//!   file (an ignored test rewrites it). It links the crate, so it compiles
+//!   the documents of the classes of the crate (`x:Class`) and the documents
+//!   that name its types.
+//!
+//! The source scanner of section 9.5 removes the difference.
 
 use ::ferroui_markup_xaml::RuntimeXamlLoaderConfiguration;
 
@@ -547,6 +555,9 @@ pub fn transformed_class_group(class: &'static ferroui_base::TypeInfo) -> Result
 /// creates the class with (`XamlCompilerTaskExecutor`: a public parameterless
 /// constructor, else a public constructor whose single parameter is the
 /// service provider). The name is the associated function of the class.
+///
+/// [`generate_class_file`] picks it as upstream's compiler does unless its
+/// caller states it.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum ClassConstructor {
     /// `new T()`: a function without parameters.
@@ -554,6 +565,58 @@ pub enum ClassConstructor {
     /// `new T(CreateRootServiceProviderV3(serviceProvider))`: a function that takes
     /// `Option<Rc<dyn IServiceProvider>>`.
     ServiceProvider(&'static str),
+}
+
+impl ClassConstructor {
+    /// The constructor upstream's compiler creates `class` with in the loader table
+    /// (`XamlCompilerTaskExecutor`), read from the constructors the type system projects
+    /// for the class: a public parameterless constructor (the default constructor of
+    /// the class, `T::new()`), else a public constructor whose single parameter is the
+    /// service provider (the typed function of the declared constructor,
+    /// `T::__markup_new_<n>`). `Ok(None)` when the class has neither: upstream reports
+    /// the document as not reachable through the loader and writes no entry for it.
+    ///
+    /// `Err` when the constructor exists and cannot be called from generated code: it
+    /// has no typed function, the function is fallible, or its parameter is not
+    /// `Option<Rc<dyn IServiceProvider>>`.
+    pub(crate) fn of(
+        class: &'static ferroui_base::TypeInfo,
+        configuration: &xamlx::transform::TransformerConfiguration,
+    ) -> Result<Option<Self>, String> {
+        use crate::runtime::type_system::RuntimeConstructor;
+        let constructors = FerroXamlIlRuntimeCompiler::type_system().type_of_class(class).constructors();
+        if constructors.iter().any(|c| c.is_public() && !c.is_static() && c.parameters().is_empty()) {
+            if class.default_constructor().is_none() {
+                return Err(format!("the parameterless constructor of {} is not its default constructor", class.full_name()));
+            }
+            return Ok(Some(ClassConstructor::Parameterless("new")));
+        }
+        let service_provider = configuration.type_mappings.service_provider().map_err(|e| e.message())?;
+        let Some(constructor) = constructors.iter().find(|c| {
+            let parameters = c.parameters();
+            c.is_public() && !c.is_static() && parameters.len() == 1 && parameters[0].equals(&*service_provider)
+        }) else {
+            return Ok(None);
+        };
+        let optional = std::any::TypeId::of::<Option<std::rc::Rc<dyn ferroui_base::metadata::IServiceProvider>>>();
+        let emit = constructor
+            .as_any()
+            .downcast_ref::<RuntimeConstructor>()
+            .filter(|constructor| {
+                constructor.parameter_handles.first().copied().flatten().is_some_and(|handle| handle.id() == optional)
+            })
+            .and_then(|constructor| constructor.declared)
+            .and_then(|declared| declared.emit)
+            .filter(|emit| !emit.fallible)
+            .ok_or_else(|| {
+                format!(
+                    "the constructor of {} that takes the service provider has no typed function \
+                     `fn(Option<Rc<dyn IServiceProvider>>) -> Ref<Self>`",
+                    class.full_name()
+                )
+            })?;
+        Ok(Some(ClassConstructor::ServiceProvider(emit.function)))
+    }
 }
 
 /// Whether the document `xaml` is public, from the `x:ClassModifier` directive of
@@ -601,9 +664,16 @@ fn class_modifier_public(xaml: &str) -> Result<Option<bool>, String> {
 ///
 /// The file ends with `try_load`, the `CompiledXamlLoader` of the documents
 /// (upstream's `!XamlLoader.TryLoad`): a load by URI of
-/// the document of the class creates the class with `constructor`, a load of
+/// the document of the class creates the class with its constructor, a load of
 /// another public document calls its build function with a root service
 /// provider; a document that is not public has no entry, as upstream.
+///
+/// `constructor`: `None` lets the compiler pick the constructor of the class as
+/// upstream's does ([`ClassConstructor`]); a class without one has no entry, and
+/// [`ClassFile::warnings`] holds upstream's warning. `Some` states it, for a class
+/// whose markup metadata declares constructors the class of upstream does not have
+/// (the two themes: `new()` next to the constructor that takes the service provider,
+/// where upstream has the one constructor with an optional parameter).
 ///
 /// `module_path` is the absolute path of the module the file is the body of
 /// (`::my_crate::compiled_xaml`), for the `.xamlmeta` of the file
@@ -615,7 +685,7 @@ fn class_modifier_public(xaml: &str) -> Result<Option<bool>, String> {
 /// is compiled whole or not at all.
 pub fn generate_class_file(
     class: &'static ferroui_base::TypeInfo,
-    constructor: ClassConstructor,
+    constructor: Option<ClassConstructor>,
     module_path: &str,
     dependencies: &[XamlMetadata],
 ) -> Result<ClassFile, String> {
@@ -637,6 +707,17 @@ pub fn generate_class_file(
     configuration.local_assembly = group.assembly;
     let transformed = FerroXamlIlRuntimeCompiler::transform_documents(&borrowed(&documents), &configuration, dependencies)
         .map_err(|error| format!("the group does not transform: {}", error.message()))?;
+    let constructor = match constructor {
+        Some(constructor) => Some(constructor),
+        None => ClassConstructor::of(class, &transformed[0].configuration)?,
+    };
+    let mut warnings = Vec::new();
+    if constructor.is_none() {
+        warnings.push(format!(
+            "XAML resource \"{}\" won't be reachable via runtime loader, as no public constructor was found",
+            documents[0].2.clone().unwrap_or_default()
+        ));
+    }
 
     // Whether each document is public. A class document follows its class, which has a
     // public Rust path; the directive, if present, must agree, as upstream validates it.
@@ -791,6 +872,7 @@ pub fn generate_class_file(
     let assembly = configuration.local_assembly;
     Ok(ClassFile {
         source,
+        warnings,
         assembly_name: assembly.map_or_else(String::new, |assembly| assembly.name.to_string()),
         crate_name: own_crate.to_string(),
         documents: exported,
@@ -801,6 +883,8 @@ pub fn generate_class_file(
 pub struct ClassFile {
     /// The complete text of the file.
     pub source: String,
+    /// The warnings of the compilation, with upstream's texts (`XamlLoaderUnreachable`).
+    pub warnings: Vec<String>,
     assembly_name: String,
     crate_name: String,
     documents: Vec<DocumentModel>,
@@ -829,7 +913,7 @@ fn loader_table(
     names: &[String],
     loadable: &[usize],
     class_path: &str,
-    constructor: ClassConstructor,
+    constructor: Option<ClassConstructor>,
 ) -> String {
     let provider = "::ferroui_markup_xaml::xaml_il::runtime::XamlIlRuntimeHelpers::create_root_service_provider_v3(service_provider.cloned())";
     let class_path = class_path.trim_start_matches("::");
@@ -842,18 +926,16 @@ fn loader_table(
     source.push_str("    service_provider: ::core::option::Option<&::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,\n");
     source.push_str("    uri: &str,\n");
     source.push_str(") -> ::core::result::Result<::core::option::Option<::ferroui_base::BoxedValue>, ::ferroui_markup_xaml::XamlLoadException> {\n");
-    for index in std::iter::once(0).chain(loadable.iter().copied()) {
+    // The class has an entry when it has a constructor the table can call.
+    for index in constructor.iter().map(|_| 0).chain(loadable.iter().copied()) {
         let uri = documents[index].2.clone().unwrap_or_default();
         source.push_str(&format!("    if rt::uri_equals(uri, {}, \"\") {{\n", rust_string_literal(&uri)));
-        let value = if index == 0 {
-            match constructor {
-                ClassConstructor::Parameterless(function) => format!("::{class_path}::{function}()"),
-                ClassConstructor::ServiceProvider(function) => {
-                    format!("::{class_path}::{function}(::core::option::Option::Some({provider}))")
-                }
+        let value = match (index, constructor) {
+            (0, Some(ClassConstructor::Parameterless(function))) => format!("::{class_path}::{function}()"),
+            (0, Some(ClassConstructor::ServiceProvider(function))) => {
+                format!("::{class_path}::{function}(::core::option::Option::Some({provider}))")
             }
-        } else {
-            format!("{}(::core::option::Option::Some({provider}))?", names[index])
+            _ => format!("{}(::core::option::Option::Some({provider}))?", names[index]),
         };
         source.push_str(&format!(
             "        return ::core::result::Result::Ok(::ferroui_base::metadata::into_markup_value({value}));\n"
