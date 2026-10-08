@@ -106,6 +106,26 @@ impl CultureInfo {
         CultureInfo { name: Rc::from(name), lcid, date_time_format: None, number_format: None }
     }
 
+    /// The culture for an IETF language tag (C# `GetCultureInfoByIetfLanguageTag`),
+    /// or `None` for a name that is not an IETF tag (C# throws
+    /// `CultureNotFoundException`): the old names `zh-CHT` and `zh-CHS`, an
+    /// alternate sort order and the traditional sort of Spanish.
+    pub fn get_culture_info_by_ietf_language_tag(name: &str) -> Option<CultureInfo> {
+        // Disallow old zh-CHT/zh-CHS names
+        if name == "zh-CHT" || name == "zh-CHS" {
+            return None;
+        }
+
+        let ci = Self::get_culture_info(name);
+
+        // Disallow alt sorts and es-es_TS
+        if ci.lcid > 0xffff || ci.lcid == 0x040a {
+            return None;
+        }
+
+        Some(ci)
+    }
+
     /// The culture for a Windows language identifier (C# `GetCultureInfo(int)`),
     /// or `None` when the identifier is not known (C# throws `CultureNotFoundException`).
     pub fn get_culture_info_by_lcid(lcid: i32) -> Option<CultureInfo> {

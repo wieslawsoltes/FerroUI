@@ -343,6 +343,7 @@ crate::ferro_rust_paths! {
         crate::styling::ThemeVariant,
         crate::utilities::CalendarWeekRule,
         crate::utilities::CancelEventArgs,
+        crate::utilities::CultureInfo,
         crate::utilities::DateTime,
         crate::utilities::DateTimeKind,
         crate::utilities::DateTimeOffset,

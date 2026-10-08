@@ -287,6 +287,11 @@ pub(crate) fn define_core_types(system: &Rc<RuntimeTypeSystem>) {
         handles![CultureInfo, Option<CultureInfo>],
         Box::new(|b| {
             b.interface(b.t("System.IFormatProvider"));
+            // One source: the metadata the type declares; the member below only
+            // stands in while no metadata is registered.
+            if b.project_metadata("System.Globalization", "CultureInfo") {
+                return;
+            }
             b.property(
                 "InvariantCulture",
                 b.t("System.Globalization.CultureInfo"),

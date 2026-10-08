@@ -4,6 +4,7 @@
 //! A collection is a shared handle (the type itself); a plain class is held
 //! through `Rc`.
 
+use crate::utilities::CultureInfo;
 use crate::animation::{IAnimation, IAnimationSetter, ITransition, KeyFrame, KeyFrames, Transitions};
 use crate::collections::{FerroDictionary, FerroList};
 use crate::data::core::ValueTypes;
@@ -330,6 +331,10 @@ ferro_markup_type!(class CompiledBinding {
     properties: [
         Delay: i32 { get: CompiledBinding::delay, set: CompiledBinding::set_delay },
         Converter: Option<Rc<dyn IValueConverter>> { get: CompiledBinding::converter, set: CompiledBinding::set_converter },
+        ConverterCulture: Option<CultureInfo> {
+            get: CompiledBinding::converter_culture,
+            set: CompiledBinding::set_converter_culture
+        },
         ConverterParameter: Option<BoxedValue> {
             get: CompiledBinding::converter_parameter,
             set: CompiledBinding::set_converter_parameter
@@ -369,6 +374,10 @@ ferro_markup_type!(class ReflectionBinding {
         Converter: Option<Rc<dyn IValueConverter>> {
             get: ReflectionBinding::converter,
             set: ReflectionBinding::set_converter
+        },
+        ConverterCulture: Option<CultureInfo> {
+            get: ReflectionBinding::converter_culture,
+            set: ReflectionBinding::set_converter_culture
         },
         ConverterParameter: Option<BoxedValue> {
             get: ReflectionBinding::converter_parameter,
@@ -413,6 +422,10 @@ ferro_markup_type!(class MultiBinding {
         Bindings: FerroList<Rc<dyn BindingBase>> { get: MultiBinding::bindings, set: MultiBinding::set_bindings }
             [AssignBinding],
         Converter: Option<Rc<dyn IMultiValueConverter>> { get: MultiBinding::converter, set: MultiBinding::set_converter },
+        ConverterCulture: Option<CultureInfo> {
+            get: MultiBinding::converter_culture,
+            set: MultiBinding::set_converter_culture
+        },
         ConverterParameter: Option<BoxedValue> {
             get: MultiBinding::converter_parameter,
             set: MultiBinding::set_converter_parameter
@@ -443,6 +456,10 @@ ferro_markup_type!(class TemplateBinding {
     ],
     properties: [
         Converter: Option<Rc<dyn IValueConverter>> { get: TemplateBinding::converter, set: TemplateBinding::set_converter },
+        ConverterCulture: Option<CultureInfo> {
+            get: TemplateBinding::converter_culture,
+            set: TemplateBinding::set_converter_culture
+        },
         ConverterParameter: Option<BoxedValue> {
             get: TemplateBinding::converter_parameter,
             set: TemplateBinding::set_converter_parameter
