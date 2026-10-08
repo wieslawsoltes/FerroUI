@@ -185,23 +185,130 @@ impl Decimal {
         }
     }
 
+    /// The nearest single-precision number (the explicit conversion of the
+    /// managed type to a float): the double of the value, narrowed.
+    #[inline]
+    pub fn to_f32(&self) -> f32 {
+        self.to_f64() as f32
+    }
+
+    /// The value rounded to an integer, midpoints to even (`Decimal.Round`
+    /// with no decimals, which the conversions of the managed runtime to the
+    /// integer types apply before their range check).
+    pub fn round_to_integer(&self) -> i128 {
+        let mantissa = self.mantissa();
+        let divisor = 10u128.pow(u32::from(self.scale()));
+        let mut integer = mantissa / divisor;
+        let remainder = mantissa % divisor;
+        // The divisor is even whenever there is a remainder (a scale of zero has none).
+        let half = divisor / 2;
+        if remainder > half || (remainder == half && remainder != 0 && integer % 2 == 1) {
+            integer += 1;
+        }
+
+        // At most 2^96, so it fits.
+        if self.is_sign_negative() {
+            -(integer as i128)
+        } else {
+            integer as i128
+        }
+    }
+
     /// The decimal of a double-precision number, rounded to 15 significant
     /// digits (the explicit conversion of a double to the managed type).
     ///
     /// Panics when the number is not finite or is outside the value range.
     pub fn from_f64(value: f64) -> Decimal {
+        Self::try_from_f64(value).unwrap_or_else(|| panic!("{OVERFLOW}"))
+    }
+
+    /// The decimal of a single-precision number, rounded to 7 significant
+    /// digits (the explicit conversion of a float to the managed type).
+    ///
+    /// Panics when the number is not finite or is outside the value range.
+    pub fn from_f32(value: f32) -> Decimal {
+        Self::try_from_f32(value).unwrap_or_else(|| panic!("{OVERFLOW}"))
+    }
+
+    /// [`from_f32`](Self::from_f32), with `None` where it panics.
+    pub fn try_from_f32(value: f32) -> Option<Decimal> {
+        // As for a double: an exponent of -94 could just barely reach 0.5,
+        // smaller exponents always round to zero.
+        const SNG_BIAS: i32 = 126;
+        let exp = ((value.to_bits() >> 23) & 0xFF) as i32 - SNG_BIAS;
+        if exp < -94 {
+            return Some(Decimal::ZERO);
+        }
+
+        // Not a number and the infinities have the largest exponent.
+        if exp > 96 {
+            return None;
+        }
+
+        let negative = value < 0.0;
+        let mut dbl = f64::from(value.abs());
+
+        // Round the value to a 7-digit integer: a float has only 7 digits of
+        // precision, and the digits beyond are kept out of the decimal.
+        let mut power = 6 - ((exp * 19728) >> 16);
+        // power is between -22 and 35
+
+        if power >= 0 {
+            // Less than 7 digits: scale the value up.
+            if power > i32::from(MAX_SCALE) {
+                power = i32::from(MAX_SCALE);
+            }
+
+            dbl *= DOUBLE_POWERS_10[power as usize];
+        } else if power != -1 || dbl >= 1E7 {
+            dbl /= DOUBLE_POWERS_10[(-power) as usize];
+        } else {
+            power = 0; // didn't scale it
+        }
+
+        if dbl < 1E6 && power < i32::from(MAX_SCALE) {
+            dbl *= 10.0;
+            power += 1;
+        }
+
+        // Round to an integer, midpoints to even.
+        let mut mant = dbl.round_ties_even() as u64;
+        if mant == 0 {
+            return Some(Decimal::ZERO);
+        }
+
+        if power < 0 {
+            // Add -power factors of 10, -power <= (29 - 7) = 22.
+            Some(Decimal::from_parts(u128::from(mant) * 10u128.pow((-power) as u32), 0, negative))
+        } else {
+            // Factor out powers of 10 to reduce the scale, if possible. The
+            // most that could be factored out is 6: the number has 7 digits
+            // and the most significant one is not zero.
+            let mut lmax = power.min(6);
+            while lmax > 0 && mant % 10 == 0 {
+                mant /= 10;
+                power -= 1;
+                lmax -= 1;
+            }
+
+            Some(Decimal::from_parts(u128::from(mant), power as u8, negative))
+        }
+    }
+
+    /// [`from_f64`](Self::from_f64), with `None` where it panics.
+    pub fn try_from_f64(value: f64) -> Option<Decimal> {
         // The most the value can be scaled by is 10^28, which is just
         // slightly more than 2^93. So a double with an exponent of -94 could
         // just barely reach 0.5, but smaller exponents always round to zero.
         const DBL_BIAS: i32 = 1022;
         let exp = ((value.to_bits() >> 52) & 0x7FF) as i32 - DBL_BIAS;
         if exp < -94 {
-            return Decimal::ZERO;
+            return Some(Decimal::ZERO);
         }
 
         // Not a number and the infinities have the largest exponent.
         if exp > 96 {
-            panic!("{OVERFLOW}");
+            return None;
         }
 
         let negative = value < 0.0;
@@ -237,12 +344,12 @@ impl Decimal {
         // Round to an integer, midpoints to even.
         let mut mant = dbl.round_ties_even() as u64;
         if mant == 0 {
-            return Decimal::ZERO;
+            return Some(Decimal::ZERO);
         }
 
         if power < 0 {
             // Add -power factors of 10, -power <= (29 - 15) = 14.
-            Decimal::from_parts(u128::from(mant) * 10u128.pow((-power) as u32), 0, negative)
+            Some(Decimal::from_parts(u128::from(mant) * 10u128.pow((-power) as u32), 0, negative))
         } else {
             // Factor out powers of 10 to reduce the scale, if possible. The
             // most that could be factored out is 14: the number has 15
@@ -256,7 +363,7 @@ impl Decimal {
                 lmax -= 1;
             }
 
-            Decimal::from_parts(u128::from(mant), power as u8, negative)
+            Some(Decimal::from_parts(u128::from(mant), power as u8, negative))
         }
     }
 
@@ -313,8 +420,8 @@ impl Decimal {
     }
 
     /// Makes the type known to the untyped value conversions: its text
-    /// form, its nullable form and the conversions from text and from the
-    /// integers.
+    /// form, its nullable form and the conversions from text and from and
+    /// to the other numbers.
     pub(crate) fn register_value_type() {
         ValueTypes::register_display::<Decimal>();
         ValueTypes::register_nullable::<Decimal>();
@@ -332,6 +439,33 @@ impl Decimal {
             };
         }
         integers!(i8, i16, i32, i64, u8, u16, u32, u64, isize, usize);
+
+        // The floating point numbers convert when they are in the range of
+        // the type (`Convert.ToDecimal` fails for the others, and for the
+        // infinities and not-a-number).
+        ValueTypes::register_conversion::<f64, Decimal>(|v| Decimal::try_from_f64(*v));
+        ValueTypes::register_conversion::<f64, Option<Decimal>>(|v| Decimal::try_from_f64(*v).map(Some));
+        ValueTypes::register_conversion::<f32, Decimal>(|v| Decimal::try_from_f32(*v));
+        ValueTypes::register_conversion::<f32, Option<Decimal>>(|v| Decimal::try_from_f32(*v).map(Some));
+        ValueTypes::register_conversion::<Decimal, f64>(|v| Some(v.to_f64()));
+        ValueTypes::register_conversion::<Decimal, Option<f64>>(|v| Some(Some(v.to_f64())));
+        ValueTypes::register_conversion::<Decimal, f32>(|v| Some(v.to_f32()));
+        ValueTypes::register_conversion::<Decimal, Option<f32>>(|v| Some(Some(v.to_f32())));
+
+        // A decimal becomes an integer rounded, midpoints to even, when the
+        // integer is in the range of the type (`Convert.ToInt32(decimal)`
+        // and its siblings).
+        macro_rules! to_integers {
+            ($($ty:ty),*) => {
+                $(
+                    ValueTypes::register_conversion::<Decimal, $ty>(|v| <$ty>::try_from(v.round_to_integer()).ok());
+                    ValueTypes::register_conversion::<Decimal, Option<$ty>>(|v| {
+                        <$ty>::try_from(v.round_to_integer()).ok().map(Some)
+                    });
+                )*
+            };
+        }
+        to_integers!(i8, i16, i32, i64, u8, u16, u32, u64, isize, usize);
     }
 }
 
@@ -618,6 +752,46 @@ mod tests {
         assert_eq!(Decimal::from(-42i64).to_string(), "-42");
         assert_eq!(Decimal::from(i64::MIN).to_string(), "-9223372036854775808");
         assert_eq!(Decimal::from(u64::MAX).to_string(), "18446744073709551615");
+    }
+
+    #[test]
+    fn single_conversions() {
+        // Seven significant digits.
+        assert_eq!(Decimal::from_f32(0.1).to_string(), "0.1");
+        assert_eq!(Decimal::from_f32(-2.5).to_string(), "-2.5");
+        assert_eq!(Decimal::from_f32(1234.5).to_string(), "1234.5");
+        assert_eq!(Decimal::from_f32(16777216.0).to_string(), "16777220");
+        assert_eq!(Decimal::from_f32(1e10).to_string(), "10000000000");
+        assert_eq!(Decimal::from_f32(0.0).to_string(), "0");
+        assert!(!Decimal::from_f32(-1e-30).is_sign_negative());
+        assert_eq!(Decimal::try_from_f32(f32::NAN), None);
+        assert_eq!(Decimal::try_from_f32(f32::INFINITY), None);
+        assert_eq!(Decimal::try_from_f32(1e30), None);
+        assert!(std::panic::catch_unwind(|| Decimal::from_f32(f32::NEG_INFINITY)).is_err());
+        assert_eq!(Decimal::try_from_f64(f64::NAN), None);
+        assert_eq!(Decimal::try_from_f64(-1e30), None);
+        assert_eq!(Decimal::try_from_f64(2.5), Some(d("2.5")));
+
+        assert_eq!(d("0.5").to_f32(), 0.5);
+        assert_eq!(d("0.1").to_f32(), 0.1f32);
+        assert_eq!(Decimal::MAX_VALUE.to_f32(), 7.9228163e28);
+    }
+
+    #[test]
+    fn rounding_to_an_integer_takes_midpoints_to_even() {
+        assert_eq!(d("0").round_to_integer(), 0);
+        assert_eq!(d("7").round_to_integer(), 7);
+        assert_eq!(d("0.5").round_to_integer(), 0);
+        assert_eq!(d("1.5").round_to_integer(), 2);
+        assert_eq!(d("2.5").round_to_integer(), 2);
+        assert_eq!(d("2.50").round_to_integer(), 2);
+        assert_eq!(d("2.51").round_to_integer(), 3);
+        assert_eq!(d("2.49").round_to_integer(), 2);
+        assert_eq!(d("-1.5").round_to_integer(), -2);
+        assert_eq!(d("-2.5").round_to_integer(), -2);
+        assert_eq!(d("-0.4").round_to_integer(), 0);
+        assert_eq!(Decimal::MAX_VALUE.round_to_integer(), MAX_MANTISSA as i128);
+        assert_eq!(Decimal::MIN_VALUE.round_to_integer(), -(MAX_MANTISSA as i128));
     }
 
     #[test]

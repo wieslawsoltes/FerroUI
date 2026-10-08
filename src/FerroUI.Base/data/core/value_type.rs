@@ -1080,10 +1080,27 @@ impl ValueTypes {
 
 /// The implicit numeric conversions of the managed original
 /// (`TypeUtilities.ImplicitConversions`), for the numeric types of the port:
-/// each source type converts to the wider types listed for it. The character
-/// and decimal rows of that table are not here: no ported property is set
-/// with either through the untyped route.
+/// each source type converts to the wider types listed for it, and every
+/// integer to the decimal. A floating point number does not convert to the
+/// decimal implicitly, nor the decimal to anything else. The character row
+/// of that table is not here: no ported property is set with a character
+/// through the untyped route.
 fn implicit_numeric(value: &dyn std::any::Any, target: TypeId) -> Option<BoxedValue> {
+    use crate::utilities::Decimal;
+
+    if target == TypeId::of::<Decimal>() {
+        macro_rules! integers {
+            ($($from:ty),*) => {
+                $(
+                    if let Some(v) = value.downcast_ref::<$from>() {
+                        return Some(Rc::new(Decimal::from(*v)) as BoxedValue);
+                    }
+                )*
+            };
+        }
+        integers!(i8, u8, i16, u16, i32, u32, i64, u64);
+        return None;
+    }
     macro_rules! widen {
         ($($from:ty => [$($to:ty),*]);* $(;)?) => {
             $(
@@ -1733,5 +1750,193 @@ mod tests {
         let flag: BoxedValue = Rc::new(true);
         let text = ValueTypes::try_convert_with_culture(Some(&flag), ValueType::of::<String>(), &culture);
         assert_eq!(text.flatten().and_then(|text| text.downcast_ref::<String>().cloned()).as_deref(), Some("True"));
+    }
+
+    // Not upstream tests (upstream has none for the table of `TypeUtilities`): the
+    // conversions between the numeric types, `TypeUtilities.Conversions` with
+    // `Convert.ChangeType`.
+    fn convert_number<TFrom: PartialEq + 'static, TTo: Clone + 'static>(value: TFrom) -> Option<TTo> {
+        let value: BoxedValue = Rc::new(value);
+        let converted = ValueTypes::try_convert(Some(&value), ValueType::of::<TTo>()).flatten()?;
+        Some(converted.downcast_ref::<TTo>().expect("a value of the target type").clone())
+    }
+
+    #[track_caller]
+    fn assert_number_converts<TFrom, TTo>(value: TFrom, expected: TTo)
+    where
+        TFrom: Clone + PartialEq + fmt::Debug + 'static,
+        TTo: Clone + PartialEq + fmt::Debug + 'static,
+    {
+        // To the type and to its nullable form, from the type and from its nullable form.
+        assert_eq!(convert_number::<TFrom, TTo>(value.clone()), Some(expected.clone()), "from {value:?}");
+        assert_eq!(convert_number::<TFrom, Option<TTo>>(value.clone()), Some(Some(expected.clone())), "from {value:?}");
+        assert_eq!(convert_number::<Option<TFrom>, TTo>(Some(value.clone())), Some(expected.clone()), "from {value:?}");
+        assert_eq!(
+            convert_number::<Option<TFrom>, Option<TTo>>(Some(value.clone())),
+            Some(Some(expected)),
+            "from {value:?}"
+        );
+    }
+
+    #[test]
+    fn every_number_converts_to_every_numeric_type() {
+        use crate::utilities::Decimal;
+
+        macro_rules! pairs {
+            (@from $from:expr => [$($to:expr),*]) => {
+                $( assert_number_converts($from, $to); )*
+            };
+            ($($from:expr),* => $all:tt) => {
+                $( pairs!(@from $from => $all); )*
+            };
+        }
+        pairs!(
+            1i8, 1i16, 1i32, 1i64, 1u8, 1u16, 1u32, 1u64, 1isize, 1usize, 1f32, 1f64, Decimal::ONE
+            => [1i8, 1i16, 1i32, 1i64, 1u8, 1u16, 1u32, 1u64, 1isize, 1usize, 1f32, 1f64, Decimal::ONE]
+        );
+    }
+
+    #[test]
+    fn floating_point_numbers_and_decimals_convert_to_each_other() {
+        use crate::utilities::Decimal;
+
+        let decimal = |text: &str| Decimal::parse(text).expect("a decimal");
+
+        assert_number_converts(2.5f64, decimal("2.5"));
+        assert_number_converts(-0.1f64, decimal("-0.1"));
+        assert_number_converts(2.5f32, decimal("2.5"));
+        // A float has seven digits, a double fifteen.
+        assert_number_converts(0.1f32, decimal("0.1"));
+        assert_number_converts(1.0f64 / 3.0, decimal("0.333333333333333"));
+        assert_number_converts(decimal("2.5"), 2.5f64);
+        assert_number_converts(decimal("2.50"), 2.5f32);
+        assert_number_converts(decimal("-0.1"), -0.1f64);
+
+        // `Convert.ToDecimal` fails outside the range of the type: no conversion.
+        for value in [f64::NAN, f64::INFINITY, f64::NEG_INFINITY, 1e30, -1e30] {
+            assert_eq!(convert_number::<f64, Decimal>(value), None, "{value}");
+            assert_eq!(convert_number::<f64, Option<Decimal>>(value), None, "{value}");
+        }
+        for value in [f32::NAN, f32::INFINITY, f32::NEG_INFINITY, 1e30] {
+            assert_eq!(convert_number::<f32, Decimal>(value), None, "{value}");
+            assert_eq!(convert_number::<f32, Option<Decimal>>(value), None, "{value}");
+        }
+
+        // A null converts to the nullable form alone.
+        assert_eq!(convert_number::<Option<f64>, Option<Decimal>>(None), Some(None));
+        assert_eq!(convert_number::<Option<f64>, Decimal>(None), None);
+        assert_eq!(convert_number::<Option<Decimal>, Option<f64>>(None), Some(None));
+        assert_eq!(convert_number::<Option<Decimal>, f64>(None), None);
+    }
+
+    #[test]
+    fn a_decimal_converts_to_an_integer_rounded_and_in_range() {
+        use crate::utilities::Decimal;
+
+        let decimal = |text: &str| Decimal::parse(text).expect("a decimal");
+
+        // Midpoints go to the even integer (`Convert.ToInt32(decimal)`).
+        assert_number_converts(decimal("2.5"), 2i32);
+        assert_number_converts(decimal("3.5"), 4i32);
+        assert_number_converts(decimal("-2.5"), -2i64);
+        assert_number_converts(decimal("2.6"), 3u8);
+        assert_number_converts(decimal("255.4"), 255u8);
+        assert_number_converts(decimal("-0.5"), 0u32);
+        assert_number_converts(Decimal::from(u64::MAX), u64::MAX);
+        assert_number_converts(Decimal::from(i64::MIN), i64::MIN);
+
+        // Out of the range of the target: no conversion.
+        assert_eq!(convert_number::<Decimal, u8>(decimal("255.5")), None);
+        assert_eq!(convert_number::<Decimal, Option<u8>>(decimal("256")), None);
+        assert_eq!(convert_number::<Decimal, u32>(decimal("-1")), None);
+        assert_eq!(convert_number::<Decimal, i8>(decimal("-129")), None);
+        assert_eq!(convert_number::<Decimal, i64>(Decimal::MAX_VALUE), None);
+        assert_eq!(convert_number::<Decimal, u64>(Decimal::MIN_VALUE), None);
+
+        // The integers convert exactly.
+        assert_number_converts(i64::MIN, Decimal::from(i64::MIN));
+        assert_number_converts(u64::MAX, Decimal::from(u64::MAX));
+    }
+
+    #[test]
+    fn numbers_convert_between_the_other_types_as_the_runtime_converts_them() {
+        // A floating point number becomes an integer rounded to even, in range.
+        assert_number_converts(2.5f64, 2i32);
+        assert_number_converts(3.5f32, 4i32);
+        assert_eq!(convert_number::<f64, i32>(f64::NAN), None);
+        assert_eq!(convert_number::<f64, u8>(256.0), None);
+        assert_eq!(convert_number::<f64, u8>(-1.0), None);
+        // An integer becomes an integer in range.
+        assert_number_converts(255i32, 255u8);
+        assert_eq!(convert_number::<i32, u8>(256), None);
+        assert_eq!(convert_number::<i32, Option<u8>>(-1), None);
+        assert_eq!(convert_number::<u64, i64>(u64::MAX), None);
+        // A double narrows to a float without a range check.
+        assert_eq!(convert_number::<f64, f32>(1e300), Some(f32::INFINITY));
+    }
+
+    #[test]
+    fn numbers_and_text_convert_to_each_other() {
+        use crate::utilities::Decimal;
+
+        let decimal = |text: &str| Decimal::parse(text).expect("a decimal");
+
+        assert_number_converts(decimal("1.50"), "1.50".to_string());
+        assert_number_converts(2.5f64, "2.5".to_string());
+        assert_number_converts(7i32, "7".to_string());
+        assert_number_converts("1.50".to_string(), decimal("1.50"));
+        assert_number_converts("2.5".to_string(), 2.5f64);
+        assert_number_converts("7".to_string(), 7i32);
+        assert_eq!(convert_number::<String, Decimal>("x".to_string()), None);
+        assert_eq!(convert_number::<String, Option<Decimal>>("x".to_string()), None);
+
+        // With a culture: its decimal separator.
+        let culture = comma_culture();
+        let value: BoxedValue = Rc::new(decimal("1.5"));
+        let text = ValueTypes::try_convert_with_culture(Some(&value), ValueType::of::<String>(), &culture);
+        assert_eq!(text.flatten().and_then(|text| text.downcast_ref::<String>().cloned()).as_deref(), Some("1,5"));
+        let text: BoxedValue = Rc::new("2,5".to_string());
+        let number = ValueTypes::try_convert_with_culture(Some(&text), ValueType::of::<Option<Decimal>>(), &culture);
+        assert_eq!(number.flatten().and_then(|n| n.downcast_ref::<Option<Decimal>>().cloned()), Some(Some(decimal("2.5"))));
+        // The other conversions of numbers do not depend on the culture.
+        let value: BoxedValue = Rc::new(2.5f64);
+        let number = ValueTypes::try_convert_with_culture(Some(&value), ValueType::of::<Option<Decimal>>(), &culture);
+        assert_eq!(number.flatten().and_then(|n| n.downcast_ref::<Option<Decimal>>().cloned()), Some(Some(decimal("2.5"))));
+    }
+
+    #[test]
+    fn the_implicit_conversions_of_numbers_are_those_of_the_language() {
+        use crate::utilities::Decimal;
+
+        let implicit = |value: &dyn std::any::Any, target: TypeId| ValueTypes::try_convert_implicit(value, target);
+        let decimal_of = |value: &dyn std::any::Any| {
+            implicit(value, TypeId::of::<Decimal>()).map(|v| *v.downcast_ref::<Decimal>().expect("a decimal"))
+        };
+
+        // Every integer converts to the decimal.
+        assert_eq!(decimal_of(&7i8), Some(Decimal::from(7)));
+        assert_eq!(decimal_of(&7u8), Some(Decimal::from(7)));
+        assert_eq!(decimal_of(&7i16), Some(Decimal::from(7)));
+        assert_eq!(decimal_of(&7u16), Some(Decimal::from(7)));
+        assert_eq!(decimal_of(&7i32), Some(Decimal::from(7)));
+        assert_eq!(decimal_of(&7u32), Some(Decimal::from(7)));
+        assert_eq!(decimal_of(&i64::MIN), Some(Decimal::from(i64::MIN)));
+        assert_eq!(decimal_of(&u64::MAX), Some(Decimal::from(u64::MAX)));
+        // A floating point number does not, nor the decimal to anything else.
+        assert_eq!(decimal_of(&2.5f64), None);
+        assert_eq!(decimal_of(&2.5f32), None);
+        assert!(implicit(&Decimal::ONE, TypeId::of::<f64>()).is_none());
+        assert!(implicit(&Decimal::ONE, TypeId::of::<i32>()).is_none());
+        // The implicit conversion gives the type itself, not its nullable form.
+        assert!(implicit(&7i32, TypeId::of::<Option<Decimal>>()).is_none());
+
+        // The widening conversions, and no narrowing one.
+        assert!(implicit(&7i32, TypeId::of::<f64>()).is_some_and(|v| v.downcast_ref::<f64>() == Some(&7.0)));
+        assert!(implicit(&7i32, TypeId::of::<i64>()).is_some_and(|v| v.downcast_ref::<i64>() == Some(&7)));
+        assert!(implicit(&7.5f32, TypeId::of::<f64>()).is_some_and(|v| v.downcast_ref::<f64>() == Some(&7.5)));
+        assert!(implicit(&7i64, TypeId::of::<i32>()).is_none());
+        assert!(implicit(&7.0f64, TypeId::of::<f32>()).is_none());
+        assert!(implicit(&7i32, TypeId::of::<u32>()).is_none());
+        assert!(implicit(&7.0f64, TypeId::of::<i32>()).is_none());
     }
 }

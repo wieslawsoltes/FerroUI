@@ -8,8 +8,6 @@
 //! Not ported: `Can_Convert_From_Delegate_To_Command` and
 //! `Can_Convert_From_Delegate_To_Command_No_Parameters` (delegates are not
 //! binding values: methods bind as commands through the method nodes).
-//! `Can_Convert_Decimal_To_NullableDouble` converts a 64-bit integer, as
-//! there is no decimal type.
 
 use super::*;
 use crate::animation::TimeSpan;
@@ -107,9 +105,29 @@ fn do_not_throw_on_invalid_input_for_nullable_int() {
 
 #[test]
 fn can_convert_decimal_to_nullable_double() {
-    let result = convert::<_, Option<f64>>(5i64);
+    let result = convert::<_, Option<f64>>(crate::utilities::Decimal::from(5));
 
     assert_value(result, Some(5.0));
+}
+
+// Not from upstream: the reverse of the conversion above, the one a decimal
+// property bound to a floating-point source needs.
+#[test]
+fn can_convert_double_to_nullable_decimal() {
+    let result = convert::<_, Option<crate::utilities::Decimal>>(2.5);
+
+    assert_value(result, Some(crate::utilities::Decimal::parse("2.5").expect("a decimal")));
+}
+
+// Not from upstream: a number outside the range of the decimal is an error of
+// the binding, as the conversion of the managed runtime fails.
+#[test]
+fn do_not_throw_on_a_double_outside_the_range_of_the_decimal() {
+    for value in [f64::NAN, f64::INFINITY, 1e30] {
+        let result = convert::<_, Option<crate::utilities::Decimal>>(value);
+
+        assert!(result.expect("a value").is::<BindingNotification>());
+    }
 }
 
 #[test]
