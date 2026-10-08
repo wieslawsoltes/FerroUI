@@ -1,4 +1,5 @@
 use super::{ValueType, ValueTypes};
+use crate::utilities::CultureInfo;
 use crate::{BoxedValue, UnsetValueType};
 
 /// Converts the values produced by a binding to the type of its target (and
@@ -28,9 +29,16 @@ impl TargetTypeConverter {
         TargetTypeConverter { reflection: true }
     }
 
-    /// Converts `value` to exactly `type_`. Returns `None` if the value
-    /// cannot be converted. The unset marker passes through unchanged.
-    pub fn try_convert(&self, value: Option<&BoxedValue>, type_: ValueType) -> Option<Option<BoxedValue>> {
+    /// Converts `value` to exactly `type_`, with the conventions of
+    /// `culture` for the conversions that depend on one. Returns `None` if
+    /// the value cannot be converted. The unset marker passes through
+    /// unchanged.
+    pub fn try_convert(
+        &self,
+        value: Option<&BoxedValue>,
+        type_: ValueType,
+        culture: &CultureInfo,
+    ) -> Option<Option<BoxedValue>> {
         if value.is_some_and(|v| v.is::<UnsetValueType>()) {
             return Some(value.cloned());
         }
@@ -44,7 +52,7 @@ impl TargetTypeConverter {
         // Includes the conversion of text with the `parse:` of the markup
         // metadata of the target type (the type converter of the type in the
         // managed original).
-        ValueTypes::try_convert(value, type_)
+        ValueTypes::try_convert_with_culture(value, type_, culture)
     }
 }
 
@@ -101,21 +109,21 @@ mod tests {
         MarkupType::register(<ConvertedLength as MarkupTyped>::MARKUP);
         ValueTypes::register_nullable::<ConvertedLength>();
         for converter in [TargetTypeConverter::get_default_converter(), TargetTypeConverter::get_reflection_converter()] {
-            let converted = converter.try_convert(Some(&text("12px")), ValueType::of::<ConvertedLength>());
+            let converted = converter.try_convert(Some(&text("12px")), ValueType::of::<ConvertedLength>(), &crate::utilities::CultureInfo::invariant_culture());
             let converted = converted.flatten().expect("a length");
             assert_eq!(converted.downcast_ref::<ConvertedLength>(), Some(&ConvertedLength(12)));
 
-            let nullable = converter.try_convert(Some(&text("3px")), ValueType::of::<Option<ConvertedLength>>());
+            let nullable = converter.try_convert(Some(&text("3px")), ValueType::of::<Option<ConvertedLength>>(), &crate::utilities::CultureInfo::invariant_culture());
             let nullable = nullable.flatten().expect("a nullable length");
             assert_eq!(nullable.downcast_ref::<Option<ConvertedLength>>(), Some(&Some(ConvertedLength(3))));
 
             // Text that does not parse, and values that are not text, do not convert.
-            assert!(converter.try_convert(Some(&text("wide")), ValueType::of::<ConvertedLength>()).is_none());
+            assert!(converter.try_convert(Some(&text("wide")), ValueType::of::<ConvertedLength>(), &crate::utilities::CultureInfo::invariant_culture()).is_none());
             let number: BoxedValue = Rc::new(1.5f64);
-            assert!(converter.try_convert(Some(&number), ValueType::of::<ConvertedLength>()).is_none());
+            assert!(converter.try_convert(Some(&number), ValueType::of::<ConvertedLength>(), &crate::utilities::CultureInfo::invariant_culture()).is_none());
             // The unset marker passes through.
             let unset = FerroProperty::unset_value();
-            assert!(converter.try_convert(Some(&unset), ValueType::of::<ConvertedLength>()).flatten().is_some());
+            assert!(converter.try_convert(Some(&unset), ValueType::of::<ConvertedLength>(), &crate::utilities::CultureInfo::invariant_culture()).flatten().is_some());
         }
     }
 
@@ -149,21 +157,21 @@ mod tests {
         let data = text("M0,0l1,0");
         for converter in [TargetTypeConverter::get_default_converter(), TargetTypeConverter::get_reflection_converter()] {
             // The handle and its nullable form (the type of a property that holds a shape).
-            let converted = converter.try_convert(Some(&data), ValueType::of::<Ref<ConvertedShape>>());
+            let converted = converter.try_convert(Some(&data), ValueType::of::<Ref<ConvertedShape>>(), &crate::utilities::CultureInfo::invariant_culture());
             assert!(converted.flatten().expect("a shape").is::<Ref<ConvertedShape>>());
-            let converted = converter.try_convert(Some(&data), ValueType::of::<Option<Ref<ConvertedShape>>>());
+            let converted = converter.try_convert(Some(&data), ValueType::of::<Option<Ref<ConvertedShape>>>(), &crate::utilities::CultureInfo::invariant_culture());
             let converted = converted.flatten().expect("a nullable shape");
             assert!(converted.downcast_ref::<Option<Ref<ConvertedShape>>>().is_some_and(Option::is_some));
 
             // Text that does not parse is not converted.
-            let none = converter.try_convert(Some(&text("x")), ValueType::of::<Option<Ref<ConvertedShape>>>());
+            let none = converter.try_convert(Some(&text("x")), ValueType::of::<Option<Ref<ConvertedShape>>>(), &crate::utilities::CultureInfo::invariant_culture());
             assert!(none.is_none());
             // The conversion of the base class applies to a derived class, but its result
             // is not a value of the derived class.
-            let derived = converter.try_convert(Some(&data), ValueType::of::<Ref<ConvertedDerivedShape>>());
+            let derived = converter.try_convert(Some(&data), ValueType::of::<Ref<ConvertedDerivedShape>>(), &crate::utilities::CultureInfo::invariant_culture());
             assert!(derived.is_none());
             // A class that states no conversion.
-            let plain = converter.try_convert(Some(&data), ValueType::of::<Option<Ref<ConvertedPlainObject>>>());
+            let plain = converter.try_convert(Some(&data), ValueType::of::<Option<Ref<ConvertedPlainObject>>>(), &crate::utilities::CultureInfo::invariant_culture());
             assert!(plain.is_none());
         }
         assert!(PARSED_SHAPES.with(Cell::get) >= 4);
@@ -202,16 +210,16 @@ mod tests {
         assert_ne!(reflection, default);
 
         for target in [ValueType::of::<Rc<dyn ICommand>>(), ValueType::of::<Option<Rc<dyn ICommand>>>()] {
-            let command = reflection.try_convert(Some(&delegate("Run")), target).flatten().expect("a command");
+            let command = reflection.try_convert(Some(&delegate("Run")), target, &crate::utilities::CultureInfo::invariant_culture()).flatten().expect("a command");
             assert_eq!(ValueType::of_value(&*command), target);
-            assert!(default.try_convert(Some(&delegate("Run")), target).is_none());
+            assert!(default.try_convert(Some(&delegate("Run")), target, &crate::utilities::CultureInfo::invariant_culture()).is_none());
             // A method with more than one parameter is no command.
-            assert!(reflection.try_convert(Some(&delegate("Two")), target).is_none());
+            assert!(reflection.try_convert(Some(&delegate("Two")), target, &crate::utilities::CultureInfo::invariant_culture()).is_none());
             // Neither is a callback that is not the delegate of a method.
             let callback: BoxedValue = Rc::new(MarkupDelegate::new(|_| None));
-            assert!(reflection.try_convert(Some(&callback), target).is_none());
+            assert!(reflection.try_convert(Some(&callback), target, &crate::utilities::CultureInfo::invariant_culture()).is_none());
         }
-        let command = reflection.try_convert(Some(&delegate("Run")), ValueType::of::<Rc<dyn ICommand>>()).flatten();
+        let command = reflection.try_convert(Some(&delegate("Run")), ValueType::of::<Rc<dyn ICommand>>(), &crate::utilities::CultureInfo::invariant_culture()).flatten();
         command.unwrap().downcast_ref::<Rc<dyn ICommand>>().unwrap().execute(None);
         assert_eq!(vm.runs.get(), 1);
 
