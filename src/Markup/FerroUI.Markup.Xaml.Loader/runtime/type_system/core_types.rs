@@ -14,7 +14,7 @@ use xamlx::type_system::{IXamlType, IXamlTypeSystem};
 
 use super::runtime_type::{RuntimeInvoker, RuntimeTypeKind};
 use super::runtime_type_system::{MemberBuilder, RuntimeTypeSystem, PROPERTY_NAMESPACE};
-use super::values::{DeferredContentFactory, ITypeDescriptorContext, RuntimeTypeValue};
+use super::values::{DeferredContentFactory, ITypeDescriptorContext, RuntimeList, RuntimeTypeValue};
 
 use RuntimeTypeKind::{Class, Interface, Struct};
 
@@ -22,6 +22,11 @@ const SYSTEM: &str = "System";
 const COLLECTIONS: &str = "System.Collections";
 const GENERIC: &str = "System.Collections.Generic";
 const COMPONENT_MODEL: &str = "System.ComponentModel";
+
+/// The generic definition of the list of the runtime library.
+pub(crate) const LIST_DEFINITION: &str = "System.Collections.Generic.List`1";
+/// The untyped list of the runtime library.
+pub(crate) const ARRAY_LIST: &str = "System.Collections.ArrayList";
 
 fn dynamic(
     invoke: impl Fn(&[MarkupValue]) -> Result<MarkupValue, MarkupInvokeError> + 'static,
@@ -52,6 +57,85 @@ macro_rules! handles {
     ($($type_:ty),* $(,)?) => {
         vec![$(ValueType::of::<$type_>()),*]
     };
+}
+
+/// The members of a list of the runtime library that markup creates: `List<T>` for the
+/// element type `T`, `ArrayList` without one. Its values are run-time lists
+/// ([`RuntimeList`]); the members are the ones markup and binding paths use (the
+/// constructor, `Add`, `Count` and the indexer).
+pub(crate) fn list_members(b: &mut MemberBuilder, element_type: Option<Rc<dyn IXamlType>>) {
+    fn instance(arguments: &[MarkupValue]) -> Result<RuntimeList, MarkupInvokeError> {
+        argument::<RuntimeList>(arguments, 0)
+    }
+    // The `ArgumentOutOfRangeException` of the indexer.
+    fn index(list: &RuntimeList, arguments: &[MarkupValue]) -> Result<usize, MarkupInvokeError> {
+        let index = argument::<i32>(arguments, 1)?;
+        usize::try_from(index).ok().filter(|index| *index < list.count()).ok_or_else(|| {
+            MarkupInvokeError::Failed(
+                "Index was out of range. Must be non-negative and less than the size of the collection.".to_string(),
+            )
+        })
+    }
+
+    let int32 = b.t("System.Int32");
+    let void = b.t("System.Void");
+    let item = match &element_type {
+        Some(element_type) => element_type.clone(),
+        None => b.t("System.Object"),
+    };
+    b.base("System.Object");
+    if let Some(element_type) = &element_type {
+        for definition in ["System.Collections.Generic.IList`1", "System.Collections.Generic.IReadOnlyList`1"] {
+            let interface = b.generic(definition, std::slice::from_ref(element_type));
+            b.interface(interface);
+        }
+    }
+    let list = b.t("System.Collections.IList");
+    b.interface(list);
+
+    // `List<T>.Add(T)` returns nothing, `ArrayList.Add(object)` the index of the item.
+    let returns_index = element_type.is_none();
+    let add_result = if returns_index { int32.clone() } else { void.clone() };
+    b.constructor(Vec::new(), dynamic(move |_| Ok(boxed(RuntimeList::new(element_type.clone())))));
+    b.method(
+        "Add",
+        false,
+        add_result,
+        vec![item.clone()],
+        dynamic(move |arguments| {
+            let list = instance(arguments)?;
+            let value =
+                arguments.get(1).ok_or(MarkupInvokeError::ArgumentCount { expected: 2, actual: arguments.len() })?;
+            let added = list.add(value.clone());
+            Ok(if returns_index { boxed(added as i32) } else { None })
+        }),
+    );
+    b.property("Count", int32.clone(), false, dynamic(|arguments| Ok(boxed(instance(arguments)?.count() as i32))));
+    // The accessors of the indexer: `MemberBuilder::indexer` takes the ones declared here.
+    b.method(
+        "get_Item",
+        false,
+        item.clone(),
+        vec![int32.clone()],
+        dynamic(|arguments| {
+            let list = instance(arguments)?;
+            Ok(list.get(index(&list, arguments)?))
+        }),
+    );
+    b.method(
+        "set_Item",
+        false,
+        void,
+        vec![int32.clone(), item.clone()],
+        dynamic(|arguments| {
+            let list = instance(arguments)?;
+            let value =
+                arguments.get(2).ok_or(MarkupInvokeError::ArgumentCount { expected: 3, actual: arguments.len() })?;
+            list.set(index(&list, arguments)?, value.clone());
+            Ok(None)
+        }),
+    );
+    b.indexer(vec![int32], item, true);
 }
 
 /// Defines the runtime library types.
@@ -446,6 +530,10 @@ pub(crate) fn define_core_types(system: &Rc<RuntimeTypeSystem>) {
             b.indexer(vec![b.t("System.Int32")], item, false);
         }),
     );
+    // The untyped list: any children, null included.
+    define(COLLECTIONS, "ArrayList", Class, &[], Vec::new(), Box::new(|b| list_members(b, None)));
+    // The definition of the generic list: an instantiation metadata registers has the
+    // members of its metadata, every other instantiation the ones of `list_members`.
     define(
         GENERIC,
         "List`1",

@@ -128,6 +128,18 @@ ferro_markup_type!(interface dyn IPopupHost as "IPopupHost" {
     handles: [Rc<dyn IPopupHost>, Option<Rc<dyn IPopupHost>>],
 });
 
+// System.Collections
+
+// The collection handle of the items controls is the enumerable of the managed original
+// (`IEnumerable? ItemsSource`): a collection created in markup is assignable to a property
+// that holds the handle.
+// Deviation (DEVIATIONS.md, Run-time type system of markup): upstream assigns any enumerable;
+// here a collection is cast to the handle by the cast registered for its type.
+ferro_markup_type!(interface crate::ItemsSource as "IEnumerable" {
+    namespace: "System.Collections",
+    handles: [crate::ItemsSource, Option<crate::ItemsSource>],
+});
+
 /// The types declared in this file.
 // FerroUI.Controls.Notifications: the data type of the notification templates of the themes.
 ferro_markup_type!(interface dyn crate::notifications::INotification as "INotification" {
@@ -159,6 +171,7 @@ pub(super) const TYPES: &[&MarkupType] = &[
     <dyn IWindowDrawnDecorationsTemplate as MarkupTyped>::MARKUP,
     <dyn ISelectionModel as MarkupTyped>::MARKUP,
     <dyn IPopupHost as MarkupTyped>::MARKUP,
+    <crate::ItemsSource as MarkupTyped>::MARKUP,
 ];
 
 /// Registers the nullable forms of the contract handles that can be held in

@@ -744,6 +744,103 @@ fn runtime_library_collections_have_count_and_an_indexer() {
 }
 
 #[test]
+fn a_list_of_the_runtime_library_is_created_for_any_element_type() {
+    let ts = system();
+    let known = ts.well_known_types();
+    let definition = ts.find_type("System.Collections.Generic.List`1").expect("the definition");
+    // The assembly markup names for the list (`assembly=System.Collections`).
+    assert!(ts.find_type_in_assembly("System.Collections.Generic.List`1", "System.Collections").is_some());
+
+    // No metadata registers `List<double>`.
+    let list_type = definition.make_generic_type(&[ts.get("System.Double")]).expect("the instantiation");
+    assert_eq!(list_type.full_name(), "System.Collections.Generic.List`1[System.Double]");
+    assert!(list_type.generic_type_definition().unwrap().equals(&*definition));
+    assert!(known.i_enumerable.is_assignable_from(&*list_type));
+    let ilist = known.i_list_of_t.make_generic_type(&[ts.get("System.Double")]).unwrap();
+    assert!(ilist.is_assignable_from(&*list_type));
+
+    let constructor = list_type.find_constructor(None).expect("the constructor");
+    let constructor = constructor.as_any().downcast_ref::<RuntimeConstructor>().expect("a run-time constructor");
+    let list = constructor.invoke(&[]).expect("a list");
+    assert!(ts.runtime_type_of(list.as_ref().unwrap()).equals(&*list_type));
+    assert!(ts.is_instance(&list, &*known.i_enumerable));
+
+    let add = method(&list_type, "Add");
+    assert!(add.is_invocable() && add.return_type().equals(&*known.void));
+    assert_eq!(add.parameters()[0].full_name(), "System.Double");
+    add.invoke(&[list.clone(), boxed(1.5f64)]).expect("add");
+    // The method of the list contract dispatches to the list.
+    let contract_add = ilist.get_all_interfaces().iter().flat_map(|i| i.methods()).find(|m| m.name() == "Add").expect("Add");
+    let contract_add = contract_add.as_any().downcast_ref::<RuntimeMethod>().unwrap();
+    assert!(!contract_add.is_invocable());
+    contract_add.invoke(&[list.clone(), boxed(2.5f64)]).expect("dispatch");
+
+    let count = method(&list_type, "get_Count");
+    assert_eq!(from_markup_value::<i32>(&count.invoke(&[list.clone()]).unwrap()), Some(2));
+    let get = method(&list_type, "get_Item");
+    assert_eq!(from_markup_value::<f64>(&get.invoke(&[list.clone(), boxed(1i32)]).unwrap()), Some(2.5));
+    assert!(get.invoke(&[list.clone(), boxed(2i32)]).is_err());
+    assert!(get.invoke(&[list.clone(), boxed(-1i32)]).is_err());
+    method(&list_type, "set_Item").invoke(&[list.clone(), boxed(0i32), boxed(3.5f64)]).expect("set");
+
+    let items = from_markup_value::<RuntimeList>(&list).expect("the run-time list");
+    assert!(items.element_type().is_some_and(|element_type| element_type.full_name() == "System.Double"));
+    assert_eq!(items.count(), 2);
+    assert_eq!(from_markup_value::<f64>(&items.get(0)), Some(3.5));
+    // An untyped target takes the list itself.
+    assert!(to_exact_value(&list, ValueType::object()).is_ok());
+    assert!(items.to_declared(ValueType::object()).is_none());
+
+    // A registered instantiation keeps the members and the values of its metadata.
+    let registered = definition.make_generic_type(&[ts.get("System.Int32")]).unwrap();
+    assert!(registered.equals(&*ts.resolve(ValueType::of::<Rc<TestList<i32>>>())));
+}
+
+#[test]
+fn an_array_list_takes_any_item() {
+    let ts = system();
+    let known = ts.well_known_types();
+    let list_type = ts.find_type("System.Collections.ArrayList").expect("the type");
+    assert!(ts.find_type_in_assembly("System.Collections.ArrayList", "System.Collections.NonGeneric").is_some());
+    assert_eq!(list_type.base_type().map(|b| b.full_name()).as_deref(), Some("System.Object"));
+    assert!(known.i_list.is_assignable_from(&*list_type));
+    assert!(known.i_enumerable.is_assignable_from(&*list_type));
+
+    let constructor = list_type.find_constructor(None).expect("the constructor");
+    let constructor = constructor.as_any().downcast_ref::<RuntimeConstructor>().expect("a run-time constructor");
+    let list = constructor.invoke(&[]).expect("a list");
+    assert!(ts.runtime_type_of(list.as_ref().unwrap()).equals(&*list_type));
+
+    // `ArrayList.Add(object)` returns the index of the item; null is an item.
+    let add = method(&list_type, "Add");
+    assert!(add.return_type().equals(&*known.int32) && add.parameters()[0].equals(&*known.object));
+    assert_eq!(from_markup_value::<i32>(&add.invoke(&[list.clone(), None]).unwrap()), Some(0));
+    assert_eq!(from_markup_value::<i32>(&add.invoke(&[list.clone(), boxed("Hello".to_string())]).unwrap()), Some(1));
+    assert_eq!(from_markup_value::<i32>(&add.invoke(&[list.clone(), boxed(7i32)]).unwrap()), Some(2));
+
+    let items = from_markup_value::<RuntimeList>(&list).expect("the run-time list");
+    assert!(items.element_type().is_none());
+    assert_eq!(items.count(), 3);
+    assert!(items.get(0).is_none());
+    assert_eq!(from_markup_value::<String>(&items.get(1)).as_deref(), Some("Hello"));
+    let get = method(&list_type, "get_Item");
+    assert_eq!(from_markup_value::<i32>(&get.invoke(&[list.clone(), boxed(2i32)]).unwrap()), Some(7));
+
+    // The shared list of the items is what a collection handle is cast from.
+    let shared: BoxedValue = Rc::new(items.items().clone());
+    ValueTypes::register_cast::<Rc<ferroui_base::collections::FerroList<MarkupValue>>, ListProbe>(|list| ListProbe(list.count()));
+    let probe = to_exact_value(&list, ValueType::of::<ListProbe>()).expect("the cast of the shared list");
+    assert_eq!(probe.downcast_ref::<ListProbe>(), Some(&ListProbe(3)));
+    assert!(ValueTypes::try_cast(&shared, ValueType::of::<ListProbe>()).is_some());
+    // Without a registered cast the list is not a value of the type.
+    assert!(to_exact_value(&list, ValueType::of::<String>()).is_err());
+}
+
+/// What a crate registers a cast of the shared list of items to: a collection handle.
+#[derive(Clone, Debug, PartialEq)]
+struct ListProbe(usize);
+
+#[test]
 fn a_static_value_declared_as_a_field_is_a_field_only() {
     let ts = projection_system();
     let probe = ts.find_type("RtProjection.Probe").expect("the type");

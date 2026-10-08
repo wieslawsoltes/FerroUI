@@ -40,7 +40,6 @@ fn gap_c200_cast_with_a_prefix_in_a_reflection_binding_path() {
 }
 
 #[test]
-#[ignore = "gap C201: System.Collections.ArrayList is not a markup type"]
 fn gap_c201_array_list_in_markup() {
     let _app = start_application();
     // Upstream: an `ArrayList` element collects its children (null included) and is the items

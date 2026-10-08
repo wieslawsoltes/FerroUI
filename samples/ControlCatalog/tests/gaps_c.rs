@@ -70,7 +70,6 @@ fn gap_c304_resolve_by_name_extension_for_an_element_reference() {
 }
 
 #[test]
-#[ignore = "gap C305: System.Collections.Generic.List`1 with x:TypeArguments is not a type of the markup type system"]
 fn gap_c305_generic_list_element() {
     let _app = start_application();
     let combo_box = from_markup_value::<Ref<ComboBox>>(&Some(load_text(&format!(
@@ -121,7 +120,6 @@ fn gap_c308_text_element_properties_of_inlines() {
 }
 
 #[test]
-#[ignore = "gap C309: System.Collections.ArrayList is not a type of the markup type system"]
 fn gap_c309_array_list_element() {
     let _app = start_application();
     let combo_box = from_markup_value::<Ref<ComboBox>>(&Some(load_text(&format!(

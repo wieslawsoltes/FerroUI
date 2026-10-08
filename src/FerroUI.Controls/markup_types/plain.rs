@@ -333,6 +333,11 @@ pub(super) fn register_value_types() {
     ValueTypes::register_nullable::<crate::ItemsSource>();
     ValueTypes::register_nullable::<crate::primitives::SelectedItemsList>();
     crate::ItemsSource::register_binding_conversion::<crate::ItemsSource>();
+    // A list of untyped items is an enumerable (a list of the runtime library the run-time
+    // loader creates for markup, `List<T>` or `ArrayList`): the handle shares the list.
+    ValueTypes::register_cast::<Rc<FerroList<Option<BoxedValue>>>, crate::ItemsSource>(|list| {
+        crate::ItemsSource::from(list.clone())
+    });
     ValueTypes::register_nullable::<Rc<TrayIcons>>();
     ValueTypes::register_nullable::<FerroList<Ref<TrayIcon>>>();
     ValueTypes::register_cast::<Rc<TrayIcons>, FerroList<Ref<TrayIcon>>>(|c| (***c).clone());
