@@ -1,3 +1,4 @@
+use crate::utilities::CultureInfo;
 use super::IValueConverter;
 use crate::data::core::{ValueType, ValueTypes};
 use crate::data::BindingError;
@@ -111,6 +112,7 @@ impl<TIn: PropertyValue, TOut: PropertyValue> IValueConverter for FuncValueConve
         value: Option<&BoxedValue>,
         _target_type: ValueType,
         _parameter: Option<&BoxedValue>,
+        _culture: &CultureInfo,
     ) -> Result<Option<BoxedValue>, BindingError> {
         match cast_value::<TIn>(value) {
             Some(value) => Ok(box_result((self.convert)(value))),
@@ -123,6 +125,7 @@ impl<TIn: PropertyValue, TOut: PropertyValue> IValueConverter for FuncValueConve
         value: Option<&BoxedValue>,
         _target_type: ValueType,
         _parameter: Option<&BoxedValue>,
+        _culture: &CultureInfo,
     ) -> Result<Option<BoxedValue>, BindingError> {
         let Some(convert_back) = &self.convert_back else {
             return Err(not_implemented());
@@ -170,6 +173,7 @@ impl<TIn: PropertyValue, TParam: PropertyValue, TOut: PropertyValue> IValueConve
         value: Option<&BoxedValue>,
         _target_type: ValueType,
         parameter: Option<&BoxedValue>,
+        _culture: &CultureInfo,
     ) -> Result<Option<BoxedValue>, BindingError> {
         match (cast_value::<TIn>(value), cast_value::<TParam>(parameter)) {
             (Some(value), Some(parameter)) => Ok(box_result((self.convert)(value, parameter))),
@@ -182,6 +186,7 @@ impl<TIn: PropertyValue, TParam: PropertyValue, TOut: PropertyValue> IValueConve
         value: Option<&BoxedValue>,
         _target_type: ValueType,
         parameter: Option<&BoxedValue>,
+        _culture: &CultureInfo,
     ) -> Result<Option<BoxedValue>, BindingError> {
         let Some(convert_back) = &self.convert_back else {
             return Err(not_implemented());
@@ -219,7 +224,7 @@ mod tests {
     fn convert_calls_function_for_input_of_input_type() {
         let target = FuncValueConverter::<i32, String>::new(|x| format!("<{x}>"));
 
-        let result = target.convert(Some(&boxed(5i32)), ValueType::of::<String>(), None);
+        let result = target.convert(Some(&boxed(5i32)), ValueType::of::<String>(), None, &crate::utilities::CultureInfo::invariant_culture());
 
         assert_eq!(get::<String>(result), "<5>");
     }
@@ -228,38 +233,38 @@ mod tests {
     fn convert_returns_unset_for_input_of_other_type() {
         let target = FuncValueConverter::<i32, String>::new(|x| format!("<{x}>"));
 
-        assert!(is_unset(target.convert(Some(&boxed(5i64)), ValueType::of::<String>(), None)));
-        assert!(is_unset(target.convert(Some(&boxed(5.0f64)), ValueType::of::<String>(), None)));
-        assert!(is_unset(target.convert(Some(&boxed(String::from("5"))), ValueType::of::<String>(), None)));
+        assert!(is_unset(target.convert(Some(&boxed(5i64)), ValueType::of::<String>(), None, &crate::utilities::CultureInfo::invariant_culture())));
+        assert!(is_unset(target.convert(Some(&boxed(5.0f64)), ValueType::of::<String>(), None, &crate::utilities::CultureInfo::invariant_culture())));
+        assert!(is_unset(target.convert(Some(&boxed(String::from("5"))), ValueType::of::<String>(), None, &crate::utilities::CultureInfo::invariant_culture())));
     }
 
     #[test]
     fn convert_returns_unset_for_null_input_of_non_nullable_type() {
         let target = FuncValueConverter::<i32, String>::new(|x| format!("<{x}>"));
 
-        assert!(is_unset(target.convert(None, ValueType::of::<String>(), None)));
+        assert!(is_unset(target.convert(None, ValueType::of::<String>(), None, &crate::utilities::CultureInfo::invariant_culture())));
     }
 
     #[test]
     fn convert_passes_null_to_nullable_input_type() {
         let target = FuncValueConverter::<Option<i32>, String>::new(|x| format!("{x:?}"));
 
-        assert_eq!(get::<String>(target.convert(None, ValueType::of::<String>(), None)), "None");
-        assert_eq!(get::<String>(target.convert(Some(&boxed(5i32)), ValueType::of::<String>(), None)), "Some(5)");
-        assert_eq!(get::<String>(target.convert(Some(&boxed(Some(6i32))), ValueType::of::<String>(), None)), "Some(6)");
+        assert_eq!(get::<String>(target.convert(None, ValueType::of::<String>(), None, &crate::utilities::CultureInfo::invariant_culture())), "None");
+        assert_eq!(get::<String>(target.convert(Some(&boxed(5i32)), ValueType::of::<String>(), None, &crate::utilities::CultureInfo::invariant_culture())), "Some(5)");
+        assert_eq!(get::<String>(target.convert(Some(&boxed(Some(6i32))), ValueType::of::<String>(), None, &crate::utilities::CultureInfo::invariant_culture())), "Some(6)");
         assert_eq!(
-            get::<String>(target.convert(Some(&boxed(Option::<i32>::None)), ValueType::of::<String>(), None)),
+            get::<String>(target.convert(Some(&boxed(Option::<i32>::None)), ValueType::of::<String>(), None, &crate::utilities::CultureInfo::invariant_culture())),
             "None"
         );
-        assert!(is_unset(target.convert(Some(&boxed(5i64)), ValueType::of::<String>(), None)));
+        assert!(is_unset(target.convert(Some(&boxed(5i64)), ValueType::of::<String>(), None, &crate::utilities::CultureInfo::invariant_culture())));
     }
 
     #[test]
     fn convert_accepts_nullable_value_for_non_nullable_input_type() {
         let target = FuncValueConverter::<i32, i32>::new(|x| x + 1);
 
-        assert_eq!(get::<i32>(target.convert(Some(&boxed(Some(5i32))), ValueType::of::<i32>(), None)), 6);
-        assert!(is_unset(target.convert(Some(&boxed(Option::<i32>::None)), ValueType::of::<i32>(), None)));
+        assert_eq!(get::<i32>(target.convert(Some(&boxed(Some(5i32))), ValueType::of::<i32>(), None, &crate::utilities::CultureInfo::invariant_culture())), 6);
+        assert!(is_unset(target.convert(Some(&boxed(Option::<i32>::None)), ValueType::of::<i32>(), None, &crate::utilities::CultureInfo::invariant_culture())));
     }
 
     #[test]
@@ -267,17 +272,17 @@ mod tests {
         let target = FuncValueConverter::<String, usize>::new(|x| x.len());
         let nullable = FuncValueConverter::<Option<String>, usize>::new(|x| x.map_or(0, |x| x.len()));
 
-        assert_eq!(get::<usize>(target.convert(Some(&boxed("abc")), ValueType::of::<usize>(), None)), 3);
-        assert_eq!(get::<usize>(nullable.convert(Some(&boxed("abcd")), ValueType::of::<usize>(), None)), 4);
+        assert_eq!(get::<usize>(target.convert(Some(&boxed("abc")), ValueType::of::<usize>(), None, &crate::utilities::CultureInfo::invariant_culture())), 3);
+        assert_eq!(get::<usize>(nullable.convert(Some(&boxed("abcd")), ValueType::of::<usize>(), None, &crate::utilities::CultureInfo::invariant_culture())), 4);
     }
 
     #[test]
     fn convert_accepts_any_value_for_untyped_input_type() {
         let target = FuncValueConverter::<Option<BoxedValue>, bool>::new(|x| x.is_some());
 
-        assert!(get::<bool>(target.convert(Some(&boxed(5i32)), ValueType::of::<bool>(), None)));
-        assert!(get::<bool>(target.convert(Some(&FerroProperty::unset_value()), ValueType::of::<bool>(), None)));
-        assert!(!get::<bool>(target.convert(None, ValueType::of::<bool>(), None)));
+        assert!(get::<bool>(target.convert(Some(&boxed(5i32)), ValueType::of::<bool>(), None, &crate::utilities::CultureInfo::invariant_culture())));
+        assert!(get::<bool>(target.convert(Some(&FerroProperty::unset_value()), ValueType::of::<bool>(), None, &crate::utilities::CultureInfo::invariant_culture())));
+        assert!(!get::<bool>(target.convert(None, ValueType::of::<bool>(), None, &crate::utilities::CultureInfo::invariant_culture())));
     }
 
     #[test]
@@ -288,27 +293,27 @@ mod tests {
         let element = boxed(StyledElement::new());
         let object = boxed(FerroObject::new());
 
-        assert!(get::<bool>(target.convert(Some(&element), ValueType::of::<bool>(), None)));
-        assert!(get::<bool>(nullable.convert(Some(&element), ValueType::of::<bool>(), None)));
-        assert!(!get::<bool>(nullable.convert(None, ValueType::of::<bool>(), None)));
-        assert!(get::<bool>(derived.convert(Some(&element), ValueType::of::<bool>(), None)));
-        assert!(is_unset(derived.convert(Some(&object), ValueType::of::<bool>(), None)));
-        assert!(is_unset(target.convert(None, ValueType::of::<bool>(), None)));
+        assert!(get::<bool>(target.convert(Some(&element), ValueType::of::<bool>(), None, &crate::utilities::CultureInfo::invariant_culture())));
+        assert!(get::<bool>(nullable.convert(Some(&element), ValueType::of::<bool>(), None, &crate::utilities::CultureInfo::invariant_culture())));
+        assert!(!get::<bool>(nullable.convert(None, ValueType::of::<bool>(), None, &crate::utilities::CultureInfo::invariant_culture())));
+        assert!(get::<bool>(derived.convert(Some(&element), ValueType::of::<bool>(), None, &crate::utilities::CultureInfo::invariant_culture())));
+        assert!(is_unset(derived.convert(Some(&object), ValueType::of::<bool>(), None, &crate::utilities::CultureInfo::invariant_culture())));
+        assert!(is_unset(target.convert(None, ValueType::of::<bool>(), None, &crate::utilities::CultureInfo::invariant_culture())));
     }
 
     #[test]
     fn convert_boxes_nullable_result_as_null_or_contents() {
         let target = FuncValueConverter::<i32, Option<i32>>::new(|x| (x > 0).then_some(x));
 
-        assert_eq!(get::<i32>(target.convert(Some(&boxed(5i32)), ValueType::of::<Option<i32>>(), None)), 5);
-        assert!(target.convert(Some(&boxed(-5i32)), ValueType::of::<Option<i32>>(), None).expect("no error").is_none());
+        assert_eq!(get::<i32>(target.convert(Some(&boxed(5i32)), ValueType::of::<Option<i32>>(), None, &crate::utilities::CultureInfo::invariant_culture())), 5);
+        assert!(target.convert(Some(&boxed(-5i32)), ValueType::of::<Option<i32>>(), None, &crate::utilities::CultureInfo::invariant_culture()).expect("no error").is_none());
     }
 
     #[test]
     fn convert_passes_untyped_result_through() {
         let target = FuncValueConverter::<i32, BoxedValue>::new(|_| BindingOperations::do_nothing());
 
-        let result = target.convert(Some(&boxed(5i32)), ValueType::object(), None).expect("no error");
+        let result = target.convert(Some(&boxed(5i32)), ValueType::object(), None, &crate::utilities::CultureInfo::invariant_culture()).expect("no error");
 
         assert!(BindingOperations::is_do_nothing(result.as_ref()));
     }
@@ -317,7 +322,7 @@ mod tests {
     fn convert_back_without_function_is_an_error() {
         let target = FuncValueConverter::<i32, String>::new(|x| x.to_string());
 
-        let result = target.convert_back(Some(&boxed(String::from("5"))), ValueType::of::<i32>(), None);
+        let result = target.convert_back(Some(&boxed(String::from("5"))), ValueType::of::<i32>(), None, &crate::utilities::CultureInfo::invariant_culture());
 
         assert_eq!(result.expect_err("an error").to_string(), "The method or operation is not implemented.");
     }
@@ -327,34 +332,34 @@ mod tests {
         let target =
             FuncValueConverter::<i32, String>::new_two_way(|x| x.to_string(), |x| x.parse().unwrap_or_default());
 
-        assert_eq!(get::<String>(target.convert(Some(&boxed(5i32)), ValueType::of::<String>(), None)), "5");
-        assert_eq!(get::<i32>(target.convert_back(Some(&boxed(String::from("7"))), ValueType::of::<i32>(), None)), 7);
-        assert!(is_unset(target.convert_back(Some(&boxed(7i32)), ValueType::of::<i32>(), None)));
-        assert!(is_unset(target.convert_back(None, ValueType::of::<i32>(), None)));
+        assert_eq!(get::<String>(target.convert(Some(&boxed(5i32)), ValueType::of::<String>(), None, &crate::utilities::CultureInfo::invariant_culture())), "5");
+        assert_eq!(get::<i32>(target.convert_back(Some(&boxed(String::from("7"))), ValueType::of::<i32>(), None, &crate::utilities::CultureInfo::invariant_culture())), 7);
+        assert!(is_unset(target.convert_back(Some(&boxed(7i32)), ValueType::of::<i32>(), None, &crate::utilities::CultureInfo::invariant_culture())));
+        assert!(is_unset(target.convert_back(None, ValueType::of::<i32>(), None, &crate::utilities::CultureInfo::invariant_culture())));
     }
 
     #[test]
     fn parameter_converter_passes_parameter() {
         let target = FuncValueConverterWithParameter::<i32, i32, i32>::new(|x, p| x * p);
 
-        assert_eq!(get::<i32>(target.convert(Some(&boxed(5i32)), ValueType::of::<i32>(), Some(&boxed(3i32)))), 15);
+        assert_eq!(get::<i32>(target.convert(Some(&boxed(5i32)), ValueType::of::<i32>(), Some(&boxed(3i32)), &crate::utilities::CultureInfo::invariant_culture())), 15);
     }
 
     #[test]
     fn parameter_converter_returns_unset_for_value_or_parameter_of_other_type() {
         let target = FuncValueConverterWithParameter::<i32, i32, i32>::new(|x, p| x * p);
 
-        assert!(is_unset(target.convert(Some(&boxed(5i64)), ValueType::of::<i32>(), Some(&boxed(3i32)))));
-        assert!(is_unset(target.convert(Some(&boxed(5i32)), ValueType::of::<i32>(), Some(&boxed(3i64)))));
-        assert!(is_unset(target.convert(Some(&boxed(5i32)), ValueType::of::<i32>(), None)));
+        assert!(is_unset(target.convert(Some(&boxed(5i64)), ValueType::of::<i32>(), Some(&boxed(3i32)), &crate::utilities::CultureInfo::invariant_culture())));
+        assert!(is_unset(target.convert(Some(&boxed(5i32)), ValueType::of::<i32>(), Some(&boxed(3i64)), &crate::utilities::CultureInfo::invariant_culture())));
+        assert!(is_unset(target.convert(Some(&boxed(5i32)), ValueType::of::<i32>(), None, &crate::utilities::CultureInfo::invariant_culture())));
     }
 
     #[test]
     fn parameter_converter_accepts_null_parameter_of_nullable_type() {
         let target = FuncValueConverterWithParameter::<i32, Option<i32>, i32>::new(|x, p| x * p.unwrap_or(1));
 
-        assert_eq!(get::<i32>(target.convert(Some(&boxed(5i32)), ValueType::of::<i32>(), None)), 5);
-        assert_eq!(get::<i32>(target.convert(Some(&boxed(5i32)), ValueType::of::<i32>(), Some(&boxed(2i32)))), 10);
+        assert_eq!(get::<i32>(target.convert(Some(&boxed(5i32)), ValueType::of::<i32>(), None, &crate::utilities::CultureInfo::invariant_culture())), 5);
+        assert_eq!(get::<i32>(target.convert(Some(&boxed(5i32)), ValueType::of::<i32>(), Some(&boxed(2i32)), &crate::utilities::CultureInfo::invariant_culture())), 10);
     }
 
     #[test]
@@ -362,9 +367,9 @@ mod tests {
         let one_way = FuncValueConverterWithParameter::<i32, i32, i32>::new(|x, p| x * p);
         let two_way = FuncValueConverterWithParameter::<i32, i32, i32>::new_two_way(|x, p| x * p, |x, p| x / p);
 
-        let result = one_way.convert_back(Some(&boxed(15i32)), ValueType::of::<i32>(), Some(&boxed(3i32)));
+        let result = one_way.convert_back(Some(&boxed(15i32)), ValueType::of::<i32>(), Some(&boxed(3i32)), &crate::utilities::CultureInfo::invariant_culture());
         assert_eq!(result.expect_err("an error").to_string(), "The method or operation is not implemented.");
-        assert_eq!(get::<i32>(two_way.convert_back(Some(&boxed(15i32)), ValueType::of::<i32>(), Some(&boxed(3i32)))), 5);
-        assert!(is_unset(two_way.convert_back(Some(&boxed(15i32)), ValueType::of::<i32>(), Some(&boxed(String::new())))));
+        assert_eq!(get::<i32>(two_way.convert_back(Some(&boxed(15i32)), ValueType::of::<i32>(), Some(&boxed(3i32)), &crate::utilities::CultureInfo::invariant_culture())), 5);
+        assert!(is_unset(two_way.convert_back(Some(&boxed(15i32)), ValueType::of::<i32>(), Some(&boxed(String::new())), &crate::utilities::CultureInfo::invariant_culture())));
     }
 }

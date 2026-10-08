@@ -179,6 +179,7 @@ impl IValueConverter for CalendarDatePickerTextConverter {
         value: Option<&BoxedValue>,
         _target_type: ValueType,
         _parameter: Option<&BoxedValue>,
+        _culture: &CultureInfo,
     ) -> Result<Option<BoxedValue>, BindingError> {
         if let Some(d) = value.and_then(|value| value.downcast_ref::<DateTime>()) {
             // always return a single format (for this test)
@@ -193,6 +194,7 @@ impl IValueConverter for CalendarDatePickerTextConverter {
         value: Option<&BoxedValue>,
         _target_type: ValueType,
         _parameter: Option<&BoxedValue>,
+        _culture: &CultureInfo,
     ) -> Result<Option<BoxedValue>, BindingError> {
         let Some(str) = value.and_then(|value| value.downcast_ref::<String>()) else {
             return Ok(Some(FerroProperty::unset_value()));

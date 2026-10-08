@@ -847,7 +847,7 @@ impl NumericUpDown {
         if let Some(converter) = self.text_converter() {
             let boxed = value.map(|value| Rc::new(value) as BoxedValue);
             let text = converter
-                .convert_back(boxed.as_ref(), ValueType::of::<String>(), None)
+                .convert_back(boxed.as_ref(), ValueType::of::<String>(), None, &CultureInfo::current_culture())
                 .map_err(|error| ConversionError(error.to_string()))?;
             return Ok(text.map(|text| ValueTypes::to_display_string(Some(&text))));
         }
@@ -1060,7 +1060,7 @@ impl NumericUpDown {
         if let Some(converter) = self.text_converter() {
             let boxed: BoxedValue = Rc::new(text.to_string());
             let value_from_text = converter
-                .convert(Some(&boxed), ValueType::of::<Option<Decimal>>(), None)
+                .convert(Some(&boxed), ValueType::of::<Option<Decimal>>(), None, &CultureInfo::current_culture())
                 .map_err(|error| ConversionError(error.to_string()))?;
             return match value_from_text {
                 None => Ok(None),

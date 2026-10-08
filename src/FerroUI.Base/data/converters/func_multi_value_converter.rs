@@ -1,5 +1,6 @@
 use super::func_value_converter::{box_result, cast_value};
 use super::IMultiValueConverter;
+use crate::utilities::CultureInfo;
 use crate::data::core::ValueType;
 use crate::data::BindingError;
 use crate::{BoxedValue, FerroProperty, PropertyValue};
@@ -31,6 +32,7 @@ impl<TIn: PropertyValue, TOut: PropertyValue> IMultiValueConverter for FuncMulti
         values: &[Option<BoxedValue>],
         _target_type: ValueType,
         _parameter: Option<&BoxedValue>,
+        _culture: &CultureInfo,
     ) -> Result<Option<BoxedValue>, BindingError> {
         // Null values are kept when they are valid for the input type.
         let converted: Vec<TIn> = values.iter().filter_map(|value| cast_value::<TIn>(value.as_ref())).collect();
@@ -67,11 +69,11 @@ mod tests {
     fn multi_value_converter_should_not_skip_valid_null_reference_type_value() {
         let target = FuncMultiValueConverter::<Option<String>, String>::new(join);
 
-        let value = target.convert(&[boxed("Foo"), boxed("Bar"), boxed("Baz")], ValueType::of::<String>(), None);
+        let value = target.convert(&[boxed("Foo"), boxed("Bar"), boxed("Baz")], ValueType::of::<String>(), None, &crate::utilities::CultureInfo::invariant_culture());
 
         assert_eq!(string(value).as_deref(), Some("Foo,Bar,Baz"));
 
-        let value = target.convert(&[None, boxed("Bar"), boxed("Baz")], ValueType::of::<String>(), None);
+        let value = target.convert(&[None, boxed("Bar"), boxed("Baz")], ValueType::of::<String>(), None, &crate::utilities::CultureInfo::invariant_culture());
 
         assert_eq!(string(value).as_deref(), Some(",Bar,Baz"));
     }
@@ -97,11 +99,11 @@ mod tests {
                 .collect()
         };
 
-        let value = target.convert(&create(&[Some("Foo"), Some("Bar"), Some("Baz")]), ValueType::of::<String>(), None);
+        let value = target.convert(&create(&[Some("Foo"), Some("Bar"), Some("Baz")]), ValueType::of::<String>(), None, &crate::utilities::CultureInfo::invariant_culture());
 
         assert_eq!(string(value).as_deref(), Some("Foo,Bar,Baz"));
 
-        let value = target.convert(&create(&[None, Some("Bar"), Some("Baz")]), ValueType::of::<String>(), None);
+        let value = target.convert(&create(&[None, Some("Bar"), Some("Baz")]), ValueType::of::<String>(), None, &crate::utilities::CultureInfo::invariant_culture());
 
         assert_eq!(string(value).as_deref(), Some(",Bar,Baz"));
     }
@@ -110,11 +112,11 @@ mod tests {
     fn multi_value_converter_supports_indexing_the_parameters() {
         let target = FuncMultiValueConverter::<Option<String>, Option<String>>::new(|v| v[0].clone());
 
-        let value = target.convert(&[boxed("Foo"), boxed("Bar"), boxed("Baz")], ValueType::of::<String>(), None);
+        let value = target.convert(&[boxed("Foo"), boxed("Bar"), boxed("Baz")], ValueType::of::<String>(), None, &crate::utilities::CultureInfo::invariant_culture());
 
         assert_eq!(string(value).as_deref(), Some("Foo"));
 
-        let value = target.convert(&[None, boxed("Bar"), boxed("Baz")], ValueType::of::<String>(), None);
+        let value = target.convert(&[None, boxed("Bar"), boxed("Baz")], ValueType::of::<String>(), None, &crate::utilities::CultureInfo::invariant_culture());
 
         assert!(value.expect("no error").is_none());
     }
@@ -123,7 +125,7 @@ mod tests {
     fn returns_unset_if_any_value_is_not_of_input_type() {
         let target = FuncMultiValueConverter::<Option<String>, String>::new(join);
 
-        let value = target.convert(&[boxed("Foo"), boxed(1i32)], ValueType::of::<String>(), None);
+        let value = target.convert(&[boxed("Foo"), boxed(1i32)], ValueType::of::<String>(), None, &crate::utilities::CultureInfo::invariant_culture());
 
         assert!(BindingOperations::is_unset(value.expect("no error").as_ref()));
     }
@@ -132,7 +134,7 @@ mod tests {
     fn returns_unset_for_null_value_of_non_nullable_input_type() {
         let target = FuncMultiValueConverter::<bool, bool>::new(|v| v.iter().all(|v| *v));
 
-        let value = target.convert(&[boxed(true), None], ValueType::of::<bool>(), None);
+        let value = target.convert(&[boxed(true), None], ValueType::of::<bool>(), None, &crate::utilities::CultureInfo::invariant_culture());
 
         assert!(BindingOperations::is_unset(value.expect("no error").as_ref()));
     }
@@ -141,7 +143,7 @@ mod tests {
     fn untyped_inputs_accept_every_value() {
         let target = FuncMultiValueConverter::<Option<BoxedValue>, usize>::new(|v| v.len());
 
-        let value = target.convert(&[boxed("Foo"), boxed(1i32), None], ValueType::of::<usize>(), None);
+        let value = target.convert(&[boxed("Foo"), boxed(1i32), None], ValueType::of::<usize>(), None, &crate::utilities::CultureInfo::invariant_culture());
 
         assert_eq!(value.expect("no error").and_then(|v| v.downcast_ref::<usize>().copied()), Some(3));
     }

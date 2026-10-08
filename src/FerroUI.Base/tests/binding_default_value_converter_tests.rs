@@ -74,7 +74,7 @@ fn register_conversions() {
 fn convert<T: PartialEq + 'static, TTo: 'static>(value: T) -> Option<BoxedValue> {
     register_conversions();
     DefaultValueConverter::instance()
-        .convert(Some(&boxed(value)), ValueType::of::<TTo>(), None)
+        .convert(Some(&boxed(value)), ValueType::of::<TTo>(), None, &crate::utilities::CultureInfo::invariant_culture())
         .expect("the default converter does not fail")
 }
 

@@ -1,5 +1,6 @@
 //! Ported from the upstream `MultiBindingTests_Converters`.
 
+use ferroui_base::utilities::CultureInfo;
 use super::test_support::*;
 use crate::data::Binding;
 use ferroui_base::data::converters::IMultiValueConverter;
@@ -19,6 +20,7 @@ impl IMultiValueConverter for SumOfDoublesConverter {
         values: &[Option<BoxedValue>],
         _target_type: ValueType,
         _parameter: Option<&BoxedValue>,
+        _culture: &CultureInfo,
     ) -> Result<Option<BoxedValue>, BindingError> {
         let sum: f64 = values.iter().flatten().filter_map(|v| v.downcast_ref::<f64>()).sum();
         Ok(Some(boxed(sum)))

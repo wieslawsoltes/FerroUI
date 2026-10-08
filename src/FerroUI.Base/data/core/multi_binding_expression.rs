@@ -4,6 +4,7 @@ use super::{
 };
 use crate::data::converters::IMultiValueConverter;
 use crate::data::{BindingBase, BindingExpressionBase, BindingNotification, BindingOperations, BindingPriority};
+use crate::utilities::CultureInfo;
 use crate::{BoxedValue, FerroProperty};
 use std::cell::RefCell;
 use std::rc::{Rc, Weak};
@@ -65,7 +66,9 @@ impl MultiBindingExpression {
 
         match &self.converter {
             Some(converter) => {
-                let converted = match converter.convert(&values, target_type, self.converter_parameter.as_ref()) {
+                let culture = CultureInfo::current_culture();
+                let converted = match converter.convert(&values, target_type, self.converter_parameter.as_ref(), &culture)
+                {
                     Ok(v) => v,
                     Err(_) => Some(FerroProperty::unset_value()),
                 };

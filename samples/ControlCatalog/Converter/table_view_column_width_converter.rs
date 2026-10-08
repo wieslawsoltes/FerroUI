@@ -1,5 +1,6 @@
 //! Port of `Converter/TableViewColumnWidthConverter.cs`.
 
+use ferroui_base::utilities::CultureInfo;
 use ferroui_base::data::converters::IValueConverter;
 use ferroui_base::data::core::ValueType;
 use ferroui_base::data::BindingError;
@@ -35,6 +36,7 @@ impl IValueConverter for TableViewColumnWidthConverter {
         value: Option<&BoxedValue>,
         _target_type: ValueType,
         parameter: Option<&BoxedValue>,
+        _culture: &CultureInfo,
     ) -> Result<Option<BoxedValue>, BindingError> {
         let use_star_size = value.and_then(|value| value.downcast_ref::<bool>()).copied();
         let base_width = parameter.and_then(|parameter| parameter.downcast_ref::<String>()).and_then(|text| try_parse_number(text));
@@ -54,6 +56,7 @@ impl IValueConverter for TableViewColumnWidthConverter {
         _value: Option<&BoxedValue>,
         _target_type: ValueType,
         _parameter: Option<&BoxedValue>,
+        _culture: &CultureInfo,
     ) -> Result<Option<BoxedValue>, BindingError> {
         Err(BindingError::message("Specified method is not supported."))
     }
@@ -84,7 +87,7 @@ mod tests {
 
     fn convert(value: BoxedValue, parameter: Option<BoxedValue>) -> Option<GridLength> {
         let converter = TableViewColumnWidthConverter::new();
-        let value = converter.convert(Some(&value), ValueType::of::<GridLength>(), parameter.as_ref());
+        let value = converter.convert(Some(&value), ValueType::of::<GridLength>(), parameter.as_ref(), &ferroui_base::utilities::CultureInfo::invariant_culture());
         value.ok().flatten().expect("a value").downcast_ref::<GridLength>().copied()
     }
 
@@ -102,6 +105,6 @@ mod tests {
         assert_eq!(None, convert(boxed(true), Some(boxed(1.0_f64))));
         assert_eq!(None, convert(boxed(true), None));
         let converter = TableViewColumnWidthConverter::new();
-        assert!(converter.convert_back(Some(&boxed(true)), ValueType::of::<bool>(), None).is_err());
+        assert!(converter.convert_back(Some(&boxed(true)), ValueType::of::<bool>(), None, &ferroui_base::utilities::CultureInfo::invariant_culture()).is_err());
     }
 }

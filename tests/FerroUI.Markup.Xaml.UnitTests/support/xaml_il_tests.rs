@@ -57,6 +57,7 @@ impl IMultiValueConverter for XamlIlBugTestsBrushToColorConverter {
         values: &[Option<BoxedValue>],
         _target_type: ValueType,
         _parameter: Option<&BoxedValue>,
+        _culture: &CultureInfo,
     ) -> Result<Option<BoxedValue>, BindingError> {
         let brush = from_markup_value::<Rc<dyn IBrush>>(&values[0]);
         let color = brush.and_then(|brush| brush.as_solid_color_brush().map(|brush| brush.color()));

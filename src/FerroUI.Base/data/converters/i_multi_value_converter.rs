@@ -1,5 +1,6 @@
 use crate::data::core::ValueType;
 use crate::data::BindingError;
+use crate::utilities::CultureInfo;
 use crate::BoxedValue;
 
 /// Converts the values of a multi-binding to a single value.
@@ -13,6 +14,7 @@ pub trait IMultiValueConverter {
         values: &[Option<BoxedValue>],
         target_type: ValueType,
         parameter: Option<&BoxedValue>,
+        culture: &CultureInfo,
     ) -> Result<Option<BoxedValue>, BindingError>;
 }
 

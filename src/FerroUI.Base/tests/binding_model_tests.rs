@@ -2,6 +2,7 @@
 //! the model layer, compiled and string-path bindings, two-way updates,
 //! converters and data validation.
 
+use crate::utilities::CultureInfo;
 use super::*;
 use crate::data::converters::IValueConverter;
 use crate::data::core::{Maybe, ModelRef, Value, ValueType};
@@ -288,6 +289,7 @@ impl IValueConverter for Shout {
         value: Option<&BoxedValue>,
         _target_type: ValueType,
         _parameter: Option<&BoxedValue>,
+        _culture: &CultureInfo,
     ) -> Result<Option<BoxedValue>, BindingError> {
         Ok(value.and_then(|v| v.downcast_ref::<String>()).map(|v| boxed(v.to_uppercase())))
     }
@@ -297,6 +299,7 @@ impl IValueConverter for Shout {
         value: Option<&BoxedValue>,
         _target_type: ValueType,
         _parameter: Option<&BoxedValue>,
+        _culture: &CultureInfo,
     ) -> Result<Option<BoxedValue>, BindingError> {
         Ok(value.and_then(|v| v.downcast_ref::<String>()).map(|v| boxed(v.to_lowercase())))
     }

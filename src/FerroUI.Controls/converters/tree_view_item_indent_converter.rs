@@ -1,3 +1,4 @@
+use ferroui_base::utilities::CultureInfo;
 use ferroui_base::data::converters::{cast_value, IMultiValueConverter};
 use ferroui_base::data::core::ValueType;
 use ferroui_base::data::BindingError;
@@ -25,6 +26,7 @@ impl IMultiValueConverter for TreeViewItemIndentConverter {
         values: &[Option<BoxedValue>],
         _target_type: ValueType,
         _parameter: Option<&BoxedValue>,
+        _culture: &CultureInfo,
     ) -> Result<Option<BoxedValue>, BindingError> {
         if values.len() > 1 {
             if let (Some(level), Some(indent)) =

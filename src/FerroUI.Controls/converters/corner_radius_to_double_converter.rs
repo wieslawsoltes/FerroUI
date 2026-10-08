@@ -1,3 +1,4 @@
+use ferroui_base::utilities::CultureInfo;
 use super::Corners;
 use ferroui_base::data::converters::{cast_value, IValueConverter};
 use ferroui_base::data::core::ValueType;
@@ -34,6 +35,7 @@ impl IValueConverter for CornerRadiusToDoubleConverter {
         value: Option<&BoxedValue>,
         _target_type: ValueType,
         _parameter: Option<&BoxedValue>,
+        _culture: &CultureInfo,
     ) -> Result<Option<BoxedValue>, BindingError> {
         let Some(corner_radius) = cast_value::<CornerRadius>(value) else {
             return Ok(Some(FerroProperty::unset_value()));
@@ -60,6 +62,7 @@ impl IValueConverter for CornerRadiusToDoubleConverter {
         _value: Option<&BoxedValue>,
         _target_type: ValueType,
         _parameter: Option<&BoxedValue>,
+        _culture: &CultureInfo,
     ) -> Result<Option<BoxedValue>, BindingError> {
         Err(BindingError::message("The method or operation is not implemented."))
     }

@@ -1,5 +1,6 @@
 //! Port of `Converters/ColorToBrushConverter.cs`.
 
+use ferroui_base::utilities::CultureInfo;
 use ferroui_base::data::converters::IValueConverter;
 use ferroui_base::data::core::ValueType;
 use ferroui_base::data::BindingError;
@@ -60,6 +61,7 @@ impl IValueConverter for ColorToBrushConverter {
         value: Option<&BoxedValue>,
         target_type: ValueType,
         _parameter: Option<&BoxedValue>,
+        _culture: &CultureInfo,
     ) -> Result<Option<BoxedValue>, BindingError> {
         Ok(Self::convert_to(value.cloned(), Some(target_type)))
     }
@@ -69,6 +71,7 @@ impl IValueConverter for ColorToBrushConverter {
         value: Option<&BoxedValue>,
         target_type: ValueType,
         _parameter: Option<&BoxedValue>,
+        _culture: &CultureInfo,
     ) -> Result<Option<BoxedValue>, BindingError> {
         Ok(Self::convert_back_to(value.cloned(), Some(target_type)))
     }

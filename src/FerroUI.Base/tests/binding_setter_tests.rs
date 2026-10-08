@@ -5,6 +5,7 @@
 //! The control library is a separate crate, so the tests use minimal styled
 //! element classes in place of the controls used by the upstream tests.
 
+use crate::utilities::CultureInfo;
 use super::*;
 use crate::data::converters::IValueConverter;
 use crate::data::core::{Maybe, Value, ValueType};
@@ -172,6 +173,7 @@ impl IValueConverter for TestConverter {
         value: Option<&BoxedValue>,
         _target_type: ValueType,
         _parameter: Option<&BoxedValue>,
+        _culture: &CultureInfo,
     ) -> Result<Option<BoxedValue>, BindingError> {
         let value = value.and_then(|v| v.downcast_ref::<String>().cloned()).unwrap_or_default();
         Ok(Some(boxed(value + "bar")))
@@ -182,6 +184,7 @@ impl IValueConverter for TestConverter {
         _value: Option<&BoxedValue>,
         _target_type: ValueType,
         _parameter: Option<&BoxedValue>,
+        _culture: &CultureInfo,
     ) -> Result<Option<BoxedValue>, BindingError> {
         panic!("The method or operation is not implemented.");
     }

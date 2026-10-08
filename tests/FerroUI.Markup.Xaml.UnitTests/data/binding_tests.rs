@@ -1,5 +1,6 @@
 //! Ported from the upstream `Data/BindingTests`.
 
+use ferroui_base::utilities::CultureInfo;
 use std::rc::{Rc, Weak};
 
 use ferroui_base::data::converters::IMultiValueConverter;
@@ -54,6 +55,7 @@ impl IMultiValueConverter for ConcatConverter {
         values: &[Option<BoxedValue>],
         _target_type: ValueType,
         _parameter: Option<&BoxedValue>,
+        _culture: &CultureInfo,
     ) -> Result<Option<BoxedValue>, BindingError> {
         // The text of a null value is empty, as in a joined string.
         let texts: Vec<String> = values

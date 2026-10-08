@@ -1,3 +1,4 @@
+use ferroui_base::utilities::CultureInfo;
 use ferroui_base::data::converters::{cast_value, IValueConverter};
 use ferroui_base::data::core::{ValueType, ValueTypes};
 use ferroui_base::data::{BindingError, BindingOperations};
@@ -24,6 +25,7 @@ impl IValueConverter for EnumToBoolConverter {
         value: Option<&BoxedValue>,
         _target_type: ValueType,
         parameter: Option<&BoxedValue>,
+        _culture: &CultureInfo,
     ) -> Result<Option<BoxedValue>, BindingError> {
         let value_is_null = value.cloned().and_then(ValueTypes::normalize).is_none();
         let parameter_is_null = parameter.cloned().and_then(ValueTypes::normalize).is_none();
@@ -46,6 +48,7 @@ impl IValueConverter for EnumToBoolConverter {
         value: Option<&BoxedValue>,
         _target_type: ValueType,
         parameter: Option<&BoxedValue>,
+        _culture: &CultureInfo,
     ) -> Result<Option<BoxedValue>, BindingError> {
         if cast_value::<bool>(value) == Some(true) {
             return Ok(parameter.cloned());

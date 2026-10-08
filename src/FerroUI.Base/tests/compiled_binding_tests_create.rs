@@ -4,6 +4,7 @@
 //! here the same paths are built with the path builder, which is what the
 //! factory produces.
 
+use crate::utilities::CultureInfo;
 use super::*;
 use crate::data::converters::IValueConverter;
 use crate::data::core::{Maybe, ModelRef, Untyped, ValueType, ValueTypes};
@@ -67,6 +68,7 @@ impl IValueConverter for TestConverter {
         value: Option<&BoxedValue>,
         _target_type: ValueType,
         _parameter: Option<&BoxedValue>,
+        _culture: &CultureInfo,
     ) -> Result<Option<BoxedValue>, BindingError> {
         Ok(value.map(|v| boxed(ValueTypes::to_display_string(Some(v)).to_uppercase())))
     }
@@ -76,6 +78,7 @@ impl IValueConverter for TestConverter {
         value: Option<&BoxedValue>,
         _target_type: ValueType,
         _parameter: Option<&BoxedValue>,
+        _culture: &CultureInfo,
     ) -> Result<Option<BoxedValue>, BindingError> {
         Ok(value.map(|v| boxed(ValueTypes::to_display_string(Some(v)).to_lowercase())))
     }

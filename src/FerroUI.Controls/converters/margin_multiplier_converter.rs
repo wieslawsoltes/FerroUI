@@ -1,3 +1,4 @@
+use ferroui_base::utilities::CultureInfo;
 use ferroui_base::data::converters::{cast_value, IValueConverter};
 use ferroui_base::data::core::ValueType;
 use ferroui_base::data::BindingError;
@@ -73,6 +74,7 @@ impl IValueConverter for MarginMultiplierConverter {
         value: Option<&BoxedValue>,
         _target_type: ValueType,
         _parameter: Option<&BoxedValue>,
+        _culture: &CultureInfo,
     ) -> Result<Option<BoxedValue>, BindingError> {
         let indent = self.indent.get();
 
@@ -103,6 +105,7 @@ impl IValueConverter for MarginMultiplierConverter {
         _value: Option<&BoxedValue>,
         _target_type: ValueType,
         _parameter: Option<&BoxedValue>,
+        _culture: &CultureInfo,
     ) -> Result<Option<BoxedValue>, BindingError> {
         Err(BindingError::message("The method or operation is not implemented."))
     }

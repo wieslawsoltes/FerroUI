@@ -1,6 +1,7 @@
 //! The test types declared by the upstream test file
 //! `Converters/ValueConverterTests.cs`.
 
+use ferroui_base::utilities::CultureInfo;
 use std::rc::{Rc, Weak};
 
 use ferroui_base::data::converters::IValueConverter;
@@ -45,6 +46,7 @@ impl IValueConverter for TestConverter {
         value: Option<&BoxedValue>,
         _target_type: ValueType,
         _parameter: Option<&BoxedValue>,
+        _culture: &CultureInfo,
     ) -> Result<Option<BoxedValue>, BindingError> {
         if let Some(i) = value.and_then(|value| value.downcast_ref::<i32>()).copied() {
             if i > 0 {
@@ -66,6 +68,7 @@ impl IValueConverter for TestConverter {
         _value: Option<&BoxedValue>,
         _target_type: ValueType,
         _parameter: Option<&BoxedValue>,
+        _culture: &CultureInfo,
     ) -> Result<Option<BoxedValue>, BindingError> {
         Err(BindingError::message("The method or operation is not implemented."))
     }

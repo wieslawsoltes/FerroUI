@@ -1,5 +1,6 @@
 //! Port of `Converter/DegToRadConverter.cs`.
 
+use ferroui_base::utilities::CultureInfo;
 use ferroui_base::data::converters::IValueConverter;
 use ferroui_base::data::core::ValueType;
 use ferroui_base::data::BindingError;
@@ -33,6 +34,7 @@ impl IValueConverter for DegToRadConverter {
         value: Option<&BoxedValue>,
         _target_type: ValueType,
         _parameter: Option<&BoxedValue>,
+        _culture: &CultureInfo,
     ) -> Result<Option<BoxedValue>, BindingError> {
         if let Some(rad) = value.and_then(|value| value.downcast_ref::<f64>()) {
             return Ok(Some(Rc::new(rad * 180.0 / std::f64::consts::PI)));
@@ -46,6 +48,7 @@ impl IValueConverter for DegToRadConverter {
         value: Option<&BoxedValue>,
         _target_type: ValueType,
         _parameter: Option<&BoxedValue>,
+        _culture: &CultureInfo,
     ) -> Result<Option<BoxedValue>, BindingError> {
         if let Some(deg) = value.and_then(|value| value.downcast_ref::<f64>()) {
             return Ok(Some(Rc::new(deg / 180.0 * std::f64::consts::PI)));
@@ -79,16 +82,16 @@ mod tests {
     fn converts_radians_to_degrees_and_back() {
         let converter = DegToRadConverter::new();
         let target = ValueType::of::<f64>();
-        assert_eq!(180.0, number(converter.convert(Some(&boxed(std::f64::consts::PI)), target, None)));
-        assert_eq!(std::f64::consts::PI, number(converter.convert_back(Some(&boxed(180.0_f64)), target, None)));
+        assert_eq!(180.0, number(converter.convert(Some(&boxed(std::f64::consts::PI)), target, None, &ferroui_base::utilities::CultureInfo::invariant_culture())));
+        assert_eq!(std::f64::consts::PI, number(converter.convert_back(Some(&boxed(180.0_f64)), target, None, &ferroui_base::utilities::CultureInfo::invariant_culture())));
     }
 
     #[test]
     fn a_value_that_is_not_a_number_converts_to_zero() {
         let converter = DegToRadConverter::new();
         let target = ValueType::of::<f64>();
-        assert_eq!(0.0, number(converter.convert(Some(&boxed(1_i32)), target, None)));
-        assert_eq!(0.0, number(converter.convert(None, target, None)));
-        assert_eq!(0.0, number(converter.convert_back(Some(&boxed(String::from("1"))), target, None)));
+        assert_eq!(0.0, number(converter.convert(Some(&boxed(1_i32)), target, None, &ferroui_base::utilities::CultureInfo::invariant_culture())));
+        assert_eq!(0.0, number(converter.convert(None, target, None, &ferroui_base::utilities::CultureInfo::invariant_culture())));
+        assert_eq!(0.0, number(converter.convert_back(Some(&boxed(String::from("1"))), target, None, &ferroui_base::utilities::CultureInfo::invariant_culture())));
     }
 }

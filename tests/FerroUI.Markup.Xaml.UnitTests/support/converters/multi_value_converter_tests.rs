@@ -1,6 +1,7 @@
 //! The test types declared by the upstream test file
 //! `Converters/MultiValueConverterTests.cs`.
 
+use ferroui_base::utilities::CultureInfo;
 use std::rc::{Rc, Weak};
 
 use ferroui_base::data::converters::IMultiValueConverter;
@@ -47,6 +48,7 @@ impl IMultiValueConverter for TestMultiValueConverter {
         values: &[Option<BoxedValue>],
         _target_type: ValueType,
         _parameter: Option<&BoxedValue>,
+        _culture: &CultureInfo,
     ) -> Result<Option<BoxedValue>, BindingError> {
         let int = |index: usize| values[index].as_ref().and_then(|value| value.downcast_ref::<i32>()).copied();
 

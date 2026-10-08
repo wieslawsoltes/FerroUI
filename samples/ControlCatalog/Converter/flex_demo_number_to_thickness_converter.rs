@@ -1,5 +1,6 @@
 //! Port of `Converter/FlexDemoNumberToThicknessConverter.cs`.
 
+use ferroui_base::utilities::CultureInfo;
 use ferroui_base::data::converters::IValueConverter;
 use ferroui_base::data::core::{ValueType, ValueTypes};
 use ferroui_base::data::BindingError;
@@ -33,6 +34,7 @@ impl IValueConverter for FlexDemoNumberToThicknessConverter {
         value: Option<&BoxedValue>,
         target_type: ValueType,
         _parameter: Option<&BoxedValue>,
+        _culture: &CultureInfo,
     ) -> Result<Option<BoxedValue>, BindingError> {
         if let Some(x) = value.and_then(|value| value.downcast_ref::<i32>()) {
             if ValueTypes::is_assignable(ValueType::of::<Thickness>(), target_type) {
@@ -50,6 +52,7 @@ impl IValueConverter for FlexDemoNumberToThicknessConverter {
         _value: Option<&BoxedValue>,
         _target_type: ValueType,
         _parameter: Option<&BoxedValue>,
+        _culture: &CultureInfo,
     ) -> Result<Option<BoxedValue>, BindingError> {
         Err(BindingError::message("Specified method is not supported."))
     }
@@ -76,7 +79,7 @@ mod tests {
         let converter = FlexDemoNumberToThicknessConverter::new();
         let target = ValueType::of::<Thickness>();
         let convert = |x: i32| {
-            let value = converter.convert(Some(&boxed(x)), target, None).ok().flatten().expect("a value");
+            let value = converter.convert(Some(&boxed(x)), target, None, &ferroui_base::utilities::CultureInfo::invariant_culture()).ok().flatten().expect("a value");
             *value.downcast_ref::<Thickness>().expect("a thickness")
         };
         assert_eq!(Thickness::symmetric(32.0, 16.0), convert(0));
@@ -84,14 +87,14 @@ mod tests {
         assert_eq!(Thickness::symmetric(56.0, 28.0), convert(3));
         // The remainder keeps the sign of the dividend: 16 + 2 * (-5 % 9) = 6
         assert_eq!(Thickness::symmetric(12.0, 6.0), convert(-1));
-        assert!(converter.convert(Some(&boxed(1_i32)), ValueType::object(), None).is_ok());
+        assert!(converter.convert(Some(&boxed(1_i32)), ValueType::object(), None, &ferroui_base::utilities::CultureInfo::invariant_culture()).is_ok());
     }
 
     #[test]
     fn other_values_targets_and_the_way_back_are_not_supported() {
         let converter = FlexDemoNumberToThicknessConverter::new();
-        assert!(converter.convert(Some(&boxed(1.0_f64)), ValueType::of::<Thickness>(), None).is_err());
-        assert!(converter.convert(Some(&boxed(1_i32)), ValueType::of::<f64>(), None).is_err());
-        assert!(converter.convert_back(Some(&boxed(1_i32)), ValueType::of::<i32>(), None).is_err());
+        assert!(converter.convert(Some(&boxed(1.0_f64)), ValueType::of::<Thickness>(), None, &ferroui_base::utilities::CultureInfo::invariant_culture()).is_err());
+        assert!(converter.convert(Some(&boxed(1_i32)), ValueType::of::<f64>(), None, &ferroui_base::utilities::CultureInfo::invariant_culture()).is_err());
+        assert!(converter.convert_back(Some(&boxed(1_i32)), ValueType::of::<i32>(), None, &ferroui_base::utilities::CultureInfo::invariant_culture()).is_err());
     }
 }

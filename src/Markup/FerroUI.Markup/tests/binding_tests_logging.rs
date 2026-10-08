@@ -3,6 +3,7 @@
 //! The nested test classes of the upstream suite are modules here. Type
 //! names in messages are the names this port reports for the types.
 
+use ferroui_base::utilities::CultureInfo;
 use super::test_support::*;
 use crate::data::Binding;
 use ferroui_base::controls::{NameScope, NameScopeRef};
@@ -183,6 +184,7 @@ impl IValueConverter for ThrowingConverter {
         _value: Option<&BoxedValue>,
         _target_type: ValueType,
         _parameter: Option<&BoxedValue>,
+        _culture: &CultureInfo,
     ) -> Result<Option<BoxedValue>, BindingError> {
         Err(BindingError::message("The method or operation is not implemented."))
     }
@@ -192,6 +194,7 @@ impl IValueConverter for ThrowingConverter {
         _value: Option<&BoxedValue>,
         _target_type: ValueType,
         _parameter: Option<&BoxedValue>,
+        _culture: &CultureInfo,
     ) -> Result<Option<BoxedValue>, BindingError> {
         Err(BindingError::message("The method or operation is not implemented."))
     }

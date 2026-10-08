@@ -152,7 +152,7 @@ mod tests {
         ];
         for (value1, value2, value3, valid) in cases {
             let converter = ObjectConverters::are_all_null();
-            let result = converter.convert(&[text(value1), text(value2), text(value3)], ValueType::of::<bool>(), None);
+            let result = converter.convert(&[text(value1), text(value2), text(value3)], ValueType::of::<bool>(), None, &crate::utilities::CultureInfo::current_culture());
             assert_eq!(as_bool(result), valid, "{value1:?} {value2:?} {value3:?}");
         }
     }
@@ -168,7 +168,7 @@ mod tests {
         ];
         for (value1, value2, value3, valid) in cases {
             let converter = ObjectConverters::are_any_null();
-            let result = converter.convert(&[text(value1), text(value2), text(value3)], ValueType::of::<bool>(), None);
+            let result = converter.convert(&[text(value1), text(value2), text(value3)], ValueType::of::<bool>(), None, &crate::utilities::CultureInfo::current_culture());
             assert_eq!(as_bool(result), valid, "{value1:?} {value2:?} {value3:?}");
         }
     }
@@ -185,7 +185,7 @@ mod tests {
         ];
         for (values, valid) in cases {
             let converter = ObjectConverters::are_all_equal();
-            let result = converter.convert(&values, ValueType::of::<bool>(), None);
+            let result = converter.convert(&values, ValueType::of::<bool>(), None, &crate::utilities::CultureInfo::current_culture());
             assert_eq!(as_bool(result), valid);
         }
     }
@@ -202,7 +202,7 @@ mod tests {
             };
 
             let converter = ObjectConverters::are_all_equal();
-            let result = converter.convert(&values, ValueType::of::<bool>(), None);
+            let result = converter.convert(&values, ValueType::of::<bool>(), None, &crate::utilities::CultureInfo::current_culture());
             assert_eq!(as_bool(result), valid, "empty: {empty}, unique: {unique}");
         }
     }
@@ -214,21 +214,21 @@ mod tests {
 
         #[test]
         fn returns_true_if_value_and_parameter_are_null() {
-            let result = ObjectConverters::equal().convert(None, ValueType::object(), None);
+            let result = ObjectConverters::equal().convert(None, ValueType::object(), None, &crate::utilities::CultureInfo::invariant_culture());
 
             assert!(as_bool(result));
         }
 
         #[test]
         fn returns_false_if_value_is_null_and_parameter_is_not_null() {
-            let result = ObjectConverters::equal().convert(None, ValueType::object(), Some(&new_object()));
+            let result = ObjectConverters::equal().convert(None, ValueType::object(), Some(&new_object()), &crate::utilities::CultureInfo::invariant_culture());
 
             assert!(!as_bool(result));
         }
 
         #[test]
         fn returns_false_if_value_and_parameter_are_different_objects() {
-            let result = ObjectConverters::equal().convert(Some(&new_object()), ValueType::object(), Some(&new_object()));
+            let result = ObjectConverters::equal().convert(Some(&new_object()), ValueType::object(), Some(&new_object()), &crate::utilities::CultureInfo::invariant_culture());
 
             assert!(!as_bool(result));
         }
@@ -236,7 +236,7 @@ mod tests {
         #[test]
         fn returns_true_if_value_and_parameter_are_same_object() {
             let target = new_object();
-            let result = ObjectConverters::equal().convert(Some(&target), ValueType::object(), Some(&target));
+            let result = ObjectConverters::equal().convert(Some(&target), ValueType::object(), Some(&target), &crate::utilities::CultureInfo::invariant_culture());
 
             assert!(as_bool(result));
         }
@@ -245,7 +245,7 @@ mod tests {
 
         #[test]
         fn returns_false_if_value_is_not_null_and_parameter_is_null() {
-            let result = ObjectConverters::equal().convert(Some(&new_object()), ValueType::object(), None);
+            let result = ObjectConverters::equal().convert(Some(&new_object()), ValueType::object(), None, &crate::utilities::CultureInfo::invariant_culture());
 
             assert!(!as_bool(result));
         }
@@ -256,8 +256,8 @@ mod tests {
             let b: BoxedValue = Rc::new(5i32);
             let c: BoxedValue = Rc::new(5i64);
 
-            assert!(as_bool(ObjectConverters::equal().convert(Some(&a), ValueType::object(), Some(&b))));
-            assert!(!as_bool(ObjectConverters::equal().convert(Some(&a), ValueType::object(), Some(&c))));
+            assert!(as_bool(ObjectConverters::equal().convert(Some(&a), ValueType::object(), Some(&b), &crate::utilities::CultureInfo::invariant_culture())));
+            assert!(!as_bool(ObjectConverters::equal().convert(Some(&a), ValueType::object(), Some(&c), &crate::utilities::CultureInfo::invariant_culture())));
         }
 
         #[test]
@@ -266,7 +266,7 @@ mod tests {
             let a: BoxedValue = Rc::new(object.clone());
             let b: BoxedValue = Rc::new(object);
 
-            assert!(as_bool(ObjectConverters::equal().convert(Some(&a), ValueType::object(), Some(&b))));
+            assert!(as_bool(ObjectConverters::equal().convert(Some(&a), ValueType::object(), Some(&b), &crate::utilities::CultureInfo::invariant_culture())));
         }
     }
 
@@ -277,14 +277,14 @@ mod tests {
 
         #[test]
         fn returns_true_if_value_is_null() {
-            let result = ObjectConverters::is_null().convert(None, ValueType::object(), None);
+            let result = ObjectConverters::is_null().convert(None, ValueType::object(), None, &crate::utilities::CultureInfo::invariant_culture());
 
             assert!(as_bool(result));
         }
 
         #[test]
         fn returns_false_if_value_is_not_null() {
-            let result = ObjectConverters::is_null().convert(Some(&new_object()), ValueType::object(), None);
+            let result = ObjectConverters::is_null().convert(Some(&new_object()), ValueType::object(), None, &crate::utilities::CultureInfo::invariant_culture());
 
             assert!(!as_bool(result));
         }
@@ -294,7 +294,7 @@ mod tests {
         #[test]
         fn returns_true_if_value_is_an_empty_nullable() {
             let value: BoxedValue = Rc::new(Option::<i32>::None);
-            let result = ObjectConverters::is_null().convert(Some(&value), ValueType::object(), None);
+            let result = ObjectConverters::is_null().convert(Some(&value), ValueType::object(), None, &crate::utilities::CultureInfo::invariant_culture());
 
             assert!(as_bool(result));
         }
@@ -307,14 +307,14 @@ mod tests {
 
         #[test]
         fn returns_true_if_value_is_not_null() {
-            let result = ObjectConverters::is_not_null().convert(Some(&new_object()), ValueType::object(), None);
+            let result = ObjectConverters::is_not_null().convert(Some(&new_object()), ValueType::object(), None, &crate::utilities::CultureInfo::invariant_culture());
 
             assert!(as_bool(result));
         }
 
         #[test]
         fn returns_false_if_value_is_null() {
-            let result = ObjectConverters::is_not_null().convert(None, ValueType::object(), None);
+            let result = ObjectConverters::is_not_null().convert(None, ValueType::object(), None, &crate::utilities::CultureInfo::invariant_culture());
 
             assert!(!as_bool(result));
         }
@@ -327,14 +327,14 @@ mod tests {
 
         #[test]
         fn returns_false_if_value_and_parameter_are_null() {
-            let result = ObjectConverters::not_equal().convert(None, ValueType::object(), None);
+            let result = ObjectConverters::not_equal().convert(None, ValueType::object(), None, &crate::utilities::CultureInfo::invariant_culture());
 
             assert!(!as_bool(result));
         }
 
         #[test]
         fn returns_true_if_value_is_null_and_parameter_is_not_null() {
-            let result = ObjectConverters::not_equal().convert(None, ValueType::object(), Some(&new_object()));
+            let result = ObjectConverters::not_equal().convert(None, ValueType::object(), Some(&new_object()), &crate::utilities::CultureInfo::invariant_culture());
 
             assert!(as_bool(result));
         }
@@ -342,7 +342,7 @@ mod tests {
         #[test]
         fn returns_true_if_value_and_parameter_are_different_objects() {
             let result =
-                ObjectConverters::not_equal().convert(Some(&new_object()), ValueType::object(), Some(&new_object()));
+                ObjectConverters::not_equal().convert(Some(&new_object()), ValueType::object(), Some(&new_object()), &crate::utilities::CultureInfo::invariant_culture());
 
             assert!(as_bool(result));
         }
@@ -350,7 +350,7 @@ mod tests {
         #[test]
         fn returns_false_if_value_and_parameter_are_same_object() {
             let target = new_object();
-            let result = ObjectConverters::not_equal().convert(Some(&target), ValueType::object(), Some(&target));
+            let result = ObjectConverters::not_equal().convert(Some(&target), ValueType::object(), Some(&target), &crate::utilities::CultureInfo::invariant_culture());
 
             assert!(!as_bool(result));
         }

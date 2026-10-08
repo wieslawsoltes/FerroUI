@@ -7,6 +7,7 @@ use crate::data::{
 use crate::logging::{LogArea, LogEventLevel, Logger};
 use crate::property_store::ImmediateValueFrame;
 use crate::reactive::{Disposable, IDisposable, IObservable, IObserver};
+use crate::utilities::CultureInfo;
 use crate::{BoxedValue, FerroObject, FerroProperty, Ref, StyledElement, UnsetValueType, WeakRef};
 use std::any::Any;
 use std::cell::{Cell, RefCell};
@@ -195,12 +196,14 @@ impl UntypedBindingExpressionBase {
         log_target: Option<Ref<FerroObject>>,
         description: &dyn Fn() -> String,
         converter: &dyn IValueConverter,
+        converter_culture: Option<&CultureInfo>,
         converter_parameter: Option<&BoxedValue>,
         value: Option<&BoxedValue>,
         target_type: ValueType,
         error: &mut Option<ExpressionError>,
     ) -> Option<BoxedValue> {
-        match converter.convert(value, target_type, converter_parameter) {
+        let culture = converter_culture.cloned().unwrap_or_else(CultureInfo::current_culture);
+        match converter.convert(value, target_type, converter_parameter, &culture) {
             Ok(v) => v,
             Err(e) => {
                 let message = Self::conversion_message(value, target_type);
@@ -223,11 +226,13 @@ impl UntypedBindingExpressionBase {
         log_target: Option<Ref<FerroObject>>,
         description: &dyn Fn() -> String,
         converter: &dyn IValueConverter,
+        converter_culture: Option<&CultureInfo>,
         converter_parameter: Option<&BoxedValue>,
         value: Option<&BoxedValue>,
         target_type: ValueType,
     ) -> Option<BoxedValue> {
-        match converter.convert_back(value, target_type, converter_parameter) {
+        let culture = converter_culture.cloned().unwrap_or_else(CultureInfo::current_culture);
+        match converter.convert_back(value, target_type, converter_parameter, &culture) {
             Ok(v) => v,
             Err(e) => {
                 let message = Self::conversion_message(value, target_type);

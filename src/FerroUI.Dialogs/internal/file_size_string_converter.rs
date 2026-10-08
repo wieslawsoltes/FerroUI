@@ -1,3 +1,4 @@
+use ferroui_base::utilities::CultureInfo;
 use ferroui_base::data::converters::IValueConverter;
 use ferroui_base::data::core::ValueType;
 use ferroui_base::data::BindingError;
@@ -28,6 +29,7 @@ impl IValueConverter for FileSizeStringConverter {
         value: Option<&BoxedValue>,
         _target_type: ValueType,
         _parameter: Option<&BoxedValue>,
+        _culture: &CultureInfo,
     ) -> Result<Option<BoxedValue>, BindingError> {
         if let Some(&size) = value.and_then(|value| value.downcast_ref::<i64>()) {
             if size > 0 {
@@ -44,6 +46,7 @@ impl IValueConverter for FileSizeStringConverter {
         _value: Option<&BoxedValue>,
         _target_type: ValueType,
         _parameter: Option<&BoxedValue>,
+        _culture: &CultureInfo,
     ) -> Result<Option<BoxedValue>, BindingError> {
         Err(BindingError::message("The method or operation is not implemented."))
     }
@@ -62,7 +65,7 @@ mod tests {
     use super::*;
 
     fn convert(value: BoxedValue) -> String {
-        let converted = FileSizeStringConverter::new().convert(Some(&value), ValueType::of::<String>(), None).unwrap();
+        let converted = FileSizeStringConverter::new().convert(Some(&value), ValueType::of::<String>(), None, &ferroui_base::utilities::CultureInfo::invariant_culture()).unwrap();
         converted.unwrap().downcast_ref::<String>().cloned().unwrap()
     }
 

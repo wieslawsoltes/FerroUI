@@ -1,3 +1,4 @@
+use crate::utilities::CultureInfo;
 use super::IValueConverter;
 use crate::data::core::{ValueType, ValueTypes};
 use crate::data::{BindingError, BindingErrorType, BindingNotification};
@@ -47,6 +48,7 @@ impl IValueConverter for DefaultValueConverter {
         value: Option<&BoxedValue>,
         target_type: ValueType,
         _parameter: Option<&BoxedValue>,
+        _culture: &CultureInfo,
     ) -> Result<Option<BoxedValue>, BindingError> {
         Ok(Self::convert_core(value, target_type))
     }
@@ -56,6 +58,7 @@ impl IValueConverter for DefaultValueConverter {
         value: Option<&BoxedValue>,
         target_type: ValueType,
         _parameter: Option<&BoxedValue>,
+        _culture: &CultureInfo,
     ) -> Result<Option<BoxedValue>, BindingError> {
         Ok(Self::convert_core(value, target_type))
     }

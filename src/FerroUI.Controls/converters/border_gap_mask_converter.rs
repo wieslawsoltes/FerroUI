@@ -1,3 +1,4 @@
+use ferroui_base::utilities::CultureInfo;
 use crate::shapes::Rectangle;
 use crate::{ColumnDefinition, Control, Grid, GridLength, GridUnitType, RowDefinition};
 use ferroui_base::data::converters::{cast_value, IMultiValueConverter};
@@ -38,6 +39,7 @@ impl IMultiValueConverter for BorderGapMaskConverter {
         values: &[Option<BoxedValue>],
         _target_type: ValueType,
         parameter: Option<&BoxedValue>,
+        _culture: &CultureInfo,
     ) -> Result<Option<BoxedValue>, BindingError> {
         //
         // Parameter validation

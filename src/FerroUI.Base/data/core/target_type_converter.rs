@@ -176,10 +176,10 @@ mod tests {
         assert_eq!(ValueTypes::class_of(ValueType::of::<Option<Ref<ConvertedShape>>>()), Some(ConvertedShape::TYPE));
         assert_eq!(ValueTypes::class_of(ValueType::of::<String>()), None);
         let default = crate::data::converters::DefaultValueConverter::instance();
-        let converted = default.convert(Some(&data), ValueType::of::<Option<Ref<ConvertedShape>>>(), None).unwrap();
+        let converted = default.convert(Some(&data), ValueType::of::<Option<Ref<ConvertedShape>>>(), None, &crate::utilities::CultureInfo::invariant_culture()).unwrap();
         assert!(converted.expect("a value").downcast_ref::<Option<Ref<ConvertedShape>>>().is_some_and(Option::is_some));
         MarkupType::register(<ConvertedLength as MarkupTyped>::MARKUP);
-        let length = default.convert_back(Some(&text("7px")), ValueType::of::<ConvertedLength>(), None).unwrap();
+        let length = default.convert_back(Some(&text("7px")), ValueType::of::<ConvertedLength>(), None, &crate::utilities::CultureInfo::invariant_culture()).unwrap();
         assert_eq!(length.expect("a value").downcast_ref::<ConvertedLength>(), Some(&ConvertedLength(7)));
 
         // The reverse direction is the registered display form (here: of a number).

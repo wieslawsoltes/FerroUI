@@ -1,5 +1,6 @@
 //! Ported from the upstream `MultiBindingTests`.
 
+use ferroui_base::utilities::CultureInfo;
 use super::test_support::*;
 use crate::data::Binding;
 use ferroui_base::data::converters::IMultiValueConverter;
@@ -93,6 +94,7 @@ impl IMultiValueConverter for ConcatConverter {
         values: &[Option<BoxedValue>],
         _target_type: ValueType,
         _parameter: Option<&BoxedValue>,
+        _culture: &CultureInfo,
     ) -> Result<Option<BoxedValue>, BindingError> {
         Ok(Some(boxed(join(values))))
     }
@@ -106,6 +108,7 @@ impl IMultiValueConverter for UnsetValueConverter {
         _values: &[Option<BoxedValue>],
         _target_type: ValueType,
         _parameter: Option<&BoxedValue>,
+        _culture: &CultureInfo,
     ) -> Result<Option<BoxedValue>, BindingError> {
         Ok(Some(FerroProperty::unset_value()))
     }
@@ -119,6 +122,7 @@ impl IMultiValueConverter for NullValueConverter {
         _values: &[Option<BoxedValue>],
         _target_type: ValueType,
         _parameter: Option<&BoxedValue>,
+        _culture: &CultureInfo,
     ) -> Result<Option<BoxedValue>, BindingError> {
         Ok(None)
     }
@@ -132,6 +136,7 @@ impl IMultiValueConverter for BindingNotificationConverter {
         values: &[Option<BoxedValue>],
         _target_type: ValueType,
         _parameter: Option<&BoxedValue>,
+        _culture: &CultureInfo,
     ) -> Result<Option<BoxedValue>, BindingError> {
         Ok(Some(Rc::new(BindingNotification::with_error_and_fallback(
             BindingError::message("Value does not fall within the expected range."),
@@ -149,6 +154,7 @@ impl IMultiValueConverter for TestModelMemberConverter {
         values: &[Option<BoxedValue>],
         _target_type: ValueType,
         _parameter: Option<&BoxedValue>,
+        _culture: &CultureInfo,
     ) -> Result<Option<BoxedValue>, BindingError> {
         let Some(model) = values[0].as_ref().and_then(|v| v.downcast_ref::<TestModel>()) else {
             return Ok(Some(boxed(String::new())));

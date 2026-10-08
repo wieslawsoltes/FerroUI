@@ -1,5 +1,6 @@
 //! Port of the upstream `MarkupExtensions/TestValueConverter`.
 
+use ferroui_base::utilities::CultureInfo;
 use std::cell::RefCell;
 use std::rc::{Rc, Weak};
 
@@ -45,6 +46,7 @@ impl IValueConverter for TestValueConverter {
         value: Option<&BoxedValue>,
         _target_type: ValueType,
         _parameter: Option<&BoxedValue>,
+        _culture: &CultureInfo,
     ) -> Result<Option<BoxedValue>, BindingError> {
         // `value + Append`: the text of a null operand is empty.
         let value = value.map(|value| ValueTypes::to_display_string(Some(value))).unwrap_or_default();
@@ -56,6 +58,7 @@ impl IValueConverter for TestValueConverter {
         _value: Option<&BoxedValue>,
         _target_type: ValueType,
         _parameter: Option<&BoxedValue>,
+        _culture: &CultureInfo,
     ) -> Result<Option<BoxedValue>, BindingError> {
         Err(BindingError::message("The method or operation is not implemented."))
     }
