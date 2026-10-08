@@ -3,6 +3,7 @@
 # use it. Works on Linux and macOS; nothing outside the tools directory is changed.
 #
 #   scripts/browser/setup.sh [<tools directory>]        default: <repository>/.tools
+#   scripts/browser/setup.sh --threads [<tools directory>]   also the toolchain of the threaded mode
 #   source <tools directory>/env.sh                      then: scripts/build-browser.sh <example>
 #
 # Installs: the Emscripten SDK (pinned version, from github.com/emscripten-core/emsdk), the Rust
@@ -10,6 +11,11 @@
 # tool of the version the workspace uses (from crates.io). The pins are explained in
 # docs/porting/browser-platform.md, section 3; change them there and here together. CI installs the
 # toolchain with this script too (.github/actions/browser-toolchain), reading the pins from it.
+#
+# --threads also installs the nightly Rust toolchain that `scripts/build-browser.sh --threads` builds
+# with, with the source of the standard library (the threaded build compiles it with atomics,
+# -Zbuild-std) and the target. Everything else, env.sh included, is the same with and without the
+# option: the build script selects the nightly itself and reads the pin from this file.
 set -euo pipefail
 
 EMSDK_VERSION="6.0.10"
@@ -18,6 +24,22 @@ EMSDK_VERSION="6.0.10"
 # section 3). The browser build of ferroui-skia refuses older releases (src/Skia/FerroUI.Skia/build.rs).
 # The desktop builds use the stable toolchain of rustup and do not read this pin.
 RUST_VERSION="1.99.0"
+# The toolchain of the threaded mode (--threads). A nightly, because -Zbuild-std is not available on
+# a stable release. This date is in the last days of the 1.99 development cycle (1.99 left the main
+# branch for beta in early July 2026), so the compiler is as close to the stable pin as a nightly
+# gets and has the unwinding with WebAssembly exceptions that the stable pin exists for. The
+# feasibility check of the mode (docs/porting/render-thread.md, stage B0) ran a plain program on
+# nightly-2025-10-31, which reports 1.93.0 but precedes the change of the unwinding ABI (merged
+# 2025-12-05) and cannot build the port's module. Not built with yet: if this date has no nightly
+# or it lacks a component, take the nearest one that has them and change the date here.
+RUST_NIGHTLY="nightly-2026-07-01"
+
+# The one option; the tools directory stays the first argument that is left.
+THREADS=""
+for ARGUMENT in "$@"; do
+  shift
+  if [ "$ARGUMENT" = "--threads" ]; then THREADS="1"; else set -- "$@" "$ARGUMENT"; fi
+done
 
 ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
 TOOLS="${1:-$ROOT/.tools}"
@@ -38,6 +60,12 @@ fi
 
 echo "== Rust $RUST_VERSION with wasm32-unknown-emscripten"
 rustup toolchain install "$RUST_VERSION" --profile minimal --target wasm32-unknown-emscripten >/dev/null
+
+if [ -n "$THREADS" ]; then
+  echo "== Rust $RUST_NIGHTLY with rust-src and wasm32-unknown-emscripten (threaded mode)"
+  rustup toolchain install "$RUST_NIGHTLY" --profile minimal --component rust-src \
+    --target wasm32-unknown-emscripten >/dev/null
+fi
 
 echo "== wasm-bindgen $WASM_BINDGEN_VERSION"
 if [ "$("$TOOLS/bin/wasm-bindgen" --version 2>/dev/null | awk '{print $2}')" != "$WASM_BINDGEN_VERSION" ]; then
@@ -62,3 +90,6 @@ wasm-bindgen --version
 rustc --version
 echo
 echo "ready: source $TOOLS/env.sh"
+if [ -n "$THREADS" ]; then
+  echo "threaded mode: $(rustc "+$RUST_NIGHTLY" --version); build with scripts/build-browser.sh <example> --threads"
+fi

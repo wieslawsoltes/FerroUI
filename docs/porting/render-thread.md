@@ -85,11 +85,21 @@ Each stage is a pull request that builds and passes on its own; the single-threa
 | R4 | The render loop on the timer's thread; synchronous commit, resize and first-show waits; the dispatcher-thread mode kept behind the option. | The compositor suites pass in both modes. |
 | R5 | macOS: Graphite/Metal context and the software framebuffer on the render thread; the Metal device lock; render-thread naming and priority as upstream. Default switched to the render thread on the desktop. | `themed_window` and the catalog run with rendering off the UI thread; start-up and scroll numbers of `desktop-performance.md` re-measured; a stress run (resize, theme switch, scrolling) shows no stale or torn frame. |
 | B0 | Browser feasibility: the three checks of section 4. | Each is answered with a measurement, recorded here. |
-| B1 | The browser toolchain and site for threads (headers or service worker, build flags, the non-threaded fallback). | A two-thread page of the port's own module runs on the published host. |
+| B1 | The browser toolchain and site for threads (headers or service worker, build flags, the non-threaded fallback). Written, not built yet: see "B1 written" below. | A two-thread page of the port's own module runs on the published host. |
 | B2 | The threaded browser backend: render worker, `OffscreenCanvas`, the event grouper queue, the blocking dispatcher. | `themed_view` and the catalog render from the worker; the browser tests pass in both modes. |
 | B3 | Measurements: first frame and scrolling, threaded against not. | The table is in `browser-platform.md`. |
 
 Order: R1 to R5 in sequence; B0 in parallel with R1, since it only measures.
+
+### B1 written, not built yet (2026-10-08)
+
+The toolchain and the site for threads exist as an opt-in that leaves the default build as it was; `browser-platform.md`, section 21, is the description. Nothing of it has been built or run: the branch was written without a build, and the first build decides what of it stands.
+
+- **Build.** `scripts/build-browser.sh <application> --threads` builds with the flags B0 found (a nightly toolchain, `-Zbuild-std=std,panic_unwind`, `+atomics,+bulk-memory`, `-pthread`, `-sPTHREAD_POOL_SIZE` from `FERROUI_BROWSER_THREAD_POOL_SIZE`, default 2) plus two that B0 did not need for a plain program: `-pthread` for the C and C++ code that build scripts compile, and `-sENVIRONMENT=web,worker`. Its target directory (`target/threads`) and site directory (`target/browser-threads/<application>`) are its own.
+- **Toolchain.** `scripts/browser/setup.sh --threads` installs the nightly with `rust-src` and the target. The pin is `nightly-2026-07-01`, not the nightly of 2025-10-31 of the B0 measurement: that one precedes the unwinding with WebAssembly exceptions that the port's module needs (the caveat of the B0 table). The date is an assumption until it has been installed.
+- **Isolation.** The test server sends the two headers on request (`harness.mjs`, `serve.mjs --isolated`). For a host that cannot, `ferroui-coi-sw.js` adds them from a service worker, and `ferroui-threads.js` registers it, reloads once and shows a message when the page still cannot be isolated. This is the answer to the last row of the B0 table in code, not yet in measurement: it has not run on GitHub Pages.
+- **Test page.** `examples/thread_spawn` of the browser crate with `scripts/browser/tests/thread_spawn.test.mjs`: one spawned thread sends a value back, read from the page; the page is isolated once by headers and once by the service worker. It links nothing of the framework, so it does not yet answer the open item of the B0 table, the port's own module with Skia on a thread: `scripts/build-browser.sh themed_view --threads` is that link, and its run needs the host page to call the check.
+- **Open for B1 to be done:** the first build and test run; `themed_view` linked and started threaded; the threaded test page published next to the catalog on GitHub Pages and checked there (`crossOriginIsolated` after the reload); a CI job (the nightly through `setup.sh --threads`, its own build cache, `thread_spawn` built and tested). The two service workers of a site (this one and `ferroui-sw.js`) share a scope and have to become one before the catalog can be published threaded.
 
 ### Progress of R1
 

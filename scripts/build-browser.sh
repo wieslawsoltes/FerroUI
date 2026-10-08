@@ -1,7 +1,7 @@
 #!/bin/bash
 # Builds a browser application and assembles its site.
 #
-#   scripts/build-browser.sh <application> [--debug] [--out <directory>]
+#   scripts/build-browser.sh <application> [--debug] [--out <directory>] [--threads]
 #
 # <application> is either an example of the browser crate (src/Browser/FerroUI.Browser/examples/
 # <application>, with its host page in wwwroot/) or a binary package of the workspace with its host
@@ -19,28 +19,59 @@
 # Needs: the Emscripten SDK activated in the shell (emsdk 6.0.10: `source emsdk_env.sh`), the Rust
 # target wasm32-unknown-emscripten, the wasm-bindgen command-line tool of the version of the
 # wasm-bindgen crate on PATH, node and npm. See docs/porting/browser-platform.md.
+#
+# --threads (opt-in, docs/porting/browser-platform.md, "Threads (opt-in)") builds a module that can
+# spawn threads: the nightly toolchain that `scripts/browser/setup.sh --threads` installs, a standard
+# library rebuilt with atomics (-Zbuild-std) and the pthread options of Emscripten. The build goes to
+# its own target directory (target/threads) and the site to target/browser-threads/<application>, so
+# that neither replaces the output of a build without the option. The site also gets the two files
+# of scripts/browser/threads/ (the check for cross-origin isolation and the service worker that
+# provides it on a host that cannot set headers). Variables of the mode:
+#   FERROUI_BROWSER_THREAD_POOL_SIZE   web workers created before the application starts (default 2);
+#                                      a thread beyond the pool cannot start until the main thread
+#                                      returns to the browser
+#   FERROUI_BROWSER_NIGHTLY            the nightly toolchain (default: the pin of setup.sh)
 set -euo pipefail
 
 APPLICATION=""
 PROFILE="browser"
 OUT=""
+THREADS=""
 while [ $# -gt 0 ]; do
   case "$1" in
     --debug) PROFILE="debug";;
     --out) shift; OUT="$1";;
+    --threads) THREADS="1";;
     -*) echo "unknown option: $1" >&2; exit 2;;
     *) APPLICATION="$1";;
   esac
   shift
 done
 if [ -z "$APPLICATION" ]; then
-  echo "usage: scripts/build-browser.sh <application> [--debug] [--out <directory>]" >&2
+  echo "usage: scripts/build-browser.sh <application> [--debug] [--out <directory>] [--threads]" >&2
   exit 2
 fi
 
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 CRATE="$ROOT/src/Browser/FerroUI.Browser"
 TARGET_DIR="${CARGO_TARGET_DIR:-$ROOT/target}"
+# Where cargo builds. The threaded mode has its own directory: its standard library and its flags
+# differ, and sharing the directory would rebuild everything at each change of mode.
+BUILD_DIR="$TARGET_DIR"
+if [ -n "$THREADS" ]; then
+  BUILD_DIR="$TARGET_DIR/threads"
+  OUT="${OUT:-$TARGET_DIR/browser-threads/$APPLICATION}"
+  THREAD_POOL_SIZE="${FERROUI_BROWSER_THREAD_POOL_SIZE:-2}"
+  case "$THREAD_POOL_SIZE" in
+    ''|*[!0-9]*) echo "FERROUI_BROWSER_THREAD_POOL_SIZE is not a number: $THREAD_POOL_SIZE" >&2; exit 2;;
+  esac
+  # The pin lives in setup.sh, next to the pin of the stable toolchain.
+  NIGHTLY="${FERROUI_BROWSER_NIGHTLY:-$(sed -n 's/^RUST_NIGHTLY="\(.*\)"$/\1/p' "$ROOT/scripts/browser/setup.sh")}"
+  [ -n "$NIGHTLY" ] || { echo "cannot read the nightly toolchain from scripts/browser/setup.sh" >&2; exit 1; }
+  # Replaces the stable pin that env.sh exports, for every cargo and rustc call below.
+  export RUSTUP_TOOLCHAIN="$NIGHTLY"
+  cargo --version >/dev/null 2>&1 || { echo "the toolchain $NIGHTLY is not installed: run scripts/browser/setup.sh --threads" >&2; exit 1; }
+fi
 OUT="${OUT:-$TARGET_DIR/browser/$APPLICATION}"
 
 command -v node >/dev/null || { echo "node is not on PATH" >&2; exit 1; }
@@ -105,13 +136,30 @@ case " ${EMCC_CFLAGS:-} " in
   *"ERROR_ON_UNDEFINED_SYMBOLS=0"*) ;;
   *) export EMCC_CFLAGS="${EMCC_CFLAGS:+$EMCC_CFLAGS }$REQUIRED_EMCC_FLAG";;
 esac
+# Every object of a threaded link has to be compiled with threads: this reaches the C and C++ code
+# that build scripts compile for the module (HarfBuzz, the setjmp bridge of ferroui-skia).
+if [ -n "$THREADS" ]; then
+  case " $EMCC_CFLAGS " in
+    *" -pthread "*) ;;
+    *) export EMCC_CFLAGS="$EMCC_CFLAGS -pthread";;
+  esac
+fi
 
 echo "== script module"
 (cd "$CRATE/webapp" && npm ci --no-audit --no-fund && npm run typecheck && npm run lint && npm run build)
 
-echo "== WebAssembly module ($PROFILE)"
+echo "== WebAssembly module ($PROFILE${THREADS:+, threads})"
 FLAGS=()
 [ "$PROFILE" = "browser" ] && FLAGS+=(--profile browser)
+if [ -n "$THREADS" ]; then
+  # The standard library that ships with a toolchain is built without atomics and cannot be linked
+  # into a module with shared memory: it is rebuilt from rust-src with the flags of the build.
+  FLAGS+=(--target-dir "$BUILD_DIR" -Zbuild-std=std,panic_unwind)
+  # Added to the flags of the target in .cargo/config.toml (an array given with --config is appended
+  # to the one of the file; RUSTFLAGS in the environment would replace it). The environment of the
+  # file is "web" alone, and a thread is a web worker that loads the script of the module.
+  FLAGS+=(--config "target.wasm32-unknown-emscripten.rustflags=[\"-Ctarget-feature=+atomics,+bulk-memory\", \"-Clink-arg=-pthread\", \"-Clink-arg=-sPTHREAD_POOL_SIZE=$THREAD_POOL_SIZE\", \"-Clink-arg=-sENVIRONMENT=web,worker\"]")
+fi
 # The messages of the build name the output directories of the build scripts.
 MESSAGES="$(mktemp)"
 trap 'rm -f -- "$MESSAGES"' EXIT
@@ -119,7 +167,7 @@ trap 'rm -f -- "$MESSAGES"' EXIT
   --message-format=json-render-diagnostics > "$MESSAGES")
 
 echo "== site"
-BUILT="$TARGET_DIR/wasm32-unknown-emscripten/$PROFILE"
+BUILT="$BUILD_DIR/wasm32-unknown-emscripten/$PROFILE"
 [ "$KIND" = "example" ] && BUILT="$BUILT/examples"
 # The script of the module names the WebAssembly file it loads: the name of the target with `-`
 # replaced by `_` for a binary, the name of the target for an example.
@@ -136,6 +184,12 @@ cp "$CRATE/dist/ferroui.js" "$CRATE/dist/ferroui.js.map" "$CRATE/dist/storage.js
 # has to sit at the root of the site, next to the host page.
 cp "$CRATE/dist/ferroui-sw.js" "$CRATE/dist/ferroui-sw.js.map" "$OUT"/
 cp "$BUILT/$APPLICATION.js" "$BUILT/$WASM" "$OUT"/
+# The threaded mode: the check for cross-origin isolation, which a host page written for threads
+# imports before it creates the module, and the service worker the check registers on a host that
+# does not send the headers. The worker is scoped to its directory, like the one of the platform.
+if [ -n "$THREADS" ]; then
+  cp "$ROOT/scripts/browser/threads/ferroui-threads.js" "$ROOT/scripts/browser/threads/ferroui-coi-sw.js" "$OUT"/
+fi
 # Files the build scripts of the application wrote for the site.
 node -e 'const fs = require("fs"), path = require("path");
   const dirs = new Set();
