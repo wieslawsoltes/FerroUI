@@ -5,7 +5,6 @@
 use bitflags::bitflags;
 use crate::RelativePoint;
 use crate::rendering::composition::ICompositionObjectHost;
-use crate::rendering::composition::animations::IAnimationInstance;
 use crate::rendering::composition::animations::ICompositionAnimation;
 use crate::rendering::composition::expressions::ExpressionVariant;
 use crate::rendering::composition::server::CompositionProperty;
@@ -20,7 +19,6 @@ use crate::rendering::composition::transport::BatchValueReader;
 use std::any::Any;
 use std::any::TypeId;
 use std::cell::Cell;
-use std::rc::Rc;
 use std::sync::OnceLock;
 use std::time::Duration;
 
@@ -334,7 +332,7 @@ impl ServerCompositionLinearGradientBrushProps {
         ServerCompositionLinearGradientBrushHooks::deserialize_changes_extra(host, reader);
         let changed = reader.read::<CompositionLinearGradientBrushChangedFields>();
         if changed.contains(CompositionLinearGradientBrushChangedFields::START_POINT_ANIMATED) {
-            let Some(animation) = reader.read_value::<Rc<dyn IAnimationInstance>>() else {
+            let Some(animation) = reader.read_value::<crate::rendering::composition::animations::AnimationInstanceFactory>().map(crate::rendering::composition::animations::AnimationInstanceFactory::create) else {
                 panic!("a batch starts an animation of `StartPoint` without an animation instance");
             };
             host.set_animated_value(
@@ -348,7 +346,7 @@ impl ServerCompositionLinearGradientBrushProps {
             self.set_start_point(host, value);
         }
         if changed.contains(CompositionLinearGradientBrushChangedFields::END_POINT_ANIMATED) {
-            let Some(animation) = reader.read_value::<Rc<dyn IAnimationInstance>>() else {
+            let Some(animation) = reader.read_value::<crate::rendering::composition::animations::AnimationInstanceFactory>().map(crate::rendering::composition::animations::AnimationInstanceFactory::create) else {
                 panic!("a batch starts an animation of `EndPoint` without an animation instance");
             };
             host.set_animated_value(

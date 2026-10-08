@@ -40,7 +40,7 @@ use crate::media::{
     BoxShadows, FormattedText, Geometry, GlyphRun, IBrush, IExperimentalAcrylicMaterial, IImage, IPen, RenderOptions,
     TextOptions,
 };
-use crate::platform::{IBitmapImpl, IGeometryImpl};
+use crate::platform::IGeometryImpl;
 use crate::rendering::scene_graph::ICustomDrawOperation;
 use crate::utilities::MathUtilities;
 use crate::{Matrix, Point, Rect, Ref, RoundedRect};

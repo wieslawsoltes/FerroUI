@@ -33,3 +33,23 @@ pub trait IAnimationInstance: IServerClockItem + 'static {
 
     fn invalidate(&self);
 }
+
+/// An animation instance on its way to the server.
+///
+/// An instance belongs to the server: it resolves server objects and keeps
+/// its state in cells, so it cannot cross threads. What the UI thread
+/// creates and a batch carries is the factory of the instance, which holds
+/// what the instance is made of (all of it `Send`) and is called on the
+/// server.
+pub struct AnimationInstanceFactory(Box<dyn FnOnce() -> Rc<dyn IAnimationInstance> + Send>);
+
+impl AnimationInstanceFactory {
+    pub fn new(create: impl FnOnce() -> Rc<dyn IAnimationInstance> + Send + 'static) -> Self {
+        Self(Box::new(create))
+    }
+
+    /// Creates the instance. Called on the thread that runs it.
+    pub fn create(self) -> Rc<dyn IAnimationInstance> {
+        (self.0)()
+    }
+}

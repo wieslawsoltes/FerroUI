@@ -1,5 +1,5 @@
 use super::{
-    CompositionAnimation, ExpressionAnimationInstance, IAnimationInstance, ICompositionAnimation,
+    CompositionAnimation, ExpressionAnimationInstance, ICompositionAnimation,
     ICompositionAnimationBase,
 };
 use crate::rendering::composition::expressions::{Expression, ExpressionParser, ExpressionVariant};
@@ -20,7 +20,7 @@ use std::rc::Rc;
 pub struct ExpressionAnimation {
     base: CompositionAnimation,
     expression: RefCell<Option<String>>,
-    parsed_expression: RefCell<Option<Rc<Expression>>>,
+    parsed_expression: RefCell<Option<std::sync::Arc<Expression>>>,
 }
 
 impl Deref for ExpressionAnimation {
@@ -57,13 +57,13 @@ impl ExpressionAnimation {
 
     /// The parsed expression. Panics with the parse error when the
     /// expression is not valid (upstream throws the parse exception).
-    fn parsed_expression(&self) -> Rc<Expression> {
+    fn parsed_expression(&self) -> std::sync::Arc<Expression> {
         if let Some(parsed) = self.parsed_expression.borrow().clone() {
             return parsed;
         }
         let source = self.expression.borrow().clone().unwrap_or_default();
         let parsed = match ExpressionParser::parse(&source) {
-            Ok(parsed) => Rc::new(parsed),
+            Ok(parsed) => std::sync::Arc::new(parsed),
             Err(error) => panic!("{error}"),
         };
         *self.parsed_expression.borrow_mut() = Some(parsed.clone());
@@ -86,8 +86,12 @@ impl ICompositionAnimation for ExpressionAnimation {
         &self,
         target_object: ServerObjectId,
         final_value: Option<ExpressionVariant>,
-    ) -> Rc<dyn IAnimationInstance> {
-        ExpressionAnimationInstance::new(self.parsed_expression(), target_object, final_value, self.create_snapshot())
+    ) -> super::AnimationInstanceFactory {
+        let expression = self.parsed_expression();
+        let parameters = self.create_snapshot_source();
+        super::AnimationInstanceFactory::new(move || {
+            ExpressionAnimationInstance::new(expression, target_object, final_value, Rc::new(parameters.build()))
+        })
     }
 }
 

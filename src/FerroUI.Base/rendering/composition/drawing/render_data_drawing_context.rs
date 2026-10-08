@@ -7,7 +7,7 @@ use crate::media::{
     BoxShadows, EffectExtensions, Geometry, GlyphRun, IBrush, IDrawingContextCore, IEffect, IPen, ITileBrush,
     RenderOptions, TextOptions,
 };
-use crate::platform::{IBitmapImpl, IGeometryImpl};
+use crate::platform::IGeometryImpl;
 use crate::rendering::composition::Compositor;
 use crate::rendering::scene_graph::ICustomDrawOperation;
 use crate::{Matrix, Point, Rect, Ref, RoundedRect};

@@ -1,9 +1,9 @@
 use super::{IRenderDataVisitor, RenderDataStream};
 use crate::media::{
-    BoxShadows, CombinedGeometry, EllipseGeometry, Geometry, IBrush, IEffect, IPen, ImmutableGeometry,
+    BoxShadows, CombinedGeometry, EllipseGeometry, Geometry, IBrush, IPen, ImmutableGeometry,
     IntersectionResult, LineGeometry, MatrixTransform, RectangleGeometry, RenderOptions, TextOptions,
 };
-use crate::platform::{IBitmapImpl, IGeometryImpl, IGlyphRunImpl};
+use crate::platform::{IGeometryImpl, IGlyphRunImpl};
 use crate::rendering::scene_graph::ICustomDrawOperation;
 use crate::{Matrix, Point, Rect, Ref, RoundedRect};
 use std::sync::Arc;

@@ -8,7 +8,7 @@ use ferroui_base::media::{
     BoxShadows, Brushes, DrawingContext, Geometry, GlyphRun, IBrush, IDrawingContextCore, IEffect, IPen,
     MediaCollection, PenLineCap, PenLineJoin, RectangleGeometry, RenderOptions, TextOptions,
 };
-use ferroui_base::platform::{IBitmapImpl, IGeometryImpl};
+use ferroui_base::platform::IGeometryImpl;
 use ferroui_base::rendering::scene_graph::ICustomDrawOperation;
 use ferroui_base::{
     ferro_class, ferro_impl_classes, instantiate, FerroObjectImpl, Matrix, Point, Rect, Ref, RoundedRect,

@@ -245,26 +245,38 @@ macro_rules! key_frame_animation_classes {
                 &self,
                 target_object: crate::rendering::composition::server::ServerObjectId,
                 final_value: Option<crate::rendering::composition::expressions::ExpressionVariant>,
-            ) -> Rc<dyn super::IAnimationInstance> {
-                let interpolator: &'static dyn super::IInterpolator<$ty> = <$interpolator>::instance();
-                super::KeyFrameAnimationInstance::<$ty>::new(
-                    interpolator,
-                    self.base.with_key_frames::<$ty, _>(|key_frames| key_frames.snapshot()),
-                    self.create_snapshot(),
-                    final_value.map(|value| {
-                        crate::rendering::composition::expressions::ExpressionVariant::create(
-                            value.cast_or_default::<$ty>(),
-                        )
-                    }),
-                    target_object,
-                    self.delay_behavior(),
-                    self.delay_time(),
-                    self.direction(),
-                    self.duration(),
-                    self.iteration_behavior(),
-                    self.iteration_count(),
-                    self.stop_behavior(),
-                )
+            ) -> super::AnimationInstanceFactory {
+                let interpolator: &'static (dyn super::IInterpolator<$ty> + Sync) = <$interpolator>::instance();
+                let key_frames = self.base.with_key_frames::<$ty, _>(|key_frames| key_frames.snapshot());
+                let parameters = self.create_snapshot_source();
+                let final_value = final_value.map(|value| {
+                    crate::rendering::composition::expressions::ExpressionVariant::create(
+                        value.cast_or_default::<$ty>(),
+                    )
+                });
+                let delay_behavior = self.delay_behavior();
+                let delay_time = self.delay_time();
+                let direction = self.direction();
+                let duration = self.duration();
+                let iteration_behavior = self.iteration_behavior();
+                let iteration_count = self.iteration_count();
+                let stop_behavior = self.stop_behavior();
+                super::AnimationInstanceFactory::new(move || {
+                    super::KeyFrameAnimationInstance::<$ty>::new(
+                        interpolator,
+                        key_frames,
+                        Rc::new(parameters.build()),
+                        final_value,
+                        target_object,
+                        delay_behavior,
+                        delay_time,
+                        direction,
+                        duration,
+                        iteration_behavior,
+                        iteration_count,
+                        stop_behavior,
+                    )
+                })
             }
         }
 

@@ -6,7 +6,6 @@ use bitflags::bitflags;
 use crate::RelativePoint;
 use crate::RelativeScalar;
 use crate::rendering::composition::ICompositionObjectHost;
-use crate::rendering::composition::animations::IAnimationInstance;
 use crate::rendering::composition::animations::ICompositionAnimation;
 use crate::rendering::composition::expressions::ExpressionVariant;
 use crate::rendering::composition::server::CompositionProperty;
@@ -21,7 +20,6 @@ use crate::rendering::composition::transport::BatchValueReader;
 use std::any::Any;
 use std::any::TypeId;
 use std::cell::Cell;
-use std::rc::Rc;
 use std::sync::OnceLock;
 use std::time::Duration;
 
@@ -513,7 +511,7 @@ impl ServerCompositionRadialGradientBrushProps {
         ServerCompositionRadialGradientBrushHooks::deserialize_changes_extra(host, reader);
         let changed = reader.read::<CompositionRadialGradientBrushChangedFields>();
         if changed.contains(CompositionRadialGradientBrushChangedFields::CENTER_ANIMATED) {
-            let Some(animation) = reader.read_value::<Rc<dyn IAnimationInstance>>() else {
+            let Some(animation) = reader.read_value::<crate::rendering::composition::animations::AnimationInstanceFactory>().map(crate::rendering::composition::animations::AnimationInstanceFactory::create) else {
                 panic!("a batch starts an animation of `Center` without an animation instance");
             };
             host.set_animated_value(
@@ -527,7 +525,7 @@ impl ServerCompositionRadialGradientBrushProps {
             self.set_center(host, value);
         }
         if changed.contains(CompositionRadialGradientBrushChangedFields::GRADIENT_ORIGIN_ANIMATED) {
-            let Some(animation) = reader.read_value::<Rc<dyn IAnimationInstance>>() else {
+            let Some(animation) = reader.read_value::<crate::rendering::composition::animations::AnimationInstanceFactory>().map(crate::rendering::composition::animations::AnimationInstanceFactory::create) else {
                 panic!("a batch starts an animation of `GradientOrigin` without an animation instance");
             };
             host.set_animated_value(
@@ -541,7 +539,7 @@ impl ServerCompositionRadialGradientBrushProps {
             self.set_gradient_origin(host, value);
         }
         if changed.contains(CompositionRadialGradientBrushChangedFields::RADIUS_X_ANIMATED) {
-            let Some(animation) = reader.read_value::<Rc<dyn IAnimationInstance>>() else {
+            let Some(animation) = reader.read_value::<crate::rendering::composition::animations::AnimationInstanceFactory>().map(crate::rendering::composition::animations::AnimationInstanceFactory::create) else {
                 panic!("a batch starts an animation of `RadiusX` without an animation instance");
             };
             host.set_animated_value(
@@ -555,7 +553,7 @@ impl ServerCompositionRadialGradientBrushProps {
             self.set_radius_x(host, value);
         }
         if changed.contains(CompositionRadialGradientBrushChangedFields::RADIUS_Y_ANIMATED) {
-            let Some(animation) = reader.read_value::<Rc<dyn IAnimationInstance>>() else {
+            let Some(animation) = reader.read_value::<crate::rendering::composition::animations::AnimationInstanceFactory>().map(crate::rendering::composition::animations::AnimationInstanceFactory::create) else {
                 panic!("a batch starts an animation of `RadiusY` without an animation instance");
             };
             host.set_animated_value(

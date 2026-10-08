@@ -1,7 +1,7 @@
 //! The seam between the generated property blocks of composition objects
 //! and the hand-written classes that embed them.
 
-use super::animations::{IAnimationInstance, ICompositionAnimationBase};
+use super::animations::{AnimationInstanceFactory, ICompositionAnimationBase};
 use super::expressions::ExpressionVariant;
 use super::server::{CompositionProperty, ServerObjectId};
 use super::transport::IRegisterForSerialization;
@@ -20,11 +20,11 @@ pub trait ICompositionObject: 'static {
     fn into_any_rc(self: Rc<Self>) -> Rc<dyn Any>;
 }
 
-/// The animation instances created on the UI thread that have not been
-/// sent to the server yet, by the property they animate.
+/// The animation instances created on the UI thread (as their factories)
+/// that have not been sent to the server yet, by the property they animate.
 #[derive(Default)]
 pub struct PendingAnimations {
-    items: RefCell<Vec<(i32, Rc<dyn IAnimationInstance>)>>,
+    items: RefCell<Vec<(i32, AnimationInstanceFactory)>>,
 }
 
 impl PendingAnimations {
@@ -44,7 +44,7 @@ impl PendingAnimations {
 
     /// Sets the pending animation of a property, replacing the previous
     /// one.
-    pub fn set(&self, property: &CompositionProperty, animation: Rc<dyn IAnimationInstance>) {
+    pub fn set(&self, property: &CompositionProperty, animation: AnimationInstanceFactory) {
         let mut items = self.items.borrow_mut();
         match items.iter_mut().find(|(id, _)| *id == property.id()) {
             Some(entry) => entry.1 = animation,
@@ -53,7 +53,7 @@ impl PendingAnimations {
     }
 
     /// Takes the pending animation of a property.
-    pub fn get_and_remove(&self, property: &CompositionProperty) -> Option<Rc<dyn IAnimationInstance>> {
+    pub fn get_and_remove(&self, property: &CompositionProperty) -> Option<AnimationInstanceFactory> {
         let mut items = self.items.borrow_mut();
         let index = items.iter().position(|(id, _)| *id == property.id())?;
         Some(items.remove(index).1)

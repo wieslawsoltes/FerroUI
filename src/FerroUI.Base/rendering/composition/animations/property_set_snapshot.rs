@@ -154,3 +154,47 @@ impl IExpressionObject for PropertySetSnapshot {
         PropertySetSnapshot::get_property(self, name)
     }
 }
+
+/// A snapshot of a property set as it is sent to the server: values and the
+/// ids of server objects. The snapshot itself is built from it on the
+/// server, where it resolves the ids and keeps handles to the objects.
+#[derive(Default)]
+pub struct PropertySetSnapshotSource {
+    dic: HashMap<String, PropertySetSnapshotSourceValue>,
+}
+
+/// A value of a [`PropertySetSnapshotSource`].
+pub enum PropertySetSnapshotSourceValue {
+    Variant(ExpressionVariant),
+    /// A nested property set.
+    PropertySet(PropertySetSnapshotSource),
+    /// A composition object, by the id of its server object.
+    Server(ServerObjectId),
+}
+
+impl PropertySetSnapshotSource {
+    pub fn new(dic: HashMap<String, PropertySetSnapshotSourceValue>) -> Self {
+        Self { dic }
+    }
+
+    /// Builds the snapshot.
+    pub fn build(self) -> PropertySetSnapshot {
+        let dic = self
+            .dic
+            .into_iter()
+            .map(|(key, value)| {
+                let value = match value {
+                    PropertySetSnapshotSourceValue::Variant(variant) => variant.into(),
+                    PropertySetSnapshotSourceValue::PropertySet(source) => PropertySetSnapshotValue::from_object(
+                        PropertySetSnapshotObject::PropertySet(Rc::new(source.build())),
+                    ),
+                    PropertySetSnapshotSourceValue::Server(server) => PropertySetSnapshotValue::from_object(
+                        PropertySetSnapshotObject::Server(server, OnceCell::new()),
+                    ),
+                };
+                (key, value)
+            })
+            .collect();
+        PropertySetSnapshot::new(dic)
+    }
+}

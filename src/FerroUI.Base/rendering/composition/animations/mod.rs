@@ -19,7 +19,7 @@ pub use composition_animation::CompositionAnimation;
 pub use composition_animation_group::CompositionAnimationGroup;
 pub use expression_animation::ExpressionAnimation;
 pub use expression_animation_instance::ExpressionAnimationInstance;
-pub use i_animation_instance::IAnimationInstance;
+pub use i_animation_instance::{AnimationInstanceFactory, IAnimationInstance};
 pub use i_composition_animation_base::{ICompositionAnimation, ICompositionAnimationBase};
 pub use implicit_animation_collection::ImplicitAnimationCollection;
 pub use interpolators::{
@@ -36,7 +36,10 @@ pub use key_frame_animation::{
 };
 pub use key_frame_animation_instance::KeyFrameAnimationInstance;
 pub use key_frames::{IKeyFrames, KeyFrame, KeyFrames, ServerKeyFrame};
-pub use property_set_snapshot::{PropertySetSnapshot, PropertySetSnapshotObject, PropertySetSnapshotValue, SnapshotServerObject};
+pub use property_set_snapshot::{
+    PropertySetSnapshot, PropertySetSnapshotObject, PropertySetSnapshotSource, PropertySetSnapshotSourceValue,
+    PropertySetSnapshotValue, SnapshotServerObject,
+};
 
 #[cfg(test)]
 mod composition_animation_tests;

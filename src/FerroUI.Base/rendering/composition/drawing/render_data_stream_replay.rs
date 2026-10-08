@@ -1,6 +1,6 @@
 use super::{IRenderDataVisitor, RenderDataStream};
-use crate::media::{BoxShadows, IBrush, IEffect, IPen, ImmediateDrawingContext, RenderOptions, TextOptions};
-use crate::platform::{IBitmapImpl, IDrawingContextImpl, IGeometryImpl, IGlyphRunImpl};
+use crate::media::{BoxShadows, IBrush, IPen, ImmediateDrawingContext, RenderOptions, TextOptions};
+use crate::platform::{IDrawingContextImpl, IGeometryImpl, IGlyphRunImpl};
 use crate::rendering::scene_graph::ICustomDrawOperation;
 use crate::{Matrix, Point, Rect, RoundedRect};
 use std::sync::Arc;
