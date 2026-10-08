@@ -7,8 +7,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
         body { margin: 0; background: #ffffff; }
-        /* The canvas fills its container and is positioned in it. */
-        #view { position: relative; width: 200px; height: 120px; }
+        /* The canvas fills its container and is positioned in it. The container follows the size
+           of the window, so that resizing the window resizes the canvas: 200 x 120 in the window
+           of 320 x 200 the behaviour test opens. */
+        #view { position: relative; width: 62.5vw; height: 60vh; }
+        pre { margin: 0; white-space: pre-wrap; }
     </style>
 </head>
 
@@ -16,6 +19,8 @@
 <div id="out">
     <div id="view"></div>
     <pre id="result">state=loading</pre>
+    <pre id="frames">frames=0 wakeups=0</pre>
+    <pre id="wait"></pre>
 </div>
 <script type='module' src="./main.js"></script>
 </body>
