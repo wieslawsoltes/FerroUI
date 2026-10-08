@@ -105,7 +105,7 @@ R1 is delivered one payload contract at a time; each step builds and passes on i
 | R1.4b2 | The shared form of immutable brushes and pens | Done for render data: `SharedBrush` and `SharedPen`, one type for all kinds (solid, the three gradients, image), cached by the immutable object; see "Brushes and pens" below. The same forms are what R1.4c sends for the properties of composition objects. |
 | R1.4c | The values of `BatchResource<T>`; dash styles; the scene info of a target | Done: a resource value is sent in its wire form (`BatchResourceValue`): the shared form of a brush, the matrix of a transform, the offset and colour of a gradient stop; the server makes a handle of its own from it. A dash style is sent by value. The platform specific scene info is an `Arc<dyn Any + Send + Sync>` from the window implementation to the server target. |
 | R1.4d | Animation instances | Done: an animation creates the *factory* of its instance (`AnimationInstanceFactory`), which is what a batch carries and the server calls. Parsed expressions are held in `Arc`; the parameters cross as a snapshot source from which the snapshot is built on the server; a key frame carries its easing in shared form (`IEasing::to_shared`); see "Animation instances" below. |
-| R1.5 | `BatchObject::Value` requires `Send` | Done with R1.4d: `Value(Box<dyn Any + Send>)`. The workspace builds with the bound. Measurements of scroll and start-up against the numbers before R1 are still to be taken. |
+| R1.5 | `BatchObject::Value` requires `Send`; measurements | Done with R1.4d: `Value(Box<dyn Any + Send>)`, and the workspace builds with the bound. Measured below: no change of start-up; the scroll measurement of the browser is not repeated yet. |
 
 Design of R1.4. With `BatchObject::Value(Box<dyn Any + Send>)` the compiler names what is left: the brush, pen and effect of render data, its geometry wrapper, custom draw operations, the two counted holders (glyph run, bitmap) and the values of `BatchResource<T>`.
 
@@ -140,6 +140,21 @@ What a factory captures has to be `Send`:
 Found by R1.1 in the Skia backend: a path can be sent to another thread but not shared by reference, and a path measure can be neither. The geometries therefore never lend a path; the path measure is cached behind a lock in a wrapper that asserts it may move between threads (it owns its contours and has no thread affinity).
 
 Found by R1.3: a Skia bitmap cannot be sent to another thread either; it is held in a wrapper under a lock, like the path measure. `ThreadBound<T>` (`utilities/thread_bound.rs`) is the tool for a part of a shared resource that one thread owns: it panics when reached from another thread and leaks, rather than drops, when the resource dies there.
+
+### R1 measured
+
+Release builds (`cargo build --release`, the thin LTO profile) of `main` before R1 (`8c8c595`) and of the branch with all of R1 (`80e17fb`), on the development Mac (Apple silicon, macOS 26). The two builds of an application were launched alternately, after one launch each to warm the caches. **The machine was busy with other work throughout (load average 50 to 80)**, so the absolute numbers are not comparable with `desktop-performance.md`; the comparison between the two builds is what counts.
+
+| Measure | Before R1 | After R1 |
+|---|---|---|
+| `themed_window`, process start to `Window opened`, median of 15 (range) | 206 ms (171 to 596) | 207 ms (173 to 374) |
+| the same, second series | 225 ms (181 to 319) | 219 ms (186 to 494) |
+| `control-catalog-desktop`, process start to `App activated`, median of 9 (range) | 411 ms (371 to 504) | 401 ms (373 to 496) |
+| catalog, 150 pages in 20 s (`FERROUI_SMOKE_PAGES=150`), user CPU of three runs | 2.22, 2.46, 2.20 s | 2.32, 2.36, 2.71 s |
+| size of the unstripped binary, `themed_window` | 100.00 MB | 100.04 MB |
+| size of the unstripped binary, catalog | 147.45 MB | 147.95 MB |
+
+Start-up is unchanged. The CPU of the page run is about 0.1 to 0.2 s higher on average after R1, which is inside the spread of the three runs at this load; it is to be repeated on a quiet machine before it is read as a cost of the atomic counts. The scroll profile of the browser (`scripts/browser/scroll-profile.mjs`) was not repeated.
 
 ### Scope of R2, as the compiler names it
 
