@@ -265,6 +265,7 @@ pub enum FlatColor {
 }
 
 /// The members of the original that name the main shade of each color.
+// Deviation (DEVIATIONS.md, Colour picker): members of the enumeration upstream.
 #[allow(non_upper_case_globals)]
 impl FlatColor {
     pub const Pomegranate: FlatColor = FlatColor::Pomegranate6;

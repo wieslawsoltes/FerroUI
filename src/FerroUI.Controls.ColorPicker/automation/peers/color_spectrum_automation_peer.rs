@@ -102,7 +102,8 @@ impl ColorSpectrumAutomationPeer {
 
     /// Sets the color of the spectrum from text (the value provider
     /// contract). The text is parsed as [`Color::try_parse`] parses it; text
-    /// that is not a color is an error (a `FormatException` in the original).
+    /// that is not a color is an error (a `FormatException` in the original;
+    /// DEVIATIONS.md, Colour picker).
     pub fn set_value(&self, value: Option<&str>) -> Result<(), FormatError> {
         let Some(color) = value.and_then(Color::try_parse) else {
             return Err(FormatError::from_string(format!("Invalid color string: '{}'.", value.unwrap_or_default())));

@@ -5,7 +5,8 @@ use std::collections::HashMap;
 use std::sync::{LazyLock, Mutex, PoisonError};
 
 /// The key of a rounded [`HsvColor`] in the display name cache: the bits of
-/// its components (the original keys a dictionary with the color itself).
+/// its components (the original keys a dictionary with the color itself;
+/// DEVIATIONS.md, Colour picker).
 type HsvColorKey = [u64; 4];
 
 fn hsv_color_key(color: &HsvColor) -> HsvColorKey {

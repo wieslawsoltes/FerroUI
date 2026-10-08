@@ -514,7 +514,7 @@
     0
    ],
    "members": [
-    9815,
+    9819,
     11739,
     32
    ],
@@ -536,7 +536,7 @@
     "const": 347,
     "derive": 64,
     "field": 613,
-    "fn": 6261,
+    "fn": 6265,
     "free fn": 10,
     "free item": 16,
     "getter fn": 4,
@@ -5832,26 +5832,26 @@
    "scope": "in",
    "detail": "full",
    "files": [
-    0,
+    39,
     39,
     0
    ],
    "types": [
-    0,
+    41,
     41,
     0
    ],
    "members": [
-    0,
+    726,
     726,
     0
    ],
    "interfaces": [
-    0,
+    1,
     1
    ],
    "propertyRegistrations": [
-    0,
+    52,
     52
    ],
    "routedEvents": [
@@ -5859,9 +5859,140 @@
     0
    ],
    "notApplicableFiles": 1,
-   "matchKinds": {},
-   "presentFiles": {},
-   "rustOnly": []
+   "matchKinds": {
+    "const": 7,
+    "field": 6,
+    "fn": 206,
+    "variant": 507
+   },
+   "presentFiles": {
+    "AlphaComponentPosition.cs": [
+     "alpha_component_position.rs"
+    ],
+    "Automation/Peers/ColorSpectrumAutomationPeer.cs": [
+     "automation/peers/color_spectrum_automation_peer.rs"
+    ],
+    "ColorChangedEventArgs.cs": [
+     "color_changed_event_args.rs"
+    ],
+    "ColorComponent.cs": [
+     "color_component.rs"
+    ],
+    "ColorModel.cs": [
+     "color_model.rs"
+    ],
+    "ColorPalettes/FlatColorPalette.cs": [
+     "color_palettes/flat_color_palette.rs"
+    ],
+    "ColorPalettes/FlatHalfColorPalette.cs": [
+     "color_palettes/flat_half_color_palette.rs"
+    ],
+    "ColorPalettes/FluentColorPalette.cs": [
+     "color_palettes/fluent_color_palette.rs"
+    ],
+    "ColorPalettes/IColorPalette.cs": [
+     "color_palettes/i_color_palette.rs"
+    ],
+    "ColorPalettes/MaterialColorPalette.cs": [
+     "color_palettes/material_color_palette.rs"
+    ],
+    "ColorPalettes/MaterialHalfColorPalette.cs": [
+     "color_palettes/material_half_color_palette.rs"
+    ],
+    "ColorPalettes/SixteenColorPalette.cs": [
+     "color_palettes/sixteen_color_palette.rs"
+    ],
+    "ColorPicker/ColorPicker.cs": [
+     "color_picker/color_picker.rs"
+    ],
+    "ColorPreviewer/ColorPreviewer.Properties.cs": [
+     "color_previewer/color_previewer_properties.rs"
+    ],
+    "ColorPreviewer/ColorPreviewer.cs": [
+     "color_previewer/color_previewer.rs"
+    ],
+    "ColorSlider/ColorSlider.Properties.cs": [
+     "color_slider/color_slider_properties.rs"
+    ],
+    "ColorSlider/ColorSlider.cs": [
+     "color_slider/color_slider.rs"
+    ],
+    "ColorSpectrum/ColorSpectrum.Properties.cs": [
+     "color_spectrum/color_spectrum_properties.rs"
+    ],
+    "ColorSpectrum/ColorSpectrum.cs": [
+     "color_spectrum/color_spectrum.rs"
+    ],
+    "ColorSpectrum/ColorSpectrumComponents.cs": [
+     "color_spectrum/color_spectrum_components.rs"
+    ],
+    "ColorSpectrum/ColorSpectrumShape.cs": [
+     "color_spectrum/color_spectrum_shape.rs"
+    ],
+    "ColorView/ColorView.Properties.cs": [
+     "color_view/color_view_properties.rs"
+    ],
+    "ColorView/ColorView.cs": [
+     "color_view/color_view.rs"
+    ],
+    "ColorView/ColorViewTab.cs": [
+     "color_view/color_view_tab.rs"
+    ],
+    "Converters/AccentColorConverter.cs": [
+     "converters/accent_color_converter.rs"
+    ],
+    "Converters/ColorToDisplayNameConverter.cs": [
+     "converters/color_to_display_name_converter.rs"
+    ],
+    "Converters/ColorToHexConverter.cs": [
+     "converters/color_to_hex_converter.rs"
+    ],
+    "Converters/ContrastBrushConverter.cs": [
+     "converters/contrast_brush_converter.rs"
+    ],
+    "Converters/DoNothingForNullConverter.cs": [
+     "converters/do_nothing_for_null_converter.rs"
+    ],
+    "Converters/ToBrushConverter.cs": [
+     "converters/to_brush_converter.rs"
+    ],
+    "Converters/ToColorConverter.cs": [
+     "converters/to_color_converter.rs"
+    ],
+    "Helpers/ColorHelper.cs": [
+     "helpers/color_helper.rs"
+    ],
+    "Helpers/ColorPickerHelpers.cs": [
+     "helpers/color_picker_helpers.rs"
+    ],
+    "Helpers/Hsv.cs": [
+     "helpers/hsv.rs"
+    ],
+    "Helpers/IncrementAmount.cs": [
+     "helpers/increment_amount.rs"
+    ],
+    "Helpers/IncrementDirection.cs": [
+     "helpers/increment_direction.rs"
+    ],
+    "Helpers/Rgb.cs": [
+     "helpers/rgb.rs"
+    ],
+    "HsvComponent.cs": [
+     "hsv_component.rs"
+    ],
+    "RgbComponent.cs": [
+     "rgb_component.rs"
+    ]
+   },
+   "rustOnly": [
+    "assets.rs",
+    "markup_types/classes.rs",
+    "markup_types/converters.rs",
+    "markup_types/enums.rs",
+    "markup_types/palettes.rs",
+    "register_types.rs",
+    "rust_paths.rs"
+   ]
   },
   {
    "name": "Avalonia.DesignerSupport",
