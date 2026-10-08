@@ -123,11 +123,13 @@ fn gap_c313_item_type_of_a_collection_of_a_view_model() {
     // items source is bound to (`InheritDataTypeFromItems`). The view model declares the
     // collection as the typed list of its items (`ferro_markup_list!`).
     let xaml = format!(
-        "<ComboBox {XMLNS} xmlns:viewModels='using:ControlCatalog.ViewModels' \
-           x:DataType='viewModels:ComboBoxPageViewModel' ItemsSource='{{Binding Values}}' \
-           DisplayMemberBinding='{{Binding Name}}'>\
-           <ComboBox.ItemTemplate><DataTemplate><TextBlock Text='{{Binding Id}}'/></DataTemplate></ComboBox.ItemTemplate>\
-         </ComboBox>"
+        "<StackPanel {XMLNS} xmlns:viewModels='using:ControlCatalog.ViewModels' \
+           x:DataType='viewModels:ComboBoxPageViewModel'>\
+           <ComboBox ItemsSource='{{Binding Values}}' DisplayMemberBinding='{{Binding Name}}'/>\
+           <ComboBox ItemsSource='{{Binding Values}}'>\
+             <ComboBox.ItemTemplate><DataTemplate><TextBlock Text='{{Binding Id}}'/></DataTemplate></ComboBox.ItemTemplate>\
+           </ComboBox>\
+         </StackPanel>"
     );
     if let Err(error) = try_load_text(&xaml, None, None) {
         panic!("{}", describe(&error));

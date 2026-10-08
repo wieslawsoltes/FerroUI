@@ -6,7 +6,7 @@ The documents of the sample that do not load yet, grouped by what they wait for.
 cargo test -p control-catalog -- --ignored gap_
 ```
 
-Status: 219 documents, 207 load and show their class; 12 are listed below (one of them, `App.xaml`, loads in the application and in `tests/gaps.rs`).
+Status: 219 documents, 209 load and show their class; 10 are listed below (one of them, `App.xaml`, loads in the application and in `tests/gaps.rs`).
 
 ## Gaps of the framework
 
