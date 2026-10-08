@@ -49,6 +49,17 @@ impl PlatformRenderInterfaceContextManager {
         })
     }
 
+    /// The render interface of the platform, if one is registered: the one
+    /// found when the manager was created, so that the render thread, which
+    /// has no service locator of its own, gets the same answer.
+    pub fn platform_render_interface(&self) -> Option<Rc<dyn IPlatformRenderInterface>> {
+        let mut render_interface = self.render_interface.borrow_mut();
+        if render_interface.is_none() {
+            *render_interface = FerroLocator::current().get_service::<dyn IPlatformRenderInterface>();
+        }
+        render_interface.clone()
+    }
+
     /// Raised after a lost graphics context has been released.
     pub fn context_disposed(&self, handler: impl Fn() + 'static) -> Rc<dyn IDisposable> {
         let token = self.context_disposed.add(Rc::new(handler));

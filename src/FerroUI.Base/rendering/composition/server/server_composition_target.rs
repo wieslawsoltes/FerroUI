@@ -6,7 +6,7 @@ use super::{
 use crate::media::Colors;
 use crate::platform::surfaces::IPlatformRenderSurface;
 use crate::platform::{
-    IDrawingContextImpl, IDrawingContextLayerImpl, IPlatformRenderInterface, IRenderTarget, LtrbRect,
+    IDrawingContextImpl, IDrawingContextLayerImpl, IRenderTarget, LtrbRect,
     RenderTargetSceneInfo,
 };
 use crate::rendering::composition::generated::{
@@ -15,7 +15,7 @@ use crate::rendering::composition::generated::{
 use crate::rendering::composition::transport::BatchStreamReader;
 use crate::rendering::composition::{CompositionTransparencyLevel, ICompositionTargetDebugEvents};
 use crate::rendering::{LayoutPassTiming, RendererDebugOverlays};
-use crate::{FerroLocator, LocatorExtensions, Matrix, PixelRect, PixelSize, Size};
+use crate::{Matrix, PixelRect, PixelSize, Size};
 use std::any::{Any, TypeId};
 use std::cell::{Cell, RefCell};
 use std::collections::HashMap;
@@ -58,7 +58,9 @@ impl ServerCompositionTarget {
     /// that it can match readback data against it.
     pub fn new(compositor: &Rc<ServerCompositor>, surfaces: RenderSurfaces, id: i64) -> Rc<ServerCompositionTarget> {
         let mut dirty_rects: Option<Rc<dyn IDirtyRectTracker>> = None;
-        let platform_render = FerroLocator::current().get_service::<dyn IPlatformRenderInterface>();
+        // Not the service locator: a target is created by the thread that
+        // applies the batch.
+        let platform_render = compositor.render_interface().platform_render_interface();
         if let Some(platform_render) = platform_render {
             if platform_render.supports_regions() && compositor.options().use_region_dirty_rect_clipping == Some(true) {
                 let max_rects = compositor.options().max_dirty_rects.unwrap_or(8);
@@ -84,7 +86,7 @@ impl ServerCompositionTarget {
                 compositor: Rc::downgrade(compositor),
                 props: ServerCompositionTargetProps::new(),
                 surfaces,
-                overlays: CompositionTargetOverlays::new(),
+                overlays: CompositionTargetOverlays::new(compositor),
                 render_target: RefCell::new(None),
                 layer_size: Cell::new(PixelSize::default()),
                 layer: RefCell::new(None),

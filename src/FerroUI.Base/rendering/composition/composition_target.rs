@@ -103,6 +103,13 @@ impl CompositionTarget {
     }
 
     pub fn set_debug_overlays(&self, value: RendererDebugOverlays) {
+        if !value.is_empty() {
+            // The text of the overlays is made from the default typeface,
+            // on this thread; the frames that draw it may run on another.
+            self.compositor().with_server(|server| {
+                server.diagnostic_text_renderer();
+            });
+        }
         self.props.set_debug_overlays(self, value);
     }
 
