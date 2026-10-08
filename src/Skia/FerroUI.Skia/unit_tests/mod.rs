@@ -14,6 +14,7 @@ mod drawing_context_impl_tests;
 mod hit_testing;
 mod media;
 mod render_bounds_tests;
+mod skia_options_tests;
 mod test_font_manager;
 
 pub(crate) use test_font_manager::TestFontManager;
