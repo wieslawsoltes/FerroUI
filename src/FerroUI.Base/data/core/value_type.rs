@@ -379,9 +379,18 @@ impl ValueTypes {
     /// `TTo` (the same value, seen as a wider type), as opposed to values
     /// that can merely be converted to it. A cast is also a conversion.
     pub fn register_cast<TFrom: 'static, TTo: PropertyValue>(cast: impl Fn(&TFrom) -> TTo + 'static) {
-        let cast: ConvertFn =
-            Rc::new(move |v: &BoxedValue| v.downcast_ref::<TFrom>().map(|v| Rc::new(cast(v)) as BoxedValue));
-        insert_cast((TypeId::of::<TFrom>(), TypeId::of::<TTo>()), cast);
+        let cast = Rc::new(cast);
+        let boxed = cast.clone();
+        let convert: ConvertFn =
+            Rc::new(move |v: &BoxedValue| v.downcast_ref::<TFrom>().map(|v| Rc::new(boxed(v)) as BoxedValue));
+        insert_cast((TypeId::of::<TFrom>(), TypeId::of::<TTo>()), convert);
+        // The same cast for a value that is only borrowed: the untyped
+        // property routes are handed `&dyn Any` (see `try_convert_implicit`).
+        let convert_any: AnyConvertFn =
+            Rc::new(move |v: &dyn std::any::Any| v.downcast_ref::<TFrom>().map(|v| Rc::new(cast(v)) as BoxedValue));
+        with_registry(|r| {
+            r.any_conversions.insert((TypeId::of::<TFrom>(), TypeId::of::<TTo>()), convert_any);
+        });
     }
 
     /// Registers a conversion between two value types. Returning `None`
@@ -464,6 +473,20 @@ impl ValueTypes {
         let key = (<dyn std::any::Any>::type_id(value), target);
         let f = with_registry(|r| r.any_conversions.get(&key).cloned());
         f.and_then(|f| f(value))
+    }
+
+    /// Converts a borrowed untyped value to the value type `target` with the
+    /// conversions the managed original allows implicitly when a property is
+    /// set through its untyped route (`TypeUtilities.TryConvertImplicit`):
+    /// an assignability cast (a value to its nullable form, a handle to a
+    /// base class or interface handle, an element to an element reference)
+    /// and the implicit numeric conversions of the language. A conversion
+    /// that can lose the value (a narrowing one, parsing text) is not among
+    /// them; neither is a user-defined implicit operator, which the managed
+    /// original finds by reflection: a type states such a conversion with
+    /// [`ValueTypes::register_cast`].
+    pub fn try_convert_implicit(value: &dyn std::any::Any, target: TypeId) -> Option<BoxedValue> {
+        Self::try_convert_for_property(value, target).or_else(|| implicit_numeric(value, target))
     }
 
     /// Registers the interface handle type `I` (for example
@@ -995,6 +1018,40 @@ impl ValueTypes {
             _ => false,
         }
     }
+}
+
+/// The implicit numeric conversions of the managed original
+/// (`TypeUtilities.ImplicitConversions`), for the numeric types of the port:
+/// each source type converts to the wider types listed for it. The character
+/// and decimal rows of that table are not here: no ported property is set
+/// with either through the untyped route.
+fn implicit_numeric(value: &dyn std::any::Any, target: TypeId) -> Option<BoxedValue> {
+    macro_rules! widen {
+        ($($from:ty => [$($to:ty),*]);* $(;)?) => {
+            $(
+                if let Some(v) = value.downcast_ref::<$from>() {
+                    $(
+                        if target == TypeId::of::<$to>() {
+                            return Some(Rc::new(*v as $to) as BoxedValue);
+                        }
+                    )*
+                    return None;
+                }
+            )*
+        };
+    }
+    widen! {
+        i8 => [i16, i32, i64, f32, f64];
+        u8 => [i16, u16, i32, u32, i64, u64, f32, f64];
+        i16 => [i32, i64, f32, f64];
+        u16 => [i32, u32, i64, u64, f32, f64];
+        i32 => [i64, f32, f64];
+        u32 => [i64, u64, f32, f64];
+        i64 => [f32, f64];
+        u64 => [f32, f64];
+        f32 => [f64];
+    }
+    None
 }
 
 macro_rules! numeric_conversions {
