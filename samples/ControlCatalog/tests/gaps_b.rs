@@ -145,7 +145,6 @@ fn gap_c208_font_family_name_in_a_compiled_binding() {
 }
 
 #[test]
-#[ignore = "gap C209: TextBox.Cut, Copy, Paste and Clear are not declared as methods for markup"]
 fn gap_c209_text_box_methods_as_commands() {
     let _app = start_catalog_application();
     // `Pages/ContextFlyoutPage.xaml`: the buttons of the flyout of a text box bind its methods as

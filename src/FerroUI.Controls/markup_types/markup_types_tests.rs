@@ -542,6 +542,28 @@ fn data_templates_give_back_their_concrete_type_and_the_platform_can_be_mocked()
 }
 
 #[test]
+fn the_methods_of_a_text_box_are_declared() {
+    // A binding path that ends in one of them is a command (`{Binding $parent[TextBox].Cut}`).
+    let markup = class_markup::<crate::TextBox>();
+    for name in ["ClearSelection", "Cut", "Copy", "Paste", "Clear", "SelectAll", "Undo", "Redo"] {
+        let methods: Vec<_> = markup.find_methods(name).collect();
+        assert_eq!(methods.len(), 1, "{name}");
+        assert!(!methods[0].is_static, "{name}");
+        assert!(methods[0].parameters.is_empty(), "{name}");
+        assert!(methods[0].return_type.is_none(), "{name}");
+    }
+    let scroll_to_line = markup.find_methods("ScrollToLine").next().expect("ScrollToLine");
+    assert_eq!(scroll_to_line.parameters.iter().map(|p| p()).collect::<Vec<_>>(), [ValueType::of::<i32>()]);
+
+    let _app = crate::testing::UnitTestApplication::start(crate::testing::TestServices::styled_window());
+    let text_box = crate::TextBox::new();
+    text_box.set_text(Some("text"));
+    let clear = markup.find_methods("Clear").next().expect("Clear");
+    (clear.invoke)(&[into_markup_value(text_box.clone())]).unwrap();
+    assert!(text_box.text().unwrap_or_default().is_empty());
+}
+
+#[test]
 fn attached_accessors_take_the_element_type_the_managed_original_declares() {
     crate::register_types();
     // `TextElement.FontSize` is registered for text elements; its accessors take a control.
