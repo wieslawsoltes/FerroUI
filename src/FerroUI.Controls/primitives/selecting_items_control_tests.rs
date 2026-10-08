@@ -757,6 +757,28 @@ fn resetting_items_collection_should_raise_selection_changed() {
     assert_items(received_args[0].removed_items(), &[boxed(&selected_item)]);
 }
 
+// Not a port: the reference keeps the selected value (and its snapshot of the
+// selected items) of a selection lost to a reset until the selection changes
+// again, which here would keep the items alive (see
+// `page::page_lifetime_tests::tab_control_cleared_items_are_freed`).
+#[test]
+fn resetting_items_collection_should_clear_selected_value() {
+    let _scope = start();
+    let items = item_list(&[Item::new(), Item::new(), Item::new()]);
+
+    let target = target_with(source(&items));
+
+    let _root = prepare(&target);
+    target.set_selected_index(1);
+
+    let selected_item = item_of(&items, 1);
+    assert_same(&boxed(&selected_item), &target.selected_value());
+
+    items.clear();
+
+    assert!(target.selected_value().is_none());
+}
+
 #[test]
 fn resetting_items_to_empty_with_multiple_selection_should_raise_selection_changed() {
     let _scope = start();

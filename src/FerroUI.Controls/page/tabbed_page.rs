@@ -5,8 +5,8 @@ use super::{
 use crate::primitives::{SelectingItemsControl, TemplateAppliedEventArgs, TemplatedControlImpl, TemplatedControlImplExt};
 use crate::templates::IDataTemplate;
 use crate::{
-    ContainerClearingEventArgs, ContainerPreparedEventArgs, Control, ControlImpl, Dock, ItemsSource, TabControl,
-    TabItem,
+    ContainerClearingEventArgs, ContainerIndexChangedEventArgs, ContainerPreparedEventArgs, Control, ControlImpl, Dock,
+    ItemsSource, TabControl, TabItem,
 };
 use ferroui_base::animation::IPageTransition;
 use ferroui_base::input::gesture_recognizers::SwipeGestureRecognizer;
@@ -44,6 +44,7 @@ struct TabControlPart {
     tab_control: Ref<TabControl>,
     selection_changed: Option<RoutedEventHandlerToken>,
     container_prepared: Rc<dyn IDisposable>,
+    container_index_changed: Rc<dyn IDisposable>,
     container_clearing: Rc<dyn IDisposable>,
 }
 
@@ -232,6 +233,7 @@ impl TemplatedControlImpl for TabbedPage {
                 previous.tab_control.remove_handler(SelectingItemsControl::selection_changed_event(), token);
             }
             previous.container_prepared.dispose();
+            previous.container_index_changed.dispose();
             previous.container_clearing.dispose();
         }
 
@@ -247,6 +249,12 @@ impl TemplatedControlImpl for TabbedPage {
                 }
             });
             let weak = this.to_ref().downgrade();
+            let container_index_changed = tab_control.container_index_changed(move |e| {
+                if let Some(this) = weak.upgrade() {
+                    this.on_container_index_changed(e);
+                }
+            });
+            let weak = this.to_ref().downgrade();
             let container_clearing = tab_control.container_clearing(move |e| {
                 if let Some(this) = weak.upgrade() {
                     this.on_container_clearing(e);
@@ -256,6 +264,7 @@ impl TemplatedControlImpl for TabbedPage {
                 tab_control: tab_control.clone(),
                 selection_changed: None,
                 container_prepared,
+                container_index_changed,
                 container_clearing,
             });
             tab_control.set_items_source(this.items_source().or_else(|| this.pages_items_source()));
@@ -619,6 +628,37 @@ impl TabbedPage {
         if e.index() == self.tab_control().map_or(-1, |tab_control| tab_control.selected_index()) {
             self.update_active_page();
         }
+    }
+
+    /// Selects the page of the tab that took the place of the selected tab
+    /// when the selected page left the tab control.
+    ///
+    /// Deviation (DEVIATIONS.md, Selection and pages): the tab control
+    /// moves its selection while the container of the page that left is
+    /// still the one at its index, so the selection change it raises
+    /// resolves to that page again; the containers are updated afterwards.
+    /// The reference does not handle this event: its selected page stays
+    /// the page that left, which here keeps that page alive.
+    fn on_container_index_changed(&self, e: &ContainerIndexChangedEventArgs) {
+        let Some(tab_control) = self.tab_control() else {
+            return;
+        };
+        if e.new_index() != tab_control.selected_index() {
+            return;
+        }
+        let Some(selected_page) = self.selected_page() else {
+            return;
+        };
+        if self.page_container(&selected_page).is_some() {
+            return;
+        }
+        let Some(page) = e.container().clone().cast::<TabItem>().and_then(|tab_item| self.container_page(&tab_item))
+        else {
+            return;
+        };
+
+        self.commit_selection(e.new_index(), Some(page), NavigationType::Remove);
+        self.update_content_safe_area_padding();
     }
 
     fn on_container_clearing(&self, e: &ContainerClearingEventArgs) {

@@ -1174,6 +1174,16 @@ impl SelectingItemsControl {
     fn on_selection_model_lost_selection(&self) {
         let before_reset = self.selected_items_before_reset.take();
         if let Some(before_reset) = before_reset.filter(|items| !items.is_empty()) {
+            // Deviation (DEVIATIONS.md, Selection and pages): the items
+            // selected before the reset are reported as removed here and
+            // the selection model raises no change for them, so they are
+            // dropped from the snapshot and from the selected value. The
+            // reference keeps both until the next change of the selection,
+            // which here keeps the removed items alive.
+            let reported = std::mem::take(&mut *self.selected_items_snapshot.borrow_mut());
+            drop(reported);
+            self.update_selected_value_from_item();
+
             self.raise_selection_changed(|| before_reset, Vec::new);
         }
 

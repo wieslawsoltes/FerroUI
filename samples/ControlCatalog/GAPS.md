@@ -12,11 +12,7 @@ Status: 219 documents, 218 load and show their class; 1 is listed below.
 
 No gap of the framework blocks a document of the list. One gap is open: C101, a reflection binding (`x:CompileBindings="False"`) cannot resolve `$parent[prefix:Type]` for a type of a `using:` namespace (`gaps_a::gap_c101_reflection_binding_parent_of_prefixed_type`). The theme of `SampleGalleryPage` uses such paths with compiled bindings, which resolve them.
 
-One gap is open that blocks no document:
-
-| Gap | What is missing | Reproduction | Documents |
-|---|---|---|---|
-| C316 | The tab of a `TabbedPage` that is selected when it is removed (or when the pages are cleared) stays alive; a tab that is removed while another one is selected is freed. Found by the lifetime tests written for C314, after its cause (the dynamic resource holding the element it is looked up from) was fixed. The holder is not found yet: the selection of the page, its current page, or what showed the page. | `ferroui-controls`, `page::page_lifetime_tests::tabbed_page_removed_tab_that_was_selected_is_freed`, `tabbed_page_cleared_tabs_are_freed` | none |
+No other gap is open.
 
 ## Code-behind that needs framework API the port does not have
 
