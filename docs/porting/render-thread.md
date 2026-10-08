@@ -190,6 +190,23 @@ What the survey of R4 found: the render loop and its timers are ported and alrea
 | R4.2 | `NonPumpingLockHelper` around the waits, as upstream. | Not applicable: the helper only has an implementation on Windows (it keeps a single-threaded apartment from pumping messages while it waits); without one it does nothing. The other places upstream uses it in `Compositor` are not waits, and the port has their logic (a commit requested while a batch is pending is triggered from its `Processed` completion through the dispatcher). |
 | R4.3 | The option that chooses the mode and where `Compositor::new` reads it. | Open; depends on R5 for a window to render. |
 
+### R5, the finding that shapes it: both threads render the server compositor upstream
+
+The native platform creates its compositor as `new Compositor(_platformGraphics, true)`: `UseUiThreadForSynchronousCommits` is **true** on macOS, and the render loop runs on the thread of `ThreadProxyRenderTimer`. The port's platform set-up is the same, line for line. So upstream on macOS:
+
+- the render thread renders frames (`ServerCompositor.Render` from the loop);
+- the UI thread **also** calls `ServerCompositor.Render`, at the synchronous points (`MediaContext.SyncWaitCompositorBatch`: the resize a window asks for, the first show, the disposal of a target), because AppKit presents a resized window in step with the UI thread;
+- `ServerCompositor.Render` takes `lock (_lock)`, and server objects check that they are only touched under it (`VerifyAccess`: "can be only accessed under compositor lock"). The server compositor is not confined to a thread: it is confined to a **lock**.
+
+The render-thread mode of R3 confines the server compositor to one thread (thread-local, `Rc`), which is not this model. Two ways forward for the desktop:
+
+1. **Upstream's model: confinement to the lock.** The graph of server objects (all `Rc` and cells inside) lives in a cell that is `Send` by an `unsafe impl`, entered only through the lock; whichever thread holds the lock renders. This is sound if no handle into the graph exists outside the lock, which is what R1 to R3 established for everything that crosses (batches, resources, jobs, readback) and what has to be audited for the rest (thread-locals, the render interface context, the dispatcher a frame disables, the diagnostics). It keeps upstream's behaviour at the synchronous points, including the resize of a window.
+2. **Strict confinement to the render thread.** `UseUiThreadForSynchronousCommits` false: the UI thread waits for the render thread (R4.1) and never renders. No `unsafe`, but it departs from what upstream does on macOS, where presenting a resize from another thread than the UI thread is what the flag exists to avoid; the result on screen during a live resize has to be seen before it can be chosen.
+
+Recommended: 1, because it is the port of what upstream does on this platform and the audit it needs is the continuation of R1 to R3; 2 stays available per platform (it is upstream's model where `UseUiThreadForSynchronousCommits` is false, and what the browser's worker needs). Not started: it is the owner's call, since 1 puts an `unsafe impl Send` under the whole server side.
+
+Either way R5 also needs, on the native backend: the platform graphics (`MetalPlatformGraphics`) and the render surfaces of a top level usable by the thread that renders (upstream creates the software render target on the UI thread only, and throws `RenderTargetNotReady` elsewhere; the port has the same check), and the lock of the Metal device.
+
 ### Scope of R3, surveyed
 
 What the UI side asks the server compositor for directly today (outside `rendering/composition/server/`, tests aside). Each becomes a member of the handle the compositor keeps, a job, or a readback:
