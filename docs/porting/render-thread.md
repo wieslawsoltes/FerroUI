@@ -141,6 +141,19 @@ Found by R1.1 in the Skia backend: a path can be sent to another thread but not 
 
 Found by R1.3: a Skia bitmap cannot be sent to another thread either; it is held in a wrapper under a lock, like the path measure. `ThreadBound<T>` (`utilities/thread_bound.rs`) is the tool for a part of a shared resource that one thread owns: it panics when reached from another thread and leaks, rather than drops, when the resource dies there.
 
+### Scope of R2, as the compiler names it
+
+Requiring `Send` of `ServerJob`, `ServerObjectJob` and `ServerObjectFactory` (tried on top of R1) fails at these places in the base crate; each is a decision, not a rename:
+
+| Where | What is captured | Direction |
+|---|---|---|
+| The job queue of the server compositor | the resolved server object of an object job (`Rc`) | The queue is the server's own: its element type is a job of the render thread, not the `Send` job of a batch. |
+| `Compositor::invoke_server_job_async` and `invoke_server_object_job_async` | the task (`Rc<RefCell<..>>`) and an error as `Rc<dyn Error>` | `ServerJobTask` holds its result in `Arc<Mutex<..>>`; the continuations stay on the UI thread and run from the dispatcher; the error is `Send`. The result type `T` is `Send`. |
+| `CompositionBrush::create`, `CompositionVisual::create_with` | the closures that make the server object and its content | The bound is passed on to the callers; what they capture is checked next. |
+| `CompositionCustomVisual` | the messages for the handler (`Rc<dyn Any>`) | A message crosses threads: `Box<dyn Any + Send>`. |
+| `CompositionTarget::new` | the render surfaces (`Rc<dyn Fn() -> Vec<Rc<dyn IPlatformRenderSurface>>>`) | The surfaces are made by the window implementation on the UI thread and used by the render target on the render thread: the closure and the surface contract become thread-safe, which reaches the native backend. This is the largest item of R2. |
+| `CompositionTarget::set_debug_events` | `Rc<dyn ICompositionTargetDebugEvents>` | `Arc` and `Send + Sync`; the receiver is called on the render thread. |
+
 ## 6. Risks
 
 - **Scope of R1.** The audit names eight payload kinds, but each pulls in what it holds (a gradient brush its stops and transform, an image brush its bitmap, a glyph run its typeface). The stage is driven by the compiler until the bound holds; its size is **[E]** the largest of the desktop stages.
