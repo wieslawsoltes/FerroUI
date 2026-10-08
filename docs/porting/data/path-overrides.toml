@@ -1145,6 +1145,10 @@ path = "src/FerroUI.Base/media/shared_brush.rs"
 reason = "The values of an immutable brush or pen in a form that is Send + Sync: the handles of the brush contract are Rc, so what the render thread draws with is a copy with a stable identity (render thread, stage R1)"
 
 [[rust_only]]
+path = "src/FerroUI.Base/rendering/composition/render_thread_tests.rs"
+reason = "Tests of the render-thread mode of the compositor: upstream has no test that runs the two threads"
+
+[[rust_only]]
 path = "src/FerroUI.Base/type_system.rs"
 reason = "object model runtime (Ref/WeakRef handles, TypeInfo, class macros): replaces the CLR type system, virtual dispatch and GC references"
 

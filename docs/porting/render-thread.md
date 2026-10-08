@@ -166,6 +166,20 @@ Start-up is unchanged. The CPU of the page run is about 0.1 to 0.2 s higher on a
 - The debug events of a target are `Arc` and `Send + Sync`.
 - **Left bound to the UI thread, in `ThreadBound`:** the render surfaces of a target, the update closures of a drawing surface, the import and dispose closures of the interop objects. A server on its own thread panics on their first use: this is the list of what R3 to R5 (and B2) have to make usable from the render thread.
 
+### R3 done: the server compositor on its own thread
+
+`Compositor::with_render_thread` creates a compositor whose server compositor is created by the first tick of the render loop, on the thread that ticks, from a `Send` factory, and is kept there in a thread-local registry by the key of the compositor. The compositor itself holds what the two threads share (the queue of committed batches under a lock, the readback indices) and no server object; `Compositor::server()` is the accessor of the dispatcher-thread mode and of the tests that run the server on their own thread. Dropping the compositor tells the render thread to release the server compositor at its next tick.
+
+`render_thread_tests.rs` is the test the stage asks for: objects are created and a batch is committed on one thread, the loop is ticked on a second one, a job runs there and reports the thread it ran on and the number of server objects, and its continuation runs on the first thread from the dispatcher.
+
+What the render-thread mode does **not** have yet, each a panic or an absent answer today and the content of R4 and R5:
+
+- No composition target: the render surfaces are bound to the UI thread (R2), so a window cannot be rendered in this mode.
+- `try_get_render_interface_feature` answers `None`: the features are objects of the render thread.
+- The platform graphics object is made by a closure on the render thread; no backend supplies one yet.
+- Nothing chooses the mode: `Compositor::new` (the one applications get) still creates the dispatcher-thread mode. The option and the default are R4 and R5.
+- The synchronous points (resize, first show) and the render timer's thread are R4.
+
 ### Scope of R3, surveyed
 
 What the UI side asks the server compositor for directly today (outside `rendering/composition/server/`, tests aside). Each becomes a member of the handle the compositor keeps, a job, or a readback:
