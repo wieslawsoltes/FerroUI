@@ -19,6 +19,7 @@ mod carousel_demo_page;
 mod carousel_page;
 mod check_box_page;
 mod clipboard_page;
+mod color_picker_page;
 mod combo_box_page;
 mod command_bar_page;
 mod connected_animation_demo_page;
@@ -119,6 +120,7 @@ pub use carousel_demo_page::CarouselDemoPage;
 pub use carousel_page::CarouselPage;
 pub use check_box_page::CheckBoxPage;
 pub use clipboard_page::ClipboardPage;
+pub use color_picker_page::ColorPickerPage;
 pub use combo_box_page::ComboBoxPage;
 pub use command_bar::{
     CommandBarCustomizationPage,
@@ -262,6 +264,7 @@ const ROOT_TYPES: &[&TypeInfo] = &[
     CanvasPage::TYPE,
     CheckBoxPage::TYPE,
     ClipboardPage::TYPE,
+    ColorPickerPage::TYPE,
     ComboBoxPage::TYPE,
     CommandBarPage::TYPE,
     ConnectedAnimationDemoPage::TYPE,
@@ -341,6 +344,7 @@ const ROOT_CLASSES: &[&XamlClass] = &[
     &CanvasPage::XAML_CLASS,
     &CheckBoxPage::XAML_CLASS,
     &ClipboardPage::XAML_CLASS,
+    &ColorPickerPage::XAML_CLASS,
     &ComboBoxPage::XAML_CLASS,
     &CommandBarPage::XAML_CLASS,
     &ConnectedAnimationDemoPage::XAML_CLASS,

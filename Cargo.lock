@@ -103,6 +103,7 @@ version = "0.1.0"
 dependencies = [
  "ferroui-base",
  "ferroui-controls",
+ "ferroui-controls-color-picker",
  "ferroui-dialogs",
  "ferroui-harfbuzz",
  "ferroui-markup",

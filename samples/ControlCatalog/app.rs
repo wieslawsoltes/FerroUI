@@ -1,13 +1,9 @@
 //! Port of `App.xaml.cs`: the class of the document `App.xaml`.
-//!
-//! TEMPORARY, marked where it is: while `App.xaml` does not load, the
-//! application loads the subset of it that does (see [`crate::temporary`]).
 
 use crate::main_view::MainView;
 use crate::main_window::MainWindow;
 use crate::markup::{describe, try_load_document_group, xaml_class};
 use crate::models::CatalogTheme;
-use crate::temporary;
 use crate::view_models::{ApplicationViewModel, MainWindowViewModel};
 use ferroui_base::controls::ResourceKey;
 use ferroui_base::metadata::from_markup_value;
@@ -21,6 +17,7 @@ use ferroui_controls::{
     Application, ApplicationImpl, ApplicationImplExt, Control, NativeDock, NativeMenuItem, NewApplication, Page,
     PageNavigationHost, Window,
 };
+use ferroui_markup_xaml_loader::FerroRuntimeXamlLoader;
 use ferroui_themes_fluent::FluentTheme;
 use ferroui_themes_simple::SimpleTheme;
 use std::cell::{Cell, RefCell};
@@ -123,19 +120,20 @@ impl App {
         this
     }
 
+    /// The rooted asset path of the dictionary `App.xaml` merges.
+    pub const CUSTOM_THEMES_PATH: &'static str = "/CustomThemes.xaml";
+
     /// `FerroXamlLoader.Load(this)`: populates the application from
     /// `App.xaml`, with the dictionary it includes (`CustomThemes.xaml`).
-    ///
-    /// TEMPORARY: while `App.xaml` is listed in `excluded.txt` the subset of
-    /// it that loads is loaded instead.
-    fn load_document(&self) {
+    pub(crate) fn load_document(&self) {
         crate::register_types();
+        // The documents of the libraries `App.xaml` includes (the styles of the colour
+        // picker) have no compiled markup: the includes stay run-time includes that the
+        // run-time loader loads, so the application makes it the loader of such
+        // documents (see DEVIATIONS.md, "Colour picker").
+        FerroRuntimeXamlLoader::register();
         let root: BoxedValue = Rc::new(self.to_ref());
-        let result = if crate::excluded(Self::DOCUMENT_PATH).is_some() {
-            temporary::load_app_document_subset(root)
-        } else {
-            try_load_document_group(Self::DOCUMENT_PATH, Some(root), &[temporary::CUSTOM_THEMES_PATH]).map(|_| ())
-        };
+        let result = try_load_document_group(Self::DOCUMENT_PATH, Some(root), &[Self::CUSTOM_THEMES_PATH]).map(|_| ());
         if let Err(error) = result {
             panic!("{}: {}", Self::DOCUMENT_PATH, describe(&error));
         }
@@ -221,22 +219,16 @@ impl App {
             app.theme_styles_container.add(Style::new());
         }
 
-        // A colour picker style that is not available leaves its slot as it is (TEMPORARY: the
-        // managed original has both; see `crate::temporary`).
         if theme == CatalogTheme::Fluent {
-            if let Some(fluent_theme) = app.fluent_theme.borrow().clone() {
-                app.theme_styles_container.set(0, fluent_theme.as_style());
-            }
-            if let Some(color_picker_fluent) = app.color_picker_fluent.borrow().clone() {
-                app.theme_styles_container.set(1, color_picker_fluent);
-            }
+            let fluent_theme = app.fluent_theme.borrow().clone().expect("the Fluent theme of App.xaml");
+            app.theme_styles_container.set(0, fluent_theme.as_style());
+            let color_picker_fluent = app.color_picker_fluent.borrow().clone().expect("the colour picker Fluent styles of App.xaml");
+            app.theme_styles_container.set(1, color_picker_fluent);
         } else if theme == CatalogTheme::Simple {
-            if let Some(simple_theme) = app.simple_theme.borrow().clone() {
-                app.theme_styles_container.set(0, simple_theme.as_style());
-            }
-            if let Some(color_picker_simple) = app.color_picker_simple.borrow().clone() {
-                app.theme_styles_container.set(1, color_picker_simple);
-            }
+            let simple_theme = app.simple_theme.borrow().clone().expect("the Simple theme of App.xaml");
+            app.theme_styles_container.set(0, simple_theme.as_style());
+            let color_picker_simple = app.color_picker_simple.borrow().clone().expect("the colour picker Simple styles of App.xaml");
+            app.theme_styles_container.set(1, color_picker_simple);
         }
 
         if should_reopen_window {
