@@ -59,7 +59,11 @@ impl TemplateBindingExpression {
         if self.base.target_property().is_none() && target_type.is_object() {
             return value;
         }
-        match TargetTypeConverter::get_default_converter().try_convert(value.as_ref(), target_type) {
+        match TargetTypeConverter::get_default_converter().try_convert(
+            value.as_ref(),
+            target_type,
+            &CultureInfo::invariant_culture(),
+        ) {
             Some(result) => result,
             None => {
                 let message = format!(

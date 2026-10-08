@@ -9,6 +9,7 @@
 //! (compiled) bindings whose source and target types match never consult the
 //! table.
 
+use crate::utilities::CultureInfo;
 use crate::{AnyValue, BoxedValue, FerroObject, ObjectType, PropertyValue, Ref, StyledElement, TypeInfo, Upcast};
 use std::any::TypeId;
 use std::cell::RefCell;
@@ -823,6 +824,63 @@ impl ValueTypes {
         Self::try_parse_text(value, target).map(Some)
     }
 
+    /// Converts a value to exactly `target` as [`try_convert`](Self::try_convert)
+    /// does, with the conventions of `culture` for the conversions between
+    /// numbers or dates and text (`TypeUtilities.TryConvert(to, value, culture)`,
+    /// which converts them with `Convert.ToString(value, culture)` and
+    /// `Convert.ChangeType(value, to, culture)`).
+    ///
+    /// A number or a date becomes text as the culture formats it. Text
+    /// becomes a number as the culture writes one: for an integer the signs
+    /// of the culture, for a floating point number and a decimal also its
+    /// decimal separator and its group separators. Every other conversion
+    /// does not depend on the culture, and the invariant culture gives
+    /// exactly [`try_convert`](Self::try_convert).
+    // Deviation (DEVIATIONS.md, Bindings): the conversion of text to a number is the
+    // invariant conversion applied to the text with the symbols of the culture replaced by
+    // the invariant ones, not a port of the number parser of the runtime for every type;
+    // text is not converted to a date with the culture.
+    pub fn try_convert_with_culture(
+        value: Option<&BoxedValue>,
+        target: ValueType,
+        culture: &CultureInfo,
+    ) -> Option<Option<BoxedValue>> {
+        if culture.is_invariant() {
+            return Self::try_convert(value, target);
+        }
+        let Some(value) = value else {
+            return Self::try_convert(None, target);
+        };
+        let Some(inner) = Self::normalize(value.clone()) else {
+            return Self::try_convert(Some(value), target);
+        };
+        let id = value_type_id(&*inner);
+        if id == target.id() {
+            return Self::try_convert(Some(value), target);
+        }
+
+        if (target.is::<String>() || target.is::<Option<String>>()) && is_formatted_with_culture(id) {
+            let text = crate::data::converters::composite_format::format_values_with(
+                "{0}",
+                std::slice::from_ref(&Some(inner)),
+                culture,
+            )
+            .ok()?;
+            return Some(Some(if target.is::<String>() { Rc::new(text) } else { Rc::new(Some(text)) }));
+        }
+
+        if let Some(text) = inner.downcast_ref::<String>() {
+            let target_id = with_registry(|r| r.nullable_inner.get(&target.id()).map_or(target.id(), |inner| inner.id()));
+            if let Some(kind) = number_kind(target_id) {
+                let invariant = number_text_to_invariant(text, kind, &culture.number_format())?;
+                let invariant: BoxedValue = Rc::new(invariant);
+                return Self::try_convert(Some(&invariant), target);
+            }
+        }
+
+        Self::try_convert(Some(value), target)
+    }
+
     /// The class of the object model that `type_` is a handle of: `Ref<T>`
     /// or its nullable form `Option<Ref<T>>` of a registered class `T`.
     pub fn class_of(type_: ValueType) -> Option<&'static TypeInfo> {
@@ -1164,6 +1222,75 @@ macro_rules! primitive {
             ValueTypes::register_conversion::<String, Option<$ty>>(|s| s.trim().parse::<$ty>().ok().map(Some));
         )*
     };
+}
+
+/// Whether the text form of a value of the type depends on the culture: the numbers and
+/// the dates.
+fn is_formatted_with_culture(id: TypeId) -> bool {
+    macro_rules! any_of {
+        ($($type_:ty),*) => { $(id == TypeId::of::<$type_>())||* };
+    }
+    any_of!(
+        i8, i16, i32, i64, u8, u16, u32, u64, isize, usize, f32, f64,
+        crate::utilities::Decimal, crate::utilities::DateTime, crate::utilities::DateTimeOffset
+    )
+}
+
+/// How the text of a number of a type is read.
+#[derive(Clone, Copy, PartialEq, Eq)]
+enum NumberKind {
+    /// `NumberStyles.Integer`: a sign and digits.
+    Integer,
+    /// `NumberStyles.Float | NumberStyles.AllowThousands` (the floating point types) and
+    /// `NumberStyles.Number` (the decimal): a sign, group separators and a decimal separator.
+    Fraction,
+}
+
+fn number_kind(id: TypeId) -> Option<NumberKind> {
+    macro_rules! any_of {
+        ($($type_:ty),*) => { $(id == TypeId::of::<$type_>())||* };
+    }
+    if any_of!(i8, i16, i32, i64, u8, u16, u32, u64, isize, usize) {
+        Some(NumberKind::Integer)
+    } else if any_of!(f32, f64, crate::utilities::Decimal) {
+        Some(NumberKind::Fraction)
+    } else {
+        None
+    }
+}
+
+/// The text of a number written with the symbols of `info`, rewritten with the symbols of
+/// the invariant culture; `None` when the text holds an invariant symbol that means
+/// something else in the culture (a `.` that is neither its decimal separator nor its group
+/// separator), which the culture does not read as a number.
+fn number_text_to_invariant(text: &str, kind: NumberKind, info: &crate::utilities::NumberFormatInfo) -> Option<String> {
+    let mut text = text.trim().to_string();
+    let decimal = info.number_decimal_separator();
+    let group = info.number_group_separator();
+    let negative = info.negative_sign();
+    let positive = info.positive_sign();
+
+    if kind == NumberKind::Fraction {
+        if decimal != "." && group != "." && text.contains('.') {
+            return None;
+        }
+        if !group.is_empty() && group != decimal {
+            text = text.replace(group, "");
+        }
+        if decimal != "." && !decimal.is_empty() {
+            text = text.replace(decimal, ".");
+        }
+    }
+    if negative != "-" && !negative.is_empty() {
+        if text.contains('-') {
+            return None;
+        }
+        text = text.replace(negative, "-");
+    }
+    if positive != "+" && !positive.is_empty() {
+        text = text.replace(positive, "+");
+    }
+    Some(text)
 }
 
 /// The name of the runtime library type a primitive mirrors.
@@ -1554,5 +1681,57 @@ mod tests {
         assert_eq!(name(ValueType::of::<Ref<StyledElement>>()), element);
         assert_eq!(name(ValueType::of::<Option<Ref<StyledElement>>>()), element);
         assert_eq!(name(ValueType::of::<Unknown>()), std::any::type_name::<Unknown>());
+    }
+
+    // Not upstream tests: the conversions between numbers and text with a culture
+    // (`TypeUtilities.TryConvert(to, value, culture)`).
+    fn comma_culture() -> CultureInfo {
+        let numbers = crate::utilities::NumberFormatInfo::new()
+            .with_number_decimal_separator(",")
+            .with_number_group_separator(".");
+        CultureInfo::get_culture_info("de-DE").with_number_format(numbers)
+    }
+
+    #[test]
+    fn a_number_becomes_text_as_the_culture_formats_it() {
+        let culture = comma_culture();
+        let value: BoxedValue = Rc::new(1.5f64);
+
+        let text = ValueTypes::try_convert_with_culture(Some(&value), ValueType::of::<String>(), &culture);
+        assert_eq!(text.flatten().and_then(|text| text.downcast_ref::<String>().cloned()).as_deref(), Some("1,5"));
+
+        let nullable: BoxedValue = Rc::new(Some(2.25f64));
+        let text = ValueTypes::try_convert_with_culture(Some(&nullable), ValueType::of::<Option<String>>(), &culture);
+        let text = text.flatten().and_then(|text| text.downcast_ref::<Option<String>>().cloned()).flatten();
+        assert_eq!(text.as_deref(), Some("2,25"));
+
+        // The invariant culture is the conversion without a culture.
+        let invariant = CultureInfo::invariant_culture();
+        let text = ValueTypes::try_convert_with_culture(Some(&value), ValueType::of::<String>(), &invariant);
+        assert_eq!(text.flatten().and_then(|text| text.downcast_ref::<String>().cloned()).as_deref(), Some("1.5"));
+    }
+
+    #[test]
+    fn text_becomes_a_number_as_the_culture_writes_it() {
+        let culture = comma_culture();
+        let convert = |text: &str, target: ValueType| {
+            let text: BoxedValue = Rc::new(text.to_string());
+            ValueTypes::try_convert_with_culture(Some(&text), target, &culture).flatten()
+        };
+
+        let number = convert("1.234,5", ValueType::of::<f64>()).expect("a number");
+        assert_eq!(number.downcast_ref::<f64>(), Some(&1234.5));
+        let number = convert(" 2,5 ", ValueType::of::<Option<f64>>()).expect("a nullable number");
+        assert_eq!(number.downcast_ref::<Option<f64>>(), Some(&Some(2.5)));
+        // An integer has no separators.
+        let number = convert("12", ValueType::of::<i32>()).expect("an integer");
+        assert_eq!(number.downcast_ref::<i32>(), Some(&12));
+        assert!(convert("1,5", ValueType::of::<i32>()).is_none());
+        assert!(convert("x", ValueType::of::<f64>()).is_none());
+
+        // Values that are not numbers or text convert as without a culture.
+        let flag: BoxedValue = Rc::new(true);
+        let text = ValueTypes::try_convert_with_culture(Some(&flag), ValueType::of::<String>(), &culture);
+        assert_eq!(text.flatten().and_then(|text| text.downcast_ref::<String>().cloned()).as_deref(), Some("True"));
     }
 }

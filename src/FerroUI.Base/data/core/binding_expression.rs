@@ -483,7 +483,12 @@ impl BindingExpression {
         if is_unset(&fallback) || (self.base.target_property().is_none() && target_type.is_object()) {
             return fallback;
         }
-        if let Some(result) = ValueTypes::try_convert(fallback.as_ref(), target_type) {
+        // The original converts with its target type converter and the converter culture.
+        let converted = match &self.target_type_converter {
+            Some(converter) => converter.try_convert(fallback.as_ref(), target_type, &self.converter_culture()),
+            None => ValueTypes::try_convert(fallback.as_ref(), target_type),
+        };
+        if let Some(result) = converted {
             return result;
         }
         if let Some(target) = self.base.try_get_target() {
@@ -510,7 +515,7 @@ impl BindingExpression {
         // The converter of string-path bindings knows conversions the table
         // of value types does not (the delegate of a method to a command).
         let converted = match &self.target_type_converter {
-            Some(converter) => converter.try_convert(value.as_ref(), target_type),
+            Some(converter) => converter.try_convert(value.as_ref(), target_type, &self.converter_culture()),
             None => ValueTypes::try_convert(value.as_ref(), target_type),
         };
         if let Some(result) = converted {
@@ -663,7 +668,7 @@ impl UntypedBindingExpression for BindingExpression {
         // Use the target type converter to convert the value to the source
         // type if necessary.
         if let Some(converter) = &self.target_type_converter {
-            if let Some(converted) = converter.try_convert(value.as_ref(), type_) {
+            if let Some(converted) = converter.try_convert(value.as_ref(), type_, &self.converter_culture()) {
                 value = converted;
             } else if !is_unset(&self.fallback_value()) {
                 value = self.fallback_value();

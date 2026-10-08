@@ -19,7 +19,7 @@ impl DefaultValueConverter {
         INSTANCE.with(Rc::clone)
     }
 
-    fn convert_core(value: Option<&BoxedValue>, target_type: ValueType) -> Option<BoxedValue> {
+    fn convert_core(value: Option<&BoxedValue>, target_type: ValueType, culture: &CultureInfo) -> Option<BoxedValue> {
         if value.is_none() && ValueTypes::accepts_null(target_type) {
             return ValueTypes::try_convert(None, target_type).flatten();
         }
@@ -27,7 +27,7 @@ impl DefaultValueConverter {
         if let Some(command) = value.and_then(|value| super::method_to_command(value, target_type)) {
             return Some(command);
         }
-        if let Some(result) = ValueTypes::try_convert(value, target_type) {
+        if let Some(result) = ValueTypes::try_convert_with_culture(value, target_type, culture) {
             return result;
         }
         let message = match value {
@@ -48,9 +48,9 @@ impl IValueConverter for DefaultValueConverter {
         value: Option<&BoxedValue>,
         target_type: ValueType,
         _parameter: Option<&BoxedValue>,
-        _culture: &CultureInfo,
+        culture: &CultureInfo,
     ) -> Result<Option<BoxedValue>, BindingError> {
-        Ok(Self::convert_core(value, target_type))
+        Ok(Self::convert_core(value, target_type, culture))
     }
 
     fn convert_back(
@@ -58,8 +58,8 @@ impl IValueConverter for DefaultValueConverter {
         value: Option<&BoxedValue>,
         target_type: ValueType,
         _parameter: Option<&BoxedValue>,
-        _culture: &CultureInfo,
+        culture: &CultureInfo,
     ) -> Result<Option<BoxedValue>, BindingError> {
-        Ok(Self::convert_core(value, target_type))
+        Ok(Self::convert_core(value, target_type, culture))
     }
 }
