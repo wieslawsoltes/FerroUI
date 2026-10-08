@@ -29,6 +29,13 @@ placeholder-branding = []
 # register (see build.rs). For the browser, where the WebAssembly module is downloaded and has a
 # size budget.
 separate-assets = []
+# The performance counters of the framework (`ferroui_base::diagnostics::perf_counters`): the
+# recycling benchmark of the tests prints them per recycled row. For measuring only.
+perf-counters = ["ferroui-base/perf-counters", "ferroui-controls/perf-counters", "ferroui-markup-xaml/perf-counters"]
+# Makes the global allocator of the test build of the sample one that counts allocations and
+# bytes (`tests/allocations.rs`), for the recycling benchmark. Nothing but the test build of this
+# crate is affected, and only with the feature.
+count-allocations = []
 
 [dependencies]
 ferroui-base = { workspace = true }
