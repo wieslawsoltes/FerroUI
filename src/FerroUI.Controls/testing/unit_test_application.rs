@@ -177,6 +177,12 @@ impl UnitTestApplicationScope {
                 tool_tip_service.dispose();
             }
 
+            if let Some(font_manager) = ferroui_base::LocatorExtensions::get_service::<ferroui_base::media::FontManager>(
+                &*FerroLocator::current(),
+            ) {
+                font_manager.dispose();
+            }
+
             Dispatcher::reset_for_unit_tests();
         }
 
