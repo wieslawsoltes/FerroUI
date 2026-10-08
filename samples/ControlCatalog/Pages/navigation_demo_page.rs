@@ -3,10 +3,12 @@
 
 use super::navigation_demo_helper::{Demo, NavigationDemoHelper};
 use super::{
-    NavigationPageAppearancePage, NavigationPageAttachedMethodsPage, NavigationPageBackButtonPage,
-    NavigationPageEventsPage, NavigationPageFirstLookPage, NavigationPageGesturePage, NavigationPageModalPage,
-    NavigationPageModalTransitionsPage, NavigationPageScrollAwarePage, NavigationPageStackPage,
-    NavigationPageTitlePage, NavigationPageToolbarPage, NavigationPageTransitionsPage,
+    FerroFlixAppPage, LAvenirAppPage, NavigationPageAppearancePage, NavigationPageAttachedMethodsPage,
+    NavigationPageBackButtonPage, NavigationPageCurvedHeaderPage, NavigationPageEventsPage,
+    NavigationPageFirstLookPage, NavigationPageGesturePage, NavigationPageInteractiveHeaderPage,
+    NavigationPageModalPage, NavigationPageModalTransitionsPage, NavigationPageMvvmPage,
+    NavigationPagePassDataPage, NavigationPageScrollAwarePage, NavigationPageStackPage, NavigationPageTitlePage,
+    NavigationPageToolbarPage, NavigationPageTransitionsPage, PulseAppPage, RetroGamingAppPage,
 };
 use crate::markup::{content_page_class, xaml_class};
 use ferroui_base::interactivity::{Interactive, RoutedEventArgs};
@@ -15,13 +17,8 @@ use ferroui_controls::{ContentPage, NavigationPage};
 
 /// The registry of the samples of the page.
 ///
-/// Nine entries of the original are not listed, because their pages are not ported (see
-/// `excluded.txt`): the group "Data", "Pass Data" (`NavigationPagePassDataPage`) and "MVVM
-/// Navigation" (`NavigationPageMvvmPage`); "Interactive Header" of group "Features"
-/// (`NavigationPageInteractiveHeaderPage`); the group "Performance", "Performance Monitor"
-/// (`NavigationPagePerformancePage`); and the group "Showcases": "Pulse Fitness"
-/// (`PulseAppPage`), "L'Avenir" (`LAvenirAppPage`), the streaming app (`FerroFlixAppPage`),
-/// "Retro Gaming" (`RetroGamingAppPage`) and "Curved Header" (`NavigationPageCurvedHeaderPage`).
+/// The entry "Performance Monitor" of group "Performance" (`NavigationPagePerformancePage`) of the
+/// original is not listed, because its page is not ported (see `excluded.txt`).
 const DEMOS: &[Demo] = &[
     // Overview
     (
@@ -54,6 +51,19 @@ const DEMOS: &[Demo] = &[
         "Header",
         "Set page header content: a string, icon, or any custom control in the navigation bar.",
         || NavigationPageTitlePage::new().upcast(),
+    ),
+    // Data
+    (
+        "Data",
+        "Pass Data",
+        "Pass data during navigation via constructor arguments or DataContext.",
+        || NavigationPagePassDataPage::new().upcast(),
+    ),
+    (
+        "Data",
+        "MVVM Navigation",
+        "Keep navigation decisions in view models by routing NavigationPage push and pop operations through a small INavigationService.",
+        || NavigationPageMvvmPage::new().upcast(),
     ),
     // Features
     (
@@ -94,6 +104,12 @@ const DEMOS: &[Demo] = &[
     ),
     (
         "Features",
+        "Interactive Header",
+        "Build a header with a title and live search box that filters page content in real time.",
+        || NavigationPageInteractiveHeaderPage::new().upcast(),
+    ),
+    (
+        "Features",
         "Back Swipe Gesture",
         "Swipe from the left edge to interactively pop the current page.",
         || NavigationPageGesturePage::new().upcast(),
@@ -103,6 +119,37 @@ const DEMOS: &[Demo] = &[
         "Scroll-Aware Bar",
         "Hide the navigation bar on downward scroll and reveal it on upward scroll.",
         || NavigationPageScrollAwarePage::new().upcast(),
+    ),
+    // Showcases
+    (
+        "Showcases",
+        "Pulse Fitness",
+        "Login flow with RemovePage, TabbedPage dashboard with bottom tabs, and NavigationPage push for workout detail.",
+        || PulseAppPage::new().upcast(),
+    ),
+    (
+        "Showcases",
+        "L'Avenir",
+        "Restaurant app with DrawerPage flyout menu, TabbedPage bottom tabs, and NavigationPage push for dish detail.",
+        || LAvenirAppPage::new().upcast(),
+    ),
+    (
+        "Showcases",
+        "FerroFlix",
+        "Streaming app with dark NavigationPage, hidden nav bar on home, and custom bar tint on movie detail pages.",
+        || FerroFlixAppPage::new().upcast(),
+    ),
+    (
+        "Showcases",
+        "Retro Gaming",
+        "Arcade-style app with NavigationPage header, TabbedPage bottom tabs with CenteredTabPanel, and game detail push.",
+        || RetroGamingAppPage::new().upcast(),
+    ),
+    (
+        "Showcases",
+        "Curved Header",
+        "Shop app with dome-bottomed white header on home (nav bar hidden) and blue curved header on detail (BarLayoutBehavior.Overlay).",
+        || NavigationPageCurvedHeaderPage::new().upcast(),
     ),
 ];
 

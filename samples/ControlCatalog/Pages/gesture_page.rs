@@ -2,18 +2,20 @@
 //! `Pages/GesturePage.xaml`.
 
 use super::navigation_demo_helper::{Demo, NavigationDemoHelper};
-use super::{GesturePinchRotationPage, GesturePinchZoomPage};
+use super::{GesturePinchRotationPage, GesturePinchZoomPage, GesturePullPage, GestureSwipePage};
 use crate::markup::{content_page_class, xaml_class};
 use ferroui_base::interactivity::{Interactive, RoutedEventArgs};
 use ferroui_base::{ferro_class_info, instantiate, Ref};
 use ferroui_controls::{ContentPage, NavigationPage};
 
 /// The registry of the samples of the page.
-///
-/// Two entries of the original are not listed, because their pages are not ported (see
-/// `excluded.txt`): "Pull Gesture" of group "Touch / Pen" (`GesturePullPage`) and
-/// "Swipe Gesture" of group "Touch / Pen / Mouse" (`GestureSwipePage`).
 const DEMOS: &[Demo] = &[
+    (
+        "Touch / Pen",
+        "Pull Gesture",
+        "Press and drag from colored border zones. A green ball tracks the pull delta and springs back on release.",
+        || GesturePullPage::new().upcast(),
+    ),
     (
         "Multi Touch",
         "Pinch / Zoom",
@@ -25,6 +27,12 @@ const DEMOS: &[Demo] = &[
         "Pinch / Rotation",
         "Pinch to rotate a rectangle. The Angle property from the pinch event drives a RotateTransform.",
         || GesturePinchRotationPage::new().upcast(),
+    ),
+    (
+        "Touch / Pen / Mouse",
+        "Swipe Gesture",
+        "Swipe horizontally or vertically. Configure direction, threshold, and mouse support. Shows live delta, velocity, and direction.",
+        || GestureSwipePage::new().upcast(),
     ),
 ];
 
