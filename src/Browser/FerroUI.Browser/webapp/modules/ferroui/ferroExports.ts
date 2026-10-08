@@ -8,6 +8,10 @@
 //     runtime.runMain();
 //
 // so that every export is resolved before the first callback can fire.
+//
+// A thread of a module built with threads is a web worker with its own copy of this script and of
+// the module. Nobody calls `attach` by hand there: the script of the module does it when it is
+// loaded into the worker (scripts/browser/threads/ferroui-worker-attach.js).
 export interface FerroRuntime {
     GL?: any;
     HEAPU8: Uint8Array;
@@ -90,7 +94,8 @@ export class FerroExports {
 
     public static get CanvasHelper() {
         return FerroExports.group("CanvasHelper", {
-            OnSizeChanged: "CanvasHelper_OnSizeChanged"
+            OnSizeChanged: "CanvasHelper_OnSizeChanged",
+            OnRenderTargetRegistered: "CanvasHelper_OnRenderTargetRegistered"
         });
     }
 
