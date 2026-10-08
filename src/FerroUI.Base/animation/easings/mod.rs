@@ -38,7 +38,7 @@ mod spline_easing;
 mod spring_easing;
 
 pub use easing::Easing;
-pub use i_easing::IEasing;
+pub use i_easing::{IEasing, SharedEasing};
 pub use back_ease_in::BackEaseIn;
 pub use back_ease_in_out::BackEaseInOut;
 pub use back_ease_out::BackEaseOut;

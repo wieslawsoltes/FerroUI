@@ -124,6 +124,19 @@ The accessors of the brush and pen contracts return `Rc` handles (`IBrush::trans
 
 Open inside this step: the scene brush contents (`CompositionRenderDataSceneBrushContent`, `ImmediateRenderDataSceneBrushContent`) are immutable brushes that hold render data; how they reach the server is read from the code before they are converted. A brush type of an application that implements only the interface has no shared form until it provides one.
 
+#### Animation instances (R1.4d), decided
+
+An animation instance is created on the UI thread (`ICompositionAnimation::create_instance`) and from then on belongs to the server: it resolves server objects, subscribes to them and keeps its clock state in cells. Its type therefore cannot be `Send`, although nothing of the server is in it when it is sent. What is sent instead is an **instance factory**: a `Send` closure that builds the instance on the server (`Box<dyn FnOnce() -> Rc<dyn IAnimationInstance> + Send>`). The property writers of the composition objects keep and send factories; the server calls the factory where it used to take the instance from the batch.
+
+What a factory captures has to be `Send`:
+
+| Captured | Today | Becomes |
+|---|---|---|
+| The parsed expression | `Rc<Expression>` | `Arc<Expression>` (a tree of values) |
+| The parameters | `Rc<PropertySetSnapshot>`, which holds nested snapshots in `Rc` and, once resolved, weak handles to server objects | a snapshot *source* (variant, nested source, or the id of a server object) from which the snapshot is built on the server |
+| Key frames | value, expression and an `Rc<dyn IEasing>` | the easing in its shared form |
+| The easing of a key frame | an easing object of the UI thread, evaluated on the render thread by convention | `IEasing::to_shared()`: an `Arc<dyn IEasing + Send + Sync>` with the parameters of the easing at that moment. The stateless easings return themselves; the spline and spring easings copy their parameters. |
+
 Found by R1.1 in the Skia backend: a path can be sent to another thread but not shared by reference, and a path measure can be neither. The geometries therefore never lend a path; the path measure is cached behind a lock in a wrapper that asserts it may move between threads (it owns its contours and has no thread affinity).
 
 Found by R1.3: a Skia bitmap cannot be sent to another thread either; it is held in a wrapper under a lock, like the path measure. `ThreadBound<T>` (`utilities/thread_bound.rs`) is the tool for a part of a shared resource that one thread owns: it panics when reached from another thread and leaks, rather than drops, when the resource dies there.

@@ -11,6 +11,10 @@ impl CircularEaseOut {
 }
 
 impl IEasing for CircularEaseOut {
+    fn to_shared(&self) -> std::sync::Arc<crate::animation::easings::SharedEasing> {
+        std::sync::Arc::new(*self)
+    }
+
     fn ease(&self, progress: f64) -> f64 {
         let p = progress;
         ((2.0 - p) * p).sqrt()

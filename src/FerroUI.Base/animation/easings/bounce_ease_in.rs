@@ -12,6 +12,10 @@ impl BounceEaseIn {
 }
 
 impl IEasing for BounceEaseIn {
+    fn to_shared(&self) -> std::sync::Arc<crate::animation::easings::SharedEasing> {
+        std::sync::Arc::new(*self)
+    }
+
     fn ease(&self, progress: f64) -> f64 {
         1.0 - BounceEaseUtils::bounce(1.0 - progress)
     }

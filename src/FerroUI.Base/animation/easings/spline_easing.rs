@@ -75,7 +75,47 @@ impl Default for SplineEasing {
 }
 
 impl IEasing for SplineEasing {
+    fn to_shared(&self) -> std::sync::Arc<crate::animation::easings::SharedEasing> {
+        let spline = &self.internal_key_spline;
+        std::sync::Arc::new(SharedSplineEasing::new(
+            spline.control_point_x1(),
+            spline.control_point_y1(),
+            spline.control_point_x2(),
+            spline.control_point_y2(),
+        ))
+    }
+
     fn ease(&self, progress: f64) -> f64 {
         self.internal_key_spline.get_spline_progress(progress)
+    }
+}
+
+/// A spline easing with the control points it had when it was shared.
+///
+/// A key spline is an object of the UI thread, so the render thread
+/// evaluates the same curve with a solver of its own
+/// ([`KeySplineSolver`](crate::animation::KeySplineSolver)).
+struct SharedSplineEasing {
+    control_points: [f64; 4],
+    solver: std::sync::Mutex<crate::animation::KeySplineSolver>,
+}
+
+impl SharedSplineEasing {
+    fn new(x1: f64, y1: f64, x2: f64, y2: f64) -> Self {
+        Self {
+            control_points: [x1, y1, x2, y2],
+            solver: std::sync::Mutex::new(crate::animation::KeySplineSolver::new(x1, y1, x2, y2)),
+        }
+    }
+}
+
+impl IEasing for SharedSplineEasing {
+    fn to_shared(&self) -> std::sync::Arc<crate::animation::easings::SharedEasing> {
+        let [x1, y1, x2, y2] = self.control_points;
+        std::sync::Arc::new(SharedSplineEasing::new(x1, y1, x2, y2))
+    }
+
+    fn ease(&self, progress: f64) -> f64 {
+        self.solver.lock().unwrap().get_spline_progress(progress)
     }
 }

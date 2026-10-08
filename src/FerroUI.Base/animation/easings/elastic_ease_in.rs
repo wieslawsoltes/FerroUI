@@ -12,6 +12,10 @@ impl ElasticEaseIn {
 }
 
 impl IEasing for ElasticEaseIn {
+    fn to_shared(&self) -> std::sync::Arc<crate::animation::easings::SharedEasing> {
+        std::sync::Arc::new(*self)
+    }
+
     fn ease(&self, progress: f64) -> f64 {
         let p = progress;
         (13.0 * EasingUtils::HALFPI * p).sin() * 2.0_f64.powf(10.0 * (p - 1.0))

@@ -78,7 +78,7 @@ pub use interpolating_transition_base::{interpolating_do_transition, Interpolati
 pub use iteration_count::{IterationCount, IterationType};
 pub use key_frame::KeyFrame;
 pub use key_frames::KeyFrames;
-pub use key_spline::KeySpline;
+pub use key_spline::{KeySpline, KeySplineSolver};
 pub use page_slide::{PageSlide, SlideAxis};
 pub use page_transition_item::PageTransitionItem;
 pub use play_state::PlayState;
