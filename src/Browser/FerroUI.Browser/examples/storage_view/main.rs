@@ -12,6 +12,8 @@
 //! streams a saved file to the download.
 //!
 //! Build and assemble the site with `scripts/build-browser.sh storage_view`.
+//! Built with threads (`--threads`) the view is rendered by a render thread;
+//! `?RenderThread=false` keeps such a module on the thread of the page.
 
 #![cfg_attr(target_os = "emscripten", no_main)]
 
@@ -363,6 +365,7 @@ pub fn run_main(query: &str) {
     let options = BrowserPlatformOptions {
         prefer_file_dialog_polyfill: query_value(query, "PreferPolyfill").is_some_and(|value| value == "true"),
         register_ferro_service_worker: query_value(query, "RegisterServiceWorker").is_some_and(|value| value == "true"),
+        render_thread: query_value(query, "RenderThread").is_none_or(|value| !value.eq_ignore_ascii_case("false")),
         ..Default::default()
     };
 
