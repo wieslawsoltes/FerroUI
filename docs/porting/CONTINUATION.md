@@ -23,20 +23,7 @@ Merged this period, in order: #26, #34, #33, #31, #27, #32, #29, #30, #36, #35, 
 
 ## In flight on 2026-10-08
 
-One cloud worker per row, started from `main` with the brief named.
-
-| Branch | Task | Brief |
-|---|---|---|
-| `xaml-e5-includes` | XAML compiler stage E5, includes across crates (task 2, remaining step 1) | `cloud-tasks/xaml-e5-includes.md` |
-| `color-picker` | The colour picker library, its themes, tests and catalog page. Delivered as #55: crate `ferroui-controls-color-picker`, its theme documents, the spectrum peer tests, `ColorPickerPage` and the colour picker styles of `App.xaml`. Its "Continuation" section lists what is left | `cloud-tasks/color-picker.md` |
-| `core-port-12` | Color, focus and glyph typeface suites and the clean-ups of task 3 | `cloud-tasks/core-port-suites.md` |
-| `skia-test-suites` | The remaining suites of the Skia backend and the typeface hook (row 16) | `cloud-tasks/skia-test-suites.md` |
-
-Merged on 2026-10-08, done in the local session because they are macOS only: the native storage provider with file and URL activation and files on the clipboard (#50), and the native control host (#54). Both advance row 18 of `CRITICAL-PATH.md`; neither was exercised against AppKit beyond start-up (the pickers need a user, and nothing in the port hosts a native view yet).
-
-The four workers above are the last cloud workers: the owner decided on 2026-10-08 that all work is done locally once they have finished. See "How to run the next period".
-
-Next in line, locally, when a worker has finished: build integration of the XAML compiler (task 2, remaining step 2), the documents still on `samples/ControlCatalog/excluded.txt`, and design 09 of `performance/` (benchmarks and counters).
+Nothing runs in the cloud; the four cloud workers of the morning delivered and were the last ones. In flight locally, each on its own branch, written by a sub-agent without a compiler and validated in the main checkout: `b2-1-render-worker-clear`, `b2-4-strict-confinement`, `markup-gaps-types`, `markup-gaps-events`. Open pull requests: 91 (the two-mode frame benchmark) and 92 (the OpenGL page of the catalog). See "Critical now" below for what each is.
 
 ## In flight at the hand-over of 2026-10-07
 
@@ -149,39 +136,22 @@ Also: the layout clock is in milliseconds (`DEVIATIONS.md`, Layout). Found while
 
 ## Critical now: the render thread (owner, 2026-10-08)
 
-The owner's order on 2026-10-08: finish the work in flight, then the render thread, then the scheduled work. Design, stages and what each step found: `docs/porting/render-thread.md`.
+The owner's order on 2026-10-08: finish the work in flight, then the render thread, then the scheduled work. Design, stages and what each step found: `docs/porting/render-thread.md`; the browser stage B2: `docs/porting/browser-render-worker.md`.
 
-State on 2026-10-08, end of day:
+State on 2026-10-08, late:
 
-- **Stage R1 (thread-safe render resources) is written.** On `main`: R1.1 to R1.4b2. Open, stacked, waiting for CI: pull request 78 (R1.4c) and 79 (R1.4d and R1.5, with the generator change and the measurements). Merge them through the top pull request once it is green on all three checks (retarget it to `main`, rebase merge, close the lower one with a note), as was done for 74 and 77.
-- **Stage R2 (jobs and factories are `Send`) is written** on the branch `render-thread-r2` (on top of `render-thread-r1-4d`): `CommittedBatch: Send` is asserted at compile time. What stays bound to the UI thread in `ThreadBound` (render surfaces, drawing surface updates, interop imports) is listed in `render-thread.md`, "R2 done", and in `DEVIATIONS.md`; it is the work list of R3 to R5.
-- **Stage R3 is written** on the branch `render-thread-r3` (on top of `render-thread-r2`): `Compositor::with_render_thread` runs the server compositor on the thread that ticks the render loop, and `render_thread_tests.rs` commits from one thread and renders on another. What the mode lacks is listed in `render-thread.md`, "R3 done".
-- **Stage R4 is in progress** on the branch `render-thread-r4` (on top of `render-thread-r3`). Done: R4.1, the synchronous wait of the media context. The table of steps is in `render-thread.md`, "R4 in progress". The largest piece ahead is R5: a window's render surfaces (native top level, headless window) usable from the render thread, and the Metal context there; until then `Compositor::new` keeps the dispatcher-thread mode.
-- **Decided by the owner on 2026-10-08 for R5: the lock model.** Upstream's server compositor on macOS is rendered by both threads under a lock (`UseUiThreadForSynchronousCommits` is true there). The server side becomes confined to a (reentrant) lock: whichever thread holds it renders. `render-thread.md`, "R5, the finding that shapes it". First step (R5.1): the compositor lock around the server compositor in both modes, replacing the thread-local registry of R3.
-- **R5.1 is written** on the branch `render-thread-r5` (on top of `render-thread-r4`): the compositor lock, the render-thread mode under it, the UI thread rendering at the synchronous points; `render-thread.md`, "R5.1 done". **R5.2 is written as far as the services go** (same branch; the table is in `render-thread.md`, "R5.2"). **Next:** the render surfaces of a target, which R2 bound to the UI thread in `ThreadBound` and which a frame of the render thread panics on: `RenderSurfaces` in `server_composition_target.rs`, `ITopLevelImpl::surfaces`, the headless window and the native top level as surfaces. Then the drawing surface updates and the interop imports. After that the native backend: `TopLevelImpl` as a render surface and `MetalPlatformGraphics` used by the render thread, and `Compositor::new` choosing the mode for a background render loop.
-- **R5.3 (render surfaces shared between the threads) is written** on the branch `render-thread-r5-3` (on top of `render-thread-r5`): the contract, and the OpenGL, headless, browser and native backends, each written by a sub-agent without a build and validated centrally (`render-thread.md`, "R5.3 in progress"). **Next, R5.4:** the native reference counts are not atomic (`native/FerroUI.Native/inc/comimpl.h`), so Metal frames on the render thread are not sound: make `AddRef`/`Release` atomic there (and rebuild the native library), port the lock of the Metal device (`MetalDevice::ensure_current`), then let `Compositor::new` choose the render-thread mode for a background render loop behind an option and run `themed_window` with it.
-- **R5.4 is written** on the branch `render-thread-r5-4` (on top of `render-thread-r5-3`): atomic reference counts in the native library, the lock of the Metal device, and `FERROUI_RENDER_THREAD=1`, with which a window renders in the render-thread mode. What is left before it can be the default is listed in `render-thread.md`, "R5.4": a stress run and a look at the frames, the audit of the Metal wrappers, the drawing surface and interop closures, the measurements. Then the browser stages B1 to B3.
-- **R5.5 and R5.6 are written** on the branch `render-thread-r5-5` (on top of `render-thread-r5-4`): the audit of the Metal objects (by a sub-agent), the two faults it found fixed, the GPU interop objects and the drawing surface updates confined to the compositor lock (by a sub-agent), and the two modes measured. Open: interaction by hand in the render-thread mode, a frame time and input latency measurement during scrolling, `import_shared_image`. Waiting to be validated: the branches `catalog-followups` (ControlCatalog follow-ups, on `main`) and `b1-browser-threads` (stage B1, the opt-in threaded browser build; needs a nightly toolchain and has not been built).
-- The sub-agents of the core port are finished and removed; the session check-in loop is cancelled. Nothing runs in the background.
+- **Desktop: done and the default.** Stages R1 to R5.7 are on `main` (thread-safe render resources, `Send` jobs, the render-thread mode, the synchronous wait, the compositor lock, render surfaces shared between the threads, atomic native reference counts, the Metal audit, GPU interop objects confined to the lock, the shared image import). `Compositor::new` chooses the render-thread mode wherever the render loop runs in the background; `FERROUI_RENDER_THREAD=0` is the way back (pull request 89).
+- **Desktop, still open:** interaction by hand and a stress run in the render-thread mode; the measurements repeated on a quiet machine (the two-mode frame benchmark is pull request 91); two latent items of the audit (`Rc<dyn IPlatformGraphics>` as a shared handle, and `try_get_render_interface_feature` handing a feature out of the lock; the second is part of B2.4).
+- **Browser B1 is on `main`** (pull request 88): `scripts/build-browser.sh <example> --threads`, the isolation service worker, the example `thread_spawn`. The threaded link passes `--no-check-features` because the prebuilt Skia bindings shim has no atomics; the proper fix is to compile the shim with `-pthread`.
+- **Browser B2 is designed and started.** Owner decision: the UI stays on the browser's main thread and only rendering moves to a worker, with strict confinement of the render target to that worker. Steps B2.1 to B2.8 are the table of section 6 of the design. In flight: B2.1 (`render_worker_clear`, branch `b2-1-render-worker-clear`) and B2.4 (the base library's strict mode, branch `b2-4-strict-confinement`), each written by a sub-agent and validated in the main checkout. Then B2.2, B2.3, B2.5 to B2.8 in order, then the measurements of B3.
+- **Scheduled work running beside it:** the markup gaps that block catalog pages, in two groups (`markup-gaps-types`: C305, C309, C201, C306, C208, C102; `markup-gaps-events`: C301, C203, C312, C207, C202); the OpenGL page of the catalog is pull request 92.
+- After those: the build integration of the XAML compiler (task 2, remaining step 2), design 09 of `performance/`, the review of waivers and doubly mapped files with one regeneration of the tracking pages, the Metal external objects feature, the EGL seams, Ganesh GL on the desktop.
 
-## Core first (owner, 2026-10-08)
+## Core first (owner, 2026-10-08): done
 
-The owner's order of 2026-10-08: finish the core port first, with all four local sub-agents on it, then continue with everything else (the ControlCatalog documents still excluded, the XAML compiler's build integration, the performance designs). The queue below comes from the tracking pages; the member counts are matched by name only, so every batch starts by sorting real gaps from false ones. For each gap the outcome is one of: ported exactly with its upstream tests; found under another name or place (an entry in `data/path-overrides.toml`); not applicable in Rust (an entry in `data/path-overrides.toml` or `data/member-waivers.toml` with a concrete reason).
+The owner's order of 2026-10-08 was to finish the core port first, with all four local sub-agents on it. The whole queue (the base library by area, `ferroui-controls`, the markup crates and the run-time loader, the Skia and macOS backends, the headless platform) was written without a compiler, integrated and validated in one build, and merged as pull request 66, with the follow-ups in pull requests 65 (the Metal external objects contracts) and 68. Most of what the tracking pages listed as missing was a false negative of their name matching; what was absent is ported, and the rest is recorded in `docs/porting/data/path-overrides.toml` and `member-waivers.toml`.
 
-| # | Batch (`ferroui-base` unless stated) | Missing members | Branch | State |
-|---|---|---:|---|---|
-| 1 | `Utilities` | about 276 | `core-utilities` | being written |
-| 2 | `Data`: bindings, parsers, expression nodes, plugins, converters | about 180 | `core-data` | being written |
-| 3 | `PropertyStore` and the files of the crate root | about 190 | `core-property-store` | being written |
-| 4 | `Threading`, then `Rendering/Composition` | about 65 and 150 | `core-threading-composition` | being written |
-| 5 | `Media` | about 110 | | waits for `core-port-12` (pull request 51) |
-| 6 | `Input`, `Styling`, `Platform`, `Metadata`, `Reactive`, `Diagnostics` | about 350 | | queued (`Input` waits for pull request 51) |
-| 7 | `ferroui-controls`: the crate root, `Selection`, `Platform`, `Primitives`, the rest | about 250 | | queued |
-| 8 | The markup crates and the run-time loader | about 215 | | queued |
-| 9 | The Skia backend and the macOS backend: what is left after pull requests 50, 52 and 54 | about 45 and 230 | | queued |
-| 10 | The headless platform (test infrastructure; not started) | 251 | | queued |
-
-After the last batch: regenerate the tracking pages once (`scripts/port-status/run.sh`) and take the remaining gaps from them.
+Left from it: regenerate the tracking pages once (`scripts/port-status/run.sh`) in a pull request of their own, and take the remaining gaps from them.
 
 ## How to run the next period
 
