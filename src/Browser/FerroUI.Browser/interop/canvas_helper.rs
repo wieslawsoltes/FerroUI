@@ -91,12 +91,39 @@ pub fn on_render_target_registered(target_id: i32, kind: i32) {
     }
 }
 
-/// The canvas of a top-level changed its size or its scaling.
+thread_local! {
+    // Per thread: the size of a canvas is observed on the thread of the page.
+    static SIZE_CHANGED: HandlerList<dyn Fn(i32, f64, f64, f64)> = HandlerList::new();
+}
+
+/// Subscribes this thread to the size changes of every canvas; the arguments
+/// are those of [`on_size_changed`]. Returns the token of the subscription.
+///
+/// Not from upstream. It is how a canvas that was created without a
+/// top-level (the id it was created with names none) is followed: the page
+/// that renders from a thread without the compositor writes the size into a
+/// [`BrowserSurfaceShared`](crate::rendering::BrowserSurfaceShared) from
+/// here.
+pub fn add_size_changed(handler: Rc<dyn Fn(i32, f64, f64, f64)>) -> u64 {
+    SIZE_CHANGED.with(|handlers| handlers.add(handler))
+}
+
+/// Ends a subscription to the size changes.
+pub fn remove_size_changed(token: u64) -> bool {
+    SIZE_CHANGED.with(|handlers| handlers.remove(token))
+}
+
+/// The canvas of a top-level changed its size or its scaling. `width` and
+/// `height` are in device pixels; `dpr` is the device pixel ratio.
 #[wasm_bindgen(js_name = CanvasHelper_OnSizeChanged)]
 pub fn on_size_changed(top_level_id: i32, width: f64, height: f64, dpr: f64) {
     if let Some(surface) = BrowserTopLevelImpl::try_get_top_level(top_level_id).and_then(|top_level| top_level.surface())
     {
         surface.on_size_changed(width, height, dpr);
+    }
+    let handlers = SIZE_CHANGED.with(|handlers| handlers.snapshot());
+    for (_, handler) in handlers.iter() {
+        handler(top_level_id, width, height, dpr);
     }
 }
 
@@ -121,5 +148,22 @@ mod tests {
 
         assert_eq!(vec![(3, RENDER_TARGET_KIND_WEB_GL)], *seen.borrow());
         assert!(!remove_render_target_registered(token));
+    }
+
+    #[test]
+    fn a_size_change_of_a_canvas_without_a_top_level_reaches_the_subscribers() {
+        let seen = Rc::new(RefCell::new(Vec::new()));
+        let token = add_size_changed({
+            let seen = seen.clone();
+            Rc::new(move |top_level_id, width, height, dpr| seen.borrow_mut().push((top_level_id, width, height, dpr)))
+        });
+
+        // No top-level has the id 0.
+        on_size_changed(0, 300.0, 180.0, 1.5);
+        assert!(remove_size_changed(token));
+        on_size_changed(0, 150.0, 90.0, 1.0);
+
+        assert_eq!(vec![(0, 300.0, 180.0, 1.5)], *seen.borrow());
+        assert!(!remove_size_changed(token));
     }
 }
