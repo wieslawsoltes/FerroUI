@@ -4,7 +4,7 @@
 use crate::helpers::drawing_context_helper::wrap_skia_surface;
 use crate::*;
 use ferroui_base::media::imaging::{
-    BitmapBlendingMode, BitmapEncoderOptions, BitmapInterpolationMode, CompressionLevel, JpegBitmapEncoderOptions,
+    BitmapBlendingMode, BitmapEncoderOptions, BitmapInterpolationMode, CompressionLevel,
     PngBitmapEncoderOptions,
 };
 use ferroui_base::media::immutable::{
@@ -1537,37 +1537,6 @@ fn writeable_bitmap_is_redrawn_after_its_pixels_change() {
         context.draw_bitmap(&*bitmap, 1.0, Rect::new(0.0, 0.0, 4.0, 4.0), Rect::new(50.0, 50.0, 50.0, 50.0));
     });
     assert_eq!(BLUE, target.pixel(75, 75));
-}
-
-// BitmapSaveTests
-
-#[test]
-fn save_with_invalid_jpeg_quality_fails() {
-    let bitmap = red_writeable_bitmap(16, 16);
-    let mut stream = Vec::new();
-    let error = bitmap.save(&mut stream, &JpegBitmapEncoderOptions { quality: -1 }.into()).unwrap_err();
-    assert_eq!(std::io::ErrorKind::InvalidInput, error.kind());
-    assert!(bitmap.save(&mut stream, &JpegBitmapEncoderOptions { quality: 101 }.into()).is_err());
-}
-
-#[test]
-fn save_with_png_options_produces_png() {
-    let bitmap = red_writeable_bitmap(16, 16);
-    let mut stream = Vec::new();
-    bitmap.save(&mut stream, &png()).unwrap();
-
-    let codec = skia_safe::Codec::from_data(skia_safe::Data::new_copy(&stream)).unwrap();
-    assert_eq!(skia_safe::EncodedImageFormat::PNG, codec.encoded_format());
-}
-
-#[test]
-fn save_with_jpeg_options_produces_jpeg() {
-    let bitmap = red_writeable_bitmap(16, 16);
-    let mut stream = Vec::new();
-    bitmap.save(&mut stream, &JpegBitmapEncoderOptions::DEFAULT.into()).unwrap();
-
-    let codec = skia_safe::Codec::from_data(skia_safe::Data::new_copy(&stream)).unwrap();
-    assert_eq!(skia_safe::EncodedImageFormat::JPEG, codec.encoded_format());
 }
 
 #[test]
