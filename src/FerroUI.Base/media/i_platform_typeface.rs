@@ -1,3 +1,4 @@
+use std::any::Any;
 use std::io::Read;
 
 use crate::media::{FontSimulations, FontStretch, FontStyle, FontWeight, IFontMemory};
@@ -22,4 +23,8 @@ pub trait IPlatformTypeface: IFontMemory {
 
     /// Attempts to obtain a stream over the raw font data.
     fn try_get_stream(&self) -> Option<Box<dyn Read>>;
+
+    /// Lets the backend that created the typeface recover its concrete type
+    /// (C#'s type test `PlatformTypeface is SkiaTypeface`).
+    fn as_any(&self) -> &dyn Any;
 }

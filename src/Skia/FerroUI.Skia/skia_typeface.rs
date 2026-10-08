@@ -3,20 +3,9 @@ use ferroui_base::media::fonts::OpenTypeTag;
 use ferroui_base::media::{FontSimulations, FontStretch, FontStyle, FontWeight, IFontMemory, IPlatformTypeface};
 use ferroui_base::utilities::ReadOnlyMemory;
 use skia_safe::{Font, Typeface};
-use std::cell::RefCell;
-use std::collections::HashMap;
+use std::any::Any;
 use std::io::{Cursor, Read};
-use std::rc::{Rc, Weak};
-
-thread_local! {
-    /// The live typefaces of this backend by address.
-    ///
-    /// The platform typeface contract has no hook to recover the backend's
-    /// type from a `dyn IPlatformTypeface`, so the typefaces the backend
-    /// creates are tracked here and looked up by the address of the object
-    /// behind the handle. Entries are removed when the typeface is dropped.
-    static REGISTRY: RefCell<HashMap<usize, Weak<SkiaTypeface>>> = RefCell::new(HashMap::new());
-}
+use std::rc::Rc;
 
 /// A platform typeface over a Skia typeface.
 pub struct SkiaTypeface {
@@ -33,18 +22,13 @@ impl SkiaTypeface {
     pub fn new(typeface: Typeface, font_simulations: FontSimulations) -> Rc<Self> {
         let font_style = typeface.font_style();
 
-        let typeface = Rc::new(Self {
+        Rc::new(Self {
             weight: FontWeight(*font_style.weight()),
             style: slant_to_font_style(font_style.slant()),
             stretch: FontStretch::from_i32(*font_style.width()).unwrap_or(FontStretch::Normal),
             sk_typeface: typeface,
             font_simulations,
-        });
-
-        let key = Rc::as_ptr(&typeface) as *const () as usize;
-        REGISTRY.with(|registry| registry.borrow_mut().insert(key, Rc::downgrade(&typeface)));
-
-        typeface
+        })
     }
 
     /// The Skia typeface.
@@ -63,22 +47,12 @@ impl SkiaTypeface {
         font
     }
 
-    /// Recovers the backend typeface behind a platform typeface.
+    /// Recovers the backend typeface behind a platform typeface (C#'s
+    /// `PlatformTypeface as SkiaTypeface`).
     ///
     /// Returns `None` for typefaces created by another backend.
-    pub fn try_get(platform_typeface: &dyn IPlatformTypeface) -> Option<Rc<SkiaTypeface>> {
-        let key = platform_typeface as *const dyn IPlatformTypeface as *const () as usize;
-        REGISTRY.with(|registry| registry.borrow().get(&key).and_then(Weak::upgrade))
-    }
-}
-
-impl Drop for SkiaTypeface {
-    fn drop(&mut self) {
-        let key = self as *const Self as usize;
-        // The registry may already be gone during thread teardown.
-        let _ = REGISTRY.try_with(|registry| {
-            registry.borrow_mut().remove(&key);
-        });
+    pub fn try_get(platform_typeface: &dyn IPlatformTypeface) -> Option<&SkiaTypeface> {
+        platform_typeface.as_any().downcast_ref::<SkiaTypeface>()
     }
 }
 
@@ -120,5 +94,9 @@ impl IPlatformTypeface for SkiaTypeface {
         let (bytes, _) = self.sk_typeface.to_font_bytes()?;
 
         Some(Box::new(Cursor::new(bytes)))
+    }
+
+    fn as_any(&self) -> &dyn Any {
+        self
     }
 }
