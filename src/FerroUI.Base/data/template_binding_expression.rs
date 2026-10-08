@@ -7,6 +7,7 @@ use crate::data::core::{
 use crate::data::{BindingMode, BindingOperations, BindingPriority};
 use crate::logging::LogEventLevel;
 use crate::reactive::IDisposable;
+use crate::utilities::CultureInfo;
 use crate::{BoxedValue, FerroObject, FerroProperty, Ref, StyledElement};
 use std::cell::{Cell, RefCell};
 use std::rc::{Rc, Weak};
@@ -17,6 +18,7 @@ pub struct TemplateBindingExpression {
     this: Weak<TemplateBindingExpression>,
     base: UntypedBindingExpressionBase,
     converter: Option<Rc<dyn IValueConverter>>,
+    converter_culture: Option<CultureInfo>,
     converter_parameter: Option<BoxedValue>,
     mode: BindingMode,
     property: Option<&'static FerroProperty>,
@@ -29,6 +31,7 @@ impl TemplateBindingExpression {
     pub fn new(
         property: Option<&'static FerroProperty>,
         converter: Option<Rc<dyn IValueConverter>>,
+        converter_culture: Option<CultureInfo>,
         converter_parameter: Option<BoxedValue>,
         mode: BindingMode,
     ) -> Rc<Self> {
@@ -36,6 +39,7 @@ impl TemplateBindingExpression {
             this: this.clone(),
             base: UntypedBindingExpressionBase::new(this.clone(), BindingPriority::Template, None, false),
             converter,
+            converter_culture,
             converter_parameter,
             mode,
             property,
@@ -86,7 +90,7 @@ impl TemplateBindingExpression {
                     self.should_log_error(),
                     &|| self.description(),
                     &**converter,
-                    None,
+                    self.converter_culture.as_ref(),
                     self.converter_parameter.as_ref(),
                     value.as_ref(),
                     self.base.target_type(),
@@ -183,7 +187,7 @@ impl UntypedBindingExpression for TemplateBindingExpression {
                 self.should_log_error(),
                 &|| self.description(),
                 &**converter,
-                None,
+                self.converter_culture.as_ref(),
                 self.converter_parameter.as_ref(),
                 value.as_ref(),
                 self.base.target_type(),

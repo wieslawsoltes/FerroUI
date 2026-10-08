@@ -8,6 +8,7 @@ use crate::data::core::{BindingExpression, BindingExpressionOptions, TargetTypeC
 use crate::data::{
     BindingBase, BindingExpressionBase, BindingMode, BindingPriority, CompiledBindingPath, UpdateSourceTrigger,
 };
+use crate::utilities::CultureInfo;
 use crate::{BoxedValue, FerroObject, FerroProperty, Ref, StyledElement, WeakRef};
 use std::rc::{Rc, Weak};
 
@@ -126,6 +127,9 @@ binding_properties! {
     pub struct CompiledBinding {
         /// The converter to use.
         converter / set_converter / with_converter_value: Option<Rc<dyn IValueConverter>> = None,
+        /// The culture in which to evaluate the converter. `None` (the
+        /// default) uses the current culture.
+        converter_culture / set_converter_culture / with_converter_culture: Option<CultureInfo> = None,
         /// A parameter to pass to the converter.
         converter_parameter / set_converter_parameter / with_converter_parameter: Option<BoxedValue> = None,
         /// The amount of time, in milliseconds, to wait before updating the
@@ -302,6 +306,7 @@ impl BindingBase for CompiledBinding {
                 delay: self.delay(),
                 fallback_value: self.fallback_value(),
                 converter: self.converter(),
+                converter_culture: self.converter_culture(),
                 converter_parameter: self.converter_parameter(),
                 enable_data_validation,
                 mode,

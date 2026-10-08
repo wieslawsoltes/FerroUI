@@ -4,6 +4,7 @@ use crate::data::converters::{IMultiValueConverter, StringFormatMultiValueConver
 use crate::data::core::plugins::property_value_type;
 use crate::data::core::{MultiBindingExpression, ValueType};
 use crate::data::{BindingBase, BindingExpressionBase, BindingMode, BindingPriority, RelativeSource};
+use crate::utilities::CultureInfo;
 use crate::{BoxedValue, FerroObject, FerroProperty, Ref};
 use std::rc::Rc;
 
@@ -23,6 +24,9 @@ binding_properties! {
         bindings / set_bindings / with_bindings_list: FerroList<Rc<dyn BindingBase>> = FerroList::new(),
         /// The converter to use.
         converter / set_converter / with_converter_value: Option<Rc<dyn IMultiValueConverter>> = None,
+        /// The culture in which to evaluate the converter. `None` (the
+        /// default) uses the current culture.
+        converter_culture / set_converter_culture / with_converter_culture: Option<CultureInfo> = None,
         /// A parameter to pass to the converter.
         converter_parameter / set_converter_parameter / with_converter_parameter: Option<BoxedValue> = None,
         /// The value to use when the binding is unable to produce a value;
@@ -91,6 +95,7 @@ impl BindingBase for MultiBinding {
             self.priority(),
             self.bindings().to_vec(),
             converter,
+            self.converter_culture(),
             self.converter_parameter(),
             self.fallback_value(),
             self.target_null_value(),
