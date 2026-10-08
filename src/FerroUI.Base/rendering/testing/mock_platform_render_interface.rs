@@ -489,15 +489,44 @@ impl IPlatformRenderInterfaceContext for MockPlatformRenderInterfaceContext {
     fn dispose(&self) {}
 }
 
+/// Creates the backend context of a [`MockPlatformRenderInterface`] in place
+/// of the mock one: see
+/// [`set_backend_context_factory`](MockPlatformRenderInterface::set_backend_context_factory).
+type BackendContextFactory = Box<
+    dyn Fn(&DrawingLog, Option<Rc<dyn IPlatformGraphicsContext>>) -> Rc<dyn IPlatformRenderInterfaceContext>
+        + Send
+        + Sync,
+>;
+
 /// A render interface for tests: rectangle-like geometries, drawing
 /// contexts that record to a [`DrawingLog`], no bitmap decoding.
 pub struct MockPlatformRenderInterface {
     log: DrawingLog,
+    backend_context_factory: std::sync::OnceLock<BackendContextFactory>,
 }
 
 impl MockPlatformRenderInterface {
     pub fn new(log: DrawingLog) -> Rc<MockPlatformRenderInterface> {
-        Rc::new(MockPlatformRenderInterface { log })
+        Rc::new(MockPlatformRenderInterface { log, backend_context_factory: std::sync::OnceLock::new() })
+    }
+
+    /// Makes `factory` create the backend contexts, for a test that watches
+    /// what is done with them. It is called by the thread that creates the
+    /// context, with the log of this interface and the graphics context.
+    ///
+    /// # Panics
+    ///
+    /// When a factory was set before.
+    pub fn set_backend_context_factory(
+        &self,
+        factory: impl Fn(&DrawingLog, Option<Rc<dyn IPlatformGraphicsContext>>) -> Rc<dyn IPlatformRenderInterfaceContext>
+            + Send
+            + Sync
+            + 'static,
+    ) {
+        if self.backend_context_factory.set(Box::new(factory)).is_err() {
+            panic!("the backend context factory of the mock render interface is set once");
+        }
     }
 
     /// The log every drawing context created through this interface records
@@ -681,8 +710,11 @@ impl IPlatformRenderInterface for MockPlatformRenderInterface {
     }
     fn create_backend_context(
         &self,
-        _graphics_api_context: Option<Rc<dyn IPlatformGraphicsContext>>,
+        graphics_api_context: Option<Rc<dyn IPlatformGraphicsContext>>,
     ) -> Rc<dyn IPlatformRenderInterfaceContext> {
+        if let Some(factory) = self.backend_context_factory.get() {
+            return factory(&self.log, graphics_api_context);
+        }
         Rc::new(MockPlatformRenderInterfaceContext { log: self.log.clone(), is_lost: Cell::new(false) })
     }
     fn supports_individual_round_rects(&self) -> bool {
