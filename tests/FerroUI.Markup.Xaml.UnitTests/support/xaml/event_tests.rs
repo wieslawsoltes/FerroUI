@@ -1,6 +1,6 @@
 //! The test types declared by the upstream test file `Xaml/EventTests.cs`.
 
-use std::cell::Cell;
+use std::cell::{Cell, RefCell};
 use std::rc::Rc;
 
 use ferroui_base::input::InputElementImpl;
@@ -10,6 +10,7 @@ use ferroui_base::{
     ferro_class, ferro_class_info, ferro_impl_classes, instantiate, BoxedValue, FerroObjectImpl, Ref, StyledElementImpl,
     VisualImpl,
 };
+use ferroui_controls::primitives::popup_positioning::{CustomPopupPlacement, PopupAnchor};
 use ferroui_controls::primitives::TemplatedControlImpl;
 use ferroui_controls::{Button, ButtonImpl, ContentControlImpl, ControlImpl, Panel, PanelImpl};
 
@@ -157,5 +158,60 @@ impl MyPanel {
     }
 }
 
+// --- MyHost ------------------------------------------------------------------
+
+/// Not a type of the upstream test file: a panel with the methods the tests
+/// this port adds name in a document (a method for a property of a delegate
+/// type, handlers of events that are not routed events).
+#[repr(C)]
+pub struct MyHost {
+    base: Panel,
+    placements: Cell<u32>,
+}
+
+ferro_class!(MyHost: Panel);
+ferro_impl_classes!(
+    MyHost: FerroObjectImpl,
+    StyledElementImpl,
+    VisualImpl,
+    LayoutableImpl,
+    InteractiveImpl,
+    InputElementImpl,
+    ControlImpl,
+    PanelImpl
+);
+ferro_class_info!(MyHost {
+    new: MyHost::new,
+    markup: {
+        namespace: "FerroUI.Markup.Xaml.UnitTests.Xaml",
+        methods: [
+            fn OnCustomPlacement(Rc<RefCell<CustomPopupPlacement>>) =>
+                |this: &Ref<MyHost>, placement: Rc<RefCell<CustomPopupPlacement>>| {
+                    this.on_custom_placement(&mut placement.borrow_mut())
+                },
+        ],
+    },
+});
+
+impl MyHost {
+    pub fn construct() -> Self {
+        Self { base: Panel::construct(), placements: Cell::new(0) }
+    }
+
+    pub fn new() -> Ref<Self> {
+        instantiate(Self::construct())
+    }
+
+    /// How many times the placement method was called.
+    pub fn placements(&self) -> u32 {
+        self.placements.get()
+    }
+
+    pub fn on_custom_placement(&self, placement: &mut CustomPopupPlacement) {
+        self.placements.set(self.placements.get() + 1);
+        placement.set_anchor(PopupAnchor::TOP);
+    }
+}
+
 pub(crate) const MODULE: TypeModule =
-    TypeModule { types: &[MyButton::TYPE, MyPanel::TYPE], markup_types: &[], value_types: || {} };
+    TypeModule { types: &[MyButton::TYPE, MyPanel::TYPE, MyHost::TYPE], markup_types: &[], value_types: || {} };

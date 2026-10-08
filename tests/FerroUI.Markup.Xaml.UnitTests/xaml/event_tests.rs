@@ -5,12 +5,12 @@ use ferroui_base::input::{
 };
 use ferroui_base::interactivity::{RoutedEvent, RoutedEventArgs};
 use ferroui_base::Point;
-use ferroui_controls::Button;
+use ferroui_controls::{Button, Control, ToolTip};
 
 use crate::support::app::xaml_test_base;
 use crate::support::helpers::{assert_throws_xaml_diagnostic, boxed};
 use crate::support::loader::{load_with_root, try_load_with_root};
-use crate::support::xaml::event_tests::{MyButton, MyPanel};
+use crate::support::xaml::event_tests::{MyButton, MyHost, MyPanel};
 
 #[test]
 fn event_is_assigned() {
@@ -92,4 +92,37 @@ fn attached_event_routed_event_handler() {
     target.raise_event(&RoutedEventArgs::with_event(Button::click_event()));
 
     assert!(host.was_clicked());
+}
+
+// --- Tests this port adds: upstream has none for these forms. ---
+
+/// A method of the root object named as the value of a property of a
+/// delegate type (`XamlLoadMethodDelegateNode` of the compiler), as the
+/// tool tip and flyout pages of the control catalog do.
+#[test]
+fn method_name_is_assigned_to_a_property_of_a_delegate_type() {
+    let _base = xaml_test_base();
+    let xaml = "<Panel xmlns='https://github.com/ferroui'>\
+        <Border Name='target' ToolTip.Placement='Custom' ToolTip.CustomPopupPlacementCallback='OnCustomPlacement'/>\
+        <Button Name='button'><Button.Flyout><Flyout Placement='Custom' CustomPopupPlacementCallback='OnCustomPlacement'/></Button.Flyout></Button>\
+    </Panel>";
+    let host = MyHost::new();
+
+    load_with_root(xaml, None, boxed(host.clone()));
+
+    let target = host.get_control::<Control>("target");
+    assert!(ToolTip::get_custom_popup_placement_callback(&target).is_some());
+    let flyout = host.get_control::<Button>("button").flyout().expect("the flyout of the button");
+    let flyout = flyout.cast::<ferroui_controls::primitives::PopupFlyoutBase>().expect("a popup flyout");
+    assert!(flyout.custom_popup_placement_callback().is_some());
+    assert_eq!(host.placements(), 0);
+}
+
+#[test]
+fn exception_is_thrown_if_method_of_a_delegate_property_not_found() {
+    let _base = xaml_test_base();
+    let xaml = "<Panel xmlns='https://github.com/ferroui'><Border ToolTip.CustomPopupPlacementCallback='NotFound'/></Panel>";
+    let host = MyHost::new();
+
+    assert!(try_load_with_root(xaml, None, boxed(host.clone())).is_err());
 }

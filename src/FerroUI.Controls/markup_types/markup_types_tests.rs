@@ -5,6 +5,8 @@ use super::TYPE_LISTS;
 use crate::chrome::WindowDrawnDecorationsContent;
 use crate::documents::{Inline, InlineCollection, Run};
 use crate::presenters::ContentPresenter;
+use crate::primitives::popup_positioning::{CustomPopupPlacement, PopupAnchor};
+use crate::primitives::CustomPopupPlacementCallbackValue;
 use crate::{
     Border, Button, ColumnDefinition, ContentControl, Control, Decorator, Dock, GridLength, Panel, SizeToContent,
     TickList, Window, WindowTransparencyLevel,
@@ -12,10 +14,11 @@ use crate::{
 use ferroui_base::data::core::{ValueType, ValueTypes};
 use ferroui_base::interactivity::{RoutedEvent, RoutedEventArgs};
 use ferroui_base::metadata::{
-    attributes, from_markup_value, into_markup_value, MarkupAttributeValue, MarkupProperty, MarkupType,
+    attributes, from_markup_value, into_markup_value, MarkupAttributeValue, MarkupDelegate, MarkupProperty, MarkupType,
     MarkupTypeKind, MarkupTyped, MarkupValue,
 };
-use ferroui_base::{BoxedValue, LocatorExtensions, Ref, StaticType, TypeInfo};
+use ferroui_base::{BoxedValue, LocatorExtensions, Point, Ref, Size, StaticType, Thickness, TypeInfo, Visual};
+use std::cell::RefCell;
 use std::rc::Rc;
 
 fn boxed<T: PartialEq + 'static>(value: T) -> MarkupValue {
@@ -850,3 +853,36 @@ fn a_null_setter_value_clears_a_template_property() {
     }
 }
 
+
+#[test]
+fn the_delegate_of_a_method_is_a_custom_popup_placement_callback() {
+    crate::register_types();
+    let markup = <CustomPopupPlacementCallbackValue as MarkupTyped>::MARKUP;
+    assert_eq!(markup.full_name(), "FerroUI.Controls.Primitives.PopupPositioning.CustomPopupPlacementCallback");
+    // A delegate type: markup looks for a method of the root object with the signature of `Invoke`.
+    assert_eq!(markup.base.map(|base| base()), Some(ValueType::of::<MarkupDelegate>()));
+    let invoke: Vec<_> = markup.find_methods("Invoke").collect();
+    assert_eq!(invoke.len(), 1);
+    assert!(invoke[0].return_type.is_none());
+    assert_eq!((invoke[0].parameters[0])(), ValueType::of::<Rc<RefCell<CustomPopupPlacement>>>());
+
+    // The delegate of a method that changes the parameters it is called with.
+    let method = MarkupDelegate::new(|arguments| {
+        let placement = unbox::<Rc<RefCell<CustomPopupPlacement>>>(&arguments[0]);
+        placement.borrow_mut().set_anchor(PopupAnchor::TOP);
+        placement.borrow_mut().offset = Point::new(1.0, 2.0);
+        None
+    });
+    let callback = unbox::<Option<CustomPopupPlacementCallbackValue>>(&boxed(method)).expect("a callback");
+    let target: Ref<Visual> = Border::new().upcast();
+    let mut placement = CustomPopupPlacement::new(Size::new(10.0, 20.0), Thickness::default(), target);
+    (callback.0)(&mut placement);
+    assert_eq!(placement.anchor(), PopupAnchor::TOP);
+    assert_eq!(placement.offset, Point::new(1.0, 2.0));
+    assert_eq!(placement.popup_size(), Size::new(10.0, 20.0));
+
+    // The callback is called through its `Invoke` as well, with the shared form of the parameters.
+    let shared = Rc::new(RefCell::new(placement));
+    (invoke[0].invoke)(&[boxed(callback.clone()), boxed(shared.clone())]).unwrap();
+    assert_eq!(shared.borrow().offset, Point::new(1.0, 2.0));
+}

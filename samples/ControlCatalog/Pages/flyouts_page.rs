@@ -8,7 +8,9 @@ use ferroui_base::{ferro_class_info, instantiate, Point, Ref};
 use ferroui_controls::primitives::popup_positioning::{CustomPopupPlacement, PopupAnchor, PopupGravity};
 use ferroui_controls::primitives::FlyoutBase;
 use ferroui_controls::{ContentPage, Panel, TextBlock};
+use std::cell::RefCell;
 use std::hash::{BuildHasher, Hasher};
+use std::rc::Rc;
 
 #[repr(C)]
 pub struct FlyoutsPage {
@@ -16,7 +18,17 @@ pub struct FlyoutsPage {
 }
 
 content_page_class!(FlyoutsPage);
-ferro_class_info!(FlyoutsPage { new: FlyoutsPage::new });
+ferro_class_info!(FlyoutsPage {
+    new: FlyoutsPage::new,
+    markup: {
+        methods: [
+            fn CustomPlacementCallback(Rc<RefCell<CustomPopupPlacement>>) =>
+                |this: &Ref<FlyoutsPage>, placement: Rc<RefCell<CustomPopupPlacement>>| {
+                    this.custom_placement_callback(&mut placement.borrow_mut())
+                },
+        ],
+    },
+});
 xaml_class!(FlyoutsPage, "/Pages/FlyoutsPage.xaml");
 
 /// A non-negative random integer (`new Random().Next()`).
