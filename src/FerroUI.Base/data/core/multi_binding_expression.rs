@@ -16,6 +16,7 @@ pub struct MultiBindingExpression {
     base: UntypedBindingExpressionBase,
     bindings: Vec<Rc<dyn BindingBase>>,
     converter: Option<Rc<dyn IMultiValueConverter>>,
+    converter_culture: Option<CultureInfo>,
     converter_parameter: Option<BoxedValue>,
     expressions: RefCell<Vec<Option<Rc<dyn BindingExpressionBase>>>>,
     fallback_value: Option<BoxedValue>,
@@ -30,6 +31,7 @@ impl MultiBindingExpression {
         priority: BindingPriority,
         bindings: Vec<Rc<dyn BindingBase>>,
         converter: Option<Rc<dyn IMultiValueConverter>>,
+        converter_culture: Option<CultureInfo>,
         converter_parameter: Option<BoxedValue>,
         fallback_value: Option<BoxedValue>,
         target_null_value: Option<BoxedValue>,
@@ -40,6 +42,7 @@ impl MultiBindingExpression {
             base: UntypedBindingExpressionBase::new(this.clone(), priority, None, false),
             bindings,
             converter,
+            converter_culture,
             converter_parameter,
             expressions: RefCell::new(vec![None; count]),
             fallback_value,
@@ -50,6 +53,12 @@ impl MultiBindingExpression {
 
     pub fn converter(&self) -> Option<&Rc<dyn IMultiValueConverter>> {
         self.converter.as_ref()
+    }
+
+    /// The culture in which the converter is evaluated; `None` for the
+    /// current culture.
+    pub fn converter_culture(&self) -> Option<&CultureInfo> {
+        self.converter_culture.as_ref()
     }
 
     fn publish(&self) {
@@ -66,7 +75,7 @@ impl MultiBindingExpression {
 
         match &self.converter {
             Some(converter) => {
-                let culture = CultureInfo::current_culture();
+                let culture = self.converter_culture.clone().unwrap_or_else(CultureInfo::current_culture);
                 let converted = match converter.convert(&values, target_type, self.converter_parameter.as_ref(), &culture)
                 {
                     Ok(v) => v,

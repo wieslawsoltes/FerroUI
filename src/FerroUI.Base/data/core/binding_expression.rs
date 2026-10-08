@@ -13,6 +13,7 @@ use crate::input::InputElement;
 use crate::interactivity::RoutedEventHandlerToken;
 use crate::reactive::IDisposable;
 use crate::threading::{Dispatcher, DispatcherPriority, DispatcherTimer};
+use crate::utilities::CultureInfo;
 use crate::{BoxedValue, FerroObject, FerroProperty, Ref, UnsetValueType};
 use std::any::Any;
 use std::cell::{Cell, RefCell};
@@ -27,6 +28,9 @@ pub struct BindingExpressionOptions {
     /// The fallback value; the unset marker for no fallback.
     pub fallback_value: Option<BoxedValue>,
     pub converter: Option<Rc<dyn IValueConverter>>,
+    /// The culture in which to evaluate the converter; `None` for the
+    /// current culture.
+    pub converter_culture: Option<CultureInfo>,
     pub converter_parameter: Option<BoxedValue>,
     pub enable_data_validation: bool,
     pub mode: BindingMode,
@@ -46,6 +50,7 @@ impl Default for BindingExpressionOptions {
             delay: 0,
             fallback_value: Some(FerroProperty::unset_value()),
             converter: None,
+            converter_culture: None,
             converter_parameter: None,
             enable_data_validation: false,
             mode: BindingMode::OneWay,
@@ -65,6 +70,7 @@ struct UncommonFields {
     delay_timer: RefCell<Option<Rc<DispatcherTimer>>>,
     delay_tick: RefCell<Option<Rc<dyn IDisposable>>>,
     converter: Option<Rc<dyn IValueConverter>>,
+    converter_culture: Option<CultureInfo>,
     converter_parameter: Option<BoxedValue>,
     fallback_value: Option<BoxedValue>,
     string_format: Option<String>,
@@ -116,6 +122,7 @@ impl BindingExpression {
 
         let uncommon = if options.delay > 0
             || options.converter.is_some()
+            || options.converter_culture.is_some()
             || options.converter_parameter.is_some()
             || !is_unset(&options.fallback_value)
             || string_format.is_some()
@@ -127,6 +134,7 @@ impl BindingExpression {
                 delay_timer: RefCell::new(None),
                 delay_tick: RefCell::new(None),
                 converter: options.converter,
+                converter_culture: options.converter_culture,
                 converter_parameter: options.converter_parameter,
                 fallback_value: options.fallback_value,
                 string_format: string_format.map(|s| if s.contains('{') { s } else { format!("{{0:{s}}}") }),
@@ -184,6 +192,15 @@ impl BindingExpression {
 
     pub fn converter(&self) -> Option<&Rc<dyn IValueConverter>> {
         self.uncommon.as_ref().and_then(|u| u.converter.as_ref())
+    }
+
+    /// The culture in which the converter is evaluated: the converter
+    /// culture of the binding, or the current culture when it names none.
+    pub fn converter_culture(&self) -> CultureInfo {
+        self.uncommon
+            .as_ref()
+            .and_then(|uncommon| uncommon.converter_culture.clone())
+            .unwrap_or_else(CultureInfo::current_culture)
     }
 
     pub fn converter_parameter(&self) -> Option<&BoxedValue> {
@@ -388,7 +405,7 @@ impl BindingExpression {
                     self.should_log_error(),
                     &|| self.description(),
                     &**converter,
-                    None,
+                    Some(&self.converter_culture()),
                     self.converter_parameter(),
                     value.as_ref(),
                     target_type,
@@ -426,7 +443,11 @@ impl BindingExpression {
                 {
                     // The string format applies if the target can accept a
                     // string and the value isn't the target null value.
-                    value = match composite_format::format_values(string_format, std::slice::from_ref(&value)) {
+                    value = match composite_format::format_values_with(
+                        string_format,
+                        std::slice::from_ref(&value),
+                        &self.converter_culture(),
+                    ) {
                         Ok(s) => self.convert_from(Some(Rc::new(s)), &mut error),
                         Err(e) => {
                             error = Some(ExpressionError::new(BindingError::new(e), BindingErrorType::Error));
@@ -520,7 +541,7 @@ impl BindingExpression {
             self.should_log_error(),
             &|| self.description(),
             &**converter,
-            None,
+            Some(&self.converter_culture()),
             self.converter_parameter(),
             value.as_ref(),
             value_type,

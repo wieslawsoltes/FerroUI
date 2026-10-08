@@ -1,6 +1,7 @@
 use crate::data::compiled_binding::binding_properties;
 use crate::data::converters::IValueConverter;
 use crate::data::{BindingBase, BindingExpressionBase, BindingMode, TemplateBindingExpression};
+use crate::utilities::CultureInfo;
 use crate::{BoxedValue, FerroObject, FerroProperty, Ref};
 use std::rc::Rc;
 
@@ -17,6 +18,9 @@ binding_properties! {
     pub struct TemplateBinding {
         /// The converter to use.
         converter / set_converter / with_converter_value: Option<Rc<dyn IValueConverter>> = None,
+        /// The culture in which to evaluate the converter. `None` (the
+        /// default) uses the current culture.
+        converter_culture / set_converter_culture / with_converter_culture: Option<CultureInfo> = None,
         /// A parameter to pass to the converter.
         converter_parameter / set_converter_parameter / with_converter_parameter: Option<BoxedValue> = None,
         /// The binding mode.
@@ -70,6 +74,7 @@ impl BindingBase for TemplateBinding {
         TemplateBindingExpression::new(
             self.property(),
             self.converter(),
+            self.converter_culture(),
             self.converter_parameter(),
             mode,
         )
