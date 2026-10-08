@@ -13,7 +13,7 @@
 use super::ServerCompositor;
 use std::mem::ManuallyDrop;
 use std::rc::Rc;
-use std::sync::{Arc, Condvar, Mutex};
+use std::sync::{Arc, Condvar, Mutex, OnceLock};
 use std::thread::{self, ThreadId};
 
 /// A lock that the thread holding it may enter again (`lock` in C#).
@@ -75,6 +75,10 @@ pub struct LockedServerCompositor {
     /// `None` once the compositor has released it. Only touched under
     /// `lock` (or by the one thread of the dispatcher-thread mode).
     server: std::cell::UnsafeCell<Option<Rc<ServerCompositor>>>,
+    /// The thread the graph is confined to besides the lock, once it is
+    /// known: see [`confine_to_current_thread`](Self::confine_to_current_thread).
+    /// Never set where both threads render.
+    confined_to: OnceLock<ThreadId>,
 }
 
 // SAFETY: the server compositor and every object reachable from it are only
@@ -91,7 +95,40 @@ unsafe impl Sync for LockedServerCompositor {}
 
 impl LockedServerCompositor {
     pub(crate) fn new(server: Rc<ServerCompositor>) -> Self {
-        Self { lock: CompositorLock::new(), server: std::cell::UnsafeCell::new(Some(server)) }
+        Self {
+            lock: CompositorLock::new(),
+            server: std::cell::UnsafeCell::new(Some(server)),
+            confined_to: OnceLock::new(),
+        }
+    }
+
+    /// Confines what the graph renders with to the calling thread: the
+    /// render thread of a compositor whose thread never renders
+    /// (`UseUiThreadForSynchronousCommits` false with a background loop).
+    /// Called by every frame of such a compositor; the first one decides.
+    ///
+    /// The lock still orders every access. What this adds is for the objects
+    /// that belong to one thread whatever lock is held (a graphics context
+    /// that only exists in the thread that created it): the graph is
+    /// released by this thread, and a thread that is left with the last
+    /// handle to it leaks it instead of dropping it (see the `Drop` impls of
+    /// this type and of [`LockBound`]).
+    ///
+    /// # Panics
+    ///
+    /// When another thread has rendered this compositor before.
+    pub(crate) fn confine_to_current_thread(&self) {
+        let current = thread::current().id();
+        assert!(
+            *self.confined_to.get_or_init(|| current) == current,
+            "a compositor that is confined to its render thread was rendered by another thread"
+        );
+    }
+
+    /// Whether the graph is confined to a thread that is not the calling
+    /// one.
+    pub(crate) fn is_confined_to_another_thread(&self) -> bool {
+        self.confined_to.get().is_some_and(|thread| *thread != thread::current().id())
     }
 
     /// Runs `f` with the server compositor, under the lock.
@@ -139,6 +176,10 @@ impl LockedServerCompositor {
     /// handles that it shares with objects of the UI thread (the render
     /// interface, the platform graphics), so it is released there and not by
     /// whichever thread drops the last handle to this object.
+    ///
+    /// Where the graph is confined to the render thread it is the other way
+    /// round: the compositor lets go of the shared handles on its thread and
+    /// the render thread calls this, as its last job.
     pub(crate) fn release(&self) {
         let _guard = self.lock.enter();
         // SAFETY: as in `try_with`.
@@ -159,6 +200,21 @@ impl LockedServerCompositor {
     }
 }
 
+impl Drop for LockedServerCompositor {
+    fn drop(&mut self) {
+        // The last handle to a graph that is confined to the render thread
+        // and was never released there (the render loop stopped ticking
+        // before the compositor was dropped): it holds objects that may only
+        // be dropped by that thread, so it is leaked, as a `ThreadBound`
+        // does. Otherwise the field is dropped as before.
+        if self.is_confined_to_another_thread() {
+            if let Some(server) = self.server.get_mut().take() {
+                std::mem::forget(server);
+            }
+        }
+    }
+}
+
 /// A value confined to the compositor lock: an object of the server side
 /// that is not part of the graph of the server compositor.
 ///
@@ -172,6 +228,12 @@ impl LockedServerCompositor {
 /// is the one thread of the compositor), and it is dropped inside the lock.
 /// Unlike a `ThreadBound` it does not depend on the thread: both the render
 /// thread and the thread of the compositor reach it, one at a time.
+///
+/// Where the graph is confined to the render thread
+/// ([`LockedServerCompositor::confine_to_current_thread`]) the value is
+/// still reached by both threads under the lock, for what upstream reads
+/// from the UI thread, but only the render thread drops it: dropped by
+/// another thread it is leaked.
 pub struct LockBound<T> {
     value: ManuallyDrop<T>,
     server: Arc<LockedServerCompositor>,
@@ -229,6 +291,12 @@ impl<T> LockBound<T> {
 
 impl<T> Drop for LockBound<T> {
     fn drop(&mut self) {
+        // An object of the render interface is dropped by the thread it
+        // belongs to or not at all: its disposal is a job of the render
+        // thread, and what is leaked here is what that job left of it.
+        if self.server.is_confined_to_another_thread() {
+            return;
+        }
         // The last handle may be dropped by either thread, outside a job:
         // the value is released inside the lock.
         let server = self.server.clone();

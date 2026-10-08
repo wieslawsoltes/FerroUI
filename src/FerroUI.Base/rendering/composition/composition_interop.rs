@@ -66,17 +66,43 @@ impl CompositionInterop {
     /// compositor lock from here on: a caller that is not inside the lock
     /// hands it over whole, without keeping a clone. (Upstream the
     /// constructor runs in a job of the render thread.)
+    ///
+    /// # Panics
+    ///
+    /// When the compositor is confined to its render thread and that thread
+    /// has no context of the render interface: see [`try_new`](Self::try_new).
     pub fn new(
         compositor: &Rc<Compositor>,
         external_objects: Rc<dyn IExternalObjectsRenderInterfaceContextFeature>,
     ) -> Rc<CompositionInterop> {
+        match Self::try_new(compositor, external_objects) {
+            Some(interop) => interop,
+            None => panic!("the context of the render interface is created by the render thread, which has none"),
+        }
+    }
+
+    /// [`new`](Self::new), for a caller that can do without the interop.
+    ///
+    /// Upstream the constructor takes `RenderInterface.Value`, which creates
+    /// the context when there is none. The thread of a compositor that is
+    /// confined to its render thread may not create it: there the context
+    /// the render thread has is taken as it is, and without one the answer
+    /// is `None`.
+    pub(crate) fn try_new(
+        compositor: &Rc<Compositor>,
+        external_objects: Rc<dyn IExternalObjectsRenderInterfaceContextFeature>,
+    ) -> Option<Rc<CompositionInterop>> {
         compositor.with_server(|server| {
-            let context = server.render_interface().value();
+            let context = if compositor.is_confined_to_render_thread() {
+                server.render_interface().existing_backend_context()?
+            } else {
+                server.render_interface().value()
+            };
             let external_objects_with_handle_wrap = {
                 let features: &dyn crate::platform::IOptionalFeatureProvider = &*context;
                 features.try_get::<dyn IExternalObjectsHandleWrapRenderInterfaceContextFeature>()
             };
-            Rc::new(CompositionInterop {
+            Some(Rc::new(CompositionInterop {
                 compositor: compositor.clone(),
                 device_luid: RefCell::new(external_objects.device_luid()),
                 device_uuid: RefCell::new(external_objects.device_uuid()),
@@ -84,7 +110,7 @@ impl CompositionInterop {
                     server,
                     InteropState { context, external_objects, external_objects_with_handle_wrap },
                 ),
-            })
+            }))
         })
     }
 

@@ -52,6 +52,14 @@ pub struct Compositor {
     /// render-thread mode); otherwise a tick is marshalled to the thread of
     /// this compositor (the dispatcher-thread mode).
     render_thread: bool,
+    /// The loop task of the render-thread mode when the server compositor is
+    /// confined to the render thread (see
+    /// [`is_confined_to_render_thread`](Self::is_confined_to_render_thread)):
+    /// the compositor asks it for the release of the server graph.
+    confined_loop_task: Option<Arc<RenderThreadLoopTask>>,
+    /// Whether a job of the render thread is on its way to fill the cache
+    /// of the features of the render interface.
+    render_interface_features_requested: Arc<AtomicBool>,
     /// The readback of the server: what the two threads share besides the
     /// queue of batches.
     readback: Arc<super::server::ReadbackIndices>,
@@ -117,13 +125,71 @@ pub type SharedCompositorClock = Arc<dyn Fn() -> Duration + Send + Sync>;
 /// The render loop task of a compositor in the render-thread mode: the
 /// thread that ticks renders, under the compositor lock.
 struct RenderThreadLoopTask {
+    this: std::sync::Weak<RenderThreadLoopTask>,
     server: Arc<super::server::LockedServerCompositor>,
+    /// Whether the thread that ticks is the only one that renders: the
+    /// server graph is then confined to it, and released by it.
+    confined: bool,
+    /// Set by the compositor when it is dropped, where `confined`: the next
+    /// tick releases the server graph instead of rendering.
+    release_requested: AtomicBool,
+    removal_posted: AtomicBool,
+    render_loop: std::sync::Weak<dyn IRenderLoop>,
+    dispatcher: Arc<Dispatcher>,
+}
+
+impl RenderThreadLoopTask {
+    /// Asks the render thread to release the server graph with its next
+    /// tick. From then on no frame is rendered.
+    fn request_release(&self) {
+        self.release_requested.store(true, Ordering::SeqCst);
+    }
+
+    /// Takes the task out of the render loop once the graph is released. A
+    /// task is added and removed by the thread of the compositor, so the
+    /// removal is posted there.
+    fn remove_from_loop(&self) {
+        if self.removal_posted.swap(true, Ordering::SeqCst) {
+            return;
+        }
+        let Some(this) = self.this.upgrade() else { return };
+        let render_loop = self.render_loop.clone();
+        self.dispatcher.post(
+            move || {
+                if let Some(render_loop) = render_loop.upgrade() {
+                    let task: Arc<dyn IRenderLoopTask> = this;
+                    render_loop.remove(&task);
+                }
+            },
+            DispatcherPriority::SEND,
+        );
+    }
 }
 
 impl IRenderLoopTask for RenderThreadLoopTask {
     fn render(&self) -> bool {
-        // Nothing to render once the compositor is gone.
-        self.server.try_with(|server| server.render()).unwrap_or(false)
+        if self.confined {
+            self.server.confine_to_current_thread();
+        }
+        // The request is read inside the lock: the compositor sets it before
+        // it enters the lock to take its handles back, so a frame either
+        // ends before that or does not start.
+        let rendered = self
+            .server
+            .try_with(|server| (!self.release_requested.load(Ordering::SeqCst)).then(|| server.render()));
+        match rendered {
+            Some(Some(wants_next_tick)) => wants_next_tick,
+            Some(None) => {
+                // The last job of the render thread: the graph, and with it
+                // every render target and the graphics context, is dropped
+                // here.
+                self.server.release();
+                self.remove_from_loop();
+                false
+            }
+            // Nothing to render once the compositor is gone.
+            None => false,
+        }
     }
 }
 
@@ -135,6 +201,11 @@ impl Compositor {
     /// thread: with `use_ui_thread_for_synchronous_commits` the thread of
     /// this compositor renders too, at the synchronous points (a resize, the
     /// first show), as the reference does on platforms that ask for it.
+    ///
+    /// Without it, and with a loop that runs in the background, the server
+    /// compositor is also confined to the thread that ticks (see
+    /// [`is_confined_to_render_thread`](Self::is_confined_to_render_thread)).
+    /// The loop says where it runs when the compositor is created.
     pub fn with_render_thread(
         render_loop: Arc<dyn IRenderLoop>,
         gpu: Option<Rc<dyn IPlatformGraphics>>,
@@ -147,11 +218,16 @@ impl Compositor {
         let options = options
             .or_else(|| FerroLocator::current().get_service::<CompositionOptions>().map(|o| *o))
             .unwrap_or_default();
-        // The clock is read by both threads.
+        // The clock is read by both threads. Each side has a handle of its
+        // own to it: the server graph may be released by the render thread.
         let clock = clock.unwrap_or_else(|| {
             let origin = std::time::Instant::now();
             Arc::new(move || origin.elapsed())
         });
+        let server_clock: CompositorClock = {
+            let clock = clock.clone();
+            Rc::new(move || clock())
+        };
         let clock: CompositorClock = Rc::new(move || clock());
         let batches = Arc::new(BatchQueue::default());
         let readback = Arc::new(super::server::ReadbackIndices::new());
@@ -160,13 +236,27 @@ impl Compositor {
             options,
             batches.clone(),
             readback.clone(),
-            clock.clone(),
+            server_clock,
         )));
         let key = NEXT_COMPOSITOR_KEY.fetch_add(1, Ordering::SeqCst);
-        let loop_task: Arc<dyn IRenderLoopTask> = Arc::new(RenderThreadLoopTask { server: server.clone() });
+        // The condition of the reference for a thread of the compositor that
+        // never renders (`UseUiThreadForSynchronousCommits: false`,
+        // `Loop.RunsInBackground: true`).
+        let confined = !use_ui_thread_for_synchronous_commits && render_loop.runs_in_background();
+        let task = Arc::new_cyclic(|this| RenderThreadLoopTask {
+            this: this.clone(),
+            server: server.clone(),
+            confined,
+            release_requested: AtomicBool::new(false),
+            removal_posted: AtomicBool::new(false),
+            render_loop: Arc::downgrade(&render_loop),
+            dispatcher: dispatcher.clone(),
+        });
+        let loop_task: Arc<dyn IRenderLoopTask> = task.clone();
         Self::build(
             render_loop,
             loop_task,
+            confined.then_some(task),
             use_ui_thread_for_synchronous_commits,
             server,
             true,
@@ -255,6 +345,7 @@ impl Compositor {
         Self::build(
             render_loop,
             loop_task,
+            None,
             use_ui_thread_for_synchronous_commits,
             server,
             false,
@@ -271,6 +362,7 @@ impl Compositor {
     fn build(
         render_loop: Arc<dyn IRenderLoop>,
         loop_task: Arc<dyn IRenderLoopTask>,
+        confined_loop_task: Option<Arc<RenderThreadLoopTask>>,
         use_ui_thread_for_synchronous_commits: bool,
         server: Arc<super::server::LockedServerCompositor>,
         render_thread: bool,
@@ -290,6 +382,8 @@ impl Compositor {
             readback,
             server,
             render_thread,
+            confined_loop_task,
+            render_interface_features_requested: Arc::new(AtomicBool::new(false)),
             batches,
             clock,
             next_commit: RefCell::new(None),
@@ -360,7 +454,16 @@ impl Compositor {
 
     /// Renders a frame on this thread, under the compositor lock: what the
     /// synchronous points do (`Server.Render` upstream).
+    ///
+    /// # Panics
+    ///
+    /// When the compositor is confined to its render thread: this thread
+    /// waits for a frame there, it never renders one.
     pub fn render_on_this_thread(&self) -> bool {
+        assert!(
+            !self.is_confined_to_render_thread(),
+            "a compositor that is confined to its render thread is not rendered by the thread of the compositor"
+        );
         self.server.with(|server| server.render())
     }
 
@@ -368,6 +471,21 @@ impl Compositor {
     /// not the thread of this compositor.
     pub fn renders_on_render_thread(&self) -> bool {
         self.render_thread
+    }
+
+    /// Whether the thread that ticks the render loop is the only one that
+    /// renders: the render-thread mode without
+    /// `use_ui_thread_for_synchronous_commits`, on a loop that runs in the
+    /// background (the condition under which the reference waits for the
+    /// render thread at the synchronous points).
+    ///
+    /// The render targets, the graphics context and everything else that
+    /// belongs to the thread that draws are then created, used and dropped
+    /// by the render thread alone. This thread still enters the compositor
+    /// lock ([`with_server`](Self::with_server)), for what does not render:
+    /// it commits batches, posts jobs and waits for them.
+    pub fn is_confined_to_render_thread(&self) -> bool {
+        self.confined_loop_task.is_some()
     }
 
     /// The readback indices the server writes and this side reads.
@@ -835,8 +953,10 @@ impl Compositor {
             let external_objects = feature
                 .downcast_ref::<Rc<dyn crate::platform::IExternalObjectsRenderInterfaceContextFeature>>()?
                 .clone();
+            // `None` where this thread may not create the context of the
+            // render interface and the render thread has none at present.
             let interop: Rc<dyn super::ICompositionGpuInterop> =
-                super::CompositionInterop::new(&self.this(), external_objects);
+                super::CompositionInterop::try_new(&self.this(), external_objects)?;
             Some(interop)
         })
     }
@@ -846,8 +966,27 @@ impl Compositor {
     /// Upstream the answer comes from a job on the render thread when it is
     /// not cached; the server compositor runs on this thread, so it is
     /// asked directly.
+    ///
+    /// A compositor that is confined to its render thread answers from the
+    /// cache alone, as upstream with a background loop: without a cache the
+    /// answer is `None` for now, and a job of the render thread fills the
+    /// cache (`InvokeServerJobAsync(Server.RT_GetRenderInterfaceFeatures)`),
+    /// so that a later call has the answer. This thread never creates the
+    /// backend context there.
     pub fn try_get_render_interface_feature(&self, feature_type: std::any::TypeId) -> Option<Rc<dyn std::any::Any>> {
         self.dispatcher.verify_access();
+        if self.is_confined_to_render_thread() {
+            let cached = self.server.with(|server| {
+                server.at_try_get_cached_render_interface_features().map(|features| features.get(&feature_type).cloned())
+            });
+            return match cached {
+                Some(feature) => feature,
+                None => {
+                    self.request_render_interface_features();
+                    None
+                }
+            };
+        }
         // The features are objects of the server side: they are read under
         // the lock. What is handed out are the public features of the render
         // interface, which a backend makes for callers on this thread.
@@ -860,6 +999,24 @@ impl Compositor {
             }
             server.rt_get_render_interface_features().get(&feature_type).cloned()
         })
+    }
+
+    /// Posts the job of the render thread that fills the cache of the
+    /// features of the render interface, unless one is on its way.
+    fn request_render_interface_features(&self) {
+        if self.render_interface_features_requested.swap(true, Ordering::SeqCst) {
+            return;
+        }
+        let requested = self.render_interface_features_requested.clone();
+        self.post_server_job(
+            move |server| {
+                // A job runs in a frame that has a backend context: the
+                // cache is there, or is filled from it here.
+                server.rt_get_render_interface_features();
+                requested.store(false, Ordering::SeqCst);
+            },
+            false,
+        );
     }
 
     /// Whether an object is queued for serialization (for unit tests).
@@ -875,11 +1032,33 @@ impl Compositor {
 
 impl Drop for Compositor {
     fn drop(&mut self) {
-        self.render_loop.remove(&self.loop_task);
-        // The server compositor is released here, on the thread of the
-        // compositor: a tick in progress on the render thread may still hold
-        // the task, and with it the lock object, but not the graph.
-        self.server.release();
+        match &self.confined_loop_task {
+            Some(task) => {
+                // The graph holds what only the render thread may drop (the
+                // render targets, the graphics context), so its release is
+                // the last job of that thread: the task stays in the loop
+                // for one more tick, releases the graph there and then has
+                // itself removed. Asked for before the lock is entered: no
+                // frame starts after this thread has been inside.
+                task.request_release();
+                // What the graph shares with this thread is dropped here,
+                // for the same reason the other modes release all of it
+                // here: the counts of these handles belong to this thread.
+                self.server.try_with(|server| server.render_interface().release_platform_handles());
+                // A loop that does not tick again keeps the task, and the
+                // graph with it: whichever thread drops the loop then leaks
+                // the graph instead of dropping it (`LockedServerCompositor`).
+                self.render_loop.wakeup();
+            }
+            None => {
+                self.render_loop.remove(&self.loop_task);
+                // The server compositor is released here, on the thread of
+                // the compositor: a tick in progress on the render thread
+                // may still hold the task, and with it the lock object, but
+                // not the graph.
+                self.server.release();
+            }
+        }
         let key = self.key;
         // The registry may already be gone when the thread is exiting.
         let _ = COMPOSITORS.try_with(|compositors| {
