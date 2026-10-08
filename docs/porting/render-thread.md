@@ -235,6 +235,22 @@ A frame on the render thread has no service locator (it belongs to a thread here
 | The three kinds R2 bound to the UI thread in `ThreadBound`: the render surfaces of a target, the update closures of a drawing surface, the import and dispose closures of the interop objects | **Open.** A frame of the render thread panics on them. The surfaces are next: they are what a window needs. |
 | `Compositor::server()` callers outside tests: `composition_interop.rs` (three places) | **Open**, with the interop closures. |
 
+### R5.3, planned: render surfaces a frame of the render thread may use
+
+How upstream does it, read from the native backend: `TopLevelImpl.Surfaces` is called by the thread that renders and returns objects that thread then uses. For the GPU they are purpose-made objects over the native top level (`MetalPlatformSurface`, the GL surface), whose native side is callable from the render thread. For software rendering it is the top level itself, and `CreateFramebufferRenderTarget` throws `RenderTargetNotReady` unless it is called on the UI thread: the software render target of a window is created by a frame the UI thread renders (the first show and every resize are synchronous commits, and the platform sets `UseUiThreadForSynchronousCommits`), and the frames of the render thread reuse it.
+
+The port today: `RenderSurfaces` is `Rc<dyn Fn() -> Vec<Rc<dyn IPlatformRenderSurface>>>`, implemented by the window implementation itself in the native and headless backends (an object of the UI thread with cells), and R2 bound it to the UI thread. 46 uses of the surface handle in 25 files (the contract, the Skia backend's render target creation, the native, headless, browser and EGL backends, tests).
+
+Plan:
+
+1. The contract: `IPlatformRenderSurface: Send + Sync`, held in `Arc`; `RenderSurfaces` is `Arc<dyn Fn() -> Vec<Arc<dyn IPlatformRenderSurface>> + Send + Sync>`. The `ThreadBound` around the surfaces of a target goes away.
+2. Each backend hands out surface objects made for it, not its window implementation:
+   - native: the Metal surface already is one (it holds the native top level; `ComPtr` has to be allowed to cross threads for the native interfaces that are callable from the render thread, which is a statement about the native library to verify in `native/`), and a software surface object that holds the native top level and keeps upstream's rule (creation of the render target on the UI thread only, "not ready" elsewhere);
+   - headless: a surface object with the last frame under a lock (upstream guards it with a lock too);
+   - browser, EGL: single-threaded today; their surface objects keep what belongs to their thread in `ThreadBound` until B2.
+3. `TopLevel` snapshots nothing: the closure asks the surface objects' owner under a lock of its own, or the window implementation publishes its current surfaces in a shared cell when they change.
+4. Then `Compositor::new` can choose the render-thread mode for a background render loop (R4.3), first behind an option, and `themed_window` is the first window to render off the UI thread.
+
 ### Scope of R3, surveyed
 
 What the UI side asks the server compositor for directly today (outside `rendering/composition/server/`, tests aside). Each becomes a member of the handle the compositor keeps, a job, or a readback:
