@@ -284,10 +284,11 @@ Plan:
 
 With the switch, on the development Mac: `platform_window` (software: render target created by the UI thread's frame, one paint), `platform_window --metal` (two paints) and `themed_window` (six runs) open, render and close without a panic; the frames of the loop come from the thread of the render timer (`RenderTimerLoop`).
 
+Checked since: a capture of the `themed_window` window is byte for byte the same in both modes, and the ControlCatalog selects every one of its 59 pages in the render-thread mode (`FERROUI_SMOKE_PAGES=150`) without a panic, as in the dispatcher-thread mode.
+
 Not done, and needed before the mode can be the default:
 
-- Looking at the frames: only the counts and the clean exits were checked.
-- A stress run: live resize, scrolling in the catalog, theme switch, popups, closing a window while it renders.
+- Interaction under load, by hand: live resize, scrolling in the catalog, theme switch, popups, closing a window while it renders.
 - The Metal wrappers on the Rust side (`Rc` objects behind the Skia contracts) are used under the compositor lock; whether anything reaches them outside it is not audited.
 - The update closures of a drawing surface and the import closures of the interop objects are still bound to the UI thread (R2).
 - The measurements of `desktop-performance.md` in both modes.
