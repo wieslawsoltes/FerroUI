@@ -181,9 +181,29 @@ impl Compositor {
 
     /// Creates a compositor that renders on the render loop registered in
     /// the service locator and commits through the media context.
+    ///
+    /// The threads follow the render loop, as in the reference: with a loop
+    /// that runs in the background (the thread of the platform's render
+    /// timer) that thread renders the frames, under the compositor lock (the
+    /// render-thread mode); with a loop of the UI thread the UI thread
+    /// renders. `FERROUI_RENDER_THREAD=0` in the environment keeps the
+    /// rendering on the UI thread with a background loop too (each tick is
+    /// marshalled to it): a way back while the mode is young.
     pub fn new(gpu: Option<Rc<dyn IPlatformGraphics>>, use_ui_thread_for_synchronous_commits: bool) -> Rc<Compositor> {
         let render_loop = FerroLocator::current().get_required_service::<Arc<dyn IRenderLoop>>();
         let scheduler: Rc<dyn ICompositorScheduler> = crate::media::MediaContext::instance().scheduler();
+        let render_thread_disabled = std::env::var("FERROUI_RENDER_THREAD").is_ok_and(|value| value == "0");
+        if render_loop.runs_in_background() && !render_thread_disabled {
+            return Self::with_render_thread(
+                (*render_loop).clone(),
+                gpu,
+                use_ui_thread_for_synchronous_commits,
+                &scheduler,
+                Dispatcher::ui_thread(),
+                None,
+                None,
+            );
+        }
         Self::with_scheduler(
             (*render_loop).clone(),
             gpu,

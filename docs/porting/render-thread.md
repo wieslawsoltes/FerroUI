@@ -359,6 +359,14 @@ Left as the audit describes them: the handle of the platform graphics is sound o
 
 R5.6: the update of a drawing surface and the imports and disposals of the interop objects no longer capture anything of the UI thread. Their server parts are values confined to the compositor lock (`LockBound<T>`, in `compositor_lock.rs`, reached only with a reference to the server compositor it is bound to); the jobs capture the bound value and plain values. One capture is still bound to the UI thread: the image of `import_shared_image`, whose contract passes an `Rc` that the caller keeps; on a render thread that import fails its task instead of panicking.
 
+### The render thread is the default on the desktop (owner, 2026-10-08)
+
+`Compositor::new` follows the render loop, as upstream: with a loop that runs in the background the thread that ticks it renders the frames, under the compositor lock, and the thread of the compositor renders at the synchronous points when the platform asks for that. The native platform (macOS) has such a loop (`ThreadProxyRenderTimer` over the display link) and asks for the UI thread at the synchronous points, so its windows are rendered by the `RenderTimerLoop` thread from now on; a sample of the running ControlCatalog shows the frames of the server compositor on that thread only. `FERROUI_RENDER_THREAD=0` keeps the rendering on the UI thread (each tick is marshalled to it): the way back while the mode is young. The experimental `FERROUI_RENDER_THREAD=1` is gone.
+
+Not changed by this: the headless platform (its render timer belongs to the UI thread, as upstream's) and the browser (its timer is the animation frame of the page; rendering from a worker is stage B2, `browser-render-worker.md`).
+
+What was known to be open when the default was switched, by the owner's decision: interaction by hand (live resize, scrolling, popups, closing a window while it renders) was not exercised; the frame time of both modes was not measured yet; the handle of the platform graphics and the features of the render interface are as the audit of R5.5 left them.
+
 ### Scope of R3, surveyed
 
 What the UI side asks the server compositor for directly today (outside `rendering/composition/server/`, tests aside). Each becomes a member of the handle the compositor keeps, a job, or a readback:
