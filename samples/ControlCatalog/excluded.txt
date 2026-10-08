@@ -27,10 +27,8 @@ Pages/PlatformInfoPage.xaml | gap C202: OnPlatform as an element with On childre
 
 # --- the other pages directly under Pages/ (group C) ---
 Pages/AutoCompleteBoxPage.xaml | code-behind not ported (the document also needs gap C310)
-Pages/ClipboardPage.xaml | code-behind: DataFormat.File and ClipboardExtensions.TryGetFilesAsync (storage items as clipboard data are not ported)
 Pages/ColorPickerPage.xaml | missing: ColorPicker, ColorPreviewer, ColorSlider, ColorSpectrum, ColorView, FlatHalfColorPalette
-Pages/DialogsPage.xaml | code-behind: DialogsPage is not ported yet (ManagedStorageProvider is available in ferroui-dialogs); the document also needs gap C305
-Pages/DragAndDropPage.xaml | code-behind: DialogsPage.ReadTextFromFile (DialogsPage is not ported: ManagedStorageProvider)
+Pages/DialogsPage.xaml | gap C305: System.Collections.Generic.List`1 with x:TypeArguments is not a type of the markup type system
 Pages/FlyoutsPage.xaml | gap C301: a method name is not accepted for a property of a delegate type (CustomPopupPlacementCallback)
 Pages/FocusPage.xaml | gap C305: System.Collections.Generic.List`1 with x:TypeArguments is not a type of the markup type system
 Pages/NumericUpDownPage.xaml | code-behind: CultureInfo.GetCultures(CultureTypes.SpecificCultures)

@@ -18,6 +18,7 @@ mod canvas_page;
 mod carousel_demo_page;
 mod carousel_page;
 mod check_box_page;
+mod clipboard_page;
 mod combo_box_page;
 mod command_bar_page;
 mod connected_animation_demo_page;
@@ -29,6 +30,8 @@ mod cursor_page;
 mod custom_drawing;
 mod custom_drawing_example_control;
 mod data_validation_page;
+mod dialogs_page;
+mod drag_and_drop_page;
 mod expander_page;
 mod flyouts_page;
 mod focus_page;
@@ -115,6 +118,7 @@ pub use canvas_page::CanvasPage;
 pub use carousel_demo_page::CarouselDemoPage;
 pub use carousel_page::CarouselPage;
 pub use check_box_page::CheckBoxPage;
+pub use clipboard_page::ClipboardPage;
 pub use combo_box_page::ComboBoxPage;
 pub use command_bar::{
     CommandBarCustomizationPage,
@@ -144,6 +148,8 @@ pub use custom_drawing::CustomDrawing;
 pub use custom_drawing_example_control::CustomDrawingExampleControl;
 pub use data_validation_page::DataValidationPage;
 pub use date_time_picker_page::DateTimePickerPage;
+pub use dialogs_page::DialogsPage;
+pub use drag_and_drop_page::DragAndDropPage;
 pub use drawer_demo_page::DrawerDemoPage;
 pub use expander_page::ExpanderPage;
 pub use flex_page::FlexPage;
@@ -255,6 +261,7 @@ const ROOT_TYPES: &[&TypeInfo] = &[
     ButtonsPage::TYPE,
     CanvasPage::TYPE,
     CheckBoxPage::TYPE,
+    ClipboardPage::TYPE,
     ComboBoxPage::TYPE,
     CommandBarPage::TYPE,
     ConnectedAnimationDemoPage::TYPE,
@@ -266,6 +273,8 @@ const ROOT_TYPES: &[&TypeInfo] = &[
     CustomDrawing::TYPE,
     CustomDrawingExampleControl::TYPE,
     DataValidationPage::TYPE,
+    DialogsPage::TYPE,
+    DragAndDropPage::TYPE,
     EmbedSample::TYPE,
     ExpanderPage::TYPE,
     FlyoutsPage::TYPE,
@@ -331,6 +340,7 @@ const ROOT_CLASSES: &[&XamlClass] = &[
     &ButtonsPage::XAML_CLASS,
     &CanvasPage::XAML_CLASS,
     &CheckBoxPage::XAML_CLASS,
+    &ClipboardPage::XAML_CLASS,
     &ComboBoxPage::XAML_CLASS,
     &CommandBarPage::XAML_CLASS,
     &ConnectedAnimationDemoPage::XAML_CLASS,
@@ -341,6 +351,8 @@ const ROOT_CLASSES: &[&XamlClass] = &[
     &CursorPage::XAML_CLASS,
     &CustomDrawing::XAML_CLASS,
     &DataValidationPage::XAML_CLASS,
+    &DialogsPage::XAML_CLASS,
+    &DragAndDropPage::XAML_CLASS,
     &ExpanderPage::XAML_CLASS,
     &FlyoutsPage::XAML_CLASS,
     &FocusPage::XAML_CLASS,

@@ -6,7 +6,7 @@ The documents of the sample that do not load yet, grouped by what they wait for.
 cargo test -p control-catalog -- --ignored gap_
 ```
 
-Status: 219 documents, 190 load and show their class; 29 are listed below.
+Status: 219 documents, 192 load and show their class; 27 are listed below.
 
 ## Gaps of the framework
 
@@ -20,7 +20,7 @@ Status: 219 documents, 190 load and show their class; 29 are listed below.
 | C208 | `FontFamily.Name` is not declared in the markup metadata of `FontFamily`, so `{Binding Name}` with `x:DataType="FontFamily"` does not resolve. | `gaps_b::gap_c208_font_family_name_in_a_compiled_binding` | `Pages/ComboBoxPage.xaml` |
 | C209 | The methods `TextBox.Cut`, `Copy`, `Paste` and `Clear` are not declared for markup, so they cannot be bound as commands (`{Binding $parent[TextBox].Cut}`). | `gaps_b::gap_c209_text_box_methods_as_commands` | `Pages/ContextFlyoutPage.xaml` |
 | C301 | A method name is not accepted for a property of a delegate type (`ToolTip.CustomPopupPlacementCallback`, `PopupFlyoutBase.CustomPopupPlacementCallback`). | `gaps_c::gap_c301_method_name_for_a_delegate_property` | `Pages/FlyoutsPage.xaml`, `Pages/ToolTipPage.xaml` |
-| C305 | `System.Collections.Generic.List`1` with `x:TypeArguments` is not a type of the markup type system, so a list created in markup is not accepted by `ItemsControl.ItemsSource`. | `gaps_c::gap_c305_generic_list_element` | `Pages/FocusPage.xaml`, `Pages/RefreshContainerPage.xaml`, and `Pages/DialogsPage.xaml` (which also waits for its code-behind) |
+| C305 | `System.Collections.Generic.List`1` with `x:TypeArguments` is not a type of the markup type system, so a list created in markup is not accepted by `ItemsControl.ItemsSource`. | `gaps_c::gap_c305_generic_list_element` | `Pages/FocusPage.xaml`, `Pages/RefreshContainerPage.xaml`, `Pages/DialogsPage.xaml` |
 | C306 | `Slider.Ticks` (`TickList`) is not converted from text (`Ticks="0,20,25,40,75,100"`). | `gaps_c::gap_c306_slider_ticks_from_text` | `Pages/SliderPage.xaml` |
 | C309 | `System.Collections.ArrayList` with enumeration values as children is not a type of the markup type system. | `gaps_c::gap_c309_array_list_element` | `Pages/ViewboxPage.xaml` |
 | C310 | `AutoCompleteBox.MinimumPopulateDelay` (`TimeSpan`) is not converted from text (`"00:00:01"`). | `gaps_c::gap_c310_time_span_property_from_text` | `Pages/AutoCompleteBoxPage.xaml` (which also waits for its code-behind) |
@@ -40,11 +40,8 @@ One gap of the framework blocks no document of the list: C101, a reflection bind
 
 | Document | Missing API |
 |---|---|
-| `Pages/ClipboardPage.xaml` | `DataFormat.File` and `ClipboardExtensions.TryGetFilesAsync` (`AsyncDataTransferExtensions.TryGetFilesAsync`): storage items as clipboard data. The handlers `CopyFiles` and `PasteFiles` use them; the platform clipboard does not map the file format either (`FerroUI.Native/clipboard_data_format_helper.rs`). Everything else the page uses (`DataFormat.CreateBytesApplicationFormat`, `DataTransfer`, `TryGetInProcessDataAsync`, `WindowNotificationManager`, `DispatcherTimer`) exists. |
 | `Pages/AutoCompleteBoxPage.xaml` | its code-behind (`LogicalExtensions.GetLogicalDescendants`, which it uses, is ported); the document also needs gap C310. |
 | `Pages/NumericUpDownPage.xaml` | `CultureInfo.GetCultures(CultureTypes.SpecificCultures)`. |
-| `Pages/DialogsPage.xaml` | The code-behind of the page is not ported yet (`ManagedStorageProvider` is available in `ferroui-dialogs`); the document also needs gap C305. |
-| `Pages/DragAndDropPage.xaml` | `DialogsPage.ReadTextFromFile`, which waits for `DialogsPage`. |
 | `Pages/OpenGlPage.xaml` | The OpenGL library (`OpenGlControlBase`, `GlInterface`), `Compositor.CreateCompositionVisualSnapshot`. |
 | `Pages/OpenGl/OpenGlInteropPage.xaml` | The OpenGL library (`GlInterface`, `IGlContext`), composition GPU interop (`ICompositionGpuInterop`, `CompositionDrawingSurface`). |
 | `Pages/OpenGl/OpenGlLeasePage.xaml` | The OpenGL library (`GlInterface`), `CompositionCustomVisualHandler`, `ISkiaSharpApiLeaseFeature`. |
