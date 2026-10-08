@@ -21,7 +21,7 @@ use crate::media::{
     BoxShadows, Brushes, DrawingContext, IBrush, IDashStyle, IImmutableBrush, IPen, ITransform, Pen, PenLineCap,
     PenLineJoin, SolidColorBrush,
 };
-use crate::platform::{IBitmapImpl, IGeometryImpl};
+use crate::platform::IGeometryImpl;
 use crate::rendering::composition::drawing::{
     CompositionRenderData, ICompositionRenderResource, RenderDataDrawingContext, ServerCompositionRenderData,
 };

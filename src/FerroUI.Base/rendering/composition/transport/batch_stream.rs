@@ -63,10 +63,11 @@ pub enum BatchMarker {
 /// One slot of the object stream.
 ///
 /// Everything a UI-thread object hands to the server goes through one of
-/// these variants. `Job`, `Create` and `Value` payloads are not `Send`
-/// today because the platform resource handles they carry (`Rc<dyn
-/// IGeometryImpl>`, bitmaps, glyph runs, immutable brushes) are `Rc`-based;
-/// see the threading notes in `rendering/composition/mod.rs`.
+/// these variants. A `Value` payload is `Send`: render resources are held
+/// in `Arc`, and what belongs to the UI thread crosses in a form of its own
+/// (the shared form of a brush, the factory of an animation instance). The
+/// `Job` and `Create` payloads are closures that are not `Send` yet; see
+/// `docs/porting/render-thread.md`, stage R2.
 pub enum BatchObject {
     Null,
     /// A reference to a server-side object.
@@ -78,12 +79,12 @@ pub enum BatchObject {
     Create(ServerObjectFactory),
     /// Any other reference-typed payload (render data resources, platform
     /// handles, lists).
-    Value(Box<dyn Any>),
+    Value(Box<dyn Any + Send>),
 }
 
 impl BatchObject {
     /// Wraps a payload value.
-    pub fn value<T: Any>(value: T) -> BatchObject {
+    pub fn value<T: Any + Send>(value: T) -> BatchObject {
         BatchObject::Value(Box::new(value))
     }
 }
@@ -460,7 +461,7 @@ impl<'a> BatchStreamWriter<'a> {
 
     /// Writes a payload value (or null) to the object stream.
     #[inline]
-    pub fn write_value<T: Any>(&mut self, item: Option<T>) {
+    pub fn write_value<T: Any + Send>(&mut self, item: Option<T>) {
         self.write_object(match item {
             Some(item) => BatchObject::value(item),
             None => BatchObject::Null,
@@ -578,7 +579,7 @@ mod tests {
     fn batch_stream_correctly_writes_and_reads_data() {
         let mut data = BatchStreamData::new();
         let values: Vec<u128> = (0..453u128).map(|c| c.wrapping_mul(0x9E37_79B9_7F4A_7C15_F39C_C060_5CED_C835)).collect();
-        let objects: Vec<Rc<()>> = (0..453).map(|_| Rc::new(())).collect();
+        let objects: Vec<std::sync::Arc<()>> = (0..453).map(|_| std::sync::Arc::new(())).collect();
 
         {
             let mut writer = BatchStreamWriter::new(&mut data);
@@ -595,7 +596,7 @@ mod tests {
             assert_eq!(*value, reader.read::<u128>());
         }
         for object in &objects {
-            assert!(Rc::ptr_eq(object, &reader.read_value::<Rc<()>>().unwrap()));
+            assert!(std::sync::Arc::ptr_eq(object, &reader.read_value::<std::sync::Arc<()>>().unwrap()));
         }
         assert!(reader.is_object_eof());
         assert!(reader.is_struct_eof());

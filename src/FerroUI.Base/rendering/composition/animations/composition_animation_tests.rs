@@ -81,7 +81,7 @@ fn generic_check(data: AnimationData) {
         ani.insert_key_frame_with_easing(*key, *value, Rc::new(LinearEasing::new()));
     }
     ani.set_duration(Duration::from_secs(1));
-    let instance = ani.create_instance(target.server(), None);
+    let instance = ani.create_instance(target.server(), None).create();
     instance.resolve(compositor.server());
     instance.initialize(
         Duration::ZERO,
@@ -140,7 +140,7 @@ fn expression_animation_operations_works_correctly() {
     server.visual_props().set_offset(&*server, Vector3D::new(100.0, 200.0, 0.0));
 
     let ani = compositor.create_expression_animation_with("this.Target.Offset.X * 0.5 + 10");
-    let instance = ani.create_instance(target.server(), None);
+    let instance = ani.create_instance(target.server(), None).create();
     instance.resolve(compositor.server());
     instance.initialize(
         Duration::ZERO,
@@ -166,7 +166,7 @@ fn expression_animation_tracks_reference_parameter() {
 
     let ani = compositor.create_expression_animation_with("obj.Offset.X * 0.5 + 10");
     ani.set_reference_parameter("obj", (*obj).clone());
-    let instance = ani.create_instance(target.server(), None);
+    let instance = ani.create_instance(target.server(), None).create();
 
     let target_server = fixture.server(&target);
     target_server.activate();
@@ -199,7 +199,7 @@ fn expression_animation_tracks_target() {
     target_server.visual_props().set_offset(&*target_server, Vector3D::new(100.0, 200.0, 0.0));
 
     let ani = compositor.create_expression_animation_with("this.Target.Offset.X * 0.5 + 10");
-    let instance = ani.create_instance(target.server(), None);
+    let instance = ani.create_instance(target.server(), None).create();
 
     target_server.activate();
 
@@ -262,7 +262,7 @@ fn key_frame_animation_timing() {
     fixture.run_jobs();
     let property = ServerCompositionVisualProps::id_of_rotation_angle_property();
     let evaluate = |ani: &Rc<ScalarKeyFrameAnimation>, times: &[f32]| -> Vec<f64> {
-        let instance = ani.create_instance(target.server(), None);
+        let instance = ani.create_instance(target.server(), None).create();
         instance.resolve(compositor.server());
         instance.initialize(Duration::ZERO, ExpressionVariant::create(0f32), property);
         times
@@ -399,7 +399,7 @@ fn mutually_referencing_animations_do_not_keep_their_objects_alive() {
 
     let server_a = Rc::downgrade(&fixture.server(&a));
     let server_b = Rc::downgrade(&fixture.server(&b));
-    let instance = ani_a.create_instance(a.server(), None);
+    let instance = ani_a.create_instance(a.server(), None).create();
     instance.resolve(compositor.server());
     instance.initialize(
         Duration::ZERO,

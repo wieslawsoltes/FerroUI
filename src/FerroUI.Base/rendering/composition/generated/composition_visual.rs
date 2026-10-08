@@ -16,7 +16,6 @@ use crate::numerics::Quaternion;
 use crate::platform::IGeometryImpl;
 use crate::rendering::composition::ICompositionObject;
 use crate::rendering::composition::ICompositionObjectHost;
-use crate::rendering::composition::animations::IAnimationInstance;
 use crate::rendering::composition::animations::ICompositionAnimation;
 use crate::rendering::composition::expressions::ExpressionVariant;
 use crate::rendering::composition::server::AsServerRenderResource;
@@ -2049,7 +2048,7 @@ impl ServerCompositionVisualProps {
             self.set_parent(host, value);
         }
         if changed.contains(CompositionVisualChangedFields::VISIBLE_ANIMATED) {
-            let Some(animation) = reader.read_value::<Rc<dyn IAnimationInstance>>() else {
+            let Some(animation) = reader.read_value::<crate::rendering::composition::animations::AnimationInstanceFactory>().map(crate::rendering::composition::animations::AnimationInstanceFactory::create) else {
                 panic!("a batch starts an animation of `Visible` without an animation instance");
             };
             host.set_animated_value(
@@ -2063,7 +2062,7 @@ impl ServerCompositionVisualProps {
             self.set_visible(host, value);
         }
         if changed.contains(CompositionVisualChangedFields::OPACITY_ANIMATED) {
-            let Some(animation) = reader.read_value::<Rc<dyn IAnimationInstance>>() else {
+            let Some(animation) = reader.read_value::<crate::rendering::composition::animations::AnimationInstanceFactory>().map(crate::rendering::composition::animations::AnimationInstanceFactory::create) else {
                 panic!("a batch starts an animation of `Opacity` without an animation instance");
             };
             host.set_animated_value(
@@ -2081,7 +2080,7 @@ impl ServerCompositionVisualProps {
             self.set_clip(host, value);
         }
         if changed.contains(CompositionVisualChangedFields::CLIP_TO_BOUNDS_ANIMATED) {
-            let Some(animation) = reader.read_value::<Rc<dyn IAnimationInstance>>() else {
+            let Some(animation) = reader.read_value::<crate::rendering::composition::animations::AnimationInstanceFactory>().map(crate::rendering::composition::animations::AnimationInstanceFactory::create) else {
                 panic!("a batch starts an animation of `ClipToBounds` without an animation instance");
             };
             host.set_animated_value(
@@ -2095,7 +2094,7 @@ impl ServerCompositionVisualProps {
             self.set_clip_to_bounds(host, value);
         }
         if changed.contains(CompositionVisualChangedFields::OFFSET_ANIMATED) {
-            let Some(animation) = reader.read_value::<Rc<dyn IAnimationInstance>>() else {
+            let Some(animation) = reader.read_value::<crate::rendering::composition::animations::AnimationInstanceFactory>().map(crate::rendering::composition::animations::AnimationInstanceFactory::create) else {
                 panic!("a batch starts an animation of `Offset` without an animation instance");
             };
             host.set_animated_value(
@@ -2109,7 +2108,7 @@ impl ServerCompositionVisualProps {
             self.set_offset(host, value);
         }
         if changed.contains(CompositionVisualChangedFields::TRANSLATION_ANIMATED) {
-            let Some(animation) = reader.read_value::<Rc<dyn IAnimationInstance>>() else {
+            let Some(animation) = reader.read_value::<crate::rendering::composition::animations::AnimationInstanceFactory>().map(crate::rendering::composition::animations::AnimationInstanceFactory::create) else {
                 panic!("a batch starts an animation of `Translation` without an animation instance");
             };
             host.set_animated_value(
@@ -2123,7 +2122,7 @@ impl ServerCompositionVisualProps {
             self.set_translation(host, value);
         }
         if changed.contains(CompositionVisualChangedFields::SIZE_ANIMATED) {
-            let Some(animation) = reader.read_value::<Rc<dyn IAnimationInstance>>() else {
+            let Some(animation) = reader.read_value::<crate::rendering::composition::animations::AnimationInstanceFactory>().map(crate::rendering::composition::animations::AnimationInstanceFactory::create) else {
                 panic!("a batch starts an animation of `Size` without an animation instance");
             };
             host.set_animated_value(
@@ -2137,7 +2136,7 @@ impl ServerCompositionVisualProps {
             self.set_size(host, value);
         }
         if changed.contains(CompositionVisualChangedFields::ANCHOR_POINT_ANIMATED) {
-            let Some(animation) = reader.read_value::<Rc<dyn IAnimationInstance>>() else {
+            let Some(animation) = reader.read_value::<crate::rendering::composition::animations::AnimationInstanceFactory>().map(crate::rendering::composition::animations::AnimationInstanceFactory::create) else {
                 panic!("a batch starts an animation of `AnchorPoint` without an animation instance");
             };
             host.set_animated_value(
@@ -2151,7 +2150,7 @@ impl ServerCompositionVisualProps {
             self.set_anchor_point(host, value);
         }
         if changed.contains(CompositionVisualChangedFields::CENTER_POINT_ANIMATED) {
-            let Some(animation) = reader.read_value::<Rc<dyn IAnimationInstance>>() else {
+            let Some(animation) = reader.read_value::<crate::rendering::composition::animations::AnimationInstanceFactory>().map(crate::rendering::composition::animations::AnimationInstanceFactory::create) else {
                 panic!("a batch starts an animation of `CenterPoint` without an animation instance");
             };
             host.set_animated_value(
@@ -2165,7 +2164,7 @@ impl ServerCompositionVisualProps {
             self.set_center_point(host, value);
         }
         if changed.contains(CompositionVisualChangedFields::ROTATION_ANGLE_ANIMATED) {
-            let Some(animation) = reader.read_value::<Rc<dyn IAnimationInstance>>() else {
+            let Some(animation) = reader.read_value::<crate::rendering::composition::animations::AnimationInstanceFactory>().map(crate::rendering::composition::animations::AnimationInstanceFactory::create) else {
                 panic!("a batch starts an animation of `RotationAngle` without an animation instance");
             };
             host.set_animated_value(
@@ -2179,7 +2178,7 @@ impl ServerCompositionVisualProps {
             self.set_rotation_angle(host, value);
         }
         if changed.contains(CompositionVisualChangedFields::ORIENTATION_ANIMATED) {
-            let Some(animation) = reader.read_value::<Rc<dyn IAnimationInstance>>() else {
+            let Some(animation) = reader.read_value::<crate::rendering::composition::animations::AnimationInstanceFactory>().map(crate::rendering::composition::animations::AnimationInstanceFactory::create) else {
                 panic!("a batch starts an animation of `Orientation` without an animation instance");
             };
             host.set_animated_value(
@@ -2193,7 +2192,7 @@ impl ServerCompositionVisualProps {
             self.set_orientation(host, value);
         }
         if changed.contains(CompositionVisualChangedFields::SCALE_ANIMATED) {
-            let Some(animation) = reader.read_value::<Rc<dyn IAnimationInstance>>() else {
+            let Some(animation) = reader.read_value::<crate::rendering::composition::animations::AnimationInstanceFactory>().map(crate::rendering::composition::animations::AnimationInstanceFactory::create) else {
                 panic!("a batch starts an animation of `Scale` without an animation instance");
             };
             host.set_animated_value(
@@ -2207,7 +2206,7 @@ impl ServerCompositionVisualProps {
             self.set_scale(host, value);
         }
         if changed.contains(CompositionVisualChangedFields::TRANSFORM_MATRIX_ANIMATED) {
-            let Some(animation) = reader.read_value::<Rc<dyn IAnimationInstance>>() else {
+            let Some(animation) = reader.read_value::<crate::rendering::composition::animations::AnimationInstanceFactory>().map(crate::rendering::composition::animations::AnimationInstanceFactory::create) else {
                 panic!("a batch starts an animation of `TransformMatrix` without an animation instance");
             };
             host.set_animated_value(

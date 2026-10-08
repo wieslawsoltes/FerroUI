@@ -1,4 +1,4 @@
-use super::PropertySetSnapshot;
+use super::{PropertySetSnapshot, PropertySetSnapshotSource};
 use crate::media::Color;
 use crate::numerics::{Matrix3x2, Matrix4x4, Quaternion, Vector2, Vector3, Vector4};
 use crate::rendering::composition::expressions::ExpressionVariant;
@@ -107,5 +107,11 @@ impl CompositionAnimation {
 
     pub(crate) fn create_snapshot(&self) -> Rc<PropertySetSnapshot> {
         Rc::new(self.property_set.snapshot())
+    }
+
+    /// The parameters of the animation in the form that is sent to the
+    /// server.
+    pub(crate) fn create_snapshot_source(&self) -> PropertySetSnapshotSource {
+        self.property_set.snapshot_source()
     }
 }

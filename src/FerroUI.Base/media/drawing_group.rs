@@ -5,7 +5,7 @@ use crate::media::{
     GlyphRunDrawing, IBrush, IDrawingContextCore, IPen, MatrixTransform, PlatformGeometry, PushedState,
     RectangleGeometry, RenderOptions, TextOptions, Transform,
 };
-use crate::platform::{self, IBitmapImpl, IGeometryImpl, IPlatformRenderInterface};
+use crate::platform::{self, IGeometryImpl, IPlatformRenderInterface};
 use crate::reactive::IDisposable;
 use crate::rendering::scene_graph::ICustomDrawOperation;
 use crate::{

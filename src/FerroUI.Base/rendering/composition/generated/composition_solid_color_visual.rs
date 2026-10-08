@@ -4,7 +4,6 @@
 
 use bitflags::bitflags;
 use crate::media::Color;
-use crate::rendering::composition::animations::IAnimationInstance;
 use crate::rendering::composition::animations::ICompositionAnimation;
 use crate::rendering::composition::expressions::ExpressionVariant;
 use crate::rendering::composition::server::CompositionProperty;
@@ -19,7 +18,6 @@ use crate::rendering::composition::transport::BatchValueReader;
 use std::any::Any;
 use std::any::TypeId;
 use std::cell::Cell;
-use std::rc::Rc;
 use std::sync::OnceLock;
 use std::time::Duration;
 use super::CompositionContainerVisualHooks;
@@ -251,7 +249,7 @@ impl ServerCompositionSolidColorVisualProps {
         ServerCompositionSolidColorVisualHooks::deserialize_changes_extra(host, reader);
         let changed = reader.read::<CompositionSolidColorVisualChangedFields>();
         if changed.contains(CompositionSolidColorVisualChangedFields::COLOR_ANIMATED) {
-            let Some(animation) = reader.read_value::<Rc<dyn IAnimationInstance>>() else {
+            let Some(animation) = reader.read_value::<crate::rendering::composition::animations::AnimationInstanceFactory>().map(crate::rendering::composition::animations::AnimationInstanceFactory::create) else {
                 panic!("a batch starts an animation of `Color` without an animation instance");
             };
             host.set_animated_value(

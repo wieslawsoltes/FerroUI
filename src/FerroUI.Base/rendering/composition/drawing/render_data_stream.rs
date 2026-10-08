@@ -4,13 +4,13 @@
 
 use super::{
     DrawBitmapPayload, DrawCustomPayload, DrawEllipsePayload, DrawGeometryPayload, DrawGlyphRunPayload,
-    DrawLinePayload, DrawRectanglePayload, IRenderDataGeometry, IRenderDataVisitor, PushClipPayload,
+    DrawLinePayload, DrawRectanglePayload, IRenderDataVisitor, PushClipPayload,
     PushEffectPayload, PushGeometryClipPayload, PushOpacityMaskPayload, PushOpacityPayload,
     PushRenderOptionsPayload, PushTextOptionsPayload, PushTransformPayload, RenderDataOpcode, RenderDataReader,
     RenderDataResource, RenderDataResources, RenderDataWriter,
 };
-use crate::media::{BoxShadow, BoxShadows, IBrush, IEffect, IPen, RenderOptions, TextOptions};
-use crate::platform::{IBitmapImpl, IGlyphRunImpl};
+use crate::media::{BoxShadow, BoxShadows, RenderOptions, TextOptions};
+use crate::platform::IGlyphRunImpl;
 use crate::rendering::composition::server::{IServerObject, ServerObjectId};
 use crate::rendering::composition::transport::{BatchObject, BatchStreamReader, BatchStreamWriter};
 use crate::rendering::scene_graph::ICustomDrawOperation;

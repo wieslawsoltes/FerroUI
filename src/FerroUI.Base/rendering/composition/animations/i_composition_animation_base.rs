@@ -1,7 +1,6 @@
-use super::{CompositionAnimationGroup, IAnimationInstance};
+use super::CompositionAnimationGroup;
 use crate::rendering::composition::expressions::ExpressionVariant;
 use crate::rendering::composition::server::ServerObjectId;
-use std::rc::Rc;
 
 /// Base class for composition animations.
 ///
@@ -34,11 +33,11 @@ pub trait ICompositionAnimation: ICompositionAnimationBase {
     fn target(&self) -> Option<String>;
 
     /// Creates the server-side instance of the animation for a property of
-    /// `target_object`. `final_value` is the value the property was just
+    /// `target_object`, as the factory that is sent to the server. `final_value` is the value the property was just
     /// set to when the animation is implicit.
     fn create_instance(
         &self,
         target_object: ServerObjectId,
         final_value: Option<ExpressionVariant>,
-    ) -> Rc<dyn IAnimationInstance>;
+    ) -> super::AnimationInstanceFactory;
 }

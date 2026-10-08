@@ -11,14 +11,14 @@ use std::time::Duration;
 /// Server-side counterpart of [`ExpressionAnimation`](super::ExpressionAnimation) with values baked-in.
 pub struct ExpressionAnimationInstance {
     base: AnimationInstanceBase,
-    expression: Rc<Expression>,
+    expression: std::sync::Arc<Expression>,
     starting_value: Cell<ExpressionVariant>,
     final_value: Option<ExpressionVariant>,
 }
 
 impl ExpressionAnimationInstance {
     pub fn new(
-        expression: Rc<Expression>,
+        expression: std::sync::Arc<Expression>,
         target: ServerObjectId,
         final_value: Option<ExpressionVariant>,
         parameters: Rc<PropertySetSnapshot>,

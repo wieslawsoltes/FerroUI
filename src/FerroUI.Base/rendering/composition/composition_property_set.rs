@@ -1,9 +1,9 @@
-use super::animations::{PropertySetSnapshot, PropertySetSnapshotObject, PropertySetSnapshotValue};
+use super::animations::{PropertySetSnapshot, PropertySetSnapshotSource, PropertySetSnapshotSourceValue};
 use super::expressions::{ExpressionVariant, ExpressionVariantValue};
 use super::{AsCompositionObject, CompositionObject, Compositor};
 use crate::media::Color;
 use crate::numerics::{Matrix3x2, Matrix4x4, Quaternion, Vector2, Vector3, Vector4};
-use std::cell::{OnceCell, RefCell};
+use std::cell::RefCell;
 use std::collections::HashMap;
 use std::rc::Rc;
 
@@ -152,10 +152,16 @@ impl CompositionPropertySet {
     }
 
     pub(crate) fn snapshot(&self) -> PropertySetSnapshot {
+        self.snapshot_source().build()
+    }
+
+    /// The snapshot in the form that is sent to the server, which builds
+    /// the snapshot from it.
+    pub(crate) fn snapshot_source(&self) -> PropertySetSnapshotSource {
         self.snapshot_core(1)
     }
 
-    fn snapshot_core(&self, allowed_nesting_level: i32) -> PropertySetSnapshot {
+    fn snapshot_core(&self, allowed_nesting_level: i32) -> PropertySetSnapshotSource {
         let objects: Vec<(String, Rc<dyn AsCompositionObject>)> =
             self.objects.borrow().iter().map(|(k, v)| (k.clone(), v.clone())).collect();
         let variants = self.variants.borrow();
@@ -169,25 +175,20 @@ impl CompositionPropertySet {
                 }
                 dic.insert(
                     key,
-                    PropertySetSnapshotValue::from_object(PropertySetSnapshotObject::PropertySet(Rc::new(
-                        ps.snapshot_core(allowed_nesting_level - 1),
-                    ))),
+                    PropertySetSnapshotSourceValue::PropertySet(ps.snapshot_core(allowed_nesting_level - 1)),
                 );
             } else if let Some(server) = server {
-                dic.insert(
-                    key,
-                    PropertySetSnapshotValue::from_object(PropertySetSnapshotObject::Server(server, OnceCell::new())),
-                );
+                dic.insert(key, PropertySetSnapshotSourceValue::Server(server));
             } else {
                 panic!("Object of type {type_name} is not allowed");
             }
         }
 
         for (key, value) in variants.iter() {
-            dic.insert(key.clone(), (*value).into());
+            dic.insert(key.clone(), PropertySetSnapshotSourceValue::Variant(*value));
         }
 
-        PropertySetSnapshot::new(dic)
+        PropertySetSnapshotSource::new(dic)
     }
 }
 

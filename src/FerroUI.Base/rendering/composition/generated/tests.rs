@@ -511,11 +511,17 @@ impl ICompositionAnimation for FakeAnimation {
         &self,
         target_object: ServerObjectId,
         final_value: Option<ExpressionVariant>,
-    ) -> Rc<dyn IAnimationInstance> {
+    ) -> crate::rendering::composition::animations::AnimationInstanceFactory {
         let instance =
             Rc::new(FakeAnimationInstance { target: target_object, final_value, state: RefCell::default() });
         self.created.borrow_mut().push(instance.clone());
-        instance
+        // The tests look at the instance before the server has it, and run
+        // the server on their own thread: the factory hands out the instance
+        // made here.
+        let instance = crate::utilities::ThreadBound::new(instance);
+        crate::rendering::composition::animations::AnimationInstanceFactory::new(move || {
+            instance.get().clone() as Rc<dyn IAnimationInstance>
+        })
     }
 }
 

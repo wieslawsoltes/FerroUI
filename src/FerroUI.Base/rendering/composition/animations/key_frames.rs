@@ -47,7 +47,7 @@ impl<T: Copy + Default + 'static> KeyFrames<T> {
         self.items.push(KeyFrame {
             normalized_progress_key,
             value: T::default(),
-            expression: Some(Rc::new(expression)),
+            expression: Some(std::sync::Arc::new(expression)),
             easing_function,
         });
     }
@@ -63,7 +63,7 @@ impl<T: Copy + Default + 'static> KeyFrames<T> {
             .map(|f| ServerKeyFrame {
                 expression: f.expression.clone(),
                 value: f.value,
-                easing_function: Some(f.easing_function.clone()),
+                easing_function: Some(f.easing_function.to_shared()),
                 key: f.normalized_progress_key,
             })
             .collect()
@@ -77,7 +77,7 @@ pub struct KeyFrame<T> {
     pub value: T,
     /// The expression of an expression key frame (`null` upstream for a
     /// value key frame).
-    pub expression: Option<Rc<Expression>>,
+    pub expression: Option<std::sync::Arc<Expression>>,
     pub easing_function: Rc<dyn IEasing>,
 }
 
@@ -85,10 +85,11 @@ pub struct KeyFrame<T> {
 #[derive(Clone, Default)]
 pub struct ServerKeyFrame<T> {
     pub value: T,
-    pub expression: Option<Rc<Expression>>,
+    pub expression: Option<std::sync::Arc<Expression>>,
     /// Always set on a key frame of a snapshot; `None` only on the frame an
     /// instance builds for the starting value, whose easing is never used.
-    pub easing_function: Option<Rc<dyn IEasing>>,
+    /// The easing in the form the render thread evaluates.
+    pub easing_function: Option<std::sync::Arc<crate::animation::easings::SharedEasing>>,
     pub key: f32,
 }
 

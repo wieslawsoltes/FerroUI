@@ -5,7 +5,7 @@ use crate::media::{
     BoxShadows, EffectExtensions, Geometry, GlyphRun, IBrush, IEffect, IExperimentalAcrylicMaterial, IPen,
     RenderOptions, TextOptions,
 };
-use crate::platform::{IBitmapImpl, IDrawingContextImpl, IGeometryImpl};
+use crate::platform::{IDrawingContextImpl, IGeometryImpl};
 use crate::rendering::scene_graph::ICustomDrawOperation;
 use crate::{Matrix, Point, Rect, Ref, RoundedRect};
 use std::cell::RefCell;

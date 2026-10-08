@@ -1,5 +1,5 @@
-use crate::media::{BoxShadows, IBrush, IEffect, IPen, RenderOptions, TextOptions};
-use crate::platform::{IBitmapImpl, IGeometryImpl, IGlyphRunImpl};
+use crate::media::{BoxShadows, IBrush, IPen, RenderOptions, TextOptions};
+use crate::platform::{IGeometryImpl, IGlyphRunImpl};
 use crate::rendering::scene_graph::ICustomDrawOperation;
 use crate::{Matrix, Point, Rect, RoundedRect};
 use std::sync::Arc;

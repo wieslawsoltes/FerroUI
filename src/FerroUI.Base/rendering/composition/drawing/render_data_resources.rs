@@ -1,6 +1,6 @@
 use super::IRenderDataGeometry;
-use crate::media::{IBrush, IEffect, IPen};
-use crate::platform::{IBitmapImpl, IGeometryImpl, IGlyphRunImpl};
+use crate::media::{IBrush, IPen};
+use crate::platform::{IGeometryImpl, IGlyphRunImpl};
 use crate::rendering::composition::server::ServerObjectId;
 use crate::rendering::scene_graph::ICustomDrawOperation;
 use std::collections::HashMap;

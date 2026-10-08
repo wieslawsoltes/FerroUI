@@ -1,6 +1,6 @@
 use super::{IRenderDataVisitor, RenderDataStream};
 use crate::media::{BoxShadows, IBrush, IEffect, IPen, RenderOptions, TextOptions};
-use crate::platform::{IBitmapImpl, IGeometryImpl, IGlyphRunImpl};
+use crate::platform::{IGeometryImpl, IGlyphRunImpl};
 use crate::rendering::scene_graph::{ICustomDrawOperation, LineBoundsHelper};
 use crate::{Matrix, Point, Rect, RoundedRect, Thickness};
 use std::sync::Arc;
