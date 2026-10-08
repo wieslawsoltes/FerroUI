@@ -27,6 +27,9 @@
   does, so `themed_window` still links it; section 9). Corpus: 109 of 109 documents eligible, all
   match; theme documents: 165 of 165 eligible. See section 9 for the measurements.
 - Stage E5 is next (section 9). Nothing is half-done in the working tree of E4.
+- Stage E5, steps 1 and 2 are DONE: the loader table (#43) and includes across crates through the
+  `.xamlmeta` of each crate (#53, `xaml.md` 9.7.3 and the E5 status of 9.10.1; fixture
+  `tests/XamlIncludeFixture`). Next: build integration (`compile_xaml()`), then the compiled catalog.
 
 Design documents in the repository: `docs/porting/xaml.md`, sections 9 (emitter design: call forms
 A/B/C, build integration, code-behind), 9.5 (source scanner), 9.12 (the 14 rulings), 9.13, and

@@ -68,25 +68,30 @@ The stage-table row "E5 Includes and assets" in `xaml.md` (9.10.1), and items 3 
 - The `remove-compiled-documents` feature is gone. Its deviation row moved to "Corrected divergences".
 - One seam is recorded in `xaml.md` 9.10.1: the caller of `generate_class_file` states the class constructor. Upstream picks it from the assembly; the port has no build-time type system of the crate yet.
 
+**Done: step 2, includes across crates (#53).**
+- A crate with compiled markup writes `compiled_xaml.xamlmeta` (`rust_emitter::XamlMetadata`, the `documents[]` of `xaml.md` 9.5.1) next to its generated file; both themes do.
+- The emitter's transform puts `CompiledFerroXaml.!FerroResources` with `Build:<path>` methods on the assembly of each dependency (`CompiledMarkupTypeSystem`), so upstream's include transformer links an include of another crate's document to its build function, or to its class. A merge include of another crate's document is upstream's error.
+- The include group transformers were compared with upstream; the emitter's transform has no run-time include fallback.
+- `generate_file` now links includes within its group, and the emitter writes source information (`CreateSourceInfo`).
+- Fixture: `tests/XamlIncludeFixture` (library `xaml-include-fixture-theme`, application `xaml-include-fixture-application`), running upstream's `ResourceIncludeTests`, `StyleIncludeTests` and `MergeResourceIncludeTests` against compiled documents.
+
 Remaining, in order. #43's "Continuation" section has the upstream files for each step.
 
-1. **Includes across crates.**
-   - `StyleInclude`, `ResourceInclude` and `MergeResourceInclude` resolve compiled documents of another crate at build time, through its `.xamlmeta` `documents[]` (`xaml.md` 9.7.3).
-   - Port upstream's `XamlIncludeGroupTransformer` and `XamlMergeResourceGroupTransformer`.
-   - The test is a two-crate fixture (theme library and application) running upstream's `ResourceIncludeTests`, `StyleIncludeTests` and `MergeResourceIncludeTests`.
-2. **Build integration.**
+1. **Build integration.**
    - `compile_xaml()` / `embed_assets()` (`xaml.md` 9.6) replace the checked-in `compiled_xaml.rs`, with `register()` (R8) and the generated `register_types` of 9.7.4.
    - The constructor choice of the seam moves into the compiler.
+   - The `.xamlmeta` files travel through Cargo `links` metadata (`DEP_<CRATE>_XAML_XAMLMETA`, `xaml.md` 9.6.3); today each generator names the checked-in files of its dependencies (`DEPENDENCIES` in the fixture application's `tests/compiled_xaml_tests.rs`).
    - The `XamlIlTests` that load compiled documents of the test assembly can then be ported.
-3. **The catalog compiled.**
+2. **The catalog compiled.**
    - Its 219 documents and the `x:Class` documents of `src/FerroUI.Dialogs`, so that neither links the run-time loader.
    - The estimate is +6 to +10 MB raw and +0.5 to +1.2 MB gzip on the catalog module, against 0.24 s less CPU before the first frame.
    - Measure a few pages first. If the growth exceeds the estimate, the owner decides on the merge.
-4. **Measure #43.** Measure `themed_view` and `control-catalog-browser` for #43's change (not measured yet) and add the table to section 20. `themed_view` is expected to lose the 168 theme documents, as the catalog did in #35.
+3. **Measure #43.** Measure `themed_view` and `control-catalog-browser` for #43's change (not measured yet) and add the table to section 20. `themed_view` is expected to lose the 168 theme documents, as the catalog did in #35.
 
 Regenerating output:
 - Corpus: `cargo test -p ferroui-markup-xaml-tests --lib emitter::differential_tests::regenerate_emitter_output -- --ignored --exact`.
 - Themes: `cargo test -p ferroui-themes-<fluent|simple> --lib tests::compiled_xaml_tests::regenerate_compiled_xaml -- --ignored`.
+- Include fixture (library first, the application reads its `.xamlmeta`): `cargo test -p xaml-include-fixture-<theme|application> --lib tests::compiled_xaml_tests::regenerate_compiled_xaml -- --ignored`.
 - Regenerate twice and diff before every push.
 
 ### 3. Core port: the remaining upstream suites
