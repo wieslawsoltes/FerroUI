@@ -178,7 +178,8 @@ impl FerroXamlIlRuntimeCompiler {
             Some(group) => group,
             None => {
                 let type_system = runtime_type_system.as_type_system();
-                let group = Rc::new(Self::transform_group(&runtime_type_system, type_system, &sources, configuration)?);
+                let group =
+                    Rc::new(Self::transform_group(&runtime_type_system, type_system, &sources, configuration, true)?);
                 if let Some(key) = cache_key {
                     GROUPS.with(|groups| {
                         let mut groups = groups.borrow_mut();
@@ -274,7 +275,7 @@ impl FerroXamlIlRuntimeCompiler {
                 base_uri: base_uri.clone(),
             })
             .collect();
-        let group = Self::transform_group(&runtime_type_system, type_system, &sources, configuration)?;
+        let group = Self::transform_group(&runtime_type_system, type_system, &sources, configuration, false)?;
         let mut transformed = Vec::with_capacity(group.providers.len());
         for provider in &group.providers {
             let (root, configuration, document) =
@@ -288,11 +289,18 @@ impl FerroXamlIlRuntimeCompiler {
     /// populate methods: everything of `LoadGroup` up to running them. The transformers
     /// see `type_system`: the run-time type system, or (for the emitter) the run-time
     /// type system with the compiled markup of other crates.
+    ///
+    /// `run_time_includes`: whether an include of a document of an assembly without
+    /// compiled markup may stay a run-time include (`XamlRuntimeIncludeFallback`, xaml.md
+    /// decision 22). The run-time loader allows it; the emitter does not, so that its
+    /// output does not depend on what the process that generates it can load, and an
+    /// include is linked or reported exactly as upstream's build does.
     fn transform_group(
         runtime_type_system: &Rc<RuntimeTypeSystem>,
         type_system: Rc<dyn IXamlTypeSystem>,
         sources: &[DocumentSource],
         configuration: &RuntimeXamlLoaderConfiguration,
+        run_time_includes: bool,
     ) -> XamlResult<TransformedGroup> {
         let runtime_type_system = runtime_type_system.clone();
 
@@ -351,6 +359,11 @@ impl FerroXamlIlRuntimeCompiler {
         )?;
         let transformer_configuration = compiler_configuration.as_transformer_configuration().clone();
         framework::configure_configuration(&transformer_configuration);
+        if !run_time_includes {
+            transformer_configuration
+                .get_or_create_extra::<crate::compiler_extensions::group_transformers::XamlRuntimeIncludeFallback>()
+                .set(None);
+        }
 
         let compiler = FerroXamlIlCompiler::new(transformer_configuration.clone())?;
         compiler.set_default_compile_bindings(configuration.use_compiled_bindings_by_default);

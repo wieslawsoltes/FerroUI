@@ -67,7 +67,10 @@ pub const COMPILED_RESOURCES_TYPE_NAME: &str = "CompiledFerroXaml.!FerroResource
 /// The fallback applies only where upstream reports that the assembly or its
 /// compiled-resources type is missing: a document that is missing from an assembly that
 /// does have compiled markup stays an error, and so does everything else. Without a
-/// predicate (the default, and what a build-time compilation uses) nothing changes.
+/// predicate (the default, and what the emitter's compilation uses) nothing changes.
+///
+/// Deviation (xaml.md, decision 22): upstream has no such fallback; it exists for the
+/// run-time loader of assemblies that have no compiled markup.
 #[derive(Default)]
 pub struct XamlRuntimeIncludeFallback {
     can_load: std::cell::RefCell<Option<Rc<dyn Fn(&str) -> bool>>>,
