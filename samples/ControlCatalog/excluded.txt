@@ -55,7 +55,6 @@ Pages/NavigationPage/NavigationPageInteractiveHeaderPage.xaml | pending: the cla
 Pages/NavigationPage/NavigationPageMvvmPage.xaml | pending: the class of the document is not ported yet
 Pages/NavigationPage/NavigationPagePassDataPage.xaml | pending: the class of the document is not ported yet
 Pages/NavigationPage/NavigationPagePerformancePage.xaml | code-behind: NavigationPerformanceMonitorHelper (measures the managed heap: GC.GetTotalMemory, GC.Collect)
-Pages/NavigationPage/NavigationPageScrollAwarePage.xaml | pending: the class of the document is not ported yet
 Pages/NavigationPage/NavigationPageTransitionsPage.xaml | pending: the class of the document is not ported yet
 Pages/NavigationPage/PulseAppPage.xaml | pending: the class of the document is not ported yet
 Pages/NavigationPage/RetroGamingAppPage.xaml | pending: the class of the document is not ported yet
