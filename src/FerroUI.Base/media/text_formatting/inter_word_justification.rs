@@ -6,8 +6,10 @@ use crate::media::text_formatting::unicode::LineBreakEnumerator;
 use crate::media::text_formatting::{GlyphInfo, JustificationProperties, ShapedBuffer, ShapedTextRun, TextLine, TextRun};
 
 /// Justifies a line by widening the gaps at its break opportunities.
+///
+/// Internal upstream; public so the Skia unit tests reach it.
 #[allow(dead_code)] // constructed by the text layout (a later step)
-pub(crate) struct InterWordJustification {
+pub struct InterWordJustification {
     width: f64,
 }
 

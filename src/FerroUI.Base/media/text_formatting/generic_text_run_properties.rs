@@ -21,7 +21,8 @@ pub struct GenericTextRunProperties {
 }
 
 impl GenericTextRunProperties {
-    pub(crate) const DEFAULT_FONT_RENDERING_EM_SIZE: f64 = 12.0;
+    // Internal upstream; public so the Skia unit tests reach it.
+    pub const DEFAULT_FONT_RENDERING_EM_SIZE: f64 = 12.0;
 
     /// Creates properties for a typeface with the default em size (12) and
     /// nothing else set.
