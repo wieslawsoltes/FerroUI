@@ -2,6 +2,7 @@
 
 mod empty_shaped_buffer_tests;
 mod multi_buffer_text_source;
+mod shaped_buffer_shared_storage_tests;
 mod single_buffer_text_source;
 mod tables;
 mod text_collapsing_bidi_tests;
