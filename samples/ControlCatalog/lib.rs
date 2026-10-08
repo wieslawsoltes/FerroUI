@@ -29,7 +29,6 @@ pub mod markup;
 mod page_assets;
 mod register_types;
 mod smoke;
-pub mod temporary;
 mod transparent_styles;
 
 #[path = "Controls/mod.rs"]

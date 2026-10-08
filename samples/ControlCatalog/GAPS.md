@@ -27,13 +27,6 @@ Status: 219 documents, 193 load and show their class; 26 are listed below (one o
 
 One gap of the framework blocks no document of the list: C101, a reflection binding (`x:CompileBindings="False"`) cannot resolve `$parent[prefix:Type]` for a type of a `using:` namespace (`gaps_a::gap_c101_reflection_binding_parent_of_prefixed_type`). The theme of `SampleGalleryPage` uses such paths with compiled bindings, which resolve them.
 
-## Types and assemblies that are not ported
-
-| Document | Missing |
-|---|---|
-| `MainWindow.xaml` | `Win32Properties` (the attached property `WindowCornerPreference`). The window loads the rest of the document (`temporary.rs`). |
-| `Pages/WindowCustomizationsPage.xaml` | `Win32Properties`; `MainWindowViewModel.Win32WindowCornerPreferences` and `Win32WindowCornerPreference` wait for it. |
-
 ## Code-behind that needs framework API the port does not have
 
 | Document | Missing API |
