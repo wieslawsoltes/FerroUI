@@ -15,6 +15,7 @@ mod gaps_c;
 mod gaps_d;
 mod frame_benchmark;
 mod navigation_pages_b;
+mod navigation_pages_a;
 mod page_assets;
 mod support;
 mod survey;
