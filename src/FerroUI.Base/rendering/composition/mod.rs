@@ -133,6 +133,8 @@ pub use animations::{
 #[cfg(test)]
 mod compositor_tests;
 #[cfg(test)]
+mod render_thread_tests;
+#[cfg(test)]
 mod composition_drawing_surface_tests;
 #[cfg(test)]
 pub(crate) mod test_compositor;
