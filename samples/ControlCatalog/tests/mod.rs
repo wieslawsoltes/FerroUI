@@ -4,6 +4,8 @@
 //! `document_<name>` loads the document through the run-time loader and
 //! `class_<name>` constructs its class and shows it in a window. A test of a
 //! document `excluded.txt` lists is ignored with the reason of the list.
+//! The tests of a document start the application `test_applications.txt`
+//! names for it.
 //! `gaps` holds the minimal reproductions of the gaps of the framework the
 //! list names.
 

@@ -34,7 +34,9 @@
 //! through the run-time loader) and one per document with a class (the
 //! class constructs, loads its document and is shown in a window); a test
 //! of a document `excluded.txt` lists is ignored with the reason of the
-//! list.
+//! list. The tests of a document start the application
+//! `test_applications.txt` names for it, the unit test application of the
+//! tests when the document is not listed there.
 
 #[path = "build/page_files.rs"]
 mod page_files;
@@ -47,6 +49,14 @@ use std::path::{Path, PathBuf};
 
 /// The list of the documents that do not load yet.
 const EXCLUDED_LIST: &str = "excluded.txt";
+
+/// The list of the documents whose generated tests start another
+/// application than the unit test application of the tests.
+const TEST_APPLICATION_LIST: &str = "test_applications.txt";
+
+/// The applications a line of [`TEST_APPLICATION_LIST`] can name, with the
+/// variant of `TestApplication` (`tests/support.rs`) of each.
+const TEST_APPLICATIONS: &[(&str, &str)] = &[("unit-test", "UnitTest"), ("catalog", "Catalog")];
 
 /// The directory of the placeholder artwork of the feature
 /// `placeholder-branding`, with the layout of `Assets/`.
@@ -329,6 +339,30 @@ fn main() {
     }
     text.push_str("];\n");
 
+    // The application the tests of a document start: `<file> | <application>` per line.
+    let test_applications_path = root.join(TEST_APPLICATION_LIST);
+    println!("cargo::rerun-if-changed={}", test_applications_path.display());
+    let mut test_applications = BTreeMap::new();
+    for line in fs::read_to_string(&test_applications_path).unwrap_or_default().lines() {
+        let line = line.trim();
+        if line.is_empty() || line.starts_with('#') {
+            continue;
+        }
+        let (file, application) = line.split_once('|').unwrap_or((line, ""));
+        let asset_path = format!("/{}", file.trim());
+        assert!(
+            assets.iter().any(|(path, _)| *path == asset_path),
+            "{TEST_APPLICATION_LIST} names {asset_path}, which is not a document of the crate"
+        );
+        let application = application.trim();
+        let variant = TEST_APPLICATIONS
+            .iter()
+            .find(|(name, _)| *name == application)
+            .map(|(_, variant)| *variant)
+            .unwrap_or_else(|| panic!("{TEST_APPLICATION_LIST} names the application {application:?} for {asset_path}"));
+        test_applications.insert(asset_path, variant);
+    }
+
     // The documents and the classes they name.
     text.push_str("pub(crate) static DOCUMENTS: &[(&str, Option<&str>)] = &[\n");
     let mut tests = String::new();
@@ -348,14 +382,24 @@ fn main() {
         } else {
             tests.push_str("#[test]\n");
         }
-        writeln!(tests, "fn document_{name}() {{\n    super::support::document_loads({asset_path:?});\n}}\n").expect("write");
+        let application = test_applications.get(asset_path).copied().unwrap_or(TEST_APPLICATIONS[0].1);
+        let application = format!("super::support::TestApplication::{application}");
+        writeln!(
+            tests,
+            "fn document_{name}() {{\n    super::support::document_loads({asset_path:?}, {application});\n}}\n"
+        )
+        .expect("write");
         if class.is_some() {
             if let Some(reason) = page_reason {
                 writeln!(tests, "#[test]\n#[ignore = {reason:?}]").expect("write");
             } else {
                 tests.push_str("#[test]\n");
             }
-            writeln!(tests, "fn class_{name}() {{\n    super::support::class_constructs({asset_path:?});\n}}\n").expect("write");
+            writeln!(
+                tests,
+                "fn class_{name}() {{\n    super::support::class_constructs({asset_path:?}, {application});\n}}\n"
+            )
+            .expect("write");
         }
     }
     text.push_str("];\n");
