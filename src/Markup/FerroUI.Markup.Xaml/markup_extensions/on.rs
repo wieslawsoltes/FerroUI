@@ -1,5 +1,6 @@
 //! Port of `MarkupExtensions/On.cs`.
 
+use ferroui_base::metadata::IAddChild;
 use ferroui_base::{ferro_markup_type, BoxedValue};
 use std::cell::RefCell;
 use std::rc::Rc;
@@ -65,5 +66,22 @@ ferro_markup_type!(class On as "On" {
     ],
     methods: [
         fn AddOption(String) => |on: &Rc<On>, option: String| on.add_option(option),
+    ],
+});
+
+/// Carries the metadata of `IAddChild<On>`, the contract of the option markup
+/// extensions (`OnPlatform`, `OnFormFactor`): with it markup finds how the
+/// `On` children of an extension written as an element are added, as it
+/// does for a type without a content property.
+#[doc(hidden)]
+pub struct AddChildOfOn;
+
+ferro_markup_type!(interface AddChildOfOn as "IAddChild`1" {
+    namespace: "FerroUI.Metadata",
+    handles: [Rc<dyn IAddChild<Rc<On>>>, Option<Rc<dyn IAddChild<Rc<On>>>>],
+    this: Rc<dyn IAddChild<Rc<On>>>,
+    generic: "IAddChild`1" [Rc<On>],
+    methods: [
+        fn AddChild(Rc<On>) => |this: &Rc<dyn IAddChild<Rc<On>>>, child: Rc<On>| this.add_child(child),
     ],
 });

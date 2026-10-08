@@ -9,7 +9,7 @@ use crate::converters::{
 use crate::diagnostics::XamlSourceInfo;
 use crate::markup_extensions::compiled_bindings::PropertyInfoAccessorFactory;
 use crate::markup_extensions::{
-    CompiledBindingExtension, DynamicResourceExtension, On, OnFormFactorExtension, OnPlatformExtension,
+    AddChildOfOn, CompiledBindingExtension, DynamicResourceExtension, On, OnFormFactorExtension, OnPlatformExtension,
     ReflectionBindingExtension, RelativeSourceExtension, ResolveByNameExtension, StaticResourceExtension,
 };
 use crate::styling::{MergeResourceInclude, ResourceInclude, StyleInclude};
@@ -162,6 +162,9 @@ pub fn register_types() {
         TypeInfo::register_all(TYPES);
         crate::rust_paths::register_rust_paths();
         MarkupType::register_all(MARKUP_TYPES);
+        // An instantiation of a contract of the base crate, not a type of the namespaces of
+        // this crate: `IAddChild<On>`.
+        MarkupType::register(<AddChildOfOn as MarkupTyped>::MARKUP);
         MarkupAssembly::register(&ASSEMBLY);
         ValueTypes::register_global(register_value_types);
     });
@@ -508,6 +511,22 @@ mod tests {
         assert_eq!(types(factory, "CreateInpcPropertyAccessor"), [(true, t![WeakValue, Info], r![Accessor])]);
         assert_eq!(types(factory, "CreateFerroPropertyAccessor"), [(true, t![WeakValue, Info], r![Accessor])]);
         assert_eq!(types(factory, "CreateIndexerPropertyAccessor"), [(true, t![WeakValue, Info, i32], r![Accessor])]);
+
+        // Option markup extensions add their `On` children through `IAddChild<On>`, which is
+        // how the children of the element form are found (the extensions have no content property).
+        let add_child = MarkupType::find_by_handle(std::any::TypeId::of::<Rc<dyn IAddChild<Rc<On>>>>())
+            .expect("the metadata of IAddChild<On>");
+        assert!(std::ptr::eq(add_child, <AddChildOfOn as MarkupTyped>::MARKUP));
+        assert_eq!(add_child.full_name(), "FerroUI.Metadata.IAddChild`1");
+        assert_eq!(
+            add_child.generic.map(|generic| (generic.definition, (generic.arguments[0])())),
+            Some(("IAddChild`1", ValueType::of::<Rc<On>>()))
+        );
+        assert_eq!(types(add_child, "AddChild"), [(false, t![Rc<On>], None)]);
+        for extension in [<OnPlatformExtension as MarkupTyped>::MARKUP, <OnFormFactorExtension as MarkupTyped>::MARKUP] {
+            assert!(extension.content_property.is_none());
+            assert!(extension.interfaces.iter().any(|i| i() == ValueType::of::<Rc<dyn IAddChild<Rc<On>>>>()));
+        }
 
         // Option markup extensions: `bool ShouldProvideOption(..)` with one or two parameters.
         assert_eq!(types(<OnPlatformExtension as MarkupTyped>::MARKUP, "ShouldProvideOption"), [(true, t![String], r![bool])]);
