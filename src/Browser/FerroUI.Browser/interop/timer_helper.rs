@@ -4,9 +4,16 @@ use wasm_bindgen::prelude::*;
 
 #[wasm_bindgen(raw_module = "./ferroui.js")]
 extern "C" {
-    /// Starts the perpetual animation frame loop of the page.
+    /// Starts the perpetual animation frame loop of the calling thread: of
+    /// the page, or of the worker of a render thread.
     #[wasm_bindgen(js_namespace = TimerHelper, js_name = runAnimationFrames)]
     pub fn run_animation_frames();
+
+    /// The clock the timestamps of the animation frames of the calling
+    /// thread are read from, in milliseconds. Not from upstream: a frame out
+    /// of turn has no animation frame to take its timestamp from.
+    #[wasm_bindgen(js_namespace = TimerHelper, js_name = now)]
+    pub fn now() -> f64;
 }
 
 thread_local! {

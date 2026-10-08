@@ -8,4 +8,10 @@ export class TimerHelper {
         }
         self.requestAnimationFrame(render);
     }
+
+    // Not in the original. The clock of the timestamps of the animation frames of this thread
+    // (each worker has a time origin of its own), for a frame that is rendered out of turn.
+    public static now(): number {
+        return performance.now();
+    }
 }
