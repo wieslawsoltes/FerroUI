@@ -295,7 +295,7 @@ impl IDrawingContextCore for RenderDataDrawingContext {
         self.stream().draw_ellipse(server_brush, server_pen, client_pen, rect);
     }
 
-    fn draw_bitmap(&mut self, source: &Rc<dyn IBitmapImpl>, opacity: f64, source_rect: Rect, dest_rect: Rect) {
+    fn draw_bitmap(&mut self, source: &std::sync::Arc<crate::platform::SharedBitmapImpl>, opacity: f64, source_rect: Rect, dest_rect: Rect) {
         if source_rect.is_empty() || dest_rect.is_empty() {
             return;
         }

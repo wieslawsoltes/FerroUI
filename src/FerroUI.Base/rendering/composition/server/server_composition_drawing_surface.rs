@@ -29,7 +29,7 @@ fn context_lost() -> Rc<dyn std::error::Error> {
 /// a surface whose content is a snapshot of an imported GPU image.
 pub struct ServerCompositionDrawingSurface {
     compositor: Weak<ServerCompositor>,
-    bitmap: RefCell<Option<RefCounted<dyn IBitmapImpl>>>,
+    bitmap: RefCell<Option<RefCounted<crate::platform::SharedBitmapImpl>>>,
     created_with_context: RefCell<Option<Rc<dyn IPlatformRenderInterfaceContext>>>,
     disposed: Cell<bool>,
     changed: ServerCompositionSurfaceChanged,
@@ -55,7 +55,7 @@ impl ServerCompositionDrawingSurface {
     }
 
     /// The counted reference to the content of the surface.
-    pub fn bitmap_ref(&self) -> Option<RefCounted<dyn IBitmapImpl>> {
+    pub fn bitmap_ref(&self) -> Option<RefCounted<crate::platform::SharedBitmapImpl>> {
         // Failsafe to avoid consuming an image imported with a different context
         let current = self.current_context();
         let same = self
@@ -88,7 +88,7 @@ impl ServerCompositionDrawingSurface {
         Ok(())
     }
 
-    fn update(&self, new_image: Rc<dyn IBitmapImpl>, context: Rc<dyn IPlatformRenderInterfaceContext>) {
+    fn update(&self, new_image: std::sync::Arc<crate::platform::SharedBitmapImpl>, context: Rc<dyn IPlatformRenderInterfaceContext>) {
         if self.disposed.get() {
             // Batches are processed with disposals before server jobs, so an update job
             // can be processed after this surface was disposed in the same batch.
@@ -203,7 +203,7 @@ impl IServerObject for ServerCompositionDrawingSurface {
 }
 
 impl IServerCompositionSurface for ServerCompositionDrawingSurface {
-    fn bitmap(&self) -> Option<Rc<dyn IBitmapImpl>> {
+    fn bitmap(&self) -> Option<std::sync::Arc<crate::platform::SharedBitmapImpl>> {
         self.bitmap_ref().map(|bitmap| bitmap.item())
     }
 

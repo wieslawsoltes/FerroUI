@@ -54,7 +54,7 @@ fn aliased() -> RenderOptions {
 
 /// A 100x100 render target bitmap and helpers to draw into it and read it.
 struct Target {
-    bitmap: Rc<dyn IRenderTargetBitmapImpl>,
+    bitmap: std::sync::Arc<dyn IRenderTargetBitmapImpl>,
 }
 
 impl Target {
@@ -806,7 +806,7 @@ fn push_layer_isolates_drawing_until_popped() {
     assert_eq!(BLUE, target.pixel(75, 50));
 }
 
-fn checker_bitmap() -> Rc<dyn IBitmapImpl> {
+fn checker_bitmap() -> std::sync::Arc<ferroui_base::platform::SharedBitmapImpl> {
     // 2x2: red, blue / blue, red (BGRA premultiplied).
     let red = [0u8, 0, 255, 255];
     let blue = [255u8, 0, 0, 255];
@@ -905,7 +905,7 @@ fn bitmap_can_be_drawn_through_an_opacity_mask() {
 
 #[test]
 fn render_options_are_merged_and_restored() {
-    let bitmap = Rc::new(RenderTargetBitmapImpl::new(PixelSize::new(10, 10), DPI));
+    let bitmap = std::sync::Arc::new(RenderTargetBitmapImpl::new(PixelSize::new(10, 10), DPI));
     let mut context = bitmap.create_drawing_context();
 
     context.push_render_options(aliased());
@@ -961,7 +961,7 @@ fn antialiasing_follows_the_edge_mode() {
 
 #[test]
 fn lease_gives_access_to_the_surface_and_blocks_the_context() {
-    let bitmap = Rc::new(RenderTargetBitmapImpl::new(PixelSize::new(20, 20), DPI));
+    let bitmap = std::sync::Arc::new(RenderTargetBitmapImpl::new(PixelSize::new(20, 20), DPI));
     let mut context = bitmap.create_drawing_context();
     context.set_transform(Matrix::create_translation(5.0, 5.0));
 
@@ -1482,7 +1482,7 @@ fn geometries_of_another_backend_are_not_recognized() {
 // Bitmaps
 // ---------------------------------------------------------------------------
 
-fn red_writeable_bitmap(width: i32, height: i32) -> Rc<WriteableBitmapImpl> {
+fn red_writeable_bitmap(width: i32, height: i32) -> std::sync::Arc<WriteableBitmapImpl> {
     let bitmap = WriteableBitmapImpl::new(PixelSize::new(width, height), DPI, PixelFormat::BGRA8888, AlphaFormat::Premul);
     let framebuffer = bitmap.lock();
     // SAFETY: the locked framebuffer is `row_bytes * height` bytes long.

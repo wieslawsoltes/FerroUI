@@ -425,7 +425,7 @@ mod tests {
             unimplemented!()
         }
 
-        fn create_render_target_bitmap(&self, _size: PixelSize, _dpi: Vector) -> Rc<dyn IRenderTargetBitmapImpl> {
+        fn create_render_target_bitmap(&self, _size: PixelSize, _dpi: Vector) -> std::sync::Arc<dyn IRenderTargetBitmapImpl> {
             unimplemented!()
         }
 
@@ -435,15 +435,15 @@ mod tests {
             _dpi: Vector,
             _format: PixelFormat,
             _alpha_format: AlphaFormat,
-        ) -> Rc<dyn IWriteableBitmapImpl> {
+        ) -> std::sync::Arc<dyn IWriteableBitmapImpl> {
             unimplemented!()
         }
 
-        fn load_bitmap_from_file(&self, _file_name: &str) -> std::io::Result<Rc<dyn IBitmapImpl>> {
+        fn load_bitmap_from_file(&self, _file_name: &str) -> std::io::Result<std::sync::Arc<crate::platform::SharedBitmapImpl>> {
             unimplemented!()
         }
 
-        fn load_bitmap(&self, _stream: &mut dyn Read) -> std::io::Result<Rc<dyn IBitmapImpl>> {
+        fn load_bitmap(&self, _stream: &mut dyn Read) -> std::io::Result<std::sync::Arc<crate::platform::SharedBitmapImpl>> {
             unimplemented!()
         }
 
@@ -452,7 +452,7 @@ mod tests {
             _stream: &mut dyn Read,
             _width: i32,
             _interpolation_mode: BitmapInterpolationMode,
-        ) -> std::io::Result<Rc<dyn IWriteableBitmapImpl>> {
+        ) -> std::io::Result<std::sync::Arc<dyn IWriteableBitmapImpl>> {
             unimplemented!()
         }
 
@@ -461,15 +461,15 @@ mod tests {
             _stream: &mut dyn Read,
             _height: i32,
             _interpolation_mode: BitmapInterpolationMode,
-        ) -> std::io::Result<Rc<dyn IWriteableBitmapImpl>> {
+        ) -> std::io::Result<std::sync::Arc<dyn IWriteableBitmapImpl>> {
             unimplemented!()
         }
 
-        fn load_writeable_bitmap_from_file(&self, _file_name: &str) -> std::io::Result<Rc<dyn IWriteableBitmapImpl>> {
+        fn load_writeable_bitmap_from_file(&self, _file_name: &str) -> std::io::Result<std::sync::Arc<dyn IWriteableBitmapImpl>> {
             unimplemented!()
         }
 
-        fn load_writeable_bitmap(&self, _stream: &mut dyn Read) -> std::io::Result<Rc<dyn IWriteableBitmapImpl>> {
+        fn load_writeable_bitmap(&self, _stream: &mut dyn Read) -> std::io::Result<std::sync::Arc<dyn IWriteableBitmapImpl>> {
             unimplemented!()
         }
 
@@ -478,7 +478,7 @@ mod tests {
             _stream: &mut dyn Read,
             _width: i32,
             _interpolation_mode: BitmapInterpolationMode,
-        ) -> std::io::Result<Rc<dyn IBitmapImpl>> {
+        ) -> std::io::Result<std::sync::Arc<crate::platform::SharedBitmapImpl>> {
             unimplemented!()
         }
 
@@ -487,7 +487,7 @@ mod tests {
             _stream: &mut dyn Read,
             _height: i32,
             _interpolation_mode: BitmapInterpolationMode,
-        ) -> std::io::Result<Rc<dyn IBitmapImpl>> {
+        ) -> std::io::Result<std::sync::Arc<crate::platform::SharedBitmapImpl>> {
             unimplemented!()
         }
 
@@ -496,7 +496,7 @@ mod tests {
             _bitmap_impl: &dyn IBitmapImpl,
             _destination_size: PixelSize,
             _interpolation_mode: BitmapInterpolationMode,
-        ) -> Rc<dyn IBitmapImpl> {
+        ) -> std::sync::Arc<crate::platform::SharedBitmapImpl> {
             unimplemented!()
         }
 
@@ -508,7 +508,7 @@ mod tests {
             _size: PixelSize,
             _dpi: Vector,
             _stride: i32,
-        ) -> Rc<dyn IBitmapImpl> {
+        ) -> std::sync::Arc<crate::platform::SharedBitmapImpl> {
             unimplemented!()
         }
 

@@ -181,13 +181,13 @@ impl SurfaceRenderTarget {
     /// # Panics
     /// Panics when the render target has no render context affinity or its
     /// contents cannot be read back.
-    pub fn create_non_affined_snapshot(&self) -> Rc<dyn IBitmapImpl> {
+    pub fn create_non_affined_snapshot(&self) -> std::sync::Arc<ferroui_base::platform::SharedBitmapImpl> {
         if !self.has_render_context_affinity() {
             panic!("The render target has no render context affinity");
         }
 
         let image = self.create_raster_snapshot().unwrap_or_else(|| panic!("Unable to read back the render target"));
-        Rc::new(ImmutableBitmap::from_image(image, None))
+        std::sync::Arc::new(ImmutableBitmap::from_image(image, None))
     }
 }
 
@@ -250,6 +250,14 @@ impl IDrawingContextLayerImpl for SurfaceRenderTarget {
 
     fn is_corrupted(&self) -> bool {
         self.gpu.as_ref().is_some_and(|gpu| gpu.is_lost())
+    }
+
+    fn create_shared_snapshot(&self) -> std::sync::Arc<ferroui_base::platform::SharedBitmapImpl> {
+        let image = match self.create_raster_snapshot() {
+            Some(image) => image,
+            None => self.snapshot_image(),
+        };
+        std::sync::Arc::new(ImmutableBitmap::from_image(image, None))
     }
 
     fn create_drawing_context(&self) -> Box<dyn IDrawingContextImpl> {

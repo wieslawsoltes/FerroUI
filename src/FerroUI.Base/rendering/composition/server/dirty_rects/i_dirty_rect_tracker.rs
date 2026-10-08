@@ -416,7 +416,7 @@ pub(crate) mod tests {
             &self,
             _: crate::PixelSize,
             _: crate::Vector,
-        ) -> Rc<dyn crate::platform::IRenderTargetBitmapImpl> {
+        ) -> std::sync::Arc<dyn crate::platform::IRenderTargetBitmapImpl> {
             unimplemented!()
         }
         fn create_writeable_bitmap(
@@ -425,13 +425,13 @@ pub(crate) mod tests {
             _: crate::Vector,
             _: crate::platform::PixelFormat,
             _: crate::platform::AlphaFormat,
-        ) -> Rc<dyn crate::platform::IWriteableBitmapImpl> {
+        ) -> std::sync::Arc<dyn crate::platform::IWriteableBitmapImpl> {
             unimplemented!()
         }
-        fn load_bitmap_from_file(&self, _: &str) -> std::io::Result<Rc<dyn crate::platform::IBitmapImpl>> {
+        fn load_bitmap_from_file(&self, _: &str) -> std::io::Result<std::sync::Arc<crate::platform::SharedBitmapImpl>> {
             unimplemented!()
         }
-        fn load_bitmap(&self, _: &mut dyn std::io::Read) -> std::io::Result<Rc<dyn crate::platform::IBitmapImpl>> {
+        fn load_bitmap(&self, _: &mut dyn std::io::Read) -> std::io::Result<std::sync::Arc<crate::platform::SharedBitmapImpl>> {
             unimplemented!()
         }
         fn load_writeable_bitmap_to_width(
@@ -439,7 +439,7 @@ pub(crate) mod tests {
             _: &mut dyn std::io::Read,
             _: i32,
             _: crate::media::imaging::BitmapInterpolationMode,
-        ) -> std::io::Result<Rc<dyn crate::platform::IWriteableBitmapImpl>> {
+        ) -> std::io::Result<std::sync::Arc<dyn crate::platform::IWriteableBitmapImpl>> {
             unimplemented!()
         }
         fn load_writeable_bitmap_to_height(
@@ -447,19 +447,19 @@ pub(crate) mod tests {
             _: &mut dyn std::io::Read,
             _: i32,
             _: crate::media::imaging::BitmapInterpolationMode,
-        ) -> std::io::Result<Rc<dyn crate::platform::IWriteableBitmapImpl>> {
+        ) -> std::io::Result<std::sync::Arc<dyn crate::platform::IWriteableBitmapImpl>> {
             unimplemented!()
         }
         fn load_writeable_bitmap_from_file(
             &self,
             _: &str,
-        ) -> std::io::Result<Rc<dyn crate::platform::IWriteableBitmapImpl>> {
+        ) -> std::io::Result<std::sync::Arc<dyn crate::platform::IWriteableBitmapImpl>> {
             unimplemented!()
         }
         fn load_writeable_bitmap(
             &self,
             _: &mut dyn std::io::Read,
-        ) -> std::io::Result<Rc<dyn crate::platform::IWriteableBitmapImpl>> {
+        ) -> std::io::Result<std::sync::Arc<dyn crate::platform::IWriteableBitmapImpl>> {
             unimplemented!()
         }
         fn load_bitmap_to_width(
@@ -467,7 +467,7 @@ pub(crate) mod tests {
             _: &mut dyn std::io::Read,
             _: i32,
             _: crate::media::imaging::BitmapInterpolationMode,
-        ) -> std::io::Result<Rc<dyn crate::platform::IBitmapImpl>> {
+        ) -> std::io::Result<std::sync::Arc<crate::platform::SharedBitmapImpl>> {
             unimplemented!()
         }
         fn load_bitmap_to_height(
@@ -475,7 +475,7 @@ pub(crate) mod tests {
             _: &mut dyn std::io::Read,
             _: i32,
             _: crate::media::imaging::BitmapInterpolationMode,
-        ) -> std::io::Result<Rc<dyn crate::platform::IBitmapImpl>> {
+        ) -> std::io::Result<std::sync::Arc<crate::platform::SharedBitmapImpl>> {
             unimplemented!()
         }
         fn resize_bitmap(
@@ -483,7 +483,7 @@ pub(crate) mod tests {
             _: &dyn crate::platform::IBitmapImpl,
             _: crate::PixelSize,
             _: crate::media::imaging::BitmapInterpolationMode,
-        ) -> Rc<dyn crate::platform::IBitmapImpl> {
+        ) -> std::sync::Arc<crate::platform::SharedBitmapImpl> {
             unimplemented!()
         }
         fn load_bitmap_from_pixels(
@@ -494,7 +494,7 @@ pub(crate) mod tests {
             _: crate::PixelSize,
             _: crate::Vector,
             _: i32,
-        ) -> Rc<dyn crate::platform::IBitmapImpl> {
+        ) -> std::sync::Arc<crate::platform::SharedBitmapImpl> {
             unimplemented!()
         }
         fn create_backend_context(

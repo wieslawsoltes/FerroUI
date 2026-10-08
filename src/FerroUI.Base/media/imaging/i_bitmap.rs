@@ -17,7 +17,7 @@ pub trait IBitmap: IImage {
     fn pixel_size(&self) -> PixelSize;
 
     /// The platform-specific bitmap implementation.
-    fn platform_impl(&self) -> &RefCounted<dyn IBitmapImpl>;
+    fn platform_impl(&self) -> &RefCounted<crate::platform::SharedBitmapImpl>;
 
     /// Saves the bitmap to a stream.
     fn save(&self, stream: &mut dyn Write, options: &BitmapEncoderOptions) -> std::io::Result<()>;

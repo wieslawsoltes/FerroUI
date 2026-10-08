@@ -60,7 +60,7 @@ pub trait IPlatformRenderInterface: 'static {
     /// Creates a render target bitmap.
     ///
     /// `dpi` is the DPI of the bitmap; 96 means one pixel per logical unit.
-    fn create_render_target_bitmap(&self, size: PixelSize, dpi: Vector) -> Rc<dyn IRenderTargetBitmapImpl>;
+    fn create_render_target_bitmap(&self, size: PixelSize, dpi: Vector) -> std::sync::Arc<dyn IRenderTargetBitmapImpl>;
 
     /// Creates a writeable bitmap.
     fn create_writeable_bitmap(
@@ -69,13 +69,13 @@ pub trait IPlatformRenderInterface: 'static {
         dpi: Vector,
         format: PixelFormat,
         alpha_format: AlphaFormat,
-    ) -> Rc<dyn IWriteableBitmapImpl>;
+    ) -> std::sync::Arc<dyn IWriteableBitmapImpl>;
 
     /// Loads a bitmap from a file.
-    fn load_bitmap_from_file(&self, file_name: &str) -> std::io::Result<Rc<dyn IBitmapImpl>>;
+    fn load_bitmap_from_file(&self, file_name: &str) -> std::io::Result<std::sync::Arc<crate::platform::SharedBitmapImpl>>;
 
     /// Loads a bitmap from a stream.
-    fn load_bitmap(&self, stream: &mut dyn Read) -> std::io::Result<Rc<dyn IBitmapImpl>>;
+    fn load_bitmap(&self, stream: &mut dyn Read) -> std::io::Result<std::sync::Arc<crate::platform::SharedBitmapImpl>>;
 
     /// Loads a writeable bitmap from a stream, decoded to the given width.
     fn load_writeable_bitmap_to_width(
@@ -83,7 +83,7 @@ pub trait IPlatformRenderInterface: 'static {
         stream: &mut dyn Read,
         width: i32,
         interpolation_mode: BitmapInterpolationMode,
-    ) -> std::io::Result<Rc<dyn IWriteableBitmapImpl>>;
+    ) -> std::io::Result<std::sync::Arc<dyn IWriteableBitmapImpl>>;
 
     /// Loads a writeable bitmap from a stream, decoded to the given height.
     fn load_writeable_bitmap_to_height(
@@ -91,13 +91,13 @@ pub trait IPlatformRenderInterface: 'static {
         stream: &mut dyn Read,
         height: i32,
         interpolation_mode: BitmapInterpolationMode,
-    ) -> std::io::Result<Rc<dyn IWriteableBitmapImpl>>;
+    ) -> std::io::Result<std::sync::Arc<dyn IWriteableBitmapImpl>>;
 
     /// Loads a writeable bitmap from a file.
-    fn load_writeable_bitmap_from_file(&self, file_name: &str) -> std::io::Result<Rc<dyn IWriteableBitmapImpl>>;
+    fn load_writeable_bitmap_from_file(&self, file_name: &str) -> std::io::Result<std::sync::Arc<dyn IWriteableBitmapImpl>>;
 
     /// Loads a writeable bitmap from a stream.
-    fn load_writeable_bitmap(&self, stream: &mut dyn Read) -> std::io::Result<Rc<dyn IWriteableBitmapImpl>>;
+    fn load_writeable_bitmap(&self, stream: &mut dyn Read) -> std::io::Result<std::sync::Arc<dyn IWriteableBitmapImpl>>;
 
     /// Loads a bitmap from a stream, decoded to the given width.
     fn load_bitmap_to_width(
@@ -105,7 +105,7 @@ pub trait IPlatformRenderInterface: 'static {
         stream: &mut dyn Read,
         width: i32,
         interpolation_mode: BitmapInterpolationMode,
-    ) -> std::io::Result<Rc<dyn IBitmapImpl>>;
+    ) -> std::io::Result<std::sync::Arc<crate::platform::SharedBitmapImpl>>;
 
     /// Loads a bitmap from a stream, decoded to the given height.
     fn load_bitmap_to_height(
@@ -113,7 +113,7 @@ pub trait IPlatformRenderInterface: 'static {
         stream: &mut dyn Read,
         height: i32,
         interpolation_mode: BitmapInterpolationMode,
-    ) -> std::io::Result<Rc<dyn IBitmapImpl>>;
+    ) -> std::io::Result<std::sync::Arc<crate::platform::SharedBitmapImpl>>;
 
     /// Creates a resized copy of a bitmap.
     fn resize_bitmap(
@@ -121,7 +121,7 @@ pub trait IPlatformRenderInterface: 'static {
         bitmap_impl: &dyn IBitmapImpl,
         destination_size: PixelSize,
         interpolation_mode: BitmapInterpolationMode,
-    ) -> Rc<dyn IBitmapImpl>;
+    ) -> std::sync::Arc<crate::platform::SharedBitmapImpl>;
 
     /// Loads a bitmap from raw pixel data.
     ///
@@ -134,7 +134,7 @@ pub trait IPlatformRenderInterface: 'static {
         size: PixelSize,
         dpi: Vector,
         stride: i32,
-    ) -> Rc<dyn IBitmapImpl>;
+    ) -> std::sync::Arc<crate::platform::SharedBitmapImpl>;
 
     /// Creates a backend-specific render context from a platform graphics
     /// context (`None` selects software rendering).

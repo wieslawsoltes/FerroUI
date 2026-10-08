@@ -185,7 +185,7 @@ impl IPlatformRenderInterface for PlatformRenderInterface {
         std::sync::Arc::new(GlyphRunImpl::new(glyph_typeface, font_rendering_em_size, glyph_infos, baseline_origin))
     }
 
-    fn create_render_target_bitmap(&self, size: PixelSize, dpi: Vector) -> Rc<dyn IRenderTargetBitmapImpl> {
+    fn create_render_target_bitmap(&self, size: PixelSize, dpi: Vector) -> std::sync::Arc<dyn IRenderTargetBitmapImpl> {
         if size.width < 1 {
             panic!("Width can't be less than 1");
         }
@@ -194,7 +194,7 @@ impl IPlatformRenderInterface for PlatformRenderInterface {
             panic!("Height can't be less than 1");
         }
 
-        Rc::new(RenderTargetBitmapImpl::new(size, dpi))
+        std::sync::Arc::new(RenderTargetBitmapImpl::new(size, dpi))
     }
 
     fn create_writeable_bitmap(
@@ -203,17 +203,17 @@ impl IPlatformRenderInterface for PlatformRenderInterface {
         dpi: Vector,
         format: PixelFormat,
         alpha_format: AlphaFormat,
-    ) -> Rc<dyn IWriteableBitmapImpl> {
+    ) -> std::sync::Arc<dyn IWriteableBitmapImpl> {
         WriteableBitmapImpl::new(size, dpi, format, alpha_format)
     }
 
-    fn load_bitmap_from_file(&self, file_name: &str) -> io::Result<Rc<dyn IBitmapImpl>> {
+    fn load_bitmap_from_file(&self, file_name: &str) -> io::Result<std::sync::Arc<ferroui_base::platform::SharedBitmapImpl>> {
         let mut stream = File::open(file_name)?;
         self.load_bitmap(&mut stream)
     }
 
-    fn load_bitmap(&self, stream: &mut dyn Read) -> io::Result<Rc<dyn IBitmapImpl>> {
-        Ok(Rc::new(ImmutableBitmap::from_stream(stream)?))
+    fn load_bitmap(&self, stream: &mut dyn Read) -> io::Result<std::sync::Arc<ferroui_base::platform::SharedBitmapImpl>> {
+        Ok(std::sync::Arc::new(ImmutableBitmap::from_stream(stream)?))
     }
 
     fn load_writeable_bitmap_to_width(
@@ -221,7 +221,7 @@ impl IPlatformRenderInterface for PlatformRenderInterface {
         stream: &mut dyn Read,
         width: i32,
         interpolation_mode: BitmapInterpolationMode,
-    ) -> io::Result<Rc<dyn IWriteableBitmapImpl>> {
+    ) -> io::Result<std::sync::Arc<dyn IWriteableBitmapImpl>> {
         Ok(WriteableBitmapImpl::from_stream_to_size(stream, width, true, interpolation_mode)?)
     }
 
@@ -230,16 +230,16 @@ impl IPlatformRenderInterface for PlatformRenderInterface {
         stream: &mut dyn Read,
         height: i32,
         interpolation_mode: BitmapInterpolationMode,
-    ) -> io::Result<Rc<dyn IWriteableBitmapImpl>> {
+    ) -> io::Result<std::sync::Arc<dyn IWriteableBitmapImpl>> {
         Ok(WriteableBitmapImpl::from_stream_to_size(stream, height, false, interpolation_mode)?)
     }
 
-    fn load_writeable_bitmap_from_file(&self, file_name: &str) -> io::Result<Rc<dyn IWriteableBitmapImpl>> {
+    fn load_writeable_bitmap_from_file(&self, file_name: &str) -> io::Result<std::sync::Arc<dyn IWriteableBitmapImpl>> {
         let mut stream = File::open(file_name)?;
         self.load_writeable_bitmap(&mut stream)
     }
 
-    fn load_writeable_bitmap(&self, stream: &mut dyn Read) -> io::Result<Rc<dyn IWriteableBitmapImpl>> {
+    fn load_writeable_bitmap(&self, stream: &mut dyn Read) -> io::Result<std::sync::Arc<dyn IWriteableBitmapImpl>> {
         Ok(WriteableBitmapImpl::from_stream(stream)?)
     }
 
@@ -248,8 +248,8 @@ impl IPlatformRenderInterface for PlatformRenderInterface {
         stream: &mut dyn Read,
         width: i32,
         interpolation_mode: BitmapInterpolationMode,
-    ) -> io::Result<Rc<dyn IBitmapImpl>> {
-        Ok(Rc::new(ImmutableBitmap::from_stream_to_size(stream, width, true, interpolation_mode)?))
+    ) -> io::Result<std::sync::Arc<ferroui_base::platform::SharedBitmapImpl>> {
+        Ok(std::sync::Arc::new(ImmutableBitmap::from_stream_to_size(stream, width, true, interpolation_mode)?))
     }
 
     fn load_bitmap_to_height(
@@ -257,8 +257,8 @@ impl IPlatformRenderInterface for PlatformRenderInterface {
         stream: &mut dyn Read,
         height: i32,
         interpolation_mode: BitmapInterpolationMode,
-    ) -> io::Result<Rc<dyn IBitmapImpl>> {
-        Ok(Rc::new(ImmutableBitmap::from_stream_to_size(stream, height, false, interpolation_mode)?))
+    ) -> io::Result<std::sync::Arc<ferroui_base::platform::SharedBitmapImpl>> {
+        Ok(std::sync::Arc::new(ImmutableBitmap::from_stream_to_size(stream, height, false, interpolation_mode)?))
     }
 
     fn resize_bitmap(
@@ -266,9 +266,9 @@ impl IPlatformRenderInterface for PlatformRenderInterface {
         bitmap_impl: &dyn IBitmapImpl,
         destination_size: PixelSize,
         interpolation_mode: BitmapInterpolationMode,
-    ) -> Rc<dyn IBitmapImpl> {
+    ) -> std::sync::Arc<ferroui_base::platform::SharedBitmapImpl> {
         match bitmap_impl.as_any().downcast_ref::<ImmutableBitmap>() {
-            Some(ibmp) => Rc::new(
+            Some(ibmp) => std::sync::Arc::new(
                 ImmutableBitmap::resized(ibmp, destination_size, interpolation_mode)
                     .unwrap_or_else(|error| panic!("Unable to resize the bitmap: {error}")),
             ),
@@ -284,8 +284,8 @@ impl IPlatformRenderInterface for PlatformRenderInterface {
         size: PixelSize,
         dpi: Vector,
         stride: i32,
-    ) -> Rc<dyn IBitmapImpl> {
-        Rc::new(
+    ) -> std::sync::Arc<ferroui_base::platform::SharedBitmapImpl> {
+        std::sync::Arc::new(
             ImmutableBitmap::from_pixels(size, dpi, stride, format, alpha_format, data)
                 .unwrap_or_else(|error| panic!("{error}")),
         )

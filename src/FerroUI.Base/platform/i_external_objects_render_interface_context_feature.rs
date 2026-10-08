@@ -80,13 +80,13 @@ pub trait IPlatformRenderInterfaceImportedObject {
 
 /// A GPU image imported into the render context.
 pub trait IPlatformRenderInterfaceImportedImage: IPlatformRenderInterfaceImportedObject {
-    fn snapshot_with_keyed_mutex(&self, acquire_index: u32, release_index: u32) -> Rc<dyn IBitmapImpl>;
+    fn snapshot_with_keyed_mutex(&self, acquire_index: u32, release_index: u32) -> std::sync::Arc<crate::platform::SharedBitmapImpl>;
 
     fn snapshot_with_semaphores(
         &self,
         wait_for_semaphore: &Rc<dyn IPlatformRenderInterfaceImportedSemaphore>,
         signal_semaphore: &Rc<dyn IPlatformRenderInterfaceImportedSemaphore>,
-    ) -> Rc<dyn IBitmapImpl>;
+    ) -> std::sync::Arc<crate::platform::SharedBitmapImpl>;
 
     fn snapshot_with_timeline_semaphores(
         &self,
@@ -94,9 +94,9 @@ pub trait IPlatformRenderInterfaceImportedImage: IPlatformRenderInterfaceImporte
         wait_for_value: u64,
         signal_semaphore: &Rc<dyn IPlatformRenderInterfaceImportedSemaphore>,
         signal_value: u64,
-    ) -> Rc<dyn IBitmapImpl>;
+    ) -> std::sync::Arc<crate::platform::SharedBitmapImpl>;
 
-    fn snapshot_with_automatic_sync(&self) -> Rc<dyn IBitmapImpl>;
+    fn snapshot_with_automatic_sync(&self) -> std::sync::Arc<crate::platform::SharedBitmapImpl>;
 }
 
 /// A GPU semaphore imported into the render context.

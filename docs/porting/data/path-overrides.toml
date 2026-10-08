@@ -1137,6 +1137,10 @@ types = { FontCollectionKeyExtensions = "FontCollectionKey" }
 reason = "the three `ToFontCollectionKey` extension methods are the conversions `From<&Typeface>`, `From<&GlyphTypeface>` and `From<&dyn IPlatformTypeface>` of `FontCollectionKey`"
 
 [[rust_only]]
+path = "src/FerroUI.Base/utilities/thread_bound.rs"
+reason = "A part of a shared render resource that stays on the thread that created it; the original relies on convention where Rust needs the object to be Send + Sync (render thread, stage R1)"
+
+[[rust_only]]
 path = "src/FerroUI.Base/type_system.rs"
 reason = "object model runtime (Ref/WeakRef handles, TypeInfo, class macros): replaces the CLR type system, virtual dispatch and GC references"
 

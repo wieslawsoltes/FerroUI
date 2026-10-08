@@ -988,7 +988,7 @@ impl DrawingContextImpl {
         let mut paint_wrapper = PaintWrapper::new(paint);
 
         let tile_brush = brush.as_tile_brush();
-        let mut tile_brush_image: Option<Rc<dyn IBitmapImpl>> = None;
+        let mut tile_brush_image: Option<std::sync::Arc<ferroui_base::platform::SharedBitmapImpl>> = None;
 
         if let Some(scene_brush) = brush.as_scene_brush() {
             match scene_brush.create_content() {

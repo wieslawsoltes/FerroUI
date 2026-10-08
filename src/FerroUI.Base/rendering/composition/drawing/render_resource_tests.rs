@@ -712,11 +712,11 @@ fn every_brush_class_is_a_render_resource() {
 
 fn mock_bitmap(helper: &RenderResourceTestHelper) -> Rc<Bitmap> {
     let log = helper.render_interface.log().clone();
-    Rc::new(Bitmap::from_impl(Rc::new(MockDrawingContextLayerImpl::new(log, PixelSize::new(4, 2)))))
+    Rc::new(Bitmap::from_impl(std::sync::Arc::new(MockDrawingContextLayerImpl::new(log, PixelSize::new(4, 2)))))
 }
 
-fn same_bitmap(platform_bitmap: &Rc<dyn crate::platform::IBitmapImpl>, bitmap: &Bitmap) -> bool {
-    std::ptr::addr_eq(Rc::as_ptr(platform_bitmap), Rc::as_ptr(&bitmap.platform_impl().item()))
+fn same_bitmap(platform_bitmap: &std::sync::Arc<crate::platform::SharedBitmapImpl>, bitmap: &Bitmap) -> bool {
+    std::ptr::addr_eq(std::sync::Arc::as_ptr(platform_bitmap), std::sync::Arc::as_ptr(&bitmap.platform_impl().item()))
 }
 
 #[test]

@@ -4847,7 +4847,7 @@ fn cursor_can_be_created_from_a_bitmap() {
     let factory = Rc::new(RecordingCursorFactory(RefCell::new(Vec::new())));
     FerroLocator::current_mutable().bind::<dyn ICursorFactory>().to_constant(factory.clone());
 
-    let bitmap = crate::media::imaging::Bitmap::from_impl(Rc::new(TestBitmapImpl));
+    let bitmap = crate::media::imaging::Bitmap::from_impl(std::sync::Arc::new(TestBitmapImpl));
     let cursor = Cursor::from_bitmap(&bitmap, PixelPoint::new(3, 4));
 
     assert_eq!(cursor.to_string(), "BitmapCursor");

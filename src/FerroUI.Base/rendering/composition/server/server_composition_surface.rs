@@ -41,7 +41,7 @@ impl ServerCompositionSurfaceChanged {
 /// provides a bitmap to the surface visuals that show it.
 pub trait IServerCompositionSurface: IServerObject {
     /// The current content of the surface.
-    fn bitmap(&self) -> Option<Rc<dyn IBitmapImpl>>;
+    fn bitmap(&self) -> Option<std::sync::Arc<crate::platform::SharedBitmapImpl>>;
 
     /// Raised when the content changed.
     fn changed(&self) -> &ServerCompositionSurfaceChanged;

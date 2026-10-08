@@ -14,7 +14,6 @@ use crate::platform::{IBitmapImpl, IDrawingContextImpl, IGlyphRunImpl};
 use crate::rendering::composition::drawing::{RenderDataResource, RenderDataStream};
 use crate::rendering::testing::{DrawingLog, MockDrawingContextImpl, MockGlyphRunImpl};
 use crate::{Matrix, Point, Rect};
-use std::rc::Rc;
 
 #[test]
 fn replay_forwards_line() {
@@ -149,7 +148,7 @@ fn replay_forwards_text_options() {
 
 #[test]
 fn dispose_resources_disposes_owned_resources() {
-    let bitmap: Rc<dyn IBitmapImpl> = Rc::new(TestBitmapImpl);
+    let bitmap: std::sync::Arc<crate::platform::SharedBitmapImpl> = std::sync::Arc::new(TestBitmapImpl);
     let glyph_run: std::sync::Arc<dyn IGlyphRunImpl> = MockGlyphRunImpl::new(Rect::default());
     let operation = TestCustomOperation::new();
 
@@ -159,14 +158,14 @@ fn dispose_resources_disposes_owned_resources() {
         stream.draw_glyph_run(None, Some(glyph_run.clone()));
         stream.draw_custom(Some(operation.clone()));
 
-        assert_eq!(2, Rc::strong_count(&bitmap));
+        assert_eq!(2, std::sync::Arc::strong_count(&bitmap));
         assert_eq!(2, std::sync::Arc::strong_count(&glyph_run));
 
         stream.dispose_resources();
         stream.dispose();
     }
 
-    assert_eq!(1, Rc::strong_count(&bitmap));
+    assert_eq!(1, std::sync::Arc::strong_count(&bitmap));
     assert_eq!(1, std::sync::Arc::strong_count(&glyph_run));
     assert_eq!(1, operation.dispose_count.get());
 }

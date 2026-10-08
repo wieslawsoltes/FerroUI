@@ -15,7 +15,7 @@ use std::rc::Rc;
 
 #[derive(Default)]
 struct TrackingBitmapImpl {
-    is_disposed: Cell<bool>,
+    is_disposed: std::sync::atomic::AtomicBool,
 }
 
 impl IBitmapImpl for TrackingBitmapImpl {
@@ -36,7 +36,7 @@ impl IBitmapImpl for TrackingBitmapImpl {
     }
 
     fn dispose(&self) {
-        self.is_disposed.set(true)
+        self.is_disposed.store(true, std::sync::atomic::Ordering::SeqCst)
     }
 
     fn as_any(&self) -> &dyn Any {
@@ -46,12 +46,12 @@ impl IBitmapImpl for TrackingBitmapImpl {
 
 #[derive(Default)]
 struct FakeImportedImage {
-    last_snapshot: RefCell<Option<Rc<TrackingBitmapImpl>>>,
+    last_snapshot: RefCell<Option<std::sync::Arc<TrackingBitmapImpl>>>,
 }
 
 impl FakeImportedImage {
-    fn snapshot(&self) -> Rc<dyn IBitmapImpl> {
-        let snapshot = Rc::new(TrackingBitmapImpl::default());
+    fn snapshot(&self) -> std::sync::Arc<crate::platform::SharedBitmapImpl> {
+        let snapshot = std::sync::Arc::new(TrackingBitmapImpl::default());
         *self.last_snapshot.borrow_mut() = Some(snapshot.clone());
         snapshot
     }
@@ -62,7 +62,7 @@ impl IPlatformRenderInterfaceImportedObject for FakeImportedImage {
 }
 
 impl IPlatformRenderInterfaceImportedImage for FakeImportedImage {
-    fn snapshot_with_keyed_mutex(&self, _acquire_index: u32, _release_index: u32) -> Rc<dyn IBitmapImpl> {
+    fn snapshot_with_keyed_mutex(&self, _acquire_index: u32, _release_index: u32) -> std::sync::Arc<crate::platform::SharedBitmapImpl> {
         self.snapshot()
     }
 
@@ -70,7 +70,7 @@ impl IPlatformRenderInterfaceImportedImage for FakeImportedImage {
         &self,
         _wait_for_semaphore: &Rc<dyn IPlatformRenderInterfaceImportedSemaphore>,
         _signal_semaphore: &Rc<dyn IPlatformRenderInterfaceImportedSemaphore>,
-    ) -> Rc<dyn IBitmapImpl> {
+    ) -> std::sync::Arc<crate::platform::SharedBitmapImpl> {
         self.snapshot()
     }
 
@@ -80,11 +80,11 @@ impl IPlatformRenderInterfaceImportedImage for FakeImportedImage {
         _wait_for_value: u64,
         _signal_semaphore: &Rc<dyn IPlatformRenderInterfaceImportedSemaphore>,
         _signal_value: u64,
-    ) -> Rc<dyn IBitmapImpl> {
+    ) -> std::sync::Arc<crate::platform::SharedBitmapImpl> {
         self.snapshot()
     }
 
-    fn snapshot_with_automatic_sync(&self) -> Rc<dyn IBitmapImpl> {
+    fn snapshot_with_automatic_sync(&self) -> std::sync::Arc<crate::platform::SharedBitmapImpl> {
         self.snapshot()
     }
 }
@@ -172,7 +172,7 @@ fn update_processed_after_dispose_should_dispose_snapshot_instead_of_orphaning_i
     let snapshot = feature.image.last_snapshot.borrow().clone();
     let snapshot = snapshot.expect("a snapshot was taken");
     assert!(
-        snapshot.is_disposed.get(),
+        snapshot.is_disposed.load(std::sync::atomic::Ordering::SeqCst),
         "The snapshot taken by an update processed after the surface was disposed \
          must be disposed on the render thread instead of being orphaned."
     );
@@ -199,12 +199,12 @@ fn update_before_dispose_in_separate_batches_should_dispose_snapshot_with_the_su
 
     let snapshot = feature.image.last_snapshot.borrow().clone();
     let snapshot = snapshot.expect("a snapshot was taken");
-    assert!(!snapshot.is_disposed.get());
+    assert!(!snapshot.is_disposed.load(std::sync::atomic::Ordering::SeqCst));
 
     surface.dispose();
     services.run_jobs();
 
-    assert!(snapshot.is_disposed.get());
+    assert!(snapshot.is_disposed.load(std::sync::atomic::Ordering::SeqCst));
 }
 
 /// Not from upstream: an update queued after the dispose of the surface has
@@ -238,7 +238,7 @@ fn update_after_dispose_in_an_earlier_batch_should_dispose_snapshot() {
 
     let snapshot = feature.image.last_snapshot.borrow().clone();
     let snapshot = snapshot.expect("a snapshot was taken");
-    assert!(snapshot.is_disposed.get());
+    assert!(snapshot.is_disposed.load(std::sync::atomic::Ordering::SeqCst));
     assert!(services.server::<server::ServerCompositionDrawingSurface>(ICompositionObject::server(&**other)).bitmap_ref().is_none());
 }
 

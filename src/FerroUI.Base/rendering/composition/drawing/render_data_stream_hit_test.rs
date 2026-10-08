@@ -189,7 +189,7 @@ impl IRenderDataVisitor for HitTestVisitor {
         }
     }
 
-    fn on_draw_bitmap(&mut self, _bitmap: Option<&Rc<dyn IBitmapImpl>>, _opacity: f64, _source_rect: Rect, dest_rect: Rect) {
+    fn on_draw_bitmap(&mut self, _bitmap: Option<&std::sync::Arc<crate::platform::SharedBitmapImpl>>, _opacity: f64, _source_rect: Rect, dest_rect: Rect) {
         if !self.live {
             return;
         }

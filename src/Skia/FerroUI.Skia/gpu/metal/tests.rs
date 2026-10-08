@@ -423,7 +423,7 @@ fn no_interpolation() -> RenderOptions {
 }
 
 /// A 4x4 bitmap: the left half red, the right half blue.
-fn two_tone_bitmap() -> Rc<dyn IBitmapImpl> {
+fn two_tone_bitmap() -> std::sync::Arc<ferroui_base::platform::SharedBitmapImpl> {
     let mut data = Vec::new();
     for _ in 0..4 {
         for x in 0..4 {
@@ -432,7 +432,7 @@ fn two_tone_bitmap() -> Rc<dyn IBitmapImpl> {
         }
     }
 
-    Rc::new(
+    std::sync::Arc::new(
         ImmutableBitmap::from_pixels(
             PixelSize::new(4, 4),
             Vector::new(96.0, 96.0),
@@ -483,7 +483,7 @@ impl GraphiteTarget {
     }
 
     /// Reads the render target back from the GPU.
-    fn snapshot(&self) -> Rc<dyn IBitmapImpl> {
+    fn snapshot(&self) -> std::sync::Arc<ferroui_base::platform::SharedBitmapImpl> {
         self.layer.as_any().downcast_ref::<SurfaceRenderTarget>().unwrap().create_non_affined_snapshot()
     }
 
@@ -757,7 +757,7 @@ fn graphite_uploads_encoded_images_and_draws_the_acrylic_noise() {
 /// A 64x64 bitmap of vertical stripes four pixels wide, black and white,
 /// placed so that the middle of every block of eight columns lies inside a
 /// black stripe.
-fn striped_bitmap() -> Rc<dyn IBitmapImpl> {
+fn striped_bitmap() -> std::sync::Arc<ferroui_base::platform::SharedBitmapImpl> {
     let mut data = Vec::new();
     for _ in 0..64 {
         for x in 0..64 {
@@ -766,7 +766,7 @@ fn striped_bitmap() -> Rc<dyn IBitmapImpl> {
         }
     }
 
-    Rc::new(
+    std::sync::Arc::new(
         ImmutableBitmap::from_pixels(
             PixelSize::new(64, 64),
             Vector::new(96.0, 96.0),

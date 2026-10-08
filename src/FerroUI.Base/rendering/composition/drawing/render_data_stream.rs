@@ -185,7 +185,7 @@ impl RenderDataStream {
     /// (upstream's caller passes `source.Clone()`).
     pub fn draw_bitmap(
         &mut self,
-        bitmap: Option<Rc<dyn IBitmapImpl>>,
+        bitmap: Option<std::sync::Arc<crate::platform::SharedBitmapImpl>>,
         opacity: f64,
         source_rect: Rect,
         dest_rect: Rect,

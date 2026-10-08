@@ -44,7 +44,7 @@ impl IDrawingContextCore for RecordingDrawingContext {
     }
 
     fn draw_ellipse_core(&mut self, _brush: Option<&Rc<dyn IBrush>>, _pen: Option<&Rc<dyn IPen>>, _rect: Rect) {}
-    fn draw_bitmap(&mut self, _source: &Rc<dyn IBitmapImpl>, _opacity: f64, _source_rect: Rect, _dest_rect: Rect) {}
+    fn draw_bitmap(&mut self, _source: &std::sync::Arc<ferroui_base::platform::SharedBitmapImpl>, _opacity: f64, _source_rect: Rect, _dest_rect: Rect) {}
     fn custom(&mut self, _custom: &Rc<dyn ICustomDrawOperation>) {}
     fn draw_glyph_run(&mut self, _foreground: Option<&Rc<dyn IBrush>>, _glyph_run: &Rc<GlyphRun>) {}
     fn push_clip_core(&mut self, _rect: Rect) {}

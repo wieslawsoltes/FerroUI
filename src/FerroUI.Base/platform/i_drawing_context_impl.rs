@@ -162,6 +162,10 @@ pub trait IDrawingContextLayerImpl: IBitmapImpl {
     /// Creates a drawing context that draws into the layer.
     fn create_drawing_context(&self) -> Box<dyn IDrawingContextImpl>;
 
+    /// The contents of the layer as a bitmap that can leave the render
+    /// thread. A layer itself stays on the thread that created it.
+    fn create_shared_snapshot(&self) -> std::sync::Arc<crate::platform::SharedBitmapImpl>;
+
     /// The layer as one that may be bound to the render context it was
     /// created with, if it is one.
     fn as_layer_with_render_context_affinity(&self) -> Option<&dyn IDrawingContextLayerWithRenderContextAffinityImpl> {
@@ -176,5 +180,5 @@ pub trait IDrawingContextLayerWithRenderContextAffinityImpl: IDrawingContextLaye
     fn has_render_context_affinity(&self) -> bool;
 
     /// Creates a snapshot of the layer that is usable with any context.
-    fn create_non_affined_snapshot(&self) -> Rc<dyn IBitmapImpl>;
+    fn create_non_affined_snapshot(&self) -> std::sync::Arc<crate::platform::SharedBitmapImpl>;
 }

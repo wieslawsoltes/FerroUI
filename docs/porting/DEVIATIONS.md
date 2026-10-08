@@ -43,6 +43,8 @@ Other pages hold the entries of their own area, and this page does not repeat th
 | `RenderDataStream.Visit` has no default case: an invalid opcode loops forever. | `Visit` panics on `RenderDataOpcode::Invalid`. | Behaviour | A panic stops at the fault instead of hanging. Only reachable with a corrupt stream. | #26 |
 | Each payload has a static `Opcode` field. | The associated const `IRenderDataPayload::OPCODE`. | Representation | The Rust form of a per-type constant. The tracking scanner does not match it, so `RenderDataPayloads.cs` shows 35/50 members. | #26 |
 | The batch stream is made of 64-byte pooled segments. | No pooled segments. | Representation | The port's batch stream never had them, so `Round_Trip_Spanning_Multiple_Stream_Segments` cannot cross a segment boundary (see the test's header). | #26 |
+| `ServerCompositor.CreateCompositionVisualSnapshot` returns the offscreen render target itself when it has no render context affinity. | It returns `IDrawingContextLayerImpl::create_shared_snapshot` of the target and disposes the target; the member is an addition to the layer contract. | Addition | A layer may own objects of the render thread and is not `Send`; the snapshot crosses to the UI thread. With Skia the snapshot of a raster surface shares its pixels until the surface is written again, and the target is disposed right after. | Render thread R1.3 |
+| `IRef<T>` over render resources is shared between threads by convention. | `RefCounted<T>` holds an `Arc` and counts atomically; its release action is `Send`. | Representation | The counted references of bitmaps are held by batches. | Render thread R1.3 |
 
 ### Bindings (`src/FerroUI.Base/data/`)
 
@@ -124,6 +126,8 @@ The port binds through compiled paths and through the metadata types declare, ne
 | Upstream | Port | Kind | Why | Since |
 |---|---|---|---|---|
 | The backend recovers its typeface with the type test `PlatformTypeface is SkiaTypeface`. | `IPlatformTypeface::as_any`, and `SkiaTypeface::try_get` downcasts through it. | Representation | The Rust form of a runtime type test; it replaces the thread-local registry of live typefaces by address that stood in for it. | #52 |
+| `RenderTargetBitmapImpl` keeps its framebuffer render target as a plain field. | The field is a `ThreadBound<FramebufferRenderTarget>`: reached only on the thread that created the bitmap. | Representation | A render target bitmap is shared with the render thread (`IRenderTargetBitmapImpl: Send + Sync`), and the render target holds a surface and a framebuffer that are not. | Render thread R1.3 |
+| `WriteableBitmapImpl` keeps `_bitmap`, `_image` and `_imageValid` as fields guarded by `lock (_lock)` in some members. | One lock over the pixels and the image; an invalid image is an absent one. | Representation | The UI thread writes and the render thread draws. | Render thread R1.3 |
 
 ### Headless platform (`src/Headless/FerroUI.Headless/`)
 
