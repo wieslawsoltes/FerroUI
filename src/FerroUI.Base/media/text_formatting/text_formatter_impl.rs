@@ -119,7 +119,8 @@ impl TextFormatterImpl {
     /// when the split lands on a cluster boundary) is returned as the second
     /// value. This lets the wrap caller avoid a separate
     /// second pass to sum run lengths.
-    pub(crate) fn split_text_runs_with_length(
+    // Internal upstream; public so the Skia unit tests reach it.
+    pub fn split_text_runs_with_length(
         text_runs: &[Rc<dyn TextRun>],
         length: i32,
         object_pool: &FormattingObjectPool,

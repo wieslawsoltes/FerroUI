@@ -236,14 +236,15 @@ impl ShapedBuffer {
 
     /// True when the cluster cache is in "simple" mode (every cluster is one
     /// character wide).
-    #[allow(dead_code)] // upstream internal member nothing uses yet
-    pub(crate) fn is_cluster_cache_simple(&self) -> bool {
+    // Internal upstream; public so the Skia unit tests reach it.
+    pub fn is_cluster_cache_simple(&self) -> bool {
         self.ensure_cluster_cache();
         self.cache.borrow().start_chars.is_none()
     }
 
     /// Sum of all glyph advances in this buffer (cached).
-    pub(crate) fn total_glyph_advance(&self) -> f64 {
+    // Internal upstream; public so the Skia unit tests reach it.
+    pub fn total_glyph_advance(&self) -> f64 {
         self.ensure_cluster_cache();
         let cache = self.cache.borrow();
         let prefix = cache.prefix.as_deref().unwrap_or(&[0.0]);
@@ -252,7 +253,8 @@ impl ShapedBuffer {
 
     /// Number of text characters covered by this buffer's first cluster, in
     /// logical order. Zero for an empty buffer.
-    pub(crate) fn first_cluster_char_length(&self) -> i32 {
+    // Internal upstream; public so the Skia unit tests reach it.
+    pub fn first_cluster_char_length(&self) -> i32 {
         self.ensure_cluster_cache();
         let cache = self.cache.borrow();
 
@@ -400,8 +402,8 @@ impl ShapedBuffer {
     }
 
     /// The shared prefix sum array of the cluster cache, when built.
-    #[cfg(test)]
-    pub(crate) fn cluster_prefix(&self) -> Option<Rc<[f64]>> {
+    // Internal upstream; public so the Skia unit tests reach it.
+    pub fn cluster_prefix(&self) -> Option<Rc<[f64]>> {
         self.cache.borrow().prefix.clone()
     }
 
@@ -411,7 +413,8 @@ impl ShapedBuffer {
 
     /// An alias of this buffer with a different bidi level, sharing the glyph
     /// storage and (when built) the cluster cache.
-    pub(crate) fn with_bidi_level(self: &Rc<Self>, paragraph_embedding_level: i8) -> Rc<ShapedBuffer> {
+    // Internal upstream; public so the Skia unit tests reach it.
+    pub fn with_bidi_level(self: &Rc<Self>, paragraph_embedding_level: i8) -> Rc<ShapedBuffer> {
         if self.bidi_level == paragraph_embedding_level {
             return self.clone();
         }
@@ -708,7 +711,8 @@ impl ShapedBuffer {
     /// The largest count of leading characters (in logical order) whose
     /// cumulative cluster advance fits within `available_width`, or 0 if not
     /// even the first cluster fits.
-    pub(crate) fn find_leading_char_count_within_width(&self, available_width: f64) -> i32 {
+    // Internal upstream; public so the Skia unit tests reach it.
+    pub fn find_leading_char_count_within_width(&self, available_width: f64) -> i32 {
         if available_width <= 0.0 {
             return 0;
         }
@@ -740,7 +744,8 @@ impl ShapedBuffer {
     /// The largest count of trailing characters (in logical order) whose
     /// cumulative cluster advance fits within `available_width`, together with
     /// the consumed width. `(0, 0.0)` if not even the last cluster fits.
-    pub(crate) fn find_trailing_char_count_within_width(&self, available_width: f64) -> (i32, f64) {
+    // Internal upstream; public so the Skia unit tests reach it.
+    pub fn find_trailing_char_count_within_width(&self, available_width: f64) -> (i32, f64) {
         if available_width <= 0.0 {
             return (0, 0.0);
         }

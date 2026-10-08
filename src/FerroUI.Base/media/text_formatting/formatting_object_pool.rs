@@ -10,14 +10,15 @@ use crate::media::text_formatting::{TextLine, TextRun, UnshapedTextRun};
 ///
 /// In most applications, there'll be only one instance: on the UI thread,
 /// which is responsible for layout.
-pub(crate) struct FormattingObjectPool {
+// Internal upstream; public so the Skia unit tests reach it.
+pub struct FormattingObjectPool {
     pub text_run_lists: ListPool<Rc<dyn TextRun>>,
     pub unshaped_text_run_lists: ListPool<Rc<UnshapedTextRun>>,
     pub text_lines: ListPool<Rc<dyn TextLine>>,
 }
 
 /// A list rented from a [`ListPool`]. Give it back with [`ListPool::return_list`].
-pub(crate) type RentedList<T> = Vec<T>;
+pub type RentedList<T> = Vec<T>;
 
 impl FormattingObjectPool {
     /// The pool of the current thread.
@@ -42,7 +43,7 @@ impl FormattingObjectPool {
 }
 
 /// A pool of reusable lists.
-pub(crate) struct ListPool<T> {
+pub struct ListPool<T> {
     lists: RefCell<Vec<Vec<T>>>,
     pending_return_count: Cell<i32>,
 }
