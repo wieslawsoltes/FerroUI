@@ -107,7 +107,7 @@ impl ServerCompositionCustomVisual {
     }
 
     /// Dispatches the messages the UI thread sent to the handler.
-    pub fn dispatch_messages(&self, messages: Vec<Rc<dyn Any>>) {
+    pub fn dispatch_messages(&self, messages: Vec<std::sync::Arc<dyn Any + Send + Sync>>) {
         for message in messages {
             guarded(&self.handler, "OnMessage", || self.handler.on_message(message));
         }

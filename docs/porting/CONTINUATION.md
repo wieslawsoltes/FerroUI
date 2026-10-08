@@ -146,7 +146,14 @@ Also: the layout clock is in milliseconds (`DEVIATIONS.md`, Layout). Found while
 
 ## Critical now: the render thread (owner, 2026-10-08)
 
-The owner's order of 2026-10-08, ahead of everything else: the port gets upstream's UI thread and render thread, on the desktop and in the browser. The design, the compiler audit of what crosses the thread boundary and the stages are in `render-thread.md`. Desktop stages R1 to R5 in sequence; the browser feasibility checks (B0) in parallel with R1, because a threaded browser build may be blocked by the prebuilt Skia binaries and by the pinned stable toolchain, and that has to be measured before any backend work.
+The owner's order on 2026-10-08: finish the work in flight, then the render thread, then the scheduled work. Design, stages and what each step found: `docs/porting/render-thread.md`.
+
+State on 2026-10-08, end of day:
+
+- **Stage R1 (thread-safe render resources) is written.** On `main`: R1.1 to R1.4b2. Open, stacked, waiting for CI: pull request 78 (R1.4c) and 79 (R1.4d and R1.5, with the generator change and the measurements). Merge them through the top pull request once it is green on all three checks (retarget it to `main`, rebase merge, close the lower one with a note), as was done for 74 and 77.
+- **Stage R2 (jobs and factories are `Send`) is written** on the branch `render-thread-r2` (on top of `render-thread-r1-4d`): `CommittedBatch: Send` is asserted at compile time. What stays bound to the UI thread in `ThreadBound` (render surfaces, drawing surface updates, interop imports) is listed in `render-thread.md`, "R2 done", and in `DEVIATIONS.md`; it is the work list of R3 to R5.
+- **Next: stage R3** (the compositor's handle to the server; every direct access from the UI side to a server object turned into a job or a readback; the server compositor constructed on its own thread). Start by listing the uses of `compositor.server()` outside `rendering/composition/server/`.
+- The sub-agents of the core port are finished and removed; the session check-in loop is cancelled. Nothing runs in the background.
 
 ## Core first (owner, 2026-10-08)
 

@@ -117,3 +117,10 @@ pub struct CommittedBatch {
     pub(crate) changes: BatchStreamData,
     pub(crate) committed_at: Duration,
 }
+
+/// A batch crosses from the UI thread to the render thread: everything in
+/// it is `Send`, and stays so.
+const _: fn() = || {
+    fn sent<T: Send>() {}
+    sent::<CommittedBatch>();
+};

@@ -67,6 +67,12 @@ const COMMIT_GRACE_TICKS: i32 = 10;
 /// Server-side counterpart of the compositor: owns the server objects,
 /// applies the batches committed by the UI thread and renders.
 ///
+
+/// A job in the queues of the server compositor: a job of a batch, or one
+/// bound to the server object it was sent for. It never leaves the render
+/// thread, unlike the [`ServerJob`] of a batch.
+type RenderThreadJob = Box<dyn FnOnce(&ServerCompositor)>;
+
 /// Confined to the render thread. UI-thread code interacts with it only by
 /// enqueueing batches (and by reading the clock and the readback indices,
 /// which are thread-safe values).
@@ -74,9 +80,9 @@ pub struct ServerCompositor {
     this: Weak<ServerCompositor>,
     batches: Rc<BatchQueue>,
     objects: RefCell<Vec<Option<Rc<dyn IServerObject>>>>,
-    received_job_queue: RefCell<VecDeque<ServerJob>>,
+    received_job_queue: RefCell<VecDeque<RenderThreadJob>>,
     disposed_in_batch: RefCell<Vec<ServerObjectId>>,
-    received_post_target_job_queue: RefCell<VecDeque<ServerJob>>,
+    received_post_target_job_queue: RefCell<VecDeque<RenderThreadJob>>,
     last_batch_id: Cell<i64>,
     clock: CompositorClock,
     server_now: Cell<Duration>,
@@ -312,7 +318,7 @@ impl ServerCompositor {
         }
     }
 
-    fn read_server_jobs(&self, reader: &mut BatchStreamReader<'_>, queue: &RefCell<VecDeque<ServerJob>>, end: BatchMarker) {
+    fn read_server_jobs(&self, reader: &mut BatchStreamReader<'_>, queue: &RefCell<VecDeque<RenderThreadJob>>, end: BatchMarker) {
         loop {
             match reader.read_object() {
                 BatchObject::Marker(marker) if marker == end => break,
@@ -351,7 +357,7 @@ impl ServerCompositor {
         }
     }
 
-    fn execute_server_jobs(&self, queue: &RefCell<VecDeque<ServerJob>>) {
+    fn execute_server_jobs(&self, queue: &RefCell<VecDeque<RenderThreadJob>>) {
         loop {
             let Some(job) = queue.borrow_mut().pop_front() else { break };
             job(self);

@@ -50,11 +50,18 @@ impl CompositionDrawingSurface {
     /// disposed surface disposes the new snapshot.
     fn invoke(
         &self,
-        update: impl FnOnce(&ServerCompositionDrawingSurface) -> Result<(), Rc<dyn std::error::Error>> + 'static,
+        update: impl FnOnce(&ServerCompositionDrawingSurface) -> Result<(), crate::rendering::composition::ServerJobError> + 'static,
     ) -> ServerJobTask<()> {
+        // The update runs on the render thread with the image and the
+        // synchronisation objects the caller made on this thread. Until the
+        // server has a thread of its own they are bound to this one; which of
+        // them the render thread may take is settled with the GPU contexts
+        // (`docs/porting/render-thread.md`, stage R5).
+        let update = crate::utilities::ThreadBound::new(update);
         self.compositor().invoke_server_object_job_async(
             self.server_id(),
             move |_, server: Option<Rc<dyn IServerObject>>| {
+                let update = update.into_inner();
                 let server = server.and_then(|server| server.into_any_rc().downcast::<ServerCompositionDrawingSurface>().ok());
                 match server {
                     Some(server) => update(&server),

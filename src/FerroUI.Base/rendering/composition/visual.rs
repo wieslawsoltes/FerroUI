@@ -105,7 +105,7 @@ impl CompositionVisual {
     pub(crate) fn create(
         compositor: &Rc<Compositor>,
         kind: CompositionVisualKind,
-        content: impl FnOnce() -> Box<dyn IServerVisualContent> + 'static,
+        content: impl FnOnce() -> Box<dyn IServerVisualContent> + Send + 'static,
     ) -> Rc<CompositionVisual> {
         Self::create_with(compositor, kind, content, |_| {})
     }
@@ -115,8 +115,8 @@ impl CompositionVisual {
     pub(crate) fn create_with(
         compositor: &Rc<Compositor>,
         kind: CompositionVisualKind,
-        content: impl FnOnce() -> Box<dyn IServerVisualContent> + 'static,
-        created: impl FnOnce(&Rc<ServerCompositionVisual>) + 'static,
+        content: impl FnOnce() -> Box<dyn IServerVisualContent> + Send + 'static,
+        created: impl FnOnce(&Rc<ServerCompositionVisual>) + Send + 'static,
     ) -> Rc<CompositionVisual> {
         let children_server =
             compositor.create_server_object(|compositor, _| ServerCompositionVisualCollection::new(compositor));

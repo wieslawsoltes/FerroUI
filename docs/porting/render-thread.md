@@ -156,6 +156,16 @@ Release builds (`cargo build --release`, the thin LTO profile) of `main` before 
 
 Start-up is unchanged. The CPU of the page run is about 0.1 to 0.2 s higher on average after R1, which is inside the spread of the three runs at this load; it is to be repeated on a quiet machine before it is read as a cost of the atomic counts. The scroll profile of the browser (`scripts/browser/scroll-profile.mjs`) was not repeated.
 
+### R2 done
+
+`ServerJob`, `ServerObjectJob` and `ServerObjectFactory` require `Send`, and `CommittedBatch: Send` is asserted at compile time (`transport/batch.rs`). How each item of the table below was settled:
+
+- The queues of the server compositor hold jobs of the render thread (`RenderThreadJob`), which may capture a resolved server object.
+- `ServerJobTask` holds its result under a lock; its continuations are bound to the thread of the task and run there, from the dispatcher when the job completed elsewhere; the error is `ServerJobError`.
+- The closures that create a server object are `Send`; a custom visual takes the factory of its handler, and its messages are `Arc<dyn Any + Send + Sync>`.
+- The debug events of a target are `Arc` and `Send + Sync`.
+- **Left bound to the UI thread, in `ThreadBound`:** the render surfaces of a target, the update closures of a drawing surface, the import and dispose closures of the interop objects. A server on its own thread panics on their first use: this is the list of what R3 to R5 (and B2) have to make usable from the render thread.
+
 ### Scope of R2, as the compiler names it
 
 Requiring `Send` of `ServerJob`, `ServerObjectJob` and `ServerObjectFactory` (tried on top of R1) fails at these places in the base crate; each is a decision, not a rename:

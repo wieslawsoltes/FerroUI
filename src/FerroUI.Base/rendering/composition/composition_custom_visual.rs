@@ -11,7 +11,7 @@ use std::rc::Rc;
 /// handler that wait for the next commit.
 pub(crate) struct CustomVisualData {
     props: CompositionContainerVisualProps,
-    messages: RefCell<Option<Vec<Rc<dyn Any>>>>,
+    messages: RefCell<Option<Vec<std::sync::Arc<dyn Any + Send + Sync>>>>,
 }
 
 impl CustomVisualData {
@@ -33,12 +33,15 @@ impl Deref for CompositionCustomVisual {
 }
 
 impl CompositionCustomVisual {
-    pub(crate) fn new(compositor: &Rc<Compositor>, handler: Rc<dyn ICompositionCustomVisualHandler>) -> CompositionCustomVisual {
+    pub(crate) fn new(
+        compositor: &Rc<Compositor>,
+        handler: impl FnOnce() -> Rc<dyn ICompositionCustomVisualHandler> + Send + 'static,
+    ) -> CompositionCustomVisual {
         let data = CustomVisualData { props: CompositionContainerVisualProps::new(), messages: RefCell::new(None) };
         CompositionCustomVisual(CompositionVisual::create_with(
             compositor,
             CompositionVisualKind::Custom(data),
-            move || Box::new(ServerCompositionCustomVisual::new(handler)),
+            move || Box::new(ServerCompositionCustomVisual::new(handler())),
             ServerCompositionCustomVisual::attach,
         ))
     }
@@ -57,7 +60,7 @@ impl CompositionCustomVisual {
 
     /// Sends a message to the handler, which receives it on the render
     /// thread with the next commit.
-    pub fn send_handler_message(&self, message: Rc<dyn Any>) {
+    pub fn send_handler_message(&self, message: std::sync::Arc<dyn Any + Send + Sync>) {
         let first = self.data().messages.borrow().is_none();
         if first {
             *self.data().messages.borrow_mut() = Some(Vec::new());

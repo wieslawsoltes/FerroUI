@@ -104,7 +104,7 @@ impl CompositionBrush {
     fn create(
         compositor: &Rc<Compositor>,
         kind: CompositionBrushKind,
-        server: impl FnOnce(&Rc<ServerCompositor>) -> Rc<dyn IServerObject> + 'static,
+        server: impl FnOnce(&Rc<ServerCompositor>) -> Rc<dyn IServerObject> + Send + 'static,
     ) -> Rc<CompositionBrush> {
         let server = compositor.create_server_object(move |compositor, _| server(compositor));
         Rc::new_cyclic(|this: &Weak<CompositionBrush>| CompositionBrush {

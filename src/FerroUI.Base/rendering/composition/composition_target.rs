@@ -14,6 +14,7 @@ use crate::rendering::{LayoutPassTiming, RendererDebugOverlays};
 use crate::Size;
 use std::any::Any;
 use std::cell::RefCell;
+use std::sync::Arc;
 use std::rc::{Rc, Weak};
 use std::sync::atomic::{AtomicI64, Ordering};
 
@@ -34,8 +35,12 @@ pub struct CompositionTarget {
 impl CompositionTarget {
     pub(crate) fn new(compositor: &Rc<Compositor>, surfaces: RenderSurfaces) -> Rc<CompositionTarget> {
         let id = NEXT_ID.fetch_add(1, Ordering::SeqCst) + 1;
-        let server =
-            compositor.create_server_object(move |compositor, _| ServerCompositionTarget::new(compositor, surfaces, id));
+        // The surfaces are objects of the window implementation, made on this
+        // thread: they are bound to it until each backend has a surface that
+        // the render thread may use (`docs/porting/render-thread.md`, R5, B2).
+        let surfaces = crate::utilities::ThreadBound::new(surfaces);
+        let server = compositor
+            .create_server_object(move |compositor, _| ServerCompositionTarget::new(compositor, surfaces.into_inner(), id));
         let target = Rc::new_cyclic(|this: &Weak<CompositionTarget>| CompositionTarget {
             this: this.clone(),
             object: CompositionObject::new(compositor, Some(server)),
@@ -143,7 +148,7 @@ impl CompositionTarget {
 
     /// Sets the receiver of the debug events of the server-side target.
     /// It is handed over with the next batch.
-    pub fn set_debug_events(&self, events: Option<Rc<dyn ICompositionTargetDebugEvents>>) {
+    pub fn set_debug_events(&self, events: Option<Arc<dyn ICompositionTargetDebugEvents>>) {
         let server = self.server();
         self.compositor().post_server_job(
             move |compositor| {

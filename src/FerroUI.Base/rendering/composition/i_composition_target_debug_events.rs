@@ -2,7 +2,7 @@ use crate::platform::LtrbRect;
 
 /// Receives debugging information from a composition target while it renders
 /// a frame.
-pub trait ICompositionTargetDebugEvents {
+pub trait ICompositionTargetDebugEvents: Send + Sync {
     /// The number of visuals rendered during the frame.
     fn rendered_visuals(&self) -> i32;
 

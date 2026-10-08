@@ -131,7 +131,7 @@ impl CompositionDrawListVisual {
     pub fn with_extension(
         compositor: &Rc<Compositor>,
         visual: &Visual,
-        server_content: impl FnOnce() -> Box<dyn IServerVisualContent> + 'static,
+        server_content: impl FnOnce() -> Box<dyn IServerVisualContent> + Send + 'static,
         extension: Rc<dyn ICompositionDrawListVisualExtension>,
     ) -> CompositionDrawListVisual {
         Self::create_core(compositor, visual, false, Some(extension), server_content)
@@ -152,7 +152,7 @@ impl CompositionDrawListVisual {
         visual: &Visual,
         acrylic: bool,
         extension: Option<Rc<dyn ICompositionDrawListVisualExtension>>,
-        server_content: impl FnOnce() -> Box<dyn IServerVisualContent> + 'static,
+        server_content: impl FnOnce() -> Box<dyn IServerVisualContent> + Send + 'static,
     ) -> CompositionDrawListVisual {
         let data = DrawListData {
             props: CompositionContainerVisualProps::new(),

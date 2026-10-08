@@ -125,6 +125,11 @@ struct DebugEvents {
     visited_visuals: Cell<i32>,
 }
 
+// SAFETY: the tests create and use the receiver on one thread; the impls
+// only satisfy the thread-safety bound of the contract.
+unsafe impl Send for DebugEvents {}
+unsafe impl Sync for DebugEvents {}
+
 impl DebugEvents {
     fn reset(&self) {
         self.rects.borrow_mut().clear();
@@ -160,7 +165,7 @@ struct CompositorCanvas {
     renderer: Rc<CompositingRenderer>,
     source: Rc<TestSource>,
     compositor: Rc<Compositor>,
-    events: Rc<DebugEvents>,
+    events: std::sync::Arc<DebugEvents>,
     render_loop: Arc<ManualRenderLoop>,
     render_interface: Rc<MockPlatformRenderInterface>,
     locator_scope: Rc<dyn crate::reactive::IDisposable>,
@@ -202,7 +207,7 @@ impl CompositorCanvas {
         renderer.set_root(Some(root.clone().upcast()));
         renderer.start();
 
-        let events = Rc::new(DebugEvents::default());
+        let events = std::sync::Arc::new(DebugEvents::default());
         renderer.composition_target().set_debug_events(Some(events.clone()));
 
         let canvas = TestBorder::new();
@@ -1228,7 +1233,7 @@ fn custom_visual_draws_through_its_handler() {
             &self.base
         }
 
-        fn on_message(&self, message: Rc<dyn Any>) {
+        fn on_message(&self, message: std::sync::Arc<dyn Any + Send + Sync>) {
             let value = *message.downcast_ref::<i32>().unwrap();
             self.messages.borrow_mut().push(value);
             if value == 1 {
@@ -1259,11 +1264,16 @@ fn custom_visual_draws_through_its_handler() {
     let s = CompositorCanvas::new();
     let log = s.render_interface.log().clone();
     let handler = Rc::new(Handler::default());
-    let visual = s.compositor.create_custom_visual(handler.clone());
+    // The tests run the server on their own thread and look at the handler:
+    // the factory hands out the one made here.
+    let server_handler = crate::utilities::ThreadBound::new(handler.clone());
+    let visual = s
+        .compositor
+        .create_custom_visual(move || server_handler.into_inner() as Rc<dyn ICompositionCustomVisualHandler>);
     visual.set_size(Vector::new(20.0, 10.0));
     ElementComposition::set_element_child_visual(&s.canvas, Some((*visual).clone()));
-    visual.send_handler_message(Rc::new(1i32));
-    visual.send_handler_message(Rc::new(2i32));
+    visual.send_handler_message(std::sync::Arc::new(1i32));
+    visual.send_handler_message(std::sync::Arc::new(2i32));
     assert!(handler.messages.borrow().is_empty());
     s.run_jobs();
 

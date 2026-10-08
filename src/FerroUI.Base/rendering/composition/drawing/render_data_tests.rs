@@ -485,17 +485,25 @@ fn text_reaches_the_server_through_a_batch() {
 fn commit_is_requested_through_the_scheduler_and_runs_with_the_frame() {
     let fixture = Fixture::new();
     let server = fixture.compositor.server().clone();
-    let ran = Rc::new(Cell::new(0));
+    // A job of the server is `Send`: the counter is atomic.
+    let ran = std::sync::Arc::new(std::sync::atomic::AtomicI32::new(0));
     let (before, job) = (ran.clone(), ran.clone());
-    fixture.compositor.request_composition_update(move || before.set(before.get() + 1));
-    fixture.compositor.post_server_job(move |_| job.set(job.get() + 10), false);
+    fixture.compositor.request_composition_update(move || {
+        before.fetch_add(1, std::sync::atomic::Ordering::SeqCst);
+    });
+    fixture.compositor.post_server_job(
+        move |_| {
+            job.fetch_add(10, std::sync::atomic::Ordering::SeqCst);
+        },
+        false,
+    );
     assert!(MediaContext::instance().is_render_scheduled());
 
     Dispatcher::ui_thread().run_jobs(None);
     // The media context committed; the server has not run yet.
-    assert_eq!(ran.get(), 1);
+    assert_eq!(ran.load(std::sync::atomic::Ordering::SeqCst), 1);
     fixture.render_loop.tick();
-    assert_eq!(ran.get(), 11);
+    assert_eq!(ran.load(std::sync::atomic::Ordering::SeqCst), 11);
     assert!(server.last_batch_id() > 0);
 }
 

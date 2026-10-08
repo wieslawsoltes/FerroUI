@@ -7,11 +7,11 @@ use std::rc::Rc;
 /// debug events sink.
 pub struct DebugEventsDirtyRectCollectorProxy {
     inner: Rc<dyn IDirtyRectCollector>,
-    events: Rc<dyn ICompositionTargetDebugEvents>,
+    events: std::sync::Arc<dyn ICompositionTargetDebugEvents>,
 }
 
 impl DebugEventsDirtyRectCollectorProxy {
-    pub fn new(inner: Rc<dyn IDirtyRectCollector>, events: Rc<dyn ICompositionTargetDebugEvents>) -> Self {
+    pub fn new(inner: Rc<dyn IDirtyRectCollector>, events: std::sync::Arc<dyn ICompositionTargetDebugEvents>) -> Self {
         Self { inner, events }
     }
 }
@@ -34,6 +34,11 @@ mod tests {
         rendered: Cell<i32>,
         visited: Cell<i32>,
     }
+
+    // SAFETY: the tests create and use this recorder on one thread; the
+    // impls only satisfy the thread-safety bound of the contract.
+    unsafe impl Send for Recorder {}
+    unsafe impl Sync for Recorder {}
 
     impl IDirtyRectCollector for Recorder {
         fn add_rect(&self, rect: LtrbRect) {
@@ -63,7 +68,7 @@ mod tests {
     fn forwards_to_inner_then_reports_event() {
         let log = Rc::new(RefCell::new(Vec::new()));
         let inner = Rc::new(Recorder { log: log.clone(), ..Default::default() });
-        let events = Rc::new(Recorder { log: log.clone(), ..Default::default() });
+        let events = std::sync::Arc::new(Recorder { log: log.clone(), ..Default::default() });
         let proxy = DebugEventsDirtyRectCollectorProxy::new(inner, events);
         proxy.add_rect(LtrbRect::new(1.0, 0.0, 2.0, 2.0));
         proxy.add_rect(LtrbRect::new(7.0, 0.0, 9.0, 2.0));

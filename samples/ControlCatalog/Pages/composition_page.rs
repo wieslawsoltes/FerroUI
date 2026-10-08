@@ -333,7 +333,7 @@ impl CompositionPage {
             if same_compositor {
                 return;
             }
-            let custom_visual = compositor.create_custom_visual(Rc::new(CustomVisualHandler::new()));
+            let custom_visual = compositor.create_custom_visual(|| Rc::new(CustomVisualHandler::new()) as Rc<dyn ICompositionCustomVisualHandler>);
             *this.custom_visual.borrow_mut() = Some(custom_visual.clone());
             ElementComposition::set_element_child_visual(&v, Some((*custom_visual).clone()));
             custom_visual.send_handler_message(CustomVisualHandler::start_message());
@@ -578,14 +578,16 @@ impl CompositionPage {
 /// A message of the custom visual handler: the identity of the object is the message.
 struct HandlerMessage;
 
-// Deviation (DEVIATIONS.md, ControlCatalog sample): upstream's messages are `static readonly object`
-// instances; `Rc` cannot be a `static`, so they are thread-local.
-thread_local! {
-    static STOP_MESSAGE: Rc<dyn Any> = Rc::new(HandlerMessage);
-    static START_MESSAGE: Rc<dyn Any> = Rc::new(HandlerMessage);
-    static USE_PRECISE_DIRTY_RECTS: Rc<dyn Any> = Rc::new(HandlerMessage);
-    static USE_NON_PRECISE_DIRTY_RECTS: Rc<dyn Any> = Rc::new(HandlerMessage);
-}
+// The messages are sent from the UI thread and compared on the render thread by identity, as
+// upstream's `static readonly object` instances are.
+type HandlerMessageRef = std::sync::Arc<dyn Any + Send + Sync>;
+
+static STOP_MESSAGE: std::sync::LazyLock<HandlerMessageRef> = std::sync::LazyLock::new(|| std::sync::Arc::new(HandlerMessage));
+static START_MESSAGE: std::sync::LazyLock<HandlerMessageRef> = std::sync::LazyLock::new(|| std::sync::Arc::new(HandlerMessage));
+static USE_PRECISE_DIRTY_RECTS: std::sync::LazyLock<HandlerMessageRef> =
+    std::sync::LazyLock::new(|| std::sync::Arc::new(HandlerMessage));
+static USE_NON_PRECISE_DIRTY_RECTS: std::sync::LazyLock<HandlerMessageRef> =
+    std::sync::LazyLock::new(|| std::sync::Arc::new(HandlerMessage));
 
 struct CustomVisualHandler {
     base: CompositionCustomVisualHandler,
@@ -608,20 +610,20 @@ impl CustomVisualHandler {
         }
     }
 
-    fn stop_message() -> Rc<dyn Any> {
-        STOP_MESSAGE.with(Rc::clone)
+    fn stop_message() -> HandlerMessageRef {
+        STOP_MESSAGE.clone()
     }
 
-    fn start_message() -> Rc<dyn Any> {
-        START_MESSAGE.with(Rc::clone)
+    fn start_message() -> HandlerMessageRef {
+        START_MESSAGE.clone()
     }
 
-    fn use_precise_dirty_rects() -> Rc<dyn Any> {
-        USE_PRECISE_DIRTY_RECTS.with(Rc::clone)
+    fn use_precise_dirty_rects() -> HandlerMessageRef {
+        USE_PRECISE_DIRTY_RECTS.clone()
     }
 
-    fn use_non_precise_dirty_rects() -> Rc<dyn Any> {
-        USE_NON_PRECISE_DIRTY_RECTS.with(Rc::clone)
+    fn use_non_precise_dirty_rects() -> HandlerMessageRef {
+        USE_NON_PRECISE_DIRTY_RECTS.clone()
     }
 
     fn update_rects(&self) {
@@ -694,16 +696,16 @@ impl ICompositionCustomVisualHandler for CustomVisualHandler {
         }
     }
 
-    fn on_message(&self, message: Rc<dyn Any>) {
-        if Rc::ptr_eq(&message, &Self::start_message()) {
+    fn on_message(&self, message: HandlerMessageRef) {
+        if std::sync::Arc::ptr_eq(&message, &Self::start_message()) {
             self.running.set(true);
             self.last_server_time.set(None);
             self.base.register_for_next_animation_frame_update();
-        } else if Rc::ptr_eq(&message, &Self::stop_message()) {
+        } else if std::sync::Arc::ptr_eq(&message, &Self::stop_message()) {
             self.running.set(false);
-        } else if Rc::ptr_eq(&message, &Self::use_precise_dirty_rects()) {
+        } else if std::sync::Arc::ptr_eq(&message, &Self::use_precise_dirty_rects()) {
             self.precise_dirty_rects.set(true);
-        } else if Rc::ptr_eq(&message, &Self::use_non_precise_dirty_rects()) {
+        } else if std::sync::Arc::ptr_eq(&message, &Self::use_non_precise_dirty_rects()) {
             self.precise_dirty_rects.set(false);
         }
     }

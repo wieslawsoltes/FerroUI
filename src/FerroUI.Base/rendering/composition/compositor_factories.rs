@@ -50,7 +50,12 @@ impl Compositor {
         CompositionSolidColorVisual::new(&self.this_rc())
     }
 
-    pub fn create_custom_visual(&self, handler: Rc<dyn ICompositionCustomVisualHandler>) -> CompositionCustomVisual {
+    ///
+    /// The handler belongs to the render thread: `handler` creates it there.
+    pub fn create_custom_visual(
+        &self,
+        handler: impl FnOnce() -> Rc<dyn ICompositionCustomVisualHandler> + Send + 'static,
+    ) -> CompositionCustomVisual {
         CompositionCustomVisual::new(&self.this_rc(), handler)
     }
 

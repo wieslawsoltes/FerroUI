@@ -19,6 +19,7 @@ use crate::{FerroLocator, LocatorExtensions, Matrix, PixelRect, PixelSize, Size}
 use std::any::{Any, TypeId};
 use std::cell::{Cell, RefCell};
 use std::collections::HashMap;
+use std::sync::Arc;
 use std::rc::{Rc, Weak};
 use std::time::Duration;
 
@@ -45,7 +46,7 @@ pub struct ServerCompositionTarget {
     attached_visuals: RefCell<HashMap<*const ServerCompositionVisual, Rc<ServerCompositionVisual>>>,
     dirty_rects: Rc<dyn IDirtyRectTracker>,
     id: i64,
-    debug_events: RefCell<Option<Rc<dyn ICompositionTargetDebugEvents>>>,
+    debug_events: RefCell<Option<Arc<dyn ICompositionTargetDebugEvents>>>,
     rendered_visuals: Cell<i32>,
     visited_visuals: Cell<i32>,
     is_waiting_for_ready_render_target: Cell<bool>,
@@ -115,11 +116,11 @@ impl ServerCompositionTarget {
         self.id
     }
 
-    pub fn debug_events(&self) -> Option<Rc<dyn ICompositionTargetDebugEvents>> {
+    pub fn debug_events(&self) -> Option<Arc<dyn ICompositionTargetDebugEvents>> {
         self.debug_events.borrow().clone()
     }
 
-    pub fn set_debug_events(&self, value: Option<Rc<dyn ICompositionTargetDebugEvents>>) {
+    pub fn set_debug_events(&self, value: Option<Arc<dyn ICompositionTargetDebugEvents>>) {
         *self.debug_events.borrow_mut() = value;
     }
 
