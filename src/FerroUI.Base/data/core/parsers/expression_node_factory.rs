@@ -2,12 +2,12 @@ use super::Node;
 use crate::controls::NameScopeRef;
 use crate::data::core::expression_nodes::{
     CastTarget, DataContextNode, ExpressionNode, FerroPropertyAccessorNode, LogicalAncestorElementNode,
-    LogicalNotNode, NamedElementNode, PropertyAccessorNode, ReflectionIndexerNode, StreamNode, TemplatedParentNode,
-    TypeCastNode, VisualAncestorElementNode,
+    LogicalNotNode, NamedElementNode, ParentDataContextNode, PropertyAccessorNode, ReflectionIndexerNode, StreamNode,
+    TemplatedParentNode, TypeCastNode, VisualAncestorElementNode,
 };
 use crate::data::core::ExpressionParseException;
 use crate::data::{RelativeSource, RelativeSourceMode, TreeType};
-use crate::{FerroPropertyRegistry, TypeInfo};
+use crate::{FerroProperty, FerroPropertyRegistry, StyledElement, TypeInfo};
 use std::rc::Rc;
 
 /// Resolves a type name (namespace, name) of a binding path.
@@ -93,6 +93,16 @@ impl ExpressionNodeFactory {
                 TreeType::Logical => Some(LogicalAncestorElementNode::new(source.ancestor_type(), level)),
                 TreeType::Visual => Some(VisualAncestorElementNode::new(source.ancestor_type(), level)),
             },
+        }
+    }
+
+    /// The data context source node for a binding to `target_property`: a binding to the data
+    /// context itself reads the data context of the parent.
+    pub fn create_data_context(target_property: Option<&'static FerroProperty>) -> Rc<dyn ExpressionNode> {
+        if target_property.is_some_and(|p| p.id() == StyledElement::data_context_property().id()) {
+            ParentDataContextNode::new()
+        } else {
+            DataContextNode::new()
         }
     }
 

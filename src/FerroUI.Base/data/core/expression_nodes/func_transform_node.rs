@@ -21,6 +21,10 @@ impl ExpressionNode for FuncTransformNode {
         &self.state
     }
 
+    fn build_string(&self, _builder: &mut String) {
+        // We don't have enough information to add anything here.
+    }
+
     fn on_source_changed(&self, source: Option<&BoxedValue>, _data_validation_error: Option<&BindingError>) {
         // Only used for type casts, which produce null from null. Any error
         // belongs to the member access which follows.

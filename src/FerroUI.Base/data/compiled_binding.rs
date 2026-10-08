@@ -1,5 +1,7 @@
+use crate::controls::INameScope;
 use crate::data::converters::IValueConverter;
-use crate::data::core::expression_nodes::{DataContextNode, ExpressionNode, ParentDataContextNode};
+use crate::data::core::expression_nodes::ExpressionNode;
+use crate::data::core::parsers::ExpressionNodeFactory;
 use crate::data::compiled_binding_path::TypedPropertyElement;
 use crate::data::core::plugins::property_value_type;
 use crate::data::core::{BindingExpression, BindingExpressionOptions, TargetTypeConverter};
@@ -7,7 +9,7 @@ use crate::data::{
     BindingBase, BindingExpressionBase, BindingMode, BindingPriority, CompiledBindingPath, UpdateSourceTrigger,
 };
 use crate::{BoxedValue, FerroObject, FerroProperty, Ref, StyledElement, WeakRef};
-use std::rc::Rc;
+use std::rc::{Rc, Weak};
 
 /// Resolves the binding mode and update source trigger defaults of a binding
 /// against the metadata of its target property.
@@ -35,11 +37,7 @@ pub(crate) fn resolve_defaults_from_metadata(
 
 /// The data context source node for a binding to `target_property`.
 pub(crate) fn create_data_context_node(target_property: Option<&'static FerroProperty>) -> Rc<dyn ExpressionNode> {
-    if target_property.is_some_and(|p| p.id() == StyledElement::data_context_property().id()) {
-        ParentDataContextNode::new()
-    } else {
-        DataContextNode::new()
-    }
+    ExpressionNodeFactory::create_data_context(target_property)
 }
 
 
@@ -155,6 +153,8 @@ binding_properties! {
         update_source_trigger / set_update_source_trigger / with_update_source_trigger: UpdateSourceTrigger = UpdateSourceTrigger::Default,
         /// The anchor to use if the target is not an element.
         default_anchor / set_default_anchor / with_default_anchor: Option<WeakRef<FerroObject>> = None,
+        /// The name scope of the place in markup where the binding was created.
+        name_scope / set_name_scope / with_name_scope: Option<Weak<dyn INameScope>> = None,
     }
 }
 

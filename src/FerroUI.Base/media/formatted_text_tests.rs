@@ -684,6 +684,25 @@ fn highlight_geometry_surrounds_the_text() {
 }
 
 #[test]
+fn build_geometry_collects_the_glyph_runs_of_the_lines() {
+    let _scope = TextTestScope::new();
+
+    // Nothing is drawn for an empty text.
+    assert!(formatted("").build_geometry(Point::default()).is_none());
+
+    let text = formatted("ab\ncdef");
+
+    let geometry = text.build_geometry(Point::new(1.0, 2.0)).expect("a geometry");
+
+    let group = geometry.cast::<GeometryGroup>().expect("a geometry group");
+
+    assert_eq!(group.fill_rule(), FillRule::NonZero);
+
+    // One geometry per glyph run: one run per line.
+    assert_eq!(group.children().len(), 2);
+}
+
+#[test]
 fn invalid_arguments_panic() {
     let _scope = TextTestScope::new();
 

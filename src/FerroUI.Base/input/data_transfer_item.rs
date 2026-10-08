@@ -1,6 +1,7 @@
 use super::platform::ClipboardError;
 use super::{DataFormat, DataFormatOf, IAsyncDataTransferItem, IDataTransferItem, LocalBoxFuture};
 use crate::media::imaging::Bitmap;
+use crate::platform::storage::IStorageItem;
 use std::any::Any;
 use std::cell::RefCell;
 use std::rc::Rc;
@@ -126,6 +127,13 @@ impl DataTransferItem {
         self.set(&DataFormat::text(), value.map(str::to_string))
     }
 
+    /// Sets the value for the [`DataFormat::file`] format.
+    ///
+    /// If `value` is `None`, the format won't be part of the item.
+    pub fn set_file(&self, value: Option<Rc<dyn IStorageItem>>) {
+        self.set(&DataFormat::file(), value)
+    }
+
     /// Sets the value for the [`DataFormat::bitmap`] format.
     ///
     /// If `value` is `None`, the format won't be part of the item.
@@ -158,6 +166,13 @@ impl DataTransferItem {
     /// If `value` is `None`, the format won't be part of the item.
     pub fn create_text(value: Option<&str>) -> Rc<DataTransferItem> {
         Self::create(&DataFormat::text(), value.map(str::to_string))
+    }
+
+    /// Creates a new item with [`DataFormat::file`] as a single format.
+    ///
+    /// If `value` is `None`, the format won't be part of the item.
+    pub fn create_file(value: Option<Rc<dyn IStorageItem>>) -> Rc<DataTransferItem> {
+        Self::create(&DataFormat::file(), value)
     }
 }
 

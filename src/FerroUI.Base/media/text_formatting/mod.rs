@@ -26,7 +26,7 @@ pub mod unicode;
 mod bidi_reorderer;
 mod drawable_text_run;
 mod formatted_text_source;
-mod formatting_buffer_helper;
+pub(crate) mod formatting_buffer_helper;
 mod formatting_object_pool;
 mod generic_text_paragraph_properties;
 mod generic_text_run_properties;

@@ -1,7 +1,8 @@
 use super::platform::KeyGestureFormatInfo;
 use super::{Key, KeyEventArgs, KeyModifiers, ParseKeyModifiersError};
-use std::rc::Rc;
+use crate::utilities::FormatError;
 use std::fmt;
+use std::rc::Rc;
 use std::str::FromStr;
 
 /// Defines a keyboard input combination.
@@ -128,6 +129,28 @@ impl KeyGesture {
     /// registered with the locator, or the invariant one.
     pub fn to_platform_string(&self, format_provider: Option<Rc<KeyGestureFormatInfo>>) -> String {
         self.format_with(&KeyGestureFormatInfo::get_instance(format_provider))
+    }
+
+    /// Returns the gesture as a string formatted according to the format string and the
+    /// format provider.
+    ///
+    /// The format is `None`, an empty string or `"g"` for the invariant format, or `"p"`
+    /// for the platform specific format: the given format info, or the one registered with
+    /// the locator, or the invariant one.
+    ///
+    /// Fails with a [`FormatError`] if the format string is anything else.
+    pub fn to_string_format(
+        &self,
+        format: Option<&str>,
+        format_provider: Option<Rc<KeyGestureFormatInfo>>,
+    ) -> Result<String, FormatError> {
+        let format_info = match format {
+            None | Some("") | Some("g") => KeyGestureFormatInfo::invariant(),
+            Some("p") => KeyGestureFormatInfo::get_instance(format_provider),
+            _ => return Err(FormatError::new("Unknown format specifier")),
+        };
+
+        Ok(self.format_with(&format_info))
     }
 
     /// Formats the gesture with the given format info.
@@ -258,6 +281,24 @@ mod tests {
         let gesture = KeyGesture::new(Key::OemPlus, KeyModifiers::CONTROL | KeyModifiers::META);
         assert_eq!(gesture.to_platform_string(None), gesture.to_string());
         assert_eq!(gesture.to_string(), "Ctrl+Cmd+OemPlus");
+    }
+
+    // Not an upstream test: the format strings of `ToString(string, IFormatProvider)`.
+    #[test]
+    fn to_string_format_selects_the_format_info() {
+        let gesture = KeyGesture::new(Key::A, KeyModifiers::CONTROL | KeyModifiers::SHIFT);
+
+        assert_eq!(gesture.to_string_format(None, None).unwrap(), "Ctrl+Shift+A");
+        assert_eq!(gesture.to_string_format(Some(""), None).unwrap(), "Ctrl+Shift+A");
+        assert_eq!(gesture.to_string_format(Some("g"), None).unwrap(), "Ctrl+Shift+A");
+
+        let info = Rc::new(KeyGestureFormatInfo::new(None, "\u{2318}", "\u{2303}", "\u{2325}", "\u{21E7}"));
+
+        // The invariant format ignores the provider; the platform format uses it.
+        assert_eq!(gesture.to_string_format(Some("g"), Some(info.clone())).unwrap(), "Ctrl+Shift+A");
+        assert_eq!(gesture.to_string_format(Some("p"), Some(info)).unwrap(), "\u{2303}+\u{21E7}+A");
+
+        assert_eq!(gesture.to_string_format(Some("x"), None), Err(FormatError::new("Unknown format specifier")));
     }
 
     #[test]

@@ -6,9 +6,10 @@ use crate::media::text_formatting::{
     TextEndOfParagraph, TextFormatter, TextLine, TextLineBreak, TextParagraphProperties, TextRun, TextRunProperties,
 };
 use crate::media::{
-    BaselineAlignment, FlowDirection, FontFamily, FontFeatureCollection, FontStretch, FontStyle, FontWeight,
-    Geometry, GeometryCombineMode, IBrush, RectangleGeometry, TextAlignment, TextCollapsingCreateInfo,
-    TextDecorationCollection, TextTrimming, TextWrapping, Transform, Typeface,
+    BaselineAlignment, Drawing, DrawingGroup, FillRule, FlowDirection, FontFamily, FontFeatureCollection,
+    FontStretch, FontStyle, FontWeight, Geometry, GeometryCombineMode, GeometryDrawing, GeometryGroup,
+    GlyphRunDrawing, IBrush, LineGeometry, RectangleGeometry, TextAlignment, TextCollapsingCreateInfo,
+    TextDecorationCollection, TextTrimming, TextWrapping, Transform, TranslateTransform, Typeface,
 };
 use crate::utilities::span::{SpanPosition, SpanRider, SpanVector};
 use crate::utilities::{CultureInfo, ReadOnlyMemory};
@@ -794,6 +795,107 @@ impl FormattedText {
     /// including the width of whitespace characters at the end of the line.
     pub fn width_including_trailing_whitespace(&self) -> f64 {
         self.metrics().width_including_trailing_whitespace
+    }
+
+    /// Obtains geometry for the text, including underlines and strikethroughs.
+    ///
+    /// * `origin` — the left top origin of the resulting geometry.
+    ///
+    /// Returns the geometry object containing the outline of the formatted text: the union
+    /// of all of the glyphs, underlines and strikethroughs that represent the formatted text.
+    pub fn build_geometry(&self, origin: Point) -> Option<Ref<Geometry>> {
+        let mut accumulated_geometry: Option<Ref<GeometryGroup>> = None;
+        let mut line_origin = origin;
+
+        let drawing = DrawingGroup::new();
+
+        {
+            let mut ctx = drawing.open();
+
+            {
+                let mut enumerator = self.get_enumerator();
+
+                while enumerator.move_next() {
+                    let Some(current_line) = enumerator.current() else {
+                        continue;
+                    };
+
+                    current_line.draw(&mut ctx, line_origin);
+
+                    self.advance_line_origin(&mut line_origin, &*current_line);
+                }
+
+                enumerator.dispose();
+            }
+
+            ctx.dispose();
+        }
+
+        let mut transform: Option<Ref<Transform>> = Some(TranslateTransform::with_offset(origin.x, origin.y).upcast());
+
+        //  recursively go down the DrawingGroup to build up the geometry
+        Self::combine_geometry_recursive(&drawing.upcast(), &mut transform, &mut accumulated_geometry);
+
+        accumulated_geometry.map(|geometry| geometry.upcast())
+    }
+
+    fn combine_geometry_recursive(
+        drawing: &Ref<Drawing>,
+        transform: &mut Option<Ref<Transform>>,
+        accumulated_geometry: &mut Option<Ref<GeometryGroup>>,
+    ) {
+        fn accumulated(accumulated_geometry: &mut Option<Ref<GeometryGroup>>) -> &Ref<GeometryGroup> {
+            accumulated_geometry.get_or_insert_with(|| {
+                let group = GeometryGroup::new();
+                group.set_fill_rule(FillRule::NonZero);
+                group
+            })
+        }
+
+        if let Some(group) = drawing.cast::<DrawingGroup>() {
+            *transform = group.transform();
+
+            // recursively go down for DrawingGroup
+            for child in group.children().iter() {
+                Self::combine_geometry_recursive(&child, transform, accumulated_geometry);
+            }
+        } else if let Some(glyph_run_drawing) = drawing.cast::<GlyphRunDrawing>() {
+            // process glyph run
+            if let Some(glyph_run) = glyph_run_drawing.glyph_run() {
+                let glyph_run_geometry = glyph_run.build_geometry();
+
+                glyph_run_geometry.set_transform(transform.clone());
+
+                accumulated(accumulated_geometry).children().add(glyph_run_geometry);
+            }
+        } else if let Some(geometry_drawing) = drawing.cast::<GeometryDrawing>() {
+            // process geometry (i.e. TextDecoration on the line)
+            if let Some(mut geometry) = geometry_drawing.geometry() {
+                geometry.set_transform(transform.clone());
+
+                if let Some(line_geometry) = geometry.cast::<LineGeometry>() {
+                    // For TextDecoration drawn by DrawLine(), the geometry is a LineGeometry which has no
+                    // bounding area. So this line won't show up. Work aroud it by increase the Bounding rect
+                    // to be Pen's thickness
+
+                    let mut bounds = line_geometry.bounds();
+
+                    let thickness = geometry_drawing.pen().map_or(0.0, |pen| pen.thickness());
+
+                    if bounds.height == 0.0 {
+                        bounds = bounds.with_height(thickness);
+                    } else if bounds.width == 0.0 {
+                        bounds = bounds.with_width(thickness);
+                    }
+
+                    // convert the line geometry into a rectangle geometry
+                    // we lost line cap info here
+                    geometry = RectangleGeometry::with_rect(bounds).upcast();
+                }
+
+                accumulated(accumulated_geometry).children().add(geometry);
+            }
+        }
     }
 
     /// Builds a highlight geometry object.

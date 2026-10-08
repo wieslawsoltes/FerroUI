@@ -54,6 +54,15 @@ impl Disposable {
     pub fn create(action: impl FnOnce() + 'static) -> Rc<dyn IDisposable> {
         Rc::new(AnonymousDisposable { action: Cell::new(Some(action)) })
     }
+
+    /// A disposable that gives `state` to `dispose` the first time it is
+    /// disposed.
+    pub fn create_with_state<TState: 'static>(
+        state: TState,
+        dispose: impl FnOnce(TState) + 'static,
+    ) -> Rc<dyn IDisposable> {
+        Rc::new(AnonymousDisposable { action: Cell::new(Some(move || dispose(state))) })
+    }
 }
 
 /// Holds a replaceable inner disposable; assigning a new one disposes the
@@ -90,5 +99,23 @@ impl IDisposable for SerialDisposable {
                 old.dispose();
             }
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    // Not from upstream: the original has no tests of this type.
+    use super::*;
+
+    #[test]
+    fn a_disposable_with_state_gives_it_to_the_action_once() {
+        let seen = Rc::new(RefCell::new(Vec::new()));
+        let s = seen.clone();
+        let target = Disposable::create_with_state(5, move |state: i32| s.borrow_mut().push(state));
+
+        assert!(seen.borrow().is_empty());
+        target.dispose();
+        target.dispose();
+        assert_eq!(vec![5], *seen.borrow());
     }
 }

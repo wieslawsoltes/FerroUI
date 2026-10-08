@@ -160,6 +160,7 @@ pub(crate) trait PropertyRoutes {
         priority: BindingPriority,
     ) -> Rc<dyn IDisposable>;
     fn route_get_metadata(&'static self, type_: &'static TypeInfo) -> FerroPropertyMetadata;
+    fn route_unregister(&'static self, type_: &'static TypeInfo);
     fn route_is_valid_value(&'static self, value: &dyn Any) -> bool;
     /// The typed property behind the routes, for downcasting.
     fn as_any(&'static self) -> &'static dyn Any;
@@ -438,6 +439,12 @@ impl FerroProperty {
     /// Gets the base metadata of the property on the type of `owner`.
     pub fn get_metadata_for(&self, owner: &FerroObject) -> FerroPropertyMetadata {
         self.routes().route_get_metadata(owner.get_type())
+    }
+
+    /// Removes the metadata registered for the property on the specified
+    /// type.
+    pub fn unregister(&self, type_: &'static TypeInfo) {
+        self.routes().route_unregister(type_)
     }
 
     /// Checks whether `value` is valid for the property: of the property's

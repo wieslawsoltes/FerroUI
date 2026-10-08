@@ -71,6 +71,35 @@ pub use compare_info::{CompareInfo, CompareOptions, ICompareRules, StringCompari
 pub use read_only_memory::ReadOnlyMemory;
 pub use value_span::ValueSpan;
 
+// --- collections ---
+
+mod bidi_dictionary;
+mod binary_search_extension;
+mod ferro_property_dictionary;
+mod mapped_array_slice;
+mod object_pool;
+mod pooled_inline_list;
+mod ref_counting_small_dictionary;
+mod ref_tracking_dictionary;
+mod single_or_queue;
+mod small_dictionary;
+mod value_single_or_list;
+
+#[cfg(test)]
+mod string_splitter_tests;
+
+pub use bidi_dictionary::BidiDictionary;
+pub use binary_search_extension::BinarySearchExtension;
+pub use ferro_property_dictionary::FerroPropertyDictionary;
+pub use mapped_array_slice::MappedArraySlice;
+pub use object_pool::ObjectPool;
+pub use pooled_inline_list::{PooledInlineList, PooledInlineListEnumerator, PooledInlineListRawState};
+pub use ref_counting_small_dictionary::RefCountingSmallDictionary;
+pub use ref_tracking_dictionary::RefTrackingDictionary;
+pub use single_or_queue::SingleOrQueue;
+pub use small_dictionary::{InlineDictionary, InlineDictionaryEnumerator};
+pub use value_single_or_list::ValueSingleOrList;
+
 // --- date and time ---
 
 mod date_time;

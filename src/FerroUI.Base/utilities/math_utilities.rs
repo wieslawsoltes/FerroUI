@@ -1,5 +1,6 @@
 //! Math utilities not provided by the standard library.
 
+use super::Decimal;
 use crate::{Point, Vector};
 
 /// Returns the smaller of two doubles; NaN is propagated and `-0.0 < +0.0`.
@@ -226,6 +227,25 @@ impl MathUtilities {
     /// Panics if `min > max` (a programmer error).
     #[inline]
     pub fn clamp_i32(val: i32, min: i32, max: i32) -> i32 {
+        if min > max {
+            throw_cannot_be_greater_than(min, max);
+        }
+
+        if val < min {
+            min
+        } else if val > max {
+            max
+        } else {
+            val
+        }
+    }
+
+    /// Clamps a value between a minimum and maximum value.
+    ///
+    /// # Panics
+    /// Panics if `min > max` (a programmer error).
+    #[inline]
+    pub fn clamp_decimal(val: Decimal, min: Decimal, max: Decimal) -> Decimal {
         if min > max {
             throw_cannot_be_greater_than(min, max);
         }
@@ -624,5 +644,23 @@ mod tests {
         assert!(!MathUtilities::do_polygons_intersect(4, &a, 4, &c));
         assert!(MathUtilities::is_entirely_contained(4, &d, 4, &a));
         assert!(!MathUtilities::is_entirely_contained(4, &b, 4, &a));
+    }
+
+    // Not from upstream.
+    #[test]
+    fn decimal_clamp_returns_the_value_or_the_nearest_bound() {
+        let decimal = |text: &str| Decimal::parse(text).expect("a decimal");
+        let (min, max) = (decimal("-1.5"), decimal("2.5"));
+
+        assert_eq!(decimal("1"), MathUtilities::clamp_decimal(decimal("1"), min, max));
+        assert_eq!(min, MathUtilities::clamp_decimal(decimal("-2"), min, max));
+        assert_eq!(max, MathUtilities::clamp_decimal(decimal("3"), min, max));
+    }
+
+    // Not from upstream.
+    #[test]
+    #[should_panic(expected = "cannot be greater than")]
+    fn decimal_clamp_throws_when_min_is_greater_than_max() {
+        MathUtilities::clamp_decimal(Decimal::ZERO, Decimal::ONE, Decimal::ZERO);
     }
 }

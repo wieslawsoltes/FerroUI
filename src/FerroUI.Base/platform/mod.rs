@@ -8,6 +8,10 @@ mod i_drawing_context_impl;
 mod i_glyph_run_impl;
 mod i_locked_framebuffer;
 mod i_optional_feature_provider;
+mod i_scoped_resource;
+mod i_surface_orientation;
+mod platform_graphics_device_adapter_description;
+mod surface_orientation;
 mod i_platform_behavior_inhibition;
 mod i_external_objects_render_interface_context_feature;
 mod i_platform_gpu;
@@ -30,6 +34,10 @@ pub use i_drawing_context_impl::{
 pub use i_glyph_run_impl::IGlyphRunImpl;
 pub use i_locked_framebuffer::ILockedFramebuffer;
 pub use i_optional_feature_provider::IOptionalFeatureProvider;
+pub use i_scoped_resource::{IScopedResource, ScopedResource};
+pub use i_surface_orientation::ISurfaceOrientation;
+pub use platform_graphics_device_adapter_description::PlatformGraphicsDeviceAdapterDescription;
+pub use surface_orientation::SurfaceOrientation;
 pub use i_platform_behavior_inhibition::IPlatformBehaviorInhibition;
 pub use i_external_objects_render_interface_context_feature::{
     IExternalObjectsHandleWrapRenderInterfaceContextFeature, IExternalObjectsRenderInterfaceContextFeature,

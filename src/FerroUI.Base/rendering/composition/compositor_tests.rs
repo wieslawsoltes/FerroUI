@@ -1288,3 +1288,38 @@ fn custom_visual_draws_through_its_handler() {
     let result = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| handler.base.effective_size()));
     assert!(result.is_err());
 }
+
+// --- Compositor.CreateCompositionVisualSnapshot --------------------------------------
+//
+// Not upstream tests: upstream covers the member in the headless rendering tests
+// (`Should_Render_To_A_Compositor_Snapshot_Capture`), which need a rendering backend.
+
+#[test]
+fn create_composition_visual_snapshot_faults_for_a_visual_without_a_root() {
+    let s = CompositorCanvas::new();
+    let visual = s.compositor.create_container_visual();
+
+    let task = s.compositor.create_composition_visual_snapshot(&visual, 1.0);
+
+    assert!(task.is_faulted());
+    assert_eq!(
+        "the visual is not attached to a composition target",
+        task.exception().expect("the task is faulted").to_string()
+    );
+}
+
+#[test]
+fn create_composition_visual_snapshot_completes_after_the_next_batch() {
+    let s = CompositorCanvas::new();
+    let control = TestBorder::filled(30.0, 50.0, 20.0, 10.0);
+    s.canvas.add(&control);
+    s.run_jobs();
+    let visual = control.composition_visual().expect("the control is attached");
+
+    let task = s.compositor.create_composition_visual_snapshot(&visual, 2.0);
+
+    assert!(!task.is_completed());
+    s.run_jobs();
+    assert!(task.is_completed_successfully());
+    assert!(matches!(task.take_result(), Some(Ok(_))));
+}

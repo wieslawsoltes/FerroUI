@@ -58,6 +58,15 @@ impl ContainerQuery {
         result
     }
 
+    /// Creates a container from a function that builds its query and,
+    /// optionally, the name of the container to query.
+    pub fn with_query_fn(
+        query: impl FnOnce(Option<StyleQuery>) -> StyleQuery,
+        container_name: Option<String>,
+    ) -> Ref<Self> {
+        Self::with_query(query(None), container_name)
+    }
+
     /// The container's query.
     pub fn query(&self) -> Option<StyleQuery> {
         self.query.borrow().clone()

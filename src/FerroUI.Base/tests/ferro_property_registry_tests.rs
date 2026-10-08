@@ -152,3 +152,43 @@ fn find_registered_doesnt_find_non_add_ownered_attached_property() {
 
     assert!(result.is_none());
 }
+
+test_class!(UnregisterBase: FerroObject);
+
+impl UnregisterBase {
+    ferro_property!(pub fn foo_property() -> StyledProperty<String> {
+        FerroProperty::register::<UnregisterBase, _>("Foo", String::from("foodefault"))
+    });
+}
+
+test_class!(UnregisterDerived: UnregisterBase);
+test_class!(UnregisterDerived2: UnregisterBase);
+
+/// Not from upstream, which has no test of `UnregisterByModule`: the
+/// metadata a type overrides is gone once the type is unregistered.
+#[test]
+fn unregister_by_module_removes_metadata_of_types() {
+    let property = UnregisterBase::foo_property();
+    property.override_default_value_for(UnregisterDerived::TYPE, String::from("foooverride"));
+
+    assert_eq!("foooverride", property.get_default_value(UnregisterDerived::TYPE));
+    assert_eq!("foodefault", property.get_default_value(UnregisterBase::TYPE));
+
+    assert!(FerroPropertyRegistry::instance().unregister_by_module([UnregisterDerived::TYPE]));
+
+    assert_eq!("foodefault", property.get_default_value(UnregisterDerived::TYPE));
+    assert_eq!("foodefault", property.get_default_value(UnregisterBase::TYPE));
+}
+
+/// Not from upstream: `FerroProperty::unregister` removes the metadata of a
+/// type through the untyped property.
+#[test]
+fn unregister_removes_metadata_of_type() {
+    let property = UnregisterBase::foo_property();
+    property.override_default_value_for(UnregisterDerived2::TYPE, String::from("foooverride"));
+    assert_eq!("foooverride", property.get_default_value(UnregisterDerived2::TYPE));
+
+    property.as_property().unregister(UnregisterDerived2::TYPE);
+
+    assert_eq!("foodefault", property.get_default_value(UnregisterDerived2::TYPE));
+}

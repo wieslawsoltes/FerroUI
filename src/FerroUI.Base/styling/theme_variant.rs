@@ -143,7 +143,32 @@ impl ThemeVariant {
             .map(|settings| settings.get_color_values().theme_variant())
             .unwrap_or(PlatformThemeVariant::Light);
 
-        match variant {
+        ThemeVariant::from(variant)
+    }
+
+    /// The platform theme variant of a theme variant (the original's
+    /// explicit conversion to a nullable platform theme variant): the light
+    /// and the dark variant convert to their counterparts, another variant
+    /// converts as the variant it inherits from, and a variant that inherits
+    /// from neither, or no variant, converts to nothing.
+    pub fn to_platform_theme_variant(theme_variant: Option<&ThemeVariant>) -> Option<PlatformThemeVariant> {
+        let theme_variant = theme_variant?;
+        if *theme_variant == ThemeVariant::light() {
+            Some(PlatformThemeVariant::Light)
+        } else if *theme_variant == ThemeVariant::dark() {
+            Some(PlatformThemeVariant::Dark)
+        } else if let Some(inherit_variant) = theme_variant.inherit_variant() {
+            Self::to_platform_theme_variant(Some(&inherit_variant))
+        } else {
+            None
+        }
+    }
+}
+
+/// The original's explicit conversion from a platform theme variant.
+impl From<PlatformThemeVariant> for ThemeVariant {
+    fn from(theme_variant: PlatformThemeVariant) -> Self {
+        match theme_variant {
             PlatformThemeVariant::Light => ThemeVariant::light(),
             PlatformThemeVariant::Dark => ThemeVariant::dark(),
         }
@@ -205,5 +230,38 @@ impl FromStr for ThemeVariant {
             "Dark" => Ok(ThemeVariant::dark()),
             _ => Err(ThemeVariantParseError),
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    // Not from upstream: the original has no tests of the conversions.
+    use super::*;
+
+    #[test]
+    fn platform_theme_variant_converts_to_the_built_in_variants() {
+        assert_eq!(ThemeVariant::light(), ThemeVariant::from(PlatformThemeVariant::Light));
+        assert_eq!(ThemeVariant::dark(), ThemeVariant::from(PlatformThemeVariant::Dark));
+    }
+
+    #[test]
+    fn theme_variant_converts_to_the_platform_variant_it_is_or_inherits() {
+        assert_eq!(None, ThemeVariant::to_platform_theme_variant(None));
+        assert_eq!(None, ThemeVariant::to_platform_theme_variant(Some(&ThemeVariant::default())));
+        assert_eq!(
+            Some(PlatformThemeVariant::Light),
+            ThemeVariant::to_platform_theme_variant(Some(&ThemeVariant::light()))
+        );
+        assert_eq!(
+            Some(PlatformThemeVariant::Dark),
+            ThemeVariant::to_platform_theme_variant(Some(&ThemeVariant::dark()))
+        );
+
+        let custom = ThemeVariant::new("Custom", None);
+        assert_eq!(None, ThemeVariant::to_platform_theme_variant(Some(&custom)));
+
+        let inherited = ThemeVariant::new("Inherited", Some(ThemeVariant::dark()));
+        let nested = ThemeVariant::new("Nested", Some(inherited));
+        assert_eq!(Some(PlatformThemeVariant::Dark), ThemeVariant::to_platform_theme_variant(Some(&nested)));
     }
 }

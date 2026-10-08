@@ -14,6 +14,8 @@ use crate::BoxedValue;
 /// the binding logs the error and treats the value as unset.
 ///
 /// There is no culture argument: formatting and parsing are invariant.
+// Deviation (DEVIATIONS.md, Bindings): upstream passes the `CultureInfo` of the binding
+// (`ConverterCulture`) to `Convert` and `ConvertBack`.
 pub trait IValueConverter {
     /// Converts a value on its way from the binding source to the target.
     fn convert(
