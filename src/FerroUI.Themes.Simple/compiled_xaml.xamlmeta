@@ -1,0 +1,23 @@
+{
+  "name": "FerroUI.Themes.Simple",
+  "crate_name": "ferroui_themes_simple",
+  "documents": [
+    {
+      "uri": "ferres://ferroui.themes.simple/SimpleTheme.xaml",
+      "root_type": "FerroUI.Themes.Simple.SimpleTheme",
+      "class_rust_path": "::ferroui_themes_simple::SimpleTheme",
+      "build_path": null,
+      "populate_path": "::ferroui_themes_simple::compiled_xaml::populate",
+      "public": true
+    },
+    {
+      "uri": "ferres://ferroui.themes.simple/Controls/SimpleControls.xaml",
+      "root_type": "FerroUI.Styling.Styles",
+      "class_rust_path": null,
+      "build_path": "::ferroui_themes_simple::compiled_xaml::build_controls_simplecontrols_xaml",
+      "populate_path": null,
+      "public": false
+    }
+  ],
+  "dependencies": []
+}

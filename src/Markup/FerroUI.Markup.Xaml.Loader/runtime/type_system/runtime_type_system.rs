@@ -1630,12 +1630,14 @@ impl IXamlTypeSystem for RuntimeTypeSystem {
             })
             .clone()
     }
+    /// `SreTypeSystem.FindAssembly(name)` (the type system of upstream's run-time loader):
+    /// the assembly whose name equals `name` without regard to case.
     fn find_assembly(&self, substring: &str) -> Option<Rc<dyn IXamlAssembly>> {
         self.sync_assemblies();
         self.assemblies
             .borrow()
             .iter()
-            .find(|a| a.name.to_lowercase().contains(&substring.to_lowercase()))
+            .find(|a| a.name.to_lowercase() == substring.to_lowercase())
             .map(|a| a.clone() as Rc<dyn IXamlAssembly>)
     }
     fn find_type(&self, name: &str) -> Option<Rc<dyn IXamlType>> {

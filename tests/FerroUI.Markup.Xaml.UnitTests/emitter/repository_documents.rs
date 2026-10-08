@@ -72,7 +72,7 @@ fn measure_theme_documents() {
             .map(|(name, text)| (name.as_str(), text.as_str()))
             .collect();
         let root_uri = format!("ferres://{assembly}/");
-        compiled.extend(compile_documents(&documents, Some(&root_uri), &RuntimeXamlLoaderConfiguration::new()));
+        compiled.extend(compile_documents(&documents, Some(&root_uri), &RuntimeXamlLoaderConfiguration::new(), &[]));
     }
     let mut reasons: BTreeMap<String, usize> = BTreeMap::new();
     let mut eligible = 0;

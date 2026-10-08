@@ -32,6 +32,7 @@ use crate::compiler_extensions::ast_nodes::{
     FerroXamlIlFerroListConstantAstNode, FerroXamlIlFontFamilyAstNode, FerroXamlIlGridLengthAstNode, FerroXamlIlVectorLikeConstantAstNode,
 };
 use crate::compiler_extensions::group_transformers::NewServiceProviderNode;
+use super::compiled_resources::CompiledDocumentBuildMethod;
 use crate::compiler_extensions::transformers::{
     CombinatorSelectorType, EnsureCapacityNode, FerroNameScopeRegistrationXamlIlNode, FerroXamlIlWellKnownTypesExtensions,
     HandleRootObjectScopeNode, OptionsMarkupExtensionMethod, ResourceAdderSetter, XamlIlAttachedPropertyEqualsSelector,
@@ -2463,6 +2464,24 @@ impl Emitter<'_> {
                 .ok_or_else(|| unsupported(node, "the service provider of a build method that is not one"))?;
             let handle = class.handle().ok_or_else(|| unsupported(node, "the root class of the document has no handle"))?;
             return Ok((format!("{function}({service_provider})?"), Some(handle)));
+        }
+        if let Some(compiled) = method.as_any().downcast_ref::<CompiledDocumentBuildMethod>() {
+            // `Build:<path>(serviceProvider)` of a compiled document of another crate: its
+            // build function there.
+            let return_type = compiled.return_type();
+            let class = runtime_type(&return_type)
+                .and_then(RuntimeType::type_info)
+                .ok_or_else(|| unsupported(node, "a compiled document of another crate whose root is not a class"))?;
+            let values = call.arguments.borrow().clone();
+            let [service_provider] = values.as_slice() else {
+                return Err(unsupported(node, "a call of the build method of a document without its service provider"));
+            };
+            let service_provider = self.value(&service_provider.as_node())?;
+            let service_provider = self
+                .coerce(&service_provider, TypeId::of::<Option<Rc<dyn IServiceProvider>>>())
+                .ok_or_else(|| unsupported(node, "the service provider of a build method that is not one"))?;
+            let handle = class.handle().ok_or_else(|| unsupported(node, "the root class of the document has no handle"))?;
+            return Ok((format!("{}({service_provider})?", compiled.rust_path()), Some(handle)));
         }
         let runtime = method
             .as_any()
