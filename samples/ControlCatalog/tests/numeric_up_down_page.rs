@@ -40,6 +40,7 @@ fn the_values_of_the_view_model_are_shown_in_the_selected_format() {
     let window = show(&page);
     let view_model = view_model(&page);
     let up_down = page.get_control::<NumericUpDown>("upDown");
+    let double_up_down = page.get_control::<NumericUpDown>("DoubleUpDown");
 
     // Without culture data the runtime has no specific culture: the list of the cultures is
     // empty and the numbers have the conventions of the current culture, the invariant one.
@@ -66,6 +67,11 @@ fn the_values_of_the_view_model_are_shown_in_the_selected_format() {
     run_jobs();
     assert_eq!(decimal("3"), view_model.decimal_value());
 
+    // The other control shows the floating-point value.
+    view_model.set_double_value(2.5);
+    run_jobs();
+    assert_eq!(Some(decimal("2.5")), double_up_down.value());
+    assert_eq!(Some("2.50 \u{00B0}"), double_up_down.text().as_deref());
     window.close();
 }
 
@@ -108,17 +114,26 @@ fn the_selected_culture_gives_the_number_format() {
 }
 
 #[test]
-#[ignore = "gap C315: a floating-point value is not converted for a decimal property by a binding"]
-fn gap_c315_double_bound_to_the_decimal_value() {
+fn a_double_of_the_view_model_is_the_decimal_value_of_the_control() {
     let _app = start_catalog_application();
     let page = NumericUpDownPage::new();
     let window = show(&page);
     let view_model = view_model(&page);
-    // `Value="{Binding DoubleValue}"`: upstream's binding converts the `double` of the view
-    // model to the `decimal?` of the control.
+    // `Value="{Binding DoubleValue}"`: the binding converts the `double` of the view model
+    // to the `decimal?` of the control.
     let double_up_down = page.get_control::<NumericUpDown>("DoubleUpDown");
+    assert_eq!(Some(decimal("0")), double_up_down.value());
     view_model.set_double_value(2.5);
     run_jobs();
     assert_eq!(Some(decimal("2.5")), double_up_down.value());
+
+    // And the value of the control back to the `double` of the view model.
+    double_up_down.set_numeric_value(Some(decimal("7.5")));
+    run_jobs();
+    assert_eq!(7.5, view_model.double_value());
+    // The control without a value: a `double` has no null, the view model keeps its value.
+    double_up_down.set_numeric_value(None);
+    run_jobs();
+    assert_eq!(7.5, view_model.double_value());
     window.close();
 }
