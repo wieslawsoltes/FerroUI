@@ -18,10 +18,13 @@ use crate::{FerroLocator, LocatorExtensions};
 /// was created on.
 pub struct PlatformRenderInterfaceContextManager {
     weak_self: Weak<PlatformRenderInterfaceContextManager>,
-    graphics: Option<Rc<dyn IPlatformGraphics>>,
+    /// In cells with the render interface below: the three handles the
+    /// manager shares with the thread that created it, which takes them back
+    /// with [`release_platform_handles`](Self::release_platform_handles).
+    graphics: RefCell<Option<Rc<dyn IPlatformGraphics>>>,
     backend: RefCell<Option<Rc<dyn IPlatformRenderInterfaceContext>>>,
     gpu_context: RefCell<Option<OwnedDisposable<dyn IPlatformGraphicsContext>>>,
-    ready_state_feature: Option<Rc<dyn IPlatformGraphicsReadyStateFeature>>,
+    ready_state_feature: RefCell<Option<Rc<dyn IPlatformGraphicsReadyStateFeature>>>,
     /// The render interface of the platform, looked up where the manager is
     /// created: the service locator belongs to a thread, and the context may
     /// be created by another one (the render thread).
@@ -39,10 +42,10 @@ impl PlatformRenderInterfaceContextManager {
 
         Rc::new_cyclic(|weak_self| PlatformRenderInterfaceContextManager {
             weak_self: weak_self.clone(),
-            graphics,
+            graphics: RefCell::new(graphics),
             backend: RefCell::new(None),
             gpu_context: RefCell::new(None),
-            ready_state_feature,
+            ready_state_feature: RefCell::new(ready_state_feature),
             render_interface: RefCell::new(FerroLocator::current().get_service::<dyn IPlatformRenderInterface>()),
             context_disposed: HandlerList::new(),
             context_created: HandlerList::new(),
@@ -73,6 +76,19 @@ impl PlatformRenderInterfaceContextManager {
     pub fn with_platform_render_interface<R>(&self, f: impl FnOnce(&dyn IPlatformRenderInterface) -> R) -> Option<R> {
         let render_interface = self.render_interface.borrow();
         render_interface.as_deref().map(f)
+    }
+
+    /// Lets go of the handles the manager shares with the thread that
+    /// created it: the platform graphics, its ready state feature and the
+    /// render interface. Their counts are not atomic, so they are dropped
+    /// here, by that thread, when the rest of the manager is about to be
+    /// released by the render thread (a compositor that is confined to it).
+    /// The manager creates no backend context afterwards.
+    pub fn release_platform_handles(&self) {
+        let graphics = self.graphics.borrow_mut().take();
+        let ready_state_feature = self.ready_state_feature.borrow_mut().take();
+        let render_interface = self.render_interface.borrow_mut().take();
+        drop((graphics, ready_state_feature, render_interface));
     }
 
     /// Raised after a lost graphics context has been released.
@@ -107,7 +123,7 @@ impl PlatformRenderInterfaceContextManager {
         if self.backend.borrow().is_none() && !self.has_platform_render_interface() {
             return false;
         }
-        self.ready_state_feature.as_ref().is_none_or(|feature| feature.is_ready())
+        self.ready_state_feature.borrow().as_ref().is_none_or(|feature| feature.is_ready())
     }
 
     /// Makes sure there is a backend context that is not lost.
@@ -134,8 +150,8 @@ impl PlatformRenderInterfaceContextManager {
                 }
             }
 
-            if let Some(graphics) = &self.graphics {
-                if self.ready_state_feature.as_ref().is_none_or(|feature| feature.uses_contexts()) {
+            if let Some(graphics) = &*self.graphics.borrow() {
+                if self.ready_state_feature.borrow().as_ref().is_none_or(|feature| feature.uses_contexts()) {
                     let gpu_context = if graphics.uses_shared_context() {
                         OwnedDisposable::new(graphics.get_shared_context(), false)
                     } else {
@@ -164,6 +180,14 @@ impl PlatformRenderInterfaceContextManager {
     pub fn value(&self) -> Rc<dyn IPlatformRenderInterfaceContext> {
         self.ensure_valid_backend_context();
         self.backend.borrow().clone().expect("the backend context was just ensured")
+    }
+
+    /// The backend context if there is one, as it is: nothing is created,
+    /// and a lost context is not replaced. For a thread that may look at the
+    /// context but must not create one (the thread of a compositor that is
+    /// confined to its render thread).
+    pub fn existing_backend_context(&self) -> Option<Rc<dyn IPlatformRenderInterfaceContext>> {
+        self.backend.borrow().clone()
     }
 
     /// The graphics context the backend context is bound to, if any.
