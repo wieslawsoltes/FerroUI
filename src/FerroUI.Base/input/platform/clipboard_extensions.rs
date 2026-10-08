@@ -4,6 +4,7 @@ use crate::input::{
     LocalBoxFuture,
 };
 use crate::media::imaging::Bitmap;
+use crate::platform::storage::IStorageItem;
 use std::rc::Rc;
 
 /// Disposes the data transfer returned by the clipboard when the operation
@@ -137,6 +138,16 @@ pub trait ClipboardExtensions: IClipboard {
         self.try_get_value_async(&DataFormat::text())
     }
 
+    /// Returns a file (or folder), if available, from the clipboard.
+    fn try_get_file_async(&self) -> LocalBoxFuture<Result<Option<Rc<dyn IStorageItem>>, ClipboardError>> {
+        self.try_get_value_async(&DataFormat::file())
+    }
+
+    /// Returns the files (or folders), if available, from the clipboard.
+    fn try_get_files_async(&self) -> LocalBoxFuture<Result<Option<Vec<Rc<dyn IStorageItem>>>, ClipboardError>> {
+        self.try_get_values_async(&DataFormat::file())
+    }
+
     /// Returns a bitmap, if available, from the clipboard.
     fn try_get_bitmap_async(&self) -> LocalBoxFuture<Result<Option<Rc<Bitmap>>, ClipboardError>> {
         self.try_get_value_async(&DataFormat::bitmap())
@@ -150,6 +161,32 @@ pub trait ClipboardExtensions: IClipboard {
     /// will be cleared instead.
     fn set_text_async(&self, text: Option<&str>) -> LocalBoxFuture<Result<(), ClipboardError>> {
         self.set_value_async(&DataFormat::text(), text.map(str::to_string))
+    }
+
+    /// Places a file (or folder) on the clipboard.
+    ///
+    /// By calling this method, the clipboard will be instantly cleared.
+    ///
+    /// If `file` is `None`, nothing will be placed on the clipboard and it
+    /// will be cleared instead.
+    fn set_file_async(&self, file: Option<Rc<dyn IStorageItem>>) -> LocalBoxFuture<Result<(), ClipboardError>> {
+        self.set_value_async(&DataFormat::file(), file)
+    }
+
+    /// Places a list of files (or folders) on the clipboard.
+    ///
+    /// By calling this method, the clipboard will be instantly cleared.
+    ///
+    /// If `files` is `None` or empty, nothing will be placed on the
+    /// clipboard and it will be cleared instead.
+    fn set_files_async(
+        &self,
+        files: Option<impl IntoIterator<Item = Rc<dyn IStorageItem>>>,
+    ) -> LocalBoxFuture<Result<(), ClipboardError>>
+    where
+        Self: Sized,
+    {
+        self.set_values_async(&DataFormat::file(), files)
     }
 
     /// Places a bitmap on the clipboard.

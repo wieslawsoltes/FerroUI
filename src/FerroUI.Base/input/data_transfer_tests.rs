@@ -796,6 +796,26 @@ fn clipboard_null_values_clear_it() {
 }
 
 #[test]
+fn clipboard_file_members_use_the_file_format() {
+    use crate::platform::storage::IStorageItem;
+
+    let (clipboard_impl, clipboard) = clipboard(false, false);
+
+    // No file, no files and an empty list of files clear the clipboard.
+    ready(clipboard.set_file_async(None));
+    ready(clipboard.set_files_async(None::<Vec<Rc<dyn IStorageItem>>>));
+    ready(clipboard.set_files_async(Some(Vec::<Rc<dyn IStorageItem>>::new())));
+    assert_eq!(vec!["clear"; 3], *clipboard_impl.calls.borrow());
+    assert!(ready(clipboard.try_get_file_async()).is_none());
+    assert!(ready(clipboard.try_get_files_async()).is_none());
+
+    // Data without the file format has no files.
+    ready(clipboard.set_text_async(Some("hello")));
+    assert!(ready(clipboard.try_get_file_async()).is_none());
+    assert!(ready(clipboard.try_get_files_async()).is_none());
+}
+
+#[test]
 fn clipboard_flush_is_forwarded_to_flushable_implementations_only() {
     let (clipboard_impl, clipboard) = clipboard(false, false);
     ready(clipboard.flush_async());

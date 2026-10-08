@@ -133,7 +133,7 @@ fn the_start_up_files_are_only_what_the_start_up_needs() {
         PAGE_ASSETS.iter().filter(|(_, assets)| assets.contains(&asset)).map(|(page, _)| *page).collect()
     };
     assert_eq!(vec!["TextBlock", "TextBox"], pages_of("/Assets/Fonts/WenQuanYiMicroHei-01.ttf"));
-    assert_eq!(vec!["Container Queries"], pages_of("/Assets/image1.jpg"));
+    assert_eq!(vec!["Clipboard", "Container Queries", "Drag+Drop"], pages_of("/Assets/image1.jpg"));
 }
 
 /// The host page of the browser preloads exactly the start-up files, so
