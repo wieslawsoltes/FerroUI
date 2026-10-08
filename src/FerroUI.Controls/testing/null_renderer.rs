@@ -140,7 +140,7 @@ impl IRenderer for NullRenderer {
         self.is_started.set(false);
     }
 
-    fn try_get_render_interface_feature(&self, _feature_type: TypeId) -> Option<Rc<dyn Any>> {
+    fn try_get_render_interface_feature(&self, _feature_type: TypeId) -> Option<ferroui_base::rendering::composition::RenderInterfaceFeature> {
         None
     }
 

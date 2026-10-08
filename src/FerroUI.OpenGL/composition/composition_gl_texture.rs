@@ -10,7 +10,7 @@ use ferroui_base::platform::{KnownPlatformGraphicsExternalImageHandleTypes, Plat
 use ferroui_base::reactive::IDisposable;
 use ferroui_base::rendering::composition::{
     CompositionDrawingSurface, ICompositionGpuInterop, ICompositionImportableSharedGpuContextImage,
-    ICompositionImportedGpuImage, ServerJobTask,
+    ICompositionImportedGpuImage, RenderInterfaceFeature, ServerJobTask,
 };
 use ferroui_base::threading::DispatcherTask;
 use ferroui_base::PixelSize;
@@ -74,14 +74,26 @@ impl CompositionGlTexture {
     }
 
     /// `new SharedCompositionGlTexture(owner, sharingFeature, interop, surface, size)`.
+    ///
+    /// The sharing feature is asked for the texture inside the compositor lock; the texture
+    /// it answers with is shared between the threads by its contract.
+    ///
+    /// # Panics
+    /// Panics if `sharing_feature` is not the texture sharing feature of a compositor that
+    /// is alive (the interop only keeps one that is, with its compositor).
     pub(crate) fn new_shared(
         owner: &Rc<CompositionGlContext>,
-        sharing_feature: &Rc<dyn IOpenGlTextureSharingRenderInterfaceContextFeature>,
+        sharing_feature: &RenderInterfaceFeature,
         interop: Rc<dyn ICompositionGpuInterop>,
         surface: CompositionDrawingSurface,
         size: PixelSize,
     ) -> Rc<CompositionGlTexture> {
-        let texture = sharing_feature.create_shared_texture_for_composition(&owner.gl_context(), size);
+        let gl_context = owner.gl_context();
+        let texture = sharing_feature
+            .with::<dyn IOpenGlTextureSharingRenderInterfaceContextFeature, _>(|feature| {
+                feature.create_shared_texture_for_composition(&gl_context, size)
+            })
+            .expect("the texture sharing feature of the compositor of the context");
         Self::new(owner, interop, surface, size, TextureKind::Shared(texture))
     }
 

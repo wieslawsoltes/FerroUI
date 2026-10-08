@@ -1,8 +1,10 @@
 use super::composition_gl_texture::CompositionGlTexture;
 use super::task_support::start;
 use super::{ICompositionGlContext, ICompositionGlTexture};
-use crate::{IGlContext, IGlContextExternalObjectsFeature, IOpenGlTextureSharingRenderInterfaceContextFeature};
-use ferroui_base::rendering::composition::{CompositionDrawingSurface, Compositor, ICompositionGpuInterop};
+use crate::{IGlContext, IGlContextExternalObjectsFeature};
+use ferroui_base::rendering::composition::{
+    CompositionDrawingSurface, Compositor, ICompositionGpuInterop, RenderInterfaceFeature,
+};
 use ferroui_base::threading::DispatcherTask;
 use ferroui_base::PixelSize;
 use std::cell::{Cell, RefCell};
@@ -16,7 +18,10 @@ pub(crate) struct CompositionGlContext {
     compositor: Rc<Compositor>,
     gl_context: Rc<dyn IGlContext>,
     interop: Rc<dyn ICompositionGpuInterop>,
-    sharing_feature: Option<Rc<dyn IOpenGlTextureSharingRenderInterfaceContextFeature>>,
+    /// The texture sharing feature of the render interface of the compositor
+    /// (`IOpenGlTextureSharingRenderInterfaceContextFeature`): an object of the server side,
+    /// held as the handle the compositor hands out and asked inside the compositor lock.
+    sharing_feature: Option<RenderInterfaceFeature>,
     external_objects: Option<Rc<dyn IGlContextExternalObjectsFeature>>,
     textures: RefCell<Vec<Rc<CompositionGlTexture>>>,
     disposed: Cell<bool>,
@@ -27,7 +32,7 @@ impl CompositionGlContext {
         compositor: Rc<Compositor>,
         gl_context: Rc<dyn IGlContext>,
         interop: Rc<dyn ICompositionGpuInterop>,
-        sharing_feature: Option<Rc<dyn IOpenGlTextureSharingRenderInterfaceContextFeature>>,
+        sharing_feature: Option<RenderInterfaceFeature>,
         external_objects: Option<Rc<dyn IGlContextExternalObjectsFeature>>,
     ) -> Rc<CompositionGlContext> {
         Rc::new_cyclic(|this| Self {

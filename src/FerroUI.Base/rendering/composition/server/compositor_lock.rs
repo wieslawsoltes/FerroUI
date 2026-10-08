@@ -86,10 +86,25 @@ pub struct LockedServerCompositor {
 // what it hands out cannot outlive the call. Nothing that crosses to or from
 // the server side is an `Rc` into this graph: batches, resources and jobs
 // are `Send` (asserted where they are defined), the readback is atomic, and
-// a job that runs inside the graph is called under the lock. A caller of
-// `with` that lets a handle of the graph escape the closure (by cloning an
-// `Rc` out of it) breaks this; the same-thread accessor of the compositor
-// exists for the mode in which no second thread enters.
+// a job that runs inside the graph is called under the lock. The same-thread
+// accessor of the compositor exists for the mode in which no second thread
+// enters.
+//
+// What leaves the graph for a caller on the thread of the compositor leaves
+// it in a type that keeps the rule: a feature of the render interface is
+// handed out as a `RenderInterfaceFeature`, a `LockBound` over the handle
+// the map of features holds, which lends the feature inside the lock and
+// never the handle.
+//
+// What the type cannot check, and stays on the caller:
+//
+// - a caller of `with` (`Compositor::with_server`) gets the server
+//   compositor itself, and must not let a handle of the graph escape the
+//   closure by cloning an `Rc` out of it;
+// - an object of the graph that returns an `Rc` from one of its methods to
+//   a caller that will keep it outside the lock (a feature that creates a
+//   context for its caller) must return one that shares no count with the
+//   graph.
 unsafe impl Send for LockedServerCompositor {}
 unsafe impl Sync for LockedServerCompositor {}
 
@@ -286,6 +301,15 @@ impl<T> LockBound<T> {
     pub fn get<'a>(&'a self, server: &'a ServerCompositor) -> &'a T {
         self.verify(server);
         &self.value
+    }
+
+    /// Runs `f` with the value, for a caller that is not inside the
+    /// compositor lock: the calling thread enters it for the call. `None`
+    /// once the compositor has released the server compositor.
+    ///
+    /// What `f` gets must not leave it: see the note on the caller above.
+    pub(crate) fn with<R>(&self, f: impl FnOnce(&ServerCompositor, &T) -> R) -> Option<R> {
+        self.server.try_with(|server| f(server, &self.value))
     }
 }
 

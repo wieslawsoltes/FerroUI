@@ -17,7 +17,7 @@ use ferroui_base::{
     ferro_class, ferro_impl_classes, instantiate, FerroObjectExtensions, FerroObjectImpl, Matrix, Point, Rect, Ref,
     Size, StyledElementImpl, Visual, VisualImpl,
 };
-use std::any::{Any, TypeId};
+use std::any::TypeId;
 use std::cell::RefCell;
 use std::panic::{catch_unwind, AssertUnwindSafe};
 use std::rc::Rc;
@@ -108,7 +108,7 @@ impl IRenderer for RecordingRenderer {
     fn scene_invalidated(&self, _handler: Rc<dyn Fn(&SceneInvalidatedEventArgs)>) -> Rc<dyn IDisposable> {
         Disposable::empty()
     }
-    fn try_get_render_interface_feature(&self, _feature_type: TypeId) -> Option<Rc<dyn Any>> {
+    fn try_get_render_interface_feature(&self, _feature_type: TypeId) -> Option<ferroui_base::rendering::composition::RenderInterfaceFeature> {
         None
     }
     fn add_dirty(&self, visual: &Visual) {

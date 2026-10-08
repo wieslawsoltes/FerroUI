@@ -7,7 +7,7 @@
 //! The last part is the third shape: a compositor that is confined to its
 //! render thread, whose own thread never renders.
 
-use super::{CompositionTarget, CompositionVisual, Compositor, RenderSurfaces};
+use super::{CompositionTarget, CompositionVisual, Compositor, RenderInterfaceFeature, RenderSurfaces};
 use crate::media::MediaContext;
 use crate::platform::surfaces::IPlatformRenderSurface;
 use crate::platform::{
@@ -596,4 +596,372 @@ fn a_confined_compositor_whose_loop_has_stopped_is_leaked_and_not_dropped_by_ano
     assert!(!log.saw("the graphics context is dropped"));
     assert_eq!(Vec::<String>::new(), log.violations());
     assert!(log.owner().is_some_and(|owner| owner != test_thread));
+}
+
+// --- the features of the render interface, asked for while a thread renders -----
+//
+// A feature is an `Rc` in the map of the server compositor. What a caller
+// gets is a handle that stays inside the compositor lock, so that the count
+// of the feature is only changed there: by the thread that asks, by the
+// thread that renders and replaces the map with the context, and by whoever
+// drops a handle. The doubles count what a lost or doubled count would show:
+// a feature that is never dropped, and two threads inside a feature or a
+// frame at once.
+
+/// What the doubles of the feature tests share.
+#[derive(Default)]
+struct FeatureWorld {
+    /// Raised to lose the graphics context: the next frame replaces it and
+    /// the backend context, and with them the map of features.
+    generation: AtomicUsize,
+    /// The backend contexts created so far.
+    contexts: AtomicUsize,
+    features_created: AtomicUsize,
+    features_dropped: AtomicUsize,
+    inside: AtomicUsize,
+    overlaps: AtomicUsize,
+}
+
+impl FeatureWorld {
+    /// Runs `f` and records whether another thread was inside at the same
+    /// time: everything that calls this runs under the compositor lock.
+    fn exclusively<R>(&self, f: impl FnOnce() -> R) -> R {
+        if self.inside.fetch_add(1, Ordering::SeqCst) != 0 {
+            self.overlaps.fetch_add(1, Ordering::SeqCst);
+        }
+        thread::yield_now();
+        let result = f();
+        self.inside.fetch_sub(1, Ordering::SeqCst);
+        result
+    }
+
+    fn lose_context(&self) {
+        self.generation.fetch_add(1, Ordering::SeqCst);
+    }
+
+    fn contexts(&self) -> usize {
+        self.contexts.load(Ordering::SeqCst)
+    }
+
+    /// Every feature that was made has been dropped, once, and no two
+    /// threads were inside a feature or a frame at once.
+    fn assert_every_feature_is_dropped(&self) {
+        assert_eq!(self.features_created.load(Ordering::SeqCst), self.features_dropped.load(Ordering::SeqCst));
+        assert_eq!(0, self.overlaps.load(Ordering::SeqCst));
+    }
+}
+
+/// A feature a backend context hands to callers, registered as an
+/// `Rc<dyn ILockedFeature>` as the features of the backends are.
+trait ILockedFeature {
+    /// The number of the backend context the feature belongs to.
+    fn context(&self) -> usize;
+
+    /// Counts a call and answers with the count.
+    fn call(&self) -> usize;
+}
+
+/// Its state is a plain cell, as the state of a feature of a backend is.
+struct LockedFeature {
+    world: Arc<FeatureWorld>,
+    context: usize,
+    calls: Cell<usize>,
+}
+
+impl ILockedFeature for LockedFeature {
+    fn context(&self) -> usize {
+        self.context
+    }
+
+    fn call(&self) -> usize {
+        self.world.exclusively(|| {
+            self.calls.set(self.calls.get() + 1);
+            self.calls.get()
+        })
+    }
+}
+
+impl Drop for LockedFeature {
+    fn drop(&mut self) {
+        self.world.features_dropped.fetch_add(1, Ordering::SeqCst);
+    }
+}
+
+/// Platform graphics whose context a test can lose.
+struct LosableGraphics {
+    world: Arc<FeatureWorld>,
+}
+
+impl IPlatformGraphics for LosableGraphics {
+    fn uses_shared_context(&self) -> bool {
+        false
+    }
+
+    fn create_context(&self) -> Rc<dyn IPlatformGraphicsContext> {
+        Rc::new(LosableGraphicsContext {
+            world: self.world.clone(),
+            generation: self.world.generation.load(Ordering::SeqCst),
+        })
+    }
+
+    fn get_shared_context(&self) -> Rc<dyn IPlatformGraphicsContext> {
+        self.create_context()
+    }
+}
+
+struct LosableGraphicsContext {
+    world: Arc<FeatureWorld>,
+    generation: usize,
+}
+
+impl IOptionalFeatureProvider for LosableGraphicsContext {
+    fn try_get_feature(&self, _feature_type: TypeId) -> Option<Rc<dyn Any>> {
+        None
+    }
+}
+
+impl IPlatformGraphicsContext for LosableGraphicsContext {
+    /// Asked by every frame, inside the compositor lock.
+    fn is_lost(&self) -> bool {
+        self.world.exclusively(|| self.world.generation.load(Ordering::SeqCst) != self.generation)
+    }
+
+    fn ensure_current(&self) -> Rc<dyn IDisposable> {
+        Disposable::empty()
+    }
+
+    fn dispose(&self) {}
+
+    fn as_any(&self) -> &dyn Any {
+        self
+    }
+}
+
+/// A backend context with one public feature.
+struct FeatureBackendContext {
+    world: Arc<FeatureWorld>,
+    number: usize,
+    drawing_log: DrawingLog,
+    _graphics_context: Option<Rc<dyn IPlatformGraphicsContext>>,
+}
+
+impl IOptionalFeatureProvider for FeatureBackendContext {
+    fn try_get_feature(&self, _feature_type: TypeId) -> Option<Rc<dyn Any>> {
+        None
+    }
+}
+
+impl IPlatformRenderInterfaceContext for FeatureBackendContext {
+    fn create_render_target(&self, _surfaces: &[Arc<dyn IPlatformRenderSurface>]) -> Rc<dyn IRenderTarget> {
+        MockRenderTarget::new(self.drawing_log.clone())
+    }
+
+    fn create_offscreen_render_target(
+        &self,
+        pixel_size: PixelSize,
+        _scaling: Vector,
+        _enable_text_antialiasing: bool,
+    ) -> Rc<dyn IDrawingContextLayerImpl> {
+        Rc::new(MockDrawingContextLayerImpl::new(self.drawing_log.clone(), pixel_size))
+    }
+
+    fn is_lost(&self) -> bool {
+        false
+    }
+
+    fn max_offscreen_render_target_pixel_size(&self) -> Option<PixelSize> {
+        None
+    }
+
+    fn public_features(&self) -> HashMap<TypeId, Rc<dyn Any>> {
+        self.world.features_created.fetch_add(1, Ordering::SeqCst);
+        let feature: Rc<dyn ILockedFeature> =
+            Rc::new(LockedFeature { world: self.world.clone(), context: self.number, calls: Cell::new(0) });
+        let registered: Rc<dyn Any> = Rc::new(feature);
+        HashMap::from([(TypeId::of::<dyn ILockedFeature>(), registered)])
+    }
+
+    fn dispose(&self) {}
+}
+
+/// How the compositor of a feature test renders.
+enum FeatureMode {
+    /// The thread of the compositor renders every frame.
+    DispatcherThread,
+    /// The thread that ticks the loop renders, and the thread of the
+    /// compositor too: the lock model of the desktop.
+    Lock,
+}
+
+/// A compositor over the doubles above. Each backend context it creates has
+/// the number of its creation, from 1, and one feature that knows it.
+fn feature_compositor(
+    render_interface: &MockPlatformRenderInterface,
+    mode: FeatureMode,
+) -> (Arc<FeatureWorld>, Arc<ManualRenderLoop>, Rc<Compositor>) {
+    let world = Arc::new(FeatureWorld::default());
+    let context_world = world.clone();
+    render_interface.set_backend_context_factory(move |drawing_log, graphics_context| {
+        let number = context_world.contexts.fetch_add(1, Ordering::SeqCst) + 1;
+        let context: Rc<dyn IPlatformRenderInterfaceContext> = Rc::new(FeatureBackendContext {
+            world: context_world.clone(),
+            number,
+            drawing_log: drawing_log.clone(),
+            _graphics_context: graphics_context,
+        });
+        context
+    });
+    let graphics: Rc<dyn IPlatformGraphics> = Rc::new(LosableGraphics { world: world.clone() });
+    let (render_loop, compositor) = match mode {
+        FeatureMode::DispatcherThread => {
+            let render_loop = ManualRenderLoop::new();
+            let compositor = Compositor::with_scheduler(
+                render_loop.clone(),
+                Some(graphics),
+                false,
+                &MediaContext::instance().scheduler(),
+                Dispatcher::ui_thread(),
+                None,
+                None,
+            );
+            (render_loop, compositor)
+        }
+        FeatureMode::Lock => {
+            let render_loop = ManualRenderLoop::background();
+            let compositor = Compositor::with_render_thread(
+                render_loop.clone(),
+                Some(graphics),
+                true,
+                &MediaContext::instance().scheduler(),
+                Dispatcher::ui_thread(),
+                None,
+                None,
+            );
+            (render_loop, compositor)
+        }
+    };
+    (world, render_loop, compositor)
+}
+
+#[test]
+fn a_feature_is_asked_while_the_render_thread_renders_and_replaces_its_context() {
+    let _dispatcher_scope = Dispatcher::unit_test_scope();
+    let (_locator_scope, render_interface) = MockPlatformRenderInterface::install();
+    let (world, render_loop, compositor) = feature_compositor(&render_interface, FeatureMode::Lock);
+    assert!(compositor.renders_on_render_thread());
+    assert!(!compositor.is_confined_to_render_thread());
+    let render_thread = RenderThread::start(&render_loop);
+    let feature_type = TypeId::of::<dyn ILockedFeature>();
+
+    // Each round asks for the feature and calls it while the render thread
+    // renders, then loses the context: a frame of the render thread, or one
+    // of this thread in every other round, replaces the context and drops
+    // the map the handle was cloned from.
+    const ROUNDS: usize = 200;
+    let mut kept = Vec::new();
+    for round in 0..ROUNDS {
+        let feature = compositor.try_get_render_interface_feature(feature_type).expect("the context has the feature");
+        assert!(feature.is::<Rc<dyn ILockedFeature>>());
+        let context = feature
+            .with::<dyn ILockedFeature, _>(|feature| {
+                feature.call();
+                feature.context()
+            })
+            .expect("the feature is registered as the trait object it was asked for by");
+        let contexts = world.contexts();
+        assert_eq!(contexts, context, "the feature is the one of the context in use");
+
+        world.lose_context();
+        if round % 2 == 0 {
+            // A synchronous point: this thread renders a frame too.
+            compositor.render_on_this_thread();
+        }
+        wait_until("a frame has replaced the lost context", || world.contexts() > contexts);
+        assert_eq!(contexts + 1, world.contexts());
+
+        // The handle keeps the feature of the context that is gone, as the
+        // object the reference hands out does.
+        assert_eq!(Some(context), feature.with::<dyn ILockedFeature, _>(|feature| feature.context()));
+        // A handle is let go by this thread, outside the lock: now, or
+        // after many more contexts have come and gone.
+        if round % 3 == 0 {
+            kept.push(feature);
+        }
+    }
+
+    drop(render_thread);
+    drop(kept);
+    drop(compositor);
+    world.assert_every_feature_is_dropped();
+}
+
+#[test]
+fn a_feature_handle_is_used_and_dropped_by_another_thread() {
+    let _dispatcher_scope = Dispatcher::unit_test_scope();
+    let (_locator_scope, render_interface) = MockPlatformRenderInterface::install();
+    let (world, render_loop, compositor) = feature_compositor(&render_interface, FeatureMode::Lock);
+    let render_thread = RenderThread::start(&render_loop);
+    let feature_type = TypeId::of::<dyn ILockedFeature>();
+
+    // A third thread calls the feature through each handle and drops the
+    // handle, while this thread asks for more and the render thread renders.
+    let (sender, receiver) = std::sync::mpsc::channel::<RenderInterfaceFeature>();
+    let user = thread::spawn(move || {
+        let mut calls = 0;
+        for feature in receiver {
+            if feature.with::<dyn ILockedFeature, _>(|feature| feature.call()).is_some() {
+                calls += 1;
+            }
+        }
+        calls
+    });
+
+    const ROUNDS: usize = 400;
+    for round in 0..ROUNDS {
+        let feature = compositor.try_get_render_interface_feature(feature_type).expect("the context has the feature");
+        sender.send(feature).expect("the other thread takes the handles");
+        if round % 10 == 9 {
+            let contexts = world.contexts();
+            world.lose_context();
+            wait_until("a frame has replaced the lost context", || world.contexts() > contexts);
+        }
+    }
+    drop(sender);
+    assert_eq!(ROUNDS, user.join().expect("the other thread ran"));
+
+    drop(render_thread);
+    drop(compositor);
+    world.assert_every_feature_is_dropped();
+}
+
+#[test]
+fn a_feature_is_lent_where_the_thread_of_the_compositor_renders() {
+    let _dispatcher_scope = Dispatcher::unit_test_scope();
+    let (_locator_scope, render_interface) = MockPlatformRenderInterface::install();
+    let (world, _render_loop, compositor) = feature_compositor(&render_interface, FeatureMode::DispatcherThread);
+    assert!(!compositor.renders_on_render_thread());
+
+    // The query creates the backend context on this thread, as before.
+    let feature = compositor
+        .try_get_render_interface_feature(TypeId::of::<dyn ILockedFeature>())
+        .expect("the context has the feature");
+    assert_eq!(1, world.contexts());
+    assert_eq!(Some(1), feature.with::<dyn ILockedFeature, _>(|feature| feature.context()));
+    // With the server compositor in hand, as a job has it.
+    assert_eq!(Some(1), feature.get::<dyn ILockedFeature>(compositor.server()).map(|feature| feature.call()));
+    assert_eq!(Some(2), feature.with::<dyn ILockedFeature, _>(|feature| feature.call()));
+    // Lent as what it is registered as, and as nothing else.
+    assert!(feature.is::<Rc<dyn ILockedFeature>>());
+    assert!(!feature.is::<ConfinedFeature>());
+    assert!(feature.with::<ConfinedFeature, _>(|_| ()).is_none());
+    // A feature the context does not have.
+    assert!(compositor.try_get_render_interface_feature(TypeId::of::<ConfinedFeature>()).is_none());
+
+    // The handle outlives the compositor: it lends nothing then, and the
+    // feature goes with the handle.
+    drop(compositor);
+    assert!(feature.with::<dyn ILockedFeature, _>(|feature| feature.context()).is_none());
+    assert!(!feature.is::<Rc<dyn ILockedFeature>>());
+    drop(feature);
+    world.assert_every_feature_is_dropped();
 }
