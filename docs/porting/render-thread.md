@@ -275,6 +275,23 @@ Plan:
 3. `TopLevel` snapshots nothing: the closure asks the surface objects' owner under a lock of its own, or the window implementation publishes its current surfaces in a shared cell when they change.
 4. Then `Compositor::new` can choose the render-thread mode for a background render loop (R4.3), first behind an option, and `themed_window` is the first window to render off the UI thread.
 
+### R5.4: the native library and the first window in the render-thread mode
+
+- The reference counts of the native objects are atomic: a patch of `comimpl.h` (`std::atomic`), kept in `native/FerroUI.Native/patches/` so that `scripts/sync-native.sh` applies it again after a sync. Upstream has the plain increments.
+- `DisposableLock` (`utilities/disposable_lock.rs`) is ported, and `MetalDevice::ensure_current` takes it, as upstream; it was empty while the device was only used on the UI thread.
+- **`FERROUI_RENDER_THREAD=1`** makes the native platform create its compositor with `Compositor::with_render_thread` (`use_ui_thread_for_synchronous_commits` true, as upstream on this platform). Without it nothing changes. It is a switch for bringing the mode up, not an option of the product yet.
+- Found by the first run: the render interface is registered after the platform creates its compositor, so the render thread could not find it. It is now looked up by the UI thread when a composition target is created, and a frame of a thread that cannot find it waits (`is_ready`).
+
+With the switch, on the development Mac: `platform_window` (software: render target created by the UI thread's frame, one paint), `platform_window --metal` (two paints) and `themed_window` (six runs) open, render and close without a panic; the frames of the loop come from the thread of the render timer (`RenderTimerLoop`).
+
+Not done, and needed before the mode can be the default:
+
+- Looking at the frames: only the counts and the clean exits were checked.
+- A stress run: live resize, scrolling in the catalog, theme switch, popups, closing a window while it renders.
+- The Metal wrappers on the Rust side (`Rc` objects behind the Skia contracts) are used under the compositor lock; whether anything reaches them outside it is not audited.
+- The update closures of a drawing surface and the import closures of the interop objects are still bound to the UI thread (R2).
+- The measurements of `desktop-performance.md` in both modes.
+
 ### Scope of R3, surveyed
 
 What the UI side asks the server compositor for directly today (outside `rendering/composition/server/`, tests aside). Each becomes a member of the handle the compositor keeps, a job, or a readback:
