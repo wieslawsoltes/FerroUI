@@ -12,7 +12,6 @@ use crate::rendering::scene_graph::ICustomDrawOperation;
 use crate::rendering::testing::{DrawingLog, MockDrawingContextImpl, MockGeometryImpl};
 use crate::{Matrix, PixelSize, Point, Rect, RoundedRect, Vector};
 use std::any::Any;
-use std::cell::Cell;
 use std::rc::Rc;
 use std::sync::Arc;
 
@@ -164,25 +163,44 @@ impl IBitmapImpl for TestBitmapImpl {
 
 /// `Mock<ICustomDrawOperation>`: the bounds and the hit points it was set up
 /// with, and the counts of its `Render` and `Dispose` calls.
+/// A counter of a test operation: operations are shared between threads,
+/// so it counts atomically behind the interface of a cell.
+#[derive(Default)]
+pub(crate) struct Counter(std::sync::atomic::AtomicI32);
+
+impl Counter {
+    pub(crate) fn new(value: i32) -> Self {
+        Self(std::sync::atomic::AtomicI32::new(value))
+    }
+
+    pub(crate) fn get(&self) -> i32 {
+        self.0.load(std::sync::atomic::Ordering::SeqCst)
+    }
+
+    pub(crate) fn set(&self, value: i32) {
+        self.0.store(value, std::sync::atomic::Ordering::SeqCst);
+    }
+}
+
 #[derive(Default)]
 pub(crate) struct TestCustomOperation {
     pub bounds: Rect,
     pub hits: Vec<Point>,
-    pub render_count: Cell<i32>,
-    pub dispose_count: Cell<i32>,
+    pub render_count: Counter,
+    pub dispose_count: Counter,
 }
 
 impl TestCustomOperation {
-    pub(crate) fn new() -> Rc<TestCustomOperation> {
-        Rc::new(TestCustomOperation::default())
+    pub(crate) fn new() -> Arc<TestCustomOperation> {
+        Arc::new(TestCustomOperation::default())
     }
 
-    pub(crate) fn with_bounds(bounds: Rect) -> Rc<TestCustomOperation> {
-        Rc::new(TestCustomOperation { bounds, ..Default::default() })
+    pub(crate) fn with_bounds(bounds: Rect) -> Arc<TestCustomOperation> {
+        Arc::new(TestCustomOperation { bounds, ..Default::default() })
     }
 
-    pub(crate) fn with_hits(hits: &[Point]) -> Rc<TestCustomOperation> {
-        Rc::new(TestCustomOperation { hits: hits.to_vec(), ..Default::default() })
+    pub(crate) fn with_hits(hits: &[Point]) -> Arc<TestCustomOperation> {
+        Arc::new(TestCustomOperation { hits: hits.to_vec(), ..Default::default() })
     }
 }
 

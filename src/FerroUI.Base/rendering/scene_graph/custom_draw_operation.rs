@@ -2,7 +2,11 @@ use crate::media::{Geometry, ImmediateDrawingContext, IntersectionResult};
 use crate::{Point, Rect, Ref};
 
 /// Represents a custom draw operation in the low-level scene graph.
-pub trait ICustomDrawOperation: 'static {
+///
+/// An operation is created on the UI thread and rendered on the render
+/// thread, so it is `Send + Sync`: what it draws with is captured by value
+/// or in thread-safe form.
+pub trait ICustomDrawOperation: Send + Sync + 'static {
     /// The bounds of the visible content in the node in global coordinates.
     fn bounds(&self) -> Rect;
 

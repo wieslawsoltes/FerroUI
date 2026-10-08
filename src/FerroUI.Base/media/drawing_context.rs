@@ -94,7 +94,7 @@ pub trait IDrawingContextCore {
     fn draw_bitmap(&mut self, source: &std::sync::Arc<crate::platform::SharedBitmapImpl>, opacity: f64, source_rect: Rect, dest_rect: Rect);
 
     /// Draws a custom drawing operation.
-    fn custom(&mut self, custom: &Rc<dyn ICustomDrawOperation>);
+    fn custom(&mut self, custom: &std::sync::Arc<dyn ICustomDrawOperation>);
 
     /// Draws a glyph run.
     fn draw_glyph_run(&mut self, foreground: Option<&Rc<dyn IBrush>>, glyph_run: &Rc<GlyphRun>);
@@ -359,7 +359,7 @@ impl<'a> DrawingContext<'a> {
     }
 
     /// Draws a custom drawing operation.
-    pub fn custom(&mut self, custom: &Rc<dyn ICustomDrawOperation>) {
+    pub fn custom(&mut self, custom: &std::sync::Arc<dyn ICustomDrawOperation>) {
         self.core().custom(custom);
     }
 

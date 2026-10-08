@@ -115,7 +115,7 @@ impl IDrawingContextCore for PlatformDrawingContext<'_> {
         self.platform_impl.get().draw_bitmap(&**source, opacity, source_rect, dest_rect);
     }
 
-    fn custom(&mut self, custom: &Rc<dyn ICustomDrawOperation>) {
+    fn custom(&mut self, custom: &std::sync::Arc<dyn ICustomDrawOperation>) {
         let mut immediate = ImmediateDrawingContext::borrowed(self.platform_impl.get());
         custom.render(&mut immediate);
         immediate.dispose();

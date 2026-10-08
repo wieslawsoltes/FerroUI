@@ -70,7 +70,7 @@ pub struct FluidNavBar {
     float_going_up: RefCell<Vec<bool>>,
 
     /// The parsed paths of the icons, shared with the draw operations.
-    parsed_paths: RefCell<Rc<Vec<Option<Path>>>>,
+    parsed_paths: RefCell<SharedPaths>,
 
     anim_timer: RefCell<Option<Rc<DispatcherTimer>>>,
     clock: Instant,
@@ -250,7 +250,7 @@ impl VisualImpl for FluidNavBar {
             *scale_y = 0.1_f64.max(1.5_f64.min(*scale_y));
         }
 
-        let op: Rc<dyn ICustomDrawOperation> = Rc::new(FluidNavBarRenderOp {
+        let op: std::sync::Arc<dyn ICustomDrawOperation> = std::sync::Arc::new(FluidNavBarRenderOp {
             bounds: Rect::new(0.0, -(ACTIVE_FLOAT + CIRCLE_RADIUS), w, h + ACTIVE_FLOAT + CIRCLE_RADIUS),
             w: w as f32,
             h: h as f32,
@@ -292,7 +292,7 @@ impl FluidNavBar {
             float_progress: RefCell::new(Vec::new()),
             float_start_sec: RefCell::new(Vec::new()),
             float_going_up: RefCell::new(Vec::new()),
-            parsed_paths: RefCell::new(Rc::new(Vec::new())),
+            parsed_paths: RefCell::new(SharedPaths::default()),
             anim_timer: RefCell::new(None),
             clock: Instant::now(),
             animating: Cell::new(false),
@@ -377,7 +377,7 @@ impl FluidNavBar {
                 if svg.is_empty() { None } else { Path::from_svg(&svg) }
             })
             .collect();
-        *self.parsed_paths.borrow_mut() = Rc::new(parsed_paths);
+        *self.parsed_paths.borrow_mut() = std::sync::Arc::new(std::sync::Mutex::new(parsed_paths));
 
         let sel = self.selected_index().clamp(0, 0.max(n as i32 - 1));
         *self.float_progress.borrow_mut() = (0..n).map(|i| if i as i32 == sel { 1.0 } else { 0.0 }).collect();
@@ -558,6 +558,11 @@ impl FluidNavBar {
     }
 }
 
+/// The parsed icon paths, shared with the draw operations. An operation is
+/// rendered on the render thread, and a Skia path may be sent to another
+/// thread but not shared by reference, hence the lock.
+type SharedPaths = std::sync::Arc<std::sync::Mutex<Vec<Option<Path>>>>;
+
 /// The draw operation of a frame of the bar.
 struct FluidNavBarRenderOp {
     bounds: Rect,
@@ -569,7 +574,7 @@ struct FluidNavBarRenderOp {
     float_off: Vec<f64>,
     scale_y: Vec<f64>,
     fill: Vec<f64>,
-    paths: Rc<Vec<Option<Path>>>,
+    paths: SharedPaths,
     bar: Color,
     btn: Color,
     active: Color,
@@ -668,7 +673,7 @@ impl FluidNavBarRenderOp {
         canvas.draw_circle((cx, cy - fo), R, &cp);
 
         // The icon.
-        if let Some(Some(path)) = self.paths.get(i) {
+        if let Some(Some(path)) = self.paths.lock().unwrap().get(i) {
             self.draw_icon(canvas, path, cx, cy - fo, sy, fa);
         }
     }

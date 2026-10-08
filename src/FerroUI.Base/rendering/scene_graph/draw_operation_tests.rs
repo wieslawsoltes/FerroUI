@@ -415,7 +415,7 @@ fn immutable_pen_is_not_registered_as_server_resource() {
 #[test]
 fn custom_draw_operation_disposed_when_render_data_disposed_before_commit() {
     let op = TestCustomOperation::with_bounds(Rect::new(0.0, 0.0, 10.0, 10.0));
-    let custom: Rc<dyn ICustomDrawOperation> = op.clone();
+    let custom: std::sync::Arc<dyn ICustomDrawOperation> = op.clone();
     let mut ctx = TestContext::new();
     ctx.draw(|c| c.custom(&custom));
     let rd = ctx.get_render_results().expect("something was drawn");

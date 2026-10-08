@@ -8,18 +8,17 @@ use super::scene_graph_test_support::TestCustomOperation;
 use crate::rendering::composition::drawing::{RenderDataResource, RenderDataResources, NULL_HANDLE};
 use crate::rendering::scene_graph::ICustomDrawOperation;
 use crate::{Point, Rect};
-use std::rc::Rc;
 
-fn new_object() -> Rc<dyn ICustomDrawOperation> {
+fn new_object() -> std::sync::Arc<dyn ICustomDrawOperation> {
     TestCustomOperation::new()
 }
 
-fn resource(object: &Rc<dyn ICustomDrawOperation>) -> Option<RenderDataResource> {
+fn resource(object: &std::sync::Arc<dyn ICustomDrawOperation>) -> Option<RenderDataResource> {
     Some(RenderDataResource::CustomDrawOperation(object.clone()))
 }
 
-fn is_same(resource: Option<&RenderDataResource>, object: &Rc<dyn ICustomDrawOperation>) -> bool {
-    matches!(resource, Some(RenderDataResource::CustomDrawOperation(stored)) if Rc::ptr_eq(stored, object))
+fn is_same(resource: Option<&RenderDataResource>, object: &std::sync::Arc<dyn ICustomDrawOperation>) -> bool {
+    matches!(resource, Some(RenderDataResource::CustomDrawOperation(stored)) if std::sync::Arc::ptr_eq(stored, object))
 }
 
 #[test]
@@ -105,7 +104,7 @@ fn dispose_resets_the_table() {
 
 /// `new EqualByValue()`: an object equal to every other object of its
 /// kind. Custom draw operations compare with `equals`.
-fn equal_by_value() -> Rc<dyn ICustomDrawOperation> {
+fn equal_by_value() -> std::sync::Arc<dyn ICustomDrawOperation> {
     struct EqualByValue;
 
     impl ICustomDrawOperation for EqualByValue {
@@ -124,5 +123,5 @@ fn equal_by_value() -> Rc<dyn ICustomDrawOperation> {
         fn dispose(&self) {}
     }
 
-    Rc::new(EqualByValue)
+    std::sync::Arc::new(EqualByValue)
 }

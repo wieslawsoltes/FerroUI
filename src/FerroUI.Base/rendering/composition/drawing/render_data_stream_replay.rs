@@ -99,7 +99,7 @@ impl IRenderDataVisitor for ReplayVisitor<'_> {
         }
     }
 
-    fn on_draw_custom(&mut self, operation: Option<&Rc<dyn ICustomDrawOperation>>) {
+    fn on_draw_custom(&mut self, operation: Option<&std::sync::Arc<dyn ICustomDrawOperation>>) {
         if let Some(operation) = operation {
             let mut context = ImmediateDrawingContext::borrowed(self.context);
             operation.render(&mut context);

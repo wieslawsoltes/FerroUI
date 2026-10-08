@@ -60,15 +60,17 @@ fn replay(stream: &RenderDataStream) -> Vec<String> {
     log.entries()
 }
 
+use crate::rendering::scene_graph::scene_graph_test_support::Counter;
+
 struct TestOperation {
     bounds: Rect,
-    rendered: Cell<u32>,
-    disposed: Cell<u32>,
+    rendered: Counter,
+    disposed: Counter,
 }
 
 impl TestOperation {
-    fn new(bounds: Rect) -> Rc<TestOperation> {
-        Rc::new(TestOperation { bounds, rendered: Cell::new(0), disposed: Cell::new(0) })
+    fn new(bounds: Rect) -> std::sync::Arc<TestOperation> {
+        std::sync::Arc::new(TestOperation { bounds, rendered: Counter::new(0), disposed: Counter::new(0) })
     }
 }
 
@@ -573,7 +575,7 @@ fn disposing_immediate_scene_brush_content_releases_the_custom_operations() {
     use crate::media::ISceneBrushContent;
 
     let operation = TestOperation::new(Rect::new(0.0, 0.0, 10.0, 10.0));
-    let custom: Rc<dyn ICustomDrawOperation> = operation.clone();
+    let custom: std::sync::Arc<dyn ICustomDrawOperation> = operation.clone();
     let mut recorder = RenderDataDrawingContext::new(None);
     {
         let mut context = DrawingContext::new(&mut recorder);

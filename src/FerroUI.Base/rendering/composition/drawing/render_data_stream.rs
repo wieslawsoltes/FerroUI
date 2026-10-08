@@ -16,12 +16,13 @@ use crate::rendering::composition::transport::{BatchObject, BatchStreamReader, B
 use crate::rendering::scene_graph::ICustomDrawOperation;
 use crate::{Matrix, Point, Rect, RoundedRect};
 use std::rc::Rc;
+use std::sync::Arc;
 
 const TAG_NOT_SENT: u8 = 0;
 const TAG_BRUSH: u8 = 1;
 const TAG_PEN: u8 = 2;
 const TAG_GEOMETRY_IMPL: u8 = 3;
-const TAG_GEOMETRY: u8 = 4;
+// Tag 4 was a geometry wrapper sent by value, which does not happen.
 const TAG_GLYPH_RUN: u8 = 5;
 const TAG_BITMAP: u8 = 6;
 const TAG_CUSTOM: u8 = 7;
@@ -173,7 +174,7 @@ impl RenderDataStream {
         server_brush: Option<RenderDataResource>,
         glyph_run: Option<std::sync::Arc<dyn IGlyphRunImpl>>,
     ) {
-        let glyph_run = glyph_run.map(|glyph_run| RenderDataResource::GlyphRun(Rc::new(glyph_run)));
+        let glyph_run = glyph_run.map(|glyph_run| RenderDataResource::GlyphRun(Arc::new(glyph_run)));
         let payload = DrawGlyphRunPayload {
             server_brush: self.resources.intern(server_brush),
             glyph_run: self.resources.intern(glyph_run),
@@ -190,7 +191,7 @@ impl RenderDataStream {
         source_rect: Rect,
         dest_rect: Rect,
     ) {
-        let bitmap = bitmap.map(|bitmap| RenderDataResource::Bitmap(Rc::new(bitmap)));
+        let bitmap = bitmap.map(|bitmap| RenderDataResource::Bitmap(Arc::new(bitmap)));
         let payload = DrawBitmapPayload {
             bitmap: self.resources.intern(bitmap),
             opacity,
@@ -200,7 +201,7 @@ impl RenderDataStream {
         self.writer.write_payload(payload);
     }
 
-    pub fn draw_custom(&mut self, operation: Option<Rc<dyn ICustomDrawOperation>>) {
+    pub fn draw_custom(&mut self, operation: Option<std::sync::Arc<dyn ICustomDrawOperation>>) {
         let payload = DrawCustomPayload {
             operation: self.resources.intern(operation.map(RenderDataResource::CustomDrawOperation)),
         };
@@ -277,10 +278,10 @@ impl RenderDataStream {
                     writer.write(TAG_GEOMETRY_IMPL);
                     writer.write_object(BatchObject::value(v.clone()));
                 }
-                RenderDataResource::Geometry(v) => {
-                    writer.write(TAG_GEOMETRY);
-                    writer.write_object(BatchObject::value(v.clone()));
-                }
+                // With a compositor a geometry object is sent as the id of
+                // its server object; the wrapper is what the server resolves
+                // the id to, and what render data keeps on the UI thread.
+                RenderDataResource::Geometry(_) => panic!("a geometry of render data is not sent by value"),
                 RenderDataResource::GlyphRun(v) => {
                     writer.write(TAG_GLYPH_RUN);
                     writer.write_object(BatchObject::value(v.clone()));
@@ -347,7 +348,6 @@ impl RenderDataStream {
                 TAG_BRUSH => RenderDataResource::Brush(value::<Rc<dyn IBrush>>(reader)),
                 TAG_PEN => RenderDataResource::Pen(value::<Rc<dyn IPen>>(reader)),
                 TAG_GEOMETRY_IMPL => RenderDataResource::GeometryImpl(value(reader)),
-                TAG_GEOMETRY => RenderDataResource::Geometry(value::<Rc<dyn IRenderDataGeometry>>(reader)),
                 TAG_GLYPH_RUN => RenderDataResource::GlyphRun(value(reader)),
                 TAG_BITMAP => RenderDataResource::Bitmap(value(reader)),
                 TAG_CUSTOM => RenderDataResource::CustomDrawOperation(value(reader)),
