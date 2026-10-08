@@ -1079,6 +1079,53 @@ The helpers that compare two captures (`differing`, `colours`) moved from `theme
 12. **The fallback of the snapshot** was never taken in a test: a context that cannot copy its surface is a lost one. The Metal path of the desktop takes the same code; there it used to hand out the GPU image, which is the unsound thing on any render thread.
 13. **The tracking data** (`docs/porting/data/path-overrides.toml`) was not touched; `FerroView::dispose` and the new script functions have no upstream counterpart to map.
 
+## Skia shim: the bindings of Skia compiled for threads (written, not built, 2026-10-09)
+
+Since B1 the threaded link passed `-Wl,--no-check-features`, because the linker refused the bindings shim of Skia in a module with shared memory. From B2.6 on two threads of the module call Skia (the UI thread measures and shapes text and decodes images, the render worker rasterises), so what the flag hid is a data race and not a formality. This section is the investigation, the fix as written, and how to check it. Nothing here was built: the rules of the session allowed reading existing files only.
+
+### How the two archives are produced
+
+Read in `skia-bindings` 0.153.3 (the version of `Cargo.lock`), in the cargo registry:
+
+- **Nothing is compiled for this target.** `build.rs` (`main`) has three ways. With `SKIA_SOURCE_DIR` and `SKIA_LIBRARY_SEARCH_PATH` it takes the Skia libraries from a directory, compiles the shim and generates `bindings.rs` itself (it needs the definitions in `SKIA_BUILD_DEFINES`, and libclang for the binding generator). With `SKIA_SOURCE_DIR` alone it builds Skia from that source. Otherwise, with the feature `binary-cache` (a default), `build_support/binary_cache/download.rs` (`try_prepare_download`) downloads `skia-binaries-<key>.tar.gz` from `SKIA_BINARIES_URL` (default: the releases of `rust-skia/skia-binaries`, tag = the version of the crate) and unpacks it into `OUT_DIR/skia`; only if `FORCE_SKIA_BUILD` is set or the download fails does it build Skia from source (`gn`, `ninja`, the whole of Skia, with the source downloaded into the directory of the crate). The key is the first twenty digits of the revision the crate was packaged from, the target and the features: here `b7f043e0b1e2a850e702-wasm32-unknown-emscripten-ganesh-gl-jpegd-jpege-pdf`.
+- **The archive holds both libraries and the bindings**: `libskia.a` (1020 objects, 13.4 MB), `libskia-bindings.a` (4 objects, 156 kB), `bindings.rs`, `key.txt`, `tag.txt` and Skia's licence. The log of the build script in the target directory of the threaded build (`target/threads/wasm32-unknown-emscripten/browser/build/skia-bindings-*/output`) shows the download and no compile.
+- **`libskia.a` is Skia**, built by Skia's own build (`gn` and `ninja`). Its configuration for WebAssembly passes `-pthread` to every compile: `gn/skia/BUILD.gn` of the Skia source, `config("wasm") { common = [ "-pthread" ] ... cflags = common }`.
+- **`libskia-bindings.a` is the shim**: the crate's `src/bindings.cpp`, `gl.cpp`, `gpu.cpp` and `ganesh.cpp` for this feature set (`build_support/skia_bindgen.rs`, `Configuration::new`), compiled by the `cc` crate (`generate_bindings`: `cc_build.compile("skia-bindings")`) on the machine that published the binaries. The `cc` crate reads `CXXFLAGS_wasm32_unknown_emscripten`, which is why `build-browser.sh --threads` exports `-pthread` in it, but that only acts where the compile runs, and it does not run here. The members of the archive have the names the `cc` crate gives (`0602fb52cb66f316-bindings.o`).
+- `CC`, `CXX`, `EMCC_CFLAGS` and the `CFLAGS` variables therefore change nothing in the Skia part of a build from the published binaries. `EMCC_CFLAGS` still reaches every `emcc` the other build scripts start (HarfBuzz, the setjmp bridge).
+
+### The evidence
+
+```
+node scripts/browser/wasm-features.mjs --summary <OUT_DIR>/skia/libskia.a <OUT_DIR>/skia/libskia-bindings.a
+```
+
+run on the published files in the target directory of the threaded build (`wasm-features.mjs` reads the `target_features` section of every object; the SDK has no `wasm-objdump`):
+
+| Archive | Objects | Target features |
+|---|---|---|
+| `libskia.a` | 1020 of 1020 | `atomics bulk-memory mutable-globals sign-ext` |
+| `libskia-bindings.a` | `bindings`, `gl`, `ganesh` | `mutable-globals sign-ext`, and `-shared-mem` (disallowed) |
+| `libskia-bindings.a` | `gpu` | `mutable-globals sign-ext` |
+| `libembedded_harfbuzz.a`, `libferroui_emscripten_sjlj.a` of the threaded build | all | `atomics bulk-memory` and others |
+
+So the comment of B1 was right about `libskia.a` (and it holds for all its objects, not the 40 sampled in B0). `-shared-mem` is what the compiler records when it compiles thread-local storage without atomics: it turns the variables into plain globals and forbids the object in a shared memory, which is the error the linker gave. Three of the four objects therefore do contain thread-local variables that are one global for both threads today, besides the reference counts of the inline `sk_sp` code and the guards of local statics. `llvm-nm` of the SDK on the published shim shows what it was compiled with otherwise: 774 functions defined, 765 of them the `C_` functions of the bindings; no position-independent code; and, by which of the conditional functions are present or referenced, the definitions `SK_CODEC_DECODES_JPEG`, `SK_CODEC_ENCODES_JPEG`, `SK_SUPPORT_PDF`, `SK_ASSUME_WEBGL`, `SK_FONTMGR_FREETYPE_DIRECTORY_AVAILABLE` and `SK_FONTMGR_FREETYPE_EMPTY_AVAILABLE`.
+
+### The fix
+
+The published archive is kept, with the shim compiled again with `-pthread`: `scripts/browser/skia-threads-shim.sh`, run by `scripts/browser/setup.sh --threads`. Its header lists the steps; in short it downloads the crate file (checked against the checksum of `Cargo.lock`), the published binaries for the key, and the Skia source of the tag the crate names; gets the preprocessor definitions of the Skia build the way the crate does in a build from source (`gn gen` with the crate's arguments for the feature set, then the `defines` lines of `obj/skia.ninja` and `obj/gpu.ninja`); compiles the four sources with the flags of the `cc` crate and of the build script plus `-pthread`; checks the result; and writes `.tools/skia-threads/<id>/skia-binaries-<key>.tar.gz`, where the id names the version of the crate, the features, the version of Emscripten and the format of the script. `scripts/build-browser.sh --threads` exports `SKIA_BINARIES_URL=file://.../skia-binaries-{key}.tar.gz`, which the crate supports for binaries from elsewhere, refuses to build when the directory of the id is missing, and no longer passes `--no-check-features`. `libskia.a` and `bindings.rs` are the published files, so the Rust side of the bindings is what it was. The build without `--threads` reads none of this.
+
+Routes not taken, and why:
+
+- **The crate's own split** (`SKIA_SOURCE_DIR` with `SKIA_LIBRARY_SEARCH_PATH`) would compile the shim inside the build, which is the neatest, but it also generates `bindings.rs` on the machine: that needs libclang on the host (the SDK ships none) parsing the C++ library of the SDK, and replaces a file the published build generated with one from another compiler. It needs the same Skia source and the same definitions as the route taken.
+- **A build of Skia from source** (`FORCE_SKIA_BUILD`) compiles 1020 objects for each cargo output directory, clones Skia's third-party sources and writes into the cargo registry; section 13 of `browser-platform.md` notes that it fails today.
+- **A patched copy of the crate** (`[patch.crates-io]`) is not needed: the crate already has the variable.
+
+The way back, for finding out whether a fault comes from the shim built here: `FERROUI_BROWSER_SKIA_PUBLISHED_SHIM=1 scripts/build-browser.sh <application> --threads` links the published shim with `--no-check-features`, as before. It is unsafe with two threads in Skia.
+
+### Cost
+
+Once per tools directory and per version of the crate or of Emscripten, in `setup.sh --threads`: about 200 MB of downloads and unpacked source (the Skia source is most of it; the work directory is deleted at the end), a `gn gen` (seconds), and four compiles, of which `bindings.cpp` (4200 lines against most of Skia's public headers) is the long one: expected well under two minutes in all on the development Mac, not measured. The kept result is the archive (about 4.5 MB) and two text files. A build pays nothing: the crate unpacks a local file where it downloaded one. The first threaded build after the change runs the build script of `skia-bindings` again (it watches `SKIA_BINARIES_URL`) and links again.
+
 ### Validation
 
 ```
@@ -1447,3 +1494,32 @@ Stage B3 of `render-thread.md`: rendering from the worker against rendering on o
 - **Memory outside the module** (compiled code, the workers, the WebGL contexts): the exports report the memory of the module only.
 - **A quiet machine**: it was shared with builds and system work. The load average was 5 to 14 during the series (it is recorded per run), the runner waited while it was 12 or more, and one series (the Home page in WebGL2 under the software rasteriser) ran while it rose to 125 and is marked; a repeat of it was started and given up when the load stayed high. Processor times are trusted; of wall-clock times only differences larger than the spread of the runs are.
 - **Why the software rasteriser makes the thread that renders wait**, in the first frame and for the animation frames after it: only the wait was observed, from the traces, not its cause in the GPU process.
+
+ID="$(scripts/browser/skia-threads-shim.sh --id)"; cat .tools/skia-threads/$ID/complete
+wc -l .tools/skia-threads/$ID/skia-defines.txt .tools/skia-threads/$ID/functions.txt
+scripts/build-browser.sh themed_view --threads
+node scripts/browser/wasm-features.mjs --require atomics,bulk-memory \
+  target/threads/wasm32-unknown-emscripten/browser/build/*/out/*.a \
+  target/threads/wasm32-unknown-emscripten/browser/build/skia-bindings-*/out/skia/*.a \
+  target/browser-threads/themed_view/themed_view.wasm
+scripts/build-browser.sh themed_view && node scripts/browser/tests/themed_view.test.mjs
+```
+
+Expected:
+
+- `setup.sh --threads` ends its new part with `774 functions, the same as the published shim`, then `libskia.a: 1020 of 1020 objects: atomics bulk-memory mutable-globals sign-ext` and one line for the four objects of the new shim with `atomics bulk-memory` among their features (the other features depend on the compiler of the SDK) and no `disallows`, then `written: ...`. A second run prints `up to date`. `functions.txt` has 774 lines; `skia-defines.txt` has the definitions, among them the six named above, `SK_GANESH`, `SK_GL` and `NDEBUG`.
+- The threaded build prints, after the link, `== target features (threads)` with the module (`themed_view.wasm: no target_features section [shared memory]`: Emscripten strips the section from an optimised module; with `--debug` the features may be listed) and a line or two per archive of C and C++ objects, all with `atomics bulk-memory`. The build fails there if an object lacks them.
+- The command by hand lists every object of the archives of the threaded target directory (Skia's 1020, the four of the shim, HarfBuzz, the setjmp bridge), each with `atomics bulk-memory`, and the module, and exits with 0; add `--summary` for a line per archive. A target directory built before this change has a second `skia-bindings-*` directory with the published shim, whose four objects are then listed on the standard error as lacking the features: the directory of the new build is the one whose `output` file names the `file://` address.
+- The build script of the crate logs `FROM: file://.../skia-binaries-b7f043e0b1e2a850e702-wasm32-unknown-emscripten-ganesh-gl-jpegd-jpege-pdf.tar.gz` and `DOWNLOAD AND INSTALL SUCCEEDED` in `target/threads/.../build/skia-bindings-*/output`. `STARTING A FULL BUILD` there means the archive was not found under the key the crate asked for.
+- The threaded tests as before (`thread_spawn`, `render_worker_clear`, `storage_view` and `themed_view` served isolated), and the build without threads unchanged: it never reads `.tools/skia-threads`.
+
+### What is doubted, most likely first
+
+1. **`gn gen` on a Skia source without its third-party checkouts.** The crate runs `tools/git-sync-deps` before `gn`; the script does not (it compiles nothing of Skia). Read: the build files import nothing from `third_party/externals` except `third_party/libjxl`, which this feature set should not reach, and `gn` does not look for source files when it generates. Not run. If it fails, the definitions have to come from elsewhere: a full `git-sync-deps` first, or the list written by hand from `gn/skia.gni` and `BUILD.gn`.
+2. **The arguments given to `gn`** are copied by hand from `build_support/skia/config.rs` and `platform/emscripten.rs` for this feature set. A wrong one changes the definitions. The check of the 774 functions catches the definitions that decide what the shim contains; a definition that only changes a layout or an inline function in a header would not be caught. The compiler named to `gn` (`emcc`, `em++`) is a guess at what the published build used; it should not change the definitions.
+3. **The flags of the compile** are those the `cc` crate 1.6.0 and the build script give for this target, read from their sources, with `-O3` for the release profile the published binaries were presumably built with; `-nobuiltininc` with the include directories of the sysroot is what the crate passes and was not tried with this SDK.
+4. **The link without `--no-check-features`.** B1 recorded the shim as the only thing the linker refused. If another object is refused, the message names it.
+5. **The check after the link** fails a threaded build for any C or C++ object without atomics. HarfBuzz and the setjmp bridge have them in the existing threaded build; an object without a `target_features` section is reported and passes.
+6. **A change of the Skia features of the workspace** makes the crate ask for a key that is not in the directory, and it then starts a build of Skia from source instead of failing. CI checks the features of the target (`ci.yml`, "Skia features of the target"); the pin is `SKIA_FEATURES_KEY` and `SHIM_SOURCES` in the script.
+7. **Downloads**: the crate file from `static.crates.io`, the tag archive from `codeload.github.com` (its top directory is assumed to be `skia-<tag>`, as the crate assumes), the `gn` binary from `chrome-infra-packages.appspot.com` through Skia's `bin/fetch-gn`. The options of `tar` are those both the `tar` of macOS and GNU `tar` take.
+8. **Skia's own thread safety** is not changed by this: objects Skia documents as not shareable between threads stay so. The shim compiled for threads makes the reference counts, the statics and the thread-local storage of its inline code behave as those of Skia's own objects already do.
