@@ -144,6 +144,10 @@ Also: the layout clock is in milliseconds (`DEVIATIONS.md`, Layout). Found while
 - **CI speed-up.** The earlier proposal for a faster CI run is still open.
 - **Stale branches.** Branches of merged pull requests can be deleted by hand.
 
+## Critical now: the render thread (owner, 2026-10-08)
+
+The owner's order of 2026-10-08, ahead of everything else: the port gets upstream's UI thread and render thread, on the desktop and in the browser. The design, the compiler audit of what crosses the thread boundary and the stages are in `render-thread.md`. Desktop stages R1 to R5 in sequence; the browser feasibility checks (B0) in parallel with R1, because a threaded browser build may be blocked by the prebuilt Skia binaries and by the pinned stable toolchain, and that has to be measured before any backend work.
+
 ## Core first (owner, 2026-10-08)
 
 The owner's order of 2026-10-08: finish the core port first, with all four local sub-agents on it, then continue with everything else (the ControlCatalog documents still excluded, the XAML compiler's build integration, the performance designs). The queue below comes from the tracking pages; the member counts are matched by name only, so every batch starts by sorting real gaps from false ones. For each gap the outcome is one of: ported exactly with its upstream tests; found under another name or place (an entry in `data/path-overrides.toml`); not applicable in Rust (an entry in `data/path-overrides.toml` or `data/member-waivers.toml` with a concrete reason).
