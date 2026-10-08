@@ -262,6 +262,7 @@ const PARSE_SAMPLES: &[(&str, &str)] = &[
     ("FerroUI.Styling.ThemeVariant", "Dark"),
     ("System.TimeSpan", "0:0:1"),
     ("System.Uri", "https://example.org/a"),
+    ("System.Globalization.CultureInfo", "de-DE"),
 ];
 
 /// The types whose `Parse` needs the services of a platform.
