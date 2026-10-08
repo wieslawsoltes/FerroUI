@@ -20,7 +20,6 @@ Pages/ContentPage/ContentPagePerformancePage.xaml | code-behind: NavigationPerfo
 # --- ViewModels, Models, Views and the pages of the view models (group B) ---
 
 # --- the other pages directly under Pages/ (group C) ---
-Pages/AutoCompleteBoxPage.xaml | pending: the code-behind (AutoCompleteBoxPage.xaml.cs) is not ported yet
 Pages/NumericUpDownPage.xaml | code-behind: CultureInfo.GetCultures(CultureTypes.SpecificCultures)
 Pages/OpenGl/OpenGlLeasePage.xaml | code-behind: OpenGlFbo (Pages/OpenGl/OpenGlFbo.cs, not ported) wraps an OpenGL texture in a Ganesh surface (GRContext, GRBackendTexture, GRGlTextureInfo), and the Skia backend has Ganesh on OpenGL in browser builds only
 
