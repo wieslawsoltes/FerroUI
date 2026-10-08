@@ -8,8 +8,8 @@ export class CanvasSurface {
     public targetId: number;
     private sizeParams?: [number, number, number];
 
-    constructor(public canvas: HTMLCanvasElement, modes: BrowserRenderingMode[], topLevelId: number) {
-        this.targetId = WebRenderTargetRegistry.create(canvas, modes);
+    constructor(public canvas: HTMLCanvasElement, modes: BrowserRenderingMode[], topLevelId: number, threadId: number) {
+        this.targetId = WebRenderTargetRegistry.create(threadId, canvas, modes);
         ResizeHandler.observeSize(canvas, (width, height, dpr) => {
             this.sizeParams = [width, height, dpr];
 
@@ -35,11 +35,11 @@ export class CanvasSurface {
     public destroy(): void {
     }
 
-    public static create(container: HTMLElement, modes: BrowserRenderingMode[] | Int32Array, topLevelId: number): CanvasSurface {
+    public static create(container: HTMLElement, modes: BrowserRenderingMode[] | Int32Array, topLevelId: number, threadId: number): CanvasSurface {
         const canvas = FerroDOM.createFerroCanvas(container);
         FerroDOM.attachCanvas(container, canvas);
         try {
-            return new CanvasSurface(canvas, Array.from(modes), topLevelId);
+            return new CanvasSurface(canvas, Array.from(modes), topLevelId, threadId);
         } catch (ex) {
             FerroDOM.detachCanvas(container, canvas);
             throw ex;

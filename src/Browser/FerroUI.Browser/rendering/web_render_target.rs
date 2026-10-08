@@ -20,6 +20,22 @@ extern "C" {
 
     #[wasm_bindgen(js_namespace = WebRenderTarget, js_name = setSize)]
     fn set_js_size(target: &JsObject, w: i32, h: i32);
+
+    #[wasm_bindgen(js_namespace = WebRenderTargetRegistry, js_name = initializeWorker)]
+    fn initialize_js_worker();
+}
+
+/// Makes the worker of the calling thread take the canvases that are
+/// transferred to it: installs the message handler of the registry of the
+/// thread's script, which creates the render target of each canvas and
+/// reports it
+/// ([`on_render_target_registered`](crate::interop::canvas_helper::on_render_target_registered)).
+///
+/// Called once, by a thread other than the one of the page, before a canvas
+/// is created with its id. The thread has to stay alive afterwards and
+/// return to the event loop of its worker, where the messages arrive.
+pub fn initialize_worker() {
+    initialize_js_worker();
 }
 
 /// The size of the canvas in device pixels and its scaling, asked for at

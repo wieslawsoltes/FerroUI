@@ -16,4 +16,4 @@ pub use browser_software_render_target::BrowserSoftwareRenderTarget;
 pub use browser_surface::BrowserSurface;
 pub use browser_web_gl_render_target::{BrowserWebGlRenderTarget, WebGlContext};
 pub use render_target_browser_surface::RenderTargetBrowserSurface;
-pub use web_render_target::{BrowserRenderTarget, CanvasSize};
+pub use web_render_target::{get_render_target, initialize_worker, BrowserRenderTarget, CanvasSize};

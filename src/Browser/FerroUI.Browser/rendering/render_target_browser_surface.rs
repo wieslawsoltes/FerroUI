@@ -49,7 +49,8 @@ impl RenderTargetBrowserSurface {
     /// `modes` the browser supports, and the surface over it.
     pub fn create(container: &JsObject, modes: &[BrowserRenderingMode], top_level_id: i32) -> Rc<Self> {
         let modes: Vec<i32> = modes.iter().map(|m| *m as i32).collect();
-        let js = CanvasSurface::create_render_target_surface(container, &modes, top_level_id);
+        // No thread: the render target is created and used on this one.
+        let js = CanvasSurface::create_render_target_surface(container, &modes, top_level_id, 0);
         Self::new(js)
     }
 
