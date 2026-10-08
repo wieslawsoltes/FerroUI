@@ -749,3 +749,151 @@ The step built and passed without a change to what was written.
 - Without threads, on the new objects: `themed_view` 30 checks, `storage_view` 18 checks, the pixel test of `webapp/`; the catalog is run by CI.
 - With threads: `render_worker_clear` passes its six checks on the objects of the crate (`RenderWorker`, the per-thread table, the shared surface), among them the new one, where the script did keep the canvas back until the thread had reported itself; `thread_spawn` 3 checks, `storage_view` 19, `themed_view` served isolated 30.
 - So B2.6 can switch the render worker on: start it before the render loop sets its tick, make the timer a background one, and create the compositor with `with_render_thread` and the flag false.
+
+## B2.6: the compositor on the worker (written, 2026-10-09)
+
+Status: written on 2026-10-09, **not built and not run**. No cargo, no browser build and no browser. What could be checked without a build: the Rust files parse (the formatter reads them), the script modules pass the type check of `webapp/` with the tools of the main checkout (the only errors are the missing package of the storage bundle, as before), and the scripts and the test parse (`node --check`). **[R]** marks what was read in Emscripten 6.0.10 (`.tools/emsdk/upstream/emscripten`) and **[G]** what was read in the script of the threaded `themed_view` of the B2.5 validation (`target/browser-threads/themed_view/themed_view.js`); everything else is **[M]** unless marked.
+
+### What was written
+
+| Piece | Where | What it is |
+|---|---|---|
+| The switch | `browser_app_builder.rs`, `BrowserPlatformOptions::render_thread` | `true` by default: a module built with threads renders on a render thread. `false` keeps such a module on the thread of the page. No effect without threads |
+| The start of the render thread | `rendering/browser_shared_render_loop.rs`, `BrowserSharedRenderLoop::start_render_thread` and `renders_on_render_thread`; called by `BrowserWindowingPlatform::register` (`windowing_platform.rs`) | In a module built with threads (`cfg!(all(target_os = "emscripten", target_feature = "atomics"))`) and while the render timer of the page does not exist yet: creates the timer with `is_background` true, hands it to `RenderWorker::start`, and makes it the timer of the page when the thread could be created. Otherwise it does nothing and the timer is created on first use as before (`new(false)`). `register` calls it after the dispatcher is installed (the render thread wakes it) and before anything asks for the render loop |
+| The compositor of a view | `rendering/render_target_browser_surface.rs` | A canvas is created for the render thread only when the render loop of the page ticks there (`renders_on_render_thread`); then `thread_id` is not 0 and the compositor is `Compositor::with_render_thread(loop, gpu, false, ..)`. Over a background loop that is a compositor **confined to its render thread** ("B2.4"). With `thread_id` 0 the code is the one of B2.5, character for character |
+| A tick asked for before the timer is started | `rendering/browser_render_timer.rs` | `request_tick_out_of_turn` on a background timer that no thread has started yet sets a flag, and `start_on_this_thread` ticks once when it finds it. Below, "The first show" |
+| Where the frames are drawn | `rendering/render_statistics.rs` (new), exported as `rendering::RenderStatistics` | Counters of the module, all atomics: the frames that reached a canvas, the thread, kind, OpenGL ES version and size of the last one; the ticks of the frame loop of a render thread and the calls those ticks had the runtime carry to the main thread. A frame is counted where it ends: when the session of a WebGL render target is disposed, and after `putPixelData` of a software one |
+| The count of proxied calls | `scripts/browser/threads/ferroui-worker-attach.js` (part 3), `webapp/modules/ferroui/ferroExports.ts` (`proxiedCalls`, `lastProxiedFunction`), `interop/thread_proxy.rs` (`proxied_calls`, `last_proxied_function`), `browser_render_timer.rs` | In the worker of a thread the script wraps `proxyToMainThread` and counts its calls on the worker's `Module`. A background timer reads the count before and after each tick and reports the difference. Below, "What a frame asks of the main thread" |
+| The examples | `examples/themed_view/main.rs`, `examples/storage_view/main.rs` | `?RenderThread=false` sets `render_thread` to false. `themed_view` exports `themedViewRendering()`: `frames`, `frame_thread`, `page_thread`, `other_thread`, `render_thread`, `on_render_thread`, `kind`, `gl`, `size`, `ticks`, `proxied`, `last_proxied` as a line of `name=value` pairs |
+| The host pages | `examples/themed_view/wwwroot/main.js` | Calls `ensureCrossOriginIsolated` when the script of the module says it was built with threads, as the page of `storage_view` does since B2.2 (checked: unchanged). A site without threads makes no extra request |
+| The test | `scripts/browser/tests/themed_view.test.mjs` | Below |
+| Host tests | `render_statistics.rs` (4), `browser_render_timer.rs` (3 new, 2 changed), `browser_shared_render_loop.rs` (1), `browser_app_builder.rs` (1) | The counters; what a background tick reports; the request before the start; no render thread without threads |
+| Records | `DEVIATIONS.md` (browser backend: one row changed, five added), `browser-platform.md` (the file table) | |
+
+**The base library was not changed.** Everything the browser needs was there since B2.4 and B2.5: the confined mode, the frame out of turn, the feature query through the cache, the release of the graph by the render thread.
+
+### The order at start-up
+
+1. `BrowserWindowingPlatform::register`: the dispatcher of the page is created; then `start_render_thread` creates the background timer and starts the thread. `RenderWorker::exists()` is true from here on.
+2. The thread (a worker of the pool, so it runs at once and in parallel **[R]**) subscribes to the reports of its registry, installs the handler, keeps itself alive, starts the timer on itself (its animation frames begin) and publishes its id. A call queued for the thread of the page announces it to the script there.
+3. The first view: `RenderWorker::canvas_thread_id()` makes the announcement itself if the thread has reported by then, and answers with the id; otherwise with `PENDING_RENDER_THREAD`. The script transfers the canvas and posts it (at once, or when the announcement comes: B2.5). The compositor is created confined: `RenderLoop::from_timer` over the background timer, the flag false.
+4. The worker creates the script's render target and reports it (`CanvasHelper_OnRenderTargetRegistered`); the shared state of the canvas has a kind, so the graphics is ready on both threads.
+5. The next tick of the render thread creates the backend context: `BrowserPlatformGraphics::get_shared_context` wraps the target of that thread (`get_render_target`, the `WebGlContext`, the `GlInterface`), and Skia creates its GL interface and its Ganesh context there; then the render target of the composition target, then the first frame.
+
+### The first show, and why nothing waits for ever
+
+The first show, a resize and the disposal of a target are synchronous commits: the thread of the page commits, asks the loop for a frame out of turn and waits for the batch (`MediaContext::sync_wait_compositor_batch`). Three things make that wait end, read in the code:
+
+- **The wait ends with a tick, not with a picture.** `ServerCompositor::render` notifies `Rendered` for the batches it applied at the end of every tick, also of one that found the graphics not ready and drew nothing (`render_core` returns early; `NotifyRendered` runs on the way out). So the first show does not wait for the canvas to reach the worker, which in the `PENDING_RENDER_THREAD` case could not happen while the thread of the page waits (the announcement is delivered to its event loop).
+- **The tick is asked for.** The commit has woken the loop (the tick callback is set), then `request_tick_out_of_turn` queues one tick for the render thread, which runs it from its event loop whether or not the page is visible.
+- **A request that comes before the thread has started the timer is kept** (new). Without it the request did nothing, and the wait depended on the first animation frame of the worker, which a page that is loaded hidden does not have. The flag is taken exactly once by whichever thread gets there: the one that starts the timer, or the one that asked.
+
+The cost is what B2.3 measured: under a millisecond with a frame out of turn, on the main thread, as a spin.
+
+A frame can be drawn between the moment the thread of the page writes a new size of the canvas (`BrowserSurfaceShared`, in `on_size_changed`) and the commit of the layout for that size. Such a frame has the new canvas size and the old scene. The synchronous commit of the resize follows in the same task of the page.
+
+### The audit: what a frame of the render thread reaches
+
+Read from `ServerCompositor::render` down: `render_core`, `ServerCompositionTarget::render`, `PlatformRenderInterfaceContextManager`, the Skia backend (`PlatformRenderInterface::create_backend_context`, `SkiaContext`, `GlSkiaGpu`, `GlRenderTarget`, `GaneshGrContext`, `FramebufferRenderTarget`, `DrawingContextImpl` and the caches), `ferroui-opengl` as far as the browser uses it, and the browser crate. The desktop audits (R5.2, R5.5) covered the server side and the drawing path of Skia for the lock model; this one is for the confined mode, the Ganesh GL path and the browser's objects. "Found" lists what assumes a thread; "Verdict" what was done.
+
+| Found | Who creates it, who uses it | Verdict |
+|---|---|---|
+| `BrowserPlatformGraphics` (`Rc<dyn IPlatformGraphics>`) | The thread of the page, with the compositor. The render thread calls `uses_shared_context` and `get_shared_context` by reference; the context manager never clones the handle (R5.5), and `Compositor::drop` takes it back on its own thread before the graph is released ("B2.4") | Correct as it is: it holds only the `Arc<BrowserSurfaceShared>`, and `get_shared_context` resolves the target of the calling thread |
+| The ready state feature (`Rc<dyn IPlatformGraphicsReadyStateFeature>`) | Asked for once by the context manager when the compositor is created (thread of the page); `is_ready` and `uses_contexts` by reference on the render thread | Correct: a second object over the same atomics. `uses_contexts` panics before the target exists; its one caller (`ensure_valid_backend_context`) runs after `is_ready` |
+| The render interface (`Rc<dyn IPlatformRenderInterface>`, the Skia `PlatformRenderInterface`) | Looked up by the thread of the page (when the compositor and when a composition target is created); lent to the render thread for `create_backend_context` | Correct: plain fields, and lent, not cloned (R5.5) |
+| `get_render_target`, the table of render targets, `BrowserWebGlRenderTarget`, `BrowserSoftwareRenderTarget`, `WebGlContext`, `GlInterface`, `GlSurface`, `GlSession`, the framebuffer render target and its `RetainedFramebuffer` | The render thread, on its first frame and per frame; `Rc` and cells | Correct by B2.5: objects of the thread that draws, in a table of that thread. `WebGlContext::verify_access` still panics on any other thread |
+| `BrowserRenderSurface` and the list the top-level publishes (`Arc<Mutex<Vec<Arc<..>>>>`) | Created and written by the thread of the page, read by the render thread when it creates a render target | Correct by B2.5 |
+| `GlSkiaGpu`, the Skia `Interface` (`Interface::new_native`), `GaneshGrContext` (`RefCell<DirectContext>`), `GlRenderTarget`, `SkiaContext`, `SkiaGpuRenderTarget`, the sessions and surfaces of a frame | The render thread, inside the graph; `GlSkiaGpu` has no feature (`try_get_feature` is `None`) and `SkiaContext` hands out the features of its GPU, so nothing of it reaches the thread of the page | Correct: confined. The public feature map of the render interface is empty in the browser, which settles doubt 5 of "B2.4" and doubt 10 of "B2.5" for this platform |
+| The thread-local caches of the Skia backend: `SkPaintCache`, `SkRoundRectCache`, `SkTextBlobBuilderCache`, the acrylic noise image | Per thread, by design (R5.2) | No change: the render thread has its own; the noise image is decoded once more there, on first use |
+| `SkiaOptions` read from the service locator by every `DrawingContextImpl` | The render thread has no services | Correct since R5.2: falls back to `SkiaPlatform::options`, a static behind a lock |
+| The `longjmp` bridge of the decoders (`emscripten/emscripten_sjlj.cpp`) | A decode on either thread | Correct: it has no state of its own, and `setThrew` of the runtime is per thread. Bitmaps are decoded when they are loaded, on the thread of the page (`immutable_bitmap.rs`); the only decode a frame makes is the noise image |
+| Glyph runs, typefaces, geometries, bitmaps, brushes, pens, effects that a batch carries | Created by the thread of the page (shaping and measuring stay there); drawn by the render thread | Correct since R1: `Send + Sync` in `Arc`, caches behind locks. What both threads then share inside Skia (a typeface, the glyph strikes, the FreeType face behind them, the resource cache) Skia guards itself **[D]**. See doubt 2 for the one part of the binary that was not built for threads |
+| `Dispatcher::ui_thread()` in `ServerCompositor::render` | Every frame | Correct: on the render thread it is the dispatcher of the page, and `check_access` is false there, so the frame does not touch its processing (R5.1) |
+| The completions of batches and jobs | Posted to the dispatcher by the render thread | Correct since B2.3: the signal handle carries the wake-up across (`interop/thread_proxy.rs`); checked that `Dispatcher` takes its handle from `signal_handle()` |
+| The debug overlays (the text renderer, the time graphs) | The text renderer on the thread of the page, under the lock, when overlays are switched on | No change (R5.2); a frame draws no overlay text until it exists |
+| `Logger` | A frame that logs | Correct: the sink is a static behind a lock; the sink of a thread is per thread and the render thread has none |
+| `DefaultRenderLoop::timer_tick` catches a panic of a frame and logs it | The render thread | No change, but see doubt 8: a frame that panics is not an error of the page |
+| `BrowserSurface` (the cells for the client size and scaling), `BrowserTopLevelImpl`, the input handler, the insets, the storage | The thread of the page only | Not reached by a frame: the render thread reads the size from `BrowserSurfaceShared` |
+| What the thread of the page did with the render target | `RenderTargetBrowserSurface::new` wraps the target and publishes its kind when the canvas was created for no thread | With a render thread it does neither; the worker reports the kind. Nothing else on the thread of the page names a render target |
+
+Nothing had to change in the Skia backend. Not read: the custom draw operations and the custom visual handlers of `src/FerroUI.Controls` (they run on the thread that renders, as upstream documents; the controls are outside this step), and anything a frame reaches only on pages `themed_view` does not have (drawing surfaces, visual snapshots, the GPU interop: "B2.7").
+
+### What a frame calls in script, and what the runtime would carry to the main thread
+
+Imports of the wasm-bindgen glue, each a function of the worker's own copy of `ferroui.js` (settled in "B2.1"):
+
+| When | Calls |
+|---|---|
+| The start of the thread | `WebRenderTargetRegistry.initializeWorker`, `TimerHelper.runAnimationFrames` |
+| Each tick | `FerroExports.proxiedCalls` twice; `TimerHelper.now` for a tick out of turn |
+| The first frame of a canvas | `WebRenderTargetRegistry.getRenderTarget`, the getters of the target (`renderTargetType`, a string; `contextHandle`, `fboId`, `stencil`, `sample`, `depth`, `attrs.majorVersion`), `WebGlRenderTarget.getCurrentContext` and `makeContextCurrent` |
+| A WebGL frame | `WebRenderTarget.setSize`, `getCurrentContext`, `makeContextCurrent` (twice when the context was not current), and the GL entry points, which are functions of the worker's own `GL` object and are not proxied without `OFFSCREEN_FRAMEBUFFER` **[R]** ("B2.1") |
+| A software frame | `WebRenderTarget.setSize`, `SoftwareRenderTarget.staticPutPixelData` (which reads the memory through `FerroExports.heapU8()` of the worker) |
+| The end of a batch | Nothing in script: the wake-up of the dispatcher is `emscripten_proxy_async` on the platform's own queue. It is queued, nobody waits for it, and wake-ups raised before the page has taken one are one |
+
+What Emscripten carries from a thread to the main thread, synchronously, is the list of its script functions marked for it **[G]**: the file system calls (`__syscall_openat`, `__syscall_fstat64`, `__syscall_stat64`, `__syscall_lstat64`, `__syscall_newfstatat`, `__syscall_getdents64`, `__syscall_getcwd`, `__syscall_fcntl64`, `__syscall_ioctl`, `fd_read`, `fd_pread`, `fd_seek`, `fd_close`), **`fd_write`**, `_mmap_js` and `_munmap_js` (a file mapping; an anonymous one stays in C), `environ_get` and `environ_sizes_get`, and `proc_exit`. A frame reaches none of them by reading: no file is opened (fonts and bitmaps are in memory before a frame sees them), the clock is `performance.now()` of the worker, the memory is fixed ("B2.2"). The one that can appear is `fd_write`: a line on standard output or standard error. That is the panic message of a frame that panics, a log sink that prints, and Skia's own diagnostics (a shader that does not compile). So the expected count for a frame is **zero**, and a count above zero is a line somebody printed.
+
+How it is counted: every such function calls `proxyToMainThread` **[R]** (`libpthread.js`), which is a `var` of the script **[G]**. `ferroui-worker-attach.js` replaces it, in a worker only, by a function that counts and calls the original, and keeps the index of the last function (an index into `proxiedFunctionTable` of the generated script, which is how a count above zero is explained: look the index up there). The counters are properties of the worker's `Module`; `FerroExports.proxiedCalls()` answers -1 where nothing counts (the main thread, a build without threads). `BrowserRenderTimer` reads the count around each tick of a background timer and adds the difference to `RenderStatistics`; a tick of the timer of the page is not measured and makes no extra call, so the build without threads does what it did.
+
+Not counted by this: calls proxied from C without the script (`emscripten_proxy_sync` and its relatives). The port makes none, and no path a frame takes was found that does.
+
+### The test
+
+`themed_view.test.mjs` takes the site directory as its argument, as before; a site is threaded when it has `ferroui-threads.js` (the way `storage_view.test.mjs` decides since B2.2), and is then opened isolated. Against a site without threads it registers the same 30 checks with the same assertions.
+
+Against a threaded site:
+
+- **The 30 checks, on the render thread.** One assertion differs there: "input works with the software render target too" asked the canvas of the page for its 2D context, which a canvas whose control was transferred refuses; it asserts `kind=software` from `themedViewRendering` instead. Before the checks of a threaded site start, the page is waited for until `frames` is above zero (the splash is closed by the thread of the page, the first frame comes from the other one).
+- **The same 30 checks with `?RenderThread=false`** ("(one thread)" in their names).
+- **The frames are drawn by a render thread, and a frame asks nothing of the main thread**: `on_render_thread`, `other_thread`, `frame_thread` equal to `render_thread` and not to `page_thread`; WebGL 2 and the size of the view; the canvas of the page gives out no context; a capture shows a view; pointer input draws further frames and a click is counted; `ticks` above zero, `proxied` counted and **0**; no error in the page; and the capture equals the capture of the same page on one thread in the same state (sampled every 4 pixels, at most 0.5 % of the samples may differ by more than 8 per channel; the count is printed).
+- **`?RenderThread=false`**: no render thread (`render_thread=0`, `on_render_thread=false`), frames drawn by the thread of the page, no tick of a render thread, and the page kept its canvas.
+- **`?RenderingMode=Software2D`, `WebGL1`, `WebGL2`**, each: drawn by the render thread, the kind and the OpenGL ES version of the mode, a click toggles the check box, no error, and the capture equals the one of one thread.
+- **A resize** (`WebGL2` and `Software2D`), to 600 x 400 and to 380 x 560: the last frame has the new size, the capture has it, and the capture equals the one of one thread resized the same way (which is how a stretched canvas would show).
+- **A hidden page**: a change of the view draws frames while the page is visible; while it is hidden (the window is minimised, or, if that does not hide it, a tab is opened in front) a second change draws none in 2.5 s; shown again, frames follow.
+
+68 checks against a threaded site.
+
+### What could not be verified without a build
+
+- Everything in Rust beyond parsing, in the three builds (host, module without threads, module with threads).
+- That the build without threads passes `themed_view.test.mjs` (30), `storage_view.test.mjs` (18) and `control_catalog.test.mjs` unchanged. What changed on its path: `BrowserPlatformOptions` has one more field; `register` calls a function that returns at once; the glue has two more imports (never called); `GlSession::dispose` and the blit count a frame in six atomics.
+- Every behaviour of the threaded page: Skia on the render thread; the first show against a compositor whose canvas has not arrived; the three modes from the worker; the resize; the hidden page; the counter of proxied calls.
+- That `storage_view` and the catalog, which now render from the worker by default when built with threads, still pass their tests (`storage_view.test.mjs target/browser-threads/storage_view`, 19 checks; the catalog threaded is "B2.7").
+
+### Doubts, most likely to bite first
+
+1. **Rust that was not compiled.** Likeliest: the two imports with `js_namespace = FerroExports` in `interop/thread_proxy.rs` (the first imports of the crate from that class; if the glue refuses a static method of an exported class there, they move to `TimerHelper`); `Option<Rc<BrowserPlatformOptions>>::as_ref().is_none_or(..)` in `register`; the constants of `canvas_helper` as patterns of a `match` in the example; `std::thread::scope` over a local in the tests of `render_statistics.rs`; the test closures of the timer; an unused import in one of the three builds.
+2. **Skia called by two threads at once, for the first time.** The thread of the page builds paths, measures and shapes text and decodes bitmaps while the render thread rasterises. `libskia.a` is built for threads; **`libskia-bindings.a` is not** (`render-thread.md`, "B1 validated": linked with `--no-check-features`; "a `thread_local` is a plain global and the guard of a local static is not atomic" in its four objects). Until now only one thread called Skia, so this was dormant. A function-local static of the bindings that both threads initialise at the same moment, or a `thread_local` of theirs that both use, is a race no test of this step looks for. If the threaded page shows rare corruption or a crash inside Skia, this is the first place; the fix is the one B1 names (compile those four objects with `-pthread`).
+3. **Ganesh on a WebGL context of a worker.** `Interface::new_native()` and `direct_contexts::make_gl` on the render thread; B2.1 to B2.5 drew with raw GL only. With `WebGL1` in particular: no test ran Skia on WebGL 1 before, on any thread, so a failure of that check may not be about threads (the `(one thread)` capture of the same mode tells).
+4. **The hidden page in headless Chrome.** Whether minimising the window or a tab in front makes `document.visibilityState` "hidden" there was not tried; if neither does, the check fails with a message that says so, and needs another way to hide the page. Whether a worker's animation frames stop for a hidden page is the hypothesis of section 4 that the check exists for.
+5. **The captures compared between the two modes.** Same module, same backend, same state: they should be equal. What could differ: a hover or focus transition still running when the capture is taken (the comparison waits until no frame was drawn for 400 ms), and the WebGL of a worker against the WebGL of the page in SwiftShader.
+6. **The wrapper of `proxyToMainThread`.** It relies on the name and on `var` in the generated script **[G]**; with `const` or another name the assignment throws while the script loads in a worker, and no thread starts (the page stays on its splash and every threaded test fails at once). The `typeof` guard covers a missing name, not a `const`.
+7. **The first frames.** That the canvas arrives, the target is reported and the first frame is drawn without the thread of the page having to do anything but return to its event loop; and that hit testing and input, which the 30 checks exercise, behave the same when the readback comes from another thread (the desktop has this since R5; the browser not).
+8. **A panic in a frame is swallowed.** `DefaultRenderLoop::timer_tick` catches it and logs through `Logger`; the page sees no exception. On one thread that was so too, but there a panic in a frame usually showed elsewhere. The checks would see it as frames that stop (`framesAfter` times out) or as a `proxied` count above zero (the panic message is a `fd_write`).
+9. **The console of the worker is not in the log of the test.** `page.errors` is the page target; `console.error` in the worker (a render target that could not be created) is not there. An error thrown in the worker reaches the page through the runtime; a logged one does not.
+10. **A debug build.** With the assertions of Emscripten the first wait of the main thread logs "Blocking on the main thread is very dangerous" as an error ("B2.3"), and two of the 30 checks assert that the page logged no error. The release build, which the tests use, has no such line.
+11. **Several canvases.** Each view has a compositor, a WebGL context and a Ganesh context of its own in the one worker. Frames make their context current; the release of a graph (a closed view) drops Ganesh's objects without making its context current (doubt 3 of "B2.4"), which with a second context current would delete objects by id in the wrong one. `themed_view` has one canvas and never closes it. "B2.7".
+12. **The catalog and `storage_view` threaded** render from the worker from now on, without having been run so. The catalog can opt out only through the new field of the options (its `parse_args` does not read `RenderThread`; the sample is outside this step).
+13. **The statistics are always on.** A background tick makes two calls into script for the count, and every frame writes six atomics. Negligible next to a frame, but it is not behind a switch.
+14. **`RenderStatistics` is read field by field**: a reader can see the thread of one frame with the count of the next. The checks only read it when no frame was drawn for a while, or wait for a field to reach a value.
+15. **A render thread somebody else started** (`RenderWorker::start` called by an application before the platform is registered): `start_render_thread` answers `false`, the page renders on its own thread and no canvas of a view goes to that thread. Before this step such a page showed nothing (doubt 6 of "B2.5").
+
+### Validation
+
+```
+scripts/browser/setup.sh --threads && source .tools/env.sh
+cargo test -p ferroui-browser --lib
+cargo build -p ferroui-browser --examples
+(cd src/Browser/FerroUI.Browser/webapp && npm run typecheck && npm run lint && npm run test:pixels)
+scripts/build-browser.sh themed_view && node scripts/browser/tests/themed_view.test.mjs
+scripts/build-browser.sh storage_view && node scripts/browser/tests/storage_view.test.mjs
+scripts/build-browser.sh control-catalog-browser && node scripts/browser/tests/control_catalog.test.mjs
+scripts/build-browser.sh themed_view --threads && node scripts/browser/tests/themed_view.test.mjs target/browser-threads/themed_view
+scripts/build-browser.sh storage_view --threads && node scripts/browser/tests/storage_view.test.mjs target/browser-threads/storage_view
+scripts/build-browser.sh render_worker_clear --threads && node scripts/browser/tests/render_worker_clear.test.mjs
+scripts/build-browser.sh thread_spawn --threads && node scripts/browser/tests/thread_spawn.test.mjs
+```
+
+Expected: 9 host tests of the browser crate more than before (217); the three tests of the build without threads unchanged in number and result (30, 18, the catalog); `themed_view.test.mjs` against the threaded site with 68 checks, printing as `measured:` the pixels that differ between the two modes, the ticks, frames and proxied calls, and how the page was hidden; `storage_view` threaded with its 19 checks, now drawn by the render thread; `render_worker_clear` (6) and `thread_spawn` (3) unchanged (the first uses `RenderWorker` and a background timer of its own, and now also reports its ticks to `RenderStatistics`).
+
+By hand, served isolated (`node scripts/browser/serve.mjs target/browser-threads/themed_view --isolated`): the page, `?RenderThread=false`, `?RenderingMode=Software2D`, `?RenderingMode=WebGL1`; `themedView.themedViewRendering()` in the console.

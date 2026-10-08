@@ -429,7 +429,7 @@ Phase key: 1 = MVP, 2 = input, 3 = services, 4 = late, – = not ported. Rust pa
 | `Rendering/BrowserWebGlRenderTarget.cs` | GL surface and GL context over Emscripten GL | `rendering/browser_web_gl_render_target.rs` (Emscripten only) | 1 |
 | `Rendering/BrowserRenderTimer.cs` | Render timer | `rendering/browser_render_timer.rs` | 1 |
 | `Rendering/BrowserSharedRenderLoop.cs` | Shared render loop | `rendering/browser_shared_render_loop.rs` | 1 |
-| `Rendering/RenderWorker.cs` | Render web worker (threaded mode) | `rendering/render_worker.rs` (written in stage B2.5 of `browser-render-worker.md`, not started by the platform yet) | B2 |
+| `Rendering/RenderWorker.cs` | Render web worker (threaded mode) | `rendering/render_worker.rs` (written in stage B2.5 of `browser-render-worker.md`; started by the platform in a module built with threads since B2.6, through `BrowserSharedRenderLoop::start_render_thread`) | B2 |
 | `Storage/BrowserStorageProvider.cs` | Storage provider, items, bookmarks | `storage/browser_storage_provider.rs` | 3 |
 | `Storage/BlobReadableStream.cs` | Read stream over a Blob | `storage/blob_readable_stream.rs` | 3 |
 | `Storage/WriteableStream.cs` | Write stream over a file handle | `storage/writeable_stream.rs` | 3 |
