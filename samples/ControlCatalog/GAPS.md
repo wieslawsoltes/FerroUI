@@ -12,7 +12,6 @@ Status: 219 documents, 207 load and show their class; 12 are listed below (one o
 
 | Gap | What is missing | Reproduction | Documents |
 |---|---|---|---|
-| C209 | The methods `TextBox.Cut`, `Copy`, `Paste` and `Clear` are not declared for markup, so they cannot be bound as commands (`{Binding $parent[TextBox].Cut}`). | `gaps_b::gap_c209_text_box_methods_as_commands` | `Pages/ContextFlyoutPage.xaml` |
 | C310 | `AutoCompleteBox.MinimumPopulateDelay` (`TimeSpan`) is not converted from text (`"00:00:01"`). | `gaps_c::gap_c310_time_span_property_from_text` | `Pages/AutoCompleteBoxPage.xaml` (which also waits for its code-behind) |
 
 One gap of the framework blocks no document of the list: C101, a reflection binding (`x:CompileBindings="False"`) cannot resolve `$parent[prefix:Type]` for a type of a `using:` namespace (`gaps_a::gap_c101_reflection_binding_parent_of_prefixed_type`). The theme of `SampleGalleryPage` uses such paths with compiled bindings, which resolve them.

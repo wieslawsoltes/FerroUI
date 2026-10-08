@@ -351,6 +351,19 @@ CONTROLS = {
                 set: |text_box: &Ref<TextBox>, value: String| text_box.set_selected_text(Some(&value))
             }""",
         ],
+        # The public methods of the managed original, in the order of their declaration: a
+        # binding path that ends in one is a command (`{Binding $parent[TextBox].Cut}`).
+        'methods': [
+            "fn ClearSelection() => TextBox::clear_selection",
+            "fn Cut() => TextBox::cut",
+            "fn Copy() => TextBox::copy",
+            "fn Paste() => TextBox::paste",
+            "fn Clear() => TextBox::clear",
+            "fn ScrollToLine(i32) => |text_box: &Ref<TextBox>, line_index: i32| text_box.scroll_to_line(line_index)",
+            "fn SelectAll() => TextBox::select_all",
+            "fn Undo() => TextBox::undo",
+            "fn Redo() => TextBox::redo",
+        ],
         'static_properties': [
             "CutGesture: Option<KeyGesture> { get: TextBox::cut_gesture }",
             "CopyGesture: Option<KeyGesture> { get: TextBox::copy_gesture }",
