@@ -428,3 +428,74 @@ Built with `scripts/build-browser.sh render_worker_clear --threads` and run with
 8. **The capture.** That `Page.captureScreenshot` shows the frame of a canvas presented from a worker, and how soon; the test asks again for up to 15 seconds.
 9. **Presenting without a frame callback.** The clear runs inside a message handler of the worker and the context has `preserveDrawingBuffer: false`: the browser should present when the handler returns. If the capture stays empty although the state line is right, the frame has to be drawn from `requestAnimationFrame` of the worker, which is B2.3.
 10. **The size of the canvas** is set by `begin_draw` on the `OffscreenCanvas` (`WebRenderTarget.setSize` in the worker) from the device pixels the page computed; at a device scale factor other than 1 the test's 200 x 120 does not hold (the test runs at 1).
+
+## B2.2: memory views and one service worker (written, 2026-10-08)
+
+Status: written, **the modules not built**. No cargo and no browser build was run. What was run, with the tools installed in the main checkout: the type check, the linter and the bundle of `webapp/` (clean); `webapp/tests/software-blit.test.mjs` in headless Chrome (passes); and `thread_spawn.test.mjs` against a copy of the `thread_spawn` site of the B2.1 validation in which `ferroui-sw.js` and `ferroui-threads.js` were replaced by the new ones and `ferroui-coi-sw.js` removed (its 3 checks pass: the merged worker isolates the page). The module of that copy was linked with the old flags, so nothing below about the link, about `wasmMemory` on a real module, or about `storage_view` has been seen to run. **[R]** marks what was read in Emscripten 6.0.10 (`.tools/emsdk/upstream/emscripten`) and **[G]** what was read in the script of the threaded `themed_view` of the B2.1 validation (`target/browser-threads/themed_view/themed_view.js`).
+
+### What was written
+
+| Piece | Where | What it is |
+|---|---|---|
+| The accessor | `webapp/modules/ferroui/ferroExports.ts` | `FerroExports.heapU8()`: reads `buffer` of the memory object of the attached module (`runtime.wasmMemory`) and returns a `Uint8Array` over it, kept until the buffer is another object. It throws when no module is attached or the memory is not exported. `FerroRuntime` no longer declares `HEAPU8` |
+| Its three callers | `rendering/softwareRenderTarget.ts` (`putPixelData`), `stream.ts` (`write`, `toMemoryView`) | They ask for the view at each call. `stream.ts` loses its own `heap()`. No reader of `runtime.HEAPU8` is left under `webapp/` |
+| The export | `.cargo/config.toml`, `scripts/build-browser.sh` | `wasmMemory` added to `-sEXPORTED_RUNTIME_METHODS` in both builds (`GL,HEAPU8,wasmMemory`, and with `PThread` in the threaded one). `HEAPU8` stays exported: nothing of the port reads it any more, and nothing was removed that a host page might read |
+| The memory in a worker | `scripts/browser/threads/ferroui-worker-attach.js` | In a thread `Module.wasmMemory` becomes a property that reads the variable of the script (below) |
+| Growth | `scripts/build-browser.sh`, the `--threads` flags | `-sALLOW_MEMORY_GROWTH=0` and `-sINITIAL_MEMORY=<n>MB`, `n` from `FERROUI_BROWSER_THREAD_MEMORY_MB` (default 512, checked to be a number between 16 and 2048). The build without threads is unchanged |
+| One service worker | `webapp/modules/ferroui-sw.ts` | The handler of the isolation worker follows the handler of the polyfill in one `fetch` listener, behind `new URL(self.location.href).searchParams.get("coi") === "1"`. Kept from the old file: the request of the browser's own tools that is left alone, the opaque response passed on as it is, and the null body for the statuses 101, 204, 205 and 304. One addition: with the parameter the response of a download gets the three headers too (below) |
+| Who registers it | `scripts/browser/threads/ferroui-threads.js`, `interop/ferro_module.rs` | The default of `ensureCrossOriginIsolated` is `./ferroui-sw.js?coi=1`. `resolve_service_worker_path` answers with the same address when the module is built with threads (`cfg!(target_feature = "atomics")`, what `thread_spawn` already reports) and with `./ferroui-sw.js` otherwise |
+| The file removed | `scripts/browser/threads/ferroui-coi-sw.js` | Deleted; the build copies one file of that directory to a threaded site. `thread_spawn.test.mjs` and `render_worker_clear.test.mjs` assert `ferroui-sw.js?coi=1` as the script of the controller, and nothing else in them changed |
+| A page that serves both builds | `scripts/browser/threads/ferroui-worker-import.js`, `examples/storage_view/wwwroot/main.js` | The script of a threaded module exports `ferrouiThreads = true` (one more top-level statement of the `--extern-pre-js`). The host page of `storage_view` reads it from the namespace of the module script and only then imports `ferroui-threads.js` and calls the check. A site without threads makes no extra request. This is the part of B2.6 that the test of this step needs; `themed_view` is left to B2.6 |
+| Tests | `webapp/tests/software-blit.test.mjs`, `scripts/browser/tests/storage_view.test.mjs` | Below |
+| Records | `DEVIATIONS.md` (two rows), `NOTICE.md` of the crate, `browser-platform.md` section 21 | The second part of the worker and its address; the accessor |
+
+### `wasmMemory` on the module
+
+- **[R]** `wasmMemory` is a symbol of the script library (`$wasmMemory`, `lib/libcore.js`), so it is a legal name in `EXPORTED_RUNTIME_METHODS` (`modules.mjs`, `exportRuntimeSymbols`).
+- **[R]** Without threads it is an alias of the `memory` export of the module, and the property is assigned with the other exports when the module is instantiated (`tools/emscripten.py`: the assignment of the export continues with `= wasmMemory = Module['wasmMemory']`). The assertion of a debug build that `Module['wasmMemory']` is not given by the page runs before that.
+- **[R]** With threads the memory is imported (`IMPORTED_MEMORY`), created by `initMemory()` before the list of runtime exports, and `Module['wasmMemory'] = wasmMemory` is one of those assignments. **In a thread `initMemory` returns at once** and the memory arrives later, in the message that loads the module (`runtime_pthread.js`: `wasmMemory = msgData.wasmMemory`), so the property would stay `undefined` in every worker. `ferroui-worker-attach.js` therefore redefines it in a thread as a property with a getter over the variable. `Module.HEAPU8`, by contrast, is assigned by `updateMemoryViews` in every thread, which is why B2.1 worked without this.
+
+### The decision on growth: fixed
+
+Read in the generated script **[G]**, against the two conditions of section 5:
+
+- Every access of the glue to `HEAPU8`, `HEAP32`, `HEAPU32` is rewritten by Emscripten to `(growMemViews(), HEAPU8)`, and `growMemViews` compares `wasmMemory.buffer` with the buffer of the views: refreshed by identity. Strings are decoded through `slice`, a copy. So far the conditions hold.
+- **`HEAP_DATA_VIEW` is not guarded.** The glue replaces it only inside `updateMemoryViews` (which it wraps), that is, when this thread grows the memory or happens to make a guarded access after another thread did. It writes through it directly in 43 places of that script: the pointer and length of every returned string, array or `Option` (`setInt32`, `setFloat64` into the return area), and the elements of an array of script objects (`passArrayJsValueToWasm0`, right after the allocation that may lie in new memory); it reads through it in `getArrayJsValueFromWasm0`. Most return-area writes follow a guarded access in the same function and are safe by accident; those of an `Option` that is `None`, of a number, and the two array functions are not. After a growth by another thread such an access throws a `RangeError` on a `DataView` that ends where the memory ended before.
+- On the page's thread the return area is on the main stack, low in the memory, so only the array functions are exposed there (`getAllScreens`, the accept types of the file pickers). On a worker the stack of the thread is itself allocated, and all of them are.
+
+That is the "if not" of section 5: a stale view inside the glue, which the port's script cannot renew. So the threaded build is linked with a memory that does not grow. With growth off Emscripten emits no `growMemViews` at all and creates the views once per thread **[R]** (`runtime_common.js`), so the guarded accesses and their cost go too, and an allocation that does not fit aborts with Emscripten's message that names `INITIAL_MEMORY`.
+
+**The size is not measured.** Section 5 asks for the peak of the catalog and a margin; this branch could not build or run anything, so 512 MB is a provisional default behind a variable, and the first thing validation should replace: read `wasmMemory.buffer.byteLength` of the build without threads after a tour of the catalog (a growing memory records its own high-water mark), add the stacks of the pool, and set the default. A shared memory reserves address space, not pages, on desktop systems; phones are known to refuse large reservations, which B2.8 has to keep in mind when it chooses the module for a device.
+
+The other way out, not taken: `-sGROWABLE_ARRAYBUFFERS=2` **[R]** (`settings.js`, `runtime_common.js`) makes the views length-tracking over a growable shared buffer, which no thread ever has to renew. Whether the glue's `new DataView(wasmMemory.buffer)` is then over that same buffer, and which browsers have the interface (the settings file says it was not usable in Firefox before 154), was not looked into. It is the candidate if a fixed size turns out to be too rigid.
+
+`heapU8()` is correct either way: with a fixed memory the buffer never changes and the accessor returns one view for ever; in the build without threads it renews the view after each growth.
+
+### One worker, two registrations
+
+The page of a threaded site registers `./ferroui-sw.js?coi=1` when the host does not send the headers; the application registers the same address when it sets `register_ferro_service_worker`. Three cases:
+
+| Site | Who registers | Result |
+|---|---|---|
+| Without threads | The application, `./ferroui-sw.js` | As before: the worker answers downloads only |
+| Threaded, host sends the headers | The application only, `./ferroui-sw.js?coi=1` | The worker also adds headers the server already sent. Harmless, and the address is the same on both kinds of host, so that moving a site between them never swaps the worker |
+| Threaded, static host | The page, then the application, both `./ferroui-sw.js?coi=1` | The second registration finds the registration it asks for **[D]** |
+
+The download of the polyfill is a navigation of a hidden frame to an address the worker answers with the stream. In an isolated page the document of a frame must itself carry `Cross-Origin-Embedder-Policy`, and whether the browser checks that before it turns the response into a download is not something to rest on, so with `?coi=1` the stream response gets the three headers as well. Without the parameter the response is the original's.
+
+### Tests
+
+- `webapp/tests/software-blit.test.mjs`: the page stands in for the module with an object that has a `buffer`. Three frames: from the first buffer; after the buffer was replaced by a larger one and the old one detached (`ArrayBuffer.prototype.transfer`), with the frame beyond the old end; and from a `SharedArrayBuffer` that replaced a smaller shared one which stays alive. It asserts the pixels of each, that the accessor returns the same view while the buffer stays and a new one over the new buffer, and that the old content is there. The test server now sends the isolation headers, which the shared buffer needs. Run: passes.
+- `scripts/browser/tests/storage_view.test.mjs`: a site is taken as threaded when it has `ferroui-threads.js`, and is then served isolated. The large write reads the size from `storageView.wasmMemory`, asserts that it is a `WebAssembly.Memory` with a buffer of the expected kind, and asserts growth without threads and an unchanged size with them. The service worker check expects the address of the mode and one registration. One more check, threaded only, serves the site **without** the headers with `?PreferPolyfill=true&RegisterServiceWorker=true`: two loads, `crossOriginIsolated`, the controller is `ferroui-sw.js?coi=1`, the streamed save arrives, and after one more load the page is still isolated with one registration.
+- `thread_spawn.test.mjs`, `render_worker_clear.test.mjs`: the name of the controlling script.
+
+### Not verified, most likely to fail first
+
+1. **`storage_view` threaded has never been linked or started.** Everything the test asks of it beyond the service worker (the top level, the storage provider, the dispatcher in a module with atomics) is first exercised here; `themed_view` threaded is the nearest thing that ran.
+2. **The size of the fixed memory** (above). Too small shows as an abort naming `INITIAL_MEMORY`; whether a 512 MB shared memory is granted everywhere the tests run was not tried.
+3. **The download frame in an isolated page.** A navigation of a hidden frame that ends as a download, under `require-corp`, answered by the service worker. The headers are added to that response on the assumption that this is what the browser wants; if the save does not arrive in the threaded checks, this is the place.
+4. **`Module.wasmMemory` in a worker**: the `defineProperty` over the property the export list assigned (an ordinary assignment in the script read, so configurable). Not exercised by any test of this step: nothing reads the memory through the port's script on a worker until the software frames of B2.3, which then depend on it.
+5. **The export `ferrouiThreads`**: a second top-level statement in the file given as `--extern-pre-js`, which Emscripten writes in front of the script unchanged **[R]** (`link.py`, after the optimiser). If the export is lost, `storage_view` threaded starts without the check: it still passes served with headers and fails the check without them.
+6. **Both registrations being one** **[D]**: that `register` with the address and scope of the active worker neither installs a second worker nor makes the page lose its controller. The last assertions of the new check are there for this.
+7. **`-sALLOW_MEMORY_GROWTH=0` after the `=1` of the file**, replaced as the other repeated settings are; the warning Emscripten gives for threads with growth should be gone from the link.
+8. **A debug build** (`--debug --threads`): Emscripten's assertion that `updateMemoryViews` runs once per thread with a fixed memory, with the glue's wrapper around it. Read as satisfied; not run.
