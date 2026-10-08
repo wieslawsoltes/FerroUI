@@ -1380,6 +1380,7 @@ impl VirtualizingStackPanel {
         let recycle_key = recycle_key?;
 
         let recycled = self.recycle_pool.borrow_mut().get_mut(&recycle_key).and_then(Vec::pop)?;
+        ferroui_base::perf_count!(ContainersReused);
 
         recycled.set_current_value(Visual::is_visible_property(), true);
         generator.prepare_item_container(&recycled, item, index);
@@ -1395,6 +1396,7 @@ impl VirtualizingStackPanel {
         index: i32,
         recycle_key: Option<RecycleKey>,
     ) -> Ref<Control> {
+        ferroui_base::perf_count!(ContainersCreated);
         let container = generator.create_container(item, index, recycle_key);
 
         container.set_value(Self::recycle_key_property(), recycle_key);
@@ -1436,6 +1438,7 @@ impl VirtualizingStackPanel {
                     *self.focused_element.borrow_mut() = Some(element.clone());
                     self.focused_index.set(index);
                 } else {
+                    ferroui_base::perf_count!(ContainersRecycled);
                     self.generator().clear_item_container(element);
                     self.push_to_recycle_pool(recycle_key, element);
                     element.set_current_value(Visual::is_visible_property(), false);

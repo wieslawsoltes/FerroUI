@@ -16,6 +16,11 @@ autoexamples = false
 [lib]
 path = "lib.rs"
 
+[features]
+# The performance counters of the base crate, which the counting site of this crate (dynamic
+# resource expressions) counts into.
+perf-counters = ["ferroui-base/perf-counters", "ferroui-controls/perf-counters"]
+
 [dependencies]
 # The runtime helpers of compiled XAML call the typed functions of the declared members, as
 # generated code does (`xaml_il::runtime::compiled::add_setter`).
