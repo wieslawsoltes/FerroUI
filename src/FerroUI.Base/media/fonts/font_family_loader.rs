@@ -3,7 +3,7 @@ use crate::utilities::{Uri, UriExtensions, UriKind};
 use crate::{FerroLocator, LocatorExtensions};
 
 /// Finds the font assets of a font family source.
-pub(crate) struct FontFamilyLoader;
+pub struct FontFamilyLoader;
 
 impl FontFamilyLoader {
     /// Loads all font assets that belong to the specified source: a single
