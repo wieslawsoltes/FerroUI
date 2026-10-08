@@ -1,3 +1,4 @@
+use crate::utils::debug_display::{append_optional_boxed_value, build_base_debug_display};
 use super::as_content_presenter_host;
 use crate::documents::TextElement;
 use crate::metadata::PseudoClassesAttribute;
@@ -827,5 +828,20 @@ impl ContentPresenter {
             as_content_presenter_host(parent).is_some_and(|host| host.register_content_presenter(self))
         });
         *self.host.borrow_mut() = if registered { new_value.as_ref().map(Ref::downgrade) } else { None };
+    }
+}
+
+impl ContentPresenter {
+    /// Appends the text that describes the presenter in diagnostics: the base description,
+    /// its host and, with the content, its content.
+    pub(crate) fn build_debug_display(&self, builder: &mut String, include_content: bool) {
+        build_base_debug_display(self, builder);
+
+        let host: Option<BoxedValue> = self.host().map(|host| Rc::new(host) as BoxedValue);
+        append_optional_boxed_value(builder, "Host", host.as_ref(), false);
+
+        if include_content {
+            append_optional_boxed_value(builder, "Content", self.content().as_ref(), true);
+        }
     }
 }

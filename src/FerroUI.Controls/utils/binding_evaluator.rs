@@ -47,6 +47,12 @@ impl BindingEvaluator {
         self.get_value(Self::value_property())
     }
 
+    /// Sets the evaluated value (the setter of `Value`; `set_value` is the property setter
+    /// of every object).
+    pub fn set_evaluated_value(&self, value: Option<BoxedValue>) {
+        self.set_value(Self::value_property(), value)
+    }
+
     /// Evaluates the binding against a data context.
     pub fn evaluate(&self, data_context: &Option<BoxedValue>) -> Option<BoxedValue> {
         // Only update the data context if necessary.

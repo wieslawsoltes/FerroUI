@@ -1,3 +1,4 @@
+use crate::utils::debug_display::append_optional_boxed_value;
 use super::TemplatedControlImpl;
 use crate::metadata::TemplatePartAttribute;
 use crate::presenters::ContentPresenter;
@@ -129,5 +130,18 @@ impl crate::i_headered::IHeadered for HeaderedContentControl {
 
     fn set_header(&self, value: Option<BoxedValue>) {
         HeaderedContentControl::set_header(self, value)
+    }
+}
+
+impl HeaderedContentControl {
+    /// Appends the text that describes the control in diagnostics: the description of the
+    /// content control and, with the content, its header.
+    pub(crate) fn build_debug_display(&self, builder: &mut String, include_content: bool) {
+        let base: &ContentControl = self;
+        base.build_debug_display(builder, include_content);
+
+        if include_content {
+            append_optional_boxed_value(builder, "Header", self.header().as_ref(), true);
+        }
     }
 }

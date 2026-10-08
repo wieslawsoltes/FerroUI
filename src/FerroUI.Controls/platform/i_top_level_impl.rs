@@ -1,4 +1,6 @@
-use super::{IPlatformHandle, IPopupImpl, IWindowBaseImpl, IWindowImpl, PlatformThemeVariant};
+use super::{
+    IPlatformHandle, IPopupImpl, IWin32OptionsTopLevelImpl, IWindowBaseImpl, IWindowImpl, PlatformThemeVariant,
+};
 use crate::{AcrylicPlatformCompensationLevels, WindowResizeReason, WindowTransparencyLevel};
 use ferroui_base::input::raw::IRawInputEventArgs;
 use ferroui_base::input::IInputRoot;
@@ -156,6 +158,11 @@ pub trait ITopLevelImpl: IOptionalFeatureProvider + IDisposable {
 
     /// The toplevel as a popup implementation, if it is one.
     fn as_popup_impl(&self) -> Option<&dyn IPopupImpl> {
+        None
+    }
+
+    /// The toplevel as the Win32-specific options of a toplevel, if it has them.
+    fn as_win32_options_top_level_impl(&self) -> Option<&dyn IWin32OptionsTopLevelImpl> {
         None
     }
 }

@@ -126,6 +126,11 @@ impl OffscreenTopLevelImplBase {
         self.client_size.get()
     }
 
+    /// The size of the frame of the top-level: an offscreen top-level has none.
+    pub fn frame_size(&self) -> Option<Size> {
+        None
+    }
+
     /// Sets the client size and notifies the top-level.
     pub fn set_client_size(&self, value: Size) {
         self.client_size.set(value);

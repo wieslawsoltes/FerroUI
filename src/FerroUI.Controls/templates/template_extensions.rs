@@ -1,7 +1,15 @@
 use crate::primitives::TemplatedControl;
+use crate::Control;
 use ferroui_base::{FerroObject, Ref, Visual};
 
 impl TemplatedControl {
+    /// Gets the list of all control descendants that are part of the template of this
+    /// control: the template descendants that are controls.
+    #[deprecated(note = "Use get_template_descendants")]
+    pub fn get_template_children(&self) -> Vec<Ref<Control>> {
+        self.get_template_descendants().into_iter().filter_map(|child| child.cast::<Control>()).collect()
+    }
+
     /// Gets a visual tree's template descendants: the visual descendants
     /// whose templated parent is this control.
     pub fn get_template_descendants(&self) -> Vec<Ref<Visual>> {

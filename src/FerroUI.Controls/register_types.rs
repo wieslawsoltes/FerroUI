@@ -66,6 +66,7 @@ const NAMESPACES: &[(&str, &str)] = &[
     ("ferroui_controls::platform", "FerroUI.Controls.Platform"),
     ("ferroui_controls::platform::mac_os_properties", "FerroUI.Controls"),
     ("ferroui_controls::platform::x11_properties", "FerroUI.Controls"),
+    ("ferroui_controls::platform::win32_properties", "FerroUI.Controls"),
     ("ferroui_controls::platform::in_process_drag_source", "FerroUI.Platform"),
     ("ferroui_controls::embedding::offscreen", "FerroUI.Controls.Embedding.Offscreen"),
     ("ferroui_controls::url_opened_event_args", "FerroUI"),
@@ -359,6 +360,7 @@ const TYPES: &[&TypeInfo] = types![
     crate::embedding::offscreen::OffscreenTopLevel,
     crate::native_control_host::NativeControlHost,
     crate::platform::X11Properties,
+    crate::platform::Win32Properties,
     // --- flexpanel ---
     crate::flex_panel::Flex,
     crate::flex_panel::FlexPanel,
