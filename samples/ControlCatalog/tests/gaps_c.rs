@@ -147,6 +147,15 @@ fn gap_c310_time_span_property_from_text() {
 }
 
 #[test]
+#[ignore = "gap C312: the event FerroObject.PropertyChanged is not declared for markup"]
+fn gap_c312_property_changed_event_in_markup() {
+    let _app = start_application();
+    // As `Pages/OpenGl/OpenGlInteropPage.xaml`: `<openGl:GlPageKnobs PropertyChanged="KnobsPropertyChanged"/>`.
+    let markup = ferroui_base::FerroObject::TYPE.markup().expect("the markup metadata of the class");
+    assert!(markup.find_event("PropertyChanged").is_some());
+}
+
+#[test]
 fn gap_c311_binding_assigned_to_value_member_binding() {
     let _app = start_application();
     // As `Pages/AutoCompleteBoxPage.xaml`: a compiled binding needs the data type of its source.
