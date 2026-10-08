@@ -4,7 +4,7 @@ use crate::templates::{
     ITypedDataTemplate,
 };
 use crate::test_support::boxed_str;
-use crate::{Border, Control, Decorator};
+use crate::{Border, Canvas, Control, Decorator};
 use ferroui_base::styling::ITemplate;
 use ferroui_base::{AnyValue, BoxedValue, FerroObject, Ref};
 use std::any::TypeId;
@@ -66,6 +66,39 @@ fn typed_func_data_template_matches_only_its_type() {
     assert!(!template.match_(Some(&number)));
     assert!(!template.match_(None));
     assert!(template.build(&boxed_str("foo")).unwrap().is::<Border>());
+}
+
+/// Not from upstream: `TypeUtilities.CanCast<T>` accepts a value of the type
+/// a nullable `T` holds (an `int` for `int?`), null for a nullable `T`, and a
+/// handle whose object is of class `T`.
+#[test]
+fn typed_func_data_template_matches_as_type_utilities_can_cast() {
+    let nullable = FuncDataTemplate::for_type::<Option<i32>>(
+        |value, _| {
+            let border = Border::new();
+            border.set_tag(Some(Rc::new(value.unwrap_or(-1)) as BoxedValue));
+            Some(border.upcast())
+        },
+        false,
+    );
+    let number: BoxedValue = Rc::new(42_i32);
+
+    assert!(nullable.match_(Some(&number)));
+    assert!(nullable.match_(None));
+    assert!(!nullable.match_(boxed_str("foo").as_ref()));
+    let built = nullable.build(&Some(number)).unwrap();
+    let tag = built.tag().unwrap();
+    let tag: &dyn AnyValue = &*tag;
+    assert_eq!(tag.downcast_ref::<i32>(), Some(&42));
+
+    let borders = FuncDataTemplate::for_type::<Ref<Border>>(|_, _| Some(Decorator::new().upcast()), false);
+    let border = Control::boxed(Border::new());
+    let canvas = Control::boxed(Canvas::new());
+
+    assert!(borders.match_(Some(&border)));
+    assert!(!borders.match_(Some(&canvas)));
+    assert!(!borders.match_(None));
+    assert!(borders.build(&Some(border)).unwrap().is::<Decorator>());
 }
 
 #[test]
