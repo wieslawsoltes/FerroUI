@@ -106,6 +106,9 @@ mod tabbed_demo_page;
 mod table_view_page;
 #[path = "OpenGl/mod.rs"]
 pub mod open_gl;
+// In the namespace of the pages, as its class is; the file is next to its document.
+#[path = "OpenGl/open_gl_interop_page.rs"]
+mod open_gl_interop_page;
 
 pub use accelerator_page::AcceleratorPage;
 pub use acrylic_page::AcrylicPage;
@@ -168,6 +171,7 @@ pub use list_box_page::ListBoxPage;
 pub use menu_page::MenuPage;
 pub use native_embed_page::{EmbedSample, INativeDemoControl, NativeEmbedPage};
 pub use navigation_demo_page::NavigationDemoPage;
+pub use open_gl_interop_page::OpenGlInteropPage;
 pub use open_gl_page::{OpenGlPage, OpenGlPageControl};
 pub use carousel_page_samples::*;
 pub use drawer_page::*;
@@ -293,6 +297,7 @@ const ROOT_TYPES: &[&TypeInfo] = &[
     MenuPage::TYPE,
     NativeEmbedPage::TYPE,
     NavigationDemoPage::TYPE,
+    OpenGlInteropPage::TYPE,
     OpenGlPage::TYPE,
     OpenGlPageControl::TYPE,
     PlatformInfoPage::TYPE,
@@ -373,6 +378,7 @@ const ROOT_CLASSES: &[&XamlClass] = &[
     &MenuPage::XAML_CLASS,
     &NativeEmbedPage::XAML_CLASS,
     &NavigationDemoPage::XAML_CLASS,
+    &OpenGlInteropPage::XAML_CLASS,
     &OpenGlPage::XAML_CLASS,
     &PlatformInfoPage::XAML_CLASS,
     &PlatformSettingsPage::XAML_CLASS,

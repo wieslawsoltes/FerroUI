@@ -24,7 +24,6 @@ Pages/ContextFlyoutPage.xaml | gap C209: TextBox.Cut, Copy, Paste and Clear are 
 # --- the other pages directly under Pages/ (group C) ---
 Pages/AutoCompleteBoxPage.xaml | code-behind not ported (the document also needs gap C310)
 Pages/NumericUpDownPage.xaml | code-behind: CultureInfo.GetCultures(CultureTypes.SpecificCultures)
-Pages/OpenGl/OpenGlInteropPage.xaml | pending: the code-behind (OpenGlInteropPage.xaml.cs) is not ported yet; everything it uses is
 Pages/OpenGl/OpenGlLeasePage.xaml | code-behind: OpenGlFbo (Pages/OpenGl/OpenGlFbo.cs, not ported) wraps an OpenGL texture in a Ganesh surface (GRContext, GRBackendTexture, GRGlTextureInfo), and the Skia backend has Ganesh on OpenGL in browser builds only
 
 # --- the demo pages and the page sample directories ---

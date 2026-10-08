@@ -6,7 +6,7 @@ The documents of the sample that do not load yet, grouped by what they wait for.
 cargo test -p control-catalog -- --ignored gap_
 ```
 
-Status: 219 documents, 206 load and show their class; 13 are listed below (one of them, `App.xaml`, loads in the application and in `tests/gaps.rs`).
+Status: 219 documents, 207 load and show their class; 12 are listed below (one of them, `App.xaml`, loads in the application and in `tests/gaps.rs`).
 
 ## Gaps of the framework
 
@@ -24,7 +24,6 @@ One gap of the framework blocks no document of the list: C101, a reflection bind
 |---|---|
 | `Pages/AutoCompleteBoxPage.xaml` | its code-behind (`LogicalExtensions.GetLogicalDescendants`, which it uses, is ported); the document also needs gap C310. |
 | `Pages/NumericUpDownPage.xaml` | `CultureInfo.GetCultures(CultureTypes.SpecificCultures)`. |
-| `Pages/OpenGl/OpenGlInteropPage.xaml` | The code-behind is not ported yet. What it uses is ported: the event `FerroObject.PropertyChanged` for its handler `KnobsPropertyChanged` (declared for markup since gap C312 was closed; the handler receives `OwnedFerroPropertyChangedEventArgs`), `OpenGlContent` (`Pages/OpenGl/open_gl_content.rs`), `GlInterface`, `IGlContext`, the composition interop of `ferroui-opengl` (`OpenGlCompositionInterop::try_create_compatible_gl_context`, `ICompositionGlContext`, `ICompositionGlTexture` and its lease), `Compositor::create_drawing_surface`, `create_surface_visual` and `request_composition_update`, and the events `AttachedToVisualTree` and `DetachedFromVisualTree` of the viewport, which are declared for markup. |
 | `Pages/OpenGl/OpenGlLeasePage.xaml` | `OpenGlFbo` (`Pages/OpenGl/OpenGlFbo.cs`, not ported): it wraps an OpenGL texture in a Ganesh surface (`GRContext.ResetContext` and `Flush`, `GRBackendTexture`, `GRGlTextureInfo`, `SKSurface.Create` over a backend texture). The Skia backend enables the `gl` feature of `skia-safe`, which has these types, for `target_os = "emscripten"` only (`src/Skia/FerroUI.Skia/Cargo.toml`; the desktop build is Graphite on Metal, and no published Skia binary has Graphite and Ganesh together), and `ISkiaGrContext` does not give the Ganesh context (`skia_safe::gpu::DirectContext`) to a lease. The page needs both, and a desktop platform whose leased graphics context is an `IGlContext`. |
 | `Pages/ContentPage/ContentPagePerformancePage.xaml`, `Pages/CarouselPage/CarouselPagePerformancePage.xaml`, `Pages/DrawerPage/DrawerPagePerformancePage.xaml`, `Pages/NavigationPage/NavigationPagePerformancePage.xaml`, `Pages/TabbedPage/TabbedPagePerformancePage.xaml` | `NavigationPerformanceMonitorHelper` measures the managed heap (`GC.GetTotalMemory`, `GC.Collect`), which has no counterpart. |
 
