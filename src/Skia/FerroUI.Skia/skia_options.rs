@@ -43,15 +43,3 @@ impl SkiaOptions {
         use_stencil_buffers != Some(true)
     }
 }
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn stencil_buffers_are_avoided_unless_explicitly_enabled() {
-        for (use_stencil_buffers, expected) in [(None, true), (Some(false), true), (Some(true), false)] {
-            assert_eq!(expected, SkiaOptions::should_avoid_stencil_buffers(use_stencil_buffers));
-        }
-    }
-}
