@@ -47,9 +47,16 @@ export function findChrome() {
     return candidates[0];
 }
 
-export function serve(siteDirectory) {
+// Serves a site directory on 127.0.0.1 (`port` 0: any free port). With `isolated` every response
+// carries the two headers that make a page cross-origin isolated, which a site built with threads
+// needs (docs/porting/browser-platform.md, "Threads (opt-in)").
+export function serve(siteDirectory, { isolated = false, port = 0 } = {}) {
     const root = path.resolve(siteDirectory);
     const server = http.createServer((request, response) => {
+        if (isolated) {
+            response.setHeader("cross-origin-opener-policy", "same-origin");
+            response.setHeader("cross-origin-embedder-policy", "require-corp");
+        }
         let relative = decodeURIComponent(request.url.split("?")[0]);
         if (relative.endsWith("/")) { relative += "index.html"; }
         // The browser asks for /favicon.ico on its own, at a moment of its choosing; a site
@@ -64,7 +71,7 @@ export function serve(siteDirectory) {
         response.setHeader("content-type", TYPES[path.extname(file)] ?? "application/octet-stream");
         fs.createReadStream(file).pipe(response);
     });
-    return new Promise((resolve) => server.listen(0, "127.0.0.1", () => resolve(server)));
+    return new Promise((resolve) => server.listen(port, "127.0.0.1", () => resolve(server)));
 }
 
 // Decodes an 8-bit RGB or RGBA, non-interlaced PNG (what the screenshots are).
@@ -117,9 +124,10 @@ const KEYS = {
 const MODIFIERS = { alt: 1, ctrl: 2, meta: 4, shift: 8 };
 
 // Opens `siteDirectory` (query appended to index.html) and resolves to the page driver. `initScript`
-// is evaluated in the page before its own scripts.
-export async function open(siteDirectory, { query = "", width = 460, height = 520, scale = 1, chromeArgs = [], initScript } = {}) {
-    const server = await serve(siteDirectory);
+// is evaluated in the page before its own scripts. `isolated` serves the site cross-origin isolated
+// (see `serve`).
+export async function open(siteDirectory, { query = "", width = 460, height = 520, scale = 1, chromeArgs = [], initScript, isolated = false } = {}) {
+    const server = await serve(siteDirectory, { isolated });
     const profile = fs.mkdtempSync(path.join(os.tmpdir(), "ferroui-browser-"));
     const chrome = spawn(findChrome(), [
         "--headless=new", "--no-first-run", "--no-default-browser-check", "--no-sandbox", "--hide-scrollbars",

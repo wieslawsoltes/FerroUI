@@ -499,6 +499,8 @@ cargo test -p ferroui-browser            # desktop unit tests of the backend (no
 cargo check --locked --target wasm32-unknown-emscripten -p ferroui-browser --examples
 ```
 
+The opt-in threaded build (`setup.sh --threads`, `build-browser.sh <application> --threads`, `thread_spawn.test.mjs`) is described in section 21; the commands above are not affected by it.
+
 `scripts/browser/harness.mjs` is the test library: it serves a site, drives Chrome or Chromium over the DevTools protocol (real mouse, wheel and key events), reads pixels and evaluates expressions. It finds the browser through `CHROME`, the usual install paths and Playwright's directories. The example exports `themedViewState()` (a line of `name=value` pairs) and the host page exposes the module as `globalThis.themedView`; the ControlCatalog host exports `catalogState()` and exposes `globalThis.controlCatalog`; give a new application the same kind of hook rather than testing through pixels alone.
 
 Rules that keep the boundary sound (section 5): imports by `raw_module = "./ferroui.js"` with `js_namespace`/`js_name`, typed getters on `extern` types, flat exports `<Class>_<Method>` listed in `ferroExports.ts` (every name on both sides), no `js-sys`/`web-sys`/closures, synchronous answers. Before building for a new target or feature set run `cargo tree -e features` on `ferroui-skia`: an unpublished Skia feature combination silently starts a source build.
@@ -967,6 +969,66 @@ node --no-wasm-native-module-cache-enabled [--no-wasm-lazy-compilation] [--wasm-
 `compile.mjs` is three lines: read the file, `await WebAssembly.compile(bytes)`, print the time. The instrumented and split modules need the feature flags above (the module uses atomics from Skia's archive and the bulk memory and reference types of Emscripten 6.0.10).
 
 Sources (checked 2026-10-06): V8, "WebAssembly compilation pipeline" (https://v8.dev/docs/wasm-compilation-pipeline) and "Code caching for WebAssembly developers" (https://v8.dev/blog/wasm-code-caching); Mozilla bug 1487113 (alt-data caching of stream-compiled modules); WebKit, "Introducing the JetStream 3 Benchmark Suite" (IPInt, BBQ, OMG); MDN browser-compat-data pull request 30552 (JSPI in Safari 27) and the Firefox 153 release notes (JSPI); Chromium's 8 MB limit on synchronous compilation on the main thread (`v8_initializer.cc`); Emscripten 6.0.10 `src/settings.js` (`SPLIT_MODULE`, `WASM_LEGACY_EXCEPTIONS`), `src/preamble.js` (`splitModuleProxyHandler`, `instantiateSync`), `tools/link.py` (`do_split_module`); upstream `src/Avalonia.Build.Tasks/XamlCompilerTaskExecutor.cs` (`res.Remove()`).
+
+## 21. Threads (opt-in) (2026-10-08)
+
+Section 6 decided against threads for the first backend, and the default build is unchanged: one thread, the stable toolchain, no requirement on the host. This section describes a second, opt-in way to build a site whose module can start threads. It is stage B1 of `render-thread.md`, the ground for the render thread of the browser backend (B2). **Status: written, not built yet.** Nothing below is marked **[M]**; the commands have been checked for syntax only, and the list of what may not work is at the end.
+
+### What the mode needs
+
+| Need | Why | Where it is |
+|---|---|---|
+| A nightly Rust toolchain with `rust-src` | The standard library that ships with a toolchain is compiled without atomics, and the linker refuses it in a module with shared memory (`render-thread.md`, stage B0). It has to be rebuilt with `-Zbuild-std=std,panic_unwind`, which only a nightly accepts | `RUST_NIGHTLY` in `scripts/browser/setup.sh`, installed by `setup.sh --threads` |
+| `-C target-feature=+atomics,+bulk-memory` for all Rust code, `-pthread` for all C and C++ code and for the link | Every object of a shared-memory link has to be compiled with threads. Skia's prebuilt objects already are (B0); HarfBuzz and the setjmp bridge of `ferroui-skia` are compiled by build scripts and get the option through `EMCC_CFLAGS` | `scripts/build-browser.sh --threads` |
+| `-sPTHREAD_POOL_SIZE=<n>` | A thread is a web worker, and a worker only starts when the main thread returns to the browser. The pool is created before the application starts, so that `std::thread::spawn` gives a running thread at once. The size is fixed at build time: `FERROUI_BROWSER_THREAD_POOL_SIZE`, default 2 (a render thread and one spare) | the same |
+| `-sENVIRONMENT=web,worker` | The script of the module is also what each worker loads; the default build leaves worker support out | the same |
+| A cross-origin isolated page | Shared memory (`SharedArrayBuffer`) exists only in a page served with `Cross-Origin-Opener-Policy: same-origin` and `Cross-Origin-Embedder-Policy: require-corp` (or `credentialless`) | the server, or `ferroui-coi-sw.js` (below) |
+
+The nightly is pinned to `nightly-2026-07-01`. The measurement of B0 used the nightly of 2025-10-31 that happened to be installed; it reports 1.93.0 but is older than the change of the unwinding ABI (merged 2025-12-05, section 3), so it would build the module with JavaScript exceptions, which `ferroui-skia` and Skia's setjmp bridge no longer support, while passing the version check of `src/Skia/FerroUI.Skia/build.rs` (which reads the minor version only). The pinned date lies in the last days of the 1.99 development cycle, so the compiler is as close to the stable pin (1.99.0) as a nightly gets. The date was chosen from the release calendar and has not been installed: if it has no nightly or lacks `rust-src`, take the nearest date that has both and change the pin. `FERROUI_BROWSER_NIGHTLY` overrides it for one build.
+
+### Commands
+
+```
+scripts/browser/setup.sh --threads       # as without the option, plus the nightly with rust-src and the target
+source .tools/env.sh                     # unchanged: the build script selects the nightly itself
+scripts/build-browser.sh thread_spawn --threads          # site in target/browser-threads/thread_spawn
+node scripts/browser/tests/thread_spawn.test.mjs         # headless Chrome: headers, service worker, message
+node scripts/browser/serve.mjs target/browser-threads/thread_spawn --isolated   # by hand: http://127.0.0.1:8080/
+FERROUI_BROWSER_THREAD_POOL_SIZE=4 scripts/build-browser.sh thread_spawn --threads   # another pool size
+```
+
+`--threads` combines with `--debug` and `--out`. The threaded build has its own cargo target directory, `target/threads` (a standard library of its own and other flags: sharing the directory would rebuild everything at each change of mode), and its own default site directory, `target/browser-threads/<application>`, so a build with the option and one without never replace each other's output. The flags are added to those of `.cargo/config.toml` with `--config`, because `RUSTFLAGS` in the environment would replace the flags of the file. Without `--threads` the script does what it did before.
+
+`scripts/browser/harness.mjs` serves a site with the two headers when asked (`serve(directory, { isolated: true })`, `open(directory, { isolated: true })`); `scripts/browser/serve.mjs` is the same server for a browser opened by hand. Any other server works if it sends the two headers with every response of the site, the scripts and the module included.
+
+### The site: isolation without headers
+
+A threaded build copies two files of `scripts/browser/threads/` next to the host page:
+
+- **`ferroui-threads.js`**, the check. A host page written for threads imports it and calls `ensureCrossOriginIsolated()` before it creates the module. In an isolated page (`self.crossOriginIsolated`) it resolves to `true` and does nothing else. Otherwise it registers the service worker, waits until it is active and reloads the page once. If that is not possible (no secure context, no service workers, registration refused) or the page is still not isolated after the reload, it replaces the content of the page with a message that names the cause and the two headers, and resolves to `false`: the page then does not create the module, which would fail with an error about `SharedArrayBuffer` that names no cause. `{ register: false }` leaves the worker out for a host that sends the headers.
+- **`ferroui-coi-sw.js`**, the service worker. It answers every request of the pages in its scope, the request for the page itself included, by fetching the response and handing it on with `Cross-Origin-Opener-Policy: same-origin`, `Cross-Origin-Embedder-Policy: require-corp` and `Cross-Origin-Resource-Policy: cross-origin` added. That is the only way to isolate a page on a host that cannot set headers, such as GitHub Pages. It is written for this repository (about twenty lines), after the pattern known as `coi-serviceworker`.
+
+Limits of the service worker:
+
+- **The first load reloads once.** The page that registers the worker was itself loaded without it. A returning visitor has the worker and is isolated at the first response. The reload is counted in session storage so that it cannot repeat; where session storage is not available the page asks for a manual reload instead.
+- **No isolation where service workers are not available**: private windows of browsers that disable them there, embedded web views without them, a user setting, and any page that is not a secure context (plain HTTP on a host other than localhost). The page shows the message.
+- **A forced reload bypasses the worker** and gives a page that is not isolated; a normal reload restores it.
+- **Resources of other origins.** Under `require-corp` a resource of another origin is refused unless it is fetched with CORS or its server sends `Cross-Origin-Resource-Policy: cross-origin`. The worker cannot change an opaque response. The catalog's own site loads everything from its origin; an application that embeds third-party content (the native control host with an `iframe`) has to check this.
+- **One worker per scope.** The service worker of the platform (`ferroui-sw.js`, section 16, B6) is registered with the same scope, the directory of the site, and a scope has one worker: an application that sets `register_ferro_service_worker` would replace this one and lose the isolation on a static host. Until the two are one worker (the fetch handler above added to `ferroui-sw.ts`, in B2), a threaded site on a static host cannot also use the polyfill's streamed saves.
+
+The test page is `src/Browser/FerroUI.Browser/examples/thread_spawn`. It uses nothing of the framework: `threadSpawnStart` starts a thread with `std::thread::Builder::spawn` that adds the numbers from 1 to 1000 and sends the sum over a channel, and the host page reads `threadSpawnState` from a timer and writes it into the element `result` (`atomics=true state=done value=500500 other_thread=true`). The main thread never waits, which is also the rule for the backend: a browser does not allow the main thread of a page to block. `thread_spawn.test.mjs` has three checks: the thread answers in a page isolated by the headers of the server, with no worker registered and one load; without the headers the worker is registered, the page loads twice and the thread answers; with `?ThreadsServiceWorker=false` and no headers the page shows the message and does not create the module. The example also builds without threads (the workspace checks cover it) and then reports `state=failed`.
+
+Existing host pages (`themed_view`, `storage_view`, the catalog) do not call the check. `scripts/build-browser.sh themed_view --threads` builds them threaded and copies the two files, but their `main.js` has to import `ferroui-threads.js` as `thread_spawn/wwwroot/main.js` does before such a site can run on a host without the headers; that is part of B2.
+
+### Not verified, most likely to fail first
+
+1. **wasm-bindgen with threads on Emscripten.** `-sWASM_BINDGEN` makes `emcc` merge the glue of wasm-bindgen into the script of the module, and each worker of the pool loads that script. Whether the glue initialises correctly in a worker, and whether a module of the framework, whose glue imports `./ferroui.js` (code written for a page, not for a worker), loads in one, is unknown. `thread_spawn` has two exports and no imports, the smallest case.
+2. **The nightly pin** (above), and whether the workspace builds on it without new warnings turned errors.
+3. **`-Zbuild-std` with the `browser` profile** (thin LTO, `opt-level = "z"`) and with `--locked`.
+4. **`-sENVIRONMENT=web,worker` given after `-sENVIRONMENT=web`**: the later setting should win.
+5. **Memory growth with threads.** `-sALLOW_MEMORY_GROWTH=1` stays on; Emscripten warns that code outside the module then reads the memory more slowly, and the script side of the platform reads `runtime.HEAPU8`, a view that goes stale when another thread grows the memory. Not a concern for `thread_spawn`; to settle in B2 (a fixed maximum, or reading through a fresh view).
+6. **Module size and start-up.** The pool workers each compile or receive the module before the application starts; not measured (B3).
+7. **Browsers other than Chrome.** As everywhere in this document (section 16, B9b).
 
 ## Owner decision (2026-10-04)
 
