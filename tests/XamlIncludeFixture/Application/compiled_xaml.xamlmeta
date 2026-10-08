@@ -83,6 +83,14 @@
       "public": true
     },
     {
+      "uri": "ferres://アセンブリ/Fluent_Theme_Is_Included_Across_Crates.xaml",
+      "root_type": "FerroUI.Controls.ContentControl",
+      "class_rust_path": null,
+      "build_path": "::xaml_include_fixture_application::compiled_xaml::build_fluent_theme_is_included_across_crates_xaml",
+      "populate_path": null,
+      "public": true
+    },
+    {
       "uri": "ferres://アセンブリ/Style_Inside_Resources_Should_Produce_Warning.xaml",
       "root_type": "FerroUI.Controls.ContentControl",
       "class_rust_path": null,
@@ -91,5 +99,5 @@
       "public": true
     }
   ],
-  "dependencies": ["../Theme/compiled_xaml.xamlmeta", "../../../src/FerroUI.Themes.Simple/compiled_xaml.xamlmeta"]
+  "dependencies": ["../Theme/compiled_xaml.xamlmeta", "../../../src/FerroUI.Themes.Simple/compiled_xaml.xamlmeta", "../../../src/FerroUI.Themes.Fluent/compiled_xaml.xamlmeta"]
 }

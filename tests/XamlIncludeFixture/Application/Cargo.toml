@@ -22,6 +22,7 @@ ferroui-markup-xaml = { workspace = true }
 # The crates whose compiled documents the documents of this crate include.
 xaml-include-fixture-theme = { path = "../Theme" }
 ferroui-themes-simple = { workspace = true }
+ferroui-themes-fluent = { workspace = true }
 
 [dev-dependencies]
 ferroui-base = { workspace = true, features = ["testing"] }
