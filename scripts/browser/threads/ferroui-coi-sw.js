@@ -34,6 +34,8 @@ self.addEventListener("fetch", (event) => {
         headers.set("Cross-Origin-Embedder-Policy", "require-corp");
         // The resources of the site itself may be embedded by the isolated page.
         headers.set("Cross-Origin-Resource-Policy", "cross-origin");
-        return new Response(response.body, { status: response.status, statusText: response.statusText, headers });
+        // A response of these statuses has no body, and building one with a body is an error.
+        const body = [101, 204, 205, 304].includes(response.status) ? null : response.body;
+        return new Response(body, { status: response.status, statusText: response.statusText, headers });
     }));
 });
