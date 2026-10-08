@@ -9,7 +9,7 @@ use ferroui_base::controls::NameScopeRef;
 use ferroui_base::metadata::{from_markup_value, MarkupAttributeValue};
 use ferroui_base::reactive::{IDisposable, IObservable, IObserver, LightweightSubject};
 use ferroui_base::styling::{IStyle, Styles};
-use ferroui_base::{Ref, StaticType, TypeInfo};
+use ferroui_base::{Ref, TypeInfo};
 use ferroui_controls::primitives::TemplatedControl;
 use ferroui_controls::testing::{TestServices, UnitTestApplication, UnitTestApplicationScope};
 use ferroui_controls::{Application, Control, TextBox, Window};

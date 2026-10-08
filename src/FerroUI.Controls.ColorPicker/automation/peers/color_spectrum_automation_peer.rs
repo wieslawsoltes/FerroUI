@@ -120,3 +120,7 @@ impl ColorSpectrumAutomationPeer {
         );
     }
 }
+
+#[cfg(test)]
+#[path = "color_spectrum_automation_peer_tests.rs"]
+mod color_spectrum_automation_peer_tests;
