@@ -70,6 +70,38 @@ Other pages hold the entries of their own area, and this page does not repeat th
 |---|---|---|---|---|
 | `ValueStore` propagates inherited values over `GetInheritanceChildren()` by index up to the count at the start; an index past the end throws. | `FerroObject::for_each_inheritance_child` stops at an index past the end, and skips a child that was dropped without being detached. | Behaviour | The port's list holds weak references, and `inheritance_children` prunes dropped children, which can shorten the list during the loop; upstream's list of strong references cannot shrink that way. | #29 |
 
+### Bindings (`src/FerroUI.Base/data/`)
+
+| Upstream | Port | Kind | Why | Since |
+|---|---|---|---|---|
+| `IValueConverter.Convert` / `ConvertBack` and `IMultiValueConverter.Convert` take a `CultureInfo`; `CompiledBinding`, `ReflectionBinding`, `MultiBinding` and `TemplateBinding` have a `ConverterCulture` property, which `BindingExpression.ConverterCulture` and `MultiBindingExpression.ConverterCulture` pass on; `CultureInfoIetfLanguageTagConverter` converts the text of that property in markup. | The converter contracts have no culture argument and the bindings have no `ConverterCulture`: a converter formats and parses with the invariant culture. `CultureInfoIetfLanguageTagConverter` is not ported. | Missing | The converter contracts were ported before `utilities::CultureInfo` existed. Adding the argument changes every implementation of the two contracts in every crate, so it is a change of its own. Until then a binding cannot ask for a culture, and a converter that would use it behaves as under the invariant culture. These members are listed as missing in the tracking pages, not waived. | before this change |
+| A binding path can be built from a LINQ expression tree: `CompiledBinding.Create<TIn, TOut>(Expression<Func<TIn, TOut>>)` through `BindingExpressionVisitor<TIn>`, with the markers of `StreamBindingExtensions` for `^`. | Not ported. The path is written with `CompiledBindingPathBuilder` (which is what the visitor produces) and given to `CompiledBinding::new`. | Missing | Rust has no expression trees: a closure cannot be inspected. The tests of `CompiledBindingTests_Create` are ported with paths written by hand; the 36 tests of `BindingExpressionVisitorTests` have no subject. | before this change |
+| String paths (`ReflectionBinding`) and the dynamic plugins read members by reflection over the run-time type of the source. | They read the markup metadata (`metadata::MarkupType`) and the binding metadata (`data::model::ModelTypes`) the type of the source declares. | Behaviour | There is no reflection. A member of a type that declares no metadata is not found, and the binding reports the error upstream reports for a missing member (`xaml.md` 3.7). | before this change |
+| `DataAnnotationsValidationPlugin` validates a property against its `System.ComponentModel.DataAnnotations` attributes. | Not ported; the registered data validators are `IndeiValidationPlugin` and `ExceptionValidationPlugin`. | Missing | Members have no attributes, and the port declares no validation attributes in metadata. A model reports validation errors through `INotifyDataErrorInfo` or by failing in its setter. | before this change |
+| `BindingValue<T>.FromUntyped` converts null to `T` when `T` is a reference type or `Nullable<>`. | `BindingValue::<T>::from_untyped` converts null only when `T` is a nullable form with a registered null value (`Option<X>`); for any other `T` null gives a binding error. | Representation | A Rust `T` has no null of its own; nullable properties are typed `Option<X>`. | this change |
+| `BindingValue<T>.ToString()` of a value without a value prints the default of `T` (`0` for a number). | `Display` prints `(null)`. | Behaviour | The port holds no default value for the "no value" states (`Option<T>`). Only the text of an unset or do-nothing binding value of a value type differs. | this change |
+
+#### What stands for the reflection-based parts of bindings
+
+The port binds through compiled paths and through the metadata types declare, never through run-time reflection (`xaml.md` 3.6 and 3.7). Per upstream type of `Data/Core/ExpressionNodes/Reflection`, `Data/Core/Parsers` and `Data/Core/Plugins` that depends on reflection or on expression trees, this is what stands for it. `docs/porting/data/path-overrides.toml` and `member-waivers.toml` carry the same decisions for the tracking pages.
+
+| Upstream type | Counterpart in the port | Notes |
+|---|---|---|
+| `DynamicPluginPropertyAccessorNode` | `PropertyAccessorNode::new_dynamic` (`data/core/expression_nodes/property_accessor_node.rs`) | Same node as for a compiled path, without a fixed plugin: it asks `BindingPlugins::property_accessors()` for the first plugin that matches the source, as upstream. |
+| `DynamicPluginStreamNode` | `StreamNode::new_dynamic` (`expression_nodes/stream_node.rs`) | The same, over `BindingPlugins::stream_handlers()`. |
+| `ReflectionIndexerNode` | `ReflectionIndexerNode` (`expression_nodes/reflection_indexer_node.rs`) | Kept by name. The indexer is found in the binding metadata of the source (a list, a dictionary, a declared indexer) or in its markup metadata (`markup_members::find_indexer`) instead of `Type.GetProperties`; the arguments are converted to the declared parameter types. |
+| `ReflectionTypeCastNode` | `TypeCastNode` with a `CastTarget` (`expression_nodes/type_cast_node.rs`) | `Type.IsInstanceOfType` becomes `CastTarget::is_instance`: a class of the object model by its `TypeInfo`, any other type by its `ValueType`. The type name of the path is resolved by the `TypeResolver` of the binding. |
+| `ExpressionTreeIndexerNode` | None | Built only from a LINQ `IndexExpression`. An indexer of a compiled path is a property element (`CompiledBindingPathBuilder::indexer_property`, `list_item`, `dictionary_item`, read through `PropertyInfoAccessorFactory::create_indexer_property_accessor`); one of a string path is `ReflectionIndexerNode`. Unreachable without expression trees. |
+| `BindingExpressionVisitor<TIn>`, `BindingExpressionVisitorMembers` | None | Translate an expression tree into path elements. Unreachable without expression trees; `CompiledBindingPathBuilder` is called directly. |
+| `StreamBindingExtensions` | None | Marker methods that exist to be found in an expression tree; `CompiledBindingPathBuilder::stream_task` / `stream_observable` say the same in a path. |
+| `ReflectionClrPropertyInfo` | `MarkupPropertyInfo` (`data/core/plugins/markup_members.rs`) | A property description over the plain property a type declares in its markup metadata, in place of one over `System.Reflection.PropertyInfo`. Compiled paths use `ClrPropertyInfo` / `TypedClrPropertyInfo` over accessor closures, as upstream uses generated accessors. |
+| `ReflectionMethodAccessorPlugin` | `MethodAccessorPlugin` (`plugins/method_accessor_plugin.rs`) | Matches a method by name and chooses the overload a command can call with upstream's priority (`markup_members::find_best_command_method`), over the methods declared in markup or binding metadata. |
+| `MethodAccessorPlugin(MethodInfo, Type)` | `UntypedAccessorPlugin` with `UntypedMember::Method` (`plugins/untyped_accessor_plugin.rs`) | The plugin of one fixed method of a compiled path: a closure creates the delegate in place of `MethodInfo.CreateDelegate`. |
+| `ObservableStreamPlugin`, `ObservableStreamPlugin<T>` | `ObservableStreamPlugin` over `ObservableValue` (`plugins/i_stream_plugin.rs`) | Upstream finds `IObservable<T>` among the interfaces of the value and boxes each item by a reflected generic call. Here a property that can be streamed holds an `ObservableValue`, which boxes each item when the observable is wrapped. |
+| `InpcPropertyAccessorPlugin` (reflection over the properties of an `INotifyPropertyChanged` object) | `InpcPropertyAccessorPlugin` (`plugins/inpc_property_accessor_plugin.rs`) | Kept by name; it reads the property from the binding or markup metadata of the source. |
+| `DataAnnotationsValidationPlugin` | None | See the register above. |
+| `MethodToCommandConverter` (compiled `Expression` lambdas over a `Delegate`) | `MethodToCommandConverter` over a `metadata::MarkupDelegate` (`converters/method_to_command_converter.rs`) | The delegate carries its method metadata, from which the `Can<Name>` companion and its `DependsOn` properties are read. |
+
 ### ControlCatalog sample (`samples/ControlCatalog/`)
 
 | Upstream | Port | Kind | Why | Since |
@@ -91,6 +123,15 @@ Other pages hold the entries of their own area, and this page does not repeat th
 |---|---|---|---|---|
 | The backend recovers its typeface with the type test `PlatformTypeface is SkiaTypeface`. | `IPlatformTypeface::as_any`, and `SkiaTypeface::try_get` downcasts through it. | Representation | The Rust form of a runtime type test; it replaces the thread-local registry of live typefaces by address that stood in for it. | #52 |
 
+### Headless platform (`src/Headless/FerroUI.Headless/`)
+
+| Upstream | Port | Kind | Why | Since |
+|---|---|---|---|---|
+| `HeadlessPlatformTypeface` keeps the font in an `UnmanagedFontMemory`, which is internal to the base assembly and visible to the headless assembly. | `FontMemory` in `headless_platform_stubs.rs` repeats the lookup of the sfnt table directory. | Representation | `UnmanagedFontMemory` is private to `ferroui-base` (`pub(crate)` in `media/fonts/mod.rs`), and that directory belongs to another batch. Making the type public removes the copy. | branch `core-base-rest-native-headless` (no pull request yet) |
+| `HeadlessPlatformTypeface` reads the family name, weight, style and stretch from a dummy `GlyphTypeface` created over itself in its constructor. | The dummy glyph typeface is created over a private probe typeface with a copy of the font bytes (`IdentityProbeTypeface`). | Representation | A glyph typeface holds an `Rc` of its platform typeface, which does not exist while the typeface is being constructed. | branch `core-base-rest-native-headless` (no pull request yet) |
+| `HeadlessWindowExtensions.GetLastRenderedFrame` tests the render interface of the locator with `is HeadlessPlatformRenderInterface`. | `HeadlessPlatformRenderInterface::is_current` compares the service by identity with the instances `initialize` created on the thread. | Representation | `IPlatformRenderInterface` has no way back from the trait object to its type. | branch `core-base-rest-native-headless` (no pull request yet) |
+| `AvaloniaHeadlessPlatform.Compositor`, the render timer and `HeadlessWindowImpl._nextGlobalZOrder` are static fields; the last rendered frame of a window is guarded by a lock. | Thread-local values; a `RefCell` for the frame. | Representation | The compositor is an `Rc`, and the frames are written on the UI thread, where the server compositor runs (row 12 of `CRITICAL-PATH.md`). A headless application lives on the thread that initialised the platform. | branch `core-base-rest-native-headless` (no pull request yet) |
+
 ### Tests and test support
 
 | Upstream | Port | Kind | Why | Since |
@@ -110,6 +151,13 @@ Other pages hold the entries of their own area, and this page does not repeat th
 | `BitmapSaveTests.Save_With_Null_Options_Throws` and `Save_With_Invalid_Png_CompressionLevel_Throws`. | Not ported (header of `unit_tests/media/bitmap_save_tests.rs`). | Test | The options are a reference that cannot be null, and `CompressionLevel` is a closed enum that cannot hold 42. | #52 |
 | `TextFormatterTests.Wrap_With_Ltr_Text_Does_Not_Touch_Trailing_Whitespace_BiDi` formats a text that names the upstream project. | The text names the port. | Test | The naming rule; the test compares the text with itself. | #52 |
 | `CustomFontCollectionTests` load the font folder next to the test assembly (`AppContext.BaseDirectory`). | `file://` URIs of the crate's `test_assets` folder. | Test | The port's `Uri` has no implicit file URIs, and the test fonts are not copied next to the test binary. | #52 |
+| `GlyphDrawingOptions` is a record class: `Default` is one instance, and `GlyphDrawingOptionsTests` asserts the identity of instances (`Assert.Same`, `Assert.NotSame`). | `GlyphDrawingOptions` is a `Copy` value with the constant `DEFAULT`; `with_palette_index` and `with_pixel_size` take the place of the `init` accessors and of the `with` expression, with the same validation. The tests keep their names and every assertion except the ones on identity (`glyph_drawing_options.rs`). | Representation | Two optional integers with value equality: a value has no identity to assert, and nothing reads the options by reference. | branch `core-media-input` |
+
+### OpenGL (`src/FerroUI.OpenGL/`)
+
+| Upstream | Port | Kind | Why | Since |
+|---|---|---|---|---|
+| `EglContext` keeps its `EglExternalObjectsFeature` among its features after `Dispose` (the feature is not `IDisposable`), so `TryGetFeature(typeof(IGlContextExternalObjectsFeature))` of a disposed context still returns it. | The feature is registered with a disposable that does nothing, so `EglContext::dispose` removes it with the disposable features and a disposed context answers `None` (`egl_context.rs`). `EglExternalObjectsFeature` itself refers to its context weakly. | Behaviour | The feature holds the feature of the OpenGL extensions (`ExternalObjectsOpenGlExtensionFeature`), which holds the context: without a garbage collector the context and the feature would keep each other alive. Nothing can use the feature of a disposed context: its members need the context. | branch `core-opengl-egl-external-objects` |
 
 ## Corrected divergences
 
