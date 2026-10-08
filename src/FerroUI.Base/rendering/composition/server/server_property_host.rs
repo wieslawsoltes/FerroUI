@@ -211,6 +211,17 @@ impl<T: ?Sized> ServerPropertyValue for Option<Rc<T>> {
     }
 }
 
+/// Shared, thread-safe references compare by identity.
+impl<T: ?Sized> ServerPropertyValue for Option<std::sync::Arc<T>> {
+    fn differs(&self, other: &Self) -> bool {
+        match (self, other) {
+            (Some(a), Some(b)) => !std::ptr::addr_eq(std::sync::Arc::as_ptr(a), std::sync::Arc::as_ptr(b)),
+            (None, None) => false,
+            _ => true,
+        }
+    }
+}
+
 impl<T: ?Sized> ServerPropertyValue for Option<ServerResourceRef<T>> {
     fn differs(&self, other: &Self) -> bool {
         match (self, other) {

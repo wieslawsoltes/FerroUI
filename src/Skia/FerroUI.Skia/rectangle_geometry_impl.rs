@@ -1,23 +1,23 @@
-use crate::geometry_impl::{impl_geometry_impl, register, FillPath, GeometryImpl, GeometryImplBase};
+use crate::geometry_impl::{impl_geometry_impl, register, FillPath, GeometryImpl, GeometryImplBase, Shared};
 use crate::skia_sharp_extensions::to_sk_rect;
 use ferroui_base::Rect;
 use skia_safe::{Path, PathBuilder};
-use std::rc::Rc;
+use std::sync::Arc;
 
 /// A Skia implementation of a rectangle geometry.
 pub struct RectangleGeometryImpl {
     base: GeometryImplBase,
     bounds: Rect,
-    stroke_path: Path,
+    stroke_path: Shared<Path>,
 }
 
 impl RectangleGeometryImpl {
     /// Creates the geometry of `rect`.
-    pub fn new(rect: Rect) -> Rc<Self> {
+    pub fn new(rect: Rect) -> Arc<Self> {
         let mut path = PathBuilder::new();
         path.add_rect(to_sk_rect(rect), None, None);
 
-        register(Self { base: GeometryImplBase::new(), bounds: rect, stroke_path: path.detach() })
+        register(Self { base: GeometryImplBase::new(), bounds: rect, stroke_path: Shared::new(path.detach()) })
     }
 
     fn geometry_bounds(&self) -> Rect {
@@ -31,7 +31,7 @@ impl GeometryImpl for RectangleGeometryImpl {
     }
 
     fn stroke_path(&self) -> Option<Path> {
-        Some(self.stroke_path.clone())
+        Some(self.stroke_path.get())
     }
 
     fn fill(&self) -> FillPath {

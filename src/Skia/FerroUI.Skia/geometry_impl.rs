@@ -7,8 +7,7 @@ use ferroui_base::media::{GeometryCombineMode, IPen, IntersectionResult};
 use ferroui_base::platform::{IGeometryImpl, ITransformedGeometryImpl};
 use ferroui_base::{Matrix, Point, Rect};
 use skia_safe::{Path, PathBuilder, PathMeasure, Region, RoundOut};
-use std::cell::RefCell;
-use std::rc::{Rc, Weak};
+use std::sync::{Arc, Mutex, Weak};
 
 /// The fill path of a geometry in relation to its stroke path.
 ///
@@ -60,10 +59,43 @@ pub trait GeometryImpl: IGeometryImpl {
 /// handle to the geometry itself.
 #[derive(Default)]
 pub struct GeometryImplBase {
-    path_cache: RefCell<PathCache>,
-    cached_path_measure: RefCell<Option<PathMeasure>>,
-    weak_self: RefCell<Option<Weak<dyn GeometryImpl>>>,
+    path_cache: Mutex<PathCache>,
+    cached_path_measure: Mutex<Option<SendPathMeasure>>,
+    weak_self: Mutex<Option<Weak<dyn GeometryImpl>>>,
 }
+
+/// A value of a geometry that the UI thread and the render thread both read.
+///
+/// The values of Skia held this way (paths) can be sent to another thread
+/// but not shared by reference, so readers take a copy under a lock; a copy
+/// of a path shares its storage.
+#[derive(Default)]
+pub struct Shared<T>(Mutex<T>);
+
+impl<T: Clone> Shared<T> {
+    /// Wraps `value`.
+    pub fn new(value: T) -> Self {
+        Self(Mutex::new(value))
+    }
+
+    /// A copy of the value.
+    pub fn get(&self) -> T {
+        self.0.lock().unwrap().clone()
+    }
+
+    /// Replaces the value.
+    pub fn set(&self, value: T) {
+        *self.0.lock().unwrap() = value;
+    }
+}
+
+/// The path measure cached by a geometry.
+struct SendPathMeasure(PathMeasure);
+
+// SAFETY: a path measure owns the contours it iterates (they are counted
+// with atomic reference counts) and has no affinity to the thread that
+// created it; the cache only hands it out under its lock.
+unsafe impl Send for SendPathMeasure {}
 
 impl GeometryImplBase {
     /// Creates the state of a new geometry.
@@ -73,14 +105,15 @@ impl GeometryImplBase {
 
     /// Invalidates all caches. Call after the paths of the geometry changed.
     pub fn invalidate_caches(&self) {
-        *self.path_cache.borrow_mut() = PathCache::default();
-        *self.cached_path_measure.borrow_mut() = None;
+        *self.path_cache.lock().unwrap() = PathCache::default();
+        *self.cached_path_measure.lock().unwrap() = None;
     }
 
     /// The handle of the geometry this state belongs to.
-    fn to_rc(&self) -> Rc<dyn GeometryImpl> {
+    fn to_arc(&self) -> Arc<dyn GeometryImpl> {
         self.weak_self
-            .borrow()
+            .lock()
+            .unwrap()
             .as_ref()
             .and_then(Weak::upgrade)
             .expect("geometries of the backend are created behind a handle")
@@ -89,10 +122,10 @@ impl GeometryImplBase {
 
 /// Puts a new geometry behind a handle and lets it find that handle again
 /// (a transformed geometry keeps its source alive).
-pub(crate) fn register<T: GeometryImpl>(geometry: T) -> Rc<T> {
-    let geometry = Rc::new(geometry);
-    let weak: Weak<dyn GeometryImpl> = Rc::downgrade(&(geometry.clone() as Rc<dyn GeometryImpl>));
-    *geometry.base().weak_self.borrow_mut() = Some(weak);
+pub(crate) fn register<T: GeometryImpl>(geometry: T) -> Arc<T> {
+    let geometry = Arc::new(geometry);
+    let weak: Weak<dyn GeometryImpl> = Arc::downgrade(&(geometry.clone() as Arc<dyn GeometryImpl>));
+    *geometry.base().weak_self.lock().unwrap() = Some(weak);
     geometry
 }
 
@@ -134,9 +167,9 @@ pub fn try_get_geometry_impl(geometry: &dyn IGeometryImpl) -> Option<&dyn Geomet
 
 fn with_path_measure<R>(geometry: &dyn GeometryImpl, f: impl FnOnce(&mut PathMeasure) -> R) -> Option<R> {
     let stroke_path = geometry.stroke_path()?;
-    let mut measure = geometry.base().cached_path_measure.borrow_mut();
-    let measure = measure.get_or_insert_with(|| PathMeasure::new(&stroke_path, false, None));
-    Some(f(measure))
+    let mut measure = geometry.base().cached_path_measure.lock().unwrap();
+    let measure = measure.get_or_insert_with(|| SendPathMeasure(PathMeasure::new(&stroke_path, false, None)));
+    Some(f(&mut measure.0))
 }
 
 pub(crate) fn contour_length(geometry: &dyn GeometryImpl) -> f64 {
@@ -148,7 +181,7 @@ pub(crate) fn fill_contains(geometry: &dyn GeometryImpl, point: Point) -> bool {
 }
 
 pub(crate) fn stroke_contains(geometry: &dyn GeometryImpl, pen: Option<&dyn IPen>, point: Point) -> bool {
-    let mut cache = geometry.base().path_cache.borrow_mut();
+    let mut cache = geometry.base().path_cache.lock().unwrap();
     cache.update_if_needed(geometry.stroke_path().as_ref(), pen);
     path_contains_core(cache.expanded_path(), point)
 }
@@ -157,14 +190,14 @@ fn path_contains_core(path: Option<&Path>, point: Point) -> bool {
     path.is_some_and(|path| path.contains(to_sk_point(point)))
 }
 
-pub(crate) fn intersect(geometry: &dyn GeometryImpl, other: &dyn IGeometryImpl) -> Option<Rc<dyn IGeometryImpl>> {
+pub(crate) fn intersect(geometry: &dyn GeometryImpl, other: &dyn IGeometryImpl) -> Option<Arc<dyn IGeometryImpl>> {
     let other = try_get_geometry_impl(other)?;
     CombinedGeometryImpl::try_create(GeometryCombineMode::Intersect, geometry, other)
-        .map(|geometry| geometry as Rc<dyn IGeometryImpl>)
+        .map(|geometry| geometry as Arc<dyn IGeometryImpl>)
 }
 
 pub(crate) fn get_render_bounds(geometry: &dyn GeometryImpl, pen: Option<&dyn IPen>) -> Rect {
-    let mut cache = geometry.base().path_cache.borrow_mut();
+    let mut cache = geometry.base().path_cache.lock().unwrap();
     cache.update_if_needed(geometry.stroke_path().as_ref(), pen);
     let mut bounds = cache.render_bounds();
 
@@ -175,7 +208,7 @@ pub(crate) fn get_render_bounds(geometry: &dyn GeometryImpl, pen: Option<&dyn IP
     bounds
 }
 
-pub(crate) fn get_widened_geometry(geometry: &dyn GeometryImpl, pen: &dyn IPen) -> Rc<dyn IGeometryImpl> {
+pub(crate) fn get_widened_geometry(geometry: &dyn GeometryImpl, pen: &dyn IPen) -> Arc<dyn IGeometryImpl> {
     if let Some(stroke_path) = geometry.stroke_path() {
         if let Some(path) = sk_path_helper::create_stroked_path(&stroke_path, pen) {
             // The path returned by Skia here does not have closed figures.
@@ -188,8 +221,8 @@ pub(crate) fn get_widened_geometry(geometry: &dyn GeometryImpl, pen: &dyn IPen) 
     StreamGeometryImpl::from_paths(Path::new(), FillPath::None, None)
 }
 
-pub(crate) fn with_transform(geometry: &dyn GeometryImpl, transform: Matrix) -> Rc<dyn ITransformedGeometryImpl> {
-    TransformedGeometryImpl::new(geometry.base().to_rc(), transform)
+pub(crate) fn with_transform(geometry: &dyn GeometryImpl, transform: Matrix) -> Arc<dyn ITransformedGeometryImpl> {
+    TransformedGeometryImpl::new(geometry.base().to_arc(), transform)
 }
 
 pub(crate) fn try_get_point_at_distance(geometry: &dyn GeometryImpl, distance: f64) -> Option<Point> {
@@ -209,7 +242,7 @@ pub(crate) fn try_get_segment(
     start_distance: f64,
     stop_distance: f64,
     start_on_begin_figure: bool,
-) -> Option<Rc<dyn IGeometryImpl>> {
+) -> Option<Arc<dyn IGeometryImpl>> {
     let mut segment = PathBuilder::new();
     let res = with_path_measure(geometry, |measure| {
         measure.get_segment(start_distance as f32, stop_distance as f32, &mut segment, start_on_begin_figure)
@@ -349,7 +382,7 @@ macro_rules! impl_geometry_impl {
             fn get_widened_geometry(
                 &self,
                 pen: &dyn ferroui_base::media::IPen,
-            ) -> std::rc::Rc<dyn ferroui_base::platform::IGeometryImpl> {
+            ) -> std::sync::Arc<dyn ferroui_base::platform::IGeometryImpl> {
                 $crate::geometry_impl::get_widened_geometry(self, pen)
             }
 
@@ -367,7 +400,7 @@ macro_rules! impl_geometry_impl {
             fn intersect(
                 &self,
                 geometry: &dyn ferroui_base::platform::IGeometryImpl,
-            ) -> Option<std::rc::Rc<dyn ferroui_base::platform::IGeometryImpl>> {
+            ) -> Option<std::sync::Arc<dyn ferroui_base::platform::IGeometryImpl>> {
                 $crate::geometry_impl::intersect(self, geometry)
             }
 
@@ -382,7 +415,7 @@ macro_rules! impl_geometry_impl {
             fn with_transform(
                 &self,
                 transform: ferroui_base::Matrix,
-            ) -> std::rc::Rc<dyn ferroui_base::platform::ITransformedGeometryImpl> {
+            ) -> std::sync::Arc<dyn ferroui_base::platform::ITransformedGeometryImpl> {
                 $crate::geometry_impl::with_transform(self, transform)
             }
 
@@ -402,7 +435,7 @@ macro_rules! impl_geometry_impl {
                 start_distance: f64,
                 stop_distance: f64,
                 start_on_begin_figure: bool,
-            ) -> Option<std::rc::Rc<dyn ferroui_base::platform::IGeometryImpl>> {
+            ) -> Option<std::sync::Arc<dyn ferroui_base::platform::IGeometryImpl>> {
                 $crate::geometry_impl::try_get_segment(self, start_distance, stop_distance, start_on_begin_figure)
             }
 

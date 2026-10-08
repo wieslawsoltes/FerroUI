@@ -1,44 +1,43 @@
-use crate::geometry_impl::{impl_geometry_impl, register, FillPath, GeometryImpl, GeometryImplBase};
+use crate::geometry_impl::{impl_geometry_impl, register, FillPath, GeometryImpl, GeometryImplBase, Shared};
 use crate::skia_sharp_extensions::{to_rect, to_sk_point};
 use ferroui_base::media::{FillRule, SweepDirection};
 use ferroui_base::platform::{IGeometryContext, IStreamGeometryContextImpl, IStreamGeometryImpl};
 use ferroui_base::{Point, Rect, Size};
 use skia_safe::path_builder::ArcSize;
 use skia_safe::{Path, PathBuilder, PathDirection, PathFillType};
-use std::cell::{Cell, RefCell};
-use std::rc::Rc;
+use std::sync::Arc;
 
 /// The paths of a stream geometry, shared with the contexts that define it.
 struct StreamGeometryState {
     base: GeometryImplBase,
-    bounds: Cell<Rect>,
-    stroke_path: RefCell<Path>,
-    fill: RefCell<FillPath>,
+    bounds: Shared<Rect>,
+    stroke_path: Shared<Path>,
+    fill: Shared<FillPath>,
 }
 
 /// A Skia implementation of a stream geometry.
 pub struct StreamGeometryImpl {
-    state: Rc<StreamGeometryState>,
+    state: Arc<StreamGeometryState>,
 }
 
 impl StreamGeometryImpl {
     /// Creates a geometry from a stroke path and a fill. `bounds` defaults to
     /// the tight bounds of the stroke path.
-    pub fn from_paths(stroke: Path, fill: FillPath, bounds: Option<Rect>) -> Rc<Self> {
+    pub fn from_paths(stroke: Path, fill: FillPath, bounds: Option<Rect>) -> Arc<Self> {
         let bounds = bounds.unwrap_or_else(|| to_rect(stroke.compute_tight_bounds()));
 
         register(Self {
-            state: Rc::new(StreamGeometryState {
+            state: Arc::new(StreamGeometryState {
                 base: GeometryImplBase::new(),
-                bounds: Cell::new(bounds),
-                stroke_path: RefCell::new(stroke),
-                fill: RefCell::new(fill),
+                bounds: Shared::new(bounds),
+                stroke_path: Shared::new(stroke),
+                fill: Shared::new(fill),
             }),
         })
     }
 
     /// Creates an empty geometry.
-    pub fn new() -> Rc<Self> {
+    pub fn new() -> Arc<Self> {
         Self::from_paths(Self::create_empty_path(), FillPath::SameAsStroke, Some(Rect::default()))
     }
 
@@ -57,18 +56,18 @@ impl GeometryImpl for StreamGeometryImpl {
     }
 
     fn stroke_path(&self) -> Option<Path> {
-        Some(self.state.stroke_path.borrow().clone())
+        Some(self.state.stroke_path.get())
     }
 
     fn fill(&self) -> FillPath {
-        self.state.fill.borrow().clone()
+        self.state.fill.get()
     }
 }
 
 impl IStreamGeometryImpl for StreamGeometryImpl {
-    fn clone_geometry(&self) -> Rc<dyn IStreamGeometryImpl> {
-        let stroke = self.state.stroke_path.borrow().clone();
-        let fill = self.state.fill.borrow().clone();
+    fn clone_geometry(&self) -> Arc<dyn IStreamGeometryImpl> {
+        let stroke = self.state.stroke_path.get();
+        let fill = self.state.fill.get();
 
         StreamGeometryImpl::from_paths(stroke, fill, Some(self.geometry_bounds()))
     }
@@ -100,7 +99,7 @@ enum FillBuilder {
 /// from the geometry's current paths and writes the result back when it is
 /// disposed (or dropped).
 struct StreamContext {
-    geometry_impl: Rc<StreamGeometryState>,
+    geometry_impl: Arc<StreamGeometryState>,
     stroke: PathBuilder,
     fill: FillBuilder,
     is_filled: bool,
@@ -110,9 +109,9 @@ struct StreamContext {
 }
 
 impl StreamContext {
-    fn new(geometry_impl: Rc<StreamGeometryState>) -> Self {
-        let stroke = PathBuilder::new_path(&geometry_impl.stroke_path.borrow());
-        let fill = match &*geometry_impl.fill.borrow() {
+    fn new(geometry_impl: Arc<StreamGeometryState>) -> Self {
+        let stroke = PathBuilder::new_path(&geometry_impl.stroke_path.get());
+        let fill = match &geometry_impl.fill.get() {
             FillPath::None => FillBuilder::None,
             FillPath::SameAsStroke => FillBuilder::SameAsStroke,
             FillPath::Separate(path) => FillBuilder::Separate(PathBuilder::new_path(path)),
@@ -181,8 +180,8 @@ impl StreamContext {
         };
 
         self.geometry_impl.bounds.set(to_rect(stroke.compute_tight_bounds()));
-        *self.geometry_impl.stroke_path.borrow_mut() = stroke;
-        *self.geometry_impl.fill.borrow_mut() = fill;
+        self.geometry_impl.stroke_path.set(stroke);
+        self.geometry_impl.fill.set(fill);
         self.geometry_impl.base.invalidate_caches();
     }
 }

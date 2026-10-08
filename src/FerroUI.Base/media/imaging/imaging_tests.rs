@@ -20,6 +20,7 @@ use std::any::{Any, TypeId};
 use std::cell::{Cell, RefCell};
 use std::io::{Read, Write};
 use std::rc::Rc;
+use std::sync::Arc;
 
 /// A bitmap held in memory; the backend of every bitmap kind in these tests.
 struct MockBitmap {
@@ -237,7 +238,7 @@ impl MockBackend {
 }
 
 impl IPlatformRenderInterface for MockBackend {
-    fn build_glyph_run_geometry(&self, _glyph_run: &crate::media::GlyphRun) -> Rc<dyn IGeometryImpl> {
+    fn build_glyph_run_geometry(&self, _glyph_run: &crate::media::GlyphRun) -> Arc<dyn IGeometryImpl> {
         unimplemented!()
     }
 
@@ -251,27 +252,27 @@ impl IPlatformRenderInterface for MockBackend {
         unimplemented!()
     }
 
-    fn create_ellipse_geometry(&self, _: Rect) -> Rc<dyn IGeometryImpl> {
+    fn create_ellipse_geometry(&self, _: Rect) -> Arc<dyn IGeometryImpl> {
         unimplemented!()
     }
-    fn create_line_geometry(&self, _: Point, _: Point) -> Rc<dyn IGeometryImpl> {
+    fn create_line_geometry(&self, _: Point, _: Point) -> Arc<dyn IGeometryImpl> {
         unimplemented!()
     }
-    fn create_rectangle_geometry(&self, _: Rect) -> Rc<dyn IGeometryImpl> {
+    fn create_rectangle_geometry(&self, _: Rect) -> Arc<dyn IGeometryImpl> {
         unimplemented!()
     }
-    fn create_stream_geometry(&self) -> Rc<dyn IStreamGeometryImpl> {
+    fn create_stream_geometry(&self) -> Arc<dyn IStreamGeometryImpl> {
         unimplemented!()
     }
-    fn create_geometry_group(&self, _: FillRule, _: &[Rc<dyn IGeometryImpl>]) -> Rc<dyn IGeometryImpl> {
+    fn create_geometry_group(&self, _: FillRule, _: &[Arc<dyn IGeometryImpl>]) -> Arc<dyn IGeometryImpl> {
         unimplemented!()
     }
     fn create_combined_geometry(
         &self,
         _: GeometryCombineMode,
-        _: Rc<dyn IGeometryImpl>,
-        _: Rc<dyn IGeometryImpl>,
-    ) -> Rc<dyn IGeometryImpl> {
+        _: Arc<dyn IGeometryImpl>,
+        _: Arc<dyn IGeometryImpl>,
+    ) -> Arc<dyn IGeometryImpl> {
         unimplemented!()
     }
     fn create_render_target_bitmap(&self, size: PixelSize, dpi: Vector) -> Rc<dyn IRenderTargetBitmapImpl> {

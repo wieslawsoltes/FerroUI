@@ -1,24 +1,24 @@
 use crate::geometry_impl::{
-    impl_geometry_impl, register, try_get_geometry_impl, FillPath, GeometryImpl, GeometryImplBase,
+    impl_geometry_impl, register, try_get_geometry_impl, FillPath, GeometryImpl, GeometryImplBase, Shared,
 };
 use crate::skia_sharp_extensions::to_rect;
 use ferroui_base::media::GeometryCombineMode;
 use ferroui_base::platform::IGeometryImpl;
 use ferroui_base::Rect;
 use skia_safe::{Path, PathOp};
-use std::rc::Rc;
+use std::sync::Arc;
 
 /// A Skia implementation of a combined geometry.
 pub struct CombinedGeometryImpl {
     base: GeometryImplBase,
     bounds: Rect,
-    stroke_path: Option<Path>,
-    fill: FillPath,
+    stroke_path: Shared<Option<Path>>,
+    fill: Shared<FillPath>,
 }
 
 impl CombinedGeometryImpl {
     /// Creates a geometry from an already combined stroke and fill.
-    pub fn new(stroke: Option<Path>, fill: FillPath) -> Rc<Self> {
+    pub fn new(stroke: Option<Path>, fill: FillPath) -> Arc<Self> {
         let mut bounds = stroke.as_ref().map(Path::compute_tight_bounds).unwrap_or_default();
 
         if let FillPath::Separate(fill) = &fill {
@@ -31,7 +31,7 @@ impl CombinedGeometryImpl {
             );
         }
 
-        register(Self { base: GeometryImplBase::new(), bounds: to_rect(bounds), stroke_path: stroke, fill })
+        register(Self { base: GeometryImplBase::new(), bounds: to_rect(bounds), stroke_path: Shared::new(stroke), fill: Shared::new(fill) })
     }
 
     /// Combines two geometries; the result is empty when they cannot be
@@ -40,7 +40,7 @@ impl CombinedGeometryImpl {
         combine_mode: GeometryCombineMode,
         g1: &dyn IGeometryImpl,
         g2: &dyn IGeometryImpl,
-    ) -> Rc<CombinedGeometryImpl> {
+    ) -> Arc<CombinedGeometryImpl> {
         if let (Some(i1), Some(i2)) = (try_get_geometry_impl(g1), try_get_geometry_impl(g2)) {
             if let Some(result) = Self::try_create(combine_mode, i1, i2) {
                 return result;
@@ -56,7 +56,7 @@ impl CombinedGeometryImpl {
         combine_mode: GeometryCombineMode,
         g1: &dyn GeometryImpl,
         g2: &dyn GeometryImpl,
-    ) -> Option<Rc<CombinedGeometryImpl>> {
+    ) -> Option<Arc<CombinedGeometryImpl>> {
         let op = match combine_mode {
             GeometryCombineMode::Intersect => PathOp::Intersect,
             GeometryCombineMode::Xor => PathOp::XOR,
@@ -100,11 +100,11 @@ impl GeometryImpl for CombinedGeometryImpl {
     }
 
     fn stroke_path(&self) -> Option<Path> {
-        self.stroke_path.clone()
+        self.stroke_path.get()
     }
 
     fn fill(&self) -> FillPath {
-        self.fill.clone()
+        self.fill.get()
     }
 }
 

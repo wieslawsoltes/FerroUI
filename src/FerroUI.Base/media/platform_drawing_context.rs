@@ -10,6 +10,7 @@ use crate::rendering::scene_graph::ICustomDrawOperation;
 use crate::{Matrix, Point, Rect, Ref, RoundedRect};
 use std::cell::RefCell;
 use std::rc::Rc;
+use std::sync::Arc;
 
 /// A platform drawing context implementation, borrowed or owned.
 pub(crate) enum ImplRef<'a> {
@@ -91,7 +92,7 @@ impl IDrawingContextCore for PlatformDrawingContext<'_> {
         &mut self,
         brush: Option<&Rc<dyn IBrush>>,
         pen: Option<&Rc<dyn IPen>>,
-        geometry: &Rc<dyn IGeometryImpl>,
+        geometry: &Arc<dyn IGeometryImpl>,
     ) {
         self.platform_impl.get().draw_geometry(brush.map(|b| &**b), pen.map(|p| &**p), &**geometry);
     }

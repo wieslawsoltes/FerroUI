@@ -117,6 +117,7 @@ pub(crate) mod tests {
     use std::any::{Any, TypeId};
     use std::cell::RefCell;
     use std::rc::Rc;
+    use std::sync::Arc;
 
     /// A drawing context that records the calls it receives.
     pub(crate) struct MockDrawingContext {
@@ -275,37 +276,37 @@ pub(crate) mod tests {
 
     /// A stream geometry that records the figure commands it receives.
     pub(crate) struct MockStreamGeometry {
-        pub log: Rc<RefCell<Vec<String>>>,
+        pub log: Arc<std::sync::Mutex<Vec<String>>>,
     }
 
     struct MockStreamGeometryContext {
-        log: Rc<RefCell<Vec<String>>>,
+        log: Arc<std::sync::Mutex<Vec<String>>>,
     }
 
     impl crate::platform::IGeometryContext for MockStreamGeometryContext {
         fn arc_to(&mut self, _: Point, _: crate::Size, _: f64, _: bool, _: crate::media::SweepDirection, _: bool) {
-            self.log.borrow_mut().push("arc".to_string());
+            self.log.lock().unwrap().push("arc".to_string());
         }
         fn begin_figure(&mut self, start_point: Point, is_filled: bool) {
-            self.log.borrow_mut().push(format!("begin {start_point} {is_filled}"));
+            self.log.lock().unwrap().push(format!("begin {start_point} {is_filled}"));
         }
         fn cubic_bezier_to(&mut self, _: Point, _: Point, _: Point, _: bool) {
-            self.log.borrow_mut().push("cubic".to_string());
+            self.log.lock().unwrap().push("cubic".to_string());
         }
         fn quadratic_bezier_to(&mut self, _: Point, _: Point, _: bool) {
-            self.log.borrow_mut().push("quad".to_string());
+            self.log.lock().unwrap().push("quad".to_string());
         }
         fn line_to(&mut self, point: Point, is_stroked: bool) {
-            self.log.borrow_mut().push(format!("line {point} {is_stroked}"));
+            self.log.lock().unwrap().push(format!("line {point} {is_stroked}"));
         }
         fn end_figure(&mut self, is_closed: bool) {
-            self.log.borrow_mut().push(format!("end {is_closed}"));
+            self.log.lock().unwrap().push(format!("end {is_closed}"));
         }
         fn set_fill_rule(&mut self, _: crate::media::FillRule) {
-            self.log.borrow_mut().push("fill".to_string());
+            self.log.lock().unwrap().push("fill".to_string());
         }
         fn dispose(&mut self) {
-            self.log.borrow_mut().push("dispose".to_string());
+            self.log.lock().unwrap().push("dispose".to_string());
         }
     }
 
@@ -324,7 +325,7 @@ pub(crate) mod tests {
         fn get_render_bounds(&self, _pen: Option<&dyn IPen>) -> Rect {
             Rect::default()
         }
-        fn get_widened_geometry(&self, _pen: &dyn IPen) -> Rc<dyn IGeometryImpl> {
+        fn get_widened_geometry(&self, _pen: &dyn IPen) -> Arc<dyn IGeometryImpl> {
             unimplemented!()
         }
         fn fill_contains(&self, _point: Point) -> bool {
@@ -333,7 +334,7 @@ pub(crate) mod tests {
         fn get_fill_intersection_result(&self, _geometry: &dyn IGeometryImpl) -> crate::media::IntersectionResult {
             crate::media::IntersectionResult::Empty
         }
-        fn intersect(&self, _geometry: &dyn IGeometryImpl) -> Option<Rc<dyn IGeometryImpl>> {
+        fn intersect(&self, _geometry: &dyn IGeometryImpl) -> Option<Arc<dyn IGeometryImpl>> {
             None
         }
         fn stroke_contains(&self, _pen: Option<&dyn IPen>, _point: Point) -> bool {
@@ -345,10 +346,10 @@ pub(crate) mod tests {
         fn try_get_point_and_tangent_at_distance(&self, _distance: f64) -> Option<(Point, Point)> {
             None
         }
-        fn try_get_segment(&self, _start: f64, _stop: f64, _begin: bool) -> Option<Rc<dyn IGeometryImpl>> {
+        fn try_get_segment(&self, _start: f64, _stop: f64, _begin: bool) -> Option<Arc<dyn IGeometryImpl>> {
             None
         }
-        fn with_transform(&self, _: Matrix) -> Rc<dyn crate::platform::ITransformedGeometryImpl> {
+        fn with_transform(&self, _: Matrix) -> Arc<dyn crate::platform::ITransformedGeometryImpl> {
             unimplemented!()
         }
         fn as_stream_geometry(&self) -> Option<&dyn crate::platform::IStreamGeometryImpl> {
@@ -357,8 +358,8 @@ pub(crate) mod tests {
     }
 
     impl crate::platform::IStreamGeometryImpl for MockStreamGeometry {
-        fn clone_geometry(&self) -> Rc<dyn crate::platform::IStreamGeometryImpl> {
-            Rc::new(MockStreamGeometry { log: Rc::new(RefCell::new(self.log.borrow().clone())) })
+        fn clone_geometry(&self) -> Arc<dyn crate::platform::IStreamGeometryImpl> {
+            Arc::new(MockStreamGeometry { log: Arc::new(std::sync::Mutex::new(self.log.lock().unwrap().clone())) })
         }
         fn open(&self) -> Box<dyn crate::platform::IStreamGeometryContextImpl> {
             Box::new(MockStreamGeometryContext { log: self.log.clone() })
@@ -370,11 +371,11 @@ pub(crate) mod tests {
     #[derive(Default)]
     pub(crate) struct MockRenderInterface {
         pub regions: RefCell<Vec<Rc<MockRegion>>>,
-        pub streams: RefCell<Vec<Rc<RefCell<Vec<String>>>>>,
+        pub streams: RefCell<Vec<Arc<std::sync::Mutex<Vec<String>>>>>,
     }
 
     impl crate::platform::IPlatformRenderInterface for MockRenderInterface {
-        fn build_glyph_run_geometry(&self, _: &crate::media::GlyphRun) -> Rc<dyn IGeometryImpl> {
+        fn build_glyph_run_geometry(&self, _: &crate::media::GlyphRun) -> Arc<dyn IGeometryImpl> {
             unimplemented!()
         }
         fn create_glyph_run(
@@ -386,29 +387,29 @@ pub(crate) mod tests {
         ) -> Rc<dyn crate::platform::IGlyphRunImpl> {
             unimplemented!()
         }
-        fn create_ellipse_geometry(&self, _: Rect) -> Rc<dyn IGeometryImpl> {
+        fn create_ellipse_geometry(&self, _: Rect) -> Arc<dyn IGeometryImpl> {
             unimplemented!()
         }
-        fn create_line_geometry(&self, _: Point, _: Point) -> Rc<dyn IGeometryImpl> {
+        fn create_line_geometry(&self, _: Point, _: Point) -> Arc<dyn IGeometryImpl> {
             unimplemented!()
         }
-        fn create_rectangle_geometry(&self, _: Rect) -> Rc<dyn IGeometryImpl> {
+        fn create_rectangle_geometry(&self, _: Rect) -> Arc<dyn IGeometryImpl> {
             unimplemented!()
         }
-        fn create_stream_geometry(&self) -> Rc<dyn crate::platform::IStreamGeometryImpl> {
-            let log = Rc::new(RefCell::new(Vec::new()));
+        fn create_stream_geometry(&self) -> Arc<dyn crate::platform::IStreamGeometryImpl> {
+            let log = Arc::new(std::sync::Mutex::new(Vec::new()));
             self.streams.borrow_mut().push(log.clone());
-            Rc::new(MockStreamGeometry { log })
+            Arc::new(MockStreamGeometry { log })
         }
-        fn create_geometry_group(&self, _: crate::media::FillRule, _: &[Rc<dyn IGeometryImpl>]) -> Rc<dyn IGeometryImpl> {
+        fn create_geometry_group(&self, _: crate::media::FillRule, _: &[Arc<dyn IGeometryImpl>]) -> Arc<dyn IGeometryImpl> {
             unimplemented!()
         }
         fn create_combined_geometry(
             &self,
             _: crate::media::GeometryCombineMode,
-            _: Rc<dyn IGeometryImpl>,
-            _: Rc<dyn IGeometryImpl>,
-        ) -> Rc<dyn IGeometryImpl> {
+            _: Arc<dyn IGeometryImpl>,
+            _: Arc<dyn IGeometryImpl>,
+        ) -> Arc<dyn IGeometryImpl> {
             unimplemented!()
         }
         fn create_render_target_bitmap(

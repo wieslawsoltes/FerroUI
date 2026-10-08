@@ -5,7 +5,7 @@ use crate::{
     FerroPropertyChangedEventArgs, Ref, StyledProperty,
 };
 use std::cell::RefCell;
-use std::rc::Rc;
+use std::sync::Arc;
 
 /// Represents a composite geometry, composed of other [`Geometry`] objects.
 #[repr(C)]
@@ -45,7 +45,7 @@ impl GeometryImpl for GeometryGroup {
         result.upcast()
     }
 
-    fn create_defining_geometry(this: &Self) -> Option<Rc<dyn IGeometryImpl>> {
+    fn create_defining_geometry(this: &Self) -> Option<Arc<dyn IGeometryImpl>> {
         let children = this.children_or_panic();
         if children.is_empty() {
             return None;
@@ -53,7 +53,7 @@ impl GeometryImpl for GeometryGroup {
 
         let factory = platform::render_interface();
         // Children without a platform implementation contribute nothing.
-        let children: Vec<Rc<dyn IGeometryImpl>> = children.iter().filter_map(|child| child.platform_impl()).collect();
+        let children: Vec<Arc<dyn IGeometryImpl>> = children.iter().filter_map(|child| child.platform_impl()).collect();
 
         Some(factory.create_geometry_group(this.fill_rule(), &children))
     }
@@ -130,6 +130,7 @@ impl GeometryGroup {
 
 #[cfg(test)]
 mod tests {
+    use std::rc::Rc;
     use super::*;
     use crate::media::StreamGeometry;
     use std::cell::Cell;

@@ -5,6 +5,7 @@ use crate::platform::{self, IDrawingContextImpl, IGeometryImpl, IPlatformRenderI
 use crate::{Matrix, Point, Rect, Size};
 use std::cell::{Cell, RefCell};
 use std::rc::Rc;
+use std::sync::Arc;
 
 const HEADER_PADDING: f64 = 2.0;
 
@@ -148,7 +149,7 @@ impl FrameTimeGraph {
         context.set_transform(old_transform);
     }
 
-    fn build_graph_geometry(&self, max_y: f64) -> Rc<dyn IStreamGeometryImpl> {
+    fn build_graph_geometry(&self, max_y: f64) -> Arc<dyn IStreamGeometryImpl> {
         debug_assert!(self.frame_count.get() > 0);
 
         let graph_geometry = self.render_interface.create_stream_geometry();
@@ -370,7 +371,7 @@ mod tests {
                 "end false".to_string(),
                 "dispose".to_string(),
             ],
-            *streams[0].borrow()
+            *streams[0].lock().unwrap()
         );
     }
 
@@ -383,8 +384,8 @@ mod tests {
         graph.render(&mut ctx);
         let streams = platform.streams.borrow();
         // x = round(1 * 45) = 45; y scale is 46 / 20.
-        assert_eq!(format!("begin {} false", Point::new(0.0, 46.0 - 5.0 * 2.3)), streams[0].borrow()[0]);
-        assert_eq!(format!("line {} true", Point::new(45.0, 46.0 - 10.0 * 2.3)), streams[0].borrow()[1]);
+        assert_eq!(format!("begin {} false", Point::new(0.0, 46.0 - 5.0 * 2.3)), streams[0].lock().unwrap()[0]);
+        assert_eq!(format!("line {} true", Point::new(45.0, 46.0 - 10.0 * 2.3)), streams[0].lock().unwrap()[1]);
         let texts = drawn_texts(&ctx);
         // The value is right-aligned in 5 characters.
         assert_eq!("Min:  5.00ms", texts[1].0);
@@ -408,7 +409,7 @@ mod tests {
         graph.render(&mut MockDrawingContext::default());
         let streams = platform.streams.borrow();
         let xs: Vec<String> =
-            streams[0].borrow().iter().filter(|l| l.starts_with("line")).map(|l| l.to_string()).collect();
+            streams[0].lock().unwrap().iter().filter(|l| l.starts_with("line")).map(|l| l.to_string()).collect();
         assert_eq!(
             [0.0, 1.0, 2.0, 2.0].iter().map(|x| format!("line {} true", Point::new(*x, 46.0))).collect::<Vec<_>>(),
             xs

@@ -148,7 +148,7 @@ fn rectangle_radii_are_clamped_to_half_the_size() {
             &mut self,
             _: Option<&Rc<dyn IBrush>>,
             _: Option<&Rc<dyn IPen>>,
-            _: &Rc<dyn crate::platform::IGeometryImpl>,
+            _: &std::sync::Arc<dyn crate::platform::IGeometryImpl>,
         ) {
         }
         fn draw_rectangle_core(

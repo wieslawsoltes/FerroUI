@@ -1,10 +1,10 @@
 use crate::platform::{IGeometryImpl, IStreamGeometryContextImpl};
-use std::rc::Rc;
+use std::sync::Arc;
 
 /// Defines the platform-specific interface for a stream geometry.
 pub trait IStreamGeometryImpl: IGeometryImpl {
     /// Clones the geometry.
-    fn clone_geometry(&self) -> Rc<dyn IStreamGeometryImpl>;
+    fn clone_geometry(&self) -> Arc<dyn IStreamGeometryImpl>;
 
     /// Opens the geometry to start defining it.
     ///

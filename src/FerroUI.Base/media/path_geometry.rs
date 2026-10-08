@@ -13,6 +13,7 @@ use crate::{
 use std::cell::RefCell;
 use std::fmt;
 use std::rc::Rc;
+use std::sync::Arc;
 
 type FigureSubscriptions = Rc<RefCell<Vec<(Ref<PathFigure>, Rc<dyn IDisposable>)>>>;
 
@@ -38,7 +39,7 @@ impl FerroObjectImpl for PathGeometry {
 }
 
 impl GeometryImpl for PathGeometry {
-    fn create_defining_geometry(this: &Self) -> Option<Rc<dyn IGeometryImpl>> {
+    fn create_defining_geometry(this: &Self) -> Option<Arc<dyn IGeometryImpl>> {
         let figures = this.figures()?;
 
         let factory = platform::render_interface();

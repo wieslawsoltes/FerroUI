@@ -13,6 +13,7 @@ use crate::rendering::scene_graph::ICustomDrawOperation;
 use crate::{Matrix, Point, Rect, Ref, RoundedRect};
 use std::collections::HashSet;
 use std::rc::Rc;
+use std::sync::Arc;
 
 #[derive(Clone, Copy, Default)]
 struct PushEntry {
@@ -222,7 +223,7 @@ impl IDrawingContextCore for RenderDataDrawingContext {
         &mut self,
         brush: Option<&Rc<dyn IBrush>>,
         pen: Option<&Rc<dyn IPen>>,
-        geometry: &Rc<dyn IGeometryImpl>,
+        geometry: &Arc<dyn IGeometryImpl>,
     ) {
         if brush.is_none() && pen.is_none() {
             return;

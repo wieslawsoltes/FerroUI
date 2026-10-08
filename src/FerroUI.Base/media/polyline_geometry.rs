@@ -7,6 +7,7 @@ use crate::{
 };
 use std::cell::RefCell;
 use std::rc::Rc;
+use std::sync::Arc;
 
 /// Represents the geometry of a polyline or polygon.
 #[repr(C)]
@@ -29,7 +30,7 @@ impl GeometryImpl for PolylineGeometry {
         result.upcast()
     }
 
-    fn create_defining_geometry(this: &Self) -> Option<Rc<dyn IGeometryImpl>> {
+    fn create_defining_geometry(this: &Self) -> Option<Arc<dyn IGeometryImpl>> {
         let factory = platform::render_interface();
         let geometry = factory.create_stream_geometry();
 

@@ -287,7 +287,7 @@ impl ServerCompositionVisual {
         self.props.base().opacity()
     }
 
-    pub fn clip(&self) -> Option<Rc<dyn IGeometryImpl>> {
+    pub fn clip(&self) -> Option<Arc<dyn IGeometryImpl>> {
         self.props.base().clip()
     }
 

@@ -5,6 +5,7 @@ use crate::rendering::composition::generated::{ServerCompositionSimpleGeometryHo
 use crate::rendering::composition::transport::BatchStreamReader;
 use std::any::{Any, TypeId};
 use std::rc::Rc;
+use std::sync::Arc;
 use std::time::Duration;
 
 /// The server-side counterpart of a geometry object: the platform geometry
@@ -29,11 +30,11 @@ impl ServerCompositionSimpleGeometry {
         self.base.is_disposed()
     }
 
-    pub fn geometry_impl(&self) -> Option<Rc<dyn IGeometryImpl>> {
+    pub fn geometry_impl(&self) -> Option<Arc<dyn IGeometryImpl>> {
         self.props.geometry_impl()
     }
 
-    pub fn set_geometry_impl(&self, value: Option<Rc<dyn IGeometryImpl>>) {
+    pub fn set_geometry_impl(&self, value: Option<Arc<dyn IGeometryImpl>>) {
         self.props.set_geometry_impl(self, value)
     }
 }
@@ -77,7 +78,7 @@ impl IServerObject for ServerCompositionSimpleGeometry {
 }
 
 impl IRenderDataGeometry for ServerCompositionSimpleGeometry {
-    fn geometry_impl(&self) -> Option<Rc<dyn IGeometryImpl>> {
+    fn geometry_impl(&self) -> Option<Arc<dyn IGeometryImpl>> {
         self.props.geometry_impl()
     }
 }

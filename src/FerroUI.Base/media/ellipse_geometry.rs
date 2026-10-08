@@ -4,7 +4,7 @@ use crate::{
     ferro_class, ferro_property, instantiate, FerroObjectImpl, FerroProperty, Point, Rect, Ref,
     StyledProperty,
 };
-use std::rc::Rc;
+use std::sync::Arc;
 
 /// Represents the geometry of an ellipse or circle.
 #[repr(C)]
@@ -43,7 +43,7 @@ impl GeometryImpl for EllipseGeometry {
         result.upcast()
     }
 
-    fn create_defining_geometry(this: &Self) -> Option<Rc<dyn IGeometryImpl>> {
+    fn create_defining_geometry(this: &Self) -> Option<Arc<dyn IGeometryImpl>> {
         let factory = platform::render_interface();
 
         let rect = this.rect();

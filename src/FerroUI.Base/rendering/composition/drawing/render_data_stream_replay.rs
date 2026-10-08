@@ -4,6 +4,7 @@ use crate::platform::{IBitmapImpl, IDrawingContextImpl, IGeometryImpl, IGlyphRun
 use crate::rendering::scene_graph::ICustomDrawOperation;
 use crate::{Matrix, Point, Rect, RoundedRect};
 use std::rc::Rc;
+use std::sync::Arc;
 
 #[derive(Clone, Copy, PartialEq, Eq)]
 enum ReplayScopeKind {
@@ -79,7 +80,7 @@ impl IRenderDataVisitor for ReplayVisitor<'_> {
         server_brush: Option<&dyn IBrush>,
         server_pen: Option<&dyn IPen>,
         _client_pen: Option<&dyn IPen>,
-        geometry: Option<&Rc<dyn IGeometryImpl>>,
+        geometry: Option<&Arc<dyn IGeometryImpl>>,
     ) {
         if let Some(geometry) = geometry {
             self.context.draw_geometry(server_brush, server_pen, &**geometry);
@@ -111,7 +112,7 @@ impl IRenderDataVisitor for ReplayVisitor<'_> {
         ReplayScope::new(ReplayScopeKind::Clip, true)
     }
 
-    fn on_push_geometry_clip(&mut self, geometry: Option<&Rc<dyn IGeometryImpl>>) -> ReplayScope {
+    fn on_push_geometry_clip(&mut self, geometry: Option<&Arc<dyn IGeometryImpl>>) -> ReplayScope {
         if let Some(geometry) = geometry {
             self.context.push_geometry_clip(&**geometry);
         }

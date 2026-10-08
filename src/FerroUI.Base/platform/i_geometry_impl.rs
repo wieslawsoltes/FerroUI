@@ -1,10 +1,10 @@
 use crate::media::{IPen, IntersectionResult};
 use crate::platform::{IStreamGeometryImpl, ITransformedGeometryImpl};
 use crate::{Matrix, Point, Rect};
-use std::rc::Rc;
+use std::sync::Arc;
 
 /// Defines the platform-specific interface for a geometry.
-pub trait IGeometryImpl: 'static {
+pub trait IGeometryImpl: Send + Sync + 'static {
     /// The geometry's bounding rectangle.
     fn bounds(&self) -> Rect;
 
@@ -17,7 +17,7 @@ pub trait IGeometryImpl: 'static {
 
     /// Gets a geometry that is the shape defined by the stroke on the
     /// geometry produced by the specified pen.
-    fn get_widened_geometry(&self, pen: &dyn IPen) -> Rc<dyn IGeometryImpl>;
+    fn get_widened_geometry(&self, pen: &dyn IPen) -> Arc<dyn IGeometryImpl>;
 
     /// Indicates whether the geometry's fill contains the specified point.
     fn fill_contains(&self, point: Point) -> bool;
@@ -29,13 +29,13 @@ pub trait IGeometryImpl: 'static {
     ///
     /// Returns a new geometry object representing the intersection or `None`
     /// when the operation failed.
-    fn intersect(&self, geometry: &dyn IGeometryImpl) -> Option<Rc<dyn IGeometryImpl>>;
+    fn intersect(&self, geometry: &dyn IGeometryImpl) -> Option<Arc<dyn IGeometryImpl>>;
 
     /// Indicates whether the geometry's stroke contains the specified point.
     fn stroke_contains(&self, pen: Option<&dyn IPen>, point: Point) -> bool;
 
     /// Makes a clone of the geometry with the specified transform.
-    fn with_transform(&self, transform: Matrix) -> Rc<dyn ITransformedGeometryImpl>;
+    fn with_transform(&self, transform: Matrix) -> Arc<dyn ITransformedGeometryImpl>;
 
     /// Attempts to get the corresponding point at the specified distance.
     fn try_get_point_at_distance(&self, distance: f64) -> Option<Point>;
@@ -55,7 +55,7 @@ pub trait IGeometryImpl: 'static {
         start_distance: f64,
         stop_distance: f64,
         start_on_begin_figure: bool,
-    ) -> Option<Rc<dyn IGeometryImpl>>;
+    ) -> Option<Arc<dyn IGeometryImpl>>;
 
     /// Lets the backend recover its concrete type.
     fn as_any(&self) -> &dyn std::any::Any;

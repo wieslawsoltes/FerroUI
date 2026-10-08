@@ -14,6 +14,7 @@ use crate::{
 };
 use std::cell::{Cell, RefCell};
 use std::rc::Rc;
+use std::sync::Arc;
 
 type ChildSubscription = (Ref<Drawing>, Rc<dyn IDisposable>);
 
@@ -480,7 +481,7 @@ impl IDrawingContextCore for DrawingGroupDrawingContext {
         &mut self,
         brush: Option<&Rc<dyn IBrush>>,
         pen: Option<&Rc<dyn IPen>>,
-        geometry: &Rc<dyn IGeometryImpl>,
+        geometry: &Arc<dyn IGeometryImpl>,
     ) {
         if brush.is_none() && pen.is_none() {
             return;
@@ -857,7 +858,7 @@ mod tests {
 
     impl IDrawingContextCore for MockDrawingContext {
         fn draw_line_core(&mut self, _: &Rc<dyn IPen>, _: Point, _: Point) {}
-        fn draw_geometry_impl_core(&mut self, _: Option<&Rc<dyn IBrush>>, _: Option<&Rc<dyn IPen>>, _: &Rc<dyn IGeometryImpl>) {
+        fn draw_geometry_impl_core(&mut self, _: Option<&Rc<dyn IBrush>>, _: Option<&Rc<dyn IPen>>, _: &Arc<dyn IGeometryImpl>) {
         }
         fn draw_rectangle_core(&mut self, _: Option<&Rc<dyn IBrush>>, _: Option<&Rc<dyn IPen>>, _: RoundedRect, _: &BoxShadows) {
         }

@@ -6,6 +6,7 @@ use crate::rendering::composition::transport::BatchResource;
 use crate::rendering::composition::Compositor;
 use crate::Ref;
 use std::rc::Rc;
+use std::sync::Arc;
 
 /// The composition render resource behind a brush, if the brush is a
 /// mutable brush with server-side counterparts.
@@ -37,7 +38,7 @@ pub(crate) fn transform_render_resource(transform: &dyn ITransform) -> Option<&d
 struct ClientGeometry(Ref<Geometry>);
 
 impl IRenderDataGeometry for ClientGeometry {
-    fn geometry_impl(&self) -> Option<Rc<dyn IGeometryImpl>> {
+    fn geometry_impl(&self) -> Option<Arc<dyn IGeometryImpl>> {
         self.0.platform_impl()
     }
 }

@@ -4,7 +4,7 @@ use crate::{
     ferro_class, ferro_property, instantiate, FerroObjectImpl, FerroProperty, Rect, Ref,
     StyledProperty,
 };
-use std::rc::Rc;
+use std::sync::Arc;
 
 /// Represents the geometry of a rectangle.
 #[repr(C)]
@@ -22,7 +22,7 @@ impl GeometryImpl for RectangleGeometry {
         RectangleGeometry::with_rect_and_radii(this.rect(), this.radius_x(), this.radius_y()).upcast()
     }
 
-    fn create_defining_geometry(this: &Self) -> Option<Rc<dyn IGeometryImpl>> {
+    fn create_defining_geometry(this: &Self) -> Option<Arc<dyn IGeometryImpl>> {
         let radius_x = this.radius_x();
         let radius_y = this.radius_y();
         let factory = platform::render_interface();
@@ -156,7 +156,7 @@ mod tests {
                     "end true",
                     "dispose",
                 ],
-                *factory.streams.borrow()[0].borrow()
+                *factory.streams.borrow()[0].lock().unwrap()
             );
 
             let clone = target.clone_geometry().cast::<RectangleGeometry>().unwrap();

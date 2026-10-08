@@ -162,6 +162,7 @@ impl PlatformRenderInterfaceContextManager {
 
 #[cfg(test)]
 mod tests {
+    use std::sync::Arc;
     use super::*;
     use crate::media::imaging::BitmapInterpolationMode;
     use crate::media::{FillRule, GeometryCombineMode};
@@ -377,7 +378,7 @@ mod tests {
             backend
         }
 
-        fn build_glyph_run_geometry(&self, _glyph_run: &crate::media::GlyphRun) -> Rc<dyn IGeometryImpl> {
+        fn build_glyph_run_geometry(&self, _glyph_run: &crate::media::GlyphRun) -> Arc<dyn IGeometryImpl> {
             unimplemented!()
         }
 
@@ -391,36 +392,36 @@ mod tests {
             unimplemented!()
         }
 
-        fn create_ellipse_geometry(&self, _rect: Rect) -> Rc<dyn IGeometryImpl> {
+        fn create_ellipse_geometry(&self, _rect: Rect) -> Arc<dyn IGeometryImpl> {
             unimplemented!()
         }
 
-        fn create_line_geometry(&self, _p1: Point, _p2: Point) -> Rc<dyn IGeometryImpl> {
+        fn create_line_geometry(&self, _p1: Point, _p2: Point) -> Arc<dyn IGeometryImpl> {
             unimplemented!()
         }
 
-        fn create_rectangle_geometry(&self, _rect: Rect) -> Rc<dyn IGeometryImpl> {
+        fn create_rectangle_geometry(&self, _rect: Rect) -> Arc<dyn IGeometryImpl> {
             unimplemented!()
         }
 
-        fn create_stream_geometry(&self) -> Rc<dyn IStreamGeometryImpl> {
+        fn create_stream_geometry(&self) -> Arc<dyn IStreamGeometryImpl> {
             unimplemented!()
         }
 
         fn create_geometry_group(
             &self,
             _fill_rule: FillRule,
-            _children: &[Rc<dyn IGeometryImpl>],
-        ) -> Rc<dyn IGeometryImpl> {
+            _children: &[Arc<dyn IGeometryImpl>],
+        ) -> Arc<dyn IGeometryImpl> {
             unimplemented!()
         }
 
         fn create_combined_geometry(
             &self,
             _combine_mode: GeometryCombineMode,
-            _g1: Rc<dyn IGeometryImpl>,
-            _g2: Rc<dyn IGeometryImpl>,
-        ) -> Rc<dyn IGeometryImpl> {
+            _g1: Arc<dyn IGeometryImpl>,
+            _g2: Arc<dyn IGeometryImpl>,
+        ) -> Arc<dyn IGeometryImpl> {
             unimplemented!()
         }
 

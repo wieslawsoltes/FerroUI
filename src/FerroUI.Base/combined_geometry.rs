@@ -7,6 +7,7 @@ use crate::{
 };
 use std::cell::RefCell;
 use std::rc::Rc;
+use std::sync::Arc;
 
 /// Specifies the different methods by which two geometries can be combined.
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq, Hash)]
@@ -85,7 +86,7 @@ impl GeometryImpl for CombinedGeometry {
         .upcast()
     }
 
-    fn create_defining_geometry(this: &Self) -> Option<Rc<dyn IGeometryImpl>> {
+    fn create_defining_geometry(this: &Self) -> Option<Arc<dyn IGeometryImpl>> {
         let g1 = this.geometry1().and_then(|g| g.platform_impl());
         let g2 = this.geometry2().and_then(|g| g.platform_impl());
 

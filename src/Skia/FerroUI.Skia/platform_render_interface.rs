@@ -31,6 +31,7 @@ use skia_safe::{ColorType, FontHinting, PathBuilder};
 use std::fs::File;
 use std::io::{self, Read};
 use std::rc::Rc;
+use std::sync::Arc;
 
 /// Skia platform render interface.
 pub struct PlatformRenderInterface {
@@ -116,36 +117,36 @@ impl Default for PlatformRenderInterface {
 }
 
 impl IPlatformRenderInterface for PlatformRenderInterface {
-    fn create_ellipse_geometry(&self, rect: Rect) -> Rc<dyn IGeometryImpl> {
+    fn create_ellipse_geometry(&self, rect: Rect) -> Arc<dyn IGeometryImpl> {
         EllipseGeometryImpl::new(rect)
     }
 
-    fn create_line_geometry(&self, p1: Point, p2: Point) -> Rc<dyn IGeometryImpl> {
+    fn create_line_geometry(&self, p1: Point, p2: Point) -> Arc<dyn IGeometryImpl> {
         LineGeometryImpl::new(p1, p2)
     }
 
-    fn create_rectangle_geometry(&self, rect: Rect) -> Rc<dyn IGeometryImpl> {
+    fn create_rectangle_geometry(&self, rect: Rect) -> Arc<dyn IGeometryImpl> {
         RectangleGeometryImpl::new(rect)
     }
 
-    fn create_stream_geometry(&self) -> Rc<dyn IStreamGeometryImpl> {
+    fn create_stream_geometry(&self) -> Arc<dyn IStreamGeometryImpl> {
         StreamGeometryImpl::new()
     }
 
-    fn create_geometry_group(&self, fill_rule: FillRule, children: &[Rc<dyn IGeometryImpl>]) -> Rc<dyn IGeometryImpl> {
+    fn create_geometry_group(&self, fill_rule: FillRule, children: &[Arc<dyn IGeometryImpl>]) -> Arc<dyn IGeometryImpl> {
         GeometryGroupImpl::new(fill_rule, children)
     }
 
     fn create_combined_geometry(
         &self,
         combine_mode: GeometryCombineMode,
-        g1: Rc<dyn IGeometryImpl>,
-        g2: Rc<dyn IGeometryImpl>,
-    ) -> Rc<dyn IGeometryImpl> {
+        g1: Arc<dyn IGeometryImpl>,
+        g2: Arc<dyn IGeometryImpl>,
+    ) -> Arc<dyn IGeometryImpl> {
         CombinedGeometryImpl::force_create(combine_mode, &*g1, &*g2)
     }
 
-    fn build_glyph_run_geometry(&self, glyph_run: &GlyphRun) -> Rc<dyn IGeometryImpl> {
+    fn build_glyph_run_geometry(&self, glyph_run: &GlyphRun) -> Arc<dyn IGeometryImpl> {
         let glyph_typeface = SkiaTypeface::try_get(&**glyph_run.glyph_typeface().platform_typeface())
             .unwrap_or_else(|| panic!("PlatformImpl can't be null."));
 

@@ -1,6 +1,6 @@
 use crate::platform::IGeometryImpl;
 use crate::Matrix;
-use std::rc::Rc;
+use std::sync::Arc;
 
 /// Represents a geometry with a transform applied.
 ///
@@ -8,7 +8,7 @@ use std::rc::Rc;
 /// result through the members of [`IGeometryImpl`].
 pub trait ITransformedGeometryImpl: IGeometryImpl {
     /// The source geometry that the transform is applied to.
-    fn source_geometry(&self) -> Rc<dyn IGeometryImpl>;
+    fn source_geometry(&self) -> Arc<dyn IGeometryImpl>;
 
     /// The applied transform.
     fn transform(&self) -> Matrix;
