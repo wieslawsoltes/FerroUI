@@ -213,6 +213,10 @@ version = "0.1.0"
 dependencies = [
  "ferroui-base",
  "ferroui-controls",
+ "ferroui-markup-xaml",
+ "ferroui-markup-xaml-loader",
+ "ferroui-themes-fluent",
+ "ferroui-themes-simple",
 ]
 
 [[package]]

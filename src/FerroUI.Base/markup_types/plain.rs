@@ -29,6 +29,7 @@ use crate::metadata::{from_markup_value, MarkupType, MarkupTyped};
 use crate::styling::{
     IStyle, ITemplate, Selector, Setter, SetterBase, SetterValue, StyleChildren, StyleQuery, ThemeVariant,
 };
+use crate::utilities::NumberFormatInfo;
 use crate::{BoxedValue, FerroProperty, Point, Ref, TypeInfo};
 use std::rc::Rc;
 
@@ -117,6 +118,52 @@ ferro_markup_type!(class TypeInfo as "Type" {
         Namespace: String { get: |type_: &&'static TypeInfo| type_.namespace().to_string() },
         FullName: String { get: |type_: &&'static TypeInfo| type_.full_name() },
         BaseType: Option<&'static TypeInfo> { get: |type_: &&'static TypeInfo| type_.base_type() },
+    ],
+});
+
+// System.Globalization
+
+// The mirror of the runtime library's number format, which markup creates as a resource for the
+// `NumberFormat` of numeric inputs (the colour view of the colour picker). Its numeric
+// properties are settable; the text properties are not declared.
+ferro_markup_type!(class NumberFormatInfo {
+    namespace: "System.Globalization",
+    handles: [Rc<NumberFormatInfo>, Option<Rc<NumberFormatInfo>>],
+    this: Rc<NumberFormatInfo>,
+    constructors: [() => || Rc::new(NumberFormatInfo::new())],
+    properties: [
+        CurrencyDecimalDigits: i32 {
+            get: |info: &Rc<NumberFormatInfo>| info.currency_decimal_digits(),
+            set: |info: &Rc<NumberFormatInfo>, value: i32| info.set_currency_decimal_digits(value)
+        },
+        CurrencyNegativePattern: i32 {
+            get: |info: &Rc<NumberFormatInfo>| info.currency_negative_pattern(),
+            set: |info: &Rc<NumberFormatInfo>, value: i32| info.set_currency_negative_pattern(value)
+        },
+        CurrencyPositivePattern: i32 {
+            get: |info: &Rc<NumberFormatInfo>| info.currency_positive_pattern(),
+            set: |info: &Rc<NumberFormatInfo>, value: i32| info.set_currency_positive_pattern(value)
+        },
+        NumberDecimalDigits: i32 {
+            get: |info: &Rc<NumberFormatInfo>| info.number_decimal_digits(),
+            set: |info: &Rc<NumberFormatInfo>, value: i32| info.set_number_decimal_digits(value)
+        },
+        NumberNegativePattern: i32 {
+            get: |info: &Rc<NumberFormatInfo>| info.number_negative_pattern(),
+            set: |info: &Rc<NumberFormatInfo>, value: i32| info.set_number_negative_pattern(value)
+        },
+        PercentDecimalDigits: i32 {
+            get: |info: &Rc<NumberFormatInfo>| info.percent_decimal_digits(),
+            set: |info: &Rc<NumberFormatInfo>, value: i32| info.set_percent_decimal_digits(value)
+        },
+        PercentNegativePattern: i32 {
+            get: |info: &Rc<NumberFormatInfo>| info.percent_negative_pattern(),
+            set: |info: &Rc<NumberFormatInfo>, value: i32| info.set_percent_negative_pattern(value)
+        },
+        PercentPositivePattern: i32 {
+            get: |info: &Rc<NumberFormatInfo>| info.percent_positive_pattern(),
+            set: |info: &Rc<NumberFormatInfo>, value: i32| info.set_percent_positive_pattern(value)
+        },
     ],
 });
 
@@ -881,6 +928,7 @@ ferro_markup_type!(class FerroDictionary<ThemeVariant, Rc<dyn IThemeVariantProvi
 pub(super) const TYPES: &[&MarkupType] = &[
     <TypeInfo as MarkupTyped>::MARKUP,
     <FerroProperty as MarkupTyped>::MARKUP,
+    <NumberFormatInfo as MarkupTyped>::MARKUP,
     <BindingOperations as MarkupTyped>::MARKUP,
     <RoutedEvent as MarkupTyped>::MARKUP,
     <Setter as MarkupTyped>::MARKUP,
@@ -936,6 +984,7 @@ pub(super) const TYPES: &[&MarkupType] = &[
 pub(super) fn register_value_types() {
     ValueTypes::register_nullable::<&'static TypeInfo>();
     ValueTypes::register_nullable::<&'static FerroProperty>();
+    ValueTypes::register_nullable::<Rc<NumberFormatInfo>>();
     ValueTypes::register_nullable::<Transitions>();
     ValueTypes::register_nullable::<GradientStops>();
     ValueTypes::register_nullable::<PathFigures>();
