@@ -240,6 +240,10 @@ impl IPlatformTypeface for TestPlatformTypeface {
     fn try_get_stream(&self) -> Option<Box<dyn Read>> {
         None
     }
+
+    fn as_any(&self) -> &dyn std::any::Any {
+        self
+    }
 }
 
 /// A font manager backend that serves synthetic fonts. The first font is the

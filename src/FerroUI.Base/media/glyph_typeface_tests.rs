@@ -674,6 +674,10 @@ impl IPlatformTypeface for CustomPlatformTypeface {
         // the stream reads a copy of the bytes.
         Some(Box::new(Cursor::new(self.font_memory.memory().span().to_vec())))
     }
+
+    fn as_any(&self) -> &dyn std::any::Any {
+        self
+    }
 }
 
 // ── Not from upstream ──

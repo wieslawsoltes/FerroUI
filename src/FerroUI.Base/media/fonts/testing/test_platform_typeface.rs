@@ -138,4 +138,8 @@ impl IPlatformTypeface for TestPlatformTypeface {
 
         Some(Box::new(Cursor::new(bytes.span().to_vec())))
     }
+
+    fn as_any(&self) -> &dyn std::any::Any {
+        self
+    }
 }
