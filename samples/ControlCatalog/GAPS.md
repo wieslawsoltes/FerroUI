@@ -6,7 +6,7 @@ The documents of the sample that do not load yet, grouped by what they wait for.
 cargo test -p control-catalog -- --ignored gap_
 ```
 
-Status: 219 documents, 195 load and show their class; 24 are listed below (one of them, `App.xaml`, loads in the application and in `tests/gaps.rs`).
+Status: 219 documents, 196 load and show their class; 23 are listed below (one of them, `App.xaml`, loads in the application and in `tests/gaps.rs`).
 
 ## Gaps of the framework
 
@@ -24,6 +24,7 @@ Status: 219 documents, 195 load and show their class; 24 are listed below (one o
 | C306 | `Slider.Ticks` (`TickList`) is not converted from text (`Ticks="0,20,25,40,75,100"`). | `gaps_c::gap_c306_slider_ticks_from_text` | `Pages/SliderPage.xaml` |
 | C309 | `System.Collections.ArrayList` with enumeration values as children is not a type of the markup type system. | `gaps_c::gap_c309_array_list_element` | `Pages/ViewboxPage.xaml` |
 | C310 | `AutoCompleteBox.MinimumPopulateDelay` (`TimeSpan`) is not converted from text (`"00:00:01"`). | `gaps_c::gap_c310_time_span_property_from_text` | `Pages/AutoCompleteBoxPage.xaml` (which also waits for its code-behind) |
+| C312 | The event `FerroObject.PropertyChanged` is not declared for markup (`<openGl:GlPageKnobs PropertyChanged="KnobsPropertyChanged"/>`): the events of `FerroObject` in `src/FerroUI.Base/markup_types/classes.rs` do not list it, and its arguments, `FerroPropertyChangedEventArgs<'_>`, borrow the values of the change, so they are not a value a markup handler can be invoked with as they are. | `gaps_c::gap_c312_property_changed_event_in_markup` | `Pages/OpenGl/OpenGlInteropPage.xaml`, `Pages/OpenGl/OpenGlLeasePage.xaml` |
 
 One gap of the framework blocks no document of the list: C101, a reflection binding (`x:CompileBindings="False"`) cannot resolve `$parent[prefix:Type]` for a type of a `using:` namespace (`gaps_a::gap_c101_reflection_binding_parent_of_prefixed_type`). The theme of `SampleGalleryPage` uses such paths with compiled bindings, which resolve them.
 
@@ -33,8 +34,8 @@ One gap of the framework blocks no document of the list: C101, a reflection bind
 |---|---|
 | `Pages/AutoCompleteBoxPage.xaml` | its code-behind (`LogicalExtensions.GetLogicalDescendants`, which it uses, is ported); the document also needs gap C310. |
 | `Pages/NumericUpDownPage.xaml` | `CultureInfo.GetCultures(CultureTypes.SpecificCultures)`. |
-| `Pages/OpenGlPage.xaml`, `Pages/OpenGl/OpenGlInteropPage.xaml`, `Pages/OpenGl/OpenGlLeasePage.xaml` | The three pages draw with `OpenGlContent` (`Pages/OpenGl/OpenGlContent.cs`, not ported). It needs `Matrix4x4.CreatePerspectiveFieldOfView` and `Matrix4x4.CreateLookAt`, which `ferroui_base::numerics::Matrix4x4` does not have, and it passes `Matrix4x4` and `Vector3` values to OpenGL by address (`glUniformMatrix4fv`, `glBufferData`), for which the two types declare no layout (`#[repr(C)]`). What the pages use besides is ported: `OpenGlControlBase`, `GlInterface`, `IGlContext`, the composition interop of `ferroui-opengl` (`OpenGlCompositionInterop`, `ICompositionGlContext`, `ICompositionGlTexture`), `Compositor::create_composition_visual_snapshot`, `CompositionCustomVisualHandler` and `ISkiaApiLeaseFeature`. The sample does not depend on `ferroui-opengl` yet. |
-| `Pages/OpenGl/OpenGlLeasePage.xaml` | Also `OpenGlFbo` (`Pages/OpenGl/OpenGlFbo.cs`, not ported): it wraps an OpenGL texture in a Ganesh surface (`GRContext`, `GRBackendTexture`, `GRGlTextureInfo`). The Skia backend has Ganesh on OpenGL in browser builds only (the desktop build is Graphite on Metal), and `ISkiaGrContext` does not give the Ganesh context to a lease. |
+| `Pages/OpenGl/OpenGlInteropPage.xaml` | Nothing but gap C312: the code-behind is not ported because its handler `KnobsPropertyChanged` cannot be declared for markup until the event is. What it uses besides is ported: `OpenGlContent` (`Pages/OpenGl/open_gl_content.rs`), `GlInterface`, `IGlContext`, the composition interop of `ferroui-opengl` (`OpenGlCompositionInterop::try_create_compatible_gl_context`, `ICompositionGlContext`, `ICompositionGlTexture` and its lease), `Compositor::create_drawing_surface`, `create_surface_visual` and `request_composition_update`, and the events `AttachedToVisualTree` and `DetachedFromVisualTree` of the viewport, which are declared for markup. |
+| `Pages/OpenGl/OpenGlLeasePage.xaml` | Gap C312, and `OpenGlFbo` (`Pages/OpenGl/OpenGlFbo.cs`, not ported): it wraps an OpenGL texture in a Ganesh surface (`GRContext.ResetContext` and `Flush`, `GRBackendTexture`, `GRGlTextureInfo`, `SKSurface.Create` over a backend texture). The Skia backend enables the `gl` feature of `skia-safe`, which has these types, for `target_os = "emscripten"` only (`src/Skia/FerroUI.Skia/Cargo.toml`; the desktop build is Graphite on Metal, and no published Skia binary has Graphite and Ganesh together), and `ISkiaGrContext` does not give the Ganesh context (`skia_safe::gpu::DirectContext`) to a lease. The page needs both, and a desktop platform whose leased graphics context is an `IGlContext`. |
 | `Pages/ContentPage/ContentPagePerformancePage.xaml`, `Pages/CarouselPage/CarouselPagePerformancePage.xaml`, `Pages/DrawerPage/DrawerPagePerformancePage.xaml`, `Pages/NavigationPage/NavigationPagePerformancePage.xaml`, `Pages/TabbedPage/TabbedPagePerformancePage.xaml` | `NavigationPerformanceMonitorHelper` measures the managed heap (`GC.GetTotalMemory`, `GC.Collect`), which has no counterpart. |
 
 ## Classes of the sample that are not ported yet
