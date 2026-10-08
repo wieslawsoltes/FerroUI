@@ -9,6 +9,7 @@ use crate::media::{FillRule, GeometryCombineMode};
 use crate::{PixelSize, Point, Rect, Vector};
 use std::io::Read;
 use std::rc::Rc;
+use std::sync::Arc;
 
 /// Defines the main platform-specific interface for the rendering subsystem.
 ///
@@ -17,30 +18,30 @@ use std::rc::Rc;
 /// goes through it.
 pub trait IPlatformRenderInterface: 'static {
     /// Creates an ellipse geometry implementation.
-    fn create_ellipse_geometry(&self, rect: Rect) -> Rc<dyn IGeometryImpl>;
+    fn create_ellipse_geometry(&self, rect: Rect) -> Arc<dyn IGeometryImpl>;
 
     /// Creates a line geometry implementation.
-    fn create_line_geometry(&self, p1: Point, p2: Point) -> Rc<dyn IGeometryImpl>;
+    fn create_line_geometry(&self, p1: Point, p2: Point) -> Arc<dyn IGeometryImpl>;
 
     /// Creates a rectangle geometry implementation.
-    fn create_rectangle_geometry(&self, rect: Rect) -> Rc<dyn IGeometryImpl>;
+    fn create_rectangle_geometry(&self, rect: Rect) -> Arc<dyn IGeometryImpl>;
 
     /// Creates a stream geometry implementation.
-    fn create_stream_geometry(&self) -> Rc<dyn IStreamGeometryImpl>;
+    fn create_stream_geometry(&self) -> Arc<dyn IStreamGeometryImpl>;
 
     /// Creates a geometry group implementation.
-    fn create_geometry_group(&self, fill_rule: FillRule, children: &[Rc<dyn IGeometryImpl>]) -> Rc<dyn IGeometryImpl>;
+    fn create_geometry_group(&self, fill_rule: FillRule, children: &[Arc<dyn IGeometryImpl>]) -> Arc<dyn IGeometryImpl>;
 
     /// Creates a geometry that combines two geometries.
     fn create_combined_geometry(
         &self,
         combine_mode: GeometryCombineMode,
-        g1: Rc<dyn IGeometryImpl>,
-        g2: Rc<dyn IGeometryImpl>,
-    ) -> Rc<dyn IGeometryImpl>;
+        g1: Arc<dyn IGeometryImpl>,
+        g2: Arc<dyn IGeometryImpl>,
+    ) -> Arc<dyn IGeometryImpl>;
 
     /// Builds a glyph run geometry.
-    fn build_glyph_run_geometry(&self, glyph_run: &crate::media::GlyphRun) -> Rc<dyn IGeometryImpl>;
+    fn build_glyph_run_geometry(&self, glyph_run: &crate::media::GlyphRun) -> Arc<dyn IGeometryImpl>;
 
     /// Creates a platform implementation of a glyph run.
     ///

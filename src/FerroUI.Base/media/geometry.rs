@@ -17,6 +17,7 @@ use crate::{
 };
 use std::cell::{Cell, RefCell};
 use std::rc::Rc;
+use std::sync::Arc;
 
 /// Defines a geometric shape.
 #[repr(C)]
@@ -24,7 +25,7 @@ pub struct Geometry {
     base: FerroObject,
     is_dirty: Cell<bool>,
     can_invalidate: bool,
-    platform_impl: RefCell<Option<Rc<dyn IGeometryImpl>>>,
+    platform_impl: RefCell<Option<Arc<dyn IGeometryImpl>>>,
     changed: HandlerList<dyn Fn()>,
     transform_subscription: RefCell<Option<Rc<dyn IDisposable>>>,
     resource: CompositorResourceHolder,
@@ -37,7 +38,7 @@ ferro_class! {
 
         /// Creates the platform implementation of the geometry, without the
         /// transform applied.
-        fn create_defining_geometry(this) -> Option<Rc<dyn IGeometryImpl>>;
+        fn create_defining_geometry(this) -> Option<Arc<dyn IGeometryImpl>>;
     }
 }
 
@@ -48,7 +49,7 @@ impl GeometryImpl for Geometry {
         panic!("Geometry is abstract: 'clone_geometry' must be implemented by the deriving class")
     }
 
-    fn create_defining_geometry(_this: &Self) -> Option<Rc<dyn IGeometryImpl>> {
+    fn create_defining_geometry(_this: &Self) -> Option<Arc<dyn IGeometryImpl>> {
         panic!("Geometry is abstract: 'create_defining_geometry' must be implemented by the deriving class")
     }
 }
@@ -80,7 +81,7 @@ impl Geometry {
 
     /// Creates the class data of a geometry with a fixed platform
     /// implementation, which is never invalidated.
-    pub fn construct_with_impl(platform_impl: Option<Rc<dyn IGeometryImpl>>) -> Self {
+    pub fn construct_with_impl(platform_impl: Option<Arc<dyn IGeometryImpl>>) -> Self {
         Self {
             base: FerroObject::construct(),
             is_dirty: Cell::new(false),
@@ -119,7 +120,7 @@ impl Geometry {
     }
 
     /// The platform-specific implementation of the geometry.
-    pub fn platform_impl(&self) -> Option<Rc<dyn IGeometryImpl>> {
+    pub fn platform_impl(&self) -> Option<Arc<dyn IGeometryImpl>> {
         if self.is_dirty.get() {
             let mut geometry = self.create_defining_geometry();
             let transform = self.transform();
@@ -127,7 +128,7 @@ impl Geometry {
             if let (Some(defining), Some(transform)) = (&geometry, &transform) {
                 let value = transform.value();
                 if value != Matrix::IDENTITY {
-                    let transformed: Rc<dyn IGeometryImpl> = defining.with_transform(value);
+                    let transformed: Arc<dyn IGeometryImpl> = defining.with_transform(value);
                     geometry = Some(transformed);
                 }
             }
@@ -228,19 +229,19 @@ impl Geometry {
         let current = self.platform_impl.borrow().clone();
 
         if let Some(current) = current {
-            let replacement: Option<Rc<dyn IGeometryImpl>> = match current.as_transformed_geometry() {
+            let replacement: Option<Arc<dyn IGeometryImpl>> = match current.as_transformed_geometry() {
                 Some(t) => match transform {
                     None => Some(t.source_geometry()),
                     Some(transform) if transform == Matrix::IDENTITY => Some(t.source_geometry()),
                     Some(transform) if transform != t.transform() => {
-                        let transformed: Rc<dyn IGeometryImpl> = t.source_geometry().with_transform(transform);
+                        let transformed: Arc<dyn IGeometryImpl> = t.source_geometry().with_transform(transform);
                         Some(transformed)
                     }
                     Some(_) => None,
                 },
                 None => match transform {
                     Some(transform) if transform != Matrix::IDENTITY => {
-                        let transformed: Rc<dyn IGeometryImpl> = current.with_transform(transform);
+                        let transformed: Arc<dyn IGeometryImpl> = current.with_transform(transform);
                         Some(transformed)
                     }
                     _ => None,
@@ -371,13 +372,13 @@ pub(crate) mod tests {
     pub(crate) struct MockGeometryImpl;
 
     impl MockGeometryImpl {
-        pub fn create() -> Rc<dyn IGeometryImpl> {
-            Rc::new(MockGeometryImpl)
+        pub fn create() -> Arc<dyn IGeometryImpl> {
+            Arc::new(MockGeometryImpl)
         }
     }
 
     pub(crate) struct MockTransformedGeometryImpl {
-        source: Rc<dyn IGeometryImpl>,
+        source: Arc<dyn IGeometryImpl>,
         transform: Matrix,
     }
 
@@ -392,7 +393,7 @@ pub(crate) mod tests {
             fn get_render_bounds(&self, _pen: Option<&dyn IPen>) -> Rect {
                 Rect::default()
             }
-            fn get_widened_geometry(&self, _pen: &dyn IPen) -> Rc<dyn IGeometryImpl> {
+            fn get_widened_geometry(&self, _pen: &dyn IPen) -> Arc<dyn IGeometryImpl> {
                 MockGeometryImpl::create()
             }
             fn fill_contains(&self, _point: Point) -> bool {
@@ -401,7 +402,7 @@ pub(crate) mod tests {
             fn get_fill_intersection_result(&self, _geometry: &dyn IGeometryImpl) -> IntersectionResult {
                 IntersectionResult::Empty
             }
-            fn intersect(&self, _geometry: &dyn IGeometryImpl) -> Option<Rc<dyn IGeometryImpl>> {
+            fn intersect(&self, _geometry: &dyn IGeometryImpl) -> Option<Arc<dyn IGeometryImpl>> {
                 None
             }
             fn stroke_contains(&self, _pen: Option<&dyn IPen>, _point: Point) -> bool {
@@ -416,7 +417,7 @@ pub(crate) mod tests {
             fn as_any(&self) -> &dyn std::any::Any {
                 self
             }
-            fn try_get_segment(&self, _start: f64, _stop: f64, _begin: bool) -> Option<Rc<dyn IGeometryImpl>> {
+            fn try_get_segment(&self, _start: f64, _stop: f64, _begin: bool) -> Option<Arc<dyn IGeometryImpl>> {
                 None
             }
         };
@@ -426,10 +427,10 @@ pub(crate) mod tests {
     impl IGeometryImpl for MockGeometryImpl {
         mock_geometry_members!();
 
-        fn with_transform(&self, transform: Matrix) -> Rc<dyn ITransformedGeometryImpl> {
+        fn with_transform(&self, transform: Matrix) -> Arc<dyn ITransformedGeometryImpl> {
             // The source of a transformed mock is a fresh mock: the tests
             // only look at the kind of the implementation.
-            Rc::new(MockTransformedGeometryImpl { source: MockGeometryImpl::create(), transform })
+            Arc::new(MockTransformedGeometryImpl { source: MockGeometryImpl::create(), transform })
         }
 
         fn as_stream_geometry(&self) -> Option<&dyn IStreamGeometryImpl> {
@@ -440,8 +441,8 @@ pub(crate) mod tests {
     impl IGeometryImpl for MockTransformedGeometryImpl {
         mock_geometry_members!();
 
-        fn with_transform(&self, transform: Matrix) -> Rc<dyn ITransformedGeometryImpl> {
-            Rc::new(MockTransformedGeometryImpl { source: self.source.clone(), transform })
+        fn with_transform(&self, transform: Matrix) -> Arc<dyn ITransformedGeometryImpl> {
+            Arc::new(MockTransformedGeometryImpl { source: self.source.clone(), transform })
         }
 
         fn as_transformed_geometry(&self) -> Option<&dyn ITransformedGeometryImpl> {
@@ -450,7 +451,7 @@ pub(crate) mod tests {
     }
 
     impl ITransformedGeometryImpl for MockTransformedGeometryImpl {
-        fn source_geometry(&self) -> Rc<dyn IGeometryImpl> {
+        fn source_geometry(&self) -> Arc<dyn IGeometryImpl> {
             self.source.clone()
         }
 
@@ -459,7 +460,7 @@ pub(crate) mod tests {
         }
     }
 
-    pub(crate) type CommandLog = Rc<RefCell<Vec<String>>>;
+    pub(crate) type CommandLog = Arc<std::sync::Mutex<Vec<String>>>;
 
     /// A stream geometry that records the drawing commands it receives.
     pub(crate) struct MockStreamGeometryImpl {
@@ -480,30 +481,30 @@ pub(crate) mod tests {
             sweep_direction: crate::media::SweepDirection,
             is_stroked: bool,
         ) {
-            self.log.borrow_mut().push(format!(
+            self.log.lock().unwrap().push(format!(
                 "arc {point} {size} {rotation_angle} {is_large_arc} {sweep_direction:?} {is_stroked}"
             ));
         }
         fn begin_figure(&mut self, start_point: Point, is_filled: bool) {
-            self.log.borrow_mut().push(format!("begin {start_point} {is_filled}"));
+            self.log.lock().unwrap().push(format!("begin {start_point} {is_filled}"));
         }
         fn cubic_bezier_to(&mut self, p1: Point, p2: Point, p3: Point, is_stroked: bool) {
-            self.log.borrow_mut().push(format!("cubic {p1} {p2} {p3} {is_stroked}"));
+            self.log.lock().unwrap().push(format!("cubic {p1} {p2} {p3} {is_stroked}"));
         }
         fn quadratic_bezier_to(&mut self, p1: Point, p2: Point, is_stroked: bool) {
-            self.log.borrow_mut().push(format!("quad {p1} {p2} {is_stroked}"));
+            self.log.lock().unwrap().push(format!("quad {p1} {p2} {is_stroked}"));
         }
         fn line_to(&mut self, point: Point, is_stroked: bool) {
-            self.log.borrow_mut().push(format!("line {point} {is_stroked}"));
+            self.log.lock().unwrap().push(format!("line {point} {is_stroked}"));
         }
         fn end_figure(&mut self, is_closed: bool) {
-            self.log.borrow_mut().push(format!("end {is_closed}"));
+            self.log.lock().unwrap().push(format!("end {is_closed}"));
         }
         fn set_fill_rule(&mut self, fill_rule: crate::media::FillRule) {
-            self.log.borrow_mut().push(format!("fill {fill_rule:?}"));
+            self.log.lock().unwrap().push(format!("fill {fill_rule:?}"));
         }
         fn dispose(&mut self) {
-            self.log.borrow_mut().push("dispose".to_string());
+            self.log.lock().unwrap().push("dispose".to_string());
         }
     }
 
@@ -512,8 +513,8 @@ pub(crate) mod tests {
     impl IGeometryImpl for MockStreamGeometryImpl {
         mock_geometry_members!();
 
-        fn with_transform(&self, transform: Matrix) -> Rc<dyn ITransformedGeometryImpl> {
-            Rc::new(MockTransformedGeometryImpl { source: MockGeometryImpl::create(), transform })
+        fn with_transform(&self, transform: Matrix) -> Arc<dyn ITransformedGeometryImpl> {
+            Arc::new(MockTransformedGeometryImpl { source: MockGeometryImpl::create(), transform })
         }
 
         fn as_stream_geometry(&self) -> Option<&dyn IStreamGeometryImpl> {
@@ -522,8 +523,8 @@ pub(crate) mod tests {
     }
 
     impl IStreamGeometryImpl for MockStreamGeometryImpl {
-        fn clone_geometry(&self) -> Rc<dyn IStreamGeometryImpl> {
-            Rc::new(MockStreamGeometryImpl { log: Rc::new(RefCell::new(self.log.borrow().clone())) })
+        fn clone_geometry(&self) -> Arc<dyn IStreamGeometryImpl> {
+            Arc::new(MockStreamGeometryImpl { log: Arc::new(std::sync::Mutex::new(self.log.lock().unwrap().clone())) })
         }
 
         fn open(&self) -> Box<dyn crate::platform::IStreamGeometryContextImpl> {
@@ -539,7 +540,7 @@ pub(crate) mod tests {
     }
 
     impl crate::platform::IPlatformRenderInterface for MockFactory {
-        fn build_glyph_run_geometry(&self, _glyph_run: &crate::media::GlyphRun) -> Rc<dyn IGeometryImpl> {
+        fn build_glyph_run_geometry(&self, _glyph_run: &crate::media::GlyphRun) -> Arc<dyn IGeometryImpl> {
             unimplemented!()
         }
         fn create_glyph_run(
@@ -551,38 +552,38 @@ pub(crate) mod tests {
         ) -> Rc<dyn crate::platform::IGlyphRunImpl> {
             unimplemented!()
         }
-        fn create_ellipse_geometry(&self, rect: Rect) -> Rc<dyn IGeometryImpl> {
+        fn create_ellipse_geometry(&self, rect: Rect) -> Arc<dyn IGeometryImpl> {
             self.created.borrow_mut().push(format!("ellipse {rect}"));
             MockGeometryImpl::create()
         }
-        fn create_line_geometry(&self, p1: Point, p2: Point) -> Rc<dyn IGeometryImpl> {
+        fn create_line_geometry(&self, p1: Point, p2: Point) -> Arc<dyn IGeometryImpl> {
             self.created.borrow_mut().push(format!("line {p1} {p2}"));
             MockGeometryImpl::create()
         }
-        fn create_rectangle_geometry(&self, rect: Rect) -> Rc<dyn IGeometryImpl> {
+        fn create_rectangle_geometry(&self, rect: Rect) -> Arc<dyn IGeometryImpl> {
             self.created.borrow_mut().push(format!("rectangle {rect}"));
             MockGeometryImpl::create()
         }
-        fn create_stream_geometry(&self) -> Rc<dyn IStreamGeometryImpl> {
+        fn create_stream_geometry(&self) -> Arc<dyn IStreamGeometryImpl> {
             self.created.borrow_mut().push("stream".to_string());
-            let log = Rc::new(RefCell::new(Vec::new()));
+            let log = Arc::new(std::sync::Mutex::new(Vec::new()));
             self.streams.borrow_mut().push(log.clone());
-            Rc::new(MockStreamGeometryImpl { log })
+            Arc::new(MockStreamGeometryImpl { log })
         }
         fn create_geometry_group(
             &self,
             fill_rule: crate::media::FillRule,
-            children: &[Rc<dyn IGeometryImpl>],
-        ) -> Rc<dyn IGeometryImpl> {
+            children: &[Arc<dyn IGeometryImpl>],
+        ) -> Arc<dyn IGeometryImpl> {
             self.created.borrow_mut().push(format!("group {fill_rule:?} {}", children.len()));
             MockGeometryImpl::create()
         }
         fn create_combined_geometry(
             &self,
             combine_mode: GeometryCombineMode,
-            _g1: Rc<dyn IGeometryImpl>,
-            _g2: Rc<dyn IGeometryImpl>,
-        ) -> Rc<dyn IGeometryImpl> {
+            _g1: Arc<dyn IGeometryImpl>,
+            _g2: Arc<dyn IGeometryImpl>,
+        ) -> Arc<dyn IGeometryImpl> {
             self.created.borrow_mut().push(format!("combined {combine_mode:?}"));
             MockGeometryImpl::create()
         }
@@ -723,7 +724,7 @@ pub(crate) mod tests {
             Self::parent_clone_geometry(this)
         }
 
-        fn create_defining_geometry(_this: &Self) -> Option<Rc<dyn IGeometryImpl>> {
+        fn create_defining_geometry(_this: &Self) -> Option<Arc<dyn IGeometryImpl>> {
             Some(MockGeometryImpl::create())
         }
     }
@@ -767,7 +768,7 @@ pub(crate) mod tests {
 
         target.set_foo(true);
 
-        assert!(!Rc::ptr_eq(&platform_impl, &target.platform_impl().unwrap()));
+        assert!(!Arc::ptr_eq(&platform_impl, &target.platform_impl().unwrap()));
     }
 
     #[test]
@@ -904,7 +905,7 @@ pub(crate) mod tests {
             let streams = factory.streams.borrow();
             assert_eq!(
                 vec!["fill NonZero", "begin 0, 0 true", "line 1, 0 true", "line 1, 1 true", "end true", "dispose"],
-                *streams[0].borrow()
+                *streams[0].lock().unwrap()
             );
             assert_eq!(
                 vec![
@@ -915,10 +916,10 @@ pub(crate) mod tests {
                     "end true",
                     "dispose"
                 ],
-                *streams[1].borrow()
+                *streams[1].lock().unwrap()
             );
-            assert_eq!(vec!["begin 1, 1 true", "line 2, 2 true", "end false", "dispose"], *streams[2].borrow());
-            assert_eq!(vec!["begin 1, 1 true", "line 2, 2 true", "end false", "dispose"], *streams[3].borrow());
+            assert_eq!(vec!["begin 1, 1 true", "line 2, 2 true", "end false", "dispose"], *streams[2].lock().unwrap());
+            assert_eq!(vec!["begin 1, 1 true", "line 2, 2 true", "end false", "dispose"], *streams[3].lock().unwrap());
         });
     }
 

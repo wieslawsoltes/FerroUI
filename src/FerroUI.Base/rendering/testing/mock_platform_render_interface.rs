@@ -15,6 +15,7 @@ use std::any::{Any, TypeId};
 use std::cell::{Cell, RefCell};
 use std::io::Read;
 use std::rc::Rc;
+use std::sync::{Arc, Mutex};
 
 /// A platform geometry that behaves like its bounding rectangle.
 ///
@@ -24,29 +25,29 @@ use std::rc::Rc;
 /// (`HeadlessTransformedGeometryStub`): fill intersections between such
 /// geometries and with stream geometries use a separating axis test on them.
 pub struct MockGeometryImpl {
-    bounds: Cell<Rect>,
-    source: Option<(Rc<MockGeometryImpl>, Matrix)>,
+    bounds: Rect,
+    source: Option<(Arc<MockGeometryImpl>, Matrix)>,
     edges: Option<Vec<Point>>,
 }
 
 impl MockGeometryImpl {
-    pub fn new(bounds: Rect) -> Rc<MockGeometryImpl> {
-        Rc::new(MockGeometryImpl { bounds: Cell::new(bounds), source: None, edges: None })
+    pub fn new(bounds: Rect) -> Arc<MockGeometryImpl> {
+        Arc::new(MockGeometryImpl { bounds: bounds, source: None, edges: None })
     }
 
     /// A geometry with the given corner points
     /// (`HeadlessGeometryWithEdgesStub`).
-    fn with_edges(bounds: Rect, points: Vec<Point>) -> Rc<MockGeometryImpl> {
-        Rc::new(MockGeometryImpl { bounds: Cell::new(bounds), source: None, edges: Some(points) })
+    fn with_edges(bounds: Rect, points: Vec<Point>) -> Arc<MockGeometryImpl> {
+        Arc::new(MockGeometryImpl { bounds: bounds, source: None, edges: Some(points) })
     }
 
     /// `HeadlessRectangleGeometryContextStub`.
-    pub fn rectangle(bounds: Rect) -> Rc<MockGeometryImpl> {
+    pub fn rectangle(bounds: Rect) -> Arc<MockGeometryImpl> {
         Self::with_edges(bounds, vec![bounds.top_left(), bounds.top_right(), bounds.bottom_left(), bounds.bottom_right()])
     }
 
     /// `HeadlessLineGeometryContextStub`.
-    pub fn line(p1: Point, p2: Point) -> Rc<MockGeometryImpl> {
+    pub fn line(p1: Point, p2: Point) -> Arc<MockGeometryImpl> {
         let bounds = Rect::from_points(
             Point::new(p1.x.min(p2.x), p1.y.min(p2.y)),
             Point::new(p1.x.max(p2.x), p1.y.max(p2.y)),
@@ -135,20 +136,20 @@ fn rect_intersection(a: Rect, b: Rect) -> IntersectionResult {
 
 impl IGeometryImpl for MockGeometryImpl {
     fn bounds(&self) -> Rect {
-        self.bounds.get()
+        self.bounds
     }
     fn contour_length(&self) -> f64 {
-        let bounds = self.bounds.get();
+        let bounds = self.bounds;
         2.0 * (bounds.width + bounds.height)
     }
     fn get_render_bounds(&self, pen: Option<&dyn IPen>) -> Rect {
-        self.bounds.get().inflate(pen.map_or(0.0, |p| p.thickness()) / 2.0)
+        self.bounds.inflate(pen.map_or(0.0, |p| p.thickness()) / 2.0)
     }
-    fn get_widened_geometry(&self, pen: &dyn IPen) -> Rc<dyn IGeometryImpl> {
-        MockGeometryImpl::new(self.bounds.get().inflate(pen.thickness() / 2.0))
+    fn get_widened_geometry(&self, pen: &dyn IPen) -> Arc<dyn IGeometryImpl> {
+        MockGeometryImpl::new(self.bounds.inflate(pen.thickness() / 2.0))
     }
     fn fill_contains(&self, point: Point) -> bool {
-        self.bounds.get().contains(point)
+        self.bounds.contains(point)
     }
     fn get_fill_intersection_result(&self, geometry: &dyn IGeometryImpl) -> IntersectionResult {
         // A geometry with edges of its own (not a transformed one, which
@@ -170,10 +171,10 @@ impl IGeometryImpl for MockGeometryImpl {
                 return IntersectionResult::Intersects;
             }
         }
-        rect_intersection(self.bounds.get(), geometry.bounds())
+        rect_intersection(self.bounds, geometry.bounds())
     }
-    fn intersect(&self, geometry: &dyn IGeometryImpl) -> Option<Rc<dyn IGeometryImpl>> {
-        let intersection = self.bounds.get().intersect(geometry.bounds());
+    fn intersect(&self, geometry: &dyn IGeometryImpl) -> Option<Arc<dyn IGeometryImpl>> {
+        let intersection = self.bounds.intersect(geometry.bounds());
         if intersection.width <= 0.0 || intersection.height <= 0.0 {
             None
         } else {
@@ -182,25 +183,25 @@ impl IGeometryImpl for MockGeometryImpl {
     }
     fn stroke_contains(&self, pen: Option<&dyn IPen>, point: Point) -> bool {
         let half = pen.map_or(0.0, |p| p.thickness()) / 2.0;
-        let bounds = self.bounds.get();
+        let bounds = self.bounds;
         bounds.inflate(half).contains(point) && !bounds.deflate(half).contains_exclusive(point)
     }
-    fn with_transform(&self, transform: Matrix) -> Rc<dyn ITransformedGeometryImpl> {
+    fn with_transform(&self, transform: Matrix) -> Arc<dyn ITransformedGeometryImpl> {
         // As the reference, the transform of a transformed geometry is
         // combined with the new one over the same source.
         let (source, transform) = match &self.source {
             Some((source, own)) => (source.clone(), *own * transform),
             None => (
-                Rc::new(MockGeometryImpl {
-                    bounds: Cell::new(self.bounds.get()),
+                Arc::new(MockGeometryImpl {
+                    bounds: self.bounds,
                     source: None,
                     edges: self.edges.clone(),
                 }),
                 transform,
             ),
         };
-        Rc::new(MockGeometryImpl {
-            bounds: Cell::new(source.bounds.get().transform_to_aabb(transform)),
+        Arc::new(MockGeometryImpl {
+            bounds: source.bounds.transform_to_aabb(transform),
             source: Some((source, transform)),
             edges: None,
         })
@@ -211,7 +212,7 @@ impl IGeometryImpl for MockGeometryImpl {
     fn try_get_point_and_tangent_at_distance(&self, _distance: f64) -> Option<(Point, Point)> {
         None
     }
-    fn try_get_segment(&self, _start: f64, _stop: f64, _begin: bool) -> Option<Rc<dyn IGeometryImpl>> {
+    fn try_get_segment(&self, _start: f64, _stop: f64, _begin: bool) -> Option<Arc<dyn IGeometryImpl>> {
         None
     }
     fn as_transformed_geometry(&self) -> Option<&dyn ITransformedGeometryImpl> {
@@ -223,10 +224,10 @@ impl IGeometryImpl for MockGeometryImpl {
 }
 
 impl ITransformedGeometryImpl for MockGeometryImpl {
-    fn source_geometry(&self) -> Rc<dyn IGeometryImpl> {
+    fn source_geometry(&self) -> Arc<dyn IGeometryImpl> {
         match &self.source {
-            Some((source, _)) => source.clone() as Rc<dyn IGeometryImpl>,
-            None => MockGeometryImpl::new(self.bounds.get()),
+            Some((source, _)) => source.clone() as Arc<dyn IGeometryImpl>,
+            None => MockGeometryImpl::new(self.bounds),
         }
     }
     fn transform(&self) -> Matrix {
@@ -238,16 +239,16 @@ impl ITransformedGeometryImpl for MockGeometryImpl {
 /// written to it; a point is in its fill when it is in one of the triangles
 /// of consecutive points.
 pub struct MockStreamGeometryImpl {
-    points: Rc<RefCell<Vec<Point>>>,
+    points: Arc<Mutex<Vec<Point>>>,
 }
 
 impl MockStreamGeometryImpl {
-    pub fn new() -> Rc<MockStreamGeometryImpl> {
-        Rc::new(MockStreamGeometryImpl { points: Rc::new(RefCell::new(Vec::new())) })
+    pub fn new() -> Arc<MockStreamGeometryImpl> {
+        Arc::new(MockStreamGeometryImpl { points: Arc::new(Mutex::new(Vec::new())) })
     }
 
-    fn as_rect(&self) -> Rc<MockGeometryImpl> {
-        let points = self.points.borrow();
+    fn as_rect(&self) -> Arc<MockGeometryImpl> {
+        let points = self.points.lock().unwrap();
         let mut bounds: Option<Rect> = None;
         for p in points.iter() {
             let r = Rect::new(p.x, p.y, 0.0, 0.0);
@@ -274,7 +275,7 @@ impl IGeometryImpl for MockStreamGeometryImpl {
     fn get_render_bounds(&self, pen: Option<&dyn IPen>) -> Rect {
         self.as_rect().get_render_bounds(pen)
     }
-    fn get_widened_geometry(&self, pen: &dyn IPen) -> Rc<dyn IGeometryImpl> {
+    fn get_widened_geometry(&self, pen: &dyn IPen) -> Arc<dyn IGeometryImpl> {
         self.as_rect().get_widened_geometry(pen)
     }
     fn fill_contains(&self, point: Point) -> bool {
@@ -282,7 +283,7 @@ impl IGeometryImpl for MockStreamGeometryImpl {
         // tested against the triangles of consecutive points (the geometry
         // is assumed to be convex), with the algorithm from
         // https://www.blackpawn.com/texts/pointinpoly/default.html.
-        let points = self.points.borrow();
+        let points = self.points.lock().unwrap();
         let count = points.len();
         for i in 0..count {
             let a = points[i];
@@ -312,18 +313,18 @@ impl IGeometryImpl for MockStreamGeometryImpl {
         // As the headless stream geometry of the reference: against a
         // geometry with edges, a separating axis test on the points.
         if let Some(other) = edge_points_of(geometry) {
-            let points = self.points.borrow();
+            let points = self.points.lock().unwrap();
             return if separated(&points, &other) { IntersectionResult::Empty } else { IntersectionResult::Intersects };
         }
         self.as_rect().get_fill_intersection_result(geometry)
     }
-    fn intersect(&self, geometry: &dyn IGeometryImpl) -> Option<Rc<dyn IGeometryImpl>> {
+    fn intersect(&self, geometry: &dyn IGeometryImpl) -> Option<Arc<dyn IGeometryImpl>> {
         self.as_rect().intersect(geometry)
     }
     fn stroke_contains(&self, pen: Option<&dyn IPen>, point: Point) -> bool {
         self.as_rect().stroke_contains(pen, point)
     }
-    fn with_transform(&self, transform: Matrix) -> Rc<dyn ITransformedGeometryImpl> {
+    fn with_transform(&self, transform: Matrix) -> Arc<dyn ITransformedGeometryImpl> {
         self.as_rect().with_transform(transform)
     }
     fn try_get_point_at_distance(&self, _distance: f64) -> Option<Point> {
@@ -332,7 +333,7 @@ impl IGeometryImpl for MockStreamGeometryImpl {
     fn try_get_point_and_tangent_at_distance(&self, _distance: f64) -> Option<(Point, Point)> {
         None
     }
-    fn try_get_segment(&self, _start: f64, _stop: f64, _begin: bool) -> Option<Rc<dyn IGeometryImpl>> {
+    fn try_get_segment(&self, _start: f64, _stop: f64, _begin: bool) -> Option<Arc<dyn IGeometryImpl>> {
         None
     }
     fn as_stream_geometry(&self) -> Option<&dyn IStreamGeometryImpl> {
@@ -344,34 +345,34 @@ impl IGeometryImpl for MockStreamGeometryImpl {
 }
 
 impl IStreamGeometryImpl for MockStreamGeometryImpl {
-    fn clone_geometry(&self) -> Rc<dyn IStreamGeometryImpl> {
-        Rc::new(MockStreamGeometryImpl { points: Rc::new(RefCell::new(self.points.borrow().clone())) })
+    fn clone_geometry(&self) -> Arc<dyn IStreamGeometryImpl> {
+        Arc::new(MockStreamGeometryImpl { points: Arc::new(Mutex::new(self.points.lock().unwrap().clone())) })
     }
     fn open(&self) -> Box<dyn IStreamGeometryContextImpl> {
-        self.points.borrow_mut().clear();
+        self.points.lock().unwrap().clear();
         Box::new(MockStreamGeometryContext { points: self.points.clone() })
     }
 }
 
 struct MockStreamGeometryContext {
-    points: Rc<RefCell<Vec<Point>>>,
+    points: Arc<Mutex<Vec<Point>>>,
 }
 
 impl IGeometryContext for MockStreamGeometryContext {
     fn arc_to(&mut self, point: Point, _: Size, _: f64, _: bool, _: SweepDirection, _: bool) {
-        self.points.borrow_mut().push(point);
+        self.points.lock().unwrap().push(point);
     }
     fn begin_figure(&mut self, start_point: Point, _is_filled: bool) {
-        self.points.borrow_mut().push(start_point);
+        self.points.lock().unwrap().push(start_point);
     }
     fn cubic_bezier_to(&mut self, p1: Point, p2: Point, p3: Point, _is_stroked: bool) {
-        self.points.borrow_mut().extend([p1, p2, p3]);
+        self.points.lock().unwrap().extend([p1, p2, p3]);
     }
     fn quadratic_bezier_to(&mut self, p1: Point, p2: Point, _is_stroked: bool) {
-        self.points.borrow_mut().extend([p1, p2]);
+        self.points.lock().unwrap().extend([p1, p2]);
     }
     fn line_to(&mut self, point: Point, _is_stroked: bool) {
-        self.points.borrow_mut().push(point);
+        self.points.lock().unwrap().push(point);
     }
     fn end_figure(&mut self, _is_closed: bool) {}
     fn set_fill_rule(&mut self, _fill_rule: FillRule) {}
@@ -555,7 +556,7 @@ impl crate::platform::IGlyphRunImpl for MockGlyphRunImpl {
 }
 
 impl IPlatformRenderInterface for MockPlatformRenderInterface {
-    fn build_glyph_run_geometry(&self, glyph_run: &crate::media::GlyphRun) -> Rc<dyn IGeometryImpl> {
+    fn build_glyph_run_geometry(&self, glyph_run: &crate::media::GlyphRun) -> Arc<dyn IGeometryImpl> {
         MockGeometryImpl::new(glyph_run.bounds())
     }
     fn create_glyph_run(
@@ -579,28 +580,28 @@ impl IPlatformRenderInterface for MockPlatformRenderInterface {
             ),
         })
     }
-    fn create_ellipse_geometry(&self, rect: Rect) -> Rc<dyn IGeometryImpl> {
+    fn create_ellipse_geometry(&self, rect: Rect) -> Arc<dyn IGeometryImpl> {
         MockGeometryImpl::new(rect)
     }
-    fn create_line_geometry(&self, p1: Point, p2: Point) -> Rc<dyn IGeometryImpl> {
+    fn create_line_geometry(&self, p1: Point, p2: Point) -> Arc<dyn IGeometryImpl> {
         MockGeometryImpl::line(p1, p2)
     }
-    fn create_rectangle_geometry(&self, rect: Rect) -> Rc<dyn IGeometryImpl> {
+    fn create_rectangle_geometry(&self, rect: Rect) -> Arc<dyn IGeometryImpl> {
         MockGeometryImpl::rectangle(rect)
     }
-    fn create_stream_geometry(&self) -> Rc<dyn IStreamGeometryImpl> {
+    fn create_stream_geometry(&self) -> Arc<dyn IStreamGeometryImpl> {
         MockStreamGeometryImpl::new()
     }
-    fn create_geometry_group(&self, _fill_rule: FillRule, children: &[Rc<dyn IGeometryImpl>]) -> Rc<dyn IGeometryImpl> {
+    fn create_geometry_group(&self, _fill_rule: FillRule, children: &[Arc<dyn IGeometryImpl>]) -> Arc<dyn IGeometryImpl> {
         let bounds = children.iter().fold(None, |acc, g| Rect::union_optional(acc, Some(g.bounds())));
         MockGeometryImpl::new(bounds.unwrap_or_default())
     }
     fn create_combined_geometry(
         &self,
         _combine_mode: GeometryCombineMode,
-        g1: Rc<dyn IGeometryImpl>,
-        g2: Rc<dyn IGeometryImpl>,
-    ) -> Rc<dyn IGeometryImpl> {
+        g1: Arc<dyn IGeometryImpl>,
+        g2: Arc<dyn IGeometryImpl>,
+    ) -> Arc<dyn IGeometryImpl> {
         MockGeometryImpl::new(g1.bounds().union(g2.bounds()))
     }
     fn create_render_target_bitmap(&self, size: PixelSize, dpi: Vector) -> Rc<dyn IRenderTargetBitmapImpl> {

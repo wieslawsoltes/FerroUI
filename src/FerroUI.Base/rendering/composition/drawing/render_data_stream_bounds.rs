@@ -4,6 +4,7 @@ use crate::platform::{IBitmapImpl, IGeometryImpl, IGlyphRunImpl};
 use crate::rendering::scene_graph::{ICustomDrawOperation, LineBoundsHelper};
 use crate::{Matrix, Point, Rect, RoundedRect, Thickness};
 use std::rc::Rc;
+use std::sync::Arc;
 
 /// The bounds accumulated outside of a scope, and how to map the bounds of
 /// the scope's content when it ends.
@@ -77,7 +78,7 @@ impl IRenderDataVisitor for BoundsVisitor {
         _server_brush: Option<&dyn IBrush>,
         server_pen: Option<&dyn IPen>,
         _client_pen: Option<&dyn IPen>,
-        geometry: Option<&Rc<dyn IGeometryImpl>>,
+        geometry: Option<&Arc<dyn IGeometryImpl>>,
     ) {
         self.union(Some(geometry.map(|g| g.get_render_bounds(server_pen)).unwrap_or_default()));
     }
@@ -98,7 +99,7 @@ impl IRenderDataVisitor for BoundsVisitor {
         self.plain_scope()
     }
 
-    fn on_push_geometry_clip(&mut self, _geometry: Option<&Rc<dyn IGeometryImpl>>) -> BoundsScope {
+    fn on_push_geometry_clip(&mut self, _geometry: Option<&Arc<dyn IGeometryImpl>>) -> BoundsScope {
         self.plain_scope()
     }
 

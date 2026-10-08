@@ -19,7 +19,7 @@ use crate::rendering::composition::transport::BatchValueReader;
 use std::any::Any;
 use std::any::TypeId;
 use std::cell::RefCell;
-use std::rc::Rc;
+use std::sync::Arc;
 use std::sync::OnceLock;
 use std::time::Duration;
 
@@ -55,7 +55,7 @@ pub trait ServerCompositionSimpleGeometryHooks: IServerPropertyHost {
 
 /// The server-side properties of `ServerCompositionSimpleGeometry`.
 pub struct ServerCompositionSimpleGeometryProps {
-    geometry_impl: RefCell<Option<Rc<dyn IGeometryImpl>>>,
+    geometry_impl: RefCell<Option<Arc<dyn IGeometryImpl>>>,
 }
 
 impl Default for ServerCompositionSimpleGeometryProps {
@@ -83,10 +83,10 @@ impl ServerCompositionSimpleGeometryProps {
     }
 
     /// The composition property of `GeometryImpl`.
-    pub fn id_of_geometry_impl_property() -> &'static CompositionPropertyOf<Option<Rc<dyn IGeometryImpl>>> {
-        static PROPERTY: OnceLock<CompositionPropertyOf<Option<Rc<dyn IGeometryImpl>>>> = OnceLock::new();
+    pub fn id_of_geometry_impl_property() -> &'static CompositionPropertyOf<Option<Arc<dyn IGeometryImpl>>> {
+        static PROPERTY: OnceLock<CompositionPropertyOf<Option<Arc<dyn IGeometryImpl>>>> = OnceLock::new();
         PROPERTY.get_or_init(|| {
-            CompositionProperty::register::<ServerCompositionSimpleGeometryProps, Option<Rc<dyn IGeometryImpl>>>(
+            CompositionProperty::register::<ServerCompositionSimpleGeometryProps, Option<Arc<dyn IGeometryImpl>>>(
                 "GeometryImpl",
                 "ServerCompositionSimpleGeometry",
                 |obj| props_of::<ServerCompositionSimpleGeometryProps>(obj).geometry_impl.borrow().clone(),
@@ -98,11 +98,11 @@ impl ServerCompositionSimpleGeometryProps {
     }
 
     /// `GeometryImpl`.
-    pub fn geometry_impl(&self) -> Option<Rc<dyn IGeometryImpl>> {
+    pub fn geometry_impl(&self) -> Option<Arc<dyn IGeometryImpl>> {
         self.geometry_impl.borrow().clone()
     }
 
-    pub fn set_geometry_impl(&self, host: &dyn ServerCompositionSimpleGeometryHooks, value: Option<Rc<dyn IGeometryImpl>>) {
+    pub fn set_geometry_impl(&self, host: &dyn ServerCompositionSimpleGeometryHooks, value: Option<Arc<dyn IGeometryImpl>>) {
         let old_value = self.geometry_impl.borrow().clone();
         let mut changed = false;
         if old_value.differs(&value) {
@@ -134,7 +134,7 @@ impl ServerCompositionSimpleGeometryProps {
         ServerCompositionSimpleGeometryHooks::deserialize_changes_extra(host, reader);
         let changed = reader.read::<CompositionSimpleGeometryChangedFields>();
         if changed.contains(CompositionSimpleGeometryChangedFields::GEOMETRY_IMPL) {
-            let value = reader.read_value::<Rc<dyn IGeometryImpl>>();
+            let value = reader.read_value::<Arc<dyn IGeometryImpl>>();
             self.set_geometry_impl(host, value);
         }
         ServerCompositionSimpleGeometryHooks::on_fields_deserialized(host, changed);
@@ -144,7 +144,7 @@ impl ServerCompositionSimpleGeometryProps {
     /// [`deserialize_changes_core`](Self::deserialize_changes_core) reads.
     pub fn serialize_all_changes(
         writer: &mut BatchStreamWriter<'_>,
-        geometry_impl: Option<Rc<dyn IGeometryImpl>>,
+        geometry_impl: Option<Arc<dyn IGeometryImpl>>,
     ) {
         writer.write(CompositionSimpleGeometryChangedFields::GEOMETRY_IMPL);
         writer.write_value(geometry_impl);

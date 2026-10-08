@@ -33,6 +33,7 @@ use crate::{Matrix, Point, Rect, RelativePoint, RoundedRect};
 use std::any::Any;
 use std::cell::Cell;
 use std::rc::Rc;
+use std::sync::Arc;
 
 /// Declares one test per data row of a parameterized test.
 macro_rules! theory {
@@ -165,7 +166,7 @@ fn hit_test_on_geometry_node_with_zero_transform_does_not_throw() {
     let mut ctx = TestContext::new();
     ctx.draw(|c| {
         let state = c.push_transform(Matrix::default());
-        let geometry: Rc<dyn IGeometryImpl> = TestGeometryImpl::new();
+        let geometry: Arc<dyn IGeometryImpl> = TestGeometryImpl::new();
         c.draw_geometry_impl(Some(&black()), None, &geometry);
         c.pop(state);
     });
@@ -464,7 +465,7 @@ fn geometry_node_add_refs_brush_and_pen() {
     let brush = TrackingBrush::new();
     let pen = TrackingPen::new();
     let (as_brush, as_pen): (Rc<dyn IBrush>, Rc<dyn IPen>) = (brush.clone(), pen.clone());
-    let geometry: Rc<dyn IGeometryImpl> = TestGeometryImpl::new();
+    let geometry: Arc<dyn IGeometryImpl> = TestGeometryImpl::new();
     let mut ctx = TestContext::new();
     ctx.draw(|c| c.draw_geometry_impl(Some(&as_brush), Some(&as_pen), &geometry));
     let rd = ctx.get_render_results().expect("something was drawn");
@@ -479,7 +480,7 @@ fn geometry_node_add_refs_brush_and_pen() {
 
 #[test]
 fn geometry_node_hit_test_uses_fill_contains_when_brush_set() {
-    let geom_mock: Rc<dyn IGeometryImpl> = TestGeometryImpl::with_fill(&[Point::new(5.0, 5.0)]);
+    let geom_mock: Arc<dyn IGeometryImpl> = TestGeometryImpl::with_fill(&[Point::new(5.0, 5.0)]);
 
     let mut ctx = TestContext::new();
     ctx.draw(|c| c.draw_geometry_impl(Some(&black()), None, &geom_mock));
@@ -492,7 +493,7 @@ fn geometry_node_hit_test_uses_fill_contains_when_brush_set() {
 #[test]
 fn geometry_node_hit_test_uses_stroke_contains_when_pen_set() {
     let pen: Rc<dyn IPen> = Rc::new(ImmutablePen::with_brush(Some(Brushes::black()), 1.0));
-    let geom_mock: Rc<dyn IGeometryImpl> = TestGeometryImpl::with_stroke_pen(&pen, &[Point::new(5.0, 5.0)]);
+    let geom_mock: Arc<dyn IGeometryImpl> = TestGeometryImpl::with_stroke_pen(&pen, &[Point::new(5.0, 5.0)]);
 
     let mut ctx = TestContext::new();
     ctx.draw(|c| c.draw_geometry_impl(None, Some(&pen), &geom_mock));

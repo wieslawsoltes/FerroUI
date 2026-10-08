@@ -1,6 +1,7 @@
 use std::cell::{Cell, OnceCell, RefCell};
 use std::collections::{HashMap, HashSet};
 use std::rc::Rc;
+use std::sync::Arc;
 
 use crate::logging::{LogArea, LogEventLevel, Logger};
 use crate::media::fonts::tables::cmap::{CharacterToGlyphMap, CmapFormat, CmapTable};
@@ -709,7 +710,7 @@ impl GlyphTypeface {
     /// `draw_geometry` overload that takes a platform geometry. It is the lightweight
     /// platform geometry rather than a `Geometry` object so it can be cached and used on the
     /// hot path; do not mutate it.
-    pub fn get_glyph_outline(&self, glyph_index: u16) -> Option<Rc<dyn IGeometryImpl>> {
+    pub fn get_glyph_outline(&self, glyph_index: u16) -> Option<Arc<dyn IGeometryImpl>> {
         if i32::from(glyph_index) >= self.glyph_count() {
             return None;
         }
@@ -727,7 +728,7 @@ impl GlyphTypeface {
         ctx.dispose();
 
         if built {
-            return Some(Rc::new(ImmutableGeometryImpl::new(geometry)));
+            return Some(std::sync::Arc::new(ImmutableGeometryImpl::new(geometry)));
         }
 
         None

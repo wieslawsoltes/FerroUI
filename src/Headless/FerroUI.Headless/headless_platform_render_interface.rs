@@ -20,9 +20,10 @@ use ferroui_base::platform::{
 };
 use ferroui_base::{FerroLocator, LocatorExtensions, Matrix, PixelSize, Point, Rect, RoundedRect, Size, Vector};
 use std::any::{Any, TypeId};
-use std::cell::{Cell, OnceCell, RefCell};
+use std::cell::{Cell, RefCell};
 use std::io::{Read, Write};
 use std::rc::{Rc, Weak};
+use std::sync::{Arc, Mutex};
 
 thread_local! {
     /// The render interfaces `initialize` registered on this thread: see
@@ -113,23 +114,23 @@ impl IPlatformRenderInterface for HeadlessPlatformRenderInterface {
         panic!("Specified method is not supported.");
     }
 
-    fn create_ellipse_geometry(&self, rect: Rect) -> Rc<dyn IGeometryImpl> {
+    fn create_ellipse_geometry(&self, rect: Rect) -> Arc<dyn IGeometryImpl> {
         HeadlessGeometryStub::new(rect)
     }
 
-    fn create_line_geometry(&self, p1: Point, p2: Point) -> Rc<dyn IGeometryImpl> {
+    fn create_line_geometry(&self, p1: Point, p2: Point) -> Arc<dyn IGeometryImpl> {
         HeadlessGeometryStub::line(p1, p2)
     }
 
-    fn create_rectangle_geometry(&self, rect: Rect) -> Rc<dyn IGeometryImpl> {
+    fn create_rectangle_geometry(&self, rect: Rect) -> Arc<dyn IGeometryImpl> {
         HeadlessGeometryStub::rectangle(rect)
     }
 
-    fn create_stream_geometry(&self) -> Rc<dyn IStreamGeometryImpl> {
+    fn create_stream_geometry(&self) -> Arc<dyn IStreamGeometryImpl> {
         HeadlessStreamingGeometryStub::new()
     }
 
-    fn create_geometry_group(&self, _fill_rule: FillRule, children: &[Rc<dyn IGeometryImpl>]) -> Rc<dyn IGeometryImpl> {
+    fn create_geometry_group(&self, _fill_rule: FillRule, children: &[Arc<dyn IGeometryImpl>]) -> Arc<dyn IGeometryImpl> {
         let mut bounds: Option<Rect> = None;
         for child in children {
             bounds = Some(match bounds {
@@ -143,9 +144,9 @@ impl IPlatformRenderInterface for HeadlessPlatformRenderInterface {
     fn create_combined_geometry(
         &self,
         _combine_mode: GeometryCombineMode,
-        g1: Rc<dyn IGeometryImpl>,
-        g2: Rc<dyn IGeometryImpl>,
-    ) -> Rc<dyn IGeometryImpl> {
+        g1: Arc<dyn IGeometryImpl>,
+        g2: Arc<dyn IGeometryImpl>,
+    ) -> Arc<dyn IGeometryImpl> {
         HeadlessGeometryStub::new(g1.bounds().union(g2.bounds()))
     }
 
@@ -238,7 +239,7 @@ impl IPlatformRenderInterface for HeadlessPlatformRenderInterface {
         Rc::new(HeadlessBitmapStub::from_pixel_size(destination_size, Vector::new(96.0, 96.0)))
     }
 
-    fn build_glyph_run_geometry(&self, glyph_run: &GlyphRun) -> Rc<dyn IGeometryImpl> {
+    fn build_glyph_run_geometry(&self, glyph_run: &GlyphRun) -> Arc<dyn IGeometryImpl> {
         HeadlessGeometryStub::new(glyph_run.bounds())
     }
 
@@ -342,7 +343,7 @@ fn base_get_render_bounds(bounds: Rect, pen: Option<&dyn IPen>) -> Rect {
 }
 
 /// `HeadlessGeometryStub.Intersect`.
-fn base_intersect(bounds: Rect, geometry: &dyn IGeometryImpl) -> Rc<HeadlessGeometryStub> {
+fn base_intersect(bounds: Rect, geometry: &dyn IGeometryImpl) -> Arc<HeadlessGeometryStub> {
     let mut intersection = geometry.bounds().intersect(bounds);
     if intersection == Rect::default() {
         // In the case that a 0-width or 0-height geometry, like a line is being tested
@@ -456,36 +457,36 @@ fn edge_points_of(geometry: &dyn IGeometryImpl) -> Option<Vec<Point>> {
 /// `HeadlessGeometryStub`, and with points `HeadlessGeometryWithEdgesStub`
 /// (`HeadlessLineGeometryContextStub`, `HeadlessRectangleGeometryContextStub`).
 struct HeadlessGeometryStub {
-    this: Weak<HeadlessGeometryStub>,
+    this: std::sync::Weak<HeadlessGeometryStub>,
     bounds: Rect,
     points: Option<Vec<Point>>,
 }
 
 impl HeadlessGeometryStub {
-    fn create(bounds: Rect, points: Option<Vec<Point>>) -> Rc<HeadlessGeometryStub> {
-        Rc::new_cyclic(|this| HeadlessGeometryStub { this: this.clone(), bounds, points })
+    fn create(bounds: Rect, points: Option<Vec<Point>>) -> Arc<HeadlessGeometryStub> {
+        Arc::new_cyclic(|this| HeadlessGeometryStub { this: this.clone(), bounds, points })
     }
 
-    fn new(bounds: Rect) -> Rc<HeadlessGeometryStub> {
+    fn new(bounds: Rect) -> Arc<HeadlessGeometryStub> {
         Self::create(bounds, None)
     }
 
     /// `HeadlessLineGeometryContextStub`.
-    fn line(p1: Point, p2: Point) -> Rc<HeadlessGeometryStub> {
+    fn line(p1: Point, p2: Point) -> Arc<HeadlessGeometryStub> {
         let bounds =
             Rect::from_points(Point::new(p1.x.min(p2.x), p1.y.min(p2.y)), Point::new(p1.x.max(p2.x), p1.y.max(p2.y)));
         Self::create(bounds, Some(vec![p1, p2]))
     }
 
     /// `HeadlessRectangleGeometryContextStub`.
-    fn rectangle(bounds: Rect) -> Rc<HeadlessGeometryStub> {
+    fn rectangle(bounds: Rect) -> Arc<HeadlessGeometryStub> {
         Self::create(
             bounds,
             Some(vec![bounds.top_left(), bounds.top_right(), bounds.bottom_left(), bounds.bottom_right()]),
         )
     }
 
-    fn rc(&self) -> Rc<HeadlessGeometryStub> {
+    fn rc(&self) -> Arc<HeadlessGeometryStub> {
         self.this.upgrade().expect("the geometry is alive while it is used")
     }
 }
@@ -507,7 +508,7 @@ impl IGeometryImpl for HeadlessGeometryStub {
         base_get_render_bounds(self.bounds, pen)
     }
 
-    fn get_widened_geometry(&self, _pen: &dyn IPen) -> Rc<dyn IGeometryImpl> {
+    fn get_widened_geometry(&self, _pen: &dyn IPen) -> Arc<dyn IGeometryImpl> {
         self.rc()
     }
 
@@ -515,13 +516,13 @@ impl IGeometryImpl for HeadlessGeometryStub {
         false
     }
 
-    fn intersect(&self, geometry: &dyn IGeometryImpl) -> Option<Rc<dyn IGeometryImpl>> {
-        let intersection: Rc<dyn IGeometryImpl> = base_intersect(self.bounds, geometry);
+    fn intersect(&self, geometry: &dyn IGeometryImpl) -> Option<Arc<dyn IGeometryImpl>> {
+        let intersection: Arc<dyn IGeometryImpl> = base_intersect(self.bounds, geometry);
         Some(intersection)
     }
 
-    fn with_transform(&self, transform: Matrix) -> Rc<dyn ITransformedGeometryImpl> {
-        let source: Rc<dyn IGeometryImpl> = self.rc();
+    fn with_transform(&self, transform: Matrix) -> Arc<dyn ITransformedGeometryImpl> {
+        let source: Arc<dyn IGeometryImpl> = self.rc();
         HeadlessTransformedGeometryStub::new(source, transform)
     }
 
@@ -538,7 +539,7 @@ impl IGeometryImpl for HeadlessGeometryStub {
         _start_distance: f64,
         _stop_distance: f64,
         _start_on_begin_figure: bool,
-    ) -> Option<Rc<dyn IGeometryImpl>> {
+    ) -> Option<Arc<dyn IGeometryImpl>> {
         None
     }
 
@@ -564,15 +565,15 @@ impl IGeometryImpl for HeadlessGeometryStub {
 
 /// `HeadlessTransformedGeometryStub`.
 struct HeadlessTransformedGeometryStub {
-    this: Weak<HeadlessTransformedGeometryStub>,
+    this: std::sync::Weak<HeadlessTransformedGeometryStub>,
     bounds: Rect,
-    source_geometry: Rc<dyn IGeometryImpl>,
+    source_geometry: Arc<dyn IGeometryImpl>,
     transform: Matrix,
-    points: OnceCell<Vec<Point>>,
+    points: std::sync::OnceLock<Vec<Point>>,
 }
 
 impl HeadlessTransformedGeometryStub {
-    fn new(b: Rc<dyn IGeometryImpl>, transform: Matrix) -> Rc<HeadlessTransformedGeometryStub> {
+    fn new(b: Arc<dyn IGeometryImpl>, transform: Matrix) -> Arc<HeadlessTransformedGeometryStub> {
         // `Fix`: the transform of a transformed geometry is combined with the new one over the
         // same source.
         let (b, transform) = match b.as_any().downcast_ref::<HeadlessTransformedGeometryStub>() {
@@ -581,16 +582,16 @@ impl HeadlessTransformedGeometryStub {
         };
         let bounds = b.bounds().transform_to_aabb(transform);
 
-        Rc::new_cyclic(|this| HeadlessTransformedGeometryStub {
+        Arc::new_cyclic(|this| HeadlessTransformedGeometryStub {
             this: this.clone(),
             bounds,
             source_geometry: b,
             transform,
-            points: OnceCell::new(),
+            points: std::sync::OnceLock::new(),
         })
     }
 
-    fn rc(&self) -> Rc<HeadlessTransformedGeometryStub> {
+    fn rc(&self) -> Arc<HeadlessTransformedGeometryStub> {
         self.this.upgrade().expect("the geometry is alive while it is used")
     }
 
@@ -624,7 +625,7 @@ impl IGeometryImpl for HeadlessTransformedGeometryStub {
         base_get_render_bounds(self.bounds, pen)
     }
 
-    fn get_widened_geometry(&self, _pen: &dyn IPen) -> Rc<dyn IGeometryImpl> {
+    fn get_widened_geometry(&self, _pen: &dyn IPen) -> Arc<dyn IGeometryImpl> {
         self.rc()
     }
 
@@ -632,13 +633,13 @@ impl IGeometryImpl for HeadlessTransformedGeometryStub {
         false
     }
 
-    fn intersect(&self, geometry: &dyn IGeometryImpl) -> Option<Rc<dyn IGeometryImpl>> {
-        let intersection: Rc<dyn IGeometryImpl> = base_intersect(self.bounds, geometry);
+    fn intersect(&self, geometry: &dyn IGeometryImpl) -> Option<Arc<dyn IGeometryImpl>> {
+        let intersection: Arc<dyn IGeometryImpl> = base_intersect(self.bounds, geometry);
         Some(intersection)
     }
 
-    fn with_transform(&self, transform: Matrix) -> Rc<dyn ITransformedGeometryImpl> {
-        let source: Rc<dyn IGeometryImpl> = self.rc();
+    fn with_transform(&self, transform: Matrix) -> Arc<dyn ITransformedGeometryImpl> {
+        let source: Arc<dyn IGeometryImpl> = self.rc();
         HeadlessTransformedGeometryStub::new(source, transform)
     }
 
@@ -655,7 +656,7 @@ impl IGeometryImpl for HeadlessTransformedGeometryStub {
         _start_distance: f64,
         _stop_distance: f64,
         _start_on_begin_figure: bool,
-    ) -> Option<Rc<dyn IGeometryImpl>> {
+    ) -> Option<Arc<dyn IGeometryImpl>> {
         None
     }
 
@@ -675,7 +676,7 @@ impl IGeometryImpl for HeadlessTransformedGeometryStub {
 }
 
 impl ITransformedGeometryImpl for HeadlessTransformedGeometryStub {
-    fn source_geometry(&self) -> Rc<dyn IGeometryImpl> {
+    fn source_geometry(&self) -> Arc<dyn IGeometryImpl> {
         self.source_geometry.clone()
     }
 
@@ -686,30 +687,30 @@ impl ITransformedGeometryImpl for HeadlessTransformedGeometryStub {
 
 /// `HeadlessStreamingGeometryStub`.
 struct HeadlessStreamingGeometryStub {
-    this: Weak<HeadlessStreamingGeometryStub>,
+    this: std::sync::Weak<HeadlessStreamingGeometryStub>,
     /// `Bounds` of the base class, set when the context is disposed.
-    bounds: Rc<Cell<Rect>>,
+    bounds: Arc<Mutex<Rect>>,
     /// The points of the one context of the geometry.
-    points: Rc<RefCell<Vec<Point>>>,
+    points: Arc<Mutex<Vec<Point>>>,
 }
 
 impl HeadlessStreamingGeometryStub {
-    fn new() -> Rc<HeadlessStreamingGeometryStub> {
-        Rc::new_cyclic(|this| HeadlessStreamingGeometryStub {
+    fn new() -> Arc<HeadlessStreamingGeometryStub> {
+        Arc::new_cyclic(|this| HeadlessStreamingGeometryStub {
             this: this.clone(),
-            bounds: Rc::new(Cell::new(Rect::default())),
-            points: Rc::new(RefCell::new(Vec::new())),
+            bounds: Arc::new(Mutex::new(Rect::default())),
+            points: Arc::new(Mutex::new(Vec::new())),
         })
     }
 
-    fn rc(&self) -> Rc<HeadlessStreamingGeometryStub> {
+    fn rc(&self) -> Arc<HeadlessStreamingGeometryStub> {
         self.this.upgrade().expect("the geometry is alive while it is used")
     }
 }
 
 impl IGeometryImpl for HeadlessStreamingGeometryStub {
     fn bounds(&self) -> Rect {
-        self.bounds.get()
+        *self.bounds.lock().unwrap()
     }
 
     fn contour_length(&self) -> f64 {
@@ -720,7 +721,7 @@ impl IGeometryImpl for HeadlessStreamingGeometryStub {
     fn fill_contains(&self, point: Point) -> bool {
         // Use the algorithm from https://www.blackpawn.com/texts/pointinpoly/default.html
         // to determine if the point is in the geometry (since it will always be convex in this situation)
-        let points = self.points.borrow();
+        let points = self.points.lock().unwrap();
         for i in 0..points.len() {
             let a = points[i];
             let b = points[(i + 1) % points.len()];
@@ -750,10 +751,10 @@ impl IGeometryImpl for HeadlessStreamingGeometryStub {
     }
 
     fn get_render_bounds(&self, pen: Option<&dyn IPen>) -> Rect {
-        base_get_render_bounds(self.bounds.get(), pen)
+        base_get_render_bounds(*self.bounds.lock().unwrap(), pen)
     }
 
-    fn get_widened_geometry(&self, _pen: &dyn IPen) -> Rc<dyn IGeometryImpl> {
+    fn get_widened_geometry(&self, _pen: &dyn IPen) -> Arc<dyn IGeometryImpl> {
         self.rc()
     }
 
@@ -761,13 +762,13 @@ impl IGeometryImpl for HeadlessStreamingGeometryStub {
         false
     }
 
-    fn intersect(&self, geometry: &dyn IGeometryImpl) -> Option<Rc<dyn IGeometryImpl>> {
-        let intersection: Rc<dyn IGeometryImpl> = base_intersect(self.bounds.get(), geometry);
+    fn intersect(&self, geometry: &dyn IGeometryImpl) -> Option<Arc<dyn IGeometryImpl>> {
+        let intersection: Arc<dyn IGeometryImpl> = base_intersect(*self.bounds.lock().unwrap(), geometry);
         Some(intersection)
     }
 
-    fn with_transform(&self, transform: Matrix) -> Rc<dyn ITransformedGeometryImpl> {
-        let source: Rc<dyn IGeometryImpl> = self.rc();
+    fn with_transform(&self, transform: Matrix) -> Arc<dyn ITransformedGeometryImpl> {
+        let source: Arc<dyn IGeometryImpl> = self.rc();
         HeadlessTransformedGeometryStub::new(source, transform)
     }
 
@@ -784,18 +785,18 @@ impl IGeometryImpl for HeadlessStreamingGeometryStub {
         _start_distance: f64,
         _stop_distance: f64,
         _start_on_begin_figure: bool,
-    ) -> Option<Rc<dyn IGeometryImpl>> {
+    ) -> Option<Arc<dyn IGeometryImpl>> {
         None
     }
 
     fn get_fill_intersection_result(&self, geometry: &dyn IGeometryImpl) -> IntersectionResult {
         // `HeadlessStreamingGeometryContextStub.FillContains(IHeadlessGeometryWithEdges)`.
         if let Some(other) = edge_points_of(geometry) {
-            let points = self.points.borrow();
+            let points = self.points.lock().unwrap();
             return if separated(&points, &other) { IntersectionResult::Empty } else { IntersectionResult::Intersects };
         }
 
-        base_get_fill_intersection_result(self.bounds.get(), geometry)
+        base_get_fill_intersection_result(*self.bounds.lock().unwrap(), geometry)
     }
 
     fn as_stream_geometry(&self) -> Option<&dyn IStreamGeometryImpl> {
@@ -809,7 +810,7 @@ impl IGeometryImpl for HeadlessStreamingGeometryStub {
 
 impl IStreamGeometryImpl for HeadlessStreamingGeometryStub {
     /// As upstream, the clone is the geometry itself.
-    fn clone_geometry(&self) -> Rc<dyn IStreamGeometryImpl> {
+    fn clone_geometry(&self) -> Arc<dyn IStreamGeometryImpl> {
         self.rc()
     }
 
@@ -823,13 +824,13 @@ impl IStreamGeometryImpl for HeadlessStreamingGeometryStub {
 /// `HeadlessStreamingGeometryContextStub`: a handle to the points and the
 /// bounds of its geometry.
 struct HeadlessStreamingGeometryContextStub {
-    bounds: Rc<Cell<Rect>>,
-    points: Rc<RefCell<Vec<Point>>>,
+    bounds: Arc<Mutex<Rect>>,
+    points: Arc<Mutex<Vec<Point>>>,
 }
 
 impl HeadlessStreamingGeometryContextStub {
     fn track(&mut self, pt: Point) {
-        self.points.borrow_mut().push(pt);
+        self.points.lock().unwrap().push(pt);
     }
 
     fn calculate_bounds(&self) -> Rect {
@@ -838,7 +839,7 @@ impl HeadlessStreamingGeometryContextStub {
         let mut top = f64::MAX;
         let mut bottom = f64::MIN;
 
-        for p in self.points.borrow().iter() {
+        for p in self.points.lock().unwrap().iter() {
             left = p.x.min(left);
             right = p.x.max(right);
             top = p.y.min(top);
@@ -888,7 +889,8 @@ impl IGeometryContext for HeadlessStreamingGeometryContextStub {
     fn set_fill_rule(&mut self, _fill_rule: FillRule) {}
 
     fn dispose(&mut self) {
-        self.bounds.set(self.calculate_bounds());
+        let bounds = self.calculate_bounds();
+        *self.bounds.lock().unwrap() = bounds;
     }
 }
 

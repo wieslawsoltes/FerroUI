@@ -47,6 +47,7 @@ use crate::{Matrix, Point, Rect, Ref, RoundedRect};
 use std::cell::RefCell;
 use std::ops::{Deref, DerefMut};
 use std::rc::Rc;
+use std::sync::Arc;
 
 /// The overridable part of a drawing context: the `*Core` members.
 ///
@@ -74,7 +75,7 @@ pub trait IDrawingContextCore {
         &mut self,
         brush: Option<&Rc<dyn IBrush>>,
         pen: Option<&Rc<dyn IPen>>,
-        geometry: &Rc<dyn IGeometryImpl>,
+        geometry: &Arc<dyn IGeometryImpl>,
     );
 
     /// Draws a rectangle with the specified brush and pen.
@@ -273,7 +274,7 @@ impl<'a> DrawingContext<'a> {
         &mut self,
         brush: Option<&Rc<dyn IBrush>>,
         pen: Option<&Rc<dyn IPen>>,
-        geometry: &Rc<dyn IGeometryImpl>,
+        geometry: &Arc<dyn IGeometryImpl>,
     ) {
         if brush.is_some() || pen_is_visible(pen) {
             self.core().draw_geometry_impl_core(brush, pen, geometry);

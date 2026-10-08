@@ -3,13 +3,13 @@ use crate::platform::{self, IGeometryContext, IGeometryImpl, IStreamGeometryImpl
 use crate::utilities::FormatError;
 use crate::{ferro_class, ferro_impl_classes, instantiate, FerroObjectImpl, Ref};
 use std::cell::RefCell;
-use std::rc::Rc;
+use std::sync::Arc;
 
 /// Represents the geometry of an arbitrarily complex shape.
 #[repr(C)]
 pub struct StreamGeometry {
     base: Geometry,
-    impl_: RefCell<Option<Rc<dyn IStreamGeometryImpl>>>,
+    impl_: RefCell<Option<Arc<dyn IStreamGeometryImpl>>>,
 }
 
 ferro_class!(StreamGeometry: Geometry);
@@ -23,7 +23,7 @@ impl GeometryImpl for StreamGeometry {
         StreamGeometry::with_impl(stream.clone_geometry()).upcast()
     }
 
-    fn create_defining_geometry(this: &Self) -> Option<Rc<dyn IGeometryImpl>> {
+    fn create_defining_geometry(this: &Self) -> Option<Arc<dyn IGeometryImpl>> {
         let mut impl_ = this.impl_.borrow_mut();
         let geometry = impl_.get_or_insert_with(|| platform::render_interface().create_stream_geometry()).clone();
         Some(geometry)
@@ -41,7 +41,7 @@ impl StreamGeometry {
     }
 
     /// Creates a stream geometry over a platform implementation.
-    fn with_impl(impl_: Rc<dyn IStreamGeometryImpl>) -> Ref<Self> {
+    fn with_impl(impl_: Arc<dyn IStreamGeometryImpl>) -> Ref<Self> {
         instantiate(Self { base: Geometry::construct(), impl_: RefCell::new(Some(impl_)) })
     }
 

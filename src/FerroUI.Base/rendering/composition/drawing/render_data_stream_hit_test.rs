@@ -7,6 +7,7 @@ use crate::platform::{IBitmapImpl, IGeometryImpl, IGlyphRunImpl};
 use crate::rendering::scene_graph::ICustomDrawOperation;
 use crate::{Matrix, Point, Rect, Ref, RoundedRect};
 use std::rc::Rc;
+use std::sync::Arc;
 
 /// What a hit-tested push has to restore.
 pub struct HitTestScope {
@@ -149,7 +150,7 @@ impl IRenderDataVisitor for HitTestVisitor {
         server_brush: Option<&dyn IBrush>,
         _server_pen: Option<&dyn IPen>,
         client_pen: Option<&dyn IPen>,
-        geometry: Option<&Rc<dyn IGeometryImpl>>,
+        geometry: Option<&Arc<dyn IGeometryImpl>>,
     ) {
         let Some(geometry) = geometry else { return };
         if !self.live {
@@ -231,7 +232,7 @@ impl IRenderDataVisitor for HitTestVisitor {
         scope
     }
 
-    fn on_push_geometry_clip(&mut self, geometry: Option<&Rc<dyn IGeometryImpl>>) -> HitTestScope {
+    fn on_push_geometry_clip(&mut self, geometry: Option<&Arc<dyn IGeometryImpl>>) -> HitTestScope {
         let scope = HitTestScope::new(self.live);
         if let (true, Some(geometry)) = (self.live, geometry) {
             if self.current_point.is_some_and(|point| !geometry.fill_contains(point))
@@ -405,8 +406,8 @@ fn hit_test_rectangle_geometry(
 fn hit_test_geometry(
     server_brush: Option<&dyn IBrush>,
     client_pen: Option<&dyn IPen>,
-    current_geometry: Option<&Rc<dyn IGeometryImpl>>,
-    target_geometry: Option<&Rc<dyn IGeometryImpl>>,
+    current_geometry: Option<&Arc<dyn IGeometryImpl>>,
+    target_geometry: Option<&Arc<dyn IGeometryImpl>>,
 ) -> IntersectionResult {
     let (Some(current_geometry), Some(target_geometry)) = (current_geometry, target_geometry) else {
         return IntersectionResult::Empty;

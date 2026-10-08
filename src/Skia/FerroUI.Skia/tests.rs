@@ -32,6 +32,7 @@ use ferroui_base::{
 use std::any::{Any, TypeId};
 use std::cell::{Cell, RefCell};
 use std::rc::Rc;
+use std::sync::Arc;
 
 const DPI: Vector = Vector::new(96.0, 96.0);
 
@@ -1432,8 +1433,8 @@ fn geometries_of_another_backend_are_not_recognized() {
         fn get_render_bounds(&self, _: Option<&dyn IPen>) -> Rect {
             Rect::default()
         }
-        fn get_widened_geometry(&self, _: &dyn IPen) -> Rc<dyn IGeometryImpl> {
-            Rc::new(Foreign)
+        fn get_widened_geometry(&self, _: &dyn IPen) -> Arc<dyn IGeometryImpl> {
+            Arc::new(Foreign)
         }
         fn fill_contains(&self, _: Point) -> bool {
             true
@@ -1441,13 +1442,13 @@ fn geometries_of_another_backend_are_not_recognized() {
         fn get_fill_intersection_result(&self, _: &dyn IGeometryImpl) -> IntersectionResult {
             IntersectionResult::Empty
         }
-        fn intersect(&self, _: &dyn IGeometryImpl) -> Option<Rc<dyn IGeometryImpl>> {
+        fn intersect(&self, _: &dyn IGeometryImpl) -> Option<Arc<dyn IGeometryImpl>> {
             None
         }
         fn stroke_contains(&self, _: Option<&dyn IPen>, _: Point) -> bool {
             false
         }
-        fn with_transform(&self, _: Matrix) -> Rc<dyn ferroui_base::platform::ITransformedGeometryImpl> {
+        fn with_transform(&self, _: Matrix) -> Arc<dyn ferroui_base::platform::ITransformedGeometryImpl> {
             unimplemented!()
         }
         fn try_get_point_at_distance(&self, _: f64) -> Option<Point> {
@@ -1456,14 +1457,14 @@ fn geometries_of_another_backend_are_not_recognized() {
         fn try_get_point_and_tangent_at_distance(&self, _: f64) -> Option<(Point, Point)> {
             None
         }
-        fn try_get_segment(&self, _: f64, _: f64, _: bool) -> Option<Rc<dyn IGeometryImpl>> {
+        fn try_get_segment(&self, _: f64, _: f64, _: bool) -> Option<Arc<dyn IGeometryImpl>> {
             None
         }
     }
 
     let render_interface = render_interface();
     let ours = render_interface.create_rectangle_geometry(Rect::new(0.0, 0.0, 10.0, 10.0));
-    let foreign: Rc<dyn IGeometryImpl> = Rc::new(Foreign);
+    let foreign: Arc<dyn IGeometryImpl> = Arc::new(Foreign);
 
     assert!(try_get_geometry_impl(&*ours).is_some());
     assert!(try_get_geometry_impl(&*foreign).is_none());

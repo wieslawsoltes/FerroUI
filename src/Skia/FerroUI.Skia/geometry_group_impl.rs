@@ -1,25 +1,25 @@
 use crate::geometry_impl::{
-    impl_geometry_impl, register, try_get_geometry_impl, FillPath, GeometryImpl, GeometryImplBase,
+    impl_geometry_impl, register, try_get_geometry_impl, FillPath, GeometryImpl, GeometryImplBase, Shared,
 };
 use crate::skia_sharp_extensions::to_rect;
 use ferroui_base::media::FillRule;
 use ferroui_base::platform::IGeometryImpl;
 use ferroui_base::Rect;
 use skia_safe::{Path, PathBuilder, PathFillType};
-use std::rc::Rc;
+use std::sync::Arc;
 
 /// A Skia implementation of a geometry group.
 pub struct GeometryGroupImpl {
     base: GeometryImplBase,
     bounds: Rect,
-    stroke_path: Path,
-    fill: FillPath,
+    stroke_path: Shared<Path>,
+    fill: Shared<FillPath>,
 }
 
 impl GeometryGroupImpl {
     /// Creates a geometry from the paths of `children`. Children of another
     /// backend are skipped.
-    pub fn new(fill_rule: FillRule, children: &[Rc<dyn IGeometryImpl>]) -> Rc<Self> {
+    pub fn new(fill_rule: FillRule, children: &[Arc<dyn IGeometryImpl>]) -> Arc<Self> {
         let fill_type = if fill_rule == FillRule::NonZero { PathFillType::Winding } else { PathFillType::EvenOdd };
         let children: Vec<&dyn GeometryImpl> =
             children.iter().filter_map(|child| try_get_geometry_impl(&**child)).collect();
@@ -55,7 +55,7 @@ impl GeometryGroupImpl {
 
         let bounds = to_rect(stroke_path.compute_tight_bounds());
 
-        register(Self { base: GeometryImplBase::new(), bounds, stroke_path, fill })
+        register(Self { base: GeometryImplBase::new(), bounds, stroke_path: Shared::new(stroke_path), fill: Shared::new(fill) })
     }
 
     fn geometry_bounds(&self) -> Rect {
@@ -69,11 +69,11 @@ impl GeometryImpl for GeometryGroupImpl {
     }
 
     fn stroke_path(&self) -> Option<Path> {
-        Some(self.stroke_path.clone())
+        Some(self.stroke_path.get())
     }
 
     fn fill(&self) -> FillPath {
-        self.fill.clone()
+        self.fill.get()
     }
 }
 

@@ -5,6 +5,7 @@ use crate::rendering::composition::server::ServerObjectId;
 use crate::rendering::scene_graph::ICustomDrawOperation;
 use std::collections::HashMap;
 use std::rc::Rc;
+use std::sync::Arc;
 
 /// The handle of "no resource".
 pub const NULL_HANDLE: i32 = -1;
@@ -19,7 +20,7 @@ pub const NULL_HANDLE: i32 = -1;
 pub enum RenderDataResource {
     Brush(Rc<dyn IBrush>),
     Pen(Rc<dyn IPen>),
-    GeometryImpl(Rc<dyn IGeometryImpl>),
+    GeometryImpl(Arc<dyn IGeometryImpl>),
     Geometry(Rc<dyn IRenderDataGeometry>),
     /// A recorded glyph run: one counted reference (`IRef<IGlyphRunImpl>`
     /// upstream), shared by the client render data and the server render
@@ -64,7 +65,7 @@ impl RenderDataResource {
         match self {
             RenderDataResource::Brush(v) => (Kind::Brush, address(v)),
             RenderDataResource::Pen(v) | RenderDataResource::ClientPen(v) => (Kind::Pen, address(v)),
-            RenderDataResource::GeometryImpl(v) => (Kind::GeometryImpl, address(v)),
+            RenderDataResource::GeometryImpl(v) => (Kind::GeometryImpl, std::sync::Arc::as_ptr(v) as *const () as usize),
             RenderDataResource::Geometry(v) => (Kind::Geometry, address(v)),
             RenderDataResource::GlyphRun(v) => (Kind::GlyphRun, address(v)),
             RenderDataResource::Bitmap(v) => (Kind::Bitmap, address(v)),
@@ -144,7 +145,7 @@ impl RenderDataResources {
         }
     }
 
-    pub fn geometry_impl(&self, handle: i32) -> Option<Rc<dyn IGeometryImpl>> {
+    pub fn geometry_impl(&self, handle: i32) -> Option<Arc<dyn IGeometryImpl>> {
         match self.get(handle)? {
             RenderDataResource::GeometryImpl(geometry) => Some(geometry.clone()),
             RenderDataResource::Geometry(geometry) | RenderDataResource::ServerGeometry { client: geometry, .. } => {

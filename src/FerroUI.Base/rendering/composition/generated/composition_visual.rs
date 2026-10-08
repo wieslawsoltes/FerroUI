@@ -40,6 +40,7 @@ use std::any::TypeId;
 use std::cell::Cell;
 use std::cell::RefCell;
 use std::rc::Rc;
+use std::sync::Arc;
 use std::sync::OnceLock;
 use std::time::Duration;
 
@@ -117,7 +118,7 @@ pub trait CompositionVisualHooks: ICompositionObjectHost {
     fn on_opacity_changed(&self) {}
     fn on_opacity_changing(&self) {}
 
-    fn validate_clip_change(&self, _old_value: &Option<Rc<dyn IGeometryImpl>>, _new_value: &Option<Rc<dyn IGeometryImpl>>) {}
+    fn validate_clip_change(&self, _old_value: &Option<Arc<dyn IGeometryImpl>>, _new_value: &Option<Arc<dyn IGeometryImpl>>) {}
     fn on_clip_changed(&self) {}
     fn on_clip_changing(&self) {}
 
@@ -197,7 +198,7 @@ pub struct CompositionVisualProps {
     parent: RefCell<Option<Rc<dyn ICompositionObject>>>,
     visible: Cell<bool>,
     opacity: Cell<f32>,
-    clip: RefCell<Option<Rc<dyn IGeometryImpl>>>,
+    clip: RefCell<Option<Arc<dyn IGeometryImpl>>>,
     clip_to_bounds: Cell<bool>,
     offset: Cell<Vector3D>,
     translation: Cell<Vector3D>,
@@ -405,12 +406,12 @@ impl CompositionVisualProps {
     }
 
     /// `Clip` (internal).
-    pub fn clip(&self) -> Option<Rc<dyn IGeometryImpl>> {
+    pub fn clip(&self) -> Option<Arc<dyn IGeometryImpl>> {
         self.clip.borrow().clone()
     }
 
     /// Sets `Clip` (internal).
-    pub fn set_clip(&self, host: &dyn CompositionVisualHooks, value: Option<Rc<dyn IGeometryImpl>>) {
+    pub fn set_clip(&self, host: &dyn CompositionVisualHooks, value: Option<Arc<dyn IGeometryImpl>>) {
         let mut changed = false;
         let old_value = self.clip.borrow().clone();
         if old_value.differs(&value) {
@@ -1253,7 +1254,7 @@ pub struct ServerCompositionVisualProps {
     parent: RefCell<Option<Rc<dyn IServerObject>>>,
     visible: Cell<bool>,
     opacity: Cell<f32>,
-    clip: RefCell<Option<Rc<dyn IGeometryImpl>>>,
+    clip: RefCell<Option<Arc<dyn IGeometryImpl>>>,
     clip_to_bounds: Cell<bool>,
     offset: Cell<Vector3D>,
     translation: Cell<Vector3D>,
@@ -1451,10 +1452,10 @@ impl ServerCompositionVisualProps {
     }
 
     /// The composition property of `Clip`.
-    pub fn id_of_clip_property() -> &'static CompositionPropertyOf<Option<Rc<dyn IGeometryImpl>>> {
-        static PROPERTY: OnceLock<CompositionPropertyOf<Option<Rc<dyn IGeometryImpl>>>> = OnceLock::new();
+    pub fn id_of_clip_property() -> &'static CompositionPropertyOf<Option<Arc<dyn IGeometryImpl>>> {
+        static PROPERTY: OnceLock<CompositionPropertyOf<Option<Arc<dyn IGeometryImpl>>>> = OnceLock::new();
         PROPERTY.get_or_init(|| {
-            CompositionProperty::register::<ServerCompositionVisualProps, Option<Rc<dyn IGeometryImpl>>>(
+            CompositionProperty::register::<ServerCompositionVisualProps, Option<Arc<dyn IGeometryImpl>>>(
                 "Clip",
                 "ServerCompositionVisual",
                 |obj| props_of::<ServerCompositionVisualProps>(obj).clip.borrow().clone(),
@@ -1466,11 +1467,11 @@ impl ServerCompositionVisualProps {
     }
 
     /// `Clip`.
-    pub fn clip(&self) -> Option<Rc<dyn IGeometryImpl>> {
+    pub fn clip(&self) -> Option<Arc<dyn IGeometryImpl>> {
         self.clip.borrow().clone()
     }
 
-    pub fn set_clip(&self, host: &dyn ServerCompositionVisualHooks, value: Option<Rc<dyn IGeometryImpl>>) {
+    pub fn set_clip(&self, host: &dyn ServerCompositionVisualHooks, value: Option<Arc<dyn IGeometryImpl>>) {
         let old_value = self.clip.borrow().clone();
         let mut changed = false;
         if old_value.differs(&value) {
@@ -2076,7 +2077,7 @@ impl ServerCompositionVisualProps {
             self.set_opacity(host, value);
         }
         if changed.contains(CompositionVisualChangedFields::CLIP) {
-            let value = reader.read_value::<Rc<dyn IGeometryImpl>>();
+            let value = reader.read_value::<Arc<dyn IGeometryImpl>>();
             self.set_clip(host, value);
         }
         if changed.contains(CompositionVisualChangedFields::CLIP_TO_BOUNDS_ANIMATED) {

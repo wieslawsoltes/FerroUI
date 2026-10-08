@@ -15,6 +15,7 @@ use ferroui_base::{
     StyledElementImpl, VisualImpl,
 };
 use std::rc::Rc;
+use std::sync::Arc;
 
 #[repr(C)]
 struct TestShape {
@@ -56,7 +57,7 @@ impl IDrawingContextCore for RecordingDrawingContext {
         &mut self,
         _brush: Option<&Rc<dyn IBrush>>,
         pen: Option<&Rc<dyn IPen>>,
-        _geometry: &Rc<dyn IGeometryImpl>,
+        _geometry: &Arc<dyn IGeometryImpl>,
     ) {
         self.last_pen = pen.cloned();
     }

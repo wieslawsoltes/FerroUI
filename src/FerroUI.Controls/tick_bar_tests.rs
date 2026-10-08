@@ -12,6 +12,7 @@ use ferroui_base::platform::{IBitmapImpl, IGeometryImpl};
 use ferroui_base::rendering::scene_graph::ICustomDrawOperation;
 use ferroui_base::{Matrix, Point, Rect, Ref, RoundedRect};
 use std::rc::Rc;
+use std::sync::Arc;
 
 #[derive(Default)]
 struct RecordingDrawingContext {
@@ -29,7 +30,7 @@ impl IDrawingContextCore for RecordingDrawingContext {
         &mut self,
         _brush: Option<&Rc<dyn IBrush>>,
         _pen: Option<&Rc<dyn IPen>>,
-        _geometry: &Rc<dyn IGeometryImpl>,
+        _geometry: &Arc<dyn IGeometryImpl>,
     ) {
     }
 

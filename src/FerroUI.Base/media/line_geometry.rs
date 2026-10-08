@@ -4,7 +4,7 @@ use crate::{
     ferro_class, ferro_property, instantiate, FerroObjectImpl, FerroProperty, Point, Ref,
     StyledProperty,
 };
-use std::rc::Rc;
+use std::sync::Arc;
 
 /// Represents the geometry of a line.
 #[repr(C)]
@@ -22,7 +22,7 @@ impl GeometryImpl for LineGeometry {
         LineGeometry::with_points(this.start_point(), this.end_point()).upcast()
     }
 
-    fn create_defining_geometry(this: &Self) -> Option<Rc<dyn IGeometryImpl>> {
+    fn create_defining_geometry(this: &Self) -> Option<Arc<dyn IGeometryImpl>> {
         let factory = platform::render_interface();
 
         Some(factory.create_line_geometry(this.start_point(), this.end_point()))

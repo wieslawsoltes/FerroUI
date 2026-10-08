@@ -14,6 +14,7 @@ use crate::{Matrix, PixelSize, Point, Rect, RoundedRect, Vector};
 use std::any::Any;
 use std::cell::Cell;
 use std::rc::Rc;
+use std::sync::Arc;
 
 /// `Brushes.Black`.
 pub(crate) fn black() -> Rc<dyn IBrush> {
@@ -59,21 +60,29 @@ pub(crate) fn replay(stream: &RenderDataStream) -> Vec<String> {
 pub(crate) struct TestGeometryImpl {
     pub fill: Vec<Point>,
     pub stroke: Vec<Point>,
-    pub stroke_pen: Option<Rc<dyn IPen>>,
+    pub stroke_pen: Option<TestPen>,
 }
 
+/// The pen a [`TestGeometryImpl`] expects. The tests run on one thread; the
+/// wrapper only satisfies the thread-safety bound of the geometry contract.
+pub(crate) struct TestPen(Rc<dyn IPen>);
+
+// SAFETY: test geometries are created and used on the thread of the test.
+unsafe impl Send for TestPen {}
+unsafe impl Sync for TestPen {}
+
 impl TestGeometryImpl {
-    pub(crate) fn new() -> Rc<TestGeometryImpl> {
-        Rc::new(TestGeometryImpl::default())
+    pub(crate) fn new() -> Arc<TestGeometryImpl> {
+        Arc::new(TestGeometryImpl::default())
     }
 
-    pub(crate) fn with_fill(points: &[Point]) -> Rc<TestGeometryImpl> {
-        Rc::new(TestGeometryImpl { fill: points.to_vec(), ..Default::default() })
+    pub(crate) fn with_fill(points: &[Point]) -> Arc<TestGeometryImpl> {
+        Arc::new(TestGeometryImpl { fill: points.to_vec(), ..Default::default() })
     }
 
     /// `StrokeContains(pen, point)` set up for the given pen only.
-    pub(crate) fn with_stroke_pen(pen: &Rc<dyn IPen>, points: &[Point]) -> Rc<TestGeometryImpl> {
-        Rc::new(TestGeometryImpl { stroke: points.to_vec(), stroke_pen: Some(pen.clone()), ..Default::default() })
+    pub(crate) fn with_stroke_pen(pen: &Rc<dyn IPen>, points: &[Point]) -> Arc<TestGeometryImpl> {
+        Arc::new(TestGeometryImpl { stroke: points.to_vec(), stroke_pen: Some(TestPen(pen.clone())), ..Default::default() })
     }
 }
 
@@ -87,7 +96,7 @@ impl IGeometryImpl for TestGeometryImpl {
     fn get_render_bounds(&self, _pen: Option<&dyn IPen>) -> Rect {
         Rect::default()
     }
-    fn get_widened_geometry(&self, _pen: &dyn IPen) -> Rc<dyn IGeometryImpl> {
+    fn get_widened_geometry(&self, _pen: &dyn IPen) -> Arc<dyn IGeometryImpl> {
         MockGeometryImpl::new(Rect::default())
     }
     fn fill_contains(&self, point: Point) -> bool {
@@ -96,18 +105,18 @@ impl IGeometryImpl for TestGeometryImpl {
     fn get_fill_intersection_result(&self, _geometry: &dyn IGeometryImpl) -> IntersectionResult {
         IntersectionResult::NotCalculated
     }
-    fn intersect(&self, _geometry: &dyn IGeometryImpl) -> Option<Rc<dyn IGeometryImpl>> {
+    fn intersect(&self, _geometry: &dyn IGeometryImpl) -> Option<Arc<dyn IGeometryImpl>> {
         None
     }
     fn stroke_contains(&self, pen: Option<&dyn IPen>, point: Point) -> bool {
         let pen_matches = match (&self.stroke_pen, pen) {
             (None, _) => true,
-            (Some(expected), Some(pen)) => **expected == *pen,
+            (Some(expected), Some(pen)) => *expected.0 == *pen,
             (Some(_), None) => false,
         };
         pen_matches && self.stroke.contains(&point)
     }
-    fn with_transform(&self, transform: Matrix) -> Rc<dyn ITransformedGeometryImpl> {
+    fn with_transform(&self, transform: Matrix) -> Arc<dyn ITransformedGeometryImpl> {
         MockGeometryImpl::new(Rect::default()).with_transform(transform)
     }
     fn try_get_point_at_distance(&self, _distance: f64) -> Option<Point> {
@@ -121,7 +130,7 @@ impl IGeometryImpl for TestGeometryImpl {
         _start_distance: f64,
         _stop_distance: f64,
         _start_on_begin_figure: bool,
-    ) -> Option<Rc<dyn IGeometryImpl>> {
+    ) -> Option<Arc<dyn IGeometryImpl>> {
         None
     }
     fn as_any(&self) -> &dyn Any {

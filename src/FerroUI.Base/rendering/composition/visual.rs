@@ -80,7 +80,7 @@ visual_value_properties! {
     visible / set_visible: bool;
     opacity / set_opacity: f32;
     /// The geometry the visual is clipped with.
-    clip / set_clip: Option<Rc<dyn IGeometryImpl>>;
+    clip / set_clip: Option<Arc<dyn IGeometryImpl>>;
     clip_to_bounds / set_clip_to_bounds: bool;
     offset / set_offset: Vector3D;
     translation / set_translation: Vector3D;

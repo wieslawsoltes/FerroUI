@@ -91,6 +91,20 @@ Each stage is a pull request that builds and passes on its own; the single-threa
 
 Order: R1 to R5 in sequence; B0 in parallel with R1, since it only measures.
 
+### Progress of R1
+
+R1 is delivered one payload contract at a time; each step builds and passes on its own.
+
+| Step | Contract | State |
+|---|---|---|
+| R1.1 | `IGeometryImpl`, `IStreamGeometryImpl`, `ITransformedGeometryImpl` | Done: the contract requires `Send + Sync` and is held in `Arc` everywhere. The Skia geometries keep their paths behind a lock and hand out copies (a copy of a path shares its storage); the stroke cache and the path measure are under a lock; the headless stubs and the test geometries follow. |
+| R1.2 | `IGlyphRunImpl` | Open. |
+| R1.3 | `IBitmapImpl` and the contracts built on it | Open. The surface render target is a bitmap that owns GPU objects of the render thread, so the layer contract is decided here. |
+| R1.4 | Immutable brushes, pens, effects; custom draw operations | Open. |
+| R1.5 | `BatchObject::Value` requires `Send`; measurements | Open. |
+
+Found by R1.1 in the Skia backend: a path can be sent to another thread but not shared by reference, and a path measure can be neither. The geometries therefore never lend a path; the path measure is cached behind a lock in a wrapper that asserts it may move between threads (it owns its contours and has no thread affinity).
+
 ## 6. Risks
 
 - **Scope of R1.** The audit names eight payload kinds, but each pulls in what it holds (a gradient brush its stops and transform, an image brush its bitmap, a glyph run its typeface). The stage is driven by the compiler until the bound holds; its size is **[E]** the largest of the desktop stages.

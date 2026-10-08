@@ -1,13 +1,13 @@
 use crate::media::{Geometry, GeometryImpl};
 use crate::platform::IGeometryImpl;
 use crate::{ferro_class, ferro_impl_classes, instantiate, FerroObjectImpl, Ref};
-use std::rc::Rc;
+use std::sync::Arc;
 
 /// A geometry that wraps a platform implementation.
 #[repr(C)]
 pub struct PlatformGeometry {
     base: Geometry,
-    geometry_impl: Rc<dyn IGeometryImpl>,
+    geometry_impl: Arc<dyn IGeometryImpl>,
 }
 
 ferro_class!(PlatformGeometry: Geometry);
@@ -18,13 +18,13 @@ impl GeometryImpl for PlatformGeometry {
         PlatformGeometry::new(this.geometry_impl.clone()).upcast()
     }
 
-    fn create_defining_geometry(this: &Self) -> Option<Rc<dyn IGeometryImpl>> {
+    fn create_defining_geometry(this: &Self) -> Option<Arc<dyn IGeometryImpl>> {
         Some(this.geometry_impl.clone())
     }
 }
 
 impl PlatformGeometry {
-    pub fn new(geometry_impl: Rc<dyn IGeometryImpl>) -> Ref<Self> {
+    pub fn new(geometry_impl: Arc<dyn IGeometryImpl>) -> Ref<Self> {
         instantiate(Self { base: Geometry::construct(), geometry_impl })
     }
 }

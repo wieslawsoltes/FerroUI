@@ -1,7 +1,7 @@
 use crate::media::{IPen, IntersectionResult};
 use crate::platform::{IGeometryImpl, ITransformedGeometryImpl};
 use crate::{Matrix, Point, Rect};
-use std::rc::Rc;
+use std::sync::Arc;
 
 /// An immutable [`IGeometryImpl`] that wraps a built platform geometry and exposes only
 /// its read-only surface.
@@ -13,11 +13,11 @@ use std::rc::Rc;
 /// returned by `GlyphTypeface::get_glyph_outline`. It is also not an object of the
 /// property system, so it carries none of the styling overhead.
 pub(crate) struct ImmutableGeometryImpl {
-    inner: Rc<dyn IGeometryImpl>,
+    inner: Arc<dyn IGeometryImpl>,
 }
 
 impl ImmutableGeometryImpl {
-    pub(crate) fn new(inner: Rc<dyn IGeometryImpl>) -> ImmutableGeometryImpl {
+    pub(crate) fn new(inner: Arc<dyn IGeometryImpl>) -> ImmutableGeometryImpl {
         ImmutableGeometryImpl { inner }
     }
 }
@@ -35,7 +35,7 @@ impl IGeometryImpl for ImmutableGeometryImpl {
         self.inner.get_render_bounds(pen)
     }
 
-    fn get_widened_geometry(&self, pen: &dyn IPen) -> Rc<dyn IGeometryImpl> {
+    fn get_widened_geometry(&self, pen: &dyn IPen) -> Arc<dyn IGeometryImpl> {
         self.inner.get_widened_geometry(pen)
     }
 
@@ -43,7 +43,7 @@ impl IGeometryImpl for ImmutableGeometryImpl {
         self.inner.fill_contains(point)
     }
 
-    fn intersect(&self, geometry: &dyn IGeometryImpl) -> Option<Rc<dyn IGeometryImpl>> {
+    fn intersect(&self, geometry: &dyn IGeometryImpl) -> Option<Arc<dyn IGeometryImpl>> {
         self.inner.intersect(geometry)
     }
 
@@ -55,7 +55,7 @@ impl IGeometryImpl for ImmutableGeometryImpl {
         self.inner.stroke_contains(pen, point)
     }
 
-    fn with_transform(&self, transform: Matrix) -> Rc<dyn ITransformedGeometryImpl> {
+    fn with_transform(&self, transform: Matrix) -> Arc<dyn ITransformedGeometryImpl> {
         self.inner.with_transform(transform)
     }
 
@@ -72,7 +72,7 @@ impl IGeometryImpl for ImmutableGeometryImpl {
         start_distance: f64,
         stop_distance: f64,
         start_on_begin_figure: bool,
-    ) -> Option<Rc<dyn IGeometryImpl>> {
+    ) -> Option<Arc<dyn IGeometryImpl>> {
         self.inner.try_get_segment(start_distance, stop_distance, start_on_begin_figure)
     }
 
