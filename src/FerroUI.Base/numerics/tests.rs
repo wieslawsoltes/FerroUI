@@ -555,3 +555,139 @@ fn matrix4x4_inverts_a_general_matrix() {
     }
     assert!((m.get_determinant() * inverse.get_determinant() - 1.0).abs() < tolerance);
 }
+
+// The expected values of the look-at and perspective tests follow from the
+// documented formulas of the reference runtime, computed by hand.
+
+#[test]
+fn matrix4x4_look_at_down_the_negative_z_axis_is_a_translation() {
+    // zaxis = (0, 0, 1), xaxis = (1, 0, 0), yaxis = (0, 1, 0): no rotation.
+    let view = Matrix4x4::create_look_at(Vector3::new(0.0, 0.0, 1.0), Vector3::ZERO, Vector3::UNIT_Y);
+    close(&m4(view), &m4(Matrix4x4::create_translation_xyz(0.0, 0.0, -1.0)));
+}
+
+#[test]
+fn matrix4x4_look_at_builds_the_basis_of_the_camera() {
+    // The camera is at (3, 0, 0) and looks at the origin:
+    // zaxis = (1, 0, 0), xaxis = up x zaxis = (0, 0, -1), yaxis = zaxis x xaxis = (0, 1, 0).
+    let position = Vector3::new(3.0, 0.0, 0.0);
+    let view = Matrix4x4::create_look_at(position, Vector3::ZERO, Vector3::UNIT_Y);
+    close(
+        &m4(view),
+        &[0.0, 0.0, 1.0, 0.0, 0.0, 1.0, 0.0, 0.0, -1.0, 0.0, 0.0, 0.0, 0.0, 0.0, -3.0, 1.0],
+    );
+    // The camera is the origin of the view space, and the target lies on the
+    // negative z axis at its distance from the camera.
+    close(&v3(Vector3::transform(position, view)), &[0.0, 0.0, 0.0]);
+    close(&v3(Vector3::transform(Vector3::ZERO, view)), &[0.0, 0.0, -3.0]);
+}
+
+#[test]
+fn matrix4x4_look_at_from_a_diagonal() {
+    // zaxis = (1, 1, 1) / sqrt(3), xaxis = (1, 0, -1) / sqrt(2), yaxis = (-1, 2, -1) / sqrt(6);
+    // the translation is (0, 0, -|position|) with |position| = 25 * sqrt(3).
+    let view = Matrix4x4::create_look_at(Vector3::new(25.0, 25.0, 25.0), Vector3::ZERO, Vector3::UNIT_Y);
+    let (x, y, z) = (0.70710678, 0.40824829, 0.57735027);
+    close(
+        &m4(view),
+        &[x, -y, z, 0.0, 0.0, 2.0 * y, z, 0.0, -x, -y, z, 0.0, 0.0, 0.0, -43.30127, 1.0],
+    );
+}
+
+#[test]
+fn matrix4x4_look_at_without_a_direction_is_not_a_number() {
+    let view = Matrix4x4::create_look_at(Vector3::ONE, Vector3::ONE, Vector3::UNIT_Y);
+    assert!(view.m11.is_nan() && view.m22.is_nan() && view.m33.is_nan());
+    assert_eq!((view.m14, view.m24, view.m34, view.m44), (0.0, 0.0, 0.0, 1.0));
+}
+
+#[test]
+fn matrix4x4_perspective_field_of_view() {
+    // tan(pi / 4) = 1: height = 1, width = 1 / aspect = 0.5,
+    // range = far / (near - far) = 100 / (1 - 100), m43 = near * range.
+    let projection = Matrix4x4::create_perspective_field_of_view(PI / 2.0, 2.0, 1.0, 100.0);
+    close(
+        &m4(projection),
+        &[0.5, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, -100.0 / 99.0, -1.0, 0.0, 0.0, -100.0 / 99.0, 0.0],
+    );
+
+    // height = 1 / tan(pi / 8) = 1 + sqrt(2), width = height / 1.6,
+    // range = 1000 / (0.5 - 1000), m43 = 0.5 * range.
+    let projection = Matrix4x4::create_perspective_field_of_view(PI / 4.0, 1.6, 0.5, 1000.0);
+    close(
+        &m4(projection),
+        &[
+            1.50888348, 0.0, 0.0, 0.0, 0.0, 2.41421356, 0.0, 0.0, 0.0, 0.0, -1.00050025, -1.0, 0.0, 0.0,
+            -0.500250125, 0.0,
+        ],
+    );
+}
+
+#[test]
+fn matrix4x4_perspective_maps_the_planes_to_the_depth_range() {
+    // A point on the near plane has the depth 0 and one on the far plane the depth 1.
+    let projection = Matrix4x4::create_perspective_field_of_view(1.0, 1.5, 2.0, 50.0);
+    for (z, depth) in [(-2.0, 0.0), (-50.0, 1.0)] {
+        let clip_z = z * projection.m33 + projection.m43;
+        let clip_w = z * projection.m34 + projection.m44;
+        close(&[clip_z / clip_w], &[depth]);
+    }
+}
+
+#[test]
+fn matrix4x4_perspective_accepts_a_far_plane_at_infinity() {
+    let projection = Matrix4x4::create_perspective_field_of_view(PI / 2.0, 1.0, 0.25, f32::INFINITY);
+    close(
+        &m4(projection),
+        &[1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, -1.0, -1.0, 0.0, 0.0, -0.25, 0.0],
+    );
+}
+
+#[test]
+#[should_panic(expected = "field_of_view ('0') must be greater than '0'.")]
+fn matrix4x4_perspective_rejects_a_field_of_view_of_zero() {
+    Matrix4x4::create_perspective_field_of_view(0.0, 1.0, 1.0, 10.0);
+}
+
+#[test]
+#[should_panic(expected = "field_of_view")]
+fn matrix4x4_perspective_rejects_a_field_of_view_of_a_half_turn() {
+    Matrix4x4::create_perspective_field_of_view(PI, 1.0, 1.0, 10.0);
+}
+
+#[test]
+#[should_panic(expected = "near_plane_distance ('0') must be greater than '0'.")]
+fn matrix4x4_perspective_rejects_a_near_plane_at_the_camera() {
+    Matrix4x4::create_perspective_field_of_view(1.0, 1.0, 0.0, 10.0);
+}
+
+#[test]
+#[should_panic(expected = "far_plane_distance ('-1') must be greater than '0'.")]
+fn matrix4x4_perspective_rejects_a_far_plane_behind_the_camera() {
+    Matrix4x4::create_perspective_field_of_view(1.0, 1.0, 1.0, -1.0);
+}
+
+#[test]
+#[should_panic(expected = "near_plane_distance ('10') must be less than '10'.")]
+fn matrix4x4_perspective_rejects_a_near_plane_at_the_far_plane() {
+    Matrix4x4::create_perspective_field_of_view(1.0, 1.0, 10.0, 10.0);
+}
+
+#[test]
+fn matrix4x4_and_vector3_have_the_layout_of_the_reference_runtime() {
+    assert_eq!(std::mem::size_of::<Matrix4x4>(), 16 * std::mem::size_of::<f32>());
+    assert_eq!(std::mem::size_of::<Vector3>(), 3 * std::mem::size_of::<f32>());
+    assert_eq!(std::mem::align_of::<Matrix4x4>(), std::mem::align_of::<f32>());
+    assert_eq!(std::mem::align_of::<Vector3>(), std::mem::align_of::<f32>());
+
+    assert_eq!(std::mem::offset_of!(Matrix4x4, m11), 0);
+    assert_eq!(std::mem::offset_of!(Matrix4x4, m12), 4);
+    assert_eq!(std::mem::offset_of!(Matrix4x4, m21), 16);
+    assert_eq!(std::mem::offset_of!(Matrix4x4, m31), 32);
+    assert_eq!(std::mem::offset_of!(Matrix4x4, m41), 48);
+    assert_eq!(std::mem::offset_of!(Matrix4x4, m44), 60);
+
+    assert_eq!(std::mem::offset_of!(Vector3, x), 0);
+    assert_eq!(std::mem::offset_of!(Vector3, y), 4);
+    assert_eq!(std::mem::offset_of!(Vector3, z), 8);
+}
