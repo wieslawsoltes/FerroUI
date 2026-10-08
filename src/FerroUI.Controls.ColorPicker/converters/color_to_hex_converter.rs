@@ -1,3 +1,4 @@
+use ferroui_base::utilities::CultureInfo;
 use super::as_solid_color_brush;
 use crate::AlphaComponentPosition;
 use ferroui_base::data::converters::{cast_value, IValueConverter};
@@ -181,6 +182,7 @@ impl IValueConverter for ColorToHexConverter {
         value: Option<&BoxedValue>,
         _target_type: ValueType,
         parameter: Option<&BoxedValue>,
+        _culture: &CultureInfo,
     ) -> Result<Option<BoxedValue>, BindingError> {
         let color: Color;
         let include_symbol = parameter.and_then(|parameter| parameter.downcast_ref::<bool>().copied()).unwrap_or(false);
@@ -206,6 +208,7 @@ impl IValueConverter for ColorToHexConverter {
         value: Option<&BoxedValue>,
         _target_type: ValueType,
         _parameter: Option<&BoxedValue>,
+        _culture: &CultureInfo,
     ) -> Result<Option<BoxedValue>, BindingError> {
         let hex_value = value.map(|value| ValueTypes::to_display_string(Some(value))).unwrap_or_default();
         Ok(Some(match Self::parse_hex_string(&hex_value, self.alpha_position()) {

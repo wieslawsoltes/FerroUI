@@ -1,3 +1,4 @@
+use ferroui_base::utilities::CultureInfo;
 use super::as_solid_color_brush;
 use ferroui_base::data::converters::{cast_value, IValueConverter};
 use ferroui_base::data::core::ValueType;
@@ -24,6 +25,7 @@ impl IValueConverter for ToColorConverter {
         value: Option<&BoxedValue>,
         _target_type: ValueType,
         _parameter: Option<&BoxedValue>,
+        _culture: &CultureInfo,
     ) -> Result<Option<BoxedValue>, BindingError> {
         if let Some(value_color) = cast_value::<Color>(value) {
             return Ok(Some(Rc::new(value_color)));
@@ -52,6 +54,7 @@ impl IValueConverter for ToColorConverter {
         _value: Option<&BoxedValue>,
         _target_type: ValueType,
         _parameter: Option<&BoxedValue>,
+        _culture: &CultureInfo,
     ) -> Result<Option<BoxedValue>, BindingError> {
         Ok(Some(FerroProperty::unset_value()))
     }

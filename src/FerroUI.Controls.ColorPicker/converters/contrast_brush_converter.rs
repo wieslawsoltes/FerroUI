@@ -1,3 +1,4 @@
+use ferroui_base::utilities::CultureInfo;
 use super::{solid_color_brush, ToColorConverter};
 use crate::primitives::ColorHelper;
 use ferroui_base::data::converters::IValueConverter;
@@ -46,12 +47,13 @@ impl IValueConverter for ContrastBrushConverter {
         value: Option<&BoxedValue>,
         target_type: ValueType,
         parameter: Option<&BoxedValue>,
+        culture: &CultureInfo,
     ) -> Result<Option<BoxedValue>, BindingError> {
         let comparison_color: Color;
         let mut default_color: Option<Color> = None;
 
         // Get the changing color to compare against
-        let converted_value = self.to_color_converter.convert(value, target_type, parameter)?;
+        let converted_value = self.to_color_converter.convert(value, target_type, parameter, culture)?;
         if let Some(value_color) = converted_value.as_ref().and_then(|value| value.downcast_ref::<Color>()) {
             comparison_color = *value_color;
         } else {
@@ -60,7 +62,7 @@ impl IValueConverter for ContrastBrushConverter {
         }
 
         // Get the default color when transparency is high
-        let converted_parameter = self.to_color_converter.convert(parameter, target_type, parameter)?;
+        let converted_parameter = self.to_color_converter.convert(parameter, target_type, parameter, culture)?;
         if let Some(parameter_color) = converted_parameter.as_ref().and_then(|value| value.downcast_ref::<Color>()) {
             default_color = Some(*parameter_color);
         }
@@ -89,6 +91,7 @@ impl IValueConverter for ContrastBrushConverter {
         _value: Option<&BoxedValue>,
         _target_type: ValueType,
         _parameter: Option<&BoxedValue>,
+        culture: &CultureInfo,
     ) -> Result<Option<BoxedValue>, BindingError> {
         Ok(Some(FerroProperty::unset_value()))
     }

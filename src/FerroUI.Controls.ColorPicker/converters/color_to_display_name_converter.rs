@@ -1,3 +1,4 @@
+use ferroui_base::utilities::CultureInfo;
 use super::as_solid_color_brush;
 use crate::primitives::ColorHelper;
 use ferroui_base::data::converters::{cast_value, IValueConverter};
@@ -24,6 +25,7 @@ impl IValueConverter for ColorToDisplayNameConverter {
         value: Option<&BoxedValue>,
         _target_type: ValueType,
         _parameter: Option<&BoxedValue>,
+        _culture: &CultureInfo,
     ) -> Result<Option<BoxedValue>, BindingError> {
         let color: Color;
 
@@ -55,6 +57,7 @@ impl IValueConverter for ColorToDisplayNameConverter {
         _value: Option<&BoxedValue>,
         _target_type: ValueType,
         _parameter: Option<&BoxedValue>,
+        _culture: &CultureInfo,
     ) -> Result<Option<BoxedValue>, BindingError> {
         Ok(Some(FerroProperty::unset_value()))
     }

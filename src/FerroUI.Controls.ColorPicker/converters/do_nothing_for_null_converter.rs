@@ -1,3 +1,4 @@
+use ferroui_base::utilities::CultureInfo;
 use ferroui_base::data::converters::IValueConverter;
 use ferroui_base::data::core::ValueType;
 use ferroui_base::data::{BindingError, BindingOperations};
@@ -21,6 +22,7 @@ impl IValueConverter for DoNothingForNullConverter {
         value: Option<&BoxedValue>,
         _target_type: ValueType,
         _parameter: Option<&BoxedValue>,
+        _culture: &CultureInfo,
     ) -> Result<Option<BoxedValue>, BindingError> {
         Ok(Some(value.cloned().unwrap_or_else(BindingOperations::do_nothing)))
     }
@@ -30,6 +32,7 @@ impl IValueConverter for DoNothingForNullConverter {
         value: Option<&BoxedValue>,
         _target_type: ValueType,
         _parameter: Option<&BoxedValue>,
+        _culture: &CultureInfo,
     ) -> Result<Option<BoxedValue>, BindingError> {
         Ok(Some(value.cloned().unwrap_or_else(BindingOperations::do_nothing)))
     }
