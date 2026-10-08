@@ -6,8 +6,8 @@ use super::{
     CareCompanionAppPage, CarouselCustomizationPage, CarouselDataBindingPage, CarouselGalleryAppPage,
     CarouselGesturesPage, CarouselGettingStartedPage, CarouselMultiItemPage, CarouselPageCustomizationPage,
     CarouselPageDataTemplatePage, CarouselPageEventsPage, CarouselPageFirstLookPage, CarouselPageGesturePage,
-    CarouselPageSelectionPage, CarouselPageTransitionsPage, CarouselTransitionsPage, CarouselVerticalPage,
-    SanctuaryShowcasePage,
+    CarouselPagePerformancePage, CarouselPageSelectionPage, CarouselPageTransitionsPage, CarouselTransitionsPage,
+    CarouselVerticalPage, SanctuaryShowcasePage,
 };
 use crate::markup::{content_page_class, xaml_class};
 use ferroui_base::interactivity::{Interactive, RoutedEventArgs};
@@ -16,8 +16,9 @@ use ferroui_controls::{ContentPage, NavigationPage};
 
 /// The registry of the samples of the page.
 ///
-/// The entry "Performance Monitor" of group "Performance" (`CarouselPagePerformancePage`) of the
-/// original is not listed, because its page is not ported.
+/// The description of the entry "Performance Monitor" differs from the original's, which
+/// promises the size of the managed heap and the effect of the garbage collector: the page
+/// reports what can be measured here (see `navigation_performance_monitor_helper.rs`).
 const DEMOS: &[Demo] = &[
     // Overview
     (
@@ -64,6 +65,13 @@ const DEMOS: &[Demo] = &[
         "Events",
         "SelectionChanged, NavigatedTo, and NavigatedFrom events. Swipe or navigate to see the live event log.",
         || CarouselPageEventsPage::new().upcast(),
+    ),
+    // Performance
+    (
+        "Performance",
+        "Performance Monitor",
+        "Track page count and live page instances. Observe how pages are released after removing them.",
+        || CarouselPagePerformancePage::new().upcast(),
     ),
     // Showcases
     (

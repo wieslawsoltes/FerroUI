@@ -46,6 +46,7 @@ mod list_box_page;
 mod menu_page;
 mod native_embed_page;
 pub(crate) mod navigation_demo_helper;
+pub(crate) mod navigation_performance_monitor_helper;
 mod navigation_demo_page;
 mod numeric_up_down_page;
 mod open_gl_page;
@@ -148,6 +149,7 @@ pub use content_page::{
     ContentPageCustomizationPage,
     ContentPageEventsPage,
     ContentPageFirstLookPage,
+    ContentPagePerformancePage,
     ContentPageSafeAreaPage,
 };
 pub use context_flyout_page::ContextFlyoutPage;

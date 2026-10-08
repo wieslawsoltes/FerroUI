@@ -15,7 +15,6 @@ App.xaml | harness: the tray icon of the document loads its icon through the ico
 Pages/SettingsPage.xaml | harness: {x:Static local:App.CurrentTheme} needs the application of the catalog as the current application (the page is offered by the application)
 
 # --- Controls, Converter, Pages/CommandBar, Pages/TextBox, Pages/Gestures, Pages/ContentPage (group A) ---
-Pages/ContentPage/ContentPagePerformancePage.xaml | code-behind: NavigationPerformanceMonitorHelper (measures the managed heap: GC.GetTotalMemory, GC.Collect)
 
 # --- ViewModels, Models, Views and the pages of the view models (group B) ---
 
@@ -23,7 +22,3 @@ Pages/ContentPage/ContentPagePerformancePage.xaml | code-behind: NavigationPerfo
 Pages/OpenGl/OpenGlLeasePage.xaml | code-behind: OpenGlFbo (Pages/OpenGl/OpenGlFbo.cs, not ported) wraps an OpenGL texture in a Ganesh surface (GRContext, GRBackendTexture, GRGlTextureInfo), and the Skia backend has Ganesh on OpenGL in browser builds only
 
 # --- the demo pages and the page sample directories ---
-Pages/CarouselPage/CarouselPagePerformancePage.xaml | code-behind: NavigationPerformanceMonitorHelper (measures the managed heap: GC.GetTotalMemory, GC.Collect)
-Pages/DrawerPage/DrawerPagePerformancePage.xaml | code-behind: NavigationPerformanceMonitorHelper (measures the managed heap: GC.GetTotalMemory, GC.Collect)
-Pages/NavigationPage/NavigationPagePerformancePage.xaml | code-behind: NavigationPerformanceMonitorHelper (measures the managed heap: GC.GetTotalMemory, GC.Collect)
-Pages/TabbedPage/TabbedPagePerformancePage.xaml | code-behind: NavigationPerformanceMonitorHelper (measures the managed heap: GC.GetTotalMemory, GC.Collect)

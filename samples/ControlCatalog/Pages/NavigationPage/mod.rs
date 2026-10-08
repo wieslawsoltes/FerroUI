@@ -32,6 +32,7 @@ mod navigation_page_mvvm_page;
 mod navigation_page_mvvm_page_factory;
 mod navigation_page_mvvm_view_models;
 mod navigation_page_pass_data_page;
+mod navigation_page_performance_page;
 mod navigation_page_stack_page;
 mod navigation_page_title_page;
 mod navigation_page_toolbar_page;
@@ -77,6 +78,7 @@ pub use navigation_page_scroll_aware_page::NavigationPageScrollAwarePage;
 pub use navigation_page_mvvm_page::NavigationPageMvvmPage;
 pub use navigation_page_mvvm_view_models::{NavigationPageMvvmShellViewModel, ProjectCardViewModel};
 pub use navigation_page_pass_data_page::NavigationPagePassDataPage;
+pub use navigation_page_performance_page::NavigationPagePerformancePage;
 pub use navigation_page_stack_page::NavigationPageStackPage;
 pub use navigation_page_title_page::NavigationPageTitlePage;
 pub use navigation_page_toolbar_page::NavigationPageToolbarPage;
@@ -123,6 +125,7 @@ pub(crate) const TYPES: &[&TypeInfo] = &[
     NavigationPageScrollAwarePage::TYPE,
     NavigationPageMvvmPage::TYPE,
     NavigationPagePassDataPage::TYPE,
+    NavigationPagePerformancePage::TYPE,
     NavigationPageStackPage::TYPE,
     NavigationPageTitlePage::TYPE,
     NavigationPageToolbarPage::TYPE,
@@ -167,6 +170,7 @@ pub(crate) const CLASSES: &[&XamlClass] = &[
     &NavigationPageScrollAwarePage::XAML_CLASS,
     &NavigationPageMvvmPage::XAML_CLASS,
     &NavigationPagePassDataPage::XAML_CLASS,
+    &NavigationPagePerformancePage::XAML_CLASS,
     &NavigationPageStackPage::XAML_CLASS,
     &NavigationPageTitlePage::XAML_CLASS,
     &NavigationPageToolbarPage::XAML_CLASS,

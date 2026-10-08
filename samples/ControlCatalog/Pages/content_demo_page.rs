@@ -3,7 +3,7 @@
 
 use super::{
     ContentPageCommandBarPage, ContentPageCustomizationPage, ContentPageEventsPage, ContentPageFirstLookPage,
-    ContentPageSafeAreaPage,
+    ContentPagePerformancePage, ContentPageSafeAreaPage,
 };
 use crate::markup::{content_page_class, xaml_class};
 use ferroui_base::interactivity::{Interactive, RoutedEventArgs};
@@ -19,9 +19,10 @@ use std::rc::Rc;
 /// An entry of the registry of the samples: its group, title, description
 /// and the factory of its control.
 ///
-/// The entry "Performance Monitor" (group "Performance") of the original is
-/// not listed: its page, `ContentPagePerformancePage`, is not ported (see
-/// `excluded.txt`).
+/// The description of the entry "Performance Monitor" differs from the
+/// original's, which promises the size of the managed heap and the effect of
+/// the garbage collector: the page reports what can be measured here (see
+/// `navigation_performance_monitor_helper.rs`).
 type Demo = (&'static str, &'static str, &'static str, fn() -> Ref<UserControl>);
 
 const DEMOS: &[Demo] = &[
@@ -57,6 +58,13 @@ const DEMOS: &[Demo] = &[
         "Events",
         "Observe page lifecycle events: NavigatedTo, NavigatedFrom, and Navigating.",
         || ContentPageEventsPage::new().upcast(),
+    ),
+    // Performance
+    (
+        "Performance",
+        "Performance Monitor",
+        "Push ContentPages of varying weight (50 KB to 2 MB) and observe the live instance count. Pop pages to confirm they are released.",
+        || ContentPagePerformancePage::new().upcast(),
     ),
 ];
 

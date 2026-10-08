@@ -5,7 +5,8 @@ use super::navigation_demo_helper::{Demo, NavigationDemoHelper};
 use super::{
     ControlsGalleryAppPage, DrawerPageBreakpointPage, DrawerPageCompactPage, DrawerPageCustomFlyoutPage,
     DrawerPageCustomizationPage, DrawerPageEventsPage, DrawerPageFirstLookPage, DrawerPageNavigationPage,
-    DrawerPageRtlPage, DrawerPageTransitionsPage, EcoTrackerAppPage, FerroFlixAppPage, LAvenirAppPage, ModernAppPage,
+    DrawerPagePerformancePage, DrawerPageRtlPage, DrawerPageTransitionsPage, EcoTrackerAppPage, FerroFlixAppPage,
+    LAvenirAppPage, ModernAppPage,
 };
 use crate::markup::{content_page_class, xaml_class};
 use ferroui_base::interactivity::{Interactive, RoutedEventArgs};
@@ -14,8 +15,9 @@ use ferroui_controls::{ContentPage, NavigationPage};
 
 /// The registry of the samples of the page.
 ///
-/// The entry "Performance Monitor" of group "Performance" (`DrawerPagePerformancePage`) of the
-/// original is not listed, because its page is not ported.
+/// The description of the entry "Performance Monitor" differs from the original's, which
+/// promises the size of the managed heap and the effect of the garbage collector: the page
+/// reports what can be measured here (see `navigation_performance_monitor_helper.rs`).
 const DEMOS: &[Demo] = &[
     // Overview
     (
@@ -73,6 +75,13 @@ const DEMOS: &[Demo] = &[
         "Transitions",
         "Configure the detail NavigationPage transition. Choose CrossFade, PageSlide, or CompositePageTransition to animate detail page changes.",
         || DrawerPageTransitionsPage::new().upcast(),
+    ),
+    // Performance
+    (
+        "Performance",
+        "Performance Monitor",
+        "Track detail page swaps and live page instances. Observe how pages are released after swapping them.",
+        || DrawerPagePerformancePage::new().upcast(),
     ),
     // Showcases
     (

@@ -4,10 +4,10 @@
 use super::navigation_demo_helper::{Demo, NavigationDemoHelper};
 use super::{
     FerroFlixAppPage, LAvenirAppPage, NavigationPageAppearancePage, NavigationPageAttachedMethodsPage,
-    NavigationPageBackButtonPage, NavigationPageCurvedHeaderPage, NavigationPageEventsPage,
-    NavigationPageFirstLookPage, NavigationPageGesturePage, NavigationPageInteractiveHeaderPage,
-    NavigationPageModalPage, NavigationPageModalTransitionsPage, NavigationPageMvvmPage,
-    NavigationPagePassDataPage, NavigationPageScrollAwarePage, NavigationPageStackPage, NavigationPageTitlePage,
+    NavigationPageBackButtonPage, NavigationPageCurvedHeaderPage, NavigationPageEventsPage, NavigationPageFirstLookPage,
+    NavigationPageGesturePage, NavigationPageInteractiveHeaderPage, NavigationPageModalPage,
+    NavigationPageModalTransitionsPage, NavigationPageMvvmPage, NavigationPagePassDataPage,
+    NavigationPagePerformancePage, NavigationPageScrollAwarePage, NavigationPageStackPage, NavigationPageTitlePage,
     NavigationPageToolbarPage, NavigationPageTransitionsPage, PulseAppPage, RetroGamingAppPage,
 };
 use crate::markup::{content_page_class, xaml_class};
@@ -17,8 +17,9 @@ use ferroui_controls::{ContentPage, NavigationPage};
 
 /// The registry of the samples of the page.
 ///
-/// The entry "Performance Monitor" of group "Performance" (`NavigationPagePerformancePage`) of the
-/// original is not listed, because its page is not ported (see `excluded.txt`).
+/// The description of the entry "Performance Monitor" differs from the original's, which
+/// promises the size of the managed heap and the effect of the garbage collector: the page
+/// reports what can be measured here (see `navigation_performance_monitor_helper.rs`).
 const DEMOS: &[Demo] = &[
     // Overview
     (
@@ -119,6 +120,13 @@ const DEMOS: &[Demo] = &[
         "Scroll-Aware Bar",
         "Hide the navigation bar on downward scroll and reveal it on upward scroll.",
         || NavigationPageScrollAwarePage::new().upcast(),
+    ),
+    // Performance
+    (
+        "Performance",
+        "Performance Monitor",
+        "Track stack depth and live page instances. Observe how pages are released after popping them.",
+        || NavigationPagePerformancePage::new().upcast(),
     ),
     // Showcases
     (
