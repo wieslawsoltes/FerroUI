@@ -849,3 +849,59 @@ fn table_view_wheel_scrolling_renders_every_frame_and_reuses_its_rows() {
     assert_eq!(40, bench.surface.frames.load(std::sync::atomic::Ordering::SeqCst) - rendered);
     assert!(rows.len() <= realized + 2, "{} rows for {realized} realized", rows.len());
 }
+
+/// The rounds of the test below.
+const UNPACED_ROUNDS: usize = 400;
+
+/// The render-thread mode under changes the UI thread does not pace: the
+/// benchmarks above wait for each frame before they make the next change,
+/// which a user does not. Here the UI thread moves the pointer, scrolls,
+/// resizes the window and replaces its content while the render thread is
+/// rendering, commits without waiting, and renders a frame itself now and
+/// then (what a resize or a show does on the desktop), so that the two
+/// threads meet at the compositor lock in every order.
+#[test]
+fn the_render_thread_mode_takes_unpaced_changes_of_the_ui_thread() {
+    let bench = Bench::start_in(RenderMode::RenderThread, || TableViewPage::new().upcast());
+    let count = || bench.surface.frames.load(std::sync::atomic::Ordering::SeqCst);
+    let rendered = count();
+    let center = Point::new(WIDTH / 2.0, HEIGHT / 2.0);
+
+    let mut batches = Vec::new();
+    for round in 0..UNPACED_ROUNDS {
+        bench.pointer_move(Point::new((round * 37 % WIDTH as usize) as f64, (round * 23 % HEIGHT as usize) as f64));
+        let delta = if (round / 20) % 2 == 0 { -0.4 } else { 0.4 };
+        bench.wheel(center, Vector::new(0.0, delta));
+        if round % 10 == 5 {
+            bench.window.set_width(WIDTH - (round % 7) as f64 * 20.0);
+            bench.window.set_height(HEIGHT - (round % 5) as f64 * 20.0);
+        }
+        if round % 25 == 24 {
+            let page: Ref<Control> =
+                if (round / 25) % 2 == 0 { ButtonsPage::new().upcast::<Control>() } else { TableViewPage::new().upcast::<Control>() };
+            bench.window.set_content(Some(Control::boxed(&page)));
+        }
+        if round % 3 == 0 {
+            batches.push(bench.compositor().request_commit_async());
+        }
+        // Layout, the recording of the render data and the commit; the frame
+        // is not waited for.
+        Dispatcher::ui_thread().run_jobs(None);
+        if round % 7 == 3 {
+            bench.compositor().render_on_this_thread();
+        }
+    }
+
+    // Everything that was committed is rendered once the threads settle.
+    bench.frame();
+    for (index, batch) in batches.iter().enumerate() {
+        assert!(batch.rendered().is_completed(), "batch {index} was not rendered");
+    }
+    assert!(count() > rendered);
+
+    // And the window still renders what changes after that.
+    let before = count();
+    bench.window.set_content(Some(Control::boxed(&ButtonsPage::new().upcast::<Control>())));
+    bench.frame();
+    assert!(count() > before);
+}
