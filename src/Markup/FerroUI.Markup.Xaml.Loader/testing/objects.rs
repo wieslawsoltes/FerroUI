@@ -472,8 +472,8 @@ pub fn dump_tree(root: &Rc<dyn IXamlAstNode>) -> String {
 }
 
 /// Declares `Tests.MainView : ContentControl` (in the controls assembly) with the event
-/// handler `void OnClick(object, RoutedEventArgs)`, for documents with `x:Class`. Calling it
-/// again is harmless.
+/// handlers `void OnClick(object, RoutedEventArgs)` and `void OnAnything(object, object)`, for
+/// documents with `x:Class`. Calling it again is harmless.
 pub fn define_main_view(fw: &TestFramework) {
     if fw.as_type_system().find_type("Tests.MainView").is_some() {
         return;
@@ -488,6 +488,12 @@ pub fn define_main_view(fw: &TestFramework) {
             fw.t("System.Object"),
             fw.t("FerroUI.Interactivity.RoutedEventArgs"),
         ],
+        false,
+    );
+    view.add_method(
+        "OnAnything",
+        fw.t("System.Void"),
+        vec![fw.t("System.Object"), fw.t("System.Object")],
         false,
     );
 }

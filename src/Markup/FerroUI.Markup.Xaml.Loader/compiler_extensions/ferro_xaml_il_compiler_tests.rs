@@ -159,6 +159,39 @@ const DOCUMENT: &str = "
   </Grid>
 </ContentControl>";
 
+/// Not a port: the handler lookup of the language (`FerroXamlIlLanguage::custom_value_converter`)
+/// accepts a method whose parameters are wider than the ones the delegate passes when no method
+/// matches them exactly.
+#[test]
+fn a_handler_with_wider_parameters_is_the_delegate_of_an_event() {
+    let fw = create_objects_test_framework();
+    let compiler = compiler(&fw);
+    define_main_view(&fw);
+    let handler_of = |name: &str| {
+        let xaml = format!(
+            "<ContentControl xmlns='https://github.com/ferroui' \
+             xmlns:x='http://schemas.microsoft.com/winfx/2006/xaml' x:Class='Tests.MainView'>\
+             <Button Click='{name}'/></ContentControl>"
+        );
+        let mut document = compiler.parse(&xaml, None).expect("parsed");
+        document.document = Some("MainView.xaml".to_string());
+        compiler.transform(&mut document).expect("transformed");
+        let root = document.root().expect("root");
+        let click = &assignments(&root, "Click")[0];
+        let handler = click.values.borrow()[0]
+            .cast::<XamlLoadMethodDelegateNode>()
+            .expect("handler");
+        (handler.method.name(), handler.method.parameters()[1].full_name())
+    };
+    assert_eq!(handler_of("OnAnything"), ("OnAnything".to_string(), "System.Object".to_string()));
+    // The method with exactly the parameters of the delegate is the one upstream finds.
+    assert_eq!(
+        handler_of("OnClick"),
+        ("OnClick".to_string(), "FerroUI.Interactivity.RoutedEventArgs".to_string())
+    );
+    assert_eq!(errors(&fw), Vec::<String>::new());
+}
+
 fn transform_document(fw: &TestFramework, compiler: &FerroXamlIlCompiler) -> XamlDocument {
     define_main_view(fw);
     let mut document = compiler.parse(DOCUMENT, None).expect("parsed");

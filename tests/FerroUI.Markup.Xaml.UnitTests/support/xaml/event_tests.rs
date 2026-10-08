@@ -6,6 +6,8 @@ use std::rc::Rc;
 use ferroui_base::input::InputElementImpl;
 use ferroui_base::interactivity::{IRoutedEventArgs, InteractiveImpl, RoutedEventArgs};
 use ferroui_base::layout::LayoutableImpl;
+use ferroui_base::metadata::{into_markup_value, MarkupDelegate};
+use ferroui_base::utilities::{CancelEventArgs, EventArgs};
 use ferroui_base::{
     ferro_class, ferro_class_info, ferro_impl_classes, instantiate, BoxedValue, FerroObjectImpl, Ref, StyledElementImpl,
     VisualImpl,
@@ -167,6 +169,8 @@ impl MyPanel {
 pub struct MyHost {
     base: Panel,
     placements: Cell<u32>,
+    opening: RefCell<Vec<MarkupDelegate>>,
+    openings: Cell<u32>,
 }
 
 ferro_class!(MyHost: Panel);
@@ -189,13 +193,28 @@ ferro_class_info!(MyHost {
                 |this: &Ref<MyHost>, placement: Rc<RefCell<CustomPopupPlacement>>| {
                     this.on_custom_placement(&mut placement.borrow_mut())
                 },
+            // `void OnOpening(object sender, EventArgs e)` of the managed form: the arguments
+            // are the ones the event raises, whatever their class.
+            fn OnOpening(Option<BoxedValue>, BoxedValue) =>
+                |this: &Ref<MyHost>, sender: Object, e: BoxedValue| this.on_opening(&sender, &e),
+        ],
+        events: [
+            // `event EventHandler Opening`, raised with cancellable arguments.
+            Opening(Option<BoxedValue>, EventArgs) => |this: &Ref<MyHost>, handler: MarkupDelegate| {
+                this.opening.borrow_mut().push(handler)
+            },
         ],
     },
 });
 
 impl MyHost {
     pub fn construct() -> Self {
-        Self { base: Panel::construct(), placements: Cell::new(0) }
+        Self {
+            base: Panel::construct(),
+            placements: Cell::new(0),
+            opening: RefCell::new(Vec::new()),
+            openings: Cell::new(0),
+        }
     }
 
     pub fn new() -> Ref<Self> {
@@ -210,6 +229,30 @@ impl MyHost {
     pub fn on_custom_placement(&self, placement: &mut CustomPopupPlacement) {
         self.placements.set(self.placements.get() + 1);
         placement.set_anchor(PopupAnchor::TOP);
+    }
+
+    /// Raises `Opening` with cancellable arguments, as `PopupFlyoutBase` raises its
+    /// `Opening`. Returns whether a handler cancelled it.
+    pub fn raise_opening(&self) -> bool {
+        let args = CancelEventArgs::new();
+        let sender = into_markup_value(self.to_ref());
+        let handlers = self.opening.borrow().clone();
+        for handler in handlers {
+            handler.invoke(&[sender.clone(), into_markup_value(args.clone())]);
+        }
+        args.cancel()
+    }
+
+    /// How many times the handler of `Opening` was called.
+    pub fn openings(&self) -> u32 {
+        self.openings.get()
+    }
+
+    pub fn on_opening(&self, _sender: &Object, e: &BoxedValue) {
+        self.openings.set(self.openings.get() + 1);
+        if let Some(args) = e.downcast_ref::<CancelEventArgs>() {
+            args.set_cancel(true);
+        }
     }
 }
 

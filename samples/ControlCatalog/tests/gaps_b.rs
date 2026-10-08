@@ -73,7 +73,6 @@ fn gap_c202_on_platform_element_with_on_children() {
 }
 
 #[test]
-#[ignore = "gap C203: a handler with plain event arguments is not accepted for PopupFlyoutBase.Opening, and cannot see the cancellable arguments the event passes"]
 fn gap_c203_flyout_opening_handler() {
     let _app = start_application();
     // Upstream: `Opening` is an `EventHandler`; the page declares
