@@ -1,6 +1,11 @@
 use crate::automation::peers::AutomationPeer;
 use ferroui_base::Ref;
-use crate::automation::ElementNotEnabledException;
+
+/// The error of [`IValueProvider::set_value`]: what the setter throws in the
+/// original, which is any exception (an [`ElementNotEnabledException`](crate::automation::ElementNotEnabledException)
+/// for an element that is not enabled, a format error for text a peer cannot
+/// parse, ...). Inspect it with `downcast_ref`.
+pub type ProviderError = Box<dyn std::error::Error + Send + Sync>;
 
 /// Exposes methods and properties to support access by a UI Automation client to controls
 /// that have an intrinsic value not spanning a range and that can be represented as a string.
@@ -21,7 +26,7 @@ pub trait IValueProvider {
     /// Sets the value of a control.
     ///
     /// Windows: `IValueProvider.SetValue`. macOS: `NSAccessibilityProtocol.setAccessibilityValue`.
-    fn set_value(&self, value: Option<&str>) -> Result<(), ElementNotEnabledException>;
+    fn set_value(&self, value: Option<&str>) -> Result<(), ProviderError>;
 }
 
 impl PartialEq for dyn IValueProvider {

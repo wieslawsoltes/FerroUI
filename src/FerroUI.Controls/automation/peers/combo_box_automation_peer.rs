@@ -3,7 +3,7 @@ use super::{
     ItemsControlAutomationPeerImpl, SelectingItemsControlAutomationPeer, SelectingItemsControlAutomationPeerImpl,
     SelectingItemsControlAutomationPeerImplExt, UnrealizedElementAutomationPeer,
 };
-use crate::automation::provider::{IExpandCollapseProvider, IValueProvider, ProviderAdapter};
+use crate::automation::provider::{IExpandCollapseProvider, IValueProvider, ProviderError, ProviderAdapter};
 use crate::automation::{
     AutomationElementIdentifiers, AutomationProperties, ElementNotEnabledException, ExpandCollapsePatternIdentifiers,
     ExpandCollapseState, ValuePatternIdentifiers,
@@ -133,8 +133,8 @@ impl IValueProvider for ProviderAdapter<ComboBoxAutomationPeer> {
         self.0.value()
     }
 
-    fn set_value(&self, value: Option<&str>) -> Result<(), ElementNotEnabledException> {
-        self.0.set_value(value)
+    fn set_value(&self, value: Option<&str>) -> Result<(), ProviderError> {
+        self.0.set_value(value).map_err(Into::into)
     }
 }
 

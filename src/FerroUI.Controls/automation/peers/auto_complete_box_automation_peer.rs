@@ -1,7 +1,7 @@
 use super::{
     AutomationControlType, AutomationPeer, AutomationPeerImpl, ControlAutomationPeer, ControlAutomationPeerImpl,
 };
-use crate::automation::provider::{IExpandCollapseProvider, IValueProvider, ProviderAdapter};
+use crate::automation::provider::{IExpandCollapseProvider, IValueProvider, ProviderError, ProviderAdapter};
 use crate::automation::{
     ElementNotEnabledException, ExpandCollapsePatternIdentifiers, ExpandCollapseState, ValuePatternIdentifiers,
 };
@@ -87,7 +87,7 @@ impl IValueProvider for ProviderAdapter<AutoCompleteBoxAutomationPeer> {
 
     /// The member of the contract is implemented apart from the setter of
     /// the `Value` property of the class: it sets the text unconditionally.
-    fn set_value(&self, value: Option<&str>) -> Result<(), ElementNotEnabledException> {
+    fn set_value(&self, value: Option<&str>) -> Result<(), ProviderError> {
         self.0.owner().set_text(value);
         Ok(())
     }

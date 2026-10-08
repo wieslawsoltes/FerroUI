@@ -27,7 +27,7 @@ pub use i_scroll_provider::{IScrollProvider, ScrollAmount};
 pub use i_selection_item_provider::ISelectionItemProvider;
 pub use i_selection_provider::ISelectionProvider;
 pub use i_toggle_provider::{IToggleProvider, ToggleState};
-pub use i_value_provider::IValueProvider;
+pub use i_value_provider::{IValueProvider, ProviderError};
 
 use ferroui_base::{ObjectType, Ref};
 use std::rc::Rc;

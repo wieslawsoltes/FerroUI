@@ -194,6 +194,15 @@ impl KnownColors {
         Self::get_known_color_name(rgb)
     }
 
+    /// The known colors in ascending order of their ARGB values, one per
+    /// value: the counterpart of `Enum.GetValues<KnownColor>()` without
+    /// `None` (which the original lists first) and without the second name of
+    /// a shared value, which has the same value and the same name
+    /// ([`get_known_color_name`](Self::get_known_color_name)).
+    pub fn values() -> impl Iterator<Item = KnownColor> {
+        BY_VALUE.iter().map(|(value, _)| KnownColor(*value))
+    }
+
     /// Converts the known color to a [`Color`].
     #[inline]
     pub const fn to_color(color: KnownColor) -> Color {
