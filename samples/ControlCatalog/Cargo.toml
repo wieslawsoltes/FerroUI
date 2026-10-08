@@ -42,6 +42,8 @@ ferroui-markup-xaml = { workspace = true }
 # The documents of the sample are loaded through the run-time XAML loader until the build-time
 # compiler exists; the dependency goes away with it.
 ferroui-markup-xaml-loader = { workspace = true, features = ["runtime"] }
+# The OpenGL pages: the OpenGL control and the entry points the scene of the pages draws with.
+ferroui-opengl = { workspace = true }
 ferroui-themes-simple = { workspace = true }
 ferroui-themes-fluent = { workspace = true }
 # The Skia lease of `Pages/TabbedPage/FluidNavBar` (custom drawing on the canvas of the backend).
