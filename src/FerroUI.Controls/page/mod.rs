@@ -83,6 +83,8 @@ mod navigation_page_tests_navigating;
 #[cfg(test)]
 mod navigation_page_tests_stack;
 #[cfg(test)]
+mod page_lifetime_tests;
+#[cfg(test)]
 mod page_navigation_host_tests;
 #[cfg(test)]
 mod tabbed_page_tests;
