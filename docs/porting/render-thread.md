@@ -187,7 +187,7 @@ What the survey of R4 found: the render loop and its timers are ported and alrea
 | Step | Content | State |
 |---|---|---|
 | R4.1 | The synchronous wait of the media context (`SyncWaitCompositorBatch`): in the render-thread mode a synchronous commit blocks on the `Processed` or `Rendered` completion of the batch (`BatchCompletion::wait`) where the dispatcher-thread mode renders on the spot. The condition is upstream's (`UseUiThreadForSynchronousCommits` false and a background loop) and the mode of the compositor. | Done; `render_thread_tests.rs` commits synchronously against a render thread that ticks. |
-| R4.2 | `NonPumpingLockHelper` around the waits, as upstream. | Open: to check what the port has. |
+| R4.2 | `NonPumpingLockHelper` around the waits, as upstream. | Not applicable: the helper only has an implementation on Windows (it keeps a single-threaded apartment from pumping messages while it waits); without one it does nothing. The other places upstream uses it in `Compositor` are not waits, and the port has their logic (a commit requested while a batch is pending is triggered from its `Processed` completion through the dispatcher). |
 | R4.3 | The option that chooses the mode and where `Compositor::new` reads it. | Open; depends on R5 for a window to render. |
 
 ### Scope of R3, surveyed
