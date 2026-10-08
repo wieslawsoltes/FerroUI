@@ -13,7 +13,7 @@ use crate::controls::{Classes, NameScopeRef};
 use crate::data::core::expression_nodes::CastTarget;
 use crate::data::core::plugins::IPropertyAccessor;
 use crate::data::core::{ClrPropertyInfo, IPropertyInfo, ValueTypes};
-use crate::data::{BindingBase, BindingExpressionBase, CompiledBindingPath, CompiledBindingPathBuilder};
+use crate::data::{BindingBase, BindingExpressionBase, BindingPriority, CompiledBindingPath, CompiledBindingPathBuilder};
 use crate::ferro_markup_type;
 use crate::interactivity::{IRoutedEventArgs, RoutedEvent, RoutedEventArgs, RoutingStrategies};
 use crate::media::imaging::Bitmap;
@@ -25,8 +25,8 @@ use crate::reactive::IDisposable;
 use crate::styling::{Selector, Selectors, StyleQueries, StyleQuery, StyleQueryComparisonOperator};
 use crate::utilities::{CancelEventArgs, EventArgs, FormatError};
 use crate::{
-    BoxedValue, ClassBindingManager, FerroObject, FerroProperty, ISupportInitialize, Ref, StyledElement, TypeInfo,
-    UnsetValueType,
+    BoxedValue, ClassBindingManager, FerroObject, FerroProperty, ISupportInitialize, OwnedFerroPropertyChangedEventArgs,
+    Ref, StyledElement, TypeInfo, UnsetValueType,
 };
 use std::marker::PhantomData;
 use std::rc::Rc;
@@ -409,6 +409,21 @@ ferro_markup_type!(class CancelEventArgs {
     ],
 });
 
+// The arguments of the `PropertyChanged` event of an object, as a handler attached from
+// markup receives them: the change held by value.
+ferro_markup_type!(class OwnedFerroPropertyChangedEventArgs as "FerroPropertyChangedEventArgs" {
+    namespace: "FerroUI",
+    handles: [OwnedFerroPropertyChangedEventArgs, Option<OwnedFerroPropertyChangedEventArgs>],
+    base: EventArgs,
+    properties: [
+        Sender: Ref<FerroObject> { get: OwnedFerroPropertyChangedEventArgs::sender },
+        Property: &'static FerroProperty { get: OwnedFerroPropertyChangedEventArgs::property },
+        OldValue: Option<BoxedValue> { get: OwnedFerroPropertyChangedEventArgs::old_value },
+        NewValue: Option<BoxedValue> { get: OwnedFerroPropertyChangedEventArgs::new_value },
+        Priority: BindingPriority { get: OwnedFerroPropertyChangedEventArgs::priority },
+    ],
+});
+
 // System.ComponentModel
 
 ferro_markup_type!(interface dyn ISupportInitialize as "ISupportInitialize" {
@@ -457,6 +472,7 @@ pub(super) const TYPES: &[&MarkupType] = &[
     <dyn ISupportInitialize as MarkupTyped>::MARKUP,
     <EventArgs as MarkupTyped>::MARKUP,
     <CancelEventArgs as MarkupTyped>::MARKUP,
+    <OwnedFerroPropertyChangedEventArgs as MarkupTyped>::MARKUP,
     <Bitmap as MarkupTyped>::MARKUP,
     <ImmutableSolidColorBrush as MarkupTyped>::MARKUP,
     <dyn IAddChild<BoxedValue> as MarkupTyped>::MARKUP,
@@ -484,6 +500,7 @@ pub(super) fn register_value_types() {
     ValueTypes::register_nullable::<UnsetValueType>();
     ValueTypes::register_nullable::<EventArgs>();
     ValueTypes::register_nullable::<CancelEventArgs>();
+    ValueTypes::register_nullable::<OwnedFerroPropertyChangedEventArgs>();
     ValueTypes::register_nullable::<RuntimePlatformInfo>();
     ValueTypes::register_nullable::<CompiledBindingPath>();
     ValueTypes::register_nullable::<CompiledBindingPathBuilder>();

@@ -168,6 +168,9 @@ pub(crate) trait PropertyRoutes {
     /// into `out`, which must be an `&mut Option<T>`. Returns false if either
     /// has a different type.
     fn route_copy_value(&'static self, value: &dyn Any, out: &mut dyn Any) -> bool;
+    /// Clones `value`, which must hold exactly the property's value type `T`,
+    /// into a box of its own. `None` if it has a different type.
+    fn route_box_value(&'static self, value: &dyn Any) -> Option<BoxedValue>;
     /// Creates a value entry for `frame` that reads its values from `source`.
     /// Only supported by styled properties.
     fn route_create_binding_entry(

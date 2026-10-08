@@ -157,3 +157,21 @@ fn handler_with_untyped_arguments_is_assigned_to_the_opening_of_a_flyout() {
     assert!(host.get_control::<Button>("button").flyout().is_some());
     assert_eq!(host.openings(), 0);
 }
+
+/// The property-changed event of every object (`PropertyChanged='Handler'` on an element),
+/// as the OpenGL pages of the control catalog attach it.
+#[test]
+fn property_changed_event_is_assigned() {
+    let _base = xaml_test_base();
+    let xaml = "<Panel xmlns='https://github.com/ferroui'><Border Name='target' PropertyChanged='OnPropertyChanged'/></Panel>";
+    let host = MyHost::new();
+
+    load_with_root(xaml, None, boxed(host.clone()));
+
+    let target = host.get_control::<Control>("target");
+    let before = host.changed_properties().len();
+    target.set_opacity(0.5);
+
+    let changed = host.changed_properties();
+    assert_eq!(changed[before..], ["Opacity".to_string()]);
+}

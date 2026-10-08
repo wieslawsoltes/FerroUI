@@ -17,8 +17,10 @@ use crate::metadata::{
     MarkupType, MarkupTypeKind, MarkupTyped, MarkupValue,
 };
 use crate::styling::{ControlTheme, Style, Styles};
-use crate::{BoxedValue, FerroObject, Ref, StaticType, StyledElement, Thickness, TypeInfo};
-use std::cell::Cell;
+use crate::{
+    BoxedValue, FerroObject, OwnedFerroPropertyChangedEventArgs, Ref, StaticType, StyledElement, Thickness, TypeInfo,
+};
+use std::cell::{Cell, RefCell};
 use std::rc::Rc;
 
 fn boxed<T: PartialEq + 'static>(value: T) -> MarkupValue {
@@ -1715,3 +1717,43 @@ fn a_null_setter_value_is_not_a_value_of_a_structure() {
     crate::styling::testing::try_attach(&style_with_null_setter(margin), &visual, None);
 }
 
+
+#[test]
+fn property_changes_reach_a_handler_attached_through_metadata() {
+    crate::register_types();
+    // The event every object has (`FerroObject.PropertyChanged`), which markup attaches a
+    // handler to (`PropertyChanged="Handler"` on an element).
+    let markup = FerroObject::TYPE.markup().expect("the markup metadata of the class");
+    let event = markup.find_event("PropertyChanged").unwrap();
+    assert_eq!(
+        event.arguments.iter().map(|a| a()).collect::<Vec<_>>(),
+        [ValueType::of::<Option<BoxedValue>>(), ValueType::of::<OwnedFerroPropertyChangedEventArgs>()]
+    );
+    let arguments_type = MarkupType::find("FerroUI", "FerroPropertyChangedEventArgs").unwrap();
+    assert!(std::ptr::eq(arguments_type, <OwnedFerroPropertyChangedEventArgs as MarkupTyped>::MARKUP));
+
+    let element = StyledElement::new();
+    let changes: Rc<RefCell<Vec<OwnedFerroPropertyChangedEventArgs>>> = Rc::new(RefCell::new(Vec::new()));
+    let handler = MarkupDelegate::new({
+        let (changes, element) = (changes.clone(), element.clone());
+        move |arguments| {
+            assert_eq!(arguments.len(), 2);
+            assert_eq!(unbox::<Ref<StyledElement>>(&arguments[0]), element);
+            changes.borrow_mut().push(unbox::<OwnedFerroPropertyChangedEventArgs>(&arguments[1]));
+            None
+        }
+    });
+    (event.add)(&[into_markup_value(element.clone()), boxed(handler)]).unwrap();
+    element.set_data_context(Some(Rc::new(1i32) as BoxedValue));
+
+    // The handler received the change held by value: the values are copies in untyped form.
+    let changes = changes.borrow();
+    let data_context = StyledElement::data_context_property().as_property();
+    let change = changes.iter().find(|change| change.property() == data_context).expect("the change of the data context");
+    assert!(change.sender() == element.clone().upcast::<FerroObject>());
+    assert!(change.old_value().is_none());
+    assert_eq!(change.new_value().and_then(|value| value.downcast_ref::<i32>().copied()), Some(1));
+    assert!(change.is_effective_value_change());
+    let new_value = (arguments_type.find_property("NewValue").unwrap().get.unwrap())(&[boxed(change.clone())]).unwrap();
+    assert_eq!(unbox::<i32>(&new_value), 1);
+}

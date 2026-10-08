@@ -83,7 +83,7 @@ pub use ferro_property::{
     AnyValue, BoxedValue, DoNothingType, FerroProperty, NotifyingCallback, PropertyChangedObservable,
     PropertyValue, StyledPropertyOptions, UnsetValueType,
 };
-pub use ferro_property_changed_event_args::FerroPropertyChangedEventArgs;
+pub use ferro_property_changed_event_args::{FerroPropertyChangedEventArgs, OwnedFerroPropertyChangedEventArgs};
 pub use ferro_property_metadata::{
     CoerceValueCallback, DirectPropertyMetadata, FerroPropertyMetadata, StyledPropertyMetadata,
 };
