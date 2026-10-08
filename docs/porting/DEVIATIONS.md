@@ -26,7 +26,6 @@ Other pages hold the entries of their own area, and this page does not repeat th
 | Upstream | Port | Kind | Why | Since |
 |---|---|---|---|---|
 | `LayoutManager.GetTimestamp` uses `Stopwatch.GetTimestamp()` (sub-millisecond ticks). | `get_timestamp` in `layout_manager.rs` reads `Dispatcher::current_dispatcher().now()`, which is in milliseconds. | Behaviour | The port times layout with the dispatcher's clock. Durations below 1 ms read as 0 in `LayoutPassTimed` and the layout time graph. | #25 |
-| `LayoutManager` calls `Dispatcher.UIThread.VerifyAccess()` in its public entry points. | Not called. | Missing | No reason was recorded. `Dispatcher::verify_access` exists (`threading/dispatcher.rs`), so this can be ported; until then a call from a wrong thread is not caught here. | before #25 |
 
 ### Colors (`src/FerroUI.Base/media/color.rs`, `hsl_color.rs`, `hsv_color.rs`)
 
@@ -112,3 +111,4 @@ Places where the port did work that upstream does not do, or did it differently,
 | `XamlTypeSystem.FindAssembly(name)` (`SreTypeSystem` of the run-time loader, `CecilTypeSystem` of the build) finds the assembly whose name equals `name` (without regard to case in the SRE type system). | `RuntimeTypeSystem::find_assembly` returned the first assembly whose name contained `name`, so the include transformer looked for the compiled documents of `ferres://Tests/..` in any assembly whose name contains `tests` (`runtime_type_system.rs`). | #53 |
 | The `TestRoot` of `Avalonia.UnitTests` is a focus scope (`IFocusScope`). | The `TestRoot` of `ferroui-controls` was not one, so the focus of its content was not remembered for the root (`test_support.rs`). | #51 |
 | `TypeUtilities.CanCast<T>` is `value is T`: a value of the type a nullable `T` holds (`int` for `int?`) and an object of class `T` behind a handle of a base class match. | `FuncDataTemplate::for_type` matched a value only when its box held exactly `T` (`func_data_template.rs`). | #51 |
+| `LayoutManager.InvalidateMeasure`, `InvalidateArrange`, `ExecuteLayoutPass` and `EnqueueBringIntoView` call `Dispatcher.UIThread.VerifyAccess()` (formerly the Layout row "`LayoutManager` calls `Dispatcher.UIThread.VerifyAccess()`"). | Did not call it, so a call from a thread other than the UI thread was not caught (`layout_manager.rs`). | #51 |
