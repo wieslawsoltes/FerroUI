@@ -6,6 +6,9 @@
 //! the exports (functions of the framework, called by the script module).
 //! Objects of the page are opaque [`JsObject`] handles; nothing outside this
 //! module and the render targets touches them except to pass them back.
+//!
+//! [`thread_proxy`] is the one file that does not talk to the script module:
+//! it crosses from one thread of the module to another.
 
 pub mod canvas_helper;
 pub mod completion_helper;
@@ -17,6 +20,7 @@ pub mod navigation_helper;
 pub mod screen_helper;
 pub mod storage_helper;
 pub mod stream_helper;
+pub mod thread_proxy;
 pub mod timer_helper;
 
 /// An object of the web page, held by the framework without looking inside.

@@ -1,8 +1,10 @@
+use crate::interop::thread_proxy::{self, RunOnThread};
 use ferroui_base::threading::{
     DispatcherImplEvent, IDispatcherImpl, IDispatcherImplWithExplicitBackgroundProcessing, IDispatcherSignal,
 };
 use std::cell::{Cell, RefCell};
 use std::rc::Rc;
+use std::sync::atomic::{AtomicBool, AtomicUsize, Ordering};
 use std::sync::Arc;
 use std::thread::{self, ThreadId};
 use std::time::Instant;
@@ -60,9 +62,20 @@ fn instance() -> Option<Rc<BrowserSingleThreadedDispatcherImpl>> {
     INSTANCE.with(|instance| instance.borrow().clone())
 }
 
-/// Dispatcher backend for single-threaded WASM. The browser event loop is
-/// the only loop: wake-ups are posted as macrotasks and everything runs on
-/// the main thread, so no locking is needed. Pending input is deliberately
+/// The thread of the dispatcher, as [`thread_proxy::current_thread`] names
+/// it; 0 until a dispatcher is created, and always in a build without
+/// threads.
+static LOOP_THREAD: AtomicUsize = AtomicUsize::new(0);
+
+/// Whether a wake-up raised on another thread is on its way to the thread of
+/// the dispatcher.
+static CROSS_THREAD_SIGNAL_PENDING: AtomicBool = AtomicBool::new(false);
+
+/// Dispatcher backend for the browser. The browser event loop is the only
+/// loop: wake-ups are posted as macrotasks and the dispatcher runs on the
+/// main thread, so its own state needs no locking. A module built with
+/// threads has other threads (the render worker), which wake the dispatcher
+/// through its signal handle. Pending input is deliberately
 /// not queried: the browser dispatches input between our tasks on its own,
 /// and gating low-priority jobs on a pending-input query starves them for as
 /// long as the pointer keeps moving.
@@ -78,15 +91,59 @@ pub struct BrowserSingleThreadedDispatcherImpl {
     scheduling: Box<dyn IScheduling>,
 }
 
-/// Wakes the dispatcher up. There is one thread, so the handle forwards to
-/// the instance of that thread.
+/// Wakes the dispatcher up. On the thread of the dispatcher the handle
+/// forwards to the instance of that thread. On any other thread of a module
+/// built with threads it carries the wake-up across.
+///
+/// Not from upstream, whose browser dispatcher in the threaded mode is the
+/// managed one, woken through an event of the runtime. See
+/// `docs/porting/browser-render-worker.md`, section 3 and "B2.3".
 struct Signal;
 
 impl IDispatcherSignal for Signal {
     fn signal(&self) {
         if let Some(instance) = instance() {
             IDispatcherImpl::signal(&*instance);
+        } else {
+            signal_from_another_thread(
+                &CROSS_THREAD_SIGNAL_PENDING,
+                LOOP_THREAD.load(Ordering::SeqCst),
+                thread_proxy::run_on_thread,
+            );
         }
+    }
+}
+
+/// Carries a wake-up to `loop_thread`: a flag, so that the wake-ups raised
+/// before the thread has taken one are one, and a call queued for the thread
+/// that signals its dispatcher there. The call runs from the event loop of
+/// the thread, and what it does is what a signal raised on that thread does:
+/// it posts the task of the dispatcher. So a wake-up from another thread
+/// never runs dispatcher work in the middle of something else, not even
+/// while the thread waits for a frame.
+///
+/// Does nothing without a loop thread (no dispatcher yet, or a build without
+/// threads, where a thread that has no dispatcher has nobody to wake).
+fn signal_from_another_thread(pending: &'static AtomicBool, loop_thread: usize, run_on_thread: RunOnThread) {
+    if loop_thread == 0 {
+        return;
+    }
+    if pending.swap(true, Ordering::SeqCst) {
+        return;
+    }
+    let queued = run_on_thread(
+        loop_thread,
+        Box::new(move || {
+            // Cleared first: a wake-up raised from here on is queued again,
+            // and the signal below covers everything raised before.
+            pending.store(false, Ordering::SeqCst);
+            if let Some(instance) = instance() {
+                IDispatcherImpl::signal(&*instance);
+            }
+        }),
+    );
+    if !queued {
+        pending.store(false, Ordering::SeqCst);
     }
 }
 
@@ -110,6 +167,7 @@ impl BrowserSingleThreadedDispatcherImpl {
             scheduling,
         });
         INSTANCE.with(|instance| *instance.borrow_mut() = Some(this.clone()));
+        LOOP_THREAD.store(thread_proxy::current_thread(), Ordering::SeqCst);
         this
     }
 }
@@ -270,6 +328,65 @@ mod tests {
         impl_.signal_handle().signal();
 
         assert_eq!(vec!["signal"], *calls.borrow());
+    }
+
+    #[test]
+    fn a_signal_from_another_thread_is_carried_to_the_loop_thread_once() {
+        use crate::interop::thread_proxy::ThreadWork;
+        use std::sync::Mutex;
+
+        static PENDING: AtomicBool = AtomicBool::new(false);
+        static QUEUED: Mutex<Vec<(usize, ThreadWork)>> = Mutex::new(Vec::new());
+        fn queue(thread: usize, work: ThreadWork) -> bool {
+            QUEUED.lock().unwrap().push((thread, work));
+            true
+        }
+        fn refuse(_thread: usize, _work: ThreadWork) -> bool {
+            false
+        }
+        fn take() -> Vec<(usize, ThreadWork)> {
+            QUEUED.lock().unwrap().drain(..).collect()
+        }
+
+        let (_impl, calls) = create();
+
+        // Another thread has no dispatcher; its two wake-ups are one call for the loop thread.
+        std::thread::spawn(|| {
+            assert!(instance().is_none());
+            signal_from_another_thread(&PENDING, 7, queue);
+            signal_from_another_thread(&PENDING, 7, queue);
+        })
+        .join()
+        .unwrap();
+        let queued = take();
+        assert_eq!(vec![7], queued.iter().map(|(thread, _)| *thread).collect::<Vec<usize>>());
+        assert!(calls.borrow().is_empty());
+
+        // The call runs on the loop thread and signals the dispatcher there.
+        for (_, work) in queued {
+            work();
+        }
+        assert_eq!(vec!["signal"], *calls.borrow());
+        assert!(!PENDING.load(Ordering::SeqCst));
+
+        // A wake-up that could not be queued does not keep later ones back.
+        signal_from_another_thread(&PENDING, 7, refuse);
+        assert!(!PENDING.load(Ordering::SeqCst));
+
+        // Without a loop thread there is nobody to wake.
+        signal_from_another_thread(&PENDING, 0, queue);
+        assert!(take().is_empty());
+    }
+
+    #[test]
+    fn the_signal_handle_of_a_thread_without_a_dispatcher_is_lost_in_a_build_without_threads() {
+        let (impl_, calls) = create();
+        let handle = impl_.signal_handle();
+
+        std::thread::spawn(move || handle.signal()).join().unwrap();
+
+        assert!(calls.borrow().is_empty());
+        assert!(!CROSS_THREAD_SIGNAL_PENDING.load(Ordering::SeqCst));
     }
 
     #[test]
