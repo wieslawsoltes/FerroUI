@@ -43,13 +43,14 @@ impl IAccessKeyHandler for MenuItemAccessKeyHandler {
     }
 
     fn set_owner(&self, owner: &Ref<InputElement>) {
-        self.base.set_owner_without_handlers(owner);
-
-        let weak = self.this.clone();
-        owner.add_handler(InputElement::text_input_event(), move |_, e: &TextInputEventArgs| {
-            if let Some(this) = weak.upgrade() {
-                this.on_text_input(e);
-            }
+        // `OnSetOwner`: the handlers of the base class stay attached.
+        self.base.set_owner_with(owner, |owner| {
+            let weak = self.this.clone();
+            owner.add_handler(InputElement::text_input_event(), move |_, e: &TextInputEventArgs| {
+                if let Some(this) = weak.upgrade() {
+                    this.on_text_input(e);
+                }
+            });
         });
     }
 

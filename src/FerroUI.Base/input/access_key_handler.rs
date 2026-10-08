@@ -206,13 +206,11 @@ impl AccessKeyHandler {
             .collect()
     }
 
-    /// Sets the owner of the handler without attaching the key and pointer
-    /// handlers of a window: the part of setting the owner that a handler
-    /// built on this one keeps when it replaces the handlers that are
-    /// attached to the owner.
+    /// Records the owner of the handler: the first part of
+    /// [`IAccessKeyHandler::set_owner`].
     ///
     /// This method can only be called once.
-    pub fn set_owner_without_handlers(&self, owner: &Element) {
+    fn set_owner_without_handlers(&self, owner: &Element) {
         if self.owner.borrow().is_some() {
             panic!("AccessKeyHandler owner has already been set.");
         }
