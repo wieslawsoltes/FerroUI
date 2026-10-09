@@ -67,3 +67,5 @@ Some ported files derive from sources that the upstream project took from third 
 ## Third-party crates
 
 Rust dependencies are used under their own licenses as declared in their crate metadata; they are not vendored in this repository. Direct dependencies: `skia-safe` (MIT), `harfbuzz-sys` (MIT), `bitflags`, `paste`, `cc`, `roxmltree`, `time` (MIT OR Apache-2.0), `rust_decimal` (MIT) and `sysinfo` (MIT).
+
+The Vello render backend (`src/Vello/FerroUI.Vello`) links crates of the Vello project and their companions: `kurbo`, `peniko`, `vello_cpu` (with `vello_common`), `linesweeper` and `png`, each under the Apache License 2.0 or the MIT license at the choice of the user. The versions, what each is used for and the copyright lines are in `src/Vello/FerroUI.Vello/NOTICE.md`.

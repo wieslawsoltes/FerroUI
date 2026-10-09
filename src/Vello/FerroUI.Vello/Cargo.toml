@@ -1,0 +1,23 @@
+[package]
+name = "ferroui-vello"
+description = "The Vello render backend: the render contracts of the base library on kurbo, peniko and the renderers of the Vello project"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+
+[lib]
+path = "lib.rs"
+
+[dependencies]
+ferroui-base.workspace = true
+ferroui-controls.workspace = true
+kurbo.workspace = true
+peniko.workspace = true
+vello_cpu.workspace = true
+linesweeper.workspace = true
+png.workspace = true
+
+[dev-dependencies]
+ferroui-controls = { workspace = true, features = ["testing"] }
