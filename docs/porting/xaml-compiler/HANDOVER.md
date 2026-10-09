@@ -145,6 +145,18 @@
   the `PipsPager` case and the colour picker compiled by its build are NOT STARTED. Nothing is
   half-done in the working tree.
 
+- The eleventh stage (branch `xaml-catalog-last-refusals`, on `xaml-catalog-rustc`, section 21) worked
+  the refusals of section 20 to the end, built and run by its author with the commands the stage
+  allowed. DONE: lists of the runtime library created in markup, a method as a command in a compiled
+  binding path, container queries and the adder of a collection among the setters chosen at run time
+  (`xaml.md` 9.4.9 to 9.4.11), each in both hosts with corpus documents and an execution test; the
+  colour picker compiled by its build (9.5.20) and with it `App.xaml` of the catalog; the
+  registrations only the run-time loader made, moved to the base crate, and the fixture's workaround
+  removed (9.5.21). The measure: **218 of 219 documents emitted, 218 compiled by rustc, 217 of 217
+  trees with a class equal**; the one refused is the document of the class that is not ported.
+  WRITTEN, NOT STARTED: the plan for converting the sample itself (section 21, item 6). Nothing is
+  half-done in the working tree.
+
 Design documents in the repository: `docs/porting/xaml.md`, sections 9 (emitter design: call forms
 A/B/C, build integration, code-behind), 9.5 (source scanner), 9.12 (the 14 rulings), 9.13, and
 decisions 1 to 27. Read section 9 before touching the emitter. `DRAFT-AUTHOR-REPORT.md` is the
@@ -1653,3 +1665,120 @@ The reference tests of both themes, of the dialogs and of the fixtures compare t
 3. The fixture's tests start from a process in which the run-time loader has loaded a document (`xaml.md` 9.5.19, the registration found). What else a process without the run-time loader lacks is not known.
 4. The build of the fixture with the feature was timed on one fast machine (165 s with the test binary). CI does not build it; a slower machine may take several times that.
 5. The fixture links what the sample links (Skia, the OpenGL controls, both themes): it is as heavy as the sample for CI, also without the feature.
+
+## 21. What the eleventh stage delivered (the last refusals of the catalog, the colour picker compiled, a process with compiled markup only), the plan for the sample, and how to validate it
+
+Branch `xaml-catalog-last-refusals`, on `xaml-catalog-rustc`. Read `xaml.md` 9.4.9 to 9.4.11, 9.5.20 and 9.5.21 first.
+
+### Items 1 to 3: the refusals
+
+| Reason of section 20 | Documents | What was done | Where |
+|---|---|---|---|
+| Lists created in markup | 5 | The list the run-time loader creates for `List<T>` and `ArrayList` is a type of the runtime library (`rt::RuntimeList`), which the run-time loader and generated code both create; the emitter writes the construction, each `Add` and the list as a collection handle (`rt::list_cast`) | `xaml.md` 9.4.9; `src/Markup/FerroUI.Markup.Xaml/xaml_il/runtime/runtime_list.rs`, `runtime/type_system/values.rs` (the re-export, `new_list`, `list_element`), `Emitter::new_runtime_list`, `runtime_list_add`, `coerce_runtime_list`, `Known::RuntimeList`, `Known::ListItems` |
+| A method as a command | 3 | The element the interpreter builds (`CompiledBindingPathBuilder::command_untyped`, which existed) over the typed functions of the execute and the can-execute method | `xaml.md` 9.4.10; `rt::path_command`, `rt::path_command_with_can_execute`, `Emitter::path_command`, `command_method` |
+| Container queries | 2 | The builder calls of the styling system, one local per node | `xaml.md` 9.4.11; `Emitter::query`, `Known::StyleQuery` |
+| The `PipsPager` case | 1 | The refusal was general: a value in property element syntax has the adders of the type of its property among its setters, and the emitter had no statement for an adder in a choice at run time | `xaml.md` 9.4.11; `Emitter::adder_statement` |
+
+Not done of item 1: an array. The task named `x:Array`; markup has no array element, and no document of the catalog was refused for an array. The array constant of the compiler (a text assigned to a member of an array type) is still refused by name (`xaml.md` 9.4.9, "Not emitted").
+
+Rules a new worker would otherwise rediscover:
+
+- The members of the two lists of the table of runtime library types state no Rust type (`MethodInfo::parameter_handles` is empty in the run-time host): the emitter takes the handle of the type of the parameter (`EmitTypes::handle_of`). A constructor of that table is `built` in the run-time host and not in the model host; the rule for the list asks neither.
+- An instantiation of `List<T>` a crate declares metadata for (``List`1[String]``) is not this list: it has a declared constructor and keeps the Rust type of its metadata, with or without a public path.
+- The regeneration test of the corpus writes `generated.rs` whatever the emitter says: a document of the corpus that does not *transform* (a query text the grammar refuses) makes every document not eligible and empties the file. Read the output of the regeneration before trusting the file.
+- A document of the corpus whose instance is converted at run time (`rt::argument`) asks for a cast that is not registered, and belongs in `ASK_FOR_A_CAST_THAT_IS_NOT_REGISTERED` of `model_emit.rs`.
+- The owner of a command is the box the binding holds: a data context `Rc<T>` coerced to an untyped value is a box of `T`, which is the instance type `Rc<T>` only for a type registered as a reference (`ValueTypes::register_reference::<T>()`), in both back ends.
+
+### Item 4: the colour picker compiled by its build
+
+`xaml.md` 9.5.20. `src/FerroUI.Controls.ColorPicker`: `build.rs`, `Cargo.toml` (`links`, the runtime library, `ferroui-build`), `lib.rs`, `register_types.rs`, `assets.rs`, `tests/compiled_xaml_tests.rs`; `Cargo.lock`. The crate never depended on the run-time loader outside its tests. **The documents stay embedded as assets** next to the compiled markup, and the section says why (decision 22: the run-time loader leaves an include to run time only for a document the asset loader has; the unconverted ControlCatalog includes the styles from a document it loads at run time). They go with step 6 of the plan below.
+
+The fixture no longer exports the model of the colour picker (`EXPORTED` has two crates left), the measure builds the colour picker as its build script does, and `App.xaml` is compiled and compared.
+
+One change of `ferroui-build` came with it (`crate_file`, the text of `$OUT_DIR/xaml/mod.rs`): the module of a group without a class is `#[allow(dead_code)]`. The five resource dictionaries of each theme of the colour picker are not public and are only merged, so their own build functions are never called (their content is in the document that merges them), and rustc reported 105 unused items on every build of the crate. No emitted document changed; the file of a class states its own attributes, as before.
+
+### Item 5: a process with compiled markup only
+
+`xaml.md` 9.5.21 has the audit and the proof. Two registrations moved to where a crate registers its types:
+
+- `Option<Vec<T>>` as the nullable form of `Vec<T>` for the nine element types the type system of the run-time loader stated when it was created (`RuntimeArray::register_element`): `src/FerroUI.Base/markup_types/plain.rs`, `register_value_types`.
+- The handle of a class (`ValueTypes::register_object::<T>`), which the initialisation of the class made: `TypeInfo::with_handle_registration` (set by `ferro_class!`), and `TypeInfo::register` / `register_all` state it for every thread (`ValueTypes::register_global`). The run-time loader initialises a class when it reads it; compiled markup names a class without initialising it, and the null of `Option<Ref<ContextMenu>>` was not null to the conversions.
+
+The fixture's workaround is gone (`tests/mod.rs`, `TestApplication::start`: the application merges the compiled `CustomThemes.xaml`), and `NOT_RUN` is empty again.
+
+### The measure
+
+`cargo test -p ferroui-markup-xaml-tests --lib emitter::catalog_measure -- --ignored --nocapture`, and `cargo test -p xaml-catalog-fixture --lib --features catalog`.
+
+| | Emitted | Compiled by rustc | The tree of the run-time loader | Refused | Emitted Rust |
+|---|---|---|---|---|---|
+| Section 20 | 206 | 206 | 205 of 205 with a class | 13 | 13,800,499 bytes, 144,673 lines |
+| After item 1 (lists) | 211 | 211 | 210 of 210 | 8 | |
+| After item 2 (commands) | 214 | 214 | 212 of 213 (`ContextFlyoutPage`: one value printed differently, item 5) | 5 | |
+| After item 3 (queries, adders) | 217 | 217 | 215 of 216 | 2 | 14,412,441 bytes, 151,333 lines |
+| After item 4 (the colour picker, `App.xaml`) | 218 | 218 | 216 of 217 | 1 | 14,758,945 bytes, 154,891 lines |
+| After item 5 (no run-time load before a compiled tree) | 218 | 218 | 217 of 217 | 1 | |
+
+Refused now: `Pages/OpenGl/OpenGlLeasePage.xaml` (`the type models have no type ControlCatalog.Pages.OpenGlLeasePage`: the class is not ported; it stays).
+
+### Item 6: the plan for converting the sample (not started; nothing of it is in the tree)
+
+`samples/ControlCatalog` loads 219 documents with the run-time loader. 218 compile and are the trees of the run-time loader; the conversion is to make the sample itself load them compiled. What follows is the order, with the check at each step. The sample's sources belong to the catalog worker (section 1), so each step is a change there.
+
+**Decisions.**
+
+1. *How a document without a class names its own crate: `extern crate self as control_catalog;` in `lib.rs`, not an emitter change.* A document without a class (`CustomThemes.xaml`) is compiled as a group file, which names the types of its crate by the name of the crate (`::control_catalog::controls::SamplePage`); the file of a class names them through `crate` (`generate_class_file_with` rewrites the prefix). Writing `crate::` in a group file too would be the tidier output, and it changes bytes that are checked: the corpus (`emitter/generated.rs` has 46 such paths of the test crate), the include fixture's application, the colour picker (96 uses of one accessor alone) and the catalog fixture. It would *not* change the themes or the dialogs: both are one class group each, and their files have no path with the name of their crate today (`compiled_xaml.rs` of the Simple theme: 0 of `::ferroui_themes_simple::`, of the Fluent theme: 0 of `::ferroui_themes_fluent::`). So the emitter change is safe for the themes and buys nothing the declaration does not: one line, used by four crates already (the XAML test crate, the include fixture, the catalog fixture, the colour picker), no generated byte changed anywhere. If the owner prefers the emitter change, it is `generate_file_with` applying the rewrite `generate_class_file_with` applies, plus the regeneration of the corpus and the removal of the four declarations.
+2. *The class table stays the sample's own, fed by the build.* The sample's `XamlClass` (document, class, `create`, `create_uninitialized`) is read by its tests and by its page list; the build of the fixture already writes `COMPILED` (document, `populate`) from the model of the build, and `markup::load_component` of the fixture populates from it and falls back to the run-time loader. The sample takes that module as it is. The generated loader table (`compiled_markup::try_load`) replaces the hand-written `try_load` of `register_types.rs`; `xaml_class!` keeps declaring `initialize_component()`, so no class constructor changes.
+3. *The documents the build rewrites are compiled as rewritten.* With `placeholder-branding` the build script replaces the path data of some `StreamGeometry` resources; the compiler must get the rewritten text (`XamlGroup::documents` takes texts, so the script passes what `substitute_placeholder_geometries` produced), or the compiled sample shows the upstream artwork.
+4. *One group per document, as the fixture and the measure build them* (a class document with the documents of the sample it includes): a refused document then never takes another with it, and the build fails with the one diagnostic.
+5. *What stays on the run-time loader:* `Pages/OpenGl/OpenGlLeasePage.xaml` (not loaded by anything: the class is not ported; it stays an asset and a line of `excluded.txt`); the previewer of the designer support (`ferroui-designer-support` loads markup at run time by design and keeps its own dependency on the loader; the sample does not link it); and the sample's *tests*, which load every document through the run-time loader to compare and to report gaps (`tests/support.rs`, `gaps*.rs`, `survey.rs`: 24 calls), so the loader becomes a dev-dependency of the sample, as in the themes.
+
+**Steps.**
+
+| # | Step | Check |
+|---|---|---|
+| 1 | Build scripts with `links` keys for the two crates whose models the fixture still exports (`ferroui-opengl`, `mini-mvvm`: `Build::from_env().type_system(Model).run()` with no group, as the framework crates export theirs); `EXPORTED` of the fixture and the two `export` calls of the measure go | the fixture and the measure unchanged in what they emit; `cargo build -p control-catalog` |
+| 2 | The sample's `build.rs` compiles its documents: after the placeholder substitution, `Build::from_env().type_system(Model).default_compile_bindings(true)` with one group per document but `OpenGlLeasePage.xaml`; `ferroui-build` as a build dependency; `links = "control_catalog_xaml"` is not needed (nothing is built on the sample) | the build emits 218 documents; the emitted bytes are the fixture's for the same texts (compare the output directories with `placeholder-branding` off) |
+| 3 | `lib.rs`: `extern crate self as control_catalog;` and `ferroui_markup_xaml::include_compiled_xaml!()`; `ferroui-base` with `markup-functions` | rustc compiles the 14.8 MB of generated code in the sample (in the fixture: 165 s for the test binary with it, 85 s without, on the author's machine) |
+| 4 | `markup.rs` as the fixture has it (`populate_compiled` over `COMPILED`, the run-time loader as the fallback while it is still linked); `register_types.rs` registers `compiled_markup::register()`; `app.rs` populates `App` from its compiled markup (the group of `App.xaml` has `CustomThemes.xaml` and the styles of the colour picker linked at build time) and stops calling `FerroRuntimeXamlLoader::register()` outside tests | the suite of the sample (645 passed, 9 ignored today) unchanged; the generated per-document tests still load through the run-time loader and now also compare with the compiled class (the fixture's `compare`, moved into the sample's tests); the fixture can then go, or shrink to the pages CI builds |
+| 5 | The run-time loader becomes a dev-dependency (`ferroui-markup-xaml-loader` out of `[dependencies]`); the documents leave the embedded assets except `OpenGlLeasePage.xaml` and what a test reads (a `#[cfg(test)]` table, as in the themes) | `cargo tree -p control-catalog -e normal` has no `ferroui-markup-xaml-loader` and no `xamlx`; the desktop host starts and every page opens (the session over the whole catalog, `scripts/browser/catalog-pages.mjs` for the browser) |
+| 6 | The colour picker stops embedding its documents (`assets.rs` and the table of `build.rs` go; 9.5.20) | its 45 tests; no document of the workspace includes its styles from markup loaded at run time (the colour picker's own theme tests do: they move to the loader table, or keep a test-only asset table) |
+| 7 | The browser build and its budget (below) | `scripts/build-browser.sh control-catalog-browser --both`, the size report, the published site by hand |
+
+**The browser module.** The catalog module is 43.85 MB raw and 11.42 MB with gzip, against a budget of 14 MB with gzip (`browser-platform.md`, section 18, measured after the themes were compiled). What step 5 stops linking, from the attribution of that document (`themed_view`): the XAML pipeline is 2.50 MB raw and 0.60 MB with gzip, of which the runtime library stays; the loader, `xamlx` and `roxmltree` are the larger part, so about 2 MB raw and 0.5 MB with gzip go. The document texts leave the data section: 1.26 MB raw (219 files), about 0.2 MB with gzip. **The type metadata does not go**: the markup metadata of every type (`MarkupType`, with its by-name invokers) is reached from generated code (`rt::clr_property_info` and `rt::path_property` invoke the accessors of a declared property through it, `rt::add_event_handler` a subscription, `rt::class_markup` and `MarkupTyped::MARKUP` name the tables) and from reflection bindings and data templates at run time, so the linker keeps the tables and their closures; only `compiler-metadata`, which a normal build never had, is the emitter's alone. What is added is the compiled code of 218 documents, 14.76 MB of Rust. The one measured ratio is the themes: 10.94 MB of generated Rust (3.65 MB and 7.28 MB) made the catalog module 11.98 MB larger raw and 1.97 MB larger with gzip, before the shared helpers of `rt` took the repeated statement sequences out of the call sites. At that ratio the catalog adds 16 MB raw and 2.7 MB with gzip; the estimate of `xaml.md` 9.10.1 was +6 to +10 MB raw and +0.5 to +1.2 MB with gzip. Net of what goes: between +3 and +13 MB raw and between -0.2 and +2.0 MB with gzip, that is 11.2 to 13.4 MB with gzip against 14. The upper end leaves no room, so step 7 is a gate, not a formality: measure with `scripts/browser/wasm-size-report.py` before the workflow is changed, and if the module is over, the first lever is the one the themes had (more statement sequences into `rt` helpers: the pages repeat `StackPanel` children and `TextBlock` assignments as the themes repeated setters), not leaving pages on the run-time loader, which keeps the 2 MB of the loader for every page.
+
+### How to validate
+
+What the author ran, all green (debug profile, the dependencies built):
+
+```text
+cargo test -p ferroui-build --lib                                   24 passed
+cargo test -p ferroui-build-scan --lib                              44 passed
+cargo test -p ferroui-markup-xaml --lib                             194 passed (the runtime library; the list and the command helpers are exercised by the XAML test crate)
+cargo test -p ferroui-markup-xaml-loader --lib                      397 passed, 1 ignored
+cargo test -p ferroui-markup-xaml-loader --lib --no-default-features --features compiler     272 passed
+cargo test -p ferroui-markup-xaml-tests --lib                       594 passed, 17 ignored (590 before; the corpus is 126 documents, 122 before)
+cargo test -p ferroui-themes-simple --lib                           205 passed, 3 ignored
+cargo test -p ferroui-themes-fluent --lib                           200 passed, 2 ignored
+cargo test -p xaml-include-fixture-theme --lib                      3 passed
+cargo test -p xaml-include-fixture-application --lib                28 passed
+cargo test -p ferroui-dialogs --lib                                 49 passed
+cargo test -p ferroui-controls-color-picker --lib                   45 passed (43 before)
+cargo test -p ferroui-base --lib markup_types                       46 passed (the two registrations of item 5)
+cargo test -p xaml-catalog-fixture --lib                            130 passed
+cargo test -p xaml-catalog-fixture --lib --features catalog         341 passed (217 compiled documents with a class, each compared)
+cargo test -p control-catalog --lib                                 645 passed, 9 ignored (the unchanged sample, over the compiled colour picker)
+cargo test -p ferroui-markup-xaml-tests --lib emitter::catalog_measure -- --ignored --nocapture
+```
+
+The reference tests of both themes, of the dialogs and of the fixtures compare the output of their builds with the checked-in or regenerated text: every output that existed is unchanged, byte for byte. The checked-in files of the corpus and of the Rust paths were regenerated with the ignored tests the files name (four documents and one type more, nothing else differs).
+
+**Not run by the author, for the validating session:** `cargo build --workspace` and `cargo clippy`; the whole suites of the base crate and of the controls (the base crate changed by nine registrations and by the handle registration of `ferro_class!`, which every class of the workspace expands); the browser build; `scripts/check-upstream-name.sh` or its equivalent (the author checked the added lines of each commit).
+
+**What the author doubts.**
+
+1. *The handle registration costs start-up time.* Every class of a type table now registers its handle (four table entries and two closures) on each thread when the thread first converts an untyped value, where before only the classes a thread initialised did: about 700 classes, estimated at one to four milliseconds on the first conversion of a thread and not measured (no command of the stage measures start-up). `ValueTypes::register_object<T>` is already one of the largest generic families of the browser module (348 instances, 1.85 MB raw); the instances are the same ones, now all reachable from the type tables. If the cost matters, the alternative is to register on a miss (`TypeInfo::find_by_handle` in the lookups of the nullable forms), which is a change of the conversions and not a registration, so it was not done here.
+2. *The rule of this stage for the base crate was "only registrations".* The handle registration needed a field of `TypeInfo`, a builder call in `ferro_class!` and two lines in `TypeInfo::register` / `register_all`. It registers and does nothing else; it is still a change of the class macro, and the owner may want it another way.
+3. The order of the adder branch (the collection read before the value is converted) and the command parameter that is a list or an array (`xaml.md` 9.4.10 and 9.4.11, the deviations).
+4. The comparison of the colour picker runs the test binary a second time; a test harness that does not accept `--exact` with the name of the test would fail it, loudly.
+5. The estimate of the browser module is one ratio measured before a known reduction, applied to other markup: the range is honest, the number is not known until step 7.
