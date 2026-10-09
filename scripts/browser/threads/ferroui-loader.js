@@ -48,6 +48,9 @@ const WORKER_FRAMES = "ferroui-loader-worker-frames";
 // The module with threads was chosen and could not be created.
 const THREADS_FAILED = "ferroui-loader-threads-failed";
 
+// The lock a document holds from the moment it asks for the reload: see `reload`.
+const RELOAD_LOCK = "ferroui-loader-reload";
+
 // How long the probe worker may take to answer, and the service worker to become active.
 const PROBE_TIMEOUT = 2000;
 const SERVICE_WORKER_TIMEOUT = 10000;
@@ -171,6 +174,20 @@ async function isolate() {
     }
     // Without session storage the reload cannot be counted and could repeat for ever.
     if (!write(RELOADED, "1")) { return "the reload that isolates the page cannot be counted without session storage"; }
+    return reload();
+}
+
+// Reloads the page for the service worker and never resolves. The document that asks is finished:
+// it has no module and never will. The page that replaces it is isolated and this one is not, so
+// the browser puts the two in different groups of contexts, and that makes this document one the
+// back/forward cache may keep; Chrome has been seen to bring it back, frozen splash and all, as the
+// answer to a later reload of the page. Two things against that, as ferroui-threads.js does: a lock
+// that is never released, which keeps a document out of that cache (shared, so that two pages of
+// the site do not wait for each other); and, where a browser keeps it all the same, a document that
+// is shown again from the cache reloads, this time through the service worker.
+function reload() {
+    try { globalThis.navigator.locks?.request(RELOAD_LOCK, { mode: "shared" }, () => new Promise(() => { }))?.catch(() => { }); } catch { }
+    globalThis.addEventListener("pageshow", (event) => { if (event.persisted) { globalThis.location.reload(); } });
     globalThis.location.reload();
     return new Promise(() => { });
 }

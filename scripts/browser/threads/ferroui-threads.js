@@ -17,6 +17,9 @@
 // is still not isolated after it shows the message instead of reloading for ever.
 const RELOADED = "ferroui-threads-reloaded";
 
+// The lock a document holds from the moment it asks for the reload: see `reload`.
+const RELOAD_LOCK = "ferroui-threads-reload";
+
 function flag(action) {
     // Session storage is not available in every mode of every browser.
     try { return action(globalThis.sessionStorage); } catch { return null; }
@@ -80,6 +83,20 @@ export async function ensureCrossOriginIsolated({ serviceWorker = "./ferroui-sw.
         showMessage(element, "The service worker that adds the headers is now registered: reload the page.");
         return false;
     }
+    return reload();
+}
+
+// Reloads the page for the service worker and never resolves. The document that asks is finished:
+// it never creates the module. The page that replaces it is isolated and this one is not, so the
+// browser puts the two in different groups of contexts, and that makes this document one the
+// back/forward cache may keep; Chrome has been seen to bring it back, as it was left, as the answer
+// to a later reload of the page. Two things against that: a lock that is never released, which
+// keeps a document out of that cache (shared, so that two pages of the site do not wait for each
+// other); and, where a browser keeps it all the same, a document that is shown again from the cache
+// reloads, this time through the service worker.
+function reload() {
+    try { navigator.locks?.request(RELOAD_LOCK, { mode: "shared" }, () => new Promise(() => { }))?.catch(() => { }); } catch { }
+    globalThis.addEventListener("pageshow", (event) => { if (event.persisted) { globalThis.location.reload(); } });
     globalThis.location.reload();
     return new Promise(() => { });
 }
