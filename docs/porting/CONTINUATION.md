@@ -244,6 +244,8 @@ Four more members were looked for in the Rust code and not found. They are left 
 - `BrowserWindowingPlatform.EventGrouperDispatchQueue` (`Avalonia.Browser`): the queue of the raw event grouper, which upstream creates when the runtime has threads and the dispatcher is the managed one. `browser_input_handler.rs` dispatches input directly and says so: the UI thread of the port is the thread of the page, with and without the render worker.
 - `HeadlessGlyphRunStub.GlyphTypeface` (`Avalonia.Headless`): the stub of the port is created without the typeface (`HeadlessGlyphRunStub::new`), which nothing reads.
 
+Settled on the branch `small-gaps` (2026-10-09), each read against upstream and its users: the two of the browser and the one of the headless platform have no meaning in the port and have a waiver each in `member-waivers.toml` that says why (`FrameSize` belongs to a contract the class does not implement and nothing reads it; the event grouper queue exists only where the UI thread is a worker, which `browser-render-worker.md` leaves out of B2; the glyph typeface of the stub is the recorded deviation of the headless platform).
+
 Read together, the 452 members the pages report are:
 
 - 394 in the tooling of phase 4 (rows 2, 3 and 10): real gaps, not scheduled.

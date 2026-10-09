@@ -5088,3 +5088,23 @@ project = "Avalonia.Remote.Protocol"
 type = "Avalonia.Remote.Protocol.BsonTcpTransport"
 member = ".ctor"
 rust = ["new", "empty"]
+# The three members the review of 2026-10-09 looked for in the Rust code and did not find, each read
+# against upstream and its users (branch `small-gaps`): none has a meaning in the port.
+
+[[waive]]
+project = "Avalonia.Browser"
+type = "*BrowserTopLevelImpl"
+member = "FrameSize"
+reason = "no counterpart: the property returns null and is a member of `IWindowBaseImpl`, which the class does not implement (it is an `ITopLevelImpl` only); upstream reads `FrameSize` of a platform implementation in `WindowBase` and `Window`, never of a top-level that is not a window, so nothing can reach it. `TopLevel.FrameSize` of a browser view stays unset in the port as upstream"
+
+[[waive]]
+project = "Avalonia.Browser"
+type = "*BrowserWindowingPlatform"
+member = "EventGrouperDispatchQueue"
+reason = "no counterpart: the queue of the raw event grouper, which `Register` creates only when the runtime has threads, where the UI thread is a worker with `ManagedDispatcherImpl` and the queue is its input provider; it is null otherwise and `BrowserInputHandler` then dispatches each event at once. The UI thread of the port is the main thread of the page with `BrowserSingleThreadedDispatcherImpl`, with and without the render worker (owner's decision of 2026-10-08, `browser-render-worker.md`, section 3 and \"Not in B2\"), so the port is the branch without the queue: `BrowserInputHandler::schedule_input` dispatches directly. Applicable if the UI ever moves to a worker"
+
+[[waive]]
+project = "Avalonia.Headless"
+type = "*HeadlessGlyphRunStub"
+member = "GlyphTypeface"
+reason = "not kept (DEVIATIONS.md, Headless platform): the property is no member of `IGlyphRunImpl` and nothing reads it upstream; the glyph typeface is an object of the UI thread (`Rc<GlyphTypeface>`) and a glyph run is shared with the render thread (`IGlyphRunImpl: Send + Sync`), so the stub is created without it (`HeadlessGlyphRunStub::new`)"
