@@ -117,6 +117,7 @@ mod json;
 pub mod model;
 pub mod model_set;
 pub mod scanner;
+pub mod type_system;
 
 use std::env;
 use std::fs;
