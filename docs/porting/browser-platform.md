@@ -1253,6 +1253,17 @@ B2.7 found that under the software rasteriser a worker gets no animation frame f
 
 The render thread uses 24.5 MB at the start that the same module on one thread does not, and 2 MB more at the end of the tour: what it takes at the start the tour later needs anyway. The fixed 512 MB is four times the peak. What the browser holds outside the memory of the module (the compiled code, the WebGL contexts, the canvases, the two workers of the pool) is not in these numbers and was not measured.
 
+**The whole catalog (2026-10-09, after B3).** `catalog-memory.mjs --all`: every page the catalog offers in a browser and that can be opened (72 of 74), each scrolled and its demos opened, the prefetch on, two runs each; the method, the pages left out and what follows from it are in `browser-render-worker.md`, "B3 follow-ups".
+
+| Configuration | At the start | At the end | Peak | Size of the memory |
+|---|---:|---:|---:|---:|
+| without threads | 35.1, 35.1 | 286.0, 287.3 | 286.0, 287.3 | 326.6, grown to |
+| one thread | 35.0, 35.1 | 285.6, 286.9 | 285.6, 286.9 | 512, fixed |
+| render thread | 59.8, 59.8 | 288.7, 288.6 | 288.7, 288.6 | 512, fixed |
+| render thread, the catalog twice in one session (`--passes 2`) | 59.8 | 470.4 | 470.4 (288.8 after the first pass) | 512, fixed |
+
+The fixed 512 MB is 1.77 times the peak of one pass, and a page that is visited again costs again: the memory grows with the session in every configuration. The default was not changed.
+
 ### Not measured
 
 - **A network and the published host.** The server is local. The reload of the service worker route, the loader's later start of the download and the prefetch that starts early with the render thread all cost more on a network; `first-frame.mjs --throttle` with `--encoding` can measure the first two against a combined site.

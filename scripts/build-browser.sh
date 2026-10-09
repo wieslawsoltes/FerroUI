@@ -104,8 +104,9 @@ if [ -n "$THREADS" ]; then
   case "$THREAD_POOL_SIZE" in
     ''|*[!0-9]*) echo "FERROUI_BROWSER_THREAD_POOL_SIZE is not a number: $THREAD_POOL_SIZE" >&2; exit 2;;
   esac
-  # Not measured yet: the default is a provisional size, to be replaced by the peak of the catalog
-  # with a margin (docs/porting/browser-render-worker.md, "B2.2"). The stack alone is 8 MB.
+  # Measured (docs/porting/browser-render-worker.md, "B3 follow-ups"): one visit to every page of the
+  # ControlCatalog ends at 289 MB and a second one at 470 MB, so nothing smaller is supported, and
+  # the memory in use grows with the session until its cause is found. The stack alone is 8 MB.
   THREAD_MEMORY_MB="${FERROUI_BROWSER_THREAD_MEMORY_MB:-512}"
   case "$THREAD_MEMORY_MB" in
     ''|*[!0-9]*) echo "FERROUI_BROWSER_THREAD_MEMORY_MB is not a number: $THREAD_MEMORY_MB" >&2; exit 2;;
