@@ -9,6 +9,7 @@ interface EmscriptenGL {
     registerContext: (ctx: WebGLRenderingContext, attrs: WebGLContextAttributes) => number;
     currentContext?: EmscriptenGlContext;
     makeContextCurrent: (handle: number) => boolean;
+    deleteContext?: (handle: number) => void;
 }
 
 function getGL(): EmscriptenGL {
@@ -65,6 +66,16 @@ export class WebGlRenderTarget extends WebRenderTarget {
         this.sample = context.getParameter(context.SAMPLES);
         this.depth = context.getParameter(context.DEPTH_BITS);
         this.attrs = attrs;
+    }
+
+    // Not in the original, where a context lives as long as the page. The context leaves the
+    // table of Emscripten's GL object, which is what keeps a WebGL context alive after its view
+    // is closed. Whatever drew with it (Skia's context) has been released before, with this
+    // context current.
+    public release(): void {
+        const handle = this.contextHandle;
+        this.contextHandle = undefined;
+        if (handle != null) { WebGlRenderTarget._gl?.deleteContext?.(handle); }
     }
 
     public static getCurrentContext(): number {

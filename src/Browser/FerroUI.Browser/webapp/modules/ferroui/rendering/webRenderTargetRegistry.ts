@@ -108,12 +108,49 @@ export class WebRenderTargetRegistry {
                 // the target, so the worker reports it: 2 for WebGL, 1 for software.
                 FerroExports.CanvasHelper?.OnRenderTargetRegistered(msg.data.id, target.renderTargetType === "webgl" ? 2 : 1);
             } else if (msg.data.ferrouiCmd === "unregisterCanvas") {
-                /* eslint-disable */
-                // Our keys are _always_ numbers and are safe to delete
-                delete WebRenderTargetRegistry.targets[msg.data.id];
-                /* eslint-enable */
+                // The original deletes the entry and nothing sends the message. Here the thread
+                // that created the canvas sends it (`unregister`), and the context of the canvas
+                // is released with the entry.
+                WebRenderTargetRegistry.releaseTarget(msg.data.id);
             } else if (oldHandler != null) { oldHandler.call(self, ev); }
         };
+    }
+
+    // Not in the original, which never lets go of a canvas. Called on the thread that created the
+    // canvas `id`, when the thread that draws to it has released everything it drew with (the
+    // framework calls it from there, or has it called from there): the render target of a canvas
+    // this thread kept is released here; for a canvas whose control went to a worker the worker
+    // is told (`unregisterCanvas`), and a canvas that was never posted is forgotten.
+    static unregister(id: number) {
+        const entry = WebRenderTargetRegistry.registry[id];
+        /* eslint-disable */
+        // Our keys are _always_ numbers and are safe to delete
+        delete WebRenderTargetRegistry.registry[id];
+        /* eslint-enable */
+        const held = WebRenderTargetRegistry.heldBack.findIndex(canvas => canvas.id === id);
+        if (held >= 0) {
+            WebRenderTargetRegistry.heldBack.splice(held, 1);
+            return;
+        }
+        if (entry?.worker != null) {
+            entry.worker.postMessage({
+                ferrouiCmd: "unregisterCanvas",
+                id
+            });
+            return;
+        }
+        WebRenderTargetRegistry.releaseTarget(id);
+    }
+
+    // The render target `id` of this thread leaves the table and lets go of its context.
+    private static releaseTarget(id: number) {
+        const target = WebRenderTargetRegistry.targets[id];
+        if (target == null) { return; }
+        /* eslint-disable */
+        // Our keys are _always_ numbers and are safe to delete
+        delete WebRenderTargetRegistry.targets[id];
+        /* eslint-enable */
+        target.release();
     }
 
     static getRenderTarget(id: number): WebRenderTarget | undefined {
