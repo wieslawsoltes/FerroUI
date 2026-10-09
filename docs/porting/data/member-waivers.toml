@@ -2949,8 +2949,8 @@ type = "Avalonia.Controls.ResourceDictionary"
 member = "*ICollection<KeyValuePair<object, object?>>.*"
 reason = "explicit members of `ICollection<KeyValuePair<object, object?>>` (`IsReadOnly`, `Contains`, `CopyTo`): there is no collection interface to implement; `contains_key`, `keys` and `try_get_value` are the typed members"
 
-# Avalonia.Native (triage of 2026-10-08). `MetalExternalObjectsFeature` of `Metal.cs` is a real gap and is
-# deliberately not waived.
+# Avalonia.Native (triage of 2026-10-08). `MetalExternalObjectsFeature` of `Metal.cs` is ported in `metal.rs`
+# (row 9 of the work list of 2026-10-09).
 
 [[waive]]
 project = "Avalonia.Native"
@@ -4976,3 +4976,11 @@ project = "Avalonia.Skia"
 type = "Avalonia.Skia.GlSkiaImportedImage"
 member = "GlSkiaImportedImage(*GlSkiaSharedTextureForComposition*"
 reason = "the two constructors are one `new` with the source of the image as an enum (`ImportedImageSource::External`, `Shared`)"
+
+# Avalonia.Skia: the external objects of the Metal GPU (row 9 of the work list of 2026-10-09).
+
+[[alias]]
+project = "Avalonia.Skia"
+type = "Avalonia.Skia.Metal.SkiaMetalExternalObjectsFeature"
+member = "ImportImage"
+rust = ["import_shared_image"]

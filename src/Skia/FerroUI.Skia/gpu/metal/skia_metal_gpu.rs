@@ -1,14 +1,16 @@
-use super::AutoReleasePool;
+use super::{AutoReleasePool, SkiaMetalExternalObjectsFeature};
 use crate::gpu::graphite::GraphiteGrContext;
 use crate::gpu::{
     ISkiaGpu, ISkiaGpuRenderSession, ISkiaGpuRenderTarget, ISkiaGrContext, ISkiaSurface, ScopedGrContext,
     SkiaSurfaceOrigin,
 };
 use crate::metal::{
-    try_get_metal_surface, IMetalDevice, IMetalPlatformSurfaceRenderTarget, IMetalPlatformSurfaceRenderingSession,
+    try_get_metal_surface, IMetalDevice, IMetalExternalObjectsFeature, IMetalPlatformSurfaceRenderTarget,
+    IMetalPlatformSurfaceRenderingSession,
 };
 use ferroui_base::platform::surfaces::IPlatformRenderSurface;
 use ferroui_base::platform::{
+    IExternalObjectsHandleWrapRenderInterfaceContextFeature, IExternalObjectsRenderInterfaceContextFeature,
     IOptionalFeatureProvider, IPlatformGraphicsContext, PlatformRenderTargetState, RenderTargetSceneInfo,
 };
 use ferroui_base::reactive::IDisposable;
@@ -22,12 +24,13 @@ use std::rc::Rc;
 
 /// The Graphite context shared by a Metal GPU and its render targets; empty
 /// once the GPU has been disposed.
-type SharedContext = Rc<RefCell<Option<Rc<GraphiteGrContext>>>>;
+pub(super) type SharedContext = Rc<RefCell<Option<Rc<GraphiteGrContext>>>>;
 
 /// A Skia GPU that renders with a platform Metal device through Graphite.
 pub struct SkiaMetalGpu {
     context: SharedContext,
     device: Rc<dyn IMetalDevice>,
+    external_objects: Option<Rc<SkiaMetalExternalObjectsFeature>>,
 }
 
 impl SkiaMetalGpu {
@@ -52,8 +55,14 @@ impl SkiaMetalGpu {
         if let Some(max_resource_bytes) = max_resource_bytes {
             context.set_resource_cache_limit(max_resource_bytes);
         }
+        let context: SharedContext = Rc::new(RefCell::new(Some(Rc::new(context))));
 
-        Rc::new(Self { context: Rc::new(RefCell::new(Some(Rc::new(context)))), device })
+        let features: &dyn IOptionalFeatureProvider = &*device;
+        let external_objects = features
+            .try_get::<dyn IMetalExternalObjectsFeature>()
+            .map(|external_objects| Rc::new(SkiaMetalExternalObjectsFeature::new(context.clone(), external_objects)));
+
+        Rc::new(Self { context, device, external_objects })
     }
 
     /// The Graphite context of the GPU.
@@ -66,7 +75,16 @@ impl SkiaMetalGpu {
 }
 
 impl IOptionalFeatureProvider for SkiaMetalGpu {
-    fn try_get_feature(&self, _feature_type: TypeId) -> Option<Rc<dyn Any>> {
+    /// The external objects feature of the GPU, when the device has one,
+    /// and the handle wrapping feature of the device.
+    fn try_get_feature(&self, feature_type: TypeId) -> Option<Rc<dyn Any>> {
+        if feature_type == TypeId::of::<dyn IExternalObjectsHandleWrapRenderInterfaceContextFeature>() {
+            return self.device.try_get_feature(feature_type);
+        }
+        if feature_type == TypeId::of::<dyn IExternalObjectsRenderInterfaceContextFeature>() {
+            let feature: Rc<dyn IExternalObjectsRenderInterfaceContextFeature> = self.external_objects.clone()?;
+            return Some(Rc::new(feature));
+        }
         None
     }
 }

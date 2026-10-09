@@ -913,3 +913,321 @@ fn graphite_reports_an_image_it_cannot_upload_once() {
     Logger::set_thread_sink(previous);
     target.dispose();
 }
+
+// ---------------------------------------------------------------------------
+// External objects
+// ---------------------------------------------------------------------------
+
+/// The external objects feature of the Metal GPU over a device whose own
+/// feature is a double: it hands out a texture of the test as the imported
+/// image and records the waits and signals. Not from upstream, which has no
+/// tests of the feature.
+mod external_objects {
+    use super::*;
+    use crate::metal::{IMetalExternalObjectsFeature, IMetalExternalTexture, IMetalSharedEvent};
+    use ferroui_base::platform::{
+        IExternalObjectsRenderInterfaceContextFeature, IPlatformHandle, PlatformGraphicsExternalImageFormat,
+        PlatformGraphicsExternalImageProperties, PlatformHandle,
+    };
+    use ferroui_base::rendering::composition::CompositionGpuImportedImageSynchronizationCapabilities;
+    use skia_safe::{PixelGeometry, SurfaceProps, SurfacePropsFlags};
+    use std::panic::{catch_unwind, AssertUnwindSafe};
+
+    type Log = Rc<RefCell<Vec<String>>>;
+
+    struct FakeExternalObjects {
+        log: Log,
+    }
+
+    impl IMetalExternalObjectsFeature for FakeExternalObjects {
+        fn supported_image_handle_types(&self) -> Vec<String> {
+            vec!["IOSurfaceRef".to_string()]
+        }
+
+        fn supported_semaphore_types(&self) -> Vec<String> {
+            vec!["MetalSharedEvent".to_string()]
+        }
+
+        fn device_luid(&self) -> Option<Vec<u8>> {
+            Some(vec![1, 2, 3])
+        }
+
+        fn get_synchronization_capabilities(
+            &self,
+            _image_handle_type: &str,
+        ) -> CompositionGpuImportedImageSynchronizationCapabilities {
+            CompositionGpuImportedImageSynchronizationCapabilities::TIMELINE_SEMAPHORES
+        }
+
+        fn import_image(
+            &self,
+            handle: Rc<dyn IPlatformHandle>,
+            properties: PlatformGraphicsExternalImageProperties,
+        ) -> Rc<dyn IMetalExternalTexture> {
+            Rc::new(FakeTexture {
+                log: self.log.clone(),
+                texture: handle.handle() as Id,
+                width: properties.width,
+                height: properties.height,
+            })
+        }
+
+        fn import_shared_event(&self, handle: Rc<dyn IPlatformHandle>) -> Rc<dyn IMetalSharedEvent> {
+            Rc::new(FakeEvent { log: self.log.clone(), id: handle.handle() })
+        }
+
+        fn submit_wait(&self, event: &dyn IMetalSharedEvent, wait_for_value: u64) {
+            self.log.borrow_mut().push(format!("SubmitWait({}, {wait_for_value})", event.handle() as usize));
+        }
+
+        fn submit_signal(&self, event: &dyn IMetalSharedEvent, signal_value: u64) {
+            self.log.borrow_mut().push(format!("SubmitSignal({}, {signal_value})", event.handle() as usize));
+        }
+    }
+
+    struct FakeTexture {
+        log: Log,
+        texture: Id,
+        width: i32,
+        height: i32,
+    }
+
+    impl IMetalExternalTexture for FakeTexture {
+        fn width(&self) -> i32 {
+            self.width
+        }
+
+        fn height(&self) -> i32 {
+            self.height
+        }
+
+        fn samples(&self) -> i32 {
+            1
+        }
+
+        fn handle(&self) -> *mut c_void {
+            self.texture
+        }
+
+        fn dispose(&self) {
+            self.log.borrow_mut().push("the texture is disposed".to_string());
+        }
+    }
+
+    struct FakeEvent {
+        log: Log,
+        id: isize,
+    }
+
+    impl IMetalSharedEvent for FakeEvent {
+        fn handle(&self) -> *mut c_void {
+            self.id as *mut c_void
+        }
+
+        fn dispose(&self) {
+            self.log.borrow_mut().push(format!("the event {} is disposed", self.id));
+        }
+
+        fn as_any(&self) -> &dyn Any {
+            self
+        }
+    }
+
+    /// The Metal device of the test with an external objects feature.
+    struct ExternalObjectsDevice {
+        weak_self: Weak<ExternalObjectsDevice>,
+        inner: Rc<TestMetalDevice>,
+        feature: Rc<FakeExternalObjects>,
+    }
+
+    impl ExternalObjectsDevice {
+        fn new(inner: Rc<TestMetalDevice>, log: Log) -> Rc<Self> {
+            Rc::new_cyclic(|weak_self| Self {
+                weak_self: weak_self.clone(),
+                inner,
+                feature: Rc::new(FakeExternalObjects { log }),
+            })
+        }
+    }
+
+    impl IOptionalFeatureProvider for ExternalObjectsDevice {
+        fn try_get_feature(&self, feature_type: TypeId) -> Option<Rc<dyn Any>> {
+            if feature_type == TypeId::of::<dyn IMetalDevice>() {
+                let device: Rc<dyn IMetalDevice> = self.weak_self.upgrade()?;
+                return Some(Rc::new(device));
+            }
+            if feature_type == TypeId::of::<dyn IMetalExternalObjectsFeature>() {
+                let feature: Rc<dyn IMetalExternalObjectsFeature> = self.feature.clone();
+                return Some(Rc::new(feature));
+            }
+            None
+        }
+    }
+
+    impl IPlatformGraphicsContext for ExternalObjectsDevice {
+        fn is_lost(&self) -> bool {
+            false
+        }
+        fn ensure_current(&self) -> Rc<dyn IDisposable> {
+            Disposable::empty()
+        }
+        fn dispose(&self) {}
+        fn as_any(&self) -> &dyn Any {
+            self
+        }
+    }
+
+    impl IMetalDevice for ExternalObjectsDevice {
+        fn device(&self) -> *mut c_void {
+            self.inner.device
+        }
+        fn command_queue(&self) -> *mut c_void {
+            self.inner.queue
+        }
+    }
+
+    fn external_objects(context: &crate::SkiaContext) -> Option<Rc<dyn IExternalObjectsRenderInterfaceContextFeature>> {
+        context
+            .public_features()
+            .get(&TypeId::of::<dyn IExternalObjectsRenderInterfaceContextFeature>())?
+            .downcast_ref::<Rc<dyn IExternalObjectsRenderInterfaceContextFeature>>()
+            .cloned()
+    }
+
+    fn take(log: &Log) -> Vec<String> {
+        std::mem::take(&mut *log.borrow_mut())
+    }
+
+    /// The colors of the middle of the upper and of the lower half of a
+    /// 32x32 bitmap that lives on the GPU.
+    fn halves(
+        gr_context: &crate::gpu::graphite::GraphiteGrContext,
+        bitmap: &ImmutableBitmap,
+    ) -> (skia_safe::Color, skia_safe::Color) {
+        let image = bitmap.image();
+        let info = skia_safe::ImageInfo::new((32, 32), ColorType::BGRA8888, skia_safe::AlphaType::Premul, None);
+        let props = SurfaceProps::new(SurfacePropsFlags::default(), PixelGeometry::RGBH);
+        let mut surface = gr_context.create_surface(&info, &props).expect("an offscreen surface");
+        surface.canvas().draw_image(&image, (0.0, 0.0), None);
+        let raster = gr_context.snapshot_to_raster(&mut surface).expect("the surface can be read back");
+        let pixmap = raster.peek_pixels().unwrap();
+        (pixmap.get_color((16, 8)), pixmap.get_color((16, 24)))
+    }
+
+    #[test]
+    fn a_metal_gpu_has_the_external_objects_of_its_device_only() {
+        let Some(metal) = TestMetalDevice::try_new() else {
+            eprintln!("skipped: no Metal device available");
+            return;
+        };
+
+        let context = crate::SkiaContext::new(Some(super::super::SkiaMetalGpu::new(metal.clone(), None, None)));
+        assert!(external_objects(&context).is_none());
+        context.dispose();
+
+        let device = ExternalObjectsDevice::new(metal, Log::default());
+        let context = crate::SkiaContext::new(Some(super::super::SkiaMetalGpu::new(device, None, None)));
+        let feature = external_objects(&context).expect("the feature of the GPU");
+
+        assert_eq!(vec!["IOSurfaceRef".to_string()], feature.supported_image_handle_types());
+        assert_eq!(vec!["MetalSharedEvent".to_string()], feature.supported_semaphore_types());
+        assert_eq!(None, feature.supported_dma_buf_formats());
+        assert_eq!(
+            CompositionGpuImportedImageSynchronizationCapabilities::TIMELINE_SEMAPHORES,
+            feature.get_synchronization_capabilities("IOSurfaceRef")
+        );
+        assert_eq!(Some(vec![1, 2, 3]), feature.device_luid());
+        assert_eq!(None, feature.device_uuid());
+
+        drop(feature);
+        context.dispose();
+    }
+
+    #[test]
+    fn an_imported_image_is_copied_between_the_wait_and_the_signal() {
+        let Some(metal) = TestMetalDevice::try_new() else {
+            eprintln!("skipped: no Metal device available");
+            return;
+        };
+
+        let log = Log::default();
+        let device = ExternalObjectsDevice::new(metal.clone(), log.clone());
+        let gpu = super::super::SkiaMetalGpu::new(device, None, None);
+        let gr_context = gpu.gr_context();
+        let context = crate::SkiaContext::new(Some(gpu));
+        let feature = external_objects(&context).expect("the feature of the GPU");
+
+        // The image: a texture whose upper half is red and whose lower half
+        // is blue.
+        // SAFETY: the device handle is valid for the lifetime of `metal`.
+        let texture = unsafe { create_texture(metal.device, 32, 32) };
+        assert!(!texture.is_null());
+        // SAFETY: `texture` is alive until it is released below.
+        let backend_texture = unsafe { backend_textures::make_metal((32, 32), texture) };
+        let mut surface = gr_context
+            .with_recorder(|recorder| {
+                surfaces::wrap_backend_texture(recorder, &backend_texture, ColorType::BGRA8888, None, None)
+            })
+            .expect("the texture can be wrapped");
+        let mut paint = skia_safe::Paint::default();
+        paint.set_color(skia_safe::Color::RED);
+        paint.set_anti_alias(false);
+        surface.canvas().clear(skia_safe::Color::BLUE);
+        surface.canvas().draw_rect(skia_safe::Rect::from_xywh(0.0, 0.0, 32.0, 16.0), &paint);
+        drop(surface);
+        gr_context.flush();
+
+        let handle: Rc<dyn IPlatformHandle> = Rc::new(PlatformHandle::new(texture as isize, Some("IOSurfaceRef")));
+        let wait = feature.import_semaphore(Rc::new(PlatformHandle::new(1, Some("MetalSharedEvent"))));
+        let signal = feature.import_semaphore(Rc::new(PlatformHandle::new(2, Some("MetalSharedEvent"))));
+
+        for top_left_origin in [true, false] {
+            let image = feature.import_image(
+                handle.clone(),
+                PlatformGraphicsExternalImageProperties {
+                    width: 32,
+                    height: 32,
+                    format: PlatformGraphicsExternalImageFormat::B8G8R8A8UNorm,
+                    top_left_origin,
+                    ..Default::default()
+                },
+            );
+            assert!(take(&log).is_empty());
+
+            let snapshot = image.snapshot_with_timeline_semaphores(&wait, 3, &signal, 4);
+            assert_eq!(vec!["SubmitWait(1, 3)", "SubmitSignal(2, 4)"], take(&log));
+            assert_eq!(PixelSize::new(32, 32), snapshot.pixel_size());
+
+            let bitmap = snapshot.as_any().downcast_ref::<ImmutableBitmap>().expect("a bitmap of the backend");
+            let (upper, lower) = halves(&gr_context, bitmap);
+            if top_left_origin {
+                assert_eq!((skia_safe::Color::RED, skia_safe::Color::BLUE), (upper, lower));
+            } else {
+                // The first row of the texture is the bottom one of the image.
+                assert_eq!((skia_safe::Color::BLUE, skia_safe::Color::RED), (upper, lower));
+            }
+
+            // Metal synchronizes with shared events only.
+            assert!(catch_unwind(AssertUnwindSafe(|| image.snapshot_with_automatic_sync())).is_err());
+            assert!(catch_unwind(AssertUnwindSafe(|| image.snapshot_with_keyed_mutex(0, 1))).is_err());
+            assert!(catch_unwind(AssertUnwindSafe(|| image.snapshot_with_semaphores(&wait, &signal))).is_err());
+            assert!(take(&log).is_empty());
+
+            snapshot.dispose();
+            image.dispose();
+            assert_eq!(vec!["the texture is disposed"], take(&log));
+        }
+
+        wait.dispose();
+        signal.dispose();
+        assert_eq!(vec!["the event 1 is disposed", "the event 2 is disposed"], take(&log));
+
+        drop(feature);
+        context.dispose();
+        drop(gr_context);
+
+        // SAFETY: balances the +1 of `newTextureWithDescriptor:`; Skia no
+        // longer references the texture.
+        unsafe { send(texture, sel(b"release\0")) };
+    }
+}

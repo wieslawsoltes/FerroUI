@@ -1,5 +1,6 @@
 use ferroui_base::platform::{IPlatformHandle, PlatformGraphicsExternalImageProperties};
 use ferroui_base::rendering::composition::CompositionGpuImportedImageSynchronizationCapabilities;
+use std::any::Any;
 use std::ffi::c_void;
 use std::rc::Rc;
 
@@ -77,4 +78,8 @@ pub trait IMetalSharedEvent {
 
     /// Releases the event.
     fn dispose(&self);
+
+    /// Lets the device that imported the event recover its concrete type
+    /// (the cast upstream performs on the events it is asked to submit).
+    fn as_any(&self) -> &dyn Any;
 }
