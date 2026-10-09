@@ -7,6 +7,10 @@ rust-version.workspace = true
 license.workspace = true
 repository.workspace = true
 build = "build.rs"
+# The build script exports the type model of the crate; Cargo hands the path of the file to the build
+# scripts of the crates that depend on this one (`DEP_FERROUI_DIALOGS_XAML_XAMLMETA`;
+# docs/porting/xaml.md, 9.5.13 and 9.6.3): the themes, whose documents name the types of the dialogs.
+links = "ferroui_dialogs_xaml"
 
 # Unit tests live next to the code (`tests/` modules of the library), not as
 # integration test targets.
@@ -29,6 +33,10 @@ ferroui-markup-xaml-loader = { workspace = true, features = ["runtime"] }
 # The mounted volumes of the file system (the drive list of the .NET base library); the browser
 # has no mounted volumes.
 sysinfo = { workspace = true }
+
+[build-dependencies]
+# The source scanner and the export of the type model: nothing of the framework.
+ferroui-build-scan = { workspace = true }
 
 [dev-dependencies]
 ferroui-base = { workspace = true, features = ["testing"] }

@@ -100,7 +100,17 @@ fn compiled_xaml_metadata_reads_its_dependencies() {
     let names: Vec<&str> = read.iter().map(|model| model.name.as_str()).collect();
     assert_eq!(
         names,
-        [ASSEMBLY.name, "FerroUI.Base", "FerroUI.Controls", "FerroUI.Markup.Xaml", "FerroUI.Themes.Fluent", "FerroUI.Themes.Simple", "Tests"]
+        [
+            ASSEMBLY.name,
+            "FerroUI.Base",
+            "FerroUI.Controls",
+            "FerroUI.Markup.Xaml",
+            "FerroUI.Themes.Fluent",
+            // Not a direct dependency: the file of the theme names the file of the dialogs.
+            "FerroUI.Dialogs",
+            "FerroUI.Themes.Simple",
+            "Tests"
+        ]
     );
     assert_eq!(read[0].dependencies.len(), 6);
 }

@@ -259,6 +259,7 @@ name = "ferroui-dialogs"
 version = "0.1.0"
 dependencies = [
  "ferroui-base",
+ "ferroui-build-scan",
  "ferroui-controls",
  "ferroui-markup-xaml",
  "ferroui-markup-xaml-loader",
@@ -396,7 +397,7 @@ name = "ferroui-themes-simple"
 version = "0.1.0"
 dependencies = [
  "ferroui-base",
- "ferroui-build-scan",
+ "ferroui-build",
  "ferroui-controls",
  "ferroui-desktop",
  "ferroui-dialogs",
