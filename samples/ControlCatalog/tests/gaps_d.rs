@@ -305,7 +305,7 @@ fn gap_c320_content_of_a_scroll_viewer_that_was_dropped_while_shown() {
     assert!(content.upgrade().is_none());
 }
 
-// --- C322 to C326: what a visit still retained after C317 to C321 ---
+// --- C322 to C329: what a visit still retained after C317 to C321 ---
 //
 // Found with the revisits of `catalog_tour.rs` and the markup probe (`catalog_markup_survivors`),
 // with the weak references of the object model marked for the allocation trace. Each is a cycle
@@ -438,4 +438,31 @@ fn gap_c326_page_that_is_its_own_data_context() {
     drop((page, context));
     assert!(weak.upgrade().is_none());
     window.close();
+}
+
+/// C327: the observer of a binding of a local value and the observable it is subscribed to hold
+/// each other after the object of the binding was dropped. The default data template binds the
+/// text of its text block to an observable of the data context of the block: every such block
+/// left the observable, the observer and its own memory, which their weak references held.
+#[test]
+fn gap_c327_local_value_binding_of_an_object_that_was_dropped() {
+    use ferroui_base::data::BindingPriority;
+    use ferroui_base::{FerroObject, FerroObjectExtensions};
+    let _app = start_catalog_application();
+    let source = Border::new();
+    let target = Border::new();
+    let source_object: &FerroObject = &source;
+    let target_object: &FerroObject = &target;
+    let subscribers = source_object.property_changed_subscriber_count();
+    let observable = FerroObjectExtensions::get_observable(source_object, Control::tag_property());
+    let binding =
+        FerroObjectExtensions::bind_typed(target_object, Control::tag_property(), observable, BindingPriority::LocalValue);
+    source.set_tag(Some(Rc::new(String::from("value")) as BoxedValue));
+    assert!(target.tag().is_some());
+    assert_eq!(subscribers + 1, source_object.property_changed_subscriber_count());
+
+    // The target goes without the binding being disposed, as an element goes with its tree.
+    drop(binding);
+    drop(target);
+    assert_eq!(subscribers, source_object.property_changed_subscriber_count());
 }
