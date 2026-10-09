@@ -5,8 +5,12 @@ document per improvement that follows from it. Nothing here is implemented yet, 
 says so. Each design can be taken up on its own.
 
 Status: the native part of design 09 is written (the benchmark of recycling of the table view, with
-allocations per recycled row, and the counters behind the feature `perf-counters`); its numbers are
-still to be measured. The other designs are not started.
+allocations per recycled row, and the counters behind the feature `perf-counters`), with its first
+figures. Designs 03 and 04 are verified against those figures and upstream: what the rule below
+allows of them is implemented (the pool of the lists of old and new inherited values; the hasher of
+the resource dictionary, the handle of the styling parent and the start of a reevaluation in
+place), their caches and their reordered walk are not, and their gains are still to be measured.
+The other designs are not started.
 
 Markers, as in the other performance documents: **[M]** measured, **[E]** estimated with the reasoning
 next to it, **[H]** a hypothesis that the design must verify before any code changes.
@@ -104,8 +108,8 @@ first step of each design (always a measurement) has been done.
 |---|---|---|---|---|---|
 | [01](designs/01-virtual-dispatch.md) | Virtual tables without forwarding closures | `type_system.rs`, the class macro | 5 to 8 % **[E]** | Low | Medium |
 | [02](designs/02-property-change-notification.md) | Cheaper property change notifications | `ferro_object.rs`, the property store | 5 to 10 % **[E]** | Medium | Large |
-| [03](designs/03-inheritance-parent-change.md) | Inherited values on a parent change in one pass | the property store | 4 to 7 % **[E]** | Medium | Medium |
-| [04](designs/04-tree-attachment-and-styling.md) | Tree attachment: styles, implicit themes, resources | `styled_element.rs`, styling | 5 to 10 % **[E]** | Medium | Large |
+| [03](designs/03-inheritance-parent-change.md) | Inherited values on a parent change (the pool of lists written; the single pass dropped: it reorders notifications) | the property store | small, to be measured (was 4 to 7 % **[E]** with the single pass) | Low | Small |
+| [04](designs/04-tree-attachment-and-styling.md) | Tree attachment: styles, implicit themes, resources (the hasher and two handle and list changes written; the caches dropped: upstream has none) | `styled_element.rs`, resources, the property store | small, to be measured (was 5 to 10 % **[E]** with the caches) | Low | Small |
 | [05](designs/05-bindings-on-recycle.md) | Bindings that publish less while a container is recycled | data and markup bindings | 4 to 8 % **[E]** | Medium | Medium |
 | [06](designs/06-text-layout.md) | Text layout: shaped runs and line metrics | text formatting, HarfBuzz backend | 3 to 6 % **[E]** | Low | Medium |
 | [07](designs/07-compositor-frame-cost.md) | Cost of a composed frame | composition, Skia backend | 3 to 8 % **[E]** | Medium | Medium |
