@@ -15,6 +15,17 @@ python3 scripts/port-status/port_status.py --explain Avalonia.Base Point.cs   # 
 
 Requirements: Python 3.11+ (standard library only); the .NET SDK only when the upstream JSON has to be regenerated.
 
+The tracking documents count members. The upstream unit tests that the port does not have are counted by a
+script of its own, which reads the upstream test projects at the tracked commit and the test functions of the port:
+
+```sh
+python3 scripts/port-status/test_gaps.py ../Avalonia --all                           # every project: docs/porting/data/test-gaps-*.txt and the table
+python3 scripts/port-status/test_gaps.py ../Avalonia tests/Avalonia.Base.UnitTests   # the report of one project
+```
+
+Its rules are at its top; `docs/porting/data/test-aliases.toml` holds the tests the port has under another name
+and the ones that are not ported for a stated reason, with a section per upstream test project.
+
 ## Pipeline
 
 1. `scripts/api-extract` (C#, Roslyn syntax trees, no compilation) reads the upstream projects listed in
