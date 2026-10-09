@@ -230,6 +230,15 @@ cp "$BUILT/$APPLICATION.js" "$BUILT/$WASM" "$OUT"/
 # imports before it creates the module.
 if [ -n "$THREADS" ]; then
   cp "$ROOT/scripts/browser/threads/ferroui-threads.js" "$OUT"/
+  # The worker of a thread loads the script of the module by the name the linker gave it, which
+  # is the name of the module file: for an application with a hyphen in its name that is not the
+  # name Cargo gives the script (control_catalog_browser.js against control-catalog-browser.js).
+  # Without the file every worker fails to load and the module never finishes starting. The
+  # script under the worker's name is the script of the module itself, imported.
+  WORKER_SCRIPT="$(sed -n 's/.*new Worker(new URL("\([^"]*\.js\)",import\.meta\.url).*/\1/p' "$BUILT/$APPLICATION.js" | head -n 1)"
+  if [ -n "$WORKER_SCRIPT" ] && [ "$WORKER_SCRIPT" != "$APPLICATION.js" ]; then
+    printf 'import "./%s";\n' "$APPLICATION.js" > "$OUT/$WORKER_SCRIPT"
+  fi
 fi
 # Files the build scripts of the application wrote for the site.
 node -e 'const fs = require("fs"), path = require("path");
