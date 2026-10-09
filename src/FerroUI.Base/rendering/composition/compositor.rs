@@ -206,9 +206,13 @@ impl Compositor {
     /// compositor is also confined to the thread that ticks (see
     /// [`is_confined_to_render_thread`](Self::is_confined_to_render_thread)).
     /// The loop says where it runs when the compositor is created.
+    ///
+    /// `gpu` is shared with the caller, who may keep its handle: the server
+    /// side holds one of its own and the thread that renders asks it for
+    /// the graphics context.
     pub fn with_render_thread(
         render_loop: Arc<dyn IRenderLoop>,
-        gpu: Option<Rc<dyn IPlatformGraphics>>,
+        gpu: Option<Arc<dyn IPlatformGraphics>>,
         use_ui_thread_for_synchronous_commits: bool,
         scheduler: &Rc<dyn ICompositorScheduler>,
         dispatcher: Arc<Dispatcher>,
@@ -279,7 +283,7 @@ impl Compositor {
     /// renders. `FERROUI_RENDER_THREAD=0` in the environment keeps the
     /// rendering on the UI thread with a background loop too (each tick is
     /// marshalled to it): a way back while the mode is young.
-    pub fn new(gpu: Option<Rc<dyn IPlatformGraphics>>, use_ui_thread_for_synchronous_commits: bool) -> Rc<Compositor> {
+    pub fn new(gpu: Option<Arc<dyn IPlatformGraphics>>, use_ui_thread_for_synchronous_commits: bool) -> Rc<Compositor> {
         let render_loop = FerroLocator::current().get_required_service::<Arc<dyn IRenderLoop>>();
         let scheduler: Rc<dyn ICompositorScheduler> = crate::media::MediaContext::instance().scheduler();
         let render_thread_disabled = std::env::var("FERROUI_RENDER_THREAD").is_ok_and(|value| value == "0");
@@ -311,7 +315,7 @@ impl Compositor {
     /// `clock` defaults to the dispatcher's clock.
     pub fn with_scheduler(
         render_loop: Arc<dyn IRenderLoop>,
-        gpu: Option<Rc<dyn IPlatformGraphics>>,
+        gpu: Option<Arc<dyn IPlatformGraphics>>,
         use_ui_thread_for_synchronous_commits: bool,
         scheduler: &Rc<dyn ICompositorScheduler>,
         dispatcher: Arc<Dispatcher>,
@@ -1068,7 +1072,9 @@ impl Drop for Compositor {
                 task.request_release();
                 // What the graph shares with this thread is dropped here,
                 // for the same reason the other modes release all of it
-                // here: the counts of these handles belong to this thread.
+                // here: the count of the handle of the render interface
+                // belongs to this thread. (The platform graphics and their
+                // ready state are shared by their contracts and go with it.)
                 self.server.try_with(|server| server.render_interface().release_platform_handles());
                 // A loop that does not tick again keeps the task, and the
                 // graph with it: whichever thread drops the loop then leaks

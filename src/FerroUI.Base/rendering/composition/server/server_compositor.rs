@@ -118,7 +118,7 @@ impl ServerCompositor {
     /// batches and the readback are what it shares with its compositor, which
     /// creates them.
     pub(crate) fn new(
-        platform_graphics: Option<Rc<dyn IPlatformGraphics>>,
+        platform_graphics: Option<Arc<dyn IPlatformGraphics>>,
         options: CompositionOptions,
         batches: Arc<BatchQueue>,
         readback: Arc<ReadbackIndices>,

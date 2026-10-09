@@ -3,7 +3,18 @@ use crate::reactive::IDisposable;
 use std::rc::Rc;
 
 /// Entry point to a platform GPU API (Metal, OpenGL, Vulkan, ...).
-pub trait IPlatformGraphics {
+///
+/// The object is shared by threads, as in the reference, where the platform
+/// registers one object that the UI thread finds among its services and the
+/// thread that renders asks for its context. It is therefore held in an
+/// `Arc` and is `Send + Sync`: the platform creates it on its thread, the
+/// compositor hands a handle to the server side, and either side may clone,
+/// call and drop its handle without the other. An implementation holds only
+/// what two threads may share; what belongs to one thread (a display or a
+/// context that is an `Rc`) it keeps bound to that thread.
+///
+/// A context it creates is an object of the thread that asked for it.
+pub trait IPlatformGraphics: Send + Sync {
     /// Whether the backend renders through one context shared by all
     /// surfaces.
     fn uses_shared_context(&self) -> bool;
@@ -23,10 +34,24 @@ pub trait IPlatformGraphics {
 }
 
 /// Reports whether the platform graphics are ready to be used.
-pub trait IPlatformGraphicsReadyStateFeature {
+///
+/// Asked by the thread that renders, at every frame, about a state the
+/// thread of the platform changes: shared by the two as the platform
+/// graphics are (`Send + Sync`). The platform graphics announce the feature
+/// through their optional features as an `Arc<dyn IPlatformGraphicsReadyStateFeature>`
+/// (`try_get_shared` of the optional features).
+pub trait IPlatformGraphicsReadyStateFeature: Send + Sync {
     fn is_ready(&self) -> bool;
     fn uses_contexts(&self) -> bool;
 }
+
+const _: fn() = || {
+    // The two contracts the thread of the platform and the thread that
+    // renders hold a handle to.
+    fn assert_send_sync<T: Send + Sync>() {}
+    assert_send_sync::<std::sync::Arc<dyn IPlatformGraphics>>();
+    assert_send_sync::<std::sync::Arc<dyn IPlatformGraphicsReadyStateFeature>>();
+};
 
 /// A context of a platform GPU API.
 pub trait IPlatformGraphicsContext: IOptionalFeatureProvider {

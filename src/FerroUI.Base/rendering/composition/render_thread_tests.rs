@@ -12,8 +12,8 @@ use crate::media::MediaContext;
 use crate::platform::surfaces::IPlatformRenderSurface;
 use crate::platform::{
     IDrawingContextImpl, IDrawingContextLayerImpl, IOptionalFeatureProvider, IPlatformGraphics,
-    IPlatformGraphicsContext, IPlatformRenderInterfaceContext, IRenderTarget, RenderTargetDrawingContextProperties,
-    RenderTargetProperties, RenderTargetSceneInfo,
+    IPlatformGraphicsContext, IPlatformGraphicsReadyStateFeature, IPlatformRenderInterfaceContext, IRenderTarget,
+    RenderTargetDrawingContextProperties, RenderTargetProperties, RenderTargetSceneInfo,
 };
 use crate::reactive::{Disposable, IDisposable};
 use crate::rendering::testing::{
@@ -264,8 +264,8 @@ impl Drop for ConfinedSurface {
     }
 }
 
-/// The platform graphics: an object of the thread of the compositor, which
-/// the thread that renders asks for its context.
+/// The platform graphics: made by the thread of the compositor and shared
+/// with the thread that renders, which asks it for its context.
 struct ConfinedGraphics {
     log: Arc<ConfinementLog>,
 }
@@ -445,7 +445,7 @@ impl ConfinedCompositor {
             context
         });
         let render_loop = ManualRenderLoop::background();
-        let graphics: Rc<dyn IPlatformGraphics> = Rc::new(ConfinedGraphics { log: log.clone() });
+        let graphics: Arc<dyn IPlatformGraphics> = Arc::new(ConfinedGraphics { log: log.clone() });
         let compositor = Compositor::with_render_thread(
             render_loop.clone(),
             Some(graphics),
@@ -620,6 +620,9 @@ struct FeatureWorld {
     features_dropped: AtomicUsize,
     inside: AtomicUsize,
     overlaps: AtomicUsize,
+    /// What the ready state feature of the graphics answers with.
+    not_ready: AtomicBool,
+    graphics_dropped: AtomicUsize,
 }
 
 impl FeatureWorld {
@@ -687,9 +690,44 @@ impl Drop for LockedFeature {
     }
 }
 
-/// Platform graphics whose context a test can lose.
+/// Platform graphics whose context a test can lose. Shared by the test
+/// thread and the thread that renders, as the contract says: all it holds is
+/// the shared state of the doubles.
 struct LosableGraphics {
     world: Arc<FeatureWorld>,
+}
+
+impl Drop for LosableGraphics {
+    fn drop(&mut self) {
+        self.world.graphics_dropped.fetch_add(1, Ordering::SeqCst);
+    }
+}
+
+impl IOptionalFeatureProvider for LosableGraphics {
+    fn try_get_feature(&self, feature_type: TypeId) -> Option<Rc<dyn Any>> {
+        if feature_type == TypeId::of::<dyn IPlatformGraphicsReadyStateFeature>() {
+            let feature: Arc<dyn IPlatformGraphicsReadyStateFeature> =
+                Arc::new(LosableReadyState { world: self.world.clone() });
+            return Some(Rc::new(feature));
+        }
+        None
+    }
+}
+
+/// The ready state of [`LosableGraphics`]: changed by the test thread, read
+/// by every frame.
+struct LosableReadyState {
+    world: Arc<FeatureWorld>,
+}
+
+impl IPlatformGraphicsReadyStateFeature for LosableReadyState {
+    fn is_ready(&self) -> bool {
+        !self.world.not_ready.load(Ordering::SeqCst)
+    }
+
+    fn uses_contexts(&self) -> bool {
+        true
+    }
 }
 
 impl IPlatformGraphics for LosableGraphics {
@@ -706,6 +744,10 @@ impl IPlatformGraphics for LosableGraphics {
 
     fn get_shared_context(&self) -> Rc<dyn IPlatformGraphicsContext> {
         self.create_context()
+    }
+
+    fn as_feature_provider(&self) -> Option<&dyn IOptionalFeatureProvider> {
+        Some(self)
     }
 }
 
@@ -791,6 +833,8 @@ enum FeatureMode {
     /// The thread that ticks the loop renders, and the thread of the
     /// compositor too: the lock model of the desktop.
     Lock,
+    /// The thread that ticks the loop is the only one that renders.
+    Confined,
 }
 
 /// A compositor over the doubles above. Each backend context it creates has
@@ -800,6 +844,19 @@ fn feature_compositor(
     mode: FeatureMode,
 ) -> (Arc<FeatureWorld>, Arc<ManualRenderLoop>, Rc<Compositor>) {
     let world = Arc::new(FeatureWorld::default());
+    let graphics: Arc<dyn IPlatformGraphics> = Arc::new(LosableGraphics { world: world.clone() });
+    let (render_loop, compositor) = feature_compositor_over(render_interface, mode, &world, graphics);
+    (world, render_loop, compositor)
+}
+
+/// [`feature_compositor`] over platform graphics the caller made, and may
+/// keep a handle to.
+fn feature_compositor_over(
+    render_interface: &MockPlatformRenderInterface,
+    mode: FeatureMode,
+    world: &Arc<FeatureWorld>,
+    graphics: Arc<dyn IPlatformGraphics>,
+) -> (Arc<ManualRenderLoop>, Rc<Compositor>) {
     let context_world = world.clone();
     render_interface.set_backend_context_factory(move |drawing_log, graphics_context| {
         let number = context_world.contexts.fetch_add(1, Ordering::SeqCst) + 1;
@@ -811,8 +868,7 @@ fn feature_compositor(
         });
         context
     });
-    let graphics: Rc<dyn IPlatformGraphics> = Rc::new(LosableGraphics { world: world.clone() });
-    let (render_loop, compositor) = match mode {
+    match mode {
         FeatureMode::DispatcherThread => {
             let render_loop = ManualRenderLoop::new();
             let compositor = Compositor::with_scheduler(
@@ -826,12 +882,12 @@ fn feature_compositor(
             );
             (render_loop, compositor)
         }
-        FeatureMode::Lock => {
+        FeatureMode::Lock | FeatureMode::Confined => {
             let render_loop = ManualRenderLoop::background();
             let compositor = Compositor::with_render_thread(
                 render_loop.clone(),
                 Some(graphics),
-                true,
+                matches!(mode, FeatureMode::Lock),
                 &MediaContext::instance().scheduler(),
                 Dispatcher::ui_thread(),
                 None,
@@ -839,8 +895,7 @@ fn feature_compositor(
             );
             (render_loop, compositor)
         }
-    };
-    (world, render_loop, compositor)
+    }
 }
 
 #[test]
@@ -964,4 +1019,86 @@ fn a_feature_is_lent_where_the_thread_of_the_compositor_renders() {
     assert!(!feature.is::<Rc<dyn ILockedFeature>>());
     drop(feature);
     world.assert_every_feature_is_dropped();
+}
+
+// --- the platform graphics, one object for both threads ---------------------------
+
+#[test]
+fn the_platform_graphics_are_shared_by_the_thread_that_made_them_and_the_thread_that_renders() {
+    let _dispatcher_scope = Dispatcher::unit_test_scope();
+    let (_locator_scope, render_interface) = MockPlatformRenderInterface::install();
+    let world = Arc::new(FeatureWorld::default());
+    let graphics: Arc<dyn IPlatformGraphics> = Arc::new(LosableGraphics { world: world.clone() });
+    // This thread keeps its handle, as a platform does that registers the
+    // graphics among its services.
+    let (render_loop, compositor) =
+        feature_compositor_over(&render_interface, FeatureMode::Lock, &world, graphics.clone());
+    let render_thread = RenderThread::start(&render_loop);
+    wait_until("a frame has created the context", || world.contexts() > 0);
+
+    const ROUNDS: usize = 200;
+    for round in 0..ROUNDS {
+        // Outside the compositor lock this thread clones its handle, asks
+        // it for a context of its own and lets both go, while a frame asks
+        // the handle of the server side for the context that replaces the
+        // lost one.
+        let contexts = world.contexts();
+        world.lose_context();
+        let handle = graphics.clone();
+        let own_context = handle.create_context();
+        own_context.dispose();
+        drop(own_context);
+        drop(handle);
+        if round % 2 == 0 {
+            compositor.render_on_this_thread();
+        }
+        wait_until("a frame has replaced the lost context", || world.contexts() > contexts);
+        assert_eq!(contexts + 1, world.contexts());
+
+        // The ready state is changed by this thread and read by the frames
+        // of both. It is changed inside the lock here so that no frame is
+        // between its two readings of it.
+        compositor.with_server(|server| {
+            world.not_ready.store(true, Ordering::SeqCst);
+            assert!(!server.render_interface().is_ready());
+        });
+        assert!(!compositor.with_server(|server| server.render_interface().is_ready()));
+        compositor.with_server(|server| {
+            world.not_ready.store(false, Ordering::SeqCst);
+            assert!(server.render_interface().is_ready());
+        });
+    }
+
+    // The graph lets go of its handle when the compositor releases it; the
+    // object goes with the last handle, here the one of this thread.
+    drop(render_thread);
+    drop(compositor);
+    assert_eq!(0, world.graphics_dropped.load(Ordering::SeqCst));
+    drop(graphics);
+    assert_eq!(1, world.graphics_dropped.load(Ordering::SeqCst));
+    world.assert_every_feature_is_dropped();
+}
+
+#[test]
+fn the_platform_graphics_of_a_confined_compositor_are_asked_by_the_render_thread_and_dropped_once() {
+    let _dispatcher_scope = Dispatcher::unit_test_scope();
+    let (_locator_scope, render_interface) = MockPlatformRenderInterface::install();
+    let world = Arc::new(FeatureWorld::default());
+    let graphics: Arc<dyn IPlatformGraphics> = Arc::new(LosableGraphics { world: world.clone() });
+    // The graph gets the only handle.
+    let (render_loop, compositor) = feature_compositor_over(&render_interface, FeatureMode::Confined, &world, graphics);
+    assert!(compositor.is_confined_to_render_thread());
+    let render_thread = RenderThread::start(&render_loop);
+    wait_until("a frame of the render thread has created the context", || world.contexts() > 0);
+    assert_eq!(0, world.graphics_dropped.load(Ordering::SeqCst));
+
+    // The compositor takes the handles the graph shares with this thread
+    // back before the render thread releases the graph: the graphics go
+    // here, once, and the rest of the graph on the render thread.
+    drop(compositor);
+    assert_eq!(1, world.graphics_dropped.load(Ordering::SeqCst));
+    wait_until("the task of the compositor has left the loop", || render_loop.task_count() == 0);
+    assert_eq!(1, world.graphics_dropped.load(Ordering::SeqCst));
+    world.assert_every_feature_is_dropped();
+    drop(render_thread);
 }

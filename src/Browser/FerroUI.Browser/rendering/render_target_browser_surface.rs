@@ -48,7 +48,7 @@ impl RenderTargetBrowserSurface {
                 shared.set_target_kind(target.kind());
             }
         }
-        let gpu: Rc<dyn IPlatformGraphics> = Rc::new(BrowserPlatformGraphics { shared: shared.clone() });
+        let gpu: Arc<dyn IPlatformGraphics> = Arc::new(BrowserPlatformGraphics { shared: shared.clone() });
         let compositor = if thread_id == 0 {
             Compositor::with_scheduler(
                 BrowserSharedRenderLoop::render_loop(),
@@ -220,7 +220,7 @@ impl IOptionalFeatureProvider for BrowserPlatformGraphics {
             // Upstream answers with the object itself. A second object over
             // the same shared state is the same answer, and the feature then
             // holds no handle of the platform graphics.
-            let this: Rc<dyn IPlatformGraphicsReadyStateFeature> = Rc::new(Self { shared: self.shared.clone() });
+            let this: Arc<dyn IPlatformGraphicsReadyStateFeature> = Arc::new(Self { shared: self.shared.clone() });
             return Some(Rc::new(this));
         }
         None
@@ -249,9 +249,9 @@ mod tests {
         Some(BrowserRenderTarget::Software(BrowserSoftwareRenderTarget::new(JsObject::NULL)))
     }
 
-    fn ready_state(graphics: &BrowserPlatformGraphics) -> Rc<dyn IPlatformGraphicsReadyStateFeature> {
+    fn ready_state(graphics: &BrowserPlatformGraphics) -> Arc<dyn IPlatformGraphicsReadyStateFeature> {
         let features: &dyn IOptionalFeatureProvider = graphics;
-        features.try_get::<dyn IPlatformGraphicsReadyStateFeature>().expect("the graphics has the feature")
+        features.try_get_shared::<dyn IPlatformGraphicsReadyStateFeature>().expect("the graphics has the feature")
     }
 
     #[test]
