@@ -15,10 +15,14 @@ ferroui-controls.workspace = true
 # The about dialog of the application menu.
 ferroui-dialogs.workspace = true
 ferroui-microcom.workspace = true
-ferroui-skia.workspace = true
+# The Metal contracts the platform implements; which backend draws with them is the application's
+# choice.
+ferroui-metal.workspace = true
 
 [dev-dependencies]
 ferroui-harfbuzz.workspace = true
+# The example of a window and the accessibility test draw with the Skia backend.
+ferroui-skia.workspace = true
 
 [build-dependencies]
 cc.workspace = true

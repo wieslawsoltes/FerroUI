@@ -355,6 +355,13 @@ dependencies = [
 ]
 
 [[package]]
+name = "ferroui-metal"
+version = "0.1.0"
+dependencies = [
+ "ferroui-base",
+]
+
+[[package]]
 name = "ferroui-microcom"
 version = "0.1.0"
 
@@ -367,6 +374,7 @@ dependencies = [
  "ferroui-controls",
  "ferroui-dialogs",
  "ferroui-harfbuzz",
+ "ferroui-metal",
  "ferroui-microcom",
  "ferroui-skia",
  "microcom-codegen",
@@ -395,6 +403,7 @@ dependencies = [
  "ferroui-controls",
  "ferroui-fonts-inter",
  "ferroui-harfbuzz",
+ "ferroui-metal",
  "ferroui-opengl",
  "skia-safe",
 ]

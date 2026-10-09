@@ -70,7 +70,7 @@ The % column is member coverage (file coverage for plain file lists).
 | [Avalonia.Desktop](tracking/Avalonia.Desktop.md) | `src/Avalonia.Desktop` | `src/FerroUI.Desktop` | `ferroui-desktop` | 1/1 | 1/1 | 1/1 | 100.0% | 1 - desktop (macOS) | P0 |
 | [Avalonia.Dialogs](tracking/Avalonia.Dialogs.md) | `src/Avalonia.Dialogs` | `src/FerroUI.Dialogs` | `ferroui-dialogs` | 17/17 | 18/18 | 94/94 | 100.0% | 3 - extras | P3 |
 | [Avalonia.Fonts.Inter](tracking/Avalonia.Fonts.Inter.md) | `src/Avalonia.Fonts.Inter` | `src/FerroUI.Fonts.Inter` | `ferroui-fonts-inter` | 2/2 | 2/2 | 2/2 | 100.0% | 3 - browser | P2 |
-| [Avalonia.Metal](tracking/Avalonia.Metal.md) | `src/Avalonia.Metal` | `src/Skia/FerroUI.Skia/metal` | `ferroui-skia (module metal)` | 2/2 | 7/7 | 21/21 | 100.0% | 1 - desktop (macOS) | P1 |
+| [Avalonia.Metal](tracking/Avalonia.Metal.md) | `src/Avalonia.Metal` | `src/FerroUI.Metal` | `ferroui-metal` | 2/2 | 7/7 | 21/21 | 100.0% | 1 - desktop (macOS) | P1 |
 | [Avalonia.MicroCom](tracking/Avalonia.MicroCom.md) | `src/Avalonia.MicroCom` | `src/FerroUI.MicroCom` | `ferroui-microcom` | 1/1 | 1/1 | 0/6 (6 waived) | - | 0 - core | P0 |
 | [Avalonia.Native](tracking/Avalonia.Native.md) | `src/Avalonia.Native` | `src/FerroUI.Native` | `ferroui-native` | 48/48 | 65/76 (11 waived) | 455/531 (76 waived) | 100.0% | 1 - desktop (macOS) | P0 |
 | [Avalonia.OpenGL](tracking/Avalonia.OpenGL.md) | `src/Avalonia.OpenGL` | `src/FerroUI.OpenGL` | `ferroui-opengl` | 39/39 | 61/63 (2 waived) | 601/639 (38 waived) | 100.0% | 2 - rendering backends | P2 |
@@ -140,7 +140,7 @@ Libraries.
 | `src/Avalonia.Fonts.Inter` | 3 | `src/FerroUI.Fonts.Inter` | workspace member | [Avalonia.Fonts.Inter](tracking/Avalonia.Fonts.Inter.md) |
 | `src/Avalonia.FreeDesktop` | 18 | `src/FerroUI.FreeDesktop` | not created | [Avalonia.FreeDesktop](tracking/Avalonia.FreeDesktop.md) (out of scope) |
 | `src/Avalonia.FreeDesktop.AtSpi` | 27 | `src/FerroUI.FreeDesktop.AtSpi` | not created | [Avalonia.FreeDesktop.AtSpi](tracking/Avalonia.FreeDesktop.AtSpi.md) (out of scope) |
-| `src/Avalonia.Metal` | 2 | `src/Skia/FerroUI.Skia/metal` | directory exists | [Avalonia.Metal](tracking/Avalonia.Metal.md) |
+| `src/Avalonia.Metal` | 2 | `src/FerroUI.Metal` | directory exists | [Avalonia.Metal](tracking/Avalonia.Metal.md) |
 | `src/Avalonia.MicroCom` | 1 | `src/FerroUI.MicroCom` | workspace member | [Avalonia.MicroCom](tracking/Avalonia.MicroCom.md) |
 | `src/Avalonia.Native` | 49 | `src/FerroUI.Native` | workspace member | [Avalonia.Native](tracking/Avalonia.Native.md) |
 | `src/Avalonia.OpenGL` | 39 | `src/FerroUI.OpenGL` | workspace member | [Avalonia.OpenGL](tracking/Avalonia.OpenGL.md) |
