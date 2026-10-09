@@ -78,12 +78,18 @@ skia-safe = { version = "0.153" }
 # The Vello render backend (docs/porting/vello-backend.md, section 2): exact versions, because the
 # renderers of the Vello project change their interfaces between minor releases. `vello_cpu` without
 # its default features: no thread pool (a drawing context is confined to the thread that draws), no
-# PNG support of its own (the backend decodes and encodes with `png`) and no text (stage 5).
+# PNG support of its own for images (the backend decodes and encodes with `png`). Its `text`
+# feature draws glyph runs (`glifo`), and its `png` feature is on for the one thing it adds to
+# that: the bitmap glyphs of a colour font. `skrifa` is the version `glifo` links, for the outlines
+# of glyphs; `fontique` enumerates and matches the fonts of the system.
 kurbo = { version = "=0.13.1" }
 peniko = { version = "=0.6.1" }
-vello_cpu = { version = "=0.3.0", default-features = false, features = ["std", "u8_pipeline"] }
+vello_cpu = { version = "=0.3.0", default-features = false, features = ["std", "u8_pipeline", "text", "png"] }
 linesweeper = { version = "=0.5.0" }
 png = { version = "=0.18.1" }
+skrifa = { version = "=0.44.0" }
+glifo = { version = "=0.4.0", default-features = false, features = ["std"] }
+fontique = { version = "=0.12.0" }
 # The version of the `wasm-bindgen` command-line tool on PATH has to be this exact version.
 wasm-bindgen = "=0.2.129"
 roxmltree = "0.20"

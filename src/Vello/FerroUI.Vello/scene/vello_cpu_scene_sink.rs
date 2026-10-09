@@ -1,6 +1,7 @@
-use crate::scene::{IVelloSceneSink, VelloSceneBrush, VelloSceneCapabilities, VelloScenePaint};
+use crate::scene::{IVelloSceneSink, VelloSceneBrush, VelloSceneCapabilities, VelloSceneGlyphRun, VelloScenePaint};
+use glifo::{FontEmbolden, Glyph};
 use crate::vello_options::VelloRenderingMode;
-use kurbo::{Affine, BezPath, PathEl, Stroke, StrokeOpts};
+use kurbo::{Affine, BezPath, Diagonal2, PathEl, Stroke, StrokeOpts};
 use peniko::color::AlphaColor;
 use peniko::{BlendMode, Fill, ImageBrush, ImageSampler};
 use std::borrow::Cow;
@@ -161,6 +162,50 @@ impl IVelloSceneSink for VelloCpuSceneSink {
         let outline = kurbo::stroke(path.iter(), stroke, &StrokeOpts::default(), CURVE_TOLERANCE / scale);
 
         self.fill(&outline, Fill::NonZero, transform, paint, BlendMode::default(), anti_alias);
+    }
+
+    fn draw_glyph_run(
+        &mut self,
+        glyph_run: &VelloSceneGlyphRun<'_>,
+        transform: Affine,
+        paint: &VelloScenePaint,
+        anti_alias: bool,
+    ) {
+        if glyph_run.glyphs.is_empty() || !(glyph_run.font_size.is_finite() && glyph_run.font_size > 0.0) {
+            return;
+        }
+
+        self.set_anti_alias(anti_alias);
+        self.set_paint(paint, transform, transform);
+        self.context.set_transform(transform);
+        self.context.set_fill_rule(Fill::NonZero);
+
+        // The renderer widens the outline it keeps of a glyph, which is in
+        // the units of the font unless the glyph is hinted, when it is in
+        // pixels: an emboldened run is not hinted, so that the amount has
+        // one unit.
+        let emboldened = glyph_run.embolden > 0.0;
+
+        let mut builder = self
+            .context
+            .glyph_run(&mut self.resources, glyph_run.font)
+            .font_size(glyph_run.font_size)
+            .normalized_coords(glyph_run.normalized_coords)
+            .hint(glyph_run.hint && !emboldened);
+
+        if emboldened {
+            let amount = glyph_run.embolden * glyph_run.units_per_em.max(1) as f64 / glyph_run.font_size as f64;
+            builder = builder.font_embolden(FontEmbolden::new(Diagonal2::new(amount, amount)));
+        }
+
+        if glyph_run.skew != 0.0 {
+            builder = builder.glyph_transform(Affine::skew(glyph_run.skew, 0.0));
+        }
+
+        // A glyph the renderer has no representation of (a bitmap format it
+        // does not decode) is left out by it and reported: the rest of the
+        // run is drawn, as a font without that glyph would be.
+        let _ = builder.fill_glyphs(glyph_run.glyphs.iter().map(|glyph| Glyph { id: glyph.id, x: glyph.x, y: glyph.y }));
     }
 
     fn push_clip(&mut self, path: &BezPath, fill_rule: Fill, transform: Affine, anti_alias: bool) {

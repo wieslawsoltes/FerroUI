@@ -1,6 +1,7 @@
 use crate::platform_render_interface::PlatformRenderInterface;
 use crate::vello_options::VelloOptions;
-use ferroui_base::platform::IPlatformRenderInterface;
+use crate::font_manager_impl::FontManagerImpl;
+use ferroui_base::platform::{IFontManagerImpl, IPlatformRenderInterface};
 use ferroui_base::{FerroLocator, Vector};
 use std::rc::Rc;
 
@@ -16,17 +17,19 @@ impl VelloPlatform {
         Self::initialize_with_options(VelloOptions::default());
     }
 
-    /// Initializes the Vello platform: registers the render interface in the
-    /// service locator.
-    ///
-    /// No font manager is registered: the font manager of the backend is
-    /// stage 5 of the design document. An application that draws text binds
-    /// one of its own until then, or fails where it asks for one.
+    /// Initializes the Vello platform: registers the render interface and
+    /// the font manager in the service locator.
     pub fn initialize_with_options(options: VelloOptions) {
         *OPTIONS.write().unwrap_or_else(|e| e.into_inner()) = Some(options);
         let render_interface: Rc<dyn IPlatformRenderInterface> = Rc::new(PlatformRenderInterface::new(options));
 
-        FerroLocator::current_mutable().bind::<dyn IPlatformRenderInterface>().to_constant(render_interface);
+        let font_manager: Rc<dyn IFontManagerImpl> = Rc::new(FontManagerImpl::new());
+
+        FerroLocator::current_mutable()
+            .bind::<dyn IPlatformRenderInterface>()
+            .to_constant(render_interface)
+            .bind::<dyn IFontManagerImpl>()
+            .to_constant(font_manager);
     }
 
     /// The options the backend was initialized with. Read by the thread

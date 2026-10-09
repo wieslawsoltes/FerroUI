@@ -1,7 +1,7 @@
 use crate::vello_options::VelloRenderingMode;
 use kurbo::{Affine, BezPath, Stroke};
 use peniko::color::{AlphaColor, Srgb};
-use peniko::{BlendMode, Extend, Fill, Gradient, ImageData, ImageQuality};
+use peniko::{BlendMode, Extend, Fill, FontData, Gradient, ImageData, ImageQuality};
 
 /// What a renderer of the Vello project draws of what the drawing context
 /// contract asks for. The drawing context asks before it draws something a
@@ -62,6 +62,45 @@ impl VelloScenePaint {
     }
 }
 
+/// A glyph of a run: its index in the font and its origin on the baseline,
+/// in the space of the run.
+#[derive(Clone, Copy, Debug, PartialEq)]
+pub struct VelloSceneGlyph {
+    /// The index of the glyph in the font.
+    pub id: u32,
+    /// The horizontal position of the origin of the glyph.
+    pub x: f32,
+    /// The vertical position of the origin of the glyph, downwards.
+    pub y: f32,
+}
+
+/// Glyphs of one font that are drawn alike.
+#[derive(Clone, Copy, Debug)]
+pub struct VelloSceneGlyphRun<'a> {
+    /// The font file and the index of the font in it.
+    pub font: &'a FontData,
+    /// The em size, in the units of the space of the run.
+    pub font_size: f32,
+    /// The units of the em square of the font.
+    pub units_per_em: u16,
+    /// The position in the variation space of the font, a normalized
+    /// coordinate for each axis as a fixed-point number of 14 fractional
+    /// bits; empty for the default instance.
+    pub normalized_coords: &'a [i16],
+    /// The glyphs.
+    pub glyphs: &'a [VelloSceneGlyph],
+    /// By how much the outline of every glyph is widened on each side, in
+    /// the units of the space of the run: the bold simulation. Zero for
+    /// none.
+    pub embolden: f64,
+    /// The horizontal shear of every glyph about its origin, in a space of
+    /// which y points down: the oblique simulation. Zero for none.
+    pub skew: f64,
+    /// Whether the outlines are fitted to the pixels of the target, as far
+    /// as the renderer does it.
+    pub hint: bool,
+}
+
 /// The scene of one frame: where the drawing context records what the
 /// contract's immediate calls draw, in the form of one of the renderers of
 /// the Vello project.
@@ -103,6 +142,16 @@ pub trait IVelloSceneSink {
 
     /// Strokes a path.
     fn stroke(&mut self, path: &BezPath, stroke: &Stroke, transform: Affine, paint: &VelloScenePaint, anti_alias: bool);
+
+    /// Fills the glyphs of a run: outlines with the paint, the glyphs of a
+    /// colour font with their own colours as far as the renderer draws them.
+    fn draw_glyph_run(
+        &mut self,
+        glyph_run: &VelloSceneGlyphRun<'_>,
+        transform: Affine,
+        paint: &VelloScenePaint,
+        anti_alias: bool,
+    );
 
     /// Restricts drawing to the fill of a path until the matching
     /// [`pop_clip`](Self::pop_clip). The clip does not isolate what is drawn
