@@ -3,7 +3,9 @@
 //! talking to it over TCP. Here a [`RemoteServer`] and the other end of its
 //! connection run in the test, joined by the TCP transport of the protocol
 //! over the loopback interface, so that the messages arrive on the reader
-//! threads of the connections as they do in an application.
+//! threads of the connections as they do in an application. One test needs
+//! the messages in an order that timing cannot give it: its connection is
+//! one whose messages the test delivers ([`ManualConnection`]).
 //!
 //! The render interface of the tests is the mock one with render targets
 //! that lock the framebuffer of their surface and fill it with a known
@@ -36,7 +38,8 @@ use ferroui_remote_protocol::viewport::{
     MeasureViewportMessage, PixelFormat,
 };
 use ferroui_remote_protocol::{
-    message_handler, BsonTcpTransport, DisposableServer, IFerroRemoteTransportConnection, TcpTransportBase,
+    message_handler, BsonTcpTransport, Delegate, DisposableServer, Error, ExceptionHandler, HandlerToken,
+    IFerroRemoteTransportConnection, Message, MessageHandler, Task, TcpTransportBase,
 };
 use std::any::{Any, TypeId};
 use std::cell::RefCell;
@@ -199,6 +202,71 @@ fn collect_frames(client: &Arc<dyn IFerroRemoteTransportConnection>) -> Arc<Mute
     frames
 }
 
+/// The end of a connection whose other end is the test: what the server
+/// sends is recorded, and a message arrives when the test delivers it, in
+/// the order the test chooses.
+struct ManualConnection {
+    handlers: Mutex<Delegate<Message>>,
+    exception_handlers: Mutex<Delegate<Error>>,
+    sent: Mutex<Vec<Message>>,
+}
+
+impl ManualConnection {
+    fn new() -> Arc<ManualConnection> {
+        Arc::new(ManualConnection {
+            handlers: Mutex::new(Delegate::new()),
+            exception_handlers: Mutex::new(Delegate::new()),
+            sent: Mutex::new(Vec::new()),
+        })
+    }
+
+    /// Raises the message event on a thread of its own, as a reader thread
+    /// does, and returns when the handlers have returned.
+    fn deliver(self: &Arc<Self>, message: Message) {
+        let connection = self.clone();
+        std::thread::spawn(move || {
+            let handlers = connection.handlers.lock().unwrap().snapshot();
+            for handler in handlers {
+                handler(&*connection, &message);
+            }
+        })
+        .join()
+        .expect("the handlers of the message return");
+    }
+
+    /// The frames sent so far.
+    fn frames(&self) -> Vec<FrameMessage> {
+        self.sent.lock().unwrap().iter().filter_map(|message| message.downcast_ref::<FrameMessage>().cloned()).collect()
+    }
+}
+
+impl IFerroRemoteTransportConnection for ManualConnection {
+    fn dispose(&self) {}
+
+    fn send(&self, data: Message) -> Task {
+        self.sent.lock().unwrap().push(data);
+        Task::completed()
+    }
+
+    fn on_message(&self, handler: MessageHandler) -> HandlerToken {
+        self.handlers.lock().unwrap().add(handler)
+    }
+
+    fn remove_on_message(&self, token: HandlerToken) {
+        self.handlers.lock().unwrap().remove(token);
+    }
+
+    fn on_exception(&self, handler: ExceptionHandler) -> HandlerToken {
+        self.exception_handlers.lock().unwrap().add(handler)
+    }
+
+    fn remove_on_exception(&self, token: HandlerToken) {
+        self.exception_handlers.lock().unwrap().remove(token);
+    }
+
+    fn start(&self) {}
+}
+
 fn assert_filled(data: &[u8], width: i32, height: i32, stride: i32) {
     assert_eq!((stride * height) as usize, data.len());
     for y in 0..height as usize {
@@ -234,6 +302,65 @@ fn the_server_sends_no_pixels_before_the_client_states_its_pixel_formats() {
     server.dispose();
     assert!(server.platform_impl().is_disposed());
     drop(connections);
+    services.dispose();
+}
+
+/// Runs the jobs of the UI thread and renders frames until nothing is left
+/// that would render by itself.
+fn settle(services: &CompositorTestServices) {
+    for _ in 0..20 {
+        services.run_jobs();
+    }
+}
+
+// The interleaving in which the first frame with pixels was lost: the
+// client states its pixel formats while a frame without pixels is on its
+// way, the request to render is refused because of that frame, and the
+// acknowledgement of the frame finds nothing to send. The messages are
+// delivered in that order by the test.
+#[test]
+fn a_render_asked_for_while_a_frame_is_unacknowledged_is_done_when_the_frame_is_acknowledged() {
+    let services = start();
+    let connection = ManualConnection::new();
+    let server = RemoteServer::new(connection.clone());
+
+    // The first frame is rendered before the client has stated its pixel
+    // formats: it has no pixels. It is not acknowledged, and whatever the
+    // compositor renders by itself meanwhile goes into the same framebuffer.
+    connection.deliver(Arc::new(ClientViewportAllocatedMessage { width: 8.0, height: 4.0, dpi_x: 96.0, dpi_y: 96.0 }));
+    pump_until(&services, "the frame without pixels", || !connection.frames().is_empty());
+    settle(&services);
+    assert_eq!(
+        vec![(1, 0, 0)],
+        connection.frames().iter().map(|frame| (frame.sequence_id, frame.width, frame.height)).collect::<Vec<_>>()
+    );
+
+    // The pixel formats arrive before the acknowledgement: nothing is sent
+    // while the frame is on its way, whatever is asked for.
+    connection.deliver(Arc::new(ClientSupportedPixelFormatsMessage { formats: Some(vec![PixelFormat::Rgba8888]) }));
+    settle(&services);
+    assert_eq!(1, connection.frames().len());
+
+    // The acknowledgement: the render that was asked for meanwhile is done
+    // now, and the next frame has the pixels.
+    connection.deliver(Arc::new(FrameReceivedMessage { sequence_id: 1 }));
+    settle(&services);
+    {
+        let frames = connection.frames();
+        assert_eq!(2, frames.len());
+        let frame = &frames[1];
+        assert_eq!(2, frame.sequence_id);
+        assert_eq!(PixelFormat::Rgba8888, frame.format);
+        assert_eq!((8, 4, 32), (frame.width, frame.height, frame.stride));
+        assert_filled(frame.data.as_deref().unwrap(), 8, 4, 32);
+    }
+
+    // An acknowledgement without a render asked for sends nothing.
+    connection.deliver(Arc::new(FrameReceivedMessage { sequence_id: 2 }));
+    settle(&services);
+    assert_eq!(2, connection.frames().len());
+
+    server.dispose();
     services.dispose();
 }
 

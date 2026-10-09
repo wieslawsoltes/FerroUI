@@ -69,6 +69,10 @@ struct State {
     last_sent_frame: i64,
     last_received_frame: i64,
     next_frame_number: i64,
+    /// A render was asked for while the last frame sent was not yet
+    /// acknowledged, and was not done: it is done when the frame is
+    /// acknowledged. (Not from upstream: DEVIATIONS.md, Remote rendering.)
+    render_requested: bool,
     pending_allocation: Option<ClientViewportAllocatedMessage>,
     format: Option<ProtocolPixelFormat>,
     client_size: Size,
@@ -234,7 +238,21 @@ impl RemoteServerSurface {
 
         if let Some(last_frame) = obj.downcast_ref::<FrameReceivedMessage>() {
             state.last_received_frame = last_frame.sequence_id.max(state.last_received_frame);
-            self.handle.post(|this| this.with(|this| this.surface.send_last_frame_if_needed()), DispatcherPriority::DEFAULT);
+            // Deviation (DEVIATIONS.md, Remote rendering): the original
+            // posts `SendLastFrameIfNeeded` only, and a render that was
+            // asked for while the frame was on its way is lost.
+            self.handle.post(
+                |this| {
+                    this.with(|this| {
+                        if this.surface.state().render_requested {
+                            this.render_and_send_frame_if_needed();
+                        } else {
+                            this.surface.send_last_frame_if_needed();
+                        }
+                    })
+                },
+                DispatcherPriority::DEFAULT,
+            );
         } else if let Some(render_info) = obj.downcast_ref::<ClientRenderInfoMessage>() {
             let dpi_x = render_info.dpi_x;
             self.handle.post(
@@ -490,6 +508,7 @@ impl RemoteServerTopLevelImpl {
                     last_sent_frame: -1,
                     last_received_frame: -1,
                     next_frame_number: 1,
+                    render_requested: false,
                     pending_allocation: None,
                     format: None,
                     client_size: Size::default(),
@@ -614,9 +633,19 @@ impl RemoteServerTopLevelImpl {
 
         {
             let mut state = self.surface.state();
-            if state.last_received_frame != state.last_sent_frame || state.format.is_none() {
+            if state.format.is_none() {
                 return;
             }
+
+            // Deviation (DEVIATIONS.md, Remote rendering): the original
+            // returns here and forgets the request; the port remembers it
+            // for the acknowledgement of the frame that is on its way.
+            if state.last_received_frame != state.last_sent_frame {
+                state.render_requested = true;
+                return;
+            }
+
+            state.render_requested = false;
 
             // The size and the scaling as they are now, however they were set.
             state.client_size = self.base.client_size();
