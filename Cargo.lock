@@ -235,6 +235,7 @@ dependencies = [
  "ferroui-skia",
  "ferroui-themes-fluent",
  "ferroui-themes-simple",
+ "ferroui-vello",
  "mini-mvvm",
  "skia-safe",
  "unicode-normalization",
