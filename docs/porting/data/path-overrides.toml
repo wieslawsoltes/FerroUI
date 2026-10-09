@@ -979,9 +979,15 @@ reason = "the extension methods are inherent methods of `dyn IResourceHost` (`fi
 
 [[map]]
 project = "Avalonia.Native"
-upstream = ["AvaloniaNativeGlPlatformGraphics.cs", "GpuHandleWrapFeature.cs"]
+upstream = ["AvaloniaNativeGlPlatformGraphics.cs"]
 kind = "not-applicable"
-reason = "not ported for now (row 18 of CRITICAL-PATH.md): the desktop build of the Skia backend has Graphite on Metal and no Ganesh, so nothing could draw through the OpenGL platform graphics of the backend, and the external objects feature they carry is not ported in `ferroui-opengl` either"
+reason = "not ported for now (row 18 of CRITICAL-PATH.md): the desktop build of the Skia backend has Graphite on Metal and no Ganesh, so nothing could draw through the OpenGL platform graphics of the macOS backend. Applicable when the desktop build has Ganesh on OpenGL: the file is then ported to `avalonia_native_gl_platform_graphics.rs` under the mapped name, with the Skia side of the external objects on OpenGL (`Gpu/OpenGl/GlSkiaExternalObjectsFeature.cs`, reported as missing); the contracts it implements are in `ferroui-opengl` already (`i_gl_context_external_objects_feature.rs`)"
+
+[[map]]
+project = "Avalonia.Native"
+upstream = ["GpuHandleWrapFeature.cs"]
+kind = "not-applicable"
+reason = "not ported for now: the feature that retains an `IOSurface` or a shared Metal event while the compositor imports it (`IExternalObjectsHandleWrapRenderInterfaceContextFeature`, whose contract is in the base crate). Upstream creates it in the Metal device (`Metal.cs`) and in the OpenGL context, and `MetalDevice::try_get_feature` of `metal.rs` does not offer it. Applicable with the external objects feature on Metal (`MetalExternalObjectsFeature` of `Metal.cs` and `Gpu/Metal/SkiaMetalExternalObjectsFeature.cs` of the Skia backend, both reported as missing): the entry is removed when that work starts"
 
 [[map]]
 project = "Avalonia.Native"
@@ -1015,7 +1021,7 @@ reason = "assembly attributes that tell the xUnit and NUnit integrations which a
 project = "Avalonia.Headless"
 upstream = ["HeadlessUnitTestSession.cs"]
 kind = "not-applicable"
-reason = "not ported for now: the session of the xUnit and NUnit integrations, which runs the tests of an assembly on a dispatcher thread of its own and finds the application through reflection (the assembly attribute, a `BuildAvaloniaApp` method); the test harness of cargo runs a test on a thread of its own, where the test sets up its application. A session that shares one application between tests (the `PerAssembly` isolation) has no counterpart and is an open decision"
+reason = "not ported for now: the session of the xUnit and NUnit integrations, which runs the tests of an assembly on a dispatcher thread of its own and finds the application through reflection (the assembly attribute, a `BuildAvaloniaApp` method); the test harness of cargo runs a test on a thread of its own, where the test sets up its application. Applicable if the owner decides that tests of a crate share one application (the `PerAssembly` isolation, which has no counterpart today): the session is then the object that owns the dispatcher thread and runs each test on it"
 
 [[map]]
 project = "Avalonia.Headless.XUnit"
@@ -1190,6 +1196,13 @@ reason = "port of the MicroCom.Runtime package, which upstream consumes as a NuG
 
 # ------------------------------------------------------------------------ XamlX
 # Decisions recorded in docs/porting/xaml.md, sections 1.2 and 6.1.
+
+[[map]]
+project = "XamlX"
+upstream = ["IL/RuntimeContext.cs"]
+kind = "replaced"
+rust = "emit/xaml_language_emit_mappings.rs"
+reason = "the run-time context of a document. The interface `IXamlILContextDefinition` is ported, as a trait of `emit/xaml_language_emit_mappings.rs`, because the emit mappings refer to it. The class the IL back end generates for every document (`XamlILContextDefinition`, with its fields, `GetService` and the parent stack) is written once as `XamlIlContext` and `XamlIlContextDefinition` of `src/Markup/FerroUI.Markup.Xaml/xaml_il/runtime/xaml_il_context.rs`, which the interpreter and the generated Rust source both create (docs/porting/xaml.md 1.2; 9.12, ruling 7). `RuntimeContext`, the factory that emits the IL which constructs it, has no counterpart"
 
 [[map]]
 project = "XamlX"
