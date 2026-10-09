@@ -16,6 +16,7 @@
 //!
 //! This is the one crate that links both backends; an application has one.
 
+pub mod effect_scenes;
 pub mod geometries;
 pub mod scenes;
 pub mod text;
@@ -165,6 +166,7 @@ pub fn compare(a: &Pixels, b: &Pixels) -> Difference {
 
 #[cfg(test)]
 mod application_tests;
+mod effect_tests;
 #[cfg(test)]
 mod tests;
 #[cfg(test)]
