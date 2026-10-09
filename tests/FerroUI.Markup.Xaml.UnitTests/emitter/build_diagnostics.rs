@@ -36,7 +36,10 @@ struct Fixture {
 
 impl Fixture {
     fn new() -> Self {
-        let root = std::env::temp_dir().join(format!("ferroui-build-diagnostics-{}", std::process::id()));
+        // A directory of its own for each fixture: the tests of the file run at the same time.
+        static NEXT: std::sync::atomic::AtomicUsize = std::sync::atomic::AtomicUsize::new(0);
+        let number = NEXT.fetch_add(1, std::sync::atomic::Ordering::Relaxed);
+        let root = std::env::temp_dir().join(format!("ferroui-build-diagnostics-{}-{number}", std::process::id()));
         let _ = fs::remove_dir_all(&root);
         fs::create_dir_all(root.join("crate")).expect("the directory of the crate");
         fs::write(root.join("crate").join("lib.rs"), "//! A crate without types.\n").expect("the root file of the crate");
@@ -128,5 +131,25 @@ fn build_reports_the_diagnostics_of_the_compiler_with_their_codes() {
     assert_eq!(
         refused.errors,
         ["a_b.xaml: error FRN3000: the generated function `build_a_b_xaml` would also be defined for the document `a-b.xaml`; rename one of them"]
+    );
+}
+
+/// A method named as the handler of an event that no method of the root object answers to
+/// is one error of the build: the code of the compiler's diagnostic, the document, the
+/// place of the attribute, the method and the event.
+#[test]
+fn build_reports_a_handler_that_is_not_found() {
+    let fixture = Fixture::new();
+    let border = border();
+    let button = format!("<StackPanel {NAMESPACES}>\n    <Button Content='Go'\n            Click='OnGo'/>\n</StackPanel>");
+    let outcome = fixture.build("handler", &[("Plain.xaml", border.as_str()), ("Views/Buttons.xaml", button.as_str())], |build| build);
+    assert_eq!(outcome.errors.len(), 1, "{:?}", outcome.errors);
+    assert!(
+        outcome.errors[0].starts_with(
+            "Views/Buttons.xaml(3,13): error FRN3000: No method `OnGo` for `Click` (System.EventHandler`1[FerroUI.Interactivity.RoutedEventArgs]): \
+             the document has no class (`x:Class`), and the type of its root object has no method of that name that the delegate can call."
+        ),
+        "{:?}",
+        outcome.errors
     );
 }

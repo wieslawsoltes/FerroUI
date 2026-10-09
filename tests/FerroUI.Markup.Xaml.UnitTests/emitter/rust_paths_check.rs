@@ -356,6 +356,9 @@ pub fn classes() -> Vec<(&'static ::ferroui_base::TypeInfo, &'static str)> {
         (<::ferroui_controls::utils::BindingEvaluator as ::ferroui_base::StaticType>::TYPE, "ferroui_controls::utils::BindingEvaluator"),
         (<::ferroui_markup_xaml::diagnostics::XamlSourceInfo as ::ferroui_base::StaticType>::TYPE, "ferroui_markup_xaml::diagnostics::XamlSourceInfo"),
         (<::ferroui_markup_xaml_tests::support::emitter::FailingEndInit as ::ferroui_base::StaticType>::TYPE, "ferroui_markup_xaml_tests::support::emitter::FailingEndInit"),
+        (<::ferroui_markup_xaml_tests::support::xaml::event_tests::MyButton as ::ferroui_base::StaticType>::TYPE, "ferroui_markup_xaml_tests::support::xaml::event_tests::MyButton"),
+        (<::ferroui_markup_xaml_tests::support::xaml::event_tests::MyHost as ::ferroui_base::StaticType>::TYPE, "ferroui_markup_xaml_tests::support::xaml::event_tests::MyHost"),
+        (<::ferroui_markup_xaml_tests::support::xaml::event_tests::MyPanel as ::ferroui_base::StaticType>::TYPE, "ferroui_markup_xaml_tests::support::xaml::event_tests::MyPanel"),
     ]
 }
 

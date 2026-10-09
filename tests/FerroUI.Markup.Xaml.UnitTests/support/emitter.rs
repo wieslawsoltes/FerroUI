@@ -12,6 +12,7 @@ use ferroui_base::{
 };
 use ferroui_controls::{Control, ControlImpl};
 
+use super::xaml::event_tests::{MyButton, MyHost, MyPanel};
 use super::TypeModule;
 
 /// A control whose `EndInit` fails, after ending the initialisation, with the
@@ -54,5 +55,10 @@ impl FailingEndInit {
 pub(crate) const MODULE: TypeModule = TypeModule { types: &[FailingEndInit::TYPE], ..TypeModule::EMPTY };
 
 /// The public Rust paths of the classes of this module, for generated code.
-pub(crate) const RUST_PATHS: &[(&TypeInfo, &str)] =
-    &[(FailingEndInit::TYPE, "ferroui_markup_xaml_tests::support::emitter::FailingEndInit")];
+pub(crate) const RUST_PATHS: &[(&TypeInfo, &str)] = &[
+    (FailingEndInit::TYPE, "ferroui_markup_xaml_tests::support::emitter::FailingEndInit"),
+    // The classes of the class documents of the corpus.
+    (MyButton::TYPE, "ferroui_markup_xaml_tests::support::xaml::event_tests::MyButton"),
+    (MyHost::TYPE, "ferroui_markup_xaml_tests::support::xaml::event_tests::MyHost"),
+    (MyPanel::TYPE, "ferroui_markup_xaml_tests::support::xaml::event_tests::MyPanel"),
+];

@@ -3,8 +3,10 @@
 //!
 //! | File | Contents |
 //! |---|---|
-//! | `corpus.rs` | the documents and which of them must (not) be eligible |
+//! | `corpus.rs` | the documents and which of them must (not) be eligible; the documents with a class |
 //! | `generated.rs` | the emitter's output for the corpus, CHECKED IN |
+//! | `generated_handlers/` | the emitter's output for the class documents of the corpus, CHECKED IN |
+//! | `event_handlers.rs` | the class documents: both hosts write the checked-in files; a class populated by them and one populated by the run-time loader are the same tree and call the same handlers; a method that is not found |
 //! | `differential_tests.rs` | generated output is current; both back ends build equal object trees; registration by URI |
 //! | `build_diagnostics.rs` | the diagnostics of a build against the type models: codes, documents, positions, the severities of an EditorConfig file |
 //! | `model_transform.rs` | the transform of the corpus against the build-time type system, measured against the transform against the run-time type system |
@@ -34,12 +36,16 @@ pub mod corpus;
 #[rustfmt::skip]
 pub mod generated;
 #[rustfmt::skip]
+pub mod generated_handlers;
+#[rustfmt::skip]
 pub mod rust_paths_check;
 
 #[cfg(test)]
 mod build_diagnostics;
 #[cfg(test)]
 mod differential_tests;
+#[cfg(test)]
+mod event_handlers;
 #[cfg(test)]
 mod model_emit;
 #[cfg(test)]
