@@ -51,6 +51,9 @@ mod theme_gap_tests;
 mod theme_readiness_tests;
 
 #[cfg(test)]
+mod type_system_drift;
+
+#[cfg(test)]
 mod xaml;
 
 /// The dotted namespaces of the modules of this crate.
