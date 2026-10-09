@@ -18,6 +18,7 @@
 
 pub mod effect_scenes;
 pub mod geometries;
+pub mod modes;
 pub mod scenes;
 pub mod text;
 

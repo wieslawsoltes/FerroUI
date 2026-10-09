@@ -30,7 +30,8 @@ fn text_scenes_stay_within_their_bounds() {
     let skia = Backend::skia();
     let mut failures = Vec::new();
 
-    for mode in Backend::vello_modes() {
+    // The CPU mode; the other modes are measured in `modes.rs`, each with its own bounds.
+    for mode in [VelloRenderingMode::Cpu] {
         let vello = Backend::vello(mode);
         let (mut share_sum, mut count) = (0.0, 0);
 

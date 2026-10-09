@@ -21,8 +21,15 @@ pub struct VelloOptions {
     /// The rendering modes in the order they are tried: the first one that
     /// is available draws. `None` ends the list.
     ///
-    /// Only the CPU mode is built so far; a list without it has no mode
-    /// that can draw.
+    /// The hybrid and the GPU mode draw the window of a platform that
+    /// renders on a graphics device, and each is available when the crate
+    /// was built with its feature (`hybrid`, `gpu`) and the device runs it.
+    /// What is drawn into memory (render target bitmaps, layers, the
+    /// framebuffer of a platform that renders in software) is drawn by the
+    /// CPU mode whenever the list has it, wherever it stands: a scene that
+    /// ends as pixels in memory gains nothing from a round over the GPU. A
+    /// list without the CPU mode draws those in its GPU modes too, and has
+    /// no mode that can draw on a machine without a graphics device.
     pub rendering_modes: [Option<VelloRenderingMode>; MODE_COUNT],
 
     /// Use a layer to apply opacity, so that every visual is rendered to
@@ -33,11 +40,14 @@ pub struct VelloOptions {
 impl Default for VelloOptions {
     fn default() -> Self {
         Self {
-            // The order a desktop wants once every mode is built; until
-            // then the first two are skipped as not available.
+            // The window of a desktop is a scene of a user interface: the
+            // hybrid mode draws everything such a scene has, with the
+            // pixels of the CPU mode; the GPU mode lacks edges without
+            // anti-aliasing and is the faster one on scenes dense with
+            // paths (design document, section 4).
             rendering_modes: [
-                Some(VelloRenderingMode::Gpu),
                 Some(VelloRenderingMode::Hybrid),
+                Some(VelloRenderingMode::Gpu),
                 Some(VelloRenderingMode::Cpu),
             ],
             use_opacity_save_layer: false,

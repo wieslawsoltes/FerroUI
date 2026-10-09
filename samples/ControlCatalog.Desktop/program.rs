@@ -41,10 +41,28 @@ fn main() -> std::process::ExitCode {
 
 /// The application builder of the catalog.
 pub fn build_ferro_app() -> AppBuilder {
-    AppBuilder::configure::<App>()
-        .use_platform_detect()
-        .after_setup(|_| smoke_run())
-        .log_to_trace(LogEventLevel::Warning, &[])
+    let builder = AppBuilder::configure::<App>().use_platform_detect();
+    #[cfg(feature = "vello")]
+    let builder = use_renderer_of_the_environment(builder);
+    builder.after_setup(|_| smoke_run()).log_to_trace(LogEventLevel::Warning, &[])
+}
+
+/// The render backend asked for with `FERROUI_RENDERER`: `vello` (the modes
+/// of the Vello backend in their default order), `vello-hybrid`, `vello-gpu`
+/// or `vello-cpu`. Anything else, and no value, leaves the backend of the
+/// platform.
+#[cfg(feature = "vello")]
+fn use_renderer_of_the_environment(builder: AppBuilder) -> AppBuilder {
+    use ferroui_vello::{VelloApplicationExtensions, VelloOptions, VelloRenderingMode};
+    let options = match std::env::var("FERROUI_RENDERER").ok().as_deref() {
+        Some("vello") => VelloOptions::default(),
+        Some("vello-hybrid") => VelloOptions::with_rendering_mode(VelloRenderingMode::Hybrid),
+        Some("vello-gpu") => VelloOptions::with_rendering_mode(VelloRenderingMode::Gpu),
+        Some("vello-cpu") => VelloOptions::with_rendering_mode(VelloRenderingMode::Cpu),
+        _ => return builder,
+    };
+    eprintln!("ControlCatalog: the Vello backend, modes {:?}", options.rendering_mode_order());
+    builder.with(std::rc::Rc::new(options)).use_vello()
 }
 
 fn environment_milliseconds(name: &str) -> Option<u64> {

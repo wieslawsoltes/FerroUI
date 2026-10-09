@@ -16,7 +16,7 @@ use vello_cpu::{
 
 /// The coverage from which a pixel of an edge without anti-aliasing is
 /// painted: half of it.
-const ALIASING_THRESHOLD: u8 = 128;
+pub(super) const ALIASING_THRESHOLD: u8 = 128;
 
 /// The distance, in pixels of the target, a curve may be from the lines it
 /// is drawn as.
@@ -27,7 +27,7 @@ const ALIASING_THRESHOLD: u8 = 128;
 /// visibly lighter than the same edge drawn by Skia (design document,
 /// section 1.3). Curves are therefore flattened here, five times finer, and
 /// the renderer is given lines.
-const CURVE_TOLERANCE: f64 = 0.05;
+pub(super) const CURVE_TOLERANCE: f64 = 0.05;
 
 /// A path in the pixels of the target as lines only, or `None` for a path
 /// that has no curve: such a path is drawn as it is, with its transform.
@@ -42,7 +42,7 @@ fn flatten(path: &BezPath, transform: Affine) -> Option<BezPath> {
 }
 
 /// The path to hand to the renderer with the transform to draw it with.
-fn prepare(path: &BezPath, transform: Affine) -> (Cow<'_, BezPath>, Affine) {
+pub(super) fn prepare(path: &BezPath, transform: Affine) -> (Cow<'_, BezPath>, Affine) {
     match flatten(path, transform) {
         Some(flattened) => (Cow::Owned(flattened), Affine::IDENTITY),
         None => (Cow::Borrowed(path), transform),
