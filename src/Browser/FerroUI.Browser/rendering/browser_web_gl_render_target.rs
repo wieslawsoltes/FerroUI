@@ -41,6 +41,12 @@ extern "C" {
     #[wasm_bindgen(method, getter)]
     fn attrs(this: &JsWebGlRenderTarget) -> JsWebGlAttributes;
 
+    /// The canvas of the target: an `HTMLCanvasElement`, or an
+    /// `OffscreenCanvas` on a worker.
+    #[cfg(feature = "vello")]
+    #[wasm_bindgen(method, getter)]
+    fn canvas(this: &JsWebGlRenderTarget) -> JsValue;
+
     /// The attributes a WebGL context was created with.
     type JsWebGlAttributes;
 
@@ -90,6 +96,10 @@ impl BrowserWebGlRenderTarget {
             GlVersion::new(GlProfileType::OpenGLES, if version > 1 { 3 } else { 2 }, 0),
             gl_info.samples,
             gl_info.stencils,
+            // The canvas of a WebGL 2 context, for the backend that draws
+            // with the context of the page itself.
+            #[cfg(feature = "vello")]
+            (version > 1).then(|| target.canvas()),
         );
         Rc::new(Self { js, gl_info, gl_context })
     }
@@ -229,6 +239,10 @@ pub struct WebGlContext {
     gl_interface: Rc<GlInterface>,
     sample_count: i32,
     stencil_size: i32,
+    /// The canvas of the context, when it is a WebGL 2 context: an object
+    /// of the thread the context belongs to.
+    #[cfg(feature = "vello")]
+    canvas: Option<JsValue>,
 }
 
 struct RestoreContext {
@@ -245,7 +259,13 @@ impl IDisposable for RestoreContext {
 
 impl WebGlContext {
     /// Wraps the context with the given id and resolves its entry points.
-    pub fn new(context_id: i32, version: GlVersion, sample_count: i32, stencil_size: i32) -> Rc<Self> {
+    pub fn new(
+        context_id: i32,
+        version: GlVersion,
+        sample_count: i32,
+        stencil_size: i32,
+        #[cfg(feature = "vello")] canvas: Option<JsValue>,
+    ) -> Rc<Self> {
         let old = get_current_context();
         if !make_context_current(context_id) {
             panic!("{}", OpenGlException::new("Unable to make the context current"));
@@ -272,6 +292,8 @@ impl WebGlContext {
             gl_interface,
             sample_count,
             stencil_size,
+            #[cfg(feature = "vello")]
+            canvas,
         })
     }
 
@@ -290,6 +312,13 @@ impl IOptionalFeatureProvider for WebGlContext {
         }
         if feature_type == TypeId::of::<dyn IGlSkiaSpecificOptionsFeature>() {
             let this: Rc<dyn IGlSkiaSpecificOptionsFeature> = self.this.upgrade()?;
+            return Some(Rc::new(this));
+        }
+        // Not from upstream: the Vello backend draws with the WebGL2
+        // context of the page, which it gets from its canvas.
+        #[cfg(feature = "vello")]
+        if feature_type == TypeId::of::<dyn ferroui_vello::web_gl::IWebGlCanvasFeature>() && self.canvas.is_some() {
+            let this: Rc<dyn ferroui_vello::web_gl::IWebGlCanvasFeature> = self.this.upgrade()?;
             return Some(Rc::new(this));
         }
         None
@@ -355,6 +384,14 @@ impl IGlContext for WebGlContext {
 
     fn create_shared_context(&self, _preferred_versions: Option<&[GlVersion]>) -> Option<Rc<dyn IGlContext>> {
         panic!("Specified method is not supported.");
+    }
+}
+
+#[cfg(feature = "vello")]
+impl ferroui_vello::web_gl::IWebGlCanvasFeature for WebGlContext {
+    fn canvas(&self) -> JsValue {
+        self.verify_access();
+        self.canvas.clone().expect("the feature is handed out for a context with a canvas")
     }
 }
 

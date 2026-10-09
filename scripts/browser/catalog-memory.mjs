@@ -3,6 +3,7 @@
 //   node scripts/browser/catalog-memory.mjs <site directory> [options]
 //
 //   --query <text>      more of the query string of the page, e.g. "&RenderThread=false"
+//   --mode <mode>       rendering mode of the page (default WebGL2; Software2D)
 //   --isolated          serve the site cross-origin isolated (a site built with threads)
 //   --angle <backend>   what WebGL runs on: swiftshader (the default) or a backend of ANGLE with the GPU (metal)
 //   --all               visit every page of the catalog, not the tour of thirteen (below)
@@ -11,7 +12,7 @@
 //   --verbose           with --all: a line on the standard error for every page as it is visited
 //   --json              print the result as JSON
 //
-// The tour is the one of catalog-pages.mjs (thirteen pages), at its size, in WebGL2, with the prefetch of
+// The tour is the one of catalog-pages.mjs (thirteen pages), at its size, in WebGL2 (or --mode), with the prefetch of
 // the files of the pages on, as the last check of tests/control_catalog.test.mjs makes it. With --all it
 // is the whole catalog (`visitAll` of catalog-pages.mjs): every page of the list the application is built
 // from, each opened from the drawer, its content scrolled down and back (a virtualized list for thirty
@@ -30,20 +31,21 @@ import { open, sleep } from "./harness.mjs";
 import { ALL_SIZE, TOUR, TOUR_SIZE, catalogPages, drive, pairs, visit, visitAll, waitUntilReady } from "./catalog-pages.mjs";
 
 const args = process.argv.slice(2);
-const valued = new Set(["--query", "--angle", "--passes"]);
+const valued = new Set(["--query", "--angle", "--passes", "--mode"]);
 const option = (name, fallback) => { const i = args.indexOf(name); return i >= 0 ? args[i + 1] : fallback; };
 const site = args.find((a, i) => !a.startsWith("--") && !valued.has(args[i - 1]));
 if (!site || !fs.existsSync(path.join(site, "index.html"))) {
-    console.error("usage: node scripts/browser/catalog-memory.mjs <site directory> [--query q] [--isolated] [--angle a] [--all [--passes n] [--verbose]] [--json]");
+    console.error("usage: node scripts/browser/catalog-memory.mjs <site directory> [--query q] [--mode m] [--isolated] [--angle a] [--all [--passes n] [--verbose]] [--json]");
     process.exit(2);
 }
 const query = option("--query", "");
+const mode = option("--mode", "WebGL2");
 const all = args.includes("--all");
 const passes = Number(option("--passes", "1"));
 const megabytes = (bytes) => Number((Number(bytes) / (1024 * 1024)).toFixed(1));
 
 const page = await open(site, {
-    query: `?RenderingMode=WebGL2&MemoryReport=true${query}`, ...(all ? ALL_SIZE : TOUR_SIZE), isolated: args.includes("--isolated"), angle: option("--angle")
+    query: `?RenderingMode=${mode}&MemoryReport=true${query}`, ...(all ? ALL_SIZE : TOUR_SIZE), isolated: args.includes("--isolated"), angle: option("--angle")
 });
 try {
     await waitUntilReady(page, 180_000);

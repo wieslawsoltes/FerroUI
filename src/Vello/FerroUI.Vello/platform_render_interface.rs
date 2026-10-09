@@ -231,6 +231,17 @@ impl IPlatformRenderInterface for PlatformRenderInterface {
         &self,
         graphics_api_context: Option<Rc<dyn IPlatformGraphicsContext>>,
     ) -> Rc<dyn IPlatformRenderInterfaceContext> {
+        // The WebGL2 context of a canvas of a web page: the hybrid mode
+        // draws the canvas with the renderer of that context.
+        #[cfg(feature = "hybrid-webgl")]
+        if let Some(graphics_context) = &graphics_api_context {
+            match crate::web_gl::VelloWebGlGpu::try_new(graphics_context) {
+                Some(Ok(web_gl)) => return Rc::new(VelloContext::with_web_gl(web_gl, self.rendering_modes.clone())),
+                Some(Err(error)) => panic!("The Vello backend cannot draw with the WebGL2 context of the canvas: {error}."),
+                None => {}
+            }
+        }
+
         match graphics_api_context {
             None => Rc::new(VelloContext::new(self.rendering_modes.clone())),
             // A scene is drawn into the surface of a window on a device
@@ -241,8 +252,9 @@ impl IPlatformRenderInterface for PlatformRenderInterface {
             }
             #[cfg(not(any(feature = "hybrid", feature = "gpu")))]
             Some(_) => panic!(
-                "The Vello backend was built without a GPU mode (the features `hybrid` and `gpu` of ferroui-vello): \
-                 it draws into the framebuffer of a platform that renders in software, not on its graphics device"
+                "The Vello backend was built without a GPU mode for this graphics context (the features `hybrid` and \
+                 `gpu` of ferroui-vello draw on the device of a desktop platform, `hybrid-webgl` with the WebGL2 \
+                 context of a canvas): it draws into the framebuffer of a platform that renders in software"
             ),
         }
     }

@@ -29,13 +29,22 @@ gif.workspace = true
 vello_gpu = { workspace = true, optional = true }
 vello = { workspace = true, optional = true }
 wgpu = { workspace = true, optional = true }
+# The hybrid mode in a web page (feature `hybrid-webgl`): the OpenGL contracts a platform hands out
+# the surface of a canvas with, and the bindings of the WebGL2 context the renderer draws to.
+ferroui-opengl = { workspace = true, optional = true }
+wasm-bindgen = { workspace = true, optional = true }
+js-sys = { workspace = true, optional = true }
+web-sys = { workspace = true, optional = true, features = ["HtmlCanvasElement", "WebGl2RenderingContext", "WebGlTexture"] }
 
 # The CPU mode is always built. An application states the GPU modes it uses: each brings its renderer
 # and `wgpu` (docs/porting/vello-backend.md, section 2).
 [features]
 default = []
 # The sparse-strips renderer with the strips drawn on the GPU (`vello_gpu`).
-hybrid = ["dep:vello_gpu", "wgpu-device"]
+hybrid = ["dep:vello_gpu", "vello_gpu/wgpu", "wgpu-device"]
+# The same renderer over the WebGL2 context of a canvas of a web page, without `wgpu` (`vello_gpu`
+# with its `webgl` feature): the hybrid mode of the browser platform (gpu_web_gl/).
+hybrid-webgl = ["dep:vello_gpu", "vello_gpu/webgl", "dep:ferroui-opengl", "dep:wasm-bindgen", "dep:js-sys", "dep:web-sys"]
 # The compute renderer (`vello`).
 gpu = ["dep:vello", "wgpu-device"]
 # What both GPU modes need: `wgpu`, and on macOS the Metal contracts of the platform with the bindings
