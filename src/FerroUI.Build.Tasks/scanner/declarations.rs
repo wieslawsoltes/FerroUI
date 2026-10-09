@@ -706,6 +706,8 @@ pub(crate) struct Registration {
     pub added_owner: Option<Tokens>,
     pub assign_binding: bool,
     pub inherits: bool,
+    /// The registration of a direct property states `None` where the setter goes.
+    pub read_only: bool,
 }
 
 /// Reads the body of an accessor: the registration is found wherever the body states it
@@ -719,6 +721,7 @@ pub(crate) fn read_registration(body: &[TokenTree]) -> Registration {
         added_owner: None,
         assign_binding: calls_with_true(body, &["assign_binding", "set_assign_binding"]),
         inherits: calls_with_true(body, &["inherits"]),
+        read_only: states_no_setter(body),
     };
     if let Some((name, type_arguments)) = find_register(body) {
         registration.kind = RegistrationModel::Declared;
@@ -733,6 +736,44 @@ pub(crate) fn read_registration(body: &[TokenTree]) -> Registration {
         registration.source = Some(source);
     }
     registration
+}
+
+/// Whether `tokens`, at any depth, register a direct property without a setter:
+/// `register_direct*::<..>("Name", getter, None, ..)`, or `.add_owner::<..>(getter, None, ..)`
+/// (the owner a direct property is added to states its own accessors; the owner of a
+/// styled property states none, so its call has no second argument).
+fn states_no_setter(tokens: &[TokenTree]) -> bool {
+    for index in 0..tokens.len() {
+        if let TokenTree::Group(group) = &tokens[index] {
+            if states_no_setter(&tokens_of(group.stream())) {
+                return true;
+            }
+            continue;
+        }
+        let Some(name) = ident_of(&tokens[index]) else { continue };
+        let position = if name.starts_with("register_direct") {
+            2
+        } else if name == "add_owner" {
+            1
+        } else {
+            continue;
+        };
+        // `::<..>` may stand between the name and the arguments.
+        let mut after = index + 1;
+        if is_path_separator(tokens, after) {
+            match angle_group(tokens, after + 2) {
+                Some((_, next)) => after = next,
+                None => continue,
+            }
+        }
+        let Some(call) = tokens.get(after).and_then(|token| group_of(token, Delimiter::Parenthesis)) else { continue };
+        let arguments = tokens_of(call.stream());
+        let setter = arguments.split(|token| is_punct(token, ',')).nth(position);
+        if setter.is_some_and(|setter| setter.len() == 1 && ident_of(&setter[0]).as_deref() == Some("None")) {
+            return true;
+        }
+    }
+    false
 }
 
 /// Whether `tokens`, at any depth, call `.name(true)` for one of `names`.

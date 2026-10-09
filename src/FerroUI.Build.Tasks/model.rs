@@ -506,6 +506,9 @@ pub struct RegisteredModel {
     pub assign_binding: bool,
     /// The body states `.inherits(true)`.
     pub inherits: bool,
+    /// The registration of a direct property states no setter (`None` where the setter
+    /// goes): the property is read-only.
+    pub read_only: bool,
     /// The types of the scanned crate that add themselves as owners of the property, by
     /// their Rust path, in the order of the scan. Owners in other crates are in the models
     /// of those crates.
@@ -527,6 +530,7 @@ impl RegisteredModel {
                 .optional("source", self.source.as_ref().map(CallableModel::to_json))
                 .flag("assign_binding", self.assign_binding)
                 .flag("inherits", self.inherits)
+                .flag("read_only", self.read_only)
                 .list("added_owners", &self.added_owners, |owner| Json::string(owner)),
         )
     }
@@ -545,6 +549,7 @@ impl RegisteredModel {
             source: fields.optional("source", CallableModel::from_json)?,
             assign_binding: fields.flag("assign_binding")?,
             inherits: fields.flag("inherits")?,
+            read_only: fields.flag("read_only")?,
             added_owners: fields.list("added_owners", |owner| text_of(owner, "an added owner"))?,
         })
     }
@@ -605,6 +610,10 @@ pub struct TypeModel {
     /// The markup name.
     pub name: String,
     pub kind: TypeKind,
+    /// The type is a type of the object model: a class (`ferro_class!`) or the static
+    /// owner type of attached properties (`ferro_static_type!`), with a runtime type of
+    /// its own. Its handles (`Ref<X>`, `Option<Ref<X>>` for a class) are implied.
+    pub object_model: bool,
     /// The Rust type: for a type the crate declares, the absolute path of the declaring
     /// module and the name; for a type the metadata is declared for, the type as the
     /// declaration writes it, normalised.
@@ -660,6 +669,7 @@ impl TypeModel {
             explicit_namespace: None,
             name: name.to_string(),
             kind,
+            object_model: false,
             rust_path,
             public_path: None,
             module: module.to_string(),
@@ -703,6 +713,111 @@ impl TypeModel {
         self.registered.iter().find(|registered| registered.name.as_deref() == Some(name))
     }
 
+    /// The path generated code and other crates name the type by: the public path when
+    /// the scanner found one, else the Rust type.
+    pub fn named_path(&self) -> &str {
+        self.public_path.as_deref().unwrap_or(&self.rust_path.text)
+    }
+
+    /// Calls `visit` with every type text of the type: its own, its handles, base and
+    /// interfaces, and the types of its members and of the arguments of its attributes.
+    pub fn visit_types_mut(&mut self, visit: &mut dyn FnMut(&mut RustType)) {
+        fn value(value_: &mut AttributeValueModel, visit: &mut dyn FnMut(&mut RustType)) {
+            match value_ {
+                AttributeValueModel::Type(type_) => visit(type_),
+                AttributeValueModel::Array(items) => {
+                    for item in items {
+                        value(item, visit);
+                    }
+                }
+                _ => {}
+            }
+        }
+        fn attributes(attributes_: &mut [AttributeModel], visit: &mut dyn FnMut(&mut RustType)) {
+            for attribute in attributes_ {
+                for argument in &mut attribute.arguments {
+                    value(argument, visit);
+                }
+                for (_, argument) in &mut attribute.properties {
+                    value(argument, visit);
+                }
+            }
+        }
+        fn parameters(parameters_: &mut [ParameterModel], visit: &mut dyn FnMut(&mut RustType)) {
+            for parameter in parameters_ {
+                visit(&mut parameter.type_);
+                attributes(&mut parameter.attributes, visit);
+            }
+        }
+        fn members(members_: &mut [MemberModel], visit: &mut dyn FnMut(&mut RustType)) {
+            for member in members_ {
+                parameters(&mut member.parameters, visit);
+                if let Some(type_) = &mut member.return_type {
+                    visit(type_);
+                }
+                attributes(&mut member.attributes, visit);
+            }
+        }
+        fn properties(properties_: &mut [PropertyModel], visit: &mut dyn FnMut(&mut RustType)) {
+            for property in properties_ {
+                parameters(&mut property.parameters, visit);
+                visit(&mut property.value_type);
+                attributes(&mut property.attributes, visit);
+            }
+        }
+        visit(&mut self.rust_path);
+        for type_ in self.handles.iter_mut().chain(&mut self.interfaces) {
+            visit(type_);
+        }
+        for type_ in [&mut self.this, &mut self.base, &mut self.type_info, &mut self.notify_property_changed].into_iter().flatten() {
+            visit(type_);
+        }
+        if let Some(generic) = &mut self.generic {
+            for type_ in &mut generic.arguments {
+                visit(type_);
+            }
+        }
+        members(&mut self.constructors, visit);
+        members(&mut self.methods, visit);
+        members(&mut self.fields, visit);
+        members(&mut self.events, visit);
+        properties(&mut self.properties, visit);
+        properties(&mut self.static_properties, visit);
+        properties(&mut self.indexers, visit);
+        for registered in &mut self.registered {
+            visit(&mut registered.value_type);
+            for type_ in registered.owner.iter_mut().chain(registered.host.iter_mut()) {
+                visit(type_);
+            }
+        }
+        attributes(&mut self.attributes, visit);
+        for (_, property_attributes) in &mut self.property_attributes {
+            attributes(property_attributes, visit);
+        }
+    }
+
+    /// Calls `visit` with every callable of the type that is a path: its constructors,
+    /// `parse:`, the accessors of its properties, its members, and the sources of its
+    /// registered properties.
+    pub fn visit_callables_mut(&mut self, visit: &mut dyn FnMut(&mut CallableModel)) {
+        for callable in self.default_constructor.iter_mut().chain(self.parse.iter_mut()) {
+            visit(callable);
+        }
+        for member in self.constructors.iter_mut().chain(&mut self.methods).chain(&mut self.fields).chain(&mut self.events) {
+            visit(&mut member.callable);
+        }
+        for property in self.properties.iter_mut().chain(&mut self.static_properties).chain(&mut self.indexers) {
+            for accessor in property.getter.iter_mut().chain(property.setter.iter_mut()) {
+                visit(&mut accessor.callable);
+            }
+        }
+        for registered in &mut self.registered {
+            if let Some(callable) = &mut registered.source {
+                visit(callable);
+            }
+        }
+    }
+
     fn to_json(&self) -> Json {
         let optional_type = |type_: &Option<RustType>| type_.as_ref().map(RustType::to_json);
         let members = Members::new()
@@ -710,6 +825,7 @@ impl TypeModel {
             .optional_text("explicit_namespace", &self.explicit_namespace)
             .text("name", &self.name)
             .text("kind", self.kind.name())
+            .flag("object_model", self.object_model)
             .always("rust_path", self.rust_path.to_json())
             .optional_text("public_path", &self.public_path)
             .text_or_empty("module", &self.module)
@@ -754,6 +870,7 @@ impl TypeModel {
             explicit_namespace: fields.optional_text("explicit_namespace")?,
             name: fields.text("name")?,
             kind: TypeKind::of(&fields.text("kind")?)?,
+            object_model: fields.flag("object_model")?,
             rust_path: fields.optional("rust_path", RustType::from_json)?.ok_or_else(|| "\"rust_path\" is missing in a type".to_string())?,
             public_path: fields.optional_text("public_path")?,
             module: fields.text_or_empty("module")?,
@@ -810,6 +927,16 @@ pub struct XmlnsPrefixModel {
     pub prefix: String,
 }
 
+/// A path another crate can name a type of the crate by.
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct ExportModel {
+    /// The public path (`::ferroui_controls::Border`).
+    pub path: String,
+    /// The path of the declaring module and the name (`::ferroui_controls::border::Border`);
+    /// a path into another crate for a type the crate exports again.
+    pub declared: String,
+}
+
 fn pair_to_json(first: &str, second: &str) -> Json {
     Json::Array(vec![Json::string(first), Json::string(second)])
 }
@@ -837,6 +964,11 @@ pub struct AssemblyModel {
     /// prefix of the path of its module.
     pub namespaces: Vec<(String, String)>,
     pub types: Vec<TypeModel>,
+    /// The export table of the crate: every path another crate can name a type of the
+    /// crate by, with the path of the module that declares it (9.5.2, step 1). What a glob
+    /// import of a module of the crate brings into another crate, and what makes a path
+    /// into the crate canonical, is read from it.
+    pub exports: Vec<ExportModel>,
     /// The compiled documents, in the order of the compilation.
     pub documents: Vec<DocumentModel>,
     /// The `.xamlmeta` files of the crates this crate is built on, relative to the
@@ -855,6 +987,7 @@ impl AssemblyModel {
             metadata: Vec::new(),
             namespaces: Vec::new(),
             types: Vec::new(),
+            exports: Vec::new(),
             documents: Vec::new(),
             dependencies: Vec::new(),
         }
@@ -926,7 +1059,8 @@ impl AssemblyModel {
             .list("xmlns_prefixes", &self.xmlns_prefixes, |prefix| pair_to_json(&prefix.xml_namespace, &prefix.prefix))
             .list("metadata", &self.metadata, |(name, value)| pair_to_json(name, value))
             .list("namespaces", &self.namespaces, |(module, namespace)| pair_to_json(module, namespace))
-            .list("types", &self.types, TypeModel::to_json);
+            .list("types", &self.types, TypeModel::to_json)
+            .list("exports", &self.exports, |export| pair_to_json(&export.path, &export.declared));
         Json::object(members).to_text()
     }
 
@@ -961,6 +1095,7 @@ impl AssemblyModel {
             metadata: fields.list("metadata", |pair| pair_from_json(pair, "an entry of the metadata"))?,
             namespaces: fields.list("namespaces", |pair| pair_from_json(pair, "an entry of the namespace table"))?,
             types: fields.list("types", TypeModel::from_json)?,
+            exports: fields.list("exports", |pair| pair_from_json(pair, "an entry of the export table").map(|(path, declared)| ExportModel { path, declared }))?,
             documents,
             dependencies: fields.list("dependencies", |path| text_of(path, "a dependency"))?,
         })
@@ -991,6 +1126,7 @@ mod tests {
         let mut type_ = TypeModel::new("Panel", TypeKind::Class, RustType::resolved("::fixture::panel::Panel"), "fixture::panel");
         type_.namespace = "Fixture.Controls".to_string();
         type_.explicit_namespace = Some("Fixture.Controls".to_string());
+        type_.object_model = true;
         type_.public_path = Some("::fixture::Panel".to_string());
         type_.cfg = vec!["feature = \"panels\"".to_string()];
         type_.handles = vec![RustType::resolved("::fixture::panel::Panel"), unresolved.clone()];
@@ -1057,6 +1193,7 @@ mod tests {
                 source: None,
                 assign_binding: true,
                 inherits: true,
+                read_only: false,
                 added_owners: vec!["::fixture::grid::Grid".to_string()],
             },
             RegisteredModel {
@@ -1071,6 +1208,7 @@ mod tests {
                 source: Some(callable("TextBlock::text_property", None)),
                 assign_binding: false,
                 inherits: false,
+                read_only: true,
                 added_owners: Vec::new(),
             },
         ];
@@ -1100,6 +1238,7 @@ mod tests {
         model.metadata = vec![("FerroXamlCreateSourceInfo".to_string(), "true".to_string())];
         model.namespaces = vec![("fixture".to_string(), "Fixture".to_string()), ("fixture::panel".to_string(), "Fixture.Controls".to_string())];
         model.types = vec![type_, TypeModel::new("Dock", TypeKind::Enum, RustType::resolved("::fixture::Dock"), "fixture")];
+        model.exports = vec![ExportModel { path: "::fixture::Panel".to_string(), declared: "::fixture::panel::Panel".to_string() }];
         model.documents = vec![DocumentModel {
             uri: "ferres://Fixture/Main.xaml".to_string(),
             root_type: "Fixture.Controls.Panel".to_string(),

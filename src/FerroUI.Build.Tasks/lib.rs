@@ -72,19 +72,34 @@
 //! # The build-time type model
 //!
 //! The way out of both consequences is xaml.md 9.5: the types read from the
-//! sources instead of the process. Its first stage is here and [`Build`] does
-//! not use it yet:
+//! sources instead of the process. What is here:
 //!
 //! - [`model`]: the type model of a crate (`AssemblyModel`, `TypeModel`,
 //!   `MemberModel`, `RegisteredModel`) and its file, the `.xamlmeta` of format
 //!   2, which keeps the documents of format 1 where the compiler reads them;
 //! - [`scanner`]: the source scanner, which fills the model from the
 //!   declaration macros of the sources of a crate (`scan_crate`), linking
-//!   nothing.
+//!   nothing;
+//! - [`model_set`]: the models of several crates read together, so that a
+//!   type or a property of one crate is found by the path another crate
+//!   names it by;
+//! - [`Build::export_metadata`]: the scan of the crate, with the models of
+//!   its dependencies, written into its `.xamlmeta`;
+//! - [`type_system`]: the type system of the compiler over the models
+//!   (`ModelTypeSystem`, xaml.md 9.5.5), with the closed table of runtime
+//!   library types it shares with the run-time type system.
 //!
-//! What is missing between the model and [`Build`] is the type system over
-//! the model (`ModelTypeSystem`, xaml.md 9.5.5) and the call forms of 9.5.3;
-//! xaml.md 9.10.1 has the stages.
+//! [`Build::compile_xaml`] still transforms against the run-time type system.
+//! What is missing between `ModelTypeSystem` and the compilation is the call
+//! forms of 9.5.3 and an emitter that reads them; xaml.md 9.10.1 has the
+//! stages.
+//!
+//! ```ignore
+//! // build.rs of a crate that declares types and has no documents
+//! fn main() {
+//!     ferroui_build::Build::from_env().export_metadata().run();
+//! }
+//! ```
 //!
 //! # A crate with checked-in compiled markup
 //!
@@ -100,6 +115,7 @@
 
 mod json;
 pub mod model;
+pub mod model_set;
 pub mod scanner;
 
 use std::env;
@@ -108,6 +124,10 @@ use std::path::{Path, PathBuf};
 
 use ferroui_base::metadata::MarkupAssembly;
 use ferroui_markup_xaml::RuntimeXamlLoaderConfiguration;
+
+use crate::model::AssemblyModel;
+use crate::model_set::ModelSet;
+use crate::scanner::{scan_crate, Scan, ScanOptions, Severity};
 use ferroui_markup_xaml_loader::rust_emitter::{generate_file, rust_string_literal, XamlMetadata};
 use ferroui_markup_xaml_loader::FerroRuntimeXamlLoader;
 
@@ -182,6 +202,8 @@ pub struct Build {
     checked_in_metadata: Vec<PathBuf>,
     inputs: Vec<PathBuf>,
     dependencies: Vec<PathBuf>,
+    export_metadata: bool,
+    source_root: Option<PathBuf>,
 }
 
 impl Build {
@@ -223,7 +245,56 @@ impl Build {
             checked_in_metadata: Vec::new(),
             inputs: Vec::new(),
             dependencies,
+            export_metadata: false,
+            source_root: None,
         }
+    }
+
+    /// Scans the sources of the crate and writes its type model into its `.xamlmeta`
+    /// (format 2: the model next to the compiled documents), which the crates that depend
+    /// on this one read as they read its documents (xaml.md 9.6.3). The scan reads the
+    /// models of the dependencies of the crate first, so that what the crate names of
+    /// theirs is resolved ([`ScanOptions::dependencies`]).
+    ///
+    /// The sources are read as files: nothing of the crate is linked, and a crate that
+    /// only exports its model needs no [`assembly`](Self::assembly) (the scan reads the
+    /// `MarkupAssembly` the sources state; a crate without one is the assembly named after
+    /// the crate). What the scanner cannot read of a declaration is a `cargo::warning=`
+    /// line and does not fail the build.
+    pub fn export_metadata(mut self) -> Self {
+        self.export_metadata = true;
+        self
+    }
+
+    /// The root file of the sources of the crate, relative to the crate directory, for
+    /// [`export_metadata`](Self::export_metadata). Without the call: `src/lib.rs`, else
+    /// `lib.rs`, else `src/main.rs`.
+    pub fn source_root(mut self, file: &str) -> Self {
+        self.source_root = Some(PathBuf::from(file));
+        self
+    }
+
+    /// The scan of the sources of the crate, with the models of its dependencies.
+    fn scan(&self, dependencies: Vec<AssemblyModel>) -> Result<Scan, String> {
+        let root = match &self.source_root {
+            Some(root) => self.manifest_dir.join(root),
+            None => ["src/lib.rs", "lib.rs", "src/main.rs"]
+                .iter()
+                .map(|candidate| self.manifest_dir.join(candidate))
+                .find(|candidate| candidate.is_file())
+                .ok_or_else(|| {
+                    format!(
+                        "the root file of the sources of the crate is not found in {} (`src/lib.rs`, `lib.rs`, `src/main.rs`): state it with Build::source_root",
+                        self.manifest_dir.display()
+                    )
+                })?,
+        };
+        if !root.is_file() {
+            return Err(format!("the root file of the sources of the crate, {}, is not a file", root.display()));
+        }
+        let mut options = ScanOptions::new(&self.crate_name, root).with_dependencies(dependencies);
+        options.assembly_name = self.assembly.map(|assembly| assembly.name.to_string());
+        Ok(scan_crate(&options))
     }
 
     /// The assembly of the crate: its name is the host of the URIs of its documents and
@@ -309,13 +380,15 @@ impl Build {
         for input in &self.inputs {
             rerun(&mut lines, input);
         }
-        let Some(assembly) = self.assembly else {
+        // The documents are compiled against the assembly the crate registers; a build
+        // that only exports the type model of the crate reads the assembly from the sources.
+        if self.assembly.is_none() && (!self.export_metadata || !self.groups.is_empty()) {
             errors.push("the assembly of the crate is not stated (Build::assembly)".to_string());
             return Outcome { lines, errors };
-        };
+        }
 
-        // 1. The compiled markup of the dependencies.
-        let (dependencies, dependency_files) = match read_dependencies(&self.dependencies) {
+        // 1. The compiled markup and the type models of the dependencies.
+        let (models, dependency_files) = match ModelSet::read(&self.dependencies) {
             Ok(read) => read,
             Err(error) => {
                 errors.push(format!("the .xamlmeta of a dependency cannot be read: {error}"));
@@ -325,21 +398,51 @@ impl Build {
         for file in &dependency_files {
             rerun(&mut lines, file);
         }
+        let dependencies: Vec<XamlMetadata> = models.iter().map(AssemblyModel::metadata).collect();
 
-        // The compiler resolves the assembly of the crate and the types of the runtime
-        // library; every other type is the build script's to register.
-        ferroui_markup_xaml::register_types();
-        MarkupAssembly::register(assembly);
-        // Makes the assembly known to the asset loader, as the `register_types()` of the
-        // crate does: the host of the emitter in the tests of a crate runs with it.
-        ferroui_base::platform::register_assets(assembly.name, &[]);
-        FerroRuntimeXamlLoader::register();
+        // The type model of the crate, from its sources.
+        let mut model: Option<AssemblyModel> = None;
+        if self.export_metadata {
+            match self.scan(models) {
+                Ok(scan) => {
+                    for file in &scan.files {
+                        rerun(&mut lines, &file.path);
+                    }
+                    for diagnostic in scan.diagnostics_of(Severity::Error) {
+                        lines.push(format!("cargo::warning={diagnostic}"));
+                    }
+                    model = Some(scan.model);
+                }
+                Err(error) => {
+                    errors.push(error);
+                    return Outcome { lines, errors };
+                }
+            }
+        }
+        let assembly_name: String = match (self.assembly, &model) {
+            (Some(assembly), _) => assembly.name.to_string(),
+            (None, Some(model)) if !model.name.is_empty() => model.name.clone(),
+            // A crate that states no assembly is the assembly named after the crate, as
+            // the type systems name it.
+            (None, _) => self.crate_name.clone(),
+        };
+
+        if let Some(assembly) = self.assembly {
+            // The compiler resolves the assembly of the crate and the types of the runtime
+            // library; every other type is the build script's to register.
+            ferroui_markup_xaml::register_types();
+            MarkupAssembly::register(assembly);
+            // Makes the assembly known to the asset loader, as the `register_types()` of the
+            // crate does: the host of the emitter in the tests of a crate runs with it.
+            ferroui_base::platform::register_assets(assembly.name, &[]);
+            FerroRuntimeXamlLoader::register();
+        }
 
         // 2. The groups.
         let xaml_directory = self.out_dir.join("xaml");
-        let root_uri = format!("ferres://{}/", assembly.name);
+        let root_uri = format!("ferres://{assembly_name}/");
         let mut metadata = XamlMetadata {
-            name: assembly.name.to_string(),
+            name: assembly_name.clone(),
             crate_name: self.crate_name.clone(),
             documents: Vec::new(),
             dependencies: self.dependencies.iter().map(|path| path.display().to_string()).collect(),
@@ -347,6 +450,7 @@ impl Build {
         let mut modules: Vec<(String, PathBuf, bool)> = Vec::new();
         let mut compiled_documents: Vec<String> = Vec::new();
         for group in &self.groups {
+            let Some(assembly) = self.assembly else { break };
             if modules.iter().any(|(module, _, _)| *module == group.module) {
                 errors.push(format!("two groups have the module `{}`", group.module));
                 continue;
@@ -399,12 +503,12 @@ impl Build {
             rerun(&mut lines, path);
             let read = fs::read_to_string(path).map_err(|error| error.to_string()).and_then(|text| XamlMetadata::parse(&text));
             match read {
-                Ok(read) if read.name == assembly.name => metadata.documents.extend(read.documents),
+                Ok(read) if read.name == assembly_name => metadata.documents.extend(read.documents),
                 Ok(read) => errors.push(format!(
                     "{}: the file describes the assembly `{}`, the crate is `{}`",
                     path.display(),
                     read.name,
-                    assembly.name
+                    assembly_name
                 )),
                 Err(error) => errors.push(format!("{}: {error}", path.display())),
             }
@@ -427,11 +531,25 @@ impl Build {
             return Outcome { lines, errors };
         }
 
-        // 4. The `.xamlmeta` and the file the crate includes.
+        // 4. The `.xamlmeta` (with the type model of the crate, when it is exported) and
+        // the file the crate includes.
         let metadata_path = self.out_dir.join(format!("{}.xamlmeta", self.crate_name));
-        write_if_changed(&metadata_path, &metadata.to_json(), &mut errors);
-        let text = crate_file(assembly.name, &modules, &self.loaders, &assets);
-        write_if_changed(&xaml_directory.join("mod.rs"), &text, &mut errors);
+        let metadata_text = match model {
+            Some(mut model) => {
+                model.name = metadata.name;
+                model.crate_name = metadata.crate_name;
+                model.documents = metadata.documents;
+                model.dependencies = metadata.dependencies;
+                model.to_json()
+            }
+            None => metadata.to_json(),
+        };
+        write_if_changed(&metadata_path, &metadata_text, &mut errors);
+        // A crate that only exports its model includes nothing.
+        if self.assembly.is_some() {
+            let text = crate_file(&assembly_name, &modules, &self.loaders, &assets);
+            write_if_changed(&xaml_directory.join("mod.rs"), &text, &mut errors);
+        }
 
         // 5. For the dependents, and for the crate itself.
         lines.push(format!("cargo::metadata=xamlmeta={}", metadata_path.display()));
@@ -452,30 +570,10 @@ pub fn embed_assets(assembly: &'static MarkupAssembly, directories: &[&str]) {
     Build::from_env().assembly(assembly).embed_assets(directories).run();
 }
 
-/// The models of the `.xamlmeta` files `paths` and, transitively, of the files they
-/// name (relative to the naming file; `DEP_*` metadata exists for direct dependencies
-/// only), each assembly once, in the order of `paths`, with every file that was read.
-fn read_dependencies(paths: &[PathBuf]) -> Result<(Vec<XamlMetadata>, Vec<PathBuf>), String> {
-    let mut models: Vec<XamlMetadata> = Vec::new();
-    let mut files = Vec::new();
-    let mut pending: Vec<PathBuf> = paths.iter().rev().cloned().collect();
-    while let Some(path) = pending.pop() {
-        if files.contains(&path) {
-            continue;
-        }
-        let text = fs::read_to_string(&path).map_err(|error| format!("{}: {error}", path.display()))?;
-        let model = XamlMetadata::parse(&text).map_err(|error| format!("{}: {error}", path.display()))?;
-        let directory = path.parent().map(Path::to_path_buf).unwrap_or_default();
-        files.push(path);
-        if models.iter().any(|known| known.name == model.name) {
-            continue;
-        }
-        for dependency in model.dependencies.iter().rev() {
-            pending.push(directory.join(dependency));
-        }
-        models.push(model);
-    }
-    Ok((models, files))
+/// Scans the sources of the crate whose build script is running and exports its type
+/// model (`Build::from_env().export_metadata().run()`).
+pub fn export_metadata() {
+    Build::from_env().export_metadata().run();
 }
 
 /// Every file below `directory`, with its rooted path below `root` (`/Assets/a.png`),
@@ -606,6 +704,50 @@ mod tests {
         let group = text.find("= super::compiled_xaml::try_load(service_provider, uri)?").expect("the table of the group");
         assert!(checked_in < group, "{text}");
         assert!(!text.contains("super::compiled_xaml_source_info::try_load"), "{text}");
+    }
+
+    /// Not from upstream: `export_metadata()` scans the sources of the crate, writes its
+    /// type model into its `.xamlmeta` and names every file it read; the build of a crate
+    /// that depends on it reads that file and resolves against the model in it.
+    #[test]
+    fn export_metadata_writes_the_model_and_reads_the_models_of_the_dependencies() {
+        let fixtures = Path::new(env!("CARGO_MANIFEST_DIR")).join("tests").join("fixtures");
+        let out = env::temp_dir().join(format!("ferroui-build-export-{}", std::process::id()));
+        let first = Build::new(fixtures.join("scanner"), out.join("fixture"), "fixture", Vec::new()).source_root("lib.rs").export_metadata().execute();
+        assert_eq!(first.errors, Vec::<String>::new());
+        let fixture_file = out.join("fixture").join("fixture.xamlmeta");
+        assert!(first.lines.contains(&format!("cargo::metadata=xamlmeta={}", fixture_file.display())), "{:?}", first.lines);
+        let border = fixtures.join("scanner").join("controls").join("border.rs");
+        assert!(first.lines.contains(&format!("cargo::rerun-if-changed={}", border.display())), "{:?}", first.lines);
+        // What the scanner does not read is a warning of the build.
+        assert!(first.lines.iter().any(|line| line.starts_with("cargo::warning=") && line.contains("error FRN9010")), "{:?}", first.lines);
+        let text = fs::read_to_string(&fixture_file).expect("the .xamlmeta of the fixture");
+        let model = AssemblyModel::parse(&text).expect("a file of format 2");
+        assert_eq!((model.name.as_str(), model.crate_name.as_str()), ("Fixture", "fixture"));
+        assert!(model.find_type("Fixture.Controls.Border").is_some() && !model.exports.is_empty());
+        assert!(model.documents.is_empty() && model.dependencies.is_empty());
+        assert_eq!(XamlMetadata::parse(&text).map(|metadata| metadata.name), Ok("Fixture".to_string()));
+        assert!(!out.join("fixture").join("xaml").join("mod.rs").exists(), "a crate that only exports its model includes nothing");
+
+        let second = Build::new(fixtures.join("dependent"), out.join("dependent"), "dependent", vec![fixture_file.clone()]).export_metadata().execute();
+        assert_eq!(second.errors, Vec::<String>::new());
+        assert!(second.lines.contains(&format!("cargo::rerun-if-changed={}", fixture_file.display())), "{:?}", second.lines);
+        let text = fs::read_to_string(out.join("dependent").join("dependent.xamlmeta")).expect("the .xamlmeta of the dependent crate");
+        let model = AssemblyModel::parse(&text).expect("a file of format 2");
+        assert_eq!((model.name.as_str(), model.crate_name.as_str()), ("dependent", "dependent"));
+        assert_eq!(model.dependencies, [fixture_file.display().to_string()]);
+        let card = model.find_type("Card").expect("the class of the dependent crate");
+        assert_eq!(card.registered[0].name.as_deref(), Some("Background"));
+        assert_eq!(card.base.as_ref().map(|base| base.text.as_str()), Some("::fixture::controls::border::Border"));
+        // The models are read back as a set, the dependency through the file that names it.
+        let (models, files) = ModelSet::read(&[out.join("dependent").join("dependent.xamlmeta")]).expect("the two files");
+        assert_eq!(models.iter().map(|model| model.name.as_str()).collect::<Vec<_>>(), ["dependent", "Fixture"]);
+        assert_eq!(files.len(), 2);
+
+        let missing = Build::new(fixtures.join("dependent"), out.join("missing"), "dependent", Vec::new()).source_root("main.rs").export_metadata().execute();
+        assert_eq!(missing.errors.len(), 1, "{:?}", missing.errors);
+        assert!(missing.errors[0].ends_with("main.rs, is not a file"), "{:?}", missing.errors);
+        let _ = fs::remove_dir_all(&out);
     }
 
     /// Not from upstream: a build without an assembly reports it, with the lines that make

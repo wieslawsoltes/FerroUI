@@ -53,6 +53,9 @@ pub(crate) struct Module {
     /// The module has a glob import that names no module of the crate: a name that is
     /// not found in it may come from there.
     external_glob: bool,
+    /// The modules of other crates the glob imports name, of the crates whose export
+    /// table is known ([`Modules::externals`]), as absolute paths (`::ferroui_base`).
+    external_globs: Vec<String>,
 }
 
 /// What a path names.
@@ -80,6 +83,9 @@ const ALWAYS_EXTERN: &[&str] = &["std", "core", "alloc"];
 /// Imports are followed this deep; a cycle of `use` items ends there.
 const MAX_DEPTH: usize = 32;
 
+/// Modules are exported this deep ([`Modules::export_table`]).
+const MAX_EXPORT_DEPTH: usize = 12;
+
 /// Whether `name` can be the name of a crate: an identifier without capitals (a head in
 /// capitals is a type: `Self`, a type parameter, a type a macro declares).
 fn is_crate_name(name: &str) -> bool {
@@ -93,12 +99,23 @@ pub(crate) struct Modules {
     /// The names of other crates: the ones the caller stated and the first segments of
     /// the `use` paths of the crate that name nothing in their module.
     pub extern_crates: BTreeSet<String>,
+    /// The export tables of the crates the crate is built on: every public path of a type
+    /// of such a crate (`::ferroui_base::Border`), with the path of the module that
+    /// declares it. A name a glob import of a module of such a crate brings is found here.
+    pub externals: BTreeMap<String, String>,
+    /// The crates whose export table is in [`externals`](Self::externals).
+    pub external_crates: BTreeSet<String>,
 }
 
 impl Modules {
     /// The tree with the root module of the crate `crate_name`.
     pub fn new(crate_name: &str, extern_crates: &[String]) -> Self {
-        let mut modules = Self { modules: Vec::new(), extern_crates: extern_crates.iter().cloned().collect() };
+        let mut modules = Self {
+            modules: Vec::new(),
+            extern_crates: extern_crates.iter().cloned().collect(),
+            externals: BTreeMap::new(),
+            external_crates: BTreeSet::new(),
+        };
         modules.modules.push(Module {
             path: vec![crate_name.to_string()],
             parent: None,
@@ -107,6 +124,7 @@ impl Modules {
             globs: Vec::new(),
             glob_sources: Vec::new(),
             external_glob: false,
+            external_globs: Vec::new(),
         });
         modules
     }
@@ -128,6 +146,7 @@ impl Modules {
             globs: Vec::new(),
             glob_sources: Vec::new(),
             external_glob: false,
+            external_globs: Vec::new(),
         });
         self.modules[parent].items.insert(name.to_string(), Item { kind: ItemKind::Module(index), public });
         index
@@ -182,7 +201,22 @@ impl Modules {
         }
         for index in 0..self.modules.len() {
             let external = self.modules[index].globs.iter().any(|glob| !matches!(self.resolve(index, &glob.path), Some(Target::Module(_))));
+            // The globs of modules of crates whose export table is known: their names are
+            // looked up there. The module still counts as one with a glob of another crate,
+            // so that a name no table has is not guessed.
+            let mut known = Vec::new();
+            for glob in &self.modules[index].globs {
+                let segments = match self.resolve(index, &glob.path) {
+                    Some(Target::Module(_)) => continue,
+                    Some(Target::External(segments)) => segments,
+                    _ => glob.path.iter().filter(|segment| !segment.is_empty()).cloned().collect(),
+                };
+                if segments.first().is_some_and(|name| self.external_crates.contains(name)) {
+                    known.push(format!("::{}", segments.join("::")));
+                }
+            }
             self.modules[index].external_glob = external;
+            self.modules[index].external_globs = known;
         }
         // Without a glob of another crate, the first segment of a `use` path that names
         // nothing of the module names a crate (the language leaves nothing else).
@@ -254,6 +288,11 @@ impl Modules {
                     if path.len() == 1 {
                         return BUILTIN.contains(&first).then_some(Target::Builtin);
                     }
+                    // A path below a module a glob import of another crate brings
+                    // (`media::Brush` next to `use ferroui_base::*`).
+                    if let Some(found) = self.external_item(module, &path.join("::")) {
+                        return Some(found);
+                    }
                     return self.is_extern(module, first).then(|| Target::External(path.to_vec()));
                 }
             },
@@ -318,7 +357,59 @@ impl Modules {
                 return Some(found);
             }
         }
-        None
+        self.external_item(module, name)
+    }
+
+    /// The type of another crate that `path` (a name, or a path below a module) names
+    /// through a glob import of `module`, by the export table of that crate: the path of
+    /// its declaring module.
+    fn external_item(&self, module: usize, path: &str) -> Option<Target> {
+        self.modules[module].external_globs.iter().find_map(|glob| {
+            let declared = self.externals.get(&format!("{glob}::{path}"))?;
+            Some(Target::External(declared.split("::").filter(|segment| !segment.is_empty()).map(str::to_string).collect()))
+        })
+    }
+
+    /// The export table of the crate: every path another crate can name a type of the
+    /// crate by, with the absolute path of the item in its declaring module (a path into
+    /// another crate for a type the crate exports again), in the order of the paths.
+    pub fn export_table(&self) -> Vec<(String, String)> {
+        let mut table = BTreeMap::new();
+        let path = self.modules[0].path.clone();
+        self.export_module(0, &path, &mut vec![0], &mut table);
+        table.into_iter().collect()
+    }
+
+    /// Adds what `module`, named by `path` from outside, exports. `stack` holds the
+    /// modules on the way: a module that exports itself again is entered once.
+    fn export_module(&self, module: usize, path: &[String], stack: &mut Vec<usize>, table: &mut BTreeMap<String, String>) {
+        for (name, target) in self.exports(module, &mut vec![module]) {
+            let mut named = path.to_vec();
+            named.push(name);
+            match target {
+                Target::Module(inner) => {
+                    if !stack.contains(&inner) && stack.len() < MAX_EXPORT_DEPTH {
+                        stack.push(inner);
+                        self.export_module(inner, &named, stack, table);
+                        stack.pop();
+                    }
+                }
+                Target::Builtin => {}
+                Target::Item { ref rest, .. } if !rest.is_empty() => {}
+                item => {
+                    // A function, a constant or a static is not a type.
+                    if let Target::Item { module: declaring, name: declared_name, .. } = &item {
+                        let is_value = self.modules[*declaring].items.get(declared_name).is_some_and(|declared| declared.kind == ItemKind::Value);
+                        if is_value {
+                            continue;
+                        }
+                    }
+                    if let Some(declared) = self.absolute(&item) {
+                        table.insert(format!("::{}", named.join("::")), declared);
+                    }
+                }
+            }
+        }
     }
 
     /// The absolute text of a target (`::ferroui_controls::border::Border`); nothing for a
@@ -503,5 +594,46 @@ mod tests {
         assert_eq!(paths.get("::fixture::primitives::Popup"), Some(&"::fixture::Popup".to_string()));
         assert_eq!(paths.get("::fixture::primitives::Hidden"), None);
         assert_eq!(paths.len(), 2, "{paths:?}");
+    }
+
+    /// Not from upstream: the export table has every path another crate can write for a
+    /// type, with the module that declares it.
+    #[test]
+    fn export_table_has_every_public_path() {
+        let (mut modules, _, primitives, _) = fixture();
+        modules.add_item(primitives, "helper", ItemKind::Value, true);
+        let pair = |path: &str, declared: &str| (path.to_string(), declared.to_string());
+        assert_eq!(
+            modules.export_table(),
+            vec![
+                pair("::fixture::Border", "::fixture::border::Border"),
+                pair("::fixture::Popup", "::fixture::primitives::Popup"),
+                pair("::fixture::primitives::Popup", "::fixture::primitives::Popup"),
+            ]
+        );
+    }
+
+    /// Not from upstream: with the export table of another crate, a name its glob import
+    /// brings is the type the table has, by the module that declares it; a name the table
+    /// does not have stays unknown.
+    #[test]
+    fn glob_of_another_crate_is_resolved_by_its_export_table() {
+        let mut modules = Modules::new("fixture", &[]);
+        let prelude = modules.add_module(0, "prelude", false);
+        let nested = modules.add_module(0, "nested", false);
+        glob(&mut modules, prelude, "base", false);
+        glob(&mut modules, nested, "base::media", false);
+        modules.external_crates.insert("base".to_string());
+        modules.externals.insert("::base::Brush".to_string(), "::base::media::brush::Brush".to_string());
+        modules.externals.insert("::base::media::Brush".to_string(), "::base::media::brush::Brush".to_string());
+        modules.externals.insert("::base::media::Color".to_string(), "::base::media::color::Color".to_string());
+        modules.finish();
+        assert_eq!(resolved(&modules, prelude, "Brush"), Some("::base::media::brush::Brush".to_string()));
+        assert_eq!(resolved(&modules, prelude, "media::Color"), Some("::base::media::color::Color".to_string()));
+        assert_eq!(resolved(&modules, prelude, "Brush::parse"), Some("::base::media::brush::Brush::parse".to_string()));
+        assert_eq!(resolved(&modules, nested, "Color"), Some("::base::media::color::Color".to_string()));
+        assert_eq!(modules.resolve(prelude, &path("Color")), None);
+        assert_eq!(modules.resolve(prelude, &path("media::Missing")), None);
+        assert_eq!(modules.resolve(0, &path("Brush")), None);
     }
 }
