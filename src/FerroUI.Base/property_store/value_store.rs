@@ -16,6 +16,29 @@ use std::rc::Rc;
 
 type EffectiveValueRef = Rc<dyn EffectiveValueDyn>;
 
+/// The value of an inherited property before and after a change of the
+/// inheritance ancestor: the effective value the old ancestors hold for it
+/// and the one the new ancestors hold, either of which may be absent.
+struct OldNewValue {
+    property: &'static FerroProperty,
+    old: Option<EffectiveValueRef>,
+    new: Option<EffectiveValueRef>,
+}
+
+/// The most lists the pool below keeps (the size of the pool of the
+/// original).
+const MAX_OLD_NEW_VALUES_POOL_SIZE: usize = 4;
+
+thread_local! {
+    /// The lists in which [`ValueStore::set_inheritance_parent`] pairs the
+    /// old and the new inherited values, kept for the next change (the pool
+    /// of property dictionaries of the original): a change takes a list
+    /// from the pool, or makes one when the pool is empty (a change that
+    /// happens inside the notifications of another has its own list), and
+    /// gives it back empty.
+    static OLD_NEW_VALUES_POOL: RefCell<Vec<Vec<OldNewValue>>> = const { RefCell::new(Vec::new()) };
+}
+
 /// Stores the styled property values of a [`FerroObject`] and resolves the
 /// effective value of each property from the values supplied at different
 /// priorities.
@@ -397,12 +420,6 @@ impl ValueStore {
     }
 
     pub fn set_inheritance_parent(&self, owner: &FerroObject, new_parent: Option<&Ref<FerroObject>>) {
-        struct OldNew {
-            property: &'static FerroProperty,
-            old: Option<EffectiveValueRef>,
-            new: Option<EffectiveValueRef>,
-        }
-
         let old_ancestor = self.inheritance_ancestor();
         let new_ancestor = new_parent.and_then(Self::ancestor_for);
 
@@ -417,7 +434,10 @@ impl ValueStore {
         }
         crate::perf_count!(InheritanceAncestorChanges);
 
-        let mut values: Vec<OldNew> = Vec::new();
+        // A list of the pool. The pool is not there any more while the
+        // thread is torn down: a new list serves then.
+        let mut values: Vec<OldNewValue> =
+            OLD_NEW_VALUES_POOL.try_with(|pool| pool.borrow_mut().pop()).ok().flatten().unwrap_or_default();
 
         fn collect(
             start: Option<Ref<FerroObject>>,
@@ -437,7 +457,7 @@ impl ValueStore {
         // First get the old values from the old inheritance ancestor.
         collect(old_ancestor, |property, value| {
             if !values.iter().any(|v| v.property.id() == property.id()) {
-                values.push(OldNew { property, old: Some(value.clone()), new: None });
+                values.push(OldNewValue { property, old: Some(value.clone()), new: None });
             }
         });
 
@@ -449,15 +469,17 @@ impl ValueStore {
                         existing.new = Some(value.clone());
                     }
                 }
-                None => values.push(OldNew { property, old: None, new: Some(value.clone()) }),
+                None => values.push(OldNewValue { property, old: None, new: Some(value.clone()) }),
             }
         });
 
         self.on_inheritance_ancestor_changed(owner, new_ancestor.as_ref());
 
         // Raise PropertyChanged events where necessary on this object and
-        // inheritance children.
-        for v in values {
+        // inheritance children. Each pair leaves the list as its turn comes,
+        // in the order it was added, and the pairs after it stay in the list
+        // until theirs.
+        for v in values.drain(..) {
             crate::perf_count!(InheritedValuesCompared);
             let same = match (&v.old, &v.new) {
                 (Some(a), Some(b)) => std::ptr::addr_eq(Rc::as_ptr(a), Rc::as_ptr(b)),
@@ -468,6 +490,14 @@ impl ValueStore {
                 self.inherited_value_changed(owner, v.property, v.old.as_deref(), v.new.as_deref());
             }
         }
+
+        // Give the list, now empty, back to the pool.
+        let _ = OLD_NEW_VALUES_POOL.try_with(|pool| {
+            let mut pool = pool.borrow_mut();
+            if pool.len() < MAX_OLD_NEW_VALUES_POOL_SIZE {
+                pool.push(values);
+            }
+        });
     }
 
     /// The next ancestor up the chain from `this_object`'s store, skipping the
