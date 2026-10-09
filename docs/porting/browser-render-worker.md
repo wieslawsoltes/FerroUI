@@ -1357,3 +1357,14 @@ node scripts/browser/module-sizes.mjs target/browser-both/control-catalog-browse
 Expected: the tests of the sites with one module unchanged in number and result from "B2.7" (`themed_view` 32 and 72, `storage_view` 18 and 19, the catalog 13 and 16, `thread_spawn` 3, `render_worker_clear` 6); `site_loader.test.mjs` 10 checks against each composed site; the composition printing the three parts of each site. To record here afterwards: the sizes of the catalog site with both modules, the gzip size of the threaded catalog module against the budget, and the first run of the three jobs with their durations.
 
 By hand, the composed catalog as a static host serves it and as a host with the headers: `node scripts/browser/serve.mjs target/browser-both/control-catalog-browser` and the same with `--isolated`; `ferrouiModule` and `controlCatalog.catalogRendering()` in the console; `?Threads=false`; then the list above on the published site.
+
+### Result of the validation of B2.8 (2026-10-09)
+
+Both combined sites were built with `scripts/build-browser.sh <application> --both` and tested in headless Chrome.
+
+- `site_loader.test.mjs`: 10 of 10 on the combined `themed_view` site (twice) and on the combined catalog site. (A first run of the `themed_view` site while the machine ran a benchmark timed out in the two checks of the service worker route; not seen again.)
+- The single-module sites with the new host pages: the catalog without threads 13 of 13, `themed_view` without threads 32 of 32.
+- The combiner had to learn two things the catalog has and `themed_view` does not: the script the workers of the module load under another name (B2.7) belongs to the module with threads and moves with it, and the script of the module imports scripts of the application's host besides the platform's (`embed.js`, `page-assets.js`), each of which is re-exported from the directory of the module with threads so that the page and the module share one instance.
+- Sizes, raw: `themed_view` 0.33 MB shared, 30.63 MB without threads, 30.42 MB with, 61.39 MB in all; the catalog 24.39 MB shared (assets), 39.57 MB without threads, 39.35 MB with, 103.30 MB in all. A visitor downloads the shared files and one module.
+
+Not verified here: the workflows (the new jobs run for the first time in the pull request of this step) and the published site on GitHub Pages (the list for a check by hand is above).
