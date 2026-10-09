@@ -2,15 +2,14 @@
 //! `SetValue_Should_Not_Cause_StackOverflow_And_Have_Correct_Values` and the
 //! `TwoWay_Binding_*` tests.
 //!
-//! Not ported: the two `*_Indexer` tests (indexers are covered by the
-//! indexer suite) and the three tests that upstream skips
+//! Not ported: the three tests that upstream skips
 //! (`TwoWay_Binding_Should_Not_Update_Source_When_Higher_Priority_*`,
 //! `TwoWay_Style_Binding_Should_Not_Update_Source_When_StyleTrigger_Value_Set`).
 
 use super::*;
-use crate::data::core::Value;
-use crate::data::model::{Event, INotifyPropertyChanged, Model};
-use crate::data::{BindingMode, IndexerBinding, ReflectionBinding};
+use crate::data::core::{Value, ValueType};
+use crate::data::model::{Event, IBindableIndexer, INotifyPropertyChanged, Model};
+use crate::data::{BindingError, BindingMode, IndexerBinding, ReflectionBinding};
 use crate::{
     ferro_class, ferro_impl_classes, ferro_model, ferro_property, instantiate, FerroObject, FerroObjectImpl,
     FerroProperty, StyledElement, StyledElementImpl, StyledProperty,
@@ -116,8 +115,30 @@ impl TestTwoWayBindingViewModel {
     }
 }
 
-ferro_model!(TestTwoWayBindingViewModel, |b| b.property::<Value<f64>>("Value", |o| o.value(), |o, v| o
-    .set_value(v)));
+/// C# `public double this[int index]`: the value, whatever the index.
+impl IBindableIndexer for TestTwoWayBindingViewModel {
+    fn index_parameter_types(&self) -> Vec<ValueType> {
+        vec![ValueType::of::<i32>()]
+    }
+
+    fn value_type(&self) -> ValueType {
+        ValueType::of::<f64>()
+    }
+
+    fn get(&self, _arguments: &[BoxedValue]) -> Result<Option<BoxedValue>, BindingError> {
+        Ok(Some(Rc::new(self.value()) as BoxedValue))
+    }
+
+    fn set(&self, _arguments: &[BoxedValue], value: Option<&BoxedValue>) -> Result<bool, BindingError> {
+        let value = *value.and_then(|v| v.downcast_ref::<f64>()).expect("a converted value");
+        self.set_value(value);
+        Ok(true)
+    }
+}
+
+ferro_model!(TestTwoWayBindingViewModel, |b| b
+    .property::<Value<f64>>("Value", |o| o.value(), |o, v| o.set_value(v))
+    .indexer());
 
 fn two_way_binding(source: BoxedValue) -> Rc<ReflectionBinding> {
     let binding = ReflectionBinding::new("Value").with_mode(BindingMode::TwoWay);
@@ -166,6 +187,26 @@ fn two_way_binding_should_update_source() {
 
     assert!(source.setter_called.get());
     assert_eq!(source.value(), 123.4);
+}
+
+#[test]
+fn two_way_binding_should_not_call_setter_on_creation_indexer() {
+    let target = Class1::new();
+    let source = TestTwoWayBindingViewModel::new();
+
+    let binding = ReflectionBinding::new("[0]").with_mode(BindingMode::TwoWay);
+    binding.set_source(Some(source.clone()));
+    target.bind_binding(Class1::double_value_property(), &binding);
+
+    assert!(!source.setter_called.get());
+}
+
+#[test]
+fn two_way_binding_should_not_fail_with_null_data_context_indexer() {
+    let target = instantiate(TextBlock { base: StyledElement::construct() });
+    target.set_data_context(None);
+
+    target.bind_binding(TextBlock::text_property(), &ReflectionBinding::new("[0]").with_mode(BindingMode::TwoWay));
 }
 
 #[test]
