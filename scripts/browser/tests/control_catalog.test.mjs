@@ -15,7 +15,8 @@
 // - the module, the list of the asset files and the start-up asset files are downloaded once each,
 //   through the preloads of the host page, and the page preloads no other asset file;
 // - input, driven with real pointer and key events: the navigation drawer opens from its toggle
-//   button, three pages are reached through the drawer and show their content, a click on a button
+//   button, three pages are reached through the drawer and show their content, the home page and the
+//   page of a section show the cards of their pages and a card opens its page, a click on a button
 //   has its effect, and text typed into a text box becomes its text;
 // - the native control demo (samples/ControlCatalog.Browser/embed_sample_browser.rs): the Native Embed
 //   page shows its two native controls, elements of the page over the view (a button of the page that
@@ -296,6 +297,31 @@ check("three pages are reached through the drawer and show their content", async
     await navigate(page, "CheckBox");
     await page.until("the check boxes of the page are shown", (s) => s.elements.filter((e) => e.type === "CheckBox" && inContent(e)).length >= 3);
     assert(!(await page.state()).elements.some((e) => e.text === "Click the first button to raise Click." && e.hit), "the previous page is still shown");
+    assert(page.errors.length === 0, `errors were logged:\n${page.errors.join("\n")}`);
+});
+
+check("the home page and the page of a section show the cards of their pages, and a card opens its page", async (page) => {
+    // The home page lists, under the title of each section, a card for each page of the section: its
+    // header and its description. The first cards of the first section are in the view at this size.
+    const home = ["Buttons", "Button, RepeatButton, ToggleButton and friends", "ButtonSpinner", "CheckBox", "Two- and three-state check boxes"];
+    await page.until("the home page is shown", (s) => s.page === "Home" && !s.navigating);
+    await page.find("Basic Input", inContent);
+    for (const text of home) { await page.find(text, inContent); }
+
+    // The page of a section shows the cards of the section, and a card opens its page. The section
+    // lower in the drawer comes first: an open section above it pushes the ones below it down.
+    await navigate(page, "Text");
+    await page.find("Text input with completion suggestions", inContent);
+    await page.clickElement(await page.find("AutoCompleteBox", inContent));
+    await page.until("the card opened the AutoCompleteBox page", (s) => s.page === "AutoCompleteBox" && !s.navigating);
+
+    // Back on the home page, a card of it opens its page.
+    await navigate(page, "Home");
+    for (const text of home) { await page.find(text, inContent); }
+    await page.clickElement(await page.find("CheckBox", inContent));
+    await page.until("the card opened the CheckBox page", (s) => s.page === "CheckBox" && !s.navigating
+        && s.elements.filter((e) => e.type === "CheckBox" && inContent(e)).length >= 3);
+    assert(!(await page.state()).elements.some((e) => e.text === "Two- and three-state check boxes" && e.hit), "the home page is still shown");
     assert(page.errors.length === 0, `errors were logged:\n${page.errors.join("\n")}`);
 });
 
