@@ -1,0 +1,16 @@
+[package]
+name = "ferroui-remote-protocol"
+description = "The remote protocol of FerroUI: the messages of the previewer and of remote rendering, their BSON serialization and the transports that carry them"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+
+[lib]
+path = "lib.rs"
+
+# A leaf library, as the upstream project: nothing of the framework and no
+# external crate. The two key enumerations are compiled in from the sources of
+# the base library (see `lib.rs`), as the upstream project file does.
+[dependencies]

@@ -352,6 +352,10 @@ dependencies = [
 ]
 
 [[package]]
+name = "ferroui-remote-protocol"
+version = "0.1.0"
+
+[[package]]
 name = "ferroui-skia"
 version = "0.1.0"
 dependencies = [
