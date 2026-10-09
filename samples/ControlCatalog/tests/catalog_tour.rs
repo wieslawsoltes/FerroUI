@@ -60,6 +60,10 @@
 //!   blocks of every epoch, after the reference counts of those blocks.
 //! - `CATALOG_TOUR_SITES`, `CATALOG_TOUR_FRAMES`: how many call stacks are
 //!   printed (12) and how many frames of each (22).
+//! - `CATALOG_TOUR_CLASSES`: how many classes the table of objects lists
+//!   (60); `CATALOG_TOUR_HOLDERS`, `CATALOG_TOUR_HOLDER_FRAMES`: how many
+//!   groups of holders are printed (40) and how many frames of the call
+//!   stack that allocated each holder (7).
 
 use super::allocation_trace::{self as trace, Holder, Site};
 use super::allocations::{self, LiveCounts};
