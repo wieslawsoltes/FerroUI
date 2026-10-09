@@ -16,6 +16,8 @@ path = "lib.rs"
 
 [dependencies]
 ferroui-base.workspace = true
+# The messages and the connections of remote rendering (`remote`).
+ferroui-remote-protocol.workspace = true
 bitflags.workspace = true
 
 [features]
