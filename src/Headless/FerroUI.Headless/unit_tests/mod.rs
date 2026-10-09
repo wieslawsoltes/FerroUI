@@ -18,12 +18,18 @@ use std::time::Duration;
 
 mod test_application;
 
+mod async_setup_tests;
+mod headless_unit_test_session_tests;
 mod input_tests;
+mod isolation_tests;
+mod leak_tests;
 mod mouse_device_tests;
 mod popup_tests;
 mod rendering_tests;
 mod second_window_tests;
 mod services_tests;
+mod setup_tests;
+mod threading_tests;
 
 /// A future that is completed by hand: the stand-in for a task completion
 /// source.
