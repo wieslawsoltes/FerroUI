@@ -477,3 +477,43 @@ fn gap_c328_view_model_with_an_observable_of_its_own_properties() {
     drop(view_model);
     assert!(weak.upgrade().is_none());
 }
+
+/// C329: the path of a compiled binding to a named element holds the name scope. The binding of a
+/// setter of a style declared under a named element is held by that element, which the scope
+/// holds.
+#[test]
+fn gap_c329_compiled_binding_to_a_name_in_a_style_under_a_named_element() {
+    let _app = start_catalog_application();
+    let root = from_markup_value::<Ref<ferroui_controls::Panel>>(&Some(load_text(&format!(
+        "<Panel {XMLNS}>\
+           <StackPanel Name='named' Tag='of the named element'>\
+             <StackPanel.Styles>\
+               <Style Selector='Border'>\
+                 <Setter Property='Tag' Value='{{CompiledBinding #named.Tag}}'/>\
+               </Style>\
+             </StackPanel.Styles>\
+             <Border/>\
+           </StackPanel>\
+         </Panel>"
+    ))))
+    .expect("a panel");
+    let window = Window::new();
+    window.set_content(Some(Control::boxed(&root)));
+    window.show();
+    run_jobs();
+    let (named, bound) = {
+        let named = root.children().get(0).cast::<ferroui_controls::StackPanel>().expect("the named panel");
+        let bound = named.children().get(0);
+        let tag = bound.tag().and_then(|tag| tag.downcast_ref::<String>().cloned());
+        assert_eq!(Some(String::from("of the named element")), tag);
+        (named.downgrade(), bound.downgrade())
+    };
+    window.set_content(None);
+    run_jobs();
+    let weak = root.downgrade();
+    drop(root);
+    assert!(weak.upgrade().is_none());
+    assert!(named.upgrade().is_none());
+    assert!(bound.upgrade().is_none());
+    window.close();
+}

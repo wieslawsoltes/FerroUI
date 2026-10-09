@@ -62,7 +62,14 @@ enum PathElement {
     SelfElement,
     Ancestor { ancestor_type: Option<&'static TypeInfo>, level: usize },
     VisualAncestor { ancestor_type: Option<&'static TypeInfo>, level: usize },
-    ElementName { name_scope: NameScopeRef, name: Box<str> },
+    // The name scope is held weakly. The managed original holds it, and its
+    // collector frees a path that is held by what the scope names: the
+    // binding of a setter of a style declared under a named element (or
+    // under an element with a named ancestor) is held by that element, and
+    // the scope holds the element. The node created from the path has
+    // always held the scope weakly, as a reflection binding holds its
+    // `NameScope`; a path whose scope is gone creates a node without one.
+    ElementName { name_scope: std::rc::Weak<dyn crate::controls::INameScope>, name: Box<str> },
     TemplatedParent,
     ArrayElement { indices: Vec<i32> },
     TypeCast { type_name: &'static str, cast: Cast },
@@ -297,7 +304,8 @@ impl CompiledBindingPath {
                 }
                 PathElement::ElementName { name_scope, name } => {
                     is_rooted = true;
-                    Some(NamedElementNode::new(Some(name_scope), name))
+                    let name_scope = name_scope.upgrade().map(NameScopeRef);
+                    Some(NamedElementNode::new(name_scope.as_ref(), name))
                 }
                 PathElement::Stream(plugin) => Some(StreamNode::new(plugin.clone())),
                 PathElement::TypeCast { cast, .. } => Some(FuncTransformNode::new(cast.clone())),
@@ -578,6 +586,7 @@ impl CompiledBindingPathBuilder {
 
     /// Roots the path at a named element.
     pub fn element_name(&self, name_scope: NameScopeRef, name: &str) -> Self {
+        let name_scope = std::rc::Rc::downgrade(&name_scope.0);
         self.elements.borrow_mut().push(PathElement::ElementName { name_scope, name: name.into() });
         self.clone()
     }
