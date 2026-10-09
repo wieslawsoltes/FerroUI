@@ -106,14 +106,35 @@ pub struct DeferredContent {
     this: Weak<DeferredContent>,
     parent_name_scope: Option<Weak<dyn INameScope>>,
     root_object: Option<WeakValue>,
-    parent_resource_nodes: Rc<Vec<WeakValue>>,
+    parent_resource_nodes: Rc<CapturedResourceNodes>,
     builder: DeferredContentBuilder,
     result_type: ValueType,
 }
 
+/// The resource nodes above a declaration, held weakly, shared by the
+/// deferred content declared under the same parents.
+struct CapturedResourceNodes {
+    nodes: Vec<WeakValue>,
+    /// The stack of the nodes that are alive, while an instantiation (or
+    /// whoever asked one for it) holds it: instantiations that overlap share
+    /// one stack, as all of them do in the managed original.
+    alive: RefCell<Weak<Vec<BoxedValue>>>,
+}
+
+impl CapturedResourceNodes {
+    fn alive(&self) -> Rc<Vec<BoxedValue>> {
+        if let Some(alive) = self.alive.borrow().upgrade() {
+            return alive;
+        }
+        let alive: Rc<Vec<BoxedValue>> = Rc::new(self.nodes.iter().filter_map(WeakValue::upgrade).collect());
+        *self.alive.borrow_mut() = Rc::downgrade(&alive);
+        alive
+    }
+}
+
 impl DeferredContent {
     fn new(
-        parent_resource_nodes: Rc<Vec<WeakValue>>,
+        parent_resource_nodes: Rc<CapturedResourceNodes>,
         root_object: Option<BoxedValue>,
         parent_name_scope: Option<NameScopeRef>,
         builder: DeferredContentBuilder,
@@ -159,11 +180,9 @@ impl DeferredContent {
         };
         // The captured objects that are still alive, for the time of the
         // instantiation.
-        let parent_resource_nodes: Vec<BoxedValue> =
-            self.parent_resource_nodes.iter().filter_map(WeakValue::upgrade).collect();
         let provider: Rc<dyn IServiceProvider> = DeferredParentServiceProvider::new(
             service_provider.cloned(),
-            Rc::new(parent_resource_nodes),
+            self.parent_resource_nodes.alive(),
             self.root_object.as_ref().and_then(WeakValue::upgrade),
             scope.clone(),
         );
@@ -315,7 +334,7 @@ fn name_scope_service(service_type: TypeId, scope: &NameScopeRef) -> Option<Rc<d
 /// resource dictionary), cache the last ones.
 struct LastParentStack {
     parent_stack_provider: Weak<dyn IFerroXamlIlParentStackProvider>,
-    resource_nodes: Weak<Vec<WeakValue>>,
+    resource_nodes: Weak<CapturedResourceNodes>,
 }
 
 impl LastParentStack {
@@ -323,18 +342,18 @@ impl LastParentStack {
         &self,
         parent_stack_provider: &Rc<dyn IFerroXamlIlParentStackProvider>,
         resource_nodes: &[BoxedValue],
-    ) -> Option<Rc<Vec<WeakValue>>> {
+    ) -> Option<Rc<CapturedResourceNodes>> {
         let last_parent_stack_provider = self.parent_stack_provider.upgrade()?;
         let last_resource_nodes = self.resource_nodes.upgrade()?;
         if !std::ptr::addr_eq(Rc::as_ptr(parent_stack_provider), Rc::as_ptr(&last_parent_stack_provider))
-            || resource_nodes.len() != last_resource_nodes.len()
+            || resource_nodes.len() != last_resource_nodes.nodes.len()
         {
             return None;
         }
 
         let same = resource_nodes
             .iter()
-            .zip(last_resource_nodes.iter())
+            .zip(last_resource_nodes.nodes.iter())
             .all(|(a, b)| b.upgrade().is_some_and(|b| ValueTypes::identity_equals(Some(a), Some(&b))));
         same.then_some(last_resource_nodes)
     }
@@ -442,7 +461,7 @@ impl XamlIlRuntimeHelpers {
         Ok(DeferredContent::new(resource_nodes, root_object, parent_scope, builder, result_type))
     }
 
-    fn as_resource_nodes_stack(provider: &Rc<dyn IFerroXamlIlParentStackProvider>) -> Rc<Vec<WeakValue>> {
+    fn as_resource_nodes_stack(provider: &Rc<dyn IFerroXamlIlParentStackProvider>) -> Rc<CapturedResourceNodes> {
         let mut buffer = RESOURCE_NODE_BUFFER.with(|buffer| std::mem::take(&mut *buffer.borrow_mut()));
         buffer.clear();
 
@@ -473,7 +492,10 @@ impl XamlIlRuntimeHelpers {
         let resource_nodes = match cached {
             Some(resource_nodes) => resource_nodes,
             None => {
-                let resource_nodes: Rc<Vec<WeakValue>> = Rc::new(buffer.iter().map(WeakValue::new).collect());
+                let resource_nodes = Rc::new(CapturedResourceNodes {
+                    nodes: buffer.iter().map(WeakValue::new).collect(),
+                    alive: RefCell::new(Weak::new()),
+                });
                 LAST_PARENT_STACK.with(|last| {
                     *last.borrow_mut() = Some(LastParentStack {
                         parent_stack_provider: Rc::downgrade(provider),
