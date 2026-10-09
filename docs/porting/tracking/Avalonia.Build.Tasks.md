@@ -11,7 +11,7 @@ Generated from upstream commit `17350180c33b063f0e98abbfd19aa3cae63f5d56`. Back 
 | Crate | `ferroui-build` |
 | Phase / priority | 2 - xaml + themes / P1 |
 | Files | 6/6 (100.0%), 4 not applicable |
-| Types | 7/7 (100.0%) |
+| Types | 6/7 (1 waived) (100.0%) |
 | Members | 7/35 (28 waived) (100.0%) |
 | Contracts (interfaces) | 0/0 |
 | Property registrations | 0/0 |
@@ -19,7 +19,7 @@ Generated from upstream commit `17350180c33b063f0e98abbfd19aa3cae63f5d56`. Back 
 
 ## Files
 
-### `(project root)` - files 6/6, types 7/7, members 7/35 (28 waived)
+### `(project root)` - files 6/6, types 6/7 (1 waived), members 7/35 (28 waived)
 
 | Upstream file | Rust file | Status | Types | Members | Notes |
 |---|---|---|---|---|---|
@@ -31,7 +31,7 @@ Generated from upstream commit `17350180c33b063f0e98abbfd19aa3cae63f5d56`. Back 
 | `SpanCompat.cs` | - | n/a | - | - | no non-private types (assembly attributes, global usings or file-local helpers) |
 | `XamlCompilerDiagnosticsFilter.cs` | `xaml_compiler_diagnostics_filter.rs` | present | 1/1 | 3/3 |  |
 | `XamlCompilerTaskExecutor.Helpers.cs` | `lib.rs` | present | 1/1 | 0/0 | replaced: the compilation of the documents of an assembly into its IL with Mono.Cecil (the populate and build methods, the trampolines, the loader dispatch, the rewrite of the calls of the loader): `Build::execute` of `lib.rs`, which compiles each group with `rust_emitter::generate_file` of the loader crate and writes Rust source, the loader table and the `.xamlmeta`; its result is `Outcome` (docs/porting/xaml.md 6.3: becomes `ferroui_build::compile_xaml`; 9.4.1 lists what upstream generates) |
-| `XamlCompilerTaskExecutor.cs` | `lib.rs` | present | 2/2 | 1/4 (3 waived) | replaced: the compilation of the documents of an assembly into its IL with Mono.Cecil (the populate and build methods, the trampolines, the loader dispatch, the rewrite of the calls of the loader): `Build::execute` of `lib.rs`, which compiles each group with `rust_emitter::generate_file` of the loader crate and writes Rust source, the loader table and the `.xamlmeta`; its result is `Outcome` (docs/porting/xaml.md 6.3: becomes `ferroui_build::compile_xaml`; 9.4.1 lists what upstream generates) |
+| `XamlCompilerTaskExecutor.cs` | `lib.rs` | present | 1/2 (1 waived) | 1/4 (3 waived) | replaced: the compilation of the documents of an assembly into its IL with Mono.Cecil (the populate and build methods, the trampolines, the loader dispatch, the rewrite of the calls of the loader): `Build::execute` of `lib.rs`, which compiles each group with `rust_emitter::generate_file` of the loader crate and writes Rust source, the loader table and the `.xamlmeta`; its result is `Outcome` (docs/porting/xaml.md 6.3: becomes `ferroui_build::compile_xaml`; 9.4.1 lists what upstream generates) |
 | `XamlFileInfo.cs` | - | n/a | - | - | not-applicable: reads `x:Class` of a document for the index from class to resource path that the resources task packs (`!AvaloniaResourceXamlInfo`). docs/porting/xaml.md 6.3 drops the index (`PortableXaml/AvaloniaResourceXamlInfo.cs`): a compiled document carries its class in the `.xamlmeta` of the crate (`DocumentModel::class_rust_path`) |
 
 ## Rust-only files
@@ -40,19 +40,7 @@ Rust sources of this crate that no upstream file maps to. Give each a reason in 
 
 | Rust file | Reason | Types defined |
 |---|---|---|
-| `call_forms.rs` | **unmapped** | `CallFormStatistics`, `Candidate`, `Functions` |
-| `json.rs` | the JSON the type model is written in (`.xamlmeta`): a value, its reader and its deterministic writer | `Fields`, `Json`, `Members`, `Parser` |
-| `model.rs` | the build-time type model of a crate and of the crates it is built on, and its file, the `.xamlmeta` (docs/porting/xaml.md, 9.5.1): upstream's compiler reads the types of the referenced assemblies with Mono.Cecil instead | `AccessorModel`, `AliasModel`, `AssemblyModel`, `AttributeModel`, `AttributeValueModel`, `CallForm`, `CallableModel`, `CastModel`, `EnumMemberModel`, `ExportModel`, `FunctionModel`, `FunctionsModel`, ... (26 total) |
-| `model_set.rs` | the build-time type model of a crate and of the crates it is built on, and its file, the `.xamlmeta` (docs/porting/xaml.md, 9.5.1): upstream's compiler reads the types of the referenced assemblies with Mono.Cecil instead | `ModelSet` |
-| `scanner/constants.rs` | the source scanner, which fills the type model from the declaration macros of a crate's sources (docs/porting/xaml.md, 9.5.2, 9.5.6): no counterpart upstream, where the compiler reads the compiled assembly | `Scope` |
-| `scanner/declarations.rs` | the source scanner, which fills the type model from the declaration macros of a crate's sources (docs/porting/xaml.md, 9.5.2, 9.5.6): no counterpart upstream, where the compiler reads the compiled assembly | `Accessor`, `Declaration`, `EnumMember`, `MarkupBody`, `RawAccessor`, `RawAttribute`, `RawMember`, `RawParameter`, `RawProperty`, `RawValue`, `Registration` |
-| `scanner/modules.rs` | the source scanner, which fills the type model from the declaration macros of a crate's sources (docs/porting/xaml.md, 9.5.2, 9.5.6): no counterpart upstream, where the compiler reads the compiled assembly | `Glob`, `Import`, `Item`, `ItemKind`, `Module`, `Modules`, `Target` |
-| `scanner/source.rs` | the source scanner, which fills the type model from the declaration macros of a crate's sources (docs/porting/xaml.md, 9.5.2, 9.5.6): no counterpart upstream, where the compiler reads the compiled assembly | `Category`, `Context`, `Counter`, `HandWritten`, `Invocation`, `InvokedMacros`, `LocalImports`, `LocalMacro`, `Located`, `RawAssembly`, `RawCast`, `RawFunction`, ... (18 total) |
-| `scanner/tests.rs` | the unit tests of the module |  |
-| `scanner/tokens.rs` | the source scanner, which fills the type model from the declaration macros of a crate's sources (docs/porting/xaml.md, 9.5.2, 9.5.6): no counterpart upstream, where the compiler reads the compiled assembly | `Cursor`, `ParseError`, `Piece`, `Tokens`, `TypeEnd` |
 | `type_system/emit_types.rs` | the build-time type system of the compiler over the type models (docs/porting/xaml.md, 9.5.2, 9.5.5): the counterpart of the Cecil type system of upstream's build task (XamlX.IL.Cecil, which the tracking does not list) | `Conversions`, `ModelClass`, `ModelEmitProperty`, `ModelEmitTypes`, `ModelMarkup` |
 | `type_system/model_type_system.rs` | the build-time type system of the compiler over the type models (docs/porting/xaml.md, 9.5.2, 9.5.5): the counterpart of the Cecil type system of upstream's build task (XamlX.IL.Cecil, which the tracking does not list) | `Index`, `MemberBuilder`, `Merged`, `ModelTypeSystem`, `Position` |
 | `type_system/tests.rs` | the unit tests of the module |  |
 | `type_system/types.rs` | the build-time type system of the compiler over the type models (docs/porting/xaml.md, 9.5.2, 9.5.5): the counterpart of the Cecil type system of upstream's build task (XamlX.IL.Cecil, which the tracking does not list) | `DeclaredRust`, `MemberRust`, `MemberSource`, `MembersInit`, `ModelAssembly`, `ModelConstructor`, `ModelCustomAttribute`, `ModelEvent`, `ModelField`, `ModelMembers`, `ModelMethod`, `ModelParameterInfo`, ... (17 total) |
-
-Tests, examples and build scripts (not scanned): `tests/fixtures/dependent/lib.rs`, `tests/fixtures/dependent/panel.rs`, `tests/fixtures/registration/keys.rs`, `tests/fixtures/registration/lib.rs`, `tests/fixtures/registration/panel.rs`, `tests/fixtures/registration/register_types.rs`, `tests/fixtures/scanner/controls/border.rs`, `tests/fixtures/scanner/controls/decorator.rs`, `tests/fixtures/scanner/controls/grid.rs`, `tests/fixtures/scanner/controls/mod.rs`, `tests/fixtures/scanner/controls/text_block.rs`, `tests/fixtures/scanner/lib.rs`, `tests/fixtures/scanner/macros.rs`, `tests/fixtures/scanner/markup_types/classes.rs`, `tests/fixtures/scanner/markup_types/mod.rs`, `tests/fixtures/scanner/markup_types/plain.rs`, `tests/fixtures/scanner/media/brush.rs`, `tests/fixtures/scanner/media/mod.rs`, `tests/fixtures/scanner/not_read.rs`, `tests/fixtures/scanner/odd/inner.rs`, `tests/fixtures/scanner/odd/placed_elsewhere.rs`, `tests/fixtures/scanner/register_types.rs`, `tests/fixtures/scanner/rust_paths.rs`.

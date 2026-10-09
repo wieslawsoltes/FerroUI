@@ -229,6 +229,7 @@ dependencies = [
  "bitflags",
  "ferroui-base",
  "ferroui-build-scan",
+ "ferroui-remote-protocol",
 ]
 
 [[package]]

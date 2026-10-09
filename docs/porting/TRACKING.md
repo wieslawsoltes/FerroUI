@@ -44,9 +44,9 @@ Percentages are `present / (total - waived)`. Member matching is by name with re
 
 | | Ported | Total | Waived | % |
 |---|---:|---:|---:|---:|
-| C# files | 2250 | 2263 | 0 | 99.4% |
-| Types | 2906 | 3133 | 204 | 99.2% |
-| Members | 20922 | 23125 | 2006 | 99.1% |
+| C# files | 2261 | 2263 | 0 | 99.9% |
+| Types | 2922 | 3133 | 205 | 99.8% |
+| Members | 21083 | 23125 | 2006 | 99.8% |
 | Contracts (interfaces) | 434 | 458 | - | 94.8% |
 | Property registrations | 1218 | 1233 | - | 98.8% |
 | Routed events | 108 | 108 | - | 100.0% |
@@ -63,10 +63,10 @@ The % column is member coverage (file coverage for plain file lists).
 | [XamlX](tracking/XamlX.md) | `external/XamlX/src/XamlX` | `external/XamlX/src/XamlX` | `xamlx` | 62/62 | 172/177 (5 waived) | 713/878 (165 waived) | 100.0% | 2 - xaml + themes | P1 |
 | [Avalonia.Native (native sources)](tracking/Avalonia.Native_native_sources.md) | `native/Avalonia.Native` | `native/FerroUI.Native` | (Objective-C++ sources built by ferroui-native) | 62/62 | - | - | 100.0% | 1 - desktop (macOS) | P0 |
 | [Avalonia.Base](tracking/Avalonia.Base.md) | `src/Avalonia.Base` | `src/FerroUI.Base` | `ferroui-base` | 1248/1248 | 1523/1659 (136 waived) | 10280/11433 (1153 waived) | 100.0% | 0 - core | P0 |
-| [Avalonia.Build.Tasks](tracking/Avalonia.Build.Tasks.md) | `src/Avalonia.Build.Tasks` | `src/FerroUI.Build.Tasks` | `ferroui-build` | 6/6 | 7/7 | 7/35 (28 waived) | 100.0% | 2 - xaml + themes | P1 |
-| [Avalonia.Controls](tracking/Avalonia.Controls.md) | `src/Avalonia.Controls` | `src/FerroUI.Controls` | `ferroui-controls` | 534/538 | 616/628 (7 waived) | 6199/6405 (189 waived) | 99.7% | 1 - controls | P0 |
+| [Avalonia.Build.Tasks](tracking/Avalonia.Build.Tasks.md) | `src/Avalonia.Build.Tasks` | `src/FerroUI.Build.Tasks` | `ferroui-build` | 6/6 | 6/7 (1 waived) | 7/35 (28 waived) | 100.0% | 2 - xaml + themes | P1 |
+| [Avalonia.Controls](tracking/Avalonia.Controls.md) | `src/Avalonia.Controls` | `src/FerroUI.Controls` | `ferroui-controls` | 538/538 | 621/628 (7 waived) | 6214/6405 (189 waived) | 100.0% | 1 - controls | P0 |
 | [Avalonia.Controls.ColorPicker](tracking/Avalonia.Controls.ColorPicker.md) | `src/Avalonia.Controls.ColorPicker` | `src/FerroUI.Controls.ColorPicker` | `ferroui-controls-color-picker` | 39/39 | 41/41 | 726/726 | 100.0% | 3 - extras | P2 |
-| [Avalonia.DesignerSupport](tracking/Avalonia.DesignerSupport.md) | `src/Avalonia.DesignerSupport` | `src/FerroUI.DesignerSupport` | `ferroui-designer-support` | 0/9 | 0/18 | 0/176 | 0.0% | 4 - tooling | P3 |
+| [Avalonia.DesignerSupport](tracking/Avalonia.DesignerSupport.md) | `src/Avalonia.DesignerSupport` | `src/FerroUI.DesignerSupport` | `ferroui-designer-support` | 7/9 | 12/18 | 146/176 | 83.0% | 4 - tooling | P3 |
 | [Avalonia.Desktop](tracking/Avalonia.Desktop.md) | `src/Avalonia.Desktop` | `src/FerroUI.Desktop` | `ferroui-desktop` | 1/1 | 1/1 | 1/1 | 100.0% | 1 - desktop (macOS) | P0 |
 | [Avalonia.Dialogs](tracking/Avalonia.Dialogs.md) | `src/Avalonia.Dialogs` | `src/FerroUI.Dialogs` | `ferroui-dialogs` | 17/17 | 18/18 | 94/94 | 100.0% | 3 - extras | P3 |
 | [Avalonia.Fonts.Inter](tracking/Avalonia.Fonts.Inter.md) | `src/Avalonia.Fonts.Inter` | `src/FerroUI.Fonts.Inter` | `ferroui-fonts-inter` | 2/2 | 2/2 | 2/2 | 100.0% | 3 - browser | P2 |
@@ -134,7 +134,7 @@ Libraries.
 | `src/Avalonia.Build.Tasks` | 10 | `src/FerroUI.Build.Tasks` | workspace member | [Avalonia.Build.Tasks](tracking/Avalonia.Build.Tasks.md) |
 | `src/Avalonia.Controls` | 539 | `src/FerroUI.Controls` | workspace member | [Avalonia.Controls](tracking/Avalonia.Controls.md) |
 | `src/Avalonia.Controls.ColorPicker` | 40 | `src/FerroUI.Controls.ColorPicker` | workspace member | [Avalonia.Controls.ColorPicker](tracking/Avalonia.Controls.ColorPicker.md) |
-| `src/Avalonia.DesignerSupport` | 9 | `src/FerroUI.DesignerSupport` | not created | [Avalonia.DesignerSupport](tracking/Avalonia.DesignerSupport.md) |
+| `src/Avalonia.DesignerSupport` | 9 | `src/FerroUI.DesignerSupport` | workspace member | [Avalonia.DesignerSupport](tracking/Avalonia.DesignerSupport.md) |
 | `src/Avalonia.Desktop` | 1 | `src/FerroUI.Desktop` | workspace member | [Avalonia.Desktop](tracking/Avalonia.Desktop.md) |
 | `src/Avalonia.Dialogs` | 17 | `src/FerroUI.Dialogs` | workspace member | [Avalonia.Dialogs](tracking/Avalonia.Dialogs.md) |
 | `src/Avalonia.Fonts.Inter` | 3 | `src/FerroUI.Fonts.Inter` | workspace member | [Avalonia.Fonts.Inter](tracking/Avalonia.Fonts.Inter.md) |
@@ -305,9 +305,11 @@ Upstream unit tests are ported next to the code (`#[cfg(test)] mod tests` or `<f
 | `samples/MiniMvvm` | `samples/MiniMvvm` (not tracked) |
 | `src/Browser/FerroUI.Browser` | `src/Browser/Avalonia.Browser` |
 | `src/FerroUI.Base` | `src/Avalonia.Base` |
+| `src/FerroUI.Build.Scan` | none (FerroUI only) |
 | `src/FerroUI.Build.Tasks` | `src/Avalonia.Build.Tasks` |
 | `src/FerroUI.Controls` | `src/Avalonia.Controls` |
 | `src/FerroUI.Controls.ColorPicker` | `src/Avalonia.Controls.ColorPicker` |
+| `src/FerroUI.DesignerSupport` | `src/Avalonia.DesignerSupport` |
 | `src/FerroUI.Desktop` | `src/Avalonia.Desktop` |
 | `src/FerroUI.Dialogs` | `src/Avalonia.Dialogs` |
 | `src/FerroUI.Fonts.Inter` | `src/Avalonia.Fonts.Inter` |
@@ -332,7 +334,7 @@ FerroUI-only crates have no upstream source directory (for example the MicroCom 
 
 ## Rust-only files
 
-332 Rust source files have no upstream counterpart (1 without a recorded reason). They are listed at the end of each project page.
+323 Rust source files have no upstream counterpart (0 without a recorded reason). They are listed at the end of each project page.
 
 | Project | Rust file | Reason |
 |---|---|---|
@@ -481,16 +483,6 @@ FerroUI-only crates have no upstream source directory (for example the MicroCom 
 | [Avalonia.Base](tracking/Avalonia.Base.md) | `src/FerroUI.Base/utilities/thread_bound.rs` | A part of a shared render resource that stays on the thread that created it; the original relies on convention where Rust needs the object to be Send + Sync (render thread, stage R1) |
 | [Avalonia.Base](tracking/Avalonia.Base.md) | `src/FerroUI.Base/utilities/time_zone_info.rs` | minimal counterpart of .NET `System.TimeZoneInfo`: the offset of local time comes from a provider of the platform layer |
 | [Avalonia.Base](tracking/Avalonia.Base.md) | `src/FerroUI.Base/utilities/uri.rs` | minimal counterpart of .NET `System.Uri`, covering what resource and font keys need |
-| [Avalonia.Build.Tasks](tracking/Avalonia.Build.Tasks.md) | `src/FerroUI.Build.Tasks/call_forms.rs` | **unmapped** |
-| [Avalonia.Build.Tasks](tracking/Avalonia.Build.Tasks.md) | `src/FerroUI.Build.Tasks/json.rs` | the JSON the type model is written in (`.xamlmeta`): a value, its reader and its deterministic writer |
-| [Avalonia.Build.Tasks](tracking/Avalonia.Build.Tasks.md) | `src/FerroUI.Build.Tasks/model.rs` | the build-time type model of a crate and of the crates it is built on, and its file, the `.xamlmeta` (docs/porting/xaml.md, 9.5.1): upstream's compiler reads the types of the referenced assemblies with Mono.Cecil instead |
-| [Avalonia.Build.Tasks](tracking/Avalonia.Build.Tasks.md) | `src/FerroUI.Build.Tasks/model_set.rs` | the build-time type model of a crate and of the crates it is built on, and its file, the `.xamlmeta` (docs/porting/xaml.md, 9.5.1): upstream's compiler reads the types of the referenced assemblies with Mono.Cecil instead |
-| [Avalonia.Build.Tasks](tracking/Avalonia.Build.Tasks.md) | `src/FerroUI.Build.Tasks/scanner/constants.rs` | the source scanner, which fills the type model from the declaration macros of a crate's sources (docs/porting/xaml.md, 9.5.2, 9.5.6): no counterpart upstream, where the compiler reads the compiled assembly |
-| [Avalonia.Build.Tasks](tracking/Avalonia.Build.Tasks.md) | `src/FerroUI.Build.Tasks/scanner/declarations.rs` | the source scanner, which fills the type model from the declaration macros of a crate's sources (docs/porting/xaml.md, 9.5.2, 9.5.6): no counterpart upstream, where the compiler reads the compiled assembly |
-| [Avalonia.Build.Tasks](tracking/Avalonia.Build.Tasks.md) | `src/FerroUI.Build.Tasks/scanner/modules.rs` | the source scanner, which fills the type model from the declaration macros of a crate's sources (docs/porting/xaml.md, 9.5.2, 9.5.6): no counterpart upstream, where the compiler reads the compiled assembly |
-| [Avalonia.Build.Tasks](tracking/Avalonia.Build.Tasks.md) | `src/FerroUI.Build.Tasks/scanner/source.rs` | the source scanner, which fills the type model from the declaration macros of a crate's sources (docs/porting/xaml.md, 9.5.2, 9.5.6): no counterpart upstream, where the compiler reads the compiled assembly |
-| [Avalonia.Build.Tasks](tracking/Avalonia.Build.Tasks.md) | `src/FerroUI.Build.Tasks/scanner/tests.rs` | the unit tests of the module |
-| [Avalonia.Build.Tasks](tracking/Avalonia.Build.Tasks.md) | `src/FerroUI.Build.Tasks/scanner/tokens.rs` | the source scanner, which fills the type model from the declaration macros of a crate's sources (docs/porting/xaml.md, 9.5.2, 9.5.6): no counterpart upstream, where the compiler reads the compiled assembly |
 | [Avalonia.Build.Tasks](tracking/Avalonia.Build.Tasks.md) | `src/FerroUI.Build.Tasks/type_system/emit_types.rs` | the build-time type system of the compiler over the type models (docs/porting/xaml.md, 9.5.2, 9.5.5): the counterpart of the Cecil type system of upstream's build task (XamlX.IL.Cecil, which the tracking does not list) |
 | [Avalonia.Build.Tasks](tracking/Avalonia.Build.Tasks.md) | `src/FerroUI.Build.Tasks/type_system/model_type_system.rs` | the build-time type system of the compiler over the type models (docs/porting/xaml.md, 9.5.2, 9.5.5): the counterpart of the Cecil type system of upstream's build task (XamlX.IL.Cecil, which the tracking does not list) |
 | [Avalonia.Build.Tasks](tracking/Avalonia.Build.Tasks.md) | `src/FerroUI.Build.Tasks/type_system/tests.rs` | the unit tests of the module |
@@ -536,6 +528,7 @@ FerroUI-only crates have no upstream source directory (for example the MicroCom 
 | [Avalonia.Controls](tracking/Avalonia.Controls.md) | `src/FerroUI.Controls/primitives/selecting_items_control_tests_multiple.rs` | a part of an upstream test suite (`&lt;Suite&gt;Tests_&lt;Part&gt;.cs` or `&lt;Suite&gt;Tests.&lt;Part&gt;.cs`): the scanner takes only `*_tests.rs` for a test file |
 | [Avalonia.Controls](tracking/Avalonia.Controls.md) | `src/FerroUI.Controls/primitives/selecting_items_control_tests_selected_value.rs` | a part of an upstream test suite (`&lt;Suite&gt;Tests_&lt;Part&gt;.cs` or `&lt;Suite&gt;Tests.&lt;Part&gt;.cs`): the scanner takes only `*_tests.rs` for a test file |
 | [Avalonia.Controls](tracking/Avalonia.Controls.md) | `src/FerroUI.Controls/register_types.rs` | the type table of the crate (porting guide, Classes): its namespaces, its classes and what it states about itself for markup; takes the place of the assembly metadata the upstream compiler and loader reflect over |
+| [Avalonia.Controls](tracking/Avalonia.Controls.md) | `src/FerroUI.Controls/remote/ui_thread_handle.rs` | How a handler on the reader thread of a connection reaches an object of the UI thread: a number registered on that thread and its dispatcher, in place of the `this` a delegate of the original captures (DEVIATIONS.md, Remote rendering) |
 | [Avalonia.Controls](tracking/Avalonia.Controls.md) | `src/FerroUI.Controls/render_tests_culling.rs` | a part of an upstream test suite (`&lt;Suite&gt;Tests_&lt;Part&gt;.cs` or `&lt;Suite&gt;Tests.&lt;Part&gt;.cs`): the scanner takes only `*_tests.rs` for a test file |
 | [Avalonia.Controls](tracking/Avalonia.Controls.md) | `src/FerroUI.Controls/rust_paths.rs` | generated by scripts/generate_markup_types.py: the public Rust paths of the registered types of the crate, which the emitter of the XAML compiler writes into generated code |
 | [Avalonia.Controls](tracking/Avalonia.Controls.md) | `src/FerroUI.Controls/scroll_viewer_tests_i_logical_scrollable.rs` | a part of an upstream test suite (`&lt;Suite&gt;Tests_&lt;Part&gt;.cs` or `&lt;Suite&gt;Tests.&lt;Part&gt;.cs`): the scanner takes only `*_tests.rs` for a test file |
@@ -582,6 +575,7 @@ FerroUI-only crates have no upstream source directory (for example the MicroCom 
 | [Avalonia.Controls.ColorPicker](tracking/Avalonia.Controls.ColorPicker.md) | `src/FerroUI.Controls.ColorPicker/markup_types/palettes.rs` | the markup metadata of the types of the crate (content property, plain properties, constructors, methods, events, enums, converters, typed lists), most of it generated by scripts/generate_markup_types.py: takes the place of the attributes and the reflection upstream reads them with |
 | [Avalonia.Controls.ColorPicker](tracking/Avalonia.Controls.ColorPicker.md) | `src/FerroUI.Controls.ColorPicker/register_types.rs` | the type table of the crate (porting guide, Classes): its namespaces, its classes and what it states about itself for markup; takes the place of the assembly metadata the upstream compiler and loader reflect over |
 | [Avalonia.Controls.ColorPicker](tracking/Avalonia.Controls.ColorPicker.md) | `src/FerroUI.Controls.ColorPicker/rust_paths.rs` | generated by scripts/generate_markup_types.py: the public Rust paths of the registered types of the crate, which the emitter of the XAML compiler writes into generated code |
+| [Avalonia.DesignerSupport](tracking/Avalonia.DesignerSupport.md) | `src/FerroUI.DesignerSupport/remote/test_connection.rs` | A connection for the tests of the crate, which records what is sent and raises what a test tells it to |
 | [Avalonia.Dialogs](tracking/Avalonia.Dialogs.md) | `src/FerroUI.Dialogs/assets.rs` | embeds the document of the about dialog and its font: the counterpart of the resource items of the upstream project file |
 | [Avalonia.Dialogs](tracking/Avalonia.Dialogs.md) | `src/FerroUI.Dialogs/markup.rs` | loads the document of the about dialog with the run-time loader until the XAML compiler generates InitializeComponent |
 | [Avalonia.Dialogs](tracking/Avalonia.Dialogs.md) | `src/FerroUI.Dialogs/register_types.rs` | the type table of the crate (porting guide, Classes): namespaces, classes, markup metadata, the document loader |
@@ -653,7 +647,6 @@ FerroUI-only crates have no upstream source directory (for example the MicroCom 
 | [Avalonia.Markup.Xaml.Loader](tracking/Avalonia.Markup.Xaml.Loader.md) | `src/Markup/FerroUI.Markup.Xaml.Loader/rust_emitter/runtime_types.rs` | the Rust emitter, the ahead-of-time back end of the compiler, which takes the place of the IL emitter of upstream's build task (docs/porting/xaml.md, section 9) |
 | [Avalonia.Markup.Xaml.Loader](tracking/Avalonia.Markup.Xaml.Loader.md) | `src/Markup/FerroUI.Markup.Xaml.Loader/rust_emitter/source.rs` | the Rust emitter, the ahead-of-time back end of the compiler, which takes the place of the IL emitter of upstream's build task (docs/porting/xaml.md, section 9) |
 | [Avalonia.Markup.Xaml.Loader](tracking/Avalonia.Markup.Xaml.Loader.md) | `src/Markup/FerroUI.Markup.Xaml.Loader/rust_emitter/transform.rs` | the Rust emitter, the ahead-of-time back end of the compiler, which takes the place of the IL emitter of upstream's build task (docs/porting/xaml.md, section 9) |
-| [Avalonia.Markup.Xaml.Loader](tracking/Avalonia.Markup.Xaml.Loader.md) | `src/Markup/FerroUI.Markup.Xaml.Loader/rust_emitter/xaml_metadata.rs` | the Rust emitter, the ahead-of-time back end of the compiler, which takes the place of the IL emitter of upstream's build task (docs/porting/xaml.md, section 9) |
 | [Avalonia.Markup.Xaml.Loader](tracking/Avalonia.Markup.Xaml.Loader.md) | `src/Markup/FerroUI.Markup.Xaml.Loader/testing/bindings.rs` | test support shared by the test suites of this crate and of the crates built on it: mocks, test services, fixtures and helpers, among them the ports of the ones of the upstream test projects (`tests/Avalonia.UnitTests` and the helpers next to the suites) |
 | [Avalonia.Markup.Xaml.Loader](tracking/Avalonia.Markup.Xaml.Loader.md) | `src/Markup/FerroUI.Markup.Xaml.Loader/testing/objects.rs` | test support shared by the test suites of this crate and of the crates built on it: mocks, test services, fixtures and helpers, among them the ports of the ones of the upstream test projects (`tests/Avalonia.UnitTests` and the helpers next to the suites) |
 | [Avalonia.Markup.Xaml.Loader](tracking/Avalonia.Markup.Xaml.Loader.md) | `src/Markup/FerroUI.Markup.Xaml.Loader/testing/styles.rs` | test support shared by the test suites of this crate and of the crates built on it: mocks, test services, fixtures and helpers, among them the ports of the ones of the upstream test projects (`tests/Avalonia.UnitTests` and the helpers next to the suites) |
