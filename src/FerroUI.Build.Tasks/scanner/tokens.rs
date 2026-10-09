@@ -58,6 +58,53 @@ pub(crate) struct ParseError {
     pub message: String,
 }
 
+/// `stream` with the value of every `break 'label ::path..` in parentheses
+/// (`break 'label (::path..)`), and whether there was one.
+///
+/// The parser of `syn` takes the first colon of a path that starts at the crate root for
+/// the colon of a labelled expression there (`break 'label: loop { .. }`, which the
+/// language does not allow) and refuses the file; the language reads the value of the
+/// `break`. The emitter of compiled markup writes this form. A value in parentheses is the
+/// same value, and the tokens keep their lines.
+pub(crate) fn with_parenthesised_break_values(stream: TokenStream) -> (TokenStream, bool) {
+    let tokens: Vec<TokenTree> = stream.into_iter().collect();
+    let mut result: Vec<TokenTree> = Vec::with_capacity(tokens.len());
+    let mut changed = false;
+    let mut index = 0;
+    while index < tokens.len() {
+        let is_break_with_label = ident_of(&tokens[index]).as_deref() == Some("break")
+            && tokens.get(index + 1).is_some_and(|token| is_punct(token, '\''))
+            && tokens.get(index + 2).is_some_and(|token| matches!(token, TokenTree::Ident(_)))
+            && is_path_separator(&tokens, index + 3);
+        if is_break_with_label {
+            result.extend(tokens[index..index + 3].iter().cloned());
+            let start = index + 3;
+            let end = tokens[start..].iter().position(|token| is_punct(token, ';') || is_punct(token, ',')).map_or(tokens.len(), |offset| start + offset);
+            let (value, _) = with_parenthesised_break_values(tokens[start..end].iter().cloned().collect());
+            result.push(TokenTree::Group(Group::new(Delimiter::Parenthesis, value)));
+            changed = true;
+            index = end;
+            continue;
+        }
+        match &tokens[index] {
+            TokenTree::Group(group) => {
+                let (inner, inner_changed) = with_parenthesised_break_values(group.stream());
+                if inner_changed {
+                    let mut replaced = Group::new(group.delimiter(), inner);
+                    replaced.set_span(group.span());
+                    result.push(TokenTree::Group(replaced));
+                    changed = true;
+                } else {
+                    result.push(tokens[index].clone());
+                }
+            }
+            token => result.push(token.clone()),
+        }
+        index += 1;
+    }
+    (result.into_iter().collect(), changed)
+}
+
 /// Where a type ends, besides `,`, `;`, `=>` and the end of the tokens, which always end it.
 #[derive(Clone, Copy, Default)]
 pub(crate) struct TypeEnd {
@@ -281,7 +328,7 @@ impl<'a> Cursor<'a> {
     }
 
     /// The tokens of an expression: up to a `,` (or `;`) that is not inside the parameters
-    /// of a leading closure or a turbofish.
+    /// or the return type of a leading closure, or a turbofish.
     pub fn take_expression(&mut self, what: &str) -> Result<&'a [TokenTree], ParseError> {
         let start = self.at;
         self.eat_ident("move");
@@ -291,6 +338,13 @@ impl<'a> Cursor<'a> {
             while let Some(token) = self.next() {
                 if is_punct(token, '|') {
                     break;
+                }
+            }
+            // A closure that states its return type has a block for its body: the type is
+            // everything up to the block (`|a| -> Result<(), E> { .. }`).
+            if is_arrow(self.tokens, self.at, '-') {
+                while self.peek().is_some_and(|token| group_of(token, Delimiter::Brace).is_none()) {
+                    self.at += 1;
                 }
             }
         }
@@ -699,19 +753,36 @@ mod tests {
     /// parameters of a closure or of a turbofish.
     #[test]
     fn expression_reader_keeps_closures_and_turbofish_whole() {
-        let source = tokens("|this: &Ref<Window>, handler: MarkupDelegate| this.add(handler), Map::<A, B>::new, move || 1, Type::function");
+        let source = tokens(
+            "|this: &Ref<Window>, handler: MarkupDelegate| this.add(handler), Map::<A, B>::new, move || 1, Type::function, |a: A| -> Result<(), E> { Ok(()) }",
+        );
         let mut cursor = Cursor::new(&source, 1);
         let mut expressions = Vec::new();
         while !cursor.is_end() {
             expressions.push(cursor.take_expression("an expression").expect("an expression").to_vec());
             cursor.eat_punct(',');
         }
-        assert_eq!(expressions.len(), 4);
+        assert_eq!(expressions.len(), 5);
+        assert_eq!(plain_path(&expressions[4]), None);
         assert_eq!(plain_path(&expressions[0]), None);
         assert_eq!(plain_path(&expressions[1]), Some(vec!["Map".to_string(), "new".to_string()]));
         assert_eq!(plain_path(&expressions[2]), None);
         assert_eq!(plain_path(&expressions[3]), Some(vec!["Type".to_string(), "function".to_string()]));
         assert_eq!(text_of(&expressions[3]), "Type::function");
+    }
+
+    /// Not from upstream: a `break` with a label whose value is a path from the crate root
+    /// is a file the parser reads once the value is in parentheses.
+    #[test]
+    fn break_values_from_the_crate_root_are_parenthesised() {
+        let text = "fn f() -> u8 { let a = 'done: { if c() { break 'done ::m::one(1, 2); } ::m::two() }; a }";
+        assert!(syn::parse_file(text).is_err());
+        let (rewritten, changed) = with_parenthesised_break_values(text.parse().expect("tokens"));
+        assert!(changed);
+        assert!(syn::parse2::<syn::File>(rewritten).is_ok());
+        let (same, changed) = with_parenthesised_break_values("fn f() { loop { break 'a; } }".parse().expect("tokens"));
+        assert!(!changed);
+        assert!(syn::parse2::<syn::File>(same).is_ok());
     }
 
     /// Not from upstream: the arguments of a generic type, and the invocations of a macro
