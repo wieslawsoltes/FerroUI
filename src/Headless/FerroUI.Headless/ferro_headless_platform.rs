@@ -77,6 +77,18 @@ impl FerroHeadlessPlatform {
         COMPOSITOR.with(|compositor| compositor.borrow().clone())
     }
 
+    /// Lets go of the compositor of the calling thread. Not in the
+    /// original, whose compositor is a static field that lives as long as
+    /// the process: here it belongs to the thread that initialised the
+    /// platform, and a thread that ends must drop it while it still has its
+    /// dispatcher. Left to the destructors of the thread, the compositor is
+    /// dropped after the dispatcher is gone, and its removal from the render
+    /// loop, which asserts the UI thread, panics there.
+    pub(crate) fn release_compositor() {
+        let compositor = COMPOSITOR.with(|slot| slot.borrow_mut().take());
+        drop(compositor);
+    }
+
     pub(crate) fn initialize(opts: &FerroHeadlessPlatformOptions) {
         if opts.use_shared_mouse_device == Some(true) {
             MouseDevice::reset_primary_for_unit_tests();

@@ -296,6 +296,16 @@ impl Drop for CancelOnDrop {
     }
 }
 
+/// Drops the compositor of the headless platform when the thread of a
+/// session ends (see `FerroHeadlessPlatform::release_compositor`).
+struct ReleaseCompositorOnDrop;
+
+impl Drop for ReleaseCompositorOnDrop {
+    fn drop(&mut self) {
+        crate::ferro_headless_platform::FerroHeadlessPlatform::release_compositor();
+    }
+}
+
 impl HeadlessUnitTestSession {
     /// Queues an action on the dispatcher thread; see
     /// [`dispatch_task`](Self::dispatch_task).
@@ -501,6 +511,8 @@ impl HeadlessUnitTestSession {
                     // See the module documentation: the dispatcher of the session is the
                     // dispatcher of this thread.
                     let _dispatcher = Dispatcher::unit_test_scope();
+                    // Dropped before the scope of the dispatcher, after the session.
+                    let _compositor = ReleaseCompositorOnDrop;
                     let session = match catch_unwind(|| {
                         let mut app_builder = entry_point_type();
 
