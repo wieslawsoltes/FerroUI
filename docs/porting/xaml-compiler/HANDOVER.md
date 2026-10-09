@@ -124,10 +124,13 @@
   the list of section 18 from the largest reason down, built and run by its author with the
   commands the stage allowed. DONE: the scanner reads the registrations a macro makes for each type
   it is invoked with, and what a macro of another crate declares (`xaml.md` 9.5.16); the emitter's
-  rule for a text a type converter converts when the document is loaded (`xaml.md` 9.4.6). The
-  measure of the catalog is 192 of 219 documents emitted (84 before, 156 with the registrations
-  counted as read). Section 19 has the table after each item, what is refused now and why, and
-  where the stage stopped. Nothing is half-done in the working tree.
+  rule for a text a type converter converts when the document is loaded (`xaml.md` 9.4.6) and for
+  a class set in markup; a first real compile of pages of the catalog (`tests/XamlCatalogFixture`,
+  `xaml.md` 9.5.17). The measure of the catalog is 195 of 219 documents emitted (84 before, 156
+  with the registrations counted as read). **The real compile found emitted code rustc refuses**
+  (the instance of a member a named collection inherits; section 19, "The first real compile"): it
+  is the first thing the next stage does. Section 19 has the table after each item, what is
+  refused now and why, and where the stage stopped. Nothing is half-done in the working tree.
 
 Design documents in the repository: `docs/porting/xaml.md`, sections 9 (emitter design: call forms
 A/B/C, build integration, code-behind), 9.5 (source scanner), 9.12 (the 14 rulings), 9.13, and
@@ -1427,19 +1430,102 @@ Not covered, and refused by name: a converter whose result is cast to a *value t
 | After item 3 | 156 | 63 (the 6 of reason 3 are now 5 for a public path and 1 for a list created in markup) | not measured apart |
 | After item 2 | 192 | 27 | 12,433,841 bytes, 130,285 lines |
 
-The rows of items 1 and 3 are not measurements of their own: the measure was run with the three items in place (192), and the two rows are derived from it and from section 18 (36 of the 37 documents of reason 2 emit; the 37th, `LabelsPage`, moved on to a method as a command).
+| After the class setters of item 4 | 195 | 24 | 12,908,248 bytes, 135,098 lines |
 
-Refused after item 2, 27 documents (the first error of each):
+The rows of items 1 and 3 are not measurements of their own: the measure was run with the three items in place (192), and the two rows are derived from it and from section 18 (36 of the 37 documents of reason 2 emit; the 37th, `LabelsPage`, moved on to a method as a command). The last two rows are measured.
+
+### Item 4: what was done of the rest, and where it stopped
+
+Done: **a class set in markup** (section 18, reason 4; 4 documents). `Classes.name="{Binding ..}"` is `ClassBindingSetter` and `Classes.name="True"` is `ClassValueSetter`, and the emitter had a rule for neither. Both are calls of declared methods, written with their typed functions as the interpreter calls them (`runtime/framework/setters.rs`): `StyledElement::__markup_get_Classes` and `Classes::__markup_Set_3(&classes, name, value)`; `ClassBindingManager::__markup_BindClass_0(element, name, binding, None)`, whose result (the subscription) is dropped as the interpreter drops it. `Emitter::class_value_assignment`, `class_binding_assignment` and `class_value` in `rust_emitter/emitter.rs`; the corpus documents `class_value.xaml` and `class_binding.xaml` (a binding to a named element and a reflection binding), emitted the same by both hosts and equal to the run-time loader's trees. Three of the four documents emit; `TabControlPage` moved on (`XamlTypeExtensionNode: System.Object has no metadata`: `{x:Type sys:Object}`).
+
+Not started, in the order of the table: compiled binding paths over types without metadata, lists and arrays created in markup, a method as a command, container queries, the `PipsPager` case, the colour picker compiled by its build (`App.xaml`). The stage went to the real compile instead, because what it would find decides more than three more reasons of a few documents each, and it did find something.
+
+Refused after item 4, 24 documents (the first error of each):
 
 | Documents | Reason | What it needs |
 |---|---|---|
 | 5 | `XamlIlBindingPathNode: no public Rust path is recorded for FerroUI.Collections.FerroList`1[T]` (`CursorPage`, `NumericUpDownPage`, `TableViewPage`, `TreeViewPage`, `WrapPanelPage`) | The sample exports its five lists (`pub use`): a change of the sample. |
 | 5 | `XamlIlBindingPathNode: T has no metadata` (`CustomThemes.xaml`: `FerroList<Rc<SampleInfo>>`; `DataValidationPage`: `ErrorConverter`; `ListBoxPage`: ``IObservable`1[Object]``; `FlexPage`: ``Nullable`1[FlexAlignItems]``; `CalendarDatePickerPage`: ``Nullable`1[DateTime]``) | Compiled binding paths over types without markup metadata. |
-| 4 | `XamlPropertyAssignmentNode: class:name: not a plain property setter` | `Classes.name="{Binding ..}"`. |
+| 1 | `XamlTypeExtensionNode: System.Object has no metadata` (`TabControlPage`) | `{x:Type sys:Object}`: a type of the closed table of runtime library types as a value. |
 | 3 | `XamlIlBindingPathNode: a binding path with a method as a command` (`ContextFlyoutPage`, `LabelsPage`, `TransitioningContentControlPage`) | As section 18, reason 7. |
 | 5 | `XamlAstNewClrObjectNode: .. is not a class of the object model` (`System.Collections.ArrayList`: `ComboBoxPage`, `ViewboxPage`; ``List`1[T]``: `RefreshContainerPage`, `FocusPage`, `DialogsPage`) | Lists and arrays created in markup. |
 | 2 | `XamlIlWidthQuery: no emitter for this value node` | Container queries. |
 | 1 | `PreviousButtonTheme: not a plain property setter` | As section 18, reason 9. |
 | 1 | `App.xaml`: the include of the colour picker's theme documents | The colour picker compiled by its build. |
 | 1 | `OpenGlLeasePage`: the class is not ported | Left out. |
+
+### Item 5: the first real compile (`tests/XamlCatalogFixture`)
+
+`xaml.md` 9.5.17 has the design. The crate `xaml-catalog-fixture` is a member of the workspace (a test fixture, `publish = false`). It has no copies: its build script reads five documents of the sample from `samples/ControlCatalog/Pages`, and its modules are the source files of the sample by `#[path]` (the five page classes, the view model of the wrap panel page with its list, the random number generator it uses). Its assembly is `ControlCatalog`, so the documents name their classes as they do in the sample. The one thing that is the fixture's own is `markup.rs`: the two macros the page classes take from `crate::markup`, where `initialize_component()` calls the compiled markup of the class instead of the run-time loader. The sample is not changed.
+
+**What is proven**, by `cargo test -p xaml-catalog-fixture --lib` (10 tests: 4 of the fixture, 6 that the sample's files bring with them):
+
+1. A build script with `Build::type_system(TypeSystem::Model)` and `default_compile_bindings(true)` emits the five documents, each as the document of its class, from the scan of the sample's own class sources through macros of the crate (`content_page_class!`) and of another crate (`ferroui_controls::ferro_markup_list!`). No document is refused.
+2. **rustc compiles the emitted Rust** of the five documents (207,653 bytes: `CheckBoxPage` 19,806, `ButtonSpinnerPage` 26,586, `ImagePage` 45,806, `ProgressBarPage` 50,114, `WrapPanelPage` 65,351), without an error and without a warning of its own, as modules of the crate of the classes.
+3. It runs, and the result is the run-time loader's. For `CheckBoxPage`, `ProgressBarPage`, `ButtonSpinnerPage` and `WrapPanelPage`, an instance populated by the compiled markup and an instance populated by `FerroRuntimeXamlLoader::load_document` from the same file (the URI of the document, the assembly, compiled bindings as the default, as the sample loads it) have the same dump: every object with its class, the registered properties set on it with values and priorities, its name, its logical children. The constructors of the sample (`CheckBoxPage::new()`, which calls `initialize_component()`) give the same tree.
+4. A handler named in a document is the method of the class: raising `Spin` on a spinner of the compiled `ButtonSpinnerPage` changes the text it shows, as in the loaded page.
+5. Compiled bindings deliver: with the same `WrapPanelPageViewModel` as the data context of both pages the dumps stay equal, and the items control of the compiled page has the 50 items of the typed list.
+6. `ImagePage` (three handlers, named elements, two bitmaps named by asset paths, one of them the source of a `CroppedBitmap`) compiles and **fails to load, with the same message from both back ends** (`The resource /Assets/delicate-arch-896885_640.jpg could not be found`): the fixture embeds no asset and the test services decode no bitmap. That the converter's code is compiled by rustc and reaches the asset loader with the base URI is proven; a bitmap loaded by compiled markup is not.
+
+**What is not proven:** anything about the other 190 emitted documents; the application (`App.xaml`, `MainView.xaml`, the page table and the loader table of a converted sample); a bitmap that loads; `StaticResource ScrollPage` of the pages, which neither back end resolves in the fixture (there is no application with the resources of the sample; the property is not set in either tree); the size of the module of a converted sample.
+
+### The first real compile: what rustc refuses
+
+Two documents that were tried first are not in the fixture, because rustc refuses their emitted code. The emitter wrote them without a complaint, and both are among the 195:
+
+```text
+error[E0308]: mismatched types
+   --> $OUT_DIR/xaml/compiled_canvas_page.rs:279:104
+279 |     rt::invoked(<::ferroui_base::collections::FerroList<::ferroui_base::Point>>::__markup_set_Capacity(&points_0, 5_i32), 34, 16)?;
+    |                                                                                                        ^^^^^^^^^ expected `&FerroList<Point>`, found `&Points`
+   --> $OUT_DIR/xaml/compiled_slider_page.rs:146:67
+146 |     <::ferroui_base::media::MediaCollection<f64>>::__markup_Add_0(&tick_list_0, 0.0_f64);
+    |                                                                   ^^^^^^^^^^^^ expected `&MediaCollection<f64>`, found `&TickList`
+```
+
+16 errors, 2 in `CanvasPage` (`Points="..."` of a polygon) and 14 in `SliderPage` (`Ticks="0,20,25,40,75,100"`), one cause. A list written as text is a `FerroXamlIlFerroListConstantAstNode`: the list created, its capacity set and each element added with the methods of the instantiation of ``FerroList`1`` the named collection derives from. `Emitter::receiver` passes the instance of a member that a *base* of the value's type declares as `&value`, on the assumption that the Rust type of a markup type dereferences to the Rust type of the base its declaration names (`&RowDefinitions` as `&FerroList<Ref<RowDefinition>>`, which holds, and is in the output of both themes). The assumption is not a fact the type system has: `Points` (base `FerroList<Point>`) has no `Deref`, and `TickList` (base `MediaCollection<f64>`) dereferences to `FerroList<f64>`. The run-time loader converts the instance with the cast the crate registers (`ValueTypes::register_cast::<Points, FerroList<Point>>(..)`), which is a closure and says nothing about `Deref`.
+
+Not fixed in this stage, because every fix that is sound needs a decision:
+
+- The fact has to come from somewhere both hosts read. The scanner can read `impl Deref for X { type Target = Y; }` (and follow chains); the run-time type system cannot know it, so the run-time host of the emitter (the reference of the corpus and of the themes) would either differ from the model host or keep writing what rustc refuses.
+- A registration next to the cast (`register_deref::<RowDefinitions, FerroList<Ref<RowDefinition>>>(|list| list)`, a closure that compiles exactly when the coercion does) gives both hosts the fact, and needs one line per named collection in the base crate and the controls. Every pair the themes and the corpus rely on today must be registered, or their output changes.
+- Without the fact, the instance can always be converted at run time (`rt::argument`, what the emitter writes today when no base matches), which is what the interpreter does; that changes the bytes of every existing output that has `&value` for an inherited member.
+
+Until then a document with such a member is emitted and does not compile, which is the one case this compiler must not have (ruling 6). The cheapest guard, if the decision takes time: refuse the receiver when the type of the value is not the declaring type and the base is not a type the value is known to dereference to, starting from the list of pairs the existing outputs use.
+
+How many of the 195 documents have such a member was not counted: the measure does not compile what it emits. A converted sample is the count.
+
+### How to validate
+
+What the author ran, all green (debug profile):
+
+```text
+cargo test -p ferroui-build --lib                                   24 passed
+cargo test -p ferroui-build-scan --lib                              44 passed
+cargo test -p ferroui-markup-xaml-loader --lib                      397 passed, 1 ignored
+cargo test -p ferroui-markup-xaml-loader --lib --no-default-features --features compiler     272 passed
+cargo test -p ferroui-markup-xaml-tests --lib                       589 passed, 17 ignored (586 before; the corpus is 119 documents, 109 before)
+cargo test -p ferroui-themes-simple --lib                           205 passed, 3 ignored
+cargo test -p ferroui-themes-fluent --lib                           200 passed, 2 ignored
+cargo test -p xaml-include-fixture-theme --lib                      3 passed
+cargo test -p xaml-include-fixture-application --lib                28 passed
+cargo test -p ferroui-dialogs --lib                                 49 passed
+cargo test -p ferroui-controls-color-picker --lib                   43 passed
+cargo test -p xaml-catalog-fixture --lib                            10 passed
+cargo build -p control-catalog
+cargo test -p ferroui-markup-xaml-tests --lib emitter::catalog_measure -- --ignored --nocapture
+```
+
+The reference tests of both themes, of the dialogs and of the fixtures compare the output of their builds with the checked-in or regenerated text: every output that existed is unchanged, byte for byte. The checked-in files of the corpus and of the Rust paths were regenerated with the ignored tests the files name (`regenerate_emitter_output`, `regenerate_rust_paths_check`): the corpus has ten documents more and the paths of the types `support/emitter.rs` adds.
+
+**Not run by the author, for the validating session:** `cargo build --workspace` and `cargo clippy`; the suites beyond the ones above (the model of the controls crate now lists `ferro_markup_list!`, which every crate built on the controls reads); the browser build; `scripts/check-upstream-name.sh` or its equivalent (the author checked the files of the stage by hand).
+
+**What the author doubts.**
+
+1. The matcher of a repetition is greedy and does not look ahead as `macro_rules!` does: it takes rounds while the tokens have the form of the repetition. A rule whose repetition is followed by tokens of the same form is matched differently from rustc. No macro of the crates has one.
+2. The rules of an exported macro go through the model as text (`TokenStream::to_string`) and are parsed again; the lines of the tokens of an expansion are then the lines of the text, not of the file, so a diagnostic inside such an expansion names the line of the invocation.
+3. A crate that exports a declaring macro under a name a crate built on it also defines: the definition of the crate itself wins, as in Rust. Two dependencies that export the same name: the first model in the order of the build wins, which is not Rust's rule (an ambiguity there).
+4. `rt::cast_checked` followed by `rt::exact` in the setter of a converted value: the second cannot fail where the first passed, as long as a cast the crates register for assignability also converts; the message it would raise is the setter's, not the interpreter's.
+5. The two deviations of `xaml.md` 9.4.6 (the order of the invariant culture and the converter; the text of the base URI).
+6. The dump of the fixture's tests is its own and smaller than the one of the corpus (no plain properties, no resources, no styles, no templates built): two trees that differ only there compare as equal.
 

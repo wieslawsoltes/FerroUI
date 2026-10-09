@@ -1931,6 +1931,22 @@ Two forms the scan of the colour picker and of the catalog did not read (HANDOVE
 
 The drift test (`type_system_drift`) asserts that no crate of it has a cast its scan did not read, and `the_colour_picker_is_read_with_its_macros` asserts both forms on the colour picker, read as files. The colour picker cannot be a crate of the comparison itself in that process (HANDOVER.md, section 19): it was compared once, linked, with nothing in a kind that must be empty.
 
+#### 9.5.17 Implemented (2026-10-09): a first real compile of pages of the catalog
+
+Everything the measure of the catalog counts as emitted is Rust rustc has not seen. `tests/XamlCatalogFixture` (`xaml-catalog-fixture`) is the smallest build that changes that without converting the sample: a crate whose sources *are* files of the sample.
+
+| Part | What it is |
+|---|---|
+| `build.rs` | `Build::from_env().type_system(TypeSystem::Model).default_compile_bindings(true)` with one group per page, `XamlGroup::new(module).documents(&[(path, text)]).class_document(path)`, the text read from `samples/ControlCatalog/<path>` |
+| `pages.rs`, `view_models.rs` | `#[path = "../../samples/ControlCatalog/Pages/check_box_page.rs"] mod check_box_page;` and so on: the five page classes, `WrapPanelPageViewModel` with `WrapPanelItemList`, `Random`. The scanner follows `#[path]`, so the model of the fixture is the scan of the sample's files |
+| `markup.rs` | the two macros the page classes take from `crate::markup`: `content_page_class!` as the sample has it, and `xaml_class!`, whose `initialize_component()` calls `<Class as CompiledMarkup>::populate(&self.to_ref())`, the `populate` of the module the build wrote |
+| `lib.rs` | the assembly `ControlCatalog` and the namespaces of the sample, so that `x:Class="ControlCatalog.Pages.CheckBoxPage"` and `using:ControlCatalog.ViewModels` are what they are there; `include_compiled_xaml!()` |
+| `tests/mod.rs` | each page populated by its compiled markup against the same class populated by the run-time loader from the same file |
+
+It proves, for five documents (`CheckBoxPage`, `ProgressBarPage`, `ButtonSpinnerPage`, `WrapPanelPage`, `ImagePage`): the build emits them from the scan of the sample's own sources; rustc compiles the 207,653 bytes; four of them load to the tree the run-time loader builds, a handler is the method of the class, the compiled bindings deliver the typed list of the view model; the fifth fails to load as it does with the run-time loader, because no bitmap can be loaded in the tests. HANDOVER.md, section 19, has the exact list and what is not proven.
+
+**It also found the first code rustc refuses.** `CanvasPage` and `SliderPage` are emitted and do not compile: the instance of a member a named collection inherits from the list it derives from is passed as `&value`, which is right only where the Rust type dereferences to the Rust type of the base (`RowDefinitions`), and that is not a fact either type system has (`Points`, `TickList`). The measure cannot see it. HANDOVER.md, section 19, "The first real compile: what rustc refuses", has the errors and the ways to give the emitter the fact; it is the first item of the next stage, before any conversion.
+
 ### 9.6 Build integration
 
 #### 9.6.1 Entry points
@@ -2253,8 +2269,8 @@ For applications, `export_metadata()` can generate the whole function (`$OUT_DIR
 | `XamlIlTypeQuery`, `XamlIlStringQuery`, `XamlIlCombinatorQuery` | builder method called through the type system | form C call of the same builder method | never created upstream; emit kept for table completeness |
 | `XamlIlDirectCallPropertySetter` | `setter.set_Value(object)` | form B/C call with `into_markup_value(v)` | — |
 | `FerroNameScopeRegistrationXamlIlNode` | scope must exist and not be completed; `register` | `rt::register_name(ctx.name_scope(), name, &t)?` | — |
-| `ClassValueSetter` | `target.Classes.Set(name, value)` | `t.classes().set("name", v);` | — |
-| `ClassBindingSetter` | `BindClass(target, name, binding, null)` | form C call of the `BindClass` method declared in `markup_types/well_known.rs` (no public typed function was found) | a `pub` typed entry point would allow form B |
+| `ClassValueSetter` | `target.Classes.Set(name, value)` | as implemented: `let classes_n = StyledElement::__markup_get_Classes(..); Classes::__markup_Set_3(&classes_n, name, value);`, the two typed functions of the declared members the interpreter calls | — |
+| `ClassBindingSetter` | `BindClass(target, name, binding, null)` | as implemented: `let _ = ClassBindingManager::__markup_BindClass_0(target, name, binding, None);`, the typed function of the declared method; the subscription it returns is dropped | — |
 | `FerroAttachedInstancePropertySetterMethod` | `set_value_untyped(Field, value, LocalValue)` | typed `t.set_value(Owner::p_property(), v)` when the value type is exact, else untyped | setter arity quirk (decision 15) |
 | `FerroAttachedInstancePropertyGetterMethod` | `GetValue(Field)` | `t.get_value(Owner::p_property())` | — |
 | `XamlDirectCallAddHandler` | `AddHandler(event, handler, Direct \| Bubble, false)` | `rt::add_handler(&t, &Owner::__markup_field_NameEvent(), delegate);` (`add_handler_untyped` with `Direct \| Bubble`, `false`; 9.4.4) | a choice of the setter at run time is refused |
@@ -2370,6 +2386,8 @@ Not done, and why (9.6.8): a build script cannot compile a document that names a
 
 **E5 status (2026-10-09, event handlers; the dialogs).** Built and run by its author with the commands of the stage. Done (9.4.4): the emitter's rule for a method of the root object named in markup, in both hosts: a routed event, an event that is not a routed event, a property of a delegate type, a handler inside a template, with the method found and checked by the transform as at run time; a method that is not found is one diagnostic that names the document, the member and the method. Done (9.5.15): the dialogs are compiled by their build script and no longer link the run-time loader. Every output that existed is unchanged (the corpus, both themes, the fixtures). Measured, not converted: the ControlCatalog against the models (HANDOVER.md, section 18): of its 219 documents the emitter writes 84 today and 156 once four registrations of the colour picker are read by the scanner (emitted, not yet compiled by rustc); the reasons of the others, with counts, are the work list of item 2 below.
 
+**E5 status (2026-10-09, the work list of the catalog).** Built and run by its author with the commands of the stage (HANDOVER.md, section 19). Done: the scanner reads the registrations a macro makes for each type it is invoked with and what a macro of another crate declares (9.5.16); the emitter's rule for a text a type converter converts when the document is loaded (9.4.6) and for a class set in markup (9.8.2), in both hosts, with ten corpus documents more (119, all the same bytes by both hosts and the same trees as the run-time loader's). The measure of the catalog: 195 of 219 documents emitted (84). A first real compile (9.5.17): five pages of the sample, with their classes, compiled by a build and by rustc and compared with the run-time loader. It found emitted code rustc refuses, for one cause, which the next stage starts with. Every output that existed is unchanged.
+
 Remaining for E5, in order:
 
 1. The rest of the build-time type system (9.5), in stages that each build and test on their own:
@@ -2381,7 +2399,7 @@ Remaining for E5, in order:
    6. **The framework crates export their models and the themes compile in their build scripts** *(done for the base crate, the controls, the XAML runtime library, the dialogs and both themes, 9.5.13 and 9.5.14: the emitter is out of the `runtime` feature of the loader and the Fluent theme compiles in its build script; left: the manifest keys)*: the leaf crate of 9.5.7 (`ferroui-build-scan`: `json`, `model`, `model_set`, `scanner` and the export, with the two text constants and `DocumentModel` owned there, so that the base crate can scan itself), `links` and `build.rs` in the framework crates, the manifest keys of 9.6.1 (`[package.metadata.ferroui]`), then the two themes on `compile_xaml()` with their checked-in files as the differential (the three reasons of 9.6.8 against converting them fall with stage 5: the group no longer needs the theme crate linked, and nothing is built for the host).
 
    Before step 5, the two `XamlIlTests` documents and the dialogs can use the checked-in path.
-2. The ControlCatalog: its documents compiled, so that it does not link the run-time loader (browser-platform.md, section 20, item 3). *(The dialogs are done: 9.4.4 and 9.5.15. The catalog was measured against the models without converting it; the table of what compiles and what is refused, by reason, is section 18 of HANDOVER.md and is the work list.)* Measure a few pages first against the estimate there (+6 to +10 MB raw, +0.5 to +1.2 MB gzip on the module); above it, the owner decides.
+2. The ControlCatalog: its documents compiled, so that it does not link the run-time loader (browser-platform.md, section 20, item 3). *(The dialogs are done: 9.4.4 and 9.5.15. The catalog was measured against the models without converting it, and the list was worked down to 24 refused documents of 219; five of its pages compile with rustc and run (9.5.17). Sections 18 and 19 of HANDOVER.md have the tables. Before a conversion: the instance of a member a named collection inherits, which is emitted and does not compile (section 19).)* Measure a few pages first against the estimate there (+6 to +10 MB raw, +0.5 to +1.2 MB gzip on the module); above it, the owner decides.
 
 #### 9.10.2 Test strategy
 
