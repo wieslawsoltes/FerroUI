@@ -10,9 +10,9 @@ Generated from upstream commit `17350180c33b063f0e98abbfd19aa3cae63f5d56`. Back 
 | FerroUI | `src/FerroUI.DesignerSupport` (exists) |
 | Crate | `ferroui-designer-support` |
 | Phase / priority | 4 - tooling / P3 |
-| Files | 7/9 (77.8%) |
-| Types | 12/18 (66.7%) |
-| Members | 146/176 (83.0%) |
+| Files | 9/9 (100.0%) |
+| Types | 17/18 (94.4%) |
+| Members | 170/176 (3 waived) (98.3%) |
 | Contracts (interfaces) | 0/1 |
 | Property registrations | 0/0 |
 | Routed events | 0/0 |
@@ -64,12 +64,12 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 
 </details>
 
-### `Remote/HtmlTransport` - files 0/2, types 0/5, members 0/27
+### `Remote/HtmlTransport` - files 2/2, types 5/5, members 24/27 (3 waived)
 
 | Upstream file | Rust file | Status | Types | Members | Notes |
 |---|---|---|---|---|---|
-| `HtmlTransport.cs` | `remote/html_transport/html_transport.rs` | missing | 0/1 | 0/6 |  |
-| `SimpleWebSocketHttpServer.cs` | `remote/html_transport/simple_web_socket_http_server.rs` | missing | 0/4 | 0/21 |  |
+| `HtmlTransport.cs` | `remote/html_transport/html_transport.rs` | present | 1/1 | 6/6 |  |
+| `SimpleWebSocketHttpServer.cs` | `remote/html_transport/simple_web_socket_http_server.rs` | present | 4/4 | 18/21 (3 waived) |  |
 
 ## Rust-only files
 
