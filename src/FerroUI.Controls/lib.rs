@@ -299,6 +299,8 @@ mod styled_element_tests;
 #[cfg(test)]
 mod input_element_focus_tests;
 #[cfg(test)]
+mod drawing_image_propagation_tests;
+#[cfg(test)]
 mod input_element_gesture_tests;
 #[cfg(test)]
 mod styled_element_tests_theming;
