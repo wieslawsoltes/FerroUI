@@ -1,6 +1,6 @@
 //! Port of `MarkupExtensions/ReflectionBindingExtension.cs`.
 
-use crate::ServiceProviderExtensions;
+use crate::{IXamlTypeResolver, ServiceProviderExtensions};
 use ferroui_base::data::{BindingBase, BindingExpressionBase, ReflectionBinding};
 use ferroui_base::metadata::IServiceProvider;
 use ferroui_base::{ferro_markup_type, FerroObject, FerroProperty, Ref};
@@ -36,10 +36,23 @@ impl ReflectionBindingExtension {
 
     /// Creates the binding the extension describes.
     pub fn provide_value(&self, service_provider: &Rc<dyn IServiceProvider>) -> Rc<ReflectionBinding> {
-        let resolver_provider = service_provider.clone();
+        // The type resolver of the binding is `serviceProvider.ResolveType` in the
+        // managed original: a delegate that holds the service provider, which is the
+        // context of the build with the root object, the name scope and the parents it
+        // was built with. The binding instance of an element of that tree holds the
+        // binding, so held that way the tree would keep itself alive (the collector of
+        // the managed original frees it). Here the resolver holds the one service
+        // `ResolveType` asks the provider for, which belongs to the document.
+        let type_resolver = service_provider.get_service_of::<Rc<dyn IXamlTypeResolver>>();
         let binding = ReflectionBinding::empty();
-        binding
-            .set_type_resolver(Some(Rc::new(move |namespace, name| resolver_provider.resolve_type(namespace, name).ok())));
+        binding.set_type_resolver(Some(Rc::new(move |namespace: Option<&str>, name: &str| {
+            let type_resolver = type_resolver.as_ref()?;
+            match namespace {
+                Some(prefix) if !prefix.is_empty() => type_resolver.resolve(&format!("{prefix}:{name}")),
+                _ => type_resolver.resolve(name),
+            }
+            .ok()
+        })));
         binding.set_converter(self.converter());
         binding.set_converter_culture(self.converter_culture());
         binding.set_converter_parameter(self.converter_parameter());
