@@ -176,7 +176,7 @@ pub use list_box_page::ListBoxPage;
 pub use menu_page::MenuPage;
 pub use native_embed_page::{EmbedSample, INativeDemoControl, NativeEmbedPage};
 pub use navigation_demo_page::NavigationDemoPage;
-pub use numeric_up_down_page::{FormatObject, NumbersPageViewModel, NumericUpDownPage};
+pub use numeric_up_down_page::{FormatObject, FormatObjectList, NumbersPageViewModel, NumericUpDownPage};
 pub use open_gl_interop_page::OpenGlInteropPage;
 pub use open_gl_page::{OpenGlPage, OpenGlPageControl};
 pub use carousel_page_samples::*;
