@@ -161,6 +161,46 @@ fn resource_node_stacks_of_the_same_parents_are_shared() {
     assert!(Rc::ptr_eq(&stacks[0], &stacks[1]));
 }
 
+/// Not a port: upstream's deferred content holds what it captured, and its
+/// collector frees the cycle (DEVIATIONS.md, Markup).
+#[test]
+fn deferred_content_does_not_keep_what_it_was_declared_under_alive() {
+    let root = Border::new();
+    let provider = declaration_context(vec![boxed(root.clone())], boxed(root.clone()), None);
+    let content = XamlIlRuntimeHelpers::deferred_transformation_factory_v3::<Ref<Control>>(button_builder(), &provider);
+    drop(provider);
+
+    // The root owns the content, as an element owns the template declared
+    // under it.
+    root.set_tag(Some(content as BoxedValue));
+    let weak = root.downgrade();
+    drop(root);
+    assert!(weak.upgrade().is_none());
+}
+
+/// Not a port: an instantiation sees the captured objects that are alive.
+#[test]
+fn deferred_content_is_instantiated_with_the_captured_objects_that_are_alive() {
+    let root = Border::new();
+    let gone = Border::new();
+    let provider = declaration_context(vec![boxed(root.clone()), boxed(gone.clone())], boxed(root.clone()), None);
+    let seen: Rc<RefCell<Vec<usize>>> = Rc::new(RefCell::new(Vec::new()));
+    let builder = {
+        let seen = seen.clone();
+        DeferredContentBuilder::new(move |sp| {
+            seen.borrow_mut().push(sp.get_parents::<Ref<Border>>().len());
+            None
+        })
+    };
+    let content = XamlIlRuntimeHelpers::deferred_transformation_factory_v3::<Ref<Control>>(builder, &provider);
+    drop(provider);
+
+    content.build_with(None);
+    drop(gone);
+    content.build_with(None);
+    assert_eq!(vec![2, 1], *seen.borrow());
+}
+
 #[test]
 fn deferred_content_builds_the_object_as_the_deferred_content_contract() {
     let root = Border::new();
