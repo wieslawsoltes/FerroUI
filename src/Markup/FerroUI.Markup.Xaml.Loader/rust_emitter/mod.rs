@@ -99,8 +99,8 @@ mod source;
 mod transform;
 
 pub use compiled::{
-    compile_documents, compile_documents_with, generate_class_file, generate_file, generate_file_with, ClassConstructor, ClassFile,
-    CompiledDocument, EmitterHost, GeneratedFile,
+    class_document_group, class_of_document, compile_documents, compile_documents_with, generate_class_file, generate_class_file_with,
+    generate_file, generate_file_with, ClassConstructor, ClassFile, ClassGroup, CompiledDocument, EmitterHost, GeneratedFile,
 };
 pub use transform::{transform_group, DocumentSource, TransformOptions, TransformedDocument};
 #[cfg(any(test, feature = "testing"))]
