@@ -50,10 +50,11 @@ impl BrowserRenderSurface {
     }
 
     /// The render target of the canvas on the calling thread; `None` while
-    /// no thread has reported the target, and on a thread that does not
-    /// have it.
+    /// no thread has reported the target, on a thread that does not have
+    /// it, and once the view is disposed (the target has left the table of
+    /// its thread then, and must not be wrapped a second time).
     fn target(&self) -> Option<BrowserRenderTarget> {
-        if !self.shared.has_target() {
+        if !self.shared.has_target() || self.shared.is_disposed() {
             return None;
         }
         get_render_target(self.shared.target_id())

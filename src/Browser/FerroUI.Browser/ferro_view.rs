@@ -100,4 +100,18 @@ impl FerroView {
     pub(crate) fn top_level(&self) -> Ref<TopLevel> {
         self.top_level.clone().upcast()
     }
+
+    /// Closes the view: its top-level is disposed, which releases the
+    /// surface of the canvas (on the thread that renders, the render target
+    /// of the canvas and what drew to it) and stops the renderer of the
+    /// view. The elements of the view stay in the page. The view cannot be
+    /// used afterwards.
+    ///
+    /// Not from upstream, whose view has no way to be closed (the top-level
+    /// under it is disposable there as here). A page that shows and removes
+    /// views would otherwise keep the canvas and the graphics context of
+    /// every view it ever had.
+    pub fn dispose(&self) {
+        self.top_level.dispose();
+    }
 }

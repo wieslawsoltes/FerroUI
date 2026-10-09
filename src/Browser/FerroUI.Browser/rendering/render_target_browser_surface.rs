@@ -1,13 +1,18 @@
-use super::web_render_target::get_render_target;
-use super::{BrowserRenderSurface, BrowserSharedRenderLoop, BrowserSurface, BrowserSurfaceShared, RenderWorker};
+use super::web_render_target::{get_render_target, remove_render_target, unregister_canvas};
+use super::{
+    BrowserRenderSurface, BrowserSharedRenderLoop, BrowserSurface, BrowserSurfaceShared, RenderStatistics,
+    RenderWorker,
+};
 use crate::browser_app_builder::BrowserRenderingMode;
 use crate::interop::canvas_helper::CanvasSurface;
-use crate::interop::JsObject;
+use crate::interop::{thread_proxy, JsObject};
 use ferroui_base::media::MediaContext;
 use ferroui_base::platform::surfaces::IPlatformRenderSurface;
 use ferroui_base::platform::{
     IOptionalFeatureProvider, IPlatformGraphics, IPlatformGraphicsContext, IPlatformGraphicsReadyStateFeature,
 };
+use ferroui_base::reactive::IDisposable;
+use ferroui_base::rendering::composition::server::ServerCompositor;
 use ferroui_base::rendering::composition::Compositor;
 use ferroui_base::threading::Dispatcher;
 use ferroui_base::{PixelSize, Size};
@@ -161,12 +166,85 @@ impl RenderTargetBrowserSurface {
 
     /// Releases the canvas surface.
     ///
-    /// The compositor is not told: it leaves the render loop by itself when
-    /// the top-level that holds it is released.
+    /// Upstream's order: a job is posted to the compositor, then the surface
+    /// of the script side is destroyed. Upstream's job takes the compositor
+    /// out of the render loop; a compositor of this port leaves the loop by
+    /// itself when the top-level that holds it is released, so the job here
+    /// does what upstream leaves to its garbage collector and what nothing
+    /// in upstream does at all ([`release_canvas`]): on the thread that
+    /// renders, it releases what was drawn to the canvas with, marks the
+    /// canvas as disposed, takes its render target out of the table of that
+    /// thread and has the script let go of the target (`unregisterCanvas`
+    /// for a canvas of a render worker).
+    ///
+    /// The top-level is disposed before its renderer: the composition target
+    /// of the view is disposed after this call, in a batch of its own. The
+    /// job does not depend on which of the two reaches the thread that
+    /// renders first.
+    ///
+    /// A canvas whose render target never came to exist (the view was closed
+    /// before the render thread had taken the canvas) is not released: the
+    /// jobs of a compositor that is not ready do not run.
     pub fn dispose(&self) {
         // A target reported under the id from here on belongs to no canvas.
         self.shared.unregister();
+        let shared = self.shared.clone();
+        // This thread created the canvas, and its script is the one to tell.
+        let page_thread = thread_proxy::current_thread();
+        // After the targets of the frame: nothing of that frame draws to the
+        // canvas after the job.
+        self.base.compositor().post_server_job(move |server| release_canvas(server, &shared, page_thread), true);
         self.base.dispose();
+    }
+}
+
+/// The last job of the compositor of a closed view. Runs on the thread that
+/// renders, inside a frame.
+///
+/// 1. With the graphics context of the canvas current, the render targets
+///    and layers that are still there and the backend context (Skia's
+///    context, which holds the objects of the graphics interface it drew
+///    with) are released. A thread that renders several canvases has several
+///    contexts, and an object that is deleted while another context is
+///    current is deleted there, where the same number names something else:
+///    this is the one place where the context of a closed canvas is
+///    certainly current while its objects go. The composition target of the
+///    view, when it is disposed after this, finds nothing to release.
+/// 2. The rest is [`release_canvas_objects`].
+fn release_canvas(server: &ServerCompositor, shared: &Arc<BrowserSurfaceShared>, page_thread: usize) {
+    let render_interface = server.render_interface();
+    // A compositor that never drew has no backend context, and none is
+    // created to be released.
+    if render_interface.existing_backend_context().is_some() {
+        let current = render_interface.ensure_current();
+        server.reset_all_gpu_resources();
+        current.dispose();
+    }
+    release_canvas_objects(shared, page_thread);
+}
+
+/// What the thread that renders does with the canvas of a closed view once
+/// nothing draws to it:
+///
+/// 1. the canvas is marked as disposed: the graphics of its compositor is
+///    not ready from here on, so no frame creates a backend context or a
+///    render target for it again;
+/// 2. the render target leaves the table of this thread;
+/// 3. the script of the thread that created the canvas (`page_thread`) is
+///    told ([`unregister_canvas`]): directly when that is this thread,
+///    through its event loop otherwise. It releases the target of the script
+///    side, or sends `unregisterCanvas` to the worker that has it.
+fn release_canvas_objects(shared: &Arc<BrowserSurfaceShared>, page_thread: usize) {
+    let target_id = shared.target_id();
+    shared.dispose();
+    remove_render_target(target_id);
+    RenderStatistics::canvas_released();
+    if thread_proxy::current_thread() == page_thread {
+        unregister_canvas(target_id);
+    } else {
+        // When the call cannot be queued the script keeps the target: the
+        // canvas of the closed view stays alive in the worker, unused.
+        thread_proxy::run_on_thread(page_thread, Box::new(move || unregister_canvas(target_id)));
     }
 }
 
@@ -242,7 +320,10 @@ mod tests {
     use super::*;
     use crate::interop::canvas_helper::{RENDER_TARGET_KIND_SOFTWARE, RENDER_TARGET_KIND_WEB_GL};
     use crate::interop::JsObject;
-    use crate::rendering::web_render_target::{set_script_render_targets_for_unit_tests, BrowserRenderTarget};
+    use crate::rendering::web_render_target::{
+        set_script_render_targets_for_unit_tests, set_script_unregister_for_unit_tests, BrowserRenderTarget,
+    };
+    use std::cell::RefCell;
     use crate::rendering::BrowserSoftwareRenderTarget;
 
     fn software_script(_id: i32) -> Option<BrowserRenderTarget> {
@@ -309,6 +390,59 @@ mod tests {
         let graphics = BrowserPlatformGraphics { shared };
 
         graphics.get_shared_context();
+    }
+
+    thread_local! {
+        /// The canvases the thread of a test told its script to let go of.
+        static UNREGISTERED: RefCell<Vec<i32>> = const { RefCell::new(Vec::new()) };
+    }
+
+    fn record_unregistered(id: i32) {
+        UNREGISTERED.with(|unregistered| unregistered.borrow_mut().push(id));
+    }
+
+    #[test]
+    fn a_released_canvas_is_disposed_leaves_the_table_of_its_thread_and_is_unregistered() {
+        set_script_render_targets_for_unit_tests(software_script);
+        set_script_unregister_for_unit_tests(record_unregistered);
+        let shared = BrowserSurfaceShared::new();
+        shared.register(9701);
+        shared.set_target_kind(RENDER_TARGET_KIND_SOFTWARE);
+        shared.on_size_changed(300.0, 180.0, 1.0);
+        let graphics = BrowserPlatformGraphics { shared: shared.clone() };
+        let feature = ready_state(&graphics);
+        let surface = BrowserRenderSurface::new(shared.clone());
+        assert!(get_render_target(9701).is_some());
+        assert!(feature.is_ready() && surface.is_ready());
+        assert!(surface.as_framebuffer_surface().is_some());
+
+        // The one thread of a build without threads is the thread of the
+        // page: its script is told directly.
+        release_canvas_objects(&shared, thread_proxy::current_thread());
+
+        assert!(shared.is_disposed());
+        assert!(!feature.is_ready() && !surface.is_ready());
+        // The surface is of no kind any more, and nothing wraps the target a
+        // second time.
+        assert!(surface.as_framebuffer_surface().is_none());
+        assert!(!remove_render_target(9701));
+        assert_eq!(vec![9701], UNREGISTERED.with(|unregistered| unregistered.borrow().clone()));
+    }
+
+    #[test]
+    fn a_thread_that_did_not_create_the_canvas_does_not_tell_its_own_script() {
+        set_script_render_targets_for_unit_tests(software_script);
+        set_script_unregister_for_unit_tests(record_unregistered);
+        let shared = BrowserSurfaceShared::new();
+        shared.register(9702);
+        shared.set_target_kind(RENDER_TARGET_KIND_SOFTWARE);
+
+        // Created by a thread with another id: the call is queued for it
+        // (and dropped here, where there are no threads to queue for).
+        release_canvas_objects(&shared, thread_proxy::current_thread() + 1);
+
+        assert!(shared.is_disposed());
+        assert!(UNREGISTERED.with(|unregistered| unregistered.borrow().is_empty()));
     }
 
     #[test]

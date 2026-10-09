@@ -47,6 +47,15 @@ pub struct RenderStatistics {
     /// The index, in the table of the script of the module, of the function
     /// of the last such call; -1 when there was none.
     pub last_proxied_function: i64,
+    /// The canvases of closed views whose render target the thread that
+    /// drew to them has released
+    /// ([`RenderTargetBrowserSurface::dispose`](super::RenderTargetBrowserSurface::dispose)).
+    pub canvases_released: u64,
+    /// The panics of the render thread since the module started. A frame
+    /// that panics is caught by the render loop, which goes on with the next
+    /// tick; each is reported to the thread of the page
+    /// ([`RenderWorker`](super::RenderWorker)).
+    pub render_thread_panics: u64,
 }
 
 impl RenderStatistics {
@@ -69,6 +78,17 @@ impl RenderStatistics {
     pub(crate) fn tick_ended(proxied_calls: Option<u64>, last_proxied_function: Option<i64>) {
         COUNTERS.tick_ended(proxied_calls, last_proxied_function);
     }
+
+    /// The thread that renders released the render target of the canvas of
+    /// a closed view.
+    pub(crate) fn canvas_released() {
+        COUNTERS.canvases_released.fetch_add(1, Ordering::SeqCst);
+    }
+
+    /// The render thread panicked.
+    pub(crate) fn render_thread_panicked() {
+        COUNTERS.render_thread_panics.fetch_add(1, Ordering::SeqCst);
+    }
 }
 
 struct Counters {
@@ -83,6 +103,8 @@ struct Counters {
     /// Whether every tick so far came with a count of its proxied calls.
     proxied_calls_counted: AtomicBool,
     last_proxied_function: AtomicI64,
+    canvases_released: AtomicU64,
+    render_thread_panics: AtomicU64,
 }
 
 static COUNTERS: Counters = Counters::new();
@@ -100,6 +122,8 @@ impl Counters {
             tick_proxied_calls: AtomicU64::new(0),
             proxied_calls_counted: AtomicBool::new(true),
             last_proxied_function: AtomicI64::new(-1),
+            canvases_released: AtomicU64::new(0),
+            render_thread_panics: AtomicU64::new(0),
         }
     }
 
@@ -139,6 +163,8 @@ impl Counters {
             ticks,
             tick_proxied_calls: counted.then(|| self.tick_proxied_calls.load(Ordering::SeqCst)),
             last_proxied_function: self.last_proxied_function.load(Ordering::SeqCst),
+            canvases_released: self.canvases_released.load(Ordering::SeqCst),
+            render_thread_panics: self.render_thread_panics.load(Ordering::SeqCst),
         }
     }
 }

@@ -27,6 +27,9 @@ extern "C" {
 
     #[wasm_bindgen(js_namespace = WebRenderTargetRegistry, js_name = workerStarted)]
     fn js_worker_started(thread_id: i32);
+
+    #[wasm_bindgen(js_namespace = WebRenderTargetRegistry, js_name = unregister)]
+    fn js_unregister(id: i32);
 }
 
 /// Makes the worker of the calling thread take the canvases that are
@@ -59,6 +62,21 @@ pub const PENDING_RENDER_THREAD: i32 = -1;
 /// later ones at once.
 pub(crate) fn worker_started(thread_id: i32) {
     js_worker_started(thread_id);
+}
+
+/// Tells the registry of the script side of the calling thread, which has to
+/// be the thread that created the canvas `id`, that the canvas is closed:
+/// the registry releases the render target of a canvas that thread kept, or
+/// tells the worker the canvas was transferred to (`unregisterCanvas`),
+/// which releases it there.
+///
+/// Called last in the disposal of a view, when the thread that renders has
+/// released what it drew to the canvas with and has taken the target out of
+/// its table ([`remove_render_target`]). Upstream's script has the handler
+/// of the message and nothing that sends it.
+pub(crate) fn unregister_canvas(id: i32) {
+    let unregister = SCRIPT_UNREGISTER.with(|unregister| unregister.get());
+    unregister(id);
 }
 
 /// The render target of a canvas, as the thread that draws to it holds it.
@@ -108,6 +126,9 @@ thread_local! {
     /// The registry of the script of this thread; a test puts a table of its
     /// own in its place.
     static SCRIPT_RENDER_TARGETS: Cell<ScriptRenderTargets> = Cell::new(wrap_script_render_target as ScriptRenderTargets);
+    /// How this thread tells the registry of its script that a canvas is
+    /// closed; a test puts a recorder in its place.
+    static SCRIPT_UNREGISTER: Cell<fn(i32)> = Cell::new(js_unregister as fn(i32));
 }
 
 /// The render target the script of the calling thread created under `id`,
@@ -163,6 +184,13 @@ pub fn remove_render_target(id: i32) -> bool {
 #[cfg(test)]
 pub(crate) fn set_script_render_targets_for_unit_tests(script: fn(i32) -> Option<BrowserRenderTarget>) {
     SCRIPT_RENDER_TARGETS.with(|current| current.set(script));
+}
+
+/// Replaces the call that tells the script of the calling thread that a
+/// canvas is closed.
+#[cfg(test)]
+pub(crate) fn set_script_unregister_for_unit_tests(unregister: fn(i32)) {
+    SCRIPT_UNREGISTER.with(|current| current.set(unregister));
 }
 
 /// Sets the size of the canvas behind a render target.
