@@ -565,12 +565,12 @@ fn assembly_and_namespace_table_are_read() {
     assert_eq!(
         model.xmlns_definitions,
         vec![
-            XmlnsDefinitionModel { xml_namespace: ferroui_base::metadata::FERRO_XML_NAMESPACE.to_string(), namespace: "Fixture.Controls".to_string() },
+            XmlnsDefinitionModel { xml_namespace: crate::FERRO_XML_NAMESPACE.to_string(), namespace: "Fixture.Controls".to_string() },
             XmlnsDefinitionModel { xml_namespace: "https://example.org/fixture".to_string(), namespace: "Fixture.Media".to_string() },
         ]
     );
     assert_eq!(model.xmlns_prefixes, vec![XmlnsPrefixModel { xml_namespace: "https://example.org/fixture".to_string(), prefix: "f".to_string() }]);
-    assert_eq!(model.metadata, vec![pair(ferroui_base::metadata::MarkupAssembly::CREATE_SOURCE_INFO, "true")]);
+    assert_eq!(model.metadata, vec![pair(crate::CREATE_SOURCE_INFO, "true")]);
     assert!(model.documents.is_empty() && model.dependencies.is_empty());
 }
 
