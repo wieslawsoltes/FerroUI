@@ -271,14 +271,17 @@ mod tests {
     }
 
     #[test]
-    fn a_control_with_a_preview_host_is_previewed_as_the_host() {
+    fn a_control_that_names_a_preview_host_is_previewed_as_itself() {
         let app = start();
+        // `Design.SetPreviewWith(target, control)` records nothing for a
+        // target that is a visual ("not a supported scenario without
+        // templates"), so the control is previewed as any other control.
         let window = load(&format!(
             "<UserControl {XMLNS}><Design.PreviewWith><Border Name='host' Padding='20'/></Design.PreviewWith></UserControl>"
         ));
         let content = content_of(&window);
-        assert_eq!(Some("host".to_string()), content.name());
-        assert!(content.is::<Border>());
+        assert_eq!(None, content.name());
+        assert!(content.is::<UserControl>());
         window.close();
         app.dispose();
     }
