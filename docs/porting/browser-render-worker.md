@@ -918,3 +918,148 @@ Measured in headless Chrome, `themed_view` built with threads (68 checks):
 Other examples with this step: `storage_view` with threads, now rendering from the worker, 19 checks (six runs; one run failed in the removal of the browser's profile directory by the harness, not in a check); `render_worker_clear` 6; `thread_spawn` 3; without threads `themed_view` 30 and `storage_view` 18; the host tests of the browser crate 217.
 
 Still open: the Skia bindings shim is linked without the atomics feature while two threads now call Skia (the fix is written on the branch `skia-shim-threads` and waits for validation); several canvases in one worker (B2.7); the catalog on the worker (B2.7); browsers other than headless Chrome.
+
+## B2.7: the catalog and the rest (written, 2026-10-09)
+
+Status: written on 2026-10-09, **not built and not run**. No cargo, no browser build and no browser. What could be checked without a build: the Rust files parse (the formatter reads them), the script modules pass the type check of `webapp/` with the tools of the main checkout (the only errors are the missing package of the storage bundle, as before), and the scripts and tests parse (`node --check`). The linter of `webapp/` was not run (its configuration does not resolve from a worktree). Everything here is **[M]** unless marked; **[R]** is read in Emscripten 6.0.10.
+
+### What was written
+
+| Piece | Where | What it is |
+|---|---|---|
+| The catalog host, threaded | `samples/ControlCatalog.Browser/wwwroot/main.js`, `program.rs` | The page calls `ensureCrossOriginIsolated` when the script of the module says it was built with threads, as the pages of `themed_view` and `storage_view` do. `parse_args` reads `RenderThread` (`bool.TryParse`, as `PreferFileDialogPolyfill`): `?RenderThread=false` keeps a module built with threads on the thread of the page. New exports, none a port: `catalogRendering` (the line of `themedViewRendering`), `catalogMemory`, `catalogPanicInFrame`; the page offers `controlCatalogPanics()` and samples the memory with `?MemoryReport=true` |
+| The disposal of a view | `rendering/render_target_browser_surface.rs` (`dispose`, `release_canvas`, `release_canvas_objects`), `rendering/web_render_target.rs` (`unregister_canvas`), `rendering/browser_render_surface.rs`, `webRenderTargetRegistry.ts` (`unregister`, `releaseTarget`), `webRenderTarget.ts` and `webGlRenderTarget.ts` (`release`) | Below, "The disposal of a view" |
+| A way to close a view | `ferro_view.rs`, `FerroView::dispose` | Disposes the top-level of the view. Not from upstream, whose view cannot be closed; without it nothing outside the crate reaches the disposal |
+| A panic of the render thread | `rendering/render_worker.rs` (`report_panics`, `on_panic`, `panic_message`), `interop/thread_proxy.rs` (`report_render_thread_panic`), `ferroExports.ts` (`reportRenderThreadPanic`, `renderThreadPanics`) | Below, "A panic on the render thread" |
+| The statistics | `rendering/render_statistics.rs` | Two more counters: `canvases_released`, `render_thread_panics` |
+| A snapshot that crosses threads is always in memory | `src/Skia/FerroUI.Skia/surface_render_target.rs`, `create_shared_snapshot`, `read_raster_snapshot` | Below, the table of offscreen paths, first row |
+| The example | `examples/themed_view/main.rs` | `themedViewSecondView("open" \| "close")`: a second view in an element the page adds, and its disposal. `themedViewRendering` reports `released` and `panics` |
+| The tests | `scripts/browser/tests/control_catalog.test.mjs`, `themed_view.test.mjs`; `scripts/browser/catalog-pages.mjs` (new), `harness.mjs` | Below, "The tests" |
+| The comparison of the two modes | `scripts/browser/capture-catalog.mjs` (new) | Below, "The comparison" |
+| Host tests | `render_target_browser_surface.rs` (2), `render_worker.rs` (1), `samples/ControlCatalog.Browser/program.rs` (2) | A released canvas is disposed, leaves the table of its thread, is of no kind any more and is unregistered with the script of the thread that created it, and only there; the message of a panic; the option and the probes of the host |
+| Records | `DEVIATIONS.md` (browser backend: six rows; Skia backend: one; the sample: one) | |
+
+**The base library was not changed**, and neither were the contracts of `src/FerroUI.Base/rendering`. The disposal uses what is public there: `Compositor::post_server_job`, `ServerCompositor::render_interface` and `reset_all_gpu_resources`, `PlatformRenderInterfaceContextManager::existing_backend_context` and `ensure_current`.
+
+### The disposal of a view
+
+Upstream's order **[U]** (`EmbeddableControlRoot.Dispose`, `BrowserTopLevelImpl.Dispose`, `RenderTargetBrowserSurface.Dispose`, `BrowserSurface.Dispose`): the top-level implementation is disposed first; its surface posts a job to the compositor (`InvokeServerJobAsync`, which takes the server compositor out of the render loop: "CompositionTarget should be gone at this point too") and then destroys the surface of the script side (`CanvasHelper.Destroy`, which does nothing in script); then the root closes, which stops its renderer. Nothing sends `unregisterCanvas`, nothing releases Skia's context, and the canvas with its WebGL context lives as long as the garbage collector lets it.
+
+The port keeps the order and gives the job the work (`RenderTargetBrowserSurface::dispose`):
+
+1. **The thread of the page**: the canvas leaves the registry by target id (`BrowserSurfaceShared::unregister`, as before); a job is posted to the compositor (`post_server_job`, after the targets of its frame); the surface of the script side is destroyed (`CanvasSurface.destroy`, a no-op as upstream's). The top-level then publishes an empty list of surfaces and the root closes, as before.
+2. **The thread that renders, inside a frame** (`release_canvas`): when the compositor has a backend context, the graphics context of the canvas is made current (`ensure_current`), every render target and layer that is still there is released and the backend context is disposed (`reset_all_gpu_resources`: Skia's `SkiaContext::dispose`, `GlSkiaGpu::dispose`, `release_resources_and_abandon` of the Ganesh context), and the context that was current before is restored. This is the answer to doubt 3 of "B2.4" and doubt 11 of "B2.6" for a view that is closed: the objects of a canvas go while its own context is current, whatever other canvases the thread draws.
+3. **The same thread, next** (`release_canvas_objects`): the shared state is marked disposed, so the graphics of that compositor is not ready any more and no later frame creates a backend context or a render target for it; the render target leaves the table of the thread (`remove_render_target`); `canvases_released` is counted; and the script of the thread that created the canvas is told (`unregister_canvas`): directly when that is this thread, through its event loop otherwise (`thread_proxy::run_on_thread`).
+4. **The script of the thread that created the canvas** (`WebRenderTargetRegistry.unregister`): the entry of the canvas goes; a canvas this thread kept has its render target released here; a canvas whose control went to a worker has `unregisterCanvas` posted to that worker; a canvas that was held back and never posted is forgotten.
+5. **The worker** (the handler upstream's script has and never triggers): the target leaves the table of the script and lets go of its context (`WebGlRenderTarget.release`: `GL.deleteContext` **[R]** (`libwebgl.js`), which takes the context out of the table that keeps it alive and frees its handle).
+
+Why the disposed flag is set by the job and not by the thread of the page (what "B2.5" left open): the composition target of the view is disposed after the top-level, in a batch of its own (`sync_dispose_composition_target`), and its server side releases its render target under `ensure_current`, which panics for graphics that is not ready. Set at the start, the flag would turn the disposal of every view into that panic. Set by the job, the order of the two no longer matters: if the batch of the target comes first, the job finds no target and releases the backend context; if the job comes first, the target finds nothing left to release (`reset_render_target` returns before it asks for the context).
+
+The same code runs without a render thread: the job runs on the thread of the page and tells its script directly. That is a change of what the build without threads does **when a view is disposed**, which nothing did before `FerroView::dispose` existed; a page that never closes a view takes none of these paths.
+
+What it does not cover:
+
+- **A view that is dropped without being disposed.** Its compositor is released by `Compositor::drop` as before: on the render thread for a confined compositor, without making its context current. Doubt 3 of "B2.4" stands for that path.
+- **A view that is closed before its canvas reached the render thread.** The jobs of a compositor whose graphics is not ready do not run, so nothing is released and the script keeps the transferred canvas (on its list of held-back canvases, or in the worker without a render target of the framework).
+- **The canvas element** stays in the document, as upstream's does.
+
+### Offscreen rendering asked for by the thread of the page
+
+Read against the confined mode ("B2.4"): the thread of the page has the render interface of Skia in its locator and no graphics context; `WebGlContext::verify_access` refuses every thread but the one that wrapped it.
+
+| Path | Used by the catalog | What runs where | Verdict |
+|---|---|---|---|
+| `Compositor::create_composition_visual_snapshot` | `Pages/open_gl_page.rs` (the Snapshot button, which is only shown under a `Window`: hidden in a browser) | A post-target job (`compositor.rs`). On the render thread: `ensure_current`, an offscreen layer on the Ganesh context of that thread, the visual drawn into it, `create_shared_snapshot`, the layer disposed, the context restored (`server_compositor.rs`). The bitmap that crosses is a raster copy (`make_raster_image`). **Was not sound in one case**: when that copy failed, `create_shared_snapshot` handed out the image of the GPU surface itself, in an `Arc` that then crossed to the thread of the page | **Fixed**: a shared snapshot of a surface with a GPU context is always in memory: the copy of the context, else the pixels read from the surface, else (a lost context) transparent pixels of its size. A surface without a GPU context is unchanged |
+| `RenderTargetBitmap` (`with_dpi`, `render`) | No page names it; `src/FerroUI.Controls/animation/connected_animation.rs` does | `create_render_target_bitmap` makes a `WriteableBitmapImpl` and a framebuffer render target without a graphics context; `render` goes through `ImmediateRenderer`, which has no compositor and takes no lock | Sound: the thread of the page, in memory |
+| Custom draw operations (`context.custom`) | `Pages/TabbedPage/FluidNavBar/fluid_nav_bar.rs` | The trait is `Send + Sync + 'static`; `render` runs in the replay of a frame, on the thread that renders. The Skia lease it can ask for there hands out the canvas (and the GPU context) of that thread. The operation of the catalog captures plain values and an `Arc<Mutex<..>>` | Sound |
+| Custom visual handlers (`create_custom_visual`) | `Pages/composition_page.rs` | The factory is `Send` and, by its documentation, runs on the render thread (where it runs was not traced); messages are `Arc<dyn Any + Send + Sync>`, sent as one job per composition update; `on_render` and `on_animation_frame_update` are driven by the server | Sound |
+| Drawing surfaces, the GPU interop (`try_get_composition_gpu_interop`, `create_drawing_surface`) | `Pages/OpenGl/open_gl_interop_page.rs`, and `OpenGlControlBase` under `Pages/open_gl_page.rs` | The Skia backend context publishes no feature and `GlSkiaGpu::try_get_feature` is `None`, so the interop is absent before anything is created: `try_create_compatible_gl_context` answers `None`, the interop page shows "Compositor OpenGL interop is not available on this platform", and `OpenGlControlBase::initialize` logs and gives up. No surface, no GL call, no wait. `BrowserPlatformGraphics::create_context` (which panics) is not on the path | Not reachable in the browser, in either mode |
+| `try_get_render_interface_feature` | Not called by the catalog | Confined: from the cache, or `None` and one job ("B2.4", change 1). The map is empty in the browser | Sound |
+| `WriteableBitmap` | None | In memory | Sound |
+
+The information text of the OpenGL page is set from `on_open_gl_render`, which never runs in a browser: the page shows its knobs and an empty text there, in both modes.
+
+### Popups and text input
+
+**Popups are overlays of the view.** `BrowserTopLevelImpl::create_popup` answers `None` (as upstream **[U]**), and the one caller of the platform's `create_popup`, `OverlayPopupHost::create_popup_host`, then makes an `OverlayPopupHost` on the overlay layer of the same top-level. `Popup` goes through it, and tooltips, context menus and flyouts go through `Popup`. `BrowserTopLevelImpl::new` has one call site (`ferro_view.rs`): no popup gets a canvas. A `Window` cannot be created in the browser at all (`BrowserWindowingPlatform::create_window` panics); the buttons of the catalog that open one (`Pages/dialogs_page.rs`) do in both modes what they did.
+
+**The caret and the IME element wait for nothing.** The rectangle comes from `InputMethodManager::update_cursor_rect`: `transform_to_visual` (matrices of the visual tree) and the caret bounds of the text presenter (its text layout), both on the thread of the page; `BrowserTextInputMethod::set_cursor_rect` hands it to `InputHelper.setBounds`, which places the input element in the DOM (`caretHelper.ts`). It is triggered by a `TransformTrackingHelper` that posts to the dispatcher at the priority after render: a job of the thread of the page, not a wait for a frame. Nothing on the path reads the readback of the compositor or enters `MediaContext::sync_wait_compositor_batch`. No change.
+
+### A panic on the render thread
+
+What happens to it: `DefaultRenderLoop::timer_tick` catches the panic of a frame, logs it through the logger and returns; the next tick runs. That is upstream's behaviour **[U]** (`RenderLoop.TimerTick`: `try`, `catch (Exception)`, a log line "Exception in render loop", and the loop goes on), and it is kept: the loop **continues**. A compositor does not know that a frame of it failed; the guards of `ServerCompositor::render` still tell the batches of the tick "rendered", so a thread of the page that waits for the frame is released.
+
+What was missing is that the page hears of it: the render thread has no log sink, and a line on the console of a worker is not on the console of the page. `RenderWorker::start` now wraps the panic hook of the process once (the hook that was there runs first). When the thread that panics is the render thread, the hook counts the panic (`RenderStatistics::render_thread_panics`) and queues a call for the thread of the page (`thread_proxy::run_on_thread`, nobody waits for it), which calls `FerroExports.reportRenderThreadPanic(message)`: `console.error("FerroUI: the render thread panicked: <message> (<file>:<line>)")`, and the message is kept in `FerroExports.renderThreadPanics`. `page.errors` of the harness holds every `console.error` of the page, so a test that asserts "no error was logged" now fails on a frame that panicked on the render thread.
+
+The hook for a test: `catalogPanicInFrame()` posts a job that panics to the compositor of the view. `control_catalog.test.mjs` calls it on a threaded site and asserts the error line, the kept message, `panics=1`, and that the view goes on taking input and drawing.
+
+### The tests
+
+`control_catalog.test.mjs` takes the site directory as its argument; a site with `ferroui-threads.js` is opened isolated. What changed for every site:
+
+- **Readiness.** A page is waited for until a frame was drawn and something of its view is hit (`waitUntilReady` of `catalog-pages.mjs`: `frames` of `catalogRendering`, `hit` of the elements of `catalogState`). `catalogState` already told: its `hit` is the hit test of the view, which answers from the last frame. Before, the first check that reads `hit` without waiting ("the navigation drawer opens from its toggle button") could run before the first frame of a render thread. Every other place that sends input goes through `page.find` with a filter on `hit`, which waits. `storage_view.test.mjs` has one place that sends input to the view (the drop), which waits since the validation of "B2.6"; nothing changed there.
+- **The kind of the canvas** is asked of the thread that draws when the canvas was transferred (`catalogRendering`: `kind`, `gl`), and the size of the canvas is the size of the last frame there; otherwise as before.
+- **One more check for every site: the memory after a tour of pages** (below).
+
+Against a threaded site, three more: the frames are drawn by the render thread (the ids, WebGL 2, the canvas of the page hands out no context, a navigation is drawn by that thread; the calls of its ticks to the main thread are printed, not asserted: the catalog was never measured); `?RenderThread=false` (no render thread, frames by the thread of the page, the page kept its canvas, navigation works); and the panic. 13 checks against a site without threads, 16 against a threaded one.
+
+`themed_view.test.mjs`: **a second view is drawn and closed while the first one goes on drawing**, in the default mode and in `Software2D`. The page adds an element, `themedViewSecondView("open")` puts a view of one colour in it, the colour is on the screen, the first view takes a click; the second view is closed, `released` goes up by one, the first view takes input and draws, and its picture equals the one before the close in the same state; a view opened and closed again is released again; no panic of the render thread, no error. It runs like the other checks: once without threads (32 checks), and on the render thread and on one thread against a threaded site (72).
+
+The helpers that compare two captures (`differing`, `colours`) moved from `themed_view.test.mjs` to `harness.mjs`.
+
+### The comparison
+
+`node scripts/browser/capture-catalog.mjs [<threaded site>] [--mode WebGL2] [--out <directory>]` visits a tour of thirteen pages (`TOUR` of `catalog-pages.mjs`) in one page drawn by the render thread and in one with `?RenderThread=false`, both with `?PrefetchAssets=false`, at 1024 x 1100, and prints per page how many sampled pixels differ: every fourth pixel, 8 per channel, a page passes with at most 0.5 % different (the tolerance of the tests of "B2.6"). The tour: Platform Information, Data Validation, OpenGL (its knobs and information text), Image and Container Queries (pictures), Composition (a custom visual handler; it animates, so it is visited and not compared), Border, TabControl, ListBox, TextBox (text input; nothing has the focus, so no caret blinks), TextBlock, Slider, Buttons. A page is captured when no frame was drawn for 700 ms; one that keeps drawing is reported as not compared. The corner where the catalog draws its frame counter (520 x 28 pixels at the top left) is left out: it shows another number in every run. The script fails when a page differs by more, when a run was not drawn by the thread it was meant for, or when a page logged an error.
+
+### Memory
+
+`catalogMemory()` answers `top=<bytes>;peak=<bytes>;size=<bytes>`: `top` is the end of the dynamic memory of the module (`sbrk(0)`), below which everything the module uses lies (its data, the stack of the page, and what the allocator took from the system: the stacks of the threads are allocations); `peak` is the largest `top` a call has seen, and with `?MemoryReport=true` the page calls it ten times a second; `size` is the memory of the module (`emscripten_get_heap_size`): the fixed size of a threaded build, or what the memory has grown to without threads. The last check of `control_catalog.test.mjs` opens the catalog with the prefetch on, visits the tour, waits for the prefetch to end and prints the end of the dynamic memory after each page and, as `measured:`, start, end, peak and size. That peak, of a threaded site in WebGL2, is the number section 5 asks for. **The default of 512 MB was not changed.**
+
+### What could not be verified without a build
+
+- Everything in Rust beyond parsing, in the three builds (host, module without threads, module with threads).
+- The catalog on the render thread: it has never been run so. Its checks, the tour and the comparison are untried against any site.
+- The disposal in a browser: the second view itself (two views in one page have not been run in this port), the order of the job and the batch, `GL.deleteContext` after Skia let go, the message to the worker.
+- That the panic of a job reaches the hook on the render thread and the page.
+- The numbers of the memory check.
+
+### Doubts, most likely to bite first
+
+1. **Rust that was not compiled.** Likeliest: `js_unregister as fn(i32)` (a wasm-bindgen import as a function pointer in a `thread_local!`); the closure handed to `std::panic::set_hook` (inference of `&PanicHookInfo`); `ElementComposition::get_element_visual(&top_level)` with a `Ref<TopLevel>`; `self.top_level.dispose()` on the view (the method the class macro generates); `Surface::read_pixels` and `images::raster_from_data` in `read_raster_snapshot` (written after the Graphite readback); the `extern "C"` block inside `module_memory`; an unused import in one of the three builds.
+2. **Two views in one page.** `themedViewSecondView` is the first second `FerroView` of the port: global handlers that assume one view, focus, the splash look-up, two compositors over one render loop, and with threads two canvases in the worker. A failure of the new check before its `close` is this, not the disposal.
+3. **The job never runs.** It needs a commit of a compositor whose top-level has just left the media context (`request_commit_async`; read: the media context commits whatever is in its list of requested commits), and graphics that is ready. If `released` does not go up, look here first.
+4. **`GL.deleteContext`.** Read in `libwebgl.js` **[R]**: it calls `JSEvents.removeAllHandlersOnTarget` when `JSEvents` is linked, and with threads `_free` on the handle. Called after Skia abandoned its context and with the Rust `WebGlContext` still alive in the context manager until the compositor is dropped; nothing was found that makes that context current again (a compositor that is not ready renders nothing, and its release drops without GL calls). If something does, `makeContextCurrent` answers false and the frame panics, which the new report would show.
+5. **A closed view whose compositor lives on.** Its graphics is "not ready" for good: every tick of the loop asks for the next one for it (`render_core` returns early with `true`), until the compositor is dropped; a job posted to it afterwards (a snapshot) never runs and its task never completes. The loop of the browser ticks with every animation frame anyway.
+6. **The catalog under cross-origin isolation.** The iframe of the Native Embed page loads another site, which a page with `require-corp` blocks; the check filters error lines that name that site, and the blocked load may be logged in other words. The preload check counts requests by initiator, with a pool of workers in the page for the first time.
+7. **The tour.** It finds entries in the drawer by their text and scrolls the drawer when an entry is not in view; the layout of the drawer at 1024 x 1100 was not seen. The frame counter is assumed to stay inside 520 x 28 pixels. A page of the tour that animates without being marked is reported as not compared, not as a failure.
+8. **The peak of the memory.** `sbrk(0)` is the high-water mark only while the allocator never gives memory back at the top; Emscripten's default allocator was not read for that, which is why the page samples. Allocations of the render thread count (one memory); what the browser itself holds for the WebGL contexts and the canvases does not, and is not part of the fixed size either.
+9. **A panic while the thread of the page waits.** The guards release a wait for "rendered". A wait for "processed" (the disposal of a composition target) whose batch panics while it is applied is released by the next tick, which needs an animation frame of the worker or another request. And the hook that ran before prints the panic to standard error, which the runtime carries to the main thread synchronously: the page may log the panic twice, and `proxied` counts that line.
+10. **The hook is global and stays.** It is installed when the render thread was created (never on the host, where none can be) and runs for every panic of the module, also for those that are caught; for a thread other than the render thread it only compares two numbers. A panic of the render thread outside a frame (in the handler of the registry) is reported too, and then unwinds into the worker as before.
+11. **A view dropped without `dispose`**, and **a view closed before its canvas arrived**: above.
+12. **The fallback of the snapshot** was never taken in a test: a context that cannot copy its surface is a lost one. The Metal path of the desktop takes the same code; there it used to hand out the GPU image, which is the unsound thing on any render thread.
+13. **The tracking data** (`docs/porting/data/path-overrides.toml`) was not touched; `FerroView::dispose` and the new script functions have no upstream counterpart to map.
+
+### Validation
+
+```
+scripts/browser/setup.sh --threads && source .tools/env.sh
+cargo test -p ferroui-browser --lib
+cargo test -p control-catalog-browser
+cargo test -p ferroui-skia
+cargo build -p ferroui-browser --examples
+(cd src/Browser/FerroUI.Browser/webapp && npm run typecheck && npm run lint && npm run test:pixels)
+scripts/build-browser.sh themed_view && node scripts/browser/tests/themed_view.test.mjs
+scripts/build-browser.sh storage_view && node scripts/browser/tests/storage_view.test.mjs
+scripts/build-browser.sh control-catalog-browser && node scripts/browser/tests/control_catalog.test.mjs
+scripts/build-browser.sh themed_view --threads && node scripts/browser/tests/themed_view.test.mjs target/browser-threads/themed_view
+scripts/build-browser.sh storage_view --threads && node scripts/browser/tests/storage_view.test.mjs target/browser-threads/storage_view
+scripts/build-browser.sh control-catalog-browser --threads && node scripts/browser/tests/control_catalog.test.mjs target/browser-threads/control-catalog-browser
+node scripts/browser/capture-catalog.mjs target/browser-threads/control-catalog-browser --out target/browser-threads/captures
+node scripts/browser/capture-catalog.mjs target/browser-threads/control-catalog-browser --mode Software2D
+scripts/build-browser.sh render_worker_clear --threads && node scripts/browser/tests/render_worker_clear.test.mjs
+scripts/build-browser.sh thread_spawn --threads && node scripts/browser/tests/thread_spawn.test.mjs
+```
+
+Expected: 3 host tests of the browser crate more than before (220) and 2 more of the catalog host; `themed_view` 32 checks without threads and 72 against the threaded site; `storage_view` 18 and 19, unchanged; the catalog 13 checks without threads and 16 against the threaded site, with the memory printed as `measured:`; `capture-catalog.mjs` with twelve pages compared and one visited. To record here afterwards: the peak of the memory of the threaded catalog (and the fixed size chosen from it), the differing pixels per page, and the calls the ticks of the render thread had the main thread serve in the catalog.
+
+By hand, served isolated (`node scripts/browser/serve.mjs target/browser-threads/control-catalog-browser --isolated`): the catalog, `?RenderThread=false`, `controlCatalog.catalogRendering()` and `controlCatalog.catalogMemory()` in the console.
