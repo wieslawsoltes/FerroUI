@@ -19,7 +19,6 @@ use std::cell::RefCell;
 use std::rc::Rc;
 
 use ferroui_base::utilities::Uri;
-use ferroui_markup_xaml::{RuntimeXamlDiagnostic, RuntimeXamlDiagnosticSeverity, RuntimeXamlLoaderConfiguration, XamlDiagnosticFunc};
 use xamlx::ast::XamlAstExtensions as _;
 use xamlx::ast::XamlAstNodeExtensions as _;
 use xamlx::ast::{IXamlAstNode, IXamlAstValueNode, XamlDocument};
@@ -33,8 +32,7 @@ use crate::compiler_extensions::{
     FerroXamlDiagnosticCodes, FerroXamlIlCompiler, FerroXamlIlCompilerConfiguration, FerroXamlIlLanguage, IXamlCompileTimeValueParser,
     IXamlDocumentResource, IXamlDocumentTypeBuilderProvider, XamlCompileTimeValueParsers, XamlDocumentResource,
 };
-use crate::runtime::framework::{self, RuntimeDocumentTypeBuilderProvider};
-use crate::runtime::interpreter::XmlNamespaceInfoProvider;
+use crate::back_end::{adapt_type_mappings, DocumentTypeBuilderProvider, XmlNamespaceInfoProvider};
 
 use super::source::rust_string_literal;
 
@@ -51,6 +49,9 @@ pub struct DocumentSource<'s> {
     pub root_type: Option<Rc<dyn IXamlType>>,
 }
 
+/// Receives a diagnostic of a transform and returns the severity it has from then on.
+pub type DiagnosticHandler = Rc<dyn Fn(&XamlDiagnostic) -> XamlDiagnosticSeverity>;
+
 /// What a transform depends on beside the documents and the type system.
 #[derive(Clone, Default)]
 pub struct TransformOptions {
@@ -63,18 +64,44 @@ pub struct TransformOptions {
     /// Whether source information is attached to the objects the documents create.
     pub create_source_info: bool,
     /// Receives the diagnostics of the transform and may change their severity.
-    pub diagnostic_handler: Option<XamlDiagnosticFunc>,
+    pub diagnostic_handler: Option<DiagnosticHandler>,
 }
 
+#[cfg(any(feature = "emitter", all(test, feature = "runtime")))]
 impl TransformOptions {
-    /// The options of the configuration of the run-time loader.
-    pub fn of(configuration: &RuntimeXamlLoaderConfiguration) -> Self {
+    /// The options of the configuration of the run-time loader. The diagnostic handler of
+    /// the configuration sees a diagnostic as the run-time loader gives it to the handler.
+    pub fn of(configuration: &ferroui_markup_xaml::RuntimeXamlLoaderConfiguration) -> Self {
+        use ferroui_markup_xaml::{RuntimeXamlDiagnostic, RuntimeXamlDiagnosticSeverity};
+        let diagnostic_handler = configuration.diagnostic_handler.clone().map(|handler| {
+            Rc::new(move |diagnostic: &XamlDiagnostic| {
+                let mut runtime_diagnostic = RuntimeXamlDiagnostic::new(
+                    diagnostic.code.clone(),
+                    match diagnostic.severity {
+                        XamlDiagnosticSeverity::None => RuntimeXamlDiagnosticSeverity::Info,
+                        XamlDiagnosticSeverity::Warning => RuntimeXamlDiagnosticSeverity::Warning,
+                        XamlDiagnosticSeverity::Error => RuntimeXamlDiagnosticSeverity::Error,
+                        XamlDiagnosticSeverity::Fatal => RuntimeXamlDiagnosticSeverity::Fatal,
+                    },
+                    diagnostic.title.clone(),
+                    diagnostic.line_number,
+                    diagnostic.line_position,
+                );
+                runtime_diagnostic.document = diagnostic.document.clone();
+                match handler(&runtime_diagnostic) {
+                    RuntimeXamlDiagnosticSeverity::Info => XamlDiagnosticSeverity::None,
+                    RuntimeXamlDiagnosticSeverity::Warning => XamlDiagnosticSeverity::Warning,
+                    RuntimeXamlDiagnosticSeverity::Error => XamlDiagnosticSeverity::Error,
+                    RuntimeXamlDiagnosticSeverity::Fatal => XamlDiagnosticSeverity::Fatal,
+                }
+            }) as DiagnosticHandler
+        });
         Self {
             local_assembly: configuration.local_assembly.map(|assembly| assembly.name.to_string()),
             use_compiled_bindings_by_default: configuration.use_compiled_bindings_by_default,
             design_mode: configuration.design_mode,
             create_source_info: configuration.create_source_info(),
-            diagnostic_handler: configuration.diagnostic_handler.clone(),
+            diagnostic_handler,
         }
     }
 }
@@ -107,7 +134,7 @@ pub fn transform_group(
     parsers: &[Rc<dyn IXamlCompileTimeValueParser>],
 ) -> XamlResult<Vec<TransformedDocument>> {
     let (mut mappings, emit_mappings) = FerroXamlIlLanguage::configure(&type_system)?;
-    framework::adapt_type_mappings(&mut mappings);
+    adapt_type_mappings(&mut mappings);
 
     let assembly: Option<Rc<dyn IXamlAssembly>> = match &options.local_assembly {
         Some(local) => type_system.assemblies().into_iter().find(|a| a.name() == *local),
@@ -120,26 +147,7 @@ pub fn transform_group(
         let handler = options.diagnostic_handler.clone();
         XamlDiagnosticsHandler {
             handle_diagnostic: Some(Box::new(move |diagnostic: &XamlDiagnostic| {
-                let mut runtime_diagnostic = RuntimeXamlDiagnostic::new(
-                    diagnostic.code.clone(),
-                    match diagnostic.severity {
-                        XamlDiagnosticSeverity::None => RuntimeXamlDiagnosticSeverity::Info,
-                        XamlDiagnosticSeverity::Warning => RuntimeXamlDiagnosticSeverity::Warning,
-                        XamlDiagnosticSeverity::Error => RuntimeXamlDiagnosticSeverity::Error,
-                        XamlDiagnosticSeverity::Fatal => RuntimeXamlDiagnosticSeverity::Fatal,
-                    },
-                    diagnostic.title.clone(),
-                    diagnostic.line_number,
-                    diagnostic.line_position,
-                );
-                runtime_diagnostic.document = diagnostic.document.clone();
-                let new_severity = match handler.as_ref().map(|handler| handler(&runtime_diagnostic)) {
-                    Some(RuntimeXamlDiagnosticSeverity::Info) => XamlDiagnosticSeverity::None,
-                    Some(RuntimeXamlDiagnosticSeverity::Warning) => XamlDiagnosticSeverity::Warning,
-                    Some(RuntimeXamlDiagnosticSeverity::Error) => XamlDiagnosticSeverity::Error,
-                    Some(RuntimeXamlDiagnosticSeverity::Fatal) => XamlDiagnosticSeverity::Fatal,
-                    None => diagnostic.severity,
-                };
+                let new_severity = handler.as_ref().map_or(diagnostic.severity, |handler| handler(diagnostic));
                 let mut diagnostic = diagnostic.clone();
                 diagnostic.severity = new_severity;
                 diagnostics.borrow_mut().push(diagnostic);
@@ -178,7 +186,7 @@ pub fn transform_group(
     let void = transformer_configuration.well_known_types().void.clone();
 
     let mut parsed_documents: Vec<Rc<dyn IXamlDocumentResource>> = Vec::with_capacity(sources.len());
-    let mut providers: Vec<Rc<RuntimeDocumentTypeBuilderProvider>> = Vec::with_capacity(sources.len());
+    let mut providers: Vec<Rc<DocumentTypeBuilderProvider>> = Vec::with_capacity(sources.len());
     for document in sources {
         let mut parsed: XamlDocument = compiler.parse(document.xaml, document.root_type.clone())?;
         parsed.document = Some(document.name.to_string());
@@ -193,7 +201,7 @@ pub fn transform_group(
             .type_()
             .get_clr_type()?;
         let xaml_name = document.base_uri.as_ref().map(|uri| uri.replace([':', '/', '?', '=', '.'], "_")).unwrap_or_else(|| root_type.name());
-        let provider = RuntimeDocumentTypeBuilderProvider::new(
+        let provider = DocumentTypeBuilderProvider::new(
             &format!("Builder_{xaml_name}"),
             root_type,
             service_provider_type.clone(),

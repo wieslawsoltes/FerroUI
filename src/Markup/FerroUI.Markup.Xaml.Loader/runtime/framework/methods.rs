@@ -16,14 +16,15 @@ use ferroui_markup_xaml::xaml_il::runtime::{DeferredContentBuilder, XamlIlRuntim
 use xamlx::ast::XamlAstExtensions as _;
 use xamlx::ast::{IXamlAstNode, IXamlLineInfo};
 use xamlx::exceptions::{XamlError, XamlResult};
-use xamlx::type_system::{
-    AnonymousParameterInfo, IXamlCustomAttribute, IXamlMember, IXamlMethod, IXamlParameterInfo, IXamlType,
-};
+use xamlx::type_system::{IXamlMethod, IXamlType};
 
 use crate::compiler_extensions::transformers::{
     FerroAttachedInstancePropertyGetterMethod, OptionsMarkupExtensionMethod,
 };
+use crate::back_end::{document_method, DocumentMethodSignature};
 use crate::compiler_extensions::IXamlDocumentTypeBuilderProvider;
+
+pub use crate::back_end::DeferredTransformationFactoryMethod;
 use crate::runtime::interpreter::{
     constant_value, runtime_error, EvalContext, IXamlMethodEvaluator, Interpreter, RuntimeDocument,
 };
@@ -78,7 +79,7 @@ impl IXamlMethodEvaluator for FrameworkMethodEvaluator {
             return Some(options_markup_extension(method, options, context, arguments));
         }
         if let Some(factory) = any.downcast_ref::<DeferredTransformationFactoryMethod>() {
-            return Some(factory.invoke(arguments));
+            return Some(invoke_deferred_transformation_factory(factory, arguments));
         }
         if let Some(build) = any.downcast_ref::<DocumentBuildMethod>() {
             return Some(build.invoke(arguments));
@@ -163,50 +164,35 @@ fn default_value(type_: &Rc<dyn IXamlType>) -> XamlResult<MarkupValue> {
 
 // --- deferred content ---------------------------------------------------------
 
-/// `XamlIlRuntimeHelpers.DeferredTransformationFactoryV3<T>`: the deferred
-/// content customisation of the language as a generic method definition.
-///
-/// Metadata declares no generic methods, so the method the language found
-/// by name is wrapped: [`make_generic_method`](IXamlMethod::make_generic_method)
-/// records the type argument, and the call creates the deferred content
-/// with it as the result type from the build function of the interpreter.
-pub struct DeferredTransformationFactoryMethod {
-    inner: Rc<dyn IXamlMethod>,
-    type_argument: Option<Rc<dyn IXamlType>>,
-}
-
-impl DeferredTransformationFactoryMethod {
-    pub fn new(inner: Rc<dyn IXamlMethod>) -> Rc<dyn IXamlMethod> {
-        Rc::new(Self { inner, type_argument: None })
-    }
-
-    fn invoke(&self, arguments: &[MarkupValue]) -> XamlResult<MarkupValue> {
-        let factory = arguments.first().and_then(from_markup_value::<DeferredContentFactory>).ok_or_else(|| {
-            runtime_error("InvalidCastException", "The deferred content factory was not given a build function", &NoLineInfo)
+/// The call of the deferred content customisation of the language
+/// ([`DeferredTransformationFactoryMethod`]): creates the deferred content with the type
+/// argument of the method as the result type from the build function of the interpreter.
+fn invoke_deferred_transformation_factory(method: &DeferredTransformationFactoryMethod, arguments: &[MarkupValue]) -> XamlResult<MarkupValue> {
+    let factory = arguments.first().and_then(from_markup_value::<DeferredContentFactory>).ok_or_else(|| {
+        runtime_error("InvalidCastException", "The deferred content factory was not given a build function", &NoLineInfo)
+    })?;
+    let provider =
+        arguments.get(1).and_then(from_markup_value::<Rc<dyn IServiceProvider>>).ok_or_else(|| {
+            runtime_error("InvalidCastException", "The deferred content factory was not given a service provider", &NoLineInfo)
         })?;
-        let provider =
-            arguments.get(1).and_then(from_markup_value::<Rc<dyn IServiceProvider>>).ok_or_else(|| {
-                runtime_error("InvalidCastException", "The deferred content factory was not given a service provider", &NoLineInfo)
-            })?;
-        let result_type = match &self.type_argument {
-            None => ValueType::object(),
-            Some(argument) => argument
-                .as_any()
-                .downcast_ref::<RuntimeType>()
-                .and_then(RuntimeType::handle)
-                .unwrap_or_else(ValueType::object),
-        };
-        // A failure while the content is built is the load error of the failing node:
-        // returned by the fallible entry points of the runtime library, raised by the
-        // infallible ones (a template instantiated later by a control).
-        let builder = DeferredContentBuilder::try_new(move |service_provider| {
-            factory.invoke(Some(service_provider.clone())).map_err(load_exception)
-        });
-        let content = XamlIlRuntimeHelpers::try_deferred_transformation_factory_for(result_type, builder, &provider)
-            .map_err(|e| runtime_error("InvalidOperationException", e.message().to_string(), &NoLineInfo))?;
-        let content: BoxedValue = Rc::new(content);
-        Ok(Some(crate::runtime::type_system::normalize_object(content)))
-    }
+    let result_type = match method.type_argument() {
+        None => ValueType::object(),
+        Some(argument) => argument
+            .as_any()
+            .downcast_ref::<RuntimeType>()
+            .and_then(RuntimeType::handle)
+            .unwrap_or_else(ValueType::object),
+    };
+    // A failure while the content is built is the load error of the failing node:
+    // returned by the fallible entry points of the runtime library, raised by the
+    // infallible ones (a template instantiated later by a control).
+    let builder = DeferredContentBuilder::try_new(move |service_provider| {
+        factory.invoke(Some(service_provider.clone())).map_err(load_exception)
+    });
+    let content = XamlIlRuntimeHelpers::try_deferred_transformation_factory_for(result_type, builder, &provider)
+        .map_err(|e| runtime_error("InvalidOperationException", e.message().to_string(), &NoLineInfo))?;
+    let content: BoxedValue = Rc::new(content);
+    Ok(Some(crate::runtime::type_system::normalize_object(content)))
 }
 
 /// The failure of a member the loaded document called (a constructor, a setter, an `Add`
@@ -265,88 +251,6 @@ pub(crate) fn describe(error: &XamlError) -> String {
     match (error.line_number(), error.line_position()) {
         (Some(line), Some(position)) => format!("{} (line {line} position {position})", error.message()),
         _ => error.message(),
-    }
-}
-
-impl IXamlMember for DeferredTransformationFactoryMethod {
-    fn name(&self) -> String {
-        self.inner.name()
-    }
-    fn declaring_type(&self) -> Rc<dyn IXamlType> {
-        self.inner.declaring_type()
-    }
-}
-
-impl IXamlMethod for DeferredTransformationFactoryMethod {
-    fn is_public(&self) -> bool {
-        self.inner.is_public()
-    }
-    fn is_private(&self) -> bool {
-        self.inner.is_private()
-    }
-    fn is_family(&self) -> bool {
-        self.inner.is_family()
-    }
-    fn is_static(&self) -> bool {
-        true
-    }
-    fn contains_generic_parameters(&self) -> bool {
-        self.type_argument.is_none()
-    }
-    fn is_generic_method(&self) -> bool {
-        true
-    }
-    fn is_generic_method_definition(&self) -> bool {
-        self.type_argument.is_none()
-    }
-    fn return_type(&self) -> Rc<dyn IXamlType> {
-        self.inner.return_type()
-    }
-    fn parameters(&self) -> Vec<Rc<dyn IXamlType>> {
-        self.inner.parameters()
-    }
-    fn make_generic_method(&self, type_arguments: &[Rc<dyn IXamlType>]) -> XamlResult<Rc<dyn IXamlMethod>> {
-        match type_arguments {
-            [argument] => {
-                Ok(Rc::new(Self { inner: self.inner.clone(), type_argument: Some(argument.clone()) }))
-            }
-            _ => Err(XamlError::argument(format!(
-                "{} takes one type argument, {} were given",
-                self.inner.name(),
-                type_arguments.len()
-            ))),
-        }
-    }
-    fn custom_attributes(&self) -> Vec<Rc<dyn IXamlCustomAttribute>> {
-        self.inner.custom_attributes()
-    }
-    fn get_parameter_info(&self, index: usize) -> XamlResult<Rc<dyn IXamlParameterInfo>> {
-        self.inner.get_parameter_info(index)
-    }
-    fn generic_parameters(&self) -> Vec<Rc<dyn IXamlType>> {
-        Vec::new()
-    }
-    fn generic_arguments(&self) -> Vec<Rc<dyn IXamlType>> {
-        self.type_argument.iter().cloned().collect()
-    }
-    fn equals(&self, other: &dyn IXamlMethod) -> bool {
-        match other.as_any().downcast_ref::<Self>() {
-            Some(other) => {
-                self.inner.equals(&*other.inner)
-                    && match (&self.type_argument, &other.type_argument) {
-                        (None, None) => true,
-                        (Some(a), Some(b)) => a.equals(&**b),
-                        _ => false,
-                    }
-            }
-            None => false,
-        }
-    }
-    fn get_hash_code(&self) -> u64 {
-        self.inner.get_hash_code()
-    }
-    fn as_any(&self) -> &dyn Any {
-        self
     }
 }
 
@@ -464,14 +368,6 @@ fn run_build(
     interpreter.build(&root, service_provider, &document)
 }
 
-struct DocumentMethodSignature {
-    name: &'static str,
-    document_name: String,
-    declaring_type: Rc<dyn IXamlType>,
-    return_type: Rc<dyn IXamlType>,
-    parameters: Vec<Rc<dyn IXamlType>>,
-}
-
 fn service_provider_argument(arguments: &[MarkupValue]) -> Option<Rc<dyn IServiceProvider>> {
     arguments.first().and_then(from_markup_value::<Rc<dyn IServiceProvider>>)
 }
@@ -506,82 +402,6 @@ impl DocumentBuildMethod {
         let body = &self.body;
         run_build(body, service_provider_argument(arguments))
     }
-}
-
-macro_rules! document_method {
-    ($type_:ident) => {
-        impl IXamlMember for $type_ {
-            fn name(&self) -> String {
-                self.signature.name.to_string()
-            }
-            fn declaring_type(&self) -> Rc<dyn IXamlType> {
-                self.signature.declaring_type.clone()
-            }
-        }
-
-        impl IXamlMethod for $type_ {
-            fn is_public(&self) -> bool {
-                true
-            }
-            fn is_private(&self) -> bool {
-                false
-            }
-            fn is_family(&self) -> bool {
-                false
-            }
-            fn is_static(&self) -> bool {
-                true
-            }
-            fn contains_generic_parameters(&self) -> bool {
-                false
-            }
-            fn is_generic_method(&self) -> bool {
-                false
-            }
-            fn is_generic_method_definition(&self) -> bool {
-                false
-            }
-            fn return_type(&self) -> Rc<dyn IXamlType> {
-                self.signature.return_type.clone()
-            }
-            fn parameters(&self) -> Vec<Rc<dyn IXamlType>> {
-                self.signature.parameters.clone()
-            }
-            fn make_generic_method(&self, _type_arguments: &[Rc<dyn IXamlType>]) -> XamlResult<Rc<dyn IXamlMethod>> {
-                Err(XamlError::invalid_operation(format!(
-                    "{} of document {} is not a generic method definition",
-                    self.signature.name, self.signature.document_name
-                )))
-            }
-            fn custom_attributes(&self) -> Vec<Rc<dyn IXamlCustomAttribute>> {
-                Vec::new()
-            }
-            fn get_parameter_info(&self, index: usize) -> XamlResult<Rc<dyn IXamlParameterInfo>> {
-                match self.signature.parameters.get(index) {
-                    Some(parameter) => Ok(Rc::new(AnonymousParameterInfo::with_index(parameter.clone(), index))),
-                    None => Err(XamlError::internal(
-                        "ArgumentOutOfRangeException",
-                        format!("Method {} doesn't have a parameter {index}", self.signature.name),
-                    )),
-                }
-            }
-            fn generic_parameters(&self) -> Vec<Rc<dyn IXamlType>> {
-                Vec::new()
-            }
-            fn generic_arguments(&self) -> Vec<Rc<dyn IXamlType>> {
-                Vec::new()
-            }
-            fn equals(&self, other: &dyn IXamlMethod) -> bool {
-                other.as_any().downcast_ref::<$type_>().is_some_and(|other| std::ptr::eq(self, other))
-            }
-            fn get_hash_code(&self) -> u64 {
-                self as *const Self as usize as u64
-            }
-            fn as_any(&self) -> &dyn Any {
-                self
-            }
-        }
-    };
 }
 
 document_method!(DocumentPopulateMethod);

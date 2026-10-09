@@ -18,10 +18,16 @@ default = ["runtime"]
 # The run-time back end: the run-time type system, the AST interpreter (`ferroui_markup_xaml_loader::runtime`)
 # and the run-time XAML loader built on the XAML runtime library.
 runtime = ["dep:ferroui-markup-xaml"]
-# The emitter of Rust source (`ferroui_markup_xaml_loader::rust_emitter`): the build-time back end of the
-# compiler. It needs the accessor table of registered properties, which only this feature turns on in the
-# base crate; applications that load markup at run time do not pay for it.
-emitter = ["runtime", "ferroui-base/compiler-metadata", "dep:ferroui-build-scan"]
+# The compiler as a build tool (`ferroui_markup_xaml_loader::rust_emitter`): the transform of a group of
+# documents and the emitter of Rust source, against the type system the host states. It links neither the
+# XAML runtime library nor the controls: `ferroui-build` compiles with it against the type models of the
+# crates (docs/porting/xaml.md, 9.5).
+compiler = ["dep:ferroui-build-scan"]
+# The run-time host of the emitter: the run-time type system as the type system of a transform, with what
+# it states for the emitter (`rust_emitter::runtime_types`). It needs the accessor table of registered
+# properties, which only this feature turns on in the base crate; applications that load markup at run time
+# do not pay for it.
+emitter = ["runtime", "compiler", "ferroui-base/compiler-metadata"]
 # Exposes the test framework fixture (`ferroui_markup_xaml_loader::testing`) to dependent crates.
 testing = []
 
@@ -35,7 +41,7 @@ ferroui-base = { workspace = true }
 ferroui-markup-xaml = { workspace = true, optional = true }
 # The `.xamlmeta` of a crate with compiled markup (`XamlMetadata`, `DocumentModel`), which the emitter
 # writes and reads. The file and its model are owned by the crate the framework crates export their
-# type models with, which links nothing of the framework. Only with the `emitter` feature.
+# type models with, which links nothing of the framework. Only with the `compiler` feature.
 ferroui-build-scan = { workspace = true, optional = true }
 
 [dev-dependencies]

@@ -13,14 +13,22 @@ autoexamples = false
 [lib]
 path = "lib.rs"
 
+[features]
+# The run-time host of `Build` (`TypeSystem::Runtime`, with `Build::assembly`): the documents are compiled
+# against the types the build script registered in its process. It links the XAML runtime library and,
+# through it, the controls, which a build script then builds for the host. No crate of the repository
+# enables it: every build compiles against the type models (`TypeSystem::Model`).
+runtime-host = ["dep:ferroui-markup-xaml", "ferroui-markup-xaml-loader/emitter"]
+
 [dependencies]
-# `MarkupAssembly`, the asset registry.
+# `MarkupAssembly`, and the attributes of the type model the build-time type system projects.
 ferroui-base = { workspace = true }
-# The configuration of the loader and the registration of the runtime library.
-ferroui-markup-xaml = { workspace = true }
-# The compiler: the transform (against the run-time type system, which is why the build script that
-# calls this crate links the crates of the types its documents name) and the emitter of Rust source.
-ferroui-markup-xaml-loader = { workspace = true, features = ["runtime", "emitter"] }
+# The configuration of the run-time loader and the registration of the runtime library: the run-time host
+# only.
+ferroui-markup-xaml = { workspace = true, optional = true }
+# The compiler: the transform and the emitter of Rust source against the type system the host states
+# (the `compiler` feature, which links neither the XAML runtime library nor the controls).
+ferroui-markup-xaml-loader = { workspace = true, features = ["compiler"] }
 # The type-system contracts of the compiler (`IXamlType`, `IXamlTypeSystem`), which the build-time type
 # system over the type model implements (docs/porting/xaml.md, 9.5.5). The loader links it already.
 xamlx = { workspace = true }

@@ -9,6 +9,7 @@
 //! |---|---|---|
 //! | [`compiler_extensions`] | `CompilerExtensions/` | language, well-known types, nodes, transformers |
 //! | [`parsers`] | `Markup.Xaml/Parsers` | parsers shared with the markup runtime |
+//! | [`back_end`] | (none) | what the interpreter and the emitter of Rust source share |
 //! | [`testing`] | (none) | the in-memory framework fixture for unit tests (feature `testing`) |
 //!
 //! There is no IL back end. Types that generate IL upstream carry their data and document the
@@ -18,6 +19,8 @@
 // The port keeps the upstream shapes (constructor argument lists, callback signatures).
 #![allow(clippy::type_complexity, clippy::too_many_arguments)]
 
+/// What the run-time and the build-time back end share, read from the transformed AST alone.
+pub mod back_end;
 pub mod compiler_extensions;
 /// The closed table of runtime library types, shared by the run-time and the build-time type system.
 pub mod core_table;
@@ -28,7 +31,7 @@ pub mod parsers;
 pub mod runtime;
 
 /// The emitter of Rust source: the build-time back end over the same transformed AST.
-#[cfg(any(feature = "emitter", all(test, feature = "runtime")))]
+#[cfg(any(feature = "compiler", all(test, feature = "runtime")))]
 pub mod rust_emitter;
 
 #[cfg(feature = "runtime")]

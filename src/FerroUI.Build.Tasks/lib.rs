@@ -49,9 +49,16 @@
 //!
 //! # Where the type metadata comes from
 //!
-//! The compiler transforms a document against the run-time type system: the
+//! A build compiles against the type models of the crates
+//! ([`TypeSystem::Model`], the next section): this crate links the compiler
+//! (the transform and the emitter of Rust source) and the base crate, and
+//! neither the XAML runtime library nor the controls, so a build script that
+//! uses it builds none of them for the host.
+//!
+//! The other host is the feature `runtime-host` ([`TypeSystem::Runtime`]): the
+//! compiler transforms a document against the run-time type system, the
 //! types, properties and constructors the crates registered in the process
-//! (`register_types()` of each). A build script therefore takes the crates
+//! (`register_types()` of each). A build script that enables it takes the crates
 //! whose types its documents name as build dependencies and registers them
 //! before it calls [`Build::run`], and it starts whatever application
 //! services the transform of its documents needs. Two consequences:
@@ -66,8 +73,8 @@
 //!   `.xamlmeta` join the ones of the build through [`Build::loader`] and
 //!   [`Build::checked_in_metadata`].
 //!
-//! This crate itself links the compiler and the base crate only, never the
-//! controls.
+//! The feature links the XAML runtime library and, through it, the controls. No
+//! crate of the repository enables it.
 //!
 //! # The build-time type model
 //!
@@ -79,7 +86,8 @@
 //! against the type system over those models: the build script registers
 //! nothing, needs no crate for its types, and compiles the documents of the
 //! classes of the crate it builds ([`XamlGroup::class_document`]). The
-//! run-time type system stays the default until every consumer is converted.
+//! run-time type system stays the value of a build that does not state one, and
+//! is an error of the build without the feature `runtime-host`.
 //!
 //! ```ignore
 //! // build.rs
@@ -147,7 +155,6 @@ use std::rc::Rc;
 use std::time::Instant;
 
 use ferroui_base::metadata::MarkupAssembly;
-use ferroui_markup_xaml::RuntimeXamlLoaderConfiguration;
 use xamlx::type_system::IXamlTypeSystem;
 
 use crate::export::ScanReport;
@@ -157,10 +164,9 @@ use crate::scanner::{scan_crate, Scan, ScanOptions, Severity};
 use crate::type_system::{ModelEmitTypes, ModelTypeSystem};
 pub use ferroui_markup_xaml_loader::rust_emitter::ClassConstructor;
 use ferroui_markup_xaml_loader::rust_emitter::{
-    class_document_group, class_of_document, generate_class_file_with, generate_file, generate_file_with, rust_string_literal, ClassGroup,
-    CompiledMarkupTypeSystem, EmitterHost, TransformOptions, XamlMetadata,
+    class_document_group, class_of_document, generate_class_file_with, generate_file_with, rust_string_literal, ClassGroup, CompiledMarkupTypeSystem,
+    EmitterHost, TransformOptions, XamlMetadata,
 };
-use ferroui_markup_xaml_loader::FerroRuntimeXamlLoader;
 
 /// The name of the module of the default group ([`Build::compile_xaml`]).
 pub const DEFAULT_MODULE: &str = "compiled_xaml";
@@ -186,7 +192,10 @@ pub struct XamlGroup {
 pub enum TypeSystem {
     /// The run-time type system: the types the build script registered in its process. The
     /// script links the crates whose types its documents name, and cannot compile a
-    /// document that names a type of the crate it builds.
+    /// document that names a type of the crate it builds. Only with the feature
+    /// `runtime-host` of this crate, which links the XAML runtime library and the
+    /// controls; without it a build that compiles documents against this type system
+    /// fails with an error that says so.
     #[default]
     Runtime,
     /// The build-time type system over the type models (docs/porting/xaml.md, 9.5): the
@@ -447,6 +456,14 @@ impl Build {
             errors.push("the assembly of the crate is not stated (Build::assembly)".to_string());
             return Outcome { lines, errors };
         }
+        // The run-time type system is in the build only with the feature that links it.
+        if !on_models && !self.groups.is_empty() && !cfg!(feature = "runtime-host") {
+            errors.push(
+                "the documents are compiled against the type models (Build::type_system(TypeSystem::Model)): the run-time type system is the feature `runtime-host` of ferroui-build, which links the XAML runtime library and the controls"
+                    .to_string(),
+            );
+            return Outcome { lines, errors };
+        }
 
         // 1. The compiled markup and the type models of the dependencies.
         let mut report = ScanReport { crate_name: self.crate_name.clone(), ..ScanReport::default() };
@@ -534,14 +551,10 @@ impl Build {
                 }
             }
         } else if let Some(assembly) = self.assembly {
-            // The compiler resolves the assembly of the crate and the types of the runtime
-            // library; every other type is the build script's to register.
-            ferroui_markup_xaml::register_types();
-            MarkupAssembly::register(assembly);
-            // Makes the assembly known to the asset loader, as the `register_types()` of the
-            // crate does: the host of the emitter in the tests of a crate runs with it.
-            ferroui_base::platform::register_assets(assembly.name, &[]);
-            FerroRuntimeXamlLoader::register();
+            #[cfg(feature = "runtime-host")]
+            runtime_host::register(assembly);
+            #[cfg(not(feature = "runtime-host"))]
+            let _ = assembly;
         }
 
         // 2. The groups.
@@ -635,15 +648,15 @@ impl Build {
                     };
                     generate_file_with(&host, &assembly_name, &root_uri, &borrowed, &options)
                 }
+                #[cfg(feature = "runtime-host")]
                 None => {
                     let Some(assembly) = self.assembly else { break };
-                    let mut configuration = RuntimeXamlLoaderConfiguration::new();
-                    configuration.local_assembly = Some(assembly);
-                    if let Some(create_source_info) = group.create_source_info {
-                        configuration.set_create_source_info(create_source_info);
-                    }
-                    generate_file(assembly.name, &root_uri, &borrowed, &configuration, &dependencies)
+                    runtime_host::generate_file(assembly, &root_uri, &borrowed, group.create_source_info, &dependencies)
                 }
+                // Reported before the groups: without the feature no group is compiled
+                // against the run-time type system.
+                #[cfg(not(feature = "runtime-host"))]
+                None => break,
             };
             for (name, reason) in &file.documents {
                 if let Some(reason) = reason {
@@ -729,6 +742,45 @@ impl Build {
         lines.push(format!("cargo::metadata=xamlmeta={}", metadata_path.display()));
         lines.push(format!("cargo::rustc-env={XAMLMETA_VARIABLE}={}", metadata_path.display()));
         Outcome { lines, errors }
+    }
+}
+
+/// The run-time host of the compiler: the documents are compiled against the types the
+/// build script registered in its process. With the feature `runtime-host`, which links
+/// the XAML runtime library and, through it, the controls.
+#[cfg(feature = "runtime-host")]
+mod runtime_host {
+    use ferroui_base::metadata::MarkupAssembly;
+    use ferroui_markup_xaml::RuntimeXamlLoaderConfiguration;
+    use ferroui_markup_xaml_loader::rust_emitter::{GeneratedFile, XamlMetadata};
+    use ferroui_markup_xaml_loader::FerroRuntimeXamlLoader;
+
+    /// Makes the assembly of the crate and the runtime library known to the compiler.
+    pub(super) fn register(assembly: &'static MarkupAssembly) {
+        // The compiler resolves the assembly of the crate and the types of the runtime
+        // library; every other type is the build script's to register.
+        ferroui_markup_xaml::register_types();
+        MarkupAssembly::register(assembly);
+        // Makes the assembly known to the asset loader, as the `register_types()` of the
+        // crate does: the host of the emitter in the tests of a crate runs with it.
+        ferroui_base::platform::register_assets(assembly.name, &[]);
+        FerroRuntimeXamlLoader::register();
+    }
+
+    /// The generated file of a group, with the configuration of the run-time loader.
+    pub(super) fn generate_file(
+        assembly: &'static MarkupAssembly,
+        root_uri: &str,
+        documents: &[(&str, &str)],
+        create_source_info: Option<bool>,
+        dependencies: &[XamlMetadata],
+    ) -> GeneratedFile {
+        let mut configuration = RuntimeXamlLoaderConfiguration::new();
+        configuration.local_assembly = Some(assembly);
+        if let Some(create_source_info) = create_source_info {
+            configuration.set_create_source_info(create_source_info);
+        }
+        ferroui_markup_xaml_loader::rust_emitter::generate_file(assembly.name, root_uri, documents, &configuration, dependencies)
     }
 }
 
@@ -998,15 +1050,17 @@ mod tests {
         let border = fixtures.join("scanner").join("controls").join("border.rs");
         assert!(on_models.lines.contains(&format!("cargo::rerun-if-changed={}", border.display())), "{:?}", on_models.lines);
 
+        // Against the run-time type system the document of a class is not compiled; without
+        // the feature that links that type system no document is.
         static ASSEMBLY: MarkupAssembly =
             MarkupAssembly { name: "Fixture", crate_name: "fixture", xmlns_definitions: &[], xmlns_prefixes: &[], metadata: &[] };
         let at_run_time = build("runtime").assembly(&ASSEMBLY).compile_group(group()).execute();
         assert_eq!(at_run_time.errors.len(), 1, "{:?}", at_run_time.errors);
-        assert!(
-            at_run_time.errors[0].starts_with("Border.xaml: the document of a class of the crate is compiled against the type models only"),
-            "{:?}",
-            at_run_time.errors
-        );
+        let expected = match cfg!(feature = "runtime-host") {
+            true => "Border.xaml: the document of a class of the crate is compiled against the type models only",
+            false => "the documents are compiled against the type models (Build::type_system(TypeSystem::Model)): the run-time type system is the feature `runtime-host`",
+        };
+        assert!(at_run_time.errors[0].starts_with(expected), "{:?}", at_run_time.errors);
         let _ = fs::remove_dir_all(&out);
     }
 

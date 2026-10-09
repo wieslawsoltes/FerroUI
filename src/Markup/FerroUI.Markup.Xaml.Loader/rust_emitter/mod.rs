@@ -1,5 +1,5 @@
 //! The emitter of Rust source: the build-time back end over the SAME
-//! transformed AST the interpreter ([`crate::runtime::interpreter`])
+//! transformed AST the interpreter (`crate::runtime::interpreter`)
 //! evaluates (docs/porting/xaml.md, section 9).
 //!
 //! # What this increment emits
@@ -85,26 +85,43 @@
 //! The transform ([`transform_group`]) runs against any type system, and the
 //! emitter reads what it needs beyond the contracts of the compiler through
 //! [`emit_types::EmitTypes`]. The host of this crate is the run-time type
-//! system ([`EmitterHost::runtime`], [`runtime_types::RuntimeEmitTypes`]: the
+//! system (`EmitterHost::runtime`, `runtime_types::RuntimeEmitTypes`: the
 //! host links the framework and the types are the ones the process
 //! registered); the build-time type system over the models of the crates
 //! (`ferroui-build`, section 9.5) is the other implementation.
+//!
+//! # Features
+//!
+//! The transform, the emitter and the file of a group against the type system a
+//! host states are the `compiler` feature, which links neither the XAML runtime
+//! library nor the controls: what is shared with the interpreter is read from the
+//! transformed AST alone ([`crate::back_end`]). The run-time host (the functions
+//! that take the configuration of the run-time loader, `EmitterHost::runtime`,
+//! `runtime_types`) is the `emitter` feature, which adds the `runtime` feature
+//! and the accessor table of the base crate.
 
 mod compiled;
 mod compiled_resources;
 pub mod emit_types;
 mod emitter;
+/// The run-time host: with the `emitter` feature (and in the tests of the crate with the
+/// `runtime` feature), which links the XAML runtime library.
+#[cfg(any(feature = "emitter", all(test, feature = "runtime")))]
+mod runtime_host;
+#[cfg(any(feature = "emitter", all(test, feature = "runtime")))]
 pub mod runtime_types;
 mod source;
 mod transform;
 
 pub use compiled::{
-    class_document_group, class_of_document, compile_documents, compile_documents_with, generate_class_file, generate_class_file_with,
-    generate_file, generate_file_with, ClassConstructor, ClassFile, ClassGroup, CompiledDocument, EmitterHost, GeneratedFile,
+    class_document_group, class_of_document, compile_documents_with, generate_class_file_with, generate_file_with, ClassConstructor, ClassFile,
+    ClassGroup, CompiledDocument, EmitterHost, GeneratedFile,
 };
-pub use transform::{transform_group, DocumentSource, TransformOptions, TransformedDocument};
-#[cfg(any(test, feature = "testing"))]
-pub use compiled::{transformed_class_group, transformed_tree};
+#[cfg(any(feature = "emitter", all(test, feature = "runtime")))]
+pub use runtime_host::{compile_documents, generate_class_file, generate_file};
+#[cfg(all(any(test, feature = "testing"), any(feature = "emitter", all(test, feature = "runtime"))))]
+pub use runtime_host::{transformed_class_group, transformed_tree};
+pub use transform::{transform_group, DiagnosticHandler, DocumentSource, TransformOptions, TransformedDocument};
 pub use compiled_resources::CompiledMarkupTypeSystem;
 pub use compiled_resources::CompiledDocumentBuildMethod;
 pub use emitter::{emit_document, UnsupportedNode};
