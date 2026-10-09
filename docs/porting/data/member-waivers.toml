@@ -3252,11 +3252,6 @@ reason = "ported as `ferroui_markup::markup::parsers::PropertyParser` (`parse`, 
 
 [[waive]]
 project = "Avalonia.Markup.Xaml"
-type = "Avalonia.Markup.Xaml.PortableXaml.AvaloniaResourceXamlInfo"
-reason = "data contract of the index (class name to resource path) the upstream build task writes into the resources of an assembly: documents are embedded and found through the document table of each crate"
-
-[[waive]]
-project = "Avalonia.Markup.Xaml"
 type = "Avalonia.Markup.Xaml.Extensions"
 member = "GetService"
 reason = "ported as `get_service_of::<T>()` of the service provider contract in `ferroui_base::metadata`"
@@ -3271,11 +3266,6 @@ project = "Avalonia.Markup.Xaml.Loader"
 type = "Avalonia.Markup.Xaml.XamlIl.AvaloniaXamlIlRuntimeCompiler"
 member = "Load*Sre"
 reason = "System.Reflection.Emit loader: exists only to emit or load IL: the Rust emitter and the run-time interpreter stand for the IL back end (docs/porting/xaml.md, section 9)"
-
-[[waive]]
-project = "Avalonia.Markup.Xaml.Loader"
-type = "*XamlDocumentTypeBuilderProvider"
-reason = "holder of the IL type and method builders of a document: replaced by the `IXamlDocumentTypeBuilderProvider` trait of the compiler, whose handles the back ends define (see the module documentation of `ferro_xaml_il_compiler.rs`)"
 
 [[waive]]
 project = "Avalonia.Markup.Xaml.Loader"
