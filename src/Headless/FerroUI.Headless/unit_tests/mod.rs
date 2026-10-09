@@ -19,6 +19,9 @@ use std::time::Duration;
 mod test_application;
 
 mod input_tests;
+mod mouse_device_tests;
+mod popup_tests;
+mod rendering_tests;
 mod second_window_tests;
 mod services_tests;
 
