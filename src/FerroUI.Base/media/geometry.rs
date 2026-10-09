@@ -93,6 +93,13 @@ impl Geometry {
         }
     }
 
+    /// The number of subscribers to the changes of the geometry (a
+    /// diagnostics member, used by tests to verify that subscriptions are
+    /// released).
+    pub fn changed_subscriber_count(&self) -> usize {
+        self.changed.len()
+    }
+
     /// Subscribes to changes of the geometry. Disposing the returned handle
     /// unsubscribes.
     pub fn changed(&self, handler: impl Fn() + 'static) -> Rc<dyn IDisposable> {

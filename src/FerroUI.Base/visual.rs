@@ -441,6 +441,22 @@ impl VisualImpl for Visual {
     }
 }
 
+// The subscriptions to the values of the render-affecting properties are weak
+// events in the managed original (`InvalidatedWeakEvent`): the value does not
+// keep the visual, and the entries of visuals that were collected are removed
+// from its list when the list is compacted. Here the handler of a visual holds
+// it weakly too, and the visual takes its handlers out of the lists when it is
+// dropped: a value many visuals share (the geometry of an icon that is a
+// resource) would otherwise keep one entry, and the memory of the visual its
+// weak reference holds, for every visual that ever drew it.
+impl Drop for Visual {
+    fn drop(&mut self) {
+        for (_, subscription) in self.affects_render_subscriptions.get_mut().drain(..) {
+            subscription.dispose();
+        }
+    }
+}
+
 crate::ferro_properties! { impl Visual {
     ferro_property!(
         /// Defines the `Bounds` property.

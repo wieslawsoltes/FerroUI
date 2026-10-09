@@ -305,7 +305,7 @@ fn gap_c320_content_of_a_scroll_viewer_that_was_dropped_while_shown() {
     assert!(content.upgrade().is_none());
 }
 
-// --- C322 to C329: what a visit still retained after C317 to C321 ---
+// --- C322 to C330: what a visit still retained after C317 to C321 ---
 //
 // Found with the revisits of `catalog_tour.rs` and the markup probe (`catalog_markup_survivors`),
 // with the weak references of the object model marked for the allocation trace. Each is a cycle
@@ -516,4 +516,21 @@ fn gap_c329_compiled_binding_to_a_name_in_a_style_under_a_named_element() {
     assert!(named.upgrade().is_none());
     assert!(bound.upgrade().is_none());
     window.close();
+}
+
+/// C330: a visual subscribes to the changes of the values of its render-affecting properties, and
+/// a value that many visuals share (the geometry of an icon that is a resource) kept the entry of
+/// every visual that ever drew it, with the memory of the visual its weak reference held. The
+/// managed original subscribes with a weak event, whose list is compacted.
+#[test]
+fn gap_c330_shared_geometry_of_a_visual_that_was_dropped() {
+    use ferroui_base::media::{Geometry, RectangleGeometry};
+    let _app = start_catalog_application();
+    let geometry: Ref<Geometry> = RectangleGeometry::new().upcast();
+    let subscribers = geometry.changed_subscriber_count();
+    let icon = ferroui_controls::PathIcon::new();
+    icon.set_data(&geometry);
+    assert_eq!(subscribers + 1, geometry.changed_subscriber_count());
+    drop(icon);
+    assert_eq!(subscribers, geometry.changed_subscriber_count());
 }
