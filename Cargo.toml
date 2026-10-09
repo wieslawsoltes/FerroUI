@@ -7,6 +7,7 @@ members = [
     "src/Markup/FerroUI.Markup",
     "src/Markup/FerroUI.Markup.Xaml",
     "src/Markup/FerroUI.Markup.Xaml.Loader",
+    "src/FerroUI.Build.Scan",
     "src/FerroUI.Build.Tasks",
     "src/FerroUI.MicroCom",
     "src/FerroUI.Native",
@@ -46,6 +47,7 @@ ferroui-controls-color-picker = { path = "src/FerroUI.Controls.ColorPicker" }
 ferroui-markup = { path = "src/Markup/FerroUI.Markup" }
 ferroui-markup-xaml = { path = "src/Markup/FerroUI.Markup.Xaml" }
 ferroui-markup-xaml-loader = { path = "src/Markup/FerroUI.Markup.Xaml.Loader" }
+ferroui-build-scan = { path = "src/FerroUI.Build.Scan" }
 ferroui-build = { path = "src/FerroUI.Build.Tasks" }
 xamlx = { path = "external/XamlX/src/XamlX" }
 ferroui-microcom = { path = "src/FerroUI.MicroCom" }

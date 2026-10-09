@@ -22,7 +22,7 @@ const THICKNESS: &str = "::fixture::media::Thickness";
 const CONTROL: &str = "::ferroui_base::Control";
 
 fn fixture_directory() -> PathBuf {
-    Path::new(env!("CARGO_MANIFEST_DIR")).join("tests").join("fixtures").join("scanner")
+    Path::new(env!("CARGO_MANIFEST_DIR")).with_file_name("FerroUI.Build.Scan").join("tests").join("fixtures").join("scanner")
 }
 
 fn fixture() -> Scan {
@@ -89,7 +89,7 @@ fn registered(name: &str, kind: RegisteredKind, value_type: RustType, owner: &st
 }
 
 fn dependent_directory() -> PathBuf {
-    Path::new(env!("CARGO_MANIFEST_DIR")).join("tests").join("fixtures").join("dependent")
+    Path::new(env!("CARGO_MANIFEST_DIR")).with_file_name("FerroUI.Build.Scan").join("tests").join("fixtures").join("dependent")
 }
 
 /// The type of the model with the markup name `name`.
@@ -1080,7 +1080,7 @@ fn inherited<'a>(scan: &'a Scan, type_: &'a TypeModel, name: &str) -> Option<(&'
 /// The base crate and the controls crate of the workspace, read as files (nothing of them
 /// is linked into this test). The test checks what must hold whatever the crates
 /// declare, and prints the numbers of each scan and what the scanner did not read, for
-/// the reader to judge the coverage (`cargo test -p ferroui-build real_crates -- --nocapture`).
+/// the reader to judge the coverage (`cargo test -p ferroui-build-scan real_crates -- --nocapture`).
 #[test]
 fn real_crates_are_scanned_without_skipping_a_declaration() {
     let source = Path::new(env!("CARGO_MANIFEST_DIR")).parent().expect("the directory of the crates").to_path_buf();
@@ -1321,7 +1321,7 @@ fn real_crates_are_scanned_without_skipping_a_declaration() {
 }
 
 fn registration_directory() -> PathBuf {
-    Path::new(env!("CARGO_MANIFEST_DIR")).join("tests").join("fixtures").join("registration")
+    Path::new(env!("CARGO_MANIFEST_DIR")).with_file_name("FerroUI.Build.Scan").join("tests").join("fixtures").join("registration")
 }
 
 /// The scan of the third fixture crate: what a crate registers next to its declarations.

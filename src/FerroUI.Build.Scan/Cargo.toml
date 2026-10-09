@@ -1,0 +1,25 @@
+[package]
+name = "ferroui-build-scan"
+description = "The build-time type model of FerroUI and the source scanner that fills it: what a build script exports of a crate, linking nothing of the framework"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+autotests = false
+autobenches = false
+autoexamples = false
+
+[lib]
+path = "lib.rs"
+
+# The crate is a build dependency of the framework crates themselves (the base crate, the controls,
+# the XAML runtime library), so it depends on nothing of the framework: the standard library and the
+# three crates the scanner reads Rust source with (docs/porting/xaml.md, 9.5.13).
+[dependencies]
+# The source scanner (docs/porting/xaml.md, 9.5.1): `syn` reads a source file into items, the
+# bodies of the declaration macros are read from their tokens. `span-locations` gives the tokens
+# the lines the diagnostics of the scanner name; `quote` prints the types of function signatures.
+proc-macro2 = { version = "1", default-features = false, features = ["span-locations"] }
+quote = { version = "1", default-features = false }
+syn = { version = "2", default-features = false, features = ["full", "parsing", "printing", "visit"] }

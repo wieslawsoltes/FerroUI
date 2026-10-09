@@ -9,7 +9,7 @@
 //! method per document, and the `x:Class` types. A Rust crate cannot be
 //! inspected that way, so a crate with compiled markup describes its
 //! documents in this file, and the compiler of a dependent crate synthesises
-//! the same type from it ([`super::compiled_resources`]).
+//! the same type from it (`rust_emitter::CompiledMarkupTypeSystem` of the loader).
 //!
 //! # Transport
 //!

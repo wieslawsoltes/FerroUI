@@ -28,7 +28,7 @@ const BRUSHES: &str = "Vec<::ferroui_base::Ref<::fixture::media::brush::Brush>>"
 
 /// The type system over the scan of the fixture crate.
 fn fixture() -> Rc<ModelTypeSystem> {
-    let root = Path::new(env!("CARGO_MANIFEST_DIR")).join("tests").join("fixtures").join("scanner").join("lib.rs");
+    let root = Path::new(env!("CARGO_MANIFEST_DIR")).with_file_name("FerroUI.Build.Scan").join("tests").join("fixtures").join("scanner").join("lib.rs");
     ModelTypeSystem::new(vec![scan_crate(&ScanOptions::new("fixture", root)).model])
 }
 
@@ -628,7 +628,7 @@ fn declarations_are_merged_and_found_across_crates() {
 
 /// The type system over the scan of the third fixture crate (`tests/fixtures/registration`).
 fn registration() -> Rc<ModelTypeSystem> {
-    let root = Path::new(env!("CARGO_MANIFEST_DIR")).join("tests").join("fixtures").join("registration").join("lib.rs");
+    let root = Path::new(env!("CARGO_MANIFEST_DIR")).with_file_name("FerroUI.Build.Scan").join("tests").join("fixtures").join("registration").join("lib.rs");
     ModelTypeSystem::new(vec![scan_crate(&ScanOptions::new("registration", root)).model])
 }
 
