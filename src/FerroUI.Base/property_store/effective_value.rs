@@ -196,9 +196,14 @@ impl<T: PropertyValue> EffectiveValue<T> {
         self.is_overriden_current_value.set(is_overridden_current_value);
         self.is_coerced_default_value.set(is_coerced_default_value);
 
-        let v = match &self.uncommon {
-            Some(uncommon) if !is_coerced_default_value => (uncommon.coerce)(owner, value.clone()),
-            _ => value.clone(),
+        // `v = value`, or the coerced value. The value as it was given is
+        // only read again where it is stored uncoerced, so without a
+        // coercion `v` is the value itself and not a copy of it.
+        let (v, uncoerced) = match &self.uncommon {
+            Some(uncommon) if !is_coerced_default_value => {
+                ((uncommon.coerce)(owner, value.clone()), Some((uncommon, value)))
+            }
+            _ => (value, None),
         };
 
         if priority <= self.priority.get() {
@@ -207,7 +212,7 @@ impl<T: PropertyValue> EffectiveValue<T> {
             // dropped: dropping a value may run code that reads the property.
             self.value.replace(v.clone());
             self.priority.set(priority);
-            if let (false, Some(uncommon)) = (is_coerced_default_value, &self.uncommon) {
+            if let Some((uncommon, value)) = &uncoerced {
                 uncommon.uncoerced_value.replace(value.clone());
             }
         }
@@ -216,7 +221,7 @@ impl<T: PropertyValue> EffectiveValue<T> {
             base_value_changed = self.base_value.borrow().as_ref() != Some(&v);
             self.base_value.replace(Some(v));
             self.base_priority.set(priority);
-            if let (false, Some(uncommon)) = (is_coerced_default_value, &self.uncommon) {
+            if let Some((uncommon, value)) = uncoerced {
                 uncommon.uncoerced_base_value.replace(value);
             }
         }
