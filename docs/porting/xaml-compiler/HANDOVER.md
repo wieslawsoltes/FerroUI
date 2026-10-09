@@ -76,6 +76,19 @@
   of the language, at a constructor of `XamlSourceInfo`), then the list of `xaml.md` 9.10.1,
   "Remaining for E5", item 1, stage 4.
 
+- The build-time type system, fifth stage, is DONE FOR THE CORPUS on branch
+  `xaml-emit-types-on-model` (on `xaml-compile-on-model-v`), built and run by its author with the
+  seven commands of the stage (section 15). Done: `markup-xaml` in the drift test with nothing
+  different (893 types); the transform of the corpus the same for all 109 documents
+  (`xaml.md` 9.5.11); `EmitTypes` over the models (`ModelEmitTypes` in `ferroui-build`) and the
+  corpus emitted through both implementations byte for byte the same for all 109 documents, with
+  a document refused, not changed, where the models cannot answer (`xaml.md` 9.5.12). The run-time
+  type system is still the only host of `Build::compile_xaml()`. NOT done, and nothing of it is
+  half in place: `compile_xaml()` on the model (no option of `Build`, no leaf crate, no build
+  script in a framework crate), `StyleWithServiceProvider` on the build. Next: the list at the
+  end of `xaml.md` 9.5.12 (the models of the framework crates in a build script, the class file
+  from files, the compiled documents of dependencies over the models, the option).
+
 Design documents in the repository: `docs/porting/xaml.md`, sections 9 (emitter design: call forms
 A/B/C, build integration, code-behind), 9.5 (source scanner), 9.12 (the 14 rulings), 9.13, and
 decisions 1 to 27. Read section 9 before touching the emitter. `DRAFT-AUTHOR-REPORT.md` is the
@@ -1042,3 +1055,84 @@ For the owner: `ferroui-build` links `ferroui-controls` through `ferroui-markup-
 `xaml.md` 9.5.10). The rule "the build crate never links the controls" does not hold on `main`
 for the transitive graph, and the controls need the leaf crate for their build script as the base
 crate does.
+
+## 15. What the fifth stage delivered (the transform and the emitter against the models), and how to validate it
+
+Read `xaml.md` 9.5.11 and 9.5.12 first: the drift table with the third crate and the three
+forms the scanner learned; how `ModelEmitTypes` answers each question of the emitter; what was
+added to the model and the scanner; the rule for a *no* of assignability and the refusal; the
+proof and its numbers; what is doubted; what `compile_xaml()` on the model involves. The author
+ran only the seven commands the owner allowed, each as written.
+
+What exists:
+
+- `src/FerroUI.Build.Tasks/scanner/`: `tokens.rs` (`take_expression` with the return type of a
+  closure; `with_parenthesised_break_values`; `calls_of`, `stated_calls_of`), `modules.rs`
+  (`PRELUDE_PATHS`), `source.rs` (the registrations with the untyped value conversions: in
+  functions, in the values of constants and statics, in the bodies of declarations, in the
+  expansions of the macros a function invokes, `expand_registration_macros`; the lists of generic
+  types of `ferro_rust_paths!`), `mod.rs` (`value_types`, `unread_value_types`, `stated_path`,
+  `class_markup`, the line "value types:" of the summary). `model.rs`: `ValueTypeModel`,
+  `VALUE_REGISTRATIONS`, `AssemblyModel::value_types` and `unread_value_types`,
+  `TypeModel::class_markup` and `stated_path`. The fixture `tests/fixtures/registration` has a
+  function with every form.
+- `src/FerroUI.Build.Tasks/type_system/`: `emit_types.rs` (new: `ModelEmitTypes`, `ModelClass`,
+  `ModelMarkup`, `ModelEmitProperty`), `types.rs` (`MemberRust`, `DeclaredRust` on the methods,
+  constructors and fields), `model_type_system.rs` (the Rust side of every projected member).
+- `src/Markup/FerroUI.Markup.Xaml.Loader/rust_emitter/`: `emit_types.rs`
+  (`EmitTypes::take_unanswered`, a default method), `compiled.rs` (`compile_documents_with`
+  refuses a document with what was recorded). Nothing else of the loader changed.
+- `tests/FerroUI.Markup.Xaml.UnitTests/`: `type_system_drift.rs` (three crates),
+  `emitter/model_transform.rs` (`scanned_models()`, 109 asserted), `emitter/model_emit.rs` (new:
+  the differential of the two hosts, and the refusal).
+
+Unchanged: the declaration macros and their uses, the base and the controls crates, the XAML
+runtime library, the run-time type system, the interpreter, `Build`, every build script, every
+checked-in generated file, `Cargo.toml` and `Cargo.lock`.
+
+Validation by the session that has the whole workspace:
+
+1. The seven commands; all passed for the author: `cargo test -p ferroui-build --lib` (51),
+   `cargo test -p ferroui-markup-xaml-loader --lib` (397, 1 ignored),
+   `cargo test -p ferroui-markup-xaml-tests --lib` (577, 15 ignored),
+   `cargo test -p xaml-include-fixture-theme --lib` (4, 1 ignored),
+   `cargo test -p xaml-include-fixture-application --lib` (28),
+   `cargo test -p ferroui-themes-fluent --lib tests::compiled_xaml_tests` and the same for
+   `ferroui-themes-simple` (1 each, 1 ignored).
+2. `cargo test -p ferroui-markup-xaml-tests --lib emitter::model_emit -- --nocapture` for the
+   numbers of 9.5.12 (the registrations read and not read per crate; 109 the same, 0 refused, 0
+   different; then 100 and 9 with one cast marked as not read), and
+   `type_system_drift -- --nocapture` for the table of 9.5.11.
+3. What the author could not run: the ignored regeneration tests (each `regenerate_*`, then
+   `git diff`: nothing is expected, the output of the run-time host is unchanged and the drift
+   tests of step 1 compare the same text); the loader without the `emitter` feature
+   (`EmitTypes` and `compiled.rs` are behind it); `cargo build --workspace`; the suites of
+   section 2; `scripts/build-browser.sh`. The build crate, the loader's emitter and the XAML test
+   crate are all that changed.
+4. The order of the tests. The two type systems are compared in one process with the other tests
+   of the XAML test crate; the run-time side depends on which classes were initialised
+   (`xaml.md` 9.5.8 and 9.5.12, doubt 3). The author ran the suite whole and the two tests alone;
+   both orders passed. A failure of `model_emit` under another order names the document and the
+   first line that differs.
+
+What the author doubts (the list of `xaml.md` 9.5.12 in short): the order of two accessors of one
+definition under one type; the reasons that still say "of the run-time type system"; the
+compile-time value parser, which the model host does not have; the themes and the fixture
+through the model path, which were not measured.
+
+Found in the sources and not changed (described for the owner):
+
+1. `syn` 2.0.119 does not parse `break 'label ::path::call()` (it takes the path's first colon
+   for a label's colon). The emitter writes that form in every block with a value
+   (`break 'provided_0 ::std::string::String::from(..)`), so no tool built on `syn` reads
+   generated code as it is; the scanner reads it with the value in parentheses. Writing the
+   parentheses in the emitter would change the generated files and is not done here.
+2. `XamlSourceInfo` is declared twice in one module (`ferro_static_type!` and
+   `ferro_markup_type!(class ..)`), which the scan reports as `FRN9022`; both type systems make
+   it one type. The form `ferro_markup_type!(static X { type_info: X, .. })` is the one the
+   macros document for a static type with values.
+3. The registrations with the untyped value conversions that no scan can read are the ones
+   generic code makes for the type it is called for (`register_reference::<S>()` of a binding
+   source in `compiled_binding_path.rs`, `model_type.rs`, `clr_property_info.rs`): which shared
+   types exist is known only to the process. The models answer *no* for such a type only where
+   the shape of the question rules the registration out (`xaml.md` 9.5.12).
