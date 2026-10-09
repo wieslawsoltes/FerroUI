@@ -14,7 +14,15 @@ Designs 05 and 06 are verified in the same way: of 05 two small changes of machi
 implemented (a box the data context nodes made for nothing, and the order in which a conversion
 asks whom to log against), its typed path for template bindings is not (upstream has none); 06 has
 nothing the rule allows (the cache of the formatter is upstream's and hits when upstream's does)
-and nothing is implemented for it. The other designs are not started.
+and nothing is implemented for it.
+Designs 01 and 02 are verified in the same way too: of design 02 two of the three hypotheses are
+contradicted by the code (the list of handlers is not copied for a notification, the arguments
+borrow the values) and its fast path is not allowed; what it leaves is the dispatch of the
+overrides, which is design 01, and a copy of the value in the effective value. Design 01 is
+implemented where a class states what it overrides (the table takes the slot of the base class
+for the other members), for every implementation that overrides nothing and for the root class
+members on the path of a property change; their gains are to be measured. The other designs are
+not started.
 
 Markers, as in the other performance documents: **[M]** measured, **[E]** estimated with the reasoning
 next to it, **[H]** a hypothesis that the design must verify before any code changes.
@@ -110,8 +118,8 @@ first step of each design (always a measurement) has been done.
 
 | # | Design | Touches | Expected gain | Risk | Size |
 |---|---|---|---|---|---|
-| [01](designs/01-virtual-dispatch.md) | Virtual tables without forwarding closures | `type_system.rs`, the class macro | 5 to 8 % **[E]** | Low | Medium |
-| [02](designs/02-property-change-notification.md) | Cheaper property change notifications | `ferro_object.rs`, the property store | 5 to 10 % **[E]** | Medium | Large |
+| [01](designs/01-virtual-dispatch.md) | Virtual tables without forwarding closures (written for the implementations that state what they override: all the empty ones and eleven with overrides; inlining dropped: it cannot remove a call through a table) | `type_system.rs`, the class macro, `ferro_object.rs` | to be measured (was 5 to 8 % **[E]** with every chain gone) | Low to medium | Medium |
+| [02](designs/02-property-change-notification.md) | Cheaper property change notifications (the four steps dropped: the lists and the arguments already cost nothing, the fast path is different logic; written: the dispatch of the overrides by design 01, one copy of the value less per set) | `ferro_object.rs`, the property store | small, to be measured (was 5 to 10 % **[E]** with the four steps) | Medium | Small |
 | [03](designs/03-inheritance-parent-change.md) | Inherited values on a parent change (the pool of lists written; the single pass dropped: it reorders notifications) | the property store | small, to be measured (was 4 to 7 % **[E]** with the single pass) | Low | Small |
 | [04](designs/04-tree-attachment-and-styling.md) | Tree attachment: styles, implicit themes, resources (the hasher and two handle and list changes written; the caches dropped: upstream has none) | `styled_element.rs`, resources, the property store | small, to be measured (was 5 to 10 % **[E]** with the caches) | Low | Small |
 | [05](designs/05-bindings-on-recycle.md) | Bindings while a container is recycled (a box and an order corrected; the typed path for template bindings dropped: upstream has none) | data bindings | small, to be measured (was 4 to 8 % **[E]** with the typed path) | Low | Small |
