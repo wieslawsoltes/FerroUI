@@ -12,6 +12,7 @@ use xamlx::ast::XamlAstExtensions as _;
 use xamlx::ast::XamlAstNodeExtensions as _;
 use xamlx::ast::{
     visit_node, IXamlAstNode, IXamlAstValueNode, IXamlAstVisitor, IXamlPropertySetter, XamlAstCompilerLocalNode,
+    XamlAstNeedsParentStackValueNode, XamlAstRuntimeCastNode,
     XamlAstImperativeValueManipulation, XamlAstLocalInitializationNodeEmitter, XamlAstManipulationImperativeNode,
     XamlAstNewClrObjectNode, XamlAstTextNode, XamlConstantNode, XamlDirectCallPropertySetter, XamlLoadMethodDelegateNode, XamlManipulationGroupNode,
     XamlNullExtensionNode, XamlRootObjectNode,
@@ -683,6 +684,24 @@ impl<'a> Emitter<'a> {
             let value = self.exact(Known::F64, f64_literal(grid_length.value));
             let unit = self.enum_member(node, &unit_type, i64::from(grid_length.grid_unit_type as i32))?;
             return self.constructor_call(node, &constructor, &[value, unit]);
+        }
+        if let Some(n) = node.cast::<XamlAstNeedsParentStackValueNode>() {
+            // `(T) new Converter().ConvertFrom(context, CultureInfo.InvariantCulture, text)`: a text
+            // the converter of the type converts when the document is loaded. Not emitted yet;
+            // the refusal names the converter and the type.
+            let target = n.base.type_().get_clr_type().map(|type_| type_.full_name()).unwrap_or_default();
+            let converter = n
+                .base
+                .value()
+                .cast::<XamlAstRuntimeCastNode>()
+                .and_then(|cast| {
+                    let call = cast.value().as_node();
+                    let call = call.as_method_call_base_node()?;
+                    let first = call.arguments.borrow().first().cloned()?;
+                    first.type_().get_clr_type().ok().map(|type_| type_.full_name())
+                })
+                .unwrap_or_else(|| "a converter".to_string());
+            return Err(unsupported(node, format!("a text converted to {target} by its type converter {converter} when the document is loaded")));
         }
         Err(unsupported(node, "no emitter for this value node"))
     }
