@@ -123,8 +123,7 @@ impl DrawingContextImpl {
             None => whole,
         };
 
-        let scene: Box<dyn IVelloSceneSink> =
-            Box::new(VelloCpuSceneSink::new(bounds.width() as u16, bounds.height() as u16));
+        let scene = self.create_filter_scene(bounds.width() as u16, bounds.height() as u16);
         let sink = match self.sink.replace(scene) {
             Some(sink) => sink,
             None => panic!("The drawing context has been disposed"),
@@ -152,17 +151,69 @@ impl DrawingContextImpl {
             Some(scene) => scene,
             None => panic!("The drawing context has been disposed"),
         };
-        let (width, height) = (scene.width(), scene.height());
-        crate::perf::count(crate::perf::Phase::EffectAsImage, u64::from(width) * u64::from(height) * 4);
-        let mut rgba = vec![0u8; width as usize * height as usize * 4];
-        scene.render_to_pixels(&mut rgba);
-
         let position = self.sink_origin - outer.origin;
         self.sink_origin = outer.origin;
         self.open_clips = outer.open_clips;
 
+        self.draw_filter_scene(&mut *scene, position.x, position.y, crate::perf::Phase::EffectAsImage);
+    }
+
+    /// A scene of its own for something that is drawn through a filter and
+    /// composed into the scene of the context as a picture: on the device
+    /// of the scene of the context when its renderer has filter layers (the
+    /// hybrid mode), by the CPU renderer otherwise.
+    pub(super) fn create_filter_scene(&mut self, width: u16, height: u16) -> Box<dyn IVelloSceneSink> {
+        #[cfg(feature = "hybrid")]
+        {
+            let scene = self.scene();
+            if scene.rendering_mode() == crate::VelloRenderingMode::Hybrid && scene.filter_capabilities().filter_layers {
+                if let Some(device) = scene.device().cloned() {
+                    return Box::new(crate::scene::VelloHybridSceneSink::new(device, width, height));
+                }
+            }
+        }
+
+        Box::new(VelloCpuSceneSink::new(width, height))
+    }
+
+    /// Renders a scene of [`create_filter_scene`](Self::create_filter_scene)
+    /// and draws its picture into the scene of the context, its top left
+    /// pixel at (`x`, `y`) of that scene: as a texture of the device when
+    /// it was drawn there, as an image otherwise.
+    pub(super) fn draw_filter_scene(&mut self, scene: &mut dyn IVelloSceneSink, x: f64, y: f64, phase: crate::perf::Phase) {
+        let (width, height) = (scene.width(), scene.height());
+        crate::perf::count(phase, u64::from(width) * u64::from(height) * 4);
+
+        #[cfg(any(feature = "hybrid", feature = "gpu"))]
+        if let Some(device) = scene.device().cloned() {
+            if self.draws_on_device(&device) {
+                let texture = crate::gpu::VelloDeviceTexture::new(
+                    &device,
+                    u32::from(width),
+                    u32::from(height),
+                    crate::gpu::VelloTextureAlpha::Premultiplied,
+                );
+                match scene.render_to_texture(&crate::gpu::VelloGpuTexture { texture: texture.texture() }) {
+                    Ok(()) => {
+                        let brush = crate::scene::VelloSceneBrush::Texture(crate::scene::VelloSceneTexture {
+                            texture,
+                            x_extend: peniko::Extend::Pad,
+                            y_extend: peniko::Extend::Pad,
+                            quality: peniko::ImageQuality::Low,
+                            alpha: 1.0,
+                        });
+                        self.draw_brush_at_pixels(brush, x, y, f64::from(width), f64::from(height));
+                    }
+                    Err(error) => crate::gpu::log_render_failure("hybrid", &error),
+                }
+                return;
+            }
+        }
+
+        let mut rgba = vec![0u8; width as usize * height as usize * 4];
+        scene.render_to_pixels(&mut rgba);
         let image = to_image(rgba, PixelSize::new(width as i32, height as i32));
-        self.draw_image_at_pixels(image, position.x, position.y);
+        self.draw_image_at_pixels(image, x, y);
     }
 }
 

@@ -16,13 +16,12 @@
 //!   composed under the clip of the shadow ([`DrawingContextImpl::draw_blurred_path`]).
 
 use super::DrawingContextImpl;
-use crate::helpers::pixel_format_helper::to_image;
 use crate::scene::{
-    IVelloSceneSink, VelloCpuSceneSink, VelloSceneBrush, VelloSceneFilter, VelloSceneImage, VelloScenePaint,
+    VelloSceneBrush, VelloSceneFilter, VelloSceneImage, VelloScenePaint,
 };
 use crate::vello_extensions::{rect_path, rounded_rect_path, to_kurbo_rect};
 use ferroui_base::media::{BoxShadow, BoxShadows};
-use ferroui_base::{Matrix, PixelSize, Rect, RoundedRect, Vector};
+use ferroui_base::{Matrix, Rect, RoundedRect, Vector};
 use kurbo::{Affine, BezPath, Shape};
 use peniko::color::{AlphaColor, Srgb};
 use peniko::{BlendMode, Extend, Fill, ImageQuality};
@@ -296,34 +295,35 @@ impl DrawingContextImpl {
         // What of the shape lies beyond the scene still blurs into it: the
         // renderer draws as much of the content of a filter layer as its
         // filter reaches.
-        crate::perf::count(crate::perf::Phase::ShadowAsImage, u64::from(width) * u64::from(height) * 4);
         let scene_transform = Affine::translate((-bounds.x0, -bounds.y0)) * transform;
-        let mut scene = VelloCpuSceneSink::new(width, height);
+        let mut scene = self.create_filter_scene(width, height);
         scene.push_filter_layer(&VelloSceneFilter::Blur { std_deviation: std_deviation as f32 }, scene_transform);
         scene.fill(path, fill_rule, scene_transform, &VelloScenePaint::solid(color), BlendMode::default(), true);
         scene.pop_layer();
 
-        let mut rgba = vec![0u8; width as usize * height as usize * 4];
-        scene.render_to_pixels(&mut rgba);
-        let image = to_image(rgba, PixelSize::new(width as i32, height as i32));
-
-        self.draw_image_at_pixels(image, bounds.x0, bounds.y0);
+        self.draw_filter_scene(&mut *scene, bounds.x0, bounds.y0, crate::perf::Phase::ShadowAsImage);
     }
 
     /// Draws an image with its pixels on the pixels of the scene of the
     /// context, its top left pixel at (`x`, `y`).
     pub(super) fn draw_image_at_pixels(&mut self, image: peniko::ImageData, x: f64, y: f64) {
-        let path = rect_path(Rect::new(x, y, image.width as f64, image.height as f64));
-        let paint = VelloScenePaint {
-            brush: VelloSceneBrush::Image(VelloSceneImage {
-                image,
-                x_extend: Extend::Pad,
-                y_extend: Extend::Pad,
-                quality: ImageQuality::Low,
-                alpha: 1.0,
-            }),
-            transform: Affine::translate((x, y)),
-        };
+        let (width, height) = (image.width as f64, image.height as f64);
+        let brush = VelloSceneBrush::Image(VelloSceneImage {
+            image,
+            x_extend: Extend::Pad,
+            y_extend: Extend::Pad,
+            quality: ImageQuality::Low,
+            alpha: 1.0,
+        });
+
+        self.draw_brush_at_pixels(brush, x, y, width, height);
+    }
+
+    /// Fills the rectangle of `width` by `height` pixels at (`x`, `y`) of
+    /// the scene of the context with a brush whose first pixel lies there.
+    pub(super) fn draw_brush_at_pixels(&mut self, brush: VelloSceneBrush, x: f64, y: f64, width: f64, height: f64) {
+        let path = rect_path(Rect::new(x, y, width, height));
+        let paint = VelloScenePaint { brush, transform: Affine::translate((x, y)) };
 
         self.sink().fill(&path, Fill::NonZero, Affine::IDENTITY, &paint, BlendMode::default(), false);
     }

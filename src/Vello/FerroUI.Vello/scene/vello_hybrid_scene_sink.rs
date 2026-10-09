@@ -1,9 +1,10 @@
 use crate::gpu::{log_render_failure, premultiplied_rgba, VelloGpuTexture, VelloWgpuDevice};
 use crate::scene::vello_cpu_scene_sink::{prepare, stroke_outline, ALIASING_THRESHOLD};
 use crate::scene::{
-    IVelloSceneSink, VelloSceneBrush, VelloSceneCapabilities, VelloSceneGlyphRun, VelloScenePaint,
-    VelloScenePixelRect,
+    IVelloSceneSink, VelloSceneBrush, VelloSceneCapabilities, VelloSceneFilter, VelloSceneFilterCapabilities,
+    VelloSceneGlyphRun, VelloScenePaint, VelloScenePixelRect,
 };
+use vello_cpu::filter_effects::{EdgeMode, Filter, FilterPrimitive};
 use glifo::{FontEmbolden, Glyph};
 use crate::vello_options::VelloRenderingMode;
 use kurbo::{Affine, BezPath, Diagonal2, Rect, Shape, Stroke};
@@ -485,5 +486,49 @@ impl IVelloSceneSink for VelloHybridSceneSink {
     fn render_to_texture(&mut self, target: &VelloGpuTexture<'_>) -> Result<(), String> {
         let view = target.texture.create_view(&wgpu::TextureViewDescriptor::default());
         self.render(&view, target.texture.format())
+    }
+
+    fn filter_capabilities(&self) -> VelloSceneFilterCapabilities {
+        // The filters of the CPU renderer, on the device: the two renderers
+        // share the code that describes them.
+        VelloSceneFilterCapabilities { filter_layers: true, blurred_rounded_rects: true }
+    }
+
+    fn push_filter_layer(&mut self, filter: &VelloSceneFilter, transform: Affine) {
+        // As the CPU sink: beyond its content a layer is transparent to the
+        // blur, and the lengths of the filter are scaled by the transform
+        // that is current when the layer is pushed.
+        let edge_mode = EdgeMode::None;
+        let primitive = match *filter {
+            VelloSceneFilter::Blur { std_deviation } => FilterPrimitive::GaussianBlur { std_deviation, edge_mode },
+            VelloSceneFilter::DropShadow { dx, dy, std_deviation, color } => {
+                FilterPrimitive::DropShadow { dx, dy, std_deviation, color, edge_mode }
+            }
+        };
+
+        self.scene.set_blend_mode(BlendMode::default());
+        self.scene.set_transform(transform);
+        self.scene.push_layer(None, None, None, None, Some(Filter::from_primitive(primitive)));
+    }
+
+    fn fill_blurred_rounded_rect(
+        &mut self,
+        rect: kurbo::Rect,
+        radius: f64,
+        std_deviation: f64,
+        invert: bool,
+        transform: Affine,
+        color: AlphaColor<peniko::color::Srgb>,
+    ) {
+        self.set_anti_alias(true);
+        self.scene.set_blend_mode(BlendMode::default());
+        self.scene.set_paint(PaintType::Solid(color));
+        self.scene.set_paint_transform(Affine::IDENTITY);
+        self.scene.set_transform(transform);
+        self.scene.set_fill_rule(Fill::NonZero);
+        // The factor of the CPU sink: what the renderers call the standard
+        // deviation is the square root of two times the Gaussian's.
+        let std_dev = std_deviation * std::f64::consts::SQRT_2;
+        self.scene.fill_blurred_rounded_rect(&rect, radius as f32, std_dev as f32, invert);
     }
 }
