@@ -281,6 +281,8 @@ mod font_manager;
 mod font_manager_tests;
 #[cfg(test)]
 mod glyph_run_tests;
+#[cfg(test)]
+mod synthetic_font_variable_tests;
 mod font_manager_options;
 mod font_metrics;
 mod font_simulations;
