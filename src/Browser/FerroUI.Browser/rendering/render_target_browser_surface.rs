@@ -11,12 +11,12 @@ use ferroui_base::platform::surfaces::IPlatformRenderSurface;
 use ferroui_base::platform::{
     IOptionalFeatureProvider, IPlatformGraphics, IPlatformGraphicsContext, IPlatformGraphicsReadyStateFeature,
 };
-use ferroui_base::reactive::IDisposable;
 use ferroui_base::rendering::composition::server::ServerCompositor;
 use ferroui_base::rendering::composition::Compositor;
 use ferroui_base::threading::Dispatcher;
 use ferroui_base::{PixelSize, Size};
 use std::any::{Any, TypeId};
+use std::cell::Cell;
 use std::rc::Rc;
 use std::sync::Arc;
 
@@ -33,6 +33,8 @@ pub struct RenderTargetBrowserSurface {
     base: BrowserSurface,
     shared: Arc<BrowserSurfaceShared>,
     render_surface: Arc<BrowserRenderSurface>,
+    /// Whether [`dispose`](Self::dispose) has run.
+    disposed: Cell<bool>,
 }
 
 impl RenderTargetBrowserSurface {
@@ -84,7 +86,12 @@ impl RenderTargetBrowserSurface {
         };
 
         let render_surface = BrowserRenderSurface::new(shared.clone());
-        let this = Rc::new(Self { base: BrowserSurface::new(js_surface, compositor), shared, render_surface });
+        let this = Rc::new(Self {
+            base: BrowserSurface::new(js_surface, compositor),
+            shared,
+            render_surface,
+            disposed: Cell::new(false),
+        });
         if let Some((w, h, s)) = this.base.initial_size() {
             this.on_size_changed(w, h, s);
         }
@@ -166,69 +173,116 @@ impl RenderTargetBrowserSurface {
 
     /// Releases the canvas surface.
     ///
-    /// Upstream's order: a job is posted to the compositor, then the surface
-    /// of the script side is destroyed. Upstream's job takes the compositor
-    /// out of the render loop; a compositor of this port leaves the loop by
-    /// itself when the top-level that holds it is released, so the job here
-    /// does what upstream leaves to its garbage collector and what nothing
-    /// in upstream does at all ([`release_canvas`]): on the thread that
-    /// renders, it releases what was drawn to the canvas with, marks the
-    /// canvas as disposed, takes its render target out of the table of that
-    /// thread and has the script let go of the target (`unregisterCanvas`
-    /// for a canvas of a render worker).
+    /// Upstream posts a job to the compositor, which takes its server
+    /// compositor out of the render loop, and then destroys the surface of
+    /// the script side. A job is not what this port can use: it runs with a
+    /// batch, and the batch of a closed view is the one that is likely never
+    /// applied (the compositor is dropped as soon as the media context has
+    /// committed it, and its graph is released in place of the next frame);
+    /// a job does not run either while the graphics are not ready. So the
+    /// thread that renders is given the work directly ([`release_canvas`]):
+    ///
+    /// - this thread, when it renders the view itself: the work is done
+    ///   here, before the call returns;
+    /// - the render thread, when the compositor is confined to it: the work
+    ///   is queued for that thread, which enters the graph under the
+    ///   compositor lock. Whether it gets there before or after the graph is
+    ///   released does not matter: a graph that is released has released
+    ///   what it drew with, in its own graphics context.
     ///
     /// The top-level is disposed before its renderer: the composition target
-    /// of the view is disposed after this call, in a batch of its own. The
-    /// job does not depend on which of the two reaches the thread that
-    /// renders first.
+    /// of the view is disposed after this call, in a batch of its own that
+    /// this thread waits for. The work does not depend on which of the two
+    /// reaches the thread that renders first.
     ///
-    /// A canvas whose render target never came to exist (the view was closed
-    /// before the render thread had taken the canvas) is not released: the
-    /// jobs of a compositor that is not ready do not run.
+    /// A canvas that never reached the render thread (the view was closed
+    /// before that thread had reported itself) is let go of here: the script
+    /// of this thread still holds it back. When the work cannot be queued
+    /// for a render thread that runs, the canvas is only marked as disposed
+    /// and stays alive in the worker, unused.
+    ///
+    /// A surface that is dropped without this call makes it itself: a view
+    /// that is let go of without being closed releases what it drew with in
+    /// the same way, and not when its compositor happens to be dropped.
     pub fn dispose(&self) {
+        if self.disposed.replace(true) {
+            return;
+        }
         // A target reported under the id from here on belongs to no canvas.
         self.shared.unregister();
         let shared = self.shared.clone();
         // This thread created the canvas, and its script is the one to tell.
         let page_thread = thread_proxy::current_thread();
-        // After the targets of the frame: nothing of that frame draws to the
-        // canvas after the job.
-        self.base.compositor().post_server_job(move |server| release_canvas(server, &shared, page_thread), true);
+        let compositor = self.base.compositor();
+        if compositor.is_confined_to_render_thread() {
+            let server = compositor.locked_server();
+            let posted = RenderWorker::post({
+                let shared = shared.clone();
+                move || {
+                    let released = server.try_with(|server| release_canvas(server, &shared, page_thread));
+                    if released.is_none() {
+                        // The graph is gone, and what it drew with went
+                        // with it.
+                        release_canvas_objects(&shared, page_thread);
+                    }
+                }
+            });
+            if !posted {
+                if RenderWorker::thread_id() == 0 {
+                    release_canvas_objects(&shared, page_thread);
+                } else {
+                    shared.dispose();
+                }
+            }
+        } else {
+            compositor.with_server(|server| release_canvas(server, &shared, page_thread));
+        }
         self.base.dispose();
     }
 }
 
-/// The last job of the compositor of a closed view. Runs on the thread that
-/// renders, inside a frame.
+impl Drop for RenderTargetBrowserSurface {
+    fn drop(&mut self) {
+        // Not while the thread unwinds: the release calls into the script
+        // and into the graph, and a second panic would end the module.
+        if !std::thread::panicking() {
+            self.dispose();
+        }
+    }
+}
+
+/// What the thread that renders does when a view is closed. Runs under the
+/// compositor lock, outside a frame.
 ///
 /// 1. With the graphics context of the canvas current, the render targets
 ///    and layers that are still there and the backend context (Skia's
 ///    context, which holds the objects of the graphics interface it drew
-///    with) are released. A thread that renders several canvases has several
-///    contexts, and an object that is deleted while another context is
-///    current is deleted there, where the same number names something else:
-///    this is the one place where the context of a closed canvas is
-///    certainly current while its objects go. The composition target of the
-///    view, when it is disposed after this, finds nothing to release.
-/// 2. The rest is [`release_canvas_objects`].
+///    with) are released
+///    ([`release_gpu_resources`](ServerCompositor::release_gpu_resources)).
+///    A thread that renders several canvases has several contexts, and an
+///    object that is deleted while another context is current is deleted
+///    there, where the same number names something else; with no context
+///    current the call fails in the script of the module. The composition
+///    target of the view, when it is disposed after this, finds nothing to
+///    release.
+/// 2. The compositor stops rendering
+///    ([`stop_rendering`](ServerCompositor::stop_rendering)): it still
+///    applies the batches of the view that is being closed, and asks for no
+///    tick. Upstream's job takes the server compositor out of the render
+///    loop here.
+/// 3. The rest is [`release_canvas_objects`].
 fn release_canvas(server: &ServerCompositor, shared: &Arc<BrowserSurfaceShared>, page_thread: usize) {
-    let render_interface = server.render_interface();
-    // A compositor that never drew has no backend context, and none is
-    // created to be released.
-    if render_interface.existing_backend_context().is_some() {
-        let current = render_interface.ensure_current();
-        server.reset_all_gpu_resources();
-        current.dispose();
-    }
+    server.release_gpu_resources();
+    server.stop_rendering();
     release_canvas_objects(shared, page_thread);
 }
 
 /// What the thread that renders does with the canvas of a closed view once
 /// nothing draws to it:
 ///
-/// 1. the canvas is marked as disposed: the graphics of its compositor is
-///    not ready from here on, so no frame creates a backend context or a
-///    render target for it again;
+/// 1. the canvas is marked as disposed: its surface is of no kind and its
+///    graphics is not ready from here on, so nothing creates a backend
+///    context or a render target for it again;
 /// 2. the render target leaves the table of this thread;
 /// 3. the script of the thread that created the canvas (`page_thread`) is
 ///    told ([`unregister_canvas`]): directly when that is this thread,
