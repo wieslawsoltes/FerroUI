@@ -96,7 +96,10 @@ export async function ensureCrossOriginIsolated({ serviceWorker = "./ferroui-sw.
 // reloads, this time through the service worker.
 function reload() {
     try { navigator.locks?.request(RELOAD_LOCK, { mode: "shared" }, () => new Promise(() => { }))?.catch(() => { }); } catch { }
-    globalThis.addEventListener("pageshow", (event) => { if (event.persisted) { globalThis.location.reload(); } });
-    globalThis.location.reload();
+    globalThis.addEventListener("pageshow", (event) => { if (event.persisted) { globalThis.location.replace(globalThis.location.href); } });
+    // Not `location.reload()`: the page that follows takes the place of this document in the
+    // history, so that no entry is left for which the browser could bring this document back (it
+    // has been seen to, on a slow machine, with the lock held and without a `pageshow`).
+    globalThis.location.replace(globalThis.location.href);
     return new Promise(() => { });
 }
