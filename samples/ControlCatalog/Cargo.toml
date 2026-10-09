@@ -38,6 +38,11 @@ perf-counters = ["ferroui-base/perf-counters", "ferroui-controls/perf-counters",
 # (`tests/allocation_trace.rs`) reads the blocks that are alive, and with the feature the weak
 # references of the object model are marked for it (`ferroui-base/tagged-weak-references`).
 count-allocations = ["ferroui-base/tagged-weak-references"]
+# The documents are not compiled by the build: every document is an embedded asset, and the classes
+# are populated by the run-time XAML loader, as the sample was before its markup was compiled. For
+# working on the documents and the classes of the sample, where a build without the compiled markup is
+# several times shorter (docs/porting/xaml.md, 9.5.22, has the measures).
+runtime-markup = []
 
 [dependencies]
 ferroui-base = { workspace = true }
@@ -61,6 +66,12 @@ skia-safe = { workspace = true }
 mini-mvvm = { path = "../MiniMvvm" }
 # The compatibility decomposition of the search keys of the pages (`PageItem::create_search_key`).
 unicode-normalization = "0.1"
+
+[build-dependencies]
+# The build script compiles the documents (`build.rs`) against the type models: the scan of the
+# sources of this crate and the models of the crates it is built on. It links the compiler and no
+# crate for its types.
+ferroui-build = { workspace = true }
 
 [dev-dependencies]
 ferroui-base = { workspace = true, features = ["testing"] }

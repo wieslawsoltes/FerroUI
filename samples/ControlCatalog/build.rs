@@ -1,11 +1,34 @@
-//! Embeds the assets of the sample and generates its per-document tests.
+//! Compiles the markup documents of the sample, embeds its assets and generates its
+//! per-document tests.
 //!
-//! The counterpart of the resource items of the upstream project file:
-//! every markup document (`**/*.xaml`), everything under `Assets/` and
-//! `Pages/teapot.bin`. The table is written to `$OUT_DIR/assets.rs` as
-//! `(rooted path, bytes)` pairs and registered with the asset loader by
-//! `register_types()`, next to the table of the documents `excluded.txt`
-//! lists.
+//! The counterpart of the resource items of the upstream project file (every markup
+//! document, `**/*.xaml`, everything under `Assets/` and `Pages/teapot.bin`) and of its
+//! markup compiler (docs/porting/xaml.md, 9.5.13, 9.5.22 and 9.6).
+//!
+//! # The documents
+//!
+//! Every document is compiled to `$OUT_DIR/xaml/`, each as a group of its own (a document
+//! with a class as the document of its class, with the documents of the sample it includes),
+//! against the type models: the scan of the sources of this crate and the models of the
+//! crates it is built on, which Cargo hands to this script as `DEP_<CRATE>_XAML_XAMLMETA`.
+//! The script links the compiler and no crate for its types. A document the compiler refuses
+//! is listed with its reason (`build/compiled_documents.rs`); any other
+//! refusal fails the build with the diagnostic of the document. Next to the compiled markup
+//! the script writes `$OUT_DIR/compiled_classes.rs`: the compiled documents with a class,
+//! each with the function that populates an instance of the class (`markup::load_component`,
+//! what `initialize_component()` of a class calls). The loader table of the compiled markup
+//! (`compiled_markup::try_load`, registered by `register_types()`) answers a load of a
+//! document by its URI.
+//!
+//! With the feature `runtime-markup` nothing is compiled: every document is an asset, and
+//! the classes are populated by the run-time loader, as the sample was before its markup was
+//! compiled. What a build of each kind costs is in docs/porting/xaml.md, 9.5.22.
+//!
+//! # The assets
+//!
+//! The table is written to `$OUT_DIR/assets.rs` as `(rooted path, bytes)` pairs and
+//! registered with the asset loader by `register_types()`, next to the table of the
+//! documents `excluded.txt` lists.
 //!
 //! With the feature `placeholder-branding` (on by default) an asset `Assets/<path>` that has
 //! a counterpart `PlaceholderAssets/<path>` is embedded with the content of
@@ -30,14 +53,22 @@
 //! also written as tables for the tests (`$OUT_DIR/page_assets.rs`), with
 //! or without the feature.
 //!
+//! # The tests
+//!
 //! `$OUT_DIR/document_tests.rs` holds one test per document (it loads
 //! through the run-time loader) and one per document with a class (the
-//! class constructs, loads its document and is shown in a window); a test
-//! of a document `excluded.txt` lists is ignored with the reason of the
-//! list. The tests of a document start the application
+//! class constructs, populates itself from its document and is shown in a
+//! window); a test of a document `excluded.txt` lists is ignored with the
+//! reason of the list. The tests of a document start the application
 //! `test_applications.txt` names for it, the unit test application of the
 //! tests when the document is not listed there.
+//! `$OUT_DIR/compiled_document_tests.rs` holds one test per compiled document
+//! with a class: the class populated by its compiled markup is the tree of the
+//! class populated by the run-time loader (`tests/compiled_markup.rs`).
 
+#[allow(dead_code)]
+#[path = "build/compiled_documents.rs"]
+mod compiled_documents;
 #[path = "build/page_files.rs"]
 mod page_files;
 
@@ -46,6 +77,9 @@ use std::env;
 use std::fmt::Write as _;
 use std::fs;
 use std::path::{Path, PathBuf};
+
+use ferroui_build::model::AssemblyModel;
+use ferroui_build::{Build, TypeSystem, XamlGroup};
 
 /// The list of the documents that do not load yet.
 const EXCLUDED_LIST: &str = "excluded.txt";
@@ -237,6 +271,101 @@ fn substitute_placeholder_geometries(root: &Path, out_dir: &Path, assets: &mut [
     }
 }
 
+/// What the build of the documents wrote for the crate.
+#[derive(Default)]
+struct CompiledMarkup {
+    /// The entries of the table of `compiled_classes.rs`.
+    classes: String,
+    /// The text of `compiled_document_tests.rs`.
+    tests: String,
+}
+
+/// Compiles the documents `(rooted asset path, text)` but the ones the compiler refuses
+/// (`compiled_documents::REFUSED`), each as a group of its own: one refused document then
+/// never takes another with it, and the build fails with the one diagnostic. The texts are
+/// what the placeholder artwork made of the files, so that the compiled sample shows the
+/// artwork its assets would. `catalog_application` lists the documents whose tests start the
+/// application of the catalog.
+fn compile_documents(out_dir: &Path, documents: &[(String, String)], catalog_application: &[&str]) -> CompiledMarkup {
+    for (name, _) in compiled_documents::REFUSED.iter().chain(compiled_documents::NOT_LOADED).chain(compiled_documents::NOT_RUN) {
+        assert!(
+            documents.iter().any(|(document, _)| document.strip_prefix('/') == Some(*name)),
+            "build/compiled_documents.rs names {name}, which is not a document of the crate"
+        );
+    }
+    let named: Vec<(&str, &str)> = documents.iter().map(|(path, text)| (path.trim_start_matches('/'), text.as_str())).collect();
+    let compiled: Vec<(&str, &str)> =
+        named.iter().copied().filter(|(name, _)| !compiled_documents::REFUSED.iter().any(|(refused, _)| refused == name)).collect();
+    let mut build = Build::from_env()
+        .type_system(TypeSystem::Model)
+        // The upstream sample is built with compiled bindings as the default of its documents.
+        .default_compile_bindings(true)
+        .input("build/compiled_documents.rs");
+    for (name, text) in &compiled {
+        // A document that includes another one of the sample is given every document, of
+        // which the compiler takes the ones it includes.
+        let includes = text.contains(&format!("ferres://{ASSEMBLY_NAME}/"));
+        let group = XamlGroup::new(&format!("compiled_{}", test_name(name)));
+        let group = match (class_of(text).is_some(), includes) {
+            (true, true) => group.documents(&named).class_document(name),
+            (true, false) => group.documents(&[(*name, *text)]).class_document(name),
+            (false, _) => group.documents(&[(*name, *text)]),
+        };
+        build = build.compile_group(group);
+    }
+    let outcome = build.execute();
+    for line in &outcome.lines {
+        println!("{line}");
+    }
+    if !outcome.errors.is_empty() {
+        for error in &outcome.errors {
+            eprintln!("error: {error}");
+            println!("cargo::error={error}");
+        }
+        std::process::exit(1);
+    }
+
+    // The compiled documents with a class, from the model the build wrote.
+    let crate_name = env::var("CARGO_PKG_NAME").expect("CARGO_PKG_NAME").replace('-', "_");
+    let model_path = out_dir.join(format!("{crate_name}.xamlmeta"));
+    let model = fs::read_to_string(&model_path).map_err(|error| error.to_string()).and_then(|text| AssemblyModel::parse(&text));
+    let model = model.unwrap_or_else(|error| panic!("the model of the crate cannot be read: {error}"));
+    let own_crate = format!("::{crate_name}::");
+    let in_crate = |path: &str| match path.strip_prefix(&own_crate) {
+        Some(rest) => format!("crate::{rest}"),
+        None => path.to_string(),
+    };
+    let mut classes = String::new();
+    let mut tests = String::new();
+    for (name, text) in &compiled {
+        if class_of(text).is_none() {
+            continue;
+        }
+        let rooted = format!("/{name}");
+        let document = model
+            .documents
+            .iter()
+            .find(|document| document.uri.split_once("://").and_then(|(_, rest)| rest.split_once('/')).is_some_and(|(_, path)| path.eq_ignore_ascii_case(name)));
+        let Some((class, populate)) = document.and_then(|document| Some((document.class_rust_path.as_ref()?, document.populate_path.as_ref()?))) else {
+            panic!("{name}: the build wrote no function that populates the class of the document");
+        };
+        writeln!(
+            classes,
+            "    ({rooted:?}, |root| {populate}(::core::option::Option::None, root.downcast_ref::<::ferroui_base::Ref<{class}>>().expect(\"an instance of the class of the document\"))),",
+            populate = in_crate(populate),
+            class = in_crate(class)
+        )
+        .expect("write");
+        match compiled_documents::NOT_RUN.iter().find(|(document, _)| document == name) {
+            Some((_, reason)) => writeln!(tests, "#[test]\n#[ignore = {reason:?}]").expect("write"),
+            None => tests.push_str("#[test]\n"),
+        }
+        let application = if catalog_application.contains(&rooted.as_str()) { "Catalog" } else { "UnitTest" };
+        writeln!(tests, "fn compiled_{}() {{\n    super::compare({rooted:?}, super::TestApplication::{application});\n}}\n", test_name(name)).expect("write");
+    }
+    CompiledMarkup { classes, tests }
+}
+
 struct Excluded {
     path: String,
     /// The reason applies to the test of the class only (the document loads).
@@ -256,6 +385,45 @@ fn main() {
         substitute_placeholders(&root, &mut assets);
         substitute_placeholder_geometries(&root, &out_dir, &mut assets);
     }
+
+    // The application the tests of a document start: `<file> | <application>` per line.
+    let test_applications_path = root.join(TEST_APPLICATION_LIST);
+    println!("cargo::rerun-if-changed={}", test_applications_path.display());
+    let mut test_applications = BTreeMap::new();
+    for line in fs::read_to_string(&test_applications_path).unwrap_or_default().lines() {
+        let line = line.trim();
+        if line.is_empty() || line.starts_with('#') {
+            continue;
+        }
+        let (file, application) = line.split_once('|').unwrap_or((line, ""));
+        let asset_path = format!("/{}", file.trim());
+        assert!(
+            assets.iter().any(|(path, _)| *path == asset_path),
+            "{TEST_APPLICATION_LIST} names {asset_path}, which is not a document of the crate"
+        );
+        let application = application.trim();
+        let variant = TEST_APPLICATIONS
+            .iter()
+            .find(|(name, _)| *name == application)
+            .map(|(_, variant)| *variant)
+            .unwrap_or_else(|| panic!("{TEST_APPLICATION_LIST} names the application {application:?} for {asset_path}"));
+        test_applications.insert(asset_path, variant);
+    }
+
+    // The compiled markup of the documents, as the placeholder artwork left them.
+    let compiled = match env::var_os("CARGO_FEATURE_RUNTIME_MARKUP") {
+        Some(_) => CompiledMarkup::default(),
+        None => {
+            let documents: Vec<(String, String)> = assets
+                .iter()
+                .filter(|(asset_path, _)| asset_path.ends_with(".xaml"))
+                .map(|(asset_path, path)| (asset_path.clone(), fs::read_to_string(path).unwrap_or_else(|e| panic!("cannot read {}: {e}", path.display()))))
+                .collect();
+            let catalog_application: Vec<&str> =
+                test_applications.iter().filter(|(_, application)| **application == "Catalog").map(|(asset_path, _)| asset_path.as_str()).collect();
+            compile_documents(&out_dir, &documents, &catalog_application)
+        }
+    };
 
     // The pages that use each asset (see build/page_files.rs).
     let sizes: BTreeMap<String, u64> = assets
@@ -339,30 +507,6 @@ fn main() {
     }
     text.push_str("];\n");
 
-    // The application the tests of a document start: `<file> | <application>` per line.
-    let test_applications_path = root.join(TEST_APPLICATION_LIST);
-    println!("cargo::rerun-if-changed={}", test_applications_path.display());
-    let mut test_applications = BTreeMap::new();
-    for line in fs::read_to_string(&test_applications_path).unwrap_or_default().lines() {
-        let line = line.trim();
-        if line.is_empty() || line.starts_with('#') {
-            continue;
-        }
-        let (file, application) = line.split_once('|').unwrap_or((line, ""));
-        let asset_path = format!("/{}", file.trim());
-        assert!(
-            assets.iter().any(|(path, _)| *path == asset_path),
-            "{TEST_APPLICATION_LIST} names {asset_path}, which is not a document of the crate"
-        );
-        let application = application.trim();
-        let variant = TEST_APPLICATIONS
-            .iter()
-            .find(|(name, _)| *name == application)
-            .map(|(_, variant)| *variant)
-            .unwrap_or_else(|| panic!("{TEST_APPLICATION_LIST} names the application {application:?} for {asset_path}"));
-        test_applications.insert(asset_path, variant);
-    }
-
     // The documents and the classes they name.
     text.push_str("pub(crate) static DOCUMENTS: &[(&str, Option<&str>)] = &[\n");
     let mut tests = String::new();
@@ -406,7 +550,17 @@ fn main() {
 
     // Written only when they changed, so that the crate is not rebuilt for nothing.
     let page_assets = plan.rust_tables();
-    for (file, content) in [("assets.rs", &text), ("document_tests.rs", &tests), ("page_assets.rs", &page_assets)] {
+    let compiled_classes = format!(
+        "/// The documents the build compiled, by their rooted asset paths, each with the function\n/// that populates an instance of its class from its compiled markup.\npub(crate) static COMPILED: &[(&str, fn(&::ferroui_base::BoxedValue) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadException>)] = &[\n{}];\n",
+        compiled.classes
+    );
+    for (file, content) in [
+        ("assets.rs", &text),
+        ("document_tests.rs", &tests),
+        ("page_assets.rs", &page_assets),
+        ("compiled_classes.rs", &compiled_classes),
+        ("compiled_document_tests.rs", &compiled.tests),
+    ] {
         let out = out_dir.join(file);
         if fs::read_to_string(&out).ok().as_deref() != Some(content.as_str()) {
             fs::write(&out, content).unwrap_or_else(|e| panic!("cannot write {}: {e}", out.display()));

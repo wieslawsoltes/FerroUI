@@ -102,6 +102,7 @@ name = "control-catalog"
 version = "0.1.0"
 dependencies = [
  "ferroui-base",
+ "ferroui-build",
  "ferroui-controls",
  "ferroui-controls-color-picker",
  "ferroui-dialogs",
