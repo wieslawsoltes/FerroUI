@@ -17,7 +17,10 @@
 //! collector would. What it finds is every reference into what the work
 //! left: the strong one that keeps it alive among them, beside the weak
 //! ones (a weak reference points at the same block) and the words a list
-//! leaves in the part of its buffer it no longer uses. No holder from an
+//! leaves in the part of its buffer it no longer uses. The weak references
+//! of the object model (`WeakRef`) are marked in a build with the feature
+//! (`ferroui-base/tagged-weak-references`) and counted apart; the holders
+//! with references that are not marked come first. No holder from an
 //! earlier epoch means a cycle of the blocks among themselves, or a holder
 //! that is not a recorded block (a static, a block allocated before the
 //! recording or outside the allocator of Rust).
@@ -44,6 +47,11 @@ pub struct Site {
 pub struct Holder {
     /// The number of pointers.
     pub references: u64,
+    /// How many of them are weak references of the object model (the mark of
+    /// `tagged-weak-references` follows the pointer). Of the others nothing is
+    /// known: a strong reference, a weak one of the standard library, a word
+    /// of a buffer that is no longer in use.
+    pub weak: u64,
     /// The epoch of the blocks that hold the pointers.
     pub epoch: u32,
     /// The size of one of the blocks that hold the pointers.
@@ -236,7 +244,7 @@ mod recording {
 
     pub fn holders(epoch: u32, every_epoch: bool, is_target: &dyn Fn(&[usize]) -> bool) -> Vec<Holder> {
         let entered = enter();
-        let mut holders: HashMap<(Vec<usize>, Vec<usize>, u32), (u64, usize)> = HashMap::new();
+        let mut holders: HashMap<(Vec<usize>, Vec<usize>, u32), (u64, usize, u64)> = HashMap::new();
         if let Ok(records) = RECORDS.lock() {
             if let Some(records) = records.as_ref() {
                 // The blocks of the epoch, by address.
@@ -276,15 +284,30 @@ mod recording {
                         let entry = holders.entry(key).or_default();
                         entry.0 += 1;
                         entry.1 = record.size;
+                        // A weak reference is the pointer, the table of its
+                        // type and the mark.
+                        if index + 2 < words {
+                            // SAFETY: a word of the same block.
+                            let mark = unsafe { std::ptr::read_volatile((*address as *const usize).add(index + 2)) };
+                            if mark == ferroui_base::WEAK_REFERENCE_TAG {
+                                entry.2 += 1;
+                            }
+                        }
                     }
                 }
             }
         }
         let mut holders: Vec<Holder> = holders
             .into_iter()
-            .map(|((holder, target, epoch), (references, bytes))| Holder { references, epoch, bytes, holder, target })
+            .map(|((holder, target, epoch), (references, bytes, weak))| Holder { references, weak, epoch, bytes, holder, target })
             .collect();
-        holders.sort_by(|a, b| b.references.cmp(&a.references).then_with(|| a.holder.cmp(&b.holder)).then_with(|| a.target.cmp(&b.target)));
+        holders.sort_by(|a, b| {
+            (b.references - b.weak)
+                .cmp(&(a.references - a.weak))
+                .then_with(|| b.references.cmp(&a.references))
+                .then_with(|| a.holder.cmp(&b.holder))
+                .then_with(|| a.target.cmp(&b.target))
+        });
         if entered {
             leave();
         }
@@ -480,7 +503,7 @@ fn a_block_alive_after_the_recording_is_reported_with_its_call_stack() {
     assert!(before < epoch);
     assert!(sites.iter().any(|site| site.bytes == 12_345 && !site.frames.is_empty()));
     assert!(sites.iter().all(|site| site.bytes != 23_456));
-    assert!(holders.iter().any(|holder| holder.references == 1 && !holder.holder.is_empty()));
+    assert!(holders.iter().any(|holder| holder.references == 1 && holder.weak == 0 && !holder.holder.is_empty()));
     drop(kept);
     drop(holder);
 }

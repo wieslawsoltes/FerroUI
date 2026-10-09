@@ -34,8 +34,10 @@ separate-assets = []
 perf-counters = ["ferroui-base/perf-counters", "ferroui-controls/perf-counters", "ferroui-markup-xaml/perf-counters"]
 # Makes the global allocator of the test build of the sample one that counts allocations and
 # bytes (`tests/allocations.rs`), for the recycling benchmark. Nothing but the test build of this
-# crate is affected, and only with the feature.
-count-allocations = []
+# crate is affected, and only with the feature. The allocation trace of the tests
+# (`tests/allocation_trace.rs`) reads the blocks that are alive, and with the feature the weak
+# references of the object model are marked for it (`ferroui-base/tagged-weak-references`).
+count-allocations = ["ferroui-base/tagged-weak-references"]
 
 [dependencies]
 ferroui-base = { workspace = true }

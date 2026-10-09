@@ -395,8 +395,9 @@ fn print_holders(epoch: u32, holders: &[Holder]) {
             std::cmp::Ordering::Greater => "after",
         };
         println!(
-            "      {} into {}, from blocks of {} bytes allocated {age}",
+            "      {} ({} weak) into {}, from blocks of {} bytes allocated {age}",
             holder.references,
+            holder.weak,
             allocation_in_a_line(&target_frames),
             holder.bytes
         );
@@ -483,14 +484,16 @@ fn shown_page(tour: &Tour) -> ferroui_base::WeakRef<ferroui_controls::Page> {
 }
 
 /// The first thing a visit must not retain is the page itself. The home page
-/// declares a data template (gap C317); the others stand for the pages
-/// without one.
+/// declares a data template (gap C317); Border, Calendar and TextBlock stand
+/// for the pages without one, and the others are the ones that stayed alive
+/// for gaps C322 to C326: the page that is its own data context, and pages
+/// with validated controls, sliders and styles under an element.
 #[test]
 fn the_catalog_frees_the_page_it_navigated_away_from() {
     let tour = Tour::start();
     let pages = tour.pages();
     let home = tour.view_model().home_item();
-    for name in ["Border", "Calendar", "TextBlock"] {
+    for name in ["Border", "Calendar", "TextBlock", "Buttons", "NumericUpDown", "Slider", "CalendarDatePicker", "Flex Panel"] {
         let page = pages.iter().find(|page| page.header() == name).expect("a page of the list");
         assert!(tour.show(&home));
         let home_page = shown_page(&tour);
@@ -576,6 +579,61 @@ fn catalog_revisit_memory() {
     for (header, (epoch, sites, holders)) in &reports {
         print_sites(header, sites);
         print_holders(*epoch, holders);
+    }
+}
+
+/// What a piece of markup leaves behind: the elements of `CATALOG_TOUR_XAML`
+/// (the children of a panel, in the namespace of the framework) are shown in
+/// the window of the catalog, with the Fluent theme and rendered frames, and
+/// taken out again; the elements that are still alive, of the visual tree
+/// they had while shown, are printed by class. With `CATALOG_TOUR_TRACE`
+/// the blocks the markup left are reported as the revisits report theirs.
+#[test]
+#[ignore = "measurement: set CATALOG_TOUR_XAML; run with --ignored --nocapture --test-threads=1"]
+fn catalog_markup_survivors() {
+    use ferroui_base::metadata::from_markup_value;
+    let Some(xaml) = environment("CATALOG_TOUR_XAML") else {
+        println!("CATALOG_TOUR_XAML is not set");
+        return;
+    };
+    let traced = environment("CATALOG_TOUR_TRACE").is_some();
+    if traced {
+        trace::start();
+    }
+    let tour = Tour::start();
+    let epoch = if traced { trace::next_epoch() } else { 0 };
+    let document = format!(
+        "<Panel xmlns='https://github.com/ferroui' xmlns:x='http://schemas.microsoft.com/winfx/2006/xaml'>{xaml}</Panel>"
+    );
+    let root = from_markup_value::<Ref<Control>>(&Some(load_text(&document))).expect("a control");
+    tour.window.set_content(Some(Control::boxed(&root)));
+    tour.settle();
+    let mut elements: Vec<(String, ferroui_base::WeakRef<ferroui_base::Visual>)> = Vec::new();
+    let mut pending: Vec<(usize, Ref<ferroui_base::Visual>)> = vec![(0, root.clone().upcast())];
+    while let Some((depth, visual)) = pending.pop() {
+        elements.push((format!("{}{}", "  ".repeat(depth), visual.get_type().name()), visual.downgrade()));
+        for child in visual.get_visual_children().iter().rev() {
+            pending.push((depth + 1, child.clone()));
+        }
+    }
+    if traced {
+        // What the main view allocates when it is shown again is not the markup's.
+        trace::next_epoch();
+    }
+    tour.window.set_content(Some(Control::boxed(&tour.main_view)));
+    drop(root);
+    tour.settle();
+    let alive: Vec<&String> = elements.iter().filter(|(_, element)| element.upgrade().is_some()).map(|(name, _)| name).collect();
+    println!("markup survivors: {} of {} elements are alive", alive.len(), elements.len());
+    for name in alive {
+        println!("  {name}");
+    }
+    if traced {
+        print_objects(epoch);
+        let report = (trace::alive(epoch), holders_of(epoch));
+        trace::clear();
+        print_sites("the markup", &report.0);
+        print_holders(epoch, &report.1);
     }
 }
 

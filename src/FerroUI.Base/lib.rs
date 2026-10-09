@@ -115,6 +115,8 @@ pub use type_system::{
     __forwards_to_parent, __register_class, cast_this, instantiate, parent_vtable, ClassDefaults, IntoRef, Nullable,
     ObjectType, Ref, StaticType, Subclassable, TypeInfo, Upcast, WeakRef,
 };
+#[cfg(feature = "tagged-weak-references")]
+pub use type_system::WEAK_REFERENCE_TAG;
 pub use vector::Vector;
 pub use visual::{Visual, VisualImpl, VisualImplExt, VisualVTable};
 pub use visual_tree_attachment_event_args::VisualTreeAttachmentEventArgs;

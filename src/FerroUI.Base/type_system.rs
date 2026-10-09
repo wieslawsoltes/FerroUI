@@ -783,7 +783,7 @@ impl<T: ObjectType> Ref<T> {
     /// Creates a weak reference to the object.
     #[inline]
     pub fn downgrade(&self) -> WeakRef<T> {
-        WeakRef { ptr: Rc::downgrade(&self.ptr), _marker: PhantomData }
+        WeakRef::of(Rc::downgrade(&self.ptr))
     }
 
     /// Whether two handles refer to the same object.
@@ -841,10 +841,32 @@ impl<T: ObjectType> fmt::Debug for Ref<T> {
     }
 }
 
+/// The word that follows the pointer of every [`WeakRef`] in a build with the
+/// feature `tagged-weak-references`: a reader of the memory of the process
+/// (the allocation trace of the tests of the ControlCatalog) tells a weak
+/// reference to an object from a strong one by it.
+#[cfg(feature = "tagged-weak-references")]
+pub const WEAK_REFERENCE_TAG: usize = 0x5745_414B_5245_4631_u64 as usize;
+
 /// A weak reference to an object of class `T` or a class derived from it.
+#[cfg_attr(feature = "tagged-weak-references", repr(C))]
 pub struct WeakRef<T: ObjectType> {
     ptr: Weak<dyn Any>,
+    #[cfg(feature = "tagged-weak-references")]
+    tag: usize,
     _marker: PhantomData<T>,
+}
+
+impl<T: ObjectType> WeakRef<T> {
+    #[inline]
+    fn of(ptr: Weak<dyn Any>) -> Self {
+        WeakRef {
+            ptr,
+            #[cfg(feature = "tagged-weak-references")]
+            tag: WEAK_REFERENCE_TAG,
+            _marker: PhantomData,
+        }
+    }
 }
 
 impl<T: ObjectType> WeakRef<T> {
@@ -860,7 +882,7 @@ impl<T: ObjectType> WeakRef<T> {
     where
         T: Upcast<U>,
     {
-        WeakRef { ptr: self.ptr, _marker: PhantomData }
+        WeakRef::of(self.ptr)
     }
 
     /// Whether the weak reference points at `object`.
@@ -877,14 +899,14 @@ impl<T: ObjectType> WeakRef<T> {
 
     #[inline]
     pub(crate) fn from_weak(ptr: Weak<dyn Any>) -> Self {
-        WeakRef { ptr, _marker: PhantomData }
+        WeakRef::of(ptr)
     }
 }
 
 impl<T: ObjectType> Clone for WeakRef<T> {
     #[inline]
     fn clone(&self) -> Self {
-        WeakRef { ptr: self.ptr.clone(), _marker: PhantomData }
+        WeakRef::of(self.ptr.clone())
     }
 }
 

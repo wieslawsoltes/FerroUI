@@ -35,6 +35,12 @@ compiler-metadata = ["markup-functions"]
 # layouts created. For measuring only: without the feature the counting sites are no code and
 # no type has a field for them.
 perf-counters = []
+# A word beside the pointer of every weak reference to an object (`WeakRef`) that marks it as
+# one (`type_system::WEAK_REFERENCE_TAG`), for a reader of the memory of the process: the
+# allocation trace of the tests of the ControlCatalog finds the blocks that point at an object
+# that should have been freed, and tells the weak references from the one that keeps it alive
+# by the mark. For measuring only: a weak reference is one word larger with it.
+tagged-weak-references = []
 
 [dependencies]
 bitflags.workspace = true
