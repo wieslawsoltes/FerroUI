@@ -117,12 +117,12 @@ fn build_script_output_is_the_emitters() {
             first_difference(built, expected)
         );
     }
+    // The file of the build also names the files of the crates the crate is built on, which
+    // only the build knows (`DEP_<CRATE>_XAML_XAMLMETA`): everything else is compared.
     let metadata = std::fs::read_to_string(env!("FERROUI_XAMLMETA")).expect("the .xamlmeta of the build can be read");
-    assert!(
-        metadata == generated.metadata,
-        "the .xamlmeta of the build script differs from the emitter's in the tests (first difference at line {})",
-        first_difference(&metadata, &generated.metadata)
-    );
+    let mut metadata = XamlMetadata::parse(&metadata).expect("the .xamlmeta of the build is read");
+    metadata.dependencies.clear();
+    assert!(metadata.to_json() == generated.metadata, "the .xamlmeta of the build script differs from the emitter's in the tests");
 }
 
 #[test]
@@ -138,12 +138,13 @@ fn compiled_class_document_is_up_to_date() {
     }
 }
 
-/// The `.xamlmeta` is the model the emitter writes.
+/// The `.xamlmeta` is the model the emitter writes, and it names the files of the crates the
+/// crate is built on, which export their type models (docs/porting/xaml.md, 9.5.13).
 #[test]
 fn compiled_xaml_metadata_is_readable() {
     let read = XamlMetadata::read(env!("FERROUI_XAMLMETA")).expect("the file can be read");
-    assert_eq!(read.len(), 1);
-    assert_eq!(read[0].name, "Tests");
+    let names: Vec<&str> = read.iter().map(|metadata| metadata.name.as_str()).collect();
+    assert_eq!(names, ["Tests", "FerroUI.Base", "FerroUI.Controls", "FerroUI.Markup.Xaml"]);
 }
 
 #[test]

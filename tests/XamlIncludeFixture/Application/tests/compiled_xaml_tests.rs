@@ -98,6 +98,9 @@ fn build_script_output_is_the_emitters() {
 fn compiled_xaml_metadata_reads_its_dependencies() {
     let read = metadata();
     let names: Vec<&str> = read.iter().map(|model| model.name.as_str()).collect();
-    assert_eq!(names, [ASSEMBLY.name, "FerroUI.Themes.Fluent", "FerroUI.Themes.Simple", "Tests"]);
-    assert_eq!(read[0].dependencies.len(), 3);
+    assert_eq!(
+        names,
+        [ASSEMBLY.name, "FerroUI.Base", "FerroUI.Controls", "FerroUI.Markup.Xaml", "FerroUI.Themes.Fluent", "FerroUI.Themes.Simple", "Tests"]
+    );
+    assert_eq!(read[0].dependencies.len(), 6);
 }

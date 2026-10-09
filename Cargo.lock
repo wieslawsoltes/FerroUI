@@ -182,6 +182,7 @@ name = "ferroui-base"
 version = "0.1.0"
 dependencies = [
  "bitflags",
+ "ferroui-build-scan",
  "paste",
  "rust_decimal",
  "time",
@@ -206,12 +207,19 @@ name = "ferroui-build"
 version = "0.1.0"
 dependencies = [
  "ferroui-base",
+ "ferroui-build-scan",
  "ferroui-markup-xaml",
  "ferroui-markup-xaml-loader",
+ "xamlx",
+]
+
+[[package]]
+name = "ferroui-build-scan"
+version = "0.1.0"
+dependencies = [
  "proc-macro2",
  "quote",
  "syn 2.0.119",
- "xamlx",
 ]
 
 [[package]]
@@ -220,6 +228,7 @@ version = "0.1.0"
 dependencies = [
  "bitflags",
  "ferroui-base",
+ "ferroui-build-scan",
 ]
 
 [[package]]
@@ -295,6 +304,7 @@ name = "ferroui-markup-xaml"
 version = "0.1.0"
 dependencies = [
  "ferroui-base",
+ "ferroui-build-scan",
  "ferroui-controls",
  "ferroui-markup",
 ]
@@ -304,6 +314,7 @@ name = "ferroui-markup-xaml-loader"
 version = "0.1.0"
 dependencies = [
  "ferroui-base",
+ "ferroui-build-scan",
  "ferroui-markup",
  "ferroui-markup-xaml",
  "xamlx",

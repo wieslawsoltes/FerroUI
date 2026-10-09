@@ -5,6 +5,11 @@ edition.workspace = true
 rust-version.workspace = true
 license.workspace = true
 repository.workspace = true
+# The build script exports the type model of the crate (`build.rs`); Cargo hands the path of the file
+# to the build scripts of the crates that depend on this one (`DEP_FERROUI_CONTROLS_XAML_XAMLMETA`;
+# docs/porting/xaml.md, 9.5.13 and 9.6.3).
+build = "build.rs"
+links = "ferroui_controls_xaml"
 
 [lib]
 path = "lib.rs"
@@ -23,3 +28,8 @@ perf-counters = ["ferroui-base/perf-counters"]
 
 [dev-dependencies]
 ferroui-base = { workspace = true, features = ["testing"] }
+
+[build-dependencies]
+# The source scanner and the export of the type model: the standard library and `syn`, nothing of the
+# framework.
+ferroui-build-scan = { workspace = true }
