@@ -401,3 +401,17 @@ project = "Avalonia.Controls.UnitTests"
 file = "Platform/ScreensTests.cs"
 test = "Should_Raise_Event_When_Screen_Changed_From_Another_Thread"
 reason = "the screens of the port are reference counted on the UI thread (`Rc`, not `Send`): a change cannot be pushed from another thread, a platform posts it to the dispatcher itself"
+
+# === Avalonia.Markup.UnitTests ================================================================================
+
+[[waive]]
+project = "Avalonia.Markup.UnitTests"
+file = "Data/BindingTests.cs"
+test = "Binding_Can_Resolve_Property_From_IReflectableType_Type"
+reason = "`IReflectableType` is custom reflection of .NET: an object that hands out a type of its own, whose properties the binding then reads. A property of a model of the port is a registered accessor of its type; there is no reflection an object could replace"
+
+[[waive]]
+project = "Avalonia.Markup.UnitTests"
+file = "Data/BindingTests.cs"
+test = "Binding_To_Types_Should_Work"
+reason = "binds to the `Name` of a `System.Type` object, a regression test of reflection over the runtime type of .NET: a type of the port (`TypeInfo`) is not a model with registered properties"
