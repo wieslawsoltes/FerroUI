@@ -299,6 +299,40 @@ fn current_is_registered_with_the_locator_and_dispose_releases_everything() {
 // ── try_get_font_collection ──
 
 #[test]
+fn try_get_font_collection_system_font_scheme_returns_true() {
+    let _scope = TestFontScope::start();
+
+    let source = uri(&format!("{}:Arial", FontManager::SYSTEM_FONT_SCHEME));
+
+    assert!(FontManager::current().try_get_font_collection(&source).is_some());
+}
+
+#[test]
+fn try_get_font_collection_system_fonts_key_returns_true() {
+    let _scope = TestFontScope::start();
+
+    assert!(FontManager::current().try_get_font_collection(&FontManager::system_fonts_key()).is_some());
+}
+
+#[test]
+fn try_get_font_collection_absolute_resm_returns_true() {
+    let _scope = TestFontScope::with_assets();
+
+    let source = uri(test_fonts::ASSETS);
+
+    assert!(FontManager::current().try_get_font_collection(&source).is_some());
+}
+
+#[test]
+fn try_get_font_collection_ferres_returns_true() {
+    let _scope = TestFontScope::start();
+
+    let source = uri("ferres://FerroUI.Base.UnitTests/Assets");
+
+    assert!(FontManager::current().try_get_font_collection(&source).is_some());
+}
+
+#[test]
 fn try_get_font_collection_system_font_scheme_yields_system_font_collection() {
     let _scope = TestFontScope::start();
 
@@ -346,7 +380,7 @@ fn try_get_font_collection_system_font_scheme_and_system_fonts_key_return_same_i
 }
 
 #[test]
-fn try_get_font_collection_registered_fonts_collection_is_returned() {
+fn try_get_font_collection_registered_fonts_collection_returns_true() {
     let _scope = TestFontScope::start();
 
     let key = uri("fonts:MyTest");
@@ -361,7 +395,7 @@ fn try_get_font_collection_registered_fonts_collection_is_returned() {
 }
 
 #[test]
-fn try_get_font_collection_unregistered_fonts_collection_returns_none() {
+fn try_get_font_collection_unregistered_fonts_collection_returns_false() {
     let _scope = TestFontScope::start();
 
     let key = uri("fonts:DoesNotExist");
@@ -370,7 +404,7 @@ fn try_get_font_collection_unregistered_fonts_collection_returns_none() {
 }
 
 #[test]
-fn try_get_font_collection_unregistered_fonts_collection_does_not_cache_none() {
+fn try_get_font_collection_unregistered_fonts_collection_does_not_cache_null() {
     let _scope = TestFontScope::start();
 
     let key = uri("fonts:DoesNotExist2");
@@ -440,7 +474,7 @@ fn try_get_font_collection_ferres_returns_same_instance_on_subsequent_calls() {
 }
 
 #[test]
-fn try_get_font_collection_unknown_scheme_returns_none() {
+fn try_get_font_collection_unknown_scheme_returns_false() {
     let _scope = TestFontScope::start();
 
     let source = uri("https://example.com/fonts");
@@ -449,7 +483,7 @@ fn try_get_font_collection_unknown_scheme_returns_none() {
 }
 
 #[test]
-fn try_get_font_collection_unknown_scheme_does_not_cache_none() {
+fn try_get_font_collection_unknown_scheme_does_not_cache_null() {
     let _scope = TestFontScope::start();
 
     // Verify that repeated lookups for the same unknown-scheme URI
