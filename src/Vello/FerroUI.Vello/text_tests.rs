@@ -15,7 +15,7 @@ use ferroui_base::media::text_formatting::{ITextDrawingSink, TextLayout, TextLay
 use ferroui_base::media::{
     BaselinePixelAlignment, BoxShadows, CharacterHit, Colors, EdgeMode, FlowDirection, FontFamily, FontFeature,
     FontManager, FontSimulations, FontStretch, FontStyle, FontWeight, GlyphInfoList, GlyphRun, IBrush, IPen,
-    IPlatformTypeface,
+    IFontMemory, IPlatformTypeface,
     RenderOptions, TextHintingMode, TextOptions, TextRenderingMode, Typeface,
 };
 use ferroui_base::platform::{
@@ -870,4 +870,303 @@ fn text_layout_right_to_left_paragraph_with_arabic() {
 
     layout.dispose();
     scope.dispose();
+}
+
+// ---------------------------------------------------------------------------
+// Tests of this backend: what the Skia backend leaves to Skia and this one
+// does itself
+// ---------------------------------------------------------------------------
+
+const INTER_VARIABLE: &[u8] = include_bytes!("../../Skia/FerroUI.Skia/test_assets/assets/InterVariable.ttf");
+const INTER: &[u8] = include_bytes!("../../Skia/FerroUI.Skia/test_assets/assets/Inter-Regular.ttf");
+
+/// The glyph run of a text in a typeface of this backend, shaped at an em
+/// size.
+fn glyph_run_of(platform_typeface: Rc<VelloTypeface>, text: &str, em_size: f64, origin: Point) -> Rc<GlyphRun> {
+    let font_simulations = platform_typeface.font_simulations();
+    let glyph_typeface = ferroui_base::media::GlyphTypeface::new(platform_typeface, font_simulations).unwrap();
+    let options = TextShaperOptions::with_all(glyph_typeface.clone(), em_size, 0, None, 0.0, 0.0, None);
+    let buffer = TextShaper::current().shape_text(&utf16(text), &options);
+
+    let glyph_infos = buffer.glyph_infos().to_vec();
+
+    GlyphRun::new(glyph_typeface, em_size, utf16(text), GlyphInfoList::from(glyph_infos), Some(origin), 0)
+}
+
+/// The share of the pixels of two renderings that differ by more than a
+/// quarter of the range, in percent of the pixels with ink in the first.
+fn difference_of_ink(first: &TextTarget, second: &TextTarget) -> f64 {
+    let (first, second) = (first.pixels(), second.pixels());
+    let ink = first.iter().flatten().filter(|pixel| is_dark(**pixel)).count().max(1);
+    let differing = first
+        .iter()
+        .flatten()
+        .zip(second.iter().flatten())
+        .filter(|((first, _, _), (second, _, _))| first.abs_diff(*second) > 64)
+        .count();
+
+    100.0 * differing as f64 / ink as f64
+}
+
+#[test]
+fn simulated_glyph_runs_are_drawn_as_their_outlines() {
+    let scope = start();
+    let foreground = ImmutableSolidColorBrush::new(Colors::BLACK);
+    let render_interface = FerroLocator::current().get_service::<dyn IPlatformRenderInterface>().unwrap();
+
+    let draw = |font_simulations| {
+        let typeface = VelloTypeface::from_bytes(INTER.to_vec(), font_simulations).unwrap();
+        let glyph_run = glyph_run_of(typeface, "Bold & oblique", 30.0, Point::new(8.0, 40.0));
+        let geometry = render_interface.build_glyph_run_geometry(&glyph_run);
+
+        let drawn = TextTarget::new(260, 60);
+        drawn.draw(|context| {
+            // The geometry is the outline without hinting.
+            context.push_text_options(TextOptions { text_hinting_mode: TextHintingMode::None, ..TextOptions::default() });
+            context.draw_glyph_run(Some(&foreground), &*glyph_run.platform_impl());
+            context.pop_text_options();
+        });
+        let filled = TextTarget::new(260, 60);
+        filled.draw(|context| context.draw_geometry(Some(&foreground), None, &*geometry));
+
+        (drawn, filled)
+    };
+
+    let (plain, plain_outline) = draw(FontSimulations::None);
+    assert!(difference_of_ink(&plain, &plain_outline) < 1.5, "{}", difference_of_ink(&plain, &plain_outline));
+    let (_, plain_ink) = plain.ink(is_dark);
+
+    for font_simulations in [FontSimulations::Bold, FontSimulations::Oblique, FontSimulations::Bold | FontSimulations::Oblique] {
+        let (drawn, filled) = draw(font_simulations);
+        let difference = difference_of_ink(&drawn, &filled);
+        assert!(difference < 1.5, "{font_simulations:?}: {difference} % of the ink differs from the outline");
+
+        // A simulation changes what is drawn: bold adds ink.
+        assert!(difference_of_ink(&plain, &drawn) > 10.0, "{font_simulations:?}");
+        if font_simulations.contains(FontSimulations::Bold) {
+            let (_, ink) = drawn.ink(is_dark);
+            assert!(ink as f64 > plain_ink as f64 * 1.2, "{font_simulations:?}: {ink} against {plain_ink}");
+        }
+    }
+
+    scope.dispose();
+}
+
+#[test]
+fn typefaces_of_a_variable_font_are_drawn_at_their_axes() {
+    let scope = start();
+    let foreground = ImmutableSolidColorBrush::new(Colors::BLACK);
+
+    let default_instance = VelloTypeface::from_bytes(INTER_VARIABLE.to_vec(), FontSimulations::None).unwrap();
+    assert!(default_instance.face().normalized_coords().is_empty());
+    assert_eq!(FontWeight::Normal, default_instance.weight());
+
+    let heavy =
+        VelloTypeface::from_bytes_with_variations(INTER_VARIABLE.to_vec(), FontSimulations::None, &[("wght", 900.0)])
+            .unwrap();
+    let light =
+        VelloTypeface::from_bytes_with_variations(INTER_VARIABLE.to_vec(), FontSimulations::None, &[("wght", 100.0)])
+            .unwrap();
+
+    // The ends of the weight axis are the normalized coordinates 1 and -1.
+    assert_eq!(FontWeight(900), heavy.weight());
+    assert_eq!(FontWeight(100), light.weight());
+    assert!(heavy.face().normalized_coords().iter().any(|coord| coord.to_f32() == 1.0), "{:?}", heavy.face().normalized_coords());
+    assert!(light.face().normalized_coords().iter().any(|coord| coord.to_f32() == -1.0), "{:?}", light.face().normalized_coords());
+    assert_eq!(heavy.face().normalized_coords().len(), heavy.face().normalized_coord_bits().len());
+
+    // An axis the font does not have, and a tag that is none, are ignored.
+    let unknown = VelloTypeface::from_bytes_with_variations(
+        INTER_VARIABLE.to_vec(),
+        FontSimulations::None,
+        &[("zzzz", 3.0), ("toolong", 1.0)],
+    )
+    .unwrap();
+    assert!(unknown.face().normalized_coords().is_empty());
+
+    // The tables are those of the font file whatever the instance is: the
+    // glyph typeface and the shaper read the default instance.
+    let tag = OpenTypeTag::parse("hmtx");
+    assert_eq!(default_instance.try_get_table(tag).unwrap().to_vec(), heavy.try_get_table(tag).unwrap().to_vec());
+
+    // The outline of a glyph, and what is drawn, follow the axis.
+    let glyph = skrifa::MetadataProvider::charmap(&heavy.face().font_ref()).map('l').unwrap().to_u32() as u16;
+    let stem = |typeface: &Rc<VelloTypeface>| kurbo::Shape::bounding_box(&typeface.face().glyph_path(glyph, 100.0).unwrap()).width();
+    assert!(stem(&light) < stem(&default_instance) && stem(&default_instance) < stem(&heavy));
+    assert!(stem(&heavy) > 2.5 * stem(&light), "{} {}", stem(&heavy), stem(&light));
+
+    let ink = |typeface: Rc<VelloTypeface>| {
+        let glyph_run = glyph_run_of(typeface, "illicit", 40.0, Point::new(8.0, 50.0));
+        let target = TextTarget::new(200, 70);
+        target.draw(|context| context.draw_glyph_run(Some(&foreground), &*glyph_run.platform_impl()));
+        target.ink(is_dark).1
+    };
+    let (light_ink, default_ink, heavy_ink) = (ink(light), ink(default_instance), ink(heavy));
+    assert!(light_ink > 50 && (light_ink as f64) < default_ink as f64 * 0.6, "{light_ink} {default_ink}");
+    assert!(heavy_ink as f64 > default_ink as f64 * 1.5, "{heavy_ink} {default_ink}");
+
+    scope.dispose();
+}
+
+#[test]
+fn intersections_are_where_the_outlines_cross_a_band() {
+    let scope = start();
+
+    // "H" and "o" of Inter at 100: the stems of the H are vertical, so a
+    // band anywhere between the baseline and the cap height is crossed from
+    // the left edge of the left stem to the right edge of the right one.
+    let typeface = VelloTypeface::from_bytes(INTER.to_vec(), FontSimulations::None).unwrap();
+    let glyph_run = glyph_run_of(typeface.clone(), "Ho", 100.0, Point::new(20.0, 120.0));
+    let platform_impl = glyph_run.platform_impl();
+
+    let glyph = |character: char| {
+        skrifa::MetadataProvider::charmap(&typeface.face().font_ref()).map(character).unwrap().to_u32() as u16
+    };
+    let h = kurbo::Shape::bounding_box(&typeface.face().glyph_path(glyph('H'), 100.0).unwrap());
+    let o = kurbo::Shape::bounding_box(&typeface.face().glyph_path(glyph('o'), 100.0).unwrap());
+    let advance = glyph_run.glyph_infos().borrow()[0].glyph_advance;
+
+    // Above the "o", in the upper half of the "H": the H alone, relative to
+    // the baseline origin of the run.
+    let upper = platform_impl.get_intersections(-70.0, -65.0);
+    assert_eq!(2, upper.len(), "{upper:?}");
+    assert!((upper[0] as f64 - h.x0).abs() < 1e-3 && (upper[1] as f64 - h.x1).abs() < 1e-3, "{upper:?} {h:?}");
+
+    // Through the middle of the "o": both glyphs, the "o" at its widest.
+    let middle = platform_impl.get_intersections((o.y0 + o.height() / 2.0 - 1.0) as f32, (o.y0 + o.height() / 2.0 + 1.0) as f32);
+    assert_eq!(4, middle.len(), "{middle:?}");
+    assert!((middle[2] as f64 - (advance + o.x0)).abs() < 0.05, "{middle:?} {o:?}");
+    assert!((middle[3] as f64 - (advance + o.x1)).abs() < 0.05, "{middle:?} {o:?}");
+
+    // Below the baseline neither has ink (the "o" overshoots it a little),
+    // and the limits may be given in either order.
+    assert!(platform_impl.get_intersections(5.0, 8.0).is_empty());
+    assert_eq!(upper, platform_impl.get_intersections(-65.0, -70.0));
+
+    // The bounds of the run: for every glyph the pixels its outline
+    // touches when its origin is on a pixel and one more on each side, at
+    // the pen position of the glyph.
+    let bounds = platform_impl.bounds();
+    assert_eq!(20.0 + h.x0.floor() - 1.0, bounds.x);
+    assert_eq!(120.0 + h.y0.floor() - 1.0, bounds.y);
+    assert!((20.0 + advance + o.x1.ceil() + 1.0 - bounds.right()).abs() < 1e-9, "{bounds}");
+    assert_eq!(120.0 + o.y1.ceil() + 1.0, bounds.bottom());
+
+    scope.dispose();
+}
+
+#[test]
+fn a_font_without_a_head_table_is_a_typeface_that_draws_nothing() {
+    let scope = start();
+
+    // A bitmap font of Apple: `bhed` in place of `head`, `bdat` in place of
+    // outlines. The renderers read the em square from `head`.
+    let font: &[u8] = include_bytes!("../../Skia/FerroUI.Skia/test_assets/assets/NISC18030.ttf");
+    let typeface = VelloTypeface::from_bytes(font.to_vec(), FontSimulations::None).expect("the font is read");
+    assert_eq!("GB18030 Bitmap", typeface.family_name());
+    assert!(!typeface.face().is_drawable());
+    assert_eq!(2048, typeface.face().units_per_em());
+    assert!(typeface.face().glyph_path(5, 16.0).is_none());
+
+    let glyph_typeface = ferroui_base::media::GlyphTypeface::new(typeface.clone(), FontSimulations::None).unwrap();
+    assert!(glyph_typeface.glyph_count() > 20000);
+
+    let glyph_run = glyph_run_of(typeface, "\u{4E2D}\u{6587}", 16.0, Point::new(10.0, 30.0));
+    let foreground = ImmutableSolidColorBrush::new(Colors::BLACK);
+    let target = TextTarget::new(80, 50);
+    target.draw(|context| context.draw_glyph_run(Some(&foreground), &*glyph_run.platform_impl()));
+    assert_eq!(0, target.ink(is_not_white).1);
+    assert!(glyph_run.platform_impl().get_intersections(-8.0, -4.0).is_empty());
+
+    scope.dispose();
+}
+
+#[test]
+fn font_manager_falls_back_by_script_language_and_character() {
+    let font_manager = FontManagerImpl::new();
+    let family_of = |codepoint: u32, culture: &str| {
+        font_manager
+            .try_match_character(
+                codepoint as i32,
+                FontStyle::Normal,
+                FontWeight::Normal,
+                FontStretch::Normal,
+                None,
+                Some(&CultureInfo::get_culture_info(culture)),
+            )
+            .map(|typeface| {
+                let glyph = skrifa::MetadataProvider::charmap(&VelloTypeface::try_get(&*typeface).unwrap().face().font_ref())
+                    .map(codepoint);
+                assert!(glyph.is_some_and(|glyph| glyph.to_u32() != 0), "U+{codepoint:04X} in {}", typeface.family_name());
+                typeface.family_name()
+            })
+    };
+
+    // A character the default family has stays in it, whatever the script.
+    let default_family = font_manager.get_default_font_family_name();
+    assert_eq!(Some(default_family.clone()), family_of('A' as u32, "en-US"));
+
+    // A script the default family lacks, a symbol without a script and an
+    // emoji all find a font, and the same one when asked again.
+    for (codepoint, what) in [(0x0E01, "Thai"), (0x4E2D, "Han"), (0x2192, "an arrow"), (0x2603, "a snowman"), (0x1F600, "an emoji")] {
+        let family = family_of(codepoint, "en-US").unwrap_or_else(|| panic!("a font of the system has {what}"));
+        assert_eq!(Some(family), family_of(codepoint, "en-US"), "{what}");
+    }
+
+    // An emoji is drawn by the emoji font, a symbol that is one only when a
+    // text says so by a font of text.
+    let emoji = family_of(0x1F600, "en-US").unwrap();
+    assert_ne!(Some(emoji), family_of(0x2603, "en-US"));
+
+    // A family that is named is used when it has the character, and not
+    // when it has not.
+    let named = font_manager
+        .try_match_character('A' as i32, FontStyle::Normal, FontWeight::Normal, FontStretch::Normal, Some("Courier New"), None)
+        .map(|typeface| typeface.family_name());
+    if font_manager.try_match_family_style("Courier New", FontStyle::Normal, FontWeight::Normal, FontStretch::Normal).is_some() {
+        assert_eq!(Some("Courier New".to_owned()), named);
+    }
+    let unnamed = font_manager
+        .try_match_character(0x1F600, FontStyle::Normal, FontWeight::Normal, FontStretch::Normal, Some(&default_family), None)
+        .map(|typeface| typeface.family_name());
+    assert_ne!(Some(default_family), unnamed);
+
+    // Not a character.
+    assert!(font_manager
+        .try_match_character(-1, FontStyle::Normal, FontWeight::Normal, FontStretch::Normal, None, None)
+        .is_none());
+}
+
+#[test]
+fn font_manager_lists_each_family_once_and_makes_the_default_typeface() {
+    let font_manager = FontManagerImpl::new();
+    let families = font_manager.get_installed_font_family_names(false);
+
+    let mut sorted = families.clone();
+    sorted.sort();
+    sorted.dedup();
+    assert_eq!(sorted, families, "the families are sorted and each is listed once");
+    assert!(families.iter().all(|family| !family.starts_with('.') && !family.is_empty()));
+
+    // Every listed family resolves, to a typeface with a character map.
+    for family in families.iter().step_by(families.len() / 12 + 1) {
+        let typeface = font_manager
+            .try_create_glyph_typeface(family, FontStyle::Normal, FontWeight::Normal, FontStretch::Normal)
+            .unwrap_or_else(|| panic!("{family} resolves"));
+        assert!(font_manager.try_get_family_typefaces(family).is_some_and(|typefaces| !typefaces.is_empty()), "{family}");
+        assert!(typeface.try_get_table(OpenTypeTag::parse("cmap")).is_some(), "{family}");
+    }
+
+    // What Skia's font manager gives for no family and for one that is not
+    // installed: the default family.
+    let default_family = font_manager.get_default_font_family_name();
+    for family in [None, Some("No Such Family 4f1c")] {
+        let typeface = font_manager
+            .legacy_make_typeface(family, FontStyle::Normal, FontWeight::Normal, FontStretch::Normal)
+            .expect("the default typeface");
+        assert_eq!(default_family, typeface.family_name());
+    }
+    assert!(font_manager
+        .try_match_family_style("No Such Family 4f1c", FontStyle::Normal, FontWeight::Normal, FontStretch::Normal)
+        .is_none());
 }

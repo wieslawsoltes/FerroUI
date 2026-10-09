@@ -456,8 +456,13 @@ name = "ferroui-render-backends-comparison"
 version = "0.1.0"
 dependencies = [
  "ferroui-base",
+ "ferroui-controls",
+ "ferroui-harfbuzz",
+ "ferroui-headless",
  "ferroui-skia",
+ "ferroui-themes-fluent",
  "ferroui-vello",
+ "skia-safe",
 ]
 
 [[package]]

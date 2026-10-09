@@ -1,7 +1,7 @@
 use ferroui_base::media::fonts::OpenTypeTag;
 use ferroui_base::media::{FontSimulations, FontStretch, FontStyle, FontWeight, IFontMemory, IPlatformTypeface};
 use ferroui_base::utilities::ReadOnlyMemory;
-use kurbo::{Affine, BezPath, Diagonal2, Join};
+use kurbo::{Affine, BezPath, Diagonal2, Join, Shape};
 use peniko::{Blob, FontData};
 use skrifa::instance::{LocationRef, NormalizedCoord, Size};
 use skrifa::outline::{DrawSettings, OutlinePen};
@@ -11,9 +11,10 @@ use skrifa::raw::TableProvider;
 use skrifa::string::StringId;
 use skrifa::{FontRef, GlyphId, MetadataProvider};
 use std::any::Any;
+use std::collections::HashMap;
 use std::io::{Cursor, Read};
 use std::rc::Rc;
-use std::sync::Arc;
+use std::sync::{Arc, Mutex};
 
 /// The slant of the oblique simulation: the horizontal shear of a glyph in
 /// a space of which y points down, as the Skia backend sets it on its font.
@@ -53,6 +54,10 @@ pub struct VelloFontFace {
     units_per_em: u16,
     has_head_table: bool,
     font_simulations: FontSimulations,
+    /// The bounds of the outlines of the glyphs that were asked for, in
+    /// the units of the font: a glyph run measures every glyph it is made
+    /// of, and a text is made of the same glyphs again and again.
+    glyph_bounds: Mutex<HashMap<u16, Option<kurbo::Rect>>>,
 }
 
 impl VelloFontFace {
@@ -116,23 +121,70 @@ impl VelloFontFace {
         self.glyph_path_with(glyph_index, em_size, self.font_simulations)
     }
 
+    /// The outline of a glyph in the units of the font, y pointing up,
+    /// without simulations.
+    fn unscaled_glyph_path(&self, glyph_index: u16) -> Option<BezPath> {
+        let font = self.font_ref();
+        let glyph = font.outline_glyphs().get(GlyphId::new(glyph_index as u32))?;
+
+        let mut pen = PathPen(BezPath::new());
+        let settings = DrawSettings::unhinted(Size::unscaled(), LocationRef::new(&self.normalized_coords));
+        glyph.draw(settings, &mut pen).ok()?;
+
+        Some(pen.0)
+    }
+
+    /// The bounds of the outline of a glyph at an em size, in the space of
+    /// [`glyph_path`](Self::glyph_path), with the simulations of the face.
+    ///
+    /// Returns `None` for a glyph without an outline and `Some(None)` for
+    /// one without contours.
+    pub fn glyph_path_bounds(&self, glyph_index: u16, em_size: f64) -> Option<Option<kurbo::Rect>> {
+        if !(em_size.is_finite() && em_size > 0.0) {
+            return None;
+        }
+
+        // A simulated outline is measured as it is made; a plain one is the
+        // outline of the font at a scale, and so are its bounds.
+        if !self.font_simulations.is_empty() {
+            let path = self.glyph_path(glyph_index, em_size)?;
+
+            return Some((!path.elements().is_empty()).then(|| path.bounding_box()));
+        }
+
+        let bounds = *self
+            .glyph_bounds
+            .lock()
+            .unwrap_or_else(|e| e.into_inner())
+            .entry(glyph_index)
+            .or_insert_with(|| {
+                // `None` for no outline, an empty rectangle marked by a
+                // negative width for no contours.
+                let path = self.unscaled_glyph_path(glyph_index)?;
+
+                Some(if path.elements().is_empty() { kurbo::Rect::new(0.0, 0.0, -1.0, 0.0) } else { path.bounding_box() })
+            });
+
+        let bounds = bounds?;
+        if bounds.x1 < bounds.x0 {
+            return Some(None);
+        }
+
+        let scale = em_size / self.units_per_em.max(1) as f64;
+
+        Some(Some(kurbo::Rect::new(bounds.x0 * scale, -bounds.y1 * scale, bounds.x1 * scale, -bounds.y0 * scale)))
+    }
+
     fn glyph_path_with(&self, glyph_index: u16, em_size: f64, font_simulations: FontSimulations) -> Option<BezPath> {
         if !(em_size.is_finite() && em_size > 0.0) {
             return None;
         }
 
-        let font = self.font_ref();
-        let glyph = font.outline_glyphs().get(GlyphId::new(glyph_index as u32))?;
-
         // The outline in the units of the font, scaled afterwards: a glyph
         // of a size is the same curve, and the result is not rounded to the
         // single precision of a size.
-        let mut pen = PathPen(BezPath::new());
-        let settings = DrawSettings::unhinted(Size::unscaled(), LocationRef::new(&self.normalized_coords));
-        glyph.draw(settings, &mut pen).ok()?;
-
         let scale = em_size / self.units_per_em.max(1) as f64;
-        let mut path = Affine::scale_non_uniform(scale, -scale) * pen.0;
+        let mut path = Affine::scale_non_uniform(scale, -scale) * self.unscaled_glyph_path(glyph_index)?;
 
         if font_simulations.contains(FontSimulations::Bold) && !path.elements().is_empty() {
             let amount = bold_simulation_outline_width(em_size) / 2.0;
@@ -196,6 +248,16 @@ impl VelloTypeface {
     /// Returns `None` when the bytes are not a font.
     pub fn from_bytes(bytes: Vec<u8>, font_simulations: FontSimulations) -> Option<Rc<Self>> {
         Self::new(Blob::new(Arc::new(bytes)), 0, font_simulations, &[])
+    }
+
+    /// Creates the typeface of the first font of a font file at values of
+    /// the axes of a variable font (see [`VelloTypeface::new`]).
+    pub fn from_bytes_with_variations(
+        bytes: Vec<u8>,
+        font_simulations: FontSimulations,
+        variation_settings: &[(&str, f32)],
+    ) -> Option<Rc<Self>> {
+        Self::new(Blob::new(Arc::new(bytes)), 0, font_simulations, variation_settings)
     }
 
     /// Creates the typeface of a font of a font file or collection.
@@ -294,6 +356,7 @@ impl VelloTypeface {
                 units_per_em,
                 has_head_table,
                 font_simulations,
+                glyph_bounds: Mutex::new(HashMap::new()),
             }),
             family_name,
             font_simulations,

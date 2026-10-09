@@ -34,15 +34,9 @@ fn enumerated_collection(refresh: bool) -> Collection {
         .clone()
 }
 /// The families a character is looked for in before every installed family
-/// is searched: the fonts an interface is set in, then the ones for emoji
-/// and for mathematics.
-const PREFERRED_FALLBACKS: [GenericFamily; 5] = [
-    GenericFamily::SystemUi,
-    GenericFamily::SansSerif,
-    GenericFamily::Serif,
-    GenericFamily::Emoji,
-    GenericFamily::Math,
-];
+/// is searched: the fonts text is set in, then the one for mathematics.
+const PREFERRED_FALLBACKS: [GenericFamily; 4] =
+    [GenericFamily::SansSerif, GenericFamily::SystemUi, GenericFamily::Serif, GenericFamily::Math];
 
 /// The fonts of the system and what was found in them.
 struct SystemFonts {
@@ -243,16 +237,31 @@ impl FontManagerImpl {
             system_fonts.family_has_character(family, codepoint, style, weight, stretch)
         };
 
-        // What the system falls back to for the script of the character in
-        // the language of the culture.
-        let script = Codepoint::new(codepoint).script();
+        let character = Codepoint::new(codepoint);
+        let script = character.script();
+        let emoji: Vec<FamilyId> = system_fonts.collection.generic_families(GenericFamily::Emoji).collect();
         let mut candidates: Vec<FamilyId> = Vec::new();
 
+        // The default family first: a fallback of the system starts from
+        // the font plain text is set in, and stays in it when it has the
+        // character.
+        candidates.extend(system_fonts.collection.generic_families(GenericFamily::SansSerif).take(1));
+
+        // What the system falls back to for the script of the character in
+        // the language of the culture.
         if !matches!(script, Script::Unknown | Script::Common | Script::Inherited) {
             let language = Language::parse(culture.name()).ok();
             let fallback_key = FallbackKey::new(fontique::Script::from_bytes(script_tag(script)), language.as_ref());
 
             candidates.extend(system_fonts.collection.fallback_families(fallback_key));
+        }
+
+        // A character that is an emoji unless a text says otherwise is
+        // looked for in the emoji font before the fonts of text; any other
+        // character after every one of them, so that a symbol a text font
+        // has is not drawn as a picture.
+        if character.has_emoji_presentation() {
+            candidates.extend(emoji.iter().copied());
         }
 
         for generic in PREFERRED_FALLBACKS {
@@ -261,23 +270,30 @@ impl FontManagerImpl {
 
         let mut found = candidates.into_iter().find(|family| has_character(system_fonts, *family));
 
-        // Every installed family, in the order of their names.
+        // Every installed family, in the order of their names; the emoji
+        // font and the last resort font, which has a glyph for every
+        // character, after the fonts of text.
         if found.is_none() {
-            let mut families: Vec<(String, FamilyId)> = system_fonts
-                .collection
-                .family_names()
-                .map(str::to_owned)
-                .collect::<Vec<_>>()
+            let ids: Vec<FamilyId> = system_fonts.collection.family_ids().collect();
+            let mut families: Vec<(u8, String, FamilyId)> = ids
                 .into_iter()
-                .filter_map(|name| Some((name.clone(), system_fonts.collection.family_id(&name)?)))
+                .filter_map(|family| {
+                    let name = system_fonts.collection.family_name(family)?.to_owned();
+                    let rank = if name.contains("LastResort") {
+                        2
+                    } else if emoji.contains(&family) {
+                        1
+                    } else {
+                        0
+                    };
+
+                    Some((rank, name, family))
+                })
                 .collect();
-            families.sort();
+            families.sort_by(|a, b| (a.0, &a.1).cmp(&(b.0, &b.1)));
+            families.dedup_by_key(|(_, _, family)| *family);
 
-            // The last resort font has a glyph for every character and is
-            // tried after the fonts that have its own.
-            families.sort_by_key(|(name, _)| name.contains("LastResort"));
-
-            found = families.into_iter().map(|(_, family)| family).find(|family| has_character(system_fonts, *family));
+            found = families.into_iter().map(|(_, _, family)| family).find(|family| has_character(system_fonts, *family));
         }
 
         system_fonts.fallbacks.insert(key, found);
@@ -319,15 +335,17 @@ impl IFontManagerImpl for FontManagerImpl {
             *self.system_fonts.borrow_mut() = Some(SystemFonts::new(true));
         }
 
-        // A family of which the name begins with a dot is one the system
-        // keeps for itself (its interface font): it is matched by name, and
-        // not listed, as the system does not list it.
-        let mut names: Vec<String> = self
-            .system_fonts()
-            .collection
-            .family_names()
+        // A family once, under its own name: the collection also knows it
+        // by the names it has in other languages, by which it is matched. A
+        // family of which the name begins with a dot is one the system
+        // keeps for itself: it is matched by name, and not listed, as the
+        // system does not list it.
+        let mut system_fonts = self.system_fonts();
+        let ids: Vec<FamilyId> = system_fonts.collection.family_ids().collect();
+        let mut names: Vec<String> = ids
+            .into_iter()
+            .filter_map(|family| system_fonts.collection.family_name(family).map(str::to_owned))
             .filter(|name| !name.starts_with('.'))
-            .map(str::to_owned)
             .collect();
 
         names.sort();
