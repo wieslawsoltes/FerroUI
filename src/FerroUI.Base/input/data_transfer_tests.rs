@@ -56,7 +56,7 @@ fn create_in_process_format_returns_format_with_correct_identifier() {
 }
 
 #[test]
-fn create_in_process_format_panics_on_empty_identifier() {
+fn create_in_process_format_throws_on_empty_identifier() {
     assert!(panics(|| {
         DataFormat::create_in_process_format::<String>("");
     }));
@@ -70,7 +70,7 @@ fn create_in_process_format_allows_non_ascii_identifiers() {
 }
 
 #[test]
-fn to_system_name_panics_for_in_process() {
+fn to_system_name_throws_for_in_process() {
     let format = DataFormat::create_in_process_format::<String>("test");
 
     assert!(panics(|| {
@@ -105,7 +105,7 @@ fn in_process_format_inequality_different_kind_same_identifier() {
 }
 
 #[test]
-fn try_get_raw_with_mismatched_format_returns_none_for_single_format_item() {
+fn try_get_raw_with_mismatched_format_returns_null_for_single_format_item() {
     let item = DataTransferItem::create_text(Some("hello"));
 
     let result = item.try_get_raw(&DataFormat::bitmap());
@@ -336,7 +336,7 @@ fn is_format(value: Option<Rc<dyn Any>>, format: &DataFormat) -> bool {
 }
 
 #[test]
-fn try_get_raw_should_return_none_when_format_is_unknown() {
+fn try_get_raw_should_return_null_when_format_is_unknown() {
     let format = DataFormat::create_bytes_application_format("test-format");
     let item = PlatformDataTransferItem::new(TestPlatformDataTransferItem(vec![]));
 
@@ -356,7 +356,7 @@ fn try_get_raw_should_return_expected_value_when_format_is_known() {
 }
 
 #[test]
-fn try_get_raw_async_should_return_none_when_format_is_unknown() {
+fn try_get_raw_async_should_return_null_when_format_is_unknown() {
     let format = DataFormat::create_bytes_application_format("test-format");
     let item = PlatformDataTransferItem::new(TestPlatformDataTransferItem(vec![]));
 
