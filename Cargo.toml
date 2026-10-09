@@ -22,12 +22,14 @@ members = [
     "src/FerroUI.Remote.Protocol",
     "src/FerroUI.DesignerSupport",
     "src/Skia/FerroUI.Skia",
+    "src/Vello/FerroUI.Vello",
     "src/HarfBuzz/FerroUI.HarfBuzz",
     "src/tools/MicroCom.CodeGenerator",
     "external/XamlX/src/XamlX",
     "tests/FerroUI.Markup.Xaml.UnitTests",
     "tests/XamlIncludeFixture/Theme",
     "tests/XamlIncludeFixture/Application",
+    "tests/FerroUI.RenderBackends.Comparison",
     "samples/MiniMvvm",
     "samples/ControlCatalog",
     "samples/ControlCatalog.Desktop",
@@ -67,11 +69,21 @@ ferroui-opengl = { path = "src/FerroUI.OpenGL" }
 ferroui-remote-protocol = { path = "src/FerroUI.Remote.Protocol" }
 ferroui-designer-support = { path = "src/FerroUI.DesignerSupport" }
 ferroui-skia = { path = "src/Skia/FerroUI.Skia" }
+ferroui-vello = { path = "src/Vello/FerroUI.Vello" }
 ferroui-harfbuzz = { path = "src/HarfBuzz/FerroUI.HarfBuzz" }
 bitflags = "2"
 paste = "1"
 cc = "1"
 skia-safe = { version = "0.153" }
+# The Vello render backend (docs/porting/vello-backend.md, section 2): exact versions, because the
+# renderers of the Vello project change their interfaces between minor releases. `vello_cpu` without
+# its default features: no thread pool (a drawing context is confined to the thread that draws), no
+# PNG support of its own (the backend decodes and encodes with `png`) and no text (stage 5).
+kurbo = { version = "=0.13.1" }
+peniko = { version = "=0.6.1" }
+vello_cpu = { version = "=0.3.0", default-features = false, features = ["std", "u8_pipeline"] }
+linesweeper = { version = "=0.5.0" }
+png = { version = "=0.18.1" }
 # The version of the `wasm-bindgen` command-line tool on PATH has to be this exact version.
 wasm-bindgen = "=0.2.129"
 roxmltree = "0.20"

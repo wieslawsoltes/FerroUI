@@ -1,0 +1,18 @@
+[package]
+name = "ferroui-render-backends-comparison"
+description = "Test crate: renders the same scenes with the Skia and the Vello render backend and compares the pixels and the geometry queries"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+publish = false
+
+[lib]
+path = "lib.rs"
+
+# The one crate that links both render backends: an application has one.
+[dependencies]
+ferroui-base.workspace = true
+ferroui-skia.workspace = true
+ferroui-vello.workspace = true
