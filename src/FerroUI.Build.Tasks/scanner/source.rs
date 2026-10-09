@@ -17,7 +17,9 @@ use syn::visit::Visit;
 use super::constants::{evaluate, Scope};
 use super::declarations::{read_declaration, read_property, Accessor, Declaration, DECLARATION_MACROS};
 use super::modules::{Glob, Import, ItemKind, Modules};
-use super::tokens::{group_of, ident_of, invocations, is_arrow, is_punct, split_types, text_of, tokens_of, Cursor, ParseError, Tokens, TypeEnd};
+use super::tokens::{
+    group_of, ident_of, invocations, is_arrow, is_punct, split_types, text_of, tokens_of, with_parenthesised_break_values, Cursor, ParseError, Tokens, TypeEnd,
+};
 use super::{codes, Diagnostic, InvocationCounts, ScanOptions, ScannedFile, Severity};
 
 /// Where a declaration is written.
@@ -269,9 +271,17 @@ impl Source {
         let parsed = match syn::parse_file(&text) {
             Ok(parsed) => parsed,
             Err(error) => {
-                let line = error.span().start().line;
-                self.diagnostic_at(Severity::Error, codes::FILE, file, line, format!("the file is not read: {error}"));
-                return;
+                // A form of the language the parser refuses and a rewrite of the tokens
+                // makes readable (`with_parenthesised_break_values`).
+                let rewritten = text.parse::<proc_macro2::TokenStream>().ok().map(with_parenthesised_break_values);
+                match rewritten.filter(|(_, changed)| *changed).and_then(|(tokens, _)| syn::parse2::<syn::File>(tokens).ok()) {
+                    Some(parsed) => parsed,
+                    None => {
+                        let line = error.span().start().line;
+                        self.diagnostic_at(Severity::Error, codes::FILE, file, line, format!("the file is not read: {error}"));
+                        return;
+                    }
+                }
             }
         };
         let file_directory = path.parent().unwrap_or(Path::new("")).to_path_buf();

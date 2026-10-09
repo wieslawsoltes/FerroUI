@@ -77,6 +77,26 @@ const BUILTIN: &[&str] = &[
     "Vec", "Box", "Result",
 ];
 
+/// The paths of the standard library the names of the prelude are declared at: a type
+/// written by such a path (`::std::option::Option<T>`, as a macro writes it so that no
+/// item of the invoking module shadows it) is the type its name alone is.
+const PRELUDE_PATHS: &[(&[&str], &str)] = &[
+    (&["option", "Option"], "Option"),
+    (&["string", "String"], "String"),
+    (&["vec", "Vec"], "Vec"),
+    (&["boxed", "Box"], "Box"),
+    (&["result", "Result"], "Result"),
+];
+
+/// The name of the prelude a path into the standard library names, when it names one.
+fn prelude_name(segments: &[String]) -> Option<&'static str> {
+    let (library, rest) = segments.split_first()?;
+    if !ALWAYS_EXTERN.contains(&library.as_str()) {
+        return None;
+    }
+    PRELUDE_PATHS.iter().find(|(path, _)| path.iter().copied().eq(rest.iter().map(String::as_str))).map(|(_, name)| *name)
+}
+
 /// The crates every crate can name.
 const ALWAYS_EXTERN: &[&str] = &["std", "core", "alloc"];
 
@@ -425,7 +445,10 @@ impl Modules {
                 }
                 Some(text)
             }
-            Target::External(segments) => Some(format!("::{}", segments.join("::"))),
+            Target::External(segments) => Some(match prelude_name(segments) {
+                Some(name) => name.to_string(),
+                None => format!("::{}", segments.join("::")),
+            }),
             Target::Builtin => None,
         }
     }
@@ -580,6 +603,11 @@ mod tests {
         assert_eq!(modules.resolve(prelude, &path("Brush")), None);
         assert_eq!(modules.resolve(prelude, &path("media::Brush")), None);
         assert_eq!(resolved(&modules, prelude, "std::rc::Rc"), Some("::std::rc::Rc".to_string()));
+        // The path of a name of the prelude is the name.
+        assert_eq!(resolved(&modules, prelude, "std::option::Option"), Some("Option".to_string()));
+        assert_eq!(resolved(&modules, prelude, "core::option::Option"), Some("Option".to_string()));
+        assert_eq!(resolved(&modules, prelude, "alloc::string::String"), Some("String".to_string()));
+        assert_eq!(resolved(&modules, prelude, "std::option::Other"), Some("::std::option::Other".to_string()));
         assert_eq!(resolved(&modules, prelude, "base::Brush"), Some("::base::Brush".to_string()));
         assert_eq!(resolved(&modules, prelude, "Border"), Some("::fixture::border::Border".to_string()));
     }
