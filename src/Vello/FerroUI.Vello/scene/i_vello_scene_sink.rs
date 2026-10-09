@@ -175,4 +175,81 @@ pub trait IVelloSceneSink {
     ///
     /// Every clip and layer has to be ended first.
     fn render_to_pixels(&mut self, pixels: &mut [u8]);
+
+    /// What the renderer of this sink does of blurs. A sink that does not
+    /// say draws none: the drawing context then renders what is blurred on
+    /// the processor and gives the sink an image.
+    fn filter_capabilities(&self) -> VelloSceneFilterCapabilities {
+        VelloSceneFilterCapabilities::default()
+    }
+
+    /// Begins a layer whose content is drawn on its own, passed through
+    /// `filter` and then composed source-over. `transform` maps the lengths
+    /// of the filter (standard deviation, offset) to the pixels of the
+    /// target. Ended by [`pop_layer`](Self::pop_layer).
+    ///
+    /// # Panics
+    /// Panics in a sink whose
+    /// [`filter_capabilities`](Self::filter_capabilities) have no filter
+    /// layers.
+    fn push_filter_layer(&mut self, filter: &VelloSceneFilter, transform: Affine) {
+        let _ = (filter, transform);
+        panic!("The {:?} rendering mode of the Vello backend has no filter layers", self.rendering_mode());
+    }
+
+    /// Fills the blur of a rounded rectangle of one circular corner radius
+    /// with a color: what a Gaussian of `std_deviation` makes of the
+    /// rectangle, computed in closed form. With `invert` the blur of
+    /// everything but the rectangle is filled.
+    ///
+    /// # Panics
+    /// Panics in a sink whose
+    /// [`filter_capabilities`](Self::filter_capabilities) have no blurred
+    /// rounded rectangles.
+    fn fill_blurred_rounded_rect(
+        &mut self,
+        rect: kurbo::Rect,
+        radius: f64,
+        std_deviation: f64,
+        invert: bool,
+        transform: Affine,
+        color: AlphaColor<Srgb>,
+    ) {
+        let _ = (rect, radius, std_deviation, invert, transform, color);
+        panic!("The {:?} rendering mode of the Vello backend has no blurred rounded rectangles", self.rendering_mode());
+    }
+}
+
+/// What a renderer does of blurs (design document, section 4).
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
+pub struct VelloSceneFilterCapabilities {
+    /// Layers that are blurred or given a drop shadow when they are
+    /// composed ([`IVelloSceneSink::push_filter_layer`]).
+    pub filter_layers: bool,
+    /// The blur of a rounded rectangle in closed form
+    /// ([`IVelloSceneSink::fill_blurred_rounded_rect`]).
+    pub blurred_rounded_rects: bool,
+}
+
+/// What a filter layer does to its content. Lengths are in the space of the
+/// transform the layer is pushed with.
+#[derive(Clone, Copy, Debug, PartialEq)]
+pub enum VelloSceneFilter {
+    /// A Gaussian blur. Beyond its content the layer is transparent.
+    Blur {
+        /// The standard deviation of the Gaussian.
+        std_deviation: f32,
+    },
+    /// The content over its shadow: the alpha of the content, blurred,
+    /// moved and given a color.
+    DropShadow {
+        /// How far the shadow is moved to the right.
+        dx: f32,
+        /// How far the shadow is moved down.
+        dy: f32,
+        /// The standard deviation of the blur of the shadow; none when 0.
+        std_deviation: f32,
+        /// The color of the shadow.
+        color: AlphaColor<Srgb>,
+    },
 }
