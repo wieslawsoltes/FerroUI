@@ -1759,3 +1759,61 @@ fn property_changes_reach_a_handler_attached_through_metadata() {
     let new_value = (arguments_type.find_property("NewValue").unwrap().get.unwrap())(&[boxed(change.clone())]).unwrap();
     assert_eq!(unbox::<i32>(&new_value), 1);
 }
+
+/// Not from upstream. The vectors of the element types markup has arrays of have their
+/// nullable forms from the registration of this crate: a property that holds one
+/// (`Option<Vec<T>>`) reads as null on a thread that never created the type system of the
+/// run-time XAML loader, which states the same forms when it is created.
+#[test]
+fn the_vectors_markup_has_arrays_of_have_nullable_forms() {
+    std::thread::spawn(|| {
+        crate::register_types();
+        fn check<T: Clone + PartialEq + 'static>() {
+            let nullable = ValueType::of::<Option<Vec<T>>>();
+            assert!(ValueTypes::nullable_inner(nullable).is_some_and(|inner| inner.is::<Vec<T>>()), "{}", nullable.name());
+            assert!(ValueTypes::accepts_null(nullable), "{}", nullable.name());
+            let null: BoxedValue = Rc::new(None::<Vec<T>>);
+            assert!(ValueTypes::normalize(null).is_none(), "{}", nullable.name());
+            let value: BoxedValue = Rc::new(Some(Vec::<T>::new()));
+            assert!(ValueTypes::normalize(value).is_some_and(|value| value.downcast_ref::<Vec<T>>().is_some()), "{}", nullable.name());
+        }
+        check::<bool>();
+        check::<u8>();
+        check::<i32>();
+        check::<i64>();
+        check::<f32>();
+        check::<f64>();
+        check::<String>();
+        check::<crate::Point>();
+        check::<BoxedValue>();
+    })
+    .join()
+    .expect("the thread of the test");
+}
+
+/// Not from upstream. The handle of a class of the type table of the crate is registered
+/// with the untyped value conversions of a thread whether or not the class has been
+/// initialised on it: the null of its nullable form (the value of a property typed with
+/// the handle, before anything creates an instance of the class) reads as null. The
+/// initialisation of a class registers its handle as well; the run-time XAML loader
+/// initialises a class when it reads it, and compiled markup does not.
+#[test]
+fn the_handle_of_a_class_of_the_type_table_is_registered_before_the_class_is_initialised() {
+    std::thread::spawn(|| {
+        crate::register_types();
+        // Nothing has initialised a class on this thread.
+        let nullable = ValueType::of::<Option<Ref<ControlTheme>>>();
+        assert!(ValueTypes::nullable_inner(nullable).is_some_and(|inner| inner.is::<Ref<ControlTheme>>()));
+        assert!(ValueTypes::accepts_null(nullable));
+        let null: BoxedValue = Rc::new(None::<Ref<ControlTheme>>);
+        assert!(ValueTypes::normalize(null).is_none());
+        assert!(ValueTypes::try_convert(None, nullable).flatten().is_some_and(|null| null.downcast_ref::<Option<Ref<ControlTheme>>>().is_some()));
+        assert!(ValueTypes::class_of(ValueType::of::<Ref<ControlTheme>>()).is_some_and(|class| std::ptr::eq(class, ControlTheme::TYPE)));
+        // An instance, created afterwards, is a value of the handle as before.
+        let theme = ControlTheme::new();
+        let value: BoxedValue = Rc::new(Some(theme.clone()));
+        assert!(ValueTypes::normalize(value).is_some_and(|value| value.downcast_ref::<Ref<ControlTheme>>().is_some_and(|value| *value == theme)));
+    })
+    .join()
+    .expect("the thread of the test");
+}

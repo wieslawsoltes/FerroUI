@@ -1001,6 +1001,20 @@ pub(super) const TYPES: &[&MarkupType] = &[
 pub(super) fn register_value_types() {
     ValueTypes::register_nullable::<&'static TypeInfo>();
     ValueTypes::register_nullable::<&'static FerroProperty>();
+    // The vectors of the element types markup has arrays of (the elements of the runtime
+    // library and the values the markup compiler parses a list of): a property that holds
+    // one is null without it (`Option<Vec<T>>`). The run-time XAML loader states the same
+    // nine when its type system is created; a process that loads compiled markup alone
+    // never creates one, and reads such a property all the same.
+    ValueTypes::register_nullable::<Vec<bool>>();
+    ValueTypes::register_nullable::<Vec<u8>>();
+    ValueTypes::register_nullable::<Vec<i32>>();
+    ValueTypes::register_nullable::<Vec<i64>>();
+    ValueTypes::register_nullable::<Vec<f32>>();
+    ValueTypes::register_nullable::<Vec<f64>>();
+    ValueTypes::register_nullable::<Vec<String>>();
+    ValueTypes::register_nullable::<Vec<Point>>();
+    ValueTypes::register_nullable::<Vec<BoxedValue>>();
     ValueTypes::register_nullable::<Rc<NumberFormatInfo>>();
     ValueTypes::register_nullable::<Transitions>();
     ValueTypes::register_nullable::<GradientStops>();

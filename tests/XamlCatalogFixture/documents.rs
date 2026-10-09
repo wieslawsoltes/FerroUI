@@ -42,7 +42,4 @@ pub const NOT_LOADED: &[(&str, &str)] = &[];
 /// The compiled documents whose comparison is not run, each with the reason (the test of
 /// such a document is ignored with it): a document whose load panics in the services of a
 /// test, with either back end.
-pub const NOT_RUN: &[(&str, &str)] = &[(
-    "Pages/ContextFlyoutPage.xaml",
-    "the trees are the same and one value prints differently: the null of `ContextMenu=\"{x:Null}\"` is known as the null of `Option<Ref<ContextMenu>>` once the class is initialised, which the run-time loader does when it reads the class and compiled markup never does (docs/porting/xaml.md 9.5.19: the registrations of a process without the run-time loader)",
-)];
+pub const NOT_RUN: &[(&str, &str)] = &[];

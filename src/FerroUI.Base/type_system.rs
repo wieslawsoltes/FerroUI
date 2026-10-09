@@ -51,6 +51,7 @@ pub struct TypeInfo {
     class_init: Option<fn()>,
     constructor: Option<fn() -> Ref<FerroObject>>,
     handles: Option<fn() -> [TypeId; 2]>,
+    handle_registration: Option<fn()>,
     interfaces: &'static [TypeOf],
     markup: Option<&'static MarkupType>,
 }
@@ -64,6 +65,7 @@ impl TypeInfo {
             class_init: None,
             constructor: None,
             handles: None,
+            handle_registration: None,
             interfaces: &[],
             markup: None,
         }
@@ -102,6 +104,20 @@ impl TypeInfo {
     /// the type of a value ([`find_by_handle`](Self::find_by_handle)).
     pub const fn with_handles(mut self, handles: fn() -> [TypeId; 2]) -> Self {
         self.handles = Some(handles);
+        self
+    }
+
+    /// States the registration of the handle of the class with the untyped
+    /// value conversions
+    /// ([`ValueTypes::register_object`](crate::data::core::ValueTypes::register_object)
+    /// of the class): what makes `Ref<T>` an object handle and
+    /// `Option<Ref<T>>` its nullable form. The initialisation of the class
+    /// makes it on the thread that initialises the class; a class of a table
+    /// of types ([`register_all`](Self::register_all)) has it on every thread,
+    /// initialised or not, because a property of another class may hold the
+    /// null of its handle before anything creates an instance of it.
+    pub const fn with_handle_registration(mut self, handle_registration: fn()) -> Self {
+        self.handle_registration = Some(handle_registration);
         self
     }
 
@@ -278,13 +294,35 @@ impl TypeInfo {
             return;
         }
         write_registry().insert(type_);
+        // As for the types of a table: see `register_all`.
+        if let Some(handle_registration) = type_.handle_registration {
+            crate::data::core::ValueTypes::register_global(handle_registration);
+        }
     }
 
     /// Registers several types; see [`register`](Self::register).
+    ///
+    /// The handle of each class is registered with the untyped value
+    /// conversions of every thread as well
+    /// ([`with_handle_registration`](Self::with_handle_registration)), when
+    /// the thread next converts an untyped value: the nullable form of the
+    /// handle of a class of a table is known whether or not the class has
+    /// been initialised. A property typed with the handle of another class
+    /// holds its null from the start (`Control.ContextMenu`), and what reads
+    /// that value untyped (a binding, markup) must see null. The run-time
+    /// XAML loader initialises a class when it reads it, which hid the
+    /// difference; compiled markup names a class without initialising it.
     pub fn register_all(types: &[&'static TypeInfo]) {
-        let mut registry = write_registry();
+        {
+            let mut registry = write_registry();
+            for type_ in types {
+                registry.insert(type_);
+            }
+        }
         for type_ in types {
-            registry.insert(type_);
+            if let Some(handle_registration) = type_.handle_registration {
+                crate::data::core::ValueTypes::register_global(handle_registration);
+            }
         }
     }
 
@@ -1043,6 +1081,7 @@ macro_rules! ferro_class {
                         ::std::any::TypeId::of::<::std::option::Option<$crate::Ref<$name>>>(),
                     ]
                 })
+                .with_handle_registration($crate::data::core::ValueTypes::register_object::<$name>)
                 .with_interfaces({
                     #[allow(unused_imports)]
                     use $crate::ClassDefaults as _;
