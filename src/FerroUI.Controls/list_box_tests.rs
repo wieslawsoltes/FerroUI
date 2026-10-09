@@ -1468,3 +1468,34 @@ fn list_box_item_should_not_block_tapped_events() {
 
     assert_eq!(2, tapped_count.get());
 }
+
+#[test]
+fn should_not_handle_space_when_text_box_inside_list_box_item() {
+    let _scope = start_with_focus();
+    let target = crate::TextBox::new();
+    target.set_focusable(true);
+    let item = ListBoxItem::new();
+    item.set_content(Some(Control::boxed(target.clone())));
+    let listbox = templated_list_box();
+    listbox.items().add(Some(Control::boxed(item)));
+
+    let n_key_down = Rc::new(Cell::new(0));
+
+    let root = test_root();
+    root.set_width(1000.0);
+    root.set_height(1000.0);
+    root.set_child(listbox.clone());
+
+    let count = n_key_down.clone();
+    root.key_down(move |_, _| count.set(count.get() + 1));
+
+    listbox.apply_template();
+    root.layout_manager().execute_initial_layout_pass();
+
+    target.focus();
+
+    raise_key_event(&target, Key::Space, KeyModifiers::NONE);
+
+    assert_eq!(1, n_key_down.get());
+}
+
