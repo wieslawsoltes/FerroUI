@@ -26,7 +26,7 @@
 //! type); conversions that change the value (parsing, numeric conversion)
 //! are the caller's business.
 
-use crate::data::core::{ValueType, ValueTypes};
+use crate::data::core::{ValueType, ValueTypes, WeakValue};
 use crate::{BoxedValue, TypeInfo};
 use std::any::{Any, TypeId};
 use std::collections::HashMap;
@@ -77,9 +77,29 @@ impl std::error::Error for MarkupInvokeError {}
 /// The declared method a [`MarkupDelegate`] was created from: what the
 /// `Target` and `Method` of a delegate are in the managed original.
 struct MarkupDelegateMethod {
-    target: MarkupValue,
+    target: DelegateTarget,
     declaring_type: &'static MarkupType,
     method: &'static MarkupMethod,
+}
+
+/// The instance the delegate of a declared method is bound to.
+#[derive(Clone)]
+enum DelegateTarget {
+    /// The instance, kept alive by the delegate; `None` for a static method.
+    Strong(MarkupValue),
+    /// The instance of the delegate of a binding source
+    /// ([`MarkupDelegate::for_method_of_source`]).
+    Weak(WeakValue),
+}
+
+impl DelegateTarget {
+    /// The instance; `Err` once an instance that is held weakly is gone.
+    fn get(&self) -> Result<MarkupValue, ()> {
+        match self {
+            DelegateTarget::Strong(target) => Ok(target.clone()),
+            DelegateTarget::Weak(target) => target.upgrade().map(Some).ok_or(()),
+        }
+    }
 }
 
 /// An untyped callback (the equivalent of a delegate instance): what an
@@ -106,10 +126,43 @@ impl MarkupDelegate {
     /// (after the instance) and discards a failure;
     /// [`try_invoke`](Self::try_invoke) reports it.
     pub fn for_method(target: MarkupValue, declaring_type: &'static MarkupType, method: &'static MarkupMethod) -> Self {
-        let target = if method.is_static { None } else { target };
+        let target = DelegateTarget::Strong(if method.is_static { None } else { target });
+        Self::bound(target, declaring_type, method)
+    }
+
+    /// The delegate of a method of a binding source: what a binding to a
+    /// method reads. As [`for_method`](Self::for_method), but the delegate
+    /// does not keep `target` alive (a source that is a reference; a plain
+    /// value is held as a binding holds it, by value). Once the target is
+    /// gone [`target`](Self::target) is `None`,
+    /// [`is_target_alive`](Self::is_target_alive) is false and invoking the
+    /// delegate does nothing.
+    ///
+    /// Deviation (DEVIATIONS.md, Bindings): the managed delegate has its
+    /// target strongly, and so has the command made from it. A template that
+    /// binds a command of one of its parts to a method of the templated
+    /// control is a cycle there (the control, its template, the part, the
+    /// value of its command property, the control), which the collector
+    /// frees; without one it would never be freed.
+    pub fn for_method_of_source(
+        target: &BoxedValue,
+        declaring_type: &'static MarkupType,
+        method: &'static MarkupMethod,
+    ) -> Self {
+        let target = match method.is_static {
+            true => DelegateTarget::Strong(None),
+            false => DelegateTarget::Weak(WeakValue::new(target)),
+        };
+        Self::bound(target, declaring_type, method)
+    }
+
+    fn bound(target: DelegateTarget, declaring_type: &'static MarkupType, method: &'static MarkupMethod) -> Self {
         let bound = target.clone();
         Self {
-            call: Rc::new(move |arguments| invoke_method(method, &bound, arguments).ok().flatten()),
+            call: Rc::new(move |arguments| match bound.get() {
+                Ok(target) => invoke_method(method, &target, arguments).ok().flatten(),
+                Err(()) => None,
+            }),
             method: Some(Rc::new(MarkupDelegateMethod { target, declaring_type, method })),
         }
     }
@@ -124,7 +177,10 @@ impl MarkupDelegate {
     /// arguments, a failing member) is returned.
     pub fn try_invoke(&self, arguments: &[MarkupValue]) -> Result<MarkupValue, MarkupInvokeError> {
         match &self.method {
-            Some(bound) => invoke_method(bound.method, &bound.target, arguments),
+            Some(bound) => match bound.target.get() {
+                Ok(target) => invoke_method(bound.method, &target, arguments),
+                Err(()) => Ok(None),
+            },
             None => Ok((self.call)(arguments)),
         }
     }
@@ -133,7 +189,14 @@ impl MarkupDelegate {
     /// (the `Target` of the managed original). `None` for a static method
     /// and for a delegate that was not created from a declared method.
     pub fn target(&self) -> MarkupValue {
-        self.method.as_ref().and_then(|bound| bound.target.clone())
+        self.method.as_ref().and_then(|bound| bound.target.get().ok().flatten())
+    }
+
+    /// Whether the delegate can still call what it was created for: false
+    /// once the target of the delegate of a binding source
+    /// ([`for_method_of_source`](Self::for_method_of_source)) is gone.
+    pub fn is_target_alive(&self) -> bool {
+        self.method.as_ref().is_none_or(|bound| bound.target.get().is_ok())
     }
 
     /// The declared method the delegate was created from (the `Method` of

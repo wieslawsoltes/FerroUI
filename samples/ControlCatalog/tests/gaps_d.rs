@@ -726,3 +726,49 @@ fn gap_c330_shared_geometry_of_a_visual_that_was_dropped() {
     drop(icon);
     assert_eq!(subscribers, geometry.changed_subscriber_count());
 }
+
+/// C332: a part of a template whose command is a method of the templated control. The scroll
+/// buttons of the menu scroll viewer of the themes bind their commands to the methods of the
+/// scroll viewer (`Command="{Binding LineUp, RelativeSource={RelativeSource TemplatedParent}}"`,
+/// declared for markup with C406). The delegate the binding reads has the scroll viewer as its
+/// target, and so has the command made from it, which the button has as the value of its
+/// command: the scroll viewer, its template, the button, its command, the scroll viewer. The
+/// managed original has the same references and its collector frees them; here every menu that
+/// was opened stayed, with its items. The delegate of a binding source has the source weakly.
+#[test]
+fn gap_c332_part_of_a_template_with_a_command_of_a_method_of_the_templated_control() {
+    use ferroui_controls::{RepeatButton, ScrollViewer};
+    let _app = start_catalog_application();
+    let viewer = from_markup_value::<Ref<ScrollViewer>>(&Some(load_text(&format!(
+        "<ScrollViewer {XMLNS} Theme='{{StaticResource SimpleMenuScrollViewer}}' Width='100' Height='40'>\
+           <StackPanel><TextBlock Height='30'>One</TextBlock><TextBlock Height='30'>Two</TextBlock></StackPanel>\
+         </ScrollViewer>"
+    ))))
+    .expect("a scroll viewer");
+    let window = Window::new();
+    window.set_content(Some(Control::boxed(&viewer)));
+    window.show();
+    run_jobs();
+    // The two scroll buttons have their commands, and the commands scroll.
+    let buttons: Vec<Ref<RepeatButton>> =
+        viewer.get_visual_descendants().filter_map(|visual| visual.cast::<RepeatButton>()).collect();
+    assert_eq!(2, buttons.len());
+    let commands: Vec<_> =
+        buttons.iter().filter_map(|button| button.get_value(ferroui_controls::Button::command_property())).collect();
+    assert_eq!(2, commands.len());
+    assert_eq!(0.0, viewer.offset().y);
+    commands[1].execute(None);
+    assert!(viewer.offset().y > 0.0, "the command of the lower button scrolls a line down");
+    commands[0].execute(None);
+    assert_eq!(0.0, viewer.offset().y);
+
+    window.set_content(None);
+    run_jobs();
+    let weak = viewer.downgrade();
+    drop((viewer, buttons));
+    assert!(weak.upgrade().is_none(), "the scroll viewer is alive after it left the tree and was dropped");
+    // A command that outlives the scroll viewer does nothing.
+    assert!(!commands[0].can_execute(None));
+    commands[1].execute(None);
+    window.close();
+}
