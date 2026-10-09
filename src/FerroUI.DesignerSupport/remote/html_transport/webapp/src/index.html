@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <title>FerroUI XAML previewer web edition</title>
+</head>
+
+<!-- Removes the default margin of the body element.
+     Most browsers apply a default margin (typically 8px) to the body element
+     Setting it to 0 makes the content flush against the browser window edges, eliminating white space -->
+<body style="margin: 0;">
+    <div id="app">
+        <center>Loading...</center>
+    </div>
+    <noscript>JavaScript is required</noscript>
+    <script>
+        window["ferroPreviewerSecurityCookie"] = "PREVIEWER_SECURITY_COOKIE";
+    </script>
+    <script type="module" src="index.js"></script>
+</body>
+</html>

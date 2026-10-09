@@ -3,6 +3,7 @@
 
 pub(crate) mod detachable_transport_connection;
 pub(crate) mod file_watcher_transport;
+pub mod html_transport;
 pub(crate) mod previewer_window_impl;
 pub(crate) mod previewer_windowing_platform;
 pub(crate) mod remote_designer_entry_point;

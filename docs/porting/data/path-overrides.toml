@@ -2132,8 +2132,10 @@ reason = "The table of the exported types of an assembly with their identifier a
 #
 # Every ported upstream file has the Rust file of the default rule (`Remote/Server/RemoteServerTopLevelImpl.cs`
 # -> `remote/server/remote_server_top_level_impl.rs`, its partial `RemoteServerTopLevelImpl.Framebuffer.cs` ->
-# `remote_server_top_level_impl_framebuffer.rs`, `Remote/Stubs.cs` -> `remote/stubs.rs`). The two files of
-# `Remote/HtmlTransport/` of Avalonia.DesignerSupport are not ported and have no entry: they are a gap.
+# `remote_server_top_level_impl_framebuffer.rs`, `Remote/Stubs.cs` -> `remote/stubs.rs`,
+# `Remote/HtmlTransport/HtmlTransport.cs` -> `remote/html_transport/html_transport.rs`). The web application of
+# `Remote/HtmlTransport/webapp` is not Rust and is not scanned: it is ported under
+# `remote/html_transport/webapp` (DEVIATIONS.md, Designer support).
 
 [[rust_only]]
 path = "src/FerroUI.Controls/remote/ui_thread_handle.rs"
