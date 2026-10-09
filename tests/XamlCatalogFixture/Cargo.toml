@@ -1,6 +1,6 @@
 [package]
 name = "xaml-catalog-fixture"
-description = "Test fixture of the XAML compiler: pages of the ControlCatalog, their documents and their classes as the sample has them, compiled by a build script and compared with the run-time loader"
+description = "Test fixture of the XAML compiler: the ControlCatalog, its documents and its sources as the sample has them, compiled by a build script and compared with the run-time loader"
 version.workspace = true
 edition.workspace = true
 rust-version.workspace = true
@@ -18,22 +18,45 @@ autoexamples = false
 [lib]
 path = "lib.rs"
 
+[features]
+# The build script compiles every document of the sample the compiler does not refuse
+# (`documents.rs`), and rustc compiles all of the emitted code. Without the feature the
+# build compiles seven pages (`documents::PAGES`) and the other classes are populated by
+# the run-time loader, as in the sample. Off by default: the emitted code of the whole
+# sample is the larger part of the build of this crate.
+catalog = []
+
 [dependencies]
+# The dependencies of the sample (`samples/ControlCatalog/Cargo.toml`): the sources of
+# this crate are its sources.
 # The compiled markup of the crate calls the typed functions of the declared members.
 ferroui-base = { workspace = true, features = ["markup-functions"] }
 ferroui-controls = { workspace = true }
+ferroui-controls-color-picker = { workspace = true }
+ferroui-dialogs = { workspace = true }
+ferroui-markup = { workspace = true }
 ferroui-markup-xaml = { workspace = true }
-# The view models of the sample derive from its view model base.
+# A class whose document the build does not compile is populated by the run-time loader.
+ferroui-markup-xaml-loader = { workspace = true, features = ["runtime"] }
+ferroui-opengl = { workspace = true }
+ferroui-themes-simple = { workspace = true }
+ferroui-themes-fluent = { workspace = true }
+ferroui-skia = { workspace = true }
+skia-safe = { workspace = true }
 mini-mvvm = { path = "../../samples/MiniMvvm" }
+unicode-normalization = "0.1"
 
 [build-dependencies]
 # The build script compiles the documents (`build.rs`) against the type models: the scan of the
-# sources of this crate, which are the sources of the sample, and the models the framework crates
-# export. It links the compiler and no crate for its types.
+# sources of this crate, which are the sources of the sample, and the models of the crates the
+# sample is built on. It links the compiler and no crate for its types.
 ferroui-build = { workspace = true }
 
 [dev-dependencies]
 ferroui-base = { workspace = true, features = ["testing"] }
 ferroui-controls = { workspace = true, features = ["testing"] }
-# The run-time loader the compiled pages are compared with (`tests/mod.rs`).
+# The render interface, the font manager and the text shaper of the tests, as in the tests of the
+# sample: the pages decode bitmaps and lay out text, which the mock services do not.
+ferroui-harfbuzz = { workspace = true }
+# The run-time loader the compiled classes are compared with (`tests/mod.rs`).
 ferroui-markup-xaml-loader = { workspace = true, features = ["runtime", "testing"] }

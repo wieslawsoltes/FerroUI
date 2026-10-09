@@ -1132,9 +1132,19 @@ dependencies = [
  "ferroui-base",
  "ferroui-build",
  "ferroui-controls",
+ "ferroui-controls-color-picker",
+ "ferroui-dialogs",
+ "ferroui-harfbuzz",
+ "ferroui-markup",
  "ferroui-markup-xaml",
  "ferroui-markup-xaml-loader",
+ "ferroui-opengl",
+ "ferroui-skia",
+ "ferroui-themes-fluent",
+ "ferroui-themes-simple",
  "mini-mvvm",
+ "skia-safe",
+ "unicode-normalization",
 ]
 
 [[package]]

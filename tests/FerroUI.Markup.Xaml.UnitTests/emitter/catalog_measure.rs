@@ -25,6 +25,12 @@
 //! macro that repeats is expanded for the registrations of a function), so the measure is
 //! taken once, and the test fails if a model has a cast the scan did not read.
 //!
+//! "Compiled" here is what the build emits. That rustc compiles it and that it loads to
+//! the tree of the run-time loader is proven by the fixture `tests/XamlCatalogFixture`,
+//! whose build with the feature `catalog` compiles every document but the ones its list
+//! `documents::REFUSED` names; the measure fails when the documents it finds refused are
+//! not exactly that list, so the two cannot drift apart.
+//!
 //! ```text
 //! cargo test -p ferroui-markup-xaml-tests --lib emitter::catalog_measure -- --ignored --nocapture
 //! ```
@@ -39,6 +45,11 @@ use ferroui_build::export::Export;
 use ferroui_build::model::AssemblyModel;
 use ferroui_build::scanner::{scan_crate, ScanOptions, Severity};
 use ferroui_build::{Build, TypeSystem, XamlGroup};
+
+/// The lists of the fixture that compiles the catalog (`tests/XamlCatalogFixture`).
+#[allow(dead_code)]
+#[path = "../../XamlCatalogFixture/documents.rs"]
+mod fixture_documents;
 
 /// How a question the type models cannot answer starts in the reason of a refusal.
 const CANNOT_ANSWER: &str = "the type system of the host cannot answer: ";
@@ -357,4 +368,9 @@ fn measure_the_control_catalog_against_the_models() {
 
     let _ = fs::remove_dir_all(&out);
     assert!(measured.questions.is_empty(), "the type models cannot answer: {:?}", measured.questions);
+    // The documents the fixture leaves out of its build are the refused ones, no more and
+    // no fewer: every other document is compiled by rustc and compared there.
+    let refused: std::collections::BTreeSet<&str> = measured.kinds.values().flatten().map(String::as_str).collect();
+    let listed: std::collections::BTreeSet<&str> = fixture_documents::REFUSED.iter().map(|(name, _)| *name).collect();
+    assert_eq!(refused, listed, "the refused documents and the list of the fixture (tests/XamlCatalogFixture/documents.rs, REFUSED) differ");
 }
