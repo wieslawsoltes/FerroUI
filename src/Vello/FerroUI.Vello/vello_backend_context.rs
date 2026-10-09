@@ -75,6 +75,31 @@ impl IPlatformRenderInterfaceContext for VelloContext {
         scaling: Vector,
         _enable_text_antialiasing: bool,
     ) -> Rc<dyn IDrawingContextLayerImpl> {
+        // With a graphics device whose window is drawn in a mode that
+        // composes over a texture, an offscreen target is a texture of the
+        // device too: what is drawn into it is drawn from without leaving
+        // the device.
+        #[cfg(any(feature = "hybrid", feature = "gpu"))]
+        if let Some(gpu) = &self.gpu {
+            let window_mode = self.rendering_modes.iter().copied().find(|mode| match mode {
+                VelloRenderingMode::Cpu => true,
+                VelloRenderingMode::Hybrid => cfg!(feature = "hybrid"),
+                VelloRenderingMode::Gpu => cfg!(feature = "gpu") && gpu.device().supports_compute(),
+            });
+            if let Some(mode) = window_mode
+                .filter(|mode| crate::gpu::DeviceSurfaceRenderTarget::is_available(*mode, gpu.device()))
+            {
+                return Rc::new(crate::gpu::DeviceSurfaceRenderTarget::new(
+                    gpu.device().clone(),
+                    mode,
+                    pixel_size,
+                    scaling * 96.0,
+                    self.rendering_modes.clone(),
+                    false,
+                ));
+            }
+        }
+
         Rc::new(SurfaceRenderTarget::new(SurfaceRenderTargetCreateInfo {
             width: pixel_size.width,
             height: pixel_size.height,
@@ -118,6 +143,8 @@ impl IPlatformRenderInterfaceContext for VelloContext {
     }
 
     fn dispose(&self) {
+        crate::perf::print_summary();
+
         #[cfg(any(feature = "hybrid", feature = "gpu"))]
         if let Some(gpu) = &self.gpu {
             gpu.dispose();

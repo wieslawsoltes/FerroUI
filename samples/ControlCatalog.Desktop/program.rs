@@ -36,6 +36,10 @@ fn main() -> std::process::ExitCode {
     let builder = build_ferro_app();
 
     let exit_code = builder.start_with_classic_desktop_lifetime(&args);
+    // With `FERROUI_VELLO_PERF` the Vello backend says where the time of its
+    // frames went.
+    #[cfg(feature = "vello")]
+    ferroui_vello::perf::print_summary();
     std::process::ExitCode::from(exit_code as u8)
 }
 

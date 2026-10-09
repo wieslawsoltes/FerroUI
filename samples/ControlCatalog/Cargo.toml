@@ -81,6 +81,10 @@ ferroui-controls = { workspace = true, features = ["testing"] }
 # lay out text, which the mock services of the framework tests do not.
 ferroui-skia = { workspace = true }
 ferroui-harfbuzz = { workspace = true }
+# The Vello render backend, for the frame benchmarks: they are run once a backend and rendering mode
+# (`FERROUI_TEST_RENDERER`, tests/support.rs), on a raster framebuffer or on a Metal surface that is
+# not on screen (`FERROUI_BENCH_SURFACE`, tests/frame_benchmark.rs).
+ferroui-vello = { workspace = true, features = ["hybrid", "gpu"] }
 # The styles of the colour picker as assets too: `App.xaml` loaded with the run-time loader includes
 # them, and the loader leaves such an include to run time only for a document the asset loader has.
 ferroui-controls-color-picker = { workspace = true, features = ["document-assets"] }

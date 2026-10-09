@@ -88,16 +88,34 @@ impl DrawingContextImpl {
     }
 
     /// Replaces the scene of the context by a new one of the CPU renderer
-    /// that covers `clip_rect` (the whole scene without one) and returns the
-    /// scene that was replaced.
-    fn begin_effect_scene(&mut self, clip_rect: Option<Rect>) -> OuterScene {
+    /// that covers `clip_rect` and what `filter` spreads of it beyond the
+    /// rectangle (the whole scene without one), and returns the scene that
+    /// was replaced.
+    ///
+    /// The clip rectangle cuts the content of the effect, not what the
+    /// filter makes of it: a blur of content that is cut spreads beyond the
+    /// cut, as far as a blur reaches, and a shadow lies where its offset
+    /// puts it.
+    fn begin_effect_scene(&mut self, clip_rect: Option<Rect>, filter: &VelloSceneFilter) -> OuterScene {
         let (width, height) = (self.sink().width(), self.sink().height());
         let whole = kurbo::Rect::new(0.0, 0.0, width as f64, height as f64);
 
         let bounds = match clip_rect {
             Some(clip_rect) => {
                 let transform = self.device_transform();
-                let bounds = (transform * rect_path(clip_rect)).bounding_box().expand().intersect(whole);
+                let scale = super::box_shadows::largest_scale(transform);
+                let (std_deviation, offset) = match *filter {
+                    VelloSceneFilter::Blur { std_deviation } => (f64::from(std_deviation), 0.0),
+                    VelloSceneFilter::DropShadow { dx, dy, std_deviation, .. } => {
+                        (f64::from(std_deviation), f64::from(dx.abs().max(dy.abs())))
+                    }
+                };
+                let reach = ((super::box_shadows::BLUR_REACH * std_deviation + offset) * scale).ceil() + 1.0;
+                let bounds = (transform * rect_path(clip_rect))
+                    .bounding_box()
+                    .inflate(reach, reach)
+                    .expand()
+                    .intersect(whole);
                 // A scene has at least a pixel.
                 let (x0, y0) = (bounds.x0.clamp(0.0, whole.x1 - 1.0), bounds.y0.clamp(0.0, whole.y1 - 1.0));
                 kurbo::Rect::new(x0, y0, bounds.x1.clamp(x0 + 1.0, whole.x1), bounds.y1.clamp(y0 + 1.0, whole.y1))
@@ -135,6 +153,7 @@ impl DrawingContextImpl {
             None => panic!("The drawing context has been disposed"),
         };
         let (width, height) = (scene.width(), scene.height());
+        crate::perf::count(crate::perf::Phase::EffectAsImage, u64::from(width) * u64::from(height) * 4);
         let mut rgba = vec![0u8; width as usize * height as usize * 4];
         scene.render_to_pixels(&mut rgba);
 
@@ -157,7 +176,8 @@ impl IDrawingContextImplWithEffects for DrawingContextImpl {
             return;
         };
 
-        let outer = if self.draws_effects_in_the_scene() { None } else { Some(self.begin_effect_scene(clip_rect)) };
+        let outer =
+            if self.draws_effects_in_the_scene() { None } else { Some(self.begin_effect_scene(clip_rect, &filter)) };
 
         let transform = self.device_transform();
         self.sink().push_filter_layer(&filter, transform);

@@ -18,7 +18,9 @@ pub use i_vello_scene_sink::{
     IVelloSceneSink, VelloSceneBrush, VelloSceneCapabilities, VelloSceneGlyph, VelloSceneGlyphRun, VelloSceneImage,
     VelloScenePaint,
 };
-pub use i_vello_scene_sink::{VelloSceneFilter, VelloSceneFilterCapabilities};
+pub use i_vello_scene_sink::{VelloSceneFilter, VelloSceneFilterCapabilities, VelloScenePixelRect};
+#[cfg(any(feature = "hybrid", feature = "gpu"))]
+pub use i_vello_scene_sink::VelloSceneTexture;
 pub use vello_cpu_scene_sink::VelloCpuSceneSink;
 #[cfg(feature = "gpu")]
 pub use vello_gpu_scene_sink::{VelloGpuAntiAliasing, VelloGpuSceneSink};

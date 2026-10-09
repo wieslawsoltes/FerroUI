@@ -4,6 +4,7 @@ use crate::helpers::path_helper;
 use crate::i_drawable_bitmap_impl::try_get_drawable_bitmap;
 use crate::scene::{
     IVelloSceneSink, VelloSceneBrush, VelloSceneGlyph, VelloSceneGlyphRun, VelloSceneImage, VelloScenePaint,
+    VelloScenePixelRect,
 };
 use crate::surface_render_target::{SurfaceRenderTarget, SurfaceRenderTargetCreateInfo};
 use crate::vello_extensions::{
@@ -45,8 +46,8 @@ pub struct CreateInfo {
     pub sink: Box<dyn IVelloSceneSink>,
 
     /// What the target holds from the frames before, when it holds
-    /// anything: the scene starts with it.
-    pub backdrop: Option<ImageData>,
+    /// anything: it stays under the scene.
+    pub backdrop: Option<VelloBackdrop>,
 
     /// Receives the scene when the context is disposed, to render it into
     /// the target.
@@ -61,6 +62,133 @@ pub struct CreateInfo {
     /// The rendering modes of intermediate surfaces, in the order they are
     /// tried.
     pub rendering_modes: Vec<VelloRenderingMode>,
+}
+
+/// What a target holds when a drawing context is created for it, and how
+/// the scene of the context keeps it.
+///
+/// A scene replaces the pixels of its target. What the target held is kept
+/// in one of two ways:
+///
+/// * **The scene is composed over the target** by the renderer
+///   ([`IVelloSceneSink::retain_target`]), when the target can be drawn
+///   over where it is ([`composes_over_target`](Self::composes_over_target))
+///   and the first thing the context is asked for is a clear to
+///   transparent inside clips that are rectangles of pixels: what the
+///   compositor does to redraw the dirty part of a layer. Those rectangles
+///   are cleared in the target and nothing is copied: the cost of a frame
+///   is the cost of what changed.
+/// * **The scene starts with the content as a paint**
+///   ([`brush`](Self::brush)), in every other case: the first thing that is
+///   drawn is drawn over what the target held. This is exact for whatever
+///   follows (a clear inside a rounded clip takes out what the target
+///   held, which a scene composed over its target could not), and costs a
+///   copy of the target.
+///
+/// A clear outside every clip and layer starts the scene over: the content
+/// is not kept.
+pub struct VelloBackdrop {
+    /// Whether the scene of the context can be composed over what the
+    /// target holds: the one that renders the scene composes over the
+    /// target itself (the pixels of a surface in memory with the CPU sink,
+    /// a texture of the device with a sink of the device).
+    pub composes_over_target: bool,
+
+    /// The content as a brush whose pixels lie on the pixels of the target,
+    /// or `None` when the target holds nothing after all. Asked for only
+    /// when the scene is not composed over the target.
+    pub brush: Box<dyn FnOnce() -> Option<VelloSceneBrush>>,
+}
+
+impl VelloBackdrop {
+    /// The backdrop of a target that cannot be drawn over where it is: an
+    /// image of what it holds.
+    pub fn image(image: ImageData) -> Self {
+        Self {
+            composes_over_target: false,
+            brush: Box::new(move || {
+                Some(VelloSceneBrush::Image(VelloSceneImage {
+                    image,
+                    x_extend: Extend::Pad,
+                    y_extend: Extend::Pad,
+                    quality: ImageQuality::Low,
+                    alpha: 1.0,
+                }))
+            }),
+        }
+    }
+}
+
+/// An intermediate surface of a drawing context: what a tile brush or the
+/// content of a scene brush is drawn into before a shape is painted with
+/// it. For a scene that is drawn on a device it is a texture of the device
+/// ([`DeviceSurfaceRenderTarget`](crate::gpu::DeviceSurfaceRenderTarget)),
+/// drawn and painted with there; otherwise pixels in memory.
+pub(crate) enum IntermediateSurface {
+    /// Pixels in memory.
+    Memory(SurfaceRenderTarget),
+    /// A texture of the device of the scene.
+    #[cfg(any(feature = "hybrid", feature = "gpu"))]
+    Device(crate::gpu::DeviceSurfaceRenderTarget),
+}
+
+impl IntermediateSurface {
+    pub(crate) fn create_drawing_context(&self) -> Box<dyn IDrawingContextImpl> {
+        match self {
+            IntermediateSurface::Memory(surface) => IDrawingContextLayerImpl::create_drawing_context(surface),
+            #[cfg(any(feature = "hybrid", feature = "gpu"))]
+            IntermediateSurface::Device(surface) => IDrawingContextLayerImpl::create_drawing_context(surface),
+        }
+    }
+
+    /// The surface as a bitmap of the contract.
+    pub(crate) fn bitmap(&self) -> &dyn IBitmapImpl {
+        match self {
+            IntermediateSurface::Memory(surface) => surface,
+            #[cfg(any(feature = "hybrid", feature = "gpu"))]
+            IntermediateSurface::Device(surface) => surface,
+        }
+    }
+
+    /// The surface as a brush for the scene of `context`, with its size in
+    /// pixels: the texture where the scene is drawn on its device, an image
+    /// of the pixels otherwise.
+    pub(crate) fn brush(
+        &self,
+        context: &mut DrawingContextImpl,
+        extend: (Extend, Extend),
+        quality: ImageQuality,
+        alpha: f32,
+    ) -> Option<(VelloSceneBrush, PixelSize)> {
+        let _ = &context;
+        match self {
+            IntermediateSurface::Memory(surface) => {
+                let image = crate::i_drawable_bitmap_impl::IDrawableBitmapImpl::image(surface)?;
+                let size = PixelSize::new(image.width as i32, image.height as i32);
+                let (x_extend, y_extend) = extend;
+                Some((VelloSceneBrush::Image(VelloSceneImage { image, x_extend, y_extend, quality, alpha }), size))
+            }
+            #[cfg(any(feature = "hybrid", feature = "gpu"))]
+            IntermediateSurface::Device(surface) => {
+                Some((surface.brush(context, extend, quality, alpha)?, IBitmapImpl::pixel_size(surface)))
+            }
+        }
+    }
+
+    pub(crate) fn dispose(&self) {
+        IBitmapImpl::dispose(self.bitmap());
+    }
+}
+
+/// What the context remembers of a clip that is open.
+struct ClipRecord {
+    /// The clip as rectangles of pixels of the scene, when it is that: a
+    /// region, or a rectangle whose transform leaves its sides on whole
+    /// pixels.
+    rects: Option<Vec<VelloScenePixelRect>>,
+    /// The clip as it was pushed, while the scene may have to start over
+    /// with the content of the target under it.
+    pushed: Option<(BezPath, Fill, Affine, bool)>,
 }
 
 /// The stage of the design document a feature that is not built belongs to.
@@ -103,6 +231,16 @@ pub struct DrawingContextImpl {
     intermediate_surface_dpi: Vector,
     rendering_modes: Vec<VelloRenderingMode>,
     state_stack: Vec<(Matrix, SavedKind)>,
+    /// For each state of `state_stack`, what is remembered of it when it is
+    /// a clip, while the content of the target is kept.
+    clip_records: Vec<Option<ClipRecord>>,
+    /// What the target holds, until it is decided how the scene keeps it
+    /// ([`VelloBackdrop`]).
+    backdrop: Option<VelloBackdrop>,
+    /// Whether the scene is composed over what the target holds.
+    retains_target: bool,
+    /// Whether anything was drawn into the scene of the target.
+    drawn: bool,
     mask_stack: Vec<(Affine, PaintWrapper)>,
     opacity_stack: Vec<(f64, bool)>,
     render_options_stack: Vec<RenderOptions>,
@@ -122,6 +260,9 @@ pub struct DrawingContextImpl {
     /// the context: not the first one while an effect is recorded into a
     /// scene of its own.
     sink_origin: kurbo::Vec2,
+    /// When the context was created, while the phases of a frame are timed
+    /// ([`crate::perf`]).
+    created: Option<std::time::Instant>,
 }
 
 impl DrawingContextImpl {
@@ -145,13 +286,17 @@ impl DrawingContextImpl {
             .or_else(VelloPlatform::options)
             .is_some_and(|options| options.use_opacity_save_layer);
 
-        let mut context = Self {
+        let context = Self {
             sink: Some(create_info.sink),
             on_finished: Some(create_info.on_finished),
             disposables,
             intermediate_surface_dpi: create_info.dpi,
             rendering_modes: create_info.rendering_modes,
             state_stack: Vec::new(),
+            clip_records: Vec::new(),
+            backdrop: create_info.backdrop,
+            retains_target: false,
+            drawn: false,
             mask_stack: Vec::new(),
             opacity_stack: Vec::new(),
             render_options_stack: Vec::new(),
@@ -166,29 +311,123 @@ impl DrawingContextImpl {
             effect_stack: Vec::new(),
             open_clips: 0,
             sink_origin: kurbo::Vec2::ZERO,
+            created: crate::perf::frame_start(),
         };
-
-        if let Some(backdrop) = create_info.backdrop {
-            context.draw_image_in_device_space(backdrop, BlendMode::default());
-        }
+        crate::perf::count(crate::perf::Phase::Context, 0);
 
         context
     }
 
-    /// The scene.
+    /// The scene, to draw into: what the target held is under whatever is
+    /// drawn now.
     ///
     /// # Panics
     /// Panics when the drawing context has been disposed.
     fn sink(&mut self) -> &mut dyn IVelloSceneSink {
+        if self.backdrop.is_some() {
+            self.start_with_backdrop();
+        }
+        self.drawn = true;
+        self.scene()
+    }
+
+    /// The scene, to ask it something or to open a clip in it: nothing is
+    /// decided about what the target held.
+    ///
+    /// # Panics
+    /// Panics when the drawing context has been disposed.
+    fn scene(&mut self) -> &mut dyn IVelloSceneSink {
         match &mut self.sink {
             Some(sink) => &mut **sink,
             None => panic!("The drawing context has been disposed"),
         }
     }
 
+    /// Starts the scene with what the target held as a paint, under the
+    /// clips that are open (see [`VelloBackdrop`]).
+    fn start_with_backdrop(&mut self) {
+        let Some(backdrop) = self.backdrop.take() else {
+            return;
+        };
+
+        // The clips that are open were pushed into a scene that holds
+        // nothing else: the scene starts over with the content, and the
+        // clips are opened again above it.
+        let clips: Vec<(BezPath, Fill, Affine, bool)> =
+            self.clip_records.iter_mut().filter_map(|record| record.as_mut()?.pushed.take()).collect();
+
+        let Some(brush) = (backdrop.brush)() else {
+            return;
+        };
+
+        let (width, height) = (self.scene().width() as f64, self.scene().height() as f64);
+        let path = rect_path(Rect::new(0.0, 0.0, width, height));
+        let paint = VelloScenePaint { brush, transform: Affine::IDENTITY };
+
+        let scene = self.scene();
+        if !clips.is_empty() {
+            scene.reset();
+        }
+        scene.fill(&path, Fill::NonZero, Affine::IDENTITY, &paint, BlendMode::default(), false);
+        for (path, fill_rule, transform, anti_alias) in &clips {
+            scene.push_clip(path, *fill_rule, *transform, *anti_alias);
+        }
+    }
+
+    /// Whether the clips that are open are remembered: while the content of
+    /// the target is kept or may be.
+    fn records_clips(&self) -> bool {
+        self.backdrop.is_some() || self.retains_target
+    }
+
+    /// The pixels the open clips leave, when everything that is open is a
+    /// clip of rectangles of pixels.
+    fn clipped_pixel_rects(&self) -> Option<Vec<VelloScenePixelRect>> {
+        if self.clip_records.len() != self.state_stack.len() || self.clip_records.is_empty() {
+            return None;
+        }
+
+        let mut rects: Option<Vec<VelloScenePixelRect>> = None;
+        for record in &self.clip_records {
+            let clip = record.as_ref()?.rects.as_ref()?;
+            rects = Some(match rects {
+                None => clip.clone(),
+                Some(rects) => rects
+                    .iter()
+                    .flat_map(|rect| clip.iter().filter_map(move |other| rect.intersect(*other)))
+                    .collect(),
+            });
+        }
+        rects
+    }
+
+    /// A rectangle in the pixels of the scene as whole pixels, when its
+    /// sides are on whole pixels.
+    fn whole_pixels(rect: kurbo::Rect, width: u16, height: u16) -> Option<VelloScenePixelRect> {
+        let on_pixel = |value: f64| value.is_finite() && (value - value.round()).abs() < 1e-6;
+        if !(on_pixel(rect.x0) && on_pixel(rect.y0) && on_pixel(rect.x1) && on_pixel(rect.y1)) {
+            return None;
+        }
+        let clamp = |value: f64, limit: u16| value.round().clamp(0.0, f64::from(limit)) as u16;
+        Some(VelloScenePixelRect {
+            x0: clamp(rect.x0.min(rect.x1), width),
+            y0: clamp(rect.y0.min(rect.y1), height),
+            x1: clamp(rect.x0.max(rect.x1), width),
+            y1: clamp(rect.y0.max(rect.y1), height),
+        })
+    }
+
     /// The rendering mode the context draws in.
     pub fn rendering_mode(&mut self) -> VelloRenderingMode {
-        self.sink().rendering_mode()
+        self.scene().rendering_mode()
+    }
+
+    /// Whether the scene of the context is drawn on `device` and paints
+    /// with its textures.
+    #[cfg(any(feature = "hybrid", feature = "gpu"))]
+    pub(crate) fn draws_on_device(&mut self, device: &std::sync::Arc<crate::gpu::VelloWgpuDevice>) -> bool {
+        let scene = self.scene();
+        scene.capabilities().device_textures && scene.device().is_some_and(|own| std::sync::Arc::ptr_eq(own, device))
     }
 
     /// The render options in effect.
@@ -234,21 +473,39 @@ impl DrawingContextImpl {
 
     /// Whether an edge is anti-aliased when the contract asks for it to be
     /// or not to be: as asked, and always in a rendering mode whose
-    /// renderer has no aliased edges (classic `vello`).
+    /// renderer has no aliased edges at all. A renderer that has them for
+    /// rectangles on the axes only (classic `vello`, whose sink snaps such
+    /// rectangles to pixels) is asked as the contract asks: its sink draws
+    /// every other shape anti-aliased.
     fn edge_anti_alias(&self, anti_alias: bool) -> bool {
-        anti_alias || !self.sink.as_ref().is_some_and(|sink| sink.capabilities().aliased_edges)
+        anti_alias
+            || !self.sink.as_ref().is_some_and(|sink| {
+                let capabilities = sink.capabilities();
+                capabilities.aliased_edges || capabilities.aliased_rectangles
+            })
     }
 
     /// The whole target as a path, in pixels.
     fn target_path(&mut self) -> BezPath {
-        let (width, height) = (self.sink().width() as f64, self.sink().height() as f64);
+        let (width, height) = (self.scene().width() as f64, self.scene().height() as f64);
         rect_path(Rect::new(0.0, 0.0, width, height))
     }
 
     /// Saves the transform with what the pop has to end in the scene.
     fn save(&mut self, kind: SavedKind) {
+        self.save_with(kind, None);
+    }
+
+    /// [`save`](Self::save) with what is remembered of a clip.
+    fn save_with(&mut self, kind: SavedKind, record: Option<ClipRecord>) {
         if kind == SavedKind::Clip {
             self.open_clips += 1;
+        }
+        // The records are kept beside the states for as long as every state
+        // since the first has one or none: a context that keeps nothing of
+        // its target has none.
+        if self.clip_records.len() == self.state_stack.len() && (record.is_some() || !self.clip_records.is_empty()) {
+            self.clip_records.push(record);
         }
         self.state_stack.push((self.current_transform, kind));
     }
@@ -256,13 +513,16 @@ impl DrawingContextImpl {
     /// Ends the innermost pushed state. The transform of the context is the
     /// one that was current when the state was pushed.
     fn restore(&mut self) {
+        if self.clip_records.len() == self.state_stack.len() {
+            self.clip_records.pop();
+        }
         let (transform, kind) =
             self.state_stack.pop().unwrap_or_else(|| panic!("The state stack of the drawing context is empty"));
 
         match kind {
             SavedKind::Clip => {
                 self.open_clips -= 1;
-                self.sink().pop_clip();
+                self.scene().pop_clip();
             }
             SavedKind::Layer => self.sink().pop_layer(),
             SavedKind::Nothing => {}
@@ -273,26 +533,62 @@ impl DrawingContextImpl {
     }
 
     fn push_clip_path(&mut self, path: &BezPath, fill_rule: Fill, anti_alias: bool) {
+        self.push_clip_path_with(path, fill_rule, anti_alias, None);
+    }
+
+    /// Opens a clip. `pixel_rect` is the clip in the space of the context
+    /// when it is a rectangle that may lie on whole pixels.
+    fn push_clip_path_with(&mut self, path: &BezPath, fill_rule: Fill, anti_alias: bool, rect: Option<Rect>) {
         let (transform, anti_alias) = (self.device_transform(), self.edge_anti_alias(anti_alias));
-        self.sink().push_clip(path, fill_rule, transform, anti_alias);
-        self.save(SavedKind::Clip);
+
+        let record = self.records_clips().then(|| {
+            let (width, height) = (self.scene().width(), self.scene().height());
+            let [_, b, c, _, _, _] = transform.as_coeffs();
+            let rects = rect
+                .filter(|_| b == 0.0 && c == 0.0)
+                .and_then(|rect| {
+                    let rect = kurbo::Rect::new(rect.x, rect.y, rect.x + rect.width, rect.y + rect.height);
+                    Self::whole_pixels(transform.transform_rect_bbox(rect), width, height)
+                })
+                .map(|rect| vec![rect]);
+            ClipRecord {
+                rects,
+                pushed: self.backdrop.is_some().then(|| (path.clone(), fill_rule, transform, anti_alias)),
+            }
+        });
+
+        self.scene().push_clip(path, fill_rule, transform, anti_alias);
+        self.save_with(SavedKind::Clip, record);
     }
 
     /// Draws an image with its pixels on the pixels of the target, whatever
     /// the transform of the context is.
     pub(crate) fn draw_image_in_device_space(&mut self, image: ImageData, blend_mode: BlendMode) {
+        let (width, height) = (image.width as f64, image.height as f64);
+        let brush = VelloSceneBrush::Image(VelloSceneImage {
+            image,
+            x_extend: Extend::Pad,
+            y_extend: Extend::Pad,
+            quality: ImageQuality::Low,
+            alpha: 1.0,
+        });
+
+        self.draw_brush_in_device_space(brush, width, height, blend_mode);
+    }
+
+    /// Fills the rectangle of `width` by `height` pixels at the first pixel
+    /// of the target with a brush whose pixels lie on the pixels of the
+    /// target, whatever the transform of the context is.
+    pub(crate) fn draw_brush_in_device_space(
+        &mut self,
+        brush: VelloSceneBrush,
+        width: f64,
+        height: f64,
+        blend_mode: BlendMode,
+    ) {
         let pixel_transform = self.pixel_transform();
-        let path = rect_path(Rect::new(0.0, 0.0, image.width as f64, image.height as f64));
-        let paint = VelloScenePaint {
-            brush: VelloSceneBrush::Image(VelloSceneImage {
-                image,
-                x_extend: Extend::Pad,
-                y_extend: Extend::Pad,
-                quality: ImageQuality::Low,
-                alpha: 1.0,
-            }),
-            transform: Affine::IDENTITY,
-        };
+        let path = rect_path(Rect::new(0.0, 0.0, width, height));
+        let paint = VelloScenePaint { brush, transform: Affine::IDENTITY };
 
         self.sink().fill(&path, Fill::NonZero, pixel_transform, &paint, blend_mode, false);
     }
@@ -540,6 +836,10 @@ impl DrawingContextImpl {
         if intermediate_size.width < 1 || intermediate_size.height < 1 {
             return;
         }
+        crate::perf::count(
+            crate::perf::Phase::BrushSurface,
+            intermediate_size.width as u64 * intermediate_size.height as u64 * 4,
+        );
         let intermediate = self.create_render_target(intermediate_size, true);
 
         {
@@ -569,10 +869,14 @@ impl DrawingContextImpl {
             Matrix::IDENTITY
         };
 
-        let Some(image) = crate::i_drawable_bitmap_impl::IDrawableBitmapImpl::image(&intermediate) else {
+        // The Skia backend samples the tile with its default sampling: the
+        // nearest pixel.
+        let (x_extend, y_extend) = Self::get_tile_modes(tile_mode);
+        let brush = intermediate.brush(self, (x_extend, y_extend), ImageQuality::Low, opacity);
+        intermediate.dispose();
+        let Some((brush, tile_size)) = brush else {
             return;
         };
-        IBitmapImpl::dispose(&intermediate);
 
         // From the pixels of the tile to the space of the shape: the
         // position of a relative destination, the pixels as logical units,
@@ -594,29 +898,17 @@ impl DrawingContextImpl {
         }
 
         let paint_transform = to_affine(paint_transform);
-        let (x_extend, y_extend) = Self::get_tile_modes(tile_mode);
 
         if tile_mode == TileMode::None {
             // A tile that is not repeated paints nothing beside itself. An
             // image of peniko has no such extend mode (Skia's is "decal"):
             // the shape is clipped to the tile instead.
-            let mut tile = rect_path(Rect::new(0.0, 0.0, image.width as f64, image.height as f64));
+            let mut tile = rect_path(Rect::new(0.0, 0.0, tile_size.width as f64, tile_size.height as f64));
             tile.apply_affine(paint_transform);
             paint_wrapper.clip = Some(tile);
         }
 
-        paint_wrapper.paint = Some(VelloScenePaint {
-            brush: VelloSceneBrush::Image(VelloSceneImage {
-                image,
-                x_extend,
-                y_extend,
-                // The Skia backend samples the tile with its default
-                // sampling: the nearest pixel.
-                quality: ImageQuality::Low,
-                alpha: opacity,
-            }),
-            transform: paint_transform,
-        });
+        paint_wrapper.paint = Some(VelloScenePaint { brush, transform: paint_transform });
     }
 
     /// Creates a paint wrapper for the given brush.
@@ -731,10 +1023,34 @@ impl DrawingContextImpl {
         }
     }
 
-    /// Creates a new render target compatible with this drawing context.
+    /// Creates a new render target compatible with this drawing context: a
+    /// texture of the device for a scene that is drawn on one, pixels in
+    /// memory otherwise.
     ///
     /// `use_scaled_drawing` auto-scales the drawing to the DPI.
-    fn create_render_target(&self, pixel_size: PixelSize, use_scaled_drawing: bool) -> SurfaceRenderTarget {
+    fn create_render_target(&mut self, pixel_size: PixelSize, use_scaled_drawing: bool) -> IntermediateSurface {
+        #[cfg(any(feature = "hybrid", feature = "gpu"))]
+        {
+            let scene = self.scene();
+            let mode = scene.rendering_mode();
+            if let Some(device) = scene.device().cloned() {
+                if crate::gpu::DeviceSurfaceRenderTarget::is_available(mode, &device) {
+                    return IntermediateSurface::Device(crate::gpu::DeviceSurfaceRenderTarget::new(
+                        device,
+                        mode,
+                        pixel_size,
+                        self.intermediate_surface_dpi,
+                        self.rendering_modes.clone(),
+                        use_scaled_drawing,
+                    ));
+                }
+            }
+        }
+
+        IntermediateSurface::Memory(self.create_memory_render_target(pixel_size, use_scaled_drawing))
+    }
+
+    fn create_memory_render_target(&self, pixel_size: PixelSize, use_scaled_drawing: bool) -> SurfaceRenderTarget {
         SurfaceRenderTarget::new(SurfaceRenderTargetCreateInfo {
             width: pixel_size.width,
             height: pixel_size.height,
@@ -742,6 +1058,38 @@ impl DrawingContextImpl {
             rendering_modes: self.rendering_modes.clone(),
             use_scaled_drawing,
         })
+    }
+
+    /// Draws a surface of the device of the scene as a paint with its
+    /// texture. A texture has no levels of a mipmap: a mode with mipmaps is
+    /// sampled bilinearly.
+    #[cfg(any(feature = "hybrid", feature = "gpu"))]
+    fn draw_device_surface(
+        &mut self,
+        surface: &crate::gpu::DeviceSurfaceRenderTarget,
+        opacity: f64,
+        source_rect: Rect,
+        dest_rect: Rect,
+    ) {
+        if source_rect.width <= 0.0 || source_rect.height <= 0.0 || dest_rect.width <= 0.0 || dest_rect.height <= 0.0 {
+            return;
+        }
+
+        let image_transform = Affine::translate((dest_rect.x, dest_rect.y))
+            * Affine::scale_non_uniform(dest_rect.width / source_rect.width, dest_rect.height / source_rect.height)
+            * Affine::translate((-source_rect.x, -source_rect.y));
+        let is_upscaling = dest_rect.width > source_rect.width || dest_rect.height > source_rect.height;
+        let (quality, _) =
+            crate::vello_extensions::to_sampling(self.render_options.bitmap_interpolation_mode, is_upscaling);
+        let alpha = ((255.0 * opacity * self.current_opacity) as u8) as f32 / 255.0;
+        let blend_mode = to_blend_mode(self.render_options.bitmap_blending_mode);
+        let (transform, anti_alias) = (self.device_transform(), self.anti_alias());
+
+        let Some(brush) = surface.brush(self, (Extend::Pad, Extend::Pad), quality, alpha) else {
+            return;
+        };
+        let paint = VelloScenePaint { brush, transform: image_transform };
+        self.sink().fill(&rect_path(dest_rect), Fill::NonZero, transform, &paint, blend_mode, anti_alias);
     }
 
     fn geometry_impl(geometry: &dyn IGeometryImpl) -> &dyn GeometryImpl {
@@ -772,10 +1120,40 @@ impl IDrawingContextImpl for DrawingContextImpl {
 
     fn clear(&mut self, color: Color) {
         // Outside every clip and layer a clear replaces all there is: the
-        // scene starts over.
+        // scene starts over, and nothing of the target is kept.
         if self.state_stack.is_empty() && self.mask_stack.is_empty() {
-            self.sink().reset();
+            self.backdrop = None;
+            self.retains_target = false;
+            self.clip_records.clear();
+            self.scene().reset();
+            self.drawn = false;
             if color.a == 0 {
+                return;
+            }
+        } else if color.a == 0 && self.mask_stack.is_empty() {
+            // Inside clips that are rectangles of pixels, a clear to
+            // transparent of a target that is kept is a clear of those
+            // pixels of the target: the scene is composed over the rest
+            // (see `VelloBackdrop`).
+            let composes = self.retains_target
+                || (self.backdrop.as_ref().is_some_and(|backdrop| backdrop.composes_over_target)
+                    && self.scene().capabilities().retained_targets);
+            if composes {
+                if let Some(rects) = self.clipped_pixel_rects() {
+                    self.backdrop = None;
+                    self.retains_target = true;
+                    for record in self.clip_records.iter_mut().flatten() {
+                        record.pushed = None;
+                    }
+                    self.scene().retain_target(&rects);
+                    // What the scene itself drew there goes as well.
+                    if !self.drawn {
+                        return;
+                    }
+                }
+            } else if self.backdrop.is_none() && !self.drawn {
+                // Nothing is under the clear: the target holds nothing that
+                // is kept, and nothing was drawn.
                 return;
             }
         }
@@ -787,6 +1165,15 @@ impl IDrawingContextImpl for DrawingContextImpl {
     }
 
     fn draw_bitmap(&mut self, source: &dyn IBitmapImpl, opacity: f64, source_rect: Rect, dest_rect: Rect) {
+        // A surface of the device of the scene is drawn from where it is.
+        #[cfg(any(feature = "hybrid", feature = "gpu"))]
+        if let Some(surface) = source.as_any().downcast_ref::<crate::gpu::DeviceSurfaceRenderTarget>() {
+            if self.draws_on_device(surface.device()) {
+                self.draw_device_surface(surface, opacity, source_rect, dest_rect);
+                return;
+            }
+        }
+
         let drawable_image = try_get_drawable_bitmap(source)
             .unwrap_or_else(|| panic!("The bitmap was not created by the Vello backend"));
         let Some(image) = drawable_image.image() else {
@@ -1065,14 +1452,33 @@ impl IDrawingContextImpl for DrawingContextImpl {
     }
 
     fn create_layer(&mut self, size: PixelSize) -> Rc<dyn IDrawingContextLayerImpl> {
-        Rc::new(self.create_render_target(size, false))
+        // A layer of a scene that is drawn on a device stays on the device.
+        #[cfg(any(feature = "hybrid", feature = "gpu"))]
+        {
+            let scene = self.scene();
+            let mode = scene.rendering_mode();
+            if let Some(device) = scene.device().cloned() {
+                if crate::gpu::DeviceSurfaceRenderTarget::is_available(mode, &device) {
+                    return Rc::new(crate::gpu::DeviceSurfaceRenderTarget::new(
+                        device,
+                        mode,
+                        size,
+                        self.intermediate_surface_dpi,
+                        self.rendering_modes.clone(),
+                        false,
+                    ));
+                }
+            }
+        }
+
+        Rc::new(self.create_memory_render_target(size, false))
     }
 
     fn push_clip(&mut self, clip: Rect) {
         // The edges of a rectangle clip are not anti-aliased, those of a
         // rounded rectangle and of a geometry are, whatever the edge mode
         // is: what the Skia backend asks of its canvas.
-        self.push_clip_path(&rect_path(clip), Fill::NonZero, false);
+        self.push_clip_path_with(&rect_path(clip), Fill::NonZero, false, Some(clip));
     }
 
     fn push_clip_rounded(&mut self, clip: RoundedRect) {
@@ -1085,8 +1491,33 @@ impl IDrawingContextImpl for DrawingContextImpl {
         // A region is a set of pixels of the target: it is not transformed
         // and has no edge inside a pixel.
         let (pixel_transform, anti_alias) = (self.pixel_transform(), self.edge_anti_alias(false));
-        self.sink().push_clip(&path, Fill::NonZero, pixel_transform, anti_alias);
-        self.save(SavedKind::Clip);
+
+        let record = self.records_clips().then(|| {
+            let (width, height) = (self.scene().width(), self.scene().height());
+            let origin = self.sink_origin;
+            let rects = IPlatformRenderInterfaceRegion::rects(Self::region_impl(region))
+                .iter()
+                .map(|rect| {
+                    Self::whole_pixels(
+                        kurbo::Rect::new(
+                            rect.left as f64 - origin.x,
+                            rect.top as f64 - origin.y,
+                            rect.right as f64 - origin.x,
+                            rect.bottom as f64 - origin.y,
+                        ),
+                        width,
+                        height,
+                    )
+                })
+                .collect::<Option<Vec<_>>>();
+            ClipRecord {
+                rects,
+                pushed: self.backdrop.is_some().then(|| (path.clone(), Fill::NonZero, pixel_transform, anti_alias)),
+            }
+        });
+
+        self.scene().push_clip(&path, Fill::NonZero, pixel_transform, anti_alias);
+        self.save_with(SavedKind::Clip, record);
     }
 
     fn pop_clip(&mut self) {
@@ -1241,6 +1672,23 @@ impl IDrawingContextImpl for DrawingContextImpl {
         }
         while !self.state_stack.is_empty() {
             self.restore();
+        }
+
+        // A target nothing was drawn to keeps what it held.
+        if let Some(composes) = self.backdrop.as_ref().map(|backdrop| backdrop.composes_over_target) {
+            if composes && self.scene().capabilities().retained_targets {
+                self.backdrop = None;
+                self.scene().retain_target(&[]);
+            } else {
+                self.start_with_backdrop();
+            }
+        }
+
+        // The recording of the scene: the life of the context up to here.
+        // The contexts of intermediate surfaces that were drawn meanwhile
+        // are counted in it too.
+        if let Some(created) = self.created {
+            crate::perf::add_time(crate::perf::Phase::Scene, created.elapsed());
         }
 
         if let (Some(mut sink), Some(on_finished)) = (self.sink.take(), self.on_finished.take()) {

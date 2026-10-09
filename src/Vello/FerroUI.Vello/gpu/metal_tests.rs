@@ -204,11 +204,8 @@ impl Window {
         // the platform is given directly.
         let gpu = VelloMetalGpu::new(device.clone()).unwrap();
         let platform_target = TestRenderTarget::new(device.clone(), size, scaling);
-        let render_target: Rc<dyn IRenderTarget> = Rc::new(VelloMetalRenderTarget {
-            gpu: gpu.clone(),
-            target: RefCell::new(Some(platform_target.clone())),
-            rendering_modes: vec![mode],
-        });
+        let render_target: Rc<dyn IRenderTarget> =
+            Rc::new(VelloMetalRenderTarget::new(gpu.clone(), platform_target.clone(), vec![mode]));
 
         Self { gpu, platform_target, render_target }
     }
@@ -217,8 +214,7 @@ impl Window {
     fn draw_frame(&self, frame: u32) {
         let (size, scaling) = (self.platform_target.size.get(), self.platform_target.scaling.get());
         let scene_info = RenderTargetSceneInfo::new(size, scaling, CompositionTransparencyLevel::None);
-        let (mut context, properties) = self.render_target.create_drawing_context(&scene_info);
-        assert!(!properties.previous_frame_is_retained);
+        let (mut context, _) = self.render_target.create_drawing_context(&scene_info);
 
         context.clear(Colors::WHITE);
         context.set_transform(Matrix::create_scale(scaling, scaling));
@@ -363,11 +359,7 @@ fn a_lost_device_is_reported_by_the_context_and_the_render_target() {
     let gpu = VelloMetalGpu::new(device.clone()).unwrap();
     let context = crate::VelloContext::with_gpu(gpu.clone(), vec![VelloRenderingMode::Cpu]);
     let platform_target = TestRenderTarget::new(device.clone(), PixelSize::new(8, 8), 1.0);
-    let render_target = VelloMetalRenderTarget {
-        gpu: gpu.clone(),
-        target: RefCell::new(Some(platform_target)),
-        rendering_modes: vec![VelloRenderingMode::Cpu],
-    };
+    let render_target = VelloMetalRenderTarget::new(gpu.clone(), platform_target, vec![VelloRenderingMode::Cpu]);
 
     use ferroui_base::platform::IPlatformRenderInterfaceContext;
     assert!(!context.is_lost());
@@ -382,4 +374,248 @@ fn a_lost_device_is_reported_by_the_context_and_the_render_target() {
     let shared = VelloWgpuDevice::shared().unwrap();
     assert!(!Arc::ptr_eq(gpu.device(), &shared));
     assert!(!shared.is_lost());
+}
+
+/// The frames of [`a_frame_of_many_render_passes_is_drawn`]: what is nested
+/// or repeated in each, `count` times.
+#[derive(Clone, Copy, Debug)]
+enum ManyPasses {
+    /// Layers one after the other, each with a rectangle.
+    LayersInARow,
+    /// Layers inside each other, a rectangle in each.
+    LayersInsideEachOther,
+    /// Opacity masks one after the other: a layer and a mask layer each.
+    MasksInARow,
+    /// Opacity masks inside each other.
+    MasksInsideEachOther,
+}
+
+fn draw_many_passes(context: &mut dyn IDrawingContextImpl, kind: ManyPasses, count: usize) {
+    let brush = |index: usize| {
+        ImmutableSolidColorBrush::new(Color::from_argb(200, (index * 37 % 255) as u8, 90, (index * 11 % 255) as u8))
+    };
+    let mask = ImmutableSolidColorBrush::new(Color::from_argb(128, 0, 0, 0));
+    let bounds = Rect::new(0.0, 0.0, 256.0, 256.0);
+    let rect = |index: usize| {
+        RoundedRect::from_rect(Rect::new((index % 14) as f64 * 15.0, (index / 14 % 14) as f64 * 15.0, 24.0, 24.0))
+    };
+
+    context.clear(Colors::WHITE);
+    match kind {
+        ManyPasses::LayersInARow => {
+            for index in 0..count {
+                context.push_layer(bounds);
+                context.draw_rectangle(Some(&brush(index)), None, rect(index), &BoxShadows::default());
+                context.pop_layer();
+            }
+        }
+        ManyPasses::LayersInsideEachOther => {
+            for index in 0..count {
+                context.push_layer(bounds);
+                context.draw_rectangle(Some(&brush(index)), None, rect(index), &BoxShadows::default());
+            }
+            for _ in 0..count {
+                context.pop_layer();
+            }
+        }
+        ManyPasses::MasksInARow => {
+            for index in 0..count {
+                context.push_opacity_mask(&mask, bounds);
+                context.draw_rectangle(Some(&brush(index)), None, rect(index), &BoxShadows::default());
+                context.pop_opacity_mask();
+            }
+        }
+        ManyPasses::MasksInsideEachOther => {
+            for index in 0..count {
+                context.push_opacity_mask(&mask, bounds);
+                context.draw_rectangle(Some(&brush(index)), None, rect(index), &BoxShadows::default());
+            }
+            for _ in 0..count {
+                context.pop_opacity_mask();
+            }
+        }
+    }
+}
+
+/// What the catalog hung on (design document, section 11): a frame whose
+/// scene needs more render passes than the command queue of the platform
+/// holds command buffers that are not complete (64 for a queue that was
+/// made without a number). `wgpu` makes a command buffer of Metal for every
+/// pass and commits none of them before the last is encoded: on the queue
+/// of the platform the 65th waited for one of the first 64 to complete,
+/// forever, with the compositor lock held. The frames are drawn on a
+/// thread of their own, and each has to be there within a time limit.
+#[test]
+fn a_frame_of_many_render_passes_is_drawn() {
+    use std::sync::mpsc;
+    use std::time::Duration;
+
+    let test = "a_frame_of_many_render_passes_is_drawn";
+    if MTLCreateSystemDefaultDevice().is_none() {
+        println!("skipped: no adapter ({test}): the system has no Metal device");
+        return;
+    }
+    let _serial = SERIAL.lock().unwrap_or_else(|e| e.into_inner());
+
+    let mut hung = Vec::new();
+    for mode in [VelloRenderingMode::Hybrid, VelloRenderingMode::Gpu] {
+        if (mode == VelloRenderingMode::Hybrid && !cfg!(feature = "hybrid"))
+            || (mode == VelloRenderingMode::Gpu && !cfg!(feature = "gpu"))
+        {
+            continue;
+        }
+        for kind in [
+            ManyPasses::LayersInARow,
+            ManyPasses::LayersInsideEachOther,
+            ManyPasses::MasksInARow,
+            ManyPasses::MasksInsideEachOther,
+        ] {
+            // The device of the frames, for the case that they hang: it is
+            // then marked lost, so that no later test draws with it.
+            let shared_device: Arc<std::sync::Mutex<Option<Arc<VelloWgpuDevice>>>> = Arc::default();
+            let (sender, receiver) = mpsc::channel::<(usize, [u8; 4])>();
+
+            let published = shared_device.clone();
+            std::thread::spawn(move || {
+                let Some(device) = TestMetalDevice::new(test) else { return };
+                let size = PixelSize::new(256, 256);
+                let window = Window::new(&device, mode, size, 1.0);
+                *published.lock().unwrap_or_else(|e| e.into_inner()) = Some(window.gpu.device().clone());
+                if mode == VelloRenderingMode::Gpu && !window.gpu.device().supports_compute() {
+                    return;
+                }
+
+                for count in [4usize, 24, 70, 150] {
+                    let scene_info = RenderTargetSceneInfo::new(size, 1.0, CompositionTransparencyLevel::None);
+                    let (mut context, _) = window.render_target.create_drawing_context(&scene_info);
+                    draw_many_passes(&mut *context, kind, count);
+                    context.dispose();
+
+                    let (size, pixels) = window.read_back();
+                    if sender.send((count, pixel(size, &pixels, 250, 250))).is_err() {
+                        return;
+                    }
+                }
+            });
+
+            loop {
+                match receiver.recv_timeout(Duration::from_secs(20)) {
+                    Ok((count, corner)) => {
+                        println!("{test}: {mode:?}, {kind:?}, {count}: drawn, the corner is {corner:?}");
+                        // Nothing of the frame reaches the corner: the white
+                        // it was cleared to. The renderer of the GPU mode is
+                        // only asked to be there in time: it has a fixed
+                        // amount of memory for what is blended above the
+                        // fourth layer of a pixel and draws nothing of a
+                        // frame that needs more, without saying so (design
+                        // document, section 11.6).
+                        if mode == VelloRenderingMode::Hybrid {
+                            assert_eq!([255, 255, 255, 255], corner, "{mode:?}, {kind:?}, {count}");
+                        }
+                    }
+                    Err(mpsc::RecvTimeoutError::Disconnected) => break,
+                    Err(mpsc::RecvTimeoutError::Timeout) => {
+                        println!("{test}: {mode:?}, {kind:?}: a frame was not drawn within 20 s");
+                        if let Some(device) = shared_device.lock().unwrap_or_else(|e| e.into_inner()).as_ref() {
+                            device.mark_lost();
+                        }
+                        hung.push(format!("{mode:?}, {kind:?}"));
+                        break;
+                    }
+                }
+            }
+        }
+    }
+
+    assert!(hung.is_empty(), "frames that were not drawn within their time: {hung:?}");
+}
+
+/// The render target keeps the frame of the window: the compositor draws
+/// what changed straight into it, inside its dirty rectangle, and the
+/// drawable of the next session, which holds nothing, shows the whole
+/// frame. A frame of another size starts over.
+#[test]
+fn the_frame_of_the_window_is_retained_and_a_dirty_rectangle_is_drawn_into_it() {
+    let test = "the_frame_of_the_window_is_retained_and_a_dirty_rectangle_is_drawn_into_it";
+    let Some(device) = TestMetalDevice::new(test) else {
+        return;
+    };
+    let _serial = SERIAL.lock().unwrap_or_else(|e| e.into_inner());
+    let probe = VelloMetalGpu::new(device.clone()).unwrap();
+
+    for mode in window_modes(probe.device()) {
+        let size = PixelSize::new(96, 64);
+        let window = Window::new(&device, mode, size, 1.0);
+        let properties = window.render_target.properties();
+        assert!(properties.retains_previous_frame_contents && properties.is_suitable_for_direct_rendering);
+
+        let scene_info = RenderTargetSceneInfo::new(size, 1.0, CompositionTransparencyLevel::None);
+        let rectangle = |context: &mut dyn IDrawingContextImpl, rect: Rect, color: Color| {
+            context.draw_rectangle(
+                Some(&ImmutableSolidColorBrush::new(color)),
+                None,
+                RoundedRect::from_rect(rect),
+                &BoxShadows::default(),
+            );
+        };
+
+        // The first frame: nothing is retained, everything is drawn, as
+        // the compositor draws it (a clip of the whole, a clear).
+        let (mut context, properties) = window.render_target.create_drawing_context(&scene_info);
+        assert!(!properties.previous_frame_is_retained, "{mode:?}");
+        context.push_clip(Rect::new(0.0, 0.0, 96.0, 64.0));
+        context.clear(Colors::TRANSPARENT);
+        rectangle(&mut *context, Rect::new(0.0, 0.0, 96.0, 64.0), Color::from_rgb(250, 250, 250));
+        rectangle(&mut *context, Rect::new(8.0, 8.0, 30.0, 30.0), Color::from_rgb(200, 20, 20));
+        context.pop_clip();
+        context.dispose();
+
+        let (size, pixels) = window.read_back();
+        assert_eq!([200, 20, 20, 255], pixel(size, &pixels, 10, 10), "{mode:?}");
+        assert_eq!([250, 250, 250, 255], pixel(size, &pixels, 80, 50), "{mode:?}");
+
+        // The second frame: a dirty rectangle is cleared and drawn again.
+        // The session has the same texture here; a window has another
+        // drawable, which holds nothing: the texture is cleared to show
+        // that the whole frame reaches it.
+        let (mut context, properties) = window.render_target.create_drawing_context(&scene_info);
+        assert!(properties.previous_frame_is_retained, "{mode:?}");
+        context.push_clip(Rect::new(20.0, 20.0, 40.0, 30.0));
+        context.clear(Colors::TRANSPARENT);
+        rectangle(&mut *context, Rect::new(0.0, 0.0, 96.0, 64.0), Color::from_rgb(250, 250, 250));
+        rectangle(&mut *context, Rect::new(30.0, 30.0, 10.0, 10.0), Color::from_rgb(20, 20, 200));
+        context.pop_clip();
+        context.dispose();
+
+        let (size, pixels) = window.read_back();
+        // Outside the dirty rectangle: the first frame.
+        assert_eq!([200, 20, 20, 255], pixel(size, &pixels, 10, 10), "{mode:?}");
+        assert_eq!([250, 250, 250, 255], pixel(size, &pixels, 80, 50), "{mode:?}");
+        // Inside it: the red rectangle is gone where it was not drawn
+        // again, and the blue one is there.
+        assert_eq!([250, 250, 250, 255], pixel(size, &pixels, 25, 25), "{mode:?}");
+        assert_eq!([20, 20, 200, 255], pixel(size, &pixels, 35, 35), "{mode:?}");
+
+        // A frame that draws nothing shows the same.
+        let (mut context, properties) = window.render_target.create_drawing_context(&scene_info);
+        assert!(properties.previous_frame_is_retained, "{mode:?}");
+        context.dispose();
+        let (_, again) = window.read_back();
+        assert_eq!(pixels, again, "{mode:?}");
+
+        // Another size: nothing is retained.
+        window.platform_target.size.set(PixelSize::new(50, 40));
+        let scene_info = RenderTargetSceneInfo::new(PixelSize::new(50, 40), 1.0, CompositionTransparencyLevel::None);
+        let (mut context, properties) = window.render_target.create_drawing_context(&scene_info);
+        assert!(!properties.previous_frame_is_retained, "{mode:?}");
+        context.clear(Colors::TRANSPARENT);
+        rectangle(&mut *context, Rect::new(0.0, 0.0, 20.0, 20.0), Color::from_rgb(20, 200, 20));
+        context.dispose();
+        let (size, pixels) = window.read_back();
+        assert_eq!(PixelSize::new(50, 40), size);
+        assert_eq!([20, 200, 20, 255], pixel(size, &pixels, 10, 10), "{mode:?}");
+        assert_eq!([0, 0, 0, 0], pixel(size, &pixels, 30, 30), "{mode:?}");
+
+        println!("{test}: {mode:?}: drawn");
+    }
 }

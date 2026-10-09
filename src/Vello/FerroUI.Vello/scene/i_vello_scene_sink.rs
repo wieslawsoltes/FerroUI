@@ -16,10 +16,66 @@ pub struct VelloSceneCapabilities {
     /// rectangles; what it still draws without anti-aliasing has its edges
     /// between pixels, where the two are the same.
     pub aliased_edges: bool,
+    /// Rectangles whose sides stay on the axes, drawn and clipped to without
+    /// anti-aliasing: the pixels whose centers they hold. A sink that has
+    /// these and no other aliased edges is still asked for edges without
+    /// anti-aliasing, and draws whatever is no such rectangle anti-aliased.
+    pub aliased_rectangles: bool,
     /// Images as paints, with an extend mode for each axis.
     pub image_paints: bool,
     /// The pixels of the finished scene can be read back.
     pub read_back: bool,
+    /// A texture of the device of the sink as a paint
+    /// ([`VelloSceneBrush::Texture`]): what was drawn on the device is drawn
+    /// from without leaving it.
+    pub device_textures: bool,
+    /// A render that composes the scene over what its target holds
+    /// ([`IVelloSceneSink::retain_target`]).
+    pub retained_targets: bool,
+}
+
+/// A rectangle of pixels of a target: `x0` and `y0` are its first column
+/// and row, `x1` and `y1` the ones after its last.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub struct VelloScenePixelRect {
+    /// The first column.
+    pub x0: u16,
+    /// The first row.
+    pub y0: u16,
+    /// The column after the last.
+    pub x1: u16,
+    /// The row after the last.
+    pub y1: u16,
+}
+
+impl VelloScenePixelRect {
+    /// The pixels both rectangles hold, when they hold any.
+    pub fn intersect(self, other: Self) -> Option<Self> {
+        let rect = Self {
+            x0: self.x0.max(other.x0),
+            y0: self.y0.max(other.y0),
+            x1: self.x1.min(other.x1),
+            y1: self.y1.min(other.y1),
+        };
+        (rect.x0 < rect.x1 && rect.y0 < rect.y1).then_some(rect)
+    }
+}
+
+/// A texture of a device as a paint: premultiplied pixels and how they are
+/// sampled.
+#[cfg(any(feature = "hybrid", feature = "gpu"))]
+#[derive(Clone, Debug)]
+pub struct VelloSceneTexture {
+    /// The texture.
+    pub texture: std::sync::Arc<crate::gpu::VelloDeviceTexture>,
+    /// How the texture continues to the left and right of its pixels.
+    pub x_extend: Extend,
+    /// How the texture continues above and below its pixels.
+    pub y_extend: Extend,
+    /// The filter the texture is sampled with.
+    pub quality: ImageQuality,
+    /// A factor of the alpha of every pixel.
+    pub alpha: f32,
 }
 
 /// An image as a paint: premultiplied RGBA pixels and how they are sampled.
@@ -46,6 +102,11 @@ pub enum VelloSceneBrush {
     Gradient(Gradient),
     /// An image.
     Image(VelloSceneImage),
+    /// A texture of the device of the sink. Only for a sink whose
+    /// capabilities have device textures and whose device
+    /// ([`IVelloSceneSink::device`]) is the one of the texture.
+    #[cfg(any(feature = "hybrid", feature = "gpu"))]
+    Texture(VelloSceneTexture),
 }
 
 /// A brush with the transform from its own space to the space of the shape
@@ -188,6 +249,37 @@ pub trait IVelloSceneSink {
     #[cfg(any(feature = "hybrid", feature = "gpu"))]
     fn render_to_texture(&mut self, _target: &crate::gpu::VelloGpuTexture<'_>) -> Result<(), String> {
         Err(format!("The {:?} rendering mode of the Vello backend renders into memory", self.rendering_mode()))
+    }
+
+    /// The device this sink draws on, for a sink that draws on one.
+    #[cfg(any(feature = "hybrid", feature = "gpu"))]
+    fn device(&self) -> Option<&std::sync::Arc<crate::gpu::VelloWgpuDevice>> {
+        None
+    }
+
+    /// Makes the next render compose the scene over what the target holds
+    /// instead of replacing it: the pixels of `cleared` are made transparent
+    /// first, every other pixel of the target stays under the scene. Called
+    /// again, the rectangles add up; [`reset`](Self::reset) ends it.
+    ///
+    /// The scene is composed over the target as a whole: nothing in it
+    /// takes anything out of what the target holds, so a destructive
+    /// composition (`Copy`, `Clear`, ...) acts on what the scene itself drew
+    /// below it. What has to go is named in `cleared`.
+    ///
+    /// Whether the target of a render can be kept is up to the one that
+    /// renders: the CPU sink composes over the pixels it is given, a sink
+    /// on a device over the texture it is given
+    /// ([`render_to_texture`](Self::render_to_texture)), and a sink on a
+    /// device that is rendered into pixels draws into a texture of its own
+    /// that holds nothing.
+    ///
+    /// # Panics
+    /// Panics in a sink whose [`capabilities`](Self::capabilities) have no
+    /// retained targets.
+    fn retain_target(&mut self, cleared: &[VelloScenePixelRect]) {
+        let _ = cleared;
+        panic!("The {:?} rendering mode of the Vello backend replaces what its target holds", self.rendering_mode());
     }
 
     /// What the renderer of this sink does of blurs. A sink that does not

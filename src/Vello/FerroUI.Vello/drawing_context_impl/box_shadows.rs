@@ -38,7 +38,7 @@ pub(crate) fn blur_radius_to_sigma(radius: f64) -> f32 {
 
 /// How far, in standard deviations, a blur reaches: beyond it less than a
 /// four-hundredth of the color is left.
-const BLUR_REACH: f64 = 3.0;
+pub(super) const BLUR_REACH: f64 = 3.0;
 
 /// A rounded rectangle with every side moved outwards by `delta` (inwards
 /// when it is negative), as `SkRRect::outset` and `SkRRect::inset` do it: a
@@ -296,6 +296,7 @@ impl DrawingContextImpl {
         // What of the shape lies beyond the scene still blurs into it: the
         // renderer draws as much of the content of a filter layer as its
         // filter reaches.
+        crate::perf::count(crate::perf::Phase::ShadowAsImage, u64::from(width) * u64::from(height) * 4);
         let scene_transform = Affine::translate((-bounds.x0, -bounds.y0)) * transform;
         let mut scene = VelloCpuSceneSink::new(width, height);
         scene.push_filter_layer(&VelloSceneFilter::Blur { std_deviation: std_deviation as f32 }, scene_transform);

@@ -1,9 +1,12 @@
 use crate::gpu::{log_render_failure, premultiplied_rgba, VelloGpuTexture, VelloWgpuDevice};
-use crate::scene::vello_cpu_scene_sink::{prepare, ALIASING_THRESHOLD, CURVE_TOLERANCE};
-use crate::scene::{IVelloSceneSink, VelloSceneBrush, VelloSceneCapabilities, VelloSceneGlyphRun, VelloScenePaint};
+use crate::scene::vello_cpu_scene_sink::{prepare, stroke_outline, ALIASING_THRESHOLD};
+use crate::scene::{
+    IVelloSceneSink, VelloSceneBrush, VelloSceneCapabilities, VelloSceneGlyphRun, VelloScenePaint,
+    VelloScenePixelRect,
+};
 use glifo::{FontEmbolden, Glyph};
 use crate::vello_options::VelloRenderingMode;
-use kurbo::{Affine, BezPath, Diagonal2, Rect, Shape, Stroke, StrokeOpts};
+use kurbo::{Affine, BezPath, Diagonal2, Rect, Shape, Stroke};
 use peniko::color::AlphaColor;
 use peniko::{BlendMode, Fill, ImageBrush, ImageData, ImageSampler};
 use std::collections::HashMap;
@@ -74,6 +77,13 @@ pub struct VelloHybridSceneSink {
     scene: Scene,
     /// The images of the scene by the identity of their pixels.
     images: HashMap<u64, ImageData>,
+    /// The textures of the device the scene paints with, by their
+    /// identity.
+    textures: HashMap<u64, wgpu::TextureView>,
+    /// The rectangles of the target that are made transparent before the
+    /// scene is composed over what the target holds, when it is
+    /// ([`IVelloSceneSink::retain_target`]).
+    retained: Option<Vec<RectU16>>,
 }
 
 impl VelloHybridSceneSink {
@@ -86,7 +96,14 @@ impl VelloHybridSceneSink {
     /// Creates the scene of a target of the given size and format: the
     /// texture of a window.
     pub fn for_format(device: Arc<VelloWgpuDevice>, width: u16, height: u16, format: wgpu::TextureFormat) -> Self {
-        Self { device, format, scene: Scene::new(width, height), images: HashMap::new() }
+        Self {
+            device,
+            format,
+            scene: Scene::new(width, height),
+            images: HashMap::new(),
+            textures: HashMap::new(),
+            retained: None,
+        }
     }
 
     fn new_state(_device: &VelloWgpuDevice) -> HybridRendererState {
@@ -144,6 +161,34 @@ impl VelloHybridSceneSink {
                     },
                 })
             }
+            VelloSceneBrush::Texture(texture) => {
+                assert!(
+                    Arc::ptr_eq(texture.texture.device(), &self.device)
+                        && texture.texture.alpha() == crate::gpu::VelloTextureAlpha::Premultiplied,
+                    "The hybrid mode paints with a texture of its device that holds premultiplied colors"
+                );
+                let id = texture.texture.id();
+                self.textures.entry(id).or_insert_with(|| texture.texture.view().clone());
+
+                PaintType::Image(ImageBrush {
+                    image: ImageSource::ExternalTexture {
+                        id: TextureId(id),
+                        source_region: RectU16 {
+                            x0: 0,
+                            y0: 0,
+                            x1: texture.texture.width().min(u32::from(u16::MAX)) as u16,
+                            y1: texture.texture.height().min(u32::from(u16::MAX)) as u16,
+                        },
+                        may_have_transparency: true,
+                    },
+                    sampler: ImageSampler {
+                        x_extend: texture.x_extend,
+                        y_extend: texture.y_extend,
+                        quality: texture.quality,
+                        alpha: texture.alpha,
+                    },
+                })
+            }
         };
 
         (paint_type, transform * paint.transform)
@@ -161,7 +206,8 @@ impl VelloHybridSceneSink {
             return Err(format!("The scene was made for a target of the format {:?}, not {format:?}", self.format));
         }
         let (width, height) = (self.scene.width(), self.scene.height());
-        let (scene, images) = (&self.scene, &self.images);
+        let (scene, images, textures) = (&self.scene, &self.images, &self.textures);
+        let retained = self.retained.as_deref();
 
         self.device.with_renderer_state(
             Self::new_state,
@@ -178,9 +224,22 @@ impl VelloHybridSceneSink {
                     texture.last_used = render_count;
                     bindings.insert(TextureId(*id), texture.view.clone());
                 }
+                for (id, view) in textures {
+                    bindings.insert(TextureId(*id), view.clone());
+                }
+
+                // A target that is kept: its cleared rectangles are made
+                // transparent, and the scene is composed over the rest.
+                let target_init = match retained {
+                    Some([]) => TargetInit::SrcOver,
+                    Some(rects) => TargetInit::Clear(ClearSettings::Rects { color: AlphaColor::TRANSPARENT, rects }),
+                    None => TargetInit::Clear(ClearSettings::Viewport { color: AlphaColor::TRANSPARENT }),
+                };
 
                 let format_renderer = Self::format_renderer(state, device, format, width, height);
 
+                let _perf =
+                    crate::perf::scope(crate::perf::Phase::Render, u64::from(width) * u64::from(height) * 4);
                 let mut encoder = device
                     .device()
                     .create_command_encoder(&wgpu::CommandEncoderDescriptor { label: Some("FerroUI Vello hybrid") });
@@ -195,7 +254,7 @@ impl VelloHybridSceneSink {
                     view,
                     None,
                     &bindings,
-                    TargetInit::Clear(ClearSettings::Viewport { color: AlphaColor::TRANSPARENT }),
+                    target_init,
                 );
                 device.queue().submit([encoder.finish()]);
 
@@ -220,7 +279,27 @@ impl IVelloSceneSink for VelloHybridSceneSink {
     }
 
     fn capabilities(&self) -> VelloSceneCapabilities {
-        VelloSceneCapabilities { blend_layers: true, aliased_edges: true, image_paints: true, read_back: true }
+        VelloSceneCapabilities {
+            blend_layers: true,
+            aliased_edges: true,
+            aliased_rectangles: true,
+            image_paints: true,
+            read_back: true,
+            device_textures: true,
+            retained_targets: true,
+        }
+    }
+
+    fn device(&self) -> Option<&Arc<VelloWgpuDevice>> {
+        Some(&self.device)
+    }
+
+    fn retain_target(&mut self, cleared: &[VelloScenePixelRect]) {
+        let (width, height) = (self.scene.width(), self.scene.height());
+        self.retained.get_or_insert_with(Vec::new).extend(cleared.iter().filter_map(|rect| {
+            let rect = RectU16 { x0: rect.x0.min(width), y0: rect.y0.min(height), x1: rect.x1.min(width), y1: rect.y1.min(height) };
+            (rect.x0 < rect.x1 && rect.y0 < rect.y1).then_some(rect)
+        }));
     }
 
     fn width(&self) -> u16 {
@@ -234,6 +313,8 @@ impl IVelloSceneSink for VelloHybridSceneSink {
     fn reset(&mut self) {
         self.scene.reset();
         self.images.clear();
+        self.textures.clear();
+        self.retained = None;
     }
 
     fn fill(
@@ -293,7 +374,7 @@ impl IVelloSceneSink for VelloHybridSceneSink {
         if !(scale.is_finite() && scale > 0.0) {
             return;
         }
-        let outline = kurbo::stroke(path.iter(), stroke, &StrokeOpts::default(), CURVE_TOLERANCE / scale);
+        let outline = stroke_outline(path, stroke, scale);
 
         self.fill(&outline, Fill::NonZero, transform, paint, BlendMode::default(), anti_alias);
     }
@@ -308,6 +389,8 @@ impl IVelloSceneSink for VelloHybridSceneSink {
         if glyph_run.glyphs.is_empty() || !(glyph_run.font_size.is_finite() && glyph_run.font_size > 0.0) {
             return;
         }
+
+        let _perf = crate::perf::scope(crate::perf::Phase::GlyphRun, glyph_run.glyphs.len() as u64);
 
         // As the CPU mode draws a run, with the glyph renderer both scenes
         // share (`glifo`); see there for the bold simulation and hinting.
@@ -385,6 +468,9 @@ impl IVelloSceneSink for VelloHybridSceneSink {
         let (width, height) = (u32::from(self.scene.width()), u32::from(self.scene.height()));
         let texture = self.device.create_rgba_texture(width, height, wgpu::TextureUsages::RENDER_ATTACHMENT);
         let view = texture.create_view(&wgpu::TextureViewDescriptor::default());
+
+        // The texture is new and holds nothing: there is nothing to keep.
+        self.retained = None;
 
         match self.render(&view, texture.format()) {
             Ok(()) => {

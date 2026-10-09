@@ -165,6 +165,42 @@ pub fn compare(a: &Pixels, b: &Pixels) -> Difference {
     }
 }
 
+/// The pixels of two renderings of one scene by one backend that may differ,
+/// and by how much: none, but for the GPU mode of the Vello backend.
+///
+/// The compute renderer of that mode is not exact to the last bit from one
+/// render to the next: its stages run in parallel over the tiles and the
+/// segments of a scene and hand out memory with atomic counters, so the
+/// order in which the segments of a tile are summed up to the coverage of a
+/// pixel is the order in which the threads of the GPU got there, and the
+/// sum, in single precision, differs in its last bit. A pixel in ten
+/// thousand of a scene of text (many short segments) comes out one digit of
+/// a color apart, in some renders and not in others (measured: 1 to 5
+/// pixels of 40 000 in one of four renders of a text scene, also with a new
+/// renderer for every render; never in a scene without curves). It is not
+/// state that is carried from a render to the next: that was found and
+/// closed in the sink of the mode (the places of images in the atlas of the
+/// renderer, `ImagePlace` in `vello_gpu_scene_sink.rs`), and a difference of
+/// more than one digit, or in more pixels than this, fails.
+pub const GPU_MODE_REPEAT_PIXELS: usize = 16;
+
+/// Checks that a backend drew a scene the same way twice: the same pixels,
+/// and for the GPU mode of the Vello backend at most
+/// [`GPU_MODE_REPEAT_PIXELS`] pixels one digit of a color apart.
+pub fn drawn_the_same_way_twice(backend: &Backend, first: &Pixels, second: &Pixels) -> Result<(), String> {
+    if first == second {
+        return Ok(());
+    }
+
+    let differing = first.rgba.chunks_exact(4).zip(second.rgba.chunks_exact(4)).filter(|(a, b)| a != b).count();
+    let largest = first.rgba.iter().zip(&second.rgba).map(|(a, b)| a.abs_diff(*b)).max().unwrap_or(0);
+    if backend.name == "Vello GPU" && largest <= 1 && differing <= GPU_MODE_REPEAT_PIXELS {
+        return Ok(());
+    }
+
+    Err(format!("{differing} pixels differ, by up to {largest} of 255"))
+}
+
 #[cfg(test)]
 mod application_tests;
 #[cfg(test)]
