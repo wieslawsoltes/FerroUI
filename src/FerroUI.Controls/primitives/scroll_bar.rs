@@ -78,7 +78,42 @@ pub struct ScrollBar {
 }
 
 ferro_class!(ScrollBar: RangeBase);
-ferroui_base::ferro_class_info!(ScrollBar { new: ScrollBar::new });
+// The `markup:` part is declared here and not generated: the public methods of the class are
+// declared for markup, the commands of the context menu of the scroll bar in the control themes
+// (`Command="{Binding $parent[ScrollBar].ScrollHere}"`).
+ferroui_base::ferro_class_info!(ScrollBar {
+    new: ScrollBar::new,
+    markup: {
+        methods: [
+            fn ScrollHere() => ScrollBar::scroll_here,
+            fn ScrollToHome() => ScrollBar::scroll_to_home,
+            fn ScrollToEnd() => ScrollBar::scroll_to_end,
+            fn PageUp() => ScrollBar::page_up,
+            fn PageDown() => ScrollBar::page_down,
+            fn PageLeft() => ScrollBar::page_left,
+            fn PageRight() => ScrollBar::page_right,
+            fn LineUp() => ScrollBar::line_up,
+            fn LineDown() => ScrollBar::line_down,
+            fn LineLeft() => ScrollBar::line_left,
+            fn LineRight() => ScrollBar::line_right,
+        ],
+        events: [
+            Scroll(Option<ferroui_base::BoxedValue>, crate::primitives::ScrollEventArgs) => |this: &ferroui_base::Ref<ScrollBar>, handler: ferroui_base::metadata::MarkupDelegate| {
+                let sender = this.downgrade();
+                this.scroll(move |e: &crate::primitives::ScrollEventArgs| {
+                    handler.invoke(&[ferroui_base::metadata::into_markup_value(sender.upgrade()), ferroui_base::metadata::into_markup_value(e.clone())]);
+                })
+            },
+        ],
+        attributes: [
+            TemplatePart("PART_LineDownButton", type(ferroui_base::Ref<crate::Button>)),
+            TemplatePart("PART_LineUpButton", type(ferroui_base::Ref<crate::Button>)),
+            TemplatePart("PART_PageDownButton", type(ferroui_base::Ref<crate::Button>)),
+            TemplatePart("PART_PageUpButton", type(ferroui_base::Ref<crate::Button>)),
+            PseudoClasses(":vertical", ":horizontal"),
+        ],
+    },
+});
 ferro_impl_classes!(ScrollBar: StyledElementImpl, LayoutableImpl, InteractiveImpl);
 
 impl ControlImpl for ScrollBar {

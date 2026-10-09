@@ -44,7 +44,22 @@ pub struct SelectableTextBlock {
 }
 
 ferro_class!(SelectableTextBlock: TextBlock);
-ferroui_base::ferro_class_info!(SelectableTextBlock { new: SelectableTextBlock::new });
+// The `markup:` part is declared here and not generated: the public methods of the class are
+// declared for markup, the command of the context menu of the text block in the control themes
+// (`Command="{Binding $parent[SelectableTextBlock].Copy}"`).
+ferroui_base::ferro_class_info!(SelectableTextBlock {
+    new: SelectableTextBlock::new,
+    markup: {
+        methods: [
+            fn Copy() => SelectableTextBlock::copy,
+            fn SelectAll() => SelectableTextBlock::select_all,
+            fn ClearSelection() => SelectableTextBlock::clear_selection,
+        ],
+        fields: [
+            CopyingToClipboardEvent: ferroui_base::interactivity::RoutedEvent<ferroui_base::interactivity::RoutedEventArgs> => || *SelectableTextBlock::copying_to_clipboard_event(),
+        ],
+    },
+});
 
 ferroui_base::ferro_impl_classes!(SelectableTextBlock: StyledElementImpl);
 ferroui_base::ferro_impl_classes!(SelectableTextBlock: VisualImpl);

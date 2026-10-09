@@ -15,7 +15,11 @@ use crate::{
     ColumnDefinition, ColumnDefinitions, Control, Controls, ItemCollection, RowDefinition, RowDefinitions, TrayIcon,
     TrayIcons, WindowIcon,
 };
+use super::classes::RoutedEventOf;
+use crate::ScrollChangedEventArgs;
 use ferroui_base::data::core::ValueTypes;
+use ferroui_base::interactivity::{IRoutedEventArgs, RoutedEvent};
+use ferroui_base::Vector;
 use ferroui_base::ferro_markup_type;
 use ferroui_base::metadata::{MarkupDelegate, MarkupType, MarkupTyped};
 use ferroui_base::{BoxedValue, Point, Rect, Ref, Size, Thickness, Visual};
@@ -351,8 +355,54 @@ ferro_markup_type!(class FerroListOf<Ref<TableViewColumn>> as "FerroList`1" {
     methods: [fn Add(Ref<TableViewColumn>) => |list: &FerroList<Ref<TableViewColumn>>, item: Ref<TableViewColumn>| list.add(item)],
 });
 
+// The arguments of `ScrollViewer.ScrollChanged` and the type of its routed event. `classes.rs`
+// declares the arguments of the routed events of the classes whose `markup:` part it generates;
+// the scroll viewer declares its part in its own file (with its public methods), so the two
+// declarations its event needs are written here.
+
+ferro_markup_type!(class RoutedEventOf<ScrollChangedEventArgs> as "RoutedEvent`1" {
+    namespace: "FerroUI.Interactivity",
+    handles: [RoutedEvent<ScrollChangedEventArgs>, Option<RoutedEvent<ScrollChangedEventArgs>>],
+    base: RoutedEvent,
+    generic: "RoutedEvent`1" [ScrollChangedEventArgs],
+});
+
+/// The arguments of a routed event as the arguments of `ScrollChanged`.
+fn scroll_changed_event_args<R>(
+    e: &Rc<dyn IRoutedEventArgs>,
+    f: impl FnOnce(&ScrollChangedEventArgs) -> R,
+) -> Result<R, String> {
+    match e
+        .query_args(std::any::TypeId::of::<ScrollChangedEventArgs>())
+        .and_then(|args| args.downcast_ref::<ScrollChangedEventArgs>())
+    {
+        Some(args) => Ok(f(args)),
+        None => Err(format!("The arguments are not {}.", std::any::type_name::<ScrollChangedEventArgs>())),
+    }
+}
+
+ferro_markup_type!(class ScrollChangedEventArgs {
+    namespace: "FerroUI.Controls",
+    handles: [ScrollChangedEventArgs],
+    this: Rc<dyn IRoutedEventArgs>,
+    base: Rc<dyn IRoutedEventArgs>,
+    properties: [
+        ExtentDelta: Vector {
+            try_get: |e: &Rc<dyn IRoutedEventArgs>| scroll_changed_event_args(e, |e| e.extent_delta())
+        },
+        OffsetDelta: Vector {
+            try_get: |e: &Rc<dyn IRoutedEventArgs>| scroll_changed_event_args(e, |e| e.offset_delta())
+        },
+        ViewportDelta: Vector {
+            try_get: |e: &Rc<dyn IRoutedEventArgs>| scroll_changed_event_args(e, |e| e.viewport_delta())
+        },
+    ],
+});
+
 /// The types declared in this file.
 pub(super) const TYPES: &[&MarkupType] = &[
+    <RoutedEventOf<ScrollChangedEventArgs> as MarkupTyped>::MARKUP,
+    <ScrollChangedEventArgs as MarkupTyped>::MARKUP,
     <dyn crate::ICommandBarElement as MarkupTyped>::MARKUP,
     <FerroListOf<Rc<dyn crate::ICommandBarElement>> as MarkupTyped>::MARKUP,
     <Controls as MarkupTyped>::MARKUP,
@@ -379,6 +429,7 @@ pub(super) const TYPES: &[&MarkupType] = &[
 /// Registers the nullable forms of the types that can be held in untyped
 /// values with the untyped value conversions of the current thread.
 pub(super) fn register_value_types() {
+    ValueTypes::register_cast::<RoutedEvent<ScrollChangedEventArgs>, RoutedEvent>(|event| event.as_routed_event());
     ValueTypes::register_nullable::<Rc<dyn crate::ICommandBarElement>>();
     ValueTypes::register_nullable::<FerroList<Rc<dyn crate::ICommandBarElement>>>();
     ValueTypes::register_nullable::<Controls>();

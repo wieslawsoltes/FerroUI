@@ -36,7 +36,9 @@ pub struct ProgressBarTemplateSettings {
 }
 
 ferro_class!(ProgressBarTemplateSettings: FerroObject);
-ferroui_base::ferro_class_info!(ProgressBarTemplateSettings { new: ProgressBarTemplateSettings::new });
+ferroui_base::ferro_class_info!(ProgressBarTemplateSettings {
+    new: ProgressBarTemplateSettings::new,
+});
 ferro_impl_classes!(ProgressBarTemplateSettings: FerroObjectImpl);
 
 ferroui_base::ferro_properties! { impl ProgressBarTemplateSettings {
@@ -268,7 +270,21 @@ pub struct ProgressBar {
 }
 
 ferro_class!(ProgressBar: RangeBase);
-ferroui_base::ferro_class_info!(ProgressBar { new: ProgressBar::new });
+// The `markup:` part is declared here and not generated: `TemplateSettings` is a plain property
+// (a property of the class that is not a registered one), which the bindings of the control
+// themes read (`{Binding $parent[ProgressBar].TemplateSettings.ContainerWidth}`).
+ferroui_base::ferro_class_info!(ProgressBar {
+    new: ProgressBar::new,
+    markup: {
+        properties: [
+            TemplateSettings: Ref<ProgressBarTemplateSettings> { get: ProgressBar::template_settings },
+        ],
+        attributes: [
+            TemplatePart("PART_Indicator", type(Ref<Border>), IsRequired = true),
+            PseudoClasses(":vertical", ":horizontal", ":indeterminate"),
+        ],
+    },
+});
 ferro_impl_classes!(ProgressBar: StyledElementImpl, VisualImpl, InteractiveImpl, InputElementImpl);
 
 impl ControlImpl for ProgressBar {
@@ -422,8 +438,8 @@ impl ProgressBar {
     }
 
     /// The template settings of the progress bar.
-    pub fn template_settings(&self) -> &Ref<ProgressBarTemplateSettings> {
-        &self.template_settings
+    pub fn template_settings(&self) -> Ref<ProgressBarTemplateSettings> {
+        self.template_settings.clone()
     }
 
     /// Whether the progress bar shows the actual value or a generic,

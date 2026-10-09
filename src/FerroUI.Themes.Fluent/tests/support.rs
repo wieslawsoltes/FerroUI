@@ -132,28 +132,39 @@ fn realise_dictionary(dictionary: &Ref<ResourceDictionary>, realised: &mut Reali
 /// Starts a unit test application with the services of a styled window and
 /// the Simple theme as the theme of the application.
 pub fn start_themed_application() -> UnitTestApplicationScope {
+    start_themed_application_with_clock(Rc::new(MockGlobalClock::new()))
+}
+
+/// [`start_themed_application`] with `clock` as the global clock: the test pulses it, and
+/// the animations of the control themes run.
+pub fn start_themed_application_with_clock(clock: Rc<MockGlobalClock>) -> UnitTestApplicationScope {
     register_types();
-    let services = TestServices::styled_window()
-        .with_global_clock(Rc::new(MockGlobalClock::new()))
-        .with_theme(|| crate::FluentTheme::new().as_style());
+    let services =
+        TestServices::styled_window().with_global_clock(clock).with_theme(|| crate::FluentTheme::new().as_style());
     let scope = UnitTestApplication::start(services);
     FerroRuntimeXamlLoader::register();
     scope
 }
 
 /// The global clock of the themed application: the transitions of the control themes need one.
-/// It never pulses.
-struct MockGlobalClock {
+/// It pulses when a test tells it to ([`pulse`](Self::pulse)), which most tests never do.
+pub struct MockGlobalClock {
     subject: ferroui_base::reactive::LightweightSubject<ferroui_base::animation::TimeSpan>,
     play_state: std::cell::Cell<ferroui_base::animation::PlayState>,
 }
 
 impl MockGlobalClock {
-    fn new() -> Self {
+    pub fn new() -> Self {
         Self {
             subject: ferroui_base::reactive::LightweightSubject::new(),
             play_state: std::cell::Cell::new(ferroui_base::animation::PlayState::Run),
         }
+    }
+
+    /// Ticks the clock: its subscribers are told that the time is `time`.
+    pub fn pulse(&self, time: ferroui_base::animation::TimeSpan) {
+        use ferroui_base::reactive::IObserver;
+        self.subject.on_next(time);
     }
 }
 

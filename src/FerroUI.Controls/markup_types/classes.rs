@@ -531,16 +531,6 @@ ferro_class_info!(Panel {
     },
 });
 
-ferro_class_info!(ProgressBar {
-    markup: {
-        namespace: "FerroUI.Controls",
-        attributes: [
-            TemplatePart("PART_Indicator", type(Ref<Border>), IsRequired = true),
-            PseudoClasses(":vertical", ":horizontal", ":indeterminate"),
-        ],
-    },
-});
-
 ferro_class_info!(RefreshContainer {
     markup: {
         namespace: "FerroUI.Controls",
@@ -625,74 +615,6 @@ ferro_class_info!(RowDefinition {
         constructors: [
             (f64, GridUnitType) => RowDefinition::with_value,
             (GridLength) => RowDefinition::with_height,
-        ],
-    },
-});
-
-ferro_class_info!(ScrollViewer {
-    markup: {
-        namespace: "FerroUI.Controls",
-        properties: [
-            BringIntoViewOnFocusChange: bool {
-                get: |this: &Ref<ScrollViewer>| this.get_value(ScrollViewer::bring_into_view_on_focus_change_property()),
-                set: |this: &Ref<ScrollViewer>, value: bool| this.set_value(ScrollViewer::bring_into_view_on_focus_change_property(), value)
-            },
-            HorizontalScrollBarVisibility: ScrollBarVisibility {
-                get: |this: &Ref<ScrollViewer>| this.get_value(ScrollViewer::horizontal_scroll_bar_visibility_property()),
-                set: |this: &Ref<ScrollViewer>, value: ScrollBarVisibility| this.set_value(ScrollViewer::horizontal_scroll_bar_visibility_property(), value)
-            },
-            VerticalScrollBarVisibility: ScrollBarVisibility {
-                get: |this: &Ref<ScrollViewer>| this.get_value(ScrollViewer::vertical_scroll_bar_visibility_property()),
-                set: |this: &Ref<ScrollViewer>, value: ScrollBarVisibility| this.set_value(ScrollViewer::vertical_scroll_bar_visibility_property(), value)
-            },
-            HorizontalSnapPointsType: SnapPointsType {
-                get: |this: &Ref<ScrollViewer>| this.get_value(ScrollViewer::horizontal_snap_points_type_property()),
-                set: |this: &Ref<ScrollViewer>, value: SnapPointsType| this.set_value(ScrollViewer::horizontal_snap_points_type_property(), value)
-            },
-            VerticalSnapPointsType: SnapPointsType {
-                get: |this: &Ref<ScrollViewer>| this.get_value(ScrollViewer::vertical_snap_points_type_property()),
-                set: |this: &Ref<ScrollViewer>, value: SnapPointsType| this.set_value(ScrollViewer::vertical_snap_points_type_property(), value)
-            },
-            HorizontalSnapPointsAlignment: SnapPointsAlignment {
-                get: |this: &Ref<ScrollViewer>| this.get_value(ScrollViewer::horizontal_snap_points_alignment_property()),
-                set: |this: &Ref<ScrollViewer>, value: SnapPointsAlignment| this.set_value(ScrollViewer::horizontal_snap_points_alignment_property(), value)
-            },
-            VerticalSnapPointsAlignment: SnapPointsAlignment {
-                get: |this: &Ref<ScrollViewer>| this.get_value(ScrollViewer::vertical_snap_points_alignment_property()),
-                set: |this: &Ref<ScrollViewer>, value: SnapPointsAlignment| this.set_value(ScrollViewer::vertical_snap_points_alignment_property(), value)
-            },
-            AllowAutoHide: bool {
-                get: |this: &Ref<ScrollViewer>| this.get_value(ScrollViewer::allow_auto_hide_property()),
-                set: |this: &Ref<ScrollViewer>, value: bool| this.set_value(ScrollViewer::allow_auto_hide_property(), value)
-            },
-            IsScrollChainingEnabled: bool {
-                get: |this: &Ref<ScrollViewer>| this.get_value(ScrollViewer::is_scroll_chaining_enabled_property()),
-                set: |this: &Ref<ScrollViewer>, value: bool| this.set_value(ScrollViewer::is_scroll_chaining_enabled_property(), value)
-            },
-            IsScrollInertiaEnabled: bool {
-                get: |this: &Ref<ScrollViewer>| this.get_value(ScrollViewer::is_scroll_inertia_enabled_property()),
-                set: |this: &Ref<ScrollViewer>, value: bool| this.set_value(ScrollViewer::is_scroll_inertia_enabled_property(), value)
-            },
-            IsDeferredScrollingEnabled: bool {
-                get: |this: &Ref<ScrollViewer>| this.get_value(ScrollViewer::is_deferred_scrolling_enabled_property()),
-                set: |this: &Ref<ScrollViewer>, value: bool| this.set_value(ScrollViewer::is_deferred_scrolling_enabled_property(), value)
-            },
-        ],
-        fields: [
-            ScrollChangedEvent: RoutedEvent<ScrollChangedEventArgs> => || *ScrollViewer::scroll_changed_event(),
-        ],
-        attributes: [
-            TemplatePart("PART_HorizontalScrollBar", type(Ref<ScrollBar>)),
-            TemplatePart("PART_VerticalScrollBar", type(Ref<ScrollBar>)),
-        ],
-    },
-});
-
-ferro_class_info!(SelectableTextBlock {
-    markup: {
-        namespace: "FerroUI.Controls",
-        fields: [
-            CopyingToClipboardEvent: RoutedEvent<RoutedEventArgs> => || *SelectableTextBlock::copying_to_clipboard_event(),
         ],
     },
 });
@@ -1341,27 +1263,6 @@ ferro_class_info!(RangeBase {
     },
 });
 
-ferro_class_info!(ScrollBar {
-    markup: {
-        namespace: "FerroUI.Controls.Primitives",
-        events: [
-            Scroll(Option<BoxedValue>, ScrollEventArgs) => |this: &Ref<ScrollBar>, handler: MarkupDelegate| {
-                let sender = this.downgrade();
-                this.scroll(move |e: &ScrollEventArgs| {
-                    handler.invoke(&[into_markup_value(sender.upgrade()), into_markup_value(e.clone())]);
-                })
-            },
-        ],
-        attributes: [
-            TemplatePart("PART_LineDownButton", type(Ref<Button>)),
-            TemplatePart("PART_LineUpButton", type(Ref<Button>)),
-            TemplatePart("PART_PageDownButton", type(Ref<Button>)),
-            TemplatePart("PART_PageUpButton", type(Ref<Button>)),
-            PseudoClasses(":vertical", ":horizontal"),
-        ],
-    },
-});
-
 ferro_class_info!(SelectingItemsControl {
     markup: {
         namespace: "FerroUI.Controls.Primitives",
@@ -1486,13 +1387,6 @@ ferro_markup_type!(class RoutedEventOf<RequestBringIntoViewEventArgs> as "Routed
     generic: "RoutedEvent`1" [RequestBringIntoViewEventArgs],
 });
 
-ferro_markup_type!(class RoutedEventOf<ScrollChangedEventArgs> as "RoutedEvent`1" {
-    namespace: "FerroUI.Interactivity",
-    handles: [RoutedEvent<ScrollChangedEventArgs>, Option<RoutedEvent<ScrollChangedEventArgs>>],
-    base: RoutedEvent,
-    generic: "RoutedEvent`1" [ScrollChangedEventArgs],
-});
-
 ferro_markup_type!(class RoutedEventOf<SelectionChangedEventArgs> as "RoutedEvent`1" {
     namespace: "FerroUI.Interactivity",
     handles: [RoutedEvent<SelectionChangedEventArgs>, Option<RoutedEvent<SelectionChangedEventArgs>>],
@@ -1609,24 +1503,6 @@ ferro_markup_type!(class RequestBringIntoViewEventArgs {
     ],
 });
 
-ferro_markup_type!(class ScrollChangedEventArgs {
-    namespace: "FerroUI.Controls",
-    handles: [ScrollChangedEventArgs],
-    this: Rc<dyn IRoutedEventArgs>,
-    base: Rc<dyn IRoutedEventArgs>,
-    properties: [
-        ExtentDelta: Vector {
-            try_get: |e: &Rc<dyn IRoutedEventArgs>| typed_event_args::<ScrollChangedEventArgs, _>(e, |e| e.extent_delta())
-        },
-        OffsetDelta: Vector {
-            try_get: |e: &Rc<dyn IRoutedEventArgs>| typed_event_args::<ScrollChangedEventArgs, _>(e, |e| e.offset_delta())
-        },
-        ViewportDelta: Vector {
-            try_get: |e: &Rc<dyn IRoutedEventArgs>| typed_event_args::<ScrollChangedEventArgs, _>(e, |e| e.viewport_delta())
-        },
-    ],
-});
-
 ferro_markup_type!(class SelectionChangedEventArgs {
     namespace: "FerroUI.Controls",
     handles: [SelectionChangedEventArgs],
@@ -1708,7 +1584,6 @@ pub(super) fn register_value_types() {
     ValueTypes::register_cast::<RoutedEvent<RangeBaseValueChangedEventArgs>, RoutedEvent>(|event| event.as_routed_event());
     ValueTypes::register_cast::<RoutedEvent<RefreshRequestedEventArgs>, RoutedEvent>(|event| event.as_routed_event());
     ValueTypes::register_cast::<RoutedEvent<RequestBringIntoViewEventArgs>, RoutedEvent>(|event| event.as_routed_event());
-    ValueTypes::register_cast::<RoutedEvent<ScrollChangedEventArgs>, RoutedEvent>(|event| event.as_routed_event());
     ValueTypes::register_cast::<RoutedEvent<SelectionChangedEventArgs>, RoutedEvent>(|event| event.as_routed_event());
     ValueTypes::register_cast::<RoutedEvent<SizeChangedEventArgs>, RoutedEvent>(|event| event.as_routed_event());
     ValueTypes::register_cast::<RoutedEvent<SpinEventArgs>, RoutedEvent>(|event| event.as_routed_event());
@@ -1729,7 +1604,6 @@ pub(super) const TYPES: &[&MarkupType] = &[
     <RoutedEventOf<RangeBaseValueChangedEventArgs> as MarkupTyped>::MARKUP,
     <RoutedEventOf<RefreshRequestedEventArgs> as MarkupTyped>::MARKUP,
     <RoutedEventOf<RequestBringIntoViewEventArgs> as MarkupTyped>::MARKUP,
-    <RoutedEventOf<ScrollChangedEventArgs> as MarkupTyped>::MARKUP,
     <RoutedEventOf<SelectionChangedEventArgs> as MarkupTyped>::MARKUP,
     <RoutedEventOf<SizeChangedEventArgs> as MarkupTyped>::MARKUP,
     <RoutedEventOf<SpinEventArgs> as MarkupTyped>::MARKUP,
@@ -1742,7 +1616,6 @@ pub(super) const TYPES: &[&MarkupType] = &[
     <RangeBaseValueChangedEventArgs as MarkupTyped>::MARKUP,
     <RefreshRequestedEventArgs as MarkupTyped>::MARKUP,
     <RequestBringIntoViewEventArgs as MarkupTyped>::MARKUP,
-    <ScrollChangedEventArgs as MarkupTyped>::MARKUP,
     <SelectionChangedEventArgs as MarkupTyped>::MARKUP,
     <SizeChangedEventArgs as MarkupTyped>::MARKUP,
     <SpinEventArgs as MarkupTyped>::MARKUP,

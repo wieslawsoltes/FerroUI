@@ -5,6 +5,7 @@ mod documents;
 mod fluent_theme_tests;
 mod gaps;
 mod load_time;
+mod progress_bar_tests;
 mod public_api_tests;
 mod resource_dictionary_tests;
 mod support;
