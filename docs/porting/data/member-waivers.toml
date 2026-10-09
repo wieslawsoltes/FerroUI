@@ -2725,7 +2725,7 @@ reason = "protected state for the derived swapchain: `SwapchainBase` is embedded
 project = "Avalonia.Base"
 type = "Avalonia.Rendering.SwapchainBase*"
 member = "DisposeAsync"
-reason = "ported as `SwapchainBase::dispose`: the images are disposed directly, since the server compositor runs on the thread of its compositor and nothing has to be awaited (row 12 of CRITICAL-PATH.md)"
+reason = "ported as `SwapchainBase::dispose`, which is synchronous because `ISwapchainImage::dispose` of the port is: the contract returns nothing to await. Nothing implements the contract outside the tests of `swapchain_base.rs` (the swapchain of the OpenGL control keeps its own entries and awaits them in `CompositionOpenGlSwapchain::dispose_async`), so no image is released late today. Since the render thread an imported object is released on that thread (`ICompositionGpuImportedObject::dispose_async` returns a task): the first swapchain built on this class has to make `ISwapchainImage::dispose` and this member return that task, as upstream awaits `DisposeAsync` of each image"
 
 [[waive]]
 project = "Avalonia.Base"
@@ -3613,13 +3613,13 @@ reason = "one function takes the place of the overloads with an array and with a
 project = "Avalonia.OpenGL"
 type = "Avalonia.OpenGL.Egl.EglDisplay"
 member = "DisplayLockIsSharedWithContexts"
-reason = "says whether the contexts of the display share its monitor: the display and its contexts belong to one thread and have no monitor (`lock` and `ensure_locked` return handles that do nothing)"
+reason = "says whether the contexts of the display share its monitor: the display and its contexts belong to one thread (`Rc<EglDisplay>`, `Rc<EglContext>`) and have no monitor (`lock` and `ensure_locked` return handles that do nothing). Applicable when an EGL platform renders on the render thread while another thread uses a context of the same display: the display then needs the monitor and this member"
 
 [[waive]]
 project = "Avalonia.OpenGL"
 type = "Avalonia.OpenGL.Egl.EglDisplay"
 member = "ContextSharedSyncRoot"
-reason = "the monitor of the display for its contexts: the display and its contexts belong to one thread and have no monitor"
+reason = "the monitor of the display for its contexts: the display and its contexts belong to one thread (`Rc<EglDisplay>`, `Rc<EglContext>`) and have no monitor. Applicable with `DisplayLockIsSharedWithContexts`, when an EGL platform renders on the render thread"
 
 [[waive]]
 project = "Avalonia.OpenGL"
