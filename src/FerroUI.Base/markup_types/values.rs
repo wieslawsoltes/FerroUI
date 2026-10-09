@@ -6,7 +6,7 @@ use crate::animation::easings::Easing;
 use crate::animation::{Cue, IterationCount, IterationType, TimeSpan};
 use crate::data::core::ValueTypes;
 use crate::data::CultureInfoIetfLanguageTagConverter;
-use crate::utilities::{CultureInfo, DateTime, DateTimeOffset, Decimal, NumberStyles};
+use crate::utilities::{CultureInfo, DateTime, DateTimeKind, DateTimeOffset, DayOfWeek, Decimal, NumberStyles};
 use crate::ferro_markup_type;
 use crate::input::{Cursor, Key, KeyGesture, KeyModifiers, StandardCursorType};
 use crate::media::{
@@ -571,6 +571,23 @@ ferro_markup_type!(struct DateTime {
         Now: DateTime { get: DateTime::now },
         UtcNow: DateTime { get: DateTime::utc_now },
         Today: DateTime { get: DateTime::today },
+    ],
+    // The components of a date, read by bindings (`{Binding Source={x:Static sys:DateTime.Today},
+    // Path=Day}` in the control theme of the calendar date picker).
+    properties: [
+        Date: DateTime { get: |d: &DateTime| d.date() },
+        Day: i32 { get: |d: &DateTime| d.day() },
+        DayOfWeek: DayOfWeek { get: |d: &DateTime| d.day_of_week() },
+        DayOfYear: i32 { get: |d: &DateTime| d.day_of_year() },
+        Hour: i32 { get: |d: &DateTime| d.hour() },
+        Kind: DateTimeKind { get: |d: &DateTime| d.kind() },
+        Millisecond: i32 { get: |d: &DateTime| d.millisecond() },
+        Minute: i32 { get: |d: &DateTime| d.minute() },
+        Month: i32 { get: |d: &DateTime| d.month() },
+        Second: i32 { get: |d: &DateTime| d.second() },
+        Ticks: i64 { get: |d: &DateTime| d.ticks() },
+        TimeOfDay: TimeSpan { get: |d: &DateTime| d.time_of_day() },
+        Year: i32 { get: |d: &DateTime| d.year() },
     ],
 });
 

@@ -753,6 +753,8 @@ mod metadata_typed_path {
             Count: i32 { try_get: HookVm::try_count },
             Guarded: i32 { get: |vm: &Rc<HookVm>| vm.count.get(), try_set: HookVm::try_set_count },
             WriteOnly: bool { set: HookVm::set_flag },
+            Tag: BoxedValue { get: |vm: &Rc<HookVm>| -> BoxedValue { Rc::new(vm.count.get()) } },
+            TagOrNull: Option<BoxedValue> { get: |vm: &Rc<HookVm>| -> Option<BoxedValue> { Some(Rc::new(vm.count.get())) } },
         ],
         notify_property_changed: HookVm,
     });
@@ -786,6 +788,7 @@ mod metadata_typed_path {
                 get: |silent: &Rc<HookSilent>| silent.value.get(),
                 set: |silent: &Rc<HookSilent>, value: i32| silent.value.set(value)
             },
+            Tag: BoxedValue { get: |silent: &Rc<HookSilent>| -> BoxedValue { Rc::new(silent.value.get()) } },
         ],
     });
 
@@ -891,6 +894,21 @@ mod metadata_typed_path {
         let plain = <HookPlain as MarkupTyped>::MARKUP.find_property("Value").unwrap();
         assert!((plain.typed_path_element.expect("the hook"))(&builder, false).is_none());
         // Nothing was added to the path.
+        assert_eq!(builder.build().elements().count(), 0);
+    }
+
+    /// A property of the untyped value type (`object`) holds a value of any type: what a
+    /// binding reads is that value, which the untyped element delivers. A typed element
+    /// would deliver the box of the value as the value.
+    #[test]
+    fn a_property_of_the_untyped_value_type_has_no_typed_path_element() {
+        let builder = CompiledBindingPathBuilder::new();
+        for name in ["Tag", "TagOrNull"] {
+            let property = <HookVm as MarkupTyped>::MARKUP.find_property(name).unwrap();
+            assert!((property.typed_path_element.expect("the hook"))(&builder, false).is_none(), "{name}");
+        }
+        let silent = <HookSilent as MarkupTyped>::MARKUP.find_property("Tag").unwrap();
+        assert!((silent.typed_path_element.expect("the hook"))(&builder, false).is_none());
         assert_eq!(builder.build().elements().count(), 0);
     }
 

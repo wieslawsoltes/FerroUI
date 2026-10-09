@@ -875,9 +875,51 @@ impl ValueTypes {
         if target.is::<Option<String>>() {
             return Self::try_to_string(&**value).map(|s| Some(Rc::new(Some(s)) as BoxedValue));
         }
+        if let Some(v) = Self::try_convert_enumeration(value, id, target) {
+            return Some(Some(v));
+        }
         // Text converts to a type that states its conversion from text in
         // its markup metadata: the type converter of the managed original.
         Self::try_parse_text(value, target).map(Some)
+    }
+
+    /// The conversions between an enumeration and a number
+    /// (`TypeUtilities.TryConvert`): a value that is not of an enumeration
+    /// converts to an enumeration when it converts to the underlying type of
+    /// the enumeration (`Enum.ToObject(to, value)`), and a value of an
+    /// enumeration converts to a numeric type through its numeric value
+    /// (`Convert.ChangeType((int)value, to)`). `id` is the type of `value`.
+    // Deviation (DEVIATIONS.md, Bindings): a number that is not the value of a member of a
+    // plain enumeration does not convert: an enumeration of the port holds its members only.
+    fn try_convert_enumeration(value: &BoxedValue, id: TypeId, target: ValueType) -> Option<BoxedValue> {
+        use crate::metadata::{MarkupType, MarkupTypeKind};
+
+        let enumeration = |markup: Option<&'static MarkupType>| markup.filter(|markup| markup.kind == MarkupTypeKind::Enum);
+        match enumeration(MarkupType::find_by_handle(id)) {
+            None => {
+                let (markup, is_nullable) = match enumeration(MarkupType::find_by_handle(target.id())) {
+                    Some(markup) => (markup, false),
+                    None => (enumeration(MarkupType::find_by_nullable_handle(target.id()))?, true),
+                };
+                let number = Self::try_convert(Some(value), ValueType::of::<i32>())??;
+                let member = (markup.enum_from_value?)(i64::from(*number.downcast_ref::<i32>()?))?;
+                match is_nullable {
+                    true => Self::try_convert_registered(&member, target),
+                    false => Some(member),
+                }
+            }
+            Some(markup) => {
+                let target_id =
+                    with_registry(|r| r.nullable_inner.get(&target.id()).map_or(target.id(), |inner| inner.id()));
+                number_kind(target_id)?;
+                let number = match markup.enum_to_value {
+                    Some(to_value) => to_value(&**value)?,
+                    None => markup.enum_members.iter().find(|member| (member.get)().any_value_eq(&**value))?.value,
+                };
+                let number: BoxedValue = Rc::new(i32::try_from(number).ok()?);
+                Self::try_convert(Some(&number), target)?
+            }
+        }
     }
 
     /// Converts a value to exactly `target` as [`try_convert`](Self::try_convert)
@@ -1766,6 +1808,52 @@ mod tests {
             <NamedSize as MarkupTyped>::MARKUP,
             <NamedMode as MarkupTyped>::MARKUP,
         ]);
+    }
+
+    bitflags::bitflags! {
+        #[derive(Clone, Copy, Debug, PartialEq, Eq)]
+        pub struct NamedFlags: u32 {
+            const ONE = 1;
+            const TWO = 2;
+        }
+    }
+
+    ferro_markup_enum!(flags NamedFlags { One = NamedFlags::ONE, Two = NamedFlags::TWO }, { namespace: "Tests.Display" });
+
+    /// `TypeUtilities.TryConvert`: a value of an enumeration converts to a numeric type, and
+    /// a value that converts to the underlying type of an enumeration converts to it.
+    #[test]
+    fn enumerations_convert_to_numbers_and_numbers_to_enumerations() {
+        register_named();
+        MarkupType::register_all(&[<NamedFlags as MarkupTyped>::MARKUP]);
+        ValueTypes::register_nullable::<NamedMode>();
+        let convert = |value: BoxedValue, target: ValueType| ValueTypes::try_convert(Some(&value), target).flatten();
+
+        let number = convert(Rc::new(NamedMode::Second), ValueType::of::<i32>()).expect("a number");
+        assert_eq!(number.downcast_ref::<i32>(), Some(&1));
+        let number = convert(Rc::new(NamedMode::Second), ValueType::of::<f64>()).expect("a number");
+        assert_eq!(number.downcast_ref::<f64>(), Some(&1.0));
+        let number = convert(Rc::new(NamedFlags::ONE | NamedFlags::TWO), ValueType::of::<i32>()).expect("a number");
+        assert_eq!(number.downcast_ref::<i32>(), Some(&3));
+        // The nullable form of an enumeration converts as its contents.
+        let number = convert(Rc::new(Some(NamedMode::Second)), ValueType::of::<i32>()).expect("a number");
+        assert_eq!(number.downcast_ref::<i32>(), Some(&1));
+
+        let mode = convert(Rc::new(1i32), ValueType::of::<NamedMode>()).expect("a member");
+        assert_eq!(mode.downcast_ref::<NamedMode>(), Some(&NamedMode::Second));
+        let mode = convert(Rc::new(0i32), ValueType::of::<Option<NamedMode>>()).expect("a member");
+        assert_eq!(mode.downcast_ref::<Option<NamedMode>>(), Some(&Some(NamedMode::First)));
+        let mode = convert(Rc::new(String::from("1")), ValueType::of::<NamedMode>()).expect("a member");
+        assert_eq!(mode.downcast_ref::<NamedMode>(), Some(&NamedMode::Second));
+        let flags = convert(Rc::new(3i32), ValueType::of::<NamedFlags>()).expect("flags");
+        assert_eq!(flags.downcast_ref::<NamedFlags>(), Some(&(NamedFlags::ONE | NamedFlags::TWO)));
+
+        // A number that is the value of no member is no value of the enumeration.
+        assert!(convert(Rc::new(7i32), ValueType::of::<NamedMode>()).is_none());
+        // An enumeration does not convert to what is not a number.
+        assert!(convert(Rc::new(NamedMode::Second), ValueType::of::<bool>()).is_none());
+        // An enumeration does not convert to another one.
+        assert!(convert(Rc::new(NamedMode::Second), ValueType::of::<NamedFlags>()).is_none());
     }
 
     #[test]

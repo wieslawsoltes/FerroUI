@@ -16,7 +16,7 @@
 //! change notifications of the source when `S: INotifyPropertyChanged`, one
 //! that reads the value once per source otherwise. For every other
 //! declaration (value types, handles of contracts, classes of the object
-//! model) it produces nothing and the caller uses the untyped element. The
+//! model, and a property of the untyped value type) it produces nothing and the caller uses the untyped element. The
 //! choice is made by method resolution at the declaration (the most
 //! specific form that applies is selected), so a declaration needs no
 //! syntax for it.
@@ -75,6 +75,9 @@ impl<S: INotifyPropertyChanged + PartialEq + 'static, V: PropertyValue> TypedPat
         get: Option<TypedPathGetter<Rc<S>, V>>,
         set: Option<TypedPathSetter<Rc<S>, V>>,
     ) -> Option<CompiledBindingPathBuilder> {
+        if is_untyped::<V>() {
+            return None;
+        }
         let info = TypedClrPropertyInfo::<S, V>::from_handle_accessors(name, get, set);
         Some(builder.typed_property_info_with(info, accepts_null))
     }
@@ -102,9 +105,21 @@ impl<S: PartialEq + 'static, V: PropertyValue> TypedPathShared<Rc<S>, V> for &&T
         get: Option<TypedPathGetter<Rc<S>, V>>,
         set: Option<TypedPathSetter<Rc<S>, V>>,
     ) -> Option<CompiledBindingPathBuilder> {
+        if is_untyped::<V>() {
+            return None;
+        }
         let info = TypedClrPropertyInfo::<S, V>::from_handle_accessors(name, get, set);
         Some(builder.typed_plain_property_info_with(info, accepts_null))
     }
+}
+
+/// Whether `V` is the untyped value (the `object` of the managed original): a
+/// property of that type has no typed form. What a binding reads from it is
+/// the value the property holds, of whatever type that is, and a typed
+/// element would hand the box of the value over as the value.
+fn is_untyped<V: 'static>() -> bool {
+    let id = std::any::TypeId::of::<V>();
+    id == std::any::TypeId::of::<crate::BoxedValue>() || id == std::any::TypeId::of::<Option<crate::BoxedValue>>()
 }
 
 /// Every other declaration: no typed form (selected last).
