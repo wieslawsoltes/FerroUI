@@ -33,8 +33,7 @@ What is counted
     `[Test]`, ...). A `[Theory]` is one test, however many `[InlineData]` rows it has. Comments, strings and
     preprocessor lines are blanked before the search; code in an inactive `#if` branch is therefore counted too.
     A method that two classes of one file declare is one test per class, listed as `Class.Method` (the class is
-    the one declared last before the method), and the n-th of them is present when the port has n functions of
-    the name; overloads within a class are one test.
+    the one declared last before the method); overloads within a class are one test.
 
     Port: every `fn` that follows a `#[test]` attribute (other attributes may stand between them) in a `.rs`
     file below the roots, and every other `fn` of a file that has at least one such test: the port writes a
@@ -45,9 +44,12 @@ What is counted
 
     Match: by name alone. Both names are lower-cased and their underscores removed; in the upstream name
     `Avalonia` reads as `Ferro` and a word-initial `Avn` as `Frn` (the renames of docs/porting/PORTING-GUIDE.md).
-    A name found in any Rust file of the roots counts as present, so a common name (`Should_Work`) of one upstream
-    file is satisfied by a test of another; a test that the port has under a different name counts as missing
-    until it is renamed or given an alias.
+    A name found in any Rust file of the roots counts as present, wherever the file is. A name that n tests of
+    the project have (in several classes or files) needs n functions of the port: the n-th of them, in the order
+    of the paths, is present when the port has n functions of the name, so the file reported for such a test may
+    not be the one whose test is missing. A test that the port has under a different name counts as missing until
+    it is renamed or given an alias. The same name in another upstream project is not accounted for: a test of
+    the base library and one of the controls with one name are both satisfied by one function.
 
 The alias file
 
@@ -493,6 +495,7 @@ def main() -> int:
     used_waivers = set()
     used_file_waivers = set()
 
+    occurrence: dict[str, int] = defaultdict(int)
     for path in sorted(sources):
         pairs = upstream_tests(sources[path])
         if not pairs:
@@ -501,10 +504,9 @@ def main() -> int:
         counts[path] = len(pairs)
         total += len(pairs)
         several = len({owner for owner, _ in pairs}) > 1
-        occurrence: dict[str, int] = defaultdict(int)
         for owner, method in pairs:
-            # A method that several classes of the file declare is one test per class: the n-th of them is
-            # present when the port has n functions of the name.
+            # A method that several classes or files of the project declare is one test in each: the n-th of
+            # them, in the order of the paths, is present when the port has n functions of the name.
             occurrence[method] += 1
             present = len(port.get(normalise_upstream(method), ())) >= occurrence[method]
             name = f"{owner}.{method}" if several else method
