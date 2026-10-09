@@ -20,7 +20,7 @@ use ferroui_base::data::core::{Maybe, Value};
 use ferroui_base::data::model::Model;
 use ferroui_base::data::{ReflectionBinding, TemplateBinding};
 use ferroui_base::styling::{ControlTheme, Selectors, Setter, Style};
-use ferroui_base::{BoxedValue, ObjectType};
+use ferroui_base::BoxedValue;
 use std::rc::Rc;
 use ferroui_base::input::{InputElement, Key, KeyEventArgs, VectorEventArgs};
 use ferroui_base::media::TranslateTransform;

@@ -282,7 +282,7 @@ mod design_tests {
     use ferroui_base::media::{Brushes, Color, Colors, IBrush};
     use ferroui_base::reactive::ObservableExt;
     use ferroui_base::styling::{IStyle, Selectors, Setter, Style};
-    use ferroui_base::{BoxedValue, Ref};
+    use ferroui_base::BoxedValue;
     use std::rc::Rc;
 
     fn start() -> UnitTestApplicationScope {
