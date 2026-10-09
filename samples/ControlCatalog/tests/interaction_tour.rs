@@ -79,11 +79,11 @@ use super::frame_benchmark::{RasterSurface, HEIGHT, WIDTH};
 use crate::models::PageItem;
 use ferroui_base::input::raw::{
     IRawInputEventArgs, RawKeyEventArgs, RawKeyEventType, RawMouseWheelEventArgs, RawPointerEventArgs, RawPointerEventType,
-    RawTextInputEventArgs,
+    RawTextInputEventArgs, RawTouchEventArgs,
 };
 use ferroui_base::input::{
     IInputDevice, IKeyboardDevice, InputElement, Key, KeyDeviceType, KeyboardDevice, MouseDevice, PhysicalKey, Pointer, PointerType,
-    RawInputModifiers,
+    RawInputModifiers, TouchDevice,
 };
 use ferroui_base::platform::surfaces::IPlatformRenderSurface;
 use ferroui_base::rendering::composition::Compositor;
@@ -163,6 +163,7 @@ type Impls = Rc<RefCell<Vec<Weak<MockWindowImpl>>>>;
 pub(super) struct Driver {
     mouse: Rc<MouseDevice>,
     keyboard: Rc<KeyboardDevice>,
+    touch: Rc<TouchDevice>,
     timestamp: Cell<u64>,
     popups: Impls,
     windows: Impls,
@@ -209,13 +210,21 @@ fn popups_of(parent: &Rc<MockWindowImpl>, compositor: &Rc<Compositor>, popups: &
 
 impl Driver {
     /// The driver of `tour`: the popups of its window, and the windows a
-    /// page creates, are recorded from here on.
+    /// page creates, are recorded from here on. `CATALOG_TOUR_POPUPS` says
+    /// where the popups are hosted.
     pub(super) fn new(tour: &Tour) -> Driver {
+        Self::with_popups(tour, tour::environment("CATALOG_TOUR_POPUPS").as_deref() == Some("overlay"))
+    }
+
+    /// The driver of `tour`, with the popups of its window as popups of the
+    /// mock platform, or, with `overlay`, hosted in the overlay layer of
+    /// the window.
+    pub(super) fn with_popups(tour: &Tour, overlay: bool) -> Driver {
         let popups: Impls = Rc::new(RefCell::new(Vec::new()));
         let windows: Impls = Rc::new(RefCell::new(Vec::new()));
         let compositor = tour.compositor().clone();
         popups_of(tour.window_impl(), &compositor, &popups);
-        if tour::environment("CATALOG_TOUR_POPUPS").as_deref() == Some("overlay") {
+        if overlay {
             // As a platform without popup windows (a browser): the popups
             // are hosted in the overlay layer of the window.
             tour.window_impl().setup_create_popup(|_| None);
@@ -240,6 +249,7 @@ impl Driver {
         Driver {
             mouse: MouseDevice::with_pointer(Pointer::new(0, PointerType::Mouse, true)),
             keyboard,
+            touch: TouchDevice::new(),
             timestamp: Cell::new(0),
             popups,
             windows,
@@ -259,13 +269,25 @@ impl Driver {
         }
     }
 
-    fn pointer(&self, target: &MockWindowImpl, kind: RawPointerEventType, position: Point, modifiers: RawInputModifiers) {
+    pub(super) fn pointer(&self, target: &MockWindowImpl, kind: RawPointerEventType, position: Point, modifiers: RawInputModifiers) {
         let Some(root) = target.input_root() else { return };
         let device: Rc<dyn IInputDevice> = self.mouse.clone();
         self.input(target, Rc::new(RawPointerEventArgs::new(device, self.next_timestamp(), root, kind, position, modifiers)));
     }
 
-    fn wheel(&self, target: &MockWindowImpl, position: Point, delta: Vector) {
+    /// A raw event of the finger `finger` on a touch screen, `milliseconds`
+    /// after the event before it.
+    pub(super) fn touch(&self, target: &MockWindowImpl, kind: RawPointerEventType, position: Point, finger: i64, milliseconds: u64) {
+        let Some(root) = target.input_root() else { return };
+        let device: Rc<dyn IInputDevice> = self.touch.clone();
+        self.timestamp.set(self.timestamp.get() + milliseconds);
+        self.input(
+            target,
+            Rc::new(RawTouchEventArgs::new(device, self.timestamp.get(), root, kind, position, RawInputModifiers::NONE, finger)),
+        );
+    }
+
+    pub(super) fn wheel(&self, target: &MockWindowImpl, position: Point, delta: Vector) {
         let Some(root) = target.input_root() else { return };
         let device: Rc<dyn IInputDevice> = self.mouse.clone();
         self.input(
@@ -274,7 +296,7 @@ impl Driver {
         );
     }
 
-    fn key(&self, target: &MockWindowImpl, key: Key, physical_key: PhysicalKey, modifiers: RawInputModifiers) {
+    pub(super) fn key(&self, target: &MockWindowImpl, key: Key, physical_key: PhysicalKey, modifiers: RawInputModifiers) {
         let Some(root) = target.input_root() else { return };
         for kind in [RawKeyEventType::KeyDown, RawKeyEventType::KeyUp] {
             let device: Rc<dyn IInputDevice> = self.keyboard.clone();
@@ -295,21 +317,21 @@ impl Driver {
         }
     }
 
-    fn text(&self, target: &MockWindowImpl, text: &str) {
+    pub(super) fn text(&self, target: &MockWindowImpl, text: &str) {
         let Some(root) = target.input_root() else { return };
         let device: Rc<dyn IInputDevice> = self.keyboard.clone();
         self.input(target, Rc::new(RawTextInputEventArgs::new(device, self.next_timestamp(), root, text)));
     }
 
     /// Fires every timer of the dispatcher once, as if its time had come.
-    fn fire_timers(&self) {
+    pub(super) fn fire_timers(&self) {
         for timer in Dispatcher::timers_for_unit_tests() {
             Dispatcher::force_fire_timer_for_unit_tests(&timer);
         }
     }
 
     /// The popups that are shown, in the order they were created.
-    fn open_popups(&self) -> Vec<Rc<MockWindowImpl>> {
+    pub(super) fn open_popups(&self) -> Vec<Rc<MockWindowImpl>> {
         let mut popups = self.popups.borrow_mut();
         popups.retain(|popup| popup.strong_count() > 0);
         popups.iter().filter_map(Weak::upgrade).filter(|popup| is_shown(popup)).collect()
@@ -317,7 +339,7 @@ impl Driver {
 
     /// Whether a popup is open: a popup of the platform, or one hosted in
     /// the overlay layer of the window.
-    fn popup_is_open(&self, tour: &Tour) -> bool {
+    pub(super) fn popup_is_open(&self, tour: &Tour) -> bool {
         !self.open_popups().is_empty() || overlay_popups(tour) > 0
     }
 
@@ -370,7 +392,7 @@ impl Driver {
 
     /// Closes what is open: Escape, once for every level and once more; then
     /// a press in the corner of the window.
-    fn close_popups(&self, tour: &Tour, driven: &mut Driven) {
+    pub(super) fn close_popups(&self, tour: &Tour, driven: &mut Driven) {
         for _ in 0..4 {
             if !self.popup_is_open(tour) {
                 return;
@@ -597,7 +619,7 @@ fn path(element: &Ref<Control>) -> String {
 }
 
 /// The popups hosted in the overlay layer of the window of the tour.
-fn overlay_popups(tour: &Tour) -> usize {
+pub(super) fn overlay_popups(tour: &Tour) -> usize {
     use ferroui_controls::primitives::OverlayPopupHost;
     let root: &Visual = tour.window();
     root.get_visual_descendants().filter(|visual| visual.is::<OverlayPopupHost>()).count()

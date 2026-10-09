@@ -28,6 +28,7 @@ mod gaps_b;
 mod gaps_c;
 mod gaps_d;
 mod frame_benchmark;
+mod interaction_controls;
 mod interaction_tour;
 mod navigation_pages_b;
 mod navigation_pages_a;
