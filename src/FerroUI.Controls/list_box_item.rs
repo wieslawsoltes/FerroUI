@@ -31,7 +31,7 @@ ferro_impl_classes!(
     ContentControlImpl
 );
 
-impl FerroObjectImpl for ListBoxItem {}
+ferroui_base::ferro_impl_classes!(ListBoxItem: FerroObjectImpl);
 
 impl InputElementImpl for ListBoxItem {
     fn on_pointer_pressed(this: &Self, e: &PointerPressedEventArgs) {

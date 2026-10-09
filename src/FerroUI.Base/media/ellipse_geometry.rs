@@ -15,7 +15,7 @@ pub struct EllipseGeometry {
 ferro_class!(EllipseGeometry: Geometry);
 crate::ferro_class_info!(EllipseGeometry { new: EllipseGeometry::new });
 
-impl FerroObjectImpl for EllipseGeometry {}
+crate::ferro_impl_classes!(EllipseGeometry: FerroObjectImpl);
 
 impl GeometryImpl for EllipseGeometry {
     fn clone_geometry(this: &Self) -> Ref<Geometry> {

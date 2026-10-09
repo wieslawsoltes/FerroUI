@@ -29,7 +29,7 @@ ferro_impl_classes!(
     ControlImpl
 );
 
-impl FerroObjectImpl for Sector {}
+ferroui_base::ferro_impl_classes!(Sector: FerroObjectImpl);
 
 impl ShapeImpl for Sector {
     fn create_defining_geometry(this: &Self) -> Option<Ref<Geometry>> {

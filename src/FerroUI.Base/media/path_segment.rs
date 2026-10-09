@@ -17,7 +17,7 @@ ferro_class! {
     }
 }
 
-impl FerroObjectImpl for PathSegment {}
+crate::ferro_impl_classes!(PathSegment: FerroObjectImpl);
 
 impl PathSegmentImpl for PathSegment {
     fn apply_to(_this: &Self, _ctx: &mut StreamGeometryContext) {

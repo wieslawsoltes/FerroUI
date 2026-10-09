@@ -75,7 +75,7 @@ ferro_impl_classes!(
     ContentControlImpl
 );
 
-impl FerroObjectImpl for DataValidationErrors {}
+ferroui_base::ferro_impl_classes!(DataValidationErrors: FerroObjectImpl);
 
 impl DataValidationErrors {
     /// The pseudoclasses set by the class.

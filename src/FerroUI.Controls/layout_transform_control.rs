@@ -48,7 +48,7 @@ ferro_class!(LayoutTransformControl: Decorator);
 ferroui_base::ferro_class_info!(LayoutTransformControl { new: LayoutTransformControl::new });
 ferro_impl_classes!(LayoutTransformControl: StyledElementImpl, InteractiveImpl, InputElementImpl, ControlImpl);
 
-impl FerroObjectImpl for LayoutTransformControl {}
+ferroui_base::ferro_impl_classes!(LayoutTransformControl: FerroObjectImpl);
 
 impl VisualImpl for LayoutTransformControl {
     fn on_attached_to_visual_tree(this: &Self, e: &VisualTreeAttachmentEventArgs) {

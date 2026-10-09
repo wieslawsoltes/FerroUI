@@ -12,7 +12,7 @@ pub struct BlurEffect {
 ferro_class!(BlurEffect: Effect);
 crate::ferro_class_info!(BlurEffect { new: BlurEffect::new });
 
-impl FerroObjectImpl for BlurEffect {}
+crate::ferro_impl_classes!(BlurEffect: FerroObjectImpl);
 
 crate::ferro_properties! { impl BlurEffect {
     ferro_property!(pub fn radius_property() -> StyledProperty<f64> {

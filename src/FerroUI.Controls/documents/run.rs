@@ -17,8 +17,8 @@ pub struct Run {
 ferro_class!(Run: Inline);
 ferroui_base::ferro_class_info!(Run { new: Run::new });
 
-impl StyledElementImpl for Run {}
-impl TextElementImpl for Run {}
+ferroui_base::ferro_impl_classes!(Run: StyledElementImpl);
+ferroui_base::ferro_impl_classes!(Run: TextElementImpl);
 
 impl FerroObjectImpl for Run {
     fn on_property_changed(this: &Self, change: &FerroPropertyChangedEventArgs<'_>) {

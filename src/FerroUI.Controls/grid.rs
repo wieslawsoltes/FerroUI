@@ -293,7 +293,7 @@ ferro_class!(Grid: Panel);
 ferroui_base::ferro_class_info!(Grid { new: Grid::new });
 ferro_impl_classes!(Grid: StyledElementImpl, VisualImpl, InteractiveImpl, InputElementImpl, ControlImpl);
 
-impl FerroObjectImpl for Grid {}
+ferroui_base::ferro_impl_classes!(Grid: FerroObjectImpl);
 
 impl LayoutableImpl for Grid {
     /// Content measurement.

@@ -120,7 +120,7 @@ ferro_impl_classes!(
     ContentControlImpl
 );
 
-impl FerroObjectImpl for Spinner {}
+ferroui_base::ferro_impl_classes!(Spinner: FerroObjectImpl);
 
 impl SpinnerImpl for Spinner {
     fn on_valid_spin_direction_changed(_this: &Self, _old_value: ValidSpinDirections, _new_value: ValidSpinDirections) {}

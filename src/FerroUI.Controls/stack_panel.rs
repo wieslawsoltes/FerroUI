@@ -43,7 +43,7 @@ ferro_impl_classes!(
     PanelImpl
 );
 
-impl FerroObjectImpl for StackPanel {}
+ferroui_base::ferro_impl_classes!(StackPanel: FerroObjectImpl);
 
 impl LayoutableImpl for StackPanel {
     /// General stack panel layout behaviour is to grow unbounded in the

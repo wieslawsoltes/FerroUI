@@ -26,7 +26,7 @@ ferro_impl_classes!(
     ControlImpl
 );
 
-impl FerroObjectImpl for Path {}
+ferroui_base::ferro_impl_classes!(Path: FerroObjectImpl);
 
 impl ShapeImpl for Path {
     fn create_defining_geometry(this: &Self) -> Option<Ref<Geometry>> {

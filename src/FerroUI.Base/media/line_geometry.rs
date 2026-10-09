@@ -15,7 +15,7 @@ pub struct LineGeometry {
 ferro_class!(LineGeometry: Geometry);
 crate::ferro_class_info!(LineGeometry { new: LineGeometry::new });
 
-impl FerroObjectImpl for LineGeometry {}
+crate::ferro_impl_classes!(LineGeometry: FerroObjectImpl);
 
 impl GeometryImpl for LineGeometry {
     fn clone_geometry(this: &Self) -> Ref<Geometry> {

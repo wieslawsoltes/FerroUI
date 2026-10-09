@@ -34,7 +34,7 @@ ferro_class! {
     }
 }
 
-impl FerroObjectImpl for FlyoutBase {}
+ferroui_base::ferro_impl_classes!(FlyoutBase: FerroObjectImpl);
 
 impl FlyoutBaseImpl for FlyoutBase {
     fn show_at(_this: &Self, _placement_target: &Control) {

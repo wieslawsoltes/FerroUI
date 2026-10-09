@@ -65,7 +65,7 @@ impl ControlImpl for TreeView {
     }
 }
 
-impl FerroObjectImpl for TreeView {}
+ferroui_base::ferro_impl_classes!(TreeView: FerroObjectImpl);
 
 impl InputElementImpl for TreeView {
     fn as_custom_keyboard_navigation(this: &Self) -> Option<&dyn ICustomKeyboardNavigation> {

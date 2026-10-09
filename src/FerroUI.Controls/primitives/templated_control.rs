@@ -41,7 +41,7 @@ ferroui_base::ferro_class_info!(TemplatedControl { new: TemplatedControl::new })
 
 ferro_impl_classes!(TemplatedControl: VisualImpl, InteractiveImpl, InputElementImpl);
 
-impl FerroObjectImpl for TemplatedControl {}
+ferroui_base::ferro_impl_classes!(TemplatedControl: FerroObjectImpl);
 
 impl StyledElementImpl for TemplatedControl {
     fn notify_child_resources_changed(this: &Self, e: ResourcesChangedEventArgs) {

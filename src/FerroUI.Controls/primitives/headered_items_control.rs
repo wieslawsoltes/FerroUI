@@ -46,7 +46,7 @@ ferro_impl_classes!(
     ItemsControlImpl
 );
 
-impl FerroObjectImpl for HeaderedItemsControl {}
+ferroui_base::ferro_impl_classes!(HeaderedItemsControl: FerroObjectImpl);
 
 impl StyledElementImpl for HeaderedItemsControl {
     fn on_attached_to_logical_tree(this: &Self, e: &LogicalTreeAttachmentEventArgs) {

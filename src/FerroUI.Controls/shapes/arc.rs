@@ -29,7 +29,7 @@ ferro_impl_classes!(
     ControlImpl
 );
 
-impl FerroObjectImpl for Arc {}
+ferroui_base::ferro_impl_classes!(Arc: FerroObjectImpl);
 
 impl ShapeImpl for Arc {
     fn create_defining_geometry(this: &Self) -> Option<Ref<Geometry>> {

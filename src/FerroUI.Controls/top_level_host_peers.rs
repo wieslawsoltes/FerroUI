@@ -44,8 +44,8 @@ struct TopLevelHostAutomationPeer {
 ferro_class!(TopLevelHostAutomationPeer: ControlAutomationPeer);
 ferroui_base::ferro_class_info!(TopLevelHostAutomationPeer {});
 
-impl FerroObjectImpl for TopLevelHostAutomationPeer {}
-impl AutomationPeerImpl for TopLevelHostAutomationPeer {}
+ferroui_base::ferro_impl_classes!(TopLevelHostAutomationPeer: FerroObjectImpl);
+ferroui_base::ferro_impl_classes!(TopLevelHostAutomationPeer: AutomationPeerImpl);
 
 impl ControlAutomationPeerImpl for TopLevelHostAutomationPeer {
     fn get_children_core(_this: &Self) -> Option<Vec<Ref<AutomationPeer>>> {
@@ -75,7 +75,7 @@ pub(crate) struct DecorationsOverlaysAutomationPeer {
 ferro_class!(DecorationsOverlaysAutomationPeer: AutomationPeer);
 ferroui_base::ferro_class_info!(DecorationsOverlaysAutomationPeer {});
 
-impl FerroObjectImpl for DecorationsOverlaysAutomationPeer {}
+ferroui_base::ferro_impl_classes!(DecorationsOverlaysAutomationPeer: FerroObjectImpl);
 
 impl AutomationPeerImpl for DecorationsOverlaysAutomationPeer {
     fn bring_into_view_core(this: &Self) {

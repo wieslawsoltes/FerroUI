@@ -57,7 +57,7 @@ impl ControlImpl for ToolTip {
     }
 }
 
-impl FerroObjectImpl for ToolTip {}
+ferroui_base::ferro_impl_classes!(ToolTip: FerroObjectImpl);
 
 impl ToolTip {
     /// The pseudoclasses set by the class.

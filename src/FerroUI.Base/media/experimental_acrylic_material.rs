@@ -21,7 +21,7 @@ pub struct ExperimentalAcrylicMaterial {
 ferro_class!(ExperimentalAcrylicMaterial: FerroObject);
 crate::ferro_class_info!(ExperimentalAcrylicMaterial { new: ExperimentalAcrylicMaterial::new, interfaces: [std::rc::Rc<dyn crate::media::IExperimentalAcrylicMaterial>] });
 
-impl FerroObjectImpl for ExperimentalAcrylicMaterial {}
+crate::ferro_impl_classes!(ExperimentalAcrylicMaterial: FerroObjectImpl);
 
 crate::ferro_properties! { impl ExperimentalAcrylicMaterial {
     ferro_property!(

@@ -65,7 +65,7 @@ ferro_class! {
     }
 }
 
-impl FerroObjectImpl for DefinitionBase {}
+ferroui_base::ferro_impl_classes!(DefinitionBase: FerroObjectImpl);
 
 impl DefinitionBaseImpl for DefinitionBase {
     fn user_size_value_cache(_this: &Self) -> GridLength {

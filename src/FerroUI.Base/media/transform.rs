@@ -30,7 +30,7 @@ ferro_class! {
 }
 crate::ferro_class_info!(Transform { interfaces: [std::rc::Rc<dyn crate::media::ITransform>] });
 
-impl FerroObjectImpl for Transform {}
+crate::ferro_impl_classes!(Transform: FerroObjectImpl);
 
 impl TransformImpl for Transform {
     fn value(_this: &Self) -> Matrix {

@@ -34,7 +34,7 @@ ferro_impl_classes!(
     TemplatedControlImpl
 );
 
-impl FerroObjectImpl for HeaderedContentControl {}
+ferroui_base::ferro_impl_classes!(HeaderedContentControl: FerroObjectImpl);
 
 impl ContentControlImpl for HeaderedContentControl {
     fn register_content_presenter(this: &Self, presenter: &ContentPresenter) -> bool {

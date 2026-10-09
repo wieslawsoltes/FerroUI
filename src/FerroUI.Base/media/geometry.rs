@@ -42,7 +42,7 @@ ferro_class! {
     }
 }
 
-impl FerroObjectImpl for Geometry {}
+crate::ferro_impl_classes!(Geometry: FerroObjectImpl);
 
 impl GeometryImpl for Geometry {
     fn clone_geometry(_this: &Self) -> Ref<Geometry> {

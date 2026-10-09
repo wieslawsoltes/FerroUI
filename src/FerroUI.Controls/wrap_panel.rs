@@ -58,7 +58,7 @@ ferro_impl_classes!(
     PanelImpl
 );
 
-impl FerroObjectImpl for WrapPanel {}
+ferroui_base::ferro_impl_classes!(WrapPanel: FerroObjectImpl);
 
 impl LayoutableImpl for WrapPanel {
     fn measure_override(this: &Self, constraint: Size) -> Size {

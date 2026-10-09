@@ -56,14 +56,14 @@ ferro_class! {
 }
 ferroui_base::ferro_class_info!(TextBlock { new: TextBlock::new });
 
-impl InteractiveImpl for TextBlock {}
-impl InputElementImpl for TextBlock {}
+ferroui_base::ferro_impl_classes!(TextBlock: InteractiveImpl);
+ferroui_base::ferro_impl_classes!(TextBlock: InputElementImpl);
 impl ControlImpl for TextBlock {
     fn on_create_automation_peer(this: &Self) -> Ref<crate::automation::peers::AutomationPeer> {
         crate::automation::peers::TextBlockAutomationPeer::new(this).upcast()
     }
 }
-impl StyledElementImpl for TextBlock {}
+ferroui_base::ferro_impl_classes!(TextBlock: StyledElementImpl);
 
 ferroui_base::ferro_overrides! { impl FerroObjectImpl for TextBlock {
     fn constructed(this: &Self) {

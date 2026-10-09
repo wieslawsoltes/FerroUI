@@ -29,7 +29,7 @@ ferro_impl_classes!(
     PanelImpl
 );
 
-impl FerroObjectImpl for UniformGrid {}
+ferroui_base::ferro_impl_classes!(UniformGrid: FerroObjectImpl);
 
 impl LayoutableImpl for UniformGrid {
     fn measure_override(this: &Self, available_size: Size) -> Size {

@@ -31,7 +31,7 @@ ferro_class!(TopLevelHost: Control);
 ferro_impl_classes!(TopLevelHost: StyledElementImpl, InteractiveImpl);
 // With the drawn decorations the pointer moved override lives in `top_level_host_decorations.rs`.
 // The automation peer override lives in `top_level_host_peers.rs`.
-impl FerroObjectImpl for TopLevelHost {}
+ferroui_base::ferro_impl_classes!(TopLevelHost: FerroObjectImpl);
 
 impl VisualImpl for TopLevelHost {
     fn bypass_flow_direction_policies(_this: &Self) -> bool {

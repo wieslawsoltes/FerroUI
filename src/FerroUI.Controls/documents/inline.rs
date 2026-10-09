@@ -31,8 +31,8 @@ ferro_class! {
     }
 }
 
-impl StyledElementImpl for Inline {}
-impl TextElementImpl for Inline {}
+ferroui_base::ferro_impl_classes!(Inline: StyledElementImpl);
+ferroui_base::ferro_impl_classes!(Inline: TextElementImpl);
 
 impl FerroObjectImpl for Inline {
     fn on_property_changed(this: &Self, change: &FerroPropertyChangedEventArgs<'_>) {

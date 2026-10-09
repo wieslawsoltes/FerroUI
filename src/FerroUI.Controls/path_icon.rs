@@ -27,7 +27,7 @@ ferro_impl_classes!(
     TemplatedControlImpl
 );
 
-impl FerroObjectImpl for PathIcon {}
+ferroui_base::ferro_impl_classes!(PathIcon: FerroObjectImpl);
 
 ferroui_base::ferro_properties! { impl PathIcon {
     ferro_property!(

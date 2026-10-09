@@ -15,7 +15,7 @@ pub struct DropShadowEffectBase {
 
 ferro_class!(DropShadowEffectBase: Effect);
 
-impl FerroObjectImpl for DropShadowEffectBase {}
+crate::ferro_impl_classes!(DropShadowEffectBase: FerroObjectImpl);
 
 crate::ferro_properties! { impl DropShadowEffectBase {
     ferro_property!(pub fn blur_radius_property() -> StyledProperty<f64> {
@@ -83,7 +83,7 @@ pub struct DropShadowEffect {
 ferro_class!(DropShadowEffect: DropShadowEffectBase);
 crate::ferro_class_info!(DropShadowEffect { new: DropShadowEffect::new });
 
-impl FerroObjectImpl for DropShadowEffect {}
+crate::ferro_impl_classes!(DropShadowEffect: FerroObjectImpl);
 
 crate::ferro_properties! { impl DropShadowEffect {
     ferro_property!(pub fn offset_x_property() -> StyledProperty<f64> {
@@ -152,7 +152,7 @@ pub struct DropShadowDirectionEffect {
 ferro_class!(DropShadowDirectionEffect: DropShadowEffectBase);
 crate::ferro_class_info!(DropShadowDirectionEffect { new: DropShadowDirectionEffect::new });
 
-impl FerroObjectImpl for DropShadowDirectionEffect {}
+crate::ferro_impl_classes!(DropShadowDirectionEffect: FerroObjectImpl);
 
 crate::ferro_properties! { impl DropShadowDirectionEffect {
     ferro_property!(pub fn shadow_depth_property() -> StyledProperty<f64> {
