@@ -1,15 +1,16 @@
 #!/bin/bash
 # Builds a browser application and assembles its site.
 #
-#   scripts/build-browser.sh <application> [--debug] [--out <directory>] [--threads]
+#   scripts/build-browser.sh <application> [--debug] [--out <directory>] [--threads | --both]
 #
 # <application> is either an example of the browser crate (src/Browser/FerroUI.Browser/examples/
 # <application>, with its host page in wwwroot/) or a binary package of the workspace with its host
 # page in the wwwroot/ directory of the package (control-catalog-browser). The site is written to
 # target/browser/<application> (or --out): the host page, the script modules of the platform
 # (ferroui.js and storage.js, built from webapp/ with esbuild), the service worker (ferroui-sw.js, at
-# the root of the site, which its scope and the save picker polyfill need) and the WebAssembly module
-# with its script, plus the files that build scripts of the application leave for the site in
+# the root of the site, which its scope and the save picker polyfill need), the loader the host page
+# imports the script of the module through (scripts/browser/threads/ferroui-loader.js) and the
+# WebAssembly module with its script, plus the files that build scripts of the application leave for the site in
 # `$OUT_DIR/browser-site/` (asset files the host page downloads). Serve the directory with any
 # static web server.
 #
@@ -35,24 +36,38 @@
 #   FERROUI_BROWSER_THREAD_MEMORY_MB   the size of the memory of the module in megabytes (default
 #                                      512): all the application can ever allocate
 #   FERROUI_BROWSER_NIGHTLY            the nightly toolchain (default: the pin of setup.sh)
+#
+# --both builds the site without threads and the site with threads, each as without the option and
+# in its usual directory (--debug applies to both), and composes them into one site that carries
+# both modules, in target/browser-both/<application> (or --out): scripts/browser/combine-site.mjs,
+# which describes the layout and checks that the files the two share are identical. The host page of
+# that site chooses the module at run time (the loader; docs/porting/browser-render-worker.md,
+# "B2.8"). This is the site to publish: a module built with threads cannot start in a page that is
+# not cross-origin isolated or in a browser that cannot render from a worker.
 set -euo pipefail
 
 APPLICATION=""
 PROFILE="browser"
 OUT=""
 THREADS=""
+BOTH=""
 while [ $# -gt 0 ]; do
   case "$1" in
     --debug) PROFILE="debug";;
     --out) shift; OUT="$1";;
     --threads) THREADS="1";;
+    --both) BOTH="1";;
     -*) echo "unknown option: $1" >&2; exit 2;;
     *) APPLICATION="$1";;
   esac
   shift
 done
 if [ -z "$APPLICATION" ]; then
-  echo "usage: scripts/build-browser.sh <application> [--debug] [--out <directory>] [--threads]" >&2
+  echo "usage: scripts/build-browser.sh <application> [--debug] [--out <directory>] [--threads | --both]" >&2
+  exit 2
+fi
+if [ -n "$BOTH" ] && [ -n "$THREADS" ]; then
+  echo "--both builds the site with threads too: give one of --threads and --both" >&2
   exit 2
 fi
 
@@ -62,6 +77,18 @@ TARGET_DIR="${CARGO_TARGET_DIR:-$ROOT/target}"
 # Where cargo builds. The threaded mode has its own directory: its standard library and its flags
 # differ, and sharing the directory would rebuild everything at each change of mode.
 BUILD_DIR="$TARGET_DIR"
+# Both modules in one site: the two builds as they are, one after the other, and the composition.
+# --out names the composed site; the two sites it is composed of keep their usual directories.
+if [ -n "$BOTH" ]; then
+  command -v node >/dev/null || { echo "node is not on PATH" >&2; exit 1; }
+  MODE=()
+  [ "$PROFILE" = "debug" ] && MODE+=(--debug)
+  "$0" "$APPLICATION" ${MODE[@]+"${MODE[@]}"}
+  "$0" "$APPLICATION" ${MODE[@]+"${MODE[@]}"} --threads
+  echo "== site with both modules"
+  exec node "$ROOT/scripts/browser/combine-site.mjs" "$TARGET_DIR/browser/$APPLICATION" \
+    "$TARGET_DIR/browser-threads/$APPLICATION" "${OUT:-$TARGET_DIR/browser-both/$APPLICATION}"
+fi
 if [ -n "$THREADS" ]; then
   BUILD_DIR="$TARGET_DIR/threads"
   OUT="${OUT:-$TARGET_DIR/browser-threads/$APPLICATION}"
@@ -226,6 +253,9 @@ cp "$CRATE/dist/ferroui.js" "$CRATE/dist/ferroui.js.map" "$CRATE/dist/storage.js
 # site, next to the host page.
 cp "$CRATE/dist/ferroui-sw.js" "$CRATE/dist/ferroui-sw.js.map" "$OUT"/
 cp "$BUILT/$APPLICATION.js" "$BUILT/$WASM" "$OUT"/
+# The loader, through which a host page imports the script of the module: in a site with one module
+# it imports that one; scripts/browser/combine-site.mjs makes a site with both, where it chooses.
+cp "$ROOT/scripts/browser/threads/ferroui-loader.js" "$OUT"/
 # The threaded mode: the check for cross-origin isolation, which a host page written for threads
 # imports before it creates the module.
 if [ -n "$THREADS" ]; then
