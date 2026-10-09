@@ -724,3 +724,20 @@ What is most likely wrong, in the author's order:
    following `use crate::{Control, ..}` through `pub use control::{Control, ..}` in `lib.rs`.
 5. Run time of step 5: an unknown name is looked up through every glob import of the crate; it is
    bounded, not measured.
+
+### The scanner on the real crates (validated 2026-10-09)
+
+The first stage built and passed unchanged (28 tests of `ferroui-build`). `cargo test -p ferroui-build --lib real_crates -- --nocapture` prints, for the sources of the two framework crates read as files:
+
+| | `ferroui_base` | `ferroui_controls` |
+|---|---:|---:|
+| Files | 1356 | 608 |
+| Types in the model | 442 (96 classes, 11 static types, 248 markup types, 87 enumerations) | 408 (248 classes, 12 static types, 77 markup types, 71 enumerations) |
+| Registered properties | 225 (167 styled, 31 direct, 27 attached) | 935 (675 styled, 99 direct, 161 attached; 206 added owners; 7 without a name: owners added across crates) |
+| Members | 212 constructors, 643 plain properties, 103 methods, 77 fields, 20 events | 42 constructors, 154 plain properties, 1 indexer, 92 methods, 53 fields, 34 events |
+| Callables | 1305, 500 of them paths, all resolved; the others are closures | 834, 519 of them paths, all resolved |
+| Type texts | 2835, none unresolved | 3105, 18 unresolved in 4 names (`CancelRoutedEventArgs`, `VectorEventArgs`, `IStyle`, `Styles`: names behind a glob import of another crate) |
+| Public paths stated by the crate | 390, all found by the scanner | 363, all found |
+| Declaration macro invocations not read | 0 | 0 |
+
+One note for the base crate: the runtime type of `FerroObject` is implemented by hand, so the model has the type without a base. No form of a declaration macro departs from the documented grammar. So the next stage (dependency models, then the `ModelTypeSystem`) starts from a model that covers the two crates; the closures (about 60 % of the callables) are what the invoker form of 9.5.3 is for.
