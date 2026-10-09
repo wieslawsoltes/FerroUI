@@ -31,6 +31,9 @@ impl Auth {
 
 #[test]
 fn property_equals_attached_property_matching_value() {
+    // Upstream runs the class constructor of `Grid` first: the property has to be registered to be found by name.
+    let _ = Grid::column_property();
+
     let target = SelectorParser::new(|ns, type_| match (ns, type_) {
         ("", "TextBlock") => Some(TextBlock::TYPE),
         ("", "Grid") => Some(Grid::TYPE),
