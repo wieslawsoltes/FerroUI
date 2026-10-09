@@ -317,6 +317,8 @@ mod pointer_tests_base;
 #[cfg(test)]
 mod routed_event_registry_tests;
 #[cfg(test)]
+mod setter_tests;
+#[cfg(test)]
 mod input_element_gesture_tests;
 #[cfg(test)]
 mod styled_element_tests_theming;
