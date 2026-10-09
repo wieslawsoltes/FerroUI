@@ -331,7 +331,7 @@ FerroUI-only crates have no upstream source directory (for example the MicroCom 
 
 ## Rust-only files
 
-322 Rust source files have no upstream counterpart (0 without a recorded reason). They are listed at the end of each project page.
+323 Rust source files have no upstream counterpart (0 without a recorded reason). They are listed at the end of each project page.
 
 | Project | Rust file | Reason |
 |---|---|---|
@@ -483,6 +483,7 @@ FerroUI-only crates have no upstream source directory (for example the MicroCom 
 | [Avalonia.Build.Tasks](tracking/Avalonia.Build.Tasks.md) | `src/FerroUI.Build.Tasks/json.rs` | the JSON the type model is written in (`.xamlmeta`): a value, its reader and its deterministic writer |
 | [Avalonia.Build.Tasks](tracking/Avalonia.Build.Tasks.md) | `src/FerroUI.Build.Tasks/model.rs` | the build-time type model of a crate and of the crates it is built on, and its file, the `.xamlmeta` (docs/porting/xaml.md, 9.5.1): upstream's compiler reads the types of the referenced assemblies with Mono.Cecil instead |
 | [Avalonia.Build.Tasks](tracking/Avalonia.Build.Tasks.md) | `src/FerroUI.Build.Tasks/model_set.rs` | the build-time type model of a crate and of the crates it is built on, and its file, the `.xamlmeta` (docs/porting/xaml.md, 9.5.1): upstream's compiler reads the types of the referenced assemblies with Mono.Cecil instead |
+| [Avalonia.Build.Tasks](tracking/Avalonia.Build.Tasks.md) | `src/FerroUI.Build.Tasks/scanner/constants.rs` | the source scanner, which fills the type model from the declaration macros of a crate's sources (docs/porting/xaml.md, 9.5.2, 9.5.6): no counterpart upstream, where the compiler reads the compiled assembly |
 | [Avalonia.Build.Tasks](tracking/Avalonia.Build.Tasks.md) | `src/FerroUI.Build.Tasks/scanner/declarations.rs` | the source scanner, which fills the type model from the declaration macros of a crate's sources (docs/porting/xaml.md, 9.5.2, 9.5.6): no counterpart upstream, where the compiler reads the compiled assembly |
 | [Avalonia.Build.Tasks](tracking/Avalonia.Build.Tasks.md) | `src/FerroUI.Build.Tasks/scanner/modules.rs` | the source scanner, which fills the type model from the declaration macros of a crate's sources (docs/porting/xaml.md, 9.5.2, 9.5.6): no counterpart upstream, where the compiler reads the compiled assembly |
 | [Avalonia.Build.Tasks](tracking/Avalonia.Build.Tasks.md) | `src/FerroUI.Build.Tasks/scanner/source.rs` | the source scanner, which fills the type model from the declaration macros of a crate's sources (docs/porting/xaml.md, 9.5.2, 9.5.6): no counterpart upstream, where the compiler reads the compiled assembly |
