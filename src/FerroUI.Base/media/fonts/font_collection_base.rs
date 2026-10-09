@@ -1391,12 +1391,13 @@ impl FontCollectionBase {
     /// Attempts to add a glyph typeface to the cache for the specified font
     /// family and key.
     ///
-    /// If the specified font family does not exist in the cache, it is added
-    /// along with the glyph typeface. The method ensures that the font family
-    /// is inserted in a sorted order within the collection.
+    /// The font family is added to the collection, in sorted order, with the
+    /// first glyph typeface cached for it.
     ///
     /// `glyph_typeface` can be `None` (the platform has no typeface for the
-    /// key).
+    /// key): the answer is cached so that the platform is not asked again,
+    /// and the family is not added to the collection, which lists only
+    /// families it has a typeface of.
     ///
     /// Returns `true` if the glyph typeface was successfully added to the
     /// cache or the same typeface is already cached for the key; otherwise,
@@ -1413,15 +1414,7 @@ impl FontCollectionBase {
 
         let base = this.base();
 
-        let (glyph_typefaces, added) = base.glyph_typeface_cache.get_or_add(family_name);
-
-        if added {
-            // Family doesn't exist yet: publish the font family once.
-            let font_family = FontFamily::new(&format!("{}#{}", this.key(), family_name));
-
-            // Add the font family to the sorted list
-            base.add_font_family(font_family);
-        }
+        let (glyph_typefaces, _) = base.glyph_typeface_cache.get_or_add(family_name);
 
         let mut glyph_typefaces = glyph_typefaces.borrow_mut();
 
@@ -1434,7 +1427,20 @@ impl FontCollectionBase {
             };
         }
 
+        // Deviation (DEVIATIONS.md, Fonts): upstream's `TryAddGlyphTypeface` publishes the family
+        // when it creates the cache entry, also for a miss, so a family the platform cannot
+        // create becomes a family of the system fonts that has no glyph typeface. The family is
+        // published once, with its first glyph typeface.
+        let publish = glyph_typeface.is_some() && glyph_typefaces.values().all(Option::is_none);
+
         glyph_typefaces.insert(key, glyph_typeface);
+
+        if publish {
+            let font_family = FontFamily::new(&format!("{}#{}", this.key(), family_name));
+
+            // Add the font family to the sorted list
+            base.add_font_family(font_family);
+        }
 
         true
     }

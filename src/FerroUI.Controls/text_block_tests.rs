@@ -838,3 +838,59 @@ fn embedded_control_should_keep_focus() {
 
     assert_eq!(Some(text_box_element), focus_manager.get_focused_element());
 }
+
+/// The family of the font the first run of the first line of a text block is drawn with.
+fn first_run_family(text_block: &TextBlock) -> String {
+    let text_layout = text_block.text_layout();
+    let runs = text_layout.text_lines()[0].text_runs();
+
+    runs[0]
+        .downcast_ref::<ferroui_base::media::text_formatting::ShapedTextRun>()
+        .expect("a shaped run")
+        .glyph_run()
+        .glyph_typeface()
+        .family_name()
+        .to_owned()
+}
+
+#[test]
+fn text_of_a_family_the_font_manager_does_not_have_is_laid_out_with_the_default_family() {
+    use ferroui_base::media::text_formatting::testing::DEFAULT_FAMILY;
+    use ferroui_base::media::{FontFamily, FontManager};
+
+    let _scope = test_scope();
+
+    let reference = text_block("Hello World");
+
+    reference.measure(infinity());
+
+    assert_eq!(first_run_family(&reference), DEFAULT_FAMILY);
+
+    // Named alone, and as the first of a list none of which the font manager has.
+    for family in ["Cascadia Mono", "Cascadia Mono,Consolas,Menlo,DejaVu Sans Mono"] {
+        // A text block of the family.
+        let target = text_block("Hello World");
+
+        target.set_font_family(FontFamily::new(family));
+        target.measure(infinity());
+
+        assert_eq!(target.desired_size(), reference.desired_size(), "{family}");
+        assert_eq!(first_run_family(&target), DEFAULT_FAMILY, "{family}");
+
+        // A run of the family in a text block of the default one.
+        let target = TextBlock::new();
+        let run = Run::with_text(Some("Hello World"));
+
+        run.set_font_family(FontFamily::new(family));
+        target.inlines().unwrap().add(run);
+        target.measure(infinity());
+
+        assert_eq!(target.desired_size(), reference.desired_size(), "{family}");
+        assert_eq!(first_run_family(&target), DEFAULT_FAMILY, "{family}");
+    }
+
+    // Asking did not make them families of the system fonts.
+    let system_fonts = FontManager::current().system_fonts();
+
+    assert!(system_fonts.font_families().iter().all(|font_family| font_family.name() != "Cascadia Mono"));
+}

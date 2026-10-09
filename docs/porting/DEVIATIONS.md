@@ -34,6 +34,12 @@ Other pages hold the entries of their own area, and this page does not repeat th
 | `HslColor.ToRgb`, `HslColor.ToHsv`, `HsvColor.ToRgb` and `HsvColor.ToHsl` bring the hue into range with `while (hue >= 360.0) hue -= 360.0;` and `while (hue < 0.0) hue += 360.0;`, which never end for an infinite hue or one so large that subtracting 360 does not change it. | `wrap_hue` stops when a step does not change the hue and goes on with the hue as it is. | Behaviour | A hang on a non-finite or huge hue becomes a result. Finite hues of ordinary magnitude convert as upstream. | before #51 |
 | `Color.Parse(string)` throws `ArgumentNullException` for null, and `TryParse(string?)` returns false for null. | `parse` and `try_parse` take `&str`, which cannot be null. | Representation | The non-nullable form of the string argument; `Parse_Throws_ArgumentNullException_For_Null_Input` and the null row of `TryParse_Returns_False_For_Invalid_Input` have no counterpart (`color_tests.rs`). | before #51 |
 
+### Fonts (`src/FerroUI.Base/media/fonts/`)
+
+| Upstream | Port | Kind | Why | Since |
+|---|---|---|---|---|
+| `FontCollectionBase.TryAddGlyphTypeface(familyName, key, glyphTypeface)` publishes the family (`AddFontFamily(new FontFamily(Key + "#" + familyName))`) when it creates the cache entry of the family, also when `glyphTypeface` is `null`: `SystemFontCollection.TryGetGlyphTypeface` caches the `null` of a family the platform cannot create, so a family that was only asked for becomes a family of `FontManager.SystemFonts`. | `FontCollectionBase::try_add_glyph_typeface_by_name` caches the miss and publishes the family with the first glyph typeface cached for it. A family with misses only is not listed. | Behaviour | A family listed by the system fonts carries the key of the collection (`fonts:SystemFonts#Name`), and `FontManager.TryGetGlyphTypeface` does not fall back to the default family for a family with a key, so `Typeface.GlyphTypeface` throws for it. Where the platform has no such font (a browser has no system fonts; fontconfig and DirectWrite answer nothing for an unknown name, CoreText substitutes a font), any text naming `Cascadia Mono,Consolas,Menlo` made those names system fonts, and a list of the system fonts with each name drawn in its own family (the ComboBox page of the catalog) ended the application. Upstream has the same defect. | Typeface of a missing family |
+
 ### Render data (`src/FerroUI.Base/rendering/composition/drawing/`)
 
 | Upstream | Port | Kind | Why | Since |

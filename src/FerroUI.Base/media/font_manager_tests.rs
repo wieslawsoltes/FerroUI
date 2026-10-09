@@ -1078,3 +1078,66 @@ fn try_get_glyph_typeface_should_cache_matched_glyph_typeface_under_requested_fa
     assert!(Rc::ptr_eq(&first, &second));
     assert_eq!(scope.font_manager_impl().create_typeface_calls_for("NotInstalled"), 1);
 }
+
+/// The names of the families the system font collection lists.
+fn system_font_family_names() -> Vec<String> {
+    FontManager::current().system_fonts().font_families().iter().map(|family| family.name().to_owned()).collect()
+}
+
+#[test]
+fn should_use_the_default_family_for_a_family_the_platform_does_not_have() {
+    let _scope = TestFontScope::start();
+
+    let font_manager = FontManager::current();
+    let default_glyph_typeface = Typeface::default_typeface().glyph_typeface();
+
+    // Named alone, and as the first of a list none of which the platform has.
+    for name in ["Cascadia Mono", "Cascadia Mono,Consolas,Menlo,DejaVu Sans Mono"] {
+        for weight in [FontWeight::Normal, FontWeight::Bold] {
+            let typeface = Typeface::from_name_with_style(name, FontStyle::Normal, weight, FontStretch::Normal);
+
+            let glyph_typeface = font_manager.try_get_glyph_typeface(&typeface).expect(name);
+
+            assert_eq!(glyph_typeface.family_name(), default_glyph_typeface.family_name(), "{name}");
+
+            // The getter that panics when there is no glyph typeface.
+            assert_eq!(typeface.glyph_typeface().family_name(), default_glyph_typeface.family_name(), "{name}");
+        }
+    }
+}
+
+#[test]
+fn system_fonts_should_not_list_a_family_the_platform_cannot_create() {
+    let scope = TestFontScope::start();
+
+    let font_manager = FontManager::current();
+
+    assert!(font_manager.try_get_glyph_typeface(&Typeface::default_typeface()).is_some());
+
+    let families_before = system_font_family_names();
+
+    assert!(!families_before.is_empty());
+
+    for name in ["Cascadia Mono", "Cascadia Mono,Consolas,Menlo,DejaVu Sans Mono", "Unknown Bold"] {
+        assert!(font_manager.try_get_glyph_typeface(&Typeface::from_name(name)).is_some(), "{name}");
+    }
+
+    // The misses are remembered: the platform is not asked a second time.
+    let calls = scope.font_manager_impl().create_typeface_calls();
+
+    assert!(font_manager.try_get_glyph_typeface(&Typeface::from_name("Cascadia Mono")).is_some());
+    assert_eq!(scope.font_manager_impl().create_typeface_calls(), calls);
+
+    // And they are not families of the collection.
+    assert_eq!(system_font_family_names(), families_before);
+
+    // Every family the collection lists has a glyph typeface: a list of the system fonts
+    // with each name drawn in its own family asks for exactly these.
+    for font_family in font_manager.system_fonts().font_families() {
+        let typeface = Typeface::new(font_family.clone());
+
+        assert!(font_manager.try_get_glyph_typeface(&typeface).is_some(), "{}", font_family.name());
+
+        let _ = typeface.glyph_typeface();
+    }
+}

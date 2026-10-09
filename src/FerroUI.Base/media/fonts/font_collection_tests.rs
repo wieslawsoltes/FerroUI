@@ -1433,6 +1433,47 @@ fn unsupported_font_sources_add_nothing() {
 }
 
 #[test]
+fn a_family_is_listed_with_its_first_glyph_typeface_and_not_with_a_cached_miss() {
+    let _scope = TestFontScope::start();
+
+    let font_collection = CustomFontCollection::new("fonts:custom");
+
+    let regular = create_glyph_typeface(&test_fonts::inter_regular(), FontSimulations::None);
+    let bold = create_glyph_typeface(&test_fonts::inter_bold(), FontSimulations::None);
+    let regular_key = FontCollectionKey::from(&*regular);
+    let bold_key = FontCollectionKey::from(&*bold);
+
+    assert!(regular_key != bold_key);
+
+    // A miss is cached, twice the same, and the family is not one of the collection.
+    assert!(FontCollectionBase::try_add_glyph_typeface_by_name(&*font_collection, "Inter", regular_key, None));
+    assert!(FontCollectionBase::try_add_glyph_typeface_by_name(&*font_collection, "Inter", regular_key, None));
+    assert_eq!(font_collection.count(), 0);
+    assert!(font_collection.font_families().is_empty());
+    assert!(get_normal(&*font_collection, "Inter").is_none());
+
+    // The cached miss stays the answer for its key.
+    assert!(!FontCollectionBase::try_add_glyph_typeface_by_name(
+        &*font_collection,
+        "Inter",
+        regular_key,
+        Some(regular.clone())
+    ));
+    assert_eq!(font_collection.count(), 0);
+
+    // The first glyph typeface of the family lists it, once.
+    assert!(FontCollectionBase::try_add_glyph_typeface_by_name(&*font_collection, "Inter", bold_key, Some(bold.clone())));
+    assert_eq!(font_collection.count(), 1);
+    assert_eq!(font_collection.get(0), FontFamily::new("fonts:custom#Inter"));
+
+    let black_key = FontCollectionKey { weight: FontWeight::Black, ..bold_key };
+
+    assert!(FontCollectionBase::try_add_glyph_typeface_by_name(&*font_collection, "inter", black_key, Some(bold.clone())));
+    assert!(!FontCollectionBase::try_add_glyph_typeface_by_name(&*font_collection, "Inter", black_key, None));
+    assert_eq!(font_collection.count(), 1);
+}
+
+#[test]
 fn adding_a_glyph_typeface_twice_is_accepted_and_another_one_for_the_same_key_is_not() {
     let _scope = TestFontScope::start();
 
