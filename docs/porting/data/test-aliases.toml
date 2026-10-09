@@ -415,3 +415,25 @@ project = "Avalonia.Markup.UnitTests"
 file = "Data/BindingTests.cs"
 test = "Binding_To_Types_Should_Work"
 reason = "binds to the `Name` of a `System.Type` object, a regression test of reflection over the runtime type of .NET: a type of the port (`TypeInfo`) is not a model with registered properties"
+
+# === Avalonia.Skia.UnitTests ==================================================================================
+
+[[waive]]
+project = "Avalonia.Skia.UnitTests"
+file = "Media/BitmapSaveTests.cs"
+test = "Save_With_Null_Options_Throws"
+reason = "the encoder options are a reference (`&dyn BitmapEncoderOptions`), which cannot be null"
+
+[[waive]]
+project = "Avalonia.Skia.UnitTests"
+file = "Media/BitmapSaveTests.cs"
+test = "Save_With_Invalid_Png_CompressionLevel_Throws"
+reason = "`CompressionLevel` is a closed enum: `(CompressionLevel)42` cannot be constructed"
+
+# === Avalonia.Build.Tasks.UnitTest ============================================================================
+
+[[waive]]
+project = "Avalonia.Build.Tasks.UnitTest"
+file = "CompileAvaloniaXamlTaskTest.cs"
+test = "Does_Not_Fail_When_Codebehind_Contains_DllImport"
+reason = "runs the MSBuild task that rewrites a compiled assembly (the compiled XAML is woven into its IL, which is then verified) on an assembly whose code-behind declares a P/Invoke. The build integration of the port emits Rust source from a build script: there is no assembly to rewrite and no IL to verify, and the compiler reads the code-behind only for its type declarations"
