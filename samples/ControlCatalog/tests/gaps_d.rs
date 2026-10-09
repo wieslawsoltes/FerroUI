@@ -108,3 +108,89 @@ fn control_without_a_dynamic_resource_that_left_the_tree_is_freed() {
     assert!(weak.upgrade().is_none());
     window.close();
 }
+
+// --- C317: what a visit to a page of the catalog retained ---
+//
+// Found with the tours of `catalog_tour.rs`: every visit to a page left the page, or most of
+// what it showed, alive. Each reproduction is one of the cycles: the managed original has the
+// same references and its collector frees them.
+
+/// Loads a control and returns what remains of it once the caller lets go of it.
+fn load_and_release(xaml: &str) -> ferroui_base::WeakRef<Control> {
+    let control = from_markup_value::<Ref<Control>>(&Some(load_text(xaml))).expect("a control");
+    let weak = control.downgrade();
+    drop(control);
+    weak
+}
+
+/// C317: the deferred content of a template holds the root of its document and the resource
+/// nodes above its declaration, which own the template.
+#[test]
+fn gap_c317_element_with_a_template_declared_under_it() {
+    let _app = start_catalog_application();
+    let weak = load_and_release(&format!(
+        "<ItemsControl {XMLNS}>\
+           <ItemsControl.ItemTemplate>\
+             <DataTemplate><TextBlock/></DataTemplate>\
+           </ItemsControl.ItemTemplate>\
+         </ItemsControl>"
+    ));
+    assert!(weak.upgrade().is_none());
+}
+
+/// C317: the deferred content of a template holds the name scope of its document, which holds
+/// the named elements: here the element that owns the template.
+#[test]
+fn gap_c317_named_element_with_a_template_declared_under_it() {
+    let _app = start_catalog_application();
+    let panel = from_markup_value::<Ref<ferroui_controls::StackPanel>>(&Some(load_text(&format!(
+        "<StackPanel {XMLNS}>\
+           <ItemsControl Name='list'>\
+             <ItemsControl.ItemTemplate>\
+               <DataTemplate><TextBlock/></DataTemplate>\
+             </ItemsControl.ItemTemplate>\
+           </ItemsControl>\
+         </StackPanel>"
+    ))))
+    .expect("a panel");
+    let list = panel.children().get(0).downgrade();
+    let weak = panel.downgrade();
+    drop(panel);
+    assert!(weak.upgrade().is_none());
+    assert!(list.upgrade().is_none());
+}
+
+/// C317: what the deferred content holds weakly is there when the template is built: the
+/// resources of the element above the declaration, and the elements its document names.
+#[test]
+fn gap_c317_template_finds_the_resources_and_the_names_of_its_document() {
+    let _app = start_catalog_application();
+    let panel = from_markup_value::<Ref<ferroui_controls::StackPanel>>(&Some(load_text(&format!(
+        "<StackPanel {XMLNS} Name='root' Tag='named'>\
+           <StackPanel.Resources>\
+             <SolidColorBrush x:Key='Declared' Color='Red'/>\
+           </StackPanel.Resources>\
+           <ContentControl Content='content'>\
+             <ContentControl.ContentTemplate>\
+               <DataTemplate>\
+                 <Border Background='{{StaticResource Declared}}' Tag='{{ReflectionBinding #root.Tag}}'/>\
+               </DataTemplate>\
+             </ContentControl.ContentTemplate>\
+           </ContentControl>\
+         </StackPanel>"
+    ))))
+    .expect("a panel");
+    let window = Window::new();
+    window.set_content(Some(Control::boxed(&panel)));
+    window.show();
+    run_jobs();
+
+    let border = panel
+        .get_visual_descendants()
+        .find_map(|visual| visual.cast::<Border>())
+        .expect("the border of the template");
+    assert!(border.background().is_some());
+    let tag = border.tag().and_then(|tag| tag.downcast_ref::<String>().cloned());
+    assert_eq!(Some(String::from("named")), tag);
+    window.close();
+}
