@@ -1,7 +1,7 @@
 use super::AncestorFinder;
 use crate::{Border, Control, Decorator};
 use ferroui_base::reactive::ObservableExt;
-use ferroui_base::{ObjectType, Ref, StyledElement};
+use ferroui_base::{Ref, StyledElement};
 use std::cell::RefCell;
 use std::rc::Rc;
 
