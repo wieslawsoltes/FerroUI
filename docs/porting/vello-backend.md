@@ -28,8 +28,13 @@ Established on 2026-10-09 with `cargo search`, `cargo info` and the sources of t
 | `fontique` | 0.12.0 | 1.88 | Apache-2.0 OR MIT | font enumeration and fallback |
 | `linesweeper` | 0.5.0 | not stated | MIT OR Apache-2.0 | boolean operations of Bézier paths of kurbo ("early beta" by its README) |
 | `png` | 0.18.1 | 1.73 | MIT OR Apache-2.0 | PNG decoding and encoding |
+| `zune-jpeg` | 0.5.15 (0.5.16-rc2 is a release candidate) | 1.75 | MIT OR Apache-2.0 OR Zlib | JPEG decoding |
+| `zune-bmp` | 0.5.2 | 1.87 | MIT OR Apache-2.0 OR Zlib | BMP decoding |
+| `zune-core` | 0.5.3 | 1.75 | MIT OR Apache-2.0 OR Zlib | options and readers of the two zune crates |
+| `jpeg-encoder` | 0.7.1 | 1.87 | (MIT OR Apache-2.0) AND IJG | JPEG encoding; the IJG terms ask for a statement in the documentation, which `NOTICE.md` has |
+| `gif` | 0.14.2 | 1.62 | MIT OR Apache-2.0 | GIF decoding (with `weezl` 0.1.12) |
 
-Everything the backend links is Apache-2.0 OR MIT and within the toolchain of the workspace, except `vello_api` (1.92), which it does not link. The notices are in `src/Vello/FerroUI.Vello/NOTICE.md`.
+Everything the backend links is Apache-2.0 OR MIT (`jpeg-encoder` with the IJG terms beside it) and within the toolchain of the workspace, except `vello_api` (1.92), which it does not link. The notices are in `src/Vello/FerroUI.Vello/NOTICE.md`.
 
 ### 1.2 The three renderers
 
@@ -58,11 +63,11 @@ The owner wants all three modes; the backend is designed for all three from the 
 | Layers with opacity | `push_layer(clip, blend, opacity, mask, filter)` | same | `push_layer(blend, alpha, transform, clip)` | none |
 | Blend modes | all 16 `Mix` and 14 `Compose` of peniko | some panic when not isolated [V README] | same enum | every `BitmapBlendingMode` of the contract maps (12 Porter-Duff, 15 mix functions); in hybrid mode the ones that panic must be drawn in an isolated layer |
 | Opacity masks | a layer composed `DestIn` with the mask drawn into it (built); also `Mask` layers | mask layers panic: the `DestIn` layer is the way | `push_luminance_mask_layer` | none in CPU; to verify in the others |
-| Images with interpolation | `ImageQuality::{Low, Medium, High}` = nearest, bilinear, bicubic | same | same | no mipmaps: Skia's medium and high quality when shrinking use them; a bitmap shrunk a lot aliases more (open, stage 6: resize on the CPU first) |
+| Images with interpolation | `ImageQuality::{Low, Medium, High}` = nearest, bilinear, bicubic | same | same | no mipmaps: Skia's medium and high quality when shrinking use them. Built in the drawing context, for every mode: the levels of `SkMipmap` and the two of them Skia samples (section 10.2) |
 | Glyph runs by id and position | `glyph_run(font).font_size().hint().normalized_coords().glyph_transform().font_embolden().fill_glyphs()` (`glifo`) | same | `draw_glyphs(font)` with the same options | built for the CPU mode (stage 5; section 8, "Text"). Variable coordinates, synthetic bold (embolden) and italic (a skew as glyph transform) exist in all three; colour fonts: COLR and bitmap glyphs in `glifo` (`GlyphColr`, its `png` feature) and in `vello` (`scene.rs:599`); **no sub-pixel (LCD) text** in any of them: text is grey-scale anti-aliased, not closable short of an own rasterizer. Hinting in `glifo` is vertical only and is not applied under a rotation or a non-uniform scale (`glyph.rs:1674-1700`); it widens an emboldened outline in the units of the font, or in pixels when the glyph is hinted (`glyph.rs:1248`, `2087`), so an emboldened run is drawn without hinting; it reads the em square from `head` and panics without one (`glyph.rs:1736`), so a font without that table is not handed to it |
-| Blur and drop shadow effects | `push_filter_layer` with `FilterPrimitive::{GaussianBlur, DropShadow}`; "experimental", panics with the thread pool | filters on the GPU; "complex filter graphs" panic | **none**: only `draw_blurred_rounded_rect` | CPU and hybrid: native (stage 6). GPU: a render-to-texture pass with an own blur shader, or the layer drawn by `vello_cpu` and composed as an image |
-| Box shadows | `fill_blurred_rounded_rect(rect, radius, std_dev, invert)`: one radius, `invert` for inset shadows | same | `draw_blurred_rounded_rect` | stage 6. Per-corner and elliptical radii: the blurred shape through the filter layer instead |
-| Anti-aliasing modes | analytic; `set_aliasing_threshold(Some(n))` for aliased edges | same | `AaConfig::{Area, Msaa8, Msaa16}`, no aliased mode | GPU mode: `EdgeMode::Aliased` is not available (capability flag of the sink); snap to pixels where the contract uses it for crisp lines |
+| Blur and drop shadow effects | `push_filter_layer` with `FilterPrimitive::{GaussianBlur, DropShadow}`; "experimental", panics with the thread pool | filters on the GPU; "complex filter graphs" panic | **none**: only `draw_blurred_rounded_rect` | built for the CPU mode: a filter layer where nothing clips the scene, else the layer drawn by `vello_cpu` into an image, which is also what a mode without filters gets (section 10.2). GPU: that image, or later a render-to-texture pass with an own blur shader |
+| Box shadows | `fill_blurred_rounded_rect(rect, radius, std_dev, invert)`: one radius, `invert` for inset shadows | same | `draw_blurred_rounded_rect` | built: the closed form where it agrees with the Gaussian, else the shape blurred as an image (section 10.2). Its `std_dev` is not the Gaussian's but √2 times it [M] |
+| Anti-aliasing modes | analytic; `set_aliasing_threshold(Some(n))` for aliased edges | same | `AaConfig::{Area, Msaa8, Msaa16}`, no aliased mode | GPU mode: `EdgeMode::Aliased` is not available (capability flag of the sink): the drawing context then asks for anti-aliased edges; snapping to pixels where the contract uses the mode for crisp lines is open |
 | Offscreen render and read back | renders into memory | render to a texture, read back with `wgpu` (copy to a buffer, map) | same | none |
 | Perspective transforms | `Affine` only | same | same | not closable in the renderer: the perspective column of a matrix is dropped (`to_affine`). The Skia backend passes a 4x4 matrix. Open; a 3D transform would have to be drawn into a layer and mapped as a mesh |
 
@@ -78,8 +83,8 @@ The owner wants all three modes; the backend is designed for all three from the 
 | Arcs of the stream geometry | `kurbo::SvgArc` and `Arc::from_svg_arc` (endpoint parameters of SVG, radii scaled up when too small, a line when degenerate: `svg.rs:405-470`), as cubic Béziers | built; agrees with Skia's `arcTo` to 0.0005 units in the bounds [M] |
 | Boolean operations of combined geometries | `linesweeper` 0.5.0 (`binary_op(a, b, fill_rule, op)` on `BezPath`, curves kept as curves, output contours fill alike under both rules). Candidates looked at: `i_overlay` 9.0.1 (polygons only: curves would be flattened), `flo_curves` 0.8.1 (own path types, Apache-2.0 only), `kurbo` (none) | built. Risk: "early beta"; a panic inside it is caught and gives the empty geometry of the contract |
 | Regions | own code (`vello_region_impl.rs`): rectangles and their decomposition into bands | built |
-| Bitmap decode and encode | `png` for PNG. JPEG, GIF, WebP, BMP, ICO: `image` 0.25 with only the formats needed (`zune-jpeg`, `image-webp`, `gif`), or the codec crates directly | PNG built; the rest stage 6, failing with a load error until then |
-| Pixel formats | own code (`helpers/pixel_format_helper.rs`): RGBA8888 and BGRA8888, premultiplied, not premultiplied, opaque | built; RGB565, which the Skia backend also supports, is open |
+| Bitmap decode and encode | a crate a format, not the `image` crate over them (which adds `moxcms` and more to every build): `png`, `zune-jpeg` and `jpeg-encoder`, `gif`, `zune-bmp`; ICO and WBMP are own code | built for what the codecs of Skia decode in this workspace (PNG, JPEG, GIF, BMP, ICO, WBMP) and for the two formats the contract encodes (PNG, JPEG); WebP, which Skia decodes only when built with it, fails to load (section 10.4) |
+| Pixel formats | own code (`helpers/pixel_format_helper.rs`): RGBA8888 and BGRA8888, premultiplied, not premultiplied, opaque | built: RGBA8888 and BGRA8888 in the three alpha formats, RGB565 and RGB32, for bitmaps from pixels, writeable bitmaps and framebuffers |
 | Writeable bitmaps | own code: pixels under a lock, an image of them until they change | built |
 | Font manager: installed fonts, matching, fallback by character | `fontique` 0.12: `Collection::load_system_fonts` (CoreText on macOS through `objc2-core-text`, DirectWrite, fontconfig), `family_names`, `Query` matching by weight, style and width, `fallback_families(key)` with a key of script and locale. Skia's font manager gives the same three things (`FontMgr::family_names`, `match_family_style`, `match_family_style_character` with a culture) | built (`font_manager_impl.rs`), verified on macOS [M]: the families, the match by weight, style and width, the data of a matched font (memory-mapped, by `SourceCache`) and what to synthesize (`FontInfo::synthesis`: the variation settings of a variable font, embolden, skew). Three things it does not give and how each is closed: **(1)** fallback is by script and language (`fallback_families(FallbackKey)`: on macOS a font CoreText returns for a sample text of the script), not by character: the script of the character is looked up with the Unicode data of the base library (`helpers/script_tag.rs` has the ISO 15924 codes, which the base library keeps to itself), the family is checked for the character, and a character without a script (a symbol, an emoji) or one the family lacks is searched in the default family, the generic families and then every installed family, once for a character and a culture; **(2)** `family_names` lists a family under each of its localized names (458 names for 320 families here): the list is made from the family identifiers; **(3)** `Collection::new` reads every font file of the system (a scan): the enumerated collection is shared by the font managers of a process and made when a font of the system is first asked for. It leaves out the PingFang families, whose outlines are in Apple's `hvgl` table that `skrifa` does not read, and falls back to Heiti (`backend/coretext.rs`, under the comment "HACK") |
 | Glyph metrics and outlines for the glyph typeface | the base crate's own font tables (`src/FerroUI.Base/media/fonts`), which the glyph typeface of the port already reads from the tables a platform typeface serves: every metric is the base library's, the same number over either backend (section 8, "Text"). `skrifa` 0.44.0 (the version `glifo` links) for what the contract leaves to the backend: the tables by tag, the identity of the font, the axes of a variable font, and the outline of a glyph for the bounds, the intersections and the geometry of a glyph run | built (`vello_typeface.rs`) |
@@ -94,7 +99,7 @@ The owner wants all three modes; the backend is designed for all three from the 
 
 `src/Vello/FerroUI.Vello`, package `ferroui-vello`. An application chooses it with `use_vello` on the application builder (`VelloApplicationExtensions`, in the crate, as `use_skia` is in Skia's); the options are `VelloOptions` bound in the locator. An application has one backend; only the comparison harness links both.
 
-Dependencies, exact versions in the workspace manifest: `kurbo = "=0.13.1"`, `peniko = "=0.6.1"`, `vello_cpu = "=0.3.0"` (without default features: `std`, `u8_pipeline`; no thread pool, no PNG, no text), `linesweeper = "=0.5.0"`, `png = "=0.18.1"`. `Cargo.lock` gained 24 third-party packages (among them `glifo`, `skrifa`, `read-fonts` and `font-types`, which are optional dependencies of `vello_cpu` and are not compiled) and changed the version of none. In a build of the whole workspace `arrayvec` gains its `serde` feature (asked for by `linesweeper`) and `hashbrown` `default-hasher` (`vello_cpu`); a build of one application does not, since no crate but the harness depends on the backend. `wgpu`, `vello` and `vello_gpu` are not dependencies yet: they come with stages 7 and 8, behind features of the crate, so that an application of the CPU mode does not compile a graphics API.
+Dependencies, exact versions in the workspace manifest: `kurbo = "=0.13.1"`, `peniko = "=0.6.1"`, `vello_cpu = "=0.3.0"` (without default features: `std`, `u8_pipeline`; no thread pool, no PNG, no text), `linesweeper = "=0.5.0"`, `png = "=0.18.1"`. `Cargo.lock` gained 24 third-party packages (among them `glifo`, `skrifa`, `read-fonts` and `font-types`, which are optional dependencies of `vello_cpu` and are not compiled) and changed the version of none. In a build of the whole workspace `arrayvec` gains its `serde` feature (asked for by `linesweeper`) and `hashbrown` `default-hasher` (`vello_cpu`); a build of one application does not, since no crate but the harness depends on the backend. Stage 6 added `zune-core = "=0.5.3"`, `zune-jpeg = "=0.5.15"` (`std` and its SIMD paths, which are its default), `zune-bmp = "=0.5.2"` (`std`), `jpeg-encoder = "=0.7.1"` (`std`; not its `simd` feature) and `gif = "=0.14.2"` (`std`; not its color quantizer, which only its encoder uses): `Cargo.lock` gained these five and `weezl` 0.1.12 and changed the version of none. `wgpu`, `vello` and `vello_gpu` are not dependencies yet: they come with stages 7 and 8, behind features of the crate, so that an application of the CPU mode does not compile a graphics API.
 
 Stage 5 added, at exact versions: the features `text` and `png` of `vello_cpu` (`text` compiles `glifo` 0.4.0, the glyph renderer, with `skrifa` 0.44.0, `read-fonts` 0.41.0 and `font-types` 0.12.6, which were in `Cargo.lock` already as optional dependencies; `png` adds nothing but the decoding of the bitmap glyphs of a colour font, the crate `png` being linked already), `glifo = "=0.4.0"` and `skrifa = "=0.44.0"` as direct dependencies (the embolden settings of a glyph run are a type of `glifo` that `vello_cpu` does not re-export; `skrifa` for the typeface), and `fontique = "=0.12.0"` with its default `system` feature. `Cargo.lock` gained 18 packages and changed the version of none: `fontique`, `parlance`, `memmap2`, the bindings `fontique` reaches the font interface of a platform with, each linked on its platform only (`objc2`, `objc2-encode`, `objc2-foundation` and `objc2-core-text` on Apple platforms, where `objc2-core-foundation` was linked already; `windows` and `windows-core` with six parts on Windows; `yeslogic-fontconfig-sys` and `dlib` on Linux; `roxmltree` 0.21.1 on Android, beside the 0.20 the workspace uses). On macOS a build of the backend now also compiles `glifo`, `skrifa`, `read-fonts`, `font-types`, `fontique`, `parlance`, `memmap2` and the `objc2` bindings; the build time was not measured.
 
@@ -108,12 +113,13 @@ Stage 5 added, at exact versions: the features `text` and `png` of `vello_cpu` (
 | `skia_platform.rs`, `skia_options.rs`, `skia_application_extensions.rs` | `vello_platform.rs`, `vello_options.rs`, `vello_application_extensions.rs` | initialization, options for the render thread | options: the rendering modes in the order they are tried; no GPU resource limit or stencil option. The font manager is bound as in the Skia backend |
 | `platform_render_interface.rs` | `platform_render_interface.rs` | every member | glyph runs and their geometry are built on the outlines of `skrifa`; a platform graphics context fails with stages 7 and 8; default pixel format RGBA8888 |
 | `skia_backend_context.rs` (`SkiaContext`) | `vello_backend_context.rs` (`VelloContext`) | render targets of framebuffer surfaces, offscreen targets | software only so far |
-| `drawing_context_impl.rs` | `drawing_context_impl.rs` | the state (opacity, render and text options, transforms), brush and pen logic, gradients kind by kind, tile brushes | records into `IVelloSceneSink`; the state stack is its own (section 5); no lease of a canvas; `PaintWrapper` lists what a paint of Skia does in one |
+| `drawing_context_impl.rs` | `drawing_context_impl.rs` and, for what stage 6 added, `drawing_context_impl/box_shadows.rs`, `effects.rs`, `scene_brushes.rs`, `acrylic.rs` | the state (opacity, render and text options, transforms), brush and pen logic, gradients kind by kind, tile brushes; the geometry of box shadows, the filters of effects, the transforms of scene brushes | records into `IVelloSceneSink`; the state stack is its own (section 5); no lease of a canvas; `PaintWrapper` lists what a paint of Skia does in one; blurs as section 10.2 has them |
 | `geometry_impl.rs` and the seven geometry files | same names | everything but the path type | `VelloPath` (a `BezPath` and its fill rule) for `SkPath`; no `unsafe impl Send` |
 | `helpers/pen_helper.rs` | `helpers/pen_helper.rs` | identical | |
 | `helpers/sk_path_helper.rs` | `helpers/path_helper.rs` | the outline of a pen | `kurbo::stroke`; its figures are closed already |
-| `helpers/drawing_context_helper.rs` | `helpers/drawing_context_helper.rs` | dash lengths | `render_async`/`wrap_skia_surface` have no counterpart yet (stage 6) |
-| `helpers/image_saving_helper.rs` | `helpers/image_saving_helper.rs` | options | `png` crate; decoding lives here too |
+| `helpers/drawing_context_helper.rs` | `helpers/drawing_context_helper.rs` | dash lengths | `render_async`/`wrap_skia_surface`, which draw onto a surface of Skia that another API made, have no counterpart: there is no such surface before the GPU modes (open) |
+| `helpers/image_saving_helper.rs` | `helpers/image_saving_helper.rs`, `helpers/image_decoding_helper.rs` | options | `png` and `jpeg-encoder`; the decoders, which in the Skia backend are the codec of Skia inside `immutable_bitmap.rs` |
+| (the mipmaps of Skia) | `helpers/mipmap_helper.rs` | | own code |
 | `helpers/pixel_format_helper.rs`, `skia_sharp_extensions.rs` | `helpers/pixel_format_helper.rs`, `vello_extensions.rs` | conversions | to kurbo and peniko types; shape paths (rounded rectangle with elliptical radii) |
 | (Skia's `SkPathMeasure`) | `helpers/path_measure.rs` | | own code |
 | `skia_region_impl.rs` | `vello_region_impl.rs` | the contract | own bands |
@@ -121,7 +127,7 @@ Stage 5 added, at exact versions: the features `text` and `png` of `vello_cpu` (
 | `framebuffer_render_target.rs` | `framebuffer_render_target.rs` | locking, properties | every frame goes the way of Skia's conversion shim: rendered in memory, written in the format of the framebuffer |
 | `surface_render_target.rs` | `surface_render_target.rs` | layer, blit, snapshot | pixels in memory |
 | `locked_framebuffer.rs` | not needed yet | | comes with the GPU surfaces |
-| `picture_render_target.rs` | stage 6 | | a recorded scene for scalable scene brushes |
+| `picture_render_target.rs` | none | | only the drawing context of the Skia backend uses it (and a test of it), for scalable scene brushes; here their content is replayed into a surface at the resolution of the target (section 10.2) |
 | `skia_typeface.rs` | `vello_typeface.rs` (`VelloTypeface`, `VelloFontFace`) | the contract: family name, weight, style, stretch, simulations, the stream, a table by tag | the bytes of the font file read with `skrifa` where Skia has a typeface object; `VelloFontFace` is what a glyph run keeps (the font data, the position in the variation space, the simulations), `Send + Sync` where the typeface is not; the outline of a glyph with the simulations applied (the rule of Skia's fake bold, the skew of -0.3); the values of the axes of a variable font, which the contract has no member for |
 | `font_manager_impl.rs` | `font_manager_impl.rs` | every member, the rule for the simulations (bold from a weight of 600 on a lighter font, oblique for italic on an upright one) | `fontique` where Skia has `SkFontMgr`; the fallback for a character is put together here (1.4); `try_match_family_style` and `legacy_make_typeface` for what tests and callers ask of Skia's font manager directly |
 | `glyph_run_impl.rs` | `glyph_run_impl.rs` | positions, the bounds placed at the pen positions, the contract | no text blob and no cache of them: a run is glyph indices and positions and the scene draws it; bounds and intersections are computed from the outlines |
@@ -161,6 +167,7 @@ IDrawingContextImpl (contract)
 - `VelloSceneCapabilities` answers what a mode lacks (blend layers, aliased edges, image paints, read back); the drawing context asks before it uses such a feature and fails with a message rather than draw something else.
 - `VelloRenderingMode { Cpu, Hybrid, Gpu }` and `VelloOptions::rendering_modes`, the order in which they are tried (default: GPU, hybrid, CPU). `scene::try_create_scene_sink` fails for a mode that is not built or not available with its reason; `create_scene_sink` takes the first that works and panics with every reason when none does. `DrawingContextImpl::rendering_mode` tells which one draws.
 - Glyph runs are a call of the interface (stage 5): `draw_glyph_run(&VelloSceneGlyphRun, transform, paint, anti_alias)`, the run being the font data, the em size, the normalized variation coordinates, the glyphs with their origins, the widening of the bold simulation, the skew of the oblique one and whether to hint. It is a required member: **the sinks of stages 7 and 8 have to implement it** (`vello_gpu::Scene::glyph_run` has the same builder as `vello_cpu`'s; `vello::Scene::draw_glyphs` takes the same options). The CPU sink draws it with `RenderContext::glyph_run`. Filters (stage 6) join the interface the same way.
+- Filters are members with capability flags (stage 6): `filter_capabilities` (`VelloSceneFilterCapabilities { filter_layers, blurred_rounded_rects }`), `push_filter_layer` and `fill_blurred_rounded_rect`, at the end of the trait with default bodies that say "none" and fail when called, so a sink that does not implement them is drawn for as section 10.3 describes.
 
 **Which renderer serves which surface.**
 
@@ -200,16 +207,16 @@ The desktop surface: the native backend hands the Skia backend a Metal device an
 | 3 | CPU render path: render targets, drawing context (shapes, brushes, pens, clips, layers, opacity, masks), bitmaps | ported contract tests | done |
 | 4 | Comparison harness | the scene table of section 8, a bound per scene | done |
 | 5 | Text: `glyph_run_impl.rs`, `vello_typeface.rs`, `font_manager_impl.rs` (`fontique`), glyph run geometry, intersections; the `text` feature of `vello_cpu` | the text suites of `unit_tests/media` of the Skia backend (fonts, glyph runs, text formatting, 326 tests) and its `text_tests.rs` (14) ported; 13 text scenes and nine numeric comparisons in the harness; a window of the Fluent theme on the headless platform (section 8, "Text") | done for the CPU mode |
-| 6 | Effects, box shadows, scene brushes (visual and drawing brushes, the recorded scene), JPEG and the other codecs, RGB565, mipmapped downscaling, `render_async` | the effect and scene brush tests of `tests.rs` ported; scenes in the harness; the `HitTesting` suite | open |
+| 6 | Effects, box shadows, scene brushes (visual and drawing brushes), acrylic materials, render options, JPEG and the other codecs, RGB565, mipmapped downscaling | the effect, scene brush, acrylic and bitmap tests of the Skia backend ported; 61 scenes and the codec tests in the harness (section 10) | done, but `render_async` (no surface of another API before the GPU modes) and the `HitTesting` suite (which needs the font services of the tests of stage 5) |
 | 7 | Hybrid mode: `VelloHybridSceneSink` offscreen on a headless `wgpu` device, then the desktop window (after the Metal contracts moved) | the harness compares hybrid against Skia and against CPU; ControlCatalog runs with `use_vello` | open |
 | 8 | GPU mode: `VelloGpuSceneSink`, blur passes | the same, three modes compared | open |
 | 9 | Browser: WebGPU, WebGL2, CPU | `browser-platform.md` | open |
 
-**Members that fail with their stage** (nothing pretends to work): box shadows of `draw_rectangle`, scene brushes (stage 6; a panic); `as_drawing_context_impl_with_effects` and `as_drawing_context_with_acrylic_like_support` return `None`, the contract's way to say a backend has no effects (stage 6); saving JPEG returns an `Unsupported` error and loading anything but PNG a load error (stage 6); `create_backend_context` with a platform graphics context (stages 7, 8; a panic); the hybrid and GPU modes (`VelloRenderingModeUnavailable`).
+**Members that fail with their stage** (nothing pretends to work): loading WebP and whatever else is not PNG, JPEG, GIF, BMP, ICO or WBMP (a load error, as for data in no format); `create_backend_context` with a platform graphics context (stages 7, 8; a panic); the hybrid and GPU modes (`VelloRenderingModeUnavailable`).
 
 ## 8. How correctness is measured
 
-1. **The contract tests of the Skia backend, ported** (`src/Vello/FerroUI.Vello/tests.rs`, `unit_tests.rs`): the same scenes and expectations, pixel by pixel, for everything that tests the contract and not Skia. 83 tests pass: 79 in `tests.rs` (the drawing context, the geometries, the bitmaps, the framebuffer render target and the software context, the image brushes, and tests that what is not built fails with its stage and that a target keeps its content) and 4 of the suites `RenderBoundsTests`, `CombinedGeometryImplTests` and `DrawingContextImplTests`. Stage 5 added the text tests (below, "Text"): 430 tests in the crate, 421 pass and 9 are ignored as they are in the Skia backend. Left for their stages: effects, scene brushes and `HitTesting`.
+1. **The contract tests of the Skia backend, ported** (`src/Vello/FerroUI.Vello/tests.rs`, `unit_tests.rs`): the same scenes and expectations, pixel by pixel, for everything that tests the contract and not Skia. 83 tests pass: 79 in `tests.rs` (the drawing context, the geometries, the bitmaps, the framebuffer render target and the software context, the image brushes, and tests that what is not built fails with its stage and that a target keeps its content) and 4 of the suites `RenderBoundsTests`, `CombinedGeometryImplTests` and `DrawingContextImplTests`. Stage 5 added the text tests (below, "Text"): 430 tests in the crate, 421 pass and 9 are ignored as they are in the Skia backend. Stage 6 ported the tests of box shadows, effects, scene brushes, acrylic and bitmaps (section 10.4). Left: `HitTesting`.
 2. **The comparison harness** (`tests/FerroUI.RenderBackends.Comparison`, crate `ferroui-render-backends-comparison`): the same scenes through the contracts by Skia raster and by every Vello mode that is built, 200 by 200 pixels, and for each scene the share of pixels of which a channel differs by more than 32 of 255. Each scene has a recorded bound (the measured share, half as much again and 0.05 %); `scenes_stay_within_their_bounds` fails when a scene exceeds it. `cargo test -p ferroui-render-backends-comparison -- --nocapture` prints the tables below.
 
 ### Scenes: Vello CPU against Skia raster (2026-10-09)
@@ -434,7 +441,182 @@ Reading:
 | 6 | `linesweeper` is in "early beta" | a panic is caught and gives the empty geometry; the harness compares its areas with Skia's path operations |
 | 7 | Every software frame is rendered in memory and converted to the framebuffer's format, and a retained target is drawn back in as an image | correct, not fast. Stage 7 removes it for windows; for the CPU mode: render in place when the framebuffer is premultiplied RGBA without padding, and render only the dirty rectangle (`RasterizerSettings::offset` and a smaller scene) |
 | 8 | Curves are flattened on every draw | cache per geometry and scale |
-| 9 | No mipmaps for shrunk images; RGB565; codecs beyond PNG | stage 6 |
+| 9 | No mipmaps for shrunk images; RGB565; codecs beyond PNG | done in stage 6. The levels of a mipmap are built for every draw (section 10.6) |
 | 10 | A second backend duplicates neutral logic of the first | the list of section 3; move after the Vello backend draws text, so that the shape of the shared code is known |
 | 11 | The Metal contracts live in the Skia crate | move before stage 7 (section 3); this is the one change outside the crate the backend needs. **No platform contract of the base crate needed a change** for stages 1 to 4 |
 | 12 | Scene sizes are 16 bit | `max_offscreen_render_target_pixel_size` reports 65535; larger targets fail with a message |
+
+## 10. Stage 6: box shadows, effects, scene brushes, render options, codecs
+
+Done on 2026-10-09 for the CPU mode, with capabilities for the modes that follow. Marks as in section 1.
+
+### 10.1 What was verified about the renderer
+
+| Fact | How |
+|---|---|
+| `vello_cpu` 0.3 has filter layers: `RenderContext::push_layer(clip, blend, opacity, mask, filter)` and `push_filter_layer`, with `FilterPrimitive::{GaussianBlur, DropShadow, DropShadowOnly, Flood, Offset}`; a graph of more than one primitive is `unimplemented!`. "Incomplete and experimental"; panics with the thread pool, which the backend does not compile in | [V] `vello_cpu-0.3.0/src/render.rs:503-590`, `vello_common-0.3.0/src/filter/mod.rs:42-104` |
+| The lengths of a filter (standard deviation, offset) are scaled by the transform that is current when the layer is pushed; a blur by the mean of the two scales of the transform, so it stays round under a non-uniform scale, where the image filter of Skia becomes elliptical | [V] `vello_common-0.3.0/src/filter/gaussian_blur.rs:17-33` |
+| The blur is a separable Gaussian of at most 13 taps on a pyramid of halvings, in eight bits. Against the exact blur of an edge (the error function) it is within 4 of 255 for deviations of 0.8 to 12 pixels | [V] `vello_cpu-0.3.0/src/filter/gaussian_blur.rs`; [M] a probe: 3.8, 1.5, 0.9, 0.5, 1.1, 1.6 of 255 at deviations 0.8, 1.5, 2, 3.39, 6.27, 12 |
+| Beyond its content a filter layer is transparent to the blur (`EdgeMode::None`), as a layer of Skia is | [V] `filter_effects.rs:332-353` |
+| **A clip that is open when a filter layer is pushed cuts the content of the layer before it is blurred and does not cut the blurred layer**: a square blurred under a clip that halves it is the blur of the half, and spreads over the clip. The canvas of Skia does the opposite | [M] a probe; the test `an_effect_under_a_clip_is_cut_by_the_clip_and_its_content_is_not` |
+| Content of a filter layer that lies outside of the scene still blurs into it: the renderer draws as much of it as the filter reaches | [V] the comment at `render.rs:526-531`; [M] the tests `a_shadow_that_reaches_beyond_the_target_is_not_cut_short`, `an_effect_is_recorded_into_a_scene_as_large_as_its_clip_rectangle` |
+| `fill_blurred_rounded_rect(rect, radius, std_dev, invert)` is a closed form over a distance field (after Raph Levien's `blurrr`), evaluated at the middle of a pixel, for one circular radius. **Its `std_dev` is √2 times the standard deviation of the Gaussian it stands for**: the ramp it draws across an edge for a `std_dev` of s is that of a Gaussian of s/√2. Given the deviation of the Gaussian it is 21 of 255 from the Gaussian blur of a plain rectangle, given √2 times it 5 | [V] the form: `vello_common-0.3.0/src/encode.rs:887-960`, `vello_cpu-0.3.0/src/fine/common/rounded_blurred_rect.rs`; [M] the factor: a probe against the blur filter of the same renderer |
+| With the factor the closed form is within 6 of 255 of the Gaussian when the radius is at most a quarter of the shorter side, that side at least five deviations long and the deviation at least a pixel (68 of 126 shapes of a sweep); a capsule is up to 22 off, a rectangle thin against its blur 18 | [M] the test `the_closed_form_of_a_blurred_rounded_rectangle_agrees_with_the_gaussian` |
+| With `invert` it paints nothing beyond 2.5 deviations around the rectangle, where an inset shadow has to be opaque: not used | [V] `render.rs:446-451` |
+| The bicubic filter of `ImageQuality::High` is Mitchell's (B = C = 1/3), the one the Skia backend uses for high quality | [V] `vello_cpu-0.3.0/src/fine/common/image.rs:506-508`; [M] `interpolation_high_upscaled`: 1 of 255 |
+| No mipmaps, in any of the three renderers | [V] |
+| `vello_gpu` 0.3 has `push_filter_layer`, `fill_blurred_rounded_rect` and `set_aliasing_threshold` under the same names; classic `vello` 0.11 has `draw_blurred_rounded_rect` and no filter | [V] `vello_gpu-0.3.0/src/scene.rs:445, 550, 726`, `vello-0.11.0/src/scene.rs:244` |
+| Skia chooses the level of a mipmap by the smaller of the two scales of the inverse matrix, less half a level, blends the level at and the level below it, and builds a level by adding two pixels (three, the middle one twice, along an odd axis) and shifting the sum, which cuts the quotient off | [V] `skia-bindings-0.153.3/skia/src/core/SkMipmap.cpp:196-219`, `SkMipmapAccessor.cpp:49-106`; [M] the other choices of scale and bias are 2 to 5 times further from Skia's pixels |
+| A JPEG that `jpeg-encoder` 0.7.1 writes with Huffman tables made for the image is decoded as black by `zune-jpeg` 0.5.15 and correctly by Skia | [M] the two decodings of the file differ in 95 % of the pixels. Not examined further; the backend writes the standard tables |
+
+### 10.2 How each member is built
+
+| Member | How | Where |
+|---|---|---|
+| Box shadows, outset | The box grown by the spread as `SkRRect::outset` grows it (a round corner by as much, a square one stays square), drawn with the transform followed by the offset (the offset is not transformed, as in the original), everywhere but in the box: a clip of the target with the box as a hole, anti-aliased for a rounded box and not for a rectangle, as the Skia backend clips. No shadows for a box of more than 8192 units | `drawing_context_impl/box_shadows.rs` |
+| Box shadows, inset | Everything around the box (the area of the Skia backend, after Chromium) with the box shrunk by the spread as its hole, moved by the offset, inside the box only | same |
+| The blur of a shadow | (a) none: a fill, anti-aliased whatever the edge mode; (b) the closed form of the renderer, when the sink has it and the shape passes the rule of 10.1 (outset shadows of rectangles and of boxes with one moderate radius: the common case); (c) otherwise the shape is drawn through a blur layer by `vello_cpu` into a scene of its own, as large as the blur reaches inside the target, and the picture is composed under the clip. (c) serves every inset shadow, elliptical and uneven corners, capsules and thin shapes, and every shadow of a mode without the closed form | same |
+| Effects | Blur and drop shadow with the deviation Skia derives from a radius (`0.288675 r + 0.5`); the alpha of a drop shadow times its opacity and the opacity of the context. A filter layer of the scene when the sink has them **and no clip is open**; otherwise everything drawn inside the effect is recorded into a scene of its own of `vello_cpu`, as large as the clip rectangle of the effect inside the target (the whole target without one), and its picture is composed when the effect is popped, under the clips. The clip rectangle cuts the content before the filter, as Skia cuts a filtered layer to the bounds it is given. An effect that changes nothing (a blur without a radius) is a layer | `drawing_context_impl/effects.rs` |
+| Scene brushes | Content that is not scalable: drawn into a surface of its own size, the image of a tile brush. Scalable content: replayed into a surface of one tile at the resolution of the target (at most 2048 by 2048 pixels, the limit of the picture shader of Skia), sampled by the nearest pixel as that shader samples; source and destination rectangle, stretch, alignment, tile modes and the transforms of the content as the Skia backend computes them. A tile that is not repeated clips the shape to itself | `drawing_context_impl/scene_brushes.rs` |
+| Acrylic materials | The tint over the color of the material as one color, then the noise texture (the asset of the Skia backend, its alpha scaled to 0.0225), repeated; a material that digs through replaces what is under it | `drawing_context_impl/acrylic.rs` |
+| Bitmap interpolation | Nearest; bilinear; bilinear with mipmaps (medium); Mitchell when a bitmap is enlarged and bilinear with mipmaps when not (high). With mipmaps the two levels Skia would sample are built and both drawn, each with its share as its alpha, added in a layer; with a blending mode other than source-over, which composes inside the rectangle of the bitmap only, one image (the lower level blended into the upper) stands for both. Also for resizing a bitmap and decoding to a size | `helpers/mipmap_helper.rs`, `vello_extensions.rs` (`to_sampling`) |
+| Blending modes | All 27 of the contract: 12 Porter-Duff operators, 15 mix functions composed source-over | `vello_extensions.rs` (`to_blend_mode`) |
+| Edge mode | Aliased: the threshold of the renderer at half coverage. A sink without aliased edges is asked for anti-aliased ones | `drawing_context_impl.rs` (`edge_anti_alias`) |
+| Decoding | By the first bytes of the data: PNG (`png`), JPEG (`zune-jpeg`), GIF (`gif`: the first frame on the canvas of the image), BMP (`zune-bmp`), ICO (own: the first of the largest images, a PNG or a bitmap with its mask, or with its alpha at 32 bits), WBMP (own; it has no signature and is tried last). A decoder says whether the image has no alpha, and the bitmap is then opaque, as the codec of Skia reports it. 96 DPI always: the Skia backend reads no resolution either | `helpers/image_decoding_helper.rs` |
+| Decoding to a width or height | The image is decoded, a JPEG is reduced to the eighths of its size at which the codec of Skia would decode it (libjpeg's scaled decoding; here the mean of the pixels), then scaled with the interpolation mode | `immutable_bitmap.rs` |
+| Encoding | PNG with the compression levels (`png`); JPEG with a quality of 0 to 100 (`jpeg-encoder`): the premultiplied colors (what is translucent over black), the color difference channels at half the resolution by the mean of four pixels, standard Huffman tables | `helpers/image_saving_helper.rs` |
+| Pixel formats | RGB565, RGB32, RGBA8888 and BGRA8888, premultiplied, not premultiplied and opaque, read into and written from the premultiplied RGBA the renderers draw. A bitmap from pixels takes a negative stride for rows from the bottom up, keeps the pixels it was made from and is read in their format; the render interface reports RGB565, RGBA8888 and BGRA8888 as supported, as the Skia backend does | `helpers/pixel_format_helper.rs`, `immutable_bitmap.rs`, `writeable_bitmap_impl.rs` |
+
+### 10.3 Capabilities per mode
+
+What the drawing context asks of a sink, and what it does when the sink lacks it. The CPU column is built and tested; the other two are what their renderers have by 10.1 and what the context does until their sinks say so (a sink that does not implement the filter members has none: the tests draw with such a sink).
+
+| | CPU (`vello_cpu`) | Hybrid (`vello_gpu`) | GPU (`vello`) | Without it |
+|---|---|---|---|---|
+| Filter layers (`filter_layers`) | yes; used when no clip is open | the renderer has them ("complex filter graphs" panic; one primitive is what is asked) | no | the effect is recorded into a scene of `vello_cpu` and composed as an image: correct in every mode, on the processor |
+| Blurred rounded rectangle (`blurred_rounded_rects`) | yes, with the factor √2 | the renderer has it; whether its `std_dev` is the same is to be measured by its sink | `draw_blurred_rounded_rect`, the same to be measured | the shadow is blurred as an image by `vello_cpu` |
+| Shadows that are not in closed form, inset shadows | an image by `vello_cpu` | the same image | the same image | |
+| Aliased edges (`aliased_edges`) | yes | the renderer has the threshold | no | anti-aliased edges |
+| Blending modes of a bitmap | all 27 | "certain blend modes for non-isolated blending" panic by its README: its sink has to isolate them | all | |
+| Mipmaps, scene brushes, acrylic, pixel formats, codecs | in the drawing context and the bitmaps: the same in every mode | | | |
+
+### 10.4 Measures against the Skia backend
+
+**The measure for blurred scenes.** A blur is a smooth ramp: two renderers that blur a little differently differ a little in every pixel of the ramp and by much in none. The share of pixels beyond a tolerance, the measure of the other scenes, is blind to a blur of the wrong width: a rectangle blurred by a radius of 13 instead of 10 has no pixel beyond the tolerance of 32 (the largest difference is 28). The scenes of stage 6 keep that measure with the same tolerance (it finds a shadow that is missing, moved or clipped wrongly: the same blur moved by two pixels has 3 % of its pixels beyond it) and have a second bound, on the mean difference of all channels of all pixels. Between the two backends the blurred rectangle has a mean of 0.25, which gives it a bound of 0.43; the blur that is 30 % too wide has 1.06 and the one that is moved 1.17 (the test `the_mean_difference_finds_a_blur_of_another_width`). The tolerance was not raised. Each bound is the measured value, half as much again and 0.05.
+
+`cargo test -p ferroui-render-backends-comparison -- --nocapture` prints the tables.
+
+| Scene | Pixels beyond the tolerance | Largest difference | Mean difference | Bound of the share | Bound of the mean |
+|---|---|---|---|---|---|
+| `shadows_outset_rectangle` | 0.000 % | 6 | 0.321 | 0.05 % | 0.54 |
+| `shadows_outset_rounded` | 0.092 % | 78 | 0.347 | 0.19 % | 0.58 |
+| `shadows_outset_elliptical` | 0.005 % | 37 | 0.300 | 0.06 % | 0.50 |
+| `shadows_outset_capsule` | 0.048 % | 72 | 0.285 | 0.13 % | 0.48 |
+| `shadows_inset_rectangle` | 0.000 % | 10 | 0.238 | 0.05 % | 0.41 |
+| `shadows_inset_rounded` | 0.113 % | 49 | 0.311 | 0.22 % | 0.52 |
+| `shadows_inset_elliptical` | 0.007 % | 36 | 0.257 | 0.07 % | 0.44 |
+| `shadows_combined` | 0.000 % | 32 | 0.318 | 0.05 % | 0.53 |
+| `effect_blur` | 0.000 % | 6 | 0.329 | 0.05 % | 0.55 |
+| `effect_blur_transformed` | 0.000 % | 5 | 0.175 | 0.05 % | 0.32 |
+| `effect_blur_bounded` | 0.000 % | 12 | 0.423 | 0.05 % | 0.69 |
+| `effect_drop_shadow` | 0.025 % | 43 | 0.221 | 0.09 % | 0.39 |
+| `effect_drop_shadow_transformed` | 0.018 % | 42 | 0.191 | 0.08 % | 0.34 |
+| `scene_brush_single` | 0.028 % | 60 | 0.021 | 0.10 % | 0.09 |
+| `scene_brush_tile` | 0.660 % | 60 | 0.678 | 1.04 % | 1.07 |
+| `scene_brush_flip_x` | 0.680 % | 60 | 0.682 | 1.07 % | 1.08 |
+| `scene_brush_flip_y` | 0.705 % | 60 | 0.679 | 1.11 % | 1.07 |
+| `scene_brush_flip_xy` | 0.720 % | 60 | 0.681 | 1.13 % | 1.08 |
+| `scene_brush_surface_single` | 0.000 % | 27 | 0.009 | 0.05 % | 0.07 |
+| `scene_brush_surface_tile` | 0.000 % | 32 | 0.267 | 0.05 % | 0.46 |
+| `scene_brush_surface_flip_xy` | 0.000 % | 32 | 0.267 | 0.05 % | 0.46 |
+| `scene_brush_stretched` | 0.180 % | 67 | 0.236 | 0.32 % | 0.41 |
+| `scene_brush_transformed` | 0.320 % | 68 | 0.340 | 0.53 % | 0.56 |
+| `acrylic` | 0.025 % | 56 | 0.216 | 0.09 % | 0.38 |
+| `interpolation_none_upscaled` | 0.000 % | 0 | 0.000 | 0.05 % | 0.05 |
+| `interpolation_low_upscaled` | 0.000 % | 2 | 0.190 | 0.05 % | 0.34 |
+| `interpolation_medium_upscaled` | 0.000 % | 2 | 0.193 | 0.05 % | 0.34 |
+| `interpolation_high_upscaled` | 0.000 % | 1 | 0.000 | 0.05 % | 0.05 |
+| `interpolation_none_downscaled` | 0.000 % | 23 | 0.046 | 0.05 % | 0.12 |
+| `interpolation_low_downscaled` | 0.000 % | 23 | 0.182 | 0.05 % | 0.33 |
+| `interpolation_medium_downscaled` | 0.000 % | 22 | 0.513 | 0.05 % | 0.82 |
+| `interpolation_high_downscaled` | 0.000 % | 22 | 0.513 | 0.05 % | 0.82 |
+| `blend_source_over` | 0.095 % | 56 | 0.212 | 0.20 % | 0.37 |
+| `blend_source` | 0.085 % | 59 | 0.252 | 0.18 % | 0.43 |
+| `blend_destination` | 0.000 % | 21 | 0.044 | 0.05 % | 0.12 |
+| `blend_destination_over` | 0.000 % | 30 | 0.141 | 0.05 % | 0.27 |
+| `blend_source_in` | 0.055 % | 47 | 0.183 | 0.14 % | 0.33 |
+| `blend_destination_in` | 0.055 % | 47 | 0.160 | 0.14 % | 0.29 |
+| `blend_source_out` | 0.000 % | 30 | 0.100 | 0.05 % | 0.20 |
+| `blend_destination_out` | 0.060 % | 47 | 0.157 | 0.14 % | 0.29 |
+| `blend_source_atop` | 0.040 % | 43 | 0.133 | 0.11 % | 0.25 |
+| `blend_destination_atop` | 0.085 % | 60 | 0.243 | 0.18 % | 0.42 |
+| `blend_xor` | 0.045 % | 47 | 0.213 | 0.12 % | 0.37 |
+| `blend_plus` | 0.100 % | 59 | 0.231 | 0.20 % | 0.40 |
+| `blend_screen` | 0.095 % | 56 | 0.300 | 0.20 % | 0.50 |
+| `blend_overlay` | 0.000 % | 30 | 0.210 | 0.05 % | 0.37 |
+| `blend_darken` | 0.000 % | 30 | 0.158 | 0.05 % | 0.29 |
+| `blend_lighten` | 0.098 % | 57 | 0.220 | 0.20 % | 0.38 |
+| `blend_color_dodge` | 0.125 % | 58 | 0.210 | 0.24 % | 0.37 |
+| `blend_color_burn` | 0.000 % | 30 | 0.167 | 0.05 % | 0.31 |
+| `blend_hard_light` | 0.077 % | 54 | 0.310 | 0.17 % | 0.52 |
+| `blend_soft_light` | 0.000 % | 30 | 0.164 | 0.05 % | 0.30 |
+| `blend_difference` | 0.090 % | 54 | 0.242 | 0.19 % | 0.42 |
+| `blend_exclusion` | 0.087 % | 53 | 0.385 | 0.19 % | 0.63 |
+| `blend_multiply` | 0.000 % | 30 | 0.248 | 0.05 % | 0.43 |
+| `blend_hue` | 0.000 % | 31 | 0.201 | 0.05 % | 0.36 |
+| `blend_saturation` | 0.000 % | 30 | 0.162 | 0.05 % | 0.30 |
+| `blend_color` | 0.000 % | 31 | 0.196 | 0.05 % | 0.35 |
+| `blend_luminosity` | 0.030 % | 40 | 0.239 | 0.10 % | 0.41 |
+| `edge_mode_aliased` | 0.068 % | 255 | 0.134 | 0.16 % | 0.26 |
+| `pixel_formats` | 0.013 % | 36 | 0.064 | 0.07 % | 0.15 |
+| **all 61 scenes** | **0.081 %** | | **0.248** | | |
+
+Reading. A blur agrees to 6 of 255 where nothing else is in the scene (`shadows_outset_rectangle`, `effect_blur`, the transformed blur under a rounded clip) and to 12 where the clip rectangle of the effect cuts its content (which confirms that Skia cuts before it filters: cutting after would be off by a hundred). The larger differences of the shadow scenes are on the sharp edges of the shadows without a blur and of the rounded clips, as in the scenes of section 8 (`rounded_rectangle`: 62). Scalable scene brushes differ like the shapes they draw, once a tile (0.03 % a tile, 22 tiles). The nearest pixel, bilinear and bicubic sampling agree to the last digits of a color; with mipmaps the mean is 0.5 with the Vello backend lighter by 0.8 of 255 everywhere (not traced: a rounding in the two alphas of the levels or in Skia's blend). Every blending mode agrees; what is beyond the tolerance is on the edge of the ellipse of the bitmap.
+
+**Codecs** (`codec_tests.rs` of the harness; the worst row of each group):
+
+| Data | Pixels beyond the tolerance | Largest difference | Mean difference |
+|---|---|---|---|
+| 23 photographs of the sample application (JPEG), decoded by both; 8 of them identical | 0.000 % | 10 | 0.259 |
+| PNG, opaque and translucent, encoded by either backend and decoded by the other, against the picture | 0.000 % | 0 | 0.000 |
+| JPEG of quality 100, 75, 30 encoded by either backend: the two decodings of one file | 0.000 % | 4 | 0.386 |
+| JPEG encoded by Vello against the picture, beside Skia's: quality 100 | 6.934 % (Skia 6.934 %) | 74 (74) | 1.259 (1.259) |
+| the same, quality 75 | 7.064 % (7.064 %) | 80 (80) | 2.123 (2.114) |
+| the same, quality 30 | 7.975 % (7.943 %) | 102 (98) | 3.657 (3.642) |
+| GIF (the first of two frames, a transparent color), BMP (24 bits from the bottom and from the top, 8 bits with a palette), ICO (24 bits with a mask, 32 bits with alpha, an embedded PNG, the largest of three), WBMP (drawn) | 0.000 % | 0 | 0.000 |
+| a JPEG of 600 by 400 decoded to a width of 181 and of 901, bilinear, with mipmaps, bicubic | 0.000 % | 5 | 0.403 |
+| the same by the nearest pixel, reduced | 0.000 % | 7 | 0.290 |
+| the same by the nearest pixel, enlarged (600 rows from 400: the middle of every third row lies on the edge between two rows of the image, see 10.5) | 0.563 % | 144 | 1.107 |
+| a bitmap of 64 by 48 resized to 23 by 17 and to 150 by 100, every mode | 0.000 % | 5 | 0.947 |
+
+The two JPEG encoders lose the same (the picture has a block of a saturated color, whose edge the halved color channels blur: hence 7 %); the files of the Vello backend are larger (1814 against 1252 bytes at quality 100, 967 against 546 at 75) because Skia writes Huffman tables made for the image (10.1). Whether both backends report an image as opaque is asserted for every file of the GIF, BMP and ICO group.
+
+**Tests.** The crate has 148 tests (83 before the stage; two of those tested that a member fails with stage 6 and are gone): 67 new ones in `effect_tests.rs`, `helpers/mipmap_helper.rs` and `helpers/pixel_format_helper.rs`. Ported from the Skia backend with their expectations: the three box shadow tests, the five effect tests, the two scene brush tests, the three acrylic tests (`tests.rs`), the three of `BitmapSaveTests`, and the constructor of a bitmap from pixels (`immutable_bitmap.rs`). The harness has 14 tests (5 before).
+
+### 10.5 Where the backend behaves differently from the Skia backend
+
+| Difference | Why |
+|---|---|
+| A blur under a transform that scales x and y differently is round, of the mean of the two scales; Skia's is elliptical | the filter of `vello_cpu` has one deviation (its TODO); not measured, no scene has such a blur |
+| The clip rectangle of an effect under a rotation cuts the content to the rotated rectangle; Skia to its bounds in pixels | a clip of the scene; the compositor gives bounds that hold the content either way |
+| The nearest pixel of a bitmap, where the middle of a pixel of the target falls exactly on the edge between two pixels of the bitmap, is the one on one side here and on the other in Skia: at 8.5 times the size every second edge, 4.4 % of the pixels of that scene | each renderer's rounding; at whole factors and positions no middle falls on an edge. The scenes avoid the case |
+| A pixel that is declared opaque but whose fourth byte is not 255 is read as opaque; the raster path of Skia copies the byte into the target | such data is outside what Skia defines |
+| A bitmap from pixels in a format other than premultiplied RGBA holds its pixels twice: as given, and as the image it is drawn from | the renderers draw one format; a bitmap of Skia draws any |
+| A decoded bitmap is RGBA8888; Skia's is the 32 bit format of the platform (BGRA8888 here). A WBMP is decoded to opaque RGBA; Skia's is a bitmap of gray that it draws and cannot lock | |
+| JPEG files are about a third larger at the same quality | standard Huffman tables (10.1) |
+| Scalable scene brush content is replayed for every paint with the brush, into a surface; Skia records a picture and its shader rasterizes the tile | no recorded scene; the pixels are the same |
+| An anti-aliased edge of an acrylic rectangle weighs the tint and the noise by the coverage one after the other | two fills for one composed paint |
+| With mipmaps and a blending mode other than source-over, one image stands for the two levels: where the lower level has detail of a pixel, sampling is a little softer (a mean of 1.05 of 255 against Skia where the two levels give 0.51) | the two levels are added in a layer, which such a mode would compose beyond the rectangle of the bitmap |
+
+### 10.6 Open after the stage
+
+| # | What | Plan |
+|---|---|---|
+| 1 | An effect under a clip, which is most effects of a window (the compositor clips to what it redraws), is drawn into a scene of its own and composed as an image, a layer of pixels for every effect of a frame | when `vello_cpu` cuts a filter layer by the clips around it as Skia does, or through a clip layer of the scene that is measured to do so, the filter layer can be used there too; the hybrid and GPU sinks decide for their renderers |
+| 2 | The levels of a mipmap are built for every draw of a reduced bitmap in a mode with mipmaps, and the blurred picture of a shadow that is not in closed form for every draw | keep the levels with the bitmap (by its version) and the picture of a shadow by its shape, blur and scale |
+| 3 | `render_async` and `wrap_skia_surface` of the Skia backend's helper have no counterpart | with the GPU modes, when there is a surface another API hands over |
+| 4 | The `HitTesting` suite of the Skia backend is not ported | it runs controls through the compositor with the font services of the text tests: after stage 5 |
+| 5 | WebP is not decoded | the Skia backend of this workspace does not decode it either; `image-webp` when it does |
+| 6 | The JPEG encoder writes standard Huffman tables; a file with optimized tables by `jpeg-encoder` is decoded as black by `zune-jpeg` | find which crate is at fault (Skia reads the file) before a newer version of either is taken; a JPEG from elsewhere that decodes as black would be the same defect |
+| 7 | The filter capabilities of the hybrid and GPU sinks | their stages: implement the three members at the end of `IVelloSceneSink` where the renderer has them and measure the deviation of its blurred rounded rectangle; without them everything of this stage is drawn through images of `vello_cpu` |
+| 8 | Snapping to pixels in the aliased edge mode in a mode without aliased edges | stage 8 |
