@@ -145,7 +145,7 @@ fn can_click_button_inside_platform_popup() {
 
     window.close();
 }
-ferro_fact!(can_click_button_inside_platform_popup, shows_a_window);
+ferro_fact!(can_click_button_inside_platform_popup);
 
 fn nested_popup_is_owned_by_parent_popup() {
     let nested_target = sized_border(20.0, 20.0);
@@ -194,13 +194,7 @@ fn nested_popup_is_owned_by_parent_popup() {
 
     window.close();
 }
-// The test closes a popup, a top-level of its own, and goes on: the difference of
-// `second_window_tests` within one test. It fails in most runs, depending on when the render
-// timer ticks.
-ferro_fact!(
-    #[ignore = "after the nested popup has closed the render loop panics with `a server object id was reused while still alive` (server_compositor.rs), as for a second window (second_window_tests.rs): the test fails with that panic in most runs"]
-    nested_popup_is_owned_by_parent_popup
-);
+ferro_fact!(nested_popup_is_owned_by_parent_popup);
 
 pub(crate) fn get_popup_top_level(popup: &Popup) -> Option<Ref<TopLevel>> {
     let child = popup.child();
