@@ -145,8 +145,16 @@ pub fn transform_group(
     let diagnostics_handler = {
         let diagnostics = diagnostics.clone();
         let handler = options.diagnostic_handler.clone();
+        let type_system = type_system.clone();
+        // The documents, for the diagnostic of a method name no method answers to.
+        let documents: Vec<(String, String, Option<String>)> = sources
+            .iter()
+            .map(|source| (source.name.to_string(), source.xaml.to_string(), source.root_type.as_ref().map(|class| class.full_name())))
+            .collect();
         XamlDiagnosticsHandler {
             handle_diagnostic: Some(Box::new(move |diagnostic: &XamlDiagnostic| {
+                let described = method_not_found(&type_system, &documents, diagnostic);
+                let diagnostic = described.as_ref().unwrap_or(diagnostic);
                 let new_severity = handler.as_ref().map_or(diagnostic.severity, |handler| handler(diagnostic));
                 let mut diagnostic = diagnostic.clone();
                 diagnostic.severity = new_severity;
@@ -190,7 +198,7 @@ pub fn transform_group(
     for document in sources {
         let mut parsed: XamlDocument = compiler.parse(document.xaml, document.root_type.clone())?;
         parsed.document = Some(document.name.to_string());
-        compiler.transform(&mut parsed)?;
+        compiler.transform(&mut parsed).map_err(|error| described_error(&diagnostics, error))?;
 
         let root = parsed.root()?;
         let root_type = root
@@ -241,6 +249,124 @@ pub fn transform_group(
         });
     }
     Ok(transformed)
+}
+
+/// The error of a transform as the diagnostic that describes it, when the handler of the
+/// diagnostics described the diagnostic of the error ([`method_not_found`]).
+fn described_error(diagnostics: &RefCell<Vec<XamlDiagnostic>>, error: XamlError) -> XamlError {
+    let described = diagnostics
+        .borrow()
+        .iter()
+        .rev()
+        .find(|diagnostic| {
+            diagnostic.title.starts_with(METHOD_NOT_FOUND)
+                && diagnostic.line_number == error.line_number()
+                && diagnostic.line_position == error.line_position()
+        })
+        .map(|diagnostic| diagnostic.to_exception());
+    described.unwrap_or(error)
+}
+
+/// How the diagnostic of a method name that no method of the root object answers to starts
+/// ([`method_not_found`]); the name of the method, the member it is named for and the
+/// diagnostic of the compiler follow.
+pub const METHOD_NOT_FOUND: &str = "No method `";
+
+/// The diagnostic of the compiler for a method name assigned to an event or to a property
+/// of a delegate type when no method of the root object fits, with what a build needs to
+/// name: the method and the member it is named for (the document and the position are the
+/// ones of the diagnostic).
+///
+/// The compiler reports such an assignment as any assignment no setter takes (`Unable to
+/// find suitable setter or adder for property Click ... for argument System.String`,
+/// upstream's text, which the run-time loader gives unchanged): the name of the method is
+/// a text to it. Here the text is read back from the document at the position of the
+/// diagnostic, and the diagnostic is described as the missing method when a setter of the
+/// member takes a delegate. `None` for any other diagnostic.
+fn method_not_found(
+    type_system: &Rc<dyn IXamlTypeSystem>,
+    documents: &[(String, String, Option<String>)],
+    diagnostic: &XamlDiagnostic,
+) -> Option<XamlDiagnostic> {
+    use xamlx::ast::{IXamlAstVisitor, IXamlLineInfo, XamlAstNamePropertyReference, XamlAstTextNode, XamlAstXamlPropertyValueNode};
+
+    let rest = diagnostic.title.strip_prefix("Unable to find suitable setter or adder for property ")?;
+    let (member, rest) = rest.split_once(" of type ")?;
+    let (_, rest) = rest.split_once(" for argument ")?;
+    let (argument, lists) = rest.split_once(", available setter parameter lists are:\n")?;
+    if !argument.ends_with("System.String") {
+        return None;
+    }
+    // A setter of the member takes one delegate: an event, or a property of a delegate type
+    // (a registered one also has the setters of every registered property, which take a
+    // binding and the unset value).
+    let delegate = type_system.find_type("System.Delegate")?;
+    let is_delegate = |name: &str| {
+        let definition = name.split('[').next().unwrap_or(name);
+        type_system.find_type(definition).is_some_and(|found| delegate.is_assignable_from(&*found))
+    };
+    let lists: Vec<&str> = lists
+        .lines()
+        .map(|list| list.split(" Line ").next().unwrap_or(list).trim())
+        .filter(|list| !list.is_empty() && !list.contains(", ") && is_delegate(list))
+        .collect();
+    if lists.is_empty() {
+        return None;
+    }
+
+    let name = diagnostic.document.as_deref()?;
+    let (_, xaml, class) = documents.iter().find(|(document, _, _)| document == name)?;
+    let (line, position) = (diagnostic.line_number?, diagnostic.line_position?);
+
+    /// Finds the text assigned to the member at a position.
+    struct Assigned<'m> {
+        member: &'m str,
+        line: i32,
+        position: i32,
+        found: Option<String>,
+    }
+    impl IXamlAstVisitor for Assigned<'_> {
+        fn visit(&mut self, node: Rc<dyn IXamlAstNode>) -> XamlResult<Rc<dyn IXamlAstNode>> {
+            if let Some(assignment) = node.cast::<XamlAstXamlPropertyValueNode>() {
+                let named = assignment.property.borrow().cast::<XamlAstNamePropertyReference>().is_some_and(|property| property.name() == self.member);
+                if let ([value], true) = (assignment.values.borrow().as_slice(), named) {
+                    if let Some(text) = value.cast::<XamlAstTextNode>() {
+                        if text.line() == self.line && text.position() == self.position {
+                            self.found = Some(text.text());
+                        }
+                    }
+                }
+            }
+            Ok(node)
+        }
+        fn push(&mut self, _node: Rc<dyn IXamlAstNode>) {}
+        fn pop(&mut self) {}
+    }
+    let parsed = xamlx::parsers::XDocumentXamlParser::parse(xaml, None).ok()?;
+    let mut assigned = Assigned { member, line, position, found: None };
+    xamlx::ast::visit_node(&parsed.root().ok()?, &mut assigned).ok()?;
+    let method = assigned.found?;
+
+    let owner = match class {
+        Some(class) => format!(
+            "the class `{class}` of the document has no method of that name that the delegate can call (a method the markup metadata \
+             of the class declares, `methods: [fn {method}(..) => ..]`, with the parameters of the delegate or wider ones)"
+        ),
+        None => "the document has no class (`x:Class`), and the type of its root object has no method of that name that the delegate can call"
+            .to_string(),
+    };
+    // The text of the compiler follows, without the place it ends with: the diagnostic has it.
+    let place = format!(" Line {line}, position {position}.");
+    let original = diagnostic.title.replace(['\r', '\n'], " ");
+    let mut described = diagnostic.clone();
+    described.title = format!(
+        "{METHOD_NOT_FOUND}{method}` for `{member}` ({}): {owner}. {}",
+        lists.join(" or "),
+        original.strip_suffix(&place).unwrap_or(&original)
+    );
+    // The error of the diagnostic is the described one, not the error it was made from.
+    described.inner_exception = None;
+    Some(described)
 }
 
 /// The namespace information of a document as the value of an `rt::XmlNamespaceTable`
