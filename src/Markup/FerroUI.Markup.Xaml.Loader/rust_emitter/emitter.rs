@@ -2976,6 +2976,14 @@ impl<'a> Emitter<'a> {
                         if type_.handle_is_shared() {
                             return None;
                         }
+                        // The declaration names the base; that the Rust type of the value
+                        // dereferences to the Rust type of the base is a fact a crate
+                        // registers for the pair (`RowDefinitions` does, `Points` holds its
+                        // list and does not). Without it the caller converts the instance
+                        // at run time, which is always valid.
+                        if !self.types.dereferences(id, target) {
+                            return None;
+                        }
                         return Some(format!("&{}", argument.expr));
                     }
                     current = type_.base_type();

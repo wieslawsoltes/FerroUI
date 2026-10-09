@@ -342,6 +342,13 @@ impl EmitTypes for RuntimeEmitTypes {
         }
     }
 
+    fn dereferences(&self, from: TypeKey<'_>, to: TypeKey<'_>) -> bool {
+        match (id_of(from), id_of(to)) {
+            (Some(from), Some(to)) => ValueTypes::dereferences(from, to),
+            _ => false,
+        }
+    }
+
     fn null_converts_to(&self, target: TypeKey<'_>) -> bool {
         let Some(target) = id_of(target) else { return false };
         matches!(

@@ -162,6 +162,11 @@ struct Registry {
     /// names the type.
     #[cfg(feature = "compiler-metadata")]
     element_refs: IdMap<TypeId, (&'static TypeInfo, bool)>,
+    /// The pairs of types of which a reference to the first coerces to a
+    /// reference to the second ([`ValueTypes::register_deref`]): what the
+    /// emitter of Rust source may write as `&value`.
+    #[cfg(feature = "compiler-metadata")]
+    derefs: IdMap<(TypeId, TypeId), ()>,
     /// Conversions applied to borrowed untyped values when a property is
     /// set with a value that is not of its exact type.
     any_conversions: IdMap<(TypeId, TypeId), AnyConvertFn>,
@@ -392,6 +397,39 @@ impl ValueTypes {
         with_registry(|r| {
             r.any_conversions.insert((TypeId::of::<TFrom>(), TypeId::of::<TTo>()), convert_any);
         });
+    }
+
+    /// States that the Rust type `TFrom` dereferences to `TTo`: `&TFrom`
+    /// coerces to `&TTo` (a named collection that implements `Deref` down to
+    /// the list it derives from). `deref` is that coercion, written `|c| c`:
+    /// the call compiles exactly when the coercion does, so the fact cannot
+    /// be stated of two types it does not hold for.
+    ///
+    /// The fact is recorded for the emitter of Rust source, which writes the
+    /// instance of a member the base declares as `&value` only for a pair
+    /// stated here; it changes no conversion (the cast of the pair is
+    /// registered with [`register_cast`](Self::register_cast)). Without the
+    /// `compiler-metadata` feature nothing is recorded.
+    pub fn register_deref<TFrom: 'static, TTo: 'static>(deref: fn(&TFrom) -> &TTo) {
+        let _ = deref;
+        #[cfg(feature = "compiler-metadata")]
+        with_registry(|r| {
+            r.derefs.insert((TypeId::of::<TFrom>(), TypeId::of::<TTo>()), ());
+        });
+    }
+
+    /// Whether `from` is registered as dereferencing to `to`
+    /// ([`register_deref`](Self::register_deref)).
+    #[cfg(feature = "compiler-metadata")]
+    pub fn dereferences(from: TypeId, to: TypeId) -> bool {
+        with_registry(|r| r.derefs.get(&(from, to)).is_some())
+    }
+
+    /// The number of pairs registered with
+    /// [`register_deref`](Self::register_deref).
+    #[cfg(feature = "compiler-metadata")]
+    pub fn dereference_count() -> usize {
+        with_registry(|r| r.derefs.len())
     }
 
     /// Registers a conversion between two value types. Returning `None`

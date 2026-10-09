@@ -358,6 +358,11 @@ pub trait EmitTypes {
     /// A value of the Rust type `from` is a value of `to` through the casts the crates
     /// register (a contract a class implements, a registered cast).
     fn is_assignable(&self, from: TypeKey<'_>, to: TypeKey<'_>) -> bool;
+    /// A reference to a value of the Rust type `from` coerces to a reference to `to`: a
+    /// crate states it of the two types (`ValueTypes::register_deref::<From, To>`). The
+    /// declaration of a type names a base; whether the Rust type of the one dereferences
+    /// to the Rust type of the other is not a fact of the declaration.
+    fn dereferences(&self, from: TypeKey<'_>, to: TypeKey<'_>) -> bool;
     /// The null of the untyped value conversions is a value of exactly `target` (`None` of
     /// a nullable form).
     fn null_converts_to(&self, target: TypeKey<'_>) -> bool;

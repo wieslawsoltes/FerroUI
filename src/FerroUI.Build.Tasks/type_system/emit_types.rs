@@ -253,6 +253,9 @@ struct Conversions {
     reference_objects: HashMap<String, String>,
     /// The element references (`ElementRef<T>` and its nullable form), with the class.
     element_refs: HashMap<String, (Position, bool)>,
+    /// The pairs of types of which a reference to the first coerces to a reference to
+    /// the second (`register_deref::<From, To>`).
+    derefs: HashSet<(String, String)>,
     /// The registration functions with calls the scanner did not read, over all models.
     unread: HashSet<String>,
 }
@@ -506,6 +509,9 @@ impl ModelEmitTypes {
                             conversions.interfaces.entry(interface.clone()).or_default().push(position);
                             nullable(&mut conversions, interface);
                         }
+                    }
+                    ("deref", [from, to]) => {
+                        conversions.derefs.insert((from.clone(), to.clone()));
                     }
                     ("upcast", [class, base]) => {
                         let (from, to) = (format!("{ref_path}<{class}>"), format!("{ref_path}<{base}>"));
@@ -1026,6 +1032,17 @@ impl EmitTypes for ModelEmitTypes {
         }
         if let Err(reason) = self.decided_not_assignable(from, to, 0) {
             self.cannot_answer(format!("whether a value of `{from}` is a value of `{to}`: {reason}"));
+        }
+        false
+    }
+
+    fn dereferences(&self, from: TypeKey<'_>, to: TypeKey<'_>) -> bool {
+        let (Some(from), Some(to)) = (text_of(from), text_of(to)) else { return false };
+        if self.conversions.derefs.contains(&(from.to_string(), to.to_string())) {
+            return true;
+        }
+        if self.unread(&["deref"]) {
+            self.cannot_answer(format!("whether `{from}` dereferences to `{to}`: a crate states it of types the scanner did not read"));
         }
         false
     }

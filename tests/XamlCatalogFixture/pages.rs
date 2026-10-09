@@ -9,24 +9,42 @@ use crate::markup::CompiledMarkup;
 
 #[path = "../../samples/ControlCatalog/Pages/button_spinner_page.rs"]
 mod button_spinner_page;
+#[path = "../../samples/ControlCatalog/Pages/canvas_page.rs"]
+mod canvas_page;
 #[path = "../../samples/ControlCatalog/Pages/check_box_page.rs"]
 mod check_box_page;
 #[path = "../../samples/ControlCatalog/Pages/image_page.rs"]
 mod image_page;
 #[path = "../../samples/ControlCatalog/Pages/progress_bar_page.rs"]
 mod progress_bar_page;
+#[path = "../../samples/ControlCatalog/Pages/slider_page.rs"]
+mod slider_page;
 #[path = "../../samples/ControlCatalog/Pages/wrap_panel_page.rs"]
 mod wrap_panel_page;
 
 pub use button_spinner_page::ButtonSpinnerPage;
+pub use canvas_page::CanvasPage;
 pub use check_box_page::CheckBoxPage;
 pub use image_page::ImagePage;
 pub use progress_bar_page::ProgressBarPage;
+pub use slider_page::SliderPage;
 pub use wrap_panel_page::WrapPanelPage;
 
 impl CompiledMarkup for ButtonSpinnerPage {
     fn populate(this: &Ref<Self>) -> Result<(), XamlLoadException> {
         crate::compiled_button_spinner_page::populate(None, this)
+    }
+}
+
+impl CompiledMarkup for CanvasPage {
+    fn populate(this: &Ref<Self>) -> Result<(), XamlLoadException> {
+        crate::compiled_canvas_page::populate(None, this)
+    }
+}
+
+impl CompiledMarkup for SliderPage {
+    fn populate(this: &Ref<Self>) -> Result<(), XamlLoadException> {
+        crate::compiled_slider_page::populate(None, this)
     }
 }
 
@@ -55,5 +73,12 @@ impl CompiledMarkup for WrapPanelPage {
 }
 
 /// The classes of this namespace.
-pub(crate) const TYPES: &[&TypeInfo] =
-    &[ButtonSpinnerPage::TYPE, CheckBoxPage::TYPE, ImagePage::TYPE, ProgressBarPage::TYPE, WrapPanelPage::TYPE];
+pub(crate) const TYPES: &[&TypeInfo] = &[
+    ButtonSpinnerPage::TYPE,
+    CanvasPage::TYPE,
+    CheckBoxPage::TYPE,
+    ImagePage::TYPE,
+    ProgressBarPage::TYPE,
+    SliderPage::TYPE,
+    WrapPanelPage::TYPE,
+];

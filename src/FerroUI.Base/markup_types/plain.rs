@@ -1057,6 +1057,10 @@ pub(super) fn register_value_types() {
     ValueTypes::register_cast::<crate::media::TextDecorationCollection, FerroList<Ref<crate::media::TextDecoration>>>(
         |c| (**c.list()).clone(),
     );
+    // The named collections whose Rust type dereferences to the list: generated code
+    // passes a reference to such a collection where a member of the list takes the list.
+    ValueTypes::register_deref::<KeyFrames, FerroList<Ref<KeyFrame>>>(|c| c);
+    ValueTypes::register_deref::<Transitions, FerroList<Rc<dyn ITransition>>>(|c| c);
     ValueTypes::register_nullable::<FerroList<crate::media::FontFeature>>();
     ValueTypes::register_nullable::<FerroList<Ref<crate::media::TextDecoration>>>();
     // A list of transform operations is a transform.
