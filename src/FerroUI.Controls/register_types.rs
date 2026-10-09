@@ -200,6 +200,7 @@ const TYPES: &[&TypeInfo] = types![
     crate::context_menu::ContextMenu,
     crate::control::Control,
     crate::data_validation_errors::DataValidationErrors,
+    crate::top_level_host_peers::DecorationsOverlaysAutomationPeer,
     crate::decorator::Decorator,
     crate::definition_base::DefinitionBase,
     crate::design::Design,

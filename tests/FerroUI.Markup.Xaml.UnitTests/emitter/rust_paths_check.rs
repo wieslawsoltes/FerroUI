@@ -70,6 +70,7 @@ pub fn classes() -> Vec<(&'static ::ferroui_base::TypeInfo, &'static str)> {
         (<::ferroui_base::media::Geometry as ::ferroui_base::StaticType>::TYPE, "ferroui_base::media::Geometry"),
         (<::ferroui_base::media::GeometryDrawing as ::ferroui_base::StaticType>::TYPE, "ferroui_base::media::GeometryDrawing"),
         (<::ferroui_base::media::GeometryGroup as ::ferroui_base::StaticType>::TYPE, "ferroui_base::media::GeometryGroup"),
+        (<::ferroui_base::media::GlyphRunDrawing as ::ferroui_base::StaticType>::TYPE, "ferroui_base::media::GlyphRunDrawing"),
         (<::ferroui_base::media::GradientBrush as ::ferroui_base::StaticType>::TYPE, "ferroui_base::media::GradientBrush"),
         (<::ferroui_base::media::GradientStop as ::ferroui_base::StaticType>::TYPE, "ferroui_base::media::GradientStop"),
         (<::ferroui_base::media::ImageBrush as ::ferroui_base::StaticType>::TYPE, "ferroui_base::media::ImageBrush"),

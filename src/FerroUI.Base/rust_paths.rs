@@ -72,6 +72,7 @@ crate::ferro_rust_paths! {
         crate::media::Geometry,
         crate::media::GeometryDrawing,
         crate::media::GeometryGroup,
+        crate::media::GlyphRunDrawing,
         crate::media::GradientBrush,
         crate::media::GradientStop,
         crate::media::ImageBrush,
