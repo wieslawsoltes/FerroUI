@@ -93,11 +93,15 @@ impl IFramebufferRenderTarget for FramebufferRenderTarget {
         }
 
         let blit_target = Rc::downgrade(&self.parent);
+        let shared = self.shared.clone();
         let locked = fb.as_ref().expect("the framebuffer was just created").lock(
             Vector::new(scaling * 96.0, scaling * 96.0),
             move |fb| {
                 if let Some(parent) = blit_target.upgrade() {
                     parent.blit(fb);
+                    // The frame is on the canvas: whoever waits for the
+                    // first one of this canvas is told.
+                    shared.frame_presented();
                 }
             },
         );

@@ -93,11 +93,12 @@ export function drive(page) {
 /**
  * Waits until the application has started and its view can take input: the splash is closed, the view
  * has a canvas and a state, a frame was drawn, something of the view is hit and the view has drawn
- * what it has laid out by then. The splash is closed by the thread of the page; the first frame comes
- * from the thread that renders, which with a render thread is another one and may be later, and a
- * view is hit from what its last frame drew: input that arrives before that frame hits nothing. The
- * first frame is also not the last one of the start: the main view adapts its drawer to the width of
- * the view when it is loaded, after the first frame, and the frame with that layout follows.
+ * what it has laid out by then. The splash is closed when the first frame of the view has been drawn,
+ * whichever thread drew it (a module built before that closed it at the first animation frame of the
+ * thread of the page, which with a render thread is earlier: the count of frames is still awaited),
+ * and a view is hit from what its last frame drew: input that arrives before that frame hits nothing.
+ * The first frame is also not the last one of the start: the main view adapts its drawer to the width
+ * of the view when it is loaded, after the first frame, and the frame with that layout follows.
  */
 export async function waitUntilReady(page, timeout) {
     await page.waitFor(`(() => {

@@ -85,7 +85,11 @@ export function ensurePageAssets(page) {
     return Promise.all(pending.map((entry) => entry.promise)).then(() => null);
 }
 
-/** Resolves once the first frame of the view is on screen: when the splash screen of the host page closes. */
+/**
+ * Resolves once the first frame of the view has been drawn: when the splash screen of the host page
+ * closes. The platform closes it at the first frame that reached the canvas of the view, whichever
+ * thread drew it (with a render thread, the worker's first frame, reported to this thread).
+ */
 function firstFrame() {
     return new Promise((resolve) => {
         const splash = document.querySelector("#out .ferroui-splash");

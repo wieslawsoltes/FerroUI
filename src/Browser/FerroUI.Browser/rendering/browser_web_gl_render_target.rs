@@ -118,6 +118,7 @@ struct GlSession {
     context: Rc<dyn IGlContext>,
     size: PixelSize,
     scaling: f64,
+    shared: Arc<BrowserSurfaceShared>,
 }
 
 impl IGlPlatformSurfaceRenderingSession for GlSession {
@@ -152,6 +153,8 @@ impl IGlPlatformSurfaceRenderingSession for GlSession {
                 self.size.height,
             );
             restore_context.dispose();
+            // Whoever waits for the first frame of this canvas is told.
+            self.shared.frame_presented();
         }
     }
 }
@@ -180,6 +183,7 @@ impl IGlPlatformSurfaceRenderTarget for GlSurface {
             context: self.target.gl_context.clone(),
             size,
             scaling,
+            shared: self.shared.clone(),
         })
     }
 

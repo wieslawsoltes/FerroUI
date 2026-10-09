@@ -31,7 +31,9 @@
 //   wasm:   the end of the response of the WebAssembly module (resource timing);
 //   draw:   the first draw call of the framework (a WebGL draw call, or putImageData on a 2D canvas);
 //   frame:  the first animation frame after that draw call, when the drawn frame is on screen;
-//   splash: the moment the splash screen of the host page is closed;
+//   splash: the moment the splash screen of the host page is closed, and how many frames the module
+//           reported at that moment (`splashFrames`): the platform closes the splash when the first frame
+//           of the view has been drawn, so the number is at least 1;
 //   rendered: the moment the module reports its first frame drawn (the `frames` of the export
 //           `catalogRendering` or `themedViewRendering` of the host, asked every 4 ms by the thread of the
 //           page). This is the first frame of a view drawn by a render thread, whose draw calls are made
@@ -39,7 +41,9 @@
 //           neither export has no such time;
 //   requests: the number of requests the page started before the first frame, the document included
 //             (resource timing).
-// With --phases, also: the end of the response of every file of the site (resource timing); when
+// With --phases, also: a line per load with "splash closed" and "first frame" (the one the module reports),
+// how far the first is after the second and how many frames were drawn when the splash closed; "splash
+// closed" among the phases; the end of the response of every file of the site (resource timing); when
 // WebAssembly.instantiateStreaming was called, when the module was compiled and when it was
 // instantiated (the call is replaced by compileStreaming and instantiate, which is what it does);
 // and the performance marks the page sets (the catalog host marks the start and end of the calls
@@ -137,7 +141,7 @@ await new Promise((r) => server.listen(0, "127.0.0.1", r));
 const port = server.address().port;
 
 const instrumentation = `(() => {
-    const t = globalThis.__ferroTiming = { contexts: [], draw: null, frame: null, splash: null,
+    const t = globalThis.__ferroTiming = { contexts: [], draw: null, frame: null, splash: null, splashFrames: null,
         compileStart: null, compiled: null, instantiated: null, rendered: null, rendering: null, offset: 0, pageLoads: 1, longTasks: [] };
     try { new PerformanceObserver((list) => { for (const entry of list.getEntries()) t.longTasks.push([entry.startTime, entry.duration]); }).observe({ type: "longtask" }); } catch { }
     // A page that reloads itself: the start of this load, counted from the start of the first one.
@@ -149,10 +153,15 @@ const instrumentation = `(() => {
         sessionStorage.setItem("__ferroLoads", String(t.pageLoads));
     } catch { }
     // The first frame the module reports, whichever thread drew it.
-    const poll = () => {
+    const reported = () => {
         let line = null;
         try { line = globalThis.controlCatalog?.catalogRendering?.() ?? globalThis.themedView?.themedViewRendering?.() ?? null; } catch { }
-        if (line !== null && Number(/(?:^|;)frames=(\\d+)/.exec(line)?.[1] ?? 0) > 0) { t.rendered = performance.now(); t.rendering = line; return; }
+        return { line, frames: line === null ? null : Number(/(?:^|;)frames=(\\d+)/.exec(line)?.[1] ?? 0) };
+    };
+    const poll = () => {
+        if (t.rendered !== null) return;
+        const { line, frames } = reported();
+        if (frames > 0) { t.rendered = performance.now(); t.rendering = line; return; }
         setTimeout(poll, 1);
     };
     setTimeout(poll, 1);
@@ -186,7 +195,13 @@ const instrumentation = `(() => {
         return context;
     };
     new MutationObserver(() => {
-        if (t.splash === null && document.querySelector(".splash-close")) t.splash = performance.now();
+        if (t.splash !== null || !document.querySelector(".splash-close")) return;
+        t.splash = performance.now();
+        // What the module reports in the task that closed the splash. A frame it reports here was drawn
+        // before the splash closed, though the poll above has not seen it yet.
+        const { line, frames } = reported();
+        t.splashFrames = frames;
+        if (frames > 0 && t.rendered === null) { t.rendered = t.splash; t.rendering = line; }
     }).observe(document, { subtree: true, attributes: true, attributeFilter: ["class"] });
 })();`;
 
@@ -332,11 +347,11 @@ async function load(takeScreenshot, profile_, wasmProfile) {
         const longTasks = { count: long.length, sum: long.reduce((a, b) => a + b, 0), longest: Math.max(0, ...long) };
         const inWorker = reported.kind === "webgl" ? `webgl (OpenGL ES ${reported.gl}) in a worker` : reported.kind === "software" ? "2d in a worker" : undefined;
         const result = { requests, mode: timing.contexts[0] ?? inWorker, contexts: timing.contexts, wasm: module, product,
-            draw: shift(timing.draw), frame: shift(timing.frame), splash: shift(timing.splash), rendered: shift(timing.rendered),
+            draw: shift(timing.draw), frame: shift(timing.frame), splash: shift(timing.splash), splashFrames: timing.splashFrames, rendered: shift(timing.rendered),
             framesReported: Number(reported.frames ?? 0), longTasks, threads, pageLoads: timing.pageLoads, renderThread: reported.on_render_thread === "true" && reported.other_thread === "true",
             phases: { ...shifted(resources), "compile start": shift(timing.compileStart), compiled: shift(timing.compiled),
                 instantiated: shift(timing.instantiated), ...shifted(marks), "first draw": shift(timing.draw), "first frame": shift(timing.frame),
-                "first frame reported by the module": shift(timing.rendered),
+                "first frame reported by the module": shift(timing.rendered), "splash closed": shift(timing.splash),
                 ...(timing.pageLoads > 1 ? { "navigation of the load that ran the module": timing.offset } : {}) },
             streamingFailed: console_.some((l) => l.includes("wasm streaming compile failed")), console: console_ };
 
@@ -407,7 +422,7 @@ const report = { site, query, runs, chromium: chromePath, product: last.product,
 const median = (key) => { const v = results.map(key).filter((x) => x != null).sort((a, b) => a - b); return v.length ? v[Math.floor(v.length / 2)] : null; };
 report.median = { wasm: median((r) => r.wasm?.end), draw: median((r) => r.draw), frame: median((r) => r.frame), splash: median((r) => r.splash),
     rendered: median((r) => r.rendered), requests: median((r) => r.requests) };
-report.loads = results.map((r) => ({ wasm: r.wasm?.end, draw: r.draw, frame: r.frame, splash: r.splash, rendered: r.rendered, requests: r.requests, mode: r.mode,
+report.loads = results.map((r) => ({ wasm: r.wasm?.end, draw: r.draw, frame: r.frame, splash: r.splash, splashFrames: r.splashFrames, rendered: r.rendered, requests: r.requests, mode: r.mode,
     pageLoads: r.pageLoads, renderThread: r.renderThread, framesReported: r.framesReported, longTasks: r.longTasks, ...(r.threads ? { threads: r.threads } : {}),
     ...(phases ? { phases: r.phases } : {}) }));
 if (phases) {
@@ -452,6 +467,15 @@ if (json) {
     }
     console.log(`  median: wasm ${ms(report.median.wasm)}, first draw ${ms(report.median.draw)}, first frame ${ms(report.median.frame)}, first frame reported by the module ${ms(report.median.rendered)}, splash closed ${ms(report.median.splash)}, ${report.median.requests} requests before the first frame`);
     if (report.medianPhases) {
+        report.loads.forEach((l, i) => {
+            // The first frame is the one the module reports, whichever thread drew it: it is seen by a poll of
+            // the page, or at the latest in the task that closes the splash, so a splash that closes on a drawn
+            // frame is never earlier than it.
+            const distance = l.splash == null || l.rendered == null ? null : l.splash - l.rendered;
+            const order = distance == null ? "not both seen" : `the splash closed ${Math.abs(distance).toFixed(1)} ms ${distance < 0 ? "BEFORE" : "after"} the first frame`;
+            const reportedThen = l.splashFrames == null ? "the host reports no frames" : `${l.splashFrames} frame${l.splashFrames === 1 ? "" : "s"} drawn when it closed`;
+            console.log(`  load ${i + 1}: splash closed ${ms(l.splash)}, first frame ${ms(l.rendered)}: ${order}; ${reportedThen}${l.splashFrames === 0 ? " (CLOSED ON AN EMPTY CANVAS)" : ""}`);
+        });
         console.log("  phases (median of the loads, from the start of navigation):");
         for (const [n, v] of Object.entries(report.medianPhases).sort((a, b) => a[1] - b[1])) console.log(`    ${ms(v).padStart(9)}  ${n}`);
     }

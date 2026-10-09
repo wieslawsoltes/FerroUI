@@ -1529,3 +1529,42 @@ Expected:
 `scripts/browser/setup.sh --threads` built the shim on the first try, in 26 seconds including the downloads: the definitions came from `gn gen` without Skia's third-party checkouts (28 definitions), the four sources compiled with `-pthread`, the new shim defines the same 774 functions as the published one, and the checks pass (`libskia.a`: 1020 of 1020 objects with atomics and bulk memory; `libskia-bindings.a`: 4 of 4).
 
 `scripts/build-browser.sh themed_view --threads` then links without `--no-check-features`. The check after the link lists every C and C++ archive of the build with atomics and bulk memory (the two of Skia, HarfBuzz, the setjmp bridge) and the module with a shared memory. `themed_view.test.mjs` against that site passes its 72 checks, rendering from the worker with the shim compiled for threads.
+
+## B3 follow-ups (written, 2026-10-09)
+
+Status: written on 2026-10-09 on top of the measurements of "B3", **no module built**: no cargo and no browser build. The Rust below was checked against the source by reading; the scripts parse and were run against the sites the validation of "B3" left in the main checkout, which still have the old behaviour.
+
+### The splash closes on the first drawn frame
+
+**What closed it.** `FerroView::with_host` asked the top-level for an animation frame (`top_level.request_animation_frame`) and closed the splash in its callback, as upstream's `AvaloniaView` does. That callback is run by the media context on the thread of the user interface, when it pulses the animation clock at the start of the first frame it prepares (`MediaContext::render_core`): before the layout and the commit of that frame, and before anything is drawn. Upstream's view is drawn by the thread that runs that callback, soon after it. On one thread this port does the same, and the splash was still early: measured against the site without threads in the main checkout, the class was set 0.45 s before the first frame was finished under the software rasteriser (`themed_view`: splash closed at 4420 ms, first draw call at 4617 ms, frame reported at 4867 ms, on a loaded machine), in an earlier task than the one that drew, with no frame drawn. So "on one thread the splash closes on the first frame" was not true either; the page could present the closed splash before the frame, for a shorter time. With a render thread the callback runs on the thread of the page, the frame is drawn by the worker when the browser gives it an animation frame, and the page presents the closed splash over an empty canvas for as long as that takes (2.1 s in the catalog under the software rasteriser, 0.1 s with the GPU).
+
+**What closes it now.** The first frame that reached the canvas of the view, in both modes:
+
+| Piece | Where | What |
+|---|---|---|
+| The count and the notification | `rendering/browser_surface_shared.rs` | `BrowserSurfaceShared` counts the frames of its canvas (`frames`, an atomic). `on_first_frame(handler)` is called by the thread that created the canvas: the handler stays in a table of that thread, by the id of the render target (it holds objects of the page and cannot cross); the thread is recorded. `frame_presented()` is called by the thread that drew: at the first frame it runs the handler directly when it is the thread that asked, and otherwise queues a call for that thread through the queue of the platform (`thread_proxy::run_on_thread`), which carries the id only. `forget_first_frame()` drops a handler that still waits |
+| Where a frame is counted | `rendering/browser_web_gl_render_target.rs`, `rendering/browser_software_render_target.rs` | Where `RenderStatistics::frame_presented` already is: when the session of the WebGL render target ends, and after `putPixelData` |
+| The view | `ferro_view.rs` | Gives the handler that closes the splash to the surface of its top-level, in place of the animation frame |
+| The disposal | `rendering/render_target_browser_surface.rs` | `dispose` forgets the handler of a view closed before its first frame |
+
+Nothing is polled and nobody waits. The order of the two threads: the thread of the page records itself and stores the handler before it reads the count; the thread that draws counts before it reads the thread. Whichever comes first, the handler runs once. A handler given after the first frame runs at once.
+
+**What this does not do.** A view that never draws (a hidden page, a host element without a size) keeps its splash; before, the splash closed at the first animation frame, which a hidden page does not have either. When the call cannot be queued (the queue of the platform could not be created), the splash stays: there is no second route from the worker to the page, and the same failure keeps the dispatcher from being woken.
+
+**The prefetch of the catalog** (`page-assets.js`, `prefetchAfterFirstFrame`) waits for the class of the splash and needed no change: it starts at the first frame again in both modes.
+
+**Deviation**: recorded in `DEVIATIONS.md` (Browser backend).
+
+**What the validating session should see after a rebuild** (`scripts/build-browser.sh themed_view --both`, `scripts/build-browser.sh control-catalog-browser --both`):
+
+1. `cargo test -p ferroui-browser` (host): three new tests in `rendering::browser_surface_shared` (`the_first_frame_runs_the_handler_once`, `a_handler_given_after_the_first_frame_runs_at_once`, `a_forgotten_handler_does_not_run`).
+2. `node scripts/browser/tests/themed_view.test.mjs` (32) and the same against `target/browser-threads/themed_view` (72), `node scripts/browser/tests/control_catalog.test.mjs` (13) and against `target/browser-threads/control-catalog-browser` (16): the same numbers as before. Every start of a page now asserts that the module reported at least one frame in the task that closed the splash (`SPLASH_PROBE` and `splashFrames` of `harness.mjs`); the failure reads "the splash was closed before the first frame of the view was drawn". **Against a module built before this change every check fails with that message** (the sites in the main checkout do: `{"frames":0,...}`), which is how to tell that the module under test is the new one.
+3. `node scripts/browser/first-frame.mjs target/browser-threads/control-catalog-browser --isolated --phases --runs 3` prints one new line per load before the phases:
+
+   ```
+   load 1: splash closed 2950 ms, first frame 2948 ms: the splash closed 2.0 ms after the first frame; 1 frame drawn when it closed
+   ```
+
+   (the times are an example: those of "B3" under the software rasteriser). "first frame" is the frame the module reports; the distance is the hop from the worker to the event loop of the page: 0 to a few milliseconds, more while the page is in a long task, never "BEFORE", and at least 1 frame drawn. The same command against `target/browser/control-catalog-browser` (no `--isolated`), and against the threaded site with `--query "?RenderThread=false"`, prints a distance of 0.0 ms: on one thread the class is set inside the frame and the script sees both in the same task. Before the change the line reads, for the render thread, `the splash closed 2107.0 ms BEFORE the first frame; 0 frames drawn when it closed (CLOSED ON AN EMPTY CANVAS)`, and on one thread about `450 ms BEFORE` with the same remark. Among the phases, "splash closed" is now listed, at or just after "first frame reported by the module".
+4. `measure-render-thread.mjs --only first-frame` has one more row in the table of the phases, "frames drawn when the splash closed": 1 or more in every column.
+
