@@ -11,8 +11,10 @@ use ferroui_base::input::{
     RawInputModifiers,
 };
 use ferroui_base::platform::surfaces::{
-    FuncFramebufferRenderTarget, IFramebufferPlatformSurface, IFramebufferRenderTarget, IPlatformRenderSurface,
+    FramebufferLockProperties, IFramebufferPlatformSurface, IFramebufferRenderTarget, IPlatformRenderSurface,
+    IPlatformRenderSurfaceRenderTarget,
 };
+use ferroui_base::platform::{ILockedFramebuffer, PlatformRenderTargetState, RenderTargetSceneInfo};
 use ferroui_base::threading::DispatcherPriority;
 use ferroui_base::{FerroLocator, LocatorExtensions, Point, Rect, Size, Vector};
 use ferroui_remote_protocol::input::{
@@ -457,11 +459,44 @@ impl IPlatformRenderSurface for RemoteServerSurface {
 impl IFramebufferPlatformSurface for RemoteServerSurface {
     fn create_framebuffer_render_target(&self) -> Rc<dyn IFramebufferRenderTarget> {
         let surface = self.this.upgrade().expect("the surface is alive while it is used");
-        Rc::new(FuncFramebufferRenderTarget::new(move || {
-            let unlocked = surface.clone();
-            surface.get_or_create_framebuffer().lock(Box::new(move || unlocked.send_last_frame_if_needed()))
-        }))
+        Rc::new(RemoteServerFramebufferRenderTarget { surface })
     }
+}
+
+/// `new FuncFramebufferRenderTarget(() => GetOrCreateFramebuffer().Lock(_sendLastFrameIfNeeded))`,
+/// with a state.
+// Deviation (DEVIATIONS.md, Remote rendering): the render target of the
+// original is always ready, and the compositor renders into a framebuffer
+// that has no pixels (no pixel format stated, or no viewport allocated yet)
+// at every tick: a backend that draws with a surface over the framebuffer
+// fails each time, and the failure ends in the render loop. Here the target
+// is not ready while its framebuffer has no pixels, so the compositor waits
+// for it.
+struct RemoteServerFramebufferRenderTarget {
+    surface: Arc<RemoteServerSurface>,
+}
+
+impl IPlatformRenderSurfaceRenderTarget for RemoteServerFramebufferRenderTarget {
+    fn state(&self) -> PlatformRenderTargetState {
+        // `framebuffer.Stride > 0`: the test `RenderAndSendFrameIfNeeded`
+        // paints by.
+        if self.surface.get_or_create_framebuffer().stride() > 0 {
+            PlatformRenderTargetState::READY
+        } else {
+            PlatformRenderTargetState::NOT_READY_TRY_LATER
+        }
+    }
+}
+
+impl IFramebufferRenderTarget for RemoteServerFramebufferRenderTarget {
+    fn lock(&self, _scene_info: &RenderTargetSceneInfo) -> (Rc<dyn ILockedFramebuffer>, FramebufferLockProperties) {
+        let unlocked = self.surface.clone();
+        let framebuffer =
+            self.surface.get_or_create_framebuffer().lock(Box::new(move || unlocked.send_last_frame_if_needed()));
+        (framebuffer, FramebufferLockProperties::default())
+    }
+
+    fn dispose(&self) {}
 }
 
 /// `this` of a posted action: the implementation, if it is still alive.

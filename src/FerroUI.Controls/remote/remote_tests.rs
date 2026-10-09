@@ -22,7 +22,8 @@ use ferroui_base::input::{IKeyboardDevice, Key, KeyboardDevice, PhysicalKey, Raw
 use ferroui_base::platform::surfaces::{IFramebufferRenderTarget, IPlatformRenderSurface};
 use ferroui_base::platform::{
     IDrawingContextImpl, IDrawingContextLayerImpl, IOptionalFeatureProvider, IPlatformRenderInterfaceContext,
-    IRenderTarget, RenderTargetDrawingContextProperties, RenderTargetProperties, RenderTargetSceneInfo,
+    IRenderTarget, PlatformRenderTargetState, RenderTargetDrawingContextProperties, RenderTargetProperties,
+    RenderTargetSceneInfo,
 };
 use ferroui_base::rendering::testing::{
     DrawingLog, MockDrawingContextImpl, MockDrawingContextLayerImpl, MockPlatformRenderInterface,
@@ -359,6 +360,50 @@ fn a_render_asked_for_while_a_frame_is_unacknowledged_is_done_when_the_frame_is_
     connection.deliver(Arc::new(FrameReceivedMessage { sequence_id: 2 }));
     settle(&services);
     assert_eq!(2, connection.frames().len());
+
+    server.dispose();
+    services.dispose();
+}
+
+// What a backend asks before it locks the framebuffer: the compositor
+// renders a top-level as soon as it is started, before the client has
+// stated its pixel formats and allocated a viewport, and a backend that
+// draws with a surface over the framebuffer cannot draw into one without
+// pixels. The messages are delivered by the test, one at a time.
+#[test]
+fn the_render_target_is_not_ready_while_the_framebuffer_has_no_pixels() {
+    let services = start();
+    let connection = ManualConnection::new();
+    let server = RemoteServer::new(connection.clone());
+    let surfaces = server.platform_impl().surfaces();
+    let target = surfaces[0].as_framebuffer_surface().unwrap().create_framebuffer_render_target();
+
+    // Nothing from the client yet: the empty framebuffer.
+    settle(&services);
+    assert_eq!(PlatformRenderTargetState::NOT_READY_TRY_LATER, target.state());
+
+    // A format without a viewport: a framebuffer of the format without pixels.
+    connection.deliver(Arc::new(ClientSupportedPixelFormatsMessage { formats: Some(vec![PixelFormat::Rgba8888]) }));
+    settle(&services);
+    assert_eq!(PlatformRenderTargetState::NOT_READY_TRY_LATER, target.state());
+
+    connection.deliver(Arc::new(ClientViewportAllocatedMessage { width: 8.0, height: 4.0, dpi_x: 96.0, dpi_y: 96.0 }));
+    settle(&services);
+    assert_eq!(PlatformRenderTargetState::READY, target.state());
+
+    // A viewport without pixels again.
+    connection.deliver(Arc::new(FrameReceivedMessage { sequence_id: 1 }));
+    connection.deliver(Arc::new(ClientViewportAllocatedMessage { width: 0.0, height: 4.0, dpi_x: 96.0, dpi_y: 96.0 }));
+    settle(&services);
+    assert_eq!(PlatformRenderTargetState::NOT_READY_TRY_LATER, target.state());
+
+    // No format any more: the empty framebuffer.
+    connection.deliver(Arc::new(ClientViewportAllocatedMessage { width: 8.0, height: 4.0, dpi_x: 96.0, dpi_y: 96.0 }));
+    settle(&services);
+    assert_eq!(PlatformRenderTargetState::READY, target.state());
+    connection.deliver(Arc::new(ClientSupportedPixelFormatsMessage { formats: None }));
+    settle(&services);
+    assert_eq!(PlatformRenderTargetState::NOT_READY_TRY_LATER, target.state());
 
     server.dispose();
     services.dispose();
