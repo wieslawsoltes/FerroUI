@@ -1156,3 +1156,25 @@ What is doubted:
 3. **`hit` of `catalogState` is generous**: it is true when the hit element is an ancestor of the element asked about, which is how the toggle button counted as hit while the frame on the screen had the drawer over that point. With the wait the frame is the right one, so the answer means what it says; it was not made stricter, because a text block that is not hit-test visible is legitimately hit through its ancestor.
 4. **The other scripts** that drive the catalog with their own waits (`frame-times.mjs`, `scroll-profile.mjs`) were not changed; they read a state and send input without this wait.
 5. **The lag itself.** With the software rasteriser the view of a page that renders from a worker is hundreds of milliseconds behind the application after an expensive frame, where the same page on one thread keeps its animation frames. A tick out of turn when no animation frame has come for some time would shorten it (the timer has the mechanism since "B2.3"); it would also draw for a hidden page, which upstream's pacing and this one's do not, and it was not written. To be measured in a browser with a GPU and on a slow machine before anything is decided.
+
+### Result of the validation of B2.7 (2026-10-09)
+
+The step built on the first try. Three things were wrong at validation, and each is recorded where it was fixed:
+
+- **The catalog did not start with threads.** The workers of the module load its script by the name the linker gave it, which for an application with a hyphen in its name is not the name of the script Cargo writes (`control_catalog_browser.js` against `control-catalog-browser.js`). Every worker failed to load, silently, and the module never finished starting. The build with threads now writes the script under the worker's name too (one line that imports the script).
+- **Closing a second view** (the section "What failed in the first run of the second view, and why"): the release job never ran, the graph was dropped with no context current, and the media context waited for a batch of a compositor that was gone. Fixed in the base library and the browser backend.
+- **Clicks sent before the frame they aim at was drawn** (the section on the drawer): not a defect of the platform. The checks now wait for a drawn frame.
+
+Measured in headless Chrome:
+
+| What | Result |
+|---|---|
+| `control_catalog.test.mjs` against the catalog built with threads | 16 of 16: the 13 checks of the catalog on the render thread, frames drawn by the render thread, `?RenderThread=false`, a panic of a frame reported to the page |
+| Calls a tick of the render thread had the main thread serve | 0 |
+| `themed_view.test.mjs` against the site built with threads | 72 of 72, among them a second view opened and closed while the first goes on drawing, in WebGL2 and Software2D, on the render thread and on one thread |
+| `capture-catalog.mjs`: twelve pages of the catalog captured on the render thread and on one thread | 0 of 69490 sampled pixels differ on every page (Platform Information, Data Validation, OpenGL, Image, Container Queries, Border, TabControl, ListBox, TextBox, TextBlock, Slider, Buttons); the Composition page keeps drawing and is not compared |
+| Memory of the module after the tour of 13 pages | 59.3 MB at the start, 127.4 MB at the end and at the peak, of 512 MB fixed |
+
+The peak of this tour is a quarter of the fixed memory. Section 5 asks for the peak of the catalog to choose the size: 512 MB stays the default until every page was visited in one session (the tour visits 13); 256 MB would hold this tour twice over.
+
+Open after this step: the Skia bindings shim without the atomics feature (its fix waits for the owner's approval of its downloads); the delay of a worker's animation frames under the software rasteriser of headless Chrome (up to about 600 ms after an expensive frame; not seen with a GPU rasteriser), which B3 measures on real hardware; browsers other than Chrome.
