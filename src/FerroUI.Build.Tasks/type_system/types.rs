@@ -70,6 +70,46 @@ pub enum MemberSource {
     Declared { type_path: String, callable: CallableModel, typed_function: Option<String>, fallible: bool, call: Option<CallForm> },
 }
 
+/// What a declared member is in its declaration, with the Rust type it yields, as the one
+/// text of the type ([`ModelSet::expanded`](crate::model_set::ModelSet::expanded)).
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub enum DeclaredRust {
+    /// The getter of an instance property, and the type of the property.
+    Getter(String),
+    /// The setter of an instance property.
+    Setter,
+    /// The getter of a static property, and the type of the property.
+    StaticGetter(String),
+    /// The setter of a static property.
+    StaticSetter,
+    /// A method, and the type it returns.
+    Method(Option<String>),
+    /// `parse:` of the type; it returns a value of the type.
+    Parse,
+    /// A constructor; it returns a value of the type.
+    Constructor,
+    /// A static field of the metadata, and its type.
+    Field(String),
+    /// A member of an enumeration.
+    EnumMember,
+}
+
+/// The Rust side of a member, which the emitter of Rust source reads next to the
+/// contracts of the compiler (docs/porting/xaml.md, 9.5.10): the Rust types the member
+/// declares, where the contracts have the types of the type system they map to.
+#[derive(Clone, Debug, Default, PartialEq, Eq)]
+pub struct MemberRust {
+    /// The declared Rust types of the parameters (of a method: without the instance),
+    /// each as the one text of its type; nothing for a parameter no declaration types.
+    pub parameters: Vec<Option<String>>,
+    /// What the member is in its declaration; nothing for a member the type system
+    /// builds, an accessor of an indexer and the subscription of an event.
+    pub declared: Option<DeclaredRust>,
+    /// For the static field with the definition of a registered property: the property,
+    /// by the position of the type it is listed under and its position there.
+    pub registered: Option<((usize, usize), usize)>,
+}
+
 /// The lazily projected part of a [`ModelType`].
 #[derive(Default)]
 pub struct ModelMembers {
@@ -535,6 +575,7 @@ pub struct ModelMethod {
     /// An abstract member of a type of the table of runtime library types.
     pub(crate) is_abstract: bool,
     pub(crate) source: MemberSource,
+    pub(crate) rust: MemberRust,
 }
 
 impl ModelMethod {
@@ -549,6 +590,34 @@ impl ModelMethod {
         self.is_abstract
     }
 
+    /// The Rust side of the method.
+    pub fn rust(&self) -> &MemberRust {
+        &self.rust
+    }
+
+    /// The method with its Rust side stated.
+    pub(crate) fn with_rust(mut self: Rc<Self>, rust: MemberRust) -> Rc<Self> {
+        match Rc::get_mut(&mut self) {
+            Some(method) => {
+                method.rust = rust;
+                self
+            }
+            None => Rc::new(ModelMethod {
+                name: self.name.clone(),
+                declaring_type: self.declaring_type.clone(),
+                is_static: self.is_static,
+                return_type: self.return_type.clone(),
+                parameters: self.parameters.clone(),
+                attributes: self.attributes.clone(),
+                generic_parameters: self.generic_parameters.clone(),
+                generic_arguments: self.generic_arguments.clone(),
+                is_abstract: self.is_abstract,
+                source: self.source.clone(),
+                rust,
+            }),
+        }
+    }
+
     pub(crate) fn substituted(&self, declaring_type: &Weak<ModelType>, parameters: &[Rc<ModelType>], arguments: &[Rc<dyn IXamlType>]) -> Rc<ModelMethod> {
         Rc::new(ModelMethod {
             name: self.name.clone(),
@@ -561,6 +630,7 @@ impl ModelMethod {
             generic_arguments: self.generic_arguments.clone(),
             is_abstract: self.is_abstract,
             source: self.source.clone(),
+            rust: self.rust.clone(),
         })
     }
 }
@@ -631,6 +701,7 @@ impl IXamlMethod for ModelMethod {
             generic_arguments: type_arguments.to_vec(),
             is_abstract: self.is_abstract,
             source: self.source.clone(),
+            rust: self.rust.clone(),
         }))
     }
     fn custom_attributes(&self) -> Vec<Rc<dyn IXamlCustomAttribute>> {
@@ -680,6 +751,7 @@ pub struct ModelConstructor {
     /// without attributes).
     pub(crate) parameter_attributes: Vec<Vec<Rc<dyn IXamlCustomAttribute>>>,
     pub(crate) source: MemberSource,
+    pub(crate) rust: MemberRust,
 }
 
 /// A parameter of a projected constructor.
@@ -703,6 +775,11 @@ impl ModelConstructor {
         &self.source
     }
 
+    /// The Rust side of the constructor.
+    pub fn rust(&self) -> &MemberRust {
+        &self.rust
+    }
+
     pub(crate) fn substituted(&self, declaring_type: &Weak<ModelType>, parameters: &[Rc<ModelType>], arguments: &[Rc<dyn IXamlType>]) -> Rc<ModelConstructor> {
         Rc::new(ModelConstructor {
             declaring_type: declaring_type.clone(),
@@ -710,6 +787,7 @@ impl ModelConstructor {
             is_public: self.is_public,
             parameter_attributes: self.parameter_attributes.clone(),
             source: self.source.clone(),
+            rust: self.rust.clone(),
         })
     }
 }
@@ -835,12 +913,18 @@ pub struct ModelField {
     pub(crate) literal: Option<XamlValue>,
     pub(crate) attributes: Vec<Rc<dyn IXamlCustomAttribute>>,
     pub(crate) source: MemberSource,
+    pub(crate) rust: MemberRust,
 }
 
 impl ModelField {
     /// The declaration the field is the projection of.
     pub fn source(&self) -> &MemberSource {
         &self.source
+    }
+
+    /// The Rust side of the field.
+    pub fn rust(&self) -> &MemberRust {
+        &self.rust
     }
 }
 
