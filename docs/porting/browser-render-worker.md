@@ -1178,3 +1178,182 @@ Measured in headless Chrome:
 The peak of this tour is a quarter of the fixed memory. Section 5 asks for the peak of the catalog to choose the size: 512 MB stays the default until every page was visited in one session (the tour visits 13); 256 MB would hold this tour twice over.
 
 Open after this step: the Skia bindings shim without the atomics feature (its fix waits for the owner's approval of its downloads); the delay of a worker's animation frames under the software rasteriser of headless Chrome (up to about 600 ms after an expensive frame; not seen with a GPU rasteriser), which B3 measures on real hardware; browsers other than Chrome.
+
+## B2.8: the site and CI (written, 2026-10-09)
+
+Status: written on 2026-10-09, **no module built**. No cargo, no browser build and no `setup.sh`. What was run, with what was already on the machine: the scripts parse (`node --check`, `bash -n`), the workflow files parse as YAML, and, in headless Chrome, **the composition and the loader against modules built earlier**: `combine-site.mjs` composed a site with both modules from the `themed_view` sites that the validations of the earlier steps left in the main checkout (`target/browser` and `target/browser-threads`, copied, with the host page and the loader of this branch put in), and `site_loader.test.mjs` passes its 10 checks against it, three runs. So the layout, the one-line re-export, the choice, the service worker route, the fallbacks and the request assertions have been seen to work with a real module of each kind. The catalog as a site with both modules, `--both` of the build script, and everything in the workflows have not. No Rust source changed. Everything here is **[M]** unless marked; **[G]** is read in the script of a module built with threads.
+
+### What was written
+
+| Piece | Where | What it is |
+|---|---|---|
+| The loader | `scripts/browser/threads/ferroui-loader.js` | `loadModule({ script, element })`: imports the script of the module for a host page, and on a site with both modules decides which one first. No imports, nothing of the platform. Below, "The decision" |
+| The composition | `scripts/browser/combine-site.mjs` | Makes one site of a site built without threads and one built with them. Below, "The site with both modules" |
+| The build | `scripts/build-browser.sh` | `--both`: the build without the option, the build with `--threads`, then the composition, into `target/browser-both/<application>` (or `--out`); `--debug` applies to both builds. Every site gets `ferroui-loader.js` next to its host page. Nothing of the threaded flags changed |
+| The host pages | `samples/ControlCatalog.Browser/wwwroot/main.js` and `index.html`; `examples/themed_view/wwwroot/main.js`, `examples/storage_view/wwwroot/main.js` | They import the script of the module through the loader, not by a static import. The page of the catalog preloads the loader with its other scripts. `thread_spawn` and `render_worker_clear` exist with threads only and keep their pages |
+| The test | `scripts/browser/tests/site_loader.test.mjs` | Below, "The test" |
+| The harness | `scripts/browser/harness.mjs` | `open(.., { network: true })` keeps the addresses the page requests, over every load, in `page.requests`. The removal of the browser's profile directory is tried again when the browser is still writing to it (the failure "Directory not empty" that the validation of "B2.6" met once: here 4 checks of 20 failed in it before the change, on a machine busy with a build, and none of 20 after) |
+| CI | `.github/workflows/ci.yml`, `.github/actions/browser-toolchain/action.yml` | Below, "CI" |
+| Pages | `.github/workflows/pages.yml` | Builds `--both`, tests the three sites, publishes the composed one; the size budget is for each module |
+
+### The site with both modules
+
+```
+index.html main.js app.css ...          the host page: the files of the site without threads
+ferroui.js storage.js ferroui-sw.js     the script modules of the platform and the service worker, once (with their maps)
+ferroui-loader.js                       the loader
+assets/...                              the files the build scripts of the application wrote, once
+<application>.js  <name>.wasm           the module without threads, where a site with one module has it
+threads/<application>.js                the module with threads, under the same two names
+threads/<name>.wasm
+threads/ferroui.js                      one line: export * from "../ferroui.js";
+```
+
+**Why a directory and not other file names.** The script of a module names its WebAssembly file and, with threads, itself (each web worker of a thread is `new Worker(new URL("<application>.js", import.meta.url), ..)`) relative to its own address **[G]**. Other file names would mean rewriting generated script; a directory needs no change to it. What a directory does break is the one import the script makes: `./ferroui.js`, written by the wasm-bindgen glue and by `ferroui-worker-import.js`, would be a second copy of the script module of the platform, while the host page attaches the module to its own copy (`FerroExports.attach`). `threads/ferroui.js` re-exports the one of the site, so the page, the module and the module script of each worker resolve to one address and, per thread, one instance. `ferroui.js` has no default export, and it finds `storage.js` relative to its own address, which has not moved. The composition refuses a module script that imports anything else relative to itself.
+
+**The service worker** stays at the root, so its scope covers `threads/`; the application in a threaded module registers `./ferroui-sw.js?coi=1` relative to the document, the address the loader registers.
+
+**Shared files are verified, not assumed.** Every file both sites have, other than the script of the module and the WebAssembly file, is compared byte for byte; a file only one of them has is an error, except `ferroui-threads.js` of the site with threads, which is left out (the loader isolates the page itself and never shows the message of that check). When something differs the composition fails with the list and writes nothing. This is what "not duplicated where they are identical" rests on: the bundles are built twice by the two builds, with the same esbuild from the same lock file, and the asset files and their list are written twice by the build script of the catalog. Tried: two `themed_view` sites built from different commits were refused for `ferroui.js` and its map.
+
+**The host page** of the composed site differs from the one of the sources in two places: the elements that preload the script of the module and the WebAssembly file are removed, and `<meta name="ferroui-modules" content='{"threads":"./threads/","wasm":"<name>.wasm"}'>` is added before `</head>`. The element is how the loader knows, without a request, that the site has both.
+
+**Size.** The composed site is the site without threads, plus the two files of the module with threads, plus about 200 bytes. Composed from the `themed_view` sites at hand: shared files 0.33 MB (ten files, maps included), the module without threads 30.59 MB (`themed_view.js` 0.18 MB, `themed_view.wasm` 30.41 MB), the module with threads 30.42 MB (0.20 MB and 30.22 MB): 61.35 MB, raw. For the catalog the same sum applies: its site without threads (the module, 39.11 MB raw in the last build in the main checkout, and about 23 MB of asset files) plus one more module of about the same size. The threaded catalog module has not been built on this branch, so its number is for the validation to fill in (`combine-site.mjs` prints the three parts, `module-sizes.mjs` the table). A visitor downloads one of the two modules, never both; the size budget of the Pages workflow is therefore applied to each module, not to their sum.
+
+### The preloads, and the preload test
+
+Preloading a module that is not used downloads it for nothing, so on a site with both the page preloads neither, and the loader adds the preload of the WebAssembly file of the module it chose (`<link rel="preload" as="fetch" type="application/wasm" crossorigin>`, the attributes of the element of the catalog page) right before it imports the script of that module: the two downloads run side by side, and the script's own fetch of the WebAssembly file is answered by the preload.
+
+- **A site with one module is unchanged in what it downloads and when**, but for one small file: its page keeps its preload elements, and the loader finds no `ferroui-modules` element, makes no decision, asks no worker and imports the script the page named, which the page preloaded. The first frame of the build without threads therefore waits for nothing new. `main.js` no longer has the script of the module among its static imports, so it runs when its small imports are there, and the dynamic import that follows finds the module script already fetched. Not measured: B3.
+- **The existing preload check stays what it was** for the sites it runs against (`control_catalog.test.mjs` against `target/browser/..` and `target/browser-threads/..`): the WebAssembly file, the list and the start-up files are each downloaded once, by the elements of the page.
+- **For the site with both**, `site_loader.test.mjs` asserts the same thing of the chosen module in every check: its WebAssembly file is in the resource timing of the page exactly once, with the initiator `link`, and no file of the other module was requested in any load of the page.
+- **What the site with both pays**: the download of the module starts when `main.js` runs, not with the page, and on the first visit of a session after the answer of the probe worker. Section 19 of `browser-platform.md` measured 180 ms for the preloads at 50 Mbit/s; some of that is given back on the published site. If B3 finds it matters, the decision can move into a script in the head of the page; the session cache already makes later loads decide without a worker.
+
+### The decision
+
+`choose` of the loader, for a site with both modules. First match wins; nothing of either module has been requested when it runs.
+
+| # | Condition | Module | Service worker registered | Reload |
+|---|---|---|---|---|
+| 1 | `?Threads=false` | without threads | no | no |
+| 2 | The module with threads could not be created earlier in this session | without threads | no | no |
+| 3 | No `WebAssembly`, no `Worker`, no `Atomics`, no `HTMLCanvasElement.prototype.transferControlToOffscreen`, or no shared memory | without threads | no | no |
+| 4 | Not isolated, and the page could not be isolated earlier in this session | without threads | no | no |
+| 5 | The probe worker says a worker has no `requestAnimationFrame` or no `OffscreenCanvas`, cannot be a script module, fails, or does not answer in 2 s (the answer is kept for the session) | without threads | no | no |
+| 6 | `crossOriginIsolated` | **with threads** | no | no |
+| 7 | Not a secure context, or no `navigator.serviceWorker` | without threads | no | no |
+| 8 | The page was reloaded for the service worker and is still not isolated | without threads; recorded for the session (row 4 from then on) | it is there | no |
+| 9 | The service worker cannot be registered, or is not active within 10 s | without threads; recorded | maybe | no |
+| 10 | Session storage cannot count the reload | without threads | yes | no |
+| 11 | Otherwise | none in this load: after the reload, row 6 (or row 8) | yes, `./ferroui-sw.js?coi=1` | **once** |
+
+`?Threads=true` skips rows 2 to 5 and enters at row 6: it forces the module with threads past what the browser was asked, but not past isolation, without which the module cannot be created at all.
+
+- **Why this order.** Everything that can say "no" without side effects comes before the isolation, so a browser that cannot run the module with threads never gets the service worker with the headers and is never reloaded.
+- **Shared memory before isolation.** `SharedArrayBuffer` is not a global in a page that is not isolated yet, which is the page that asks. The loader accepts the global, or else a `WebAssembly.Memory` made with `shared: true` whose buffer is a shared one **[D]**, which a browser with shared memory makes in any page.
+- **The probe** is a worker made from a blob of one line, created as a script module because a thread of the module is one (a browser without such workers never reads the `type` option, which is how that is seen). It answers by `typeof`: a hidden page has no animation frames to wait for. One worker per session; the answer, a timeout included, is in session storage (`ferroui-loader-worker-frames`).
+- **No reload loop.** The reload happens only after the flag `ferroui-loader-reloaded` was written to session storage, and a load that finds the flag and is not isolated removes it, records `ferroui-loader-not-isolated` and loads the module without threads; from then on nothing is tried in that session. This is the guard of `ferroui-threads.js` with the message replaced by the other module, and with keys of its own, so that the two cannot read each other's flag. A load that is isolated clears both.
+- **Silent.** No path of a site with both shows the message of `ferroui-threads.js`. The loader logs nothing on a fallback; what it decided and why is `globalThis.ferrouiModule` (`threads`, `reason`, `site`).
+- **A last net.** When the module with threads was chosen and its factory rejects (the fixed memory of "B2.2", 512 MB by default, is refused, which phones are known to do), the loader warns on the console, records it for the session (row 2) and creates the module without threads in the same page. This is the only case in which one page load requests both, and it has not been exercised: nothing here can make the factory fail.
+- **`?RenderThread=false`** is not the loader's: the application reads it and keeps a module built with threads on the thread of the page. `?Threads=false` loads the other module.
+
+**A site with one module**: built without threads, the script is imported and that is all; built with threads alone, the loader does what the pages did since "B2.2" (`ensureCrossOriginIsolated` of `ferroui-threads.js`, with the message, and `null` to the page when it cannot be isolated), because there is nothing to fall back to. `thread_spawn.test.mjs` and the tests of the threaded sites assert that behaviour and are unchanged.
+
+### The test
+
+`node scripts/browser/tests/site_loader.test.mjs [<site with both modules>]` (default `target/browser-both/control-catalog-browser`; it also knows a `themed_view` site). Every check opens the site with the requests of the page recorded and asserts: which module `ferrouiModule` says was chosen; the script and the WebAssembly file of that module were requested and no file of the other one, in any load; the WebAssembly file was downloaded once, by the preload; where the frames are drawn (`catalogRendering` or `themedViewRendering`: by a render thread other than the thread of the page, or by the thread of the page with no render thread); no message element; no error.
+
+1. The layout of the site (no browser).
+2. Served with the headers: the module with threads, one load, no service worker.
+3. Served without: one reload, `ferroui-sw.js?coi=1` controls the page, the module with threads; a second visit is isolated at once (one more load, not two) and has one registration.
+4. `?Threads=false` with the headers: the module without threads.
+5. `?Threads=false` without: no service worker, no reload.
+6. `transferControlToOffscreen` removed before the page runs: the module without threads, no service worker, no reload, and the reason says so.
+7. The probe worker cannot be created (served with the headers): the module without threads, the answer `0` kept.
+8. `?Threads=true` with the same failing probe: the module with threads, and the probe did not run.
+9. `navigator.serviceWorker` removed, no headers: the module without threads, no message.
+10. `crossOriginIsolated` made to answer false whatever the headers: two loads and not more, the module without threads, the failure recorded and the reload flag gone; a further load decides from the record.
+
+### CI
+
+Two jobs more, beside the existing one, and nothing compiled twice:
+
+| Job | What it does | New |
+|---|---|---|
+| `browser` (its steps unchanged) | Builds and tests the three sites without threads | Uploads `target/browser/themed_view` and `target/browser/control-catalog-browser` as an artifact kept for a day |
+| `browser-threads` | `setup.sh --threads` through the composite action (`threads: true`); builds with `--threads` and tests `thread_spawn`, `render_worker_clear`, `themed_view`, `storage_view` and the catalog, each test against its site in `target/browser-threads`; uploads the two sites the next job needs | The whole job |
+| `browser-site` (needs both) | Node only. Downloads the four sites, composes `themed_view` and the catalog (which is also the check that the two jobs produced identical shared files), runs `site_loader.test.mjs` against both | The whole job |
+
+**Why a job beside and not steps after.** The build with threads compiles everything again: another toolchain, a standard library built from source, its own target directory. As steps of the `browser` job it would about double that job, which a pull request waits for; in a job of its own it runs at the same time. What that costs in machine time is one more installation of the toolchain from caches, node, and the artifacts (four sites, about 130 MB before compression): a few minutes. The composition job compiles nothing. Doing all of it in one job would save those minutes and add the whole threaded build to the wait. No duration of the existing `browser` job is written down in the documents (section 18 of `browser-platform.md` has 11 to 18 minutes for one full build of `themed_view` and 15 for the catalog in a 4-core container, without a cache); the expectation for `browser-threads` is the duration of `browser` plus the standard library and two small examples, and for `browser-site` about five minutes, most of it the catalog starting a dozen times in headless Chrome.
+
+**Caches.** The composite action reads the nightly pin from `setup.sh` like the other pins. With `threads: true` it restores `~/.rustup/toolchains/<pin>-*` and `~/.rustup/update-hashes/<pin>-*` under a key made of the pin, calls `setup.sh --threads` as the one entry (whatever else that script installs for the mode is not cached and not known to the workflow), and gives the Rust build cache a key of its own with the pin in it, since `target/threads` holds a standard library built by that nightly.
+
+**Docs-only changes** still start nothing: the `paths-ignore` of the workflow covers every job.
+
+**Required checks.** The names of the two new checks are "Check (browser with threads, wasm32-unknown-emscripten)" and "Check (browser, the site with both modules)". `CONTINUATION.md` lists three checks as the condition for a merge; whether the two new ones join them is the owner's.
+
+### Pages: what the workflow does, and the list for a check by hand
+
+`pages.yml` installs the toolchain with `threads: true`, runs `scripts/build-browser.sh control-catalog-browser --both`, tests the module without threads and the module with threads with `control_catalog.test.mjs` against their sites and the composed site with `site_loader.test.mjs`, and uploads `target/browser-both/control-catalog-browser`. The size budget (`PUBLISHED_MODULE_GZIP_BUDGET_MB`, 14 MB with gzip) is checked for each of the two modules. The build job runs both builds one after the other; its time limit went from 120 to 240 minutes.
+
+CI serves the sites from `127.0.0.1`; what the real host does can only be seen there. After the first deployment, in a browser with the developer tools open (Chrome, then Firefox and Safari), at the address of the site:
+
+1. **First visit** (a private window, or after "Clear site data"): the page loads, reloads itself once, and shows the catalog. In the console `crossOriginIsolated` is `true`, `ferrouiModule` is `{ threads: true, site: "both", reason: .. }`, and the Network panel of the second load has `threads/control_catalog_browser.wasm` and no `control_catalog_browser.wasm` of the root.
+2. **Frames come from the worker**: `controlCatalog.catalogRendering()` has `on_render_thread=true`, `other_thread=true`, `frames` rising while the pointer moves over the view, `panics=0`; the developer tools list the `em-pthread` workers.
+3. **A second visit** (a reload, and a new tab in the same window): the page does not reload itself and is isolated at the first response; Application, Service workers shows one registration, `ferroui-sw.js?coi=1`, activated.
+4. **`?Threads=false`**: the catalog works, `ferrouiModule.threads` is `false`, `catalogRendering()` has `on_render_thread=false`, and the Network panel has the module of the root and nothing of `threads/`.
+5. **`?RenderThread=false`** (without `Threads`): the module with threads, `on_render_thread=false`.
+6. **The storage features of the service worker still work**: with `?PreferFileDialogPolyfill=true`, a file saved from the catalog arrives as a download, and one can be opened; without the parameter the native pickers open and save. The catalog does not register the service worker itself; on a visit that took the module with threads the worker is there because the loader registered it, and it is the same worker, with the part that streams the saves.
+7. **The fallbacks**: a private window of a browser that has no service workers there shows the catalog with `ferrouiModule.threads` false and no message; a forced reload (which bypasses the worker) gives a page that reloads once more by itself and is isolated again.
+8. **The headers**: `curl -I` of the site shows no `Cross-Origin-Opener-Policy`; the responses in the Network panel of an isolated visit show the three headers and the service worker as their source.
+9. **Phones**: the catalog starts on a phone. If the fixed memory of the module with threads is refused there, the console has the warning of the loader and the catalog still starts (the last net above); this is the case nothing could exercise.
+
+### What could not be verified without a build
+
+- `scripts/build-browser.sh <application> --both` itself: the script calling itself twice and the composition after it.
+- The catalog as a site with both modules: its page with the two preload elements removed (tried on stand-in files only), the list and the start-up files fetched before the choice, and, on the service worker route, their requests cut short by the reload.
+- That the two builds write identical shared files for the catalog (its asset files and their list are written by a build script, once per build and by two compilers), in one job and across two.
+- The host pages against their own tests with a current module. What ran: `themed_view.test.mjs` against a copy of the site without threads of the main checkout with the new page and the loader passes 30 of its 32 checks, and the two that fail call `themedViewSecondView`, an export of "B2.7" that this older module does not have; against a copy of the site with threads, served isolated, 68 of 72 pass, and the four that fail are the checks of the second view of "B2.7" (`released` never reaches 1; one run logs `Cannot read properties of undefined (reading 'finish')` from `_emscripten_glFinish`), in a module of that step that was not validated yet when it was copied: they are about the disposal of a view, not about how the module is loaded, and are for the validation of "B2.7" to look at. The pages of `storage_view` and of the catalog did not run.
+- Everything in the workflows: the input of the composite action, the cache of the nightly, the artifacts and their paths, the two new jobs, the Pages build.
+- The size of the threaded catalog module against the budget.
+- Any browser but headless Chrome; the real host.
+
+### Doubts, most likely to bite first
+
+1. **The size budget of Pages.** It is now applied to the module with threads too. If that module is over 14 MB with gzip the deployment stops, where before nothing measured it. The `themed_view` modules of the two kinds differ by under 1 % raw; the catalog's was never measured.
+2. **Identical shared files across two jobs.** The composition in CI compares files built on two runners by two toolchains. If the list of the asset files or a bundle is not reproducible, `browser-site` fails naming the file, and the answer is either to make it reproducible or to build both in one job (`--both`, as the Pages workflow does).
+3. **Requests cut short by the reload.** The catalog page starts fetching its asset list and start-up files before it asks the loader. A reload aborts them; whether Chrome logs an aborted fetch as an error of the page, which check 3 of the loader test would then report for the catalog, was not seen (`themed_view` fetches nothing before the choice). If it does, the page should ask the loader first.
+4. **The cache of the nightly.** Restoring a directory of `~/.rustup/toolchains` and its update hash was not tried; if rustup does not accept the restored toolchain it installs it again (slower, not wrong).
+5. **The Rust build cache with a nested target directory.** `target/threads` is a cargo target directory inside the one the cache action looks after; that it is kept and cleaned as one is from memory of that action, not seen.
+6. **The start of the download on the site with both** (above, "The preloads"): later than on a site with one module, by the scripts of the page and, once a session, the probe. On the service worker route the first visit pays the page and its scripts twice, and the start-up files of the catalog up to twice.
+7. **`WebAssembly.Memory` with `shared: true` in a page that is not isolated** **[D]**: Chrome makes it (the checks ran there); Firefox and Safari were not tried. If one of them refuses, row 3 says no and that browser gets the module without threads although it could run the other: the safe direction.
+8. **The probe in other browsers.** A worker from a blob under a content security policy that forbids `blob:` fails, which reads as "no". The getter on the `type` option as the test for workers that are script modules is the usual one **[D]**. Two seconds may be short on a loaded phone; the answer is then "no" for the session.
+9. **Two addresses of one service worker.** The module without threads registers `./ferroui-sw.js`, the one with threads and the loader `./ferroui-sw.js?coi=1`. An application that sets `register_ferro_service_worker` and is opened once with each module (`?Threads=false`, or a fallback, in a browser that had the other) replaces the registration each time, and the next visit with threads reloads once again. The catalog does not register the worker itself. Where the page is controlled by the worker with the headers and runs the module without threads (rows 2 and 8), `require-corp` applies to that page all the same: content of another origin without CORS is refused (doubt 6 of "B2.7").
+10. **An embedding that cannot be isolated** (a frame in a page that is not): the page registers the worker, reloads once, finds itself not isolated, and falls back; that is one reload per session for nothing, since the record is the session's. A longer-lived record would spare it and would also keep a browser from ever trying again.
+11. **The last net** (a module with threads that cannot be created): written, never taken. That the factory rejects rather than failing later, that the workers of the pool it leaves behind do no harm, and that the second module can be created in the same page are read, not seen.
+12. **`ferroui-loader.js` lives in `scripts/browser/threads/`** although every site gets it, the sites of `thread_spawn` and `render_worker_clear` included, which do not use it.
+13. **`module-sizes.mjs` on the composed site** sums the two modules in its `wasm_*` outputs; the workflows take those outputs from the two sites with one module each.
+
+### Validation
+
+```
+scripts/browser/setup.sh --threads && source .tools/env.sh
+node --check scripts/browser/combine-site.mjs && node --check scripts/browser/tests/site_loader.test.mjs && bash -n scripts/build-browser.sh
+scripts/build-browser.sh themed_view --both
+node scripts/browser/tests/themed_view.test.mjs
+node scripts/browser/tests/themed_view.test.mjs target/browser-threads/themed_view
+node scripts/browser/tests/site_loader.test.mjs target/browser-both/themed_view
+scripts/build-browser.sh storage_view && node scripts/browser/tests/storage_view.test.mjs
+scripts/build-browser.sh storage_view --threads && node scripts/browser/tests/storage_view.test.mjs target/browser-threads/storage_view
+scripts/build-browser.sh thread_spawn --threads && node scripts/browser/tests/thread_spawn.test.mjs
+scripts/build-browser.sh render_worker_clear --threads && node scripts/browser/tests/render_worker_clear.test.mjs
+scripts/build-browser.sh control-catalog-browser --both
+node scripts/browser/tests/control_catalog.test.mjs
+node scripts/browser/tests/control_catalog.test.mjs target/browser-threads/control-catalog-browser
+node scripts/browser/tests/site_loader.test.mjs
+node scripts/browser/module-sizes.mjs target/browser-threads/control-catalog-browser
+node scripts/browser/module-sizes.mjs target/browser-both/control-catalog-browser
+```
+
+Expected: the tests of the sites with one module unchanged in number and result from "B2.7" (`themed_view` 32 and 72, `storage_view` 18 and 19, the catalog 13 and 16, `thread_spawn` 3, `render_worker_clear` 6); `site_loader.test.mjs` 10 checks against each composed site; the composition printing the three parts of each site. To record here afterwards: the sizes of the catalog site with both modules, the gzip size of the threaded catalog module against the budget, and the first run of the three jobs with their durations.
+
+By hand, the composed catalog as a static host serves it and as a host with the headers: `node scripts/browser/serve.mjs target/browser-both/control-catalog-browser` and the same with `--isolated`; `ferrouiModule` and `controlCatalog.catalogRendering()` in the console; `?Threads=false`; then the list above on the published site.
