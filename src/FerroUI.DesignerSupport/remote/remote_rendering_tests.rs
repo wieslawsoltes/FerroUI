@@ -31,13 +31,13 @@ const TIMEOUT: Duration = Duration::from_secs(10);
 const RED: [u8; 4] = [255, 0, 0, 255];
 
 /// A unit test application that renders with Skia through the compositor.
-struct Services {
+pub(crate) struct Services {
     services: CompositorTestServices,
     locator: Rc<dyn IDisposable>,
 }
 
 impl Services {
-    fn start() -> Services {
+    pub(crate) fn start() -> Services {
         let locator = FerroLocator::enter_scope();
         SkiaPlatform::initialize();
         let render_interface = FerroLocator::current().get_required_service::<dyn IPlatformRenderInterface>();
@@ -52,7 +52,7 @@ impl Services {
     }
 
     /// Runs the jobs of the UI thread and renders frames until `done`.
-    fn pump_until(&self, what: &str, mut done: impl FnMut() -> bool) {
+    pub(crate) fn pump_until(&self, what: &str, mut done: impl FnMut() -> bool) {
         let deadline = Instant::now() + TIMEOUT;
         loop {
             self.services.run_jobs();
@@ -71,7 +71,7 @@ impl Services {
         }
     }
 
-    fn end(self) {
+    pub(crate) fn end(self) {
         self.services.dispose();
         self.locator.dispose();
     }
@@ -122,13 +122,13 @@ fn collect_frames(client: &Arc<dyn IFerroRemoteTransportConnection>) -> Arc<Mute
 }
 
 /// Whether the frame has the given size and every pixel of it is red.
-fn is_red(frame: &FrameMessage, width: i32, height: i32) -> bool {
+pub(crate) fn is_red(frame: &FrameMessage, width: i32, height: i32) -> bool {
     (frame.width, frame.height) == (width, height)
         && frame.data.as_deref().is_some_and(|data| data.chunks_exact(4).all(|pixel| pixel == RED))
 }
 
 /// A server whose scene is a red border that fills the top-level.
-fn red_server(connection: &Arc<dyn IFerroRemoteTransportConnection>) -> RemoteServer {
+pub(crate) fn red_server(connection: &Arc<dyn IFerroRemoteTransportConnection>) -> RemoteServer {
     let server = RemoteServer::new(connection.clone());
     let border = Border::new();
     border.set_background(Some(Brushes::red()));

@@ -8,7 +8,9 @@
 //! - [`remote::RemoteDesignerEntryPoint`] is the previewer: it connects to
 //!   the IDE over the remote protocol, receives the text of the document
 //!   whenever it changes, and sends back frames of the previewed window
-//!   and the errors of the document.
+//!   and the errors of the document. With the `html` method
+//!   ([`remote::html_transport::HtmlWebSocketTransport`]) the frames go to
+//!   a web page the previewer serves, which sends back the mouse input.
 //!
 //! An application of the port is linked into its binary, so there is no
 //! separate host process that loads the application: the binary of the

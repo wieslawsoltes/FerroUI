@@ -1,5 +1,6 @@
 use crate::design_window_loader::DesignWindowLoader;
 use crate::remote::file_watcher_transport::FileWatcherTransport;
+use crate::remote::html_transport::HtmlWebSocketTransport;
 use crate::remote::previewer_windowing_platform::PreviewerWindowingPlatform;
 use ferroui_base::threading::{CancellationToken, Dispatcher, DispatcherPriority};
 use ferroui_base::utilities::{Uri, UriKind};
@@ -70,7 +71,7 @@ pub struct UsageError;
 
 /// `Guid.NewGuid()`: a random identifier of version four. The random bits
 /// are the keys the standard library seeds its hash maps with.
-fn new_guid() -> Guid {
+pub(crate) fn new_guid() -> Guid {
     let mut bytes = [0u8; 16];
     for chunk in bytes.chunks_mut(8) {
         let random = std::collections::hash_map::RandomState::new().build_hasher().finish();
@@ -81,8 +82,15 @@ fn new_guid() -> Guid {
     Guid::from_byte_array(&bytes).expect("sixteen bytes are an identifier")
 }
 
-/// `Uri.Host` and `Uri.Port` of an absolute URI with an authority.
+/// `Uri.Host` and `Uri.Port` of an absolute URI with an authority that
+/// names its port.
 fn host_and_port(uri: &Uri) -> Option<(String, u16)> {
+    host_and_port_or(uri, None)
+}
+
+/// `Uri.Host` and `Uri.Port` of an absolute URI with an authority;
+/// `default_port` is the port of the scheme, for a URI that names none.
+pub(crate) fn host_and_port_or(uri: &Uri, default_port: Option<u16>) -> Option<(String, u16)> {
     let text = uri.absolute_uri();
     let rest = &text[text.find("://")? + 3..];
     let authority = &rest[..rest.find(['/', '?', '#']).unwrap_or(rest.len())];
@@ -91,11 +99,18 @@ fn host_and_port(uri: &Uri) -> Option<(String, u16)> {
         // `[::1]:30243`
         Some(bracketed) => {
             let (host, port) = bracketed.split_once(']')?;
-            (host, port.strip_prefix(':')?)
+            (host, port.strip_prefix(':'))
         }
-        None => authority.rsplit_once(':')?,
+        None => match authority.rsplit_once(':') {
+            Some((host, port)) => (host, Some(port)),
+            None => (authority, None),
+        },
     };
-    Some((host.to_string(), port.parse().ok()?))
+    let port = match port {
+        Some(port) => port.parse().ok()?,
+        None => default_port?,
+    };
+    Some((host.to_string(), port))
 }
 
 fn die(error: Option<&str>) -> ! {
@@ -222,16 +237,16 @@ impl RemoteDesignerEntryPoint {
         args: &CommandLineArgs,
         builder: &AppBuilder,
     ) -> Result<Arc<dyn IFerroRemoteTransportConnection>, String> {
+        let mut transport = transport;
         let builder = builder.use_standard_runtime_platform_subsystem();
         if args.method == methods::FERRO_REMOTE {
             let transport = transport.clone();
             drop(builder.use_windowing_subsystem(move || PreviewerWindowingPlatform::initialize(transport.clone()), ""));
         }
-        // Left out (DEVIATIONS.md, Designer support): the HTML method wraps
-        // the connection in `HtmlWebSocketTransport`, which serves the web
-        // application of the upstream project; neither is ported.
         if args.method == methods::HTML {
-            return Err("The 'html' method is not available: the HTML transport of the previewer is not ported.".to_string());
+            transport = Self::html_transport(transport, args.html_method_listen_uri.as_ref())?;
+            let transport = transport.clone();
+            drop(builder.use_windowing_subsystem(move || PreviewerWindowingPlatform::initialize(transport.clone()), ""));
         }
 
         // Left out: the win32 method initializes the Win32 platform, which
@@ -240,6 +255,24 @@ impl RemoteDesignerEntryPoint {
             return Err("The 'win32' method is not available: there is no Win32 windowing platform.".to_string());
         }
         drop(builder.setup_without_starting());
+        Ok(transport)
+    }
+
+    /// `new HtmlWebSocketTransport(transport, args.HtmlMethodListenUri ??
+    /// new Uri("http://localhost:5000"))`: the connection of the `html`
+    /// method around the connection to the IDE. What the constructor throws
+    /// in the original is the error, which ends the previewer: so does the
+    /// default, whose host is a name and not an IP address, in the original
+    /// too (`IPAddress.Parse`), so that the method needs `--html-url`.
+    fn html_transport(
+        transport: Arc<dyn IFerroRemoteTransportConnection>,
+        html_method_listen_uri: Option<&Uri>,
+    ) -> Result<Arc<dyn IFerroRemoteTransportConnection>, String> {
+        let listen_uri = match html_method_listen_uri {
+            Some(listen_uri) => listen_uri.clone(),
+            None => Uri::new("http://localhost:5000", UriKind::Absolute).map_err(|_| "Invalid URI".to_string())?,
+        };
+        let transport = HtmlWebSocketTransport::new(transport, &listen_uri).map_err(|e| e.to_string())?;
         Ok(transport)
     }
 
@@ -497,6 +530,37 @@ mod tests {
         assert_eq!(Some(("localhost".to_string(), 5000)), host_and_port(&uri("http://localhost:5000")));
         assert_eq!(Some(("::1".to_string(), 30243)), host_and_port(&uri("tcp-bson://[::1]:30243/")));
         assert_eq!(None, host_and_port(&uri("tcp-bson://127.0.0.1/")));
+        // The port of the scheme for a URI that names none.
+        assert_eq!(Some(("127.0.0.1".to_string(), 80)), host_and_port_or(&uri("http://127.0.0.1"), Some(80)));
+        assert_eq!(Some(("::1".to_string(), 80)), host_and_port_or(&uri("http://[::1]/"), Some(80)));
+        assert_eq!(Some(("127.0.0.1".to_string(), 8081)), host_and_port_or(&uri("http://127.0.0.1:8081"), Some(80)));
+    }
+
+    #[test]
+    fn the_html_method_wraps_the_connection_in_the_html_transport() {
+        use ferroui_remote_protocol::viewport::FrameMessage;
+        use ferroui_remote_protocol::HtmlTransportStartedMessage;
+
+        let uri = |text: &str| Uri::new(text, UriKind::Absolute).unwrap();
+        let connection = TestConnection::new();
+        let transport = RemoteDesignerEntryPoint::html_transport(connection.clone(), Some(&uri("http://127.0.0.1:0")))
+            .expect("the loopback interface can be listened on");
+        // The IDE is told where the page is, and the frames of a window no
+        // longer go to it.
+        assert_eq!(1, connection.sent_of::<HtmlTransportStartedMessage>().len());
+        transport.send(Arc::new(FrameMessage::default()));
+        assert!(connection.sent_of::<FrameMessage>().is_empty());
+        transport.dispose();
+
+        // The default of the original names a host, which is no address,
+        // and a URI of another scheme is not one of the method.
+        let connection = TestConnection::new();
+        assert_eq!(
+            Some("An invalid IP address was specified.".to_string()),
+            RemoteDesignerEntryPoint::html_transport(connection.clone(), None).err()
+        );
+        assert!(RemoteDesignerEntryPoint::html_transport(connection.clone(), Some(&uri("https://127.0.0.1:1"))).is_err());
+        assert!(connection.sent().is_empty());
     }
 
     #[test]

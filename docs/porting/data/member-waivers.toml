@@ -5120,3 +5120,23 @@ project = "Avalonia.Headless"
 type = "*HeadlessGlyphRunStub"
 member = "GlyphTypeface"
 reason = "not kept (DEVIATIONS.md, Headless platform): the property is no member of `IGlyphRunImpl` and nothing reads it upstream; the glyph typeface is an object of the UI thread (`Rc<GlyphTypeface>`) and a glyph run is shared with the render thread (`IGlyphRunImpl: Send + Sync`), so the stub is created without it (`HeadlessGlyphRunStub::new`)"
+
+# ---------------------------------------------------------------- Avalonia.DesignerSupport, the HTML transport
+
+[[waive]]
+project = "Avalonia.DesignerSupport"
+type = "Avalonia.DesignerSupport.Remote.HtmlTransport.SimpleWebSocketHttpServer"
+member = "AcceptAsync"
+reason = "ported as `SimpleWebSocketHttpServer::accept`, which blocks: the server has no asynchronous runtime (DEVIATIONS.md, Designer support)"
+
+[[waive]]
+project = "Avalonia.DesignerSupport"
+type = "Avalonia.DesignerSupport.Remote.HtmlTransport.SimpleWebSocketHttpRequest"
+member = "RespondAsync"
+reason = "ported as `SimpleWebSocketHttpRequest::respond`, which blocks (DEVIATIONS.md, Designer support)"
+
+[[waive]]
+project = "Avalonia.DesignerSupport"
+type = "Avalonia.DesignerSupport.Remote.HtmlTransport.SimpleWebSocket"
+member = "*SendMessage(bool isText, byte[] data, int offset, int length)*"
+reason = "the overload with an offset and a length is `SimpleWebSocket::send_message` with a slice"
