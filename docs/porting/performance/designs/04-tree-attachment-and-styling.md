@@ -259,24 +259,24 @@ that moves is a change of logic and a defect of this work.
 
 | Counter | Before | Expected after | Measured after |
 |---|---:|---|---|
-| elements attached to a logical tree | 18.00 | 18.00 | to be measured |
-| elements detached from a logical tree | 18.00 | 18.00 | to be measured |
-| implicit theme lookups | 17.00 | 17.00 | to be measured |
-| style hosts walked | 261.00 | 261.00 | to be measured |
-| styles evaluated | 0.00 | 0.00 | to be measured |
-| styles matched | 0.00 | 0.00 | to be measured |
-| control themes evaluated | 4.00 | 4.00 | to be measured |
-| control themes matched | 2.00 | 2.00 | to be measured |
-| style instances attached | 2.00 | 2.00 | to be measured |
-| style instances created | 2.00 | 2.00 | to be measured |
-| resource lookups | 43.00 | 43.00 | to be measured |
-| resource hosts probed | 467.00 | 467.00 | to be measured |
-| content presenter children replaced | 10.00 | 10.00 | to be measured |
-| virtual calls of `StyledElement::styling_parent` | 764.00 | 764.00 | to be measured |
-| virtual calls of `ResourceProvider::try_get_resource` | 343.00 | 343.00 | to be measured |
-| property changes raised | 459.24 | 459.24 | to be measured |
-| allocations | 1224.0 | lower, by at most one per reevaluation of all effective values **[E]** | to be measured |
-| layout microseconds (`release`) | 411.3 | lower | to be measured |
+| elements attached to a logical tree | 18.00 | 18.00 | 18.00 (unchanged) |
+| elements detached from a logical tree | 18.00 | 18.00 | 18.00 (unchanged) |
+| implicit theme lookups | 17.00 | 17.00 | 17.00 (unchanged) |
+| style hosts walked | 261.00 | 261.00 | 261.00 (unchanged) |
+| styles evaluated | 0.00 | 0.00 | 0.00 (unchanged) |
+| styles matched | 0.00 | 0.00 | 0.00 (unchanged) |
+| control themes evaluated | 4.00 | 4.00 | 4.00 (unchanged) |
+| control themes matched | 2.00 | 2.00 | 2.00 (unchanged) |
+| style instances attached | 2.00 | 2.00 | 2.00 (unchanged) |
+| style instances created | 2.00 | 2.00 | 2.00 (unchanged) |
+| resource lookups | 43.00 | 43.00 | 43.00 (unchanged) |
+| resource hosts probed | 467.00 | 467.00 | 467.00 (unchanged) |
+| content presenter children replaced | 10.00 | 10.00 | 10.00 (unchanged) |
+| virtual calls of `StyledElement::styling_parent` | 764.00 | 764.00 | 764.00 (unchanged) |
+| virtual calls of `ResourceProvider::try_get_resource` | 343.00 | 343.00 | 343.00 (unchanged) |
+| property changes raised | 459.24 | 459.24 | 459.24 (unchanged) |
+| allocations | 1224.0 | lower, by at most one per reevaluation of all effective values **[E]** | 1175.0 with the changes of both designs (1224.0 before); 1137.2 for a viewport per step (1186.3 before) |
+| layout microseconds (`release`) | 411.3 | lower | not measured: the machine was under heavy load on 2026-10-09; to be measured on an idle machine |
 
 ### Commands
 
@@ -319,3 +319,7 @@ Most likely first.
    names, addresses or small numbers.
 4. The time at which an effective value is freed when a handler removes it from the store in the
    middle of a reevaluation (see the third change).
+
+### Measured on 2026-10-09
+
+The whole workspace passes with the changes (12037 tests). The run with `perf-counters` gives the same value for every one of the 70 counter lines of the benchmark as before the changes: nothing the framework does has changed. With the changes of designs 03 and 04 together, a recycled row costs 49 fewer allocations (1175.0 against 1224.0, 4 %), 12 fewer reallocations (14.9 against 26.9) and 7231 fewer bytes (104865 against 112096, 6.5 %) when scrolling 20 px a step, and the same differences when scrolling a viewport a step. The time per row was not compared: the machine was under heavy load, and the difference expected is within what that load moves.
