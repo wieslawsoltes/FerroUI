@@ -109,7 +109,7 @@ fn control_without_a_dynamic_resource_that_left_the_tree_is_freed() {
     window.close();
 }
 
-// --- C317 and C318: what a visit to a page of the catalog retained ---
+// --- C317 to C319: what a visit to a page of the catalog retained ---
 //
 // Found with the tours of `catalog_tour.rs`: every visit to a page left the page, or most of
 // what it showed, alive. Each reproduction is one of the cycles: the managed original has the
@@ -213,4 +213,52 @@ fn gap_c318_element_whose_data_context_is_bound() {
     assert!(weak.upgrade().is_none());
     assert!(child.upgrade().is_none());
     window.close();
+}
+
+/// C319: the node of a binding that locates an element (by name, as an ancestor) holds the
+/// element it found, whose tree owns the target of the binding.
+#[test]
+fn gap_c319_element_bound_to_an_element_above_it() {
+    let _app = start_catalog_application();
+    for path in ["#owner.Tag", "$parent[Border].Tag", "$parent.Tag"] {
+        let panel = from_markup_value::<Ref<ferroui_controls::StackPanel>>(&Some(load_text(&format!(
+            "<StackPanel {XMLNS}>\
+               <Border Name='owner' Tag='above'>\
+                 <TextBlock Tag='{{ReflectionBinding {path}}}'/>\
+               </Border>\
+             </StackPanel>"
+        ))))
+        .expect("a panel");
+        let window = Window::new();
+        window.set_content(Some(Control::boxed(&panel)));
+        window.show();
+        run_jobs();
+        let owner = panel.children().get(0).cast::<Border>().expect("the border");
+        let bound = owner.child().expect("the text block");
+        let tag = bound.tag().and_then(|tag| tag.downcast_ref::<String>().cloned());
+        assert_eq!(Some(String::from("above")), tag, "{path}");
+        window.set_content(None);
+        run_jobs();
+
+        let (owner, bound, weak) = {
+            let weak = (owner.downgrade(), bound.downgrade(), panel.downgrade());
+            drop((owner, bound, panel));
+            weak
+        };
+        assert!(weak.upgrade().is_none(), "{path}");
+        assert!(owner.upgrade().is_none(), "{path}");
+        assert!(bound.upgrade().is_none(), "{path}");
+        window.close();
+    }
+}
+
+/// Open: the name scope of a document holds the elements it names, and the root of the
+/// document holds the name scope, so a root that has a name keeps itself alive. The managed
+/// original has both references. Reported by the tours as what remains.
+#[test]
+#[ignore = "open: a named root and its name scope hold each other"]
+fn open_named_root_of_a_document() {
+    let _app = start_catalog_application();
+    let weak = load_and_release(&format!("<StackPanel {XMLNS} Name='root'/>"));
+    assert!(weak.upgrade().is_none());
 }

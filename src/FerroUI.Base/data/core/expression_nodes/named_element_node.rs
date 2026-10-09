@@ -19,7 +19,7 @@ impl NamedElementNode {
     pub fn new(name_scope: Option<&NameScopeRef>, name: &str) -> Rc<Self> {
         Rc::new_cyclic(|this| Self {
             this: this.clone(),
-            state: NodeState::new(),
+            state: NodeState::locating_an_element(),
             name_scope: name_scope.map(|s| Rc::downgrade(&s.0)),
             name: name.into(),
             subscription: RefCell::new(None),

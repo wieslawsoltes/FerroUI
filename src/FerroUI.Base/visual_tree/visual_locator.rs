@@ -1,5 +1,5 @@
 use crate::reactive::{IDisposable, IObservable, IObserver, LightweightObservable, LightweightObservableBase};
-use crate::{Ref, TypeInfo, Visual};
+use crate::{Ref, TypeInfo, Visual, WeakRef};
 use std::cell::RefCell;
 use std::rc::{Rc, Weak};
 
@@ -25,7 +25,10 @@ impl VisualLocator {
 struct VisualTracker {
     this: Weak<VisualTracker>,
     base: LightweightObservableBase<Option<Ref<Visual>>>,
-    relative_to: Ref<Visual>,
+    /// Held weakly (DEVIATIONS.md, Logical tree): the tracker belongs to a
+    /// binding of the visual; held strongly, as the managed original holds
+    /// it, the visual keeps itself alive.
+    relative_to: WeakRef<Visual>,
     ancestor_level: usize,
     ancestor_type: Option<&'static TypeInfo>,
     subscriptions: RefCell<Vec<Rc<dyn IDisposable>>>,
@@ -36,7 +39,7 @@ impl VisualTracker {
         Rc::new_cyclic(|this| Self {
             this: this.clone(),
             base: LightweightObservableBase::new(),
-            relative_to,
+            relative_to: relative_to.downgrade(),
             ancestor_level,
             ancestor_type,
             subscriptions: RefCell::new(Vec::new()),
@@ -48,8 +51,9 @@ impl VisualTracker {
     }
 
     fn get_result(&self) -> Option<Ref<Visual>> {
-        if self.relative_to.is_attached_to_visual_tree() {
-            self.relative_to
+        let relative_to = self.relative_to.upgrade()?;
+        if relative_to.is_attached_to_visual_tree() {
+            relative_to
                 .get_visual_ancestors()
                 .filter(|x| self.ancestor_type.is_none_or(|t| t.is_assignable_from(x.get_type())))
                 .nth(self.ancestor_level)
@@ -66,13 +70,14 @@ impl LightweightObservable<Option<Ref<Visual>>> for VisualTracker {
 
     fn initialize(&self) {
         let this = self.this.clone();
-        let attached = self.relative_to.attached_to_visual_tree(move |_| {
+        let Some(relative_to) = self.relative_to.upgrade() else { return };
+        let attached = relative_to.attached_to_visual_tree(move |_| {
             if let Some(this) = this.upgrade() {
                 this.attached_detached();
             }
         });
         let this = self.this.clone();
-        let detached = self.relative_to.detached_from_visual_tree(move |_| {
+        let detached = relative_to.detached_from_visual_tree(move |_| {
             if let Some(this) = this.upgrade() {
                 this.attached_detached();
             }

@@ -19,7 +19,15 @@ pub struct NodeState {
     index: Cell<usize>,
     owner: RefCell<Option<Weak<BindingExpression>>>,
     source: RefCell<Option<WeakValue>>,
-    value: RefCell<Option<BoxedValue>>,
+    value: RefCell<HeldValue>,
+}
+
+/// The value of a node, as the node holds it.
+enum HeldValue {
+    Value(Option<BoxedValue>),
+    /// The value of a node that locates an element
+    /// ([`NodeState::locating_an_element`]).
+    Element(Option<WeakValue>),
 }
 
 impl Default for NodeState {
@@ -34,8 +42,22 @@ impl NodeState {
             index: Cell::new(0),
             owner: RefCell::new(None),
             source: RefCell::new(None),
-            value: RefCell::new(Some(FerroProperty::unset_value())),
+            value: RefCell::new(HeldValue::Value(Some(FerroProperty::unset_value()))),
         }
+    }
+
+    /// The state of a node whose value is an element it locates from the
+    /// target of the binding: an element of a name scope, an ancestor, the
+    /// templated parent.
+    ///
+    /// Such a node holds its value weakly (DEVIATIONS.md, Bindings). The
+    /// element it finds is kept alive by the tree it was found in, and that
+    /// tree most often owns the target of the binding, which owns the
+    /// binding and its nodes: held strongly, as the managed original holds
+    /// the value of every node, the element and the target keep each other
+    /// alive. The value reads null once the element is gone.
+    pub fn locating_an_element() -> Self {
+        Self { value: RefCell::new(HeldValue::Element(Some(WeakValue::new(&FerroProperty::unset_value())))), ..Self::new() }
     }
 
     /// The index of the node in the binding path.
@@ -61,11 +83,24 @@ impl NodeState {
 
     /// The current value of the node. May be the unset marker.
     pub fn value(&self) -> Option<BoxedValue> {
-        self.value.borrow().clone()
+        match &*self.value.borrow() {
+            HeldValue::Value(value) => value.clone(),
+            HeldValue::Element(value) => value.as_ref().and_then(WeakValue::upgrade),
+        }
     }
 
     pub(crate) fn set_raw_value(&self, value: Option<BoxedValue>) {
-        self.value.replace(value);
+        let mut held = self.value.borrow_mut();
+        let old = match &*held {
+            HeldValue::Value(_) => std::mem::replace(&mut *held, HeldValue::Value(value)),
+            HeldValue::Element(_) => {
+                std::mem::replace(&mut *held, HeldValue::Element(value.as_ref().map(WeakValue::new)))
+            }
+        };
+        // The old value is dropped after the cell is released: dropping it
+        // may run code that reads the node.
+        drop(held);
+        drop(old);
     }
 
     /// Sets the current value to the unset marker, notifying the owner.
