@@ -1,5 +1,5 @@
-import createRuntime, * as moduleScript from "./control-catalog-browser.js";
 import { FerroExports } from "./ferroui.js";
+import { loadModule } from "./ferroui-loader.js";
 import * as pageAssets from "./page-assets.js";
 
 const is_browser = typeof window != "undefined";
@@ -13,22 +13,22 @@ const manifest = pageAssets.fetchManifest();
 const startup = manifest.then((list) => Promise.all(list.startup.map((asset) =>
     pageAssets.fetchFile(list, asset, "start-up").then((content) => [asset, content]))));
 
-// A module built with threads (`scripts/build-browser.sh control-catalog-browser --threads`) says so in
-// its script, and it can only be created in a cross-origin isolated page. The check, which that build
-// copies next to the page, resolves to true in such a page; otherwise it registers the service worker
-// that isolates the page and reloads the page once (it does not resolve then), or shows a message and
-// resolves to false. A site built without threads has neither the export nor the file, and makes no
-// request for it.
-let ready = true;
-if (moduleScript.ferrouiThreads === true) {
-    const { ensureCrossOriginIsolated } = await import("./ferroui-threads.js");
-    ready = await ensureCrossOriginIsolated({ element: document.getElementById("out") });
-}
+// The script of the module is imported by the loader the build copies next to the page
+// (scripts/browser/threads/ferroui-loader.js), not by an import of this file. A site has the module built
+// without threads, the one built with threads (`scripts/build-browser.sh control-catalog-browser --threads`),
+// or both (`--both`, the published site). A module built with threads can only be created in a cross-origin
+// isolated page and in a browser that can render from a worker, so on a site with both the loader decides
+// before either is requested: the one with threads when the page is isolated, or can be made so by the
+// service worker (the page is reloaded once, and the promise does not resolve), and the browser has what
+// the render thread needs; the other one otherwise. `?Threads=true|false` forces either. On a site with the
+// module with threads alone a page that cannot be isolated shows a message, and the loader answers null.
+// A site with one module makes no request it did not make before, except for the loader itself.
+const loaded = await loadModule({ script: "./control-catalog-browser.js", element: document.getElementById("out") });
 
-if (ready) {
+if (loaded) {
     // The steps of the start-up are marked on the performance timeline of the page
     // (scripts/browser/first-frame.mjs --phases reports them).
-    const runtime = await createRuntime();
+    const runtime = await loaded.createRuntime();
     performance.mark("module instantiated");
 
     // The script side resolves the exports of the framework through the module.
