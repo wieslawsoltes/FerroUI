@@ -19,13 +19,13 @@ use std::rc::Rc;
 /// still reach it, and the id cannot be reused meanwhile. When the object is
 /// dropped, its counterpart is disposed (if it was not) and released with a
 /// later batch: this stands in for the garbage collector, which reclaims a
-/// server object upstream once the UI-thread object is unreachable.
+/// server object upstream once the UI-thread object is unreachable. A
+/// counterpart that was disposed out of band (a composition target) is kept
+/// and released the same way.
 pub struct CompositionObject {
     compositor: Rc<Compositor>,
     server: Option<ServerObjectId>,
     is_disposed: Cell<bool>,
-    /// Whether the server side has been released by other means.
-    is_released: Cell<bool>,
     registered_for_serialization: Cell<bool>,
     pending_animations: PendingAnimations,
     implicit_animations: RefCell<Option<Rc<ImplicitAnimationCollection>>>,
@@ -37,7 +37,6 @@ impl CompositionObject {
             compositor: compositor.clone(),
             server,
             is_disposed: Cell::new(false),
-            is_released: Cell::new(false),
             registered_for_serialization: Cell::new(false),
             pending_animations: PendingAnimations::new(),
             implicit_animations: RefCell::new(None),
@@ -106,10 +105,11 @@ impl CompositionObject {
     }
 
     /// Marks the object disposed without queueing the disposal of its
-    /// server side: it has been disposed and released by other means.
+    /// server side, which is disposed out of band
+    /// ([`Compositor::oob_dispose`]). The server side stays under its id
+    /// until this object is dropped, as after [`dispose`](Self::dispose).
     pub(crate) fn mark_disposed(&self) {
         self.is_disposed.set(true);
-        self.is_released.set(true);
     }
 
     /// Queues the object for serialization. `this` yields the handle of the
@@ -155,9 +155,6 @@ impl CompositionObject {
 
 impl Drop for CompositionObject {
     fn drop(&mut self) {
-        if self.is_released.get() {
-            return;
-        }
         if let Some(server) = self.server {
             if self.is_disposed.get() {
                 self.compositor.release_with_a_later_batch(server);

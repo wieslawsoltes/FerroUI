@@ -57,6 +57,12 @@ pub struct ServerCompositionTarget {
 }
 
 impl ServerCompositionTarget {
+    /// Whether the target has been disposed. A disposed target stays in
+    /// the table of the compositor until its id is released.
+    pub(crate) fn is_disposed(&self) -> bool {
+        self.disposed.get()
+    }
+
     /// `id` is the identity of the target, allocated by the UI thread so
     /// that it can match readback data against it.
     pub fn new(compositor: &Rc<ServerCompositor>, surfaces: RenderSurfaces, id: i64) -> Rc<ServerCompositionTarget> {
