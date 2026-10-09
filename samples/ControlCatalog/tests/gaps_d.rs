@@ -32,12 +32,10 @@ fn gap_c400_image_brush_source_from_text() {
 
 /// C401: a reflection binding reads `ProgressBar.TemplateSettings`, as the control theme of
 /// the Fluent theme does for the sizes of its indeterminate indicators
-/// (`{Binding $parent[ProgressBar].TemplateSettings.ContainerWidth}`). Found in the log of the
-/// desktop host while the page was compared with and without compiled markup: the binding
-/// reports "Could not find a matching property accessor for 'TemplateSettings' on
-/// 'ProgressBar'" either way, and the indicators get no size from it.
+/// (`{Binding $parent[ProgressBar].TemplateSettings.ContainerWidth}`). The class declared the
+/// property for nothing but its own code, so the binding reported "Could not find a matching
+/// property accessor for 'TemplateSettings' on 'ProgressBar'" and the indicators got no size.
 #[test]
-#[ignore = "gap C401: ProgressBar.TemplateSettings has no markup metadata, so a reflection binding finds no accessor for it"]
 fn gap_c401_progress_bar_template_settings_in_a_reflection_binding() {
     let _app = start_catalog_application();
     let progress_bar = from_markup_value::<Ref<ferroui_controls::ProgressBar>>(&Some(load_text(&format!(
@@ -45,6 +43,183 @@ fn gap_c401_progress_bar_template_settings_in_a_reflection_binding() {
     ))))
     .expect("a progress bar");
     assert!(progress_bar.tag().is_some(), "the binding to the template settings delivers nothing");
+}
+
+/// C401, the member of the settings: the path of the control themes, to the end.
+#[test]
+fn gap_c401_progress_bar_template_settings_member_in_a_reflection_binding() {
+    let _app = start_catalog_application();
+    let progress_bar = from_markup_value::<Ref<ferroui_controls::ProgressBar>>(&Some(load_text(&format!(
+        "<ProgressBar {XMLNS} x:CompileBindings='False' Tag='{{Binding $self.TemplateSettings.ContainerWidth}}'/>"
+    ))))
+    .expect("a progress bar");
+    assert_eq!(Some(0.0), from_markup_value::<f64>(&progress_bar.tag()));
+    progress_bar.template_settings().set_container_width(40.0);
+    assert_eq!(Some(40.0), from_markup_value::<f64>(&progress_bar.tag()));
+}
+
+/// C401 with a compiled binding: the path is typed by the data type, and each segment is a
+/// declared member.
+#[test]
+fn gap_c401_progress_bar_template_settings_in_a_compiled_binding() {
+    let _app = start_catalog_application();
+    let progress_bar = from_markup_value::<Ref<ferroui_controls::ProgressBar>>(&Some(load_text(&format!(
+        "<ProgressBar {XMLNS} x:CompileBindings='True' Tag='{{Binding $self.TemplateSettings.Container2Width}}'/>"
+    ))))
+    .expect("a progress bar");
+    assert_eq!(Some(0.0), from_markup_value::<f64>(&progress_bar.tag()));
+    progress_bar.template_settings().set_container2_width(60.0);
+    assert_eq!(Some(60.0), from_markup_value::<f64>(&progress_bar.tag()));
+}
+
+/// C402: a reflection binding reads a component of a date, as the control theme of the calendar
+/// date picker of the Fluent theme does for the day in its button
+/// (`{Binding Source={x:Static sys:DateTime.Today}, Path=Day}`). The metadata of `DateTime` had
+/// its static members only, and the binding reported "Could not find a matching property
+/// accessor for 'Day' on 'System.DateTime'".
+#[test]
+fn gap_c402_date_time_component_in_a_reflection_binding() {
+    use ferroui_base::utilities::DateTime;
+
+    let _app = start_catalog_application();
+    let text_block = from_markup_value::<Ref<ferroui_controls::TextBlock>>(&Some(load_text(&format!(
+        "<TextBlock {XMLNS} xmlns:sys='using:System' x:CompileBindings='False' \
+           Text='{{Binding Source={{x:Static sys:DateTime.Today}}, Path=Day}}'/>"
+    ))))
+    .expect("a text block");
+    assert_eq!(Some(DateTime::today().day().to_string()), text_block.text());
+}
+
+/// C403: a binding delivers the converter of `DataValidationErrors.ErrorConverter`, as the
+/// data validation page binds the converters of its view model. The property holds the
+/// nullable form of the delegate, which no conversion produced, and the binding reported
+/// "Could not convert 'ErrorConverter' to 'Option<ErrorConverter>'".
+#[test]
+fn gap_c403_error_converter_from_a_binding() {
+    use crate::view_models::DataValidationViewModel;
+    use ferroui_controls::{DataValidationErrors, TextBox};
+
+    let _app = start_catalog_application();
+    let text_box = from_markup_value::<Ref<TextBox>>(&Some(load_text(&format!(
+        "<TextBox {XMLNS} x:CompileBindings='False' DataValidationErrors.ErrorConverter='{{Binding Converter}}'/>"
+    ))))
+    .expect("a text box");
+    let view_model = DataValidationViewModel::new();
+    text_box.set_data_context(Some(view_model.clone() as BoxedValue));
+    assert_eq!(Some(view_model.converter()), DataValidationErrors::get_error_converter(&text_box));
+}
+
+/// C404: a compiled binding whose path is one property of type `object`, as the expander page
+/// binds the corner radius of its expanders to a property that holds a corner radius or the
+/// unset value. The typed element of such a path delivered the box of the value as the value,
+/// and the binding reported "Could not convert 'Rc<dyn AnyValue>' to 'CornerRadius'".
+#[test]
+fn gap_c404_compiled_binding_to_a_property_of_type_object() {
+    use crate::view_models::ExpanderPageViewModel;
+    use ferroui_base::CornerRadius;
+
+    let _app = start_catalog_application();
+    let border = from_markup_value::<Ref<Border>>(&Some(load_text(&format!(
+        "<Border {XMLNS} xmlns:viewModels='using:ControlCatalog.ViewModels' x:CompileBindings='True' \
+           x:DataType='viewModels:ExpanderPageViewModel' CornerRadius='{{Binding CornerRadius}}'/>"
+    ))))
+    .expect("a border");
+    let view_model = ExpanderPageViewModel::new();
+    border.set_data_context(Some(view_model.clone() as BoxedValue));
+    // The unset value: the property keeps its default.
+    assert_eq!(CornerRadius::default(), border.corner_radius());
+    view_model.set_rounded(true);
+    assert_eq!(CornerRadius::uniform(25.0), border.corner_radius());
+    view_model.set_rounded(false);
+    assert_eq!(CornerRadius::default(), border.corner_radius());
+}
+
+/// C405: a two-way binding between a number and a property of an enumeration, as the tab
+/// control page and the tree view page bind the selected index of a combo box
+/// (`SelectedIndex="{Binding TabPlacement, Mode=TwoWay}"`). Neither conversion existed, and
+/// the binding reported "Could not convert 'Top' (Dock) to 'i32'".
+#[test]
+fn gap_c405_enumeration_bound_to_a_number_in_both_directions() {
+    use crate::view_models::TabControlPageViewModel;
+    use ferroui_controls::{ComboBox, Dock};
+
+    let _app = start_catalog_application();
+    let combo_box = from_markup_value::<Ref<ComboBox>>(&Some(load_text(&format!(
+        "<ComboBox {XMLNS} x:CompileBindings='False' SelectedIndex='{{Binding TabPlacement, Mode=TwoWay}}'>\
+           <ComboBoxItem>Left</ComboBoxItem>\
+           <ComboBoxItem>Bottom</ComboBoxItem>\
+           <ComboBoxItem>Right</ComboBoxItem>\
+           <ComboBoxItem>Top</ComboBoxItem>\
+         </ComboBox>"
+    ))))
+    .expect("a combo box");
+    let view_model = TabControlPageViewModel::new();
+    combo_box.set_data_context(Some(view_model.clone() as BoxedValue));
+    assert_eq!(view_model.tab_placement() as i32, combo_box.selected_index());
+    view_model.set_tab_placement(Dock::Right);
+    assert_eq!(Dock::Right as i32, combo_box.selected_index());
+    combo_box.set_selected_index(Dock::Bottom as i32);
+    assert_eq!(Dock::Bottom, view_model.tab_placement());
+}
+
+/// C406: a public method of a control bound as a command, as the control themes bind the items
+/// of the context menu of a scroll bar (`Command="{Binding $parent[ScrollBar].LineDown}"`), the
+/// scroll buttons of the menu scroll viewer and the copy item of the selectable text block.
+/// Found by the audit of the binding paths of the themes (`theme_binding_paths` of the XAML test
+/// crate): the classes declared no method for markup, so the bindings found no member and the
+/// items did nothing.
+#[test]
+fn gap_c406_methods_of_the_scrolling_controls_as_commands() {
+    use ferroui_base::metadata::into_markup_value;
+    use ferroui_controls::primitives::ScrollBar;
+    use ferroui_controls::{Button, ScrollViewer, SelectableTextBlock};
+
+    let _app = start_catalog_application();
+    let button_bound_to = |method: &str, source: BoxedValue| {
+        let button = from_markup_value::<Ref<Button>>(&Some(load_text(&format!(
+            "<Button {XMLNS} x:CompileBindings='False' Command='{{Binding {method}}}'/>"
+        ))))
+        .expect("a button");
+        button.set_data_context(Some(source));
+        button
+    };
+
+    let scroll_bar = ScrollBar::new();
+    scroll_bar.set_maximum(100.0);
+    scroll_bar.set_small_change(5.0);
+    scroll_bar.set_large_change(20.0);
+    let source = into_markup_value(scroll_bar.clone()).expect("the scroll bar as a value");
+    for (method, value) in [
+        ("LineDown", 5.0),
+        ("LineRight", 10.0),
+        ("PageDown", 30.0),
+        ("PageRight", 50.0),
+        ("LineUp", 45.0),
+        ("LineLeft", 40.0),
+        ("PageUp", 20.0),
+        ("PageLeft", 0.0),
+        ("ScrollToEnd", 100.0),
+        ("ScrollToHome", 0.0),
+    ] {
+        let button = button_bound_to(method, source.clone());
+        let command = button.command().unwrap_or_else(|| panic!("ScrollBar.{method} is no command"));
+        command.execute(None);
+        assert_eq!(value, scroll_bar.value(), "{method}");
+    }
+    assert!(button_bound_to("ScrollHere", source.clone()).command().is_some());
+
+    let scroll_viewer = into_markup_value(ScrollViewer::new()).expect("the scroll viewer as a value");
+    for method in [
+        "LineUp", "LineDown", "LineLeft", "LineRight", "PageUp", "PageDown", "PageLeft", "PageRight", "ScrollToHome",
+        "ScrollToEnd",
+    ] {
+        assert!(button_bound_to(method, scroll_viewer.clone()).command().is_some(), "ScrollViewer.{method}");
+    }
+
+    let text_block = into_markup_value(SelectableTextBlock::new()).expect("the text block as a value");
+    for method in ["Copy", "SelectAll", "ClearSelection"] {
+        assert!(button_bound_to(method, text_block.clone()).command().is_some(), "SelectableTextBlock.{method}");
+    }
 }
 
 // --- C314: what keeps a page alive after it left its host ---
