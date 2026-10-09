@@ -1,26 +1,32 @@
 use ferroui_base::media::imaging::{BitmapEncoderOptions, CompressionLevel};
 use peniko::ImageData;
-use std::io::{self, Read, Write};
+use std::io::{self, Write};
+
+pub use crate::helpers::image_decoding_helper::decode_image;
+pub(crate) use crate::helpers::image_decoding_helper::load_error;
 
 fn invalid_input(message: &str) -> io::Error {
     io::Error::new(io::ErrorKind::InvalidInput, message)
 }
 
-/// Saves an image of premultiplied RGBA pixels to a stream.
-///
-/// PNG is written with the `png` crate. JPEG is not built yet: it fails with
-/// the stage it belongs to (design document, stage 6).
+/// Saves an image of premultiplied RGBA pixels to a file.
+pub fn save_image_to_file(image: &ImageData, file_name: &str, options: &BitmapEncoderOptions) -> io::Result<()> {
+    let mut stream = std::fs::File::create(file_name)?;
+    save_image(image, &mut stream, options)
+}
+
+/// Saves an image of premultiplied RGBA pixels to a stream, in one of the
+/// two formats of the contract: PNG with the `png` crate, JPEG with the
+/// `jpeg-encoder` crate.
 pub fn save_image(image: &ImageData, stream: &mut dyn Write, options: &BitmapEncoderOptions) -> io::Result<()> {
     match options {
         BitmapEncoderOptions::Png(options) => save_png(image, stream, options.compression_level),
         BitmapEncoderOptions::Jpeg(options) => {
+            // Validate the options before doing any work.
             if !(0..=100).contains(&options.quality) {
                 return Err(invalid_input("Unknown quality"));
             }
-            Err(io::Error::new(
-                io::ErrorKind::Unsupported,
-                "The Vello backend does not encode JPEG yet: stage 6 of docs/porting/vello-backend.md",
-            ))
+            save_jpeg(image, stream, options.quality as u8)
         }
     }
 }
@@ -52,63 +58,27 @@ fn save_png(image: &ImageData, stream: &mut dyn Write, compression_level: Compre
     writer.finish().map_err(io::Error::other)
 }
 
-pub(crate) fn load_error() -> io::Error {
-    io::Error::new(io::ErrorKind::InvalidData, "Unable to load bitmap from provided data")
-}
-
-/// Decodes an encoded image at its natural size into premultiplied RGBA
-/// pixels without padding, with its width and height.
-///
-/// PNG is decoded with the `png` crate. The other formats the Skia backend
-/// decodes (JPEG, GIF, WebP, BMP, ICO) are not built yet: data in them fails
-/// to load, as data in no format does (design document, stage 6).
-pub fn decode_image(stream: &mut dyn Read) -> io::Result<(Vec<u8>, u32, u32)> {
-    let mut bytes = Vec::new();
-    stream.read_to_end(&mut bytes)?;
-
-    let mut decoder = png::Decoder::new(io::Cursor::new(bytes));
-    // Palettes, low bit depths and transparency chunks are expanded and
-    // sixteen bits a channel are reduced to eight.
-    decoder.set_transformations(png::Transformations::normalize_to_color8());
-
-    let mut reader = decoder.read_info().map_err(|_| load_error())?;
-    let buffer_size = reader.output_buffer_size().ok_or_else(load_error)?;
-    let mut buffer = vec![0u8; buffer_size];
-    let info = reader.next_frame(&mut buffer).map_err(|_| load_error())?;
-    let decoded = &buffer[..info.buffer_size()];
-
-    let premultiply = |c: u8, a: u8| ((c as u32 * a as u32 + 127) / 255) as u8;
-    let pixel_count = info.width as usize * info.height as usize;
-    let mut rgba = Vec::with_capacity(pixel_count * 4);
-
-    match info.color_type {
-        png::ColorType::Rgba => {
-            for p in decoded.chunks_exact(4) {
-                rgba.extend_from_slice(&[premultiply(p[0], p[3]), premultiply(p[1], p[3]), premultiply(p[2], p[3]), p[3]]);
-            }
-        }
-        png::ColorType::Rgb => {
-            for p in decoded.chunks_exact(3) {
-                rgba.extend_from_slice(&[p[0], p[1], p[2], 255]);
-            }
-        }
-        png::ColorType::GrayscaleAlpha => {
-            for p in decoded.chunks_exact(2) {
-                let gray = premultiply(p[0], p[1]);
-                rgba.extend_from_slice(&[gray, gray, gray, p[1]]);
-            }
-        }
-        png::ColorType::Grayscale => {
-            for p in decoded {
-                rgba.extend_from_slice(&[*p, *p, *p, 255]);
-            }
-        }
-        png::ColorType::Indexed => return Err(load_error()),
+/// Encodes an image as a baseline JPEG, as the encoder of Skia does with
+/// its default options: the colors as they are premultiplied (a JPEG has no
+/// alpha: what is translucent is written as it is drawn over black) and the
+/// two color difference channels at half the resolution in both directions,
+/// each of their samples the mean of four pixels. The Huffman tables are
+/// the standard ones: with tables made for the image, which the encoder of
+/// Skia writes and which make a file about a third smaller, what this
+/// encoder wrote was decoded as black by the decoder of this backend (which
+/// of the two crates is at fault was not examined).
+/// A quality of 0 is the lowest quality there is, 1, as in libjpeg.
+fn save_jpeg(image: &ImageData, stream: &mut dyn Write, quality: u8) -> io::Result<()> {
+    let (Ok(width), Ok(height)) = (u16::try_from(image.width), u16::try_from(image.height)) else {
+        return Err(io::Error::other("Could not encode image: a JPEG is at most 65535 pixels wide and high"));
+    };
+    if width == 0 || height == 0 {
+        return Err(io::Error::other("Could not encode image"));
     }
 
-    if rgba.len() != pixel_count * 4 {
-        return Err(load_error());
-    }
-
-    Ok((rgba, info.width, info.height))
+    let mut encoder = jpeg_encoder::Encoder::new(stream, quality.max(1));
+    encoder.set_sampling_factor(jpeg_encoder::SamplingFactor::F_2_2);
+    encoder.set_chroma_subsampling_method(jpeg_encoder::ChromaSubsamplingMethod::Average);
+    // The alpha of the pixels is passed over by the encoder.
+    encoder.encode(image.data.data(), width, height, jpeg_encoder::ColorType::Rgba).map_err(io::Error::other)
 }

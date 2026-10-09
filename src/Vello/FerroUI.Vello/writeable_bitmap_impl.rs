@@ -32,7 +32,7 @@ pub struct WriteableBitmapImpl {
 }
 
 struct Pixels {
-    /// `pixel_size.width * 4` bytes a row.
+    /// The pixels in the format of the bitmap, rows without padding.
     data: Option<Vec<u8>>,
     /// The snapshot the bitmap is drawn from, until the pixels change.
     image: Option<ImageData>,
@@ -51,16 +51,19 @@ impl WriteableBitmapImpl {
         })
     }
 
-    fn from_image(image: ImageData) -> Arc<Self> {
+    fn from_image(image: ImageData, alpha_format: AlphaFormat) -> Arc<Self> {
         let pixel_size = PixelSize::new(image.width as i32, image.height as i32);
         let data = image.data.data().to_vec();
 
-        Self::from_data(data, pixel_size, VelloPlatform::default_dpi(), PixelFormat::RGBA8888, AlphaFormat::Premul)
+        Self::from_data(data, pixel_size, VelloPlatform::default_dpi(), PixelFormat::RGBA8888, alpha_format)
     }
 
-    /// Creates a writeable bitmap from the given stream.
+    /// Creates a writeable bitmap from the given stream. A bitmap of an
+    /// image without alpha is opaque, as the codec of Skia reports it.
     pub fn from_stream(stream: &mut dyn Read) -> io::Result<Arc<Self>> {
-        Ok(Self::from_image(decode_bitmap(stream)?))
+        let (image, opaque) = decode_bitmap(stream)?;
+
+        Ok(Self::from_image(image, if opaque { AlphaFormat::Opaque } else { AlphaFormat::Premul }))
     }
 
     /// Creates a writeable bitmap from a stream, decoded so that its width
@@ -71,7 +74,9 @@ impl WriteableBitmapImpl {
         horizontal: bool,
         interpolation_mode: BitmapInterpolationMode,
     ) -> io::Result<Arc<Self>> {
-        Ok(Self::from_image(decode_bitmap_to_size(stream, decode_size, horizontal, interpolation_mode)?))
+        let image = decode_bitmap_to_size(stream, decode_size, horizontal, interpolation_mode)?;
+
+        Ok(Self::from_image(image, AlphaFormat::Premul))
     }
 
     /// Creates a writeable bitmap with the given size, DPI and formats. The
@@ -81,14 +86,12 @@ impl WriteableBitmapImpl {
     /// Panics when the pixel format is not one the backend reads and writes
     /// or the size has no pixels.
     pub fn new(size: PixelSize, dpi: Vector, format: PixelFormat, alpha_format: AlphaFormat) -> Arc<Self> {
-        if !pixel_format_helper::is_supported(format) {
-            panic!("Unsupported pixel format: {format:?}. The Vello backend reads and writes RGBA8888 and BGRA8888.");
-        }
+        let pixel_bytes = pixel_format_helper::bytes_per_pixel(format);
         if size.width < 1 || size.height < 1 {
             panic!("Unable to allocate a {}x{} bitmap", size.width, size.height);
         }
 
-        let data = vec![0u8; size.width as usize * size.height as usize * 4];
+        let data = vec![0u8; size.width as usize * size.height as usize * pixel_bytes];
 
         Self::from_data(data, size, dpi, format, alpha_format)
     }
@@ -99,7 +102,7 @@ impl WriteableBitmapImpl {
     }
 
     fn row_bytes(&self) -> usize {
-        self.pixel_size.width as usize * 4
+        self.pixel_size.width as usize * pixel_format_helper::bytes_per_pixel(self.format)
     }
 }
 

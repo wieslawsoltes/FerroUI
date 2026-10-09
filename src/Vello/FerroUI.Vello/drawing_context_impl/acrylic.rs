@@ -9,7 +9,7 @@
 //! the two fills is weighted by the coverage on its own.
 
 use super::DrawingContextImpl;
-use crate::helpers::image_saving_helper::decode_image;
+use crate::helpers::image_decoding_helper::decode_image;
 use crate::helpers::pixel_format_helper::to_image;
 use crate::scene::{VelloSceneBrush, VelloSceneImage, VelloScenePaint};
 use crate::vello_extensions::rounded_rect_path;
@@ -36,7 +36,8 @@ fn acrylic_noise() -> Option<ImageData> {
     ACRYLIC_NOISE.with(|noise| {
         noise
             .get_or_init(|| {
-                let (mut rgba, width, height) = decode_image(&mut &NOISE_ASSET[..]).ok()?;
+                let decoded = decode_image(&mut &NOISE_ASSET[..]).ok()?;
+                let (mut rgba, width, height) = (decoded.rgba, decoded.width, decoded.height);
 
                 for pixel in rgba.chunks_exact_mut(4) {
                     let alpha = pixel[3] as u32;

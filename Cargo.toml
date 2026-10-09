@@ -92,6 +92,16 @@ png = { version = "=0.18.1" }
 skrifa = { version = "=0.44.0" }
 glifo = { version = "=0.4.0", default-features = false, features = ["std"] }
 fontique = { version = "=0.12.0" }
+# The codecs of the Vello render backend beside PNG (vello-backend.md, section 1.4), one crate a
+# format, each with the features it needs and no more: JPEG is decoded by `zune-jpeg` (with its
+# SIMD paths, which are its default) and encoded by `jpeg-encoder`, GIF is decoded by `gif`
+# (without its color quantizer, which only its encoder uses), BMP and the bitmaps of an ICO by
+# `zune-bmp`; `zune-core` has the options and the readers of the two zune crates.
+zune-core = { version = "=0.5.3", default-features = false, features = ["std"] }
+zune-jpeg = { version = "=0.5.15", default-features = false, features = ["std", "neon", "x86"] }
+zune-bmp = { version = "=0.5.2", default-features = false, features = ["std"] }
+jpeg-encoder = { version = "=0.7.1", default-features = false, features = ["std"] }
+gif = { version = "=0.14.2", default-features = false, features = ["std"] }
 # The version of the `wasm-bindgen` command-line tool on PATH has to be this exact version.
 wasm-bindgen = "=0.2.129"
 roxmltree = "0.20"

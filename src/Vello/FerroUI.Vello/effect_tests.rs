@@ -1753,3 +1753,733 @@ mod render_options {
         assert!(rendered.rgba.chunks_exact(4).any(|pixel| pixel[3] != 0 && pixel[3] != 255));
     }
 }
+
+// ---------------------------------------------------------------------------
+// Pixel formats and codecs
+// ---------------------------------------------------------------------------
+
+mod bitmaps {
+    use super::*;
+    use crate::helpers::image_decoding_helper::{encoded_format, EncodedImageFormat};
+    use ferroui_base::media::imaging::{
+        BitmapEncoderOptions, BitmapInterpolationMode, JpegBitmapEncoderOptions, PngBitmapEncoderOptions,
+    };
+    use ferroui_base::platform::surfaces::{
+        FramebufferLockProperties, FuncFramebufferRenderTarget, IFramebufferRenderTarget,
+    };
+    use ferroui_base::platform::{AlphaFormat, IBitmapImpl, IRenderTarget, IWriteableBitmapImpl, RenderTargetSceneInfo};
+    use std::io::ErrorKind;
+
+    fn jpeg(quality: i32) -> BitmapEncoderOptions {
+        JpegBitmapEncoderOptions { quality }.into()
+    }
+
+    /// A writeable bitmap of one color: the port of `CreateBitmap` of the
+    /// bitmap save tests.
+    fn create_bitmap(color: Color, width: i32, height: i32) -> std::sync::Arc<dyn IWriteableBitmapImpl> {
+        let bitmap = render_interface().create_writeable_bitmap(
+            PixelSize::new(width, height),
+            DPI,
+            PixelFormat::BGRA8888,
+            AlphaFormat::Premul,
+        );
+
+        let framebuffer = bitmap.lock();
+        framebuffer.with_data(&mut |pixels| {
+            for pixel in pixels.chunks_exact_mut(4) {
+                pixel.copy_from_slice(&[color.b, color.g, color.r, color.a]);
+            }
+        });
+        framebuffer.dispose();
+
+        bitmap
+    }
+
+    // The three tests of `Media/BitmapSaveTests.cs`, as the Skia backend
+    // ports them; the format of what was saved is told by its first bytes.
+
+    #[test]
+    fn save_with_invalid_jpeg_quality_throws() {
+        let bitmap = create_bitmap(Colors::RED, 16, 16);
+
+        for quality in [-1, 101] {
+            let mut stream = Vec::new();
+            let error = bitmap.save(&mut stream, &jpeg(quality)).unwrap_err();
+            assert_eq!(ErrorKind::InvalidInput, error.kind());
+            assert!(stream.is_empty());
+        }
+    }
+
+    #[test]
+    fn save_with_png_options_produces_png() {
+        let bitmap = create_bitmap(Colors::RED, 16, 16);
+        let mut stream = Vec::new();
+
+        bitmap.save(&mut stream, &PngBitmapEncoderOptions::DEFAULT.into()).unwrap();
+
+        assert_eq!(Some(EncodedImageFormat::Png), encoded_format(&stream));
+    }
+
+    #[test]
+    fn save_with_jpeg_options_produces_jpeg() {
+        let bitmap = create_bitmap(Colors::RED, 16, 16);
+        let mut stream = Vec::new();
+
+        bitmap.save(&mut stream, &JpegBitmapEncoderOptions::DEFAULT.into()).unwrap();
+
+        assert_eq!(Some(EncodedImageFormat::Jpeg), encoded_format(&stream));
+    }
+
+    // The test of `ImmutableBitmap` of the Skia backend
+    // (`Constructor_From_Pixels_Copies_Source_Data`).
+
+    fn constructor_from_pixels_copies_source_data(width: i32, height: i32, negative_stride: bool) {
+        let size = PixelSize::new(width, height);
+        let row_bytes = (width * 4) as usize;
+        let abs_stride = row_bytes;
+        let byte_size = abs_stride * height as usize;
+
+        // Logical pixel byte: deterministic function of (row, byte index within row).
+        let expected = |row: usize, x: usize| ((row * row_bytes + x) * 7 + 1) as u8;
+
+        // Lay the logical rows out in physical memory. For a negative stride
+        // the rows are stored bottom-up.
+        let mut source = vec![0u8; byte_size];
+        for row in 0..height as usize {
+            let physical_row = if negative_stride { height as usize - 1 - row } else { row };
+            for x in 0..row_bytes {
+                source[physical_row * abs_stride + x] = expected(row, x);
+            }
+        }
+
+        let stride = if negative_stride { -(abs_stride as i32) } else { abs_stride as i32 };
+
+        let bitmap =
+            ImmutableBitmap::from_pixels(size, DPI, stride, PixelFormat::BGRA8888, AlphaFormat::Premul, &source).unwrap();
+
+        // The constructor must take its own copy: corrupting the source
+        // afterwards must not affect the bitmap's pixels.
+        source.fill(0xCD);
+        drop(source);
+
+        assert_eq!(size, bitmap.pixel_size());
+
+        let locked = bitmap.lock();
+        assert_eq!(size, locked.size());
+        assert_eq!(PixelFormat::BGRA8888, locked.format());
+
+        let locked_row_bytes = locked.row_bytes() as usize;
+        locked.with_data(&mut |data| {
+            for row in 0..height as usize {
+                for x in 0..row_bytes {
+                    assert_eq!(expected(row, x), data[row * locked_row_bytes + x]);
+                }
+            }
+        });
+
+        locked.dispose();
+        bitmap.dispose();
+    }
+
+    #[test]
+    fn constructor_from_pixels_copies_source_data_cases() {
+        for (width, height) in [(1, 1), (3, 5), (64, 64)] {
+            constructor_from_pixels_copies_source_data(width, height, false);
+            constructor_from_pixels_copies_source_data(width, height, true);
+        }
+    }
+
+    // What follows is not from the Skia backend's tests.
+
+    #[test]
+    fn a_bitmap_from_pixels_keeps_its_format_and_is_drawn() {
+        // Sixteen bits a pixel, with padding in every row and the rows from
+        // the bottom up: red above blue.
+        let red = 0xf800u16.to_le_bytes();
+        let blue = 0x001fu16.to_le_bytes();
+        let data = [blue[0], blue[1], blue[0], blue[1], 0, 0, red[0], red[1], red[0], red[1], 0, 0];
+        let bitmap = ImmutableBitmap::from_pixels(
+            PixelSize::new(2, 2),
+            Vector::new(192.0, 192.0),
+            -6,
+            PixelFormat::RGB565,
+            AlphaFormat::Opaque,
+            &data,
+        )
+        .unwrap();
+
+        assert_eq!(Some(PixelFormat::RGB565), bitmap.format());
+        assert_eq!(Some(AlphaFormat::Opaque), bitmap.alpha_format());
+        assert_eq!(Vector::new(192.0, 192.0), bitmap.dpi());
+        let locked = bitmap.lock();
+        assert_eq!((4, PixelFormat::RGB565), (locked.row_bytes(), locked.format()));
+        locked.with_data(&mut |data| assert_eq!([red[0], red[1], red[0], red[1], blue[0], blue[1], blue[0], blue[1]], data));
+        locked.dispose();
+
+        let target = Target::with_size(4, 4);
+        target.draw(|context| {
+            context.push_render_options(RenderOptions {
+                bitmap_interpolation_mode: BitmapInterpolationMode::None,
+                ..RenderOptions::default()
+            });
+            context.draw_bitmap(&bitmap, 1.0, Rect::new(0.0, 0.0, 2.0, 2.0), Rect::new(0.0, 0.0, 4.0, 4.0));
+            context.pop_render_options();
+        });
+        assert_eq!(RED, target.pixel(1, 0));
+        assert_eq!(BLUE, target.pixel(1, 3));
+
+        // Pixels that are not premultiplied are premultiplied to be drawn
+        // and read as they were given.
+        let bitmap = ImmutableBitmap::from_pixels(
+            PixelSize::new(1, 1),
+            DPI,
+            4,
+            PixelFormat::RGBA8888,
+            AlphaFormat::Unpremul,
+            &[200, 100, 50, 128],
+        )
+        .unwrap();
+        assert_eq!(Some(AlphaFormat::Unpremul), bitmap.alpha_format());
+        assert_eq!((200, 100, 50, 128), read_pixel(&bitmap, 0, 0));
+        let target = Target::with_size(1, 1);
+        target.draw(|context| context.draw_bitmap(&bitmap, 1.0, Rect::new(0.0, 0.0, 1.0, 1.0), Rect::new(0.0, 0.0, 1.0, 1.0)));
+        assert_eq!((100, 50, 25, 128), target.pixel(0, 0));
+
+        // Data that is too short for the size, and a size without pixels.
+        let short = ImmutableBitmap::from_pixels(PixelSize::new(2, 2), DPI, 8, PixelFormat::RGBA8888, AlphaFormat::Premul, &[0; 15]);
+        assert_eq!(ErrorKind::InvalidInput, short.err().expect("an error").kind());
+        let empty = ImmutableBitmap::from_pixels(PixelSize::new(0, 2), DPI, 8, PixelFormat::RGBA8888, AlphaFormat::Premul, &[0; 16]);
+        assert!(empty.is_err());
+    }
+
+    #[test]
+    fn a_writeable_bitmap_of_sixteen_bits_a_pixel_is_written_and_drawn() {
+        let interface = render_interface();
+        assert!(interface.is_supported_bitmap_pixel_format(PixelFormat::RGB565));
+
+        let bitmap =
+            interface.create_writeable_bitmap(PixelSize::new(3, 2), DPI, PixelFormat::RGB565, AlphaFormat::Opaque);
+        let framebuffer = bitmap.lock();
+        assert_eq!((6, PixelFormat::RGB565), (framebuffer.row_bytes(), framebuffer.format()));
+        framebuffer.with_data(&mut |pixels| {
+            assert_eq!(12, pixels.len());
+            for pixel in pixels.chunks_exact_mut(2) {
+                pixel.copy_from_slice(&0x07e0u16.to_le_bytes());
+            }
+        });
+        framebuffer.dispose();
+
+        let target = Target::with_size(3, 2);
+        target.draw(|context| context.draw_bitmap(&*bitmap, 1.0, Rect::new(0.0, 0.0, 3.0, 2.0), Rect::new(0.0, 0.0, 3.0, 2.0)));
+        assert_eq!((0, 255, 0, 255), target.pixel(2, 1));
+
+        // Saved and loaded again.
+        let mut encoded = Vec::new();
+        bitmap.save(&mut encoded, &PngBitmapEncoderOptions::DEFAULT.into()).unwrap();
+        let decoded = interface.load_bitmap(&mut &encoded[..]).unwrap();
+        assert_eq!((0, 255, 0, 255), read_pixel(decoded.as_readable_bitmap().expect("a readable bitmap"), 0, 0));
+    }
+
+    #[test]
+    #[should_panic(expected = "Unknown pixel format")]
+    fn a_writeable_bitmap_of_an_unknown_format_fails() {
+        render_interface().create_writeable_bitmap(
+            PixelSize::new(1, 1),
+            DPI,
+            ferroui_base::platform::PixelFormats::GRAY8,
+            AlphaFormat::Opaque,
+        );
+    }
+
+    #[test]
+    fn a_framebuffer_of_sixteen_bits_a_pixel_is_drawn_into() {
+        // The frame is written to a framebuffer of RGB565 with padding in
+        // its rows, and what it holds is what the next frame is drawn over.
+        struct Framebuffer {
+            pixels: RefCell<Vec<u8>>,
+        }
+        impl ILockedFramebuffer for Framebuffer {
+            fn address(&self) -> *mut u8 {
+                self.pixels.borrow_mut().as_mut_ptr()
+            }
+            fn with_data(&self, access: &mut dyn FnMut(&mut [u8])) {
+                access(&mut self.pixels.borrow_mut());
+            }
+            fn size(&self) -> PixelSize {
+                PixelSize::new(4, 2)
+            }
+            fn row_bytes(&self) -> i32 {
+                12
+            }
+            fn dpi(&self) -> Vector {
+                DPI
+            }
+            fn format(&self) -> PixelFormat {
+                PixelFormat::RGB565
+            }
+            fn alpha_format(&self) -> ferroui_base::platform::AlphaFormat {
+                AlphaFormat::Opaque
+            }
+            fn dispose(&self) {}
+        }
+
+        let framebuffer = Rc::new(Framebuffer { pixels: RefCell::new(vec![0u8; 24]) });
+        let locked = framebuffer.clone();
+        let surface_target: Rc<dyn IFramebufferRenderTarget> = Rc::new(FuncFramebufferRenderTarget::with_scene_info(
+            move |_| {
+                (locked.clone() as Rc<dyn ILockedFramebuffer>, FramebufferLockProperties { previous_frame_is_retained: true })
+            },
+            true,
+        ));
+        let render_target = FramebufferRenderTarget::from_render_target(surface_target, false, vec![VelloRenderingMode::Cpu]);
+
+        let draw = |rectangle: RoundedRect, color: Color| {
+            let scene_info = RenderTargetSceneInfo::new(
+                PixelSize::new(4, 2),
+                1.0,
+                ferroui_base::rendering::composition::CompositionTransparencyLevel::None,
+            );
+            let (mut context, _) = render_target.create_drawing_context(&scene_info);
+            context.draw_rectangle(Some(&solid(color)), None, rectangle, &no_shadows());
+            context.dispose();
+        };
+        let word = |x: usize, y: usize| {
+            let pixels = framebuffer.pixels.borrow();
+            u16::from_le_bytes([pixels[y * 12 + x * 2], pixels[y * 12 + x * 2 + 1]])
+        };
+
+        draw(rect(0.0, 0.0, 2.0, 2.0), Colors::RED);
+        assert_eq!((0xf800, 0), (word(1, 1), word(2, 0)));
+        // The padding of the rows is left alone.
+        assert_eq!([0u8; 4], framebuffer.pixels.borrow()[8..12]);
+
+        draw(rect(2.0, 0.0, 2.0, 1.0), Colors::BLUE);
+        assert_eq!((0xf800, 0x001f, 0), (word(1, 1), word(3, 0), word(3, 1)));
+    }
+
+    /// An image of 32 by 24 pixels: a ramp of red from left to right, of
+    /// green from top to bottom, and a blue block.
+    fn picture() -> std::sync::Arc<dyn IWriteableBitmapImpl> {
+        let bitmap = render_interface().create_writeable_bitmap(
+            PixelSize::new(32, 24),
+            DPI,
+            PixelFormat::RGBA8888,
+            AlphaFormat::Premul,
+        );
+        let framebuffer = bitmap.lock();
+        framebuffer.with_data(&mut |pixels| {
+            for (index, pixel) in pixels.chunks_exact_mut(4).enumerate() {
+                let (x, y) = (index % 32, index / 32);
+                let blue = if (8..24).contains(&x) && (6..18).contains(&y) { 220 } else { 30 };
+                pixel.copy_from_slice(&[(x * 8) as u8, (y * 10) as u8, blue, 255]);
+            }
+        });
+        framebuffer.dispose();
+        bitmap
+    }
+
+    /// The largest and the mean difference of a channel between a decoded
+    /// bitmap and the picture.
+    fn difference_to_the_picture(decoded: &dyn IReadableBitmapImpl) -> (u8, f64) {
+        let original = picture();
+        let (mut largest, mut sum) = (0u8, 0u64);
+        for y in 0..24 {
+            for x in 0..32 {
+                let (a, b) = (read_pixel(&*original, x, y), read_pixel(decoded, x, y));
+                for (a, b) in [(a.0, b.0), (a.1, b.1), (a.2, b.2), (a.3, b.3)] {
+                    largest = largest.max(a.abs_diff(b));
+                    sum += a.abs_diff(b) as u64;
+                }
+            }
+        }
+        (largest, sum as f64 / (32.0 * 24.0 * 4.0))
+    }
+
+    #[test]
+    fn jpeg_is_encoded_with_a_quality_and_decoded() {
+        let interface = render_interface();
+        let bitmap = picture();
+
+        let encode = |quality| {
+            let mut encoded = Vec::new();
+            bitmap.save(&mut encoded, &jpeg(quality)).unwrap();
+            assert_eq!(Some(EncodedImageFormat::Jpeg), encoded_format(&encoded));
+            encoded
+        };
+        let (best, default, worst, least) = (encode(100), encode(75), encode(10), encode(0));
+
+        // A higher quality is a larger file and a truer picture.
+        assert!(best.len() > default.len() && default.len() > worst.len() && worst.len() >= least.len());
+
+        let decoded = interface.load_bitmap(&mut &best[..]).unwrap();
+        assert_eq!(PixelSize::new(32, 24), decoded.pixel_size());
+        assert_eq!(DPI, decoded.dpi());
+        let (largest, mean) = difference_to_the_picture(decoded.as_readable_bitmap().expect("a readable bitmap"));
+        // The color difference channels have half the resolution: the edge
+        // of the blue block is where the largest difference is.
+        assert!(mean < 4.0 && largest < 120, "quality 100: {largest}, {mean}");
+
+        let decoded = interface.load_bitmap(&mut &worst[..]).unwrap();
+        let (_, worst_mean) = difference_to_the_picture(decoded.as_readable_bitmap().expect("a readable bitmap"));
+        assert!(worst_mean > mean && worst_mean < 30.0, "quality 10: {worst_mean}");
+
+        // A writeable bitmap, and a bitmap of a width.
+        let writeable = interface.load_writeable_bitmap(&mut &best[..]).unwrap();
+        assert_eq!(PixelSize::new(32, 24), writeable.pixel_size());
+        let narrow = interface.load_bitmap_to_width(&mut &best[..], 16, BitmapInterpolationMode::HighQuality).unwrap();
+        assert_eq!(PixelSize::new(16, 12), narrow.pixel_size());
+        let (r, g, b, a) = read_pixel(narrow.as_readable_bitmap().expect("a readable bitmap"), 8, 6);
+        assert!(a == 255 && r.abs_diff(132) < 16 && g.abs_diff(125) < 16 && b > 180, "{:?}", (r, g, b, a));
+    }
+
+    #[test]
+    fn a_jpeg_has_what_is_translucent_over_black() {
+        let bitmap = render_interface().create_writeable_bitmap(
+            PixelSize::new(16, 16),
+            DPI,
+            PixelFormat::RGBA8888,
+            AlphaFormat::Premul,
+        );
+        let framebuffer = bitmap.lock();
+        framebuffer.with_data(&mut |pixels| {
+            for pixel in pixels.chunks_exact_mut(4) {
+                // Half transparent white, premultiplied.
+                pixel.copy_from_slice(&[128, 128, 128, 128]);
+            }
+        });
+        framebuffer.dispose();
+
+        let mut encoded = Vec::new();
+        bitmap.save(&mut encoded, &jpeg(100)).unwrap();
+        let decoded = render_interface().load_bitmap(&mut &encoded[..]).unwrap();
+        let (r, g, b, a) = read_pixel(decoded.as_readable_bitmap().expect("a readable bitmap"), 8, 8);
+        assert!(a == 255 && r.abs_diff(128) <= 2 && g.abs_diff(128) <= 2 && b.abs_diff(128) <= 2, "{:?}", (r, g, b, a));
+    }
+
+    /// A bitmap file of 24 bits a pixel: 3 by 2 pixels, rows from the
+    /// bottom up with a byte of padding each. The top row is red, green,
+    /// blue and the bottom row white, black, grey.
+    fn bmp_24() -> Vec<u8> {
+        let mut file = Vec::new();
+        file.extend_from_slice(b"BM");
+        file.extend_from_slice(&(54u32 + 24).to_le_bytes());
+        file.extend_from_slice(&[0; 4]);
+        file.extend_from_slice(&54u32.to_le_bytes());
+        file.extend_from_slice(&bitmap_header(3, 2, 24, 0));
+        // Blue, green, red.
+        file.extend_from_slice(&[255, 255, 255, 0, 0, 0, 128, 128, 128, 0, 0, 0]);
+        file.extend_from_slice(&[0, 0, 255, 0, 255, 0, 255, 0, 0, 0, 0, 0]);
+        file
+    }
+
+    /// The forty bytes of the header of a bitmap.
+    fn bitmap_header(width: i32, height: i32, bits_per_pixel: u16, colors: u32) -> Vec<u8> {
+        let mut header = Vec::new();
+        header.extend_from_slice(&40u32.to_le_bytes());
+        header.extend_from_slice(&width.to_le_bytes());
+        header.extend_from_slice(&height.to_le_bytes());
+        header.extend_from_slice(&1u16.to_le_bytes());
+        header.extend_from_slice(&bits_per_pixel.to_le_bytes());
+        // Not compressed; the size of the pixels may be zero then.
+        header.extend_from_slice(&[0; 8]);
+        // 72 pixels an inch.
+        header.extend_from_slice(&2835u32.to_le_bytes());
+        header.extend_from_slice(&2835u32.to_le_bytes());
+        header.extend_from_slice(&colors.to_le_bytes());
+        header.extend_from_slice(&[0; 4]);
+        header
+    }
+
+    fn pixels_of(bitmap: &dyn IBitmapImpl) -> Vec<(u8, u8, u8, u8)> {
+        let size = bitmap.pixel_size();
+        let readable = bitmap.as_readable_bitmap().expect("a readable bitmap");
+        (0..size.height).flat_map(|y| (0..size.width).map(move |x| (x, y))).map(|(x, y)| read_pixel(readable, x, y)).collect()
+    }
+
+    const WHITE: (u8, u8, u8, u8) = (255, 255, 255, 255);
+    const BLACK: (u8, u8, u8, u8) = (0, 0, 0, 255);
+    const GREEN: (u8, u8, u8, u8) = (0, 255, 0, 255);
+    const GREY: (u8, u8, u8, u8) = (128, 128, 128, 255);
+
+    #[test]
+    fn bmp_is_decoded() {
+        let interface = render_interface();
+
+        let file = bmp_24();
+        assert_eq!(Some(EncodedImageFormat::Bmp), encoded_format(&file));
+        let decoded = interface.load_bitmap(&mut &file[..]).unwrap();
+        assert_eq!(PixelSize::new(3, 2), decoded.pixel_size());
+        // The resolution of the file is not read: 96 DPI, as in the Skia
+        // backend.
+        assert_eq!(DPI, decoded.dpi());
+        assert_eq!(vec![RED, GREEN, BLUE, WHITE, BLACK, GREY], pixels_of(&*decoded));
+
+        // Eight bits a pixel with a palette of two colors, rows from the
+        // top down (a negative height).
+        let mut file = Vec::new();
+        file.extend_from_slice(b"BM");
+        file.extend_from_slice(&(54u32 + 8 + 8).to_le_bytes());
+        file.extend_from_slice(&[0; 4]);
+        file.extend_from_slice(&(54u32 + 8).to_le_bytes());
+        file.extend_from_slice(&bitmap_header(2, -2, 8, 2));
+        file.extend_from_slice(&[0, 0, 255, 0, 255, 0, 0, 0]);
+        file.extend_from_slice(&[0, 1, 0, 0, 1, 1, 0, 0]);
+        let decoded = interface.load_bitmap(&mut &file[..]).unwrap();
+        assert_eq!(vec![RED, BLUE, BLUE, BLUE], pixels_of(&*decoded));
+
+        // A file that ends early.
+        let file = bmp_24();
+        assert!(interface.load_bitmap(&mut &file[..60]).is_err());
+    }
+
+    /// An image of 4 by 2 pixels with two frames; the first one covers the
+    /// right three columns and has a transparent pixel.
+    fn gif() -> Vec<u8> {
+        let mut file = Vec::new();
+        {
+            // Red, green, blue, white.
+            let palette = [255, 0, 0, 0, 255, 0, 0, 0, 255, 255, 255, 255];
+            let mut encoder = gif::Encoder::new(&mut file, 4, 2, &palette).unwrap();
+            encoder
+                .write_frame(&gif::Frame {
+                    left: 1,
+                    top: 0,
+                    width: 3,
+                    height: 2,
+                    transparent: Some(3),
+                    buffer: std::borrow::Cow::Borrowed(&[0, 1, 2, 3, 2, 0]),
+                    ..gif::Frame::default()
+                })
+                .unwrap();
+            encoder
+                .write_frame(&gif::Frame {
+                    width: 4,
+                    height: 2,
+                    buffer: std::borrow::Cow::Borrowed(&[1; 8]),
+                    ..gif::Frame::default()
+                })
+                .unwrap();
+        }
+        file
+    }
+
+    #[test]
+    fn gif_is_decoded_to_its_first_frame() {
+        let file = gif();
+        assert_eq!(Some(EncodedImageFormat::Gif), encoded_format(&file));
+
+        let decoded = render_interface().load_bitmap(&mut &file[..]).unwrap();
+        assert_eq!(PixelSize::new(4, 2), decoded.pixel_size());
+        assert_eq!(
+            vec![TRANSPARENT, RED, GREEN, BLUE, TRANSPARENT, TRANSPARENT, BLUE, RED],
+            pixels_of(&*decoded)
+        );
+
+        assert!(render_interface().load_bitmap(&mut &file[..20]).is_err());
+    }
+
+    /// An icon of the given images: for each its width and height and its
+    /// data, a PNG file or a bitmap without its file header.
+    fn ico(images: &[(u8, u8, Vec<u8>)]) -> Vec<u8> {
+        let mut file = vec![0, 0, 1, 0];
+        file.extend_from_slice(&(images.len() as u16).to_le_bytes());
+
+        let mut offset = 6 + 16 * images.len();
+        for (width, height, data) in images {
+            file.extend_from_slice(&[*width, *height, 0, 0, 1, 0, 32, 0]);
+            file.extend_from_slice(&(data.len() as u32).to_le_bytes());
+            file.extend_from_slice(&(offset as u32).to_le_bytes());
+            offset += data.len();
+        }
+        for (_, _, data) in images {
+            file.extend_from_slice(data);
+        }
+        file
+    }
+
+    #[test]
+    fn ico_is_decoded_to_its_largest_image() {
+        let interface = render_interface();
+
+        // A bitmap of 24 bits a pixel, 2 by 2, twice as high in its header,
+        // with the mask after it: the bottom left pixel is masked out.
+        let mut with_mask = bitmap_header(2, 4, 24, 0);
+        with_mask.extend_from_slice(&[255, 0, 0, 0, 0, 255, 0, 0]);
+        with_mask.extend_from_slice(&[0, 0, 255, 0, 255, 0, 0, 0]);
+        with_mask.extend_from_slice(&[0b1000_0000, 0, 0, 0]);
+        with_mask.extend_from_slice(&[0, 0, 0, 0]);
+
+        // A bitmap of 32 bits a pixel, 1 by 1: half transparent red.
+        let mut with_alpha = bitmap_header(1, 2, 32, 0);
+        with_alpha.extend_from_slice(&[0, 0, 255, 128]);
+        with_alpha.extend_from_slice(&[0, 0, 0, 0]);
+
+        // A PNG of 3 by 3.
+        let mut png = Vec::new();
+        create_bitmap(Colors::BLUE, 3, 3).save(&mut png, &PngBitmapEncoderOptions::DEFAULT.into()).unwrap();
+
+        let file = ico(&[(2, 2, with_mask.clone())]);
+        assert_eq!(Some(EncodedImageFormat::Ico), encoded_format(&file));
+        let decoded = interface.load_bitmap(&mut &file[..]).unwrap();
+        assert_eq!(vec![RED, GREEN, TRANSPARENT, RED], pixels_of(&*decoded));
+
+        let file = ico(&[(1, 1, with_alpha.clone())]);
+        let decoded = interface.load_bitmap(&mut &file[..]).unwrap();
+        assert_eq!(vec![(128, 0, 0, 128)], pixels_of(&*decoded));
+
+        // The largest image of three, whichever comes first; of two of a
+        // size the first.
+        for images in [
+            vec![(1, 1, with_alpha.clone()), (3, 3, png.clone()), (2, 2, with_mask.clone())],
+            vec![(3, 3, png.clone()), (2, 2, with_mask.clone()), (1, 1, with_alpha.clone())],
+        ] {
+            let file = ico(&images);
+            let decoded = interface.load_bitmap(&mut &file[..]).unwrap();
+            assert_eq!(vec![BLUE; 9], pixels_of(&*decoded));
+        }
+        let mut other = bitmap_header(1, 2, 32, 0);
+        other.extend_from_slice(&[255, 0, 0, 255, 0, 0, 0, 0]);
+        let file = ico(&[(1, 1, with_alpha.clone()), (1, 1, other)]);
+        assert_eq!(vec![(128, 0, 0, 128)], pixels_of(&*interface.load_bitmap(&mut &file[..]).unwrap()));
+
+        // An icon without images, and one whose image is not in the file.
+        assert!(interface.load_bitmap(&mut &ico(&[])[..]).is_err());
+        let file = ico(&[(2, 2, with_mask)]);
+        assert!(interface.load_bitmap(&mut &file[..file.len() - 30]).is_err());
+    }
+
+    #[test]
+    fn wbmp_is_decoded() {
+        // 10 by 2 pixels, a bit a pixel, the rows padded to bytes: white
+        // where a bit is set.
+        let file = [0u8, 0, 10, 2, 0b1010_0000, 0b0100_0000, 0b0000_0000, 0b1100_0000];
+        assert_eq!(Some(EncodedImageFormat::Wbmp), encoded_format(&file));
+
+        let decoded = render_interface().load_bitmap(&mut &file[..]).unwrap();
+        assert_eq!(PixelSize::new(10, 2), decoded.pixel_size());
+        let pixels = pixels_of(&*decoded);
+        assert_eq!([WHITE, BLACK, WHITE, BLACK], pixels[..4]);
+        assert_eq!([BLACK, WHITE, BLACK], pixels[8..11]);
+        assert_eq!([WHITE, WHITE], pixels[18..]);
+        assert_eq!(Some(AlphaFormat::Opaque), decoded.as_readable_bitmap().expect("a readable bitmap").alpha_format());
+
+        // A width of more than seven bits: 200 by 1.
+        let mut wide = vec![0u8, 0, 0x81, 0x48, 1];
+        wide.extend_from_slice(&[0xff; 25]);
+        let decoded = render_interface().load_bitmap(&mut &wide[..]).unwrap();
+        assert_eq!(PixelSize::new(200, 1), decoded.pixel_size());
+    }
+
+    #[test]
+    fn a_decoded_bitmap_tells_whether_its_image_has_alpha() {
+        let interface = render_interface();
+        let alpha_format = |data: &[u8]| {
+            let bitmap = interface.load_bitmap(&mut &data[..]).unwrap();
+            let writeable = interface.load_writeable_bitmap(&mut &data[..]).unwrap();
+            let alpha_format = bitmap.as_readable_bitmap().expect("a readable bitmap").alpha_format();
+            assert_eq!(alpha_format, writeable.alpha_format());
+            alpha_format
+        };
+
+        // A JPEG, a bitmap file of 24 bits and a GIF whose frame covers it
+        // without a transparent color have no alpha; a PNG with an alpha
+        // channel, a GIF with a transparent color and an icon have.
+        let mut jpeg_file = Vec::new();
+        picture().save(&mut jpeg_file, &jpeg(90)).unwrap();
+        let mut png_file = Vec::new();
+        picture().save(&mut png_file, &PngBitmapEncoderOptions::DEFAULT.into()).unwrap();
+        let mut opaque_gif = Vec::new();
+        gif::Encoder::new(&mut opaque_gif, 2, 1, &[255, 0, 0, 0, 0, 255])
+            .unwrap()
+            .write_frame(&gif::Frame {
+                width: 2,
+                height: 1,
+                buffer: std::borrow::Cow::Borrowed(&[0, 1]),
+                ..gif::Frame::default()
+            })
+            .unwrap();
+
+        assert_eq!(Some(AlphaFormat::Opaque), alpha_format(&jpeg_file));
+        assert_eq!(Some(AlphaFormat::Opaque), alpha_format(&bmp_24()));
+        assert_eq!(Some(AlphaFormat::Opaque), alpha_format(&opaque_gif));
+        assert_eq!(Some(AlphaFormat::Premul), alpha_format(&png_file));
+        assert_eq!(Some(AlphaFormat::Premul), alpha_format(&gif()));
+
+        // A bitmap that is decoded to a size is premultiplied, as in the
+        // Skia backend.
+        let scaled = interface.load_bitmap_to_width(&mut &jpeg_file[..], 16, BitmapInterpolationMode::LowQuality).unwrap();
+        assert_eq!(Some(AlphaFormat::Premul), scaled.as_readable_bitmap().expect("a readable bitmap").alpha_format());
+    }
+
+    #[test]
+    fn a_jpeg_is_reduced_as_its_codec_would_decode_it() {
+        use crate::helpers::image_decoding_helper::{jpeg_scaled_dimensions, reduce_by_area};
+
+        // The eighths of the size the codec of Skia decodes at for a scale.
+        assert_eq!((600, 400), jpeg_scaled_dimensions(600, 400, 1.5));
+        assert_eq!((600, 400), jpeg_scaled_dimensions(600, 400, 0.94));
+        assert_eq!((525, 350), jpeg_scaled_dimensions(600, 400, 0.9));
+        assert_eq!((300, 200), jpeg_scaled_dimensions(600, 400, 0.5));
+        assert_eq!((150, 100), jpeg_scaled_dimensions(600, 400, 0.3));
+        assert_eq!((75, 50), jpeg_scaled_dimensions(600, 400, 0.05));
+        // Rounded up.
+        assert_eq!((2, 1), jpeg_scaled_dimensions(9, 5, 0.1));
+
+        // The mean of the pixels that fall into one: whole pixels, and
+        // parts of them.
+        let row = [0u8, 0, 0, 255, 100, 100, 100, 255, 200, 200, 200, 255, 60, 60, 60, 255];
+        assert_eq!(vec![50, 50, 50, 255, 130, 130, 130, 255], reduce_by_area(&row, 4, 1, 2, 1));
+        assert_eq!(vec![90, 90, 90, 255], reduce_by_area(&row, 4, 1, 1, 1));
+        // Three pixels of four: a pixel and a third of the next, ...
+        let thirds = reduce_by_area(&row, 4, 1, 3, 1);
+        assert_eq!([25, 150, 95], [thirds[0], thirds[4], thirds[8]]);
+    }
+
+    #[test]
+    fn formats_that_are_not_decoded_fail_to_load() {
+        let interface = render_interface();
+
+        // WebP (a RIFF container), a wireless bitmap that is longer than its
+        // pixels, and nothing at all.
+        let webp = b"RIFF\x1a\x00\x00\x00WEBPVP8L\x0d\x00\x00\x00\x2f\x00\x00\x00\x10\x07\x10\x11\x11\x88\x88\xfe\x07\x00";
+        let wbmp = [0u8, 0, 1, 1, 0x80, 0x80];
+        for data in [&webp[..], &wbmp[..], &[][..], b"not an image"] {
+            assert_eq!(None, encoded_format(data));
+            let error = interface.load_bitmap(&mut &data[..]).err().expect("an error");
+            assert_eq!(ErrorKind::InvalidData, error.kind());
+            assert!(interface.load_writeable_bitmap(&mut &data[..]).is_err());
+            assert!(interface.load_bitmap_to_width(&mut &data[..], 8, BitmapInterpolationMode::LowQuality).is_err());
+        }
+    }
+
+    #[test]
+    fn the_pictures_of_the_catalog_are_decoded() {
+        // JPEG files as cameras and editors write them: the pictures of the
+        // sample application.
+        let directory = std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("../../../samples/ControlCatalog/Assets");
+        let mut decoded_files = 0;
+
+        for folder in ["CurvedHeader", "ModernApp"] {
+            for entry in std::fs::read_dir(directory.join(folder)).expect("the assets of the catalog") {
+                let path = entry.unwrap().path();
+                if path.extension().is_none_or(|extension| extension != "jpg") {
+                    continue;
+                }
+
+                let bitmap = render_interface()
+                    .load_bitmap_from_file(path.to_str().expect("a path that is text"))
+                    .unwrap_or_else(|error| panic!("{}: {error}", path.display()));
+                let size = bitmap.pixel_size();
+                assert!(size.width >= 16 && size.height >= 16, "{}: {size:?}", path.display());
+
+                // A photograph is opaque and not one color.
+                let readable = bitmap.as_readable_bitmap().expect("a readable bitmap");
+                let (first, middle) = (read_pixel(readable, 1, 1), read_pixel(readable, size.width / 2, size.height / 2));
+                assert_eq!((255, 255), (first.3, middle.3), "{}", path.display());
+                decoded_files += 1;
+            }
+        }
+
+        assert!(decoded_files >= 10, "{decoded_files}");
+    }
+}
