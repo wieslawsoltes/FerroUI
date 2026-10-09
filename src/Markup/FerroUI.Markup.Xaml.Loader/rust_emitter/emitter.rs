@@ -40,7 +40,8 @@ use crate::compiler_extensions::transformers::{
     XamlSourceInfoValueManipulation,
 };
 use crate::compiler_extensions::{
-    BindingSetter, BindingWithPrioritySetter, SetValueWithPrioritySetter, UnsetValueSetter, XamlIlBindingPathElementNode, XamlIlBindingPathNode, XamlIlFerroPropertyFieldNode,
+    BindingSetter, BindingWithPrioritySetter, SetValueWithPrioritySetter, UnsetValueSetter, XamlIlBindingPathElementNode, XamlIlBindingPathNode,
+    XamlIlClrMethodAsCommandPathElementNode, XamlIlFerroPropertyFieldNode,
     XamlIlFerroPropertyHelper, XamlIlFerroPropertyNode, XamlIlProvideValueTargetProperty,
 };
 use crate::back_end::{context_definition, numeric_constant, plan_setters, FRAMEWORK_CONTEXT};
@@ -2573,10 +2574,79 @@ impl<'a> Emitter<'a> {
             }
             XamlIlBindingPathElementNode::ClrIndexer(_) => return Err(unsupported(node, "a binding path with an indexer")),
             XamlIlBindingPathElementNode::ClrMethod(_) => return Err(unsupported(node, "a binding path with a method")),
-            XamlIlBindingPathElementNode::ClrMethodAsCommand(_) => {
-                return Err(unsupported(node, "a binding path with a method as a command"));
-            }
+            XamlIlBindingPathElementNode::ClrMethodAsCommand(e) => self.path_command(node, e)?,
         })
+    }
+
+    /// The call of the typed function of a method of the owner of a command, as the body
+    /// of the closure `rt::path_command` takes: the owner, then the arguments read from the
+    /// ones the command passes, in the types the method declares. Returns the closure and
+    /// the method.
+    fn command_method(&self, node: &Rc<dyn IXamlAstNode>, method: &Rc<dyn IXamlMethod>, yields: bool) -> EmitResult<(String, MethodInfo<'a>)> {
+        let name = method.name();
+        let runtime = self
+            .types
+            .method(method.as_ref())
+            .ok_or_else(|| unsupported(node, format!("{name}: the method of a command is not a method of the type system of the host")))?;
+        if runtime.is_static {
+            return Err(unsupported(node, format!("{name}: a static method as a command")));
+        }
+        let declared = runtime
+            .declared()
+            .filter(|declared| declared.kind == DeclaredKind::Method)
+            .ok_or_else(|| unsupported(node, format!("{name}: the method of a command is not a method markup metadata declares")))?;
+        let emit = declared.emit().ok_or_else(|| unsupported(node, format!("{name}: the declaration has no typed function")))?;
+        let owner = self.owner_path(node, &runtime)?;
+        let count = runtime.parameters.len();
+        let mut arguments: Vec<&str> = Vec::with_capacity(count + 1);
+        arguments.push("this");
+        arguments.extend(std::iter::repeat_n("arguments.next()?", count));
+        let call = format!("{owner}::{}({})", emit.function, arguments.join(", "));
+        let call = if emit.fallible { format!("{call}?") } else { call };
+        let body = match (yields, declared.returns) {
+            (true, Some(_)) => format!("::core::result::Result::Ok(rt::delegate_result({call}))"),
+            (true, None) => return Err(unsupported(node, format!("{name}: a can-execute method that returns nothing"))),
+            // What the method of a command returns is dropped.
+            (false, Some(_)) => format!("{{ let _ = {call}; ::core::result::Result::Ok(::core::option::Option::None) }}"),
+            (false, None) => format!("{{ {call}; ::core::result::Result::Ok(::core::option::Option::None) }}"),
+        };
+        let parameter = if count == 0 { "_arguments" } else { "arguments" };
+        Ok((format!("|this, {parameter}| {body}"), runtime))
+    }
+
+    /// A method used as a command, the last element of a path bound to a command property
+    /// (`XamlIlClrMethodAsCommandPathElementNode`:
+    /// `builder.Command(name, execute, canExecute, dependsOnProperties)`): the element the
+    /// interpreter builds (`rt::path_command`), over the typed functions of the execute
+    /// method and of the can-execute method, with the metadata of the declaring type of
+    /// the execute method, which states how the owner notifies of changes.
+    fn path_command(&mut self, node: &Rc<dyn IXamlAstNode>, command: &XamlIlClrMethodAsCommandPathElementNode) -> EmitResult<String> {
+        let name = command.execute_method.name();
+        let (execute, method) = self.command_method(node, &command.execute_method, false)?;
+        let parameter_is_value_type = match method.parameters.as_slice() {
+            [] => false,
+            [parameter] => parameter.is_value_type(),
+            _ => return Err(unsupported(node, format!("{name}: a method with more than one parameter as a command"))),
+        };
+        let declaring = method
+            .declaring_type
+            .clone()
+            .ok_or_else(|| unsupported(node, format!("{name}: the declaring type is gone")))?;
+        let markup = self.markup_expr(node, &declaring)?;
+        let head = format!(
+            "&builder, {markup}, {}, {}, {parameter_is_value_type}, {execute}",
+            rust_string_literal(&name),
+            !method.parameters.is_empty()
+        );
+        let Some(can_execute) = &command.can_execute_method else {
+            return Ok(format!("rt::path_command({head})"));
+        };
+        let (can_execute, can_execute_method) = self.command_method(node, can_execute, true)?;
+        if can_execute_method.parameters.len() != 1 {
+            return Err(unsupported(node, format!("{name}: a can-execute method that does not take the command parameter")));
+        }
+        let depends_on: Vec<String> = command.depends_on_properties.iter().map(|property| rust_string_literal(property)).collect();
+        Ok(format!("rt::path_command_with_can_execute({head}, {can_execute}, &[{}])", depends_on.join(", ")))
     }
 
     /// The expression of the metadata of a type: `<T as MarkupTyped>::MARKUP`

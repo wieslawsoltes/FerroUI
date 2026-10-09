@@ -1296,6 +1296,30 @@ Both hosts name the two Rust types (`Known::RuntimeList`, `Known::ListItems`). N
 
 **Not emitted:** an array (`x:Array` is not a directive of the language of the port, and the array constant of the compiler, `FerroXamlIlArrayConstantAstNode`, is in no document of the catalog; it is refused by name as before). **Proof:** `runtime_lists.xaml` of the corpus (a typed list and an untyped one as items sources, with null, a text, a value of an enumeration and a control; an untyped and an empty typed list as a `Tag`), emitted the same by both hosts and equal to the run-time loader's tree, and `a_list_created_in_markup_is_the_list_of_the_run_time_loader`, which reads the items both back ends deliver; the five pages of the catalog are in the fixture of 9.5.19 and load to the trees of the run-time loader.
 
+#### 9.4.10 Implemented (2026-10-09): a method as a command in a compiled binding path
+
+`Command="{Binding Save}"`, `Command="{Binding #page.DoSave}"`, `Command="{Binding $parent[TextBox].Cut}"` (three documents of the catalog). The transform replaces the last element of a path bound to a command property by `XamlIlClrMethodAsCommandPathElementNode` (upstream's `XamlIlBindingPathHelper`): the execute method, the can-execute method `bool Can<Name>(object)` of its declaring type when there is one, and the arguments of the `DependsOn` attributes of that method. Upstream emits two trampolines and `builder.Command(name, execute, canExecute, dependsOnProperties)`. The builder of the port has the element (`CompiledBindingPathBuilder::command_untyped`, which the interpreter calls, `runtime/framework/binding_path.rs`); the emitter had no rule.
+
+```rust
+let builder = rt::path_command_with_can_execute(&builder, <::app::Desk as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Fire", true, false,
+    |this, arguments| { ::app::Desk::__markup_Fire_2(this, arguments.next()?); ::core::result::Result::Ok(::core::option::Option::None) },
+    |this, arguments| ::core::result::Result::Ok(rt::delegate_result(::app::Desk::__markup_CanFire_3(this, arguments.next()?))),
+    &["Armed"]);
+```
+
+| Part | What the interpreter does | What is emitted |
+|---|---|---|
+| the execute trampoline | invokes the method with the owner and, when the method takes one, the command parameter, converted to the declared parameter type; what the method returns is dropped; a parameter that does not convert and a failure of the method escape `ICommand.Execute` as a panic that names the exception of the managed original | a closure over the typed function of the declared method (form A of 9.3), with the owner and the parameter read from `rt::DelegateArguments` in the types the method declares (the reader the delegate of a handler uses, 9.4.4); `rt::path_command` wraps it with the conversion of the owner and the same panics, which need whether the method takes a parameter and whether that parameter is a value type (null of a value type is another exception): two literals |
+| the can-execute trampoline | invokes `Can<Name>` with the owner and the parameter; a failure, or a result that is no `bool`, is `false` | a second closure over its typed function, `rt::path_command_with_can_execute` |
+| the dependent properties | the names, in the order of the attributes | a slice of string literals |
+| how the owner notifies | `notify_property_changed` of the markup metadata of the declaring type of the execute method | the metadata expression of that type (`<T as MarkupTyped>::MARKUP`, `rt::class_markup(..)` for a class), from which `rt::path_command` reads the same member |
+
+Refused by name: a static method, a method that is not one markup metadata declares or that has no typed function, more than one parameter. `XamlIlClrMethodPathElementNode` (a method as a delegate value) and an indexer in a path are refused as before; no document of the catalog has one.
+
+**Deviation.** The interpreter adapts the arguments of an invoked member (`adapt_arguments`: a type value, an array or a list of the run-time loader passed as the Rust type the member declares); the reader of generated code converts an object passed to an untyped parameter and nothing else. A command parameter is what the element holds as its `CommandParameter`, which is none of those three in a process without the run-time loader.
+
+**Proof.** `method_command.xaml` of the corpus (a method without a parameter, one whose parameter is a text and which returns a value, one with a can-execute method that depends on a property, a method of a named element), emitted the same by both hosts and equal to the run-time loader's tree, and `a_method_is_a_command_in_both_back_ends`: both back ends call the same methods with the same arguments, answer `CanExecute` the same before and after the property changes, raise the change of the state of the command once, and select the text of the named text box. The three pages of the catalog are in the fixture of 9.5.19 and load to the trees of the run-time loader.
+
 ### 9.5 Typing without the framework linked into the build tool
 
 #### 9.5.1 Inputs of the build-time type system
@@ -2393,7 +2417,7 @@ For applications, `export_metadata()` can generate the whole function (`$OUT_DIR
 | `XamlIlFerroPropertyPropertyPathElementNode` | `.ferro_property(p)` / `.ferro_property_with(p, true)` | same with `Owner::p_property().as_property()` | — |
 | `XamlIlClrPropertyPathElementNode` | `.property(info, inpc factory)` with a metadata-backed `RuntimePropertyInfo` | `.notifying_property::<O, K>("Name", \|o\| o.name(), \|o, v\| o.set_name(v))` / `notifying_read_only_property` (decision 13); `.typed_property` for the single-element typed case; `.property(rt::property_info(MARKUP, "Name"), ..)` when the accessors are form C | owner without `INotifyPropertyChanged` needs a non-notifying builder entry point; `accepts_null` variant for the typed forms |
 | `XamlIlClrMethodPathElementNode` | not supported at run time (`method_untyped` missing) | closure-based builder call **(new)** | builder has no entry point yet (R9) |
-| `XamlIlClrMethodAsCommandPathElementNode` | not supported at run time | `.command::<O>("Name", \|o, p\| o.method(..), can_execute, &["Dep"])` / `.notifying_command` | parameter conversion from `Option<&BoxedValue>`; the interpreter gap stays (R9) |
+| `XamlIlClrMethodAsCommandPathElementNode` | `builder.command_untyped(name, execute, can_execute, depends_on, notifier)` over the invokers of the two methods | `rt::path_command` / `rt::path_command_with_can_execute` over their typed functions (9.4.10) | the panics of a parameter that does not convert are the interpreter's |
 | `XamlIlClrIndexerPathElementNode` | `.property(info, indexer or INPC factory)` | `.indexer_property::<O, K>(index, get, set)` or `.property(..)` with form C | non-integer indexers |
 | `XamlIlArrayIndexerPathElementNode` | `.array_element(&values)` | same | — |
 | `TypeCastPathElementNode` | `.type_cast_value(CastTarget::Class(..) / Value(..))` | same with `T::TYPE` / `ValueType::of::<T>()` | — |

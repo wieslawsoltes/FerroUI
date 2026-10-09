@@ -832,6 +832,71 @@ fn a_list_created_in_markup_is_the_list_of_the_run_time_loader() {
     assert_eq!(generated, interpreted);
 }
 
+/// Not from upstream. A method named by a compiled binding of a command property is a
+/// command, in both back ends: executing it calls the method of the data context (without
+/// a parameter, with the command parameter as the type the method declares, and with the
+/// parameter untyped), its can-execute method decides whether it can execute, the property
+/// that method depends on re-queries it, and a method of a named element is called on the
+/// element.
+#[test]
+fn a_method_is_a_command_in_both_back_ends() {
+    use crate::support::emitter::Desk;
+    use ferroui_controls::{Button, StackPanel, TextBox};
+
+    let _base = xaml_test_base();
+    let name = "method_command.xaml";
+    let (_, xaml) = DOCUMENTS.iter().find(|(document, _)| *document == name).expect("a corpus document");
+    let run = |root: BoxedValue| -> Vec<String> {
+        let panel = ValueTypes::as_object(&*root).and_then(|object| object.cast::<StackPanel>()).expect("the root is a panel");
+        let desk = Desk::new();
+        panel.set_data_context(Some(desk.clone() as BoxedValue));
+        let children = panel.children().to_vec();
+        let buttons: Vec<Ref<Button>> = children.iter().filter_map(|child| child.cast::<Button>()).collect();
+        let text_box = children.iter().find_map(|child| child.cast::<TextBox>()).expect("the text box");
+        let mut seen = Vec::new();
+        let commands: Vec<_> = buttons.iter().map(|button| button.command().expect("the button has its command")).collect();
+        // The state of the command with a can-execute method follows the property it depends on.
+        let queried = Rc::new(std::cell::Cell::new(0));
+        let subscription = commands[2].can_execute_changed(Rc::new({
+            let queried = queried.clone();
+            move || queried.set(queried.get() + 1)
+        }));
+        seen.push(format!("can fire {}", commands[2].can_execute(None)));
+        desk.set_armed(true);
+        ferroui_base::threading::Dispatcher::ui_thread().run_jobs(None);
+        seen.push(format!("can fire {} after {} changes", commands[2].can_execute(None), queried.get()));
+        subscription.dispose();
+        for (button, command) in buttons.iter().zip(&commands).take(3) {
+            let parameter = button.command_parameter();
+            seen.push(format!("can execute {}", command.can_execute(parameter.as_ref())));
+            command.execute(parameter.as_ref());
+        }
+        seen.extend(desk.calls());
+        seen.push(format!("selection {}..{}", text_box.selection_start(), text_box.selection_end()));
+        commands[3].execute(None);
+        seen.push(format!("selection {}..{}", text_box.selection_start(), text_box.selection_end()));
+        seen
+    };
+    let generated = run(build_generated(name).expect("the document is eligible").expect("the document is built"));
+    let interpreted = run(try_load(xaml).expect("the run-time loader loads the document"));
+    assert_eq!(generated, interpreted);
+    assert_eq!(
+        generated,
+        [
+            "can fire false",
+            "can fire true after 1 changes",
+            "can execute true",
+            "can execute true",
+            "can execute true",
+            "Save",
+            "Rename draft",
+            "Fire now",
+            "selection 0..0",
+            "selection 0..8",
+        ]
+    );
+}
+
 /// Not from upstream. Two dumps that hold a value the dump cannot read never compare as
 /// equal, even when the text is the same: what the marker hides may differ.
 #[test]

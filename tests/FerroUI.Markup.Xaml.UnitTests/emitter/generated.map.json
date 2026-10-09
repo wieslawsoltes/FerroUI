@@ -711,6 +711,25 @@
     {"file_lines": [5130, 5133], "document": "runtime_lists.xaml", "line": 25, "position": 21},
     {"file_lines": [5134, 5135], "document": "runtime_lists.xaml", "line": 29, "position": 4},
     {"file_lines": [5136, 5139], "document": "runtime_lists.xaml", "line": 29, "position": 4},
-    {"file_lines": [5140, 5146], "document": "runtime_lists.xaml", "line": 31, "position": 8}
+    {"file_lines": [5140, 5146], "document": "runtime_lists.xaml", "line": 31, "position": 8},
+    {"file_lines": [5163, 5168], "document": "method_command.xaml", "line": 1, "position": 2},
+    {"file_lines": [5169, 5170], "document": "method_command.xaml", "line": 4, "position": 4},
+    {"file_lines": [5171, 5175], "document": "method_command.xaml", "line": 4, "position": 4},
+    {"file_lines": [5176, 5188], "document": "method_command.xaml", "line": 4, "position": 11},
+    {"file_lines": [5189, 5190], "document": "method_command.xaml", "line": 5, "position": 4},
+    {"file_lines": [5191, 5195], "document": "method_command.xaml", "line": 5, "position": 4},
+    {"file_lines": [5196, 5206], "document": "method_command.xaml", "line": 5, "position": 11},
+    {"file_lines": [5207, 5210], "document": "method_command.xaml", "line": 5, "position": 38},
+    {"file_lines": [5211, 5212], "document": "method_command.xaml", "line": 6, "position": 4},
+    {"file_lines": [5213, 5217], "document": "method_command.xaml", "line": 6, "position": 4},
+    {"file_lines": [5218, 5228], "document": "method_command.xaml", "line": 6, "position": 11},
+    {"file_lines": [5229, 5232], "document": "method_command.xaml", "line": 6, "position": 36},
+    {"file_lines": [5233, 5234], "document": "method_command.xaml", "line": 7, "position": 4},
+    {"file_lines": [5235, 5238], "document": "method_command.xaml", "line": 7, "position": 4},
+    {"file_lines": [5239, 5241], "document": "method_command.xaml", "line": 7, "position": 12},
+    {"file_lines": [5242, 5244], "document": "method_command.xaml", "line": 7, "position": 23},
+    {"file_lines": [5245, 5246], "document": "method_command.xaml", "line": 8, "position": 4},
+    {"file_lines": [5247, 5251], "document": "method_command.xaml", "line": 8, "position": 4},
+    {"file_lines": [5252, 5269], "document": "method_command.xaml", "line": 8, "position": 11}
   ]
 }

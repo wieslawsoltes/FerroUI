@@ -886,6 +886,7 @@ pub fn markup_types() -> Vec<(&'static ::ferroui_base::metadata::MarkupType, &'s
         (<::ferroui_markup_xaml::xamlx_runtime::XamlXmlNamespaceInfoV1 as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "ferroui_markup_xaml::xamlx_runtime::XamlXmlNamespaceInfoV1", false),
         (<::ferroui_markup_xaml_tests::support::emitter::Caption as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "ferroui_markup_xaml_tests::support::emitter::Caption", false),
         (<::ferroui_markup_xaml_tests::support::emitter::CaptionConverter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "ferroui_markup_xaml_tests::support::emitter::CaptionConverter", false),
+        (<::ferroui_markup_xaml_tests::support::emitter::Desk as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "ferroui_markup_xaml_tests::support::emitter::Desk", false),
         (<::ferroui_markup_xaml_tests::support::emitter::Row as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "ferroui_markup_xaml_tests::support::emitter::Row", false),
         (<::ferroui_markup_xaml_tests::support::emitter::RowList as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "ferroui_markup_xaml_tests::support::emitter::RowList", false),
         (<::ferroui_markup_xaml_tests::support::emitter::Table as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "ferroui_markup_xaml_tests::support::emitter::Table", false),
