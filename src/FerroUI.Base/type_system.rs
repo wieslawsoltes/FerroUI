@@ -646,15 +646,38 @@ pub fn parent_vtable<T: ObjectType, V>() -> &'static V {
 /// The slot is not taken where the parent class has no table `V`: the class
 /// that introduced a member has to implement it, and its default panics
 /// when it is called (see [`parent_vtable`]), not when the table is built.
+///
+/// A constant function: the tables evaluate it when the class is compiled,
+/// so a table is built without comparing names and the forwarding function
+/// of a slot that is taken from the parent is not referenced.
 #[doc(hidden)]
-pub fn __forwards_to_parent<T: ObjectType, V>(overrides: Option<&'static [&'static str]>, member: &str) -> bool {
-    match overrides {
-        Some(overrides) => {
-            std::mem::size_of::<<T::Parent as ObjectType>::VTable>() >= std::mem::size_of::<V>()
-                && !overrides.iter().any(|name| *name == member)
-        }
-        None => false,
+pub const fn __forwards_to_parent<T: ObjectType, V>(
+    overrides: Option<&'static [&'static str]>,
+    member: &str,
+) -> bool {
+    let overrides = match overrides {
+        Some(overrides) => overrides,
+        None => return false,
+    };
+    if std::mem::size_of::<<T::Parent as ObjectType>::VTable>() < std::mem::size_of::<V>() {
+        return false;
     }
+    let member = member.as_bytes();
+    let mut index = 0;
+    while index < overrides.len() {
+        let name = overrides[index].as_bytes();
+        if name.len() == member.len() {
+            let mut at = 0;
+            while at < name.len() && name[at] == member[at] {
+                at += 1;
+            }
+            if at == name.len() {
+                return false;
+            }
+        }
+        index += 1;
+    }
+    true
 }
 
 /// A strong reference to an object of class `T` or a class derived from it.
@@ -1158,10 +1181,13 @@ macro_rules! ferro_class {
                                 // A member `T` states it does not override is
                                 // the default, which calls this slot of the
                                 // parent table: the slot itself is taken.
-                                if $crate::__forwards_to_parent::<T, [<$name VTable>]>(
-                                    <T as $impl_trait>::__OVERRIDES,
-                                    ::std::stringify!($method),
-                                ) {
+                                let forwards: bool = const {
+                                    $crate::__forwards_to_parent::<T, [<$name VTable>]>(
+                                        <T as $impl_trait>::__OVERRIDES,
+                                        ::std::stringify!($method),
+                                    )
+                                };
+                                if forwards {
                                     $crate::parent_vtable::<T, [<$name VTable>]>().$method
                                 } else {
                                     own
