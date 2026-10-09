@@ -21,6 +21,14 @@ use std::rc::{Rc, Weak};
 /// A failure of the method (its `Err`, or a command parameter that cannot be
 /// converted to a parameter that takes no null) panics: a command has no
 /// other way to report what the managed original throws from `Execute`.
+///
+/// The command has the target of the delegate as the delegate has it. The
+/// delegate a binding reads from its source
+/// ([`MarkupDelegate::for_method_of_source`]) does not keep the source
+/// alive (DEVIATIONS.md, Bindings): once the source is gone the command
+/// cannot execute and executing it does nothing, as the command of a
+/// compiled binding path
+/// ([`MethodCommand`](crate::data::core::expression_nodes::MethodCommand)).
 pub struct MethodToCommandConverter {
     this: Weak<MethodToCommandConverter>,
     action: MarkupDelegate,
@@ -28,8 +36,6 @@ pub struct MethodToCommandConverter {
     parameter_type: Option<ValueType>,
     can_execute: Option<&'static MarkupMethod>,
     dependency_properties: Vec<&'static str>,
-    /// The target of the delegate, as the instance its members are invoked on.
-    target: MarkupValue,
     token: Cell<Option<u64>>,
     can_execute_changed: Event<()>,
 }
@@ -39,7 +45,6 @@ impl MethodToCommandConverter {
     /// ([`MarkupDelegate::for_method`]). For any other delegate the command
     /// calls it with the command parameter and can always execute.
     pub fn new(action: &MarkupDelegate) -> Rc<Self> {
-        let target = action.target();
         let method = action.method();
         let parameter_type = method.and_then(|method| method.parameters.first()).map(|parameter| parameter());
 
@@ -79,13 +84,13 @@ impl MethodToCommandConverter {
             parameter_type,
             can_execute,
             dependency_properties,
-            target,
             token: Cell::new(None),
             can_execute_changed: Event::new(),
         });
 
         if !this.dependency_properties.is_empty() {
-            if let Some(inpc) = this.target.as_ref().and_then(|target| InpcPropertyAccessor::find_notifier(&**target)) {
+            let target = action.target();
+            if let Some(inpc) = target.as_ref().and_then(|target| InpcPropertyAccessor::find_notifier(&**target)) {
                 // The target does not keep the command alive.
                 let weak = this.this.clone();
                 let token = inpc.property_changed().add(Rc::new(move |name: &str| {
@@ -125,10 +130,13 @@ impl MethodToCommandConverter {
 
 impl ICommand for MethodToCommandConverter {
     fn can_execute(&self, parameter: Option<&BoxedValue>) -> bool {
+        if !self.action.is_target_alive() {
+            return false;
+        }
         let Some(can_execute) = self.can_execute else { return true };
         let result = match can_execute.is_static {
             true => (can_execute.invoke)(&[parameter.cloned()]),
-            false => (can_execute.invoke)(&[self.target.clone(), parameter.cloned()]),
+            false => (can_execute.invoke)(&[self.action.target(), parameter.cloned()]),
         };
         match result {
             Ok(value) => crate::metadata::from_markup_value::<bool>(&value).unwrap_or(false),
@@ -141,6 +149,9 @@ impl ICommand for MethodToCommandConverter {
             self.action.invoke(&[parameter.cloned()]);
             return;
         };
+        if !self.action.is_target_alive() {
+            return;
+        }
         if let Err(error) = self.action.try_invoke(&self.arguments(parameter)) {
             panic!("{}: {error}", method.name);
         }
@@ -160,7 +171,8 @@ impl ICommand for MethodToCommandConverter {
 impl Drop for MethodToCommandConverter {
     fn drop(&mut self) {
         if let Some(token) = self.token.take() {
-            if let Some(inpc) = self.target.as_ref().and_then(|target| InpcPropertyAccessor::find_notifier(&**target)) {
+            let target = self.action.target();
+            if let Some(inpc) = target.as_ref().and_then(|target| InpcPropertyAccessor::find_notifier(&**target)) {
                 inpc.property_changed().remove(token);
             }
         }

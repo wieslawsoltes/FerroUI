@@ -17,6 +17,8 @@ use std::rc::{Rc, Weak};
 /// ([`MarkupDelegate`](crate::metadata::MarkupDelegate)), which the
 /// converters of the binding turn into a command for a command-typed target
 /// ([`MethodToCommandConverter`](crate::data::converters::MethodToCommandConverter)).
+/// Neither keeps the object alive
+/// ([`MarkupDelegate::for_method_of_source`]).
 /// A method declared in binding metadata ([`ModelTypes`]) has no delegate
 /// form: the accessor produces its command directly.
 pub struct MethodAccessorPlugin;
@@ -45,7 +47,9 @@ impl IPropertyAccessorPlugin for MethodAccessorPlugin {
         let error = match markup_members::find_best_command_method(&*instance, method_name) {
             MethodLookup::Method(declaring_type, method) => {
                 let target = markup_members::instance_of(&instance);
-                let delegate = MarkupDelegate::for_method(Some(target), declaring_type, method);
+                // The delegate has the source as the binding has it: weakly
+                // (DEVIATIONS.md, Bindings).
+                let delegate = MarkupDelegate::for_method_of_source(&target, declaring_type, method);
                 return Some(Rc::new(DelegateAccessor {
                     base: PropertyAccessorBase::new(),
                     value: Rc::new(delegate),

@@ -570,6 +570,109 @@ fn method_to_command_converter_is_made_from_a_delegate_and_does_not_outlive_its_
     assert!(weak.upgrade().is_none());
 }
 
+/// The method a template binds as the command of one of its parts is a
+/// method of the control that owns the part (the buttons of the scroll
+/// viewer of a menu and its `LineUp` and `LineDown`): the object owns the
+/// control whose command calls it. The delegate a binding reads and the
+/// command made from it do not keep the object alive (DEVIATIONS.md,
+/// Bindings).
+#[test]
+fn a_command_of_a_method_of_the_object_that_owns_its_control_keeps_neither_alive() {
+    pub struct Owner {
+        part: RefCell<Option<Ref<MemberTarget>>>,
+        enabled: Cell<bool>,
+        runs: Cell<i32>,
+        property_changed: Event<str>,
+    }
+    impl PartialEq for Owner {
+        fn eq(&self, other: &Self) -> bool {
+            std::ptr::eq(self, other)
+        }
+    }
+    impl INotifyPropertyChanged for Owner {
+        fn property_changed(&self) -> &Event<str> {
+            &self.property_changed
+        }
+    }
+    ferro_markup_type!(class Owner {
+        this: Rc<Owner>,
+        handles: [Owner, Rc<Owner>, Option<Rc<Owner>>],
+        methods: [
+            fn Run() => (|owner: &Rc<Owner>| owner.runs.set(owner.runs.get() + 1)),
+            fn CanRun(Option<BoxedValue>) -> bool => (|owner: &Rc<Owner>, _: Option<BoxedValue>| owner.enabled.get()) [DependsOn("Enabled")],
+        ],
+        notify_property_changed: Owner,
+    });
+    let _scope = Dispatcher::unit_test_scope();
+    MarkupType::register(<Owner as MarkupTyped>::MARKUP);
+    ValueTypes::register_reference::<Owner>();
+
+    let owner = Rc::new(Owner {
+        part: RefCell::new(None),
+        enabled: Cell::new(true),
+        runs: Cell::new(0),
+        property_changed: Event::new(),
+    });
+    let part = MemberTarget::new();
+    owner.part.replace(Some(part.clone()));
+    let source: BoxedValue = owner.clone();
+    let binding = ReflectionBinding::new("Run");
+    binding.set_source(Some(source.clone()));
+    part.bind_binding(MemberTarget::command_property(), &binding);
+    // The delegate of the same method, as a binding to a property of
+    // another type reads it.
+    let delegate_binding = ReflectionBinding::new("Run");
+    delegate_binding.set_source(Some(source));
+    part.bind_binding(MemberTarget::tag_property(), &delegate_binding);
+    // The bindings have their source; the expressions made from them do not.
+    drop((binding, delegate_binding));
+
+    // While the owner lives the command executes and follows the method
+    // that says whether it can.
+    let command = part.get_value(MemberTarget::command_property()).expect("a command");
+    let tag = part.get_value(MemberTarget::tag_property()).expect("a delegate");
+    let delegate = tag.downcast_ref::<MarkupDelegate>().expect("a delegate").clone();
+    drop(tag);
+    assert!(delegate.is_target_alive());
+    assert!(delegate.target().is_some());
+    assert!(command.can_execute(None));
+    command.execute(None);
+    delegate.invoke(&[]);
+    assert_eq!(owner.runs.get(), 2);
+    let raised = Rc::new(Cell::new(0));
+    let subscription = command.can_execute_changed({
+        let raised = raised.clone();
+        Rc::new(move || raised.set(raised.get() + 1))
+    });
+    owner.enabled.set(false);
+    owner.property_changed.raise("Enabled");
+    Dispatcher::current_dispatcher().run_jobs(None);
+    assert_eq!(raised.get(), 1);
+    assert!(!command.can_execute(None));
+    owner.enabled.set(true);
+    owner.property_changed.raise("Enabled");
+    Dispatcher::current_dispatcher().run_jobs(None);
+    assert_eq!(raised.get(), 2);
+    assert!(command.can_execute(None));
+
+    // The owner is dropped: nothing of the part holds it, and the part goes
+    // with it when nothing else has it.
+    let weak_owner = Rc::downgrade(&owner);
+    let weak_part = part.downgrade();
+    drop(owner);
+    assert!(weak_owner.upgrade().is_none(), "the command or the delegate of the part keeps the owner alive");
+    // The command and the delegate that outlive their target do nothing.
+    assert!(!delegate.is_target_alive());
+    assert!(delegate.target().is_none());
+    assert_eq!(delegate.invoke(&[]), None);
+    assert_eq!(delegate.try_invoke(&[]), Ok(None));
+    assert!(!command.can_execute(None));
+    command.execute(None);
+    subscription.dispose();
+    drop((command, delegate, part));
+    assert!(weak_part.upgrade().is_none());
+}
+
 #[test]
 fn overloads_that_cannot_be_chosen_are_binding_errors() {
     let vm = MemberVm::new("Ann");
