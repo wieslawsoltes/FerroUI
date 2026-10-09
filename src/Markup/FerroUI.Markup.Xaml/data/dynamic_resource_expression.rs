@@ -23,12 +23,17 @@ pub(crate) enum DynamicResourceAnchor {
     Host(ResourceHostRef),
 }
 
-/// The anchor as the expression keeps it. The managed original holds the
+/// The anchor as the expression keeps it, and as the extension the
+/// expression is created from keeps it. The managed original holds the
 /// element and the host themselves, which the collector makes harmless; here
 /// an element owns the expressions of its values, and an expression that held
 /// the element (or an element above it) would keep both alive, so they are
-/// held weakly. A resource provider is no element and stays held.
-enum HeldAnchor {
+/// held weakly. The extension is the value of a setter of a style declared
+/// under the element it is anchored to (`<TextBox.Styles>` in a template),
+/// which the element owns the same way. A resource provider is no element
+/// and stays held.
+#[derive(Clone)]
+pub(crate) enum HeldAnchor {
     Element(WeakRef<StyledElement>),
     Provider(Rc<dyn IResourceProvider>),
     Host(WeakResourceHost),
@@ -69,12 +74,22 @@ impl DynamicResourceExpression {
         theme_variant: Option<ThemeVariant>,
         priority: BindingPriority,
     ) -> Rc<Self> {
+        Self::with_held_anchor(resource_key, anchor.map(HeldAnchor::from), theme_variant, priority)
+    }
+
+    /// [`new`](Self::new) with the anchor as it is kept.
+    pub(crate) fn with_held_anchor(
+        resource_key: ResourceKey,
+        anchor: Option<HeldAnchor>,
+        theme_variant: Option<ThemeVariant>,
+        priority: BindingPriority,
+    ) -> Rc<Self> {
         ferroui_base::perf_count!(DynamicResourceExpressionsCreated);
         Rc::new_cyclic(|this: &Weak<DynamicResourceExpression>| Self {
             this: this.clone(),
             base: UntypedBindingExpressionBase::new(this.clone(), priority, None, false),
             resource_key,
-            anchor: anchor.map(HeldAnchor::from),
+            anchor,
             host: RefCell::new(None),
             provider: RefCell::new(None),
             override_theme_variant: Cell::new(false),
