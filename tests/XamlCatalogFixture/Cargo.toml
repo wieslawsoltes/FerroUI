@@ -1,0 +1,39 @@
+[package]
+name = "xaml-catalog-fixture"
+description = "Test fixture of the XAML compiler: pages of the ControlCatalog, their documents and their classes as the sample has them, compiled by a build script and compared with the run-time loader"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+publish = false
+build = "build.rs"
+# The build script writes the `.xamlmeta` of the crate and hands its path on
+# (docs/porting/xaml.md, 9.6.3); no crate depends on this one.
+links = "xaml_catalog_fixture_xaml"
+autotests = false
+autobenches = false
+autoexamples = false
+
+[lib]
+path = "lib.rs"
+
+[dependencies]
+# The compiled markup of the crate calls the typed functions of the declared members.
+ferroui-base = { workspace = true, features = ["markup-functions"] }
+ferroui-controls = { workspace = true }
+ferroui-markup-xaml = { workspace = true }
+# The view models of the sample derive from its view model base.
+mini-mvvm = { path = "../../samples/MiniMvvm" }
+
+[build-dependencies]
+# The build script compiles the documents (`build.rs`) against the type models: the scan of the
+# sources of this crate, which are the sources of the sample, and the models the framework crates
+# export. It links the compiler and no crate for its types.
+ferroui-build = { workspace = true }
+
+[dev-dependencies]
+ferroui-base = { workspace = true, features = ["testing"] }
+ferroui-controls = { workspace = true, features = ["testing"] }
+# The run-time loader the compiled pages are compared with (`tests/mod.rs`).
+ferroui-markup-xaml-loader = { workspace = true, features = ["runtime", "testing"] }

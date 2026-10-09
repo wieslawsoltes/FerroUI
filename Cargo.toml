@@ -28,6 +28,7 @@ members = [
     "tests/FerroUI.Markup.Xaml.UnitTests",
     "tests/XamlIncludeFixture/Theme",
     "tests/XamlIncludeFixture/Application",
+    "tests/XamlCatalogFixture",
     "samples/MiniMvvm",
     "samples/ControlCatalog",
     "samples/ControlCatalog.Desktop",
