@@ -33,8 +33,10 @@ use peniko::{BlendMode, Compose, Extend, Fill, Gradient, ImageData, ImageQuality
 use std::any::{Any, TypeId};
 use std::rc::Rc;
 
+mod acrylic;
 pub(crate) mod box_shadows;
 mod effects;
+mod scene_brushes;
 
 /// Context create info.
 pub struct CreateInfo {
@@ -633,8 +635,13 @@ impl DrawingContextImpl {
         let tile_brush = brush.as_tile_brush();
         let mut tile_brush_image: Option<std::sync::Arc<ferroui_base::platform::SharedBitmapImpl>> = None;
 
-        if brush.as_scene_brush().is_some() {
-            not_built("brushes that paint a scene (visual and drawing brushes)", "stage 6");
+        if let Some(scene_brush) = brush.as_scene_brush() {
+            // A scene brush without content paints nothing.
+            if let Some(content) = scene_brush.create_content() {
+                self.configure_scene_brush_content(&mut paint_wrapper, &*content, target_rect, opacity);
+                content.dispose();
+                return paint_wrapper;
+            }
         } else if let Some(image_brush) = brush.as_image_brush() {
             tile_brush_image = image_brush
                 .source()
@@ -1159,6 +1166,12 @@ impl IDrawingContextImpl for DrawingContextImpl {
     fn as_drawing_context_impl_with_effects(
         &mut self,
     ) -> Option<&mut dyn ferroui_base::platform::IDrawingContextImplWithEffects> {
+        Some(self)
+    }
+
+    fn as_drawing_context_with_acrylic_like_support(
+        &mut self,
+    ) -> Option<&mut dyn ferroui_base::platform::IDrawingContextWithAcrylicLikeSupport> {
         Some(self)
     }
 
