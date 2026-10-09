@@ -172,6 +172,13 @@ impl Tour {
         &self.window_impl
     }
 
+    /// Shows `content` in the window in place of the main view of the
+    /// catalog, or the main view again.
+    pub(super) fn set_content(&self, content: Option<&Ref<Control>>) {
+        let content = content.cloned().unwrap_or_else(|| self.main_view.clone().upcast());
+        self.window.set_content(Some(Control::boxed(&content)));
+    }
+
     /// The compositor the window renders through.
     pub(super) fn compositor(&self) -> &Rc<ferroui_base::rendering::composition::Compositor> {
         self.services.compositor()
@@ -440,6 +447,14 @@ fn print_holders(epoch: u32, holders: &[Holder]) {
             println!("        held by a block of {frame}");
         }
     }
+}
+
+/// Prints what is alive of the blocks recorded in `epoch`: the objects by
+/// class, the blocks by what allocated them, and what holds them.
+pub(super) fn print_recording(title: &str, epoch: u32) {
+    print_objects(epoch);
+    print_sites(title, &trace::alive(epoch));
+    print_holders(epoch, &holders_of(epoch));
 }
 
 #[test]
