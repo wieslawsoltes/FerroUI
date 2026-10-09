@@ -220,7 +220,7 @@ impl ComboBoxAutomationPeer {
 /// The peer of the selected item of a combo box the drop-down of which is
 /// closed: the item has no container then.
 #[repr(C)]
-struct UnrealizedSelectionPeer {
+pub(crate) struct UnrealizedSelectionPeer {
     base: UnrealizedElementAutomationPeer,
     // The combo box peer owns this peer: the reference back is weak.
     owner: WeakRef<ComboBoxAutomationPeer>,

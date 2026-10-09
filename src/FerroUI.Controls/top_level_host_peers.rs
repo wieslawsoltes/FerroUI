@@ -37,7 +37,7 @@ impl TopLevelHost {
 /// Without this, connecting a peer would walk up through the host and
 /// set the parent peer of the window to the peer of the host, breaking the root.
 #[repr(C)]
-struct TopLevelHostAutomationPeer {
+pub(crate) struct TopLevelHostAutomationPeer {
     base: ControlAutomationPeer,
 }
 
