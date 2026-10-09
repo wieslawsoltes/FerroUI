@@ -221,7 +221,22 @@ impl Row {
     pub fn name(&self) -> String {
         self.name.clone()
     }
+
+    /// A value of a Rust type no metadata declares.
+    pub fn stamp(&self) -> Stamp {
+        Stamp(self.name.len() as u32)
+    }
+
+    /// A value of the nullable form of a number.
+    pub fn length(&self) -> Option<i32> {
+        Some(self.name.len() as i32)
+    }
 }
+
+/// A Rust type no metadata declares: the type of a property a compiled binding reads,
+/// which generated code cannot name.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub struct Stamp(pub u32);
 
 ferro_markup_type!(class Row {
     this: Rc<Row>,
@@ -229,6 +244,8 @@ ferro_markup_type!(class Row {
     namespace: "FerroUI.Markup.Xaml.UnitTests",
     properties: [
         Name: String { get: |this: &Rc<Row>| this.name() },
+        Stamp: Stamp { get: |this: &Rc<Row>| this.stamp() },
+        Length: Option<i32> { get: |this: &Rc<Row>| this.length() },
     ],
 });
 

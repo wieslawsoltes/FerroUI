@@ -21,6 +21,11 @@
 //! `tests` compares each class populated by its compiled markup with the same class
 //! populated by the run-time loader from the same document.
 
+// The compiled markup of a document without a class (`CustomThemes.xaml`) names the types of
+// this crate by the name of the crate, as the compiled markup of another crate would; the
+// compiled markup of a class names them through `crate`.
+extern crate self as xaml_catalog_fixture;
+
 use crate::markup::XamlClass;
 use ferroui_base::metadata::MarkupType;
 use ferroui_base::TypeInfo;

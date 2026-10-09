@@ -137,6 +137,7 @@ pub const DOCUMENTS: &[(&str, &str)] = &[
     ("class_binding.xaml", "<StackPanel xmlns='https://github.com/ferroui' xmlns:x='http://schemas.microsoft.com/winfx/2006/xaml'>\n  <CheckBox Name='Toggle' IsChecked='True'/>\n  <Border Classes.accent='{Binding #Toggle.IsChecked}'/>\n  <Border Classes.other='{ReflectionBinding IsChecked, ElementName=Toggle}'/>\n</StackPanel>\n"),
     ("list_text_held_collection.xaml", "<Canvas xmlns='https://github.com/ferroui' xmlns:x='http://schemas.microsoft.com/winfx/2006/xaml'>\n  <Polygon Points='75,0 120,120 0,45'/>\n  <Polyline Points='0,0 65,0'/>\n  <Slider Ticks='0,20,25,40'/>\n  <Grid RowDefinitions='Auto,*'/>\n</Canvas>\n"),
     ("type_extension_object.xaml", "<StackPanel xmlns='https://github.com/ferroui' xmlns:x='http://schemas.microsoft.com/winfx/2006/xaml'>\n  <Border Tag='{x:Type x:Object}'/>\n  <ContentControl Content='text'>\n    <ContentControl.ContentTemplate>\n      <DataTemplate x:DataType='x:Object'>\n        <TextBlock Text='{Binding}'/>\n      </DataTemplate>\n    </ContentControl.ContentTemplate>\n  </ContentControl>\n</StackPanel>\n"),
+    ("compiled_binding_unnamed_types.xaml", "<StackPanel xmlns='https://github.com/ferroui' xmlns:x='http://schemas.microsoft.com/winfx/2006/xaml'\n            xmlns:t='clr-namespace:FerroUI.Markup.Xaml.UnitTests;assembly=FerroUI.Markup.Xaml.UnitTests'\n            x:DataType='t:Row'>\n  <Border Tag='{CompiledBinding Stamp}'/>\n  <Border Tag='{CompiledBinding Length}'/>\n  <TextBlock Text='{CompiledBinding Name}'/>\n</StackPanel>\n"),
 ];
 
 /// The documents that must be eligible for emission.
@@ -262,6 +263,7 @@ pub const EXPECTED_ELIGIBLE: &[&str] = &[
     "class_binding.xaml",
     "list_text_held_collection.xaml",
     "type_extension_object.xaml",
+    "compiled_binding_unnamed_types.xaml",
 ];
 
 /// The documents whose values depend on the base URI of the document or on a service of

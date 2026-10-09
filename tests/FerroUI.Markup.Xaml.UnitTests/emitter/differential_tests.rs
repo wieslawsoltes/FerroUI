@@ -742,6 +742,34 @@ fn a_text_is_converted_by_the_type_converter_of_its_property() {
     assert_eq!(captions[2], None);
 }
 
+/// Not from upstream. Compiled bindings to plain properties whose types generated code
+/// cannot name (a Rust type no metadata declares, the nullable form of a number) deliver
+/// the values of the data context, in both back ends: the type of such a property is read
+/// from its declaration (`rt::declared_property_type`).
+#[test]
+fn compiled_bindings_read_properties_of_types_generated_code_cannot_name() {
+    use crate::support::emitter::{Row, Stamp};
+    let _base = xaml_test_base();
+    let name = "compiled_binding_unnamed_types.xaml";
+    let (_, xaml) = DOCUMENTS.iter().find(|(document, _)| *document == name).expect("a corpus document");
+    let tags = |root: BoxedValue| -> (Vec<Option<Stamp>>, Vec<Option<i32>>) {
+        let panel = ValueTypes::as_object(&*root).and_then(|object| object.cast::<ferroui_controls::StackPanel>()).expect("the root is a panel");
+        panel.set_data_context(Some(Row::new("first") as BoxedValue));
+        let tags: Vec<Option<BoxedValue>> =
+            panel.get_visual_descendants().into_iter().filter_map(|visual| visual.cast::<ferroui_controls::Border>()).map(|border| border.tag()).collect();
+        let untyped = |tag: &Option<BoxedValue>| tag.clone().and_then(ferroui_markup_xaml::xaml_il::runtime::compiled::to_untyped);
+        (
+            tags.iter().map(|tag| untyped(tag).and_then(|tag| tag.downcast_ref::<Stamp>().copied())).collect(),
+            tags.iter().map(|tag| untyped(tag).and_then(|tag| tag.downcast_ref::<i32>().copied())).collect(),
+        )
+    };
+    let generated = tags(build_generated(name).expect("the document is eligible").expect("the document is built"));
+    let interpreted = tags(try_load(xaml).expect("the run-time loader loads the document"));
+    assert_eq!(generated.0, [Some(Stamp(5)), None]);
+    assert_eq!(generated.1, [None, Some(5)]);
+    assert_eq!(generated, interpreted);
+}
+
 /// Not from upstream. Two dumps that hold a value the dump cannot read never compare as
 /// equal, even when the text is the same: what the marker hides may differ.
 #[test]

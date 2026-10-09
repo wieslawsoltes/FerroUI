@@ -678,6 +678,16 @@
     {"file_lines": [4923, 4924], "document": "type_extension_object.xaml", "line": 5, "position": 8},
     {"file_lines": [4925, 4935], "document": "type_extension_object.xaml", "line": 6, "position": 10},
     {"file_lines": [4943, 4947], "document": "type_extension_object.xaml", "line": 6, "position": 10},
-    {"file_lines": [4948, 4954], "document": "type_extension_object.xaml", "line": 6, "position": 20}
+    {"file_lines": [4948, 4954], "document": "type_extension_object.xaml", "line": 6, "position": 20},
+    {"file_lines": [4971, 4976], "document": "compiled_binding_unnamed_types.xaml", "line": 1, "position": 2},
+    {"file_lines": [4977, 4978], "document": "compiled_binding_unnamed_types.xaml", "line": 4, "position": 4},
+    {"file_lines": [4979, 4983], "document": "compiled_binding_unnamed_types.xaml", "line": 4, "position": 4},
+    {"file_lines": [4984, 5001], "document": "compiled_binding_unnamed_types.xaml", "line": 4, "position": 11},
+    {"file_lines": [5002, 5003], "document": "compiled_binding_unnamed_types.xaml", "line": 5, "position": 4},
+    {"file_lines": [5004, 5008], "document": "compiled_binding_unnamed_types.xaml", "line": 5, "position": 4},
+    {"file_lines": [5009, 5026], "document": "compiled_binding_unnamed_types.xaml", "line": 5, "position": 11},
+    {"file_lines": [5027, 5028], "document": "compiled_binding_unnamed_types.xaml", "line": 6, "position": 4},
+    {"file_lines": [5029, 5033], "document": "compiled_binding_unnamed_types.xaml", "line": 6, "position": 4},
+    {"file_lines": [5034, 5050], "document": "compiled_binding_unnamed_types.xaml", "line": 6, "position": 14}
   ]
 }

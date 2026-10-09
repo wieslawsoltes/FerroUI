@@ -4961,6 +4961,102 @@ fn build_type_extension_object_xaml_untyped(
     ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
 }
 
+/// The base URI and the XML namespaces of `compiled_binding_unnamed_types.xaml`.
+static BUILD_COMPILED_BINDING_UNNAMED_TYPES_XAML_DOCUMENT: rt::DocumentInfo = rt::DocumentInfo { base_uri: ::core::option::Option::Some("ferres://FerroUI.Markup.Xaml.UnitTests/Emitter/compiled_binding_unnamed_types.xaml"), namespaces: XML_NAMESPACES_3 };
+
+/// Generated from `compiled_binding_unnamed_types.xaml`.
+pub fn build_compiled_binding_unnamed_types_xaml(
+    service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
+) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::StackPanel>, ::ferroui_markup_xaml::XamlLoadException> {
+    // compiled_binding_unnamed_types.xaml(1,2) StackPanel
+    let stack_panel_0 = ::ferroui_controls::StackPanel::new();
+    let context = rt::populate_context(service_provider, &BUILD_COMPILED_BINDING_UNNAMED_TYPES_XAML_DOCUMENT, rt::to_value(stack_panel_0.clone()));
+    let name_scope = context.name_scope_field();
+    stack_panel_0.begin_init();
+    context.push_parent(rt::to_value(stack_panel_0.clone()));
+    // compiled_binding_unnamed_types.xaml(4,4) Children
+    let children_collection_0 = ::ferroui_controls::Panel::__markup_get_Children(stack_panel_0.upcast_ref::<::ferroui_controls::Panel>());
+    // compiled_binding_unnamed_types.xaml(4,4) Border
+    let border_0 = ::ferroui_controls::Border::new();
+    border_0.begin_init();
+    ::ferroui_controls::Controls::__markup_Add_0(&children_collection_0, ::core::clone::Clone::clone(&border_0).upcast::<::ferroui_controls::Control>());
+    context.push_parent(rt::to_value(border_0.clone()));
+    // compiled_binding_unnamed_types.xaml(4,11) Tag (setter chosen at run time)
+    let path_0 = {
+        let builder = ::ferroui_base::data::CompiledBindingPathBuilder::new();
+        let builder = rt::path_property(&builder, <::ferroui_markup_xaml_tests::support::emitter::Row as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Stamp", false, rt::declared_property_type(<::ferroui_markup_xaml_tests::support::emitter::Row as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Stamp", false), false, false, true);
+        builder.build()
+    };
+    let compiled_binding_extension_0 = ::ferroui_markup_xaml::markup_extensions::CompiledBindingExtension::__markup_new_1(path_0.clone());
+    context.set_target_property(rt::property_value(::ferroui_controls::Control::tag_property()));
+    let provided_0 = ::ferroui_markup_xaml::markup_extensions::CompiledBindingExtension::__markup_ProvideValue_0(&compiled_binding_extension_0, ::core::option::Option::Some(rt::service_provider(&context)));
+    context.set_target_property(::core::option::Option::None);
+    let value_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_0);
+    if value_0.is_some() {
+        rt::bind(border_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::Control::tag_property(), value_0.clone(), 4, 11)?;
+    } else {
+        border_0.set_value(::ferroui_controls::Control::tag_property(), rt::exact(value_0.clone(), "FerroUI.Controls.Control.set_Tag", 0, 4, 11)?);
+    }
+    context.pop_parent();
+    rt::invoked(border_0.try_end_init(), 4, 4)?;
+    // compiled_binding_unnamed_types.xaml(5,4) Children
+    let children_collection_1 = ::ferroui_controls::Panel::__markup_get_Children(stack_panel_0.upcast_ref::<::ferroui_controls::Panel>());
+    // compiled_binding_unnamed_types.xaml(5,4) Border
+    let border_1 = ::ferroui_controls::Border::new();
+    border_1.begin_init();
+    ::ferroui_controls::Controls::__markup_Add_0(&children_collection_1, ::core::clone::Clone::clone(&border_1).upcast::<::ferroui_controls::Control>());
+    context.push_parent(rt::to_value(border_1.clone()));
+    // compiled_binding_unnamed_types.xaml(5,11) Tag (setter chosen at run time)
+    let path_1 = {
+        let builder = ::ferroui_base::data::CompiledBindingPathBuilder::new();
+        let builder = rt::path_property(&builder, <::ferroui_markup_xaml_tests::support::emitter::Row as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Length", false, rt::declared_property_type(<::ferroui_markup_xaml_tests::support::emitter::Row as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Length", false), false, false, true);
+        builder.build()
+    };
+    let compiled_binding_extension_1 = ::ferroui_markup_xaml::markup_extensions::CompiledBindingExtension::__markup_new_1(path_1.clone());
+    context.set_target_property(rt::property_value(::ferroui_controls::Control::tag_property()));
+    let provided_1 = ::ferroui_markup_xaml::markup_extensions::CompiledBindingExtension::__markup_ProvideValue_0(&compiled_binding_extension_1, ::core::option::Option::Some(rt::service_provider(&context)));
+    context.set_target_property(::core::option::Option::None);
+    let value_1: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_1);
+    if value_1.is_some() {
+        rt::bind(border_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::Control::tag_property(), value_1.clone(), 5, 11)?;
+    } else {
+        border_1.set_value(::ferroui_controls::Control::tag_property(), rt::exact(value_1.clone(), "FerroUI.Controls.Control.set_Tag", 0, 5, 11)?);
+    }
+    context.pop_parent();
+    rt::invoked(border_1.try_end_init(), 5, 4)?;
+    // compiled_binding_unnamed_types.xaml(6,4) Children
+    let children_collection_2 = ::ferroui_controls::Panel::__markup_get_Children(stack_panel_0.upcast_ref::<::ferroui_controls::Panel>());
+    // compiled_binding_unnamed_types.xaml(6,4) TextBlock
+    let text_block_0 = ::ferroui_controls::TextBlock::new();
+    text_block_0.begin_init();
+    ::ferroui_controls::Controls::__markup_Add_0(&children_collection_2, ::core::clone::Clone::clone(&text_block_0).upcast::<::ferroui_controls::Control>());
+    context.push_parent(rt::to_value(text_block_0.clone()));
+    // compiled_binding_unnamed_types.xaml(6,14) Text
+    let path_2 = {
+        let builder = ::ferroui_base::data::CompiledBindingPathBuilder::new();
+        let builder = rt::path_property(&builder, <::ferroui_markup_xaml_tests::support::emitter::Row as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Name", false, ::ferroui_base::data::core::ValueType::of::<::std::string::String>(), false, false, true);
+        builder.build()
+    };
+    let compiled_binding_extension_2 = ::ferroui_markup_xaml::markup_extensions::CompiledBindingExtension::__markup_new_1(path_2.clone());
+    context.set_target_property(rt::property_value(::ferroui_controls::TextBlock::text_property()));
+    let provided_2 = ::ferroui_markup_xaml::markup_extensions::CompiledBindingExtension::__markup_ProvideValue_0(&compiled_binding_extension_2, ::core::option::Option::Some(rt::service_provider(&context)));
+    context.set_target_property(::core::option::Option::None);
+    rt::bind(text_block_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::TextBlock::text_property(), provided_2, 6, 14)?;
+    context.pop_parent();
+    rt::invoked(text_block_0.try_end_init(), 6, 4)?;
+    context.pop_parent();
+    rt::invoked(stack_panel_0.try_end_init(), 1, 2)?;
+    rt::complete_root_name_scope(::core::option::Option::Some(&stack_panel_0), name_scope.as_ref(), 1, 2)?;
+    ::core::result::Result::Ok(stack_panel_0)
+}
+
+fn build_compiled_binding_unnamed_types_xaml_untyped(
+    service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
+) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadException> {
+    let root = build_compiled_binding_unnamed_types_xaml(service_provider)?;
+    ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
+}
+
 /// The build function of every eligible public document, by document name.
 pub const DOCUMENTS: &[(&str, BuildDocument)] = &[
     ("border_empty.xaml", build_border_empty_xaml_untyped as BuildDocument),
@@ -5084,6 +5180,7 @@ pub const DOCUMENTS: &[(&str, BuildDocument)] = &[
     ("class_binding.xaml", build_class_binding_xaml_untyped as BuildDocument),
     ("list_text_held_collection.xaml", build_list_text_held_collection_xaml_untyped as BuildDocument),
     ("type_extension_object.xaml", build_type_extension_object_xaml_untyped as BuildDocument),
+    ("compiled_binding_unnamed_types.xaml", build_compiled_binding_unnamed_types_xaml_untyped as BuildDocument),
 ];
 
 /// The loader of the compiled markup of the assembly: builds the document with the URI
