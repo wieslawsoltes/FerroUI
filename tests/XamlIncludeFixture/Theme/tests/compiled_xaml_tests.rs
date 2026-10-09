@@ -2,21 +2,15 @@
 //! source for the documents of [`crate::documents`] (docs/porting/xaml.md, 9.6
 //! and 9.7.3). Not a test of upstream.
 //!
-//! Two hosts run the emitter, and the tests compare each with the emitter run
-//! here, in the tests of the crate, where every type of the crate is linked:
-//!
-//! - the build script (`build.rs`), which writes the modules `compiled_xaml`
-//!   and `compiled_xaml_source_info` and the `.xamlmeta` of the crate to
-//!   `OUT_DIR`. It registers the types of the crates the crate depends on and
-//!   none of this crate; the comparison shows that it compiles the documents
-//!   to the text a host with every type compiles them to;
-//! - the ignored test below, which writes the checked-in document of the class
-//!   of the crate (`compiled_style_with_service_provider.rs` and its
-//!   `.xamlmeta`), because a build script cannot link the crate it builds:
-//!
-//! ```text
-//! cargo test -p xaml-include-fixture-theme --lib tests::compiled_xaml_tests::regenerate_compiled_xaml -- --ignored
-//! ```
+//! The build script (`build.rs`) compiles every document of the crate against
+//! the build-time type system: the type models of this crate and of the
+//! framework crates, with nothing of them linked for its types. It writes the
+//! modules `compiled_xaml`, `compiled_xaml_source_info` and
+//! `compiled_style_with_service_provider` (the document of a class of this
+//! crate) and the `.xamlmeta` of the crate to `OUT_DIR`. The test runs the
+//! emitter here against the run-time type system, where every type of the
+//! crate is linked and registered, and compares: the two hosts give the same
+//! text, byte for byte.
 
 use ferroui_base::platform::register_assets;
 use ferroui_base::StaticType;
@@ -34,6 +28,10 @@ const ROOT_URI: &str = "ferres://Tests/";
 const BUILT: &[(&str, &str)] = &[
     ("compiled_xaml.rs", include_str!(concat!(env!("OUT_DIR"), "/xaml/compiled_xaml.rs"))),
     ("compiled_xaml_source_info.rs", include_str!(concat!(env!("OUT_DIR"), "/xaml/compiled_xaml_source_info.rs"))),
+    (
+        "compiled_style_with_service_provider.rs",
+        include_str!(concat!(env!("OUT_DIR"), "/xaml/compiled_style_with_service_provider.rs")),
+    ),
 ];
 
 /// What the emitter generates here.
@@ -42,8 +40,6 @@ struct Generated {
     built: Vec<(&'static str, String)>,
     /// The `.xamlmeta` of the crate, which the build script writes.
     metadata: String,
-    /// The checked-in files, by their path below the crate directory.
-    checked_in: Vec<(&'static str, String)>,
 }
 
 fn generate() -> Generated {
@@ -92,12 +88,12 @@ fn generate() -> Generated {
     let mut metadata = file.metadata("xaml_include_fixture_theme", "::xaml_include_fixture_theme::compiled_xaml", &[]);
     metadata.documents.extend(class_metadata.documents.iter().cloned());
     Generated {
-        built: vec![("compiled_xaml.rs", file.source), ("compiled_xaml_source_info.rs", source_info_file.source)],
-        metadata: metadata.to_json(),
-        checked_in: vec![
+        built: vec![
+            ("compiled_xaml.rs", file.source),
+            ("compiled_xaml_source_info.rs", source_info_file.source),
             ("compiled_style_with_service_provider.rs", class_file.source),
-            ("compiled_style_with_service_provider.xamlmeta", class_metadata.to_json()),
         ],
+        metadata: metadata.to_json(),
     }
 }
 
@@ -106,10 +102,12 @@ fn first_difference(a: &str, b: &str) -> usize {
     a.lines().zip(b.lines()).position(|(a, b)| a != b).unwrap_or_else(|| a.lines().count().min(b.lines().count())) + 1
 }
 
-/// The build script compiles the documents to the text the emitter gives here.
+/// The build script compiles the documents, the document of the class of the crate among
+/// them, to the text the emitter gives here.
 #[test]
 fn build_script_output_is_the_emitters() {
     let generated = generate();
+    assert_eq!(BUILT.len(), generated.built.len());
     for ((name, built), (_, expected)) in BUILT.iter().zip(&generated.built) {
         assert!(
             built == expected,
@@ -125,19 +123,6 @@ fn build_script_output_is_the_emitters() {
     assert!(metadata.to_json() == generated.metadata, "the .xamlmeta of the build script differs from the emitter's in the tests");
 }
 
-#[test]
-fn compiled_class_document_is_up_to_date() {
-    for (path, generated) in generate().checked_in {
-        let checked_in = std::fs::read_to_string(format!("{}/{path}", env!("CARGO_MANIFEST_DIR")))
-            .unwrap_or_else(|e| panic!("{path} cannot be read: {e}"));
-        assert!(
-            generated == checked_in,
-            "{path} is out of date; regenerate it with \
-             `cargo test -p xaml-include-fixture-theme --lib tests::compiled_xaml_tests::regenerate_compiled_xaml -- --ignored`"
-        );
-    }
-}
-
 /// The `.xamlmeta` is the model the emitter writes, and it names the files of the crates the
 /// crate is built on, which export their type models (docs/porting/xaml.md, 9.5.13).
 #[test]
@@ -145,13 +130,4 @@ fn compiled_xaml_metadata_is_readable() {
     let read = XamlMetadata::read(env!("FERROUI_XAMLMETA")).expect("the file can be read");
     let names: Vec<&str> = read.iter().map(|metadata| metadata.name.as_str()).collect();
     assert_eq!(names, ["Tests", "FerroUI.Base", "FerroUI.Controls", "FerroUI.Markup.Xaml"]);
-}
-
-#[test]
-#[ignore = "writes the generated files; run it to regenerate the checked-in output"]
-fn regenerate_compiled_xaml() {
-    for (path, generated) in generate().checked_in {
-        std::fs::write(format!("{}/{path}", env!("CARGO_MANIFEST_DIR")), generated)
-            .unwrap_or_else(|e| panic!("{path} cannot be written: {e}"));
-    }
 }

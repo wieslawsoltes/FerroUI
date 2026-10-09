@@ -30,6 +30,11 @@ ferroui-controls = { workspace = true }
 ferroui-dialogs = { workspace = true }
 ferroui-markup-xaml = { workspace = true }
 
+[build-dependencies]
+# The build script exports the type model of the crate with its compiled markup: the source scanner,
+# which links nothing of the framework.
+ferroui-build-scan = { workspace = true }
+
 [dev-dependencies]
 ferroui-base = { workspace = true, features = ["testing"] }
 ferroui-controls = { workspace = true, features = ["testing"] }

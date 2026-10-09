@@ -339,8 +339,8 @@ pub const SOURCE_INFO_DOCUMENTS: &[(&str, &str)] = &[
 ];
 
 /// The document of [`crate::StyleWithServiceProvider`] (upstream's embedded
-/// `Xaml/StyleWithServiceProvider.xaml` of the test assembly), compiled into
-/// `compiled_style_with_service_provider.rs`.
+/// `Xaml/StyleWithServiceProvider.xaml` of the test assembly), compiled into the module
+/// `compiled_style_with_service_provider`.
 pub const STYLE_WITH_SERVICE_PROVIDER: (&str, &str) = (
     "/Xaml/StyleWithServiceProvider.xaml",
     r#"<Style xmlns='https://github.com/ferroui'

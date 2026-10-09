@@ -25,15 +25,14 @@ ferroui-controls = { workspace = true }
 ferroui-markup-xaml = { workspace = true }
 
 [build-dependencies]
-# The build script compiles the documents of the crate (`build.rs`). The compiler reads the types the
-# documents name from the registries of the process, so the script links the crates that declare them.
+# The build script compiles the documents of the crate (`build.rs`) against the type models: the scan
+# of the sources of this crate and the models the framework crates export. It links the compiler and
+# no crate for its types.
 ferroui-build = { workspace = true }
-ferroui-base = { workspace = true }
-ferroui-controls = { workspace = true, features = ["testing"] }
 
 [dev-dependencies]
 ferroui-base = { workspace = true, features = ["testing"] }
 ferroui-controls = { workspace = true, features = ["testing"] }
-# The emitter generates the compiled markup of the class of the crate and checks it, and checks the
-# output of the build script (`tests/compiled_xaml_tests.rs`).
+# The emitter, run against the run-time type system, checks the output of the build script
+# (`tests/compiled_xaml_tests.rs`).
 ferroui-markup-xaml-loader = { workspace = true, features = ["runtime", "testing", "emitter"] }
