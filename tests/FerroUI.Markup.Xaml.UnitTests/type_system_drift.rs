@@ -1,6 +1,6 @@
 //! The drift test of the build-time type system (docs/porting/xaml.md, 9.5.5
-//! and 9.10.1): the type system over the scanned models of the base and the
-//! controls crates (`ferroui_build::type_system::ModelTypeSystem`) against the
+//! and 9.10.1): the type system over the scanned models of the base crate, the
+//! controls and the XAML runtime library (`ferroui_build::type_system::ModelTypeSystem`) against the
 //! run-time type system over the same crates as they are linked into this
 //! test (`RuntimeTypeSystem`).
 //!
@@ -51,7 +51,7 @@ use xamlx::type_system::{
 };
 
 /// The crates the two type systems are compared for.
-const CRATES: &[&str] = &["ferroui_base", "ferroui_controls"];
+const CRATES: &[&str] = &["ferroui_base", "ferroui_controls", "ferroui_markup_xaml"];
 
 /// How many differences of one kind are printed.
 const LISTED: usize = 400;
@@ -458,20 +458,26 @@ fn crate_of(module_path: &str) -> &str {
     module_path.split("::").next().unwrap_or(module_path)
 }
 
-/// The build-time type system over the scans of the base and the controls crates agrees
+/// The build-time type system over the scans of the base crate, the controls and the XAML runtime
+/// library agrees
 /// with the run-time type system over the same crates as this test links them.
 #[test]
 fn model_type_system_agrees_with_the_runtime_type_system() {
     crate::register_types();
     ferroui_controls::register_types();
 
-    // The model: the two crates read as files, the controls with the model of the base
-    // crate, as their build scripts would export them.
+    // The model: the three crates read as files, the controls with the model of the base
+    // crate and the XAML runtime library with both, as their build scripts would export
+    // them.
     let source = Path::new(env!("CARGO_MANIFEST_DIR")).join("..").join("..").join("src");
     let base = scan_crate(&ScanOptions::new("ferroui_base", source.join("FerroUI.Base").join("lib.rs")));
     let controls =
         scan_crate(&ScanOptions::new("ferroui_controls", source.join("FerroUI.Controls").join("lib.rs")).with_dependencies(vec![base.model.clone()]));
-    for scan in [&base, &controls] {
+    let markup_xaml = scan_crate(
+        &ScanOptions::new("ferroui_markup_xaml", source.join("Markup").join("FerroUI.Markup.Xaml").join("lib.rs"))
+            .with_dependencies(vec![base.model.clone(), controls.model.clone()]),
+    );
+    for scan in [&base, &controls, &markup_xaml] {
         println!("==== the scan of {} ====\n{}\n", scan.model.crate_name, scan.summary());
         // What the scanner did not read explains a type or a member only the run-time side has.
         let not_read: Vec<String> = scan.diagnostics_of(Severity::Error).map(|diagnostic| diagnostic.to_string()).collect();
@@ -479,12 +485,15 @@ fn model_type_system_agrees_with_the_runtime_type_system() {
         for line in &not_read {
             println!("{line}");
         }
+        for diagnostic in scan.diagnostics_of(Severity::Warning) {
+            println!("{diagnostic}");
+        }
         println!();
     }
-    let model_system = ModelTypeSystem::new(vec![base.model, controls.model]);
+    let model_system = ModelTypeSystem::new(vec![base.model, controls.model, markup_xaml.model]);
     let runtime_system = RuntimeTypeSystem::new();
 
-    // The types of the two crates, on each side, by the name they are compared by.
+    // The types of the crates, on each side, by the name they are compared by.
     let mut runtime_types: BTreeMap<String, Rc<dyn IXamlType>> = BTreeMap::new();
     for type_info in TypeInfo::registered_types() {
         if CRATES.contains(&crate_of(type_info.module_path())) {
@@ -508,7 +517,7 @@ fn model_type_system_agrees_with_the_runtime_type_system() {
         }
     }
     println!("types of {CRATES:?}: {} at run time, {} in the model\n", runtime_types.len(), model_types.len());
-    assert!(runtime_types.len() > 500, "only {} types of the two crates are registered", runtime_types.len());
+    assert!(runtime_types.len() > 500, "only {} types of the crates are registered", runtime_types.len());
 
     let mut differences = Differences::default();
     let mut compared = 0;
