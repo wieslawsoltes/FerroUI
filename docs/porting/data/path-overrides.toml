@@ -2115,3 +2115,25 @@ project = "Avalonia.Skia"
 upstream = ["Gpu/Vulkan/VulkanSkiaExternalObjectsFeature.cs"]
 kind = "not-applicable"
 reason = "import of external images and semaphores into the Skia context on Vulkan (`IVulkanContextExternalObjectsFeature` of Avalonia.Vulkan): out of scope while Avalonia.Vulkan is (scripts/api-extract/projects.json). Applicable when a platform with Vulkan is ported, after the external objects of the backend on OpenGL and Metal"
+
+# ---------------------------------------------------------------- Avalonia.Remote.Protocol
+#
+# Every upstream file has the Rust file of the default rule (`MetsysBson.cs` -> `metsys_bson.rs`,
+# `AvaloniaRemoteMessageGuidAttribute.cs` -> `ferro_remote_message_guid_attribute.rs`,
+# `ITransport.cs` -> `i_transport.rs`, `BsonStreamTransport.cs` -> `bson_stream_transport.rs`).
+
+[[rust_only]]
+path = "src/FerroUI.Remote.Protocol/guid.rs"
+reason = "`System.Guid` of the runtime library: the text forms and the byte layout (`ToByteArray`) the header of a message carries"
+
+[[rust_only]]
+path = "src/FerroUI.Remote.Protocol/error.rs"
+reason = "The exceptions the upstream library throws or lets through, as one error value that the exception event of a connection hands to its handlers"
+
+[[rust_only]]
+path = "src/FerroUI.Remote.Protocol/task.rs"
+reason = "`Task` and `TaskCompletionSource` of the runtime library, as far as `Send` of a connection uses them: the library has no asynchronous runtime (DEVIATIONS.md, Remote protocol)"
+
+[[rust_only]]
+path = "src/FerroUI.Remote.Protocol/assembly.rs"
+reason = "The table of the exported types of an assembly with their identifier attributes: what `DefaultMessageTypeResolver` reads by reflection upstream (`Assembly.ExportedTypes`)"
