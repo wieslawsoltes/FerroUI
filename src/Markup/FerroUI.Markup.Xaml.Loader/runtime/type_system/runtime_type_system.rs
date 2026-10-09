@@ -779,10 +779,17 @@ impl RuntimeTypeSystem {
             }
         }
         if let Some(list) = value.downcast_ref::<super::values::RuntimeList>() {
-            let type_ = match list.element_type() {
-                Some(element_type) => self
-                    .find_type(core_types::LIST_DEFINITION)
-                    .and_then(|definition| definition.make_generic_type(std::slice::from_ref(element_type)).ok()),
+            let element_type = match super::values::list_element(list) {
+                Some(super::values::ListElement::Type(element_type)) => Some(Some(element_type)),
+                // A list generated code created names its element type.
+                Some(super::values::ListElement::Named(full_name)) => Some(self.find_type(&full_name)),
+                None => None,
+            };
+            let type_ = match element_type {
+                Some(element_type) => element_type.and_then(|element_type| {
+                    self.find_type(core_types::LIST_DEFINITION)
+                        .and_then(|definition| definition.make_generic_type(std::slice::from_ref(&element_type)).ok())
+                }),
                 None => self.find_type(core_types::ARRAY_LIST),
             };
             if let Some(type_) = type_ {

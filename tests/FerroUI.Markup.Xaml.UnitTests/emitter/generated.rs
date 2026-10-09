@@ -41,6 +41,15 @@ const XML_NAMESPACES_3: rt::XmlNamespaceTable = &[
     ("x", &[]),
 ];
 
+/// The XML namespaces of documents of this file, as the compiler resolved them.
+const XML_NAMESPACES_4: rt::XmlNamespaceTable = &[
+    ("", &[("FerroUI", "FerroUI.Base"), ("FerroUI.Animation", "FerroUI.Base"), ("FerroUI.Animation.Easings", "FerroUI.Base"), ("FerroUI.Controls", "FerroUI.Base"), ("FerroUI.Data", "FerroUI.Base"), ("FerroUI.Data.Converters", "FerroUI.Base"), ("FerroUI.Input", "FerroUI.Base"), ("FerroUI.Input.GestureRecognizers", "FerroUI.Base"), ("FerroUI.Input.TextInput", "FerroUI.Base"), ("FerroUI.Layout", "FerroUI.Base"), ("FerroUI.LogicalTree", "FerroUI.Base"), ("FerroUI.Media", "FerroUI.Base"), ("FerroUI.Media.Imaging", "FerroUI.Base"), ("FerroUI.Media.Transformation", "FerroUI.Base"), ("FerroUI.Styling", "FerroUI.Base"), ("FerroUI", "FerroUI.Controls"), ("FerroUI.Automation", "FerroUI.Controls"), ("FerroUI.Controls", "FerroUI.Controls"), ("FerroUI.Controls.Embedding", "FerroUI.Controls"), ("FerroUI.Controls.Presenters", "FerroUI.Controls"), ("FerroUI.Controls.Primitives", "FerroUI.Controls"), ("FerroUI.Controls.Shapes", "FerroUI.Controls"), ("FerroUI.Controls.Templates", "FerroUI.Controls"), ("FerroUI.Controls.Notifications", "FerroUI.Controls"), ("FerroUI.Controls.Chrome", "FerroUI.Controls"), ("FerroUI.Controls.Documents", "FerroUI.Controls"), ("FerroUI.Markup.Xaml.MarkupExtensions", "FerroUI.Markup.Xaml"), ("FerroUI.Markup.Xaml.Styling", "FerroUI.Markup.Xaml"), ("FerroUI.Markup.Xaml.Templates", "FerroUI.Markup.Xaml")]),
+    ("col", &[("System.Collections", "")]),
+    ("generic", &[("System.Collections.Generic", "netstandard")]),
+    ("sys", &[("System", "")]),
+    ("x", &[]),
+];
+
 /// The base URI and the XML namespaces of `border_empty.xaml`.
 static BUILD_BORDER_EMPTY_XAML_DOCUMENT: rt::DocumentInfo = rt::DocumentInfo { base_uri: ::core::option::Option::Some("ferres://FerroUI.Markup.Xaml.UnitTests/Emitter/border_empty.xaml"), namespaces: XML_NAMESPACES_0 };
 
@@ -5057,6 +5066,93 @@ fn build_compiled_binding_unnamed_types_xaml_untyped(
     ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
 }
 
+/// The base URI and the XML namespaces of `runtime_lists.xaml`.
+static BUILD_RUNTIME_LISTS_XAML_DOCUMENT: rt::DocumentInfo = rt::DocumentInfo { base_uri: ::core::option::Option::Some("ferres://FerroUI.Markup.Xaml.UnitTests/Emitter/runtime_lists.xaml"), namespaces: XML_NAMESPACES_4 };
+
+/// Generated from `runtime_lists.xaml`.
+pub fn build_runtime_lists_xaml(
+    service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
+) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::StackPanel>, ::ferroui_markup_xaml::XamlLoadException> {
+    // runtime_lists.xaml(1,2) StackPanel
+    let stack_panel_0 = ::ferroui_controls::StackPanel::new();
+    let context = rt::populate_context(service_provider, &BUILD_RUNTIME_LISTS_XAML_DOCUMENT, rt::to_value(stack_panel_0.clone()));
+    let name_scope = context.name_scope_field();
+    stack_panel_0.begin_init();
+    // runtime_lists.xaml(4,4) Children
+    let children_collection_0 = ::ferroui_controls::Panel::__markup_get_Children(stack_panel_0.upcast_ref::<::ferroui_controls::Panel>());
+    // runtime_lists.xaml(4,4) ComboBox
+    let combo_box_0 = ::ferroui_controls::ComboBox::new();
+    combo_box_0.begin_init();
+    ::ferroui_controls::Controls::__markup_Add_0(&children_collection_0, ::core::clone::Clone::clone(&combo_box_0).upcast::<::ferroui_controls::Control>());
+    // runtime_lists.xaml(4,4) SelectedIndex
+    combo_box_0.set_direct_value(::ferroui_controls::primitives::SelectingItemsControl::selected_index_property(), 1_i32);
+    // runtime_lists.xaml(6,8) ItemsSource
+    let list_1_0 = rt::RuntimeList::of("FerroUI.Media.Stretch");
+    // runtime_lists.xaml(7,18) Content
+    rt::RuntimeList::add(&list_1_0, rt::to_value(::ferroui_base::media::Stretch::Uniform));
+    // runtime_lists.xaml(8,18) Content
+    rt::RuntimeList::add(&list_1_0, rt::to_value(::ferroui_base::media::Stretch::Fill));
+    combo_box_0.set_value(::ferroui_controls::ItemsControl::items_source_property(), rt::list_cast(&list_1_0, 8, 18)?);
+    rt::invoked(combo_box_0.try_end_init(), 4, 4)?;
+    // runtime_lists.xaml(12,4) Children
+    let children_collection_1 = ::ferroui_controls::Panel::__markup_get_Children(stack_panel_0.upcast_ref::<::ferroui_controls::Panel>());
+    // runtime_lists.xaml(12,4) ItemsControl
+    let items_control_0 = ::ferroui_controls::ItemsControl::new();
+    items_control_0.begin_init();
+    ::ferroui_controls::Controls::__markup_Add_0(&children_collection_1, ::core::clone::Clone::clone(&items_control_0).upcast::<::ferroui_controls::Control>());
+    // runtime_lists.xaml(14,8) ItemsSource
+    let array_list_0 = rt::RuntimeList::untyped();
+    // runtime_lists.xaml(15,10) Content
+    rt::RuntimeList::add(&array_list_0, ::core::option::Option::None);
+    // runtime_lists.xaml(16,21) Content
+    rt::RuntimeList::add(&array_list_0, rt::to_object(::std::string::String::from("Hello")));
+    // runtime_lists.xaml(17,18) Content
+    rt::RuntimeList::add(&array_list_0, rt::to_object(::ferroui_base::media::Stretch::None));
+    // runtime_lists.xaml(18,10) Content
+    // runtime_lists.xaml(18,10) Border
+    let border_0 = ::ferroui_controls::Border::new();
+    border_0.begin_init();
+    rt::RuntimeList::add(&array_list_0, rt::to_object(::core::clone::Clone::clone(&border_0)));
+    // runtime_lists.xaml(18,17) Name
+    border_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("item")));
+    rt::register_name(name_scope.as_ref(), "item", ::core::clone::Clone::clone(&border_0).upcast::<::ferroui_base::FerroObject>(), 18, 17)?;
+    rt::invoked(border_0.try_end_init(), 18, 10)?;
+    items_control_0.set_value(::ferroui_controls::ItemsControl::items_source_property(), rt::list_cast(&array_list_0, 18, 10)?);
+    rt::invoked(items_control_0.try_end_init(), 12, 4)?;
+    // runtime_lists.xaml(22,4) Children
+    let children_collection_2 = ::ferroui_controls::Panel::__markup_get_Children(stack_panel_0.upcast_ref::<::ferroui_controls::Panel>());
+    // runtime_lists.xaml(22,4) Border
+    let border_1 = ::ferroui_controls::Border::new();
+    border_1.begin_init();
+    ::ferroui_controls::Controls::__markup_Add_0(&children_collection_2, ::core::clone::Clone::clone(&border_1).upcast::<::ferroui_controls::Control>());
+    // runtime_lists.xaml(24,8) Tag
+    let array_list_1 = rt::RuntimeList::untyped();
+    // runtime_lists.xaml(25,21) Content
+    rt::RuntimeList::add(&array_list_1, rt::to_object(::std::string::String::from("tagged")));
+    border_1.set_value(::ferroui_controls::Control::tag_property(), rt::to_object(::core::clone::Clone::clone(&array_list_1)));
+    rt::invoked(border_1.try_end_init(), 22, 4)?;
+    // runtime_lists.xaml(29,4) Children
+    let children_collection_3 = ::ferroui_controls::Panel::__markup_get_Children(stack_panel_0.upcast_ref::<::ferroui_controls::Panel>());
+    // runtime_lists.xaml(29,4) Border
+    let border_2 = ::ferroui_controls::Border::new();
+    border_2.begin_init();
+    ::ferroui_controls::Controls::__markup_Add_0(&children_collection_3, ::core::clone::Clone::clone(&border_2).upcast::<::ferroui_controls::Control>());
+    // runtime_lists.xaml(31,8) Tag
+    let list_1_1 = rt::RuntimeList::of("FerroUI.Controls.Dock");
+    border_2.set_value(::ferroui_controls::Control::tag_property(), rt::to_object(::core::clone::Clone::clone(&list_1_1)));
+    rt::invoked(border_2.try_end_init(), 29, 4)?;
+    rt::invoked(stack_panel_0.try_end_init(), 1, 2)?;
+    rt::complete_root_name_scope(::core::option::Option::Some(&stack_panel_0), name_scope.as_ref(), 1, 2)?;
+    ::core::result::Result::Ok(stack_panel_0)
+}
+
+fn build_runtime_lists_xaml_untyped(
+    service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
+) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadException> {
+    let root = build_runtime_lists_xaml(service_provider)?;
+    ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
+}
+
 /// The build function of every eligible public document, by document name.
 pub const DOCUMENTS: &[(&str, BuildDocument)] = &[
     ("border_empty.xaml", build_border_empty_xaml_untyped as BuildDocument),
@@ -5181,6 +5277,7 @@ pub const DOCUMENTS: &[(&str, BuildDocument)] = &[
     ("list_text_held_collection.xaml", build_list_text_held_collection_xaml_untyped as BuildDocument),
     ("type_extension_object.xaml", build_type_extension_object_xaml_untyped as BuildDocument),
     ("compiled_binding_unnamed_types.xaml", build_compiled_binding_unnamed_types_xaml_untyped as BuildDocument),
+    ("runtime_lists.xaml", build_runtime_lists_xaml_untyped as BuildDocument),
 ];
 
 /// The loader of the compiled markup of the assembly: builds the document with the URI

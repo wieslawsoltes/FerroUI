@@ -33,17 +33,12 @@ pub const PAGES: &[&str] = &[
 pub const REFUSED: &[(&str, &str)] = &[
     ("App.xaml", "the include of the theme documents of the colour picker, which is not compiled by its build"),
     ("MainView.xaml", "a container query: no emitter for XamlIlWidthQuery"),
-    ("Pages/ComboBoxPage.xaml", "a list created in markup: System.Collections.ArrayList is not a class of the object model"),
     ("Pages/ContainerQueryPage.xaml", "a container query: no emitter for XamlIlWidthQuery"),
     ("Pages/ContextFlyoutPage.xaml", "a compiled binding path with a method as a command"),
-    ("Pages/DialogsPage.xaml", "a list created in markup: List<T> is not a class of the object model"),
-    ("Pages/FocusPage.xaml", "a list created in markup: List<T> is not a class of the object model"),
     ("Pages/LabelsPage.xaml", "a compiled binding path with a method as a command"),
     ("Pages/OpenGl/OpenGlLeasePage.xaml", "the class of the document is not ported"),
     ("Pages/PipsPager/PipsPagerCustomButtonThemesPage.xaml", "PreviousButtonTheme: not a plain property setter"),
-    ("Pages/RefreshContainerPage.xaml", "a list created in markup: List<T> is not a class of the object model"),
     ("Pages/TransitioningContentControlPage.xaml", "a compiled binding path with a method as a command"),
-    ("Pages/ViewboxPage.xaml", "a list created in markup: System.Collections.ArrayList is not a class of the object model"),
 ];
 
 /// The compiled documents that neither back end loads in the services of a test, each

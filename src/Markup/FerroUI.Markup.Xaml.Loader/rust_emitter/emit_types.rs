@@ -94,6 +94,12 @@ pub enum Known {
     TypeDescriptorContext,
     /// `Option<Rc<dyn ITypeDescriptorContext>>`.
     OptionTypeDescriptorContext,
+    /// `RuntimeList`: a list of the runtime library created in markup (`List<T>`,
+    /// `ArrayList`).
+    RuntimeList,
+    /// `Rc<FerroList<Option<BoxedValue>>>`: the shared list of the items of a
+    /// [`RuntimeList`](Known::RuntimeList), which a collection handle is cast from.
+    ListItems,
 }
 
 /// The Rust type that holds a value of a type of the type system (its handle).

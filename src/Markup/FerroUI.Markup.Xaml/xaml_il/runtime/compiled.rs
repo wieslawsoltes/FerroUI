@@ -1093,6 +1093,26 @@ pub fn cast<T: Clone + 'static, V: PartialEq + 'static>(value: V, line: i32, pos
     }
 }
 
+/// The list of the runtime library markup creates (`new List<T>()`, `new ArrayList()`), as
+/// generated code names it.
+pub use super::RuntimeList;
+
+/// A list created in markup as the value of a member that declares the Rust type `T` for
+/// a collection (the items source of an items control): the shared list of its items
+/// through the cast the crate of `T` registers for it, as the run-time loader passes the
+/// list (`RuntimeList::to_declared`). The emitter writes it only where
+/// [`ValueTypes::is_assignable`] holds for the list of the items and `T`, which is when
+/// the cast succeeds; a list it does not convert is the `InvalidCastException` of the
+/// loader at `line`, `position`.
+pub fn list_cast<T: Clone + 'static>(list: &RuntimeList, line: i32, position: i32) -> Result<T, XamlLoadException> {
+    let target = ValueType::of::<T>();
+    let converted = list.to_declared(target);
+    match converted.as_ref().and_then(|converted| converted.downcast_ref::<T>()) {
+        Some(value) => Ok(value.clone()),
+        None => Err(at("InvalidCastException", format!("Unable to cast the value to {}.", target.name()), line, position)),
+    }
+}
+
 /// The arguments a delegate of a method named in markup is called with, read in order as
 /// the Rust types the method declares ([`method_delegate`]).
 pub struct DelegateArguments<'a> {

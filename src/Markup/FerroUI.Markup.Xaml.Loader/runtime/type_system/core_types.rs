@@ -167,7 +167,7 @@ pub(crate) fn list_members(b: &mut MemberBuilder, element_type: Option<Rc<dyn IX
     let invoker = |member: &CoreMember| match member {
         CoreMember::Constructor { .. } => {
             let element_type = element_type.clone();
-            dynamic(move |_| Ok(boxed(RuntimeList::new(element_type.clone()))))
+            dynamic(move |_| Ok(boxed(super::values::new_list(element_type.clone()))))
         }
         CoreMember::Method { name, .. } if name == "Add" => dynamic(move |arguments| {
             let list = instance(arguments)?;

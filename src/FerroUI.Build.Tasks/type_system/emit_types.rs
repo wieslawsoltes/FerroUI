@@ -317,6 +317,8 @@ const KNOWN: &[(Known, &str)] = &[
     (Known::Delegate, "::ferroui_base::metadata::MarkupDelegate"),
     (Known::TypeDescriptorContext, "::std::rc::Rc<dyn ::ferroui_markup_xaml::converters::ITypeDescriptorContext>"),
     (Known::OptionTypeDescriptorContext, "Option<::std::rc::Rc<dyn ::ferroui_markup_xaml::converters::ITypeDescriptorContext>>"),
+    (Known::RuntimeList, "::ferroui_markup_xaml::xaml_il::runtime::RuntimeList"),
+    (Known::ListItems, "::std::rc::Rc<::ferroui_base::collections::FerroList<Option<::ferroui_base::BoxedValue>>>"),
 ];
 
 /// The primitive types generated code names by their name, and `String` by its path.

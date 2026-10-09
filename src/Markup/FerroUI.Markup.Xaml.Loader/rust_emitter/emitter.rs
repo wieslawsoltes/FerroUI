@@ -264,6 +264,25 @@ fn system_type_as(
     None
 }
 
+/// Whether `type_` is a list of the runtime library that markup creates: `Some(Some(T))`
+/// for `System.Collections.Generic.List<T>`, `Some(None)` for
+/// `System.Collections.ArrayList`. The run-time loader creates one list type for both
+/// (`RuntimeList`); an instantiation of `List<T>` a crate declares metadata for has a
+/// declared constructor and is not asked.
+fn runtime_list_element(type_: &Rc<dyn IXamlType>) -> Option<Option<Rc<dyn IXamlType>>> {
+    if type_.full_name() == crate::core_table::ARRAY_LIST {
+        return Some(None);
+    }
+    let definition = type_.generic_type_definition()?;
+    if definition.full_name() != crate::core_table::LIST_DEFINITION {
+        return None;
+    }
+    match type_.generic_arguments().as_slice() {
+        [element_type] => Some(Some(element_type.clone())),
+        _ => None,
+    }
+}
+
 /// The values a property setter is performed with.
 enum SetterValues<'v, 'a> {
     /// Only check that the statement can be written (no value is used).
@@ -772,6 +791,11 @@ impl<'a> Emitter<'a> {
     fn new_object(&mut self, node: &Rc<dyn IXamlAstNode>, n: &Rc<XamlAstNewClrObjectNode>) -> EmitResult<Typed<'a>> {
         let type_ = n.type_.borrow().get_clr_type().map_err(|e| failed(node, e))?;
         let is_declared = self.types.constructor(n.constructor.as_ref()).is_some_and(|c| c.declared.is_some());
+        if !is_declared {
+            if let Some(element_type) = runtime_list_element(&type_) {
+                return self.new_runtime_list(node, n, &type_, element_type);
+            }
+        }
         if is_declared {
             // A constructor of metadata (with or without arguments): the arguments in order,
             // then the typed function.
@@ -786,6 +810,67 @@ impl<'a> Emitter<'a> {
             return Err(unsupported(node, "constructor arguments"));
         }
         self.default_object(node, &type_, &n.constructor)
+    }
+
+    /// `new List<T>()` and `new ArrayList()` of the runtime library: the list the run-time
+    /// loader creates for both (`RuntimeList`, the element type and the untyped items),
+    /// with the element type by the full name the compiler resolved.
+    fn new_runtime_list(
+        &mut self,
+        node: &Rc<dyn IXamlAstNode>,
+        n: &Rc<XamlAstNewClrObjectNode>,
+        type_: &Rc<dyn IXamlType>,
+        element_type: Option<Rc<dyn IXamlType>>,
+    ) -> EmitResult<Typed<'a>> {
+        // The one constructor the table of runtime library types gives the list.
+        let is_default_constructor = self.types.constructor(n.constructor.as_ref()).is_some_and(|c| c.parameters.is_empty());
+        if !is_default_constructor || !n.arguments.borrow().is_empty() {
+            return Err(unsupported(node, format!("a constructor of {} with arguments", type_.full_name())));
+        }
+        let expr = match element_type {
+            Some(element_type) => format!("rt::RuntimeList::of({})", rust_string_literal(&element_type.full_name())),
+            None => "rt::RuntimeList::untyped()".to_string(),
+        };
+        Ok(self.exact(Known::RuntimeList, expr))
+    }
+
+    /// `list.Add(item)` of a list of the runtime library created in markup
+    /// (`XamlDirectCallPropertySetter` of the adder of the list): the item as the type
+    /// the adder declares (the element type of a `List<T>`, `object` for an `ArrayList`),
+    /// held untyped as the run-time loader holds the value of a node, then added. What
+    /// `ArrayList.Add` returns (the index) is dropped, as the interpreter drops it.
+    fn runtime_list_add(
+        &mut self,
+        node: &Rc<dyn IXamlAstNode>,
+        assignment: &Rc<XamlPropertyAssignmentNode>,
+        add: &MethodInfo<'a>,
+        target: &Typed<'a>,
+    ) -> EmitResult<()> {
+        let property_name = assignment.property.name();
+        // The adder is a member the type system builds: it states the type of the item,
+        // not a Rust type, so the item is stated as the handle of that type.
+        let parameter = match add.parameters.as_slice() {
+            [parameter] => self.types.handle_of(&**parameter),
+            _ => None,
+        };
+        let Some(parameter) = parameter else {
+            return Err(unsupported(node, format!("{property_name}: the element type of the list has no Rust type")));
+        };
+        self.marker(node, &property_name);
+        let mut values = self.assignment_values(node, assignment)?;
+        let (Some(value), true) = (values.pop(), values.is_empty()) else {
+            return Err(unsupported(node, format!("{property_name}: an item of a list with more than one value")));
+        };
+        self.position.set((node.line(), node.position()));
+        let item = self
+            .coerce(&value, parameter.id())
+            .ok_or_else(|| unsupported(node, format!("{property_name}: the item cannot be stated as `{}`", parameter.name())))?;
+        let item = match parameter.is_object() {
+            true => item,
+            false => format!("rt::to_value({item})"),
+        };
+        self.line(format!("rt::RuntimeList::add(&{}, {item});", target.expr));
+        Ok(())
     }
 
     /// `new T()` of a class of the object model through its default
@@ -1107,7 +1192,24 @@ impl<'a> Emitter<'a> {
     /// run-time loader applies to the argument of the property's setter
     /// (`to_exact`). `None`: it cannot be stated.
     fn coerce(&self, value: &Typed<'a>, target: TypeKey<'a>) -> Option<String> {
-        self.coerce_static(value, target).or_else(|| self.coerce_registered(value, target))
+        self.coerce_static(value, target)
+            .or_else(|| self.coerce_runtime_list(value, target))
+            .or_else(|| self.coerce_registered(value, target))
+    }
+
+    /// A list of the runtime library created in markup as the collection handle a member
+    /// declares (the items source of an items control): the shared list of its items
+    /// through the cast the crate of the handle registers for it, as the run-time loader
+    /// passes the list (`RuntimeList::to_declared`); `rt::list_cast`, where
+    /// `ValueTypes::is_assignable` proves the cast exists.
+    fn coerce_runtime_list(&self, value: &Typed<'a>, target: TypeKey<'a>) -> Option<String> {
+        let Kind::Exact { id, .. } = value.kind else { return None };
+        if id != self.types.known(Known::RuntimeList) || !is_identifier(&value.expr) {
+            return None;
+        }
+        self.types
+            .is_assignable(self.types.known(Known::ListItems), target)
+            .then(|| format!("rt::list_cast(&{}, {}, {})?", value.expr, self.position.get().0, self.position.get().1))
     }
 
     /// A conversion through the assignability casts of the untyped value
@@ -1369,6 +1471,10 @@ impl<'a> Emitter<'a> {
         if let Some(runtime) = self.direct_setter(&setter) {
             if runtime.declared().is_some() {
                 return self.declared_setter_assignment(node, assignment, &runtime, target);
+            }
+            let is_list = matches!(target.kind, Kind::Exact { id, .. } if id == self.types.known(Known::RuntimeList));
+            if is_list && !runtime.is_static && runtime.name == "Add" {
+                return self.runtime_list_add(node, assignment, &runtime, target);
             }
         }
         let values = assignment.values.borrow().clone();
