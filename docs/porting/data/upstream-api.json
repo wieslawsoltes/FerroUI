@@ -269433,7 +269433,8 @@
    "path": "src/Avalonia.Metal",
    "detail": "full",
    "scope": "in",
-   "crate": "ferroui-metal",
+   "rust": "src/Skia/FerroUI.Skia/metal",
+   "crate": "ferroui-skia (module metal)",
    "phase": "1 - desktop (macOS)",
    "priority": "P1",
    "files": [

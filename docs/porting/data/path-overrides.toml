@@ -1799,10 +1799,6 @@ path = "src/Headless/FerroUI.Headless/headless_window_surface.rs"
 reason = "the part of `HeadlessWindowImpl.cs` that a frame uses (`Lock`, `CreateFramebufferRenderTarget`, the last rendered frame and its lock), as an object of its own; upstream implements the framebuffer surface on the window implementation"
 
 [[rust_only]]
-path = "src/Skia/FerroUI.Skia/metal/*.rs"
-reason = "port of the project Avalonia.Metal (`IMetalDevice.cs`, `IMetalExternalObjectsFeature.cs`) inside the Skia backend, its only user; the tracking of Avalonia.Metal looks in `src/FerroUI.Metal`, which does not exist, and reports the two files as missing"
-
-[[rust_only]]
 path = "src/Skia/FerroUI.Skia/locked_framebuffer.rs"
 reason = "a locked framebuffer described by plain values: the `Platform/LockedFramebuffer.cs` of Avalonia.Base, which the base crate cannot hold without unsafe code, for the surfaces of the backend"
 
@@ -1893,3 +1889,63 @@ reason = "the source scanner, which fills the type model from the declaration ma
 [[rust_only]]
 path = "src/FerroUI.Build.Tasks/type_system/*.rs"
 reason = "the build-time type system of the compiler over the type models (docs/porting/xaml.md, 9.5.2, 9.5.5): the counterpart of the Cecil type system of upstream's build task (XamlX.IL.Cecil, which the tracking does not list)"
+
+# ------------------------------------------------ False negatives of the name matching (review of 2026-10-09)
+# Ported code the scanner did not find because the type has another name than the default rule
+# derives. The members are in member-waivers.toml, under the same heading.
+
+[[map]]
+project = "Avalonia.Skia"
+upstream = ["SKCacheBase.cs"]
+kind = "renamed"
+rust = "sk_cache_base.rs"
+types = { SKCacheBase = "SkCacheBase" }
+reason = "Rust spelling of the acronym: `SkCacheBase<TCachedItem>` of `sk_cache_base.rs`; the second type parameter of upstream (the cache itself, for its static instance) is not needed, since each cache keeps its own instance"
+
+[[map]]
+project = "Avalonia.Skia"
+upstream = ["SKPaintCache.cs"]
+kind = "renamed"
+rust = "sk_paint_cache.rs"
+types = { SKPaintCache = "SkPaintCache" }
+reason = "Rust spelling of the acronym: `SkPaintCache` of `sk_paint_cache.rs`"
+
+[[map]]
+project = "Avalonia.Skia"
+upstream = ["SKRoundRectCache.cs"]
+kind = "renamed"
+rust = "sk_round_rect_cache.rs"
+types = { SKRoundRectCache = "SkRoundRectCache" }
+reason = "Rust spelling of the acronym: `SkRoundRectCache` of `sk_round_rect_cache.rs`"
+
+[[map]]
+project = "Avalonia.Skia"
+upstream = ["SKTextBlobBuilderCache.cs"]
+kind = "renamed"
+rust = "sk_text_blob_builder_cache.rs"
+types = { SKTextBlobBuilderCache = "SkTextBlobBuilderCache" }
+reason = "Rust spelling of the acronym: `SkTextBlobBuilderCache` of `sk_text_blob_builder_cache.rs`"
+
+[[map]]
+project = "Avalonia.Base"
+upstream = ["Platform/Storage/ILauncher.cs"]
+kind = "merged"
+rust = "platform/storage/i_launcher.rs"
+types = { LauncherExtensions = "ILauncher" }
+reason = "the extension methods of `LauncherExtensions` are inherent functions of the trait object (`impl dyn ILauncher`: `launch_file_info_async`, `launch_directory_info_async`) in the file of the trait"
+
+[[map]]
+project = "Avalonia.Base"
+upstream = ["Platform/Storage/StorageProviderExtensions.cs"]
+kind = "merged"
+rust = "platform/storage/storage_provider_extensions.rs"
+types = { StorageProviderExtensions = "IStorageProvider" }
+reason = "the extension methods are inherent functions of the trait objects in `storage_provider_extensions.rs`: `impl dyn IStorageProvider` (`try_get_file_from_path_str_async`, `try_get_folder_from_path_str_async`) and `impl dyn IStorageItem` (`try_get_local_path`)"
+
+[[map]]
+project = "Avalonia.Base"
+upstream = ["Platform/Surfaces/IFramebufferPlatformSurface.cs"]
+kind = "renamed"
+rust = "platform/surfaces/i_framebuffer_platform_surface.rs"
+types = { LockFramebufferDelegate = "LockFramebuffer" }
+reason = "the nested delegate `FuncFramebufferRenderTarget.LockFramebufferDelegate` is the type alias `LockFramebuffer` of the file: a closure that returns the framebuffer with its properties, since Rust has no `out` parameter"
