@@ -13,3 +13,7 @@ path = "lib.rs"
 ferroui-base.workspace = true
 ferroui-controls.workspace = true
 harfbuzz-sys.workspace = true
+
+[dev-dependencies]
+ferroui-base = { workspace = true, features = ["testing"] }
+ferroui-controls = { workspace = true, features = ["testing"] }
