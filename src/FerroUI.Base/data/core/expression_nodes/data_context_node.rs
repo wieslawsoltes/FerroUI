@@ -31,6 +31,16 @@ fn data_context_of(object: &FerroObject) -> Option<BoxedValue> {
     object.get_value(StyledElement::data_context_property())
 }
 
+/// The data context of an object that provides one, as the value of a node:
+/// null, or the contents of a nullable value.
+///
+/// This is `ValueTypes::normalize` of the property value in a box, without
+/// the box: the normal form of a boxed `Option<BoxedValue>` is null for
+/// `None` and the normal form of its contents otherwise.
+fn data_context_value_of(object: &FerroObject) -> Option<BoxedValue> {
+    data_context_of(object).and_then(ValueTypes::normalize)
+}
+
 /// A node that reads the data context of its source element.
 pub struct DataContextNode {
     this: Weak<DataContextNode>,
@@ -77,13 +87,13 @@ impl ExpressionNode for DataContextNode {
                                 .source_object()
                                 .filter(|o| <dyn IDataContextProvider>::is_implemented_by(o));
                             if let Some(object) = object {
-                                this.state.set_value(ValueTypes::normalize(Rc::new(data_context_of(&object))), None);
+                                this.state.set_value(data_context_value_of(&object), None);
                             }
                         }
                     }
                 });
                 self.subscription.replace(Some(subscription));
-                self.state.set_value(ValueTypes::normalize(Rc::new(data_context_of(&object))), None);
+                self.state.set_value(data_context_value_of(&object), None);
             }
             None => self
                 .state
@@ -155,12 +165,12 @@ impl ParentDataContextNode {
                 let subscription = object.property_changed(move |e| {
                     if e.property().id() == id {
                         if let (Some(this), Some(object)) = (weak.upgrade(), weak_object.upgrade()) {
-                            this.state.set_value(ValueTypes::normalize(Rc::new(data_context_of(&object))), None);
+                            this.state.set_value(data_context_value_of(&object), None);
                         }
                     }
                 });
                 self.parent_subscription.replace(Some(subscription));
-                self.state.set_value(ValueTypes::normalize(Rc::new(data_context_of(&object))), None);
+                self.state.set_value(data_context_value_of(&object), None);
             }
             None => self.state.set_value(None, None),
         }
