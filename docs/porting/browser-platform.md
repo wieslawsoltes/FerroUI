@@ -1040,8 +1040,224 @@ A module built with threads cannot start at all in a page that is not cross-orig
 3. **`-Zbuild-std` with the `browser` profile** (thin LTO, `opt-level = "z"`) and with `--locked`.
 4. **`-sENVIRONMENT=web,worker` given after `-sENVIRONMENT=web`**: the later setting should win.
 5. **Memory growth with threads.** Settled in B2.2 (`browser-render-worker.md`, "B2.2"): the script side of the platform reads the memory through `FerroExports.heapU8()`, a view made from the memory object at each use, and the threaded build is linked with a memory that does not grow (`FERROUI_BROWSER_THREAD_MEMORY_MB`), because the wasm-bindgen glue writes through a view it does not renew.
-6. **Module size and start-up.** The pool workers each compile or receive the module before the application starts; not measured (B3).
+6. **Module size and start-up.** The pool workers each compile or receive the module before the application starts. Measured in section 22: the module with threads is not larger, and the first frame is 20 to 25 ms later with a GPU.
 7. **Browsers other than Chrome.** As everywhere in this document (section 16, B9b).
+
+## 22. Rendering from a worker: measurements (B3) (2026-10-09)
+
+Stage B3 of `render-thread.md`: what the render thread of section 21 buys and what it costs. Everything in this section is **[M]**, measured on this branch against the sites `scripts/build-browser.sh themed_view --both` and `scripts/build-browser.sh control-catalog-browser --both` wrote. The conclusions and the recommendations are in `browser-render-worker.md`, "B3".
+
+### Method
+
+- **Machine.** Apple M3 Pro, 11 cores, 18 GB, macOS 26.6. Node 24.21.0.
+- **Browser.** Chrome 154.0.8037.98, headless: `--headless=new --no-first-run --no-default-browser-check --no-sandbox --hide-scrollbars --force-device-scale-factor=1 --force-color-profile=srgb`, a fresh profile directory for every run. `first-frame.mjs` and `frame-times.mjs` add `--ignore-gpu-blocklist`. The frame rate limit of the browser is kept everywhere (60 animation frames a second).
+- **Rasteriser.** Every measurement twice: with the software rasteriser the scripts always used (`--enable-unsafe-swiftshader --use-angle=swiftshader`; WebGL reports "SwiftShader"), and with the GPU of the machine (`--use-angle=metal`; WebGL reports "ANGLE Metal Renderer: Apple M3 Pro"). The scripts take `--angle <backend>`, and the harness the environment variable `FERROUI_BROWSER_ANGLE`.
+- **Configurations.** *Without threads*: `target/browser/<application>`. *Render thread*: `target/browser-threads/<application>`, served with the two headers of cross-origin isolation. *One thread*: the same module with `?RenderThread=false`, which separates what the threaded build costs from what the render thread gains. For the first frame also the site with both modules, `target/browser-both/<application>`: *loader, headers* (served with the headers) and *loader, service worker* (served without: the loader registers the service worker and reloads the page once).
+- **Runs.** Five runs of every configuration, alternating (run 1 of each configuration, then run 2 of each), so that a change of the load of the machine falls on all of them. A value is the **median, with the smallest and the largest run in brackets**. The server is local and not throttled: nothing here measures a network.
+- **Load.** The machine was shared with other work (Rust builds of other checkouts, system services). The runner reads the load average of the last minute before every run and waits while it is 12 or more. Over the runs below it was between 5.1 and 13.6, with one exception that is marked. Four headless browsers that earlier test runs had left behind, each using a processor, were stopped before the series. Processor times of a thread are robust against this; wall-clock times are not, and where the spread of a row is wider than the difference between two rows, no conclusion is drawn from it.
+- **How to repeat.** `node scripts/browser/measure-render-thread.mjs --out results.json` runs everything and prints the tables (`--report results.json` prints them again); it calls the scripts named below with `--json`. Each script describes its measurement in its header.
+
+What the scripts measure:
+
+| Script | Measures | How |
+|---|---|---|
+| `first-frame.mjs --phases --trace [--isolated]` | The phases of a page load and the first frame | A script in the page: resource timing, `WebAssembly.instantiateStreaming` replaced by its two halves, the marks of the host page, the first draw call and the animation frame after it. **New:** a view a render thread draws makes no draw call the page sees, so its first frame is the moment the module reports one (`frames` of `catalogRendering` or `themedViewRendering`, asked every 4 ms); a page that reloads itself is followed, and times count from the first navigation; the long tasks of the page; and, from a trace of the browser, the processor time and the longest task of each thread up to the first frame |
+| `scroll-profile.mjs --trace` | Scrolling the TableView page: 60 wheel events of 120 pixels, 50 ms apart, 30 down and 30 up, 1280 x 900 (the scenario of `performance/README.md`) | A trace of the browser: the tasks of the thread of the page, of the workers (the render thread is one) and of the main thread of the GPU process, with their processor time; the time the thread of the page was in tasks from one wheel event to the next |
+| `scroll-profile.mjs --latency` | From a wheel event to the frame that shows it | After each wheel event the view is asked for a frame (`catalogRequestFrame`) and `catalogFrameDrawn` is asked without pause; the time from the dispatch of the event in the page to the answer. "Drawn" is when the thread that renders has finished the frame, not when the display shows it |
+| `frame-times.mjs --frame-rate-limit --trace` | A page of the catalog for some seconds: how long the thread of the page is blocked, and the animation frames of the thread that renders | The tasks of the thread of the page from a trace (their share of the time, the longest); a timer of the page every 4 ms (a longer gap is time the page could run nothing; "blocked" sums what exceeds 5 ms); the start of every animation frame callback of the thread that renders (in the worker, through a second DevTools session) |
+| `frame-times.mjs --scenario start` | The first 6 s of the page | A trace from before the page exists: the animation frames of every thread, and for each gap over 100 ms how long that thread was in tasks of its own (the rest it waited for an animation frame it had asked for) |
+| `catalog-memory.mjs` | The memory of the module over the tour of thirteen pages | `catalogMemory`, as the last check of `control_catalog.test.mjs` |
+| `module-sizes.mjs` | Sizes | unchanged |
+
+### First frame
+
+Milliseconds from the start of the first navigation. "First frame" is the animation frame after the first draw call where the page draws, and the first frame the module reports where a render thread draws. `runMain` returned and the splash screen closed are given for the catalog because they differ in kind between the configurations (below).
+
+**The catalog, GPU (Metal).** Load 8.5 to 10.4.
+
+| Configuration | Module downloaded | Runtime created (with threads: the pool started) | `runMain` returned | Splash closed | **First frame** | Long tasks of the page before it, sum | Longest task of the page | Longest task of a worker |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|
+| without threads | 42 (40 to 51) | 99 (96 to 105) | 491 (484 to 504) | 607 (597 to 618) | **684 (673 to 697)** | 616 (596 to 627) | 415 (387 to 445) | - |
+| render thread | 93 (46 to 102) | 119 (110 to 129) | 493 (486 to 503) | 605 (599 to 616) | **708 (697 to 725)** | 482 (481 to 485) | 379 (378 to 380) | 196 (194 to 198) |
+| one thread | 48 (43 to 50) | 121 (117 to 126) | 503 (499 to 507) | 620 (618 to 628) | **694 (691 to 702)** | 565 (563 to 569) | 386 (385 to 387) | 7 (6 to 7) |
+| loader, headers | 72 (59 to 119) | 138 (121 to 146) | 511 (491 to 516) | 625 (601 to 628) | **719 (698 to 732)** | 478 (477 to 485) | 375 (374 to 380) | 196 (194 to 200) |
+| loader, service worker (2 page loads; the second starts at 50 (49 to 52)) | 159 (152 to 167) | 178 (172 to 189) | 549 (542 to 564) | 661 (654 to 677) | **756 (751 to 770)** | 480 (477 to 484) | 375 (374 to 380) | 197 (193 to 198) |
+
+**The catalog, software rasteriser.** Load 9.8 to 13.6.
+
+| Configuration | Module downloaded | Runtime created | `runMain` returned | Splash closed | **First frame** | Long tasks of the page before it, sum | Longest task of the page | Longest task of a worker |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|
+| without threads | 38 (34 to 74) | 134 (103 to 155) | 2595 (2401 to 3221) | 2782 (2583 to 3366) | **3241 (3083 to 4047)** | 3056 (2519 to 3259) | 2509 (2347 to 3122) | - |
+| render thread | 276 (231 to 362) | 334 (314 to 472) | 719 (713 to 911) | 841 (834 to 1044) | **2948 (2765 to 4455)** | 517 (503 to 636) | 397 (390 to 446) | 1977 (1970 to 3271) |
+| one thread | 265 (261 to 360) | 336 (286 to 455) | 2649 (2608 to 5667) | 2823 (2768 to 5823) | **3148 (3030 to 6259)** | 3188 (3050 to 6243) | 2328 (2301 to 5217) | 6 (6 to 7) |
+| loader, headers | 285 (266 to 313) | 356 (323 to 407) | 744 (717 to 809) | 869 (838 to 943) | **3024 (2694 to 3470)** | 520 (504 to 582) | 400 (388 to 446) | 2006 (1894 to 2231) |
+| loader, service worker (2 page loads; the second starts at 73 (47 to 92)) | 334 (300 to 404) | 353 (319 to 425) | 744 (712 to 832) | 876 (832 to 1001) | **3268 (2988 to 3722)** | 518 (508 to 571) | 398 (396 to 412) | 2089 (1822 to 2681) |
+
+**`themed_view`.** Load 8.6 to 10.3 (Metal) and 6.3 to 9.7 (software).
+
+| Configuration | First frame, Metal | Splash closed, Metal | Long tasks of the page, Metal | First frame, software | Splash closed, software | Long tasks of the page, software | Longest task of a worker, software |
+|---|---:|---:|---:|---:|---:|---:|---:|
+| without threads | **311 (308 to 329)** | 257 (253 to 268) | 236 (233 to 247) | **2742 (2543 to 3841)** | 2368 (2336 to 3581) | 2634 (2462 to 3750) | - |
+| render thread | **332 (330 to 336)** | 263 (262 to 267) | 168 (168 to 171) | **2568 (2353 to 3451)** | 439 (434 to 480) | 170 (167 to 179) | 1907 (1893 to 2919) |
+| one thread | **333 (329 to 340)** | 278 (274 to 282) | 236 (231 to 240) | **2670 (2554 to 3619)** | 2380 (2343 to 2660) | 2396 (2279 to 3326) | 5 (4 to 6) |
+| loader, headers | **343 (338 to 352)** | 274 (270 to 282) | 167 (165 to 167) | **2522 (2399 to 2574)** | 460 (446 to 480) | 171 (166 to 187) | 1923 (1820 to 2044) |
+| loader, service worker | **392 (386 to 395)** | 322 (316 to 324) | 166 (164 to 168) | **2543 (2409 to 3363)** | 471 (455 to 490) | 168 (166 to 184) | 1948 (1859 to 2313) |
+
+Processor time up to the first frame of the catalog, from the trace (Metal; the software rasteriser gives the same within 12 %): the thread of the page 624 ms (621 to 635) without threads, 583 ms (569 to 587) with the render thread, 634 ms (633 to 639) on one thread; the workers 0, 101 ms (93 to 103) and 26 ms (25 to 29); the main thread of the GPU process 76 to 80 ms in all three.
+
+What the tables say:
+
+- **With a GPU the render thread delays the first frame by 20 to 25 ms** (the catalog 708 against 684 ms, `themed_view` 332 against 311 ms), and the threaded build alone, on one thread, by 10 to 22 ms. The pool of two workers is created in about 20 ms ("runtime created" is 10 to 22 ms after the module is instantiated; 1 ms without threads).
+- **The site with both modules** costs 11 ms more than the site with the module with threads alone when the server sends the headers (the module is requested by the loader, not preloaded by the page), and **the service worker route with its reload costs 37 to 49 ms more than that** on a local server: 756 ms against 684 ms for the catalog from the first navigation, 392 against 311 ms for `themed_view`. The second load starts 50 ms after the first. On a real network the reload adds the round trips of the page and its scripts, which this does not measure.
+- **Under the software rasteriser the first frame takes 2.5 to 3.3 s in every configuration, and about 2 s of it is one task of the thread that renders that uses almost no processor**: the longest task is 2.3 to 2.5 s on the thread of the page (which used 0.7 s of processor in all up to the first frame) or 2.0 s on the worker (which used 0.1 s). The thread waits in its first frame for the GPU process. With Metal the same task is 0.2 s. The medians of the configurations with the render thread are 0.1 to 0.3 s lower than the others, and the ranges of the runs overlap: no difference is concluded. **First-frame figures taken with the software rasteriser (the earlier sections of this document, CI) say little about a machine with a GPU.**
+- **Where the wait happens is what the render thread changes.** The long tasks of the thread of the page before the first frame sum to 3.1 s without threads and 0.5 s with the render thread under the software rasteriser (the longest 2.5 s against 0.4 s), and to 0.62 s against 0.48 s with Metal.
+- **The splash screen closes before the first frame is drawn, and with the render thread long before it under the software rasteriser**: 841 ms against a first frame at 2948 ms in the catalog (439 against 2568 ms in `themed_view`). The splash is closed by the first animation frame of the top-level on the thread of the page (`ferro_view.rs`, as upstream), which on one thread is the frame that draws and with a render thread is not. For those two seconds the page shows an empty canvas and input hits nothing. With Metal the gap is 0.1 s (605 against 708 ms). The catalog starts prefetching the files of its pages when the splash closes (`page-assets.js`), so with the render thread the prefetch of 23 MB starts before the first frame.
+- `runMain` returns after 0.7 s with the render thread under the software rasteriser and after 2.6 s without, for the same reason: on one thread the first show draws inside it.
+- Not explained: under the software rasteriser the response of the module ends about 230 ms later in the two configurations of the module with threads (265 to 285 ms against 38 ms), also on one thread; with Metal the difference is 6 to 50 ms. It is over before the application starts in either case.
+
+### Scrolling the TableView page
+
+60 wheel events. Processor time of the tasks of each thread from the first wheel event until 350 ms after the last.
+
+| Rasteriser, configuration | Page thread per wheel event, ms | Page thread in tasks between two events: median ms | p95 ms | Longest task ms | Page thread, total ms | Workers, total ms | Both ms | GPU process main thread ms |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|
+| Metal, without threads | **10.3 (9.67 to 10.5)** | 9.83 (9.15 to 10.1) | 14.1 (13.7 to 14.9) | 22.1 (17.4 to 24.2) | 619 (580 to 632) | 0 | 619 (580 to 632) | 71 (65 to 72) |
+| Metal, render thread | **7.09 (6.35 to 7.28)** | 6.51 (5.65 to 7.27) | 9.05 (8.80 to 9.57) | 26.0 (23.5 to 27.8) | 425 (381 to 437) | 192 (179 to 202) | 618 (560 to 639) | 66 (57 to 72) |
+| Metal, one thread | **10.3 (8.86 to 10.5)** | 9.25 (8.41 to 10.6) | 14.4 (9.93 to 14.8) | 18.5 (18.1 to 24.1) | 617 (532 to 628) | 0 | 617 (532 to 628) | 68 (60 to 71) |
+| software, without threads | **9.34 (8.53 to 9.96)** | 9.00 (8.26 to 9.20) | 11.2 (9.69 to 15.6) | 17.9 (17.3 to 18.9) | 561 (512 to 598) | 0 | 561 (512 to 598) | 97 (91 to 105) |
+| software, render thread | **6.98 (5.87 to 7.51)** | 6.59 (5.65 to 6.80) | 8.37 (6.54 to 12.2) | 19.7 (18.3 to 22.0) | 419 (352 to 450) | 195 (164 to 215) | 614 (517 to 665) | 99 (89 to 105) |
+| software, one thread | **9.36 (8.53 to 10.3)** | 9.01 (8.31 to 9.88) | 10.5 (9.66 to 15.6) | 19.8 (17.6 to 22.2) | 562 (512 to 621) | 0 | 562 (512 to 621) | 96 (89 to 102) |
+
+Load 5.5 to 9.0 (Metal) and 10.1 to 11.9 (software). Every run had one task of the thread of the page over 16.7 ms and none over 50 ms.
+
+From a wheel event to the frame that shows it (a separate series; load 5.4 to 8.1 and 8.5 to 12.0):
+
+| Rasteriser, configuration | Median ms | p95 ms | Longest ms | Frames drawn for the 60 events |
+|---|---:|---:|---:|---:|
+| Metal, without threads | 33.6 (33.5 to 33.7) | 35.1 (33.7 to 35.4) | 48.3 (33.9 to 50.6) | 120 |
+| Metal, render thread | 33.5 (33.4 to 33.6) | 35.1 (33.6 to 35.2) | 50.2 (49.6 to 50.6) | 92 (91 to 94) |
+| Metal, one thread | 33.6 (33.6 to 33.6) | 33.8 (33.7 to 34.6) | 50.1 (50.0 to 50.1) | 120 |
+| software, without threads | 33.6 (33.5 to 33.6) | 33.8 (33.7 to 35.3) | 50.1 (50.0 to 50.3) | 120 |
+| software, render thread | 33.5 (33.5 to 33.6) | 33.7 (33.6 to 35.0) | 50.2 (50.2 to 51.4) | 92 (91 to 92) |
+| software, one thread | 33.6 (33.6 to 33.6) | 33.9 (33.6 to 35.3) | 50.1 (49.0 to 50.2) | 120 |
+
+- **The thread of the page is busy 7.0 to 7.1 ms per wheel event with the render thread against 9.3 to 10.3 ms without: 25 % less with the software rasteriser and 31 % less with Metal.** The 190 ms that left it are the 190 ms the worker spends: the "compositor render and Skia, 25 %" of `performance/README.md`. What stays is layout, the virtualizing panel and the commit.
+- **The total is the same**: the two threads together use what one thread used (618 against 619 ms with Metal; 614 against 561 ms with the software rasteriser, where the ranges overlap).
+- **The threaded build costs nothing here**: the module with threads on one thread equals the module without (10.3 and 10.3 ms; 9.36 and 9.34 ms).
+- **The longest task of the thread of the page is not shorter** (18 to 26 ms in every configuration): it is a layout pass, not rendering.
+- **The delay from input to frame is the same in all six rows: two frame intervals in the median (33.5 ms), three at most (50 ms).** Risk 11 of `browser-render-worker.md` (one frame more of latency) does not show. In that series the render thread drew 92 frames where the page drew 120: commits that arrive between two animation frames of the worker are drawn as one frame.
+
+### How long the thread of the page is blocked
+
+Three scenes of the catalog at 1280 x 800, 60 animation frames a second. "In tasks" is the share of the time the thread of the page was running a task; "blocked" is what the gaps of the 4 ms timer of the page exceed 5 ms by, summed.
+
+**The Home page, whose banner animates, drawn in software (`?RenderingMode=Software2D`), for 8 s.** Skia rasterises on the processor and a frame costs 13.3 ms of the thread that renders in every configuration. Load 6.6 to 8.6 and 7.7 to 10.2.
+
+| Rasteriser of the browser, configuration | Page thread in tasks | Tasks of the page over 8 ms | Longest task ms | 4 ms timer: p99 gap ms | Blocked, of 8000 ms | Workers, processor ms | Frames drawn per second |
+|---|---:|---:|---:|---:|---:|---:|---:|
+| Metal, without threads | **82.0 % (81.4 to 83.0)** | 481 (481 to 482) | 14.6 (13.9 to 22.4) | 18.2 (17.2 to 18.4) | 5313 (5242 to 5346) | 0 | 60.0 |
+| Metal, render thread | **2.4 % (2.3 to 2.5)** | 0 | 1.19 (1.04 to 1.76) | 5.21 (5.20 to 5.24) | 24 (17 to 33) | 6423 (6376 to 6442) | 60.0 (59.2 to 60.1) |
+| Metal, one thread | **81.8 % (81.6 to 82.5)** | 482 (480 to 482) | 14.7 (14.1 to 24.3) | 17.9 (17.1 to 18.4) | 5297 (5254 to 5348) | 0 | 60.0 |
+| software, without threads | **81.6 % (81.0 to 81.8)** | 483 (481 to 485) | 16.0 (14.0 to 26.6) | 17.9 (17.1 to 18.2) | 5298 (5260 to 5382) | 0 | 60.1 (59.9 to 60.4) |
+| software, render thread | **2.6 % (2.3 to 2.8)** | 0 | 1.08 (0.80 to 1.14) | 5.25 (5.25 to 5.28) | 29 (26 to 30) | 6409 (5186 to 6432) | 59.5 (48.1 to 59.9) |
+| software, one thread | **81.2 % (80.8 to 82.1)** | 484 (480 to 485) | 15.7 (14.1 to 20.2) | 18.2 (17.3 to 18.3) | 5309 (5270 to 5334) | 0 | 60.3 (59.8 to 60.4) |
+
+**The same page in WebGL2, for 8 s.** A frame costs the thread that renders 0.6 to 1.0 ms on this machine: the page is not expensive to draw here, and nothing in the catalog that animates by itself is. Load 5.7 to 7.5 (Metal). The software rasteriser row was measured while the load rose to 125 (other work started during the series): its spread is given, and only the share of the thread of the page, a processor time, is used.
+
+| Rasteriser, configuration | Page thread in tasks | Longest task ms | Blocked, of 8000 ms | Workers, processor ms | Frames drawn per second |
+|---|---:|---:|---:|---:|---:|
+| Metal, without threads | **10.0 % (9.0 to 11.5)** | 3.40 (3.11 to 3.77) | 73 (61 to 126) | 0 | 60.0 |
+| Metal, render thread | **3.8 % (2.8 to 4.3)** | 1.59 (1.18 to 2.16) | 44 (39 to 49) | 553 (359 to 597) | 60.1 |
+| Metal, one thread | **10.2 % (7.6 to 11.2)** | 3.42 (1.88 to 3.86) | 73 (31 to 97) | 0 | 60.0 |
+| software, without threads (load 8.9 to 125.6) | **7.4 % (4.9 to 7.7)** | 2.46 (1.86 to 3.76) | 41 (35 to 64) | 0 | 48.5 (27.0 to 60.1) |
+| software, render thread (the same) | **2.6 % (2.3 to 3.6)** | 0.99 (0.43 to 2.15) | 42 (31 to 47) | 370 (320 to 421) | 59.7 (46.4 to 60.1) |
+| software, one thread (the same) | **7.9 % (6.2 to 8.5)** | 2.12 (1.73 to 2.29) | 37 (29 to 48) | 0 | 60.0 (50.1 to 60.1) |
+
+**Page transitions for 10 s (WebGL2)**: the drawer entries Buttons and Slider clicked in turn, one every 1.2 s; each click builds a page and runs the transition of the navigation page. Load 5.1 to 10.0 and 7.6 to 10.4.
+
+| Rasteriser, configuration | Page thread in tasks | Longest task ms | Tasks over 50 ms | Blocked, of 10000 ms | Animation frames of the thread that renders: gaps over 33 ms | Their excess over 33 ms, summed |
+|---|---:|---:|---:|---:|---:|---:|
+| Metal, without threads | 9.3 % (8.5 to 10.0) | 64.6 (58.4 to 66.7) | 3 | 586 (514 to 607) | 4 | 94 ms (87 to 102) |
+| Metal, render thread | 6.8 % (5.4 to 7.1) | 66.8 (54.2 to 72.2) | 3 (3 to 4) | 512 (443 to 520) | **0** | **0 ms** |
+| Metal, one thread | 9.7 % (8.0 to 10.3) | 70.9 (53.9 to 72.2) | 3 (3 to 4) | 579 (488 to 600) | 4 | 103 ms (81 to 129) |
+| software, without threads | 9.1 % (8.1 to 9.6) | 67.3 (56.9 to 71.3) | 3 (2 to 3) | 560 (498 to 593) | 6 (5 to 6) | 174 ms (128 to 187) |
+| software, render thread | 7.0 % (6.4 to 7.2) | 71.8 (57.1 to 73.5) | 4 (3 to 4) | 514 (457 to 538) | **1 (1 to 2)** | **45 ms (40 to 58)** |
+| software, one thread | 9.5 % (9.1 to 9.8) | 69.0 (63.5 to 73.9) | 4 (3 to 4) | 580 (554 to 600) | 5 (5 to 8) | 175 ms (151 to 208) |
+
+- **Where drawing is expensive for the processor, the render thread frees the thread of the page almost entirely**: in Software2D it is in tasks 2.5 % of the time instead of 82 %, with no task over 8 ms instead of 480 of them in 8 s (one per frame, 13.6 ms each), at the same 60 frames a second.
+- In WebGL2 a frame is cheap on this machine, and the gain is in proportion: 3.8 % against 10.0 %.
+- **A page transition blocks the thread of the page as before**: three or four tasks of 55 to 74 ms in 10 s in every configuration. That is building the page (the run-time loading of its markup, layout), which stays on the thread of the page. What the render thread changes is that **the view keeps its animation frames meanwhile**: with Metal no gap over 33 ms on the render thread against four per run where the page draws.
+
+### The rasteriser: animation frames that are withheld
+
+B2.7 found that under the software rasteriser a worker gets no animation frame for 120 to 630 ms after frames that are expensive to present, and not with Metal. Measured here in two ways.
+
+**While the catalog draws steadily** (the tables above: 8 s of the Home page in two modes, 10 s of transitions): no gap over 250 ms between two animation frames of the thread that renders in any configuration with either rasteriser, in any run with a load under 12. With Metal no gap over 33 ms on the render thread at all. With the software rasteriser the render thread had a median of 1 to 3 gaps over 33 ms per run (73 in one run of the Software2D scene) and its longest gap was 35 to 125 ms; the thread of the page, where it draws, had a median of 0 to 6 and a longest gap of 17 to 107 ms.
+
+**The first 6 s of the catalog**, from the start of the navigation (the first frames are the expensive ones). Gaps over 100 ms between two animation frames of a thread, and how much of them the thread was in tasks of its own; the rest it had asked for an animation frame and was given none. Load 8.3 to 11.9 and 8.5 to 11.1.
+
+| Rasteriser, configuration, thread | Gaps over 100 ms | Over 250 ms | Their sum ms | Of it busy ms | **Of it waiting ms** | **Longest wait ms** | Frames drawn in the 6 s |
+|---|---:|---:|---:|---:|---:|---:|---:|
+| software, without threads, the page (it draws) | 3 (2 to 4) | 1 (1 to 3) | 1082 (902 to 1954) | 420 (278 to 624) | **804 (523 to 1330)** | **400 (371 to 564)** | 111 (17 to 143) |
+| software, one thread, the page (it draws) | 4 (3 to 5) | 2 (2 to 3) | 1523 (932 to 4068) | 24 (12 to 2757) | **1079 (918 to 1499)** | **566 (375 to 654)** | 144 (76 to 160) |
+| software, render thread, the worker (it draws) | 4 (3 to 5) | 3 (3 to 4) | 3334 (2824 to 3833) | 1930 (1749 to 2345) | **1339 (1075 to 1488)** | **484 (332 to 650)** | 136 (102 to 171) |
+| software, render thread, the page (it does not draw) | 5 (4 to 7) | 2 (1 to 3) | 1499 (834 to 1773) | 43 (21 to 552) | **980 (813 to 1611)** | **398 (354 to 516)** | |
+| Metal, without threads, the page (it draws) | 2 | 1 | 522 (509 to 550) | 410 (404 to 417) | **113 (100 to 133)** | **101 (100 to 121)** | 316 (312 to 317) |
+| Metal, one thread, the page (it draws) | 2 | 1 | 508 (497 to 674) | 402 (392 to 508) | **108 (105 to 166)** | **102 (100 to 163)** | 316 (291 to 317) |
+| Metal, render thread, the worker (it draws) | 1 | 0 | 200 (200 to 233) | 188 (186 to 214) | **14 (5 to 19)** | **14 (5 to 19)** | 316 (307 to 317) |
+| Metal, render thread, the page (it does not draw) | 2 | 1 | 486 (483 to 566) | 384 (378 to 446) | **105 (101 to 120)** | **99 (95 to 113)** | |
+
+- **The delay is real and it is the rasteriser's, not the worker's.** Under the software rasteriser every thread of the page waits for animation frames it asked for during the first seconds: 0.8 to 1.3 s in all, 0.4 to 0.57 s at the longest, whether it is the worker that draws, the thread of the page that draws, or the thread of the page beside a worker that draws. The ranges of the three overlap. What B2.7 saw on the worker happens to a page on one thread as well; there it went unnoticed, because the thread that would have clicked was the one that waited.
+- **With Metal the worker waits 14 ms in all**, and a thread of the page about 100 ms once, in every configuration.
+- In 6 s the catalog draws 111 to 144 frames under the software rasteriser and 316 with Metal: the start is 2.3 s longer and the frames after it are withheld for about another second.
+
+### Size
+
+`module-sizes.mjs`, megabytes of 1,000,000 bytes.
+
+| File | Raw | gzip -9 | brotli -11 |
+|---|---:|---:|---:|
+| catalog, module without threads (`control_catalog_browser.wasm`) | 39.38 MB | 11.72 MB | 7.28 MB |
+| catalog, module with threads | 39.15 MB | 11.67 MB | 7.24 MB |
+| catalog, script of the module without threads | 181.6 kB | 42.4 kB | 34.6 kB |
+| catalog, script of the module with threads | 197.1 kB | 47.2 kB | 38.3 kB |
+| `themed_view`, module without threads | 30.45 MB | 9.58 MB | 5.95 MB |
+| `themed_view`, module with threads | 30.23 MB | 9.54 MB | 5.94 MB |
+| `themed_view`, script without and with threads | 182.4 and 197.9 kB | 42.3 and 47.0 kB | 34.5 and 38.2 kB |
+| `ferroui-loader.js` (every site) | 14.6 kB | 4.6 kB | 3.9 kB |
+| `ferroui-threads.js` (a site with the module with threads alone) | 4.8 kB | 1.8 kB | 1.5 kB |
+| the asset files of the catalog (94) | 24.03 MB | 20.72 MB | |
+
+| Site | Raw | gzip -9 | brotli -11 |
+|---|---:|---:|---:|
+| catalog without threads | 63.71 MB | 32.52 MB | 27.36 MB |
+| catalog with threads | 63.49 MB | 32.47 MB | 27.32 MB |
+| catalog with both modules | 103.05 MB | 44.23 MB | 34.64 MB |
+| `themed_view` without threads, with threads, with both | 30.71, 30.51 and 61.14 MB | 9.65, 9.61 and 19.23 MB | 6.01, 6.00 and 11.99 MB |
+
+**The module with threads is not larger: it is 0.6 % smaller raw and 0.4 % smaller with gzip.** Its script is 15.5 kB larger raw (4.8 kB with gzip). The site with both modules is the site with one plus one module: 39.3 MB raw, 11.7 MB with gzip. A visitor downloads one module, so what a visit transfers is that of a site with one module plus the loader.
+
+### Memory
+
+`catalog-memory.mjs`: the tour of thirteen pages of the catalog with the prefetch on, two runs each, software rasteriser (the memory of the module does not depend on it; load 6.5 to 11.7). The end of the dynamic memory of the module, in MB of 1,048,576 bytes.
+
+| Configuration | At the start | At the end | Peak | Size of the memory |
+|---|---:|---:|---:|---:|
+| without threads | 35.1 | 125 (123 to 126) | 125 (123 to 126) | 131, grown to |
+| render thread | 59.5 (59.3 to 59.8) | 128 | 128 | 512, fixed |
+| one thread | 35.0 | 126 (125 to 126) | 126 (125 to 126) | 512, fixed |
+
+The render thread uses 24.5 MB at the start that the same module on one thread does not, and 2 MB more at the end of the tour: what it takes at the start the tour later needs anyway. The fixed 512 MB is four times the peak. What the browser holds outside the memory of the module (the compiled code, the WebGL contexts, the canvases, the two workers of the pool) is not in these numbers and was not measured.
+
+### Not measured
+
+- **A network and the published host.** The server is local. The reload of the service worker route, the loader's later start of the download and the prefetch that starts early with the render thread all cost more on a network; `first-frame.mjs --throttle` with `--encoding` can measure the first two against a combined site.
+- **Any browser but headless Chrome 154, and any other machine.** No phone, no slow processor, no integrated GPU of another vendor. Whether a phone accepts 512 MB of fixed memory is as open as before.
+- **A frame on the screen.** "First frame" and "frame drawn" are when the thread that renders has finished the frame; when the display shows it was not measured in either mode.
+- **A scene that is expensive to draw in WebGL.** Nothing in the catalog that animates by itself costs more than 1 ms a frame on this machine; the Software2D mode stands in for it.
+- **Memory outside the module**, above.
+- **The Home page in WebGL2 under the software rasteriser on a quiet machine**: the load rose during that series.
+- **Why** the software rasteriser withholds animation frames, and what the GPU process does during the 2 s of the first frame: only that the threads of the page wait.
 
 ## Owner decision (2026-10-04)
 

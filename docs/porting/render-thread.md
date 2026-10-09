@@ -87,7 +87,7 @@ Each stage is a pull request that builds and passes on its own; the single-threa
 | B0 | Browser feasibility: the three checks of section 4. | Each is answered with a measurement, recorded here. |
 | B1 | The browser toolchain and site for threads (headers or service worker, build flags, the non-threaded fallback). Written; the test page is built and passes, the port's module is not built in this mode yet: see "B1 validated" below. | A two-thread page of the port's own module runs on the published host. |
 | B2 | The threaded browser backend: render worker, `OffscreenCanvas`, the event grouper queue, the blocking dispatcher. | Designed in [`browser-render-worker.md`](browser-render-worker.md): what upstream does, the model for the browser (strict confinement to a render worker, the UI thread staying on the browser's main thread), the surface objects, memory growth, the steps B2.1 to B2.8 with their tests, and the risks. Done when its step B2.7 is: `themed_view` and the catalog render from the worker; the browser tests pass in both modes. |
-| B3 | Measurements: first frame and scrolling, threaded against not. | The table is in `browser-platform.md`. |
+| B3 | Measurements: first frame and scrolling, threaded against not. Measured on 2026-10-09: the tables are in `browser-platform.md`, section 22, the conclusions and recommendations in [`browser-render-worker.md`](browser-render-worker.md), "B3". | The table is in `browser-platform.md`. |
 
 Order: R1 to R5 in sequence; B0 in parallel with R1, since it only measures.
 
