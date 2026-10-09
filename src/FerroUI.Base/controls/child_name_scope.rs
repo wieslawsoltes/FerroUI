@@ -91,4 +91,12 @@ impl INameScope for ChildNameScope {
     fn is_completed(&self) -> bool {
         self.inner.is_completed() && self.parent_scope.is_completed()
     }
+
+    fn attached_to(&self, owner: &Ref<FerroObject>) {
+        self.inner.attached_to(owner)
+    }
+
+    fn detached_from(&self, owner: &Ref<FerroObject>) {
+        self.inner.detached_from(owner)
+    }
 }

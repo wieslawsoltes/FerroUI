@@ -56,6 +56,18 @@ pub trait INameScope {
     /// Whether the name scope is completed, no further registrations are
     /// allowed.
     fn is_completed(&self) -> bool;
+
+    /// The scope became the value of the attached `NameScope` property of
+    /// `owner`, which holds it from now on. Not a member of the managed
+    /// original: there the scope and the element hold each other and the
+    /// collector frees both; here the scope holds this one element weakly
+    /// (it finds it as long as it is alive). A scope that holds no elements
+    /// itself has nothing to do.
+    fn attached_to(&self, _owner: &Ref<FerroObject>) {}
+
+    /// The scope is no longer the value of the attached `NameScope`
+    /// property of `owner`: it holds the element as every other again.
+    fn detached_from(&self, _owner: &Ref<FerroObject>) {}
 }
 
 /// A shared handle to a name scope, compared by identity so that it can be a

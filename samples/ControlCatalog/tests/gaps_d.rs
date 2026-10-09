@@ -252,15 +252,31 @@ fn gap_c319_element_bound_to_an_element_above_it() {
     }
 }
 
-/// Open: the name scope of a document holds the elements it names, and the root of the
-/// document holds the name scope, so a root that has a name keeps itself alive. The managed
-/// original has both references. Reported by the tours as what remains.
+/// C321: the name scope of a document holds the elements it names, and the root of the
+/// document holds the name scope, so a root that has a name kept itself alive. The managed
+/// original has both references. The scope holds the element it is attached to weakly, and
+/// finds it by its name as long as it is alive; the other names are held as before.
 #[test]
-#[ignore = "open: a named root and its name scope hold each other"]
-fn open_named_root_of_a_document() {
+fn gap_c321_named_root_of_a_document() {
     let _app = start_catalog_application();
     let weak = load_and_release(&format!("<StackPanel {XMLNS} Name='root'/>"));
     assert!(weak.upgrade().is_none());
+
+    let root = from_markup_value::<Ref<Control>>(&Some(load_text(&format!(
+        "<StackPanel {XMLNS} Name='root'><Border Name='child'/></StackPanel>"
+    ))))
+    .expect("a control");
+    let scope = ferroui_base::controls::NameScope::get_name_scope(&root).expect("the name scope of the root");
+    assert!(scope.find("root").is_some_and(|found| found == root));
+    let child = scope.find("child").expect("the named child").downgrade();
+    let weak = root.downgrade();
+    drop(root);
+    assert!(weak.upgrade().is_none());
+    // The scope outlives its root here: the root is gone, the child is the scope's.
+    assert!(scope.find("root").is_none());
+    assert!(child.upgrade().is_some());
+    drop(scope);
+    assert!(child.upgrade().is_none());
 }
 
 /// C320: a binding entry of a value store and the observable it is subscribed to hold each
