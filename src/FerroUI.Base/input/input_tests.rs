@@ -3662,21 +3662,42 @@ impl IMainMenu for FakeMenu {
     }
 }
 
+fn key_events_for_unregistered_access_key(with_menu: bool) -> Vec<String> {
+    let root = TestRoot::new();
+    let target = AccessKeyHandler::new();
+    target.set_owner(&element(&root.root));
+    if with_menu {
+        target.set_main_menu(Some(FakeMenu::new()));
+    }
+    let events = key_events(&root);
+
+    alt_a_sequence(&root.root);
+
+    let events = events.borrow().clone();
+    events
+}
+
 #[test]
 fn should_raise_key_events_for_unregistered_access_key() {
-    for with_menu in [false, true] {
-        let root = TestRoot::new();
-        let target = AccessKeyHandler::new();
-        target.set_owner(&element(&root.root));
-        if with_menu {
-            target.set_main_menu(Some(FakeMenu::new()));
-        }
-        let events = key_events(&root);
+    assert_eq!(key_events_for_unregistered_access_key(false), ["KeyDown LeftAlt", "KeyDown A", "KeyUp A", "KeyUp LeftAlt"]);
+}
 
-        alt_a_sequence(&root.root);
+#[test]
+fn should_raise_key_events_for_unregistered_access_key_with_main_menu() {
+    assert_eq!(key_events_for_unregistered_access_key(true), ["KeyDown LeftAlt", "KeyDown A", "KeyUp A", "KeyUp LeftAlt"]);
+}
 
-        assert_eq!(*events.borrow(), ["KeyDown LeftAlt", "KeyDown A", "KeyUp A", "KeyUp LeftAlt"]);
-    }
+#[test]
+fn should_raise_key_events_for_alt_key() {
+    let root = TestRoot::new();
+    let target = AccessKeyHandler::new();
+    target.set_owner(&element(&root.root));
+    let events = key_events(&root);
+
+    raise_key(&root.root, true, Key::LeftAlt, None, KeyModifiers::NONE);
+    raise_key(&root.root, false, Key::LeftAlt, None, KeyModifiers::NONE);
+
+    assert_eq!(*events.borrow(), ["KeyDown LeftAlt", "KeyUp LeftAlt"]);
 }
 
 #[test]
@@ -3784,10 +3805,25 @@ fn should_raise_access_key_for_registered_access_key_when_effectively_enabled() 
     assert_eq!(access_key_raised("A", Key::A, "a", true, Some("button"), false), 1);
 }
 
+// Regression test of the reference suite: a system key event (Alt+key) carries
+// a lower-case key symbol.
 #[test]
-fn should_raise_access_key_whatever_is_focused() {
+fn should_raise_access_key_for_system_key_event_with_key_symbol() {
+    assert_eq!(access_key_raised("F", Key::F, "f", true, Some("button"), false), 1);
+}
+
+#[test]
+fn should_raise_access_key_when_nothing_is_focused() {
     assert_eq!(access_key_raised("A", Key::A, "a", true, None, false), 1);
+}
+
+#[test]
+fn should_raise_access_key_when_owner_itself_is_focused() {
     assert_eq!(access_key_raised("A", Key::A, "a", true, Some("root"), false), 1);
+}
+
+#[test]
+fn should_raise_access_key_when_focus_is_on_descendant() {
     assert_eq!(access_key_raised("A", Key::A, "a", true, Some("button"), true), 1);
 }
 
@@ -3812,30 +3848,37 @@ fn access_key_focuses_the_target_by_default() {
     assert!(!target.process_key(Some("F"), None));
 }
 
+fn open_main_menu_on_alt_key_up(focus_menu: bool) {
+    let keyboard = real_focus();
+    let target = AccessKeyHandler::new();
+    let menu = FakeMenu::new();
+    let menu_element = button("menu");
+    let root = TestRoot::with_child(&menu_element);
+
+    if focus_menu {
+        keyboard.set_focused_element(Some(&element(&menu_element)), NavigationMethod::Unspecified, KeyModifiers::NONE);
+    }
+
+    target.set_owner(&element(&root.root));
+    target.set_main_menu(Some(menu.clone()));
+
+    raise_key(&root.root, true, Key::LeftAlt, None, KeyModifiers::NONE);
+    assert_eq!(menu.times_open_called.get(), 0);
+    assert!(root.root.get_value(AccessKeyHandler::show_access_key_property()));
+    assert!(menu_element.get_value(AccessKeyHandler::show_access_key_property()));
+
+    raise_key(&root.root, false, Key::LeftAlt, None, KeyModifiers::NONE);
+    assert_eq!(menu.times_open_called.get(), 1);
+}
+
 #[test]
 fn should_open_main_menu_on_alt_key_up() {
-    for focus_menu in [true, false] {
-        let keyboard = real_focus();
-        let target = AccessKeyHandler::new();
-        let menu = FakeMenu::new();
-        let menu_element = button("menu");
-        let root = TestRoot::with_child(&menu_element);
+    open_main_menu_on_alt_key_up(true);
+}
 
-        if focus_menu {
-            keyboard.set_focused_element(Some(&element(&menu_element)), NavigationMethod::Unspecified, KeyModifiers::NONE);
-        }
-
-        target.set_owner(&element(&root.root));
-        target.set_main_menu(Some(menu.clone()));
-
-        raise_key(&root.root, true, Key::LeftAlt, None, KeyModifiers::NONE);
-        assert_eq!(menu.times_open_called.get(), 0);
-        assert!(root.root.get_value(AccessKeyHandler::show_access_key_property()));
-        assert!(menu_element.get_value(AccessKeyHandler::show_access_key_property()));
-
-        raise_key(&root.root, false, Key::LeftAlt, None, KeyModifiers::NONE);
-        assert_eq!(menu.times_open_called.get(), 1);
-    }
+#[test]
+fn should_open_main_menu_on_alt_key_up_when_nothing_is_focused() {
+    open_main_menu_on_alt_key_up(false);
 }
 
 #[test]
