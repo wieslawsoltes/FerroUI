@@ -326,3 +326,7 @@ Most likely first.
    one to revert.
 4. Whether the walk of `reevaluate_effective_values` should become upstream's walk by index (see
    "Left for a profile"): it needs a decision about behaviour under re-entrancy, not a measurement.
+
+### Measured on 2026-10-09
+
+The whole workspace passes with the changes of designs 01 and 02 together (12080 tests), and the desktop catalog starts and runs. The run with `perf-counters` gives the same value for every one of the 70 counter lines of the benchmark as before: the same notifications, virtual calls by member and everything else. A recycled row costs 5 fewer allocations (1170.0 against 1175.0, from the value no longer copied per set). What these changes are for is processor time (the forwarding functions a virtual call no longer passes through), and that was not measured: the machine was under heavy load, and the time per row moved by more than the expected gain between runs. To be measured on an idle machine and in the browser (`scripts/browser/scroll-profile.mjs`), where the indirect calls cost most.
