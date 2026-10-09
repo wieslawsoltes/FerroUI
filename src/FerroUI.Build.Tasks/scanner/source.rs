@@ -14,9 +14,10 @@ use proc_macro2::{Delimiter, Group, TokenTree};
 use quote::ToTokens;
 use syn::visit::Visit;
 
-use super::declarations::{read_declaration, read_property, Declaration, DECLARATION_MACROS};
+use super::constants::{evaluate, Scope};
+use super::declarations::{read_declaration, read_property, Accessor, Declaration, DECLARATION_MACROS};
 use super::modules::{Glob, Import, ItemKind, Modules};
-use super::tokens::{group_of, ident_of, invocations, is_arrow, is_punct, text_of, tokens_of, Cursor, ParseError, Tokens, TypeEnd};
+use super::tokens::{group_of, ident_of, invocations, is_arrow, is_punct, split_types, text_of, tokens_of, Cursor, ParseError, Tokens, TypeEnd};
 use super::{codes, Diagnostic, InvocationCounts, ScanOptions, ScannedFile, Severity};
 
 /// Where a declaration is written.
@@ -105,11 +106,35 @@ pub(crate) struct LocalMacro {
     pub site: Site,
 }
 
-/// An invocation, in item position, of a macro the scanner does not read by itself.
+/// An invocation, in item position or among the members of an inherent `impl` block, of a
+/// macro the scanner does not read by itself.
 pub(crate) struct Invocation {
     pub name: String,
     pub tokens: Tokens,
     pub site: Site,
+    /// The type of the `impl` block the invocation is a member of.
+    pub impl_owner: Option<String>,
+}
+
+/// The names a function imports for itself (`use std::rc::Rc;` in its body): each name
+/// with the path it stands for. The types a statement of the function names are resolved
+/// with them first.
+pub(crate) type LocalImports = Vec<(String, Vec<String>)>;
+
+/// `MarkupType::register_handle::<Handle>(<Type as MarkupTyped>::MARKUP)`: one more Rust
+/// type that holds a value of a type with markup metadata.
+pub(crate) struct RawHandle {
+    pub handle: Tokens,
+    /// The type the metadata is declared for, as the declaration writes it (`dyn Trait`).
+    pub type_: Tokens,
+    pub imports: LocalImports,
+}
+
+/// `ValueTypes::register_cast::<From, To>(..)`.
+pub(crate) struct RawCast {
+    pub from: Tokens,
+    pub to: Tokens,
+    pub imports: LocalImports,
 }
 
 /// What the files of a crate state, before anything is resolved.
@@ -122,6 +147,18 @@ pub(crate) struct Source {
     pub enums: BTreeMap<(usize, String), Vec<(String, Option<i64>)>>,
     /// The constants of the `bitflags!` types, by module and name, with their expressions.
     pub flags: BTreeMap<(usize, String), Vec<(String, Tokens)>>,
+    /// The associated constants of the inherent `impl` blocks, by the module of the block
+    /// and the name of the type, with their expressions.
+    pub associated: BTreeMap<(usize, String), Vec<(String, Tokens)>>,
+    /// The type aliases without parameters (`type Name = Type;`): the name and the type.
+    pub aliases: Vec<Located<(String, Tokens)>>,
+    /// The lists of the classes the crate registers (`const TYPES: &[&TypeInfo]`): the
+    /// types of each list, or nothing for a list with an entry the scanner does not read.
+    pub class_lists: Vec<Located<Option<Vec<Tokens>>>>,
+    /// The handles the crate registers for types with markup metadata.
+    pub handles: Vec<Located<RawHandle>>,
+    /// The casts the crate registers.
+    pub casts: Vec<Located<RawCast>>,
     /// The text constants of the modules, by module and name.
     pub constants: BTreeMap<(usize, String), String>,
     /// The associated text constants, by the name of the type and of the constant.
@@ -162,6 +199,11 @@ impl Source {
             declarations: Vec::new(),
             enums: BTreeMap::new(),
             flags: BTreeMap::new(),
+            associated: BTreeMap::new(),
+            aliases: Vec::new(),
+            class_lists: Vec::new(),
+            handles: Vec::new(),
+            casts: Vec::new(),
             constants: BTreeMap::new(),
             associated_constants: BTreeMap::new(),
             functions: Vec::new(),
@@ -389,16 +431,28 @@ impl Source {
             syn::Item::Union(item) => self.modules.add_item(module, &item.ident.to_string(), ItemKind::Type, is_public(&item.vis)),
             syn::Item::Trait(item) => self.modules.add_item(module, &item.ident.to_string(), ItemKind::Type, is_public(&item.vis)),
             syn::Item::TraitAlias(item) => self.modules.add_item(module, &item.ident.to_string(), ItemKind::Type, is_public(&item.vis)),
-            syn::Item::Type(item) => self.modules.add_item(module, &item.ident.to_string(), ItemKind::Type, is_public(&item.vis)),
-            syn::Item::Fn(item) => self.modules.add_item(module, &item.sig.ident.to_string(), ItemKind::Value, is_public(&item.vis)),
+            syn::Item::Type(item) => {
+                let name = item.ident.to_string();
+                self.modules.add_item(module, &name, ItemKind::Type, is_public(&item.vis));
+                if item.generics.params.is_empty() {
+                    self.aliases.push(Located { site: site(&item.ident), value: (name, tokens_of(item.ty.to_token_stream())) });
+                }
+            }
+            syn::Item::Fn(item) => {
+                self.modules.add_item(module, &item.sig.ident.to_string(), ItemKind::Value, is_public(&item.vis));
+                self.read_registrations(&item.block, context, &cfg);
+            }
             syn::Item::Enum(item) => {
                 let name = item.ident.to_string();
                 self.modules.add_item(module, &name, ItemKind::Type, is_public(&item.vis));
                 let mut next = Some(0i64);
-                let mut variants = Vec::new();
+                let mut variants: Vec<(String, Option<i64>)> = Vec::new();
                 for variant in &item.variants {
                     if let Some((_, expression)) = &variant.discriminant {
-                        next = integer_of(expression);
+                        // A discriminant is a constant expression over literals and the
+                        // variants before it.
+                        let earlier = |variant: &str| variants.iter().find(|(known, _)| known == variant).and_then(|(_, value)| *value);
+                        next = evaluate(&tokens_of(expression.to_token_stream()), &Scope { type_name: &name, member: &earlier, all: &|| None });
                     }
                     variants.push((variant.ident.to_string(), next));
                     next = next.and_then(|value| value.checked_add(1));
@@ -410,6 +464,14 @@ impl Source {
                 self.modules.add_item(module, &name, ItemKind::Value, is_public(&item.vis));
                 if let Text::Literal(text) = text_of_expression(&item.expr) {
                     self.constants.insert((module, name.clone()), text);
+                }
+                if is_class_list(&item.ty) {
+                    let list = class_list_of(&item.expr);
+                    if list.is_none() {
+                        let message = format!("the list of registered classes `{name}` has an entry that is not `Type::TYPE` or `<Type as StaticType>::TYPE` (or a type, in a macro that writes the list): the classes the crate registers are not read, and no class is marked as not registered");
+                        self.diagnostic(Severity::Warning, codes::ASSEMBLY, &site(&item.ident), message);
+                    }
+                    self.class_lists.push(Located { site: site(&item.ident), value: list });
                 }
                 if name == "NAMESPACES" {
                     match pairs_of(&item.expr) {
@@ -490,7 +552,7 @@ impl Source {
                     self.diagnostic_at(Severity::Note, codes::FORM, file, error.line, message);
                 }
             }
-            _ => self.invocations.push(Invocation { name, tokens, site }),
+            _ => self.invocations.push(Invocation { name, tokens, site, impl_owner: None }),
         }
     }
 
@@ -543,8 +605,7 @@ impl Source {
                             invocations(&tokens, DECLARATION_MACROS, &mut |name, _| add_count(counts, name, category));
                             match result {
                                 Ok((stated, accessor)) => {
-                                    let declaration = Declaration::Properties { owner: stated.unwrap_or_else(|| owner.clone()), accessors: vec![accessor] };
-                                    self.declarations.push(Located { site, value: declaration });
+                                    self.declarations.push(Located { site, value: property_of(stated, owner, accessor) });
                                 }
                                 Err(error) => self.unreadable(&name, &site, error),
                             }
@@ -564,10 +625,15 @@ impl Source {
                                 });
                             }
                         }
+                        // A macro of the crate that writes members of the block.
+                        _ if !DECLARATION_MACROS.contains(&name.as_str()) => {
+                            self.invocations.push(Invocation { name: name.clone(), tokens, site, impl_owner: Some(owner.clone()) });
+                        }
                         _ => {}
                     }
                 }
                 (syn::ImplItem::Fn(member), Some(owner), None) => {
+                    self.read_registrations(&member.block, context, &member_cfg);
                     let parameters = member
                         .sig
                         .inputs
@@ -596,6 +662,8 @@ impl Source {
                     if let Text::Literal(text) = text_of_expression(&member.expr) {
                         self.associated_constants.insert((owner.clone(), member.ident.to_string()), text);
                     }
+                    let constants = self.associated.entry((context.module, owner.clone())).or_default();
+                    constants.push((member.ident.to_string(), tokens_of(member.expr.to_token_stream())));
                 }
                 _ => {}
             }
@@ -684,7 +752,7 @@ impl Source {
                 _ => Err("the crate defines more than one macro of that name"),
             };
             let name = invocation.name.clone();
-            let site = Site { expanded: true, ..invocation.site };
+            let site = Site { expanded: true, ..invocation.site.clone() };
             let expansion = match expansion {
                 Ok(expansion) => expansion,
                 Err(reason) => {
@@ -712,7 +780,18 @@ impl Source {
                             continue;
                         };
                         let declaration_macro = ident.to_string();
-                        match read_declaration(&declaration_macro, &tokens_of(group.stream()), site.line) {
+                        let tokens = tokens_of(group.stream());
+                        // Among the members of an `impl` block the only declaration is the
+                        // accessor of a property, of the type of the block unless it states
+                        // its owner.
+                        let declaration = match (&invocation.impl_owner, declaration_macro.as_str()) {
+                            (Some(owner), "ferro_property") => {
+                                read_property(&mut Cursor::new(&tokens, site.line)).map(|(stated, accessor)| property_of(stated, owner, accessor))
+                            }
+                            (Some(_), _) => Err(ParseError { line: site.line, message: "the declaration is written among the members of an `impl` block".to_string() }),
+                            (None, _) => read_declaration(&declaration_macro, &tokens, site.line),
+                        };
+                        match declaration {
                             Ok(declaration) => {
                                 *self.expanded.entry(name.clone()).or_default() += 1;
                                 self.declarations.push(Located { site: site.clone(), value: declaration });
@@ -855,17 +934,6 @@ fn visibility_of(visibility: &syn::Visibility) -> String {
 fn last_segment_of_type(type_: &syn::Type) -> Option<String> {
     match type_ {
         syn::Type::Path(path) if path.qself.is_none() => path.path.segments.last().map(|segment| segment.ident.to_string()),
-        _ => None,
-    }
-}
-
-/// The value of an integer literal, negated or not.
-fn integer_of(expression: &syn::Expr) -> Option<i64> {
-    match expression {
-        syn::Expr::Lit(syn::ExprLit { lit: syn::Lit::Int(integer), .. }) => integer.base10_parse::<i64>().ok(),
-        syn::Expr::Unary(syn::ExprUnary { op: syn::UnOp::Neg(_), expr, .. }) => integer_of(expr).and_then(i64::checked_neg),
-        syn::Expr::Paren(inner) => integer_of(&inner.expr),
-        syn::Expr::Group(inner) => integer_of(&inner.expr),
         _ => None,
     }
 }
@@ -1094,61 +1162,209 @@ fn substitute(tokens: &[TokenTree], bindings: &BTreeMap<String, Tokens>) -> Opti
     Some(result)
 }
 
-/// The value of the expression of a constant of a `bitflags!` type: integer literals,
-/// `<<`, `|`, parentheses and the other constants of the type (`Self::A.bits()`).
-pub(crate) fn flags_value(constants: &[(String, Tokens)], name: &str, depth: usize) -> Option<i64> {
-    let (_, expression) = constants.iter().find(|(constant, _)| constant == name)?;
-    if depth > 16 {
-        return None;
-    }
-    let mut cursor = Cursor::new(expression, 0);
-    let value = flags_or(constants, &mut cursor, depth)?;
-    cursor.is_end().then_some(value)
+/// The accessor `accessor` that `ferro_property!` declares among the members of the `impl`
+/// block of `impl_owner`: a property of the owner it states (`for Owner;`), else of the type
+/// of the block. An accessor of the property of another type is a function of the type of
+/// the block.
+fn property_of(stated: Option<String>, impl_owner: &str, accessor: Accessor) -> Declaration {
+    let function_of = stated.as_deref().filter(|owner| *owner != impl_owner).map(|_| impl_owner.to_string());
+    Declaration::Properties { owner: stated.unwrap_or_else(|| impl_owner.to_string()), accessors: vec![accessor], function_of }
 }
 
-fn flags_or(constants: &[(String, Tokens)], cursor: &mut Cursor, depth: usize) -> Option<i64> {
-    let mut value = flags_shift(constants, cursor, depth)?;
-    while cursor.eat_punct('|') {
-        value |= flags_shift(constants, cursor, depth)?;
-    }
-    Some(value)
+/// Whether `type_` is `&[&TypeInfo]`: the type of a list of classes a crate registers.
+fn is_class_list(type_: &syn::Type) -> bool {
+    let syn::Type::Reference(list) = type_ else { return false };
+    let syn::Type::Slice(slice) = &*list.elem else { return false };
+    let syn::Type::Reference(entry) = &*slice.elem else { return false };
+    last_segment_of_type(&entry.elem).as_deref() == Some("TypeInfo")
 }
 
-fn flags_shift(constants: &[(String, Tokens)], cursor: &mut Cursor, depth: usize) -> Option<i64> {
-    let mut value = flags_primary(constants, cursor, depth)?;
-    while cursor.is_punct('<') && cursor.peek_at(1).is_some_and(|token| is_punct(token, '<')) {
-        cursor.next();
-        cursor.next();
-        let shift = flags_primary(constants, cursor, depth)?;
-        value = value.checked_shl(u32::try_from(shift).ok()?)?;
+/// The types of a list of classes: `&[Type::TYPE, <Type as StaticType>::TYPE]`, or the
+/// arguments of a macro that writes such a list from types (`types![Type, ..]`). Nothing
+/// when an entry has another form.
+fn class_list_of(expression: &syn::Expr) -> Option<Vec<Tokens>> {
+    match expression {
+        syn::Expr::Macro(invocation) => split_types(&tokens_of(invocation.mac.tokens.clone()), 0).ok(),
+        syn::Expr::Paren(inner) => class_list_of(&inner.expr),
+        syn::Expr::Group(inner) => class_list_of(&inner.expr),
+        _ => items_of(expression)?
+            .into_iter()
+            .map(|entry| match entry {
+                syn::Expr::Path(path) if path.path.segments.last().is_some_and(|last| last.ident == "TYPE") => match &path.qself {
+                    Some(qualified) => Some(tokens_of(qualified.ty.to_token_stream())),
+                    None => {
+                        // The path without `::TYPE`.
+                        let tokens = tokens_of(path.path.to_token_stream());
+                        (tokens.len() > 3).then(|| tokens[..tokens.len() - 3].to_vec())
+                    }
+                },
+                _ => None,
+            })
+            .collect(),
     }
-    Some(value)
 }
 
-fn flags_primary(constants: &[(String, Tokens)], cursor: &mut Cursor, depth: usize) -> Option<i64> {
-    match cursor.next()? {
-        TokenTree::Literal(literal) => match syn::Lit::new(literal.clone()) {
-            syn::Lit::Int(integer) => integer.base10_parse::<i64>().ok(),
-            _ => None,
-        },
-        TokenTree::Group(group) if group.delimiter() == Delimiter::Parenthesis || group.delimiter() == Delimiter::None => {
-            let inner = tokens_of(group.stream());
-            let mut inner = Cursor::new(&inner, 0);
-            let value = flags_or(constants, &mut inner, depth)?;
-            inner.is_end().then_some(value)
-        }
-        TokenTree::Ident(_) => {
-            // `Self::A.bits()` or `Name::A.bits()`: a constant of the same type.
-            if !cursor.eat_path_separator() {
-                return None;
-            }
-            let constant = cursor.take_ident("a constant").ok()?;
-            if !cursor.eat_punct('.') || !cursor.eat_ident("bits") {
-                return None;
-            }
-            cursor.take_group(Delimiter::Parenthesis, "`()`").ok()?;
-            flags_value(constants, &constant, depth + 1)
-        }
+/// `<Type as MarkupTyped>::MARKUP`: the type.
+fn markup_of(expression: &syn::Expr) -> Option<&syn::Type> {
+    match expression {
+        syn::Expr::Path(path) if path.path.segments.last().is_some_and(|last| last.ident == "MARKUP") => path.qself.as_ref().map(|qualified| &*qualified.ty),
+        syn::Expr::Paren(inner) => markup_of(&inner.expr),
+        syn::Expr::Group(inner) => markup_of(&inner.expr),
         _ => None,
+    }
+}
+
+/// The type arguments of the last segment of a path (`register_cast::<A, B>`), when all
+/// of them are types the call states (`_` is left to inference).
+fn type_arguments_of(segment: &syn::PathSegment) -> Option<Vec<Tokens>> {
+    match &segment.arguments {
+        syn::PathArguments::AngleBracketed(arguments) => arguments
+            .args
+            .iter()
+            .map(|argument| match argument {
+                syn::GenericArgument::Type(type_) if !matches!(type_, syn::Type::Infer(_)) => Some(tokens_of(type_.to_token_stream())),
+                _ => None,
+            })
+            .collect(),
+        _ => None,
+    }
+}
+
+/// Finds what a function registers for markup next to the declarations: the handles
+/// (`MarkupType::register_handle::<Handle>(type_)`, where `type_` is
+/// `<Type as MarkupTyped>::MARKUP` or a variable of the function bound to it) and the
+/// casts (`ValueTypes::register_cast::<From, To>(..)`).
+#[derive(Default)]
+struct RegistrationFinder {
+    /// `let name = <Type as MarkupTyped>::MARKUP;`
+    bindings: Vec<(String, Tokens)>,
+    /// The `use` items of the function.
+    imports: LocalImports,
+    /// The handle and the type of each registration of a handle, with its line.
+    found: Vec<((Tokens, Tokens), usize)>,
+    casts: Vec<((Tokens, Tokens), usize)>,
+    /// The lines of the registrations of handles whose type is not read.
+    unread: Vec<usize>,
+}
+
+/// The names the `use` tree `tree` below `prefix` imports, each with its path.
+fn local_imports(tree: &syn::UseTree, prefix: &mut Vec<String>, imports: &mut LocalImports) {
+    match tree {
+        syn::UseTree::Path(path) => {
+            prefix.push(path.ident.to_string());
+            local_imports(&path.tree, prefix, imports);
+            prefix.pop();
+        }
+        syn::UseTree::Name(name) if name.ident == "self" => imports.extend(prefix.last().map(|last| (last.clone(), prefix.clone()))),
+        syn::UseTree::Name(name) => {
+            let mut path = prefix.clone();
+            path.push(name.ident.to_string());
+            imports.push((name.ident.to_string(), path));
+        }
+        syn::UseTree::Rename(rename) if rename.rename != "_" => {
+            let mut path = prefix.clone();
+            if rename.ident != "self" {
+                path.push(rename.ident.to_string());
+            }
+            imports.push((rename.rename.to_string(), path));
+        }
+        syn::UseTree::Group(group) => group.items.iter().for_each(|tree| local_imports(tree, prefix, imports)),
+        // What a glob brings is not known here, and a name imported as `_` is no name.
+        syn::UseTree::Rename(_) | syn::UseTree::Glob(_) => {}
+    }
+}
+
+impl<'ast> Visit<'ast> for RegistrationFinder {
+    fn visit_item_use(&mut self, node: &'ast syn::ItemUse) {
+        let mut prefix = Vec::new();
+        if node.leading_colon.is_some() {
+            prefix.push(String::new());
+        }
+        local_imports(&node.tree, &mut prefix, &mut self.imports);
+    }
+
+    fn visit_local(&mut self, node: &'ast syn::Local) {
+        if let (syn::Pat::Ident(name), Some(init)) = (&node.pat, &node.init) {
+            if let Some(type_) = markup_of(&init.expr) {
+                self.bindings.push((name.ident.to_string(), tokens_of(type_.to_token_stream())));
+            }
+        }
+        syn::visit::visit_local(self, node);
+    }
+
+    fn visit_expr_call(&mut self, node: &'ast syn::ExprCall) {
+        syn::visit::visit_expr_call(self, node);
+        let syn::Expr::Path(function) = &*node.func else { return };
+        let segments: Vec<&syn::PathSegment> = function.path.segments.iter().collect();
+        let [.., owner, last] = segments.as_slice() else { return };
+        let line = last.ident.span().start().line;
+        // A cast whose types the call leaves to inference is not read: nothing states them.
+        if owner.ident == "ValueTypes" && last.ident == "register_cast" {
+            if let Some([from, to]) = type_arguments_of(last).as_deref() {
+                self.casts.push(((from.clone(), to.clone()), line));
+            }
+            return;
+        }
+        if owner.ident != "MarkupType" || last.ident != "register_handle" {
+            return;
+        }
+        let handle = type_arguments_of(last).filter(|arguments| arguments.len() == 1).and_then(|mut arguments| arguments.pop());
+        let type_ = node.args.first().and_then(|argument| match markup_of(argument) {
+            Some(type_) => Some(tokens_of(type_.to_token_stream())),
+            None => match argument {
+                syn::Expr::Path(variable) => {
+                    let name = variable.path.get_ident()?;
+                    self.bindings.iter().rev().find(|(known, _)| name == known).map(|(_, type_)| type_.clone())
+                }
+                _ => None,
+            },
+        });
+        match (handle, type_) {
+            (Some(handle), Some(type_)) if node.args.len() == 1 => self.found.push(((handle, type_), line)),
+            _ => self.unread.push(line),
+        }
+    }
+}
+
+impl Source {
+    /// The handles and the casts the function with the body `block` registers.
+    fn read_registrations(&mut self, block: &syn::Block, context: &Context, cfg: &[String]) {
+        let mut finder = RegistrationFinder::default();
+        finder.visit_block(block);
+        let site = |line: usize| Site { module: context.module, file: context.file, line, cfg: cfg.to_vec(), expanded: false };
+        for ((handle, type_), line) in finder.found {
+            self.handles.push(Located { site: site(line), value: RawHandle { handle, type_, imports: finder.imports.clone() } });
+        }
+        for ((from, to), line) in finder.casts {
+            self.casts.push(Located { site: site(line), value: RawCast { from, to, imports: finder.imports.clone() } });
+        }
+        for line in finder.unread {
+            let message = "`MarkupType::register_handle` is called with a type that is not `<Type as MarkupTyped>::MARKUP` or a variable of the function bound to it: the handle is not in the model".to_string();
+            self.diagnostic_at(Severity::Warning, codes::FORM, context.file, line, message);
+        }
+    }
+
+    /// The value of the member `name` of the enumeration or of the set of flags declared
+    /// as `declared` (the module and the name): a variant, a constant of the `bitflags!`
+    /// type, or an associated constant of the type (`pub const NONE: Flags = Flags::empty();`,
+    /// `pub const Enter: Key = Key::Return;`) whose expression is a constant expression
+    /// over literals and the other members.
+    pub fn member_value(&self, declared: &(usize, String), name: &str, depth: usize) -> Option<i64> {
+        if depth > 16 {
+            return None;
+        }
+        if let Some((_, value)) = self.enums.get(declared).and_then(|variants| variants.iter().find(|(variant, _)| variant == name)) {
+            return *value;
+        }
+        let constant = |constants: &BTreeMap<(usize, String), Vec<(String, Tokens)>>| -> Option<Tokens> {
+            constants.get(declared).and_then(|constants| constants.iter().find(|(constant, _)| constant == name)).map(|(_, expression)| expression.clone())
+        };
+        let expression = constant(&self.flags).or_else(|| constant(&self.associated))?;
+        let member = |other: &str| self.member_value(declared, other, depth + 1);
+        let all = || {
+            let constants = self.flags.get(declared)?;
+            constants.iter().try_fold(0i64, |union, (constant, _)| Some(union | self.member_value(declared, constant, depth + 1)?))
+        };
+        evaluate(&expression, &Scope { type_name: &declared.1, member: &member, all: &all })
     }
 }

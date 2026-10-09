@@ -457,6 +457,11 @@ pub(crate) fn pieces(tokens: &[TokenTree], path: &mut dyn FnMut(&[String]) -> St
                     '>' => (">", ">".to_string()),
                     other => ("", other.to_string()),
                 };
+                // A trailing comma of a list of type arguments is not part of the text
+                // (`Map<K, V,>` written over several lines is `Map<K, V>`).
+                if mark == ">" && matches!(result.last(), Some(Piece::Mark(last, _)) if *last == ",") {
+                    result.pop();
+                }
                 result.push(Piece::Mark(mark, text));
                 index += 1;
             }
@@ -639,6 +644,8 @@ mod tests {
             (":: std :: rc :: Rc < crate :: a :: B >", "::std::rc::Rc<crate::a::B>"),
             ("FerroList<Ref<Control>>", "FerroList<Ref<Control>>"),
             ("(A,B)", "(A, B)"),
+            ("Map<\n    K,\n    Rc<dyn V>,\n>", "Map<K, Rc<dyn V>>"),
+            ("Option<Map<K, V,>,>", "Option<Map<K, V>>"),
             ("Box<dyn Iterator<Item = u8>>", "Box<dyn Iterator<Item = u8>>"),
             ("<T as Trait>::Output", "<T as Trait>::Output"),
         ] {

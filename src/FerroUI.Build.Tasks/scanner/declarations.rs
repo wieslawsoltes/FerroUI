@@ -28,7 +28,9 @@ pub(crate) enum Declaration {
     /// `ferro_static_type!(Name)`.
     StaticType { name: String },
     /// `ferro_properties! { impl Owner .. { .. } }`, or one `ferro_property!`.
-    Properties { owner: String, accessors: Vec<Accessor> },
+    /// `function_of` is the type of the `impl` block an accessor is written in, when it is
+    /// not the owner (`ferro_property!(for Owner; ..)` among the members of another type).
+    Properties { owner: String, accessors: Vec<Accessor>, function_of: Option<String> },
     /// `ferro_class_info!(Name { new: .., interfaces: [..], markup: {..} })`.
     ClassInfo { name: String, new: Option<Tokens>, interfaces: Vec<Tokens>, markup: Option<MarkupBody> },
     /// `ferro_markup_type!(kind Type [as "Name"] { .. })`.
@@ -143,7 +145,7 @@ pub(crate) fn read_declaration(name: &str, tokens: &[TokenTree], line: usize) ->
         "ferro_property" => {
             let (owner, accessor) = read_property(&mut cursor)?;
             match owner {
-                Some(owner) => Ok(Declaration::Properties { owner, accessors: vec![accessor] }),
+                Some(owner) => Ok(Declaration::Properties { owner, accessors: vec![accessor], function_of: None }),
                 None => Err(ParseError { line, message: "a `ferro_property!` without `for Owner;` outside an `impl` block has no owner".to_string() }),
             }
         }
@@ -228,7 +230,7 @@ fn read_properties(cursor: &mut Cursor) -> Result<Declaration, ParseError> {
             accessors.push(read_accessor(&mut body)?);
         }
     }
-    Ok(Declaration::Properties { owner, accessors })
+    Ok(Declaration::Properties { owner, accessors, function_of: None })
 }
 
 /// The tokens of `ferro_property!`: `[for Owner;] accessor`.

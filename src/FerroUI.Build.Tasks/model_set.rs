@@ -26,6 +26,12 @@ pub struct ModelSet {
     exports: HashMap<String, String>,
     /// The types by the text of their Rust type, the first of a text.
     types: HashMap<String, (usize, usize)>,
+    /// The accessors of registered properties that are functions of another type than the
+    /// one they are listed under, by their path (`Other::name_property`): the model, the
+    /// type and the position among its registered properties.
+    functions: HashMap<String, (usize, usize, usize)>,
+    /// The type aliases of the models, by their path, with the text of their type.
+    aliases: HashMap<String, String>,
 }
 
 impl ModelSet {
@@ -37,14 +43,28 @@ impl ModelSet {
                 exports.entry(export.path.clone()).or_insert_with(|| export.declared.clone());
             }
         }
-        let mut set = Self { models, exports, types: HashMap::new() };
+        let mut set = Self { models, exports, types: HashMap::new(), functions: HashMap::new(), aliases: HashMap::new() };
         let mut types = HashMap::new();
+        let mut functions = HashMap::new();
+        let mut aliases = HashMap::new();
         for (model_index, model) in set.models.iter().enumerate() {
             for (type_index, type_) in model.types.iter().enumerate() {
                 types.entry(set.canonical(&type_.rust_path.text)).or_insert((model_index, type_index));
+                for (position, registered) in type_.registered.iter().enumerate() {
+                    if let Some(function_of) = &registered.function_of {
+                        let path = format!("{}::{}", set.canonical_path(function_of), registered.accessor);
+                        functions.entry(path).or_insert((model_index, type_index, position));
+                    }
+                }
+            }
+            // An alias whose type has a path the scanner did not resolve stays a name.
+            for alias in model.aliases.iter().filter(|alias| alias.target.is_resolved()) {
+                aliases.entry(set.canonical_path(&alias.path)).or_insert_with(|| set.canonical(&alias.target.text));
             }
         }
         set.types = types;
+        set.functions = functions;
+        set.aliases = aliases;
         set
     }
 
@@ -93,6 +113,30 @@ impl ModelSet {
         if self.exports.is_empty() {
             return text.to_string();
         }
+        self.map_paths(text, &|path| self.canonical_path(path))
+    }
+
+    /// The normalised type text `text` as the one text of its Rust type: canonical
+    /// ([`canonical`](Self::canonical)), with every type alias of the models replaced by
+    /// the type it stands for (`PageList` by `FerroList<Ref<Page>>`). Two spellings of one
+    /// type have one expanded text, which is what a handle is looked up by.
+    pub fn expanded(&self, text: &str) -> String {
+        let mut current = self.canonical(text);
+        if self.aliases.is_empty() {
+            return current;
+        }
+        for _ in 0..MAX_HOPS {
+            let next = self.map_paths(&current, &|path| self.aliases.get(path).cloned().unwrap_or_else(|| path.to_string()));
+            if next == current {
+                break;
+            }
+            current = next;
+        }
+        current
+    }
+
+    /// `text` with every absolute path of it (`::a::b::C`) replaced by what `map` gives.
+    fn map_paths(&self, text: &str, map: &dyn Fn(&str) -> String) -> String {
         let is_word = |character: char| character.is_alphanumeric() || character == '_';
         let mut result = String::with_capacity(text.len());
         let mut rest = text;
@@ -113,7 +157,7 @@ impl ModelSet {
                     end += 2 + length;
                 }
                 if end > 0 {
-                    result.push_str(&self.canonical_path(&rest[..end]));
+                    result.push_str(&map(&rest[..end]));
                     before = rest[..end].chars().next_back();
                     rest = &rest[end..];
                     continue;
@@ -150,11 +194,29 @@ impl ModelSet {
 
     /// The accessor of a registered property with the absolute path `path`
     /// (`::ferroui_base::Decorator::child_property`, in any spelling), with its type.
+    ///
+    /// The path names the type the accessor is a function of, which is the type the
+    /// property is listed under unless the model states another
+    /// ([`RegisteredModel::function_of`]): `ThemeVariant::actual_theme_variant_property` is
+    /// found with `StyledElement`, the type that has the property.
     pub fn find_accessor(&self, path: &str) -> Option<(&TypeModel, &RegisteredModel)> {
         let path = self.canonical_path(path);
+        if let Some((model, type_, position)) = self.functions.get(&path) {
+            let type_ = self.type_at((*model, *type_));
+            return Some((type_, &type_.registered[*position]));
+        }
         let (type_path, accessor) = path.rsplit_once("::")?;
         let type_ = self.type_at(*self.types.get(type_path)?);
-        type_.registered.iter().find(|registered| registered.accessor == accessor).map(|registered| (type_, registered))
+        type_.registered.iter().find(|registered| registered.accessor == accessor && registered.function_of.is_none()).map(|registered| (type_, registered))
+    }
+
+    /// The path generated code names the type by whose function the accessor `registered`
+    /// of the type `listed` is: the type itself, or the one the model states.
+    pub fn accessor_type_path<'a>(&'a self, listed: &'a TypeModel, registered: &'a RegisteredModel) -> &'a str {
+        match &registered.function_of {
+            Some(function_of) => self.find_rust_type(function_of).map_or(function_of.as_str(), |(_, type_)| type_.named_path()),
+            None => listed.named_path(),
+        }
     }
 
     /// The declaration of the property `registered` is an accessor of: itself when it
@@ -222,7 +284,7 @@ impl ModelSet {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::model::{CallableModel, ExportModel, RegisteredKind, RustType, TypeKind};
+    use crate::model::{AliasModel, CallableModel, ExportModel, RegisteredKind, RustType, TypeKind};
 
     fn export(path: &str, declared: &str) -> ExportModel {
         ExportModel { path: path.to_string(), declared: declared.to_string() }
@@ -236,6 +298,7 @@ mod tests {
             owner: None,
             host: None,
             accessor: accessor.to_string(),
+            function_of: None,
             visibility: "pub".to_string(),
             registration,
             source: source.map(|path| CallableModel { path: Some(path.to_string()), resolved: Some(path.to_string()) }),
@@ -255,11 +318,21 @@ mod tests {
             export("::base::shapes::Shape", "::base::shapes::shape::Shape"),
             export("::base::Handle", "::other::rc::Rc"),
             export("::base::media::Brush", "::base::media::Brush"),
+            export("::base::Pen", "::base::media::pen::Pen"),
+            export("::base::Shapes", "::base::shapes::shape::Shapes"),
         ];
         let mut shape = TypeModel::new("Shape", TypeKind::Class, RustType::resolved("::base::shapes::shape::Shape"), "base::shapes::shape");
         shape.namespace = "Base.Shapes".to_string();
-        shape.registered = vec![registered(Some("Fill"), "fill_property", RegistrationModel::Declared, None)];
+        // `stroke_property` is a function of `Pen`, a type without a declaration of its own.
+        let mut stroke = registered(Some("Stroke"), "stroke_property", RegistrationModel::Declared, None);
+        stroke.function_of = Some("::base::media::pen::Pen".to_string());
+        shape.registered = vec![registered(Some("Fill"), "fill_property", RegistrationModel::Declared, None), stroke];
         base.types = vec![shape];
+        base.aliases = vec![
+            AliasModel { path: "::base::shapes::shape::Shapes".to_string(), target: RustType::resolved("Vec<::base::Shape>") },
+            AliasModel { path: "::base::shapes::shape::Figures".to_string(), target: RustType::resolved("Option<::base::shapes::shape::Shapes>") },
+            AliasModel { path: "::base::Lost".to_string(), target: RustType { text: "Vec<Missing>".to_string(), unresolved: vec!["Missing".to_string()] } },
+        ];
 
         let mut other = AssemblyModel::new("Other", "other");
         other.exports = vec![export("::other::rc::Rc", "::other::alloc::Rc")];
@@ -270,6 +343,7 @@ mod tests {
             registered(None, "fill_property", RegistrationModel::AddedOwner, Some("::base::Shape::fill_property")),
             registered(None, "paint_property", RegistrationModel::Alias, Some("::controls::path::Path::fill_property")),
             registered(None, "lost_property", RegistrationModel::AddedOwner, Some("::missing::Type::lost_property")),
+            registered(None, "stroke_property", RegistrationModel::AddedOwner, Some("::base::Pen::stroke_property")),
         ];
         controls.types = vec![path];
         ModelSet::new(vec![base, other, controls])
@@ -316,9 +390,33 @@ mod tests {
         assert_eq!(set.name_of(&path.registered[2]), None);
         assert_eq!(set.declaration_of(&path.registered[1]).map(|declared| declared.accessor.as_str()), Some("fill_property"));
         assert_eq!(set.find_accessor("::base::Shape::fill_property").map(|(type_, _)| type_.name.as_str()), Some("Shape"));
+        // An accessor that is a function of another type is found by the path of that type,
+        // and not by the path of the type it is listed under.
+        assert_eq!(set.name_of(&path.registered[3]), Some("Stroke"));
+        let stroke = set.find_accessor("::base::Pen::stroke_property").map(|(type_, registered)| (type_.name.as_str(), registered.accessor.as_str()));
+        assert_eq!(stroke, Some(("Shape", "stroke_property")));
+        assert!(set.find_accessor("::base::Shape::stroke_property").is_none());
+        let shape = set.type_at((0, 0));
+        assert_eq!(set.accessor_type_path(shape, &shape.registered[0]), "::base::shapes::shape::Shape");
+        assert_eq!(set.accessor_type_path(shape, &shape.registered[1]), "::base::media::pen::Pen");
 
         let mut names: Vec<(&str, &str)> = set.exported_names("::base").collect();
         names.sort();
-        assert_eq!(names, vec![("Handle", "::other::rc::Rc"), ("Shape", "::base::shapes::shape::Shape")]);
+        assert_eq!(names, vec![("Handle", "::other::rc::Rc"), ("Pen", "::base::media::pen::Pen"), ("Shape", "::base::shapes::shape::Shape"), ("Shapes", "::base::shapes::shape::Shapes")]);
+    }
+
+    /// Not from upstream: an alias is replaced by its type, in any spelling of its path
+    /// and through other aliases; an alias the scanner did not resolve stays a name.
+    #[test]
+    fn aliases_are_expanded_to_the_type_they_stand_for() {
+        let set = set();
+        const SHAPE: &str = "::base::shapes::shape::Shape";
+        assert_eq!(set.expanded("::base::Shapes"), format!("Vec<{SHAPE}>"));
+        assert_eq!(set.expanded("Option<::base::shapes::shape::Shapes>"), format!("Option<Vec<{SHAPE}>>"));
+        assert_eq!(set.expanded("::base::shapes::shape::Figures"), format!("Option<Vec<{SHAPE}>>"));
+        assert_eq!(set.expanded("::base::Shape"), SHAPE);
+        assert_eq!(set.expanded("::base::Lost"), "::base::Lost");
+        assert_eq!(set.expanded("f64"), "f64");
+        assert_eq!(set.canonical("::base::Shapes"), "::base::shapes::shape::Shapes");
     }
 }
