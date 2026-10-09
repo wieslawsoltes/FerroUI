@@ -186,3 +186,74 @@ fn child_scope_find_async_should_prefer_own_elements() {
     find_async(&found, &child_scope, "foo");
     assert_eq!(child_scope.find("foo"), Some(child_element));
 }
+
+// Not ports: the scope holds the element it is attached to weakly (the
+// managed original holds it as every other element and leaves the cycle to
+// its collector).
+
+fn element_and_scope() -> (Ref<crate::Border>, NameScopeRef) {
+    (crate::Border::new(), NameScopeRef::new(NameScope::new()))
+}
+
+#[test]
+fn scope_does_not_keep_the_element_it_is_attached_to_alive() {
+    let _scope = test_scope();
+    // Named before the scope is attached, as the root of a document is.
+    let (element, scope) = element_and_scope();
+    scope.register("root", element.clone().upcast());
+    NameScope::set_name_scope(&element, Some(scope.clone()));
+    assert!(scope.find("root").is_some_and(|found| found == element));
+    let weak = element.downgrade();
+    drop(element);
+    assert!(weak.upgrade().is_none());
+    assert!(scope.find("root").is_none());
+
+    // Named after the scope is attached.
+    let (element, scope) = element_and_scope();
+    NameScope::set_name_scope(&element, Some(scope.clone()));
+    scope.register("root", element.clone().upcast());
+    assert!(scope.find("root").is_some_and(|found| found == element));
+    let weak = element.downgrade();
+    drop(element);
+    assert!(weak.upgrade().is_none());
+}
+
+#[test]
+fn scope_keeps_the_other_elements_and_one_it_was_detached_from() {
+    let _scope = test_scope();
+    let (element, scope) = element_and_scope();
+    let other = crate::Border::new();
+    scope.register("root", element.clone().upcast());
+    scope.register("other", other.clone().upcast());
+    NameScope::set_name_scope(&element, Some(scope.clone()));
+    let other_weak = other.downgrade();
+    drop(other);
+    assert!(other_weak.upgrade().is_some());
+
+    NameScope::set_name_scope(&element, None);
+    let weak = element.downgrade();
+    drop(element);
+    assert!(scope.find("root").is_some_and(|found| weak.points_to(&found)));
+}
+
+#[test]
+fn child_scope_does_not_keep_the_element_it_is_attached_to_alive() {
+    let _scope = test_scope();
+    let element = crate::Border::new();
+    let scope = NameScopeRef::new(ChildNameScope::new(NameScopeRef::new(NameScope::new())));
+    scope.register("root", element.clone().upcast());
+    NameScope::set_name_scope(&element, Some(scope.clone()));
+    let weak = element.downgrade();
+    drop(element);
+    assert!(weak.upgrade().is_none());
+}
+
+#[test]
+fn name_of_a_dropped_element_stays_taken() {
+    let _scope = test_scope();
+    let (element, scope) = element_and_scope();
+    scope.register("root", element.clone().upcast());
+    NameScope::set_name_scope(&element, Some(scope.clone()));
+    drop(element);
+    assert!(scope.try_register("root", FerroObject::new()).is_err());
+}
