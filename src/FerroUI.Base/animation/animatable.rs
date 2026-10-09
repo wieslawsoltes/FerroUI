@@ -35,7 +35,7 @@ struct TransitionState {
 ferro_class!(Animatable: FerroObject);
 crate::ferro_class_info!(Animatable { new: Animatable::new });
 
-impl FerroObjectImpl for Animatable {
+crate::ferro_overrides! { impl FerroObjectImpl for Animatable {
     /// Starts transitions when the base value of a property with a
     /// transition changes, and tracks the transitions collection.
     ///
@@ -127,7 +127,7 @@ impl FerroObjectImpl for Animatable {
 
         Self::parent_on_property_changed_core(this, change);
     }
-}
+} }
 
 crate::ferro_properties! { impl Animatable {
     ferro_property!(
