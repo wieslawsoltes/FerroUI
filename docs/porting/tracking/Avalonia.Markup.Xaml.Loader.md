@@ -10,9 +10,9 @@ Generated from upstream commit `17350180c33b063f0e98abbfd19aa3cae63f5d56`. Back 
 | FerroUI | `src/Markup/FerroUI.Markup.Xaml.Loader` (exists) |
 | Crate | `ferroui-markup-xaml-loader` |
 | Phase / priority | 2 - xaml + themes / P1 |
-| Files | 65/67 (97.0%) |
-| Types | 119/127 (93.7%) |
-| Members | 398/506 (78.7%) |
+| Files | 65/66 (98.5%), 1 not applicable |
+| Types | 119/126 (7 waived) (100.0%) |
+| Members | 398/505 (107 waived) (100.0%) |
 | Contracts (interfaces) | 5/6 |
 | Property registrations | 0/0 |
 | Routed events | 0/0 |
@@ -25,153 +25,50 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 |---|---|---|---|---|
 | `Avalonia.Markup.Xaml.XamlIl.CompilerExtensions.GroupTransformers.IXamlAstGroupTransformer` | internal | `CompilerExtensions/GroupTransformers/IXamlAstGroupTransformer.cs` | 1/1 | present |
 | `Avalonia.Markup.Xaml.XamlIl.CompilerExtensions.IXamlDocumentResource` | internal | `CompilerExtensions/IXamlDocumentResource.cs` | 7/7 | present |
-| `Avalonia.Markup.Xaml.XamlIl.CompilerExtensions.IXamlIlAvaloniaClassPropertyNode` | internal | `CompilerExtensions/XamlIlAvaloniaPropertyHelper.cs` | 0/0 | missing |
-| `Avalonia.Markup.Xaml.XamlIl.CompilerExtensions.IXamlIlAvaloniaProperty` | internal | `CompilerExtensions/XamlIlAvaloniaPropertyHelper.cs` | 0/1 | partial |
-| `Avalonia.Markup.Xaml.XamlIl.CompilerExtensions.IXamlIlAvaloniaPropertyNode` | internal | `CompilerExtensions/XamlIlAvaloniaPropertyHelper.cs` | 0/1 | partial |
+| `Avalonia.Markup.Xaml.XamlIl.CompilerExtensions.IXamlIlAvaloniaClassPropertyNode` | internal | `CompilerExtensions/XamlIlAvaloniaPropertyHelper.cs` | 0/0 | waived |
+| `Avalonia.Markup.Xaml.XamlIl.CompilerExtensions.IXamlIlAvaloniaProperty` | internal | `CompilerExtensions/XamlIlAvaloniaPropertyHelper.cs` | 0/1 (1 waived) | present |
+| `Avalonia.Markup.Xaml.XamlIl.CompilerExtensions.IXamlIlAvaloniaPropertyNode` | internal | `CompilerExtensions/XamlIlAvaloniaPropertyHelper.cs` | 0/1 (1 waived) | present |
 | `Avalonia.Markup.Xaml.XamlIl.CompilerExtensions.IXamlIlBindingPathNode` | internal | `CompilerExtensions/XamlIlBindingPathHelper.cs` | 1/1 | present |
 
 ## Files
 
-### `(project root)` - files 2/3, types 2/3, members 8/11
+### `(project root)` - files 2/2, types 2/2, members 8/10 (2 waived)
 
 | Upstream file | Rust file | Status | Types | Members | Notes |
 |---|---|---|---|---|---|
 | `AvaloniaRuntimeXamlLoader.cs` | `ferro_runtime_xaml_loader.rs` | present | 1/1 | 6/6 |  |
-| `AvaloniaXamlIlRuntimeCompiler.cs` | `ferro_xaml_il_runtime_compiler.rs` | partial | 1/1 | 2/4 |  |
-| `CompilerDynamicDependencies.cs` | `compiler_dynamic_dependencies.rs` | missing | 0/1 | 0/1 |  |
+| `AvaloniaXamlIlRuntimeCompiler.cs` | `ferro_xaml_il_runtime_compiler.rs` | present | 1/1 | 2/4 (2 waived) |  |
+| `CompilerDynamicDependencies.cs` | - | n/a | - | - | not-applicable: trimming annotation (`DynamicallyAccessedMembers`) for the reflection the IL loader does: no reflection, nothing to annotate |
 
-<details><summary><code>AvaloniaXamlIlRuntimeCompiler.cs</code> - 2 missing</summary>
-
-- `AvaloniaXamlIlRuntimeCompiler` (class): 2 missing
-  - `static object LoadSre(RuntimeXamlLoaderDocument document, RuntimeXamlLoaderConfiguration configuration)`
-  - `static IReadOnlyList<object> LoadGroupSre(IReadOnlyCollection<RuntimeXamlLoaderDocument> documents, Runtime...`
-
-</details>
-
-### `CompilerExtensions` - files 14/15, types 21/23, members 79/107
+### `CompilerExtensions` - files 14/15, types 21/23 (2 waived), members 79/107 (28 waived)
 
 | Upstream file | Rust file | Status | Types | Members | Notes |
 |---|---|---|---|---|---|
-| `AvaloniaXamlDiagnosticCodes.cs` | `compiler_extensions/ferro_xaml_diagnostic_codes.rs` | partial | 1/1 | 21/23 |  |
-| `AvaloniaXamlIlCompiler.cs` | `compiler_extensions/ferro_xaml_il_compiler.rs` | partial | 1/1 | 10/13 |  |
-| `AvaloniaXamlIlCompilerConfiguration.cs` | `compiler_extensions/ferro_xaml_il_compiler_configuration.rs` | partial | 1/1 | 1/4 |  |
+| `AvaloniaXamlDiagnosticCodes.cs` | `compiler_extensions/ferro_xaml_diagnostic_codes.rs` | present | 1/1 | 21/23 (2 waived) |  |
+| `AvaloniaXamlIlCompiler.cs` | `compiler_extensions/ferro_xaml_il_compiler.rs` | present | 1/1 | 10/13 (3 waived) |  |
+| `AvaloniaXamlIlCompilerConfiguration.cs` | `compiler_extensions/ferro_xaml_il_compiler_configuration.rs` | present | 1/1 | 1/4 (3 waived) |  |
 | `AvaloniaXamlIlLanguage.cs` | `compiler_extensions/ferro_xaml_il_language.rs` | present | 1/1 | 3/3 |  |
 | `AvaloniaXamlIlLanguageParseIntrinsics.cs` | `compiler_extensions/ferro_xaml_il_language_parse_intrinsics.rs` | present | 1/1 | 1/1 |  |
 | `IXamlDocumentResource.cs` | `compiler_extensions/i_xaml_document_resource.rs` | present | 1/1 | 7/7 |  |
 | `XamlAstNewClrObjectHelper.cs` | `compiler_extensions/xaml_ast_new_clr_object_helper.rs` | present | 1/1 | 1/1 |  |
 | `XamlDocumentResource.cs` | `compiler_extensions/xaml_document_resource.rs` | present | 1/1 | 10/10 |  |
-| `XamlDocumentTypeBuilderProvider.cs` | `compiler_extensions/xaml_document_type_builder_provider.rs` | missing | 0/1 | 0/5 |  |
+| `XamlDocumentTypeBuilderProvider.cs` | `compiler_extensions/xaml_document_type_builder_provider.rs` | missing | 0/1 (1 waived) | 0/5 (5 waived) |  |
 | `XamlDocumentUsage.cs` | `compiler_extensions/xaml_document_usage.rs` | present | 1/1 | 3/3 |  |
-| `XamlIlAvaloniaPropertyHelper.cs` | `compiler_extensions/xaml_il_ferro_property_helper.rs` | partial | 7/8 | 11/25 |  |
+| `XamlIlAvaloniaPropertyHelper.cs` | `compiler_extensions/xaml_il_ferro_property_helper.rs` | present | 7/8 (1 waived) | 11/25 (14 waived) |  |
 | `XamlIlBindingPathHelper.cs` | `compiler_extensions/xaml_il_binding_path_helper.rs` | present | 2/2 | 2/2 |  |
 | `XamlIlClrPropertyInfoHelper.cs` | `compiler_extensions/xaml_il_clr_property_info_helper.rs` | present | 1/1 | 3/3 |  |
-| `XamlIlPropertyInfoAccessorFactoryEmitter.cs` | `compiler_extensions/xaml_il_property_info_accessor_factory_emitter.rs` | partial | 1/1 | 3/4 |  |
+| `XamlIlPropertyInfoAccessorFactoryEmitter.cs` | `compiler_extensions/xaml_il_property_info_accessor_factory_emitter.rs` | present | 1/1 | 3/4 (1 waived) |  |
 | `XamlIlTrampolineBuilder.cs` | `compiler_extensions/xaml_il_trampoline_builder.rs` | present | 1/1 | 3/3 |  |
 
-<details><summary><code>AvaloniaXamlDiagnosticCodes.cs</code> - 2 missing</summary>
-
-- `AvaloniaXamlDiagnosticCodes` (class): 2 missing
-  - `const string AvaloniaIntrinsicsError`
-  - `static string XamlXDiagnosticCodeToAvalonia(object codeOrException)` *(internal)*
-
-</details>
-
-<details><summary><code>AvaloniaXamlIlCompiler.cs</code> - 3 missing</summary>
-
-- `AvaloniaXamlIlCompiler` (class): 3 missing
-  - `AvaloniaXamlIlCompiler(TransformerConfiguration configuration, XamlLanguageEmitMappings<IXamlILEmitter, Xam...` *(1 of 2 constructors found)*
-  - `void Compile(XamlDocument document, XamlDocumentTypeBuilderProvider typeBuilderProvider, string? baseUri, I...`
-  - `void ParseAndCompile(string xaml, string? baseUri, IFileSource fileSource, IXamlTypeBuilder<IXamlILEmitter>...`
-
-</details>
-
-<details><summary><code>AvaloniaXamlIlCompilerConfiguration.cs</code> - 3 missing</summary>
-
-- `AvaloniaXamlIlCompilerConfiguration` (class): 3 missing
-  - `XamlIlClrPropertyInfoEmitter ClrPropertyEmitter { get; }`
-  - `XamlIlPropertyInfoAccessorFactoryEmitter AccessorFactoryEmitter { get; }`
-  - `XamlIlTrampolineBuilder TrampolineBuilder { get; }`
-
-</details>
-
-<details><summary><code>XamlIlAvaloniaPropertyHelper.cs</code> - 15 missing</summary>
-
-- `XamlIlAvaloniaPropertyHelper` (class): 4 missing
-  - `static bool EmitProvideValueTarget(XamlIlEmitContext context, IXamlILEmitter emitter, XamlAstClrProperty pr...`
-  - `static bool Emit(XamlIlEmitContext context, IXamlILEmitter emitter, XamlAstClrProperty property)`
-  - `static bool Emit(XamlIlEmitContext context, IXamlILEmitter emitter, IXamlProperty property)`
-  - `static IXamlType GetAvaloniaPropertyType(IXamlField field, AvaloniaXamlIlWellKnownTypes types, IXamlLineInf...`
-- `IXamlIlAvaloniaPropertyNode` (interface): 1 missing
-  - `IXamlType AvaloniaPropertyType { get; }`
-- `IXamlIlAvaloniaClassPropertyNode` (interface, internal): **type missing** (0 members)
-- `XamlIlAvaloniaPropertyNode` (class): 3 missing
-  - `XamlIlAvaloniaPropertyNode(IXamlLineInfo lineInfo, IXamlType type, XamlAstClrProperty property)` *(1 of 2 constructors found)*
-  - `XamlILNodeEmitResult Emit(XamlIlEmitContext context, IXamlILEmitter codeGen)`
-  - `IXamlType AvaloniaPropertyType { get; }`
-- `XamlIlAvaloniaPropertyFieldNode` (class): 2 missing
-  - `XamlILNodeEmitResult Emit(XamlIlEmitContext context, IXamlILEmitter codeGen)`
-  - `IXamlType AvaloniaPropertyType { get; }`
-- `IXamlIlAvaloniaProperty` (interface): 1 missing
-  - `IXamlField AvaloniaProperty { get; }`
-- `XamlIlAvaloniaProperty` (class): 1 missing
-  - `IXamlField AvaloniaProperty { get; }`
-- `XamlIlAvaloniaClassProperty` (class): 2 missing
-  - `IXamlType AvaloniaPropertyType { get; }`
-  - `XamlILNodeEmitResult Emit(XamlEmitContextWithLocals<IXamlILEmitter, XamlILNodeEmitResult> context, IXamlILE...`
-
-</details>
-
-<details><summary><code>XamlIlPropertyInfoAccessorFactoryEmitter.cs</code> - 1 missing</summary>
-
-- `XamlIlPropertyInfoAccessorFactoryEmitter` (class): 1 missing
-  - `IXamlType EmitLoadAvaloniaPropertyAccessorFactory(XamlIlEmitContext context, IXamlILEmitter codeGen)`
-
-</details>
-
-### `CompilerExtensions/AstNodes` - files 5/5, types 5/5, members 10/15
+### `CompilerExtensions/AstNodes` - files 5/5, types 5/5, members 10/15 (5 waived)
 
 | Upstream file | Rust file | Status | Types | Members | Notes |
 |---|---|---|---|---|---|
-| `AvaloniaXamlIlArrayConstantAstNode.cs` | `compiler_extensions/ast_nodes/ferro_xaml_il_array_constant_ast_node.rs` | partial | 1/1 | 2/3 |  |
-| `AvaloniaXamlIlAvaloniaListConstantAstNode.cs` | `compiler_extensions/ast_nodes/ferro_xaml_il_ferro_list_constant_ast_node.rs` | partial | 1/1 | 2/3 |  |
-| `AvaloniaXamlIlFontFamilyAstNode.cs` | `compiler_extensions/ast_nodes/ferro_xaml_il_font_family_ast_node.rs` | partial | 1/1 | 2/3 |  |
-| `AvaloniaXamlIlGridLengthAstNode.cs` | `compiler_extensions/ast_nodes/ferro_xaml_il_grid_length_ast_node.rs` | partial | 1/1 | 2/3 |  |
-| `AvaloniaXamlIlVectorLikeConstantAstNode.cs` | `compiler_extensions/ast_nodes/ferro_xaml_il_vector_like_constant_ast_node.rs` | partial | 1/1 | 2/3 |  |
-
-<details><summary><code>AvaloniaXamlIlArrayConstantAstNode.cs</code> - 1 missing</summary>
-
-- `AvaloniaXamlIlArrayConstantAstNode` (class): 1 missing
-  - `XamlILNodeEmitResult Emit(XamlEmitContext<IXamlILEmitter, XamlILNodeEmitResult> context, IXamlILEmitter cod...`
-
-</details>
-
-<details><summary><code>AvaloniaXamlIlAvaloniaListConstantAstNode.cs</code> - 1 missing</summary>
-
-- `AvaloniaXamlIlAvaloniaListConstantAstNode` (class): 1 missing
-  - `XamlILNodeEmitResult Emit(XamlEmitContext<IXamlILEmitter, XamlILNodeEmitResult> context, IXamlILEmitter cod...`
-
-</details>
-
-<details><summary><code>AvaloniaXamlIlFontFamilyAstNode.cs</code> - 1 missing</summary>
-
-- `AvaloniaXamlIlFontFamilyAstNode` (class): 1 missing
-  - `XamlILNodeEmitResult Emit(XamlEmitContext<IXamlILEmitter, XamlILNodeEmitResult> context, IXamlILEmitter cod...`
-
-</details>
-
-<details><summary><code>AvaloniaXamlIlGridLengthAstNode.cs</code> - 1 missing</summary>
-
-- `AvaloniaXamlIlGridLengthAstNode` (class): 1 missing
-  - `XamlILNodeEmitResult Emit(XamlEmitContext<IXamlILEmitter, XamlILNodeEmitResult> context, IXamlILEmitter cod...`
-
-</details>
-
-<details><summary><code>AvaloniaXamlIlVectorLikeConstantAstNode.cs</code> - 1 missing</summary>
-
-- `AvaloniaXamlIlVectorLikeConstantAstNode` (class): 1 missing
-  - `XamlILNodeEmitResult Emit(XamlEmitContext<IXamlILEmitter, XamlILNodeEmitResult> context, IXamlILEmitter cod...`
-
-</details>
+| `AvaloniaXamlIlArrayConstantAstNode.cs` | `compiler_extensions/ast_nodes/ferro_xaml_il_array_constant_ast_node.rs` | present | 1/1 | 2/3 (1 waived) |  |
+| `AvaloniaXamlIlAvaloniaListConstantAstNode.cs` | `compiler_extensions/ast_nodes/ferro_xaml_il_ferro_list_constant_ast_node.rs` | present | 1/1 | 2/3 (1 waived) |  |
+| `AvaloniaXamlIlFontFamilyAstNode.cs` | `compiler_extensions/ast_nodes/ferro_xaml_il_font_family_ast_node.rs` | present | 1/1 | 2/3 (1 waived) |  |
+| `AvaloniaXamlIlGridLengthAstNode.cs` | `compiler_extensions/ast_nodes/ferro_xaml_il_grid_length_ast_node.rs` | present | 1/1 | 2/3 (1 waived) |  |
+| `AvaloniaXamlIlVectorLikeConstantAstNode.cs` | `compiler_extensions/ast_nodes/ferro_xaml_il_vector_like_constant_ast_node.rs` | present | 1/1 | 2/3 (1 waived) |  |
 
 ### `CompilerExtensions/GroupTransformers` - files 3/3, types 4/4, members 11/11
 
@@ -181,37 +78,37 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 | `XamlIncludeGroupTransformer.cs` | `compiler_extensions/group_transformers/xaml_include_group_transformer.rs` | present | 1/1 | 2/2 |  |
 | `XamlMergeResourceGroupTransformer.cs` | `compiler_extensions/group_transformers/xaml_merge_resource_group_transformer.rs` | present | 1/1 | 2/2 |  |
 
-### `CompilerExtensions/Transformers` - files 40/40, types 86/91, members 286/358
+### `CompilerExtensions/Transformers` - files 40/40, types 86/91 (5 waived), members 286/358 (72 waived)
 
 | Upstream file | Rust file | Status | Types | Members | Notes |
 |---|---|---|---|---|---|
-| `AddNameScopeRegistration.cs` | `compiler_extensions/transformers/add_name_scope_registration.rs` | partial | 3/4 | 5/7 |  |
+| `AddNameScopeRegistration.cs` | `compiler_extensions/transformers/add_name_scope_registration.rs` | present | 3/4 (1 waived) | 5/7 (2 waived) |  |
 | `AvaloniaBindingExtensionTransformer.cs` | `compiler_extensions/transformers/ferro_binding_extension_transformer.rs` | present | 3/3 | 5/5 |  |
 | `AvaloniaXAmlIlClassesTransformer.cs` | `compiler_extensions/transformers/ferro_x_aml_il_classes_transformer.rs` | present | 1/1 | 1/1 |  |
 | `AvaloniaXamlIlAddSourceInfoTransformer.cs` | `compiler_extensions/transformers/ferro_xaml_il_add_source_info_transformer.rs` | present | 1/1 | 2/2 |  |
 | `AvaloniaXamlIlAvaloniaPropertyResolver.cs` | `compiler_extensions/transformers/ferro_xaml_il_ferro_property_resolver.rs` | present | 1/1 | 1/1 |  |
-| `AvaloniaXamlIlBindingPathParser.cs` | `compiler_extensions/transformers/ferro_xaml_il_binding_path_parser.rs` | partial | 5/5 | 9/13 |  |
+| `AvaloniaXamlIlBindingPathParser.cs` | `compiler_extensions/transformers/ferro_xaml_il_binding_path_parser.rs` | present | 5/5 | 9/13 (4 waived) |  |
 | `AvaloniaXamlIlBindingPathTransformer.cs` | `compiler_extensions/transformers/ferro_xaml_il_binding_path_transformer.rs` | present | 1/1 | 1/1 |  |
 | `AvaloniaXamlIlClassesPropertyResolver.cs` | `compiler_extensions/transformers/ferro_xaml_il_classes_property_resolver.rs` | present | 1/1 | 1/1 |  |
 | `AvaloniaXamlIlCompiledBindingsMetadataRemover.cs` | `compiler_extensions/transformers/ferro_xaml_il_compiled_bindings_metadata_remover.rs` | present | 1/1 | 1/1 |  |
 | `AvaloniaXamlIlConstructorServiceProviderTransformer.cs` | `compiler_extensions/transformers/ferro_xaml_il_constructor_service_provider_transformer.rs` | present | 1/1 | 1/1 |  |
 | `AvaloniaXamlIlControlTemplatePartsChecker.cs` | `compiler_extensions/transformers/ferro_xaml_il_control_template_parts_checker.rs` | present | 1/1 | 1/1 |  |
 | `AvaloniaXamlIlControlTemplatePriorityTransformer.cs` | `compiler_extensions/transformers/ferro_xaml_il_control_template_priority_transformer.rs` | present | 1/1 | 1/1 |  |
-| `AvaloniaXamlIlControlTemplateTargetTypeMetadataTransformer.cs` | `compiler_extensions/transformers/ferro_xaml_il_control_template_target_type_metadata_transformer.rs` | partial | 3/3 | 7/8 |  |
+| `AvaloniaXamlIlControlTemplateTargetTypeMetadataTransformer.cs` | `compiler_extensions/transformers/ferro_xaml_il_control_template_target_type_metadata_transformer.rs` | present | 3/3 | 7/8 (1 waived) |  |
 | `AvaloniaXamlIlControlThemeTransformer.cs` | `compiler_extensions/transformers/ferro_xaml_il_control_theme_transformer.rs` | present | 1/1 | 1/1 |  |
 | `AvaloniaXamlIlDataContextTypeTransformer.cs` | `compiler_extensions/transformers/ferro_xaml_il_data_context_type_transformer.rs` | present | 4/4 | 5/5 |  |
 | `AvaloniaXamlIlDataTemplateWarningsTransformer.cs` | `compiler_extensions/transformers/ferro_xaml_il_data_template_warnings_transformer.rs` | present | 1/1 | 1/1 |  |
 | `AvaloniaXamlIlDesignPropertiesTransformer.cs` | `compiler_extensions/transformers/ferro_xaml_il_design_properties_transformer.rs` | present | 1/1 | 2/2 |  |
 | `AvaloniaXamlIlDuplicateSettersChecker.cs` | `compiler_extensions/transformers/ferro_xaml_il_duplicate_setters_checker.rs` | present | 1/1 | 1/1 |  |
-| `AvaloniaXamlIlEnsureResourceDictionaryCapacityTransformer.cs` | `compiler_extensions/transformers/ferro_xaml_il_ensure_resource_dictionary_capacity_transformer.rs` | partial | 2/2 | 3/4 |  |
+| `AvaloniaXamlIlEnsureResourceDictionaryCapacityTransformer.cs` | `compiler_extensions/transformers/ferro_xaml_il_ensure_resource_dictionary_capacity_transformer.rs` | present | 2/2 | 3/4 (1 waived) |  |
 | `AvaloniaXamlIlMetadataRemover.cs` | `compiler_extensions/transformers/ferro_xaml_il_metadata_remover.rs` | present | 1/1 | 1/1 |  |
-| `AvaloniaXamlIlOptionMarkupExtensionTransformer.cs` | `compiler_extensions/transformers/ferro_xaml_il_option_markup_extension_transformer.rs` | partial | 5/5 | 34/37 |  |
-| `AvaloniaXamlIlQueryTransformer.cs` | `compiler_extensions/transformers/ferro_xaml_il_query_transformer.rs` | partial | 11/12 | 20/42 |  |
+| `AvaloniaXamlIlOptionMarkupExtensionTransformer.cs` | `compiler_extensions/transformers/ferro_xaml_il_option_markup_extension_transformer.rs` | present | 5/5 | 34/37 (3 waived) |  |
+| `AvaloniaXamlIlQueryTransformer.cs` | `compiler_extensions/transformers/ferro_xaml_il_query_transformer.rs` | present | 11/12 (1 waived) | 20/42 (22 waived) |  |
 | `AvaloniaXamlIlReorderClassesPropertiesTransformer.cs` | `compiler_extensions/transformers/ferro_xaml_il_reorder_classes_properties_transformer.rs` | present | 1/1 | 1/1 |  |
 | `AvaloniaXamlIlResolveByNameMarkupExtensionReplacer.cs` | `compiler_extensions/transformers/ferro_xaml_il_resolve_by_name_markup_extension_replacer.rs` | present | 1/1 | 1/1 |  |
 | `AvaloniaXamlIlResourceTransformer.cs` | `compiler_extensions/transformers/ferro_xaml_il_resource_transformer.rs` | present | 1/1 | 2/2 |  |
-| `AvaloniaXamlIlRootObjectScopeTransformer.cs` | `compiler_extensions/transformers/ferro_xaml_il_root_object_scope_transformer.rs` | partial | 1/2 | 1/2 |  |
-| `AvaloniaXamlIlSelectorTransformer.cs` | `compiler_extensions/transformers/ferro_xaml_il_selector_transformer.rs` | partial | 14/16 | 31/55 |  |
+| `AvaloniaXamlIlRootObjectScopeTransformer.cs` | `compiler_extensions/transformers/ferro_xaml_il_root_object_scope_transformer.rs` | present | 1/2 (1 waived) | 1/2 (1 waived) |  |
+| `AvaloniaXamlIlSelectorTransformer.cs` | `compiler_extensions/transformers/ferro_xaml_il_selector_transformer.rs` | present | 14/16 (2 waived) | 31/55 (24 waived) |  |
 | `AvaloniaXamlIlSetterTargetTypeMetadataTransformer.cs` | `compiler_extensions/transformers/ferro_xaml_il_setter_target_type_metadata_transformer.rs` | present | 1/1 | 1/1 |  |
 | `AvaloniaXamlIlSetterTransformer.cs` | `compiler_extensions/transformers/ferro_xaml_il_setter_transformer.rs` | present | 2/2 | 2/2 |  |
 | `AvaloniaXamlIlStyleValidatorTransformer.cs` | `compiler_extensions/transformers/ferro_xaml_il_style_validator_transformer.rs` | present | 1/1 | 1/1 |  |
@@ -220,156 +117,11 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 | `AvaloniaXamlIlTransformRoutedEvent.cs` | `compiler_extensions/transformers/ferro_xaml_il_transform_routed_event.rs` | present | 1/1 | 1/1 |  |
 | `AvaloniaXamlIlTransformSyntheticCompiledBindingMembers.cs` | `compiler_extensions/transformers/ferro_xaml_il_transform_synthetic_compiled_binding_members.rs` | present | 3/3 | 5/5 |  |
 | `AvaloniaXamlIlTransitionsTypeMetadataTransformer.cs` | `compiler_extensions/transformers/ferro_xaml_il_transitions_type_metadata_transformer.rs` | present | 1/1 | 1/1 |  |
-| `AvaloniaXamlIlWellKnownTypes.cs` | `compiler_extensions/transformers/ferro_xaml_il_well_known_types.rs` | partial | 3/3 | 129/143 |  |
+| `AvaloniaXamlIlWellKnownTypes.cs` | `compiler_extensions/transformers/ferro_xaml_il_well_known_types.rs` | present | 3/3 | 129/143 (14 waived) |  |
 | `IgnoredDirectivesTransformer.cs` | `compiler_extensions/transformers/ignored_directives_transformer.rs` | present | 1/1 | 1/1 |  |
 | `XDataTypeTransformer.cs` | `compiler_extensions/transformers/x_data_type_transformer.rs` | present | 1/1 | 1/1 |  |
 | `XNameTransformer.cs` | `compiler_extensions/transformers/x_name_transformer.rs` | present | 1/1 | 1/1 |  |
 | `XamlPropertyPathException.cs` | `compiler_extensions/transformers/xaml_property_path_exception.rs` | present | 1/1 | 1/1 |  |
-
-<details><summary><code>AddNameScopeRegistration.cs</code> - 3 missing</summary>
-
-- `AvaloniaNameScopeRegistrationXamlIlNode` (class): 1 missing
-  - `IXamlAstValueNode Name { get; set; }` *(getter `name` found, setter `set_name` missing)*
-- `AvaloniaNameScopeRegistrationXamlIlNodeEmitter` (class, internal): **type missing** (1 members)
-
-</details>
-
-<details><summary><code>AvaloniaXamlIlBindingPathParser.cs</code> - 4 missing</summary>
-
-- `ParsedBindingPathNode` (class): 1 missing
-  - `override void VisitChildren(IXamlAstVisitor visitor)`
-- `VisualAncestorBindingExpressionNode` (class): 1 missing
-  - `VisualAncestorBindingExpressionNode(IXamlType type)`
-- `LogicalAncestorBindingExpressionNode` (class): 1 missing
-  - `LogicalAncestorBindingExpressionNode(IXamlType type)`
-- `TemplatedParentBindingExpressionNode` (class): 1 missing
-  - `TemplatedParentBindingExpressionNode(IXamlType type)`
-
-</details>
-
-<details><summary><code>AvaloniaXamlIlControlTemplateTargetTypeMetadataTransformer.cs</code> - 1 missing</summary>
-
-- `AvaloniaXamlIlTargetTypeMetadataNode` (class): 1 missing
-  - `IXamlAstTypeReference TargetType { get; set; }` *(getter `target_type` found, setter `set_target_type` missing)*
-
-</details>
-
-<details><summary><code>AvaloniaXamlIlEnsureResourceDictionaryCapacityTransformer.cs</code> - 1 missing</summary>
-
-- `AvaloniaXamlIlEnsureResourceDictionaryCapacityTransformer.EnsureCapacityNode` (class): 1 missing
-  - `XamlILNodeEmitResult Emit(XamlEmitContext<IXamlILEmitter, XamlILNodeEmitResult> context, IXamlILEmitter cod...`
-
-</details>
-
-<details><summary><code>AvaloniaXamlIlOptionMarkupExtensionTransformer.cs</code> - 3 missing</summary>
-
-- `AvaloniaXamlIlOptionMarkupExtensionTransformer.OptionsMarkupExtensionBranch` (class): 2 missing
-  - `IXamlAstValueNode Option { get; set; }` *(getter `option` found, setter `set_option` missing)*
-  - `IXamlAstValueNode Value { get; set; }` *(getter `value` found, setter `set_value` missing)*
-- `AvaloniaXamlIlOptionMarkupExtensionTransformer.OptionsMarkupExtensionMethod` (class): 1 missing
-  - `void EmitCall(XamlEmitContext<IXamlILEmitter, XamlILNodeEmitResult> context, IXamlILEmitter codeGen)`
-
-</details>
-
-<details><summary><code>AvaloniaXamlIlQueryTransformer.cs</code> - 23 missing</summary>
-
-- `XamlIlQueryNode` (class): 5 missing
-  - `XamlIlQueryNode(XamlIlQueryNode? previous, IXamlLineInfo? info = null, IXamlType? queryType = null)`
-  - `IXamlAstTypeReference Type { get; }`
-  - `virtual XamlILNodeEmitResult Emit(XamlEmitContext<IXamlILEmitter, XamlILNodeEmitResult> context, IXamlILEmi...`
-  - `abstract void DoEmit(XamlEmitContext<IXamlILEmitter, XamlILNodeEmitResult> context, IXamlILEmitter codeGen)` *(protected)*
-  - `void EmitCall(XamlEmitContext<IXamlILEmitter, XamlILNodeEmitResult> context, IXamlILEmitter codeGen, Func<I...` *(protected)*
-- `XamlIlQueryInitialNode` (class): 1 missing
-  - `override void DoEmit(XamlEmitContext<IXamlILEmitter, XamlILNodeEmitResult> context, IXamlILEmitter codeGen)` *(protected)*
-- `XamlIlTypeQuery` (class): 1 missing
-  - `override void DoEmit(XamlEmitContext<IXamlILEmitter, XamlILNodeEmitResult> context, IXamlILEmitter codeGen)` *(protected)*
-- `XamlIlStringQuery` (class): 2 missing
-  - `string String { get; set; }` *(getter `string` found, setter `set_string` missing)*
-  - `override void DoEmit(XamlEmitContext<IXamlILEmitter, XamlILNodeEmitResult> context, IXamlILEmitter codeGen)` *(protected)*
-- `XamlIlStringQuery.QueryType` (enum, public): **type missing** (2 members)
-- `XamlIlCombinatorQuery` (class): 1 missing
-  - `override void DoEmit(XamlEmitContext<IXamlILEmitter, XamlILNodeEmitResult> context, IXamlILEmitter codeGen)` *(protected)*
-- `XamlIlWidthQuery` (class): 1 missing
-  - `override void DoEmit(XamlEmitContext<IXamlILEmitter, XamlILNodeEmitResult> context, IXamlILEmitter codeGen)` *(protected)*
-- `XamlIlHeightQuery` (class): 1 missing
-  - `override void DoEmit(XamlEmitContext<IXamlILEmitter, XamlILNodeEmitResult> context, IXamlILEmitter codeGen)` *(protected)*
-- `XamlIlOrQueryNode` (class): 4 missing
-  - `XamlIlOrQueryNode(IXamlLineInfo info, IXamlType queryType)`
-  - `void Add(XamlIlQueryNode node)`
-  - `override IXamlType? TargetType { get; }`
-  - `override void DoEmit(XamlEmitContext<IXamlILEmitter, XamlILNodeEmitResult> context, IXamlILEmitter codeGen)` *(protected)*
-- `XamlIlAndQueryNode` (class): 4 missing
-  - `XamlIlAndQueryNode(IXamlLineInfo info, IXamlType queryType)`
-  - `void Add(XamlIlQueryNode node)`
-  - `override IXamlType? TargetType { get; }`
-  - `override void DoEmit(XamlEmitContext<IXamlILEmitter, XamlILNodeEmitResult> context, IXamlILEmitter codeGen)` *(protected)*
-
-</details>
-
-<details><summary><code>AvaloniaXamlIlRootObjectScopeTransformer.cs</code> - 2 missing</summary>
-
-- `AvaloniaXamlIlRootObjectScope.Emitter` (class, internal): **type missing** (1 members)
-
-</details>
-
-<details><summary><code>AvaloniaXamlIlSelectorTransformer.cs</code> - 26 missing</summary>
-
-- `XamlIlSelectorNode` (class): 5 missing
-  - `XamlIlSelectorNode(XamlIlSelectorNode? previous, IXamlLineInfo? info = null, IXamlType? selectorType = null)`
-  - `IXamlAstTypeReference Type { get; }`
-  - `virtual XamlILNodeEmitResult Emit(XamlEmitContext<IXamlILEmitter, XamlILNodeEmitResult> context, IXamlILEmi...`
-  - `abstract void DoEmit(XamlEmitContext<IXamlILEmitter, XamlILNodeEmitResult> context, IXamlILEmitter codeGen)` *(protected)*
-  - `void EmitCall(XamlEmitContext<IXamlILEmitter, XamlILNodeEmitResult> context, IXamlILEmitter codeGen, Func<I...` *(protected)*
-- `XamlIlSelectorInitialNode` (class): 1 missing
-  - `override void DoEmit(XamlEmitContext<IXamlILEmitter, XamlILNodeEmitResult> context, IXamlILEmitter codeGen)` *(protected)*
-- `XamlIlTypeSelector` (class): 1 missing
-  - `override void DoEmit(XamlEmitContext<IXamlILEmitter, XamlILNodeEmitResult> context, IXamlILEmitter codeGen)` *(protected)*
-- `XamlIlStringSelector` (class): 2 missing
-  - `string String { get; set; }` *(getter `string` found, setter `set_string` missing)*
-  - `override void DoEmit(XamlEmitContext<IXamlILEmitter, XamlILNodeEmitResult> context, IXamlILEmitter codeGen)` *(protected)*
-- `XamlIlStringSelector.SelectorType` (enum, public): **type missing** (2 members)
-- `XamlIlCombinatorSelector` (class): 1 missing
-  - `override void DoEmit(XamlEmitContext<IXamlILEmitter, XamlILNodeEmitResult> context, IXamlILEmitter codeGen)` *(protected)*
-- `XamlIlNotSelector` (class): 1 missing
-  - `override void DoEmit(XamlEmitContext<IXamlILEmitter, XamlILNodeEmitResult> context, IXamlILEmitter codeGen)` *(protected)*
-- `XamlIlNthChildSelector` (class): 1 missing
-  - `override void DoEmit(XamlEmitContext<IXamlILEmitter, XamlILNodeEmitResult> context, IXamlILEmitter codeGen)` *(protected)*
-- `XamlIlNthChildSelector.SelectorType` (enum, public): **type missing** (2 members)
-- `XamlIlPropertyEqualsSelector` (class): 3 missing
-  - `IXamlProperty Property { get; set; }` *(getter `property` found, setter `set_property` missing)*
-  - `IXamlAstValueNode Value { get; set; }` *(getter `value` found, setter `set_value` missing)*
-  - `override void DoEmit(XamlEmitContext<IXamlILEmitter, XamlILNodeEmitResult> context, IXamlILEmitter codeGen)` *(protected)*
-- `XamlIlAttachedPropertyEqualsSelector` (class): 3 missing
-  - `IXamlField PropertyFiled { get; set; }` *(getter `property_filed` found, setter `set_property_filed` missing)*
-  - `IXamlAstValueNode Value { get; set; }` *(getter `value` found, setter `set_value` missing)*
-  - `override void DoEmit(XamlEmitContext<IXamlILEmitter, XamlILNodeEmitResult> context, IXamlILEmitter codeGen)` *(protected)*
-- `XamlIlOrSelectorNode` (class): 1 missing
-  - `override void DoEmit(XamlEmitContext<IXamlILEmitter, XamlILNodeEmitResult> context, IXamlILEmitter codeGen)` *(protected)*
-- `XamlIlNestingSelector` (class): 1 missing
-  - `override void DoEmit(XamlEmitContext<IXamlILEmitter, XamlILNodeEmitResult> context, IXamlILEmitter codeGen)` *(protected)*
-
-</details>
-
-<details><summary><code>AvaloniaXamlIlWellKnownTypes.cs</code> - 14 missing</summary>
-
-- `AvaloniaXamlIlWellKnownTypes` (class): 10 missing
-  - `IXamlType AvaloniaObject { get; }`
-  - `IXamlType AvaloniaObjectExtensions { get; }`
-  - `IXamlType AvaloniaProperty { get; }`
-  - `IXamlType AvaloniaPropertyT { get; }`
-  - `IXamlMethod AvaloniaObjectSetStyledPropertyValue { get; }`
-  - `IXamlType AvaloniaAttachedPropertyT { get; }`
-  - `IXamlMethod AvaloniaObjectBindMethod { get; }`
-  - `IXamlMethod AvaloniaObjectSetValueMethod { get; }`
-  - `IXamlType AvaloniaListAttribute { get; }`
-  - `IXamlType AvaloniaList { get; }`
-- `AvaloniaXamlIlWellKnownTypesExtensions` (class): 4 missing
-  - `static AvaloniaXamlIlWellKnownTypes GetAvaloniaTypes(this TransformerConfiguration cfg)`
-  - `static AvaloniaXamlIlWellKnownTypes GetAvaloniaTypes(this AstTransformationContext ctx)`
-  - `static AvaloniaXamlIlWellKnownTypes GetAvaloniaTypes(this XamlEmitContext<IXamlILEmitter, XamlILNodeEmitRes...`
-  - `static AvaloniaXamlIlWellKnownTypes GetAvaloniaTypes(this AstGroupTransformationContext ctx)`
-
-</details>
 
 ### `CompilerExtensions/Visitors` - files 1/1, types 1/1, members 4/4
 
@@ -383,32 +135,33 @@ Rust sources of this crate that no upstream file maps to. Give each a reason in 
 
 | Rust file | Reason | Types defined |
 |---|---|---|
-| `runtime/framework/binding_path.rs` | **unmapped** | `RuntimePropertyAccessors` |
-| `runtime/framework/helpers.rs` | **unmapped** |  |
-| `runtime/framework/methods.rs` | **unmapped** | `DeferredTransformationFactoryMethod`, `DocumentBody`, `DocumentBuildMethod`, `DocumentMethodSignature`, `DocumentPopulateMethod`, `FrameworkMethodEvaluator`, `NoLineInfo`, `RuntimeDocumentTypeBuilderProvider`, `XamlMemberException` |
-| `runtime/framework/nodes.rs` | **unmapped** | `FrameworkNodeEvaluator` |
-| `runtime/framework/services.rs` | **unmapped** | `FerroRuntimeContextServices`, `NamespaceInfoProvider` |
-| `runtime/framework/setters.rs` | **unmapped** | `FrameworkSetterEvaluator`, `NoLineInfo` |
-| `runtime/framework/tests.rs` | **unmapped** |  |
-| `runtime/interpreter/evaluators.rs` | **unmapped** | `AssignmentPlan`, `StandardNodeEvaluator` |
-| `runtime/interpreter/interpreter.rs` | **unmapped** | `EvalContext`, `EvalResult`, `IXamlAstEvaluableNode`, `IXamlConstructorEvaluator`, `IXamlEvaluablePropertySetter`, `IXamlEvaluableWrappedMethod`, `IXamlMethodEvaluator`, `IXamlNodeEvaluator`, `IXamlSetterEvaluator`, `IXamlWrappedMethodEvaluator`, `Interpreter`, `ParentStackCache`, ... (16 total) |
-| `runtime/interpreter/runtime_context.rs` | **unmapped** | `IRuntimeContextServices`, `NamespaceInfoStaticProvider`, `XamlXmlNamespaceInfo`, `XmlNamespaceInfoProvider` |
-| `runtime/interpreter/services.rs` | **unmapped** | `DefaultRuntimeContextServices`, `IProvideValueTarget`, `IRootObjectProvider`, `IUriContext`, `IXamlParentStackProvider`, `IXamlXmlNamespaceInfoProvider` |
-| `runtime/type_system/core_types.rs` | **unmapped** |  |
-| `runtime/type_system/list_converter.rs` | **unmapped** | `RuntimeListConverter` |
-| `runtime/type_system/object_model.rs` | **unmapped** |  |
-| `runtime/type_system/runtime_type.rs` | **unmapped** | `DeclaredMember`, `MembersInit`, `RuntimeAssembly`, `RuntimeConstructor`, `RuntimeCustomAttribute`, `RuntimeEvent`, `RuntimeField`, `RuntimeFieldValue`, `RuntimeInvoker`, `RuntimeMembers`, `RuntimeMethod`, `RuntimeParameterInfo`, ... (17 total) |
-| `runtime/type_system/runtime_type_system.rs` | **unmapped** | `GenericIndex`, `MemberBuilder`, `RuntimeTypeSystem` |
-| `runtime/type_system/tests.rs` | **unmapped** | `Declared`, `Detached`, `Probe` |
-| `runtime/type_system/values.rs` | **unmapped** | `ArrayForm`, `DeferredContentFactory`, `ITypeDescriptorContext`, `RuntimeArray`, `RuntimeTypeValue` |
-| `runtime/value_parser.rs` | **unmapped** | `RuntimeCompileTimeValueParser` |
-| `rust_emitter/compiled.rs` | **unmapped** | `ClassConstructor`, `ClassFile`, `CompiledDocument`, `GeneratedFile` |
-| `rust_emitter/compiled_resources.rs` | **unmapped** | `CompiledAssembly`, `CompiledDocumentBuildMethod`, `CompiledMarkupTypeSystem`, `CompiledResourcesType` |
-| `rust_emitter/emitter.rs` | **unmapped** | `DocumentFunctions`, `EmitResult`, `Emitter`, `Kind`, `ParentStackNodes`, `SetterValues`, `Statement`, `Typed`, `UnsupportedNode` |
-| `rust_emitter/source.rs` | **unmapped** |  |
-| `rust_emitter/xaml_metadata.rs` | **unmapped** | `DocumentModel`, `JsonParser`, `JsonValue`, `XamlMetadata` |
-| `testing/bindings.rs` | **unmapped** | `BindingsPipelineOptions`, `NodeCollector` |
-| `testing/objects.rs` | **unmapped** | `Collector`, `Dumper` |
-| `testing/styles.rs` | **unmapped** | `Collector` |
+| `core_table.rs` | the closed table of runtime library (`System.*`) types markup can name, as data: what both type systems of the compiler define from it (docs/porting/xaml.md, 9.5.1 and 9.5.5) | `CoreBody`, `CoreKind`, `CoreMember`, `CoreRef`, `CoreType` |
+| `runtime/framework/binding_path.rs` | the run-time back end of the compiler: the interpreter, the evaluators of the framework language and the run-time type system, which take the place of the IL back end and of the reflection type system of upstream's loader (docs/porting/xaml.md) | `RuntimePropertyAccessors` |
+| `runtime/framework/helpers.rs` | the run-time back end of the compiler: the interpreter, the evaluators of the framework language and the run-time type system, which take the place of the IL back end and of the reflection type system of upstream's loader (docs/porting/xaml.md) |  |
+| `runtime/framework/methods.rs` | the run-time back end of the compiler: the interpreter, the evaluators of the framework language and the run-time type system, which take the place of the IL back end and of the reflection type system of upstream's loader (docs/porting/xaml.md) | `DeferredTransformationFactoryMethod`, `DocumentBody`, `DocumentBuildMethod`, `DocumentMethodSignature`, `DocumentPopulateMethod`, `FrameworkMethodEvaluator`, `NoLineInfo`, `RuntimeDocumentTypeBuilderProvider`, `XamlMemberException` |
+| `runtime/framework/nodes.rs` | the run-time back end of the compiler: the interpreter, the evaluators of the framework language and the run-time type system, which take the place of the IL back end and of the reflection type system of upstream's loader (docs/porting/xaml.md) | `FrameworkNodeEvaluator` |
+| `runtime/framework/services.rs` | the run-time back end of the compiler: the interpreter, the evaluators of the framework language and the run-time type system, which take the place of the IL back end and of the reflection type system of upstream's loader (docs/porting/xaml.md) | `FerroRuntimeContextServices`, `NamespaceInfoProvider` |
+| `runtime/framework/setters.rs` | the run-time back end of the compiler: the interpreter, the evaluators of the framework language and the run-time type system, which take the place of the IL back end and of the reflection type system of upstream's loader (docs/porting/xaml.md) | `FrameworkSetterEvaluator`, `NoLineInfo` |
+| `runtime/framework/tests.rs` | the unit tests of the module |  |
+| `runtime/interpreter/evaluators.rs` | the run-time back end of the compiler: the interpreter, the evaluators of the framework language and the run-time type system, which take the place of the IL back end and of the reflection type system of upstream's loader (docs/porting/xaml.md) | `AssignmentPlan`, `StandardNodeEvaluator` |
+| `runtime/interpreter/interpreter.rs` | the run-time back end of the compiler: the interpreter, the evaluators of the framework language and the run-time type system, which take the place of the IL back end and of the reflection type system of upstream's loader (docs/porting/xaml.md) | `EvalContext`, `EvalResult`, `IXamlAstEvaluableNode`, `IXamlConstructorEvaluator`, `IXamlEvaluablePropertySetter`, `IXamlEvaluableWrappedMethod`, `IXamlMethodEvaluator`, `IXamlNodeEvaluator`, `IXamlSetterEvaluator`, `IXamlWrappedMethodEvaluator`, `Interpreter`, `ParentStackCache`, ... (16 total) |
+| `runtime/interpreter/runtime_context.rs` | the run-time back end of the compiler: the interpreter, the evaluators of the framework language and the run-time type system, which take the place of the IL back end and of the reflection type system of upstream's loader (docs/porting/xaml.md) | `IRuntimeContextServices`, `NamespaceInfoStaticProvider`, `XamlXmlNamespaceInfo`, `XmlNamespaceInfoProvider` |
+| `runtime/interpreter/services.rs` | the run-time back end of the compiler: the interpreter, the evaluators of the framework language and the run-time type system, which take the place of the IL back end and of the reflection type system of upstream's loader (docs/porting/xaml.md) | `DefaultRuntimeContextServices`, `IProvideValueTarget`, `IRootObjectProvider`, `IUriContext`, `IXamlParentStackProvider`, `IXamlXmlNamespaceInfoProvider` |
+| `runtime/type_system/core_types.rs` | the run-time back end of the compiler: the interpreter, the evaluators of the framework language and the run-time type system, which take the place of the IL back end and of the reflection type system of upstream's loader (docs/porting/xaml.md) |  |
+| `runtime/type_system/list_converter.rs` | the run-time back end of the compiler: the interpreter, the evaluators of the framework language and the run-time type system, which take the place of the IL back end and of the reflection type system of upstream's loader (docs/porting/xaml.md) | `RuntimeListConverter` |
+| `runtime/type_system/object_model.rs` | the run-time back end of the compiler: the interpreter, the evaluators of the framework language and the run-time type system, which take the place of the IL back end and of the reflection type system of upstream's loader (docs/porting/xaml.md) |  |
+| `runtime/type_system/runtime_type.rs` | the run-time back end of the compiler: the interpreter, the evaluators of the framework language and the run-time type system, which take the place of the IL back end and of the reflection type system of upstream's loader (docs/porting/xaml.md) | `DeclaredMember`, `MembersInit`, `RuntimeAssembly`, `RuntimeConstructor`, `RuntimeCustomAttribute`, `RuntimeEvent`, `RuntimeField`, `RuntimeFieldValue`, `RuntimeInvoker`, `RuntimeMembers`, `RuntimeMethod`, `RuntimeParameterInfo`, ... (17 total) |
+| `runtime/type_system/runtime_type_system.rs` | the run-time back end of the compiler: the interpreter, the evaluators of the framework language and the run-time type system, which take the place of the IL back end and of the reflection type system of upstream's loader (docs/porting/xaml.md) | `GenericIndex`, `MemberBuilder`, `RuntimeTypeSystem` |
+| `runtime/type_system/tests.rs` | the unit tests of the module | `Declared`, `Detached`, `ListProbe`, `Probe` |
+| `runtime/type_system/values.rs` | the run-time back end of the compiler: the interpreter, the evaluators of the framework language and the run-time type system, which take the place of the IL back end and of the reflection type system of upstream's loader (docs/porting/xaml.md) | `ArrayForm`, `DeferredContentFactory`, `ITypeDescriptorContext`, `RuntimeArray`, `RuntimeList`, `RuntimeTypeValue` |
+| `runtime/value_parser.rs` | the run-time back end of the compiler: the interpreter, the evaluators of the framework language and the run-time type system, which take the place of the IL back end and of the reflection type system of upstream's loader (docs/porting/xaml.md) | `RuntimeCompileTimeValueParser` |
+| `rust_emitter/compiled.rs` | the Rust emitter, the ahead-of-time back end of the compiler, which takes the place of the IL emitter of upstream's build task (docs/porting/xaml.md, section 9) | `ClassConstructor`, `ClassFile`, `CompiledDocument`, `GeneratedFile` |
+| `rust_emitter/compiled_resources.rs` | the Rust emitter, the ahead-of-time back end of the compiler, which takes the place of the IL emitter of upstream's build task (docs/porting/xaml.md, section 9) | `CompiledAssembly`, `CompiledDocumentBuildMethod`, `CompiledMarkupTypeSystem`, `CompiledResourcesType` |
+| `rust_emitter/emitter.rs` | the Rust emitter, the ahead-of-time back end of the compiler, which takes the place of the IL emitter of upstream's build task (docs/porting/xaml.md, section 9) | `DocumentFunctions`, `EmitResult`, `Emitter`, `Kind`, `ParentStackNodes`, `SetterValues`, `Statement`, `Typed`, `UnsupportedNode` |
+| `rust_emitter/source.rs` | the Rust emitter, the ahead-of-time back end of the compiler, which takes the place of the IL emitter of upstream's build task (docs/porting/xaml.md, section 9) |  |
+| `rust_emitter/xaml_metadata.rs` | the Rust emitter, the ahead-of-time back end of the compiler, which takes the place of the IL emitter of upstream's build task (docs/porting/xaml.md, section 9) | `DocumentModel`, `JsonParser`, `JsonValue`, `XamlMetadata` |
+| `testing/bindings.rs` | test support shared by the test suites of this crate and of the crates built on it: mocks, test services, fixtures and helpers, among them the ports of the ones of the upstream test projects (`tests/Avalonia.UnitTests` and the helpers next to the suites) | `BindingsPipelineOptions`, `NodeCollector` |
+| `testing/objects.rs` | test support shared by the test suites of this crate and of the crates built on it: mocks, test services, fixtures and helpers, among them the ports of the ones of the upstream test projects (`tests/Avalonia.UnitTests` and the helpers next to the suites) | `Collector`, `Dumper` |
+| `testing/styles.rs` | test support shared by the test suites of this crate and of the crates built on it: mocks, test services, fixtures and helpers, among them the ports of the ones of the upstream test projects (`tests/Avalonia.UnitTests` and the helpers next to the suites) | `Collector` |
 
 Tests, examples and build scripts (not scanned): `compiler_extensions/ferro_xaml_il_compiler_tests.rs`, `compiler_extensions/ferro_xaml_il_language_parse_intrinsics_tests.rs`, `compiler_extensions/ferro_xaml_il_language_tests.rs`, `compiler_extensions/transformers/compiled_bindings_tests.rs`, `compiler_extensions/transformers/ferro_xaml_il_control_template_parts_checker_tests.rs`, `compiler_extensions/transformers/ferro_xaml_il_control_template_target_type_metadata_transformer_tests.rs`, `compiler_extensions/transformers/ferro_xaml_il_control_theme_transformer_tests.rs`, `compiler_extensions/transformers/ferro_xaml_il_query_transformer_tests.rs`, `compiler_extensions/transformers/ferro_xaml_il_selector_transformer_tests.rs`, `compiler_extensions/transformers/ferro_xaml_il_setter_transformer_tests.rs`, `compiler_extensions/transformers/objects_transformers_tests.rs`, `compiler_extensions/xaml_il_binding_path_helper_tests.rs`, `compiler_extensions/xaml_il_ferro_property_helper_tests.rs`, `runtime/framework/evaluator_tests.rs`, `runtime/interpreter/tests/classes.rs`, `runtime/interpreter/tests/compiler_tests.rs`, `runtime/interpreter/tests/dynamic_setters_tests.rs`, `runtime/interpreter/tests/markup_extension_tests.rs`, `runtime/interpreter/tests/mod.rs`.

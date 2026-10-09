@@ -11,8 +11,8 @@ Generated from upstream commit `17350180c33b063f0e98abbfd19aa3cae63f5d56`. Back 
 | Crate | `ferroui-markup-xaml` |
 | Phase / priority | 2 - xaml + themes / P1 |
 | Files | 45/47 (95.7%), 1 not applicable |
-| Types | 60/64 (93.8%) |
-| Members | 191/240 (79.6%) |
+| Types | 61/64 (3 waived) (100.0%) |
+| Members | 199/240 (41 waived) (100.0%) |
 | Contracts (interfaces) | 9/9 |
 | Property registrations | 0/0 |
 | Routed events | 0/0 |
@@ -35,40 +35,18 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 
 ## Files
 
-### `(project root)` - files 8/8, types 14/15, members 43/56
+### `(project root)` - files 8/8, types 15/15, members 51/56 (5 waived)
 
 | Upstream file | Rust file | Status | Types | Members | Notes |
 |---|---|---|---|---|---|
 | `AvaloniaXamlLoader.cs` | `ferro_xaml_loader.rs` | present | 2/2 | 5/5 |  |
 | `EagerParentStackEnumerator.cs` | `eager_parent_stack_enumerator.rs` | present | 1/1 | 3/3 |  |
-| `Extensions.cs` | `extensions.rs` | partial | 0/1 | 0/9 |  |
+| `Extensions.cs` | `extensions.rs` | present | 1/1 | 8/9 (1 waived) | renamed: the extension methods are the trait `ServiceProviderExtensions`, implemented for the service provider contract |
 | `MarkupExtension.cs` | `markup_extension.rs` | present | 1/1 | 1/1 |  |
 | `RuntimeXamlLoaderConfiguration.cs` | `runtime_xaml_loader_configuration.rs` | present | 4/4 | 16/16 |  |
-| `RuntimeXamlLoaderDocument.cs` | `runtime_xaml_loader_document.rs` | partial | 1/1 | 10/13 |  |
-| `XamlLoadException.cs` | `xaml_load_exception.rs` | partial | 1/1 | 2/3 |  |
+| `RuntimeXamlLoaderDocument.cs` | `runtime_xaml_loader_document.rs` | present | 1/1 | 10/13 (3 waived) |  |
+| `XamlLoadException.cs` | `xaml_load_exception.rs` | present | 1/1 | 2/3 (1 waived) |  |
 | `XamlTypes.cs` | `xaml_types.rs` | present | 4/4 | 6/6 |  |
-
-<details><summary><code>Extensions.cs</code> - 10 missing</summary>
-
-- `Extensions` (class, internal): **type missing** (9 members)
-
-</details>
-
-<details><summary><code>RuntimeXamlLoaderDocument.cs</code> - 3 missing</summary>
-
-- `RuntimeXamlLoaderDocument` (class): 3 missing
-  - `RuntimeXamlLoaderDocument(Uri? baseUri, Stream stream)` *(5 of 8 constructors found)*
-  - `RuntimeXamlLoaderDocument(object? rootInstance, Stream stream)` *(5 of 8 constructors found)*
-  - `RuntimeXamlLoaderDocument(Uri? baseUri, object? rootInstance, Stream stream)` *(5 of 8 constructors found)*
-
-</details>
-
-<details><summary><code>XamlLoadException.cs</code> - 1 missing</summary>
-
-- `XamlLoadException` (class): 1 missing
-  - `XamlLoadException(string message, Exception innerException)` *(2 of 3 constructors found)*
-
-</details>
 
 ### `Converters` - files 8/8, types 8/8, members 17/17
 
@@ -95,113 +73,38 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 |---|---|---|---|---|---|
 | `XamlSourceInfo.cs` | `diagnostics/xaml_source_info.rs` | present | 1/1 | 9/9 |  |
 
-### `MarkupExtensions` - files 9/9, types 14/14, members 40/57
+### `MarkupExtensions` - files 9/9, types 14/14, members 40/57 (17 waived)
 
 | Upstream file | Rust file | Status | Types | Members | Notes |
 |---|---|---|---|---|---|
-| `CompiledBindingExtension.cs` | `markup_extensions/compiled_binding_extension.rs` | partial | 1/1 | 3/4 |  |
-| `DynamicResourceExtension.cs` | `markup_extensions/dynamic_resource_extension.rs` | partial | 1/1 | 4/5 |  |
+| `CompiledBindingExtension.cs` | `markup_extensions/compiled_binding_extension.rs` | present | 1/1 | 3/4 (1 waived) |  |
+| `DynamicResourceExtension.cs` | `markup_extensions/dynamic_resource_extension.rs` | present | 1/1 | 4/5 (1 waived) |  |
 | `On.cs` | `markup_extensions/on.rs` | present | 2/2 | 2/2 |  |
-| `OnFormFactorExtension.cs` | `markup_extensions/on_form_factor_extension.rs` | partial | 3/3 | 6/12 |  |
-| `OnPlatformExtension.cs` | `markup_extensions/on_platform_extension.rs` | partial | 3/3 | 10/16 |  |
-| `ReflectionBindingExtension.cs` | `markup_extensions/reflection_binding_extension.rs` | partial | 1/1 | 2/3 |  |
-| `RelativeSourceExtension.cs` | `markup_extensions/relative_source_extension.rs` | partial | 1/1 | 6/7 |  |
+| `OnFormFactorExtension.cs` | `markup_extensions/on_form_factor_extension.rs` | present | 3/3 | 6/12 (6 waived) |  |
+| `OnPlatformExtension.cs` | `markup_extensions/on_platform_extension.rs` | present | 3/3 | 10/16 (6 waived) |  |
+| `ReflectionBindingExtension.cs` | `markup_extensions/reflection_binding_extension.rs` | present | 1/1 | 2/3 (1 waived) |  |
+| `RelativeSourceExtension.cs` | `markup_extensions/relative_source_extension.rs` | present | 1/1 | 6/7 (1 waived) |  |
 | `ResolveByNameExtension.cs` | `markup_extensions/resolve_by_name_extension.rs` | present | 1/1 | 3/3 |  |
-| `StaticResourceExtension.cs` | `markup_extensions/static_resource_extension.rs` | partial | 1/1 | 4/5 |  |
+| `StaticResourceExtension.cs` | `markup_extensions/static_resource_extension.rs` | present | 1/1 | 4/5 (1 waived) |  |
 
-<details><summary><code>CompiledBindingExtension.cs</code> - 1 missing</summary>
-
-- `CompiledBindingExtension` (class): 1 missing
-  - `CompiledBindingExtension(CompiledBindingPath path)` *(1 of 2 constructors found)*
-
-</details>
-
-<details><summary><code>DynamicResourceExtension.cs</code> - 1 missing</summary>
-
-- `DynamicResourceExtension` (class): 1 missing
-  - `DynamicResourceExtension(object resourceKey)` *(1 of 2 constructors found)*
-
-</details>
-
-<details><summary><code>OnFormFactorExtension.cs</code> - 6 missing</summary>
-
-- `OnFormFactorExtension` (class): 3 missing
-  - `OnFormFactorExtension()`
-  - `OnFormFactorExtension(object defaultValue)`
-  - `static bool ShouldProvideOption(IServiceProvider serviceProvider, FormFactorType option)`
-- `OnFormFactorExtension<TReturn>` (class): 3 missing
-  - `OnFormFactorExtension()`
-  - `OnFormFactorExtension(TReturn defaultValue)`
-  - `static bool ShouldProvideOption(IServiceProvider serviceProvider, FormFactorType option)`
-
-</details>
-
-<details><summary><code>OnPlatformExtension.cs</code> - 6 missing</summary>
-
-- `OnPlatformExtension` (class): 3 missing
-  - `OnPlatformExtension()`
-  - `OnPlatformExtension(object defaultValue)`
-  - `static bool ShouldProvideOption(string option)`
-- `OnPlatformExtension<TReturn>` (class): 3 missing
-  - `OnPlatformExtension()`
-  - `OnPlatformExtension(TReturn defaultValue)`
-  - `static bool ShouldProvideOption(string option)`
-
-</details>
-
-<details><summary><code>ReflectionBindingExtension.cs</code> - 1 missing</summary>
-
-- `ReflectionBindingExtension` (class): 1 missing
-  - `ReflectionBindingExtension(string path)` *(1 of 2 constructors found)*
-
-</details>
-
-<details><summary><code>RelativeSourceExtension.cs</code> - 1 missing</summary>
-
-- `RelativeSourceExtension` (class): 1 missing
-  - `RelativeSourceExtension(RelativeSourceMode mode)` *(1 of 2 constructors found)*
-
-</details>
-
-<details><summary><code>StaticResourceExtension.cs</code> - 1 missing</summary>
-
-- `StaticResourceExtension` (class): 1 missing
-  - `StaticResourceExtension(object resourceKey)` *(1 of 2 constructors found)*
-
-</details>
-
-### `MarkupExtensions/CompiledBindings` - files 2/2, types 4/5, members 13/26
+### `MarkupExtensions/CompiledBindings` - files 2/2, types 4/5 (1 waived), members 13/26 (13 waived)
 
 | Upstream file | Rust file | Status | Types | Members | Notes |
 |---|---|---|---|---|---|
-| `PropertyInfoAccessorFactory.cs` | `markup_extensions/compiled_bindings/property_info_accessor_factory.rs` | partial | 3/4 | 11/24 |  |
+| `PropertyInfoAccessorFactory.cs` | `markup_extensions/compiled_bindings/property_info_accessor_factory.rs` | present | 3/4 (1 waived) | 11/24 (13 waived) |  |
 | `TaskStreamPlugin.cs` | `markup_extensions/compiled_bindings/task_stream_plugin.rs` | present | 1/1 | 2/2 |  |
 
-<details><summary><code>PropertyInfoAccessorFactory.cs</code> - 14 missing</summary>
-
-- `PropertyInfoAccessorFactory` (class): 1 missing
-  - `static IPropertyAccessor CreateAvaloniaPropertyAccessor(WeakReference<object?> target, IPropertyInfo property)`
-- `AvaloniaPropertyAccessor` (class, internal): **type missing** (8 members)
-- `InpcPropertyAccessor` (class): 1 missing
-  - `void OnEvent(object? sender, WeakEvent ev, PropertyChangedEventArgs e)`
-- `IndexerAccessor` (class): 3 missing
-  - `override void SubscribeCore()` *(protected)*
-  - `override void UnsubscribeCore()` *(protected)*
-  - `void OnEvent(object? sender, WeakEvent ev, NotifyCollectionChangedEventArgs args)`
-
-</details>
-
-### `Parsers` - files 0/1, types 0/1, members 0/2
+### `Parsers` - files 0/1, types 0/1 (1 waived), members 0/2 (2 waived)
 
 | Upstream file | Rust file | Status | Types | Members | Notes |
 |---|---|---|---|---|---|
-| `PropertyParser.cs` | `parsers/property_parser.rs` | missing | 0/1 | 0/2 |  |
+| `PropertyParser.cs` | `parsers/property_parser.rs` | missing | 0/1 (1 waived) | 0/2 (2 waived) |  |
 
-### `PortableXaml` - files 0/1, types 0/1, members 0/1
+### `PortableXaml` - files 0/1, types 0/1 (1 waived), members 0/1 (1 waived)
 
 | Upstream file | Rust file | Status | Types | Members | Notes |
 |---|---|---|---|---|---|
-| `AvaloniaResourceXamlInfo.cs` | `portable_xaml/ferro_resource_xaml_info.rs` | missing | 0/1 | 0/1 |  |
+| `AvaloniaResourceXamlInfo.cs` | `portable_xaml/ferro_resource_xaml_info.rs` | missing | 0/1 (1 waived) | 0/1 (1 waived) |  |
 
 ### `Properties` - files 0/0, types 0/0, members 0/0
 
@@ -209,34 +112,13 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 |---|---|---|---|---|---|
 | `AssemblyInfo.cs` | - | n/a | - | - | no non-private types (assembly attributes, global usings or file-local helpers) |
 
-### `Styling` - files 3/3, types 3/3, members 21/24
+### `Styling` - files 3/3, types 3/3, members 21/24 (3 waived)
 
 | Upstream file | Rust file | Status | Types | Members | Notes |
 |---|---|---|---|---|---|
-| `MergeResourceInclude.cs` | `styling/merge_resource_include.rs` | partial | 1/1 | 1/2 |  |
-| `ResourceInclude.cs` | `styling/resource_include.rs` | partial | 1/1 | 10/11 |  |
-| `StyleInclude.cs` | `styling/style_include.rs` | partial | 1/1 | 10/11 |  |
-
-<details><summary><code>MergeResourceInclude.cs</code> - 1 missing</summary>
-
-- `MergeResourceInclude` (class): 1 missing
-  - `MergeResourceInclude(IServiceProvider serviceProvider)` *(1 of 2 constructors found)*
-
-</details>
-
-<details><summary><code>ResourceInclude.cs</code> - 1 missing</summary>
-
-- `ResourceInclude` (class): 1 missing
-  - `ResourceInclude(IServiceProvider serviceProvider)` *(1 of 2 constructors found)*
-
-</details>
-
-<details><summary><code>StyleInclude.cs</code> - 1 missing</summary>
-
-- `StyleInclude` (class): 1 missing
-  - `StyleInclude(IServiceProvider serviceProvider)` *(1 of 2 constructors found)*
-
-</details>
+| `MergeResourceInclude.cs` | `styling/merge_resource_include.rs` | present | 1/1 | 1/2 (1 waived) |  |
+| `ResourceInclude.cs` | `styling/resource_include.rs` | present | 1/1 | 10/11 (1 waived) |  |
+| `StyleInclude.cs` | `styling/style_include.rs` | present | 1/1 | 10/11 (1 waived) |  |
 
 ### `Templates` - files 8/8, types 8/8, members 25/25
 
@@ -267,13 +149,13 @@ Rust sources of this crate that no upstream file maps to. Give each a reason in 
 
 | Rust file | Reason | Types defined |
 |---|---|---|
-| `converters/type_converter.rs` | **unmapped** | `ITypeDescriptorContext`, `ServiceProviderTypeDescriptorContext`, `TypeConverter` |
-| `object_casts.rs` | **unmapped** | `ElementResourceNode`, `FromXamlObject`, `ObjectKey`, `StyleResourceProvider`, `TargetProperty`, `XamlResourceNode` |
-| `register_types.rs` | **unmapped** |  |
-| `rust_paths.rs` | **unmapped** |  |
-| `test_support.rs` | **unmapped** | `LazyParents`, `TestAssetLoader`, `TestServiceProvider` |
-| `xaml_il/runtime/compiled.rs` | **unmapped** | `CompiledLoadError`, `CompiledXmlNamespaceInfo`, `DeclaredAccessors`, `DeferredBuild`, `DocumentInfo`, `NullableInstance`, `XmlNamespaceTable` |
-| `xaml_il/runtime/xaml_il_context.rs` | **unmapped** | `FerroXamlIlContextNameScopeField`, `FrameworkContextServices`, `IStaticServiceProvider`, `IXamlIlContextServices`, `WeakContextServiceProvider`, `XamlIlContext`, `XamlIlContextDefinition`, `XamlIlContextService` |
-| `xamlx_runtime.rs` | **unmapped** | `IXamlParentStackProviderV1`, `IXamlXmlNamespaceInfoProviderV1`, `XamlXmlNamespaceInfoV1` |
+| `converters/type_converter.rs` | counterpart of .NET `System.ComponentModel.TypeConverter` and `ITypeDescriptorContext`, which the converters of the markup runtime derive from and receive | `ITypeDescriptorContext`, `ServiceProviderTypeDescriptorContext`, `TypeConverter` |
+| `object_casts.rs` | type tests on untyped objects: the `is` / `as` casts upstream performs on the objects of a parent stack, on provide-value targets and on root objects | `ElementResourceNode`, `FromXamlObject`, `ObjectKey`, `StyleResourceProvider`, `TargetProperty`, `XamlResourceNode` |
+| `register_types.rs` | the type table of the crate (porting guide, Classes): its namespaces, its classes and what it states about itself for markup; takes the place of the assembly metadata the upstream compiler and loader reflect over |  |
+| `rust_paths.rs` | generated by scripts/generate_markup_types.py: the public Rust paths of the registered types of the crate, which the emitter of the XAML compiler writes into generated code |  |
+| `test_support.rs` | hand-built service providers and platform doubles for the tests of the crate | `LazyParents`, `TestAssetLoader`, `TestServiceProvider` |
+| `xaml_il/runtime/compiled.rs` | the helpers that Rust source generated from markup calls (docs/porting/xaml.md, section 9.9): upstream's compiler emits the same steps as IL | `CompiledLoadError`, `CompiledXmlNamespaceInfo`, `DeclaredAccessors`, `DeferredBuild`, `DocumentInfo`, `NullableInstance`, `XmlNamespaceTable` |
+| `xaml_il/runtime/xaml_il_context.rs` | the run-time context of a document being built: the class the IL back end of upstream generates for every document (`IL/RuntimeContext.cs` of XamlX) | `FerroXamlIlContextNameScopeField`, `FrameworkContextServices`, `IStaticServiceProvider`, `IXamlIlContextServices`, `WeakContextServiceProvider`, `XamlIlContext`, `XamlIlContextDefinition`, `XamlIlContextService` |
+| `xamlx_runtime.rs` | port of the runtime contracts of the XAML compiler (`XamlX.Runtime/Interfaces.cs`), which the tracking of XamlX does not list: the compiler crate has no runtime part | `IXamlParentStackProviderV1`, `IXamlXmlNamespaceInfoProviderV1`, `XamlXmlNamespaceInfoV1` |
 
 Tests, examples and build scripts (not scanned): `converters/converters_tests.rs`, `data/dynamic_resource_expression_tests.rs`, `markup_extensions/compiled_bindings/property_info_accessor_factory_tests.rs`, `markup_extensions/markup_extensions_tests.rs`, `styling/includes_tests.rs`, `templates/templates_tests.rs`, `xaml_il/runtime/compiled_tests.rs`, `xaml_il/runtime/xaml_il_runtime_helpers_tests.rs`.

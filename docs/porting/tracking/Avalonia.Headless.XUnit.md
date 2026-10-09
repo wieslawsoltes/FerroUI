@@ -10,30 +10,30 @@ Generated from upstream commit `17350180c33b063f0e98abbfd19aa3cae63f5d56`. Back 
 | FerroUI | `src/Headless/FerroUI.Headless.XUnit` (not created yet) |
 | Crate | `ferroui-headless-xunit` |
 | Phase / priority | 1 - test infrastructure / P1 |
-| Files | 0/14 (0.0%) |
-| Types | 0/14 (0.0%) |
-| Members | 0/26 (0.0%) |
+| Files | 0/0 (-), 14 not applicable |
+| Types | 0/0 (-) |
+| Members | 0/0 (-) |
 | Contracts (interfaces) | 0/0 |
 | Property registrations | 0/0 |
 | Routed events | 0/0 |
 
 ## Files
 
-### `(project root)` - files 0/14, types 0/14, members 0/26
+### `(project root)` - files 0/0, types 0/0, members 0/0
 
 | Upstream file | Rust file | Status | Types | Members | Notes |
 |---|---|---|---|---|---|
-| `AvaloniaDelayEnumeratedTheoryTestCase.cs` | `ferro_delay_enumerated_theory_test_case.rs` | missing | 0/1 | 0/3 |  |
-| `AvaloniaFact.cs` | `ferro_fact.rs` | missing | 0/1 | 0/1 |  |
-| `AvaloniaFactDiscoverer.cs` | `ferro_fact_discoverer.rs` | missing | 0/1 | 0/1 |  |
-| `AvaloniaTestCase.cs` | `ferro_test_case.rs` | missing | 0/1 | 0/3 |  |
-| `AvaloniaTestCaseRunner.cs` | `ferro_test_case_runner.rs` | missing | 0/1 | 0/3 |  |
-| `AvaloniaTestCaseRunnerContext.cs` | `ferro_test_case_runner_context.rs` | missing | 0/1 | 0/2 |  |
-| `AvaloniaTestFramework.cs` | `ferro_test_framework.rs` | missing | 0/1 | 0/2 |  |
-| `AvaloniaTestFrameworkAttribute.cs` | `ferro_test_framework_attribute.rs` | missing | 0/1 | 0/1 |  |
-| `AvaloniaTestFrameworkDiscoverer.cs` | `ferro_test_framework_discoverer.rs` | missing | 0/1 | 0/1 |  |
-| `AvaloniaTestFrameworkExecutor.cs` | `ferro_test_framework_executor.rs` | missing | 0/1 | 0/3 |  |
-| `AvaloniaTestRunner.cs` | `ferro_test_runner.rs` | missing | 0/1 | 0/2 |  |
-| `AvaloniaTestRunnerContext.cs` | `ferro_test_runner_context.rs` | missing | 0/1 | 0/2 |  |
-| `AvaloniaTheoryAttribute.cs` | `ferro_theory_attribute.rs` | missing | 0/1 | 0/0 |  |
-| `AvaloniaTheoryDiscoverer.cs` | `ferro_theory_discoverer.rs` | missing | 0/1 | 0/2 |  |
+| `AvaloniaDelayEnumeratedTheoryTestCase.cs` | - | n/a | - | - | not-applicable: glue between the headless platform and the xUnit test framework (test attributes, test case runners): there is no such framework to integrate with; tests use the harness of cargo |
+| `AvaloniaFact.cs` | - | n/a | - | - | not-applicable: glue between the headless platform and the xUnit test framework (test attributes, test case runners): there is no such framework to integrate with; tests use the harness of cargo |
+| `AvaloniaFactDiscoverer.cs` | - | n/a | - | - | not-applicable: glue between the headless platform and the xUnit test framework (test attributes, test case runners): there is no such framework to integrate with; tests use the harness of cargo |
+| `AvaloniaTestCase.cs` | - | n/a | - | - | not-applicable: glue between the headless platform and the xUnit test framework (test attributes, test case runners): there is no such framework to integrate with; tests use the harness of cargo |
+| `AvaloniaTestCaseRunner.cs` | - | n/a | - | - | not-applicable: glue between the headless platform and the xUnit test framework (test attributes, test case runners): there is no such framework to integrate with; tests use the harness of cargo |
+| `AvaloniaTestCaseRunnerContext.cs` | - | n/a | - | - | not-applicable: glue between the headless platform and the xUnit test framework (test attributes, test case runners): there is no such framework to integrate with; tests use the harness of cargo |
+| `AvaloniaTestFramework.cs` | - | n/a | - | - | not-applicable: glue between the headless platform and the xUnit test framework (test attributes, test case runners): there is no such framework to integrate with; tests use the harness of cargo |
+| `AvaloniaTestFrameworkAttribute.cs` | - | n/a | - | - | not-applicable: glue between the headless platform and the xUnit test framework (test attributes, test case runners): there is no such framework to integrate with; tests use the harness of cargo |
+| `AvaloniaTestFrameworkDiscoverer.cs` | - | n/a | - | - | not-applicable: glue between the headless platform and the xUnit test framework (test attributes, test case runners): there is no such framework to integrate with; tests use the harness of cargo |
+| `AvaloniaTestFrameworkExecutor.cs` | - | n/a | - | - | not-applicable: glue between the headless platform and the xUnit test framework (test attributes, test case runners): there is no such framework to integrate with; tests use the harness of cargo |
+| `AvaloniaTestRunner.cs` | - | n/a | - | - | not-applicable: glue between the headless platform and the xUnit test framework (test attributes, test case runners): there is no such framework to integrate with; tests use the harness of cargo |
+| `AvaloniaTestRunnerContext.cs` | - | n/a | - | - | not-applicable: glue between the headless platform and the xUnit test framework (test attributes, test case runners): there is no such framework to integrate with; tests use the harness of cargo |
+| `AvaloniaTheoryAttribute.cs` | - | n/a | - | - | not-applicable: glue between the headless platform and the xUnit test framework (test attributes, test case runners): there is no such framework to integrate with; tests use the harness of cargo |
+| `AvaloniaTheoryDiscoverer.cs` | - | n/a | - | - | not-applicable: glue between the headless platform and the xUnit test framework (test attributes, test case runners): there is no such framework to integrate with; tests use the harness of cargo |

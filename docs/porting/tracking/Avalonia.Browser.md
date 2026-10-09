@@ -10,317 +10,125 @@ Generated from upstream commit `17350180c33b063f0e98abbfd19aa3cae63f5d56`. Back 
 | FerroUI | `src/Browser/FerroUI.Browser` (exists) |
 | Crate | `ferroui-browser` |
 | Phase / priority | 3 - browser / P2 |
-| Files | 49/49 (100.0%), 3 not applicable |
-| Types | 53/61 (86.9%) |
-| Members | 302/426 (70.9%) |
+| Files | 50/50 (100.0%), 2 not applicable |
+| Types | 60/62 (2 waived) (100.0%) |
+| Members | 332/428 (90 waived) (98.2%) |
 | Contracts (interfaces) | 0/0 |
 | Property registrations | 0/0 |
 | Routed events | 0/0 |
 
 ## Files
 
-### `(project root)` - files 28/28, types 32/35, members 156/177
+### `(project root)` - files 28/28, types 34/35 (1 waived), members 161/177 (14 waived)
 
 | Upstream file | Rust file | Status | Types | Members | Notes |
 |---|---|---|---|---|---|
-| `AvaloniaView.cs` | `ferro_view.rs` | partial | 1/1 | 3/4 | renamed: the view type is named after the framework |
+| `AvaloniaView.cs` | `ferro_view.rs` | present | 1/1 | 3/4 (1 waived) | renamed: the view type is named after the framework |
 | `BrowserActivatableLifetime.cs` | `browser_activatable_lifetime.rs` | present | 1/1 | 1/1 |  |
-| `BrowserAppBuilder.cs` | `browser_app_builder.rs` | partial | 3/3 | 7/13 |  |
+| `BrowserAppBuilder.cs` | `browser_app_builder.rs` | present | 3/3 | 7/13 (6 waived) |  |
 | `BrowserClipboardDataTransfer.cs` | `browser_clipboard_data_transfer.rs` | present | 1/1 | 4/4 |  |
-| `BrowserClipboardDataTransferItem.cs` | `browser_clipboard_data_transfer_item.rs` | partial | 1/1 | 3/4 |  |
+| `BrowserClipboardDataTransferItem.cs` | `browser_clipboard_data_transfer_item.rs` | present | 1/1 | 3/4 (1 waived) |  |
 | `BrowserDataFormatHelper.cs` | `browser_data_format_helper.rs` | present | 1/1 | 2/2 |  |
 | `BrowserDataTransferHelper.cs` | `browser_data_transfer_helper.rs` | present | 1/1 | 2/2 |  |
 | `BrowserDragDataTransfer.cs` | `browser_drag_data_transfer.rs` | present | 1/1 | 4/4 |  |
-| `BrowserDragDataTransferItem.cs` | `browser_drag_data_transfer_item.rs` | partial | 1/1 | 3/4 |  |
+| `BrowserDragDataTransferItem.cs` | `browser_drag_data_transfer_item.rs` | present | 1/1 | 3/4 (1 waived) |  |
 | `BrowserInputHandler.cs` | `browser_input_handler.rs` | present | 1/1 | 14/14 |  |
 | `BrowserInputPane.cs` | `browser_input_pane.rs` | present | 1/1 | 1/1 |  |
 | `BrowserInsetsManager.cs` | `browser_insets_manager.rs` | present | 1/1 | 5/5 |  |
-| `BrowserMouseDevice.cs` | `browser_mouse_device.rs` | partial | 1/2 | 2/4 |  |
+| `BrowserMouseDevice.cs` | `browser_mouse_device.rs` | present | 1/2 (1 waived) | 2/4 (2 waived) |  |
 | `BrowserNativeControlHost.cs` | `browser_native_control_host.rs` | present | 1/1 | 5/5 |  |
 | `BrowserPlatformSettings.cs` | `browser_platform_settings.rs` | present | 1/1 | 6/6 |  |
 | `BrowserRuntimePlatform.cs` | `browser_runtime_platform.rs` | present | 2/2 | 3/3 |  |
-| `BrowserScreens.cs` | `browser_screens.rs` | partial | 2/2 | 10/11 |  |
+| `BrowserScreens.cs` | `browser_screens.rs` | present | 2/2 | 10/11 (1 waived) |  |
 | `BrowserSingleThreadedDispatcherImpl.cs` | `browser_single_threaded_dispatcher_impl.rs` | present | 1/1 | 12/12 |  |
 | `BrowserSingleViewLifetime.cs` | `browser_single_view_lifetime.rs` | present | 1/1 | 3/3 |  |
 | `BrowserSystemNavigationManager.cs` | `browser_system_navigation_manager.rs` | present | 1/1 | 2/2 |  |
 | `BrowserTextInputMethod.cs` | `browser_text_input_method.rs` | present | 1/1 | 10/10 |  |
-| `BrowserTopLevelImpl.cs` | `browser_top_level_impl.rs` | partial | 1/1 | 28/30 |  |
+| `BrowserTopLevelImpl.cs` | `browser_top_level_impl.rs` | partial | 1/1 | 28/30 (1 waived) |  |
 | `ClipboardImpl.cs` | `clipboard_impl.rs` | present | 1/1 | 3/3 |  |
 | `Cursor.cs` | `cursor.rs` | present | 2/2 | 9/9 |  |
-| `JSObjectControlHandle.cs` | `js_object_control_handle.rs` | partial | 0/2 | 0/5 | renamed: snake case of the acronym |
+| `JSObjectControlHandle.cs` | `js_object_control_handle.rs` | present | 2/2 | 5/5 | renamed: snake case of the acronym |
 | `KeyInterop.cs` | `key_interop.rs` | present | 1/1 | 3/3 |  |
 | `WinStubs.cs` | `win_stubs.rs` | present | 1/1 | 3/3 |  |
-| `WindowingPlatform.cs` | `windowing_platform.rs` | partial | 1/1 | 8/10 |  |
+| `WindowingPlatform.cs` | `windowing_platform.rs` | partial | 1/1 | 8/10 (1 waived) |  |
 
-<details><summary><code>AvaloniaView.cs</code> - 1 missing</summary>
+<details><summary><code>BrowserTopLevelImpl.cs</code> - 1 missing</summary>
 
-- `AvaloniaView` (class): 1 missing
-  - `AvaloniaView(JSObject host)` *(1 of 2 constructors found)*
-
-</details>
-
-<details><summary><code>BrowserAppBuilder.cs</code> - 6 missing</summary>
-
-- `BrowserPlatformOptions` (record): 4 missing
-  - `Func<string, string>? FrameworkAssetPathResolver { get; set; }`
-  - `bool RegisterAvaloniaServiceWorker { get; set; }`
-  - `string? AvaloniaServiceWorkerScope { get; set; }`
-  - `bool? PreferManagedThreadDispatcher { get; set; }`
-- `BrowserAppBuilder` (class): 2 missing
-  - `static async Task StartBrowserAppAsync(this AppBuilder builder, string mainDivId, BrowserPlatformOptions? o...`
-  - `static async Task SetupBrowserAppAsync(this AppBuilder builder, BrowserPlatformOptions? options = null)`
-
-</details>
-
-<details><summary><code>BrowserClipboardDataTransferItem.cs</code> - 1 missing</summary>
-
-- `BrowserClipboardDataTransferItem` (class): 1 missing
-  - `void Dispose()`
-
-</details>
-
-<details><summary><code>BrowserDragDataTransferItem.cs</code> - 1 missing</summary>
-
-- `BrowserDragDataTransferItem` (class): 1 missing
-  - `void Dispose()`
-
-</details>
-
-<details><summary><code>BrowserMouseDevice.cs</code> - 3 missing</summary>
-
-- `BrowserMouseDevice.BrowserMousePointer` (class, internal): **type missing** (2 members)
-
-</details>
-
-<details><summary><code>BrowserScreens.cs</code> - 1 missing</summary>
-
-- `BrowserScreen` (class): 1 missing
-  - `bool IsCurrent { get; set; }` *(internal; getter `is_current` found, setter `set_is_current` missing)*
-
-</details>
-
-<details><summary><code>BrowserTopLevelImpl.cs</code> - 2 missing</summary>
-
-- `BrowserTopLevelImpl` (class): 2 missing
-  - `static BrowserTopLevelImpl()` *(static)*
+- `BrowserTopLevelImpl` (class): 1 missing
   - `Size? FrameSize { get; }`
+  - waived (no static constructor is needed: the static state is thread-local and initialised in place): `.cctor`
 
 </details>
 
-<details><summary><code>JSObjectControlHandle.cs</code> - 7 missing</summary>
+<details><summary><code>WindowingPlatform.cs</code> - 1 missing</summary>
 
-- `JSObjectPlatformHandle` (class, public): **type missing** (3 members)
-- `JSObjectControlHandle` (class, public): **type missing** (2 members)
-
-</details>
-
-<details><summary><code>WindowingPlatform.cs</code> - 2 missing</summary>
-
-- `BrowserWindowingPlatform` (class): 2 missing
+- `BrowserWindowingPlatform` (class): 1 missing
   - `static ManualRawEventGrouperDispatchQueue? EventGrouperDispatchQueue` *(internal)*
-  - `static readonly bool IsThreadingEnabled` *(internal)*
+  - waived (a flag detected at start-up from the runtime: here it is known at compile time (`target_feature = "atomics"`, the module built with `scripts/build-browser.sh --threads`), and whether such a module renders on its render thread is `BrowserPlatformOptions::render_thread`): `IsThreadingEnabled`
 
 </details>
 
-### `Interop` - files 10/10, types 9/11, members 59/123
+### `Interop` - files 10/10, types 10/11 (1 waived), members 64/123 (59 waived)
 
 | Upstream file | Rust file | Status | Types | Members | Notes |
 |---|---|---|---|---|---|
-| `AvaloniaModule.cs` | `interop/ferro_module.rs` | partial | 1/1 | 4/10 | renamed: the module is named after the framework; it is imported statically, so the asynchronous import and path resolution members have no counterpart |
-| `CanvasHelper.cs` | `interop/canvas_helper.rs` | partial | 1/2 | 1/9 |  |
-| `DomHelper.cs` | `interop/dom_helper.rs` | partial | 1/1 | 7/15 |  |
+| `AvaloniaModule.cs` | `interop/ferro_module.rs` | present | 1/1 | 4/10 (6 waived) | renamed: the module is named after the framework; it is imported statically, so the asynchronous import and path resolution members have no counterpart |
+| `CanvasHelper.cs` | `interop/canvas_helper.rs` | present | 2/2 | 6/9 (3 waived) | renamed: Rust spelling of the acronym |
+| `DomHelper.cs` | `interop/dom_helper.rs` | present | 1/1 | 7/15 (8 waived) |  |
 | `GeneralHelpers.cs` | - | n/a | - | - | not-applicable: reflective access to script objects: replaced by typed property getters in interop/ |
-| `InputHelper.cs` | `interop/input_helper.rs` | partial | 1/1 | 19/37 |  |
+| `InputHelper.cs` | `interop/input_helper.rs` | present | 1/1 | 19/37 (18 waived) |  |
 | `JsCallbackHelper.cs` | - | n/a | - | - | not-applicable: restores the synchronisation context of the managed runtime in callbacks: no equivalent concept |
-| `NativeControlHostHelper.cs` | `interop/native_control_host_helper.rs` | partial | 0/1 | 0/7 |  |
-| `NavigationHelper.cs` | `interop/navigation_helper.rs` | partial | 1/1 | 1/3 |  |
-| `ScreenHelper.cs` | `interop/screen_helper.rs` | partial | 1/1 | 2/11 |  |
-| `StorageHelper.cs` | `interop/storage_helper.rs` | partial | 1/1 | 17/22 |  |
+| `NativeControlHostHelper.cs` | `interop/native_control_host_helper.rs` | present | 0/1 (1 waived) | 0/7 (7 waived) |  |
+| `NavigationHelper.cs` | `interop/navigation_helper.rs` | present | 1/1 | 1/3 (2 waived) |  |
+| `ScreenHelper.cs` | `interop/screen_helper.rs` | present | 1/1 | 2/11 (9 waived) |  |
+| `StorageHelper.cs` | `interop/storage_helper.rs` | present | 1/1 | 17/22 (5 waived) |  |
 | `StreamHelper.cs` | `interop/stream_helper.rs` | present | 1/1 | 6/6 |  |
-| `TimerHelper.cs` | `interop/timer_helper.rs` | partial | 1/1 | 2/3 |  |
+| `TimerHelper.cs` | `interop/timer_helper.rs` | present | 1/1 | 2/3 (1 waived) |  |
 
-<details><summary><code>AvaloniaModule.cs</code> - 6 missing</summary>
-
-- `AvaloniaModule` (class) (ported as module-level items): 6 missing
-  - `static Task ImportMainToWorkerContext()`
-  - `const string StorageModuleName`
-  - `const string AssetsBasePath`
-  - `static Task ImportMain()`
-  - `static bool IsMobile()`
-  - `static bool IsTv()`
-
-</details>
-
-<details><summary><code>CanvasHelper.cs</code> - 9 missing</summary>
-
-- `GLInfo` (record, internal): **type missing** (6 members)
-- `CanvasHelper` (class) (ported as module-level items): 2 missing
-  - `static JSObject CreateRenderTargetSurface(JSObject canvasSurface, int[] modes, int topLevelId, int threadId)`
-  - `static void Destroy(JSObject canvasSurface)`
-
-</details>
-
-<details><summary><code>DomHelper.cs</code> - 8 missing</summary>
-
-- `DomHelper` (class) (ported as module-level items): 8 missing
-  - `static JSObject GetGlobalThis()` *(internal)*
-  - `static JSObject CreateAvaloniaHost(JSObject element)`
-  - `static bool IsFullscreen(JSObject globalThis)`
-  - `static double[] GetSafeAreaPadding(JSObject globalThis)`
-  - `static int[] GetDarkMode(JSObject globalThis)`
-  - `static string? GetNavigatorLanguage(JSObject globalThis)`
-  - `static void AddCssClass(JSObject element, string className)`
-  - `static void InitGlobalDomEvents(JSObject globalThis)`
-
-</details>
-
-<details><summary><code>InputHelper.cs</code> - 18 missing</summary>
-
-- `InputHelper` (class) (ported as module-level items): 18 missing
-  - `static Task RedirectInputAsync(int topLevelId, Action<BrowserTopLevelImpl> handler)`
-  - `static Task<T> RedirectInputRetunAsync<T>(int topLevelId, Func<BrowserTopLevelImpl, T> handler, T @default)`
-  - `static void SubscribeInputEvents(JSObject htmlElement, int topLevelId)`
-  - `static double[] GetCoalescedEvents(JSObject pointerEvent)`
-  - `static void ClearInputElement(JSObject htmlElement)`
-  - `static void FocusElement(JSObject htmlElement)`
-  - `static void SetCursor(JSObject htmlElement, string kind)`
-  - `static void HideElement(JSObject htmlElement)`
-  - `static void ShowElement(JSObject htmlElement)`
-  - `static void SetSurroundingText(JSObject htmlElement, string text, int start, int end)`
-  - `static void SetBounds(JSObject htmlElement, int x, int y, int width, int height, int caret)`
-  - `static void InitializeBackgroundHandlers(JSObject globalThis)`
-  - `static bool IsClipboardFormatSupported(string format)`
-  - `static JSObject CreateWriteableClipboardSource()`
-  - `static JSObject CreateWriteableClipboardItem(JSObject source)`
-  - `static void AddStringToWriteableClipboardItem(JSObject item, string format, string value)`
-  - `static void AddBytesToWriteableClipboardItem(JSObject item, string format, [JSMarshalAs<JSType.MemoryView>]...`
-  - `static string[] GetReadableDataItemFormats(JSObject item)`
-
-</details>
-
-<details><summary><code>NativeControlHostHelper.cs</code> - 8 missing</summary>
-
-- `NativeControlHostHelper` (class, internal): **type missing** (7 members)
-
-</details>
-
-<details><summary><code>NavigationHelper.cs</code> - 2 missing</summary>
-
-- `NavigationHelper` (class) (ported as module-level items): 2 missing
-  - `static void AddBackHandler([JSMarshalAs<JSType.Function<JSType.Boolean>>] Func<bool> backHandlerCallback)`
-  - `static bool WindowOpen(string uri, string target)`
-
-</details>
-
-<details><summary><code>ScreenHelper.cs</code> - 9 missing</summary>
-
-- `ScreenHelper` (class) (ported as module-level items): 9 missing
-  - `static void SubscribeOnChanged(JSObject globalThis)`
-  - `static JSObject[] GetAllScreens(JSObject globalThis)`
-  - `static string GetDisplayName(JSObject screen)`
-  - `static double GetScaling(JSObject screen)`
-  - `static double[] GetBounds(JSObject screen)`
-  - `static double[] GetWorkingArea(JSObject screen)`
-  - `static bool IsCurrent(JSObject screen)`
-  - `static bool IsPrimary(JSObject screen)`
-  - `static int GetCurrentOrientation(JSObject screen)`
-
-</details>
-
-<details><summary><code>StorageHelper.cs</code> - 5 missing</summary>
-
-- `StorageHelper` (class) (ported as module-level items): 5 missing
-  - `static bool HasNativeFilePicker()`
-  - `static JSObject CreateWellKnownDirectory(string wellKnownDirectory)`
-  - `static JSObject[] ItemsArray(JSObject item)`
-  - `static JSObject[] FilesToItemsArray(JSObject item)`
-  - `static JSObject CreateAcceptType(string description, string[] mimeTypes, string[]? extensions)`
-
-</details>
-
-<details><summary><code>TimerHelper.cs</code> - 1 missing</summary>
-
-- `TimerHelper` (class) (ported as module-level items): 1 missing
-  - `static void RunAnimationFrames()`
-
-</details>
-
-### `Rendering` - files 7/7, types 8/8, members 46/51
+### `Rendering` - files 8/8, types 9/9, members 44/53 (5 waived)
 
 | Upstream file | Rust file | Status | Types | Members | Notes |
 |---|---|---|---|---|---|
 | `BrowserRenderTimer.cs` | `rendering/browser_render_timer.rs` | present | 1/1 | 4/4 |  |
 | `BrowserSharedRenderLoop.cs` | `rendering/browser_shared_render_loop.rs` | present | 1/1 | 2/2 |  |
-| `BrowserSoftwareRenderTarget.cs` | `rendering/browser_software_render_target.rs` | partial | 1/1 | 3/4 |  |
-| `BrowserSurface.cs` | `rendering/browser_surface.rs` | partial | 1/1 | 11/13 |  |
-| `BrowserWebGlRenderTarget.cs` | `rendering/browser_web_gl_render_target.rs` | present | 2/2 | 18/18 |  |
+| `BrowserSoftwareRenderTarget.cs` | `rendering/browser_software_render_target.rs` | partial | 1/1 | 2/4 (1 waived) |  |
+| `BrowserSurface.cs` | `rendering/browser_surface.rs` | present | 1/1 | 11/13 (2 waived) |  |
+| `BrowserWebGlRenderTarget.cs` | `rendering/browser_web_gl_render_target.rs` | partial | 2/2 | 17/18 |  |
 | `RenderTargetBrowserSurface.cs` | `rendering/render_target_browser_surface.rs` | present | 1/1 | 5/5 |  |
-| `RenderWorker.cs` | - | n/a | - | - | not-applicable: threaded mode (render worker): not ported, the browser platform is single-threaded (docs/porting/browser-platform.md 6) |
-| `WebRenderTarget.cs` | `rendering/web_render_target.rs` | partial | 1/1 | 3/5 | renamed: the file is named after its script-side counterpart upstream; it declares the render target base |
+| `RenderWorker.cs` | `rendering/render_worker.rs` | partial | 1/1 | 0/2 |  |
+| `WebRenderTarget.cs` | `rendering/web_render_target.rs` | present | 1/1 | 3/5 (2 waived) | renamed: the file is named after its script-side counterpart upstream; it declares the render target base |
 
 <details><summary><code>BrowserSoftwareRenderTarget.cs</code> - 1 missing</summary>
 
 - `BrowserSoftwareRenderTarget` (class): 1 missing
-  - `static void PutPixelData(JSObject js, int address, int size, int width, int height)`
+  - `override IPlatformGraphicsContext? PlatformGraphicsContext { get; }`
+  - waived (present: the functions are declared in the `wasm-bindgen` extern block of `rendering/browser_software_render_target.rs` (imports of the script module), which the scanner does not read as members of a type): `PutPixelData`
 
 </details>
 
-<details><summary><code>BrowserSurface.cs</code> - 2 missing</summary>
+<details><summary><code>BrowserWebGlRenderTarget.cs</code> - 1 missing</summary>
 
-- `BrowserSurface` (class): 2 missing
-  - `virtual void Initialize()` *(protected)*
-  - `virtual IPlatformRenderSurface[] GetRenderSurfaces()`
-
-</details>
-
-<details><summary><code>WebRenderTarget.cs</code> - 2 missing</summary>
-
-- `BrowserRenderTarget` (class): 2 missing
-  - `BrowserRenderTarget(JSObject js)`
-  - `readonly JSObject Js` *(protected)*
+- `BrowserWebGlRenderTarget` (class): 1 missing
+  - `override IPlatformGraphicsContext? PlatformGraphicsContext { get; }`
 
 </details>
 
-### `Storage` - files 4/4, types 4/7, members 41/75
+<details><summary><code>RenderWorker.cs</code> - 2 missing</summary>
+
+- `RenderWorker` (class): 2 missing
+  - `static int WorkerThreadId` *(internal)*
+  - `static Task InitializeAsync()`
+
+</details>
+
+### `Storage` - files 4/4, types 7/7, members 63/75 (12 waived)
 
 | Upstream file | Rust file | Status | Types | Members | Notes |
 |---|---|---|---|---|---|
-| `BlobReadableStream.cs` | `storage/blob_readable_stream.rs` | partial | 1/1 | 9/16 |  |
+| `BlobReadableStream.cs` | `storage/blob_readable_stream.rs` | present | 1/1 | 9/16 (7 waived) |  |
 | `BrowserLauncher.cs` | `storage/browser_launcher.rs` | present | 1/1 | 2/2 |  |
-| `BrowserStorageProvider.cs` | `storage/browser_storage_provider.rs` | partial | 1/4 | 18/40 |  |
-| `WriteableStream.cs` | `storage/writeable_stream.rs` | partial | 1/1 | 12/17 |  |
-
-<details><summary><code>BlobReadableStream.cs</code> - 7 missing</summary>
-
-- `BlobReadableStream` (class): 7 missing
-  - `override long Position { get; set; }` *(getter `position` found, setter `set_position` missing)*
-  - `override void Flush()`
-  - `override void SetLength(long value)`
-  - `override void Write(byte[] buffer, int offset, int count)`
-  - `override async ValueTask<int> ReadAsync(Memory<byte> buffer, CancellationToken cancellationToken = default)` *(1 of 2 overloads found)*
-  - `override IAsyncResult BeginRead(byte[] buffer, int offset, int count, AsyncCallback? callback, object? state)`
-  - `override int EndRead(IAsyncResult asyncResult)`
-
-</details>
-
-<details><summary><code>BrowserStorageProvider.cs</code> - 25 missing</summary>
-
-- `JSStorageItem` (class, internal): **type missing** (13 members)
-- `JSStorageFile` (class, internal): **type missing** (3 members)
-- `JSStorageFolder` (class, internal): **type missing** (6 members)
-
-</details>
-
-<details><summary><code>WriteableStream.cs</code> - 5 missing</summary>
-
-- `WriteableStream` (class): 5 missing
-  - `override int Read(byte[] buffer, int offset, int count)`
-  - `override Task WriteAsync(byte[] buffer, int offset, int count, CancellationToken cancellationToken)` *(1 of 2 overloads found)*
-  - `override IAsyncResult BeginWrite(byte[] buffer, int offset, int count, AsyncCallback? callback, object? state)`
-  - `override void EndWrite(IAsyncResult asyncResult)`
-  - `override async ValueTask DisposeAsync()`
-
-</details>
+| `BrowserStorageProvider.cs` | `storage/browser_storage_provider.rs` | present | 4/4 | 40/40 | renamed: Rust spelling of the acronym |
+| `WriteableStream.cs` | `storage/writeable_stream.rs` | present | 1/1 | 12/17 (5 waived) |  |
 
 ## Other files: typescript - 8/33
 
@@ -370,6 +178,10 @@ Rust sources of this crate that no upstream file maps to. Give each a reason in 
 
 | Rust file | Reason | Types defined |
 |---|---|---|
-| `interop/completion_helper.rs` | **unmapped** | `Completions`, `IPromiseTracker`, `PagePromiseTracker`, `PendingRequest`, `PromiseError`, `PromiseFuture`, `PromiseOutcome` |
+| `interop/completion_helper.rs` | completion of the asynchronous calls into the page: upstream's runtime turns a promise of the page into a task | `Completions`, `IPromiseTracker`, `PagePromiseTracker`, `PendingRequest`, `PromiseError`, `PromiseFuture`, `PromiseOutcome` |
+| `interop/thread_proxy.rs` | the threads of the module: the id of the calling thread and a call made on another one; upstream's runtime carries a call from one thread to another (browser stage B2.3) | `ProxyingQueue`, `RunOnThread`, `ThreadWork` |
+| `rendering/browser_render_surface.rs` | the render surface of a canvas as it is handed to the compositor: upstream hands out the render target itself, which with a render worker exists on the render thread only (browser stage B2.5) | `BrowserRenderSurface` |
+| `rendering/browser_surface_shared.rs` | what the thread of the user interface and the thread that renders both know about one canvas: one object read by both threads by convention upstream (browser stage B2.3) | `BrowserSurfaceShared`, `SurfaceRegistry` |
+| `rendering/render_statistics.rs` | where the frames of the page are drawn and what the ticks of a render thread asked of the main thread, for tests and diagnostics (browser stage B2.6): not from upstream | `Counters`, `RenderStatistics` |
 
-Tests, examples and build scripts (not scanned): `examples/storage_view/main.rs`, `examples/themed_view/main.rs`.
+Tests, examples and build scripts (not scanned): `examples/render_worker_clear/main.rs`, `examples/storage_view/main.rs`, `examples/themed_view/main.rs`, `examples/thread_spawn/main.rs`.

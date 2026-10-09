@@ -10,10 +10,10 @@ Generated from upstream commit `17350180c33b063f0e98abbfd19aa3cae63f5d56`. Back 
 | FerroUI | `src/FerroUI.Native` (exists) |
 | Crate | `ferroui-native` |
 | Phase / priority | 1 - desktop (macOS) / P0 |
-| Files | 45/49 (91.8%) |
-| Types | 61/85 (71.8%) |
-| Members | 435/601 (72.4%) |
-| Contracts (interfaces) | 0/4 |
+| Files | 47/47 (100.0%), 2 not applicable |
+| Types | 63/75 (11 waived) (98.4%) |
+| Members | 437/528 (76 waived) (96.7%) |
+| Contracts (interfaces) | 1/4 |
 | Property registrations | 1/1 |
 | Routed events | 0/0 |
 
@@ -23,175 +23,74 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 
 | Interface | Access | Upstream file | Members | Status |
 |---|---|---|---|---|
-| `Avalonia.Native.Interop.IAvnMenu` | internal | `IAvnMenu.cs` | 0/4 | missing |
-| `Avalonia.Native.Interop.IAvnMenuItem` | internal | `IAvnMenuItem.cs` | 0/0 | missing |
-| `Avalonia.Native.Interop.IAvnString` | internal | `AvnString.cs` | 0/2 | missing |
-| `Avalonia.Native.Interop.IAvnStringArray` | internal | `AvnString.cs` | 0/1 | missing |
+| `Avalonia.Native.Interop.IAvnMenu` | internal | `IAvnMenu.cs` | 0/4 (4 waived) | waived |
+| `Avalonia.Native.Interop.IAvnMenuItem` | internal | `IAvnMenuItem.cs` | 0/0 | present |
+| `Avalonia.Native.Interop.IAvnString` | internal | `AvnString.cs` | 0/2 (2 waived) | waived |
+| `Avalonia.Native.Interop.IAvnStringArray` | internal | `AvnString.cs` | 0/1 (1 waived) | waived |
 
 ## Files
 
-### `(project root)` - files 45/49, types 61/85, members 435/601
+### `(project root)` - files 47/47, types 63/75 (11 waived), members 437/528 (76 waived)
 
 | Upstream file | Rust file | Status | Types | Members | Notes |
 |---|---|---|---|---|---|
 | `AvaloniaNativeApplicationPlatform.cs` | `ferro_native_application_platform.rs` | present | 1/1 | 11/11 |  |
 | `AvaloniaNativeDragSource.cs` | `ferro_native_drag_source.rs` | present | 1/1 | 2/2 |  |
-| `AvaloniaNativeGlPlatformGraphics.cs` | `ferro_native_gl_platform_graphics.rs` | missing | 0/9 | 0/70 |  |
-| `AvaloniaNativeMenuExporter.cs` | `ferro_native_menu_exporter.rs` | partial | 2/2 | 10/13 |  |
+| `AvaloniaNativeGlPlatformGraphics.cs` | - | n/a | - | - | not-applicable: not ported for now (row 18 of CRITICAL-PATH.md): the desktop build of the Skia backend has Graphite on Metal and no Ganesh, so nothing could draw through the OpenGL platform graphics of the backend, and the external objects feature they carry is not ported in `ferroui-opengl` either |
+| `AvaloniaNativeMenuExporter.cs` | `ferro_native_menu_exporter.rs` | present | 2/2 | 10/13 (3 waived) |  |
 | `AvaloniaNativePlatform.cs` | `ferro_native_platform.rs` | present | 1/1 | 13/13 |  |
-| `AvaloniaNativePlatformExtensions.cs` | `ferro_native_platform_extensions.rs` | partial | 4/4 | 10/13 |  |
-| `AvaloniaNativeRenderTimer.cs` | `ferro_native_render_timer.rs` | partial | 1/1 | 3/4 |  |
+| `AvaloniaNativePlatformExtensions.cs` | `ferro_native_platform_extensions.rs` | present | 4/4 | 10/13 (3 waived) |  |
+| `AvaloniaNativeRenderTimer.cs` | `ferro_native_render_timer.rs` | present | 1/1 | 3/4 (1 waived) |  |
 | `AvaloniaNativeTextInputMethod.cs` | `ferro_native_text_input_method.rs` | present | 1/1 | 6/6 |  |
 | `AvnAutomationPeer.cs` | `frn_automation_peer.rs` | present | 2/2 | 71/71 |  |
 | `AvnDispatcher.cs` | `frn_dispatcher.rs` | present | 1/1 | 1/1 |  |
-| `AvnString.cs` | `frn_string.rs` | partial | 2/6 | 9/18 |  |
-| `CallbackBase.cs` | `callback_base.rs` | partial | 0/1 | 0/1 |  |
+| `AvnString.cs` | `frn_string.rs` | present | 2/6 (4 waived) | 9/18 (9 waived) |  |
+| `CallbackBase.cs` | `callback_base.rs` | present | 0/1 (1 waived) | 0/1 (1 waived) | replaced: base class of the objects native code calls: a callback body runs inside `callback_base::guard`, which hands a panic to the dispatcher implementation as the base class hands an exception, and the lifetime half is `ferroui_microcom::ComObject` (`Drop` is the destroyed notification) |
 | `ClipboardDataFormatHelper.cs` | `clipboard_data_format_helper.rs` | present | 1/1 | 3/3 |  |
-| `ClipboardDataTransfer.cs` | `clipboard_data_transfer.rs` | partial | 1/1 | 4/5 |  |
+| `ClipboardDataTransfer.cs` | `clipboard_data_transfer.rs` | present | 1/1 | 4/5 (1 waived) |  |
 | `ClipboardDataTransferItem.cs` | `clipboard_data_transfer_item.rs` | present | 1/1 | 3/3 |  |
 | `ClipboardImpl.cs` | `clipboard_impl.rs` | present | 1/1 | 7/7 |  |
 | `ClipboardReadSession.cs` | `clipboard_read_session.rs` | present | 1/1 | 10/10 |  |
 | `Cursor.cs` | `cursor.rs` | present | 2/2 | 8/8 |  |
 | `DataTransferItemToAvnClipboardDataItemWrapper.cs` | `data_transfer_item_to_frn_clipboard_data_item_wrapper.rs` | present | 1/1 | 3/3 |  |
 | `DataTransferToAvnClipboardDataSourceWrapper.cs` | `data_transfer_to_frn_clipboard_data_source_wrapper.rs` | present | 1/1 | 4/4 |  |
-| `DeferredFramebuffer.cs` | `deferred_framebuffer.rs` | partial | 1/1 | 2/9 |  |
+| `DeferredFramebuffer.cs` | `deferred_framebuffer.rs` | present | 1/1 | 2/9 (7 waived) |  |
 | `DispatcherImpl.cs` | `dispatcher_impl.rs` | present | 1/1 | 13/13 |  |
 | `DoubleClickHelper.cs` | `double_click_helper.rs` | present | 1/1 | 1/1 |  |
 | `EmbeddableTopLevelImpl.cs` | `embeddable_top_level_impl.rs` | present | 1/1 | 1/1 |  |
 | `Extensions.cs` | `extensions.rs` | present | 1/1 | 2/2 |  |
-| `GpuHandleWrapFeature.cs` | `gpu_handle_wrap_feature.rs` | missing | 0/1 | 0/3 |  |
-| `Helpers.cs` | `helpers.rs` | partial | 0/1 | 0/10 |  |
-| `IAvnMenu.cs` | `frn_menu.rs` | partial | 1/3 | 3/16 | interface merged into implementation file |
-| `IAvnMenuItem.cs` | `i_frn_menu_item.rs` | missing | 0/2 | 0/4 |  |
+| `GpuHandleWrapFeature.cs` | - | n/a | - | - | not-applicable: not ported for now (row 18 of CRITICAL-PATH.md): the desktop build of the Skia backend has Graphite on Metal and no Ganesh, so nothing could draw through the OpenGL platform graphics of the backend, and the external objects feature they carry is not ported in `ferroui-opengl` either |
+| `Helpers.cs` | `helpers.rs` | present | 0/1 (1 waived) | 0/10 (10 waived) |  |
+| `IAvnMenu.cs` | `frn_menu.rs` | present | 1/3 (2 waived) | 3/16 (13 waived) | interface merged into implementation file |
+| `IAvnMenuItem.cs` | `frn_menu_item.rs` | present | 2/2 | 3/4 (1 waived) | merged: the members the file adds to the generated proxy of the native menu item are members of `FrnMenuItem`, the struct that wraps the native item |
 | `IconLoader.cs` | `icon_loader.rs` | present | 1/1 | 3/3 |  |
 | `MacOSActivatableLifetime.cs` | `mac_os_activatable_lifetime.rs` | present | 1/1 | 2/2 |  |
-| `MacOSMountedVolumeInfoProvider.cs` | `mac_os_mounted_volume_info_provider.rs` | partial | 2/2 | 3/4 |  |
+| `MacOSMountedVolumeInfoProvider.cs` | `mac_os_mounted_volume_info_provider.rs` | present | 2/2 | 3/4 (1 waived) |  |
 | `MacOSNativeMenuCommands.cs` | `mac_os_native_menu_commands.rs` | present | 1/1 | 6/6 |  |
 | `MenuActionCallback.cs` | `menu_action_callback.rs` | present | 1/1 | 2/2 |  |
-| `Metal.cs` | `metal.rs` | partial | 5/6 | 22/33 |  |
+| `Metal.cs` | `metal.rs` | partial | 5/6 | 22/33 (3 waived) |  |
 | `NativeControlHostImpl.cs` | `native_control_host_impl.rs` | present | 1/1 | 6/6 |  |
-| `NativeOwned.cs` | `native_owned.rs` | missing | 0/1 | 0/6 |  |
+| `NativeOwned.cs` | `callback_base.rs` | present | 0/1 (1 waived) | 0/6 (6 waived) | replaced: base class of a COM object whose lifetime the native side owns: `ferroui_microcom::ComObject` drops the Rust value with the last native reference (`Drop` is `Destroyed`), and `callback_base::guard` hands a panic of a callback to the dispatcher implementation as `RaiseException` does |
 | `NativePlatformSettings.cs` | `native_platform_settings.rs` | present | 1/1 | 4/4 |  |
 | `PlatformBehaviorInhibition.cs` | `platform_behavior_inhibition.rs` | present | 1/1 | 2/2 |  |
-| `PopupImpl.cs` | `popup_impl.rs` | partial | 1/1 | 7/8 |  |
+| `PopupImpl.cs` | `popup_impl.rs` | present | 1/1 | 7/8 (1 waived) |  |
 | `PredicateCallback.cs` | `predicate_callback.rs` | present | 1/1 | 2/2 |  |
-| `ScreenImpl.cs` | `screen_impl.rs` | partial | 1/2 | 7/9 |  |
+| `ScreenImpl.cs` | `screen_impl.rs` | present | 1/2 (1 waived) | 7/9 (2 waived) |  |
 | `StorageItem.cs` | `storage_item.rs` | partial | 3/3 | 17/24 |  |
-| `StorageProviderApi.cs` | `storage_provider_api.rs` | partial | 3/3 | 23/26 |  |
+| `StorageProviderApi.cs` | `storage_provider_api.rs` | present | 3/3 | 23/26 (3 waived) |  |
 | `StorageProviderImpl.cs` | `storage_provider_impl.rs` | present | 1/1 | 14/14 |  |
-| `TopLevelImpl.cs` | `top_level_impl.rs` | partial | 3/3 | 57/62 |  |
+| `TopLevelImpl.cs` | `top_level_impl.rs` | present | 3/3 | 56/62 (6 waived) |  |
 | `TrayIconImpl.cs` | `tray_icon_impl.rs` | present | 1/1 | 8/8 |  |
-| `WindowImpl.cs` | `window_impl.rs` | partial | 1/1 | 31/32 |  |
-| `WindowImplBase.cs` | `window_impl_base.rs` | partial | 1/2 | 19/23 |  |
+| `WindowImpl.cs` | `window_impl.rs` | present | 1/1 | 31/32 (1 waived) |  |
+| `WindowImplBase.cs` | `window_impl_base.rs` | present | 1/2 (1 waived) | 19/23 (4 waived) |  |
 
-<details><summary><code>AvaloniaNativeMenuExporter.cs</code> - 3 missing</summary>
-
-- `AvaloniaNativeMenuExporter` (class): 3 missing
-  - `AvaloniaNativeMenuExporter(IAvaloniaNativeFactory factory)` *(1 of 4 constructors found)*
-  - `AvaloniaNativeMenuExporter(IAvnTrayIcon trayIcon, IAvaloniaNativeFactory factory)` *(1 of 4 constructors found)*
-  - `AvaloniaNativeMenuExporter(IAvaloniaNativeFactory factory, MenuTarget target)` *(internal; 1 of 4 constructors found)*
-
-</details>
-
-<details><summary><code>AvaloniaNativePlatformExtensions.cs</code> - 3 missing</summary>
-
-- `AvaloniaNativePlatformExtensions` (class): 1 missing
-  - `static AppBuilder UseAvaloniaNative(this AppBuilder builder)`
-- `AvaloniaNativePlatformOptions` (class): 1 missing
-  - `string? AvaloniaNativeLibraryPath { get; set; }`
-- `MacOSPlatformOptions` (class): 1 missing
-  - `bool DisableAvaloniaAppDelegate { get; set; }`
-
-</details>
-
-<details><summary><code>AvaloniaNativeRenderTimer.cs</code> - 1 missing</summary>
-
-- `AvaloniaNativeRenderTimer` (class): 1 missing
-  - `void Run()`
-
-</details>
-
-<details><summary><code>AvnString.cs</code> - 13 missing</summary>
-
-- `IAvnString` (interface, internal): **type missing** (2 members)
-- `IAvnStringArray` (interface, internal): **type missing** (1 members)
-- `AvnString` (class): 1 missing
-  - `override void Destroyed()` *(protected)*
-- `AvnStringArray` (class): 1 missing
-  - `override void Destroyed()` *(protected)*
-- `__MicroComIAvnStringProxy` (class, internal): **type missing** (3 members)
-- `__MicroComIAvnStringArrayProxy` (class, internal): **type missing** (1 members)
-
-</details>
-
-<details><summary><code>CallbackBase.cs</code> - 2 missing</summary>
-
-- `NativeCallbackBase` (class, internal): **type missing** (1 members)
-
-</details>
-
-<details><summary><code>ClipboardDataTransfer.cs</code> - 1 missing</summary>
-
-- `ClipboardDataTransfer` (class): 1 missing
-  - `IEnumerable<DataFormat> GetFormats()`
-
-</details>
-
-<details><summary><code>DeferredFramebuffer.cs</code> - 7 missing</summary>
-
-- `DeferredFramebuffer` (class): 7 missing
-  - `IntPtr Address { get; set; }` *(getter `address` found, setter `set_address` missing)*
-  - `PixelSize Size { get; set; }` *(getter `size` found, setter `set_size` missing)*
-  - `int Height { get; set; }`
-  - `int RowBytes { get; set; }` *(getter `row_bytes` found, setter `set_row_bytes` missing)*
-  - `Vector Dpi { get; set; }` *(getter `dpi` found, setter `set_dpi` missing)*
-  - `PixelFormat Format { get; set; }` *(getter `format` found, setter `set_format` missing)*
-  - `AlphaFormat AlphaFormat { get; set; }` *(getter `alpha_format` found, setter `set_alpha_format` missing)*
-
-</details>
-
-<details><summary><code>Helpers.cs</code> - 11 missing</summary>
-
-- `Helpers` (class, internal): **type missing** (10 members)
-
-</details>
-
-<details><summary><code>IAvnMenu.cs</code> - 15 missing</summary>
-
-- `MenuEvents` (class): 1 missing
-  - `void Initialise(IAvnMenu parent)`
-- `IAvnMenu` (interface, internal): **type missing** (4 members)
-- `__MicroComIAvnMenuProxy` (class, internal): **type missing** (8 members)
-
-</details>
-
-<details><summary><code>MacOSMountedVolumeInfoProvider.cs</code> - 1 missing</summary>
-
-- `MacOSMountedVolumeInfoListener` (class): 1 missing
-  - `virtual void Dispose(bool disposing)` *(protected; 1 of 2 overloads found)*
-
-</details>
-
-<details><summary><code>Metal.cs</code> - 12 missing</summary>
+<details><summary><code>Metal.cs</code> - 9 missing</summary>
 
 - `MetalExternalObjectsFeature` (class, internal): **type missing** (9 members)
-- `MetalRenderTarget` (class): 1 missing
-  - `MetalRenderTarget(IAvnMetalRenderTarget native)`
-- `MetalDrawingSession` (class): 1 missing
-  - `MetalDrawingSession(IAvnMetalRenderingSession session)`
-
-</details>
-
-<details><summary><code>PopupImpl.cs</code> - 1 missing</summary>
-
-- `PopupImpl` (class): 1 missing
-  - `sealed override void Init(MacOSTopLevelHandle handle)` *(internal)*
-
-</details>
-
-<details><summary><code>ScreenImpl.cs</code> - 3 missing</summary>
-
-- `AvnScreen` (class, internal): **type missing** (2 members)
+- `MetalRenderTarget` (class): complete
+  - waived (created with a struct literal by the object that owns the native one (`MetalPlatformSurface::create_render_target`, `MetalRenderTarget::begin_rendering`)): `.ctor`
+- `MetalDrawingSession` (class): complete
+  - waived (created with a struct literal by the object that owns the native one (`MetalPlatformSurface::create_render_target`, `MetalRenderTarget::begin_rendering`)): `.ctor`
 
 </details>
 
@@ -205,42 +104,6 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
   - `Task<IStorageFolder?> GetParentAsync()`
   - `Task DeleteAsync()`
   - `Task<IStorageItem?> MoveAsync(IStorageFolder destination)`
-
-</details>
-
-<details><summary><code>StorageProviderApi.cs</code> - 3 missing</summary>
-
-- `StorageProviderApi` (class): 1 missing
-  - `void Dispose()`
-- `StorageProviderApi.FilePickerFileTypesWrapper` (class): 1 missing
-  - `override void Destroyed()` *(protected)*
-- `StorageProviderApi.SystemDialogEvents` (class): 1 missing
-  - `Task<(string[] Results, int? SelectedFilterIndex)> Task { get; }`
-
-</details>
-
-<details><summary><code>TopLevelImpl.cs</code> - 5 missing</summary>
-
-- `TopLevelImpl` (class): 4 missing
-  - `Compositor Compositor { get; }`
-  - `virtual void SetFrameThemeVariant(PlatformThemeVariant? themeVariant)`
-  - `IMouseDevice? MouseDevice { get; }`
-  - `virtual IPopupImpl? CreatePopup()`
-- `TopLevelImpl.TopLevelEvents` (class): 1 missing
-  - `TopLevelEvents(TopLevelImpl parent)`
-
-</details>
-
-<details><summary><code>WindowImpl.cs</code> - 1 missing</summary>
-
-- `WindowImpl` (class): 1 missing
-  - `sealed override void Init(MacOSTopLevelHandle handle)` *(internal)*
-
-</details>
-
-<details><summary><code>WindowImplBase.cs</code> - 5 missing</summary>
-
-- `WindowBaseImpl.WindowBaseEvents` (class, protected): **type missing** (4 members)
 
 </details>
 
@@ -349,9 +212,5 @@ Interfaces 58/58, methods 328/328, enums 23/23, structs 8/8. Names are compared 
 ## Rust-only files
 
 Rust sources of this crate that no upstream file maps to. Give each a reason in `docs/porting/data/path-overrides.toml` (`[[rust_only]]`), or map upstream files to it (`[[map]]`).
-
-| Rust file | Reason | Types defined |
-|---|---|---|
-| `frn_menu_item.rs` | **unmapped** | `FrnMenuItem` |
 
 Tests, examples and build scripts (not scanned): `build.rs`, `examples/platform_window.rs`, `examples/raw_window.rs`, `menu_tests.rs`, `tests/accessibility_tree.rs`.

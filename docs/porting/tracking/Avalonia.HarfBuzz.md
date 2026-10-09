@@ -12,29 +12,20 @@ Generated from upstream commit `17350180c33b063f0e98abbfd19aa3cae63f5d56`. Back 
 | Phase / priority | 1 - rendering / P0 |
 | Files | 3/3 (100.0%) |
 | Types | 3/3 (100.0%) |
-| Members | 5/8 (62.5%) |
+| Members | 5/8 (3 waived) (100.0%) |
 | Contracts (interfaces) | 0/0 |
 | Property registrations | 0/0 |
 | Routed events | 0/0 |
 
 ## Files
 
-### `(project root)` - files 3/3, types 3/3, members 5/8
+### `(project root)` - files 3/3, types 3/3, members 5/8 (3 waived)
 
 | Upstream file | Rust file | Status | Types | Members | Notes |
 |---|---|---|---|---|---|
 | `HarfBuzzApplicationExtensions.cs` | `harf_buzz_application_extensions.rs` | present | 1/1 | 1/1 |  |
 | `HarfBuzzTextShaper.cs` | `harf_buzz_text_shaper.rs` | present | 1/1 | 2/2 |  |
-| `HarfBuzzTypeface.cs` | `harf_buzz_typeface.rs` | partial | 1/1 | 2/5 |  |
-
-<details><summary><code>HarfBuzzTypeface.cs</code> - 3 missing</summary>
-
-- `HarfBuzzTypeface` (class): 3 missing
-  - `GlyphTypeface GlyphTypeface { get; }`
-  - `Face HBFace { get; }`
-  - `Font HBFont { get; }`
-
-</details>
+| `HarfBuzzTypeface.cs` | `harf_buzz_typeface.rs` | present | 1/1 | 2/5 (3 waived) |  |
 
 ## Rust-only files
 
@@ -42,4 +33,4 @@ Rust sources of this crate that no upstream file maps to. Give each a reason in 
 
 | Rust file | Reason | Types defined |
 |---|---|---|
-| `hb.rs` | **unmapped** | `Buffer`, `Direction`, `Face`, `Font`, `TableProvider` |
+| `hb.rs` | a thin safe wrapper over the HarfBuzz objects the shaper uses, with every unsafe block of the crate: the HarfBuzzSharp binding upstream | `Buffer`, `Direction`, `Face`, `Font`, `TableProvider` |

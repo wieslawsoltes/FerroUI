@@ -7,13 +7,13 @@ Generated from upstream commit `17350180c33b063f0e98abbfd19aa3cae63f5d56`. Back 
 | | |
 |---|---|
 | Upstream | `src/Headless/Avalonia.Headless` |
-| FerroUI | `src/Headless/FerroUI.Headless` (not created yet) |
+| FerroUI | `src/Headless/FerroUI.Headless` (exists) |
 | Crate | `ferroui-headless` |
 | Phase / priority | 1 - test infrastructure / P1 |
-| Files | 0/11 (0.0%) |
-| Types | 0/24 (0.0%) |
-| Members | 0/251 (0.0%) |
-| Contracts (interfaces) | 0/3 |
+| Files | 8/8 (100.0%), 3 not applicable |
+| Types | 18/20 (2 waived) (100.0%) |
+| Members | 223/235 (9 waived) (98.7%) |
+| Contracts (interfaces) | 2/3 |
 | Property registrations | 0/0 |
 | Routed events | 0/0 |
 
@@ -23,24 +23,55 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 
 | Interface | Access | Upstream file | Members | Status |
 |---|---|---|---|---|
-| `Avalonia.Headless.HeadlessPlatformRenderInterface.IHeadlessGeometryWithEdges` | internal | `HeadlessPlatformRenderInterface.cs` | 0/3 | missing |
-| `Avalonia.Headless.IHeadlessTouchPointer` | public | `IHeadlessTouchPointer.cs` | 0/0 | missing |
-| `Avalonia.Headless.IHeadlessWindow` | internal | `IHeadlessWindow.cs` | 0/11 | missing |
+| `Avalonia.Headless.HeadlessPlatformRenderInterface.IHeadlessGeometryWithEdges` | internal | `HeadlessPlatformRenderInterface.cs` | 0/3 (3 waived) | waived |
+| `Avalonia.Headless.IHeadlessTouchPointer` | public | `IHeadlessTouchPointer.cs` | 0/0 | present |
+| `Avalonia.Headless.IHeadlessWindow` | internal | `IHeadlessWindow.cs` | 11/11 | present |
 
 ## Files
 
-### `(project root)` - files 0/11, types 0/24, members 0/251
+### `(project root)` - files 8/8, types 18/20 (2 waived), members 223/235 (9 waived)
 
 | Upstream file | Rust file | Status | Types | Members | Notes |
 |---|---|---|---|---|---|
-| `AvaloniaHeadlessPlatform.cs` | `ferro_headless_platform.rs` | missing | 0/3 | 0/10 |  |
-| `AvaloniaTestApplicationAttribute.cs` | `ferro_test_application_attribute.rs` | missing | 0/1 | 0/2 |  |
-| `HeadlessPlatformRenderInterface.cs` | `headless_platform_render_interface.rs` | missing | 0/4 | 0/74 |  |
-| `HeadlessPlatformStubs.cs` | `headless_platform_stubs.rs` | missing | 0/8 | 0/36 |  |
-| `HeadlessRenderTimer.cs` | `headless_render_timer.rs` | missing | 0/1 | 0/4 |  |
-| `HeadlessUnitTestIsolationAttribute.cs` | `headless_unit_test_isolation_attribute.rs` | missing | 0/2 | 0/4 |  |
-| `HeadlessUnitTestSession.cs` | `headless_unit_test_session.rs` | missing | 0/1 | 0/10 |  |
-| `HeadlessWindowExtensions.cs` | `headless_window_extensions.rs` | missing | 0/1 | 0/16 |  |
-| `HeadlessWindowImpl.cs` | `headless_window_impl.rs` | missing | 0/1 | 0/84 |  |
-| `IHeadlessTouchPointer.cs` | `i_headless_touch_pointer.rs` | missing | 0/1 | 0/0 |  |
-| `IHeadlessWindow.cs` | `i_headless_window.rs` | missing | 0/1 | 0/11 |  |
+| `AvaloniaHeadlessPlatform.cs` | `ferro_headless_platform.rs` | present | 3/3 | 10/10 |  |
+| `AvaloniaTestApplicationAttribute.cs` | - | n/a | - | - | not-applicable: assembly attributes that tell the xUnit and NUnit integrations which application to build and how to isolate the tests of an assembly: there are no assembly attributes and no test framework integration; a test sets up its application with `AppBuilder` and `use_headless` (the `PerTest` isolation), as `tests.rs` of the crate does |
+| `HeadlessPlatformRenderInterface.cs` | `headless_platform_render_interface.rs` | partial | 3/4 (1 waived) | 69/74 (4 waived) |  |
+| `HeadlessPlatformStubs.cs` | `headless_platform_stubs.rs` | present | 7/8 (1 waived) | 35/36 (1 waived) |  |
+| `HeadlessRenderTimer.cs` | `headless_render_timer.rs` | present | 1/1 | 4/4 |  |
+| `HeadlessUnitTestIsolationAttribute.cs` | - | n/a | - | - | not-applicable: assembly attributes that tell the xUnit and NUnit integrations which application to build and how to isolate the tests of an assembly: there are no assembly attributes and no test framework integration; a test sets up its application with `AppBuilder` and `use_headless` (the `PerTest` isolation), as `tests.rs` of the crate does |
+| `HeadlessUnitTestSession.cs` | - | n/a | - | - | not-applicable: not ported for now: the session of the xUnit and NUnit integrations, which runs the tests of an assembly on a dispatcher thread of its own and finds the application through reflection (the assembly attribute, a `BuildAvaloniaApp` method); the test harness of cargo runs a test on a thread of its own, where the test sets up its application. A session that shares one application between tests (the `PerAssembly` isolation) has no counterpart and is an open decision |
+| `HeadlessWindowExtensions.cs` | `headless_window_extensions.rs` | present | 1/1 | 16/16 |  |
+| `HeadlessWindowImpl.cs` | `headless_window_impl.rs` | partial | 1/1 | 78/84 (4 waived) |  |
+| `IHeadlessTouchPointer.cs` | `i_headless_touch_pointer.rs` | present | 1/1 | 0/0 |  |
+| `IHeadlessWindow.cs` | `i_headless_window.rs` | present | 1/1 | 11/11 |  |
+
+<details><summary><code>HeadlessPlatformRenderInterface.cs</code> - 1 missing</summary>
+
+- `HeadlessPlatformRenderInterface` (class): complete
+  - waived (an empty dictionary: the default of `IPlatformRenderInterfaceContext::public_features`, which the headless interface does not override): `PublicFeatures`
+- `HeadlessPlatformRenderInterface.HeadlessGlyphRunStub` (class): 1 missing
+  - `GlyphTypeface GlyphTypeface { get; }`
+- `HeadlessPlatformRenderInterface.IHeadlessGeometryWithEdges` (interface): waived - interface with default members, tested with `is`: the free functions `edge_points_of` (the test and `Points`), `projection_on_axis` and `get_axes` of `headless_platform_render_interface.rs`
+
+</details>
+
+<details><summary><code>HeadlessWindowImpl.cs</code> - 2 missing</summary>
+
+- `HeadlessWindowImpl` (class): 2 missing
+  - `ILockedFramebuffer Lock()`
+  - `IFramebufferRenderTarget CreateFramebufferRenderTarget()`
+  - waived (empty public method that is not a member of the window interface any more and that nothing calls): `SetSystemDecorations`
+  - waived (the public setter of the auto-property is only used by the class itself: the field `client_size`, set by `do_resize`): `ClientSize`
+  - waived (the public setter of the auto-property is only used by the class itself: the field `position`, set by `move_` and by the popup positioner): `Position`
+  - waived (the public setter of the auto-property is only used by the class itself: the field `transparency_level`, set by `set_transparency_level_hint`): `TransparencyLevel`
+
+</details>
+
+## Rust-only files
+
+Rust sources of this crate that no upstream file maps to. Give each a reason in `docs/porting/data/path-overrides.toml` (`[[rust_only]]`), or map upstream files to it (`[[map]]`).
+
+| Rust file | Reason | Types defined |
+|---|---|---|
+| `headless_window_surface.rs` | the part of `HeadlessWindowImpl.cs` that a frame uses (`Lock`, `CreateFramebufferRenderTarget`, the last rendered frame and its lock), as an object of its own; upstream implements the framebuffer surface on the window implementation | `FramebufferMetrics`, `HeadlessWindowFramebuffer`, `HeadlessWindowSurface`, `RenderedFrame` |
+| `tests.rs` | the unit tests of the module | `HeadlessApplication` |

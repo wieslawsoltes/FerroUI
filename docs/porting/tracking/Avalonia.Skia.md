@@ -10,10 +10,10 @@ Generated from upstream commit `17350180c33b063f0e98abbfd19aa3cae63f5d56`. Back 
 | FerroUI | `src/Skia/FerroUI.Skia` (exists) |
 | Crate | `ferroui-skia` |
 | Phase / priority | 1 - rendering / P0 |
-| Files | 47/54 (87.0%) |
-| Types | 49/66 (74.2%) |
-| Members | 329/451 (72.9%) |
-| Contracts (interfaces) | 6/10 |
+| Files | 48/54 (88.9%) |
+| Types | 52/66 (78.8%) |
+| Members | 335/451 (74.3%) |
+| Contracts (interfaces) | 9/10 |
 | Property registrations | 0/0 |
 | Routed events | 0/0 |
 
@@ -29,14 +29,14 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 | `Avalonia.Skia.ISkiaGpu` | internal | `Gpu/ISkiaGpu.cs` | 5/5 | present |
 | `Avalonia.Skia.ISkiaGpuRenderSession` | public | `Gpu/ISkiaGpuRenderSession.cs` | 4/4 | present |
 | `Avalonia.Skia.ISkiaGpuRenderTarget` | public | `Gpu/ISkiaGpuRenderTarget.cs` | 2/2 | present |
-| `Avalonia.Skia.ISkiaSharpApiLease` | public | `ISkiaSharpApiLeaseFeature.cs` | 0/5 | missing |
-| `Avalonia.Skia.ISkiaSharpApiLeaseFeature` | public | `ISkiaSharpApiLeaseFeature.cs` | 0/1 | missing |
-| `Avalonia.Skia.ISkiaSharpPlatformGraphicsApiLease` | public | `ISkiaSharpApiLeaseFeature.cs` | 0/1 | missing |
+| `Avalonia.Skia.ISkiaSharpApiLease` | public | `ISkiaSharpApiLeaseFeature.cs` | 4/5 | partial |
+| `Avalonia.Skia.ISkiaSharpApiLeaseFeature` | public | `ISkiaSharpApiLeaseFeature.cs` | 1/1 | present |
+| `Avalonia.Skia.ISkiaSharpPlatformGraphicsApiLease` | public | `ISkiaSharpApiLeaseFeature.cs` | 1/1 | present |
 | `Avalonia.Skia.ISkiaSurface` | public | `Gpu/ISkiaGpu.cs` | 3/3 | present |
 
 ## Files
 
-### `(project root)` - files 32/33, types 31/38, members 256/300
+### `(project root)` - files 33/33, types 34/38, members 262/300
 
 | Upstream file | Rust file | Status | Types | Members | Notes |
 |---|---|---|---|---|---|
@@ -50,7 +50,7 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 | `GeometryImpl.cs` | `geometry_impl.rs` | partial | 1/1 | 13/15 |  |
 | `GlyphRunImpl.cs` | `glyph_run_impl.rs` | present | 1/1 | 7/7 |  |
 | `IDrawableBitmapImpl.cs` | `i_drawable_bitmap_impl.rs` | present | 1/1 | 1/1 |  |
-| `ISkiaSharpApiLeaseFeature.cs` | `i_skia_sharp_api_lease_feature.rs` | missing | 0/3 | 0/7 |  |
+| `ISkiaSharpApiLeaseFeature.cs` | `i_skia_api_lease_feature.rs` | partial | 3/3 | 6/7 | renamed: the binding is not SkiaSharp, so the contracts are named after Skia: `ISkiaApiLeaseFeature`, `ISkiaApiLease`, `ISkiaPlatformGraphicsApiLease` |
 | `ImmutableBitmap.cs` | `immutable_bitmap.rs` | partial | 1/1 | 13/14 |  |
 | `LineGeometryImpl.cs` | `line_geometry_impl.rs` | partial | 1/1 | 3/4 |  |
 | `PictureRenderTarget.cs` | `picture_render_target.rs` | present | 1/1 | 4/4 |  |
@@ -100,6 +100,13 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 - `GeometryImpl` (class): 2 missing
   - `abstract Rect Bounds { get; }`
   - `void InvalidateCaches()` *(protected)*
+
+</details>
+
+<details><summary><code>ISkiaSharpApiLeaseFeature.cs</code> - 1 missing</summary>
+
+- `ISkiaSharpApiLease` (interface): 1 missing
+  - `SKCanvas SkCanvas { get; }`
 
 </details>
 
@@ -276,13 +283,13 @@ Rust sources of this crate that no upstream file maps to. Give each a reason in 
 | Rust file | Reason | Types defined |
 |---|---|---|
 | `gpu/ganesh/ganesh_gr_context.rs` | the Ganesh implementation of the backend-neutral GPU context (the binding has separate Ganesh and Graphite context types) | `GaneshGrContext` |
-| `gpu/graphite/graphite_gr_context.rs` | **unmapped** | `GraphiteGrContext`, `GraphiteState`, `UploadedImage` |
-| `gpu/i_skia_gr_context.rs` | **unmapped** | `ISkiaGrContext`, `SkiaGpuBackend` |
-| `gpu/metal/tests.rs` | **unmapped** | `GraphiteTarget`, `Id`, `LogSink`, `Sel`, `TestMetalDevice`, `TextureRenderTarget`, `TextureSession`, `TextureSurface` |
-| `i_skia_api_lease_feature.rs` | **unmapped** | `ISkiaApiLease`, `ISkiaApiLeaseFeature`, `ISkiaPlatformGraphicsApiLease` |
-| `locked_framebuffer.rs` | **unmapped** | `LockedFramebuffer` |
-| `metal/i_metal_device.rs` | **unmapped** | `IMetalDevice`, `IMetalPlatformSurface`, `IMetalPlatformSurfaceRenderTarget`, `IMetalPlatformSurfaceRenderingSession` |
-| `tests.rs` | **unmapped** | `BrushSpec`, `Material`, `MockFramebuffer`, `MockSurface`, `Target`, `TwoSquares`, `TwoSquaresBrush` |
+| `gpu/graphite/graphite_gr_context.rs` | the Graphite implementation of the backend-neutral GPU context (the binding has separate Ganesh and Graphite context types) | `GraphiteGrContext`, `GraphiteState`, `UploadedImage` |
+| `gpu/i_skia_gr_context.rs` | the backend-neutral GPU context of the Skia backend (the binding has separate Ganesh and Graphite context types, SkiaSharp has one `GRContext`) | `ISkiaGrContext`, `SkiaGpuBackend` |
+| `gpu/metal/tests.rs` | the unit tests of the module | `GraphiteTarget`, `Id`, `LogSink`, `Sel`, `TestMetalDevice`, `TextureRenderTarget`, `TextureSession`, `TextureSurface` |
+| `locked_framebuffer.rs` | a locked framebuffer described by plain values: the `Platform/LockedFramebuffer.cs` of Avalonia.Base, which the base crate cannot hold without unsafe code, for the surfaces of the backend | `LockedFramebuffer` |
+| `metal/i_metal_device.rs` | port of the project Avalonia.Metal (`IMetalDevice.cs`, `IMetalExternalObjectsFeature.cs`) inside the Skia backend, its only user; the tracking of Avalonia.Metal looks in `src/FerroUI.Metal`, which does not exist, and reports the two files as missing | `IMetalDevice`, `IMetalPlatformSurface`, `IMetalPlatformSurfaceRenderTarget`, `IMetalPlatformSurfaceRenderingSession` |
+| `metal/i_metal_external_objects_feature.rs` | port of the project Avalonia.Metal (`IMetalDevice.cs`, `IMetalExternalObjectsFeature.cs`) inside the Skia backend, its only user; the tracking of Avalonia.Metal looks in `src/FerroUI.Metal`, which does not exist, and reports the two files as missing | `IMetalExternalObjectsFeature`, `IMetalExternalTexture`, `IMetalSharedEvent` |
+| `tests.rs` | the unit tests of the module | `BrushSpec`, `Material`, `MockFramebuffer`, `MockSurface`, `Target`, `TwoSquares`, `TwoSquaresBrush` |
 | `unit_tests/hit_testing.rs` | the port of upstream's Skia unit test project (tests/Avalonia.Skia.UnitTests) and its test doubles, not of the library | `CompositorTestServices`, `LocatorScope` |
 | `unit_tests/media/custom_font_manager_impl.rs` | the port of upstream's Skia unit test project (tests/Avalonia.Skia.UnitTests) and its test doubles, not of the library | `CustomFontManagerImpl` |
 | `unit_tests/media/text_formatting/multi_buffer_text_source.rs` | the port of upstream's Skia unit test project (tests/Avalonia.Skia.UnitTests) and its test doubles, not of the library | `MultiBufferTextSource` |

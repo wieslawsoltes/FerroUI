@@ -10,20 +10,20 @@ Generated from upstream commit `17350180c33b063f0e98abbfd19aa3cae63f5d56`. Back 
 | FerroUI | `src/Headless/FerroUI.Headless.NUnit` (not created yet) |
 | Crate | `ferroui-headless-nunit` |
 | Phase / priority | 1 - test infrastructure / P1 |
-| Files | 0/4 (0.0%) |
-| Types | 0/4 (0.0%) |
-| Members | 0/4 (0.0%) |
+| Files | 0/0 (-), 4 not applicable |
+| Types | 0/0 (-) |
+| Members | 0/0 (-) |
 | Contracts (interfaces) | 0/0 |
 | Property registrations | 0/0 |
 | Routed events | 0/0 |
 
 ## Files
 
-### `(project root)` - files 0/4, types 0/4, members 0/4
+### `(project root)` - files 0/0, types 0/0, members 0/0
 
 | Upstream file | Rust file | Status | Types | Members | Notes |
 |---|---|---|---|---|---|
-| `AvaloniaTest.cs` | `ferro_test.rs` | missing | 0/1 | 0/1 |  |
-| `AvaloniaTestMethodCommand.cs` | `ferro_test_method_command.rs` | missing | 0/1 | 0/2 |  |
-| `AvaloniaTheory.cs` | `ferro_theory.rs` | missing | 0/1 | 0/1 |  |
-| `NUnitReflectionHelper.cs` | `n_unit_reflection_helper.rs` | missing | 0/1 | 0/0 |  |
+| `AvaloniaTest.cs` | - | n/a | - | - | not-applicable: glue between the headless platform and the NUnit test framework (test attributes, commands): there is no such framework to integrate with; tests use the harness of cargo |
+| `AvaloniaTestMethodCommand.cs` | - | n/a | - | - | not-applicable: glue between the headless platform and the NUnit test framework (test attributes, commands): there is no such framework to integrate with; tests use the harness of cargo |
+| `AvaloniaTheory.cs` | - | n/a | - | - | not-applicable: glue between the headless platform and the NUnit test framework (test attributes, commands): there is no such framework to integrate with; tests use the harness of cargo |
+| `NUnitReflectionHelper.cs` | - | n/a | - | - | not-applicable: glue between the headless platform and the NUnit test framework (test attributes, commands): there is no such framework to integrate with; tests use the harness of cargo |
