@@ -940,3 +940,87 @@ fn value_type_cast_produces_exactly_the_target_type() {
     assert!(cast(boxed(s("1")), ValueType::of::<i32>()).is_none());
     assert!(cast(boxed(1i32), ValueType::of::<String>()).is_none());
 }
+
+// --- not from upstream: the order of a failed conversion --------------------
+
+/// A converter that records that it ran, and fails when told to.
+struct RecordingConverter {
+    calls: Rc<RefCell<Vec<&'static str>>>,
+    fails: bool,
+}
+
+impl RecordingConverter {
+    fn result(&self, call: &'static str, value: Option<&BoxedValue>) -> Result<Option<BoxedValue>, BindingError> {
+        self.calls.borrow_mut().push(call);
+        if self.fails {
+            Err(BindingError::message("The converter failed."))
+        } else {
+            Ok(value.cloned())
+        }
+    }
+}
+
+impl crate::data::converters::IValueConverter for RecordingConverter {
+    fn convert(
+        &self,
+        value: Option<&BoxedValue>,
+        _target_type: ValueType,
+        _parameter: Option<&BoxedValue>,
+        _culture: &crate::utilities::CultureInfo,
+    ) -> Result<Option<BoxedValue>, BindingError> {
+        self.result("convert", value)
+    }
+
+    fn convert_back(
+        &self,
+        value: Option<&BoxedValue>,
+        _target_type: ValueType,
+        _parameter: Option<&BoxedValue>,
+        _culture: &crate::utilities::CultureInfo,
+    ) -> Result<Option<BoxedValue>, BindingError> {
+        self.result("convert back", value)
+    }
+}
+
+/// Upstream's `Convert` and `ConvertBack` call `ShouldLogError` in the
+/// handler of the exception of the converter: whom to log against is asked
+/// after the converter has failed, and not at all when it has not.
+#[test]
+fn a_conversion_asks_whom_to_log_against_only_after_the_converter_has_failed() {
+    use crate::data::core::UntypedBindingExpression;
+
+    let expression = crate::data::TemplateBindingExpression::new(None, None, None, None, BindingMode::OneWay);
+    let calls: Rc<RefCell<Vec<&'static str>>> = Rc::new(RefCell::new(Vec::new()));
+    let log_target = || -> Option<Ref<FerroObject>> {
+        calls.borrow_mut().push("log target");
+        None
+    };
+    let description = || s("description");
+    let value = boxed(s("a"));
+    let target_type = ValueType::of::<String>();
+    let succeeds = RecordingConverter { calls: calls.clone(), fails: false };
+    let fails = RecordingConverter { calls: calls.clone(), fails: true };
+
+    let mut error = None;
+    let converted =
+        expression.base().convert(&log_target, &description, &succeeds, None, None, Some(&value), target_type, &mut error);
+    assert!(converted.is_some_and(|converted| Rc::ptr_eq(&converted, &value)));
+    assert!(error.is_none());
+    assert_eq!(calls.take(), vec!["convert"]);
+
+    let converted =
+        expression.base().convert(&log_target, &description, &fails, None, None, Some(&value), target_type, &mut error);
+    assert!(converted.is_some_and(|converted| converted.is::<crate::UnsetValueType>()));
+    assert!(error.is_some_and(|error| error.error_type == crate::data::BindingErrorType::Error));
+    assert_eq!(calls.take(), vec!["convert", "log target"]);
+
+    let converted =
+        expression.base().convert_back(&log_target, &description, &succeeds, None, None, Some(&value), target_type);
+    assert!(converted.is_some_and(|converted| Rc::ptr_eq(&converted, &value)));
+    assert_eq!(calls.take(), vec!["convert back"]);
+
+    let converted =
+        expression.base().convert_back(&log_target, &description, &fails, None, None, Some(&value), target_type);
+    assert!(converted.is_some_and(|converted| converted.is::<crate::UnsetValueType>()));
+    assert_eq!(calls.take(), vec!["convert back", "log target"]);
+}

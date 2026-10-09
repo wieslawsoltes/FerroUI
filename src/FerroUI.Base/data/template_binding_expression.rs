@@ -92,7 +92,7 @@ impl TemplateBindingExpression {
             let mut error: Option<ExpressionError> = None;
             if let Some(converter) = &self.converter {
                 value = self.base.convert(
-                    self.should_log_error(),
+                    &|| self.should_log_error(),
                     &|| self.description(),
                     &**converter,
                     self.converter_culture.as_ref(),
@@ -189,7 +189,7 @@ impl UntypedBindingExpression for TemplateBindingExpression {
         let mut value = value;
         if let Some(converter) = &self.converter {
             value = self.base.convert_back(
-                self.should_log_error(),
+                &|| self.should_log_error(),
                 &|| self.description(),
                 &**converter,
                 self.converter_culture.as_ref(),
