@@ -17,9 +17,12 @@
 //! [`FerroHeadlessPlatformExtensions::use_headless`] on its builder.
 
 mod ferro_headless_platform;
+mod ferro_test_application_attribute;
 mod headless_platform_render_interface;
 mod headless_platform_stubs;
 mod headless_render_timer;
+mod headless_unit_test_isolation_attribute;
+mod headless_unit_test_session;
 mod headless_window_extensions;
 mod headless_window_impl;
 mod headless_window_surface;
@@ -27,6 +30,9 @@ mod i_headless_touch_pointer;
 mod i_headless_window;
 
 pub use ferro_headless_platform::{FerroHeadlessPlatform, FerroHeadlessPlatformExtensions, FerroHeadlessPlatformOptions};
+pub use ferro_test_application_attribute::FerroTestApplicationAttribute;
+pub use headless_unit_test_isolation_attribute::{FerroTestIsolationAttribute, FerroTestIsolationLevel};
+pub use headless_unit_test_session::{FerroTestAssembly, HeadlessUnitTestSession, HeadlessUnitTestTask};
 pub use headless_window_extensions::HeadlessWindowExtensions;
 pub use i_headless_touch_pointer::IHeadlessTouchPointer;
 
