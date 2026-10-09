@@ -1195,6 +1195,134 @@ pub fn static_method_delegate(
     })
 }
 
+/// A method of the owner of a command, as generated code writes it: the typed function of
+/// the declared method called with the owner and the arguments it reads from
+/// [`DelegateArguments`] in the types the method declares.
+type CommandMethod<This> = dyn Fn(&This, &mut DelegateArguments<'_>) -> Result<MarkupValue, MarkupInvokeError>;
+
+/// Calls a method of the owner of a command with the owner and `arguments`, as the
+/// run-time loader invokes the method: the owner as the Rust type instance members take
+/// (`This`), an owner that is not one is the argument error of the instance.
+fn invoke_command_method<This: Clone + 'static>(
+    method: &CommandMethod<This>,
+    owner: &BoxedValue,
+    arguments: &[MarkupValue],
+) -> Result<MarkupValue, MarkupInvokeError> {
+    let instance = Some(owner.clone());
+    let this = from_markup_value::<This>(&instance).ok_or_else(|| MarkupInvokeError::Argument {
+        index: 0,
+        expected: std::any::type_name::<This>(),
+        actual: owner.type_name().to_string(),
+    })?;
+    method(&this, &mut DelegateArguments { arguments, next: 0 })
+}
+
+/// Raises the failure of the execute trampoline of a method used as a command. The
+/// trampoline of the managed original unboxes (value types) or casts (reference types) the
+/// command parameter to the parameter type and calls the method; the exception of a failed
+/// cast, or the one the method throws, escapes `ICommand.Execute`. The counterpart of an
+/// escaping exception is a panic that names it, the panic of the run-time loader.
+fn raise_command_failure(
+    declaring: &'static MarkupType,
+    name: &str,
+    parameter_is_value_type: bool,
+    parameter: Option<&BoxedValue>,
+    error: MarkupInvokeError,
+) -> ! {
+    match error {
+        MarkupInvokeError::Argument { expected, actual, .. } => {
+            if parameter.is_none() && parameter_is_value_type {
+                // `unbox.any` of a null reference.
+                panic!("NullReferenceException: Object reference not set to an instance of an object.");
+            }
+            panic!("InvalidCastException: Unable to cast object of type '{actual}' to type '{expected}'.");
+        }
+        MarkupInvokeError::ArgumentCount { .. } => {
+            panic!("TargetParameterCountException: {}.{name}: {error}", declaring.full_name())
+        }
+        MarkupInvokeError::Failed(message) => panic!("{message}"),
+    }
+}
+
+fn command_element<This: Clone + 'static>(
+    builder: &CompiledBindingPathBuilder,
+    declaring: &'static MarkupType,
+    name: &'static str,
+    takes_parameter: bool,
+    parameter_is_value_type: bool,
+    execute: Rc<CommandMethod<This>>,
+    can_execute: Option<Rc<CommandMethod<This>>>,
+    depends_on_properties: &[&str],
+) -> CompiledBindingPathBuilder {
+    use ferroui_base::data::core::plugins::{UntypedCanExecute, UntypedExecute};
+    let execute: UntypedExecute = Rc::new(move |owner: &BoxedValue, parameter: Option<&BoxedValue>| {
+        let mut arguments = Vec::with_capacity(1);
+        if takes_parameter {
+            arguments.push(parameter.cloned());
+        }
+        if let Err(error) = invoke_command_method(&*execute, owner, &arguments) {
+            raise_command_failure(declaring, name, parameter_is_value_type, parameter, error);
+        }
+    });
+    let can_execute: Option<UntypedCanExecute> = can_execute.map(|can_execute| {
+        Rc::new(move |owner: &BoxedValue, parameter: Option<&BoxedValue>| {
+            let result = invoke_command_method(&*can_execute, owner, &[parameter.cloned()]);
+            result.ok().and_then(|result| from_markup_value::<bool>(&result)).unwrap_or(false)
+        }) as UntypedCanExecute
+    });
+    builder.command_untyped(name, execute, can_execute, depends_on_properties, declaring.notify_property_changed)
+}
+
+/// The element of a compiled binding path for a method used as a command
+/// (`builder.Command(methodName, execute, canExecute, dependsOnProperties)`, the last
+/// element of a path bound to a command property), as the run-time loader builds it:
+/// `execute` calls the typed function of the method `name` the metadata `declaring`
+/// declares, with the owner and, when the method takes one (`takes_parameter`), the
+/// command parameter, which it reads from [`DelegateArguments`] in the type the method
+/// declares. A parameter that is not of that type, and a failure of the method, escape
+/// `ICommand.Execute` as a panic that names the exception of the managed original
+/// (`parameter_is_value_type`: the parameter type is a value type, whose null is another
+/// exception). The command re-queries its state when the owner, viewed as a notifier by
+/// the declaration of `declaring`, reports a change.
+pub fn path_command<This: Clone + 'static>(
+    builder: &CompiledBindingPathBuilder,
+    declaring: &'static MarkupType,
+    name: &'static str,
+    takes_parameter: bool,
+    parameter_is_value_type: bool,
+    execute: impl Fn(&This, &mut DelegateArguments<'_>) -> Result<MarkupValue, MarkupInvokeError> + 'static,
+) -> CompiledBindingPathBuilder {
+    command_element(builder, declaring, name, takes_parameter, parameter_is_value_type, Rc::new(execute), None, &[])
+}
+
+/// [`path_command`] of a method with a can-execute method (`bool Can<Name>(object)` of the
+/// declaring type): `can_execute` calls its typed function with the owner and the command
+/// parameter; a call that fails, or yields no `bool`, is `false`. `depends_on_properties`
+/// are the properties of the owner whose change re-queries the state of the command (the
+/// `DependsOn` attributes of the can-execute method).
+#[allow(clippy::too_many_arguments)]
+pub fn path_command_with_can_execute<This: Clone + 'static>(
+    builder: &CompiledBindingPathBuilder,
+    declaring: &'static MarkupType,
+    name: &'static str,
+    takes_parameter: bool,
+    parameter_is_value_type: bool,
+    execute: impl Fn(&This, &mut DelegateArguments<'_>) -> Result<MarkupValue, MarkupInvokeError> + 'static,
+    can_execute: impl Fn(&This, &mut DelegateArguments<'_>) -> Result<MarkupValue, MarkupInvokeError> + 'static,
+    depends_on_properties: &[&str],
+) -> CompiledBindingPathBuilder {
+    command_element(
+        builder,
+        declaring,
+        name,
+        takes_parameter,
+        parameter_is_value_type,
+        Rc::new(execute),
+        Some(Rc::new(can_execute)),
+        depends_on_properties,
+    )
+}
+
 /// `target.AddHandler(event, handler, RoutingStrategies.Direct | RoutingStrategies.Bubble, false)`:
 /// what the compiler writes for a routed event assigned in markup
 /// (`XamlDirectCallAddHandler`). The handler is called with the element it is attached to

@@ -5153,6 +5153,129 @@ fn build_runtime_lists_xaml_untyped(
     ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
 }
 
+/// The base URI and the XML namespaces of `method_command.xaml`.
+static BUILD_METHOD_COMMAND_XAML_DOCUMENT: rt::DocumentInfo = rt::DocumentInfo { base_uri: ::core::option::Option::Some("ferres://FerroUI.Markup.Xaml.UnitTests/Emitter/method_command.xaml"), namespaces: XML_NAMESPACES_3 };
+
+/// Generated from `method_command.xaml`.
+pub fn build_method_command_xaml(
+    service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
+) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::StackPanel>, ::ferroui_markup_xaml::XamlLoadException> {
+    // method_command.xaml(1,2) StackPanel
+    let stack_panel_0 = ::ferroui_controls::StackPanel::new();
+    let context = rt::populate_context(service_provider, &BUILD_METHOD_COMMAND_XAML_DOCUMENT, rt::to_value(stack_panel_0.clone()));
+    let name_scope = context.name_scope_field();
+    stack_panel_0.begin_init();
+    context.push_parent(rt::to_value(stack_panel_0.clone()));
+    // method_command.xaml(4,4) Children
+    let children_collection_0 = ::ferroui_controls::Panel::__markup_get_Children(stack_panel_0.upcast_ref::<::ferroui_controls::Panel>());
+    // method_command.xaml(4,4) Button
+    let button_0 = ::ferroui_controls::Button::new();
+    button_0.begin_init();
+    ::ferroui_controls::Controls::__markup_Add_0(&children_collection_0, ::core::clone::Clone::clone(&button_0).upcast::<::ferroui_controls::Control>());
+    context.push_parent(rt::to_value(button_0.clone()));
+    // method_command.xaml(4,11) Command
+    let path_0 = {
+        let builder = ::ferroui_base::data::CompiledBindingPathBuilder::new();
+        let builder = rt::path_command(&builder, <::ferroui_markup_xaml_tests::support::emitter::Desk as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Save", false, false, |this, _arguments| { ::ferroui_markup_xaml_tests::support::emitter::Desk::__markup_Save_0(this); ::core::result::Result::Ok(::core::option::Option::None) });
+        builder.build()
+    };
+    let compiled_binding_extension_0 = ::ferroui_markup_xaml::markup_extensions::CompiledBindingExtension::__markup_new_1(path_0.clone());
+    context.set_target_property(rt::property_value(::ferroui_controls::Button::command_property()));
+    let provided_0 = ::ferroui_markup_xaml::markup_extensions::CompiledBindingExtension::__markup_ProvideValue_0(&compiled_binding_extension_0, ::core::option::Option::Some(rt::service_provider(&context)));
+    context.set_target_property(::core::option::Option::None);
+    rt::bind(button_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::Button::command_property(), provided_0, 4, 11)?;
+    context.pop_parent();
+    rt::invoked(button_0.try_end_init(), 4, 4)?;
+    // method_command.xaml(5,4) Children
+    let children_collection_1 = ::ferroui_controls::Panel::__markup_get_Children(stack_panel_0.upcast_ref::<::ferroui_controls::Panel>());
+    // method_command.xaml(5,4) Button
+    let button_1 = ::ferroui_controls::Button::new();
+    button_1.begin_init();
+    ::ferroui_controls::Controls::__markup_Add_0(&children_collection_1, ::core::clone::Clone::clone(&button_1).upcast::<::ferroui_controls::Control>());
+    context.push_parent(rt::to_value(button_1.clone()));
+    // method_command.xaml(5,11) Command
+    let path_1 = {
+        let builder = ::ferroui_base::data::CompiledBindingPathBuilder::new();
+        let builder = rt::path_command(&builder, <::ferroui_markup_xaml_tests::support::emitter::Desk as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Rename", true, false, |this, arguments| { let _ = ::ferroui_markup_xaml_tests::support::emitter::Desk::__markup_Rename_1(this, arguments.next()?); ::core::result::Result::Ok(::core::option::Option::None) });
+        builder.build()
+    };
+    let compiled_binding_extension_1 = ::ferroui_markup_xaml::markup_extensions::CompiledBindingExtension::__markup_new_1(path_1.clone());
+    context.set_target_property(rt::property_value(::ferroui_controls::Button::command_property()));
+    let provided_1 = ::ferroui_markup_xaml::markup_extensions::CompiledBindingExtension::__markup_ProvideValue_0(&compiled_binding_extension_1, ::core::option::Option::Some(rt::service_provider(&context)));
+    context.set_target_property(::core::option::Option::None);
+    rt::bind(button_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::Button::command_property(), provided_1, 5, 11)?;
+    // method_command.xaml(5,38) CommandParameter
+    button_1.set_value(::ferroui_controls::Button::command_parameter_property(), rt::to_object(::std::string::String::from("draft")));
+    context.pop_parent();
+    rt::invoked(button_1.try_end_init(), 5, 4)?;
+    // method_command.xaml(6,4) Children
+    let children_collection_2 = ::ferroui_controls::Panel::__markup_get_Children(stack_panel_0.upcast_ref::<::ferroui_controls::Panel>());
+    // method_command.xaml(6,4) Button
+    let button_2 = ::ferroui_controls::Button::new();
+    button_2.begin_init();
+    ::ferroui_controls::Controls::__markup_Add_0(&children_collection_2, ::core::clone::Clone::clone(&button_2).upcast::<::ferroui_controls::Control>());
+    context.push_parent(rt::to_value(button_2.clone()));
+    // method_command.xaml(6,11) Command
+    let path_2 = {
+        let builder = ::ferroui_base::data::CompiledBindingPathBuilder::new();
+        let builder = rt::path_command_with_can_execute(&builder, <::ferroui_markup_xaml_tests::support::emitter::Desk as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Fire", true, false, |this, arguments| { ::ferroui_markup_xaml_tests::support::emitter::Desk::__markup_Fire_2(this, arguments.next()?); ::core::result::Result::Ok(::core::option::Option::None) }, |this, arguments| ::core::result::Result::Ok(rt::delegate_result(::ferroui_markup_xaml_tests::support::emitter::Desk::__markup_CanFire_3(this, arguments.next()?))), &["Armed"]);
+        builder.build()
+    };
+    let compiled_binding_extension_2 = ::ferroui_markup_xaml::markup_extensions::CompiledBindingExtension::__markup_new_1(path_2.clone());
+    context.set_target_property(rt::property_value(::ferroui_controls::Button::command_property()));
+    let provided_2 = ::ferroui_markup_xaml::markup_extensions::CompiledBindingExtension::__markup_ProvideValue_0(&compiled_binding_extension_2, ::core::option::Option::Some(rt::service_provider(&context)));
+    context.set_target_property(::core::option::Option::None);
+    rt::bind(button_2.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::Button::command_property(), provided_2, 6, 11)?;
+    // method_command.xaml(6,36) CommandParameter
+    button_2.set_value(::ferroui_controls::Button::command_parameter_property(), rt::to_object(::std::string::String::from("now")));
+    context.pop_parent();
+    rt::invoked(button_2.try_end_init(), 6, 4)?;
+    // method_command.xaml(7,4) Children
+    let children_collection_3 = ::ferroui_controls::Panel::__markup_get_Children(stack_panel_0.upcast_ref::<::ferroui_controls::Panel>());
+    // method_command.xaml(7,4) TextBox
+    let text_box_0 = ::ferroui_controls::TextBox::new();
+    text_box_0.begin_init();
+    ::ferroui_controls::Controls::__markup_Add_0(&children_collection_3, ::core::clone::Clone::clone(&text_box_0).upcast::<::ferroui_controls::Control>());
+    // method_command.xaml(7,12) Name
+    text_box_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("box")));
+    rt::register_name(name_scope.as_ref(), "box", ::core::clone::Clone::clone(&text_box_0).upcast::<::ferroui_base::FerroObject>(), 7, 12)?;
+    // method_command.xaml(7,23) Text
+    text_box_0.set_value(::ferroui_controls::TextBox::text_property(), ::core::option::Option::Some(::std::string::String::from("selected")));
+    rt::invoked(text_box_0.try_end_init(), 7, 4)?;
+    // method_command.xaml(8,4) Children
+    let children_collection_4 = ::ferroui_controls::Panel::__markup_get_Children(stack_panel_0.upcast_ref::<::ferroui_controls::Panel>());
+    // method_command.xaml(8,4) Button
+    let button_3 = ::ferroui_controls::Button::new();
+    button_3.begin_init();
+    ::ferroui_controls::Controls::__markup_Add_0(&children_collection_4, ::core::clone::Clone::clone(&button_3).upcast::<::ferroui_controls::Control>());
+    context.push_parent(rt::to_value(button_3.clone()));
+    // method_command.xaml(8,11) Command
+    let path_3 = {
+        let builder = ::ferroui_base::data::CompiledBindingPathBuilder::new();
+        let builder = builder.element_name(rt::path_name_scope(name_scope.as_ref(), 8, 11)?, "box");
+        let builder = rt::path_command(&builder, rt::class_markup(<::ferroui_controls::TextBox as ::ferroui_base::StaticType>::TYPE), "SelectAll", false, false, |this, _arguments| { ::ferroui_controls::TextBox::__markup_SelectAll_6(this); ::core::result::Result::Ok(::core::option::Option::None) });
+        builder.build()
+    };
+    let compiled_binding_extension_3 = ::ferroui_markup_xaml::markup_extensions::CompiledBindingExtension::__markup_new_1(path_3.clone());
+    context.set_target_property(rt::property_value(::ferroui_controls::Button::command_property()));
+    let provided_3 = ::ferroui_markup_xaml::markup_extensions::CompiledBindingExtension::__markup_ProvideValue_0(&compiled_binding_extension_3, ::core::option::Option::Some(rt::service_provider(&context)));
+    context.set_target_property(::core::option::Option::None);
+    rt::bind(button_3.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::Button::command_property(), provided_3, 8, 11)?;
+    context.pop_parent();
+    rt::invoked(button_3.try_end_init(), 8, 4)?;
+    context.pop_parent();
+    rt::invoked(stack_panel_0.try_end_init(), 1, 2)?;
+    rt::complete_root_name_scope(::core::option::Option::Some(&stack_panel_0), name_scope.as_ref(), 1, 2)?;
+    ::core::result::Result::Ok(stack_panel_0)
+}
+
+fn build_method_command_xaml_untyped(
+    service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
+) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadException> {
+    let root = build_method_command_xaml(service_provider)?;
+    ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
+}
+
 /// The build function of every eligible public document, by document name.
 pub const DOCUMENTS: &[(&str, BuildDocument)] = &[
     ("border_empty.xaml", build_border_empty_xaml_untyped as BuildDocument),
@@ -5278,6 +5401,7 @@ pub const DOCUMENTS: &[(&str, BuildDocument)] = &[
     ("type_extension_object.xaml", build_type_extension_object_xaml_untyped as BuildDocument),
     ("compiled_binding_unnamed_types.xaml", build_compiled_binding_unnamed_types_xaml_untyped as BuildDocument),
     ("runtime_lists.xaml", build_runtime_lists_xaml_untyped as BuildDocument),
+    ("method_command.xaml", build_method_command_xaml_untyped as BuildDocument),
 ];
 
 /// The loader of the compiled markup of the assembly: builds the document with the URI

@@ -139,6 +139,7 @@ pub const DOCUMENTS: &[(&str, &str)] = &[
     ("type_extension_object.xaml", "<StackPanel xmlns='https://github.com/ferroui' xmlns:x='http://schemas.microsoft.com/winfx/2006/xaml'>\n  <Border Tag='{x:Type x:Object}'/>\n  <ContentControl Content='text'>\n    <ContentControl.ContentTemplate>\n      <DataTemplate x:DataType='x:Object'>\n        <TextBlock Text='{Binding}'/>\n      </DataTemplate>\n    </ContentControl.ContentTemplate>\n  </ContentControl>\n</StackPanel>\n"),
     ("compiled_binding_unnamed_types.xaml", "<StackPanel xmlns='https://github.com/ferroui' xmlns:x='http://schemas.microsoft.com/winfx/2006/xaml'\n            xmlns:t='clr-namespace:FerroUI.Markup.Xaml.UnitTests;assembly=FerroUI.Markup.Xaml.UnitTests'\n            x:DataType='t:Row'>\n  <Border Tag='{CompiledBinding Stamp}'/>\n  <Border Tag='{CompiledBinding Length}'/>\n  <TextBlock Text='{CompiledBinding Name}'/>\n</StackPanel>\n"),
     ("runtime_lists.xaml", "<StackPanel xmlns='https://github.com/ferroui' xmlns:x='http://schemas.microsoft.com/winfx/2006/xaml'\n            xmlns:generic='clr-namespace:System.Collections.Generic;assembly=netstandard'\n            xmlns:col='using:System.Collections' xmlns:sys='using:System'>\n  <ComboBox SelectedIndex='1'>\n    <ComboBox.ItemsSource>\n      <generic:List x:TypeArguments='Stretch'>\n        <Stretch>Uniform</Stretch>\n        <Stretch>Fill</Stretch>\n      </generic:List>\n    </ComboBox.ItemsSource>\n  </ComboBox>\n  <ItemsControl>\n    <ItemsControl.ItemsSource>\n      <col:ArrayList>\n        <x:Null/>\n        <sys:String>Hello</sys:String>\n        <Stretch>None</Stretch>\n        <Border Name='item'/>\n      </col:ArrayList>\n    </ItemsControl.ItemsSource>\n  </ItemsControl>\n  <Border>\n    <Border.Tag>\n      <col:ArrayList>\n        <sys:String>tagged</sys:String>\n      </col:ArrayList>\n    </Border.Tag>\n  </Border>\n  <Border>\n    <Border.Tag>\n      <generic:List x:TypeArguments='Dock'/>\n    </Border.Tag>\n  </Border>\n</StackPanel>\n"),
+    ("method_command.xaml", "<StackPanel xmlns='https://github.com/ferroui' xmlns:x='http://schemas.microsoft.com/winfx/2006/xaml'\n            xmlns:t='clr-namespace:FerroUI.Markup.Xaml.UnitTests;assembly=FerroUI.Markup.Xaml.UnitTests'\n            x:DataType='t:Desk' x:CompileBindings='True'>\n  <Button Command='{Binding Save}'/>\n  <Button Command='{Binding Rename}' CommandParameter='draft'/>\n  <Button Command='{Binding Fire}' CommandParameter='now'/>\n  <TextBox Name='box' Text='selected'/>\n  <Button Command='{Binding #box.SelectAll}'/>\n</StackPanel>\n"),
 ];
 
 /// The documents that must be eligible for emission.
@@ -266,6 +267,7 @@ pub const EXPECTED_ELIGIBLE: &[&str] = &[
     "type_extension_object.xaml",
     "compiled_binding_unnamed_types.xaml",
     "runtime_lists.xaml",
+    "method_command.xaml",
 ];
 
 /// The documents whose values depend on the base URI of the document or on a service of

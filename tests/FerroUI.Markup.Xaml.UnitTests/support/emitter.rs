@@ -284,6 +284,82 @@ ferro_markup_type!(class Table {
     ],
 });
 
+// --- The owner of the commands of the corpus ----------------------------------
+
+/// The data of the document whose buttons call methods as commands: every method records
+/// its call, and one has a can-execute method that depends on a property.
+pub struct Desk {
+    calls: std::cell::RefCell<Vec<String>>,
+    armed: std::cell::Cell<bool>,
+    property_changed: ferroui_base::data::model::Event<str>,
+}
+
+crate::test_identity_eq!(Desk);
+
+impl ferroui_base::data::model::INotifyPropertyChanged for Desk {
+    fn property_changed(&self) -> &ferroui_base::data::model::Event<str> {
+        &self.property_changed
+    }
+}
+
+impl Desk {
+    pub fn new() -> Rc<Self> {
+        Rc::new(Self { calls: Default::default(), armed: Default::default(), property_changed: ferroui_base::data::model::Event::new() })
+    }
+
+    /// The calls of the methods so far, in order.
+    pub fn calls(&self) -> Vec<String> {
+        self.calls.borrow().clone()
+    }
+
+    pub fn armed(&self) -> bool {
+        self.armed.get()
+    }
+
+    pub fn set_armed(&self, value: bool) {
+        if self.armed.replace(value) != value {
+            self.property_changed.raise("Armed");
+        }
+    }
+
+    pub fn save(&self) {
+        self.calls.borrow_mut().push("Save".to_string());
+    }
+
+    /// A method with a parameter of a reference type, which returns a value the command drops.
+    pub fn rename(&self, name: Option<String>) -> i32 {
+        self.calls.borrow_mut().push(format!("Rename {}", name.unwrap_or_default()));
+        1
+    }
+
+    pub fn fire(&self, parameter: Option<BoxedValue>) {
+        let parameter = parameter.and_then(|parameter| parameter.downcast_ref::<String>().cloned()).unwrap_or_default();
+        self.calls.borrow_mut().push(format!("Fire {parameter}"));
+    }
+
+    /// `[DependsOn(nameof(Armed))] bool CanFire(object parameter)`.
+    pub fn can_fire(&self, _parameter: Option<BoxedValue>) -> bool {
+        self.armed.get()
+    }
+}
+
+ferro_markup_type!(class Desk {
+    this: Rc<Desk>,
+    handles: [Rc<Desk>, Option<Rc<Desk>>],
+    namespace: "FerroUI.Markup.Xaml.UnitTests",
+    constructors: [() => Desk::new],
+    properties: [
+        Armed: bool { get: |this: &Rc<Desk>| this.armed(), set: |this: &Rc<Desk>, value: bool| this.set_armed(value) },
+    ],
+    methods: [
+        fn Save() => |this: &Rc<Desk>| this.save(),
+        fn Rename(Option<String>) -> i32 => |this: &Rc<Desk>, name: Option<String>| this.rename(name),
+        fn Fire(Option<BoxedValue>) => |this: &Rc<Desk>, parameter: Option<BoxedValue>| this.fire(parameter),
+        fn CanFire(Option<BoxedValue>) -> bool => (|this: &Rc<Desk>, parameter: Option<BoxedValue>| this.can_fire(parameter)) [DependsOn("Armed")],
+    ],
+    notify_property_changed: Desk,
+});
+
 pub(crate) const MODULE: TypeModule = TypeModule {
     types: &[FailingEndInit::TYPE, Captioned::TYPE],
     markup_types: &[
@@ -291,11 +367,13 @@ pub(crate) const MODULE: TypeModule = TypeModule {
         <CaptionConverter as MarkupTyped>::MARKUP,
         <Row as MarkupTyped>::MARKUP,
         <Table as MarkupTyped>::MARKUP,
+        <Desk as MarkupTyped>::MARKUP,
     ],
     value_types: || {
         RowList::register();
         ValueTypes::register_nullable::<Rc<Row>>();
         ValueTypes::register_nullable::<Rc<Table>>();
+        ValueTypes::register_reference::<Desk>();
         ValueTypes::register_nullable::<Rc<Caption>>();
         ValueTypes::register_reference::<CaptionConverter>();
         ValueTypes::register_cast::<CaptionConverter, Rc<dyn TypeConverter>>(CaptionConverter::as_type_converter);
@@ -324,4 +402,5 @@ pub(crate) const MARKUP_RUST_PATHS: &[(&MarkupType, &str, bool)] = &[
     (<Row as MarkupTyped>::MARKUP, "ferroui_markup_xaml_tests::support::emitter::Row", false),
     (<RowList as MarkupTyped>::MARKUP, "ferroui_markup_xaml_tests::support::emitter::RowList", false),
     (<Table as MarkupTyped>::MARKUP, "ferroui_markup_xaml_tests::support::emitter::Table", false),
+    (<Desk as MarkupTyped>::MARKUP, "ferroui_markup_xaml_tests::support::emitter::Desk", false),
 ];
