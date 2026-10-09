@@ -163,7 +163,9 @@ check("without the headers the service worker isolates the page after one reload
     loads(page, 2);
     assert(await page.evaluate("navigator.serviceWorker.controller?.scriptURL.endsWith('/ferroui-sw.js?coi=1')") === true, "the page is not controlled by ferroui-sw.js?coi=1");
     assert(await page.evaluate(SERVICE_WORKERS) === 1, "the site does not have one service worker");
-    // The second visit: the same session, the worker in place.
+    // The second visit: the same session, the worker in place. (Chrome can answer this reload with
+    // the first document of the page, kept by its back/forward cache, unless the loader keeps that
+    // document out of it: "B2.8" of the document, "The reload that brought back the first document".)
     await page.evaluate(`globalThis.${application.global} = undefined`);
     await page.send("Page.reload");
     await sleep(500);
