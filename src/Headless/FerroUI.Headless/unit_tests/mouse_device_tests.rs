@@ -46,7 +46,7 @@ fn pointer_is_shared_between_windows_when_requested() {
     first_window.close();
     second_window.close();
 }
-ferro_fact!(pointer_is_shared_between_windows_when_requested, shows_a_window);
+ferro_fact!(pointer_is_shared_between_windows_when_requested);
 
 fn pointer_capture_crosses_top_levels_when_device_is_shared() {
     let popup_child = Border::new();
@@ -96,7 +96,7 @@ fn pointer_capture_crosses_top_levels_when_device_is_shared() {
     window.mouse_up(Point::new(50.0, 50.0), MouseButton::Left, RawInputModifiers::NONE);
     window.close();
 }
-ferro_fact!(pointer_capture_crosses_top_levels_when_device_is_shared, shows_a_window);
+ferro_fact!(pointer_capture_crosses_top_levels_when_device_is_shared);
 
 fn create_window() -> (Ref<Window>, Ref<Border>) {
     let target = Border::new();

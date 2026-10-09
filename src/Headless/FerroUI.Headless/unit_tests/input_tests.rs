@@ -73,7 +73,7 @@ fn should_click_button_on_window() {
 
     assert!(button_clicked.get());
 }
-ferro_fact!(should_click_button_on_window, shows_a_window);
+ferro_fact!(should_click_button_on_window);
 
 fn change_window_position() {
     let this = InputTests::new();
@@ -114,7 +114,7 @@ fn should_click_button_after_explicit_run_jobs() {
 
     assert_eq!(1, click_count.get());
 }
-ferro_fact!(should_click_button_after_explicit_run_jobs, shows_a_window);
+ferro_fact!(should_click_button_after_explicit_run_jobs);
 
 fn touch_contact_raises_touch_pointer_events() {
     let this = InputTests::new();
@@ -154,7 +154,7 @@ fn touch_contact_raises_touch_pointer_events() {
     assert_eq!(1, released_count.get());
     assert_eq!(Some(PointerType::Touch), pressed_pointer_type.get());
 }
-ferro_fact!(touch_contact_raises_touch_pointer_events, shows_a_window);
+ferro_fact!(touch_contact_raises_touch_pointer_events);
 
 fn multiple_touch_contacts_are_distinct_pointers() {
     let this = InputTests::new();
@@ -179,7 +179,7 @@ fn multiple_touch_contacts_are_distinct_pointers() {
 
     assert_eq!(2, pointer_ids.borrow().len());
 }
-ferro_fact!(multiple_touch_contacts_are_distinct_pointers, shows_a_window);
+ferro_fact!(multiple_touch_contacts_are_distinct_pointers);
 
 fn disposing_touch_pointer_cancels_contact() {
     let this = InputTests::new();
@@ -208,4 +208,4 @@ fn disposing_touch_pointer_cancels_contact() {
     assert_eq!(1, capture_lost_count.get());
     assert_eq!(0, released_count.get());
 }
-ferro_fact!(disposing_touch_pointer_cancels_contact, shows_a_window);
+ferro_fact!(disposing_touch_pointer_cancels_contact);

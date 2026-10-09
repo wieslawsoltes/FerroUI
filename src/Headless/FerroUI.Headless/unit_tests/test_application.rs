@@ -191,25 +191,12 @@ pub(crate) fn run_async<Fut: Future<Output = ()> + 'static>(
 
 /// The fact of the test framework integrations: the test function of the name runs on the
 /// session of each of the two test assemblies.
-///
-/// `shows_a_window` after the name ignores the test of the shared application, with the
-/// difference of the port that makes it fail (see `second_window_tests`).
 macro_rules! ferro_fact {
     ($(#[$attribute:meta])* $name:ident) => {
         $crate::unit_tests::test_application::ferro_fact!(@tests run, $name, [$(#[$attribute])*], []);
     };
-    ($(#[$attribute:meta])* $name:ident, shows_a_window) => {
-        $crate::unit_tests::test_application::ferro_fact!(@tests run, $name, [$(#[$attribute])*], [
-            #[ignore = "the second top-level of a compositor is not rendered: the render loop panics with `a server object id was reused while still alive` (server_compositor.rs) once a top-level was closed, so every test of the shared application that shows a window after another one has closed gets no frame and no hit test"]
-        ]);
-    };
     ($(#[$attribute:meta])* async $name:ident) => {
         $crate::unit_tests::test_application::ferro_fact!(@tests run_async, $name, [$(#[$attribute])*], []);
-    };
-    ($(#[$attribute:meta])* async $name:ident, shows_a_window) => {
-        $crate::unit_tests::test_application::ferro_fact!(@tests run_async, $name, [$(#[$attribute])*], [
-            #[ignore = "the second top-level of a compositor is not rendered: the render loop panics with `a server object id was reused while still alive` (server_compositor.rs) once a top-level was closed, so every test of the shared application that shows a window after another one has closed gets no frame and no hit test"]
-        ]);
     };
     (@tests $run:ident, $name:ident, [$(#[$attribute:meta])*], [$(#[$shared:meta])*]) => {
         mod $name {
@@ -232,15 +219,10 @@ macro_rules! ferro_fact {
 }
 
 /// The theory of the test framework integrations: one test per row and test assembly, each a
-/// dispatch of its own. `shows_a_window` as for a fact.
+/// dispatch of its own.
 macro_rules! ferro_theory {
     ($name:ident { $($row:ident: ($($argument:expr),*)),* $(,)? }) => {
         $crate::unit_tests::test_application::ferro_theory!(@tests run, $name, [], $($row: ($($argument),*)),*);
-    };
-    ($name:ident, shows_a_window { $($row:ident: ($($argument:expr),*)),* $(,)? }) => {
-        $crate::unit_tests::test_application::ferro_theory!(@tests run, $name, [
-            #[ignore = "the second top-level of a compositor is not rendered: the render loop panics with `a server object id was reused while still alive` (server_compositor.rs) once a top-level was closed, so every test of the shared application that shows a window after another one has closed gets no frame and no hit test"]
-        ], $($row: ($($argument),*)),*);
     };
     (async $name:ident { $($row:ident: ($($argument:expr),*)),* $(,)? }) => {
         $crate::unit_tests::test_application::ferro_theory!(@tests run_async, $name, [], $($row: ($($argument),*)),*);

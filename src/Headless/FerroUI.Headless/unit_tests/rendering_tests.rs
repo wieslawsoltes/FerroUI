@@ -40,7 +40,7 @@ fn should_render_last_frame_to_bitmap() {
 
     assert!(frame.is_some());
 }
-ferro_fact!(should_render_last_frame_to_bitmap, shows_a_window);
+ferro_fact!(should_render_last_frame_to_bitmap);
 
 fn should_not_crash_on_geometry_group() {
     let group = GeometryGroup::new();
@@ -58,7 +58,7 @@ fn should_not_crash_on_geometry_group() {
 
     assert!(frame.is_some());
 }
-ferro_fact!(should_not_crash_on_geometry_group, shows_a_window);
+ferro_fact!(should_not_crash_on_geometry_group);
 
 fn should_not_crash_on_combined_geometry() {
     let icon = PathIcon::new();
@@ -78,7 +78,7 @@ fn should_not_crash_on_combined_geometry() {
 
     assert!(frame.is_some());
 }
-ferro_fact!(should_not_crash_on_combined_geometry, shows_a_window);
+ferro_fact!(should_not_crash_on_combined_geometry);
 
 fn should_not_hang_with_non_trivial_layout() {
     let list_box = ListBox::new();
@@ -90,7 +90,7 @@ fn should_not_hang_with_non_trivial_layout() {
     let frame = window.capture_rendered_frame();
     assert!(frame.is_some());
 }
-ferro_fact!(should_not_hang_with_non_trivial_layout, shows_a_window);
+ferro_fact!(should_not_hang_with_non_trivial_layout);
 
 async fn should_render_to_a_compositor_snapshot_capture() {
     let content_control = ContentControl::new();
@@ -118,7 +118,7 @@ async fn should_render_to_a_compositor_snapshot_capture() {
     assert_eq!(100.0, snapshot.size().width);
     assert_eq!(100.0, snapshot.size().height);
 }
-ferro_fact!(async should_render_to_a_compositor_snapshot_capture, shows_a_window);
+ferro_fact!(async should_render_to_a_compositor_snapshot_capture);
 
 fn should_change_render_scaling() {
     let border = Border::new();
@@ -147,7 +147,7 @@ fn should_change_render_scaling() {
     assert_eq!(size_before.width * 2, size_after.width);
     assert_eq!(size_before.height * 2, size_after.height);
 }
-ferro_fact!(should_change_render_scaling, shows_a_window);
+ferro_fact!(should_change_render_scaling);
 
 fn should_keep_client_size_after_scaling_change() {
     let window = Window::new();
