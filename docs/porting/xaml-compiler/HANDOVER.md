@@ -157,6 +157,8 @@
   WRITTEN, NOT STARTED: the plan for converting the sample itself (section 21, item 6). Nothing is
   half-done in the working tree.
 
+- The twelfth stage (branch `catalog-compiled-markup`, on `xaml-catalog-last-refusals`, section 22) executed the plan of section 21, built and run by its author with the commands the stage allowed. DONE: **the ControlCatalog runs on the markup its build compiles** (218 of 219 documents; `xaml.md` 9.5.22) and does not link the run-time loader, which is a dependency of its tests and of its feature `runtime-markup` (the sample as it was, for a short build and as the reference of the measures); the colour picker embeds its documents only with its feature `document-assets`; the OpenGL controls and `mini-mvvm` export their models; the catalog fixture is removed and its comparison is `tests/compiled_markup.rs` of the sample (881 tests pass: the 656 it had, 217 comparisons, 8 closer looks). Measured on the desktop, unoptimised (section 22 has the table): start to the main window 438 ms (654 ms), a tour of the 75 pages 1.09 s (2.27 s), the desktop binary +13 MB (+4.4 %), the build of the crate 2 to 2.5 times as long. **NOT MEASURED: the browser module against its budget of 14 MB with gzip. It is the gate before this branch is merged** (the budget is checked by the deploy job on `main`, not by a pull request); section 22 has the commands. Section 22 also lists the five places where the plan of section 21 was wrong. Nothing is half-done in the working tree.
+
 Design documents in the repository: `docs/porting/xaml.md`, sections 9 (emitter design: call forms
 A/B/C, build integration, code-behind), 9.5 (source scanner), 9.12 (the 14 rulings), 9.13, and
 decisions 1 to 27. Read section 9 before touching the emitter. `DRAFT-AUTHOR-REPORT.md` is the
@@ -1721,7 +1723,9 @@ The fixture's workaround is gone (`tests/mod.rs`, `TestApplication::start`: the 
 
 Refused now: `Pages/OpenGl/OpenGlLeasePage.xaml` (`the type models have no type ControlCatalog.Pages.OpenGlLeasePage`: the class is not ported; it stays).
 
-### Item 6: the plan for converting the sample (not started; nothing of it is in the tree)
+### Item 6: the plan for converting the sample (executed by the twelfth stage: section 22)
+
+*(Section 22 has what each step did, the measures and the corrections. The plan is left as it was written; where it was wrong, the step says so in italics.)*
 
 `samples/ControlCatalog` loads 219 documents with the run-time loader. 218 compile and are the trees of the run-time loader; the conversion is to make the sample itself load them compiled. What follows is the order, with the check at each step. The sample's sources belong to the catalog worker (section 1), so each step is a change there.
 
@@ -1737,13 +1741,13 @@ Refused now: `Pages/OpenGl/OpenGlLeasePage.xaml` (`the type models have no type 
 
 | # | Step | Check |
 |---|---|---|
-| 1 | Build scripts with `links` keys for the two crates whose models the fixture still exports (`ferroui-opengl`, `mini-mvvm`: `Build::from_env().type_system(Model).run()` with no group, as the framework crates export theirs); `EXPORTED` of the fixture and the two `export` calls of the measure go | the fixture and the measure unchanged in what they emit; `cargo build -p control-catalog` |
-| 2 | The sample's `build.rs` compiles its documents: after the placeholder substitution, `Build::from_env().type_system(Model).default_compile_bindings(true)` with one group per document but `OpenGlLeasePage.xaml`; `ferroui-build` as a build dependency; `links = "control_catalog_xaml"` is not needed (nothing is built on the sample) | the build emits 218 documents; the emitted bytes are the fixture's for the same texts (compare the output directories with `placeholder-branding` off) |
-| 3 | `lib.rs`: `extern crate self as control_catalog;` and `ferroui_markup_xaml::include_compiled_xaml!()`; `ferroui-base` with `markup-functions` | rustc compiles the 14.8 MB of generated code in the sample (in the fixture: 165 s for the test binary with it, 85 s without, on the author's machine) |
-| 4 | `markup.rs` as the fixture has it (`populate_compiled` over `COMPILED`, the run-time loader as the fallback while it is still linked); `register_types.rs` registers `compiled_markup::register()`; `app.rs` populates `App` from its compiled markup (the group of `App.xaml` has `CustomThemes.xaml` and the styles of the colour picker linked at build time) and stops calling `FerroRuntimeXamlLoader::register()` outside tests | the suite of the sample (645 passed, 9 ignored today) unchanged; the generated per-document tests still load through the run-time loader and now also compare with the compiled class (the fixture's `compare`, moved into the sample's tests); the fixture can then go, or shrink to the pages CI builds |
-| 5 | The run-time loader becomes a dev-dependency (`ferroui-markup-xaml-loader` out of `[dependencies]`); the documents leave the embedded assets except `OpenGlLeasePage.xaml` and what a test reads (a `#[cfg(test)]` table, as in the themes) | `cargo tree -p control-catalog -e normal` has no `ferroui-markup-xaml-loader` and no `xamlx`; the desktop host starts and every page opens (the session over the whole catalog, `scripts/browser/catalog-pages.mjs` for the browser) |
-| 6 | The colour picker stops embedding its documents (`assets.rs` and the table of `build.rs` go; 9.5.20) | its 45 tests; no document of the workspace includes its styles from markup loaded at run time (the colour picker's own theme tests do: they move to the loader table, or keep a test-only asset table) |
-| 7 | The browser build and its budget (below) | `scripts/build-browser.sh control-catalog-browser --both`, the size report, the published site by hand |
+| 1 | Build scripts with `links` keys for the two crates whose models the fixture still exports (`ferroui-opengl`, `mini-mvvm`: `Build::from_env().type_system(Model).run()` with no group, as the framework crates export theirs); `EXPORTED` of the fixture and the two `export` calls of the measure go *(done; wrong for the measure: it is a test, has no models from Cargo and exports the model of every crate itself, so its two calls stay)* | the fixture and the measure unchanged in what they emit; `cargo build -p control-catalog` |
+| 2 | The sample's `build.rs` compiles its documents: after the placeholder substitution, `Build::from_env().type_system(Model).default_compile_bindings(true)` with one group per document but `OpenGlLeasePage.xaml`; `ferroui-build` as a build dependency; `links = "control_catalog_xaml"` is not needed (nothing is built on the sample) | the build emits 218 documents; the emitted bytes are the fixture's for the same texts (compare the output directories with `placeholder-branding` off) *(done: 218 of 218 files the same but for the name of the crate)* |
+| 3 | `lib.rs`: `extern crate self as control_catalog;` and `ferroui_markup_xaml::include_compiled_xaml!()`; `ferroui-base` with `markup-functions` | rustc compiles the 14.8 MB of generated code in the sample (in the fixture: 165 s for the test binary with it, 85 s without, on the author's machine) *(done, without an error or a warning of its own)* |
+| 4 | `markup.rs` as the fixture has it (`populate_compiled` over `COMPILED`, the run-time loader as the fallback while it is still linked); `register_types.rs` registers `compiled_markup::register()`; `app.rs` populates `App` from its compiled markup (the group of `App.xaml` has `CustomThemes.xaml` and the styles of the colour picker linked at build time) and stops calling `FerroRuntimeXamlLoader::register()` outside tests | the suite of the sample (645 passed, 9 ignored today) unchanged; the generated per-document tests still load through the run-time loader and now also compare with the compiled class (the fixture's `compare`, moved into the sample's tests); the fixture can then go, or shrink to the pages CI builds *(done: 881 tests; the fixture is gone. Incomplete: `markup.rs` has no fallback to the run-time loader, which is not linked; the tests of the application class need the loader registered by the test support, since the application no longer registers it)* |
+| 5 | The run-time loader becomes a dev-dependency (`ferroui-markup-xaml-loader` out of `[dependencies]`); the documents leave the embedded assets except `OpenGlLeasePage.xaml` and what a test reads (a `#[cfg(test)]` table, as in the themes) | `cargo tree -p control-catalog -e normal` has no `ferroui-markup-xaml-loader` and no `xamlx`; the desktop host starts and every page opens (the session over the whole catalog, `scripts/browser/catalog-pages.mjs` for the browser) *(done on the desktop; `cargo tree` was not a command of the stage, so the check was the symbol table of the desktop binary: no symbol of the loader or of `xamlx`. Not in the plan: the feature `runtime-markup`, which keeps the run-time path selectable)* |
+| 6 | The colour picker stops embedding its documents (`assets.rs` and the table of `build.rs` go; 9.5.20) | its 45 tests; no document of the workspace includes its styles from markup loaded at run time (the colour picker's own theme tests do: they move to the loader table, or keep a test-only asset table) *(done as a feature, not a removal; wrong: the tests of the sample load `App.xaml` with the run-time loader too, and so does its feature `runtime-markup`, and both need the assets, which a table of the tests of the colour picker cannot give another crate. The colour picker has the feature `document-assets`)* |
+| 7 | The browser build and its budget (below) | `scripts/build-browser.sh control-catalog-browser --both`, the size report, the published site by hand *(NOT DONE: no browser build was a command of the stage. Section 22 has what to run)* |
 
 **The browser module.** The catalog module is 43.85 MB raw and 11.42 MB with gzip, against a budget of 14 MB with gzip (`browser-platform.md`, section 18, measured after the themes were compiled). What step 5 stops linking, from the attribution of that document (`themed_view`): the XAML pipeline is 2.50 MB raw and 0.60 MB with gzip, of which the runtime library stays; the loader, `xamlx` and `roxmltree` are the larger part, so about 2 MB raw and 0.5 MB with gzip go. The document texts leave the data section: 1.26 MB raw (219 files), about 0.2 MB with gzip. **The type metadata does not go**: the markup metadata of every type (`MarkupType`, with its by-name invokers) is reached from generated code (`rt::clr_property_info` and `rt::path_property` invoke the accessors of a declared property through it, `rt::add_event_handler` a subscription, `rt::class_markup` and `MarkupTyped::MARKUP` name the tables) and from reflection bindings and data templates at run time, so the linker keeps the tables and their closures; only `compiler-metadata`, which a normal build never had, is the emitter's alone. What is added is the compiled code of 218 documents, 14.76 MB of Rust. The one measured ratio is the themes: 10.94 MB of generated Rust (3.65 MB and 7.28 MB) made the catalog module 11.98 MB larger raw and 1.97 MB larger with gzip, before the shared helpers of `rt` took the repeated statement sequences out of the call sites. At that ratio the catalog adds 16 MB raw and 2.7 MB with gzip; the estimate of `xaml.md` 9.10.1 was +6 to +10 MB raw and +0.5 to +1.2 MB with gzip. Net of what goes: between +3 and +13 MB raw and between -0.2 and +2.0 MB with gzip, that is 11.2 to 13.4 MB with gzip against 14. The upper end leaves no room, so step 7 is a gate, not a formality: measure with `scripts/browser/wasm-size-report.py` before the workflow is changed, and if the module is over, the first lever is the one the themes had (more statement sequences into `rt` helpers: the pages repeat `StackPanel` children and `TextBlock` assignments as the themes repeated setters), not leaving pages on the run-time loader, which keeps the 2 MB of the loader for every page.
 
@@ -1782,3 +1786,110 @@ The reference tests of both themes, of the dialogs and of the fixtures compare t
 3. The order of the adder branch (the collection read before the value is converted) and the command parameter that is a list or an array (`xaml.md` 9.4.10 and 9.4.11, the deviations).
 4. The comparison of the colour picker runs the test binary a second time; a test harness that does not accept `--exact` with the name of the test would fail it, loudly.
 5. The estimate of the browser module is one ratio measured before a known reduction, applied to other markup: the range is honest, the number is not known until step 7.
+
+## 22. What the twelfth stage delivered (the ControlCatalog on the markup its build compiles), and how to validate it
+
+Branch `catalog-compiled-markup`, on `xaml-catalog-last-refusals`. Read `xaml.md` 9.5.22 first: it has the table of what changed in the sample, the measures and the reasons.
+
+### The steps of section 21
+
+| # | State | What was done | Where |
+|---|---|---|---|
+| 1 | Done | `ferroui-opengl` and `mini-mvvm` export their type models (`Export::from_env().run()`, a `links` key each). The fixture's build took every model from Cargo and emitted the same 218 files, byte for byte | `src/FerroUI.OpenGL/build.rs`, `samples/MiniMvvm/build.rs`, the two manifests |
+| 2 | Done | The sample's `build.rs` compiles its documents after the placeholder artwork is put in, one group per document, and writes `compiled_classes.rs` and `compiled_document_tests.rs`. Without the placeholder artwork: 218 of 218 files equal to the fixture's but for the name of the crate (14,758,945 bytes, 154,891 lines); with it 14,758,687 bytes (one document is rewritten) | `samples/ControlCatalog/build.rs`, `build/compiled_documents.rs` (`REFUSED`, `NOT_LOADED`, `NOT_RUN`) |
+| 3 | Done | `extern crate self as control_catalog;`, `include_compiled_xaml!()`, `ferroui-base` with `markup-functions`. rustc compiles the emitted code without an error and without a warning of its own (the crate has the three warnings it had) | `lib.rs`, `Cargo.toml` |
+| 4 | Done | `markup::load_component` populates from `COMPILED`; `App::load_document` is `initialize_component()`; `register_types()` registers `compiled_markup::register()` and the runtime library. The comparison of the fixture is `tests/compiled_markup.rs`; the fixture is removed (`xaml.md` 9.5.22 says why) | `markup.rs`, `app.rs`, `register_types.rs`, `assets.rs`, `tests/compiled_markup.rs`, `tests/support.rs`, `tests/mod.rs`; `tests/XamlCatalogFixture` deleted; `catalog_measure.rs` reads `build/compiled_documents.rs` |
+| 5 | Done | The loader is optional (the feature `runtime-markup`) and a dev-dependency. The compiled documents are not assets (`DOCUMENT_ASSETS` in a test build). The desktop binary has no symbol of the loader or of `xamlx` | `Cargo.toml`, `build.rs`, `assets.rs` |
+| 6 | Done as a feature | The colour picker embeds its documents only with `document-assets` (and in its own tests); the sample states it for its tests and for `runtime-markup` | `src/FerroUI.Controls.ColorPicker` (`Cargo.toml`, `lib.rs`, `register_types.rs`, `assets.rs`, `build.rs`) |
+| 7 | Measured on the desktop; the browser NOT measured | The table below | `xaml.md` 9.5.22 |
+
+Steps 3 to 5 are one commit: with the documents out of the assets the loader has nothing to load, and with the loader out the classes need the compiled markup.
+
+### Where the plan was wrong or incomplete
+
+1. *The measure keeps its two exports* (step 1). `emitter::catalog_measure` is a test: Cargo hands it no model, and it exports the model of every crate itself, the framework crates' included. Only the fixture's exports went.
+2. *The colour picker's assets cannot simply go* (step 6). The plan's check was "no document of the workspace includes its styles from markup loaded at run time". The tests of the sample do: `document_app` and the survey load `App.xaml` with the run-time loader, and the loader leaves an include of a document of another assembly to run time only for a document the asset loader has (decision 22). A test-only table of the colour picker cannot serve another crate's tests, so the assets are a feature of the colour picker, which the sample's dev-dependency states.
+3. *The run-time path stays selectable* (not in the plan; the task of the stage asked for it if the measures called for it, and the build time does). The feature `runtime-markup` of the sample: no compile, every document an asset, the classes and `App` loaded at run time, the loader table written by hand. Its cost is about sixty lines behind `cfg`, and it is what made a before-and-after on one tree possible.
+4. *No fallback in `load_component`* (step 4). The plan took the fixture's module, which falls back to the run-time loader for a class whose document is not compiled. The sample does not link the loader, and the one document that is not compiled has no class, so a class without compiled markup is an error that says so.
+5. *The application no longer registers the run-time loader* (step 4), so the test support does it for the application of the catalog (`tests/support.rs`, `start_catalog_app`): the tests that load a document under that application relied on the registration `App::load_document` made.
+6. *The check of step 5.* `cargo tree` was not among the commands of the stage; the symbol table of the desktop binary was read instead (3,738 symbols of the loader and 4,463 of `xamlx` with `runtime-markup`, none without). The validating session can run `cargo tree -p control-catalog -e normal` and look for `ferroui-markup-xaml-loader` and `xamlx`.
+
+### What still uses the run-time loader
+
+- **The library of the sample: nothing.** `Pages/OpenGl/OpenGlLeasePage.xaml` is the one document not compiled (its class is not ported); it is an asset no code loads.
+- **The tests of the sample** (the loader is a dev-dependency): `document_<name>` for each of the 219 documents, the comparison of each compiled class, the reproductions of the gaps and the survey, and the resources the test applications merge (`tests/support.rs`).
+- **The feature `runtime-markup`**: everything, as before the stage.
+- **`ferroui-designer-support`**: the previewer, by design. The sample does not depend on it.
+
+### The measures
+
+| | Markup loaded at run time (the sample before this stage; `--features runtime-markup` now) | Markup compiled by the build (the default) |
+|---|---|---|
+| Documents | 219 embedded as assets (1.26 MB of text) | 218 compiled; 1 asset (the document of the class that is not ported) |
+| Rust the build emits | none | 218 files, 154,891 lines, 14,758,687 bytes (14,758,945 without the placeholder artwork, which is what the measure and the fixture before it emitted) |
+| The build script, one run | about 0.1 s | the scan of the 307 source files 0.8 to 1.1 s, the 218 documents about 7 s |
+| The library after its build script was touched (the script compiled and run, the crate compiled; the dependencies built), wall time / processor time | 22 to 30 s / 36 to 44 s (a single run before the stage, with the artifacts of the crate removed: 26.6 s) | 46 to 49 s / 73 to 79 s (the single run: 54.6 s) |
+| The library after one document was touched | 18 to 20 s / 33 to 34 s | 53 to 69 s / 79 to 85 s |
+| The library after one source file was touched | 21 to 27 s / 36 to 41 s | 46 to 59 s / 72 to 82 s |
+| The test binary after one source file was touched, with the run of the tests | 46 to 49 s / 178 to 185 s (the tests run for 19 s) | 74 to 109 s / 220 to 259 s (the tests run for 24 to 46 s, by the load) |
+| The library (`rlib`) | 209.85 MB | 244.94 MB |
+| The desktop binary as linked / stripped | 296.31 MB / 198.46 MB | 309.36 MB / 212.39 MB (+13.05 MB, +4.4 %; stripped +13.93 MB, +7.0 %) |
+| Of it: code (`__text`) / constants (`__const` of the text segment) | 90.44 MB / 27.31 MB | 105.04 MB / 25.94 MB (+14.60 MB of code, with the loader and the compiler library gone; -1.37 MB of constants, the texts of the documents among them) |
+| Symbols of the run-time loader and of the compiler library in the desktop binary (`nm`) | 3,738 and 4,463 | 0 and 0 |
+| The test binary | 289.20 MB | 311.76 MB |
+| The tests | 656 passed, 12 ignored | 881 passed, 13 ignored (the 656, the 217 comparisons of a compiled class, 8 that look closer; the ignored one more is the reproduction of gap C401) |
+| Start of the desktop host to the application set up (`App.xaml` populated, both themes created), median of 12 | 304 ms | 193 ms |
+| Start to `App activated` (the main window shown; the marker of `desktop-performance.md`), median of 12 | 654 ms | 438 ms (-33 %) |
+| 75 pages created and made the current page one after the other (`FERROUI_SMOKE_PAGES=1`), median of 7 | 2.27 s | 1.09 s (-52 %) |
+
+How it was measured. One machine, busy with other builds (the load average was between 8 and 16 throughout, so the wall times are high and the processor times are the ones to compare), the `dev` profile without debug information and **without incremental compilation** (`CARGO_PROFILE_DEV_DEBUG=0 CARGO_INCREMENTAL=0`, the settings the stage was allowed). The build times of the two columns were taken on one tree, one after the other, twice, and the table has the range of the two passes. The size of the desktop binary with markup loaded at run time was taken twice, on the tree before the stage and with the feature on the tree after it, and the two agree (296.32 MB and 296.31 MB): the feature is the sample as it was. The start and the tour ran the two desktop binaries in turn. No optimised build was made: the start in a release build (876 ms for the catalog in `desktop-performance.md`) and the size of a release binary are not measured.
+
+**The decision.** Compiled markup is the default of the sample; the run-time path is the feature. `xaml.md` 9.5.22 has the reasoning: the start and the pages are faster, the binary 4.4 % larger, and the build of the crate, which is the one thing that got worse, is paid by whoever builds the sample and can be avoided with the feature.
+
+### The browser module (for the validating session, before the branch is merged)
+
+Nothing of `src/Browser`, `scripts/` or the browser host changed; `control-catalog-browser` takes the sample with its default features, so it builds the compiled markup. The crate of the sample is built at the optimisation level of the profile (`opt-level = "z"` in `[profile.browser]`), and so is its compiled markup.
+
+```text
+scripts/build-browser.sh control-catalog-browser --both
+node scripts/browser/module-sizes.mjs target/browser-both/control-catalog-browser
+```
+
+Compare each of the two modules with 14 MB with gzip (`PUBLISHED_MODULE_GZIP_BUDGET_MB` of `.github/workflows/pages.yml`), and with the module before the stage: 43.85 MB raw and 11.42 MB with gzip when `browser-platform.md`, section 18, was written (build `main` for today's number). Section 21 estimated 11.2 to 13.4 MB with gzip. For the same tree without compiled markup, add `"runtime-markup"` to the features of `control-catalog` in `samples/ControlCatalog.Browser/Cargo.toml` (the line under `[target.'cfg(target_os = "emscripten")'.dependencies]`) and build again. Then `scripts/browser/catalog-pages.mjs` and `scripts/browser/tests/control_catalog.test.mjs` against the site: every page opens from compiled markup, with no document text in the module.
+
+If a module is over the budget: the lever is the one section 21 names (the statement sequences the pages repeat, into helpers of `rt`), and until it is pulled the browser host can state `runtime-markup` and publish what it publishes today, with one line of its manifest.
+
+### How to validate
+
+What the author ran, all green (debug profile, the dependencies built):
+
+```text
+cargo test -p control-catalog --lib                                 881 passed, 13 ignored
+cargo test -p control-catalog --lib --features runtime-markup       656 passed, 13 ignored
+cargo test -p control-catalog --lib -- --ignored gap_c401_progress_bar_template_settings_in_a_reflection_binding      fails, as a reproduction of an open gap does
+cargo test -p ferroui-controls-color-picker --lib                   45 passed (the byte check of its build among them)
+cargo test -p ferroui-markup-xaml-tests --lib emitter::catalog_measure -- --ignored --nocapture      218 emitted, 1 refused, 14,758,945 bytes
+cargo build -p control-catalog-desktop                              and FERROUI_SMOKE_EXIT_MS=1 / FERROUI_SMOKE_PAGES=400 FERROUI_SMOKE_EXIT_MS=34000 target/debug/control-catalog-desktop
+cargo build -p control-catalog-desktop -p control-catalog --features control-catalog/runtime-markup
+cargo check --all-targets -p control-catalog -p control-catalog-desktop -p ferroui-controls-color-picker -p ferroui-opengl -p mini-mvvm      no warning the crates did not have
+cargo check -p control-catalog-browser                              checks on the host (not a browser build)
+```
+
+The desktop host was started under a watchdog in both builds: it shows its main window and closes (`FERROUI_SMOKE_EXIT_MS`), and it visits all 75 pages (`FERROUI_SMOKE_PAGES`) with the same lines in its log in both builds when a page stays 400 ms (32 reports of bindings, each one of the sample or of gap C401; no panic).
+
+**Not run by the author, for the validating session:** the browser build (above); `cargo build --workspace`, `cargo clippy` and `cargo test --workspace` (the workspace lost a member; a test build of the workspace unifies the feature `document-assets` of the colour picker for every crate, which is what the tests want); an optimised build of the desktop host (start-up and size in the release profile); a build with incremental compilation; `scripts/check-upstream-name.sh` or its equivalent (the author checked the added lines of each commit).
+
+**What the author doubts.**
+
+1. *The browser module.* The whole case for the default rests on a desktop measure; the module may be over its budget, and the estimate has a wide range. It is one build away from being known.
+2. *The build time with incremental compilation off* is the worst case for compiled markup, and the measures were taken on a machine other builds were using. The ratio is stable between the two passes; the absolute times are not what a quiet machine gives.
+3. *Two tables for one document.* A class is populated through `COMPILED` (path to `populate`), and created through `XamlClass` (path to constructor), both keyed by the rooted path; a class whose `xaml_class!` names a path the build did not compile panics when it is constructed, not when the crate is built. `every_document_the_compiler_does_not_refuse_is_compiled` holds the two together for the documents; a typo in a path is found by the test of the class.
+4. *The loader table is 218 tables asked in turn* (`compiled_markup::try_load` calls the `try_load` of each module until one answers): a load by URI compares up to 218 strings. Nothing of the sample loads its own documents by URI at run time (the page list creates classes), so it was left; a build that grouped the class documents would have one table.
+5. *The comparison in a window covers fifteen pages*, chosen by hand. The other 202 are compared as logical trees after the load, as before.
+
+### The next stage
+
+1. The browser module measured (above), and the lever of section 21 if it is over.
+2. Gap C401 (`ProgressBar.TemplateSettings` without markup metadata): a declaration in the controls crate, outside what this stage could touch.
+3. What `xaml.md` 9.10.1 still lists for the build: the compile-time value parser, the manifest keys, the cache (a build of the sample runs the compiler over 218 documents on every change of a source file, about 8 s, whatever changed), `include_xaml!` per class and the generated `register_types` (which would replace the sample's hand-written type table and with it `XamlClass`), and the run-time host of `Build` removed.
+4. With the generated code of the sample as the largest consumer: its size. 14.8 MB of Rust for 218 documents is 68 KB a document; the repeated sequences are the same lever for the build time of the crate as for the module.
