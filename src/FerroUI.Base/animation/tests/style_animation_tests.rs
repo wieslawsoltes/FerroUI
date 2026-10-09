@@ -202,3 +202,122 @@ fn animations_are_disposed_when_the_style_is_detached() {
     assert_eq!(target.opacity(), 1.0);
     assert!(!clock.has_observers());
 }
+
+// --- The animation tests of the upstream style tests (`Styling/StyleTests.cs`) ---
+//
+// They are here because they need the clocks of the animation tests. `Class1`
+// is the class of the styling tests.
+
+use crate::animation::Cue;
+use crate::media::Brushes;
+use crate::styling::test_support::Class1;
+use crate::styling::testing::try_attach;
+
+fn green() -> Rc<dyn IBrush> {
+    Brushes::green()
+}
+
+fn yellow() -> Rc<dyn IBrush> {
+    Brushes::yellow()
+}
+
+fn blue() -> Rc<dyn IBrush> {
+    Brushes::blue()
+}
+
+fn double_animation() -> Ref<Animation> {
+    let animation = Animation::new();
+    animation.set_duration(seconds(1.0));
+    let first = KeyFrame::new();
+    first.setters().add(Setter::new(Class1::double_property(), 5.0) as _);
+    animation.children().add(first);
+    animation
+        .children()
+        .add(KeyFrame::with_cue(Cue::new(1.0), [Setter::new(Class1::double_property(), 10.0) as _]));
+    animation
+}
+
+#[test]
+fn animations_should_be_activated() {
+    let style = Style::with_selector(Selectors::of_type::<Class1>());
+    style.add_animation(&double_animation());
+
+    let clock = TestClock::new();
+    let target = Class1::new();
+    target.set_clock(Some(clock.as_clock()));
+
+    try_attach(&style, &target, None);
+
+    assert_eq!(0.0, target.double());
+
+    clock.step(TimeSpan::ZERO);
+    assert_eq!(5.0, target.double());
+
+    clock.step(seconds(0.5));
+    assert_eq!(7.5, target.double());
+}
+
+#[test]
+fn animations_with_trigger_should_be_activated_and_deactivated() {
+    let style = Style::with_selector(Selectors::of_type::<Class1>().class("foo"));
+    style.add_animation(&double_animation());
+
+    let clock = TestClock::new();
+    let target = Class1::new();
+    target.set_clock(Some(clock.as_clock()));
+
+    try_attach(&style, &target, None);
+
+    assert_eq!(0.0, target.double());
+
+    target.classes().add("foo");
+    clock.step(TimeSpan::ZERO);
+    assert_eq!(5.0, target.double());
+
+    clock.step(seconds(0.5));
+    assert_eq!(7.5, target.double());
+
+    target.classes().remove("foo");
+    assert_eq!(0.0, target.double());
+}
+
+#[test]
+fn animations_with_activator_trigger_should_be_activated_and_deactivated() {
+    let clock = TestClock::new();
+    let border = Border::new();
+
+    let root = TestRoot::new();
+    root.set_clock(Some(clock.as_clock()));
+
+    let animation = Animation::new();
+    animation.set_duration(seconds(1.0));
+    animation.children().add(KeyFrame::with_cue(
+        Cue::new(0.0),
+        [Setter::new(Border::background_property(), Some(green())) as _],
+    ));
+    animation.children().add(KeyFrame::with_cue(
+        Cue::new(1.0),
+        [Setter::new(Border::background_property(), Some(green())) as _],
+    ));
+    let style = Style::with_setters(
+        Selectors::of_type::<Border>().not(Selectors::class(None, "foo")),
+        [Setter::new(Border::background_property(), Some(yellow()))],
+    );
+    style.add_animation(&animation);
+    root.styles().add(style);
+    root.styles().add(Style::with_setters(
+        Selectors::of_type::<Border>().class("foo"),
+        [Setter::new(Border::background_property(), Some(blue()))],
+    ));
+    root.set_child(&border);
+
+    root.measure(Size::INFINITY);
+
+    assert!(border.background() == Some(yellow()));
+
+    clock.step(seconds(0.5));
+    assert!(border.background() == Some(green()));
+
+    border.classes().add("foo");
+    assert!(border.background() == Some(blue()));
+}
