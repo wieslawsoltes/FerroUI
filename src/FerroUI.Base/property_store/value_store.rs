@@ -908,10 +908,12 @@ impl ValueStore {
 
             let generation = self.frame_generation.get();
 
-            // Notify the existing effective values that reevaluation is starting.
-            let existing: Vec<EffectiveValueRef> =
-                self.effective_values.borrow().iter().map(|(_, v)| v.clone()).collect();
-            for value in &existing {
+            // Notify the existing effective values that reevaluation is
+            // starting. They are visited in place, as the original indexes
+            // its list: `begin_reevaluation` only resets the priorities the
+            // value records and calls nothing that could reach the store, so
+            // no copy of the list is needed for the visit.
+            for (_, value) in self.effective_values.borrow().iter() {
                 value.begin_reevaluation(false);
             }
 
