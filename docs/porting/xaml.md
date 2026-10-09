@@ -1739,6 +1739,73 @@ The build scripts of both fixture crates have `ferroui-build` as their only buil
 3. The compile-time value parser of the build (9.5.11), the manifest keys (`[package.metadata.ferroui]`), diagnostics with codes and the severity mapping (`XamlCompilerDiagnosticsFilter` is not ported; `ferro_xaml_diagnostic_codes.rs` is), a position map for the file of a class, `include_xaml!` per class, the generated `register_types` (9.7.4), the cache of 9.6.4.
 4. The drift test of the descriptions `EmitTypes` hands out (9.5.12, doubts 1 to 3), now with three more bodies of evidence than the corpus: 82 theme documents and the two fixture crates agree.
 
+#### 9.5.14 Implemented (2026-10-09): the compiler without the framework, and the Fluent theme compiled by its build
+
+Until this stage `ferroui-build` depended on the loader with its `emitter` feature, which implied `runtime`, which links the XAML runtime library and through it the controls: every build script that compiled against the type models still built the controls for the host. The model host needs none of that. What the emitter took from the run-time side was small, and none of it needs the run-time type system:
+
+| What the emitter used | Where it was | Where it is |
+|---|---|---|
+| the plan of a property assignment (`plan_setters`), the reading of a numeric constant | `runtime/interpreter/evaluators.rs` | `back_end/assignment.rs`; the interpreter imports it |
+| what the language configured the context to be, and the context of the framework language | `runtime/interpreter/runtime_context.rs`, `FRAMEWORK_CONTEXT` of the runtime library | `back_end/context.rs` (`ContextDefinition`, its own `FRAMEWORK_CONTEXT`; a test with the `runtime` feature compares it with the constant of the runtime library, field by field) |
+| the namespace information of a parsed document | `runtime/interpreter/runtime_context.rs` | `back_end/namespaces.rs`; re-exported where it was |
+| the deferred content customisation as a generic method definition, `adapt_type_mappings` | `runtime/framework` | `back_end/methods.rs`; the call of the method stays in `runtime/framework/methods.rs` as a function over it |
+| the build and populate methods of the documents of a group | `RuntimeDocumentTypeBuilderProvider` (methods with a body the interpreter runs) | `back_end/methods.rs`: `DocumentTypeBuilderProvider`, the same signatures without a body; the run-time provider keeps its own methods and shares the signature and the method contracts |
+| the include sources of a document, from its text | the run-time loader | `back_end/includes.rs`; the run-time loader imports it |
+| the diagnostic handler of a transform | the type of the configuration of the run-time loader | `rust_emitter::DiagnosticHandler` over the diagnostics of the compiler; `TransformOptions::of` (run-time host) wraps the handler of a configuration as before |
+
+Features of the loader:
+
+| Feature | Contents | Links |
+|---|---|---|
+| `compiler` | `rust_emitter`: `transform_group`, `compile_documents_with`, `generate_file_with`, `generate_class_file_with`, `EmitTypes`, `CompiledMarkupTypeSystem` | base, markup, `xamlx`, `ferroui-build-scan` |
+| `runtime` (the default of the crate itself) | the run-time type system, the interpreter, the run-time loader | + the XAML runtime library, the controls |
+| `emitter` = `runtime` + `compiler` + the accessor table of the base crate | the run-time host of the emitter: `EmitterHost::runtime`, `compile_documents`, `generate_file`, `generate_class_file`, `runtime_types` (`rust_emitter/runtime_host.rs`) | as `runtime` |
+
+The workspace states the loader without its default features; every crate that loads markup at run time states `runtime` (they all did). `ferroui-build` takes `compiler` alone. Its run-time host (`TypeSystem::Runtime`, with `Build::assembly`) is the feature `runtime-host` of `ferroui-build`, which no crate of the repository enables: no build script used it any more (the two fixture crates and the Simple theme were converted in 9.5.13). Without the feature a build that compiles documents against the run-time type system fails with an error that names the feature; `TypeSystem::Runtime` stays the value of a build that states none.
+
+What a build script that uses `ferroui-build` links (`cargo tree -p ferroui-build`), before and after:
+
+```text
+before                                  after
+ferroui-build                           ferroui-build
+├── ferroui-base                        ├── ferroui-base
+├── ferroui-build-scan                  ├── ferroui-build-scan
+├── ferroui-markup-xaml                 ├── ferroui-markup-xaml-loader
+│   ├── ferroui-base                    │   ├── ferroui-base
+│   ├── ferroui-controls                │   ├── ferroui-build-scan
+│   └── ferroui-markup                  │   ├── ferroui-markup
+├── ferroui-markup-xaml-loader          │   └── xamlx
+│   ├── ferroui-base                    └── xamlx
+│   ├── ferroui-build-scan
+│   ├── ferroui-markup
+│   ├── ferroui-markup-xaml
+│   └── xamlx
+└── xamlx
+```
+
+The base crate is still built for the host (the compile-time value parsers of the compiler extensions and `MarkupAssembly`); the controls and the XAML runtime library are not.
+
+**The Fluent theme** is compiled by its build script as the Simple theme is: `Build::type_system(TypeSystem::Model)` with the group of `FluentTheme.xaml`, the crate includes the output (`include_compiled_xaml!`), the checked-in `compiled_xaml.rs` and `compiled_xaml.xamlmeta` are the reference, and `build_script_output_is_the_checked_in_reference` compares them byte for byte.
+
+| Crate | Documents | Identical to the checked-in file | Refused |
+|---|---|---|---|
+| Simple theme | 82 | 82 | 0 |
+| Fluent theme | 86 | 86 | 0 |
+| include fixture (theme, application) | as 9.5.13 | all | 0 |
+| corpus (model against run time, `model_emit`) | 109 | 109 | 0 |
+
+Numbers of the stage (run by its author, debug profile): `ferroui-build --lib` 24 tests, the loader 397 with its default features and 272 with `--no-default-features --features compiler`, `ferroui-markup-xaml-tests` 578, the Simple theme 205, the Fluent theme 200, the fixture 3 and 28, the dialogs 47.
+
+**The dialogs: not converted.** The crate has one class document, `AboutFerroDialog.xaml`, populated by the run-time loader in the constructor of the class (`markup::load_component`). Compiled by its build (`XamlGroup::class_document`, with `Build::default_compile_bindings(true)`: the upstream project is built with compiled bindings as the default), every node of the document is emitted except one, which the emitter refuses:
+
+```text
+AboutFerroDialog.xaml: XamlPropertyAssignmentNode: Click: not a plain property setter (line 63 position 8)
+```
+
+`Click="Button_OnClick"` reaches the emitter as `XamlDirectCallAddHandler` over a `XamlLoadMethodDelegateNode` (9.4.4), and the emitter has no rule for either: event handlers are the open item of 9.4.4. It is a rule of the emitter (the handler as a closure over the weak root that calls the typed function of the declared method, an `rt` helper that attaches it to the routed event, the two `EmitTypes` hosts answering for the event field and the method, corpus documents), not a rule of the scanner or the model: the transform against the models already produces the node. Until it exists the dialogs keep the run-time loader as a dependency, for that document alone (`markup.rs`, `register_types.rs`); nothing else in the crate uses it outside its tests.
+
+Not done here: the compile-time value parser of the build; the manifest keys; removing the run-time host from `Build` and the `emitter` feature's use by the tests of the themes (the reference tests generate the checked-in file through it); `deterministic_id_generator.rs`, which is still not called (neither host passes an identifier generator to the compiler configuration; wiring it is a change of emitted names to measure against the references).
+
 ### 9.6 Build integration
 
 #### 9.6.1 Entry points
@@ -1818,6 +1885,22 @@ The script therefore runs on every source edit and must be fast: the scan result
 - All documents are parsed and transformed before failing; the script exits non-zero once, after printing every error (upstream behaviour: continue past the first error).
 - On error the previous generated files are left in place and a `compile_error!` is written into `compiled_xaml.rs`, so that a stale build cannot succeed silently when Cargo is run with `--keep-going`.
 - Scanner diagnostics (unreadable declaration, unresolved type name) use the Rust file position and codes in a separate range (`FRN9xxx`).
+
+**Implemented (2026-10-09)** for the model host of `Build` (`src/FerroUI.Build.Tasks/diagnostics.rs`), as `XamlCompilerTaskExecutor` does it:
+
+| Upstream | Here |
+|---|---|
+| `HandleDiagnostic = d => { newSeverity = diagnosticsFilter.Handle(d); diagnostics.Add(d with Severity); return newSeverity; }` | the diagnostic handler of every transform of a build (`TransformOptions::diagnostic_handler`): the filter states the severity, the transform continues with it, the diagnostic is kept |
+| `AnalyzerConfigFiles` of the task | `Build::analyzer_config_files(&[..])`, relative to the crate directory: entries `ferro_xaml_diagnostic.<code>.severity = error / warning / default / anything else (silent)`; each file is an input of the build; one that does not exist is skipped |
+| `ReportDiagnostics` (at most 100 of a document), `LogDiagnostic` | after each group: a warning is `cargo::warning=<document>(<line>,<position>): warning <code>: <title>`, an error the same text with `error` as an error of the build, a silenced one nothing |
+| `TreatWarningsAsErrors`, left to the build system | `Build::warnings_as_errors(true)`: a warning the filter leaves a warning is reported as an error; it fails the build and not the transform, so every document is still compiled |
+| `LogError(TransformError, "", e)` for a group that does not transform | one error for the group, `the group <module>: error FRN2000: ..` with the module in backquotes, (it was one line per document), and none when the diagnostics of the transform already reported an error; for a class group `<class document>: error FRN2000: ..` (the class not found in the models, the group not transformed) |
+| `LogError(EmitError, res.FilePath, e)` | `<document>: error FRN3000: <reason>` for each document the emitter refuses, with the node and its position in the reason |
+| `XamlLoaderUnreachable` through `diagnosticsFilter.Handle(Warning, code)` | the warning of a class without a constructor the loader table can call: `FRN3001`, through the filter by its code |
+
+Tests: `diagnostics::tests` in `ferroui-build` (the handler, the report, the EditorConfig severities, warnings as errors, the cap) and `emitter::build_diagnostics` in `ferroui-markup-xaml-tests`, which runs builds over the scanned models of the framework crates with real documents: the warning `Views/List.xaml(4,14): warning FRN2208` (an item container in an item template), the same as an error under warnings as errors, silenced and raised by an EditorConfig file, a group with an unknown type (one `FRN2000`), and two documents whose functions collide (`FRN3000`).
+
+Not done: the `compile_error!` of the third point (a failed build script already fails the build of the crate); positions for `FRN3000` as a `(line,position)` pair (they are in the text of the reason); the EditorConfig files found without a call (they come with the manifest keys of 9.6.1); the run-time host of `Build` reports as before.
 
 #### 9.6.6 Group transformers
 
@@ -2158,6 +2241,8 @@ Not done, and why (9.6.8): a build script cannot compile a document that names a
 
 **E1 status (2026-10-09, `compile_xaml()` on the model).** Built and run by its author with the commands of the stage (9.5.13). Done: the model, the scanner and the export in a leaf crate (`ferroui-build-scan`) that the framework crates take as a build dependency; `ferroui-base`, `ferroui-controls`, `ferroui-markup-xaml` and `ferroui-dialogs` export their models from their build scripts, the Fluent theme its model with its checked-in documents; `Build::type_system(TypeSystem::Model)` compiles the groups of a crate, the group of a class of the crate among them, through `ModelTypeSystem` and `ModelEmitTypes`; the include fixture is whole on it (the checked-in class document is gone) and the Simple theme compiles its 82 documents in its build script, each output the same byte for byte as the emitter's against the run-time type system, no document refused. Stage 5 of the list below is done for those consumers and stage 6 for the framework crates and one theme. Not done: the Fluent theme, the dialogs and the catalog on the models; the emitter out of the `runtime` feature (a build script that uses `ferroui-build` still builds the controls for the host); the compile-time value parser, the manifest keys, diagnostics with codes, the cache.
 
+**E1 status (2026-10-09, the compiler without the framework; the Fluent theme; diagnostics).** Built and run by its author with the commands of the stage (9.5.14, 9.6.5). Done: the transform and the emitter are the `compiler` feature of the loader, which links neither the XAML runtime library nor the controls (what they shared with the interpreter is `back_end`); `ferroui-build` takes it alone and its run-time host is the feature `runtime-host`, which no crate enables; every emitted output is unchanged (the Simple theme's 82 documents, the corpus 109 of 109, the fixtures). The Fluent theme is compiled by its build script: 86 documents, all identical to the checked-in reference, none refused. The diagnostics of a build have upstream's codes and go through the filter of upstream's task. Stopped: the class document of the dialogs is refused for its event handler (`Click="Button_OnClick"`, 9.4.4), which the emitter has no rule for; the dialogs still link the run-time loader for that document.
+
 Remaining for E5, in order:
 
 1. The rest of the build-time type system (9.5), in stages that each build and test on their own:
@@ -2166,10 +2251,10 @@ Remaining for E5, in order:
    3. **`ModelTypeSystem<EmitBacking>` (9.5.5)** in the loader, outside the `runtime` feature: `IXamlType` over `AssemblyModel` (the model moves to the loader or the loader takes it as a trait; `ferroui-build` already depends on the loader). 9.5.2 steps 2 to 4 (the handle table, the structural rules, opaque types), the projection rules of 9.5.5 shared with `runtime/type_system` (`core_types.rs`, `object_model.rs` as data). Exit test: the drift test, the dumps of `RuntimeTypeSystem` and of the scanned `ModelTypeSystem` equal for base, controls and markup-xaml.
    4. **Call forms (9.5.3) and the emitter.** *Done for the corpus (9.5.9, 9.5.11, 9.5.12): the call forms, the seam, the transform, `markup-xaml` in the drift test, `ModelEmitTypes` and the differential of the two hosts (109 of 109 the same). What is left of this stage: the compile-time value parser of the build (9.6.1), the themes and the include fixture through the model path, and a drift test of the descriptions `EmitTypes` hands out. As the stage was planned when it started:* *The call forms are done (9.5.9); of the emitter, the seam and the transform are done and the implementation over the models is not (9.5.10: the table of what `EmitTypes` asks and what the model lacks for each answer is the work list). In order: `markup-xaml` in the drift test; the registrations of `ValueTypes` in the scanner (`register_interface`, `register_upcast`, `register_reference`, `register_nullable`, `register_object`, `register_element_ref`) and one statement of `is_assignable` for both sides; the Rust types of parameters and results, the kind of a declared member, the type of a value and the nullable form of a type on the members and types of `ModelTypeSystem`; `ModelEmitTypes` in `ferroui-build`; the compile-time value parser of the build (9.6.1); then the differential test of the two hosts over the corpus, with `model_transform.rs` as its transform half.* As planned before the stage: The drift test is at nothing in every kind that must be empty and in the open kinds (9.5.8), and is the guard from here on; add `markup-xaml` to it first. Then the scanner (or a pass over the model) fills `call`: A from the declaration, B when `CallableModel::resolved` names a `pub` function of `Scan::functions` with the declared signature, else the typed function (`typed_function`, today's form with `markup-functions`) or C. The emitter reads `MemberSource` of the members of `ModelTypeSystem` (the `EmitBacking` of 9.5.5) instead of `MarkupEmit`, `DeclaredMember` and the registered Rust paths: every place of `rust_emitter` that downcasts to a `Runtime*` member is one to give a second arm, or a trait both member families implement. `Scan::functions` has to be in the model (or the choice made at scan time) for the members of dependencies.
    5. **`compile_xaml()` on the model** *(done as an option of `Build`, 9.5.13: the include fixture and the Simple theme compile on it; the run-time host is still the default. Left of this stage: the compile-time value parser, the manifest keys, `include_xaml!` per class, the generated `register_types`, the diagnostics and the cache. As it stood before:)* *(not started; nothing in the emitter blocks it any more. 9.5.12 lists what it involves: the models of the framework crates in a build script, the class file from files, the compiled documents of dependencies over `ModelTypeSystem`, the option; 9.5.10 says what the build crate links today)*: `Build` builds the `ModelTypeSystem` from its own scan and the models of the dependencies (a crate being compiled has no list of registered classes unless it writes one: the generated `register_types` of 9.7.4 registers every class, so none is marked), wraps it in `CompiledMarkupTypeSystem` for the documents of the dependencies, and the transform and the emitter run against it. The build script stops linking the crates of its documents and compiles `x:Class` documents of its own crate. The intrinsics the transformers evaluate at compile time through the run-time registries (`IXamlCompileTimeValueParser`, 9.6.1) need a build-time implementation. Then the manifest keys (`[package.metadata.ferroui]`: a TOML reader, or the keys stay builder calls), `include_xaml!` per class, the generated `register_types`, the diagnostics and the cache of 9.6.4 and 9.6.5.
-   6. **The framework crates export their models and the themes compile in their build scripts** *(done for the base crate, the controls, the XAML runtime library, the dialogs and the Simple theme, 9.5.13; left: the Fluent theme, after the emitter is out of the `runtime` feature of the loader, and the manifest keys)*: the leaf crate of 9.5.7 (`ferroui-build-scan`: `json`, `model`, `model_set`, `scanner` and the export, with the two text constants and `DocumentModel` owned there, so that the base crate can scan itself), `links` and `build.rs` in the framework crates, the manifest keys of 9.6.1 (`[package.metadata.ferroui]`), then the two themes on `compile_xaml()` with their checked-in files as the differential (the three reasons of 9.6.8 against converting them fall with stage 5: the group no longer needs the theme crate linked, and nothing is built for the host).
+   6. **The framework crates export their models and the themes compile in their build scripts** *(done for the base crate, the controls, the XAML runtime library, the dialogs and both themes, 9.5.13 and 9.5.14: the emitter is out of the `runtime` feature of the loader and the Fluent theme compiles in its build script; left: the manifest keys)*: the leaf crate of 9.5.7 (`ferroui-build-scan`: `json`, `model`, `model_set`, `scanner` and the export, with the two text constants and `DocumentModel` owned there, so that the base crate can scan itself), `links` and `build.rs` in the framework crates, the manifest keys of 9.6.1 (`[package.metadata.ferroui]`), then the two themes on `compile_xaml()` with their checked-in files as the differential (the three reasons of 9.6.8 against converting them fall with stage 5: the group no longer needs the theme crate linked, and nothing is built for the host).
 
    Before step 5, the two `XamlIlTests` documents and the dialogs can use the checked-in path.
-2. The ControlCatalog: its documents and the `x:Class` documents of the dialogs compiled, so that neither links the run-time loader (browser-platform.md, section 20, item 3). Measure a few pages first against the estimate there (+6 to +10 MB raw, +0.5 to +1.2 MB gzip on the module); above it, the owner decides.
+2. The ControlCatalog: its documents and the `x:Class` documents of the dialogs compiled, so that neither links the run-time loader (browser-platform.md, section 20, item 3). *(The dialogs were tried in 9.5.14: their one class document compiles up to its event handler. Event handlers in the emitter (9.4.4) come first; then the dialogs' build script is the Simple theme's with `default_compile_bindings(true)`, the constructor calls `crate::compiled_about_ferro_dialog::populate`, the hand-written loader table and `markup.rs` go, and the dependency on the loader with them.)* Measure a few pages first against the estimate there (+6 to +10 MB raw, +0.5 to +1.2 MB gzip on the module); above it, the owner decides.
 
 #### 9.10.2 Test strategy
 
