@@ -1,11 +1,6 @@
 //! The reference tests use user controls and content pages; here a
 //! `ContentControl` stands in for both (neither class is part of this crate
 //! yet).
-//!
-//! Reference tests that are not ported:
-//!
-//! - `Can_Have_Empty_Tab_Control`: loads a window from markup (waits for the
-//!   markup loader).
 
 use crate::platform::ITopLevelImpl;
 use crate::presenters::{ContentPresenter, ItemsPresenter};
@@ -752,6 +747,33 @@ fn should_not_propagate_data_context_to_tab_item_content() {
     apply_template(&target);
 
     assert!(!items_equal(&data_context, &tab_item.content()));
+}
+
+/// The data of `can_have_empty_tab_control` (an anonymous object in the
+/// reference).
+struct TabsData {
+    tabs: ItemsSource,
+}
+
+ferroui_base::ferro_model!(TabsData, |b| b
+    .read_only::<Value<ItemsSource>>("Tabs", |data| data.tabs.clone()));
+
+/// The reference test loads the window from markup; it is built in code.
+#[test]
+fn can_have_empty_tab_control() {
+    let _app = UnitTestApplication::start(TestServices::styled_window());
+    ItemsSource::register_binding_conversion::<ItemsSource>();
+
+    let tab_control = TabControl::new();
+    tab_control.set_name(Some("tabs".to_string()));
+    tab_control.bind_binding(crate::ItemsControl::items_source_property().as_property(), &*binding("Tabs"));
+    let window = crate::Window::new();
+    window.set_content(boxed(&tab_control));
+
+    tab_control.set_data_context(Some(Model::new_model(TabsData { tabs: ItemsSource::from_strs([]) })));
+    window.apply_template();
+
+    assert_eq!(0, tab_control.items_source().expect("an items source").count());
 }
 
 /// The reference test loads the control from markup; the loader brackets
