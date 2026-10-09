@@ -880,12 +880,14 @@ impl ModelTypeSystem {
             callable: member.callable.clone(),
             typed_function: member.typed_function.clone(),
             fallible: member.fallible,
+            call: member.call.clone(),
         };
         let accessor_source = |accessor: &crate::model::AccessorModel| MemberSource::Declared {
             type_path: type_path.clone(),
             callable: accessor.callable.clone(),
             typed_function: accessor.typed_function.clone(),
             fallible: accessor.fallible,
+            call: accessor.call.clone(),
         };
         for interface in &declared.interfaces {
             let interface = self.resolve(&interface.text);
@@ -984,6 +986,7 @@ impl ModelTypeSystem {
                 callable: parse.clone(),
                 typed_function: Some("__markup_parse".to_string()),
                 fallible: true,
+                call: declared.parse_call.clone(),
             };
             members.methods.push(self.method(type_, "Parse".to_string(), true, self_type.clone(), vec![self.get("System.String")], Vec::new(), source));
         }
@@ -1049,9 +1052,10 @@ impl ModelTypeSystem {
                     attributes: Vec::new(),
                     source: MemberSource::Declared {
                         type_path: type_path.clone(),
-                        callable: crate::model::CallableModel { path: member.rust_variant.clone().or(member.rust_value.clone()), resolved: None },
+                        callable: crate::model::CallableModel { path: member.rust_variant.clone().or(member.rust_value.clone()), resolved: None, dereferenced: None },
                         typed_function: None,
                         fallible: false,
+                        call: None,
                     },
                 }));
             }

@@ -1,6 +1,6 @@
 use super::decorator::Decorator;
-use crate::media::{Brush, IBrush};
-use ferroui_base::{ferro_class, ferro_property, DirectProperty, FerroProperty, Ref, StyledProperty};
+use crate::media::{Brush, IBrush, Thickness};
+use ferroui_base::{ferro_class, ferro_property, BoxedValue, DirectProperty, FerroProperty, Ref, StyledProperty};
 use std::rc::Rc;
 
 /// A control which decorates a child with a border.
@@ -56,5 +56,29 @@ impl Border {
         // A class declared inside a function: the scanner reports it and does not read it.
         ferro_class!(Local: Border);
         scale
+    }
+
+    pub fn with_name(name: String) -> Ref<Border> {
+        let _ = name;
+        Border::new()
+    }
+
+    pub fn tag(&self) -> Option<BoxedValue> {
+        None
+    }
+
+    pub(crate) fn set_tag(&self, _value: Option<BoxedValue>) {}
+
+    pub fn default_thickness() -> Thickness {
+        Thickness::uniform(0.0)
+    }
+
+    fn set_default_thickness(_value: Thickness) -> Result<(), String> {
+        Ok(())
+    }
+
+    /// Takes no index: not what the indexer of the metadata passes.
+    pub fn brush_at(&self) -> Ref<Brush> {
+        Brush::new()
     }
 }

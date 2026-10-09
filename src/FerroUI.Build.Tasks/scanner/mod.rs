@@ -38,9 +38,10 @@
 //! # Seams for the next stages
 //!
 //! - [`MemberModel::call`](crate::model::MemberModel::call) and
-//!   [`AccessorModel::call`](crate::model::AccessorModel::call) are not
-//!   chosen (9.5.3): the callable as written, its resolved path, the typed
-//!   function of the member and [`Scan::functions`] are what the choice needs.
+//!   [`AccessorModel::call`](crate::model::AccessorModel::call) are chosen at
+//!   the end of the scan ([`crate::call_forms`], 9.5.3), from the resolved path
+//!   of the callable, [`Scan::functions`] and the functions the models of the
+//!   dependencies list.
 //! - Without the models of the crates the crate is built on, paths into them
 //!   are absolute as the file spells them. With them
 //!   ([`ScanOptions::dependencies`]) a path into such a crate is the path of
@@ -280,6 +281,9 @@ pub struct Statistics {
     pub callables: usize,
     pub callable_paths: usize,
     pub callable_paths_resolved: usize,
+    /// The call forms chosen for the callables (9.5.3): every callable but `new:` of a
+    /// class and the source of an added owner, which are form A by their declaration.
+    pub call_forms: crate::call_forms::CallFormStatistics,
     pub enum_members: usize,
     pub enum_members_without_value: usize,
     /// The type texts of the model, and how many have an unresolved path.
@@ -353,6 +357,7 @@ impl Scan {
                 "callables: {} ({} paths, {} of them resolved; the others are closures)",
                 statistics.callables, statistics.callable_paths, statistics.callable_paths_resolved
             ),
+            statistics.call_forms.summary(),
             format!("enumeration members: {} ({} without a value)", statistics.enum_members, statistics.enum_members_without_value),
             format!(
                 "registration: {} classes are not in the list of registered classes; {} handles registered for types with markup metadata; {} casts; {} type aliases",
@@ -397,6 +402,24 @@ impl Scan {
             lines.push(format!("unresolved: `{path}` in {count} type texts"));
         }
         lines.join("\n")
+    }
+}
+
+/// The path of the function a closure without parameters dereferences the result of:
+/// `|| *Type::function()`, as it is or in parentheses. Nothing for any other expression.
+fn dereferenced_call(tokens: &[TokenTree]) -> Option<Vec<String>> {
+    let is = |token: Option<&TokenTree>, character: char| matches!(token, Some(TokenTree::Punct(punct)) if punct.as_char() == character);
+    match tokens {
+        [TokenTree::Group(group)] if group.delimiter() == proc_macro2::Delimiter::Parenthesis => {
+            dereferenced_call(&group.stream().into_iter().collect::<Vec<_>>())
+        }
+        [.., TokenTree::Group(arguments)] if tokens.len() > 4 && arguments.delimiter() == proc_macro2::Delimiter::Parenthesis && arguments.stream().is_empty() => {
+            if !(is(tokens.first(), '|') && is(tokens.get(1), '|') && is(tokens.get(2), '*')) {
+                return None;
+            }
+            plain_path(&tokens[3..tokens.len() - 1])
+        }
+        _ => None,
     }
 }
 
@@ -539,9 +562,12 @@ impl Builder {
                 if resolved.is_some() {
                     self.statistics.callable_paths_resolved += 1;
                 }
-                CallableModel { path: Some(text_of(tokens)), resolved }
+                CallableModel { path: Some(text_of(tokens)), resolved, dereferenced: None }
             }
-            None => CallableModel::default(),
+            None => {
+                let dereferenced = dereferenced_call(tokens).and_then(|segments| self.resolve_path(site.module, &segments, self_type));
+                CallableModel { path: None, resolved: None, dereferenced }
+            }
         }
     }
 
@@ -1104,9 +1130,11 @@ impl Builder {
         for type_ in &mut self.model.types {
             type_.visit_types_mut(&mut canonical);
             type_.visit_callables_mut(&mut |callable: &mut CallableModel| {
-                let canonical = callable.resolved.as_deref().map(|resolved| set.canonical_path(resolved));
-                if canonical.is_some() {
-                    callable.resolved = canonical;
+                for path in [&mut callable.resolved, &mut callable.dereferenced] {
+                    let canonical = path.as_deref().map(|path| set.canonical_path(path));
+                    if canonical.is_some() {
+                        *path = canonical;
+                    }
                 }
             });
         }
@@ -1184,7 +1212,12 @@ impl Builder {
             })
             .collect();
 
+        // The call form of every callable (9.5.3), and the public functions of the crate
+        // for the crates built on it.
+        let call_forms = crate::call_forms::choose(&mut self.model, &functions, &public, dependencies);
+
         let mut statistics = self.statistics;
+        statistics.call_forms = call_forms;
         statistics.files = self.source.files.len();
         statistics.modules = self.source.modules.modules.len();
         statistics.expanded = std::mem::take(&mut self.source.expanded);

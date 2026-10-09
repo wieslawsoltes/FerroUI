@@ -27,7 +27,11 @@ ferro_class_info!(Border {
             static try fn Parse(String) -> Ref<Border> => Border::parse [Browsable(false)],
             fn Count() -> i32 => (|border: &Ref<Border>| border.count()) [Obsolete],
         ],
-        fields: [PressedEvent: RoutedEvent<RoutedEventArgs> => Border::pressed_event],
+        fields: [
+            PressedEvent: RoutedEvent<RoutedEventArgs> => Border::pressed_event,
+            ReleasedEvent: RoutedEvent<RoutedEventArgs> => || *Border::pressed_event(),
+            NewEvent: Ref<Border> => || *Border::new(),
+        ],
         events: [
             Closed(Option<BoxedValue>, EventArgs) => |border: &Ref<Border>, handler: MarkupDelegate| border.on_closed(handler),
             try Opened() => Border::on_opened,

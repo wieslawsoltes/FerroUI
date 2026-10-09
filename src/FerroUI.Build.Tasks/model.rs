@@ -121,37 +121,62 @@ pub struct CallableModel {
     pub path: Option<String>,
     /// The path made absolute, when the scanner resolved its head.
     pub resolved: Option<String>,
+    /// For a closure without parameters whose body dereferences the result of a function
+    /// called without arguments (`|| *Button::click_event()`, the form a static field of
+    /// a routed event is declared in): the path of that function, made absolute.
+    pub dereferenced: Option<String>,
 }
 
 impl CallableModel {
     fn to_json(&self) -> Json {
-        Json::object(Members::new().optional_text("path", &self.path).optional_text("resolved", &self.resolved))
+        Json::object(
+            Members::new().optional_text("path", &self.path).optional_text("resolved", &self.resolved).optional_text("dereferenced", &self.dereferenced),
+        )
     }
 
     fn from_json(value: &Json) -> Result<Self, String> {
         let fields = Fields::of(value, "a callable")?;
-        Ok(Self { path: fields.optional_text("path")?, resolved: fields.optional_text("resolved")? })
+        Ok(Self { path: fields.optional_text("path")?, resolved: fields.optional_text("resolved")?, dereferenced: fields.optional_text("dereferenced")? })
     }
 }
 
-/// How generated code calls a member (9.5.3). The scanner does not choose it: the choice
-/// belongs to the stage that emits against the model.
+/// How generated code calls a member (9.5.3). The scan chooses it for every callable of
+/// the model once the models of the dependencies are attached ([`crate::call_forms`]).
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub enum CallForm {
-    /// Form A: typed code derived from the declaration.
+    /// Form A: typed code derived from the declaration. The callable is a function a
+    /// declaration macro writes for the type (the accessor of a routed event or of a
+    /// registered property), or the closure that dereferences what such a function
+    /// returns ([`CallableModel::dereferenced`]); generated code calls the function by
+    /// the public path of the type.
     Structural,
-    /// Form B: the public function with this absolute path.
+    /// Form B: the public function with this absolute path (the public path of the type
+    /// and the name of the function), called with the instance by reference and the
+    /// arguments in the declared types.
     Path(String),
+    /// Form B for code generated into the crate of the declaration only: the function is
+    /// visible in its crate (`pub(crate)`). For any other crate the member is called as
+    /// [`Invoker`](Self::Invoker).
+    CratePath(String),
     /// Form C: the invoker of the metadata.
     Invoker,
 }
 
 impl CallForm {
+    /// The form as a crate other than the declaring one calls the member.
+    pub fn from_another_crate(&self) -> &CallForm {
+        match self {
+            CallForm::CratePath(_) => &CallForm::Invoker,
+            other => other,
+        }
+    }
+
     fn to_json(&self) -> Json {
         match self {
             CallForm::Structural => Json::string("structural"),
             CallForm::Invoker => Json::string("invoker"),
             CallForm::Path(path) => Json::object(Members::new().text("path", path)),
+            CallForm::CratePath(path) => Json::object(Members::new().text("path", path).flag("crate", true)),
         }
     }
 
@@ -160,7 +185,11 @@ impl CallForm {
             Json::String(text) if text == "structural" => Ok(CallForm::Structural),
             Json::String(text) if text == "invoker" => Ok(CallForm::Invoker),
             Json::String(text) => Err(format!("\"{text}\" is not a call form")),
-            _ => Ok(CallForm::Path(Fields::of(value, "a call form")?.text("path")?)),
+            _ => {
+                let fields = Fields::of(value, "a call form")?;
+                let path = fields.text("path")?;
+                Ok(if fields.flag("crate")? { CallForm::CratePath(path) } else { CallForm::Path(path) })
+            }
         }
     }
 }
@@ -661,6 +690,8 @@ pub struct TypeModel {
     /// `parse:` (`has_parse` of the design is `parse.is_some()`); its typed function is
     /// `__markup_parse`.
     pub parse: Option<CallableModel>,
+    /// The call form of `parse:` (9.5.3), once it is chosen.
+    pub parse_call: Option<CallForm>,
     pub constructors: Vec<MemberModel>,
     pub properties: Vec<PropertyModel>,
     pub static_properties: Vec<PropertyModel>,
@@ -701,6 +732,7 @@ impl TypeModel {
             default_constructor: None,
             content_property: None,
             parse: None,
+            parse_call: None,
             constructors: Vec::new(),
             properties: Vec::new(),
             static_properties: Vec::new(),
@@ -863,6 +895,7 @@ impl TypeModel {
             .optional("default_constructor", self.default_constructor.as_ref().map(CallableModel::to_json))
             .optional_text("content_property", &self.content_property)
             .optional("parse", self.parse.as_ref().map(CallableModel::to_json))
+            .optional("parse_call", self.parse_call.as_ref().map(CallForm::to_json))
             .list("constructors", &self.constructors, MemberModel::to_json)
             .list("properties", &self.properties, PropertyModel::to_json)
             .list("static_properties", &self.static_properties, PropertyModel::to_json)
@@ -907,6 +940,7 @@ impl TypeModel {
             default_constructor: fields.optional("default_constructor", CallableModel::from_json)?,
             content_property: fields.optional_text("content_property")?,
             parse: fields.optional("parse", CallableModel::from_json)?,
+            parse_call: fields.optional("parse_call", CallForm::from_json)?,
             constructors: fields.list("constructors", MemberModel::from_json)?,
             properties: fields.list("properties", PropertyModel::from_json)?,
             static_properties: fields.list("static_properties", PropertyModel::from_json)?,
@@ -989,6 +1023,78 @@ pub struct CastModel {
     pub to: RustType,
 }
 
+/// A public function of an inherent `impl` block of a type of a crate, as far as the choice
+/// of a call form reads it (9.5.3, form B).
+#[derive(Clone, Debug, Default, PartialEq, Eq)]
+pub struct FunctionModel {
+    pub name: String,
+    /// Whether the function takes `self`.
+    pub receiver: bool,
+    /// The number of parameters after `self`.
+    pub parameters: usize,
+    /// The declaration macro that writes the function (`ferro_routed_event`), when one does.
+    pub declared_by: Option<String>,
+}
+
+/// The public functions of the inherent `impl` blocks of one type of a crate
+/// (`FunctionsModel`): what a callable of a crate built on this one is looked up in, so
+/// that a member declared there with a function of this crate is called by its path.
+#[derive(Clone, Debug, Default, PartialEq, Eq)]
+pub struct FunctionsModel {
+    /// The Rust path of the type, by its declaring module.
+    pub owner: String,
+    /// The shortest path another crate names the type by.
+    pub public_path: String,
+    /// The functions, in the order of the scan.
+    pub functions: Vec<FunctionModel>,
+}
+
+impl FunctionsModel {
+    fn to_json(&self) -> Json {
+        let function = |function: &FunctionModel| {
+            let mut parts = vec![Json::string(&function.name), Json::Integer(function.parameters as i64)];
+            if function.receiver || function.declared_by.is_some() {
+                parts.push(Json::Bool(function.receiver));
+            }
+            if let Some(declared_by) = &function.declared_by {
+                parts.push(Json::string(declared_by));
+            }
+            Json::Array(parts)
+        };
+        Json::Array(vec![Json::string(&self.owner), Json::string(&self.public_path), Json::Array(self.functions.iter().map(function).collect())])
+    }
+
+    fn from_json(value: &Json) -> Result<Self, String> {
+        let function = |value: &Json| match value {
+            Json::Array(parts) if (2..=4).contains(&parts.len()) => Ok(FunctionModel {
+                name: text_of(&parts[0], "the name of a function")?,
+                parameters: match &parts[1] {
+                    Json::Integer(count) if *count >= 0 => *count as usize,
+                    _ => return Err("the number of parameters of a function is not a number".to_string()),
+                },
+                receiver: match parts.get(2) {
+                    None => false,
+                    Some(Json::Bool(receiver)) => *receiver,
+                    Some(_) => return Err("the receiver of a function is not a flag".to_string()),
+                },
+                declared_by: parts.get(3).map(|declared_by| text_of(declared_by, "the macro of a function")).transpose()?,
+            }),
+            _ => Err("a function is not a list of two to four parts".to_string()),
+        };
+        match value {
+            Json::Array(parts) if parts.len() == 3 => Ok(Self {
+                owner: text_of(&parts[0], "the owner of functions")?,
+                public_path: text_of(&parts[1], "the public path of the owner of functions")?,
+                functions: match &parts[2] {
+                    Json::Array(functions) => functions.iter().map(function).collect::<Result<_, _>>()?,
+                    _ => return Err("the functions of a type are not a list".to_string()),
+                },
+            }),
+            _ => Err("the functions of a type are not a list of three parts".to_string()),
+        }
+    }
+}
+
 fn pair_to_json(first: &str, second: &str) -> Json {
     Json::Array(vec![Json::string(first), Json::string(second)])
 }
@@ -1028,6 +1134,9 @@ pub struct AssemblyModel {
     pub handles: Vec<HandleModel>,
     /// The casts the crate registers between Rust types, in the order of the scan.
     pub casts: Vec<CastModel>,
+    /// The public functions of the inherent `impl` blocks of the types of the crate that
+    /// another crate can name, by type, in the order of the scan.
+    pub functions: Vec<FunctionsModel>,
     /// The compiled documents, in the order of the compilation.
     pub documents: Vec<DocumentModel>,
     /// The `.xamlmeta` files of the crates this crate is built on, relative to the
@@ -1050,6 +1159,7 @@ impl AssemblyModel {
             aliases: Vec::new(),
             handles: Vec::new(),
             casts: Vec::new(),
+            functions: Vec::new(),
             documents: Vec::new(),
             dependencies: Vec::new(),
         }
@@ -1141,7 +1251,8 @@ impl AssemblyModel {
             .list("exports", &self.exports, |export| pair_to_json(&export.path, &export.declared))
             .list("aliases", &self.aliases, |alias| Json::Array(vec![Json::string(&alias.path), alias.target.to_json()]))
             .list("handles", &self.handles, |handle| Json::Array(vec![handle.handle.to_json(), handle.type_.to_json()]))
-            .list("casts", &self.casts, |cast| Json::Array(vec![cast.from.to_json(), cast.to.to_json()]));
+            .list("casts", &self.casts, |cast| Json::Array(vec![cast.from.to_json(), cast.to.to_json()]))
+            .list("functions", &self.functions, FunctionsModel::to_json);
         Json::object(members).to_text()
     }
 
@@ -1189,6 +1300,7 @@ impl AssemblyModel {
                 Json::Array(pair) if pair.len() == 2 => Ok(CastModel { from: RustType::from_json(&pair[0])?, to: RustType::from_json(&pair[1])? }),
                 _ => Err("a registered cast is not a pair".to_string()),
             })?,
+            functions: fields.list("functions", FunctionsModel::from_json)?,
             documents,
             dependencies: fields.list("dependencies", |path| text_of(path, "a dependency"))?,
         })
@@ -1201,7 +1313,7 @@ mod tests {
     use std::path::Path;
 
     fn callable(path: &str, resolved: Option<&str>) -> CallableModel {
-        CallableModel { path: Some(path.to_string()), resolved: resolved.map(str::to_string) }
+        CallableModel { path: Some(path.to_string()), resolved: resolved.map(str::to_string), dereferenced: None }
     }
 
     /// A model with every member of every part set to something that is not its default.
@@ -1232,6 +1344,7 @@ mod tests {
         type_.default_constructor = Some(callable("Panel::new", Some("::fixture::panel::Panel::new")));
         type_.content_property = Some("Children".to_string());
         type_.parse = Some(CallableModel::default());
+        type_.parse_call = Some(CallForm::CratePath("::fixture::Panel::parse".to_string()));
         type_.constructors = vec![MemberModel {
             parameters: vec![
                 ParameterModel { name: Some("name".to_string()), type_: RustType::resolved("String"), attributes: vec![attribute.clone()] },
@@ -1317,7 +1430,13 @@ mod tests {
             typed_function: Some("__markup_Add_0".to_string()),
             ..MemberModel::default()
         }];
-        type_.fields = vec![MemberModel { name: "ClickEvent".to_string(), return_type: Some(unresolved.clone()), is_static: true, ..MemberModel::default() }];
+        type_.fields = vec![MemberModel {
+            name: "ClickEvent".to_string(),
+            return_type: Some(unresolved.clone()),
+            is_static: true,
+            callable: CallableModel { path: None, resolved: None, dereferenced: Some("::fixture::panel::Panel::click_event".to_string()) },
+            ..MemberModel::default()
+        }];
         type_.events = vec![MemberModel { name: "Closed".to_string(), fallible: true, ..MemberModel::default() }];
         type_.enum_members = vec![
             EnumMemberModel { name: "Self".to_string(), rust_variant: Some("Self_".to_string()), rust_value: None, value: Some(2) },
@@ -1341,6 +1460,15 @@ mod tests {
             type_: RustType::resolved("dyn ::fixture::IPanel"),
         }];
         model.casts = vec![CastModel { from: RustType::resolved("::fixture::panel::Panels"), to: RustType::resolved("Vec<::fixture::panel::Panel>") }];
+        model.functions = vec![FunctionsModel {
+            owner: "::fixture::panel::Panel".to_string(),
+            public_path: "::fixture::Panel".to_string(),
+            functions: vec![
+                FunctionModel { name: "new".to_string(), ..FunctionModel::default() },
+                FunctionModel { name: "add".to_string(), receiver: true, parameters: 1, declared_by: None },
+                FunctionModel { name: "click_event".to_string(), receiver: false, parameters: 0, declared_by: Some("ferro_routed_event".to_string()) },
+            ],
+        }];
         model.documents = vec![DocumentModel {
             uri: "ferres://Fixture/Main.xaml".to_string(),
             root_type: "Fixture.Controls.Panel".to_string(),

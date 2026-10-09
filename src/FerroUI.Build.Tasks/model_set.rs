@@ -301,7 +301,7 @@ mod tests {
             function_of: None,
             visibility: "pub".to_string(),
             registration,
-            source: source.map(|path| CallableModel { path: Some(path.to_string()), resolved: Some(path.to_string()) }),
+            source: source.map(|path| CallableModel { path: Some(path.to_string()), resolved: Some(path.to_string()), dereferenced: None }),
             assign_binding: false,
             inherits: false,
             read_only: false,

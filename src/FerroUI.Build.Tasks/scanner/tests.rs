@@ -9,7 +9,7 @@ use std::collections::BTreeMap;
 use std::path::{Path, PathBuf};
 
 use super::*;
-use crate::model::XamlMetadata;
+use crate::model::{CallForm, XamlMetadata};
 
 const BORDER: &str = "::fixture::controls::border::Border";
 const DECORATOR: &str = "::fixture::controls::decorator::Decorator";
@@ -39,7 +39,7 @@ fn unresolved(text: &str, paths: &[&str]) -> RustType {
 
 /// A callable that is a path: as written, and resolved.
 fn path(written: &str, resolved: &str) -> CallableModel {
-    CallableModel { path: Some(written.to_string()), resolved: Some(resolved.to_string()) }
+    CallableModel { path: Some(written.to_string()), resolved: Some(resolved.to_string()), dereferenced: None }
 }
 
 /// A callable that is not a path.
@@ -59,8 +59,14 @@ fn positional(type_: RustType) -> ParameterModel {
     ParameterModel { name: None, type_, attributes: Vec::new() }
 }
 
+/// An accessor whose callable is not called by a path (form C).
 fn accessor(callable: CallableModel, typed_function: Option<&str>) -> AccessorModel {
-    AccessorModel { fallible: false, callable, typed_function: typed_function.map(str::to_string), call: None }
+    AccessorModel { fallible: false, callable, typed_function: typed_function.map(str::to_string), call: Some(CallForm::Invoker) }
+}
+
+/// The public function `name` of the border of the fixture, as form B names it.
+fn border_function(name: &str) -> Option<CallForm> {
+    Some(CallForm::Path(format!("::fixture::Border::{name}")))
 }
 
 fn registered(name: &str, kind: RegisteredKind, value_type: RustType, owner: &str, accessor: &str) -> RegisteredModel {
@@ -177,6 +183,7 @@ fn class_with_every_kind_of_member_is_read_exactly() {
             is_static: true,
             callable: function("with_name"),
             typed_function: Some("__markup_new_0".to_string()),
+            call: border_function("with_name"),
             ..MemberModel::default()
         },
         MemberModel {
@@ -191,6 +198,7 @@ fn class_with_every_kind_of_member_is_read_exactly() {
             is_static: true,
             callable: closure(),
             typed_function: Some("__markup_new_1".to_string()),
+            call: Some(CallForm::Invoker),
             ..MemberModel::default()
         },
     ];
@@ -199,8 +207,12 @@ fn class_with_every_kind_of_member_is_read_exactly() {
             name: "Tag".to_string(),
             parameters: Vec::new(),
             value_type: ty("Option<::ferroui_base::BoxedValue>"),
-            getter: Some(accessor(function("tag"), Some("__markup_get_Tag"))),
-            setter: Some(accessor(function("set_tag"), Some("__markup_set_Tag"))),
+            getter: Some(AccessorModel { call: border_function("tag"), ..accessor(function("tag"), Some("__markup_get_Tag")) }),
+            // A function visible in its crate is called by its path from that crate only.
+            setter: Some(AccessorModel {
+                call: Some(CallForm::CratePath("::fixture::Border::set_tag".to_string())),
+                ..accessor(function("set_tag"), Some("__markup_set_Tag"))
+            }),
             attributes: vec![attribute("DependsOn", vec![text("Child")]), attribute("AssignBinding", Vec::new())],
         },
         PropertyModel {
@@ -216,7 +228,8 @@ fn class_with_every_kind_of_member_is_read_exactly() {
         name: "Default".to_string(),
         parameters: Vec::new(),
         value_type: ty(THICKNESS),
-        getter: Some(accessor(function("default_thickness"), Some("__markup_static_get_Default"))),
+        getter: Some(AccessorModel { call: border_function("default_thickness"), ..accessor(function("default_thickness"), Some("__markup_static_get_Default")) }),
+        // A private function: the invoker.
         setter: Some(AccessorModel { fallible: true, ..accessor(function("set_default_thickness"), Some("__markup_static_set_Default")) }),
         attributes: Vec::new(),
     }];
@@ -224,6 +237,7 @@ fn class_with_every_kind_of_member_is_read_exactly() {
         name: String::new(),
         parameters: vec![positional(ty("i32"))],
         value_type: ty(&brush_ref),
+        // The function takes no index: the invoker.
         getter: Some(accessor(function("brush_at"), None)),
         setter: None,
         attributes: vec![attribute("Indexed", Vec::new())],
@@ -256,6 +270,7 @@ fn class_with_every_kind_of_member_is_read_exactly() {
             parameters: vec![positional(ty(&brush_ref))],
             callable: function("add_brush"),
             typed_function: Some("__markup_Add_0".to_string()),
+            call: Some(CallForm::Invoker),
             ..MemberModel::default()
         },
         MemberModel {
@@ -267,6 +282,7 @@ fn class_with_every_kind_of_member_is_read_exactly() {
             attributes: vec![attribute("Browsable", vec![AttributeValueModel::Bool(false)])],
             callable: function("parse"),
             typed_function: Some("__markup_Parse_1".to_string()),
+            call: Some(CallForm::Invoker),
             ..MemberModel::default()
         },
         MemberModel {
@@ -275,25 +291,51 @@ fn class_with_every_kind_of_member_is_read_exactly() {
             attributes: vec![attribute("Obsolete", Vec::new())],
             callable: closure(),
             typed_function: Some("__markup_Count_2".to_string()),
+            call: Some(CallForm::Invoker),
             ..MemberModel::default()
         },
     ];
-    expected.fields = vec![MemberModel {
-        name: "PressedEvent".to_string(),
-        return_type: Some(ty("::ferroui_base::RoutedEvent<::ferroui_base::RoutedEventArgs>")),
-        is_static: true,
-        callable: function("pressed_event"),
-        typed_function: Some("__markup_field_PressedEvent".to_string()),
-        ..MemberModel::default()
-    }];
+    expected.fields = vec![
+        MemberModel {
+            name: "PressedEvent".to_string(),
+            return_type: Some(ty("::ferroui_base::RoutedEvent<::ferroui_base::RoutedEventArgs>")),
+            is_static: true,
+            callable: function("pressed_event"),
+            typed_function: Some("__markup_field_PressedEvent".to_string()),
+            // The accessor `ferro_routed_event!` writes: form A.
+            call: Some(CallForm::Structural),
+            ..MemberModel::default()
+        },
+        // A closure that dereferences what such an accessor returns is form A too.
+        MemberModel {
+            name: "ReleasedEvent".to_string(),
+            return_type: Some(ty("::ferroui_base::RoutedEvent<::ferroui_base::RoutedEventArgs>")),
+            is_static: true,
+            callable: CallableModel { path: None, resolved: None, dereferenced: Some(format!("{BORDER}::pressed_event")) },
+            typed_function: Some("__markup_field_ReleasedEvent".to_string()),
+            call: Some(CallForm::Structural),
+            ..MemberModel::default()
+        },
+        // The same closure over a function no declaration macro writes: the invoker.
+        MemberModel {
+            name: "NewEvent".to_string(),
+            return_type: Some(ty(&format!("::ferroui_base::Ref<{BORDER}>"))),
+            is_static: true,
+            callable: CallableModel { path: None, resolved: None, dereferenced: Some(format!("{BORDER}::new")) },
+            typed_function: Some("__markup_field_NewEvent".to_string()),
+            call: Some(CallForm::Invoker),
+            ..MemberModel::default()
+        },
+    ];
     expected.events = vec![
         MemberModel {
             name: "Closed".to_string(),
             parameters: vec![positional(ty("Option<::ferroui_base::BoxedValue>")), positional(ty("::ferroui_base::EventArgs"))],
             callable: closure(),
+            call: Some(CallForm::Invoker),
             ..MemberModel::default()
         },
-        MemberModel { name: "Opened".to_string(), fallible: true, callable: function("on_opened"), ..MemberModel::default() },
+        MemberModel { name: "Opened".to_string(), fallible: true, callable: function("on_opened"), call: Some(CallForm::Invoker), ..MemberModel::default() },
     ];
     expected.attributes = vec![
         attribute("UsableDuringInitialization", Vec::new()),
@@ -369,6 +411,7 @@ fn attached_properties_and_static_types_are_read_exactly() {
         is_static: true,
         callable: path("Layout::reset", &format!("{LAYOUT}::reset")),
         typed_function: Some("__markup_Reset_0".to_string()),
+        call: Some(CallForm::Invoker),
         ..MemberModel::default()
     }];
     expected.property_attributes = vec![("Spacing".to_string(), vec![attribute("ResolveByName", Vec::new())])];
@@ -408,12 +451,14 @@ fn markup_types_and_enumerations_are_read_exactly() {
     expected.public_path = Some("::fixture::Thickness".to_string());
     expected.handles = vec![ty(THICKNESS)];
     expected.parse = Some(path("Thickness::parse", &format!("{THICKNESS}::parse")));
+    expected.parse_call = Some(CallForm::Invoker);
     expected.constructors = vec![
         MemberModel {
             parameters: vec![positional(ty("f64"))],
             is_static: true,
             callable: path("Thickness::uniform", &format!("{THICKNESS}::uniform")),
             typed_function: Some("__markup_new_0".to_string()),
+            call: Some(CallForm::Invoker),
             ..MemberModel::default()
         },
         MemberModel {
@@ -422,6 +467,7 @@ fn markup_types_and_enumerations_are_read_exactly() {
             fallible: true,
             callable: closure(),
             typed_function: Some("__markup_new_1".to_string()),
+            call: Some(CallForm::Invoker),
             ..MemberModel::default()
         },
     ];
@@ -448,6 +494,7 @@ fn markup_types_and_enumerations_are_read_exactly() {
         is_static: true,
         callable: path("Setter::empty", &format!("{SETTER}::empty")),
         typed_function: Some("__markup_new_0".to_string()),
+        call: Some(CallForm::Invoker),
         ..MemberModel::default()
     }];
     expected.notify_property_changed = Some(ty(SETTER));
@@ -466,7 +513,7 @@ fn markup_types_and_enumerations_are_read_exactly() {
         name: "Red".to_string(),
         parameters: Vec::new(),
         value_type: ty("u32"),
-        getter: Some(accessor(CallableModel { path: Some("Colors::red".to_string()), resolved: None }, Some("__markup_static_get_Red"))),
+        getter: Some(accessor(CallableModel { path: Some("Colors::red".to_string()), resolved: None, dereferenced: None }, Some("__markup_static_get_Red"))),
         setter: None,
         attributes: Vec::new(),
     }];
@@ -813,11 +860,11 @@ fn statistics_functions_and_normalisation_of_the_fixture() {
     );
     assert_eq!(
         (statistics.constructors, statistics.properties, statistics.indexers, statistics.methods, statistics.fields, statistics.events),
-        (5, 5, 1, 4, 1, 2),
+        (5, 5, 1, 4, 3, 2),
         "{}",
         scan.summary()
     );
-    assert_eq!((statistics.callables, statistics.callable_paths, statistics.callable_paths_resolved), (26, 20, 19), "{}", scan.summary());
+    assert_eq!((statistics.callables, statistics.callable_paths, statistics.callable_paths_resolved), (28, 20, 19), "{}", scan.summary());
     assert_eq!((statistics.enum_members, statistics.enum_members_without_value), (10, 1), "{}", scan.summary());
     assert_eq!(statistics.type_texts_unresolved, 5, "{}", scan.summary());
     assert_eq!(
@@ -849,10 +896,54 @@ fn statistics_functions_and_normalisation_of_the_fixture() {
             (BORDER, "new", "pub", false, vec![], Some("Ref<Border>"), None, 43),
             (BORDER, "pressed_event", "pub", false, vec![], Some("RoutedEvent<RoutedEventArgs>"), Some("ferro_routed_event"), 51),
             (BORDER, "thickness", "pub(crate)", true, vec!["f64"], Some("f64"), None, 55),
+            (BORDER, "with_name", "pub", false, vec!["String"], Some("Ref<Border>"), None, 61),
+            (BORDER, "tag", "pub", true, vec![], Some("Option<BoxedValue>"), None, 66),
+            (BORDER, "set_tag", "pub(crate)", true, vec!["Option<BoxedValue>"], None, None, 70),
+            (BORDER, "default_thickness", "pub", false, vec![], Some("Thickness"), None, 72),
+            (BORDER, "set_default_thickness", "", false, vec!["Thickness"], Some("Result<(), String>"), None, 76),
+            (BORDER, "brush_at", "pub", true, vec![], Some("Ref<Brush>"), None, 81),
             (DECORATOR, "new", "pub", false, vec![], Some("Ref<Decorator>"), None, 31),
         ]
     );
     assert_eq!(scan.functions[0].module, "fixture::controls::border");
+
+    // The call forms (9.5.3): of the 20 callables that are paths, one is the accessor a
+    // declaration macro writes, three are public functions with the arguments of the
+    // declaration and one is visible in the crate only; of the closures one dereferences
+    // such an accessor; the others go through the invoker, each for its reason.
+    assert_eq!(
+        statistics.call_forms,
+        crate::call_forms::CallFormStatistics {
+            structural: 2,
+            path: 3,
+            crate_path: 1,
+            invoker: 17,
+            closures: 7,
+            unresolved: 1,
+            not_inherent: 7,
+            signature: 1,
+            private: 1,
+            no_public_path: 0,
+        },
+        "{}",
+        scan.summary()
+    );
+    // The public functions of the types another crate can name, for the crates built on this one.
+    let exported: Vec<(&str, &str, Vec<&str>)> = scan
+        .model
+        .functions
+        .iter()
+        .map(|functions| (functions.owner.as_str(), functions.public_path.as_str(), functions.functions.iter().map(|function| function.name.as_str()).collect()))
+        .collect();
+    assert_eq!(
+        exported,
+        vec![
+            (BORDER, "::fixture::Border", vec!["new", "pressed_event", "with_name", "tag", "default_thickness", "brush_at"]),
+            (DECORATOR, "::fixture::Decorator", vec!["new"]),
+        ]
+    );
+    let pressed = &scan.model.functions[0].functions[1];
+    assert_eq!((pressed.receiver, pressed.parameters, pressed.declared_by.as_deref()), (false, 0, Some("ferro_routed_event")));
 
     assert_eq!(scan.normalise("fixture::controls::border", "Option<Rc<dyn IBrush>>"), Some(ty(&format!("Option<::std::rc::Rc<dyn {IBRUSH}>>"))));
     assert_eq!(scan.normalise("fixture::markup_types::classes", "&Ref<Border>"), Some(ty(&format!("&::ferroui_base::Ref<{BORDER}>"))));
@@ -916,7 +1007,7 @@ fn dependent_crate_is_resolved_with_the_model_of_the_crate_it_is_built_on() {
     assert_eq!(alone.statistics.registered_without_name, 2, "{}", alone.summary());
     let card = the_type(&alone, "Card");
     assert_eq!(card.base, Some(unresolved("Border", &["Border"])));
-    assert_eq!(card.registered[0].source, Some(CallableModel { path: Some("Border::background_property".to_string()), resolved: None }));
+    assert_eq!(card.registered[0].source, Some(CallableModel { path: Some("Border::background_property".to_string()), resolved: None, dereferenced: None }));
     let margin = the_type(&alone, "Margin");
     assert_eq!(margin.properties[2].value_type, ty("Option<::ferroui_base::Ref<::fixture::Decorator>>"));
 
@@ -941,6 +1032,25 @@ fn dependent_crate_is_resolved_with_the_model_of_the_crate_it_is_built_on() {
     let types: Vec<&RustType> = margin.properties.iter().map(|property| &property.value_type).collect();
     assert_eq!(types, [&ty(THICKNESS), &ty("Option<::fixture::media::Dock>"), &ty(&format!("Option<::ferroui_base::Ref<{DECORATOR}>>"))]);
     assert_eq!(scan.model.exports.iter().map(|export| export.path.as_str()).collect::<Vec<_>>(), ["::dependent::Card", "::dependent::panel::Margin"]);
+
+    // The call forms: a function of the other crate is known from the model of that crate
+    // only. With it, the public function is called by its path, the accessor of a routed
+    // event is form A, and a function that model does not list (a private one) and the
+    // function of this crate no `impl` block has are called through the invoker.
+    let forms = |scan: &Scan| {
+        let margin = the_type(scan, "Margin");
+        let default = &margin.static_properties[0];
+        (
+            default.getter.as_ref().and_then(|getter| getter.call.clone()),
+            default.setter.as_ref().and_then(|setter| setter.call.clone()),
+            margin.fields[0].call.clone(),
+            margin.properties[2].getter.as_ref().and_then(|getter| getter.call.clone()),
+        )
+    };
+    let invoker = Some(CallForm::Invoker);
+    assert_eq!(forms(&alone), (invoker.clone(), invoker.clone(), invoker.clone(), invoker.clone()));
+    assert_eq!(forms(&scan), (border_function("default_thickness"), invoker.clone(), Some(CallForm::Structural), invoker));
+    assert_eq!((scan.statistics.call_forms.structural, scan.statistics.call_forms.path, scan.statistics.call_forms.not_inherent), (1, 1, 2), "{}", scan.summary());
 }
 
 /// A class of a scanned crate by its full name; the failure lists the diagnostics that
@@ -1086,6 +1196,17 @@ fn real_crates_are_scanned_without_skipping_a_declaration() {
     assert!(controls.statistics.registered > 500, "{}", controls.summary());
     assert!(base.statistics.classes > 50 && base.statistics.registered > 50, "{}", base.summary());
 
+    // The call forms (9.5.3): a form is chosen for every callable but `new:` of a class and
+    // the source of an added owner; every path is resolved, and the functions of the base
+    // crate its model lists are what the controls call by path.
+    for scan in [&base, &controls] {
+        let forms = &scan.statistics.call_forms;
+        assert_eq!(forms.unresolved, 0, "{}", forms.summary());
+        assert_eq!(forms.closures + forms.structural + forms.path + forms.crate_path + forms.not_inherent + forms.signature + forms.private + forms.no_public_path, forms.total());
+        assert!(forms.path > 100 && forms.structural > 20, "{}", forms.summary());
+    }
+    assert!(base.model.functions.len() > 100, "the model of ferroui_base lists the public functions of {} types", base.model.functions.len());
+
     // The export table of the base crate names its types by the paths the controls write.
     assert!(base.model.exports.len() > base.model.types.len(), "the export table of ferroui_base has {} paths", base.model.exports.len());
     let set = crate::model_set::ModelSet::new(vec![base.model.clone()]);
@@ -1116,6 +1237,11 @@ fn real_crates_are_scanned_without_skipping_a_declaration() {
         unresolved.join("\n")
     );
     assert!(nameless.is_empty(), "ferroui_controls with the model of ferroui_base: registered properties without a name:\n{}", nameless.join("\n"));
+    assert!(
+        linked.statistics.call_forms.path > controls.statistics.call_forms.path,
+        "with the model of ferroui_base the controls call no more functions by path: {}",
+        linked.statistics.call_forms.summary()
+    );
     assert_eq!(linked.statistics.registered_without_name, 0);
     assert_eq!(linked.statistics.registered, controls.statistics.registered);
 
