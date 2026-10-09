@@ -1333,3 +1333,160 @@ fn create_composition_visual_snapshot_completes_after_the_next_batch() {
     assert!(task.is_completed_successfully());
     assert!(matches!(task.take_result(), Some(Ok(_))));
 }
+
+// --- the life cycle of server object ids ---------------------------------------------
+//
+// Not from upstream, where a UI-thread object holds its server object: here
+// it names it by an id, which is handed out again once the server has
+// dropped the object.
+
+impl CompositorCanvas {
+    fn server_object(&self, id: super::server::ServerObjectId) -> Rc<ServerCompositionVisual> {
+        self.compositor.server().get::<ServerCompositionVisual>(id).expect("the server visual exists")
+    }
+}
+
+/// A composition target as a renderer makes one, over no surface.
+fn bare_target(s: &CompositorCanvas) -> Rc<super::CompositionTarget> {
+    s.compositor.create_composition_target(std::sync::Arc::new(Vec::new))
+}
+
+/// Disposes a target as a renderer does when its top level closes.
+fn dispose_out_of_band(s: &CompositorCanvas, target: &super::CompositionTarget) {
+    target.set_root(None);
+    target.mark_disposed_out_of_band();
+    MediaContext::instance().sync_dispose_composition_target(&s.compositor, target.server());
+}
+
+/// A top level that is closed before the compositor has committed: the
+/// batch of the disposal overtakes the batch that would create the server
+/// target. The target is created by the batch that disposes it, and keeps
+/// its id until the UI-thread target is dropped.
+#[test]
+fn a_target_disposed_before_its_first_commit_is_created_disposed_and_keeps_its_id() {
+    let s = CompositorCanvas::new();
+    s.run_jobs();
+    let baseline = s.compositor.server().object_count();
+
+    let target = bare_target(&s);
+    let id = target.server();
+    assert!(s.compositor.server().get_object(id).is_none(), "the creation waits for a commit");
+
+    dispose_out_of_band(&s, &target);
+
+    let server_target = s.compositor.server().get::<ServerCompositionTarget>(id).expect("the disposal created the server target");
+    assert!(server_target.is_disposed());
+    assert_eq!(baseline + 1, s.compositor.server().object_count());
+
+    // What is created while the target is alive gets other ids, and the
+    // commit that follows does not create the target again.
+    let visuals: Vec<_> = (0..4).map(|_| s.compositor.create_container_visual()).collect();
+    assert!(visuals.iter().all(|visual| visual.server() != id));
+    s.run_jobs();
+    let with_visuals = s.compositor.server().object_count();
+    let objects_of_a_visual = (with_visuals - baseline - 1) / 4;
+    assert!(objects_of_a_visual >= 1);
+    let same = s.compositor.server().get::<ServerCompositionTarget>(id).expect("the server target is kept");
+    assert!(Rc::ptr_eq(&server_target, &same));
+    drop((server_target, same));
+
+    // The release rides on the batch after the drop; the id is handed out
+    // for the batch after that one.
+    drop(target);
+    let before_release = s.compositor.create_container_visual();
+    assert_ne!(id, before_release.server());
+    s.run_jobs();
+    assert!(s.compositor.server().get_object(id).is_none());
+    assert_eq!(with_visuals - 1 + objects_of_a_visual, s.compositor.server().object_count());
+
+    let _after_release = s.compositor.create_container_visual();
+    s.run_jobs();
+    assert_eq!(with_visuals - 1 + 2 * objects_of_a_visual, s.compositor.server().object_count());
+    let reused = s.compositor.server().get_object(id).expect("the id is handed out again");
+    assert!(reused.into_any_rc().downcast::<ServerCompositionTarget>().is_err());
+}
+
+/// A top level that was rendered and is closed: the server target is
+/// disposed out of band and keeps its id until the UI-thread target is
+/// dropped, so that nothing created meanwhile takes its place.
+#[test]
+fn a_target_disposed_out_of_band_keeps_its_id_until_it_is_dropped() {
+    let s = CompositorCanvas::new();
+    let target = bare_target(&s);
+    let id = target.server();
+    s.run_jobs();
+    let baseline = s.compositor.server().object_count();
+    let server_target = s.compositor.server().get::<ServerCompositionTarget>(id).expect("the commit created the server target");
+    assert!(!server_target.is_disposed());
+
+    dispose_out_of_band(&s, &target);
+    assert!(server_target.is_disposed());
+    drop(server_target);
+
+    let visual = s.compositor.create_container_visual();
+    assert_ne!(id, visual.server());
+    s.run_jobs();
+    let with_visual = s.compositor.server().object_count();
+    assert!(with_visual > baseline);
+    assert!(s.compositor.server().get::<ServerCompositionTarget>(id).is_some());
+
+    drop(target);
+    s.canvas.invalidate_visual();
+    s.run_jobs();
+    assert!(s.compositor.server().get_object(id).is_none());
+    assert_eq!(with_visual - 1, s.compositor.server().object_count());
+}
+
+/// A second window of a compositor, as the headless tests found it: a
+/// target closed before its first commit, then a target that is shown.
+#[test]
+fn a_target_shown_after_another_one_was_closed_before_its_first_commit_is_created() {
+    let s = CompositorCanvas::new();
+    s.run_jobs();
+
+    let closed = bare_target(&s);
+    let closed_root = s.compositor.create_container_visual();
+    closed.set_root(Some(closed_root.clone()));
+    dispose_out_of_band(&s, &closed);
+    drop((closed, closed_root));
+
+    let shown = bare_target(&s);
+    let shown_root = s.compositor.create_container_visual();
+    shown.set_root(Some(shown_root.clone()));
+    MediaContext::instance().immediate_render_requested(&s.compositor);
+    s.run_jobs();
+
+    let server_target = s.compositor.server().get::<ServerCompositionTarget>(shown.server()).expect("the second target exists");
+    assert!(!server_target.is_disposed());
+    assert!(s.compositor.server().get::<ServerCompositionVisual>(shown_root.server()).is_some());
+    drop(server_target);
+    dispose_out_of_band(&s, &shown);
+}
+
+/// An id is returned to the free list once, however often its release is
+/// asked for: two objects never share one.
+#[test]
+fn an_id_released_twice_is_handed_out_once() {
+    let s = CompositorCanvas::new();
+    let visual = s.compositor.create_container_visual();
+    let id = visual.server();
+    s.run_jobs();
+
+    s.compositor.dispose_on_next_batch(id);
+    s.run_jobs();
+    s.compositor.dispose_on_next_batch(id);
+    s.run_jobs();
+    // The drop of the UI-thread object asks for the release a third time.
+    drop(visual);
+    s.canvas.invalidate_visual();
+    s.run_jobs();
+
+    // An id that is in the free list twice goes to two of the objects
+    // created next, and the server finds the second under an id in use.
+    let visuals: Vec<_> = (0..4).map(|_| s.compositor.create_container_visual()).collect();
+    s.run_jobs();
+    let servers: Vec<_> = visuals.iter().map(|visual| s.server_object(visual.server())).collect();
+    for (index, server) in servers.iter().enumerate() {
+        assert!(servers[index + 1..].iter().all(|other| !Rc::ptr_eq(server, other)));
+    }
+}

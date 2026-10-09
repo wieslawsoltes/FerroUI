@@ -73,7 +73,13 @@ pub struct Compositor {
     dispose_on_next_batch: RefCell<Vec<PendingDisposal>>,
     pending_creations: RefCell<Vec<(ServerObjectId, ServerObjectFactory)>>,
     next_server_object_id: Cell<u32>,
+    /// The ids that can be handed out again: each was released by a batch
+    /// that is committed, so the server drops its object before it reads a
+    /// creation under the same id, which can only come with a later batch.
     free_server_object_ids: RefCell<Vec<u32>>,
+    /// By id, whether the id is handed out: an id is returned to the free
+    /// list once, however often its release is asked for.
+    server_object_id_in_use: RefCell<Vec<bool>>,
     pending_batch: Arc<Mutex<Option<Arc<CompositionBatch>>>>,
     pending_server_compositor_jobs: RefCell<Vec<PendingServerJob>>,
     pending_server_compositor_post_target_jobs: RefCell<Vec<PendingServerJob>>,
@@ -403,6 +409,7 @@ impl Compositor {
             pending_creations: RefCell::new(Vec::new()),
             next_server_object_id: Cell::new(0),
             free_server_object_ids: RefCell::new(Vec::new()),
+            server_object_id_in_use: RefCell::new(Vec::new()),
             pending_batch: Arc::new(Mutex::new(None)),
             pending_server_compositor_jobs: RefCell::new(Vec::new()),
             pending_server_compositor_post_target_jobs: RefCell::new(Vec::new()),
@@ -676,11 +683,17 @@ impl Compositor {
                 BatchMarker::RenderThreadPostTargetJobsEnd,
             );
         }
-        // Ids disposed by this batch can be reused by objects created for a
+        // Ids released by this batch can be reused by objects created for a
         // later one.
-        self.free_server_object_ids
-            .borrow_mut()
-            .extend(disposed.iter().filter(|entry| entry.release).map(|entry| entry.id.0));
+        {
+            let mut in_use = self.server_object_id_in_use.borrow_mut();
+            let mut free = self.free_server_object_ids.borrow_mut();
+            for entry in disposed.iter().filter(|entry| entry.release) {
+                if in_use.get_mut(entry.id.index()).is_some_and(|in_use| std::mem::replace(in_use, false)) {
+                    free.push(entry.id.0);
+                }
+            }
+        }
 
         self.enqueue_batch(CommittedBatch { batch: commit.clone(), changes, committed_at: self.clock_elapsed() });
 
@@ -740,19 +753,45 @@ impl Compositor {
 
     /// Disposes a server object in a batch of its own, outside of the
     /// regular commit.
+    ///
+    /// The object is disposed, not released: it stays in the table of the
+    /// server under its id until the UI-thread object that names it is
+    /// dropped, as after an ordinary disposal. An object whose creation has
+    /// not been committed yet is created by the same batch, before it is
+    /// disposed: upstream the server object exists from the moment the
+    /// UI-thread object does, so the disposal always finds it. Left to the
+    /// next commit, the creation would follow the disposal and the object
+    /// would never be disposed.
     pub(crate) fn oob_dispose(&self, server: ServerObjectId) -> Arc<CompositionBatch> {
-        self.dispose_on_next_batch.borrow_mut().retain(|entry| entry.id != server);
+        // A disposal that was queued for the next batch is done here.
+        self.dispose_on_next_batch.borrow_mut().retain_mut(|entry| {
+            if entry.id == server {
+                entry.dispose = false;
+                entry.release
+            } else {
+                true
+            }
+        });
+        let pending_creation = {
+            let mut creations = self.pending_creations.borrow_mut();
+            creations.iter().position(|(id, _)| *id == server).map(|index| creations.remove(index))
+        };
         let batch = CompositionBatch::new();
         let mut changes = self.batches.rent_data();
         {
             let mut writer = BatchStreamWriter::new(&mut changes);
+            if let Some((id, factory)) = pending_creation {
+                writer.write_marker(BatchMarker::CreateStart);
+                writer.write(1i32);
+                writer.write_server_object(Some(id));
+                writer.write_object(BatchObject::Create(factory));
+            }
             writer.write_marker(BatchMarker::RenderThreadDisposeStart);
             writer.write(1i32);
             writer.write_server_object(Some(server));
             writer.write(true);
-            writer.write(true);
+            writer.write(false);
         }
-        self.free_server_object_ids.borrow_mut().push(server.0);
         self.enqueue_batch(CommittedBatch { batch: batch.clone(), changes, committed_at: self.clock_elapsed() });
         batch
     }
@@ -769,9 +808,11 @@ impl Compositor {
             None => {
                 let id = self.next_server_object_id.get();
                 self.next_server_object_id.set(id + 1);
+                self.server_object_id_in_use.borrow_mut().push(false);
                 ServerObjectId(id)
             }
         };
+        self.server_object_id_in_use.borrow_mut()[id.index()] = true;
         self.pending_creations.borrow_mut().push((id, Box::new(factory)));
         self.request_commit_async();
         id
@@ -824,6 +865,11 @@ impl Compositor {
     /// Adds `obj` to the disposal list of the next batch, or merges the
     /// request into its entry. Returns whether the list changed.
     fn queue_disposal(&self, obj: ServerObjectId, dispose: bool, release: bool) -> bool {
+        // An id that was released already names no object: asking again
+        // for its release must not return it to the free list twice.
+        if !self.server_object_id_in_use.borrow().get(obj.index()).copied().unwrap_or(false) {
+            return false;
+        }
         let Ok(mut list) = self.dispose_on_next_batch.try_borrow_mut() else { return false };
         match list.iter_mut().find(|entry| entry.id == obj) {
             Some(entry) => {
