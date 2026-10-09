@@ -30,11 +30,11 @@ impl<T: PropertyValue> LocalValueBindingObserver<T> {
     }
 
     pub fn start(&self, source: BindingSource<T>) {
-        let this = self.this.upgrade().expect("observer is alive");
+        let this = &self.this;
         let subscription = match source {
-            BindingSource::Typed(source) => source.subscribe(Rc::new(Typed(this))),
-            BindingSource::Value(source) => source.subscribe(Rc::new(Value(this))),
-            BindingSource::Untyped(source) => source.subscribe(Rc::new(Untyped(this))),
+            BindingSource::Typed(source) => source.subscribe(Rc::new(Typed(this.clone()))),
+            BindingSource::Value(source) => source.subscribe(Rc::new(Value(this.clone()))),
+            BindingSource::Untyped(source) => source.subscribe(Rc::new(Untyped(this.clone()))),
         };
         *self.subscription.borrow_mut() = Some(subscription);
     }
@@ -100,42 +100,75 @@ impl<T: PropertyValue> IDisposable for LocalValueBindingObserver<T> {
     }
 }
 
-struct Typed<T: PropertyValue>(Rc<LocalValueBindingObserver<T>>);
+// The source holds its observers, and the observer its subscription to the
+// source: in the managed original the observer is the object that subscribes
+// itself, and the collector frees the two when the object of the value store
+// is gone, the binding disposed or not. Here the observers the source holds
+// are objects of their own that hold this one weakly, the value store holds
+// it for as long as the binding lasts, and it leaves its source when it is
+// dropped with the store (as `BindingEntry` does).
+impl<T: PropertyValue> Drop for LocalValueBindingObserver<T> {
+    fn drop(&mut self) {
+        if let Some(subscription) = self.subscription.get_mut().take() {
+            subscription.dispose();
+        }
+    }
+}
+
+struct Typed<T: PropertyValue>(Weak<LocalValueBindingObserver<T>>);
 impl<T: PropertyValue> IObserver<T> for Typed<T> {
     fn on_next(&self, value: T) {
-        self.0.next(value)
+        if let Some(observer) = self.0.upgrade() {
+            observer.next(value)
+        }
     }
     fn on_error(&self, _error: ObservableError) {
-        self.0.completed()
+        if let Some(observer) = self.0.upgrade() {
+            observer.completed()
+        }
     }
     fn on_completed(&self) {
-        self.0.completed()
+        if let Some(observer) = self.0.upgrade() {
+            observer.completed()
+        }
     }
 }
 
-struct Value<T: PropertyValue>(Rc<LocalValueBindingObserver<T>>);
+struct Value<T: PropertyValue>(Weak<LocalValueBindingObserver<T>>);
 impl<T: PropertyValue> IObserver<BindingValue<T>> for Value<T> {
     fn on_next(&self, value: BindingValue<T>) {
-        self.0.next_value(value)
+        if let Some(observer) = self.0.upgrade() {
+            observer.next_value(value)
+        }
     }
     fn on_error(&self, _error: ObservableError) {
-        self.0.completed()
+        if let Some(observer) = self.0.upgrade() {
+            observer.completed()
+        }
     }
     fn on_completed(&self) {
-        self.0.completed()
+        if let Some(observer) = self.0.upgrade() {
+            observer.completed()
+        }
     }
 }
 
-struct Untyped<T: PropertyValue>(Rc<LocalValueBindingObserver<T>>);
+struct Untyped<T: PropertyValue>(Weak<LocalValueBindingObserver<T>>);
 impl<T: PropertyValue> IObserver<BoxedValue> for Untyped<T> {
     fn on_next(&self, value: BoxedValue) {
-        self.0.next_value(self.0.property.from_untyped(value.as_any()))
+        if let Some(observer) = self.0.upgrade() {
+            observer.next_value(observer.property.from_untyped(value.as_any()))
+        }
     }
     fn on_error(&self, _error: ObservableError) {
-        self.0.completed()
+        if let Some(observer) = self.0.upgrade() {
+            observer.completed()
+        }
     }
     fn on_completed(&self) {
-        self.0.completed()
+        if let Some(observer) = self.0.upgrade() {
+            observer.completed()
+        }
     }
 }
 
@@ -164,12 +197,12 @@ impl<T: PropertyValue> DirectBindingObserver<T> {
     }
 
     pub fn start(&self, source: BindingSource<T>) {
-        let this = self.this.upgrade().expect("observer is alive");
+        let this = &self.this;
         self.is_untyped.set(matches!(source, BindingSource::Untyped(_)));
         let subscription = match source {
-            BindingSource::Typed(source) => source.subscribe(Rc::new(DirectTyped(this))),
-            BindingSource::Value(source) => source.subscribe(Rc::new(DirectValue(this))),
-            BindingSource::Untyped(source) => source.subscribe(Rc::new(DirectUntyped(this))),
+            BindingSource::Typed(source) => source.subscribe(Rc::new(DirectTyped(this.clone()))),
+            BindingSource::Value(source) => source.subscribe(Rc::new(DirectValue(this.clone()))),
+            BindingSource::Untyped(source) => source.subscribe(Rc::new(DirectUntyped(this.clone()))),
         };
         *self.subscription.borrow_mut() = Some(subscription);
     }
@@ -206,36 +239,59 @@ impl<T: PropertyValue> IDisposable for DirectBindingObserver<T> {
     }
 }
 
-struct DirectTyped<T: PropertyValue>(Rc<DirectBindingObserver<T>>);
+// As `LocalValueBindingObserver`: the source holds this observer weakly, and
+// it leaves its source when it is dropped with its value store.
+impl<T: PropertyValue> Drop for DirectBindingObserver<T> {
+    fn drop(&mut self) {
+        if let Some(subscription) = self.subscription.get_mut().take() {
+            subscription.dispose();
+        }
+    }
+}
+
+struct DirectTyped<T: PropertyValue>(Weak<DirectBindingObserver<T>>);
 impl<T: PropertyValue> IObserver<T> for DirectTyped<T> {
     fn on_next(&self, value: T) {
-        self.0.next_value(BindingValue::new(value))
+        if let Some(observer) = self.0.upgrade() {
+            observer.next_value(BindingValue::new(value))
+        }
     }
     fn on_error(&self, _error: ObservableError) {
-        self.0.completed(false)
+        if let Some(observer) = self.0.upgrade() {
+            observer.completed(false)
+        }
     }
     fn on_completed(&self) {
-        self.0.completed(false)
+        if let Some(observer) = self.0.upgrade() {
+            observer.completed(false)
+        }
     }
 }
 
-struct DirectValue<T: PropertyValue>(Rc<DirectBindingObserver<T>>);
+struct DirectValue<T: PropertyValue>(Weak<DirectBindingObserver<T>>);
 impl<T: PropertyValue> IObserver<BindingValue<T>> for DirectValue<T> {
     fn on_next(&self, value: BindingValue<T>) {
-        self.0.next_value(value)
+        if let Some(observer) = self.0.upgrade() {
+            observer.next_value(value)
+        }
     }
     fn on_error(&self, _error: ObservableError) {
-        self.0.completed(false)
+        if let Some(observer) = self.0.upgrade() {
+            observer.completed(false)
+        }
     }
     fn on_completed(&self) {
-        self.0.completed(false)
+        if let Some(observer) = self.0.upgrade() {
+            observer.completed(false)
+        }
     }
 }
 
-struct DirectUntyped<T: PropertyValue>(Rc<DirectBindingObserver<T>>);
+struct DirectUntyped<T: PropertyValue>(Weak<DirectBindingObserver<T>>);
 impl<T: PropertyValue> IObserver<BoxedValue> for DirectUntyped<T> {
     fn on_next(&self, value: BoxedValue) {
         use crate::{DoNothingType, UnsetValueType};
+        let Some(observer) = self.0.upgrade() else { return };
         let value = if let Some(v) = value.downcast_ref::<T>() {
             BindingValue::new(v.clone())
         } else if value.is::<UnsetValueType>() {
@@ -245,16 +301,20 @@ impl<T: PropertyValue> IObserver<BoxedValue> for DirectUntyped<T> {
         } else if let Some(v) = value.downcast_ref::<BindingValue<T>>() {
             v.clone()
         } else if let Some(n) = value.downcast_ref::<crate::data::BindingNotification>() {
-            n.to_binding_value(self.0.property.property_type_name())
+            n.to_binding_value(observer.property.property_type_name())
         } else {
             BindingValue::binding_error(crate::data::BindingError::message("Invalid value type."))
         };
-        self.0.next_value(value)
+        observer.next_value(value)
     }
     fn on_error(&self, _error: ObservableError) {
-        self.0.completed(false)
+        if let Some(observer) = self.0.upgrade() {
+            observer.completed(false)
+        }
     }
     fn on_completed(&self) {
-        self.0.completed(false)
+        if let Some(observer) = self.0.upgrade() {
+            observer.completed(false)
+        }
     }
 }
