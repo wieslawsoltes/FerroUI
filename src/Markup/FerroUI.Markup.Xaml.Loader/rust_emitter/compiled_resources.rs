@@ -27,7 +27,7 @@ use xamlx::type_system::{
     XamlTypeWellKnownTypes,
 };
 
-use super::xaml_metadata::XamlMetadata;
+use ferroui_build_scan::xaml_metadata::XamlMetadata;
 use crate::compiler_extensions::group_transformers::COMPILED_RESOURCES_TYPE_NAME;
 
 /// A type system that knows the compiled documents of other crates: the type system it

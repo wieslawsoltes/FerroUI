@@ -28,7 +28,7 @@
 //! format 1, which are always written.
 
 use crate::json::{text_of, Fields, Json, Members};
-pub use ferroui_markup_xaml_loader::rust_emitter::{DocumentModel, XamlMetadata};
+pub use crate::xaml_metadata::{DocumentModel, XamlMetadata};
 
 /// The format [`AssemblyModel::to_json`] writes.
 pub const FORMAT: i64 = 2;

@@ -119,12 +119,11 @@
 
 #![forbid(unsafe_code)]
 
-pub mod call_forms;
 pub mod deterministic_id_generator;
-mod json;
-pub mod model;
-pub mod model_set;
-pub mod scanner;
+// The model, the scanner and the export are the crate the framework crates scan themselves
+// with (`ferroui-build-scan`, which links nothing of the framework); they are exported
+// here under the names they had in this crate.
+pub use ferroui_build_scan::{call_forms, export, model, model_set, scanner};
 pub mod type_system;
 pub mod xaml_compiler_diagnostics_filter;
 
@@ -190,14 +189,7 @@ impl XamlGroup {
     }
 }
 
-/// What a build did: the lines for Cargo and the errors.
-pub struct Outcome {
-    /// The `cargo::` lines, in order.
-    pub lines: Vec<String>,
-    /// The errors, each on one line. A build with errors wrote no `.xamlmeta` and no
-    /// `mod.rs`.
-    pub errors: Vec<String>,
-}
+pub use ferroui_build_scan::export::Outcome;
 
 /// The build of the markup of a crate; see the crate documentation.
 pub struct Build {
@@ -225,18 +217,11 @@ impl Build {
     /// Panics outside a build script (a variable Cargo sets is missing).
     pub fn from_env() -> Self {
         let variable = |name: &str| env::var_os(name).unwrap_or_else(|| panic!("{name} is not set: not a build script"));
-        let mut dependencies: Vec<(String, PathBuf)> = env::vars_os()
-            .filter_map(|(name, value)| {
-                let name = name.into_string().ok()?;
-                (name.starts_with("DEP_") && name.ends_with("_XAMLMETA")).then(|| (name, PathBuf::from(value)))
-            })
-            .collect();
-        dependencies.sort();
         Self::new(
             PathBuf::from(variable("CARGO_MANIFEST_DIR")),
             PathBuf::from(variable("OUT_DIR")),
             &variable("CARGO_PKG_NAME").to_string_lossy(),
-            dependencies.into_iter().map(|(_, path)| path).collect(),
+            ferroui_build_scan::export::dependencies_from_env(),
         )
     }
 
@@ -286,22 +271,7 @@ impl Build {
 
     /// The scan of the sources of the crate, with the models of its dependencies.
     fn scan(&self, dependencies: Vec<AssemblyModel>) -> Result<Scan, String> {
-        let root = match &self.source_root {
-            Some(root) => self.manifest_dir.join(root),
-            None => ["src/lib.rs", "lib.rs", "src/main.rs"]
-                .iter()
-                .map(|candidate| self.manifest_dir.join(candidate))
-                .find(|candidate| candidate.is_file())
-                .ok_or_else(|| {
-                    format!(
-                        "the root file of the sources of the crate is not found in {} (`src/lib.rs`, `lib.rs`, `src/main.rs`): state it with Build::source_root",
-                        self.manifest_dir.display()
-                    )
-                })?,
-        };
-        if !root.is_file() {
-            return Err(format!("the root file of the sources of the crate, {}, is not a file", root.display()));
-        }
+        let root = ferroui_build_scan::export::source_root(&self.manifest_dir, self.source_root.as_deref())?;
         let mut options = ScanOptions::new(&self.crate_name, root).with_dependencies(dependencies);
         options.assembly_name = self.assembly.map(|assembly| assembly.name.to_string());
         Ok(scan_crate(&options))
@@ -614,15 +584,8 @@ fn collect(root: &Path, directory: &Path, found: &mut Vec<(String, PathBuf)>) ->
 /// Writes `text` to `path` unless the file holds it already, so that a build that
 /// changed nothing does not make the compiler run again.
 fn write_if_changed(path: &Path, text: &str, errors: &mut Vec<String>) {
-    if fs::read_to_string(path).ok().as_deref() == Some(text) {
-        return;
-    }
-    let written = match path.parent() {
-        Some(directory) => fs::create_dir_all(directory).and_then(|()| fs::write(path, text)),
-        None => fs::write(path, text),
-    };
-    if let Err(error) = written {
-        errors.push(format!("{}: {error}", path.display()));
+    if let Err(error) = ferroui_build_scan::export::write_if_changed(path, text) {
+        errors.push(error);
     }
 }
 
@@ -721,7 +684,7 @@ mod tests {
     /// that depends on it reads that file and resolves against the model in it.
     #[test]
     fn export_metadata_writes_the_model_and_reads_the_models_of_the_dependencies() {
-        let fixtures = Path::new(env!("CARGO_MANIFEST_DIR")).join("tests").join("fixtures");
+        let fixtures = Path::new(env!("CARGO_MANIFEST_DIR")).with_file_name("FerroUI.Build.Scan").join("tests").join("fixtures");
         let out = env::temp_dir().join(format!("ferroui-build-export-{}", std::process::id()));
         let first = Build::new(fixtures.join("scanner"), out.join("fixture"), "fixture", Vec::new()).source_root("lib.rs").export_metadata().execute();
         assert_eq!(first.errors, Vec::<String>::new());
@@ -758,6 +721,14 @@ mod tests {
         assert_eq!(missing.errors.len(), 1, "{:?}", missing.errors);
         assert!(missing.errors[0].ends_with("main.rs, is not a file"), "{:?}", missing.errors);
         let _ = fs::remove_dir_all(&out);
+    }
+
+    /// Not from upstream: the two texts of the base crate the scanner states itself, because
+    /// the crate it is in cannot link the base crate, are the ones of the base crate.
+    #[test]
+    fn texts_the_scanner_states_are_the_ones_of_the_base_crate() {
+        assert_eq!(ferroui_build_scan::FERRO_XML_NAMESPACE, ferroui_base::metadata::FERRO_XML_NAMESPACE);
+        assert_eq!(ferroui_build_scan::CREATE_SOURCE_INFO, MarkupAssembly::CREATE_SOURCE_INFO);
     }
 
     /// Not from upstream: a build without an assembly reports it, with the lines that make

@@ -1086,8 +1086,8 @@ impl Builder {
                     Some(Target::External(segments)) if segments.first().map(String::as_str) == Some("ferroui_base") => {
                         let last: Vec<&str> = segments.iter().rev().take(2).map(String::as_str).collect();
                         match last.as_slice() {
-                            ["FERRO_XML_NAMESPACE", ..] => Some(ferroui_base::metadata::FERRO_XML_NAMESPACE.to_string()),
-                            ["CREATE_SOURCE_INFO", "MarkupAssembly"] => Some(ferroui_base::metadata::MarkupAssembly::CREATE_SOURCE_INFO.to_string()),
+                            ["FERRO_XML_NAMESPACE", ..] => Some(crate::FERRO_XML_NAMESPACE.to_string()),
+                            ["CREATE_SOURCE_INFO", "MarkupAssembly"] => Some(crate::CREATE_SOURCE_INFO.to_string()),
                             _ => None,
                         }
                     }

@@ -40,7 +40,7 @@ use super::emitter::{emit_function, root_class_of, DocumentFunctions};
 use super::runtime_types::{class as class_of, RuntimeEmitTypes};
 use super::transform::{transform_group, DocumentSource, TransformOptions, TransformedDocument};
 use super::source::{function_name_of, rust_string_literal};
-use super::xaml_metadata::{DocumentModel, XamlMetadata};
+use ferroui_build_scan::xaml_metadata::{DocumentModel, XamlMetadata};
 
 /// The result of compiling one document.
 pub struct CompiledDocument {

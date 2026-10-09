@@ -24,9 +24,7 @@ ferroui-markup-xaml-loader = { workspace = true, features = ["runtime", "emitter
 # The type-system contracts of the compiler (`IXamlType`, `IXamlTypeSystem`), which the build-time type
 # system over the type model implements (docs/porting/xaml.md, 9.5.5). The loader links it already.
 xamlx = { workspace = true }
-# The source scanner (docs/porting/xaml.md, 9.5.1): `syn` reads a source file into items, the
-# bodies of the declaration macros are read from their tokens. `span-locations` gives the tokens
-# the lines the diagnostics of the scanner name; `quote` prints the types of function signatures.
-proc-macro2 = { version = "1", default-features = false, features = ["span-locations"] }
-quote = { version = "1", default-features = false }
-syn = { version = "2", default-features = false, features = ["full", "parsing", "printing", "visit"] }
+# The type model, the source scanner and the export of a model (docs/porting/xaml.md, 9.5.1 and
+# 9.5.13): the crate the framework crates scan themselves with. Its modules are exported from this
+# crate under the names they had here.
+ferroui-build-scan = { workspace = true }

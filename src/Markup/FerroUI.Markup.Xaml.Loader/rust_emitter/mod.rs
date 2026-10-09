@@ -97,7 +97,6 @@ mod emitter;
 pub mod runtime_types;
 mod source;
 mod transform;
-mod xaml_metadata;
 
 pub use compiled::{
     compile_documents, compile_documents_with, generate_class_file, generate_file, generate_file_with, ClassConstructor, ClassFile,
@@ -109,5 +108,5 @@ pub use compiled::{transformed_class_group, transformed_tree};
 pub use compiled_resources::CompiledMarkupTypeSystem;
 pub use compiled_resources::CompiledDocumentBuildMethod;
 pub use emitter::{emit_document, UnsupportedNode};
-pub use xaml_metadata::{DocumentModel, XamlMetadata};
+pub use ferroui_build_scan::xaml_metadata::{DocumentModel, XamlMetadata};
 pub use source::{function_name_of, rust_string_literal};
