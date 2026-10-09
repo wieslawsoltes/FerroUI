@@ -6,6 +6,7 @@
 //! | `corpus.rs` | the documents and which of them must (not) be eligible |
 //! | `generated.rs` | the emitter's output for the corpus, CHECKED IN |
 //! | `differential_tests.rs` | generated output is current; both back ends build equal object trees; registration by URI |
+//! | `model_transform.rs` | the transform of the corpus against the build-time type system, measured against the transform against the run-time type system |
 //! | `rust_paths_check.rs` | every public Rust path the framework crates record, named from outside them, CHECKED IN |
 //! | `rust_paths_tests.rs` | the check file is current; each path names the type it is recorded for |
 //!
@@ -36,6 +37,8 @@ pub mod rust_paths_check;
 
 #[cfg(test)]
 mod differential_tests;
+#[cfg(test)]
+mod model_transform;
 #[cfg(test)]
 mod repository_documents;
 #[cfg(test)]
