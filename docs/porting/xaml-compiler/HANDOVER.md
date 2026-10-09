@@ -54,6 +54,16 @@
   lists, then the call forms and the emitter on `MemberSource`, then `compile_xaml()` on the model
   (`xaml.md` 9.10.1, "Remaining for E5", item 1, stages 4 to 6).
 
+- The build-time type system, third stage, is DONE on branch `xaml-type-system-drift` (on `main`),
+  built and run by its author with the three commands of the stage (section 13): the drift test
+  has nothing left in a kind that must be empty and is NOT IGNORED any more; the scanner reads what
+  a crate registers next to its declarations (the list of its classes, registered handles and
+  casts, type aliases, the accessors a macro writes in an `impl` block, the type an accessor is a
+  function of), and evaluates every enumeration member of the two crates (`xaml.md` 9.5.8). The
+  full suite of the XAML test crate with the drift test in it was not run by the author. Next:
+  `markup-xaml` in the drift test, then the call forms and the emitter on `MemberSource`, then
+  `compile_xaml()` on the model (`xaml.md` 9.10.1, "Remaining for E5", item 1, stages 4 to 6).
+
 Design documents in the repository: `docs/porting/xaml.md`, sections 9 (emitter design: call forms
 A/B/C, build integration, code-behind), 9.5 (source scanner), 9.12 (the 14 rulings), 9.13, and
 decisions 1 to 27. Read section 9 before touching the emitter. `DRAFT-AUTHOR-REPORT.md` is the
@@ -869,4 +879,83 @@ The drift test (`cargo test -p ferroui-markup-xaml-tests --lib type_system_drift
 | A type under a `cfg` condition only in the model | 1 | known |
 | The base of a collection declared as a notifying list | 1 | known |
 
-So the two type systems agree on everything they both have; what is left is 71 entries that one side lacks and 42 handle mappings. The test is ignored until the next stage has brought the "must be empty" kinds to zero; its output lists every entry.
+So the two type systems agree on everything they both have; what is left is 71 entries that one side lacks and 42 handle mappings. The test is ignored until the next stage has brought the "must be empty" kinds to zero; its output lists every entry. (Done: section 13.)
+
+## 13. What the third stage of the build-time type system delivered (the two type systems aligned), and how to validate it
+
+Read `xaml.md` 9.5.8 first: it has the drift test before and after, the cause of every list and
+the rule that removed it, what was added to the model, what stays known and why, and what the
+scanner still does not read. Unlike sections 10 to 12 this stage was built and run by its author,
+with three commands only (the owner's rule for it): `cargo test -p ferroui-build --lib` (49 tests
+pass), the drift test (below), `cargo test -p ferroui-markup-xaml-loader --lib runtime::type_system`
+(25 tests pass, unchanged). Nothing else of the workspace was built or run.
+
+What exists, all in `src/FerroUI.Build.Tasks` and the drift test:
+
+- `scanner/constants.rs` (new): the evaluator of constant expressions (discriminants, constants of
+  `bitflags!` types, associated constants of both).
+- `scanner/source.rs`: macros of the crate invoked among the members of an `impl` block
+  (`Invocation::impl_owner`, `property_of`), type aliases, the lists of registered classes
+  (`is_class_list`, `class_list_of`), the handles and the casts of the registration functions
+  (`RegistrationFinder`, with the `use` items of the function), the associated constants of the
+  inherent `impl` blocks, `Source::member_value`.
+- `scanner/mod.rs`: `class_lists`, `aliases_and_handles`, `function_of` and the owner of an added
+  owner in `properties`, `locate` by the path of the type an accessor is a function of, the code
+  `FRN9025`, the line "registration:" of the summary. `scanner/tokens.rs`: a trailing comma of
+  type arguments is dropped.
+- `model.rs`: `RegisteredModel::function_of`, `TypeModel::unregistered`, `AssemblyModel::aliases`,
+  `handles`, `casts` (optional members: format 2 is unchanged for a reader of the second stage).
+  `model_set.rs`: `find_accessor` through `function_of`, `accessor_type_path`, `expanded`.
+- `type_system/model_type_system.rs`: a property is projected on the owner its registration names
+  (`Index::properties`), an unregistered class is found neither by name nor by handle, handles are
+  looked up by `ModelSet::expanded`, the registered handles, `is_cast` and the list base.
+- `tests/fixtures/registration` (new): the third source tree, never compiled, for the above.
+- `tests/FerroUI.Markup.Xaml.UnitTests/type_system_drift.rs`: not ignored; the kinds below.
+
+Unchanged: the declaration macros and their uses, the base and the controls crates, the run-time
+type system, the loader, `Build`, the emitter, every build script, `Cargo.lock` (no new dependency).
+
+The drift test after the stage (`cargo test -p ferroui-markup-xaml-tests --lib type_system_drift -- --nocapture`;
+843 types of the two crates on both sides):
+
+| Kind | First result | Now | |
+|---|---:|---:|---|
+| A type only at run time | 0 | 0 | must be empty |
+| A type only in the model | 5 | 0 | must be empty |
+| A member only at run time | 63 | 0 | must be empty |
+| A member only in the model | 3 | 0 | must be empty |
+| The kind of a type, its base, its interfaces, the type of a member, the shape of a member, the custom attributes, the value of an enumeration member | 0 each | 0 each | must be empty now (were open) |
+| A Rust type the run-time type system maps and the model does not | 42 | 0 | open |
+| A Rust type the model maps and the run-time type system does not | 0 | 0 | open |
+| An enumeration member whose value the scanner did not evaluate | 34 | 0 | known |
+| The base of a collection declared as a notifying list | 1 | 0 | the kind is removed |
+| A Rust type no metadata declares, spelled differently | 0 | 0 | known |
+| A type under a `cfg` condition only in the model | 1 | 1 | known (`UnitTestApplication`) |
+| A class its crate does not register | | 5 | known, new: the 5 types of the second row |
+
+Validation by the session that has the whole workspace, in this order:
+
+1. `cargo test -p ferroui-build --lib` and the drift test alone (the command above). Both passed
+   for the author.
+2. `cargo test -p ferroui-markup-xaml-tests --lib`: the drift test in the full suite of its crate,
+   which the author did not run. It shares the process with about 590 tests. What can differ
+   there, and what the test does about it: a class its crate does not register becomes known at
+   run time when another test uses it (not compared, listed under its kind with a remark); a
+   member typed with the handle of such a class is then a handle only one side maps (an open kind,
+   printed, not failing). If a kind that must be empty is not empty only in the full suite, the
+   printed entry names the type and the member: look for a test that registers a property or a
+   handle on a type of the base or the controls crate at run time.
+3. `cargo build --workspace` and the suites of section 2: `ferroui-build` is a dependency of the
+   include fixture and of the XAML test crate only, so nothing else is expected to change.
+
+For the owner of the base and the controls crates (not edited by this stage): five classes are
+missing from the `TYPES` lists of `register_types.rs`, against the rule stated at the top of both
+files: `GlyphRunDrawing` (base), `UnrealizedSelectionPeer`, `DecorationsOverlaysAutomationPeer`,
+`TopLevelHostAutomationPeer`, `NativeMenuItemPresenter` (controls). The scan lists them as
+`FRN9025`. When they are added to the lists the kind "a class its crate does not register" goes
+to nothing without a change here.
+
+What is next (`xaml.md` 9.10.1, "Remaining for E5", item 1, stages 4 to 6): add `markup-xaml` to
+`CRATES` of the drift test; the call forms and the emitter on `MemberSource`; `compile_xaml()` on
+the model; the leaf crate for the scanner and the model so that the framework crates export their
+models from their build scripts; the manifest keys; the themes compiled in their build scripts.
