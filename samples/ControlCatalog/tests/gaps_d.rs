@@ -372,3 +372,39 @@ fn gap_c322_owner_as_the_data_context_of_a_template_part() {
     assert!(part.upgrade().is_none());
     window.close();
 }
+
+/// C323: the type resolver of a reflection binding declared in a template holds the context of
+/// the build of the template, with the root it built; the binding instance of an element of the
+/// template holds the binding.
+#[test]
+fn gap_c323_reflection_binding_declared_in_a_template() {
+    let _app = start_catalog_application();
+    for value in [
+        "<Border.Tag><ReflectionBinding Path='Tag'/></Border.Tag>",
+        "<Border.Tag><MultiBinding StringFormat='{{}}{{0}}'><ReflectionBinding Path='Tag'/></MultiBinding></Border.Tag>",
+    ] {
+        let value = value.replace("{{", "{").replace("}}", "}");
+        let control = from_markup_value::<Ref<Control>>(&Some(load_text(&format!(
+            "<ContentControl {XMLNS} DataContext='context'>\
+               <ContentControl.Template>\
+                 <ControlTemplate>\
+                   <Border>{value}</Border>\
+                 </ControlTemplate>\
+               </ContentControl.Template>\
+             </ContentControl>"
+        ))))
+        .expect("a control");
+        let window = Window::new();
+        window.set_content(Some(Control::boxed(&control)));
+        window.show();
+        run_jobs();
+        let part = control.get_visual_descendants().next().expect("the root of the template").downgrade();
+        window.set_content(None);
+        run_jobs();
+        let weak = control.downgrade();
+        drop(control);
+        assert!(weak.upgrade().is_none(), "{value}");
+        assert!(part.upgrade().is_none(), "{value}");
+        window.close();
+    }
+}
