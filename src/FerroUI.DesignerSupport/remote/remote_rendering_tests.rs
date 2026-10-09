@@ -9,6 +9,7 @@ use ferroui_base::platform::IPlatformRenderInterface;
 use ferroui_base::reactive::IDisposable;
 use ferroui_base::rendering::IRenderLoop;
 use ferroui_base::{FerroLocator, LocatorExtensions};
+use crate::remote::test_connection::TestConnection;
 use ferroui_controls::remote::{RemoteServer, RemoteWidget};
 use ferroui_controls::testing::{CompositorTestServices, TestServices};
 use ferroui_controls::{Border, Control};
@@ -60,6 +61,13 @@ impl Services {
             }
             assert!(Instant::now() < deadline, "timed out waiting for {what}");
             std::thread::sleep(Duration::from_millis(2));
+        }
+    }
+
+    /// Runs the jobs of the UI thread and renders a frame, `times` times.
+    fn pump(&self, times: usize) {
+        for _ in 0..times {
+            self.services.run_jobs();
         }
     }
 
@@ -158,6 +166,53 @@ fn a_scene_rendered_by_the_server_arrives_as_the_pixels_of_a_frame() {
 
     server.dispose();
     connections.close();
+    services.end();
+}
+
+/// The frames a server has sent over a connection of the tests.
+fn frames_of(connection: &TestConnection) -> Vec<FrameMessage> {
+    connection.sent_of::<FrameMessage>()
+}
+
+// The compositor renders a top-level from the moment the server starts it,
+// and the messages of the client arrive when they arrive: without a pixel
+// format or without a viewport the framebuffer has no pixels, and Skia
+// cannot create a surface over it. The messages are raised by the test, so
+// that frames are rendered in each of those states.
+#[test]
+fn nothing_is_rendered_while_the_framebuffer_of_the_server_has_no_pixels() {
+    let services = Services::start();
+    let connection = TestConnection::new();
+    let transport: Arc<dyn IFerroRemoteTransportConnection> = connection.clone();
+    let server = red_server(&transport);
+
+    // Nothing from the client yet.
+    services.pump(5);
+    assert!(frames_of(&connection).is_empty());
+
+    // The pixel formats without a viewport.
+    connection.raise_message(Arc::new(ClientSupportedPixelFormatsMessage { formats: Some(vec![PixelFormat::Rgba8888]) }));
+    services.pump(5);
+    assert!(frames_of(&connection).is_empty());
+
+    // The viewport: the scene is rendered.
+    connection.raise_message(Arc::new(ClientViewportAllocatedMessage { width: 8.0, height: 4.0, dpi_x: 96.0, dpi_y: 96.0 }));
+    services.pump_until("the frame of the scene", || frames_of(&connection).iter().any(|frame| is_red(frame, 8, 4)));
+    let sent = frames_of(&connection);
+    assert!(sent.iter().all(|frame| frame.width != 0 && frame.height != 0));
+
+    // A viewport without pixels again: no frame without pixels is rendered,
+    // whatever is acknowledged.
+    connection.raise_message(Arc::new(ClientViewportAllocatedMessage { width: 8.0, height: 0.0, dpi_x: 96.0, dpi_y: 96.0 }));
+    for _ in 0..3 {
+        for frame in frames_of(&connection) {
+            connection.raise_message(Arc::new(FrameReceivedMessage { sequence_id: frame.sequence_id }));
+        }
+        services.pump(5);
+    }
+    assert!(frames_of(&connection).iter().all(|frame| frame.width != 0 && frame.height != 0));
+
+    server.dispose();
     services.end();
 }
 
