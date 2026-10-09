@@ -20,3 +20,9 @@ ferroui-base = { workspace = true }
 ferroui-controls = { workspace = true }
 ferroui-desktop = { workspace = true }
 control-catalog = { path = "../ControlCatalog" }
+ferroui-vello = { workspace = true, optional = true, features = ["hybrid", "gpu"] }
+
+[features]
+# The Vello render backend beside Skia: `FERROUI_RENDERER=vello` (the default order of its modes),
+# `vello-hybrid`, `vello-gpu` or `vello-cpu` then chooses it at start.
+vello = ["dep:ferroui-vello"]

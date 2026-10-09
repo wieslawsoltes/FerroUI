@@ -15,7 +15,8 @@ path = "lib.rs"
 [dependencies]
 ferroui-base.workspace = true
 ferroui-skia.workspace = true
-ferroui-vello.workspace = true
+# With every rendering mode: the harness compares them (modes.rs).
+ferroui-vello = { workspace = true, features = ["hybrid", "gpu"] }
 # The text scenes: the shaper both backends are used with, and Skia itself
 # for the one thing the contracts have no member for, an instance of a
 # variable font.

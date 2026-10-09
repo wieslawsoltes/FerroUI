@@ -1,6 +1,6 @@
 # The Vello render backend
 
-Status: **in progress** (started 2026-10-09). Row 25 of `CRITICAL-PATH.md`.
+Status: **in progress** (started 2026-10-09). Row 25 of `CRITICAL-PATH.md`. Stages 1 to 5 (the CPU mode with text), 7 and 8 (the hybrid and the GPU mode, into memory and into the window of the macOS platform, with text) are built; effects (6) and the browser (9) are open.
 
 The port has two render backends behind the platform contracts of `src/FerroUI.Base/platform`: Skia (`src/Skia/FerroUI.Skia`, a port of upstream's `Avalonia.Skia`, mature) and Vello (`src/Vello/FerroUI.Vello`, crate `ferroui-vello`). The Vello backend is an **addition**: upstream has none. Its structure, names and logic follow the Skia backend file by file so that the two stay comparable, and its correctness is measured against the Skia backend (section 8).
 
@@ -46,7 +46,7 @@ The owner wants all three modes; the backend is designed for all three from the 
 | Scene | `RenderContext` (`render.rs`) | `Scene` (`scene.rs`), the same methods as the CPU one, name for name **[V]** | `vello::Scene` (`scene.rs`), another API: every call takes its transform, brush and style |
 | Target | `PixmapMut` over premultiplied RGBA8 without padding, 16 bit sizes; `TargetInit::Clear` or `SrcOver` | a `wgpu::TextureView` (`Renderer::render`), `RenderTargetConfig { format, width: u16, height: u16 }` | a `wgpu::TextureView` (`Renderer::render_to_texture`) |
 | Maturity (own words) | the most mature of the sparse-strips pair | "slightly less mature than its CPU-only counterpart"; mask layers, complex filter graphs and some blend modes of non-isolated blending "will panic" (`README.md`, known limitations) **[V]** | the original renderer |
-| Thread traits | `RenderContext` is `Send` (its dispatcher is `Debug + Send`, `dispatch/mod.rs:18`), not shared | [U] for its `Renderer` | `Scene: Send + Sync` (asserted, `scene.rs:50`), `Renderer: Send` and not on WebAssembly (`lib.rs:348-354`) |
+| Thread traits | `RenderContext` is `Send` (its dispatcher is `Debug + Send`, `dispatch/mod.rs:18`), not shared | `Renderer` and `Resources` are `Send` on native targets (asserted by the backend where it keeps them: `scene/vello_hybrid_scene_sink.rs`) **[M]** | `Scene: Send + Sync` (asserted, `scene.rs:50`), `Renderer: Send` and not on WebAssembly (`lib.rs:348-354`) |
 
 ### 1.3 What the drawing context contract needs, per renderer
 
@@ -70,6 +70,27 @@ The owner wants all three modes; the backend is designed for all three from the 
 | Anti-aliasing modes | analytic; `set_aliasing_threshold(Some(n))` for aliased edges | same | `AaConfig::{Area, Msaa8, Msaa16}`, no aliased mode | GPU mode: `EdgeMode::Aliased` is not available (capability flag of the sink): the drawing context then asks for anti-aliased edges; snapping to pixels where the contract uses the mode for crisp lines is open |
 | Offscreen render and read back | renders into memory | render to a texture, read back with `wgpu` (copy to a buffer, map) | same | none |
 | Perspective transforms | `Affine` only | same | same | not closable in the renderer: the perspective column of a matrix is dropped (`to_affine`). The Skia backend passes a 4x4 matrix. Open; a 3D transform would have to be drawn into a layer and mapped as a mesh |
+
+**What stages 7 and 8 found in the two GPU renderers [V][M]** (each is closed in the sink of the mode, section 4.1, and has a test in `gpu/tests.rs`):
+
+| Renderer | Finding | Where |
+|---|---|---|
+| `vello_gpu` | `Scene::set_blend_mode` asserts that the mode is not destructive (`Copy`, `Clear`, `SrcIn`, `DestIn`, `SrcOut`, `DestAtop`: `peniko::BlendMode::is_destructive`); layers take every mode | `scene.rs:744` |
+| `vello_gpu` | an image paint with its pixels (`ImageSource::Pixmap`) panics in the renderer; images are atlas entries (`Renderer::upload_image`, atlases of 4096 by 4096) or external textures bound at render time (`TextureBindings`) | `render/wgpu/mod.rs:700`, `paint.rs:122` |
+| `vello_gpu` | `push_layer` with a mask is `unimplemented!` | `scene.rs:645` |
+| `vello_gpu` | a renderer is made for one target format; it follows the size of each render | `render/wgpu/mod.rs:161`, `:2328` |
+| `vello` | the fine shader stores **colors that are not premultiplied** | `vello_shaders-0.11.0/shader/fine.wgsl:1393` |
+| `vello` | gradients are evaluated at the **corner of a pixel** (`xy` of the pixel without a half), images at the center (`:1323`): against the CPU mode a radial gradient differed in 2.8 % of the pixels | `fine.wgsl:1203-1290` |
+| `vello` | a linear gradient is drawn between its **transformed end points**: under a transform that does not keep angles its lines of one color are askew (the scene `gradient_with_transform`: 39.6 % of the pixels) | measured |
+| `vello` | a clip is a layer (`push_clip_layer`), and a blend inside it does not see what is below the clip: "not currently implemented correctly", issue 1198 of the project | `scene.rs:180` (its documentation) |
+| `vello` | a layer composed `Copy` replaces what is below it by the coverage of its clip, not in proportion to it | measured |
+| `vello` | curves are flattened on the GPU to about a quarter of a pixel and strokes expanded there: shapes differed from the CPU mode in 0.86 % of the pixels | measured |
+| `vello` | the image atlas grows to 8192 by 8192 (`vello_encoding/src/image_cache.rs:10`); a scene whose images do not fit loses images | not measured |
+| `vello_gpu` | a glyph that is a picture (a font with bitmap strikes) becomes an image paint with its pixels unless the glyph atlas of the renderer is on for the run (`GlyphRunBuilder::atlas_cache`, which its documentation calls experimental): the scene with an emoji panicked in the renderer | `text.rs:235`, measured |
+| `vello_gpu` | `Scene::glyph_run` takes the `Resources` of the renderer: a scene with glyphs belongs to the renderer of one target format | `scene.rs:613` |
+| `vello` | the bold simulation widens the outline **at the size of the font** (`glifo` widens it in the units of the font), and the transform of a glyph is applied **before** the outline is turned over, where y points up (`glifo`: after): with the conventions of the other modes the scene `text_simulations` differed in 85 % and then 9 % of the pixels | `vello_encoding-0.11.0/src/glyph_cache.rs:206`, `resolve.rs:343` |
+| `vello` | `AaConfig::Area` is the nearest to the sparse-strips renderers: mean difference from the CPU mode 0.007 of 255, against 1.02 (`Msaa8`) and 0.66 (`Msaa16`) | `area_coverage_is_the_anti_aliasing_nearest_to_the_cpu_mode` |
+| `wgpu` | `Adapter::create_device_from_hal`, `Device::create_texture_from_hal` and `wgpu_hal::metal::{Device::device_from_raw, Queue::queue_from_raw, Device::texture_from_raw}` exist as the design assumed; the Metal back end is on `objc2-metal` 0.3 | `wgpu-30.0.1/src/api/adapter.rs:77`, `wgpu-hal-30.0.1/src/metal/device.rs:415-448`, `mod.rs:476` |
 
 **Curve flattening [V][M].** `vello_common` flattens curves to a fixed quarter of a pixel (`flatten.rs:15-18`: `SQRT_TOL = 0.5`, `TOL = 0.25`). The lines are chords, so a round shape is drawn up to a quarter of a pixel thinner than it is. Against Skia the edge of an ellipse was visibly lighter: 1.03 % of the pixels of the `ellipse` scene differed by more than the tolerance. The scene of the CPU mode therefore flattens curves itself to a twentieth of a pixel (and expands strokes to their outline the same way) and hands the renderer lines: 0.38 %. The hybrid mode shares `vello_common` and needs the same; classic `vello` flattens on the GPU with its own tolerance [U].
 
@@ -99,11 +120,22 @@ The owner wants all three modes; the backend is designed for all three from the 
 
 `src/Vello/FerroUI.Vello`, package `ferroui-vello`. An application chooses it with `use_vello` on the application builder (`VelloApplicationExtensions`, in the crate, as `use_skia` is in Skia's); the options are `VelloOptions` bound in the locator. An application has one backend; only the comparison harness links both.
 
-Dependencies, exact versions in the workspace manifest: `kurbo = "=0.13.1"`, `peniko = "=0.6.1"`, `vello_cpu = "=0.3.0"` (without default features: `std`, `u8_pipeline`; no thread pool, no PNG, no text), `linesweeper = "=0.5.0"`, `png = "=0.18.1"`. `Cargo.lock` gained 24 third-party packages (among them `glifo`, `skrifa`, `read-fonts` and `font-types`, which are optional dependencies of `vello_cpu` and are not compiled) and changed the version of none. In a build of the whole workspace `arrayvec` gains its `serde` feature (asked for by `linesweeper`) and `hashbrown` `default-hasher` (`vello_cpu`); a build of one application does not, since no crate but the harness depends on the backend. Stage 6 added `zune-core = "=0.5.3"`, `zune-jpeg = "=0.5.15"` (`std` and its SIMD paths, which are its default), `zune-bmp = "=0.5.2"` (`std`), `jpeg-encoder = "=0.7.1"` (`std`; not its `simd` feature) and `gif = "=0.14.2"` (`std`; not its color quantizer, which only its encoder uses): `Cargo.lock` gained these five and `weezl` 0.1.12 and changed the version of none. `wgpu`, `vello` and `vello_gpu` are not dependencies yet: they come with stages 7 and 8, behind features of the crate, so that an application of the CPU mode does not compile a graphics API.
+Dependencies, exact versions in the workspace manifest: `kurbo = "=0.13.1"`, `peniko = "=0.6.1"`, `vello_cpu = "=0.3.0"` (without default features: `std`, `u8_pipeline`; no thread pool, no PNG, no text), `linesweeper = "=0.5.0"`, `png = "=0.18.1"`. `Cargo.lock` gained 24 third-party packages (among them `glifo`, `skrifa`, `read-fonts` and `font-types`, which are optional dependencies of `vello_cpu` and are not compiled) and changed the version of none. In a build of the whole workspace `arrayvec` gains its `serde` feature (asked for by `linesweeper`) and `hashbrown` `default-hasher` (`vello_cpu`); a build of one application does not, since no crate but the harness depends on the backend.
 
 Stage 5 added, at exact versions: the features `text` and `png` of `vello_cpu` (`text` compiles `glifo` 0.4.0, the glyph renderer, with `skrifa` 0.44.0, `read-fonts` 0.41.0 and `font-types` 0.12.6, which were in `Cargo.lock` already as optional dependencies; `png` adds nothing but the decoding of the bitmap glyphs of a colour font, the crate `png` being linked already), `glifo = "=0.4.0"` and `skrifa = "=0.44.0"` as direct dependencies (the embolden settings of a glyph run are a type of `glifo` that `vello_cpu` does not re-export; `skrifa` for the typeface), and `fontique = "=0.12.0"` with its default `system` feature. `Cargo.lock` gained 18 packages and changed the version of none: `fontique`, `parlance`, `memmap2`, the bindings `fontique` reaches the font interface of a platform with, each linked on its platform only (`objc2`, `objc2-encode`, `objc2-foundation` and `objc2-core-text` on Apple platforms, where `objc2-core-foundation` was linked already; `windows` and `windows-core` with six parts on Windows; `yeslogic-fontconfig-sys` and `dlib` on Linux; `roxmltree` 0.21.1 on Android, beside the 0.20 the workspace uses). On macOS a build of the backend now also compiles `glifo`, `skrifa`, `read-fonts`, `font-types`, `fontique`, `parlance`, `memmap2` and the `objc2` bindings; the build time was not measured.
 
-`unsafe`: none in the crate.
+**The GPU modes are features of the crate** (stages 7 and 8), so that an application of the CPU mode does not compile a graphics API:
+
+| Feature | Crates, exact versions, without their default features | Brings |
+|---|---|---|
+| (none) | the lists above | the CPU mode |
+| `hybrid` | `vello_gpu = "=0.3.0"` (`std`, `wgpu`, `text`; no `webgl`), `wgpu = "=30.0.1"` (`std`, `wgsl`, `metal`) | the hybrid mode |
+| `gpu` | `vello = "=0.11.0"` (`wgpu`; not `wgpu_default`), the same `wgpu` | the GPU mode |
+| either, on macOS | `ferroui-metal`, `objc2` 0.6, `objc2-metal` 0.3 (the versions `wgpu` links: the same types) | the window on the Metal device of the platform |
+
+`wgpu` is built with Metal alone: Vulkan and Direct3D 12 join with their platforms. `Cargo.lock` gained 110 packages with the two features when they were added (most are for other targets or build-time: `naga` and its parser generators, the `objc2` framework crates, `web-sys`), changed the version of none, and one more for `ferroui-metal`. A check of the crate from nothing, on the machine of this document, before stage 5: 36 s without a feature, 59 s more for `hybrid` (`wgpu`, `naga`, `vello_gpu`), 30 s more for `gpu` on top (`vello`, its shaders, `skrifa`), 2 s more for both. No crate of an application depends on the features; the comparison harness states both, so a build of the whole workspace has them.
+
+`unsafe`: one file, `gpu/metal.rs` (nine blocks, each with its argument): the raw handles of the Metal contract become objects of `wgpu`. None without the GPU features.
 
 ## 3. File by file
 
@@ -135,7 +167,7 @@ Stage 5 added, at exact versions: the features `text` and `png` of `vello_cpu` (
 | (the glyph members of the canvas) | `draw_glyph_run` of `IVelloSceneSink` with `VelloSceneGlyphRun`; `helpers/script_tag.rs` | | section 4 |
 | `sk_cache_base.rs`, `sk_paint_cache.rs`, `sk_round_rect_cache.rs`, `two_level_cache.rs` | none | | pools of Skia objects; paints and paths here are plain values |
 | `i_skia_api_lease_feature.rs` | none; a lease of the scene if a custom draw operation needs one (open) | | |
-| `gpu/` (`ISkiaGpu`, Graphite on Metal, Ganesh on OpenGL), `metal/` | `scene/` (`IVelloSceneSink`, `vello_cpu_scene_sink.rs`); stage 7 `vello_hybrid_scene_sink.rs`, stage 8 `vello_gpu_scene_sink.rs`, `gpu/` for the device, the queue and window surfaces | | |
+| `gpu/i_skia_gpu.rs`, `gpu/skia_gpu_render_target.rs`, `gpu/metal/skia_metal_gpu.rs` (Graphite on Metal); Ganesh on OpenGL | `gpu/i_vello_gpu.rs` (`IVelloGpu`), `gpu/metal.rs` (`VelloMetalGpu`, `VelloMetalRenderTarget`), `gpu/vello_wgpu_device.rs` (`VelloWgpuDevice`); `scene/` (`IVelloSceneSink`, `vello_cpu_scene_sink.rs`, `vello_hybrid_scene_sink.rs`, `vello_gpu_scene_sink.rs`) | a GPU made from the graphics context of the platform, a render target per Metal surface, a session per frame whose disposal presents | one device type for both modes (`wgpu`); the render target is the `IRenderTarget` itself (no separate session object: the scene is rendered when the drawing context is disposed); no external objects feature, no OpenGL |
 | `tests.rs`, `unit_tests/` | `tests.rs`, `unit_tests.rs` | the contract tests | section 8 |
 
 **Neutral code that should be shared, not copied** (listed; nothing was moved in this task, and the Skia backend was not touched):
@@ -150,7 +182,7 @@ Stage 5 added, at exact versions: the features `text` and `png` of `vello_cpu` (
 | Text rendering mode resolution of `draw_glyph_run` | Skia | base crate, before stage 5 copies it |
 | `FillPath`, `GeometryImplBase`, `Shared`, `impl_geometry_impl!`, the stream context's stroke/fill bookkeeping | both `geometry_impl.rs`/`stream_geometry_impl.rs`, generic over the path type | a generic in the base crate (`platform/internal`) with the path type as a parameter |
 | The contract tests (`tests.rs` up to the bitmaps) | copied with their expectations | a test-support module generic over `IPlatformRenderInterface`, run by each backend |
-| **The Metal contracts** `metal/i_metal_device.rs`, `metal/i_metal_external_objects_feature.rs` | in the Skia crate (upstream has them in `Avalonia.Skia`); the native backend depends on `ferroui-skia` for them | a neutral place (`ferroui_base::platform` or a small `ferroui-metal` crate like `ferroui-opengl`), before stage 8: the Vello GPU modes need the same device and surface session |
+| **The Metal contracts** `i_metal_device.rs`, `i_metal_external_objects_feature.rs` | **moved** (2026-10-09): the crate `ferroui-metal`, `src/FerroUI.Metal`, as upstream has a project of its own for them (`src/Avalonia.Metal`); they were the module `metal` of the Skia crate, which re-exports them, and the native backend no longer depends on the Skia backend | done |
 
 ## 4. The scene interface and the rendering modes
 
@@ -165,7 +197,10 @@ IDrawingContextImpl (contract)
 
 - Every call of the sink carries its state (transform, paint with its transform, fill rule, blend mode, anti-aliasing); the sink keeps none for its caller. That is the shape of `vello::Scene`; the two sparse-strips scenes get the state set before each call.
 - `VelloSceneCapabilities` answers what a mode lacks (blend layers, aliased edges, image paints, read back); the drawing context asks before it uses such a feature and fails with a message rather than draw something else.
-- `VelloRenderingMode { Cpu, Hybrid, Gpu }` and `VelloOptions::rendering_modes`, the order in which they are tried (default: GPU, hybrid, CPU). `scene::try_create_scene_sink` fails for a mode that is not built or not available with its reason; `create_scene_sink` takes the first that works and panics with every reason when none does. `DrawingContextImpl::rendering_mode` tells which one draws.
+- `VelloRenderingMode { Cpu, Hybrid, Gpu }` and `VelloOptions::rendering_modes`, the order in which they are tried (default: **hybrid, GPU, CPU**: the table below). `scene::try_create_scene_sink` fails for a mode with its reason: the crate was built without its feature, the machine has no graphics adapter, or the adapter runs no compute shaders (GPU mode). `DrawingContextImpl::rendering_mode` tells which one draws.
+- **A scene that ends in memory** (a render target bitmap, a layer, the framebuffer of a platform that renders in software) is drawn by the CPU mode whenever the order has it, wherever it stands (`create_scene_sink`): a round over the GPU with a read back gains nothing. An order without the CPU mode draws those in its GPU modes too (the harness measures the modes this way), on the device of the platform when a window has one and on a device without a surface otherwise (`VelloWgpuDevice::shared`).
+- **The window of a platform that renders on a graphics device** is drawn in the first mode of the order the device runs (`gpu::create_window_scene_sink`); the CPU mode there is rendered into memory and copied to the texture of the window.
+- A sink that draws on a device also renders into a texture of it: `IVelloSceneSink::render_to_texture` (a default member that fails for the CPU mode; with the GPU features only).
 - Glyph runs are a call of the interface (stage 5): `draw_glyph_run(&VelloSceneGlyphRun, transform, paint, anti_alias)`, the run being the font data, the em size, the normalized variation coordinates, the glyphs with their origins, the widening of the bold simulation, the skew of the oblique one and whether to hint. It is a required member: **the sinks of stages 7 and 8 have to implement it** (`vello_gpu::Scene::glyph_run` has the same builder as `vello_cpu`'s; `vello::Scene::draw_glyphs` takes the same options). The CPU sink draws it with `RenderContext::glyph_run`. Filters (stage 6) join the interface the same way.
 - Filters are members with capability flags (stage 6): `filter_capabilities` (`VelloSceneFilterCapabilities { filter_layers, blurred_rounded_rects }`), `push_filter_layer` and `fill_blurred_rounded_rect`, at the end of the trait with default bodies that say "none" and fail when called, so a sink that does not implement them is drawn for as section 10.3 describes.
 
@@ -177,7 +212,46 @@ IDrawingContextImpl (contract)
 | The desktop window (macOS, Metal) | **Hybrid first, classic GPU second** | Both draw into a `wgpu::TextureView`. The hybrid one has what a UI needs today that classic `vello` lacks: filters (blur, drop shadow), aliased edges, and the same code path as the CPU mode (the same `vello_common`, so the same pixels as the tests measure). Classic `vello` wins on scenes dense with vector paths, which a UI rarely is, and needs compute shaders. The option order lets an application prefer either |
 | The browser (later) | WebGPU: hybrid or GPU through `wgpu`; WebGL2: hybrid with its `webgl` feature; no GPU: CPU into a 2D canvas | staged with the `wasm32-unknown-unknown` configuration of `browser-platform.md`; not built now. `vello` needs WebGPU; only `vello_gpu` has a WebGL2 path |
 
-The desktop surface: the native backend hands the Skia backend a Metal device and command queue and, per frame, a session with the texture of the drawable (`IMetalDevice`, `IMetalPlatformSurfaceRenderingSession`). The GPU modes make a `wgpu::Device` over that Metal device and wrap the texture of each session (`Adapter::create_device_from_hal` and `Device::create_texture_from_hal` of `wgpu` 30, both `unsafe fn`: the one place the crate will need `unsafe`), or create a `wgpu` surface over the layer (`SurfaceTargetUnsafe::CoreAnimationLayer`) if the native backend exposes it. Decided in stage 7, after the Metal contracts have moved (section 3).
+### 4.1 The sinks of the GPU modes, as built
+
+**Hybrid (`VelloHybridSceneSink`, `vello_gpu::Scene`).** The paths of the CPU sink (the same flattening, strokes as outlines, `set_aliasing_threshold` for aliased edges). Three things differ: a shape composed destructively is a layer that is clipped to the shape, holds the paint everywhere and is composed with the mode (the scene refuses the mode on a shape); an image is a texture of the device, made when the scene is rendered, bound as an external texture and kept for sixteen renders after it was last drawn (so sizes up to the texture limit of the device, not of an atlas); mask layers are not used (an opacity mask is a `DestIn` layer in every mode). One renderer per target format is kept on the device.
+
+**GPU (`VelloGpuSceneSink`, `vello::Scene`).** Every finding of 1.3 is closed in the sink: a blended shape is a layer over the whole target, opened **outside** the clips around it with the clips opened again inside (the sink remembers the open clips); `Copy` is `DestOut` by the coverage of the shape and then `Plus` of the paint, which is exact on edges, and `Clear` the first step; curves are flattened and strokes expanded by the sink; gradients are moved by half a pixel; a linear gradient is given in the pixels of the target; an aliased rectangle whose transform keeps its sides on the axes is snapped to the pixels whose centers it holds; pixels read back are premultiplied, and the copy into the texture of a window premultiplies (the renderer writes with a compute shader into an `Rgba8Unorm` texture of its own, which is then drawn into the drawable). Anti-aliasing: area coverage.
+
+**Capabilities and what remains, per mode.**
+
+| | CPU | Hybrid | GPU |
+|---|---|---|---|
+| `blend_layers` | yes | yes | yes |
+| `aliased_edges` | yes | yes | **no**: rectangles on the axes are snapped (exact but for the pixel of a corner: half of the area against the center), every other aliased shape and clip is anti-aliased (`aliased_rectangle`, `transformed_clip` of the harness) |
+| `image_paints` | yes | yes (textures) | yes (the renderer's atlas, 8192 by 8192 for a scene) |
+| `read_back` | yes | yes | yes |
+| Destructive composition of a shape | native | a clipped layer; the edge is within the tolerance (largest difference 32 of 255 on an anti-aliased clip edge) | `Copy`, `Clear` exact; `SrcIn`, `DestIn`, `SrcOut`, `DestAtop` as a layer clipped to the shape: inside a clip they also take out what is below in the part of the shape the clip hides (**open**) |
+| Glyph runs | `glifo` through `vello_cpu` | the same glyph renderer through `vello_gpu` (its `text` feature), with the caches of the renderer of the target format; a font with bitmap strikes through the glyph atlas of the renderer, every other as paths, as in the CPU mode | `Scene::draw_glyphs`, with the bold amount and the shear in the renderer's conventions and the brush as a shape gets it; glyph outlines are flattened by the renderer (to its quarter of a pixel: up to 0.03 % of the pixels of a text scene beyond the tolerance against the CPU mode); **no aliased text** (`text_aliased`: 2.47 %) |
+| Blur, drop shadow, box shadow | stage 6 | **not built**: `vello_gpu` has filter layers and `fill_blurred_rounded_rect` | **not built**: `vello` has `draw_blurred_rounded_rect` only; a general blur through the image fallback of stage 6 |
+| Layers of the contract (`create_layer`) | memory | memory, then a texture when drawn (**open**: a layer that stays on the device) | the same |
+
+Neither GPU sink has a member that panics: a scene the device cannot render (an intermediate texture that cannot be had) is logged (`LogArea::VISUAL`) and the target keeps what it had.
+
+### 4.2 The desktop window, as built
+
+The native backend hands out a Metal device with its command queue and, per frame, a session with the texture of the drawable; it presents the drawable itself when the session is disposed, with a command buffer of that queue (`native/FerroUI.Native/src/OSX/metal.mm`). The contract does not hand out the layer.
+
+**Decision: a `wgpu` device over the Metal device and the queue of the platform, drawing into the texture of each session** (`VelloMetalGpu::new`: the adapter of `wgpu` whose device has the registry identifier of the platform's, `hal::metal::Device::device_from_raw`, `Queue::queue_from_raw`, `Adapter::create_device_from_hal`; per frame `Device::texture_from_raw` and `create_texture_from_hal`), **not a `wgpu` surface over the layer**:
+
+- the layer is the platform's: its size, its drawables and the way a frame is presented (with a transaction while the window is resized) stay in the native code, unchanged for both backends; a surface of `wgpu` would configure the layer and present on its own;
+- the frame and its presentation are command buffers of **one queue**, which runs them in the order they were committed: the frame is complete when it is presented, without waiting for the GPU. A device of `wgpu`'s own would have its own queue, and each frame would have to wait for the GPU before the session ends;
+- the device belongs to the graphics context the compositor creates on the thread that renders and ends with it, like the Graphite context of the Skia backend: the confinement of the render thread is kept.
+
+`PlatformRenderInterface::create_backend_context(Some(context))` makes the GPU from the Metal device feature of the context (`gpu::create_gpu`) and a `VelloContext` with it; `VelloContext::create_render_target` gives a `VelloMetalRenderTarget` for a Metal surface (a framebuffer surface as before). A frame: `begin_rendering` of the platform's target, the texture wrapped (its format and size are read from the texture: a resized window gives a larger texture, and the scene is made for the texture; the scaling of the session becomes the DPI), the scene drawn by the drawing context, rendered into the texture when the context is disposed (hybrid: directly; GPU: through its own texture; CPU: through memory), then the session disposed, which presents. A texture whose origin is its bottom-left corner is refused with a message (the macOS platform has none).
+
+`use_vello` on the desktop needs nothing more: with a platform that renders on Metal the window is drawn in the first available mode of `VelloOptions::rendering_modes`; without the GPU features of the crate the context of a graphics device fails with a message that names them, and the platform is to be configured for software rendering.
+
+**Proven without a human** (2026-10-09, Apple M3 Pro):
+
+- `gpu/metal_tests.rs`, 4 tests: a Metal device and queue made as the platform makes them, a render target whose sessions give a texture of that device that is not on screen. Three frames in each of the three modes through the render interface, the backend context, the render target and the drawing context at a scaling of two, read back: the rectangle of the last frame where it belongs, the frame before gone; a surface that grows, shrinks and changes its scaling followed frame by frame; every session disposed once; a lost device reported by the context and the target.
+- `examples/vello_window.rs --smoke` (`cargo run -p ferroui-vello --features hybrid,gpu --example vello_window -- --smoke [--mode hybrid|gpu|cpu] [--software]`): the macOS platform brought up, a window created through the windowing contract, 12 frames of shapes (a gradient, a card with rounded corners, a rounded clip, a layer of half opacity, a line) drawn into the drawables of its layer on a timer with a resize from 640 by 400 to 800 by 520 half way, closed; exit code 0 only if every frame was drawn, the resize seen, the window closed and the device not lost. Passed in the hybrid, the GPU and the CPU mode on Metal, in the CPU mode on the software framebuffer, and with the default order (hybrid).
+- **Left to see by hand:** the picture in the window. The texture of a drawable cannot be read back (`framebufferOnly`), and the run takes no screenshot; that the pixels are right is what the tests on the texture off screen show, with the same code from the device to the session.
 
 ## 5. The scene model
 
@@ -193,9 +267,10 @@ The desktop surface: the native backend hands the Skia backend a Metal device an
 
 - The contracts decide what crosses threads: `IGeometryImpl`, `IGlyphRunImpl`, shared bitmaps are `Send + Sync`; drawing contexts, render targets, layers and the backend context stay on the thread that renders (`render-thread.md`, section 3).
 - Geometries hold a `BezPath` behind `Arc` and their caches behind `Mutex`: `Send + Sync` without `unsafe` (the Skia backend needs two `unsafe impl Send`). Bitmaps hold their pixels and their image under one lock.
-- The sinks, `RenderContext` and the `wgpu` objects of a context are created on the render thread inside the server graph and never leave it; under the compositor lock both threads may render in turn, never at once.
+- The sinks and `RenderContext` are created on the render thread inside the server graph and never leave it; under the compositor lock both threads may render in turn, never at once.
+- **Device ownership as built.** `VelloWgpuDevice` (an `Arc`, `Send + Sync`) holds the `wgpu` device and queue and, behind one lock that is held for the length of a render, what the renderers keep between frames (the renderers of each mode with their pipelines, the textures of images, the texture the GPU mode renders a window into). There are two kinds: the device over the Metal device of a graphics context (`VelloMetalGpu`, an `Rc` owned by the `VelloContext` of that context: one per context, on the thread that renders), and one device without a surface for the process, made when a GPU mode first draws into memory without a window (`VelloWgpuDevice::headless`). The device of the context that was created last is the one scenes are drawn into memory with (`prefer`, a weak reference), so that a window and its bitmaps share a device. Two threads that render at once (tests) take the lock in turn.
 - `wgpu::Device`, `Queue` and `Surface` are `Send + Sync` on native targets (`wgpu-30.0.1/src/api/*.rs`, `static_assertions` under `cfg(send_sync)`) and not on WebAssembly without the `fragile-send-sync-non-atomic-wasm` feature. The device and the queue belong to the backend context (`VelloContext`), as the Graphite context belongs to `SkiaContext`; `vello::Renderer` is `Send`.
-- Device loss: `wgpu` reports it through the device-lost callback and failing surface acquisition. The context sets a flag that `IPlatformRenderInterfaceContext::is_lost` returns; the compositor then recreates the context and its targets, the path the Skia backend uses for a lost Metal or OpenGL context. Layers of a lost device report `is_corrupted`.
+- Device loss, as built: the device-lost callback of `wgpu` and a read back that fails set a flag on `VelloWgpuDevice`; `VelloContext::is_lost` returns it and `VelloMetalRenderTarget::platform_render_target_state` reports a corrupted target, so the compositor recreates the context and its targets, the path the Skia backend uses for a lost context. A lost device without a surface is replaced when it is next asked for. Layers hold their pixels in memory and are not lost with a device.
 - The CPU mode renders on the calling thread: `vello_cpu`'s thread pool (`multithreading`) is not compiled in. It is an option for large software frames later; filters panic with it today (1.3).
 
 ## 7. Stages
@@ -208,8 +283,8 @@ The desktop surface: the native backend hands the Skia backend a Metal device an
 | 4 | Comparison harness | the scene table of section 8, a bound per scene | done |
 | 5 | Text: `glyph_run_impl.rs`, `vello_typeface.rs`, `font_manager_impl.rs` (`fontique`), glyph run geometry, intersections; the `text` feature of `vello_cpu` | the text suites of `unit_tests/media` of the Skia backend (fonts, glyph runs, text formatting, 326 tests) and its `text_tests.rs` (14) ported; 13 text scenes and nine numeric comparisons in the harness; a window of the Fluent theme on the headless platform (section 8, "Text") | done for the CPU mode |
 | 6 | Effects, box shadows, scene brushes (visual and drawing brushes), acrylic materials, render options, JPEG and the other codecs, RGB565, mipmapped downscaling | the effect, scene brush, acrylic and bitmap tests of the Skia backend ported; 61 scenes and the codec tests in the harness (section 10) | done, but `render_async` (no surface of another API before the GPU modes) and the `HitTesting` suite (which needs the font services of the tests of stage 5) |
-| 7 | Hybrid mode: `VelloHybridSceneSink` offscreen on a headless `wgpu` device, then the desktop window (after the Metal contracts moved) | the harness compares hybrid against Skia and against CPU; ControlCatalog runs with `use_vello` | open |
-| 8 | GPU mode: `VelloGpuSceneSink`, blur passes | the same, three modes compared | open |
+| 7 | Hybrid mode: `VelloHybridSceneSink` offscreen on a headless `wgpu` device, then the desktop window (after the Metal contracts moved) | the harness compares hybrid against Skia and against CPU; the window example | **done** for shapes, brushes, clips, layers, images and glyph runs; filters after stage 6; the ControlCatalog with `use_vello` was not run |
+| 8 | GPU mode: `VelloGpuSceneSink`, the desktop window | the same, three modes compared | **done** for the same; blur passes after stage 6; open: aliased edges of shapes that are not rectangles, four destructive compositions inside a clip |
 | 9 | Browser: WebGPU, WebGL2, CPU | `browser-platform.md` | open |
 
 **Members that fail with their stage** (nothing pretends to work): loading WebP and whatever else is not PNG, JPEG, GIF, BMP, ICO or WBMP (a load error, as for data in no format); `create_backend_context` with a platform graphics context (stages 7, 8; a panic); the hybrid and GPU modes (`VelloRenderingModeUnavailable`).
@@ -218,6 +293,73 @@ The desktop surface: the native backend hands the Skia backend a Metal device an
 
 1. **The contract tests of the Skia backend, ported** (`src/Vello/FerroUI.Vello/tests.rs`, `unit_tests.rs`): the same scenes and expectations, pixel by pixel, for everything that tests the contract and not Skia. 83 tests pass: 79 in `tests.rs` (the drawing context, the geometries, the bitmaps, the framebuffer render target and the software context, the image brushes, and tests that what is not built fails with its stage and that a target keeps its content) and 4 of the suites `RenderBoundsTests`, `CombinedGeometryImplTests` and `DrawingContextImplTests`. Stage 5 added the text tests (below, "Text"): 430 tests in the crate, 421 pass and 9 are ignored as they are in the Skia backend. Stage 6 ported the tests of box shadows, effects, scene brushes, acrylic and bitmaps (section 10.4). Left: `HitTesting`.
 2. **The comparison harness** (`tests/FerroUI.RenderBackends.Comparison`, crate `ferroui-render-backends-comparison`): the same scenes through the contracts by Skia raster and by every Vello mode that is built, 200 by 200 pixels, and for each scene the share of pixels of which a channel differs by more than 32 of 255. Each scene has a recorded bound (the measured share, half as much again and 0.05 %); `scenes_stay_within_their_bounds` fails when a scene exceeds it. `cargo test -p ferroui-render-backends-comparison -- --nocapture` prints the tables below.
+
+3. **The GPU modes** (features `hybrid`, `gpu`; `cargo test -p ferroui-vello --all-features`): `gpu/tests.rs`, 15 tests of the sinks on a device without a surface, each scene drawn by the CPU mode too and compared (shapes and strokes, gradients, a linear gradient under a skewing transform, image paints with extend modes and alpha, a copy inside clips, a transparent copy, layers with opacity and a `DestIn` mask, blended shapes and a blended layer inside clips, aliased rectangles, sizes from 1 by 1 to 257 by 513 rendered twice, the factory, the measure of the anti-aliasing): nothing beyond the tolerance in either mode. `gpu/metal_tests.rs`, 4 tests of the path of a window (4.2). 83 tests without a feature, 96 with `hybrid`, 102 with both.
+4. **A machine without a graphics adapter.** Every test of the GPU modes prints `skipped: no adapter` with the reason and passes; one guard test in each crate (`a_graphics_device_is_present_when_demanded`, `the_gpu_modes_are_measured_when_demanded`) fails when the environment variable `FERROUI_VELLO_REQUIRE_GPU` is set and there is none, so a machine that is meant to test the modes cannot be green without having drawn. Here the tests ran on a real adapter (Apple M3 Pro, Metal). CI runs `cargo test --workspace` on `macos-15`, where the harness turns both features on for the whole build: whether the virtual machine of that runner gives `wgpu` an adapter that runs the compute shaders was **not verified** [U]; the output of the guard tests says which case it was, and the variable is not set in the workflow.
+
+### Scenes across the modes (2026-10-09, Apple M3 Pro)
+
+`tests/FerroUI.RenderBackends.Comparison/modes.rs`: every scene by every mode the machine runs, against Skia raster and against the CPU mode: the share of pixels beyond the tolerance and, in brackets, the largest difference of a channel. The bound of a scene against Skia is the one of the table below (measured in the CPU mode) and against the CPU mode 0.05 %, but for the three scenes of the GPU mode with aliased edges (0.89 % and 0.90 %; 1.18 %; 3.76 % for aliased text). The 13 text scenes of stage 5 (`text.rs`) are in the table; their distance from Skia is the distance of the two glyph rasterizers (section 8 of the text stage), the same in every mode.
+
+| Scene | CPU against Skia | hybrid against Skia | hybrid against CPU | GPU against Skia | GPU against CPU | Drawn another way |
+|---|---|---|---|---|---|---|
+| `rectangle` | 0.000 % (1) | 0.000 % (1) | 0.000 % (1) | 0.000 % (1) | 0.000 % (1) |  |
+| `aliased_rectangle` | 0.037 % (235) | 0.037 % (235) | 0.000 % (0) | 0.555 % (127) | 0.565 % (235) | GPU: the rectangle snapped to pixels; the ellipse anti-aliased (no aliased edges) |
+| `rounded_rectangle` | 0.080 % (62) | 0.080 % (62) | 0.000 % (1) | 0.080 % (62) | 0.000 % (1) |  |
+| `elliptical_corners` | 0.033 % (70) | 0.033 % (71) | 0.000 % (1) | 0.030 % (71) | 0.000 % (1) |  |
+| `ellipse` | 0.375 % (66) | 0.375 % (66) | 0.000 % (1) | 0.372 % (65) | 0.000 % (1) |  |
+| `lines` | 0.000 % (18) | 0.000 % (18) | 0.000 % (1) | 0.000 % (18) | 0.000 % (1) |  |
+| `curved_path` | 0.210 % (83) | 0.210 % (83) | 0.000 % (1) | 0.207 % (84) | 0.000 % (1) |  |
+| `star_non_zero` | 0.005 % (36) | 0.005 % (36) | 0.000 % (1) | 0.005 % (36) | 0.000 % (1) |  |
+| `star_even_odd` | 0.005 % (71) | 0.005 % (71) | 0.000 % (1) | 0.005 % (71) | 0.000 % (1) |  |
+| `stroke_flat_miter` | 0.000 % (14) | 0.000 % (13) | 0.000 % (1) | 0.000 % (14) | 0.000 % (1) |  |
+| `stroke_round_round` | 0.052 % (68) | 0.052 % (68) | 0.000 % (1) | 0.052 % (69) | 0.000 % (1) |  |
+| `stroke_square_bevel` | 0.000 % (23) | 0.000 % (24) | 0.000 % (1) | 0.000 % (23) | 0.000 % (1) |  |
+| `stroke_miter_limit` | 0.000 % (18) | 0.000 % (19) | 0.000 % (1) | 0.000 % (18) | 0.000 % (1) |  |
+| `dashes` | 0.468 % (156) | 0.468 % (156) | 0.000 % (1) | 0.468 % (157) | 0.000 % (1) |  |
+| `linear_gradient_pad` | 0.000 % (1) | 0.000 % (1) | 0.000 % (1) | 0.000 % (1) | 0.000 % (1) |  |
+| `linear_gradient_repeat` | 0.000 % (1) | 0.000 % (1) | 0.000 % (1) | 0.000 % (1) | 0.000 % (1) |  |
+| `linear_gradient_reflect` | 0.000 % (1) | 0.000 % (1) | 0.000 % (1) | 0.000 % (1) | 0.000 % (1) |  |
+| `linear_gradient_translucent` | 0.000 % (2) | 0.000 % (2) | 0.000 % (1) | 0.000 % (2) | 0.000 % (2) |  |
+| `radial_gradient_pad` | 0.000 % (1) | 0.000 % (1) | 0.000 % (1) | 0.000 % (1) | 0.000 % (1) |  |
+| `radial_gradient_repeat` | 0.000 % (1) | 0.000 % (1) | 0.000 % (1) | 0.000 % (1) | 0.000 % (1) |  |
+| `radial_gradient_reflect` | 0.000 % (1) | 0.000 % (1) | 0.000 % (1) | 0.000 % (1) | 0.000 % (1) |  |
+| `radial_gradient_elliptical` | 0.000 % (1) | 0.000 % (1) | 0.000 % (0) | 0.000 % (1) | 0.000 % (1) |  |
+| `radial_gradient_offset_origin` | 0.000 % (1) | 0.000 % (1) | 0.000 % (0) | 0.000 % (1) | 0.000 % (1) |  |
+| `conic_gradient` | 0.000 % (1) | 0.000 % (1) | 0.000 % (0) | 0.000 % (1) | 0.000 % (1) |  |
+| `gradient_with_transform` | 0.058 % (53) | 0.058 % (53) | 0.000 % (1) | 0.058 % (53) | 0.000 % (2) | GPU: the linear gradient given in the pixels of the target |
+| `nested_clips` | 0.095 % (55) | 0.095 % (56) | 0.000 % (1) | 0.095 % (56) | 0.000 % (1) | GPU: the rectangle clip snapped to pixels |
+| `transformed_clip` | 0.007 % (235) | 0.007 % (235) | 0.000 % (0) | 0.750 % (122) | 0.750 % (117) | GPU: the rotated clip anti-aliased (no aliased edges) |
+| `opacity_layers` | 0.000 % (14) | 0.000 % (13) | 0.000 % (2) | 0.000 % (13) | 0.000 % (2) |  |
+| `opacity_mask` | 0.000 % (24) | 0.000 % (25) | 0.000 % (2) | 0.000 % (24) | 0.000 % (2) | hybrid, GPU: a layer composed `DestIn` (no mask layers), as in every mode |
+| `layer` | 0.015 % (44) | 0.010 % (43) | 0.000 % (2) | 0.010 % (43) | 0.000 % (2) |  |
+| `tile_repeated` | 0.000 % (0) | 0.000 % (0) | 0.000 % (0) | 0.000 % (0) | 0.000 % (0) | hybrid: the tile as a texture of the device |
+| `tile_flipped` | 0.000 % (0) | 0.000 % (0) | 0.000 % (0) | 0.000 % (0) | 0.000 % (0) | hybrid: the tile as a texture of the device |
+| `tile_transformed` | 0.000 % (0) | 0.000 % (0) | 0.000 % (0) | 0.000 % (0) | 0.000 % (0) | hybrid: the tile as a texture of the device |
+| `tile_single_transformed` | 0.133 % (126) | 0.133 % (126) | 0.000 % (1) | 0.133 % (126) | 0.000 % (1) | hybrid: the tile as a texture of the device |
+| `bitmap` | 0.100 % (59) | 0.100 % (59) | 0.000 % (2) | 0.100 % (59) | 0.000 % (2) | hybrid: the bitmap as a texture of the device |
+| `transforms` | 0.253 % (78) | 0.250 % (78) | 0.000 % (2) | 0.250 % (78) | 0.000 % (2) |  |
+| `combined_union` | 0.110 % (67) | 0.110 % (67) | 0.000 % (1) | 0.110 % (67) | 0.000 % (1) |  |
+| `combined_intersect` | 0.060 % (60) | 0.058 % (60) | 0.000 % (1) | 0.058 % (60) | 0.000 % (1) |  |
+| `combined_xor` | 0.140 % (67) | 0.140 % (67) | 0.000 % (1) | 0.140 % (67) | 0.000 % (1) |  |
+| `combined_exclude` | 0.025 % (66) | 0.025 % (66) | 0.000 % (1) | 0.025 % (66) | 0.000 % (1) |  |
+| `geometry_group` | 0.195 % (59) | 0.188 % (59) | 0.000 % (1) | 0.198 % (60) | 0.000 % (1) |  |
+| `text_latin_sizes` | 4.235 % (168) | 4.162 % (169) | 0.000 % (1) | 4.155 % (161) | 0.013 % (59) |  |
+| `text_interface_sizes` | 3.215 % (92) | 3.225 % (92) | 0.000 % (1) | 3.243 % (93) | 0.000 % (4) |  |
+| `text_mixed_scripts` | 3.297 % (235) | 3.288 % (235) | 0.000 % (1) | 3.260 % (235) | 0.015 % (40) |  |
+| `text_mixed_scripts_with_fallback` | 5.955 % (255) | 5.945 % (255) | 0.000 % (3) | 5.955 % (255) | 0.013 % (64) | hybrid: the pictures of the colour font through the glyph atlas of the renderer |
+| `text_simulations` | 5.470 % (143) | 5.457 % (143) | 0.000 % (1) | 5.465 % (143) | 0.033 % (52) | GPU: the bold amount at the size of the font, the shear turned over (the renderer's own conventions) |
+| `text_variable_axis` | 5.103 % (174) | 5.090 % (174) | 0.000 % (1) | 5.085 % (174) | 0.020 % (55) |  |
+| `text_decorations` | 4.263 % (131) | 4.250 % (131) | 0.000 % (1) | 4.250 % (131) | 0.022 % (47) |  |
+| `text_rotated` | 1.448 % (123) | 1.440 % (123) | 0.000 % (1) | 1.427 % (126) | 0.010 % (61) |  |
+| `text_scaled` | 1.765 % (125) | 1.780 % (125) | 0.000 % (1) | 1.782 % (125) | 0.000 % (28) |  |
+| `text_clipped` | 2.080 % (201) | 2.075 % (201) | 0.000 % (1) | 2.078 % (202) | 0.000 % (11) |  |
+| `text_gradient` | 3.408 % (177) | 3.408 % (178) | 0.000 % (1) | 3.420 % (178) | 0.015 % (50) |  |
+| `text_aliased` | 0.190 % (235) | 0.190 % (235) | 0.000 % (0) | 2.473 % (187) | 2.473 % (120) | GPU: the glyphs anti-aliased (no aliased edges) |
+| `text_translucent` | 1.183 % (92) | 1.198 % (92) | 0.000 % (2) | 1.200 % (92) | 0.000 % (2) |  |
+| **mean of the 54 scenes** | **0.816 %** | **0.814 %** | **0.000 %** | **0.879 %** | **0.073 %** | |
+
+Reading: the hybrid mode draws the pixels of the CPU mode (no pixel beyond the tolerance in any scene, the largest difference of a channel 2 of 255): a window drawn by it and a bitmap drawn by the CPU mode agree. The GPU mode does too, once its sink flattens, strokes and places gradients as the other modes do, except where it has no aliased edges: the two scenes with an aliased ellipse and an aliased rotated clip. Text is the same: the hybrid mode draws the glyphs of the CPU mode to the pixel, the GPU mode within 0.03 % but for aliased text. No scene needed a fallback that draws on another renderer. The harness has no scene with effects yet (stage 6): a scene a mode cannot draw is listed as not drawn with its stage (`NOT_DRAWN` in `modes.rs`) and fails the test until it is listed.
 
 ### Scenes: Vello CPU against Skia raster (2026-10-09)
 
@@ -435,15 +577,15 @@ Reading:
 |---|---|---|
 | 1 | No sub-pixel (LCD) text in any Vello renderer | grey-scale text; `TextRenderingMode::SubpixelAntialias` maps to anti-aliased, as the Skia backend does where LCD text is disabled (built, asserted). Text quality against Skia was measured in stage 5 (section 8, "Text"): the glyphs are the outlines; Skia's on macOS are heavier |
 | 2 | Perspective transforms are dropped | open; needs a decision when a 3D transform of the composition layer meets the backend (draw the layer and map it) |
-| 3 | Blur and drop shadow in classic `vello` | stage 8: own passes or the CPU renderer for the layer |
-| 4 | `vello_gpu` panics on mask layers, complex filter graphs, some non-isolated blend modes | the sink avoids them (masks as `DestIn` layers, blends in isolated layers) and reports capabilities |
+| 3 | Blur and drop shadow in classic `vello` | after stage 6, through its image fallback: the layer drawn by `vello_cpu` and composed as an image, or own passes |
+| 4 | `vello_gpu` panics on mask layers, complex filter graphs, some non-isolated blend modes, images given as pixels | closed for all but the filter graphs (stage 6): masks as `DestIn` layers, destructive blends of shapes as clipped layers, images as textures (4.1) |
 | 5 | Interfaces change between minor releases (`vello_hybrid` became `vello_gpu` between 0.2 and 0.3) | exact versions; one file per renderer behind `IVelloSceneSink` |
 | 6 | `linesweeper` is in "early beta" | a panic is caught and gives the empty geometry; the harness compares its areas with Skia's path operations |
 | 7 | Every software frame is rendered in memory and converted to the framebuffer's format, and a retained target is drawn back in as an image | correct, not fast. Stage 7 removes it for windows; for the CPU mode: render in place when the framebuffer is premultiplied RGBA without padding, and render only the dirty rectangle (`RasterizerSettings::offset` and a smaller scene) |
 | 8 | Curves are flattened on every draw | cache per geometry and scale |
 | 9 | No mipmaps for shrunk images; RGB565; codecs beyond PNG | done in stage 6. The levels of a mipmap are built for every draw (section 10.6) |
 | 10 | A second backend duplicates neutral logic of the first | the list of section 3; move after the Vello backend draws text, so that the shape of the shared code is known |
-| 11 | The Metal contracts live in the Skia crate | move before stage 7 (section 3); this is the one change outside the crate the backend needs. **No platform contract of the base crate needed a change** for stages 1 to 4 |
+| 11 | The Metal contracts lived in the Skia crate | moved to `ferroui-metal` (section 3), the one change outside the crate the backend needed. **No platform contract of the base crate needed a change** for stages 1 to 8 |
 | 12 | Scene sizes are 16 bit | `max_offscreen_render_target_pixel_size` reports 65535; larger targets fail with a message |
 
 ## 10. Stage 6: box shadows, effects, scene brushes, render options, codecs
@@ -620,3 +762,9 @@ The two JPEG encoders lose the same (the picture has a block of a saturated colo
 | 6 | The JPEG encoder writes standard Huffman tables; a file with optimized tables by `jpeg-encoder` is decoded as black by `zune-jpeg` | find which crate is at fault (Skia reads the file) before a newer version of either is taken; a JPEG from elsewhere that decodes as black would be the same defect |
 | 7 | The filter capabilities of the hybrid and GPU sinks | their stages: implement the three members at the end of `IVelloSceneSink` where the renderer has them and measure the deviation of its blurred rounded rectangle; without them everything of this stage is drawn through images of `vello_cpu` |
 | 8 | Snapping to pixels in the aliased edge mode in a mode without aliased edges | stage 8 |
+| 13 | The GPU mode has no aliased edges but for rectangles on the axes | open. The contract uses `EdgeMode::Aliased` for crisp lines of a UI, which are such rectangles; an aliased shape that is none, and aliased text, is anti-aliased. The hybrid mode, the default for a window, has them |
+| 14 | In the GPU mode `SrcIn`, `DestIn`, `SrcOut` and `DestAtop` of a shape inside a clip take out what is below in the part of the shape the clip hides | open; these are `BitmapBlendingMode`s of a bitmap drawn inside a clip. Exact in the CPU and the hybrid mode |
+| 15 | A layer of the contract and a retained target of a GPU mode live in memory: drawn on the device, read back, uploaded again as an image | open: layers as textures of the device (the hybrid renderer samples external textures; `vello` has `Renderer::register_texture`) |
+| 16 | The GPU sinks have no filters | with stage 6: the members of the sink that stage adds are to be implemented for `vello_gpu` (its filter layers) and `vello` (no general blur: the image fallback), and until then the two modes must report the capability as missing. Glyph runs are built in both |
+| 17 | Vulkan and Direct3D 12 (`wgpu` is built with Metal alone), the external objects feature of a context, the browser | with their platforms; the browser is stage 9: `vello_gpu` with `webgl` or WebGPU, `vello` on WebGPU, the device made from a canvas instead of a Metal device (`IVelloGpu` is the seam) |
+| 18 | Whether the macOS runner of CI gives `wgpu` an adapter was not verified | the guard tests print the adapter or that there is none (section 8, item 4) |

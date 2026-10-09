@@ -1,5 +1,4 @@
 use crate::combined_geometry_impl::CombinedGeometryImpl;
-use crate::drawing_context_impl::not_built;
 use crate::ellipse_geometry_impl::EllipseGeometryImpl;
 use crate::geometry_group_impl::GeometryGroupImpl;
 use crate::geometry_impl::{FillPath, VelloPath};
@@ -234,9 +233,17 @@ impl IPlatformRenderInterface for PlatformRenderInterface {
     ) -> Rc<dyn IPlatformRenderInterfaceContext> {
         match graphics_api_context {
             None => Rc::new(VelloContext::new(self.rendering_modes.clone())),
-            // A scene is drawn into the surface of a window by the hybrid
-            // or the GPU mode, on a device made from the graphics context.
-            Some(_) => not_built("with a platform graphics context", "stages 7 and 8"),
+            // A scene is drawn into the surface of a window on a device
+            // made over the graphics context of the platform.
+            #[cfg(any(feature = "hybrid", feature = "gpu"))]
+            Some(graphics_context) => {
+                Rc::new(VelloContext::with_gpu(crate::gpu::create_gpu(&graphics_context), self.rendering_modes.clone()))
+            }
+            #[cfg(not(any(feature = "hybrid", feature = "gpu")))]
+            Some(_) => panic!(
+                "The Vello backend was built without a GPU mode (the features `hybrid` and `gpu` of ferroui-vello): \
+                 it draws into the framebuffer of a platform that renders in software, not on its graphics device"
+            ),
         }
     }
 

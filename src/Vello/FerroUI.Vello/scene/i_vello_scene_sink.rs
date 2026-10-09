@@ -179,6 +179,17 @@ pub trait IVelloSceneSink {
     /// Every clip and layer has to be ended first.
     fn render_to_pixels(&mut self, pixels: &mut [u8]);
 
+    /// Renders the scene into a texture of the device of this sink (the
+    /// texture of the drawable of a window), replacing what it held. Fails
+    /// for a sink that does not draw on a device, and when the device could
+    /// not draw the scene.
+    ///
+    /// Every clip and layer has to be ended first.
+    #[cfg(any(feature = "hybrid", feature = "gpu"))]
+    fn render_to_texture(&mut self, _target: &crate::gpu::VelloGpuTexture<'_>) -> Result<(), String> {
+        Err(format!("The {:?} rendering mode of the Vello backend renders into memory", self.rendering_mode()))
+    }
+
     /// What the renderer of this sink does of blurs. A sink that does not
     /// say draws none: the drawing context then renders what is blurred on
     /// the processor and gives the sink an image.
