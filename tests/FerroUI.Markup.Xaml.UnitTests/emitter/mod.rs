@@ -9,6 +9,7 @@
 //! | `event_handlers.rs` | the class documents: both hosts write the checked-in files; a class populated by them and one populated by the run-time loader are the same tree and call the same handlers; a method that is not found |
 //! | `differential_tests.rs` | generated output is current; both back ends build equal object trees; registration by URI |
 //! | `build_diagnostics.rs` | the diagnostics of a build against the type models: codes, documents, positions, the severities of an EditorConfig file |
+//! | `catalog_measure.rs` | an ignored measurement: the documents of the ControlCatalog compiled against the type models, what compiles and what is refused, by reason |
 //! | `model_transform.rs` | the transform of the corpus against the build-time type system, measured against the transform against the run-time type system |
 //! | `rust_paths_check.rs` | every public Rust path the framework crates record, named from outside them, CHECKED IN |
 //! | `rust_paths_tests.rs` | the check file is current; each path names the type it is recorded for |
@@ -42,6 +43,8 @@ pub mod rust_paths_check;
 
 #[cfg(test)]
 mod build_diagnostics;
+#[cfg(test)]
+mod catalog_measure;
 #[cfg(test)]
 mod differential_tests;
 #[cfg(test)]
