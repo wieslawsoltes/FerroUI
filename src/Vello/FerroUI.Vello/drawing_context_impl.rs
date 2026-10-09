@@ -8,7 +8,7 @@ use crate::scene::{
 use crate::surface_render_target::{SurfaceRenderTarget, SurfaceRenderTargetCreateInfo};
 use crate::vello_extensions::{
     ellipse_path, rect_path, rounded_rect_path, to_affine, to_blend_mode, to_color, to_color_with_opacity,
-    to_extend, to_fill, to_image_quality, to_kurbo_point,
+    to_extend, to_fill, to_kurbo_point,
 };
 use crate::vello_options::{VelloOptions, VelloRenderingMode};
 use crate::vello_platform::VelloPlatform;
@@ -229,7 +229,14 @@ impl DrawingContextImpl {
     }
 
     fn anti_alias(&self) -> bool {
-        self.render_options.edge_mode != EdgeMode::Aliased
+        self.edge_anti_alias(self.render_options.edge_mode != EdgeMode::Aliased)
+    }
+
+    /// Whether an edge is anti-aliased when the contract asks for it to be
+    /// or not to be: as asked, and always in a rendering mode whose
+    /// renderer has no aliased edges (classic `vello`).
+    fn edge_anti_alias(&self, anti_alias: bool) -> bool {
+        anti_alias || !self.sink.as_ref().is_some_and(|sink| sink.capabilities().aliased_edges)
     }
 
     /// The whole target as a path, in pixels.
@@ -266,7 +273,7 @@ impl DrawingContextImpl {
     }
 
     fn push_clip_path(&mut self, path: &BezPath, fill_rule: Fill, anti_alias: bool) {
-        let transform = self.device_transform();
+        let (transform, anti_alias) = (self.device_transform(), self.edge_anti_alias(anti_alias));
         self.sink().push_clip(path, fill_rule, transform, anti_alias);
         self.save(SavedKind::Clip);
     }
@@ -790,24 +797,62 @@ impl IDrawingContextImpl for DrawingContextImpl {
         }
 
         // The source rectangle of the image onto the destination rectangle.
-        let image_transform = Affine::translate((dest_rect.x, dest_rect.y))
+        let mut image_transform = Affine::translate((dest_rect.x, dest_rect.y))
             * Affine::scale_non_uniform(dest_rect.width / source_rect.width, dest_rect.height / source_rect.height)
             * Affine::translate((-source_rect.x, -source_rect.y));
 
+        let is_upscaling = dest_rect.width > source_rect.width || dest_rect.height > source_rect.height;
+        let (quality, mipmaps) =
+            crate::vello_extensions::to_sampling(self.render_options.bitmap_interpolation_mode, is_upscaling);
+
         let alpha = ((255.0 * opacity * self.current_opacity) as u8) as f32 / 255.0;
+        let blend_mode = to_blend_mode(self.render_options.bitmap_blending_mode);
+        let (transform, anti_alias) = (self.device_transform(), self.anti_alias());
+
+        // An image that is drawn reduced in a mode with mipmaps is sampled
+        // from the two levels of its mipmap that are nearest to the size
+        // it is drawn at.
+        let mut image = image;
+        if mipmaps {
+            use crate::helpers::mipmap_helper;
+
+            if let Some(levels) = mipmap_helper::levels(&image, transform * image_transform) {
+                if blend_mode == BlendMode::default() {
+                    let path = rect_path(dest_rect);
+                    mipmap_helper::fill_with_levels(
+                        self.sink(),
+                        &path,
+                        transform,
+                        image_transform,
+                        &levels,
+                        alpha,
+                        anti_alias,
+                    );
+                    return;
+                }
+
+                // Another blending mode composes the image with what is
+                // under it inside the rectangle only, which a layer of the
+                // two levels would not: one image stands for both.
+                if let Some(prefiltered) = levels.blended() {
+                    image_transform *=
+                        Affine::scale_non_uniform(1.0 / prefiltered.scale_x, 1.0 / prefiltered.scale_y);
+                    image = prefiltered.image;
+                }
+            }
+        }
+
         let paint = VelloScenePaint {
             brush: VelloSceneBrush::Image(VelloSceneImage {
                 image,
                 x_extend: Extend::Pad,
                 y_extend: Extend::Pad,
-                quality: to_image_quality(self.render_options.bitmap_interpolation_mode),
+                quality,
                 alpha,
             }),
             transform: image_transform,
         };
 
-        let blend_mode = to_blend_mode(self.render_options.bitmap_blending_mode);
-        let (transform, anti_alias) = (self.device_transform(), self.anti_alias());
         self.sink().fill(&rect_path(dest_rect), Fill::NonZero, transform, &paint, blend_mode, anti_alias);
     }
 
@@ -1039,8 +1084,8 @@ impl IDrawingContextImpl for DrawingContextImpl {
 
         // A region is a set of pixels of the target: it is not transformed
         // and has no edge inside a pixel.
-        let pixel_transform = self.pixel_transform();
-        self.sink().push_clip(&path, Fill::NonZero, pixel_transform, false);
+        let (pixel_transform, anti_alias) = (self.pixel_transform(), self.edge_anti_alias(false));
+        self.sink().push_clip(&path, Fill::NonZero, pixel_transform, anti_alias);
         self.save(SavedKind::Clip);
     }
 

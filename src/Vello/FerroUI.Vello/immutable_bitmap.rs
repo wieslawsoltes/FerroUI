@@ -2,7 +2,8 @@ use crate::helpers::image_saving_helper::{self, decode_image, load_error};
 use crate::helpers::pixel_format_helper::{scene_size, to_image, to_premul_rgba};
 use crate::i_drawable_bitmap_impl::IDrawableBitmapImpl;
 use crate::scene::{IVelloSceneSink, VelloCpuSceneSink, VelloSceneBrush, VelloSceneImage, VelloScenePaint};
-use crate::vello_extensions::{rect_path, to_image_quality};
+use crate::helpers::mipmap_helper;
+use crate::vello_extensions::{rect_path, to_sampling};
 use ferroui_base::media::imaging::{BitmapEncoderOptions, BitmapInterpolationMode};
 use ferroui_base::platform::{AlphaFormat, IBitmapImpl, ILockedFramebuffer, IReadableBitmapImpl, PixelFormat};
 use ferroui_base::{PixelSize, Rect, Vector};
@@ -78,20 +79,39 @@ pub(crate) fn scale_image(
     let mut sink = VelloCpuSceneSink::new(width, height);
 
     let destination = Rect::new(0.0, 0.0, destination_size.width as f64, destination_size.height as f64);
-    let paint = VelloScenePaint {
-        brush: VelloSceneBrush::Image(VelloSceneImage {
-            image: image.clone(),
-            x_extend: Extend::Pad,
-            y_extend: Extend::Pad,
-            quality: to_image_quality(interpolation_mode),
-            alpha: 1.0,
-        }),
-        transform: Affine::scale_non_uniform(
-            destination.width / image.width as f64,
-            destination.height / image.height as f64,
+    let is_upscaling =
+        destination_size.width as u32 > image.width || destination_size.height as u32 > image.height;
+    let (quality, mipmaps) = to_sampling(interpolation_mode, is_upscaling);
+
+    let transform =
+        Affine::scale_non_uniform(destination.width / image.width as f64, destination.height / image.height as f64);
+
+    // An image that is reduced in a mode with mipmaps is sampled from the
+    // two levels of its mipmap that are nearest to the new size.
+    match mipmaps.then(|| mipmap_helper::levels(image, transform)).flatten() {
+        Some(levels) => mipmap_helper::fill_with_levels(
+            &mut sink,
+            &rect_path(destination),
+            Affine::IDENTITY,
+            transform,
+            &levels,
+            1.0,
+            false,
         ),
-    };
-    sink.fill(&rect_path(destination), Fill::NonZero, Affine::IDENTITY, &paint, BlendMode::default(), false);
+        None => {
+            let paint = VelloScenePaint {
+                brush: VelloSceneBrush::Image(VelloSceneImage {
+                    image: image.clone(),
+                    x_extend: Extend::Pad,
+                    y_extend: Extend::Pad,
+                    quality,
+                    alpha: 1.0,
+                }),
+                transform,
+            };
+            sink.fill(&rect_path(destination), Fill::NonZero, Affine::IDENTITY, &paint, BlendMode::default(), false);
+        }
+    }
 
     let mut rgba = vec![0u8; width as usize * height as usize * 4];
     sink.render_to_pixels(&mut rgba);

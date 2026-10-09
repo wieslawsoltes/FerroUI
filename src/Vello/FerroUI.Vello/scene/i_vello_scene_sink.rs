@@ -11,7 +11,10 @@ use peniko::{BlendMode, Extend, Fill, FontData, Gradient, ImageData, ImageQualit
 pub struct VelloSceneCapabilities {
     /// A layer that is composed with a blend mode other than source-over.
     pub blend_layers: bool,
-    /// Edges without anti-aliasing.
+    /// Edges without anti-aliasing. Without them the drawing context asks
+    /// for anti-aliased edges in the aliased edge mode and for the clips of
+    /// rectangles; what it still draws without anti-aliasing has its edges
+    /// between pixels, where the two are the same.
     pub aliased_edges: bool,
     /// Images as paints, with an extend mode for each axis.
     pub image_paints: bool,

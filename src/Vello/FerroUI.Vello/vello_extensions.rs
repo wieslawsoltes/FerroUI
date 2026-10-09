@@ -98,6 +98,27 @@ pub fn to_image_quality(interpolation_mode: BitmapInterpolationMode) -> ImageQua
     }
 }
 
+/// How an image is sampled in an interpolation mode: the filter, and
+/// whether the image is averaged first when it is drawn reduced
+/// ([`mipmap_helper`](crate::helpers::mipmap_helper)). The modes are those
+/// of the Skia backend: the nearest pixel, bilinear, bilinear with mipmaps
+/// for medium quality, and for high quality the bicubic filter of Mitchell
+/// when the image is enlarged and bilinear with mipmaps when it is not.
+pub fn to_sampling(interpolation_mode: BitmapInterpolationMode, is_upscaling: bool) -> (ImageQuality, bool) {
+    match interpolation_mode {
+        BitmapInterpolationMode::None => (ImageQuality::Low, false),
+        BitmapInterpolationMode::Unspecified | BitmapInterpolationMode::LowQuality => (ImageQuality::Medium, false),
+        BitmapInterpolationMode::MediumQuality => (ImageQuality::Medium, true),
+        BitmapInterpolationMode::HighQuality => {
+            if is_upscaling {
+                (ImageQuality::High, false)
+            } else {
+                (ImageQuality::Medium, true)
+            }
+        }
+    }
+}
+
 /// Converts a bitmap blending mode. Every mode of the contract has a
 /// counterpart: the composition modes are Porter-Duff operators, the others
 /// mix functions composed source-over.

@@ -159,15 +159,44 @@ fn draw_into(sink: Box<dyn IVelloSceneSink>, f: impl FnOnce(&mut DrawingContextI
 /// interface has them for a sink that does not say otherwise.
 struct SinkWithoutFilters {
     inner: VelloCpuSceneSink,
-    /// What was asked of the sink, for the tests to see.
+    /// Whether the sink says it has edges without anti-aliasing.
+    aliased_edges: bool,
+    /// What was asked of the sink, for the tests to see: fills with an
+    /// image, and edges without anti-aliasing.
     fills_with_an_image: Rc<RefCell<usize>>,
+    aliased_calls: Rc<RefCell<usize>>,
 }
 
 impl SinkWithoutFilters {
+    /// The sink and the count of the fills with an image.
     fn new(width: u16, height: u16) -> (Box<dyn IVelloSceneSink>, Rc<RefCell<usize>>) {
         let fills_with_an_image = Rc::new(RefCell::new(0));
-        let sink = Self { inner: VelloCpuSceneSink::new(width, height), fills_with_an_image: fills_with_an_image.clone() };
+        let sink = Self {
+            inner: VelloCpuSceneSink::new(width, height),
+            aliased_edges: true,
+            fills_with_an_image: fills_with_an_image.clone(),
+            aliased_calls: Rc::new(RefCell::new(0)),
+        };
         (Box::new(sink), fills_with_an_image)
+    }
+
+    /// A sink that has no aliased edges either, and the count of the edges
+    /// it was asked to draw without anti-aliasing.
+    fn without_aliased_edges(width: u16, height: u16) -> (Box<dyn IVelloSceneSink>, Rc<RefCell<usize>>) {
+        let aliased_calls = Rc::new(RefCell::new(0));
+        let sink = Self {
+            inner: VelloCpuSceneSink::new(width, height),
+            aliased_edges: false,
+            fills_with_an_image: Rc::new(RefCell::new(0)),
+            aliased_calls: aliased_calls.clone(),
+        };
+        (Box::new(sink), aliased_calls)
+    }
+
+    fn count_edge(&self, anti_alias: bool) {
+        if !anti_alias {
+            *self.aliased_calls.borrow_mut() += 1;
+        }
     }
 }
 
@@ -176,7 +205,7 @@ impl IVelloSceneSink for SinkWithoutFilters {
         self.inner.rendering_mode()
     }
     fn capabilities(&self) -> VelloSceneCapabilities {
-        self.inner.capabilities()
+        VelloSceneCapabilities { aliased_edges: self.aliased_edges, ..self.inner.capabilities() }
     }
     fn width(&self) -> u16 {
         self.inner.width()
@@ -199,12 +228,15 @@ impl IVelloSceneSink for SinkWithoutFilters {
         if matches!(paint.brush, crate::scene::VelloSceneBrush::Image(_)) {
             *self.fills_with_an_image.borrow_mut() += 1;
         }
+        self.count_edge(anti_alias);
         self.inner.fill(path, fill_rule, transform, paint, blend_mode, anti_alias);
     }
     fn stroke(&mut self, path: &BezPath, stroke: &Stroke, transform: Affine, paint: &VelloScenePaint, anti_alias: bool) {
+        self.count_edge(anti_alias);
         self.inner.stroke(path, stroke, transform, paint, anti_alias);
     }
     fn push_clip(&mut self, path: &BezPath, fill_rule: Fill, transform: Affine, anti_alias: bool) {
+        self.count_edge(anti_alias);
         self.inner.push_clip(path, fill_rule, transform, anti_alias);
     }
     fn pop_clip(&mut self) {
@@ -1382,5 +1414,342 @@ mod acrylic {
             );
         });
         assert!(target.pixel(50, 50).2 > 240);
+    }
+}
+
+// ---------------------------------------------------------------------------
+// Render options
+// ---------------------------------------------------------------------------
+
+mod render_options {
+    use super::*;
+    use crate::vello_extensions::{to_blend_mode, to_sampling};
+    use ferroui_base::media::imaging::{BitmapBlendingMode, BitmapInterpolationMode};
+    use ferroui_base::media::immutable::ImmutablePen;
+    use ferroui_base::platform::{AlphaFormat, SharedBitmapImpl};
+    use peniko::ImageQuality;
+
+    /// A bitmap of single black and white pixels in turn.
+    fn checker_bitmap(size: i32) -> std::sync::Arc<SharedBitmapImpl> {
+        let mut data = Vec::new();
+        for y in 0..size {
+            for x in 0..size {
+                let value = if (x + y) % 2 == 0 { 255 } else { 0 };
+                data.extend_from_slice(&[value, value, value, 255]);
+            }
+        }
+
+        render_interface().load_bitmap_from_pixels(
+            PixelFormat::RGBA8888,
+            AlphaFormat::Premul,
+            &data,
+            PixelSize::new(size, size),
+            DPI,
+            size * 4,
+        )
+    }
+
+    fn with_interpolation(mode: BitmapInterpolationMode) -> RenderOptions {
+        RenderOptions { bitmap_interpolation_mode: mode, ..RenderOptions::default() }
+    }
+
+    #[test]
+    fn interpolation_modes_sample_as_those_of_the_skia_backend() {
+        use BitmapInterpolationMode::*;
+
+        // The nearest pixel; bilinear; bilinear with mipmaps; bicubic when
+        // enlarging and bilinear with mipmaps when reducing.
+        for upscaling in [false, true] {
+            assert_eq!((ImageQuality::Low, false), to_sampling(None, upscaling));
+            assert_eq!((ImageQuality::Medium, false), to_sampling(Unspecified, upscaling));
+            assert_eq!((ImageQuality::Medium, false), to_sampling(LowQuality, upscaling));
+            assert_eq!((ImageQuality::Medium, true), to_sampling(MediumQuality, upscaling));
+        }
+        assert_eq!((ImageQuality::High, false), to_sampling(HighQuality, true));
+        assert_eq!((ImageQuality::Medium, true), to_sampling(HighQuality, false));
+    }
+
+    /// The red channel of the pixels of a row of a checkerboard of 64 by
+    /// 64 pixels drawn 16 by 16 pixels large.
+    fn reduced_checker(options: RenderOptions) -> Vec<u8> {
+        let bitmap = checker_bitmap(64);
+        let target = Target::with_size(20, 20);
+        target.draw(|context| {
+            context.push_render_options(options);
+            context.draw_bitmap(&*bitmap, 1.0, Rect::new(0.0, 0.0, 64.0, 64.0), Rect::new(2.0, 2.0, 16.0, 16.0));
+            context.pop_render_options();
+        });
+        assert_eq!(TRANSPARENT, target.pixel(1, 8));
+        assert_eq!(TRANSPARENT, target.pixel(18, 8));
+        (2..18).map(|x| target.pixel(x, 8)).inspect(|pixel| assert_eq!(255, pixel.3)).map(|pixel| pixel.0).collect()
+    }
+
+    #[test]
+    fn a_reduced_bitmap_is_averaged_in_the_modes_with_mipmaps() {
+        // A quarter of the size: one pixel of the target for sixteen of
+        // the bitmap, half of them white.
+        for mode in [BitmapInterpolationMode::MediumQuality, BitmapInterpolationMode::HighQuality] {
+            let row = reduced_checker(with_interpolation(mode));
+            assert!(row.iter().all(|value| (*value as i32 - 127).abs() <= 2), "{mode:?}: {row:?}");
+        }
+
+        // The nearest pixel is one of the two colors.
+        let row = reduced_checker(with_interpolation(BitmapInterpolationMode::None));
+        assert!(row.iter().all(|value| *value == 0 || *value == 255), "{row:?}");
+
+        // Another blending mode with mipmaps: the same grey, from one image
+        // for the two levels.
+        let row = reduced_checker(RenderOptions {
+            bitmap_blending_mode: BitmapBlendingMode::Source,
+            ..with_interpolation(BitmapInterpolationMode::MediumQuality)
+        });
+        assert!(row.iter().all(|value| (*value as i32 - 127).abs() <= 2), "{row:?}");
+    }
+
+    #[test]
+    fn a_bitmap_is_resized_and_decoded_to_a_size_with_mipmaps() {
+        use ferroui_base::media::imaging::PngBitmapEncoderOptions;
+
+        let bitmap = checker_bitmap(64);
+        let interface = render_interface();
+
+        let grey = |bitmap: &dyn IReadableBitmapImpl| {
+            let (r, g, b, a) = read_pixel(bitmap, 7, 9);
+            a == 255 && (r as i32 - 127).abs() <= 2 && r == g && g == b
+        };
+
+        let resized = interface.resize_bitmap(&*bitmap, PixelSize::new(16, 16), BitmapInterpolationMode::HighQuality);
+        assert_eq!(PixelSize::new(16, 16), resized.pixel_size());
+        assert!(grey(resized.as_readable_bitmap().expect("a readable bitmap")));
+
+        // Without mipmaps the checkerboard is sampled, not averaged: the
+        // pixels are black and white, or wherever bilinear sampling falls
+        // between them, but not all the same grey.
+        let sampled = interface.resize_bitmap(&*bitmap, PixelSize::new(16, 16), BitmapInterpolationMode::None);
+        let (r, ..) = read_pixel(sampled.as_readable_bitmap().expect("a readable bitmap"), 7, 9);
+        assert!(r == 0 || r == 255);
+
+        let mut encoded = Vec::new();
+        bitmap.save(&mut encoded, &PngBitmapEncoderOptions::DEFAULT.into()).unwrap();
+        let decoded = interface
+            .load_bitmap_to_width(&mut &encoded[..], 16, BitmapInterpolationMode::MediumQuality)
+            .unwrap();
+        assert_eq!(PixelSize::new(16, 16), decoded.pixel_size());
+        assert!(grey(decoded.as_readable_bitmap().expect("a readable bitmap")));
+
+        let decoded = interface
+            .load_bitmap_to_height(&mut &encoded[..], 128, BitmapInterpolationMode::HighQuality)
+            .unwrap();
+        assert_eq!(PixelSize::new(128, 128), decoded.pixel_size());
+    }
+
+    #[test]
+    fn an_enlarged_bitmap_is_sampled_by_the_filter_of_the_mode() {
+        // Two pixels, black and white, eight times as large: the pixel of
+        // the target three pixels left of the edge between them.
+        let bitmap = render_interface().load_bitmap_from_pixels(
+            PixelFormat::RGBA8888,
+            AlphaFormat::Premul,
+            &[0, 0, 0, 255, 255, 255, 255, 255],
+            PixelSize::new(2, 1),
+            DPI,
+            8,
+        );
+        let near_the_edge = |mode| {
+            let target = Target::with_size(16, 8);
+            target.draw(|context| {
+                context.push_render_options(with_interpolation(mode));
+                context.draw_bitmap(&*bitmap, 1.0, Rect::new(0.0, 0.0, 2.0, 1.0), Rect::new(0.0, 0.0, 16.0, 8.0));
+                context.pop_render_options();
+            });
+            (target.pixel(5, 4).0, target.pixel(1, 4).0, target.pixel(14, 4).0)
+        };
+
+        // The nearest pixel: black up to the edge.
+        assert_eq!((0, 0, 255), near_the_edge(BitmapInterpolationMode::None));
+        // Bilinear: a ramp between the middles of the two pixels.
+        let (ramp, black, white) = near_the_edge(BitmapInterpolationMode::LowQuality);
+        assert!((ramp as i32 - 48).abs() <= 2 && black == 0 && white == 255, "{ramp}");
+        assert_eq!((ramp, black, white), near_the_edge(BitmapInterpolationMode::MediumQuality));
+        // Bicubic (Mitchell): another curve through the same edge.
+        let (curve, ..) = near_the_edge(BitmapInterpolationMode::HighQuality);
+        assert!(curve != ramp && curve > 10 && curve < 100, "{curve}");
+    }
+
+    const BLENDING_MODES: [BitmapBlendingMode; 28] = [
+        BitmapBlendingMode::Unspecified,
+        BitmapBlendingMode::SourceOver,
+        BitmapBlendingMode::Source,
+        BitmapBlendingMode::Destination,
+        BitmapBlendingMode::DestinationOver,
+        BitmapBlendingMode::SourceIn,
+        BitmapBlendingMode::DestinationIn,
+        BitmapBlendingMode::SourceOut,
+        BitmapBlendingMode::DestinationOut,
+        BitmapBlendingMode::SourceAtop,
+        BitmapBlendingMode::DestinationAtop,
+        BitmapBlendingMode::Xor,
+        BitmapBlendingMode::Plus,
+        BitmapBlendingMode::Screen,
+        BitmapBlendingMode::Overlay,
+        BitmapBlendingMode::Darken,
+        BitmapBlendingMode::Lighten,
+        BitmapBlendingMode::ColorDodge,
+        BitmapBlendingMode::ColorBurn,
+        BitmapBlendingMode::HardLight,
+        BitmapBlendingMode::SoftLight,
+        BitmapBlendingMode::Difference,
+        BitmapBlendingMode::Exclusion,
+        BitmapBlendingMode::Multiply,
+        BitmapBlendingMode::Hue,
+        BitmapBlendingMode::Saturation,
+        BitmapBlendingMode::Color,
+        BitmapBlendingMode::Luminosity,
+    ];
+
+    /// A half transparent red bitmap drawn in a blending mode over the
+    /// right half of an opaque blue square: the pixel where both are, where
+    /// only the bitmap is, and where only the square is, inside and outside
+    /// of the rectangle of the bitmap.
+    fn blended(mode: BitmapBlendingMode) -> [(u8, u8, u8, u8); 4] {
+        let bitmap = render_interface().load_bitmap_from_pixels(
+            PixelFormat::RGBA8888,
+            AlphaFormat::Premul,
+            &[128, 0, 0, 128],
+            PixelSize::new(1, 1),
+            DPI,
+            4,
+        );
+        let target = Target::with_size(40, 40);
+        target.draw(|context| {
+            context.push_render_options(RenderOptions {
+                bitmap_blending_mode: mode,
+                bitmap_interpolation_mode: BitmapInterpolationMode::None,
+                edge_mode: EdgeMode::Aliased,
+                ..RenderOptions::default()
+            });
+            context.draw_rectangle(Some(&solid(Colors::BLUE)), None, rect(0.0, 0.0, 20.0, 40.0), &no_shadows());
+            context.draw_bitmap(&*bitmap, 1.0, Rect::new(0.0, 0.0, 1.0, 1.0), Rect::new(10.0, 10.0, 20.0, 20.0));
+            context.pop_render_options();
+        });
+        [target.pixel(15, 20), target.pixel(25, 20), target.pixel(5, 20), target.pixel(15, 35)]
+    }
+
+    #[test]
+    fn every_blending_mode_draws() {
+        let half_red = (128, 0, 0, 128);
+
+        for mode in BLENDING_MODES {
+            let [both, bitmap_only, square_inside, square_outside] = blended(mode);
+
+            // Outside of the rectangle of the bitmap nothing changes, in
+            // any mode.
+            assert_eq!(BLUE, square_inside, "{mode:?}");
+            assert_eq!(BLUE, square_outside, "{mode:?}");
+
+            // The mix functions compose source-over: where there is only
+            // the bitmap, it is drawn as it is.
+            let mix = to_blend_mode(mode).compose == peniko::Compose::SrcOver;
+            if mix {
+                assert_eq!(half_red, bitmap_only, "{mode:?}");
+                assert_eq!(255, both.3, "{mode:?}");
+            }
+        }
+
+        // The Porter-Duff operators, by what they leave of a half
+        // transparent red over opaque blue and over nothing.
+        let close = |actual: (u8, u8, u8, u8), expected: (u8, u8, u8, u8)| {
+            [(actual.0, expected.0), (actual.1, expected.1), (actual.2, expected.2), (actual.3, expected.3)]
+                .iter()
+                .all(|(a, b)| a.abs_diff(*b) <= 1)
+        };
+        let expect = |mode, both: (u8, u8, u8, u8), bitmap_only: (u8, u8, u8, u8)| {
+            let pixels = blended(mode);
+            assert!(close(pixels[0], both) && close(pixels[1], bitmap_only), "{mode:?}: {pixels:?}");
+        };
+
+        expect(BitmapBlendingMode::SourceOver, (128, 0, 127, 255), half_red);
+        expect(BitmapBlendingMode::Source, half_red, half_red);
+        expect(BitmapBlendingMode::Destination, BLUE, TRANSPARENT);
+        expect(BitmapBlendingMode::DestinationOver, BLUE, half_red);
+        expect(BitmapBlendingMode::SourceIn, half_red, TRANSPARENT);
+        expect(BitmapBlendingMode::DestinationIn, (0, 0, 128, 128), TRANSPARENT);
+        expect(BitmapBlendingMode::SourceOut, TRANSPARENT, half_red);
+        expect(BitmapBlendingMode::DestinationOut, (0, 0, 127, 127), TRANSPARENT);
+        expect(BitmapBlendingMode::SourceAtop, (128, 0, 127, 255), TRANSPARENT);
+        expect(BitmapBlendingMode::DestinationAtop, (0, 0, 128, 128), half_red);
+        expect(BitmapBlendingMode::Xor, (0, 0, 127, 127), half_red);
+        expect(BitmapBlendingMode::Plus, (128, 0, 255, 255), half_red);
+
+        // Three of the mix functions: red and blue have no channel in
+        // common, so multiplying them gives black and screening them both.
+        expect(BitmapBlendingMode::Multiply, (0, 0, 127, 255), half_red);
+        expect(BitmapBlendingMode::Screen, (128, 0, 255, 255), half_red);
+        expect(BitmapBlendingMode::Darken, (0, 0, 127, 255), half_red);
+    }
+
+    /// The alphas of all pixels of a target with a filled and a stroked
+    /// ellipse, a line and a rotated bitmap.
+    fn alphas_of_edges(sink: Box<dyn IVelloSceneSink>, options: RenderOptions) -> Vec<u8> {
+        let bitmap = checker_bitmap(8);
+        let rendered = draw_into(sink, |context| {
+            context.push_render_options(options);
+            context.draw_ellipse(Some(&solid(Colors::RED)), None, Rect::new(5.3, 5.3, 40.0, 30.0));
+            context.draw_ellipse(
+                None,
+                Some(&ImmutablePen::with_brush(Some(Rc::new(solid(Colors::BLUE))), 3.0)),
+                Rect::new(50.5, 8.5, 40.0, 30.0),
+            );
+            context.set_transform(ferroui_base::Matrix::create_rotation(0.3) * ferroui_base::Matrix::create_translation(40.0, 50.0));
+            context.draw_bitmap(&*bitmap, 1.0, Rect::new(0.0, 0.0, 8.0, 8.0), Rect::new(0.0, 0.0, 30.0, 30.0));
+            context.set_transform(ferroui_base::Matrix::IDENTITY);
+            context.pop_render_options();
+        });
+        rendered.rgba.chunks_exact(4).map(|pixel| pixel[3]).collect()
+    }
+
+    #[test]
+    fn an_aliased_edge_has_no_pixel_that_is_covered_in_part() {
+        assert!(VelloCpuSceneSink::new(1, 1).capabilities().aliased_edges);
+
+        let aliased = alphas_of_edges(cpu_sink(100, 100), aliased());
+        assert!(aliased.iter().all(|alpha| *alpha == 0 || *alpha == 255));
+        assert!(aliased.iter().filter(|alpha| **alpha == 255).count() > 1500);
+
+        for edge_mode in [EdgeMode::Antialias, EdgeMode::Unspecified] {
+            let smooth = alphas_of_edges(cpu_sink(100, 100), RenderOptions { edge_mode, ..RenderOptions::default() });
+            assert!(smooth.iter().filter(|alpha| **alpha != 0 && **alpha != 255).count() > 200, "{edge_mode:?}");
+        }
+    }
+
+    #[test]
+    fn a_rendering_mode_without_aliased_edges_is_not_asked_for_them() {
+        // The sink says it has no aliased edges: the context asks it for
+        // anti-aliased ones, in the aliased edge mode and for the clips
+        // that are not anti-aliased otherwise.
+        let (sink, aliased_calls) = SinkWithoutFilters::without_aliased_edges(100, 100);
+        let rendered = draw_into(sink, |context| {
+            context.push_render_options(aliased());
+            context.push_clip(Rect::new(0.0, 0.0, 90.5, 90.5));
+            context.draw_ellipse(Some(&solid(Colors::RED)), None, Rect::new(5.3, 5.3, 40.0, 30.0));
+            context.draw_rectangle(
+                None,
+                None,
+                rect(50.0, 50.0, 20.0, 20.0),
+                &BoxShadows::new(BoxShadow {
+                    offset_x: 0.0,
+                    offset_y: 0.0,
+                    blur: 0.0,
+                    spread: 4.5,
+                    color: Colors::BLACK,
+                    is_inset: false,
+                }),
+            );
+            context.pop_clip();
+            context.pop_render_options();
+        });
+
+        assert_eq!(0, *aliased_calls.borrow());
+        assert!(rendered.rgba.chunks_exact(4).any(|pixel| pixel[3] != 0 && pixel[3] != 255));
     }
 }
