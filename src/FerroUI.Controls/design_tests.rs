@@ -1,5 +1,5 @@
-//! Tests of this port: the reference has no test class for the design-time
-//! helper.
+//! The tests of the reference `DesignTests` are in the module `design_tests`
+//! at the end; the others are tests of this port.
 
 use crate::templates::{FuncDataTemplate, FuncTemplate, IDataTemplate};
 use crate::test_support::test_scope;
@@ -266,4 +266,202 @@ fn apply_design_mode_properties_adds_the_design_style_to_the_target() {
 
     assert_eq!(1, target.styles().count());
     assert!(style_ptr_eq(&target.styles().get(0), &style));
+}
+
+/// The reference `DesignTests`.
+mod design_tests {
+    use super::as_object;
+    use crate::primitives::TemplatedControl;
+    use crate::templates::{FuncDataTemplate, FuncTemplate, IDataTemplate};
+    use crate::test_support::{boxed_str, string_of};
+    use crate::testing::{TestServices, UnitTestApplication, UnitTestApplicationScope};
+    use crate::{Application, Border, Button, ContentControl, Control, Design, PreviewTarget, TextBlock, Window};
+    use ferroui_base::controls::{ResourceDictionary, ResourceHostRef};
+    use ferroui_base::data::BindingPriority;
+    use ferroui_base::media::immutable::ImmutableSolidColorBrush;
+    use ferroui_base::media::{Brushes, Color, Colors, IBrush};
+    use ferroui_base::reactive::ObservableExt;
+    use ferroui_base::styling::{IStyle, Selectors, Setter, Style};
+    use ferroui_base::{BoxedValue, Ref};
+    use std::rc::Rc;
+
+    fn start() -> UnitTestApplicationScope {
+        UnitTestApplication::start(TestServices::styled_window())
+    }
+
+    /// A data template for strings that shows the string in a text block.
+    fn string_data_template() -> Rc<dyn IDataTemplate> {
+        FuncDataTemplate::for_type::<String>(
+            |data, _| {
+                let text_block = TextBlock::new();
+                text_block.set_text(Some(data));
+                Some(text_block.upcast())
+            },
+            false,
+        )
+    }
+
+    fn same_template(expected: &Rc<dyn IDataTemplate>, actual: Option<Rc<dyn IDataTemplate>>) -> bool {
+        actual.is_some_and(|actual| Rc::as_ptr(&actual) as *const () == Rc::as_ptr(expected) as *const ())
+    }
+
+    #[test]
+    fn should_preview_resource_dictionary_with_template() {
+        let _app = start();
+
+        let dictionary = ResourceDictionary::new();
+        dictionary.add_value("TestColor", Colors::GREEN);
+        Design::set_preview_with_template(
+            &as_object(&dictionary),
+            Some(FuncTemplate::new(|| {
+                let border = Border::new();
+                // The reference binds the background with the dynamic resource
+                // extension of the markup library, which this crate is not built
+                // on: the binding is the observable of the resource, with the
+                // conversion of a colour to a brush that the extension applies.
+                let background = ResourceHostRef::from(&border).resource_observable("TestColor", None).select(
+                    |value: Option<BoxedValue>| {
+                        let color = value.and_then(|value| value.downcast_ref::<Color>().copied())?;
+                        Some(Rc::new(ImmutableSolidColorBrush::new(color)) as Rc<dyn IBrush>)
+                    },
+                );
+                border.bind(Border::background_property(), background, BindingPriority::LocalValue);
+                Some(border.upcast())
+            })),
+        );
+
+        let preview = Design::create_preview_with_control(&PreviewTarget::Object(as_object(&dictionary)));
+
+        let border = preview.and_then(|preview| preview.cast::<Border>()).expect("a border");
+        let background = border.background().expect("a background");
+        assert_eq!(Colors::GREEN, background.as_solid_color_brush().expect("a solid colour brush").color());
+    }
+
+    #[test]
+    fn should_preview_data_template_with_content_control() {
+        let _app = start();
+
+        const TEST_DATA: &str = "Test Data";
+        let data_template = string_data_template();
+        Design::set_preview_with_template_for_data_template(
+            &data_template,
+            Some(FuncTemplate::new(|| {
+                let content_control = ContentControl::new();
+                content_control.set_content(boxed_str(TEST_DATA));
+                Some(content_control.upcast())
+            })),
+        );
+
+        let preview = Design::create_preview_with_control(&PreviewTarget::DataTemplate(data_template.clone()));
+
+        let preview_content_control = preview.and_then(|preview| preview.cast::<ContentControl>());
+        let preview_content_control = preview_content_control.expect("a content control");
+        assert_eq!(Some(TEST_DATA.to_string()), preview_content_control.content().as_ref().and_then(string_of));
+        assert!(same_template(&data_template, preview_content_control.content_template()));
+    }
+
+    #[test]
+    fn should_preview_data_template_with_data_context() {
+        let _app = start();
+
+        const TEST_DATA: &str = "Test Data";
+        let data_template = string_data_template();
+        Design::set_data_context_for_data_template(&data_template, boxed_str(TEST_DATA));
+
+        let preview = Design::create_preview_with_control(&PreviewTarget::DataTemplate(data_template.clone()));
+
+        let preview_content_control = preview.and_then(|preview| preview.cast::<ContentControl>());
+        let preview_content_control = preview_content_control.expect("a content control");
+        assert_eq!(Some(TEST_DATA.to_string()), preview_content_control.content().as_ref().and_then(string_of));
+        assert!(same_template(&data_template, preview_content_control.content_template()));
+    }
+
+    #[test]
+    fn should_preview_control_with_another_control() {
+        let _app = start();
+
+        let control = TextBlock::new();
+        Design::set_preview_with_template(
+            &as_object(&control),
+            Some(FuncTemplate::new(|| Some(Border::new().upcast::<Control>()))),
+        );
+
+        let preview = Design::create_preview_with_control(&PreviewTarget::Object(as_object(&control)));
+
+        assert!(preview.is_some_and(|preview| preview.is::<Border>()));
+    }
+
+    #[test]
+    fn should_apply_design_mode_properties_from_control_to_window() {
+        let _app = start();
+
+        // Use-case: User previews a control, which is wrapped by the window.
+        let window = Window::new();
+        let control = ContentControl::new();
+        window.set_content(Some(Control::boxed(control.clone())));
+
+        Design::set_width(&control, 200.0);
+        Design::set_height(&control, 150.0);
+        Design::set_data_context(&control, boxed_str("TestDataContext"));
+        let design_style: Rc<dyn IStyle> = Style::with_setters(
+            Selectors::of_type::<ContentControl>(),
+            [Setter::new(TemplatedControl::background_property(), Some(Brushes::yellow()))],
+        )
+        .into();
+        Design::set_design_style(&control, design_style);
+
+        Design::apply_design_mode_properties(&window, &control);
+
+        assert_eq!(200.0, window.width());
+        assert_eq!(150.0, window.height());
+        assert_eq!(Some("TestDataContext".to_string()), window.data_context().as_ref().and_then(string_of));
+        let background_property = TemplatedControl::background_property().as_property();
+        assert!(window.styles().snapshot().iter().any(|s| {
+            let style = s.as_object().and_then(|style| style.downcast_ref::<Style>()).expect("a style");
+            let setter = style.setters().get(0);
+            let setter = setter.as_any().and_then(|setter| setter.downcast_ref::<Setter>()).expect("a setter");
+            setter.property().is_some_and(|property| std::ptr::eq(property, background_property))
+        }));
+    }
+
+    #[test]
+    fn should_not_throw_exception_on_generic_style() {
+        let _app = start();
+
+        let style = Style::with_selector(Selectors::of_type::<Button>());
+        let preview = Design::create_preview_with_control(&PreviewTarget::Object(as_object(&style)));
+
+        // We are not going to test specific content of the placeholder preview control.
+        // But it should not throw and should not return null at least.
+        assert!(preview.is_some());
+    }
+
+    #[test]
+    fn should_not_throw_exception_on_generic_resource_dictionary() {
+        let _app = start();
+
+        let preview =
+            Design::create_preview_with_control(&PreviewTarget::Object(as_object(&ResourceDictionary::new())));
+
+        assert!(preview.is_some());
+    }
+
+    #[test]
+    fn should_not_throw_exception_on_generic_data_template() {
+        let _app = start();
+
+        let preview = Design::create_preview_with_control(&PreviewTarget::DataTemplate(string_data_template()));
+
+        assert!(preview.is_some());
+    }
+
+    #[test]
+    fn should_not_throw_exception_on_application() {
+        let _app = start();
+
+        let app = Application::new();
+        let preview = Design::create_preview_with_control(&PreviewTarget::Object(as_object(&app)));
+
+        assert!(preview.is_some());
+    }
 }
