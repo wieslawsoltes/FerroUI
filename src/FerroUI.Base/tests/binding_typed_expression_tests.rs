@@ -941,6 +941,102 @@ fn value_type_cast_produces_exactly_the_target_type() {
     assert!(cast(boxed(1i32), ValueType::of::<String>()).is_none());
 }
 
+// --- not from upstream: what a recycled target sees --------------------------
+//
+// A container that is recycled loses its item (the data context), then its
+// bindings, and gets the next item and bindings of the same descriptions.
+// These tests record the values the target takes on the way.
+
+/// Records the values the text of `target` takes.
+fn record_text(target: &TextBlock) -> Rc<RefCell<Vec<Option<String>>>> {
+    let values: Rc<RefCell<Vec<Option<String>>>> = Rc::new(RefCell::new(Vec::new()));
+    let text = TextBlock::text_property().id();
+    let recorded = values.clone();
+    target.property_changed(move |e| {
+        if e.property().id() == text {
+            recorded.borrow_mut().push(e.get_new_value::<Option<String>>());
+        }
+    });
+    values
+}
+
+#[test]
+fn recycled_target_takes_the_same_values_from_a_typed_and_an_untyped_binding() {
+    for typed in [true, false] {
+        let first = ViewModel::with_string("first");
+        let second = ViewModel::with_string("second");
+        let target = TextBlock::with_data_context(Some(&first));
+        let values = record_text(&target);
+
+        assert_expression_type(typed, &target.bind_binding(TextBlock::text_property(), &create_string_binding(typed)));
+        assert_eq!(first.property_changed_subscription_count(), 1);
+
+        // Cleared: the item leaves, then the binding.
+        target.set_data_context(None);
+        assert_eq!(first.property_changed_subscription_count(), 0);
+        target.clear_value(TextBlock::text_property());
+
+        // Prepared: the next item arrives, then a binding of the same
+        // description.
+        target.set_data_context(Some(second.clone() as BoxedValue));
+        assert_expression_type(typed, &target.bind_binding(TextBlock::text_property(), &create_string_binding(typed)));
+        second.set_string_value(Some(s("changed")));
+
+        // The item that left no longer reaches the target.
+        first.set_string_value(Some(s("stale")));
+
+        assert_eq!(values.take(), vec![Some(s("first")), None, Some(s("second")), Some(s("changed"))]);
+        assert_eq!(target.text(), Some(s("changed")));
+        assert_eq!(first.property_changed_subscription_count(), 0);
+        assert_eq!(second.property_changed_subscription_count(), 1);
+    }
+}
+
+/// A binding without a path publishes the data context itself: null for no
+/// data context and for a nullable value that is null, the contents of a
+/// nullable value otherwise.
+#[test]
+fn binding_to_the_data_context_itself_follows_it_through_null_and_nullable_values() {
+    let target = TextBlock::new();
+    let values = record_text(&target);
+
+    let expression = target.bind_binding(TextBlock::text_property(), &CompiledBinding::empty());
+    assert!(expression.as_any().is::<BindingExpression>());
+    assert_eq!(target.text(), None);
+
+    target.set_data_context(Some(boxed(s("text"))));
+    target.set_data_context(Some(boxed(Some(s("nullable")))));
+    target.set_data_context(Some(boxed(Option::<String>::None)));
+    target.set_data_context(Some(boxed(s("again"))));
+    target.set_data_context(None);
+
+    assert_eq!(values.take(), vec![Some(s("text")), Some(s("nullable")), None, Some(s("again")), None]);
+}
+
+/// A template binding does not follow the property of a parent its target
+/// has left; when the target gets the parent back, it publishes what the
+/// property is then.
+#[test]
+fn template_binding_publishes_what_the_parent_has_when_the_target_gets_it_back() {
+    let parent = TextBlock::new();
+    parent.set_text(Some("one"));
+    let target = TextBlock::new();
+    target.set_templated_parent(&parent);
+    let values = record_text(&target);
+
+    target.bind_binding(TextBlock::text_property(), &crate::data::TemplateBinding::new(TextBlock::text_property()));
+    parent.set_text(Some("two"));
+
+    target.set_templated_parent(Option::<Ref<FerroObject>>::None);
+    parent.set_text(Some("three"));
+    assert_eq!(target.text(), None);
+
+    target.set_templated_parent(&parent);
+    parent.set_text(Some("four"));
+
+    assert_eq!(values.take(), vec![Some(s("one")), Some(s("two")), None, Some(s("three")), Some(s("four"))]);
+}
+
 // --- not from upstream: the order of a failed conversion --------------------
 
 /// A converter that records that it ran, and fails when told to.
