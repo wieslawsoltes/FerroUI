@@ -1495,6 +1495,95 @@ fn implicit_theme_is_reevaluated_when_removed_and_added_to_different_logical_tre
     assert_eq!(target.foo(), "second");
 }
 
+/// The implicit theme an element found is kept while the element stays in
+/// its logical tree and is looked up again when the element enters a tree:
+/// a theme that replaced it in the resources meanwhile is the one applied
+/// then, and the first one is detached.
+#[test]
+fn implicit_theme_replaced_in_the_resources_is_applied_when_reattached_to_the_same_logical_tree() {
+    let target = Class1::new();
+    let root = TestRoot::new();
+    root.resources().add(Class1::TYPE, Some(boxed(theme("first"))));
+    set_child(&root, &target);
+    assert_eq!(target.foo(), "first");
+
+    root.resources().set(Class1::TYPE, Some(boxed(theme("second"))));
+    assert_eq!(target.foo(), "first");
+
+    remove_child(&root, &target);
+    set_child(&root, &target);
+
+    assert_eq!(target.foo(), "second");
+    assert_eq!(target.values().frames().len(), 1);
+}
+
+/// An element that found no implicit theme looks for one again when it
+/// enters a logical tree: a theme added to the resources meanwhile is found.
+#[test]
+fn implicit_theme_added_to_the_resources_is_applied_when_reattached() {
+    let target = Class1::new();
+    let root = TestRoot::new();
+    set_child(&root, &target);
+    assert_eq!(target.foo(), "foodefault");
+    assert!(target.get_effective_theme().is_none());
+
+    root.resources().add(Class1::TYPE, Some(boxed(theme("implicit"))));
+    remove_child(&root, &target);
+    set_child(&root, &target);
+
+    assert_eq!(target.foo(), "implicit");
+    assert!(target.get_effective_theme().is_some());
+}
+
+/// An implicit theme that was removed from the resources is detached when
+/// the element enters a logical tree again.
+#[test]
+fn implicit_theme_removed_from_the_resources_is_detached_when_reattached() {
+    let target = Class1::new();
+    let root = TestRoot::new();
+    root.resources().add(Class1::TYPE, Some(boxed(theme("implicit"))));
+    set_child(&root, &target);
+    assert_eq!(target.foo(), "implicit");
+
+    assert!(root.resources().remove(&ResourceKey::Type(Class1::TYPE)));
+    remove_child(&root, &target);
+    assert_eq!(target.foo(), "implicit");
+    set_child(&root, &target);
+
+    assert_eq!(target.foo(), "foodefault");
+    assert!(target.get_effective_theme().is_none());
+    assert_eq!(target.values().frames().len(), 0);
+}
+
+/// The implicit theme is the one of the nearest host on the way up from
+/// where the element is: an element moved to another parent of the same
+/// logical tree gets the theme visible from there, and a theme added
+/// afterwards to a host that had no resources is found from then on.
+#[test]
+fn implicit_theme_is_reevaluated_when_moved_between_hosts_of_the_same_logical_tree() {
+    let root = TestRoot::new();
+    root.resources().add(Class1::TYPE, Some(boxed(theme("root"))));
+    let first = TestPanel::new();
+    first.resources().add(Class1::TYPE, Some(boxed(theme("first"))));
+    let second = TestPanel::new();
+    set_child(&root, &first);
+    set_child(&root, &second);
+    let target = Class1::new();
+
+    set_child(&first, &target);
+    assert_eq!(target.foo(), "first");
+
+    remove_child(&first, &target);
+    set_child(&second, &target);
+    assert_eq!(target.foo(), "root");
+
+    second.resources().add(Class1::TYPE, Some(boxed(theme("second"))));
+    remove_child(&second, &target);
+    set_child(&second, &target);
+    assert_eq!(target.foo(), "second");
+    assert_eq!(target.values().frames().len(), 1);
+}
+
 #[test]
 fn templated_parent_theme_is_applied_to_template_children() {
     let control_theme = ControlTheme::for_type::<Class1>();

@@ -472,6 +472,54 @@ fn find_resource_should_find_control_resource_in_parent() {
     assert_eq!(string(Some(target.find_resource(&key("foo")))).as_deref(), Some("foo-value"));
 }
 
+/// A lookup asks every host on the way up, whether or not the host had
+/// resources before: a resource added later to a host between the element
+/// and the root, or to the styles of the element, is found from then on, and
+/// the resource of the root again once the nearer ones are removed.
+#[test]
+fn find_resource_finds_a_resource_added_later_to_a_host_on_the_way_up() {
+    let root = TestRoot::new();
+    root.resources().add_value("foo", "root".to_string());
+    let parent = Class3::new();
+    let target = Class1::new();
+    set_child(&root, &parent);
+    set_child(&parent, &target);
+    assert_eq!(string(Some(target.find_resource(&key("foo")))).as_deref(), Some("root"));
+
+    parent.resources().add_value("foo", "parent".to_string());
+    assert_eq!(string(Some(target.find_resource(&key("foo")))).as_deref(), Some("parent"));
+
+    target.styles().resources().add_value("foo", "styles".to_string());
+    assert_eq!(string(Some(target.find_resource(&key("foo")))).as_deref(), Some("styles"));
+
+    assert!(target.styles().resources().remove(&key("foo")));
+    assert_eq!(string(Some(target.find_resource(&key("foo")))).as_deref(), Some("parent"));
+
+    assert!(parent.resources().remove(&key("foo")));
+    assert_eq!(string(Some(target.find_resource(&key("foo")))).as_deref(), Some("root"));
+}
+
+/// The lookup follows the styling parent of where the element is now: an
+/// element moved to another parent finds the resources visible from there.
+#[test]
+fn find_resource_follows_the_element_to_another_parent() {
+    let first = Class3::new();
+    first.resources().add_value("foo", "first".to_string());
+    let second = Class3::new();
+    second.resources().add_value("foo", "second".to_string());
+    let target = Class1::new();
+
+    set_child(&first, &target);
+    assert_eq!(string(Some(target.find_resource(&key("foo")))).as_deref(), Some("first"));
+
+    remove_child(&first, &target);
+    let value = target.find_resource(&key("foo")).unwrap();
+    assert!((*value).is::<UnsetValueType>());
+
+    set_child(&second, &target);
+    assert_eq!(string(Some(target.find_resource(&key("foo")))).as_deref(), Some("second"));
+}
+
 #[test]
 fn find_resource_should_find_style_resource() {
     let target = Class1::new();
