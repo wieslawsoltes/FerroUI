@@ -4514,6 +4514,7 @@
     ]
    },
    "rustOnly": [
+    "call_forms.rs",
     "json.rs",
     "model.rs",
     "model_set.rs",
@@ -8459,8 +8460,11 @@
     "runtime/value_parser.rs",
     "rust_emitter/compiled.rs",
     "rust_emitter/compiled_resources.rs",
+    "rust_emitter/emit_types.rs",
     "rust_emitter/emitter.rs",
+    "rust_emitter/runtime_types.rs",
     "rust_emitter/source.rs",
+    "rust_emitter/transform.rs",
     "rust_emitter/xaml_metadata.rs",
     "testing/bindings.rs",
     "testing/objects.rs",
