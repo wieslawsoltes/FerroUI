@@ -2,7 +2,7 @@ use super::{ExpressionNode, NodeState, SourceNode};
 use crate::data::core::ValueTypes;
 use crate::data::BindingError;
 use crate::reactive::IDisposable;
-use crate::{BoxedValue, FerroObject, IDataContextProvider, Ref, StyledElement, Visual};
+use crate::{BoxedValue, FerroObject, IDataContextProvider, Ref, StyledElement, Visual, WeakRef};
 use std::cell::RefCell;
 use std::rc::{Rc, Weak};
 
@@ -128,7 +128,12 @@ pub struct ParentDataContextNode {
     state: NodeState,
     subscription: RefCell<Option<Rc<dyn IDisposable>>>,
     /// `None` until a parent (or the absence of one) has been recorded.
-    parent: RefCell<Option<Option<Ref<FerroObject>>>>,
+    ///
+    /// Held weakly (DEVIATIONS.md, Bindings): the node belongs to a binding
+    /// of the element, which the parent owns as its child; held strongly, as
+    /// the managed original holds it, the parent and the element keep each
+    /// other alive.
+    parent: RefCell<Option<Option<WeakRef<FerroObject>>>>,
     parent_subscription: RefCell<Option<Rc<dyn IDisposable>>>,
 }
 
@@ -146,7 +151,7 @@ impl ParentDataContextNode {
     fn set_parent(&self, parent: Option<Ref<FerroObject>>) {
         let same = match &*self.parent.borrow() {
             Some(current) => match (current, &parent) {
-                (Some(a), Some(b)) => a.ptr_eq(b),
+                (Some(a), Some(b)) => a.ptr_eq(&b.downgrade()),
                 (None, None) => true,
                 _ => false,
             },
@@ -159,7 +164,7 @@ impl ParentDataContextNode {
         if let Some(s) = old {
             s.dispose();
         }
-        self.parent.replace(Some(parent.clone()));
+        self.parent.replace(Some(parent.as_ref().map(Ref::downgrade)));
 
         match parent.filter(|p| <dyn IDataContextProvider>::is_implemented_by(p)) {
             Some(object) => {

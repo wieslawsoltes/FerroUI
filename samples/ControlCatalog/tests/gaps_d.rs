@@ -109,7 +109,7 @@ fn control_without_a_dynamic_resource_that_left_the_tree_is_freed() {
     window.close();
 }
 
-// --- C317: what a visit to a page of the catalog retained ---
+// --- C317 and C318: what a visit to a page of the catalog retained ---
 //
 // Found with the tours of `catalog_tour.rs`: every visit to a page left the page, or most of
 // what it showed, alive. Each reproduction is one of the cycles: the managed original has the
@@ -192,5 +192,25 @@ fn gap_c317_template_finds_the_resources_and_the_names_of_its_document() {
     assert!(border.background().is_some());
     let tag = border.tag().and_then(|tag| tag.downcast_ref::<String>().cloned());
     assert_eq!(Some(String::from("named")), tag);
+    window.close();
+}
+
+/// C318: the node of a binding of `DataContext` holds the parent of its element, which owns the
+/// element.
+#[test]
+fn gap_c318_element_whose_data_context_is_bound() {
+    let _app = start_catalog_application();
+    let panel = from_markup_value::<Ref<ferroui_controls::StackPanel>>(&Some(load_text(&format!(
+        "<StackPanel {XMLNS}>\
+           <Border DataContext='{{ReflectionBinding}}'/>\
+         </StackPanel>"
+    ))))
+    .expect("a panel");
+    let window = show_and_remove(panel.clone().upcast());
+    let child = panel.children().get(0).downgrade();
+    let weak = panel.downgrade();
+    drop(panel);
+    assert!(weak.upgrade().is_none());
+    assert!(child.upgrade().is_none());
     window.close();
 }
