@@ -34,7 +34,7 @@ FerroUI is a cross-platform UI framework for Rust: a retained-mode control libra
 | Themes | Fluent and Simple load for every ported control |
 | Windows and Linux platforms | Not started |
 | Browser (WebAssembly) | In progress |
-| Vello render backend | In progress: geometries, shapes, brushes, pens, clips, layers and bitmaps on the CPU renderer, measured against the Skia backend; text, effects and the GPU modes are next (`docs/porting/vello-backend.md`) |
+| Vello render backend | In progress: geometries, shapes, brushes, pens, clips, layers, bitmaps and text (typefaces, the fonts of the system, glyph runs) on the CPU renderer, measured against the Skia backend; effects and the GPU modes are next (`docs/porting/vello-backend.md`) |
 
 Roughly 70 percent of the upstream API surface that is in scope has a counterpart. The per-subsystem state is tracked in [docs/porting/CRITICAL-PATH.md](docs/porting/CRITICAL-PATH.md) and the per-member state in [docs/porting/TRACKING.md](docs/porting/TRACKING.md).
 
