@@ -4514,6 +4514,7 @@
     ]
    },
    "rustOnly": [
+    "diagnostics.rs",
     "type_system/emit_types.rs",
     "type_system/model_type_system.rs",
     "type_system/tests.rs",
@@ -6640,8 +6641,6 @@
     ]
    },
    "rustOnly": [
-    "assets.rs",
-    "markup.rs",
     "register_types.rs",
     "rust_paths.rs",
     "task_completion_source.rs"
@@ -8540,6 +8539,11 @@
     ]
    },
    "rustOnly": [
+    "back_end/assignment.rs",
+    "back_end/context.rs",
+    "back_end/includes.rs",
+    "back_end/methods.rs",
+    "back_end/namespaces.rs",
     "core_table.rs",
     "runtime/framework/binding_path.rs",
     "runtime/framework/helpers.rs",
@@ -8564,6 +8568,7 @@
     "rust_emitter/compiled_resources.rs",
     "rust_emitter/emit_types.rs",
     "rust_emitter/emitter.rs",
+    "rust_emitter/runtime_host.rs",
     "rust_emitter/runtime_types.rs",
     "rust_emitter/source.rs",
     "rust_emitter/transform.rs",
