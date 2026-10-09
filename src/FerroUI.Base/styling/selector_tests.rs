@@ -1265,6 +1265,24 @@ mod selector_tests_nth_child {
 
         assert_eq!(target.target_type(), Some(Class1::TYPE));
     }
+
+    #[test]
+    fn not_selector_should_have_correct_string_representation() {
+        let rows = [
+            (2, 0, ":nth-child(2n)"),
+            (2, 1, ":nth-child(2n+1)"),
+            (1, 0, ":nth-child(1n)"),
+            (4, -1, ":nth-child(4n-1)"),
+            (0, 1, ":nth-child(1)"),
+            (0, -1, ":nth-child(-1)"),
+            (i32::MAX, i32::MIN + 1, ":nth-child(2147483647n-2147483647)"),
+        ];
+        for (step, offset, expected) in rows {
+            let target = Selectors::nth_child(None, step, offset);
+
+            assert_eq!(expected, target.to_string());
+        }
+    }
 }
 
 // --- nth-last-child ----------------------------------------------------------
@@ -1336,6 +1354,71 @@ mod selector_tests_nth_last_child {
         let target = Selectors::nth_last_child(Some(Selectors::of_type::<Class1>()), 1, 0);
 
         assert_eq!(target.target_type(), Some(Class1::TYPE));
+    }
+
+    #[test]
+    fn nth_child_match_control_in_panel_with_singular_step() {
+        let (_panel, children) = panel_with_children(4);
+
+        let target = Selectors::nth_last_child(None, 1, 2);
+
+        assert_eq!(nth_matches(&target, &children), vec![true, true, true, false]);
+    }
+
+    #[test]
+    fn nth_child_match_control_in_panel_with_singular_step_with_negative_offset() {
+        let (_panel, children) = panel_with_children(4);
+
+        let target = Selectors::nth_last_child(None, 1, -2);
+
+        assert_eq!(nth_matches(&target, &children), vec![true, true, true, true]);
+    }
+
+    #[test]
+    fn nth_child_match_control_in_panel_with_zero_step_with_offset() {
+        let (_panel, children) = panel_with_children(4);
+
+        let target = Selectors::nth_last_child(None, 0, 2);
+
+        assert_eq!(nth_matches(&target, &children), vec![false, false, true, false]);
+    }
+
+    #[test]
+    fn nth_child_doesnt_match_control_in_panel_with_zero_step_with_negative_offset() {
+        let (_panel, children) = panel_with_children(4);
+
+        let target = Selectors::nth_last_child(None, 0, -2);
+
+        assert_eq!(nth_matches(&target, &children), vec![false, false, false, false]);
+    }
+
+    #[test]
+    fn nth_child_doesnt_match_control_out_of_panel_parent() {
+        let parent = Class3::new();
+        let b1 = Class1::new();
+        set_child(&parent, &b1);
+
+        let target = Selectors::nth_last_child(None, 1, 0);
+
+        assert_eq!(target.match_(&element(&b1), None, true).result(), SelectorMatchResult::NeverThisInstance);
+    }
+
+    #[test]
+    fn not_selector_should_have_correct_string_representation() {
+        let rows = [
+            (2, 0, ":nth-last-child(2n)"),
+            (2, 1, ":nth-last-child(2n+1)"),
+            (1, 0, ":nth-last-child(1n)"),
+            (4, -1, ":nth-last-child(4n-1)"),
+            (0, 1, ":nth-last-child(1)"),
+            (0, -1, ":nth-last-child(-1)"),
+            (i32::MAX, i32::MIN + 1, ":nth-last-child(2147483647n-2147483647)"),
+        ];
+        for (step, offset, expected) in rows {
+            let target = Selectors::nth_last_child(None, step, offset);
+
+            assert_eq!(expected, target.to_string());
+        }
     }
 }
 
