@@ -25,7 +25,9 @@ use ::ferroui_markup_xaml::RuntimeXamlLoaderConfiguration;
 
 use crate::FerroXamlIlRuntimeCompiler;
 
+use super::emit_types::{EmitClass, EmitTypes};
 use super::emitter::{emit_function, namespace_table, root_class_of, DocumentFunctions};
+use super::runtime_types::{class as class_of, RuntimeEmitTypes};
 use super::source::{function_name_of, rust_string_literal};
 use super::xaml_metadata::{DocumentModel, XamlMetadata};
 
@@ -177,6 +179,7 @@ pub fn compile_documents(
     if sources.is_empty() {
         return compiled;
     }
+    let types: &dyn EmitTypes = &RuntimeEmitTypes;
     match FerroXamlIlRuntimeCompiler::transform_documents(&sources, configuration, dependencies) {
         Ok(transformed) => {
             // The build methods of the documents of the group, by their functions: what
@@ -185,7 +188,7 @@ pub fn compile_documents(
             let functions_of_group = || {
                 let mut functions = DocumentFunctions::default();
                 for (name, transformed) in names.iter().zip(&transformed) {
-                    if let (Some(build), Some(root_class)) = (&transformed.build, root_class_of(&transformed.root)) {
+                    if let (Some(build), Some(root_class)) = (&transformed.build, root_class_of(types, &transformed.root)) {
                         functions.insert(build, name, root_class);
                     }
                 }
@@ -212,6 +215,7 @@ pub fn compile_documents(
                 let constant = format!("XML_NAMESPACES_{table_index}");
                 document.root_type = root_type_name(&transformed.root);
                 document.source = emit_function(
+                    types,
                     &transformed.root,
                     &transformed.configuration,
                     &transformed.document,
@@ -731,6 +735,7 @@ pub fn generate_class_file(
     }
 
     // The functions of the documents, by their build methods.
+    let types: &dyn EmitTypes = &RuntimeEmitTypes;
     let mut functions = DocumentFunctions::default();
     let mut names = Vec::with_capacity(documents.len());
     let mut has_build = vec![false; documents.len()];
@@ -740,7 +745,7 @@ pub fn generate_class_file(
             _ => function_name_of(&document.0),
         };
         if index > 0 {
-            if let (Some(build), Some(root_class)) = (&transformed.build, root_class_of(&transformed.root)) {
+            if let (Some(build), Some(root_class)) = (&transformed.build, root_class_of(types, &transformed.root)) {
                 functions.insert(build, &function_name, root_class);
                 has_build[index] = true;
             }
@@ -774,8 +779,9 @@ pub fn generate_class_file(
                 tables.len() - 1
             }
         };
-        let populate = (index == 0).then_some(class);
+        let populate = (index == 0).then_some(class_of(class) as &dyn EmitClass);
         match emit_function(
+            types,
             &transformed.root,
             &transformed.configuration,
             &transformed.document,
