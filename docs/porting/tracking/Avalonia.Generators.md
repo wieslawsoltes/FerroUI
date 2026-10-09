@@ -10,10 +10,10 @@ Generated from upstream commit `17350180c33b063f0e98abbfd19aa3cae63f5d56`. Back 
 | FerroUI | `src/tools/FerroUI.Generators` (not created yet) |
 | Crate | (merged into ferroui-build, see docs/porting/xaml.md) |
 | Phase / priority | 2 - xaml + themes / P2 |
-| Files | 0/30 (0.0%), 1 not applicable |
-| Types | 0/53 (0.0%) |
-| Members | 0/264 (2 waived) (0.0%) |
-| Contracts (interfaces) | 0/4 |
+| Files | 0/0 (-), 31 not applicable |
+| Types | 0/0 (-) |
+| Members | 0/0 (-) |
+| Contracts (interfaces) | 0/0 |
 | Property registrations | 0/0 |
 | Routed events | 0/0 |
 
@@ -23,70 +23,70 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 
 | Interface | Access | Upstream file | Members | Status |
 |---|---|---|---|---|
-| `Avalonia.Generators.Common.Domain.ICodeGenerator` | internal | `Common/Domain/ICodeGenerator.cs` | 0/1 | missing |
-| `Avalonia.Generators.Common.Domain.IGlobPattern` | internal | `Common/Domain/IGlobPattern.cs` | 0/1 | missing |
-| `Avalonia.Generators.Common.Domain.INameResolver` | internal | `Common/Domain/INameResolver.cs` | 0/2 | missing |
-| `Avalonia.Generators.Common.Domain.IViewResolver` | internal | `Common/Domain/IViewResolver.cs` | 0/1 | missing |
+| `Avalonia.Generators.Common.Domain.ICodeGenerator` | internal | `Common/Domain/ICodeGenerator.cs` | 0/1 | n/a |
+| `Avalonia.Generators.Common.Domain.IGlobPattern` | internal | `Common/Domain/IGlobPattern.cs` | 0/1 | n/a |
+| `Avalonia.Generators.Common.Domain.INameResolver` | internal | `Common/Domain/INameResolver.cs` | 0/2 | n/a |
+| `Avalonia.Generators.Common.Domain.IViewResolver` | internal | `Common/Domain/IViewResolver.cs` | 0/1 | n/a |
 
 ## Files
 
-### `(project root)` - files 0/3, types 0/4, members 0/19
+### `(project root)` - files 0/0, types 0/0, members 0/0
 
 | Upstream file | Rust file | Status | Types | Members | Notes |
 |---|---|---|---|---|---|
-| `GeneratorExtensions.cs` | `generator_extensions.rs` | missing | 0/1 | 0/1 |  |
-| `GeneratorOptions.cs` | `generator_options.rs` | missing | 0/2 | 0/17 |  |
-| `TrimmingMessages.cs` | `trimming_messages.rs` | missing | 0/1 | 0/1 |  |
+| `GeneratorExtensions.cs` | - | n/a | - | - | not-applicable: the host side of a Roslyn incremental generator: the MSBuild properties that switch and configure the two generators (their reader, their names, the two enums of the name generator), the names of the tracked steps of the incremental pipeline and a trimming message. docs/porting/xaml.md 3.8: there is no generator host, a build script calls `ferroui_build::Build` and states its options there |
+| `GeneratorOptions.cs` | - | n/a | - | - | not-applicable: the host side of a Roslyn incremental generator: the MSBuild properties that switch and configure the two generators (their reader, their names, the two enums of the name generator), the names of the tracked steps of the incremental pipeline and a trimming message. docs/porting/xaml.md 3.8: there is no generator host, a build script calls `ferroui_build::Build` and states its options there |
+| `TrimmingMessages.cs` | - | n/a | - | - | not-applicable: the host side of a Roslyn incremental generator: the MSBuild properties that switch and configure the two generators (their reader, their names, the two enums of the name generator), the names of the tracked steps of the incremental pipeline and a trimming message. docs/porting/xaml.md 3.8: there is no generator host, a build script calls `ferroui_build::Build` and states its options there |
 
-### `Common` - files 0/6, types 0/6, members 0/29 (2 waived)
-
-| Upstream file | Rust file | Status | Types | Members | Notes |
-|---|---|---|---|---|---|
-| `EquatableList.cs` | `common/equatable_list.rs` | missing | 0/1 | 0/7 (1 waived) |  |
-| `GlobPattern.cs` | `common/glob_pattern.rs` | missing | 0/1 | 0/6 (1 waived) |  |
-| `GlobPatternGroup.cs` | `common/glob_pattern_group.rs` | missing | 0/1 | 0/4 |  |
-| `ResolverExtensions.cs` | `common/resolver_extensions.rs` | missing | 0/1 | 0/2 |  |
-| `XamlXNameResolver.cs` | `common/xaml_x_name_resolver.rs` | missing | 0/1 | 0/5 |  |
-| `XamlXViewResolver.cs` | `common/xaml_x_view_resolver.rs` | missing | 0/1 | 0/5 |  |
-
-### `Common/Domain` - files 0/4, types 0/12, members 0/41
+### `Common` - files 0/0, types 0/0, members 0/0
 
 | Upstream file | Rust file | Status | Types | Members | Notes |
 |---|---|---|---|---|---|
-| `ICodeGenerator.cs` | `common/domain/i_code_generator.rs` | missing | 0/1 | 0/1 |  |
-| `IGlobPattern.cs` | `common/domain/i_glob_pattern.rs` | missing | 0/1 | 0/1 |  |
-| `INameResolver.cs` | `common/domain/i_name_resolver.rs` | missing | 0/5 | 0/18 |  |
-| `IViewResolver.cs` | `common/domain/i_view_resolver.rs` | missing | 0/5 | 0/21 |  |
+| `EquatableList.cs` | - | n/a | - | - | not-applicable: a read-only list with value equality, which the cache of a Roslyn incremental generator needs for its models: no incremental pipeline (docs/porting/xaml.md 3.8), and a `Vec` compares by value |
+| `GlobPattern.cs` | - | n/a | - | - | not-applicable: the glob patterns of the MSBuild properties that filter, by path and by namespace, the documents the name generator handles: the build crate compiles the documents its build script states (`Build::compile_xaml`, `Build::compile_group`, `Build::xaml_root`) and has no such filter (docs/porting/xaml.md 3.8, 9.6) |
+| `GlobPatternGroup.cs` | - | n/a | - | - | not-applicable: the glob patterns of the MSBuild properties that filter, by path and by namespace, the documents the name generator handles: the build crate compiles the documents its build script states (`Build::compile_xaml`, `Build::compile_group`, `Build::xaml_root`) and has no such filter (docs/porting/xaml.md 3.8, 9.6) |
+| `ResolverExtensions.cs` | - | n/a | - | - | not-applicable: the two visitors of the name generator, which read `x:Class` and the named elements with their `x:FieldModifier` out of a document parsed a second time, and the records they return. The build crate compiles the document once: the named elements and their types are what the transformers of the compiler resolved (docs/porting/xaml.md 3.8, 9.4.3); the parts struct that uses them is the step of stage E5 named in the entry of the name generator |
+| `XamlXNameResolver.cs` | - | n/a | - | - | not-applicable: the two visitors of the name generator, which read `x:Class` and the named elements with their `x:FieldModifier` out of a document parsed a second time, and the records they return. The build crate compiles the document once: the named elements and their types are what the transformers of the compiler resolved (docs/porting/xaml.md 3.8, 9.4.3); the parts struct that uses them is the step of stage E5 named in the entry of the name generator |
+| `XamlXViewResolver.cs` | - | n/a | - | - | not-applicable: the two visitors of the name generator, which read `x:Class` and the named elements with their `x:FieldModifier` out of a document parsed a second time, and the records they return. The build crate compiles the document once: the named elements and their types are what the transformers of the compiler resolved (docs/porting/xaml.md 3.8, 9.4.3); the parts struct that uses them is the step of stage E5 named in the entry of the name generator |
 
-### `Compiler` - files 0/5, types 0/13, members 0/106
-
-| Upstream file | Rust file | Status | Types | Members | Notes |
-|---|---|---|---|---|---|
-| `DataTemplateTransformer.cs` | `compiler/data_template_transformer.rs` | missing | 0/1 | 0/1 |  |
-| `MiniCompiler.cs` | `compiler/mini_compiler.rs` | missing | 0/1 | 0/7 |  |
-| `NameDirectiveTransformer.cs` | `compiler/name_directive_transformer.rs` | missing | 0/1 | 0/1 |  |
-| `NoopTypeSystem.cs` | `compiler/noop_type_system.rs` | missing | 0/2 | 0/11 |  |
-| `RoslynTypeSystem.cs` | `compiler/roslyn_type_system.rs` | missing | 0/8 | 0/86 |  |
-
-### `NameGenerator` - files 0/6, types 0/10, members 0/31
+### `Common/Domain` - files 0/0, types 0/0, members 0/0
 
 | Upstream file | Rust file | Status | Types | Members | Notes |
 |---|---|---|---|---|---|
-| `AvaloniaNameIncrementalGenerator.cs` | `name_generator/ferro_name_incremental_generator.rs` | missing | 0/4 | 0/14 |  |
-| `INameGenerator.cs` | - | n/a | - | - | no non-private types (assembly attributes, global usings or file-local helpers) |
-| `InitializeComponentCodeGenerator.cs` | `name_generator/initialize_component_code_generator.rs` | missing | 0/1 | 0/2 |  |
-| `NameGeneratorDiagnostics.cs` | `name_generator/name_generator_diagnostics.rs` | missing | 0/1 | 0/4 |  |
-| `OnlyPropertiesCodeGenerator.cs` | `name_generator/only_properties_code_generator.rs` | missing | 0/1 | 0/2 |  |
-| `Options.cs` | `name_generator/options.rs` | missing | 0/2 | 0/4 |  |
-| `TrackingNames.cs` | `name_generator/tracking_names.rs` | missing | 0/1 | 0/5 |  |
+| `ICodeGenerator.cs` | - | n/a | - | - | not-applicable: the name generator and its two writers of C# source: for a class with markup, a field per `x:Name` and `InitializeComponent` (or properties that look the names up). Not ported as a tool (docs/porting/xaml.md 3.8): the compiler of the build crate writes the parts struct `&lt;Class&gt;Xaml` and `initialize_component` with the compiled document (xaml.md 9.4.3). That output is not written yet: it is the step `include_xaml!` per class of stage E5 (CONTINUATION.md, task 2), new code in the emitter and not a port of these files |
+| `IGlobPattern.cs` | - | n/a | - | - | not-applicable: the glob patterns of the MSBuild properties that filter, by path and by namespace, the documents the name generator handles: the build crate compiles the documents its build script states (`Build::compile_xaml`, `Build::compile_group`, `Build::xaml_root`) and has no such filter (docs/porting/xaml.md 3.8, 9.6) |
+| `INameResolver.cs` | - | n/a | - | - | not-applicable: the two visitors of the name generator, which read `x:Class` and the named elements with their `x:FieldModifier` out of a document parsed a second time, and the records they return. The build crate compiles the document once: the named elements and their types are what the transformers of the compiler resolved (docs/porting/xaml.md 3.8, 9.4.3); the parts struct that uses them is the step of stage E5 named in the entry of the name generator |
+| `IViewResolver.cs` | - | n/a | - | - | not-applicable: the two visitors of the name generator, which read `x:Class` and the named elements with their `x:FieldModifier` out of a document parsed a second time, and the records they return. The build crate compiles the document once: the named elements and their types are what the transformers of the compiler resolved (docs/porting/xaml.md 3.8, 9.4.3); the parts struct that uses them is the step of stage E5 named in the entry of the name generator |
 
-### `PropertyGenerator` - files 0/6, types 0/8, members 0/38
+### `Compiler` - files 0/0, types 0/0, members 0/0
 
 | Upstream file | Rust file | Status | Types | Members | Notes |
 |---|---|---|---|---|---|
-| `AvaloniaPropertyIncrementalGenerator.cs` | `property_generator/ferro_property_incremental_generator.rs` | missing | 0/1 | 0/1 |  |
-| `PropertyGenEmitter.cs` | `property_generator/property_gen_emitter.rs` | missing | 0/1 | 0/1 |  |
-| `PropertyGenModelBuilder.cs` | `property_generator/property_gen_model_builder.rs` | missing | 0/1 | 0/1 |  |
-| `PropertyGenModels.cs` | `property_generator/property_gen_models.rs` | missing | 0/3 | 0/29 |  |
-| `TrackingNames.cs` | `property_generator/tracking_names.rs` | missing | 0/1 | 0/5 |  |
-| `TypedConstantFormatter.cs` | `property_generator/typed_constant_formatter.rs` | missing | 0/1 | 0/1 |  |
+| `DataTemplateTransformer.cs` | - | n/a | - | - | not-applicable: a reduced XAML compiler for the name generator: five transformers and no emitter, a type system that resolves nothing for its first pass, a transformer that empties templates and one that turns `x:Name` into `Name`. The build crate runs the whole compiler on a document (`Build::compile_xaml`), whose transformers type every named element (docs/porting/xaml.md 3.8, 9.5) |
+| `MiniCompiler.cs` | - | n/a | - | - | not-applicable: a reduced XAML compiler for the name generator: five transformers and no emitter, a type system that resolves nothing for its first pass, a transformer that empties templates and one that turns `x:Name` into `Name`. The build crate runs the whole compiler on a document (`Build::compile_xaml`), whose transformers type every named element (docs/porting/xaml.md 3.8, 9.5) |
+| `NameDirectiveTransformer.cs` | - | n/a | - | - | not-applicable: a reduced XAML compiler for the name generator: five transformers and no emitter, a type system that resolves nothing for its first pass, a transformer that empties templates and one that turns `x:Name` into `Name`. The build crate runs the whole compiler on a document (`Build::compile_xaml`), whose transformers type every named element (docs/porting/xaml.md 3.8, 9.5) |
+| `NoopTypeSystem.cs` | - | n/a | - | - | not-applicable: a reduced XAML compiler for the name generator: five transformers and no emitter, a type system that resolves nothing for its first pass, a transformer that empties templates and one that turns `x:Name` into `Name`. The build crate runs the whole compiler on a document (`Build::compile_xaml`), whose transformers type every named element (docs/porting/xaml.md 3.8, 9.5) |
+| `RoslynTypeSystem.cs` | - | n/a | - | - | not-applicable: the type system of the compiler over the Roslyn symbols of the compilation, with which the name generator types elements of the project being compiled. Its counterpart is another design, tracked as Rust-only files of Avalonia.Build.Tasks: the source scanner over the declaration macros and `ModelTypeSystem` over the type models (`src/FerroUI.Build.Tasks/scanner/`, `type_system/model_type_system.rs`; docs/porting/xaml.md 2.5, 9.5.5 to 9.5.7) |
+
+### `NameGenerator` - files 0/0, types 0/0, members 0/0
+
+| Upstream file | Rust file | Status | Types | Members | Notes |
+|---|---|---|---|---|---|
+| `AvaloniaNameIncrementalGenerator.cs` | - | n/a | - | - | not-applicable: the name generator and its two writers of C# source: for a class with markup, a field per `x:Name` and `InitializeComponent` (or properties that look the names up). Not ported as a tool (docs/porting/xaml.md 3.8): the compiler of the build crate writes the parts struct `&lt;Class&gt;Xaml` and `initialize_component` with the compiled document (xaml.md 9.4.3). That output is not written yet: it is the step `include_xaml!` per class of stage E5 (CONTINUATION.md, task 2), new code in the emitter and not a port of these files |
+| `INameGenerator.cs` | - | n/a | - | - | not-applicable: the name generator and its two writers of C# source: for a class with markup, a field per `x:Name` and `InitializeComponent` (or properties that look the names up). Not ported as a tool (docs/porting/xaml.md 3.8): the compiler of the build crate writes the parts struct `&lt;Class&gt;Xaml` and `initialize_component` with the compiled document (xaml.md 9.4.3). That output is not written yet: it is the step `include_xaml!` per class of stage E5 (CONTINUATION.md, task 2), new code in the emitter and not a port of these files |
+| `InitializeComponentCodeGenerator.cs` | - | n/a | - | - | not-applicable: the name generator and its two writers of C# source: for a class with markup, a field per `x:Name` and `InitializeComponent` (or properties that look the names up). Not ported as a tool (docs/porting/xaml.md 3.8): the compiler of the build crate writes the parts struct `&lt;Class&gt;Xaml` and `initialize_component` with the compiled document (xaml.md 9.4.3). That output is not written yet: it is the step `include_xaml!` per class of stage E5 (CONTINUATION.md, task 2), new code in the emitter and not a port of these files |
+| `NameGeneratorDiagnostics.cs` | - | n/a | - | - | not-applicable: the Roslyn diagnostic descriptors of the name generator (`AXN0001` to `AXN0004`: the class of a document not found, a document that does not parse): with one compilation of a document these are the diagnostics of the compiler itself, which `Build::run` prints as `cargo::error=` lines (docs/porting/xaml.md 3.8, 4) |
+| `OnlyPropertiesCodeGenerator.cs` | - | n/a | - | - | not-applicable: the name generator and its two writers of C# source: for a class with markup, a field per `x:Name` and `InitializeComponent` (or properties that look the names up). Not ported as a tool (docs/porting/xaml.md 3.8): the compiler of the build crate writes the parts struct `&lt;Class&gt;Xaml` and `initialize_component` with the compiled document (xaml.md 9.4.3). That output is not written yet: it is the step `include_xaml!` per class of stage E5 (CONTINUATION.md, task 2), new code in the emitter and not a port of these files |
+| `Options.cs` | - | n/a | - | - | not-applicable: the host side of a Roslyn incremental generator: the MSBuild properties that switch and configure the two generators (their reader, their names, the two enums of the name generator), the names of the tracked steps of the incremental pipeline and a trimming message. docs/porting/xaml.md 3.8: there is no generator host, a build script calls `ferroui_build::Build` and states its options there |
+| `TrackingNames.cs` | - | n/a | - | - | not-applicable: the host side of a Roslyn incremental generator: the MSBuild properties that switch and configure the two generators (their reader, their names, the two enums of the name generator), the names of the tracked steps of the incremental pipeline and a trimming message. docs/porting/xaml.md 3.8: there is no generator host, a build script calls `ferroui_build::Build` and states its options there |
+
+### `PropertyGenerator` - files 0/0, types 0/0, members 0/0
+
+| Upstream file | Rust file | Status | Types | Members | Notes |
+|---|---|---|---|---|---|
+| `AvaloniaPropertyIncrementalGenerator.cs` | - | n/a | - | - | not-applicable: the generator of property registrations for partial members marked `[GeneratedStyledProperty]`, `[GeneratedDirectProperty]` or `[GeneratedAttachedProperty]`: its model, the builder of the model from the syntax and the writer of the C# source. Properties are declared with `ferro_property!` / `ferro_properties!` of `src/FerroUI.Base/ferro_property.rs`, which take the same options as arguments (docs/porting/xaml.md 3.8) |
+| `PropertyGenEmitter.cs` | - | n/a | - | - | not-applicable: the generator of property registrations for partial members marked `[GeneratedStyledProperty]`, `[GeneratedDirectProperty]` or `[GeneratedAttachedProperty]`: its model, the builder of the model from the syntax and the writer of the C# source. Properties are declared with `ferro_property!` / `ferro_properties!` of `src/FerroUI.Base/ferro_property.rs`, which take the same options as arguments (docs/porting/xaml.md 3.8) |
+| `PropertyGenModelBuilder.cs` | - | n/a | - | - | not-applicable: the generator of property registrations for partial members marked `[GeneratedStyledProperty]`, `[GeneratedDirectProperty]` or `[GeneratedAttachedProperty]`: its model, the builder of the model from the syntax and the writer of the C# source. Properties are declared with `ferro_property!` / `ferro_properties!` of `src/FerroUI.Base/ferro_property.rs`, which take the same options as arguments (docs/porting/xaml.md 3.8) |
+| `PropertyGenModels.cs` | - | n/a | - | - | not-applicable: the generator of property registrations for partial members marked `[GeneratedStyledProperty]`, `[GeneratedDirectProperty]` or `[GeneratedAttachedProperty]`: its model, the builder of the model from the syntax and the writer of the C# source. Properties are declared with `ferro_property!` / `ferro_properties!` of `src/FerroUI.Base/ferro_property.rs`, which take the same options as arguments (docs/porting/xaml.md 3.8) |
+| `TrackingNames.cs` | - | n/a | - | - | not-applicable: the host side of a Roslyn incremental generator: the MSBuild properties that switch and configure the two generators (their reader, their names, the two enums of the name generator), the names of the tracked steps of the incremental pipeline and a trimming message. docs/porting/xaml.md 3.8: there is no generator host, a build script calls `ferroui_build::Build` and states its options there |
+| `TypedConstantFormatter.cs` | - | n/a | - | - | not-applicable: the generator of property registrations for partial members marked `[GeneratedStyledProperty]`, `[GeneratedDirectProperty]` or `[GeneratedAttachedProperty]`: its model, the builder of the model from the syntax and the writer of the C# source. Properties are declared with `ferro_property!` / `ferro_properties!` of `src/FerroUI.Base/ferro_property.rs`, which take the same options as arguments (docs/porting/xaml.md 3.8) |

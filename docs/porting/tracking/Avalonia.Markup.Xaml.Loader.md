@@ -10,9 +10,9 @@ Generated from upstream commit `17350180c33b063f0e98abbfd19aa3cae63f5d56`. Back 
 | FerroUI | `src/Markup/FerroUI.Markup.Xaml.Loader` (exists) |
 | Crate | `ferroui-markup-xaml-loader` |
 | Phase / priority | 2 - xaml + themes / P1 |
-| Files | 65/66 (98.5%), 1 not applicable |
-| Types | 119/126 (7 waived) (100.0%) |
-| Members | 398/505 (107 waived) (100.0%) |
+| Files | 66/66 (100.0%), 1 not applicable |
+| Types | 120/126 (6 waived) (100.0%) |
+| Members | 400/505 (105 waived) (100.0%) |
 | Contracts (interfaces) | 5/6 |
 | Property registrations | 0/0 |
 | Routed events | 0/0 |
@@ -40,7 +40,7 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 | `AvaloniaXamlIlRuntimeCompiler.cs` | `ferro_xaml_il_runtime_compiler.rs` | present | 1/1 | 2/4 (2 waived) |  |
 | `CompilerDynamicDependencies.cs` | - | n/a | - | - | not-applicable: trimming annotation (`DynamicallyAccessedMembers`) for the reflection the IL loader does: no reflection, nothing to annotate |
 
-### `CompilerExtensions` - files 14/15, types 21/23 (2 waived), members 79/107 (28 waived)
+### `CompilerExtensions` - files 15/15, types 22/23 (1 waived), members 81/107 (26 waived)
 
 | Upstream file | Rust file | Status | Types | Members | Notes |
 |---|---|---|---|---|---|
@@ -52,7 +52,7 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 | `IXamlDocumentResource.cs` | `compiler_extensions/i_xaml_document_resource.rs` | present | 1/1 | 7/7 |  |
 | `XamlAstNewClrObjectHelper.cs` | `compiler_extensions/xaml_ast_new_clr_object_helper.rs` | present | 1/1 | 1/1 |  |
 | `XamlDocumentResource.cs` | `compiler_extensions/xaml_document_resource.rs` | present | 1/1 | 10/10 |  |
-| `XamlDocumentTypeBuilderProvider.cs` | `compiler_extensions/xaml_document_type_builder_provider.rs` | missing | 0/1 (1 waived) | 0/5 (5 waived) |  |
+| `XamlDocumentTypeBuilderProvider.cs` | `compiler_extensions/xaml_document_resource.rs` | present | 1/1 | 2/5 (3 waived) | replaced: the IL type and method builders of a document are the trait `IXamlDocumentTypeBuilderProvider` of `xaml_document_resource.rs`: handles to the build and populate methods of a document, which each back end implements (`RuntimeDocumentTypeBuilderProvider` of the run-time loader). docs/porting/xaml.md 6.2: replaced by an output module per document |
 | `XamlDocumentUsage.cs` | `compiler_extensions/xaml_document_usage.rs` | present | 1/1 | 3/3 |  |
 | `XamlIlAvaloniaPropertyHelper.cs` | `compiler_extensions/xaml_il_ferro_property_helper.rs` | present | 7/8 (1 waived) | 11/25 (14 waived) |  |
 | `XamlIlBindingPathHelper.cs` | `compiler_extensions/xaml_il_binding_path_helper.rs` | present | 2/2 | 2/2 |  |

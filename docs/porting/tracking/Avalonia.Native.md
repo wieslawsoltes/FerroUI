@@ -12,7 +12,7 @@ Generated from upstream commit `17350180c33b063f0e98abbfd19aa3cae63f5d56`. Back 
 | Phase / priority | 1 - desktop (macOS) / P0 |
 | Files | 47/47 (100.0%), 2 not applicable |
 | Types | 63/75 (11 waived) (98.4%) |
-| Members | 437/528 (76 waived) (96.7%) |
+| Members | 443/528 (77 waived) (98.2%) |
 | Contracts (interfaces) | 1/4 |
 | Property registrations | 1/1 |
 | Routed events | 0/0 |
@@ -30,13 +30,13 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 
 ## Files
 
-### `(project root)` - files 47/47, types 63/75 (11 waived), members 437/528 (76 waived)
+### `(project root)` - files 47/47, types 63/75 (11 waived), members 443/528 (77 waived)
 
 | Upstream file | Rust file | Status | Types | Members | Notes |
 |---|---|---|---|---|---|
 | `AvaloniaNativeApplicationPlatform.cs` | `ferro_native_application_platform.rs` | present | 1/1 | 11/11 |  |
 | `AvaloniaNativeDragSource.cs` | `ferro_native_drag_source.rs` | present | 1/1 | 2/2 |  |
-| `AvaloniaNativeGlPlatformGraphics.cs` | - | n/a | - | - | not-applicable: not ported for now (row 18 of CRITICAL-PATH.md): the desktop build of the Skia backend has Graphite on Metal and no Ganesh, so nothing could draw through the OpenGL platform graphics of the backend, and the external objects feature they carry is not ported in `ferroui-opengl` either |
+| `AvaloniaNativeGlPlatformGraphics.cs` | - | n/a | - | - | not-applicable: not ported for now (row 18 of CRITICAL-PATH.md): the desktop build of the Skia backend has Graphite on Metal and no Ganesh, so nothing could draw through the OpenGL platform graphics of the macOS backend. Applicable when the desktop build has Ganesh on OpenGL: the file is then ported to `avalonia_native_gl_platform_graphics.rs` under the mapped name, with the Skia side of the external objects on OpenGL (`Gpu/OpenGl/GlSkiaExternalObjectsFeature.cs`, reported as missing); the contracts it implements are in `ferroui-opengl` already (`i_gl_context_external_objects_feature.rs`) |
 | `AvaloniaNativeMenuExporter.cs` | `ferro_native_menu_exporter.rs` | present | 2/2 | 10/13 (3 waived) |  |
 | `AvaloniaNativePlatform.cs` | `ferro_native_platform.rs` | present | 1/1 | 13/13 |  |
 | `AvaloniaNativePlatformExtensions.cs` | `ferro_native_platform_extensions.rs` | present | 4/4 | 10/13 (3 waived) |  |
@@ -59,7 +59,7 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 | `DoubleClickHelper.cs` | `double_click_helper.rs` | present | 1/1 | 1/1 |  |
 | `EmbeddableTopLevelImpl.cs` | `embeddable_top_level_impl.rs` | present | 1/1 | 1/1 |  |
 | `Extensions.cs` | `extensions.rs` | present | 1/1 | 2/2 |  |
-| `GpuHandleWrapFeature.cs` | - | n/a | - | - | not-applicable: not ported for now (row 18 of CRITICAL-PATH.md): the desktop build of the Skia backend has Graphite on Metal and no Ganesh, so nothing could draw through the OpenGL platform graphics of the backend, and the external objects feature they carry is not ported in `ferroui-opengl` either |
+| `GpuHandleWrapFeature.cs` | - | n/a | - | - | not-applicable: not ported for now: the feature that retains an `IOSurface` or a shared Metal event while the compositor imports it (`IExternalObjectsHandleWrapRenderInterfaceContextFeature`, whose contract is in the base crate). Upstream creates it in the Metal device (`Metal.cs`) and in the OpenGL context, and `MetalDevice::try_get_feature` of `metal.rs` does not offer it. Applicable with the external objects feature on Metal (`MetalExternalObjectsFeature` of `Metal.cs` and `Gpu/Metal/SkiaMetalExternalObjectsFeature.cs` of the Skia backend, both reported as missing): the entry is removed when that work starts |
 | `Helpers.cs` | `helpers.rs` | present | 0/1 (1 waived) | 0/10 (10 waived) |  |
 | `IAvnMenu.cs` | `frn_menu.rs` | present | 1/3 (2 waived) | 3/16 (13 waived) | interface merged into implementation file |
 | `IAvnMenuItem.cs` | `frn_menu_item.rs` | present | 2/2 | 3/4 (1 waived) | merged: the members the file adds to the generated proxy of the native menu item are members of `FrnMenuItem`, the struct that wraps the native item |
@@ -76,7 +76,7 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 | `PopupImpl.cs` | `popup_impl.rs` | present | 1/1 | 7/8 (1 waived) |  |
 | `PredicateCallback.cs` | `predicate_callback.rs` | present | 1/1 | 2/2 |  |
 | `ScreenImpl.cs` | `screen_impl.rs` | present | 1/2 (1 waived) | 7/9 (2 waived) |  |
-| `StorageItem.cs` | `storage_item.rs` | partial | 3/3 | 17/24 |  |
+| `StorageItem.cs` | `storage_item.rs` | present | 3/3 | 23/24 (1 waived) |  |
 | `StorageProviderApi.cs` | `storage_provider_api.rs` | present | 3/3 | 23/26 (3 waived) |  |
 | `StorageProviderImpl.cs` | `storage_provider_impl.rs` | present | 1/1 | 14/14 |  |
 | `TopLevelImpl.cs` | `top_level_impl.rs` | present | 3/3 | 56/62 (6 waived) |  |
@@ -91,19 +91,6 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
   - waived (created with a struct literal by the object that owns the native one (`MetalPlatformSurface::create_render_target`, `MetalRenderTarget::begin_rendering`)): `.ctor`
 - `MetalDrawingSession` (class): complete
   - waived (created with a struct literal by the object that owns the native one (`MetalPlatformSurface::create_render_target`, `MetalRenderTarget::begin_rendering`)): `.ctor`
-
-</details>
-
-<details><summary><code>StorageItem.cs</code> - 7 missing</summary>
-
-- `StorageItem` (class): 7 missing
-  - `Task<StorageItemProperties> GetBasicPropertiesAsync()`
-  - `bool CanBookmark { get; }`
-  - `Task<string?> SaveBookmarkAsync()`
-  - `Task ReleaseBookmarkAsync()`
-  - `Task<IStorageFolder?> GetParentAsync()`
-  - `Task DeleteAsync()`
-  - `Task<IStorageItem?> MoveAsync(IStorageFolder destination)`
 
 </details>
 

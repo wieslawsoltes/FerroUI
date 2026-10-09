@@ -12,7 +12,7 @@ Generated from upstream commit `17350180c33b063f0e98abbfd19aa3cae63f5d56`. Back 
 | Phase / priority | 3 - browser / P2 |
 | Files | 50/50 (100.0%), 2 not applicable |
 | Types | 60/62 (2 waived) (100.0%) |
-| Members | 332/428 (90 waived) (98.2%) |
+| Members | 333/428 (93 waived) (99.4%) |
 | Contracts (interfaces) | 0/0 |
 | Property registrations | 0/0 |
 | Routed events | 0/0 |
@@ -85,41 +85,18 @@ Generated from upstream commit `17350180c33b063f0e98abbfd19aa3cae63f5d56`. Back 
 | `StreamHelper.cs` | `interop/stream_helper.rs` | present | 1/1 | 6/6 |  |
 | `TimerHelper.cs` | `interop/timer_helper.rs` | present | 1/1 | 2/3 (1 waived) |  |
 
-### `Rendering` - files 8/8, types 9/9, members 44/53 (5 waived)
+### `Rendering` - files 8/8, types 9/9, members 45/53 (8 waived)
 
 | Upstream file | Rust file | Status | Types | Members | Notes |
 |---|---|---|---|---|---|
 | `BrowserRenderTimer.cs` | `rendering/browser_render_timer.rs` | present | 1/1 | 4/4 |  |
 | `BrowserSharedRenderLoop.cs` | `rendering/browser_shared_render_loop.rs` | present | 1/1 | 2/2 |  |
-| `BrowserSoftwareRenderTarget.cs` | `rendering/browser_software_render_target.rs` | partial | 1/1 | 2/4 (1 waived) |  |
+| `BrowserSoftwareRenderTarget.cs` | `rendering/browser_software_render_target.rs` | present | 1/1 | 2/4 (2 waived) |  |
 | `BrowserSurface.cs` | `rendering/browser_surface.rs` | present | 1/1 | 11/13 (2 waived) |  |
-| `BrowserWebGlRenderTarget.cs` | `rendering/browser_web_gl_render_target.rs` | partial | 2/2 | 17/18 |  |
+| `BrowserWebGlRenderTarget.cs` | `rendering/browser_web_gl_render_target.rs` | present | 2/2 | 17/18 (1 waived) |  |
 | `RenderTargetBrowserSurface.cs` | `rendering/render_target_browser_surface.rs` | present | 1/1 | 5/5 |  |
-| `RenderWorker.cs` | `rendering/render_worker.rs` | partial | 1/1 | 0/2 |  |
+| `RenderWorker.cs` | `rendering/render_worker.rs` | present | 1/1 | 1/2 (1 waived) |  |
 | `WebRenderTarget.cs` | `rendering/web_render_target.rs` | present | 1/1 | 3/5 (2 waived) | renamed: the file is named after its script-side counterpart upstream; it declares the render target base |
-
-<details><summary><code>BrowserSoftwareRenderTarget.cs</code> - 1 missing</summary>
-
-- `BrowserSoftwareRenderTarget` (class): 1 missing
-  - `override IPlatformGraphicsContext? PlatformGraphicsContext { get; }`
-  - waived (present: the functions are declared in the `wasm-bindgen` extern block of `rendering/browser_software_render_target.rs` (imports of the script module), which the scanner does not read as members of a type): `PutPixelData`
-
-</details>
-
-<details><summary><code>BrowserWebGlRenderTarget.cs</code> - 1 missing</summary>
-
-- `BrowserWebGlRenderTarget` (class): 1 missing
-  - `override IPlatformGraphicsContext? PlatformGraphicsContext { get; }`
-
-</details>
-
-<details><summary><code>RenderWorker.cs</code> - 2 missing</summary>
-
-- `RenderWorker` (class): 2 missing
-  - `static int WorkerThreadId` *(internal)*
-  - `static Task InitializeAsync()`
-
-</details>
 
 ### `Storage` - files 4/4, types 7/7, members 63/75 (12 waived)
 

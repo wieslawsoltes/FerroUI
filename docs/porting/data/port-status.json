@@ -8,23 +8,23 @@
    "scope": "in",
    "detail": "full",
    "files": [
-    61,
-    61,
+    62,
+    62,
     0
    ],
    "types": [
-    171,
-    174,
-    3
+    172,
+    177,
+    5
    ],
    "members": [
-    706,
-    857,
-    151
+    713,
+    878,
+    165
    ],
    "interfaces": [
-    46,
-    47
+    47,
+    48
    ],
    "propertyRegistrations": [
     0,
@@ -34,12 +34,12 @@
     0,
     0
    ],
-   "notApplicableFiles": 27,
+   "notApplicableFiles": 26,
    "matchKinds": {
     "alias fn": 3,
     "const": 67,
     "field": 159,
-    "fn": 426,
+    "fn": 433,
     "free fn": 6,
     "overload fn": 16,
     "trait": 3,
@@ -100,6 +100,9 @@
     ],
     "Exceptions.cs": [
      "exceptions.rs"
+    ],
+    "IL/RuntimeContext.cs": [
+     "emit/xaml_language_emit_mappings.rs"
     ],
     "Parsers/CommaSeparatedParenthesesTreeParser.cs": [
      "parsers/comma_separated_parentheses_tree_parser.rs"
@@ -510,14 +513,14 @@
     0
    ],
    "types": [
-    1520,
+    1523,
     1659,
     136
    ],
    "members": [
-    10271,
+    10280,
     11433,
-    1115
+    1153
    ],
    "interfaces": [
     247,
@@ -533,11 +536,11 @@
    ],
    "notApplicableFiles": 51,
    "matchKinds": {
-    "alias fn": 45,
+    "alias fn": 50,
     "const": 381,
     "derive": 64,
     "field": 638,
-    "fn": 6570,
+    "fn": 6574,
     "free fn": 15,
     "free item": 16,
     "getter fn": 4,
@@ -4459,19 +4462,19 @@
    "scope": "in",
    "detail": "full",
    "files": [
-    0,
-    9,
+    4,
+    6,
     0
    ],
    "types": [
-    0,
-    10,
+    5,
+    7,
     0
    ],
    "members": [
-    0,
-    44,
-    0
+    3,
+    35,
+    28
    ],
    "interfaces": [
     0,
@@ -4485,9 +4488,25 @@
     0,
     0
    ],
-   "notApplicableFiles": 1,
-   "matchKinds": {},
-   "presentFiles": {},
+   "notApplicableFiles": 4,
+   "matchKinds": {
+    "fn": 2,
+    "overload fn": 1
+   },
+   "presentFiles": {
+    "CompileAvaloniaXamlTask.cs": [
+     "lib.rs"
+    ],
+    "GenerateAvaloniaResourcesTask.cs": [
+     "lib.rs"
+    ],
+    "XamlCompilerTaskExecutor.Helpers.cs": [
+     "lib.rs"
+    ],
+    "XamlCompilerTaskExecutor.cs": [
+     "lib.rs"
+    ]
+   },
    "rustOnly": [
     "json.rs",
     "model.rs",
@@ -6716,26 +6735,26 @@
   {
    "name": "Avalonia.Metal",
    "path": "src/Avalonia.Metal",
-   "rust": "src/FerroUI.Metal",
+   "rust": "src/Skia/FerroUI.Skia/metal",
    "scope": "in",
    "detail": "full",
    "files": [
-    0,
+    2,
     2,
     0
    ],
    "types": [
-    0,
+    7,
     7,
     0
    ],
    "members": [
-    0,
+    21,
     21,
     0
    ],
    "interfaces": [
-    0,
+    7,
     7
    ],
    "propertyRegistrations": [
@@ -6747,8 +6766,17 @@
     0
    ],
    "notApplicableFiles": 0,
-   "matchKinds": {},
-   "presentFiles": {},
+   "matchKinds": {
+    "fn": 21
+   },
+   "presentFiles": {
+    "IMetalDevice.cs": [
+     "i_metal_device.rs"
+    ],
+    "IMetalExternalObjectsFeature.cs": [
+     "i_metal_external_objects_feature.rs"
+    ]
+   },
    "rustOnly": []
   },
   {
@@ -6815,9 +6843,9 @@
     11
    ],
    "members": [
-    437,
+    443,
     528,
-    76
+    77
    ],
    "interfaces": [
     1,
@@ -6833,6 +6861,7 @@
    ],
    "notApplicableFiles": 2,
    "matchKinds": {
+    "alias fn": 6,
     "field": 18,
     "fn": 394,
     "free fn": 6,
@@ -7438,9 +7467,9 @@
     2
    ],
    "members": [
-    332,
+    333,
     428,
-    90
+    93
    ],
    "interfaces": [
     0,
@@ -7456,13 +7485,14 @@
    ],
    "notApplicableFiles": 2,
    "matchKinds": {
+    "alias fn": 1,
     "const": 1,
     "field": 8,
-    "fn": 237,
+    "fn": 236,
     "free fn": 70,
     "free item": 8,
     "overload fn": 4,
-    "trait": 1,
+    "trait": 2,
     "variant": 3
    },
    "presentFiles": {
@@ -7696,7 +7726,7 @@
    "members": [
     223,
     235,
-    9
+    11
    ],
    "interfaces": [
     2,
@@ -7972,19 +8002,19 @@
    "scope": "in",
    "detail": "full",
    "files": [
-    45,
-    47,
+    46,
+    46,
     0
    ],
    "types": [
     61,
-    64,
-    3
+    63,
+    2
    ],
    "members": [
     199,
-    240,
-    41
+    239,
+    40
    ],
    "interfaces": [
     9,
@@ -7998,7 +8028,7 @@
     0,
     0
    ],
-   "notApplicableFiles": 1,
+   "notApplicableFiles": 2,
    "matchKinds": {
     "field": 26,
     "fn": 157,
@@ -8083,6 +8113,9 @@
     "MarkupExtensions/StaticResourceExtension.cs": [
      "markup_extensions/static_resource_extension.rs"
     ],
+    "Parsers/PropertyParser.cs": [
+     "parsers/mod.rs"
+    ],
     "RuntimeXamlLoaderConfiguration.cs": [
      "runtime_xaml_loader_configuration.rs"
     ],
@@ -8162,19 +8195,19 @@
    "scope": "in",
    "detail": "full",
    "files": [
-    65,
+    66,
     66,
     0
    ],
    "types": [
-    119,
+    120,
     126,
-    7
+    6
    ],
    "members": [
-    398,
+    400,
     505,
-    107
+    105
    ],
    "interfaces": [
     5,
@@ -8192,7 +8225,7 @@
    "matchKinds": {
     "const": 24,
     "field": 147,
-    "fn": 207,
+    "fn": 209,
     "overload fn": 5,
     "variant": 15
    },
@@ -8374,6 +8407,9 @@
     "CompilerExtensions/XamlDocumentResource.cs": [
      "compiler_extensions/xaml_document_resource.rs"
     ],
+    "CompilerExtensions/XamlDocumentTypeBuilderProvider.cs": [
+     "compiler_extensions/xaml_document_resource.rs"
+    ],
     "CompilerExtensions/XamlDocumentUsage.cs": [
      "compiler_extensions/xaml_document_usage.rs"
     ],
@@ -8432,18 +8468,18 @@
    "detail": "full",
    "files": [
     48,
-    54,
+    51,
     0
    ],
    "types": [
-    52,
-    66,
+    56,
+    62,
     0
    ],
    "members": [
-    335,
-    451,
-    0
+    345,
+    420,
+    32
    ],
    "interfaces": [
     9,
@@ -8457,13 +8493,13 @@
     0,
     0
    ],
-   "notApplicableFiles": 0,
+   "notApplicableFiles": 3,
    "matchKinds": {
-    "field": 28,
-    "fn": 262,
+    "field": 29,
+    "fn": 269,
     "free fn": 33,
     "free item": 1,
-    "overload fn": 10,
+    "overload fn": 12,
     "trait": 1
    },
    "presentFiles": {
@@ -8618,8 +8654,6 @@
     "gpu/i_skia_gr_context.rs",
     "gpu/metal/tests.rs",
     "locked_framebuffer.rs",
-    "metal/i_metal_device.rs",
-    "metal/i_metal_external_objects_feature.rs",
     "tests.rs",
     "unit_tests/hit_testing.rs",
     "unit_tests/media/custom_font_manager_impl.rs",
@@ -8826,22 +8860,22 @@
    "detail": "full",
    "files": [
     0,
-    30,
+    0,
     0
    ],
    "types": [
     0,
-    53,
+    0,
     0
    ],
    "members": [
     0,
-    264,
-    2
+    0,
+    0
    ],
    "interfaces": [
     0,
-    4
+    0
    ],
    "propertyRegistrations": [
     0,
@@ -8851,7 +8885,7 @@
     0,
     0
    ],
-   "notApplicableFiles": 1,
+   "notApplicableFiles": 31,
    "matchKinds": {},
    "presentFiles": {},
    "rustOnly": []

@@ -10,29 +10,29 @@ Generated from upstream commit `17350180c33b063f0e98abbfd19aa3cae63f5d56`. Back 
 | FerroUI | `src/FerroUI.Build.Tasks` (exists) |
 | Crate | `ferroui-build` |
 | Phase / priority | 2 - xaml + themes / P1 |
-| Files | 0/9 (0.0%), 1 not applicable |
-| Types | 0/10 (0.0%) |
-| Members | 0/44 (0.0%) |
+| Files | 4/6 (66.7%), 4 not applicable |
+| Types | 5/7 (71.4%) |
+| Members | 3/35 (28 waived) (42.9%) |
 | Contracts (interfaces) | 0/0 |
 | Property registrations | 0/0 |
 | Routed events | 0/0 |
 
 ## Files
 
-### `(project root)` - files 0/9, types 0/10, members 0/44
+### `(project root)` - files 4/6, types 5/7, members 3/35 (28 waived)
 
 | Upstream file | Rust file | Status | Types | Members | Notes |
 |---|---|---|---|---|---|
-| `ComInteropHelper.cs` | `com_interop_helper.rs` | missing | 0/1 | 0/1 |  |
-| `CompileAvaloniaXamlTask.cs` | `compile_ferro_xaml_task.rs` | missing | 0/1 | 0/20 |  |
+| `ComInteropHelper.cs` | - | n/a | - | - | not-applicable: patches the compiled assembly with Mono.Cecil for the MicroCom interop (interop classes, module initialisers): a Rust crate has no step after the compiler and no IL (docs/porting/xaml.md 6.3: dropped) |
+| `CompileAvaloniaXamlTask.cs` | `lib.rs` | present | 1/1 | 1/20 (19 waived) | replaced: the MSBuild task that compiles the markup of an assembly after the C# compiler: `Build` of `lib.rs` (`from_env`, `assembly`, `compile_xaml`, `compile_group`, `run`), called by the build script of a crate. The properties of the task are items and switches of MSBuild (the assembly files and references, signing, IL verification, the debugger) with no counterpart; `CreateSourceInfo` is `XamlGroup::create_source_info` (docs/porting/xaml.md 6.3, 9.6) |
 | `DeterministicIdGenerator.cs` | `deterministic_id_generator.rs` | missing | 0/1 | 0/1 |  |
-| `Extensions.cs` | `extensions.rs` | missing | 0/1 | 0/6 |  |
-| `GenerateAvaloniaResourcesTask.cs` | `generate_ferro_resources_task.rs` | missing | 0/1 | 0/7 |  |
+| `Extensions.cs` | - | n/a | - | - | not-applicable: extension methods that log errors, warnings and messages through the MSBuild engine (`IBuildEngine`) and format an exception for it: part of the MSBuild task shells docs/porting/xaml.md 6.3 drops. `Build::run` prints its errors as `cargo::error=` lines; severities and codes come with the diagnostics filter, which is to be ported |
+| `GenerateAvaloniaResourcesTask.cs` | `lib.rs` | present | 1/1 | 1/7 (6 waived) | replaced: the MSBuild task that packs the resources of an assembly into one stream with an index: `Build::embed_assets` of `lib.rs`, which lists the files of the stated directories, leaves out the compiled documents and writes the asset table of the crate (step 3 of `Build::execute`, `crate_file`). docs/porting/xaml.md 6.3: becomes `embed_assets` |
 | `SpanCompat.cs` | - | n/a | - | - | no non-private types (assembly attributes, global usings or file-local helpers) |
 | `XamlCompilerDiagnosticsFilter.cs` | `xaml_compiler_diagnostics_filter.rs` | missing | 0/1 | 0/3 |  |
-| `XamlCompilerTaskExecutor.Helpers.cs` | `xaml_compiler_task_executor_helpers.rs` | missing | 0/1 | 0/0 |  |
-| `XamlCompilerTaskExecutor.cs` | `xaml_compiler_task_executor.rs` | missing | 0/2 | 0/4 |  |
-| `XamlFileInfo.cs` | `xaml_file_info.rs` | missing | 0/1 | 0/2 |  |
+| `XamlCompilerTaskExecutor.Helpers.cs` | `lib.rs` | present | 1/1 | 0/0 | replaced: the compilation of the documents of an assembly into its IL with Mono.Cecil (the populate and build methods, the trampolines, the loader dispatch, the rewrite of the calls of the loader): `Build::execute` of `lib.rs`, which compiles each group with `rust_emitter::generate_file` of the loader crate and writes Rust source, the loader table and the `.xamlmeta`; its result is `Outcome` (docs/porting/xaml.md 6.3: becomes `ferroui_build::compile_xaml`; 9.4.1 lists what upstream generates) |
+| `XamlCompilerTaskExecutor.cs` | `lib.rs` | present | 2/2 | 1/4 (3 waived) | replaced: the compilation of the documents of an assembly into its IL with Mono.Cecil (the populate and build methods, the trampolines, the loader dispatch, the rewrite of the calls of the loader): `Build::execute` of `lib.rs`, which compiles each group with `rust_emitter::generate_file` of the loader crate and writes Rust source, the loader table and the `.xamlmeta`; its result is `Outcome` (docs/porting/xaml.md 6.3: becomes `ferroui_build::compile_xaml`; 9.4.1 lists what upstream generates) |
+| `XamlFileInfo.cs` | - | n/a | - | - | not-applicable: reads `x:Class` of a document for the index from class to resource path that the resources task packs (`!AvaloniaResourceXamlInfo`). docs/porting/xaml.md 6.3 drops the index (`PortableXaml/AvaloniaResourceXamlInfo.cs`): a compiled document carries its class in the `.xamlmeta` of the crate (`DocumentModel::class_rust_path`) |
 
 ## Rust-only files
 
