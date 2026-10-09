@@ -120,11 +120,13 @@
 #![forbid(unsafe_code)]
 
 pub mod call_forms;
+pub mod deterministic_id_generator;
 mod json;
 pub mod model;
 pub mod model_set;
 pub mod scanner;
 pub mod type_system;
+pub mod xaml_compiler_diagnostics_filter;
 
 use std::env;
 use std::fs;

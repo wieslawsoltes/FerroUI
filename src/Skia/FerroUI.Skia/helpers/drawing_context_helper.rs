@@ -1,7 +1,39 @@
 use crate::drawing_context_impl::{CanvasSource, CreateInfo, DrawingContextImpl};
-use ferroui_base::media::IPen;
-use ferroui_base::Vector;
+use crate::SkiaPlatform;
+use ferroui_base::media::{DrawingContext, IPen, PlatformDrawingContext};
+use ferroui_base::platform::IDrawingContextImpl;
+use ferroui_base::rendering::ImmediateRenderer;
+use ferroui_base::{Rect, Ref, Vector, Visual};
 use skia_safe::{PathEffect, Surface};
+use std::future::{ready, Ready};
+
+/// Renders a visual onto the canvas of a Skia surface, the whole of it at
+/// the default DPI; see [`render_async_clipped`].
+pub fn render_async(surface: &Surface, visual: &Ref<Visual>) -> Ready<()> {
+    render_async_clipped(surface, visual, visual.bounds(), SkiaPlatform::default_dpi())
+}
+
+/// Renders a visual onto the canvas of a Skia surface.
+/// This is useful in scenarios where the surface is not controlled by the
+/// application, but received from another API.
+///
+/// `clip_rect` is the clipping rectangle and `dpi` the DPI of the drawings.
+/// The visual is rendered when the function returns: the result is a
+/// completed future, as the task of the original is a completed one.
+// Deviation (DEVIATIONS.md, Skia backend): upstream takes an `SKCanvas`;
+// a drawing context owns what it draws to here, so the function takes the
+// surface the canvas belongs to, as `wrap_skia_surface` does.
+pub fn render_async_clipped(surface: &Surface, visual: &Ref<Visual>, clip_rect: Rect, dpi: Vector) -> Ready<()> {
+    let mut drawing_context_impl = wrap_skia_surface(surface, dpi);
+    {
+        let mut core = PlatformDrawingContext::borrowed(&mut drawing_context_impl);
+        let mut drawing_context = DrawingContext::new(&mut core);
+        ImmediateRenderer::render_clipped(&mut drawing_context, visual, clip_rect);
+        drawing_context.dispose();
+    }
+    drawing_context_impl.dispose();
+    ready(())
+}
 
 /// Wraps a Skia surface in a drawing context that draws onto its canvas.
 ///
