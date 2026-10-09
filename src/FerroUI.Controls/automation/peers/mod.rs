@@ -88,6 +88,8 @@ pub use calendar_date_picker_automation_peer::CalendarDatePickerAutomationPeer;
 pub use calendar_day_button_automation_peer::CalendarDayButtonAutomationPeer;
 pub use carousel_page_automation_peer::CarouselPageAutomationPeer;
 pub use combo_box_automation_peer::ComboBoxAutomationPeer;
+// Named by the type table of the crate (`register_types.rs`); not part of the public interface.
+pub(crate) use combo_box_automation_peer::UnrealizedSelectionPeer;
 pub use content_control_automation_peer::ContentControlAutomationPeer;
 pub use content_page_automation_peer::ContentPageAutomationPeer;
 pub use control_automation_peer::{

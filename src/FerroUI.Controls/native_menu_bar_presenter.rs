@@ -161,7 +161,7 @@ impl NativeMenuBarPresenter {
 /// The menu item that shows a native menu item (and the items of its
 /// submenu) inside a window.
 #[repr(C)]
-struct NativeMenuItemPresenter {
+pub(crate) struct NativeMenuItemPresenter {
     base: MenuItem,
 }
 

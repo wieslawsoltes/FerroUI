@@ -172,6 +172,7 @@ const TYPES: &[&TypeInfo] = types![
     crate::automation::peers::TreeViewAutomationPeer,
     crate::automation::peers::TreeViewItemAutomationPeer,
     crate::automation::peers::UnrealizedElementAutomationPeer,
+    crate::automation::peers::UnrealizedSelectionPeer,
     crate::automation::peers::WindowAutomationPeer,
     crate::automation::peers::WindowBaseAutomationPeer,
     // FerroUI.Controls.Automation.Peers
@@ -237,6 +238,7 @@ const TYPES: &[&TypeInfo] = types![
     crate::native_menu_bar_presenter::NativeMenuBarPresenter,
     crate::native_menu_item::NativeMenuItem,
     crate::native_menu_item_base::NativeMenuItemBase,
+    crate::native_menu_bar_presenter::NativeMenuItemPresenter,
     crate::native_menu_item_separator::NativeMenuItemSeparator,
     crate::panel::Panel,
     crate::path_icon::PathIcon,
@@ -264,6 +266,7 @@ const TYPES: &[&TypeInfo] = types![
     crate::tool_tip::ToolTip,
     crate::top_level::TopLevel,
     crate::top_level_host::TopLevelHost,
+    crate::top_level_host_peers::TopLevelHostAutomationPeer,
     crate::tray_icon::TrayIcon,
     crate::tree_view::TreeView,
     crate::tree_view_item::TreeViewItem,
