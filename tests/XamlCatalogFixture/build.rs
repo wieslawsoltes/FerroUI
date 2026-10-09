@@ -22,28 +22,22 @@
 //!   run-time loader (`tests::compare`), in the application `test_applications.txt` of the
 //!   sample names for the tests of the document.
 //!
-//! Two crates the sample is built on have no build script that exports their type model
-//! yet (the OpenGL controls, the view model library of the samples): their models are
-//! exported here, into the output directory of this script, as the build scripts of the
-//! other crates export theirs. The colour picker exports its own, with its compiled
-//! documents, which `App.xaml` includes.
+//! Every crate the sample is built on exports its type model from its own build script
+//! (the colour picker with its compiled documents, which `App.xaml` includes), and Cargo
+//! hands the files to this script (`DEP_<CRATE>_XAML_XAMLMETA`).
 
 use std::env;
 use std::fmt::Write as _;
 use std::fs;
 use std::path::{Path, PathBuf};
 
-use ferroui_build::export::{dependencies_from_env, Export};
+use ferroui_build::export::dependencies_from_env;
 use ferroui_build::model::AssemblyModel;
 use ferroui_build::{Build, TypeSystem, XamlGroup};
 
 #[allow(dead_code)]
 #[path = "documents.rs"]
 mod documents;
-
-/// The crates whose models this script exports: the directory below the root of the
-/// repository and the package.
-const EXPORTED: &[(&str, &str)] = &[("src/FerroUI.OpenGL", "ferroui-opengl"), ("samples/MiniMvvm", "mini-mvvm")];
 
 /// The directories of the sample that hold no documents.
 const SKIPPED_DIRECTORIES: &[&str] = &["target", "tests", "examples", "build", "PlaceholderAssets"];
@@ -127,7 +121,6 @@ fn main() {
     let root = PathBuf::from(env::var_os("CARGO_MANIFEST_DIR").expect("CARGO_MANIFEST_DIR"));
     let out_dir = PathBuf::from(env::var_os("OUT_DIR").expect("OUT_DIR"));
     let sample = root.join(documents::SAMPLE);
-    let repository = root.join("..").join("..");
     let full = env::var_os("CARGO_FEATURE_CATALOG").is_some();
 
     let mut files = Vec::new();
@@ -149,22 +142,6 @@ fn main() {
         assert!(!documents::REFUSED.iter().any(|(refused, _)| refused == name), "{name} is a page of the fixture and a refused document");
     }
 
-    // The models of the crates that do not export theirs.
-    let mut dependencies = dependencies_from_env();
-    let framework = dependencies.clone();
-    for (directory, package) in EXPORTED {
-        let model_directory = out_dir.join("models").join(package);
-        fs::create_dir_all(&model_directory).unwrap_or_else(|e| panic!("cannot create {}: {e}", model_directory.display()));
-        let outcome = Export::new(repository.join(directory), model_directory.clone(), package, framework.clone()).execute();
-        for line in outcome.lines.iter().filter(|line| line.starts_with("cargo::rerun-if-changed=") || line.starts_with("cargo::warning=")) {
-            println!("{line}");
-        }
-        if !outcome.errors.is_empty() {
-            fail(&outcome.errors);
-        }
-        dependencies.push(model_directory.join(format!("{}.xamlmeta", package.replace('-', "_"))));
-    }
-
     // The groups: one per compiled document.
     let compiled: Vec<&(String, PathBuf, String)> = texts
         .iter()
@@ -175,7 +152,7 @@ fn main() {
         .collect();
     let borrowed: Vec<(&str, &str)> = texts.iter().map(|(name, _, text)| (name.as_str(), text.as_str())).collect();
     let package = env::var("CARGO_PKG_NAME").expect("CARGO_PKG_NAME");
-    let mut build = Build::new(root.clone(), out_dir.clone(), &package, dependencies)
+    let mut build = Build::new(root.clone(), out_dir.clone(), &package, dependencies_from_env())
         .type_system(TypeSystem::Model)
         // The sample loads its documents with compiled bindings as their default.
         .default_compile_bindings(true)

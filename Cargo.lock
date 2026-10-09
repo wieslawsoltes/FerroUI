@@ -376,6 +376,7 @@ name = "ferroui-opengl"
 version = "0.1.0"
 dependencies = [
  "ferroui-base",
+ "ferroui-build-scan",
  "ferroui-controls",
  "paste",
 ]
@@ -546,6 +547,7 @@ name = "mini-mvvm"
 version = "0.1.0"
 dependencies = [
  "ferroui-base",
+ "ferroui-build-scan",
 ]
 
 [[package]]
