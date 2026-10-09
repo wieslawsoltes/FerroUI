@@ -180,3 +180,35 @@ opt-level = 3
 
 [profile.browser.package.roxmltree]
 opt-level = 3
+
+# The renderers of the Vello backend (in a module built with the feature `vello` of the browser
+# crate; no other module links them): flattening, strips, the fine rasterization of the CPU mode,
+# glyph outlines and the conversions of the backend are inner loops over every pixel or every curve
+# of a frame. At "z" a frame of the TableView page of the catalog took 330 ms in the CPU mode and
+# 27 ms in the hybrid mode (docs/porting/vello-backend.md, section 11.5).
+[profile.browser.package.ferroui-vello]
+opt-level = 3
+
+[profile.browser.package.vello_cpu]
+opt-level = 3
+
+[profile.browser.package.vello_common]
+opt-level = 3
+
+[profile.browser.package.vello_gpu]
+opt-level = 3
+
+[profile.browser.package.glifo]
+opt-level = 3
+
+[profile.browser.package.kurbo]
+opt-level = 3
+
+[profile.browser.package.fearless_simd]
+opt-level = 3
+
+[profile.browser.package.skrifa]
+opt-level = 3
+
+[profile.browser.package.read-fonts]
+opt-level = 3
