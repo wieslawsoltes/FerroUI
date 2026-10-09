@@ -11,8 +11,8 @@ use ferroui_base::platform::{
 use ferroui_base::{PixelSize, Vector};
 use skia_safe::canvas::SrcRectConstraint;
 use skia_safe::{
-    surfaces, AlphaType, Canvas, Image, ImageInfo, Paint, PixelGeometry, Rect, SamplingOptions, Surface,
-    SurfaceProps, SurfacePropsFlags,
+    images, surfaces, AlphaType, Canvas, Data, Image, ImageInfo, Paint, PixelGeometry, Rect, SamplingOptions,
+    Surface, SurfaceProps, SurfacePropsFlags,
 };
 use std::any::Any;
 use std::cell::{Cell, RefCell};
@@ -175,6 +175,28 @@ impl SurfaceRenderTarget {
         gr_context.snapshot_to_raster(&mut self.surface.surface())
     }
 
+    /// The pixels of the surface as an image in memory, read from the
+    /// surface itself: what a shared snapshot of a GPU surface is made of
+    /// when its context could not copy it
+    /// ([`snapshot_to_raster`](ISkiaGrContext::snapshot_to_raster)). A
+    /// surface that cannot be read either (its context is lost) gives an
+    /// image of its size that is transparent, which is what such a surface
+    /// shows.
+    ///
+    /// # Panics
+    /// Panics when Skia cannot make an image of the size of the surface.
+    fn read_raster_snapshot(&self) -> Image {
+        let mut surface = self.surface.surface();
+        let info = surface.image_info().with_alpha_type(AlphaType::Premul);
+        let row_bytes = info.min_row_bytes();
+        let mut pixels = vec![0u8; row_bytes * info.height().max(0) as usize];
+        if !surface.read_pixels(&info, &mut pixels, row_bytes, (0, 0)) {
+            pixels.fill(0);
+        }
+        images::raster_from_data(&info, Data::new_copy(&pixels), row_bytes)
+            .unwrap_or_else(|| panic!("Unable to create an image of the pixels of the surface."))
+    }
+
     /// Creates a bitmap with a copy of the contents that can be used without
     /// the GPU context.
     ///
@@ -253,8 +275,12 @@ impl IDrawingContextLayerImpl for SurfaceRenderTarget {
     }
 
     fn create_shared_snapshot(&self) -> std::sync::Arc<ferroui_base::platform::SharedBitmapImpl> {
-        let image = match self.create_raster_snapshot() {
-            Some(image) => image,
+        let image = match &self.gr_context {
+            // The image of a surface of a GPU context belongs to that
+            // context and to its thread, and a shared snapshot leaves both
+            // (a render thread hands it to the thread that asked): it is
+            // always a copy in memory.
+            Some(_) => self.create_raster_snapshot().unwrap_or_else(|| self.read_raster_snapshot()),
             None => self.snapshot_image(),
         };
         std::sync::Arc::new(ImmutableBitmap::from_image(image, None))
