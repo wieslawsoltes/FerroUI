@@ -3,25 +3,40 @@ use crate::gpu::{ISkiaGpu, SkiaGpuRenderTarget};
 use crate::surface_render_target::{SurfaceRenderTarget, SurfaceRenderTargetCreateInfo};
 use ferroui_base::platform::surfaces::IPlatformRenderSurface;
 use ferroui_base::platform::{
-    IDrawingContextLayerImpl, IOptionalFeatureProvider, IPlatformRenderInterfaceContext, IRenderTarget,
+    IDrawingContextLayerImpl, IExternalObjectsRenderInterfaceContextFeature, IOptionalFeatureProvider,
+    IPlatformRenderInterfaceContext, IRenderTarget,
 };
 use ferroui_base::{PixelSize, Vector};
+use ferroui_opengl::IOpenGlTextureSharingRenderInterfaceContextFeature;
 use std::any::{Any, TypeId};
 use std::cell::RefCell;
+use std::collections::HashMap;
 use std::rc::Rc;
 
 /// The Skia render backend bound to a GPU (or to software rendering).
 pub struct SkiaContext {
     gpu: RefCell<Option<Rc<dyn ISkiaGpu>>>,
     max_offscreen_render_target_pixel_size: Option<PixelSize>,
+    /// The features of the GPU that callers of the compositor may ask for,
+    /// by the type they are asked for; each is held as the GPU announces it
+    /// (an `Rc` of the trait object).
+    public_features: HashMap<TypeId, Rc<dyn Any>>,
 }
 
 impl SkiaContext {
     /// Creates the backend context. `None` selects software rendering.
     pub fn new(gpu: Option<Rc<dyn ISkiaGpu>>) -> Self {
         let mut max_offscreen_render_target_pixel_size = None;
+        let mut public_features = HashMap::new();
 
         if let Some(gpu) = &gpu {
+            let mut try_feature = |feature_type: TypeId| {
+                if let Some(feature) = gpu.try_get_feature(feature_type) {
+                    public_features.insert(feature_type, feature);
+                }
+            };
+            try_feature(TypeId::of::<dyn IOpenGlTextureSharingRenderInterfaceContextFeature>());
+            try_feature(TypeId::of::<dyn IExternalObjectsRenderInterfaceContextFeature>());
             if let Some(gr) = gpu.try_get_gr_context() {
                 if let Some(render_target_size) = gr.value().max_render_target_size() {
                     max_offscreen_render_target_pixel_size =
@@ -31,7 +46,7 @@ impl SkiaContext {
             }
         }
 
-        Self { gpu: RefCell::new(gpu), max_offscreen_render_target_pixel_size }
+        Self { gpu: RefCell::new(gpu), max_offscreen_render_target_pixel_size, public_features }
     }
 
     fn gpu(&self) -> Option<Rc<dyn ISkiaGpu>> {
@@ -99,6 +114,10 @@ impl IPlatformRenderInterfaceContext for SkiaContext {
 
     fn max_offscreen_render_target_pixel_size(&self) -> Option<PixelSize> {
         self.max_offscreen_render_target_pixel_size
+    }
+
+    fn public_features(&self) -> HashMap<TypeId, Rc<dyn Any>> {
+        self.public_features.clone()
     }
 
     fn is_ready_to_create_render_target(&self, surfaces: &[std::sync::Arc<dyn IPlatformRenderSurface>]) -> bool {

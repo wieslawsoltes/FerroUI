@@ -1,4 +1,7 @@
-use super::{FboSkiaSurface, GlRenderTarget, IGlSkiaSpecificOptionsFeature};
+use super::{
+    FboSkiaSurface, GlRenderTarget, GlSkiaExternalObjectsFeature, GlSkiaSharedTextureForComposition,
+    IGlSkiaSpecificOptionsFeature,
+};
 use crate::gpu::ganesh::GaneshGrContext;
 use crate::gpu::{
     ISkiaGpu, ISkiaGpuRenderSession, ISkiaGpuRenderTarget, ISkiaGrContext, ISkiaSurface, ScopedGrContext,
@@ -7,16 +10,25 @@ use crate::gpu::{
 use crate::skia_options::SkiaOptions;
 use ferroui_base::logging::{LogEventLevel, Logger};
 use ferroui_base::platform::surfaces::IPlatformRenderSurface;
-use ferroui_base::platform::{IOptionalFeatureProvider, IPlatformGraphicsContext};
+use ferroui_base::platform::{
+    IExternalObjectsHandleWrapRenderInterfaceContextFeature, IExternalObjectsRenderInterfaceContextFeature,
+    IOptionalFeatureProvider, IPlatformGraphicsContext,
+};
 use ferroui_base::reactive::IDisposable;
 use ferroui_base::PixelSize;
+use ferroui_opengl::gl_consts::*;
 use ferroui_opengl::surfaces::{try_get_gl_surface, IGlPlatformSurface, IGlPlatformSurfaceRenderTarget};
-use ferroui_opengl::{GlVersion, IGlContext, IGlPlatformSurfaceRenderTargetFactory};
+use ferroui_opengl::{
+    GlProfileType, GlVersion, ICompositionImportableOpenGlSharedTexture, IGlContext,
+    IGlContextExternalObjectsFeature, IGlPlatformSurfaceRenderTargetFactory,
+    IOpenGlTextureSharingRenderInterfaceContextFeature,
+};
 use skia_safe::gpu::gl::Interface;
 use skia_safe::gpu::{direct_contexts, ContextOptions};
 use std::any::{Any, TypeId};
 use std::cell::{Cell, RefCell};
 use std::rc::{Rc, Weak};
+use std::sync::Arc;
 
 /// A Skia GPU that renders with a platform OpenGL context through Ganesh.
 pub struct GlSkiaGpu {
@@ -24,6 +36,11 @@ pub struct GlSkiaGpu {
     gl_context: Rc<dyn IGlContext>,
     post_dispose_callbacks: RefCell<Vec<Box<dyn FnOnce()>>>,
     can_create_surfaces: Cell<Option<bool>>,
+    external_objects_feature: Rc<GlSkiaExternalObjectsFeature>,
+    /// Marks the shared textures made for this GPU: what a thread that
+    /// cannot reach the context of such a texture compares instead of
+    /// asking the contexts whether they share.
+    share_group: Arc<()>,
     this: Weak<GlSkiaGpu>,
 }
 
@@ -58,14 +75,26 @@ impl GlSkiaGpu {
         if let Some(max_resource_bytes) = max_resource_bytes {
             gr_context.set_resource_cache_limit(max_resource_bytes);
         }
+        let gr_context = Rc::new(gr_context);
+
+        let external_objects = features.try_get::<dyn IGlContextExternalObjectsFeature>();
+        let share_group = Arc::new(());
+        let external_objects_feature = GlSkiaExternalObjectsFeature::new(
+            gr_context.clone(),
+            context.clone(),
+            share_group.clone(),
+            external_objects,
+        );
 
         current.dispose();
 
         Rc::new_cyclic(|this| Self {
-            gr_context: Rc::new(gr_context),
+            gr_context,
             gl_context: context,
             post_dispose_callbacks: RefCell::new(Vec::new()),
             can_create_surfaces: Cell::new(None),
+            external_objects_feature,
+            share_group,
             this: this.clone(),
         })
     }
@@ -90,6 +119,62 @@ impl GlSkiaGpu {
     /// GPU.
     pub fn create_shared_context(&self, preferred_versions: Option<&[GlVersion]>) -> Option<Rc<dyn IGlContext>> {
         self.gl_context.create_shared_context(preferred_versions)
+    }
+
+    /// Creates a texture of `context`, a context of the share group of the
+    /// GPU, for a drawing surface of the compositor.
+    ///
+    /// The texture belongs to the thread of `context`, which calls this;
+    /// the thread that renders imports it.
+    ///
+    /// # Panics
+    /// Panics when the contexts do not share their objects (the exception
+    /// of the original).
+    pub fn create_shared_texture_for_composition(
+        &self,
+        context: &Rc<dyn IGlContext>,
+        size: PixelSize,
+    ) -> Arc<dyn ICompositionImportableOpenGlSharedTexture> {
+        if !context.is_shared_with(&*self.gl_context) {
+            panic!("Contexts do not belong to the same share group");
+        }
+
+        let current = context.ensure_current();
+
+        let gl = context.gl_interface();
+        let old_texture = gl.get_integerv(GL_TEXTURE_BINDING_2D);
+        let tex = gl.gen_texture();
+
+        let format = if context.version().type_() == GlProfileType::OpenGLES && context.version().major() == 2 {
+            GL_RGBA
+        } else {
+            GL_RGBA8
+        };
+
+        gl.bind_texture(GL_TEXTURE_2D, tex);
+        // SAFETY: a null data pointer makes OpenGL allocate the storage
+        // without reading client memory.
+        unsafe {
+            gl.tex_image_2d(
+                GL_TEXTURE_2D,
+                0,
+                format,
+                size.width,
+                size.height,
+                0,
+                GL_RGBA,
+                GL_UNSIGNED_BYTE,
+                std::ptr::null(),
+            );
+        }
+
+        gl.tex_parameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+        gl.tex_parameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+        gl.bind_texture(GL_TEXTURE_2D, old_texture);
+
+        current.dispose();
+
+        Arc::new(GlSkiaSharedTextureForComposition::new(context.clone(), tex, format, size, self.share_group.clone()))
     }
 
     /// Runs `dispose` after the Skia context has been released, when the
@@ -133,8 +218,39 @@ impl IGlPlatformSurface for SurfaceWrapper {
     }
 }
 
+impl IOpenGlTextureSharingRenderInterfaceContextFeature for GlSkiaGpu {
+    fn can_create_shared_context(&self) -> bool {
+        GlSkiaGpu::can_create_shared_context(self)
+    }
+
+    fn create_shared_context(&self, preferred_versions: Option<&[GlVersion]>) -> Option<Rc<dyn IGlContext>> {
+        GlSkiaGpu::create_shared_context(self, preferred_versions)
+    }
+
+    fn create_shared_texture_for_composition(
+        &self,
+        context: &Rc<dyn IGlContext>,
+        size: PixelSize,
+    ) -> Arc<dyn ICompositionImportableOpenGlSharedTexture> {
+        GlSkiaGpu::create_shared_texture_for_composition(self, context, size)
+    }
+}
+
 impl IOptionalFeatureProvider for GlSkiaGpu {
-    fn try_get_feature(&self, _feature_type: TypeId) -> Option<Rc<dyn Any>> {
+    /// The GPU itself as the texture sharing feature, its external objects
+    /// feature, and the handle wrapping feature of the OpenGL context.
+    fn try_get_feature(&self, feature_type: TypeId) -> Option<Rc<dyn Any>> {
+        if feature_type == TypeId::of::<dyn IOpenGlTextureSharingRenderInterfaceContextFeature>() {
+            let this: Rc<dyn IOpenGlTextureSharingRenderInterfaceContextFeature> = self.this.upgrade()?;
+            return Some(Rc::new(this));
+        }
+        if feature_type == TypeId::of::<dyn IExternalObjectsRenderInterfaceContextFeature>() {
+            let feature: Rc<dyn IExternalObjectsRenderInterfaceContextFeature> = self.external_objects_feature.clone();
+            return Some(Rc::new(feature));
+        }
+        if feature_type == TypeId::of::<dyn IExternalObjectsHandleWrapRenderInterfaceContextFeature>() {
+            return self.gl_context.try_get_feature(feature_type);
+        }
         None
     }
 }

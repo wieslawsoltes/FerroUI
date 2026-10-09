@@ -418,6 +418,10 @@ impl ICompositionImportableSharedGpuContextImage for FakeSharedImage {
             self.context.get().set(true);
         }
     }
+
+    fn as_any(&self) -> &dyn Any {
+        self
+    }
 }
 
 /// A compositor in the render-thread mode, with the scopes it lives in.
