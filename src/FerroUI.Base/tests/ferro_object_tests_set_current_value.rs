@@ -1,21 +1,26 @@
 //! Port of the upstream `SetCurrentValue` object tests.
 //!
-//! The tests that toggle styles are not ported: they need the styling system.
+//! `Class1` is a layoutable where upstream's is a control (the control
+//! library is another crate), and the initial layout pass of the tests that
+//! toggle styles is the styling of the target.
 
 use super::*;
 use crate::data::BindingPriority;
+use crate::layout::{Layoutable, LayoutableImpl};
 use crate::reactive::Observable;
+use crate::styling::test_support::TestRoot;
+use crate::styling::{Selectors, Setter, Style};
 use crate::*;
 use std::cell::Cell;
 
 #[repr(C)]
 pub struct Class1 {
-    base: FerroObject,
+    base: Layoutable,
     coerce_max: Cell<f64>,
 }
 
-ferro_class!(Class1: FerroObject);
-ferro_impl_classes!(Class1: FerroObjectImpl);
+ferro_class!(Class1: Layoutable);
+ferro_impl_classes!(Class1: FerroObjectImpl, StyledElementImpl, VisualImpl, LayoutableImpl);
 
 impl Class1 {
     ferro_property!(pub fn foo_property() -> StyledProperty<String> {
@@ -38,7 +43,7 @@ impl Class1 {
     });
 
     pub fn new() -> Ref<Self> {
-        instantiate(Self { base: FerroObject::construct(), coerce_max: Cell::new(100.0) })
+        instantiate(Self { base: Layoutable::construct(), coerce_max: Cell::new(100.0) })
     }
 
     pub fn with_parent(parent: &Ref<Class1>) -> Ref<Self> {
@@ -49,6 +54,10 @@ impl Class1 {
 
     pub fn foo(&self) -> String {
         self.get_value(Self::foo_property())
+    }
+
+    pub fn bar(&self) -> String {
+        self.get_value(Self::bar_property())
     }
 
     pub fn inherited(&self) -> String {
@@ -331,4 +340,138 @@ fn current_value_is_replaced_by_binding_value() {
 
         assert_eq!("new", target.foo(), "{priority:?}");
     }
+}
+
+#[test]
+fn set_current_value_persists_when_toggling_style_1() {
+    let target = Class1::new();
+    let root = TestRoot::with_child(&target);
+    root.styles().add(Style::with_setters(
+        Selectors::of_type::<Class1>().class("foo"),
+        [Setter::new(Class1::bar_property(), s("bar"))],
+    ));
+
+    target.apply_styling();
+
+    target.set_current_value(Class1::foo_property(), s("current"));
+
+    assert_eq!("current", target.foo());
+    assert_eq!("bardefault", target.bar());
+
+    target.classes().add("foo");
+
+    assert_eq!("current", target.foo());
+    assert_eq!("bar", target.bar());
+
+    target.classes().remove("foo");
+
+    assert_eq!("current", target.foo());
+    assert_eq!("bardefault", target.bar());
+}
+
+#[test]
+fn set_current_value_persists_when_toggling_style_2() {
+    let target = Class1::new();
+    let root = TestRoot::with_child(&target);
+    root.styles().add(Style::with_setters(
+        Selectors::of_type::<Class1>().class("foo"),
+        [Setter::new(Class1::bar_property(), s("bar")), Setter::new(Class1::inherited_property(), s("inherited"))],
+    ));
+
+    target.apply_styling();
+
+    target.set_current_value(Class1::foo_property(), s("current"));
+
+    assert_eq!("current", target.foo());
+    assert_eq!("bardefault", target.bar());
+    assert_eq!("inheriteddefault", target.inherited());
+
+    target.classes().add("foo");
+
+    assert_eq!("current", target.foo());
+    assert_eq!("bar", target.bar());
+    assert_eq!("inherited", target.inherited());
+
+    target.classes().remove("foo");
+
+    assert_eq!("current", target.foo());
+    assert_eq!("bardefault", target.bar());
+    assert_eq!("inheriteddefault", target.inherited());
+}
+
+#[test]
+fn set_current_value_persists_when_toggling_style_3() {
+    let target = Class1::new();
+    let root = TestRoot::with_child(&target);
+    root.styles().add(Style::with_setters(
+        Selectors::of_type::<Class1>().class("foo"),
+        [Setter::new(Class1::bar_property(), s("bar")), Setter::new(Class1::inherited_property(), s("inherited"))],
+    ));
+
+    target.apply_styling();
+
+    target.set_value_with_priority(Class1::foo_property(), s("not current"), BindingPriority::Template);
+    target.set_current_value(Class1::foo_property(), s("current"));
+
+    assert_eq!("current", target.foo());
+    assert_eq!("bardefault", target.bar());
+    assert_eq!("inheriteddefault", target.inherited());
+
+    target.classes().add("foo");
+
+    assert_eq!("current", target.foo());
+    assert_eq!("bar", target.bar());
+    assert_eq!("inherited", target.inherited());
+
+    target.classes().remove("foo");
+
+    assert_eq!("current", target.foo());
+    assert_eq!("bardefault", target.bar());
+    assert_eq!("inheriteddefault", target.inherited());
+}
+
+#[test]
+fn current_value_is_replaced_by_new_style_activation_1() {
+    let target = Class1::new();
+    let root = TestRoot::with_child(&target);
+    root.styles().add(Style::with_setters(
+        Selectors::of_type::<Class1>().class("foo"),
+        [Setter::new(Class1::foo_property(), s("initial")), Setter::new(Class1::bar_property(), s("bar"))],
+    ));
+    root.styles().add(Style::with_setters(
+        Selectors::of_type::<Class1>().class("bar"),
+        [Setter::new(Class1::foo_property(), s("new")), Setter::new(Class1::bar_property(), s("baz"))],
+    ));
+
+    target.apply_styling();
+
+    target.classes().add("foo");
+    assert_eq!("initial", target.foo());
+
+    target.set_current_value(Class1::foo_property(), s("current"));
+    target.classes().add("bar");
+
+    assert_eq!("new", target.foo());
+}
+
+#[test]
+fn current_value_is_replaced_by_new_style_activation_2() {
+    let target = Class1::new();
+    let root = TestRoot::with_child(&target);
+    root.styles().add(Style::with_setters(
+        Selectors::of_type::<Class1>().class("foo"),
+        [Setter::new(Class1::foo_property(), s("foo"))],
+    ));
+    root.styles().add(Style::with_setters(
+        Selectors::of_type::<Class1>().class("foo"),
+        [Setter::new(Class1::bar_property(), s("bar"))],
+    ));
+
+    target.apply_styling();
+
+    target.set_value_with_priority(Class1::foo_property(), s("template"), BindingPriority::Template);
+    target.set_current_value(Class1::foo_property(), s("current"));
+
+    target.classes().add("foo");
+    assert_eq!("foo", target.foo());
 }
