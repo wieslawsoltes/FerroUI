@@ -314,6 +314,7 @@ name = "ferroui-markup-xaml-tests"
 version = "0.1.0"
 dependencies = [
  "ferroui-base",
+ "ferroui-build",
  "ferroui-controls",
  "ferroui-markup",
  "ferroui-markup-xaml",

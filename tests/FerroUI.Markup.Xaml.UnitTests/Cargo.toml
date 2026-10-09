@@ -27,3 +27,7 @@ xamlx = { workspace = true }
 # compiles each theme's documents as a group, which names the types of the theme crates.
 ferroui-themes-simple = { workspace = true }
 ferroui-themes-fluent = { workspace = true }
+# The drift test of the build-time type system (`type_system_drift`) scans the sources of the base and the
+# controls crates and compares the type system over the scanned models with the run-time one. The build
+# crate links the compiler and the base crate, which this crate links already, and not the controls.
+ferroui-build = { workspace = true }
