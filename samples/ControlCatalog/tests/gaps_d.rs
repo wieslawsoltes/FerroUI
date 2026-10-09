@@ -425,3 +425,21 @@ fn gap_c324_element_that_keeps_the_disposable_of_its_own_handler() {
     let _app = start_catalog_application();
     show_and_release(ferroui_controls::Slider::new().upcast());
 }
+
+/// C325: a dynamic resource declared as the value of a setter is anchored to the element the
+/// style is declared under, which owns the style.
+#[test]
+fn gap_c325_dynamic_resource_in_a_style_declared_under_an_element() {
+    let _app = start_catalog_application();
+    let control = from_markup_value::<Ref<Control>>(&Some(load_text(&format!(
+        "<Border {XMLNS}>\
+           <Border.Styles>\
+             <Style Selector='Border'>\
+               <Setter Property='Tag' Value='{{DynamicResource NoSuchResource}}'/>\
+             </Style>\
+           </Border.Styles>\
+         </Border>"
+    ))))
+    .expect("a control");
+    show_and_release(control);
+}

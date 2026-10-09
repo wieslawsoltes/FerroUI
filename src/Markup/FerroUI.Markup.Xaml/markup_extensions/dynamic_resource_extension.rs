@@ -1,7 +1,7 @@
 //! Port of `MarkupExtensions/DynamicResourceExtension.cs`.
 
 use super::StaticResourceExtension;
-use crate::data::{DynamicResourceAnchor, DynamicResourceExpression};
+use crate::data::{DynamicResourceAnchor, DynamicResourceExpression, HeldAnchor};
 use crate::object_casts::resource_key_of;
 use crate::xaml_il::runtime::IFerroXamlIlParentStackProvider;
 use crate::{FromXamlObject, IProvideValueTarget, ServiceProviderExtensions};
@@ -17,7 +17,8 @@ use std::rc::{Rc, Weak};
 /// of the resources and of the theme variant.
 pub struct DynamicResourceExtension {
     this: Weak<DynamicResourceExtension>,
-    anchor: RefCell<Option<DynamicResourceAnchor>>,
+    // Held as its expressions hold it: an element or a host weakly.
+    anchor: RefCell<Option<HeldAnchor>>,
     priority: Cell<BindingPriority>,
     theme_variant: RefCell<Option<ThemeVariant>>,
     resource_key: RefCell<Option<BoxedValue>>,
@@ -70,7 +71,7 @@ impl DynamicResourceExtension {
                     service_provider.get_first_parent::<Rc<dyn IResourceProvider>>().map(DynamicResourceAnchor::Provider)
                 })
                 .or_else(|| service_provider.get_first_parent::<ResourceHostRef>().map(DynamicResourceAnchor::Host));
-            *self.anchor.borrow_mut() = anchor;
+            *self.anchor.borrow_mut() = anchor.map(HeldAnchor::from);
         }
 
         *self.theme_variant.borrow_mut() = StaticResourceExtension::get_dictionary_variant(
@@ -99,7 +100,7 @@ impl BindingBase for DynamicResourceExtension {
             panic!("DynamicResource must have a ResourceKey.");
         };
         let _ = (target, target_property);
-        DynamicResourceExpression::new(
+        DynamicResourceExpression::with_held_anchor(
             resource_key_of(&resource_key),
             self.anchor.borrow().clone(),
             self.theme_variant.borrow().clone(),
