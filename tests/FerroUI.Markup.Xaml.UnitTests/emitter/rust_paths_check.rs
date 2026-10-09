@@ -1041,6 +1041,8 @@ pub fn property_accessors() -> Vec<(&'static ::ferroui_base::FerroProperty, &'st
         (::ferroui_base::Registrable::as_registered_property(::ferroui_base::media::GeometryDrawing::pen_property()), "ferroui_base::media::GeometryDrawing::pen_property"),
         (::ferroui_base::Registrable::as_registered_property(::ferroui_base::media::GeometryGroup::children_property()), "ferroui_base::media::GeometryGroup::children_property"),
         (::ferroui_base::Registrable::as_registered_property(::ferroui_base::media::GeometryGroup::fill_rule_property()), "ferroui_base::media::GeometryGroup::fill_rule_property"),
+        (::ferroui_base::Registrable::as_registered_property(::ferroui_base::media::GlyphRunDrawing::foreground_property()), "ferroui_base::media::GlyphRunDrawing::foreground_property"),
+        (::ferroui_base::Registrable::as_registered_property(::ferroui_base::media::GlyphRunDrawing::glyph_run_property()), "ferroui_base::media::GlyphRunDrawing::glyph_run_property"),
         (::ferroui_base::Registrable::as_registered_property(::ferroui_base::media::GradientBrush::gradient_stops_property()), "ferroui_base::media::GradientBrush::gradient_stops_property"),
         (::ferroui_base::Registrable::as_registered_property(::ferroui_base::media::GradientBrush::spread_method_property()), "ferroui_base::media::GradientBrush::spread_method_property"),
         (::ferroui_base::Registrable::as_registered_property(::ferroui_base::media::GradientStop::color_property()), "ferroui_base::media::GradientStop::color_property"),

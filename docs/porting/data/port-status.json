@@ -4511,6 +4511,7 @@
     "json.rs",
     "model.rs",
     "model_set.rs",
+    "scanner/constants.rs",
     "scanner/declarations.rs",
     "scanner/modules.rs",
     "scanner/source.rs",

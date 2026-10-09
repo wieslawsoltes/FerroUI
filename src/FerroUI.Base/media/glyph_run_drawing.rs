@@ -9,6 +9,7 @@ pub struct GlyphRunDrawing {
 }
 
 ferro_class!(GlyphRunDrawing: Drawing);
+crate::ferro_class_info!(GlyphRunDrawing { new: GlyphRunDrawing::new });
 ferro_impl_classes!(GlyphRunDrawing: FerroObjectImpl);
 
 impl DrawingImpl for GlyphRunDrawing {
@@ -25,7 +26,7 @@ impl DrawingImpl for GlyphRunDrawing {
     }
 }
 
-impl GlyphRunDrawing {
+crate::ferro_properties! { impl GlyphRunDrawing {
     ferro_property!(
         /// Defines the `Foreground` property.
         pub fn foreground_property() -> StyledProperty<Option<Rc<dyn IBrush>>> {
@@ -39,7 +40,9 @@ impl GlyphRunDrawing {
             FerroProperty::register::<GlyphRunDrawing, _>("GlyphRun", None)
         }
     );
+} }
 
+impl GlyphRunDrawing {
     /// Creates the class data.
     pub fn construct() -> Self {
         Self { base: Drawing::construct() }
