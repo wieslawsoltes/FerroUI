@@ -19,9 +19,11 @@ pub mod vello_extensions;
 mod combined_geometry_impl;
 mod drawing_context_impl;
 mod ellipse_geometry_impl;
+mod font_manager_impl;
 mod framebuffer_render_target;
 mod geometry_group_impl;
 mod geometry_impl;
+mod glyph_run_impl;
 mod i_drawable_bitmap_impl;
 mod immutable_bitmap;
 mod line_geometry_impl;
@@ -36,14 +38,17 @@ mod vello_backend_context;
 mod vello_options;
 mod vello_platform;
 mod vello_region_impl;
+mod vello_typeface;
 mod writeable_bitmap_impl;
 
 pub use combined_geometry_impl::CombinedGeometryImpl;
 pub use drawing_context_impl::{CreateInfo, DrawingContextImpl};
 pub use ellipse_geometry_impl::EllipseGeometryImpl;
+pub use font_manager_impl::FontManagerImpl;
 pub use framebuffer_render_target::FramebufferRenderTarget;
 pub use geometry_group_impl::GeometryGroupImpl;
 pub use geometry_impl::{try_get_geometry_impl, FillPath, GeometryImpl, GeometryImplBase, VelloPath};
+pub use glyph_run_impl::GlyphRunImpl;
 pub use i_drawable_bitmap_impl::{try_get_drawable_bitmap, IDrawableBitmapImpl};
 pub use immutable_bitmap::ImmutableBitmap;
 pub use line_geometry_impl::LineGeometryImpl;
@@ -58,9 +63,12 @@ pub use vello_backend_context::VelloContext;
 pub use vello_options::{VelloOptions, VelloRenderingMode};
 pub use vello_platform::VelloPlatform;
 pub use vello_region_impl::VelloRegionImpl;
+pub use vello_typeface::{bold_simulation_outline_width, VelloFontFace, VelloTypeface, OBLIQUE_SKEW};
 pub use writeable_bitmap_impl::WriteableBitmapImpl;
 
 #[cfg(test)]
 mod tests;
+#[cfg(test)]
+mod text_tests;
 #[cfg(test)]
 mod unit_tests;

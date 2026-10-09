@@ -1,0 +1,17 @@
+//! Upstream's `Media` folder of the Skia unit tests: the suites of fonts,
+//! glyph runs and text formatting, as the Skia backend has them, on the
+//! typefaces, the font manager and the glyph runs of this backend. The two
+//! bitmap suites of the folder are not text and are not here.
+
+mod custom_font_collection_tests;
+mod custom_font_manager_impl;
+mod embedded_font_collection_tests;
+mod font_collection_determinism_tests;
+mod font_collection_tests;
+mod font_collection_try_match_character_tests;
+mod font_manager_tests;
+mod glyph_run_tests;
+mod glyph_typeface_shaping_tests;
+mod text_formatting;
+
+pub(crate) use custom_font_manager_impl::CustomFontManagerImpl;

@@ -2,6 +2,8 @@ use crate::combined_geometry_impl::CombinedGeometryImpl;
 use crate::drawing_context_impl::not_built;
 use crate::ellipse_geometry_impl::EllipseGeometryImpl;
 use crate::geometry_group_impl::GeometryGroupImpl;
+use crate::geometry_impl::{FillPath, VelloPath};
+use crate::glyph_run_impl::GlyphRunImpl;
 use crate::helpers::pixel_format_helper;
 use crate::immutable_bitmap::ImmutableBitmap;
 use crate::line_geometry_impl::LineGeometryImpl;
@@ -11,6 +13,7 @@ use crate::stream_geometry_impl::StreamGeometryImpl;
 use crate::vello_backend_context::VelloContext;
 use crate::vello_options::{VelloOptions, VelloRenderingMode};
 use crate::vello_region_impl::VelloRegionImpl;
+use crate::vello_typeface::VelloTypeface;
 use crate::writeable_bitmap_impl::WriteableBitmapImpl;
 use ferroui_base::media::imaging::BitmapInterpolationMode;
 use ferroui_base::media::text_formatting::GlyphInfo;
@@ -21,6 +24,7 @@ use ferroui_base::platform::{
     IWriteableBitmapImpl, PixelFormat,
 };
 use ferroui_base::{PixelSize, Point, Rect, Vector};
+use kurbo::BezPath;
 use std::fs::File;
 use std::io::{self, Read};
 use std::rc::Rc;
@@ -80,18 +84,42 @@ impl IPlatformRenderInterface for PlatformRenderInterface {
         CombinedGeometryImpl::force_create(combine_mode, &*g1, &*g2)
     }
 
-    fn build_glyph_run_geometry(&self, _glyph_run: &GlyphRun) -> Arc<dyn IGeometryImpl> {
-        not_built("the outlines of glyph runs", "stage 5");
+    fn build_glyph_run_geometry(&self, glyph_run: &GlyphRun) -> Arc<dyn IGeometryImpl> {
+        let glyph_typeface = VelloTypeface::try_get(&**glyph_run.glyph_typeface().platform_typeface())
+            .unwrap_or_else(|| panic!("PlatformImpl can't be null."));
+
+        let font_rendering_em_size = glyph_run.font_rendering_em_size();
+
+        let mut path = BezPath::new();
+
+        let baseline_origin = glyph_run.baseline_origin();
+        let (mut current_x, current_y) = (baseline_origin.x, baseline_origin.y);
+
+        let glyph_infos = glyph_run.glyph_infos();
+
+        // As the Skia backend builds it: the outline of every glyph without
+        // hinting at its pen position on the baseline.
+        for glyph_info in glyph_infos.borrow().iter() {
+            if let Some(glyph_path) = glyph_typeface.face().glyph_path(glyph_info.glyph_index, font_rendering_em_size) {
+                if !glyph_path.elements().is_empty() {
+                    path.extend(kurbo::Affine::translate((current_x, current_y)) * glyph_path);
+                }
+            }
+
+            current_x += glyph_info.glyph_advance;
+        }
+
+        StreamGeometryImpl::from_paths(VelloPath::new(path, FillRule::NonZero), FillPath::SameAsStroke, None)
     }
 
     fn create_glyph_run(
         &self,
-        _glyph_typeface: &Rc<GlyphTypeface>,
-        _font_rendering_em_size: f64,
-        _glyph_infos: &[GlyphInfo],
-        _baseline_origin: Point,
+        glyph_typeface: &Rc<GlyphTypeface>,
+        font_rendering_em_size: f64,
+        glyph_infos: &[GlyphInfo],
+        baseline_origin: Point,
     ) -> Arc<dyn IGlyphRunImpl> {
-        not_built("glyph runs", "stage 5");
+        Arc::new(GlyphRunImpl::new(glyph_typeface, font_rendering_em_size, glyph_infos, baseline_origin))
     }
 
     fn create_render_target_bitmap(&self, size: PixelSize, dpi: Vector) -> Arc<dyn IRenderTargetBitmapImpl> {

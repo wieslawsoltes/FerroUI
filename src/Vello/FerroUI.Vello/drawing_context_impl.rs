@@ -1,7 +1,10 @@
 use crate::geometry_impl::{try_get_geometry_impl, GeometryImpl};
+use crate::glyph_run_impl::GlyphRunImpl;
 use crate::helpers::path_helper;
 use crate::i_drawable_bitmap_impl::try_get_drawable_bitmap;
-use crate::scene::{IVelloSceneSink, VelloSceneBrush, VelloSceneImage, VelloScenePaint};
+use crate::scene::{
+    IVelloSceneSink, VelloSceneBrush, VelloSceneGlyph, VelloSceneGlyphRun, VelloSceneImage, VelloScenePaint,
+};
 use crate::surface_render_target::{SurfaceRenderTarget, SurfaceRenderTargetCreateInfo};
 use crate::vello_extensions::{
     ellipse_path, rect_path, rounded_rect_path, to_affine, to_blend_mode, to_color, to_color_with_opacity,
@@ -10,9 +13,10 @@ use crate::vello_extensions::{
 use crate::vello_options::{VelloOptions, VelloRenderingMode};
 use crate::vello_platform::VelloPlatform;
 use crate::vello_region_impl::VelloRegionImpl;
+use crate::vello_typeface::{bold_simulation_outline_width, OBLIQUE_SKEW};
 use ferroui_base::media::{
-    BoxShadows, Color, Colors, EdgeMode, IBrush, IGradientBrush, IPen, ITileBrush, RenderOptions, TextOptions,
-    TileMode,
+    BaselinePixelAlignment, BoxShadows, Color, Colors, EdgeMode, FontSimulations, IBrush, IGradientBrush, IPen,
+    ITileBrush, RenderOptions, TextHintingMode, TextOptions, TextRenderingMode, TileMode,
 };
 use ferroui_base::platform::{
     IBitmapImpl, IDrawingContextImpl, IDrawingContextLayerImpl, IGeometryImpl, IGlyphRunImpl,
@@ -876,12 +880,98 @@ impl IDrawingContextImpl for DrawingContextImpl {
         }
     }
 
-    fn draw_glyph_run(&mut self, foreground: Option<&dyn IBrush>, _glyph_run: &dyn IGlyphRunImpl) {
-        if foreground.is_none() {
+    fn draw_glyph_run(&mut self, foreground: Option<&dyn IBrush>, glyph_run: &dyn IGlyphRunImpl) {
+        let Some(foreground) = foreground else {
+            return;
+        };
+
+        let glyph_run_impl = glyph_run
+            .as_any()
+            .downcast_ref::<GlyphRunImpl>()
+            .unwrap_or_else(|| panic!("The glyph run was not created by the Vello backend"));
+
+        // A font no renderer draws glyphs of (see `VelloFontFace`).
+        if !glyph_run_impl.face().is_drawable() {
             return;
         }
 
-        not_built("glyph runs", "stage 5");
+        let paint_wrapper = self.create_paint(foreground, glyph_run.bounds());
+
+        // Determine the effective text options for text rendering. Start
+        // with the current pushed text options.
+        let mut effective_text_options = self.text_options;
+
+        // If the text rendering mode is unspecified in the text options, use
+        // the one from the render options, and without one there the edge
+        // mode, as the glyph run of the Skia backend does.
+        if effective_text_options.text_rendering_mode == TextRenderingMode::Unspecified {
+            effective_text_options.text_rendering_mode =
+                if self.render_options.text_rendering_mode != TextRenderingMode::Unspecified {
+                    self.render_options.text_rendering_mode
+                } else if self.render_options.edge_mode == EdgeMode::Aliased {
+                    TextRenderingMode::Alias
+                } else {
+                    TextRenderingMode::SubpixelAntialias
+                };
+        }
+
+        // No renderer of the Vello project draws text for the sub-pixels of
+        // a display: the sub-pixel mode is the grey-scale one here, as it
+        // is in the Skia backend where sub-pixel text is disabled.
+        let anti_alias = effective_text_options.text_rendering_mode != TextRenderingMode::Alias;
+
+        // Hinting as far as the renderer has it: the light and the strong
+        // mode are its one, vertical, mode.
+        let hint = effective_text_options.text_hinting_mode != TextHintingMode::None;
+
+        // Sub-pixel positioning is enabled when the edging is not alias,
+        // and the baseline is on a row of pixels unless that is disabled.
+        // Both are meant in pixels: they apply while the text is upright.
+        let transform = self.device_transform();
+        let [a, b, c, d, e, f] = transform.as_coeffs();
+        let upright = b == 0.0 && c == 0.0 && a > 0.0 && d > 0.0;
+
+        let snap_baseline =
+            upright && effective_text_options.baseline_pixel_alignment != BaselinePixelAlignment::Unaligned;
+        let whole_pixels = upright && !anti_alias;
+
+        let origin = glyph_run.baseline_origin();
+        let snap_x = |x: f64| if whole_pixels { ((a * x + e).round() - e) / a } else { x };
+        let snap_y = |y: f64| if snap_baseline { ((d * y + f).round() - f) / d } else { y };
+
+        let glyphs: Vec<VelloSceneGlyph> = glyph_run_impl
+            .glyph_indices()
+            .iter()
+            .zip(glyph_run_impl.glyph_positions())
+            .map(|(glyph_index, (x, y))| VelloSceneGlyph {
+                id: *glyph_index as u32,
+                x: snap_x(origin.x + *x as f64) as f32,
+                y: (snap_y(origin.y) + *y as f64) as f32,
+            })
+            .collect();
+
+        let face = glyph_run_impl.face();
+        let em_size = glyph_run.font_rendering_em_size();
+        let font_simulations = face.font_simulations();
+
+        let scene_glyph_run = VelloSceneGlyphRun {
+            font: face.data(),
+            font_size: em_size as f32,
+            units_per_em: face.units_per_em(),
+            normalized_coords: face.normalized_coord_bits(),
+            glyphs: &glyphs,
+            embolden: if font_simulations.contains(FontSimulations::Bold) {
+                bold_simulation_outline_width(em_size) / 2.0
+            } else {
+                0.0
+            },
+            skew: if font_simulations.contains(FontSimulations::Oblique) { OBLIQUE_SKEW } else { 0.0 },
+            hint,
+        };
+
+        self.draw_with(paint_wrapper, &|sink, paint, transform, _| {
+            sink.draw_glyph_run(&scene_glyph_run, transform, paint, anti_alias);
+        });
     }
 
     fn create_layer(&mut self, size: PixelSize) -> Rc<dyn IDrawingContextLayerImpl> {

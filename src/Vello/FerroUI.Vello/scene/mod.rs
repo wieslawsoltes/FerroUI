@@ -10,7 +10,8 @@ mod i_vello_scene_sink;
 mod vello_cpu_scene_sink;
 
 pub use i_vello_scene_sink::{
-    IVelloSceneSink, VelloSceneBrush, VelloSceneCapabilities, VelloSceneImage, VelloScenePaint,
+    IVelloSceneSink, VelloSceneBrush, VelloSceneCapabilities, VelloSceneGlyph, VelloSceneGlyphRun, VelloSceneImage,
+    VelloScenePaint,
 };
 pub use vello_cpu_scene_sink::VelloCpuSceneSink;
 

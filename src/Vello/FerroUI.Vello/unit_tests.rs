@@ -2,9 +2,19 @@
 //! a backend and not Skia, under their names there: `RenderBoundsTests`,
 //! `CombinedGeometryImplTests` and `DrawingContextImplTests`.
 //!
-//! The suites of text (fonts, glyph runs, text formatting) and `HitTesting`
-//! follow with the stages they need (design document, section 7); the
-//! suites of Skia's own types (its caches, its options) have no counterpart.
+//! The suites of text (fonts, glyph runs, text formatting) are the modules
+//! of `unit_tests/media`, file by file as in the Skia backend, with the
+//! test doubles they share (`test_font_manager.rs`, `text_support.rs`).
+//! `HitTesting` follows with the stage it needs (design document, section
+//! 7); the suites of Skia's own types (its caches, its options) have no
+//! counterpart.
+
+mod media;
+mod test_font_manager;
+mod text_support;
+
+pub(crate) use test_font_manager::TestFontManager;
+pub(crate) use text_support::{mock_platform_render_interface, register_test_assets, ASSEMBLY};
 
 use crate::geometry_impl::{FillPath, VelloPath};
 use crate::{CombinedGeometryImpl, PlatformRenderInterface};
