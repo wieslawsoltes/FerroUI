@@ -38,6 +38,8 @@ pub mod rust_paths_check;
 #[cfg(test)]
 mod differential_tests;
 #[cfg(test)]
+mod model_emit;
+#[cfg(test)]
 mod model_transform;
 #[cfg(test)]
 mod repository_documents;

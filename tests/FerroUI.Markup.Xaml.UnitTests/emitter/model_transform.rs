@@ -20,6 +20,7 @@ use std::collections::BTreeMap;
 use std::path::Path;
 use std::rc::Rc;
 
+use ferroui_build::model::AssemblyModel;
 use ferroui_build::scanner::{scan_crate, ScanOptions, Severity};
 use ferroui_build::type_system::ModelTypeSystem;
 use ferroui_markup_xaml_loader::compiler_extensions::IXamlCompileTimeValueParser;
@@ -50,13 +51,11 @@ fn transformed(
     documents.first().map(|document| dump_tree(&document.root)).ok_or_else(|| "the document was not transformed".to_string())
 }
 
-/// Not from upstream: the transform of the emitter against the build-time type system,
-/// measured over the corpus against the transform against the run-time type system.
-#[test]
-fn corpus_is_transformed_against_the_model_type_system() {
-    crate::register_types();
-    ferroui_controls::register_types();
-
+/// The models the documents of this crate are compiled against, as the build scripts of
+/// the crates would export them: the base crate, the controls on it, the XAML runtime
+/// library on both, and this crate (the crate that is compiled, without its test code) on
+/// the three. A scan that does not read a declaration fails the test that asks.
+pub(super) fn scanned_models() -> Vec<AssemblyModel> {
     let source = Path::new(env!("CARGO_MANIFEST_DIR")).join("..").join("..").join("src");
     let base = scan_crate(&ScanOptions::new("ferroui_base", source.join("FerroUI.Base").join("lib.rs")));
     let controls =
@@ -65,8 +64,6 @@ fn corpus_is_transformed_against_the_model_type_system() {
         &ScanOptions::new("ferroui_markup_xaml", source.join("Markup").join("FerroUI.Markup.Xaml").join("lib.rs"))
             .with_dependencies(vec![base.model.clone(), controls.model.clone()]),
     );
-    // The crate that is compiled: this one, as its build script would scan it (without its
-    // test code), on the models of the crates it is built on.
     let own = scan_crate(
         &ScanOptions::new("ferroui_markup_xaml_tests", Path::new(env!("CARGO_MANIFEST_DIR")).join("lib.rs"))
             .with_dependencies(vec![base.model.clone(), controls.model.clone(), markup_xaml.model.clone()]),
@@ -80,8 +77,17 @@ fn corpus_is_transformed_against_the_model_type_system() {
         assert!(not_read.is_empty(), "the scan of {} does not read {} declarations", scan.model.crate_name, not_read.len());
         assert!(!scan.model.types.is_empty(), "the scan of {} has no types", scan.model.crate_name);
     }
+    vec![base.model, controls.model, markup_xaml.model, own.model]
+}
 
-    let model_system: Rc<dyn IXamlTypeSystem> = ModelTypeSystem::new(vec![base.model, controls.model, markup_xaml.model, own.model]).as_type_system();
+/// Not from upstream: the transform of the emitter against the build-time type system,
+/// measured over the corpus against the transform against the run-time type system.
+#[test]
+fn corpus_is_transformed_against_the_model_type_system() {
+    crate::register_types();
+    ferroui_controls::register_types();
+
+    let model_system: Rc<dyn IXamlTypeSystem> = ModelTypeSystem::new(scanned_models()).as_type_system();
     let runtime = EmitterHost::runtime(&[]).unwrap_or_else(|error| panic!("the run-time type system: {}", error.message()));
 
     let mut identical: Vec<&str> = Vec::new();
