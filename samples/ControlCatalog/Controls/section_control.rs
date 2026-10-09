@@ -20,6 +20,8 @@ impl SectionControl {
     }
 
     pub fn new() -> Ref<Self> {
-        instantiate(Self::construct())
+        let this = instantiate(Self::construct());
+        this.initialize_component();
+        this
     }
 }

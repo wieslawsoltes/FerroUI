@@ -10,6 +10,9 @@
 //! with the same class populated by the run-time loader.
 //! `gaps` holds the minimal reproductions of the gaps of the framework the
 //! list names.
+//! `shell` looks at what the shell of the catalog shows: the cards of the
+//! home page and of the section pages, the drawer, the search box, the bar
+//! and the settings page, with the input of a mouse and a keyboard.
 
 mod allocation_trace;
 mod allocations;
@@ -30,6 +33,7 @@ mod numeric_up_down_page;
 mod open_gl_interop_page;
 mod page_assets;
 mod performance_pages;
+mod shell;
 mod support;
 mod survey;
 mod view_models;
