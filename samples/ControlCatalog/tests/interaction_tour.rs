@@ -82,7 +82,7 @@ use ferroui_base::input::raw::{
     RawTextInputEventArgs, RawTouchEventArgs,
 };
 use ferroui_base::input::{
-    IInputDevice, IKeyboardDevice, InputElement, Key, KeyDeviceType, KeyboardDevice, MouseDevice, PhysicalKey, Pointer, PointerType,
+    IInputDevice, InputElement, Key, KeyDeviceType, KeyboardDevice, MouseDevice, PhysicalKey, Pointer, PointerType,
     RawInputModifiers, TouchDevice,
 };
 use ferroui_base::platform::surfaces::IPlatformRenderSurface;
@@ -203,6 +203,9 @@ fn popups_of(parent: &Rc<MockWindowImpl>, compositor: &Rc<Compositor>, popups: &
         popup.setup_compositor(Some(compositor.clone()));
         popup.setup_surfaces(vec![RasterSurface::new() as std::sync::Arc<dyn IPlatformRenderSurface>]);
         popups_of(&popup, &compositor, &popups);
+        // The record keeps the memory of a popup that is gone until its entry
+        // is dropped.
+        popups.borrow_mut().retain(|popup| popup.strong_count() > 0);
         popups.borrow_mut().push(Rc::downgrade(&popup));
         Some(popup as Rc<dyn IPopupImpl>)
     });
@@ -235,14 +238,12 @@ impl Driver {
             window.setup_compositor(Some(compositor.clone()));
             window.setup_surfaces(vec![RasterSurface::new() as std::sync::Arc<dyn IPlatformRenderSurface>]);
             popups_of(&window, &compositor, &created_popups);
+            created.borrow_mut().retain(|window| window.strong_count() > 0);
             created.borrow_mut().push(Rc::downgrade(&window));
             window as Rc<dyn IWindowImpl>
         });
         FerroLocator::current_mutable().bind::<dyn IWindowingPlatform>().to_constant(platform as Rc<dyn IWindowingPlatform>);
-        // The services of the tours have no keyboard device: the one a
-        // platform registers.
-        let keyboard = KeyboardDevice::new();
-        FerroLocator::current_mutable().bind::<dyn IKeyboardDevice>().to_constant(keyboard.clone() as Rc<dyn IKeyboardDevice>);
+        let keyboard = KeyboardDevice::instance().expect("the keyboard device of the application of the tours");
         // The generators of the view models (a random selection, a random
         // colour) give the same numbers in every run.
         crate::view_models::random::test_seed::set(Some(42));

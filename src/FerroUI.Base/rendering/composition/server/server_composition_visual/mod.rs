@@ -511,6 +511,16 @@ impl IServerObject for ServerCompositionVisual {
         if let (Some(cache_mode), Some(this)) = (self.cache_mode(), self.rc()) {
             cache_mode.unsubscribe(&this);
         }
+        // An adorner is subscribed to the transforms of the visual it adorns
+        // (upstream's delegate keeps the adorner with the adorned visual; the
+        // entry here is a weak reference, which keeps the memory of the
+        // adorner). The visual it adorns outlives it, a control every focus
+        // adorner it ever had: the entry goes with the adorner.
+        if let Some(adorned) = self.adorned_visual() {
+            if !adorned.disposed.get() {
+                adorned.att_helper_unsubscribe_from_act_notification(&self.adorned_visual_act_subscription_action());
+            }
+        }
         if let Some(cache) = self.cache.borrow_mut().take() {
             cache.free_resources();
         }
