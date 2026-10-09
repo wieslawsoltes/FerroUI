@@ -37,9 +37,10 @@ What is counted:
   the parameters of the theory, called once per row by generated `#[test]` functions (`theory!`), and the tests
   of the binding suites inside a macro that runs each for the reflection and the compiled form
   (`binding_tests!`). A helper function of test code therefore also counts as a name.
-- Names are compared after normalisation: lower case, underscores removed, `avalonia` read as `ferro` and
-  `avn` at the start of a word as `frn` (docs/porting/PORTING-GUIDE.md, rule 2). `Foo_Bar` and `FooBar` are the
-  same name, and so are `AvaloniaObject_Works` and `ferro_object_works`.
+- Names are compared after normalisation: lower case, underscores removed, `avalonia` read as `ferro`,
+  `avn` at the start of a word as `frn` and `avares` (the resource scheme) as `ferres`
+  (docs/porting/PORTING-GUIDE.md, rule 2). `Foo_Bar` and `FooBar` are the same name, and so are
+  `AvaloniaObject_Works` and `ferro_object_works`.
 - The match is by name only: an upstream test is present when a Rust test of that name exists anywhere in the
   scanned directories. Two upstream tests of the same name in different files are both satisfied by one Rust
   test. The report states how many names are ambiguous in this way (the tests of the files concerned have to be
@@ -91,7 +92,7 @@ def normalise(name: str) -> str:
     words = re.sub(r"([a-z0-9])([A-Z])", r"\1_\2", name)
     words = re.sub(r"(?i)(^|_)avn", r"\1frn", words)
     key = words.replace("_", "").lower()
-    return key.replace("avalonia", "ferro")
+    return key.replace("avalonia", "ferro").replace("avares", "ferres")
 
 
 # ---------------------------------------------------------------------------------------------------------------
