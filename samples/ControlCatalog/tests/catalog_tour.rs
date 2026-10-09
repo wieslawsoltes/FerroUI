@@ -114,7 +114,7 @@ pub(super) struct Tour {
     view_model: Rc<MainWindowViewModel>,
     clock: Rc<TestGlobalClock>,
     time: Cell<f64>,
-    _window_impl: Rc<MockWindowImpl>,
+    window_impl: Rc<MockWindowImpl>,
     _surface: std::sync::Arc<RasterSurface>,
     services: CompositorTestServices,
 }
@@ -149,7 +149,7 @@ impl Tour {
             view_model,
             clock,
             time: Cell::new(0.0),
-            _window_impl: window_impl,
+            window_impl,
             _surface: surface,
             services,
         };
@@ -159,6 +159,30 @@ impl Tour {
 
     pub(super) fn view_model(&self) -> &Rc<MainWindowViewModel> {
         &self.view_model
+    }
+
+    /// The window of the catalog.
+    pub(super) fn window(&self) -> &Ref<Window> {
+        &self.window
+    }
+
+    /// The platform implementation of the window: raw input is given to its
+    /// input callback.
+    pub(super) fn window_impl(&self) -> &Rc<MockWindowImpl> {
+        &self.window_impl
+    }
+
+    /// The compositor the window renders through.
+    pub(super) fn compositor(&self) -> &Rc<ferroui_base::rendering::composition::Compositor> {
+        self.services.compositor()
+    }
+
+    /// Whether `item` is shown: it is the current page of the catalog, alone
+    /// on the stack of the navigation page, and the navigation is over.
+    pub(super) fn is_shown(&self, item: &Rc<PageItem>) -> bool {
+        let navigation_page = self.navigation_page();
+        let is_current = self.view_model.current_page_item().is_some_and(|current| Rc::ptr_eq(&current, item));
+        is_current && !navigation_page.is_navigating() && navigation_page.stack_depth() == 1
     }
 
     /// The pages the drawer offers, in the order of the page list, without
@@ -197,9 +221,7 @@ impl Tour {
     pub(super) fn show(&self, item: &Rc<PageItem>) -> bool {
         self.view_model.navigate_to_item(item);
         self.settle();
-        let navigation_page = self.navigation_page();
-        let is_current = self.view_model.current_page_item().is_some_and(|current| Rc::ptr_eq(&current, item));
-        is_current && !navigation_page.is_navigating() && navigation_page.stack_depth() == 1
+        self.is_shown(item)
     }
 
     pub(super) fn alive(&self) -> Alive {
@@ -213,16 +235,16 @@ impl Drop for Tour {
     }
 }
 
-fn environment(name: &str) -> Option<String> {
+pub(super) fn environment(name: &str) -> Option<String> {
     std::env::var(name).ok().filter(|value| !value.is_empty())
 }
 
-fn environment_number(name: &str, default: usize) -> usize {
+pub(super) fn environment_number(name: &str, default: usize) -> usize {
     environment(name).and_then(|value| value.parse().ok()).unwrap_or(default)
 }
 
 /// The pages of the tour: the ones `CATALOG_TOUR_PAGES` names, or all.
-fn selected_pages(tour: &Tour) -> Vec<Rc<PageItem>> {
+pub(super) fn selected_pages(tour: &Tour) -> Vec<Rc<PageItem>> {
     let pages = tour.pages();
     match environment("CATALOG_TOUR_PAGES") {
         Some(names) => {
@@ -233,12 +255,12 @@ fn selected_pages(tour: &Tour) -> Vec<Rc<PageItem>> {
     }
 }
 
-fn kilobytes(bytes: i64) -> String {
+pub(super) fn kilobytes(bytes: i64) -> String {
     format!("{:.1}", bytes as f64 / 1024.0)
 }
 
 /// A growth in kilobytes, with its sign.
-fn growth_kilobytes(bytes: i64) -> String {
+pub(super) fn growth_kilobytes(bytes: i64) -> String {
     format!("{:+.1}", bytes as f64 / 1024.0)
 }
 
@@ -423,15 +445,22 @@ fn print_holders(epoch: u32, holders: &[Holder]) {
 #[test]
 #[ignore = "measurement: run with --features count-allocations --ignored --nocapture --test-threads=1"]
 fn catalog_tour_memory() {
+    measure_tours("catalog tour", |_| (), |_, _, _| ());
+}
+
+/// The measurement of the tours: `after_shown` runs on every page a tour
+/// shows, after the frames of the visit, with what `setup` made of the tour.
+pub(super) fn measure_tours<D>(title: &str, setup: impl Fn(&Tour) -> D, after_shown: impl Fn(&Tour, &D, &Rc<PageItem>)) {
     let tours = environment_number("CATALOG_TOUR_TOURS", 3).max(1);
     let traced = environment("CATALOG_TOUR_TRACE").is_some();
     if traced {
         trace::start();
     }
     let tour = Tour::start();
+    let driver = setup(&tour);
     let pages = selected_pages(&tour);
     let home = tour.view_model().home_item();
-    println!("catalog tour: {} pages, {tours} tours", pages.len());
+    println!("{title}: {} pages, {tours} tours", pages.len());
     if !allocations::ENABLED {
         println!("  without the feature count-allocations: the bytes and blocks read zero");
     }
@@ -447,6 +476,7 @@ fn catalog_tour_memory() {
             if !tour.show(page) && number == 1 {
                 not_shown.push(page.header());
             }
+            after_shown(&tour, &driver, page);
         }
         // Every tour ends on the home page: the ends compare like with like.
         tour.show(&home);
@@ -490,7 +520,7 @@ fn catalog_tour_memory() {
 }
 
 /// The page the navigation page of the catalog shows.
-fn shown_page(tour: &Tour) -> ferroui_base::WeakRef<ferroui_controls::Page> {
+pub(super) fn shown_page(tour: &Tour) -> ferroui_base::WeakRef<ferroui_controls::Page> {
     let stack = tour.view_model().navigator().expect("the navigator of the catalog").navigation_stack();
     stack[0].downgrade()
 }
@@ -518,8 +548,9 @@ fn the_catalog_frees_the_page_it_navigated_away_from() {
 }
 
 /// Visits `page` from `home` and returns; what is alive back on `home`.
-fn round_trip(tour: &Tour, page: &Rc<PageItem>, home: &Rc<PageItem>) -> (bool, Alive) {
+fn round_trip(tour: &Tour, page: &Rc<PageItem>, home: &Rc<PageItem>, after_shown: &dyn Fn(&Rc<PageItem>)) -> (bool, Alive) {
     let shown = tour.show(page);
+    after_shown(page);
     tour.show(home);
     (shown, tour.alive())
 }
@@ -527,22 +558,31 @@ fn round_trip(tour: &Tour, page: &Rc<PageItem>, home: &Rc<PageItem>) -> (bool, A
 #[test]
 #[ignore = "measurement: run with --features count-allocations --ignored --nocapture --test-threads=1"]
 fn catalog_revisit_memory() {
+    measure_revisits("catalog revisits", |_| (), |_, _, _| ());
+}
+
+/// The measurement of the revisits: `after_shown` runs on the page of a
+/// round, after the frames of the visit and before the return to the home
+/// page, with what `setup` made of the tour.
+pub(super) fn measure_revisits<D>(title: &str, setup: impl Fn(&Tour) -> D, after_shown: impl Fn(&Tour, &D, &Rc<PageItem>)) {
     let traced: Vec<String> =
         environment("CATALOG_TOUR_TRACE").map(|names| names.split(',').map(|name| name.trim().to_string()).collect()).unwrap_or_default();
     if !traced.is_empty() {
         trace::start();
     }
     let tour = Tour::start();
+    let driver = setup(&tour);
+    let after_shown = |page: &Rc<PageItem>| after_shown(&tour, &driver, page);
     let home = tour.view_model().home_item();
     let pages: Vec<Rc<PageItem>> = selected_pages(&tour).into_iter().filter(|page| !Rc::ptr_eq(page, &home)).collect();
-    println!("catalog revisits: {} pages; growth of the second and of the third visit over the one before", pages.len());
+    println!("{title}: {} pages; growth of the second and of the third visit over the one before", pages.len());
     println!("  {:<28} {:>12} {:>9} {:>8} | {:>12} {:>9} {:>8}", "page", "KB", "blocks", "server", "KB", "blocks", "server");
 
     // The home page and a page fill what the pages share before the first
     // page is measured.
     tour.show(&home);
     if let Some(page) = pages.last() {
-        round_trip(&tour, page, &home);
+        round_trip(&tour, page, &home, &after_shown);
     }
 
     let mut total = (0i64, 0i64);
@@ -550,13 +590,13 @@ fn catalog_revisit_memory() {
     for page in &pages {
         let header = page.header();
         let record = traced.iter().any(|name| name == "all" || *name == header);
-        let (shown, first) = round_trip(&tour, page, &home);
+        let (shown, first) = round_trip(&tour, page, &home, &after_shown);
         let epoch = if record { trace::next_epoch() } else { 0 };
-        let (_, second) = round_trip(&tour, page, &home);
+        let (_, second) = round_trip(&tour, page, &home, &after_shown);
         if record {
             trace::next_epoch();
         }
-        let (_, third) = round_trip(&tour, page, &home);
+        let (_, third) = round_trip(&tour, page, &home, &after_shown);
         if record {
             print_objects(epoch);
         }
