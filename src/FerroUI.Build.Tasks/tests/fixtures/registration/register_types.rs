@@ -33,3 +33,47 @@ pub fn register_types() {
     // A cast whose types are left to inference is not read.
     ValueTypes::register_cast::<Wrapper, _>(unwrap);
 }
+
+/// What the crate registers with the untyped value conversions next to its casts.
+fn register_value_types() {
+    use crate::panel::{Panel, PanelCollection, Wrapper};
+    use ferroui_base::data::core::ValueTypes;
+    use std::rc::Rc;
+
+    ValueTypes::register_nullable::<PanelCollection>();
+    ValueTypes::register_reference::<Wrapper>();
+    // Handed to the function that calls it.
+    ValueTypes::register_deferred(ValueTypes::register_element_ref::<Panel>);
+    // A table of casts written with a macro of the function, by a macro of the crate that
+    // is handed its name.
+    macro_rules! assignable {
+        ($concrete:ty => $handle:ty) => {
+            assignable!($concrete => $handle, |value| value.clone());
+        };
+        ($concrete:ty => $handle:ty, $cast:expr) => {{
+            ValueTypes::register_cast::<Rc<$concrete>, $handle>($cast);
+            ValueTypes::register_nullable::<$handle>();
+        }};
+    }
+    for_each_cast!(assignable);
+    // A macro whose rule repeats a part of its input is not expanded: what it registers
+    // is not read.
+    macro_rules! references {
+        ($($type_:ty),*) => {
+            $(ValueTypes::register_reference::<$type_>();)*
+        };
+    }
+    references![PanelCollection];
+}
+
+macro_rules! for_each_cast {
+    ($apply:ident) => {
+        $apply!(Wrapper => Rc<dyn crate::panel::IPanel>);
+        $apply!(PanelCollection => Rc<Wrapper>, |collection| collection.wrapper());
+    };
+}
+
+/// A function written as a closure in the value of a constant.
+pub const VALUE_TYPES: fn() = || {
+    ferroui_base::data::core::ValueTypes::register_upcast::<crate::panel::Deep, crate::panel::Panel>();
+};

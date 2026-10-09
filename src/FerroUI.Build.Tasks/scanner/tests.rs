@@ -170,6 +170,7 @@ fn class_with_every_kind_of_member_is_read_exactly() {
 
     let mut expected = TypeModel::new("Border", TypeKind::Class, ty(BORDER), "fixture::controls::border");
     expected.object_model = true;
+    expected.class_markup = true;
     expected.namespace = "Fixture.Controls".to_string();
     expected.explicit_namespace = Some("Fixture.Controls".to_string());
     expected.public_path = Some("::fixture::Border".to_string());
@@ -1416,8 +1417,46 @@ fn registration_of_a_crate_is_read() {
             (&ty("Option<::registration::panel::Wrapper>"), &ty("::registration::panel::PanelCollection")),
         ]
     );
+    // The casts: the one of the registration function, then the ones of the table a macro
+    // of a function writes (the expansions of `assignable!`, which `for_each_cast!` invokes).
+    let shared = |text: &str| ty(&format!("::std::rc::Rc<{text}>"));
     let casts: Vec<(&RustType, &RustType)> = scan.model.casts.iter().map(|cast| (&cast.from, &cast.to)).collect();
-    assert_eq!(casts, [(&ty("::registration::panel::PanelCollection"), &ty("::registration::panel::PanelList"))]);
+    assert_eq!(
+        casts,
+        [
+            (&ty("::registration::panel::PanelCollection"), &ty("::registration::panel::PanelList")),
+            (&shared("::registration::panel::PanelCollection"), &shared("::registration::panel::Wrapper")),
+            (&shared("::registration::panel::Wrapper"), &shared("dyn ::registration::panel::IPanel")),
+        ],
+        "\n{}",
+        listing(&scan.diagnostics)
+    );
+    // The other registrations with the untyped value conversions: called, handed to a
+    // function that calls them, in a closure that is the value of a constant, and in the
+    // expansions of the table.
+    let value_types: Vec<(&str, Vec<&RustType>)> =
+        scan.model.value_types.iter().map(|registration| (registration.registration.as_str(), registration.types.iter().collect())).collect();
+    assert_eq!(
+        value_types,
+        [
+            ("nullable", vec![&ty("::registration::panel::PanelCollection")]),
+            ("reference", vec![&ty("::registration::panel::Wrapper")]),
+            ("element_ref", vec![&ty(PANEL)]),
+            ("upcast", vec![&ty("::registration::panel::Deep"), &ty(PANEL)]),
+            ("nullable", vec![&shared("::registration::panel::Wrapper")]),
+            ("nullable", vec![&shared("dyn ::registration::panel::IPanel")]),
+        ],
+        "\n{}",
+        listing(&scan.diagnostics)
+    );
+    // Not read: the cast whose target is left to inference, and what the macro whose rule
+    // repeats registers. The calls in the definition of `assignable!` are read through its
+    // expansions.
+    assert_eq!(scan.model.unread_value_types, [("cast".to_string(), 1), ("reference".to_string(), 1)]);
+    // The model keeps them in its file.
+    let read_back = crate::model::AssemblyModel::parse(&scan.model.to_json()).expect("the model is read back");
+    assert_eq!(read_back.value_types, scan.model.value_types);
+    assert_eq!(read_back.unread_value_types, scan.model.unread_value_types);
 
     // A trailing comma of a list of type arguments is not part of the text of a type.
     let collection = the_type(&scan, "PanelCollection");

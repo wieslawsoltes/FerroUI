@@ -654,6 +654,9 @@ pub struct TypeModel {
     /// owner type of attached properties (`ferro_static_type!`), with a runtime type of
     /// its own. Its handles (`Ref<X>`, `Option<Ref<X>>` for a class) are implied.
     pub object_model: bool,
+    /// The class states markup metadata of its own (`markup: { .. }` of a
+    /// `ferro_class_info!`): its runtime type has metadata, whatever the part lists.
+    pub class_markup: bool,
     /// The crate has a list of the classes it registers (`const TYPES: &[&TypeInfo]`, which
     /// its `register_types()` hands to `TypeInfo::register_all`) and the type is not in
     /// it: the type is not known by its name or by its handle until an instance of it is
@@ -667,6 +670,11 @@ pub struct TypeModel {
     /// The shortest path another crate names the type by, when the scanner found one
     /// (`::ferroui_controls::Border`).
     pub public_path: Option<String>,
+    /// The path the crate states for the type where no public path is found: the one of an
+    /// instantiation of a generic type (`generics:` of `ferro_rust_paths!`), written with
+    /// the name the crate has for the generic type and the public paths of its arguments
+    /// (`::ferroui_controls::FerroListOf<::ferroui_base::Ref<::ferroui_controls::RowDefinition>>`).
+    pub stated_path: Option<String>,
     /// The module of the declaration that gives the type its namespace
     /// (`ferroui_controls::border`).
     pub module: String,
@@ -718,9 +726,11 @@ impl TypeModel {
             name: name.to_string(),
             kind,
             object_model: false,
+            class_markup: false,
             unregistered: false,
             rust_path,
             public_path: None,
+            stated_path: None,
             module: module.to_string(),
             cfg: Vec::new(),
             handles: Vec::new(),
@@ -876,9 +886,11 @@ impl TypeModel {
             .text("name", &self.name)
             .text("kind", self.kind.name())
             .flag("object_model", self.object_model)
+            .flag("class_markup", self.class_markup)
             .flag("unregistered", self.unregistered)
             .always("rust_path", self.rust_path.to_json())
             .optional_text("public_path", &self.public_path)
+            .optional_text("stated_path", &self.stated_path)
             .text_or_empty("module", &self.module)
             .list("cfg", &self.cfg, |condition| Json::string(condition))
             .list("handles", &self.handles, RustType::to_json)
@@ -923,9 +935,11 @@ impl TypeModel {
             name: fields.text("name")?,
             kind: TypeKind::of(&fields.text("kind")?)?,
             object_model: fields.flag("object_model")?,
+            class_markup: fields.flag("class_markup")?,
             unregistered: fields.flag("unregistered")?,
             rust_path: fields.optional("rust_path", RustType::from_json)?.ok_or_else(|| "\"rust_path\" is missing in a type".to_string())?,
             public_path: fields.optional_text("public_path")?,
+            stated_path: fields.optional_text("stated_path")?,
             module: fields.text_or_empty("module")?,
             cfg: fields.list("cfg", |condition| text_of(condition, "a cfg condition"))?,
             handles: fields.list("handles", RustType::from_json)?,
@@ -1022,6 +1036,28 @@ pub struct CastModel {
     pub from: RustType,
     pub to: RustType,
 }
+
+/// A registration of Rust types with the untyped value conversions that a function of a
+/// crate makes with its types stated (`ValueTypes::register_nullable::<T>()`): what
+/// decides, next to the casts and the declarations, whether a value of one Rust type is a
+/// value of another, and which types are nullable forms.
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct ValueTypeModel {
+    /// The registration function, without `register_`: `nullable` (`Option<T>` is the
+    /// nullable form of `T`), `reference` (`T` is a shared object held as `Rc<T>` and
+    /// `Option<Rc<T>>`), `object` (`Ref<T>` is the handle of the class `T`), `element_ref`
+    /// (`ElementRef<T>` of the class `T`), `interface` (the handles of the class `T`
+    /// convert to the contract handle `I`), `upcast` (the handles of the class `T` to the
+    /// ones of its base).
+    pub registration: String,
+    /// The type arguments of the call, in order.
+    pub types: Vec<RustType>,
+}
+
+/// The registration functions of the untyped value conversions the scanner reads
+/// ([`ValueTypeModel`], and `cast` for [`CastModel`]), with the number of type arguments.
+pub const VALUE_REGISTRATIONS: &[(&str, usize)] =
+    &[("nullable", 1), ("reference", 1), ("object", 1), ("element_ref", 1), ("interface", 2), ("upcast", 2), ("cast", 2)];
 
 /// A public function of an inherent `impl` block of a type of a crate, as far as the choice
 /// of a call form reads it (9.5.3, form B).
@@ -1134,6 +1170,15 @@ pub struct AssemblyModel {
     pub handles: Vec<HandleModel>,
     /// The casts the crate registers between Rust types, in the order of the scan.
     pub casts: Vec<CastModel>,
+    /// The other registrations with the untyped value conversions the functions of the
+    /// crate make with their types stated.
+    pub value_types: Vec<ValueTypeModel>,
+    /// The registrations the text of the crate has and the model does not: for each
+    /// registration function ([`VALUE_REGISTRATIONS`]) with such calls, their number (a call
+    /// that leaves a type to inference, a call in the body of a macro, in a macro
+    /// invocation or in test code). A crate with such calls registers more than its model
+    /// states, so nothing follows from a registration that is not in the model.
+    pub unread_value_types: Vec<(String, i64)>,
     /// The public functions of the inherent `impl` blocks of the types of the crate that
     /// another crate can name, by type, in the order of the scan.
     pub functions: Vec<FunctionsModel>,
@@ -1159,6 +1204,8 @@ impl AssemblyModel {
             aliases: Vec::new(),
             handles: Vec::new(),
             casts: Vec::new(),
+            value_types: Vec::new(),
+            unread_value_types: Vec::new(),
             functions: Vec::new(),
             documents: Vec::new(),
             dependencies: Vec::new(),
@@ -1222,6 +1269,11 @@ impl AssemblyModel {
             visit(&mut cast.from);
             visit(&mut cast.to);
         }
+        for registration in &mut self.value_types {
+            for type_ in &mut registration.types {
+                visit(type_);
+            }
+        }
     }
 
     /// The model as the text of a `.xamlmeta` file of format 2.
@@ -1252,6 +1304,12 @@ impl AssemblyModel {
             .list("aliases", &self.aliases, |alias| Json::Array(vec![Json::string(&alias.path), alias.target.to_json()]))
             .list("handles", &self.handles, |handle| Json::Array(vec![handle.handle.to_json(), handle.type_.to_json()]))
             .list("casts", &self.casts, |cast| Json::Array(vec![cast.from.to_json(), cast.to.to_json()]))
+            .list("value_types", &self.value_types, |registration| {
+                let mut parts = vec![Json::string(&registration.registration)];
+                parts.extend(registration.types.iter().map(RustType::to_json));
+                Json::Array(parts)
+            })
+            .list("unread_value_types", &self.unread_value_types, |(registration, count)| Json::Array(vec![Json::string(registration), Json::Integer(*count)]))
             .list("functions", &self.functions, FunctionsModel::to_json);
         Json::object(members).to_text()
     }
@@ -1299,6 +1357,20 @@ impl AssemblyModel {
             casts: fields.list("casts", |pair| match pair {
                 Json::Array(pair) if pair.len() == 2 => Ok(CastModel { from: RustType::from_json(&pair[0])?, to: RustType::from_json(&pair[1])? }),
                 _ => Err("a registered cast is not a pair".to_string()),
+            })?,
+            value_types: fields.list("value_types", |parts| match parts {
+                Json::Array(parts) if !parts.is_empty() => Ok(ValueTypeModel {
+                    registration: text_of(&parts[0], "the name of a registration")?,
+                    types: parts[1..].iter().map(RustType::from_json).collect::<Result<_, _>>()?,
+                }),
+                _ => Err("a registration of value types is not a list".to_string()),
+            })?,
+            unread_value_types: fields.list("unread_value_types", |pair| match pair {
+                Json::Array(pair) if pair.len() == 2 => match &pair[1] {
+                    Json::Integer(count) => Ok((text_of(&pair[0], "the name of a registration")?, *count)),
+                    _ => Err("the number of registrations that are not read is not an integer".to_string()),
+                },
+                _ => Err("an entry of the registrations that are not read is not a pair".to_string()),
             })?,
             functions: fields.list("functions", FunctionsModel::from_json)?,
             documents,

@@ -18,9 +18,10 @@ use super::constants::{evaluate, Scope};
 use super::declarations::{read_declaration, read_property, Accessor, Declaration, DECLARATION_MACROS};
 use super::modules::{Glob, Import, ItemKind, Modules};
 use super::tokens::{
-    group_of, ident_of, invocations, is_arrow, is_punct, split_types, text_of, tokens_of, with_parenthesised_break_values, Cursor, ParseError, Tokens, TypeEnd,
+    calls_of, group_of, ident_of, invocations, is_arrow, is_punct, stated_calls_of, split_types, text_of, tokens_of, with_parenthesised_break_values, Cursor, ParseError, Tokens, TypeEnd,
 };
 use super::{codes, Diagnostic, InvocationCounts, ScanOptions, ScannedFile, Severity};
+use crate::model::VALUE_REGISTRATIONS;
 
 /// Where a declaration is written.
 #[derive(Clone)]
@@ -139,6 +140,25 @@ pub(crate) struct RawCast {
     pub imports: LocalImports,
 }
 
+/// `ValueTypes::register_<registration>::<Types..>(..)`, for the registrations but
+/// `register_cast` ([`VALUE_REGISTRATIONS`](crate::model::VALUE_REGISTRATIONS)).
+pub(crate) struct RawValueType {
+    pub registration: String,
+    pub types: Vec<Tokens>,
+    pub imports: LocalImports,
+}
+
+/// The macros a function invokes in its body, for what their expansions register with
+/// the untyped value conversions.
+pub(crate) struct InvokedMacros {
+    /// The `macro_rules!` definitions the body itself has, by name.
+    pub definitions: BTreeMap<String, Vec<(Tokens, Tokens)>>,
+    /// The invocations: the name, the tokens and the line.
+    pub invoked: Vec<(String, Tokens, usize)>,
+    pub imports: LocalImports,
+    pub site: Site,
+}
+
 /// What the files of a crate state, before anything is resolved.
 pub(crate) struct Source {
     pub modules: Modules,
@@ -161,6 +181,12 @@ pub(crate) struct Source {
     pub handles: Vec<Located<RawHandle>>,
     /// The casts the crate registers.
     pub casts: Vec<Located<RawCast>>,
+    /// The other registrations with the untyped value conversions.
+    pub value_types: Vec<Located<RawValueType>>,
+    /// The calls of each registration function in the text of the files, and the ones read.
+    pub value_calls: BTreeMap<String, (usize, usize)>,
+    /// The macros the functions invoke in their bodies.
+    pub invoked_macros: Vec<InvokedMacros>,
     /// The text constants of the modules, by module and name.
     pub constants: BTreeMap<(usize, String), String>,
     /// The associated text constants, by the name of the type and of the constant.
@@ -171,6 +197,9 @@ pub(crate) struct Source {
     pub namespaces: Vec<Located<Vec<(Text, Text)>>>,
     /// The entries of `ferro_rust_paths!`: the segments of each path.
     pub rust_paths: Vec<Located<Vec<String>>>,
+    /// The entries of the lists of generic types of `ferro_rust_paths!`: the type, the
+    /// path the crate states for it, and whether the type is a contract.
+    pub generic_paths: Vec<Located<(Tokens, String, bool)>>,
     pub local_macros: BTreeMap<String, Vec<LocalMacro>>,
     pub invocations: Vec<Invocation>,
     /// The declarations read from expansions of local macros, by the name of the macro.
@@ -206,6 +235,9 @@ impl Source {
             class_lists: Vec::new(),
             handles: Vec::new(),
             casts: Vec::new(),
+            value_types: Vec::new(),
+            value_calls: BTreeMap::new(),
+            invoked_macros: Vec::new(),
             constants: BTreeMap::new(),
             associated_constants: BTreeMap::new(),
             functions: Vec::new(),
@@ -213,6 +245,7 @@ impl Source {
             assemblies: Vec::new(),
             namespaces: Vec::new(),
             rust_paths: Vec::new(),
+            generic_paths: Vec::new(),
             local_macros: BTreeMap::new(),
             invocations: Vec::new(),
             expanded: BTreeMap::new(),
@@ -229,6 +262,7 @@ impl Source {
         }
         source.read_file(&options.root, 0, true, &[], None);
         source.expand_local_macros();
+        source.expand_registration_macros();
         source.modules.finish();
         source
     }
@@ -284,6 +318,20 @@ impl Source {
                 }
             }
         };
+        // Every call of a registration function of the untyped value conversions in the text
+        // of the file, wherever it stands: what the functions read is counted against it.
+        if text.contains("ValueTypes") {
+            if let Ok(tokens) = text.parse::<proc_macro2::TokenStream>() {
+                let tokens = tokens_of(tokens);
+                // What the definition of a declaration macro registers, it registers for the
+                // declarations, which are read where the macro is invoked.
+                calls_of(&tokens, "ValueTypes", DECLARATION_MACROS, &mut |function| {
+                    if let Some(registration) = function.strip_prefix("register_").filter(|name| VALUE_REGISTRATIONS.iter().any(|(known, _)| known == name)) {
+                        self.value_calls.entry(registration.to_string()).or_default().0 += 1;
+                    }
+                });
+            }
+        }
         let file_directory = path.parent().unwrap_or(Path::new("")).to_path_buf();
         let directory = if own_directory {
             file_directory.clone()
@@ -472,6 +520,7 @@ impl Source {
             syn::Item::Const(item) => {
                 let name = item.ident.to_string();
                 self.modules.add_item(module, &name, ItemKind::Value, is_public(&item.vis));
+                self.read_registrations_of_value(&item.expr, context, &cfg);
                 if let Text::Literal(text) = text_of_expression(&item.expr) {
                     self.constants.insert((module, name.clone()), text);
                 }
@@ -495,6 +544,7 @@ impl Source {
             }
             syn::Item::Static(item) => {
                 self.modules.add_item(module, &item.ident.to_string(), ItemKind::Value, is_public(&item.vis));
+                self.read_registrations_of_value(&item.expr, context, &cfg);
                 if last_segment_of_type(&item.ty).as_deref() == Some("MarkupAssembly") {
                     match assembly_of(&item.expr, site(&item.ident)) {
                         Some(assembly) => self.assemblies.push(assembly),
@@ -528,6 +578,7 @@ impl Source {
             return;
         }
         if DECLARATION_MACROS.contains(&name.as_str()) {
+            self.read_registrations_of_tokens(&tokens, &site);
             let result = read_declaration(&name, &tokens, line);
             let category = if result.is_ok() { Category::Read } else { Category::Failed };
             let counts = &mut self.files[file].invocations;
@@ -608,6 +659,7 @@ impl Source {
                     let site = site_at(line, &member_cfg);
                     match name.as_str() {
                         "ferro_property" => {
+                            self.read_registrations_of_tokens(&tokens, &site);
                             let result = read_property(&mut Cursor::new(&tokens, line));
                             let category = if result.is_ok() { Category::Read } else { Category::Failed };
                             let counts = &mut self.files[file].invocations;
@@ -693,6 +745,22 @@ impl Source {
             }
             let Ok((entries, line)) = cursor.take_group(Delimiter::Bracket, "a list in brackets") else { return };
             cursor.eat_punct(',');
+            // `(Type<Arguments>, "crate::Type<::path::Argument>")`: the path of an instantiation
+            // of a generic type, which the crate states.
+            if matches!(list.as_str(), "generics" | "generic_contracts") {
+                let mut entries = Cursor::new(&entries, line);
+                while !entries.is_end() {
+                    let Ok((entry, line)) = entries.take_group(Delimiter::Parenthesis, "an entry in parentheses") else { return };
+                    entries.eat_punct(',');
+                    let mut entry = Cursor::new(&entry, line);
+                    let Ok(type_) = entry.take_type(TypeEnd::default(), "a type") else { return };
+                    entry.eat_punct(',');
+                    let Some(TokenTree::Literal(literal)) = entry.peek() else { return };
+                    let syn::Lit::Str(path) = syn::Lit::new(literal.clone()) else { return };
+                    self.generic_paths.push(Located { site: Site { line, ..site.clone() }, value: (type_.to_vec(), path.value(), list == "generic_contracts") });
+                }
+                continue;
+            }
             if !matches!(list.as_str(), "classes" | "types" | "contracts") {
                 continue;
             }
@@ -1253,8 +1321,14 @@ struct RegistrationFinder {
     /// The handle and the type of each registration of a handle, with its line.
     found: Vec<((Tokens, Tokens), usize)>,
     casts: Vec<((Tokens, Tokens), usize)>,
+    /// The other registrations with the untyped value conversions whose types the call
+    /// states: the registration and the types, with the line.
+    value_types: Vec<((String, Vec<Tokens>), usize)>,
     /// The lines of the registrations of handles whose type is not read.
     unread: Vec<usize>,
+    /// The `macro_rules!` definitions of the body, and the macros it invokes.
+    definitions: BTreeMap<String, Vec<(Tokens, Tokens)>>,
+    invoked: Vec<(String, Tokens, usize)>,
 }
 
 /// The names the `use` tree `tree` below `prefix` imports, each with its path.
@@ -1285,6 +1359,47 @@ fn local_imports(tree: &syn::UseTree, prefix: &mut Vec<String>, imports: &mut Lo
 }
 
 impl<'ast> Visit<'ast> for RegistrationFinder {
+    /// A registration function of the untyped value conversions named with its types
+    /// (`ValueTypes::register_nullable::<T>`): called, or handed to a function that calls
+    /// it (`ValueTypes::register_deferred(ValueTypes::register_object::<T>)`). One whose
+    /// types the path leaves to inference is not read: nothing states them.
+    fn visit_expr_path(&mut self, node: &'ast syn::ExprPath) {
+        syn::visit::visit_expr_path(self, node);
+        let segments: Vec<&syn::PathSegment> = node.path.segments.iter().collect();
+        let [.., owner, last] = segments.as_slice() else { return };
+        if owner.ident != "ValueTypes" {
+            return;
+        }
+        let line = last.ident.span().start().line;
+        let name = last.ident.to_string();
+        let registration = name.strip_prefix("register_").and_then(|name| VALUE_REGISTRATIONS.iter().find(|(known, _)| *known == name));
+        let (Some((registration, count)), Some(types)) = (registration, type_arguments_of(last)) else { return };
+        if types.len() != *count {
+            return;
+        }
+        match (*registration, types.as_slice()) {
+            ("cast", [from, to]) => self.casts.push(((from.clone(), to.clone()), line)),
+            _ => self.value_types.push(((registration.to_string(), types), line)),
+        }
+    }
+
+    /// A macro the body defines for itself, or one it invokes in item position.
+    fn visit_item_macro(&mut self, node: &'ast syn::ItemMacro) {
+        let (name, _) = name_of_macro(&node.mac);
+        match &node.ident {
+            Some(defined) if name == "macro_rules" => {
+                self.definitions.entry(defined.to_string()).or_default().extend(rules_of(&tokens_of(node.mac.tokens.clone())));
+            }
+            _ => self.visit_macro(&node.mac),
+        }
+    }
+
+    /// A macro the body invokes: what it registers is in its expansion.
+    fn visit_macro(&mut self, node: &'ast syn::Macro) {
+        let (name, line) = name_of_macro(node);
+        self.invoked.push((name, tokens_of(node.tokens.clone()), line));
+    }
+
     fn visit_item_use(&mut self, node: &'ast syn::ItemUse) {
         let mut prefix = Vec::new();
         if node.leading_colon.is_some() {
@@ -1308,13 +1423,6 @@ impl<'ast> Visit<'ast> for RegistrationFinder {
         let segments: Vec<&syn::PathSegment> = function.path.segments.iter().collect();
         let [.., owner, last] = segments.as_slice() else { return };
         let line = last.ident.span().start().line;
-        // A cast whose types the call leaves to inference is not read: nothing states them.
-        if owner.ident == "ValueTypes" && last.ident == "register_cast" {
-            if let Some([from, to]) = type_arguments_of(last).as_deref() {
-                self.casts.push(((from.clone(), to.clone()), line));
-            }
-            return;
-        }
         if owner.ident != "MarkupType" || last.ident != "register_handle" {
             return;
         }
@@ -1341,16 +1449,159 @@ impl Source {
     fn read_registrations(&mut self, block: &syn::Block, context: &Context, cfg: &[String]) {
         let mut finder = RegistrationFinder::default();
         finder.visit_block(block);
-        let site = |line: usize| Site { module: context.module, file: context.file, line, cfg: cfg.to_vec(), expanded: false };
+        self.take_registrations(finder, context, cfg);
+    }
+
+    /// What the body of a declaration registers with the untyped value conversions: the
+    /// accessor of a property that registers the element reference of its value type when
+    /// it first runs (`ValueTypes::register_element_ref::<Control>();`). The body is tokens,
+    /// so the calls are found in the tokens, with their types stated.
+    fn read_registrations_of_tokens(&mut self, tokens: &[TokenTree], site: &Site) {
+        let mut stated: Vec<(String, Vec<Tokens>, usize)> = Vec::new();
+        stated_calls_of(tokens, "ValueTypes", &mut |function, types, line| stated.push((function.to_string(), types, line)));
+        for (function, types, line) in stated {
+            let Some((registration, count)) = function.strip_prefix("register_").and_then(|name| VALUE_REGISTRATIONS.iter().find(|(known, _)| *known == name)) else {
+                continue;
+            };
+            if types.len() != *count {
+                continue;
+            }
+            let site = Site { line, ..site.clone() };
+            self.value_calls.entry(registration.to_string()).or_default().1 += 1;
+            match (*registration, types.as_slice()) {
+                ("cast", [from, to]) => self.casts.push(Located { site, value: RawCast { from: from.clone(), to: to.clone(), imports: Vec::new() } }),
+                _ => self.value_types.push(Located { site, value: RawValueType { registration: registration.to_string(), types, imports: Vec::new() } }),
+            }
+        }
+    }
+
+    /// What the value of a constant or of a static registers: a function written as a
+    /// closure in it (`value_types: || { ValueTypes::register_reference::<T>(); }`).
+    fn read_registrations_of_value(&mut self, value: &syn::Expr, context: &Context, cfg: &[String]) {
+        let mut finder = RegistrationFinder::default();
+        finder.visit_expr(value);
+        self.take_registrations(finder, context, cfg);
+    }
+
+    fn take_registrations(&mut self, finder: RegistrationFinder, context: &Context, cfg: &[String]) {
+        if !finder.invoked.is_empty() {
+            let line = finder.invoked[0].2;
+            self.invoked_macros.push(InvokedMacros {
+                definitions: finder.definitions.clone(),
+                invoked: finder.invoked.clone(),
+                imports: finder.imports.clone(),
+                site: Site { module: context.module, file: context.file, line, cfg: cfg.to_vec(), expanded: true },
+            });
+        }
+        self.take_found(finder, context.module, context.file, cfg, true);
+    }
+
+    /// Expands the macros the functions invoke in their bodies, where the macro is one of
+    /// the crate (or of the body) and a rule of it has a form the scanner applies, and
+    /// reads what the expansions register with the untyped value conversions: a table of
+    /// casts written as invocations of a macro (`assignable!(A => Rc<dyn B>);`), also when
+    /// the invocations are written by another macro that is handed the name of the first
+    /// (`for_each!(assignable)`).
+    ///
+    /// The calls in the text of a definition count as read when every invocation of the
+    /// macro that was met is expanded; a definition with an invocation that is not expanded
+    /// (a rule that repeats a part of its input) keeps its calls as not read.
+    fn expand_registration_macros(&mut self) {
+        const MAX_DEPTH: usize = 8;
+        let pending = std::mem::take(&mut self.invoked_macros);
+        // By definition: the calls of the registration functions in its text, whether an
+        // invocation was expanded, and whether one was not.
+        let mut definitions_met: BTreeMap<String, (BTreeMap<String, usize>, bool, bool)> = BTreeMap::new();
+        for (body_index, body) in pending.into_iter().enumerate() {
+            let mut definitions = body.definitions;
+            let mut queue: Vec<(String, Tokens, usize, usize)> = body.invoked.into_iter().map(|(name, tokens, line)| (name, tokens, line, 0)).collect();
+            while let Some((name, tokens, line, depth)) = queue.pop() {
+                // A definition of the body before one of the crate.
+                let (key, rules) = match definitions.get(&name) {
+                    Some(rules) => (format!("{body_index}:{name}"), rules.clone()),
+                    None => match self.local_macros.get(&name).map(Vec::as_slice) {
+                        Some([definition]) => (name.clone(), definition.rules.clone()),
+                        _ => continue,
+                    },
+                };
+                let met = definitions_met.entry(key).or_insert_with(|| {
+                    let mut calls: BTreeMap<String, usize> = BTreeMap::new();
+                    for (_, transcriber) in &rules {
+                        calls_of(transcriber, "ValueTypes", &[], &mut |function| {
+                            if let Some(registration) = function.strip_prefix("register_").filter(|name| VALUE_REGISTRATIONS.iter().any(|(known, _)| known == name)) {
+                                *calls.entry(registration.to_string()).or_default() += 1;
+                            }
+                        });
+                    }
+                    (calls, false, false)
+                });
+                let expansion = match depth < MAX_DEPTH {
+                    true => rules.iter().find_map(|(matcher, transcriber)| bind(matcher, &tokens).map(|bindings| substitute(transcriber, &bindings))).flatten(),
+                    false => None,
+                };
+                let block = expansion.and_then(|expansion| {
+                    let braced = TokenTree::Group(Group::new(Delimiter::Brace, expansion.into_iter().collect()));
+                    syn::parse2::<syn::Block>(std::iter::once(braced).collect()).ok()
+                });
+                let Some(block) = block else {
+                    met.2 = true;
+                    continue;
+                };
+                met.1 = true;
+                let mut finder = RegistrationFinder::default();
+                finder.visit_block(&block);
+                for (defined, rules) in std::mem::take(&mut finder.definitions) {
+                    definitions.entry(defined).or_default().extend(rules);
+                }
+                queue.extend(std::mem::take(&mut finder.invoked).into_iter().map(|(name, tokens, _)| (name, tokens, line, depth + 1)));
+                finder.imports = body.imports.clone();
+                // The tokens of an expansion have the lines of the definition: what it
+                // registers is at the invocation.
+                for entry in finder.found.iter_mut() {
+                    entry.1 = line;
+                }
+                for entry in finder.casts.iter_mut() {
+                    entry.1 = line;
+                }
+                for entry in finder.value_types.iter_mut() {
+                    entry.1 = line;
+                }
+                finder.unread.clear();
+                self.take_found(finder, body.site.module, body.site.file, &body.site.cfg, false);
+            }
+        }
+        for (calls, expanded, not_expanded) in definitions_met.into_values() {
+            if expanded && !not_expanded {
+                for (registration, count) in calls {
+                    self.value_calls.entry(registration).or_default().1 += count;
+                }
+            }
+        }
+    }
+
+    /// Takes what `finder` found. `counted`: the calls are calls in the text of a function
+    /// (the ones of an expansion are counted with the definition of the macro).
+    fn take_found(&mut self, finder: RegistrationFinder, module: usize, file: usize, cfg: &[String], counted: bool) {
+        let context = (module, file);
+        let site = |line: usize| Site { module: context.0, file: context.1, line, cfg: cfg.to_vec(), expanded: false };
         for ((handle, type_), line) in finder.found {
             self.handles.push(Located { site: site(line), value: RawHandle { handle, type_, imports: finder.imports.clone() } });
         }
         for ((from, to), line) in finder.casts {
+            if counted {
+                self.value_calls.entry("cast".to_string()).or_default().1 += 1;
+            }
             self.casts.push(Located { site: site(line), value: RawCast { from, to, imports: finder.imports.clone() } });
+        }
+        for ((registration, types), line) in finder.value_types {
+            if counted {
+                self.value_calls.entry(registration.clone()).or_default().1 += 1;
+            }
+            self.value_types.push(Located { site: site(line), value: RawValueType { registration, types, imports: finder.imports.clone() } });
         }
         for line in finder.unread {
             let message = "`MarkupType::register_handle` is called with a type that is not `<Type as MarkupTyped>::MARKUP` or a variable of the function bound to it: the handle is not in the model".to_string();
-            self.diagnostic_at(Severity::Warning, codes::FORM, context.file, line, message);
+            self.diagnostic_at(Severity::Warning, codes::FORM, context.1, line, message);
         }
     }
 

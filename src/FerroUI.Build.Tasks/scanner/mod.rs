@@ -17,6 +17,8 @@
 //! | `const NAMESPACES`, `static _: MarkupAssembly` | the namespace table and the assembly |
 //! | `const TYPES: &[&TypeInfo]` | the classes the crate registers: a class that is not in the list is marked ([`TypeModel::unregistered`]) |
 //! | `MarkupType::register_handle::<H>(..)`, `ValueTypes::register_cast::<A, B>(..)` in a function | one more handle of a type with markup metadata ([`AssemblyModel::handles`]); the casts between Rust types ([`AssemblyModel::casts`]) |
+//! | `ValueTypes::register_nullable::<T>`, `register_reference`, `register_object`, `register_element_ref`, `register_interface`, `register_upcast` with their types stated: called or handed on in a function, in a closure that is the value of a constant or a static, in the body of a declaration, in the expansion of a macro a function invokes | what the crate registers with the untyped value conversions ([`AssemblyModel::value_types`]); the calls the text has and the model does not are counted ([`AssemblyModel::unread_value_types`]) |
+//! | `generics: [(Type<A>, "crate::Type<::path::A>")]` of `ferro_rust_paths!` | the path the crate states for an instantiation of a generic type ([`TypeModel::stated_path`]) |
 //! | `struct`, `enum`, `trait`, `type`, `use`, `mod`, `bitflags!` | the names of each module, for the resolution of paths; the values of enumerations; the type aliases ([`AssemblyModel::aliases`]) |
 //! | `impl X { fn .., const .. }` | the functions of each type ([`Scan::functions`]); the constants an enumeration or a set of flags names as members |
 //! | `ferro_rust_paths!` | the public paths the crate states, compared with the ones the scanner finds |
@@ -69,7 +71,7 @@ use proc_macro2::TokenTree;
 use crate::model::{
     AccessorModel, AliasModel, AssemblyModel, AttributeModel, AttributeValueModel, CallableModel, CastModel, EnumMemberModel, ExportModel, GenericModel,
     HandleModel, MemberModel, ParameterModel, PropertyModel, RegisteredKind, RegisteredModel, RegistrationModel, RustType, TypeKind, TypeModel,
-    XmlnsDefinitionModel, XmlnsPrefixModel,
+    ValueTypeModel, XmlnsDefinitionModel, XmlnsPrefixModel,
 };
 use crate::model_set::ModelSet;
 use declarations::{
@@ -365,6 +367,20 @@ impl Scan {
                 self.model.handles.len(),
                 self.model.casts.len(),
                 self.model.aliases.len()
+            ),
+            format!(
+                "value types: {} registrations read ({}); not read: {}",
+                self.model.value_types.len(),
+                crate::model::VALUE_REGISTRATIONS
+                    .iter()
+                    .filter(|(registration, _)| *registration != "cast")
+                    .map(|(registration, _)| format!("{} {registration}", self.model.value_types.iter().filter(|read| read.registration == *registration).count()))
+                    .collect::<Vec<_>>()
+                    .join(", "),
+                match self.model.unread_value_types.is_empty() {
+                    true => "none".to_string(),
+                    false => self.model.unread_value_types.iter().map(|(registration, count)| format!("{count} {registration}")).collect::<Vec<_>>().join(", "),
+                }
             ),
             format!(
                 "type texts: {} ({} with an unresolved path, {} distinct unresolved paths)",
@@ -748,6 +764,7 @@ impl Builder {
         let interfaces = self.rust_types(interfaces, site, Some(&self_type));
         self.model.types[index].interfaces.extend(interfaces);
         if let Some(markup) = markup {
+            self.model.types[index].class_markup = true;
             self.apply_markup(index, markup, site, &self_type);
         }
     }
@@ -1032,6 +1049,27 @@ impl Builder {
             let to = self.rust_type_in(&value.to, site, None, &value.imports);
             self.model.casts.push(CastModel { from, to });
         }
+        let value_types = std::mem::take(&mut self.source.value_types);
+        for Located { site, value } in &value_types {
+            let types = value.types.iter().map(|type_| self.rust_type_in(type_, site, None, &value.imports)).collect();
+            self.model.value_types.push(ValueTypeModel { registration: value.registration.clone(), types });
+        }
+        // A call the functions did not give the model: in the text and not read, or read
+        // with a type the scanner did not resolve (a type parameter of the function).
+        let mut unread: BTreeMap<String, i64> = BTreeMap::new();
+        for (registration, (written, read)) in &self.source.value_calls {
+            if written > read {
+                *unread.entry(registration.clone()).or_default() += (*written - *read) as i64;
+            }
+        }
+        let unresolved_casts = self.model.casts.iter().filter(|cast| !cast.from.is_resolved() || !cast.to.is_resolved()).count();
+        if unresolved_casts > 0 {
+            *unread.entry("cast".to_string()).or_default() += unresolved_casts as i64;
+        }
+        for registration in self.model.value_types.iter().filter(|registration| registration.types.iter().any(|type_| !type_.is_resolved())) {
+            *unread.entry(registration.registration.clone()).or_default() += 1;
+        }
+        self.model.unread_value_types = unread.into_iter().collect();
     }
 
     /// The value of a text of the assembly or of the namespace table: a literal, a text
@@ -1172,6 +1210,16 @@ impl Builder {
             type_.namespace = namespace;
             let path = type_.rust_path.text.strip_prefix("dyn ").unwrap_or(&type_.rust_path.text);
             type_.public_path = public.get(path).cloned();
+        }
+        // The paths the crate states for the instantiations of generic types it declares
+        // metadata for.
+        let generic_paths = std::mem::take(&mut self.source.generic_paths);
+        for Located { site, value: (type_, path, contract) } in &generic_paths {
+            let (text, _) = normalise(&self.source.modules, site.module, type_, None, &[]);
+            let text = if *contract { format!("dyn {text}") } else { text };
+            if let Some(declared) = self.model.types.iter_mut().find(|declared| declared.rust_path.text == text) {
+                declared.stated_path = Some(format!("::{}", path.trim_start_matches("::")));
+            }
         }
         self.model.exports = self.source.modules.export_table().into_iter().map(|(path, declared)| ExportModel { path, declared }).collect();
         self.aliases_and_handles();
