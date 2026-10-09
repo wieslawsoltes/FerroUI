@@ -1006,18 +1006,6 @@ rust = "callback_base.rs"
 reason = "base class of a COM object whose lifetime the native side owns: `ferroui_microcom::ComObject` drops the Rust value with the last native reference (`Drop` is `Destroyed`), and `callback_base::guard` hands a panic of a callback to the dispatcher implementation as `RaiseException` does"
 
 [[map]]
-project = "Avalonia.Headless"
-upstream = ["AvaloniaTestApplicationAttribute.cs", "HeadlessUnitTestIsolationAttribute.cs"]
-kind = "not-applicable"
-reason = "assembly attributes that tell the xUnit and NUnit integrations which application to build and how to isolate the tests of an assembly: there are no assembly attributes and no test framework integration; a test sets up its application with `AppBuilder` and `use_headless` (the `PerTest` isolation), as `tests.rs` of the crate does"
-
-[[map]]
-project = "Avalonia.Headless"
-upstream = ["HeadlessUnitTestSession.cs"]
-kind = "not-applicable"
-reason = "not ported for now: the session of the xUnit and NUnit integrations, which runs the tests of an assembly on a dispatcher thread of its own and finds the application through reflection (the assembly attribute, a `BuildAvaloniaApp` method); the test harness of cargo runs a test on a thread of its own, where the test sets up its application. Applicable if the owner decides that tests of a crate share one application (the `PerAssembly` isolation, which has no counterpart today): the session is then the object that owns the dispatcher thread and runs each test on it"
-
-[[map]]
 project = "Avalonia.Headless.XUnit"
 upstream = ["*"]
 kind = "not-applicable"
@@ -1804,6 +1792,10 @@ reason = "the enum `WindowDecorations`, declared in `Window.cs` upstream"
 [[rust_only]]
 path = "src/Headless/FerroUI.Headless/headless_window_surface.rs"
 reason = "the part of `HeadlessWindowImpl.cs` that a frame uses (`Lock`, `CreateFramebufferRenderTarget`, the last rendered frame and its lock), as an object of its own; upstream implements the framebuffer surface on the window implementation"
+
+[[rust_only]]
+path = "src/Headless/FerroUI.Headless/unit_tests/test_application.rs"
+reason = "test support: `TestApplication.cs` of the upstream unit test project of the headless platform, the two test assemblies that stand for the upstream test projects that compile its files, and the facts and theories that dispatch a test to the session of its assembly (what the xUnit integration does, which is not ported)"
 
 [[rust_only]]
 path = "src/Skia/FerroUI.Skia/locked_framebuffer.rs"

@@ -7812,19 +7812,19 @@
    "scope": "in",
    "detail": "full",
    "files": [
-    8,
-    8,
+    11,
+    11,
     0
    ],
    "types": [
-    18,
-    20,
+    22,
+    24,
     2
    ],
    "members": [
-    223,
-    235,
-    12
+    238,
+    251,
+    13
    ],
    "interfaces": [
     2,
@@ -7838,15 +7838,19 @@
     0,
     0
    ],
-   "notApplicableFiles": 3,
+   "notApplicableFiles": 0,
    "matchKinds": {
     "field": 6,
-    "fn": 206,
-    "overload fn": 11
+    "fn": 216,
+    "overload fn": 14,
+    "variant": 2
    },
    "presentFiles": {
     "AvaloniaHeadlessPlatform.cs": [
      "ferro_headless_platform.rs"
+    ],
+    "AvaloniaTestApplicationAttribute.cs": [
+     "ferro_test_application_attribute.rs"
     ],
     "HeadlessPlatformRenderInterface.cs": [
      "headless_platform_render_interface.rs"
@@ -7856,6 +7860,12 @@
     ],
     "HeadlessRenderTimer.cs": [
      "headless_render_timer.rs"
+    ],
+    "HeadlessUnitTestIsolationAttribute.cs": [
+     "headless_unit_test_isolation_attribute.rs"
+    ],
+    "HeadlessUnitTestSession.cs": [
+     "headless_unit_test_session.rs"
     ],
     "HeadlessWindowExtensions.cs": [
      "headless_window_extensions.rs"
@@ -7872,7 +7882,8 @@
    },
    "rustOnly": [
     "headless_window_surface.rs",
-    "tests.rs"
+    "tests.rs",
+    "unit_tests/test_application.rs"
    ]
   },
   {

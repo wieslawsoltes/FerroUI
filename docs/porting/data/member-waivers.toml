@@ -3117,6 +3117,12 @@ reason = "an empty dictionary: the default of `IPlatformRenderInterfaceContext::
 
 [[waive]]
 project = "Avalonia.Headless"
+type = "*HeadlessUnitTestSession"
+member = "DynamicallyAccessed"
+reason = "the members a trimmer has to keep of an entry point type that is searched through reflection: an entry point is a function"
+
+[[waive]]
+project = "Avalonia.Headless"
 type = "*IHeadlessGeometryWithEdges"
 reason = "interface with default members, tested with `is`: the free functions `edge_points_of` (the test and `Points`), `projection_on_axis` and `get_axes` of `headless_platform_render_interface.rs`"
 
