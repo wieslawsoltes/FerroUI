@@ -334,7 +334,7 @@ FerroUI-only crates have no upstream source directory (for example the MicroCom 
 
 ## Rust-only files
 
-324 Rust source files have no upstream counterpart (0 without a recorded reason). They are listed at the end of each project page.
+325 Rust source files have no upstream counterpart (0 without a recorded reason). They are listed at the end of each project page.
 
 | Project | Rust file | Reason |
 |---|---|---|
@@ -611,6 +611,7 @@ FerroUI-only crates have no upstream source directory (for example the MicroCom 
 | [Avalonia.HarfBuzz](tracking/Avalonia.HarfBuzz.md) | `src/HarfBuzz/FerroUI.HarfBuzz/hb.rs` | a thin safe wrapper over the HarfBuzz objects the shaper uses, with every unsafe block of the crate: the HarfBuzzSharp binding upstream |
 | [Avalonia.Headless](tracking/Avalonia.Headless.md) | `src/Headless/FerroUI.Headless/headless_window_surface.rs` | the part of `HeadlessWindowImpl.cs` that a frame uses (`Lock`, `CreateFramebufferRenderTarget`, the last rendered frame and its lock), as an object of its own; upstream implements the framebuffer surface on the window implementation |
 | [Avalonia.Headless](tracking/Avalonia.Headless.md) | `src/Headless/FerroUI.Headless/tests.rs` | the unit tests of the module |
+| [Avalonia.Headless](tracking/Avalonia.Headless.md) | `src/Headless/FerroUI.Headless/unit_tests/headless_unit_test_application.rs` | test support: `HeadlessUnitTestApplication.cs` of the upstream test library (`tests/Avalonia.UnitTests`), the application on the headless platform with the Simple theme that the headless probe tests of the controls run with; the headless platform and the theme are built on the controls, so the tests are in this crate |
 | [Avalonia.Headless](tracking/Avalonia.Headless.md) | `src/Headless/FerroUI.Headless/unit_tests/test_application.rs` | test support: `TestApplication.cs` of the upstream unit test project of the headless platform, the two test assemblies that stand for the upstream test projects that compile its files, and the facts and theories that dispatch a test to the session of its assembly (what the xUnit integration does, which is not ported) |
 | [Avalonia.Markup](tracking/Avalonia.Markup.md) | `src/Markup/FerroUI.Markup/markup/parsers/property_parser.rs` | port of `Parsers/PropertyParser.cs` of Avalonia.Markup.Xaml: it lives next to the grammars that share its character reader |
 | [Avalonia.Markup.Xaml](tracking/Avalonia.Markup.Xaml.md) | `src/Markup/FerroUI.Markup.Xaml/converters/type_converter.rs` | counterpart of .NET `System.ComponentModel.TypeConverter` and `ITypeDescriptorContext`, which the converters of the markup runtime derive from and receive |
