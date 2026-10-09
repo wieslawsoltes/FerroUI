@@ -2131,3 +2131,18 @@ reason = "`Task` and `TaskCompletionSource` of the runtime library, as far as `S
 [[rust_only]]
 path = "src/FerroUI.Remote.Protocol/assembly.rs"
 reason = "The table of the exported types of an assembly with their identifier attributes: what `DefaultMessageTypeResolver` reads by reflection upstream (`Assembly.ExportedTypes`)"
+
+# ---------------------------------------------------------------- Avalonia.Controls/Remote and Avalonia.DesignerSupport
+#
+# Every ported upstream file has the Rust file of the default rule (`Remote/Server/RemoteServerTopLevelImpl.cs`
+# -> `remote/server/remote_server_top_level_impl.rs`, its partial `RemoteServerTopLevelImpl.Framebuffer.cs` ->
+# `remote_server_top_level_impl_framebuffer.rs`, `Remote/Stubs.cs` -> `remote/stubs.rs`). The two files of
+# `Remote/HtmlTransport/` of Avalonia.DesignerSupport are not ported and have no entry: they are a gap.
+
+[[rust_only]]
+path = "src/FerroUI.Controls/remote/ui_thread_handle.rs"
+reason = "How a handler on the reader thread of a connection reaches an object of the UI thread: a number registered on that thread and its dispatcher, in place of the `this` a delegate of the original captures (DEVIATIONS.md, Remote rendering)"
+
+[[rust_only]]
+path = "src/FerroUI.DesignerSupport/remote/test_connection.rs"
+reason = "A connection for the tests of the crate, which records what is sent and raises what a test tells it to"
