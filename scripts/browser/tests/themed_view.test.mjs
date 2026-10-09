@@ -23,7 +23,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { open, run, assert, sleep, near } from "../harness.mjs";
+import { open, run, assert, sleep, near, differing, colours } from "../harness.mjs";
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..", "..", "..");
 const site = process.argv[2] ?? path.join(process.env.CARGO_TARGET_DIR ?? path.join(root, "target"), "browser", "themed_view");
@@ -611,6 +611,67 @@ check("a native control whose host is put back before it is destroyed keeps its 
     assert((await page.services()).native_handle === "true", "the native control was destroyed");
 });
 
+// --- the disposal of a view (stage B2.7) ----------------------------------------------------------
+
+// A second view has a canvas, a render target and (with WebGL) a graphics context of its own on the
+// thread that renders. Closing it releases them there, with its own context current, while the first
+// view goes on drawing with its context: an object released in the wrong context would be one of the
+// first view's. `released=` counts the canvases the thread that renders has let go of.
+const SECOND = { x: 260, y: 380, width: 160, height: 100 };
+const SECOND_COLOUR = [0x1f, 0x9d, 0x55];
+for (const query of ["", "?RenderingMode=Software2D"]) {
+    check(`a second view is drawn and closed while the first one goes on drawing${query ? ` (${query.slice(1)})` : ""}`, async (page) => {
+        // The part of the first view the second one does not cover.
+        const untouched = { x: 0, y: 0, width: 460, height: SECOND.y - 10 };
+        // Leaves the first view in one state each time: the button clicked, the check box toggled
+        // twice (the focus and the pointer end on it), nothing in transition.
+        const useFirstView = async () => {
+            await page.click(...BUTTON);
+            await page.click(...CHECK_BOX);
+            await page.click(...CHECK_BOX);
+            await sleep(700);
+            return (await page.state()).clicks;
+        };
+        const released = Number((await page.rendering()).released);
+        await page.evaluate(`(() => {
+            const second = document.createElement("div");
+            second.id = "second";
+            second.style.cssText = "position:absolute;left:${SECOND.x}px;top:${SECOND.y}px;width:${SECOND.width}px;height:${SECOND.height}px";
+            document.body.appendChild(second);
+            return true;
+        })()`);
+        assert(await page.evaluate(`themedView.themedViewSecondView("open")`) === "opened", "the second view was not opened");
+        const centre = [SECOND.x + SECOND.width / 2, SECOND.y + SECOND.height / 2];
+        let colour;
+        for (const end = Date.now() + 15000; Date.now() < end; await sleep(200)) {
+            colour = (await page.screenshot()).pixel(...centre);
+            if (near(colour, SECOND_COLOUR, 10)) { break; }
+        }
+        assert(near(colour, SECOND_COLOUR, 10), `the second view shows ${colour} at its centre, expected ${SECOND_COLOUR}`);
+        // Both views are live: the first one takes input and draws it.
+        assert(await useFirstView() === "1", "the first view did not count a click while the second one was open");
+        const before = await page.screenshot(undefined, untouched);
+
+        assert(await page.evaluate(`themedView.themedViewSecondView("close")`) === "closed", "the second view was not closed");
+        await page.waitFor(`Number(/released=(\\d+)/.exec(themedView.themedViewRendering())[1]) === ${released + 1}`, 15000);
+        // The first view draws on, with its own render target and context, and shows what it showed.
+        const frames = (await page.rendering()).frames;
+        assert(await useFirstView() === "2", "the first view did not count a click after the second one was closed");
+        assert(Number((await page.rendering()).frames) > Number(frames), "the first view drew no frame after the second one was closed");
+        const after = await page.screenshot(undefined, untouched);
+        const { samples, different } = differing(after, before);
+        assert(different <= samples / 200, `the first view changed when the second one was closed: ${different} of ${samples} sampled pixels differ`);
+        // A view that is opened again gets a canvas and a render target of its own.
+        assert(await page.evaluate(`themedView.themedViewSecondView("open")`) === "opened", "the second view was not opened again");
+        await sleep(800);
+        assert(await page.evaluate(`themedView.themedViewSecondView("close")`) === "closed", "the second view was not closed again");
+        await page.waitFor(`Number(/released=(\\d+)/.exec(themedView.themedViewRendering())[1]) === ${released + 2}`, 15000);
+        const rendering = await page.rendering();
+        assert(rendering.panics === "0", `the render thread panicked: ${JSON.stringify(rendering)}`);
+        assert(page.errors.length === 0, `the page reported errors:\n${page.errors.join("\n")}`);
+    }, query);
+}
+
 // --- the render thread (stage B2.6): a site built with threads only ------------------------------
 
 const measured = (text) => console.log(`      measured: ${text}`);
@@ -646,23 +707,6 @@ function assertDrawnByRenderThread(rendering) {
     assert(rendering.render_thread !== "0" && rendering.page_thread !== "0", `the threads have no ids: ${JSON.stringify(rendering)}`);
     assert(rendering.other_thread === "true" && rendering.frame_thread === rendering.render_thread && rendering.frame_thread !== rendering.page_thread,
         `the frames were not drawn by the render thread: ${JSON.stringify(rendering)}`);
-}
-
-// How many of the pixels sampled on a grid differ between two captures of the same size.
-function differing(a, b, step = 4) {
-    assert(a.width === b.width && a.height === b.height, `the captures are ${a.width} x ${a.height} and ${b.width} x ${b.height}`);
-    let samples = 0; let different = 0;
-    for (let y = 1; y < a.height; y += step) {
-        for (let x = 1; x < a.width; x += step) { samples++; if (!near(a.pixel(x, y), b.pixel(x, y), 8)) { different++; } }
-    }
-    return { samples, different };
-}
-
-// How many different colours a capture has on a grid: a view that was drawn has many.
-function colours(capture, step = 4) {
-    const seen = new Set();
-    for (let y = 1; y < capture.height; y += step) { for (let x = 1; x < capture.width; x += step) { seen.add(capture.pixel(x, y).join()); } }
-    return seen.size;
 }
 
 // Opens the same page on one thread, brings it to the same state with `prepare`, and asserts that it

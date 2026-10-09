@@ -286,3 +286,25 @@ export function assert(condition, message) { if (!condition) { throw new Error(m
 
 // Whether two RGB triples are within `tolerance` per channel.
 export function near(a, b, tolerance = 6) { return a.every((value, i) => Math.abs(value - b[i]) <= tolerance); }
+
+// How many of the pixels sampled on a grid (every `step` pixels) differ between two captures of the
+// same size by more than `tolerance` per channel. `skip` ({ x, y, width, height }) is left out.
+export function differing(a, b, step = 4, { tolerance = 8, skip } = {}) {
+    assert(a.width === b.width && a.height === b.height, `the captures are ${a.width} x ${a.height} and ${b.width} x ${b.height}`);
+    let samples = 0; let different = 0;
+    for (let y = 1; y < a.height; y += step) {
+        for (let x = 1; x < a.width; x += step) {
+            if (skip && x >= skip.x && x < skip.x + skip.width && y >= skip.y && y < skip.y + skip.height) { continue; }
+            samples++;
+            if (!near(a.pixel(x, y), b.pixel(x, y), tolerance)) { different++; }
+        }
+    }
+    return { samples, different };
+}
+
+// How many different colours a capture has on a grid: a view that was drawn has many.
+export function colours(capture, step = 4) {
+    const seen = new Set();
+    for (let y = 1; y < capture.height; y += step) { for (let x = 1; x < capture.width; x += step) { seen.add(capture.pixel(x, y).join()); } }
+    return seen.size;
+}

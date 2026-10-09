@@ -20,6 +20,8 @@
 //! the compositor and Skia run in a worker that owns the canvas.
 //! `?RenderThread=false` keeps such a module on the thread of the page, for
 //! comparison. `themedViewRendering` reports which thread drew the frames.
+//! `themedViewSecondView` opens and closes a second view in another element
+//! of the page, for the test of the disposal of a view.
 
 #![cfg_attr(target_os = "emscripten", no_main)]
 
@@ -39,7 +41,7 @@ use ferroui_base::{
 use ferroui_browser::interop::canvas_helper::{RENDER_TARGET_KIND_SOFTWARE, RENDER_TARGET_KIND_WEB_GL};
 use ferroui_browser::interop::{navigation_helper, thread_proxy};
 use ferroui_browser::rendering::{BrowserSharedRenderLoop, RenderStatistics, RenderWorker};
-use ferroui_browser::{BrowserAppBuilder, BrowserPlatformOptions, BrowserRenderingMode};
+use ferroui_browser::{BrowserAppBuilder, BrowserPlatformOptions, BrowserRenderingMode, FerroView};
 use ferroui_controls::{
     AppBuilder, Application, ApplicationImpl, ApplicationImplExt, Border, Button, CheckBox, Control, ListBox,
     NativeControlHost, NewApplication, ProgressBar, Slider, StackPanel, TextBlock, TextBox, TopLevel,
@@ -76,6 +78,8 @@ struct Services {
 }
 
 thread_local! {
+    /// The second view of the page, while it is open (`themedViewSecondView`).
+    static SECOND_VIEW: RefCell<Option<Rc<FerroView>>> = const { RefCell::new(None) };
     static THEME_VARIANT: RefCell<Option<String>> = const { RefCell::new(None) };
     static CONTROLS: RefCell<Option<Controls>> = const { RefCell::new(None) };
     static SERVICES: RefCell<Services> = RefCell::new(Services::default());
@@ -553,7 +557,9 @@ pub fn themed_view_decode_damaged() -> String {
 ///   `proxied`: the calls those ticks made the main thread of the page
 ///   serve (`unknown` when they are not counted), with `last_proxied`, the
 ///   index of the function of the last one in the script of the module (-1
-///   for none).
+///   for none);
+/// - `released`: the canvases of closed views the thread that renders has
+///   released, and `panics`: the panics of the render thread.
 #[wasm_bindgen(js_name = themedViewRendering)]
 pub fn themed_view_rendering() -> String {
     let statistics = RenderStatistics::current();
@@ -564,7 +570,7 @@ pub fn themed_view_rendering() -> String {
         _ => "none",
     };
     format!(
-        "frames={};frame_thread={};page_thread={};other_thread={};render_thread={};on_render_thread={};kind={};gl={};size={}x{};ticks={};proxied={};last_proxied={}",
+        "frames={};frame_thread={};page_thread={};other_thread={};render_thread={};on_render_thread={};kind={};gl={};size={}x{};ticks={};proxied={};last_proxied={};released={};panics={}",
         statistics.frames,
         statistics.frame_thread,
         page_thread,
@@ -578,7 +584,42 @@ pub fn themed_view_rendering() -> String {
         statistics.ticks,
         statistics.tick_proxied_calls.map_or_else(|| "unknown".to_string(), |calls| calls.to_string()),
         statistics.last_proxied_function,
+        statistics.canvases_released,
+        statistics.render_thread_panics,
     )
+}
+
+/// Opens (`open`) a second view in the element `second` of the page, which
+/// the caller has added, or closes it (`close`); returns `opened`, `closed`
+/// or what was wrong. The view shows one colour. For the behaviour tests:
+/// a second canvas next to the first one, with a render target and a
+/// graphics context of its own on the thread that renders, and the disposal
+/// of a view while another goes on drawing (`released=` of
+/// [`themed_view_rendering`] counts the canvases the thread that renders
+/// has released).
+#[wasm_bindgen(js_name = themedViewSecondView)]
+pub fn themed_view_second_view(action: &str) -> String {
+    match action {
+        "open" => {
+            if SECOND_VIEW.with(|view| view.borrow().is_some()) {
+                return "already open".to_string();
+            }
+            let view = FerroView::new("second");
+            let content = Border::new();
+            content.set_background(Some(Rc::new(ImmutableSolidColorBrush::new(Color::from_rgb(0x1f, 0x9d, 0x55)))));
+            view.set_content(Some(content.upcast()));
+            SECOND_VIEW.with(|slot| *slot.borrow_mut() = Some(view));
+            "opened".to_string()
+        }
+        "close" => match SECOND_VIEW.with(|slot| slot.borrow_mut().take()) {
+            Some(view) => {
+                view.dispose();
+                "closed".to_string()
+            }
+            None => "not open".to_string(),
+        },
+        other => format!("unknown action {other}"),
+    }
 }
 
 /// The value of `name` in a query string (`?a=1&b=2`), ignoring the case of
