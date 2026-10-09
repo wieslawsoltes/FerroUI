@@ -375,4 +375,14 @@ pub trait EmitTypes {
     /// property was resolved on, and of its base types, then the ones of the type that
     /// registered the property and of its base types). `Err` says why there is none.
     fn property_definition(&self, property: &dyn EmitProperty, preferred: Option<&dyn EmitClass>) -> Result<String, String>;
+
+    /// The questions asked since the last call that this type system could not answer,
+    /// each as text that names the type or the member. A type system that reads its
+    /// answers from declarations cannot answer what only a process decides; it answers
+    /// such a question with *no* and records it here, and the host refuses the document
+    /// the question was asked for, so that nothing is emitted from a guess. The run-time
+    /// type system answers everything.
+    fn take_unanswered(&self) -> Vec<String> {
+        Vec::new()
+    }
 }

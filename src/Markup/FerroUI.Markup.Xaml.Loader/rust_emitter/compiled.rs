@@ -297,6 +297,7 @@ pub fn compile_documents_with(
                 };
                 let constant = format!("XML_NAMESPACES_{table_index}");
                 document.root_type = root_type_name(&transformed.root);
+                let _ = types.take_unanswered();
                 document.source = emit_function(
                     types,
                     &transformed.root,
@@ -310,6 +311,12 @@ pub fn compile_documents_with(
                 )
                 .map(|source| if document.public { source } else { source.replacen("pub fn ", "pub(crate) fn ", 1) })
                 .map_err(|e| e.to_string());
+                // A question the type system of the host could not answer: the document is
+                // refused with it, whatever was emitted from the answer it gave instead.
+                let unanswered = types.take_unanswered();
+                if !unanswered.is_empty() {
+                    document.source = Err(format!("the type system of the host cannot answer: {}", unanswered.join("; ")));
+                }
                 document.namespaces = Some((constant, table));
                 calls.push((*index, functions.called()));
             }
