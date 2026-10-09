@@ -20,7 +20,7 @@ use xamlx::type_system::{
     IXamlParameterInfo, IXamlProperty, IXamlType, XamlPseudoType, XamlTypeId, XamlValue,
 };
 
-use crate::model::CallableModel;
+use crate::model::{CallForm, CallableModel};
 
 use super::model_type_system::ModelTypeSystem;
 
@@ -65,7 +65,9 @@ pub enum MemberSource {
     DefaultConstructor { type_path: String, callable: CallableModel },
     /// A member of markup metadata: a constructor, a method, a static field, the
     /// subscription of an event, an accessor of a plain property or `parse:`.
-    Declared { type_path: String, callable: CallableModel, typed_function: Option<String>, fallible: bool },
+    /// `call` is the call form the scan chose for the callable (9.5.3); nothing for a
+    /// member of an enumeration and for a model written before the choice existed.
+    Declared { type_path: String, callable: CallableModel, typed_function: Option<String>, fallible: bool, call: Option<CallForm> },
 }
 
 /// The lazily projected part of a [`ModelType`].

@@ -113,6 +113,7 @@
 
 #![forbid(unsafe_code)]
 
+pub mod call_forms;
 mod json;
 pub mod model;
 pub mod model_set;

@@ -229,6 +229,8 @@ fn class_of_the_fixture_is_projected_with_its_members() {
             ("ChildProperty".to_string(), format!("FerroUI.StyledProperty`1[{CONTROL}]")),
             ("BrushProperty".to_string(), "FerroUI.StyledProperty`1[Fixture.Media.Brush]".to_string()),
             ("PressedEvent".to_string(), "::ferroui_base::RoutedEvent<::ferroui_base::RoutedEventArgs>".to_string()),
+            ("ReleasedEvent".to_string(), "::ferroui_base::RoutedEvent<::ferroui_base::RoutedEventArgs>".to_string()),
+            ("NewEvent".to_string(), "Fixture.Controls.Border".to_string()),
         ]
     );
     assert_eq!(attribute_names(&field(&border, "ChildProperty").custom_attributes()), ["ContentAttribute", "DependsOnAttribute"]);
@@ -486,7 +488,7 @@ fn two_crates() -> Rc<ModelTypeSystem> {
         name: "SetIsDesignMode".to_string(),
         parameters: vec![parameter("::ferroui_base::Ref<::ferroui_base::FerroObject>"), parameter("bool")],
         is_static: true,
-        callable: CallableModel { path: Some("Design::set_is_design_mode".to_string()), resolved: Some(format!("{DESIGN}::set_is_design_mode")) },
+        callable: CallableModel { path: Some("Design::set_is_design_mode".to_string()), resolved: Some(format!("{DESIGN}::set_is_design_mode")), dereferenced: None },
         typed_function: Some("__markup_SetIsDesignMode_0".to_string()),
         ..MemberModel::default()
     }];
@@ -510,11 +512,12 @@ fn two_crates() -> Rc<ModelTypeSystem> {
     let mut controls = AssemblyModel::new("FerroUI.Controls", "ferroui_controls");
     let mut button = object_model("Button", "FerroUI.Controls", "::ferroui_controls::button::Button", "ferroui_controls::button");
     button.base = Some(RustType::resolved("::ferroui_base::Interactive"));
-    button.default_constructor = Some(CallableModel { path: Some("Button::new".to_string()), resolved: Some("::ferroui_controls::button::Button::new".to_string()) });
+    button.default_constructor = Some(CallableModel { path: Some("Button::new".to_string()), resolved: Some("::ferroui_controls::button::Button::new".to_string()), dereferenced: None });
     let mut owner = registered(None, RegisteredKind::Attached, "bool", "is_design_mode_property", RegistrationModel::AddedOwner);
     owner.source = Some(CallableModel {
         path: Some("Design::is_design_mode_property".to_string()),
         resolved: Some("::ferroui_base::Design::is_design_mode_property".to_string()),
+        dereferenced: None,
     });
     let mut tag = registered(Some("Tag"), RegisteredKind::Styled, "Option<::ferroui_base::BoxedValue>", "tag_property", RegistrationModel::Declared);
     tag.assign_binding = true;
