@@ -3,7 +3,7 @@ use ferroui_base::{PixelSize, Size, Vector};
 use ferroui_remote_protocol::viewport::{FrameMessage, PixelFormat as ProtocolPixelFormat};
 use std::cell::RefCell;
 use std::rc::Rc;
-use std::sync::{Arc, Condvar, Mutex, MutexGuard, OnceLock, PoisonError};
+use std::sync::{Arc, Condvar, Mutex, MutexGuard, PoisonError};
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub(super) enum FrameStatus {
@@ -53,9 +53,13 @@ pub(super) struct Framebuffer {
 
 impl Framebuffer {
     /// `Framebuffer.Empty`.
+    // Deviation (DEVIATIONS.md, Remote rendering): the original has one
+    // empty framebuffer for every top-level, whose status and monitor the
+    // top-levels therefore share. Here each use gets its own: the monitor
+    // of the port is not reentrant, and a top-level must not wait for a
+    // frame of another one.
     pub(super) fn empty() -> Arc<Framebuffer> {
-        static EMPTY: OnceLock<Arc<Framebuffer>> = OnceLock::new();
-        EMPTY.get_or_init(|| Arc::new(Framebuffer::new(ProtocolPixelFormat::Rgba8888, Size::default(), 1.0))).clone()
+        Arc::new(Framebuffer::new(ProtocolPixelFormat::Rgba8888, Size::default(), 1.0))
     }
 
     pub(super) fn new(format: ProtocolPixelFormat, client_size: Size, render_scaling: f64) -> Framebuffer {
@@ -227,6 +231,26 @@ impl ILockedFramebuffer for LockedFramebuffer {
     }
 }
 
+// A locked framebuffer that is dropped without having been disposed (the
+// backend failed between locking it and drawing: a surface of no pixels
+// cannot be created, for one) gives the pixels back and leaves the monitor,
+// without a frame: whoever waits for the framebuffer must not wait forever.
+// (The original would leave its monitor held by the thread that failed.)
+impl Drop for LockedFramebuffer {
+    fn drop(&mut self) {
+        let Some(memory) = self.memory.borrow_mut().take() else {
+            return;
+        };
+
+        {
+            let mut data = self.framebuffer.data_lock.lock().unwrap_or_else(PoisonError::into_inner);
+            data.data = Some(memory);
+            data.locked = false;
+        }
+        self.framebuffer.unlocked.notify_all();
+    }
+}
+
 #[cfg(test)]
 mod tests {
     // Not from upstream.
@@ -246,7 +270,26 @@ mod tests {
         assert_eq!(0, empty.stride());
         assert_eq!(ProtocolPixelFormat::Rgba8888, empty.format());
         assert_eq!(FrameStatus::NotRendered, empty.get_status());
-        assert!(Arc::ptr_eq(&empty, &Framebuffer::empty()));
+        // Not shared: see `empty`.
+        assert!(!Arc::ptr_eq(&empty, &Framebuffer::empty()));
+    }
+
+    #[test]
+    fn a_locked_framebuffer_that_is_dropped_leaves_the_monitor_without_a_frame() {
+        let framebuffer = Arc::new(Framebuffer::new(ProtocolPixelFormat::Rgba8888, Size::new(1.0, 1.0), 1.0));
+        let unlocked = Arc::new(AtomicUsize::new(0));
+        let counter = unlocked.clone();
+        let locked = framebuffer.lock(Box::new(move || {
+            counter.fetch_add(1, Ordering::SeqCst);
+        }));
+        drop(locked);
+        // Not blocked, not rendered, not announced; and it can be locked again.
+        assert_eq!(FrameStatus::NotRendered, framebuffer.get_status());
+        assert_eq!(0, unlocked.load(Ordering::SeqCst));
+        let locked = framebuffer.lock(Box::new(|| {}));
+        locked.with_data(&mut |data| assert_eq!(4, data.len()));
+        locked.dispose();
+        assert_eq!(FrameStatus::Rendered, framebuffer.get_status());
     }
 
     #[test]
