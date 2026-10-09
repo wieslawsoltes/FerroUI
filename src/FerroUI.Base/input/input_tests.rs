@@ -3534,6 +3534,27 @@ fn touch_move_should_not_set_is_pointer_over_and_cancel_disposes_pointer() {
     assert_eq!(moves.get(), 1);
 }
 
+/// Upstream's root is a top-level whose host is focusable and whose hit tester finds nothing: the root of the
+/// tree of the test stands for the host.
+#[test]
+fn touch_pointer_should_set_focus_on_pointer_released() {
+    let _keyboard = real_focus();
+    let root = TestRoot::new();
+    let host = root.root.clone();
+
+    host.set_focusable(true);
+    let touch_device = TouchDevice::new();
+
+    assert!(!host.is_focused());
+
+    touch(&root.host, &touch_device, RawPointerEventType::TouchBegin, Point::new(0.0, 0.0), 0, 0);
+
+    assert!(!host.is_focused());
+    touch(&root.host, &touch_device, RawPointerEventType::TouchEnd, Point::new(0.0, 0.0), 0, 0);
+
+    assert!(host.is_focused());
+}
+
 #[test]
 fn pen_input_raises_pointer_events_with_pen_state() {
     let tree = pointer_tree();
