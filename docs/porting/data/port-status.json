@@ -4524,6 +4524,7 @@
     "scanner/source.rs",
     "scanner/tests.rs",
     "scanner/tokens.rs",
+    "type_system/emit_types.rs",
     "type_system/model_type_system.rs",
     "type_system/tests.rs",
     "type_system/types.rs"
