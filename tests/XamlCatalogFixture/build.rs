@@ -2,7 +2,7 @@
 //! its own (a document with a class as the document of its class), against the type
 //! models: the scan of the sources of this crate (which are the sources of the sample,
 //! `lib.rs`) and the models of the crates the sample is built on (docs/porting/xaml.md,
-//! 9.5.13, 9.5.18 and 9.6). It is the build a build script of the sample would run; the
+//! 9.5.13, 9.5.19 and 9.6). It is the build a build script of the sample would run; the
 //! documents are read from the sample and are not changed.
 //!
 //! Which documents: with the feature `catalog` every document of the sample but the ones
