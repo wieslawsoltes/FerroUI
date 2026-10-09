@@ -10,7 +10,7 @@ use ferroui_base::interactivity::InteractiveImpl;
 use ferroui_base::layout::LayoutableImpl;
 use ferroui_base::{
     ferro_class, ferro_impl_classes, ferro_property, instantiate, AttachedProperty, BoxedValue, DirectProperty,
-    FerroObject, FerroObjectImpl, FerroProperty, FerroPropertyChangedEventArgs, Ref,
+    ElementRef, FerroObject, FerroObjectImpl, FerroProperty, FerroPropertyChangedEventArgs, Ref,
     StyledElement, StyledElementImpl, StyledProperty, VisualImpl,
 };
 use std::cell::RefCell;
@@ -59,7 +59,7 @@ impl fmt::Debug for ErrorConverter {
 #[repr(C)]
 pub struct DataValidationErrors {
     base: ContentControl,
-    owner: RefCell<Option<Ref<Control>>>,
+    owner: RefCell<Option<ElementRef<Control>>>,
 }
 
 ferro_class!(DataValidationErrors: ContentControl);
@@ -129,11 +129,18 @@ ferroui_base::ferro_properties! { impl DataValidationErrors {
 
     ferro_property!(
         /// Defines the `Owner` property.
-        pub fn owner_property() -> DirectProperty<DataValidationErrors, Option<Ref<Control>>> {
+        ///
+        /// The owner is the control the errors are shown in: an ancestor of
+        /// this control, which this control does not own, so the value is
+        /// an element reference. The themes make it the `DataContext` of a
+        /// part of the template (`DataContext="{TemplateBinding Owner}"`),
+        /// which holds the reference as it is.
+        pub fn owner_property() -> DirectProperty<DataValidationErrors, Option<ElementRef<Control>>> {
+            ferroui_base::data::core::ValueTypes::register_element_ref::<Control>();
             FerroProperty::register_direct::<DataValidationErrors, _>(
                 "Owner",
-                |o| o.owner(),
-                Some(|o, v| o.set_owner(v)),
+                |o| o.owner.borrow().clone(),
+                Some(|o, v| o.set_owner(ElementRef::resolve(&v))),
                 None,
             )
         }
@@ -163,11 +170,11 @@ impl DataValidationErrors {
 
     /// The control whose errors are displayed.
     pub fn owner(&self) -> Option<Ref<Control>> {
-        self.owner.borrow().clone()
+        ElementRef::resolve(&self.owner.borrow())
     }
 
     pub fn set_owner(&self, value: Option<Ref<Control>>) {
-        self.set_and_raise(Self::owner_property(), &self.owner, value);
+        self.set_and_raise(Self::owner_property(), &self.owner, ElementRef::from_nullable(value));
     }
 
     /// The control of a change of one of the attached properties.
