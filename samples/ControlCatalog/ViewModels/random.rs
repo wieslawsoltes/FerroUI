@@ -19,6 +19,10 @@ pub(crate) struct Random {
 impl Random {
     /// `new Random()`: a generator with a seed that differs per instance.
     pub(crate) fn new() -> Self {
+        #[cfg(test)]
+        if let Some(seed) = test_seed::next() {
+            return Self::with_seed(seed);
+        }
         // The hasher of the standard library is keyed with random data per instance.
         let seed = RandomState::new().build_hasher().finish();
         Self::with_seed((seed ^ (seed >> 32)) as u32 as i32)
@@ -137,6 +141,32 @@ impl Random {
         d += f64::from(i32::MAX - 1);
         d /= 2.0 * f64::from(i32::MAX as u32) - 1.0;
         d
+    }
+}
+
+/// The seeds of the generators a test creates without one: a measurement
+/// that presses the buttons of the pages (`tests/interaction_tour.rs`) is the
+/// same every time it runs.
+#[cfg(test)]
+pub(crate) mod test_seed {
+    use std::cell::Cell;
+
+    thread_local! {
+        static NEXT: Cell<Option<i32>> = const { Cell::new(None) };
+    }
+
+    /// From here on the generators this thread creates without a seed are
+    /// seeded with `first`, `first + 1` and so on; `None` ends it.
+    pub(crate) fn set(first: Option<i32>) {
+        NEXT.with(|next| next.set(first));
+    }
+
+    pub(super) fn next() -> Option<i32> {
+        NEXT.with(|next| {
+            let seed = next.get()?;
+            next.set(Some(seed.wrapping_add(1)));
+            Some(seed)
+        })
     }
 }
 
