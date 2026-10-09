@@ -44,6 +44,16 @@
   `ModelTypeSystem`, the call forms, `compile_xaml()` on the model (`xaml.md` 9.10.1, "Remaining
   for E5", item 1).
 
+- The build-time type system, second stage, is WRITTEN on branch `xaml-model-type-system` (on top
+  of `xaml-source-scanner-v`) and NOT BUILT by its author (section 12 has the commands and the
+  doubts): dependency models (the export table, `ModelSet`, the scan with the models of the
+  dependencies, `Build::export_metadata()`), the closed table of runtime library types shared by
+  both type systems (`core_table` of the loader), `ModelTypeSystem` in `ferroui-build`, and the
+  drift test against `RuntimeTypeSystem` in the XAML test crate (`xaml.md` 9.5.7).
+  `Build::compile_xaml()` and the emitter are untouched. Next: run the drift test and empty its
+  lists, then the call forms and the emitter on `MemberSource`, then `compile_xaml()` on the model
+  (`xaml.md` 9.10.1, "Remaining for E5", item 1, stages 4 to 6).
+
 Design documents in the repository: `docs/porting/xaml.md`, sections 9 (emitter design: call forms
 A/B/C, build integration, code-behind), 9.5 (source scanner), 9.12 (the 14 rulings), 9.13, and
 decisions 1 to 27. Read section 9 before touching the emitter. `DRAFT-AUTHOR-REPORT.md` is the
@@ -741,3 +751,102 @@ The first stage built and passed unchanged (28 tests of `ferroui-build`). `cargo
 | Declaration macro invocations not read | 0 | 0 |
 
 One note for the base crate: the runtime type of `FerroObject` is implemented by hand, so the model has the type without a base. No form of a declaration macro departs from the documented grammar. So the next stage (dependency models, then the `ModelTypeSystem`) starts from a model that covers the two crates; the closures (about 60 % of the callables) are what the invoker form of 9.5.3 is for.
+
+## 12. What the second stage of the build-time type system delivered, and how to validate it
+
+Written without a build, like sections 10 and 11. Read `xaml.md` 9.5.7 first: it has what was
+added to the model, the scan with dependency models, `export_metadata()` and what the switch of the
+framework crates needs, the shared table, `ModelTypeSystem` against the design of 9.5.5, and the
+kinds of the drift test.
+
+What exists:
+
+- `src/Markup/FerroUI.Markup.Xaml.Loader/core_table.rs` (new, outside the `runtime` feature): the
+  closed table of runtime library types as data, `attribute_type_name`, `KNOWN_ATTRIBUTES`, the
+  namespaces of the synthetic types, the property definition types, the lists markup creates, the
+  handle texts.
+- `runtime/type_system/core_types.rs` (rewritten): defines the types of the table and attaches the
+  handles and the invokers. `runtime_type_system.rs`: the three namespace constants,
+  `KNOWN_ATTRIBUTES` and `attribute_type_name` are re-exported from the table (the public names of
+  the module are unchanged); `list_converter.rs` and the dictionary constant name the constants of
+  the table. Nothing else of the run-time type system is touched.
+- `src/FerroUI.Build.Tasks`: `model.rs` (`exports`, `object_model`, `read_only`, the visitors),
+  `model_set.rs` (new), `scanner/` (`ScanOptions::dependencies`, the export table, globs of other
+  crates, `states_no_setter`, `link_dependencies`), `lib.rs` (`Build::export_metadata`,
+  `Build::source_root`, `export_metadata()`), `type_system/` (new: `mod.rs`, `types.rs`,
+  `model_type_system.rs`, `tests.rs`), `tests/fixtures/dependent` (new: a second source tree, built
+  on the first, never compiled).
+- `tests/FerroUI.Markup.Xaml.UnitTests/type_system_drift.rs` (new) and `ferroui-build` as a
+  dev-dependency of that crate.
+- `Cargo.lock`, edited by hand: `xamlx` in the dependencies of `ferroui-build`, `ferroui-build` in
+  the dependencies of `ferroui-markup-xaml-tests`. No new package.
+
+Unchanged: the declaration macros and their uses, the emitter, `Build::compile_xaml`, the build
+scripts of every crate, the behaviour of the run-time type system (its tests are untouched).
+
+Validation, in this order:
+
+1. `cargo build -p ferroui-markup-xaml-loader --locked` and
+   `cargo test -p ferroui-markup-xaml-loader --lib core_table`: the table (two tests: it names only
+   its own types, and it has the well-known types; the second asserts the number of types, 96).
+2. `cargo test -p ferroui-markup-xaml-loader --lib runtime::type_system`: the run-time type system
+   on the table. Its tests are unchanged and must pass unchanged; then the whole loader suite
+   (`cargo test -p ferroui-markup-xaml-loader --lib`) and `cargo test -p ferroui-markup-xaml-tests --lib`
+   without the drift test (`-- --skip type_system_drift`), because every document loads through
+   these types.
+3. `cargo build -p ferroui-build --locked`, then `cargo test -p ferroui-build --lib model` (the file
+   and `model_set`), `scanner::modules`, `scanner::tests:: -- --skip real_crates` (the fixture, with
+   the new expectations: `object_model`, `read_only`, the export table, the second fixture crate),
+   `tests::export_metadata` (the build in process, writes below the temporary directory).
+4. `cargo test -p ferroui-build --lib real_crates -- --nocapture`: the two crates, then the controls
+   with the model of the base crate. The new assertions: no unresolved type text, no registered
+   property without a name. It prints what remains otherwise.
+5. `cargo test -p ferroui-build --lib type_system::`: `ModelTypeSystem` over the fixture and over
+   two models written by hand. The expected member lists were derived by reading the projection
+   code; a difference is as likely a wrong expectation as a wrong projection, and each assertion
+   prints what it found.
+6. `cargo test -p ferroui-markup-xaml-tests --lib type_system_drift -- --nocapture`: the drift
+   test. Read the whole output. It fails when a "must be empty" kind is not empty; that is its
+   purpose on the first run.
+7. `cargo build --workspace` and the suites of section 2.
+
+What the drift test is expected to show on its first run (the author's guesses, most likely
+first), each with where to look:
+
+1. *Types only at run time*: metadata written by hand (`impl MarkupTyped`, the `FRN9013` notes of
+   the scan), and declarations the scanner reports as not read (printed before the comparison).
+2. *Types only in the model*: declarations a crate does not register (9.5.6, item 6), and the two
+   sides naming a declared instantiation differently when a type argument is opaque on one side.
+3. *Members only on one side*: the accessors of an attached property whose declared `GetX`/`SetX`
+   takes another host than the model resolves (`declares` in `project_class`); properties of
+   registrations the scanner reads differently from the registry (an owner added with
+   `add_owner_with`, a property registered in the `also [..]` functions of `ferro_properties!`,
+   which the scanner does not follow); the members of a class whose metadata a second
+   `ferro_markup_type!` declares without `type_info:` in another module.
+4. *Open, a Rust type only the run-time side maps*: handles that are not in `core_handles` (the
+   list was written from `core_types.rs`, not from what the two crates declare), `Option<T>` of a
+   handle the run-time side registers as nullable, bindable arrays.
+5. *Open, attributes*: the order and the duplicates of markers (`Content`, `AssignBinding`), and a
+   floating point argument (the model has its text).
+6. *Known*: the opaque spellings that differ by more than module paths (aliases other than
+   `BoxedValue`).
+
+What is most likely wrong before any of that, in the author's order:
+
+1. `runtime/type_system/core_types.rs`: it is the one change to code the interpreter runs. The
+   shapes were moved one by one from the old file to the table; the order of the definitions and of
+   the members of each type is kept, the nullable and array handles are mapped after all types
+   are defined instead of between them. If a run-time test fails, compare `core_table::core_types()`
+   with the old file (`git show 95bb6da:src/Markup/FerroUI.Markup.Xaml.Loader/runtime/type_system/core_types.rs`).
+2. Closure and borrow details the author could not compile: the invoker closures of `list_members`
+   and `apply` (`&dyn Fn(&CoreMember) -> RuntimeInvoker`), `Modules::export_module` (a `ref`
+   binding next to a by-value arm), `project_class` in `model_type_system.rs` (closures over
+   `markup` while `members` is filled).
+3. The fixture expectations: the order of the methods of `Border` in
+   `class_of_the_fixture_is_projected_with_its_members`, the 19 types, the export table of the
+   fixture, the unresolved counts of the second fixture crate scanned alone.
+4. `real_crates`: a name behind a glob that the export table of the base crate does not have (a
+   type a macro declares, which the scanner keeps only under a path that names it explicitly).
+5. The run time of the scan of the controls with dependencies (two clones of the model of the
+   base crate, one canonical rewrite of every type text) and of `ModelTypeSystem::new` (the
+   companion lookup is quadratic in the types of a model); both are bounded and not measured.
