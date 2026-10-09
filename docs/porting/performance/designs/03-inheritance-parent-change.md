@@ -203,14 +203,14 @@ is expected to move; one that does is a change of logic and a defect of this wor
 
 | Counter | Before | Expected after | Measured after |
 |---|---:|---|---|
-| inheritance ancestor changes | 12.00 | 12.00 | to be measured |
-| inherited values compared | 84.00 | 84.00 | to be measured |
-| inherited values differing | 84.00 | 84.00 | to be measured |
-| objects visited by inherited value walks | 228.00 | 228.00 | to be measured |
-| property changes raised | 459.24 | 459.24 | to be measured |
-| allocations | 1224.0 | lower by 12 **[E]** (with the changes of design 04 applied, lower by those as well) | to be measured |
-| reallocations | not in the table of design 09 (the benchmark prints them) | lower by 12 **[E]** | to be measured |
-| layout microseconds (`release`) | 411.3 | lower | to be measured |
+| inheritance ancestor changes | 12.00 | 12.00 | 12.00 (unchanged) |
+| inherited values compared | 84.00 | 84.00 | 84.00 (unchanged) |
+| inherited values differing | 84.00 | 84.00 | 84.00 (unchanged) |
+| objects visited by inherited value walks | 228.00 | 228.00 | 228.00 (unchanged) |
+| property changes raised | 459.24 | 459.24 | 459.24 (unchanged) |
+| allocations | 1224.0 | lower by 12 **[E]** (with the changes of design 04 applied, lower by those as well) | 1175.0 with the changes of both designs (1224.0 before); 1137.2 for a viewport per step (1186.3 before) |
+| reallocations | not in the table of design 09 (the benchmark prints them) | lower by 12 **[E]** | 14.9 with the changes of both designs (26.9 before); 7.8 for a viewport per step (19.8 before) |
+| layout microseconds (`release`) | 411.3 | lower | not measured: the machine was under heavy load on 2026-10-09; to be measured on an idle machine |
 
 ### Commands
 
@@ -246,3 +246,7 @@ Most likely first.
    raises it. It needs a decision, not a measurement.
 4. A list of the pool keeps the largest capacity it ever had: four lists of a few dozen pairs at
    most, per thread.
+
+### Measured on 2026-10-09
+
+The whole workspace passes with the changes (12037 tests). The run with `perf-counters` gives the same value for every one of the 70 counter lines of the benchmark as before the changes: nothing the framework does has changed. With the changes of designs 03 and 04 together, a recycled row costs 49 fewer allocations (1175.0 against 1224.0, 4 %), 12 fewer reallocations (14.9 against 26.9) and 7231 fewer bytes (104865 against 112096, 6.5 %) when scrolling 20 px a step, and the same differences when scrolling a viewport a step. The time per row was not compared: the machine was under heavy load, and the difference expected is within what that load moves.
