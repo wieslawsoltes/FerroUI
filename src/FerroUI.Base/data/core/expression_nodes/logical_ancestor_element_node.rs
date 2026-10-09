@@ -22,7 +22,7 @@ impl LogicalAncestorElementNode {
     pub fn new(ancestor_type: Option<&'static TypeInfo>, ancestor_level: usize) -> Rc<Self> {
         Rc::new_cyclic(|this| Self {
             this: this.clone(),
-            state: NodeState::new(),
+            state: NodeState::locating_an_element(),
             ancestor_type,
             ancestor_level,
             subscription: RefCell::new(None),

@@ -16,7 +16,7 @@ pub struct TemplatedParentNode {
 
 impl TemplatedParentNode {
     pub fn new() -> Rc<Self> {
-        Rc::new_cyclic(|this| Self { this: this.clone(), state: NodeState::new(), subscription: RefCell::new(None) })
+        Rc::new_cyclic(|this| Self { this: this.clone(), state: NodeState::locating_an_element(), subscription: RefCell::new(None) })
     }
 
     fn read(element: &StyledElement) -> Option<BoxedValue> {

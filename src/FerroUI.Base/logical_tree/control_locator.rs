@@ -1,5 +1,5 @@
 use crate::reactive::{IDisposable, IObservable, IObserver, LightweightObservable, LightweightObservableBase};
-use crate::{Ref, StyledElement, TypeInfo};
+use crate::{Ref, StyledElement, TypeInfo, WeakRef};
 use std::cell::RefCell;
 use std::rc::{Rc, Weak};
 
@@ -25,10 +25,14 @@ impl ControlLocator {
 struct ControlTracker {
     this: Weak<ControlTracker>,
     base: LightweightObservableBase<Option<Ref<StyledElement>>>,
-    relative_to: Ref<StyledElement>,
+    /// The element and the ancestor found are held weakly (DEVIATIONS.md,
+    /// Logical tree): the tracker belongs to a binding of the element, and
+    /// the ancestor owns the element. Held strongly, as the managed original
+    /// holds both, the element keeps itself and its ancestor alive.
+    relative_to: WeakRef<StyledElement>,
     ancestor_level: usize,
     ancestor_type: Option<&'static TypeInfo>,
-    value: RefCell<Option<Ref<StyledElement>>>,
+    value: RefCell<Option<WeakRef<StyledElement>>>,
     subscriptions: RefCell<Vec<Rc<dyn IDisposable>>>,
 }
 
@@ -37,7 +41,7 @@ impl ControlTracker {
         Rc::new_cyclic(|this| Self {
             this: this.clone(),
             base: LightweightObservableBase::new(),
-            relative_to,
+            relative_to: relative_to.downgrade(),
             ancestor_level,
             ancestor_type,
             value: RefCell::new(None),
@@ -47,8 +51,12 @@ impl ControlTracker {
 
     fn attached(&self) {
         self.update();
-        let value = self.value.borrow().clone();
+        let value = self.value();
         self.base.publish_next(value);
+    }
+
+    fn value(&self) -> Option<Ref<StyledElement>> {
+        self.value.borrow().as_ref().and_then(WeakRef::upgrade)
     }
 
     fn detached(&self) {
@@ -57,12 +65,13 @@ impl ControlTracker {
     }
 
     fn update(&self) {
-        let value = self
-            .relative_to
-            .get_logical_ancestors()
-            .filter(|x| self.ancestor_type.is_none_or(|t| t.is_assignable_from(x.get_type())))
-            .nth(self.ancestor_level);
-        *self.value.borrow_mut() = value;
+        let value = self.relative_to.upgrade().and_then(|relative_to| {
+            relative_to
+                .get_logical_ancestors()
+                .filter(|x| self.ancestor_type.is_none_or(|t| t.is_assignable_from(x.get_type())))
+                .nth(self.ancestor_level)
+        });
+        *self.value.borrow_mut() = value.as_ref().map(Ref::downgrade);
     }
 }
 
@@ -73,14 +82,15 @@ impl LightweightObservable<Option<Ref<StyledElement>>> for ControlTracker {
 
     fn initialize(&self) {
         self.update();
+        let Some(relative_to) = self.relative_to.upgrade() else { return };
         let this = self.this.clone();
-        let attached = self.relative_to.attached_to_logical_tree(move |_| {
+        let attached = relative_to.attached_to_logical_tree(move |_| {
             if let Some(this) = this.upgrade() {
                 this.attached();
             }
         });
         let this = self.this.clone();
-        let detached = self.relative_to.detached_from_logical_tree(move |_| {
+        let detached = relative_to.detached_from_logical_tree(move |_| {
             if let Some(this) = this.upgrade() {
                 this.detached();
             }
@@ -97,7 +107,7 @@ impl LightweightObservable<Option<Ref<StyledElement>>> for ControlTracker {
     }
 
     fn subscribed(&self, observer: &Rc<dyn IObserver<Option<Ref<StyledElement>>>>, _first: bool) {
-        let value = self.value.borrow().clone();
+        let value = self.value();
         observer.on_next(value);
     }
 }
