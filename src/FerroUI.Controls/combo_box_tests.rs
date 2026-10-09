@@ -37,8 +37,9 @@ use ferroui_base::input::{
     KeyboardNavigation, KeyboardNavigationHandler, KeyboardNavigationMode, TextInputEventArgs,
 };
 use ferroui_base::layout::ILayoutManager;
-use ferroui_base::media::text_formatting::testing::TextTestScope;
-use ferroui_base::media::{FlowDirection, VisualBrush};
+use ferroui_base::media::text_formatting::testing::{TextTestScope, DEFAULT_FAMILY};
+use ferroui_base::media::text_formatting::ShapedTextRun;
+use ferroui_base::media::{FlowDirection, FontFamily, FontManager, VisualBrush};
 use ferroui_base::reactive::Observable;
 use ferroui_base::styling::{styles_as_style, IStyle, Styles, ThemeVariant};
 use ferroui_base::{ferro_model, AnyValue, BoxedValue, Ref, Size};
@@ -1344,4 +1345,82 @@ fn releasing_the_pointer_on_an_item_of_the_open_drop_down_selects_it_and_closes_
     assert_eq!(1, target.selected_index());
     assert!(!target.is_drop_down_open());
     assert!(!target.classes().contains(ComboBox::PC_PRESSED));
+}
+
+/// A data template for font families that builds a text block showing the
+/// name of the family in the family, as the page of the catalog that lists
+/// the system fonts has.
+fn font_family_template() -> Option<Rc<dyn IDataTemplate>> {
+    Some(FuncDataTemplate::for_type::<FontFamily>(
+        |font_family, _| {
+            let text_block = TextBlock::new();
+            text_block.set_font_family(font_family.clone());
+            text_block.set_text(Some(font_family.name()));
+            Some(text_block.upcast())
+        },
+        false,
+    ))
+}
+
+/// The family of the font the text of a text block is drawn with.
+fn drawn_family(text_block: &TextBlock) -> String {
+    let text_layout = text_block.text_layout();
+    let runs = text_layout.text_lines()[0].text_runs();
+
+    runs[0].downcast_ref::<ShapedTextRun>().expect("a shaped run").glyph_run().glyph_typeface().family_name().to_owned()
+}
+
+#[test]
+fn items_of_font_families_are_laid_out_when_the_font_manager_does_not_have_a_family() {
+    let _app = start_styled_window();
+
+    // Some text names families the font manager does not have, as a page with a list of
+    // monospaced families does where none of them is installed.
+    let text_block = TextBlock::new();
+    text_block.set_text(Some("Hello"));
+    text_block.set_font_family(FontFamily::new("Cascadia Mono,Consolas,Menlo,DejaVu Sans Mono"));
+    text_block.measure(Size::new(f64::INFINITY, f64::INFINITY));
+
+    // They are not system fonts for having been asked for.
+    let system_fonts = FontManager::current().system_fonts().font_families();
+
+    assert!(!system_fonts.is_empty());
+
+    for name in ["Cascadia Mono", "Consolas", "Menlo", "DejaVu Sans Mono"] {
+        assert!(system_fonts.iter().all(|font_family| font_family.name() != name), "{name}");
+    }
+
+    // The system fonts, each drawn in its family, after an item of a family that the font
+    // manager does not have.
+    let mut items = vec![FontFamily::new("Cascadia Mono")];
+    items.extend(system_fonts);
+    let count = items.len();
+
+    let target = ComboBox::new();
+    target.set_item_template(font_family_template());
+    target.set_items_source(Some(ItemsSource::from_values(items)));
+    target.set_selected_index(0);
+
+    let window = show_window(&target);
+
+    let selection_box = selection_box_text_block(&target);
+
+    assert_eq!(selection_box.text().as_deref(), Some("Cascadia Mono"));
+    assert!(selection_box.is_measure_valid());
+    assert_eq!(drawn_family(&selection_box), DEFAULT_FAMILY);
+
+    target.set_is_drop_down_open(true);
+    window.layout_manager().execute_layout_pass();
+
+    for index in 0..count {
+        target.set_selected_index(index as i32);
+        window.layout_manager().execute_layout_pass();
+
+        assert!(target.container_from_index(index as i32).is_some(), "{index}");
+        assert!(selection_box_text_block(&target).is_measure_valid(), "{index}");
+    }
+
+    target.set_is_drop_down_open(false);
+    window.layout_manager().execute_layout_pass();
+    window.close();
 }

@@ -7,7 +7,7 @@ use std::rc::Rc;
 
 use crate::media::text_formatting::testing::{
     advance, format_line, format_lines, line_text, paragraph_properties, paragraph_properties_with,
-    run_properties, utf16, CustomDrawableRun, EndOfLineTextSource, InvisibleRun, ListTextSource,
+    run_properties, run_properties_for, utf16, CustomDrawableRun, EndOfLineTextSource, InvisibleRun, ListTextSource,
     MultiBufferTextSource, SingleBufferTextSource, TextTestScope, CJK_FAMILY, DEFAULT_FAMILY, EMOJI_FAMILY,
 };
 use crate::media::text_formatting::unicode::LineBreakEnumerator;
@@ -84,6 +84,39 @@ fn should_format_text_runs_with_default_style() {
     assert_eq!(run_properties.typeface(), default_properties.typeface());
     assert!(Rc::ptr_eq(run_properties.foreground_brush().unwrap(), &foreground));
     assert_eq!(runs[0].length(), text.len() as i32);
+}
+
+#[test]
+fn should_format_text_runs_of_a_family_the_font_manager_does_not_have_with_the_default_family() {
+    let _scope = TextTestScope::new();
+
+    let text = "0123456789";
+
+    let default_properties = default_properties();
+    let default_source = simple_source(text, &default_properties);
+    let default_line = format_line(&default_source, 0, f64::INFINITY, &no_wrap(&default_properties), None).unwrap();
+
+    // Named alone, and as the first of a list none of which the font manager has.
+    for family in ["Cascadia Mono", "Cascadia Mono,Consolas,Menlo,DejaVu Sans Mono"] {
+        let properties = run_properties_for(family, EM);
+
+        assert_eq!(properties.cached_glyph_typeface().family_name(), DEFAULT_FAMILY, "{family}");
+
+        let text_source = simple_source(text, &properties);
+
+        let text_line = format_line(&text_source, 0, f64::INFINITY, &no_wrap(&properties), None).unwrap();
+
+        let runs = text_line.text_runs();
+
+        assert_eq!(shaped(&runs[0]).glyph_run().glyph_typeface().family_name(), DEFAULT_FAMILY, "{family}");
+        assert_eq!(text_line.width(), default_line.width(), "{family}");
+        assert_eq!(text_line.height(), default_line.height(), "{family}");
+    }
+
+    // Asking did not make them families of the system fonts.
+    let system_fonts = crate::media::FontManager::current().system_fonts();
+
+    assert!(system_fonts.font_families().iter().all(|font_family| font_family.name() != "Cascadia Mono"));
 }
 
 #[test]
