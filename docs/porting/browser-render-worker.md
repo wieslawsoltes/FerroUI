@@ -1079,7 +1079,7 @@ The helpers that compare two captures (`differing`, `colours`) moved from `theme
 12. **The fallback of the snapshot** was never taken in a test: a context that cannot copy its surface is a lost one. The Metal path of the desktop takes the same code; there it used to hand out the GPU image, which is the unsound thing on any render thread.
 13. **The tracking data** (`docs/porting/data/path-overrides.toml`) was not touched; `FerroView::dispose` and the new script functions have no upstream counterpart to map.
 
-## Skia shim: the bindings of Skia compiled for threads (written, not built, 2026-10-09)
+## Skia shim: the bindings of Skia compiled for threads (written and built, 2026-10-09)
 
 Since B1 the threaded link passed `-Wl,--no-check-features`, because the linker refused the bindings shim of Skia in a module with shared memory. From B2.6 on two threads of the module call Skia (the UI thread measures and shapes text and decodes images, the render worker rasterises), so what the flag hid is a data race and not a formality. This section is the investigation, the fix as written, and how to check it. Nothing here was built: the rules of the session allowed reading existing files only.
 
@@ -1523,3 +1523,9 @@ Expected:
 6. **A change of the Skia features of the workspace** makes the crate ask for a key that is not in the directory, and it then starts a build of Skia from source instead of failing. CI checks the features of the target (`ci.yml`, "Skia features of the target"); the pin is `SKIA_FEATURES_KEY` and `SHIM_SOURCES` in the script.
 7. **Downloads**: the crate file from `static.crates.io`, the tag archive from `codeload.github.com` (its top directory is assumed to be `skia-<tag>`, as the crate assumes), the `gn` binary from `chrome-infra-packages.appspot.com` through Skia's `bin/fetch-gn`. The options of `tar` are those both the `tar` of macOS and GNU `tar` take.
 8. **Skia's own thread safety** is not changed by this: objects Skia documents as not shareable between threads stay so. The shim compiled for threads makes the reference counts, the statics and the thread-local storage of its inline code behave as those of Skia's own objects already do.
+
+### Result of the validation of the Skia shim (2026-10-09)
+
+`scripts/browser/setup.sh --threads` built the shim on the first try, in 26 seconds including the downloads: the definitions came from `gn gen` without Skia's third-party checkouts (28 definitions), the four sources compiled with `-pthread`, the new shim defines the same 774 functions as the published one, and the checks pass (`libskia.a`: 1020 of 1020 objects with atomics and bulk memory; `libskia-bindings.a`: 4 of 4).
+
+`scripts/build-browser.sh themed_view --threads` then links without `--no-check-features`. The check after the link lists every C and C++ archive of the build with atomics and bulk memory (the two of Skia, HarfBuzz, the setjmp bridge) and the module with a shared memory. `themed_view.test.mjs` against that site passes its 72 checks, rendering from the worker with the shim compiled for threads.
