@@ -59,7 +59,79 @@ ferro_class! {
         fn on_scroll_changed(this, e: &ScrollChangedEventArgs);
     }
 }
-ferroui_base::ferro_class_info!(ScrollViewer { new: ScrollViewer::new });
+// The `markup:` part is declared here and not generated: the public methods of the class are
+// declared for markup, the commands of the scroll buttons of the menu scroll viewer in the control themes
+// (`Command="{Binding LineUp, RelativeSource={RelativeSource TemplatedParent}}"`).
+ferroui_base::ferro_class_info!(ScrollViewer {
+    new: ScrollViewer::new,
+    markup: {
+        properties: [
+            BringIntoViewOnFocusChange: bool {
+                get: |this: &ferroui_base::Ref<ScrollViewer>| this.get_value(ScrollViewer::bring_into_view_on_focus_change_property()),
+                set: |this: &ferroui_base::Ref<ScrollViewer>, value: bool| this.set_value(ScrollViewer::bring_into_view_on_focus_change_property(), value)
+            },
+            HorizontalScrollBarVisibility: crate::primitives::ScrollBarVisibility {
+                get: |this: &ferroui_base::Ref<ScrollViewer>| this.get_value(ScrollViewer::horizontal_scroll_bar_visibility_property()),
+                set: |this: &ferroui_base::Ref<ScrollViewer>, value: crate::primitives::ScrollBarVisibility| this.set_value(ScrollViewer::horizontal_scroll_bar_visibility_property(), value)
+            },
+            VerticalScrollBarVisibility: crate::primitives::ScrollBarVisibility {
+                get: |this: &ferroui_base::Ref<ScrollViewer>| this.get_value(ScrollViewer::vertical_scroll_bar_visibility_property()),
+                set: |this: &ferroui_base::Ref<ScrollViewer>, value: crate::primitives::ScrollBarVisibility| this.set_value(ScrollViewer::vertical_scroll_bar_visibility_property(), value)
+            },
+            HorizontalSnapPointsType: crate::primitives::SnapPointsType {
+                get: |this: &ferroui_base::Ref<ScrollViewer>| this.get_value(ScrollViewer::horizontal_snap_points_type_property()),
+                set: |this: &ferroui_base::Ref<ScrollViewer>, value: crate::primitives::SnapPointsType| this.set_value(ScrollViewer::horizontal_snap_points_type_property(), value)
+            },
+            VerticalSnapPointsType: crate::primitives::SnapPointsType {
+                get: |this: &ferroui_base::Ref<ScrollViewer>| this.get_value(ScrollViewer::vertical_snap_points_type_property()),
+                set: |this: &ferroui_base::Ref<ScrollViewer>, value: crate::primitives::SnapPointsType| this.set_value(ScrollViewer::vertical_snap_points_type_property(), value)
+            },
+            HorizontalSnapPointsAlignment: crate::primitives::SnapPointsAlignment {
+                get: |this: &ferroui_base::Ref<ScrollViewer>| this.get_value(ScrollViewer::horizontal_snap_points_alignment_property()),
+                set: |this: &ferroui_base::Ref<ScrollViewer>, value: crate::primitives::SnapPointsAlignment| this.set_value(ScrollViewer::horizontal_snap_points_alignment_property(), value)
+            },
+            VerticalSnapPointsAlignment: crate::primitives::SnapPointsAlignment {
+                get: |this: &ferroui_base::Ref<ScrollViewer>| this.get_value(ScrollViewer::vertical_snap_points_alignment_property()),
+                set: |this: &ferroui_base::Ref<ScrollViewer>, value: crate::primitives::SnapPointsAlignment| this.set_value(ScrollViewer::vertical_snap_points_alignment_property(), value)
+            },
+            AllowAutoHide: bool {
+                get: |this: &ferroui_base::Ref<ScrollViewer>| this.get_value(ScrollViewer::allow_auto_hide_property()),
+                set: |this: &ferroui_base::Ref<ScrollViewer>, value: bool| this.set_value(ScrollViewer::allow_auto_hide_property(), value)
+            },
+            IsScrollChainingEnabled: bool {
+                get: |this: &ferroui_base::Ref<ScrollViewer>| this.get_value(ScrollViewer::is_scroll_chaining_enabled_property()),
+                set: |this: &ferroui_base::Ref<ScrollViewer>, value: bool| this.set_value(ScrollViewer::is_scroll_chaining_enabled_property(), value)
+            },
+            IsScrollInertiaEnabled: bool {
+                get: |this: &ferroui_base::Ref<ScrollViewer>| this.get_value(ScrollViewer::is_scroll_inertia_enabled_property()),
+                set: |this: &ferroui_base::Ref<ScrollViewer>, value: bool| this.set_value(ScrollViewer::is_scroll_inertia_enabled_property(), value)
+            },
+            IsDeferredScrollingEnabled: bool {
+                get: |this: &ferroui_base::Ref<ScrollViewer>| this.get_value(ScrollViewer::is_deferred_scrolling_enabled_property()),
+                set: |this: &ferroui_base::Ref<ScrollViewer>, value: bool| this.set_value(ScrollViewer::is_deferred_scrolling_enabled_property(), value)
+            },
+        ],
+        methods: [
+            fn LineUp() => ScrollViewer::line_up,
+            fn LineDown() => ScrollViewer::line_down,
+            fn LineLeft() => ScrollViewer::line_left,
+            fn LineRight() => ScrollViewer::line_right,
+            fn PageUp() => ScrollViewer::page_up,
+            fn PageDown() => ScrollViewer::page_down,
+            fn PageLeft() => ScrollViewer::page_left,
+            fn PageRight() => ScrollViewer::page_right,
+            fn ScrollToHome() => ScrollViewer::scroll_to_home,
+            fn ScrollToEnd() => ScrollViewer::scroll_to_end,
+        ],
+        fields: [
+            ScrollChangedEvent: ferroui_base::interactivity::RoutedEvent<crate::ScrollChangedEventArgs> => || *ScrollViewer::scroll_changed_event(),
+        ],
+        attributes: [
+            TemplatePart("PART_HorizontalScrollBar", type(ferroui_base::Ref<crate::primitives::ScrollBar>)),
+            TemplatePart("PART_VerticalScrollBar", type(ferroui_base::Ref<crate::primitives::ScrollBar>)),
+        ],
+    },
+});
 
 ferro_impl_classes!(ScrollViewer: StyledElementImpl, VisualImpl, LayoutableImpl, InteractiveImpl);
 
