@@ -90,7 +90,7 @@ fn setup() {
 }
 
 #[test]
-fn styled_default_value_can_be_overridden_in_derived_class() {
+fn default_value_can_be_overridden_in_derived_class() {
     setup();
     let base_value = Class1::styled_property().get_default_value(Class1::TYPE);
     let derived_value = Class1::styled_property().get_default_value(Class2::TYPE);
@@ -100,7 +100,7 @@ fn styled_default_value_can_be_overridden_in_derived_class() {
 }
 
 #[test]
-fn styled_default_value_can_be_overridden_in_add_ownered_property() {
+fn default_value_can_be_overridden_in_add_ownered_property() {
     setup();
     let base_value = Class1::styled_property().get_default_value(Class1::TYPE);
     let add_ownered_value = Class1::styled_property().get_default_value(Class3::TYPE);
@@ -110,7 +110,7 @@ fn styled_default_value_can_be_overridden_in_add_ownered_property() {
 }
 
 #[test]
-fn direct_unset_value_can_be_overridden_in_derived_class() {
+fn unset_value_can_be_overridden_in_derived_class() {
     setup();
     let base_value = Class1::direct_property().get_unset_value(Class1::TYPE);
     let derived_value = Class1::direct_property().get_unset_value(Class2::TYPE);
@@ -120,7 +120,7 @@ fn direct_unset_value_can_be_overridden_in_derived_class() {
 }
 
 #[test]
-fn direct_unset_value_can_be_overridden_in_add_ownered_property() {
+fn unset_value_can_be_overridden_in_add_ownered_property() {
     setup();
     let base_value = Class1::direct_property().get_unset_value(Class1::TYPE);
     let add_ownered_value = Class3::direct_property().get_unset_value(Class3::TYPE);
