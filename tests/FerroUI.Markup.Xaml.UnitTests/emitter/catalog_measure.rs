@@ -18,14 +18,12 @@
 //! compile, how many are refused and why, by reason with counts, and the size of the
 //! emitted Rust.
 //!
-//! The measure is taken twice. The first is the build as it is. Its largest reason is a
-//! question the models do not answer because one crate, the colour picker, makes
-//! registrations with the untyped value conversions the scanner does not read (in a macro
-//! of the crate, for the type the macro is invoked with); a document refused for a
-//! question is not examined further, so what else stands in its way does not show. The
-//! second measure counts those registrations as read (they are the casts of the palettes of
-//! the colour picker to their contract and their nullable forms: none is a cast between
-//! the types the documents ask about), which shows the reasons behind the first.
+//! The first measure was taken twice, the second time with four registrations of the
+//! colour picker counted as read: the scanner did not read the registrations a macro of
+//! that crate makes for each type it is invoked with, and with a cast of a crate not read
+//! the models answer no question about a cast. The scanner reads them now (a rule of a
+//! macro that repeats is expanded for the registrations of a function), so the measure is
+//! taken once, and the test fails if a model has a cast the scan did not read.
 //!
 //! ```text
 //! cargo test -p ferroui-markup-xaml-tests --lib emitter::catalog_measure -- --ignored --nocapture
@@ -280,7 +278,7 @@ fn print(title: &str, documents: usize, measure: &Measure) {
 
 /// Not from upstream: the ControlCatalog compiled against the type models, measured.
 #[test]
-#[ignore = "a measurement: scans ten crates and compiles the documents of the ControlCatalog twice; run it with --nocapture"]
+#[ignore = "a measurement: scans ten crates and compiles the documents of the ControlCatalog; run it with --nocapture"]
 fn measure_the_control_catalog_against_the_models() {
     let repository = Path::new(env!("CARGO_MANIFEST_DIR")).join("..").join("..");
     let out = std::env::temp_dir().join(format!("ferroui-catalog-measure-{}", std::process::id()));
@@ -348,20 +346,15 @@ fn measure_the_control_catalog_against_the_models() {
     let with_class = documents.iter().filter(|(_, text)| text.contains("x:Class=")).count();
     println!("the ControlCatalog: {} documents, {with_class} with a class", documents.len());
 
-    let dependencies = vec![base, controls, markup_xaml, dialogs, simple, fluent, color_picker.clone(), open_gl, mini_mvvm];
-    let first = measure(&sample, &out.join("control-catalog"), dependencies.clone(), &documents);
-    print("the ControlCatalog against the type models", documents.len(), &first);
-
-    // The second measure: the registrations of the colour picker the scanner does not read,
-    // counted as read.
-    let text = fs::read_to_string(&color_picker).expect("the model of the colour picker");
-    let mut model = AssemblyModel::parse(&text).expect("the model of the colour picker is read");
-    println!("the registrations of the colour picker counted as read in the second measure: {}", unread_of(&model));
-    model.unread_value_types.clear();
-    fs::write(&color_picker, model.to_json()).expect("the model of the colour picker is written");
-    let second = measure(&sample, &out.join("control-catalog-second"), dependencies, &documents);
-    print("the ControlCatalog against the type models, the registrations of the colour picker counted as read", documents.len(), &second);
+    let dependencies = vec![base, controls, markup_xaml, dialogs, simple, fluent, color_picker, open_gl, mini_mvvm];
+    // No model has a cast its scan did not read: no question about a cast is refused.
+    for model in models.borrow().iter().chain(std::iter::once(&scan.model)) {
+        let casts: Vec<&(String, i64)> = model.unread_value_types.iter().filter(|(registration, _)| registration == "cast").collect();
+        assert!(casts.is_empty(), "{}: casts the scan did not read: {casts:?}", model.crate_name);
+    }
+    let measured = measure(&sample, &out.join("control-catalog"), dependencies, &documents);
+    print("the ControlCatalog against the type models", documents.len(), &measured);
 
     let _ = fs::remove_dir_all(&out);
-    assert!(first.compiled.iter().all(|name| second.compiled.contains(name)), "a document compiles only with the registrations not read");
+    assert!(measured.questions.is_empty(), "the type models cannot answer: {:?}", measured.questions);
 }

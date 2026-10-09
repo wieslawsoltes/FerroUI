@@ -70,7 +70,7 @@ use proc_macro2::TokenTree;
 
 use crate::model::{
     AccessorModel, AliasModel, AssemblyModel, AttributeModel, AttributeValueModel, CallableModel, CastModel, EnumMemberModel, ExportModel, GenericModel,
-    HandleModel, MemberModel, ParameterModel, PropertyModel, RegisteredKind, RegisteredModel, RegistrationModel, RustType, TypeKind, TypeModel,
+    HandleModel, MacroModel, MemberModel, ParameterModel, PropertyModel, RegisteredKind, RegisteredModel, RegistrationModel, RustType, TypeKind, TypeModel,
     ValueTypeModel, XmlnsDefinitionModel, XmlnsPrefixModel,
 };
 use crate::model_set::ModelSet;
@@ -1016,6 +1016,21 @@ impl Builder {
         Some((type_index, position))
     }
 
+    /// The macros the crate exports that declare through a declaration macro, with their
+    /// rules: what a crate built on this one expands their invocations with. A name the
+    /// crate defines more than once is left out, as the crate itself does not expand it.
+    fn exported_macros(&mut self) {
+        let text = |tokens: &[proc_macro2::TokenTree]| tokens.iter().cloned().collect::<proc_macro2::TokenStream>().to_string();
+        for (name, definitions) in &self.source.local_macros {
+            let [definition] = definitions.as_slice() else { continue };
+            if !definition.exported || !definition.declaring || !definition.site.cfg.is_empty() || definition.rules.is_empty() {
+                continue;
+            }
+            let rules = definition.rules.iter().map(|(matcher, transcriber)| (text(matcher), text(transcriber))).collect();
+            self.model.macros.push(MacroModel { name: name.clone(), rules });
+        }
+    }
+
     /// The type aliases, the registered handles and the registered casts of the crate.
     fn aliases_and_handles(&mut self) {
         // An alias under a `cfg` condition, or declared twice, is left a name: which of
@@ -1223,6 +1238,7 @@ impl Builder {
         }
         self.model.exports = self.source.modules.export_table().into_iter().map(|(path, declared)| ExportModel { path, declared }).collect();
         self.aliases_and_handles();
+        self.exported_macros();
         self.link_dependencies(dependencies);
 
         // The public paths the crate states for the emitter, against the ones found here.

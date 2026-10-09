@@ -32,3 +32,7 @@ ferro_properties! {
         }
     }
 }
+
+// A list declared with a macro the other crate exports: read only with the model of that
+// crate, which has the rules of the macro.
+fixture::typed_list!(pub Cards: ferroui_base::Ref<Card>);

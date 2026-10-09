@@ -106,6 +106,8 @@ pub(crate) struct LocalMacro {
     pub rules: Vec<(Tokens, Tokens)>,
     /// The definition contains an invocation of a declaration macro.
     pub declaring: bool,
+    /// The crate exports the macro (`#[macro_export]`).
+    pub exported: bool,
     pub site: Site,
 }
 
@@ -201,6 +203,10 @@ pub(crate) struct Source {
     /// path the crate states for it, and whether the type is a contract.
     pub generic_paths: Vec<Located<(Tokens, String, bool)>>,
     pub local_macros: BTreeMap<String, Vec<LocalMacro>>,
+    /// The macros the crates the crate is built on export that declare through a
+    /// declaration macro, by name: the rules, with `$crate` written as the path of the
+    /// crate of the macro.
+    pub dependency_macros: BTreeMap<String, Vec<(Tokens, Tokens)>>,
     pub invocations: Vec<Invocation>,
     /// The declarations read from expansions of local macros, by the name of the macro.
     pub expanded: BTreeMap<String, usize>,
@@ -247,6 +253,7 @@ impl Source {
             rust_paths: Vec::new(),
             generic_paths: Vec::new(),
             local_macros: BTreeMap::new(),
+            dependency_macros: BTreeMap::new(),
             invocations: Vec::new(),
             expanded: BTreeMap::new(),
             read_files: BTreeSet::new(),
@@ -258,6 +265,21 @@ impl Source {
             source.modules.external_crates.insert(dependency.crate_name.clone());
             for export in &dependency.exports {
                 source.modules.externals.entry(export.path.clone()).or_insert_with(|| export.declared.clone());
+            }
+            for exported in &dependency.macros {
+                let rules: Option<Vec<(Tokens, Tokens)>> = exported
+                    .rules
+                    .iter()
+                    .map(|(matcher, transcriber)| {
+                        let matcher = matcher.parse::<proc_macro2::TokenStream>().ok()?;
+                        let transcriber = transcriber.parse::<proc_macro2::TokenStream>().ok()?;
+                        Some((tokens_of(matcher), with_crate_path(&tokens_of(transcriber), &dependency.crate_name)))
+                    })
+                    .collect();
+                // The first crate that exports a name has it, as the order of the models states.
+                if let Some(rules) = rules {
+                    source.dependency_macros.entry(exported.name.clone()).or_insert(rules);
+                }
             }
         }
         source.read_file(&options.root, 0, true, &[], None);
@@ -573,7 +595,8 @@ impl Source {
                 add_count(counts, name, Category::MacroDefinition);
             });
             if let Some(ident) = &item.ident {
-                self.local_macros.entry(ident.to_string()).or_default().push(LocalMacro { rules: rules_of(&tokens), declaring, site });
+                let exported = item.attrs.iter().any(|attribute| attribute.path().is_ident("macro_export"));
+                self.local_macros.entry(ident.to_string()).or_default().push(LocalMacro { rules: rules_of(&tokens), declaring, exported, site });
             }
             return;
         }
@@ -814,17 +837,25 @@ impl Source {
 
     /// Expands the invocations of the macros the crate defines, where a rule of the
     /// definition is one the scanner can apply, and reads what the expansion declares:
-    /// the types (`pub struct $name`) and the declaration macros at its top level.
+    /// the types (`pub struct $name`) and the declaration macros at its top level. A macro
+    /// the crate does not define and a crate it is built on exports
+    /// (`ferroui_controls::ferro_markup_list!`) is expanded the same way, with the rules the
+    /// model of that crate has.
     fn expand_local_macros(&mut self) {
         let pending = std::mem::take(&mut self.invocations);
         for invocation in pending {
-            let Some(definitions) = self.local_macros.get(&invocation.name) else { continue };
-            let declaring = definitions.iter().any(|definition| definition.declaring);
+            // A macro of a dependency is in its model because it declares.
+            let (definitions, declaring): (Vec<&Vec<(Tokens, Tokens)>>, bool) = match self.local_macros.get(&invocation.name) {
+                Some(definitions) => (definitions.iter().map(|definition| &definition.rules).collect(), definitions.iter().any(|definition| definition.declaring)),
+                None => (self.dependency_macros.get(&invocation.name).into_iter().collect(), true),
+            };
+            if definitions.is_empty() {
+                continue;
+            }
             let expansion = match definitions.as_slice() {
-                [definition] => definition
-                    .rules
+                [rules] => rules
                     .iter()
-                    .find_map(|(matcher, transcriber)| bind(matcher, &invocation.tokens).map(|bindings| substitute(transcriber, &bindings)))
+                    .find_map(|(matcher, transcriber)| bind(matcher, &invocation.tokens, false).map(|bindings| substitute(transcriber, &bindings, false)))
                     .ok_or("no rule of the definition has a form the scanner applies (identifiers, types, a visibility, attributes)")
                     .and_then(|expansion| expansion.ok_or("the rule repeats a part of its input, which the scanner does not expand")),
                 _ => Err("the crate defines more than one macro of that name"),
@@ -1100,6 +1131,35 @@ fn accessor_signature(tokens: &[TokenTree], line: usize) -> Option<(String, Stri
     Some((name, visibility, text_of(type_)))
 }
 
+/// The transcriber `tokens` of a macro of the crate `crate_name` with `$crate` written as
+/// the path of the crate (`::crate_name`): what the macro names in an expansion in another
+/// crate.
+fn with_crate_path(tokens: &[TokenTree], crate_name: &str) -> Tokens {
+    let mut result = Vec::with_capacity(tokens.len());
+    let mut index = 0;
+    while index < tokens.len() {
+        let token = &tokens[index];
+        let names_crate = is_punct(token, '$') && tokens.get(index + 1).and_then(ident_of).as_deref() == Some("crate");
+        if names_crate {
+            let span = token.span();
+            result.push(TokenTree::Punct(proc_macro2::Punct::new(':', proc_macro2::Spacing::Joint)));
+            result.push(TokenTree::Punct(proc_macro2::Punct::new(':', proc_macro2::Spacing::Alone)));
+            result.push(TokenTree::Ident(proc_macro2::Ident::new(crate_name, span)));
+            index += 2;
+        } else if let TokenTree::Group(group) = token {
+            let inner = with_crate_path(&tokens_of(group.stream()), crate_name);
+            let mut replaced = Group::new(group.delimiter(), inner.into_iter().collect());
+            replaced.set_span(group.span());
+            result.push(TokenTree::Group(replaced));
+            index += 1;
+        } else {
+            result.push(token.clone());
+            index += 1;
+        }
+    }
+    result
+}
+
 /// The rules of a `macro_rules!` definition: `(matcher) => { transcriber };`.
 fn rules_of(tokens: &[TokenTree]) -> Vec<(Tokens, Tokens)> {
     let mut rules = Vec::new();
@@ -1123,13 +1183,72 @@ fn is_attribute_repetition(tokens: &[TokenTree]) -> bool {
     tokens.len() == 2 && is_punct(&tokens[0], '#') && group_of(&tokens[1], Delimiter::Bracket).is_some()
 }
 
+/// What a variable of a matcher stands for: the tokens of the invocation, or, for a
+/// variable inside a repetition, what it stands for in each round of the repetition.
+#[derive(Clone)]
+enum Bound {
+    Tokens(Tokens),
+    Rounds(Vec<Bound>),
+}
+
+type Bindings = BTreeMap<String, Bound>;
+
+/// The separator and the operator that follow the group of a repetition at `index`
+/// (`$(..),*`, `$(..)*`, `$(..)+`, `$(..)?`), and the number of tokens the repetition takes
+/// with its `$` and its group.
+fn repetition_at(tokens: &[TokenTree], index: usize) -> Option<(Option<&TokenTree>, char, usize)> {
+    let operator = |token: &TokenTree| ['*', '+', '?'].into_iter().find(|operator| is_punct(token, *operator));
+    let first = tokens.get(index + 2)?;
+    if let Some(operator) = operator(first) {
+        return Some((None, operator, 3));
+    }
+    if matches!(first, TokenTree::Group(_)) {
+        return None;
+    }
+    // `?` takes no separator.
+    let operator = operator(tokens.get(index + 3)?).filter(|operator| *operator != '?')?;
+    Some((Some(first), operator, 4))
+}
+
+/// The names of the variables the matcher `tokens` binds (`$name:fragment`), at any depth.
+fn bound_names(tokens: &[TokenTree], names: &mut Vec<String>) {
+    for (index, token) in tokens.iter().enumerate() {
+        match token {
+            TokenTree::Group(group) => bound_names(&tokens_of(group.stream()), names),
+            TokenTree::Ident(name) if index > 0 && is_punct(&tokens[index - 1], '$') && tokens.get(index + 1).is_some_and(|colon| is_punct(colon, ':')) => {
+                names.push(name.to_string());
+            }
+            _ => {}
+        }
+    }
+}
+
+/// The names of the variables the transcriber `tokens` names (`$name`), at any depth.
+fn named_variables(tokens: &[TokenTree], names: &mut Vec<String>) {
+    for (index, token) in tokens.iter().enumerate() {
+        match token {
+            TokenTree::Group(group) => named_variables(&tokens_of(group.stream()), names),
+            TokenTree::Ident(name) if index > 0 && is_punct(&tokens[index - 1], '$') => names.push(name.to_string()),
+            _ => {}
+        }
+    }
+}
+
 /// Matches the tokens of an invocation against the matcher of a rule: the tokens each
 /// `$name:fragment` stands for. The fragments are `ident`, `vis`, `ty`, `path`, `expr`,
-/// `literal` and `tt`; the only repetition is the one of attributes, which are skipped.
+/// `literal` and `tt`. The repetition of attributes is skipped. Any other repetition
+/// (`$($type_:ty),*`, `$(,)?`) is matched with `repetitions`, round by round, as long as
+/// the tokens have its form; without `repetitions` a matcher that has one is not applied.
 /// Nothing for any other matcher, or when the invocation does not have the form.
-fn bind(matcher: &[TokenTree], input: &[TokenTree]) -> Option<BTreeMap<String, Tokens>> {
-    let mut bindings = BTreeMap::new();
+fn bind(matcher: &[TokenTree], input: &[TokenTree], repetitions: bool) -> Option<Bindings> {
     let mut cursor = Cursor::new(input, 0);
+    let bindings = bind_at(matcher, &mut cursor, repetitions)?;
+    cursor.is_end().then_some(bindings)
+}
+
+/// Matches `matcher` against the tokens at `cursor`, which may have more tokens after it.
+fn bind_at(matcher: &[TokenTree], cursor: &mut Cursor, repetitions: bool) -> Option<Bindings> {
+    let mut bindings = Bindings::new();
     let mut index = 0;
     while index < matcher.len() {
         let token = &matcher[index];
@@ -1137,7 +1256,7 @@ fn bind(matcher: &[TokenTree], input: &[TokenTree]) -> Option<BTreeMap<String, T
             let found = cursor.next()?;
             match (token, found) {
                 (TokenTree::Group(expected), TokenTree::Group(actual)) if expected.delimiter() == actual.delimiter() => {
-                    bindings.extend(bind(&tokens_of(expected.stream()), &tokens_of(actual.stream()))?);
+                    bindings.extend(bind(&tokens_of(expected.stream()), &tokens_of(actual.stream()), repetitions)?);
                 }
                 (TokenTree::Group(_), _) | (_, TokenTree::Group(_)) => return None,
                 _ => {
@@ -1151,12 +1270,49 @@ fn bind(matcher: &[TokenTree], input: &[TokenTree]) -> Option<BTreeMap<String, T
         }
         match matcher.get(index + 1)? {
             TokenTree::Group(group) => {
+                let inner = tokens_of(group.stream());
                 let repeated = matcher.get(index + 2).is_some_and(|operator| is_punct(operator, '*'));
-                if !repeated || !is_attribute_repetition(&tokens_of(group.stream())) {
+                if repeated && is_attribute_repetition(&inner) {
+                    cursor.skip_attributes();
+                    index += 3;
+                    continue;
+                }
+                if !repetitions {
                     return None;
                 }
-                cursor.skip_attributes();
-                index += 3;
+                let (separator, operator, length) = repetition_at(matcher, index)?;
+                let mut rounds: Vec<Bindings> = Vec::new();
+                loop {
+                    let start = cursor.position();
+                    if let (Some(separator), false) = (separator, rounds.is_empty()) {
+                        if !cursor.peek().is_some_and(|found| found.to_string() == separator.to_string()) {
+                            break;
+                        }
+                        cursor.next();
+                    }
+                    let before = cursor.position();
+                    match bind_at(&inner, cursor, repetitions) {
+                        // A round that takes nothing would be repeated without end.
+                        Some(round) if cursor.position() > before => rounds.push(round),
+                        _ => {
+                            cursor.rewind(start);
+                            break;
+                        }
+                    }
+                    if operator == '?' {
+                        break;
+                    }
+                }
+                if operator == '+' && rounds.is_empty() {
+                    return None;
+                }
+                let mut names = Vec::new();
+                bound_names(&inner, &mut names);
+                for name in names {
+                    let of_rounds = rounds.iter().map(|round| round.get(&name).cloned()).collect::<Option<Vec<Bound>>>()?;
+                    bindings.insert(name, Bound::Rounds(of_rounds));
+                }
+                index += length;
             }
             TokenTree::Ident(name) => {
                 if !matcher.get(index + 2).is_some_and(|colon| is_punct(colon, ':')) {
@@ -1189,19 +1345,22 @@ fn bind(matcher: &[TokenTree], input: &[TokenTree]) -> Option<BTreeMap<String, T
                     }
                     _ => return None,
                 }
-                bindings.insert(name.to_string(), cursor.since(start).to_vec());
+                bindings.insert(name.to_string(), Bound::Tokens(cursor.since(start).to_vec()));
                 index += 4;
             }
             _ => return None,
         }
     }
-    cursor.is_end().then_some(bindings)
+    Some(bindings)
 }
 
 /// The transcriber of a rule with every `$name` replaced by what it stands for and
-/// `$crate` by `crate`; the repetition of attributes is left out. Nothing when the
-/// transcriber repeats anything else or names a variable the matcher did not bind.
-fn substitute(tokens: &[TokenTree], bindings: &BTreeMap<String, Tokens>) -> Option<Tokens> {
+/// `$crate` by `crate`; the repetition of attributes is left out. Any other repetition is
+/// written with `repetitions`, once for each round of the variables of a repetition it
+/// names. Nothing when the transcriber repeats and `repetitions` is not given, when a
+/// repetition names no variable of one (or variables of different numbers of rounds), or
+/// when it names a variable the matcher did not bind at that depth.
+fn substitute(tokens: &[TokenTree], bindings: &Bindings, repetitions: bool) -> Option<Tokens> {
     let mut result = Vec::new();
     let mut index = 0;
     while index < tokens.len() {
@@ -1213,21 +1372,52 @@ fn substitute(tokens: &[TokenTree], bindings: &BTreeMap<String, Tokens>) -> Opti
                     index += 2;
                 }
                 TokenTree::Ident(name) => {
-                    result.extend(bindings.get(&name.to_string())?.iter().cloned());
+                    match bindings.get(&name.to_string())? {
+                        Bound::Tokens(tokens) => result.extend(tokens.iter().cloned()),
+                        Bound::Rounds(_) => return None,
+                    }
                     index += 2;
                 }
                 TokenTree::Group(group) => {
                     let repeated = tokens.get(index + 2).is_some_and(|operator| is_punct(operator, '*'));
                     let inner = tokens_of(group.stream());
-                    if !repeated || !is_attribute_repetition(&inner) {
+                    if repeated && is_attribute_repetition(&inner) {
+                        index += 3;
+                        continue;
+                    }
+                    if !repetitions {
                         return None;
                     }
-                    index += 3;
+                    let (separator, _, length) = repetition_at(tokens, index)?;
+                    let mut names = Vec::new();
+                    named_variables(&inner, &mut names);
+                    let repeated: Vec<(&String, &Vec<Bound>)> = names
+                        .iter()
+                        .filter_map(|name| match bindings.get(name) {
+                            Some(Bound::Rounds(rounds)) => Some((name, rounds)),
+                            _ => None,
+                        })
+                        .collect();
+                    let count = repeated.first()?.1.len();
+                    if repeated.iter().any(|(_, rounds)| rounds.len() != count) {
+                        return None;
+                    }
+                    for round in 0..count {
+                        let mut of_round = bindings.clone();
+                        for (name, rounds) in &repeated {
+                            of_round.insert((*name).clone(), rounds[round].clone());
+                        }
+                        if let (Some(separator), true) = (separator, round > 0) {
+                            result.push(separator.clone());
+                        }
+                        result.extend(substitute(&inner, &of_round, repetitions)?);
+                    }
+                    index += length;
                 }
                 _ => return None,
             }
         } else if let TokenTree::Group(group) = token {
-            let inner = substitute(&tokens_of(group.stream()), bindings)?;
+            let inner = substitute(&tokens_of(group.stream()), bindings, repetitions)?;
             let mut replaced = Group::new(group.delimiter(), inner.into_iter().collect());
             replaced.set_span(group.span());
             result.push(TokenTree::Group(replaced));
@@ -1503,9 +1693,13 @@ impl Source {
     /// the invocations are written by another macro that is handed the name of the first
     /// (`for_each!(assignable)`).
     ///
+    /// A rule that repeats a part of its input (`$(ValueTypes::register_nullable::<Rc<$type_>>();)*`
+    /// for `$($type_:ty),*`) is expanded here, once for each round, which the expansion of
+    /// the macros in item position does not do.
+    ///
     /// The calls in the text of a definition count as read when every invocation of the
     /// macro that was met is expanded; a definition with an invocation that is not expanded
-    /// (a rule that repeats a part of its input) keeps its calls as not read.
+    /// (a rule with a fragment the scanner does not match) keeps its calls as not read.
     fn expand_registration_macros(&mut self) {
         const MAX_DEPTH: usize = 8;
         let pending = std::mem::take(&mut self.invoked_macros);
@@ -1536,7 +1730,7 @@ impl Source {
                     (calls, false, false)
                 });
                 let expansion = match depth < MAX_DEPTH {
-                    true => rules.iter().find_map(|(matcher, transcriber)| bind(matcher, &tokens).map(|bindings| substitute(transcriber, &bindings))).flatten(),
+                    true => rules.iter().find_map(|(matcher, transcriber)| bind(matcher, &tokens, true).map(|bindings| substitute(transcriber, &bindings, true))).flatten(),
                     false => None,
                 };
                 let block = expansion.and_then(|expansion| {
