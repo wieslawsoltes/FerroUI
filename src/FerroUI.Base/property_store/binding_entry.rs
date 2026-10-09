@@ -74,7 +74,9 @@ impl<T: PropertyValue> BindingEntry<T> {
         }
         *self.subscription.borrow_mut() =
             if produce_value { Subscription::Creating } else { Subscription::CreatingQuiet };
-        let this = self.this.upgrade().expect("binding entry is alive");
+        // The observers hold the entry weakly (DEVIATIONS.md, Property
+        // system): the entry holds its source, and the source its observers.
+        let this = self.this.clone();
         let subscription = match &self.source {
             BindingSource::Typed(source) => source.subscribe(Rc::new(TypedObserver(this))),
             BindingSource::Value(source) => source.subscribe(Rc::new(ValueObserver(this))),
@@ -221,48 +223,74 @@ fn invalid_value_error(property: &FerroProperty) -> BindingError {
     BindingError::message(format!("The value is not valid for property '{}'.", property.name()))
 }
 
-struct TypedObserver<T: PropertyValue>(Rc<BindingEntry<T>>);
+/// An entry that is dropped while it is subscribed (its frame was dropped
+/// with the value store of an object that is gone) leaves its source: the
+/// collector does this for the managed original.
+impl<T: PropertyValue> Drop for BindingEntry<T> {
+    fn drop(&mut self) {
+        if let Subscription::Active(subscription) = std::mem::replace(self.subscription.get_mut(), Subscription::None) {
+            subscription.dispose();
+        }
+    }
+}
+
+struct TypedObserver<T: PropertyValue>(Weak<BindingEntry<T>>);
 
 impl<T: PropertyValue> IObserver<T> for TypedObserver<T> {
     fn on_next(&self, value: T) {
-        let value = self.0.validate(value);
-        self.0.set_value(value);
+        let Some(entry) = self.0.upgrade() else { return };
+        let value = entry.validate(value);
+        entry.set_value(value);
     }
     fn on_error(&self, _error: ObservableError) {
-        self.0.binding_completed()
+        if let Some(entry) = self.0.upgrade() {
+            entry.binding_completed()
+        }
     }
     fn on_completed(&self) {
-        self.0.binding_completed()
+        if let Some(entry) = self.0.upgrade() {
+            entry.binding_completed()
+        }
     }
 }
 
-struct ValueObserver<T: PropertyValue>(Rc<BindingEntry<T>>);
+struct ValueObserver<T: PropertyValue>(Weak<BindingEntry<T>>);
 
 impl<T: PropertyValue> IObserver<BindingValue<T>> for ValueObserver<T> {
     fn on_next(&self, value: BindingValue<T>) {
-        let value = self.0.convert_and_validate(value);
-        self.0.set_value(value);
+        let Some(entry) = self.0.upgrade() else { return };
+        let value = entry.convert_and_validate(value);
+        entry.set_value(value);
     }
     fn on_error(&self, _error: ObservableError) {
-        self.0.binding_completed()
+        if let Some(entry) = self.0.upgrade() {
+            entry.binding_completed()
+        }
     }
     fn on_completed(&self) {
-        self.0.binding_completed()
+        if let Some(entry) = self.0.upgrade() {
+            entry.binding_completed()
+        }
     }
 }
 
-struct UntypedObserver<T: PropertyValue>(Rc<BindingEntry<T>>);
+struct UntypedObserver<T: PropertyValue>(Weak<BindingEntry<T>>);
 
 impl<T: PropertyValue> IObserver<BoxedValue> for UntypedObserver<T> {
     fn on_next(&self, value: BoxedValue) {
-        let value = self.0.property.from_untyped(value.as_any());
-        let value = self.0.convert_and_validate(value);
-        self.0.set_value(value);
+        let Some(entry) = self.0.upgrade() else { return };
+        let value = entry.property.from_untyped(value.as_any());
+        let value = entry.convert_and_validate(value);
+        entry.set_value(value);
     }
     fn on_error(&self, _error: ObservableError) {
-        self.0.binding_completed()
+        if let Some(entry) = self.0.upgrade() {
+            entry.binding_completed()
+        }
     }
     fn on_completed(&self) {
-        self.0.binding_completed()
+        if let Some(entry) = self.0.upgrade() {
+            entry.binding_completed()
+        }
     }
 }

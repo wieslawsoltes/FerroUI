@@ -109,7 +109,7 @@ fn control_without_a_dynamic_resource_that_left_the_tree_is_freed() {
     window.close();
 }
 
-// --- C317 to C319: what a visit to a page of the catalog retained ---
+// --- C317 to C320: what a visit to a page of the catalog retained ---
 //
 // Found with the tours of `catalog_tour.rs`: every visit to a page left the page, or most of
 // what it showed, alive. Each reproduction is one of the cycles: the managed original has the
@@ -261,4 +261,30 @@ fn open_named_root_of_a_document() {
     let _app = start_catalog_application();
     let weak = load_and_release(&format!("<StackPanel {XMLNS} Name='root'/>"));
     assert!(weak.upgrade().is_none());
+}
+
+/// C320: a binding entry of a value store and the observable it is subscribed to hold each
+/// other. The presenter of a scroll viewer binds its content to the content of the viewer.
+#[test]
+fn gap_c320_content_of_a_scroll_viewer_that_was_dropped_while_shown() {
+    let _app = start_catalog_application();
+    let viewer = from_markup_value::<Ref<ferroui_controls::ScrollViewer>>(&Some(load_text(&format!(
+        "<ScrollViewer {XMLNS}><Border/></ScrollViewer>"
+    ))))
+    .expect("a scroll viewer");
+    let content = from_markup_value::<Ref<Control>>(&viewer.content()).expect("the content").downgrade();
+    let window = Window::new();
+    window.set_content(Some(Control::boxed(&viewer)));
+    window.show();
+    run_jobs();
+
+    // The window is closed with the viewer in it: nothing detaches the parts of the viewer
+    // one by one, they go with the tree.
+    let weak = viewer.downgrade();
+    drop(viewer);
+    window.close();
+    run_jobs();
+    drop(window);
+    assert!(weak.upgrade().is_none());
+    assert!(content.upgrade().is_none());
 }
