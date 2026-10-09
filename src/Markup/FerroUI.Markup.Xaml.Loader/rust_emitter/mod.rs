@@ -87,7 +87,9 @@
 
 mod compiled;
 mod compiled_resources;
+pub mod emit_types;
 mod emitter;
+pub mod runtime_types;
 mod source;
 mod xaml_metadata;
 

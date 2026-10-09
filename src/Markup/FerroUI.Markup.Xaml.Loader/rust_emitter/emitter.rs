@@ -9,9 +9,6 @@ use std::collections::{HashMap, HashSet};
 use std::fmt;
 use std::rc::Rc;
 
-use ferroui_base::metadata::{property_accessors, rust_path_of_type, IServiceProvider, MarkupType, PropertyAccessor};
-use ferroui_base::data::CompiledBindingPath;
-use ferroui_base::{BoxedValue, FerroProperty, StyledElement, TypeInfo};
 use xamlx::ast::XamlAstExtensions as _;
 use xamlx::ast::XamlAstNodeExtensions as _;
 use xamlx::ast::{
@@ -46,13 +43,11 @@ use crate::compiler_extensions::{
     XamlIlFerroPropertyHelper, XamlIlFerroPropertyNode, XamlIlProvideValueTargetProperty,
 };
 use crate::runtime::interpreter::{context_definition, numeric_constant, plan_setters, RuntimeDocument};
-use crate::runtime::type_system::{
-    DeclaredMember, RuntimeConstructor, RuntimeField, RuntimeFieldValue, RuntimeInvoker, RuntimeMethod, RuntimeType,
-};
 
 use ferroui_markup_xaml::xaml_il::runtime::compiled::FRAMEWORK_CONTEXT;
-use ferroui_markup_xaml::xaml_il::runtime::{DeferredContent, IFerroXamlIlXmlNamespaceInfoProvider};
+use ferroui_markup_xaml::xaml_il::runtime::IFerroXamlIlXmlNamespaceInfoProvider;
 
+use super::emit_types::{EmitClass, EmitMarkup, EmitProperty, EmitTypes, FieldValue, FrameworkType, Handle, Known, MethodInfo, TypeKey};
 use super::source::rust_string_literal;
 
 /// Why a document is not eligible for emission: the first node (or member)
@@ -92,27 +87,23 @@ fn failed(node: &Rc<dyn IXamlAstNode>, error: XamlError) -> UnsupportedNode {
 
 /// The Rust type of an emitted expression.
 #[derive(Clone, Copy)]
-enum Kind {
+enum Kind<'a> {
     /// The expression has exactly the Rust type `id`; `nullable` is the
-    /// `TypeId` of `Option<that type>` when the type has a nullable form.
-    Exact { id: TypeId, nullable: Option<TypeId> },
+    /// key of `Option<that type>` when the type has a nullable form.
+    Exact { id: TypeKey<'a>, nullable: Option<TypeKey<'a>> },
     /// The expression is a local holding `Ref<class>`.
-    Class(&'static TypeInfo),
+    Class(&'a dyn EmitClass),
     /// `{x:Null}`.
     Null,
     /// A `System.Type` value (`{x:Type}`): a class of the object model or a
     /// markup type. It has no Rust form of its own: it is written in the
     /// representation the destination declares ([`Emitter::coerce`]).
-    SystemType { class: Option<&'static TypeInfo>, markup: Option<&'static MarkupType>, primitive: Option<&'static str> },
+    SystemType { class: Option<&'a dyn EmitClass>, markup: Option<&'a dyn EmitMarkup>, primitive: Option<&'static str> },
 }
 
-struct Typed {
+struct Typed<'a> {
     expr: String,
-    kind: Kind,
-}
-
-fn exact<T: 'static>(expr: String) -> Typed {
-    Typed { expr, kind: Kind::Exact { id: TypeId::of::<T>(), nullable: Some(TypeId::of::<Option<T>>()) } }
+    kind: Kind<'a>,
 }
 
 /// `snake_case` of a class name, for the names of locals only (the names
@@ -188,18 +179,6 @@ fn f32_literal(value: f32) -> String {
     }
 }
 
-/// The metadata of a type of the run-time type system: the declaration it
-/// was projected from, or, for a core type of the type system that projects
-/// a declaration of its own (`System.TimeSpan`), the declaration registered
-/// for its handle.
-fn metadata_of(runtime: &RuntimeType) -> Option<&'static MarkupType> {
-    runtime.markup().or_else(|| MarkupType::find_by_handle(runtime.handle()?.id()))
-}
-
-fn runtime_type(type_: &Rc<dyn IXamlType>) -> Option<&RuntimeType> {
-    type_.as_any().downcast_ref::<RuntimeType>()
-}
-
 /// The nodes that need the parent stack or have a node below them that
 /// does (the decision of the interpreter's `ParentStackVisitor`): an object
 /// initialisation of such a node pushes its object onto the parent stack of
@@ -225,61 +204,20 @@ impl IXamlAstVisitor for ParentStackNodes {
     }
 }
 
-/// The Rust expression that yields the definition of a registered property:
-/// a call of a public accessor recorded by the declaration macros
-/// ([`property_accessors`]), by the public Rust path of the type whose
-/// `impl` block declares it ([`rust_path_of_type`]). Every recorded accessor
-/// returns the identical definition; the first one in the order of
-/// [`property_accessors`] (the type the property was resolved on and its
-/// base types, then the type that registered it and its base types) that
-/// generated code can call is taken, so the choice depends only on the
-/// declarations, never on what ran earlier on the thread.
-fn property_definition(property: &'static FerroProperty, preferred: Option<&'static TypeInfo>) -> Result<String, String> {
-    let accessors = property_accessors(property, preferred);
-    let chosen = accessors.iter().find_map(|accessor: &PropertyAccessor| {
-        accessor
-            .public
-            .then(|| rust_path_of_type(accessor.impl_type))
-            .flatten()
-            .map(|path| format!("{}::{}()", absolute(path), accessor.name))
-    });
-    chosen.ok_or_else(|| match accessors.is_empty() {
-        true => format!("no accessor of the property {} is recorded", property.name()),
-        false => format!("no accessor of the property {} is public and declared by a type with a public Rust path", property.name()),
-    })
-}
-
-/// The Rust name of a primitive type the run-time type system defines
-/// itself (`System.Int32` is `i32`), by its `TypeId`.
-fn primitive_type_name(id: TypeId) -> Option<&'static str> {
-    macro_rules! primitives {
-        ($($type_:ty),*) => {
-            [$((TypeId::of::<$type_>(), ::std::stringify!($type_))),*]
-        };
-    }
-    let table = primitives!(bool, char, i8, u8, i16, u16, i32, u32, i64, u64, f32, f64);
-    if id == TypeId::of::<String>() {
-        // Not a primitive of the language: named by its full path, as generated code names
-        // the items of the prelude.
-        return Some("::std::string::String");
-    }
-    table.iter().find(|(known, _)| *known == id).map(|(_, name)| *name)
-}
-
 /// A `System.Type` value in the representation the Rust type `target`
 /// declares (`RuntimeTypeValue::to_declared` of the run-time loader): an
 /// untyped target takes the class reference of a class of the object model
 /// and the canonical handle of any other type; `&'static TypeInfo` the class
 /// reference; [`ValueType`](ferroui_base::data::core::ValueType) and
-/// [`TypeId`] the canonical handle; each also as `Option<_>`. `None` if the
+/// `TypeId` the canonical handle; each also as `Option<_>`. `None` if the
 /// type has no such representation.
 fn system_type_as(
-    class: Option<&'static TypeInfo>,
-    markup: Option<&'static MarkupType>,
+    types: &dyn EmitTypes,
+    class: Option<&dyn EmitClass>,
+    markup: Option<&dyn EmitMarkup>,
     primitive: Option<&'static str>,
-    target: TypeId,
+    target: TypeKey<'_>,
 ) -> Option<String> {
-    use ferroui_base::data::core::ValueType;
     let class_expr = match class {
         Some(class) => Some(format!("<{} as ::ferroui_base::StaticType>::TYPE", absolute(class.rust_path()?))),
         None => None,
@@ -293,59 +231,57 @@ fn system_type_as(
                 true => format!("dyn {}", absolute(path)),
                 false => absolute(path),
             };
-            markup.handles.first()?;
+            markup.handles().first()?;
             Some(format!("rt::markup_handle(<{qualified} as ::ferroui_base::metadata::MarkupTyped>::MARKUP)"))
         }
         (None, None) => None,
     };
-    if target == TypeId::of::<Option<BoxedValue>>() {
+    if target == types.known(Known::Object) {
         return class_expr.or(handle_expr).map(|expr| format!("rt::boxed({expr})"));
     }
-    if target == TypeId::of::<&'static TypeInfo>() {
+    if target == types.known(Known::Class) {
         return class_expr;
     }
-    if target == TypeId::of::<Option<&'static TypeInfo>>() {
+    if target == types.known(Known::OptionClass) {
         return class_expr.map(|expr| format!("::core::option::Option::Some({expr})"));
     }
-    if target == TypeId::of::<ValueType>() {
+    if target == types.known(Known::ValueType) {
         return handle_expr;
     }
-    if target == TypeId::of::<Option<ValueType>>() {
+    if target == types.known(Known::OptionValueType) {
         return handle_expr.map(|expr| format!("::core::option::Option::Some({expr})"));
     }
-    if target == TypeId::of::<TypeId>() {
+    if target == types.known(Known::TypeId) {
         return handle_expr.map(|expr| format!("{expr}.id()"));
     }
-    if target == TypeId::of::<Option<TypeId>>() {
+    if target == types.known(Known::OptionTypeId) {
         return handle_expr.map(|expr| format!("::core::option::Option::Some({expr}.id())"));
     }
     None
 }
 
 /// The values a property setter is performed with.
-enum SetterValues<'a> {
+enum SetterValues<'v, 'a> {
     /// Only check that the statement can be written (no value is used).
     Checked,
     /// The setter takes no value (an unset-value setter).
     None,
     /// The evaluated value, of its static type, and its node.
-    Typed(&'a Typed, &'a Rc<dyn IXamlAstNode>),
+    Typed(&'v Typed<'a>, &'v Rc<dyn IXamlAstNode>),
     /// The local holding the value in its untyped form (a choice at run
     /// time), and the node of the value.
-    Untyped(&'a str, &'a Rc<dyn IXamlAstNode>),
+    Untyped(&'v str, &'v Rc<dyn IXamlAstNode>),
 }
 
 /// The method of a direct call property setter (`XamlDirectCallPropertySetter`,
 /// or the framework's `XamlIlDirectCallPropertySetter` of `Setter.Value`, a
-/// method taking `object` called with the value of its static type), if it
-/// is one of the run-time type system.
-fn direct_setter_method(setter: &Rc<dyn IXamlPropertySetter>) -> Option<&RuntimeMethod> {
+/// method taking `object` called with the value of its static type).
+fn direct_setter_method(setter: &Rc<dyn IXamlPropertySetter>) -> Option<&Rc<dyn IXamlMethod>> {
     let any = setter.as_any();
-    let method = match any.downcast_ref::<XamlDirectCallPropertySetter>() {
+    Some(match any.downcast_ref::<XamlDirectCallPropertySetter>() {
         Some(direct) => direct.method(),
         None => &any.downcast_ref::<XamlIlDirectCallPropertySetter>()?.method,
-    };
-    method.as_any().downcast_ref::<RuntimeMethod>()
+    })
 }
 
 /// The call `call` of a member; a `fallible` member's error is the load
@@ -374,11 +310,10 @@ fn invoked(call: String, fallible: bool, node: &Rc<dyn IXamlAstNode>) -> String 
 ///
 /// `None` (the statements are kept as they are) for any other shape: another constructor,
 /// another order of the members, a member call that can fail, a value that names the setter.
-fn fused_setter_add(lines: &[String], call: &str) -> Option<Vec<String>> {
-    use ferroui_base::metadata::MarkupTyped;
-    let setter = absolute(<ferroui_base::styling::Setter as MarkupTyped>::MARKUP.rust_path()?);
-    let style_base = absolute(ferroui_base::styling::StyleBase::TYPE.rust_path()?);
-    let setter_base = absolute(<dyn ferroui_base::styling::SetterBase as MarkupTyped>::MARKUP.rust_path()?);
+fn fused_setter_add(types: &dyn EmitTypes, lines: &[String], call: &str) -> Option<Vec<String>> {
+    let setter = types.framework_path(FrameworkType::Setter)?;
+    let style_base = types.framework_path(FrameworkType::StyleBase)?;
+    let setter_base = types.framework_path(FrameworkType::SetterBase)?;
     let statements: Vec<&str> = lines.iter().map(|line| line.strip_prefix("    ").unwrap_or(line)).collect();
     let (first, mut rest) = statements.split_first()?;
     let local = first.strip_prefix("let ")?.strip_suffix(&format!(" = {setter}::__markup_new_0();"))?;
@@ -472,13 +407,15 @@ fn untyped_argument(local: &str, member: &str, index: usize, node: &Rc<dyn IXaml
 }
 
 struct Emitter<'a> {
+    /// What the type system the document was transformed with states for the emitter.
+    types: &'a dyn EmitTypes,
     configuration: &'a TransformerConfiguration,
     document_name: &'a str,
     lines: Vec<String>,
     /// The number of locals named after each class.
     local_names: HashMap<String, usize>,
     /// The compiler locals initialised so far, by the address of their node.
-    compiler_locals: HashMap<usize, (String, Kind)>,
+    compiler_locals: HashMap<usize, (String, Kind<'a>)>,
     /// The position of the node being emitted: where a failed conversion is reported.
     position: std::cell::Cell<(i32, i32)>,
     /// The nodes that need the parent stack, by address ([`ParentStackNodes`]).
@@ -492,7 +429,7 @@ struct Emitter<'a> {
     uses_context: bool,
     uses_name_scope: bool,
     /// The functions of the other documents of the group.
-    documents: &'a DocumentFunctions,
+    documents: &'a DocumentFunctions<'a>,
     /// The property assignments being emitted, the innermost last: the
     /// property a markup extension provides its value for is the one of the
     /// innermost (the interpreter's nearest parent assignment node).
@@ -514,7 +451,28 @@ fn node_address<T: ?Sized>(node: &Rc<T>) -> usize {
     Rc::as_ptr(node) as *const () as usize
 }
 
-impl Emitter<'_> {
+impl<'a> Emitter<'a> {
+    /// `expr` as a value of a Rust type the emitter names, with its nullable form.
+    fn exact(&self, known: Known, expr: String) -> Typed<'a> {
+        Typed { expr, kind: Kind::Exact { id: self.types.known(known), nullable: Some(self.types.option_of_known(known)) } }
+    }
+
+    /// The context as the service provider an argument takes.
+    fn service_provider_argument(&self) -> Typed<'a> {
+        Typed {
+            expr: "rt::service_provider(&context)".to_string(),
+            kind: Kind::Exact {
+                id: self.types.known(Known::ServiceProvider),
+                nullable: Some(self.types.known(Known::OptionServiceProvider)),
+            },
+        }
+    }
+
+    /// The method of a direct call property setter, as the type system states it.
+    fn direct_setter(&self, setter: &Rc<dyn IXamlPropertySetter>) -> Option<MethodInfo<'a>> {
+        self.types.method(direct_setter_method(setter)?.as_ref())
+    }
+
     fn line(&mut self, text: String) {
         self.lines.push(format!("    {text}"));
     }
@@ -525,13 +483,13 @@ impl Emitter<'_> {
         self.line(format!("// {document}({},{}) {what}", node.line(), node.position()));
     }
 
-    fn local_for(&mut self, class: &'static TypeInfo) -> String {
+    fn local_for(&mut self, class: &'a dyn EmitClass) -> String {
         self.local_named(&snake_case(class.name()))
     }
 
     /// `value` held in a local: the expression is evaluated exactly once, here, and every use
     /// of the result names the local. A value that already is a local is returned as it is.
-    fn bind(&mut self, value: &Typed, base: &str) -> Typed {
+    fn bind(&mut self, value: &Typed<'a>, base: &str) -> Typed<'a> {
         if is_identifier(&value.expr) {
             return Typed { expr: value.expr.clone(), kind: value.kind };
         }
@@ -549,7 +507,7 @@ impl Emitter<'_> {
 
     // --- values -------------------------------------------------------------
 
-    fn value(&mut self, node: &Rc<dyn IXamlAstNode>) -> EmitResult<Typed> {
+    fn value(&mut self, node: &Rc<dyn IXamlAstNode>) -> EmitResult<Typed<'a>> {
         if let Some(group) = node.as_value_with_manipulation_node() {
             // `value_with_manipulation`: the value, then its manipulation unless it is an empty group.
             let created = self.value(&group.value().as_node())?;
@@ -589,7 +547,7 @@ impl Emitter<'_> {
             return Ok(Typed { expr, kind });
         }
         if let Some(n) = node.cast::<XamlAstTextNode>() {
-            return Ok(exact::<String>(format!("::std::string::String::from({})", rust_string_literal(&n.text()))));
+            return Ok(self.exact(Known::String, format!("::std::string::String::from({})", rust_string_literal(&n.text()))));
         }
         if node.is::<XamlStaticOrTargetedReturnMethodCallNode>() {
             return self.method_call_value(node);
@@ -627,20 +585,12 @@ impl Emitter<'_> {
                 .runtime_helpers
                 .get_method(|m| m.name() == NewServiceProviderNode::CREATE_ROOT_SERVICE_PROVIDER_METHOD_NAME)
                 .map_err(|e| failed(node, e))?;
-            let runtime = method
-                .as_any()
-                .downcast_ref::<RuntimeMethod>()
+            let runtime = self.types.method(method.as_ref())
                 .ok_or_else(|| unsupported(node, "CreateRootServiceProviderV3 is not a method of the run-time type system"))?;
             self.uses_context = true;
-            let context = Typed {
-                expr: "rt::service_provider(&context)".to_string(),
-                kind: Kind::Exact {
-                    id: TypeId::of::<Rc<dyn IServiceProvider>>(),
-                    nullable: Some(TypeId::of::<Option<Rc<dyn IServiceProvider>>>()),
-                },
-            };
-            let call = self.declared_call(node, runtime, &[context])?;
-            let returned = self.declared_return(node, runtime)?;
+            let context = self.service_provider_argument();
+            let call = self.declared_call(node, &runtime, &[context])?;
+            let returned = self.declared_return(node, &runtime)?;
             let local = self.local_named("service_provider");
             self.line(format!("let {local} = {call};"));
             return Ok(Typed { expr: format!("{local}.clone()"), kind: self.kind_of(returned) });
@@ -650,8 +600,8 @@ impl Emitter<'_> {
                 Some(local) => Typed {
                     expr: format!("{local}.clone()"),
                     kind: Kind::Exact {
-                        id: TypeId::of::<ferroui_base::styling::Selector>(),
-                        nullable: Some(TypeId::of::<Option<ferroui_base::styling::Selector>>()),
+                        id: self.types.known(Known::Selector),
+                        nullable: Some(self.types.known(Known::OptionSelector)),
                     },
                 },
                 None => Typed { expr: "::core::option::Option::None".to_string(), kind: Kind::Null },
@@ -662,9 +612,9 @@ impl Emitter<'_> {
             self.uses_context = true;
             let base_uri = Typed {
                 expr: "context.base_uri()".to_string(),
-                kind: Kind::Exact { id: TypeId::of::<Option<ferroui_base::utilities::Uri>>(), nullable: None },
+                kind: Kind::Exact { id: self.types.known(Known::OptionUri), nullable: None },
             };
-            let text = exact::<String>(format!("::std::string::String::from({})", rust_string_literal(n.text())));
+            let text = self.exact(Known::String, format!("::std::string::String::from({})", rust_string_literal(n.text())));
             let constructor = n.types().font_family_constructor_uri_name.clone();
             return self.constructor_call(node, &constructor, &[base_uri, text]);
         }
@@ -678,15 +628,17 @@ impl Emitter<'_> {
         if let Some(n) = node.cast::<XamlTypeExtensionNode>() {
             // `typeof(T)`: the type, written where it goes.
             let type_ = n.value().get_clr_type().map_err(|e| failed(node, e))?;
-            let runtime = runtime_type(&type_).ok_or_else(|| unsupported(node, "a type that is not one of the run-time type system"))?;
-            let class = runtime.type_info();
+            if !self.types.is_own(&*type_) {
+                return Err(unsupported(node, "a type that is not one of the run-time type system"));
+            }
+            let class = self.types.class_of(&*type_);
             let markup = match class {
                 Some(_) => None,
-                None => metadata_of(runtime),
+                None => self.types.metadata_of(&*type_),
             };
-            let primitive = runtime.handle().and_then(|handle| primitive_type_name(handle.id()));
+            let primitive = self.types.handle_of(&*type_).and_then(|handle| self.types.primitive_type_name(handle.id()));
             if class.is_none() && markup.is_none() && primitive.is_none() {
-                return Err(unsupported(node, format!("{} has no metadata", runtime.full_name())));
+                return Err(unsupported(node, format!("{} has no metadata", type_.full_name())));
             }
             return Ok(Typed { expr: String::new(), kind: Kind::SystemType { class, markup, primitive } });
         }
@@ -698,7 +650,7 @@ impl Emitter<'_> {
             return self.static_member(node, &n);
         }
         if let Some(n) = node.cast::<FerroXamlIlVectorLikeConstantAstNode>() {
-            let arguments: Vec<Typed> = n.values().iter().map(|value| exact::<f64>(f64_literal(*value))).collect();
+            let arguments: Vec<Typed> = n.values().iter().map(|value| self.exact(Known::F64, f64_literal(*value))).collect();
             return self.constructor_call(node, n.constructor(), &arguments);
         }
         if let Some(n) = node.cast::<FerroXamlIlFerroListConstantAstNode>() {
@@ -713,7 +665,7 @@ impl Emitter<'_> {
                 .cloned()
                 .ok_or_else(|| unsupported(node, "the grid length constructor doesn't take a unit"))?;
             let grid_length = n.grid_length();
-            let value = exact::<f64>(f64_literal(grid_length.value));
+            let value = self.exact(Known::F64, f64_literal(grid_length.value));
             let unit = self.enum_member(node, &unit_type, i64::from(grid_length.grid_unit_type as i32))?;
             return self.constructor_call(node, &constructor, &[value, unit]);
         }
@@ -721,9 +673,9 @@ impl Emitter<'_> {
     }
 
     /// `new T()` of a class of the object model with its default constructor.
-    fn new_object(&mut self, node: &Rc<dyn IXamlAstNode>, n: &Rc<XamlAstNewClrObjectNode>) -> EmitResult<Typed> {
+    fn new_object(&mut self, node: &Rc<dyn IXamlAstNode>, n: &Rc<XamlAstNewClrObjectNode>) -> EmitResult<Typed<'a>> {
         let type_ = n.type_.borrow().get_clr_type().map_err(|e| failed(node, e))?;
-        let is_declared = n.constructor.as_any().downcast_ref::<RuntimeConstructor>().is_some_and(|c| c.declared.is_some());
+        let is_declared = self.types.constructor(n.constructor.as_ref()).is_some_and(|c| c.declared.is_some());
         if is_declared {
             // A constructor of metadata (with or without arguments): the arguments in order,
             // then the typed function.
@@ -747,17 +699,16 @@ impl Emitter<'_> {
         node: &Rc<dyn IXamlAstNode>,
         type_: &Rc<dyn IXamlType>,
         constructor: &Rc<dyn IXamlConstructor>,
-    ) -> EmitResult<Typed> {
-        let class = runtime_type(type_)
-            .and_then(RuntimeType::type_info)
+    ) -> EmitResult<Typed<'a>> {
+        let class = self
+            .types
+            .class_of(&**type_)
             .ok_or_else(|| unsupported(node, format!("{} is not a class of the object model", type_.full_name())))?;
-        let is_default_constructor = constructor.as_any().downcast_ref::<RuntimeConstructor>().is_some_and(|c| {
-            c.parameters.is_empty() && matches!(c.invoker, RuntimeInvoker::Dynamic(_))
-        });
-        if !is_default_constructor || class.default_constructor().is_none() {
+        let is_default_constructor = self.types.constructor(constructor.as_ref()).is_some_and(|c| c.parameters.is_empty() && c.built);
+        if !is_default_constructor || !class.has_default_constructor() {
             return Err(unsupported(node, format!("{} has no default constructor", type_.full_name())));
         }
-        if crate::FerroRuntimeXamlLoader::has_class_document(class) {
+        if self.types.has_class_document(class) {
             return Err(unsupported(node, format!("{} is a class with markup of its own", type_.full_name())));
         }
         let path = class
@@ -773,7 +724,7 @@ impl Emitter<'_> {
     /// A value whose `BeginInit` runs as soon as it is created (an object
     /// that is usable during its initialisation: the consumer attaches it
     /// before it is populated).
-    fn value_with_begin_init(&mut self, node: &Rc<dyn IXamlAstNode>, n: &Rc<XamlValueNodeWithBeginInit>) -> EmitResult<Typed> {
+    fn value_with_begin_init(&mut self, node: &Rc<dyn IXamlAstNode>, n: &Rc<XamlValueNodeWithBeginInit>) -> EmitResult<Typed<'a>> {
         let value = n.base.value();
         let type_ = value.type_().get_clr_type().map_err(|e| failed(node, e))?;
         let created = self.value(&value.as_node())?;
@@ -792,14 +743,15 @@ impl Emitter<'_> {
         &mut self,
         node: &Rc<dyn IXamlAstNode>,
         n: &Rc<XamlAstLocalInitializationNodeEmitter>,
-    ) -> EmitResult<Typed> {
+    ) -> EmitResult<Typed<'a>> {
         let local = n.local();
         let value = self.value(&n.base.value().as_node())?;
         let Kind::Class(class) = value.kind else {
             return Err(unsupported(node, "a compiler local that does not hold an object of the object model"));
         };
-        let local_class = runtime_type(&local.type_)
-            .and_then(RuntimeType::type_info)
+        let local_class = self
+            .types
+            .class_of(&*local.type_)
             .ok_or_else(|| unsupported(node, format!("a compiler local of type {}", local.type_.full_name())))?;
         if !local_class.is_assignable_from(class) {
             return Err(unsupported(node, format!("a compiler local of type {}", local.type_.full_name())));
@@ -811,10 +763,10 @@ impl Emitter<'_> {
     /// A list from text (`"*,Auto"` for the column definitions of a grid):
     /// the list, its capacity, then each element added in order, as the
     /// interpreter's `list_constant` builds it.
-    fn list_constant(&mut self, node: &Rc<dyn IXamlAstNode>, n: &Rc<FerroXamlIlFerroListConstantAstNode>) -> EmitResult<Typed> {
+    fn list_constant(&mut self, node: &Rc<dyn IXamlAstNode>, n: &Rc<FerroXamlIlFerroListConstantAstNode>) -> EmitResult<Typed<'a>> {
         let list_type = IXamlAstValueNode::type_(&**n).get_clr_type().map_err(|e| failed(node, e))?;
         let constructor = n.constructor().clone();
-        let is_declared = constructor.as_any().downcast_ref::<RuntimeConstructor>().is_some_and(|c| c.declared.is_some());
+        let is_declared = self.types.constructor(constructor.as_ref()).is_some_and(|c| c.declared.is_some());
         let list = match is_declared {
             true => self.constructor_call(node, &constructor, &[])?,
             false => self.default_object(node, &list_type, &constructor)?,
@@ -822,31 +774,25 @@ impl Emitter<'_> {
         // The list is created once (`newobj`, then `dup` for each call): it is held in a local
         // that the capacity, every `Add` and the consumer use.
         let list = self.bind(&list, &snake_case(&list_type.name()));
-        let set_capacity = n
-            .list_set_capacity_method()
-            .as_any()
-            .downcast_ref::<RuntimeMethod>()
+        let set_capacity = self.types.method(n.list_set_capacity_method().as_ref())
             .ok_or_else(|| unsupported(node, "the capacity setter is not a method of the run-time type system"))?;
         let capacity = i32::try_from(n.values().len()).unwrap_or(i32::MAX);
-        let call = self.declared_call(node, set_capacity, &[Typed { expr: list.expr.clone(), kind: list.kind }, exact::<i32>(format!("{capacity}_i32"))])?;
+        let call = self.declared_call(node, &set_capacity, &[Typed { expr: list.expr.clone(), kind: list.kind }, self.exact(Known::I32, format!("{capacity}_i32"))])?;
         self.line(format!("{call};"));
-        let add = n
-            .list_add_method()
-            .as_any()
-            .downcast_ref::<RuntimeMethod>()
+        let add = self.types.method(n.list_add_method().as_ref())
             .ok_or_else(|| unsupported(node, "the adder is not a method of the run-time type system"))?;
         for value in n.values() {
             let element = self.value(&value.as_node())?;
-            let call = self.declared_call(node, add, &[Typed { expr: list.expr.clone(), kind: list.kind }, element])?;
+            let call = self.declared_call(node, &add, &[Typed { expr: list.expr.clone(), kind: list.kind }, element])?;
             self.line(format!("{call};"));
         }
         Ok(list)
     }
 
     /// A compile-time constant: what `constant_value` loads for it.
-    fn constant(&mut self, node: &Rc<dyn IXamlAstNode>, type_: &Rc<dyn IXamlType>, constant: &XamlValue) -> EmitResult<Typed> {
+    fn constant(&mut self, node: &Rc<dyn IXamlAstNode>, type_: &Rc<dyn IXamlType>, constant: &XamlValue) -> EmitResult<Typed<'a>> {
         if let XamlValue::String(text) = constant {
-            return Ok(exact::<String>(format!("::std::string::String::from({})", rust_string_literal(text))));
+            return Ok(self.exact(Known::String, format!("::std::string::String::from({})", rust_string_literal(text))));
         }
         if matches!(constant, XamlValue::Null) {
             return Ok(Typed { expr: "::core::option::Option::None".to_string(), kind: Kind::Null });
@@ -860,92 +806,94 @@ impl Emitter<'_> {
         }
         let out_of_range = || unsupported(node, format!("{integer} is out of the range of {}", type_.full_name()));
         macro_rules! integer {
-            ($type_:ty, $suffix:literal) => {
-                Ok(exact::<$type_>(format!("{}{}", <$type_>::try_from(integer).map_err(|_| out_of_range())?, $suffix)))
+            ($type_:ty, $known:ident, $suffix:literal) => {
+                Ok(self.exact(Known::$known, format!("{}{}", <$type_>::try_from(integer).map_err(|_| out_of_range())?, $suffix)))
             };
         }
         if type_.namespace().as_deref() == Some("System") {
             match type_.name().as_str() {
-                "Boolean" => return Ok(exact::<bool>(format!("{}", integer != 0))),
+                "Boolean" => return Ok(self.exact(Known::Bool, format!("{}", integer != 0))),
                 "Char" => {
                     let character = u32::try_from(integer).ok().and_then(char::from_u32).ok_or_else(out_of_range)?;
-                    return Ok(exact::<char>(format!("{character:?}")));
+                    return Ok(self.exact(Known::Char, format!("{character:?}")));
                 }
-                "SByte" => return integer!(i8, "_i8"),
-                "Byte" => return integer!(u8, "_u8"),
-                "Int16" => return integer!(i16, "_i16"),
-                "UInt16" => return integer!(u16, "_u16"),
-                "Int32" => return integer!(i32, "_i32"),
-                "UInt32" => return integer!(u32, "_u32"),
-                "Int64" => return integer!(i64, "_i64"),
-                "UInt64" => return integer!(u64, "_u64"),
-                "Single" => return Ok(exact::<f32>(f32_literal(float as f32))),
-                "Double" => return Ok(exact::<f64>(f64_literal(float))),
+                "SByte" => return integer!(i8, I8, "_i8"),
+                "Byte" => return integer!(u8, U8, "_u8"),
+                "Int16" => return integer!(i16, I16, "_i16"),
+                "UInt16" => return integer!(u16, U16, "_u16"),
+                "Int32" => return integer!(i32, I32, "_i32"),
+                "UInt32" => return integer!(u32, U32, "_u32"),
+                "Int64" => return integer!(i64, I64, "_i64"),
+                "UInt64" => return integer!(u64, U64, "_u64"),
+                "Single" => return Ok(self.exact(Known::F32, f32_literal(float as f32))),
+                "Double" => return Ok(self.exact(Known::F64, f64_literal(float))),
                 _ => {}
             }
         }
         // The constant is typed as something else (`System.Object`): its own kind decides.
         Ok(match constant {
-            XamlValue::Boolean(v) => exact::<bool>(format!("{v}")),
-            XamlValue::Char(v) => exact::<char>(format!("{v:?}")),
-            XamlValue::SByte(v) => exact::<i8>(format!("{v}_i8")),
-            XamlValue::Byte(v) => exact::<u8>(format!("{v}_u8")),
-            XamlValue::Int16(v) => exact::<i16>(format!("{v}_i16")),
-            XamlValue::UInt16(v) => exact::<u16>(format!("{v}_u16")),
-            XamlValue::Int32(v) => exact::<i32>(format!("{v}_i32")),
-            XamlValue::UInt32(v) => exact::<u32>(format!("{v}_u32")),
-            XamlValue::Int64(v) => exact::<i64>(format!("{v}_i64")),
-            XamlValue::UInt64(v) => exact::<u64>(format!("{v}_u64")),
-            XamlValue::Single(v) => exact::<f32>(f32_literal(*v)),
-            XamlValue::Double(v) => exact::<f64>(f64_literal(*v)),
+            XamlValue::Boolean(v) => self.exact(Known::Bool, format!("{v}")),
+            XamlValue::Char(v) => self.exact(Known::Char, format!("{v:?}")),
+            XamlValue::SByte(v) => self.exact(Known::I8, format!("{v}_i8")),
+            XamlValue::Byte(v) => self.exact(Known::U8, format!("{v}_u8")),
+            XamlValue::Int16(v) => self.exact(Known::I16, format!("{v}_i16")),
+            XamlValue::UInt16(v) => self.exact(Known::U16, format!("{v}_u16")),
+            XamlValue::Int32(v) => self.exact(Known::I32, format!("{v}_i32")),
+            XamlValue::UInt32(v) => self.exact(Known::U32, format!("{v}_u32")),
+            XamlValue::Int64(v) => self.exact(Known::I64, format!("{v}_i64")),
+            XamlValue::UInt64(v) => self.exact(Known::U64, format!("{v}_u64")),
+            XamlValue::Single(v) => self.exact(Known::F32, f32_literal(*v)),
+            XamlValue::Double(v) => self.exact(Known::F64, f64_literal(*v)),
             _ => return Err(unsupported(node, format!("the constant {constant:?} as a value of {}", type_.full_name()))),
         })
     }
 
     /// The member of a plain enumeration with the numeric value `value`, as
     /// its Rust variant.
-    fn enum_member(&mut self, node: &Rc<dyn IXamlAstNode>, type_: &Rc<dyn IXamlType>, value: i64) -> EmitResult<Typed> {
-        let markup = runtime_type(type_)
-            .and_then(RuntimeType::markup)
+    fn enum_member(&mut self, node: &Rc<dyn IXamlAstNode>, type_: &Rc<dyn IXamlType>, value: i64) -> EmitResult<Typed<'a>> {
+        let markup = self
+            .types
+            .markup_of(&**type_)
             .ok_or_else(|| unsupported(node, format!("{} has no metadata", type_.full_name())))?;
-        if markup.is_flags {
+        if markup.is_flags() {
             return self.flags_value(node, markup, value);
         }
-        let member = markup.enum_members.iter().find(|member| member.value == value);
-        let variant = member
+        let members = markup.enum_members();
+        let variant = members
+            .iter()
+            .find(|member| member.value == value)
             .and_then(|member| member.rust_variant)
             .ok_or_else(|| unsupported(node, format!("{value} is not a member of {}", type_.full_name())))?;
         self.enum_variant(node, markup, variant)
     }
 
-    fn enum_variant(&mut self, node: &Rc<dyn IXamlAstNode>, markup: &'static MarkupType, variant: &str) -> EmitResult<Typed> {
+    fn enum_variant(&mut self, node: &Rc<dyn IXamlAstNode>, markup: &'a dyn EmitMarkup, variant: &str) -> EmitResult<Typed<'a>> {
         let path = markup
             .rust_path()
             .ok_or_else(|| unsupported(node, format!("no public Rust path is recorded for {}", markup.full_name())))?;
-        let id = markup.handle().ok_or_else(|| unsupported(node, "the enumeration has no value type"))?.id();
-        let nullable = markup.nullable.map(|nullable| nullable().id());
+        let id = markup.handle().ok_or_else(|| unsupported(node, "the enumeration has no value type"))?;
+        let nullable = markup.nullable();
         Ok(Typed { expr: format!("{}::{variant}", absolute(path)), kind: Kind::Exact { id, nullable } })
     }
 
     /// A value of a set of flags from its integer value: the typed function
     /// the declaration generates (`__markup_flags`), for a value the members
     /// of the flags make up (as the metadata of the flags converts it).
-    fn flags_value(&mut self, node: &Rc<dyn IXamlAstNode>, markup: &'static MarkupType, value: i64) -> EmitResult<Typed> {
-        let composes = markup.enum_from_value.is_some_and(|from_value| from_value(value).is_some());
-        if !composes {
+    fn flags_value(&mut self, node: &Rc<dyn IXamlAstNode>, markup: &'a dyn EmitMarkup, value: i64) -> EmitResult<Typed<'a>> {
+        if !markup.flags_compose(value) {
             return Err(unsupported(node, format!("{value} is not made of members of {}", markup.full_name())));
         }
         let path = markup
             .rust_path()
             .ok_or_else(|| unsupported(node, format!("no public Rust path is recorded for {}", markup.full_name())))?;
-        let id = markup.handle().ok_or_else(|| unsupported(node, "the flags have no value type"))?.id();
-        let nullable = markup.nullable.map(|nullable| nullable().id());
+        let id = markup.handle().ok_or_else(|| unsupported(node, "the flags have no value type"))?;
+        let nullable = markup.nullable();
         Ok(Typed { expr: format!("{}::__markup_flags({value}_i64)", absolute(path)), kind: Kind::Exact { id, nullable } })
     }
 
     /// `{x:Static Type.Member}` naming a member of an enumeration, a static
     /// property or field.
-    fn static_member(&mut self, node: &Rc<dyn IXamlAstNode>, n: &Rc<XamlStaticExtensionNode>) -> EmitResult<Typed> {
+    fn static_member(&mut self, node: &Rc<dyn IXamlAstNode>, n: &Rc<XamlStaticExtensionNode>) -> EmitResult<Typed<'a>> {
         let member = n.resolve_member(true).map_err(|e| failed(node, e))?;
         let field = match member {
             Some(XamlStaticMember::Field(field)) => field,
@@ -954,56 +902,52 @@ impl Emitter<'_> {
                 let getter = property
                     .getter()
                     .ok_or_else(|| unsupported(node, format!("{}: a static property without a getter", property.name())))?;
-                let getter = getter
-                    .as_any()
-                    .downcast_ref::<RuntimeMethod>()
+                let getter = self.types.method(getter.as_ref())
                     .ok_or_else(|| unsupported(node, "a getter that is not a method of the run-time type system"))?;
-                let call = self.declared_call(node, getter, &[])?;
-                let returned = self.declared_return(node, getter)?;
+                let call = self.declared_call(node, &getter, &[])?;
+                let returned = self.declared_return(node, &getter)?;
                 let local = self.local_named("value");
                 self.line(format!("let {local} = {call};"));
                 return Ok(Typed { expr: local, kind: self.kind_of(returned) });
             }
             None => return Err(unsupported(node, "a static member that does not resolve")),
         };
-        let Some(runtime) = field.as_any().downcast_ref::<RuntimeField>() else {
+        let Some(runtime) = self.types.field(field.as_ref()) else {
             return Err(unsupported(node, "a field that is not a field of the run-time type system"));
         };
         if runtime.ferro_property().is_some() {
             return self.property_field(node, &field);
         }
-        if let RuntimeFieldValue::Declared(declared) = runtime.value {
+        if let FieldValue::Declared { name, emit, type_ } = &runtime.value {
             // A field of metadata, read through its typed function.
-            let emit = declared
-                .emit
-                .ok_or_else(|| unsupported(node, format!("{}: the declaration has no typed function", declared.name)))?;
+            let emit = emit.as_ref().ok_or_else(|| unsupported(node, format!("{name}: the declaration has no typed function")))?;
             let declaring = runtime
                 .declaring_type
-                .upgrade()
-                .ok_or_else(|| unsupported(node, format!("{}: the declaring type is gone", declared.name)))?;
+                .clone()
+                .ok_or_else(|| unsupported(node, format!("{name}: the declaring type is gone")))?;
             let owner = self.type_path(node, &declaring)?;
             let local = self.local_named("value");
             self.line(format!("let {local} = {owner}::{}();", emit.function));
-            return Ok(Typed { expr: local, kind: self.kind_of((declared.type_)().id()) });
+            return Ok(Typed { expr: local, kind: self.kind_of(*type_) });
         }
-        if !matches!(runtime.value, RuntimeFieldValue::EnumMember(_)) {
+        if !matches!(runtime.value, FieldValue::EnumMember) {
             return Err(unsupported(node, "a static field that is not an enumeration member"));
         }
         let declaring_type = field.declaring_type();
-        let markup = runtime_type(&declaring_type)
-            .and_then(RuntimeType::markup)
+        let markup = self
+            .types
+            .markup_of(&*declaring_type)
             .ok_or_else(|| unsupported(node, format!("{} has no metadata", declaring_type.full_name())))?;
         let name = field.name();
-        if markup.is_flags {
-            let member = markup
-                .enum_members
+        let members = markup.enum_members();
+        if markup.is_flags() {
+            let member = members
                 .iter()
                 .find(|member| member.name == name)
                 .ok_or_else(|| unsupported(node, format!("{name} is not a member of {}", declaring_type.full_name())))?;
             return self.flags_value(node, markup, member.value);
         }
-        let variant = markup
-            .enum_members
+        let variant = members
             .iter()
             .find(|member| member.name == name)
             .and_then(|member| member.rust_variant)
@@ -1018,21 +962,21 @@ impl Emitter<'_> {
         &mut self,
         node: &Rc<dyn IXamlAstNode>,
         constructor: &Rc<dyn IXamlConstructor>,
-        arguments: &[Typed],
-    ) -> EmitResult<Typed> {
-        let runtime = constructor
-            .as_any()
-            .downcast_ref::<RuntimeConstructor>()
+        arguments: &[Typed<'a>],
+    ) -> EmitResult<Typed<'a>> {
+        let runtime = self
+            .types
+            .constructor(constructor.as_ref())
             .ok_or_else(|| unsupported(node, "a constructor that is not one of the run-time type system"))?;
         let declaring = runtime
             .declaring_type
-            .upgrade()
+            .clone()
             .ok_or_else(|| unsupported(node, "the declaring type of the constructor is gone"))?;
         let declared = runtime
             .declared
+            .clone()
             .ok_or_else(|| unsupported(node, format!("a constructor of {} that metadata does not declare", declaring.full_name())))?;
         let emit = declared
-            .emit
             .ok_or_else(|| unsupported(node, format!("the constructor of {} has no typed function", declaring.full_name())))?;
         let owner = self.type_path(node, &declaring)?;
         if runtime.parameter_handles.len() != arguments.len() {
@@ -1046,11 +990,13 @@ impl Emitter<'_> {
                 unsupported(node, format!("argument {index} of the constructor cannot be stated as `{}`", handle.name()))
             })?);
         }
-        let value = metadata_of(&declaring)
-            .and_then(|markup| markup.value)
+        let value = self
+            .types
+            .metadata_of(&*declaring)
+            .and_then(|markup| markup.value())
             .ok_or_else(|| unsupported(node, format!("the value type of {} is not known", declaring.full_name())))?;
         let call = invoked(format!("{owner}::{}({})", emit.function, texts.join(", ")), emit.fallible, node);
-        let kind = self.kind_of(value().id());
+        let kind = self.kind_of(value);
         if let Kind::Class(class) = kind {
             let local = self.local_for(class);
             self.marker(node, class.name());
@@ -1064,7 +1010,7 @@ impl Emitter<'_> {
     /// value type of a registered property), with the conversion the
     /// run-time loader applies to the argument of the property's setter
     /// (`to_exact`). `None`: it cannot be stated.
-    fn coerce(&self, value: &Typed, target: TypeId) -> Option<String> {
+    fn coerce(&self, value: &Typed<'a>, target: TypeKey<'a>) -> Option<String> {
         self.coerce_static(value, target).or_else(|| self.coerce_registered(value, target))
     }
 
@@ -1072,14 +1018,14 @@ impl Emitter<'_> {
     /// conversions (an interface handle, a registered cast), where
     /// `ValueTypes::is_assignable` proves it exists: `rt::cast(value)`, which
     /// performs the very cast of the run-time loader.
-    fn coerce_registered(&self, value: &Typed, target: TypeId) -> Option<String> {
-        use ferroui_base::data::core::{ValueType, ValueTypes};
+    fn coerce_registered(&self, value: &Typed<'a>, target: TypeKey<'a>) -> Option<String> {
         let (from, expr) = match value.kind {
             Kind::Exact { id, .. } => (id, owned(&value.expr)),
             Kind::Class(class) => (class.handle()?, format!("{}.clone()", value.expr)),
             Kind::Null | Kind::SystemType { .. } => return None,
         };
-        ValueTypes::is_assignable(ValueType::new(from, ""), ValueType::new(target, ""))
+        self.types
+            .is_assignable(from, target)
             .then(|| format!("rt::cast({expr}, {}, {})?", self.position.get().0, self.position.get().1))
     }
 
@@ -1087,13 +1033,13 @@ impl Emitter<'_> {
     /// (`Rc<dyn Trait>`, or its nullable form) that the declaration of `from` (or of one of
     /// its base types) lists among its interfaces or names as a base: an unsizing coercion
     /// rustc checks.
-    fn coerce_to_contract(&self, from: TypeId, owned: &str, target: TypeId) -> Option<String> {
-        let source = MarkupType::find_by_handle(from)?;
-        let contract = MarkupType::find_by_handle(target)?;
-        let handle = contract.handle()?.id();
+    fn coerce_to_contract(&self, from: TypeKey<'a>, owned: &str, target: TypeKey<'a>) -> Option<String> {
+        let source = self.types.markup_by_handle(from)?;
+        let contract = self.types.markup_by_handle(target)?;
+        let handle = contract.handle()?;
         let nullable = match target {
             _ if target == handle => false,
-            _ if contract.handles.get(1).is_some_and(|second| second().id() == target) => true,
+            _ if contract.handles().get(1).is_some_and(|second| *second == target) => true,
             _ => return None,
         };
         if !contract.rust_path_is_trait() {
@@ -1103,9 +1049,9 @@ impl Emitter<'_> {
         let mut current = Some(source);
         let mut declared = false;
         while let Some(type_) = current {
-            declared |= type_.interfaces.iter().any(|interface| interface().id() == handle);
+            declared |= type_.interfaces().iter().any(|interface| *interface == handle);
             // A contract the declaration names as its base (`Setter` of `SetterBase`).
-            declared |= !std::ptr::eq(type_, source) && std::ptr::eq(type_, contract);
+            declared |= !type_.same(source) && type_.same(contract);
             current = type_.base_type();
         }
         if !declared {
@@ -1119,8 +1065,8 @@ impl Emitter<'_> {
         Some(if nullable { format!("::core::option::Option::Some({coerced})") } else { coerced })
     }
 
-    fn coerce_static(&self, value: &Typed, target: TypeId) -> Option<String> {
-        let object = TypeId::of::<Option<BoxedValue>>();
+    fn coerce_static(&self, value: &Typed<'a>, target: TypeKey<'a>) -> Option<String> {
+        let object = self.types.known(Known::Object);
         match value.kind {
             Kind::Exact { id, nullable } => {
                 let owned = owned(&value.expr);
@@ -1138,30 +1084,24 @@ impl Emitter<'_> {
                 if target == object {
                     return Some(format!("rt::to_object(::core::clone::Clone::clone(&{}))", value.expr));
                 }
-                let (declared, nullable) = TypeInfo::find_by_handle(target)?;
+                let (declared, nullable) = self.types.class_by_handle(target)?;
                 if !declared.is_assignable_from(class) {
                     return None;
                 }
-                let handle = if std::ptr::eq(declared, class) {
+                let handle = if declared.same(class) {
                     format!("::core::clone::Clone::clone(&{})", value.expr)
                 } else {
                     format!("::core::clone::Clone::clone(&{}).upcast::<{}>()", value.expr, absolute(declared.rust_path()?))
                 };
                 Some(if nullable { format!("::core::option::Option::Some({handle})") } else { handle })
             }
-            Kind::SystemType { class, markup, primitive } => system_type_as(class, markup, primitive, target),
+            Kind::SystemType { class, markup, primitive } => system_type_as(self.types, class, markup, primitive, target),
             Kind::Null => {
-                let is_nullable_class = TypeInfo::find_by_handle(target).is_some_and(|(_, nullable)| nullable);
+                let is_nullable_class = self.types.class_by_handle(target).is_some_and(|(_, nullable)| nullable);
                 // The null of a nullable form (`Option<T>`): what the untyped value conversions
                 // convert null to, a value of exactly the target type.
-                let is_nullable_form = || {
-                    use ferroui_base::data::core::{ValueType, ValueTypes};
-                    matches!(
-                        ValueTypes::try_convert(None, ValueType::new(target, "")),
-                        Some(Some(null)) if null.value_type_id() == target
-                    )
-                };
-                (is_nullable_class || target == object || target == TypeId::of::<Option<String>>() || is_nullable_form())
+                let is_nullable_form = || self.types.null_converts_to(target);
+                (is_nullable_class || target == object || target == self.types.known(Known::OptionString) || is_nullable_form())
                     .then(|| "::core::option::Option::None".to_string())
             }
         }
@@ -1169,7 +1109,7 @@ impl Emitter<'_> {
 
     // --- manipulations ------------------------------------------------------
 
-    fn manipulation(&mut self, node: &Rc<dyn IXamlAstNode>, target: &Typed) -> EmitResult<()> {
+    fn manipulation(&mut self, node: &Rc<dyn IXamlAstNode>, target: &Typed<'a>) -> EmitResult<()> {
         if let Some(n) = node.cast::<XamlObjectInitializationNode>() {
             return self.object_initialization(node, &n, target);
         }
@@ -1212,13 +1152,9 @@ impl Emitter<'_> {
         if let Some(n) = node.cast::<XamlSourceInfoValueManipulation>() {
             // `XamlSourceInfo.SetXamlSourceInfo(target, new XamlSourceInfo(line, position, document))`.
             let info = self.source_info(node, node.line(), node.position(), n.document.as_deref())?;
-            let setter = n
-                .types
-                .xaml_source_info_setter
-                .as_any()
-                .downcast_ref::<RuntimeMethod>()
+            let setter = self.types.method(n.types.xaml_source_info_setter.as_ref())
                 .ok_or_else(|| unsupported(node, "SetXamlSourceInfo is not a method of the run-time type system"))?;
-            let call = self.declared_call(node, setter, &[Typed { expr: target.expr.clone(), kind: target.kind }, info])?;
+            let call = self.declared_call(node, &setter, &[Typed { expr: target.expr.clone(), kind: target.kind }, info])?;
             self.line(format!("{call};"));
             return Ok(());
         }
@@ -1227,24 +1163,24 @@ impl Emitter<'_> {
 
     /// `new XamlSourceInfo(line, position, document)` (the source information of the
     /// node at `line`, `position` of the document named `document`).
-    fn source_info(&mut self, node: &Rc<dyn IXamlAstNode>, line: i32, position: i32, document: Option<&str>) -> EmitResult<Typed> {
+    fn source_info(&mut self, node: &Rc<dyn IXamlAstNode>, line: i32, position: i32, document: Option<&str>) -> EmitResult<Typed<'a>> {
         let types = self.configuration.try_get_ferro_types().map_err(|e| failed(node, e))?;
         let document = match document {
             Some(document) => format!("::core::option::Option::Some(::std::string::String::from({}))", rust_string_literal(document)),
             None => "::core::option::Option::None".to_string(),
         };
         let arguments = [
-            exact::<i32>(format!("{line}_i32")),
-            exact::<i32>(format!("{position}_i32")),
-            Typed { expr: document, kind: Kind::Exact { id: TypeId::of::<Option<String>>(), nullable: None } },
+            self.exact(Known::I32, format!("{line}_i32")),
+            self.exact(Known::I32, format!("{position}_i32")),
+            Typed { expr: document, kind: Kind::Exact { id: self.types.known(Known::OptionString), nullable: None } },
         ];
         let info = self.constructor_call(node, &types.xaml_source_info_constructor, &arguments)?;
         Ok(self.bind(&info, "source_info"))
     }
 
-    fn styled_class(&self, node: &Rc<dyn IXamlAstNode>, target: &Typed) -> EmitResult<&'static TypeInfo> {
+    fn styled_class(&self, node: &Rc<dyn IXamlAstNode>, target: &Typed<'a>) -> EmitResult<&'a dyn EmitClass> {
         match target.kind {
-            Kind::Class(class) if StyledElement::TYPE.is_assignable_from(class) => Ok(class),
+            Kind::Class(class) if self.types.is_styled_element(class) => Ok(class),
             _ => Err(unsupported(node, "the target is not a styled element")),
         }
     }
@@ -1267,7 +1203,7 @@ impl Emitter<'_> {
         &mut self,
         node: &Rc<dyn IXamlAstNode>,
         init: &Rc<XamlObjectInitializationNode>,
-        target: &Typed,
+        target: &Typed<'a>,
     ) -> EmitResult<()> {
         let type_ = init.type_.borrow().clone();
         let supports_initialize = self.supports_initialize(&type_);
@@ -1304,7 +1240,7 @@ impl Emitter<'_> {
         &mut self,
         node: &Rc<dyn IXamlAstNode>,
         assignment: &Rc<XamlPropertyAssignmentNode>,
-        target: &Typed,
+        target: &Typed<'a>,
     ) -> EmitResult<()> {
         let property_name = assignment.property.name();
         let (setters, value_types) = plan_setters(node, assignment).map_err(|e| failed(node, e))?;
@@ -1325,9 +1261,9 @@ impl Emitter<'_> {
             self.line(statement);
             return Ok(());
         }
-        if let Some(runtime) = direct_setter_method(&setter) {
+        if let Some(runtime) = self.direct_setter(&setter) {
             if runtime.declared().is_some() {
-                return self.declared_setter_assignment(node, assignment, runtime, target);
+                return self.declared_setter_assignment(node, assignment, &runtime, target);
             }
         }
         let values = assignment.values.borrow().clone();
@@ -1375,7 +1311,7 @@ impl Emitter<'_> {
     fn priority_value(&mut self, node: &Rc<dyn IXamlAstNode>) -> EmitResult<String> {
         let priority = self.value(node)?;
         let text = self
-            .coerce(&priority, TypeId::of::<ferroui_base::data::BindingPriority>())
+            .coerce(&priority, self.types.known(Known::BindingPriority))
             .ok_or_else(|| unsupported(node, "a priority that is not a binding priority"))?;
         let local = self.local_named("priority");
         self.line(format!("let {local} = {text};"));
@@ -1392,8 +1328,8 @@ impl Emitter<'_> {
         node: &Rc<dyn IXamlAstNode>,
         assignment: &XamlPropertyAssignmentNode,
         setter: &Rc<dyn IXamlPropertySetter>,
-        target: &Typed,
-        values: &SetterValues<'_>,
+        target: &Typed<'a>,
+        values: &SetterValues<'_, 'a>,
         priority: Option<&str>,
     ) -> EmitResult<String> {
         let property_name = assignment.property.name();
@@ -1418,10 +1354,7 @@ impl Emitter<'_> {
             object_target()?;
             let field = set.ferro_property();
             let definition = self.registered_definition(node, &property_name, &field)?;
-            let property = field
-                .as_any()
-                .downcast_ref::<RuntimeField>()
-                .and_then(RuntimeField::ferro_property)
+            let property = self.types.field(field.as_ref()).and_then(|field| field.ferro_property())
                 .ok_or_else(|| unsupported(node, format!("{property_name}: not a registered property")))?;
             if property.is_direct() {
                 return Err(unsupported(node, format!("{property_name}: a direct property set with a priority")));
@@ -1434,7 +1367,7 @@ impl Emitter<'_> {
                     )
                 })?,
                 SetterValues::Untyped(local, value_node) => {
-                    untyped_argument(local, &format!("{}.{}", property.owner_type().name(), property.name()), 1, value_node)
+                    untyped_argument(local, &format!("{}.{}", property.owner_name(), property.name()), 1, value_node)
                 }
                 SetterValues::Checked => return Ok(String::new()),
                 SetterValues::None => return Err(unsupported(node, format!("{property_name}: a setter without its value"))),
@@ -1450,7 +1383,7 @@ impl Emitter<'_> {
                     let expr = match value.kind {
                         Kind::Class(_) => format!("{}.clone()", value.expr),
                         Kind::SystemType { .. } => self
-                            .coerce(value, TypeId::of::<Option<BoxedValue>>())
+                            .coerce(value, self.types.known(Known::Object))
                             .ok_or_else(|| unsupported(value_node, "a type without a run-time representation"))?,
                         _ => value.expr.clone(),
                     };
@@ -1464,7 +1397,8 @@ impl Emitter<'_> {
                 target.expr
             ));
         }
-        let runtime = direct_setter_method(setter)
+        let runtime = self
+            .direct_setter(setter)
             .ok_or_else(|| unsupported(node, format!("{property_name}: not a plain property setter")))?;
         if runtime.declared().is_some() {
             // A declared setter in a choice at run time: the value converted to the declared type.
@@ -1477,7 +1411,7 @@ impl Emitter<'_> {
                         .copied()
                         .flatten()
                         .ok_or_else(|| unsupported(node, format!("{property_name}: a parameter without a Rust type")))?;
-                    let member = self.member_name(runtime);
+                    let member = self.member_name(&runtime);
                     arguments.push(Typed {
                         expr: untyped_argument(local, &member, runtime.parameters.len() - 1, value_node),
                         kind: Kind::Exact { id: handle.id(), nullable: None },
@@ -1487,10 +1421,10 @@ impl Emitter<'_> {
                 SetterValues::Checked => return Ok(String::new()),
                 SetterValues::None => return Err(unsupported(node, format!("{property_name}: a setter without its value"))),
             }
-            return Ok(format!("{};", self.declared_call(node, runtime, &arguments)?));
+            return Ok(format!("{};", self.declared_call(node, &runtime, &arguments)?));
         }
         object_target()?;
-        let (property, definition) = self.registered_accessor(node, assignment, runtime)?;
+        let (property, definition) = self.registered_accessor(node, assignment, &runtime)?;
         let value = match values {
             SetterValues::Typed(value, value_node) => self.coerce(value, property.property_type()).ok_or_else(|| {
                 unsupported(
@@ -1498,7 +1432,7 @@ impl Emitter<'_> {
                     format!("{property_name}: the value cannot be stated as `{}`", property.property_type_name()),
                 )
             })?,
-            SetterValues::Untyped(local, value_node) => untyped_argument(local, &self.member_name(runtime), 0, value_node),
+            SetterValues::Untyped(local, value_node) => untyped_argument(local, &self.member_name(&runtime), 0, value_node),
             SetterValues::Checked => return Ok(String::new()),
             SetterValues::None => return Err(unsupported(node, format!("{property_name}: a setter without its value"))),
         };
@@ -1507,8 +1441,8 @@ impl Emitter<'_> {
     }
 
     /// `Type.Member`, as the loader names a member in an argument error.
-    fn member_name(&self, method: &RuntimeMethod) -> String {
-        match method.declaring_type.upgrade() {
+    fn member_name(&self, method: &MethodInfo<'a>) -> String {
+        match &method.declaring_type {
             Some(declaring) => format!("{}.{}", declaring.full_name(), method.name),
             None => method.name.clone(),
         }
@@ -1517,13 +1451,10 @@ impl Emitter<'_> {
     /// The definition of the registered property in the static field
     /// `field` of a custom setter.
     fn registered_definition(&self, node: &Rc<dyn IXamlAstNode>, property_name: &str, field: &Rc<dyn IXamlField>) -> EmitResult<String> {
-        let property = field
-            .as_any()
-            .downcast_ref::<RuntimeField>()
-            .and_then(RuntimeField::ferro_property)
+        let property = self.types.field(field.as_ref()).and_then(|field| field.ferro_property())
             .ok_or_else(|| unsupported(node, format!("{property_name}: not a registered property")))?;
         let declaring_type = field.declaring_type();
-        property_definition(property, runtime_type(&declaring_type).and_then(RuntimeType::type_info))
+        self.types.property_definition(property, self.types.class_of(&*declaring_type))
             .map_err(|reason| unsupported(node, format!("{property_name}: {reason}")))
     }
 
@@ -1535,23 +1466,20 @@ impl Emitter<'_> {
         &self,
         node: &Rc<dyn IXamlAstNode>,
         assignment: &XamlPropertyAssignmentNode,
-        runtime: &RuntimeMethod,
-    ) -> EmitResult<(&'static FerroProperty, String)> {
+        runtime: &MethodInfo<'a>,
+    ) -> EmitResult<(&'a dyn EmitProperty, String)> {
         let property_name = assignment.property.name();
         let field = XamlIlFerroPropertyHelper::try_get_ferro_property_field(&assignment.property)
             .ok_or_else(|| unsupported(node, format!("{property_name}: not a registered property")))?;
-        let property = field
-            .as_any()
-            .downcast_ref::<RuntimeField>()
-            .and_then(RuntimeField::ferro_property)
+        let property = self.types.field(field.as_ref()).and_then(|field| field.ferro_property())
             .ok_or_else(|| unsupported(node, format!("{property_name}: not a registered property")))?;
         let expected_name = match runtime.is_static {
             true => format!("Set{}", property.name()),
             false => format!("set_{}", property.name()),
         };
         let expected_parameters = if runtime.is_static { 2 } else { 1 };
-        let declares = runtime.declaring_type.upgrade().is_some_and(|declaring| declaring.equals(&*field.declaring_type()));
-        let is_plain_accessor = matches!(runtime.invoker, RuntimeInvoker::Dynamic(_))
+        let declares = runtime.declaring_type.as_ref().is_some_and(|declaring| declaring.equals(&*field.declaring_type()));
+        let is_plain_accessor = runtime.built
             && runtime.name == expected_name
             && runtime.parameters.len() == expected_parameters
             && declares;
@@ -1562,7 +1490,7 @@ impl Emitter<'_> {
             return Err(unsupported(node, format!("{property_name}: a read-only property")));
         }
         let declaring_type = field.declaring_type();
-        let definition = property_definition(property, runtime_type(&declaring_type).and_then(RuntimeType::type_info))
+        let definition = self.types.property_definition(property, self.types.class_of(&*declaring_type))
             .map_err(|reason| unsupported(node, format!("{property_name}: {reason}")))?;
         Ok((property, definition))
     }
@@ -1580,7 +1508,7 @@ impl Emitter<'_> {
         assignment: &Rc<XamlPropertyAssignmentNode>,
         setters: &[Rc<dyn IXamlPropertySetter>],
         value_types: &[Rc<dyn IXamlType>],
-        target: &Typed,
+        target: &Typed<'a>,
     ) -> EmitResult<()> {
         let property_name = assignment.property.name();
         let values = assignment.values.borrow().clone();
@@ -1685,22 +1613,24 @@ impl Emitter<'_> {
     /// of a class, `rt::markup_handle` of a markup type), for a run-time
     /// type check.
     fn handle_expr(&self, node: &Rc<dyn IXamlAstNode>, type_: &Rc<dyn IXamlType>) -> EmitResult<String> {
-        let runtime = runtime_type(type_).ok_or_else(|| unsupported(node, format!("{} is not a type of the run-time type system", type_.get_fqn())))?;
-        let handle = runtime.handle().ok_or_else(|| unsupported(node, format!("{} has no handle", runtime.full_name())))?;
-        if let Some(primitive) = primitive_type_name(handle.id()) {
+        if !self.types.is_own(&**type_) {
+            return Err(unsupported(node, format!("{} is not a type of the run-time type system", type_.get_fqn())));
+        }
+        let handle = self.types.handle_of(&**type_).ok_or_else(|| unsupported(node, format!("{} has no handle", type_.full_name())))?;
+        if let Some(primitive) = self.types.primitive_type_name(handle.id()) {
             return Ok(format!("::ferroui_base::data::core::ValueType::of::<{primitive}>()"));
         }
-        if let Some(class) = runtime.type_info() {
+        if let Some(class) = self.types.class_of(&**type_) {
             let path = class
                 .rust_path()
-                .ok_or_else(|| unsupported(node, format!("no public Rust path is recorded for {}", runtime.full_name())))?;
+                .ok_or_else(|| unsupported(node, format!("no public Rust path is recorded for {}", type_.full_name())))?;
             if class.handle() != Some(handle.id()) {
-                return Err(unsupported(node, format!("the handle of {} is not the handle of its class", runtime.full_name())));
+                return Err(unsupported(node, format!("the handle of {} is not the handle of its class", type_.full_name())));
             }
             return Ok(format!("rt::class_handle(<{} as ::ferroui_base::StaticType>::TYPE)", absolute(path)));
         }
         // An element reference (`Option<ElementRef<Control>>`): named by its class.
-        if let Some((class, nullable)) = ferroui_base::data::core::ValueTypes::element_ref_class(handle.id()) {
+        if let Some((class, nullable)) = self.types.element_ref_class(handle.id()) {
             let path = class
                 .rust_path()
                 .ok_or_else(|| unsupported(node, format!("no public Rust path is recorded for {}", class.full_name())))?;
@@ -1710,13 +1640,13 @@ impl Emitter<'_> {
                 false => format!("::ferroui_base::data::core::ValueType::of::<{element_ref}>()"),
             });
         }
-        let markup = metadata_of(runtime).ok_or_else(|| unsupported(node, format!("{} has no metadata", runtime.full_name())))?;
-        if markup.handles.first().map(|first| first().id()) != Some(handle.id()) {
-            return Err(unsupported(node, format!("the handle of {} is not the first handle of its metadata", runtime.full_name())));
+        let markup = self.types.metadata_of(&**type_).ok_or_else(|| unsupported(node, format!("{} has no metadata", type_.full_name())))?;
+        if markup.handles().first().copied() != Some(handle.id()) {
+            return Err(unsupported(node, format!("the handle of {} is not the first handle of its metadata", type_.full_name())));
         }
         let path = markup
             .rust_path()
-            .ok_or_else(|| unsupported(node, format!("no public Rust path is recorded for {}", runtime.full_name())))?;
+            .ok_or_else(|| unsupported(node, format!("no public Rust path is recorded for {}", type_.full_name())))?;
         let qualified = match markup.rust_path_is_trait() {
             true => format!("dyn {}", absolute(path)),
             false => absolute(path),
@@ -1732,13 +1662,10 @@ impl Emitter<'_> {
         node: &Rc<dyn IXamlAstNode>,
         assignment: &Rc<XamlPropertyAssignmentNode>,
         setter: &ResourceAdderSetter,
-        target: &Typed,
+        target: &Typed<'a>,
     ) -> EmitResult<()> {
         let property_name = assignment.property.name();
-        let adder = setter
-            .adder
-            .as_any()
-            .downcast_ref::<RuntimeMethod>()
+        let adder = self.types.method(setter.adder.as_ref())
             .ok_or_else(|| unsupported(node, format!("{property_name}: the adder is not a method of the run-time type system")))?;
         let values = assignment.values.borrow().clone();
         let [key_node, value_node] = values.as_slice() else {
@@ -1747,13 +1674,11 @@ impl Emitter<'_> {
         self.marker(node, &format!("{property_name} (resource)"));
         let dictionary = match &setter.getter {
             Some(getter) => {
-                let getter = getter
-                    .as_any()
-                    .downcast_ref::<RuntimeMethod>()
+                let getter = self.types.method(getter.as_ref())
                     .ok_or_else(|| unsupported(node, format!("{property_name}: the getter is not a method of the run-time type system")))?;
                 let (call, dictionary_type) = match getter.declared() {
-                    Some(_) => (self.declared_call(node, getter, std::slice::from_ref(target))?, self.declared_return(node, getter)?),
-                    None => self.registered_getter(node, assignment, getter, target)?,
+                    Some(_) => (self.declared_call(node, &getter, std::slice::from_ref(target))?, self.declared_return(node, &getter)?),
+                    None => self.registered_getter(node, assignment, &getter, target)?,
                 };
                 let local = self.local_named("dictionary");
                 self.line(format!("let {local} = {call};"));
@@ -1764,7 +1689,7 @@ impl Emitter<'_> {
         let key = self.value(&key_node.as_node())?;
         let value = self.value(&value_node.as_node())?;
         if !setter.emit_source_info {
-            let call = self.declared_call(node, adder, &[dictionary, key, value])?;
+            let call = self.declared_call(node, &adder, &[dictionary, key, value])?;
             self.line(format!("{call};"));
             return Ok(());
         }
@@ -1772,20 +1697,16 @@ impl Emitter<'_> {
         // add, with the same dictionary and key.
         let dictionary = self.bind(&dictionary, "dictionary");
         let key = self.bind(&key, "key");
-        let call = self.declared_call(node, adder, &[
+        let call = self.declared_call(node, &adder, &[
             Typed { expr: dictionary.expr.clone(), kind: dictionary.kind },
             Typed { expr: key.expr.clone(), kind: key.kind },
             value,
         ])?;
         self.line(format!("{call};"));
         let info = self.source_info(node, setter.line, setter.position, setter.document.as_deref())?;
-        let dictionary_setter = setter
-            .types
-            .xaml_source_info_dictionary_setter
-            .as_any()
-            .downcast_ref::<RuntimeMethod>()
+        let dictionary_setter = self.types.method(setter.types.xaml_source_info_dictionary_setter.as_ref())
             .ok_or_else(|| unsupported(node, "SetXamlSourceInfo is not a method of the run-time type system"))?;
-        let call = self.declared_call(node, dictionary_setter, &[dictionary, key, info])?;
+        let call = self.declared_call(node, &dictionary_setter, &[dictionary, key, info])?;
         self.line(format!("{call};"));
         Ok(())
     }
@@ -1797,7 +1718,7 @@ impl Emitter<'_> {
     /// provider as its root) and builds the value anew, given with the
     /// context of the declaration to the deferred content customisation of
     /// the language (`DeferredTransformationFactoryV3<T>`, `rt::defer`).
-    fn deferred_content(&mut self, node: &Rc<dyn IXamlAstNode>, deferred: &Rc<XamlDeferredContentNode>) -> EmitResult<Typed> {
+    fn deferred_content(&mut self, node: &Rc<dyn IXamlAstNode>, deferred: &Rc<XamlDeferredContentNode>) -> EmitResult<Typed<'a>> {
         let customization = deferred
             .deferred_content_customization()
             .ok_or_else(|| unsupported(node, "deferred content without the customisation of the language"))?;
@@ -1807,7 +1728,7 @@ impl Emitter<'_> {
         // The handle of the type argument; the "any value" type without one (or for `object`).
         let object = "::ferroui_base::data::core::ValueType::object()".to_string();
         let result_type = match deferred.deferred_content_customization_type_parameter() {
-            Some(type_) => match runtime_type(type_).and_then(RuntimeType::handle) {
+            Some(type_) => match self.types.handle_of(&**type_) {
                 Some(handle) if handle.is_object() => object,
                 Some(_) => self.handle_expr(node, type_)?,
                 None => object,
@@ -1868,7 +1789,7 @@ impl Emitter<'_> {
             node.line(),
             node.position()
         ));
-        Ok(Typed { expr: local, kind: Kind::Exact { id: TypeId::of::<Rc<DeferredContent>>(), nullable: None } })
+        Ok(Typed { expr: local, kind: Kind::Exact { id: self.types.known(Known::DeferredContent), nullable: None } })
     }
 
     /// The statements of the body of deferred content and the value it
@@ -1888,39 +1809,31 @@ impl Emitter<'_> {
 
     /// The value of the static field holding the definition of a registered
     /// property: the definition, as `&'static FerroProperty` (`rt::property`).
-    fn property_field(&mut self, node: &Rc<dyn IXamlAstNode>, field: &Rc<dyn IXamlField>) -> EmitResult<Typed> {
+    fn property_field(&mut self, node: &Rc<dyn IXamlAstNode>, field: &Rc<dyn IXamlField>) -> EmitResult<Typed<'a>> {
         let definition = self.registered_definition(node, &field.name(), field)?;
         // `Option<&'static FerroProperty>` (`Setter.Property`) takes it as `Some(..)`, the
         // nullable wrapping the untyped value conversions perform.
-        Ok(exact::<&'static FerroProperty>(format!("rt::property({definition})")))
+        Ok(self.exact(Known::Property, format!("rt::property({definition})")))
     }
 
     /// `EnsureCapacityNode`: the resources (the getter called on the target,
     /// or the target), and if they are a resource dictionary, its capacity
     /// raised to its count plus the number of resources the document adds.
-    fn ensure_capacity(&mut self, node: &Rc<dyn IXamlAstNode>, ensure: &EnsureCapacityNode, target: &Typed) -> EmitResult<()> {
+    fn ensure_capacity(&mut self, node: &Rc<dyn IXamlAstNode>, ensure: &EnsureCapacityNode, target: &Typed<'a>) -> EmitResult<()> {
         let types = self.configuration.try_get_ferro_types().map_err(|e| failed(node, e))?;
-        let get_count = types
-            .resource_dictionary_get_count
-            .as_any()
-            .downcast_ref::<RuntimeMethod>()
+        let get_count = self.types.method(types.resource_dictionary_get_count.as_ref())
             .ok_or_else(|| unsupported(node, "ResourceDictionary.get_Count is not a method of the run-time type system"))?;
-        let ensure_method = types
-            .resource_dictionary_ensure_capacity
-            .as_any()
-            .downcast_ref::<RuntimeMethod>()
+        let ensure_method = self.types.method(types.resource_dictionary_ensure_capacity.as_ref())
             .ok_or_else(|| unsupported(node, "ResourceDictionary.EnsureCapacity is not a method of the run-time type system"))?;
         let resources = match &ensure.resources_getter {
             Some(getter) => {
-                let getter = getter
-                    .as_any()
-                    .downcast_ref::<RuntimeMethod>()
+                let getter = self.types.method(getter.as_ref())
                     .ok_or_else(|| unsupported(node, "the getter of the resources is not a method of the run-time type system"))?;
                 if getter.declared().is_none() {
                     return Err(unsupported(node, "the getter of the resources is not a declared member"));
                 }
-                let call = self.declared_call(node, getter, std::slice::from_ref(target))?;
-                Typed { expr: call, kind: self.kind_of(self.declared_return(node, getter)?) }
+                let call = self.declared_call(node, &getter, std::slice::from_ref(target))?;
+                Typed { expr: call, kind: self.kind_of(self.declared_return(node, &getter)?) }
             }
             None => Typed { expr: target.expr.clone(), kind: target.kind },
         };
@@ -1928,9 +1841,9 @@ impl Emitter<'_> {
         let handle = self.handle_expr(node, dictionary_type)?;
         let this = get_count
             .declaring_type
-            .upgrade()
-            .and_then(|declaring| metadata_of(&declaring))
-            .and_then(|markup| markup.this)
+            .as_ref()
+            .and_then(|declaring| self.types.metadata_of(&**declaring))
+            .and_then(|markup| markup.this())
             .ok_or_else(|| unsupported(node, "the instance type of ResourceDictionary is not known"))?;
         let local = self.local_named("resources");
         let untyped = match resources.kind {
@@ -1941,16 +1854,16 @@ impl Emitter<'_> {
         // The dictionary as the instance of each call, with the loader's error naming the method.
         let instance = |member: String| Typed {
             expr: format!("rt::exact({local}.clone(), {}, 0, {}, {})?", rust_string_literal(&member), node.line(), node.position()),
-            kind: Kind::Exact { id: this().id(), nullable: None },
+            kind: Kind::Exact { id: this, nullable: None },
         };
-        let (count_member, ensure_member) = (self.member_name(get_count), self.member_name(ensure_method));
-        let count = self.declared_call(node, get_count, &[instance(count_member)])?;
+        let (count_member, ensure_member) = (self.member_name(&get_count), self.member_name(&ensure_method));
+        let count = self.declared_call(node, &get_count, &[instance(count_member)])?;
         let count_local = self.local_named("count");
         let capacity = Typed {
             expr: format!("{count_local}.wrapping_add({}_i32)", ensure.capacity),
-            kind: Kind::Exact { id: TypeId::of::<i32>(), nullable: None },
+            kind: Kind::Exact { id: self.types.known(Known::I32), nullable: None },
         };
-        let ensure_call = self.declared_call(node, ensure_method, &[instance(ensure_member), capacity])?;
+        let ensure_call = self.declared_call(node, &ensure_method, &[instance(ensure_member), capacity])?;
         self.line(format!("let {local}: ::ferroui_base::metadata::MarkupValue = {untyped};"));
         self.line(format!("if rt::is_instance(&{local}, {handle}) {{"));
         self.line(format!("    let {count_local}: i32 = {count};"));
@@ -1982,24 +1895,19 @@ impl Emitter<'_> {
             .getter()
             .or_else(|| property.setter())
             .ok_or_else(|| unsupported(node, format!("{name}: a property without accessors")))?;
-        let runtime = accessor
-            .as_any()
-            .downcast_ref::<RuntimeMethod>()
+        let runtime = self.types.method(accessor.as_ref())
             .ok_or_else(|| unsupported(node, format!("{name}: an accessor that is not a method of the run-time type system")))?;
-        let is_declared = matches!(
-            runtime.declared(),
-            Some(DeclaredMember::Getter(_) | DeclaredMember::Setter(_) | DeclaredMember::StaticGetter(_) | DeclaredMember::StaticSetter(_))
-        );
+        let is_declared = runtime.declared().is_some_and(|declared| declared.kind.is_accessor());
         if !is_declared {
             return Err(unsupported(node, format!("{name}: the accessors of the property are not declared")));
         }
         let declaring = runtime
             .declaring_type
-            .upgrade()
+            .clone()
             .ok_or_else(|| unsupported(node, format!("{name}: the declaring type is gone")))?;
         let markup = self.markup_expr(node, &declaring)?;
         let property_type = property.property_type();
-        let handle = match runtime_type(&property_type).and_then(RuntimeType::handle) {
+        let handle = match self.types.handle_of(&*property_type) {
             Some(handle) if !handle.is_object() => self.handle_expr(node, &property_type)?,
             _ => "::ferroui_base::data::core::ValueType::object()".to_string(),
         };
@@ -2014,7 +1922,7 @@ impl Emitter<'_> {
     /// A compiled binding path (`XamlIlBindingPathNode`): a builder, the
     /// builder call of each transform element and then of each element, as
     /// the interpreter's `binding_path::evaluate` makes them, then `build()`.
-    fn binding_path(&mut self, node: &Rc<dyn IXamlAstNode>, path: &Rc<XamlIlBindingPathNode>) -> EmitResult<Typed> {
+    fn binding_path(&mut self, node: &Rc<dyn IXamlAstNode>, path: &Rc<XamlIlBindingPathNode>) -> EmitResult<Typed<'a>> {
         path.try_enable_typed_emission();
         let transform_elements = path.transform_elements.borrow().clone();
         let elements = path.elements.borrow().clone();
@@ -2030,7 +1938,7 @@ impl Emitter<'_> {
         }
         self.line("    builder.build()".to_string());
         self.line("};".to_string());
-        Ok(Typed { expr: format!("{local}.clone()"), kind: self.kind_of(TypeId::of::<CompiledBindingPath>()) })
+        Ok(Typed { expr: format!("{local}.clone()"), kind: self.kind_of(self.types.known(Known::CompiledBindingPath)) })
     }
 
     /// A selector (`XamlIlSelectorNode`): the selector before it, then the
@@ -2051,9 +1959,10 @@ impl Emitter<'_> {
                 None => "::core::option::Option::None".to_string(),
             })
         };
+        let types = self.types;
         let class_of = |type_: &Rc<dyn IXamlType>| -> EmitResult<String> {
-            let class = runtime_type(type_)
-                .and_then(RuntimeType::type_info)
+            let class = types
+                .class_of(&**type_)
                 .ok_or_else(|| unsupported(node, format!("{} is not a class of the object model: it cannot be used as a control type", type_.get_full_name())))?;
             let path = class
                 .rust_path()
@@ -2140,10 +2049,7 @@ impl Emitter<'_> {
         value: &Rc<dyn IXamlAstValueNode>,
     ) -> EmitResult<String> {
         let definition = self.registered_definition(node, &field.name(), field)?;
-        let property = field
-            .as_any()
-            .downcast_ref::<RuntimeField>()
-            .and_then(RuntimeField::ferro_property)
+        let property = self.types.field(field.as_ref()).and_then(|field| field.ferro_property())
             .ok_or_else(|| unsupported(node, format!("{}: not a registered property", field.name())))?;
         let value_node = value.clone().as_node();
         let value = self.value(&value_node)?;
@@ -2158,9 +2064,10 @@ impl Emitter<'_> {
     /// The builder call of one element of a binding path (`builder` is the
     /// builder so far).
     fn path_element(&mut self, node: &Rc<dyn IXamlAstNode>, element: &XamlIlBindingPathElementNode) -> EmitResult<String> {
+        let types = self.types;
         let class_of = |type_: &Rc<dyn IXamlType>| -> EmitResult<String> {
-            let class = runtime_type(type_)
-                .and_then(RuntimeType::type_info)
+            let class = types
+                .class_of(&**type_)
                 .ok_or_else(|| unsupported(node, format!("{} is not a class of the object model: it cannot be an ancestor type", type_.get_full_name())))?;
             let path = class
                 .rust_path()
@@ -2209,9 +2116,10 @@ impl Emitter<'_> {
                 format!("builder.array_element(&[{}])", indices.join(", "))
             }
             XamlIlBindingPathElementNode::TypeCast(e) => {
-                let runtime = runtime_type(&e.type_)
-                    .ok_or_else(|| unsupported(node, format!("{} is not a type of the run-time type system", e.type_.get_full_name())))?;
-                match runtime.type_info() {
+                if !self.types.is_own(&*e.type_) {
+                    return Err(unsupported(node, format!("{} is not a type of the run-time type system", e.type_.get_full_name())));
+                }
+                match self.types.class_of(&*e.type_) {
                     Some(_) => format!(
                         "builder.type_cast_value(::ferroui_base::data::core::expression_nodes::CastTarget::Class({}))",
                         class_of(&e.type_)?
@@ -2232,9 +2140,9 @@ impl Emitter<'_> {
 
     /// The expression of the metadata of a type: `<T as MarkupTyped>::MARKUP`
     /// of a markup type, `rt::class_markup` of a class.
-    fn markup_expr(&self, node: &Rc<dyn IXamlAstNode>, runtime: &Rc<RuntimeType>) -> EmitResult<String> {
-        let markup = metadata_of(runtime).ok_or_else(|| unsupported(node, format!("{} has no metadata", runtime.full_name())))?;
-        if let Some(class) = runtime.type_info() {
+    fn markup_expr(&self, node: &Rc<dyn IXamlAstNode>, runtime: &Rc<dyn IXamlType>) -> EmitResult<String> {
+        let markup = self.types.metadata_of(&**runtime).ok_or_else(|| unsupported(node, format!("{} has no metadata", runtime.full_name())))?;
+        if let Some(class) = self.types.class_of(&**runtime) {
             let path = class
                 .rust_path()
                 .ok_or_else(|| unsupported(node, format!("no public Rust path is recorded for {}", runtime.full_name())))?;
@@ -2256,14 +2164,11 @@ impl Emitter<'_> {
     /// While it runs, the provide-value target property of the context is
     /// the property of the innermost assignment (a registered property's
     /// definition, else its name), as the interpreter sets it.
-    fn markup_extension(&mut self, node: &Rc<dyn IXamlAstNode>, extension: &Rc<XamlMarkupExtensionNode>) -> EmitResult<Typed> {
+    fn markup_extension(&mut self, node: &Rc<dyn IXamlAstNode>, extension: &Rc<XamlMarkupExtensionNode>) -> EmitResult<Typed<'a>> {
         if let Some(options) = extension.provide_value.as_any().downcast_ref::<OptionsMarkupExtensionMethod>() {
             return self.options_markup_extension(node, extension, options);
         }
-        let method = extension
-            .provide_value
-            .as_any()
-            .downcast_ref::<RuntimeMethod>()
+        let method = self.types.method(extension.provide_value.as_ref())
             .ok_or_else(|| unsupported(node, "ProvideValue is not a method of the run-time type system"))?;
         let parameters = method.parameter_handles.clone();
         let needs_context = !parameters.is_empty();
@@ -2285,8 +2190,8 @@ impl Emitter<'_> {
         let mut arguments = vec![value];
         if let Some(parameter) = parameters.first() {
             let parameter = parameter.ok_or_else(|| unsupported(node, "ProvideValue takes a parameter without a Rust type"))?;
-            let provider = TypeId::of::<Rc<dyn IServiceProvider>>();
-            let nullable = TypeId::of::<Option<Rc<dyn IServiceProvider>>>();
+            let provider = self.types.known(Known::ServiceProvider);
+            let nullable = self.types.known(Known::OptionServiceProvider);
             if parameter.id() != provider && parameter.id() != nullable {
                 return Err(unsupported(node, "ProvideValue takes a parameter that is not the service provider"));
             }
@@ -2300,8 +2205,8 @@ impl Emitter<'_> {
             (true, Some(property)) => Some(self.target_property_descriptor(node, property)?),
             _ => None,
         };
-        let (function, texts, fallible) = self.declared_call_parts(node, method, &arguments)?;
-        let returned = self.declared_return(node, method)?;
+        let (function, texts, fallible) = self.declared_call_parts(node, &method, &arguments)?;
+        let returned = self.declared_return(node, &method)?;
         let local = self.local_named("provided");
         match descriptor {
             // The extension is a local borrowed as it is and the service provider is the
@@ -2353,13 +2258,10 @@ impl Emitter<'_> {
     fn target_property_descriptor(&self, node: &Rc<dyn IXamlAstNode>, property: &Rc<xamlx::ast::XamlAstClrProperty>) -> EmitResult<String> {
         Ok(match XamlIlFerroPropertyHelper::try_get_provide_value_target(property) {
             Some(XamlIlProvideValueTargetProperty::FerroProperty(field)) => {
-                let registered = field
-                    .as_any()
-                    .downcast_ref::<RuntimeField>()
-                    .and_then(RuntimeField::ferro_property)
+                let registered = self.types.field(field.as_ref()).and_then(|field| field.ferro_property())
                     .ok_or_else(|| unsupported(node, format!("{}: not a registered property", property.name())))?;
                 let declaring_type = field.declaring_type();
-                let definition = property_definition(registered, runtime_type(&declaring_type).and_then(RuntimeType::type_info))
+                let definition = self.types.property_definition(registered, self.types.class_of(&*declaring_type))
                     .map_err(|reason| unsupported(node, format!("{}: {reason}", property.name())))?;
                 format!("rt::property_value({definition})")
             }
@@ -2380,7 +2282,7 @@ impl Emitter<'_> {
         node: &Rc<dyn IXamlAstNode>,
         extension: &Rc<XamlMarkupExtensionNode>,
         options: &OptionsMarkupExtensionMethod,
-    ) -> EmitResult<Typed> {
+    ) -> EmitResult<Typed<'a>> {
         let needs_context = !options.parameters().is_empty();
         let property = self.assignments.last().map(|assignment| assignment.property.clone());
         let provide_value_target = needs_context && FRAMEWORK_CONTEXT.provide_value_target && property.is_some();
@@ -2399,18 +2301,16 @@ impl Emitter<'_> {
             self.set_target_property(node, property)?;
         }
         let return_type = options.return_type();
-        let return_handle = runtime_type(&return_type)
-            .and_then(RuntimeType::handle)
+        let return_handle = self
+            .types
+            .handle_of(&*return_type)
             .ok_or_else(|| unsupported(node, format!("the return type {} has no handle", return_type.get_fqn())))?;
         let local = self.local_named("provided");
         let label = format!("'{local}");
         self.line(format!("let {local} = {label}: {{"));
         let container = &options.extension_node_container;
         for branch in container.branches() {
-            let condition = branch
-                .condition_method
-                .as_any()
-                .downcast_ref::<RuntimeMethod>()
+            let condition = self.types.method(branch.condition_method.as_ref())
                 .ok_or_else(|| unsupported(node, "the condition of an option is not a method of the run-time type system"))?;
             let branch_node: Rc<dyn IXamlAstNode> = branch.clone();
             let mut arguments = Vec::with_capacity(3);
@@ -2419,17 +2319,11 @@ impl Emitter<'_> {
             }
             if branch.has_context() {
                 self.uses_context = true;
-                arguments.push(Typed {
-                    expr: "rt::service_provider(&context)".to_string(),
-                    kind: Kind::Exact {
-                        id: TypeId::of::<Rc<dyn IServiceProvider>>(),
-                        nullable: Some(TypeId::of::<Option<Rc<dyn IServiceProvider>>>()),
-                    },
-                });
+                arguments.push(self.service_provider_argument());
             }
             let option = self.indented_by(1, |emitter| emitter.value(&branch.option().as_node()))?;
             arguments.push(option);
-            let call = self.declared_call(&branch_node, condition, &arguments)?;
+            let call = self.declared_call(&branch_node, &condition, &arguments)?;
             self.line(format!("    if {call} {{"));
             let value_node = branch.value().as_node();
             let value = self.indented_by(2, |emitter| emitter.value(&value_node))?;
@@ -2481,11 +2375,11 @@ impl Emitter<'_> {
     /// The kind of a value of the Rust type `id` held in a local: an object
     /// of a class, or a value of exactly that type (with the nullable form
     /// of a value type with metadata).
-    fn kind_of(&self, id: TypeId) -> Kind {
-        if let Some((class, false)) = TypeInfo::find_by_handle(id) {
+    fn kind_of(&self, id: TypeKey<'a>) -> Kind<'a> {
+        if let Some((class, false)) = self.types.class_by_handle(id) {
             return Kind::Class(class);
         }
-        let nullable = MarkupType::find_by_handle(id).and_then(|markup| markup.nullable).map(|nullable| nullable().id());
+        let nullable = self.types.markup_by_handle(id).and_then(|markup| markup.nullable());
         Kind::Exact { id, nullable }
     }
 
@@ -2493,7 +2387,7 @@ impl Emitter<'_> {
     /// `XamlNoReturnMethodCallNode` on `target`): the arguments in order,
     /// then the call of the declared member. Returns the call and the Rust
     /// type it yields.
-    fn method_call(&mut self, node: &Rc<dyn IXamlAstNode>, target: Option<&Typed>) -> EmitResult<(String, Option<TypeId>)> {
+    fn method_call(&mut self, node: &Rc<dyn IXamlAstNode>, target: Option<&Typed<'a>>) -> EmitResult<(String, Option<TypeKey<'a>>)> {
         let call = node.as_method_call_base_node().ok_or_else(|| unsupported(node, "not a method call"))?;
         let wrapped = call.method.borrow().clone();
         let method = wrapped
@@ -2510,7 +2404,7 @@ impl Emitter<'_> {
             };
             let service_provider = self.value(&service_provider.as_node())?;
             let service_provider = self
-                .coerce(&service_provider, TypeId::of::<Option<Rc<dyn IServiceProvider>>>())
+                .coerce(&service_provider, self.types.known(Known::OptionServiceProvider))
                 .ok_or_else(|| unsupported(node, "the service provider of a build method that is not one"))?;
             let handle = class.handle().ok_or_else(|| unsupported(node, "the root class of the document has no handle"))?;
             return Ok((format!("{function}({service_provider})?"), Some(handle)));
@@ -2519,8 +2413,9 @@ impl Emitter<'_> {
             // `Build:<path>(serviceProvider)` of a compiled document of another crate: its
             // build function there.
             let return_type = compiled.return_type();
-            let class = runtime_type(&return_type)
-                .and_then(RuntimeType::type_info)
+            let class = self
+                .types
+                .class_of(&*return_type)
                 .ok_or_else(|| unsupported(node, "a compiled document of another crate whose root is not a class"))?;
             let values = call.arguments.borrow().clone();
             let [service_provider] = values.as_slice() else {
@@ -2528,14 +2423,12 @@ impl Emitter<'_> {
             };
             let service_provider = self.value(&service_provider.as_node())?;
             let service_provider = self
-                .coerce(&service_provider, TypeId::of::<Option<Rc<dyn IServiceProvider>>>())
+                .coerce(&service_provider, self.types.known(Known::OptionServiceProvider))
                 .ok_or_else(|| unsupported(node, "the service provider of a build method that is not one"))?;
             let handle = class.handle().ok_or_else(|| unsupported(node, "the root class of the document has no handle"))?;
             return Ok((format!("{}({service_provider})?", compiled.rust_path()), Some(handle)));
         }
-        let runtime = method
-            .as_any()
-            .downcast_ref::<RuntimeMethod>()
+        let runtime = self.types.method(method.as_ref())
             .ok_or_else(|| unsupported(node, "a method that is not a method of the run-time type system"))?;
         let mut arguments = Vec::new();
         if let Some(target) = target {
@@ -2545,16 +2438,16 @@ impl Emitter<'_> {
         for value in &values {
             arguments.push(self.value(&value.as_node())?);
         }
-        let text = self.declared_call(node, runtime, &arguments)?;
+        let text = self.declared_call(node, &runtime, &arguments)?;
         let returned = match target {
             Some(_) => None,
-            None => Some(self.declared_return(node, runtime)?),
+            None => Some(self.declared_return(node, &runtime)?),
         };
         Ok((text, returned))
     }
 
     /// A method call that yields a value, kept in a local.
-    fn method_call_value(&mut self, node: &Rc<dyn IXamlAstNode>) -> EmitResult<Typed> {
+    fn method_call_value(&mut self, node: &Rc<dyn IXamlAstNode>) -> EmitResult<Typed<'a>> {
         let (call, returned) = self.method_call(node, None)?;
         let returned = returned.ok_or_else(|| unsupported(node, "a method call that yields nothing"))?;
         let local = self.local_named("value");
@@ -2563,7 +2456,7 @@ impl Emitter<'_> {
     }
 
     /// The values of a property assignment, evaluated in order.
-    fn assignment_values(&mut self, node: &Rc<dyn IXamlAstNode>, assignment: &XamlPropertyAssignmentNode) -> EmitResult<Vec<Typed>> {
+    fn assignment_values(&mut self, node: &Rc<dyn IXamlAstNode>, assignment: &XamlPropertyAssignmentNode) -> EmitResult<Vec<Typed<'a>>> {
         let values = assignment.values.borrow().clone();
         if values.is_empty() {
             return Err(unsupported(node, "an assignment without values"));
@@ -2584,8 +2477,8 @@ impl Emitter<'_> {
         &mut self,
         node: &Rc<dyn IXamlAstNode>,
         assignment: &Rc<XamlPropertyAssignmentNode>,
-        method: &RuntimeMethod,
-        target: &Typed,
+        method: &MethodInfo<'a>,
+        target: &Typed<'a>,
     ) -> EmitResult<()> {
         let property_name = assignment.property.name();
         self.marker(node, &property_name);
@@ -2607,8 +2500,8 @@ impl Emitter<'_> {
         }
         // `Setter.Value`: the value converted to the type of the setter's property, as the
         // run-time loader converts it before it calls the setter.
-        if self.member_name(method) == "FerroUI.Styling.Setter.set_Value" {
-            let object = TypeId::of::<Option<BoxedValue>>();
+        if self.member_name(&method) == "FerroUI.Styling.Setter.set_Value" {
+            let object = self.types.known(Known::Object);
             if let (Some(last), Some(value_node)) = (arguments.last_mut(), values.last()) {
                 let untyped = self.coerce(last, object).ok_or_else(|| {
                     unsupported(&value_node.as_node(), format!("{property_name}: the value cannot be stated as an object"))
@@ -2619,9 +2512,9 @@ impl Emitter<'_> {
                 };
             }
         }
-        let call = self.declared_call(node, method, &arguments)?;
-        if self.member_name(method) == "FerroUI.Styling.StyleBase.Add" {
-            if let Some(fused) = fused_setter_add(&self.lines[start..], &call) {
+        let call = self.declared_call(node, &method, &arguments)?;
+        if self.member_name(&method) == "FerroUI.Styling.StyleBase.Add" {
+            if let Some(fused) = fused_setter_add(self.types, &self.lines[start..], &call) {
                 self.lines.truncate(start);
                 self.lines.extend(fused);
                 return Ok(());
@@ -2639,12 +2532,12 @@ impl Emitter<'_> {
     fn checked_cast(
         &self,
         node: &Rc<dyn IXamlAstNode>,
-        value: &Typed,
+        value: &Typed<'a>,
         parameter: &Rc<dyn IXamlType>,
-        handle: ferroui_base::data::core::ValueType,
-        method: &RuntimeMethod,
-    ) -> EmitResult<Option<Typed>> {
-        let object = TypeId::of::<Option<BoxedValue>>();
+        handle: Handle<'a>,
+        method: &MethodInfo<'a>,
+    ) -> EmitResult<Option<Typed<'a>>> {
+        let object = self.types.known(Known::Object);
         let Kind::Exact { id, .. } = value.kind else { return Ok(None) };
         if id != object || handle.is_object() || parameter.is_value_type() {
             return Ok(None);
@@ -2675,33 +2568,27 @@ impl Emitter<'_> {
         node: &Rc<dyn IXamlAstNode>,
         assignment: &Rc<XamlPropertyAssignmentNode>,
         adder: &AdderSetter,
-        target: &Typed,
+        target: &Typed<'a>,
     ) -> EmitResult<()> {
         let property_name = assignment.property.name();
-        let getter = adder
-            .getter()
-            .as_any()
-            .downcast_ref::<RuntimeMethod>()
+        let getter = self.types.method(adder.getter().as_ref())
             .ok_or_else(|| unsupported(node, format!("{property_name}: the getter is not a method of the run-time type system")))?;
-        let add = adder
-            .adder()
-            .as_any()
-            .downcast_ref::<RuntimeMethod>()
+        let add = self.types.method(adder.adder().as_ref())
             .ok_or_else(|| unsupported(node, format!("{property_name}: the adder is not a method of the run-time type system")))?;
         self.marker(node, &property_name);
         let (call, collection_type) = match getter.declared() {
             Some(_) => {
-                let collection_type = self.declared_return(node, getter)?;
-                (self.declared_call(node, getter, std::slice::from_ref(target))?, collection_type)
+                let collection_type = self.declared_return(node, &getter)?;
+                (self.declared_call(node, &getter, std::slice::from_ref(target))?, collection_type)
             }
-            None => self.registered_getter(node, assignment, getter, target)?,
+            None => self.registered_getter(node, assignment, &getter, target)?,
         };
         let local = self.local_named(&format!("{}_collection", snake_case(&property_name)));
         self.line(format!("let {local} = {call};"));
         let collection = Typed { expr: local, kind: self.kind_of(collection_type) };
         let mut arguments = vec![collection];
         arguments.extend(self.assignment_values(node, assignment)?);
-        let call = self.declared_call(node, add, &arguments)?;
+        let call = self.declared_call(node, &add, &arguments)?;
         self.line(format!("{call};"));
         Ok(())
     }
@@ -2714,18 +2601,15 @@ impl Emitter<'_> {
         &self,
         node: &Rc<dyn IXamlAstNode>,
         assignment: &XamlPropertyAssignmentNode,
-        getter: &RuntimeMethod,
-        target: &Typed,
-    ) -> EmitResult<(String, TypeId)> {
+        getter: &MethodInfo<'a>,
+        target: &Typed<'a>,
+    ) -> EmitResult<(String, TypeKey<'a>)> {
         let property_name = assignment.property.name();
         let field = XamlIlFerroPropertyHelper::try_get_ferro_property_field(&assignment.property)
             .ok_or_else(|| unsupported(node, format!("{property_name}: the getter is neither declared nor registered")))?;
-        let property = field
-            .as_any()
-            .downcast_ref::<RuntimeField>()
-            .and_then(RuntimeField::ferro_property)
+        let property = self.types.field(field.as_ref()).and_then(|field| field.ferro_property())
             .ok_or_else(|| unsupported(node, format!("{property_name}: not a registered property")))?;
-        let is_plain_getter = matches!(getter.invoker, RuntimeInvoker::Dynamic(_))
+        let is_plain_getter = getter.built
             && !getter.is_static
             && getter.name == format!("get_{}", property.name())
             && getter.parameters.is_empty();
@@ -2733,22 +2617,17 @@ impl Emitter<'_> {
             return Err(unsupported(node, format!("{property_name}: the getter is not the accessor of the registered property")));
         }
         let declaring_type = field.declaring_type();
-        let definition = property_definition(property, runtime_type(&declaring_type).and_then(RuntimeType::type_info))
+        let definition = self.types.property_definition(property, self.types.class_of(&*declaring_type))
             .map_err(|reason| unsupported(node, format!("{property_name}: {reason}")))?;
         let call = if property.is_direct() { "get_direct_value" } else { "get_value" };
         Ok((format!("{}.{call}({definition})", target.expr), property.property_type()))
     }
 
     /// The Rust type a declared getter or method returns.
-    fn declared_return(&self, node: &Rc<dyn IXamlAstNode>, method: &RuntimeMethod) -> EmitResult<TypeId> {
-        let returned = match method.declared() {
-            Some(DeclaredMember::Getter(property)) | Some(DeclaredMember::StaticGetter(property)) => Some((property.type_)()),
-            Some(DeclaredMember::Method(declared)) => declared.return_type.map(|return_type| return_type()),
-            Some(DeclaredMember::Parse(markup)) => markup.value.map(|value| value()),
-            _ => None,
-        };
-        returned
-            .map(|handle| handle.id())
+    fn declared_return(&self, node: &Rc<dyn IXamlAstNode>, method: &MethodInfo<'a>) -> EmitResult<TypeKey<'a>> {
+        method
+            .declared()
+            .and_then(|declared| declared.returns)
             .ok_or_else(|| unsupported(node, format!("{}: the member returns no declared value", method.name)))
     }
 
@@ -2757,14 +2636,14 @@ impl Emitter<'_> {
     /// as a handle of the declaring base class (`Ref::upcast_ref`); a value whose
     /// declaration names the declared type as its base, by deref coercion
     /// (`&RowDefinitions` as `&FerroList<Ref<RowDefinition>>`).
-    fn receiver(&self, argument: &Typed, target: TypeId) -> Option<String> {
+    fn receiver(&self, argument: &Typed<'a>, target: TypeKey<'a>) -> Option<String> {
         if !is_identifier(&argument.expr) {
             return None;
         }
         match argument.kind {
             Kind::Class(class) => {
-                let (declared, false) = TypeInfo::find_by_handle(target)? else { return None };
-                if std::ptr::eq(declared, class) {
+                let (declared, false) = self.types.class_by_handle(target)? else { return None };
+                if declared.same(class) {
                     return Some(format!("&{}", argument.expr));
                 }
                 declared.is_assignable_from(class).then(|| {
@@ -2775,14 +2654,14 @@ impl Emitter<'_> {
                 if id == target {
                     return Some(format!("&{}", argument.expr));
                 }
-                let mut current = MarkupType::find_by_handle(id)?.base_type();
+                let mut current = self.types.markup_by_handle(id)?.base_type();
                 while let Some(type_) = current {
-                    if let Some(handle) = type_.handle().filter(|handle| handle.id() == target) {
+                    if type_.handle() == Some(target) {
                         // A shared handle of the base (`Rc<ReflectionBinding>`) is not reached by
                         // deref coercion from the handle of the derived value
                         // (`Rc<ReflectionBindingExtension>` dereferences to the base itself): the
                         // caller converts it at run time.
-                        if handle.name().starts_with("alloc::rc::Rc<") {
+                        if type_.handle_is_shared() {
                             return None;
                         }
                         return Some(format!("&{}", argument.expr));
@@ -2804,19 +2683,18 @@ impl Emitter<'_> {
     fn instance_argument(
         &self,
         node: &Rc<dyn IXamlAstNode>,
-        method: &RuntimeMethod,
+        method: &MethodInfo<'a>,
         index: usize,
-        argument: &Typed,
-        parameter: TypeId,
+        argument: &Typed<'a>,
+        parameter: TypeKey<'a>,
     ) -> Option<String> {
         let Kind::Exact { id, .. } = argument.kind else { return None };
         if index != 0 || method.is_static {
             return None;
         }
-        use ferroui_base::data::core::{ValueType, ValueTypes};
-        let declaring = method.declaring_type.upgrade()?;
+        let declaring = method.declaring_type.as_ref()?;
         let member = format!("{}.{}", declaring.full_name(), method.name);
-        if ValueTypes::nullable_inner(ValueType::new(id, "")).is_some_and(|inner| inner.id() == parameter) {
+        if self.types.nullable_inner(id) == Some(parameter) {
             return Some(format!(
                 "rt::instance(&{}, {}, {}, {})?",
                 argument.expr,
@@ -2836,25 +2714,27 @@ impl Emitter<'_> {
 
     /// The path the associated functions of the declaring type of `method`
     /// are called by.
-    fn owner_path(&self, node: &Rc<dyn IXamlAstNode>, method: &RuntimeMethod) -> EmitResult<String> {
+    fn owner_path(&self, node: &Rc<dyn IXamlAstNode>, method: &MethodInfo<'a>) -> EmitResult<String> {
         let declaring = method
             .declaring_type
-            .upgrade()
+            .as_ref()
             .ok_or_else(|| unsupported(node, format!("{}: the declaring type is gone", method.name)))?;
-        self.type_path(node, &declaring)
+        self.type_path(node, declaring)
     }
 
     /// The path the associated functions of a type are called by: the
     /// public path of the class or the markup type (`<dyn ::path::Trait>` for
     /// a contract).
-    fn type_path(&self, node: &Rc<dyn IXamlAstNode>, runtime: &Rc<RuntimeType>) -> EmitResult<String> {
-        if let Some(class) = runtime.type_info() {
+    fn type_path(&self, node: &Rc<dyn IXamlAstNode>, runtime: &Rc<dyn IXamlType>) -> EmitResult<String> {
+        if let Some(class) = self.types.class_of(&**runtime) {
             return class
                 .rust_path()
                 .map(absolute)
                 .ok_or_else(|| unsupported(node, format!("no public Rust path is recorded for {}", runtime.full_name())));
         }
-        let markup = metadata_of(runtime)
+        let markup = self
+            .types
+            .metadata_of(&**runtime)
             .ok_or_else(|| unsupported(node, format!("{} has no metadata", runtime.full_name())))?;
         let path = markup
             .rust_path()
@@ -2871,8 +2751,8 @@ impl Emitter<'_> {
     /// ([`DeclaredMember`]) with `arguments` (the instance first for an
     /// instance member), each stated as the Rust type the member declares,
     /// with the failure of a fallible member as a load error at `node`.
-    fn declared_call(&self, node: &Rc<dyn IXamlAstNode>, method: &RuntimeMethod, arguments: &[Typed]) -> EmitResult<String> {
-        let (function, texts, fallible) = self.declared_call_parts(node, method, arguments)?;
+    fn declared_call(&self, node: &Rc<dyn IXamlAstNode>, method: &MethodInfo<'a>, arguments: &[Typed<'a>]) -> EmitResult<String> {
+        let (function, texts, fallible) = self.declared_call_parts(node, &method, arguments)?;
         Ok(invoked(format!("{function}({})", texts.join(", ")), fallible, node))
     }
 
@@ -2881,23 +2761,23 @@ impl Emitter<'_> {
     fn declared_call_parts(
         &self,
         node: &Rc<dyn IXamlAstNode>,
-        method: &RuntimeMethod,
-        arguments: &[Typed],
+        method: &MethodInfo<'a>,
+        arguments: &[Typed<'a>],
     ) -> EmitResult<(String, Vec<String>, bool)> {
         self.position.set((node.line(), node.position()));
         let name = &method.name;
         let declared = method.declared().ok_or_else(|| unsupported(node, format!("{name}: not a declared member")))?;
         let emit = declared.emit().ok_or_else(|| unsupported(node, format!("{name}: the declaration has no typed function")))?;
-        let owner = self.owner_path(node, method)?;
-        let mut parameters: Vec<TypeId> = Vec::with_capacity(arguments.len());
+        let owner = self.owner_path(node, &method)?;
+        let mut parameters: Vec<TypeKey<'a>> = Vec::with_capacity(arguments.len());
         if !method.is_static {
             let this = method
                 .declaring_type
-                .upgrade()
-                .and_then(|declaring| metadata_of(&declaring))
-                .and_then(|markup| markup.this)
+                .as_ref()
+                .and_then(|declaring| self.types.metadata_of(&**declaring))
+                .and_then(|markup| markup.this())
                 .ok_or_else(|| unsupported(node, format!("{name}: the instance type of the declaration is not known")))?;
-            parameters.push(this().id());
+            parameters.push(this);
         }
         for handle in &method.parameter_handles {
             let handle = handle.ok_or_else(|| unsupported(node, format!("{name}: a parameter without a Rust type")))?;
@@ -2916,7 +2796,7 @@ impl Emitter<'_> {
             }
             let text = match self.coerce(argument, *parameter) {
                 Some(text) => text,
-                None => self.instance_argument(node, method, index, argument, *parameter).ok_or_else(|| {
+                None => self.instance_argument(node, &method, index, argument, *parameter).ok_or_else(|| {
                     unsupported(node, format!("{name}: argument {index} cannot be stated as the declared type"))
                 })?,
             };
@@ -2935,12 +2815,12 @@ impl Emitter<'_> {
     }
 
     /// `if (root is StyledElement s) NameScope.SetNameScope(s, scope); scope.Complete();`.
-    fn root_object_scope(&mut self, node: &Rc<dyn IXamlAstNode>, target: &Typed) -> EmitResult<()> {
+    fn root_object_scope(&mut self, node: &Rc<dyn IXamlAstNode>, target: &Typed<'a>) -> EmitResult<()> {
         let Kind::Class(class) = target.kind else {
             return Err(unsupported(node, "the root object is not an object of the object model"));
         };
         // The exact class of the root is known, so is whether it is a styled element.
-        let root = match StyledElement::TYPE.is_assignable_from(class) {
+        let root = match self.types.is_styled_element(class) {
             true => format!("::core::option::Option::Some(&{})", target.expr),
             false => "::core::option::Option::None".to_string(),
         };
@@ -2958,7 +2838,7 @@ impl Emitter<'_> {
         &mut self,
         node: &Rc<dyn IXamlAstNode>,
         registration: &Rc<FerroNameScopeRegistrationXamlIlNode>,
-        target: &Typed,
+        target: &Typed<'a>,
     ) -> EmitResult<()> {
         if !matches!(target.kind, Kind::Class(_)) {
             return Err(unsupported(node, "the target is not an object of the object model"));
@@ -3030,6 +2910,7 @@ pub fn namespace_table(document: &RuntimeDocument) -> Option<String> {
 /// and the position markers. `Err` means the document is not eligible;
 /// nothing is written for it.
 pub fn emit_document(
+    types: &dyn EmitTypes,
     root: &Rc<dyn IXamlAstNode>,
     configuration: &TransformerConfiguration,
     document: &RuntimeDocument,
@@ -3037,35 +2918,35 @@ pub fn emit_document(
     function_name: &str,
     document_name: &str,
 ) -> Result<String, UnsupportedNode> {
-    emit_function(root, configuration, document, namespaces, function_name, document_name, &DocumentFunctions::default(), None)
+    emit_function(types, root, configuration, document, namespaces, function_name, document_name, &DocumentFunctions::default(), None)
 }
 
 /// The class of the root object a transformed document builds, if it is a
 /// class of the object model.
-pub fn root_class_of(root: &Rc<dyn IXamlAstNode>) -> Option<&'static TypeInfo> {
+pub fn root_class_of<'a>(types: &'a dyn EmitTypes, root: &Rc<dyn IXamlAstNode>) -> Option<&'a dyn EmitClass> {
     let group = root.as_value_with_manipulation_node()?;
     let type_ = group.value().type_().get_clr_type().ok()?;
-    runtime_type(&type_).and_then(RuntimeType::type_info)
+    types.class_of(&*type_)
 }
 
 /// The generated functions of the other documents of a group, by the
 /// address of their `Build` method: what a call of the method (a style or
 /// resource include the group transformers linked) calls.
 #[derive(Default)]
-pub struct DocumentFunctions {
-    builds: HashMap<usize, (String, &'static TypeInfo)>,
+pub struct DocumentFunctions<'a> {
+    builds: HashMap<usize, (String, &'a dyn EmitClass)>,
     /// The functions the emitted documents call, in the order of the calls.
     called: std::cell::RefCell<Vec<String>>,
 }
 
-impl DocumentFunctions {
+impl<'a> DocumentFunctions<'a> {
     /// Records that `build`, the build method of a document whose root is an
     /// object of `class`, is the generated function `function_name`.
-    pub fn insert(&mut self, build: &Rc<dyn IXamlMethod>, function_name: &str, class: &'static TypeInfo) {
+    pub fn insert(&mut self, build: &Rc<dyn IXamlMethod>, function_name: &str, class: &'a dyn EmitClass) {
         self.builds.insert(node_address(build), (function_name.to_string(), class));
     }
 
-    fn get(&self, method: &Rc<dyn IXamlMethod>) -> Option<&(String, &'static TypeInfo)> {
+    fn get(&self, method: &Rc<dyn IXamlMethod>) -> Option<&(String, &'a dyn EmitClass)> {
         let found = self.builds.get(&node_address(method))?;
         let mut called = self.called.borrow_mut();
         if !called.contains(&found.0) {
@@ -3093,15 +2974,16 @@ impl DocumentFunctions {
 /// ) -> Result<(), ::ferroui_markup_xaml::XamlLoadException>
 /// ```
 #[allow(clippy::too_many_arguments)]
-pub fn emit_function(
+pub fn emit_function<'a>(
+    types: &'a dyn EmitTypes,
     root: &Rc<dyn IXamlAstNode>,
-    configuration: &TransformerConfiguration,
+    configuration: &'a TransformerConfiguration,
     document: &RuntimeDocument,
     namespaces: &str,
-    function_name: &str,
-    document_name: &str,
-    documents: &DocumentFunctions,
-    populate: Option<&'static TypeInfo>,
+    function_name: &'a str,
+    document_name: &'a str,
+    documents: &'a DocumentFunctions<'a>,
+    populate: Option<&'a dyn EmitClass>,
 ) -> Result<String, UnsupportedNode> {
     if context_definition(configuration) != FRAMEWORK_CONTEXT {
         return Err(unsupported(root, "the language does not define the context of the framework language"));
@@ -3129,6 +3011,7 @@ pub fn emit_function(
     }
 
     let mut emitter = Emitter {
+        types,
         configuration,
         document_name,
         lines: Vec::new(),
