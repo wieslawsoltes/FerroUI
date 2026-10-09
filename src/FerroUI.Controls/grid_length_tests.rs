@@ -36,7 +36,7 @@ fn parse_should_parse_pixel_value() {
 }
 
 #[test]
-fn parse_should_fail_with_format_error_for_invalid_string() {
+fn parse_should_throw_format_exception_for_invalid_string() {
     assert!(GridLength::parse("2x").is_err());
     assert!("2x".parse::<GridLength>().is_err());
 }

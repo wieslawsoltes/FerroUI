@@ -70,81 +70,86 @@ fn assert_close(actual: f64, expected: f64) {
     assert!((actual - expected).abs() < 0.0005, "{actual} != {expected}");
 }
 
-#[test]
-fn use_layout_rounding_measure_rounds_padding() {
-    let _scope = test_scope();
-    let target = Border::new();
-    target.set_padding(Thickness::uniform(1.0));
-    target.set_child(canvas(101.0, 101.0));
+/// The reference `UseLayoutRounding`.
+mod use_layout_rounding {
+    use super::*;
 
-    let root = create_root(1.5, &target);
+    #[test]
+    fn measure_rounds_padding() {
+        let _scope = test_scope();
+        let target = Border::new();
+        target.set_padding(Thickness::uniform(1.0));
+        target.set_child(canvas(101.0, 101.0));
 
-    root.layout_manager().execute_initial_layout_pass();
+        let root = create_root(1.5, &target);
 
-    // - 1 pixel padding is rounded up to 1.3333; for both sides it is 2.6666
-    // - Size of 101 gets rounded up to 101.3333
-    // - Desired size = 101.3333 + 2.6666 = 104
-    assert_eq!(target.desired_size(), Size::new(104.0, 104.0));
-}
+        root.layout_manager().execute_initial_layout_pass();
 
-#[test]
-fn use_layout_rounding_measure_rounds_border_thickness() {
-    let _scope = test_scope();
-    let target = Border::new();
-    target.set_border_thickness(Thickness::uniform(1.0));
-    target.set_child(canvas(101.0, 101.0));
+        // - 1 pixel padding is rounded up to 1.3333; for both sides it is 2.6666
+        // - Size of 101 gets rounded up to 101.3333
+        // - Desired size = 101.3333 + 2.6666 = 104
+        assert_eq!(target.desired_size(), Size::new(104.0, 104.0));
+    }
 
-    let root = create_root(1.5, &target);
+    #[test]
+    fn measure_rounds_border_thickness() {
+        let _scope = test_scope();
+        let target = Border::new();
+        target.set_border_thickness(Thickness::uniform(1.0));
+        target.set_child(canvas(101.0, 101.0));
 
-    root.layout_manager().execute_initial_layout_pass();
+        let root = create_root(1.5, &target);
 
-    // - 1 pixel border thickness is rounded up to 1.3333; for both sides it is 2.6666
-    // - Size of 101 gets rounded up to 101.3333
-    // - Desired size = 101.3333 + 2.6666 = 104
-    assert_eq!(target.desired_size(), Size::new(104.0, 104.0));
-}
+        root.layout_manager().execute_initial_layout_pass();
 
-#[test]
-fn use_layout_rounding_measure_arranges_child_to_rounded_border_thickness() {
-    let _scope = test_scope();
-    let child = Canvas::new();
-    let target = Border::new();
-    target.set_border_thickness(Thickness::uniform(1.0));
-    target.set_width(82.0);
-    target.set_height(82.0);
-    target.set_child(&child);
+        // - 1 pixel border thickness is rounded up to 1.3333; for both sides it is 2.6666
+        // - Size of 101 gets rounded up to 101.3333
+        // - Desired size = 101.3333 + 2.6666 = 104
+        assert_eq!(target.desired_size(), Size::new(104.0, 104.0));
+    }
 
-    let root = create_root(1.5, &target);
+    #[test]
+    fn measure_arranges_child_to_rounded_border_thickness() {
+        let _scope = test_scope();
+        let child = Canvas::new();
+        let target = Border::new();
+        target.set_border_thickness(Thickness::uniform(1.0));
+        target.set_width(82.0);
+        target.set_height(82.0);
+        target.set_child(&child);
 
-    root.layout_manager().execute_initial_layout_pass();
+        let root = create_root(1.5, &target);
 
-    // - 1 pixel border thickness is rounded up to 1.3333; for both sides it is 2.6666
-    // - Size of 82 needs no rounding
-    // - Minus border thickness, space for child is 82 - 2.6666 = 79.3333
-    assert_close(child.bounds().left(), 1.3333);
-    assert_close(child.bounds().top(), 1.3333);
-    assert_close(child.bounds().width, 79.3333);
-    assert_close(child.bounds().height, 79.3333);
-}
+        root.layout_manager().execute_initial_layout_pass();
 
-#[test]
-fn use_layout_rounding_measure_arranges_child_with_rounded_margin() {
-    let _scope = test_scope();
-    let child = Border::new();
-    child.set_margin(Thickness::new(0.0, 25.0, 25.0, 25.0));
-    let target = Border::new();
-    target.set_width(220.0);
-    target.set_height(220.0);
-    target.set_child(&child);
+        // - 1 pixel border thickness is rounded up to 1.3333; for both sides it is 2.6666
+        // - Size of 82 needs no rounding
+        // - Minus border thickness, space for child is 82 - 2.6666 = 79.3333
+        assert_close(child.bounds().left(), 1.3333);
+        assert_close(child.bounds().top(), 1.3333);
+        assert_close(child.bounds().width, 79.3333);
+        assert_close(child.bounds().height, 79.3333);
+    }
 
-    let root = create_root(1.5, &target);
+    #[test]
+    fn measure_arranges_child_with_rounded_margin() {
+        let _scope = test_scope();
+        let child = Border::new();
+        child.set_margin(Thickness::new(0.0, 25.0, 25.0, 25.0));
+        let target = Border::new();
+        target.set_width(220.0);
+        target.set_height(220.0);
+        target.set_child(&child);
 
-    root.layout_manager().execute_initial_layout_pass();
+        let root = create_root(1.5, &target);
 
-    // - 25 margin gets rounded up to 25.3333
-    // - Size of 220 needs no rounding
-    assert_close(child.bounds().left(), 0.0);
-    assert_close(child.bounds().top(), 25.3333);
-    assert_close(child.bounds().width, 194.6666);
-    assert_close(child.bounds().height, 169.3333);
+        root.layout_manager().execute_initial_layout_pass();
+
+        // - 25 margin gets rounded up to 25.3333
+        // - Size of 220 needs no rounding
+        assert_close(child.bounds().left(), 0.0);
+        assert_close(child.bounds().top(), 25.3333);
+        assert_close(child.bounds().width, 194.6666);
+        assert_close(child.bounds().height, 169.3333);
+    }
 }

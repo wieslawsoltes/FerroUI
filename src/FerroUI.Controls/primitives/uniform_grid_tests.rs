@@ -237,7 +237,7 @@ fn measure_with_rows_and_columns_zero_and_non_zero_spacing_produces_zero_desired
 }
 
 #[test]
-fn arrange_does_not_panic_when_row_spacing_takes_all_available_height() {
+fn arrange_does_not_throw_invalid_operation_exception_when_row_spacing_takes_all_available_height() {
     // Minimum required height = 20 (2 row gaps size 10).
     // Provide height of 19 so that row gaps take all available space; thus,
     // available height for children may be negative. In that case, the grid
@@ -259,7 +259,7 @@ fn arrange_does_not_panic_when_row_spacing_takes_all_available_height() {
 }
 
 #[test]
-fn arrange_does_not_panic_when_column_spacing_takes_all_available_width() {
+fn arrange_does_not_throw_invalid_operation_exception_when_column_spacing_takes_all_available_width() {
     // Minimum required width = 20 (2 column gaps size 10).
     // Provide width of 19 so that column gaps take all available space; thus,
     // available width for children may be negative. In that case, the grid
