@@ -132,6 +132,19 @@
   is the first thing the next stage does. Section 19 has the table after each item, what is
   refused now and why, and where the stage stopped. Nothing is half-done in the working tree.
 
+- The tenth stage (branch `xaml-catalog-rustc`, on `xaml-catalog-work-list`, section 20) made what
+  the compiler emits for the catalog real, built and run by its author with the commands the stage
+  allowed. DONE: what dereferences to its base is a registration both hosts read (ruling 8,
+  `xaml.md` 9.5.18); the fixture is the whole sample by path and its build with the feature
+  `catalog` compiles every document the compiler does not refuse, **rustc compiles all of it and
+  every compiled document with a class is the tree of the run-time loader** (`xaml.md` 9.5.19);
+  two of the remaining reasons (`{x:Type x:Object}`, `xaml.md` 9.4.7; a compiled binding path over
+  a property whose type generated code cannot name, 9.4.8). The measure: 206 of 219 documents
+  emitted, 206 compiled by rustc, 205 of 205 trees equal; 13 refused. STOPPED after the second
+  reason of item 3: lists and arrays created in markup, a method as a command, container queries,
+  the `PipsPager` case and the colour picker compiled by its build are NOT STARTED. Nothing is
+  half-done in the working tree.
+
 Design documents in the repository: `docs/porting/xaml.md`, sections 9 (emitter design: call forms
 A/B/C, build integration, code-behind), 9.5 (source scanner), 9.12 (the 14 rulings), 9.13, and
 decisions 1 to 27. Read section 9 before touching the emitter. `DRAFT-AUTHOR-REPORT.md` is the
@@ -188,6 +201,17 @@ compromise that is not needed"):
    `rerun-if-changed=src` and a `links` key are acceptable; `register_types()` is generated for
    applications; hot reload behind a feature; `x:FieldModifier` mirrors upstream; marker comments
    plus a `.map.json`.
+8. (Orchestrator, 2026-10-09, on the open decision of section 19.) Whether the Rust type of a
+   named collection dereferences to the Rust type of the list it derives from is a REGISTRATION
+   both hosts read, next to the cast of the collection to its base:
+   `ValueTypes::register_deref::<Collection, List>(|c| c)`, whose argument is the coercion itself,
+   so that the fact cannot be stated of two types it does not hold for. The scanner reads the call
+   (`deref` of `VALUE_REGISTRATIONS`), the run-time registry records the pair, the drift test
+   compares the two. The emitter writes `&value` for the instance of a member a base declares only
+   for a registered pair, and otherwise the conversion that is always valid (the cast the
+   run-time loader applies). The fact is never inferred from `impl Deref` by the scanner alone:
+   the run-time host would differ. Every pair an existing output relies on is registered, so no
+   output changed by a byte.
 
 ## 2. Stage plan and targets
 
@@ -1529,3 +1553,103 @@ The reference tests of both themes, of the dialogs and of the fixtures compare t
 5. The two deviations of `xaml.md` 9.4.6 (the order of the invariant culture and the converter; the text of the base URI).
 6. The dump of the fixture's tests is its own and smaller than the one of the corpus (no plain properties, no resources, no styles, no templates built): two trees that differ only there compare as equal.
 
+## 20. What the tenth stage delivered (the emitted code of the catalog compiled by rustc and compared), and how to validate it
+
+Branch `xaml-catalog-rustc`, on `xaml-catalog-work-list`. Read `xaml.md` 9.5.18, 9.5.19, 9.4.7 and 9.4.8 first.
+
+### Item 1: the dereference fact (ruling 8)
+
+`xaml.md` 9.5.18. What exists:
+
+- `src/FerroUI.Base/data/core/value_type.rs`: `ValueTypes::register_deref`, `dereferences`, `dereference_count` (the last two and the record only with `compiler-metadata`). `src/FerroUI.Base/markup_types/plain.rs` (2 lines: `KeyFrames`, `Transitions`), `src/FerroUI.Controls/markup_types/plain.rs` (5 lines: `Controls`, `InlineCollection`, `DataTemplates`, `RowDefinitions`, `ColumnDefinitions`).
+- `src/FerroUI.Build.Scan/model.rs`: `("deref", 2)` in `VALUE_REGISTRATIONS`; nothing else of the scanner changed, the format of the `.xamlmeta` neither.
+- `rust_emitter/emit_types.rs` (`EmitTypes::dereferences`), `runtime_types.rs`, `src/FerroUI.Build.Tasks/type_system/emit_types.rs` (`Conversions::derefs`), `rust_emitter/emitter.rs` (`Emitter::receiver`).
+- `tests/FerroUI.Markup.Xaml.UnitTests/type_system_drift.rs`: the comparison of the two hosts for every type and each base, with the counts (7 pairs). The corpus: `list_text_held_collection.xaml`; the dump of the differential harness enumerates `Points` and `TickList`.
+
+A new named collection that implements `Deref` down to its list and is not registered is not wrong: its instance is converted. A registration that is not true does not compile.
+
+### Item 2: the measure compiles what it emits
+
+`xaml.md` 9.5.19 has the design, the table, the rustc errors by cause (two: `E0308`, item 1; `E0433`, a crate that names itself), the cost and what the fixture found about the registrations of the run-time loader. What exists: `tests/XamlCatalogFixture` (`Cargo.toml` with the feature `catalog`, `build.rs`, `documents.rs`, `lib.rs`, `markup.rs`, `register_types.rs`, `assets.rs`, `tests/mod.rs`; `pages.rs` and `view_models.rs` are gone), `Cargo.lock` (the dependencies of the sample for the fixture), `tests/FerroUI.Markup.Xaml.UnitTests/emitter/catalog_measure.rs` (the refused documents are the list of the fixture), and the `pub use` of five lists in `samples/ControlCatalog/ViewModels/mod.rs` and `Pages/mod.rs`.
+
+Rules a new worker would otherwise rediscover:
+
+- `Build::execute` writes nothing a crate includes when one group has an error, so the build of the fixture leaves the refused documents out by a checked-in list (`documents::REFUSED`) and fails when another document is refused. When a refusal is fixed: remove the document from the list, run the measure (it fails until the list is right) and the fixture with the feature.
+- A test of the fixture that compares a page needs the application the tests of the sample start for it; `NOT_LOADED` and `NOT_RUN` are for documents that cannot be compared and are empty.
+- The dump of the fixture is its own and smaller than the one of the corpus (registered properties with values and priorities, names, logical children; no plain properties, resources, styles or templates built): two trees that differ only there compare as equal.
+
+### Item 3: the remaining refusals, as far as the stage got
+
+| Reason of section 19 | Documents | State |
+|---|---|---|
+| No public Rust path for a list | 5 | Done by the `pub use` of the lists in the sample: 4 emit; `TreeViewPage` moved on to `SelectedItemsList has no metadata` and emits with 9.4.8 |
+| `{x:Type sys:Object}` | 1 (`TabControlPage`) | Done, `xaml.md` 9.4.7 |
+| Compiled binding paths over types without metadata | 5, and `TreeViewPage` | Done, `xaml.md` 9.4.8: `CustomThemes.xaml`, `DataValidationPage`, `ListBoxPage`, `FlexPage`, `CalendarDatePickerPage`, `TreeViewPage` |
+| Lists and arrays created in markup | 5 (`ComboBoxPage`, `ViewboxPage`: `ArrayList`; `RefreshContainerPage`, `FocusPage`, `DialogsPage`: ``List`1[T]``) | NOT STARTED. The run-time loader holds such a list in a type of its own crate (`RuntimeList`, `runtime/type_system/values.rs`: the untyped items in a shared `FerroList<Option<BoxedValue>>`, an object of the object model in its untyped form, cast to the type of the member with the registered casts). Generated code cannot name it: the runtime library needs the list (`rt`), and the emitter rules for the constructor of the two runtime library types, for `Add` on them and for the value assigned to a collection handle (`ItemsSource`) |
+| A method as a command in a compiled binding path | 3 (`ContextFlyoutPage`, `LabelsPage`, `TransitioningContentControlPage`) | NOT STARTED (`XamlIlBindingPathElementNode::ClrMethodAsCommand` in `Emitter::path_element`) |
+| Container queries | 2 (`MainView.xaml`, `ContainerQueryPage.xaml`) | NOT STARTED (`XamlIlWidthQuery` and the other query nodes) |
+| The `PipsPager` case | 1 | NOT STARTED (`<PipsPager.PreviousButtonTheme><StaticResource ../></..>`: `not a plain property setter`) |
+
+### Items 4 and 5
+
+Item 4 (the colour picker compiled by its build, which unblocks `App.xaml`) is NOT STARTED. Until it is, the fixture exports the model of the colour picker itself, with the models of the OpenGL controls and of `mini-mvvm` (`build.rs`, `EXPORTED`): three build scripts and `links` keys are still to add, and the list goes away with them. Item 5 is this section, `xaml.md` (9.4.7, 9.4.8, 9.5.18, 9.5.19, the row of `XamlTypeExtensionNode` in 9.8.1, the status of 9.10.1) and two rows of `DEVIATIONS.md`.
+
+### The measure
+
+`cargo test -p ferroui-markup-xaml-tests --lib emitter::catalog_measure -- --ignored --nocapture` (about 30 s), and `cargo test -p xaml-catalog-fixture --lib --features catalog` for the two columns the measure cannot give.
+
+| | Emitted | Compiled by rustc | The tree of the run-time loader | Refused |
+|---|---|---|---|---|
+| Section 19 | 195 | 5 (2 more refused by rustc) | 4 | 24 |
+| After item 1 and the lists exported | 199 | 199 | 199 of 199 | 20 |
+| After `{x:Type x:Object}` | 200 | 200 | 200 of 200 | 19 |
+| After the declared type of a property | 206 (13,800,499 bytes of Rust, 144,673 lines) | 206 | 205 of 205 with a class | 13 |
+
+Refused now, 13 documents (the first error of each):
+
+| Documents | Reason |
+|---|---|
+| 5 | `XamlAstNewClrObjectNode: .. is not a class of the object model` (`System.Collections.ArrayList`: `ComboBoxPage`, `ViewboxPage`; ``List`1[T]``: `RefreshContainerPage`, `FocusPage`, `DialogsPage`) |
+| 3 | `XamlIlBindingPathNode: a binding path with a method as a command` (`ContextFlyoutPage`, `LabelsPage`, `TransitioningContentControlPage`) |
+| 2 | `XamlIlWidthQuery: no emitter for this value node` (`MainView.xaml`, `ContainerQueryPage.xaml`) |
+| 1 | `PreviousButtonTheme: not a plain property setter` (`PipsPagerCustomButtonThemesPage.xaml`) |
+| 1 | `App.xaml`: the include of the theme documents of the colour picker |
+| 1 | `OpenGlLeasePage`: the class is not ported |
+
+### The next stage
+
+Converting the sample itself to load its markup compiled. In order: the refusals above (each is a document the converted sample would still load at run time, which keeps the run-time loader linked); the colour picker compiled by its build and the three model exports as build scripts; the registrations only the run-time loader makes (`xaml.md` 9.5.19: start from `RuntimeTypeSystem::new` and `RuntimeArray::register_element`), found by running the fixture with no run-time load before the first compiled page; `crate::` in the file of a group (`xaml.md` 9.5.19, the `E0433` row), or `extern crate self` in the sample; then the sample: its `markup.rs` as the fixture has it, its hand-written class table replaced by the loader table of the build, the documents its build script rewrites (`placeholder-branding`) given to the compiler as rewritten, and the size of the module measured against the estimate of `xaml.md` 9.10.1 (13.8 MB of source for 206 documents).
+
+### How to validate
+
+What the author ran, all green (debug profile, the dependencies built):
+
+```text
+cargo test -p ferroui-build --lib                                   24 passed
+cargo test -p ferroui-build-scan --lib                              44 passed
+cargo test -p ferroui-markup-xaml-loader --lib                      397 passed, 1 ignored
+cargo test -p ferroui-markup-xaml-loader --lib --no-default-features --features compiler     272 passed
+cargo test -p ferroui-markup-xaml-tests --lib                       590 passed, 17 ignored (589 before; the corpus is 122 documents, 119 before)
+cargo test -p ferroui-themes-simple --lib                           205 passed, 3 ignored
+cargo test -p ferroui-themes-fluent --lib                           200 passed, 2 ignored
+cargo test -p xaml-include-fixture-theme --lib                      3 passed
+cargo test -p xaml-include-fixture-application --lib                28 passed
+cargo test -p ferroui-dialogs --lib                                 49 passed
+cargo test -p ferroui-controls-color-picker --lib                   43 passed
+cargo test -p xaml-catalog-fixture --lib                            130 passed (7 compiled documents, each compared; 117 tests the files of the sample bring)
+cargo test -p xaml-catalog-fixture --lib --features catalog         329 passed (205 compiled documents with a class, each compared)
+cargo build -p control-catalog
+cargo test -p ferroui-markup-xaml-tests --lib emitter::catalog_measure -- --ignored --nocapture
+```
+
+The reference tests of both themes, of the dialogs and of the fixtures compare the output of their builds with the checked-in or regenerated text: every output that existed is unchanged, byte for byte. The checked-in file of the corpus was regenerated with `regenerate_emitter_output` (three documents more, nothing else differs).
+
+**Not run by the author, for the validating session:** `cargo build --workspace` and `cargo clippy`; the suites of the base crate, of the controls and of the sample (the base crate and the controls changed by `register_deref` and seven calls of it; the sample by five names in two `pub use`); the browser build; `scripts/check-upstream-name.sh` or its equivalent (the author checked the files of the stage by hand).
+
+**What the author doubts.**
+
+1. `rt::declared_property_type` is exact where the emitter's comparison is: it trusts `DeclaredMethod::returns` of both hosts to be the Rust type of the declaration. The corpus proves two shapes (a type without metadata, a nullable number) and the catalog six documents by their trees; a stream (`ListBoxPage`) is compared as a tree, not by the values it delivers.
+2. The trees of the fixture are compared right after the load, without a data context (unless the constructor of a class the document creates sets one) and without a layout pass: a binding that delivers differently, or a template that builds differently, is not seen. The corpus covers those per construct; the fixture covers that the documents compile and populate.
+3. The fixture's tests start from a process in which the run-time loader has loaded a document (`xaml.md` 9.5.19, the registration found). What else a process without the run-time loader lacks is not known.
+4. The build of the fixture with the feature was timed on one fast machine (165 s with the test binary). CI does not build it; a slower machine may take several times that.
+5. The fixture links what the sample links (Skia, the OpenGL controls, both themes): it is as heavy as the sample for CI, also without the feature.
