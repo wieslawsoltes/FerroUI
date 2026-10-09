@@ -1,6 +1,16 @@
 // Drives the pages of the ControlCatalog site through the exports of its host
-// (samples/ControlCatalog.Browser): what the view shows (`catalogState`) and where its frames are drawn
-// (`catalogRendering`). Used by tests/control_catalog.test.mjs and by capture-catalog.mjs.
+// (samples/ControlCatalog.Browser): what the view shows (`catalogState`), whether it has drawn that
+// (`catalogRequestFrame`, `catalogFrameDrawn`) and where its frames are drawn (`catalogRendering`).
+// Used by tests/control_catalog.test.mjs and by capture-catalog.mjs.
+//
+// The state is what the application has laid out; input hits what the last frame drew. The two differ
+// from a change of the application until the frame with that change, and the thread that renders draws
+// when the browser gives it an animation frame. A render thread waits for the animation frames of its
+// worker, which headless Chrome with the software rasteriser withholds for hundreds of milliseconds
+// after a frame that was expensive to present (the first frames of a page, a transition), while the
+// thread of the page, which no longer renders, answers at once. So nothing here clicks where the state
+// says an element is before the view has drawn that state: `page.find` and `page.element` wait for a
+// frame asked for after the state was read and return the element only if it is still where it was.
 import { sleep } from "./harness.mjs";
 
 export const STATE_TIMEOUT = 20_000;
@@ -22,9 +32,26 @@ export function describe(state) {
     return `page ${JSON.stringify(state.page)}${state.navigating ? " (navigating)" : ""}, drawer ${state.drawerOpen ? "open" : "closed"}, focus ${JSON.stringify(state.focus)}, texts that can be clicked ${JSON.stringify(texts)}`;
 }
 
+/**
+ * Waits until the view has drawn everything the application has changed up to this call: the host is
+ * asked for a frame (a commit of the compositor of the view) and answers once the thread that renders
+ * has drawn it.
+ */
+export async function drawn(page, timeout = STATE_TIMEOUT) {
+    if (!await page.evaluate("controlCatalog.catalogRequestFrame()")) { throw new Error("the view has no compositor to ask for a frame"); }
+    for (const end = Date.now() + timeout; Date.now() < end; await sleep(20)) {
+        if (await page.evaluate("controlCatalog.catalogFrameDrawn()")) { return; }
+    }
+    throw new Error(`the view did not draw the frame it was asked for within ${timeout} ms: ${await page.evaluate("controlCatalog.catalogRendering()")}`);
+}
+
+const sameBounds = (a, b) => a.x === b.x && a.y === b.y && a.width === b.width && a.height === b.height;
+
 /** Gives a page of the harness the functions that read and drive the view of the catalog. */
 export function drive(page) {
     page.state = async () => JSON.parse(await page.evaluate("controlCatalog.catalogState()"));
+    /** Waits until the view has drawn everything the application has changed so far (`drawn`). */
+    page.drawn = (timeout) => drawn(page, timeout);
     /** Where the frames of the view are rendered (the export exists in both builds). */
     page.rendering = async () => pairs(await page.evaluate("controlCatalog.catalogRendering()"));
     /** Waits until `predicate(state)` holds and returns that state. */
@@ -37,11 +64,25 @@ export function drive(page) {
         }
         throw new Error(`timed out waiting until ${description}; the view shows: ${describe(state)}`);
     };
-    /** The visible element whose text is `text` (and that matches `filter`), waiting for it to appear. */
-    page.find = async (text, filter = () => true) => {
-        const state = await page.until(`"${text}" is shown`, (s) => s.elements.some((e) => e.text === text && filter(e)));
-        return state.elements.find((e) => e.text === text && filter(e));
+    /**
+     * The first visible element that matches, once the view has drawn it where the state says it is:
+     * waits for the element, then for a frame asked for after that, and returns the element if the
+     * state still has it at the same bounds (it starts over when it moved or left meanwhile).
+     */
+    page.element = async (description, match, timeout = STATE_TIMEOUT) => {
+        let state;
+        for (const end = Date.now() + timeout; Date.now() < end;) {
+            state = await page.until(description, (s) => s.elements.some(match), Math.max(1, end - Date.now()));
+            const before = state.elements.find(match);
+            await page.drawn();
+            state = await page.state();
+            const after = state.elements.find(match);
+            if (after && sameBounds(before, after)) { return after; }
+        }
+        throw new Error(`timed out waiting until ${description} and stays where it is; the view shows: ${describe(state)}`);
     };
+    /** The visible element whose text is `text` (and that matches `filter`), once the view has drawn it (`page.element`). */
+    page.find = (text, filter = () => true) => page.element(`"${text}" is shown`, (e) => e.text === text && filter(e));
     /** Clicks the middle of an element of the state with real pointer events. */
     page.clickElement = async (element) => {
         await page.click(Math.round(element.x + element.width / 2), Math.round(element.y + element.height / 2));
@@ -51,10 +92,12 @@ export function drive(page) {
 
 /**
  * Waits until the application has started and its view can take input: the splash is closed, the view
- * has a canvas and a state, a frame was drawn and something of the view is hit. The splash is closed
- * by the thread of the page; the first frame comes from the thread that renders, which with a render
- * thread is another one and may be later, and a view is hit from what its last frame drew: input
- * that arrives before that frame hits nothing.
+ * has a canvas and a state, a frame was drawn, something of the view is hit and the view has drawn
+ * what it has laid out by then. The splash is closed by the thread of the page; the first frame comes
+ * from the thread that renders, which with a render thread is another one and may be later, and a
+ * view is hit from what its last frame drew: input that arrives before that frame hits nothing. The
+ * first frame is also not the last one of the start: the main view adapts its drawer to the width of
+ * the view when it is loaded, after the first frame, and the frame with that layout follows.
  */
 export async function waitUntilReady(page, timeout) {
     await page.waitFor(`(() => {
@@ -65,6 +108,7 @@ export async function waitUntilReady(page, timeout) {
     })()`, timeout);
     await page.waitFor(`Number(/frames=(\\d+)/.exec(controlCatalog.catalogRendering())[1]) > 0
         && JSON.parse(controlCatalog.catalogState()).elements.some((e) => e.hit)`, timeout);
+    await drawn(page, timeout);
 }
 
 /** Clicks the entry `text` of the drawer and waits until the main view shows the page `header`. */
@@ -113,9 +157,11 @@ export const TOUR_SIZE = { width: 1024, height: 1100 };
 
 /** The entry `text` of the drawer, scrolled into the view when the drawer is longer than the view. */
 async function drawerEntry(page, text, height) {
-    const shown = (s) => s.elements.find((e) => e.text === text && inDrawer(e));
     for (let attempt = 0; attempt < 16; attempt++) {
-        try { return shown(await page.until(`"${text}" is in the drawer`, (s) => !s.navigating && shown(s), 2500)); } catch { }
+        try {
+            await page.until("no navigation is running", (s) => !s.navigating, 2500);
+            return await page.element(`"${text}" is in the drawer`, (e) => e.text === text && inDrawer(e), 2500);
+        } catch { }
         // Down first, then back up past where it started.
         await page.wheel(Math.round(DRAWER_EDGE / 2), Math.round(height / 2), 0, attempt < 8 ? 200 : -400);
     }

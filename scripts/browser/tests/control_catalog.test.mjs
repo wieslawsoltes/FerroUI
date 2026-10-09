@@ -45,7 +45,11 @@
 //
 // A view is hit from what its last frame drew, and with a render thread the first frame comes after
 // the view exists: every page is waited for until something of its view is hit before a check
-// sends input (`hit` of the elements of `catalogState`).
+// sends input (`hit` of the elements of `catalogState`). The same holds for every later frame: the
+// state is what the application has laid out, and a click lands on what the view has drawn. A check
+// takes the element it clicks from `page.find` or `page.element`, which wait until the view has drawn
+// the state they read (`catalogRequestFrame` and `catalogFrameDrawn` of the host; see
+// ../catalog-pages.mjs).
 //
 // The last check visits a tour of pages and prints how much of the memory of the module was in use
 // (the `catalogMemory` export): the number a site built with threads, whose memory is fixed, is
@@ -257,8 +261,10 @@ check("the module, the list of the asset files and the start-up files are downlo
 check("the navigation drawer opens from its toggle button", async (page) => {
     let state = await page.until("the drawer is closed", (s) => s.drawerOpen === false);
     assert(!state.elements.some((e) => e.name === "SearchBox" && e.hit), "the search box of the closed drawer can be reached");
-    const toggle = state.elements.find((e) => e.name === "PART_BackButton" && e.hit);
-    assert(toggle, `no toggle button of the drawer; the view shows: ${describe(state)}`);
+    // The first frame of the view shows the drawer open beside the content: the main view closes it
+    // for this width when it is loaded, after that frame. The button is clicked once the view has
+    // drawn it where the closed drawer leaves it.
+    const toggle = await page.element("the toggle button of the drawer is shown", (e) => e.name === "PART_BackButton" && e.hit);
     await page.clickElement(toggle);
     state = await page.until("the drawer is open and shows its entries", (s) => s.drawerOpen === true
         && s.elements.some((e) => e.name === "SearchBox" && inDrawer(e))
@@ -305,8 +311,8 @@ check("text typed into a text box becomes its text", async (page) => {
     // The card of the sample opens it on the navigation page.
     await page.clickElement(await page.find("First Look", inContent));
     // The sample is pushed with a transition; wait until it has ended before clicking into the page.
-    const box = (await page.until("the text box of the sample is shown",
-        (s) => !s.navigating && s.elements.some((e) => e.name === "FirstLookBox" && inContent(e)))).elements.find((e) => e.name === "FirstLookBox");
+    await page.until("the text box of the sample is shown", (s) => !s.navigating && s.elements.some((e) => e.name === "FirstLookBox" && inContent(e)));
+    const box = await page.element("the text box of the sample is shown", (e) => e.name === "FirstLookBox" && inContent(e));
     assert(box.text === "" || box.text === null, `the text box starts with "${box.text}"`);
     await page.clickElement(box);
     await page.until("the text box has the focus", (s) => s.focus?.type === "TextBox");
@@ -352,6 +358,7 @@ check("the native controls of the Native Embed page are elements of the page ove
     await page.waitFor(`document.querySelector("#out .ferroui-native-host button").innerText === "Click count 2"`, STATE_TIMEOUT);
 
     // The check box above the first sample hides its native control.
+    await page.drawn();
     const visible = (await page.state()).elements.filter((e) => e.text === "Visible" && inContent(e)).sort((a, b) => a.y - b.y || a.x - b.x)[0];
     assert(visible, "no check box of the page");
     await page.clickElement(visible);
