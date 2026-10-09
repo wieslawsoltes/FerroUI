@@ -7,6 +7,11 @@ rust-version.workspace = true
 license.workspace = true
 repository.workspace = true
 build = "build.rs"
+# The build script compiles the theme documents of the crate and exports its type model with them;
+# Cargo hands the path of the file to the build scripts of the crates that depend on this one
+# (`DEP_FERROUI_CONTROLS_COLOR_PICKER_XAML_XAMLMETA`; docs/porting/xaml.md, 9.5.13 and 9.6.3): an
+# application whose documents name the types of the library and include its styles.
+links = "ferroui_controls_color_picker_xaml"
 
 # Unit tests live next to the code (`tests/` modules of the library), not as
 # integration test targets.
@@ -18,14 +23,26 @@ autoexamples = false
 path = "lib.rs"
 
 [dependencies]
-ferroui-base = { workspace = true }
+# The compiled markup of the crate calls the typed functions of the declared members, which exist
+# with this feature.
+ferroui-base = { workspace = true, features = ["markup-functions"] }
 ferroui-controls = { workspace = true }
+# The runtime library of compiled markup. The crate does not link the run-time XAML loader.
+ferroui-markup-xaml = { workspace = true }
+
+[build-dependencies]
+# The build script compiles the theme documents against the type models (`build.rs`): the compiler,
+# which reads the types from the scan of the sources of this crate and from the models the crates it
+# is built on export. It links no crate for its types.
+ferroui-build = { workspace = true }
 
 [dev-dependencies]
 ferroui-base = { workspace = true, features = ["testing"] }
 ferroui-controls = { workspace = true, features = ["testing"] }
-# The theme documents of the library are loaded through the run-time XAML loader in the tests.
-ferroui-markup-xaml = { workspace = true }
-ferroui-markup-xaml-loader = { workspace = true, features = ["runtime"] }
+# The styles of the library are loaded from their compiled markup. The tests include them in a
+# document the run-time XAML loader loads, as an application that loads its markup at run time
+# includes them, and the emitter of the loader, run against the run-time type system, is the
+# reference the output of the build is compared with (`tests/compiled_xaml_tests.rs`).
+ferroui-markup-xaml-loader = { workspace = true, features = ["runtime", "testing", "emitter"] }
 ferroui-themes-fluent = { workspace = true }
 ferroui-themes-simple = { workspace = true }

@@ -1,5 +1,6 @@
 //! The type table of this crate: its namespaces, its classes, what it
-//! states about itself for markup and its embedded assets.
+//! states about itself for markup, its embedded assets and its compiled
+//! markup.
 
 use ferroui_base::metadata::{MarkupAssembly, XmlnsDefinition, FERRO_XML_NAMESPACE};
 use ferroui_base::{StaticType, TypeInfo};
@@ -53,18 +54,24 @@ const TYPES: &[&TypeInfo] = types![
     crate::color_spectrum::ColorSpectrum,
 ];
 
-/// Registers the namespaces, the types, the assembly and the embedded
-/// assets of this crate (and of the crates it is built on). Cheap and idempotent.
+/// Registers the namespaces, the types, the assembly, the embedded assets
+/// and the compiled markup of this crate (and of the crates it is built on).
+/// Cheap and idempotent.
 pub fn register_types() {
     static ONCE: std::sync::Once = std::sync::Once::new();
     ONCE.call_once(|| {
-        ferroui_controls::register_types();
+        // The runtime library of compiled markup (the markup extensions the compiled
+        // documents create), and with it the controls and the base crate.
+        ferroui_markup_xaml::register_types();
         TypeInfo::register_namespaces(NAMESPACES);
         TypeInfo::register_all(TYPES);
         crate::rust_paths::register_rust_paths();
         MarkupAssembly::register(&ASSEMBLY);
         crate::markup_types::register();
         crate::assets::register();
+        // The loader table of the compiled markup, which the build of the crate generates: a
+        // load of a theme document by its URI builds it from its compiled markup.
+        crate::compiled_markup::register();
     });
 }
 

@@ -31,7 +31,6 @@ pub const PAGES: &[&str] = &[
 /// (`ferroui-markup-xaml-tests`, `emitter::catalog_measure`) is the test that a document
 /// listed here is still refused.
 pub const REFUSED: &[(&str, &str)] = &[
-    ("App.xaml", "the include of the theme documents of the colour picker, which is not compiled by its build"),
     ("Pages/OpenGl/OpenGlLeasePage.xaml", "the class of the document is not ported"),
 ];
 

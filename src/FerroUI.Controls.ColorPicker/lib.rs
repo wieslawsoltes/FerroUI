@@ -15,8 +15,21 @@
 //! <StyleInclude Source="ferres://FerroUI.Controls.ColorPicker/Themes/Fluent/Fluent.xaml" />
 //! ```
 //!
-//! The theme documents are embedded as assets of the assembly
-//! `FerroUI.Controls.ColorPicker`, registered by [`register_types`].
+//! The theme documents are compiled by the build of the crate (`build.rs`):
+//! [`register_types`] registers the loader table of the compiled markup,
+//! which answers a load of a document of the assembly
+//! `FerroUI.Controls.ColorPicker` by its URI, and the documents as assets of
+//! the assembly, which is what lets a document loaded at run time include
+//! them (`build.rs` says why both). The crate does not link the run-time XAML
+//! loader.
+
+// The compiled markup names the types of the crate by the name of the crate, as the markup
+// of any other crate does.
+extern crate self as ferroui_controls_color_picker;
+
+// `compiled_xaml` (the compiled markup of the theme documents) and `compiled_markup` (the
+// loader table of the crate and `register()`), which the build script generates.
+ferroui_markup_xaml::include_compiled_xaml!();
 
 mod alpha_component_position;
 mod assets;

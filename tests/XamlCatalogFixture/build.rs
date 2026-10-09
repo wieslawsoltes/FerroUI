@@ -22,10 +22,11 @@
 //!   run-time loader (`tests::compare`), in the application `test_applications.txt` of the
 //!   sample names for the tests of the document.
 //!
-//! Three crates the sample is built on have no build script that exports their type model
-//! yet (the colour picker, the OpenGL controls, the view model library of the samples):
-//! their models are exported here, into the output directory of this script, as the build
-//! scripts of the other crates export theirs.
+//! Two crates the sample is built on have no build script that exports their type model
+//! yet (the OpenGL controls, the view model library of the samples): their models are
+//! exported here, into the output directory of this script, as the build scripts of the
+//! other crates export theirs. The colour picker exports its own, with its compiled
+//! documents, which `App.xaml` includes.
 
 use std::env;
 use std::fmt::Write as _;
@@ -42,8 +43,7 @@ mod documents;
 
 /// The crates whose models this script exports: the directory below the root of the
 /// repository and the package.
-const EXPORTED: &[(&str, &str)] =
-    &[("src/FerroUI.Controls.ColorPicker", "ferroui-controls-color-picker"), ("src/FerroUI.OpenGL", "ferroui-opengl"), ("samples/MiniMvvm", "mini-mvvm")];
+const EXPORTED: &[(&str, &str)] = &[("src/FerroUI.OpenGL", "ferroui-opengl"), ("samples/MiniMvvm", "mini-mvvm")];
 
 /// The directories of the sample that hold no documents.
 const SKIPPED_DIRECTORIES: &[&str] = &["target", "tests", "examples", "build", "PlaceholderAssets"];
