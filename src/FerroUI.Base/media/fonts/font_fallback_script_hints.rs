@@ -248,7 +248,7 @@ mod tests {
     }
 
     #[test]
-    fn try_get_os2_bit_latin_returns_none() {
+    fn try_get_os2_bit_latin_returns_false() {
         assert_eq!(FontFallbackScriptHints::try_get_os2_bit(Script::Latin), None);
     }
 }

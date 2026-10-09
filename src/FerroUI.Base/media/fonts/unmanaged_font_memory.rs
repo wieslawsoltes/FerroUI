@@ -172,7 +172,7 @@ mod tests {
     }
 
     #[test]
-    fn try_get_table_returns_none_for_unknown_tag() {
+    fn try_get_table_returns_false_for_unknown_tag() {
         let tag = OpenTypeTag::parse("TEST");
         let other = OpenTypeTag::parse("OTHR");
         let font = build_font(tag, &[9, 8, 7]);
@@ -184,7 +184,7 @@ mod tests {
     }
 
     #[test]
-    fn try_get_table_returns_none_for_invalid_font() {
+    fn try_get_table_returns_false_for_invalid_font() {
         // Too short to be a valid SFNT
         let short_data = [0u8; 8];
 
