@@ -4462,17 +4462,17 @@
    "scope": "in",
    "detail": "full",
    "files": [
-    4,
+    6,
     6,
     0
    ],
    "types": [
-    5,
+    7,
     7,
     0
    ],
    "members": [
-    3,
+    7,
     35,
     28
    ],
@@ -4490,15 +4490,21 @@
    ],
    "notApplicableFiles": 4,
    "matchKinds": {
-    "fn": 2,
-    "overload fn": 1
+    "fn": 5,
+    "overload fn": 2
    },
    "presentFiles": {
     "CompileAvaloniaXamlTask.cs": [
      "lib.rs"
     ],
+    "DeterministicIdGenerator.cs": [
+     "deterministic_id_generator.rs"
+    ],
     "GenerateAvaloniaResourcesTask.cs": [
      "lib.rs"
+    ],
+    "XamlCompilerDiagnosticsFilter.cs": [
+     "xaml_compiler_diagnostics_filter.rs"
     ],
     "XamlCompilerTaskExecutor.Helpers.cs": [
      "lib.rs"
@@ -6839,14 +6845,14 @@
     0
    ],
    "types": [
-    63,
+    64,
     75,
     11
    ],
    "members": [
-    443,
+    452,
     528,
-    77
+    76
    ],
    "interfaces": [
     1,
@@ -6864,7 +6870,7 @@
    "matchKinds": {
     "alias fn": 6,
     "field": 18,
-    "fn": 394,
+    "fn": 403,
     "free fn": 6,
     "overload fn": 10,
     "trait": 1,
@@ -8468,22 +8474,22 @@
    "scope": "in",
    "detail": "full",
    "files": [
-    48,
+    51,
     51,
     0
    ],
    "types": [
-    56,
+    62,
     62,
     0
    ],
    "members": [
-    345,
+    386,
     420,
-    32
+    33
    ],
    "interfaces": [
-    9,
+    10,
     10
    ],
    "propertyRegistrations": [
@@ -8496,9 +8502,10 @@
    ],
    "notApplicableFiles": 3,
    "matchKinds": {
+    "alias fn": 3,
     "field": 29,
-    "fn": 269,
-    "free fn": 33,
+    "fn": 305,
+    "free fn": 35,
     "free item": 1,
     "overload fn": 12,
     "trait": 1
@@ -8543,6 +8550,9 @@
     "Gpu/Metal/AutoReleasePool.cs": [
      "gpu/metal/auto_release_pool.rs"
     ],
+    "Gpu/Metal/SkiaMetalExternalObjectsFeature.cs": [
+     "gpu/metal/skia_metal_external_objects_feature.rs"
+    ],
     "Gpu/Metal/SkiaMetalGpu.cs": [
      "gpu/metal/skia_metal_gpu.rs"
     ],
@@ -8552,8 +8562,14 @@
     "Gpu/OpenGl/GlRenderTarget.cs": [
      "gpu/open_gl/gl_render_target.rs"
     ],
+    "Gpu/OpenGl/GlSkiaExternalObjectsFeature.cs": [
+     "gpu/open_gl/gl_skia_external_objects_feature.rs"
+    ],
     "Gpu/OpenGl/GlSkiaGpu.cs": [
      "gpu/open_gl/gl_skia_gpu.rs"
+    ],
+    "Gpu/OpenGl/GlSkiaSharedTextureForComposition.cs": [
+     "gpu/open_gl/gl_skia_shared_texture_for_composition.rs"
     ],
     "Gpu/OpenGl/IGlSkiaSpecificOptionsFeature.cs": [
      "gpu/open_gl/i_gl_skia_specific_options_feature.rs"

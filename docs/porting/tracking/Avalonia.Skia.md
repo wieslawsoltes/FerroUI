@@ -10,10 +10,10 @@ Generated from upstream commit `17350180c33b063f0e98abbfd19aa3cae63f5d56`. Back 
 | FerroUI | `src/Skia/FerroUI.Skia` (exists) |
 | Crate | `ferroui-skia` |
 | Phase / priority | 1 - rendering / P0 |
-| Files | 48/51 (94.1%), 3 not applicable |
-| Types | 56/62 (90.3%) |
-| Members | 345/420 (32 waived) (88.9%) |
-| Contracts (interfaces) | 9/10 |
+| Files | 51/51 (100.0%), 3 not applicable |
+| Types | 62/62 (100.0%) |
+| Members | 386/420 (33 waived) (99.7%) |
+| Contracts (interfaces) | 10/10 |
 | Property registrations | 0/0 |
 | Routed events | 0/0 |
 
@@ -24,7 +24,7 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 | Interface | Access | Upstream file | Members | Status |
 |---|---|---|---|---|
 | `Avalonia.Skia.IDrawableBitmapImpl` | internal | `IDrawableBitmapImpl.cs` | 1/1 | present |
-| `Avalonia.Skia.IGlSkiaFboProvider` | internal | `Gpu/OpenGl/GlSkiaExternalObjectsFeature.cs` | 0/1 | missing |
+| `Avalonia.Skia.IGlSkiaFboProvider` | internal | `Gpu/OpenGl/GlSkiaExternalObjectsFeature.cs` | 1/1 | present |
 | `Avalonia.Skia.IGlSkiaSpecificOptionsFeature` | public | `Gpu/OpenGl/IGlSkiaSpecificOptionsFeature.cs` | 1/1 | present |
 | `Avalonia.Skia.ISkiaGpu` | internal | `Gpu/ISkiaGpu.cs` | 5/5 | present |
 | `Avalonia.Skia.ISkiaGpuRenderSession` | public | `Gpu/ISkiaGpuRenderSession.cs` | 4/4 | present |
@@ -36,7 +36,7 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 
 ## Files
 
-### `(project root)` - files 33/33, types 38/38, members 272/300 (27 waived)
+### `(project root)` - files 33/33, types 38/38, members 273/300 (27 waived)
 
 | Upstream file | Rust file | Status | Types | Members | Notes |
 |---|---|---|---|---|---|
@@ -62,7 +62,7 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 | `SKRoundRectCache.cs` | `sk_round_rect_cache.rs` | present | 1/1 | 4/4 | renamed: Rust spelling of the acronym: `SkRoundRectCache` of `sk_round_rect_cache.rs` |
 | `SKTextBlobBuilderCache.cs` | `sk_text_blob_builder_cache.rs` | present | 1/1 | 0/0 | renamed: Rust spelling of the acronym: `SkTextBlobBuilderCache` of `sk_text_blob_builder_cache.rs` |
 | `SkiaApplicationExtensions.cs` | `skia_application_extensions.rs` | present | 1/1 | 1/1 |  |
-| `SkiaBackendContext.cs` | `skia_backend_context.rs` | partial | 1/1 | 8/9 |  |
+| `SkiaBackendContext.cs` | `skia_backend_context.rs` | present | 1/1 | 9/9 |  |
 | `SkiaOptions.cs` | `skia_options.rs` | present | 1/1 | 4/4 |  |
 | `SkiaPlatform.cs` | `skia_platform.rs` | present | 1/1 | 3/3 |  |
 | `SkiaRegionImpl.cs` | `skia_region_impl.rs` | present | 1/1 | 9/9 |  |
@@ -74,13 +74,6 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 | `TwoLevelCache.cs` | `two_level_cache.rs` | present | 1/1 | 4/4 |  |
 | `WriteableBitmapImpl.cs` | `writeable_bitmap_impl.rs` | present | 1/1 | 13/13 |  |
 
-<details><summary><code>SkiaBackendContext.cs</code> - 1 missing</summary>
-
-- `SkiaContext` (class): 1 missing
-  - `IReadOnlyDictionary<Type, object> PublicFeatures { get; }`
-
-</details>
-
 ### `Gpu` - files 4/4, types 5/5, members 19/20 (1 waived)
 
 | Upstream file | Rust file | Status | Types | Members | Notes |
@@ -90,31 +83,24 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 | `ISkiaGpuRenderTarget.cs` | `gpu/i_skia_gpu_render_target.rs` | present | 1/1 | 2/2 |  |
 | `SkiaGpuRenderTarget.cs` | `gpu/skia_gpu_render_target.rs` | present | 1/1 | 5/6 (1 waived) |  |
 
-### `Gpu/Metal` - files 2/3, types 4/5, members 23/32
+### `Gpu/Metal` - files 3/3, types 5/5, members 32/32
 
 | Upstream file | Rust file | Status | Types | Members | Notes |
 |---|---|---|---|---|---|
 | `AutoReleasePool.cs` | `gpu/metal/auto_release_pool.rs` | present | 1/1 | 2/2 |  |
-| `SkiaMetalExternalObjectsFeature.cs` | `gpu/metal/skia_metal_external_objects_feature.rs` | missing | 0/1 | 0/9 |  |
+| `SkiaMetalExternalObjectsFeature.cs` | `gpu/metal/skia_metal_external_objects_feature.rs` | present | 1/1 | 9/9 |  |
 | `SkiaMetalGpu.cs` | `gpu/metal/skia_metal_gpu.rs` | present | 3/3 | 21/21 |  |
 
-### `Gpu/OpenGl` - files 4/6, types 4/9, members 25/55
+### `Gpu/OpenGl` - files 6/6, types 9/9, members 54/55 (1 waived)
 
 | Upstream file | Rust file | Status | Types | Members | Notes |
 |---|---|---|---|---|---|
 | `FboSkiaSurface.cs` | `gpu/open_gl/fbo_skia_surface.rs` | present | 1/1 | 5/5 |  |
 | `GlRenderTarget.cs` | `gpu/open_gl/gl_render_target.rs` | present | 1/1 | 4/4 |  |
-| `GlSkiaExternalObjectsFeature.cs` | `gpu/open_gl/gl_skia_external_objects_feature.rs` | missing | 0/4 | 0/22 |  |
-| `GlSkiaGpu.cs` | `gpu/open_gl/gl_skia_gpu.rs` | partial | 1/1 | 15/16 |  |
-| `GlSkiaSharedTextureForComposition.cs` | `gpu/open_gl/gl_skia_shared_texture_for_composition.rs` | missing | 0/1 | 0/7 |  |
+| `GlSkiaExternalObjectsFeature.cs` | `gpu/open_gl/gl_skia_external_objects_feature.rs` | present | 4/4 | 21/22 (1 waived) |  |
+| `GlSkiaGpu.cs` | `gpu/open_gl/gl_skia_gpu.rs` | present | 1/1 | 16/16 |  |
+| `GlSkiaSharedTextureForComposition.cs` | `gpu/open_gl/gl_skia_shared_texture_for_composition.rs` | present | 1/1 | 7/7 |  |
 | `IGlSkiaSpecificOptionsFeature.cs` | `gpu/open_gl/i_gl_skia_specific_options_feature.rs` | present | 1/1 | 1/1 |  |
-
-<details><summary><code>GlSkiaGpu.cs</code> - 1 missing</summary>
-
-- `GlSkiaGpu` (class): 1 missing
-  - `ICompositionImportableOpenGlSharedTexture CreateSharedTextureForComposition(IGlContext context, PixelSize s...`
-
-</details>
 
 ### `Gpu/Vulkan` - files 0/0, types 0/0, members 0/0
 
@@ -124,32 +110,21 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 | `VulkanSkiaGpu.cs` | - | n/a | - | - | not-applicable: the GPU of the backend over a Vulkan platform graphics context (`IVulkanPlatformGraphicsContext` of Avalonia.Vulkan): out of scope while Avalonia.Vulkan is (scripts/api-extract/projects.json). Applicable when a platform with Vulkan is ported |
 | `VulkanSkiaRenderTarget.cs` | - | n/a | - | - | not-applicable: the render target and render session of the backend over a Vulkan render target (`IVulkanRenderTarget` of Avalonia.Vulkan): out of scope while Avalonia.Vulkan is (scripts/api-extract/projects.json). Applicable when a platform with Vulkan is ported |
 
-### `Helpers` - files 5/5, types 5/5, members 6/13 (4 waived)
+### `Helpers` - files 5/5, types 5/5, members 8/13 (4 waived)
 
 | Upstream file | Rust file | Status | Types | Members | Notes |
 |---|---|---|---|---|---|
-| `DrawingContextHelper.cs` | `helpers/drawing_context_helper.rs` | partial | 1/1 | 1/4 (1 waived) |  |
-| `ImageSavingHelper.cs` | `helpers/image_saving_helper.rs` | partial | 1/1 | 1/5 (3 waived) |  |
+| `DrawingContextHelper.cs` | `helpers/drawing_context_helper.rs` | partial | 1/1 | 2/4 (1 waived) |  |
+| `ImageSavingHelper.cs` | `helpers/image_saving_helper.rs` | present | 1/1 | 2/5 (3 waived) |  |
 | `PenHelper.cs` | `helpers/pen_helper.rs` | present | 1/1 | 1/1 |  |
 | `PixelFormatHelper.cs` | `helpers/pixel_format_helper.rs` | present | 1/1 | 1/1 |  |
 | `SKPathHelper.cs` | `helpers/sk_path_helper.rs` | present | 1/1 | 2/2 |  |
 
-<details><summary><code>DrawingContextHelper.cs</code> - 2 missing</summary>
+<details><summary><code>DrawingContextHelper.cs</code> - 1 missing</summary>
 
-- `DrawingContextHelper` (class) (ported as module-level items): 2 missing
-  - `static Task RenderAsync(SKCanvas canvas, Visual visual)`
-  - `static Task RenderAsync(SKCanvas canvas, Visual visual, Rect clipRect, Vector dpi)`
+- `DrawingContextHelper` (class) (ported as module-level items): 1 missing
+  - `static Task RenderAsync(SKCanvas canvas, Visual visual, Rect clipRect, Vector dpi)` *(1 of 2 overloads found)*
   - waived (ported as the free function `wrap_skia_surface` of `helpers/drawing_context_helper.rs`: a canvas of the binding is borrowed from its surface, so the context is created from the surface (`CanvasSource::Surface`)): `WrapSkiaCanvas`
-
-</details>
-
-<details><summary><code>ImageSavingHelper.cs</code> - 1 missing</summary>
-
-- `ImageSavingHelper` (class) (ported as module-level items): 1 missing
-  - `static void SavePicture(SKPicture picture, float scale, string path)` *(internal)*
-  - waived (obsolete overloads (to a file and to a stream) that ignore the quality and save a PNG with the default options: not ported, a caller passes `BitmapEncoderOptions::Png` to `save_image_to_file` or `save_image`): `SaveImage`
-  - waived (ported as the free function `save_image_to_file` of `helpers/image_saving_helper.rs`): `SaveImage`
-  - waived (ported as the free function `save_image` of `helpers/image_saving_helper.rs`, which the scanner counts for the first overload of the name): `SaveImage`
 
 </details>
 
@@ -162,7 +137,7 @@ Rust sources of this crate that no upstream file maps to. Give each a reason in 
 | `gpu/ganesh/ganesh_gr_context.rs` | the Ganesh implementation of the backend-neutral GPU context (the binding has separate Ganesh and Graphite context types) | `GaneshGrContext` |
 | `gpu/graphite/graphite_gr_context.rs` | the Graphite implementation of the backend-neutral GPU context (the binding has separate Ganesh and Graphite context types) | `GraphiteGrContext`, `GraphiteState`, `UploadedImage` |
 | `gpu/i_skia_gr_context.rs` | the backend-neutral GPU context of the Skia backend (the binding has separate Ganesh and Graphite context types, SkiaSharp has one `GRContext`) | `ISkiaGrContext`, `SkiaGpuBackend` |
-| `gpu/metal/tests.rs` | the unit tests of the module | `GraphiteTarget`, `Id`, `LogSink`, `Sel`, `TestMetalDevice`, `TextureRenderTarget`, `TextureSession`, `TextureSurface` |
+| `gpu/metal/tests.rs` | the unit tests of the module | `ExternalObjectsDevice`, `FakeEvent`, `FakeExternalObjects`, `FakeTexture`, `GraphiteTarget`, `Id`, `Log`, `LogSink`, `Sel`, `TestMetalDevice`, `TextureRenderTarget`, `TextureSession`, ... (13 total) |
 | `locked_framebuffer.rs` | a locked framebuffer described by plain values: the `Platform/LockedFramebuffer.cs` of Avalonia.Base, which the base crate cannot hold without unsafe code, for the surfaces of the backend | `LockedFramebuffer` |
 | `tests.rs` | the unit tests of the module | `BrushSpec`, `Material`, `MockFramebuffer`, `MockSurface`, `Target`, `TwoSquares`, `TwoSquaresBrush` |
 | `unit_tests/hit_testing.rs` | the port of upstream's Skia unit test project (tests/Avalonia.Skia.UnitTests) and its test doubles, not of the library | `CompositorTestServices`, `LocatorScope` |
@@ -171,4 +146,4 @@ Rust sources of this crate that no upstream file maps to. Give each a reason in 
 | `unit_tests/media/text_formatting/single_buffer_text_source.rs` | the port of upstream's Skia unit test project (tests/Avalonia.Skia.UnitTests) and its test doubles, not of the library | `SingleBufferTextSource` |
 | `unit_tests/test_font_manager.rs` | the port of upstream's Skia unit test project (tests/Avalonia.Skia.UnitTests) and its test doubles, not of the library | `TestFontManager` |
 
-Tests, examples and build scripts (not scanned): `build.rs`, `text_tests.rs`, `unit_tests/combined_geometry_impl_tests.rs`, `unit_tests/drawing_context_impl_tests.rs`, `unit_tests/media/bitmap_save_tests.rs`, `unit_tests/media/custom_font_collection_tests.rs`, `unit_tests/media/embedded_font_collection_tests.rs`, `unit_tests/media/font_collection_determinism_tests.rs`, `unit_tests/media/font_collection_tests.rs`, `unit_tests/media/font_collection_try_match_character_tests.rs`, `unit_tests/media/font_manager_tests.rs`, `unit_tests/media/glyph_run_tests.rs`, `unit_tests/media/glyph_typeface_shaping_tests.rs`, `unit_tests/media/immutable_bitmap_tests.rs`, `unit_tests/media/text_formatting/empty_shaped_buffer_tests.rs`, `unit_tests/media/text_formatting/shaped_buffer_shared_storage_tests.rs`, `unit_tests/media/text_formatting/shaping_capability_fallback_tests.rs`, `unit_tests/media/text_formatting/split_text_runs_tests.rs`, `unit_tests/media/text_formatting/tables/cmap_table_tests.rs`, `unit_tests/media/text_formatting/text_characters_tests.rs`, `unit_tests/media/text_formatting/text_collapsing_bidi_tests.rs`, `unit_tests/media/text_formatting/text_formatter_tests.rs`, `unit_tests/media/text_formatting/text_formatter_wrap_characterization_tests.rs`, `unit_tests/media/text_formatting/text_layout_tests.rs`, `unit_tests/media/text_formatting/text_line_tests.rs`, `unit_tests/media/text_formatting/text_run_cache_tests.rs`, `unit_tests/media/text_formatting/text_shaper_tests.rs`, `unit_tests/render_bounds_tests.rs`, `unit_tests/skia_options_tests.rs`, `unit_tests/two_level_cache_tests.rs`.
+Tests, examples and build scripts (not scanned): `build.rs`, `text_tests.rs`, `unit_tests/combined_geometry_impl_tests.rs`, `unit_tests/drawing_context_helper_tests.rs`, `unit_tests/drawing_context_impl_tests.rs`, `unit_tests/media/bitmap_save_tests.rs`, `unit_tests/media/custom_font_collection_tests.rs`, `unit_tests/media/embedded_font_collection_tests.rs`, `unit_tests/media/font_collection_determinism_tests.rs`, `unit_tests/media/font_collection_tests.rs`, `unit_tests/media/font_collection_try_match_character_tests.rs`, `unit_tests/media/font_manager_tests.rs`, `unit_tests/media/glyph_run_tests.rs`, `unit_tests/media/glyph_typeface_shaping_tests.rs`, `unit_tests/media/immutable_bitmap_tests.rs`, `unit_tests/media/text_formatting/empty_shaped_buffer_tests.rs`, `unit_tests/media/text_formatting/shaped_buffer_shared_storage_tests.rs`, `unit_tests/media/text_formatting/shaping_capability_fallback_tests.rs`, `unit_tests/media/text_formatting/split_text_runs_tests.rs`, `unit_tests/media/text_formatting/tables/cmap_table_tests.rs`, `unit_tests/media/text_formatting/text_characters_tests.rs`, `unit_tests/media/text_formatting/text_collapsing_bidi_tests.rs`, `unit_tests/media/text_formatting/text_formatter_tests.rs`, `unit_tests/media/text_formatting/text_formatter_wrap_characterization_tests.rs`, `unit_tests/media/text_formatting/text_layout_tests.rs`, `unit_tests/media/text_formatting/text_line_tests.rs`, `unit_tests/media/text_formatting/text_run_cache_tests.rs`, `unit_tests/media/text_formatting/text_shaper_tests.rs`, `unit_tests/render_bounds_tests.rs`, `unit_tests/skia_options_tests.rs`, `unit_tests/two_level_cache_tests.rs`.
