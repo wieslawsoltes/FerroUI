@@ -45,8 +45,8 @@
 //! documents are not embedded: each is copied, byte for byte, to
 //! `$OUT_DIR/browser-site/assets/ControlCatalog/<path>` (its rooted asset
 //! path below the directory of the assembly), which `scripts/build-browser.sh`
-//! puts in the site. The WebAssembly module then carries the code and the
-//! documents, and the 24 MB of pictures and fonts are plain files that the
+//! puts in the site. The WebAssembly module then carries the code (with the
+//! compiled documents), and the 24 MB of pictures and fonts are plain files that the
 //! host fetches one by one and registers under their own URI. Which files
 //! the start-up and each page need follows from a scan of the sources
 //! (`build/page_files.rs`); `assets/ControlCatalog.json` lists them: the

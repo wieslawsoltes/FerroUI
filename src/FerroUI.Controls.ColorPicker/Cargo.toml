@@ -22,6 +22,15 @@ autoexamples = false
 [lib]
 path = "lib.rs"
 
+[features]
+# The theme documents are also embedded as assets of the assembly, next to their compiled markup. For
+# an application that loads its own markup at run time and includes the styles of the library: the
+# run-time XAML loader leaves an include of a document of another assembly to run time only for a
+# document the asset loader has (docs/porting/xaml.md, 9.5.20 and decision 22); the include then loads
+# the compiled markup. An application whose markup is compiled is linked to the compiled styles by its
+# build and does not need the documents.
+document-assets = []
+
 [dependencies]
 # The compiled markup of the crate calls the typed functions of the declared members, which exist
 # with this feature.

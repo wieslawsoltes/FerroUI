@@ -54,9 +54,10 @@ const TYPES: &[&TypeInfo] = types![
     crate::color_spectrum::ColorSpectrum,
 ];
 
-/// Registers the namespaces, the types, the assembly, the embedded assets
-/// and the compiled markup of this crate (and of the crates it is built on).
-/// Cheap and idempotent.
+/// Registers the namespaces, the types, the assembly and the compiled
+/// markup of this crate (and of the crates it is built on), and with the
+/// feature `document-assets` the theme documents as assets. Cheap and
+/// idempotent.
 pub fn register_types() {
     static ONCE: std::sync::Once = std::sync::Once::new();
     ONCE.call_once(|| {
@@ -68,6 +69,9 @@ pub fn register_types() {
         crate::rust_paths::register_rust_paths();
         MarkupAssembly::register(&ASSEMBLY);
         crate::markup_types::register();
+        // The theme documents as assets: what lets a document the run-time loader loads
+        // include them (the tests of this crate do).
+        #[cfg(any(test, feature = "document-assets"))]
         crate::assets::register();
         // The loader table of the compiled markup, which the build of the crate generates: a
         // load of a theme document by its URI builds it from its compiled markup.

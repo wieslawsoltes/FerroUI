@@ -1,4 +1,5 @@
-//! Compiles the theme documents of the crate and embeds them
+//! Compiles the theme documents of the crate, and lists them as the assets a
+//! build with the feature `document-assets` embeds
 //! (docs/porting/xaml.md, 9.5.13, 9.5.20 and 9.6).
 //!
 //! The counterpart of the resource items of the upstream project file
@@ -19,15 +20,19 @@
 //! its styles is linked to the build functions of the documents by its own
 //! compiler.
 //!
-//! The documents are still embedded as assets too (`$OUT_DIR/assets.rs`, as
-//! `(rooted path, bytes)` pairs, registered with the asset loader by
-//! `register_types()`). Upstream's compiler removes a compiled resource from the
-//! assembly; here a document that includes the styles and is loaded by the
-//! run-time loader leaves the include to run time only for a document the asset
-//! loader has (docs/porting/xaml.md, decision 22), and the include then loads
-//! the compiled markup through the loader table. An application that loads its
-//! own markup at run time (the ControlCatalog does) needs the assets for that
-//! one question; they go when no such application is left.
+//! Upstream's compiler removes a compiled resource from the assembly, and so
+//! does a build of this crate: the compiled documents are not assets. With the
+//! feature `document-assets`, and in the tests of the crate, they are embedded
+//! as assets too (`$OUT_DIR/assets.rs`, as `(rooted path, bytes)` pairs,
+//! registered with the asset loader by `register_types()`; the table is written
+//! by every build and compiled only then). A document that includes the styles
+//! and is loaded by the run-time loader leaves the include to run time only for
+//! a document the asset loader has (docs/porting/xaml.md, decision 22), and the
+//! include then loads the compiled markup through the loader table: an
+//! application that loads its own markup at run time needs the assets for that
+//! one question and states the feature (the ControlCatalog with its feature
+//! `runtime-markup`, and its tests, which load `App.xaml` with the run-time
+//! loader too).
 
 use std::env;
 use std::fmt::Write as _;

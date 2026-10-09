@@ -18,10 +18,13 @@
 //! The theme documents are compiled by the build of the crate (`build.rs`):
 //! [`register_types`] registers the loader table of the compiled markup,
 //! which answers a load of a document of the assembly
-//! `FerroUI.Controls.ColorPicker` by its URI, and the documents as assets of
-//! the assembly, which is what lets a document loaded at run time include
-//! them (`build.rs` says why both). The crate does not link the run-time XAML
-//! loader.
+//! `FerroUI.Controls.ColorPicker` by its URI, and the build of an application
+//! whose markup is compiled links an include of the styles to their compiled
+//! markup. A compiled document is not an asset of the assembly, as upstream's
+//! compiler removes a compiled resource; with the feature `document-assets`
+//! the documents are embedded as assets too, which is what lets a document
+//! loaded at run time include them (`build.rs` says why). The crate does not
+//! link the run-time XAML loader.
 
 // The compiled markup names the types of the crate by the name of the crate, as the markup
 // of any other crate does.
@@ -32,6 +35,7 @@ extern crate self as ferroui_controls_color_picker;
 ferroui_markup_xaml::include_compiled_xaml!();
 
 mod alpha_component_position;
+#[cfg(any(test, feature = "document-assets"))]
 mod assets;
 pub mod automation;
 mod color_changed_event_args;
