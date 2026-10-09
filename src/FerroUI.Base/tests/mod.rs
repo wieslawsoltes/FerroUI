@@ -50,6 +50,7 @@ mod ferro_object_tests_get_observable;
 mod ferro_object_tests_get_value;
 mod ferro_object_tests_inheritance;
 mod ferro_object_tests_metadata;
+mod ferro_object_tests_notification_order;
 mod ferro_object_tests_on_property_changed;
 mod ferro_object_tests_reentrancy;
 mod ferro_object_tests_set_current_value;
