@@ -410,7 +410,10 @@ impl IRenderer for TestRenderer {
     fn scene_invalidated(&self, _handler: Rc<dyn Fn(&SceneInvalidatedEventArgs)>) -> Rc<dyn IDisposable> {
         Disposable::empty()
     }
-    fn try_get_render_interface_feature(&self, _feature_type: std::any::TypeId) -> Option<Rc<dyn std::any::Any>> {
+    fn try_get_render_interface_feature(
+        &self,
+        _feature_type: std::any::TypeId,
+    ) -> Option<ferroui_base::rendering::composition::RenderInterfaceFeature> {
         None
     }
     fn add_dirty(&self, _visual: &Visual) {}
