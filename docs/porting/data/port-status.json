@@ -4467,9 +4467,9 @@
     0
    ],
    "types": [
+    6,
     7,
-    7,
-    0
+    1
    ],
    "members": [
     7,
@@ -4514,16 +4514,6 @@
     ]
    },
    "rustOnly": [
-    "call_forms.rs",
-    "json.rs",
-    "model.rs",
-    "model_set.rs",
-    "scanner/constants.rs",
-    "scanner/declarations.rs",
-    "scanner/modules.rs",
-    "scanner/source.rs",
-    "scanner/tests.rs",
-    "scanner/tokens.rs",
     "type_system/emit_types.rs",
     "type_system/model_type_system.rs",
     "type_system/tests.rs",
@@ -4537,17 +4527,17 @@
    "scope": "in",
    "detail": "full",
    "files": [
-    534,
+    538,
     538,
     0
    ],
    "types": [
-    616,
+    621,
     628,
     7
    ],
    "members": [
-    6199,
+    6214,
     6405,
     189
    ],
@@ -4569,11 +4559,11 @@
     "const": 33,
     "derive": 2,
     "field": 29,
-    "fn": 5585,
+    "fn": 5598,
     "free item": 4,
     "overload fn": 82,
     "trait": 37,
-    "variant": 423
+    "variant": 425
    },
    "presentFiles": {
     "AcrylicPlatformCompensationLevels.cs": [
@@ -5818,6 +5808,18 @@
     "RelativePanel.cs": [
      "relative_panel.rs"
     ],
+    "Remote/RemoteServer.cs": [
+     "remote/remote_server.rs"
+    ],
+    "Remote/RemoteWidget.cs": [
+     "remote/remote_widget.rs"
+    ],
+    "Remote/Server/RemoteServerTopLevelImpl.Framebuffer.cs": [
+     "remote/server/remote_server_top_level_impl_framebuffer.rs"
+    ],
+    "Remote/Server/RemoteServerTopLevelImpl.cs": [
+     "remote/server/remote_server_top_level_impl.rs"
+    ],
     "RepeatButton.cs": [
      "repeat_button.rs"
     ],
@@ -6221,6 +6223,7 @@
     "primitives/selecting_items_control_tests_multiple.rs",
     "primitives/selecting_items_control_tests_selected_value.rs",
     "register_types.rs",
+    "remote/ui_thread_handle.rs",
     "render_tests_culling.rs",
     "rust_paths.rs",
     "scroll_viewer_tests_i_logical_scrollable.rs",
@@ -6438,17 +6441,17 @@
    "scope": "in",
    "detail": "full",
    "files": [
-    0,
+    7,
     9,
     0
    ],
    "types": [
-    0,
+    12,
     18,
     0
    ],
    "members": [
-    0,
+    146,
     176,
     0
    ],
@@ -6465,9 +6468,37 @@
     0
    ],
    "notApplicableFiles": 0,
-   "matchKinds": {},
-   "presentFiles": {},
-   "rustOnly": []
+   "matchKinds": {
+    "fn": 140,
+    "free item": 2,
+    "overload fn": 4
+   },
+   "presentFiles": {
+    "DesignWindowLoader.cs": [
+     "design_window_loader.rs"
+    ],
+    "Remote/DetachableTransportConnection.cs": [
+     "remote/detachable_transport_connection.rs"
+    ],
+    "Remote/FileWatcherTransport.cs": [
+     "remote/file_watcher_transport.rs"
+    ],
+    "Remote/PreviewerWindowImpl.cs": [
+     "remote/previewer_window_impl.rs"
+    ],
+    "Remote/PreviewerWindowingPlatform.cs": [
+     "remote/previewer_windowing_platform.rs"
+    ],
+    "Remote/RemoteDesignerEntryPoint.cs": [
+     "remote/remote_designer_entry_point.rs"
+    ],
+    "Remote/Stubs.cs": [
+     "remote/stubs.rs"
+    ]
+   },
+   "rustOnly": [
+    "remote/test_connection.rs"
+   ]
   },
   {
    "name": "Avalonia.Desktop",
@@ -8524,7 +8555,6 @@
     "rust_emitter/runtime_types.rs",
     "rust_emitter/source.rs",
     "rust_emitter/transform.rs",
-    "rust_emitter/xaml_metadata.rs",
     "testing/bindings.rs",
     "testing/objects.rs",
     "testing/styles.rs"

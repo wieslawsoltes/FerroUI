@@ -7,12 +7,12 @@ Generated from upstream commit `17350180c33b063f0e98abbfd19aa3cae63f5d56`. Back 
 | | |
 |---|---|
 | Upstream | `src/Avalonia.DesignerSupport` |
-| FerroUI | `src/FerroUI.DesignerSupport` (not created yet) |
+| FerroUI | `src/FerroUI.DesignerSupport` (exists) |
 | Crate | `ferroui-designer-support` |
 | Phase / priority | 4 - tooling / P3 |
-| Files | 0/9 (0.0%) |
-| Types | 0/18 (0.0%) |
-| Members | 0/176 (0.0%) |
+| Files | 7/9 (77.8%) |
+| Types | 12/18 (66.7%) |
+| Members | 146/176 (83.0%) |
 | Contracts (interfaces) | 0/1 |
 | Property registrations | 0/0 |
 | Routed events | 0/0 |
@@ -27,22 +27,42 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 
 ## Files
 
-### `(project root)` - files 0/1, types 0/1, members 0/2
+### `(project root)` - files 1/1, types 1/1, members 2/2
 
 | Upstream file | Rust file | Status | Types | Members | Notes |
 |---|---|---|---|---|---|
-| `DesignWindowLoader.cs` | `design_window_loader.rs` | missing | 0/1 | 0/2 |  |
+| `DesignWindowLoader.cs` | `design_window_loader.rs` | present | 1/1 | 2/2 |  |
 
-### `Remote` - files 0/6, types 0/12, members 0/147
+### `Remote` - files 6/6, types 11/12, members 144/147
 
 | Upstream file | Rust file | Status | Types | Members | Notes |
 |---|---|---|---|---|---|
-| `DetachableTransportConnection.cs` | `remote/detachable_transport_connection.rs` | missing | 0/1 | 0/7 |  |
-| `FileWatcherTransport.cs` | `remote/file_watcher_transport.rs` | missing | 0/2 | 0/8 |  |
-| `PreviewerWindowImpl.cs` | `remote/previewer_window_impl.rs` | missing | 0/1 | 0/40 |  |
-| `PreviewerWindowingPlatform.cs` | `remote/previewer_windowing_platform.rs` | missing | 0/1 | 0/7 |  |
-| `RemoteDesignerEntryPoint.cs` | `remote/remote_designer_entry_point.rs` | missing | 0/2 | 0/4 |  |
-| `Stubs.cs` | `remote/stubs.rs` | missing | 0/5 | 0/81 |  |
+| `DetachableTransportConnection.cs` | `remote/detachable_transport_connection.rs` | present | 1/1 | 7/7 |  |
+| `FileWatcherTransport.cs` | `remote/file_watcher_transport.rs` | partial | 1/2 | 7/8 |  |
+| `PreviewerWindowImpl.cs` | `remote/previewer_window_impl.rs` | partial | 1/1 | 39/40 |  |
+| `PreviewerWindowingPlatform.cs` | `remote/previewer_windowing_platform.rs` | present | 1/1 | 7/7 |  |
+| `RemoteDesignerEntryPoint.cs` | `remote/remote_designer_entry_point.rs` | partial | 2/2 | 3/4 |  |
+| `Stubs.cs` | `remote/stubs.rs` | present | 5/5 | 81/81 |  |
+
+<details><summary><code>FileWatcherTransport.cs</code> - 2 missing</summary>
+
+- `ITransportWithEnforcedMethod` (interface, internal): **type missing** (1 members)
+
+</details>
+
+<details><summary><code>PreviewerWindowImpl.cs</code> - 1 missing</summary>
+
+- `PreviewerWindowImpl` (class): 1 missing
+  - `override void OnMessage(IAvaloniaRemoteTransportConnection transport, object obj)` *(protected)*
+
+</details>
+
+<details><summary><code>RemoteDesignerEntryPoint.cs</code> - 1 missing</summary>
+
+- `RemoteDesignerEntryPoint.Methods` (class) (ported as module-level items): 1 missing
+  - `const string AvaloniaRemote`
+
+</details>
 
 ### `Remote/HtmlTransport` - files 0/2, types 0/5, members 0/27
 
@@ -50,3 +70,13 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 |---|---|---|---|---|---|
 | `HtmlTransport.cs` | `remote/html_transport/html_transport.rs` | missing | 0/1 | 0/6 |  |
 | `SimpleWebSocketHttpServer.cs` | `remote/html_transport/simple_web_socket_http_server.rs` | missing | 0/4 | 0/21 |  |
+
+## Rust-only files
+
+Rust sources of this crate that no upstream file maps to. Give each a reason in `docs/porting/data/path-overrides.toml` (`[[rust_only]]`), or map upstream files to it (`[[map]]`).
+
+| Rust file | Reason | Types defined |
+|---|---|---|
+| `remote/test_connection.rs` | A connection for the tests of the crate, which records what is sent and raises what a test tells it to | `TestConnection` |
+
+Tests, examples and build scripts (not scanned): `remote/remote_rendering_tests.rs`.
