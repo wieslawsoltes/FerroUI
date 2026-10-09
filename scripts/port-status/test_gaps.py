@@ -31,7 +31,7 @@ What is counted:
   `[InlineData]` rows. Comments are removed first, so a test that is commented out is not counted. Preprocessor
   conditions are not evaluated. A method of an abstract or generic base class counts once, in its file.
 - A Rust test is a function that carries an attribute whose last path segment is `test` (`#[test]`), with any
-  other attributes between it and the `fn`, or any function of test code: a file named `*_tests.rs`, `tests.rs`
+  other attributes between it and the `fn`, or any function of test code: a file named `*_tests*.rs`, `tests.rs`
   or `test_*.rs`, a file under a `tests` directory, or what follows the first `#[cfg(test)]` of another file.
   The second form is there because the port writes an upstream theory as a function with the upstream name and
   the parameters of the theory, called once per row by generated `#[test]` functions (`theory!`), and the tests
@@ -361,7 +361,7 @@ def rust_functions(text: str, test_file: bool) -> list[tuple[str, bool]]:
 def is_test_file(path: str) -> bool:
     name = os.path.basename(path)
     parts = path.replace(os.sep, "/").split("/")
-    return name.endswith("_tests.rs") or name == "tests.rs" or name.startswith("test_") or "tests" in parts[:-1]
+    return "_tests" in name or name == "tests.rs" or name.startswith("test_") or "tests" in parts[:-1]
 
 
 def read_port(directories: list[str]) -> dict[str, list[tuple[str, bool]]]:
