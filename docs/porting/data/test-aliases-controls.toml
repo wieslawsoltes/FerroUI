@@ -45,3 +45,21 @@ reason = "the children of a panel are `Ref<Control>`, which cannot be null"
 project = "Avalonia.Controls.UnitTests"
 file = "Utils/SafeEnumerableHashSetTests.cs"
 reason = "`SafeEnumerableHashSet` is not ported: its one user, the listener set of `Classes`, is a `HandlerList` in the port (docs/porting/data/path-overrides.toml, `Utilities/SafeEnumerableHashSet.cs`), and the tests observe the inner set of the class"
+
+[[waive]]
+project = "Avalonia.Controls.UnitTests"
+file = "ItemsSourceViewTests.cs"
+test = "Cannot_Create_ItemsSourceView_With_Collection_That_Implements_INCC_But_Not_List"
+reason = "an items source of the port is an `Rc<dyn IItemsList>`: a collection that notifies but is not a list cannot be handed to `ItemsSourceView::get_or_create`"
+
+[[waive]]
+project = "Avalonia.Controls.UnitTests"
+file = "Selection/InternalSelectionModelTests.cs"
+test = "Does_Not_Accept_Fixed_Size_Items"
+reason = "`WritableSelectedItems` is an `Rc<FerroList<..>>`, which is never of a fixed size: an array cannot be assigned"
+
+[[waive]]
+project = "Avalonia.Controls.UnitTests"
+file = "Platform/ScreensTests.cs"
+test = "Should_Raise_Event_When_Screen_Changed_From_Another_Thread"
+reason = "the screens of the port are reference counted on the UI thread (`Rc`, not `Send`): a change cannot be pushed from another thread, a platform posts it to the dispatcher itself"
