@@ -75,6 +75,12 @@ fn load(uri: &str) -> Rc<GlyphTypeface> {
     glyph_typeface(CustomPlatformTypeface::new(&mut stream), FontSimulations::None)
 }
 
+/// The typeface of the embedded Inter, for the tests of the font tables
+/// (each upstream table test file opens the same resource the same way).
+pub(crate) fn load_inter() -> Rc<GlyphTypeface> {
+    load(INTER_FONT_URI)
+}
+
 #[test]
 fn should_load_inter_font() {
     let asset_loader = standard_asset_loader();

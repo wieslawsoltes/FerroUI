@@ -29,6 +29,15 @@ pub mod name;
 #[cfg(any(test, feature = "testing"))]
 pub(crate) mod testing;
 
+#[cfg(test)]
+mod head_table_tests;
+#[cfg(test)]
+mod loca_table_tests;
+#[cfg(test)]
+mod maxp_table_tests;
+#[cfg(test)]
+mod os2_table_tests;
+
 pub use big_endian_binary_reader::{BigEndianBinaryReader, FontTableError};
 pub use decycler::{CycleGuard, Decycler, DecyclerError, DecyclerException};
 pub use encoding_id_extensions::{Encoding, EncodingIDExtensions};
