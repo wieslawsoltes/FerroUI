@@ -44,6 +44,7 @@ impl PreviewerWindowingPlatform {
 
     /// The window of the previewed document, if one was created
     /// (`s_lastWindow`).
+    #[cfg_attr(not(test), allow(dead_code))]
     pub(crate) fn last_window() -> Option<Rc<PreviewerWindowImpl>> {
         LAST_WINDOW.with(|window| window.borrow().clone())
     }

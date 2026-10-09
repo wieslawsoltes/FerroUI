@@ -99,6 +99,7 @@ impl PreviewerWindowImpl {
     }
 
     /// The remote server top-level this class derives from.
+    #[cfg_attr(not(test), allow(dead_code))]
     pub(crate) fn base(&self) -> &Rc<RemoteServerTopLevelImpl> {
         &self.base
     }
