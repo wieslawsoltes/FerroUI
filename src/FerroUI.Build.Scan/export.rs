@@ -20,6 +20,11 @@
 //!    else: the script runs again when one of them changes. A new source file
 //!    is reached through the `mod` item of a file that changed.
 //!
+//! A crate whose compiled markup is checked in (the themes) exports the
+//! documents of its checked-in `.xamlmeta` in the same file
+//! ([`Export::compiled_markup`]): the file of the build is then all a crate
+//! that depends on it reads, the documents and the types.
+//!
 //! The text of the model is a function of the sources and of the models of
 //! the dependencies alone: the scan reads no environment, records a `cfg`
 //! condition instead of evaluating it, and the model is written in the order
@@ -31,6 +36,7 @@ use std::path::{Path, PathBuf};
 use std::time::{Duration, Instant};
 
 use crate::model_set::ModelSet;
+use crate::xaml_metadata::XamlMetadata;
 use crate::scanner::{scan_crate, Scan, ScanOptions, Severity};
 
 /// The file below `OUT_DIR` a run writes its cost to ([`ScanReport`]).
@@ -171,6 +177,7 @@ pub struct Export {
     crate_name: String,
     dependencies: Vec<PathBuf>,
     source_root: Option<PathBuf>,
+    compiled_markup: Vec<PathBuf>,
 }
 
 impl Export {
@@ -193,7 +200,16 @@ impl Export {
     /// The export of the package `package_name` in `manifest_dir`, writing below `out_dir`,
     /// with the `.xamlmeta` files of its direct dependencies.
     pub fn new(manifest_dir: PathBuf, out_dir: PathBuf, package_name: &str, dependencies: Vec<PathBuf>) -> Self {
-        Self { manifest_dir, out_dir, crate_name: package_name.replace('-', "_"), dependencies, source_root: None }
+        Self { manifest_dir, out_dir, crate_name: package_name.replace('-', "_"), dependencies, source_root: None, compiled_markup: Vec::new() }
+    }
+
+    /// The `.xamlmeta` of a checked-in generated file of the crate, relative to the crate
+    /// directory (format 1, written by the emitter next to the generated file): its
+    /// documents are the documents of the exported file. The file must describe the
+    /// assembly of the crate.
+    pub fn compiled_markup(mut self, path: &str) -> Self {
+        self.compiled_markup.push(self.manifest_dir.join(path));
+        self
     }
 
     /// The root file of the sources of the crate, relative to the crate directory. Without
@@ -263,6 +279,18 @@ impl Export {
         }
         model.crate_name = self.crate_name.clone();
         model.dependencies = self.dependencies.iter().map(|path| path.display().to_string()).collect();
+        for path in &self.compiled_markup {
+            rerun(&mut lines, path);
+            let read = fs::read_to_string(path).map_err(|error| error.to_string()).and_then(|text| XamlMetadata::parse(&text));
+            match read {
+                Ok(read) if read.name == model.name => model.documents.extend(read.documents),
+                Ok(read) => {
+                    let error = format!("{}: the file describes the assembly `{}`, the crate is `{}`", path.display(), read.name, model.name);
+                    return Outcome { lines, errors: vec![error] };
+                }
+                Err(error) => return Outcome { lines, errors: vec![format!("{}: {error}", path.display())] },
+            }
+        }
         let text = model.to_json();
         let path = self.out_dir.join(format!("{}.xamlmeta", self.crate_name));
         let started = Instant::now();
@@ -336,6 +364,38 @@ mod tests {
         assert_eq!((model.name.as_str(), model.crate_name.as_str()), ("dependent", "dependent"));
         assert_eq!(model.dependencies, [file.display().to_string()]);
         assert_eq!(model.find_type("Card").and_then(|card| card.base.as_ref()).map(|base| base.text.as_str()), Some("::fixture::controls::border::Border"));
+
+        // The documents of a checked-in file of the crate are exported with its model; a
+        // file of another assembly is an error.
+        let checked_in = out.join("compiled_xaml.xamlmeta");
+        let document = crate::xaml_metadata::DocumentModel {
+            uri: "ferres://dependent/Card.xaml".to_string(),
+            root_type: "Card".to_string(),
+            class_rust_path: Some("::dependent::Card".to_string()),
+            build_path: None,
+            populate_path: Some("::dependent::compiled_xaml::populate".to_string()),
+            public: true,
+        };
+        let mut metadata = XamlMetadata { name: "dependent".to_string(), crate_name: "dependent".to_string(), documents: vec![document.clone()], dependencies: Vec::new() };
+        fs::write(&checked_in, metadata.to_json()).expect("the checked-in file");
+        let with_documents = || {
+            Export::new(fixtures().join("dependent"), out.join("documents"), "dependent", vec![file.clone()])
+                .compiled_markup(&checked_in.display().to_string())
+                .execute()
+        };
+        let exported = with_documents();
+        assert_eq!(exported.errors, Vec::<String>::new());
+        assert!(exported.lines.contains(&format!("cargo::rerun-if-changed={}", checked_in.display())), "{:?}", exported.lines);
+        let text = fs::read_to_string(out.join("documents").join("dependent.xamlmeta")).expect("the .xamlmeta with the documents");
+        let model = AssemblyModel::parse(&text).expect("a file of format 2");
+        assert_eq!(model.documents, [document]);
+        assert!(model.find_type("Card").is_some());
+        assert_eq!(XamlMetadata::parse(&text).map(|read| read.documents), Ok(model.documents.clone()));
+        metadata.name = "Other".to_string();
+        fs::write(&checked_in, metadata.to_json()).expect("the checked-in file");
+        let other = with_documents();
+        assert_eq!(other.errors.len(), 1, "{:?}", other.errors);
+        assert!(other.errors[0].ends_with("the file describes the assembly `Other`, the crate is `dependent`"), "{:?}", other.errors);
 
         let missing = Export::new(fixtures().join("dependent"), out.join("missing"), "dependent", Vec::new()).source_root("main.rs").execute();
         assert_eq!(missing.errors.len(), 1, "{:?}", missing.errors);

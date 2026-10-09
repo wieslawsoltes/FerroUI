@@ -30,14 +30,10 @@ ferroui-themes-simple = { workspace = true }
 ferroui-themes-fluent = { workspace = true }
 
 [build-dependencies]
-# The build script compiles the documents of the crate (`build.rs`). The compiler reads the types the
-# documents name from the registries of the process, so the script links the crates that declare them.
+# The build script compiles the documents of the crate (`build.rs`) against the type models: the scan
+# of the sources of this crate and the models in the `.xamlmeta` of the crates it depends on. It
+# links the compiler and no crate for its types.
 ferroui-build = { workspace = true }
-ferroui-base = { workspace = true }
-ferroui-controls = { workspace = true, features = ["testing"] }
-xaml-include-fixture-theme = { path = "../Theme" }
-ferroui-themes-simple = { workspace = true }
-ferroui-themes-fluent = { workspace = true }
 
 [dev-dependencies]
 ferroui-base = { workspace = true, features = ["testing"] }
