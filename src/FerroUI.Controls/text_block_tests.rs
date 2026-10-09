@@ -7,7 +7,10 @@
 use crate::documents::{InlineCollection, InlineUIContainer, Run, Span, TextElement};
 use crate::templates::{FuncControlTemplate, FuncTemplateNameScopeExtensions};
 use crate::test_support::{boxed_str, test_scope, TestRoot};
-use crate::{Border, Button, ContentControl, Control, Image, TextBlock};
+use crate::test_support_buttons::focus_scope;
+use crate::text_box_tests::templated_text_box;
+use crate::{Border, Button, ContentControl, Control, Image, TextBlock, TextBox};
+use ferroui_base::input::InputElement;
 use ferroui_base::data::{BindingMode, TemplateBinding};
 use ferroui_base::layout::{HorizontalAlignment, LayoutHelper, VerticalAlignment};
 use ferroui_base::media::{
@@ -788,4 +791,50 @@ fn should_remeasure_embedded_controls_when_the_child_changes_while_measure_is_in
     expected.measure(Size::new(1000.0, 1000.0));
 
     assert_eq!(target.desired_size(), expected.desired_size());
+}
+
+#[test]
+fn can_call_measure_without_invalidate_text_layout() {
+    let _scope = test_scope();
+    let target = TextBlock::new();
+
+    let text_box = TextBox::new();
+    text_box.set_text(Some("Hello"));
+    target.inlines().unwrap().add_control(text_box);
+
+    target.measure(infinity());
+
+    target.invalidate_measure();
+
+    target.measure(infinity());
+}
+
+#[test]
+fn embedded_control_should_keep_focus() {
+    let _scope = test_scope();
+    let _focus = focus_scope();
+    let target = TextBlock::new();
+
+    let root = TestRoot::with_child(target.clone());
+
+    let text_box = templated_text_box(Some("Hello"));
+
+    target.inlines().unwrap().add_control(text_box.clone());
+
+    target.measure(infinity());
+
+    text_box.focus();
+
+    let focus_manager = root.presentation_source().unwrap().input_root().focus_manager().unwrap();
+    let text_box_element: Ref<InputElement> = text_box.clone().upcast();
+
+    assert_eq!(Some(text_box_element.clone()), focus_manager.get_focused_element());
+
+    target.invalidate_measure();
+
+    assert_eq!(Some(text_box_element.clone()), focus_manager.get_focused_element());
+
+    target.measure(infinity());
+
+    assert_eq!(Some(text_box_element), focus_manager.get_focused_element());
 }
