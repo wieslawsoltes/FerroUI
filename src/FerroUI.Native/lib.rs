@@ -64,6 +64,8 @@ mod frn_menu_item;
 #[cfg(target_os = "macos")]
 mod frn_string;
 #[cfg(target_os = "macos")]
+mod gpu_handle_wrap_feature;
+#[cfg(target_os = "macos")]
 mod helpers;
 #[cfg(target_os = "macos")]
 mod icon_loader;
