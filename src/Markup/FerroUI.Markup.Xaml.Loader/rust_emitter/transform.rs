@@ -251,8 +251,8 @@ pub fn namespace_table(configuration: &Rc<TransformerConfiguration>, document: &
                 .map(|info| {
                     format!(
                         "({}, {})",
-                        rust_string_literal(&info.clr_namespace().unwrap_or_default()),
-                        rust_string_literal(&info.clr_assembly_name().unwrap_or_default())
+                        rust_string_literal(&info.clr_namespace),
+                        rust_string_literal(info.clr_assembly_name.as_deref().unwrap_or(""))
                     )
                 })
                 .collect();

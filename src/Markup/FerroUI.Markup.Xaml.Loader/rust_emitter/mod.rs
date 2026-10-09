@@ -78,12 +78,17 @@
 //!
 //! Call form C (the untyped invokers) is not emitted at all: a node that
 //! would need it makes the document not eligible. That covers members of
-//! metadata without a typed function, markup extensions, bindings, templates
-//! and deferred content, styles, resources, event handlers, `x:Type`, flags
-//! enumerations, indexers and everything that needs the parent stack. The
-//! transform still runs against the run-time type system (the host of the
-//! emitter links the framework); the source scanner of section 9.5 replaces
-//! that later.
+//! metadata without a typed function, event handlers and indexers.
+//!
+//! # The type system
+//!
+//! The transform ([`transform_group`]) runs against any type system, and the
+//! emitter reads what it needs beyond the contracts of the compiler through
+//! [`emit_types::EmitTypes`]. The host of this crate is the run-time type
+//! system ([`EmitterHost::runtime`], [`runtime_types::RuntimeEmitTypes`]: the
+//! host links the framework and the types are the ones the process
+//! registered); the build-time type system over the models of the crates
+//! (`ferroui-build`, section 9.5) is the other implementation.
 
 mod compiled;
 mod compiled_resources;
@@ -91,14 +96,17 @@ pub mod emit_types;
 mod emitter;
 pub mod runtime_types;
 mod source;
+mod transform;
 mod xaml_metadata;
 
 pub use compiled::{
-    compile_documents, generate_class_file, generate_file, ClassConstructor, ClassFile, CompiledDocument, GeneratedFile,
+    compile_documents, compile_documents_with, generate_class_file, generate_file, generate_file_with, ClassConstructor, ClassFile,
+    CompiledDocument, EmitterHost, GeneratedFile,
 };
+pub use transform::{transform_group, DocumentSource, TransformOptions, TransformedDocument};
 #[cfg(any(test, feature = "testing"))]
 pub use compiled::{transformed_class_group, transformed_tree};
-pub(crate) use compiled_resources::CompiledMarkupTypeSystem;
+pub use compiled_resources::CompiledMarkupTypeSystem;
 pub use compiled_resources::CompiledDocumentBuildMethod;
 pub use emitter::{emit_document, UnsupportedNode};
 pub use xaml_metadata::{DocumentModel, XamlMetadata};
