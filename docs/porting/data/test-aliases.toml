@@ -1,0 +1,301 @@
+# Upstream tests that the port has under another name, and upstream tests that are deliberately not ported.
+# Read by scripts/port-status/test_gaps.py (the format is described at its top). An entry applies only to a test
+# that was not found by name; a waived test is listed with its reason and is not counted as missing.
+#
+# The rule of the port is upstream's test names. An alias is for a name that cannot be kept: one upstream theory
+# that became several tests, two upstream files with a test of the same name that share one Rust file, or a
+# member that the port names differently because it is a different member. A test whose subject is not ported
+# yet, or which needs a crate other than the one its upstream file belongs to, is NOT waived: it stays in the
+# count of missing tests.
+
+# --- Aliases --------------------------------------------------------------------------------------------------
+
+[[alias]]
+project = "Avalonia.Base.UnitTests"
+file = "Media/Fonts/Tables/DecyclerTests.cs"
+test = "Constructor_Throws_When_MaxDepth_Is_Less_Than_One"
+rust = ["constructor_throws_when_max_depth_is_zero", "constructor_throws_when_max_depth_is_minus_one", "constructor_throws_when_max_depth_is_min_value"]
+reason = "one theory, three tests: one per row"
+
+[[alias]]
+project = "Avalonia.Base.UnitTests"
+file = "Media/Fonts/TestInfrastructure/SyntheticFontTests.cs"
+test = "ToPlatformTypeface_Snapshots_The_Tables_At_Call_Time"
+rust = ["to_font_memory_snapshots_the_tables_at_call_time"]
+reason = "the synthetic font of the port hands out a font memory (`to_font_memory`) where upstream's hands out a platform typeface"
+
+[[alias]]
+project = "Avalonia.Base.UnitTests"
+file = "Media/TextFormatting/FormattingBufferHelperTests.cs"
+test = "Should_Keep_Small_Buffer_Stack"
+rust = ["should_keep_small_buffer_list"]
+reason = "a stack is a `Vec` in the port: `ClearThenResetIfTooLarge(Stack<T>)` is the list overload"
+
+[[alias]]
+project = "Avalonia.Base.UnitTests"
+file = "Media/TextFormatting/FormattingBufferHelperTests.cs"
+test = "Should_Reset_Large_Buffer_Stack"
+rust = ["should_reset_large_buffer_list"]
+reason = "a stack is a `Vec` in the port: `ClearThenResetIfTooLarge(Stack<T>)` is the list overload"
+
+[[alias]]
+project = "Avalonia.Base.UnitTests"
+file = "Styling/StyleTests.cs"
+test = "Should_Set_Owner_On_Assigned_Resources"
+rust = ["style_should_set_owner_on_assigned_resources"]
+reason = "StyleTests.cs and StylesTests.cs have tests of the same name and share styling/style_tests.rs: prefixed with the class"
+
+[[alias]]
+project = "Avalonia.Base.UnitTests"
+file = "Styling/StyleTests.cs"
+test = "Should_Set_Owner_On_Assigned_Resources_2"
+rust = ["style_should_set_owner_on_assigned_resources_2"]
+reason = "StyleTests.cs and StylesTests.cs have tests of the same name and share styling/style_tests.rs: prefixed with the class"
+
+[[alias]]
+project = "Avalonia.Base.UnitTests"
+file = "Styling/StylesTests.cs"
+test = "Should_Set_Owner_On_Assigned_Resources"
+rust = ["styles_should_set_owner_on_assigned_resources"]
+reason = "StyleTests.cs and StylesTests.cs have tests of the same name and share styling/style_tests.rs: prefixed with the class"
+
+[[alias]]
+project = "Avalonia.Base.UnitTests"
+file = "Styling/StylesTests.cs"
+test = "Should_Set_Owner_On_Assigned_Resources_2"
+rust = ["styles_should_set_owner_on_assigned_resources_2"]
+reason = "StyleTests.cs and StylesTests.cs have tests of the same name and share styling/style_tests.rs: prefixed with the class"
+
+[[alias]]
+project = "Avalonia.Base.UnitTests"
+file = "Styling/StylesTests.cs"
+test = "Should_Set_Owner_On_Child_Style"
+rust = ["styles_should_set_owner_on_child_style"]
+reason = "prefixed with the class, as the other tests of StylesTests.cs in styling/style_tests.rs"
+
+[[alias]]
+project = "Avalonia.Base.UnitTests"
+file = "Styling/StylesTests.cs"
+test = "Should_Set_Owner_On_Child_Style_2"
+rust = ["styles_should_set_owner_on_child_style_2"]
+reason = "prefixed with the class, as the other tests of StylesTests.cs in styling/style_tests.rs"
+
+[[alias]]
+project = "Avalonia.Base.UnitTests"
+file = "Styling/StylesTests.cs"
+test = "Finds_Resource_In_Merged_Dictionary"
+rust = ["styles_finds_resource_in_merged_dictionary"]
+reason = "prefixed with the class, as the other tests of StylesTests.cs in styling/style_tests.rs"
+
+[[alias]]
+project = "Avalonia.Base.UnitTests"
+file = "Animation/StyleAnimationTests.cs"
+test = "Application_ControlTheme_Applies_Animation"
+rust = ["control_theme_applies_animation"]
+reason = "the control theme is in the resources of the root: the application class is in the controls crate"
+
+[[alias]]
+project = "Avalonia.Base.UnitTests"
+file = "Animation/StyleAnimationTests.cs"
+test = "Application_ControlTheme_Applies_Animation_With_Bound_KeyFrame_Values"
+rust = ["control_theme_applies_animation_with_bound_key_frame_values"]
+reason = "the control theme is in the resources of the root: the application class is in the controls crate"
+
+[[alias]]
+project = "Avalonia.Base.UnitTests"
+file = "Input/PointerOverTests.cs"
+test = "TouchMove_Should_Not_Set_IsPointerOver"
+rust = ["touch_move_should_not_set_is_pointer_over_and_cancel_disposes_pointer"]
+reason = "one Rust test continues with the cancellation of the touch"
+
+# --- Waivers --------------------------------------------------------------------------------------------------
+
+[[waive]]
+project = "Avalonia.Base.UnitTests"
+file = "SourceGenerators/*"
+reason = "tests of a C# source generator (the cross-thread proxy generator), which the port does not have"
+
+[[waive]]
+project = "Avalonia.Base.UnitTests"
+file = "Data/Core/Parsers/BindingExpressionVisitorTests.cs"
+reason = "LINQ expression trees have no counterpart: binding paths are built with the path builder (docs/porting/xaml.md, 3.6.1)"
+
+[[waive]]
+project = "Avalonia.Base.UnitTests"
+file = "Data/Core/Plugins/DataAnnotationsValidationPluginTests.cs"
+reason = "System.ComponentModel.DataAnnotations has no counterpart"
+
+[[waive]]
+project = "Avalonia.Base.UnitTests"
+file = "Data/Core/BindingExpressionTests.DataValidation.cs"
+test = "*DataAnnotation*"
+reason = "System.ComponentModel.DataAnnotations has no counterpart"
+
+[[waive]]
+project = "Avalonia.Base.UnitTests"
+file = "Data/ReflectionClrPropertyInfoTests.cs"
+reason = "compiles accessors from reflected property information: the port has no reflection; property accessors are declared (markup metadata)"
+
+[[waive]]
+project = "Avalonia.Base.UnitTests"
+file = "AvaloniaObjectTests_Threading.cs"
+reason = "an object cannot be reached from another thread (`Ref<T>` is not `Send`): the access the tests expect to throw does not compile"
+
+[[waive]]
+project = "Avalonia.Base.UnitTests"
+file = "AvaloniaObjectTests_*.cs"
+test = "*Executes_On_UI*Thread"
+reason = "an observable bound to a property cannot produce a value on another thread (observers are not `Send`)"
+
+[[waive]]
+project = "Avalonia.Base.UnitTests"
+file = "Media/FontManagerTests.cs"
+test = "TryGetGlyphTypeface_Should_Be_Thread_Safe_For_Embedded_Fonts"
+reason = "the font manager is bound to its thread (`Rc`): it cannot be called from several threads"
+
+[[waive]]
+project = "Avalonia.Base.UnitTests"
+file = "DispatcherExecutionContextTests.cs"
+reason = "the .NET execution context and the culture of a thread flowing into dispatcher operations have no counterpart"
+
+[[waive]]
+project = "Avalonia.Base.UnitTests"
+file = "DispatcherTests.cs"
+test = "MediaContextRenderScheduling*ExecutionContext*"
+reason = "the .NET execution context has no counterpart"
+
+[[waive]]
+project = "Avalonia.Base.UnitTests"
+file = "AvaloniaObjectTests_Binding.cs"
+test = "TwoWay_*Should_Not_Update_Source_When_*"
+reason = "skipped upstream (\"Will need changes to binding internals in order to pass\")"
+
+[[waive]]
+project = "Avalonia.Base.UnitTests"
+file = "AssetLoaderTests.cs"
+test = "AssemblyName_With_Non_ASCII_Should_Load_Avares"
+reason = "skipped upstream (\"RegisterResUriParsers breaks this test\")"
+
+[[waive]]
+project = "Avalonia.Base.UnitTests"
+file = "Styling/StyleTests.cs"
+test = "Nested_Style_Without_Nesting_Operator_Throws"
+reason = "skipped upstream (\"TODO\")"
+
+# Null arguments: a reference cannot be null in the port, so the argument check has nothing to check.
+
+[[waive]]
+project = "Avalonia.Base.UnitTests"
+file = "AvaloniaPropertyTests.cs"
+test = "Property_Equals_Should_Handle_Null"
+reason = "null argument: a property reference cannot be null"
+
+[[waive]]
+project = "Avalonia.Base.UnitTests"
+file = "Collections/AvaloniaDictionaryTests.cs"
+test = "Constructor_Should_Throw_ArgumentNullException_When_Collection_Is_Null"
+reason = "null argument: the collection cannot be null"
+
+[[waive]]
+project = "Avalonia.Base.UnitTests"
+file = "Collections/AvaloniaListTests.cs"
+test = "*_With_Null_Should_Throw_Exception"
+reason = "null argument: the items cannot be null"
+
+[[waive]]
+project = "Avalonia.Base.UnitTests"
+file = "Collections/AvaloniaListTests.cs"
+test = "Can_CopyTo_Array_Of_Base_Type"
+reason = "array covariance (copying strings into an array of objects) has no counterpart"
+
+[[waive]]
+project = "Avalonia.Base.UnitTests"
+file = "Styling/ResourceDictionaryTests.cs"
+test = "Cannot_Add_Null_Key"
+reason = "null argument: a resource key cannot be null"
+
+[[waive]]
+project = "Avalonia.Base.UnitTests"
+file = "Input/DataFormatTests.cs"
+test = "CreateInProcessFormat_Throws_On_Null_Identifier"
+reason = "null argument: the identifier cannot be null"
+
+[[waive]]
+project = "Avalonia.Base.UnitTests"
+file = "Media/ColorTests.cs"
+test = "Parse_Throws_ArgumentNullException_For_Null_Input"
+reason = "null argument: the text cannot be null"
+
+[[waive]]
+project = "Avalonia.Base.UnitTests"
+file = "Media/Fonts/FamilyNameCollectionTests.cs"
+test = "Exception_Should_Be_Thrown_If_Names_Is_Null"
+reason = "null argument: the names cannot be null"
+
+[[waive]]
+project = "Avalonia.Base.UnitTests"
+file = "Media/Fonts/FontFamilyKeyTests.cs"
+test = "Exception_Should_Be_Thrown_If_Source_Is_Null"
+reason = "null argument: the source cannot be null"
+
+[[waive]]
+project = "Avalonia.Base.UnitTests"
+file = "Media/NormalizedVariationPositionTests.cs"
+test = "FromCoordinates_Dictionary_Throws_On_Null"
+reason = "null argument: the coordinates cannot be null"
+
+[[waive]]
+project = "Avalonia.Base.UnitTests"
+file = "Utilities/ObjectPoolTests.cs"
+test = "Constructor_Throws_When_Factory_Is_Null"
+reason = "null argument: the factory cannot be null"
+
+[[waive]]
+project = "Avalonia.Base.UnitTests"
+file = "Utilities/ObjectPoolTests.cs"
+test = "Return_Ignores_Null"
+reason = "null argument: an item cannot be null"
+
+[[waive]]
+project = "Avalonia.Base.UnitTests"
+file = "Utilities/StringSplitterTests.cs"
+test = "SplitRespectingBrackets_WithoutBrackets_NullReturnsEmptyArray"
+reason = "null argument: the input cannot be null"
+
+# Members that exist only in the managed form of a type.
+
+[[waive]]
+project = "Avalonia.Base.UnitTests"
+file = "Media/NormalizedVariationPositionTests.cs"
+test = "Coordinates_Property_Returns_Empty_Not_Default_For_Default_Struct"
+reason = "an immutable array has no uninitialised state in the port: the coordinates of the default position are an empty slice"
+
+[[waive]]
+project = "Avalonia.Base.UnitTests"
+file = "Media/NormalizedVariationPositionTests.cs"
+test = "Equality_With_Boxed_Object"
+reason = "`Equals(object)` has no counterpart: equality is `PartialEq` between positions"
+
+[[waive]]
+project = "Avalonia.Base.UnitTests"
+file = "Media/Fonts/FontCollectionKeyTests.cs"
+test = "Non_Generic_CompareTo_*"
+reason = "the non-generic `IComparable.CompareTo(object)` has no counterpart: keys are compared with `Ord`"
+
+[[waive]]
+project = "Avalonia.Base.UnitTests"
+file = "Media/Fonts/UnmanagedFontMemoryTests.cs"
+test = "Pin_IncrementsPinCount_And_Dispose_Throws_WhenPinned"
+reason = "memory is not pinned in the port: a table served by the font memory is a counted reference that stays valid after dispose"
+
+[[waive]]
+project = "Avalonia.Base.UnitTests"
+file = "Data/Core/BindingExpressionTests.Property.cs"
+test = "Should_Get_Simple_Property_From_Base_Class"
+reason = "model types have no inheritance: there is no inherited member to look up"
+
+[[waive]]
+project = "Avalonia.Base.UnitTests"
+file = "Data/Core/BindingExpressionTests.Property.cs"
+test = "Should_Not_Throw_Exception_On_Duplicate_Properties"
+reason = "model types have no inheritance: a member cannot hide another"
