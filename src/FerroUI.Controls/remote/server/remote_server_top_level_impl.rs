@@ -379,7 +379,12 @@ impl RemoteServerSurface {
         let mut state = self.state();
 
         match state.format {
-            None => state.framebuffer = Framebuffer::empty(),
+            // The empty framebuffer of this top-level: kept while it is one.
+            None => {
+                if state.framebuffer.stride() > 0 {
+                    state.framebuffer = Framebuffer::empty();
+                }
+            }
             Some(format) => {
                 if state.framebuffer.format() != format
                     || state.framebuffer.client_size() != state.client_size
