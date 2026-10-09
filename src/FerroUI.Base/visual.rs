@@ -102,7 +102,7 @@ thread_local! {
 }
 crate::ferro_class_info!(Visual { new: Visual::new });
 
-impl FerroObjectImpl for Visual {
+crate::ferro_overrides! { impl FerroObjectImpl for Visual {
     fn constructed(this: &Self) {
         Self::parent_constructed(this);
 
@@ -125,7 +125,7 @@ impl FerroObjectImpl for Visual {
             }
         }
     }
-}
+} }
 
 impl StyledElementImpl for Visual {
     fn logical_children_collection_changed(this: &Self, e: &NotifyCollectionChangedEventArgs<'_, Ref<StyledElement>>) {

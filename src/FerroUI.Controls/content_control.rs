@@ -46,7 +46,7 @@ ferro_impl_classes!(
     TemplatedControlImpl
 );
 
-impl FerroObjectImpl for ContentControl {
+ferroui_base::ferro_overrides! { impl FerroObjectImpl for ContentControl {
     fn constructed(this: &Self) {
         Self::parent_constructed(this);
         this.update_pseudo_classes();
@@ -59,7 +59,7 @@ impl FerroObjectImpl for ContentControl {
             this.content_changed(change);
         }
     }
-}
+} }
 
 impl ContentControlImpl for ContentControl {
     fn register_content_presenter(this: &Self, presenter: &ContentPresenter) -> bool {

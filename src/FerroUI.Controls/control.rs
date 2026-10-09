@@ -114,7 +114,7 @@ ferroui_base::ferro_class_info!(Control { new: Control::new });
 
 ferro_impl_classes!(Control: StyledElementImpl, LayoutableImpl, InteractiveImpl);
 
-impl FerroObjectImpl for Control {
+ferroui_base::ferro_overrides! { impl FerroObjectImpl for Control {
     fn on_property_changed(this: &Self, change: &FerroPropertyChangedEventArgs<'_>) {
         Self::parent_on_property_changed(this, change);
 
@@ -147,7 +147,7 @@ impl FerroObjectImpl for Control {
         crate::DataValidationErrors::set_error(this, error);
         Self::parent_update_data_validation(this, property, state, error);
     }
-}
+} }
 
 impl VisualImpl for Control {
     fn on_attached_to_visual_tree_core(this: &Self, e: &VisualTreeAttachmentEventArgs) {

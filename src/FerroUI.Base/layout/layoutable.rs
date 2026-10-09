@@ -85,7 +85,7 @@ ferro_class! {
 }
 crate::ferro_class_info!(Layoutable { new: Layoutable::new });
 
-impl FerroObjectImpl for Layoutable {
+crate::ferro_overrides! { impl FerroObjectImpl for Layoutable {
     fn on_property_changed(this: &Self, change: &FerroPropertyChangedEventArgs<'_>) {
         Self::parent_on_property_changed(this, change);
 
@@ -119,7 +119,7 @@ impl FerroObjectImpl for Layoutable {
             }
         }
     }
-}
+} }
 
 impl StyledElementImpl for Layoutable {
     fn invalidate_styles(this: &Self, recurse: bool) {

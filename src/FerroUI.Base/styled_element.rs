@@ -134,7 +134,7 @@ crate::ferro_class_info!(StyledElement {
     ],
 });
 
-impl FerroObjectImpl for StyledElement {
+crate::ferro_overrides! { impl FerroObjectImpl for StyledElement {
     fn constructed(this: &Self) {
         Self::parent_constructed(this);
         if this.is_logical_root() {
@@ -155,7 +155,7 @@ impl FerroObjectImpl for StyledElement {
             }
         }
     }
-}
+} }
 
 impl StyledElementImpl for StyledElement {
     fn begin_init(this: &Self) {
