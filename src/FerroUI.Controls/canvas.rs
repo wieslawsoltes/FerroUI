@@ -27,7 +27,7 @@ ferroui_base::ferro_class_info!(Canvas { new: Canvas::new });
 
 ferro_impl_classes!(Canvas: StyledElementImpl, VisualImpl, InteractiveImpl, InputElementImpl, ControlImpl, PanelImpl);
 
-impl FerroObjectImpl for Canvas {}
+ferroui_base::ferro_impl_classes!(Canvas: FerroObjectImpl);
 
 impl LayoutableImpl for Canvas {
     fn measure_override(this: &Self, _available_size: Size) -> Size {

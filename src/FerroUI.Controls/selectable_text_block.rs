@@ -46,11 +46,11 @@ pub struct SelectableTextBlock {
 ferro_class!(SelectableTextBlock: TextBlock);
 ferroui_base::ferro_class_info!(SelectableTextBlock { new: SelectableTextBlock::new });
 
-impl StyledElementImpl for SelectableTextBlock {}
-impl VisualImpl for SelectableTextBlock {}
-impl LayoutableImpl for SelectableTextBlock {}
-impl InteractiveImpl for SelectableTextBlock {}
-impl ControlImpl for SelectableTextBlock {}
+ferroui_base::ferro_impl_classes!(SelectableTextBlock: StyledElementImpl);
+ferroui_base::ferro_impl_classes!(SelectableTextBlock: VisualImpl);
+ferroui_base::ferro_impl_classes!(SelectableTextBlock: LayoutableImpl);
+ferroui_base::ferro_impl_classes!(SelectableTextBlock: InteractiveImpl);
+ferroui_base::ferro_impl_classes!(SelectableTextBlock: ControlImpl);
 
 impl FerroObjectImpl for SelectableTextBlock {
     fn constructed(this: &Self) {

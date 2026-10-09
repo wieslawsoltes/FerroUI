@@ -38,7 +38,7 @@ ferro_impl_classes!(
     SelectingItemsControlImpl
 );
 
-impl FerroObjectImpl for ListBox {}
+ferroui_base::ferro_impl_classes!(ListBox: FerroObjectImpl);
 
 impl InputElementImpl for ListBox {
     fn on_key_down(this: &Self, e: &KeyEventArgs) {

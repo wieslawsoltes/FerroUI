@@ -48,7 +48,7 @@ impl ControlImpl for Thumb {
     }
 }
 
-impl FerroObjectImpl for Thumb {}
+ferroui_base::ferro_impl_classes!(Thumb: FerroObjectImpl);
 
 impl InputElementImpl for Thumb {
     fn on_pointer_capture_lost(this: &Self, e: &PointerCaptureLostEventArgs) {

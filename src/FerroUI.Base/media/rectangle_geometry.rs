@@ -15,7 +15,7 @@ pub struct RectangleGeometry {
 ferro_class!(RectangleGeometry: Geometry);
 crate::ferro_class_info!(RectangleGeometry { new: RectangleGeometry::new });
 
-impl FerroObjectImpl for RectangleGeometry {}
+crate::ferro_impl_classes!(RectangleGeometry: FerroObjectImpl);
 
 impl GeometryImpl for RectangleGeometry {
     fn clone_geometry(this: &Self) -> Ref<Geometry> {

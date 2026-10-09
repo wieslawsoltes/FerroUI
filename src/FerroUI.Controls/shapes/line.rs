@@ -26,7 +26,7 @@ ferro_impl_classes!(
     ControlImpl
 );
 
-impl FerroObjectImpl for Line {}
+ferroui_base::ferro_impl_classes!(Line: FerroObjectImpl);
 
 impl ShapeImpl for Line {
     fn create_defining_geometry(this: &Self) -> Option<Ref<Geometry>> {

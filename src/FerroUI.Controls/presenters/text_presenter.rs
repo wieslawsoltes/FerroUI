@@ -73,10 +73,10 @@ ferro_class! {
 }
 ferroui_base::ferro_class_info!(TextPresenter { new: TextPresenter::new });
 
-impl InteractiveImpl for TextPresenter {}
-impl InputElementImpl for TextPresenter {}
-impl ControlImpl for TextPresenter {}
-impl StyledElementImpl for TextPresenter {}
+ferroui_base::ferro_impl_classes!(TextPresenter: InteractiveImpl);
+ferroui_base::ferro_impl_classes!(TextPresenter: InputElementImpl);
+ferroui_base::ferro_impl_classes!(TextPresenter: ControlImpl);
+ferroui_base::ferro_impl_classes!(TextPresenter: StyledElementImpl);
 
 impl FerroObjectImpl for TextPresenter {
     fn on_property_changed(this: &Self, change: &FerroPropertyChangedEventArgs<'_>) {

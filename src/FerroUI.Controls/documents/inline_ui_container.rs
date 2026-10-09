@@ -20,7 +20,7 @@ pub struct InlineUIContainer {
 ferro_class!(InlineUIContainer: Inline);
 ferroui_base::ferro_class_info!(InlineUIContainer { new: InlineUIContainer::new });
 
-impl StyledElementImpl for InlineUIContainer {}
+ferroui_base::ferro_impl_classes!(InlineUIContainer: StyledElementImpl);
 
 impl FerroObjectImpl for InlineUIContainer {
     fn on_property_changed(this: &Self, change: &FerroPropertyChangedEventArgs<'_>) {

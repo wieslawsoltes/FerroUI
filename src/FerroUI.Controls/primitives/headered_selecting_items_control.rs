@@ -49,7 +49,7 @@ ferro_impl_classes!(
     SelectingItemsControlImpl
 );
 
-impl FerroObjectImpl for HeaderedSelectingItemsControl {}
+ferroui_base::ferro_impl_classes!(HeaderedSelectingItemsControl: FerroObjectImpl);
 
 impl StyledElementImpl for HeaderedSelectingItemsControl {
     fn on_attached_to_logical_tree(this: &Self, e: &LogicalTreeAttachmentEventArgs) {

@@ -35,7 +35,7 @@ impl ControlImpl for Label {
     }
 }
 
-impl FerroObjectImpl for Label {}
+ferroui_base::ferro_impl_classes!(Label: FerroObjectImpl);
 
 impl InputElementImpl for Label {
     fn on_access_key(this: &Self, e: &dyn IRoutedEventArgs) {

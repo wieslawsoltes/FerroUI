@@ -66,7 +66,7 @@ ferro_class! {
     }
 }
 
-impl FerroObjectImpl for PopupFlyoutBase {}
+ferroui_base::ferro_impl_classes!(PopupFlyoutBase: FerroObjectImpl);
 
 impl FlyoutBaseImpl for PopupFlyoutBase {
     /// Shows the flyout at the given control. Sealed in the reference:

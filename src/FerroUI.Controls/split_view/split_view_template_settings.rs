@@ -17,7 +17,7 @@ ferro_class!(SplitViewTemplateSettings: FerroObject);
 // The constructor is internal upstream: no default constructor is declared.
 ferro_class_info!(SplitViewTemplateSettings {});
 
-impl FerroObjectImpl for SplitViewTemplateSettings {}
+ferroui_base::ferro_impl_classes!(SplitViewTemplateSettings: FerroObjectImpl);
 
 ferro_properties! {
     impl SplitViewTemplateSettings {

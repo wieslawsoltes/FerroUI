@@ -34,7 +34,7 @@ ferro_impl_classes!(
     TemplatedControlImpl
 );
 
-impl FerroObjectImpl for TabStrip {}
+ferroui_base::ferro_impl_classes!(TabStrip: FerroObjectImpl);
 
 impl ItemsControlImpl for TabStrip {
     fn create_container_for_item_override(

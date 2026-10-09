@@ -32,7 +32,7 @@ ferro_impl_classes!(
     PanelImpl
 );
 
-impl FerroObjectImpl for RelativePanel {}
+ferroui_base::ferro_impl_classes!(RelativePanel: FerroObjectImpl);
 
 impl LayoutableImpl for RelativePanel {
     fn measure_override(this: &Self, available_size: Size) -> Size {

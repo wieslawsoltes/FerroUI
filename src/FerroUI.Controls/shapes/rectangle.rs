@@ -19,7 +19,7 @@ ferro_class!(Rectangle: Shape);
 ferroui_base::ferro_class_info!(Rectangle { new: Rectangle::new });
 ferro_impl_classes!(Rectangle: StyledElementImpl, VisualImpl, InteractiveImpl, InputElementImpl, ControlImpl);
 
-impl FerroObjectImpl for Rectangle {}
+ferroui_base::ferro_impl_classes!(Rectangle: FerroObjectImpl);
 
 impl ShapeImpl for Rectangle {
     fn create_defining_geometry(this: &Self) -> Option<Ref<Geometry>> {

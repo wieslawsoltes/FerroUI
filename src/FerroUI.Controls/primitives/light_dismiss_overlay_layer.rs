@@ -31,7 +31,7 @@ ferro_impl_classes!(
     ControlImpl
 );
 
-impl FerroObjectImpl for LightDismissOverlayLayer {}
+ferroui_base::ferro_impl_classes!(LightDismissOverlayLayer: FerroObjectImpl);
 
 impl VisualImpl for LightDismissOverlayLayer {
     fn custom_hit_test(this: &Self, point: Point) -> Option<bool> {

@@ -16,7 +16,7 @@ ferro_class!(PipsPagerTemplateSettings: FerroObject);
 // The constructor is internal upstream: no default constructor is declared.
 ferro_class_info!(PipsPagerTemplateSettings {});
 
-impl FerroObjectImpl for PipsPagerTemplateSettings {}
+ferroui_base::ferro_impl_classes!(PipsPagerTemplateSettings: FerroObjectImpl);
 
 ferro_properties! {
     impl PipsPagerTemplateSettings {

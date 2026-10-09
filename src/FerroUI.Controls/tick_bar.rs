@@ -76,7 +76,7 @@ ferro_class!(TickBar: Control);
 ferroui_base::ferro_class_info!(TickBar { new: TickBar::new });
 ferro_impl_classes!(TickBar: StyledElementImpl, LayoutableImpl, InteractiveImpl, InputElementImpl, ControlImpl);
 
-impl FerroObjectImpl for TickBar {}
+ferroui_base::ferro_impl_classes!(TickBar: FerroObjectImpl);
 
 impl VisualImpl for TickBar {
     /// Draws the ticks.

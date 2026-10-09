@@ -19,7 +19,7 @@ ferro_class!(Ellipse: Shape);
 ferroui_base::ferro_class_info!(Ellipse { new: Ellipse::new });
 ferro_impl_classes!(Ellipse: StyledElementImpl, VisualImpl, InteractiveImpl, InputElementImpl, ControlImpl);
 
-impl FerroObjectImpl for Ellipse {}
+ferroui_base::ferro_impl_classes!(Ellipse: FerroObjectImpl);
 
 impl ShapeImpl for Ellipse {
     fn create_defining_geometry(this: &Self) -> Option<Ref<Geometry>> {

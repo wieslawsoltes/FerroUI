@@ -41,7 +41,7 @@ ferro_impl_classes!(
     ControlImpl
 );
 
-impl FerroObjectImpl for FlexPanel {}
+ferroui_base::ferro_impl_classes!(FlexPanel: FerroObjectImpl);
 
 ferroui_base::ferro_properties! {
     impl FlexPanel {

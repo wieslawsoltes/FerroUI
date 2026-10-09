@@ -26,10 +26,10 @@ pub struct AccessText {
 ferro_class!(AccessText: TextBlock);
 ferroui_base::ferro_class_info!(AccessText { new: AccessText::new });
 
-impl StyledElementImpl for AccessText {}
-impl LayoutableImpl for AccessText {}
-impl InteractiveImpl for AccessText {}
-impl InputElementImpl for AccessText {}
+ferroui_base::ferro_impl_classes!(AccessText: StyledElementImpl);
+ferroui_base::ferro_impl_classes!(AccessText: LayoutableImpl);
+ferroui_base::ferro_impl_classes!(AccessText: InteractiveImpl);
+ferroui_base::ferro_impl_classes!(AccessText: InputElementImpl);
 impl ControlImpl for AccessText {
     fn on_create_automation_peer(this: &Self) -> Ref<crate::automation::peers::AutomationPeer> {
         crate::automation::peers::NoneAutomationPeer::new(this).upcast()

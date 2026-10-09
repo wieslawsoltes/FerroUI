@@ -37,7 +37,7 @@ pub struct ConnectedAnimationService {
 ferro_class!(ConnectedAnimationService: FerroObject);
 ferro_class_info!(ConnectedAnimationService {});
 
-impl FerroObjectImpl for ConnectedAnimationService {}
+ferroui_base::ferro_impl_classes!(ConnectedAnimationService: FerroObjectImpl);
 
 impl ConnectedAnimationService {
     /// Creates the class data; see [`ferroui_base::FerroObject::construct`].

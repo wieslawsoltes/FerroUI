@@ -44,7 +44,7 @@ ferro_impl_classes!(
     PanelImpl
 );
 
-impl FerroObjectImpl for DockPanel {}
+ferroui_base::ferro_impl_classes!(DockPanel: FerroObjectImpl);
 
 impl LayoutableImpl for DockPanel {
     /// Updates the desired size of the panel. Called by parent elements; this

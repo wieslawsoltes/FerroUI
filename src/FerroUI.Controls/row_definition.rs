@@ -13,7 +13,7 @@ pub struct RowDefinition {
 ferro_class!(RowDefinition: DefinitionBase);
 ferroui_base::ferro_class_info!(RowDefinition { new: RowDefinition::new });
 
-impl FerroObjectImpl for RowDefinition {}
+ferroui_base::ferro_impl_classes!(RowDefinition: FerroObjectImpl);
 
 impl DefinitionBaseImpl for RowDefinition {
     fn user_size_value_cache(this: &Self) -> GridLength {

@@ -73,7 +73,7 @@ impl IAddChild<String> for SpanAddChild {
     }
 }
 
-impl StyledElementImpl for Span {}
+ferroui_base::ferro_impl_classes!(Span: StyledElementImpl);
 
 impl FerroObjectImpl for Span {
     fn constructed(this: &Self) {

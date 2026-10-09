@@ -28,7 +28,7 @@ ferro_impl_classes!(
     StackPanelImpl
 );
 
-impl FerroObjectImpl for ReversibleStackPanel {}
+ferroui_base::ferro_impl_classes!(ReversibleStackPanel: FerroObjectImpl);
 
 impl LayoutableImpl for ReversibleStackPanel {
     fn arrange_override(this: &Self, final_size: Size) -> Size {

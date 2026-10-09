@@ -21,7 +21,7 @@ pub struct PolylineGeometry {
 ferro_class!(PolylineGeometry: Geometry);
 crate::ferro_class_info!(PolylineGeometry { new: PolylineGeometry::new });
 
-impl FerroObjectImpl for PolylineGeometry {}
+crate::ferro_impl_classes!(PolylineGeometry: FerroObjectImpl);
 
 impl GeometryImpl for PolylineGeometry {
     fn clone_geometry(this: &Self) -> Ref<Geometry> {

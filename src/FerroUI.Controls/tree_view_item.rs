@@ -70,7 +70,7 @@ impl ControlImpl for TreeViewItem {
     }
 }
 
-impl FerroObjectImpl for TreeViewItem {}
+ferroui_base::ferro_impl_classes!(TreeViewItem: FerroObjectImpl);
 
 impl StyledElementImpl for TreeViewItem {
     fn on_attached_to_logical_tree(this: &Self, e: &LogicalTreeAttachmentEventArgs) {

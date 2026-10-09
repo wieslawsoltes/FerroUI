@@ -63,7 +63,7 @@ ferro_class!(WindowDrawnDecorations: StyledElement);
 ferroui_base::ferro_class_info!(WindowDrawnDecorations { new: WindowDrawnDecorations::new });
 ferro_impl_classes!(WindowDrawnDecorations: StyledElementImpl);
 
-impl FerroObjectImpl for WindowDrawnDecorations {}
+ferroui_base::ferro_impl_classes!(WindowDrawnDecorations: FerroObjectImpl);
 
 impl WindowDrawnDecorations {
     pub const PC_NORMAL: &'static str = ":normal";

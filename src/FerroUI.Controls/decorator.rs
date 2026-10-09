@@ -18,7 +18,7 @@ ferro_class!(Decorator: Control);
 ferroui_base::ferro_class_info!(Decorator { new: Decorator::new });
 ferro_impl_classes!(Decorator: StyledElementImpl, VisualImpl, InteractiveImpl, InputElementImpl, ControlImpl);
 
-impl FerroObjectImpl for Decorator {}
+ferroui_base::ferro_impl_classes!(Decorator: FerroObjectImpl);
 
 impl LayoutableImpl for Decorator {
     fn measure_override(this: &Self, available_size: Size) -> Size {

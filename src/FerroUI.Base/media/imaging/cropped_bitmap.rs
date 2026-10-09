@@ -24,7 +24,7 @@ ferro_class! {
 }
 crate::ferro_class_info!(CroppedBitmap { new: CroppedBitmap::new, interfaces: [std::rc::Rc<dyn crate::media::IImage>] });
 
-impl FerroObjectImpl for CroppedBitmap {}
+crate::ferro_impl_classes!(CroppedBitmap: FerroObjectImpl);
 
 impl CroppedBitmapImpl for CroppedBitmap {
     fn dispose(this: &Self) {
