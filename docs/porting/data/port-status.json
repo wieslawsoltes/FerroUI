@@ -518,9 +518,9 @@
     136
    ],
    "members": [
-    10280,
+    10281,
     11433,
-    1153
+    1152
    ],
    "interfaces": [
     247,
@@ -545,7 +545,7 @@
     "free item": 16,
     "getter fn": 4,
     "overload fn": 314,
-    "trait": 356,
+    "trait": 357,
     "trait fn": 75,
     "variant": 1793
    },
@@ -6189,6 +6189,8 @@
     "grid_mocks.rs",
     "i_clickable_control.rs",
     "i_command_source.rs",
+    "keyboard_navigation_tests_tab.rs",
+    "keyboard_navigation_tests_xy.rs",
     "layout_test_control.rs",
     "layoutable_tests_effective_viewport_changed.rs",
     "layoutable_tests_layout_rounding.rs",
@@ -6213,6 +6215,7 @@
     "page/tabbed_page_tests_data_template.rs",
     "platform/i_platform_handle.rs",
     "platform/platform_handle.rs",
+    "pointer_tests_base.rs",
     "presentation_source/renderer_factory.rs",
     "presenters/content_presenter_tests_in_template.rs",
     "presenters/content_presenter_tests_layout.rs",
@@ -6442,19 +6445,19 @@
    "scope": "in",
    "detail": "full",
    "files": [
-    7,
+    9,
     9,
     0
    ],
    "types": [
-    12,
+    17,
     18,
     0
    ],
    "members": [
-    146,
+    170,
     176,
-    0
+    3
    ],
    "interfaces": [
     0,
@@ -6470,9 +6473,10 @@
    ],
    "notApplicableFiles": 0,
    "matchKinds": {
-    "fn": 140,
+    "field": 2,
+    "fn": 161,
     "free item": 2,
-    "overload fn": 4
+    "overload fn": 5
    },
    "presentFiles": {
     "DesignWindowLoader.cs": [
@@ -6483,6 +6487,12 @@
     ],
     "Remote/FileWatcherTransport.cs": [
      "remote/file_watcher_transport.rs"
+    ],
+    "Remote/HtmlTransport/HtmlTransport.cs": [
+     "remote/html_transport/html_transport.rs"
+    ],
+    "Remote/HtmlTransport/SimpleWebSocketHttpServer.cs": [
+     "remote/html_transport/simple_web_socket_http_server.rs"
     ],
     "Remote/PreviewerWindowImpl.cs": [
      "remote/previewer_window_impl.rs"
@@ -8293,6 +8303,7 @@
     "rust_paths.rs",
     "test_support.rs",
     "xaml_il/runtime/compiled.rs",
+    "xaml_il/runtime/runtime_list.rs",
     "xaml_il/runtime/xaml_il_context.rs",
     "xamlx_runtime.rs"
    ]

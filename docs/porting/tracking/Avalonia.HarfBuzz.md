@@ -34,3 +34,5 @@ Rust sources of this crate that no upstream file maps to. Give each a reason in 
 | Rust file | Reason | Types defined |
 |---|---|---|
 | `hb.rs` | a thin safe wrapper over the HarfBuzz objects the shaper uses, with every unsafe block of the crate: the HarfBuzzSharp binding upstream | `Buffer`, `Direction`, `Face`, `Font`, `TableProvider` |
+
+Tests, examples and build scripts (not scanned): `harf_buzz_text_shaper_tests.rs`.
