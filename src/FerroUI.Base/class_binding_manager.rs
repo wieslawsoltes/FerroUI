@@ -68,3 +68,22 @@ impl ClassBindingManager {
         }
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn get_class_property_should_return_same_instance_for_same_class() {
+        let property1 = ClassBindingManager::get_class_property("Foo");
+        let property2 = ClassBindingManager::get_class_property("Foo");
+        assert!(std::ptr::eq(property1, property2));
+    }
+
+    #[test]
+    fn get_class_property_should_return_different_instances_for_different_classes() {
+        let property1 = ClassBindingManager::get_class_property("Foo");
+        let property2 = ClassBindingManager::get_class_property("Bar");
+        assert!(!std::ptr::eq(property1, property2));
+    }
+}
