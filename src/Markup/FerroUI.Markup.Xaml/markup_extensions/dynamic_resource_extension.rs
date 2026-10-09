@@ -17,7 +17,9 @@ use std::rc::{Rc, Weak};
 /// of the resources and of the theme variant.
 pub struct DynamicResourceExtension {
     this: Weak<DynamicResourceExtension>,
-    // Held as its expressions hold it: an element or a host weakly.
+    // Deviation (DEVIATIONS.md, Markup metadata and markup events): held as
+    // its expressions hold it, an element or a host weakly, where the managed
+    // extension holds `_anchor`.
     anchor: RefCell<Option<HeldAnchor>>,
     priority: Cell<BindingPriority>,
     theme_variant: RefCell<Option<ThemeVariant>>,

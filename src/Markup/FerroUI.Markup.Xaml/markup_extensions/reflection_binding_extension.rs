@@ -36,8 +36,9 @@ impl ReflectionBindingExtension {
 
     /// Creates the binding the extension describes.
     pub fn provide_value(&self, service_provider: &Rc<dyn IServiceProvider>) -> Rc<ReflectionBinding> {
-        // The type resolver of the binding is `serviceProvider.ResolveType` in the
-        // managed original: a delegate that holds the service provider, which is the
+        // Deviation (DEVIATIONS.md, Markup metadata and markup events): the type
+        // resolver of the binding is `serviceProvider.ResolveType` in the managed
+        // original: a delegate that holds the service provider, which is the
         // context of the build with the root object, the name scope and the parents it
         // was built with. The binding instance of an element of that tree holds the
         // binding, so held that way the tree would keep itself alive (the collector of

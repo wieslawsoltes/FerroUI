@@ -16,7 +16,8 @@ impl PropertyChangedExtensions {
     /// `model.WhenAnyValue(x => x.Property)`: the value of the property now
     /// and after every change notification that names it.
     ///
-    /// The managed original captures the model in the observable. A view
+    /// Deviation (DEVIATIONS.md, ControlCatalog sample): the managed
+    /// original captures the model in the observable. A view
     /// model that keeps an observable of its own properties (a property that
     /// is `this.WhenAnyValue(..)`) holds itself that way, and its collector
     /// frees it; here the observable holds the model weakly, and a

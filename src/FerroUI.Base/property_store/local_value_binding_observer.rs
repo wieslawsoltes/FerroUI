@@ -100,8 +100,8 @@ impl<T: PropertyValue> IDisposable for LocalValueBindingObserver<T> {
     }
 }
 
-// The source holds its observers, and the observer its subscription to the
-// source: in the managed original the observer is the object that subscribes
+// Deviation (DEVIATIONS.md, Property system): the source holds its observers,
+// and the observer its subscription to the source: in the managed original the observer is the object that subscribes
 // itself, and the collector frees the two when the object of the value store
 // is gone, the binding disposed or not. Here the observers the source holds
 // are objects of their own that hold this one weakly, the value store holds

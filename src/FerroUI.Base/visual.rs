@@ -441,8 +441,8 @@ impl VisualImpl for Visual {
     }
 }
 
-// The subscriptions to the values of the render-affecting properties are weak
-// events in the managed original (`InvalidatedWeakEvent`): the value does not
+// Deviation (DEVIATIONS.md, Visual tree): the subscriptions to the values of
+// the render-affecting properties are weak events in the managed original (`InvalidatedWeakEvent`): the value does not
 // keep the visual, and the entries of visuals that were collected are removed
 // from its list when the list is compacted. Here the handler of a visual holds
 // it weakly too, and the visual takes its handlers out of the lists when it is

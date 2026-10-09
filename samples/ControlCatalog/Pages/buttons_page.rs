@@ -95,7 +95,8 @@ impl ButtonsPage {
             move || weak.upgrade().is_some_and(|this| this.can_count())
         };
         *this.count_command.borrow_mut() = Some(RelayCommand::new(execute, can_execute));
-        // `DataContext = this;` in the managed original, where the collector frees a
+        // Deviation (DEVIATIONS.md, ControlCatalog sample): `DataContext = this;` in
+        // the managed original, where the collector frees a
         // page that holds itself. Here the page is its data context as an element
         // reference, which holds it weakly: the bindings of the document read the page
         // through it (`((pages:ButtonsPage)DataContext).CountCommand`).

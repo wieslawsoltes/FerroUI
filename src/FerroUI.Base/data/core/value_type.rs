@@ -709,9 +709,9 @@ impl ValueTypes {
     }
 
     /// Views a value as an object of the class hierarchy, if it is a
-    /// registered handle type. A registered element reference
-    /// ([`ElementRef<T>`](crate::ElementRef)) is viewed as the element it
-    /// refers to while that is alive: a value that is one (a `DataContext`
+    /// registered handle type. Deviation (DEVIATIONS.md, Bindings): a
+    /// registered element reference ([`ElementRef<T>`](crate::ElementRef))
+    /// is viewed as the element it refers to while that is alive: a value that is one (a `DataContext`
     /// that is an ancestor of its element) is the element to a binding.
     pub fn as_object(value: &dyn AnyValue) -> Option<Ref<FerroObject>> {
         if let Some(o) = value.downcast_ref::<Ref<FerroObject>>() {

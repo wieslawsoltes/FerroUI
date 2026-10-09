@@ -62,7 +62,8 @@ enum PathElement {
     SelfElement,
     Ancestor { ancestor_type: Option<&'static TypeInfo>, level: usize },
     VisualAncestor { ancestor_type: Option<&'static TypeInfo>, level: usize },
-    // The name scope is held weakly. The managed original holds it, and its
+    // Deviation (DEVIATIONS.md, Bindings): the name scope is held weakly. The
+    // managed original holds it, and its
     // collector frees a path that is held by what the scope names: the
     // binding of a setter of a style declared under a named element (or
     // under an element with a named ancestor) is held by that element, and

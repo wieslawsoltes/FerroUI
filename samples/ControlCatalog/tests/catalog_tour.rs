@@ -7,8 +7,8 @@
 //! what a page leaves behind. Here a page that left the navigation page is
 //! freed when the last reference to it is dropped, and a visit must cost
 //! nothing once it is over, beyond caches that are bounded. The two
-//! measurements are ignored by default (they take minutes); run them with
-//! the counting allocator, one at a time:
+//! measurements and the probe are ignored by default (they take minutes); run
+//! them with the counting allocator, one at a time:
 //!
 //! ```sh
 //! cargo test -p control-catalog --features count-allocations --lib catalog_tour_memory -- --ignored --nocapture --test-threads=1
@@ -36,6 +36,14 @@
 //! the smallest growth of the report is the most the home page itself can
 //! have retained.
 //!
+//! # The markup probe
+//!
+//! `catalog_markup_survivors` narrows a page down: it shows the markup of
+//! `CATALOG_TOUR_XAML` (the children of a panel) in the window of the tour
+//! in place of the main view, takes it out again and prints the elements of
+//! its visual tree that are still alive. With `CATALOG_TOUR_TRACE` what the
+//! markup left is reported as the revisits report it.
+//!
 //! The settings page is left out of both: it reads the application as the
 //! application of the catalog, and the tests of the compositor run under
 //! the unit test application.
@@ -57,7 +65,11 @@
 //! - `CATALOG_TOUR_TARGET`: with a recording, a part of the name of a
 //!   function (the constructor of a class, as `HomePage::new`): the holders
 //!   reported are the ones of the blocks that function allocated, from the
-//!   blocks of every epoch, after the reference counts of those blocks.
+//!   blocks of every epoch, after the reference counts of those blocks. A
+//!   holder is printed with the number of its pointers and how many of them
+//!   are weak references of the object model; the ones with other pointers
+//!   come first, and the one that keeps an object alive is among them.
+//! - `CATALOG_TOUR_XAML`: the markup of `catalog_markup_survivors`.
 //! - `CATALOG_TOUR_SITES`, `CATALOG_TOUR_FRAMES`: how many call stacks are
 //!   printed (12) and how many frames of each (22).
 //! - `CATALOG_TOUR_CLASSES`: how many classes the table of objects lists
