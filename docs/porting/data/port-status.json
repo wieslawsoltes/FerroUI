@@ -7201,22 +7201,22 @@
    "scope": "in",
    "detail": "full",
    "files": [
-    0,
+    14,
     14,
     0
    ],
    "types": [
-    0,
+    54,
     55,
-    0
-   ],
-   "members": [
-    0,
-    202,
     1
    ],
+   "members": [
+    196,
+    202,
+    3
+   ],
    "interfaces": [
-    0,
+    4,
     4
    ],
    "propertyRegistrations": [
@@ -7228,9 +7228,64 @@
     0
    ],
    "notApplicableFiles": 0,
-   "matchKinds": {},
-   "presentFiles": {},
-   "rustOnly": []
+   "matchKinds": {
+    "alias fn": 5,
+    "const": 1,
+    "field": 52,
+    "fn": 95,
+    "trait": 10,
+    "variant": 33
+   },
+   "presentFiles": {
+    "AvaloniaRemoteMessageGuidAttribute.cs": [
+     "ferro_remote_message_guid_attribute.rs"
+    ],
+    "BsonStreamTransport.cs": [
+     "bson_stream_transport.rs"
+    ],
+    "BsonTcpTransport.cs": [
+     "bson_tcp_transport.rs"
+    ],
+    "DefaultMessageTypeResolver.cs": [
+     "default_message_type_resolver.rs"
+    ],
+    "DesignMessages.cs": [
+     "design_messages.rs"
+    ],
+    "EventStash.cs": [
+     "event_stash.rs"
+    ],
+    "IMessageTypeResolver.cs": [
+     "i_message_type_resolver.rs"
+    ],
+    "ITransport.cs": [
+     "i_transport.rs"
+    ],
+    "InputMessages.cs": [
+     "input_messages.rs"
+    ],
+    "MetsysBson.cs": [
+     "metsys_bson.rs"
+    ],
+    "TcpTransportBase.cs": [
+     "tcp_transport_base.rs"
+    ],
+    "TransportConnectionWrapper.cs": [
+     "transport_connection_wrapper.rs"
+    ],
+    "TransportMessages.cs": [
+     "transport_messages.rs"
+    ],
+    "ViewportMessages.cs": [
+     "viewport_messages.rs"
+    ]
+   },
+   "rustOnly": [
+    "assembly.rs",
+    "error.rs",
+    "guid.rs",
+    "task.rs"
+   ]
   },
   {
    "name": "Avalonia.Themes.Fluent",
@@ -8913,5 +8968,35 @@
   }
  ],
  "unusedPathOverrides": [],
- "unusedWaivers": []
+ "unusedWaivers": [
+  {
+   "project": "Avalonia.Remote.Protocol",
+   "type": "Metsys.Bson.TypeHelper",
+   "member": "*LambdaExpression*",
+   "reason": "`FindProperty(LambdaExpression)`: the name of a property from an expression tree; see `ExpressionHelper`"
+  },
+  {
+   "project": "Avalonia.Remote.Protocol",
+   "type": "Metsys.Bson.ScopedCode<T>",
+   "reason": "the class with a typed scope is the one struct `ScopedCode`: its scope is a `Value`, which holds an object of any class"
+  },
+  {
+   "project": "Avalonia.Remote.Protocol",
+   "type": "Metsys.Bson.ObjectId",
+   "member": "*operator*",
+   "reason": "`==` and `!=` are `PartialEq` of `ObjectId` (by the text of the value, as upstream's `Equals`); the implicit conversions are `From<&ObjectId> for Option<String>` and `TryFrom<&str> for ObjectId`"
+  },
+  {
+   "project": "Avalonia.Remote.Protocol",
+   "type": "Metsys.Bson.ObjectId",
+   "member": "Equals",
+   "reason": "`PartialEq` of `ObjectId`"
+  },
+  {
+   "project": "Avalonia.Remote.Protocol",
+   "type": "Avalonia.Remote.Protocol.BsonStreamTransportConnection",
+   "member": "Dispose",
+   "reason": "`dispose` of the `IFerroRemoteTransportConnection` implementation of the connection (`bson_stream_transport.rs`)"
+  }
+ ]
 }
