@@ -1177,6 +1177,48 @@ fn image_brush_to_immutable_carries_relative_transform() {
 }
 
 #[test]
+fn scene_brush_content_carries_relative_transform() {
+    use crate::media::{DrawingBrush, GeometryDrawing, RectangleGeometry};
+    use crate::rendering::testing::MockPlatformRenderInterface;
+
+    let (_scope, _) = MockPlatformRenderInterface::install();
+
+    let drawing = GeometryDrawing::new();
+    drawing.set_geometry(RectangleGeometry::with_rect(Rect::new(0.0, 0.0, 10.0, 10.0)).upcast::<crate::media::Geometry>());
+    drawing.set_brush(Some(Brushes::red()));
+    let brush = DrawingBrush::with_drawing(&drawing);
+    Upcast::<Brush>::upcast(&*brush).set_relative_transform(Some(Rc::new(ImmutableTransform::new(test_matrix()))));
+
+    let content = brush.create_content().unwrap();
+
+    assert_eq!(test_matrix(), content.relative_transform().unwrap().value());
+}
+
+#[test]
+fn animating_a_gradient_brush_keeps_the_relative_transform() {
+    use crate::animation::animators::GradientBrushAnimator;
+    use crate::media::immutable::ImmutableLinearGradientBrush;
+    use crate::media::GradientSpreadMethod;
+
+    let from: Option<Rc<dyn IBrush>> = Some(Rc::new(ImmutableLinearGradientBrush::new(
+        &[],
+        1.0,
+        None,
+        None,
+        GradientSpreadMethod::Pad,
+        None,
+        None,
+        Some(Rc::new(ImmutableTransform::new(test_matrix()))),
+    )));
+    let to: Option<Rc<dyn IBrush>> =
+        Some(Rc::new(ImmutableLinearGradientBrush::new(&[], 1.0, None, None, GradientSpreadMethod::Pad, None, None, None)));
+
+    let interpolated = GradientBrushAnimator::interpolate_core(0.5, &from, &to);
+
+    assert_eq!(test_matrix(), interpolated.unwrap().relative_transform().unwrap().value());
+}
+
+#[test]
 fn immutable_solid_color_brushes_differing_only_in_relative_transform_are_not_equal() {
     let first: Rc<dyn IBrush> = Rc::new(ImmutableSolidColorBrush::new(Colors::RED));
     let second: Rc<dyn IBrush> = Rc::new(ImmutableSolidColorBrush::with_transforms(
