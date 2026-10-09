@@ -115,7 +115,7 @@ mod transform;
 
 pub use compiled::{
     class_document_group, class_of_document, compile_documents_with, generate_class_file_with, generate_file_with, ClassConstructor, ClassFile,
-    ClassGroup, CompiledDocument, EmitterHost, GeneratedFile,
+    ClassGroup, CompiledDocument, EmitterHost, GeneratedFile, CLASS_GROUP_NOT_TRANSFORMED, GROUP_NOT_TRANSFORMED,
 };
 #[cfg(any(feature = "emitter", all(test, feature = "runtime")))]
 pub use runtime_host::{compile_documents, generate_class_file, generate_file};

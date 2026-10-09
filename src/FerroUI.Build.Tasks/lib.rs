@@ -47,6 +47,21 @@
 //! Every document is compiled before the run fails: each error is printed as
 //! a `cargo::error=` line, and the script exits with a failure once.
 //!
+//! # Diagnostics
+//!
+//! What the compiler reports has the code of upstream's build task
+//! (`FerroXamlDiagnosticCodes`) and, where it is known, the document and the
+//! position: `Views/Main.xaml(12,8): warning FRN2208: ..`. A diagnostic of the
+//! transform goes through the filter of upstream's task
+//! ([`xaml_compiler_diagnostics_filter`]): the EditorConfig files of the build
+//! ([`Build::analyzer_config_files`]) state its severity by its code, and
+//! [`Build::warnings_as_errors`] makes every warning that is left an error. A
+//! warning is a `cargo::warning=` line; an error fails the build: a group that
+//! does not transform (`FRN2000`, once for the group, or the diagnostics of the
+//! transform that say why), a document the emitter refuses (`FRN3000`, with the
+//! document and the node), a class no load by URI can create (`FRN3001`, a
+//! warning).
+//!
 //! # Where the type metadata comes from
 //!
 //! A build compiles against the type models of the crates
@@ -141,6 +156,7 @@
 #![forbid(unsafe_code)]
 
 pub mod deterministic_id_generator;
+mod diagnostics;
 // The model, the scanner and the export are the crate the framework crates scan themselves
 // with (`ferroui-build-scan`, which links nothing of the framework); they are exported
 // here under the names they had in this crate.
@@ -163,9 +179,11 @@ use crate::model_set::ModelSet;
 use crate::scanner::{scan_crate, Scan, ScanOptions, Severity};
 use crate::type_system::{ModelEmitTypes, ModelTypeSystem};
 pub use ferroui_markup_xaml_loader::rust_emitter::ClassConstructor;
+use crate::xaml_compiler_diagnostics_filter::XamlCompilerDiagnosticsFilter;
+use ferroui_markup_xaml_loader::compiler_extensions::FerroXamlDiagnosticCodes;
 use ferroui_markup_xaml_loader::rust_emitter::{
     class_document_group, class_of_document, generate_class_file_with, generate_file_with, rust_string_literal, ClassGroup, CompiledMarkupTypeSystem,
-    EmitterHost, TransformOptions, XamlMetadata,
+    EmitterHost, TransformOptions, XamlMetadata, CLASS_GROUP_NOT_TRANSFORMED, GROUP_NOT_TRANSFORMED,
 };
 
 /// The name of the module of the default group ([`Build::compile_xaml`]).
@@ -278,6 +296,9 @@ pub struct Build {
     export_metadata: bool,
     source_root: Option<PathBuf>,
     type_system: TypeSystem,
+    default_compile_bindings: bool,
+    analyzer_config_files: Vec<PathBuf>,
+    warnings_as_errors: bool,
 }
 
 impl Build {
@@ -315,6 +336,9 @@ impl Build {
             export_metadata: false,
             source_root: None,
             type_system: TypeSystem::Runtime,
+            default_compile_bindings: false,
+            analyzer_config_files: Vec::new(),
+            warnings_as_errors: false,
         }
     }
 
@@ -331,6 +355,34 @@ impl Build {
     /// question; it is never compiled from a guess.
     pub fn type_system(mut self, type_system: TypeSystem) -> Self {
         self.type_system = type_system;
+        self
+    }
+
+    /// Whether `{Binding}` is a compiled binding in a document that does not say otherwise
+    /// (`x:CompileBindings`): the `DefaultCompileBindings` of upstream's build task. Not
+    /// without the call.
+    pub fn default_compile_bindings(mut self, value: bool) -> Self {
+        self.default_compile_bindings = value;
+        self
+    }
+
+    /// The EditorConfig files of the build, relative to the crate directory (the
+    /// `AnalyzerConfigFiles` of upstream's build task): an entry
+    /// `ferro_xaml_diagnostic.<code>.severity = <severity>` states the severity a diagnostic
+    /// of the markup compiler with that code is reported with (`error`, `warning`,
+    /// `default`; anything else silences it). A file that does not exist is skipped; the
+    /// build runs again when one changes.
+    pub fn analyzer_config_files(mut self, files: &[&str]) -> Self {
+        self.analyzer_config_files.extend(files.iter().map(|file| self.manifest_dir.join(file)));
+        self
+    }
+
+    /// Reports every warning of the markup compiler as an error of the build (the
+    /// `TreatWarningsAsErrors` upstream leaves to the build system), after the severities
+    /// of the EditorConfig files: a warning a file silences stays silent. Every document is
+    /// still compiled before the build fails.
+    pub fn warnings_as_errors(mut self, value: bool) -> Self {
+        self.warnings_as_errors = value;
         self
     }
 
@@ -558,6 +610,13 @@ impl Build {
         }
 
         // 2. The groups.
+        for file in &self.analyzer_config_files {
+            rerun(&mut lines, file);
+        }
+        let diagnostics = diagnostics::Diagnostics::new(
+            XamlCompilerDiagnosticsFilter::new(Some(self.analyzer_config_files.clone())),
+            self.warnings_as_errors,
+        );
         let xaml_directory = self.out_dir.join("xaml");
         let root_uri = format!("ferres://{assembly_name}/");
         let mut metadata = XamlMetadata {
@@ -605,8 +664,10 @@ impl Build {
             // The group of a class of the crate.
             if let Some(class_document) = &group.class_document {
                 let Some((type_system, models, types)) = &model_host else {
-                    errors.push(format!(
-                        "{class_document}: the document of a class of the crate is compiled against the type models only (Build::type_system(TypeSystem::Model)): a build script cannot link the crate it builds"
+                    errors.push(diagnostics::error(
+                        FerroXamlDiagnosticCodes::TRANSFORM_ERROR,
+                        class_document,
+                        "the document of a class of the crate is compiled against the type models only (Build::type_system(TypeSystem::Model)): a build script cannot link the crate it builds",
                     ));
                     continue;
                 };
@@ -614,13 +675,17 @@ impl Build {
                 let options = TransformOptions {
                     local_assembly: Some(assembly_name.clone()),
                     create_source_info: group.create_source_info.unwrap_or(assembly_source_info),
-                    ..TransformOptions::default()
+                    use_compiled_bindings_by_default: self.default_compile_bindings,
+                    diagnostic_handler: Some(diagnostics.handler()),
+                    design_mode: false,
                 };
                 let compiled = class_group(&host, &**models, &root_uri, &borrowed, class_document, group.constructor, &module_path, &options);
+                let reported_errors = diagnostics.report(&mut lines, &mut errors);
                 match compiled {
                     Ok(file) => {
+                        // Upstream's `XamlLoaderUnreachable`, a warning the filter decides on.
                         for warning in &file.warnings {
-                            lines.push(format!("cargo::warning={class_document}: {warning}"));
+                            diagnostics.warning(FerroXamlDiagnosticCodes::XAML_LOADER_UNREACHABLE, class_document, warning, &mut lines, &mut errors);
                         }
                         write_if_changed(&path, &file.source, &mut errors);
                         let class_metadata = file.metadata(&[]);
@@ -629,9 +694,21 @@ impl Build {
                             metadata.documents.extend(class_metadata.documents);
                         }
                     }
-                    Err(reasons) => errors.extend(reasons.lines().map(|reason| match reason.starts_with(class_document.as_str()) {
-                        true => reason.to_string(),
-                        false => format!("{class_document}: {reason}"),
+                    // The class is not found, or its group does not transform: an error of the
+                    // transform, which the diagnostics of the transform reported if they
+                    // have it. Anything else is a document the emitter refuses.
+                    Err(ClassGroupError::Transform(reason)) => {
+                        if !reported_errors {
+                            errors.push(diagnostics::error(FerroXamlDiagnosticCodes::TRANSFORM_ERROR, class_document, &reason));
+                        }
+                    }
+                    Err(ClassGroupError::Emit(reasons)) => errors.extend(reasons.lines().map(|reason| {
+                        // A reason names its document when it is not the document of the class.
+                        let (document, reason) = borrowed
+                            .iter()
+                            .find_map(|(name, _)| reason.strip_prefix(*name).and_then(|rest| rest.strip_prefix(": ")).map(|rest| (*name, rest)))
+                            .unwrap_or((class_document.as_str(), reason));
+                        diagnostics::error(FerroXamlDiagnosticCodes::EMIT_ERROR, document, reason)
                     })),
                 }
                 modules.push(Module { name: group.module.clone(), path, exported: group.exported, file: true });
@@ -644,23 +721,37 @@ impl Build {
                     let options = TransformOptions {
                         local_assembly: Some(assembly_name.clone()),
                         create_source_info: group.create_source_info.unwrap_or(assembly_source_info),
-                        ..TransformOptions::default()
+                        use_compiled_bindings_by_default: self.default_compile_bindings,
+                        diagnostic_handler: Some(diagnostics.handler()),
+                        design_mode: false,
                     };
                     generate_file_with(&host, &assembly_name, &root_uri, &borrowed, &options)
                 }
                 #[cfg(feature = "runtime-host")]
                 None => {
                     let Some(assembly) = self.assembly else { break };
-                    runtime_host::generate_file(assembly, &root_uri, &borrowed, group.create_source_info, &dependencies)
+                    runtime_host::generate_file(assembly, &root_uri, &borrowed, group.create_source_info, self.default_compile_bindings, &dependencies)
                 }
                 // Reported before the groups: without the feature no group is compiled
                 // against the run-time type system.
                 #[cfg(not(feature = "runtime-host"))]
                 None => break,
             };
+            let reported_errors = diagnostics.report(&mut lines, &mut errors);
+            // A group that does not transform is one error of the transform, which the
+            // diagnostics of the transform reported if they have it; a document the emitter
+            // refuses is an error of the emit, each with its document.
+            let mut group_reported = reported_errors;
             for (name, reason) in &file.documents {
-                if let Some(reason) = reason {
-                    errors.push(format!("{name}: {}", reason.replace(['\r', '\n'], " ")));
+                let Some(reason) = reason else { continue };
+                let reason = reason.replace(['\r', '\n'], " ");
+                match reason.starts_with(GROUP_NOT_TRANSFORMED) {
+                    true if group_reported => {}
+                    true => {
+                        group_reported = true;
+                        errors.push(diagnostics::error(FerroXamlDiagnosticCodes::TRANSFORM_ERROR, &format!("the group `{}`", group.module), &reason));
+                    }
+                    false => errors.push(diagnostics::error(FerroXamlDiagnosticCodes::EMIT_ERROR, name, &reason)),
                 }
             }
             write_if_changed(&path, &file.source, &mut errors);
@@ -773,10 +864,12 @@ mod runtime_host {
         root_uri: &str,
         documents: &[(&str, &str)],
         create_source_info: Option<bool>,
+        default_compile_bindings: bool,
         dependencies: &[XamlMetadata],
     ) -> GeneratedFile {
         let mut configuration = RuntimeXamlLoaderConfiguration::new();
         configuration.local_assembly = Some(assembly);
+        configuration.use_compiled_bindings_by_default = default_compile_bindings;
         if let Some(create_source_info) = create_source_info {
             configuration.set_create_source_info(create_source_info);
         }
@@ -815,15 +908,31 @@ fn class_group(
     constructor: Option<ClassConstructor>,
     module_path: &str,
     options: &TransformOptions,
-) -> Result<ferroui_markup_xaml_loader::rust_emitter::ClassFile, String> {
-    let group = class_document_group(root_uri, documents, class_document)?;
-    let class_name = class_of_document(&group[0].1)?.ok_or_else(|| "the document names no class (`x:Class`)".to_string())?;
+) -> Result<ferroui_markup_xaml_loader::rust_emitter::ClassFile, ClassGroupError> {
+    let group = class_document_group(root_uri, documents, class_document).map_err(ClassGroupError::Transform)?;
+    let class_name = class_of_document(&group[0].1)
+        .map_err(ClassGroupError::Transform)?
+        .ok_or_else(|| ClassGroupError::Transform("the document names no class (`x:Class`)".to_string()))?;
     let class = models.find_type(&class_name).ok_or_else(|| {
-        format!(
+        ClassGroupError::Transform(format!(
             "the type models have no type `{class_name}`, which the document names with `x:Class`: the class is not declared in the sources of the crate, or its declaration is not read"
-        )
+        ))
     })?;
-    generate_class_file_with(host, &ClassGroup { class, documents: &group, constructor, module_path }, options)
+    generate_class_file_with(host, &ClassGroup { class, documents: &group, constructor, module_path }, options).map_err(|reasons| {
+        match reasons.strip_prefix(CLASS_GROUP_NOT_TRANSFORMED) {
+            Some(_) => ClassGroupError::Transform(reasons),
+            None => ClassGroupError::Emit(reasons),
+        }
+    })
+}
+
+/// Why the file of a class is not generated.
+enum ClassGroupError {
+    /// The group of the class is not found or does not transform (upstream's
+    /// `TransformError`).
+    Transform(String),
+    /// Documents the emitter refuses, one reason per line (upstream's `EmitError`).
+    Emit(String),
 }
 
 /// Compiles every `.xaml` file of the crate whose build script is running
@@ -1042,7 +1151,7 @@ mod tests {
         let on_models = build("models").type_system(TypeSystem::Model).compile_group(group()).execute();
         assert_eq!(on_models.errors.len(), 1, "{:?}", on_models.errors);
         assert!(
-            on_models.errors[0].starts_with("Border.xaml: the type models have no type `Fixture.Missing`, which the document names with `x:Class`"),
+            on_models.errors[0].starts_with("Border.xaml: error FRN2000: the type models have no type `Fixture.Missing`, which the document names with `x:Class`"),
             "{:?}",
             on_models.errors
         );
@@ -1057,7 +1166,7 @@ mod tests {
         let at_run_time = build("runtime").assembly(&ASSEMBLY).compile_group(group()).execute();
         assert_eq!(at_run_time.errors.len(), 1, "{:?}", at_run_time.errors);
         let expected = match cfg!(feature = "runtime-host") {
-            true => "Border.xaml: the document of a class of the crate is compiled against the type models only",
+            true => "Border.xaml: error FRN2000: the document of a class of the crate is compiled against the type models only",
             false => "the documents are compiled against the type models (Build::type_system(TypeSystem::Model)): the run-time type system is the feature `runtime-host`",
         };
         assert!(at_run_time.errors[0].starts_with(expected), "{:?}", at_run_time.errors);

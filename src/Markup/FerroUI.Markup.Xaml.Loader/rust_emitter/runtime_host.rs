@@ -13,6 +13,7 @@ use xamlx::type_system::IXamlTypeSystem;
 
 use crate::FerroXamlIlRuntimeCompiler;
 
+use super::compiled::{CLASS_GROUP_NOT_TRANSFORMED, GROUP_NOT_TRANSFORMED};
 use super::compiled::{compile_documents_with, file_of, generate_class_file_with, ClassConstructor, ClassFile, ClassGroup, CompiledDocument, EmitterHost, GeneratedFile};
 use super::compiled_resources::CompiledMarkupTypeSystem;
 use super::runtime_types::RuntimeEmitTypes;
@@ -96,7 +97,7 @@ pub fn compile_documents(
             .map(|(name, _)| CompiledDocument {
                 name: name.to_string(),
                 function_name: function_name_of(name),
-                source: Err(format!("the group of documents does not transform: {}", error.message())),
+                source: Err(format!("{GROUP_NOT_TRANSFORMED}{}", error.message())),
                 namespaces: None,
                 root_type: None,
                 public: true,
@@ -224,7 +225,7 @@ pub fn generate_class_file(
     }
     let mut configuration = RuntimeXamlLoaderConfiguration::new();
     configuration.local_assembly = group.assembly;
-    let host = EmitterHost::runtime(dependencies).map_err(|error| format!("the group does not transform: {}", error.message()))?;
+    let host = EmitterHost::runtime(dependencies).map_err(|error| format!("{CLASS_GROUP_NOT_TRANSFORMED}{}", error.message()))?;
     let class = ClassGroup {
         class: FerroXamlIlRuntimeCompiler::type_system().type_of_class(class),
         documents: &documents,

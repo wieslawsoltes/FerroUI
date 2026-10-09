@@ -41,6 +41,15 @@ use super::transform::{transform_group, DocumentSource, TransformOptions};
 use super::source::{function_name_of, rust_string_literal};
 use ferroui_build_scan::xaml_metadata::{DocumentModel, XamlMetadata};
 
+/// How the reason of a document of a group that did not transform starts
+/// ([`CompiledDocument::source`], [`GeneratedFile::documents`]): the error of the transform
+/// follows. A host tells it from the reason of a document the emitter refuses by it.
+pub const GROUP_NOT_TRANSFORMED: &str = "the group of documents does not transform: ";
+
+/// How the reason of a class whose group did not transform starts
+/// ([`generate_class_file_with`]).
+pub const CLASS_GROUP_NOT_TRANSFORMED: &str = "the group does not transform: ";
+
 /// The result of compiling one document.
 pub struct CompiledDocument {
     /// The name of the document (its path below the root URI of the assembly).
@@ -258,7 +267,7 @@ pub fn compile_documents_with(
         }
         Err(error) => {
             for (index, _, _, _) in &group {
-                compiled[*index].source = Err(format!("the group of documents does not transform: {}", error.message()));
+                compiled[*index].source = Err(format!("{GROUP_NOT_TRANSFORMED}{}", error.message()));
             }
         }
     }
@@ -720,7 +729,7 @@ pub fn generate_class_file_with(host: &EmitterHost<'_>, group: &ClassGroup<'_>, 
         })
         .collect();
     let transformed = transform_group(host.type_system.clone(), &sources, options, &host.parsers)
-        .map_err(|error| format!("the group does not transform: {}", error.message()))?;
+        .map_err(|error| format!("{CLASS_GROUP_NOT_TRANSFORMED}{}", error.message()))?;
     let constructor = match group.constructor {
         Some(constructor) => Some(Constructor::from(constructor)),
         None => Constructor::of(types, &group.class, class, &transformed[0].configuration)?,
