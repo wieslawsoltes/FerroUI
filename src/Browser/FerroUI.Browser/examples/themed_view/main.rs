@@ -563,7 +563,9 @@ pub fn themed_view_decode_damaged() -> String {
 ///   index of the function of the last one in the script of the module (-1
 ///   for none);
 /// - `released`: the canvases of closed views the thread that renders has
-///   released, and `panics`: the panics of the render thread.
+///   released, and `panics`: the panics of the render thread;
+/// - `renderer`: the render backend the application was started with
+///   (`Skia` or `Vello`).
 #[wasm_bindgen(js_name = themedViewRendering)]
 pub fn themed_view_rendering() -> String {
     let statistics = RenderStatistics::current();
@@ -574,8 +576,7 @@ pub fn themed_view_rendering() -> String {
         _ => "none",
     };
     format!(
-        "renderer={};frames={};frame_thread={};page_thread={};other_thread={};render_thread={};on_render_thread={};kind={};gl={};size={}x{};ticks={};proxied={};last_proxied={};released={};panics={}",
-        renderer_name(),
+        "frames={};frame_thread={};page_thread={};other_thread={};render_thread={};on_render_thread={};kind={};gl={};size={}x{};ticks={};proxied={};last_proxied={};released={};panics={};renderer={}",
         statistics.frames,
         statistics.frame_thread,
         page_thread,
@@ -591,6 +592,7 @@ pub fn themed_view_rendering() -> String {
         statistics.last_proxied_function,
         statistics.canvases_released,
         statistics.render_thread_panics,
+        renderer_name(),
     )
 }
 

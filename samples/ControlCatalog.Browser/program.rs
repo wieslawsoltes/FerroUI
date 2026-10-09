@@ -222,7 +222,9 @@ pub fn catalog_state() -> String {
 ///   index of the function of the last one in the script of the module (-1
 ///   for none);
 /// - `released`: the canvases of closed views the thread that renders has
-///   released, and `panics`: the panics of the render thread.
+///   released, and `panics`: the panics of the render thread;
+/// - `renderer`: the render backend the application was started with
+///   (`Skia` or `Vello`).
 ///
 /// Not a port.
 #[wasm_bindgen(js_name = catalogRendering)]
@@ -235,8 +237,7 @@ pub fn catalog_rendering() -> String {
         _ => "none",
     };
     format!(
-        "renderer={};frames={};frame_thread={};page_thread={};other_thread={};render_thread={};on_render_thread={};kind={};gl={};size={}x{};ticks={};proxied={};last_proxied={};released={};panics={}",
-        FerroLocator::current().get_service::<BrowserPlatformOptions>().map_or(BrowserRenderer::Skia, |options| options.renderer).name(),
+        "frames={};frame_thread={};page_thread={};other_thread={};render_thread={};on_render_thread={};kind={};gl={};size={}x{};ticks={};proxied={};last_proxied={};released={};panics={};renderer={}",
         statistics.frames,
         statistics.frame_thread,
         page_thread,
@@ -252,6 +253,7 @@ pub fn catalog_rendering() -> String {
         statistics.last_proxied_function,
         statistics.canvases_released,
         statistics.render_thread_panics,
+        FerroLocator::current().get_service::<BrowserPlatformOptions>().map_or(BrowserRenderer::Skia, |options| options.renderer).name(),
     )
 }
 
@@ -560,6 +562,17 @@ mod tests {
         assert!(!parse_args(&["http://localhost/?RenderingMode=WebGL2&renderthread=False"]).unwrap().render_thread);
         assert!(parse_args(&["http://localhost/?RenderThread=true"]).unwrap().render_thread);
         assert!(parse_args(&["http://localhost/?RenderThread=no"]).unwrap().render_thread);
+    }
+
+    // Not from upstream: the render backend is an option of the port.
+    #[test]
+    fn the_renderer_is_read_from_the_query_string() {
+        assert_eq!(BrowserRenderer::Skia, parse_args(&["http://localhost/"]).unwrap().renderer);
+        assert_eq!(BrowserRenderer::Skia, parse_args(&["http://localhost/?Renderer=skia"]).unwrap().renderer);
+        // A module without the backend keeps Skia; one with it draws with it.
+        let expected = if BrowserRenderer::Vello.is_available() { BrowserRenderer::Vello } else { BrowserRenderer::Skia };
+        assert_eq!(expected, parse_args(&["http://localhost/?RenderingMode=WebGL2&renderer=VELLO"]).unwrap().renderer);
+        assert_eq!(None, parse_args(&["http://localhost/?Renderer=Direct2D"]));
     }
 
     // Not from upstream: the probes of the behaviour tests are additions of the port.
