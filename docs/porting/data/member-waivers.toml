@@ -4259,6 +4259,337 @@ type = "Avalonia.Media.TextFormatting.Unicode.BinaryReaderExtensions"
 member = "WriteBE"
 reason = "extension methods on BinaryWriter: `write_be_i32` and `write_be_u32` of the trait `BinaryWriterExtensions`, implemented for every `std::io::Write`, in `binary_reader_extensions.rs`"
 
+# ---------------------------------------------------------------- False negatives of the name matching (review of 2026-10-09)
+# Ported code the scanner did not find: each entry was written after reading the upstream member and
+# the Rust code it names. The aliases of the same review are at the end of the file, and the renamed
+# types in path-overrides.toml under the same heading.
+
+# Avalonia.Base: Platform/Storage
+
+[[waive]]
+project = "Avalonia.Base"
+type = "Avalonia.Platform.Storage.FileIO.SecurityScopedStream"
+member = "Can*"
+reason = "capability flags of `Stream` (`CanRead`, `CanSeek`, `CanWrite`), which a `std::io` stream does not have: the type implements `Read`, `Write` and `Seek` by forwarding to the file (`security_scoped_stream.rs`), and an operation the file was not opened for returns the error of the file"
+
+[[waive]]
+project = "Avalonia.Base"
+type = "Avalonia.Platform.Storage.FileIO.SecurityScopedStream"
+member = "Position"
+reason = "`Seek::stream_position` and `seek(SeekFrom::Start(..))`, provided by the `Seek` implementation of the type, whose `seek` forwards to the file"
+
+[[waive]]
+project = "Avalonia.Base"
+type = "Avalonia.Platform.Storage.FileIO.SecurityScopedStream"
+member = "*Byte"
+reason = "`ReadByte` and `WriteByte` are overridden only to forward: the provided methods of `Read` and `Write` (`read_exact`, `write_all`) over the `read` and `write` the type forwards to the file"
+
+[[waive]]
+project = "Avalonia.Base"
+type = "Avalonia.Platform.Storage.FileIO.SecurityScopedStream"
+member = "CopyTo"
+reason = "overridden only to forward: `std::io::copy` over the `Read` implementation of the type"
+
+[[waive]]
+project = "Avalonia.Base"
+type = "Avalonia.Platform.Storage.FileIO.SecurityScopedStream"
+member = "DisposeAsync"
+reason = "`Drop` of the type, which closes the file and then ends the security scope, as `Dispose(bool)` and `DisposeAsync` both do"
+
+[[waive]]
+project = "Avalonia.Base"
+type = "Avalonia.Platform.Storage.FileIO.SecurityScopedStream"
+member = "*Async"
+reason = "asynchronous forms of the `Stream` overrides (`FlushAsync`, `ReadAsync`, `WriteAsync`, `CopyToAsync`), which only forward: a `std::io` stream is synchronous, and the type forwards `read`, `write`, `flush` and `seek` to the file"
+
+[[waive]]
+project = "Avalonia.Base"
+type = "Avalonia.Platform.Storage.FileIO.SecurityScopedStream"
+member = "Begin*"
+reason = "the asynchronous programming model of `Stream` (`BeginRead`, `BeginWrite`), overridden only to forward: no counterpart on a `std::io` stream"
+
+[[waive]]
+project = "Avalonia.Base"
+type = "Avalonia.Platform.Storage.FileIO.SecurityScopedStream"
+member = "End*"
+reason = "the asynchronous programming model of `Stream` (`EndRead`, `EndWrite`), overridden only to forward: no counterpart on a `std::io` stream"
+
+[[waive]]
+project = "Avalonia.Base"
+type = "Avalonia.Platform.Storage.FileIO.BclStorageItem"
+member = "ReleaseBookmarkAsync"
+reason = "`release_bookmark_async` of the `IStorageBookmarkItem` implementation that `impl_bcl_storage_item!` (`bcl_storage_item.rs`) writes for the file and the folder; it does nothing, as upstream"
+
+[[waive]]
+project = "Avalonia.Base"
+type = "Avalonia.Platform.Storage.FileIO.BclStorageItem"
+member = "Dispose"
+reason = "`dispose` of the `IDisposable` implementation that `impl_bcl_storage_item!` (`bcl_storage_item.rs`) writes for the file and the folder; it does nothing, as upstream"
+
+[[waive]]
+project = "Avalonia.Base"
+type = "Avalonia.Platform.Storage.FileIO.BclStorageProvider"
+member = "*FilePickerAsync"
+reason = "`open_file_picker_async` and `save_file_picker_async` of `impl<T: BclStorageProvider> IStorageProvider for T` in `bcl_storage_provider.rs`, which take the files of the result of the abstract picker as upstream does; the scanner looks on the trait `BclStorageProvider` itself"
+
+[[waive]]
+project = "Avalonia.Base"
+type = "Avalonia.Platform.Storage.StorageProviderExtensions"
+member = "TryGetLocalPath"
+reason = "ported as `try_get_local_path`, an inherent function of the trait object of the item (`impl dyn IStorageItem` in `storage_provider_extensions.rs`); the type table of the file maps the class to the provider"
+
+[[waive]]
+project = "Avalonia.Base"
+type = "Avalonia.Platform.Storage.IStorageItemWithFileSystemInfo"
+member = "FileSystemInfo"
+reason = "ported as `file_system_info_full_name`: the one user of the contract (`TryGetLocalPath` of the storage provider extensions) reads the full name of the entry and nothing else"
+
+# Avalonia.Base: Platform/Surfaces, Rendering/Composition, Media/Fonts
+
+[[waive]]
+project = "Avalonia.Base"
+type = "Avalonia.Platform.Surfaces.FuncFramebufferRenderTarget"
+member = "FuncFramebufferRenderTarget(LockFramebufferDelegate*"
+reason = "ported as `FuncFramebufferRenderTarget::with_scene_info`, with the same two parameters (the scanner counts constructors named `new`)"
+
+[[waive]]
+project = "Avalonia.Base"
+type = "Avalonia.Rendering.Composition.CompositionGpuImportedObjectBase"
+member = "Context"
+reason = "`ServerGpuImportedObjectBase::context` in the same file: the context belongs to the half of the object that stays inside the compositor lock (`CompositionGpuImportedObjectBase::server`), which the render thread reads"
+
+[[waive]]
+project = "Avalonia.Base"
+type = "Avalonia.Rendering.Composition.CompositionGpuImportedObjectBase"
+member = "Feature"
+reason = "`ServerGpuImportedObjectBase::feature` in the same file: the feature belongs to the half of the object that stays inside the compositor lock"
+
+[[waive]]
+project = "Avalonia.Base"
+type = "Avalonia.Rendering.Composition.CompositionImportedGpuImage"
+member = "Image"
+reason = "`ServerImportedGpuImage::image` in the same file, the half of the object inside the compositor lock (`CompositionImportedGpuImage::server`)"
+
+[[waive]]
+project = "Avalonia.Base"
+type = "Avalonia.Rendering.Composition.CompositionImportedGpuImage"
+member = "IsUsable"
+reason = "`ServerImportedGpuImage::is_usable` in the same file, which takes the server compositor whose render interface it compares the context with"
+
+[[waive]]
+project = "Avalonia.Base"
+type = "Avalonia.Rendering.Composition.CompositionImportedGpuSemaphore"
+member = "Semaphore"
+reason = "`ServerImportedGpuSemaphore::semaphore` in the same file, the half of the object inside the compositor lock (`CompositionImportedGpuSemaphore::server`)"
+
+[[waive]]
+project = "Avalonia.Base"
+type = "Avalonia.Rendering.Composition.CompositionImportedGpuSemaphore"
+member = "IsUsable"
+reason = "`ServerImportedGpuSemaphore::is_usable` in the same file, which takes the server compositor whose render interface it compares the context with"
+
+[[waive]]
+project = "Avalonia.Base"
+type = "Avalonia.Rendering.Composition.Drawing.RenderDataStream.HitTestVisitor"
+member = "HitTestVisitor(Geometry*"
+reason = "ported as `HitTestVisitor::for_geometry` (the scanner counts constructors named `new`)"
+
+[[waive]]
+project = "Avalonia.Base"
+type = "Avalonia.Rendering.Composition.Drawing.RenderDataStream.HitTestVisitor"
+member = "HitTestVisitor(Point*"
+reason = "ported as `HitTestVisitor::for_point` (the scanner counts constructors named `new`)"
+
+[[waive]]
+project = "Avalonia.Base"
+type = "Avalonia.Media.Fonts.Tables.Cmap.C*"
+member = "*this*codePoint*"
+reason = "the indexer and `GetGlyph` are one lookup upstream (one of the two returns the other): `get_glyph` of the type (`CharacterToGlyphMap`, `CmapFormat4Table`, `CmapFormat12Or13Table`)"
+
+[[waive]]
+project = "Avalonia.Base"
+type = "Avalonia.Media.Fonts.Tables.Glyf.*Glyph"
+member = "Dispose"
+reason = "returns the arrays rented from the array pool: the glyph owns its arrays as vectors (`SimpleGlyph::flags`, `x_coordinates`, `y_coordinates`; `CompositeGlyph::components`), which are freed when it is dropped"
+
+# Avalonia.Skia
+
+[[waive]]
+project = "Avalonia.Skia"
+type = "Avalonia.Skia.SKCacheBase*"
+member = "Shared"
+reason = "the shared instance is the thread-local `SHARED` of each cache (`sk_paint_cache.rs`, `sk_round_rect_cache.rs`, `sk_text_blob_builder_cache.rs`), reached through the associated functions of the cache (`SkPaintCache::get`, `return_item`, `clear`)"
+
+[[waive]]
+project = "Avalonia.Skia"
+type = "Avalonia.Skia.SkiaSharpExtensions"
+member = "*ToSKSamplingOptions(this BitmapInterpolationMode interpolationMode, bool*"
+reason = "ported as the free function `to_sk_sampling_options_scaled` of `skia_sharp_extensions.rs` (the scanner finds one free function per name)"
+
+[[waive]]
+project = "Avalonia.Skia"
+type = "Avalonia.Skia.SkiaSharpExtensions"
+member = "*ToSKPoint(this Vector*"
+reason = "ported as the free function `vector_to_sk_point` of `skia_sharp_extensions.rs`"
+
+[[waive]]
+project = "Avalonia.Skia"
+type = "Avalonia.Skia.SkiaSharpExtensions"
+member = "*ToSKRect(this LtrbRect*"
+reason = "ported as the free function `ltrb_to_sk_rect` of `skia_sharp_extensions.rs`"
+
+[[waive]]
+project = "Avalonia.Skia"
+type = "Avalonia.Skia.SkiaSharpExtensions"
+member = "*ToSKRectI(this LtrbPixelRect*"
+reason = "ported as the free function `ltrb_to_sk_rect_i` of `skia_sharp_extensions.rs`"
+
+[[waive]]
+project = "Avalonia.Skia"
+type = "Avalonia.Skia.SkiaSharpExtensions"
+member = "ToAvaloniaRect"
+reason = "ported as the free function `to_rect` of `skia_sharp_extensions.rs`: the conversions back to the types of the framework are named after their result"
+
+[[waive]]
+project = "Avalonia.Skia"
+type = "Avalonia.Skia.SkiaSharpExtensions"
+member = "ToAvaloniaPixelRect"
+reason = "ported as the free function `to_pixel_rect` of `skia_sharp_extensions.rs`"
+
+[[waive]]
+project = "Avalonia.Skia"
+type = "Avalonia.Skia.SkiaSharpExtensions"
+member = "ToAvaloniaLtrbPixelRect"
+reason = "ported as the free function `to_ltrb_pixel_rect` of `skia_sharp_extensions.rs`"
+
+[[waive]]
+project = "Avalonia.Skia"
+type = "Avalonia.Skia.SkiaSharpExtensions"
+member = "ToAvaloniaMatrix"
+reason = "the two overloads are the free functions `to_matrix` (from a 3x3 matrix) and `matrix44_to_matrix` (from a 4x4 matrix) of `skia_sharp_extensions.rs`"
+
+[[waive]]
+project = "Avalonia.Skia"
+type = "Avalonia.Skia.SkiaSharpExtensions"
+member = "*ToAvalonia(this SKColorType*"
+reason = "ported as the free function `to_pixel_format_opt` of `skia_sharp_extensions.rs`, next to `to_pixel_format`, which panics where upstream throws"
+
+[[waive]]
+project = "Avalonia.Skia"
+type = "Avalonia.Skia.SkiaSharpExtensions"
+member = "*ToAvalonia(this SKTextAlign*"
+reason = "ported as the free function `to_text_alignment` of `skia_sharp_extensions.rs`"
+
+[[waive]]
+project = "Avalonia.Skia"
+type = "Avalonia.Skia.SkiaSharpExtensions"
+member = "*ToAvalonia(this SKFontStyleSlant*"
+reason = "ported as the free function `slant_to_font_style` of `skia_sharp_extensions.rs`"
+
+[[waive]]
+project = "Avalonia.Skia"
+type = "Avalonia.Skia.SkiaSharpExtensions"
+member = "ToSkia"
+reason = "ported as the free function `font_style_to_slant` of `skia_sharp_extensions.rs`"
+
+[[waive]]
+project = "Avalonia.Skia"
+type = "Avalonia.Skia.SkiaSharpExtensions"
+member = "Clone"
+reason = "a copy of a path that may be null: the path of the binding is `Clone`, and an absent path is an `Option`, whose `clone` is this method"
+
+[[waive]]
+project = "Avalonia.Skia"
+type = "Avalonia.Skia.*Geometry*Impl"
+member = "FillPath"
+reason = "the override is `fill` of the `GeometryImpl` implementation of the geometry, which states the fill as the enum `FillPath` (none, the stroke path, a path of its own); `GeometryImpl::fill_path` of `geometry_impl.rs` computes the path from it"
+
+[[waive]]
+project = "Avalonia.Skia"
+type = "Avalonia.Skia.*GeometryImpl"
+member = "Bounds"
+reason = "`bounds` of the `IGeometryImpl` implementation that `impl_geometry_impl!` (`geometry_impl.rs`) writes for every geometry, which returns `geometry_bounds()`; the scanner does not expand the macro"
+
+[[waive]]
+project = "Avalonia.Skia"
+type = "Avalonia.Skia.GeometryImpl"
+member = "InvalidateCaches"
+reason = "`GeometryImplBase::invalidate_caches` in the same file: the state of the abstract class is the struct a geometry returns from `GeometryImpl::base`"
+
+[[waive]]
+project = "Avalonia.Skia"
+type = "Avalonia.Skia.ISkiaSharpApiLease"
+member = "SkCanvas"
+reason = "ported as `ISkiaApiLease::with_sk_canvas`, which runs a closure with the canvas: the canvas of the binding is borrowed from its surface and cannot be returned"
+
+[[waive]]
+project = "Avalonia.Skia"
+type = "Avalonia.Skia.ImmutableBitmap"
+member = "ImmutableBitmap(PixelSize size*"
+reason = "ported as `ImmutableBitmap::from_pixels`, which copies from a slice in place of an address. The scanner reports one constructor too few because the constructor that resizes another bitmap is `ImmutableBitmap::resized`, a name it does not count"
+
+[[waive]]
+project = "Avalonia.Skia"
+type = "Avalonia.Skia.SkiaGpuRenderTarget"
+member = "*CreateDrawingContext(IRenderTarget.RenderTargetSceneInfo*"
+reason = "ported as `create_drawing_context` of the `IRenderTarget` implementation. The scanner counts that function for the other overload, `CreateDrawingContext(bool)`, a legacy member that only throws and that the `IRenderTarget` of upstream no longer declares; it is not ported"
+
+[[waive]]
+project = "Avalonia.Skia"
+type = "Avalonia.Skia.Helpers.DrawingContextHelper"
+member = "WrapSkiaCanvas"
+reason = "ported as the free function `wrap_skia_surface` of `helpers/drawing_context_helper.rs`: a canvas of the binding is borrowed from its surface, so the context is created from the surface (`CanvasSource::Surface`)"
+
+[[waive]]
+project = "Avalonia.Skia"
+type = "Avalonia.Skia.Helpers.ImageSavingHelper"
+member = "*SaveImage(SKImage image, string fileName, BitmapEncoderOptions*"
+reason = "ported as the free function `save_image_to_file` of `helpers/image_saving_helper.rs`"
+
+[[waive]]
+project = "Avalonia.Skia"
+type = "Avalonia.Skia.Helpers.ImageSavingHelper"
+member = "*SaveImage(SKImage image, Stream stream, BitmapEncoderOptions*"
+reason = "ported as the free function `save_image` of `helpers/image_saving_helper.rs`, which the scanner counts for the first overload of the name"
+
+[[waive]]
+project = "Avalonia.Skia"
+type = "Avalonia.Skia.Helpers.ImageSavingHelper"
+member = "*SaveImage(SKImage image, *int? quality*"
+reason = "obsolete overloads (to a file and to a stream) that ignore the quality and save a PNG with the default options: not ported, a caller passes `BitmapEncoderOptions::Png` to `save_image_to_file` or `save_image`"
+
+# Avalonia.Headless, Avalonia.Browser, Avalonia.Native
+
+[[waive]]
+project = "Avalonia.Headless"
+type = "*HeadlessWindowImpl"
+member = "Lock"
+reason = "`HeadlessWindowSurface::lock` of `headless_window_surface.rs`: the framebuffer surface is an object the window shares with the thread that renders, where upstream implements the surface on the window"
+
+[[waive]]
+project = "Avalonia.Headless"
+type = "*HeadlessWindowImpl"
+member = "CreateFramebufferRenderTarget"
+reason = "`create_framebuffer_render_target` of the `IFramebufferPlatformSurface` implementation of `HeadlessWindowSurface` (`headless_window_surface.rs`), the surface `HeadlessWindowImpl::surfaces` returns"
+
+[[waive]]
+project = "Avalonia.Browser"
+type = "Avalonia.Browser.Rendering.RenderWorker"
+member = "WorkerThreadId"
+reason = "ported as `RenderWorker::thread_id` (the thread, for the proxying of calls) and `RenderWorker::canvas_thread_id` (the value a canvas is created for) in `rendering/render_worker.rs`; the state is private to the file"
+
+[[waive]]
+project = "Avalonia.Browser"
+type = "Avalonia.Browser.Rendering.Browser*RenderTarget"
+member = "PlatformGraphicsContext"
+reason = "the two overrides are the two arms of `BrowserRenderTarget::platform_graphics_context` in `rendering/web_render_target.rs` (the GL context of a WebGL target, `None` for a software target): the abstract class is an enum of its two kinds"
+
+[[waive]]
+project = "Avalonia.Native"
+type = "Avalonia.Native.StorageItem"
+member = "CanBookmark"
+reason = "`can_bookmark` of the `IStorageItem` implementation that `impl_storage_item!` (`storage_item.rs`) writes for the file and the folder; it is `true`, as upstream"
+
 # Aliases: Rust functions that implement an upstream member under a name the default rule
 # (`DoIt` -> `do_it` / `do_it_*`) cannot derive.
 #
@@ -4555,3 +4886,84 @@ project = "Avalonia.OpenGL"
 type = "Avalonia.OpenGL.OpenGlCompositionInterop"
 member = "TryCreateCompatibleGlContextAsync"
 rust = ["try_create_compatible_gl_context"]
+
+# False negatives of the name matching (review of 2026-10-09). The asynchronous members of a storage
+# item are written by a macro the scanner does not expand (`impl_bcl_storage_item!` of
+# `platform/storage/file_io/bcl_storage_item.rs`, `impl_storage_item!` of `storage_item.rs` in the
+# macOS backend): each forwards to the function of the base struct named here.
+
+[[alias]]
+project = "Avalonia.Base"
+type = "Avalonia.Platform.Storage.FileIO.BclStorageItem"
+member = "GetBasicPropertiesAsync"
+rust = ["get_basic_properties"]
+
+[[alias]]
+project = "Avalonia.Base"
+type = "Avalonia.Platform.Storage.FileIO.BclStorageItem"
+member = "GetParentAsync"
+rust = ["get_parent"]
+
+[[alias]]
+project = "Avalonia.Base"
+type = "Avalonia.Platform.Storage.FileIO.BclStorageItem"
+member = "DeleteAsync"
+rust = ["delete"]
+
+[[alias]]
+project = "Avalonia.Base"
+type = "Avalonia.Platform.Storage.FileIO.BclStorageItem"
+member = "MoveAsync"
+rust = ["move_to"]
+
+[[alias]]
+project = "Avalonia.Base"
+type = "Avalonia.Platform.Storage.FileIO.BclStorageItem"
+member = "SaveBookmarkAsync"
+rust = ["save_bookmark"]
+
+[[alias]]
+project = "Avalonia.Native"
+type = "Avalonia.Native.StorageItem"
+member = "GetBasicPropertiesAsync"
+rust = ["get_basic_properties"]
+
+[[alias]]
+project = "Avalonia.Native"
+type = "Avalonia.Native.StorageItem"
+member = "SaveBookmarkAsync"
+rust = ["save_bookmark"]
+
+[[alias]]
+project = "Avalonia.Native"
+type = "Avalonia.Native.StorageItem"
+member = "ReleaseBookmarkAsync"
+rust = ["release_bookmark"]
+
+[[alias]]
+project = "Avalonia.Native"
+type = "Avalonia.Native.StorageItem"
+member = "GetParentAsync"
+rust = ["get_parent"]
+
+[[alias]]
+project = "Avalonia.Native"
+type = "Avalonia.Native.StorageItem"
+member = "DeleteAsync"
+rust = ["delete"]
+
+[[alias]]
+project = "Avalonia.Native"
+type = "Avalonia.Native.StorageItem"
+member = "MoveAsync"
+rust = ["move_to"]
+
+# The render worker of the browser: `RenderWorker::start` of `rendering/render_worker.rs` starts the
+# thread, runs the render timer on it and returns at once, where the task of upstream completes when
+# the worker runs; the page hears that the thread runs from its event loop (`RenderWorker::announce`).
+
+[[alias]]
+project = "Avalonia.Browser"
+type = "Avalonia.Browser.Rendering.RenderWorker"
+member = "InitializeAsync"
+rust = ["start"]
