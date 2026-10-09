@@ -11,6 +11,9 @@
 // thread of the page, which no longer renders, answers at once. So nothing here clicks where the state
 // says an element is before the view has drawn that state: `page.find` and `page.element` wait for a
 // frame asked for after the state was read and return the element only if it is still where it was.
+import fs from "node:fs";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
 import { sleep } from "./harness.mjs";
 
 export const STATE_TIMEOUT = 20_000;
@@ -181,4 +184,150 @@ export async function visit(page, entry, height = TOUR_SIZE.height) {
     // The pointer leaves the drawer, so that no entry is drawn hovered.
     await page.mouseMove(Math.round((DRAWER_EDGE + TOUR_SIZE.width) / 2), height - 6);
     return state;
+}
+
+// --- the whole catalog -------------------------------------------------------------------------------
+
+// The list the application builds its sections from. Its entries are `section("<title>", ..)` and, inside
+// one, `s.add("<document>", "<header>", ..)`, `s.add_with_samples(..)` (the same two first) and
+// `s.add_page(<constructor>, "<header>", ..)`.
+const PAGE_LIST = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..", "..",
+    "samples", "ControlCatalog", "ViewModels", "main_window_view_model_page_list.rs");
+
+/**
+ * Every page of the catalog, read from the list the application is built from, in its order:
+ * [{ section, name }]. A page the application leaves out of its drawer (a document listed in
+ * `excluded.txt` of the sample) is in the list all the same: `visitAll` reports it as not offered.
+ */
+export function catalogPages(file = PAGE_LIST) {
+    const source = fs.readFileSync(file, "utf8");
+    const pages = []; let section = null;
+    const entry = /\bsection\(\s*"([^"]+)"|\bs\.add(?:_with_samples)?\(\s*"[^"]+",\s*"([^"]+)"|\bs\.add_page\([^"]*"([^"]+)"/g;
+    for (let match = entry.exec(source); match !== null; match = entry.exec(source)) {
+        if (match[1] !== undefined) { section = match[1]; } else if (section !== null) { pages.push({ section, name: match[2] ?? match[3] }); }
+    }
+    if (pages.length === 0) { throw new Error(`no pages found in ${file}`); }
+    return pages;
+}
+
+// What the tour of the whole catalog does on a page besides opening it, by the header of the page.
+// `wheel`: how many wheel events of 480 pixels scroll its content down, and as many back up (default 4;
+// more for the pages with a virtualized list, so that rows are realized and recycled). `open`: texts of
+// the content that are clicked in order, each when it is shown: the demos of a page that are reached
+// without a file and without leaving the page of the browser (a drop-down, a tab, a demo page of a
+// navigation, an animation). A text that is not shown is recorded with the page and the tour goes on.
+// Nothing here opens a flyout or a menu: the flyout of the Flyouts page stays open over the view after
+// Escape (the focus is in its text box) and no entry of the drawer can be clicked any more.
+// `skip`: the page is not opened, with the reason.
+export const PAGE_ACTIONS = {
+    // The page asks the font manager for the installed fonts and creates a typeface of each; a browser
+    // has no system fonts, the typeface of the first family it names cannot be created, and the panic
+    // ends the application (seen on 2026-10-09 with the module without threads: "Could not create
+    // glyphTypeface. Font family: Cascadia Mono (key: fonts:SystemFonts)", typeface.rs).
+    "ComboBox": { skip: "the page panics in a browser (a typeface of a system font cannot be created) and the application does not recover" },
+    "ListBox": { wheel: 30 },
+    "TableView": { wheel: 30 },
+    "TreeView": { wheel: 12 },
+    "RefreshContainer": { wheel: 12 },
+    "ScrollViewer": { wheel: 12 },
+    "WrapPanel": { wheel: 12 },
+    "TextBlock": { wheel: 12 },
+    "Buttons": { wheel: 12 },
+    "TextBox": { open: ["Fonts and Complex Scripts"] },
+    "PipsPager": { open: ["Care Companion"] },
+    "CommandBar": { open: ["Overflow Menu"] },
+    "CarouselPage": { open: ["Sanctuary"] },
+    "ContentPage": { open: ["Performance Monitor"] },
+    "DrawerPage": { open: ["FerroFlix"] },
+    "NavigationPage": { open: ["First Look"] },
+    "TabbedPage": { open: ["Fluid Nav Bar"] },
+    "TabControl": { open: ["_Leaf", "Leaf"] },
+    "Expander": { open: ["Expand Up", "Expand Down"] },
+    "Composition": { open: ["Animations", "Custom", "Brushes"] },
+    "Image": { open: ["Drawing", "Crop"] },
+    "TransitioningContentControl": { open: [">", ">"] },
+    "Notifications": { open: ["Show Standard Managed Notification", "Show Custom Managed Notification"] }
+};
+
+// The view of the whole tour: wide enough for the drawer to stay open beside the page, and as tall as
+// the tour of thirteen pages, so that an open section fits.
+export const ALL_SIZE = TOUR_SIZE;
+
+/** Scrolls the content of the page `events` wheel events down and as many back up. */
+async function scrollContent(page, events, { width, height }) {
+    const x = Math.round((DRAWER_EDGE + width) / 2); const y = Math.round(height / 2);
+    for (let i = 0; i < events; i++) { await page.wheel(x, y, 0, 480); }
+    for (let i = 0; i < events; i++) { await page.wheel(x, y, 0, -480); }
+}
+
+/**
+ * Opens the page `entry` when its section is already open in the drawer (a second pass through the
+ * catalog: a click on the header of an open section would not show the section again). The entry may be
+ * scrolled out of the view: the drawer is scrolled down, then up past where it started, until it shows.
+ */
+async function revisit(page, entry, height) {
+    const shown = (state) => state.elements.some((e) => e.text === entry.name && inDrawer(e));
+    await page.until("no navigation is running", (s) => !s.navigating);
+    for (let attempt = 0; attempt < 60 && !shown(await page.state()); attempt++) {
+        await page.wheel(Math.round(DRAWER_EDGE / 2), Math.round(height / 2), 0, attempt < 20 ? 400 : -400);
+    }
+    await page.clickElement(await page.element(`"${entry.name}" is in the drawer`, (e) => e.text === entry.name && inDrawer(e), 5000));
+    const state = await page.until(`the page "${entry.name}" is shown`, (s) => s.page === entry.name && !s.navigating);
+    await page.mouseMove(Math.round((DRAWER_EDGE + TOUR_SIZE.width) / 2), height - 6);
+    return state;
+}
+
+/**
+ * Visits every page of `pages` (default: the whole catalog, the sections from the last to the first, as
+ * the tour of thirteen does: an open section pushes the ones below it down), scrolls its content and
+ * opens its demos (`PAGE_ACTIONS`), and calls `after(entry)` when the page has been used. A page that is
+ * not in the drawer, that does not open or whose actions fail is not fatal; after three pages in a row
+ * that did not open the tour ends (the application no longer answers: a panic, or a module that ran out
+ * of its memory) and the rest is listed as not visited. Resolves to
+ * { visited: [{ section, name, missed: [texts of `open` that were not shown], result }],
+ *   notVisited: [{ section, name, reason }] }, where `result` is what `after` returned. `again` says
+ * that the sections are open in the drawer: an earlier call went through them in the same session.
+ */
+export async function visitAll(page, { pages = catalogPages(), size = ALL_SIZE, settle = 500, again = false, after = async () => undefined, log = () => { } } = {}) {
+    const sections = [...new Set(pages.map((entry) => entry.section))].reverse();
+    const visited = []; const notVisited = []; let failures = 0;
+    for (const section of sections) {
+        for (const entry of pages.filter((candidate) => candidate.section === section)) {
+            const actions = PAGE_ACTIONS[entry.name] ?? {};
+            if (actions.skip) { notVisited.push({ ...entry, reason: actions.skip }); continue; }
+            if (failures >= 3) { notVisited.push({ ...entry, reason: "the tour had ended: three pages in a row did not open" }); continue; }
+            try {
+                await (again ? revisit : visit)(page, entry, size.height);
+                failures = 0;
+            } catch (error) {
+                // The section opened and has no such entry: the application does not offer the page.
+                const state = await page.state().catch(() => null);
+                const offered = state?.elements.some((e) => e.text === entry.name && inDrawer(e));
+                const reason = !again && state?.page === entry.section && !offered ? "not in the drawer: the application leaves the page out (excluded.txt of the sample)"
+                    : `did not open: ${String(error.message ?? error).split("\n")[0]}`;
+                notVisited.push({ ...entry, reason });
+                log(`  ${entry.section} / ${entry.name}: ${reason}`);
+                if (offered !== false || state?.page !== entry.section) { failures++; }
+                continue;
+            }
+            await sleep(settle);
+            const missed = [];
+            try {
+                await scrollContent(page, actions.wheel ?? 4, size);
+                for (const text of actions.open ?? []) {
+                    try {
+                        await page.clickElement(await page.element(`"${text}" is shown`, (e) => e.text === text && inContent(e), 4000));
+                        await sleep(settle);
+                    } catch { missed.push(text); }
+                }
+            } catch (error) { missed.push(`(${String(error.message ?? error).split("\n")[0]})`); }
+            // A light dismiss of whatever the page opened over itself (a drop-down, a flyout).
+            await page.press("Escape").catch(() => { });
+            await sleep(settle);
+            const result = await after(entry);
+            visited.push({ ...entry, missed, result });
+            log(`  ${entry.section} / ${entry.name}${missed.length ? `, not shown: ${missed.join(", ")}` : ""}${result === undefined ? "" : `: ${JSON.stringify(result)}`}`);
+        }
+    }
+    return { visited, notVisited };
 }
