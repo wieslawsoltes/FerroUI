@@ -3016,6 +3016,32 @@ fn key_down(keyboard: &Rc<KeyboardDevice>, root: &TestRoot, key: Key, modifiers:
 }
 
 #[test]
+fn previous_contained_doesnt_select_child_control() {
+    let child = button("child");
+    let current = TestControl::focusable("current").with_children(&[&child]);
+
+    let _top = stack_with(KeyboardNavigationMode::Contained, &[&current]);
+
+    let result = next_of(&current, NavigationDirection::Previous);
+
+    assert_eq!(result, None);
+}
+
+#[test]
+fn focuses_first_child_from_no_focus() {
+    let _keyboard = real_focus();
+    let button = button("button");
+    let root = TestRoot::with_child(&button);
+    let target = KeyboardNavigationHandler::new();
+
+    target.set_owner(&element(&root.root));
+
+    raise_key(&root.root, true, Key::Tab, None, KeyModifiers::NONE);
+
+    assert!(button.is_focused());
+}
+
+#[test]
 fn tab_key_moves_focus_through_the_handler() {
     let keyboard = real_focus();
     let (b1, b2) = (button("b1"), button("b2"));
