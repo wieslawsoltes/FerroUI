@@ -19,8 +19,8 @@ use xamlx::type_system::{IXamlMember, IXamlType};
 use super::runtime_type::{RuntimeInvoker, RuntimeMembers, RuntimeType};
 use super::runtime_type_system::{MemberBuilder, RuntimeTypeSystem};
 
-pub(crate) const DEFINITION: &str = "FerroUI.Collections.FerroListConverter`1";
-pub(crate) const LIST_DEFINITION: &str = "FerroUI.Collections.FerroList`1";
+pub(crate) const DEFINITION: &str = crate::core_table::FERRO_LIST_CONVERTER_DEFINITION;
+pub(crate) const LIST_DEFINITION: &str = crate::core_table::FERRO_LIST_DEFINITION;
 
 /// An instance of the converter: the element type it converts to.
 #[derive(Clone)]
