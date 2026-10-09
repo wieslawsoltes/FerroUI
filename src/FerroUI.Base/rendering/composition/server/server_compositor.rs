@@ -51,6 +51,25 @@ impl BatchQueue {
         self.data_pool.lock().unwrap().pop().unwrap_or_default()
     }
 
+    /// Completes the batches nothing will apply any more, without applying
+    /// them: the compositor is gone and its server compositor is released,
+    /// or about to be. Whoever waits for such a batch, or holds back its
+    /// next commit until the batch is processed (the media context does, for
+    /// every compositor at once), is answered; what the batches carry (their
+    /// jobs among it) is dropped.
+    ///
+    /// Not from upstream, where a compositor and its server live as long as
+    /// the process.
+    pub(crate) fn complete_all(&self) {
+        loop {
+            // Outside the lock of the queue: a continuation of the batch
+            // runs here.
+            let Some(batch) = self.dequeue() else { break };
+            batch.batch.notify_processed();
+            batch.batch.notify_rendered();
+        }
+    }
+
     fn return_data(&self, mut data: BatchStreamData) {
         data.reset();
         let mut pool = self.data_pool.lock().unwrap();
@@ -90,6 +109,8 @@ pub struct ServerCompositor {
     clock: CompositorClock,
     server_now: Cell<Duration>,
     ui_thread_is_inside_render: Cell<bool>,
+    /// Set by [`stop_rendering`](Self::stop_rendering).
+    rendering_stopped: Cell<bool>,
     render_interface: Rc<PlatformRenderInterfaceContextManager>,
     options: CompositionOptions,
     readback: Arc<ReadbackIndices>,
@@ -135,6 +156,7 @@ impl ServerCompositor {
             clock,
             server_now: Cell::new(Duration::ZERO),
             ui_thread_is_inside_render: Cell::new(false),
+            rendering_stopped: Cell::new(false),
             render_interface: PlatformRenderInterfaceContextManager::new(platform_graphics),
             options,
             readback,
@@ -577,6 +599,68 @@ impl ServerCompositor {
         self.render_interface.reset();
     }
 
+    /// Releases what the compositor draws with, while its graphics context
+    /// is current: the layer and the render target of every active target,
+    /// then the backend context. The context that was current before is
+    /// restored. Does nothing when no backend context was ever created, and
+    /// nothing for a graphics context that is lost (nothing can be released
+    /// in it).
+    ///
+    /// For the two places where these objects go for good: before the graph
+    /// of a compositor is dropped, and when the surface the compositor draws
+    /// to is closed. An object of a graphics interface with a current
+    /// context (OpenGL) is deleted in whatever context is current when it is
+    /// dropped: with none current the call fails, and with the context of
+    /// another compositor current it deletes an object of that one. Once the
+    /// backend context is released here, what is dropped later touches no
+    /// graphics context.
+    ///
+    /// Unlike [`reset_all_gpu_resources`](Self::reset_all_gpu_resources),
+    /// nothing is asked for that may have to be created: it also works for
+    /// graphics that are not ready, and after the compositor has taken its
+    /// platform handles back.
+    ///
+    /// Not from upstream, where these objects are finalized by the garbage
+    /// collector, on the thread of the context.
+    pub fn release_gpu_resources(&self) {
+        if self.render_interface.existing_backend_context().is_none() {
+            return;
+        }
+        let gpu_context = self.render_interface.gpu_context();
+        if gpu_context.as_ref().is_some_and(|context| context.is_lost()) {
+            return;
+        }
+        let current = gpu_context.map(|context| context.ensure_current());
+        let targets = self.active_targets.borrow().clone();
+        for target in targets {
+            target.release_render_target();
+        }
+        self.render_interface.reset();
+        if let Some(current) = current {
+            current.dispose();
+        }
+    }
+
+    /// Ends the rendering of the compositor for good: from here on a frame
+    /// applies the batches that arrive (so that whoever waits for one is
+    /// answered), drops the jobs they carry, renders nothing and does not
+    /// ask for another tick.
+    ///
+    /// For a compositor whose surface is closed while the compositor lives
+    /// on: its graphics would be "not ready" for ever, and a compositor that
+    /// is not ready asks for the next tick each time. Upstream's browser
+    /// backend takes the server compositor out of the render loop at that
+    /// point; here the compositor stays in the loop, because the thread of
+    /// the compositor still waits for the batch that disposes its target.
+    pub fn stop_rendering(&self) {
+        self.rendering_stopped.set(true);
+    }
+
+    /// Whether [`stop_rendering`](Self::stop_rendering) was called.
+    pub fn is_rendering_stopped(&self) -> bool {
+        self.rendering_stopped.get()
+    }
+
     pub fn invalidate_all_composition_targets(&self) {
         let targets = self.active_targets.borrow().clone();
         for target in targets {
@@ -653,6 +737,14 @@ impl ServerCompositor {
     fn render_core(&self) -> bool {
         self.update_server_time();
         let compositor_global_passes_elapsed = self.execute_global_passes();
+
+        if self.rendering_stopped.get() {
+            // The jobs are dropped outside the borrow of their queue.
+            let jobs = std::mem::take(&mut *self.received_job_queue.borrow_mut());
+            let post_target_jobs = std::mem::take(&mut *self.received_post_target_job_queue.borrow_mut());
+            drop((jobs, post_target_jobs));
+            return false;
+        }
 
         if !self.render_interface.is_ready() {
             return true;
