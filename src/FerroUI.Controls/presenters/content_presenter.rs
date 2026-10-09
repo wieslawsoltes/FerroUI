@@ -59,7 +59,7 @@ impl VisualImpl for ContentPresenter {
     }
 }
 
-impl FerroObjectImpl for ContentPresenter {
+ferroui_base::ferro_overrides! { impl FerroObjectImpl for ContentPresenter {
     fn constructed(this: &Self) {
         Self::parent_constructed(this);
         this.update_pseudo_classes();
@@ -74,7 +74,7 @@ impl FerroObjectImpl for ContentPresenter {
             _ => {}
         }
     }
-}
+} }
 
 impl StyledElementImpl for ContentPresenter {
     fn on_attached_to_logical_tree(this: &Self, e: &LogicalTreeAttachmentEventArgs) {

@@ -142,7 +142,7 @@ crate::ferro_class_info!(InputElement { new: InputElement::new });
 
 ferro_impl_classes!(InputElement: StyledElementImpl, LayoutableImpl, InteractiveImpl);
 
-impl FerroObjectImpl for InputElement {
+crate::ferro_overrides! { impl FerroObjectImpl for InputElement {
     fn constructed(this: &Self) {
         Self::parent_constructed(this);
         this.update_pseudo_classes(Some(this.is_focused()), Some(this.is_pointer_over()));
@@ -175,7 +175,7 @@ impl FerroObjectImpl for InputElement {
             }
         }
     }
-}
+} }
 
 impl VisualImpl for InputElement {
     fn on_detached_from_visual_tree_core(this: &Self, e: &VisualTreeAttachmentEventArgs) {

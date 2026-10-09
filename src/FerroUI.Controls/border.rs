@@ -59,7 +59,7 @@ impl VisualImpl for Border {
     }
 }
 
-impl FerroObjectImpl for Border {
+ferroui_base::ferro_overrides! { impl FerroObjectImpl for Border {
     fn on_property_changed(this: &Self, change: &FerroPropertyChangedEventArgs<'_>) {
         Self::parent_on_property_changed(this, change);
         match change.property().name() {
@@ -72,7 +72,7 @@ impl FerroObjectImpl for Border {
             _ => {}
         }
     }
-}
+} }
 
 impl LayoutableImpl for Border {
     fn measure_override(this: &Self, available_size: Size) -> Size {

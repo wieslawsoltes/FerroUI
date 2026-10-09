@@ -54,7 +54,7 @@ impl VisualImpl for Panel {
     }
 }
 
-impl FerroObjectImpl for Panel {
+ferroui_base::ferro_overrides! { impl FerroObjectImpl for Panel {
     fn constructed(this: &Self) {
         Self::parent_constructed(this);
 
@@ -78,7 +78,7 @@ impl FerroObjectImpl for Panel {
             },
         ));
     }
-}
+} }
 
 impl StyledElementImpl for Panel {
     fn child_index_provider(this: &Self) -> Option<Rc<dyn IChildIndexProvider>> {

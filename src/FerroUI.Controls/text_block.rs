@@ -65,7 +65,7 @@ impl ControlImpl for TextBlock {
 }
 impl StyledElementImpl for TextBlock {}
 
-impl FerroObjectImpl for TextBlock {
+ferroui_base::ferro_overrides! { impl FerroObjectImpl for TextBlock {
     fn constructed(this: &Self) {
         Self::parent_constructed(this);
 
@@ -106,7 +106,7 @@ impl FerroObjectImpl for TextBlock {
             _ => {}
         }
     }
-}
+} }
 
 impl VisualImpl for TextBlock {
     /// Renders the `TextBlock` to a drawing context.
