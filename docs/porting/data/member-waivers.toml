@@ -4984,3 +4984,107 @@ project = "Avalonia.Skia"
 type = "Avalonia.Skia.Metal.SkiaMetalExternalObjectsFeature"
 member = "ImportImage"
 rust = ["import_shared_image"]
+
+# The remote protocol (`src/FerroUI.Remote.Protocol/`). The serializer is driven by declarations
+# instead of reflection (DEVIATIONS.md, Remote protocol), so what exists only to reflect has no
+# counterpart, and constructors with arguments have the names the porting guide gives them.
+
+[[waive]]
+project = "Avalonia.Remote.Protocol"
+type = "Metsys.Bson.Configuration.ExpressionHelper"
+reason = "walks an expression tree (`x => x.Name`) to the name of a member: a property is named by its declared name here (`ITypeConfiguration::use_alias(\"Name\", ..)`), so there is nothing to walk"
+
+[[waive]]
+project = "Avalonia.Remote.Protocol"
+type = "Metsys.Bson.TypeHelper"
+member = "*LambdaExpression*"
+reason = "`FindProperty(LambdaExpression)`: the name of a property from an expression tree; see `ExpressionHelper`"
+
+[[waive]]
+project = "Avalonia.Remote.Protocol"
+type = "Metsys.Bson.ScopedCode<T>"
+reason = "the class with a typed scope is the one struct `ScopedCode`: its scope is a `Value`, which holds an object of any class"
+
+[[waive]]
+project = "Avalonia.Remote.Protocol"
+type = "Metsys.Bson.ObjectId"
+member = "*operator*"
+reason = "`==` and `!=` are `PartialEq` of `ObjectId` (by the text of the value, as upstream's `Equals`); the implicit conversions are `From<&ObjectId> for Option<String>` and `TryFrom<&str> for ObjectId`"
+
+[[waive]]
+project = "Avalonia.Remote.Protocol"
+type = "Metsys.Bson.ObjectId"
+member = "Equals"
+reason = "`PartialEq` of `ObjectId`"
+
+[[waive]]
+project = "Avalonia.Remote.Protocol"
+type = "Avalonia.Remote.Protocol.TcpTransportBase"
+member = "TcpTransportBase(*"
+reason = "the abstract class is a trait: the resolver its constructor takes is `TcpTransportBase::resolver` of the implementor"
+
+[[waive]]
+project = "Avalonia.Remote.Protocol"
+type = "Avalonia.Remote.Protocol.BsonStreamTransportConnection"
+member = "Dispose"
+reason = "`dispose` of the `IFerroRemoteTransportConnection` implementation of the connection (`bson_stream_transport.rs`)"
+
+[[alias]]
+project = "Avalonia.Remote.Protocol"
+type = "Metsys.Bson.MagicProperty"
+member = "_ignoredIfNull"
+rust = ["ignored_if_null"]
+
+[[alias]]
+project = "Avalonia.Remote.Protocol"
+type = "Metsys.Bson.MagicProperty"
+member = "Type"
+rust = ["property_type"]
+
+[[alias]]
+project = "Avalonia.Remote.Protocol"
+type = "Metsys.Bson.ObjectId"
+member = ".ctor"
+rust = ["new", "from_string", "from_bytes"]
+
+[[alias]]
+project = "Avalonia.Remote.Protocol"
+type = "Metsys.Bson.BsonException"
+member = ".ctor"
+rust = ["new", "with_message", "with_inner_exception"]
+
+[[alias]]
+project = "Avalonia.Remote.Protocol"
+type = "Metsys.Bson.Serializer"
+member = "Serialize"
+rust = ["serialize", "serialize_object"]
+
+[[alias]]
+project = "Avalonia.Remote.Protocol"
+type = "Metsys.Bson.Deserializer"
+member = "Deserialize"
+rust = ["deserialize", "deserialize_type"]
+
+[[alias]]
+project = "Avalonia.Remote.Protocol"
+type = "Metsys.Bson.TypeHelper"
+member = "FindProperty"
+rust = ["find_property", "find_property_info"]
+
+[[alias]]
+project = "Avalonia.Remote.Protocol"
+type = "Metsys.Bson.Configuration.*TypeConfiguration<T>"
+member = "Ignore"
+rust = ["ignore", "ignore_name"]
+
+[[alias]]
+project = "Avalonia.Remote.Protocol"
+type = "Avalonia.Remote.Protocol.Designer.ExceptionDetails"
+member = ".ctor"
+rust = ["new", "from_exception"]
+
+[[alias]]
+project = "Avalonia.Remote.Protocol"
+type = "Avalonia.Remote.Protocol.BsonTcpTransport"
+member = ".ctor"
+rust = ["new", "empty"]
