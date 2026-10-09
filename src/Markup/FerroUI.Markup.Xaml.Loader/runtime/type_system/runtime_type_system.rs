@@ -30,56 +30,11 @@ use super::runtime_type::{
 };
 use super::values::{to_untyped, RuntimeTypeValue};
 
-/// The namespace of the attribute types the metadata attributes are
-/// projected to.
-pub const METADATA_NAMESPACE: &str = "FerroUI.Metadata";
-/// The namespace of the attribute types of control metadata.
-pub const CONTROLS_METADATA_NAMESPACE: &str = "FerroUI.Controls.Metadata";
-/// The namespace of the property definition types.
-pub const PROPERTY_NAMESPACE: &str = "FerroUI";
-
-const KNOWN_ATTRIBUTES: &[&str] = &[
-    "XmlnsDefinition",
-    "XmlnsPrefix",
-    attributes::CONTENT,
-    attributes::TEMPLATE_CONTENT,
-    attributes::DEPENDS_ON,
-    attributes::ASSIGN_BINDING,
-    attributes::USABLE_DURING_INITIALIZATION,
-    attributes::WHITESPACE_SIGNIFICANT_COLLECTION,
-    attributes::TRIM_SURROUNDING_WHITESPACE,
-    attributes::CONTROL_TEMPLATE_SCOPE,
-    attributes::DATA_TYPE,
-    attributes::INHERIT_DATA_TYPE_FROM,
-    attributes::INHERIT_DATA_TYPE_FROM_ITEMS,
-    attributes::RESOLVE_BY_NAME,
-    attributes::MARKUP_EXTENSION_OPTION,
-    attributes::MARKUP_EXTENSION_DEFAULT_OPTION,
-    attributes::FERRO_LIST,
-    attributes::TEMPLATE_PART,
-    attributes::PSEUDO_CLASSES,
-    attributes::UNSTABLE,
-    attributes::PRIVATE_API,
-    attributes::NOT_CLIENT_IMPLEMENTABLE,
-    attributes::CONSTRUCTOR_ARGUMENT,
-];
-
-/// The full name of the attribute type a metadata attribute named `name`
-/// is projected to.
-pub fn attribute_type_name(name: &str) -> String {
-    match name {
-        "Obsolete" => "System.ObsoleteAttribute".to_string(),
-        "TypeConverter" => "System.ComponentModel.TypeConverterAttribute".to_string(),
-        "DefaultMember" => "System.Reflection.DefaultMemberAttribute".to_string(),
-        "TemplatePart" | "PseudoClasses" => format!("{CONTROLS_METADATA_NAMESPACE}.{name}Attribute"),
-        // Declared next to the bindings, where the compiler looks it up.
-        "AssignBinding" => format!("FerroUI.Data.{name}Attribute"),
-        // Declared with the controls (`FerroUI.Controls.ResolveByNameAttribute`), where the
-        // resolve-by-name replacer looks it up.
-        "ResolveByName" => format!("FerroUI.Controls.{name}Attribute"),
-        _ => format!("{METADATA_NAMESPACE}.{name}Attribute"),
-    }
-}
+// The names the attributes of metadata are projected to and the namespaces of the synthetic
+// types are stated with the shared table of the compiler, which the build-time type system
+// reads too.
+pub use crate::core_table::{attribute_type_name, CONTROLS_METADATA_NAMESPACE, METADATA_NAMESPACE, PROPERTY_NAMESPACE};
+use crate::core_table::KNOWN_ATTRIBUTES;
 
 type GenericIndex = (usize, HashMap<String, Vec<&'static MarkupType>>);
 
@@ -104,7 +59,7 @@ pub struct RuntimeTypeSystem {
 }
 
 /// The generic definition of the dictionary of the framework.
-const DICTIONARY_DEFINITION: &str = "FerroUI.Collections.FerroDictionary`2";
+const DICTIONARY_DEFINITION: &str = crate::core_table::FERRO_DICTIONARY_DEFINITION;
 
 impl RuntimeTypeSystem {
     /// Creates a type system over the registries. Types registered later

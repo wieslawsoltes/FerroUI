@@ -19,6 +19,8 @@
 #![allow(clippy::type_complexity, clippy::too_many_arguments)]
 
 pub mod compiler_extensions;
+/// The closed table of runtime library types, shared by the run-time and the build-time type system.
+pub mod core_table;
 pub mod parsers;
 
 /// The run-time back end: the run-time type system and the AST interpreter.
