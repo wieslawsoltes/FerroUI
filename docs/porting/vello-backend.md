@@ -1,6 +1,6 @@
 # The Vello render backend
 
-Status: **in progress** (started 2026-10-09). Row 25 of `CRITICAL-PATH.md`. Stages 1 to 8 are built (the CPU mode with text and effects; the hybrid and the GPU mode, into memory and into the window of the macOS platform); the browser (9) is open. Section 11 is the performance of the desktop window: what was measured in the ControlCatalog, the hang of the hybrid mode and what was changed.
+Status: **in progress** (started 2026-10-09). Row 25 of `CRITICAL-PATH.md`. Stages 1 to 8 are built (the CPU mode with text and effects; the hybrid and the GPU mode, into memory and into the window of the macOS platform); the browser (9) is open. Section 11 is the performance of the desktop window: what was measured in the ControlCatalog, the hang of the hybrid mode and what was changed. Stage 9, the browser, is built for the hybrid and the CPU mode (section 12).
 
 The port has two render backends behind the platform contracts of `src/FerroUI.Base/platform`: Skia (`src/Skia/FerroUI.Skia`, a port of upstream's `Avalonia.Skia`, mature) and Vello (`src/Vello/FerroUI.Vello`, crate `ferroui-vello`). The Vello backend is an **addition**: upstream has none. Its structure, names and logic follow the Skia backend file by file so that the two stay comparable, and its correctness is measured against the Skia backend (section 8).
 
@@ -211,7 +211,7 @@ IDrawingContextImpl (contract)
 |---|---|---|
 | Offscreen bitmaps, render target bitmaps, layers, tests, the headless platform | CPU | no device, deterministic, and the mode `vello_cpu`'s authors call their most mature |
 | The desktop window (macOS, Metal) | **Hybrid first, classic GPU second** | Both draw into a `wgpu::TextureView`. The hybrid one has what a UI needs today that classic `vello` lacks: filters (blur, drop shadow), aliased edges, and the same code path as the CPU mode (the same `vello_common`, so the same pixels as the tests measure). Classic `vello` wins on scenes dense with vector paths, which a UI rarely is, and needs compute shaders. The option order lets an application prefer either |
-| The browser (later) | WebGPU: hybrid or GPU through `wgpu`; WebGL2: hybrid with its `webgl` feature; no GPU: CPU into a 2D canvas | staged with the `wasm32-unknown-unknown` configuration of `browser-platform.md`; not built now. `vello` needs WebGPU; only `vello_gpu` has a WebGL2 path |
+| The browser (stage 9, section 11) | WebGL2: hybrid with the `webgl` renderer of `vello_gpu` (built); no WebGL 2: CPU into a 2D canvas (built); WebGPU: not on the Emscripten target (11.6). As planned before the stage: WebGPU: hybrid or GPU through `wgpu`; WebGL2: hybrid with its `webgl` feature; no GPU: CPU into a 2D canvas | staged with the `wasm32-unknown-unknown` configuration of `browser-platform.md`; not built now. `vello` needs WebGPU; only `vello_gpu` has a WebGL2 path |
 
 ### 4.1 The sinks of the GPU modes, as built
 
@@ -291,7 +291,7 @@ The native backend hands out a Metal device with its command queue and, per fram
 | 6 | Effects, box shadows, scene brushes (visual and drawing brushes), acrylic materials, render options, JPEG and the other codecs, RGB565, mipmapped downscaling | the effect, scene brush, acrylic and bitmap tests of the Skia backend ported; 61 scenes and the codec tests in the harness (section 10) | done, but `render_async` (no surface of another API before the GPU modes) and the `HitTesting` suite (which needs the font services of the tests of stage 5) |
 | 7 | Hybrid mode: `VelloHybridSceneSink` offscreen on a headless `wgpu` device, then the desktop window (after the Metal contracts moved) | the harness compares hybrid against Skia and against CPU; the window example | **done** for shapes, brushes, clips, layers, images and glyph runs; filters after stage 6; the ControlCatalog with `use_vello` was not run |
 | 8 | GPU mode: `VelloGpuSceneSink`, the desktop window | the same, three modes compared | **done** for the same; blur passes after stage 6; open: aliased edges of shapes that are not rectangles, four destructive compositions inside a clip |
-| 9 | Browser: WebGPU, WebGL2, CPU | `browser-platform.md` | open |
+| 9 | Browser: WebGL2 (hybrid), 2D canvas (CPU), WebGPU (GPU) | the browser tests of `themed_view` and the catalog with `Renderer=Vello`, on the thread of the page and on the render worker; the measures against Skia on the same site (section 11) | **done** for the hybrid and the CPU mode; the GPU mode is blocked on `wgpu` (11.6) |
 
 **Members that fail with their stage** (nothing pretends to work): loading WebP and whatever else is not PNG, JPEG, GIF, BMP, ICO or WBMP (a load error, as for data in no format); `create_backend_context` with a platform graphics context (stages 7, 8; a panic); the hybrid and GPU modes (`VelloRenderingModeUnavailable`).
 
@@ -575,7 +575,7 @@ Reading:
 | 6 | PingFang, SVG glyphs, `bdat` bitmaps | above |
 | 7 | A character without a script falls back to the first family that has it | the system has an answer for a character (`CTFontCreateForString`), which `fontique` does not ask; a direct call would need the CoreText bindings and `unsafe` in the crate |
 | 8 | Windows and Linux | `fontique` has DirectWrite and fontconfig backends; nothing here was run on them |
-| 9 | The browser | `fontique` without its `system` feature and a collection of registered fonts (stage 9) |
+| 9 | The browser | done (section 11): `fontique` as it is, whose backend on the target has no fonts, and the fonts an application registers with the font manager of the base library |
 
 ## 9. Gaps and risks
 
@@ -880,3 +880,221 @@ Reading. The hybrid mode draws a dirty rectangle as fast as Skia and a whole pag
 | The renderer of the GPU mode has a fixed amount of memory for what is blended above the fourth layer of a pixel (`vello_encoding` 0.11, `config.rs`: 2^20 words, that is 4096 tiles one level too deep) and draws nothing of a frame that needs more, without saying so: 24 layers inside each other over 256 by 256 pixels give a frame that is not drawn. A clip is a layer to this renderer | **open**, inherent to `vello` 0.11: whether a frame was drawn is known only from a read back (`render_to_texture_async`). A window of 2200 by 1600 is 13 750 tiles: five clips or layers inside each other over a third of it are enough. Not seen in the tour, where nothing reads the frames; the hybrid mode has no such limit |
 
 **Tests.** The crate: 512 with both GPU features (505 before), 486 without: the layer as a texture against the layer in memory through five frames of a compositor in the hybrid and the GPU mode (`gpu/layer_tests.rs`, 5 tests), the retained frame of a window in the three modes and the frame of many render passes (`gpu/metal_tests.rs`, 2 tests). The comparison harness: 30 tests, green with both features; three scenes of layers (`surface_layer`, `surface_layer_redrawn`, `surface_layer_as_bitmap`: 0.242 %, 0.175 % and 0.005 % from Skia in every mode, and no pixel beyond the tolerance between the modes).
+
+## 12. Stage 9: the browser
+
+Built 2026-10-09 and 2026-10-10 on the browser build of `browser-platform.md`: `wasm32-unknown-emscripten`, Emscripten 6.0.10, Rust 1.99.0 (the nightly of `scripts/browser/setup.sh` for threads), `wasm-bindgen` 0.2.129. The Vello backend is in the module **beside** Skia, behind the feature `vello` of the browser crate, and a page chooses it at start (`BrowserPlatformOptions::renderer`, `?Renderer=Vello` in the examples). Skia stays the default, and a module built without the feature is the module it was.
+
+### 12.1 The facts, with their evidence
+
+Sources are the crates as cargo downloaded them (`~/.cargo/registry/src/index.crates.io-*/`); "checked" is `cargo check --target wasm32-unknown-emscripten` with the pinned toolchain, "linked" a site built by `scripts/build-browser.sh`, "ran" the browser tests of 12.4.
+
+| Crate, at the pinned version | On `wasm32-unknown-emscripten` | Evidence |
+|---|---|---|
+| `vello_cpu` 0.3.0 (`std`, `u8_pipeline`, `text`, `png`) with `vello_common`, `glifo` 0.4.0, `skrifa` 0.44.0, `kurbo`, `peniko`, `linesweeper`, the codecs | compiles, links and runs as it is: `ferroui-vello` without a feature needed no change for the target | checked [M], linked [M], ran [M] |
+| `vello_gpu` 0.3.0, feature `webgl` **without** `wgpu` | compiles, links and runs. The feature has no condition on the target: it needs `js-sys` and `web-sys` (0.3.106, the release that belongs to `wasm-bindgen` 0.2.129, in `Cargo.lock` already) and `vello_gpu_shaders` with `glsl`. The one check of the target is a `debug_assert!(cfg!(target_arch = "wasm32"))` in `WebGlRenderer::begin_with` | `vello_gpu-0.3.0/Cargo.toml` (`webgl = ["dep:js-sys", "dep:web-sys", "dep:vello_gpu_shaders", "vello_gpu_shaders/glsl"]`), `src/render/webgl/mod.rs:276` [V]; checked, linked, ran [M] |
+| `vello_gpu` 0.3.0, feature `wgpu` | compiles; draws nothing a view could use (the next row) | checked [M] |
+| `wgpu` 30.0.1 | **Neither of its two web backends exists on this target.** Its build script defines `webgpu: all(not(native), not(Emscripten), feature = "webgpu")` and `webgl: all(not(native), not(Emscripten), feature = "webgl")`; the dependencies `web-sys`, `js-sys` and `wasm-bindgen` are declared for `cfg(all(target_arch = "wasm32", not(target_os = "emscripten")))` only. What Emscripten gets is the `gles` backend through EGL (`wgpu-hal-30.0.1/src/gles/egl.rs`, `khronos_egl::Instance<Static>`: the EGL of Emscripten's C library). With all three features on, the crate compiles for the target, with the GLES backend alone (`Instance::enabled_backend_features`: `GL` when `cfg!(any(gles, webgl))`, `BROWSER_WEBGPU` when `cfg!(webgpu)`) | `wgpu-30.0.1/build.rs:4-36`, `Cargo.toml:212-271`, `src/api/instance.rs:109-127` [V]; a probe crate with `gles`, `webgpu` and `webgl` checked [M] |
+| `wgpu` over that EGL, for the canvases of the browser crate | **not usable.** Emscripten's EGL has one display, one context and one surface, and creates the context on the canvas of the module: `EGL.context = GL.createContext(Browser.getCanvas(), EGL.contextAttributes)` (`emsdk/upstream/emscripten/src/lib/libegl.js:360`). The browser crate creates a canvas a view (several on a page) and never sets the canvas of the module. Every function of that EGL is `__proxy: 'sync'`: in a module with threads a call from the render worker is carried to the main thread of the page, where an `OffscreenCanvas` that was transferred to the worker does not exist | `libegl.js` of Emscripten 6.0.10 [V]. Not run |
+| `wgpu` GLES and compute shaders | none in a browser: `supports_compute = supported((3, 1), (4, 3)) \|\| extensions.contains("GL_ARB_compute_shader")`, and WebGL 2 is OpenGL ES 3.0 | `wgpu-hal-30.0.1/src/gles/adapter.rs:313` [V] |
+| classic `vello` 0.12.0 | compiles for the target (with `wgpu` as above), and cannot run: it needs compute shaders, which on this target only a WebGPU backend of `wgpu` would give, and there is none (12.6) | a probe crate with `vello` checked [M]; `vello-0.12.0/src/lib.rs` [V] |
+| `fontique` 0.12.0 with its default `system` feature | compiles and runs with **no system fonts**: on a target that is none of Windows, Apple, Linux, FreeBSD and Android its backend is "Dummy system font backend for targets like wasm32-unknown-unknown" (`src/backend/mod.rs:37-73`), whose collection is empty. `memmap2`, which its `std` feature links, compiles for the target (Emscripten is a `unix`) and is never called: nothing has a path | `fontique-0.12.0/src/backend/mod.rs` [V]; ran [M] |
+
+**Fonts.** With an empty collection the font manager of the backend is the collection-based one `browser-platform.md` (section 9) asks for, without a change: it has no installed family and no default family name, a typeface comes from bytes (`try_create_glyph_typeface_from_stream`: `VelloTypeface::from_bytes`, `skrifa`), and the families an application has are the ones it registered with the font manager of the base library (the embedded Inter collection, `with_inter_font` and `FontManagerOptions::default_family_name` in the examples; the fonts of the catalog pages, which the host page fetches). That is what the Skia backend's font manager is in the browser, whose `SkFontMgr` has no fonts there either. The text of the examples and the CJK sample of the catalog are drawn (12.4).
+
+**Threads.** A module built with threads has shared memory; everything of the backend that draws stays on the thread that draws (the thread of the page, or the render worker), as section 6 has it, and nothing of this stage is `Send`: the renderer, its caches and the textures of a canvas are `Rc` objects of that thread, like the WebGL context of the browser crate they belong to.
+
+- `vello_gpu`'s WebGL renderer holds objects of the script side (`WebGl2RenderingContext`, textures, programs): handles into the table of the `wasm-bindgen` glue of one thread. A worker has a glue of its own (`browser-render-worker.md`, "The wasm-bindgen glue in a worker"), so the renderer is created on the worker over the `OffscreenCanvas` the worker holds, and lives there.
+- Slices of the module memory that the renderer hands to WebGL (`texImage2D`, `bufferData`, uniforms) are views over a `SharedArrayBuffer` in such a module. WebGL 2 takes them (`[AllowShared]` in its interface); ran [M] (12.4, the sites built with threads).
+- No `static mut`, `thread_local!` or `unsafe impl Send/Sync` in `vello_gpu`, `vello_common`, `vello_cpu` and `glifo` at these versions (searched [V]).
+- **`vello_cpu`'s own thread pool (`multithreading`) is not used, and cannot be as the module is built.** Its dispatcher makes a `rayon` pool for every render context (`ThreadPoolBuilder::new().num_threads(n).build()`, `vello_cpu-0.3.0/src/dispatch/multi_threaded.rs:117`) and then waits on a barrier for all of its threads (`:597`). A thread of an Emscripten module is a web worker: one beyond the workers created before the application starts (`FERROUI_BROWSER_THREAD_POOL_SIZE`, 2, of which the render thread takes one) cannot start until the thread that spawned it returns to the browser, so the wait would not end; and the thread of the page may not block at all. Filters are `unimplemented!` with the pool (`:545`). It would need a pool sized for the renderer, created once, and a dispatcher that keeps it; not attempted.
+
+**SIMD.** The renderers choose their vector code at run time from what the build has (`Level::try_detect().unwrap_or(Level::baseline())`, `vello_gpu-0.3.0/src/scene.rs:198`). The module is built without `simd128` (`.cargo/config.toml` sets no target feature), so the strips of both modes are computed by the scalar code. Open (12.7).
+
+### 12.2 The route for the hybrid mode
+
+**`vello_gpu`'s own WebGL2 renderer over the context of the canvas; not `wgpu`.** Decided by what the table above shows:
+
+- `wgpu` has no WebGL backend on this target, and the one it has (GLES through EGL) belongs to the canvas of the module and to the main thread. It could draw neither a second view nor from the render worker.
+- `vello_gpu`'s `webgl` renderer needs nothing but `web-sys`, which this build links, and a canvas. `WebGlRenderer::new_with(&HtmlCanvasElement, ..)` asks the canvas for its `webgl2` context; a canvas that has one returns it whatever the options of the call are, so the renderer draws with **the context the script side of the browser crate created**, with the attributes it created it with (no anti-aliasing, a depth buffer of 24 bits beside the stencil buffer: what the renderer checks). `getContext` is a member of `HTMLCanvasElement` and of `OffscreenCanvas` with the same arguments and the binding calls it by name, so the canvas of a worker is passed as it is (an unchecked cast; the result is checked to be a `WebGL2RenderingContext`, which a worker has too).
+- It is also the smaller one: no `wgpu`, `naga` or `glow` in the module (`vello_gpu`'s own documentation, `render/common.rs:703`: "For optimal performance and binary size on web targets, use only the dedicated WebGL renderer").
+
+The context stays registered with Emscripten's `GL` object as for Skia (the script side registers every WebGL context it creates; the registration is what `makeContextCurrent` and the release of a closed view go through). Nothing of the module's WebGL emulation draws to it when the Vello backend is the render backend: an application has one.
+
+### 12.3 What was built
+
+**Selection.** `BrowserPlatformOptions::renderer: BrowserRenderer { Skia, Vello }`, Skia by default. The rendering modes of upstream keep their names and their meaning, which is what the canvas of a view is; the backend draws to that kind of canvas with what it has for it:
+
+| `BrowserRenderingMode` | canvas | Skia | Vello |
+|---|---|---|---|
+| `WebGL2` | WebGL 2 context | Ganesh | **hybrid** (`vello_gpu`, WebGL2 renderer) |
+| `WebGL1` | WebGL 1 context | Ganesh | none: the mode is taken out of the list (`BrowserRenderer::rendering_modes`); a list with nothing else is drawn in memory |
+| `Software2D` | 2D canvas | Skia raster | **CPU** (`vello_cpu`) |
+
+The fallback order is the one of the list, served by the script side as before: with the default list a browser without WebGL 2 (or with a software WebGL, which `failIfMajorPerformanceCaveat` refuses) gets a 2D canvas, and the CPU mode draws it. `start_browser_app` and `setup_browser_app` put `use_vello` in the place of the render backend the builder had, with `VelloOptions { rendering_modes: [Hybrid, Cpu] }` unless the application registered options. A module built without the feature `vello` fails at start with a message that names the feature when the option asks for the backend; the examples keep Skia then and say so. Recorded in `DEVIATIONS.md` (browser backend).
+
+**The CPU mode** needed nothing new: the software render target of the browser crate hands out a retained framebuffer (premultiplied RGBA8888), and the backend's `FramebufferRenderTarget` draws it as on every platform that renders in software (section 5; risk 7 of section 9 applies in full: a frame is rendered in memory, written to the framebuffer, and the framebuffer is drawn back in as an image for the next one).
+
+**The hybrid mode**, by file:
+
+| Skia backend | Vello backend | |
+|---|---|---|
+| `gpu/open_gl/gl_skia_gpu.rs` (`GlSkiaGpu` over an `IGlContext`) | `web_gl/mod.rs`: `VelloWebGlGpu` | made from a graphics context that has an `IGlContext` and an `IWebGlCanvasFeature`; holds the renderer, its `Resources` (glyph caches, the image atlas) and the textures of images, each kept for sixteen renders after it was last drawn, as the sink over `wgpu` keeps them |
+| (the entry points of the context: `GlInterface`) | `web_gl/mod.rs`: `IWebGlCanvasFeature` | the one new contract: a graphics context that is the WebGL2 context of a canvas hands out the canvas. `WebGlContext` of the browser crate implements it for a WebGL 2 context |
+| `gpu/open_gl/gl_render_target.rs` | `web_gl/mod.rs`: `VelloWebGlRenderTarget` | over the same `IGlPlatformSurface` and `IGlPlatformSurfaceRenderTarget` of `ferroui-opengl` the browser crate hands to Skia: a frame is a session (which sizes the canvas, counts the frame for `RenderStatistics` and tells who waits for the first frame), a scene recorded for the size of the session, rendered when the drawing context is disposed |
+| the canvas of a surface | `scene/vello_web_gl_scene_sink.rs`: `VelloWebGlSceneSink` | the scene of the hybrid sink over `wgpu`, recorded the same way (a copy of its recording code: the other sink is `wgpu` from its first line), rendered with `IVelloSceneSink::render_to_canvas`, a member with a default body like `render_to_texture` |
+
+- **Every frame is drawn whole, directly.** The compositor draws into a layer and blits it when a target does not keep its last frame, and a layer of this backend is pixels in memory drawn by the CPU mode (10.6, item 15): the GPU would draw one textured rectangle a frame. The render target therefore says that it can be drawn to directly and that the frame before is not retained (`RenderTargetProperties { retains_previous_frame_contents: true, is_suitable_for_direct_rendering: true }` with `previous_frame_is_retained: false` for each drawing context), which makes the compositor draw every visual of every frame into the scene of the canvas: shapes, glyphs and images go through `vello_gpu`. A layer is still used when a debug overlay asks for one.
+- **What ends in memory** (render target bitmaps, layers, effects) is drawn by the CPU mode, as on the desktop when the order has it; the renderer of a canvas draws to its canvas only (`try_create_scene_sink(Hybrid)` says so in a module with `hybrid-webgl` alone).
+- **Blurs and shadows**: the sink has no filter members (10.6, item 7), so they are images of `vello_cpu`, uploaded as textures.
+- **Context loss** is handled as the Skia path handles it, which is: not. `WebGlContext::is_lost` of the browser crate is `false` (upstream's `TODO`), the script side does not listen for `webglcontextlost`, and a lost context is not restored. The difference is that `vello_gpu` does not fail on a lost context ("might silently fail", its documentation), so the sink asks `isContextLost` before each render and leaves the frame out, logged. Open (12.7).
+- **A renderer that does not take the context** (a shader that does not compile, a depth buffer of less than 24 bits) is a panic of `create_backend_context` with the reason of the renderer. A canvas that has a WebGL context cannot become a 2D canvas, so there is no falling back to the CPU mode from there; the fallback is the one of the script side, before a context exists.
+- **`unsafe`**: none in this stage.
+
+**Features and manifests.** `vello_gpu` in the workspace manifest no longer names a renderer (`features = ["std", "text"]`); `hybrid` of `ferroui-vello` adds `vello_gpu/wgpu` and the new `hybrid-webgl` adds `vello_gpu/webgl`, `ferroui-opengl` (the surface contracts), `wasm-bindgen`, `js-sys` and `web-sys` (`HtmlCanvasElement`, `WebGl2RenderingContext`, `WebGlTexture`; both pinned at `=0.3.106` in the workspace). `Cargo.lock` gained no package. `ferroui-browser` has the feature `vello` (`ferroui-vello` with `hybrid-webgl`), `control-catalog-browser` a feature of the same name; `scripts/build-browser.sh <application> --features vello` builds the module and writes the site to `target/browser-vello/<application>` (`browser-threads-vello`, `browser-both-vello`).
+
+### 12.4 The tests
+
+`scripts/build-browser.sh <application> --features vello [--threads]` and then the browser tests with one more argument, which every page of the checks is opened with. Without it Skia draws and the files run what they always ran.
+
+```
+node scripts/browser/tests/themed_view.test.mjs <target>/browser-vello/themed_view Renderer=Vello
+node scripts/browser/tests/control_catalog.test.mjs <target>/browser-vello/control-catalog-browser --query Renderer=Vello
+node scripts/browser/compare-renderers.mjs <target>/browser-vello/control-catalog-browser [--mode Software2D]
+```
+
+What the Vello runs add to the checks of the Skia runs: that the backend that draws is Vello (`renderer=` at the end of `themedViewRendering` and `catalogRendering`), which kind of canvas each rendering mode gets (the default list and `WebGL2`: a WebGL 2 canvas; `Software2D` and `WebGL1`: a 2D canvas), and that the picture of the view agrees with the picture Skia draws of the same page of the same module. Text is where the two backends differ (section 8: the outlines of the glyphs here, the rasterizer of FreeType there), so the pictures are compared with the tolerance of the comparison harness, 32 of 255 a channel, and a bound of 5 % of the pixels, and they must not be equal to the last digit, which would mean one backend drew both. No check of the Skia runs was changed but one line: the rendering mode `WebGL1` of the threaded checks expects a 2D canvas when the Vello backend draws.
+
+Results (2026-10-10, headless Chrome 155, the software rasteriser of the harness unless said otherwise; the sites are the final ones, built with the profile of 12.5):
+
+| Site | Run | Result |
+|---|---|---|
+| `browser-vello/themed_view` | `Renderer=Vello` | **38 of 38** (the 32 checks of the Skia run and 6 of the backend). `themed_view`: 1.26 % of the pixels more than 32 of 255 from Skia in both modes, 1.73 % (hybrid) and 1.66 % (CPU) different at all |
+| the same | `Renderer=Vello`, WebGL on the GPU (`FERROUI_BROWSER_ANGLE=metal`) | 38 of 38 (before the profile change of 12.5) |
+| the same | Skia (no argument) | 32 of 32: the module with both backends draws with Skia as before |
+| `browser-threads-vello/themed_view` | `Renderer=Vello` | **78 of 78**: every check on the render worker and again on one thread, the three rendering modes, resizes, a hidden page, a second view opened and closed. The render worker and the thread of the page draw the same picture to the last sampled pixel in every mode; a frame of the worker asks nothing of the main thread |
+| `browser-vello/control-catalog-browser` | `--query Renderer=Vello` | **15 of 15**: start, resize, the drawer, input, the native controls, the asset files, the images of a page, the CJK sample (the font the font manager resolves is WenQuanYi Micro Hei, 6968 pixels of glyphs), the tour of thirteen pages |
+| `browser-threads-vello/control-catalog-browser` | `--query Renderer=Vello` | **18 of 18**, on the render worker; a panic in a frame is reported and the frames go on |
+| the same, and `browser/control-catalog-browser` (the module with Skia alone) | Skia (no argument) | 13 of 13 each |
+| `browser-threads-vello/themed_view` and `.../control-catalog-browser` | Skia (no argument) | 72 of 72 and 16 of 16: the modules with both backends and threads draw with Skia as before |
+| `browser-vello/control-catalog-browser` | `compare-renderers.mjs` | the twelve pages of the tour that stand still: between 1.01 % and 3.96 % of the pixels more than 32 of 255 from Skia in the hybrid mode and between 1.01 % and 3.89 % in the CPU mode; the pages with the most text (TextBox, TextBlock, Buttons) have the most. The Composition page animates and is not compared |
+| host | `cargo test -p ferroui-vello` without a feature, with `hybrid-webgl`, with `hybrid,gpu,hybrid-webgl` | 486, 486 and 505 passed, 9 ignored as before |
+| host | `cargo test -p ferroui-browser` with and without `vello`; `-p control-catalog-browser` with and without | 226 and 226; 11 and 11 |
+
+Not tested: a real loss of the WebGL context; a browser other than Chrome; a display with a scaling other than 1 in the Vello modes (the harness forces 1).
+
+### 12.5 Measures against Skia, on the same site
+
+One module with both backends (`browser-vello/control-catalog-browser`, and `browser-threads-vello/...` for the render worker), so that the only thing that changes between two rows is the query: `?RenderingMode=WebGL2` or `Software2D`, with or without `&Renderer=Vello`. Apple M3 Pro, macOS, headless Chrome 155.0.8059.39, WebGL on the GPU (`--angle metal`), the frame rate limit of the browser kept. Three runs of every row, the rows in turn; a value is the median with the smallest and the largest run in brackets. The load average of the machine was between 3 and 6 for the frame times and the memory and between 9.5 and 12.4 for the first frame.
+
+**The profile first.** The `browser` profile optimizes for size (`opt-level = "z"`), which inlines next to nothing; the renderers of the Vello project are inner loops over every pixel and every curve. At "z" a frame of the TableView page took **340 ms in the CPU mode and 29 ms in the hybrid mode**. The profile now builds `ferroui-vello`, `vello_cpu`, `vello_common`, `vello_gpu`, `glifo`, `kurbo`, `fearless_simd`, `skrifa` and `read-fonts` at level 3: **27 ms and 10 ms**, and the module is 0.07 MB smaller with gzip (14.26 to 14.19 MB). No other module links those crates. Everything below is with that profile.
+
+**First frame of the catalog**, milliseconds from the start of the navigation (`first-frame.mjs --runs 3`; the first frame the module reports).
+
+| | `runMain` returned | First frame, thread of the page | First frame, render worker |
+|---|---:|---:|---:|
+| Skia, WebGL2 (Ganesh) | 254 | 418 (413 to 436) | 437 (434 to 456) |
+| Skia, Software2D | 249 | 378 (373 to 385) | 395 (391 to 400) |
+| **Vello hybrid** (WebGL2) | 243 | **375 (365 to 375)** | **408 (396 to 409)** |
+| **Vello CPU** (Software2D) | 237 | **370 (362 to 376)** | **401 (400 to 410)** |
+
+The hybrid mode shows its first frame about 40 ms before Ganesh does (30 ms on the worker); where Ganesh spends them was not looked into. The CPU mode is level with Skia raster.
+
+**Scrolling the TableView page** (`frame-times.mjs`: 300 wheel events, one an animation frame, 1280 x 800; the view draws every second animation frame, 30.5 frames a second, where it keeps up). "A frame" is the 95th percentile of the animation frame callbacks of the thread that renders, of which half draw nothing: the cost of a frame that draws. Processor times are from a trace of the browser, per second of the measurement.
+
+| Thread that renders | Renderer | Frames drawn a second | A frame, ms | Thread of the page, ms of processor a second | Longest task of the page, ms | Render worker, ms a second | GPU process, ms a second |
+|---|---|---:|---:|---:|---:|---:|---:|
+| the page | Skia, WebGL2 | 30.5 | 2.5 (2.3 to 2.6) | 138 (133 to 140) | 5.2 | - | 21 |
+| the page | Skia, Software2D | 30.5 | 8.2 (8.1 to 8.4) | 264 (261 to 270) | 9.7 | - | 21 |
+| the page | **Vello hybrid** | 30.5 | **10.3 (10.1 to 10.3)** | 343 (338 to 343) | 12.0 | - | 27 |
+| the page | **Vello CPU** | **20.2** | **26.8 (26.7 to 26.8)** | 525 (524 to 525) | 31.1 | - | 12 |
+| the worker | Skia, WebGL2 | 30.5 | 2.6 (2.6 to 2.7) | 87 (86 to 88) | 4.5 | 62 | 21 |
+| the worker | Skia, Software2D | 30.4 | 8.3 (8.1 to 8.4) | 68 (66 to 72) | 3.1 | 196 | 32 |
+| the worker | **Vello hybrid** | 30.4 | **10.9 (10.4 to 10.9)** | **63 (60 to 63)** | 3.0 | 292 | 27 |
+| the worker | **Vello CPU** | 28.0 | **26.9 (26.9 to 27.1)** | **45 (44 to 45)** | 2.8 | 693 | 23 |
+
+**A page transition** (`frame-times.mjs --scenario navigate --page Buttons --seconds 8`: the drawer entries Buttons and Slider clicked in turn every 1.2 s).
+
+| Thread that renders | Renderer | Frames drawn a second | A frame, ms | Thread of the page, ms a second | Longest task of the page, ms | Render worker, ms a second |
+|---|---|---:|---:|---:|---:|---:|
+| the page | Skia, WebGL2 | 18.1 | 2.0 | 97 | 50 | - |
+| the page | Skia, Software2D | 18.1 | 6.7 | 170 | 48 | - |
+| the page | **Vello hybrid** | 17.9 | **8.6** | 190 | 49 | - |
+| the page | **Vello CPU** | **12.1** | **26.5** | 357 | 41 | - |
+| the worker | Skia, WebGL2 | 17.2 | 2.2 | 69 | 50 | 39 |
+| the worker | Skia, Software2D | 17.5 | 6.7 | 61 | 53 | 115 |
+| the worker | **Vello hybrid** | 17.7 | **8.8** | 59 | 52 | 142 |
+| the worker | **Vello CPU** | 12.4 | **26.8** | 59 | 55 | 322 |
+
+The longest task of the page is the layout of the new page in every row, not rendering.
+
+**Memory of the module after the tour of thirteen pages** (`catalog-memory.mjs`; megabytes, the end of the dynamic memory: at the start, after the tour, and what the memory grew to).
+
+| | Thread of the page: start | after the tour | grown to | Render worker: start | after the tour |
+|---|---:|---:|---:|---:|---:|
+| Skia, WebGL2 | 30.0 | 79.4 | 87.8 | 32.1 | 82.0 |
+| Skia, Software2D | 37.4 | 84.3 | 87.8 | 40.1 | 86.2 |
+| **Vello hybrid** | 31.3 | **77.4** | 87.8 | 33.9 | **79.3** |
+| **Vello CPU** | 56.0 | **112.8** | 126.4 | 59.3 | **121.9** |
+
+What the browser holds outside the module (the context, the textures) is not in these numbers.
+
+**Module size** (`module-sizes.mjs`; megabytes of 1,000,000 bytes).
+
+| Module | Raw | gzip -9 | brotli -11 |
+|---|---:|---:|---:|
+| the catalog, Skia alone (as published) | 44.93 | **13.29** | 8.10 |
+| the catalog, Skia and Vello | 47.12 | **14.19** | 8.75 |
+| the catalog, Skia and Vello, with threads | 46.87 | **14.12** | 8.70 |
+| `themed_view`, Skia and Vello | 31.14 | 9.88 | 6.19 |
+| `themed_view`, Skia and Vello, with threads | 30.97 | 9.87 | 6.17 |
+
+What the tables say:
+
+- **The hybrid mode works and is four times as expensive a frame as Ganesh** (10.3 against 2.5 ms on the TableView page, 8.6 against 2.0 ms in a transition), a little more than Skia's raster path. It holds the frame rate of the scenes measured, on either thread. The cost is on the processor: every frame is drawn whole (no dirty rectangles, 12.3), every glyph of it is filled from its outline (the glyph atlas of the renderer is off, section 5), and the strips are computed by scalar code (12.1).
+- **The CPU mode is three times as expensive as Skia raster** (26.8 against 8.2 ms) and does not hold 30 frames a second of the TableView page on the thread of the page (20.2). Risk 7 of section 9 in numbers: a frame is rendered whole in memory, converted, and the framebuffer drawn back in as an image, where Skia draws the dirty rectangle in place.
+- **The render worker takes all of it off the page**, as it does for Skia: with the hybrid mode the thread of the page uses 63 ms of processor a second while scrolling instead of 343, and the worker 292. With the worker the CPU mode draws 28 frames a second where the page drew 20.
+- **Memory**: the hybrid mode needs what Skia needs (77 against 79 MB after the tour). The CPU mode needs 28 MB more than Skia raster and grows the memory to 126 MB: the frame exists several times (the retained framebuffer, its copy as the backdrop image, the pixels of the scene).
+- **The module with both backends is over the budget of 14 MB with gzip** that the published module has (`browser-platform.md`, section 18): 14.19 MB, 0.90 MB more than the module with Skia alone, which keeps 0.71 MB of the budget. Nothing was published, and the published module is unchanged: the feature is off by default.
+
+**The split, proposed and not built.** A module with both backends does not fit, so a published site that offers Vello needs a module without Skia:
+
+1. `ferroui-browser` gets a default feature `skia` beside `vello`: `use_browser` chooses the one backend the module has (a module with both keeps the option), and the two places of the crate that name the Skia backend (`use_skia` in the builder, `IGlSkiaSpecificOptionsFeature` of the WebGL context) go behind it. HarfBuzz stays in both: the shaper is not the render backend's.
+2. `scripts/build-browser.sh --features vello --no-default-features` (an option to add) writes that module to `browser-vello`, and `combine-site.mjs` composes a site of up to four modules (Skia or Vello, each with and without threads), as it composes two today.
+3. The loader (`scripts/browser/threads/ferroui-loader.js`), which already chooses between the module with threads and the one without at run time, also reads `Renderer` from the query and imports the script of that module; a page without the parameter loads what it loads today.
+4. To measure first: the size of the module without Skia. Skia with HarfBuzz and a font linked to 1.9 MB with gzip before any framework code (`browser-platform.md`, section 4), so the estimate is about 12.5 MB; an estimate, not a measurement.
+
+### 12.6 The GPU mode: blocked, and by what
+
+Classic `vello` draws with compute shaders. In a browser that is WebGPU, and in this build it would have to come through `wgpu`:
+
+- `wgpu` 30.0.1 has **no WebGPU backend on `wasm32-unknown-emscripten`**: `webgpu: { all(not(native), not(Emscripten), feature = "webgpu") }` (`wgpu-30.0.1/build.rs`), and the crates the backend is written with (`web-sys`, `js-sys`, `wasm-bindgen`, `wasm-bindgen-futures`) are dependencies of `cfg(all(target_arch = "wasm32", not(target_os = "emscripten")))` only (`Cargo.toml:212-244`) [V]. The crate compiles for the target with the feature on and has the GLES backend alone [M].
+- That GLES backend has no compute shaders in a browser (WebGL 2 is OpenGL ES 3.0; `wgpu-hal-30.0.1/src/gles/adapter.rs:313` asks for 3.1) and cannot draw to the canvases of the browser crate (12.1) [V].
+- `vello` 0.12.0 itself compiles for the target [M]; `VelloGpuSceneSink` and `VelloWgpuDevice` of the backend are written against `wgpu` and would need nothing but a device.
+
+So the mode was **not attempted beyond the compile probes**: there is no device to give it. Not a matter of this repository's code.
+
+**The smallest change that would unblock it** is in `wgpu`: its WebGPU backend, which is `web-sys` code, compiled for Emscripten too (the two `not(Emscripten)` conditions of the build script and the target conditions of the manifest; `browser-platform.md`, section 3, names issue 10274 and pull request 10515 of the project for it, which were not looked at again here). `wasm-bindgen` and `web-sys` work on this target in this repository, which is what that backend needs. With such a release:
+
+1. `wgpu` with its `webgpu` feature for the target in the workspace manifest, and the features `hybrid` and `gpu` of the backend usable in the browser.
+2. A `VelloWgpuDevice` from a canvas: `Instance::create_surface(SurfaceTarget::Canvas | OffscreenCanvas)`, `request_adapter`, `request_device`. Both requests are promises: the graphics of a view would be "not ready" until they resolve (`IPlatformGraphicsReadyStateFeature`, which the browser crate already has for the render worker), and nothing may block for them.
+3. A rendering mode `WebGPU` of the browser platform and a third kind of canvas on the script side (`getContext("webgpu")`), first in the order when the Vello backend draws and the browser has `navigator.gpu`, with WebGL2 and the hybrid mode behind it.
+4. The frame: the texture of the surface for `render_to_texture`, as the Metal target does it (4.2); `vello`'s renderer writes with a compute shader into a texture of its own and blits.
+
+The other way is the second configuration of `browser-platform.md`: `wasm32-unknown-unknown`, where `wgpu` has WebGPU today, with a shaper that is not HarfBuzz and without Skia. Neither is small.
+
+### 12.7 Open after the stage
+
+| # | What | Plan |
+|---|---|---|
+| 1 | The module with both backends is over the gzip budget of the published module (14.19 against 14 MB) | the split of 12.5; nothing is published with the feature until then |
+| 2 | The GPU mode | 12.6: a release of `wgpu` with WebGPU on Emscripten, or the second target |
+| 3 | The hybrid mode draws every frame whole | a layer that stays on the context (10.6, item 15: a texture the renderer samples) would let the compositor redraw dirty rectangles; then the target can stop saying that it is drawn to directly |
+| 4 | The CPU mode: a frame rendered whole, converted, and drawn back in | risk 7 of section 9: render in place into the premultiplied RGBA framebuffer the browser crate hands out (it is the format of `vello_cpu`), and only the dirty rectangle. The largest gain available here: 27 ms a frame against 8 for Skia raster |
+| 5 | SIMD: the module is built without `simd128`, so `vello_common` runs its scalar paths | `-Ctarget-feature=+simd128` for the target raises the floor of the build to the browsers that have it (Chrome 91, Firefox 89, Safari 16.4: from memory, to be checked [U]) and applies to the whole module; measure the two Vello modes with it before deciding |
+| 6 | Glyphs are filled from their outlines every frame | the glyph atlas of `vello_gpu` (`GlyphRunBuilder::atlas_cache`, which its documentation calls experimental and which draws at other pixels: section 4.1); measure on a page of text |
+| 7 | A lost WebGL context is not restored, as with Skia; the frames of a lost context are left out | listen for `webglcontextlost` and `webglcontextrestored` on the script side, report the loss through `WebGlContext::is_lost`, and make the backend context again (the compositor already does that for a context that says it is lost) |
+| 8 | `vello_cpu`'s thread pool | 12.1: a pool sized for it in the threaded build (`FERROUI_BROWSER_THREAD_POOL_SIZE`), created once; filters are not implemented with it |
+| 9 | Blurs and shadows of the hybrid mode are images of the CPU mode | 10.6, item 7, for both renderers of `vello_gpu` |
+| 10 | Only Chrome was run; Firefox and Safari not | the harness drives Chromium |
+| 11 | `scripts/build-browser.sh --both --features vello` (the composed site of two modules with both backends) was not run | it composes what the two builds wrote, which were both built and tested |
