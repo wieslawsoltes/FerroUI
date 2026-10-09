@@ -59,7 +59,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { open, run, assert, sleep } from "../harness.mjs";
+import { SPLASH_PROBE, open, run, assert, sleep, splashFrames } from "../harness.mjs";
 import {
     DRAWER_EDGE, STATE_TIMEOUT, TOUR, TOUR_SIZE, describe, drive, inContent, inDrawer, navigate, pairs, visit,
     waitUntilReady
@@ -101,12 +101,17 @@ const NARROW_SIZE = { width: 600, height: 700 };
 
 /** Opens the site in a page of `size` and waits until the application has started and drawn. */
 async function start({ mode = "WebGL2", size = FIRST_SIZE, query = "" } = {}) {
-    const page = await open(site, { query: `?RenderingMode=${mode}${query}`, width: size.width, height: size.height, isolated: threaded });
+    const page = await open(site, { query: `?RenderingMode=${mode}${query}`, width: size.width, height: size.height, isolated: threaded, initScript: SPLASH_PROBE });
     const started = Date.now();
     // Whether a render thread draws the view: a module built with threads, unless the page keeps it
     // on its own thread.
     page.onRenderThread = threaded && !query.includes(ONE_THREAD);
-    try { await waitUntilReady(page, START_TIMEOUT); } catch (error) { await page.close(); throw error; }
+    try {
+        await waitUntilReady(page, START_TIMEOUT);
+        // The splash closes on the first drawn frame, whichever thread drew it: not on an empty canvas.
+        const splash = await splashFrames(page);
+        assert(splash && splash.frames >= 1, `the splash was closed before the first frame of the view was drawn: ${JSON.stringify(splash)}`);
+    } catch (error) { await page.close(); throw error; }
     page.startSeconds = (Date.now() - started) / 1000;
     drive(page);
     // The size of the canvas in device pixels and the device pixel ratio. A canvas whose control went

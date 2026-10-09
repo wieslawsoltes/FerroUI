@@ -131,6 +131,28 @@ export function rasteriserArgs(angle = process.env.FERROUI_BROWSER_ANGLE || "swi
     return angle === "swiftshader" ? ["--enable-unsafe-swiftshader", "--use-angle=swiftshader"] : [`--use-angle=${angle}`];
 }
 
+// An init script (`open(.., { initScript: SPLASH_PROBE })`) that keeps, in `globalThis.__ferroSplash`, how
+// many frames the module reported at the moment the splash screen of the host page was closed (the
+// `frames` of `catalogRendering` or `themedViewRendering` of the host, read in the task that closed the
+// splash): { frames, rendering }. The platform closes the splash when the first frame of the view has
+// been drawn, whichever thread drew it, so the number is at least 1 (`splashFrames` reads it).
+export const SPLASH_PROBE = `(() => {
+    new MutationObserver(() => {
+        if (globalThis.__ferroSplash || !document.querySelector(".ferroui-splash.splash-close")) { return; }
+        let rendering = null;
+        try { rendering = globalThis.controlCatalog?.catalogRendering?.() ?? globalThis.themedView?.themedViewRendering?.() ?? null; } catch { }
+        globalThis.__ferroSplash = { frames: Number(/(?:^|;)frames=(\\d+)/.exec(rendering ?? "")?.[1] ?? 0), rendering };
+    }).observe(document, { subtree: true, attributes: true, attributeFilter: ["class"] });
+})();`;
+
+/**
+ * What `SPLASH_PROBE` kept of a page whose splash is closed: { frames, rendering }; null when the page
+ * was opened without the probe or its splash has not closed.
+ */
+export async function splashFrames(page) {
+    return JSON.parse(await page.evaluate("JSON.stringify(globalThis.__ferroSplash ?? null)"));
+}
+
 // Opens `siteDirectory` (query appended to index.html) and resolves to the page driver. `initScript`
 // is evaluated in the page before its own scripts. `isolated` serves the site cross-origin isolated
 // (see `serve`). With `network` the addresses the page requests are kept in `requests`, over every

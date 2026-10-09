@@ -55,8 +55,9 @@ impl FerroView {
             None => panic!("InputElement cannot be null"),
         };
 
-        let top_level_impl: Rc<dyn ITopLevelImpl> =
-            BrowserTopLevelImpl::new(host.clone(), native_controls_container, input_element);
+        let browser_top_level = BrowserTopLevelImpl::new(host.clone(), native_controls_container, input_element);
+        let surface = browser_top_level.surface();
+        let top_level_impl: Rc<dyn ITopLevelImpl> = browser_top_level;
         let top_level = EmbeddableControlRoot::with_impl(top_level_impl);
 
         top_level.prepare();
@@ -65,16 +66,26 @@ impl FerroView {
             move |_: &Interactive, _: &FocusChangedEventArgs| input_helper::focus_element(&host)
         });
         top_level.renderer().start(); // TODO: use Start+StopRenderer() instead.
-        top_level.request_animation_frame(move |_| {
-            // Try to get local splash-screen of the specific host.
-            // If couldn't find - get global one by ID for compatibility.
-            let splash = dom_helper::get_elements_by_class_name("ferroui-splash", &host).or_else(|| {
-                dom_helper::get_element_by_id("ferroui-splash", &BrowserWindowingPlatform::global_this())
-            });
-            if let Some(splash) = splash {
-                dom_helper::add_css_class(&splash, "splash-close");
-            }
-        });
+        // Differs from upstream, which closes the splash screen at the first
+        // animation frame of the top-level, on the thread that draws the
+        // view. That animation frame comes before the first frame is drawn,
+        // and with a render thread it is not the thread of the page that
+        // draws: the first frame of the worker may be seconds away, during
+        // which the page would show an empty canvas that input cannot hit.
+        // The splash screen is closed when the first frame has been drawn
+        // to the canvas of the view, whichever thread drew it.
+        if let Some(surface) = surface {
+            surface.shared().on_first_frame(Box::new(move || {
+                // Try to get local splash-screen of the specific host.
+                // If couldn't find - get global one by ID for compatibility.
+                let splash = dom_helper::get_elements_by_class_name("ferroui-splash", &host).or_else(|| {
+                    dom_helper::get_element_by_id("ferroui-splash", &BrowserWindowingPlatform::global_this())
+                });
+                if let Some(splash) = splash {
+                    dom_helper::add_css_class(&splash, "splash-close");
+                }
+            }));
+        }
 
         Rc::new(Self { top_level })
     }

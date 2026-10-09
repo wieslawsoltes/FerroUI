@@ -208,6 +208,8 @@ impl RenderTargetBrowserSurface {
         if self.disposed.replace(true) {
             return;
         }
+        // Nothing waits for the first frame of a closed view.
+        self.shared.forget_first_frame();
         // A target reported under the id from here on belongs to no canvas.
         self.shared.unregister();
         let shared = self.shared.clone();

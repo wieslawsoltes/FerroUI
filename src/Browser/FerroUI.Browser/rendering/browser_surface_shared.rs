@@ -1,7 +1,9 @@
 use crate::interop::canvas_helper::{RENDER_TARGET_KIND_SOFTWARE, RENDER_TARGET_KIND_WEB_GL};
+use crate::interop::thread_proxy;
 use ferroui_base::PixelSize;
+use std::cell::RefCell;
 use std::collections::HashMap;
-use std::sync::atomic::{AtomicBool, AtomicI32, AtomicU32, AtomicU64, Ordering};
+use std::sync::atomic::{AtomicBool, AtomicI32, AtomicU32, AtomicU64, AtomicUsize, Ordering};
 use std::sync::{Arc, Mutex, MutexGuard, OnceLock, PoisonError, Weak};
 
 /// What the thread of the user interface and the thread that renders both
@@ -23,7 +25,10 @@ use std::sync::{Arc, Mutex, MutexGuard, OnceLock, PoisonError, Weak};
 ///   target: the thread of the page for a canvas it kept, the render thread
 ///   when its worker has created the target of a canvas that was transferred
 ///   to it;
-/// - whether the view is disposed.
+/// - whether the view is disposed;
+/// - how many frames were drawn to the canvas, counted by the thread that
+///   draws them, and the thread that is told of the first one
+///   ([`on_first_frame`](Self::on_first_frame)).
 ///
 /// A canvas is found by the id of its render target
 /// ([`register`](Self::register), [`find`](Self::find),
@@ -43,6 +48,11 @@ pub struct BrowserSurfaceShared {
     scaling: AtomicU64,
     target_kind: AtomicI32,
     disposed: AtomicBool,
+    frames: AtomicU64,
+    /// The thread that asked for the first frame
+    /// ([`on_first_frame`](Self::on_first_frame)), as
+    /// [`thread_proxy::current_thread`] names it there.
+    first_frame_thread: AtomicUsize,
 }
 
 const _: fn() = || {
@@ -72,6 +82,27 @@ fn registry() -> MutexGuard<'static, SurfaceRegistry> {
     REGISTRY.get_or_init(Mutex::default).lock().unwrap_or_else(PoisonError::into_inner)
 }
 
+/// What a thread runs when the first frame of a canvas has been drawn.
+type FirstFrameHandler = Box<dyn FnOnce()>;
+
+thread_local! {
+    /// What the calling thread runs when the first frame of a canvas has
+    /// been drawn, by the id of the render target of the canvas
+    /// ([`BrowserSurfaceShared::on_first_frame`]). A handler holds objects
+    /// of the page, so it stays with the thread that gave it: only the id
+    /// crosses to the thread that draws and back.
+    static FIRST_FRAME_HANDLERS: RefCell<HashMap<i32, FirstFrameHandler>> = RefCell::new(HashMap::new());
+}
+
+/// Runs what the calling thread wanted done at the first frame of the
+/// canvas with the render target `target_id`, when it still waits.
+fn first_frame_drawn(target_id: i32) {
+    let handler = FIRST_FRAME_HANDLERS.with(|handlers| handlers.borrow_mut().remove(&target_id));
+    if let Some(handler) = handler {
+        handler();
+    }
+}
+
 impl BrowserSurfaceShared {
     /// Creates the state of a canvas that has no render target, no id and no
     /// size yet.
@@ -84,6 +115,8 @@ impl BrowserSurfaceShared {
             scaling: AtomicU64::new(0f64.to_bits()),
             target_kind: AtomicI32::new(0),
             disposed: AtomicBool::new(false),
+            frames: AtomicU64::new(0),
+            first_frame_thread: AtomicUsize::new(0),
         })
     }
 
@@ -262,6 +295,70 @@ impl BrowserSurfaceShared {
     pub fn is_ready(&self) -> bool {
         self.has_target() && !self.is_disposed() && self.size().0 != PixelSize::default()
     }
+
+    /// The frames that were drawn to the canvas so far. Any thread may ask.
+    pub fn frames(&self) -> u64 {
+        self.frames.load(Ordering::SeqCst)
+    }
+
+    /// Runs `handler` once, on the calling thread, when the first frame has
+    /// been drawn to the canvas; at once when it already has. Called by the
+    /// thread that created the canvas, after the canvas has its id
+    /// ([`register`](Self::register)); a second handler takes the place of
+    /// one that still waits.
+    ///
+    /// Not from upstream, which has no such notification: its view closes
+    /// the splash screen of the page at the first animation frame of the
+    /// top-level, on the thread that also draws. That is before the frame
+    /// is drawn, and with a render thread the frame is drawn by another
+    /// thread, which may be seconds away
+    /// (`docs/porting/browser-render-worker.md`, "B3 follow-ups").
+    ///
+    /// When this thread draws the canvas itself the handler runs inside the
+    /// frame, right after it was drawn: it must not call into the view. When
+    /// a render thread draws, that thread queues a call for this one
+    /// ([`thread_proxy::run_on_thread`]) and the handler runs from the event
+    /// loop of this thread; nothing is polled and nobody waits. A frame is
+    /// only drawn while the page is visible and the canvas has a size, so
+    /// the handler of a view that never draws never runs.
+    pub fn on_first_frame(&self, handler: Box<dyn FnOnce()>) {
+        let target_id = self.target_id();
+        // Before the count is read: a thread that draws the first frame
+        // after that reads the thread to tell.
+        self.first_frame_thread.store(thread_proxy::current_thread(), Ordering::SeqCst);
+        FIRST_FRAME_HANDLERS.with(|handlers| handlers.borrow_mut().insert(target_id, handler));
+        if self.frames() > 0 {
+            first_frame_drawn(target_id);
+        }
+    }
+
+    /// Drops the handler of [`on_first_frame`](Self::on_first_frame) when it
+    /// still waits. Called by the thread that gave it, when the view is
+    /// closed.
+    pub fn forget_first_frame(&self) {
+        let target_id = self.target_id();
+        let handler = FIRST_FRAME_HANDLERS.with(|handlers| handlers.borrow_mut().remove(&target_id));
+        // Outside the table: what the handler holds may be dropped with it.
+        drop(handler);
+    }
+
+    /// A frame was drawn to the canvas by the calling thread. The first one
+    /// is made known to the thread that asked for it
+    /// ([`on_first_frame`](Self::on_first_frame)): directly when that is
+    /// this thread, through its event loop otherwise. When that call cannot
+    /// be queued, the handler does not run.
+    pub(crate) fn frame_presented(&self) {
+        if self.frames.fetch_add(1, Ordering::SeqCst) != 0 {
+            return;
+        }
+        let target_id = self.target_id();
+        let thread = self.first_frame_thread.load(Ordering::SeqCst);
+        if thread_proxy::current_thread() == thread {
+            first_frame_drawn(target_id);
+        } else {
+            thread_proxy::run_on_thread(thread, Box::new(move || first_frame_drawn(target_id)));
+        }
+    }
 }
 
 fn assert_target_kind(kind: i32) {
@@ -274,6 +371,8 @@ fn assert_target_kind(kind: i32) {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use std::cell::Cell;
+    use std::rc::Rc;
 
     #[test]
     fn a_new_surface_has_nothing_and_is_not_ready() {
@@ -384,6 +483,48 @@ mod tests {
         next.register(9401);
         shared.unregister();
         assert!(Arc::ptr_eq(&next, &BrowserSurfaceShared::find(9401).expect("the surface is registered")));
+    }
+
+    #[test]
+    fn the_first_frame_runs_the_handler_once() {
+        let shared = BrowserSurfaceShared::new();
+        shared.set_target_id(9801);
+        let runs = Rc::new(Cell::new(0));
+        shared.on_first_frame(Box::new({
+            let runs = runs.clone();
+            move || runs.set(runs.get() + 1)
+        }));
+        assert_eq!((0, 0), (shared.frames(), runs.get()));
+
+        shared.frame_presented();
+        assert_eq!((1, 1), (shared.frames(), runs.get()));
+        shared.frame_presented();
+        assert_eq!((2, 1), (shared.frames(), runs.get()));
+    }
+
+    #[test]
+    fn a_handler_given_after_the_first_frame_runs_at_once() {
+        let shared = BrowserSurfaceShared::new();
+        shared.set_target_id(9802);
+        shared.frame_presented();
+        let ran = Rc::new(Cell::new(false));
+        shared.on_first_frame(Box::new({
+            let ran = ran.clone();
+            move || ran.set(true)
+        }));
+
+        assert!(ran.get());
+    }
+
+    #[test]
+    fn a_forgotten_handler_does_not_run() {
+        let shared = BrowserSurfaceShared::new();
+        shared.set_target_id(9803);
+        shared.on_first_frame(Box::new(|| panic!("the view was closed before its first frame")));
+        shared.forget_first_frame();
+
+        shared.frame_presented();
+        assert_eq!(1, shared.frames());
     }
 
     #[test]

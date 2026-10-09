@@ -138,6 +138,7 @@ for (const angle of angles) {
                 ["module instantiated", phase("instantiated")],
                 ...(application === "themed_view" ? [] : [["runtime created, threads started", phase("module instantiated")], ["`runMain` returned", phase("runMain end")]]),
                 ["splash closed", (r) => r.loads[0].splash],
+                ["frames drawn when the splash closed", (r) => r.loads[0].splashFrames],
                 ["**first frame**", (r) => (r.renderThread ? r.loads[0].rendered : r.loads[0].frame)],
                 ["first frame reported by the module", (r) => r.loads[0].rendered]
             ]);

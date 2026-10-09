@@ -23,7 +23,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { open, run, assert, sleep, near, differing, colours } from "../harness.mjs";
+import { SPLASH_PROBE, open, run, assert, sleep, near, differing, colours, splashFrames } from "../harness.mjs";
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..", "..", "..");
 const site = process.argv[2] ?? path.join(process.env.CARGO_TARGET_DIR ?? path.join(root, "target"), "browser", "themed_view");
@@ -39,17 +39,22 @@ const pairs = (line) => Object.fromEntries(line.split(";").map((pair) => {
 const BUTTON = [46, 66]; const CHECK_BOX = [26, 107]; const TEXT_BOX = [230, 149]; const LIST = [200, 300]; const EMPTY = [300, 450];
 
 async function start(query = "") {
-    const page = await open(site, { query, width: 460, height: 520, isolated: threaded });
+    const page = await open(site, { query, width: 460, height: 520, isolated: threaded, initScript: SPLASH_PROBE });
     await page.waitForView();
+    // The splash closes on the first drawn frame, whichever thread drew it: not on an empty canvas.
+    const splash = await splashFrames(page);
+    if (!splash || splash.frames < 1) {
+        await page.close();
+        throw new Error(`the splash was closed before the first frame of the view was drawn: ${JSON.stringify(splash)}`);
+    }
     // Where the frames of the view are rendered (the export exists in both builds).
     page.rendering = async () => pairs(await page.evaluate("themedView.themedViewRendering()"));
     // Whether a render thread draws the view: a module built with threads, unless the page keeps it
     // on its own thread.
     page.onRenderThread = threaded && !query.includes(ONE_THREAD);
     if (threaded) {
-        // The splash is closed by the thread of the page; the first frame comes from the thread that
-        // renders, which with a render thread is another one and may be later.
-        await page.waitFor(`Number(/frames=(\\d+)/.exec(themedView.themedViewRendering())[1]) > 0`, 30000);
+        // The first frame is drawn (the splash is closed); with a render thread the frames after it
+        // come when the browser gives the worker its animation frames.
         await sleep(300);
     }
     page.state = async () => Object.fromEntries((await page.evaluate("themedView.themedViewState()")).split(";").map((pair) => {
