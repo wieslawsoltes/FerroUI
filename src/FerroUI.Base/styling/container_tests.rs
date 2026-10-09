@@ -123,6 +123,28 @@ fn container_width_queries_matches_name() {
 }
 
 #[test]
+fn container_height_queries_matches_name() {
+    let (root, container, child) = tree(&[
+        container_query(
+            StyleQueries::height(None, StyleQueryComparisonOperator::LessThanOrEquals, 500.0),
+            None,
+            height_setter(200.0),
+        ),
+        container_query(
+            StyleQueries::height(None, StyleQueryComparisonOperator::LessThanOrEquals, 450.0),
+            Some("TEST"),
+            height_setter(300.0),
+        ),
+    ]);
+    Container::set_sizing(&container, ContainerSizing::Height);
+    Container::set_name(&container, Some("TEST".to_string()));
+    set_child(&root, &container);
+
+    root.measure(Size::new(400.0, 400.0));
+    assert_eq!(child.height(), 300.0);
+}
+
+#[test]
 fn container_queries_do_not_match_without_container() {
     let (root, container, child) = tree(&[container_query(
         StyleQueries::width(None, StyleQueryComparisonOperator::LessThanOrEquals, 500.0),
