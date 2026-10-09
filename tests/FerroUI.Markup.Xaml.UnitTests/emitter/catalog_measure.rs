@@ -7,9 +7,8 @@
 //! The type models are the ones the build scripts of the crates would export, written
 //! here with the export of those scripts (`ferroui_build::export::Export`): the base
 //! crate, the controls, the XAML runtime library, the dialogs and the two themes (with
-//! their compiled documents), which export a model today, and the OpenGL controls and the
-//! view model library of the samples, which do not have a build script that exports one
-//! yet. The colour picker is built as its build script builds it (its theme documents
+//! their compiled documents), the OpenGL controls and the view model library of the
+//! samples. The colour picker is built as its build script builds it (its theme documents
 //! compiled as one group), so that its model has the compiled documents `App.xaml`
 //! includes. The model of the sample is the scan of its sources.
 //!
@@ -367,7 +366,6 @@ fn measure_the_control_catalog_against_the_models() {
         models.borrow_mut().push(model);
         path
     };
-    // These two have no build script that exports a model yet.
     let open_gl = export("src/FerroUI.OpenGL", "ferroui-opengl", &[&base, &controls], None);
     let mini_mvvm = export("samples/MiniMvvm", "mini-mvvm", &[&base], None);
 

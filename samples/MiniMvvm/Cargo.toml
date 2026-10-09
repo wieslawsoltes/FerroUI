@@ -7,6 +7,12 @@ rust-version.workspace = true
 license.workspace = true
 repository.workspace = true
 publish = false
+# The build script exports the type model of the crate (`build.rs`); Cargo hands the path of the file
+# to the build scripts of the crates that depend on this one (`DEP_MINI_MVVM_XAML_XAMLMETA`;
+# docs/porting/xaml.md, 9.5.13 and 9.6.3): the view models of a sample derive from the view model
+# base, and its compiled bindings name their members.
+build = "build.rs"
+links = "mini_mvvm_xaml"
 autotests = false
 autobenches = false
 autoexamples = false
@@ -16,3 +22,8 @@ path = "lib.rs"
 
 [dependencies]
 ferroui-base = { workspace = true }
+
+[build-dependencies]
+# The source scanner and the export of the type model: the standard library and `syn`, nothing of the
+# framework.
+ferroui-build-scan = { workspace = true }
