@@ -1,14 +1,12 @@
 //! The type table of this crate: its namespaces, its classes, what it
-//! states about itself for markup, its embedded assets and the loader of
-//! the documents with a class.
+//! states about itself for markup, its embedded assets and the loader table
+//! of its compiled markup.
 
 use crate::markup::XamlClass;
 use crate::{controls, converter, models, pages, view_models, views};
 use ferroui_base::data::core::ValueTypes;
-use ferroui_base::metadata::{IServiceProvider, MarkupAssembly, MarkupType};
-use ferroui_base::{BoxedValue, TypeInfo};
-use ferroui_markup_xaml::{FerroXamlLoader, XamlLoadException};
-use std::rc::Rc;
+use ferroui_base::metadata::{MarkupAssembly, MarkupType};
+use ferroui_base::TypeInfo;
 
 /// The dotted namespaces of the modules of this crate. A type belongs to
 /// the namespace of the longest module path that is a prefix of the path of
@@ -61,11 +59,14 @@ fn markup_types() -> impl Iterator<Item = &'static MarkupType> {
 }
 
 /// Registers the namespaces, the types, the assembly, the embedded assets
-/// and the document loader of this crate (and of the crates it is built
+/// and the compiled markup of this crate (and of the crates it is built
 /// on). Cheap and idempotent.
 pub fn register_types() {
     static ONCE: std::sync::Once = std::sync::Once::new();
     ONCE.call_once(|| {
+        // The runtime library of compiled markup (the markup extensions the compiled
+        // documents create), which registers the controls.
+        ferroui_markup_xaml::register_types();
         ferroui_themes_simple::register_types();
         ferroui_themes_fluent::register_types();
         ferroui_controls_color_picker::register_types();
@@ -82,7 +83,13 @@ pub fn register_types() {
         pages::register_lists();
         MarkupAssembly::register(&ASSEMBLY);
         crate::assets::register();
-        FerroXamlLoader::register_compiled_xaml(ASSEMBLY.name, try_load);
+        // The loader table of the compiled markup, which the build of the crate generates: a
+        // load of a document by its URI creates the class of the document with its
+        // constructor, and builds a document without a class from its compiled markup.
+        #[cfg(not(feature = "runtime-markup"))]
+        crate::compiled_markup::register();
+        #[cfg(feature = "runtime-markup")]
+        ferroui_markup_xaml::FerroXamlLoader::register_compiled_xaml(ASSEMBLY.name, try_load);
     });
 }
 
@@ -96,13 +103,15 @@ fn register_value_types() {
     pages::register_value_types();
 }
 
-/// The loader of the documents of this assembly that have a class: loading
-/// the document of a class by URI creates an instance of the class (whose
-/// constructor populates it). The other documents are left to the run-time
-/// loader.
-///
-/// This is the table the XAML compiler generates per crate; it is written
-/// by hand (the entries of [`XamlClass`]) until the compiler exists.
-fn try_load(_service_provider: Option<&Rc<dyn IServiceProvider>>, uri: &str) -> Result<Option<BoxedValue>, XamlLoadException> {
+/// The loader of the documents of this assembly that have a class, for a build that does
+/// not compile the documents (the feature `runtime-markup`): loading the document of a
+/// class by URI creates an instance of the class (whose constructor populates it with the
+/// run-time loader). The other documents are left to the run-time loader. A build that
+/// compiles the documents registers the table the compiler generates instead.
+#[cfg(feature = "runtime-markup")]
+fn try_load(
+    _service_provider: Option<&std::rc::Rc<dyn ferroui_base::metadata::IServiceProvider>>,
+    uri: &str,
+) -> Result<Option<ferroui_base::BoxedValue>, ferroui_markup_xaml::XamlLoadException> {
     Ok(classes().find(|class| uri.eq_ignore_ascii_case(&class.document_uri())).map(|class| (class.create)()))
 }

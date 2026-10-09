@@ -12,7 +12,7 @@
 //! against the type models: the scan of the sources of this crate and the models of the
 //! crates it is built on, which Cargo hands to this script as `DEP_<CRATE>_XAML_XAMLMETA`.
 //! The script links the compiler and no crate for its types. A document the compiler refuses
-//! is listed with its reason (`build/compiled_documents.rs`); any other
+//! is listed with its reason (`build/compiled_documents.rs`) and stays an asset; any other
 //! refusal fails the build with the diagnostic of the document. Next to the compiled markup
 //! the script writes `$OUT_DIR/compiled_classes.rs`: the compiled documents with a class,
 //! each with the function that populates an instance of the class (`markup::load_component`,
@@ -28,7 +28,10 @@
 //!
 //! The table is written to `$OUT_DIR/assets.rs` as `(rooted path, bytes)` pairs and
 //! registered with the asset loader by `register_types()`, next to the table of the
-//! documents `excluded.txt` lists.
+//! documents `excluded.txt` lists. A compiled document is not an asset of the assembly, as
+//! upstream's compiler removes a compiled resource; the tests of the sample, which load
+//! every document with the run-time loader too, have the compiled documents in a table of
+//! their own (`DOCUMENT_ASSETS`, compiled into a test build only).
 //!
 //! With the feature `placeholder-branding` (on by default) an asset `Assets/<path>` that has
 //! a counterpart `PlaceholderAssets/<path>` is embedded with the content of
@@ -274,6 +277,8 @@ fn substitute_placeholder_geometries(root: &Path, out_dir: &Path, assets: &mut [
 /// What the build of the documents wrote for the crate.
 #[derive(Default)]
 struct CompiledMarkup {
+    /// The rooted asset paths of the compiled documents.
+    documents: BTreeSet<String>,
     /// The entries of the table of `compiled_classes.rs`.
     classes: String,
     /// The text of `compiled_document_tests.rs`.
@@ -363,7 +368,7 @@ fn compile_documents(out_dir: &Path, documents: &[(String, String)], catalog_app
         let application = if catalog_application.contains(&rooted.as_str()) { "Catalog" } else { "UnitTest" };
         writeln!(tests, "fn compiled_{}() {{\n    super::compare({rooted:?}, super::TestApplication::{application});\n}}\n", test_name(name)).expect("write");
     }
-    CompiledMarkup { classes, tests }
+    CompiledMarkup { documents: compiled.iter().map(|(name, _)| format!("/{name}")).collect(), classes, tests }
 }
 
 struct Excluded {
@@ -441,6 +446,8 @@ fn main() {
     let asset_directory = format!("{SITE_ASSET_DIRECTORY}/{ASSEMBLY_NAME}");
     let mut site_files = BTreeSet::new();
     let mut text = String::from("pub(crate) static ASSETS: &[(&str, &[u8])] = &[\n");
+    // The compiled documents, which only a test build has as assets.
+    let mut document_assets = String::new();
     for (asset_path, path) in &assets {
         let path = path.canonicalize().unwrap_or_else(|e| panic!("cannot resolve {}: {e}", path.display()));
         println!("cargo::rerun-if-changed={}", path.display());
@@ -450,8 +457,12 @@ fn main() {
             site_files.insert(out);
             continue;
         }
-        writeln!(text, "    ({asset_path:?}, include_bytes!({:?})),", path.display().to_string()).expect("write");
+        let table = if compiled.documents.contains(asset_path) { &mut document_assets } else { &mut text };
+        writeln!(table, "    ({asset_path:?}, include_bytes!({:?})),", path.display().to_string()).expect("write");
     }
+    text.push_str("];\n");
+    text.push_str("#[cfg(test)]\npub(crate) static DOCUMENT_ASSETS: &[(&str, &[u8])] = &[\n");
+    text.push_str(&document_assets);
     text.push_str("];\n");
     if separate_assets {
         let manifest = site.join(SITE_ASSET_DIRECTORY).join(format!("{ASSEMBLY_NAME}.json"));

@@ -2,7 +2,7 @@
 
 use crate::main_view::MainView;
 use crate::main_window::MainWindow;
-use crate::markup::{describe, try_load_document_group, xaml_class};
+use crate::markup::xaml_class;
 use crate::models::CatalogTheme;
 use crate::view_models::{ApplicationViewModel, MainWindowViewModel};
 use ferroui_base::controls::ResourceKey;
@@ -17,7 +17,6 @@ use ferroui_controls::{
     Application, ApplicationImpl, ApplicationImplExt, Control, NativeDock, NativeMenuItem, NewApplication, Page,
     PageNavigationHost, Window,
 };
-use ferroui_markup_xaml_loader::FerroRuntimeXamlLoader;
 use ferroui_themes_fluent::FluentTheme;
 use ferroui_themes_simple::SimpleTheme;
 use std::cell::{Cell, RefCell};
@@ -123,15 +122,27 @@ impl App {
     /// The rooted asset path of the dictionary `App.xaml` merges.
     pub const CUSTOM_THEMES_PATH: &'static str = "/CustomThemes.xaml";
 
-    /// `FerroXamlLoader.Load(this)`: populates the application from
-    /// `App.xaml`, with the dictionary it includes (`CustomThemes.xaml`).
+    /// `FerroXamlLoader.Load(this)`: populates the application from the
+    /// compiled markup of `App.xaml`, which the build links to the dictionary
+    /// it includes (`CustomThemes.xaml`) and to the styles of the colour picker.
+    #[cfg(not(feature = "runtime-markup"))]
     pub(crate) fn load_document(&self) {
         crate::register_types();
-        // The documents of the libraries `App.xaml` includes (the styles of the colour
-        // picker) have no compiled markup: the includes stay run-time includes that the
-        // run-time loader loads, so the application makes it the loader of such
-        // documents (see DEVIATIONS.md, "Colour picker").
-        FerroRuntimeXamlLoader::register();
+        self.initialize_component();
+    }
+
+    /// `FerroXamlLoader.Load(this)`: populates the application from
+    /// `App.xaml`, with the dictionary it includes (`CustomThemes.xaml`), with
+    /// the run-time loader.
+    #[cfg(feature = "runtime-markup")]
+    pub(crate) fn load_document(&self) {
+        use crate::markup::{describe, try_load_document_group};
+        crate::register_types();
+        // The styles of the colour picker `App.xaml` includes stay run-time includes of a
+        // document loaded at run time, so the application makes the run-time loader the
+        // loader of such documents; the include then loads the compiled markup of the
+        // library through its loader table.
+        ferroui_markup_xaml_loader::FerroRuntimeXamlLoader::register();
         let root: BoxedValue = Rc::new(self.to_ref());
         let result = try_load_document_group(Self::DOCUMENT_PATH, Some(root), &[Self::CUSTOM_THEMES_PATH]).map(|_| ());
         if let Err(error) = result {
