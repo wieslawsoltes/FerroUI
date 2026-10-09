@@ -11,14 +11,10 @@
 //! framebuffer of the server to the bitmap of the widget, not the drawing
 //! of a scene.
 
-use crate::embedding::EmbeddableControlRoot;
 use crate::platform::ITopLevelImpl;
-use crate::presenters::ContentPresenter;
 use crate::remote::{RemoteServer, RemoteWidget, SizingMode};
-use crate::templates::FuncControlTemplate;
-use crate::testing::{CompositorTestServices, MockImplKind, MockWindowImpl, TestServices};
-use crate::{Border, ContentControl, Control};
-use ferroui_base::data::TemplateBinding;
+use crate::testing::{CompositorTestServices, TestServices};
+use crate::{Border, Control};
 use ferroui_base::input::raw::{IRawInputEventArgs, RawKeyEventArgs, RawKeyEventType, RawPointerEventArgs, RawPointerEventType, RawTextInputEventArgs};
 use ferroui_base::input::{IKeyboardDevice, Key, KeyboardDevice, PhysicalKey, RawInputModifiers};
 use ferroui_base::platform::surfaces::{IFramebufferRenderTarget, IPlatformRenderSurface};
@@ -30,7 +26,7 @@ use ferroui_base::rendering::testing::{
     DrawingLog, MockDrawingContextImpl, MockDrawingContextLayerImpl, MockPlatformRenderInterface,
 };
 use ferroui_base::rendering::IRenderLoop;
-use ferroui_base::{FerroLocator, FerroObject, PixelSize, Point, Size, Vector};
+use ferroui_base::{FerroLocator, PixelSize, Point, Rect, Size, Vector};
 use ferroui_remote_protocol::input::{
     InputModifiers, KeyEventMessage, MouseButton, PointerEventMessageBase, PointerPressedEventMessage,
     TextInputEventMessage,
@@ -302,9 +298,13 @@ fn a_measure_request_is_answered_with_the_desired_size_of_the_root() {
     }
     let server = RemoteServer::new(connections.server.clone());
 
-    connections.client.send(Arc::new(MeasureViewportMessage { width: 100.0, height: 80.0 }));
+    // The root of the server enforces the client size of its implementation
+    // (`EmbeddableControlRoot.EnforceClientSize`): whatever the constraint,
+    // it wants the size of the viewport it was allocated.
+    connections.client.send(Arc::new(ClientViewportAllocatedMessage { width: 100.0, height: 80.0, dpi_x: 96.0, dpi_y: 96.0 }));
+    pump_until(&services, "the allocation", || server.top_level().client_size() == Size::new(100.0, 80.0));
+    connections.client.send(Arc::new(MeasureViewportMessage { width: 300.0, height: 200.0 }));
     pump_until(&services, "the answer", || !answers.lock().unwrap().is_empty());
-    // The root of the server enforces the size it is given.
     assert_eq!(vec![(100.0, 80.0)], *answers.lock().unwrap());
 
     server.dispose();
@@ -376,7 +376,7 @@ fn input_messages_arrive_as_raw_input_of_the_top_level() {
 }
 
 #[test]
-fn a_frame_of_the_server_arrives_in_the_bitmap_of_the_widget() {
+fn a_frame_of_the_server_arrives_at_the_widget() {
     let services = start();
     let connections = Connections::open();
     let server = RemoteServer::new(connections.server.clone());
@@ -384,26 +384,15 @@ fn a_frame_of_the_server_arrives_in_the_bitmap_of_the_widget() {
     server.set_content(Some(Control::boxed(content.clone())));
     assert!(server.content().is_some());
 
-    // The widget in a root of 6 by 3: it asks for a viewport of its size at
-    // ten times the scaling, in the first format it supports.
+    // The widget arranged at 6 by 3: it asks for a viewport of its size at
+    // ten times the scaling, in the first format it supports. It is not in
+    // a root that is rendered: the mock render interface has no writeable
+    // bitmaps, so the way of the frame into the bitmap of the widget is
+    // tested with a real backend (the tests of the designer support crate).
     let widget = RemoteWidget::new(connections.client.clone());
     assert_eq!(SizingMode::Local, widget.mode());
-    let host_impl = MockWindowImpl::bare(MockImplKind::TopLevel);
-    host_impl.client_size.set(Size::new(6.0, 3.0));
-    services.setup(&host_impl);
-    let host = EmbeddableControlRoot::with_impl(host_impl);
-    host.set_template(Some(FuncControlTemplate::new(|_, scope| {
-        let presenter = ContentPresenter::new();
-        presenter.bind_binding(
-            ContentPresenter::content_property().as_property(),
-            &TemplateBinding::new(ContentControl::content_property().as_property()),
-        );
-        scope.register("PART_ContentPresenter", presenter.clone().upcast::<FerroObject>());
-        presenter.upcast()
-    })));
-    host.prepare();
-    host.start_rendering();
-    host.set_content(Some(Control::boxed(widget.clone())));
+    widget.measure(Size::new(6.0, 3.0));
+    widget.arrange(Rect::new(0.0, 0.0, 6.0, 3.0));
 
     pump_until(&services, "a frame of the size of the widget", || {
         widget
@@ -421,26 +410,11 @@ fn a_frame_of_the_server_arrives_in_the_bitmap_of_the_widget() {
         assert_filled(frame.data.as_deref().unwrap(), 60, 30, 240);
     }
 
-    // The widget is rendered with the frame: its bitmap has the size and
-    // the pixels of the frame.
-    pump_until(&services, "the bitmap of the widget", || {
-        widget.with_bitmap(|bitmap| bitmap.is_some_and(|bitmap| bitmap.pixel_size() == PixelSize::new(60, 30)))
-    });
-    widget.with_bitmap(|bitmap| {
-        let bitmap = bitmap.unwrap();
-        let locked = bitmap.lock();
-        let row_bytes = locked.row_bytes();
-        locked.with_data(&mut |data| assert_filled(&data[..(row_bytes * 30) as usize], 60, 30, row_bytes));
-        locked.dispose();
-    });
-
     // In the remote mode the widget leaves the size of the viewport to the
     // other end.
     widget.set_mode(SizingMode::Remote);
     assert_eq!(SizingMode::Remote, widget.mode());
 
-    host.stop_rendering();
-    host.dispose();
     server.dispose();
     drop(connections);
     services.dispose();

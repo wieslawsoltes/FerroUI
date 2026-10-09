@@ -183,12 +183,6 @@ impl RemoteWidget {
         }
     }
 
-    /// The bitmap the last frame was copied into (`_bitmap`).
-    #[cfg(test)]
-    pub(crate) fn with_bitmap<R>(&self, f: impl FnOnce(Option<&WriteableBitmap>) -> R) -> R {
-        f(self.bitmap.borrow().as_ref())
-    }
-
     /// The last frame received (`_lastFrame`).
     #[cfg(test)]
     pub(crate) fn last_frame(&self) -> Option<Message> {
