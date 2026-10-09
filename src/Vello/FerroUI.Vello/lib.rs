@@ -67,6 +67,8 @@ pub use vello_typeface::{bold_simulation_outline_width, VelloFontFace, VelloType
 pub use writeable_bitmap_impl::WriteableBitmapImpl;
 
 #[cfg(test)]
+mod effect_tests;
+#[cfg(test)]
 mod tests;
 #[cfg(test)]
 mod text_tests;

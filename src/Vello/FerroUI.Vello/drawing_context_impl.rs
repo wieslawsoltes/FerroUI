@@ -33,6 +33,9 @@ use peniko::{BlendMode, Compose, Extend, Fill, Gradient, ImageData, ImageQuality
 use std::any::{Any, TypeId};
 use std::rc::Rc;
 
+pub(crate) mod box_shadows;
+mod effects;
+
 /// Context create info.
 pub struct CreateInfo {
     /// The scene the context records into: of the size of the target, in
@@ -77,6 +80,8 @@ enum SavedKind {
     Layer,
     /// Nothing: a state that only saved the transform.
     Nothing,
+    /// An effect: its layer, and its scene when it has one of its own.
+    Effect,
 }
 
 /// Vello based drawing context.
@@ -107,6 +112,14 @@ pub struct DrawingContextImpl {
     use_opacity_save_layer: bool,
     render_options: RenderOptions,
     text_options: TextOptions,
+    /// The effects that are pushed.
+    effect_stack: Vec<effects::EffectFrame>,
+    /// The clips that are open in the scene of the context.
+    open_clips: usize,
+    /// The pixel of the target that is the top left pixel of the scene of
+    /// the context: not the first one while an effect is recorded into a
+    /// scene of its own.
+    sink_origin: kurbo::Vec2,
 }
 
 impl DrawingContextImpl {
@@ -148,6 +161,9 @@ impl DrawingContextImpl {
             use_opacity_save_layer,
             render_options: RenderOptions::default(),
             text_options: TextOptions::default(),
+            effect_stack: Vec::new(),
+            open_clips: 0,
+            sink_origin: kurbo::Vec2::ZERO,
         };
 
         if let Some(backdrop) = create_info.backdrop {
@@ -196,10 +212,18 @@ impl DrawingContextImpl {
     /// The transform from the space the contract draws in to the pixels of
     /// the target.
     fn device_transform(&self) -> Affine {
-        match self.post_transform {
+        let transform = match self.post_transform {
             Some(post_transform) => to_affine(self.current_transform * post_transform),
             None => to_affine(self.current_transform),
-        }
+        };
+
+        self.pixel_transform() * transform
+    }
+
+    /// The transform from the pixels of the target to the pixels of the
+    /// scene of the context.
+    fn pixel_transform(&self) -> Affine {
+        Affine::translate(-self.sink_origin)
     }
 
     fn anti_alias(&self) -> bool {
@@ -214,6 +238,9 @@ impl DrawingContextImpl {
 
     /// Saves the transform with what the pop has to end in the scene.
     fn save(&mut self, kind: SavedKind) {
+        if kind == SavedKind::Clip {
+            self.open_clips += 1;
+        }
         self.state_stack.push((self.current_transform, kind));
     }
 
@@ -224,9 +251,13 @@ impl DrawingContextImpl {
             self.state_stack.pop().unwrap_or_else(|| panic!("The state stack of the drawing context is empty"));
 
         match kind {
-            SavedKind::Clip => self.sink().pop_clip(),
+            SavedKind::Clip => {
+                self.open_clips -= 1;
+                self.sink().pop_clip();
+            }
             SavedKind::Layer => self.sink().pop_layer(),
             SavedKind::Nothing => {}
+            SavedKind::Effect => self.end_effect(),
         }
 
         self.current_transform = transform;
@@ -241,6 +272,7 @@ impl DrawingContextImpl {
     /// Draws an image with its pixels on the pixels of the target, whatever
     /// the transform of the context is.
     pub(crate) fn draw_image_in_device_space(&mut self, image: ImageData, blend_mode: BlendMode) {
+        let pixel_transform = self.pixel_transform();
         let path = rect_path(Rect::new(0.0, 0.0, image.width as f64, image.height as f64));
         let paint = VelloScenePaint {
             brush: VelloSceneBrush::Image(VelloSceneImage {
@@ -253,7 +285,7 @@ impl DrawingContextImpl {
             transform: Affine::IDENTITY,
         };
 
-        self.sink().fill(&path, Fill::NonZero, Affine::IDENTITY, &paint, blend_mode, false);
+        self.sink().fill(&path, Fill::NonZero, pixel_transform, &paint, blend_mode, false);
     }
 
     /// The relative transform of a brush conjugated into target space: the
@@ -826,15 +858,21 @@ impl IDrawingContextImpl for DrawingContextImpl {
             return;
         }
 
-        if box_shadows.iter().any(|box_shadow| box_shadow != Default::default()) {
-            not_built("box shadows", "stage 6");
-        }
+        // Arbitrary chosen values, as in the Skia backend: a box that is
+        // this large has no shadows.
+        let no_box_shadows = BoxShadows::default();
+        let box_shadows =
+            if rect.rect.height > 8192.0 || rect.rect.width > 8192.0 { &no_box_shadows } else { box_shadows };
+
+        self.draw_box_shadows(&rect, box_shadows, false);
 
         let path = rounded_rect_path(rect);
 
         if let Some(brush) = brush {
             self.fill_path(brush, rect.rect, &path, Fill::NonZero);
         }
+
+        self.draw_box_shadows(&rect, box_shadows, true);
 
         if let Some(pen) = pen {
             self.stroke_path(pen, rect.rect.inflate(pen.thickness() / 2.0), &path);
@@ -994,7 +1032,8 @@ impl IDrawingContextImpl for DrawingContextImpl {
 
         // A region is a set of pixels of the target: it is not transformed
         // and has no edge inside a pixel.
-        self.sink().push_clip(&path, Fill::NonZero, Affine::IDENTITY, false);
+        let pixel_transform = self.pixel_transform();
+        self.sink().push_clip(&path, Fill::NonZero, pixel_transform, false);
         self.save(SavedKind::Clip);
     }
 
@@ -1115,6 +1154,12 @@ impl IDrawingContextImpl for DrawingContextImpl {
     fn pop_text_options(&mut self) {
         self.text_options =
             self.text_options_stack.pop().unwrap_or_else(|| panic!("The text options stack is empty"));
+    }
+
+    fn as_drawing_context_impl_with_effects(
+        &mut self,
+    ) -> Option<&mut dyn ferroui_base::platform::IDrawingContextImplWithEffects> {
+        Some(self)
     }
 
     fn get_feature(&mut self, _feature_type: TypeId) -> Option<Rc<dyn Any>> {

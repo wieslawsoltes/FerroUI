@@ -17,7 +17,7 @@ use ferroui_base::media::immutable::{
     ImmutablePen, ImmutableRadialGradientBrush, ImmutableSolidColorBrush,
 };
 use ferroui_base::media::{
-    BoxShadow, BoxShadows, Color, Colors, EdgeMode, FillRule, GeometryCombineMode, GradientSpreadMethod,
+    BoxShadows, Color, Colors, EdgeMode, FillRule, GeometryCombineMode, GradientSpreadMethod,
     IBrush, IPen, IntersectionResult, PenLineCap, PenLineJoin, RenderOptions, SweepDirection,
 };
 use ferroui_base::platform::surfaces::{
@@ -650,23 +650,6 @@ fn rounded_rectangle_supports_individual_corner_radii() {
     assert_eq!(RED, target.pixel(96, 3));
     assert_eq!(RED, target.pixel(3, 96));
     assert_eq!(RED, target.pixel(96, 96));
-}
-
-#[test]
-#[should_panic(expected = "does not draw box shadows yet: stage 6")]
-fn box_shadows_fail_with_their_stage() {
-    let target = Target::new();
-    let shadows = BoxShadows::new(BoxShadow {
-        offset_x: 0.0,
-        offset_y: 0.0,
-        blur: 10.0,
-        spread: 5.0,
-        color: Colors::BLACK,
-        is_inset: false,
-    });
-    target.draw(|context| {
-        context.draw_rectangle(Some(&solid(Colors::RED)), None, rect(30.0, 30.0, 40.0, 40.0), &shadows);
-    });
 }
 
 #[test]

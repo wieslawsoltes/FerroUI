@@ -13,6 +13,7 @@ pub use i_vello_scene_sink::{
     IVelloSceneSink, VelloSceneBrush, VelloSceneCapabilities, VelloSceneGlyph, VelloSceneGlyphRun, VelloSceneImage,
     VelloScenePaint,
 };
+pub use i_vello_scene_sink::{VelloSceneFilter, VelloSceneFilterCapabilities};
 pub use vello_cpu_scene_sink::VelloCpuSceneSink;
 
 use crate::vello_options::VelloRenderingMode;

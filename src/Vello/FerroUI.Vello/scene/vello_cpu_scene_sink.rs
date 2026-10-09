@@ -1,11 +1,15 @@
-use crate::scene::{IVelloSceneSink, VelloSceneBrush, VelloSceneCapabilities, VelloSceneGlyphRun, VelloScenePaint};
-use glifo::{FontEmbolden, Glyph};
+use crate::scene::{
+    IVelloSceneSink, VelloSceneBrush, VelloSceneCapabilities, VelloSceneFilter, VelloSceneFilterCapabilities,
+    VelloSceneGlyphRun, VelloScenePaint,
+};
 use crate::vello_options::VelloRenderingMode;
+use glifo::{FontEmbolden, Glyph};
 use kurbo::{Affine, BezPath, Diagonal2, PathEl, Stroke, StrokeOpts};
-use peniko::color::AlphaColor;
+use peniko::color::{AlphaColor, Srgb};
 use peniko::{BlendMode, Fill, ImageBrush, ImageSampler};
 use std::borrow::Cow;
 use std::collections::HashMap;
+use vello_cpu::filter_effects::{EdgeMode, Filter, FilterPrimitive};
 use vello_cpu::{
     ImageSource, PaintType, PixmapMut, RasterizerSettings, RenderContext, RenderSettings, Resources, TargetInit,
 };
@@ -239,5 +243,51 @@ impl IVelloSceneSink for VelloCpuSceneSink {
 
         self.context.flush();
         self.context.render_with(target, &mut self.resources, settings);
+    }
+
+    fn filter_capabilities(&self) -> VelloSceneFilterCapabilities {
+        // The filters of the renderer panic with its thread pool, which is
+        // not compiled in.
+        VelloSceneFilterCapabilities { filter_layers: true, blurred_rounded_rects: true }
+    }
+
+    fn push_filter_layer(&mut self, filter: &VelloSceneFilter, transform: Affine) {
+        // Beyond its content a layer is transparent to the blur, as it is
+        // to an image filter of Skia.
+        let edge_mode = EdgeMode::None;
+        let primitive = match *filter {
+            VelloSceneFilter::Blur { std_deviation } => FilterPrimitive::GaussianBlur { std_deviation, edge_mode },
+            VelloSceneFilter::DropShadow { dx, dy, std_deviation, color } => {
+                FilterPrimitive::DropShadow { dx, dy, std_deviation, color, edge_mode }
+            }
+        };
+
+        // The renderer scales the lengths of a filter by the transform that
+        // is current when its layer is pushed.
+        self.context.set_transform(transform);
+        self.context.push_layer(None, None, None, None, Some(Filter::from_primitive(primitive)));
+    }
+
+    fn fill_blurred_rounded_rect(
+        &mut self,
+        rect: kurbo::Rect,
+        radius: f64,
+        std_deviation: f64,
+        invert: bool,
+        transform: Affine,
+        color: AlphaColor<Srgb>,
+    ) {
+        self.set_anti_alias(true);
+        self.context.set_paint(PaintType::Solid(color));
+        self.context.set_paint_transform(Affine::IDENTITY);
+        self.context.set_transform(transform);
+        self.context.set_fill_rule(Fill::NonZero);
+        // The renderer evaluates `erf(distance / std_dev)` where the blur of
+        // an edge by a Gaussian of deviation s is `erf(distance / (s √2))`:
+        // what it calls the standard deviation is √2 times the Gaussian's
+        // (measured against its own blur filter: with the factor the two
+        // agree to 5 of 255 on a rectangle, without it they are 21 apart).
+        let std_dev = std_deviation * std::f64::consts::SQRT_2;
+        self.context.fill_blurred_rounded_rect(&rect, radius as f32, std_dev as f32, invert);
     }
 }
