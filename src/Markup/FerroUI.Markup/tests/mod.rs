@@ -23,6 +23,8 @@ mod binding_tests_logging;
 mod multi_binding_tests;
 mod multi_binding_tests_converters;
 mod template_binding_tests;
+mod template_binding_tests_popups;
+mod content_control_tests;
 mod expression_node_factory_tests;
 mod expression_observer_builder_tests_attached_property;
 mod expression_observer_builder_tests_ferro_property;
