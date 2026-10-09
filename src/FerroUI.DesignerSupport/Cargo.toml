@@ -29,6 +29,6 @@ xamlx.workspace = true
 ferroui-base = { workspace = true, features = ["testing"] }
 ferroui-controls = { workspace = true, features = ["testing"] }
 # The run-time XAML loader the tests load their documents with.
-ferroui-markup-xaml-loader = { workspace = true }
+ferroui-markup-xaml-loader = { workspace = true, features = ["runtime"] }
 # The backend that renders the scene of the remote rendering test.
 ferroui-skia = { workspace = true }
