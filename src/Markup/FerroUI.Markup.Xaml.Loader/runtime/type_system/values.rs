@@ -28,7 +28,6 @@ use std::any::TypeId;
 use std::fmt;
 use std::rc::Rc;
 
-use ferroui_base::collections::FerroList;
 use ferroui_base::data::core::{ValueType, ValueTypes};
 use ferroui_base::metadata::{IServiceProvider, MarkupType, MarkupValue};
 use ferroui_base::{BoxedValue, TypeInfo};
@@ -317,89 +316,43 @@ impl fmt::Debug for RuntimeArray {
 /// A value of a list of the runtime library created in markup:
 /// `System.Collections.Generic.List<T>` (with the element type `T`) or
 /// `System.Collections.ArrayList` (without an element type). See the module
-/// documentation.
-///
-/// The items are held untyped in the list the items controls read
-/// (`FerroList<Option<BoxedValue>>`), shared: the list a collection handle
-/// receives is the list markup filled.
-// Deviation (DEVIATIONS.md, Run-time type system of markup): upstream creates the
-// `List<T>` and the `ArrayList` of the runtime library; here both are this list of
-// untyped items.
-#[derive(Clone)]
-pub struct RuntimeList {
-    element_type: Option<Rc<dyn IXamlType>>,
-    items: Rc<FerroList<MarkupValue>>,
-}
+/// documentation. The type is the one of the runtime library, which generated code
+/// creates too: a list is the same value whichever back end built its document.
+pub use ferroui_markup_xaml::xaml_il::runtime::RuntimeList;
 
-impl RuntimeList {
-    pub fn new(element_type: Option<Rc<dyn IXamlType>>) -> Self {
-        Self { element_type, items: Rc::new(FerroList::new()) }
+/// The element type of a `List<T>` the run-time loader creates: the type of its type
+/// system.
+struct ListElementType(Rc<dyn IXamlType>);
+
+impl ferroui_markup_xaml::xaml_il::runtime::RuntimeListElement for ListElementType {
+    fn full_name(&self) -> String {
+        self.0.full_name()
     }
-
-    /// The element type of a `List<T>`; `None` for an `ArrayList`.
-    pub fn element_type(&self) -> Option<&Rc<dyn IXamlType>> {
-        self.element_type.as_ref()
-    }
-
-    /// The shared list of the items.
-    pub fn items(&self) -> &Rc<FerroList<MarkupValue>> {
-        &self.items
-    }
-
-    pub fn count(&self) -> usize {
-        self.items.count()
-    }
-
-    /// The item at `index`. Panics if out of range.
-    pub fn get(&self, index: usize) -> MarkupValue {
-        self.items.get(index)
-    }
-
-    /// Replaces the item at `index`. Panics if out of range.
-    pub fn set(&self, index: usize, item: MarkupValue) {
-        self.items.set(index, Self::item(item));
-    }
-
-    /// Adds an item and returns its index.
-    pub fn add(&self, item: MarkupValue) -> usize {
-        self.items.add(Self::item(item));
-        self.items.count() - 1
-    }
-
-    /// An item as the list holds it: an object of the object model in its
-    /// untyped form.
-    fn item(item: MarkupValue) -> MarkupValue {
-        item.map(|item| untyped_object_form(&item).unwrap_or(item))
-    }
-
-    /// The list in the Rust type `target` a member declares for a collection:
-    /// the shared list of the items, cast to `target` with the assignability
-    /// casts of the untyped value conversions. `None` if `target` takes the
-    /// list as it is (an untyped target, a list) or no cast to `target` is
-    /// registered.
-    pub fn to_declared(&self, target: ValueType) -> Option<BoxedValue> {
-        if target.is_object() || target.is::<RuntimeList>() {
-            return None;
-        }
-        let items: BoxedValue = Rc::new(self.items.clone());
-        ValueTypes::try_cast(&items, target)
+    fn as_any(&self) -> &dyn std::any::Any {
+        self
     }
 }
 
-/// Lists compare by identity of their storage: a list is a reference.
-impl PartialEq for RuntimeList {
-    fn eq(&self, other: &Self) -> bool {
-        Rc::ptr_eq(&self.items, &other.items)
-    }
+/// `new List<T>()` for the element type `element_type`, `new ArrayList()` without one.
+pub(crate) fn new_list(element_type: Option<Rc<dyn IXamlType>>) -> RuntimeList {
+    RuntimeList::new(element_type.map(|element_type| {
+        Rc::new(ListElementType(element_type)) as Rc<dyn ferroui_markup_xaml::xaml_il::runtime::RuntimeListElement>
+    }))
 }
 
-impl fmt::Debug for RuntimeList {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match &self.element_type {
-            Some(element_type) => write!(f, "List<{}>[{}]", element_type.full_name(), self.items.count()),
-            None => write!(f, "ArrayList[{}]", self.items.count()),
-        }
-    }
+/// The element type of `list` as a type of the type system: the type the run-time loader
+/// created the list with, or, for a list generated code created, the full name it states.
+pub(crate) enum ListElement {
+    Type(Rc<dyn IXamlType>),
+    Named(String),
+}
+
+pub(crate) fn list_element(list: &RuntimeList) -> Option<ListElement> {
+    let element = list.element_type()?;
+    Some(match element.as_any().downcast_ref::<ListElementType>() {
+        Some(element) => ListElement::Type(element.0.clone()),
+        None => ListElement::Named(element.full_name()),
+    })
 }
 
 /// The form in which an object of the object model is handed to an UNTYPED

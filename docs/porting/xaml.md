@@ -1274,6 +1274,28 @@ rt::declared_property_type(<Owner as MarkupTyped>::MARKUP, "Name", is_static)
 
 which reads the type from the declaration at run time (`MarkupProperty::type_`). Where the two differ (a type of the runtime library with several Rust handles, of which the property states another than the first) or the property has no getter, the document is refused as before: the type generated code would pass is not the one the run-time loader passes. No existing output has the new form (a type `handle_expr` names is written as before). Corpus: `compiled_binding_unnamed_types.xaml` (`Row.Stamp`, a Rust type without metadata, and `Row.Length`, `Option<i32>`), with `compiled_bindings_read_properties_of_types_generated_code_cannot_name`, which sets a data context and reads the values both back ends deliver.
 
+#### 9.4.9 Implemented (2026-10-09): a list of the runtime library created in markup
+
+`<generic:List x:TypeArguments="T">` and `<collections:ArrayList>` (five documents of the catalog, each as the items source of an items control). The run-time loader creates one list for both (DEVIATIONS.md, "Run-time type system of markup"): the element type and the untyped items in a shared `FerroList<Option<BoxedValue>>`. The type was a type of the loader (`RuntimeList`, `runtime/type_system/values.rs`), which generated code cannot name. It is now a type of the runtime library (`ferroui_markup_xaml::xaml_il::runtime::RuntimeList`, `rt::RuntimeList`), and the run-time loader creates that same type: a list is the same value whichever back end built its document. The element type of a list is what it is named by (`RuntimeListElement`): the type of its type system for a list the run-time loader creates, the full name the compiler resolved for a list generated code creates; the type system of the run-time loader finds the type of the second by that name when it is asked the type of the value.
+
+```rust
+// runtime_lists.xaml(6,8) ItemsSource
+let list_1_0 = rt::RuntimeList::of("FerroUI.Media.Stretch");
+// runtime_lists.xaml(7,18) Content
+rt::RuntimeList::add(&list_1_0, rt::to_value(::ferroui_base::media::Stretch::Uniform));
+combo_box_0.set_value(::ferroui_controls::ItemsControl::items_source_property(), rt::list_cast(&list_1_0, 8, 18)?);
+```
+
+| Node | What the interpreter does | What is emitted |
+|---|---|---|
+| `XamlAstNewClrObjectNode` of ``System.Collections.Generic.List`1[T]`` or `System.Collections.ArrayList`, whose constructor no metadata declares | the constructor of the table of runtime library types: `RuntimeList::new(element type)` | `rt::RuntimeList::of("<full name of T>")`, `rt::RuntimeList::untyped()`. An instantiation of `List<T>` a crate declares metadata for (``List`1[String]``) has a declared constructor and keeps the Rust type of its metadata, as at run time |
+| the children: `XamlPropertyAssignmentNode` with the `XamlDirectCallPropertySetter` of `Add` | the item evaluated as the type `Add` takes (the element type, `object` for an `ArrayList`), then `RuntimeList::add`, which holds an object of the object model in its untyped form; the index `ArrayList.Add` returns is dropped | the item stated as the handle of that type (`EmitTypes::handle_of`: the adder is a member the type system builds and states no Rust type), held untyped as the run-time loader holds the value of a node (`rt::to_value`, or the value as an object), then `rt::RuntimeList::add` |
+| the list assigned to a member | `to_exact`: an untyped target and a target of the type of the list take the list; any other target the shared list of the items through the cast the crate of the target registers for it (`RuntimeList::to_declared`: `Rc<FerroList<Option<BoxedValue>>>` to `ItemsSource`) | `Emitter::coerce_runtime_list`: `rt::list_cast(&list, line, position)?`, the same call of `to_declared`, written where `EmitTypes::is_assignable(Known::ListItems, target)` proves the cast exists; `rt::to_object` for an untyped target |
+
+Both hosts name the two Rust types (`Known::RuntimeList`, `Known::ListItems`). Neither type has a handle in the type system (the table of runtime library types gives the two lists none), so nothing else is asked of a host.
+
+**Not emitted:** an array (`x:Array` is not a directive of the language of the port, and the array constant of the compiler, `FerroXamlIlArrayConstantAstNode`, is in no document of the catalog; it is refused by name as before). **Proof:** `runtime_lists.xaml` of the corpus (a typed list and an untyped one as items sources, with null, a text, a value of an enumeration and a control; an untyped and an empty typed list as a `Tag`), emitted the same by both hosts and equal to the run-time loader's tree, and `a_list_created_in_markup_is_the_list_of_the_run_time_loader`, which reads the items both back ends deliver; the five pages of the catalog are in the fixture of 9.5.19 and load to the trees of the run-time loader.
+
 ### 9.5 Typing without the framework linked into the build tool
 
 #### 9.5.1 Inputs of the build-time type system

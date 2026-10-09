@@ -5,6 +5,7 @@ pub mod compiled;
 mod i_ferro_xaml_il_control_template_provider;
 mod i_ferro_xaml_il_parent_stack_provider;
 mod i_ferro_xaml_il_xml_namespace_info_provider_v1;
+mod runtime_list;
 mod xaml_il_parent_stack_provider_wrapper;
 mod xaml_il_context;
 mod xaml_il_runtime_helpers;
@@ -16,6 +17,7 @@ pub use i_ferro_xaml_il_parent_stack_provider::{
 pub use i_ferro_xaml_il_xml_namespace_info_provider_v1::{
     FerroXamlIlXmlNamespaceInfo, IFerroXamlIlXmlNamespaceInfoProvider, XmlNamespaces,
 };
+pub use runtime_list::{RuntimeList, RuntimeListElement};
 pub(crate) use xaml_il_parent_stack_provider_wrapper::XamlIlParentStackProviderWrapper;
 pub use xaml_il_runtime_helpers::{
     DeferredContent, DeferredContentBuilder, DeferredResult, RuntimePlatformNotRegistered, XamlIlRuntimeHelpers,

@@ -770,6 +770,68 @@ fn compiled_bindings_read_properties_of_types_generated_code_cannot_name() {
     assert_eq!(generated, interpreted);
 }
 
+/// Not from upstream. A list of the runtime library created in markup (`List<T>`,
+/// `ArrayList`) is the list the run-time loader creates, in both back ends: an items
+/// control receives the shared list of its items through its collection handle (null, a
+/// text, a value of an enumeration and a control in its untyped form), and an untyped
+/// target (`Tag`) receives the list itself, which names its element type.
+#[test]
+fn a_list_created_in_markup_is_the_list_of_the_run_time_loader() {
+    use ferroui_base::media::Stretch;
+    use ferroui_controls::{Border, ComboBox, Control, ItemsControl, StackPanel};
+    use ferroui_markup_xaml::xaml_il::runtime::RuntimeList;
+
+    let _base = xaml_test_base();
+    let name = "runtime_lists.xaml";
+    let (_, xaml) = DOCUMENTS.iter().find(|(document, _)| *document == name).expect("a corpus document");
+    let describe_item = |item: &Option<BoxedValue>| -> String {
+        let Some(item) = item else { return "null".to_string() };
+        if let Some(text) = item.downcast_ref::<String>() {
+            return format!("text {text}");
+        }
+        if let Some(stretch) = item.downcast_ref::<Stretch>() {
+            return format!("stretch {stretch:?}");
+        }
+        match item.downcast_ref::<Ref<Control>>() {
+            Some(control) => format!("control {}", control.get_type().name()),
+            None => format!("a value of {}", item.type_name()),
+        }
+    };
+    let lists = |root: BoxedValue| -> Vec<String> {
+        let panel = ValueTypes::as_object(&*root).and_then(|object| object.cast::<StackPanel>()).expect("the root is a panel");
+        let mut lists = Vec::new();
+        for child in panel.children().to_vec() {
+            let source = match (child.cast::<ComboBox>(), child.cast::<ItemsControl>()) {
+                (Some(combo_box), _) => combo_box.items_source(),
+                (None, Some(items_control)) => items_control.items_source(),
+                (None, None) => None,
+            };
+            if let Some(source) = source {
+                let items: Vec<String> = (0..source.count()).map(|index| describe_item(&source.get_at(index))).collect();
+                lists.push(format!("items [{}]", items.join(", ")));
+            }
+            if let Some(tag) = child.cast::<Border>().and_then(|border| border.tag()) {
+                let list = tag.downcast_ref::<RuntimeList>().expect("the tag is the list");
+                let items: Vec<String> = (0..list.count()).map(|index| describe_item(&list.get(index))).collect();
+                lists.push(format!("{list:?} [{}]", items.join(", ")));
+            }
+        }
+        lists
+    };
+    let generated = lists(build_generated(name).expect("the document is eligible").expect("the document is built"));
+    let interpreted = lists(try_load(xaml).expect("the run-time loader loads the document"));
+    assert_eq!(
+        generated,
+        [
+            "items [stretch Uniform, stretch Fill]",
+            "items [null, text Hello, stretch None, control Border]",
+            "ArrayList[1] [text tagged]",
+            "List<FerroUI.Controls.Dock>[0] []",
+        ]
+    );
+    assert_eq!(generated, interpreted);
+}
+
 /// Not from upstream. Two dumps that hold a value the dump cannot read never compare as
 /// equal, even when the text is the same: what the marker hides may differ.
 #[test]
