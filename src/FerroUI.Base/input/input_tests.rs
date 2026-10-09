@@ -4001,9 +4001,8 @@ fn mouse_swipe_is_raised_when_enabled() {
     assert!(mouse_swipe_raised(true));
 }
 
-// Not from the reference tests.
 #[test]
-fn mouse_swipe_is_not_raised_when_disabled() {
+fn mouse_swipe_requires_is_mouse_enabled() {
     assert!(!mouse_swipe_raised(false));
 }
 
