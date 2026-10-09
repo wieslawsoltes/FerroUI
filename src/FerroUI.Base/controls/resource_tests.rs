@@ -91,6 +91,104 @@ fn resources_can_be_keyed_by_type_and_object() {
     assert!(target.try_get_resource(&ResourceKey::object(42u16), None).is_none());
 }
 
+fn int(value: Option<ResourceValue>) -> Option<i32> {
+    let value = value??;
+    (*value).downcast_ref::<i32>().copied()
+}
+
+/// The table of a dictionary places its keys with the hasher of resource
+/// keys: every key of every kind is found by an equal key made anew, a key
+/// of another kind with the same content is another key, and removing some
+/// keys leaves the others where they are found.
+#[test]
+fn resources_with_many_keys_of_every_kind_are_found_by_an_equal_key() {
+    let target = ResourceDictionary::new();
+    for i in 0..500 {
+        target.add_value(format!("resource-key-{i}"), i);
+    }
+    target.add_value(Class1::TYPE, 1000);
+    target.add_value(Class2::TYPE, 1001);
+    target.add_value(Class3::TYPE, 1002);
+    for i in 0..100u32 {
+        target.add_value(ResourceKey::object(i), 2000 + i as i32);
+    }
+    assert_eq!(target.count(), 603);
+    assert_eq!(target.keys().len(), 603);
+
+    for i in 0..500 {
+        assert_eq!(int(target.try_get_resource(&key(&format!("resource-key-{i}")), None)), Some(i));
+    }
+    assert_eq!(int(target.try_get_resource(&ResourceKey::Type(Class1::TYPE), None)), Some(1000));
+    assert_eq!(int(target.try_get_resource(&ResourceKey::Type(Class2::TYPE), None)), Some(1001));
+    assert_eq!(int(target.try_get_resource(&ResourceKey::Type(Class3::TYPE), None)), Some(1002));
+    for i in 0..100u32 {
+        assert_eq!(int(target.try_get_resource(&ResourceKey::object(i), None)), Some(2000 + i as i32));
+    }
+
+    // Keys that are not in the dictionary: an unknown name, a type without
+    // an entry, and keys of another kind with the content of a present key.
+    assert!(target.try_get_resource(&key("resource-key-500"), None).is_none());
+    assert!(target.try_get_resource(&key("resource-key-"), None).is_none());
+    assert!(target.try_get_resource(&ResourceKey::Type(TestRoot::TYPE), None).is_none());
+    assert!(target.try_get_resource(&ResourceKey::object("resource-key-1".to_string()), None).is_none());
+    assert!(target.try_get_resource(&ResourceKey::object(1u64), None).is_none());
+    assert!(target.try_get_resource(&ResourceKey::object(100u32), None).is_none());
+
+    for i in (0..500).step_by(2) {
+        assert!(target.remove(&key(&format!("resource-key-{i}"))));
+    }
+    assert!(target.remove(&ResourceKey::Type(Class2::TYPE)));
+    assert_eq!(target.count(), 352);
+    for i in 0..500 {
+        let expected = if i % 2 == 0 { None } else { Some(i) };
+        assert_eq!(int(target.try_get_resource(&key(&format!("resource-key-{i}")), None)), expected);
+    }
+    assert_eq!(int(target.try_get_resource(&ResourceKey::Type(Class1::TYPE), None)), Some(1000));
+    assert!(target.try_get_resource(&ResourceKey::Type(Class2::TYPE), None).is_none());
+    assert_eq!(int(target.try_get_resource(&ResourceKey::Type(Class3::TYPE), None)), Some(1002));
+}
+
+/// Equal keys hash equally with the hasher of resource keys, whichever
+/// allocation holds their text, and the hash of a text depends on all of it
+/// (its first and its last byte, the bytes past a whole word, a zero byte at
+/// its end).
+#[test]
+fn resource_key_hasher_hashes_equal_keys_equally_and_all_of_a_text() {
+    use super::resource_key::ResourceKeyBuildHasher;
+    use std::collections::HashSet;
+    use std::hash::BuildHasher;
+
+    let build = ResourceKeyBuildHasher::default();
+    let hash = |key: &ResourceKey| build.hash_one(key);
+
+    assert_eq!(hash(&key("SystemAccentColor")), hash(&ResourceKey::from("SystemAccentColor".to_string())));
+    assert_eq!(hash(&ResourceKey::Type(Class1::TYPE)), hash(&ResourceKey::Type(Class1::TYPE)));
+    assert_eq!(hash(&ResourceKey::object(7u32)), hash(&ResourceKey::object(7u32)));
+
+    let texts = [
+        "",
+        "a",
+        "b",
+        "ab",
+        "ba",
+        "abcdefgh",
+        "abcdefgi",
+        "abcdefgha",
+        "abcdefghb",
+        "abcdefgh\0",
+        "abcdefgh\0\0",
+        "a\0",
+        "abcdefghabcdefgh",
+        "abcdefghabcdefgi",
+        "bbcdefghabcdefgh",
+    ];
+    let hashes: HashSet<u64> = texts.iter().map(|text| hash(&key(text))).collect();
+    assert_eq!(hashes.len(), texts.len());
+
+    assert_ne!(hash(&ResourceKey::Type(Class1::TYPE)), hash(&ResourceKey::Type(Class2::TYPE)));
+    assert_ne!(hash(&key("a")), hash(&ResourceKey::object("a".to_string())));
+}
+
 #[test]
 fn try_get_resource_should_find_resource_from_merged_dictionary() {
     let target = ResourceDictionary::new();

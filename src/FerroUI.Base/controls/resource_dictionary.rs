@@ -1,3 +1,4 @@
+use super::resource_key::ResourceKeyBuildHasher;
 use super::{
     resource_provider_ptr_eq, IDeferredContent, IResourceDictionary, IResourceNode, IResourceProvider,
     IThemeVariantProvider, ResourceHostRef, ResourceKey, ResourceProvider, ResourceProviderImpl, ResourceValue,
@@ -32,7 +33,7 @@ impl<F: Fn(Option<&Rc<dyn IServiceProvider>>) -> Option<BoxedValue>> IDeferredCo
 pub struct ResourceDictionary {
     base: ResourceProvider,
     last_deferred_item_key: RefCell<Option<ResourceKey>>,
-    inner: RefCell<HashMap<ResourceKey, ResourceItem>>,
+    inner: RefCell<HashMap<ResourceKey, ResourceItem, ResourceKeyBuildHasher>>,
     merged_dictionaries: OnceCell<FerroList<Rc<dyn IResourceProvider>>>,
     theme_dictionaries: OnceCell<FerroDictionary<ThemeVariant, Rc<dyn IThemeVariantProvider>>>,
     key: RefCell<Option<ThemeVariant>>,
@@ -151,7 +152,7 @@ impl ResourceDictionary {
         Self {
             base,
             last_deferred_item_key: RefCell::new(None),
-            inner: RefCell::new(HashMap::new()),
+            inner: RefCell::new(HashMap::default()),
             merged_dictionaries: OnceCell::new(),
             theme_dictionaries: OnceCell::new(),
             key: RefCell::new(None),
