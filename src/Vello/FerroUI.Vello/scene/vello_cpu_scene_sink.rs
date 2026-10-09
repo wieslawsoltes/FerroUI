@@ -1,6 +1,6 @@
 use crate::scene::{
     IVelloSceneSink, VelloSceneBrush, VelloSceneCapabilities, VelloSceneFilter, VelloSceneFilterCapabilities,
-    VelloSceneGlyphRun, VelloScenePaint,
+    VelloSceneGlyphRun, VelloScenePaint, VelloScenePixelRect,
 };
 use crate::vello_options::VelloRenderingMode;
 use glifo::{FontEmbolden, Glyph};
@@ -36,9 +36,17 @@ fn flatten(path: &BezPath, transform: Affine) -> Option<BezPath> {
         return None;
     }
 
+    let _perf = crate::perf::scope(crate::perf::Phase::Flatten, path.elements().len() as u64);
     let mut flattened = BezPath::new();
     kurbo::flatten(path.iter().map(|element| transform * element), CURVE_TOLERANCE, |element| flattened.push(element));
     Some(flattened)
+}
+
+/// The outline of a stroke in the space of its path, to the tolerance of
+/// the sinks at `scale`, the scale of the transform the path is drawn with.
+pub(super) fn stroke_outline(path: &BezPath, stroke: &Stroke, scale: f64) -> BezPath {
+    let _perf = crate::perf::scope(crate::perf::Phase::StrokeOutline, path.elements().len() as u64);
+    kurbo::stroke(path.iter(), stroke, &StrokeOpts::default(), CURVE_TOLERANCE / scale)
 }
 
 /// The path to hand to the renderer with the transform to draw it with.
@@ -58,6 +66,10 @@ pub struct VelloCpuSceneSink {
     /// identity of their pixels: an image that is drawn many times (a
     /// tile) is converted once.
     images: HashMap<u64, ImageSource>,
+    /// The rectangles of the target that are made transparent before the
+    /// scene is composed over what the target holds, when it is
+    /// ([`IVelloSceneSink::retain_target`]).
+    retained: Option<Vec<VelloScenePixelRect>>,
 }
 
 impl VelloCpuSceneSink {
@@ -68,7 +80,12 @@ impl VelloCpuSceneSink {
     pub fn new(width: u16, height: u16) -> Self {
         let settings = RenderSettings { num_threads: 0, ..RenderSettings::default() };
 
-        Self { context: RenderContext::new_with(width, height, settings), resources: Resources::new(), images: HashMap::new() }
+        Self {
+            context: RenderContext::new_with(width, height, settings),
+            resources: Resources::new(),
+            images: HashMap::new(),
+            retained: None,
+        }
     }
 
     fn set_anti_alias(&mut self, anti_alias: bool) {
@@ -100,6 +117,12 @@ impl VelloCpuSceneSink {
                     },
                 })
             }
+            // This sink draws on no device (its capabilities say so): the
+            // one that has a texture reads it back and paints with an image.
+            #[cfg(any(feature = "hybrid", feature = "gpu"))]
+            VelloSceneBrush::Texture(_) => {
+                panic!("The CPU rendering mode of the Vello backend does not paint with a texture of a device")
+            }
         };
 
         // The renderer places a paint by the transform of the path times
@@ -118,7 +141,19 @@ impl IVelloSceneSink for VelloCpuSceneSink {
     }
 
     fn capabilities(&self) -> VelloSceneCapabilities {
-        VelloSceneCapabilities { blend_layers: true, aliased_edges: true, image_paints: true, read_back: true }
+        VelloSceneCapabilities {
+            blend_layers: true,
+            aliased_edges: true,
+            aliased_rectangles: true,
+            image_paints: true,
+            read_back: true,
+            device_textures: false,
+            retained_targets: true,
+        }
+    }
+
+    fn retain_target(&mut self, cleared: &[VelloScenePixelRect]) {
+        self.retained.get_or_insert_with(Vec::new).extend_from_slice(cleared);
     }
 
     fn width(&self) -> u16 {
@@ -132,6 +167,7 @@ impl IVelloSceneSink for VelloCpuSceneSink {
     fn reset(&mut self) {
         self.context.reset();
         self.images.clear();
+        self.retained = None;
     }
 
     fn fill(
@@ -163,7 +199,7 @@ impl IVelloSceneSink for VelloCpuSceneSink {
         if !(scale.is_finite() && scale > 0.0) {
             return;
         }
-        let outline = kurbo::stroke(path.iter(), stroke, &StrokeOpts::default(), CURVE_TOLERANCE / scale);
+        let outline = stroke_outline(path, stroke, scale);
 
         self.fill(&outline, Fill::NonZero, transform, paint, BlendMode::default(), anti_alias);
     }
@@ -179,6 +215,7 @@ impl IVelloSceneSink for VelloCpuSceneSink {
             return;
         }
 
+        let _perf = crate::perf::scope(crate::perf::Phase::GlyphRun, glyph_run.glyphs.len() as u64);
         self.set_anti_alias(anti_alias);
         self.set_paint(paint, transform, transform);
         self.context.set_transform(transform);
@@ -235,12 +272,35 @@ impl IVelloSceneSink for VelloCpuSceneSink {
 
     fn render_to_pixels(&mut self, pixels: &mut [u8]) {
         let (width, height) = (self.context.width(), self.context.height());
+        let pixels_len = pixels.len() as u64;
+        assert_eq!(
+            pixels.len(),
+            width as usize * height as usize * 4,
+            "The pixels of the target do not have the size of the scene"
+        );
+
+        // A target that is kept: its cleared rectangles are made transparent
+        // here, and the renderer composes the scene over the rest.
+        let target_init = match &self.retained {
+            Some(cleared) => {
+                let row_bytes = width as usize * 4;
+                for rect in cleared {
+                    let (x0, x1) = (rect.x0.min(width) as usize * 4, rect.x1.min(width) as usize * 4);
+                    for row in rect.y0.min(height) as usize..rect.y1.min(height) as usize {
+                        pixels[row * row_bytes + x0..row * row_bytes + x1.max(x0)].fill(0);
+                    }
+                }
+                TargetInit::SrcOver
+            }
+            None => TargetInit::Clear(AlphaColor::TRANSPARENT),
+        };
+
         let target = PixmapMut::new(width, height, pixels)
             .unwrap_or_else(|| panic!("The pixels of the target do not have the size of the scene"));
 
-        let settings =
-            RasterizerSettings { target_init: TargetInit::Clear(AlphaColor::TRANSPARENT), ..RasterizerSettings::default() };
+        let settings = RasterizerSettings { target_init, ..RasterizerSettings::default() };
 
+        let _perf = crate::perf::scope(crate::perf::Phase::CpuRender, pixels_len);
         self.context.flush();
         self.context.render_with(target, &mut self.resources, settings);
     }

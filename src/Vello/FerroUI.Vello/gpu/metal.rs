@@ -5,42 +5,65 @@
 //! each frame, a session with the texture of the drawable of the layer
 //! (`ferroui_metal`); it presents the drawable itself when the session is
 //! disposed, with a command buffer of its queue. The GPU modes therefore
-//! draw with a `wgpu` device that is made **over that Metal device and
-//! that queue** (`Adapter::create_device_from_hal`), into the texture of
-//! each session wrapped as a texture of the device
-//! (`Device::create_texture_from_hal`), and not with a surface of `wgpu`
-//! over the layer:
+//! draw with a `wgpu` device that is made **over that Metal device**
+//! (`Adapter::create_device_from_hal`), into the texture of each session
+//! wrapped as a texture of the device (`Device::create_texture_from_hal`),
+//! and not with a surface of `wgpu` over the layer:
 //!
 //! * the layer is not part of the contract: its size, its drawables and
 //!   its presentation (with a transaction while the window is resized) are
 //!   the platform's, and a surface of `wgpu` would configure the layer and
 //!   present on its own;
-//! * what is drawn and the presentation are command buffers of one queue,
-//!   which runs them in the order they were committed: the frame is
-//!   complete when it is presented, without waiting for the GPU;
 //! * the device belongs to the graphics context the compositor created on
 //!   the thread that renders, like the Graphite context of the Skia
 //!   backend, and ends with it.
 //!
+//! **The device draws with a command queue of its own, not with the queue
+//! of the platform.** A command queue of Metal holds a number of command
+//! buffers that are not complete (64 unless the queue was made with
+//! another number, as the platform makes its queue), and the one who asks
+//! for one more waits until one completes. `wgpu` makes a command buffer
+//! for every render pass of a command encoder and commits none of them
+//! before the encoder is submitted, and the hybrid renderer needs a pass
+//! and more for every layer inside another: on the queue of the platform a
+//! frame with two dozen nested layers or opacity masks waited for a command
+//! buffer that could not complete because it was not committed, forever
+//! and with the compositor lock held (the test
+//! `a_frame_of_many_render_passes_is_drawn`; `wgpu` gives the queues it
+//! makes itself 4096, for this reason). The queue of the device is made
+//! with that number.
+//!
+//! Two queues are not ordered against each other. The frame is presented
+//! by the platform on its queue when the session is disposed; before that
+//! the render target waits until the device has **scheduled** what was
+//! committed to its own queue ([`VelloMetalGpu::wait_until_scheduled`]:
+//! an empty command buffer behind the frame, `waitUntilScheduled`), which
+//! is what the platform itself waits for before it presents a frame of the
+//! UI thread. The wait is for the hand-over to the GPU, not for the GPU to
+//! draw.
+//!
 //! This is the one file of the crate with `unsafe`: the raw handles of the
 //! contract become objects of `wgpu`.
 
-use crate::drawing_context_impl::{CreateInfo, DrawingContextImpl};
-use crate::gpu::i_vello_gpu::{create_window_scene_sink, render_window_scene};
+use crate::drawing_context_impl::DrawingContextImpl;
+use crate::gpu::i_vello_gpu::window_rendering_mode;
 use crate::gpu::vello_wgpu_device::{block_on, device_descriptor};
-use crate::gpu::{log_render_failure, IVelloGpu, VelloWgpuDevice, VelloWgpuDeviceError};
+use crate::gpu::{with_autorelease_pool, DeviceSurfaceRenderTarget, IVelloGpu, VelloWgpuDevice, VelloWgpuDeviceError};
 use crate::helpers::pixel_format_helper::scene_size;
+use crate::i_drawable_bitmap_impl::IDrawableBitmapImpl;
+use crate::surface_render_target::{SurfaceRenderTarget, SurfaceRenderTargetCreateInfo};
 use crate::vello_options::VelloRenderingMode;
 use crate::vello_platform::VelloPlatform;
 use ferroui_base::platform::surfaces::IPlatformRenderSurface;
 use ferroui_base::platform::{
-    IDrawingContextImpl, IPlatformGraphicsContext, IRenderTarget, PlatformRenderTargetState,
-    RenderTargetDrawingContextProperties, RenderTargetProperties, RenderTargetSceneInfo,
+    IBitmapImpl, IDrawingContextImpl, IDrawingContextLayerImpl, IPlatformGraphicsContext, IRenderTarget,
+    PlatformRenderTargetState, RenderTargetDrawingContextProperties, RenderTargetProperties, RenderTargetSceneInfo,
 };
+use ferroui_base::PixelSize;
 use ferroui_metal::{try_get_metal_surface, IMetalDevice, IMetalPlatformSurfaceRenderTarget};
 use objc2::rc::{autoreleasepool, Retained};
 use objc2::runtime::ProtocolObject;
-use objc2_metal::{MTLCommandQueue, MTLDevice, MTLPixelFormat, MTLTexture, MTLTextureType};
+use objc2_metal::{MTLCommandBuffer, MTLCommandQueue, MTLDevice, MTLPixelFormat, MTLTexture, MTLTextureType};
 use std::cell::RefCell;
 use std::ffi::c_void;
 use std::rc::Rc;
@@ -51,20 +74,29 @@ fn unavailable(reason: impl Into<String>) -> VelloWgpuDeviceError {
     VelloWgpuDeviceError { reason: reason.into() }
 }
 
+/// The command buffers the queue of the device holds that are not
+/// complete: what `wgpu` gives the queues it makes itself (`wgpu-hal`,
+/// `metal/adapter.rs`, `MAX_COMMAND_BUFFERS`), and from which it refuses to
+/// make another.
+const COMMAND_BUFFERS: usize = 4096;
+
 /// The GPU of the Vello backend on a Metal device of the platform.
 pub struct VelloMetalGpu {
     metal: Rc<dyn IMetalDevice>,
     device: Arc<VelloWgpuDevice>,
+    /// The command queue the device draws with: a queue of the Metal device
+    /// of the platform that is the backend's own (see the module).
+    queue: Retained<ProtocolObject<dyn MTLCommandQueue>>,
 }
 
 impl VelloMetalGpu {
-    /// Makes the `wgpu` device over the Metal device and the command queue
-    /// of the platform.
+    /// Makes the `wgpu` device over the Metal device of the platform, with
+    /// a command queue of its own.
     ///
     /// Fails when `wgpu` has no adapter for the device or does not accept
     /// it.
     pub fn new(metal: Rc<dyn IMetalDevice>) -> Result<Rc<Self>, VelloWgpuDeviceError> {
-        let (raw_device, raw_queue) = (metal.device(), metal.command_queue());
+        let raw_device = metal.device();
 
         // SAFETY: the contract hands out a valid `id<MTLDevice>` (or null),
         // which lives at least as long as the platform device this call
@@ -72,9 +104,10 @@ impl VelloMetalGpu {
         // device keeps until it is dropped.
         let mtl_device: Retained<ProtocolObject<dyn MTLDevice>> = unsafe { Retained::retain(raw_device.cast()) }
             .ok_or_else(|| unavailable("the platform has no Metal device"))?;
-        // SAFETY: as above, for the `id<MTLCommandQueue>` of the contract.
-        let mtl_queue: Retained<ProtocolObject<dyn MTLCommandQueue>> = unsafe { Retained::retain(raw_queue.cast()) }
-            .ok_or_else(|| unavailable("the platform has no Metal command queue"))?;
+        let mtl_queue: Retained<ProtocolObject<dyn MTLCommandQueue>> = mtl_device
+            .newCommandQueueWithMaxCommandBufferCount(COMMAND_BUFFERS)
+            .ok_or_else(|| unavailable("the Metal device of the platform made no command queue"))?;
+        let own_queue = mtl_queue.clone();
 
         let instance = wgpu::Instance::new(wgpu::InstanceDescriptor {
             backends: wgpu::Backends::METAL,
@@ -107,8 +140,8 @@ impl VelloMetalGpu {
         let hal_device = unsafe {
             hal::metal::Device::device_from_raw(mtl_device, descriptor.required_features, &descriptor.required_limits)
         };
-        // SAFETY: the queue is a queue of that device (the contract: the
-        // queue "used to render with it").
+        // SAFETY: the queue is a queue of that device: the device made it
+        // above.
         let hal_queue = unsafe { hal::metal::Queue::queue_from_raw(mtl_queue, timestamp_period) };
 
         // SAFETY: `hal_device` wraps the Metal device the adapter was
@@ -124,7 +157,23 @@ impl VelloMetalGpu {
         // Layers and bitmaps of the GPU modes are drawn on this device too.
         device.prefer();
 
-        Ok(Rc::new(Self { metal, device }))
+        Ok(Rc::new(Self { metal, device, queue: own_queue }))
+    }
+
+    /// Waits until the device has scheduled every command buffer that was
+    /// committed to its queue: from then on the GPU runs them before what
+    /// is scheduled later, on whatever queue, so a drawable they draw to
+    /// can be presented. It does not wait for the GPU to run them.
+    pub fn wait_until_scheduled(&self) {
+        autoreleasepool(|_| {
+            // The queue schedules its command buffers in the order they
+            // were committed: when an empty one is scheduled, every one
+            // before it is.
+            if let Some(buffer) = self.queue.commandBuffer() {
+                buffer.commit();
+                buffer.waitUntilScheduled();
+            }
+        });
     }
 
     /// The texture of a session as a texture of the `wgpu` device, or why
@@ -214,11 +263,7 @@ impl IVelloGpu for VelloMetalGpu {
         for surface in surfaces {
             if let Some(metal_surface) = try_get_metal_surface(&**surface) {
                 let target = metal_surface.create_metal_render_target(self.metal.clone());
-                return Some(Rc::new(VelloMetalRenderTarget {
-                    gpu: self,
-                    target: RefCell::new(Some(target)),
-                    rendering_modes: rendering_modes.to_vec(),
-                }));
+                return Some(Rc::new(VelloMetalRenderTarget::new(self, target, rendering_modes.to_vec())));
             }
         }
 
@@ -241,18 +286,152 @@ impl IVelloGpu for VelloMetalGpu {
     }
 }
 
+/// What a window holds between its frames: the surface its scenes are
+/// rendered into. The texture of each drawable is a copy of it.
+enum WindowFrame {
+    /// A texture of the device: the hybrid and the GPU mode.
+    Device(DeviceSurfaceRenderTarget),
+    /// Pixels in memory: the CPU mode.
+    Memory(SurfaceRenderTarget),
+}
+
+impl WindowFrame {
+    fn pixel_size(&self) -> PixelSize {
+        match self {
+            WindowFrame::Device(surface) => surface.pixel_size(),
+            WindowFrame::Memory(surface) => surface.pixel_size(),
+        }
+    }
+
+    fn dpi(&self) -> ferroui_base::Vector {
+        match self {
+            WindowFrame::Device(surface) => surface.dpi(),
+            WindowFrame::Memory(surface) => surface.dpi(),
+        }
+    }
+
+    fn has_content(&self) -> bool {
+        match self {
+            WindowFrame::Device(surface) => surface.has_content(),
+            WindowFrame::Memory(surface) => surface.has_content(),
+        }
+    }
+
+    fn is_corrupted(&self) -> bool {
+        match self {
+            WindowFrame::Device(surface) => surface.is_corrupted(),
+            WindowFrame::Memory(surface) => surface.is_corrupted(),
+        }
+    }
+
+    fn create_drawing_context_with(&self, disposables: Vec<Box<dyn FnOnce()>>) -> DrawingContextImpl {
+        match self {
+            WindowFrame::Device(surface) => surface.create_drawing_context_with(disposables),
+            WindowFrame::Memory(surface) => surface.create_drawing_context_with(disposables),
+        }
+    }
+
+    /// Copies what the frame holds into the texture of a drawable.
+    fn copy_to(&self, device: &VelloWgpuDevice, target: &wgpu::Texture) {
+        match self {
+            WindowFrame::Device(surface) => {
+                if let Some(texture) = surface.texture() {
+                    let premultiply = texture.alpha() == crate::gpu::VelloTextureAlpha::Straight;
+                    device.copy_texture_to_texture(texture.view(), target, premultiply);
+                }
+            }
+            WindowFrame::Memory(surface) => {
+                if let Some(image) = IDrawableBitmapImpl::image(surface) {
+                    device.copy_pixels_to_texture(image.data.data(), image.width, image.height, target);
+                }
+            }
+        }
+    }
+
+    fn dispose(&self) {
+        match self {
+            WindowFrame::Device(surface) => IBitmapImpl::dispose(surface),
+            WindowFrame::Memory(surface) => IBitmapImpl::dispose(surface),
+        }
+    }
+}
+
 /// The render target of a Metal surface: every frame is a session of the
-/// platform, whose texture a scene is rendered into.
+/// platform, whose texture is given the frame of the window.
+///
+/// The frame of the window is a surface of the backend that lives from
+/// frame to frame ([`WindowFrame`]): a texture of the device in the hybrid
+/// and in the GPU mode, pixels in memory in the CPU mode. The render target
+/// says that it retains its frame and can be rendered to directly
+/// ([`RenderTargetProperties`]), so the compositor draws what changed
+/// straight into it, clipped to the dirty rectangles, without a layer of
+/// its own in between; the scene of a frame is composed over what the
+/// surface holds, and the texture of the drawable, which holds nothing of
+/// the frame before, gets a copy of the surface: one pass on the device
+/// (for the CPU mode, an upload).
 pub struct VelloMetalRenderTarget {
     gpu: Rc<VelloMetalGpu>,
     target: RefCell<Option<Rc<dyn IMetalPlatformSurfaceRenderTarget>>>,
     rendering_modes: Vec<VelloRenderingMode>,
+    /// The frame of the window, once a frame was drawn: of the size and
+    /// the scaling of the last session.
+    frame: RefCell<Option<Rc<WindowFrame>>>,
+}
+
+impl VelloMetalRenderTarget {
+    fn new(
+        gpu: Rc<VelloMetalGpu>,
+        target: Rc<dyn IMetalPlatformSurfaceRenderTarget>,
+        rendering_modes: Vec<VelloRenderingMode>,
+    ) -> Self {
+        Self { gpu, target: RefCell::new(Some(target)), rendering_modes, frame: RefCell::new(None) }
+    }
+
+    /// The frame of the window for a drawable of `pixel_size` at `dpi`: the
+    /// one of the frame before when it still fits, a new one otherwise (the
+    /// window was resized, its scaling changed, the device was lost).
+    fn frame_for(&self, pixel_size: PixelSize, dpi: ferroui_base::Vector) -> Rc<WindowFrame> {
+        let mut frame = self.frame.borrow_mut();
+
+        let fits = frame
+            .as_ref()
+            .is_some_and(|frame| frame.pixel_size() == pixel_size && frame.dpi() == dpi && !frame.is_corrupted());
+        if !fits {
+            if let Some(old) = frame.take() {
+                old.dispose();
+            }
+
+            let device = &self.gpu.device;
+            let mode = window_rendering_mode(device, &self.rendering_modes);
+            *frame = Some(Rc::new(match DeviceSurfaceRenderTarget::is_available(mode, device) {
+                true => WindowFrame::Device(DeviceSurfaceRenderTarget::new(
+                    device.clone(),
+                    mode,
+                    pixel_size,
+                    dpi,
+                    self.rendering_modes.clone(),
+                    false,
+                )),
+                false => WindowFrame::Memory(SurfaceRenderTarget::new(SurfaceRenderTargetCreateInfo {
+                    width: pixel_size.width,
+                    height: pixel_size.height,
+                    dpi,
+                    rendering_modes: vec![VelloRenderingMode::Cpu],
+                    use_scaled_drawing: false,
+                })),
+            }));
+        }
+
+        frame.clone().unwrap_or_else(|| panic!("The frame of the window was just created"))
+    }
 }
 
 impl IRenderTarget for VelloMetalRenderTarget {
     fn properties(&self) -> RenderTargetProperties {
-        // A drawable holds nothing of the frame before.
-        RenderTargetProperties::default()
+        // The frame of the window is kept by the render target (a drawable
+        // holds nothing of the frame before), and the compositor draws into
+        // it directly.
+        RenderTargetProperties { retains_previous_frame_contents: true, is_suitable_for_direct_rendering: true }
     }
 
     fn create_drawing_context(
@@ -262,9 +441,11 @@ impl IRenderTarget for VelloMetalRenderTarget {
         let target =
             self.target.borrow().clone().unwrap_or_else(|| panic!("VelloMetalRenderTarget has been disposed"));
 
+        let frame_start = crate::perf::frame_start();
+
         // The session is the size of the layer at this moment: a window
-        // that was resized gives a larger texture, and the scene is made
-        // for the texture.
+        // that was resized gives a larger texture, and the frame of the
+        // window is made for the texture.
         let session = target.begin_rendering();
         let scaling = session.scaling();
 
@@ -281,37 +462,42 @@ impl IRenderTarget for VelloMetalRenderTarget {
             }
         };
 
-        let pixel_size = ferroui_base::PixelSize::new(texture.width() as i32, texture.height() as i32);
+        let pixel_size = PixelSize::new(texture.width() as i32, texture.height() as i32);
         let (width, height) = scene_size(pixel_size);
-        let device = self.gpu.device.clone();
-        let sink = create_window_scene_sink(&device, &self.rendering_modes, width, height, texture.format());
+        let frame = self.frame_for(pixel_size, VelloPlatform::default_dpi() * scaling);
+        let properties = RenderTargetDrawingContextProperties { previous_frame_is_retained: frame.has_content() };
 
-        let create_info = CreateInfo {
-            sink,
-            backdrop: None,
-            on_finished: Box::new(move |sink| {
-                // Objects of Metal that are autoreleased while the frame is
-                // encoded end with the frame: the thread that renders has
-                // no pool of its own.
-                autoreleasepool(|_| {
-                    if let Err(error) = render_window_scene(&device, sink, &texture) {
-                        log_render_failure("window", &error);
-                    }
+        let (gpu, copied) = (self.gpu.clone(), frame.clone());
+        let (frame_width, frame_height) = (u32::from(width), u32::from(height));
+        let disposables: Vec<Box<dyn FnOnce()>> = vec![
+            // The scene was rendered into the frame of the window: the
+            // texture of the drawable gets a copy.
+            Box::new(move || {
+                // Objects of Metal that are autoreleased while the copy is
+                // encoded end with it: the thread that renders has no pool
+                // of its own.
+                with_autorelease_pool(|| {
+                    copied.copy_to(&gpu.device, &texture);
                     // The reference of the wrapped texture is given back
                     // before the session presents the drawable.
                     drop(texture);
                 });
+                // The platform presents on its own queue: the frame is on
+                // its way to the GPU before it does.
+                gpu.wait_until_scheduled();
             }),
-            scale_drawing_to_dpi: false,
-            dpi: VelloPlatform::default_dpi() * scaling,
-            rendering_modes: self.rendering_modes.clone(),
-        };
+            // Disposing the session presents the frame, with a command
+            // buffer of the queue of the platform.
+            Box::new(move || {
+                {
+                    let _perf = crate::perf::scope(crate::perf::Phase::Present, 0);
+                    session.dispose();
+                }
+                crate::perf::frame_end(frame_start, "window", frame_width, frame_height);
+            }),
+        ];
 
-        // Disposing the session presents the frame: with a command buffer
-        // of the queue the frame was committed to, after it.
-        let context = DrawingContextImpl::new(create_info, vec![Box::new(move || session.dispose())]);
-
-        (Box::new(context), RenderTargetDrawingContextProperties::default())
+        (Box::new(frame.create_drawing_context_with(disposables)), properties)
     }
 
     fn platform_render_target_state(&self) -> PlatformRenderTargetState {
@@ -326,6 +512,9 @@ impl IRenderTarget for VelloMetalRenderTarget {
     }
 
     fn dispose(&self) {
+        if let Some(frame) = self.frame.borrow_mut().take() {
+            frame.dispose();
+        }
         if let Some(target) = self.target.borrow_mut().take() {
             target.dispose();
         }

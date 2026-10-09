@@ -175,7 +175,30 @@ impl VelloWgpuDevice {
         let state = states.entry(TypeId::of::<S>()).or_insert_with(|| Box::new(create(self)));
         let state = state.downcast_mut::<S>().unwrap_or_else(|| panic!("A renderer state is of the type it is kept under"));
 
-        f(self, state)
+        crate::gpu::with_autorelease_pool(|| f(self, state))
+    }
+
+    /// Waits until the device has drawn everything that was submitted to
+    /// it. Returns `false` when the device is lost.
+    ///
+    /// Not for the path of a frame: for what measures or reads a frame
+    /// (a benchmark that times the work of the device, a test).
+    pub fn wait_for_submitted_work(&self) -> bool {
+        if self.device.poll(wgpu::PollType::wait_indefinitely()).is_err() {
+            self.mark_lost();
+            return false;
+        }
+        true
+    }
+
+    /// [`wait_for_submitted_work`](Self::wait_for_submitted_work) of the
+    /// device scenes are drawn with ([`shared`](Self::shared)), when there
+    /// is one.
+    pub fn wait_for_shared_device() {
+        let preferred = PREFERRED.lock().unwrap_or_else(|e| e.into_inner()).upgrade();
+        if let Some(device) = preferred {
+            device.wait_for_submitted_work();
+        }
     }
 
     /// Creates a texture of premultiplied RGBA pixels a scene is rendered
@@ -196,6 +219,11 @@ impl VelloWgpuDevice {
 
     /// Creates a texture that holds the given RGBA pixels, to be sampled.
     pub fn create_image_texture(&self, width: u32, height: u32, rgba: &[u8]) -> wgpu::Texture {
+        let _perf = crate::perf::scope(crate::perf::Phase::Upload, rgba.len() as u64);
+        crate::gpu::with_autorelease_pool(|| self.create_texture_of_pixels(width, height, rgba))
+    }
+
+    fn create_texture_of_pixels(&self, width: u32, height: u32, rgba: &[u8]) -> wgpu::Texture {
         let size = wgpu::Extent3d { width: width.max(1), height: height.max(1), depth_or_array_layers: 1 };
         let texture = self.device.create_texture(&wgpu::TextureDescriptor {
             label: Some("FerroUI Vello image"),
@@ -204,7 +232,7 @@ impl VelloWgpuDevice {
             sample_count: 1,
             dimension: wgpu::TextureDimension::D2,
             format: wgpu::TextureFormat::Rgba8Unorm,
-            usage: wgpu::TextureUsages::TEXTURE_BINDING | wgpu::TextureUsages::COPY_DST,
+            usage: wgpu::TextureUsages::TEXTURE_BINDING | wgpu::TextureUsages::COPY_DST | wgpu::TextureUsages::COPY_SRC,
             view_formats: &[],
         });
 
@@ -228,29 +256,59 @@ impl VelloWgpuDevice {
     /// channels: how a scene of the CPU mode reaches the texture of a
     /// window.
     pub fn copy_pixels_to_texture(&self, rgba: &[u8], width: u32, height: u32, target: &wgpu::Texture) {
-        /// What copies a texture into a target of a format.
-        struct PixelCopyState {
-            blitters: HashMap<wgpu::TextureFormat, wgpu::util::TextureBlitter>,
-        }
-
         let source = self.create_image_texture(width, height, rgba);
         let source_view = source.create_view(&wgpu::TextureViewDescriptor::default());
+        self.copy_texture_to_texture(&source_view, target, false);
+    }
+
+    /// Copies a texture into a texture that can be rendered to, pixel on
+    /// pixel, whatever the format of four 8 bit channels of the target is:
+    /// how what a scene was rendered into reaches the texture of a window.
+    /// With `premultiply` the colors of the source are multiplied by its
+    /// alpha on the way: the source holds colors that are not
+    /// premultiplied (what the renderer of the GPU mode writes), and the
+    /// target takes premultiplied ones.
+    pub fn copy_texture_to_texture(&self, source: &wgpu::TextureView, target: &wgpu::Texture, premultiply: bool) {
+        /// What copies a texture into a target of a format.
+        struct TextureCopyState {
+            blitters: HashMap<(wgpu::TextureFormat, bool), wgpu::util::TextureBlitter>,
+        }
+
+        let _perf = crate::perf::scope(
+            crate::perf::Phase::TextureCopy,
+            u64::from(target.width()) * u64::from(target.height()) * 4,
+        );
         let target_view = target.create_view(&wgpu::TextureViewDescriptor::default());
         let format = target.format();
 
         self.with_renderer_state(
-            |_| PixelCopyState { blitters: HashMap::new() },
+            |_| TextureCopyState { blitters: HashMap::new() },
             |device, state| {
-                let blitter = state.blitters.entry(format).or_insert_with(|| {
-                    wgpu::util::TextureBlitterBuilder::new(&device.device, format)
-                        .sample_type(wgpu::FilterMode::Nearest)
-                        .build()
+                let blitter = state.blitters.entry((format, premultiply)).or_insert_with(|| {
+                    let builder = wgpu::util::TextureBlitterBuilder::new(&device.device, format)
+                        .sample_type(wgpu::FilterMode::Nearest);
+                    match premultiply {
+                        true => {
+                            let replace_by = |factor| wgpu::BlendComponent {
+                                src_factor: factor,
+                                dst_factor: wgpu::BlendFactor::Zero,
+                                operation: wgpu::BlendOperation::Add,
+                            };
+                            builder
+                                .blend_state(wgpu::BlendState {
+                                    color: replace_by(wgpu::BlendFactor::SrcAlpha),
+                                    alpha: replace_by(wgpu::BlendFactor::One),
+                                })
+                                .build()
+                        }
+                        false => builder.build(),
+                    }
                 });
 
                 let mut encoder = device
                     .device
                     .create_command_encoder(&wgpu::CommandEncoderDescriptor { label: Some("FerroUI Vello copy") });
-                blitter.copy(&device.device, &mut encoder, &source_view, &target_view);
+                blitter.copy(&device.device, &mut encoder, source, &target_view);
                 device.queue.submit([encoder.finish()]);
             },
         );
@@ -270,6 +328,12 @@ impl VelloWgpuDevice {
             "The pixels of the target do not have the size of the scene"
         );
 
+        let _perf = crate::perf::scope(crate::perf::Phase::ReadBack, pixels.len() as u64);
+        crate::gpu::with_autorelease_pool(|| self.read_texture_pixels(texture, pixels))
+    }
+
+    fn read_texture_pixels(&self, texture: &wgpu::Texture, pixels: &mut [u8]) -> bool {
+        let (width, height) = (texture.width(), texture.height());
         let bytes_per_row = (width * 4).next_multiple_of(wgpu::COPY_BYTES_PER_ROW_ALIGNMENT);
         let buffer = self.device.create_buffer(&wgpu::BufferDescriptor {
             label: Some("FerroUI Vello read back"),

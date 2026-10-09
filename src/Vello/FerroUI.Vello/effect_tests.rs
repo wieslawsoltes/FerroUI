@@ -205,7 +205,11 @@ impl IVelloSceneSink for SinkWithoutFilters {
         self.inner.rendering_mode()
     }
     fn capabilities(&self) -> VelloSceneCapabilities {
-        VelloSceneCapabilities { aliased_edges: self.aliased_edges, ..self.inner.capabilities() }
+        VelloSceneCapabilities {
+            aliased_edges: self.aliased_edges,
+            aliased_rectangles: self.aliased_edges,
+            ..self.inner.capabilities()
+        }
     }
     fn width(&self) -> u16 {
         self.inner.width()

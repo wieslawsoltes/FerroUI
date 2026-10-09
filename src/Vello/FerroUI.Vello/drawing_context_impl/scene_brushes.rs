@@ -17,11 +17,9 @@
 //!   counterpart.
 
 use super::{DrawingContextImpl, PaintWrapper};
-use crate::i_drawable_bitmap_impl::IDrawableBitmapImpl;
-use crate::scene::{VelloSceneBrush, VelloSceneImage, VelloScenePaint};
+use crate::scene::VelloScenePaint;
 use crate::vello_extensions::{rect_path, to_affine};
 use ferroui_base::media::{Colors, ISceneBrushContent, MediaExtensions, StretchDirection, TileMode};
-use ferroui_base::platform::{IBitmapImpl, IDrawingContextLayerImpl};
 use ferroui_base::rendering::utilities::TileBrushCalculator;
 use ferroui_base::{Matrix, PixelSize, Point, Rect};
 use peniko::ImageQuality;
@@ -59,6 +57,7 @@ impl DrawingContextImpl {
         let intermediate_size = rect.size();
 
         if intermediate_size.width >= 1.0 && intermediate_size.height >= 1.0 {
+            crate::perf::count(crate::perf::Phase::BrushSurface, 0);
             let intermediate = self.create_render_target(
                 PixelSize::from_size_with_dpi_vector(intermediate_size, self.intermediate_surface_dpi),
                 true,
@@ -78,8 +77,8 @@ impl DrawingContextImpl {
                 ctx.dispose();
             }
 
-            self.configure_tile_brush(paint_wrapper, target_rect, &*content.brush(), &intermediate, opacity);
-            IBitmapImpl::dispose(&intermediate);
+            self.configure_tile_brush(paint_wrapper, target_rect, &*content.brush(), intermediate.bitmap(), opacity);
+            intermediate.dispose();
         }
     }
 
@@ -188,6 +187,7 @@ impl DrawingContextImpl {
         let pixels_per_unit_x = pixel_size.width as f64 / tile_size.width;
         let pixels_per_unit_y = pixel_size.height as f64 / tile_size.height;
 
+        crate::perf::count(crate::perf::Phase::BrushSurface, 0);
         let intermediate = self.create_render_target(pixel_size, false);
         {
             let mut ctx = intermediate.create_drawing_context();
@@ -200,9 +200,13 @@ impl DrawingContextImpl {
             ctx.dispose();
         }
 
-        let image = IDrawableBitmapImpl::image(&intermediate);
-        IBitmapImpl::dispose(&intermediate);
-        let Some(image) = image else {
+        // The picture shader of the Skia backend samples the nearest pixel
+        // of its tile.
+        let tile_mode = brush.tile_mode();
+        let (x_extend, y_extend) = Self::get_tile_modes(tile_mode);
+        let tile_brush = intermediate.brush(self, (x_extend, y_extend), ImageQuality::Low, opacity);
+        intermediate.dispose();
+        let Some((tile_brush, tile_pixels)) = tile_brush else {
             return;
         };
 
@@ -211,28 +215,14 @@ impl DrawingContextImpl {
             Matrix::create_scale(1.0 / pixels_per_unit_x, 1.0 / pixels_per_unit_y) * shader_transform,
         );
 
-        let tile_mode = brush.tile_mode();
-        let (x_extend, y_extend) = Self::get_tile_modes(tile_mode);
-
         if tile_mode == TileMode::None {
             // A tile that is not repeated paints nothing beside itself: the
             // shape is clipped to the tile.
-            let mut tile = rect_path(Rect::new(0.0, 0.0, image.width as f64, image.height as f64));
+            let mut tile = rect_path(Rect::new(0.0, 0.0, tile_pixels.width as f64, tile_pixels.height as f64));
             tile.apply_affine(paint_transform);
             paint_wrapper.clip = Some(tile);
         }
 
-        paint_wrapper.paint = Some(VelloScenePaint {
-            brush: VelloSceneBrush::Image(VelloSceneImage {
-                image,
-                x_extend,
-                y_extend,
-                // The picture shader of the Skia backend samples the
-                // nearest pixel of its tile.
-                quality: ImageQuality::Low,
-                alpha: opacity,
-            }),
-            transform: paint_transform,
-        });
+        paint_wrapper.paint = Some(VelloScenePaint { brush: tile_brush, transform: paint_transform });
     }
 }

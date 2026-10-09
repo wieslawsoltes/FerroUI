@@ -122,6 +122,138 @@ use std::time::{Duration, Instant};
 pub(super) const WIDTH: f64 = 1280.0;
 pub(super) const HEIGHT: f64 = 800.0;
 
+/// The surface of the window of a bench and the compositor that renders to
+/// it when it is not the one of the test services.
+///
+/// The environment chooses (the render backend is chosen by
+/// `FERROUI_TEST_RENDERER`, see `support.rs`):
+///
+/// - `FERROUI_BENCH_SURFACE=metal`: a Metal surface that is not on screen,
+///   rendered to on a Metal device as the window of the macOS platform is
+///   (the compositor is created with the graphics of that device, so the
+///   backend makes its GPU context over it: Graphite for Skia, `wgpu` for
+///   Vello). Each frame waits until the device has drawn it, so that the
+///   times hold the work of the device. Anything else, and no value: the
+///   raster framebuffer.
+/// - `FERROUI_BENCH_SCALING=<n>`: the scaling of the window (1): at 2 the
+///   surface has four times the pixels, as on a display of high density.
+pub(super) struct BenchSurface {
+    surface: BenchSurfaceKind,
+    /// The compositor of the window, when the surface needs one with the
+    /// graphics of a device.
+    compositor: Option<Rc<Compositor>>,
+}
+
+enum BenchSurfaceKind {
+    Raster(Arc<RasterSurface>),
+    #[cfg(target_os = "macos")]
+    Metal(Arc<ferroui_vello::gpu::metal_offscreen::OffscreenMetalSurface>),
+}
+
+/// The scaling of the windows of the benches.
+pub(super) fn bench_scaling() -> f64 {
+    std::env::var("FERROUI_BENCH_SCALING")
+        .ok()
+        .and_then(|value| value.parse::<f64>().ok())
+        .filter(|scaling| *scaling > 0.0)
+        .unwrap_or(1.0)
+}
+
+/// The graphics of the Metal device of the benches, when the environment
+/// asks for the Metal surface and the machine has a device.
+fn bench_graphics() -> Option<Arc<dyn ferroui_base::platform::IPlatformGraphics>> {
+    #[cfg(target_os = "macos")]
+    if std::env::var("FERROUI_BENCH_SURFACE").is_ok_and(|value| value == "metal") {
+        let graphics = ferroui_vello::gpu::metal_offscreen::OffscreenMetalGraphics::try_new()
+            .expect("FERROUI_BENCH_SURFACE=metal needs a Metal device");
+        return Some(graphics);
+    }
+    None
+}
+
+impl BenchSurface {
+    /// Gives `window_impl` the surface of the environment and the
+    /// compositor that renders to it: the one of `services` for the raster
+    /// surface, one of its own over the render loop of `services` with the
+    /// graphics of the Metal device for the Metal surface.
+    pub(super) fn setup(services: &CompositorTestServices, window_impl: &Rc<MockWindowImpl>) -> BenchSurface {
+        let compositor = bench_graphics().map(|graphics| {
+            Compositor::with_scheduler(
+                services.render_loop().clone(),
+                Some(graphics),
+                true,
+                &MediaContext::instance().scheduler(),
+                Dispatcher::ui_thread(),
+                None,
+                None,
+            )
+        });
+        match &compositor {
+            Some(compositor) => window_impl.setup_compositor(Some(compositor.clone())),
+            None => services.setup(window_impl),
+        }
+        BenchSurface::setup_surface(window_impl, compositor)
+    }
+
+    /// Gives `window_impl` the surface of the environment; `compositor` is
+    /// the compositor of the window when it is not the one of the test
+    /// services.
+    fn setup_surface(window_impl: &Rc<MockWindowImpl>, compositor: Option<Rc<Compositor>>) -> BenchSurface {
+        let scaling = bench_scaling();
+        window_impl.render_scaling.set(scaling);
+        window_impl.desktop_scaling.set(scaling);
+
+        #[cfg(target_os = "macos")]
+        if bench_graphics().is_some() {
+            use ferroui_vello::gpu::metal_offscreen::{OffscreenFramePresentation, OffscreenMetalSurface};
+
+            let size = PixelSize::new((WIDTH * scaling) as i32, (HEIGHT * scaling) as i32);
+            // The Vello backend draws with a command queue of its own.
+            let renderer_wait: Option<Arc<dyn Fn() + Send + Sync>> = test_renderer()
+                .vello_mode()
+                .map(|_| Arc::new(ferroui_vello::gpu::VelloWgpuDevice::wait_for_shared_device) as Arc<dyn Fn() + Send + Sync>);
+            let surface = OffscreenMetalSurface::new(size, scaling, OffscreenFramePresentation::Drawn, renderer_wait);
+            window_impl.setup_surfaces(vec![surface.clone() as Arc<dyn IPlatformRenderSurface>]);
+            return BenchSurface { surface: BenchSurfaceKind::Metal(surface), compositor };
+        }
+
+        let surface = RasterSurface::new();
+        window_impl.setup_surfaces(vec![surface.clone() as Arc<dyn IPlatformRenderSurface>]);
+        BenchSurface { surface: BenchSurfaceKind::Raster(surface), compositor }
+    }
+
+    /// The frames the surface received.
+    pub(super) fn frames(&self) -> u32 {
+        match &self.surface {
+            BenchSurfaceKind::Raster(surface) => surface.frames.load(std::sync::atomic::Ordering::SeqCst),
+            #[cfg(target_os = "macos")]
+            BenchSurfaceKind::Metal(surface) => surface.frames(),
+        }
+    }
+
+    /// The compositor of the window, when it is not the one of the test
+    /// services.
+    pub(super) fn compositor(&self) -> Option<&Rc<Compositor>> {
+        self.compositor.as_ref()
+    }
+
+    /// What the bench draws with and to, for the lines it prints.
+    pub(super) fn label(&self) -> String {
+        let surface = match &self.surface {
+            BenchSurfaceKind::Raster(_) => "raster framebuffer",
+            #[cfg(target_os = "macos")]
+            BenchSurfaceKind::Metal(_) => "Metal surface",
+        };
+        format!(
+            "{}, {surface}, {} by {} at a scaling of {}",
+            test_renderer().name(),
+            (WIDTH * bench_scaling()) as i32,
+            (HEIGHT * bench_scaling()) as i32,
+            bench_scaling()
+        )
+    }
+}
+
 /// A window surface rendered to in memory, as the software surface of the
 /// browser is.
 pub(super) struct RasterSurface {
@@ -164,12 +296,13 @@ impl IPlatformRenderSurfaceRenderTarget for RasterTarget {}
 
 impl IFramebufferRenderTarget for RasterTarget {
     fn lock(&self, _scene_info: &RenderTargetSceneInfo) -> (Rc<dyn ILockedFramebuffer>, FramebufferLockProperties) {
-        let size = PixelSize::new(WIDTH as i32, HEIGHT as i32);
+        let scaling = bench_scaling();
+        let size = PixelSize::new((WIDTH * scaling) as i32, (HEIGHT * scaling) as i32);
         let mut framebuffer = self.framebuffer.borrow_mut();
         let framebuffer =
             framebuffer.get_or_insert_with(|| RetainedFramebuffer::new(size, PixelFormats::RGBA8888, AlphaFormat::Premul));
         let frames = self.frames.clone();
-        let locked = framebuffer.lock(Vector::new(96.0, 96.0), move |_| {
+        let locked = framebuffer.lock(Vector::new(96.0 * scaling, 96.0 * scaling), move |_| {
             frames.fetch_add(1, std::sync::atomic::Ordering::SeqCst);
         });
         (locked, FramebufferLockProperties::default())
@@ -333,7 +466,7 @@ impl RenderThread {
         let render_loop = Arc::new(WokenRenderLoop::default());
         let compositor = Compositor::with_render_thread(
             render_loop.clone(),
-            None,
+            bench_graphics(),
             true,
             &MediaContext::instance().scheduler(),
             Dispatcher::ui_thread(),
@@ -366,9 +499,12 @@ struct Bench {
     services: CompositorTestServices,
     window_impl: Rc<MockWindowImpl>,
     window: Ref<Window>,
-    surface: std::sync::Arc<RasterSurface>,
+    surface: BenchSurface,
     mouse: Rc<MouseDevice>,
     timestamp: Cell<u64>,
+    /// From the creation of the content to the end of the first frame of
+    /// the shown window: the content is built, laid out and rendered.
+    first_frame: Duration,
 }
 
 impl Bench {
@@ -379,26 +515,28 @@ impl Bench {
     fn start_in(mode: RenderMode, content: impl FnOnce() -> Ref<Control>) -> Bench {
         let services = start_catalog_compositor_application();
         let window_impl = MockWindowingPlatform::create_window_mock_with_size(WIDTH, HEIGHT);
-        let render_thread = match mode {
-            RenderMode::DispatcherThread => {
-                services.setup(&window_impl);
-                None
-            }
+        let (render_thread, surface) = match mode {
+            RenderMode::DispatcherThread => (None, BenchSurface::setup(&services, &window_impl)),
             RenderMode::RenderThread => {
                 // The window renders through a compositor of the bench
                 // instead of the one of the services, which stays unused.
                 let render_thread = RenderThread::new();
                 window_impl.setup_compositor(Some(render_thread.compositor.clone()));
-                Some(render_thread)
+                (Some(render_thread), BenchSurface::setup_surface(&window_impl, None))
             }
         };
-        let surface = RasterSurface::new();
-        window_impl.setup_surfaces(vec![surface.clone() as std::sync::Arc<dyn IPlatformRenderSurface>]);
         let window = Window::with_impl(window_impl.clone());
         window.set_width(WIDTH);
         window.set_height(HEIGHT);
+        let first_frame_start = Instant::now();
         window.set_content(Some(Control::boxed(&content())));
         window.show();
+        if render_thread.is_none() {
+            Dispatcher::ui_thread().run_jobs(None);
+            services.render_loop().tick();
+            Dispatcher::ui_thread().run_jobs(None);
+        }
+        let first_frame = first_frame_start.elapsed();
         // The first frame is a frame of the UI thread in either mode (the
         // show is a synchronous commit); the render thread renders the ones
         // after it.
@@ -413,10 +551,16 @@ impl Bench {
             surface,
             mouse: MouseDevice::with_pointer(Pointer::new(0, PointerType::Mouse, true)),
             timestamp: Cell::new(0),
+            first_frame,
         };
         for _ in 0..3 {
             bench.frame();
         }
+        println!(
+            "[{}] content created, shown and its first frame rendered in {:.1} ms",
+            bench.surface.label(),
+            bench.first_frame.as_secs_f64() * 1000.0
+        );
         bench
     }
 
@@ -444,9 +588,10 @@ impl Bench {
 
     /// The compositor the window renders through.
     fn compositor(&self) -> &Rc<Compositor> {
-        match &self.render_thread {
-            None => self.services.compositor(),
-            Some(render_thread) => &render_thread.compositor,
+        match (&self.render_thread, self.surface.compositor()) {
+            (Some(render_thread), _) => &render_thread.compositor,
+            (None, Some(compositor)) => compositor,
+            (None, None) => self.services.compositor(),
         }
     }
 
@@ -521,7 +666,7 @@ impl Bench {
     /// Runs `frames` frames, each after `before_frame(frame)`, and prints the
     /// times.
     fn measure(&self, name: &str, frames: usize, before_frame: impl Fn(usize)) -> Stats {
-        let rendered = self.surface.frames.load(std::sync::atomic::Ordering::SeqCst);
+        let rendered = self.surface.frames();
         let mut totals = Vec::with_capacity(frames);
         let mut jobs = Vec::with_capacity(frames);
         let mut renders = Vec::with_capacity(frames);
@@ -538,7 +683,7 @@ impl Bench {
         println!(
             "{name}: {frames} frames, {} rendered; ms per frame: median {:.3}, mean {:.3}, p95 {:.3}, max {:.3} \
              (input and layout median {:.3}, render median {:.3})",
-            self.surface.frames.load(std::sync::atomic::Ordering::SeqCst) - rendered,
+            self.surface.frames() - rendered,
             stats.median,
             stats.mean,
             stats.p95,
@@ -554,7 +699,7 @@ impl Bench {
     /// file for what they are). A frame starts when the one before it is
     /// complete.
     fn run_frames(&self, frames: usize, before_frame: impl Fn(usize)) -> FrameTimes {
-        let count = || self.surface.frames.load(std::sync::atomic::Ordering::SeqCst);
+        let count = || self.surface.frames();
         let rendered_before = count();
         let mut times = FrameTimes {
             mode: if self.render_thread.is_some() { RenderMode::RenderThread } else { RenderMode::DispatcherThread },
@@ -1098,7 +1243,7 @@ fn table_view_wheel_scrolling_renders_every_frame_and_reuses_its_rows() {
     let realized = table_view.get_realized_containers().len();
     assert!(realized > 0);
     let mut rows: Vec<*const Control> = Vec::new();
-    let rendered = bench.surface.frames.load(std::sync::atomic::Ordering::SeqCst);
+    let rendered = bench.surface.frames();
     for _ in 0..40 {
         bench.wheel(center, Vector::new(0.0, -0.4));
         bench.frame();
@@ -1114,7 +1259,7 @@ fn table_view_wheel_scrolling_renders_every_frame_and_reuses_its_rows() {
     // was rendered, and the rows that left the viewport were recycled into
     // the rows that entered it instead of new rows being created.
     assert_eq!(800.0, scroll_viewer.offset().y);
-    assert_eq!(40, bench.surface.frames.load(std::sync::atomic::Ordering::SeqCst) - rendered);
+    assert_eq!(40, bench.surface.frames() - rendered);
     assert!(rows.len() <= realized + 2, "{} rows for {realized} realized", rows.len());
 }
 
@@ -1131,7 +1276,7 @@ const UNPACED_ROUNDS: usize = 400;
 #[test]
 fn the_render_thread_mode_takes_unpaced_changes_of_the_ui_thread() {
     let bench = Bench::start_in(RenderMode::RenderThread, || TableViewPage::new().upcast());
-    let count = || bench.surface.frames.load(std::sync::atomic::Ordering::SeqCst);
+    let count = || bench.surface.frames();
     let rendered = count();
     let center = Point::new(WIDTH / 2.0, HEIGHT / 2.0);
 
@@ -1172,4 +1317,64 @@ fn the_render_thread_mode_takes_unpaced_changes_of_the_ui_thread() {
     bench.window.set_content(Some(Control::boxed(&ButtonsPage::new().upcast::<Control>())));
     bench.frame();
     assert!(count() > before);
+}
+
+/// The markup of the content of the effects benchmark: boxes with shadows
+/// (blurred, with and without a spread, inset, on rounded corners), a
+/// blurred and a shadowed element, each with a line of text.
+fn effects_markup() -> String {
+    const XMLNS: &str = "xmlns='https://github.com/ferroui' xmlns:x='http://schemas.microsoft.com/winfx/2006/xaml'";
+    let mut boxes = String::new();
+    for index in 0..24 {
+        let shadow = match index % 4 {
+            0 => "0 4 12 0 #80000000",
+            1 => "2 2 8 2 #60203080",
+            2 => "inset 0 2 6 0 #70000000",
+            _ => "0 8 24 4 #50000000, 0 1 3 0 #80000000",
+        };
+        let radius = [0, 4, 12, 30][(index / 4) % 4];
+        let effect = match index % 6 {
+            2 => "<Border.Effect><DropShadowEffect BlurRadius='8' OffsetX='3' OffsetY='3' Opacity='0.6' /></Border.Effect>",
+            5 => "<Border.Effect><BlurEffect Radius='3' /></Border.Effect>",
+            _ => "",
+        };
+        boxes.push_str(&format!(
+            "<Border Width='180' Height='90' Margin='16' Background='#F4F4F8' CornerRadius='{radius}' BoxShadow='{shadow}'>\
+             {effect}<TextBlock Text='Box {index}: shadows and effects' Margin='8' TextWrapping='Wrap' /></Border>"
+        ));
+    }
+    format!("<WrapPanel {XMLNS} Name='Boxes' Background='White'>{boxes}</WrapPanel>")
+}
+
+/// A page of box shadows and effects: every frame changes the opacity of
+/// the panel, so that all of it is drawn again; then only one box changes.
+#[test]
+#[ignore = "benchmark: run in an optimised build with --ignored --nocapture"]
+fn frame_benchmark_effects() {
+    let bench = Bench::start(|| {
+        ferroui_base::metadata::from_markup_value::<Ref<Control>>(&Some(load_text(&effects_markup()))).expect("a control")
+    });
+    let panel = descendants::<ferroui_controls::WrapPanel>(&bench.window).into_iter().next().expect("the panel");
+    let boxes = descendants::<ferroui_controls::Border>(&panel);
+    assert!(boxes.len() >= 24);
+
+    bench.measure("effects page, every box drawn again", 200, |frame| {
+        panel.set_opacity(if frame % 2 == 0 { 0.99 } else { 1.0 });
+    });
+    bench.measure("effects page, one box drawn again", 200, |frame| {
+        boxes[7].set_opacity(if frame % 2 == 0 { 0.8 } else { 1.0 });
+    });
+    bench.measure("effects page, idle", 50, |_| {});
+}
+
+/// A page of text: the text block page of the catalog, drawn again in every
+/// frame.
+#[test]
+#[ignore = "benchmark: run in an optimised build with --ignored --nocapture"]
+fn frame_benchmark_text_page() {
+    let bench = Bench::start(|| crate::pages::TextBlockPage::new().upcast());
+    let page = descendants::<crate::pages::TextBlockPage>(&bench.window).into_iter().next().expect("the page");
+    bench.measure("text block page, drawn again", 200, |frame| {
+        page.set_opacity(if frame % 2 == 0 { 0.99 } else { 1.0 });
+    });
 }

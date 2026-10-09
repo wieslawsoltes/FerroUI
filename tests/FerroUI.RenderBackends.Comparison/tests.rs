@@ -56,7 +56,9 @@ fn a_backend_agrees_with_itself() {
         for scene in scenes() {
             let first = render(&backend, SCENE_SIZE, &scene.draw);
             let second = render(&backend, SCENE_SIZE, &scene.draw);
-            assert!(first == second, "{} draws {} the same way twice", backend.name, scene.name);
+            if let Err(difference) = crate::drawn_the_same_way_twice(&backend, &first, &second) {
+                panic!("{} does not draw {} the same way twice: {difference}", backend.name, scene.name);
+            }
         }
     }
 }

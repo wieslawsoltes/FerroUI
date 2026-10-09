@@ -1,8 +1,8 @@
 use crate::gpu::{log_render_failure, premultiply_pixel, VelloGpuTexture, VelloWgpuDevice};
-use crate::scene::vello_cpu_scene_sink::{prepare, CURVE_TOLERANCE};
+use crate::scene::vello_cpu_scene_sink::{prepare, stroke_outline};
 use crate::scene::{IVelloSceneSink, VelloSceneBrush, VelloSceneCapabilities, VelloSceneGlyphRun, VelloScenePaint};
 use crate::vello_options::VelloRenderingMode;
-use kurbo::{Affine, BezPath, Diagonal2, PathEl, Point, Rect, Stroke, StrokeOpts, Vec2};
+use kurbo::{Affine, BezPath, Diagonal2, PathEl, Point, Rect, Stroke, Vec2};
 use peniko::color::{palette, AlphaColor};
 use peniko::{BlendMode, Brush, Compose, Fill, GradientKind, ImageBrush, ImageSampler, LinearGradientPosition, Mix};
 use std::collections::HashMap;
@@ -37,17 +37,61 @@ impl VelloGpuAntiAliasing {
 }
 
 /// What the GPU mode keeps on a device: a renderer for each anti-aliasing
-/// method that was used (its pipelines are compiled for the method), the
-/// texture scenes for a window are rendered into, and what copies that
-/// texture into the texture of a drawable.
+/// method that was used (its pipelines are compiled for the method) and the
+/// texture a scene is rendered into on its way to a texture the compute
+/// shaders cannot write.
 struct GpuRendererState {
     renderers: HashMap<VelloGpuAntiAliasing, Renderer>,
     /// The texture a scene for a window is rendered into: the renderer
     /// writes with a compute shader, which the texture of a drawable does
     /// not allow.
     intermediate: Option<wgpu::Texture>,
-    blitters: HashMap<wgpu::TextureFormat, wgpu::util::TextureBlitter>,
+    /// The images that stand for what scenes paint with, by their size and
+    /// alpha form: the n-th image or texture of a size in a scene is always
+    /// the n-th of these (see [`ImagePlace`]).
+    places: HashMap<ImagePlace, Vec<peniko::ImageData>>,
+    /// The textures of the images of the last renders, by the identity of
+    /// their pixels, each with the render it was last drawn in.
+    image_textures: HashMap<u64, (wgpu::Texture, u64)>,
+    render_count: u64,
 }
+
+/// The size and the alpha form of an image a scene paints with.
+///
+/// The renderer keeps the images of its scenes in an atlas, at places it
+/// hands out by the identity of the pixels of an image, and its shader
+/// samples an image at the place plus the position in the image, in single
+/// precision: the same image at another place is sampled with weights that
+/// differ in their last bits, and a pixel in a few hundred comes out a
+/// digit of a color apart (a pixel on the border between two texels of an
+/// image that is sampled by the nearest pixel, as another texel). A bitmap
+/// that is created again for every frame has other pixels by identity each
+/// time, so the same scene drawn twice was not drawn the same way twice.
+///
+/// The scene therefore paints with images of the renderer's state that
+/// stand for what it paints with (an image without pixels for each size,
+/// alpha form and count in a scene), and the pixels reach the atlas from a
+/// texture of the device (`Renderer::override_image`): the same scene has
+/// the same places every time it is drawn.
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
+struct ImagePlace {
+    width: u32,
+    height: u32,
+    premultiplied: bool,
+}
+
+/// What an image of a scene stands for.
+enum ImageSource {
+    /// A texture of the device.
+    Texture(Arc<crate::gpu::VelloDeviceTexture>),
+    /// Pixels, which become a texture of the device when the scene is
+    /// rendered.
+    Pixels(peniko::ImageData),
+}
+
+/// The number of renders the texture of an image that is no longer drawn is
+/// kept for, as in the hybrid mode.
+const IMAGE_TEXTURE_LIFETIME: u64 = 16;
 
 const _: fn() = || {
     fn assert_send<T: Send>() {}
@@ -125,6 +169,16 @@ pub struct VelloGpuSceneSink {
     height: u16,
     anti_aliasing: VelloGpuAntiAliasing,
     open: Vec<Open>,
+    /// What the scene paints with, each with the image that stands for it
+    /// in the scene ([`ImagePlace`]): the renderer copies the texture of it
+    /// into the place of that image in its atlas when the scene is rendered
+    /// (`Renderer::override_image`), on the device.
+    images: Vec<(peniko::ImageData, ImageSource)>,
+    /// The image that stands for each image or texture of the scene, by
+    /// the identity of its pixels or of the texture.
+    stand_ins: HashMap<u64, peniko::ImageData>,
+    /// How many images of each size the scene paints with.
+    place_counts: HashMap<ImagePlace, usize>,
 }
 
 impl VelloGpuSceneSink {
@@ -142,7 +196,17 @@ impl VelloGpuSceneSink {
         height: u16,
         anti_aliasing: VelloGpuAntiAliasing,
     ) -> Self {
-        Self { device, scene: Scene::new(), width, height, anti_aliasing, open: Vec::new() }
+        Self {
+            device,
+            scene: Scene::new(),
+            width,
+            height,
+            anti_aliasing,
+            open: Vec::new(),
+            images: Vec::new(),
+            stand_ins: HashMap::new(),
+            place_counts: HashMap::new(),
+        }
     }
 
     /// The device the scene is drawn with.
@@ -154,20 +218,88 @@ impl VelloGpuSceneSink {
         Rect::new(0.0, 0.0, f64::from(self.width), f64::from(self.height))
     }
 
+    /// The image that stands in the scene for an image or a texture of
+    /// the given identity ([`ImagePlace`]).
+    fn stand_in(&mut self, id: u64, place: ImagePlace, source: impl FnOnce() -> ImageSource) -> peniko::ImageData {
+        if let Some(image) = self.stand_ins.get(&id) {
+            return image.clone();
+        }
+
+        let index = {
+            let count = self.place_counts.entry(place).or_insert(0);
+            *count += 1;
+            *count - 1
+        };
+        let image = self.device.with_renderer_state(Self::new_state, |_, state| {
+            let images = state.places.entry(place).or_default();
+            while images.len() <= index {
+                // An image without pixels: the renderer never reads it, it
+                // reads a texture in its place.
+                let no_pixels: Arc<[u8; 0]> = Arc::new([]);
+                images.push(peniko::ImageData {
+                    data: peniko::Blob::new(no_pixels),
+                    format: peniko::ImageFormat::Rgba8,
+                    alpha_type: match place.premultiplied {
+                        true => peniko::ImageAlphaType::AlphaPremultiplied,
+                        false => peniko::ImageAlphaType::Alpha,
+                    },
+                    width: place.width,
+                    height: place.height,
+                });
+            }
+            images[index].clone()
+        });
+
+        self.stand_ins.insert(id, image.clone());
+        self.images.push((image.clone(), source()));
+        image
+    }
+
     /// The brush of a paint.
-    fn brush(paint: &VelloScenePaint) -> Brush {
+    fn brush(&mut self, paint: &VelloScenePaint) -> Brush {
         match &paint.brush {
             VelloSceneBrush::Solid(color) => Brush::Solid(*color),
             VelloSceneBrush::Gradient(gradient) => Brush::Gradient(gradient.clone()),
-            VelloSceneBrush::Image(image) => Brush::Image(ImageBrush {
-                image: image.image.clone(),
-                sampler: ImageSampler {
-                    x_extend: image.x_extend,
-                    y_extend: image.y_extend,
-                    quality: image.quality,
-                    alpha: image.alpha,
-                },
-            }),
+            VelloSceneBrush::Image(image) => {
+                let place = ImagePlace {
+                    width: image.image.width,
+                    height: image.image.height,
+                    premultiplied: image.image.alpha_type == peniko::ImageAlphaType::AlphaPremultiplied,
+                };
+                let pixels = image.image.clone();
+                let stand_in = self.stand_in(image.image.data.id(), place, || ImageSource::Pixels(pixels));
+                Brush::Image(ImageBrush {
+                    image: stand_in,
+                    sampler: ImageSampler {
+                        x_extend: image.x_extend,
+                        y_extend: image.y_extend,
+                        quality: image.quality,
+                        alpha: image.alpha,
+                    },
+                })
+            }
+            VelloSceneBrush::Texture(texture) => {
+                assert!(
+                    Arc::ptr_eq(texture.texture.device(), &self.device),
+                    "A texture is painted with on the device it belongs to"
+                );
+                let place = ImagePlace {
+                    width: texture.texture.width(),
+                    height: texture.texture.height(),
+                    premultiplied: texture.texture.alpha() == crate::gpu::VelloTextureAlpha::Premultiplied,
+                };
+                let source = texture.texture.clone();
+                let stand_in = self.stand_in(texture.texture.id(), place, || ImageSource::Texture(source));
+                Brush::Image(ImageBrush {
+                    image: stand_in,
+                    sampler: ImageSampler {
+                        x_extend: texture.x_extend,
+                        y_extend: texture.y_extend,
+                        quality: texture.quality,
+                        alpha: texture.alpha,
+                    },
+                })
+            }
         }
     }
 
@@ -218,23 +350,13 @@ impl VelloGpuSceneSink {
         self.scene.pop_layer();
     }
 
-    /// The renderer's output is not premultiplied; a texture of a window
-    /// holds premultiplied pixels.
-    fn premultiplying_blend() -> wgpu::BlendState {
-        let replace_by = |factor| wgpu::BlendComponent {
-            src_factor: factor,
-            dst_factor: wgpu::BlendFactor::Zero,
-            operation: wgpu::BlendOperation::Add,
-        };
-
-        wgpu::BlendState { color: replace_by(wgpu::BlendFactor::SrcAlpha), alpha: replace_by(wgpu::BlendFactor::One) }
-    }
-
     /// Renders the scene into a view of a texture of the device that the
     /// compute shaders can write (`Rgba8Unorm`, `STORAGE_BINDING`),
     /// replacing what it held.
+    #[allow(clippy::too_many_arguments)]
     fn render(
         scene: &Scene,
+        images: &[(peniko::ImageData, ImageSource)],
         anti_aliasing: VelloGpuAntiAliasing,
         device: &VelloWgpuDevice,
         state: &mut GpuRendererState,
@@ -259,16 +381,75 @@ impl VelloGpuSceneSink {
             antialiasing_method: anti_aliasing.config(),
         };
 
-        renderer.render_to_texture(device.device(), device.queue(), scene, view, &params).map_err(|error| error.to_string())
+        // What the scene paints with takes the places of the images that
+        // stand for it, for this render: the textures of the device as they
+        // are, the pixels of an image as a texture that is made when the
+        // image is first drawn and kept while it is drawn.
+        state.render_count += 1;
+        let render_count = state.render_count;
+        for (image, source) in images {
+            let texture = match source {
+                ImageSource::Texture(texture) => texture.texture().clone(),
+                ImageSource::Pixels(pixels) => {
+                    let entry = state.image_textures.entry(pixels.data.id()).or_insert_with(|| {
+                        (device.create_image_texture(pixels.width, pixels.height, &rgba(pixels)), 0)
+                    });
+                    entry.1 = render_count;
+                    entry.0.clone()
+                }
+            };
+            renderer.override_image(
+                image,
+                Some(wgpu::TexelCopyTextureInfoBase {
+                    texture,
+                    mip_level: 0,
+                    origin: wgpu::Origin3d::ZERO,
+                    aspect: wgpu::TextureAspect::All,
+                }),
+            );
+        }
+        state.image_textures.retain(|_, (_, last_used)| render_count - *last_used < IMAGE_TEXTURE_LIFETIME);
+
+        let result = {
+            let _perf = crate::perf::scope(crate::perf::Phase::Render, u64::from(width) * u64::from(height) * 4);
+            renderer
+                .render_to_texture(device.device(), device.queue(), scene, view, &params)
+                .map_err(|error| error.to_string())
+        };
+
+        for (image, _) in images {
+            renderer.override_image(image, None);
+        }
+
+        result
     }
 
     fn new_state(_device: &VelloWgpuDevice) -> GpuRendererState {
-        GpuRendererState { renderers: HashMap::new(), intermediate: None, blitters: HashMap::new() }
+        GpuRendererState {
+            renderers: HashMap::new(),
+            intermediate: None,
+            places: HashMap::new(),
+            image_textures: HashMap::new(),
+            render_count: 0,
+        }
     }
 
     /// What the compute shaders write into.
     const TARGET_USAGE: wgpu::TextureUsages =
         wgpu::TextureUsages::STORAGE_BINDING.union(wgpu::TextureUsages::TEXTURE_BINDING);
+}
+
+/// The pixels of an image in the order of the channels of a texture, as
+/// they are otherwise: the renderer is told whether they are premultiplied.
+fn rgba(image: &peniko::ImageData) -> std::borrow::Cow<'_, [u8]> {
+    let data = image.data.data();
+    if !matches!(image.format, peniko::ImageFormat::Bgra8) {
+        return std::borrow::Cow::Borrowed(data);
+    }
+
+    let mut rgba = data.to_vec();
+    rgba.chunks_exact_mut(4).for_each(|pixel| pixel.swap(0, 2));
+    std::borrow::Cow::Owned(rgba)
 }
 
 /// A linear gradient with its transform applied to its points, and the
@@ -370,7 +551,19 @@ impl IVelloSceneSink for VelloGpuSceneSink {
 
     fn capabilities(&self) -> VelloSceneCapabilities {
         // Aliased edges: rectangles on the axes only (see the type).
-        VelloSceneCapabilities { blend_layers: true, aliased_edges: false, image_paints: true, read_back: true }
+        VelloSceneCapabilities {
+            blend_layers: true,
+            aliased_edges: false,
+            aliased_rectangles: true,
+            image_paints: true,
+            read_back: true,
+            device_textures: true,
+            retained_targets: false,
+        }
+    }
+
+    fn device(&self) -> Option<&Arc<VelloWgpuDevice>> {
+        Some(&self.device)
     }
 
     fn width(&self) -> u16 {
@@ -384,6 +577,9 @@ impl IVelloSceneSink for VelloGpuSceneSink {
     fn reset(&mut self) {
         self.scene.reset();
         self.open.clear();
+        self.images.clear();
+        self.stand_ins.clear();
+        self.place_counts.clear();
     }
 
     fn fill(
@@ -395,7 +591,7 @@ impl IVelloSceneSink for VelloGpuSceneSink {
         blend_mode: BlendMode,
         anti_alias: bool,
     ) {
-        let brush = Self::brush(paint);
+        let brush = self.brush(paint);
         // The brush in the pixels of the target. The renderer evaluates a
         // gradient at the corner of a pixel, not at its center (its fine
         // shader; images it samples at the center): a gradient is moved
@@ -468,7 +664,7 @@ impl IVelloSceneSink for VelloGpuSceneSink {
         if !(scale.is_finite() && scale > 0.0) {
             return;
         }
-        let outline = kurbo::stroke(path.iter(), stroke, &StrokeOpts::default(), CURVE_TOLERANCE / scale);
+        let outline = stroke_outline(path, stroke, scale);
 
         self.fill(&outline, Fill::NonZero, transform, paint, BlendMode::default(), true);
     }
@@ -486,6 +682,7 @@ impl IVelloSceneSink for VelloGpuSceneSink {
         if transform.determinant() == 0.0 {
             return;
         }
+        let _perf = crate::perf::scope(crate::perf::Phase::GlyphRun, glyph_run.glyphs.len() as u64);
 
         // The brush as a shape gets it (see `fill`): a gradient moved by
         // half a pixel, a linear one in the pixels of the target. The scene
@@ -495,7 +692,8 @@ impl IVelloSceneSink for VelloGpuSceneSink {
             VelloSceneBrush::Gradient(_) => Affine::translate((-0.5, -0.5)) * transform * paint.transform,
             _ => transform * paint.transform,
         };
-        let (brush, brush_in_target) = linear_gradient_in_target(Self::brush(paint), brush_in_target);
+        let brush = self.brush(paint);
+        let (brush, brush_in_target) = linear_gradient_in_target(brush, brush_in_target);
         let brush_transform = transform.inverse() * brush_in_target;
 
         // The renderer widens the outline of a glyph at the size of the
@@ -597,10 +795,10 @@ impl IVelloSceneSink for VelloGpuSceneSink {
         let (width, height) = (u32::from(self.width), u32::from(self.height));
         let texture = self.device.create_rgba_texture(width, height, Self::TARGET_USAGE);
         let view = texture.create_view(&wgpu::TextureViewDescriptor::default());
-        let (scene, anti_aliasing) = (&self.scene, self.anti_aliasing);
+        let (scene, images, anti_aliasing) = (&self.scene, &self.images, self.anti_aliasing);
 
         let rendered = self.device.with_renderer_state(Self::new_state, |device, state| {
-            Self::render(scene, anti_aliasing, device, state, &view, width, height)
+            Self::render(scene, images, anti_aliasing, device, state, &view, width, height)
         });
 
         match rendered {
@@ -615,11 +813,22 @@ impl IVelloSceneSink for VelloGpuSceneSink {
 
     fn render_to_texture(&mut self, target: &VelloGpuTexture<'_>) -> Result<(), String> {
         let (width, height) = (u32::from(self.width), u32::from(self.height));
-        let (scene, anti_aliasing) = (&self.scene, self.anti_aliasing);
+        let (scene, images, anti_aliasing) = (&self.scene, &self.images, self.anti_aliasing);
         let format = target.texture.format();
         let target_view = target.texture.create_view(&wgpu::TextureViewDescriptor::default());
 
-        self.device.with_renderer_state(Self::new_state, |device, state| {
+        // A texture the compute shaders can write (the texture of a layer)
+        // is rendered into as it is: it then holds colors that are not
+        // premultiplied, which is what this renderer samples from it.
+        if format == wgpu::TextureFormat::Rgba8Unorm
+            && target.texture.usage().contains(wgpu::TextureUsages::STORAGE_BINDING)
+        {
+            return self.device.with_renderer_state(Self::new_state, |device, state| {
+                Self::render(scene, images, anti_aliasing, device, state, &target_view, width, height)
+            });
+        }
+
+        let intermediate = self.device.with_renderer_state(Self::new_state, |device, state| {
             let reusable =
                 state.intermediate.as_ref().is_some_and(|texture| texture.width() == width && texture.height() == height);
             if !reusable {
@@ -628,22 +837,13 @@ impl IVelloSceneSink for VelloGpuSceneSink {
             let intermediate = state.intermediate.clone().unwrap_or_else(|| panic!("The texture was just created"));
             let view = intermediate.create_view(&wgpu::TextureViewDescriptor::default());
 
-            Self::render(scene, anti_aliasing, device, state, &view, width, height)?;
+            Self::render(scene, images, anti_aliasing, device, state, &view, width, height)?;
+            Ok::<_, String>(view)
+        })?;
 
-            let blitter = state.blitters.entry(format).or_insert_with(|| {
-                wgpu::util::TextureBlitterBuilder::new(device.device(), format)
-                    .sample_type(wgpu::FilterMode::Nearest)
-                    .blend_state(Self::premultiplying_blend())
-                    .build()
-            });
-
-            let mut encoder = device
-                .device()
-                .create_command_encoder(&wgpu::CommandEncoderDescriptor { label: Some("FerroUI Vello GPU") });
-            blitter.copy(device.device(), &mut encoder, &view, &target_view);
-            device.queue().submit([encoder.finish()]);
-
-            Ok(())
-        })
+        // The renderer's output is not premultiplied; the texture of a
+        // window holds premultiplied pixels.
+        self.device.copy_texture_to_texture(&intermediate, target.texture, true);
+        Ok(())
     }
 }

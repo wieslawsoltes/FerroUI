@@ -17,6 +17,7 @@
 #[cfg(any(feature = "hybrid", feature = "gpu"))]
 pub mod gpu;
 pub mod helpers;
+pub mod perf;
 pub mod scene;
 pub mod vello_extensions;
 
@@ -46,7 +47,7 @@ mod vello_typeface;
 mod writeable_bitmap_impl;
 
 pub use combined_geometry_impl::CombinedGeometryImpl;
-pub use drawing_context_impl::{CreateInfo, DrawingContextImpl};
+pub use drawing_context_impl::{CreateInfo, DrawingContextImpl, VelloBackdrop};
 pub use ellipse_geometry_impl::EllipseGeometryImpl;
 pub use font_manager_impl::FontManagerImpl;
 pub use framebuffer_render_target::FramebufferRenderTarget;

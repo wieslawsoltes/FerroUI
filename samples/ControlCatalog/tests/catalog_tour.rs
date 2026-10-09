@@ -79,20 +79,20 @@
 
 use super::allocation_trace::{self as trace, Holder, Site};
 use super::allocations::{self, LiveCounts};
-use super::frame_benchmark::{RasterSurface, HEIGHT, WIDTH};
+use super::frame_benchmark::{BenchSurface, HEIGHT, WIDTH};
 use super::support::*;
 use crate::models::PageItem;
 use crate::view_models::MainWindowViewModel;
 use crate::MainView;
 use ferroui_base::animation::TimeSpan;
-use ferroui_base::platform::surfaces::IPlatformRenderSurface;
 use ferroui_base::threading::Dispatcher;
 use ferroui_base::{BoxedValue, Ref};
 use ferroui_controls::testing::{CompositorTestServices, MockWindowImpl, MockWindowingPlatform};
 use ferroui_controls::{Control, NavigationPage, Window};
-use std::cell::Cell;
+use std::cell::{Cell, RefCell};
 use std::collections::HashMap;
 use std::rc::Rc;
+use std::time::{Duration, Instant};
 
 /// The frames after a page is selected: the transition of the navigation
 /// page takes the first ones, the release of what the page before it held
@@ -115,7 +115,10 @@ pub(super) struct Tour {
     clock: Rc<TestGlobalClock>,
     time: Cell<f64>,
     window_impl: Rc<MockWindowImpl>,
-    _surface: std::sync::Arc<RasterSurface>,
+    surface: BenchSurface,
+    /// The time of the rendering of each frame (the tick of the render loop
+    /// and the jobs it posted), in the order the frames ran.
+    render_times: RefCell<Vec<Duration>>,
     services: CompositorTestServices,
 }
 
@@ -132,9 +135,7 @@ impl Tour {
         let clock = Rc::new(TestGlobalClock::default());
         let services = start_catalog_compositor_application_with_clock(clock.clone());
         let window_impl = MockWindowingPlatform::create_window_mock_with_size(WIDTH, HEIGHT);
-        services.setup(&window_impl);
-        let surface = RasterSurface::new();
-        window_impl.setup_surfaces(vec![surface.clone() as std::sync::Arc<dyn IPlatformRenderSurface>]);
+        let surface = BenchSurface::setup(&services, &window_impl);
         let window = Window::with_impl(window_impl.clone());
         window.set_width(WIDTH);
         window.set_height(HEIGHT);
@@ -150,7 +151,8 @@ impl Tour {
             clock,
             time: Cell::new(0.0),
             window_impl,
-            _surface: surface,
+            surface,
+            render_times: RefCell::new(Vec::new()),
             services,
         };
         tour.settle();
@@ -181,7 +183,7 @@ impl Tour {
 
     /// The compositor the window renders through.
     pub(super) fn compositor(&self) -> &Rc<ferroui_base::rendering::composition::Compositor> {
-        self.services.compositor()
+        self.surface.compositor().unwrap_or_else(|| self.services.compositor())
     }
 
     /// Whether `item` is shown: it is the current page of the catalog, alone
@@ -207,8 +209,25 @@ impl Tour {
         self.time.set(time);
         self.clock.pulse(TimeSpan::from_milliseconds(time));
         Dispatcher::ui_thread().run_jobs(None);
+        let start = Instant::now();
         self.services.render_loop().tick();
         Dispatcher::ui_thread().run_jobs(None);
+        self.render_times.borrow_mut().push(start.elapsed());
+    }
+
+    /// The times of the rendering of the frames since the last call.
+    pub(super) fn take_render_times(&self) -> Vec<Duration> {
+        std::mem::take(&mut *self.render_times.borrow_mut())
+    }
+
+    /// The frames the surface of the window received.
+    pub(super) fn rendered_frames(&self) -> u32 {
+        self.surface.frames()
+    }
+
+    /// What the tour draws with and to.
+    pub(super) fn label(&self) -> String {
+        self.surface.label()
     }
 
     pub(super) fn settle(&self) {
@@ -232,7 +251,8 @@ impl Tour {
     }
 
     pub(super) fn alive(&self) -> Alive {
-        Alive { live: allocations::live(), server_objects: self.services.compositor().server().object_count() }
+        let compositor = self.surface.compositor().unwrap_or_else(|| self.services.compositor());
+        Alive { live: allocations::live(), server_objects: compositor.server().object_count() }
     }
 }
 
@@ -751,4 +771,86 @@ fn a_tour_shows_the_page_it_selects() {
     assert!(tour.show(buttons));
     assert!(tour.show(&tour.view_model().home_item()));
     assert!(tour.alive().server_objects > 0);
+}
+
+/// The frame benchmark of the tour: every page of the catalog is selected
+/// as the drawer selects it, on the render backend and the surface of the
+/// environment (`FERROUI_TEST_RENDERER` in `support.rs`,
+/// `FERROUI_BENCH_SURFACE` and `FERROUI_BENCH_SCALING` in
+/// `frame_benchmark.rs`), and the time of the rendering of the frames of
+/// each visit is printed: what the window of the desktop host does under
+/// `FERROUI_SMOKE_PAGES`, without a window. The time of a frame is the tick
+/// of the render loop with the jobs it posted; on the Metal surface it holds
+/// the work of the device.
+///
+/// ```sh
+/// FERROUI_TEST_RENDERER=vello-hybrid FERROUI_BENCH_SURFACE=metal FERROUI_BENCH_SCALING=2 \
+///   cargo test -p control-catalog --release --lib frame_benchmark_catalog_tour -- --ignored --nocapture --test-threads=1
+/// ```
+///
+/// The first tour holds what a first visit costs (the fonts, the glyphs,
+/// the images of a page); the second tour is the one to compare. With the
+/// Vello backend the phases of its frames are printed (`ferroui_vello::perf`).
+#[test]
+#[ignore = "benchmark: run in an optimised build with --ignored --nocapture"]
+fn frame_benchmark_catalog_tour() {
+    let vello = test_renderer().vello_mode().is_some();
+    if vello {
+        ferroui_vello::perf::enable(None);
+    }
+    let started = Instant::now();
+    let tour = Tour::start();
+    let first_frames = tour.take_render_times();
+    println!(
+        "catalog tour [{}]: start to the settled home page {:.1} ms; its first rendered frame {:.3} ms",
+        tour.label(),
+        started.elapsed().as_secs_f64() * 1000.0,
+        first_frames.iter().map(|time| time.as_secs_f64() * 1000.0).fold(0.0, f64::max),
+    );
+    if vello {
+        let _ = ferroui_vello::perf::take_summary();
+    }
+
+    let pages = selected_pages(&tour);
+    let ms = |time: &Duration| time.as_secs_f64() * 1000.0;
+    for round in 0..environment_number("CATALOG_TOUR_TOURS", 2) {
+        let mut all: Vec<f64> = Vec::new();
+        let mut visits: Vec<(String, f64, f64, u32)> = Vec::new();
+        for page in &pages {
+            let rendered = tour.rendered_frames();
+            let shown = tour.show(page);
+            let times = tour.take_render_times();
+            let total: f64 = times.iter().map(ms).sum();
+            let max = times.iter().map(ms).fold(0.0, f64::max);
+            all.extend(times.iter().map(ms));
+            visits.push((
+                format!("{}{}", page.header(), if shown { "" } else { " (not shown)" }),
+                total,
+                max,
+                tour.rendered_frames() - rendered,
+            ));
+        }
+        let total: f64 = all.iter().sum();
+        all.sort_by(f64::total_cmp);
+        let at = |q: f64| all[((all.len() - 1) as f64 * q).round() as usize];
+        println!(
+            "catalog tour [{}] tour {}: {} pages, {} frames; rendering {:.1} ms in all; ms per frame: median {:.3}, mean {:.3}, p95 {:.3}, max {:.3}",
+            tour.label(),
+            round + 1,
+            pages.len(),
+            all.len(),
+            total,
+            at(0.5),
+            total / all.len() as f64,
+            at(0.95),
+            at(1.0),
+        );
+        visits.sort_by(|a, b| b.1.total_cmp(&a.1));
+        for (header, total, max, frames) in &visits {
+            println!("  {header:<28} {total:>9.3} ms in {frames:>2} frames, the longest {max:>8.3} ms");
+        }
+        if vello {
+            print!("{}", ferroui_vello::perf::take_summary().report());
+        }
+    }
 }

@@ -75,20 +75,27 @@ pub fn create_window_scene_sink(
     panic!("No rendering mode of the Vello backend is available for a window. {}", reasons.join(" "));
 }
 
-/// Renders the finished scene of a frame into the texture of a window: on
-/// the device for the GPU modes, and through memory for the CPU mode.
-pub fn render_window_scene(
-    device: &VelloWgpuDevice,
-    sink: &mut dyn IVelloSceneSink,
-    texture: &wgpu::Texture,
-) -> Result<(), String> {
-    if sink.rendering_mode() != VelloRenderingMode::Cpu {
-        return sink.render_to_texture(&crate::gpu::VelloGpuTexture { texture });
+/// The mode the window of a device is drawn in: the first of the given
+/// modes that the crate was built with and that the device runs.
+///
+/// # Panics
+/// Panics when none of the modes is available, with the reason of each.
+pub fn window_rendering_mode(device: &VelloWgpuDevice, rendering_modes: &[VelloRenderingMode]) -> VelloRenderingMode {
+    let mut reasons = Vec::new();
+
+    for mode in rendering_modes {
+        match mode {
+            VelloRenderingMode::Cpu => return *mode,
+            VelloRenderingMode::Hybrid if cfg!(feature = "hybrid") => return *mode,
+            VelloRenderingMode::Hybrid => reasons.push("The crate was built without its feature `hybrid`.".to_string()),
+            VelloRenderingMode::Gpu if !cfg!(feature = "gpu") => {
+                reasons.push("The crate was built without its feature `gpu`.".to_string())
+            }
+            VelloRenderingMode::Gpu if device.supports_compute() => return *mode,
+            VelloRenderingMode::Gpu => reasons
+                .push(format!("The graphics device ({}) does not run compute shaders.", device.adapter_info().name)),
+        }
     }
 
-    let (width, height) = (u32::from(sink.width()), u32::from(sink.height()));
-    let mut pixels = vec![0u8; width as usize * height as usize * 4];
-    sink.render_to_pixels(&mut pixels);
-    device.copy_pixels_to_texture(&pixels, width, height, texture);
-    Ok(())
+    panic!("No rendering mode of the Vello backend is available for a window. {}", reasons.join(" "));
 }

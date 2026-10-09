@@ -602,6 +602,101 @@ fn geometry_group(backend: &Backend, context: &mut dyn IDrawingContextImpl) {
     );
 }
 
+/// What a compositor draws into the layer of a window in its first frame.
+fn draw_layer_frame(layer_context: &mut dyn IDrawingContextImpl) {
+    layer_context.draw_rectangle(Some(&solid(TEAL)), None, rect(20.0, 20.0, 100.0, 100.0), &no_shadows());
+    layer_context.draw_ellipse(
+        Some(&solid(Color::from_argb(160, 240, 140, 20))),
+        Some(&pen(NAVY, 5.0, PenLineCap::Round, PenLineJoin::Round)),
+        Rect::new(60.0, 60.0, 120.0, 110.0),
+    );
+}
+
+/// A layer of the contract (`create_layer`), drawn into and blitted onto
+/// the target: the layer a compositor keeps the frame of a window in. In
+/// the GPU modes of the Vello backend the layer is a texture of the device.
+fn surface_layer(_: &Backend, context: &mut dyn IDrawingContextImpl) {
+    background(context);
+    let layer = context.create_layer(SCENE_SIZE);
+    {
+        let mut layer_context = layer.create_drawing_context();
+        layer_context.clear(Colors::TRANSPARENT);
+        draw_layer_frame(&mut *layer_context);
+        layer_context.dispose();
+    }
+    layer.blit(context);
+    layer.dispose();
+}
+
+/// The layer of [`surface_layer`] drawn into again as a compositor redraws
+/// what changed: a dirty rectangle is cleared and drawn again, then the two
+/// rectangles of a region, of which nothing is drawn into the second; the
+/// rest of the layer is what the frame before left.
+fn surface_layer_redrawn(backend: &Backend, context: &mut dyn IDrawingContextImpl) {
+    background(context);
+    let layer = context.create_layer(SCENE_SIZE);
+    {
+        let mut layer_context = layer.create_drawing_context();
+        layer_context.push_clip(Rect::new(0.0, 0.0, 200.0, 200.0));
+        layer_context.clear(Colors::TRANSPARENT);
+        draw_layer_frame(&mut *layer_context);
+        layer_context.pop_clip();
+        layer_context.dispose();
+    }
+    {
+        let mut layer_context = layer.create_drawing_context();
+        layer_context.push_clip(Rect::new(40.0, 40.0, 90.0, 60.0));
+        layer_context.clear(Colors::TRANSPARENT);
+        layer_context.set_transform(Matrix::create_translation(5.0, 3.0));
+        layer_context.draw_rectangle(
+            Some(&solid(Color::from_argb(200, 20, 40, 120))),
+            None,
+            RoundedRect::from_radius(Rect::new(50.0, 50.0, 110.0, 60.0), 14.0),
+            &no_shadows(),
+        );
+        layer_context.pop_clip();
+        layer_context.dispose();
+    }
+    {
+        let region = backend.interface.create_region();
+        region.add_rect(ferroui_base::platform::LtrbPixelRect::new(130, 120, 190, 190));
+        region.add_rect(ferroui_base::platform::LtrbPixelRect::new(10, 150, 60, 190));
+        let mut layer_context = layer.create_drawing_context();
+        layer_context.push_clip_region(&*region);
+        layer_context.clear(Colors::TRANSPARENT);
+        layer_context.draw_ellipse(Some(&solid(ORANGE)), None, Rect::new(110.0, 100.0, 100.0, 100.0));
+        layer_context.pop_clip();
+        layer_context.dispose();
+    }
+    layer.blit(context);
+    layer.dispose();
+}
+
+/// A layer drawn as a bitmap: enlarged, turned and half transparent, as a
+/// compositor draws the cached layer of a visual.
+fn surface_layer_as_bitmap(_: &Backend, context: &mut dyn IDrawingContextImpl) {
+    background(context);
+    let layer = context.create_layer(PixelSize::new(80, 60));
+    {
+        let mut layer_context = layer.create_drawing_context();
+        layer_context.clear(Colors::TRANSPARENT);
+        layer_context.draw_rectangle(Some(&solid(TEAL)), None, rect(0.0, 0.0, 40.0, 60.0), &no_shadows());
+        layer_context.draw_rectangle(Some(&solid(ORANGE)), None, rect(40.0, 0.0, 40.0, 30.0), &no_shadows());
+        layer_context.draw_ellipse(Some(&solid(NAVY)), None, Rect::new(20.0, 10.0, 40.0, 40.0));
+        layer_context.dispose();
+    }
+
+    context.draw_bitmap(&*layer, 1.0, Rect::new(0.0, 0.0, 80.0, 60.0), Rect::new(10.0, 10.0, 80.0, 60.0));
+    context.push_render_options(RenderOptions {
+        bitmap_interpolation_mode: ferroui_base::media::imaging::BitmapInterpolationMode::LowQuality,
+        ..RenderOptions::default()
+    });
+    context.set_transform(Matrix::create_rotation(0.2) * Matrix::create_translation(70.0, 70.0));
+    context.draw_bitmap(&*layer, 0.5, Rect::new(0.0, 0.0, 80.0, 60.0), Rect::new(0.0, 0.0, 120.0, 90.0));
+    context.pop_render_options();
+    layer.dispose();
+}
+
 /// The scenes with the bound of each.
 pub fn scenes() -> Vec<Scene> {
     macro_rules! scene {
@@ -652,5 +747,8 @@ pub fn scenes() -> Vec<Scene> {
         scene!(combined_xor, 0.26),
         scene!(combined_exclude, 0.09),
         scene!(geometry_group, 0.35),
+        scene!(surface_layer, 0.42),
+        scene!(surface_layer_redrawn, 0.32),
+        scene!(surface_layer_as_bitmap, 0.06),
     ]
 }

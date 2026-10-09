@@ -178,8 +178,15 @@ pub fn from_premul_rgba(
 /// Premultiplied RGBA pixels without padding as an image the scene of a
 /// frame can paint with.
 pub fn to_image(rgba: Vec<u8>, size: PixelSize) -> ImageData {
+    to_shared_image(Arc::new(rgba), size)
+}
+
+/// [`to_image`] of pixels that stay shared with their owner: nothing is
+/// copied. The owner changes its pixels only once it is the only one that
+/// holds them (`Arc::make_mut`).
+pub fn to_shared_image(rgba: Arc<Vec<u8>>, size: PixelSize) -> ImageData {
     ImageData {
-        data: Blob::new(Arc::new(rgba)),
+        data: Blob::new(rgba),
         format: ImageFormat::Rgba8,
         alpha_type: ImageAlphaType::AlphaPremultiplied,
         width: size.width.max(0) as u32,

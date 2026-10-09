@@ -48,7 +48,7 @@ wgpu-device = ["dep:wgpu", "dep:ferroui-metal", "dep:objc2", "dep:objc2-metal"]
 [target.'cfg(target_os = "macos")'.dependencies]
 ferroui-metal = { workspace = true, optional = true }
 objc2 = { version = "0.6.3", optional = true }
-objc2-metal = { version = "0.3.2", optional = true, default-features = false, features = ["std", "MTLDevice", "MTLCommandQueue", "MTLTexture", "MTLResource", "MTLPixelFormat"] }
+objc2-metal = { version = "0.3.2", optional = true, default-features = false, features = ["std", "MTLDevice", "MTLCommandQueue", "MTLCommandBuffer", "MTLTexture", "MTLResource", "MTLPixelFormat", "MTLTypes"] }
 
 [dev-dependencies]
 ferroui-controls = { workspace = true, features = ["testing"] }
