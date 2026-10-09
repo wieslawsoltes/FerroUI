@@ -985,7 +985,13 @@ fn recycled_target_takes_the_same_values_from_a_typed_and_an_untyped_binding() {
         // The item that left no longer reaches the target.
         first.set_string_value(Some(s("stale")));
 
-        assert_eq!(values.take(), vec![Some(s("first")), None, Some(s("second")), Some(s("changed"))]);
+        // Clearing the value does not end a binding of the local value (`ValueStore.ClearValue`
+        // reevaluates without the local value and leaves the binding): the first binding
+        // publishes the next item, and is replaced when the second one is made.
+        assert_eq!(
+            values.take(),
+            vec![Some(s("first")), None, Some(s("second")), None, Some(s("second")), Some(s("changed"))]
+        );
         assert_eq!(target.text(), Some(s("changed")));
         assert_eq!(first.property_changed_subscription_count(), 0);
         assert_eq!(second.property_changed_subscription_count(), 1);

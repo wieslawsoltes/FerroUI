@@ -335,3 +335,7 @@ Most likely first.
    exactly, so four fewer should show.
 4. Whether the difference found (the value a data context node takes from a change) should be
    corrected: it needs a decision, not a measurement.
+
+### Measured on 2026-10-09
+
+The whole workspace passes with the changes (12061 tests; one of the new tests expected that clearing a value ends its binding, which it does not, here or in the reference, and was corrected). The run with `perf-counters` gives the same value for every one of the 70 counter lines of the benchmark as before. A recycled row costs 7 fewer allocations (1168.0 against 1175.0) and 222 fewer bytes (104643 against 104865) when scrolling 20 px a step, and the same 7 when scrolling a viewport a step (1130.2 against 1137.2). Times were not compared (the machine was under load).
