@@ -11,18 +11,20 @@
 
 use crate::Backend;
 use ferroui_base::media::effects::{ImmutableBlurEffect, ImmutableDropShadowEffect};
+use ferroui_base::media::imaging::{BitmapBlendingMode, BitmapInterpolationMode};
 use ferroui_base::media::immutable::{ImmutableImageBrush, ImmutablePen, ImmutableSolidColorBrush, ImmutableTransform};
 use ferroui_base::media::{
-    AcrylicBackgroundSource, AlignmentX, AlignmentY, BoxShadow, BoxShadows, Color, Colors, IBrush,
+    AcrylicBackgroundSource, AlignmentX, AlignmentY, BoxShadow, BoxShadows, Color, Colors, EdgeMode, IBrush,
     IExperimentalAcrylicMaterial, IImmutableBrush, ISceneBrush, ISceneBrushContent, ITileBrush, ITransform,
-    ImmutableSceneBrush, Stretch, TileMode,
+    ImmutableSceneBrush, RenderOptions, Stretch, TileMode,
 };
-use ferroui_base::platform::IDrawingContextImpl;
+use ferroui_base::platform::{AlphaFormat, IDrawingContextImpl, PixelFormat, SharedBitmapImpl};
 use ferroui_base::{
     Matrix, PixelSize, Point, Rect, RelativePoint, RelativeRect, RelativeUnit, RoundedRect, Vector,
 };
 use std::any::Any;
 use std::rc::Rc;
+use std::sync::Arc;
 
 /// The size of every scene in pixels.
 pub const SCENE_SIZE: PixelSize = PixelSize::new(200, 200);
@@ -516,6 +518,183 @@ fn acrylic(_: &Backend, context: &mut dyn IDrawingContextImpl) {
     );
 }
 
+/// A bitmap of `size` by `size` pixels with detail of every scale: blocks
+/// of four colors, a ramp, and lines a pixel wide.
+fn detail_bitmap(backend: &Backend, size: i32) -> Arc<SharedBitmapImpl> {
+    let mut data = Vec::with_capacity((size * size * 4) as usize);
+    for y in 0..size {
+        for x in 0..size {
+            let block = ((x * 8 / size) + (y * 8 / size)) % 4;
+            let (mut r, mut g, mut b) = match block {
+                0 => (230, 60, 40),
+                1 => (250, 220, 60),
+                2 => (40, 90, 200),
+                _ => (30, 160, 120),
+            };
+            // A ramp across the bitmap.
+            g = (g + x * 60 / size).min(255);
+            // Lines of a pixel, every fourth.
+            if x % 4 == 0 || y % 4 == 1 {
+                (r, g, b) = (r / 4, g / 4, b / 4);
+            }
+            // BGRA.
+            data.extend_from_slice(&[b as u8, g as u8, r as u8, 255]);
+        }
+    }
+
+    backend.interface.load_bitmap_from_pixels(
+        PixelFormat::BGRA8888,
+        AlphaFormat::Premul,
+        &data,
+        PixelSize::new(size, size),
+        Vector::new(96.0, 96.0),
+        size * 4,
+    )
+}
+
+fn interpolation(backend: &Backend, context: &mut dyn IDrawingContextImpl, mode: BitmapInterpolationMode, upscaled: bool) {
+    background(context);
+    context.push_render_options(RenderOptions { bitmap_interpolation_mode: mode, ..RenderOptions::default() });
+
+    if upscaled {
+        // A part of a small bitmap, 8.4 times as large: no middle of a
+        // pixel of the target lies on the edge between two pixels of the
+        // bitmap, where the nearest pixel is either and the two backends
+        // choose differently.
+        let bitmap = detail_bitmap(backend, 24);
+        context.draw_bitmap(&*bitmap, 1.0, Rect::new(2.0, 2.0, 20.0, 20.0), Rect::new(15.0, 15.0, 168.0, 168.0));
+    } else {
+        // A large bitmap at 0.29 of its size, at 0.7 by 0.21, and at 0.45
+        // under a rotation; at positions that keep the middles of the
+        // pixels of the target off the edges of the pixels of the bitmap.
+        let bitmap = detail_bitmap(backend, 256);
+        let whole = Rect::new(0.0, 0.0, 256.0, 256.0);
+        context.draw_bitmap(&*bitmap, 1.0, whole, Rect::new(8.3, 8.3, 75.3, 75.3));
+        context.draw_bitmap(&*bitmap, 1.0, whole, Rect::new(8.3, 140.3, 180.3, 54.3));
+        context.set_transform(Matrix::create_rotation(0.3) * Matrix::create_translation(105.0, -5.0));
+        context.draw_bitmap(&*bitmap, 1.0, whole, Rect::new(0.3, 0.3, 115.3, 115.3));
+        context.set_transform(Matrix::IDENTITY);
+    }
+
+    context.pop_render_options();
+}
+
+macro_rules! interpolation_scenes {
+    ($($name:ident => $mode:ident, $upscaled:expr;)*) => {
+        $(
+            fn $name(backend: &Backend, context: &mut dyn IDrawingContextImpl) {
+                interpolation(backend, context, BitmapInterpolationMode::$mode, $upscaled);
+            }
+        )*
+    };
+}
+
+interpolation_scenes! {
+    interpolation_none_upscaled => None, true;
+    interpolation_low_upscaled => LowQuality, true;
+    interpolation_medium_upscaled => MediumQuality, true;
+    interpolation_high_upscaled => HighQuality, true;
+    interpolation_none_downscaled => None, false;
+    interpolation_low_downscaled => LowQuality, false;
+    interpolation_medium_downscaled => MediumQuality, false;
+    interpolation_high_downscaled => HighQuality, false;
+}
+
+/// A bitmap with opaque, translucent and transparent pixels drawn in a
+/// blending mode over opaque, translucent and transparent pixels: the
+/// target is not cleared.
+fn blending(backend: &Backend, context: &mut dyn IDrawingContextImpl, mode: BitmapBlendingMode) {
+    context.draw_rectangle(Some(&solid(TEAL)), None, rect(10.0, 10.0, 110.0, 110.0), &no_shadows());
+    context.draw_ellipse(
+        Some(&ImmutableSolidColorBrush::with_opacity(NAVY, 0.6)),
+        None,
+        Rect::new(60.0, 60.0, 130.0, 130.0),
+    );
+    context.draw_rectangle(Some(&solid(Color::from_argb(255, 250, 220, 60))), None, rect(20.0, 150.0, 60.0, 40.0), &no_shadows());
+
+    let bitmap = backend.interface.create_render_target_bitmap(PixelSize::new(80, 80), Vector::new(96.0, 96.0));
+    let mut bitmap_context = bitmap.create_drawing_context();
+    bitmap_context.draw_ellipse(Some(&solid(ORANGE)), None, Rect::new(4.0, 4.0, 56.0, 56.0));
+    bitmap_context.draw_rectangle(
+        Some(&ImmutableSolidColorBrush::with_opacity(Color::from_argb(255, 200, 40, 160), 0.5)),
+        None,
+        rect(30.0, 30.0, 46.0, 46.0),
+        &no_shadows(),
+    );
+    bitmap_context.dispose();
+
+    context.push_render_options(RenderOptions { bitmap_blending_mode: mode, ..RenderOptions::default() });
+    context.draw_bitmap(&*bitmap, 1.0, Rect::new(0.0, 0.0, 80.0, 80.0), Rect::new(30.0, 30.0, 150.0, 150.0));
+    // And with an opacity, smaller.
+    context.draw_bitmap(&*bitmap, 0.6, Rect::new(0.0, 0.0, 80.0, 80.0), Rect::new(5.0, 120.0, 70.0, 70.0));
+    context.pop_render_options();
+    bitmap.dispose();
+}
+
+macro_rules! blending_scenes {
+    ($($name:ident => $mode:ident;)*) => {
+        $(
+            fn $name(backend: &Backend, context: &mut dyn IDrawingContextImpl) {
+                blending(backend, context, BitmapBlendingMode::$mode);
+            }
+        )*
+    };
+}
+
+blending_scenes! {
+    blend_source_over => SourceOver;
+    blend_source => Source;
+    blend_destination => Destination;
+    blend_destination_over => DestinationOver;
+    blend_source_in => SourceIn;
+    blend_destination_in => DestinationIn;
+    blend_source_out => SourceOut;
+    blend_destination_out => DestinationOut;
+    blend_source_atop => SourceAtop;
+    blend_destination_atop => DestinationAtop;
+    blend_xor => Xor;
+    blend_plus => Plus;
+    blend_screen => Screen;
+    blend_overlay => Overlay;
+    blend_darken => Darken;
+    blend_lighten => Lighten;
+    blend_color_dodge => ColorDodge;
+    blend_color_burn => ColorBurn;
+    blend_hard_light => HardLight;
+    blend_soft_light => SoftLight;
+    blend_difference => Difference;
+    blend_exclusion => Exclusion;
+    blend_multiply => Multiply;
+    blend_hue => Hue;
+    blend_saturation => Saturation;
+    blend_color => Color;
+    blend_luminosity => Luminosity;
+}
+
+/// Aliased edges: shapes, a stroke, a clip of a geometry and a bitmap
+/// without anti-aliasing.
+fn edge_mode_aliased(backend: &Backend, context: &mut dyn IDrawingContextImpl) {
+    background(context);
+    context.push_render_options(RenderOptions { edge_mode: EdgeMode::Aliased, ..RenderOptions::default() });
+    context.draw_rectangle(Some(&solid(TEAL)), None, rounded(10.3, 10.6, 80.0, 60.0, 14.0), &no_shadows());
+    context.draw_ellipse(
+        None,
+        Some(&ImmutablePen::with_brush(Some(Rc::new(solid(NAVY))), 5.0)),
+        Rect::new(105.5, 12.5, 80.0, 60.0),
+    );
+    context.draw_line(
+        Some(&ImmutablePen::with_brush(Some(Rc::new(solid(ORANGE))), 3.0)),
+        Point::new(12.0, 85.0),
+        Point::new(188.0, 110.0),
+    );
+
+    let bitmap = detail_bitmap(backend, 24);
+    context.set_transform(Matrix::create_rotation(0.2) * Matrix::create_translation(60.0, 105.0));
+    context.draw_bitmap(&*bitmap, 1.0, Rect::new(0.0, 0.0, 24.0, 24.0), Rect::new(0.0, 0.0, 90.0, 70.0));
+    context.set_transform(Matrix::IDENTITY);
+    context.pop_render_options();
+}
+
 /// The scenes with the bounds of each.
 pub fn scenes() -> Vec<EffectScene> {
     macro_rules! scene {
@@ -549,5 +728,41 @@ pub fn scenes() -> Vec<EffectScene> {
         scene!(scene_brush_stretched, 100.0, 255.0),
         scene!(scene_brush_transformed, 100.0, 255.0),
         scene!(acrylic, 100.0, 255.0),
+        scene!(interpolation_none_upscaled, 100.0, 255.0),
+        scene!(interpolation_low_upscaled, 100.0, 255.0),
+        scene!(interpolation_medium_upscaled, 100.0, 255.0),
+        scene!(interpolation_high_upscaled, 100.0, 255.0),
+        scene!(interpolation_none_downscaled, 100.0, 255.0),
+        scene!(interpolation_low_downscaled, 100.0, 255.0),
+        scene!(interpolation_medium_downscaled, 100.0, 255.0),
+        scene!(interpolation_high_downscaled, 100.0, 255.0),
+        scene!(blend_source_over, 100.0, 255.0),
+        scene!(blend_source, 100.0, 255.0),
+        scene!(blend_destination, 100.0, 255.0),
+        scene!(blend_destination_over, 100.0, 255.0),
+        scene!(blend_source_in, 100.0, 255.0),
+        scene!(blend_destination_in, 100.0, 255.0),
+        scene!(blend_source_out, 100.0, 255.0),
+        scene!(blend_destination_out, 100.0, 255.0),
+        scene!(blend_source_atop, 100.0, 255.0),
+        scene!(blend_destination_atop, 100.0, 255.0),
+        scene!(blend_xor, 100.0, 255.0),
+        scene!(blend_plus, 100.0, 255.0),
+        scene!(blend_screen, 100.0, 255.0),
+        scene!(blend_overlay, 100.0, 255.0),
+        scene!(blend_darken, 100.0, 255.0),
+        scene!(blend_lighten, 100.0, 255.0),
+        scene!(blend_color_dodge, 100.0, 255.0),
+        scene!(blend_color_burn, 100.0, 255.0),
+        scene!(blend_hard_light, 100.0, 255.0),
+        scene!(blend_soft_light, 100.0, 255.0),
+        scene!(blend_difference, 100.0, 255.0),
+        scene!(blend_exclusion, 100.0, 255.0),
+        scene!(blend_multiply, 100.0, 255.0),
+        scene!(blend_hue, 100.0, 255.0),
+        scene!(blend_saturation, 100.0, 255.0),
+        scene!(blend_color, 100.0, 255.0),
+        scene!(blend_luminosity, 100.0, 255.0),
+        scene!(edge_mode_aliased, 100.0, 255.0),
     ]
 }
