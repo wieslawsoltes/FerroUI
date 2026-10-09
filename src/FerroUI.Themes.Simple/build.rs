@@ -62,10 +62,6 @@ fn collect(root: &Path, directory: &Path, found: &mut Vec<(String, PathBuf)>) {
 fn main() {
     let root = PathBuf::from(env::var_os("CARGO_MANIFEST_DIR").expect("CARGO_MANIFEST_DIR"));
 
-    // The compiled markup of the theme (the documents of the checked-in `compiled_xaml.xamlmeta`)
-    // and the type model of the crate, scanned from its sources, in one file for the crates that
-    // include its documents or name its types (`$OUT_DIR/ferroui_themes_simple.xamlmeta`).
-    ferroui_build_scan::export::Export::from_env().compiled_markup("compiled_xaml.xamlmeta").run();
     let out = PathBuf::from(env::var_os("OUT_DIR").expect("OUT_DIR")).join("assets.rs");
 
     let mut assets = Vec::new();
@@ -122,6 +118,32 @@ fn main() {
         writeln!(text, "    ExcludedDocument {{ path: {asset_path:?}, missing_types: {missing_types:?} }},").expect("write");
     }
     text.push_str("];\n");
+
+    // The compiled markup of the theme: the document of the class `SimpleTheme` and every document it
+    // includes, compiled as one group against the type models (the scan of the sources of this crate
+    // and the models of the crates it is built on) into `$OUT_DIR/xaml/compiled_xaml.rs`, with the
+    // `.xamlmeta` of the crate: its type model and its compiled documents, for the crates that
+    // include them. The constructor is stated: the markup metadata of the theme declares `new()` next
+    // to the constructor that takes the service provider, so the compiler would pick `new()`, and
+    // upstream's class has the one constructor `SimpleTheme(IServiceProvider? sp = null)`.
+    let documents: Vec<(String, String)> = assets
+        .iter()
+        .filter(|(asset_path, _)| compiled(asset_path))
+        .map(|(asset_path, path)| {
+            let text = fs::read_to_string(path).unwrap_or_else(|e| panic!("cannot read {}: {e}", path.display()));
+            (asset_path.trim_start_matches('/').to_string(), text)
+        })
+        .collect();
+    let documents: Vec<(&str, &str)> = documents.iter().map(|(name, text)| (name.as_str(), text.as_str())).collect();
+    ferroui_build::Build::from_env()
+        .type_system(ferroui_build::TypeSystem::Model)
+        .compile_group(
+            ferroui_build::XamlGroup::new("compiled_xaml")
+                .documents(&documents)
+                .class_document("SimpleTheme.xaml")
+                .constructor(ferroui_build::ClassConstructor::ServiceProvider("with_service_provider")),
+        )
+        .run();
 
     // Written only when it changed, so that the crate is not rebuilt for nothing.
     if fs::read_to_string(&out).ok().as_deref() != Some(text.as_str()) {

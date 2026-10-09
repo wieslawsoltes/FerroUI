@@ -31,9 +31,10 @@ ferroui-dialogs = { workspace = true }
 ferroui-markup-xaml = { workspace = true }
 
 [build-dependencies]
-# The build script exports the type model of the crate with its compiled markup: the source scanner,
-# which links nothing of the framework.
-ferroui-build-scan = { workspace = true }
+# The build script compiles the documents of the theme against the type models (`build.rs`): the
+# compiler, which reads the types from the scan of the sources of this crate and from the models the
+# crates it is built on export.
+ferroui-build = { workspace = true }
 
 [dev-dependencies]
 ferroui-base = { workspace = true, features = ["testing"] }
