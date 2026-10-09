@@ -447,14 +447,14 @@ project = "Avalonia.Base"
 upstream = ["Controls/Metadata/PseudoClassesAttribute.cs"]
 kind = "replaced"
 rust = "metadata/markup_type.rs"
-reason = "the MarkupAttribute named `attributes::PSEUDO_CLASSES` in the `attributes:` of a control type; the pseudo-classes are its arguments"
+reason = "the MarkupAttribute named `attributes::PSEUDO_CLASSES` in the `attributes:` of a control type; the pseudo-classes are its arguments. The constant a control declares them with in Rust code is `PseudoClassesAttribute` of the crate of the controls (`src/FerroUI.Controls/metadata/pseudo_classes_attribute.rs`)"
 
 [[map]]
 project = "Avalonia.Base"
 upstream = ["Controls/Metadata/TemplatePartAttribute.cs"]
 kind = "replaced"
 rust = "metadata/markup_type.rs"
-reason = "the MarkupAttribute named `attributes::TEMPLATE_PART` in the `attributes:` of a control type; Name and Type are its arguments and IsRequired a named argument (`TemplatePart(\"PART_Bar\", type(Ref<Border>), IsRequired = true)`)"
+reason = "the MarkupAttribute named `attributes::TEMPLATE_PART` in the `attributes:` of a control type; Name and Type are its arguments and IsRequired a named argument (`TemplatePart(\"PART_Bar\", type(Ref<Border>), IsRequired = true)`). The constant a control declares its parts with in Rust code is `TemplatePartAttribute` of the crate of the controls (`src/FerroUI.Controls/metadata/template_part_attribute.rs`)"
 
 # Reactive
 
@@ -587,7 +587,7 @@ upstream = ["Utilities/SafeEnumerableHashSet.cs"]
 kind = "replaced"
 rust = "utilities/handler_list.rs"
 types = { SafeEnumerableHashSet = "HandlerList" }
-reason = "its one user is the listener set of Classes; the listeners of the port are closures in a HandlerList, which is invoked on a snapshot that is copied only when the list changes"
+reason = "its one user is the listener set of Classes; the listeners of the port are closures in a HandlerList, which is invoked on a snapshot that is copied only when the list changes. HandlerList itself has no upstream file: it is the storage of the handlers of a C# `event` (multicast delegates have no Rust equivalent; porting guide, Types table)"
 
 [[map]]
 project = "Avalonia.Base"
@@ -786,14 +786,6 @@ reason = "the file only adds `ITransform` to the generated `ServerCompositionSim
 
 [[map]]
 project = "Avalonia.Base"
-upstream = ["Rendering/Composition/Drawing/RenderDataStream.HitTest.cs"]
-kind = "merged"
-rust = "rendering/composition/drawing/render_data_stream.rs"
-members = "waive"
-reason = "ported member for member in `rendering/composition/drawing/render_data_stream_hit_test.rs` (`RenderDataStream::hit_test` and `hit_test_geometry`, `HitTestScope`, `HitTestVisitor` with its `IRenderDataVisitor` impl); the scanner does not read that file, because it takes a file name that ends in `_test.rs` for a test, so the members are waived here instead of counted"
-
-[[map]]
-project = "Avalonia.Base"
 upstream = ["Rendering/Composition/Server/SimpleServerObject.cs"]
 kind = "merged"
 rust = "rendering/composition/server/server_object.rs"
@@ -938,10 +930,10 @@ reason = "animator of `System.Decimal`, a 128-bit decimal floating point type th
 
 [[map]]
 project = "Avalonia.Base"
-upstream = ["Controls/Metadata/PseudoClassesAttribute.cs", "Controls/Metadata/TemplatePartAttribute.cs", "Controls/Templates/ITemplateResult.cs", "Controls/Templates/TemplateResult.cs"]
+upstream = ["Controls/Templates/ITemplateResult.cs", "Controls/Templates/TemplateResult.cs"]
 kind = "replaced"
 rust = "controls/mod.rs"
-reason = "ported in the crate of the controls, their only user, where the tracking of `Avalonia.Controls` does not look for them: `src/FerroUI.Controls/metadata/pseudo_classes_attribute.rs`, `metadata/template_part_attribute.rs` and `templates/template_result.rs` (`TemplateResult<T>`, which also stands for `ITemplateResult`)"
+reason = "ported in the crate of the controls, their only user, where the tracking of `Avalonia.Controls` does not look for them: `src/FerroUI.Controls/templates/template_result.rs` (`TemplateResult<T>`, which also stands for `ITemplateResult`)"
 
 [[map]]
 project = "Avalonia.Base"
@@ -975,7 +967,7 @@ reason = "interface implemented explicitly by the one class `StyledElement`: the
 project = "Avalonia.Base"
 upstream = ["Controls/PseudoClassesExtensions.cs"]
 kind = "replaced"
-rust = "controls/classes.rs"
+rust = ["controls/classes.rs", "controls/pseudo_classes_extensions.rs"]
 reason = "the one extension method, `Set`, is the inherent method `set` of `dyn IPseudoClasses`, next to the trait"
 
 [[map]]
@@ -1139,20 +1131,12 @@ path = "src/FerroUI.Base/media/shared_brush.rs"
 reason = "The values of an immutable brush or pen in a form that is Send + Sync: the handles of the brush contract are Rc, so what the render thread draws with is a copy with a stable identity (render thread, stage R1)"
 
 [[rust_only]]
-path = "src/FerroUI.Base/rendering/composition/render_thread_tests.rs"
-reason = "Tests of the render-thread mode of the compositor: upstream has no test that runs the two threads"
-
-[[rust_only]]
 path = "src/FerroUI.Base/rendering/composition/server/compositor_lock.rs"
 reason = "The compositor lock as a type: upstream confines the server side to lock (_lock) by convention, here the lock holds the server compositor (render thread, stage R5)"
 
 [[rust_only]]
 path = "src/FerroUI.Base/type_system.rs"
 reason = "object model runtime (Ref/WeakRef handles, TypeInfo, class macros): replaces the CLR type system, virtual dispatch and GC references"
-
-[[rust_only]]
-path = "src/FerroUI.Base/utilities/handler_list.rs"
-reason = "storage for C# `event` handlers (multicast delegates have no Rust equivalent; porting guide, Types table)"
 
 [[rust_only]]
 path = "src/FerroUI.Base/rendering/scene_graph/scene_graph_test_support.rs"
@@ -1246,6 +1230,14 @@ reason = "scripted OpenGL implementation of the unit tests"
 [[rust_only]]
 path = "src/Skia/FerroUI.Skia/gpu/ganesh/*.rs"
 reason = "the Ganesh implementation of the backend-neutral GPU context (the binding has separate Ganesh and Graphite context types)"
+
+[[map]]
+project = "Avalonia.Skia"
+upstream = ["ISkiaSharpApiLeaseFeature.cs"]
+kind = "renamed"
+rust = "i_skia_api_lease_feature.rs"
+types = { ISkiaSharpApiLeaseFeature = "ISkiaApiLeaseFeature", ISkiaSharpApiLease = "ISkiaApiLease", ISkiaSharpPlatformGraphicsApiLease = "ISkiaPlatformGraphicsApiLease" }
+reason = "the binding is not SkiaSharp, so the contracts are named after Skia: `ISkiaApiLeaseFeature`, `ISkiaApiLease`, `ISkiaPlatformGraphicsApiLease`"
 
 # -------------------------------------------------------- Avalonia.Fonts.Inter
 
@@ -1408,12 +1400,6 @@ reason = "the file is named after its script-side counterpart upstream; it decla
 
 [[map]]
 project = "Avalonia.Browser"
-upstream = ["Rendering/RenderWorker.cs"]
-kind = "not-applicable"
-reason = "threaded mode (render worker): not ported, the browser platform is single-threaded (docs/porting/browser-platform.md 6)"
-
-[[map]]
-project = "Avalonia.Browser"
 upstream = ["Interop/JsCallbackHelper.cs"]
 kind = "not-applicable"
 reason = "restores the synchronisation context of the managed runtime in callbacks: no equivalent concept"
@@ -1427,3 +1413,483 @@ reason = "reflective access to script objects: replaced by typed property getter
 [[rust_only]]
 path = "src/Skia/FerroUI.Skia/unit_tests/*"
 reason = "the port of upstream's Skia unit test project (tests/Avalonia.Skia.UnitTests) and its test doubles, not of the library"
+
+# ------------------------------------------------ Rust-only files (review of 2026-10-09)
+#
+# Files the scanner lists as having no upstream counterpart. The first entry that matches a path gives its
+# reason, so the entries of one file above come before the patterns here. A pattern only ever applies to a file
+# that no [[map]] entry and no default rule names.
+
+# Generated files and the tables of a crate.
+
+[[rust_only]]
+path = "src/*/rust_paths.rs"
+reason = "generated by scripts/generate_markup_types.py: the public Rust paths of the registered types of the crate, which the emitter of the XAML compiler writes into generated code"
+
+[[rust_only]]
+path = "src/*/register_types.rs"
+reason = "the type table of the crate (porting guide, Classes): its namespaces, its classes and what it states about itself for markup; takes the place of the assembly metadata the upstream compiler and loader reflect over"
+
+[[rust_only]]
+path = "src/*/markup_types/*.rs"
+reason = "the markup metadata of the types of the crate (content property, plain properties, constructors, methods, events, enums, converters, typed lists), most of it generated by scripts/generate_markup_types.py: takes the place of the attributes and the reflection upstream reads them with"
+
+[[rust_only]]
+path = "src/FerroUI.Base/rendering/composition/generated/*.rs"
+reason = "generated by scripts/generate_composition.py from the upstream `composition-schema.xml`: the property blocks of the composition objects and of their server counterparts, which upstream's source generator writes at build time"
+
+[[rust_only]]
+path = "src/FerroUI.Base/media/text_formatting/unicode/*_trie.rs"
+reason = "generated by scripts/convert-unicode-tries.py from the upstream data file of the same name (`*.trie.cs`)"
+
+[[rust_only]]
+path = "src/FerroUI.Base/media/text_formatting/unicode/script_extensions_data.rs"
+reason = "generated by scripts/convert-unicode-tries.py from the upstream data file `ScriptExtensions.data.cs`"
+
+[[rust_only]]
+path = "src/*/compiled_xaml.rs"
+reason = "generated by the Rust emitter of the XAML compiler (`rust_emitter::generate_class_file`): the compiled documents of the crate, the counterpart of the IL the upstream build task writes into the assembly"
+
+[[rust_only]]
+path = "src/*/assets.rs"
+reason = "the embedded assets of the crate, the table generated by its build script: the counterpart of the resource items of the upstream project file"
+
+# Tests and test support. Upstream has them in its test projects, which the tracking does not scan.
+
+[[rust_only]]
+path = "src/*_tests_*.rs"
+reason = "a part of an upstream test suite (`<Suite>Tests_<Part>.cs` or `<Suite>Tests.<Part>.cs`): the scanner takes only `*_tests.rs` for a test file"
+
+[[rust_only]]
+path = "src/*/tests.rs"
+reason = "the unit tests of the module"
+
+[[rust_only]]
+path = "src/*/testing/*.rs"
+reason = "test support shared by the test suites of this crate and of the crates built on it: mocks, test services, fixtures and helpers, among them the ports of the ones of the upstream test projects (`tests/Avalonia.UnitTests` and the helpers next to the suites)"
+
+[[rust_only]]
+path = "src/FerroUI.Base/styling/test_support.rs"
+reason = "classes shared by the styling tests: the control library is a separate crate, so the tests use minimal classes in place of the controls of the upstream tests"
+
+[[rust_only]]
+path = "src/FerroUI.Base/styling/testing.rs"
+reason = "the port of `StyleHelpers` of the upstream test projects, for this crate and the crates built on it"
+
+[[rust_only]]
+path = "src/FerroUI.Base/rendering/composition/test_compositor.rs"
+reason = "a compositor for the tests of the composition API that need no visual tree (upstream's `CompositorTestServices` without its top-level)"
+
+[[rust_only]]
+path = "src/FerroUI.Base/media/text_formatting/unicode/ucd_test_data.rs"
+reason = "helpers of the Unicode conformance tests, which read the test files of the Unicode Character Database from the repository where upstream downloads them at test time"
+
+[[rust_only]]
+path = "src/FerroUI.Base/utilities/date_time_net_data.rs"
+reason = "expectations of the date and time tests, recorded from .NET"
+
+[[rust_only]]
+path = "src/FerroUI.Base/utilities/decimal_double_conversion_data.rs"
+reason = "expectations of the conversions between doubles and decimals, recorded from .NET"
+
+[[rust_only]]
+path = "src/FerroUI.Base/utilities/test_culture_data_provider.rs"
+reason = "a culture data provider for tests (`en`, `en-US`, `en-GB`, with the values .NET reports)"
+
+[[rust_only]]
+path = "src/FerroUI.Controls/test_*.rs"
+reason = "classes, services and a command shared by the tests of the crate"
+
+[[rust_only]]
+path = "src/FerroUI.Controls/grid_mocks.rs"
+reason = "helpers shared by the grid tests (`GridMocks.cs` of the upstream test project)"
+
+[[rust_only]]
+path = "src/FerroUI.Controls/mouse_test_helper.rs"
+reason = "the port of `MouseTestHelper` of the upstream test projects"
+
+[[rust_only]]
+path = "src/FerroUI.Controls/layout_test_control.rs"
+reason = "the port of `LayoutTestControl.cs` and `LayoutTestRoot.cs` of the base library's test project: they derive from controls, so the layout tests that use them live with the controls"
+
+[[rust_only]]
+path = "src/Markup/FerroUI.Markup.Xaml/test_support.rs"
+reason = "hand-built service providers and platform doubles for the tests of the crate"
+
+# The runtime library of .NET, as far as the framework uses it.
+
+[[rust_only]]
+path = "src/FerroUI.Base/numerics/*.rs"
+reason = "the `System.Numerics` types the composition API takes (Vector2, Vector3, Vector4, Matrix3x2, Matrix4x4, Quaternion) and their scalar helpers: part of the .NET runtime library upstream"
+
+[[rust_only]]
+path = "src/FerroUI.Base/utilities/date_time*.rs"
+reason = "counterpart of a .NET runtime library type: `System.DateTime`, `DateTimeOffset`, `DateTimeKind`, `DateTimeStyles`, `DateTimeFormatInfo` and the engine of their format strings"
+
+[[rust_only]]
+path = "src/FerroUI.Base/utilities/number_*.rs"
+reason = "counterpart of a .NET runtime library type: `System.Globalization.NumberFormatInfo`, `NumberStyles` and the numeric format strings"
+
+[[rust_only]]
+path = "src/FerroUI.Base/utilities/decimal.rs"
+reason = "counterpart of .NET `System.Decimal`"
+
+[[rust_only]]
+path = "src/FerroUI.Base/utilities/day_of_week.rs"
+reason = "counterpart of .NET `System.DayOfWeek`"
+
+[[rust_only]]
+path = "src/FerroUI.Base/utilities/gregorian_calendar.rs"
+reason = "counterpart of .NET `System.Globalization.GregorianCalendar` and `ISOWeek`, as far as the controls use them"
+
+[[rust_only]]
+path = "src/FerroUI.Base/utilities/time_zone_info.rs"
+reason = "minimal counterpart of .NET `System.TimeZoneInfo`: the offset of local time comes from a provider of the platform layer"
+
+[[rust_only]]
+path = "src/FerroUI.Base/utilities/culture_info.rs"
+reason = "minimal counterpart of .NET `System.Globalization.CultureInfo`"
+
+[[rust_only]]
+path = "src/FerroUI.Base/utilities/i_culture_data_provider.rs"
+reason = "the source of culture data: the base library has the invariant culture built in, the data of every other culture comes from a registered provider (.NET takes it from the operating system)"
+
+[[rust_only]]
+path = "src/FerroUI.Base/utilities/compare_info.rs"
+reason = "counterpart of .NET `StringComparison`, `CompareOptions` and `CultureInfo.CompareInfo`"
+
+[[rust_only]]
+path = "src/FerroUI.Base/utilities/text_info.rs"
+reason = "minimal counterpart of .NET `System.Globalization.TextInfo`"
+
+[[rust_only]]
+path = "src/FerroUI.Base/utilities/uri.rs"
+reason = "minimal counterpart of .NET `System.Uri`, covering what resource and font keys need"
+
+[[rust_only]]
+path = "src/FerroUI.Base/utilities/read_only_memory.rs"
+reason = "counterpart of .NET `ReadOnlyMemory<T>`: the text of the text formatting subsystem"
+
+[[rust_only]]
+path = "src/FerroUI.Base/utilities/event_args.rs"
+reason = "counterpart of .NET `System.EventArgs`"
+
+[[rust_only]]
+path = "src/FerroUI.Base/utilities/cancel_event_args.rs"
+reason = "counterpart of .NET `System.ComponentModel.CancelEventArgs`"
+
+[[rust_only]]
+path = "src/FerroUI.Base/i_support_initialize.rs"
+reason = "counterpart of .NET `System.ComponentModel.ISupportInitialize`"
+
+[[rust_only]]
+path = "src/FerroUI.Base/input/i_command.rs"
+reason = "counterpart of .NET `System.Windows.Input.ICommand`"
+
+[[rust_only]]
+path = "src/FerroUI.Base/animation/time_span.rs"
+reason = "counterpart of .NET `System.TimeSpan` (signed 100-nanosecond ticks), the time type of the animation system"
+
+[[rust_only]]
+path = "src/FerroUI.Base/threading/cancellation_token.rs"
+reason = "counterpart of .NET `CancellationToken`, `CancellationTokenSource` and `CancellationTokenRegistration`"
+
+[[rust_only]]
+path = "src/FerroUI.Base/threading/dispatcher_task.rs"
+reason = "futures that run on a dispatcher: the executor half of what upstream gets from `Task` and its synchronization context (porting guide: asynchronous members return DispatcherTask)"
+
+[[rust_only]]
+path = "src/FerroUI.Base/animation/animation_task.rs"
+reason = "the completion of an animation run, the `Task` upstream returns: completed from within a clock tick or a cancellation, so it needs no executor"
+
+[[rust_only]]
+path = "src/FerroUI.Base/animation/cancellation.rs"
+reason = "cancellation callbacks for state of the UI thread: a cancellation token runs its callbacks on the cancelling thread, so they must be `Send`, and what an animation does on cancellation is not"
+
+[[rust_only]]
+path = "src/FerroUI.Base/rendering/auto_reset_event.rs"
+reason = "counterpart of .NET `AutoResetEvent` for the waits of the render thread; bare WebAssembly has no blocking wait"
+
+[[rust_only]]
+path = "src/FerroUI.Base/platform/storage/file_io/path.rs"
+reason = "the path string operations of .NET `System.IO.Path` the storage helpers need"
+
+[[rust_only]]
+path = "src/FerroUI.Base/data/converters/composite_format.rs"
+reason = "the composite formatting of .NET (`string.Format`), which the string format of a binding uses"
+
+[[rust_only]]
+path = "src/FerroUI.Base/data/model/*.rs"
+reason = "the contracts of the .NET runtime library that bindings observe on a model object (`INotifyPropertyChanged`, `INotifyCollectionChanged`, `INotifyDataErrorInfo`, events, indexers) and the declaration of a model type, which takes the place of reflection over the object"
+
+[[rust_only]]
+path = "src/FerroUI.Controls/utils/masked_text_provider.rs"
+reason = "derived from .NET `System.ComponentModel.MaskedTextProvider`, which `MaskedTextBox` uses from the runtime library upstream"
+
+[[rust_only]]
+path = "src/Markup/FerroUI.Markup.Xaml/converters/type_converter.rs"
+reason = "counterpart of .NET `System.ComponentModel.TypeConverter` and `ITypeDescriptorContext`, which the converters of the markup runtime derive from and receive"
+
+# The object model and the markup metadata, where upstream relies on the CLR, reflection or attributes.
+
+[[rust_only]]
+path = "src/FerroUI.Base/element_ref.rs"
+reason = "a reference to an element that the holder does not own, held weakly and compared by identity: the value type of properties that point sideways or up the tree (a placement target, the target of a label), a plain object reference upstream"
+
+[[rust_only]]
+path = "src/FerroUI.Base/controls/resource_key.rs"
+reason = "a value usable as a resource key (value equality and a hash) and the hasher of the resource tables: upstream keys are `object`"
+
+[[rust_only]]
+path = "src/FerroUI.Base/data/core/weak_value.rs"
+reason = "a reference to a binding source that does not keep it alive: a weak reference to an object upstream"
+
+[[rust_only]]
+path = "src/FerroUI.Base/data/core/plugins/markup_members.rs"
+reason = "member lookup over markup metadata: what the string-path bindings use where upstream reflects over the run-time type of a source object"
+
+[[rust_only]]
+path = "src/FerroUI.Base/data/core/plugins/untyped_accessor_plugin.rs"
+reason = "property accessors over untyped getters and setters of the markup metadata: takes the place of the accessors upstream builds from `PropertyInfo`"
+
+[[rust_only]]
+path = "src/FerroUI.Base/data/core/plugins/property_info_accessor_factory.rs"
+reason = "the accessor factories of compiled binding paths for plain properties, in the crate of the paths; upstream's are in `MarkupExtensions/CompiledBindings/PropertyInfoAccessorFactory.cs` of Avalonia.Markup.Xaml"
+
+[[rust_only]]
+path = "src/FerroUI.Base/metadata/markup_macros.rs"
+reason = "the declaration forms of markup metadata (`ferro_markup_type!` and its kin): take the place of the attributes and the reflection of upstream"
+
+[[rust_only]]
+path = "src/FerroUI.Base/metadata/property_accessors.rs"
+reason = "the Rust accessors of registered property definitions, for the Rust emitter of the XAML compiler (docs/porting/xaml.md, section 9): upstream's compiler loads a property definition from its static field"
+
+[[rust_only]]
+path = "src/FerroUI.Base/metadata/service_provider.rs"
+reason = "counterpart of .NET `System.IServiceProvider`, the service provider contract of markup"
+
+[[rust_only]]
+path = "src/FerroUI.Base/metadata/typed_path.rs"
+reason = "the typed path hook of a plain property declared in markup metadata, with which a compiled binding of one plain property is evaluated without boxing"
+
+[[rust_only]]
+path = "src/FerroUI.Base/media/media_collection.rs"
+reason = "a reference-counted handle to an observable list that compares by identity, as the media object model shares its collections: object references upstream"
+
+[[rust_only]]
+path = "src/FerroUI.Base/media/ref_adapter.rs"
+reason = "the bridge between class handles and the media interfaces (`IBrush`, `IPen`, `ITransform`), which immutable values and mutable classes both implement: an interface cast upstream"
+
+[[rust_only]]
+path = "src/FerroUI.Base/media/text_formatting/text_index.rs"
+reason = "conversion between UTF-16 code unit indices, the index unit of the text subsystem, and UTF-8 byte offsets of a `&str`"
+
+[[rust_only]]
+path = "src/FerroUI.Base/media/text_formatting/i_text_drawing_sink.rs"
+reason = "the drawing calls text needs, as a contract that mirrors the members of `DrawingContext` one to one and that the drawing context implements: upstream draws text onto a `DrawingContext`"
+
+[[rust_only]]
+path = "src/FerroUI.Base/input/platform/clipboard_error.rs"
+reason = "the error of a failed clipboard operation, by category: upstream lets the exceptions of the platform through"
+
+[[rust_only]]
+path = "src/FerroUI.Base/platform/render_interface_access.rs"
+reason = "access to the platform render interface registered by the rendering backend, in one place (a service locator lookup at each site upstream)"
+
+[[rust_only]]
+path = "src/FerroUI.Base/rendering/managed_hit_tester.rs"
+reason = "a hit tester that walks the visual tree directly (an implementation of `IHitTester` that needs no compositor)"
+
+[[rust_only]]
+path = "src/FerroUI.Controls/i_clickable_control.rs"
+reason = "the registry of the classes that implement `IClickableControl`: a class cannot implement the trait itself, an interface cast upstream"
+
+[[rust_only]]
+path = "src/FerroUI.Controls/i_command_source.rs"
+reason = "the registry of the classes that implement `ICommandSource`: a class cannot implement the trait itself, an interface cast upstream"
+
+[[rust_only]]
+path = "src/FerroUI.Controls/navigable_containers.rs"
+reason = "views a panel as the `INavigableContainer` it implements: an interface cast upstream"
+
+[[rust_only]]
+path = "src/FerroUI.Controls/assigned_binding.rs"
+reason = "a binding held as the value of a property that is assigned a binding rather than bound with it; equality is identity, as of the object reference upstream"
+
+[[rust_only]]
+path = "src/FerroUI.Controls/presentation_source/renderer_factory.rs"
+reason = "the renderer seam of the top-level layer: top-levels are written against a renderer contract, where upstream every presentation source creates a compositing renderer over the compositor of its platform implementation"
+
+[[rust_only]]
+path = "src/Markup/FerroUI.Markup.Xaml/object_casts.rs"
+reason = "type tests on untyped objects: the `is` / `as` casts upstream performs on the objects of a parent stack, on provide-value targets and on root objects"
+
+# Upstream declarations that are ported in a file of their own, or in another crate than the tracking looks in.
+
+[[rust_only]]
+path = "src/FerroUI.Base/media/tile_mode.rs"
+reason = "the enum `TileMode`, declared in `Media/TileBrush.cs` upstream"
+
+[[rust_only]]
+path = "src/FerroUI.Base/media/known_color_brushes.rs"
+reason = "the brush lookups of the known colours, a part of `Media/KnownColors.cs` upstream"
+
+[[rust_only]]
+path = "src/FerroUI.Base/platform/i_drawing_context_impl_with_effects.rs"
+reason = "the contract `IDrawingContextImplWithEffects`, declared in `Platform/IDrawingContextImpl.cs` upstream"
+
+[[rust_only]]
+path = "src/FerroUI.Base/rendering/i_hit_tester.rs"
+reason = "the contract `IHitTester`, declared in `Rendering/IRenderer.cs` upstream"
+
+[[rust_only]]
+path = "src/FerroUI.Base/rendering/composition/composition_cache_mode.rs"
+reason = "`CompositionCacheMode` and `CompositionBitmapCache`, classes that upstream's source generator writes from `composition-schema.xml`: the only cache mode is the bitmap cache, so the abstract class is an alias of it"
+
+[[rust_only]]
+path = "src/FerroUI.Base/rendering/composition/composition_s*_visual.rs"
+reason = "`CompositionSolidColorVisual` and `CompositionSurfaceVisual`, classes that upstream's source generator writes whole from `composition-schema.xml`: the hand-written half next to the generated property block"
+
+[[rust_only]]
+path = "src/FerroUI.Base/rendering/composition/server/server_composition_cache_mode.rs"
+reason = "the server side of `CompositionCacheMode`, a class that upstream's source generator writes from `composition-schema.xml`; `Rendering/Composition/Server/ServerCompositionCacheMode.cs` itself is mapped to the bitmap cache"
+
+[[rust_only]]
+path = "src/FerroUI.Base/rendering/composition/server/server_composition_visual_collection.rs"
+reason = "the server side of the children collection of a visual, a class that upstream's source generator writes whole from `composition-schema.xml`"
+
+[[rust_only]]
+path = "src/FerroUI.Base/rendering/composition/i_composition_object_host.rs"
+reason = "the seam between the generated property blocks of composition objects and the hand-written classes that embed them: partial classes upstream"
+
+[[rust_only]]
+path = "src/FerroUI.Base/rendering/composition/server/server_property_host.rs"
+reason = "the seam between the generated property blocks of server objects and the hand-written classes that embed them: partial classes upstream"
+
+[[rust_only]]
+path = "src/FerroUI.Controls/metadata/pseudo_classes_attribute.rs"
+reason = "the constant a control declares its pseudo-classes with in Rust code; the attribute markup reads is mapped in the base crate (`Controls/Metadata/PseudoClassesAttribute.cs` of Avalonia.Base)"
+
+[[rust_only]]
+path = "src/FerroUI.Controls/metadata/template_part_attribute.rs"
+reason = "the constant a control declares its template parts with in Rust code; the attribute markup reads is mapped in the base crate (`Controls/Metadata/TemplatePartAttribute.cs` of Avalonia.Base)"
+
+[[rust_only]]
+path = "src/FerroUI.Controls/templates/template_result.rs"
+reason = "port of `Controls/Templates/TemplateResult.cs` and `ITemplateResult.cs` of Avalonia.Base, in the crate of their only user"
+
+[[rust_only]]
+path = "src/FerroUI.Controls/utils/debug_display.rs"
+reason = "port of `Diagnostics/DebugDisplayHelper.cs` of Avalonia.Base and of the base levels of `BuildDebugDisplay`, next to the levels the controls add"
+
+[[rust_only]]
+path = "src/FerroUI.Controls/platform/*platform_handle.rs"
+reason = "`IPlatformHandle` and `PlatformHandle` declared a second time: upstream has them once, in `Platform/` of Avalonia.Base, and the base crate ports them there too (open: keep one declaration)"
+
+[[rust_only]]
+path = "src/FerroUI.Controls/size_to_content.rs"
+reason = "the enum `SizeToContent`, declared in `Window.cs` upstream"
+
+[[rust_only]]
+path = "src/FerroUI.Controls/window_decorations.rs"
+reason = "the enum `WindowDecorations`, declared in `Window.cs` upstream"
+
+[[rust_only]]
+path = "src/Headless/FerroUI.Headless/headless_window_surface.rs"
+reason = "the part of `HeadlessWindowImpl.cs` that a frame uses (`Lock`, `CreateFramebufferRenderTarget`, the last rendered frame and its lock), as an object of its own; upstream implements the framebuffer surface on the window implementation"
+
+[[rust_only]]
+path = "src/Skia/FerroUI.Skia/metal/*.rs"
+reason = "port of the project Avalonia.Metal (`IMetalDevice.cs`, `IMetalExternalObjectsFeature.cs`) inside the Skia backend, its only user; the tracking of Avalonia.Metal looks in `src/FerroUI.Metal`, which does not exist, and reports the two files as missing"
+
+[[rust_only]]
+path = "src/Skia/FerroUI.Skia/locked_framebuffer.rs"
+reason = "a locked framebuffer described by plain values: the `Platform/LockedFramebuffer.cs` of Avalonia.Base, which the base crate cannot hold without unsafe code, for the surfaces of the backend"
+
+[[rust_only]]
+path = "src/Markup/FerroUI.Markup.Xaml/xamlx_runtime.rs"
+reason = "port of the runtime contracts of the XAML compiler (`XamlX.Runtime/Interfaces.cs`), which the tracking of XamlX does not list: the compiler crate has no runtime part"
+
+[[rust_only]]
+path = "src/Markup/FerroUI.Markup.Xaml/xaml_il/runtime/xaml_il_context.rs"
+reason = "the run-time context of a document being built: the class the IL back end of upstream generates for every document (`IL/RuntimeContext.cs` of XamlX)"
+
+# The render thread, the browser worker and diagnostics.
+
+[[rust_only]]
+path = "src/FerroUI.Base/rendering/composition/render_interface_feature.rs"
+reason = "a feature of the render interface as a handle bound to the compositor lock, which lends the feature inside the lock and is dropped there: upstream hands the feature object itself to the UI thread and the garbage collector shares it (render thread, stage R5.8)"
+
+[[rust_only]]
+path = "src/FerroUI.Base/diagnostics/perf_counters.rs"
+reason = "counters of the work the framework does per operation, behind the feature `perf-counters` (docs/porting/performance, design 09): not from upstream, which is measured with the tools of its runtime"
+
+[[rust_only]]
+path = "src/Browser/FerroUI.Browser/interop/thread_proxy.rs"
+reason = "the threads of the module: the id of the calling thread and a call made on another one; upstream's runtime carries a call from one thread to another (browser stage B2.3)"
+
+[[rust_only]]
+path = "src/Browser/FerroUI.Browser/interop/completion_helper.rs"
+reason = "completion of the asynchronous calls into the page: upstream's runtime turns a promise of the page into a task"
+
+[[rust_only]]
+path = "src/Browser/FerroUI.Browser/rendering/browser_render_surface.rs"
+reason = "the render surface of a canvas as it is handed to the compositor: upstream hands out the render target itself, which with a render worker exists on the render thread only (browser stage B2.5)"
+
+[[rust_only]]
+path = "src/Browser/FerroUI.Browser/rendering/browser_surface_shared.rs"
+reason = "what the thread of the user interface and the thread that renders both know about one canvas: one object read by both threads by convention upstream (browser stage B2.3)"
+
+[[rust_only]]
+path = "src/Browser/FerroUI.Browser/rendering/render_statistics.rs"
+reason = "where the frames of the page are drawn and what the ticks of a render thread asked of the main thread, for tests and diagnostics (browser stage B2.6): not from upstream"
+
+[[rust_only]]
+path = "src/FerroUI.OpenGL/composition/task_support.rs"
+reason = "what the asynchronous members of the composition interop are built from: `async` methods over `Task` upstream"
+
+[[rust_only]]
+path = "src/HarfBuzz/FerroUI.HarfBuzz/hb.rs"
+reason = "a thin safe wrapper over the HarfBuzz objects the shaper uses, with every unsafe block of the crate: the HarfBuzzSharp binding upstream"
+
+[[rust_only]]
+path = "src/Skia/FerroUI.Skia/gpu/i_skia_gr_context.rs"
+reason = "the backend-neutral GPU context of the Skia backend (the binding has separate Ganesh and Graphite context types, SkiaSharp has one `GRContext`)"
+
+[[rust_only]]
+path = "src/Skia/FerroUI.Skia/gpu/graphite/graphite_gr_context.rs"
+reason = "the Graphite implementation of the backend-neutral GPU context (the binding has separate Ganesh and Graphite context types)"
+
+# The XAML compiler: the back ends and the build-time type system.
+
+[[rust_only]]
+path = "src/Markup/FerroUI.Markup.Xaml/xaml_il/runtime/compiled.rs"
+reason = "the helpers that Rust source generated from markup calls (docs/porting/xaml.md, section 9.9): upstream's compiler emits the same steps as IL"
+
+[[rust_only]]
+path = "src/Markup/FerroUI.Markup.Xaml.Loader/runtime/*.rs"
+reason = "the run-time back end of the compiler: the interpreter, the evaluators of the framework language and the run-time type system, which take the place of the IL back end and of the reflection type system of upstream's loader (docs/porting/xaml.md)"
+
+[[rust_only]]
+path = "src/Markup/FerroUI.Markup.Xaml.Loader/rust_emitter/*.rs"
+reason = "the Rust emitter, the ahead-of-time back end of the compiler, which takes the place of the IL emitter of upstream's build task (docs/porting/xaml.md, section 9)"
+
+[[rust_only]]
+path = "src/Markup/FerroUI.Markup.Xaml.Loader/core_table.rs"
+reason = "the closed table of runtime library (`System.*`) types markup can name, as data: what both type systems of the compiler define from it (docs/porting/xaml.md, 9.5.1 and 9.5.5)"
+
+[[rust_only]]
+path = "src/FerroUI.Build.Tasks/json.rs"
+reason = "the JSON the type model is written in (`.xamlmeta`): a value, its reader and its deterministic writer"
+
+[[rust_only]]
+path = "src/FerroUI.Build.Tasks/model*.rs"
+reason = "the build-time type model of a crate and of the crates it is built on, and its file, the `.xamlmeta` (docs/porting/xaml.md, 9.5.1): upstream's compiler reads the types of the referenced assemblies with Mono.Cecil instead"
+
+[[rust_only]]
+path = "src/FerroUI.Build.Tasks/scanner/*.rs"
+reason = "the source scanner, which fills the type model from the declaration macros of a crate's sources (docs/porting/xaml.md, 9.5.2, 9.5.6): no counterpart upstream, where the compiler reads the compiled assembly"
+
+[[rust_only]]
+path = "src/FerroUI.Build.Tasks/type_system/*.rs"
+reason = "the build-time type system of the compiler over the type models (docs/porting/xaml.md, 9.5.2, 9.5.5): the counterpart of the Cecil type system of upstream's build task (XamlX.IL.Cecil, which the tracking does not list)"
