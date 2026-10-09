@@ -305,6 +305,8 @@ dependencies = [
  "ferroui-base",
  "ferroui-controls",
  "ferroui-harfbuzz",
+ "ferroui-skia",
+ "ferroui-themes-simple",
 ]
 
 [[package]]
