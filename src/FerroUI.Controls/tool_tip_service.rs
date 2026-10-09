@@ -94,10 +94,10 @@ impl ToolTipService {
         let tip_popup_input_root = current_tip
             .and_then(|tip| tip.popup_host())
             .and_then(|host| host.as_control().get_input_root())
-            .filter(|root| Some(root_element_visual(root)) != tip_visual_root);
+            .filter(|root| root_element_visual(root) != tip_visual_root);
 
         let is_tip_event = tip_popup_input_root.as_ref().is_some_and(|root| same_input_root(e.root(), root));
-        let is_tip_owner_window_event = Some(root_element_visual(e.root())) == tip_visual_root;
+        let is_tip_owner_window_event = root_element_visual(e.root()) == tip_visual_root;
 
         if is_tip_event || is_tip_owner_window_event {
             // The pointer is on one of the two windows (tip or owner) involved: remember which one, and cancel any
@@ -410,9 +410,11 @@ impl IDisposable for ToolTipService {
     }
 }
 
-/// The root element of an input root, as a visual.
-fn root_element_visual(root: &Rc<dyn IInputRoot>) -> Ref<Visual> {
-    root.root_element().upcast()
+/// The root element of an input root, as a visual: `None` for a root that
+/// has closed, as the event that closed a popup is still processed with the
+/// popup as its root (the reference reads a null `RootElement` there).
+fn root_element_visual(root: &Rc<dyn IInputRoot>) -> Option<Ref<Visual>> {
+    root.try_root_element().map(Ref::upcast)
 }
 
 /// Whether two input root handles are the same input root.
