@@ -79,9 +79,10 @@ fn catalog_services() -> TestServices {
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub(super) enum TestApplication {
     /// A unit test application with the test services of the catalog, the Simple theme as
-    /// the theme of the application, the run-time loader registered, and the resources
-    /// the application of the sample gives its pages (`CustomThemes.xaml`, which
-    /// `App.xaml` merges).
+    /// the theme of the application, the run-time loader registered (and not used until
+    /// the test loads with it), and the resources the application of the sample gives its
+    /// pages (`CustomThemes.xaml`, which `App.xaml` merges), from their compiled markup
+    /// when the build compiled the document.
     UnitTest,
     /// The application of the catalog (`App`) with the test services of the catalog: it
     /// loads `App.xaml` and applies the Fluent theme. For what reads the application class.
@@ -95,14 +96,19 @@ impl TestApplication {
             TestApplication::UnitTest => {
                 let scope = UnitTestApplication::start(catalog_services().with_theme(|| SimpleTheme::new().as_style()));
                 FerroRuntimeXamlLoader::register();
-                // The run-time loader loads `CustomThemes.xaml`, as in the tests of the sample,
-                // also when the build compiled the document
-                // (`the_resources_of_the_application_are_compiled` reads its compiled markup).
-                // The first load of the run-time loader in a process also makes the
-                // registrations of its type system (`Option<Vec<T>>` as the nullable form of a
-                // list of values, among them), which the dump of a tree reads values with:
-                // with it here, both trees of a test are dumped in the same state.
-                let custom_themes = try_load_document("/CustomThemes.xaml", None).unwrap_or_else(|error| panic!("/CustomThemes.xaml: {}", describe(&error)));
+                // The resources of the application: `CustomThemes.xaml` from its compiled markup
+                // when the build compiled it (the feature `catalog`), and from the run-time
+                // loader otherwise. With the compiled document nothing has asked the run-time
+                // loader for anything when the first tree of a test is populated and dumped: the
+                // thread of the test is then a process that has loaded compiled markup alone,
+                // and the values of that tree read as they do after the run-time loader has
+                // created its type system (docs/porting/xaml.md, 9.5.21).
+                let uri = crate::markup::document_uri("/CustomThemes.xaml");
+                let custom_themes = match crate::compiled_markup::try_load(None, &uri) {
+                    Ok(Some(compiled)) => compiled,
+                    Ok(None) => try_load_document("/CustomThemes.xaml", None).unwrap_or_else(|error| panic!("/CustomThemes.xaml: {}", describe(&error))),
+                    Err(error) => panic!("/CustomThemes.xaml: the compiled markup fails: {}", describe(&error)),
+                };
                 let provider = from_markup_value::<Rc<dyn IResourceProvider>>(&Some(custom_themes)).expect("CustomThemes.xaml is a resource provider");
                 Application::current().expect("the unit test application").resources().merged_dictionaries().add(provider);
                 scope
