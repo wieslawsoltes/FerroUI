@@ -228,8 +228,8 @@ impl DrawingContextImpl {
         self.current_transform = transform;
     }
 
-    fn push_clip_path(&mut self, path: &BezPath, fill_rule: Fill) {
-        let (transform, anti_alias) = (self.device_transform(), self.anti_alias());
+    fn push_clip_path(&mut self, path: &BezPath, fill_rule: Fill, anti_alias: bool) {
+        let transform = self.device_transform();
         self.sink().push_clip(path, fill_rule, transform, anti_alias);
         self.save(SavedKind::Clip);
     }
@@ -889,19 +889,22 @@ impl IDrawingContextImpl for DrawingContextImpl {
     }
 
     fn push_clip(&mut self, clip: Rect) {
-        self.push_clip_path(&rect_path(clip), Fill::NonZero);
+        // The edges of a rectangle clip are not anti-aliased, those of a
+        // rounded rectangle and of a geometry are, whatever the edge mode
+        // is: what the Skia backend asks of its canvas.
+        self.push_clip_path(&rect_path(clip), Fill::NonZero, false);
     }
 
     fn push_clip_rounded(&mut self, clip: RoundedRect) {
-        self.push_clip_path(&rounded_rect_path(clip), Fill::NonZero);
+        self.push_clip_path(&rounded_rect_path(clip), Fill::NonZero, true);
     }
 
     fn push_clip_region(&mut self, region: &dyn IPlatformRenderInterfaceRegion) {
         let path = Self::region_impl(region).path();
 
-        // A region is a set of pixels of the target: it is not transformed.
-        let anti_alias = self.anti_alias();
-        self.sink().push_clip(&path, Fill::NonZero, Affine::IDENTITY, anti_alias);
+        // A region is a set of pixels of the target: it is not transformed
+        // and has no edge inside a pixel.
+        self.sink().push_clip(&path, Fill::NonZero, Affine::IDENTITY, false);
         self.save(SavedKind::Clip);
     }
 
@@ -993,7 +996,7 @@ impl IDrawingContextImpl for DrawingContextImpl {
 
     fn push_geometry_clip(&mut self, clip: &dyn IGeometryImpl) {
         match Self::geometry_impl(clip).fill_path() {
-            Some(fill_path) => self.push_clip_path(fill_path.path(), to_fill(fill_path.fill_rule())),
+            Some(fill_path) => self.push_clip_path(fill_path.path(), to_fill(fill_path.fill_rule()), true),
             None => self.save(SavedKind::Nothing),
         }
     }
