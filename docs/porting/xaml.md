@@ -1214,6 +1214,50 @@ Thread-local map; `initialize_component` performs one lookup. The lookup is comp
 5. A stable, scanner-readable statement of the class's dotted namespace (`markup: { namespace: ".." }`, exists) and, for the build tool, the module path of the file declaring it (derived from the file's position under `src/`, 9.5.1).
 6. Handler methods are inherent methods of the class in the same file as `ferro_class!` (rule 2 of 9.4.4), or are declared in metadata.
 
+#### 9.4.6 Implemented (2026-10-09): a text a type converter converts when the document is loaded
+
+A text assigned to a member whose type (or the member itself) states a type converter the compiler has no intrinsic for is converted when the document is loaded. The transform writes it as upstream's compiler does (`XamlTransformHelpers.ConvertWithConverter`):
+
+```text
+XamlAstNeedsParentStackValueNode
+  XamlAstRuntimeCastNode -> T
+    XamlStaticOrTargetedReturnMethodCallNode Converter.ConvertFrom(ITypeDescriptorContext, CultureInfo, object)
+      XamlAstNewClrObjectNode Converter
+      XamlAstContextLocalNode ITypeDescriptorContext
+      XamlStaticOrTargetedReturnMethodCallNode CultureInfo.get_InvariantCulture
+      XamlAstTextNode
+```
+
+`Source="/Assets/missing.png"` of an `Image` is the case of the catalog (here the document `image_source_rooted.xaml` of the corpus): `(IImage) new BitmapTypeConverter().ConvertFrom(context, CultureInfo.InvariantCulture, "/Assets/missing.png")`. The interpreter evaluates the nodes one by one (`runtime/interpreter/evaluators.rs`), and the emitter writes one statement per evaluation, with the typed functions the declarations give (form A of 9.3: nothing goes through the metadata by name):
+
+```rust
+// image_source_rooted.xaml(2,10) Source
+let value_0 = ::ferroui_base::utilities::CultureInfo::__markup_static_get_InvariantCulture();
+let value_1 = rt::invoked(::ferroui_markup_xaml::converters::BitmapTypeConverter::__markup_ConvertFrom_1(
+    &::ferroui_markup_xaml::converters::BitmapTypeConverter::__markup_new_0(),
+    ::core::option::Option::Some(rt::type_descriptor_context(&context)),
+    rt::cast(::core::clone::Clone::clone(&value_0), 2, 10)?,
+    rt::to_object(::std::string::String::from("/Assets/missing.png"))), 2, 10)?;
+let cast_0 = rt::cast_checked(::core::clone::Clone::clone(&value_1), rt::markup_handle(<dyn ::ferroui_base::media::IImage as ::ferroui_base::metadata::MarkupTyped>::MARKUP), "FerroUI.Media.IImage", 2, 10)?;
+image_0.set_value(::ferroui_controls::Image::source_property(), rt::exact(cast_0.clone(), "FerroUI.Controls.Image.set_Source", 0, 2, 10)?);
+```
+
+| Node | What the interpreter does | What is emitted |
+|---|---|---|
+| `XamlAstNeedsParentStackValueNode` | checks that the parent stack is provided, evaluates the value | the value. The context of generated code has the parents: the initialisation of every object around a node that needs them pushes it (`context.push_parent`), which the emitter decides from the same nodes (`ParentStackNodes`) |
+| `XamlAstContextLocalNode` of `ITypeDescriptorContext` | the context of the document as the type descriptor context (`RuntimeContext`) | `rt::type_descriptor_context(&context)`: the context of generated code (`XamlIlContext`), which states the base URI of the document (`DocumentInfo::base_uri`) and the parents |
+| the call of the converter | `ConvertFrom` with the converter, the context, the culture and the text as `object`; a failure is the exception that wraps the converter's | the typed function of the declared method, its failure through `rt::invoked` (the same wrapping) |
+| `XamlAstRuntimeCastNode` to a reference type | `castclass`: null passes, an instance of the type is held in the handle of its class, anything else is `InvalidCastException: Unable to cast object of type 'A' to type 'T'.` | `rt::cast_checked`, with the same three outcomes and the same text |
+| the assignment | the setter converts the value to the type it declares | the value is still untyped after the cast, so the setter gets `rt::exact(value, member, index, line, position)?`, the conversion of the run-time loader (`SetterValues::Untyped`, the form a setter chosen at run time already had); a declared setter that takes a reference type goes through `checked_cast` as before |
+
+The type descriptor context is a Rust type the emitter names, in both hosts (`Known::TypeDescriptorContext` and its nullable form): the type is one of the closed table of runtime library types, which has no metadata of its own to take a path from.
+
+**Not emitted:** the cast to a value type (`unbox.any`, where null is `NullReferenceException`). The document is refused with the converter and the type in the reason. No document of the catalog has one: its 37 are the converter of bitmaps to `IImage` (22), `IImageBrushSource` (14) and `IBitmap` (1).
+
+**Deviations.** (1) The call of `get_InvariantCulture` is written before the converter is created (a call that yields a value is held in a local, and the converter is created in the argument list), where the interpreter creates the converter first; neither has an effect the other can see. (2) The base URI of the context is the text the build was given for the document (`ferres://ControlCatalog/Pages/ImagePage.xaml`), where the run-time loader's is the text of the `Uri` it parsed (`Uri::to_string`, with the host in lower case); they are the same URI, and differ as text only through `Uri::original_string`.
+
+**Proof.** Seven documents of the corpus (9.10.2), emitted the same by both hosts: a converter of the test crate on a registered property (a text, the nearest parent that is a control, null, the base URI, a failure of the converter, a value of another type), and the converter of bitmaps for an `Image` and an `ImageBrush`. A bitmap that exists is not loaded by any test (the test services decode none): the documents of the bitmap converter are compared by the failure both back ends raise for an asset that does not exist, looked for below the base URI of the document.
+
 ### 9.5 Typing without the framework linked into the build tool
 
 #### 9.5.1 Inputs of the build-time type system
@@ -1342,7 +1386,7 @@ Written without a build (the validating session builds it; HANDOVER.md section 1
 
 *Type text (9.5.2, step 1).* A path is resolved against the items of the module, its `use` items (an explicit import before a glob) and the glob imports of modules of the crate, followed through re-exports to the module that declares the item, and written absolute (`::ferroui_controls::border::Border`). A path into another crate is absolute as the `use` item spells it; it is not followed to the declaring module, which needs that crate's model. Primitive types and `String`, `Option`, `Vec`, `Box`, `Result` stay as they are. Not resolved, and kept as written with a `FRN9020` warning: a name that nothing of the module declares or imports (in a file with a glob import of another crate every such name may come from the glob), and a path whose unknown head is not the name of a crate.
 
-*Macros of the crate.* The scanner does not expand macros, with one exception: an invocation of a `macro_rules!` macro the crate defines, whose rule takes only identifiers, types, a visibility, literals and attributes, is expanded by substitution, and the types (`pub struct $name`) and declaration macros at the top level of the expansion are read. `ferro_transition_class!` and `ferro_markup_list!` have that form. A macro of the crate that declares through a declaration macro and is not expanded (a repetition in its rule) is a `FRN9012` warning.
+*Macros of the crate.* The scanner does not expand macros, with one exception: an invocation of a `macro_rules!` macro the crate defines, whose rule takes only identifiers, types, a visibility, literals and attributes, is expanded by substitution, and the types (`pub struct $name`) and declaration macros at the top level of the expansion are read. `ferro_transition_class!` and `ferro_markup_list!` have that form. A macro of the crate that declares through a declaration macro and is not expanded (a repetition in its rule) is a `FRN9012` warning. (Since 9.5.16: a macro another crate exports is expanded the same way, with the rules the model of that crate has; and a rule that repeats is expanded for what a function registers with the untyped value conversions.)
 
 *Diagnostics (`FRN9xxx`, 9.6.5).* `FRN9001` a file is not read; `FRN9010` a declaration has a form the reader does not know (the declaration is not in the model); `FRN9011` a declaration macro is invoked where the scanner does not read (inside a function); `FRN9012` a macro of the crate is not expanded; `FRN9013` a runtime type or metadata written by hand; `FRN9020` an unresolved path; `FRN9021` an accessor or a registration that is not read; `FRN9022` a type declared twice; `FRN9023` a declaration names a type the scanner has no declaration of; `FRN9024` a stated public path differs; `FRN9030` the assembly or the namespace table. Every file reports, per declaration macro, how its invocations were met (read, failed, in a macro definition, in an unread position, in test code); their sum is the number of invocations in the text of the file, which is what the test of the real crates compares.
 
@@ -1871,6 +1915,22 @@ Both themes take the dialogs as a dependency and read their `.xamlmeta`, which n
 
 A crate that depends on the dialogs now builds `ferroui-build` for the host (the base crate, the loader with `compiler`, `xamlx`, the scanner), as a crate that depends on a theme already does. Not run by the author: a `wasm32` build.
 
+#### 9.5.16 Implemented (2026-10-09): macros in the scanner (the work list of the catalog)
+
+Two forms the scan of the colour picker and of the catalog did not read (HANDOVER.md, section 19, has the measure of the catalog before and after).
+
+*A rule that repeats, for registrations.* `expand_registration_macros` (9.5.12) expands the macros a function invokes and reads what the expansions register with the untyped value conversions. The matcher and the transcriber now do repetitions (`$($type_:ty),* $(,)?` and `$( .. )*`, with a separator, with `*`, `+` or `?`, nested): a variable of a repetition stands for one text per round, and a repetition of the transcriber is written once for each round of the variables it names. The colour picker registers the casts of its palettes and of its converters that way (`register_palettes!(FlatColorPalette, ..)`), and with a cast of a crate not read the models answer no question about a cast (9.5.12), which refused 72 documents of the catalog. The expansion of a macro in item position, for what it *declares* (9.5.6), does not do repetitions and is unchanged.
+
+*A macro another crate exports.* `ferroui_controls::ferro_markup_list!(pub CountryList: Rc<Country>);` declares the list of a view model as a type of markup (``FerroList`1[Country]``, with its indexer), and its definition is in the controls crate, which the scan of the crate that invokes it never reads (limit 4 of 9.5.6). The model of a crate now has the macros it exports (`#[macro_export]`) that declare through a declaration macro, as text (`AssemblyModel::macros`, `MacroModel { name, rules[(matcher, transcriber)] }`; one definition, no `cfg` condition), and the scan of a crate built on it expands an invocation of a macro its own crate does not define with those rules, `$crate` written as the path of the exporting crate. Without the type, the property bound to `ItemsSource` was a Rust type no metadata declares, and the transform found no data type for the item template (`Unable to resolve property or method of name 'Name' on type 'XamlX.TypeSystem.XamlPseudoType'`: 6 documents of the catalog; the run-time type system has the type because the expansion registers it).
+
+| Model | Before | Now |
+|---|---|---|
+| `ferroui_controls` | no macros | `ferro_markup_list!` with its rule |
+| `ferroui_controls_color_picker` | 2 `register_cast` and 2 `register_nullable` not read; no list of palette colours | 32 types, the list among them; nothing not read; the 13 casts of its two macros |
+| `control_catalog` | 289 types | 295 types (its six lists) |
+
+The drift test (`type_system_drift`) asserts that no crate of it has a cast its scan did not read, and `the_colour_picker_is_read_with_its_macros` asserts both forms on the colour picker, read as files. The colour picker cannot be a crate of the comparison itself in that process (HANDOVER.md, section 19): it was compared once, linked, with nothing in a kind that must be empty.
+
 ### 9.6 Build integration
 
 #### 9.6.1 Entry points
@@ -2152,9 +2212,9 @@ For applications, `export_metadata()` can generate the whole function (`$OUT_DIR
 | `XamlValueNodeWithBeginInit` | evaluate, BeginInit | `let x = ..; x.begin_init();` | — |
 | `XamlAstManipulationImperativeNode` | execute imperative, ignore target | the statement | — |
 | `XamlAstImperativeValueManipulation` | evaluate value, manipulate it | `let v = ..;` + manipulation on `v` | — |
-| `XamlAstContextLocalNode` | context as service provider / type descriptor context | `sp.clone()` / `rt::type_descriptor_context(&ctx)` | `ITypeDescriptorContext` lives in `ferroui_markup_xaml::converters` |
-| `XamlAstRuntimeCastNode` | evaluate as object, checked cast | `rt::cast::<T>(&v)?` or `v.cast::<T>()` | — |
-| `XamlAstNeedsParentStackValueNode` | verify stack, evaluate | the inner expression (the verification is a build-time assertion) | — |
+| `XamlAstContextLocalNode` | context as service provider / type descriptor context | `rt::service_provider(&context)` / `rt::type_descriptor_context(&context)` (as implemented, 9.4.6) | `ITypeDescriptorContext` lives in `ferroui_markup_xaml::converters` |
+| `XamlAstRuntimeCastNode` | evaluate as object, checked cast | `let cast_n = rt::cast_checked(value, <handle of T>, "T", line, position)?;` for a reference type; the member that takes it converts it (`rt::exact`). A value type is refused (as implemented, 9.4.6) | — |
+| `XamlAstNeedsParentStackValueNode` | verify stack, evaluate | the inner expression; the parents are pushed by the initialisation of the objects around it (as implemented, 9.4.6) | — |
 | `XamlDeferredContentNode` | `DeferredContentFactory` + customisation method | `rt::defer(<handle of T>, &context, <function>_deferred_<n>, line, position)?` and the free function `<function>_deferred_<n>` | captured outer locals are not possible: the body is a function of its own, rustc rejects a use of an outer local |
 | `XamlDeferredContentInitializeIntermediateRootNode` | evaluate, store as intermediate root | `let x = ..; ctx.set_intermediate_root_object(into_markup_value(x.clone()));` | — |
 | `XamlDirectCallPropertySetter` (setter) | call method with target + arguments | form A/B/C call | — |

@@ -120,6 +120,15 @@
   the models, without converting it (section 18: the table is the work list of the next stage).
   Nothing is half-done in the working tree. The browser build was not run by the author.
 
+- The ninth stage (branch `xaml-catalog-work-list`, on `xaml-emit-event-handlers`, section 19) worked
+  the list of section 18 from the largest reason down, built and run by its author with the
+  commands the stage allowed. DONE: the scanner reads the registrations a macro makes for each type
+  it is invoked with, and what a macro of another crate declares (`xaml.md` 9.5.16); the emitter's
+  rule for a text a type converter converts when the document is loaded (`xaml.md` 9.4.6). The
+  measure of the catalog is 192 of 219 documents emitted (84 before, 156 with the registrations
+  counted as read). Section 19 has the table after each item, what is refused now and why, and
+  where the stage stopped. Nothing is half-done in the working tree.
+
 Design documents in the repository: `docs/porting/xaml.md`, sections 9 (emitter design: call forms
 A/B/C, build integration, code-behind), 9.5 (source scanner), 9.12 (the 14 rulings), 9.13, and
 decisions 1 to 27. Read section 9 before touching the emitter. `DRAFT-AUTHOR-REPORT.md` is the
@@ -1370,3 +1379,67 @@ Refused, by reason (the first error of each document; the second measure, which 
 63 documents in the second measure: 37 + 6 + 4 + 4 + 5 + 2 + 2 + 1 + 1 + 1. A refused document is counted by its first error; what else stands in its way shows when that is gone.
 
 Beyond the table, for the conversion itself (not measured here): the sample's classes are populated through `markup::load_component` and listed in a hand-written table (`xaml_class!`, `XamlClass`), which the compiled markup replaces as in the dialogs; the sample replaces the path data of some `StreamGeometry` resources in its build script (`placeholder-branding`), so the documents the build compiles are the rewritten ones, not the files; its generated per-document tests load through the run-time loader, which stays a dev-dependency for them; the estimate of the size of the module (`xaml.md` 9.10.1, item 2: +6 to +10 MB raw) is to be compared with 8.6 MB of source for 156 documents, measured after a build.
+
+## 19. What the ninth stage delivered (the work list of the catalog), and how to validate it
+
+Branch `xaml-catalog-work-list`, on `xaml-emit-event-handlers`. Read `xaml.md` 9.4.6 and 9.5.16 first. The table of section 18 was worked from its largest reason down; this section is what each item did to it.
+
+### Item 1: the registrations a macro makes (reason 1, 72 documents)
+
+The scanner already expanded the macros a function invokes for what the expansions register with the untyped value conversions (`expand_registration_macros`, 9.5.12), but not a rule that repeats a part of its input, which is the form of the colour picker (`register_palettes!` in `markup_types/palettes.rs` and `register_converters!` in `markup_types/converters.rs`: `$(ValueTypes::register_nullable::<Rc<$type_>>(); ValueTypes::register_cast::<Rc<$type_>, Rc<dyn IColorPalette>>(..);)*` for `$($type_:ty),*`). The four unread calls of the measure were the two calls in the text of each of the two definitions. The rule that fits is the one the scanner has (it expands the macros of the crate by substitution): the matcher and the transcriber now do repetitions (`$(..) sep? *|+|?`, nested ones too), for the registrations of a function. The sources of the colour picker are unchanged. What exists:
+
+- `src/FerroUI.Build.Scan/scanner/source.rs`: `Bound`, `Bindings`, `repetition_at`, `bound_names`, `named_variables`, `bind` and `substitute` with `repetitions`, `bind_at`. The expansion of the macros in item position (`expand_local_macros`: what a macro *declares*) is called without repetitions and is unchanged: a declaring macro whose rule repeats is still `FRN9012`.
+- The fixture `tests/fixtures/registration/register_types.rs`: `references!` (a repetition with a trailing separator, two types) is read; `guarded!` (a `block` fragment) is the macro that is not expanded and keeps its call as not read.
+
+The colour picker's model: 0 registrations not read (2 `register_cast`, 2 `register_nullable` before), with the 13 casts of the two macros (6 palettes, 7 converters).
+
+### Item 3: the data type inferred from an `ItemsSource` collection (reason 3, 6 documents)
+
+The drift was not in the element type of a collection: the collection type itself was missing from the models. The six view models declare their list with `ferroui_controls::ferro_markup_list!(pub CountryList: Rc<Country>);`, a macro of *another* crate, whose definition the scan of the sample never sees (limit 4 of `xaml.md` 9.5.6). At run time the expansion registers ``FerroList`1[Country]`` with its indexer; the models had no such type, the property was a Rust type no metadata declares, and the transform found no item type. Found by putting the colour picker (which declares `PaletteColorList` the same way) into the drift test as a fourth crate: one type only the run-time side had, ``FerroUI.Collections.FerroList`1[FerroUI.Media.Color]``.
+
+Fixed in the models: a crate's model lists the macros it exports that declare through a declaration macro, with their rules (`AssemblyModel::macros`, `MacroModel`; written as `"macros": [[name, [[matcher, transcriber], ..]], ..]`, absent when empty, so the format stays 2), and the scan of a crate built on it expands an invocation of such a macro as it expands a macro of its own crate, with `$crate` as the path of the exporting crate. What exists:
+
+- `src/FerroUI.Build.Scan/model.rs` (`MacroModel`, `AssemblyModel::macros`), `scanner/source.rs` (`LocalMacro::exported`, `Source::dependency_macros`, `with_crate_path`, `expand_local_macros`), `scanner/mod.rs` (`exported_macros`).
+- The fixtures: `tests/fixtures/scanner/macros.rs` exports `typed_list!`; `tests/fixtures/dependent/lib.rs` invokes it; `dependent_crate_is_resolved_with_the_model_of_the_crate_it_is_built_on` asserts the type, its handles, its generic arguments and a property whose type is named through `$crate`.
+- `tests/FerroUI.Markup.Xaml.UnitTests/type_system_drift.rs`: `the_colour_picker_is_read_with_its_macros` (the scan of the colour picker with the models of the base crate and the controls: no registration unread, the 13 casts of the two macros, the list as a type with its element type), and the drift test asserts that no crate has a cast its scan did not read. The colour picker is **not** linked into the XAML test crate: registering its types adds its assembly to the namespace table of the process, which the emitter writes into every document of the other tests (107 corpus documents differed between the hosts when it was). The full comparison with the run-time type system was run once with the crate linked and registered: nothing in a kind that must be empty.
+- The corpus: `items_source_typed_list.xaml` with `Row`, `RowList` (declared with `ferroui_controls::ferro_markup_list!`) and `Table` in `support/emitter.rs`: an items control bound to the list with a compiled binding, and an item template whose data type is inferred from it. Both hosts emit the same bytes, and the tree is the run-time loader's.
+
+Five of the six documents are still refused, for another reason that the models now show: `no public Rust path is recorded for FerroUI.Collections.FerroList`1[..]`. The lists are `pub` in private modules of the sample (`mod table_view_page_view_model;`) and are not exported again, so generated code, which is a module of its own, cannot name them. That is one `pub use` per list in the sample (`CountryList`, `NodeList`, `StandardCursorList`, `WrapPanelItemList`, `FormatObjectList`), a change of the sample's sources, which this stage does not touch. The sixth (`ComboBoxPage`, whose `IdAndNameList` is reachable) moved on to a list created in markup.
+
+### Item 2: type converters applied at load (reason 2, 37 documents)
+
+`xaml.md` 9.4.6 has the rule. What exists:
+
+- `rust_emitter/emitter.rs`: the cases of `XamlAstNeedsParentStackValueNode` (the inner value, with the context), `XamlAstRuntimeCastNode` (`Emitter::runtime_cast`: `rt::cast_checked`, the result held untyped) and `XamlAstContextLocalNode` (`Emitter::context_local`: `rt::type_descriptor_context(&context)`, or the service provider) in `value`; `is_cast_result` and the untyped argument of the setter in `property_assignment`. `emit_types.rs`: `Known::TypeDescriptorContext` and `Known::OptionTypeDescriptorContext`, answered by `RuntimeEmitTypes` and `ModelEmitTypes`.
+- `src/Markup/FerroUI.Markup.Xaml/xaml_il/runtime/compiled.rs` (`rt`): `type_descriptor_context`; `runtime_type_name` names a primitive by the runtime library type it mirrors (`System.Int32`), as the run-time loader does in the message of a failed cast (it said `i32`).
+- The corpus: `type_converter.xaml`, `type_converter_failure.xaml`, `type_converter_cast_failure.xaml`, `type_converter_base_uri.xaml` (the converter `CaptionConverter` of `support/emitter.rs`, on the property `Captioned.Caption`: a text, the nearest parent control, null, a value of another type, a failure, the base URI), `image_source_missing_asset.xaml`, `image_brush_source_missing_asset.xaml`, `image_source_rooted.xaml` (the converter of bitmaps: `IImage` and `IImageBrushSource`, an absolute and a rooted path). `corpus::BASE_URI_DOCUMENTS` are the four the run-time loader is given the URI of the document and an asset loader for (`documents_that_read_their_base_uri_build_equal_object_trees`); `a_text_is_converted_by_the_type_converter_of_its_property` reads the captions back.
+
+Not covered, and refused by name: a converter whose result is cast to a *value type* (`unbox.any`; no document of the catalog). **No test loads a bitmap that exists**: the test services have no render interface that decodes one, so the three documents of the bitmap converter are compared by the failure both back ends raise (the same exception type, message and position, with the asset looked for below the base URI); the cast of a converted value and its assignment are proven by the converter of the corpus.
+
+### The measure after each item
+
+`cargo test -p ferroui-markup-xaml-tests --lib emitter::catalog_measure -- --ignored --nocapture`. The measure is taken once now (the second measure of section 18 counted as read what the scanner reads now), and the test fails if a model has a cast its scan did not read or if a question is left unanswered.
+
+| | Emitted | Refused | Emitted Rust |
+|---|---|---|---|
+| Section 18, the build as it was | 84 | 135 | 3,850,433 bytes |
+| After item 1 (the second measure of section 18) | 156 | 63 | 8,564,437 bytes |
+| After item 3 | 156 | 63 (the 6 of reason 3 are now 5 for a public path and 1 for a list created in markup) | not measured apart |
+| After item 2 | 192 | 27 | 12,433,841 bytes, 130,285 lines |
+
+The rows of items 1 and 3 are not measurements of their own: the measure was run with the three items in place (192), and the two rows are derived from it and from section 18 (36 of the 37 documents of reason 2 emit; the 37th, `LabelsPage`, moved on to a method as a command).
+
+Refused after item 2, 27 documents (the first error of each):
+
+| Documents | Reason | What it needs |
+|---|---|---|
+| 5 | `XamlIlBindingPathNode: no public Rust path is recorded for FerroUI.Collections.FerroList`1[T]` (`CursorPage`, `NumericUpDownPage`, `TableViewPage`, `TreeViewPage`, `WrapPanelPage`) | The sample exports its five lists (`pub use`): a change of the sample. |
+| 5 | `XamlIlBindingPathNode: T has no metadata` (`CustomThemes.xaml`: `FerroList<Rc<SampleInfo>>`; `DataValidationPage`: `ErrorConverter`; `ListBoxPage`: ``IObservable`1[Object]``; `FlexPage`: ``Nullable`1[FlexAlignItems]``; `CalendarDatePickerPage`: ``Nullable`1[DateTime]``) | Compiled binding paths over types without markup metadata. |
+| 4 | `XamlPropertyAssignmentNode: class:name: not a plain property setter` | `Classes.name="{Binding ..}"`. |
+| 3 | `XamlIlBindingPathNode: a binding path with a method as a command` (`ContextFlyoutPage`, `LabelsPage`, `TransitioningContentControlPage`) | As section 18, reason 7. |
+| 5 | `XamlAstNewClrObjectNode: .. is not a class of the object model` (`System.Collections.ArrayList`: `ComboBoxPage`, `ViewboxPage`; ``List`1[T]``: `RefreshContainerPage`, `FocusPage`, `DialogsPage`) | Lists and arrays created in markup. |
+| 2 | `XamlIlWidthQuery: no emitter for this value node` | Container queries. |
+| 1 | `PreviousButtonTheme: not a plain property setter` | As section 18, reason 9. |
+| 1 | `App.xaml`: the include of the colour picker's theme documents | The colour picker compiled by its build. |
+| 1 | `OpenGlLeasePage`: the class is not ported | Left out. |
+
