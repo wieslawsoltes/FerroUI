@@ -65,13 +65,24 @@
 //! every declared one is taken as registered. The drift test of the XAML test
 //! crate (`type_system_drift`) compares the two type systems and fails on a
 //! difference that is not one of these.
+//!
+//! # For the emitter of Rust source
+//!
+//! The contracts state the types of the type system; the emitter also needs
+//! the Rust side: the Rust types a member declares ([`MemberRust`]), the
+//! public paths, the accessors of property definitions and which Rust types
+//! convert to which. [`ModelEmitTypes`] answers that part (`EmitTypes` of the
+//! loader) from the models, and records a question only the process can
+//! answer instead of guessing (docs/porting/xaml.md, 9.5.12).
 
+mod emit_types;
 mod model_type_system;
 mod types;
 
+pub use emit_types::{ModelClass, ModelEmitProperty, ModelEmitTypes, ModelMarkup};
 pub use model_type_system::{ModelTypeSystem, Position};
 pub use types::{
-    MemberSource, ModelAssembly, ModelConstructor, ModelCustomAttribute, ModelEvent, ModelField, ModelMembers, ModelMethod, ModelProperty, ModelType,
+    DeclaredRust, MemberRust, MemberSource, ModelAssembly, ModelConstructor, ModelCustomAttribute, ModelEvent, ModelField, ModelMembers, ModelMethod, ModelProperty, ModelType,
     ModelTypeKind, ModelTypeOrigin,
 };
 

@@ -23,7 +23,7 @@ use crate::model::{
 use crate::model_set::ModelSet;
 
 use super::types::{
-    substitute, type_key, MemberSource, ModelAssembly, ModelConstructor, ModelCustomAttribute, ModelEvent, ModelField, ModelMembers, ModelMethod,
+    substitute, type_key, DeclaredRust, MemberRust, MemberSource, ModelAssembly, ModelConstructor, ModelCustomAttribute, ModelEvent, ModelField, ModelMembers, ModelMethod,
     ModelProperty, ModelType, ModelTypeKind, ModelTypeOrigin, ModelTypeSpec,
 };
 
@@ -202,6 +202,16 @@ impl ModelTypeSystem {
     /// The models the type system is over.
     pub fn models(&self) -> &ModelSet {
         &self.set
+    }
+
+    /// The canonical path of the handle of the classes of the object model (`Ref`).
+    pub(crate) fn ref_path(&self) -> &str {
+        &self.ref_path
+    }
+
+    /// The declaration the full name `full_name` is the name of.
+    pub(crate) fn named(&self, full_name: &str) -> Option<Position> {
+        self.index.names.get(full_name).copied()
     }
 
     /// The type named `full_name`, or the unknown pseudo type.
@@ -795,7 +805,13 @@ impl ModelTypeSystem {
             generic_arguments: Vec::new(),
             is_abstract: false,
             source,
+            rust: MemberRust::default(),
         })
+    }
+
+    /// The one text of each of the Rust types of `parameters`.
+    fn rust_types(&self, parameters: &[crate::model::ParameterModel]) -> Vec<Option<String>> {
+        parameters.iter().map(|parameter| Some(self.set.expanded(&parameter.type_.text))).collect()
     }
 
     fn resolve_all(&self, parameters: &[crate::model::ParameterModel]) -> Vec<Rc<dyn IXamlType>> {
@@ -860,6 +876,7 @@ impl ModelTypeSystem {
                         literal: field.literal.clone(),
                         attributes: field.attributes.clone(),
                         source: field.source.clone(),
+                        rust: field.rust.clone(),
                     })
                 })
                 .collect(),
@@ -911,6 +928,7 @@ impl ModelTypeSystem {
                 is_public: true,
                 parameter_attributes,
                 source: source_of(constructor),
+                rust: MemberRust { parameters: self.rust_types(&constructor.parameters), declared: Some(DeclaredRust::Constructor), registered: None },
             }));
         }
         for property in &declared.properties {
@@ -937,13 +955,18 @@ impl ModelTypeSystem {
         for indexer in &declared.indexers {
             let value_type = self.resolve(&indexer.value_type.text);
             let parameters = self.resolve_all(&indexer.parameters);
+            let index_types = self.rust_types(&indexer.parameters);
             let getter = indexer.getter.as_ref().map(|accessor| {
                 self.method(type_, "get_Item".to_string(), false, value_type.clone(), parameters.clone(), Vec::new(), accessor_source(accessor))
+                    .with_rust(MemberRust { parameters: index_types.clone(), ..MemberRust::default() })
             });
             let setter = indexer.setter.as_ref().map(|accessor| {
                 let mut setter_parameters = parameters.clone();
                 setter_parameters.push(value_type.clone());
+                let mut setter_types = index_types.clone();
+                setter_types.push(Some(self.set.expanded(&indexer.value_type.text)));
                 self.method(type_, "set_Item".to_string(), false, self.void(), setter_parameters, Vec::new(), accessor_source(accessor))
+                    .with_rust(MemberRust { parameters: setter_types, ..MemberRust::default() })
             });
             members.methods.extend(getter.iter().cloned());
             members.methods.extend(setter.iter().cloned());
@@ -970,15 +993,19 @@ impl ModelTypeSystem {
                 Some(return_type) => self.resolve(&return_type.text),
                 None => self.void(),
             };
-            members.methods.push(self.method(
-                type_,
-                method.name.clone(),
-                method.is_static,
-                return_type,
-                self.resolve_all(&method.parameters),
-                self.project_attributes(&method.attributes),
-                source_of(method),
-            ));
+            let returns = method.return_type.as_ref().map(|return_type| self.set.expanded(&return_type.text));
+            members.methods.push(
+                self.method(
+                    type_,
+                    method.name.clone(),
+                    method.is_static,
+                    return_type,
+                    self.resolve_all(&method.parameters),
+                    self.project_attributes(&method.attributes),
+                    source_of(method),
+                )
+                .with_rust(MemberRust { parameters: self.rust_types(&method.parameters), declared: Some(DeclaredRust::Method(returns)), registered: None }),
+            );
         }
         if let Some(parse) = &declared.parse {
             let source = MemberSource::Declared {
@@ -988,7 +1015,10 @@ impl ModelTypeSystem {
                 fallible: true,
                 call: declared.parse_call.clone(),
             };
-            members.methods.push(self.method(type_, "Parse".to_string(), true, self_type.clone(), vec![self.get("System.String")], Vec::new(), source));
+            members.methods.push(
+                self.method(type_, "Parse".to_string(), true, self_type.clone(), vec![self.get("System.String")], Vec::new(), source)
+                    .with_rust(MemberRust { parameters: vec![Some("String".to_string())], declared: Some(DeclaredRust::Parse), registered: None }),
+            );
         }
         for field in &declared.fields {
             let field_type = match &field.return_type {
@@ -1002,6 +1032,10 @@ impl ModelTypeSystem {
                 literal: None,
                 attributes: self.project_attributes(&field.attributes),
                 source: source_of(field),
+                rust: MemberRust {
+                    declared: field.return_type.as_ref().map(|field_type| DeclaredRust::Field(self.set.expanded(&field_type.text))),
+                    ..MemberRust::default()
+                },
             }));
         }
         // Static properties: `static T Name { get; set; }` (static accessors, no field).
@@ -1034,7 +1068,9 @@ impl ModelTypeSystem {
                     .and_then(|action| action.make_generic_type(&arguments).ok())
                     .unwrap_or_else(|| self.get("System.Delegate")),
             };
-            let add = self.method(type_, format!("add_{}", event.name), false, self.void(), vec![handler_type], Vec::new(), source_of(event));
+            let add = self
+                .method(type_, format!("add_{}", event.name), false, self.void(), vec![handler_type], Vec::new(), source_of(event))
+                .with_rust(MemberRust { parameters: vec![None], ..MemberRust::default() });
             members.methods.push(add.clone());
             members.events.push(Rc::new(ModelEvent { name: event.name.clone(), declaring_type: weak.clone(), add: Some(add) }));
         }
@@ -1057,6 +1093,7 @@ impl ModelTypeSystem {
                         fallible: false,
                         call: None,
                     },
+                    rust: MemberRust { declared: Some(DeclaredRust::EnumMember), ..MemberRust::default() },
                 }));
             }
             if declared.is_flags {
@@ -1085,12 +1122,16 @@ impl ModelTypeSystem {
         source: &dyn Fn(&crate::model::AccessorModel) -> MemberSource,
     ) -> (Option<Rc<ModelMethod>>, Option<Rc<ModelMethod>>, Rc<dyn IXamlType>) {
         let property_type = self.resolve(&property.value_type.text);
-        let getter = property
-            .getter
-            .as_ref()
-            .map(|accessor| self.method(type_, format!("get_{}", property.name), is_static, property_type.clone(), Vec::new(), Vec::new(), source(accessor)));
+        let value_type = self.set.expanded(&property.value_type.text);
+        let getter = property.getter.as_ref().map(|accessor| {
+            let declared = if is_static { DeclaredRust::StaticGetter(value_type.clone()) } else { DeclaredRust::Getter(value_type.clone()) };
+            self.method(type_, format!("get_{}", property.name), is_static, property_type.clone(), Vec::new(), Vec::new(), source(accessor))
+                .with_rust(MemberRust { parameters: Vec::new(), declared: Some(declared), registered: None })
+        });
         let setter = property.setter.as_ref().map(|accessor| {
+            let declared = if is_static { DeclaredRust::StaticSetter } else { DeclaredRust::Setter };
             self.method(type_, format!("set_{}", property.name), is_static, self.void(), vec![property_type.clone()], Vec::new(), source(accessor))
+                .with_rust(MemberRust { parameters: vec![Some(value_type.clone())], declared: Some(declared), registered: None })
         });
         (getter, setter, property_type)
     }
@@ -1231,6 +1272,7 @@ impl ModelTypeSystem {
                 is_public: true,
                 parameter_attributes: Vec::new(),
                 source: MemberSource::DefaultConstructor { type_path: type_path.clone(), callable: callable.clone() },
+                rust: MemberRust::default(),
             }));
         }
         // The metadata of the class: its own, and metadata of the same name declared next
@@ -1248,9 +1290,12 @@ impl ModelTypeSystem {
         let has_attribute = |attributes: &[Rc<dyn IXamlCustomAttribute>], name: &str| attributes.iter().any(|attribute| attribute.type_().name() == name);
         // The attributes of declared accessors of attached properties, by accessor name.
         let mut accessor_attributes: Vec<(String, Vec<Rc<dyn IXamlCustomAttribute>>)> = Vec::new();
-        for (listed, registered_index) in self.index.properties.get(&position).into_iter().flatten() {
-            let listed = self.set.type_at(*listed);
+        // The accessors the type system builds take the object as the root handle.
+        let object_handle = Some(format!("{}<{}>", self.ref_path, self.set.canonical_path("::ferroui_base::FerroObject")));
+        for (listed_position, registered_index) in self.index.properties.get(&position).into_iter().flatten() {
+            let listed = self.set.type_at(*listed_position);
             let registered = &listed.registered[*registered_index];
+            let value_handle = Some(self.set.expanded(&registered.value_type.text));
             // A second accessor of a property is no second property.
             if registered.registration == RegistrationModel::Alias {
                 continue;
@@ -1277,6 +1322,7 @@ impl ModelTypeSystem {
                 literal: None,
                 attributes: declared_attributes.clone(),
                 source: source.clone(),
+                rust: MemberRust { registered: Some((*listed_position, *registered_index)), ..MemberRust::default() },
             }));
             if attached {
                 // The accessors take the host type of the attached property.
@@ -1310,24 +1356,24 @@ impl ModelTypeSystem {
                     accessor_attributes.push((setter_name.clone(), declared_attributes.clone()));
                 }
                 if !declares(&getter_name) {
-                    members.methods.push(self.method(
-                        type_,
-                        getter_name,
-                        true,
-                        property_type.clone(),
-                        vec![object_type.clone()],
-                        declared_attributes.clone(),
-                        source.clone(),
-                    ));
+                    members.methods.push(
+                        self.method(type_, getter_name, true, property_type.clone(), vec![object_type.clone()], declared_attributes.clone(), source.clone())
+                            .with_rust(MemberRust { parameters: vec![object_handle.clone()], ..MemberRust::default() }),
+                    );
                 }
                 if !declares(&setter_name) {
-                    members.methods.push(self.method(type_, setter_name, true, self.void(), vec![object_type.clone(), property_type], declared_attributes, source));
+                    members.methods.push(
+                        self.method(type_, setter_name, true, self.void(), vec![object_type.clone(), property_type], declared_attributes, source)
+                            .with_rust(MemberRust { parameters: vec![object_handle.clone(), value_handle], ..MemberRust::default() }),
+                    );
                 }
                 continue;
             }
             let getter = self.method(type_, format!("get_{name}"), false, property_type.clone(), Vec::new(), Vec::new(), source.clone());
-            let setter = (!registered.read_only)
-                .then(|| self.method(type_, format!("set_{name}"), false, self.void(), vec![property_type.clone()], Vec::new(), source.clone()));
+            let setter = (!registered.read_only).then(|| {
+                self.method(type_, format!("set_{name}"), false, self.void(), vec![property_type.clone()], Vec::new(), source.clone())
+                    .with_rust(MemberRust { parameters: vec![value_handle.clone()], ..MemberRust::default() })
+            });
             let mut attributes = declared_attributes;
             if assign_binding && !has_attribute(&attributes, "AssignBindingAttribute") {
                 attributes.push(self.marker_attribute(attributes::ASSIGN_BINDING));
@@ -1374,6 +1420,7 @@ impl ModelTypeSystem {
                 generic_arguments: method.generic_arguments.clone(),
                 is_abstract: method.is_abstract,
                 source: method.source.clone(),
+                rust: method.rust.clone(),
             });
         }
         if members.constructors.is_empty() {
@@ -1386,6 +1433,7 @@ impl ModelTypeSystem {
                 is_public: false,
                 parameter_attributes: Vec::new(),
                 source: MemberSource::TypeSystem,
+                rust: MemberRust::default(),
             }));
         }
         match type_.key() {
@@ -1421,6 +1469,7 @@ impl ModelTypeSystem {
     }
 
     fn generic_method(&self, type_: &Rc<ModelType>, name: &str, return_type: Rc<dyn IXamlType>, parameters: Vec<Rc<dyn IXamlType>>, parameter: Rc<ModelType>) -> Rc<ModelMethod> {
+        let parameter_count = parameters.len();
         Rc::new(ModelMethod {
             name: name.to_string(),
             declaring_type: Rc::downgrade(type_),
@@ -1432,6 +1481,8 @@ impl ModelTypeSystem {
             generic_arguments: Vec::new(),
             is_abstract: false,
             source: MemberSource::TypeSystem,
+            // The parameters of a member no declaration states have no declared Rust type.
+            rust: MemberRust { parameters: vec![None; parameter_count], ..MemberRust::default() },
         })
     }
 
@@ -1633,6 +1684,7 @@ impl MemberBuilder {
         {
             return existing.clone();
         }
+        let parameter_count = parameters.len();
         let method = Rc::new(ModelMethod {
             name: name.to_string(),
             declaring_type: Rc::downgrade(&self.type_),
@@ -1644,6 +1696,7 @@ impl MemberBuilder {
             generic_arguments: Vec::new(),
             is_abstract,
             source: MemberSource::TypeSystem,
+            rust: MemberRust { parameters: vec![None; parameter_count], ..MemberRust::default() },
         });
         self.members.methods.push(method.clone());
         method
@@ -1653,12 +1706,14 @@ impl MemberBuilder {
         if self.members.constructors.iter().any(|constructor| constructor.parameters.len() == parameters.len()) {
             return;
         }
+        let parameter_count = parameters.len();
         self.members.constructors.push(Rc::new(ModelConstructor {
             declaring_type: Rc::downgrade(&self.type_),
             parameters,
             is_public: true,
             parameter_attributes: Vec::new(),
             source: MemberSource::TypeSystem,
+            rust: MemberRust { parameters: vec![None; parameter_count], ..MemberRust::default() },
         }));
     }
 
