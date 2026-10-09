@@ -21,9 +21,29 @@ Merged this period, in order: #26, #34, #33, #31, #27, #32, #29, #30, #36, #35, 
 - **Browser opt-level (#47).** `ferroui-base` and `ferroui-controls` are built at "s" in the `browser` profile: scrolling the TableView page takes about 20 % less processor time for 0.76 MB more with gzip. `scripts/browser/scroll-profile.mjs` measures it. This settles the owner decision on the browser opt-level.
 - **Performance designs (#48).** `docs/porting/performance/` holds the findings of a scrolling trace and nine improvement designs. The owner's rule for them: ported logic does not diverge from upstream.
 
-## In flight on 2026-10-08
+## Since then (2026-10-08 and 2026-10-09)
 
-Nothing runs in the cloud; the four cloud workers of the morning delivered and were the last ones. In flight locally, each on its own branch, written by a sub-agent without a compiler and validated in the main checkout: `b2-1-render-worker-clear`, `b2-4-strict-confinement`, `markup-gaps-types`, `markup-gaps-events`. Open pull requests: 91 (the two-mode frame benchmark) and 92 (the OpenGL page of the catalog). See "Critical now" below for what each is.
+Merged, by area (pull requests 89 to 112). The sections below have the state of each.
+
+- **Render thread, desktop.** The default wherever the render loop runs in the background (#89); the image of a shared GPU context shared between the two threads (R5.7, #90); the two-mode frame benchmark (#91); a test of unpaced changes of the UI thread while the render thread renders (#94); the features of the render interface and the platform graphics shared between the threads by their types (R5.8, #109).
+- **Browser, stage B2.** B2.1 (#97), B2.4 (#95), B2.2 (#100), B2.3 (#101), B2.5 (#102), B2.6 (#106): the UI on the main thread of the page and the compositor on a render worker, in a module built with threads.
+- **ControlCatalog.** The OpenGL page with its scene and the numerics it needs (#92); eleven markup gaps closed (#96), then C313, C209 and C310 (#99); AutoCompleteBox, NumericUpDown and the five performance monitor pages (#103); `App.xaml` and `SettingsPage` under the generated tests, numeric conversions, validation errors shown, pages freed when they leave a navigation page or a tabbed page (#105, #107). 218 of 219 documents load.
+- **XAML compiler.** Build integration for documents that name types of other crates (#104); the source scanner and the build-time type model (#110); dependency models and the build-time type system over the scanned model, with its drift test (#112).
+- **Performance.** Design 09: the native recycling benchmark, allocation counting and the counters behind the feature `perf-counters` (#108). Designs 04 and 03: four changes of the port's machinery, behaviour unchanged (#111).
+- **Tracking.** The mapping data reviewed and the pages regenerated (branch `tracking-and-continuation`); see "What the tracking pages show (2026-10-09)".
+
+## In flight on 2026-10-09
+
+Nothing runs in the cloud. In flight locally, each on its own branch, written by a sub-agent without a compiler and validated in the main checkout:
+
+| Branch | What | State |
+|---|---|---|
+| `b2-7-catalog-on-worker-v` | Browser B2.7: the ControlCatalog on the render worker, disposal of a view, a panic of a frame reaches the page | pull request 113, open; being validated |
+| `b2-8-site-and-ci-v` | Browser B2.8: one site with both modules, and CI for the threaded one | written; being validated; after B2.7 |
+| `skia-shim-threads` | The Skia bindings shim built for threads, so that the threaded link needs no `--no-check-features` | written; waits for the owner's approval of its downloads |
+| `xaml-type-system-drift` | XAML compiler: the drift test of the build-time type system driven to zero | in work |
+| `perf-02-property-changes` | Performance designs 02 and 01 | in work |
+| `perf-05-bindings-text` | Performance designs 05 and 06 | in work |
 
 ## In flight at the hand-over of 2026-10-07
 
@@ -41,7 +61,7 @@ The change itself is done (#42). Sizes did not change. Start-up makes 20 request
 
 - **Navigation cost:** measure navigation to DrawerPage (18 files, previously 5 bundles) or CarouselPage at `--throttle 50,40`, to put a number on the per-file request cost.
 - **First-frame difference:** look into the 30 to 100 ms, for example with a CPU profile comparing the 10 `registerAsset` calls with the earlier single bundle unpack.
-- **Stale tracking pages:** regenerate `Avalonia.Markup.Xaml.md` and `Avalonia.Markup.Xaml.Loader.md`. They are stale since the emitter work of #39 and would gain `Statement` and `DocumentInfo`.
+- **Stale tracking pages:** done. Every page was regenerated on 2026-10-09; see "What the tracking pages show (2026-10-09)".
 
 Do not reintroduce packing.
 
@@ -62,27 +82,33 @@ The stage-table row "E5 Includes and assets" in `xaml.md` (9.10.1), and items 3 
 - `generate_file` now links includes within its group, and the emitter writes source information (`CreateSourceInfo`).
 - Fixture: `tests/XamlIncludeFixture` (library `xaml-include-fixture-theme`, application `xaml-include-fixture-application`), running upstream's `ResourceIncludeTests`, `StyleIncludeTests` and `MergeResourceIncludeTests` against compiled documents.
 
-**Done: step 3, build integration over the run-time type system (branch `xaml-e5-build-integration`, not validated by a build yet).** `xaml.md` 9.6.8 has the design as built and the table of what departs from 9.6.
+**Done: step 3, build integration over the run-time type system (#104).** `xaml.md` 9.6.8 has the design as built and the table of what departs from 9.6.
 - `ferroui-build` (`src/FerroUI.Build.Tasks`): `Build::from_env().assembly(..).embed_assets(..).compile_xaml().run()` for a crate's `build.rs`. It writes the generated modules, the asset table, the loader table and `register()` (R8) to `$OUT_DIR/xaml/`, writes `$OUT_DIR/<crate>.xamlmeta`, and prints the `cargo::` lines. `ferroui_markup_xaml::include_compiled_xaml!()` includes the result.
 - The `.xamlmeta` files travel through Cargo `links` metadata (`DEP_<CRATE>_XAML_XAMLMETA`). The themes export their checked-in file that way from their existing `build.rs`.
 - The constructor of a class is picked by the compiler (`generate_class_file(class, None, ..)`), as upstream picks it. The themes still state theirs, because their markup metadata declares a `new()` upstream's class does not have.
 - The include fixture is converted: its generated files are no longer checked in, except the document of the class `StyleWithServiceProvider`.
 - The limit: the compiler reads types from the registries of the process, so the build script links the crates its documents name, and it cannot link its own crate. A document that names a type of its own crate (every `x:Class` document) cannot be compiled by a build script. That is why the themes are not converted and why `LocaleCollection` moved from the fixture application to the fixture library.
 
-**Written: the build-time type system, first stage (branch `xaml-source-scanner`, on `xaml-e5-build-integration-v`; not validated by a build yet).** `xaml.md` 9.5.6 has it as built.
+**Done: the build-time type system, first stage (#110).** `xaml.md` 9.5.6 has it as built.
 - `ferroui-build` has the type model of a crate (`model.rs`: `AssemblyModel`, `TypeModel`, `MemberModel`, `RegisteredModel`) and its file: `.xamlmeta` of format 2, which keeps the documents of format 1 where the compiler reads them.
 - The source scanner (`scanner/`, `scan_crate`) fills the model from the declaration macros of a crate's sources, with `syn` on file level, linking nothing. What it does not read is a diagnostic with file and line (`FRN9xxx`).
 - A fixture source tree and a scan of the base and the controls crates as files test it. The second prints the coverage: `cargo test -p ferroui-build --lib real_crates -- --nocapture`.
 - `Build` and the emitter are unchanged; `HANDOVER.md` section 11 has the validation.
 
+**Done: the build-time type system, second stage (#112).** `xaml.md` 9.5.7 has it as built.
+- Dependency models: the export table of a crate in its model (every public path of a type, with its declaring module), the models of several crates read as a set (`model_set.rs`, `ModelSet`), the scan with the models of the dependencies, and `Build::export_metadata()`.
+- The closed table of runtime library types is data (`core_table.rs` of the loader), and both type systems define their types from it.
+- `ModelTypeSystem` (`type_system/`): the type system of the compiler over the type models.
+- The drift test compares it with the run-time type system of the linked crates, type by type and member by member, for the base and the controls crates. Every difference has a kind; the test is set aside as the work list of the next stage, and 9.5.7 has its first result.
+
 Remaining, in order. #43's "Continuation" section has the upstream files for each step.
 
-1. **The rest of the build-time type system** (`xaml.md` 9.10.1, "Remaining for E5", item 1: validate the scanner on the real crates, dependency models and `export_metadata()`, `ModelTypeSystem<EmitBacking>` with the drift test, the call forms, `compile_xaml()` on the model).
+1. **The rest of the build-time type system** (`xaml.md` 9.10.1, "Remaining for E5"), in this order: the drift test to zero (branch `xaml-type-system-drift`), with `markup-xaml` added to it once the two crates agree; the call forms and the emitter on the model; `compile_xaml()` on the model.
    - It removes the limit above: the build script compiles `x:Class` documents without linking anything.
-   - Then: `include_xaml!` per class, the generated `register_types` of 9.7.4, the themes on the build script, diagnostics with codes and the cache (9.6.4, 9.6.5).
+   - Then: `include_xaml!` per class, the generated `register_types` of 9.7.4, the themes on the build script, diagnostics with codes and the cache (9.6.4, 9.6.5). The diagnostics bring the two files of `Avalonia.Build.Tasks` that are still to be ported (`XamlCompilerDiagnosticsFilter.cs`, `DeterministicIdGenerator.cs`; row 4 of the tracking table below).
    - Until then a crate with `x:Class` documents uses the checked-in path (`generate_class_file` in a test). The two `XamlIlTests` classes with compiled markup (`XamlIlClassWithPrecompiledXaml`, `XamlIlClassWithCustomProperty`) can be compiled that way; today their constructors populate through the run-time loader; the two tests are ported and not ignored.
    - Small and independent: remove `new:` from the markup metadata of the two themes so that the compiler picks their constructor too (check with a build that `<FluentTheme/>` in markup goes through `FerroXamlIlConstructorServiceProviderTransformer`).
-2. **The catalog compiled.**
+2. **The themes and the catalog compiled.**
    - Its 219 documents and the `x:Class` documents of `src/FerroUI.Dialogs`, so that neither links the run-time loader.
    - The estimate is +6 to +10 MB raw and +0.5 to +1.2 MB gzip on the catalog module, against 0.24 s less CPU before the first frame.
    - Measure a few pages first. If the growth exceeds the estimate, the owner decides on the merge.
@@ -146,25 +172,32 @@ Also: the layout clock is in milliseconds (`DEVIATIONS.md`, Layout). Found while
 - **Bindings from expression trees.** `CompiledBinding.Create<TIn, TOut>(Expression)` and `BindingExpressionVisitor` (36 tests) have no counterpart in the port. `xaml.md` 3.6.1 compares three options: no counterpart (recommended; the builder chain stands for the expression tree), a `binding_path!` macro, or a run-time expression model. The note maps each of the 36 tests to its counterpart: 27 have one in `CompiledBindingPathBuilder`.
 - **CI speed-up.** The earlier proposal for a faster CI run is still open.
 - **Stale branches.** Branches of merged pull requests can be deleted by hand.
+- **The downloads of the Skia bindings shim (2026-10-09).** The shim built for threads (branch `skia-shim-threads`) is written and needs downloads the owner has to approve before it is built and validated. Until then the threaded link passes `--no-check-features` while two threads call Skia (`browser-render-worker.md`, result of B2.6).
+- **The two new CI checks of B2.8 (2026-10-09).** B2.8 adds two checks to CI. Whether they become required for a merge, next to the three of today ("How to run the next period"), is the owner's decision.
+- **The order of inherited change notifications across properties (2026-10-09).** When the inheritance parent changes and more than one ancestor store contributes values, the port raises the changes in the order the pairs were found and upstream in the order of its property IDs; property IDs follow the order of registration, which is not upstream's either, so neither order reproduces upstream's sequence. Design 03 recorded it and did not change it (`performance/designs/03-inheritance-parent-change.md`, "A difference found"; `DEVIATIONS.md`, Property system). To decide: sort the pairs by property ID, or keep the order and the deviation row.
 
 ## Critical now: the render thread (owner, 2026-10-08)
 
 The owner's order on 2026-10-08: finish the work in flight, then the render thread, then the scheduled work. Design, stages and what each step found: `docs/porting/render-thread.md`; the browser stage B2: `docs/porting/browser-render-worker.md`.
 
-State on 2026-10-08, late:
+State on 2026-10-09:
 
-- **Desktop: done and the default.** Stages R1 to R5.7 are on `main` (thread-safe render resources, `Send` jobs, the render-thread mode, the synchronous wait, the compositor lock, render surfaces shared between the threads, atomic native reference counts, the Metal audit, GPU interop objects confined to the lock, the shared image import). `Compositor::new` chooses the render-thread mode wherever the render loop runs in the background; `FERROUI_RENDER_THREAD=0` is the way back (pull request 89).
-- **Desktop, still open:** interaction by hand and a stress run in the render-thread mode; the measurements repeated on a quiet machine (the two-mode frame benchmark is pull request 91); the two latent items of the audit are closed as written, to be validated (`render-thread.md`, R5.8: the platform graphics are `Arc<dyn IPlatformGraphics>` with `Send + Sync`, and `try_get_render_interface_feature` hands out a handle bound to the compositor lock).
-- **Browser B1 is on `main`** (pull request 88): `scripts/build-browser.sh <example> --threads`, the isolation service worker, the example `thread_spawn`. The threaded link passes `--no-check-features` because the prebuilt Skia bindings shim has no atomics; the proper fix is to compile the shim with `-pthread`.
-- **Browser B2 is designed and started.** Owner decision: the UI stays on the browser's main thread and only rendering moves to a worker, with strict confinement of the render target to that worker. Steps B2.1 to B2.8 are the table of section 6 of the design. In flight: B2.1 (`render_worker_clear`, branch `b2-1-render-worker-clear`) and B2.4 (the base library's strict mode, branch `b2-4-strict-confinement`), each written by a sub-agent and validated in the main checkout. Then B2.2, B2.3, B2.5 to B2.8 in order, then the measurements of B3.
-- **Scheduled work running beside it:** the markup gaps that block catalog pages, in two groups (`markup-gaps-types`: C305, C309, C201, C306, C208, C102; `markup-gaps-events`: C301, C203, C312, C207, C202); the OpenGL page of the catalog is pull request 92.
-- After those: the build integration of the XAML compiler (task 2, remaining step 2), design 09 of `performance/`, the review of waivers and doubly mapped files with one regeneration of the tracking pages, the Metal external objects feature, the EGL seams, Ganesh GL on the desktop.
+- **Desktop: done and the default.** Stages R1 to R5.8 are on `main` (thread-safe render resources, `Send` jobs, the render-thread mode, the synchronous wait, the compositor lock, render surfaces shared between the threads, atomic native reference counts, the Metal audit, GPU interop objects confined to the lock, the shared image import, and R5.8: a feature of the render interface is handed out as a handle bound to the compositor lock, and the platform graphics are `Arc<dyn IPlatformGraphics>` with `Send + Sync`, shared by their types). `Compositor::new` chooses the render-thread mode wherever the render loop runs in the background; `FERROUI_RENDER_THREAD=0` is the way back (pull request 89). A stress test (unpaced changes of the UI thread while the render thread renders, pull request 94) and the two-mode frame benchmark (pull request 91) are on `main`.
+- **Desktop, still open:** the measurements repeated on an idle machine, and interaction by hand in the render-thread mode (live resize, scrolling, popups, closing a window while it renders).
+- **Browser B1 is on `main`** (pull request 88): `scripts/build-browser.sh <example> --threads`, the isolation service worker, the example `thread_spawn`. The threaded link passes `--no-check-features` because the prebuilt Skia bindings shim has no atomics; the shim built for threads is written (branch `skia-shim-threads`) and waits for the owner's approval of its downloads.
+- **Browser B2.1 to B2.6 are on `main`.** The UI stays on the main thread of the page and the compositor runs on a render worker, in a module built with threads, with strict confinement of the render target to that worker; `BrowserPlatformOptions::render_thread` keeps such a module on one thread. Validated with `themed_view` in headless Chrome: no sampled pixel differs between the render thread and one thread, and no call is proxied to the main thread during a frame (`browser-render-worker.md`, result of B2.6).
+- **Browser B2.7 and B2.8 are written and being validated.** B2.7: the ControlCatalog on the worker, with the disposal of a view (pull request 113). B2.8: one site with both modules, the host page choosing between them, and CI. Then the measurements of B3.
+- **ControlCatalog.** 218 of 219 documents load. The one left is the OpenGL lease page, which waits for Ganesh on OpenGL in the desktop build of the Skia backend. No gap of the framework blocks a document; `samples/ControlCatalog/GAPS.md` has the gaps closed since (C102 to C316).
+- **XAML compiler.** Task 2 above: build integration for documents that name types of other crates, the source scanner, dependency models and the build-time type system with its drift test are on `main`. Next: the drift to zero, the call forms and the emitter, `compile_xaml()` on the model, then the themes and the catalog compiled.
+- **Performance.** Design 09 is implemented, with its first figures. Designs 03 and 04 are done as far as the owner's rule allows (ported logic does not diverge from upstream). Designs 02 and 01, and 05 and 06, are in work. `performance/README.md` has the status.
+- **Tracking.** The review of the waivers and of the doubly mapped files and the regeneration of the pages are done; "What the tracking pages show (2026-10-09)" below is the work list that came out of it.
+- After those: the entries of the tracking work list that need no code, the Metal external objects feature, the EGL seams, Ganesh GL on the desktop.
 
 ## Core first (owner, 2026-10-08): done
 
 The owner's order of 2026-10-08 was to finish the core port first, with all four local sub-agents on it. The whole queue (the base library by area, `ferroui-controls`, the markup crates and the run-time loader, the Skia and macOS backends, the headless platform) was written without a compiler, integrated and validated in one build, and merged as pull request 66, with the follow-ups in pull requests 65 (the Metal external objects contracts) and 68. Most of what the tracking pages listed as missing was a false negative of their name matching; what was absent is ported, and the rest is recorded in `docs/porting/data/path-overrides.toml` and `member-waivers.toml`.
 
-Left from it: regenerate the tracking pages once (`scripts/port-status/run.sh`) in a pull request of their own, and take the remaining gaps from them.
+Left from it, and done on 2026-10-09: the tracking pages regenerated in a pull request of their own. The remaining gaps are taken from them in the next section.
 
 ## What the tracking pages show (2026-10-09)
 
@@ -238,4 +271,4 @@ Kept in the data for a decision rather than changed (each is a judgement, not a 
 - A pull request is merged with a rebase merge when its three checks are green (`Source conventions`, `Build and test (macOS)`, `Check (browser, wasm32-unknown-emscripten)`). The macOS job takes about 40 minutes.
 - When `ci.yml` does not start for a pull request, dispatch it by hand on the branch.
 - After a toolchain change on `main`, re-run `scripts/browser/setup.sh` before any browser build. The toolchain is installed under `.tools/`; `source .tools/env.sh` before `scripts/build-browser.sh`.
-- The generated tracking pages (`TRACKING.md`, `tracking/*.md`) are regenerated with `scripts/port-status/run.sh` in a pull request of their own when no other pull request is open, since every regeneration touches the same files.
+- The generated tracking pages (`TRACKING.md`, `tracking/*.md`) are regenerated with `scripts/port-status/run.sh` in a pull request of their own when no other pull request is open, since every regeneration touches the same files. `run.sh` runs the extractor again when the reference checkout is not at the tracked commit, which moves the baseline: to regenerate against the tracked commit, run `python3 scripts/port-status/port_status.py` alone. Run it twice; the second run must change nothing.
