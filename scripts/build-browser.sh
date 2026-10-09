@@ -22,10 +22,8 @@
 # adds the Vello render backend to the module beside Skia (the feature of the browser crate for its
 # examples, of control-catalog-browser for the catalog; docs/porting/vello-backend.md, section 11),
 # which a page then chooses with `?Renderer=Vello`. The site of such a module is written next to the
-# site without the features, to target/browser-<list>/<application> (browser-threads-<list> with
-# --threads, browser-both-<list> with --both; a comma in the list becomes a hyphen), and built in a
-# target directory of its own in the threaded mode only (the build without threads shares one:
-# cargo keeps the two sets of features apart).
+# site without the features: target/browser-<list>/<application> (browser-threads-<list> with
+# --threads, browser-both-<list> with --both; a comma of the list becomes a hyphen).
 #
 # Needs: the Emscripten SDK activated in the shell (emsdk 6.0.10: `source emsdk_env.sh`), the Rust
 # target wasm32-unknown-emscripten, the wasm-bindgen command-line tool of the version of the

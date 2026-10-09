@@ -75,8 +75,8 @@ pub fn try_create_scene_sink(
         #[cfg(all(not(feature = "hybrid"), feature = "hybrid-webgl"))]
         VelloRenderingMode::Hybrid => Err(VelloRenderingModeUnavailable {
             mode,
-            reason: "the crate was built with its feature `hybrid-webgl` alone, whose renderer draws to the canvas \
-                     of a view; a scene that ends in memory is drawn by the CPU mode"
+            reason: "the crate was built without its feature `hybrid`: the renderer of `hybrid-webgl` draws to the \
+                     canvas of a view, and a scene that ends in memory is drawn by the CPU mode"
                 .to_string(),
         }),
         #[cfg(not(any(feature = "hybrid", feature = "hybrid-webgl")))]
