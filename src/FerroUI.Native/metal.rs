@@ -1,17 +1,24 @@
-//! Metal: the platform graphics, the device (graphics context), the render
-//! surface of a top-level and its render target and drawing session.
+//! Metal: the platform graphics, the device (graphics context) and its
+//! external objects feature, the render surface of a top-level and its
+//! render target and drawing session.
 
 use crate::helpers::ComResultExt;
 use crate::interop::*;
 use crate::top_level_impl::SurfaceTopLevel;
 use ferroui_base::platform::surfaces::{IPlatformRenderSurface, IPlatformRenderSurfaceRenderTarget};
-use ferroui_base::platform::{IOptionalFeatureProvider, IPlatformGraphics, IPlatformGraphicsContext};
+use ferroui_base::platform::{
+    IOptionalFeatureProvider, IPlatformGraphics, IPlatformGraphicsContext, IPlatformHandle,
+    KnownPlatformGraphicsExternalImageHandleTypes, KnownPlatformGraphicsExternalSemaphoreHandleTypes,
+    PlatformGraphicsExternalImageFormat, PlatformGraphicsExternalImageProperties,
+};
 use ferroui_base::reactive::IDisposable;
+use ferroui_base::rendering::composition::CompositionGpuImportedImageSynchronizationCapabilities;
 use ferroui_base::threading::Dispatcher;
 use ferroui_base::PixelSize;
 use ferroui_microcom::{ComPtr, HResult};
 use ferroui_skia::metal::{
-    IMetalDevice, IMetalPlatformSurface, IMetalPlatformSurfaceRenderTarget, IMetalPlatformSurfaceRenderingSession,
+    IMetalDevice, IMetalExternalObjectsFeature, IMetalExternalTexture, IMetalPlatformSurface,
+    IMetalPlatformSurfaceRenderTarget, IMetalPlatformSurfaceRenderingSession, IMetalSharedEvent,
 };
 use std::any::{Any, TypeId};
 use std::cell::RefCell;
@@ -78,6 +85,7 @@ impl IPlatformGraphics for MetalPlatformGraphics {
 pub struct MetalDevice {
     weak_self: std::rc::Weak<MetalDevice>,
     sync_root: ferroui_base::utilities::DisposableLock,
+    external_objects_feature: Rc<MetalExternalObjectsFeature>,
     native: RefCell<Option<ComPtr<IFrnMetalDevice>>>,
 }
 
@@ -86,6 +94,7 @@ impl MetalDevice {
         Rc::new_cyclic(|weak_self| MetalDevice {
             weak_self: weak_self.clone(),
             sync_root: ferroui_base::utilities::DisposableLock::new(),
+            external_objects_feature: Rc::new(MetalExternalObjectsFeature::new(&native, weak_self.clone())),
             native: RefCell::new(Some(native)),
         })
     }
@@ -118,13 +127,17 @@ impl MetalDevice {
 }
 
 impl IOptionalFeatureProvider for MetalDevice {
-    /// The device announces itself as a Metal device. The external-objects
-    /// features (GPU handle wrapping, IOSurface and shared event import)
-    /// are absent until their contracts are ported.
+    /// The device announces itself as a Metal device, and its external
+    /// objects feature (the import of an IOSurface and of a shared event).
+    /// The feature that wraps GPU handles is absent until it is ported.
     fn try_get_feature(&self, feature_type: TypeId) -> Option<Rc<dyn Any>> {
         if feature_type == TypeId::of::<dyn IMetalDevice>() {
             let this: Rc<dyn IMetalDevice> = self.weak_self.upgrade()?;
             return Some(Rc::new(this));
+        }
+        if feature_type == TypeId::of::<dyn IMetalExternalObjectsFeature>() {
+            let feature: Rc<dyn IMetalExternalObjectsFeature> = self.external_objects_feature.clone();
+            return Some(Rc::new(feature));
         }
         None
     }
@@ -268,6 +281,210 @@ impl IMetalPlatformSurface for MetalPlatformSurfaceView {
     }
 }
 
+/// The external objects of a Metal device: the import of an IOSurface as a
+/// texture and of a shared event, and the commands that wait for an event
+/// and signal one.
+///
+/// The feature is an object of the device: it is created with it, inside
+/// the graph of the server compositor, and used under the compositor lock
+/// like the device.
+// The original holds the native device, which its device releases when it
+// is disposed. Here every holder of a native object has a reference of its
+// own, so the feature reaches the native device through its device: a
+// disposed device fails the feature as it does upstream.
+pub(crate) struct MetalExternalObjectsFeature {
+    device: std::rc::Weak<MetalDevice>,
+    device_luid: Option<Vec<u8>>,
+}
+
+impl MetalExternalObjectsFeature {
+    fn new(native: &IFrnMetalDevice, device: std::rc::Weak<MetalDevice>) -> MetalExternalObjectsFeature {
+        let mut registry_id = 0u64;
+        // SAFETY: the pointer is valid for the one value the native method
+        // writes.
+        let has_registry_id = unsafe { native.get_io_kit_registry_id(&mut registry_id) };
+        // The bytes of the identifier, the most significant first.
+        let device_luid = has_registry_id.then(|| registry_id.to_be_bytes().to_vec());
+        MetalExternalObjectsFeature { device, device_luid }
+    }
+
+    /// The native device.
+    ///
+    /// # Panics
+    /// Panics when the device is disposed.
+    #[track_caller]
+    fn native(&self) -> ComPtr<IFrnMetalDevice> {
+        match self.device.upgrade() {
+            Some(device) => device.native(),
+            None => panic!("Cannot access a disposed object: MetalDevice"),
+        }
+    }
+}
+
+impl IMetalExternalObjectsFeature for MetalExternalObjectsFeature {
+    fn supported_image_handle_types(&self) -> Vec<String> {
+        vec![KnownPlatformGraphicsExternalImageHandleTypes::IO_SURFACE_REF.to_string()]
+    }
+
+    fn supported_semaphore_types(&self) -> Vec<String> {
+        vec![KnownPlatformGraphicsExternalSemaphoreHandleTypes::METAL_SHARED_EVENT.to_string()]
+    }
+
+    fn device_luid(&self) -> Option<Vec<u8>> {
+        self.device_luid.clone()
+    }
+
+    fn get_synchronization_capabilities(
+        &self,
+        _image_handle_type: &str,
+    ) -> CompositionGpuImportedImageSynchronizationCapabilities {
+        CompositionGpuImportedImageSynchronizationCapabilities::TIMELINE_SEMAPHORES
+    }
+
+    /// # Panics
+    /// Panics when the handle is not an IOSurface and when the native
+    /// device cannot make a texture of it.
+    fn import_image(
+        &self,
+        handle: Rc<dyn IPlatformHandle>,
+        properties: PlatformGraphicsExternalImageProperties,
+    ) -> Rc<dyn IMetalExternalTexture> {
+        // Every format of the enumeration is supported: the original
+        // refuses the values it does not name.
+        let format = match properties.format {
+            PlatformGraphicsExternalImageFormat::R8G8B8A8UNorm => FrnPixelFormat::kFrnRgba8888,
+            PlatformGraphicsExternalImageFormat::B8G8R8A8UNorm => FrnPixelFormat::kFrnBgra8888,
+        };
+
+        if handle.handle_descriptor() != Some(KnownPlatformGraphicsExternalImageHandleTypes::IO_SURFACE_REF) {
+            panic!("Specified method is not supported.");
+        }
+
+        // SAFETY: by its descriptor the handle is an `IOSurfaceRef`, which
+        // the one who imports keeps alive until the import has completed;
+        // the texture the native device makes of it retains the surface.
+        let texture = unsafe { self.native().import_io_surface(handle.handle() as *mut c_void, format) }
+            .and_then(|texture| texture.ok_or(HResult::POINTER))
+            .check();
+        Rc::new(ImportedTexture { texture: RefCell::new(Some(texture)) })
+    }
+
+    /// # Panics
+    /// Panics when the handle is not a Metal shared event and when the
+    /// native device cannot import it.
+    fn import_shared_event(&self, handle: Rc<dyn IPlatformHandle>) -> Rc<dyn IMetalSharedEvent> {
+        if handle.handle_descriptor() != Some(KnownPlatformGraphicsExternalSemaphoreHandleTypes::METAL_SHARED_EVENT) {
+            panic!("Specified method is not supported.");
+        }
+        // SAFETY: by its descriptor the handle is an `id<MTLSharedEvent>`,
+        // which the one who imports keeps alive until the import has
+        // completed; the native device makes an event of its own from it.
+        let inner = unsafe { self.native().import_shared_event(handle.handle() as *mut c_void) }
+            .and_then(|event| event.ok_or(HResult::POINTER))
+            .check();
+        Rc::new(SharedEvent { inner: RefCell::new(Some(inner)) })
+    }
+
+    /// # Panics
+    /// Panics when the event was not imported by a device of this backend.
+    fn submit_wait(&self, event: &dyn IMetalSharedEvent, wait_for_value: u64) {
+        let event = SharedEvent::from_contract(event).native();
+        self.native().submit_wait(Some(&*event), wait_for_value).check();
+    }
+
+    /// # Panics
+    /// Panics when the event was not imported by a device of this backend.
+    fn submit_signal(&self, event: &dyn IMetalSharedEvent, signal_value: u64) {
+        let event = SharedEvent::from_contract(event).native();
+        self.native().submit_signal(Some(&*event), signal_value).check();
+    }
+}
+
+/// A texture the native device made of an IOSurface.
+struct ImportedTexture {
+    texture: RefCell<Option<ComPtr<IFrnMetalTexture>>>,
+}
+
+impl ImportedTexture {
+    /// Calls the native texture where it is held.
+    ///
+    /// # Panics
+    /// Panics when the texture is disposed.
+    #[track_caller]
+    fn with_texture<R>(&self, f: impl FnOnce(&IFrnMetalTexture) -> R) -> R {
+        match self.texture.borrow().as_ref() {
+            Some(texture) => f(&**texture),
+            None => panic!("Cannot access a disposed object: ImportedTexture"),
+        }
+    }
+}
+
+impl IMetalExternalTexture for ImportedTexture {
+    fn width(&self) -> i32 {
+        self.with_texture(|texture| texture.get_width())
+    }
+
+    fn height(&self) -> i32 {
+        self.with_texture(|texture| texture.get_height())
+    }
+
+    fn samples(&self) -> i32 {
+        self.with_texture(|texture| texture.get_sample_count())
+    }
+
+    fn handle(&self) -> *mut c_void {
+        self.with_texture(|texture| texture.get_native_handle())
+    }
+
+    fn dispose(&self) {
+        let texture = self.texture.borrow_mut().take();
+        drop(texture);
+    }
+}
+
+/// A shared event the native device imported.
+struct SharedEvent {
+    inner: RefCell<Option<ComPtr<IFrnMTLSharedEvent>>>,
+}
+
+impl SharedEvent {
+    /// The event behind the contract (the cast of the original).
+    #[track_caller]
+    fn from_contract(event: &dyn IMetalSharedEvent) -> &SharedEvent {
+        match event.as_any().downcast_ref::<SharedEvent>() {
+            Some(event) => event,
+            None => panic!("The shared event belongs to a different platform backend."),
+        }
+    }
+
+    /// The native event.
+    ///
+    /// # Panics
+    /// Panics when the event is disposed.
+    #[track_caller]
+    fn native(&self) -> ComPtr<IFrnMTLSharedEvent> {
+        match self.inner.borrow().clone() {
+            Some(inner) => inner,
+            None => panic!("Cannot access a disposed object: SharedEvent"),
+        }
+    }
+}
+
+impl IMetalSharedEvent for SharedEvent {
+    fn handle(&self) -> *mut c_void {
+        self.native().get_native_handle()
+    }
+
+    fn dispose(&self) {
+        let inner = self.inner.borrow_mut().take();
+        drop(inner);
+    }
+
+    fn as_any(&self) -> &dyn Any {
+        self
+    }
+}
+
 /// The Metal render target of a top-level.
 pub struct MetalRenderTarget {
     native: RefCell<Option<ComPtr<IFrnMetalRenderTarget>>>,
@@ -340,5 +557,293 @@ impl IMetalPlatformSurfaceRenderingSession for MetalDrawingSession {
     fn dispose(&self) {
         let session = self.session.borrow_mut().take();
         drop(session);
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    // Not from upstream, which has no tests of the feature: the feature over
+    // a native device that is implemented here and records its calls.
+    use super::*;
+    use ferroui_base::platform::PlatformHandle;
+
+    type Log = Rc<RefCell<Vec<String>>>;
+
+    struct FakeNativeDevice {
+        log: Log,
+        registry_id: Option<u64>,
+    }
+
+    impl IFrnMetalDeviceImpl for FakeNativeDevice {
+        fn get_device(&self) -> *mut c_void {
+            std::ptr::null_mut()
+        }
+
+        fn get_queue(&self) -> *mut c_void {
+            std::ptr::null_mut()
+        }
+
+        fn get_io_kit_registry_id(&self, value: *mut u64) -> bool {
+            match self.registry_id {
+                Some(registry_id) => {
+                    // SAFETY: the caller passes storage for one value.
+                    unsafe { *value = registry_id };
+                    true
+                }
+                None => false,
+            }
+        }
+
+        fn import_io_surface(
+            &self,
+            handle: *mut c_void,
+            pixel_format: FrnPixelFormat,
+        ) -> Result<Option<ComPtr<IFrnMetalTexture>>, HResult> {
+            self.log.borrow_mut().push(format!("ImportIOSurface({}, {pixel_format:?})", handle as usize));
+            if handle.is_null() {
+                return Err(HResult::FAIL);
+            }
+            Ok(Some(IFrnMetalTexture::from_impl(FakeNativeTexture { log: self.log.clone() })))
+        }
+
+        fn import_shared_event(
+            &self,
+            mtl_shared_event_instance: *mut c_void,
+        ) -> Result<Option<ComPtr<IFrnMTLSharedEvent>>, HResult> {
+            let handle = mtl_shared_event_instance as usize;
+            self.log.borrow_mut().push(format!("ImportSharedEvent({handle})"));
+            Ok(Some(IFrnMTLSharedEvent::from_impl(FakeNativeEvent { log: self.log.clone(), handle })))
+        }
+
+        fn submit_wait(&self, ev: Option<&IFrnMTLSharedEvent>, value: u64) -> Result<(), HResult> {
+            let handle = ev.map(|ev| ev.get_native_handle() as usize);
+            self.log.borrow_mut().push(format!("SubmitWait({handle:?}, {value})"));
+            Ok(())
+        }
+
+        fn submit_signal(&self, ev: Option<&IFrnMTLSharedEvent>, value: u64) -> Result<(), HResult> {
+            let handle = ev.map(|ev| ev.get_native_handle() as usize);
+            self.log.borrow_mut().push(format!("SubmitSignal({handle:?}, {value})"));
+            Ok(())
+        }
+    }
+
+    struct FakeNativeTexture {
+        log: Log,
+    }
+
+    impl IFrnMetalTextureImpl for FakeNativeTexture {
+        fn get_native_handle(&self) -> *mut c_void {
+            77 as *mut c_void
+        }
+
+        fn get_width(&self) -> i32 {
+            30
+        }
+
+        fn get_height(&self) -> i32 {
+            20
+        }
+
+        fn get_sample_count(&self) -> i32 {
+            1
+        }
+    }
+
+    impl Drop for FakeNativeTexture {
+        fn drop(&mut self) {
+            self.log.borrow_mut().push("the texture is released".to_string());
+        }
+    }
+
+    struct FakeNativeEvent {
+        log: Log,
+        handle: usize,
+    }
+
+    impl IFrnMTLSharedEventImpl for FakeNativeEvent {
+        fn get_native_handle(&self) -> *mut c_void {
+            // The native event is one of the device, not the one imported.
+            (self.handle + 1000) as *mut c_void
+        }
+
+        fn wait(&self, _value: u64, _timeout_ms: u64) -> bool {
+            false
+        }
+
+        fn set_signaled_value(&self, _value: u64) {}
+
+        fn get_signaled_value(&self) -> u64 {
+            0
+        }
+    }
+
+    impl Drop for FakeNativeEvent {
+        fn drop(&mut self) {
+            self.log.borrow_mut().push("the event is released".to_string());
+        }
+    }
+
+    fn device(registry_id: Option<u64>) -> (Rc<MetalDevice>, Log) {
+        let log = Log::default();
+        let native = IFrnMetalDevice::from_impl(FakeNativeDevice { log: log.clone(), registry_id });
+        (MetalDevice::new(native), log)
+    }
+
+    fn feature(device: &Rc<MetalDevice>) -> Rc<dyn IMetalExternalObjectsFeature> {
+        let features: &dyn IOptionalFeatureProvider = &**device;
+        features.try_get::<dyn IMetalExternalObjectsFeature>().expect("the device has the feature")
+    }
+
+    fn take(log: &Log) -> Vec<String> {
+        std::mem::take(&mut *log.borrow_mut())
+    }
+
+    fn io_surface(handle: isize) -> Rc<dyn IPlatformHandle> {
+        Rc::new(PlatformHandle::new(handle, Some(KnownPlatformGraphicsExternalImageHandleTypes::IO_SURFACE_REF)))
+    }
+
+    fn shared_event(handle: isize) -> Rc<dyn IPlatformHandle> {
+        Rc::new(PlatformHandle::new(
+            handle,
+            Some(KnownPlatformGraphicsExternalSemaphoreHandleTypes::METAL_SHARED_EVENT),
+        ))
+    }
+
+    fn properties(format: PlatformGraphicsExternalImageFormat) -> PlatformGraphicsExternalImageProperties {
+        PlatformGraphicsExternalImageProperties { width: 30, height: 20, format, ..Default::default() }
+    }
+
+    #[test]
+    fn the_device_announces_what_it_imports_and_how_it_is_synchronized() {
+        let (device, _) = device(Some(0x0102_0304_0506_0708));
+        let feature = feature(&device);
+
+        assert_eq!(vec!["IOSurfaceRef".to_string()], feature.supported_image_handle_types());
+        assert_eq!(vec!["MetalSharedEvent".to_string()], feature.supported_semaphore_types());
+        assert_eq!(
+            CompositionGpuImportedImageSynchronizationCapabilities::TIMELINE_SEMAPHORES,
+            feature.get_synchronization_capabilities("IOSurfaceRef")
+        );
+        // The registry identifier, the most significant byte first.
+        assert_eq!(Some(vec![1, 2, 3, 4, 5, 6, 7, 8]), feature.device_luid());
+    }
+
+    #[test]
+    fn a_device_without_a_registry_identifier_has_no_luid() {
+        let (device, _) = device(None);
+
+        assert_eq!(None, feature(&device).device_luid());
+    }
+
+    #[test]
+    fn an_io_surface_is_imported_with_the_format_of_the_image() {
+        let (device, log) = device(None);
+        let feature = feature(&device);
+
+        let texture = feature.import_image(io_surface(5), properties(PlatformGraphicsExternalImageFormat::R8G8B8A8UNorm));
+        assert_eq!(vec!["ImportIOSurface(5, kFrnRgba8888)"], take(&log));
+        assert_eq!(30, texture.width());
+        assert_eq!(20, texture.height());
+        assert_eq!(1, texture.samples());
+        assert_eq!(77, texture.handle() as usize);
+
+        texture.dispose();
+        assert_eq!(vec!["the texture is released"], take(&log));
+        texture.dispose();
+        assert!(take(&log).is_empty());
+
+        let texture = feature.import_image(io_surface(6), properties(PlatformGraphicsExternalImageFormat::B8G8R8A8UNorm));
+        assert_eq!(vec!["ImportIOSurface(6, kFrnBgra8888)"], take(&log));
+        drop(texture);
+    }
+
+    #[test]
+    #[should_panic(expected = "Cannot access a disposed object: ImportedTexture")]
+    fn a_disposed_texture_cannot_be_read() {
+        let (device, _) = device(None);
+        let texture = feature(&device).import_image(io_surface(5), properties(Default::default()));
+        texture.dispose();
+        let _ = texture.width();
+    }
+
+    #[test]
+    #[should_panic(expected = "Specified method is not supported.")]
+    fn a_handle_that_is_not_an_io_surface_is_not_imported_as_an_image() {
+        let (device, _) = device(None);
+        let _ = feature(&device).import_image(shared_event(5), properties(Default::default()));
+    }
+
+    #[test]
+    #[should_panic(expected = "Native call failed")]
+    fn a_failed_import_of_the_native_device_fails_the_import() {
+        let (device, _) = device(None);
+        let _ = feature(&device).import_image(io_surface(0), properties(Default::default()));
+    }
+
+    #[test]
+    #[should_panic(expected = "Specified method is not supported.")]
+    fn a_handle_that_is_not_a_shared_event_is_not_imported_as_an_event() {
+        let (device, _) = device(None);
+        let _ = feature(&device).import_shared_event(io_surface(5));
+    }
+
+    #[test]
+    fn the_commands_wait_for_and_signal_the_imported_event() {
+        let (device, log) = device(None);
+        let feature = feature(&device);
+
+        let event = feature.import_shared_event(shared_event(9));
+        assert_eq!(vec!["ImportSharedEvent(9)"], take(&log));
+        assert_eq!(1009, event.handle() as usize);
+
+        feature.submit_wait(&*event, 3);
+        feature.submit_signal(&*event, 4);
+        assert_eq!(vec!["SubmitWait(Some(1009), 3)", "SubmitSignal(Some(1009), 4)"], take(&log));
+
+        event.dispose();
+        assert_eq!(vec!["the event is released"], take(&log));
+        event.dispose();
+        assert!(take(&log).is_empty());
+    }
+
+    #[test]
+    #[should_panic(expected = "Cannot access a disposed object: SharedEvent")]
+    fn a_disposed_event_cannot_be_waited_for() {
+        let (device, _) = device(None);
+        let feature = feature(&device);
+        let event = feature.import_shared_event(shared_event(9));
+        event.dispose();
+        feature.submit_wait(&*event, 3);
+    }
+
+    #[test]
+    #[should_panic(expected = "The shared event belongs to a different platform backend.")]
+    fn an_event_of_another_backend_is_refused() {
+        struct ForeignEvent;
+
+        impl IMetalSharedEvent for ForeignEvent {
+            fn handle(&self) -> *mut c_void {
+                std::ptr::null_mut()
+            }
+
+            fn dispose(&self) {}
+
+            fn as_any(&self) -> &dyn Any {
+                self
+            }
+        }
+
+        let (device, _) = device(None);
+        feature(&device).submit_signal(&ForeignEvent, 1);
+    }
+
+    #[test]
+    #[should_panic(expected = "Cannot access a disposed object: MetalDevice")]
+    fn the_feature_of_a_disposed_device_imports_nothing() {
+        let (device, _) = device(None);
+        let feature = feature(&device);
+        device.dispose();
+        let _ = feature.import_shared_event(shared_event(9));
     }
 }
