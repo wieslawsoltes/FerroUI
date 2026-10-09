@@ -7883,6 +7883,7 @@
    "rustOnly": [
     "headless_window_surface.rs",
     "tests.rs",
+    "unit_tests/headless_unit_test_application.rs",
     "unit_tests/test_application.rs"
    ]
   },

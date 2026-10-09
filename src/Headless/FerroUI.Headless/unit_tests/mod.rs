@@ -19,6 +19,8 @@ use std::time::Duration;
 mod test_application;
 
 mod async_setup_tests;
+mod headless_probe_tests;
+mod headless_unit_test_application;
 mod headless_unit_test_session_tests;
 mod input_tests;
 mod isolation_tests;

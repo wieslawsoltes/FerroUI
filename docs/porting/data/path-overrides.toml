@@ -1798,6 +1798,10 @@ path = "src/Headless/FerroUI.Headless/unit_tests/test_application.rs"
 reason = "test support: `TestApplication.cs` of the upstream unit test project of the headless platform, the two test assemblies that stand for the upstream test projects that compile its files, and the facts and theories that dispatch a test to the session of its assembly (what the xUnit integration does, which is not ported)"
 
 [[rust_only]]
+path = "src/Headless/FerroUI.Headless/unit_tests/headless_unit_test_application.rs"
+reason = "test support: `HeadlessUnitTestApplication.cs` of the upstream test library (`tests/Avalonia.UnitTests`), the application on the headless platform with the Simple theme that the headless probe tests of the controls run with; the headless platform and the theme are built on the controls, so the tests are in this crate"
+
+[[rust_only]]
 path = "src/Skia/FerroUI.Skia/locked_framebuffer.rs"
 reason = "a locked framebuffer described by plain values: the `Platform/LockedFramebuffer.cs` of Avalonia.Base, which the base crate cannot hold without unsafe code, for the surfaces of the backend"
 
