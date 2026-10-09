@@ -363,7 +363,7 @@ mod tests {
     }
 
     #[test]
-    fn try_get_coordinate_returns_value_for_present_axis() {
+    fn try_get_coordinate_returns_true_for_present_axis() {
         let settings = from_pairs(&[(wght(), 0.5), (wdth(), -0.25)]);
 
         assert_eq!(settings.try_get_coordinate(wght()), Some(0.5));
@@ -371,12 +371,12 @@ mod tests {
     }
 
     #[test]
-    fn try_get_coordinate_returns_none_for_absent_axis() {
+    fn try_get_coordinate_returns_false_for_absent_axis() {
         assert_eq!(from_pairs(&[(wght(), 0.5)]).try_get_coordinate(ital()), None);
     }
 
     #[test]
-    fn try_get_coordinate_returns_none_for_default_struct() {
+    fn try_get_coordinate_returns_false_for_default_struct() {
         assert_eq!(NormalizedVariationPosition::default().try_get_coordinate(wght()), None);
     }
 

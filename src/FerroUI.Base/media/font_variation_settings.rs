@@ -424,7 +424,9 @@ mod tests {
 
     #[test]
     #[should_panic(expected = "must not be NaN")]
-    fn constructor_rejects_nan() {
+    // The null half of the reference test has no counterpart: the variations
+    // cannot be null.
+    fn constructor_rejects_nan_and_null() {
         FontVariationSettings::new([FontVariation::new(wght(), f64::NAN)]);
     }
 
@@ -445,7 +447,7 @@ mod tests {
     }
 
     #[test]
-    fn try_get_value_misses_report_none() {
+    fn try_get_value_misses_report_false_and_zero() {
         let settings = FontVariationSettings::parse("wght=700").unwrap();
 
         assert_eq!(settings.try_get_value(opsz()), None);

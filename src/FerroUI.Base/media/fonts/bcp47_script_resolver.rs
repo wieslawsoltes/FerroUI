@@ -168,17 +168,17 @@ mod tests {
     }
 
     #[test]
-    fn invariant_culture_returns_none() {
+    fn invariant_culture_returns_null() {
         assert_eq!(Bcp47ScriptResolver::get_script_subtag(Some(&CultureInfo::invariant_culture())), None);
     }
 
     #[test]
-    fn null_culture_returns_none() {
+    fn null_culture_returns_null() {
         assert_eq!(Bcp47ScriptResolver::get_script_subtag(None), None);
     }
 
     #[test]
-    fn unknown_language_returns_none() {
+    fn unknown_language_returns_null() {
         // 'xx' is reserved as a private-use language tag; no canonical script.
         let culture = CultureInfo::get_culture_info("xx");
 
