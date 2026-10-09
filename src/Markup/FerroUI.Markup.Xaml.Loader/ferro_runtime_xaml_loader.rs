@@ -386,7 +386,7 @@ const INCLUDE_ELEMENTS: [&str; 3] = ["MergeResourceInclude", "ResourceInclude", 
 /// text is scanned without parsing it: a document that is not well formed fails when it
 /// is loaded, with the position of the error. Sources given by a markup extension are
 /// left to the run time.
-fn include_sources(xaml: &str) -> Vec<String> {
+pub(crate) fn include_sources(xaml: &str) -> Vec<String> {
     let mut sources = Vec::new();
     let mut rest = xaml;
     while let Some(start) = rest.find('<') {

@@ -72,33 +72,46 @@
 //! # The build-time type model
 //!
 //! The way out of both consequences is xaml.md 9.5: the types read from the
-//! sources instead of the process. What is here:
+//! sources instead of the process. With [`Build::type_system`] and
+//! [`TypeSystem::Model`] a build scans the crate, reads the type models of
+//! the crates it depends on from their `.xamlmeta` (the framework crates
+//! export theirs from their own build scripts) and compiles every group
+//! against the type system over those models: the build script registers
+//! nothing, needs no crate for its types, and compiles the documents of the
+//! classes of the crate it builds ([`XamlGroup::class_document`]). The
+//! run-time type system stays the default until every consumer is converted.
 //!
-//! - [`model`]: the type model of a crate (`AssemblyModel`, `TypeModel`,
-//!   `MemberModel`, `RegisteredModel`) and its file, the `.xamlmeta` of format
-//!   2, which keeps the documents of format 1 where the compiler reads them;
-//! - [`scanner`]: the source scanner, which fills the model from the
-//!   declaration macros of the sources of a crate (`scan_crate`), linking
-//!   nothing;
-//! - [`model_set`]: the models of several crates read together, so that a
-//!   type or a property of one crate is found by the path another crate
-//!   names it by;
+//! ```ignore
+//! // build.rs
+//! fn main() {
+//!     ferroui_build::Build::from_env()
+//!         .type_system(ferroui_build::TypeSystem::Model)   // the assembly is the one the sources state
+//!         .compile_group(XamlGroup::new("compiled_xaml").documents(DOCUMENTS))
+//!         .compile_group(XamlGroup::new("compiled_main_window").documents(VIEWS).class_document("MainWindow.xaml"))
+//!         .run();
+//! }
+//! ```
+//!
+//! What is here:
+//!
+//! - [`model`], [`scanner`], [`model_set`], [`call_forms`], [`export`]: the
+//!   type model of a crate and its file (the `.xamlmeta` of format 2), the
+//!   source scanner that fills it, the models of several crates read together,
+//!   the call form of every declared member, and the export of a model from a
+//!   build script. They are the crate `ferroui-build-scan`, which links
+//!   nothing of the framework so that the framework crates can scan
+//!   themselves with it, exported here under the names they had in this crate;
 //! - [`Build::export_metadata`]: the scan of the crate, with the models of
 //!   its dependencies, written into its `.xamlmeta`;
 //! - [`type_system`]: the type system of the compiler over the models
 //!   (`ModelTypeSystem`, xaml.md 9.5.5), with the closed table of runtime
-//!   library types it shares with the run-time type system.
+//!   library types it shares with the run-time type system, and what the
+//!   models state for the emitter (`ModelEmitTypes`, xaml.md 9.5.12).
 //!
-//! - [`call_forms`]: how generated code calls each member a declaration
-//!   states by a callable (xaml.md 9.5.3), chosen at the end of a scan and
-//!   written into the model.
-//!
-//! [`Build::compile_xaml`] still transforms against the run-time type system.
-//! The compiler takes its type system from a host and the emitter reads it
-//! through a trait (`rust_emitter::EmitterHost`, `EmitTypes`); what is missing
-//! between `ModelTypeSystem` and the compilation is the implementation of that
-//! trait over the models. xaml.md 9.5.10 lists what it has to answer, and
-//! 9.10.1 has the stages.
+//! What a build against the models does not have yet: the compile-time value
+//! parser of the run-time host (text a type refuses is found when the document
+//! is built, not when it is compiled), and a position map for the file of a
+//! class.
 //!
 //! ```ignore
 //! // build.rs of a crate that declares types and has no documents
@@ -130,14 +143,23 @@ pub mod xaml_compiler_diagnostics_filter;
 use std::env;
 use std::fs;
 use std::path::{Path, PathBuf};
+use std::rc::Rc;
+use std::time::Instant;
 
 use ferroui_base::metadata::MarkupAssembly;
 use ferroui_markup_xaml::RuntimeXamlLoaderConfiguration;
+use xamlx::type_system::IXamlTypeSystem;
 
+use crate::export::ScanReport;
 use crate::model::AssemblyModel;
 use crate::model_set::ModelSet;
 use crate::scanner::{scan_crate, Scan, ScanOptions, Severity};
-use ferroui_markup_xaml_loader::rust_emitter::{generate_file, rust_string_literal, XamlMetadata};
+use crate::type_system::{ModelEmitTypes, ModelTypeSystem};
+pub use ferroui_markup_xaml_loader::rust_emitter::ClassConstructor;
+use ferroui_markup_xaml_loader::rust_emitter::{
+    class_document_group, class_of_document, generate_class_file_with, generate_file, generate_file_with, rust_string_literal, ClassGroup,
+    CompiledMarkupTypeSystem, EmitterHost, TransformOptions, XamlMetadata,
+};
 use ferroui_markup_xaml_loader::FerroRuntimeXamlLoader;
 
 /// The name of the module of the default group ([`Build::compile_xaml`]).
@@ -155,6 +177,23 @@ pub struct XamlGroup {
     documents: Option<Vec<(String, String)>>,
     create_source_info: Option<bool>,
     exported: bool,
+    class_document: Option<String>,
+    constructor: Option<ClassConstructor>,
+}
+
+/// The type system the documents of a build are compiled against ([`Build::type_system`]).
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
+pub enum TypeSystem {
+    /// The run-time type system: the types the build script registered in its process. The
+    /// script links the crates whose types its documents name, and cannot compile a
+    /// document that names a type of the crate it builds.
+    #[default]
+    Runtime,
+    /// The build-time type system over the type models (docs/porting/xaml.md, 9.5): the
+    /// model of the crate, scanned from its sources, and the models of the crates it
+    /// depends on, read from their `.xamlmeta`. The script links no crate for its types
+    /// and compiles the documents of the classes of the crate ([`XamlGroup::class_document`]).
+    Model,
 }
 
 impl XamlGroup {
@@ -162,7 +201,30 @@ impl XamlGroup {
     /// root. Without [`documents`](Self::documents) the group is every `.xaml` file
     /// below the XAML root of the build.
     pub fn new(module: &str) -> Self {
-        Self { module: module.to_string(), documents: None, create_source_info: None, exported: true }
+        Self { module: module.to_string(), documents: None, create_source_info: None, exported: true, class_document: None, constructor: None }
+    }
+
+    /// Makes the group the group of a class of the crate: `name` (its path below the root
+    /// URI of the assembly) is the document of the class its root names with `x:Class`,
+    /// and the group is that document with every document of the group it includes,
+    /// directly or not. The generated file is the file of the class
+    /// (`rust_emitter::generate_class_file`): `populate`, which the constructor of the
+    /// class calls, the build functions of the included documents and the loader table.
+    /// Its module is declared at the crate root like the module of any group
+    /// (`crate::<module>::populate`).
+    ///
+    /// Only with [`TypeSystem::Model`]: the class is a type of the crate being built.
+    pub fn class_document(mut self, name: &str) -> Self {
+        self.class_document = Some(name.to_string());
+        self
+    }
+
+    /// The constructor the loader table creates the class of a class group with. Without
+    /// the call the compiler picks it as upstream's does: a public parameterless
+    /// constructor, else a public constructor that takes the service provider.
+    pub fn constructor(mut self, constructor: ClassConstructor) -> Self {
+        self.constructor = Some(constructor);
+        self
     }
 
     /// The documents of the group, by their path below the root URI of the assembly
@@ -206,6 +268,7 @@ pub struct Build {
     dependencies: Vec<PathBuf>,
     export_metadata: bool,
     source_root: Option<PathBuf>,
+    type_system: TypeSystem,
 }
 
 impl Build {
@@ -242,7 +305,24 @@ impl Build {
             dependencies,
             export_metadata: false,
             source_root: None,
+            type_system: TypeSystem::Runtime,
         }
+    }
+
+    /// The type system the documents are compiled against; [`TypeSystem::Runtime`] without
+    /// the call.
+    ///
+    /// With [`TypeSystem::Model`] the build scans the sources of the crate (as
+    /// [`export_metadata`](Self::export_metadata) does, and writes the model the same
+    /// way), reads the models of the crates it depends on from their `.xamlmeta`, and
+    /// compiles every group against the type system over those models. The build script
+    /// registers nothing and needs no [`assembly`](Self::assembly): the assembly is the
+    /// `MarkupAssembly` the sources state. A document the models cannot answer a question
+    /// of the emitter for is an error of the build that names the document and the
+    /// question; it is never compiled from a guess.
+    pub fn type_system(mut self, type_system: TypeSystem) -> Self {
+        self.type_system = type_system;
+        self
     }
 
     /// Scans the sources of the crate and writes its type model into its `.xamlmeta`
@@ -360,14 +440,17 @@ impl Build {
         for input in &self.inputs {
             rerun(&mut lines, input);
         }
+        let on_models = self.type_system == TypeSystem::Model;
         // The documents are compiled against the assembly the crate registers; a build
-        // that only exports the type model of the crate reads the assembly from the sources.
-        if self.assembly.is_none() && (!self.export_metadata || !self.groups.is_empty()) {
+        // that reads the type model of the crate reads the assembly from the sources.
+        if self.assembly.is_none() && !on_models && (!self.export_metadata || !self.groups.is_empty()) {
             errors.push("the assembly of the crate is not stated (Build::assembly)".to_string());
             return Outcome { lines, errors };
         }
 
         // 1. The compiled markup and the type models of the dependencies.
+        let mut report = ScanReport { crate_name: self.crate_name.clone(), ..ScanReport::default() };
+        let started = Instant::now();
         let (models, dependency_files) = match ModelSet::read(&self.dependencies) {
             Ok(read) => read,
             Err(error) => {
@@ -375,16 +458,28 @@ impl Build {
                 return Outcome { lines, errors };
             }
         };
+        report.read_dependencies = started.elapsed();
+        report.dependency_files = dependency_files.len();
+        report.dependency_models = models.len();
         for file in &dependency_files {
             rerun(&mut lines, file);
         }
         let dependencies: Vec<XamlMetadata> = models.iter().map(AssemblyModel::metadata).collect();
 
         // The type model of the crate, from its sources.
+        let scanned = self.export_metadata || on_models;
         let mut model: Option<AssemblyModel> = None;
-        if self.export_metadata {
+        // The models the documents are compiled against: the ones of the dependencies, then
+        // the one of the crate.
+        let mut compiled_against: Vec<AssemblyModel> = Vec::new();
+        if scanned {
+            if on_models {
+                compiled_against = models.clone();
+            }
+            let started = Instant::now();
             match self.scan(models) {
                 Ok(scan) => {
+                    report.scanned(&scan, started.elapsed());
                     for file in &scan.files {
                         rerun(&mut lines, &file.path);
                     }
@@ -406,8 +501,39 @@ impl Build {
             // the type systems name it.
             (None, _) => self.crate_name.clone(),
         };
+        // Whether source information is on for the assembly, as the configuration of the
+        // run-time loader reads it from the metadata of the assembly.
+        let assembly_source_info = model.as_ref().is_some_and(|model| {
+            model.metadata.iter().find(|(key, _)| key == ferroui_build_scan::CREATE_SOURCE_INFO).is_some_and(|(_, value)| value.trim().eq_ignore_ascii_case("true"))
+        });
 
-        if let Some(assembly) = self.assembly {
+        // The type system of the build.
+        let mut model_host: Option<(Rc<dyn IXamlTypeSystem>, Rc<dyn IXamlTypeSystem>, ModelEmitTypes)> = None;
+        if on_models {
+            if let Some(model) = &model {
+                let mut own = model.clone();
+                own.name = assembly_name.clone();
+                compiled_against.push(own);
+            }
+            let system = ModelTypeSystem::new(compiled_against);
+            // No class is one "with markup of its own" for a build: that states which
+            // classes the run-time loader populates, and a class whose document is compiled
+            // populates itself from its compiled markup.
+            let types = ModelEmitTypes::new(system.clone(), Vec::new());
+            // The compiled documents of the dependencies are part of the type system, as
+            // they are for the run-time host (`EmitterHost::runtime`).
+            let type_system = match dependencies.is_empty() {
+                true => Ok(system.as_type_system()),
+                false => CompiledMarkupTypeSystem::new(system.as_type_system(), &dependencies).map(|wrapped| wrapped as Rc<dyn IXamlTypeSystem>),
+            };
+            match type_system {
+                Ok(type_system) => model_host = Some((type_system, system.as_type_system(), types)),
+                Err(error) => {
+                    errors.push(format!("the compiled markup of a dependency cannot be read against the type models: {}", error.message()));
+                    return Outcome { lines, errors };
+                }
+            }
+        } else if let Some(assembly) = self.assembly {
             // The compiler resolves the assembly of the crate and the types of the runtime
             // library; every other type is the build script's to register.
             ferroui_markup_xaml::register_types();
@@ -427,11 +553,13 @@ impl Build {
             documents: Vec::new(),
             dependencies: self.dependencies.iter().map(|path| path.display().to_string()).collect(),
         };
-        let mut modules: Vec<(String, PathBuf, bool)> = Vec::new();
+        let mut modules: Vec<Module> = Vec::new();
         let mut compiled_documents: Vec<String> = Vec::new();
         for group in &self.groups {
-            let Some(assembly) = self.assembly else { break };
-            if modules.iter().any(|(module, _, _)| *module == group.module) {
+            if self.assembly.is_none() && !on_models {
+                break;
+            }
+            if modules.iter().any(|module| module.name == group.module) {
                 errors.push(format!("two groups have the module `{}`", group.module));
                 continue;
             }
@@ -457,27 +585,78 @@ impl Build {
                     documents
                 }
             };
-            let mut configuration = RuntimeXamlLoaderConfiguration::new();
-            configuration.local_assembly = Some(assembly);
-            if let Some(create_source_info) = group.create_source_info {
-                configuration.set_create_source_info(create_source_info);
-            }
             let borrowed: Vec<(&str, &str)> = documents.iter().map(|(name, xaml)| (name.as_str(), xaml.as_str())).collect();
-            let file = generate_file(assembly.name, &root_uri, &borrowed, &configuration, &dependencies);
+            let path = xaml_directory.join(format!("{}.rs", group.module));
+            let module_path = format!("::{}::{}", self.crate_name, group.module);
+
+            // The group of a class of the crate.
+            if let Some(class_document) = &group.class_document {
+                let Some((type_system, models, types)) = &model_host else {
+                    errors.push(format!(
+                        "{class_document}: the document of a class of the crate is compiled against the type models only (Build::type_system(TypeSystem::Model)): a build script cannot link the crate it builds"
+                    ));
+                    continue;
+                };
+                let host = EmitterHost { type_system: type_system.clone(), types, parsers: Vec::new() };
+                let options = TransformOptions {
+                    local_assembly: Some(assembly_name.clone()),
+                    create_source_info: group.create_source_info.unwrap_or(assembly_source_info),
+                    ..TransformOptions::default()
+                };
+                let compiled = class_group(&host, &**models, &root_uri, &borrowed, class_document, group.constructor, &module_path, &options);
+                match compiled {
+                    Ok(file) => {
+                        for warning in &file.warnings {
+                            lines.push(format!("cargo::warning={class_document}: {warning}"));
+                        }
+                        write_if_changed(&path, &file.source, &mut errors);
+                        let class_metadata = file.metadata(&[]);
+                        if group.exported {
+                            compiled_documents.extend(class_metadata.documents.iter().filter_map(|document| document_path(&document.uri)));
+                            metadata.documents.extend(class_metadata.documents);
+                        }
+                    }
+                    Err(reasons) => errors.extend(reasons.lines().map(|reason| match reason.starts_with(class_document.as_str()) {
+                        true => reason.to_string(),
+                        false => format!("{class_document}: {reason}"),
+                    })),
+                }
+                modules.push(Module { name: group.module.clone(), path, exported: group.exported, file: true });
+                continue;
+            }
+
+            let file = match &model_host {
+                Some((type_system, _, types)) => {
+                    let host = EmitterHost { type_system: type_system.clone(), types, parsers: Vec::new() };
+                    let options = TransformOptions {
+                        local_assembly: Some(assembly_name.clone()),
+                        create_source_info: group.create_source_info.unwrap_or(assembly_source_info),
+                        ..TransformOptions::default()
+                    };
+                    generate_file_with(&host, &assembly_name, &root_uri, &borrowed, &options)
+                }
+                None => {
+                    let Some(assembly) = self.assembly else { break };
+                    let mut configuration = RuntimeXamlLoaderConfiguration::new();
+                    configuration.local_assembly = Some(assembly);
+                    if let Some(create_source_info) = group.create_source_info {
+                        configuration.set_create_source_info(create_source_info);
+                    }
+                    generate_file(assembly.name, &root_uri, &borrowed, &configuration, &dependencies)
+                }
+            };
             for (name, reason) in &file.documents {
                 if let Some(reason) = reason {
                     errors.push(format!("{name}: {}", reason.replace(['\r', '\n'], " ")));
                 }
             }
-            let path = xaml_directory.join(format!("{}.rs", group.module));
             write_if_changed(&path, &file.source, &mut errors);
             write_if_changed(&xaml_directory.join(format!("{}.map.json", group.module)), &file.position_map, &mut errors);
             if group.exported {
-                let module_path = format!("::{}::{}", self.crate_name, group.module);
                 metadata.documents.extend(file.metadata(&self.crate_name, &module_path, &[]).documents);
                 compiled_documents.extend(documents.iter().map(|(name, _)| format!("/{name}")));
             }
-            modules.push((group.module.clone(), path, group.exported));
+            modules.push(Module { name: group.module.clone(), path, exported: group.exported, file: false });
         }
         for path in &self.checked_in_metadata {
             rerun(&mut lines, path);
@@ -511,7 +690,7 @@ impl Build {
             return Outcome { lines, errors };
         }
 
-        // 4. The `.xamlmeta` (with the type model of the crate, when it is exported) and
+        // 4. The `.xamlmeta` (with the type model of the crate, when it was scanned) and
         // the file the crate includes.
         let metadata_path = self.out_dir.join(format!("{}.xamlmeta", self.crate_name));
         let metadata_text = match model {
@@ -524,11 +703,26 @@ impl Build {
             }
             None => metadata.to_json(),
         };
-        write_if_changed(&metadata_path, &metadata_text, &mut errors);
+        let started = Instant::now();
+        report.model_bytes = metadata_text.len();
+        match ferroui_build_scan::export::write_if_changed(&metadata_path, &metadata_text) {
+            Ok(written) => report.model_written = written,
+            Err(error) => errors.push(error),
+        }
+        report.write = started.elapsed();
+        // What the scan cost, for whoever judges it (`export::ScanReport`).
+        if scanned {
+            if let Err(error) = report.write(&self.out_dir) {
+                errors.push(error);
+            }
+        }
         // A crate that only exports its model includes nothing.
-        if self.assembly.is_some() {
+        if self.assembly.is_some() || !self.groups.is_empty() || !self.asset_directories.is_empty() {
             let text = crate_file(&assembly_name, &modules, &self.loaders, &assets);
             write_if_changed(&xaml_directory.join("mod.rs"), &text, &mut errors);
+        }
+        if !errors.is_empty() {
+            return Outcome { lines, errors };
         }
 
         // 5. For the dependents, and for the crate itself.
@@ -536,6 +730,48 @@ impl Build {
         lines.push(format!("cargo::rustc-env={XAMLMETA_VARIABLE}={}", metadata_path.display()));
         Outcome { lines, errors }
     }
+}
+
+/// The module of a group in the file the crate includes.
+struct Module {
+    name: String,
+    /// The generated file.
+    path: PathBuf,
+    /// Whether the loader table of the crate asks the table of the module.
+    exported: bool,
+    /// Whether the generated file is a module file of its own (the file of a class, which
+    /// starts with attributes of the module) and not the body of a module.
+    file: bool,
+}
+
+/// The rooted path (`/Folder/Style.xaml`) of the document with the URI `uri`.
+fn document_path(uri: &str) -> Option<String> {
+    let rest = uri.split_once("://")?.1;
+    rest.find('/').map(|separator| rest[separator..].to_string())
+}
+
+/// The file of the class whose document is `class_document`, among the documents of its
+/// crate: the class is the type the models have for the `x:Class` of the document, and
+/// the group is the document with the documents it includes.
+#[allow(clippy::too_many_arguments)]
+fn class_group(
+    host: &EmitterHost<'_>,
+    models: &dyn IXamlTypeSystem,
+    root_uri: &str,
+    documents: &[(&str, &str)],
+    class_document: &str,
+    constructor: Option<ClassConstructor>,
+    module_path: &str,
+    options: &TransformOptions,
+) -> Result<ferroui_markup_xaml_loader::rust_emitter::ClassFile, String> {
+    let group = class_document_group(root_uri, documents, class_document)?;
+    let class_name = class_of_document(&group[0].1)?.ok_or_else(|| "the document names no class (`x:Class`)".to_string())?;
+    let class = models.find_type(&class_name).ok_or_else(|| {
+        format!(
+            "the type models have no type `{class_name}`, which the document names with `x:Class`: the class is not declared in the sources of the crate, or its declaration is not read"
+        )
+    })?;
+    generate_class_file_with(host, &ClassGroup { class, documents: &group, constructor, module_path }, options)
 }
 
 /// Compiles every `.xaml` file of the crate whose build script is running
@@ -593,14 +829,20 @@ fn write_if_changed(path: &Path, text: &str, errors: &mut Vec<String>) {
 /// root of the crate: the module of every group, and the module `compiled_markup`
 /// with the asset table, the loader table of the crate (the checked-in tables, then
 /// the groups, in order) and `register()`.
-fn crate_file(assembly_name: &str, modules: &[(String, PathBuf, bool)], loaders: &[String], assets: &[(String, PathBuf)]) -> String {
+fn crate_file(assembly_name: &str, modules: &[Module], loaders: &[String], assets: &[(String, PathBuf)]) -> String {
     let mut text = String::new();
     text.push_str("// @generated by ferroui-build (Build::run). Do not edit.\n");
-    for (module, path, _) in modules {
+    for Module { name: module, path, file, .. } in modules {
         text.push('\n');
         text.push_str(&format!("/// The compiled documents of the group `{module}`.\n"));
         text.push_str("#[doc(hidden)]\n");
         text.push_str("#[rustfmt::skip]\n");
+        if *file {
+            // The file of a class is a module file: it starts with attributes of the module.
+            text.push_str(&format!("#[path = {}]\n", rust_string_literal(&path.display().to_string())));
+            text.push_str(&format!("pub mod {module};\n"));
+            continue;
+        }
         text.push_str(&format!("pub mod {module} {{\n"));
         text.push_str(&format!("    include!({});\n", rust_string_literal(&path.display().to_string())));
         text.push_str("}\n");
@@ -634,7 +876,7 @@ fn crate_file(assembly_name: &str, modules: &[(String, PathBuf, bool)], loaders:
     let tables = loaders
         .iter()
         .cloned()
-        .chain(modules.iter().filter(|(_, _, exported)| *exported).map(|(module, _, _)| format!("super::{module}::try_load")));
+        .chain(modules.iter().filter(|module| module.exported).map(|module| format!("super::{}::try_load", module.name)));
     for table in tables {
         text.push_str(&format!("        if let ::core::option::Option::Some(loaded) = {table}(service_provider, uri)? {{\n"));
         text.push_str("            return ::core::result::Result::Ok(::core::option::Option::Some(loaded));\n");
@@ -663,10 +905,8 @@ mod tests {
     /// and registers the assets with the table.
     #[test]
     fn crate_file_declares_the_modules_and_the_loader_table() {
-        let modules = vec![
-            ("compiled_xaml".to_string(), PathBuf::from("/out/xaml/compiled_xaml.rs"), true),
-            ("compiled_xaml_source_info".to_string(), PathBuf::from("/out/xaml/compiled_xaml_source_info.rs"), false),
-        ];
+        let module = |name: &str, exported: bool, file: bool| Module { name: name.to_string(), path: PathBuf::from(format!("/out/xaml/{name}.rs")), exported, file };
+        let modules = vec![module("compiled_xaml", true, false), module("compiled_xaml_source_info", false, false), module("compiled_main_window", true, true)];
         let assets = vec![("/Assets/a.png".to_string(), PathBuf::from("/crate/Assets/a.png"))];
         let text = crate_file("Tests", &modules, &["crate::compiled_main::try_load".to_string()], &assets);
         assert!(text.contains("pub mod compiled_xaml {\n    include!(\"/out/xaml/compiled_xaml.rs\");\n}\n"), "{text}");
@@ -677,6 +917,9 @@ mod tests {
         let group = text.find("= super::compiled_xaml::try_load(service_provider, uri)?").expect("the table of the group");
         assert!(checked_in < group, "{text}");
         assert!(!text.contains("super::compiled_xaml_source_info::try_load"), "{text}");
+        // The file of a class is a module file of its own.
+        assert!(text.contains("#[path = \"/out/xaml/compiled_main_window.rs\"]\npub mod compiled_main_window;\n"), "{text}");
+        assert!(text.contains("= super::compiled_main_window::try_load(service_provider, uri)?"), "{text}");
     }
 
     /// Not from upstream: `export_metadata()` scans the sources of the crate, writes its
@@ -729,6 +972,42 @@ mod tests {
     fn texts_the_scanner_states_are_the_ones_of_the_base_crate() {
         assert_eq!(ferroui_build_scan::FERRO_XML_NAMESPACE, ferroui_base::metadata::FERRO_XML_NAMESPACE);
         assert_eq!(ferroui_build_scan::CREATE_SOURCE_INFO, MarkupAssembly::CREATE_SOURCE_INFO);
+    }
+
+    /// Not from upstream: against the type models a build reads the assembly from the
+    /// sources and compiles the document of a class of the crate; what the models do not
+    /// have is an error that names the document. The fixture declares no framework type,
+    /// so the group does not get as far as a transform here: the include fixture
+    /// (`tests/XamlIncludeFixture`) is the build that compiles.
+    #[test]
+    fn class_document_is_compiled_against_the_models_only() {
+        let fixtures = Path::new(env!("CARGO_MANIFEST_DIR")).with_file_name("FerroUI.Build.Scan").join("tests").join("fixtures");
+        let out = env::temp_dir().join(format!("ferroui-build-class-{}", std::process::id()));
+        let document = "<Border xmlns='https://github.com/ferroui' xmlns:x='http://schemas.microsoft.com/winfx/2006/xaml' x:Class='Fixture.Missing'/>";
+        let group = || XamlGroup::new("compiled_border").documents(&[("Border.xaml", document)]).class_document("Border.xaml");
+        let build = |name: &str| Build::new(fixtures.join("scanner"), out.join(name), "fixture", Vec::new()).source_root("lib.rs");
+
+        let on_models = build("models").type_system(TypeSystem::Model).compile_group(group()).execute();
+        assert_eq!(on_models.errors.len(), 1, "{:?}", on_models.errors);
+        assert!(
+            on_models.errors[0].starts_with("Border.xaml: the type models have no type `Fixture.Missing`, which the document names with `x:Class`"),
+            "{:?}",
+            on_models.errors
+        );
+        // The sources were scanned: the files are inputs of the build.
+        let border = fixtures.join("scanner").join("controls").join("border.rs");
+        assert!(on_models.lines.contains(&format!("cargo::rerun-if-changed={}", border.display())), "{:?}", on_models.lines);
+
+        static ASSEMBLY: MarkupAssembly =
+            MarkupAssembly { name: "Fixture", crate_name: "fixture", xmlns_definitions: &[], xmlns_prefixes: &[], metadata: &[] };
+        let at_run_time = build("runtime").assembly(&ASSEMBLY).compile_group(group()).execute();
+        assert_eq!(at_run_time.errors.len(), 1, "{:?}", at_run_time.errors);
+        assert!(
+            at_run_time.errors[0].starts_with("Border.xaml: the document of a class of the crate is compiled against the type models only"),
+            "{:?}",
+            at_run_time.errors
+        );
+        let _ = fs::remove_dir_all(&out);
     }
 
     /// Not from upstream: a build without an assembly reports it, with the lines that make

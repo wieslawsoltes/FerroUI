@@ -21,7 +21,13 @@
 //!   the documents of the classes of the crate (`x:Class`) and the documents
 //!   that name its types.
 //!
-//! The source scanner of section 9.5 removes the difference.
+//! With the build-time type system over the models of the crates (section 9.5;
+//! `ferroui-build` with `TypeSystem::Model`) the host links no crate for its
+//! types, the crate it builds included: [`generate_file_with`] and
+//! [`generate_class_file_with`] compile against the type system the host
+//! states, and [`class_document_group`] and [`class_of_document`] read the
+//! group and the class of a class document from the documents themselves,
+//! where a host with the run-time type system asks the run-time loader.
 
 use ::ferroui_markup_xaml::RuntimeXamlLoaderConfiguration;
 
@@ -35,9 +41,9 @@ use xamlx::type_system::IXamlTypeSystem;
 use crate::compiler_extensions::IXamlCompileTimeValueParser;
 
 use super::compiled_resources::CompiledMarkupTypeSystem;
-use super::emit_types::{EmitClass, EmitTypes};
+use super::emit_types::{EmitClass, EmitTypes, Known};
 use super::emitter::{emit_function, root_class_of, DocumentFunctions};
-use super::runtime_types::{class as class_of, RuntimeEmitTypes};
+use super::runtime_types::RuntimeEmitTypes;
 use super::transform::{transform_group, DocumentSource, TransformOptions, TransformedDocument};
 use super::source::{function_name_of, rust_string_literal};
 use ferroui_build_scan::xaml_metadata::{DocumentModel, XamlMetadata};
@@ -134,6 +140,7 @@ impl EmitterHost<'static> {
 /// group against the run-time type system, with the compiled markup of `dependencies`. A
 /// document with the class of its root instance (`x:Class`) is transformed to populate an
 /// instance of that class.
+#[cfg(any(test, feature = "testing"))]
 #[allow(clippy::type_complexity)]
 fn transform_with_runtime_types(
     documents: &[(&str, &str, Option<String>, Option<&'static ferroui_base::TypeInfo>)],
@@ -600,6 +607,7 @@ fn json_string(text: &str) -> String {
 
 /// A group of documents with owned texts as the borrowed form
 /// [`transform_with_runtime_types`] takes.
+#[cfg(any(test, feature = "testing"))]
 #[allow(clippy::type_complexity)]
 fn borrowed<'a>(
     documents: &'a [(String, String, Option<String>, Option<&'static ferroui_base::TypeInfo>)],
@@ -674,8 +682,25 @@ pub enum ClassConstructor {
     ServiceProvider(&'static str),
 }
 
-impl ClassConstructor {
-    /// The constructor upstream's compiler creates `class` with in the loader table
+/// [`ClassConstructor`] with the function as owned text: the typed function of a constructor
+/// a type system over the models declares is not a text of the program.
+#[derive(Clone, Debug, PartialEq, Eq)]
+enum Constructor {
+    Parameterless(String),
+    ServiceProvider(String),
+}
+
+impl From<ClassConstructor> for Constructor {
+    fn from(constructor: ClassConstructor) -> Self {
+        match constructor {
+            ClassConstructor::Parameterless(function) => Constructor::Parameterless(function.to_string()),
+            ClassConstructor::ServiceProvider(function) => Constructor::ServiceProvider(function.to_string()),
+        }
+    }
+}
+
+impl Constructor {
+    /// The constructor upstream's compiler creates the class with in the loader table
     /// (`XamlCompilerTaskExecutor`), read from the constructors the type system projects
     /// for the class: a public parameterless constructor (the default constructor of
     /// the class, `T::new()`), else a public constructor whose single parameter is the
@@ -686,17 +711,18 @@ impl ClassConstructor {
     /// `Err` when the constructor exists and cannot be called from generated code: it
     /// has no typed function, the function is fallible, or its parameter is not
     /// `Option<Rc<dyn IServiceProvider>>`.
-    pub(crate) fn of(
-        class: &'static ferroui_base::TypeInfo,
+    fn of(
+        types: &dyn EmitTypes,
+        class_type: &Rc<dyn xamlx::type_system::IXamlType>,
+        class: &dyn EmitClass,
         configuration: &xamlx::transform::TransformerConfiguration,
     ) -> Result<Option<Self>, String> {
-        use crate::runtime::type_system::RuntimeConstructor;
-        let constructors = FerroXamlIlRuntimeCompiler::type_system().type_of_class(class).constructors();
+        let constructors = class_type.constructors();
         if constructors.iter().any(|c| c.is_public() && !c.is_static() && c.parameters().is_empty()) {
-            if class.default_constructor().is_none() {
+            if !class.has_default_constructor() {
                 return Err(format!("the parameterless constructor of {} is not its default constructor", class.full_name()));
             }
-            return Ok(Some(ClassConstructor::Parameterless("new")));
+            return Ok(Some(Constructor::Parameterless("new".to_string())));
         }
         let service_provider = configuration.type_mappings.service_provider().map_err(|e| e.message())?;
         let Some(constructor) = constructors.iter().find(|c| {
@@ -705,15 +731,11 @@ impl ClassConstructor {
         }) else {
             return Ok(None);
         };
-        let optional = std::any::TypeId::of::<Option<std::rc::Rc<dyn ferroui_base::metadata::IServiceProvider>>>();
-        let emit = constructor
-            .as_any()
-            .downcast_ref::<RuntimeConstructor>()
-            .filter(|constructor| {
-                constructor.parameter_handles.first().copied().flatten().is_some_and(|handle| handle.id() == optional)
-            })
-            .and_then(|constructor| constructor.declared)
-            .and_then(|declared| declared.emit)
+        let optional = types.known(Known::OptionServiceProvider);
+        let emit = types
+            .constructor(&**constructor)
+            .filter(|constructor| constructor.parameter_handles.first().copied().flatten().is_some_and(|handle| handle.id() == optional))
+            .and_then(|constructor| constructor.declared.flatten())
             .filter(|emit| !emit.fallible)
             .ok_or_else(|| {
                 format!(
@@ -722,15 +744,13 @@ impl ClassConstructor {
                     class.full_name()
                 )
             })?;
-        Ok(Some(ClassConstructor::ServiceProvider(emit.function)))
+        Ok(Some(Constructor::ServiceProvider(emit.function)))
     }
 }
 
-/// Whether the document `xaml` is public, from the `x:ClassModifier` directive of
-/// its root (`XamlCompilerTaskExecutor`): `Public` is public, `NotPublic` and
-/// `Internal` are not (compared without regard to case), a document without the
-/// directive is public. `Ok(None)` when the directive is absent.
-fn class_modifier_public(xaml: &str) -> Result<Option<bool>, String> {
+/// The text of the directive `x:<name>` of the root of the document `xaml`: `Ok(None)`
+/// when the root has no such directive, `Ok(Some(None))` when its value is not text.
+fn root_directive(xaml: &str, name: &str) -> Result<Option<Option<String>>, String> {
     use xamlx::ast::{XamlAstNodeExtensions, XamlAstObjectNode, XamlAstTextNode, XamlAstXmlDirective};
     let parsed = xamlx::parsers::XDocumentXamlParser::parse(xaml, None).map_err(|e| e.message())?;
     let root = parsed.root().map_err(|e| e.message())?;
@@ -740,23 +760,97 @@ fn class_modifier_public(xaml: &str) -> Result<Option<bool>, String> {
     let children = root.children.borrow();
     let directive = children.iter().filter_map(|child| child.cast::<XamlAstXmlDirective>()).find(|directive| {
         directive.namespace.borrow().as_deref() == Some(xamlx::xaml_namespaces::XamlNamespaces::XAML2006)
-            && *directive.name.borrow() == "ClassModifier"
+            && *directive.name.borrow() == name
     });
     let Some(directive) = directive else {
         return Ok(None);
     };
-    let text = directive
-        .values
-        .borrow()
-        .first()
-        .and_then(|value| value.cast::<XamlAstTextNode>())
-        .map(|text| text.text().trim().to_lowercase());
-    match text.as_deref() {
+    let text = directive.values.borrow().first().and_then(|value| value.cast::<XamlAstTextNode>()).map(|text| text.text());
+    Ok(Some(text))
+}
+
+/// Whether the document `xaml` is public, from the `x:ClassModifier` directive of
+/// its root (`XamlCompilerTaskExecutor`): `Public` is public, `NotPublic` and
+/// `Internal` are not (compared without regard to case), a document without the
+/// directive is public. `Ok(None)` when the directive is absent.
+fn class_modifier_public(xaml: &str) -> Result<Option<bool>, String> {
+    let Some(text) = root_directive(xaml, "ClassModifier")? else {
+        return Ok(None);
+    };
+    match text.map(|text| text.trim().to_lowercase()).as_deref() {
         Some("public") => Ok(Some(true)),
         // The XAML specification uses "Public" and "NotPublic", the WPF documentation "public" and "internal".
         Some("notpublic") | Some("internal") => Ok(Some(false)),
         _ => Err("Invalid value for x:ClassModifier. Expected value are: Public, NotPublic (internal).".to_string()),
     }
+}
+
+/// The full name of the class of the document `xaml` (the `x:Class` directive of its
+/// root, as the parser of the compiler reads it), or nothing for a document without one:
+/// what a host that does not ask the run-time loader finds the class of a document by.
+pub fn class_of_document(xaml: &str) -> Result<Option<String>, String> {
+    Ok(root_directive(xaml, "Class")?.flatten().map(|class| class.trim().to_string()))
+}
+
+/// The group the document of a class is compiled as, read from the documents of its
+/// crate instead of from the run-time loader: the document `class_document` and every
+/// document of `documents` (`(name, xaml)`, by their path below `root_uri`) it includes,
+/// directly or not, in the order the includes are met. It is the group
+/// [`generate_class_file`] gets from `FerroRuntimeXamlLoader::document_group_without`,
+/// with `documents` in the place of the assets of the crate: a document of another
+/// crate is not among them, so an include of one is left to the compiled markup of that
+/// crate. Each document is `(name, xaml, URI)` as [`ClassGroup::documents`] takes it.
+pub fn class_document_group(
+    root_uri: &str,
+    documents: &[(&str, &str)],
+    class_document: &str,
+) -> Result<Vec<(String, String, Option<String>)>, String> {
+    use ferroui_base::utilities::{Uri, UriKind};
+    let mut uris: Vec<Uri> = Vec::with_capacity(documents.len());
+    for (name, _) in documents {
+        let text = format!("{root_uri}{name}");
+        uris.push(Uri::new(&text, UriKind::Absolute).map_err(|e| format!("The URI '{text}' of the XAML document {name} is invalid: {e}"))?);
+    }
+    let start = documents
+        .iter()
+        .position(|(name, _)| *name == class_document)
+        .ok_or_else(|| format!("the document `{class_document}` of the class is not a document of the group"))?;
+    // The documents in the order they are found; a document is found once.
+    fn collect(documents: &[(&str, &str)], uris: &[Uri], index: usize, found: &mut Vec<usize>) {
+        for source in crate::ferro_runtime_xaml_loader::include_sources(documents[index].1) {
+            let Some(relative) = Uri::try_create(&source, UriKind::RelativeOrAbsolute) else { continue };
+            let included = match relative.is_absolute_uri() {
+                true => relative,
+                false => Uri::combine(&uris[index], &relative),
+            };
+            let Some(next) = uris.iter().position(|uri| uri.absolute_uri() == included.absolute_uri()) else { continue };
+            if found.contains(&next) {
+                continue;
+            }
+            found.push(next);
+            collect(documents, uris, next, found);
+        }
+    }
+    let mut found = vec![start];
+    collect(documents, &uris, start, &mut found);
+    Ok(found
+        .into_iter()
+        .map(|index| (uris[index].absolute_path().trim_start_matches('/').to_string(), documents[index].1.to_string(), Some(uris[index].to_string())))
+        .collect())
+}
+
+/// The documents of a class, for [`generate_class_file_with`].
+pub struct ClassGroup<'a> {
+    /// The type of the class in the type system of the host.
+    pub class: Rc<dyn xamlx::type_system::IXamlType>,
+    /// The documents `(name, xaml, URI)`: the document of the class, then the documents it
+    /// includes, directly or not ([`class_document_group`]).
+    pub documents: &'a [(String, String, Option<String>)],
+    /// The constructor of the class, or nothing to let the compiler pick it
+    /// ([`generate_class_file`]).
+    pub constructor: Option<ClassConstructor>,
+    /// The absolute path of the module the file is the body of.
+    pub module_path: &'a str,
 }
 
 /// The generated file of the documents of a class: the document registered
@@ -806,17 +900,51 @@ pub fn generate_class_file(
     let group = crate::FerroRuntimeXamlLoader::document_group_without(&uri, &class.full_name(), &compiled_elsewhere)
         .map_err(|e| e.message().to_string())?;
     let name_of = |uri: &ferroui_base::utilities::Uri| uri.absolute_path().trim_start_matches('/').to_string();
-    let mut documents = vec![(name_of(&group.uri), group.text.clone(), Some(group.uri.to_string()), Some(class))];
+    let mut documents = vec![(name_of(&group.uri), group.text.clone(), Some(group.uri.to_string()))];
     for (uri, text) in &group.included {
-        documents.push((name_of(uri), text.clone(), Some(uri.to_string()), None));
+        documents.push((name_of(uri), text.clone(), Some(uri.to_string())));
     }
     let mut configuration = RuntimeXamlLoaderConfiguration::new();
     configuration.local_assembly = group.assembly;
-    let transformed = transform_with_runtime_types(&borrowed(&documents), &configuration, dependencies)
+    let host = EmitterHost::runtime(dependencies).map_err(|error| format!("the group does not transform: {}", error.message()))?;
+    let class = ClassGroup {
+        class: FerroXamlIlRuntimeCompiler::type_system().type_of_class(class),
+        documents: &documents,
+        constructor,
+        module_path,
+    };
+    generate_class_file_with(&host, &class, &TransformOptions::of(&configuration))
+}
+
+/// [`generate_class_file`] against the type system of `host`, for the documents `group`
+/// states: the document of the class is transformed to populate an instance of
+/// [`ClassGroup::class`], and the class, its public Rust path and its constructor are the
+/// ones the type system of the host states for that type. A question the type system
+/// cannot answer for a document makes the class not eligible, with the question.
+pub fn generate_class_file_with(host: &EmitterHost<'_>, group: &ClassGroup<'_>, options: &TransformOptions) -> Result<ClassFile, String> {
+    let types = host.types;
+    let (documents, module_path) = (group.documents, group.module_path);
+    if documents.is_empty() {
+        return Err("the group of the class has no document".to_string());
+    }
+    let class = types
+        .class_of(&*group.class)
+        .ok_or_else(|| format!("{} is not a class of the object model", group.class.full_name()))?;
+    let sources: Vec<DocumentSource<'_>> = documents
+        .iter()
+        .enumerate()
+        .map(|(index, (name, xaml, base_uri))| DocumentSource {
+            name,
+            xaml,
+            base_uri: base_uri.clone(),
+            root_type: (index == 0).then(|| group.class.clone()),
+        })
+        .collect();
+    let transformed = transform_group(host.type_system.clone(), &sources, options, &host.parsers)
         .map_err(|error| format!("the group does not transform: {}", error.message()))?;
-    let constructor = match constructor {
-        Some(constructor) => Some(constructor),
-        None => ClassConstructor::of(class, &transformed[0].configuration)?,
+    let constructor = match group.constructor {
+        Some(constructor) => Some(Constructor::from(constructor)),
+        None => Constructor::of(types, &group.class, class, &transformed[0].configuration)?,
     };
     let mut warnings = Vec::new();
     if constructor.is_none() {
@@ -838,7 +966,6 @@ pub fn generate_class_file(
     }
 
     // The functions of the documents, by their build methods.
-    let types: &dyn EmitTypes = &RuntimeEmitTypes;
     let mut functions = DocumentFunctions::default();
     let mut names = Vec::with_capacity(documents.len());
     let mut has_build = vec![false; documents.len()];
@@ -882,7 +1009,8 @@ pub fn generate_class_file(
                 tables.len() - 1
             }
         };
-        let populate = (index == 0).then_some(class_of(class) as &dyn EmitClass);
+        let populate = (index == 0).then_some(class);
+        let _ = types.take_unanswered();
         match emit_function(
             types,
             &transformed.root,
@@ -896,6 +1024,12 @@ pub fn generate_class_file(
         ) {
             Ok(source) => sources.push(source),
             Err(reason) => not_eligible.push(format!("{}: {reason}", document.0)),
+        }
+        // A question the type system of the host could not answer: the document is
+        // refused with it, whatever was emitted from the answer it gave instead.
+        let unanswered = types.take_unanswered();
+        if !unanswered.is_empty() {
+            not_eligible.push(format!("{}: the type system of the host cannot answer: {}", document.0, unanswered.join("; ")));
         }
         for called in functions.called() {
             if let Some(next) = names.iter().position(|name| *name == called) {
@@ -948,7 +1082,7 @@ pub fn generate_class_file(
         source.push_str(function);
     }
     source.push('\n');
-    source.push_str(&loader_table(&documents, &names, &loadable, class_path, constructor));
+    source.push_str(&loader_table(documents, &names, &loadable, class_path, constructor.as_ref()));
     // The file is a module of the crate of the class: that crate is `crate` in it.
     let own_crate = class_path.trim_start_matches("::").split("::").next().unwrap_or_default();
     let source = source.replace(&format!("::{own_crate}::"), "crate::");
@@ -978,11 +1112,10 @@ pub fn generate_class_file(
             },
         });
     }
-    let assembly = configuration.local_assembly;
     Ok(ClassFile {
         source,
         warnings,
-        assembly_name: assembly.map_or_else(String::new, |assembly| assembly.name.to_string()),
+        assembly_name: options.local_assembly.clone().unwrap_or_default(),
         crate_name: own_crate.to_string(),
         documents: exported,
     })
@@ -1016,13 +1149,12 @@ impl ClassFile {
 
 /// `try_load` of a class file: one entry per public document, in the order of the
 /// group, as `XamlCompilerTaskExecutor` writes `!XamlLoader.TryLoad`.
-#[allow(clippy::type_complexity)]
 fn loader_table(
-    documents: &[(String, String, Option<String>, Option<&'static ferroui_base::TypeInfo>)],
+    documents: &[(String, String, Option<String>)],
     names: &[String],
     loadable: &[usize],
     class_path: &str,
-    constructor: Option<ClassConstructor>,
+    constructor: Option<&Constructor>,
 ) -> String {
     let provider = "::ferroui_markup_xaml::xaml_il::runtime::XamlIlRuntimeHelpers::create_root_service_provider_v3(service_provider.cloned())";
     let class_path = class_path.trim_start_matches("::");
@@ -1040,8 +1172,8 @@ fn loader_table(
         let uri = documents[index].2.clone().unwrap_or_default();
         source.push_str(&format!("    if rt::uri_equals(uri, {}, \"\") {{\n", rust_string_literal(&uri)));
         let value = match (index, constructor) {
-            (0, Some(ClassConstructor::Parameterless(function))) => format!("::{class_path}::{function}()"),
-            (0, Some(ClassConstructor::ServiceProvider(function))) => {
+            (0, Some(Constructor::Parameterless(function))) => format!("::{class_path}::{function}()"),
+            (0, Some(Constructor::ServiceProvider(function))) => {
                 format!("::{class_path}::{function}(::core::option::Option::Some({provider}))")
             }
             _ => format!("{}(::core::option::Option::Some({provider}))?", names[index]),
@@ -1078,6 +1210,44 @@ mod tests {
         assert_eq!(
             class_modifier_public(&document(" x:ClassModifier='private'")),
             Err("Invalid value for x:ClassModifier. Expected value are: Public, NotPublic (internal).".to_string())
+        );
+    }
+
+    /// Not from upstream: the class and the group of a class document are read from the
+    /// documents of its crate as the run-time loader finds them among the assets: the
+    /// document with the documents it includes, directly or not, each once, in the order
+    /// the includes are met; a relative source is resolved against the including document,
+    /// and a document of another assembly is not of the group.
+    #[test]
+    fn class_and_group_of_a_class_document_are_read_from_the_documents() {
+        let namespaces = "xmlns='https://github.com/ferroui' xmlns:x='http://schemas.microsoft.com/winfx/2006/xaml'";
+        let theme = format!(
+            "<Styles {namespaces} x:Class=' Fixture.Theme '>\
+             <StyleInclude Source='/Controls/A.xaml'/>\
+             <StyleInclude Source='ferres://Other/Unused.xaml'/>\
+             <StyleInclude Source='Controls/B.xaml'/>\
+             </Styles>"
+        );
+        let a = format!("<Styles {namespaces}><StyleInclude Source='B.xaml'/><StyleInclude Source='/Theme.xaml'/></Styles>");
+        let plain = format!("<Styles {namespaces}/>");
+        assert_eq!(class_of_document(&theme), Ok(Some("Fixture.Theme".to_string())));
+        assert_eq!(class_of_document(&plain), Ok(None));
+
+        let documents = [("Unused.xaml", plain.as_str()), ("Controls/B.xaml", plain.as_str()), ("Theme.xaml", theme.as_str()), ("Controls/A.xaml", a.as_str())];
+        let group = class_document_group("ferres://Fixture/", &documents, "Theme.xaml").expect("the group");
+        let found: Vec<(&str, Option<&str>)> = group.iter().map(|(name, _, uri)| (name.as_str(), uri.as_deref())).collect();
+        assert_eq!(
+            found,
+            [
+                ("Theme.xaml", Some("ferres://fixture/Theme.xaml")),
+                ("Controls/A.xaml", Some("ferres://fixture/Controls/A.xaml")),
+                ("Controls/B.xaml", Some("ferres://fixture/Controls/B.xaml")),
+            ]
+        );
+        assert_eq!(group[0].1, theme);
+        assert_eq!(
+            class_document_group("ferres://Fixture/", &documents, "Missing.xaml"),
+            Err("the document `Missing.xaml` of the class is not a document of the group".to_string())
         );
     }
 
