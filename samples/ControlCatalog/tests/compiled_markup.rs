@@ -16,9 +16,10 @@ use ferroui_base::controls::IResourceProvider;
 use ferroui_base::data::core::ValueTypes;
 use ferroui_base::diagnostics::FerroObjectDiagnosticExtensions as _;
 use ferroui_base::metadata::from_markup_value;
-use ferroui_base::{instantiate, BoxedValue, FerroObject, FerroProperty, FerroPropertyRegistry, ObjectType, Ref, StyledElement};
+use ferroui_base::threading::Dispatcher;
+use ferroui_base::{instantiate, BoxedValue, FerroObject, FerroProperty, FerroPropertyRegistry, ObjectType, Ref, StyledElement, Visual};
 use ferroui_controls::testing::UnitTestApplicationScope;
-use ferroui_controls::{Application, ItemsControl};
+use ferroui_controls::{Application, Control, ItemsControl, Window};
 use ferroui_markup_xaml::XamlLoadException;
 use ferroui_markup_xaml_loader::FerroRuntimeXamlLoader;
 
@@ -108,8 +109,9 @@ fn display(value: &BoxedValue) -> String {
     }
 }
 
-/// The dump of an object and of its logical children.
-fn dump(object: &Ref<FerroObject>, indent: usize, output: &mut String) {
+/// The class of an object and the registered properties that are set on it, with their
+/// values and priorities.
+fn dump_object(object: &Ref<FerroObject>, indent: usize, output: &mut String) {
     let pad = "  ".repeat(indent);
     let class = object.get_type();
     output.push_str(&format!("{pad}{}\n", class.full_name()));
@@ -130,13 +132,27 @@ fn dump(object: &Ref<FerroObject>, indent: usize, output: &mut String) {
     }
     lines.sort();
     lines.iter().for_each(|line| output.push_str(line));
+    if let Some(name) = object.cast::<StyledElement>().and_then(|styled| styled.name()) {
+        output.push_str(&format!("{pad}  named '{name}'\n"));
+    }
+}
+
+/// The dump of an object and of its logical children.
+fn dump(object: &Ref<FerroObject>, indent: usize, output: &mut String) {
+    dump_object(object, indent, output);
     if let Some(styled) = object.cast::<StyledElement>() {
-        if let Some(name) = styled.name() {
-            output.push_str(&format!("{pad}  named '{name}'\n"));
-        }
         for child in styled.logical_children().to_vec() {
             dump(&child.upcast::<FerroObject>(), indent + 1, output);
         }
+    }
+}
+
+/// The dump of a visual and of its visual children: what a window shows of a page, with
+/// the templates of its controls built and the styles of their themes applied.
+fn dump_visual(visual: &Ref<Visual>, indent: usize, output: &mut String) {
+    dump_object(&visual.clone().upcast::<FerroObject>(), indent, output);
+    for child in visual.visual_children().snapshot().iter() {
+        dump_visual(child, indent + 1, output);
     }
 }
 
@@ -261,6 +277,68 @@ fn every_document_the_compiler_does_not_refuse_is_compiled() {
     }
     assert!(compiled > 200, "{compiled} documents with a class are compiled");
 }
+
+/// The class of the document `path`, populated by `populate` and shown as the content of a
+/// window, after the layout pass of the window: the dump of its visual tree.
+fn shown(path: &str, populate: impl Fn(&BoxedValue) -> Result<(), XamlLoadException>) -> String {
+    let class = XamlClass::find(path).unwrap_or_else(|| panic!("{path}: no class of the sample has the document"));
+    let root = (class.create_uninitialized)();
+    populate(&root).unwrap_or_else(|error| panic!("{path}: {}", describe(&error)));
+    let control = from_markup_value::<Ref<Control>>(&Some(root)).unwrap_or_else(|| panic!("{path}: the class is not a control"));
+    let window = Window::new();
+    window.set_width(1100.0);
+    window.set_height(800.0);
+    window.set_content(Some(Control::boxed(&control)));
+    window.show();
+    Dispatcher::ui_thread().run_jobs(None);
+    assert!(control.is_attached_to_visual_tree(), "{path}: the control is not in the tree of the window");
+    let mut output = String::new();
+    dump_visual(&control.clone().upcast::<Visual>(), 0, &mut output);
+    window.close();
+    output
+}
+
+/// Pages shown in a window of the application of the catalog (the Fluent theme, the
+/// resources of `App.xaml`): with the templates of the controls built, the styles of the
+/// control themes applied and the bindings delivering after a layout pass, the visual tree
+/// of a page populated by its compiled markup is the visual tree of the page the run-time
+/// loader populated. The comparison of the documents ([`compare`]) stops at the logical
+/// tree right after the load.
+#[test]
+fn shown_pages_are_the_visual_trees_of_the_run_time_loader() {
+    let _application = TestApplication::Catalog.start();
+    let mut differences = Vec::new();
+    for path in SHOWN_PAGES {
+        let from_code = shown(path, |root| populate(path, root));
+        let from_loader = shown(path, |root| load(path, root.clone()));
+        assert!(from_code.lines().count() > 50, "{path}: the window shows {} visuals lines", from_code.lines().count());
+        if from_code != from_loader {
+            differences.push(format!("{path}: {}", first_difference(&from_loader, &from_code)));
+        }
+    }
+    assert!(differences.is_empty(), "the visual trees differ:\n{}", differences.join("\n"));
+}
+
+/// The pages [`shown_pages_are_the_visual_trees_of_the_run_time_loader`] shows: controls
+/// whose templates bind to their templated parent and to its template settings, items
+/// controls with item templates, text, shapes, and a page with a header and a command bar.
+const SHOWN_PAGES: &[&str] = &[
+    "/Pages/ProgressBarPage.xaml",
+    "/Pages/ExpanderPage.xaml",
+    "/Pages/ButtonsPage.xaml",
+    "/Pages/SliderPage.xaml",
+    "/Pages/CheckBoxPage.xaml",
+    "/Pages/RadioButtonPage.xaml",
+    "/Pages/TextBlockPage.xaml",
+    "/Pages/BorderPage.xaml",
+    "/Pages/CanvasPage.xaml",
+    "/Pages/ToggleSwitchPage.xaml",
+    "/Pages/TabControlPage.xaml",
+    "/Pages/ListBoxPage.xaml",
+    "/Pages/ComboBoxPage.xaml",
+    "/Pages/NumericUpDownPage.xaml",
+    "/Pages/CommandBarPage.xaml",
+];
 
 /// Two pages without code of their own: the tree of the compiled markup is the tree the
 /// run-time loader builds from the document of the sample, and it is the tree of the

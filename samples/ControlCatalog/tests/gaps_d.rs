@@ -30,6 +30,23 @@ fn gap_c400_image_brush_source_from_text() {
     assert!(brush.source().is_some());
 }
 
+/// C401: a reflection binding reads `ProgressBar.TemplateSettings`, as the control theme of
+/// the Fluent theme does for the sizes of its indeterminate indicators
+/// (`{Binding $parent[ProgressBar].TemplateSettings.ContainerWidth}`). Found in the log of the
+/// desktop host while the page was compared with and without compiled markup: the binding
+/// reports "Could not find a matching property accessor for 'TemplateSettings' on
+/// 'ProgressBar'" either way, and the indicators get no size from it.
+#[test]
+#[ignore = "gap C401: ProgressBar.TemplateSettings has no markup metadata, so a reflection binding finds no accessor for it"]
+fn gap_c401_progress_bar_template_settings_in_a_reflection_binding() {
+    let _app = start_catalog_application();
+    let progress_bar = from_markup_value::<Ref<ferroui_controls::ProgressBar>>(&Some(load_text(&format!(
+        "<ProgressBar {XMLNS} x:CompileBindings='False' Tag='{{Binding $self.TemplateSettings}}'/>"
+    ))))
+    .expect("a progress bar");
+    assert!(progress_bar.tag().is_some(), "the binding to the template settings delivers nothing");
+}
+
 // --- C314: what keeps a page alive after it left its host ---
 //
 // A dynamic resource holds the host it looks the resource up from: the element it is the value
