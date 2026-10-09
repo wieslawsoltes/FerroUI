@@ -48,6 +48,9 @@ mod templates;
 mod smoke_tests;
 
 #[cfg(test)]
+mod theme_binding_paths;
+
+#[cfg(test)]
 mod theme_gap_tests;
 
 #[cfg(test)]
