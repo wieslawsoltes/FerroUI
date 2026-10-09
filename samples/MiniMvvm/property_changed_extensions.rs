@@ -15,6 +15,13 @@ pub struct PropertyChangedExtensions;
 impl PropertyChangedExtensions {
     /// `model.WhenAnyValue(x => x.Property)`: the value of the property now
     /// and after every change notification that names it.
+    ///
+    /// The managed original captures the model in the observable. A view
+    /// model that keeps an observable of its own properties (a property that
+    /// is `this.WhenAnyValue(..)`) holds itself that way, and its collector
+    /// frees it; here the observable holds the model weakly, and a
+    /// subscription to the observable of a model that is gone produces
+    /// nothing.
     pub fn when_any_value<TModel, TRes>(
         model: &Rc<TModel>,
         property_name: &'static str,
@@ -24,12 +31,13 @@ impl PropertyChangedExtensions {
         TModel: INotifyPropertyChanged + 'static,
         TRes: 'static,
     {
-        let model = model.clone();
+        let model = Rc::downgrade(model);
         let getter = Rc::new(getter);
         Observable::create(move |observer: Rc<dyn IObserver<TRes>>| {
+            let Some(source) = model.upgrade() else { return Disposable::empty() };
             let token = {
-                let (target, getter, observer) = (Rc::downgrade(&model), getter.clone(), observer.clone());
-                model.property_changed().add(Rc::new(move |name: &str| {
+                let (target, getter, observer) = (model.clone(), getter.clone(), observer.clone());
+                source.property_changed().add(Rc::new(move |name: &str| {
                     if name == property_name {
                         if let Some(target) = target.upgrade() {
                             observer.on_next(getter(&target));
@@ -37,10 +45,12 @@ impl PropertyChangedExtensions {
                     }
                 }))
             };
-            observer.on_next(getter(&model));
+            observer.on_next(getter(&source));
             let (model, observer) = (model.clone(), observer.clone());
             Disposable::create(move || {
-                model.property_changed().remove(token);
+                if let Some(model) = model.upgrade() {
+                    model.property_changed().remove(token);
+                }
                 observer.on_completed();
             })
         })

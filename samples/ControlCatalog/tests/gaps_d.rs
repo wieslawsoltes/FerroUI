@@ -466,3 +466,14 @@ fn gap_c327_local_value_binding_of_an_object_that_was_dropped() {
     drop(target);
     assert_eq!(subscribers, source_object.property_changed_subscriber_count());
 }
+
+/// C328: a view model of the sample keeps an observable of its own properties
+/// (`SelectionMode = this.WhenAnyValue(..)`), which held the view model.
+#[test]
+fn gap_c328_view_model_with_an_observable_of_its_own_properties() {
+    let _app = start_catalog_application();
+    let view_model = crate::view_models::ListBoxPageViewModel::new();
+    let weak = Rc::downgrade(&view_model);
+    drop(view_model);
+    assert!(weak.upgrade().is_none());
+}
