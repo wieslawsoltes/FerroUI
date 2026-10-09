@@ -12,7 +12,7 @@ Status: 219 documents, 218 load and show their class; 1 is listed below.
 
 No gap of the framework blocks a document of the list. One gap is open: C101, a reflection binding (`x:CompileBindings="False"`) cannot resolve `$parent[prefix:Type]` for a type of a `using:` namespace (`gaps_a::gap_c101_reflection_binding_parent_of_prefixed_type`). The theme of `SampleGalleryPage` uses such paths with compiled bindings, which resolve them.
 
-No other gap blocks or changes a page, and none is open for the memory of a visit (below).
+No other gap blocks or changes a page, and none is open for the memory of a visit, with or without interaction (below).
 
 ## Bindings that report an error
 
@@ -95,7 +95,70 @@ What a tour still adds is the code of three pages of the sample, which upstream 
 
 Caches that the first visit to a page fills and no later visit grows are not in these figures: the themes and control themes instantiated on first use, the parsed documents, fonts and glyphs (the first tour).
 
-What the measurements do not exercise: a tour selects the pages and renders them; it does not move the pointer or the focus, open a popup, a flyout or a tooltip, or scroll. What those leave is not measured here (the session over the built site, `scripts/browser/catalog-memory.mjs`, scrolls and opens the demos).
+What these measurements do not exercise: a tour selects the pages and renders them; it does not move the pointer or the focus, open a popup, a flyout or a tooltip, or scroll. The tours with interaction do (the next section).
+
+## What interaction retains
+
+A tour selects the pages and renders them. `tests/interaction_tour.rs` adds the input: every page a tour shows is driven through the raw input of the window and of its popups, as a platform backend delivers it, in a fixed order and by the manual clock, and what is alive is read as the tours read it. `tests/interaction_controls.rs` does the same control by control, independent of the catalog.
+
+```sh
+cargo test -p control-catalog --features count-allocations --lib catalog_interaction_tour_memory -- --ignored --nocapture --test-threads=1
+cargo test -p control-catalog --features count-allocations --lib catalog_interaction_revisit_memory -- --ignored --nocapture --test-threads=1
+cargo test -p control-catalog --features count-allocations --lib catalog_interaction_survivors -- --ignored --nocapture --test-threads=1
+cargo test -p control-catalog --features count-allocations --lib interaction_control_survivors -- --ignored --nocapture --test-threads=1
+cargo test -p control-catalog --features count-allocations --lib interaction_repeat_memory -- --ignored --nocapture --test-threads=1
+```
+
+The first two are the tours and the revisits with interaction; the third prints the elements of a page that are alive after the catalog left it, with the pointer and the focus where the visit left them; the fourth and the fifth are the measurements of the controls (below). The variables of the tours apply; `CATALOG_TOUR_POPUPS=overlay` hosts the popups in the overlay layer of the window, as a platform without popup windows does, and `CATALOG_TOUR_VERBOSE` prints what was driven on each page.
+
+### What a visit drives
+
+On every page, in this order: the pointer over a grid of the window 40 pixels apart (640 moves); the pointer resting on the elements with a tooltip, with the timers of the dispatcher fired until the tooltip opens and after the pointer left; Tab 24 times and Shift+Tab 4 times; the wheel over the scroll viewers, 30 notches down and 30 up; a press with a small drag on the focusable elements that are visible, enabled and hit at their centre (at most 48: a click on a button, a drag on a slider, an open drop-down on a combo box, a picker, a flyout button or a menu item), with typing, Backspace and undo in a text box; a popup that opened has the pointer moved over it and its middle pressed (an item of a drop-down is selected, a sub menu opens) and is closed with Escape, or by a press in a corner of the window when Escape did not close it; the right button on the elements with a context menu or a context flyout; Escape, and the timers once more. A window a page opens is closed again. The card of a gallery that a press activates pushes or shows its sample, which is then driven in place of the cards. One tour is 47 360 pointer moves, 2 887 keys, 10 080 wheel notches, 658 presses (64 with typing), 99 context menus, 173 popups opened and one window.
+
+What it does not drive: touch and pen on the pages (a control-level scenario has touch), gestures of more than one pointer, drag and drop between elements, the input method client (the platform of the tests has none), real time (an animation runs by the frames of the manual clock, a timer fires when the visit fires it), more than the first sample of a gallery, more than the 48 first focusable elements of a page and nothing outside its viewport, and the button "Select Random" of the TreeView page (its command indexes ten children of a node, as upstream's does, and panics after "Remove" was pressed; upstream throws there). The generators the view models create without a seed are seeded in the measurement, so that a visit is the same every time.
+
+### The tours with interaction
+
+| | first tour | each further tour | objects of the server compositor per tour |
+|---|---|---|---|
+| without interaction (after C321 to C330, above) | 55.6 MB alive | +56 KB (439 blocks) | +8 |
+| with interaction, at the start (2026-10-09, base `catalog-revisit-memory-2`) | not reached: the first press on an item of a drop-down panics in the tooltip service, and a press on the SplitView page overflows the stack | | |
+| with the two fixed, the keyboard navigation of the application missing from the tours | 92.8 MB alive | +83 to +86 KB (673 blocks) | +8 |
+| with the keyboard navigation, before C331 | 93.0 MB alive | +2.25 to +2.36 MB (2 998 blocks) | +8 |
+| after C331 | 93.0 MB alive | +83 to +86 KB (673 blocks) | +8 |
+
+The second tour adds 2.2 MB, what the first one did not fill; six tours measured, with the popups as popups of the platform. The revisits, in both hostings of the popups: every page adds nothing on its third visit but the four below, and the elements of every page are freed when the catalog leaves it (`catalog_interaction_survivors`: nothing alive but the presenter of the Screens page; `the_catalog_frees_the_page_it_interacted_with` asserts it for fifteen pages).
+
+What an interactive tour still adds is the 673 blocks of four pages, each the code of the sample as upstream has it:
+
+| Page | A visit leaves | Why |
+|---|---|---|
+| Composition | 27 KB, 202 to 208 blocks | The buttons "Create and animate" start key frame animations that run forever on the gradient stops and the brushes they create. Upstream's server compositor holds a running animation in its clock (`ServerCompositorAnimations._clockItems`), a brush and a gradient stop are activated when they are created (`CompositionBrush.InitializeDefaultsExtra`, `Server.Activate()`) and nothing deactivates them: the animation of a brush nothing draws any more runs on, in both implementations. Without a press the page leaves nothing. |
+| Notifications | 23.5 KB, 213 blocks, 4 objects of the server compositor | As without interaction: the `WindowNotificationManager` of every attachment. |
+| Clipboard | 22.3 KB, 193 blocks, 4 objects of the server compositor | The same. |
+| Screens | 10.8 KB, 59 blocks | As without interaction: the subscriptions of the page to its window. |
+
+### What the tours with interaction found
+
+| | What happened | Fix |
+|---|---|---|
+| Tooltip service | A press that closes the window it was delivered to (an item of a drop-down, whose popup closes) is still handed to the tooltip service with that window as its root; the service read the root element of the closed root and panicked. Upstream reads a null `RootElement` there. | `IInputRoot::try_root_element`, `None` once the root has closed; the service compares that (`tool_tip_tests`). |
+| Property values that are not a number | The value store and the transitions compared with `==`, to which NaN differs from NaN; upstream compares with `EqualityComparer<T>.Default` and `object.Equals`, to which they are equal. A width that is not set was a new base value every time it was set again: the pane of the split view, whose width has a transition, answered a width that was unset while the transition ran with one transition after the other until the stack overflowed. | `value_equals`: `==`, and NaN with NaN (`animatable_tests`). |
+| C331 | The server visual of an adorner subscribes to the transforms of the visual it adorns; the entry of a disposed adorner stayed in the list of the adorned visual, with the memory of the adorner's server visual. A control kept one for every focus adorner it ever had: 0.9 KB each time the keyboard moved the focus to it, for as long as it lived (fifty moves over four buttons: +45 KB). | The disposal of a server visual takes its entry out (`interaction_controls::gap_c331_focus_adorners_of_a_control_the_keyboard_focuses_again_and_again`). |
+
+C331 is in `docs/porting/DEVIATIONS.md` (Server composition visuals), the two others under Input and Property system; a page of the catalog is freed with its controls, so the tours show C331 only through the controls of the main view, which stay.
+
+### Control by control
+
+`tests/interaction_controls.rs` shows a control in the window of the tours, drives it, takes it out of the tree and drops it; nothing of it may be alive afterwards: its template, the containers it realized, what its popups showed. Twenty-one scenarios, each with the popups as popups of the platform and in the overlay layer (42 tests that run by default): a combo box (opened, an item pressed, Escape; removed while open; 2 000 items scrolled by the wheel), the calendar date picker, the date and the time picker, flyouts and a menu flyout, a menu with a sub menu, a context menu and a context flyout, a tooltip (and one removed while open), a list box and an items control with 10 000 items scrolled from end to end by the offset, the wheel and the keys (at most 40 containers at any moment), a text box with 300 characters typed, undo, redo and a selection, removed with the focus, a slider removed while dragged, an auto complete box removed with its drop-down open, buttons under Tab and an access key, a repeat button removed while held, transitions removed while they run, a tab control and a tree view, a scroll viewer by wheel, thumb and track, and touch (a tap, a hold that opens a context menu, a pan removed with the finger down). Every control is freed. `interaction_control_survivors` runs each scenario three times in one window: the third run adds no block. `interaction_repeat_memory` repeats fifteen interactions on a control that stays in the tree, ten times and twenty more: nothing grows after C331.
+
+Three holders keep an element for a while after it left the tree, here as upstream, and the scenarios account for them:
+
+| Holder | What it holds | For how long |
+|---|---|---|
+| The timer of the hold gesture (`Gestures.PointerPressed`, `DispatcherTimer.RunOnce`) | The arguments of the press, with the element that was pressed. | Until the timer fires, the time a hold takes to begin. The scenarios fire the pending timers before they count. |
+| The input method manager of the keyboard device (`TextInputMethodManager._focusedElement`) | The item of a drop-down that closed while the focus was moving to it: the box that lost the focus closes the drop-down, the keyboard device clears the focus, and the change that was under way ends with `_textInputManager.SetFocusedElement(element)` for the item. | Until the focus changes again. One element. |
+| The context flyout of the text boxes of the Fluent theme | Its presenter, with three menu items: the flyout is one resource of the theme that every text box shows. | As long as the theme. One presenter (`the_context_flyout_of_text_boxes_is_shared`). |
 
 ## Code-behind that needs framework API the port does not have
 

@@ -32,6 +32,9 @@ pub trait IInputRoot {
     /// The root input element.
     fn root_element(&self) -> Ref<InputElement>;
 
+    /// Deviation (DEVIATIONS.md, Input): the optional form of
+    /// [`root_element`](Self::root_element).
+    ///
     /// The root input element, or `None` once the root has closed: what the
     /// reference reads as a null `RootElement`, for the code that runs while
     /// an event that closed its root is still being processed.

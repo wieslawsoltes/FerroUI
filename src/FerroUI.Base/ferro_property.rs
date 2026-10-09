@@ -61,6 +61,9 @@ impl<T: PartialEq + 'static> AnyValue for T {
     }
 }
 
+/// Deviation (DEVIATIONS.md, Property system): the comparer of the reference
+/// in place of `PartialEq` alone.
+///
 /// Whether two property values are equal as the reference compares them
 /// (`EqualityComparer<T>.Default.Equals`, and `object.Equals` for boxed
 /// values): `==`, and a floating-point value that is not a number equals
