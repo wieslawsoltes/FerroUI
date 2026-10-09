@@ -1062,12 +1062,6 @@ reason = "the observer callbacks are implemented by the private observers of the
 
 [[waive]]
 project = "Avalonia.Base"
-type = "Avalonia.PropertyStore.DirectUntypedBindingObserver*"
-member = "Start"
-reason = "one `start` taking the `BindingSource` enum that holds either kind of observable"
-
-[[waive]]
-project = "Avalonia.Base"
 type = "Avalonia.PropertyStore.LocalValueBindingObserver*"
 member = "On*"
 reason = "the observer callbacks are implemented by the private observers of the file (`Typed`, `Value`, `Untyped`, `DirectTyped`, `DirectValue`, `DirectUntyped`), one per kind of source, which call `next`, `next_value` and `completed`"
@@ -1440,18 +1434,6 @@ reason = "finalizer that posts `Dispose` to the dispatcher: `Drop` of the embedd
 
 [[waive]]
 project = "Avalonia.Base"
-type = "Avalonia.Rendering.Composition.CompositionGpuImportedObjectBase"
-member = "Import"
-reason = "abstract member of the base class: `CompositionImportedGpuImage::import` and `CompositionImportedGpuSemaphore::import` are functions of the two classes, which embed the base as a struct and pass their import to `CompositionGpuImportedObjectBase::start_import`"
-
-[[waive]]
-project = "Avalonia.Base"
-type = "Avalonia.Rendering.Composition.CompositionGpuImportedObjectBase"
-member = "Dispose"
-reason = "abstract member of the base class: `CompositionImportedGpuImage::dispose` and `CompositionImportedGpuSemaphore::dispose` are functions of the two classes, which embed the base as a struct"
-
-[[waive]]
-project = "Avalonia.Base"
 type = "Avalonia.Rendering.Composition.CompositionObject"
 member = "St*Animation*"
 reason = "`StartAnimation` with a final value, `StartAnimationGroup` (both overloads) and `StopAnimationGroup` are the default methods `start_animation_with_final_value`, `start_animation_group`, `start_animation_group_for` and `stop_animation_group` of the trait `ICompositionObjectAnimations`, which every composition object class implements"
@@ -1484,7 +1466,7 @@ reason = "`Compositor::invoke_server_job_async` is generic over the result, so t
 project = "Avalonia.Base"
 type = "Avalonia.Rendering.Composition.Compositor"
 member = "GetRenderInterfacePublicFeatures"
-reason = "part of `Compositor::try_get_render_interface_feature`: the cached features, or the features of the server compositor asked directly, since the server compositor runs on the thread of its compositor (row 12 of CRITICAL-PATH.md) and no job has to be awaited"
+reason = "part of `Compositor::try_get_render_interface_feature` (`with_render_interface_feature`): the features are read from the map of the server compositor inside the compositor lock; a compositor confined to a render thread answers from the cached features alone, which a job of that thread fills, as upstream with a background loop (render-thread.md, R5.8)"
 
 [[waive]]
 project = "Avalonia.Base"
@@ -2482,7 +2464,7 @@ reason = "present as `register_ferro_service_worker` / `ferro_service_worker_sco
 project = "Avalonia.Browser"
 type = "*.BrowserPlatformOptions"
 member = "PreferManagedThreadDispatcher"
-reason = "the browser platform is single-threaded: there is no managed thread dispatcher to prefer (browser-platform.md, section 6)"
+reason = "chooses the dispatcher of the managed runtime for a build with threads, where the user interface runs on a thread of that runtime: here the user interface stays on the main thread of the page in every build and only rendering moves to a worker (browser-render-worker.md, owner decision of 2026-10-08), so there is one dispatcher and nothing to prefer; `BrowserPlatformOptions::render_thread` is the option of the port"
 
 [[waive]]
 project = "Avalonia.Browser"
@@ -2529,7 +2511,7 @@ reason = "the module is imported statically, so the asynchronous imports (`Impor
 project = "Avalonia.Browser"
 type = "*.CanvasHelper"
 member = "*"
-reason = "present: the functions are declared in the `wasm-bindgen` extern block of `interop/canvas_helper.rs` (imports of the script module), which the scanner does not read as members of a type; `create_render_target_surface` takes no thread identifier (single-threaded)"
+reason = "present: the functions are declared in the `wasm-bindgen` extern block of `interop/canvas_helper.rs` (imports of the script module), which the scanner does not read as members of a type"
 
 [[waive]]
 project = "Avalonia.Browser"
@@ -2541,7 +2523,7 @@ reason = "present: the functions are declared in the `wasm-bindgen` extern block
 project = "Avalonia.Browser"
 type = "*.InputHelper"
 member = "RedirectInput*"
-reason = "dispatches an input callback of a worker thread to the thread of the top-level; the platform is single-threaded and the exported input handlers of `interop/input_helper.rs` call the top-level directly"
+reason = "dispatches an input callback of the page to the thread of the top-level, which upstream runs in a worker in a build with threads: here the user interface stays on the main thread of the page in every build (browser-render-worker.md), so the exported input handlers of `interop/input_helper.rs` call the top-level directly"
 
 [[waive]]
 project = "Avalonia.Browser"
@@ -2618,7 +2600,7 @@ reason = "the members of `System.IO.Stream` a write-only stream does not support
 project = "Avalonia.Browser"
 type = "*.BrowserWindowingPlatform"
 member = "IsThreadingEnabled"
-reason = "the browser platform is single-threaded (browser-platform.md, section 6): the flag would always be false"
+reason = "a flag detected at start-up from the runtime: here it is known at compile time (`target_feature = \"atomics\"`, the module built with `scripts/build-browser.sh --threads`), and whether such a module renders on its render thread is `BrowserPlatformOptions::render_thread`"
 
 [[waive]]
 project = "Avalonia.Browser"
@@ -2645,12 +2627,6 @@ project = "Avalonia.Base"
 type = "Avalonia.Collections.AvaloniaDictionary*"
 member = "*GetEnumerator*"
 reason = "ported as `FerroDictionary::to_vec` and `for_each`, which enumerate a copy of the entries (the dictionary is behind a `RefCell`, so it does not hand out a borrowing iterator)"
-
-[[waive]]
-project = "Avalonia.Base"
-type = "Avalonia.Collections.AvaloniaDictionary*"
-member = "*ICollection.CopyTo(Array*"
-reason = "explicit `ICollection.CopyTo` to an untyped array: `FerroDictionary::copy_to` is the typed one"
 
 [[waive]]
 project = "Avalonia.Base"
@@ -3013,11 +2989,6 @@ reason = "partial interface that adds `String`, `Bytes` and `ToStringArray` to t
 
 [[waive]]
 project = "Avalonia.Native"
-type = "*__MicroComIAvnString*Proxy"
-reason = "members added to the generated proxies of native strings: the free functions `frn_string_to_string`, `frn_string_bytes` and `frn_string_array_to_vec` of `frn_string.rs`"
-
-[[waive]]
-project = "Avalonia.Native"
 type = "*AvnString*"
 member = "Destroyed"
 reason = "called when native code releases the last reference: the value is dropped with the last reference of its `ComObject`, so `Drop` takes its place"
@@ -3059,12 +3030,6 @@ reason = "partial interface that adds the managed members to the generated one: 
 project = "Avalonia.Native"
 type = "*__MicroComIAvnMenuProxy"
 reason = "members added to the generated proxy of the native menu: members of `FrnMenu`, the struct that wraps the native menu (`raise_needs_update`, `raise_opening`, `raise_closed`, `deinitialise`, `update`)"
-
-[[waive]]
-project = "Avalonia.Native"
-type = "*__MicroComIAvnMenuItemProxy"
-member = "Update"
-reason = "ported as `FrnMenuItem::update`, which takes the menu factory instead of the exporter and the native factory"
 
 [[waive]]
 project = "Avalonia.Native"
@@ -3306,11 +3271,6 @@ project = "Avalonia.Markup.Xaml.Loader"
 type = "Avalonia.Markup.Xaml.XamlIl.AvaloniaXamlIlRuntimeCompiler"
 member = "Load*Sre"
 reason = "System.Reflection.Emit loader: exists only to emit or load IL: the Rust emitter and the run-time interpreter stand for the IL back end (docs/porting/xaml.md, section 9)"
-
-[[waive]]
-project = "Avalonia.Markup.Xaml.Loader"
-type = "Avalonia.Markup.Xaml.XamlIl.CompilerDynamicDependenciesAttribute"
-reason = "trimming annotation (`DynamicallyAccessedMembers`) for the reflection the IL loader does: no reflection, nothing to annotate"
 
 [[waive]]
 project = "Avalonia.Markup.Xaml.Loader"
@@ -4274,11 +4234,6 @@ reason = "internal setter on the abstract class, which only the generic properti
 project = "Avalonia.Base"
 type = "Avalonia.Animation.Animators.EffectAnimatorBase*"
 reason = "generic base class of the two typed animators: each of them has the function `interpolate_core`, which pairs the values of its kind as the override of `Interpolate` does and steps at 0.5 otherwise, and `interpolate_blur` or `interpolate_drop_shadow` for the abstract `Interpolate`; `BindAnimation` is the default one of the trait `Animator`"
-
-[[waive]]
-project = "Avalonia.Base"
-type = "Avalonia.Animation.EffectTransition"
-reason = "the type is declared through the macro `ferro_transition_class!`, which the scanner does not expand; `DoTransition` is `Transition::do_transition` in `animation/transitions/effect_transition.rs`"
 
 [[waive]]
 project = "Avalonia.Base"
