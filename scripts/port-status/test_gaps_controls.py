@@ -37,8 +37,9 @@ What is counted
     Port: every `fn` that follows a `#[test]` attribute (other attributes may stand between them) in a `.rs`
     file below the roots, and every other `fn` of a file that has at least one such test: the port writes a
     `[Theory]`, and a test that upstream runs once per subclass of its test class, as a function with upstream's
-    name that takes the parameters, called by `#[test]` functions named after the rows or written by a macro. Comments and string
-    literals are blanked first.
+    name that takes the parameters, called by `#[test]` functions named after the rows or written by a macro.
+    The identifiers handed to a macro of the file whose body has a `#[test]` count as well
+    (`tests! { name_a, name_b }`). Comments and string literals are blanked first.
 
     Match: by name alone. Both names are lower-cased and their underscores removed; in the upstream name
     `Avalonia` reads as `Ferro` and a word-initial `Avn` as `Frn` (the renames of docs/porting/PORTING-GUIDE.md).
@@ -344,6 +345,39 @@ RUST_TEST_ATTRIBUTE = re.compile(r"#\s*\[\s*(?:[\w:]+::)?test\s*\]")
 RUST_FN = re.compile(r"\bfn\s+([A-Za-z_]\w*)")
 
 
+MACRO_RULES = re.compile(r"\bmacro_rules\s*!\s*([A-Za-z_]\w*)\s*[{(\[]")
+IDENTIFIER = re.compile(r"(?<![\w$])[a-z_][a-z0-9_]*\b(?!\s*[!(])")
+
+
+def balanced_end(text: str, i: int) -> int:
+    """`i` is at an opening bracket; returns the index after the bracket that closes it."""
+    depth = 0
+    for j in range(i, len(text)):
+        if text[j] in "{([":
+            depth += 1
+        elif text[j] in "})]":
+            depth -= 1
+            if depth == 0:
+                return j + 1
+    return len(text)
+
+
+def macro_test_names(blanked: str) -> list[str]:
+    """The identifiers handed to the macros of the file that write tests: `tests! { name_a, name_b, }` where
+    `macro_rules! tests` has a `#[test]` in its body. The names of the tests are among them."""
+    names: list[str] = []
+    for m in MACRO_RULES.finditer(blanked):
+        body_end = balanced_end(blanked, m.end() - 1)
+        if not RUST_TEST_ATTRIBUTE.search(blanked, m.end(), body_end):
+            continue
+        for call in re.finditer(r"\b" + re.escape(m.group(1)) + r"\s*!\s*[{(\[]", blanked):
+            if blanked[:call.start()].rstrip().endswith("macro_rules"):
+                continue
+            end = balanced_end(blanked, call.end() - 1)
+            names.extend(IDENTIFIER.findall(blanked, call.end(), end))
+    return names
+
+
 def rust_tests(roots: list[str]) -> dict[str, list[tuple[str, str]]]:
     """Normalised name -> [(function name, path relative to the repository)] of every Rust test and of every
     other function of a file with tests. The `#[test]` functions alone are under the key ""."""
@@ -368,7 +402,7 @@ def rust_tests(roots: list[str]) -> dict[str, list[tuple[str, str]]]:
                     continue
                 relative = os.path.relpath(path, REPO)
                 found[""].extend((name, relative) for name in tests)
-                for name in dict.fromkeys(tests + RUST_FN.findall(blanked)):
+                for name in dict.fromkeys(tests + RUST_FN.findall(blanked) + macro_test_names(blanked)):
                     found[normalise_rust(name)].append((name, relative))
     return found
 
