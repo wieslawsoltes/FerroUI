@@ -31,7 +31,9 @@
 //! (`scripts/browser/tests/control_catalog.test.mjs`): the export
 //! [`catalog_state`] reports what the view shows, so that the tests can find
 //! the controls they drive with real pointer and key events and check the
-//! effect; [`catalog_rendering`] reports which thread drew the frames;
+//! effect; [`catalog_request_frame`] and [`catalog_frame_drawn`] tell when
+//! the view has drawn that state (a view is hit from what its last frame
+//! drew); [`catalog_rendering`] reports which thread drew the frames;
 //! [`catalog_memory`] how much of the memory of the module is in use; and
 //! [`catalog_panic_in_frame`] makes the next frame panic.
 //! The native control demo of the browser (`EmbedSampleWeb`) is in
@@ -57,6 +59,7 @@ use page_assets_browser::BrowserPageAssets;
 use ferroui_base::logging::LogEventLevel;
 use ferroui_base::media::{FontFamily, FontManager, FontManagerOptions, Typeface};
 use ferroui_base::metadata::from_markup_value;
+use ferroui_base::rendering::composition::transport::CompositionBatch;
 use ferroui_base::rendering::composition::ElementComposition;
 use ferroui_base::rendering::RendererDebugOverlays;
 use ferroui_base::threading::Dispatcher;
@@ -67,8 +70,10 @@ use ferroui_browser::rendering::{BrowserSharedRenderLoop, RenderStatistics, Rend
 use ferroui_browser::{BrowserAppBuilder, BrowserPlatformOptions, BrowserRenderingMode};
 use ferroui_controls::{AppBuilder, Application, Button, Image, NavigationPage, TextBlock, TextBox, TopLevel};
 use ferroui_fonts_inter::AppBuilderExtension;
+use std::cell::RefCell;
 use std::rc::Rc;
 use std::sync::atomic::{AtomicUsize, Ordering};
+use std::sync::Arc;
 use wasm_bindgen::prelude::*;
 
 /// `Main(args)`: the entry point the host page calls once the module is
@@ -247,6 +252,44 @@ pub fn catalog_rendering() -> String {
         statistics.canvases_released,
         statistics.render_thread_panics,
     )
+}
+
+thread_local! {
+    /// The batch of the commit [`catalog_request_frame`] asked for last.
+    static REQUESTED_FRAME: RefCell<Option<Arc<CompositionBatch>>> = const { RefCell::new(None) };
+}
+
+/// Asks the view for a frame that shows everything the application has
+/// changed so far, for the behaviour tests: the compositor of the view is
+/// asked to commit, and [`catalog_frame_drawn`] tells when the frame of that
+/// commit has been drawn. Returns whether the frame was asked for (`false`
+/// before the view has a compositor). Not a port.
+///
+/// A view is hit from what its last frame drew, and [`catalog_state`] reads
+/// the elements of the view as they are laid out now. The two differ from
+/// the moment the application changes something until the frame with the
+/// change is drawn: one animation frame of the thread that renders, which
+/// with a render thread is as far away as the browser makes it (with a
+/// software rasteriser, hundreds of milliseconds after a frame that was
+/// expensive to present), while the thread of the page goes on taking
+/// input. A test that clicks where the state says an element is waits for
+/// this frame first, and reads the state again.
+#[wasm_bindgen(js_name = catalogRequestFrame)]
+pub fn catalog_request_frame() -> bool {
+    let Some(top_level) = top_level() else { return false };
+    let Some(visual) = ElementComposition::get_element_visual(&top_level) else { return false };
+    let batch = visual.compositor().request_commit_async();
+    REQUESTED_FRAME.with(|frame| *frame.borrow_mut() = Some(batch));
+    true
+}
+
+/// Whether the frame [`catalog_request_frame`] asked for last has been
+/// drawn: the thread that renders has applied the commit, drawn the view and
+/// written what the view is hit from. `false` when no frame was asked for.
+/// Not a port.
+#[wasm_bindgen(js_name = catalogFrameDrawn)]
+pub fn catalog_frame_drawn() -> bool {
+    REQUESTED_FRAME.with(|frame| frame.borrow().as_ref().is_some_and(|batch| batch.rendered().is_completed()))
 }
 
 /// Makes the next frame of the view panic, for the behaviour tests: a job
@@ -501,6 +544,8 @@ mod tests {
         assert_eq!("top=0;peak=0;size=0", catalog_memory());
         assert!(catalog_rendering().starts_with("frames="));
         assert!(!catalog_panic_in_frame());
+        assert!(!catalog_request_frame());
+        assert!(!catalog_frame_drawn());
     }
 
     #[test]
