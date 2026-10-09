@@ -90,6 +90,8 @@ mod small_dictionary;
 mod value_single_or_list;
 
 #[cfg(test)]
+mod safe_enumerable_ferro_list_tests;
+#[cfg(test)]
 mod string_splitter_tests;
 
 pub use bidi_dictionary::BidiDictionary;

@@ -397,6 +397,13 @@ impl<T: Clone> FerroList<T> {
         self.0.items.borrow().clone()
     }
 
+    /// Upstream `InnerForTests` of the list that can be mutated while it is enumerated: the identity of the storage. For unit tests
+    /// only: it does not keep the storage alive, as a snapshot would.
+    #[cfg(test)]
+    pub(crate) fn inner_for_tests(&self) -> *const Vec<T> {
+        Rc::as_ptr(&self.0.items.borrow())
+    }
+
     /// Copies the items into a vector.
     pub fn to_vec(&self) -> Vec<T> {
         self.0.items.borrow().as_ref().clone()
@@ -508,8 +515,23 @@ impl<T: Clone> FerroList<T> {
     /// Removes all items from the collection.
     pub fn clear(&self) {
         if self.count() > 0 {
-            let old = std::mem::replace(&mut *self.0.items.borrow_mut(), Rc::new(Vec::new()));
-            if self.has_collection_changed_subscribers() {
+            let subscribed = self.has_collection_changed_subscribers();
+            let removed = subscribed && self.0.reset_behavior.get() == ResetBehavior::Remove;
+            // Upstream `_inner.Clear()`: the storage is cleared in place and keeps its capacity. While a
+            // snapshot is alive the storage is left to it (upstream `OnMutating` of the list that can be
+            // enumerated while it changes).
+            let old = {
+                let mut items = self.0.items.borrow_mut();
+                match Rc::get_mut(&mut items) {
+                    Some(inner) => {
+                        let old = if removed { inner.clone() } else { Vec::new() };
+                        inner.clear();
+                        Rc::new(old)
+                    }
+                    None => std::mem::replace(&mut *items, Rc::new(Vec::new())),
+                }
+            };
+            if subscribed {
                 match self.0.reset_behavior.get() {
                     ResetBehavior::Reset => self.notify(NotifyCollectionChangedEventArgs {
                         action: NotifyCollectionChangedAction::Reset,
