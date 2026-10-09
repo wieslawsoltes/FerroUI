@@ -745,7 +745,7 @@ fn animation_completes_gracefully_when_first_key_frame_value_is_null() {
 }
 
 #[test]
-fn animation_with_unresolved_binding_does_not_throw() {
+fn animation_with_unresolved_binding_does_not_throw_null_reference_exception() {
     let clock = start();
     let animation = Animation::new();
     animation.set_duration(seconds(1.0));
