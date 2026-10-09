@@ -34,6 +34,13 @@ const XML_NAMESPACES_2: rt::XmlNamespaceTable = &[
     ("x", &[]),
 ];
 
+/// The XML namespaces of documents of this file, as the compiler resolved them.
+const XML_NAMESPACES_3: rt::XmlNamespaceTable = &[
+    ("", &[("FerroUI", "FerroUI.Base"), ("FerroUI.Animation", "FerroUI.Base"), ("FerroUI.Animation.Easings", "FerroUI.Base"), ("FerroUI.Controls", "FerroUI.Base"), ("FerroUI.Data", "FerroUI.Base"), ("FerroUI.Data.Converters", "FerroUI.Base"), ("FerroUI.Input", "FerroUI.Base"), ("FerroUI.Input.GestureRecognizers", "FerroUI.Base"), ("FerroUI.Input.TextInput", "FerroUI.Base"), ("FerroUI.Layout", "FerroUI.Base"), ("FerroUI.LogicalTree", "FerroUI.Base"), ("FerroUI.Media", "FerroUI.Base"), ("FerroUI.Media.Imaging", "FerroUI.Base"), ("FerroUI.Media.Transformation", "FerroUI.Base"), ("FerroUI.Styling", "FerroUI.Base"), ("FerroUI", "FerroUI.Controls"), ("FerroUI.Automation", "FerroUI.Controls"), ("FerroUI.Controls", "FerroUI.Controls"), ("FerroUI.Controls.Embedding", "FerroUI.Controls"), ("FerroUI.Controls.Presenters", "FerroUI.Controls"), ("FerroUI.Controls.Primitives", "FerroUI.Controls"), ("FerroUI.Controls.Shapes", "FerroUI.Controls"), ("FerroUI.Controls.Templates", "FerroUI.Controls"), ("FerroUI.Controls.Notifications", "FerroUI.Controls"), ("FerroUI.Controls.Chrome", "FerroUI.Controls"), ("FerroUI.Controls.Documents", "FerroUI.Controls"), ("FerroUI.Markup.Xaml.MarkupExtensions", "FerroUI.Markup.Xaml"), ("FerroUI.Markup.Xaml.Styling", "FerroUI.Markup.Xaml"), ("FerroUI.Markup.Xaml.Templates", "FerroUI.Markup.Xaml")]),
+    ("t", &[("FerroUI.Markup.Xaml.UnitTests", "FerroUI.Markup.Xaml.UnitTests")]),
+    ("x", &[]),
+];
+
 /// The base URI and the XML namespaces of `border_empty.xaml`.
 static BUILD_BORDER_EMPTY_XAML_DOCUMENT: rt::DocumentInfo = rt::DocumentInfo { base_uri: ::core::option::Option::Some("ferres://FerroUI.Markup.Xaml.UnitTests/Emitter/border_empty.xaml"), namespaces: XML_NAMESPACES_0 };
 
@@ -4299,6 +4306,387 @@ fn build_style_resources_xaml_untyped(
     ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
 }
 
+/// The base URI and the XML namespaces of `type_converter.xaml`.
+static BUILD_TYPE_CONVERTER_XAML_DOCUMENT: rt::DocumentInfo = rt::DocumentInfo { base_uri: ::core::option::Option::Some("ferres://FerroUI.Markup.Xaml.UnitTests/Emitter/type_converter.xaml"), namespaces: XML_NAMESPACES_1 };
+
+/// Generated from `type_converter.xaml`.
+pub fn build_type_converter_xaml(
+    service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
+) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::StackPanel>, ::ferroui_markup_xaml::XamlLoadException> {
+    // type_converter.xaml(1,2) StackPanel
+    let stack_panel_0 = ::ferroui_controls::StackPanel::new();
+    let context = rt::populate_context(service_provider, &BUILD_TYPE_CONVERTER_XAML_DOCUMENT, rt::to_value(stack_panel_0.clone()));
+    let name_scope = context.name_scope_field();
+    stack_panel_0.begin_init();
+    context.push_parent(rt::to_value(stack_panel_0.clone()));
+    // type_converter.xaml(3,4) Children
+    let children_collection_0 = ::ferroui_controls::Panel::__markup_get_Children(stack_panel_0.upcast_ref::<::ferroui_controls::Panel>());
+    // type_converter.xaml(3,4) Captioned
+    let captioned_0 = ::ferroui_markup_xaml_tests::support::emitter::Captioned::new();
+    captioned_0.begin_init();
+    ::ferroui_controls::Controls::__markup_Add_0(&children_collection_0, ::core::clone::Clone::clone(&captioned_0).upcast::<::ferroui_controls::Control>());
+    context.push_parent(rt::to_value(captioned_0.clone()));
+    // type_converter.xaml(3,4) Caption
+    let value_0 = ::ferroui_base::utilities::CultureInfo::__markup_static_get_InvariantCulture();
+    let value_1 = rt::invoked(::ferroui_markup_xaml_tests::support::emitter::CaptionConverter::__markup_ConvertFrom_1(&::ferroui_markup_xaml_tests::support::emitter::CaptionConverter::__markup_new_0(), ::core::option::Option::Some(rt::type_descriptor_context(&context)), rt::cast(::core::clone::Clone::clone(&value_0), 3, 16)?, rt::to_object(::std::string::String::from("plain"))), 3, 16)?;
+    let cast_0 = rt::cast_checked(::core::clone::Clone::clone(&value_1), rt::markup_handle(<::ferroui_markup_xaml_tests::support::emitter::Caption as ::ferroui_base::metadata::MarkupTyped>::MARKUP), "FerroUI.Markup.Xaml.UnitTests.Caption", 3, 16)?;
+    captioned_0.set_value(::ferroui_markup_xaml_tests::support::emitter::Captioned::caption_property(), rt::exact(cast_0.clone(), "FerroUI.Markup.Xaml.UnitTests.Captioned.set_Caption", 0, 3, 16)?);
+    context.pop_parent();
+    rt::invoked(captioned_0.try_end_init(), 3, 4)?;
+    // type_converter.xaml(4,4) Children
+    let children_collection_1 = ::ferroui_controls::Panel::__markup_get_Children(stack_panel_0.upcast_ref::<::ferroui_controls::Panel>());
+    // type_converter.xaml(4,4) Border
+    let border_0 = ::ferroui_controls::Border::new();
+    border_0.begin_init();
+    ::ferroui_controls::Controls::__markup_Add_0(&children_collection_1, ::core::clone::Clone::clone(&border_0).upcast::<::ferroui_controls::Control>());
+    context.push_parent(rt::to_value(border_0.clone()));
+    // type_converter.xaml(4,12) Child
+    // type_converter.xaml(4,12) Captioned
+    let captioned_1 = ::ferroui_markup_xaml_tests::support::emitter::Captioned::new();
+    captioned_1.begin_init();
+    border_0.set_value(::ferroui_controls::Decorator::child_property(), ::core::option::Option::Some(::core::clone::Clone::clone(&captioned_1).upcast::<::ferroui_controls::Control>()));
+    context.push_parent(rt::to_value(captioned_1.clone()));
+    // type_converter.xaml(4,12) Caption
+    let value_2 = ::ferroui_base::utilities::CultureInfo::__markup_static_get_InvariantCulture();
+    let value_3 = rt::invoked(::ferroui_markup_xaml_tests::support::emitter::CaptionConverter::__markup_ConvertFrom_1(&::ferroui_markup_xaml_tests::support::emitter::CaptionConverter::__markup_new_0(), ::core::option::Option::Some(rt::type_descriptor_context(&context)), rt::cast(::core::clone::Clone::clone(&value_2), 4, 24)?, rt::to_object(::std::string::String::from("@parent"))), 4, 24)?;
+    let cast_1 = rt::cast_checked(::core::clone::Clone::clone(&value_3), rt::markup_handle(<::ferroui_markup_xaml_tests::support::emitter::Caption as ::ferroui_base::metadata::MarkupTyped>::MARKUP), "FerroUI.Markup.Xaml.UnitTests.Caption", 4, 24)?;
+    captioned_1.set_value(::ferroui_markup_xaml_tests::support::emitter::Captioned::caption_property(), rt::exact(cast_1.clone(), "FerroUI.Markup.Xaml.UnitTests.Captioned.set_Caption", 0, 4, 24)?);
+    context.pop_parent();
+    rt::invoked(captioned_1.try_end_init(), 4, 12)?;
+    context.pop_parent();
+    rt::invoked(border_0.try_end_init(), 4, 4)?;
+    // type_converter.xaml(5,4) Children
+    let children_collection_2 = ::ferroui_controls::Panel::__markup_get_Children(stack_panel_0.upcast_ref::<::ferroui_controls::Panel>());
+    // type_converter.xaml(5,4) Captioned
+    let captioned_2 = ::ferroui_markup_xaml_tests::support::emitter::Captioned::new();
+    captioned_2.begin_init();
+    ::ferroui_controls::Controls::__markup_Add_0(&children_collection_2, ::core::clone::Clone::clone(&captioned_2).upcast::<::ferroui_controls::Control>());
+    context.push_parent(rt::to_value(captioned_2.clone()));
+    // type_converter.xaml(5,4) Caption
+    let value_4 = ::ferroui_base::utilities::CultureInfo::__markup_static_get_InvariantCulture();
+    let value_5 = rt::invoked(::ferroui_markup_xaml_tests::support::emitter::CaptionConverter::__markup_ConvertFrom_1(&::ferroui_markup_xaml_tests::support::emitter::CaptionConverter::__markup_new_0(), ::core::option::Option::Some(rt::type_descriptor_context(&context)), rt::cast(::core::clone::Clone::clone(&value_4), 5, 16)?, rt::to_object(::std::string::String::from("none"))), 5, 16)?;
+    let cast_2 = rt::cast_checked(::core::clone::Clone::clone(&value_5), rt::markup_handle(<::ferroui_markup_xaml_tests::support::emitter::Caption as ::ferroui_base::metadata::MarkupTyped>::MARKUP), "FerroUI.Markup.Xaml.UnitTests.Caption", 5, 16)?;
+    captioned_2.set_value(::ferroui_markup_xaml_tests::support::emitter::Captioned::caption_property(), rt::exact(cast_2.clone(), "FerroUI.Markup.Xaml.UnitTests.Captioned.set_Caption", 0, 5, 16)?);
+    context.pop_parent();
+    rt::invoked(captioned_2.try_end_init(), 5, 4)?;
+    context.pop_parent();
+    rt::invoked(stack_panel_0.try_end_init(), 1, 2)?;
+    rt::complete_root_name_scope(::core::option::Option::Some(&stack_panel_0), name_scope.as_ref(), 1, 2)?;
+    ::core::result::Result::Ok(stack_panel_0)
+}
+
+fn build_type_converter_xaml_untyped(
+    service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
+) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadException> {
+    let root = build_type_converter_xaml(service_provider)?;
+    ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
+}
+
+/// The base URI and the XML namespaces of `type_converter_failure.xaml`.
+static BUILD_TYPE_CONVERTER_FAILURE_XAML_DOCUMENT: rt::DocumentInfo = rt::DocumentInfo { base_uri: ::core::option::Option::Some("ferres://FerroUI.Markup.Xaml.UnitTests/Emitter/type_converter_failure.xaml"), namespaces: XML_NAMESPACES_1 };
+
+/// Generated from `type_converter_failure.xaml`.
+pub fn build_type_converter_failure_xaml(
+    service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
+) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::Border>, ::ferroui_markup_xaml::XamlLoadException> {
+    // type_converter_failure.xaml(1,2) Border
+    let border_0 = ::ferroui_controls::Border::new();
+    let context = rt::populate_context(service_provider, &BUILD_TYPE_CONVERTER_FAILURE_XAML_DOCUMENT, rt::to_value(border_0.clone()));
+    let name_scope = context.name_scope_field();
+    border_0.begin_init();
+    context.push_parent(rt::to_value(border_0.clone()));
+    // type_converter_failure.xaml(3,4) Child
+    // type_converter_failure.xaml(3,4) Captioned
+    let captioned_0 = ::ferroui_markup_xaml_tests::support::emitter::Captioned::new();
+    captioned_0.begin_init();
+    border_0.set_value(::ferroui_controls::Decorator::child_property(), ::core::option::Option::Some(::core::clone::Clone::clone(&captioned_0).upcast::<::ferroui_controls::Control>()));
+    context.push_parent(rt::to_value(captioned_0.clone()));
+    // type_converter_failure.xaml(3,4) Caption
+    let value_0 = ::ferroui_base::utilities::CultureInfo::__markup_static_get_InvariantCulture();
+    let value_1 = rt::invoked(::ferroui_markup_xaml_tests::support::emitter::CaptionConverter::__markup_ConvertFrom_1(&::ferroui_markup_xaml_tests::support::emitter::CaptionConverter::__markup_new_0(), ::core::option::Option::Some(rt::type_descriptor_context(&context)), rt::cast(::core::clone::Clone::clone(&value_0), 4, 7)?, rt::to_object(::std::string::String::from("!text"))), 4, 7)?;
+    let cast_0 = rt::cast_checked(::core::clone::Clone::clone(&value_1), rt::markup_handle(<::ferroui_markup_xaml_tests::support::emitter::Caption as ::ferroui_base::metadata::MarkupTyped>::MARKUP), "FerroUI.Markup.Xaml.UnitTests.Caption", 4, 7)?;
+    captioned_0.set_value(::ferroui_markup_xaml_tests::support::emitter::Captioned::caption_property(), rt::exact(cast_0.clone(), "FerroUI.Markup.Xaml.UnitTests.Captioned.set_Caption", 0, 4, 7)?);
+    context.pop_parent();
+    rt::invoked(captioned_0.try_end_init(), 3, 4)?;
+    context.pop_parent();
+    rt::invoked(border_0.try_end_init(), 1, 2)?;
+    rt::complete_root_name_scope(::core::option::Option::Some(&border_0), name_scope.as_ref(), 1, 2)?;
+    ::core::result::Result::Ok(border_0)
+}
+
+fn build_type_converter_failure_xaml_untyped(
+    service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
+) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadException> {
+    let root = build_type_converter_failure_xaml(service_provider)?;
+    ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
+}
+
+/// The base URI and the XML namespaces of `type_converter_cast_failure.xaml`.
+static BUILD_TYPE_CONVERTER_CAST_FAILURE_XAML_DOCUMENT: rt::DocumentInfo = rt::DocumentInfo { base_uri: ::core::option::Option::Some("ferres://FerroUI.Markup.Xaml.UnitTests/Emitter/type_converter_cast_failure.xaml"), namespaces: XML_NAMESPACES_1 };
+
+/// Generated from `type_converter_cast_failure.xaml`.
+pub fn build_type_converter_cast_failure_xaml(
+    service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
+) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::Border>, ::ferroui_markup_xaml::XamlLoadException> {
+    // type_converter_cast_failure.xaml(1,2) Border
+    let border_0 = ::ferroui_controls::Border::new();
+    let context = rt::populate_context(service_provider, &BUILD_TYPE_CONVERTER_CAST_FAILURE_XAML_DOCUMENT, rt::to_value(border_0.clone()));
+    let name_scope = context.name_scope_field();
+    border_0.begin_init();
+    context.push_parent(rt::to_value(border_0.clone()));
+    // type_converter_cast_failure.xaml(3,4) Child
+    // type_converter_cast_failure.xaml(3,4) Captioned
+    let captioned_0 = ::ferroui_markup_xaml_tests::support::emitter::Captioned::new();
+    captioned_0.begin_init();
+    border_0.set_value(::ferroui_controls::Decorator::child_property(), ::core::option::Option::Some(::core::clone::Clone::clone(&captioned_0).upcast::<::ferroui_controls::Control>()));
+    context.push_parent(rt::to_value(captioned_0.clone()));
+    // type_converter_cast_failure.xaml(3,4) Caption
+    let value_0 = ::ferroui_base::utilities::CultureInfo::__markup_static_get_InvariantCulture();
+    let value_1 = rt::invoked(::ferroui_markup_xaml_tests::support::emitter::CaptionConverter::__markup_ConvertFrom_1(&::ferroui_markup_xaml_tests::support::emitter::CaptionConverter::__markup_new_0(), ::core::option::Option::Some(rt::type_descriptor_context(&context)), rt::cast(::core::clone::Clone::clone(&value_0), 3, 16)?, rt::to_object(::std::string::String::from("number"))), 3, 16)?;
+    let cast_0 = rt::cast_checked(::core::clone::Clone::clone(&value_1), rt::markup_handle(<::ferroui_markup_xaml_tests::support::emitter::Caption as ::ferroui_base::metadata::MarkupTyped>::MARKUP), "FerroUI.Markup.Xaml.UnitTests.Caption", 3, 16)?;
+    captioned_0.set_value(::ferroui_markup_xaml_tests::support::emitter::Captioned::caption_property(), rt::exact(cast_0.clone(), "FerroUI.Markup.Xaml.UnitTests.Captioned.set_Caption", 0, 3, 16)?);
+    context.pop_parent();
+    rt::invoked(captioned_0.try_end_init(), 3, 4)?;
+    context.pop_parent();
+    rt::invoked(border_0.try_end_init(), 1, 2)?;
+    rt::complete_root_name_scope(::core::option::Option::Some(&border_0), name_scope.as_ref(), 1, 2)?;
+    ::core::result::Result::Ok(border_0)
+}
+
+fn build_type_converter_cast_failure_xaml_untyped(
+    service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
+) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadException> {
+    let root = build_type_converter_cast_failure_xaml(service_provider)?;
+    ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
+}
+
+/// The base URI and the XML namespaces of `type_converter_base_uri.xaml`.
+static BUILD_TYPE_CONVERTER_BASE_URI_XAML_DOCUMENT: rt::DocumentInfo = rt::DocumentInfo { base_uri: ::core::option::Option::Some("ferres://FerroUI.Markup.Xaml.UnitTests/Emitter/type_converter_base_uri.xaml"), namespaces: XML_NAMESPACES_1 };
+
+/// Generated from `type_converter_base_uri.xaml`.
+pub fn build_type_converter_base_uri_xaml(
+    service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
+) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::Border>, ::ferroui_markup_xaml::XamlLoadException> {
+    // type_converter_base_uri.xaml(1,2) Border
+    let border_0 = ::ferroui_controls::Border::new();
+    let context = rt::populate_context(service_provider, &BUILD_TYPE_CONVERTER_BASE_URI_XAML_DOCUMENT, rt::to_value(border_0.clone()));
+    let name_scope = context.name_scope_field();
+    border_0.begin_init();
+    context.push_parent(rt::to_value(border_0.clone()));
+    // type_converter_base_uri.xaml(3,4) Child
+    // type_converter_base_uri.xaml(3,4) Captioned
+    let captioned_0 = ::ferroui_markup_xaml_tests::support::emitter::Captioned::new();
+    captioned_0.begin_init();
+    border_0.set_value(::ferroui_controls::Decorator::child_property(), ::core::option::Option::Some(::core::clone::Clone::clone(&captioned_0).upcast::<::ferroui_controls::Control>()));
+    context.push_parent(rt::to_value(captioned_0.clone()));
+    // type_converter_base_uri.xaml(3,4) Caption
+    let value_0 = ::ferroui_base::utilities::CultureInfo::__markup_static_get_InvariantCulture();
+    let value_1 = rt::invoked(::ferroui_markup_xaml_tests::support::emitter::CaptionConverter::__markup_ConvertFrom_1(&::ferroui_markup_xaml_tests::support::emitter::CaptionConverter::__markup_new_0(), ::core::option::Option::Some(rt::type_descriptor_context(&context)), rt::cast(::core::clone::Clone::clone(&value_0), 3, 16)?, rt::to_object(::std::string::String::from("/name"))), 3, 16)?;
+    let cast_0 = rt::cast_checked(::core::clone::Clone::clone(&value_1), rt::markup_handle(<::ferroui_markup_xaml_tests::support::emitter::Caption as ::ferroui_base::metadata::MarkupTyped>::MARKUP), "FerroUI.Markup.Xaml.UnitTests.Caption", 3, 16)?;
+    captioned_0.set_value(::ferroui_markup_xaml_tests::support::emitter::Captioned::caption_property(), rt::exact(cast_0.clone(), "FerroUI.Markup.Xaml.UnitTests.Captioned.set_Caption", 0, 3, 16)?);
+    context.pop_parent();
+    rt::invoked(captioned_0.try_end_init(), 3, 4)?;
+    context.pop_parent();
+    rt::invoked(border_0.try_end_init(), 1, 2)?;
+    rt::complete_root_name_scope(::core::option::Option::Some(&border_0), name_scope.as_ref(), 1, 2)?;
+    ::core::result::Result::Ok(border_0)
+}
+
+fn build_type_converter_base_uri_xaml_untyped(
+    service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
+) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadException> {
+    let root = build_type_converter_base_uri_xaml(service_provider)?;
+    ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
+}
+
+/// The base URI and the XML namespaces of `image_source_missing_asset.xaml`.
+static BUILD_IMAGE_SOURCE_MISSING_ASSET_XAML_DOCUMENT: rt::DocumentInfo = rt::DocumentInfo { base_uri: ::core::option::Option::Some("ferres://FerroUI.Markup.Xaml.UnitTests/Emitter/image_source_missing_asset.xaml"), namespaces: XML_NAMESPACES_0 };
+
+/// Generated from `image_source_missing_asset.xaml`.
+pub fn build_image_source_missing_asset_xaml(
+    service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
+) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::Border>, ::ferroui_markup_xaml::XamlLoadException> {
+    // image_source_missing_asset.xaml(1,2) Border
+    let border_0 = ::ferroui_controls::Border::new();
+    let context = rt::populate_context(service_provider, &BUILD_IMAGE_SOURCE_MISSING_ASSET_XAML_DOCUMENT, rt::to_value(border_0.clone()));
+    let name_scope = context.name_scope_field();
+    border_0.begin_init();
+    context.push_parent(rt::to_value(border_0.clone()));
+    // image_source_missing_asset.xaml(2,4) Child
+    // image_source_missing_asset.xaml(2,4) Image
+    let image_0 = ::ferroui_controls::Image::new();
+    image_0.begin_init();
+    border_0.set_value(::ferroui_controls::Decorator::child_property(), ::core::option::Option::Some(::core::clone::Clone::clone(&image_0).upcast::<::ferroui_controls::Control>()));
+    context.push_parent(rt::to_value(image_0.clone()));
+    // image_source_missing_asset.xaml(2,4) Source
+    let value_0 = ::ferroui_base::utilities::CultureInfo::__markup_static_get_InvariantCulture();
+    let value_1 = rt::invoked(::ferroui_markup_xaml::converters::BitmapTypeConverter::__markup_ConvertFrom_1(&::ferroui_markup_xaml::converters::BitmapTypeConverter::__markup_new_0(), ::core::option::Option::Some(rt::type_descriptor_context(&context)), rt::cast(::core::clone::Clone::clone(&value_0), 2, 10)?, rt::to_object(::std::string::String::from("ferres://FerroUI.Markup.Xaml.UnitTests/Assets/missing.png"))), 2, 10)?;
+    let cast_0 = rt::cast_checked(::core::clone::Clone::clone(&value_1), rt::markup_handle(<dyn ::ferroui_base::media::IImage as ::ferroui_base::metadata::MarkupTyped>::MARKUP), "FerroUI.Media.IImage", 2, 10)?;
+    image_0.set_value(::ferroui_controls::Image::source_property(), rt::exact(cast_0.clone(), "FerroUI.Controls.Image.set_Source", 0, 2, 10)?);
+    context.pop_parent();
+    rt::invoked(image_0.try_end_init(), 2, 4)?;
+    context.pop_parent();
+    rt::invoked(border_0.try_end_init(), 1, 2)?;
+    rt::complete_root_name_scope(::core::option::Option::Some(&border_0), name_scope.as_ref(), 1, 2)?;
+    ::core::result::Result::Ok(border_0)
+}
+
+fn build_image_source_missing_asset_xaml_untyped(
+    service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
+) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadException> {
+    let root = build_image_source_missing_asset_xaml(service_provider)?;
+    ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
+}
+
+/// The base URI and the XML namespaces of `image_brush_source_missing_asset.xaml`.
+static BUILD_IMAGE_BRUSH_SOURCE_MISSING_ASSET_XAML_DOCUMENT: rt::DocumentInfo = rt::DocumentInfo { base_uri: ::core::option::Option::Some("ferres://FerroUI.Markup.Xaml.UnitTests/Emitter/image_brush_source_missing_asset.xaml"), namespaces: XML_NAMESPACES_0 };
+
+/// Generated from `image_brush_source_missing_asset.xaml`.
+pub fn build_image_brush_source_missing_asset_xaml(
+    service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
+) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::Border>, ::ferroui_markup_xaml::XamlLoadException> {
+    // image_brush_source_missing_asset.xaml(1,2) Border
+    let border_0 = ::ferroui_controls::Border::new();
+    let context = rt::populate_context(service_provider, &BUILD_IMAGE_BRUSH_SOURCE_MISSING_ASSET_XAML_DOCUMENT, rt::to_value(border_0.clone()));
+    let name_scope = context.name_scope_field();
+    border_0.begin_init();
+    context.push_parent(rt::to_value(border_0.clone()));
+    // image_brush_source_missing_asset.xaml(1,119) Background
+    // image_brush_source_missing_asset.xaml(1,119) ImageBrush
+    let image_brush_0 = ::ferroui_base::media::ImageBrush::new();
+    context.push_parent(rt::to_value(image_brush_0.clone()));
+    // image_brush_source_missing_asset.xaml(1,119) Source
+    let value_0 = ::ferroui_base::utilities::CultureInfo::__markup_static_get_InvariantCulture();
+    let value_1 = rt::invoked(::ferroui_markup_xaml::converters::BitmapTypeConverter::__markup_ConvertFrom_1(&::ferroui_markup_xaml::converters::BitmapTypeConverter::__markup_new_0(), ::core::option::Option::Some(rt::type_descriptor_context(&context)), rt::cast(::core::clone::Clone::clone(&value_0), 1, 130)?, rt::to_object(::std::string::String::from("ferres://FerroUI.Markup.Xaml.UnitTests/Assets/missing.png"))), 1, 130)?;
+    let cast_0 = rt::cast_checked(::core::clone::Clone::clone(&value_1), rt::markup_handle(<dyn ::ferroui_base::media::IImageBrushSource as ::ferroui_base::metadata::MarkupTyped>::MARKUP), "FerroUI.Media.IImageBrushSource", 1, 130)?;
+    image_brush_0.set_value(::ferroui_base::media::ImageBrush::source_property(), rt::exact(cast_0.clone(), "FerroUI.Media.ImageBrush.set_Source", 0, 1, 130)?);
+    // image_brush_source_missing_asset.xaml(1,119) Stretch
+    image_brush_0.set_value(::ferroui_base::media::TileBrush::stretch_property(), ::ferroui_base::media::Stretch::Fill);
+    context.pop_parent();
+    border_0.set_value(::ferroui_controls::Border::background_property(), rt::cast(image_brush_0.clone(), 1, 130)?);
+    context.pop_parent();
+    rt::invoked(border_0.try_end_init(), 1, 2)?;
+    rt::complete_root_name_scope(::core::option::Option::Some(&border_0), name_scope.as_ref(), 1, 2)?;
+    ::core::result::Result::Ok(border_0)
+}
+
+fn build_image_brush_source_missing_asset_xaml_untyped(
+    service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
+) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadException> {
+    let root = build_image_brush_source_missing_asset_xaml(service_provider)?;
+    ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
+}
+
+/// The base URI and the XML namespaces of `image_source_rooted.xaml`.
+static BUILD_IMAGE_SOURCE_ROOTED_XAML_DOCUMENT: rt::DocumentInfo = rt::DocumentInfo { base_uri: ::core::option::Option::Some("ferres://FerroUI.Markup.Xaml.UnitTests/Emitter/image_source_rooted.xaml"), namespaces: XML_NAMESPACES_0 };
+
+/// Generated from `image_source_rooted.xaml`.
+pub fn build_image_source_rooted_xaml(
+    service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
+) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::Border>, ::ferroui_markup_xaml::XamlLoadException> {
+    // image_source_rooted.xaml(1,2) Border
+    let border_0 = ::ferroui_controls::Border::new();
+    let context = rt::populate_context(service_provider, &BUILD_IMAGE_SOURCE_ROOTED_XAML_DOCUMENT, rt::to_value(border_0.clone()));
+    let name_scope = context.name_scope_field();
+    border_0.begin_init();
+    context.push_parent(rt::to_value(border_0.clone()));
+    // image_source_rooted.xaml(2,4) Child
+    // image_source_rooted.xaml(2,4) Image
+    let image_0 = ::ferroui_controls::Image::new();
+    image_0.begin_init();
+    border_0.set_value(::ferroui_controls::Decorator::child_property(), ::core::option::Option::Some(::core::clone::Clone::clone(&image_0).upcast::<::ferroui_controls::Control>()));
+    context.push_parent(rt::to_value(image_0.clone()));
+    // image_source_rooted.xaml(2,4) Source
+    let value_0 = ::ferroui_base::utilities::CultureInfo::__markup_static_get_InvariantCulture();
+    let value_1 = rt::invoked(::ferroui_markup_xaml::converters::BitmapTypeConverter::__markup_ConvertFrom_1(&::ferroui_markup_xaml::converters::BitmapTypeConverter::__markup_new_0(), ::core::option::Option::Some(rt::type_descriptor_context(&context)), rt::cast(::core::clone::Clone::clone(&value_0), 2, 10)?, rt::to_object(::std::string::String::from("/Assets/missing.png"))), 2, 10)?;
+    let cast_0 = rt::cast_checked(::core::clone::Clone::clone(&value_1), rt::markup_handle(<dyn ::ferroui_base::media::IImage as ::ferroui_base::metadata::MarkupTyped>::MARKUP), "FerroUI.Media.IImage", 2, 10)?;
+    image_0.set_value(::ferroui_controls::Image::source_property(), rt::exact(cast_0.clone(), "FerroUI.Controls.Image.set_Source", 0, 2, 10)?);
+    context.pop_parent();
+    rt::invoked(image_0.try_end_init(), 2, 4)?;
+    context.pop_parent();
+    rt::invoked(border_0.try_end_init(), 1, 2)?;
+    rt::complete_root_name_scope(::core::option::Option::Some(&border_0), name_scope.as_ref(), 1, 2)?;
+    ::core::result::Result::Ok(border_0)
+}
+
+fn build_image_source_rooted_xaml_untyped(
+    service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
+) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadException> {
+    let root = build_image_source_rooted_xaml(service_provider)?;
+    ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
+}
+
+/// The base URI and the XML namespaces of `items_source_typed_list.xaml`.
+static BUILD_ITEMS_SOURCE_TYPED_LIST_XAML_DOCUMENT: rt::DocumentInfo = rt::DocumentInfo { base_uri: ::core::option::Option::Some("ferres://FerroUI.Markup.Xaml.UnitTests/Emitter/items_source_typed_list.xaml"), namespaces: XML_NAMESPACES_3 };
+
+/// Generated from `items_source_typed_list.xaml`.
+pub fn build_items_source_typed_list_xaml(
+    service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
+) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::ItemsControl>, ::ferroui_markup_xaml::XamlLoadException> {
+    // items_source_typed_list.xaml(1,2) ItemsControl
+    let items_control_0 = ::ferroui_controls::ItemsControl::new();
+    let context = rt::populate_context(service_provider, &BUILD_ITEMS_SOURCE_TYPED_LIST_XAML_DOCUMENT, rt::to_value(items_control_0.clone()));
+    let name_scope = context.name_scope_field();
+    items_control_0.begin_init();
+    context.push_parent(rt::to_value(items_control_0.clone()));
+    // items_source_typed_list.xaml(3,36) ItemsSource
+    let path_0 = {
+        let builder = ::ferroui_base::data::CompiledBindingPathBuilder::new();
+        let builder = rt::path_property(&builder, <::ferroui_markup_xaml_tests::support::emitter::Table as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Rows", false, rt::markup_handle(<::ferroui_markup_xaml_tests::support::emitter::RowList as ::ferroui_base::metadata::MarkupTyped>::MARKUP), false, false, true);
+        builder.build()
+    };
+    let compiled_binding_extension_0 = ::ferroui_markup_xaml::markup_extensions::CompiledBindingExtension::__markup_new_1(path_0.clone());
+    context.set_target_property(rt::property_value(::ferroui_controls::ItemsControl::items_source_property()));
+    let provided_0 = ::ferroui_markup_xaml::markup_extensions::CompiledBindingExtension::__markup_ProvideValue_0(&compiled_binding_extension_0, ::core::option::Option::Some(rt::service_provider(&context)));
+    context.set_target_property(::core::option::Option::None);
+    rt::bind(items_control_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::ItemsControl::items_source_property(), provided_0, 3, 36)?;
+    // items_source_typed_list.xaml(5,6) ItemTemplate
+    let data_template_0 = ::ferroui_markup_xaml::templates::DataTemplate::__markup_new_0();
+    context.push_parent(rt::to_value(data_template_0.clone()));
+    // items_source_typed_list.xaml(6,8) Content
+    let deferred_0 = rt::defer(rt::class_handle(<::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE), &context, build_items_source_typed_list_xaml_deferred_0, 6, 8)?;
+    ::ferroui_markup_xaml::templates::DataTemplate::__markup_set_Content(&data_template_0, rt::to_object(::core::clone::Clone::clone(&deferred_0)));
+    context.pop_parent();
+    items_control_0.set_value(::ferroui_controls::ItemsControl::item_template_property(), ::core::option::Option::Some(::core::clone::Clone::clone(&data_template_0) as ::std::rc::Rc<dyn ::ferroui_controls::templates::IDataTemplate>));
+    context.pop_parent();
+    rt::invoked(items_control_0.try_end_init(), 1, 2)?;
+    rt::complete_root_name_scope(::core::option::Option::Some(&items_control_0), name_scope.as_ref(), 1, 2)?;
+    ::core::result::Result::Ok(items_control_0)
+}
+
+/// Builds the deferred content at `items_source_typed_list.xaml(6,8)` (a template or a deferred resource).
+fn build_items_source_typed_list_xaml_deferred_0(
+    service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+    let context = rt::deferred_context(service_provider, &BUILD_ITEMS_SOURCE_TYPED_LIST_XAML_DOCUMENT);
+    // items_source_typed_list.xaml(6,8) TextBlock
+    let text_block_0 = ::ferroui_controls::TextBlock::new();
+    context.set_intermediate_root_object(rt::to_value(text_block_0.clone()));
+    text_block_0.begin_init();
+    context.push_parent(rt::to_value(text_block_0.clone()));
+    // items_source_typed_list.xaml(6,18) Text
+    let path_0 = {
+        let builder = ::ferroui_base::data::CompiledBindingPathBuilder::new();
+        let builder = rt::path_property(&builder, <::ferroui_markup_xaml_tests::support::emitter::Row as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Name", false, ::ferroui_base::data::core::ValueType::of::<::std::string::String>(), false, false, true);
+        builder.build()
+    };
+    let compiled_binding_extension_0 = ::ferroui_markup_xaml::markup_extensions::CompiledBindingExtension::__markup_new_1(path_0.clone());
+    context.set_target_property(rt::property_value(::ferroui_controls::TextBlock::text_property()));
+    let provided_0 = ::ferroui_markup_xaml::markup_extensions::CompiledBindingExtension::__markup_ProvideValue_0(&compiled_binding_extension_0, ::core::option::Option::Some(rt::service_provider(&context)));
+    context.set_target_property(::core::option::Option::None);
+    rt::bind(text_block_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::TextBlock::text_property(), provided_0, 6, 18)?;
+    context.pop_parent();
+    rt::invoked(text_block_0.try_end_init(), 6, 8)?;
+    ::core::result::Result::Ok(rt::to_value(text_block_0.clone()))
+}
+
+fn build_items_source_typed_list_xaml_untyped(
+    service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
+) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadException> {
+    let root = build_items_source_typed_list_xaml(service_provider)?;
+    ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
+}
+
 /// The build function of every eligible public document, by document name.
 pub const DOCUMENTS: &[(&str, BuildDocument)] = &[
     ("border_empty.xaml", build_border_empty_xaml_untyped as BuildDocument),
@@ -4410,6 +4798,14 @@ pub const DOCUMENTS: &[(&str, BuildDocument)] = &[
     ("style_selectors.xaml", build_style_selectors_xaml_untyped as BuildDocument),
     ("style_nested.xaml", build_style_nested_xaml_untyped as BuildDocument),
     ("style_resources.xaml", build_style_resources_xaml_untyped as BuildDocument),
+    ("type_converter.xaml", build_type_converter_xaml_untyped as BuildDocument),
+    ("type_converter_failure.xaml", build_type_converter_failure_xaml_untyped as BuildDocument),
+    ("type_converter_cast_failure.xaml", build_type_converter_cast_failure_xaml_untyped as BuildDocument),
+    ("type_converter_base_uri.xaml", build_type_converter_base_uri_xaml_untyped as BuildDocument),
+    ("image_source_missing_asset.xaml", build_image_source_missing_asset_xaml_untyped as BuildDocument),
+    ("image_brush_source_missing_asset.xaml", build_image_brush_source_missing_asset_xaml_untyped as BuildDocument),
+    ("image_source_rooted.xaml", build_image_source_rooted_xaml_untyped as BuildDocument),
+    ("items_source_typed_list.xaml", build_items_source_typed_list_xaml_untyped as BuildDocument),
 ];
 
 /// The loader of the compiled markup of the assembly: builds the document with the URI

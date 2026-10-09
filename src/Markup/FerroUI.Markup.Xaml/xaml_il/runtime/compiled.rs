@@ -36,6 +36,7 @@ use super::{
     IFerroXamlIlXmlNamespaceInfoProvider, IStaticServiceProvider, IXamlIlContextServices, XamlIlContext,
     XamlIlContextDefinition, XamlIlRuntimeHelpers, XmlNamespaces,
 };
+use crate::converters::ITypeDescriptorContext;
 use crate::markup_extensions::compiled_bindings::PropertyInfoAccessorFactory;
 use crate::{ServiceProviderExtensions, XamlLoadException};
 
@@ -359,7 +360,9 @@ fn runtime_type_name(value: &BoxedValue) -> String {
     }
     match MarkupType::find_by_handle(value.value_type_id()) {
         Some(markup) => markup.full_name(),
-        None => value.type_name().to_string(),
+        // A primitive by the name of the runtime library type it mirrors (`System.Int32`),
+        // as the run-time loader names the type of a value.
+        None => ValueTypes::type_full_name(ValueType::of_value(&**value)),
     }
 }
 
@@ -640,6 +643,14 @@ fn owner_handle(target: &dyn AnyValue) -> Result<MarkupValue, BindingError> {
 /// The context as the service provider handed to user code (markup
 /// extensions, constructors that take a service provider).
 pub fn service_provider(context: &Rc<XamlIlContext>) -> Rc<dyn IServiceProvider> {
+    context.clone()
+}
+
+/// The context as the type descriptor context a type converter converts in
+/// (`converter.ConvertFrom(context, CultureInfo.InvariantCulture, text)`): the
+/// context itself, which states the base URI of the document and the parents
+/// of the value, as the context of the run-time loader does.
+pub fn type_descriptor_context(context: &Rc<XamlIlContext>) -> Rc<dyn ITypeDescriptorContext> {
     context.clone()
 }
 

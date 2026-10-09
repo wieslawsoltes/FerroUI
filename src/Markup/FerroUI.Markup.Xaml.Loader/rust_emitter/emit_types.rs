@@ -90,6 +90,10 @@ pub enum Known {
     OptionProperty,
     /// `MarkupDelegate`: the delegate of a method named in markup.
     Delegate,
+    /// `Rc<dyn ITypeDescriptorContext>`: the context a type converter converts in.
+    TypeDescriptorContext,
+    /// `Option<Rc<dyn ITypeDescriptorContext>>`.
+    OptionTypeDescriptorContext,
 }
 
 /// The Rust type that holds a value of a type of the type system (its handle).

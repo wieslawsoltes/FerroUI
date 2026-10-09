@@ -22,10 +22,10 @@ use ferroui_markup_xaml_loader::runtime::framework::XamlMemberException;
 use ferroui_markup_xaml_loader::rust_emitter::{generate_file, GeneratedFile};
 use xamlx::exceptions::XamlError;
 
-use super::corpus::{DOCUMENTS, EXPECTED_ELIGIBLE, EXPECTED_NOT_ELIGIBLE};
+use super::corpus::{BASE_URI_DOCUMENTS, DOCUMENTS, EXPECTED_ELIGIBLE, EXPECTED_NOT_ELIGIBLE};
 use super::generated;
 use crate::support::app::xaml_test_base;
-use crate::support::loader::{describe, try_load};
+use crate::support::loader::{describe, try_load, try_load_with};
 
 /// The path of the checked-in output of the emitter.
 const GENERATED_PATH: &str = concat!(env!("CARGO_MANIFEST_DIR"), "/emitter/generated.rs");
@@ -595,8 +595,11 @@ fn output_does_not_depend_on_what_ran_before() {
         for type_ in ferroui_base::TypeInfo::registered_types().into_iter().rev() {
             type_.ensure_class_init();
         }
-        for (_, xaml) in DOCUMENTS {
-            let _ = try_load(xaml);
+        for (name, xaml) in DOCUMENTS {
+            // Loaded with the services they need, in a test of their own.
+            if !BASE_URI_DOCUMENTS.contains(name) {
+                let _ = try_load(xaml);
+            }
         }
         let _ = generate();
         generate().source
@@ -639,6 +642,10 @@ fn both_back_ends_build_equal_object_trees() {
     let _base = xaml_test_base();
     let (mut matches, mut mismatches, mut not_eligible) = (0, Vec::new(), 0);
     for (name, xaml) in DOCUMENTS {
+        // Compared with the base URI of the document, in a test of their own.
+        if BASE_URI_DOCUMENTS.contains(name) {
+            continue;
+        }
         let Some(built) = build_generated(name) else {
             not_eligible += 1;
             println!("not eligible  {name}");
@@ -669,6 +676,64 @@ fn both_back_ends_build_equal_object_trees() {
     println!("{matches} match, {} mismatch, {not_eligible} not eligible", mismatches.len());
     assert!(mismatches.is_empty(), "the back ends differ:\n{}", mismatches.join("\n"));
     assert!(matches > 0 || generated::DOCUMENTS.is_empty(), "no document was compared");
+}
+
+/// Not from upstream. A document whose values depend on its base URI is the same tree, or
+/// the same failure, when the run-time loader is given the URI generated code states for
+/// the document: a type converter gets the base URI through the context of both back ends.
+#[test]
+fn documents_that_read_their_base_uri_build_equal_object_trees() {
+    let _application = crate::support::app::unit_test_application(ferroui_controls::testing::TestServices::mock_threading_interface());
+    let mut dumps = Vec::new();
+    for name in BASE_URI_DOCUMENTS {
+        let (_, xaml) = DOCUMENTS.iter().find(|(document, _)| document == name).unwrap_or_else(|| panic!("{name} is not a document of the corpus"));
+        let uri = format!("{}{name}", generated::ROOT_URI);
+        let base_uri = ferroui_base::utilities::Uri::new(&uri, ferroui_base::utilities::UriKind::Absolute).expect("the URI of the document");
+        let interpreted = match try_load_with(xaml, None, None, Some(base_uri), false) {
+            Ok(root) => dump_root(&root),
+            Err(error) => failure(&error),
+        };
+        let generated = match build_generated(name).unwrap_or_else(|| panic!("{name} is not eligible")) {
+            Ok(root) => dump_root(&root),
+            Err(error) => failure(&error),
+        };
+        if let Err(difference) = compare(&interpreted, &generated) {
+            panic!("{name}: {difference}\n--- interpreter\n{interpreted}--- generated\n{generated}");
+        }
+        dumps.push((*name, uri, generated));
+    }
+    // The converter of the corpus was given the URI of its document, and the converter of
+    // bitmaps looked for the asset below the root of that URI.
+    let (_, _, caption) = dumps.iter().find(|(name, _, _)| *name == "type_converter_base_uri.xaml").expect("the document of the caption");
+    assert!(caption.to_lowercase().contains("/emitter/type_converter_base_uri.xaml/name"), "{caption}");
+    for (name, _, dump) in dumps.iter().filter(|(name, _, _)| name.starts_with("image_")) {
+        assert!(dump.starts_with("<error ") && dump.contains("/Assets/missing.png"), "{name}: {dump}");
+    }
+}
+
+/// Not from upstream. The converter of the corpus converts with the context of the
+/// document: the parents of the value, null for no value, and the property holds the
+/// caption the text was converted to.
+#[test]
+fn a_text_is_converted_by_the_type_converter_of_its_property() {
+    use crate::support::emitter::Captioned;
+    let _base = xaml_test_base();
+    let root = build_generated("type_converter.xaml").expect("the document is eligible").expect("the document is built");
+    let dump = dump_root(&root);
+    for expected in ["Text=plain", "@parent"] {
+        assert!(dump.contains(expected), "{expected} is not in\n{dump}");
+    }
+    let panel = ValueTypes::as_object(&*root).and_then(|object| object.cast::<ferroui_controls::StackPanel>()).expect("the root is a panel");
+    let captions: Vec<Option<String>> = panel
+        .get_visual_descendants()
+        .into_iter()
+        .filter_map(|visual| visual.cast::<Captioned>())
+        .map(|captioned| captioned.caption().map(|caption| caption.text()))
+        .collect();
+    assert_eq!(captions.len(), 3);
+    assert_eq!(captions[0].as_deref(), Some("plain"));
+    assert!(captions[1].as_deref().is_some_and(|caption| caption.ends_with("@parent") && !caption.starts_with('(')), "{captions:?}");
+    assert_eq!(captions[2], None);
 }
 
 /// Not from upstream. Two dumps that hold a value the dump cannot read never compare as

@@ -12,7 +12,7 @@ use xamlx::ast::XamlAstExtensions as _;
 use xamlx::ast::XamlAstNodeExtensions as _;
 use xamlx::ast::{
     visit_node, IXamlAstNode, IXamlAstValueNode, IXamlAstVisitor, IXamlPropertySetter, XamlAstCompilerLocalNode,
-    XamlAstNeedsParentStackValueNode, XamlAstRuntimeCastNode,
+    XamlAstContextLocalNode, XamlAstNeedsParentStackValueNode, XamlAstRuntimeCastNode,
     XamlAstImperativeValueManipulation, XamlAstLocalInitializationNodeEmitter, XamlAstManipulationImperativeNode,
     XamlAstNewClrObjectNode, XamlAstTextNode, XamlConstantNode, XamlDirectCallPropertySetter, XamlLoadMethodDelegateNode, XamlManipulationGroupNode,
     XamlNullExtensionNode, XamlRootObjectNode,
@@ -686,24 +686,77 @@ impl<'a> Emitter<'a> {
             return self.constructor_call(node, &constructor, &[value, unit]);
         }
         if let Some(n) = node.cast::<XamlAstNeedsParentStackValueNode>() {
-            // `(T) new Converter().ConvertFrom(context, CultureInfo.InvariantCulture, text)`: a text
-            // the converter of the type converts when the document is loaded. Not emitted yet;
-            // the refusal names the converter and the type.
-            let target = n.base.type_().get_clr_type().map(|type_| type_.full_name()).unwrap_or_default();
-            let converter = n
-                .base
-                .value()
-                .cast::<XamlAstRuntimeCastNode>()
-                .and_then(|cast| {
-                    let call = cast.value().as_node();
-                    let call = call.as_method_call_base_node()?;
-                    let first = call.arguments.borrow().first().cloned()?;
-                    first.type_().get_clr_type().ok().map(|type_| type_.full_name())
-                })
-                .unwrap_or_else(|| "a converter".to_string());
-            return Err(unsupported(node, format!("a text converted to {target} by its type converter {converter} when the document is loaded")));
+            // A value that is evaluated with the parent stack (the text a type converter
+            // converts when the document is loaded): its value, in a context that has the
+            // parents ([`Self::object_initialization`] pushes them for a node below it).
+            self.uses_context = true;
+            return self.value(&n.base.value().as_node());
+        }
+        if let Some(n) = node.cast::<XamlAstRuntimeCastNode>() {
+            return self.runtime_cast(node, &n);
+        }
+        if let Some(n) = node.cast::<XamlAstContextLocalNode>() {
+            return self.context_local(node, &n);
         }
         Err(unsupported(node, "no emitter for this value node"))
+    }
+
+    /// `(T) value` of a value of type `object` (`XamlAstRuntimeCastNode`: what a type
+    /// converter returned, `(T) new Converter().ConvertFrom(context, CultureInfo.InvariantCulture, text)`):
+    /// the checked cast of the interpreter to a reference type (`rt::cast_checked`: null
+    /// passes, an instance of the type is held in the handle of its own class, anything
+    /// else is the loader's error). The result is still held untyped: the member that takes
+    /// it converts it to the Rust type it declares, as the run-time loader does.
+    fn runtime_cast(&mut self, node: &Rc<dyn IXamlAstNode>, cast: &Rc<XamlAstRuntimeCastNode>) -> EmitResult<Typed<'a>> {
+        let type_ = cast.type_.borrow().get_clr_type().map_err(|e| failed(node, e))?;
+        let value_node = cast.value().as_node();
+        if type_.is_value_type() {
+            // `unbox.any`: not emitted. The refusal names the converter of a converted text.
+            let converter = value_node
+                .as_method_call_base_node()
+                .and_then(|call| call.arguments.borrow().first().cloned())
+                .and_then(|first| first.type_().get_clr_type().ok())
+                .map(|converter| format!(" by its type converter {}", converter.full_name()))
+                .unwrap_or_default();
+            return Err(unsupported(node, format!("a value converted to the value type {}{converter} when the document is loaded", type_.full_name())));
+        }
+        let handle = self.handle_expr(node, &type_)?;
+        let object = self.types.known(Known::Object);
+        let value = self.value(&value_node)?;
+        let untyped = self
+            .coerce(&value, object)
+            .ok_or_else(|| unsupported(node, format!("the value cast to {} cannot be stated as an object", type_.full_name())))?;
+        let local = self.local_named("cast");
+        self.line(format!(
+            "let {local} = rt::cast_checked({untyped}, {handle}, {}, {}, {})?;",
+            rust_string_literal(&type_.full_name()),
+            node.line(),
+            node.position()
+        ));
+        Ok(Typed { expr: local, kind: Kind::Exact { id: object, nullable: None } })
+    }
+
+    /// The context of the document as a value (`XamlAstContextLocalNode`): the type
+    /// descriptor context a type converter converts in, which is the context itself (it
+    /// carries the base URI of the document and the parent stack), or the service
+    /// provider it is.
+    fn context_local(&mut self, node: &Rc<dyn IXamlAstNode>, local: &Rc<XamlAstContextLocalNode>) -> EmitResult<Typed<'a>> {
+        let type_ = IXamlAstValueNode::type_(&**local).get_clr_type().map_err(|e| failed(node, e))?;
+        self.uses_context = true;
+        if type_.full_name() != "System.ComponentModel.ITypeDescriptorContext" {
+            let service_provider = self.types.known(Known::ServiceProvider);
+            return match self.types.handle_of(&*type_) {
+                Some(handle) if handle.id() == service_provider => Ok(self.service_provider_argument()),
+                _ => Err(unsupported(node, format!("the context as a value of {}", type_.full_name()))),
+            };
+        }
+        Ok(Typed {
+            expr: "rt::type_descriptor_context(&context)".to_string(),
+            kind: Kind::Exact {
+                id: self.types.known(Known::TypeDescriptorContext),
+                nullable: Some(self.types.known(Known::OptionTypeDescriptorContext)),
+            },
+        })
     }
 
     /// `new T()` of a class of the object model with its default constructor.
@@ -1339,9 +1392,23 @@ impl<'a> Emitter<'a> {
         self.setter_statement(node, assignment, &setter, target, &SetterValues::Checked, None)?;
         self.marker(node, &property_name);
         let value = self.value(&value_node)?;
-        let statement = self.setter_statement(node, assignment, &setter, target, &SetterValues::Typed(&value, &value_node), None)?;
+        let statement = match self.is_cast_result(&value_node) {
+            // The result of a checked cast is held untyped: the setter converts it to the
+            // type it declares, as the run-time loader converts the argument of the setter.
+            true => self.setter_statement(node, assignment, &setter, target, &SetterValues::Untyped(&value.expr, &value_node), None)?,
+            false => self.setter_statement(node, assignment, &setter, target, &SetterValues::Typed(&value, &value_node), None)?,
+        };
         self.line(statement);
         Ok(())
+    }
+
+    /// Whether the value of `node` is the result of a checked cast, held untyped in a
+    /// local ([`Self::runtime_cast`]).
+    fn is_cast_result(&self, node: &Rc<dyn IXamlAstNode>) -> bool {
+        match node.cast::<XamlAstNeedsParentStackValueNode>() {
+            Some(inner) => inner.base.value().as_node().is::<XamlAstRuntimeCastNode>(),
+            None => node.is::<XamlAstRuntimeCastNode>(),
+        }
     }
 
     /// The priority of an assignment with a priority, held in a local.
