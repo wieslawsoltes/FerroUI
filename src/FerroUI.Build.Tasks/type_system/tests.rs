@@ -417,6 +417,7 @@ fn registered(name: Option<&str>, kind: RegisteredKind, value_type: &str, access
         owner: None,
         host: None,
         accessor: accessor.to_string(),
+        function_of: None,
         visibility: "pub".to_string(),
         registration,
         source: None,

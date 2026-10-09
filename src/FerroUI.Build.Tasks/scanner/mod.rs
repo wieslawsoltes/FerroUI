@@ -15,14 +15,16 @@
 //! | `ferro_class_info!(X { new, interfaces, markup })` | the default constructor, the interfaces and the markup metadata of a class |
 //! | `ferro_markup_type!`, `ferro_markup_enum!` | the other types, with handles, members and values |
 //! | `const NAMESPACES`, `static _: MarkupAssembly` | the namespace table and the assembly |
-//! | `struct`, `enum`, `trait`, `type`, `use`, `mod`, `bitflags!` | the names of each module, for the resolution of paths; the values of enumerations |
-//! | `impl X { fn .. }` | the functions of each type ([`Scan::functions`]) |
+//! | `const TYPES: &[&TypeInfo]` | the classes the crate registers: a class that is not in the list is marked ([`TypeModel::unregistered`]) |
+//! | `MarkupType::register_handle::<H>(..)`, `ValueTypes::register_cast::<A, B>(..)` in a function | one more handle of a type with markup metadata ([`AssemblyModel::handles`]); the casts between Rust types ([`AssemblyModel::casts`]) |
+//! | `struct`, `enum`, `trait`, `type`, `use`, `mod`, `bitflags!` | the names of each module, for the resolution of paths; the values of enumerations; the type aliases ([`AssemblyModel::aliases`]) |
+//! | `impl X { fn .., const .. }` | the functions of each type ([`Scan::functions`]); the constants an enumeration or a set of flags names as members |
 //! | `ferro_rust_paths!` | the public paths the crate states, compared with the ones the scanner finds |
 //!
 //! Macros are not expanded, except the macros the crate itself defines with
 //! a single form of identifiers and types (`ferro_transition_class!`): an
-//! invocation of one is expanded by substitution and the declarations it
-//! writes are read.
+//! invocation of one, as an item or among the members of an `impl` block, is
+//! expanded by substitution and the declarations it writes are read.
 //!
 //! # What is not guessed
 //!
@@ -48,6 +50,7 @@
 //! - [`Scan::normalise`] resolves any further type text against the modules
 //!   of the scan (the signatures of the handlers of an `x:Class` type).
 
+mod constants;
 mod declarations;
 mod modules;
 mod source;
@@ -63,9 +66,9 @@ use std::path::PathBuf;
 use proc_macro2::TokenTree;
 
 use crate::model::{
-    AccessorModel, AssemblyModel, AttributeModel, AttributeValueModel, CallableModel, EnumMemberModel, ExportModel, GenericModel, MemberModel,
-    ParameterModel, PropertyModel, RegisteredKind, RegisteredModel, RegistrationModel, RustType, TypeKind, TypeModel, XmlnsDefinitionModel,
-    XmlnsPrefixModel,
+    AccessorModel, AliasModel, AssemblyModel, AttributeModel, AttributeValueModel, CallableModel, CastModel, EnumMemberModel, ExportModel, GenericModel,
+    HandleModel, MemberModel, ParameterModel, PropertyModel, RegisteredKind, RegisteredModel, RegistrationModel, RustType, TypeKind, TypeModel,
+    XmlnsDefinitionModel, XmlnsPrefixModel,
 };
 use crate::model_set::ModelSet;
 use declarations::{
@@ -73,7 +76,7 @@ use declarations::{
     RawProperty, RawValue,
 };
 use modules::{Modules, Target};
-use source::{flags_value, Located, Site, Source, Text};
+use source::{Located, Site, Source, Text};
 use tokens::{pieces, plain_path, text_of, text_of_pieces, tokens_of, Tokens};
 
 /// The names of the declaration macros: the macros whose invocations are counted
@@ -102,7 +105,9 @@ pub mod codes {
     pub const OWNER: &str = "FRN9023";
     /// The public path the crate states for a type is not the one the scanner finds.
     pub const PUBLIC_PATH: &str = "FRN9024";
-    /// The assembly or the namespace table is not read.
+    /// A class the crate declares is not in its list of registered classes.
+    pub const UNREGISTERED: &str = "FRN9025";
+    /// The assembly, the namespace table or the list of registered classes is not read.
     pub const ASSEMBLY: &str = "FRN9030";
 }
 
@@ -249,6 +254,9 @@ pub struct Statistics {
     pub static_types: usize,
     pub markup_types: usize,
     pub enums: usize,
+    /// The classes and static types that are not in the list of registered classes of
+    /// the crate.
+    pub unregistered: usize,
     pub types_without_namespace: usize,
     pub types_without_public_path: usize,
     pub registered: usize,
@@ -302,7 +310,7 @@ impl Scan {
     pub fn normalise(&self, module: &str, text: &str) -> Option<RustType> {
         let module = self.modules.find_module(module)?;
         let tokens = tokens_of(text.parse().ok()?);
-        let (text, unresolved) = normalise(&self.modules, module, &tokens, None);
+        let (text, unresolved) = normalise(&self.modules, module, &tokens, None, &[]);
         Some(RustType { text, unresolved })
     }
 
@@ -346,6 +354,13 @@ impl Scan {
                 statistics.callables, statistics.callable_paths, statistics.callable_paths_resolved
             ),
             format!("enumeration members: {} ({} without a value)", statistics.enum_members, statistics.enum_members_without_value),
+            format!(
+                "registration: {} classes are not in the list of registered classes; {} handles registered for types with markup metadata; {} casts; {} type aliases",
+                statistics.unregistered,
+                self.model.handles.len(),
+                self.model.casts.len(),
+                self.model.aliases.len()
+            ),
             format!(
                 "type texts: {} ({} with an unresolved path, {} distinct unresolved paths)",
                 statistics.type_texts,
@@ -407,6 +422,7 @@ pub fn scan_crate(options: &ScanOptions) -> Scan {
         }
     }
     builder.hand_written();
+    builder.class_lists();
     for declaration in &declarations {
         match &declaration.value {
             Declaration::MarkupType { kind, type_, is_dyn, name, body } => builder.markup_type(*kind, type_, *is_dyn, name.as_deref(), body, &declaration.site),
@@ -417,7 +433,7 @@ pub fn scan_crate(options: &ScanOptions) -> Scan {
     for declaration in &declarations {
         match &declaration.value {
             Declaration::ClassInfo { name, new, interfaces, markup } => builder.class_info(name, new.as_deref(), interfaces, markup.as_ref(), &declaration.site),
-            Declaration::Properties { owner, accessors } => builder.properties(owner, accessors, &declaration.site),
+            Declaration::Properties { owner, accessors, function_of } => builder.properties(owner, accessors, function_of.as_deref(), &declaration.site),
             _ => {}
         }
     }
@@ -426,8 +442,9 @@ pub fn scan_crate(options: &ScanOptions) -> Scan {
 }
 
 /// The text of the type `tokens` written in `module`: every path the modules resolve made
-/// absolute, the others as written and listed. `self_type` is what `Self` stands for.
-fn normalise(modules: &Modules, module: usize, tokens: &[TokenTree], self_type: Option<&str>) -> (String, Vec<String>) {
+/// absolute, the others as written and listed. `self_type` is what `Self` stands for;
+/// `imports` are the names the function the type is written in imports for itself.
+fn normalise(modules: &Modules, module: usize, tokens: &[TokenTree], self_type: Option<&str>, imports: &[(String, Vec<String>)]) -> (String, Vec<String>) {
     let mut unresolved: Vec<String> = Vec::new();
     let text = text_of_pieces(&pieces(tokens, &mut |segments: &[String]| {
         let written = segments.join("::");
@@ -439,7 +456,11 @@ fn normalise(modules: &Modules, module: usize, tokens: &[TokenTree], self_type: 
             }
             return text;
         }
-        match modules.resolve(module, segments) {
+        let imported: Option<Vec<String>> = imports
+            .iter()
+            .find(|(name, _)| Some(name) == segments.first())
+            .map(|(_, path)| path.iter().chain(&segments[1..]).cloned().collect());
+        match modules.resolve(module, imported.as_deref().unwrap_or(segments)) {
             Some(target) => modules.absolute(&target).unwrap_or(written),
             None => {
                 if !unresolved.contains(&written) {
@@ -475,7 +496,12 @@ impl Builder {
     }
 
     fn rust_type(&mut self, tokens: &[TokenTree], site: &Site, self_type: Option<&str>) -> RustType {
-        let (text, unresolved) = normalise(&self.source.modules, site.module, tokens, self_type);
+        self.rust_type_in(tokens, site, self_type, &[])
+    }
+
+    /// The type `tokens` written in a function with the imports `imports`.
+    fn rust_type_in(&mut self, tokens: &[TokenTree], site: &Site, self_type: Option<&str>, imports: &[(String, Vec<String>)]) -> RustType {
+        let (text, unresolved) = normalise(&self.source.modules, site.module, tokens, self_type, imports);
         self.statistics.type_texts += 1;
         if !unresolved.is_empty() {
             self.statistics.type_texts_unresolved += 1;
@@ -579,6 +605,39 @@ impl Builder {
         }
     }
 
+    /// Marks the classes and static types that are not in the lists of registered classes
+    /// of the crate. A crate without such a list, or with a list the scanner did not
+    /// read, has no marked type: nothing says which of its types it registers.
+    fn class_lists(&mut self) {
+        let lists = std::mem::take(&mut self.source.class_lists);
+        let (Some(first), true) = (lists.first(), lists.iter().all(|list| list.value.is_some())) else { return };
+        let mut listed: BTreeSet<usize> = BTreeSet::new();
+        for Located { site, value } in &lists {
+            for entry in value.iter().flatten() {
+                let path = plain_path(entry).and_then(|segments| self.resolve_path(site.module, &segments, None));
+                match path.and_then(|path| self.index.get(&path).copied()) {
+                    Some(index) => {
+                        listed.insert(index);
+                    }
+                    None => {
+                        let message = format!("the list of registered classes names `{}`, which is no class or static type of the crate the scanner read", text_of(entry));
+                        self.source.diagnostic(Severity::Warning, codes::OWNER, site, message);
+                    }
+                }
+            }
+        }
+        for index in 0..self.model.types.len() {
+            if self.model.types[index].object_model && !listed.contains(&index) {
+                self.model.types[index].unregistered = true;
+                let message = format!(
+                    "`{}` is declared and is not in the list of registered classes: the type is not known by its name or by its handle until an instance of it is created",
+                    self.model.types[index].rust_path.text
+                );
+                self.source.diagnostic(Severity::Note, codes::UNREGISTERED, &first.site, message);
+            }
+        }
+    }
+
     fn markup_type(&mut self, kind: TypeKind, type_: &Tokens, is_dyn: bool, name: Option<&str>, body: &MarkupBody, site: &Site) {
         // The metadata of a static type that owns attached properties belongs to its
         // runtime type (`type_info: X`).
@@ -624,17 +683,20 @@ impl Builder {
             if flags {
                 let tokens = member.value.clone().unwrap_or_default();
                 rust_value = Some(text_of(&tokens));
-                // `Type::CONSTANT` of the `bitflags!` type the enumeration is.
+                // `Type::CONSTANT` of the `bitflags!` type the enumeration is: a constant of
+                // the `bitflags!` invocation or an associated constant of the type.
                 if let (Some(path), Some(declared)) = (plain_path(&tokens), &declared) {
                     let same_type = path.len() == 2 && (path[0] == "Self" || self.source.modules.resolve(site.module, &path[..1]) == target);
                     if same_type {
-                        value = self.source.flags.get(declared).and_then(|constants| flags_value(constants, &path[1], 0));
+                        value = self.source.member_value(declared, &path[1], 0);
                     }
                 }
             } else {
                 let variant = member.variant.clone().unwrap_or_else(|| member.name.clone());
+                // A variant, or an associated constant of the enumeration that names one
+                // (`pub const Enter: Key = Key::Return;`).
                 if let Some(declared) = &declared {
-                    value = self.source.enums.get(declared).and_then(|variants| variants.iter().find(|(name, _)| *name == variant)).and_then(|(_, value)| *value);
+                    value = self.source.member_value(declared, &variant, 0);
                 }
                 rust_variant = Some(variant);
             }
@@ -782,14 +844,16 @@ impl Builder {
         }
     }
 
-    /// The accessors of the registered properties of `owner`.
-    fn properties(&mut self, owner: &str, accessors: &[Accessor], site: &Site) {
+    /// The accessors of the registered properties of `owner`. `function_of` is the name of
+    /// the type whose `impl` block has them, when it is not the owner.
+    fn properties(&mut self, owner: &str, accessors: &[Accessor], function_of: Option<&str>, site: &Site) {
         let Some(index) = self.find_declared(site, owner) else {
             let message = format!("the properties of `{owner}`: no class or static type `{owner}` is read (no `ferro_class!` or `ferro_static_type!` of it in a file the scanner read): the properties are not in the model");
             self.source.diagnostic(Severity::Error, codes::OWNER, site, message);
             return;
         };
         let self_type = self.model.types[index].rust_path.text.clone();
+        let function_of = function_of.map(|name| self.resolve_path(site.module, &[name.to_string()], None).unwrap_or_else(|| name.to_string()));
         for accessor in accessors {
             let site = if site.expanded { site.clone() } else { Site { line: accessor.line, ..site.clone() } };
             let Some((kind, value_type)) = property_type(&accessor.return_type) else {
@@ -810,6 +874,7 @@ impl Builder {
                 owner: None,
                 host: None,
                 accessor: accessor.name.clone(),
+                function_of: function_of.clone(),
                 visibility: accessor.visibility.clone(),
                 registration: registration.kind,
                 source: None,
@@ -832,6 +897,8 @@ impl Builder {
                 }
                 RegistrationModel::AddedOwner | RegistrationModel::Alias => {
                     model.source = registration.source.as_ref().map(|tokens| self.callable(tokens, &site, Some(&self_type)));
+                    // `.add_owner::<Owner>(..)`.
+                    model.owner = registration.added_owner.as_ref().map(|tokens| self.rust_type(tokens, &site, Some(&self_type)));
                 }
                 RegistrationModel::Unknown => {
                     let message = format!(
@@ -850,6 +917,16 @@ impl Builder {
     fn link_properties(&mut self) {
         let mut names: Vec<(usize, usize, Option<String>)> = Vec::new();
         let mut owners: Vec<(usize, usize, String)> = Vec::new();
+        // The accessors that are functions of another type than the one they are listed
+        // under, by their path.
+        let mut functions: BTreeMap<String, (usize, usize)> = BTreeMap::new();
+        for (type_index, type_) in self.model.types.iter().enumerate() {
+            for (position, registered) in type_.registered.iter().enumerate() {
+                if let Some(function_of) = &registered.function_of {
+                    functions.entry(format!("{function_of}::{}", registered.accessor)).or_insert((type_index, position));
+                }
+            }
+        }
         for (type_index, type_) in self.model.types.iter().enumerate() {
             for (position, registered) in type_.registered.iter().enumerate() {
                 if !matches!(registered.registration, RegistrationModel::AddedOwner | RegistrationModel::Alias) {
@@ -857,7 +934,7 @@ impl Builder {
                 }
                 let mut current = registered;
                 for _ in 0..8 {
-                    let Some((source_type, source_position)) = current.source.as_ref().and_then(|source| source.resolved.as_deref()).and_then(|path| self.locate(path)) else {
+                    let Some((source_type, source_position)) = current.source.as_ref().and_then(|source| source.resolved.as_deref()).and_then(|path| self.locate(path, &functions)) else {
                         break;
                     };
                     current = &self.model.types[source_type].registered[source_position];
@@ -883,12 +960,52 @@ impl Builder {
     }
 
     /// The type and the position of the accessor with the absolute path `path`
-    /// (`::crate::decorator::Decorator::child_property`).
-    fn locate(&self, path: &str) -> Option<(usize, usize)> {
+    /// (`::crate::decorator::Decorator::child_property`): the path of the type the
+    /// accessor is a function of, which `functions` has for the accessors listed under
+    /// another type.
+    fn locate(&self, path: &str, functions: &BTreeMap<String, (usize, usize)>) -> Option<(usize, usize)> {
+        if let Some(found) = functions.get(path) {
+            return Some(*found);
+        }
         let (type_path, accessor) = path.rsplit_once("::")?;
         let type_index = *self.index.get(type_path)?;
-        let position = self.model.types[type_index].registered.iter().position(|registered| registered.accessor == accessor)?;
+        let position = self.model.types[type_index].registered.iter().position(|registered| registered.accessor == accessor && registered.function_of.is_none())?;
         Some((type_index, position))
+    }
+
+    /// The type aliases, the registered handles and the registered casts of the crate.
+    fn aliases_and_handles(&mut self) {
+        // An alias under a `cfg` condition, or declared twice, is left a name: which of
+        // its declarations holds is decided by the build.
+        let aliases = std::mem::take(&mut self.source.aliases);
+        let mut declared: BTreeMap<String, usize> = BTreeMap::new();
+        let paths: Vec<String> = aliases.iter().map(|alias| format!("::{}::{}", self.source.modules.module_path(alias.site.module), alias.value.0)).collect();
+        for path in &paths {
+            *declared.entry(path.clone()).or_default() += 1;
+        }
+        for (alias, path) in aliases.iter().zip(paths) {
+            if !alias.site.cfg.is_empty() || declared.get(&path) != Some(&1) {
+                continue;
+            }
+            // Its type is no type text of a declaration: it is not counted and not reported,
+            // and an alias whose type is not resolved is left a name.
+            let (text, unresolved) = normalise(&self.source.modules, alias.site.module, &alias.value.1, None, &[]);
+            if unresolved.is_empty() {
+                self.model.aliases.push(AliasModel { path, target: RustType { text, unresolved } });
+            }
+        }
+        let handles = std::mem::take(&mut self.source.handles);
+        for Located { site, value } in &handles {
+            let handle = self.rust_type_in(&value.handle, site, None, &value.imports);
+            let type_ = self.rust_type_in(&value.type_, site, None, &value.imports);
+            self.model.handles.push(HandleModel { handle, type_ });
+        }
+        let casts = std::mem::take(&mut self.source.casts);
+        for Located { site, value } in &casts {
+            let from = self.rust_type_in(&value.from, site, None, &value.imports);
+            let to = self.rust_type_in(&value.to, site, None, &value.imports);
+            self.model.casts.push(CastModel { from, to });
+        }
     }
 
     /// The value of a text of the assembly or of the namespace table: a literal, a text
@@ -978,12 +1095,14 @@ impl Builder {
             return;
         }
         let set = ModelSet::new(dependencies.to_vec());
+        let mut canonical = |rust_type: &mut RustType| {
+            if rust_type.text.contains("::") {
+                rust_type.text = set.canonical(&rust_type.text);
+            }
+        };
+        self.model.visit_types_mut(&mut canonical);
         for type_ in &mut self.model.types {
-            type_.visit_types_mut(&mut |rust_type: &mut RustType| {
-                if rust_type.text.contains("::") {
-                    rust_type.text = set.canonical(&rust_type.text);
-                }
-            });
+            type_.visit_types_mut(&mut canonical);
             type_.visit_callables_mut(&mut |callable: &mut CallableModel| {
                 let canonical = callable.resolved.as_deref().map(|resolved| set.canonical_path(resolved));
                 if canonical.is_some() {
@@ -1027,6 +1146,7 @@ impl Builder {
             type_.public_path = public.get(path).cloned();
         }
         self.model.exports = self.source.modules.export_table().into_iter().map(|(path, declared)| ExportModel { path, declared }).collect();
+        self.aliases_and_handles();
         self.link_dependencies(dependencies);
 
         // The public paths the crate states for the emitter, against the ones found here.
@@ -1080,6 +1200,9 @@ impl Builder {
                 TypeKind::Class if object_model => statistics.classes += 1,
                 TypeKind::Static if object_model => statistics.static_types += 1,
                 _ => statistics.markup_types += 1,
+            }
+            if type_.unregistered {
+                statistics.unregistered += 1;
             }
             if type_.namespace.is_empty() {
                 statistics.types_without_namespace += 1;

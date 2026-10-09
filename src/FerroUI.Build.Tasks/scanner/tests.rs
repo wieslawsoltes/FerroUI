@@ -71,6 +71,7 @@ fn registered(name: &str, kind: RegisteredKind, value_type: RustType, owner: &st
         owner: Some(ty(owner)),
         host: None,
         accessor: accessor.to_string(),
+        function_of: None,
         visibility: "pub".to_string(),
         registration: RegistrationModel::Declared,
         source: None,
@@ -234,8 +235,8 @@ fn class_with_every_kind_of_member_is_read_exactly() {
             read_only: true,
             ..registered("Thickness", RegisteredKind::Direct, ty("f64"), BORDER, "thickness_property")
         },
+        // The owner of an added owner is the one `add_owner::<Border>` names.
         RegisteredModel {
-            owner: None,
             registration: RegistrationModel::AddedOwner,
             source: Some(path("Decorator::child_property", &format!("{DECORATOR}::child_property"))),
             ..registered("Child", RegisteredKind::Styled, ty(&control_ref), BORDER, "child_property")
@@ -1114,15 +1115,71 @@ fn real_crates_are_scanned_without_skipping_a_declaration() {
         linked.statistics.unresolved_paths,
         unresolved.join("\n")
     );
-    // Known, for the next stage: an accessor that `ferro_property!(for Owner; ..)` declares inside
-    // the `impl` of another type is listed under the owner in the model, which does not record
-    // the type whose function it is, so an owner added through that function
-    // (`ThemeVariant::actual_theme_variant_property`) is not followed to its declaration.
-    let known = ["actual_theme_variant_property", "requested_theme_variant_property"];
-    let unknown: Vec<&String> = nameless.iter().filter(|line| !known.iter().any(|accessor| line.contains(&format!("Application::{accessor} ")))).collect();
-    assert!(unknown.is_empty(), "ferroui_controls with the model of ferroui_base: registered properties without a name:\n{}", nameless.join("\n"));
-    assert!(linked.statistics.registered_without_name <= known.len(), "{}", nameless.join("\n"));
+    assert!(nameless.is_empty(), "ferroui_controls with the model of ferroui_base: registered properties without a name:\n{}", nameless.join("\n"));
+    assert_eq!(linked.statistics.registered_without_name, 0);
     assert_eq!(linked.statistics.registered, controls.statistics.registered);
+
+    // An accessor that `ferro_property!(for Owner; ..)` declares among the members of another
+    // type is listed under the owner and found by the path of the type whose function it is:
+    // the theme variant properties of `StyledElement`, which `Application` adds itself to
+    // through `ThemeVariant::.._property()`.
+    let styled_element = class(&base, "FerroUI.StyledElement");
+    let actual = styled_element.registered("ActualThemeVariant").unwrap_or_else(|| panic!("StyledElement.ActualThemeVariant: {:?}", styled_element.registered));
+    assert_eq!(actual.accessor, "actual_theme_variant_property");
+    assert_eq!(actual.function_of.as_deref(), Some("::ferroui_base::styling::theme_variant::ThemeVariant"));
+    let application = class(&linked, "FerroUI.Application");
+    for (name, accessor) in [("ActualThemeVariant", "actual_theme_variant_property"), ("RequestedThemeVariant", "requested_theme_variant_property")] {
+        let added = application.registered(name).unwrap_or_else(|| panic!("Application.{name}: {:?}", application.registered));
+        assert_eq!((added.registration, added.accessor.as_str(), &added.function_of), (RegistrationModel::AddedOwner, accessor, &None));
+        assert_eq!(added.owner, Some(ty("::ferroui_controls::application::Application")));
+    }
+    let both = crate::model_set::ModelSet::new(vec![base.model.clone(), linked.model.clone()]);
+    let found = both.find_accessor("::ferroui_base::styling::ThemeVariant::actual_theme_variant_property").map(|(type_, registered)| (type_.full_name(), registered.name.clone()));
+    assert_eq!(found, Some(("FerroUI.StyledElement".to_string(), Some("ActualThemeVariant".to_string()))));
+
+    // The accessors a macro of the crate writes among the members of an `impl` block are read.
+    let animation = class(&base, "FerroUI.Animation.Animation");
+    let duration = animation.registered("Duration").unwrap_or_else(|| panic!("Animation.Duration: {:?}", animation.registered));
+    assert_eq!((duration.kind, duration.accessor.as_str(), duration.read_only), (RegisteredKind::Direct, "duration_property", false));
+    let xy_focus = class(&base, "FerroUI.Input.XYFocus");
+    let down = xy_focus.registered("Down").unwrap_or_else(|| panic!("XYFocus.Down: {:?}", xy_focus.registered));
+    assert_eq!((down.kind, down.accessor.as_str()), (RegisteredKind::Attached, "down_property"));
+    assert!(down.host.as_ref().is_some_and(|host| host.text.ends_with("::InputElement")), "{:?}", down.host);
+
+    // A property is stated with the owner its registration names, whichever type has the accessor.
+    let adorner_layer = class(&linked, "FerroUI.Controls.Primitives.AdornerLayer");
+    let saved = adorner_layer.registered("SavedAdornerLayer").unwrap_or_else(|| panic!("AdornerLayer.SavedAdornerLayer: {:?}", adorner_layer.registered));
+    assert_eq!(saved.owner.as_ref().map(|owner| both.canonical(&owner.text)), Some("::ferroui_base::visual::Visual".to_string()));
+
+    // The values of the members that are constants of the type, and of the discriminants
+    // that are constant expressions.
+    let value_of = |scan: &Scan, type_name: &str, member: &str| {
+        let type_ = class(scan, type_name);
+        type_.enum_members.iter().find(|candidate| candidate.name == member).unwrap_or_else(|| panic!("{type_name}.{member}: {:?}", type_.enum_members)).value
+    };
+    assert_eq!(value_of(&base, "FerroUI.Input.Key", "Return"), Some(6));
+    assert_eq!(value_of(&base, "FerroUI.Input.Key", "Enter"), Some(6));
+    assert_eq!(value_of(&base, "FerroUI.Data.BindingPriority", "Unset"), Some(i64::from(i32::MAX)));
+    assert_eq!(value_of(&base, "FerroUI.Input.KeyModifiers", "None"), Some(0));
+    assert_eq!(value_of(&base, "FerroUI.Input.RawInputModifiers", "KeyboardMask"), Some(15));
+    assert_eq!(base.statistics.enum_members_without_value, 0, "{}", base.summary());
+    assert_eq!(controls.statistics.enum_members_without_value, 0, "{}", controls.summary());
+
+    // The classes the lists of registered classes leave out are marked, and only those.
+    for scan in [&base, &linked] {
+        assert!(scan.model.types.iter().all(|type_| type_.object_model || !type_.unregistered), "{}", scan.summary());
+        assert!(scan.statistics.unregistered * 10 < scan.statistics.classes, "{}", scan.summary());
+    }
+    assert!(!class(&linked, "FerroUI.Controls.Border").unregistered && !class(&base, "FerroUI.Visual").unregistered);
+
+    // The aliases and the handles the crates register.
+    let pages = linked.model.aliases.iter().find(|alias| alias.path == "::ferroui_controls::page::multi_page::PageList").expect("the alias PageList");
+    assert!(pages.target.text.contains("FerroList<") && pages.target.text.ends_with("::Page>>"), "{:?}", pages.target);
+    let handles: Vec<(&str, &str)> = linked.model.handles.iter().map(|handle| (handle.handle.text.as_str(), handle.type_.text.as_str())).collect();
+    assert!(
+        handles.iter().any(|(handle, type_)| *handle == "Option<::ferroui_controls::assigned_binding::AssignedBinding>" && type_.starts_with("dyn ::ferroui_base::") && type_.ends_with("::BindingBase")),
+        "{handles:?}"
+    );
     assert_eq!(linked.model.types.len(), controls.model.types.len());
 
     // The type texts are canonical: a type of the base crate is named by its declaring module.
@@ -1134,4 +1191,173 @@ fn real_crates_are_scanned_without_skipping_a_declaration() {
     // The model with the dependencies is its file, too.
     let read = crate::model::AssemblyModel::parse(&linked.model.to_json()).expect("the linked model is read back");
     assert!(read == linked.model, "the linked model read back from its text differs from the scanned one");
+}
+
+fn registration_directory() -> PathBuf {
+    Path::new(env!("CARGO_MANIFEST_DIR")).join("tests").join("fixtures").join("registration")
+}
+
+/// The scan of the third fixture crate: what a crate registers next to its declarations.
+fn registration() -> Scan {
+    scan_crate(&ScanOptions::new("registration", registration_directory().join("lib.rs")))
+}
+
+const PANEL: &str = "::registration::panel::Panel";
+const PANEL_LIST: &str = "::ferroui_base::collections::FerroList<::ferroui_base::Ref<::registration::panel::Panel>>";
+
+/// The accessors of registered properties that are not written in the block of their
+/// owner: the ones a macro of the crate writes among the members of the type, and the one
+/// that is a function of another type. A property is stated with the owner its
+/// registration names.
+#[test]
+fn accessors_outside_the_block_of_their_owner_are_read() {
+    let scan = registration();
+    let panel = the_type(&scan, "Panel");
+    let accessors: Vec<(&str, Option<&str>, RegisteredKind, Option<&str>)> = panel
+        .registered
+        .iter()
+        .map(|registered| (registered.accessor.as_str(), registered.name.as_deref(), registered.kind, registered.function_of.as_deref()))
+        .collect();
+    assert_eq!(
+        accessors,
+        [
+            ("items_property", Some("Items"), RegisteredKind::Styled, None),
+            ("mark_property", Some("Mark"), RegisteredKind::Styled, Some("::registration::panel::Marker")),
+            ("spacing_property", Some("Spacing"), RegisteredKind::Direct, None),
+            ("gap_property", Some("Gap"), RegisteredKind::Direct, None),
+        ],
+        "\n{}",
+        listing(&scan.diagnostics)
+    );
+    // The accessor a macro writes is read as the one written out: its type, the name the
+    // invocation states, the owner and the missing setter of the registration.
+    let spacing = panel.registered("Spacing").expect("Panel.Spacing");
+    assert_eq!(
+        spacing,
+        &RegisteredModel { read_only: true, ..registered("Spacing", RegisteredKind::Direct, ty("f64"), PANEL, "spacing_property") },
+        "\n{}",
+        listing(&scan.diagnostics)
+    );
+    assert_eq!(scan.statistics.expanded.get("cell_property"), Some(&2));
+    assert_eq!(panel.registered("Items").map(|items| &items.value_type), Some(&ty("::registration::panel::Panels")));
+
+    // The owner added through the function of the other type has the name of the property,
+    // and the declaration has the owner.
+    let mark = panel.registered("Mark").expect("Panel.Mark");
+    assert_eq!(mark.added_owners, ["::registration::panel::Slot"]);
+    let slot = the_type(&scan, "Slot");
+    let added = &slot.registered[0];
+    assert_eq!((added.name.as_deref(), added.registration, &added.function_of), (Some("Mark"), RegistrationModel::AddedOwner, &None));
+    assert_eq!(added.source, Some(path("Marker::mark_property", "::registration::panel::Marker::mark_property")));
+    assert_eq!(added.owner, Some(ty("::registration::panel::Slot")));
+    // The property the block of `Slot` registers with `Panel` as its owner.
+    let saved = &slot.registered[1];
+    assert_eq!((saved.name.as_deref(), saved.visibility.as_str(), &saved.owner, &saved.host), (Some("Saved"), "", &Some(ty(PANEL)), &Some(ty(PANEL))));
+    assert_eq!(scan.statistics.registered_without_name, 0);
+
+    let set = ModelSet::new(vec![scan.model.clone()]);
+    let found = |path: &str| set.find_accessor(path).map(|(type_, registered)| (type_.name.clone(), registered.name.clone()));
+    assert_eq!(found("::registration::Marker::mark_property"), Some(("Panel".to_string(), Some("Mark".to_string()))));
+    assert_eq!(found("::registration::Panel::mark_property"), None);
+    assert_eq!(found("::registration::Slot::mark_property"), Some(("Slot".to_string(), Some("Mark".to_string()))));
+}
+
+/// What the registration of the crate states: the classes its list leaves out are marked,
+/// the handles and the casts of its registration function are in the model (with the names
+/// the function imports for itself resolved), and so are the aliases whose type is one
+/// the scanner resolves.
+#[test]
+fn registration_of_a_crate_is_read() {
+    let scan = registration();
+    let unregistered: Vec<&str> = scan.model.types.iter().filter(|type_| type_.unregistered).map(|type_| type_.name.as_str()).collect();
+    assert_eq!(unregistered, ["Hidden"], "\n{}", listing(&scan.diagnostics));
+    assert_eq!(scan.statistics.unregistered, 1);
+    // A crate without a list of registered classes has no marked type.
+    assert!(fixture().model.types.iter().all(|type_| !type_.unregistered));
+
+    let aliases: Vec<(&str, &RustType)> = scan.model.aliases.iter().map(|alias| (alias.path.as_str(), &alias.target)).collect();
+    assert_eq!(
+        aliases,
+        [("::registration::panel::PanelList", &ty(PANEL_LIST)), ("::registration::panel::Panels", &ty("Option<::registration::panel::PanelList>"))],
+        "\n{}",
+        listing(&scan.diagnostics)
+    );
+    let handles: Vec<(&RustType, &RustType)> = scan.model.handles.iter().map(|handle| (&handle.handle, &handle.type_)).collect();
+    assert_eq!(
+        handles,
+        [
+            (&ty("::registration::panel::Wrapper"), &ty("dyn ::registration::panel::IPanel")),
+            (&ty("Option<::registration::panel::Wrapper>"), &ty("::registration::panel::PanelCollection")),
+        ]
+    );
+    let casts: Vec<(&RustType, &RustType)> = scan.model.casts.iter().map(|cast| (&cast.from, &cast.to)).collect();
+    assert_eq!(casts, [(&ty("::registration::panel::PanelCollection"), &ty("::registration::panel::PanelList"))]);
+
+    // A trailing comma of a list of type arguments is not part of the text of a type.
+    let collection = the_type(&scan, "PanelCollection");
+    let pairs = collection.properties.iter().find(|property| property.name == "Pairs").expect("PanelCollection.Pairs");
+    assert_eq!(pairs.value_type, ty(&format!("::std::collections::HashMap<String, ::ferroui_base::Ref<{PANEL}>>")));
+
+    let directory = registration_directory();
+    let reported: Vec<(String, usize, Severity, &str)> =
+        scan.diagnostics.iter().map(|diagnostic| (relative(&diagnostic.file, &directory), diagnostic.line, diagnostic.severity, diagnostic.code)).collect();
+    let expected: Vec<(String, usize, Severity, &str)> = [
+        ("register_types.rs", 18, Severity::Warning, codes::OWNER),
+        ("register_types.rs", 18, Severity::Note, codes::UNREGISTERED),
+        ("register_types.rs", 30, Severity::Warning, codes::FORM),
+    ]
+    .into_iter()
+    .map(|(file, line, severity, code)| (file.to_string(), line, severity, code))
+    .collect();
+    assert_eq!(reported, expected, "\n{}", listing(&scan.diagnostics));
+    let message = |code: &str| scan.diagnostics.iter().find(|diagnostic| diagnostic.code == code).map(|diagnostic| diagnostic.message.as_str()).unwrap_or_default();
+    assert!(message(codes::OWNER).starts_with("the list of registered classes names `crate::Missing`"), "{}", message(codes::OWNER));
+    assert!(message(codes::UNREGISTERED).starts_with("`::registration::panel::Hidden` is declared and is not in the list of registered classes"), "{}", message(codes::UNREGISTERED));
+    assert!(message(codes::FORM).starts_with("`MarkupType::register_handle` is called with a type that is not"), "{}", message(codes::FORM));
+
+    // The model with what the crate registers is its file.
+    let read = AssemblyModel::parse(&scan.model.to_json()).expect("the model is read back");
+    assert!(read == scan.model, "the model read back from its text differs from the scanned one");
+}
+
+/// The values of the members of enumerations and of sets of flags that are constant
+/// expressions: over literals, the other members, and the associated constants of the
+/// type. A member that is not such an expression (and a variant after one) has no value.
+#[test]
+fn members_that_are_constant_expressions_have_their_values() {
+    let scan = registration();
+    let values = |name: &str| -> Vec<(String, Option<i64>)> { the_type(&scan, name).enum_members.iter().map(|member| (member.name.clone(), member.value)).collect() };
+    let expected = |members: &[(&str, Option<i64>)]| -> Vec<(String, Option<i64>)> { members.iter().map(|(name, value)| (name.to_string(), *value)).collect() };
+    assert_eq!(
+        values("Modes"),
+        expected(&[
+            ("Disabled", Some(0)),
+            ("Keyboard", Some(1)),
+            ("Remote", Some(4)),
+            ("Enabled", Some(7)),
+            ("Every", Some(7)),
+            ("Pointing", Some(6)),
+            ("Computed", None),
+        ]),
+        "\n{}",
+        listing(&scan.diagnostics)
+    );
+    assert_eq!(
+        values("Key"),
+        expected(&[
+            ("None", Some(0)),
+            ("Return", Some(6)),
+            ("Enter", Some(6)),
+            ("Pause", Some(7)),
+            ("Shifted", Some(16)),
+            ("Both", Some(22)),
+            ("Last", Some(2147483647)),
+            ("Odd", None),
+            ("After", None),
+            ("Other", None),
+        ]),
+        "\n{}",
+        listing(&scan.diagnostics)
+    );
+    assert_eq!((scan.statistics.enum_members, scan.statistics.enum_members_without_value), (17, 4));
 }

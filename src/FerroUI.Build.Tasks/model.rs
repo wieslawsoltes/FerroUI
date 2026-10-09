@@ -489,13 +489,22 @@ pub struct RegisteredModel {
     pub kind: RegisteredKind,
     /// The value type: the last type argument of the type of the accessor.
     pub value_type: RustType,
-    /// The owner the registration names (`register::<Owner, _>`), for a declared property.
+    /// The owner the registration names: `register::<Owner, _>` of a declared property,
+    /// `add_owner::<Owner>` of an added owner. The registry lists the property under this
+    /// type, whichever type has the accessor.
     pub owner: Option<RustType>,
     /// The host type of an attached property (`register_attached::<Owner, Host, _>`).
     pub host: Option<RustType>,
     /// The name of the accessor function (`background_property`); its path is the path of
-    /// the type and the name.
+    /// the type and the name, unless the accessor is a function of another type
+    /// ([`function_of`](Self::function_of)).
     pub accessor: String,
+    /// The Rust path of the type whose function the accessor is, when it is not the type
+    /// the property is listed under: `ferro_property!(for Owner; ..)` among the members of
+    /// `impl Other` declares `Other::name_property()`, a property of `Owner`
+    /// (`::ferroui_base::styling::theme_variant::ThemeVariant` for the theme variant
+    /// properties of `StyledElement`).
+    pub function_of: Option<String>,
     /// The visibility of the accessor, as written (`pub`, `pub(crate)`; empty when private).
     pub visibility: String,
     pub registration: RegistrationModel,
@@ -525,6 +534,7 @@ impl RegisteredModel {
                 .optional("owner", self.owner.as_ref().map(RustType::to_json))
                 .optional("host", self.host.as_ref().map(RustType::to_json))
                 .text("accessor", &self.accessor)
+                .optional_text("function_of", &self.function_of)
                 .text_or_empty("visibility", &self.visibility)
                 .text("registration", self.registration.name())
                 .optional("source", self.source.as_ref().map(CallableModel::to_json))
@@ -544,6 +554,7 @@ impl RegisteredModel {
             owner: fields.optional("owner", RustType::from_json)?,
             host: fields.optional("host", RustType::from_json)?,
             accessor: fields.text("accessor")?,
+            function_of: fields.optional_text("function_of")?,
             visibility: fields.text_or_empty("visibility")?,
             registration: RegistrationModel::of(&fields.text("registration")?)?,
             source: fields.optional("source", CallableModel::from_json)?,
@@ -614,6 +625,12 @@ pub struct TypeModel {
     /// owner type of attached properties (`ferro_static_type!`), with a runtime type of
     /// its own. Its handles (`Ref<X>`, `Option<Ref<X>>` for a class) are implied.
     pub object_model: bool,
+    /// The crate has a list of the classes it registers (`const TYPES: &[&TypeInfo]`, which
+    /// its `register_types()` hands to `TypeInfo::register_all`) and the type is not in
+    /// it: the type is not known by its name or by its handle until an instance of it is
+    /// created. Never set for a crate without such a list, and never for a type that is
+    /// not of the object model.
+    pub unregistered: bool,
     /// The Rust type: for a type the crate declares, the absolute path of the declaring
     /// module and the name; for a type the metadata is declared for, the type as the
     /// declaration writes it, normalised.
@@ -670,6 +687,7 @@ impl TypeModel {
             name: name.to_string(),
             kind,
             object_model: false,
+            unregistered: false,
             rust_path,
             public_path: None,
             module: module.to_string(),
@@ -826,6 +844,7 @@ impl TypeModel {
             .text("name", &self.name)
             .text("kind", self.kind.name())
             .flag("object_model", self.object_model)
+            .flag("unregistered", self.unregistered)
             .always("rust_path", self.rust_path.to_json())
             .optional_text("public_path", &self.public_path)
             .text_or_empty("module", &self.module)
@@ -871,6 +890,7 @@ impl TypeModel {
             name: fields.text("name")?,
             kind: TypeKind::of(&fields.text("kind")?)?,
             object_model: fields.flag("object_model")?,
+            unregistered: fields.flag("unregistered")?,
             rust_path: fields.optional("rust_path", RustType::from_json)?.ok_or_else(|| "\"rust_path\" is missing in a type".to_string())?,
             public_path: fields.optional_text("public_path")?,
             module: fields.text_or_empty("module")?,
@@ -937,6 +957,38 @@ pub struct ExportModel {
     pub declared: String,
 }
 
+/// A type alias without parameters of a crate (`pub type PageList = FerroList<Ref<Page>>;`):
+/// the two texts are one Rust type.
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct AliasModel {
+    /// The path of the declaring module and the name (`::ferroui_controls::page::multi_page::PageList`).
+    pub path: String,
+    /// The type the alias stands for.
+    pub target: RustType,
+}
+
+/// One more Rust type that holds a value of a type with markup metadata, registered by a
+/// crate next to the `handles:` of the declaration
+/// (`MarkupType::register_handle::<Handle>(<Type as MarkupTyped>::MARKUP)`): the wrapper a
+/// property of another crate holds the value in.
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct HandleModel {
+    pub handle: RustType,
+    /// The Rust type of the type with the metadata, as its declaration has it
+    /// ([`TypeModel::rust_path`]).
+    pub type_: RustType,
+}
+
+/// A cast a crate registers between two Rust types (`ValueTypes::register_cast::<From, To>(..)`):
+/// a value of the one is a value of the other. A collection that declares an
+/// instantiation of the notifying list as its `base:` is that list only when the cast from
+/// the collection to the list is registered.
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct CastModel {
+    pub from: RustType,
+    pub to: RustType,
+}
+
 fn pair_to_json(first: &str, second: &str) -> Json {
     Json::Array(vec![Json::string(first), Json::string(second)])
 }
@@ -969,6 +1021,13 @@ pub struct AssemblyModel {
     /// import of a module of the crate brings into another crate, and what makes a path
     /// into the crate canonical, is read from it.
     pub exports: Vec<ExportModel>,
+    /// The type aliases of the crate whose type the scanner resolved.
+    pub aliases: Vec<AliasModel>,
+    /// The handles the crate registers for types with markup metadata, of this crate or
+    /// of the crates it is built on.
+    pub handles: Vec<HandleModel>,
+    /// The casts the crate registers between Rust types, in the order of the scan.
+    pub casts: Vec<CastModel>,
     /// The compiled documents, in the order of the compilation.
     pub documents: Vec<DocumentModel>,
     /// The `.xamlmeta` files of the crates this crate is built on, relative to the
@@ -988,6 +1047,9 @@ impl AssemblyModel {
             namespaces: Vec::new(),
             types: Vec::new(),
             exports: Vec::new(),
+            aliases: Vec::new(),
+            handles: Vec::new(),
+            casts: Vec::new(),
             documents: Vec::new(),
             dependencies: Vec::new(),
         }
@@ -1036,6 +1098,22 @@ impl AssemblyModel {
         self.types.iter().find(|type_| type_.rust_path.text == rust_path)
     }
 
+    /// Calls `visit` with every type text of the model that is not of one of its types: the
+    /// types of its aliases, its registered handles and its registered casts.
+    pub fn visit_types_mut(&mut self, visit: &mut dyn FnMut(&mut RustType)) {
+        for alias in &mut self.aliases {
+            visit(&mut alias.target);
+        }
+        for handle in &mut self.handles {
+            visit(&mut handle.handle);
+            visit(&mut handle.type_);
+        }
+        for cast in &mut self.casts {
+            visit(&mut cast.from);
+            visit(&mut cast.to);
+        }
+    }
+
     /// The model as the text of a `.xamlmeta` file of format 2.
     pub fn to_json(&self) -> String {
         let document = |document: &DocumentModel| {
@@ -1060,7 +1138,10 @@ impl AssemblyModel {
             .list("metadata", &self.metadata, |(name, value)| pair_to_json(name, value))
             .list("namespaces", &self.namespaces, |(module, namespace)| pair_to_json(module, namespace))
             .list("types", &self.types, TypeModel::to_json)
-            .list("exports", &self.exports, |export| pair_to_json(&export.path, &export.declared));
+            .list("exports", &self.exports, |export| pair_to_json(&export.path, &export.declared))
+            .list("aliases", &self.aliases, |alias| Json::Array(vec![Json::string(&alias.path), alias.target.to_json()]))
+            .list("handles", &self.handles, |handle| Json::Array(vec![handle.handle.to_json(), handle.type_.to_json()]))
+            .list("casts", &self.casts, |cast| Json::Array(vec![cast.from.to_json(), cast.to.to_json()]));
         Json::object(members).to_text()
     }
 
@@ -1096,6 +1177,18 @@ impl AssemblyModel {
             namespaces: fields.list("namespaces", |pair| pair_from_json(pair, "an entry of the namespace table"))?,
             types: fields.list("types", TypeModel::from_json)?,
             exports: fields.list("exports", |pair| pair_from_json(pair, "an entry of the export table").map(|(path, declared)| ExportModel { path, declared }))?,
+            aliases: fields.list("aliases", |pair| match pair {
+                Json::Array(pair) if pair.len() == 2 => Ok(AliasModel { path: text_of(&pair[0], "the path of an alias")?, target: RustType::from_json(&pair[1])? }),
+                _ => Err("a type alias is not a pair".to_string()),
+            })?,
+            handles: fields.list("handles", |pair| match pair {
+                Json::Array(pair) if pair.len() == 2 => Ok(HandleModel { handle: RustType::from_json(&pair[0])?, type_: RustType::from_json(&pair[1])? }),
+                _ => Err("a registered handle is not a pair".to_string()),
+            })?,
+            casts: fields.list("casts", |pair| match pair {
+                Json::Array(pair) if pair.len() == 2 => Ok(CastModel { from: RustType::from_json(&pair[0])?, to: RustType::from_json(&pair[1])? }),
+                _ => Err("a registered cast is not a pair".to_string()),
+            })?,
             documents,
             dependencies: fields.list("dependencies", |path| text_of(path, "a dependency"))?,
         })
@@ -1127,6 +1220,7 @@ mod tests {
         type_.namespace = "Fixture.Controls".to_string();
         type_.explicit_namespace = Some("Fixture.Controls".to_string());
         type_.object_model = true;
+        type_.unregistered = true;
         type_.public_path = Some("::fixture::Panel".to_string());
         type_.cfg = vec!["feature = \"panels\"".to_string()];
         type_.handles = vec![RustType::resolved("::fixture::panel::Panel"), unresolved.clone()];
@@ -1188,6 +1282,7 @@ mod tests {
                 owner: Some(RustType::resolved("::fixture::panel::Panel")),
                 host: Some(RustType::resolved("::fixture::control::Control")),
                 accessor: "row_property".to_string(),
+                function_of: Some("::fixture::grid::Grid".to_string()),
                 visibility: "pub".to_string(),
                 registration: RegistrationModel::Declared,
                 source: None,
@@ -1203,6 +1298,7 @@ mod tests {
                 owner: None,
                 host: None,
                 accessor: "text_property".to_string(),
+                function_of: None,
                 visibility: String::new(),
                 registration: RegistrationModel::AddedOwner,
                 source: Some(callable("TextBlock::text_property", None)),
@@ -1239,6 +1335,12 @@ mod tests {
         model.namespaces = vec![("fixture".to_string(), "Fixture".to_string()), ("fixture::panel".to_string(), "Fixture.Controls".to_string())];
         model.types = vec![type_, TypeModel::new("Dock", TypeKind::Enum, RustType::resolved("::fixture::Dock"), "fixture")];
         model.exports = vec![ExportModel { path: "::fixture::Panel".to_string(), declared: "::fixture::panel::Panel".to_string() }];
+        model.aliases = vec![AliasModel { path: "::fixture::panel::Panels".to_string(), target: RustType::resolved("Vec<::fixture::panel::Panel>") }];
+        model.handles = vec![HandleModel {
+            handle: RustType { text: "Option<Wrapper>".to_string(), unresolved: vec!["Wrapper".to_string()] },
+            type_: RustType::resolved("dyn ::fixture::IPanel"),
+        }];
+        model.casts = vec![CastModel { from: RustType::resolved("::fixture::panel::Panels"), to: RustType::resolved("Vec<::fixture::panel::Panel>") }];
         model.documents = vec![DocumentModel {
             uri: "ferres://Fixture/Main.xaml".to_string(),
             root_type: "Fixture.Controls.Panel".to_string(),
