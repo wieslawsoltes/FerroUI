@@ -12,14 +12,14 @@ Generated from upstream commit `17350180c33b063f0e98abbfd19aa3cae63f5d56`. Back 
 | Phase / priority | 3 - browser / P2 |
 | Files | 50/50 (100.0%), 2 not applicable |
 | Types | 60/62 (2 waived) (100.0%) |
-| Members | 333/428 (93 waived) (99.4%) |
+| Members | 333/428 (95 waived) (100.0%) |
 | Contracts (interfaces) | 0/0 |
 | Property registrations | 0/0 |
 | Routed events | 0/0 |
 
 ## Files
 
-### `(project root)` - files 28/28, types 34/35 (1 waived), members 161/177 (14 waived)
+### `(project root)` - files 28/28, types 34/35 (1 waived), members 161/177 (16 waived)
 
 | Upstream file | Rust file | Status | Types | Members | Notes |
 |---|---|---|---|---|---|
@@ -44,29 +44,13 @@ Generated from upstream commit `17350180c33b063f0e98abbfd19aa3cae63f5d56`. Back 
 | `BrowserSingleViewLifetime.cs` | `browser_single_view_lifetime.rs` | present | 1/1 | 3/3 |  |
 | `BrowserSystemNavigationManager.cs` | `browser_system_navigation_manager.rs` | present | 1/1 | 2/2 |  |
 | `BrowserTextInputMethod.cs` | `browser_text_input_method.rs` | present | 1/1 | 10/10 |  |
-| `BrowserTopLevelImpl.cs` | `browser_top_level_impl.rs` | partial | 1/1 | 28/30 (1 waived) |  |
+| `BrowserTopLevelImpl.cs` | `browser_top_level_impl.rs` | present | 1/1 | 28/30 (2 waived) |  |
 | `ClipboardImpl.cs` | `clipboard_impl.rs` | present | 1/1 | 3/3 |  |
 | `Cursor.cs` | `cursor.rs` | present | 2/2 | 9/9 |  |
 | `JSObjectControlHandle.cs` | `js_object_control_handle.rs` | present | 2/2 | 5/5 | renamed: snake case of the acronym |
 | `KeyInterop.cs` | `key_interop.rs` | present | 1/1 | 3/3 |  |
 | `WinStubs.cs` | `win_stubs.rs` | present | 1/1 | 3/3 |  |
-| `WindowingPlatform.cs` | `windowing_platform.rs` | partial | 1/1 | 8/10 (1 waived) |  |
-
-<details><summary><code>BrowserTopLevelImpl.cs</code> - 1 missing</summary>
-
-- `BrowserTopLevelImpl` (class): 1 missing
-  - `Size? FrameSize { get; }`
-  - waived (no static constructor is needed: the static state is thread-local and initialised in place): `.cctor`
-
-</details>
-
-<details><summary><code>WindowingPlatform.cs</code> - 1 missing</summary>
-
-- `BrowserWindowingPlatform` (class): 1 missing
-  - `static ManualRawEventGrouperDispatchQueue? EventGrouperDispatchQueue` *(internal)*
-  - waived (a flag detected at start-up from the runtime: here it is known at compile time (`target_feature = "atomics"`, the module built with `scripts/build-browser.sh --threads`), and whether such a module renders on its render thread is `BrowserPlatformOptions::render_thread`): `IsThreadingEnabled`
-
-</details>
+| `WindowingPlatform.cs` | `windowing_platform.rs` | present | 1/1 | 8/10 (2 waived) |  |
 
 ### `Interop` - files 10/10, types 10/11 (1 waived), members 64/123 (59 waived)
 

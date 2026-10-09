@@ -12,7 +12,7 @@ Generated from upstream commit `17350180c33b063f0e98abbfd19aa3cae63f5d56`. Back 
 | Phase / priority | 1 - test infrastructure / P1 |
 | Files | 8/8 (100.0%), 3 not applicable |
 | Types | 18/20 (2 waived) (100.0%) |
-| Members | 223/235 (11 waived) (99.6%) |
+| Members | 223/235 (12 waived) (100.0%) |
 | Contracts (interfaces) | 2/3 |
 | Property registrations | 0/0 |
 | Routed events | 0/0 |
@@ -29,13 +29,13 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 
 ## Files
 
-### `(project root)` - files 8/8, types 18/20 (2 waived), members 223/235 (11 waived)
+### `(project root)` - files 8/8, types 18/20 (2 waived), members 223/235 (12 waived)
 
 | Upstream file | Rust file | Status | Types | Members | Notes |
 |---|---|---|---|---|---|
 | `AvaloniaHeadlessPlatform.cs` | `ferro_headless_platform.rs` | present | 3/3 | 10/10 |  |
 | `AvaloniaTestApplicationAttribute.cs` | - | n/a | - | - | not-applicable: assembly attributes that tell the xUnit and NUnit integrations which application to build and how to isolate the tests of an assembly: there are no assembly attributes and no test framework integration; a test sets up its application with `AppBuilder` and `use_headless` (the `PerTest` isolation), as `tests.rs` of the crate does |
-| `HeadlessPlatformRenderInterface.cs` | `headless_platform_render_interface.rs` | partial | 3/4 (1 waived) | 69/74 (4 waived) |  |
+| `HeadlessPlatformRenderInterface.cs` | `headless_platform_render_interface.rs` | present | 3/4 (1 waived) | 69/74 (5 waived) |  |
 | `HeadlessPlatformStubs.cs` | `headless_platform_stubs.rs` | present | 7/8 (1 waived) | 35/36 (1 waived) |  |
 | `HeadlessRenderTimer.cs` | `headless_render_timer.rs` | present | 1/1 | 4/4 |  |
 | `HeadlessUnitTestIsolationAttribute.cs` | - | n/a | - | - | not-applicable: assembly attributes that tell the xUnit and NUnit integrations which application to build and how to isolate the tests of an assembly: there are no assembly attributes and no test framework integration; a test sets up its application with `AppBuilder` and `use_headless` (the `PerTest` isolation), as `tests.rs` of the crate does |
@@ -44,16 +44,6 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 | `HeadlessWindowImpl.cs` | `headless_window_impl.rs` | present | 1/1 | 78/84 (6 waived) |  |
 | `IHeadlessTouchPointer.cs` | `i_headless_touch_pointer.rs` | present | 1/1 | 0/0 |  |
 | `IHeadlessWindow.cs` | `i_headless_window.rs` | present | 1/1 | 11/11 |  |
-
-<details><summary><code>HeadlessPlatformRenderInterface.cs</code> - 1 missing</summary>
-
-- `HeadlessPlatformRenderInterface` (class): complete
-  - waived (an empty dictionary: the default of `IPlatformRenderInterfaceContext::public_features`, which the headless interface does not override): `PublicFeatures`
-- `HeadlessPlatformRenderInterface.HeadlessGlyphRunStub` (class): 1 missing
-  - `GlyphTypeface GlyphTypeface { get; }`
-- `HeadlessPlatformRenderInterface.IHeadlessGeometryWithEdges` (interface): waived - interface with default members, tested with `is`: the free functions `edge_points_of` (the test and `Points`), `projection_on_axis` and `get_axes` of `headless_platform_render_interface.rs`
-
-</details>
 
 ## Rust-only files
 

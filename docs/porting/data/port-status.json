@@ -6842,18 +6842,18 @@
    "scope": "in",
    "detail": "full",
    "files": [
-    47,
-    47,
+    48,
+    48,
     0
    ],
    "types": [
-    64,
-    75,
+    65,
+    76,
     11
    ],
    "members": [
-    452,
-    528,
+    455,
+    531,
     76
    ],
    "interfaces": [
@@ -6868,11 +6868,11 @@
     0,
     0
    ],
-   "notApplicableFiles": 2,
+   "notApplicableFiles": 1,
    "matchKinds": {
     "alias fn": 6,
     "field": 18,
-    "fn": 403,
+    "fn": 406,
     "free fn": 6,
     "overload fn": 10,
     "trait": 1,
@@ -6951,6 +6951,9 @@
     ],
     "Extensions.cs": [
      "extensions.rs"
+    ],
+    "GpuHandleWrapFeature.cs": [
+     "gpu_handle_wrap_feature.rs"
     ],
     "Helpers.cs": [
      "helpers.rs"
@@ -7533,7 +7536,7 @@
    "members": [
     333,
     428,
-    93
+    95
    ],
    "interfaces": [
     0,
@@ -7790,7 +7793,7 @@
    "members": [
     223,
     235,
-    11
+    12
    ],
    "interfaces": [
     2,

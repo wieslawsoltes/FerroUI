@@ -44,15 +44,15 @@ Percentages are `present / (total - waived)`. Member matching is by name with re
 
 | | Ported | Total | Waived | % |
 |---|---:|---:|---:|---:|
-| C# files | 2249 | 2262 | 0 | 99.4% |
-| Types | 2905 | 3132 | 204 | 99.2% |
-| Members | 20919 | 23122 | 2003 | 99.1% |
+| C# files | 2250 | 2263 | 0 | 99.4% |
+| Types | 2906 | 3133 | 204 | 99.2% |
+| Members | 20922 | 23125 | 2006 | 99.1% |
 | Contracts (interfaces) | 434 | 458 | - | 94.8% |
 | Property registrations | 1218 | 1233 | - | 98.8% |
 | Routed events | 108 | 108 | - | 100.0% |
 | Other files (native sources, XAML, TypeScript, fonts) | 243 | 268 | - | 90.7% |
 
-152 upstream files are not applicable and not counted. Out of the current scope (platform backends, below): 524 files, 1197 types, 13006 members.
+151 upstream files are not applicable and not counted. Out of the current scope (platform backends, below): 524 files, 1197 types, 13006 members.
 
 ## Projects
 
@@ -72,14 +72,14 @@ The % column is member coverage (file coverage for plain file lists).
 | [Avalonia.Fonts.Inter](tracking/Avalonia.Fonts.Inter.md) | `src/Avalonia.Fonts.Inter` | `src/FerroUI.Fonts.Inter` | `ferroui-fonts-inter` | 2/2 | 2/2 | 2/2 | 100.0% | 3 - browser | P2 |
 | [Avalonia.Metal](tracking/Avalonia.Metal.md) | `src/Avalonia.Metal` | `src/Skia/FerroUI.Skia/metal` | `ferroui-skia (module metal)` | 2/2 | 7/7 | 21/21 | 100.0% | 1 - desktop (macOS) | P1 |
 | [Avalonia.MicroCom](tracking/Avalonia.MicroCom.md) | `src/Avalonia.MicroCom` | `src/FerroUI.MicroCom` | `ferroui-microcom` | 1/1 | 1/1 | 0/6 (6 waived) | - | 0 - core | P0 |
-| [Avalonia.Native](tracking/Avalonia.Native.md) | `src/Avalonia.Native` | `src/FerroUI.Native` | `ferroui-native` | 47/47 | 64/75 (11 waived) | 452/528 (76 waived) | 100.0% | 1 - desktop (macOS) | P0 |
+| [Avalonia.Native](tracking/Avalonia.Native.md) | `src/Avalonia.Native` | `src/FerroUI.Native` | `ferroui-native` | 48/48 | 65/76 (11 waived) | 455/531 (76 waived) | 100.0% | 1 - desktop (macOS) | P0 |
 | [Avalonia.OpenGL](tracking/Avalonia.OpenGL.md) | `src/Avalonia.OpenGL` | `src/FerroUI.OpenGL` | `ferroui-opengl` | 39/39 | 61/63 (2 waived) | 601/639 (38 waived) | 100.0% | 2 - rendering backends | P2 |
 | [Avalonia.Remote.Protocol](tracking/Avalonia.Remote.Protocol.md) | `src/Avalonia.Remote.Protocol` | `src/FerroUI.Remote.Protocol` | `ferroui-remote-protocol` | 14/14 | 54/55 (1 waived) | 196/202 (3 waived) | 98.5% | 4 - tooling | P3 |
 | [Avalonia.Themes.Fluent](tracking/Avalonia.Themes.Fluent.md) | `src/Avalonia.Themes.Fluent` | `src/FerroUI.Themes.Fluent` | `ferroui-themes-fluent` | 5/5 | 6/6 | 68/73 (5 waived) | 100.0% | 2 - xaml + themes | P1 |
 | [Avalonia.Themes.Simple](tracking/Avalonia.Themes.Simple.md) | `src/Avalonia.Themes.Simple` | `src/FerroUI.Themes.Simple` | `ferroui-themes-simple` | 1/1 | 1/1 | 1/1 | 100.0% | 2 - xaml + themes | P2 |
-| [Avalonia.Browser](tracking/Avalonia.Browser.md) | `src/Browser/Avalonia.Browser` | `src/Browser/FerroUI.Browser` | `ferroui-browser` | 50/50 | 60/62 (2 waived) | 333/428 (93 waived) | 99.4% | 3 - browser | P2 |
+| [Avalonia.Browser](tracking/Avalonia.Browser.md) | `src/Browser/Avalonia.Browser` | `src/Browser/FerroUI.Browser` | `ferroui-browser` | 50/50 | 60/62 (2 waived) | 333/428 (95 waived) | 100.0% | 3 - browser | P2 |
 | [Avalonia.HarfBuzz](tracking/Avalonia.HarfBuzz.md) | `src/HarfBuzz/Avalonia.HarfBuzz` | `src/HarfBuzz/FerroUI.HarfBuzz` | `ferroui-harfbuzz` | 3/3 | 3/3 | 5/8 (3 waived) | 100.0% | 1 - rendering | P0 |
-| [Avalonia.Headless](tracking/Avalonia.Headless.md) | `src/Headless/Avalonia.Headless` | `src/Headless/FerroUI.Headless` | `ferroui-headless` | 8/8 | 18/20 (2 waived) | 223/235 (11 waived) | 99.6% | 1 - test infrastructure | P1 |
+| [Avalonia.Headless](tracking/Avalonia.Headless.md) | `src/Headless/Avalonia.Headless` | `src/Headless/FerroUI.Headless` | `ferroui-headless` | 8/8 | 18/20 (2 waived) | 223/235 (12 waived) | 100.0% | 1 - test infrastructure | P1 |
 | [Avalonia.Headless.NUnit](tracking/Avalonia.Headless.NUnit.md) | `src/Headless/Avalonia.Headless.NUnit` | `src/Headless/FerroUI.Headless.NUnit` | `ferroui-headless-nunit` | 0/0 | 0/0 | 0/0 | - | 1 - test infrastructure | P1 |
 | [Avalonia.Headless.Vnc](tracking/Avalonia.Headless.Vnc.md) | `src/Headless/Avalonia.Headless.Vnc` | `src/Headless/FerroUI.Headless.Vnc` | `ferroui-headless-vnc` | 0/0 | 0/0 | 0/0 | - | 1 - test infrastructure | P1 |
 | [Avalonia.Headless.XUnit](tracking/Avalonia.Headless.XUnit.md) | `src/Headless/Avalonia.Headless.XUnit` | `src/Headless/FerroUI.Headless.XUnit` | `ferroui-headless-xunit` | 0/0 | 0/0 | 0/0 | - | 1 - test infrastructure | P1 |
@@ -523,8 +523,8 @@ FerroUI-only crates have no upstream source directory (for example the MicroCom 
 | [Avalonia.Controls](tracking/Avalonia.Controls.md) | `src/FerroUI.Controls/page/navigation_page_tests_navigating.rs` | a part of an upstream test suite (`&lt;Suite&gt;Tests_&lt;Part&gt;.cs` or `&lt;Suite&gt;Tests.&lt;Part&gt;.cs`): the scanner takes only `*_tests.rs` for a test file |
 | [Avalonia.Controls](tracking/Avalonia.Controls.md) | `src/FerroUI.Controls/page/navigation_page_tests_stack.rs` | a part of an upstream test suite (`&lt;Suite&gt;Tests_&lt;Part&gt;.cs` or `&lt;Suite&gt;Tests.&lt;Part&gt;.cs`): the scanner takes only `*_tests.rs` for a test file |
 | [Avalonia.Controls](tracking/Avalonia.Controls.md) | `src/FerroUI.Controls/page/tabbed_page_tests_data_template.rs` | a part of an upstream test suite (`&lt;Suite&gt;Tests_&lt;Part&gt;.cs` or `&lt;Suite&gt;Tests.&lt;Part&gt;.cs`): the scanner takes only `*_tests.rs` for a test file |
-| [Avalonia.Controls](tracking/Avalonia.Controls.md) | `src/FerroUI.Controls/platform/i_platform_handle.rs` | `IPlatformHandle` and `PlatformHandle` declared a second time: upstream has them once, in `Platform/` of Avalonia.Base, and the base crate ports them there too (open: keep one declaration) |
-| [Avalonia.Controls](tracking/Avalonia.Controls.md) | `src/FerroUI.Controls/platform/platform_handle.rs` | `IPlatformHandle` and `PlatformHandle` declared a second time: upstream has them once, in `Platform/` of Avalonia.Base, and the base crate ports them there too (open: keep one declaration) |
+| [Avalonia.Controls](tracking/Avalonia.Controls.md) | `src/FerroUI.Controls/platform/i_platform_handle.rs` | `IPlatformHandle` and `PlatformHandle` declared a second time: upstream has them once, in `Platform/` of Avalonia.Base, and the base crate ports them there too. The two traits have diverged: the one of the controls crate has `as_native_control_host_destroyable_control_handle`, the port's form of upstream's cast to `INativeControlHostDestroyableControlHandle`, which names a type the base crate cannot name. Not merged; the difference, the users of each and what one declaration would cost are in `docs/porting/decisions/2026-10-open-differences.md`, section 1, for a decision |
+| [Avalonia.Controls](tracking/Avalonia.Controls.md) | `src/FerroUI.Controls/platform/platform_handle.rs` | `IPlatformHandle` and `PlatformHandle` declared a second time: upstream has them once, in `Platform/` of Avalonia.Base, and the base crate ports them there too. The two traits have diverged: the one of the controls crate has `as_native_control_host_destroyable_control_handle`, the port's form of upstream's cast to `INativeControlHostDestroyableControlHandle`, which names a type the base crate cannot name. Not merged; the difference, the users of each and what one declaration would cost are in `docs/porting/decisions/2026-10-open-differences.md`, section 1, for a decision |
 | [Avalonia.Controls](tracking/Avalonia.Controls.md) | `src/FerroUI.Controls/presentation_source/renderer_factory.rs` | the renderer seam of the top-level layer: top-levels are written against a renderer contract, where upstream every presentation source creates a compositing renderer over the compositor of its platform implementation |
 | [Avalonia.Controls](tracking/Avalonia.Controls.md) | `src/FerroUI.Controls/presenters/content_presenter_tests_in_template.rs` | a part of an upstream test suite (`&lt;Suite&gt;Tests_&lt;Part&gt;.cs` or `&lt;Suite&gt;Tests.&lt;Part&gt;.cs`): the scanner takes only `*_tests.rs` for a test file |
 | [Avalonia.Controls](tracking/Avalonia.Controls.md) | `src/FerroUI.Controls/presenters/content_presenter_tests_layout.rs` | a part of an upstream test suite (`&lt;Suite&gt;Tests_&lt;Part&gt;.cs` or `&lt;Suite&gt;Tests.&lt;Part&gt;.cs`): the scanner takes only `*_tests.rs` for a test file |
