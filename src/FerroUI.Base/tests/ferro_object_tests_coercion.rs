@@ -1,7 +1,13 @@
 //! Port of the upstream `Coercion` object tests.
+//!
+//! `Control1` is a layoutable where upstream's is a control (the control
+//! library is another crate), and the initial layout pass of
+//! `Deactivating_Style_Respects_Coerced_Default_Value` is the styling of the
+//! target.
 
 use super::*;
 use crate::data::{BindingPriority, BindingValue};
+use crate::layout::{Layoutable, LayoutableImpl};
 use crate::*;
 use std::cell::{Cell, RefCell};
 
@@ -399,4 +405,70 @@ fn if_initial_state_has_coerced_default_value_then_coerce_value_must_be_called()
     target.coerce_value(Class3::foo_property());
 
     assert_eq!(50, target.foo());
+}
+
+#[repr(C)]
+pub struct Control1 {
+    base: Layoutable,
+    min_foo: Cell<i32>,
+    max_foo: Cell<i32>,
+}
+
+ferro_class!(Control1: Layoutable);
+ferro_impl_classes!(Control1: FerroObjectImpl, StyledElementImpl, VisualImpl, LayoutableImpl);
+
+impl Control1 {
+    ferro_property!(pub fn foo_property() -> StyledProperty<i32> {
+        FerroProperty::register_with::<Control1, _>("Foo", StyledPropertyOptions::new(11).coerce(Control1::coerce_foo))
+    });
+
+    pub fn new() -> Ref<Self> {
+        instantiate(Self { base: Layoutable::construct(), min_foo: Cell::new(0), max_foo: Cell::new(100) })
+    }
+
+    pub fn foo(&self) -> i32 {
+        self.get_value(Self::foo_property())
+    }
+
+    pub fn coerce_foo(instance: &FerroObject, value: i32) -> i32 {
+        let o = instance.downcast_ref::<Control1>().expect("a Control1");
+        value.clamp(o.min_foo.get(), o.max_foo.get())
+    }
+}
+
+#[test]
+fn deactivating_style_respects_coerced_default_value() {
+    use crate::styling::test_support::TestRoot;
+    use crate::styling::{Selectors, Setter, Style};
+
+    let target = Control1::new();
+    target.min_foo.set(20);
+
+    let root = TestRoot::new();
+    root.styles().add(Style::with_setters(
+        Selectors::of_type::<Control1>().class("foo"),
+        [Setter::new(Control1::foo_property(), 50)],
+    ));
+    crate::styling::test_support::set_child(&root, &target);
+
+    let raised = Rc::new(Cell::new(0));
+
+    target.classes().add("foo");
+    target.apply_styling();
+
+    assert_eq!(50, target.foo());
+
+    let r = raised.clone();
+    target.property_changed(move |e| {
+        assert!(e.property() == Control1::foo_property().as_property());
+        assert_eq!(Some(50), e.get_old_value::<i32>());
+        assert_eq!(20, e.get_new_value::<i32>());
+        assert_eq!(BindingPriority::Unset, e.priority());
+        r.set(r.get() + 1);
+    });
+
+    target.classes().remove("foo");
+
+    assert_eq!(20, target.foo());
+    assert_eq!(1, raised.get());
 }
