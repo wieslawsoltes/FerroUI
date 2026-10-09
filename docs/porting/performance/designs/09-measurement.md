@@ -205,58 +205,58 @@ the profiler with `recycling_benchmark --ignored --nocapture --test-threads=1`.
 
 ### Results
 
-To be measured, on an idle machine, three runs each; give the machine, the date and the commit.
+First figures, one run each on 2026-10-09 on the development machine (Apple silicon, macOS) while other builds were running, so the times are an upper bound and are to be repeated on an idle machine, three runs each. The counts do not depend on the load. The time and the row counts are from the run without features, the allocations from the run with `count-allocations`.
 
 | Scenario | Profile | Rows recycled | Layout pass ms per step, median | Layout us per recycled row | Allocations per row | Bytes per row |
 |---|---|---:|---:|---:|---:|---:|
-| 20 px per step | `release` | to be measured | to be measured | to be measured | to be measured | to be measured |
-| 20 px per step | `dist` | to be measured | to be measured | to be measured | to be measured | to be measured |
-| a viewport per step | `release` | to be measured | to be measured | to be measured | to be measured | to be measured |
-| a viewport per step | `dist` | to be measured | to be measured | to be measured | to be measured | to be measured |
+| 20 px per step | `release` | 169 | 0.221 | 411.3 | 1224.0 | 112096 |
+| 20 px per step | `dist` | not measured yet | | | | |
+| a viewport per step | `release` | 2454 | 4.968 | 245.7 | 1186.3 | 108803 |
+| a viewport per step | `dist` | not measured yet | | | | |
 
-Run to run difference of the per-row time (the first point of "Verification"): to be measured.
+Run to run difference of the per-row time (the first point of "Verification"): not measured yet (one run).
 
 Counters per recycled row, from the run with `perf-counters`:
 
 | Counter | 20 px per step | A viewport per step | Design |
 |---|---:|---:|---|
-| property changes raised | to be measured | to be measured | 02 |
-| property changes of an effective value | to be measured | to be measured | 02 |
-| property changes with handlers of the property | to be measured | to be measured | 02 |
-| property changes with listeners of the object | to be measured | to be measured | 02 |
-| virtual calls (all members) | to be measured | to be measured | 01 |
-| inheritance ancestor changes | to be measured | to be measured | 03 |
-| inherited values compared | to be measured | to be measured | 03 |
-| inherited values differing | to be measured | to be measured | 03 |
-| objects visited by inherited value walks | to be measured | to be measured | 03 |
-| elements attached to a logical tree | to be measured | to be measured | 04 |
-| elements detached from a logical tree | to be measured | to be measured | 04 |
-| implicit theme lookups | to be measured | to be measured | 04 |
-| style hosts walked | to be measured | to be measured | 04 |
-| styles evaluated | to be measured | to be measured | 04 |
-| styles matched | to be measured | to be measured | 04 |
-| control themes evaluated | to be measured | to be measured | 04 |
-| control themes matched | to be measured | to be measured | 04 |
-| style instances attached | to be measured | to be measured | 04 |
-| style instances created | to be measured | to be measured | 04 |
-| resource lookups | to be measured | to be measured | 04 |
-| resource hosts probed | to be measured | to be measured | 04 |
-| bindings instanced | to be measured | to be measured | 05 |
-| binding expressions created | to be measured | to be measured | 05 |
-| template binding expressions created | to be measured | to be measured | 05 |
-| dynamic resource expressions created | to be measured | to be measured | 05 |
-| binding values published | to be measured | to be measured | 05 |
-| text layouts created | to be measured | to be measured | 06 |
-| text lines formatted | to be measured | to be measured | 06 |
-| text run cache hits | to be measured | to be measured | 06 |
-| text run cache misses | to be measured | to be measured | 06 |
-| text runs shaped | to be measured | to be measured | 06 |
-| containers recycled | to be measured | to be measured | |
-| containers reused | to be measured | to be measured | |
-| containers created | to be measured | to be measured | |
-| content presenter children replaced | to be measured | to be measured | 04 |
+| property changes raised | 459.24 | 443.50 | 02 |
+| property changes of an effective value | 439.24 | 423.45 | 02 |
+| property changes with handlers of the property | 215.51 | 202.81 | 02 |
+| property changes with listeners of the object | 421.27 | 405.41 | 02 |
+| virtual calls (all members) | 2835.50 | 2682.88 | 01 |
+| inheritance ancestor changes | 12.00 | 12.03 | 03 |
+| inherited values compared | 84.00 | 84.21 | 03 |
+| inherited values differing | 84.00 | 84.21 | 03 |
+| objects visited by inherited value walks | 228.00 | 228.56 | 03 |
+| elements attached to a logical tree | 18.00 | 18.04 | 04 |
+| elements detached from a logical tree | 18.00 | 18.04 | 04 |
+| implicit theme lookups | 17.00 | 17.04 | 04 |
+| style hosts walked | 261.00 | 261.64 | 04 |
+| styles evaluated | 0.00 | 0.00 | 04 |
+| styles matched | 0.00 | 0.00 | 04 |
+| control themes evaluated | 4.00 | 4.01 | 04 |
+| control themes matched | 2.00 | 2.00 | 04 |
+| style instances attached | 2.00 | 2.00 | 04 |
+| style instances created | 2.00 | 2.00 | 04 |
+| resource lookups | 43.00 | 43.11 | 04 |
+| resource hosts probed | 467.00 | 468.14 | 04 |
+| bindings instanced | 5.00 | 5.01 | 05 |
+| binding expressions created | 7.00 | 7.02 | 05 |
+| template binding expressions created | 0.00 | 0.00 | 05 |
+| dynamic resource expressions created | 1.00 | 1.00 | 05 |
+| binding values published | 86.42 | 85.22 | 05 |
+| text layouts created | 10.00 | 10.02 | 06 |
+| text lines formatted | 10.00 | 10.02 | 06 |
+| text run cache hits | 5.00 | 5.01 | 06 |
+| text run cache misses | 5.00 | 5.01 | 06 |
+| text runs shaped | 5.00 | 5.01 | 06 |
+| containers recycled | 1.00 | 1.00 | |
+| containers reused | 1.00 | 1.00 | |
+| containers created | 0.00 | 0.00 | |
+| content presenter children replaced | 10.00 | 10.02 | 04 |
 
-The ten most called virtual members per recycled row: to be measured.
+The ten most called virtual members per recycled row (20 px per step): `StyledElement::styling_parent` 764.00; `FerroObject::on_property_changed_core` 459.24; `FerroObject::on_property_changed` 439.24; `ResourceProvider::try_get_resource` 343.00; `StyledElement::is_logical_root` 96.00; `Interactive::interactive_parent` 76.33; `InputElement::is_enabled_core` 56.00; `Visual::bypass_flow_direction_policies` 36.00; `Layoutable::arrange_core` 35.75; `Layoutable::arrange_override` 35.75.
 
 The second point of "Verification" (the size of the browser module with the feature off, before
 and after the counters): to be measured, with `scripts/browser/module-sizes.mjs` on a build of
