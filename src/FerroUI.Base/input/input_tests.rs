@@ -3397,6 +3397,59 @@ fn pointer_pressed_counts_clicks_correctly() {
     }
 }
 
+// The contacts of this test are at the origin, as the helpers of the reference
+// test place them: the click after several simultaneous contacts continues the
+// count only inside the empty rectangle those leave behind.
+fn send_x_touch_contacts_with_ids(host: &TestHost, device: &Rc<TouchDevice>, type_: RawPointerEventType, ids: &[i64]) {
+    for id in ids {
+        touch(host, device, type_, Point::new(0.0, 0.0), 0, *id);
+    }
+}
+
+fn tap_once_at_origin(host: &TestHost, device: &Rc<TouchDevice>, id: i64) {
+    send_x_touch_contacts_with_ids(host, device, RawPointerEventType::TouchBegin, &[id]);
+    send_x_touch_contacts_with_ids(host, device, RawPointerEventType::TouchEnd, &[id]);
+}
+
+#[test]
+fn click_counting_should_work_correctly_with_few_touch_contacts() {
+    let root = TestRoot::new();
+    let touch_device = TouchDevice::new();
+
+    let pointer_pressed_executed_times = Rc::new(Cell::new(0));
+    let counter = pointer_pressed_executed_times.clone();
+    root.root.pointer_pressed(move |_, e| {
+        counter.set(counter.get() + 1);
+        match counter.get() {
+            1 | 2 => assert!(e.click_count() == 1),
+            3 => assert!(e.click_count() == 2),
+            4 => assert!(e.click_count() == 3),
+            5 => assert!(e.click_count() == 4),
+            6 => assert!(e.click_count() == 5),
+            7 => assert!(e.click_count() == 1),
+            8 => assert!(e.click_count() == 1),
+            9 => assert!(e.click_count() == 2),
+            _ => {}
+        }
+    });
+    let (tapped_executed_times, double_tapped_executed_times) = tap_counters(&root);
+
+    let host = &root.host;
+    send_x_touch_contacts_with_ids(host, &touch_device, RawPointerEventType::TouchBegin, &[0, 1]);
+    send_x_touch_contacts_with_ids(host, &touch_device, RawPointerEventType::TouchEnd, &[0, 1]);
+    tap_once_at_origin(host, &touch_device, 2);
+    tap_once_at_origin(host, &touch_device, 3);
+    tap_once_at_origin(host, &touch_device, 4);
+    send_x_touch_contacts_with_ids(host, &touch_device, RawPointerEventType::TouchBegin, &[5, 6, 7]);
+    send_x_touch_contacts_with_ids(host, &touch_device, RawPointerEventType::TouchEnd, &[5, 6, 7]);
+    tap_once_at_origin(host, &touch_device, 8);
+
+    assert_eq!(6, tapped_executed_times.get());
+    assert_eq!(9, pointer_pressed_executed_times.get());
+    assert!(double_tapped_executed_times.get() > 0);
+    assert_eq!(3, double_tapped_executed_times.get());
+}
+
 #[test]
 fn double_tapped_not_fired_when_click_too_late() {
     let root = TestRoot::new();
