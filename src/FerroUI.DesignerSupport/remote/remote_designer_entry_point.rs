@@ -582,12 +582,19 @@ mod tests {
         let resizes = session.connection.sent_of::<RequestViewportResizeMessage>();
         assert_eq!(Some(&RequestViewportResizeMessage { width: 120.0, height: 80.0 }), resizes.last());
 
-        // The next update closes the window and shows another one.
+        // The next update closes the window and shows another one. Closing
+        // disposes the implementation of the window; an offscreen
+        // implementation does not report that it closed, so the window is
+        // not told (and stays visible), as in the original.
+        assert!(!platform_impl.base().is_disposed());
         let result = session.update_xaml(&format!("<UserControl {XMLNS}><Border Width='30' Height='20'/></UserControl>"));
         assert_eq!(None, result.error);
-        assert!(!window.is_visible());
+        assert!(platform_impl.base().is_disposed());
         let next = CURRENT_WINDOW.with(|slot| slot.borrow().clone()).unwrap();
         assert!(next != window);
+        let next_impl = PreviewerWindowingPlatform::last_window().unwrap();
+        assert!(!Rc::ptr_eq(&next_impl, &platform_impl));
+        assert!(!next_impl.base().is_disposed());
         session.end();
     }
 
