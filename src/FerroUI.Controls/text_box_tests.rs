@@ -15,7 +15,7 @@
 use crate::i_command_source::register_command_source;
 use crate::mouse_test_helper::MouseTestHelper;
 use crate::presenters::TextPresenter;
-use crate::primitives::{ScrollBarVisibility, TemplatedControlImpl};
+use crate::primitives::{AdornerLayer, ScrollBarVisibility, TemplatedControlImpl, VisualLayerManager};
 use crate::templates::{FuncControlTemplate, FuncTemplateNameScopeExtensions, IControlTemplate};
 use crate::test_command::TestCommand;
 use crate::test_support::TestRoot;
@@ -26,7 +26,7 @@ use crate::testing::{
 };
 use crate::utils::ClipboardHelper;
 use crate::{
-    Control, ControlImpl, HotKeyManager, PastingFromClipboardEventArgs, ScrollViewer, StackPanel,
+    Button, Control, ControlImpl, HotKeyManager, PastingFromClipboardEventArgs, ScrollViewer, StackPanel,
     TextBlock, TextBox, TextBoxImpl, Window,
 };
 use ferroui_base::controls::NameScopeRef;
@@ -57,7 +57,7 @@ use ferroui_base::threading::Dispatcher;
 use ferroui_base::logging::LogArea;
 use ferroui_base::{
     ferro_class, ferro_impl_classes, ferro_model, ferro_property, instantiate, BoxedValue, FerroObjectExtensions,
-    FerroLocator, FerroObjectImpl, FerroObjectImplExt, IntoRef, LocatorExtensions, Point, Ref, Size,
+    FerroLocator, FerroObjectImpl, FerroObjectImplExt, IntoRef, LocatorExtensions, Point, Rect, Ref, Size,
     StyledElementImpl, StyledElementImplExt, StyledProperty, Thickness, VisualImpl,
 };
 use std::cell::{Cell, RefCell};
@@ -1972,8 +1972,41 @@ fn when_selecting_multiline_selection_should_be_extended_with_down_arrow_key_til
     }
 }
 
-// Deferred: `TextBox_In_AdornerLayer_Will_Not_Cause_Collection_Modified_In_VisualLayerManager_Measure` and
-// `..._Arrange` (wait for `VisualLayerManager` and `AdornerLayer`).
+#[test]
+fn text_box_in_adorner_layer_will_not_cause_collection_modified_in_visual_layer_manager_measure() {
+    let _scope = test_scope();
+    let button = Button::new();
+    let manager = VisualLayerManager::new();
+    manager.set_child(&button);
+    let root = TestRoot::with_child(&manager);
+    let adorner = templated_text_box(Some("a"));
+
+    let adorner_layer = AdornerLayer::get_adorner_layer(&button);
+    let adorner_layer = adorner_layer.expect("an adorner layer");
+    adorner_layer.children().add(adorner.clone());
+    AdornerLayer::set_adorned_element(&adorner, &button);
+
+    root.measure(Size::new(f64::INFINITY, f64::INFINITY));
+}
+
+#[test]
+fn text_box_in_adorner_layer_will_not_cause_collection_modified_in_visual_layer_manager_arrange() {
+    let _scope = test_scope();
+    let button = Button::new();
+    let visual_layer_manager = VisualLayerManager::new();
+    visual_layer_manager.set_child(&button);
+    let root = TestRoot::with_child(&visual_layer_manager);
+    let adorner = templated_text_box(Some("a"));
+    let adorner_layer = AdornerLayer::get_adorner_layer(&button);
+    let adorner_layer = adorner_layer.expect("an adorner layer");
+
+    root.measure(Size::new(10.0, 10.0));
+
+    adorner_layer.children().add(adorner.clone());
+    AdornerLayer::set_adorned_element(&adorner, &button);
+
+    root.arrange(Rect::new(0.0, 0.0, 10.0, 10.0));
+}
 
 #[test]
 fn should_scroll_caret_to_line() {
@@ -2393,54 +2426,6 @@ fn paste_raises_event_when_no_clipboard_is_available() {
 }
 
 // --- tests of other classes that need a text box ------------------------------
-
-// `TextBlockTests.Can_Call_Measure_Without_InvalidateTextLayout` of the reference.
-#[test]
-fn text_block_can_call_measure_without_invalidate_text_layout() {
-    let _scope = test_scope();
-    let target = TextBlock::new();
-
-    let text_box = TextBox::new();
-    text_box.set_text(Some("Hello"));
-    target.inlines().unwrap().add_control(text_box);
-
-    target.measure(infinity());
-
-    target.invalidate_measure();
-
-    target.measure(infinity());
-}
-
-// `TextBlockTests.Embedded_Control_Should_Keep_Focus` of the reference.
-#[test]
-fn text_block_embedded_control_should_keep_focus() {
-    let _scope = test_scope();
-    let _focus = focus_scope();
-    let target = TextBlock::new();
-
-    let root = TestRoot::with_child(target.clone());
-
-    let text_box = templated_text_box(Some("Hello"));
-
-    target.inlines().unwrap().add_control(text_box.clone());
-
-    target.measure(infinity());
-
-    text_box.focus();
-
-    let focus_manager = root.presentation_source().unwrap().input_root().focus_manager().unwrap();
-    let text_box_element: Ref<InputElement> = text_box.clone().upcast();
-
-    assert_eq!(Some(text_box_element.clone()), focus_manager.get_focused_element());
-
-    target.invalidate_measure();
-
-    assert_eq!(Some(text_box_element.clone()), focus_manager.get_focused_element());
-
-    target.measure(infinity());
-
-    assert_eq!(Some(text_box_element), focus_manager.get_focused_element());
-}
 
 /// A text box that is a command source: its command focuses it
 /// (`HotKeyedTextBox` of the hot keyed controls tests of the reference).
