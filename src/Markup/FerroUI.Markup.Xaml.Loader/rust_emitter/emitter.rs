@@ -37,6 +37,7 @@ use crate::compiler_extensions::transformers::{
     XamlIlCombinatorSelector, XamlIlDirectCallPropertySetter, XamlIlNestingSelector, XamlIlNotSelector,
     XamlIlNthChildSelector, XamlIlNthChildSelectorType, XamlIlOrSelectorNode, XamlIlPropertyEqualsSelector,
     XamlDirectCallAddHandler, XamlIlSelectorInitialNode, XamlIlSelectorNode, XamlIlStringSelector, XamlIlStringSelectorType, XamlIlTypeSelector,
+    XamlIlAndQueryNode, XamlIlHeightQuery, XamlIlOrQueryNode, XamlIlQueryInitialNode, XamlIlQueryNode, XamlIlWidthQuery,
     XamlSourceInfoValueManipulation,
 };
 use crate::compiler_extensions::{
@@ -642,6 +643,18 @@ impl<'a> Emitter<'a> {
                     kind: Kind::Exact {
                         id: self.types.known(Known::Selector),
                         nullable: Some(self.types.known(Known::OptionSelector)),
+                    },
+                },
+                None => Typed { expr: "::core::option::Option::None".to_string(), kind: Kind::Null },
+            });
+        }
+        if node.cast::<dyn XamlIlQueryNode>().is_some() {
+            return Ok(match self.query(node)? {
+                Some(local) => Typed {
+                    expr: format!("{local}.clone()"),
+                    kind: Kind::Exact {
+                        id: self.types.known(Known::StyleQuery),
+                        nullable: Some(self.types.option_of_known(Known::StyleQuery)),
                     },
                 },
                 None => Typed { expr: "::core::option::Option::None".to_string(), kind: Kind::Null },
@@ -1711,6 +1724,9 @@ impl<'a> Emitter<'a> {
             };
             return Ok(format!("rt::add_handler(&{}, &{event}, {handler});", target.expr));
         }
+        if let Some(adder) = any.downcast_ref::<AdderSetter>() {
+            return self.adder_statement(node, assignment, adder, target, values);
+        }
         let runtime = self
             .direct_setter(setter)
             .ok_or_else(|| unsupported(node, format!("{property_name}: not a plain property setter")))?;
@@ -1752,6 +1768,57 @@ impl<'a> Emitter<'a> {
         };
         let call = if property.is_direct() { "set_direct_value" } else { "set_value" };
         Ok(format!("{}.{call}({definition}, {value});", target.expr))
+    }
+
+    /// The adder of a collection property as one of the setters of a choice at run time
+    /// (a value in property element syntax, `<Button.Theme><StaticResource ../></Button.Theme>`,
+    /// may be the value of the property or an item of the collection the property holds):
+    /// `getter(target).Add(value)`, the collection read when the setter is chosen and the
+    /// value converted to the type the adder declares, as the interpreter calls the two
+    /// methods (`call_standard_setter`). The assignment of a single adder is
+    /// [`Self::adder_assignment`], which reads the collection before the values.
+    fn adder_statement(
+        &self,
+        node: &Rc<dyn IXamlAstNode>,
+        assignment: &XamlPropertyAssignmentNode,
+        adder: &AdderSetter,
+        target: &Typed<'a>,
+        values: &SetterValues<'_, 'a>,
+    ) -> EmitResult<String> {
+        let property_name = assignment.property.name();
+        let getter = self.types.method(adder.getter().as_ref())
+            .ok_or_else(|| unsupported(node, format!("{property_name}: the getter is not a method of the run-time type system")))?;
+        let add = self.types.method(adder.adder().as_ref())
+            .ok_or_else(|| unsupported(node, format!("{property_name}: the adder is not a method of the run-time type system")))?;
+        let (call, collection_type) = match getter.declared() {
+            Some(_) => {
+                let collection_type = self.declared_return(node, &getter)?;
+                (self.declared_call(node, &getter, std::slice::from_ref(target))?, collection_type)
+            }
+            None => self.registered_getter(node, assignment, &getter, target)?,
+        };
+        let collection = Typed { expr: call, kind: self.kind_of(collection_type) };
+        let handle = add
+            .parameter_handles
+            .last()
+            .copied()
+            .flatten()
+            .ok_or_else(|| unsupported(node, format!("{property_name}: the adder has a parameter without a Rust type")))?;
+        let value = match values {
+            SetterValues::Untyped(local, value_node) => untyped_argument(local, &self.member_name(&add), add.parameters.len().saturating_sub(1), value_node),
+            // Only whether the statement can be written: the value stands for one of the declared type.
+            SetterValues::Checked => "value".to_string(),
+            SetterValues::Typed(_, value_node) => {
+                return Err(unsupported(value_node, format!("{property_name}: the adder of a collection in a choice at run time, with a typed value")));
+            }
+            SetterValues::None => return Err(unsupported(node, format!("{property_name}: a setter without its value"))),
+        };
+        let value = Typed { expr: value, kind: Kind::Exact { id: handle.id(), nullable: None } };
+        let statement = format!("{};", self.declared_call(node, &add, &[collection, value])?);
+        Ok(match values {
+            SetterValues::Checked => String::new(),
+            _ => statement,
+        })
     }
 
     /// The routed event the static field `field` holds (`Button.ClickEvent`): the typed
@@ -2476,6 +2543,60 @@ impl<'a> Emitter<'a> {
             return Err(unsupported(node, "no emitter for this selector node"));
         };
         let local = self.local_named("selector");
+        self.line(format!("let {local} = {call};"));
+        Ok(Some(local))
+    }
+
+    /// A container query (`XamlIlQueryNode`): the query before it, then the builder of the
+    /// styling system the node calls (`StyleQueries::*`), as the interpreter's `query`
+    /// builds it. Returns the local holding the query, `None` for the start of a chain.
+    fn query(&mut self, node: &Rc<dyn IXamlAstNode>) -> EmitResult<Option<String>> {
+        const QUERIES: &str = "::ferroui_base::styling::StyleQueries";
+        const OPERATOR: &str = "::ferroui_base::styling::StyleQueryComparisonOperator";
+        if node.is::<XamlIlQueryInitialNode>() {
+            return Ok(None);
+        }
+        let previous = |emitter: &mut Self, previous: &Option<Rc<dyn XamlIlQueryNode>>| -> EmitResult<String> {
+            Ok(match previous {
+                Some(previous) => match emitter.query(&previous.clone().as_node())? {
+                    Some(local) => format!("::core::option::Option::Some({local})"),
+                    None => "::core::option::Option::None".to_string(),
+                },
+                None => "::core::option::Option::None".to_string(),
+            })
+        };
+        let members = match (node.cast::<XamlIlOrQueryNode>(), node.cast::<XamlIlAndQueryNode>()) {
+            (Some(or), _) => Some((or.queries(), "or")),
+            (None, Some(and)) => Some((and.queries(), "and")),
+            (None, None) => None,
+        };
+        let call = if let Some(n) = node.cast::<XamlIlWidthQuery>() {
+            let previous = previous(self, &n.base.previous)?;
+            format!("{QUERIES}::width({previous}, {OPERATOR}::{:?}, {})", n.operator, f64_literal(n.value))
+        } else if let Some(n) = node.cast::<XamlIlHeightQuery>() {
+            let previous = previous(self, &n.base.previous)?;
+            format!("{QUERIES}::height({previous}, {OPERATOR}::{:?}, {})", n.operator, f64_literal(n.value))
+        } else if let Some((members, builder)) = members {
+            match members.as_slice() {
+                [] => return Err(unsupported(node, "a query list without members")),
+                [only] => return self.query(&only.clone().as_node()),
+                _ => {
+                    let mut list = Vec::with_capacity(members.len());
+                    for member in &members {
+                        list.push(
+                            self.query(&member.clone().as_node())?
+                                .ok_or_else(|| unsupported(node, "a member of a query list that is empty"))?,
+                        );
+                    }
+                    format!("{QUERIES}::{builder}([{}])", list.join(", "))
+                }
+            }
+        } else {
+            // The query nodes the transformer declares and never creates (a type, a name,
+            // a combinator): the interpreter calls their builders through the type system.
+            return Err(unsupported(node, "no emitter for this query node"));
+        };
+        let local = self.local_named("query");
         self.line(format!("let {local} = {call};"));
         Ok(Some(local))
     }

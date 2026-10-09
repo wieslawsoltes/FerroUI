@@ -1320,6 +1320,37 @@ Refused by name: a static method, a method that is not one markup metadata decla
 
 **Proof.** `method_command.xaml` of the corpus (a method without a parameter, one whose parameter is a text and which returns a value, one with a can-execute method that depends on a property, a method of a named element), emitted the same by both hosts and equal to the run-time loader's tree, and `a_method_is_a_command_in_both_back_ends`: both back ends call the same methods with the same arguments, answer `CanExecute` the same before and after the property changes, raise the change of the state of the command once, and select the text of the named text box. The three pages of the catalog are in the fixture of 9.5.19 and load to the trees of the run-time loader.
 
+#### 9.4.11 Implemented (2026-10-09): container queries, and the adder of a collection in a choice at run time
+
+**Container queries** (`<ContainerQuery Name="Host" Query="min-width:400">`, `MainView.xaml` and `ContainerQueryPage.xaml`). The transform turns the text of `Query` into a chain of query nodes (`FerroXamlIlQueryTransformer`), and the interpreter builds the chain with the builders of the styling system (`runtime/framework/nodes.rs`, `query`). The emitter writes the same calls, one local per node, as it does for selectors (`Emitter::query`):
+
+```rust
+let query_1 = ::ferroui_base::styling::StyleQueries::width(::core::option::Option::None, ::ferroui_base::styling::StyleQueryComparisonOperator::GreaterThanOrEquals, 400.0_f64);
+let query_2 = ::ferroui_base::styling::StyleQueries::height(::core::option::Option::None, ::ferroui_base::styling::StyleQueryComparisonOperator::LessThanOrEquals, 120.0_f64);
+let query_3 = ::ferroui_base::styling::StyleQueries::and([query_1, query_2]);
+::ferroui_base::styling::ContainerQuery::__markup_set_Query(&container_query_1, ::core::option::Option::Some(query_3.clone()));
+```
+
+| Node | Emitted |
+|---|---|
+| `XamlIlQueryInitialNode` | nothing: the start of a chain is null |
+| `XamlIlWidthQuery`, `XamlIlHeightQuery` | `StyleQueries::width` / `height(previous, operator, value)`, the operator by the name of its member |
+| `XamlIlOrQueryNode`, `XamlIlAndQueryNode` | one member: the member; several: `StyleQueries::or([..])` / `and([..])`; none is refused (the interpreter's `Invalid query count`) |
+| `XamlIlTypeQuery`, `XamlIlStringQuery`, `XamlIlCombinatorQuery` | refused by name (`no emitter for this query node`): the transformer declares them and never creates them, and the interpreter calls their builders through the type system |
+
+The value of a query is a `StyleQuery` (`Known::StyleQuery`, named by both hosts), assigned as the nullable form the setter of `ContainerQuery.Query` declares.
+
+**The adder of a collection among the setters of a choice at run time** (`PipsPagerCustomButtonThemesPage.xaml`: `<PipsPager.PreviousButtonTheme><StaticResource ResourceKey="CustomPreviousButtonTheme"/></PipsPager.PreviousButtonTheme>`). A value in property element syntax may be the value of the property or an item of the collection the property holds, so the setters of such an assignment are the setters of the property *and* the adders of its type: for a property of a control theme `[UnsetValueSetter, BindingSetter, XamlDirectCallPropertySetter, AdderSetter(Add(SetterBase)), AdderSetter(Add(IStyle)), AdderSetter(AddChild(object))]`. A markup extension provides a value whose type is known when the document is loaded, so the setter is chosen then (9.3.3), and the emitter had no statement for an adder in such a choice (`not a plain property setter`). The branch of an adder is now what the interpreter performs when it chooses it (`call_standard_setter`): the collection read with the getter, then `Add` with the value converted to the type the adder declares (`Emitter::adder_statement`):
+
+```rust
+} else if rt::is_instance(&value_0, rt::markup_handle(<dyn ::ferroui_base::styling::SetterBase as ::ferroui_base::metadata::MarkupTyped>::MARKUP)) {
+    ::ferroui_base::styling::StyleBase::__markup_Add_0(&rt::argument(button_0.get_value(::ferroui_base::StyledElement::theme_property()).clone(), "FerroUI.Styling.StyleBase.Add", 0, 10, 8)?, rt::exact(value_0.clone(), "FerroUI.Styling.StyleBase.Add", 0, 10, 8)?);
+```
+
+The instance is converted as the instance of any member is (`rt::argument`, `rt::instance`: a null collection is the loader's error). **Deviation:** the interpreter converts the value before it reads the collection, and the statement reads the collection first; the two orders differ only when both steps fail, which a value that passed the type check of its branch does not.
+
+**Proof.** `container_query.xaml` (a width, `and` followed by an alternative, two alternatives) and `static_resource_element.xaml` (a control theme and a brush provided by a static resource in element syntax) of the corpus, emitted the same by both hosts and equal to the run-time loader's trees; `container_queries_are_built_by_both_back_ends` and `a_static_resource_in_element_syntax_is_the_value_of_its_property` read the queries and the values both back ends deliver. The dump of the harness reads a style held as a value (its child styles). The three documents of the catalog are in the fixture of 9.5.19.
+
 ### 9.5 Typing without the framework linked into the build tool
 
 #### 9.5.1 Inputs of the build-time type system
