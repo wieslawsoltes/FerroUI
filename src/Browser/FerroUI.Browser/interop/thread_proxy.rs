@@ -27,6 +27,21 @@ extern "C" {
 
     #[wasm_bindgen(js_namespace = FerroExports, js_name = lastProxiedFunction)]
     fn js_last_proxied_function() -> f64;
+
+    #[wasm_bindgen(js_namespace = FerroExports, js_name = reportRenderThreadPanic)]
+    fn js_report_render_thread_panic(message: &str);
+}
+
+/// Tells the page that the render thread panicked: the script of the calling
+/// thread, which has to be the thread of the page, logs `message` as an error
+/// on the console of the page and keeps it
+/// (`FerroExports.renderThreadPanics`).
+///
+/// Not from upstream, whose render loop logs the exception of a frame through
+/// the logger of the process. A thread of this port has no log sink, and
+/// what a worker writes to its console is not on the console of the page.
+pub(crate) fn report_render_thread_panic(message: &str) {
+    js_report_render_thread_panic(message);
 }
 
 /// How many calls the runtime has carried from the calling thread to the

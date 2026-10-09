@@ -77,6 +77,20 @@ export class FerroExports {
         return typeof index === "number" ? index : -1;
     }
 
+    // Not in the original. The messages of the panics of the render thread, oldest first, for the
+    // host page (and for the tests of the port).
+    public static readonly renderThreadPanics: string[] = [];
+
+    // Not in the original, whose render loop logs the exception of a frame through the logger of
+    // the process. Called on the thread of the page with the message of a panic of the render
+    // thread (the framework queues the call from that thread): what a worker writes to its own
+    // console does not reach the console of the page, so the page logs it. The render loop goes on
+    // with its next tick, as the original's does after an exception.
+    public static reportRenderThreadPanic(message: string): void {
+        FerroExports.renderThreadPanics.push(message);
+        console.error(`FerroUI: the render thread panicked: ${message}`);
+    }
+
     private static readonly groups: { [key: string]: any } = {};
 
     // The functions of one group, looked up once per attached module.
