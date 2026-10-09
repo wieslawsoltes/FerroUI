@@ -3494,7 +3494,10 @@ fn binding_method_with_parameter_to_command_uses_single_parameter_overload() {
 /// The body of the theory `Binding_Method_With_Parameter_To_Command_With_Single_Parameter_Overload_
 /// Throws_At_Runtime_If_Mismatched_Types`: the click must throw (an exception that escapes the
 /// click is a panic whose message names the exception; each row is a test that expects it).
-fn mismatched_types_row(method_name: &str, xaml_parameter: &str) {
+fn binding_method_with_parameter_to_command_with_single_parameter_overload_throws_at_runtime_if_mismatched_types(
+    method_name: &str,
+    xaml_parameter: &str,
+) {
     let _app = styled_window_application();
 
     let xaml = r#"<Window xmlns='https://github.com/ferroui'
@@ -3524,21 +3527,30 @@ fn mismatched_types_row(method_name: &str, xaml_parameter: &str) {
 #[should_panic(expected = "InvalidCastException")]
 fn binding_method_with_parameter_to_command_with_single_parameter_overload_throws_at_runtime_if_mismatched_types_int32_method_string(
 ) {
-    mismatched_types_row("Int32Method", "<x:String>hello</x:String>");
+    binding_method_with_parameter_to_command_with_single_parameter_overload_throws_at_runtime_if_mismatched_types(
+        "Int32Method",
+        "<x:String>hello</x:String>",
+    );
 }
 
 #[test]
 #[should_panic(expected = "NullReferenceException")]
 fn binding_method_with_parameter_to_command_with_single_parameter_overload_throws_at_runtime_if_mismatched_types_int32_method_null(
 ) {
-    mismatched_types_row("Int32Method", "<x:Null />");
+    binding_method_with_parameter_to_command_with_single_parameter_overload_throws_at_runtime_if_mismatched_types(
+        "Int32Method",
+        "<x:Null />",
+    );
 }
 
 #[test]
 #[should_panic(expected = "InvalidCastException")]
 fn binding_method_with_parameter_to_command_with_single_parameter_overload_throws_at_runtime_if_mismatched_types_string_method_int32(
 ) {
-    mismatched_types_row("StringMethod", "<x:Int32>42</x:Int32>");
+    binding_method_with_parameter_to_command_with_single_parameter_overload_throws_at_runtime_if_mismatched_types(
+        "StringMethod",
+        "<x:Int32>42</x:Int32>",
+    );
 }
 
 #[test]
