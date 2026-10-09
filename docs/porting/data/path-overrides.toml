@@ -1791,7 +1791,7 @@ reason = "port of `Diagnostics/DebugDisplayHelper.cs` of Avalonia.Base and of th
 
 [[rust_only]]
 path = "src/FerroUI.Controls/platform/*platform_handle.rs"
-reason = "`IPlatformHandle` and `PlatformHandle` declared a second time: upstream has them once, in `Platform/` of Avalonia.Base, and the base crate ports them there too (open: keep one declaration)"
+reason = "`IPlatformHandle` and `PlatformHandle` declared a second time: upstream has them once, in `Platform/` of Avalonia.Base, and the base crate ports them there too. The two traits have diverged: the one of the controls crate has `as_native_control_host_destroyable_control_handle`, the port's form of upstream's cast to `INativeControlHostDestroyableControlHandle`, which names a type the base crate cannot name. Not merged; the difference, the users of each and what one declaration would cost are in `docs/porting/decisions/2026-10-open-differences.md`, section 1, for a decision"
 
 [[rust_only]]
 path = "src/FerroUI.Controls/size_to_content.rs"
