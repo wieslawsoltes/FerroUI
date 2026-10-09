@@ -125,8 +125,9 @@ const MODIFIERS = { alt: 1, ctrl: 2, meta: 4, shift: 8 };
 
 // Opens `siteDirectory` (query appended to index.html) and resolves to the page driver. `initScript`
 // is evaluated in the page before its own scripts. `isolated` serves the site cross-origin isolated
-// (see `serve`).
-export async function open(siteDirectory, { query = "", width = 460, height = 520, scale = 1, chromeArgs = [], initScript, isolated = false } = {}) {
+// (see `serve`). With `network` the addresses the page requests are kept in `requests`, over every
+// load of the page (the requests of its workers and of a service worker are not among them).
+export async function open(siteDirectory, { query = "", width = 460, height = 520, scale = 1, chromeArgs = [], initScript, isolated = false, network = false } = {}) {
     const server = await serve(siteDirectory, { isolated });
     const profile = fs.mkdtempSync(path.join(os.tmpdir(), "ferroui-browser-"));
     const chrome = spawn(findChrome(), [
@@ -156,7 +157,7 @@ export async function open(siteDirectory, { query = "", width = 460, height = 52
 
     // `log` holds every console message, uncaught exception and browser log entry; `errors` the ones
     // that are errors (console.error and console.assert, uncaught exceptions, failed loads).
-    let id = 0; const pending = new Map(); const log = []; const errors = []; const navigations = [];
+    let id = 0; const pending = new Map(); const log = []; const errors = []; const navigations = []; const requests = [];
     socket.addEventListener("message", (event) => {
         const message = JSON.parse(event.data);
         if (message.id && pending.has(message.id)) { pending.get(message.id)(message.result ?? { error: message.error }); pending.delete(message.id); return; }
@@ -174,6 +175,8 @@ export async function open(siteDirectory, { query = "", width = 460, height = 52
             if (entry.level === "error") { errors.push(line); }
         } else if (message.method === "Page.frameNavigated" && !message.params.frame.parentId) {
             navigations.push(message.params.frame.url);
+        } else if (message.method === "Network.requestWillBeSent") {
+            requests.push(message.params.request.url);
         }
     });
     const send = (method, params = {}) => new Promise((resolve) => { pending.set(++id, resolve); socket.send(JSON.stringify({ id, method, params })); });
@@ -181,6 +184,7 @@ export async function open(siteDirectory, { query = "", width = 460, height = 52
     // A fixed viewport. With a scale factor other than 1 the override would report unscaled device
     // pixels to the page, so the window size and the real scale factor of the browser are used.
     if (scale === 1) { await send("Emulation.setDeviceMetricsOverride", { width, height, deviceScaleFactor: 1, mobile: false }); }
+    if (network) { await send("Network.enable"); }
     if (initScript) { await send("Page.addScriptToEvaluateOnNewDocument", { source: initScript }); }
     const url = `http://127.0.0.1:${server.address().port}/index.html${query}`;
     await send("Page.navigate", { url });
@@ -206,6 +210,7 @@ export async function open(siteDirectory, { query = "", width = 460, height = 52
         log,
         errors,
         navigations,
+        requests,
         send,
         browserSend,
         // Sets a permission of the page ("clipboard-read", "window-management", ...) to "granted",
@@ -266,7 +271,9 @@ export async function open(siteDirectory, { query = "", width = 460, height = 52
         async close() {
             socket.close(); browserSocket?.close(); chrome.kill(); server.close();
             await sleep(200);
-            fs.rmSync(profile, { recursive: true, force: true });
+            // The browser may still be writing to its profile while it ends: a removal that finds
+            // the directory not empty is tried again.
+            fs.rmSync(profile, { recursive: true, force: true, maxRetries: 10, retryDelay: 200 });
         }
     };
     return page;
