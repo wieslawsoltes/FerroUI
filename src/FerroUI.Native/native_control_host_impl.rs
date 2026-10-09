@@ -75,6 +75,12 @@ impl IPlatformHandle for DestroyableNSView {
     fn as_any(&self) -> &dyn Any {
         self
     }
+
+    fn as_native_control_host_destroyable_control_handle(
+        &self,
+    ) -> Option<&dyn INativeControlHostDestroyableControlHandle> {
+        Some(self)
+    }
 }
 
 impl INativeControlHostDestroyableControlHandle for DestroyableNSView {
@@ -206,5 +212,64 @@ impl INativeControlHostControlTopLevelAttachment for Attachment {
         }
         let bounds = Rect::new(bounds.x, bounds.y, bounds.width.max(1.0), bounds.height.max(1.0));
         self.native().show_in_bounds(bounds.x as f32, bounds.y as f32, bounds.width as f32, bounds.height as f32);
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    // Not from upstream, which has no tests of the host: the default child
+    // over a native host that is implemented here and records its calls.
+    use super::*;
+    use ferroui_microcom::HResult;
+
+    type Log = Rc<RefCell<Vec<String>>>;
+
+    struct FakeNativeHost {
+        log: Log,
+    }
+
+    impl IFrnNativeControlHostImpl for FakeNativeHost {
+        fn create_default_child(&self, parent: *mut c_void) -> Result<*mut c_void, HResult> {
+            self.log.borrow_mut().push(format!("CreateDefaultChild({})", parent as usize));
+            Ok(77 as *mut c_void)
+        }
+
+        fn create_attachment(&self) -> Option<ComPtr<IFrnNativeControlHostTopLevelAttachment>> {
+            None
+        }
+
+        fn destroy_default_child(&self, child: *mut c_void) {
+            self.log.borrow_mut().push(format!("DestroyDefaultChild({})", child as usize));
+        }
+    }
+
+    fn take(log: &Log) -> Vec<String> {
+        std::mem::take(&mut *log.borrow_mut())
+    }
+
+    #[test]
+    fn the_default_child_is_a_handle_that_can_be_destroyed() {
+        let log = Log::default();
+        let host = NativeControlHostImpl::new(Some(IFrnNativeControlHost::from_impl(FakeNativeHost { log: log.clone() })));
+
+        let parent: Rc<dyn IPlatformHandle> = Rc::new(PlatformHandle::new(5, Some("NSView")));
+        let child = host.create_default_child(parent);
+        // The native side makes a view of its own and is not told the parent.
+        assert_eq!(vec!["CreateDefaultChild(0)"], take(&log));
+        assert_eq!(77, child.handle());
+        assert_eq!(Some("NSView"), child.handle_descriptor());
+
+        // What the control that hosts it asks of the handle it holds
+        // (`NativeControlHost::destroy_native_control_core`).
+        let destroyable = child
+            .as_native_control_host_destroyable_control_handle()
+            .expect("the default child can be destroyed");
+        destroyable.destroy();
+        assert_eq!(vec!["DestroyDefaultChild(77)"], take(&log));
+        assert_eq!(0, child.handle());
+
+        // Destroyed once.
+        destroyable.destroy();
+        assert!(take(&log).is_empty());
     }
 }
