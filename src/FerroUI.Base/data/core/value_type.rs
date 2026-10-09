@@ -167,6 +167,9 @@ struct Registry {
     /// emitter of Rust source may write as `&value`.
     #[cfg(feature = "compiler-metadata")]
     derefs: IdMap<(TypeId, TypeId), ()>,
+    /// `ElementRef<T>` → the element it refers to as an object, and the
+    /// reference to an object.
+    element_ref_objects: IdMap<TypeId, (ObjectFn, FromObjectFn)>,
     /// Conversions applied to borrowed untyped values when a property is
     /// set with a value that is not of its exact type.
     any_conversions: IdMap<(TypeId, TypeId), AnyConvertFn>,
@@ -473,6 +476,17 @@ impl ValueTypes {
         use crate::ElementRef;
 
         Self::register_nullable::<ElementRef<T>>();
+        fn element<T: ObjectType>(value: &dyn AnyValue) -> Option<Ref<FerroObject>> {
+            let element = value.downcast_ref::<ElementRef<T>>()?.get()?;
+            let object: &FerroObject = (*element).upcast();
+            Some(object.to_ref())
+        }
+        fn reference<T: ObjectType>(object: Ref<FerroObject>) -> Option<BoxedValue> {
+            object.cast::<T>().map(|element| Rc::new(ElementRef::of(&element)) as BoxedValue)
+        }
+        with_registry(|r| {
+            r.element_ref_objects.insert(TypeId::of::<ElementRef<T>>(), (element::<T>, reference::<T>));
+        });
         #[cfg(feature = "compiler-metadata")]
         with_registry(|r| {
             r.element_refs.insert(TypeId::of::<ElementRef<T>>(), (T::TYPE, false));
@@ -695,14 +709,18 @@ impl ValueTypes {
     }
 
     /// Views a value as an object of the class hierarchy, if it is a
-    /// registered handle type.
+    /// registered handle type. A registered element reference
+    /// ([`ElementRef<T>`](crate::ElementRef)) is viewed as the element it
+    /// refers to while that is alive: a value that is one (a `DataContext`
+    /// that is an ancestor of its element) is the element to a binding.
     pub fn as_object(value: &dyn AnyValue) -> Option<Ref<FerroObject>> {
         if let Some(o) = value.downcast_ref::<Ref<FerroObject>>() {
             return Some(o.clone());
         }
         let id = value_type_id(&*value);
-        let f = with_registry(|r| r.objects.get(&id).copied());
-        f.and_then(|f| (f.0)(value))
+        let (f, element) =
+            with_registry(|r| (r.objects.get(&id).map(|o| o.0), r.element_ref_objects.get(&id).map(|e| e.0)));
+        f.or(element).and_then(|f| f(value))
     }
 
     /// Registers `T` as a reference (model) type: a type whose instances are
@@ -769,8 +787,8 @@ impl ValueTypes {
         if id == TypeId::of::<Ref<FerroObject>>() {
             return Some(Rc::new(object));
         }
-        let f = with_registry(|r| r.objects.get(&id).copied());
-        f.and_then(|f| (f.1)(object))
+        let f = with_registry(|r| r.objects.get(&id).map(|o| o.1).or_else(|| r.element_ref_objects.get(&id).map(|e| e.1)));
+        f.and_then(|f| f(object))
     }
 
     /// The type a registered nullable form holds: `T` for `Option<T>` and for

@@ -304,3 +304,71 @@ fn gap_c320_content_of_a_scroll_viewer_that_was_dropped_while_shown() {
     assert!(weak.upgrade().is_none());
     assert!(content.upgrade().is_none());
 }
+
+// --- C322 to C326: what a visit still retained after C317 to C321 ---
+//
+// Found with the revisits of `catalog_tour.rs` and the markup probe (`catalog_markup_survivors`),
+// with the weak references of the object model marked for the allocation trace. Each is a cycle
+// of references the managed original has too.
+
+/// C322: `DataValidationErrors.Owner` is the control the errors are shown in, which owns the
+/// errors control through its template.
+#[test]
+fn gap_c322_owner_of_data_validation_errors() {
+    let _app = start_catalog_application();
+    let owner = ferroui_controls::ContentControl::new();
+    let errors = ferroui_controls::DataValidationErrors::new();
+    errors.set_owner(Some(owner.clone().upcast()));
+    owner.set_content(Some(Control::boxed(&errors)));
+    assert!(errors.owner().is_some_and(|found| found == owner));
+    let weak = owner.downgrade();
+    drop(owner);
+    assert!(weak.upgrade().is_none());
+    assert!(errors.owner().is_none());
+}
+
+/// C322: the themes make the owner the data context of a part of the template of the errors
+/// control (`DataContext="{TemplateBinding Owner}"`), and the bindings of that part read the
+/// owner through it.
+#[test]
+fn gap_c322_owner_as_the_data_context_of_a_template_part() {
+    let _app = start_catalog_application();
+    let control = from_markup_value::<Ref<ferroui_controls::ContentControl>>(&Some(load_text(&format!(
+        "<ContentControl {XMLNS} Tag='of the owner'>\
+           <ContentControl.Template>\
+             <ControlTemplate>\
+               <DataValidationErrors>\
+                 <DataValidationErrors.Template>\
+                   <ControlTemplate>\
+                     <Border DataContext='{{TemplateBinding Owner}}' Tag='{{ReflectionBinding Tag}}'/>\
+                   </ControlTemplate>\
+                 </DataValidationErrors.Template>\
+               </DataValidationErrors>\
+             </ControlTemplate>\
+           </ContentControl.Template>\
+         </ContentControl>"
+    ))))
+    .expect("a content control");
+    let window = Window::new();
+    window.set_content(Some(Control::boxed(&control)));
+    window.show();
+    run_jobs();
+    let part = control
+        .get_visual_descendants()
+        .find_map(|visual| visual.cast::<Border>())
+        .expect("the part of the template of the errors control");
+    let tag = part.tag().and_then(|tag| tag.downcast_ref::<String>().cloned());
+    assert_eq!(Some(String::from("of the owner")), tag);
+    let part = {
+        let weak = part.downgrade();
+        drop(part);
+        weak
+    };
+    window.set_content(None);
+    run_jobs();
+    let weak = control.downgrade();
+    drop(control);
+    assert!(weak.upgrade().is_none());
+    assert!(part.upgrade().is_none());
+    window.close();
+}
