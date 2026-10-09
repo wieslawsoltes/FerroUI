@@ -20,6 +20,7 @@ members = [
     "src/FerroUI.Themes.Fluent",
     "src/FerroUI.OpenGL",
     "src/FerroUI.Remote.Protocol",
+    "src/FerroUI.DesignerSupport",
     "src/Skia/FerroUI.Skia",
     "src/HarfBuzz/FerroUI.HarfBuzz",
     "src/tools/MicroCom.CodeGenerator",
@@ -61,6 +62,7 @@ ferroui-themes-simple = { path = "src/FerroUI.Themes.Simple" }
 ferroui-themes-fluent = { path = "src/FerroUI.Themes.Fluent" }
 ferroui-opengl = { path = "src/FerroUI.OpenGL" }
 ferroui-remote-protocol = { path = "src/FerroUI.Remote.Protocol" }
+ferroui-designer-support = { path = "src/FerroUI.DesignerSupport" }
 ferroui-skia = { path = "src/Skia/FerroUI.Skia" }
 ferroui-harfbuzz = { path = "src/HarfBuzz/FerroUI.HarfBuzz" }
 bitflags = "2"

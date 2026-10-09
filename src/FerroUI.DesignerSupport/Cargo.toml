@@ -1,0 +1,34 @@
+[package]
+name = "ferroui-designer-support"
+description = "Designer support of FerroUI: the loader of the previewed window and the previewer that talks to an IDE over the remote protocol"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+
+# Unit tests live next to the code (`mod tests`), not as integration test
+# targets.
+autotests = false
+autobenches = false
+autoexamples = false
+
+[lib]
+path = "lib.rs"
+
+[dependencies]
+ferroui-base.workspace = true
+ferroui-controls.workspace = true
+# The contract of the run-time XAML loader, which the host registers.
+ferroui-markup-xaml.workspace = true
+ferroui-remote-protocol.workspace = true
+# The errors of a document, for their class names, lines and positions.
+xamlx.workspace = true
+
+[dev-dependencies]
+ferroui-base = { workspace = true, features = ["testing"] }
+ferroui-controls = { workspace = true, features = ["testing"] }
+# The run-time XAML loader the tests load their documents with.
+ferroui-markup-xaml-loader = { workspace = true }
+# The backend that renders the scene of the remote rendering test.
+ferroui-skia = { workspace = true }

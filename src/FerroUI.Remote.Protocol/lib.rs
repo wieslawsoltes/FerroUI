@@ -75,8 +75,8 @@ pub use ferro_remote_message_guid_attribute::{FerroRemoteMessage, FerroRemoteMes
 pub use guid::Guid;
 pub use i_message_type_resolver::IMessageTypeResolver;
 pub use i_transport::{
-    exception_handler, message_handler, ExceptionHandler, Handler, HandlerToken, IFerroRemoteTransportConnection,
-    Message, MessageHandler,
+    exception_handler, message_handler, Delegate, ExceptionHandler, Handler, HandlerToken,
+    IFerroRemoteTransportConnection, Message, MessageHandler,
 };
 pub use task::{Task, TaskCompletionSource};
 pub use tcp_transport_base::{DisposableServer, DisposeCallback, TcpTransportBase};
