@@ -175,6 +175,8 @@ impl LayoutableImpl for TextBlock {
 
         let available_size = final_size.deflate(padding);
 
+        // Deviation (DEVIATIONS.md, Text block): the layout of the measure is
+        // kept when nothing it depends on differs.
         // The reference disposes the layout here and creates it again for the
         // arranged size, reusing the shaped runs of the run cache (a layout
         // created during measure is left aligned). A layout that was created

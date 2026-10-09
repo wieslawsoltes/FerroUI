@@ -10,7 +10,11 @@ figures. Designs 03 and 04 are verified against those figures and upstream: what
 allows of them is implemented (the pool of the lists of old and new inherited values; the hasher of
 the resource dictionary, the handle of the styling parent and the start of a reevaluation in
 place), their caches and their reordered walk are not, and their gains are still to be measured.
-The other designs are not started.
+Designs 05 and 06 are verified in the same way: of 05 two small changes of machinery are
+implemented (a box the data context nodes made for nothing, and the order in which a conversion
+asks whom to log against), its typed path for template bindings is not (upstream has none); 06 has
+nothing the rule allows (the cache of the formatter is upstream's and hits when upstream's does)
+and nothing is implemented for it. The other designs are not started.
 
 Markers, as in the other performance documents: **[M]** measured, **[E]** estimated with the reasoning
 next to it, **[H]** a hypothesis that the design must verify before any code changes.
@@ -110,8 +114,8 @@ first step of each design (always a measurement) has been done.
 | [02](designs/02-property-change-notification.md) | Cheaper property change notifications | `ferro_object.rs`, the property store | 5 to 10 % **[E]** | Medium | Large |
 | [03](designs/03-inheritance-parent-change.md) | Inherited values on a parent change (the pool of lists written; the single pass dropped: it reorders notifications) | the property store | small, to be measured (was 4 to 7 % **[E]** with the single pass) | Low | Small |
 | [04](designs/04-tree-attachment-and-styling.md) | Tree attachment: styles, implicit themes, resources (the hasher and two handle and list changes written; the caches dropped: upstream has none) | `styled_element.rs`, resources, the property store | small, to be measured (was 5 to 10 % **[E]** with the caches) | Low | Small |
-| [05](designs/05-bindings-on-recycle.md) | Bindings that publish less while a container is recycled | data and markup bindings | 4 to 8 % **[E]** | Medium | Medium |
-| [06](designs/06-text-layout.md) | Text layout: shaped runs and line metrics | text formatting, HarfBuzz backend | 3 to 6 % **[E]** | Low | Medium |
+| [05](designs/05-bindings-on-recycle.md) | Bindings while a container is recycled (a box and an order corrected; the typed path for template bindings dropped: upstream has none) | data bindings | small, to be measured (was 4 to 8 % **[E]** with the typed path) | Low | Small |
+| [06](designs/06-text-layout.md) | Text layout: shaped runs and line metrics (verified; nothing implemented: the caches of the design are not upstream's) | none | none (was 3 to 6 % **[E]** with the caches) | None | None |
 | [07](designs/07-compositor-frame-cost.md) | Cost of a composed frame | composition, Skia backend | 3 to 8 % **[E]** | Medium | Medium |
 | [08](designs/08-build-settings.md) | Build settings of the browser module | `Cargo.toml`, the link | up to 6 % more **[M]** | Low | Small |
 | [09](designs/09-measurement.md) | Benchmarks and a regression gate (items 1 and 2 written) | scripts, CI, `diagnostics/perf_counters.rs`, the catalog tests | none by itself | Low | Medium |

@@ -87,6 +87,10 @@ impl ExpressionNode for DataContextNode {
                                 .source_object()
                                 .filter(|o| <dyn IDataContextProvider>::is_implemented_by(o));
                             if let Some(object) = object {
+                                // Deviation (DEVIATIONS.md, Bindings): upstream's
+                                // `OnPropertyChanged` sets the new value of the
+                                // notification; here the data context is read
+                                // again (as in the handler of the parent below).
                                 this.state.set_value(data_context_value_of(&object), None);
                             }
                         }
