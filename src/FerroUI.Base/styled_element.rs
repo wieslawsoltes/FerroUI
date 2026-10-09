@@ -247,7 +247,11 @@ impl StyledElementImpl for StyledElement {
     }
 
     fn styling_parent(this: &Self) -> Option<StyleHostRef> {
-        this.inheritance_parent().and_then(|p| p.cast::<StyledElement>()).map(StyleHostRef::Element)
+        // The handle of the inheritance parent becomes the handle of the
+        // host: the walks up the tree (styles, resources, the logical root)
+        // ask for it at every step, and a second handle made and dropped
+        // there is a count up and down per step.
+        this.inheritance_parent().and_then(|p| p.downcast::<StyledElement>().ok()).map(StyleHostRef::Element)
     }
 
     fn is_theme_variant_root(_this: &Self) -> bool {
