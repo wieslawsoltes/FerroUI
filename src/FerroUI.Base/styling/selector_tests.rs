@@ -1,7 +1,17 @@
 //! Tests for the selectors and their activators.
 //!
 //! Ported from the selector tests of the reference implementation, with the
-//! classes of `test_support` in place of controls.
+//! classes of `test_support` in place of controls: `Class1` stands for the
+//! first control of a test (`Control1`, `TestLogical1`, a button, a templated
+//! control, the border of a panel), `Class2` for a class derived from it or
+//! the second one, `Class3` for an unrelated one (`TestLogical3`, a text
+//! block, the border of a template).
+//!
+//! Tests keep the names of the reference tests. Where two reference files have
+//! a test of the same name, the tests are in a module named after the file
+//! (`selector_tests_not`, `selector_tests_nth_child`,
+//! `selector_tests_nth_last_child`). A test that is not from the reference
+//! tests says so.
 
 use super::activators::{IStyleActivator, IStyleActivatorSink};
 use super::test_support::*;
@@ -36,6 +46,34 @@ impl ActivatorSink {
     }
 }
 
+/// Subscribes to an activator and records the values it produces, starting
+/// with its current one (what subscribing to the observable of an activator
+/// yields in the reference tests).
+struct ValuesSink {
+    values: std::cell::RefCell<Vec<bool>>,
+}
+
+impl IStyleActivatorSink for ValuesSink {
+    fn on_next(&self, value: bool) {
+        self.values.borrow_mut().push(value);
+    }
+}
+
+impl ValuesSink {
+    fn new(match_: &SelectorMatch) -> (Rc<Self>, Rc<dyn IStyleActivator>) {
+        let activator = match_.activator().expect("the match has an activator").clone();
+        let sink = Rc::new(ValuesSink { values: std::cell::RefCell::new(Vec::new()) });
+        let weak: Weak<dyn IStyleActivatorSink> = Rc::downgrade(&sink) as Weak<dyn IStyleActivatorSink>;
+        activator.subscribe(weak);
+        sink.values.borrow_mut().push(activator.get_is_active());
+        (sink, activator)
+    }
+
+    fn values(&self) -> Vec<bool> {
+        self.values.borrow().clone()
+    }
+}
+
 fn unsubscribe(sink: &Rc<ActivatorSink>, activator: &Rc<dyn IStyleActivator>) {
     let weak: Weak<dyn IStyleActivatorSink> = Rc::downgrade(sink) as Weak<dyn IStyleActivatorSink>;
     activator.unsubscribe(&weak);
@@ -59,6 +97,23 @@ fn of_type_doesnt_match_control_of_wrong_type() {
     let control = Class3::new();
     let target = Selectors::of_type::<Class1>();
     assert_eq!(target.match_(&element(&control), None, true).result(), SelectorMatchResult::NeverThisType);
+}
+
+#[test]
+fn of_type_class_doesnt_match_control_of_wrong_type() {
+    let control = Class3::new();
+    let target = Selectors::of_type::<Class1>().class("foo");
+
+    assert_eq!(target.match_(&element(&control), None, true).result(), SelectorMatchResult::NeverThisType);
+}
+
+#[test]
+fn of_type_matches_control_with_templated_parent() {
+    let control = Class1::new();
+    control.set_templated_parent(Class3::new().upcast::<FerroObject>());
+    let target = Selectors::of_type::<Class1>();
+
+    assert_eq!(target.match_(&element(&control), None, true).result(), SelectorMatchResult::AlwaysThisType);
 }
 
 #[test]
@@ -122,8 +177,25 @@ fn name_doesnt_match_control_without_name() {
 }
 
 #[test]
-fn name_has_correct_immutable_string() {
+fn name_doesnt_match_control_with_templated_parent() {
+    let control = Class1::new();
+    control.set_templated_parent(Class3::new().upcast::<FerroObject>());
+    let target = Selectors::name(None, "foo");
+
+    assert_eq!(target.match_(&element(&control), None, true).result(), SelectorMatchResult::NeverThisInstance);
+}
+
+#[test]
+fn name_has_correct_string_representation() {
+    let target = Selectors::name(None, "foo");
+
+    assert_eq!(target.to_string(), "#foo");
+}
+
+#[test]
+fn type_and_name_has_correct_string_representation() {
     let target = Selectors::of_type::<Class1>().name("foo");
+
     assert_eq!(target.to_string(), "Class1#foo");
 }
 
@@ -136,9 +208,22 @@ fn empty_name_is_rejected() {
 // --- class -------------------------------------------------------------------
 
 #[test]
+fn class_selector_should_have_correct_string_representation() {
+    let target = Selectors::class(None, "foo");
+
+    assert_eq!(target.to_string(), ".foo");
+}
+
+#[test]
+fn pesudo_class_selector_should_have_correct_string_representation() {
+    let target = Selectors::class(None, ":foo");
+
+    assert_eq!(target.to_string(), ":foo");
+}
+
+// Not from the reference tests: classes after a type.
+#[test]
 fn class_selector_strings() {
-    assert_eq!(Selectors::class(None, "foo").to_string(), ".foo");
-    assert_eq!(Selectors::class(None, ":foo").to_string(), ":foo");
     assert_eq!(Selectors::of_type::<Class1>().class("foo").class(":bar").to_string(), "Class1.foo:bar");
 }
 
@@ -290,7 +375,7 @@ fn child_matches_control_when_it_is_child_of_type_and_class() {
 }
 
 #[test]
-fn child_doesnt_match_control_without_parent() {
+fn child_doesnt_match_control_when_it_has_no_parent() {
     let control = Class3::new();
     let selector = Selectors::of_type::<Class1>().child().of_type::<Class3>();
     assert_eq!(selector.match_(&element(&control), None, true).result(), SelectorMatchResult::NeverThisInstance);
@@ -346,6 +431,25 @@ fn descendant_matches_control_when_it_is_descendant_of_type_and_class() {
     assert!(sink.active());
     grandparent.classes().remove("foo");
     assert!(!sink.active());
+}
+
+#[test]
+fn descendant_doesnt_match_control_when_it_is_descendant_of_type_but_wrong_class() {
+    let grandparent = Class1::new();
+    let parent = Class2::new();
+    let child = Class3::new();
+
+    grandparent.classes().add("bar");
+    set_child(&grandparent, &parent);
+    parent.classes().add("foo");
+    set_child(&parent, &child);
+
+    let selector = Selectors::of_type::<Class1>().class("foo").descendant().of_type::<Class3>();
+    let match_ = selector.match_(&element(&child), None, true);
+
+    assert!(match_.activator().is_some());
+    let (sink, _activator) = ValuesSink::new(&match_);
+    assert_eq!(sink.values(), vec![false]);
 }
 
 #[test]
@@ -419,10 +523,80 @@ fn control_in_template_is_matched_with_typeof_templated_control_class() {
 }
 
 #[test]
-fn control_without_templated_parent_is_not_matched_by_template_selector() {
-    let control = Class3::new();
-    let selector = Selectors::of_type::<Class1>().template().of_type::<Class3>();
-    assert_eq!(selector.match_(&element(&control), None, true).result(), SelectorMatchResult::NeverThisInstance);
+fn control_not_in_template_is_not_matched_with_template_selector() {
+    let target = Class1::new();
+    let border = templated_child(&target);
+    let selector = Selectors::of_type_info(None, target.get_type()).template().of_type::<Class3>();
+
+    border.set_templated_parent(None::<Ref<FerroObject>>);
+
+    assert_eq!(selector.match_(&element(&border), None, true).result(), SelectorMatchResult::NeverThisInstance);
+}
+
+#[test]
+fn control_in_template_of_wrong_type_is_not_matched_with_template_selector() {
+    let target = Class1::new();
+    let border = templated_child(&target);
+    let selector = Selectors::of_type::<TestPanel>().template().of_type::<Class3>();
+
+    assert_eq!(selector.match_(&element(&border), None, true).result(), SelectorMatchResult::NeverThisInstance);
+}
+
+#[test]
+fn control_in_template_is_matched_with_type_of_templated_control() {
+    let target = Class1::new();
+    let style_key = Class1::TYPE;
+    let border = templated_child(&target);
+    let selector = Selectors::of_type_info(None, style_key).template().of_type::<Class3>();
+
+    assert_eq!(selector.match_(&element(&border), None, true).result(), SelectorMatchResult::AlwaysThisInstance);
+}
+
+#[test]
+fn control_in_template_is_matched_with_correct_type_of_and_class_of_templated_control() {
+    let target = Class1::new();
+    target.classes().add("foo");
+    let style_key = Class1::TYPE;
+
+    let border = templated_child(&target);
+    let selector = Selectors::of_type_info(None, style_key).class("foo").template().of_type::<Class3>();
+    let match_ = selector.match_(&element(&border), None, true);
+
+    assert!(match_.activator().is_some());
+    let (sink, _activator) = ValuesSink::new(&match_);
+    assert_eq!(sink.values(), vec![true]);
+}
+
+#[test]
+fn control_in_template_is_not_matched_with_correct_type_of_and_wrong_class_of_templated_control() {
+    let target = Class1::new();
+    target.classes().add("bar");
+
+    let border = templated_child(&target);
+    let selector = Selectors::of_type_info(None, Class1::TYPE).class("foo").template().of_type::<Class3>();
+    let match_ = selector.match_(&element(&border), None, true);
+
+    assert!(match_.activator().is_some());
+    let (sink, _activator) = ValuesSink::new(&match_);
+    assert_eq!(sink.values(), vec![false]);
+}
+
+#[test]
+fn nested_selector_is_unsubscribed() {
+    let target = Class1::new();
+    target.classes().add("foo");
+    let border = templated_child(&target);
+    let selector = Selectors::of_type_info(None, Class1::TYPE).class("foo").template().of_type::<Class3>();
+    let match_ = selector.match_(&element(&border), None, true);
+    assert!(match_.activator().is_some());
+
+    {
+        let (sink, activator) = ActivatorSink::new(&match_);
+        assert_eq!(1, target.classes().listener_count());
+        unsubscribe(&sink, &activator);
+    }
+
+    assert_eq!(0, target.classes().listener_count());
 }
 
 #[test]
@@ -496,6 +670,17 @@ fn of_type_not_class_doesnt_match_control_of_wrong_type() {
     assert_eq!(target.match_(&element(&control), None, true).result(), SelectorMatchResult::NeverThisType);
 }
 
+mod selector_tests_not {
+    use super::*;
+
+    #[test]
+    fn returns_correct_target_type() {
+        let target = Selectors::of_type::<Class1>().not_with(|x| Selectors::class(x, "foo"));
+
+        assert_eq!(target.target_type(), Some(Class1::TYPE));
+    }
+}
+
 // --- or ----------------------------------------------------------------------
 
 #[test]
@@ -544,23 +729,43 @@ fn or_selector_doesnt_match_control_with_incorrect_name() {
 }
 
 #[test]
-fn or_selector_returns_correct_target_type_when_types_same() {
+fn returns_correct_target_type_when_types_same() {
     let target = Selectors::or([Selectors::of_type::<Class1>().class("foo"), Selectors::of_type::<Class1>().class("bar")]);
     assert_eq!(target.target_type(), Some(Class1::TYPE));
 }
 
 #[test]
-fn or_selector_returns_common_target_type() {
-    let target = Selectors::or([Selectors::of_type::<Class1>().class("foo"), Selectors::of_type::<Class2>().class("bar")]);
-    assert_eq!(target.target_type(), Some(Class1::TYPE));
-    let target = Selectors::or([Selectors::of_type::<Class1>(), Selectors::of_type::<Class3>()]);
+fn returns_common_target_type() {
+    let target = Selectors::or([Selectors::of_type::<Class1>().class("foo"), Selectors::of_type::<Class3>().class("bar")]);
+
     assert_eq!(target.target_type(), Some(layout::Layoutable::TYPE));
 }
 
+// Not from the reference tests: the common type of a class and a class
+// derived from it.
 #[test]
-fn or_selector_returns_null_target_type_when_a_type_is_missing() {
-    let target = Selectors::or([Selectors::of_type::<Class1>(), Selectors::class(None, "bar")]);
+fn or_selector_returns_base_target_type_for_derived_type() {
+    let target = Selectors::or([Selectors::of_type::<Class1>().class("foo"), Selectors::of_type::<Class2>().class("bar")]);
+    assert_eq!(target.target_type(), Some(Class1::TYPE));
+}
+
+#[test]
+fn returns_null_target_type_when_a_selector_has_no_target_type() {
+    let target = Selectors::or([Selectors::of_type::<Class1>().class("foo"), Selectors::class(None, "bar")]);
+
     assert_eq!(target.target_type(), None);
+}
+
+#[test]
+fn validate_nesting_selector_checks_children_when_parent_is_an_or_selector() {
+    let target = Selectors::or([Selectors::class(None, "foo"), Selectors::class(None, "bar")]).name("baz");
+
+    crate::tests::assert_panics(|| target.validate_nesting_selector(false));
+
+    let target =
+        Selectors::or([Selectors::nesting(None).class("foo"), Selectors::nesting(None).class("bar")]).name("baz");
+
+    target.validate_nesting_selector(false);
 }
 
 #[test]
@@ -641,6 +846,109 @@ fn named_template_child_of_control_with_two_classes() {
 }
 
 #[test]
+fn named_of_type_template_child_of_control_with_two_classes_wrong_type() {
+    let control = Class1::new();
+    let border = templated_child(&control);
+    border.set_name(Some("border".to_string()));
+
+    let selector =
+        Selectors::of_type::<Class1>().class("foo").class("bar").template().of_type::<Class2>().name("baz");
+
+    let match_ = selector.match_(&element(&border), None, true);
+
+    assert_eq!(match_.result(), SelectorMatchResult::NeverThisType);
+}
+
+#[test]
+fn control_with_class_descendent_of_control_with_two_classes() {
+    let text_block = Class3::new();
+    let control = Class1::new();
+    set_child(&control, &text_block);
+
+    let selector =
+        Selectors::of_type::<Class1>().class("foo").class("bar").descendant().of_type::<Class3>().class("baz");
+
+    let match_ = selector.match_(&element(&text_block), None, true);
+
+    assert_eq!(match_.result(), SelectorMatchResult::Sometimes);
+    assert!(match_.activator().is_some());
+    let (values, _activator) = ValuesSink::new(&match_);
+
+    assert_eq!(values.values(), vec![false]);
+    control.classes().add_range(["foo", "bar"]);
+    assert_eq!(values.values(), vec![false]);
+    text_block.classes().add("baz");
+    assert_eq!(values.values(), vec![false, true]);
+}
+
+#[test]
+fn nested_property_equals() {
+    let control = Class2::new();
+    let parent = Class1::new();
+    set_child(&parent, &control);
+
+    let target = Selectors::of_type::<Class1>()
+        .property_equals(Class1::foo_property(), "foo".to_string())
+        .child()
+        .of_type::<Class2>()
+        .property_equals(Class1::foo_property(), "bar".to_string());
+
+    let match_ = target.match_(&element(&control), None, true);
+    assert_eq!(match_.result(), SelectorMatchResult::Sometimes);
+
+    assert!(match_.activator().is_some());
+    let (sink, _activator) = ActivatorSink::new(&match_);
+
+    assert!(!sink.active());
+    control.set_foo("bar");
+    assert!(!sink.active());
+    parent.set_foo("foo");
+    assert!(sink.active());
+}
+
+#[test]
+fn target_type_of_type() {
+    let selector = Selectors::of_type::<Class1>();
+
+    assert_eq!(selector.target_type(), Some(Class1::TYPE));
+}
+
+#[test]
+fn target_type_of_type_class() {
+    let selector = Selectors::of_type::<Class1>().class("foo");
+
+    assert_eq!(selector.target_type(), Some(Class1::TYPE));
+}
+
+#[test]
+fn target_type_is_class() {
+    let selector = Selectors::is::<Class1>().class("foo");
+
+    assert_eq!(selector.target_type(), Some(Class1::TYPE));
+}
+
+#[test]
+fn target_type_child() {
+    let selector = Selectors::of_type::<Class1>().child().of_type::<Class3>();
+
+    assert_eq!(selector.target_type(), Some(Class3::TYPE));
+}
+
+#[test]
+fn target_type_descendant() {
+    let selector = Selectors::of_type::<Class1>().descendant().of_type::<Class3>();
+
+    assert_eq!(selector.target_type(), Some(Class3::TYPE));
+}
+
+#[test]
+fn target_type_template() {
+    let selector = Selectors::of_type::<Class1>().template().of_type::<Class3>();
+
+    assert_eq!(selector.target_type(), Some(Class3::TYPE));
+}
+
+#[test]
 fn named_class_template_child_of_control() {
     let templated_parent = Class1::new();
     let child = templated_child(&templated_parent);
@@ -666,13 +974,12 @@ fn type_child_without_matching_parent_never_matches_type() {
     assert_eq!(selector.match_(&element(&control), None, true).result(), SelectorMatchResult::NeverThisType);
 }
 
+// Not from the reference tests: a combinator has no target type, and classes
+// after a combinator keep the type of the selector they follow.
 #[test]
 fn target_type_of_selectors() {
-    assert_eq!(Selectors::of_type::<Class1>().class("foo").target_type(), Some(Class1::TYPE));
     assert_eq!(Selectors::of_type::<Class1>().child().target_type(), None);
     assert_eq!(Selectors::of_type::<Class1>().child().of_type::<Class3>().class("x").target_type(), Some(Class3::TYPE));
-    assert_eq!(Selectors::of_type::<Class1>().template().of_type::<Class3>().target_type(), Some(Class3::TYPE));
-    assert_eq!(Selectors::of_type::<Class1>().nth_child(2, 0).target_type(), Some(Class1::TYPE));
 }
 
 // --- nth-child ---------------------------------------------------------------
@@ -817,6 +1124,113 @@ fn nth_child_selector_should_have_correct_string_representation() {
     assert_eq!(Selectors::of_type::<Class1>().nth_child(2, 1).to_string(), "Class1:nth-child(2n+1)");
 }
 
+/// The values the activators of `target` produce first for eleven children of
+/// a panel (the rows of the theories of the reference tests have eleven items).
+fn nth_master_results(target: &Selector, count: usize) -> Vec<bool> {
+    let (_panel, children) = panel_with_children(count);
+    children
+        .iter()
+        .map(|border| {
+            let match_ = target.match_(&element(border), None, true);
+            let (sink, _activator) = ValuesSink::new(&match_);
+            sink.values()[0]
+        })
+        .collect()
+}
+
+const F: bool = false;
+const T: bool = true;
+
+// http://nthmaster.com/
+#[test]
+fn nth_child_master_com_test_sigle_selector() {
+    let rows: [(i32, i32, [bool; 11]); 3] = [
+        (0, 8, [F, F, F, F, F, F, F, T, F, F, F]),
+        (1, 6, [F, F, F, F, F, T, T, T, T, T, T]),
+        (-1, 9, [T, T, T, T, T, T, T, T, T, F, F]),
+    ];
+    for (step, offset, items) in rows {
+        let previous = Selectors::of_type::<Class1>();
+        let target = previous.nth_child(step, offset);
+
+        let results = nth_master_results(&target, items.len());
+
+        assert_eq!(items.to_vec(), results, "step {step}, offset {offset}");
+    }
+}
+
+// http://nthmaster.com/
+#[test]
+fn nth_child_master_com_test_double_selector() {
+    let rows: [(i32, i32, i32, i32, [bool; 11]); 2] = [
+        (1, 4, -1, 8, [F, F, F, T, T, T, T, T, F, F, F]),
+        (3, 1, 2, 0, [F, F, F, T, F, F, F, F, F, T, F]),
+    ];
+    for (step1, offset1, step2, offset2, items) in rows {
+        let previous = Selectors::of_type::<Class1>();
+        let middle = previous.nth_child(step1, offset1);
+        let target = middle.nth_child(step2, offset2);
+
+        let results = nth_master_results(&target, items.len());
+
+        assert_eq!(items.to_vec(), results, "steps {step1}, {step2}, offsets {offset1}, {offset2}");
+    }
+}
+
+// http://nthmaster.com/
+#[test]
+fn nth_child_master_com_test_triple_selector() {
+    let rows: [(i32, i32, i32, i32, i32, i32, [bool; 11]); 1] =
+        [(1, 2, 2, 1, -1, 9, [F, F, T, F, T, F, T, F, T, F, F])];
+    for (step1, offset1, step2, offset2, step3, offset3, items) in rows {
+        let previous = Selectors::of_type::<Class1>();
+        let middle1 = previous.nth_child(step1, offset1);
+        let middle2 = middle1.nth_child(step2, offset2);
+        let target = middle2.nth_child(step3, offset3);
+
+        let results = nth_master_results(&target, items.len());
+
+        assert_eq!(items.to_vec(), results);
+    }
+}
+
+/// A panel with two children of one class followed by two of another.
+fn panel_with_two_kinds() -> (Ref<TestPanel>, [Ref<Class1>; 2], [Ref<Class3>; 2]) {
+    let panel = TestPanel::new();
+    let (b1, b2, b3, b4) = (Class1::new(), Class1::new(), Class3::new(), Class3::new());
+    panel.add_child(&b1);
+    panel.add_child(&b2);
+    panel.add_child(&b3);
+    panel.add_child(&b4);
+    (panel, [b1, b2], [b3, b4])
+}
+
+mod selector_tests_nth_child {
+    use super::*;
+
+    #[test]
+    fn nth_child_match_control_in_panel_with_previous_selector() {
+        let (_panel, [b1, b2], [b3, b4]) = panel_with_two_kinds();
+
+        let previous = Selectors::of_type::<Class1>();
+        let target = previous.nth_child(2, 0);
+
+        assert_eq!(ValuesSink::new(&target.match_(&element(&b1), None, true)).0.values(), vec![false]);
+        assert_eq!(ValuesSink::new(&target.match_(&element(&b2), None, true)).0.values(), vec![true]);
+        assert!(target.match_(&element(&b3), None, true).activator().is_none());
+        assert_eq!(target.match_(&element(&b3), None, true).result(), SelectorMatchResult::NeverThisType);
+        assert!(target.match_(&element(&b4), None, true).activator().is_none());
+        assert_eq!(target.match_(&element(&b4), None, true).result(), SelectorMatchResult::NeverThisType);
+    }
+
+    #[test]
+    fn returns_correct_target_type() {
+        let target = Selectors::nth_child(Some(Selectors::of_type::<Class1>()), 1, 0);
+
+        assert_eq!(target.target_type(), Some(Class1::TYPE));
+    }
+}
+
 // --- nth-last-child ----------------------------------------------------------
 
 #[test]
@@ -861,6 +1275,32 @@ fn nth_last_child_tracks_total_count() {
 fn nth_last_child_selector_should_have_correct_string_representation() {
     assert_eq!(Selectors::nth_last_child(None, 2, 1).to_string(), ":nth-last-child(2n+1)");
     assert_eq!(Selectors::of_type::<Class1>().nth_last_child(0, 1).to_string(), "Class1:nth-last-child(1)");
+}
+
+mod selector_tests_nth_last_child {
+    use super::*;
+
+    #[test]
+    fn nth_child_match_control_in_panel_with_previous_selector() {
+        let (_panel, [b1, b2], [b3, b4]) = panel_with_two_kinds();
+
+        let previous = Selectors::of_type::<Class1>();
+        let target = previous.nth_last_child(2, 0);
+
+        assert_eq!(ValuesSink::new(&target.match_(&element(&b1), None, true)).0.values(), vec![true]);
+        assert_eq!(ValuesSink::new(&target.match_(&element(&b2), None, true)).0.values(), vec![false]);
+        assert!(target.match_(&element(&b3), None, true).activator().is_none());
+        assert_eq!(target.match_(&element(&b3), None, true).result(), SelectorMatchResult::NeverThisType);
+        assert!(target.match_(&element(&b4), None, true).activator().is_none());
+        assert_eq!(target.match_(&element(&b4), None, true).result(), SelectorMatchResult::NeverThisType);
+    }
+
+    #[test]
+    fn returns_correct_target_type() {
+        let target = Selectors::nth_last_child(Some(Selectors::of_type::<Class1>()), 1, 0);
+
+        assert_eq!(target.target_type(), Some(Class1::TYPE));
+    }
 }
 
 // --- nesting -----------------------------------------------------------------
