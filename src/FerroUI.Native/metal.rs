@@ -2,12 +2,14 @@
 //! external objects feature, the render surface of a top-level and its
 //! render target and drawing session.
 
+use crate::gpu_handle_wrap_feature::GpuHandleWrapFeature;
 use crate::helpers::ComResultExt;
 use crate::interop::*;
 use crate::top_level_impl::SurfaceTopLevel;
 use ferroui_base::platform::surfaces::{IPlatformRenderSurface, IPlatformRenderSurfaceRenderTarget};
 use ferroui_base::platform::{
-    IOptionalFeatureProvider, IPlatformGraphics, IPlatformGraphicsContext, IPlatformHandle,
+    IExternalObjectsHandleWrapRenderInterfaceContextFeature, IOptionalFeatureProvider, IPlatformGraphics,
+    IPlatformGraphicsContext, IPlatformHandle,
     KnownPlatformGraphicsExternalImageHandleTypes, KnownPlatformGraphicsExternalSemaphoreHandleTypes,
     PlatformGraphicsExternalImageFormat, PlatformGraphicsExternalImageProperties,
 };
@@ -27,8 +29,15 @@ use std::rc::Rc;
 use std::sync::{Arc, Weak};
 
 /// The Metal platform graphics of the macOS backend.
+// The original holds the factory and hands it to every device, whose
+// handle wrapping feature asks it for a memory management helper. The
+// graphics are shared with the thread that renders, and the factory is an
+// object of the UI thread (releasing its last reference ends the native
+// application state): the helper is asked for once, here, and every device
+// gets a reference to it (DEVIATIONS.md, Native backend).
 pub struct MetalPlatformGraphics {
     display: ComPtr<IFrnMetalDisplay>,
+    memory_helper: ComPtr<IFrnNativeObjectsMemoryManagement>,
 }
 
 // SAFETY: the platform graphics are shared by the UI thread and the thread
@@ -43,6 +52,14 @@ pub struct MetalPlatformGraphics {
 // of a native object is atomic (`ComObject` in
 // `native/FerroUI.Native/inc/comimpl.h`). The device a call returns belongs
 // to the thread that asked.
+//
+// The memory management helper (`MemHelper` in
+// `native/FerroUI.Native/src/OSX/memhelp.mm`) has no state either: its
+// methods retain and release the object they are handed (`CFRetain`,
+// `CFRelease`, `retain` and `release` of an Objective-C object, all of which
+// any thread may call), so a thread that creates a device may take a
+// reference to the helper, and the features and wrappers of that device may
+// call it and release it, while another thread does the same.
 unsafe impl Send for MetalPlatformGraphics {}
 // SAFETY: see `Send`.
 unsafe impl Sync for MetalPlatformGraphics {}
@@ -52,13 +69,14 @@ impl MetalPlatformGraphics {
     /// not available.
     pub fn new(factory: &IFerroNativeFactory) -> Result<MetalPlatformGraphics, HResult> {
         let display = factory.obtain_metal_display()?.ok_or(HResult::POINTER)?;
-        Ok(MetalPlatformGraphics { display })
+        let memory_helper = factory.create_memory_management_helper()?.ok_or(HResult::POINTER)?;
+        Ok(MetalPlatformGraphics { display, memory_helper })
     }
 
     /// Creates a Metal device; fails when the system has none.
     pub fn try_create_context(&self) -> Result<Rc<MetalDevice>, HResult> {
         let native = self.display.create_device()?.ok_or(HResult::POINTER)?;
-        Ok(MetalDevice::new(native))
+        Ok(MetalDevice::new(self.memory_helper.clone(), native))
     }
 }
 
@@ -85,15 +103,20 @@ impl IPlatformGraphics for MetalPlatformGraphics {
 pub struct MetalDevice {
     weak_self: std::rc::Weak<MetalDevice>,
     sync_root: ferroui_base::utilities::DisposableLock,
+    handle_wrap_feature: Rc<GpuHandleWrapFeature>,
     external_objects_feature: Rc<MetalExternalObjectsFeature>,
     native: RefCell<Option<ComPtr<IFrnMetalDevice>>>,
 }
 
 impl MetalDevice {
-    fn new(native: ComPtr<IFrnMetalDevice>) -> Rc<MetalDevice> {
+    fn new(
+        memory_helper: ComPtr<IFrnNativeObjectsMemoryManagement>,
+        native: ComPtr<IFrnMetalDevice>,
+    ) -> Rc<MetalDevice> {
         Rc::new_cyclic(|weak_self| MetalDevice {
             weak_self: weak_self.clone(),
             sync_root: ferroui_base::utilities::DisposableLock::new(),
+            handle_wrap_feature: Rc::new(GpuHandleWrapFeature::new(memory_helper)),
             external_objects_feature: Rc::new(MetalExternalObjectsFeature::new(&native, weak_self.clone())),
             native: RefCell::new(Some(native)),
         })
@@ -127,13 +150,19 @@ impl MetalDevice {
 }
 
 impl IOptionalFeatureProvider for MetalDevice {
-    /// The device announces itself as a Metal device, and its external
-    /// objects feature (the import of an IOSurface and of a shared event).
-    /// The feature that wraps GPU handles is absent until it is ported.
+    /// The device announces itself as a Metal device, the feature that
+    /// wraps the handle of an IOSurface or of a shared event for the time
+    /// of its import, and its external objects feature (the import of an
+    /// IOSurface and of a shared event).
     fn try_get_feature(&self, feature_type: TypeId) -> Option<Rc<dyn Any>> {
         if feature_type == TypeId::of::<dyn IMetalDevice>() {
             let this: Rc<dyn IMetalDevice> = self.weak_self.upgrade()?;
             return Some(Rc::new(this));
+        }
+        if feature_type == TypeId::of::<dyn IExternalObjectsHandleWrapRenderInterfaceContextFeature>() {
+            let feature: Rc<dyn IExternalObjectsHandleWrapRenderInterfaceContextFeature> =
+                self.handle_wrap_feature.clone();
+            return Some(Rc::new(feature));
         }
         if feature_type == TypeId::of::<dyn IMetalExternalObjectsFeature>() {
             let feature: Rc<dyn IMetalExternalObjectsFeature> = self.external_objects_feature.clone();
@@ -360,9 +389,11 @@ impl IMetalExternalObjectsFeature for MetalExternalObjectsFeature {
             panic!("Specified method is not supported.");
         }
 
-        // SAFETY: by its descriptor the handle is an `IOSurfaceRef`, which
-        // the one who imports keeps alive until the import has completed;
-        // the texture the native device makes of it retains the surface.
+        // SAFETY: by its descriptor the handle is an `IOSurfaceRef`. The
+        // compositor hands over the handle the wrapping feature of the
+        // device made of it, which holds a reference until the import has
+        // run; another caller keeps the surface alive for the call. The
+        // texture the native device makes of it retains the surface.
         let texture = unsafe { self.native().import_io_surface(handle.handle() as *mut c_void, format) }
             .and_then(|texture| texture.ok_or(HResult::POINTER))
             .check();
@@ -376,9 +407,11 @@ impl IMetalExternalObjectsFeature for MetalExternalObjectsFeature {
         if handle.handle_descriptor() != Some(KnownPlatformGraphicsExternalSemaphoreHandleTypes::METAL_SHARED_EVENT) {
             panic!("Specified method is not supported.");
         }
-        // SAFETY: by its descriptor the handle is an `id<MTLSharedEvent>`,
-        // which the one who imports keeps alive until the import has
-        // completed; the native device makes an event of its own from it.
+        // SAFETY: by its descriptor the handle is an `id<MTLSharedEvent>`.
+        // The compositor hands over the handle the wrapping feature of the
+        // device made of it, which holds a reference until the import has
+        // run; another caller keeps the event alive for the call. The
+        // native device makes an event of its own from it.
         let inner = unsafe { self.native().import_shared_event(handle.handle() as *mut c_void) }
             .and_then(|event| event.ok_or(HResult::POINTER))
             .check();
@@ -565,6 +598,7 @@ mod tests {
     // Not from upstream, which has no tests of the feature: the feature over
     // a native device that is implemented here and records its calls.
     use super::*;
+    use crate::gpu_handle_wrap_feature::tests::helper;
     use ferroui_base::platform::PlatformHandle;
 
     type Log = Rc<RefCell<Vec<String>>>;
@@ -687,7 +721,7 @@ mod tests {
     fn device(registry_id: Option<u64>) -> (Rc<MetalDevice>, Log) {
         let log = Log::default();
         let native = IFrnMetalDevice::from_impl(FakeNativeDevice { log: log.clone(), registry_id });
-        (MetalDevice::new(native), log)
+        (MetalDevice::new(helper(&log), native), log)
     }
 
     fn feature(device: &Rc<MetalDevice>) -> Rc<dyn IMetalExternalObjectsFeature> {
@@ -836,6 +870,57 @@ mod tests {
 
         let (device, _) = device(None);
         feature(&device).submit_signal(&ForeignEvent, 1);
+    }
+
+    #[test]
+    fn the_device_wraps_the_handles_it_imports() {
+        let (device, log) = device(None);
+        let features: &dyn IOptionalFeatureProvider = &*device;
+        let wrap = features
+            .try_get::<dyn IExternalObjectsHandleWrapRenderInterfaceContextFeature>()
+            .expect("the device has the feature");
+        let feature = feature(&device);
+
+        // An IOSurface: retained when it is handed over, imported from the
+        // wrapper, released when the import has run.
+        let surface = io_surface(5);
+        let wrapped = wrap
+            .wrap_image_handle_on_any_thread(&surface, properties(Default::default()))
+            .expect("an IOSurface is wrapped");
+        drop(surface);
+        let texture = feature.import_image(wrapped.clone().as_platform_handle(), properties(Default::default()));
+        wrapped.dispose();
+        assert_eq!(
+            vec!["RetainCFObject(5)", "ImportIOSurface(5, kFrnRgba8888)", "ReleaseCFObject(5)"],
+            take(&log)
+        );
+        drop(texture);
+        let _ = take(&log);
+
+        // A shared event likewise.
+        let event = shared_event(9);
+        let wrapped = wrap.wrap_semaphore_handle_on_any_thread(&event).expect("a shared event is wrapped");
+        drop(event);
+        let imported = feature.import_shared_event(wrapped.clone().as_platform_handle());
+        wrapped.dispose();
+        assert_eq!(vec!["RetainNSObject(9)", "ImportSharedEvent(9)", "ReleaseNSObject(9)"], take(&log));
+        drop(imported);
+    }
+
+    #[test]
+    fn the_wrapping_feature_outlives_a_disposed_device() {
+        // As in the original, the feature holds the helper and not the
+        // device: a handle wrapped before the device went is still released.
+        let (device, log) = device(None);
+        let features: &dyn IOptionalFeatureProvider = &*device;
+        let wrap = features
+            .try_get::<dyn IExternalObjectsHandleWrapRenderInterfaceContextFeature>()
+            .expect("the device has the feature");
+        let wrapped = wrap.wrap_semaphore_handle_on_any_thread(&shared_event(9)).expect("a shared event is wrapped");
+
+        device.dispose();
+        wrapped.dispose();
+        assert_eq!(vec!["RetainNSObject(9)", "ReleaseNSObject(9)"], take(&log));
     }
 
     #[test]

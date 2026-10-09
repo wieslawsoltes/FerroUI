@@ -985,12 +985,6 @@ reason = "not ported for now (row 18 of CRITICAL-PATH.md): the desktop build of 
 
 [[map]]
 project = "Avalonia.Native"
-upstream = ["GpuHandleWrapFeature.cs"]
-kind = "not-applicable"
-reason = "not ported for now: the feature that retains an `IOSurface` or a shared Metal event while the compositor imports it (`IExternalObjectsHandleWrapRenderInterfaceContextFeature`, whose contract is in the base crate). Upstream creates it in the Metal device (`Metal.cs`) and in the OpenGL context, and `MetalDevice::try_get_feature` of `metal.rs` does not offer it. Applicable with the external objects feature on Metal (`MetalExternalObjectsFeature` of `Metal.cs` and `Gpu/Metal/SkiaMetalExternalObjectsFeature.cs` of the Skia backend, both reported as missing): the entry is removed when that work starts"
-
-[[map]]
-project = "Avalonia.Native"
 upstream = ["IAvnMenuItem.cs"]
 kind = "merged"
 rust = "frn_menu_item.rs"
