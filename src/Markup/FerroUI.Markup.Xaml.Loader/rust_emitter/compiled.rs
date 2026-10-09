@@ -952,7 +952,13 @@ fn loader_table(
     source.push_str("/// `rt::uri_equals`); `Ok(None)` if this file has no such document, the load error of the build\n");
     source.push_str("/// if it fails.\n");
     source.push_str("pub fn try_load(\n");
-    source.push_str("    service_provider: ::core::option::Option<&::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,\n");
+    // A table whose only entry creates the class with its parameterless constructor does not
+    // use the service provider.
+    let uses_service_provider = !loadable.is_empty() || matches!(constructor, Some(Constructor::ServiceProvider(_)));
+    let parameter = if uses_service_provider { "service_provider" } else { "_service_provider" };
+    source.push_str(&format!(
+        "    {parameter}: ::core::option::Option<&::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,\n"
+    ));
     source.push_str("    uri: &str,\n");
     source.push_str(") -> ::core::result::Result<::core::option::Option<::ferroui_base::BoxedValue>, ::ferroui_markup_xaml::XamlLoadException> {\n");
     // The class has an entry when it has a constructor the table can call.

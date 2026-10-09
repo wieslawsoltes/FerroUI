@@ -1064,6 +1064,133 @@ pub fn cast<T: Clone + 'static, V: PartialEq + 'static>(value: V, line: i32, pos
     }
 }
 
+/// The arguments a delegate of a method named in markup is called with, read in order as
+/// the Rust types the method declares ([`method_delegate`]).
+pub struct DelegateArguments<'a> {
+    arguments: &'a [MarkupValue],
+    next: usize,
+}
+
+impl DelegateArguments<'_> {
+    /// The next argument as a `T`, as the run-time loader hands it to the method: an
+    /// object passed to an untyped parameter in the untyped form of the framework
+    /// ([`untyped_object_form`]), then the conversion of the untyped member call
+    /// ([`from_markup_value`]). A value that is not a `T` is the argument error of the
+    /// member.
+    pub fn next<T: Clone + 'static>(&mut self) -> Result<T, MarkupInvokeError> {
+        let index = self.next;
+        self.next += 1;
+        let value = self.arguments.get(index).cloned().flatten();
+        let value = match (&value, ValueType::of::<T>().is_object()) {
+            (Some(boxed), true) => untyped_object_form(boxed).map(Some).unwrap_or(value),
+            _ => value,
+        };
+        from_markup_value::<T>(&value).ok_or_else(|| MarkupInvokeError::Argument {
+            // The instance is the first argument of the member.
+            index: index + 1,
+            expected: std::any::type_name::<T>(),
+            actual: match &value {
+                Some(value) => value.type_name().to_string(),
+                None => "null".to_string(),
+            },
+        })
+    }
+}
+
+/// The value a method named in markup returns to the caller of its delegate, as the
+/// run-time loader returns the result of a member it invokes: in its untyped form, an
+/// object in the handle of its run-time class.
+pub fn delegate_result<T: PartialEq + 'static>(value: T) -> MarkupValue {
+    into_markup_value(value).map(normalize_object)
+}
+
+/// The delegate of a method of the root object of `context` named in markup
+/// (`XamlLoadMethodDelegateNode`: `new TDelegate(root, &Method)`), as the run-time loader
+/// creates it: `method` calls the typed function of the declared method with the
+/// instance and the arguments, which it reads from [`DelegateArguments`] in the types the
+/// method declares; `parameters` is the number of them.
+///
+/// The delegate does not keep the root object alive: the root object owns the element the
+/// delegate is attached to, and a strong reference would close a cycle. A delegate whose
+/// root object is gone does nothing, as does one that is called with other arguments than
+/// the method takes or whose method fails: a handler has nowhere to report a failure to.
+pub fn method_delegate<This: Clone + 'static>(
+    context: &Rc<XamlIlContext>,
+    parameters: usize,
+    method: impl Fn(&This, &mut DelegateArguments<'_>) -> Result<MarkupValue, MarkupInvokeError> + 'static,
+) -> ferroui_base::metadata::MarkupDelegate {
+    let instance = context.root_object_field().as_ref().map(ferroui_base::data::core::WeakValue::new);
+    ferroui_base::metadata::MarkupDelegate::new(move |arguments| {
+        let instance = match &instance {
+            Some(instance) => Some(normalize_object(instance.upgrade()?)),
+            None => None,
+        };
+        if arguments.len() != parameters {
+            return None;
+        }
+        let this = from_markup_value::<This>(&instance)?;
+        method(&this, &mut DelegateArguments { arguments, next: 0 }).ok().flatten()
+    })
+}
+
+/// [`method_delegate`] of a static method: the delegate has no instance.
+pub fn static_method_delegate(
+    parameters: usize,
+    method: impl Fn(&mut DelegateArguments<'_>) -> Result<MarkupValue, MarkupInvokeError> + 'static,
+) -> ferroui_base::metadata::MarkupDelegate {
+    ferroui_base::metadata::MarkupDelegate::new(move |arguments| {
+        if arguments.len() != parameters {
+            return None;
+        }
+        method(&mut DelegateArguments { arguments, next: 0 }).ok().flatten()
+    })
+}
+
+/// `target.AddHandler(event, handler, RoutingStrategies.Direct | RoutingStrategies.Bubble, false)`:
+/// what the compiler writes for a routed event assigned in markup
+/// (`XamlDirectCallAddHandler`). The handler is called with the element it is attached to
+/// and a shared handle to the arguments of the event, both untyped.
+pub fn add_handler<Target, EventArgs: ?Sized>(
+    target: &Ref<Target>,
+    event: &ferroui_base::interactivity::RoutedEvent<EventArgs>,
+    handler: ferroui_base::metadata::MarkupDelegate,
+) where
+    Target: ferroui_base::ObjectType + ferroui_base::Upcast<ferroui_base::interactivity::Interactive>,
+{
+    use ferroui_base::interactivity::{Interactive, RoutingStrategies};
+    let routes = RoutingStrategies::DIRECT | RoutingStrategies::BUBBLE;
+    let _ = target.upcast_ref::<Interactive>().add_handler_untyped(event, handler, routes, false);
+}
+
+/// `target.Event += handler` for an event that is not a routed event, which metadata
+/// declares with its subscription (`events:`): the subscription the run-time loader
+/// invokes, of the event `event` the metadata `declaring` declares. No typed function
+/// exists for a subscription (docs/porting/xaml.md, 9.5.3, form C). A failure is the load
+/// error the run-time loader reports for the member `<Type>.add_<Event>` at `line`,
+/// `position`.
+pub fn add_event_handler(
+    declaring: &'static MarkupType,
+    event: &str,
+    target: MarkupValue,
+    handler: ferroui_base::metadata::MarkupDelegate,
+    line: i32,
+    position: i32,
+) -> Result<(), XamlLoadException> {
+    let member = format!("{}.add_{event}", declaring.full_name());
+    let Some(declared) = declaring.find_event(event) else {
+        return Err(at(TARGET_INVOCATION_EXCEPTION, format!("Method {member} has no invoker"), line, position));
+    };
+    let handler: BoxedValue = Rc::new(handler);
+    match (declared.add)(&[target, Some(handler)]) {
+        Ok(_) => Ok(()),
+        Err(error @ MarkupInvokeError::Argument { .. }) => Err(at("InvalidCastException", format!("{member}: {error}"), line, position)),
+        Err(error @ MarkupInvokeError::ArgumentCount { .. }) => {
+            Err(at("InvalidOperationException", format!("{member}: {error}"), line, position))
+        }
+        Err(MarkupInvokeError::Failed(message)) => Err(at(TARGET_INVOCATION_EXCEPTION, message, line, position)),
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::uri_equals;

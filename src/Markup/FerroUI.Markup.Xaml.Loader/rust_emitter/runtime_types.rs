@@ -239,6 +239,7 @@ impl EmitTypes for RuntimeEmitTypes {
             Known::CompiledBindingPath => TypeId::of::<CompiledBindingPath>(),
             Known::Property => TypeId::of::<&'static FerroProperty>(),
             Known::OptionProperty => TypeId::of::<Option<&'static FerroProperty>>(),
+            Known::Delegate => TypeId::of::<ferroui_base::metadata::MarkupDelegate>(),
         })
     }
 
@@ -275,6 +276,7 @@ impl EmitTypes for RuntimeEmitTypes {
             Known::CompiledBindingPath => TypeId::of::<Option<CompiledBindingPath>>(),
             Known::Property => TypeId::of::<Option<&'static FerroProperty>>(),
             Known::OptionProperty => TypeId::of::<Option<Option<&'static FerroProperty>>>(),
+            Known::Delegate => TypeId::of::<Option<ferroui_base::metadata::MarkupDelegate>>(),
         })
     }
 

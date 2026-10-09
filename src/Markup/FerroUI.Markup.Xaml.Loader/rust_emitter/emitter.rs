@@ -13,7 +13,8 @@ use xamlx::ast::XamlAstNodeExtensions as _;
 use xamlx::ast::{
     visit_node, IXamlAstNode, IXamlAstValueNode, IXamlAstVisitor, IXamlPropertySetter, XamlAstCompilerLocalNode,
     XamlAstImperativeValueManipulation, XamlAstLocalInitializationNodeEmitter, XamlAstManipulationImperativeNode,
-    XamlAstNewClrObjectNode, XamlAstTextNode, XamlConstantNode, XamlDirectCallPropertySetter, XamlManipulationGroupNode, XamlNullExtensionNode,
+    XamlAstNewClrObjectNode, XamlAstTextNode, XamlConstantNode, XamlDirectCallPropertySetter, XamlLoadMethodDelegateNode, XamlManipulationGroupNode,
+    XamlNullExtensionNode, XamlRootObjectNode,
     XamlMarkupExtensionNode, XamlNoReturnMethodCallNode, XamlObjectInitializationNode, XamlPropertyAssignmentNode, XamlStaticExtensionNode,
     XamlStaticMember, XamlStaticOrTargetedReturnMethodCallNode, XamlTypeExtensionNode, XamlWrappedMethod, XamlDeferredContentNode,
     XamlDeferredContentInitializeIntermediateRootNode,
@@ -34,7 +35,7 @@ use crate::compiler_extensions::transformers::{
     HandleRootObjectScopeNode, OptionsMarkupExtensionMethod, ResourceAdderSetter, XamlIlAttachedPropertyEqualsSelector,
     XamlIlCombinatorSelector, XamlIlDirectCallPropertySetter, XamlIlNestingSelector, XamlIlNotSelector,
     XamlIlNthChildSelector, XamlIlNthChildSelectorType, XamlIlOrSelectorNode, XamlIlPropertyEqualsSelector,
-    XamlIlSelectorInitialNode, XamlIlSelectorNode, XamlIlStringSelector, XamlIlStringSelectorType, XamlIlTypeSelector,
+    XamlDirectCallAddHandler, XamlIlSelectorInitialNode, XamlIlSelectorNode, XamlIlStringSelector, XamlIlStringSelectorType, XamlIlTypeSelector,
     XamlSourceInfoValueManipulation,
 };
 use crate::compiler_extensions::{
@@ -43,7 +44,9 @@ use crate::compiler_extensions::{
 };
 use crate::back_end::{context_definition, numeric_constant, plan_setters, FRAMEWORK_CONTEXT};
 
-use super::emit_types::{EmitClass, EmitMarkup, EmitProperty, EmitTypes, FieldValue, FrameworkType, Handle, Known, MethodInfo, TypeKey};
+use super::emit_types::{
+    DeclaredKind, EmitClass, EmitMarkup, EmitProperty, EmitTypes, FieldValue, FrameworkType, Handle, Known, MethodInfo, TypeKey,
+};
 use super::source::rust_string_literal;
 
 /// Why a document is not eligible for emission: the first node (or member)
@@ -278,6 +281,19 @@ fn direct_setter_method(setter: &Rc<dyn IXamlPropertySetter>) -> Option<&Rc<dyn 
         Some(direct) => direct.method(),
         None => &any.downcast_ref::<XamlIlDirectCallPropertySetter>()?.method,
     })
+}
+
+/// The event a direct call property setter subscribes to, when its method is the
+/// subscription of an event of its declaring type (`add_Name`): the declaring type and the
+/// name of the event.
+fn subscribed_event(setter: &Rc<dyn IXamlPropertySetter>) -> Option<(Rc<dyn IXamlType>, String)> {
+    let method = setter.as_any().downcast_ref::<XamlDirectCallPropertySetter>()?.method();
+    let declaring = method.declaring_type();
+    let event = declaring
+        .events()
+        .into_iter()
+        .find(|event| event.add().is_some_and(|add| node_address(&add) == node_address(method)))?;
+    Some((declaring, event.name()))
 }
 
 /// The call `call` of a member; a `fallible` member's error is the load
@@ -573,6 +589,9 @@ impl<'a> Emitter<'a> {
         }
         if let Some(n) = node.cast::<XamlIlBindingPathNode>() {
             return self.binding_path(node, &n);
+        }
+        if let Some(n) = node.cast::<XamlLoadMethodDelegateNode>() {
+            return self.method_delegate(node, &n);
         }
         if node.is::<NewServiceProviderNode>() {
             // `XamlIlRuntimeHelpers.CreateRootServiceProviderV3(context)`.
@@ -1257,6 +1276,9 @@ impl<'a> Emitter<'a> {
             self.line(statement);
             return Ok(());
         }
+        if let Some((declaring, event)) = subscribed_event(&setter) {
+            return self.event_assignment(node, assignment, &declaring, &event, target);
+        }
         if let Some(runtime) = self.direct_setter(&setter) {
             if runtime.declared().is_some() {
                 return self.declared_setter_assignment(node, assignment, &runtime, target);
@@ -1393,6 +1415,24 @@ impl<'a> Emitter<'a> {
                 target.expr
             ));
         }
+        if let Some(add) = any.downcast_ref::<XamlDirectCallAddHandler>() {
+            // `target.AddHandler(EventField, handler, RoutingStrategies.Direct | RoutingStrategies.Bubble, false)`.
+            object_target()?;
+            let event = self.routed_event(node, &property_name, &add.event_field)?;
+            let handler = match values {
+                SetterValues::Typed(value, value_node) => self.coerce(value, self.types.known(Known::Delegate)).ok_or_else(|| {
+                    unsupported(value_node, format!("{property_name}: the handler is not the delegate of a method"))
+                })?,
+                // The interpreter passes the untyped value to `AddHandler`, which takes a delegate
+                // or fails; the plan of an assignment of a method name leaves one setter.
+                SetterValues::Untyped(_, value_node) => {
+                    return Err(unsupported(value_node, format!("{property_name}: a handler chosen at run time")));
+                }
+                SetterValues::Checked => return Ok(String::new()),
+                SetterValues::None => return Err(unsupported(node, format!("{property_name}: a setter without its value"))),
+            };
+            return Ok(format!("rt::add_handler(&{}, &{event}, {handler});", target.expr));
+        }
         let runtime = self
             .direct_setter(setter)
             .ok_or_else(|| unsupported(node, format!("{property_name}: not a plain property setter")))?;
@@ -1434,6 +1474,120 @@ impl<'a> Emitter<'a> {
         };
         let call = if property.is_direct() { "set_direct_value" } else { "set_value" };
         Ok(format!("{}.{call}({definition}, {value});", target.expr))
+    }
+
+    /// The routed event the static field `field` holds (`Button.ClickEvent`): the typed
+    /// function of the declared field, which yields the typed handle of the event. The
+    /// interpreter reads the same field and attaches the handler to the event behind the
+    /// handle.
+    fn routed_event(&self, node: &Rc<dyn IXamlAstNode>, property_name: &str, field: &Rc<dyn IXamlField>) -> EmitResult<String> {
+        let runtime = self.types.field(field.as_ref()).ok_or_else(|| {
+            unsupported(node, format!("{property_name}: the field of the routed event is not a field of the type system of the host"))
+        })?;
+        let FieldValue::Declared { name, emit, .. } = &runtime.value else {
+            return Err(unsupported(node, format!("{property_name}: the field of the routed event is not a declared field")));
+        };
+        let emit = emit.as_ref().ok_or_else(|| unsupported(node, format!("{name}: the declaration has no typed function")))?;
+        if emit.fallible {
+            return Err(unsupported(node, format!("{name}: a routed event read through a fallible member")));
+        }
+        let declaring = runtime.declaring_type.clone().ok_or_else(|| unsupported(node, format!("{name}: the declaring type is gone")))?;
+        let owner = self.type_path(node, &declaring)?;
+        Ok(format!("{owner}::{}()", emit.function))
+    }
+
+    /// The delegate of a method of the root object named in markup
+    /// (`XamlLoadMethodDelegateNode`: `new TDelegate(root, &Method)`), which the transform
+    /// found by name among the methods of the root class and checked against the `Invoke`
+    /// of the delegate type (the parameters exactly, or wider ones): `rt::method_delegate`
+    /// over the root object of the context, with the typed function of the declared method
+    /// called with the instance and the arguments in the types it declares. The delegate
+    /// holds its instance weakly and discards a failure, as the interpreter's does.
+    fn method_delegate(&mut self, node: &Rc<dyn IXamlAstNode>, delegate: &Rc<XamlLoadMethodDelegateNode>) -> EmitResult<Typed<'a>> {
+        let name = delegate.method.name();
+        if !delegate.base.value().as_node().is::<XamlRootObjectNode>() {
+            return Err(unsupported(node, format!("{name}: a delegate over another object than the root object")));
+        }
+        let method = self
+            .types
+            .method(delegate.method.as_ref())
+            .ok_or_else(|| unsupported(node, format!("{name}: the method is not a method of the type system of the host")))?;
+        let declared = method
+            .declared()
+            .filter(|declared| declared.kind == DeclaredKind::Method)
+            .ok_or_else(|| unsupported(node, format!("{name}: the method is not a method markup metadata declares")))?;
+        let emit = declared.emit().ok_or_else(|| unsupported(node, format!("{name}: the declaration has no typed function")))?;
+        // The run-time loader hands a class a method returns to the caller in a form of its
+        // own, which generated code does not have.
+        let returns_type = declared
+            .returns
+            .is_some_and(|returned| returned == self.types.known(Known::Class) || returned == self.types.known(Known::OptionClass));
+        if returns_type {
+            return Err(unsupported(node, format!("{name}: a method that returns a type")));
+        }
+        let owner = self.owner_path(node, &method)?;
+        let count = method.parameters.len();
+        let mut arguments: Vec<&str> = Vec::with_capacity(count + 1);
+        if !method.is_static {
+            arguments.push("this");
+        }
+        arguments.extend(std::iter::repeat_n("arguments.next()?", count));
+        let call = format!("{owner}::{}({})", emit.function, arguments.join(", "));
+        let call = if emit.fallible { format!("{call}?") } else { call };
+        let body = match declared.returns {
+            Some(_) => format!("::core::result::Result::Ok(rt::delegate_result({call}))"),
+            None => format!("{{ {call}; ::core::result::Result::Ok(::core::option::Option::None) }}"),
+        };
+        let parameter = if count == 0 { "_arguments" } else { "arguments" };
+        let expr = match method.is_static {
+            true => format!("rt::static_method_delegate({count}, |{parameter}| {body})"),
+            false => {
+                self.uses_context = true;
+                format!("rt::method_delegate(&context, {count}, |this, {parameter}| {body})")
+            }
+        };
+        Ok(self.exact(Known::Delegate, expr))
+    }
+
+    /// The subscription of an event that is not a routed event (`target.Event += handler`,
+    /// the direct call of `add_Event`): metadata declares the subscription as a callable
+    /// without a typed function, so it is invoked by the name of the event through the
+    /// metadata of the declaring type, the very subscription the interpreter invokes
+    /// (`rt::add_event_handler`; xaml.md 9.5.3, form C).
+    fn event_assignment(
+        &mut self,
+        node: &Rc<dyn IXamlAstNode>,
+        assignment: &Rc<XamlPropertyAssignmentNode>,
+        declaring: &Rc<dyn IXamlType>,
+        event: &str,
+        target: &Typed<'a>,
+    ) -> EmitResult<()> {
+        let property_name = assignment.property.name();
+        let values = assignment.values.borrow().clone();
+        let [value_node] = values.as_slice() else {
+            return Err(unsupported(node, format!("{property_name}: a subscription with {} values", values.len())));
+        };
+        let value_node = value_node.as_node();
+        let markup = self.markup_expr(node, declaring)?;
+        let instance = match target.kind {
+            Kind::Class(_) => format!("rt::to_value({}.clone())", target.expr),
+            Kind::Exact { .. } => format!("rt::to_value({})", owned(&target.expr)),
+            Kind::Null | Kind::SystemType { .. } => {
+                return Err(unsupported(node, format!("{property_name}: the target of the subscription is not an object")));
+            }
+        };
+        self.marker(node, &property_name);
+        let value = self.value(&value_node)?;
+        let handler = self
+            .coerce(&value, self.types.known(Known::Delegate))
+            .ok_or_else(|| unsupported(&value_node, format!("{property_name}: the handler is not the delegate of a method")))?;
+        self.line(format!(
+            "rt::add_event_handler({markup}, {}, {instance}, {handler}, {}, {})?;",
+            rust_string_literal(event),
+            node.line(),
+            node.position()
+        ));
+        Ok(())
     }
 
     /// `Type.Member`, as the loader names a member in an argument error.
