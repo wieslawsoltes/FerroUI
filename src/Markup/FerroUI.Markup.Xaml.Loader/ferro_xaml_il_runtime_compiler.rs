@@ -31,7 +31,6 @@ use crate::compiler_extensions::{
 };
 use crate::runtime::framework::{self, DocumentBody, RuntimeDocumentTypeBuilderProvider};
 use crate::runtime::type_system::RuntimeTypeSystem;
-use xamlx::type_system::IXamlMethod;
 
 thread_local! {
     static TYPE_SYSTEM: RefCell<Option<Rc<RuntimeTypeSystem>>> = const { RefCell::new(None) };
@@ -179,7 +178,7 @@ impl FerroXamlIlRuntimeCompiler {
             None => {
                 let type_system = runtime_type_system.as_type_system();
                 let group =
-                    Rc::new(Self::transform_group(&runtime_type_system, type_system, &sources, configuration, true)?);
+                    Rc::new(Self::transform_group(&runtime_type_system, type_system, &sources, configuration)?);
                 if let Some(key) = cache_key {
                     GROUPS.with(|groups| {
                         let mut groups = groups.borrow_mut();
@@ -224,83 +223,19 @@ impl FerroXamlIlRuntimeCompiler {
         GROUPS.with(|groups| groups.borrow_mut().clear());
     }
 
-    /// Parses and transforms ONE document exactly as [`Self::load_group`] does (same
-    /// language, transformers, group transformers and diagnostics) and returns its
-    /// transformed root node with the configuration of the transform and what the document
-    /// adds to its contexts (base URI `base_uri`, namespace information): the input of the
-    /// emitter of Rust source ([`crate::rust_emitter`]). Nothing is built and nothing is
-    /// cached.
-    #[cfg(any(feature = "emitter", test))]
-    pub(crate) fn transform_document(
-        xaml: &str,
-        name: &str,
-        base_uri: Option<&str>,
-        configuration: &RuntimeXamlLoaderConfiguration,
-    ) -> XamlResult<TransformedDocument> {
-        let mut documents =
-            Self::transform_documents(&[(name, xaml, base_uri.map(str::to_string), None)], configuration, &[])?;
-        documents.pop().ok_or_else(|| XamlError::invalid_operation("The document was not transformed"))
-    }
-
-    /// Parses and transforms the documents `(name, xaml, base URI, class of the root
-    /// instance)` as ONE group, exactly as [`Self::load_group`] transforms a group (the group
-    /// transformers see every document: the includes between them are resolved as
-    /// upstream's build resolves the documents of an assembly), and returns each transformed
-    /// document, in order. A document with the class of its root instance (`x:Class`) is
-    /// transformed to populate an instance of that class. Nothing is built and nothing is
-    /// cached.
-    ///
-    /// `dependencies` are the compiled markup of other crates (their `.xamlmeta`): an
-    /// include of one of their documents is linked to its compiled form, as upstream's
-    /// build links it through the metadata of the referenced assembly
-    /// ([`crate::rust_emitter::XamlMetadata`]).
-    #[cfg(any(feature = "emitter", test))]
-    pub(crate) fn transform_documents(
-        documents: &[(&str, &str, Option<String>, Option<&'static ferroui_base::TypeInfo>)],
-        configuration: &RuntimeXamlLoaderConfiguration,
-        dependencies: &[crate::rust_emitter::XamlMetadata],
-    ) -> XamlResult<Vec<TransformedDocument>> {
-        let runtime_type_system = Self::type_system();
-        let type_system: Rc<dyn IXamlTypeSystem> = if dependencies.is_empty() {
-            runtime_type_system.as_type_system()
-        } else {
-            crate::rust_emitter::CompiledMarkupTypeSystem::new(runtime_type_system.as_type_system(), dependencies)?
-        };
-        let sources: Vec<DocumentSource> = documents
-            .iter()
-            .map(|(name, xaml, base_uri, root_class)| DocumentSource {
-                xaml: xaml.to_string(),
-                override_type: root_class.map(|class| runtime_type_system.type_of_class(class)),
-                name: name.to_string(),
-                base_uri: base_uri.clone(),
-            })
-            .collect();
-        let group = Self::transform_group(&runtime_type_system, type_system, &sources, configuration, false)?;
-        let mut transformed = Vec::with_capacity(group.providers.len());
-        for provider in &group.providers {
-            let (root, configuration, document) =
-                provider.transformed_root().ok_or_else(|| XamlError::invalid_operation("The document was not transformed"))?;
-            transformed.push(TransformedDocument { root, configuration, document, build: provider.build_method() });
-        }
-        Ok(transformed)
-    }
-
     /// Parses and transforms the documents of a group and prepares their build and
     /// populate methods: everything of `LoadGroup` up to running them. The transformers
-    /// see `type_system`: the run-time type system, or (for the emitter) the run-time
-    /// type system with the compiled markup of other crates.
+    /// see `type_system`, the run-time type system.
     ///
-    /// `run_time_includes`: whether an include of a document of an assembly without
-    /// compiled markup may stay a run-time include (`XamlRuntimeIncludeFallback`, xaml.md
-    /// decision 22). The run-time loader allows it; the emitter does not, so that its
-    /// output does not depend on what the process that generates it can load, and an
-    /// include is linked or reported exactly as upstream's build does.
+    /// An include of a document of an assembly without compiled markup may stay a
+    /// run-time include (`XamlRuntimeIncludeFallback`, xaml.md decision 22). The emitter
+    /// of Rust source transforms with the same sequence and without that fallback
+    /// (`rust_emitter::transform_group`).
     fn transform_group(
         runtime_type_system: &Rc<RuntimeTypeSystem>,
         type_system: Rc<dyn IXamlTypeSystem>,
         sources: &[DocumentSource],
         configuration: &RuntimeXamlLoaderConfiguration,
-        run_time_includes: bool,
     ) -> XamlResult<TransformedGroup> {
         let runtime_type_system = runtime_type_system.clone();
 
@@ -359,11 +294,6 @@ impl FerroXamlIlRuntimeCompiler {
         )?;
         let transformer_configuration = compiler_configuration.as_transformer_configuration().clone();
         framework::configure_configuration(&transformer_configuration);
-        if !run_time_includes {
-            transformer_configuration
-                .get_or_create_extra::<crate::compiler_extensions::group_transformers::XamlRuntimeIncludeFallback>()
-                .set(None);
-        }
 
         let compiler = FerroXamlIlCompiler::new(transformer_configuration.clone())?;
         compiler.set_default_compile_bindings(configuration.use_compiled_bindings_by_default);
@@ -502,19 +432,4 @@ impl FerroXamlIlRuntimeCompiler {
     fn get_safe_uri_identifier(uri: Option<String>) -> Option<String> {
         uri.map(|uri| uri.replace([':', '/', '?', '=', '.'], "_"))
     }
-}
-
-/// A transformed document: the input of the emitter of Rust source.
-#[cfg(any(feature = "emitter", test))]
-pub(crate) struct TransformedDocument {
-    /// The transformed root node.
-    pub root: Rc<dyn xamlx::ast::IXamlAstNode>,
-    /// The configuration the document was transformed with.
-    pub configuration: Rc<xamlx::transform::TransformerConfiguration>,
-    /// What the document adds to its contexts: the base URI and the static
-    /// providers (the namespace information).
-    pub document: Rc<crate::runtime::interpreter::RuntimeDocument>,
-    /// The build method of the document in its group (what a call from another
-    /// document of the group calls).
-    pub build: Option<Rc<dyn IXamlMethod>>,
 }

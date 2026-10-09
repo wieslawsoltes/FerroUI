@@ -5,9 +5,11 @@
 //!
 //! # Hosts of the emitter
 //!
-//! The host of the emitter links the framework (the transform runs against
-//! the run-time type system), so the types the documents name are the types
-//! the host registered. Two hosts exist (docs/porting/xaml.md, 9.6):
+//! A host of the emitter states the type system the documents are transformed
+//! and emitted against ([`EmitterHost`]). With the run-time type system
+//! ([`EmitterHost::runtime`]) the host links the framework, and the types the
+//! documents name are the types the host registered. Two such hosts exist
+//! (docs/porting/xaml.md, 9.6):
 //!
 //! - a build script (`ferroui-build`, `src/FerroUI.Build.Tasks`), which takes
 //!   the crates of those types as build dependencies and writes the file to
@@ -25,9 +27,18 @@ use ::ferroui_markup_xaml::RuntimeXamlLoaderConfiguration;
 
 use crate::FerroXamlIlRuntimeCompiler;
 
+use std::rc::Rc;
+
+use xamlx::exceptions::XamlResult;
+use xamlx::type_system::IXamlTypeSystem;
+
+use crate::compiler_extensions::IXamlCompileTimeValueParser;
+
+use super::compiled_resources::CompiledMarkupTypeSystem;
 use super::emit_types::{EmitClass, EmitTypes};
-use super::emitter::{emit_function, namespace_table, root_class_of, DocumentFunctions};
+use super::emitter::{emit_function, root_class_of, DocumentFunctions};
 use super::runtime_types::{class as class_of, RuntimeEmitTypes};
+use super::transform::{transform_group, DocumentSource, TransformOptions, TransformedDocument};
 use super::source::{function_name_of, rust_string_literal};
 use super::xaml_metadata::{DocumentModel, XamlMetadata};
 
@@ -97,8 +108,55 @@ impl GeneratedFile {
     }
 }
 
+/// What a group of documents is compiled against: the type system of the transform, what
+/// that type system states for the emitter, and the compile-time value parsers of the
+/// host.
+pub struct EmitterHost<'a> {
+    pub type_system: Rc<dyn IXamlTypeSystem>,
+    pub types: &'a dyn EmitTypes,
+    pub parsers: Vec<Rc<dyn IXamlCompileTimeValueParser>>,
+}
+
+impl EmitterHost<'static> {
+    /// The run-time type system of the calling thread (the types the process registered),
+    /// with the compiled markup of `dependencies`.
+    pub fn runtime(dependencies: &[XamlMetadata]) -> XamlResult<Self> {
+        let runtime = FerroXamlIlRuntimeCompiler::type_system();
+        let type_system: Rc<dyn IXamlTypeSystem> = match dependencies.is_empty() {
+            true => runtime.as_type_system(),
+            false => CompiledMarkupTypeSystem::new(runtime.as_type_system(), dependencies)?,
+        };
+        Ok(Self { type_system, types: &RuntimeEmitTypes, parsers: vec![Rc::new(crate::runtime::RuntimeCompileTimeValueParser)] })
+    }
+}
+
+/// The documents `(name, xaml, base URI, class of the root instance)` transformed as one
+/// group against the run-time type system, with the compiled markup of `dependencies`. A
+/// document with the class of its root instance (`x:Class`) is transformed to populate an
+/// instance of that class.
+#[allow(clippy::type_complexity)]
+fn transform_with_runtime_types(
+    documents: &[(&str, &str, Option<String>, Option<&'static ferroui_base::TypeInfo>)],
+    configuration: &RuntimeXamlLoaderConfiguration,
+    dependencies: &[XamlMetadata],
+) -> XamlResult<Vec<TransformedDocument>> {
+    let host = EmitterHost::runtime(dependencies)?;
+    let runtime = FerroXamlIlRuntimeCompiler::type_system();
+    let sources: Vec<DocumentSource<'_>> = documents
+        .iter()
+        .map(|(name, xaml, base_uri, class)| DocumentSource {
+            name,
+            xaml,
+            base_uri: base_uri.clone(),
+            root_type: class.map(|class| runtime.type_of_class(class)),
+        })
+        .collect();
+    transform_group(host.type_system, &sources, &TransformOptions::of(configuration), &host.parsers)
+}
+
 /// Parses, transforms and emits the documents (`(name, xaml)`) of an assembly
-/// with the configuration of the run-time loader. The documents are
+/// with the configuration of the run-time loader, against the run-time type system
+/// ([`compile_documents_with`] and [`EmitterHost::runtime`]). The documents are
 /// transformed as ONE group, as upstream's build transforms the documents of
 /// an assembly and the run-time loader a group of documents: the group
 /// transformers see every document, so includes between them are resolved.
@@ -126,6 +184,31 @@ pub fn compile_documents(
     root_uri: Option<&str>,
     configuration: &RuntimeXamlLoaderConfiguration,
     dependencies: &[XamlMetadata],
+) -> Vec<CompiledDocument> {
+    match EmitterHost::runtime(dependencies) {
+        Ok(host) => compile_documents_with(&host, documents, root_uri, &TransformOptions::of(configuration)),
+        Err(error) => documents
+            .iter()
+            .map(|(name, _)| CompiledDocument {
+                name: name.to_string(),
+                function_name: function_name_of(name),
+                source: Err(format!("the group of documents does not transform: {}", error.message())),
+                namespaces: None,
+                root_type: None,
+                public: true,
+            })
+            .collect(),
+    }
+}
+
+/// [`compile_documents`] against the type system of `host`: the documents are
+/// transformed against it ([`transform_group`]) and emitted from what it states for the
+/// emitter. The compiled markup of other crates is part of the type system of the host.
+pub fn compile_documents_with(
+    host: &EmitterHost<'_>,
+    documents: &[(&str, &str)],
+    root_uri: Option<&str>,
+    options: &TransformOptions,
 ) -> Vec<CompiledDocument> {
     let mut compiled: Vec<CompiledDocument> = Vec::with_capacity(documents.len());
     // The items of the file each document defines, with the document that defines them.
@@ -174,13 +257,13 @@ pub fn compile_documents(
             public,
         });
     }
-    let sources: Vec<(&str, &str, Option<String>, Option<&'static ferroui_base::TypeInfo>)> =
-        group.iter().map(|(_, name, xaml, base_uri)| (*name, *xaml, base_uri.clone(), None)).collect();
+    let sources: Vec<DocumentSource<'_>> =
+        group.iter().map(|(_, name, xaml, base_uri)| DocumentSource { name, xaml, base_uri: base_uri.clone(), root_type: None }).collect();
     if sources.is_empty() {
         return compiled;
     }
-    let types: &dyn EmitTypes = &RuntimeEmitTypes;
-    match FerroXamlIlRuntimeCompiler::transform_documents(&sources, configuration, dependencies) {
+    let types = host.types;
+    match transform_group(host.type_system.clone(), &sources, options, &host.parsers) {
         Ok(transformed) => {
             // The build methods of the documents of the group, by their functions: what
             // an include the group transformers linked calls.
@@ -201,7 +284,7 @@ pub fn compile_documents(
             for ((index, name, _, _), transformed) in group.iter().zip(&transformed) {
                 let functions = functions_of_group();
                 let document = &mut compiled[*index];
-                let Some(table) = namespace_table(&transformed.document) else {
+                let Some(table) = transformed.namespaces.clone() else {
                     document.source = Err("the document has no namespace information".to_string());
                     continue;
                 };
@@ -218,7 +301,7 @@ pub fn compile_documents(
                     types,
                     &transformed.root,
                     &transformed.configuration,
-                    &transformed.document,
+                    transformed.base_uri.as_deref(),
                     &constant,
                     &document.function_name,
                     name,
@@ -281,7 +364,22 @@ pub fn generate_file(
     configuration: &RuntimeXamlLoaderConfiguration,
     dependencies: &[XamlMetadata],
 ) -> GeneratedFile {
-    let compiled = compile_documents(documents, Some(root_uri), configuration, dependencies);
+    file_of(assembly_name, root_uri, compile_documents(documents, Some(root_uri), configuration, dependencies))
+}
+
+/// [`generate_file`] against the type system of `host` ([`compile_documents_with`]).
+pub fn generate_file_with(
+    host: &EmitterHost<'_>,
+    assembly_name: &str,
+    root_uri: &str,
+    documents: &[(&str, &str)],
+    options: &TransformOptions,
+) -> GeneratedFile {
+    file_of(assembly_name, root_uri, compile_documents_with(host, documents, Some(root_uri), options))
+}
+
+/// The generated file of the compiled documents of an assembly.
+fn file_of(assembly_name: &str, root_uri: &str, compiled: Vec<CompiledDocument>) -> GeneratedFile {
     let mut source = String::new();
     source.push_str("// @generated by the Rust emitter of ferroui-markup-xaml-loader (rust_emitter::generate_file).\n");
     source.push_str("// Do not edit: regenerate it (see the header of the module that includes this file).\n");
@@ -494,7 +592,7 @@ fn json_string(text: &str) -> String {
 }
 
 /// A group of documents with owned texts as the borrowed form
-/// [`FerroXamlIlRuntimeCompiler::transform_documents`] takes.
+/// [`transform_with_runtime_types`] takes.
 #[allow(clippy::type_complexity)]
 fn borrowed<'a>(
     documents: &'a [(String, String, Option<String>, Option<&'static ferroui_base::TypeInfo>)],
@@ -526,9 +624,8 @@ fn untyped_function_name(function_name: &str) -> String {
 /// why a document is not eligible. With the `testing` feature.
 #[cfg(any(test, feature = "testing"))]
 pub fn transformed_tree(name: &str, xaml: &str, configuration: &RuntimeXamlLoaderConfiguration) -> Result<String, String> {
-    FerroXamlIlRuntimeCompiler::transform_document(xaml, name, None, configuration)
-        .map(|transformed| crate::testing::objects::dump_tree(&transformed.root))
-        .map_err(|error| error.message())
+    let transformed = transform_with_runtime_types(&[(name, xaml, None, None)], configuration, &[]).map_err(|error| error.message())?;
+    transformed.first().map(|transformed| crate::testing::objects::dump_tree(&transformed.root)).ok_or_else(|| "The document was not transformed".to_string())
 }
 
 /// The transformed trees of the group of the document registered for
@@ -546,8 +643,7 @@ pub fn transformed_class_group(class: &'static ferroui_base::TypeInfo) -> Result
     }
     let mut configuration = RuntimeXamlLoaderConfiguration::new();
     configuration.local_assembly = group.assembly;
-    let transformed = FerroXamlIlRuntimeCompiler::transform_documents(&borrowed(&documents), &configuration, &[])
-        .map_err(|error| error.message())?;
+    let transformed = transform_with_runtime_types(&borrowed(&documents), &configuration, &[]).map_err(|error| error.message())?;
     Ok(documents
         .iter()
         .zip(transformed)
@@ -709,7 +805,7 @@ pub fn generate_class_file(
     }
     let mut configuration = RuntimeXamlLoaderConfiguration::new();
     configuration.local_assembly = group.assembly;
-    let transformed = FerroXamlIlRuntimeCompiler::transform_documents(&borrowed(&documents), &configuration, dependencies)
+    let transformed = transform_with_runtime_types(&borrowed(&documents), &configuration, dependencies)
         .map_err(|error| format!("the group does not transform: {}", error.message()))?;
     let constructor = match constructor {
         Some(constructor) => Some(constructor),
@@ -771,7 +867,7 @@ pub fn generate_class_file(
         }
         emitted.push(index);
         let (document, transformed, function_name) = (&documents[index], &transformed[index], &names[index]);
-        let table = namespace_table(&transformed.document).ok_or_else(|| format!("{}: no namespace information", document.0))?;
+        let table = transformed.namespaces.clone().ok_or_else(|| format!("{}: no namespace information", document.0))?;
         let table_index = match tables.iter().position(|known| *known == table) {
             Some(known) => known,
             None => {
@@ -784,7 +880,7 @@ pub fn generate_class_file(
             types,
             &transformed.root,
             &transformed.configuration,
-            &transformed.document,
+            transformed.base_uri.as_deref(),
             &format!("XML_NAMESPACES_{table_index}"),
             function_name,
             &document.0,

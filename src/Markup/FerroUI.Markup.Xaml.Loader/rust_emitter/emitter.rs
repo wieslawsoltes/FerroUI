@@ -4,7 +4,6 @@
 //! the same order. Anything outside the supported set is reported as
 //! [`UnsupportedNode`]; nothing approximate is written.
 
-use std::any::TypeId;
 use std::collections::{HashMap, HashSet};
 use std::fmt;
 use std::rc::Rc;
@@ -42,10 +41,9 @@ use crate::compiler_extensions::{
     BindingSetter, BindingWithPrioritySetter, SetValueWithPrioritySetter, UnsetValueSetter, XamlIlBindingPathElementNode, XamlIlBindingPathNode, XamlIlFerroPropertyFieldNode,
     XamlIlFerroPropertyHelper, XamlIlFerroPropertyNode, XamlIlProvideValueTargetProperty,
 };
-use crate::runtime::interpreter::{context_definition, numeric_constant, plan_setters, RuntimeDocument};
+use crate::runtime::interpreter::{context_definition, numeric_constant, plan_setters};
 
 use ferroui_markup_xaml::xaml_il::runtime::compiled::FRAMEWORK_CONTEXT;
-use ferroui_markup_xaml::xaml_il::runtime::IFerroXamlIlXmlNamespaceInfoProvider;
 
 use super::emit_types::{EmitClass, EmitMarkup, EmitProperty, EmitTypes, FieldValue, FrameworkType, Handle, Known, MethodInfo, TypeKey};
 use super::source::rust_string_literal;
@@ -2860,36 +2858,6 @@ impl<'a> Emitter<'a> {
     }
 }
 
-/// The namespace information of a document as the value of an
-/// `rt::XmlNamespaceTable` (the argument of `rt::create_context`): what the
-/// static provider of the document gives the run-time loader's contexts,
-/// prefixes in order, one per line. `None` if the document has none.
-pub fn namespace_table(document: &RuntimeDocument) -> Option<String> {
-    let service_type = TypeId::of::<Rc<dyn IFerroXamlIlXmlNamespaceInfoProvider>>();
-    let provider = document.static_providers.iter().find_map(|provider| provider.get_static_service(service_type))?;
-    let provider = provider.downcast_ref::<Rc<dyn IFerroXamlIlXmlNamespaceInfoProvider>>()?;
-    let namespaces = provider.xml_namespaces();
-    let mut prefixes: Vec<&String> = namespaces.keys().collect();
-    prefixes.sort();
-    let entries: Vec<String> = prefixes
-        .into_iter()
-        .map(|prefix| {
-            let infos: Vec<String> = namespaces[prefix]
-                .iter()
-                .map(|info| {
-                    format!(
-                        "({}, {})",
-                        rust_string_literal(&info.clr_namespace()),
-                        rust_string_literal(&info.clr_assembly_name())
-                    )
-                })
-                .collect();
-            format!("    ({}, &[{}]),\n", rust_string_literal(prefix), infos.join(", "))
-        })
-        .collect();
-    Some(format!("&[\n{}]", entries.concat()))
-}
-
 /// Writes the Rust function that builds the document with the transformed
 /// root node `root`: the counterpart of the `Build` method
 /// (`Interpreter::build` followed by `Interpreter::populate`).
@@ -2901,7 +2869,9 @@ pub fn namespace_table(document: &RuntimeDocument) -> Option<String> {
 /// ```
 ///
 /// `namespaces` names the constant (an `rt::XmlNamespaceTable`) that holds
-/// the [`namespace_table`] of the document; the caller writes it.
+/// the namespace information of the document
+/// ([`TransformedDocument::namespaces`](super::transform::TransformedDocument)); the
+/// caller writes it. `base_uri` is the base URI of the document.
 /// `service_provider` is the parent service provider of the context (the
 /// caller passes `XamlIlRuntimeHelpers::create_root_service_provider_v3(..)`,
 /// as the run-time loader does). The function refers to the helpers of
@@ -2913,12 +2883,12 @@ pub fn emit_document(
     types: &dyn EmitTypes,
     root: &Rc<dyn IXamlAstNode>,
     configuration: &TransformerConfiguration,
-    document: &RuntimeDocument,
+    base_uri: Option<&str>,
     namespaces: &str,
     function_name: &str,
     document_name: &str,
 ) -> Result<String, UnsupportedNode> {
-    emit_function(types, root, configuration, document, namespaces, function_name, document_name, &DocumentFunctions::default(), None)
+    emit_function(types, root, configuration, base_uri, namespaces, function_name, document_name, &DocumentFunctions::default(), None)
 }
 
 /// The class of the root object a transformed document builds, if it is a
@@ -2978,7 +2948,7 @@ pub fn emit_function<'a>(
     types: &'a dyn EmitTypes,
     root: &Rc<dyn IXamlAstNode>,
     configuration: &'a TransformerConfiguration,
-    document: &RuntimeDocument,
+    base_uri: Option<&str>,
     namespaces: &str,
     function_name: &'a str,
     document_name: &'a str,
@@ -2988,8 +2958,8 @@ pub fn emit_function<'a>(
     if context_definition(configuration) != FRAMEWORK_CONTEXT {
         return Err(unsupported(root, "the language does not define the context of the framework language"));
     }
-    let base_uri = match &document.base_uri {
-        Some(uri) => format!("::core::option::Option::Some({})", rust_string_literal(uri.original_string())),
+    let base_uri = match base_uri {
+        Some(uri) => format!("::core::option::Option::Some({})", rust_string_literal(uri)),
         None => "::core::option::Option::None".to_string(),
     };
     let document_constant = format!("{}_DOCUMENT", function_name.to_uppercase());

@@ -33,7 +33,7 @@ use crate::compiler_extensions::group_transformers::COMPILED_RESOURCES_TYPE_NAME
 /// A type system that knows the compiled documents of other crates: the type system it
 /// wraps, with the type [`COMPILED_RESOURCES_TYPE_NAME`] on the assembly of every crate
 /// of `dependencies`.
-pub(crate) struct CompiledMarkupTypeSystem {
+pub struct CompiledMarkupTypeSystem {
     inner: Rc<dyn IXamlTypeSystem>,
     assemblies: Vec<Rc<CompiledAssembly>>,
 }
@@ -41,7 +41,7 @@ pub(crate) struct CompiledMarkupTypeSystem {
 impl CompiledMarkupTypeSystem {
     /// `inner` with the compiled documents of `dependencies`. A document whose root type
     /// `inner` does not know is an error: the dependency is not linked into the compiler.
-    pub(crate) fn new(inner: Rc<dyn IXamlTypeSystem>, dependencies: &[XamlMetadata]) -> XamlResult<Rc<Self>> {
+    pub fn new(inner: Rc<dyn IXamlTypeSystem>, dependencies: &[XamlMetadata]) -> XamlResult<Rc<Self>> {
         let service_provider = inner
             .find_type("System.IServiceProvider")
             .ok_or_else(|| XamlError::type_system_exception("Unable to resolve type System.IServiceProvider"))?;
