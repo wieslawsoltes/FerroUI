@@ -130,6 +130,10 @@ pub trait ICompositionImportableSharedGpuContextObject {
 pub trait ICompositionImportableSharedGpuContextImage: Send + Sync {
     /// Releases the image. Either thread may call it, more than once.
     fn dispose(&self);
+
+    /// Lets the backend that made the image recover its concrete type (the
+    /// cast upstream performs on the image it is asked to import).
+    fn as_any(&self) -> &dyn std::any::Any;
 }
 
 /// An GPU semaphore descriptor obtained from a context from the same share group as one used by the compositor

@@ -4957,3 +4957,22 @@ project = "Avalonia.Browser"
 type = "Avalonia.Browser.Rendering.RenderWorker"
 member = "InitializeAsync"
 rust = ["start"]
+# Avalonia.Skia: the external objects of the OpenGL GPU (row 6 of the work list of 2026-10-09).
+
+[[alias]]
+project = "Avalonia.Skia"
+type = "Avalonia.Skia.GlSkiaExternalObjectsFeature"
+member = "ImportImage"
+rust = ["import_shared_image"]
+
+[[alias]]
+project = "Avalonia.Skia"
+type = "Avalonia.Skia.GlSkiaSharedTextureForComposition"
+member = "Dispose"
+rust = ["dispose_with"]
+
+[[waive]]
+project = "Avalonia.Skia"
+type = "Avalonia.Skia.GlSkiaImportedImage"
+member = "GlSkiaImportedImage(*GlSkiaSharedTextureForComposition*"
+reason = "the two constructors are one `new` with the source of the image as an enum (`ImportedImageSource::External`, `Shared`)"

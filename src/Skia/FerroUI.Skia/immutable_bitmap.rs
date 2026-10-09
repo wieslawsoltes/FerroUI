@@ -134,7 +134,7 @@ impl std::ops::Deref for SendBitmap {
 pub struct ImmutableBitmap {
     image: Mutex<Option<Image>>,
     bitmap: Mutex<Option<SendBitmap>>,
-    custom_image_dispose: Mutex<Option<Box<dyn FnOnce() + Send>>>,
+    custom_image_dispose: Mutex<Option<Box<dyn FnOnce(Image) + Send>>>,
     dpi: Vector,
     pixel_size: PixelSize,
 }
@@ -161,8 +161,9 @@ impl ImmutableBitmap {
     }
 
     /// Wraps a Skia image. `custom_image_dispose` replaces releasing the
-    /// image when the bitmap is disposed.
-    pub fn from_image(image: Image, custom_image_dispose: Option<Box<dyn FnOnce() + Send>>) -> Self {
+    /// image when the bitmap is disposed: it is handed the image, to release
+    /// it where that has to happen (with a graphics context current).
+    pub fn from_image(image: Image, custom_image_dispose: Option<Box<dyn FnOnce(Image) + Send>>) -> Self {
         let pixel_size = PixelSize::new(image.width(), image.height());
 
         Self {
@@ -294,10 +295,11 @@ impl IBitmapImpl for ImmutableBitmap {
 
     fn dispose(&self) {
         let image = self.image.lock().unwrap().take();
-        if let Some(custom_image_dispose) = self.custom_image_dispose.lock().unwrap().take() {
-            custom_image_dispose();
+        let custom_image_dispose = self.custom_image_dispose.lock().unwrap().take();
+        match (custom_image_dispose, image) {
+            (Some(custom_image_dispose), Some(image)) => custom_image_dispose(image),
+            (_, image) => drop(image),
         }
-        drop(image);
         self.bitmap.lock().unwrap().take();
     }
 
