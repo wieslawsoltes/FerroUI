@@ -122,6 +122,8 @@ pub use vector3d::Vector3D;
 
 #[cfg(test)]
 mod ferro_object_tests;
+#[cfg(test)]
+mod flow_direction_tests;
 
 #[cfg(test)]
 mod tree_tests;
