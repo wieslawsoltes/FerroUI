@@ -11,8 +11,8 @@ Generated from upstream commit `17350180c33b063f0e98abbfd19aa3cae63f5d56`. Back 
 | Crate | `ferroui-native` |
 | Phase / priority | 1 - desktop (macOS) / P0 |
 | Files | 47/47 (100.0%), 2 not applicable |
-| Types | 63/75 (11 waived) (98.4%) |
-| Members | 443/528 (77 waived) (98.2%) |
+| Types | 64/75 (11 waived) (100.0%) |
+| Members | 452/528 (76 waived) (100.0%) |
 | Contracts (interfaces) | 1/4 |
 | Property registrations | 1/1 |
 | Routed events | 0/0 |
@@ -30,7 +30,7 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 
 ## Files
 
-### `(project root)` - files 47/47, types 63/75 (11 waived), members 443/528 (77 waived)
+### `(project root)` - files 47/47, types 64/75 (11 waived), members 452/528 (76 waived)
 
 | Upstream file | Rust file | Status | Types | Members | Notes |
 |---|---|---|---|---|---|
@@ -68,7 +68,7 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 | `MacOSMountedVolumeInfoProvider.cs` | `mac_os_mounted_volume_info_provider.rs` | present | 2/2 | 3/4 (1 waived) |  |
 | `MacOSNativeMenuCommands.cs` | `mac_os_native_menu_commands.rs` | present | 1/1 | 6/6 |  |
 | `MenuActionCallback.cs` | `menu_action_callback.rs` | present | 1/1 | 2/2 |  |
-| `Metal.cs` | `metal.rs` | partial | 5/6 | 22/33 (3 waived) |  |
+| `Metal.cs` | `metal.rs` | present | 6/6 | 31/33 (2 waived) |  |
 | `NativeControlHostImpl.cs` | `native_control_host_impl.rs` | present | 1/1 | 6/6 |  |
 | `NativeOwned.cs` | `callback_base.rs` | present | 0/1 (1 waived) | 0/6 (6 waived) | replaced: base class of a COM object whose lifetime the native side owns: `ferroui_microcom::ComObject` drops the Rust value with the last native reference (`Drop` is `Destroyed`), and `callback_base::guard` hands a panic of a callback to the dispatcher implementation as `RaiseException` does |
 | `NativePlatformSettings.cs` | `native_platform_settings.rs` | present | 1/1 | 4/4 |  |
@@ -83,16 +83,6 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 | `TrayIconImpl.cs` | `tray_icon_impl.rs` | present | 1/1 | 8/8 |  |
 | `WindowImpl.cs` | `window_impl.rs` | present | 1/1 | 31/32 (1 waived) |  |
 | `WindowImplBase.cs` | `window_impl_base.rs` | present | 1/2 (1 waived) | 19/23 (4 waived) |  |
-
-<details><summary><code>Metal.cs</code> - 9 missing</summary>
-
-- `MetalExternalObjectsFeature` (class, internal): **type missing** (9 members)
-- `MetalRenderTarget` (class): complete
-  - waived (created with a struct literal by the object that owns the native one (`MetalPlatformSurface::create_render_target`, `MetalRenderTarget::begin_rendering`)): `.ctor`
-- `MetalDrawingSession` (class): complete
-  - waived (created with a struct literal by the object that owns the native one (`MetalPlatformSurface::create_render_target`, `MetalRenderTarget::begin_rendering`)): `.ctor`
-
-</details>
 
 ## IDL contracts: `avn.idl` -> `frn.idl`
 
