@@ -10,9 +10,9 @@ Generated from upstream commit `17350180c33b063f0e98abbfd19aa3cae63f5d56`. Back 
 | FerroUI | `src/Headless/FerroUI.Headless` (exists) |
 | Crate | `ferroui-headless` |
 | Phase / priority | 1 - test infrastructure / P1 |
-| Files | 8/8 (100.0%), 3 not applicable |
-| Types | 18/20 (2 waived) (100.0%) |
-| Members | 223/235 (12 waived) (100.0%) |
+| Files | 11/11 (100.0%) |
+| Types | 22/24 (2 waived) (100.0%) |
+| Members | 238/251 (13 waived) (100.0%) |
 | Contracts (interfaces) | 2/3 |
 | Property registrations | 0/0 |
 | Routed events | 0/0 |
@@ -29,17 +29,17 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 
 ## Files
 
-### `(project root)` - files 8/8, types 18/20 (2 waived), members 223/235 (12 waived)
+### `(project root)` - files 11/11, types 22/24 (2 waived), members 238/251 (13 waived)
 
 | Upstream file | Rust file | Status | Types | Members | Notes |
 |---|---|---|---|---|---|
 | `AvaloniaHeadlessPlatform.cs` | `ferro_headless_platform.rs` | present | 3/3 | 10/10 |  |
-| `AvaloniaTestApplicationAttribute.cs` | - | n/a | - | - | not-applicable: assembly attributes that tell the xUnit and NUnit integrations which application to build and how to isolate the tests of an assembly: there are no assembly attributes and no test framework integration; a test sets up its application with `AppBuilder` and `use_headless` (the `PerTest` isolation), as `tests.rs` of the crate does |
+| `AvaloniaTestApplicationAttribute.cs` | `ferro_test_application_attribute.rs` | present | 1/1 | 2/2 |  |
 | `HeadlessPlatformRenderInterface.cs` | `headless_platform_render_interface.rs` | present | 3/4 (1 waived) | 69/74 (5 waived) |  |
 | `HeadlessPlatformStubs.cs` | `headless_platform_stubs.rs` | present | 7/8 (1 waived) | 35/36 (1 waived) |  |
 | `HeadlessRenderTimer.cs` | `headless_render_timer.rs` | present | 1/1 | 4/4 |  |
-| `HeadlessUnitTestIsolationAttribute.cs` | - | n/a | - | - | not-applicable: assembly attributes that tell the xUnit and NUnit integrations which application to build and how to isolate the tests of an assembly: there are no assembly attributes and no test framework integration; a test sets up its application with `AppBuilder` and `use_headless` (the `PerTest` isolation), as `tests.rs` of the crate does |
-| `HeadlessUnitTestSession.cs` | - | n/a | - | - | not-applicable: not ported for now: the session of the xUnit and NUnit integrations, which runs the tests of an assembly on a dispatcher thread of its own and finds the application through reflection (the assembly attribute, a `BuildAvaloniaApp` method); the test harness of cargo runs a test on a thread of its own, where the test sets up its application. Applicable if the owner decides that tests of a crate share one application (the `PerAssembly` isolation, which has no counterpart today): the session is then the object that owns the dispatcher thread and runs each test on it |
+| `HeadlessUnitTestIsolationAttribute.cs` | `headless_unit_test_isolation_attribute.rs` | present | 2/2 | 4/4 |  |
+| `HeadlessUnitTestSession.cs` | `headless_unit_test_session.rs` | present | 1/1 | 9/10 (1 waived) |  |
 | `HeadlessWindowExtensions.cs` | `headless_window_extensions.rs` | present | 1/1 | 16/16 |  |
 | `HeadlessWindowImpl.cs` | `headless_window_impl.rs` | present | 1/1 | 78/84 (6 waived) |  |
 | `IHeadlessTouchPointer.cs` | `i_headless_touch_pointer.rs` | present | 1/1 | 0/0 |  |
@@ -53,3 +53,6 @@ Rust sources of this crate that no upstream file maps to. Give each a reason in 
 |---|---|---|
 | `headless_window_surface.rs` | the part of `HeadlessWindowImpl.cs` that a frame uses (`Lock`, `CreateFramebufferRenderTarget`, the last rendered frame and its lock), as an object of its own; upstream implements the framebuffer surface on the window implementation | `FramebufferMetrics`, `HeadlessWindowFramebuffer`, `HeadlessWindowSurface`, `RenderedFrame` |
 | `tests.rs` | the unit tests of the module | `HeadlessApplication` |
+| `unit_tests/test_application.rs` | test support: `TestApplication.cs` of the upstream unit test project of the headless platform, the two test assemblies that stand for the upstream test projects that compile its files, and the facts and theories that dispatch a test to the session of its assembly (what the xUnit integration does, which is not ported) | `TestApplication` |
+
+Tests, examples and build scripts (not scanned): `unit_tests/async_setup_tests.rs`, `unit_tests/headless_unit_test_session_tests.rs`, `unit_tests/input_tests.rs`, `unit_tests/isolation_tests.rs`, `unit_tests/leak_tests.rs`, `unit_tests/mouse_device_tests.rs`, `unit_tests/popup_tests.rs`, `unit_tests/rendering_tests.rs`, `unit_tests/second_window_tests.rs`, `unit_tests/services_tests.rs`, `unit_tests/setup_tests.rs`, `unit_tests/threading_tests.rs`.
