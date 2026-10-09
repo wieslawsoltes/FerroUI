@@ -123,17 +123,27 @@ const KEYS = {
 };
 const MODIFIERS = { alt: 1, ctrl: 2, meta: 4, shift: 8 };
 
+// The switches that choose what WebGL runs on. "swiftshader" (the default, and what a machine without
+// a GPU has: CI runners, containers) is the software rasteriser; any other name is handed to ANGLE as
+// its backend ("metal" on macOS, "d3d11", "vulkan", "gl"), which uses the GPU of the machine. The
+// environment variable FERROUI_BROWSER_ANGLE sets it for every script that does not name one.
+export function rasteriserArgs(angle = process.env.FERROUI_BROWSER_ANGLE || "swiftshader") {
+    return angle === "swiftshader" ? ["--enable-unsafe-swiftshader", "--use-angle=swiftshader"] : [`--use-angle=${angle}`];
+}
+
 // Opens `siteDirectory` (query appended to index.html) and resolves to the page driver. `initScript`
 // is evaluated in the page before its own scripts. `isolated` serves the site cross-origin isolated
 // (see `serve`). With `network` the addresses the page requests are kept in `requests`, over every
-// load of the page (the requests of its workers and of a service worker are not among them).
-export async function open(siteDirectory, { query = "", width = 460, height = 520, scale = 1, chromeArgs = [], initScript, isolated = false, network = false } = {}) {
+// load of the page (the requests of its workers and of a service worker are not among them). `angle`
+// chooses what WebGL runs on (see `rasteriserArgs`). With `navigate: false` the page is not opened yet:
+// `page.navigate()` opens it, after whatever has to be started before the page exists (a trace).
+export async function open(siteDirectory, { query = "", width = 460, height = 520, scale = 1, chromeArgs = [], initScript, isolated = false, network = false, angle, navigate = true } = {}) {
     const server = await serve(siteDirectory, { isolated });
     const profile = fs.mkdtempSync(path.join(os.tmpdir(), "ferroui-browser-"));
     const chrome = spawn(findChrome(), [
         "--headless=new", "--no-first-run", "--no-default-browser-check", "--no-sandbox", "--hide-scrollbars",
         // WebGL through the software rasteriser where there is no GPU (CI runners, containers).
-        "--enable-unsafe-swiftshader", "--use-angle=swiftshader",
+        ...rasteriserArgs(angle),
         `--user-data-dir=${profile}`, "--remote-debugging-port=0",
         `--window-size=${width},${height}`, `--force-device-scale-factor=${scale}`, "--force-color-profile=srgb",
         ...chromeArgs, "about:blank"], { stdio: ["ignore", "ignore", "pipe"] });
@@ -158,9 +168,23 @@ export async function open(siteDirectory, { query = "", width = 460, height = 52
     // `log` holds every console message, uncaught exception and browser log entry; `errors` the ones
     // that are errors (console.error and console.assert, uncaught exceptions, failed loads).
     let id = 0; const pending = new Map(); const log = []; const errors = []; const navigations = []; const requests = [];
+    // The workers of the page a session is attached to (`attachWorkers`), and the listeners of `on`.
+    const workers = []; const listeners = [];
     socket.addEventListener("message", (event) => {
         const message = JSON.parse(event.data);
         if (message.id && pending.has(message.id)) { pending.get(message.id)(message.result ?? { error: message.error }); pending.delete(message.id); return; }
+        for (const listener of listeners) { if (listener.method === message.method) { listener.handler(message.params, message.sessionId); } }
+        if (message.method === "Target.attachedToTarget") {
+            workers.push({ sessionId: message.params.sessionId, type: message.params.targetInfo.type, url: message.params.targetInfo.url });
+            return;
+        }
+        if (message.method === "Target.detachedFromTarget") {
+            const i = workers.findIndex((worker) => worker.sessionId === message.params.sessionId);
+            if (i >= 0) { workers.splice(i, 1); }
+            return;
+        }
+        // The events of the sessions of the workers are for the listeners only.
+        if (message.sessionId) { return; }
         if (message.method === "Runtime.consoleAPICalled") {
             const line = `[console.${message.params.type}] ` + message.params.args.map((a) => a.value ?? a.description ?? "").join(" ");
             log.push(line);
@@ -179,7 +203,10 @@ export async function open(siteDirectory, { query = "", width = 460, height = 52
             requests.push(message.params.request.url);
         }
     });
-    const send = (method, params = {}) => new Promise((resolve) => { pending.set(++id, resolve); socket.send(JSON.stringify({ id, method, params })); });
+    // `sessionId` addresses a worker of the page (`attachWorkers`); without one the page itself.
+    const send = (method, params = {}, sessionId) => new Promise((resolve) => {
+        pending.set(++id, resolve); socket.send(JSON.stringify({ id, method, params, ...(sessionId ? { sessionId } : {}) }));
+    });
     await send("Runtime.enable"); await send("Log.enable"); await send("Page.enable");
     // A fixed viewport. With a scale factor other than 1 the override would report unscaled device
     // pixels to the page, so the window size and the real scale factor of the browser are used.
@@ -187,7 +214,7 @@ export async function open(siteDirectory, { query = "", width = 460, height = 52
     if (network) { await send("Network.enable"); }
     if (initScript) { await send("Page.addScriptToEvaluateOnNewDocument", { source: initScript }); }
     const url = `http://127.0.0.1:${server.address().port}/index.html${query}`;
-    await send("Page.navigate", { url });
+    if (navigate) { await send("Page.navigate", { url }); }
 
     // The browser target, for the commands the page target does not take (permissions).
     let browserSocket;
@@ -207,12 +234,52 @@ export async function open(siteDirectory, { query = "", width = 460, height = 52
 
     const page = {
         url,
+        // Opens the page, for a page of `open(.., { navigate: false })`.
+        navigate: () => send("Page.navigate", { url }),
         log,
         errors,
         navigations,
         requests,
         send,
         browserSend,
+        // The version of the browser ("Chrome/154.0.0.0") and its command line.
+        async browser() {
+            const version = await send("Browser.getVersion");
+            const commandLine = await browserSend("Browser.getBrowserCommandLine");
+            return { product: version.product, arguments: commandLine.arguments ?? [] };
+        },
+        // Calls `handler(params, sessionId)` for every event `method` of the page and of its workers.
+        on(method, handler) { listeners.push({ method, handler }); },
+        // Attaches a session to every dedicated worker of the page, those that exist and those that
+        // start later, and returns the list, which is kept up to date: { sessionId, type, url }.
+        // A thread of a module built with threads is such a worker. `send(method, params, sessionId)`
+        // addresses one.
+        async attachWorkers() {
+            await send("Target.setAutoAttach", { autoAttach: true, waitForDebuggerOnStart: false, flatten: true });
+            return workers;
+        },
+        // Evaluates an expression in a worker (`attachWorkers`) and returns its JSON-serialisable value.
+        async evaluateIn(sessionId, expression) {
+            const result = await send("Runtime.evaluate", { expression, returnByValue: true, awaitPromise: true }, sessionId);
+            if (result.error) { throw new Error(result.error.message); }
+            if (result.exceptionDetails) { throw new Error(result.exceptionDetails.exception?.description ?? result.exceptionDetails.text); }
+            return result.result?.value;
+        },
+        // Records a trace of the process of the page (every thread of it: the thread of the page and
+        // its workers) until the function returned is called, which resolves to the events.
+        async trace(categories = ["devtools.timeline", "disabled-by-default-devtools.timeline"]) {
+            const events = [];
+            const collect = (params) => { events.push(...params.value); };
+            listeners.push({ method: "Tracing.dataCollected", handler: collect });
+            const started = await send("Tracing.start", { transferMode: "ReportEvents", traceConfig: { includedCategories: categories, excludedCategories: ["*"] } });
+            if (started.error) { throw new Error(`Tracing.start: ${started.error.message}`); }
+            return async () => {
+                const complete = new Promise((resolve) => listeners.push({ method: "Tracing.tracingComplete", handler: resolve }));
+                await send("Tracing.end");
+                await complete;
+                return events;
+            };
+        },
         // Sets a permission of the page ("clipboard-read", "window-management", ...) to "granted",
         // "denied" or "prompt".
         async setPermission(name, setting) {
@@ -314,4 +381,59 @@ export function colours(capture, step = 4) {
     const seen = new Set();
     for (let y = 1; y < capture.height; y += step) { for (let x = 1; x < capture.width; x += step) { seen.add(capture.pixel(x, y).join()); } }
     return seen.size;
+}
+
+// The quantiles of a list of numbers, for a summary of durations: { count, sum, median, p95, p99, max }.
+export function distribution(values) {
+    const sorted = [...values].sort((a, b) => a - b);
+    const at = (q) => (sorted.length === 0 ? null : Number(sorted[Math.min(sorted.length - 1, Math.round((sorted.length - 1) * q))].toFixed(2)));
+    return { count: sorted.length, sum: Number(sorted.reduce((a, b) => a + b, 0).toFixed(1)), median: at(0.5), p95: at(0.95), p99: at(0.99), max: at(1) };
+}
+
+// What the threads of a trace (`page.trace`) did, from the tasks of their event loops (the `RunTask`
+// events): for the thread of the page (`main`), for each of its workers (`workers`, the busiest first:
+// a thread of a module built with threads is a worker) and for the main thread of the GPU process
+// (`gpu`), the number of tasks, their wall-clock time and their processor time in milliseconds, and
+// the wall-clock duration of every task (`durations`, in the order of the trace, with `starts`, their
+// start in milliseconds of the clock of the trace). Wall-clock time is how long the thread could do
+// nothing else; processor time leaves out the time the task waited for a processor or slept.
+// `window` ({ from, to } in milliseconds of the clock of the trace) keeps the tasks that start in it.
+// `key` names the thread in the trace (process and thread id), as `animationFrames` does.
+export function threadTimes(events, window) {
+    const names = new Map();
+    for (const event of events) { if (event.name === "thread_name") { names.set(`${event.pid}/${event.tid}`, event.args.name); } }
+    const threads = new Map();
+    for (const event of events) {
+        if (event.name !== "RunTask" || event.ph !== "X") { continue; }
+        const start = event.ts / 1000;
+        if (window && (start < window.from || start >= window.to)) { continue; }
+        const key = `${event.pid}/${event.tid}`;
+        let thread = threads.get(key);
+        if (!thread) { thread = { key, name: names.get(key) ?? "", tasks: 0, wallMs: 0, cpuMs: 0, durations: [], starts: [] }; threads.set(key, thread); }
+        thread.tasks++; thread.wallMs += (event.dur ?? 0) / 1000; thread.cpuMs += (event.tdur ?? 0) / 1000;
+        thread.durations.push((event.dur ?? 0) / 1000); thread.starts.push(start);
+    }
+    const named = (name) => [...threads.values()].filter((thread) => thread.name === name).sort((a, b) => b.cpuMs - a.cpuMs);
+    const empty = { key: "", name: "", tasks: 0, wallMs: 0, cpuMs: 0, durations: [], starts: [] };
+    return { main: named("CrRendererMain")[0] ?? empty, workers: named("DedicatedWorker thread"), gpu: named("CrGpuMain")[0] ?? empty };
+}
+
+// The start, in milliseconds of the clock of a trace, of every event of the DOM of type `type` the
+// thread of the page dispatched ("wheel", "pointermove", ...).
+export function dispatched(events, type) {
+    return events.filter((event) => event.name === "EventDispatch" && event.args?.data?.type === type).map((event) => event.ts / 1000).sort((a, b) => a - b);
+}
+
+// The animation frames of every thread of a trace: a map from the key of the thread (`threadTimes`) to
+// the start of each of its animation frames, in milliseconds of the clock of the trace.
+export function animationFrames(events) {
+    const threads = new Map();
+    for (const event of events) {
+        if (event.name !== "FireAnimationFrame") { continue; }
+        const key = `${event.pid}/${event.tid}`;
+        if (!threads.has(key)) { threads.set(key, []); }
+        threads.get(key).push(event.ts / 1000);
+    }
+    for (const times of threads.values()) { times.sort((a, b) => a - b); }
+    return threads;
 }
