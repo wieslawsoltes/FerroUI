@@ -4,12 +4,19 @@ description: >
   wasm32-unknown-emscripten, the Emscripten SDK and the wasm-bindgen command-line tool), puts it on
   the environment of the job and sets up node with the npm cache of the script module, with caches
   for all of them. The pins live in scripts/browser/setup.sh; see docs/porting/browser-platform.md,
-  section 3.
+  section 3. With `threads` it installs the toolchain of the threaded mode too (`setup.sh --threads`:
+  the pinned nightly with the source of the standard library, and whatever else that mode needs).
 
 inputs:
   cache-key:
     description: Key of the Rust build cache, so that jobs that build different things keep separate caches.
     required: true
+  threads:
+    description: >
+      "true" for a job that builds with `scripts/build-browser.sh --threads` or `--both`: the toolchain
+      is installed with `scripts/browser/setup.sh --threads`.
+    required: false
+    default: "false"
 
 runs:
   using: composite
@@ -21,6 +28,7 @@ runs:
         echo "emsdk=$(sed -n 's/^EMSDK_VERSION="\(.*\)"$/\1/p' scripts/browser/setup.sh)" >> "$GITHUB_OUTPUT"
         echo "rust=$(sed -n 's/^RUST_VERSION="\(.*\)"$/\1/p' scripts/browser/setup.sh)" >> "$GITHUB_OUTPUT"
         echo "wasm-bindgen=$(sed -n 's/^wasm-bindgen = "=\(.*\)"$/\1/p' Cargo.toml)" >> "$GITHUB_OUTPUT"
+        echo "nightly=$(sed -n 's/^RUST_NIGHTLY="\(.*\)"$/\1/p' scripts/browser/setup.sh)" >> "$GITHUB_OUTPUT"
     - name: Cache the Emscripten SDK
       uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
       with:
@@ -31,10 +39,20 @@ runs:
       with:
         path: ~/browser-tools/bin
         key: wasm-bindgen-cli-${{ runner.os }}-${{ steps.pins.outputs.wasm-bindgen }}-rust-${{ steps.pins.outputs.rust }}
+    # The nightly of the threaded mode, as rustup keeps it: the toolchain and the record that it is
+    # up to date. The key is the pin, so a change of the pin installs anew.
+    - name: Cache the nightly toolchain of the threaded mode
+      if: inputs.threads == 'true'
+      uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
+      with:
+        path: |
+          ~/.rustup/toolchains/${{ steps.pins.outputs.nightly }}-*
+          ~/.rustup/update-hashes/${{ steps.pins.outputs.nightly }}-*
+        key: rust-nightly-${{ runner.os }}-${{ runner.arch }}-${{ steps.pins.outputs.nightly }}-rust-src-wasm32-unknown-emscripten
     - name: Install the toolchain (scripts/browser/setup.sh)
       shell: bash
       run: |
-        scripts/browser/setup.sh ~/browser-tools
+        scripts/browser/setup.sh ${{ inputs.threads == 'true' && '--threads' || '' }} ~/browser-tools
         # The environment of env.sh, for the following steps of the job.
         source ~/browser-tools/env.sh
         echo "EMSDK=$EMSDK" >> "$GITHUB_ENV"
@@ -45,7 +63,9 @@ runs:
         echo "$HOME/browser-tools/bin" >> "$GITHUB_PATH"
     - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2
       with:
-        key: ${{ inputs.cache-key }}
+        # The build with threads has a standard library and objects of its own (target/threads), made
+        # by the nightly: its cache is another one, and a change of the pin starts it anew.
+        key: ${{ inputs.cache-key }}${{ inputs.threads == 'true' && format('-threads-{0}', steps.pins.outputs.nightly) || '' }}
     - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
       with:
         node-version: 24
