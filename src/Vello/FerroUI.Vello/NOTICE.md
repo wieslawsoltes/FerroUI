@@ -11,8 +11,10 @@ names and the logic that is not Skia's own are derived from it.
 The backend links the crates below from crates.io at the exact versions the
 workspace manifest names. All of them are licensed under the terms of both
 the Apache License, Version 2.0 and the MIT license, at the choice of the
-user; FerroUI uses them under the MIT license. The texts of both licenses
-ship with each crate (`LICENSE-APACHE`, `LICENSE-MIT`).
+user (the crates of the zune project also under the zlib license, and
+`jpeg-encoder` with a further license, below); FerroUI uses them under the
+MIT license. The texts of the licenses ship with each crate (`LICENSE-APACHE`,
+`LICENSE-MIT`, `LICENSE-ZLIB`, `LICENSE-IJG`).
 
 | Crate | Version | Used for | Copyright |
 |---|---|---|---|
@@ -32,6 +34,19 @@ ship with each crate (`LICENSE-APACHE`, `LICENSE-MIT`).
 | `font-types` | 0.12.6 | scalar types of `read-fonts` | the Fontations Authors (Google LLC) |
 | `fontique` | 0.12.0 | the installed fonts of the system: enumeration, matching, fallback | Copyright 2024 the Parley Authors |
 | `parlance` | 0.1.1 | text property types of `fontique` | the Parley Authors |
+| `zune-jpeg` | 0.5.15 | JPEG decoding | Copyright (c) zune-image developers |
+| `zune-bmp` | 0.5.2 | BMP decoding, and the bitmaps of an ICO | Copyright (c) zune-image developers |
+| `zune-core` | 0.5.3 | options and readers of the two zune crates | Copyright (c) zune-image developers |
+| `jpeg-encoder` | 0.7.1 | JPEG encoding | Copyright (c) 2021 Volker Ströbel |
+| `gif` | 0.14.2 | GIF decoding | Copyright (c) 2015 nwin; the image-rs developers |
+| `weezl` | 0.1.12 | LZW decompression of `gif` | Copyright (c) HeroicKatora 2020 |
+
+`jpeg-encoder` is licensed "(MIT OR Apache-2.0) AND IJG": parts of it (the
+quantization and Huffman tables and the scaling of a quality to them, and
+its SIMD code, which this workspace does not enable) derive from the software
+of the Independent JPEG Group, whose terms ask for this statement in the
+documentation of a product that uses it in executable form: **this software is
+based in part on the work of the Independent JPEG Group.**
 
 Their own dependencies (`bytemuck`, `smallvec`, `euclid`, `guillotiere`,
 `thiserror`, `fdeflate`, `miniz_oxide`, `foldhash`, `hashbrown`, `log`,
@@ -49,3 +64,9 @@ Apache License 2.0); on Linux and FreeBSD `yeslogic-fontconfig-sys` and
 `dlib` (MIT); on Android `roxmltree` (MIT or Apache License 2.0).
 
 No source of these crates is copied into the repository.
+
+## Assets
+
+`assets/noise_asset_256x256_png.png`, the noise texture of acrylic materials,
+is the asset of the Skia backend (`src/Skia/FerroUI.Skia/assets`), which has
+it from the upstream project named above (MIT).

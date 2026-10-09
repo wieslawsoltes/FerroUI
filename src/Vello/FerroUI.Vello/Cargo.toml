@@ -21,6 +21,11 @@ png.workspace = true
 skrifa.workspace = true
 glifo.workspace = true
 fontique.workspace = true
+zune-core.workspace = true
+zune-jpeg.workspace = true
+zune-bmp.workspace = true
+jpeg-encoder.workspace = true
+gif.workspace = true
 
 [dev-dependencies]
 ferroui-controls = { workspace = true, features = ["testing"] }

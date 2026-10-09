@@ -695,6 +695,68 @@ fn edge_mode_aliased(backend: &Backend, context: &mut dyn IDrawingContextImpl) {
     context.pop_render_options();
 }
 
+/// Bitmaps created from pixels in each format and alpha format the
+/// backends read: sixteen bits a pixel, thirty-two without alpha, and the
+/// two orders of four channels premultiplied, not premultiplied and opaque.
+fn pixel_formats(backend: &Backend, context: &mut dyn IDrawingContextImpl) {
+    background(context);
+    context.draw_ellipse(Some(&solid(TEAL)), None, Rect::new(20.0, 20.0, 160.0, 160.0));
+
+    // The color and the alpha of a pixel of a pattern of 12 by 12.
+    let pattern = |x: u32, y: u32| ((x * 21) as u8, (y * 21) as u8, ((x + y) * 10) as u8, (40 + (x * y * 3) % 216) as u8);
+    let bitmap = |format: PixelFormat, alpha_format: AlphaFormat| {
+        let mut data = Vec::new();
+        for y in 0..12 {
+            for x in 0..12 {
+                let (r, g, b, a) = pattern(x, y);
+                // The fourth byte of an opaque pixel is 255, but for the
+                // format that has no alpha, where it is not looked at. (Of
+                // a pixel that is declared opaque and has another byte
+                // there, the raster path of Skia copies the byte into the
+                // target; the Vello backend reads the pixel as opaque.)
+                let a = if alpha_format == AlphaFormat::Opaque && format != PixelFormat::RGB32 { 255 } else { a };
+                if format == PixelFormat::RGB565 {
+                    let value = ((r as u16 >> 3) << 11) | ((g as u16 >> 2) << 5) | (b as u16 >> 3);
+                    data.extend_from_slice(&value.to_le_bytes());
+                } else {
+                    // Premultiplied pixels have colors no larger than their
+                    // alpha.
+                    let (r, g, b) = if alpha_format == AlphaFormat::Premul {
+                        let premultiply = |channel: u8| ((channel as u32 * a as u32 + 127) / 255) as u8;
+                        (premultiply(r), premultiply(g), premultiply(b))
+                    } else {
+                        (r, g, b)
+                    };
+                    data.extend_from_slice(&if format == PixelFormat::BGRA8888 { [b, g, r, a] } else { [r, g, b, a] });
+                }
+            }
+        }
+        let stride = if format == PixelFormat::RGB565 { 24 } else { 48 };
+        backend.interface.load_bitmap_from_pixels(format, alpha_format, &data, PixelSize::new(12, 12), Vector::new(96.0, 96.0), stride)
+    };
+
+    let bitmaps = [
+        bitmap(PixelFormat::RGB565, AlphaFormat::Opaque),
+        bitmap(PixelFormat::RGB32, AlphaFormat::Opaque),
+        bitmap(PixelFormat::RGBA8888, AlphaFormat::Premul),
+        bitmap(PixelFormat::BGRA8888, AlphaFormat::Premul),
+        bitmap(PixelFormat::RGBA8888, AlphaFormat::Unpremul),
+        bitmap(PixelFormat::BGRA8888, AlphaFormat::Unpremul),
+        bitmap(PixelFormat::RGBA8888, AlphaFormat::Opaque),
+        bitmap(PixelFormat::BGRA8888, AlphaFormat::Opaque),
+    ];
+
+    context.push_render_options(RenderOptions {
+        bitmap_interpolation_mode: BitmapInterpolationMode::None,
+        ..RenderOptions::default()
+    });
+    for (index, bitmap) in bitmaps.iter().enumerate() {
+        let (x, y) = (4.0 + 49.0 * (index % 4) as f64, 28.0 + 78.0 * (index / 4) as f64);
+        context.draw_bitmap(&**bitmap, 1.0, Rect::new(0.0, 0.0, 12.0, 12.0), Rect::new(x, y, 48.0, 60.0));
+    }
+    context.pop_render_options();
+}
+
 /// The scenes with the bounds of each.
 pub fn scenes() -> Vec<EffectScene> {
     macro_rules! scene {
@@ -704,65 +766,66 @@ pub fn scenes() -> Vec<EffectScene> {
     }
 
     vec![
-        scene!(shadows_outset_rectangle, 100.0, 255.0),
-        scene!(shadows_outset_rounded, 100.0, 255.0),
-        scene!(shadows_outset_elliptical, 100.0, 255.0),
-        scene!(shadows_outset_capsule, 100.0, 255.0),
-        scene!(shadows_inset_rectangle, 100.0, 255.0),
-        scene!(shadows_inset_rounded, 100.0, 255.0),
-        scene!(shadows_inset_elliptical, 100.0, 255.0),
-        scene!(shadows_combined, 100.0, 255.0),
-        scene!(effect_blur, 100.0, 255.0),
-        scene!(effect_blur_transformed, 100.0, 255.0),
-        scene!(effect_blur_bounded, 100.0, 255.0),
-        scene!(effect_drop_shadow, 100.0, 255.0),
-        scene!(effect_drop_shadow_transformed, 100.0, 255.0),
-        scene!(scene_brush_single, 100.0, 255.0),
-        scene!(scene_brush_tile, 100.0, 255.0),
-        scene!(scene_brush_flip_x, 100.0, 255.0),
-        scene!(scene_brush_flip_y, 100.0, 255.0),
-        scene!(scene_brush_flip_xy, 100.0, 255.0),
-        scene!(scene_brush_surface_single, 100.0, 255.0),
-        scene!(scene_brush_surface_tile, 100.0, 255.0),
-        scene!(scene_brush_surface_flip_xy, 100.0, 255.0),
-        scene!(scene_brush_stretched, 100.0, 255.0),
-        scene!(scene_brush_transformed, 100.0, 255.0),
-        scene!(acrylic, 100.0, 255.0),
-        scene!(interpolation_none_upscaled, 100.0, 255.0),
-        scene!(interpolation_low_upscaled, 100.0, 255.0),
-        scene!(interpolation_medium_upscaled, 100.0, 255.0),
-        scene!(interpolation_high_upscaled, 100.0, 255.0),
-        scene!(interpolation_none_downscaled, 100.0, 255.0),
-        scene!(interpolation_low_downscaled, 100.0, 255.0),
-        scene!(interpolation_medium_downscaled, 100.0, 255.0),
-        scene!(interpolation_high_downscaled, 100.0, 255.0),
-        scene!(blend_source_over, 100.0, 255.0),
-        scene!(blend_source, 100.0, 255.0),
-        scene!(blend_destination, 100.0, 255.0),
-        scene!(blend_destination_over, 100.0, 255.0),
-        scene!(blend_source_in, 100.0, 255.0),
-        scene!(blend_destination_in, 100.0, 255.0),
-        scene!(blend_source_out, 100.0, 255.0),
-        scene!(blend_destination_out, 100.0, 255.0),
-        scene!(blend_source_atop, 100.0, 255.0),
-        scene!(blend_destination_atop, 100.0, 255.0),
-        scene!(blend_xor, 100.0, 255.0),
-        scene!(blend_plus, 100.0, 255.0),
-        scene!(blend_screen, 100.0, 255.0),
-        scene!(blend_overlay, 100.0, 255.0),
-        scene!(blend_darken, 100.0, 255.0),
-        scene!(blend_lighten, 100.0, 255.0),
-        scene!(blend_color_dodge, 100.0, 255.0),
-        scene!(blend_color_burn, 100.0, 255.0),
-        scene!(blend_hard_light, 100.0, 255.0),
-        scene!(blend_soft_light, 100.0, 255.0),
-        scene!(blend_difference, 100.0, 255.0),
-        scene!(blend_exclusion, 100.0, 255.0),
-        scene!(blend_multiply, 100.0, 255.0),
-        scene!(blend_hue, 100.0, 255.0),
-        scene!(blend_saturation, 100.0, 255.0),
-        scene!(blend_color, 100.0, 255.0),
-        scene!(blend_luminosity, 100.0, 255.0),
-        scene!(edge_mode_aliased, 100.0, 255.0),
+        scene!(shadows_outset_rectangle, 0.05, 0.54),
+        scene!(shadows_outset_rounded, 0.19, 0.58),
+        scene!(shadows_outset_elliptical, 0.06, 0.50),
+        scene!(shadows_outset_capsule, 0.13, 0.48),
+        scene!(shadows_inset_rectangle, 0.05, 0.41),
+        scene!(shadows_inset_rounded, 0.22, 0.52),
+        scene!(shadows_inset_elliptical, 0.07, 0.44),
+        scene!(shadows_combined, 0.05, 0.53),
+        scene!(effect_blur, 0.05, 0.55),
+        scene!(effect_blur_transformed, 0.05, 0.32),
+        scene!(effect_blur_bounded, 0.05, 0.69),
+        scene!(effect_drop_shadow, 0.09, 0.39),
+        scene!(effect_drop_shadow_transformed, 0.08, 0.34),
+        scene!(scene_brush_single, 0.10, 0.09),
+        scene!(scene_brush_tile, 1.04, 1.07),
+        scene!(scene_brush_flip_x, 1.07, 1.08),
+        scene!(scene_brush_flip_y, 1.11, 1.07),
+        scene!(scene_brush_flip_xy, 1.13, 1.08),
+        scene!(scene_brush_surface_single, 0.05, 0.07),
+        scene!(scene_brush_surface_tile, 0.05, 0.46),
+        scene!(scene_brush_surface_flip_xy, 0.05, 0.46),
+        scene!(scene_brush_stretched, 0.32, 0.41),
+        scene!(scene_brush_transformed, 0.53, 0.56),
+        scene!(acrylic, 0.09, 0.38),
+        scene!(interpolation_none_upscaled, 0.05, 0.05),
+        scene!(interpolation_low_upscaled, 0.05, 0.34),
+        scene!(interpolation_medium_upscaled, 0.05, 0.34),
+        scene!(interpolation_high_upscaled, 0.05, 0.05),
+        scene!(interpolation_none_downscaled, 0.05, 0.12),
+        scene!(interpolation_low_downscaled, 0.05, 0.33),
+        scene!(interpolation_medium_downscaled, 0.05, 0.82),
+        scene!(interpolation_high_downscaled, 0.05, 0.82),
+        scene!(blend_source_over, 0.20, 0.37),
+        scene!(blend_source, 0.18, 0.43),
+        scene!(blend_destination, 0.05, 0.12),
+        scene!(blend_destination_over, 0.05, 0.27),
+        scene!(blend_source_in, 0.14, 0.33),
+        scene!(blend_destination_in, 0.14, 0.29),
+        scene!(blend_source_out, 0.05, 0.20),
+        scene!(blend_destination_out, 0.14, 0.29),
+        scene!(blend_source_atop, 0.11, 0.25),
+        scene!(blend_destination_atop, 0.18, 0.42),
+        scene!(blend_xor, 0.12, 0.37),
+        scene!(blend_plus, 0.20, 0.40),
+        scene!(blend_screen, 0.20, 0.50),
+        scene!(blend_overlay, 0.05, 0.37),
+        scene!(blend_darken, 0.05, 0.29),
+        scene!(blend_lighten, 0.20, 0.38),
+        scene!(blend_color_dodge, 0.24, 0.37),
+        scene!(blend_color_burn, 0.05, 0.31),
+        scene!(blend_hard_light, 0.17, 0.52),
+        scene!(blend_soft_light, 0.05, 0.30),
+        scene!(blend_difference, 0.19, 0.42),
+        scene!(blend_exclusion, 0.19, 0.63),
+        scene!(blend_multiply, 0.05, 0.43),
+        scene!(blend_hue, 0.05, 0.36),
+        scene!(blend_saturation, 0.05, 0.30),
+        scene!(blend_color, 0.05, 0.35),
+        scene!(blend_luminosity, 0.10, 0.41),
+        scene!(edge_mode_aliased, 0.16, 0.26),
+        scene!(pixel_formats, 0.07, 0.15),
     ]
 }
