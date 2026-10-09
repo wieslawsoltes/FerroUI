@@ -32,11 +32,34 @@
 // which reports the drawer, the current page, the focus and the visible text with its bounds; the
 // tests find the controls they click from those bounds.
 //
+// The same checks run against a site built with threads, which is recognised by the file the build
+// adds to such a site (ferroui-threads.js) and served cross-origin isolated:
+//
+//   scripts/build-browser.sh control-catalog-browser --threads
+//   node scripts/browser/tests/control_catalog.test.mjs target/browser-threads/control-catalog-browser
+//
+// There the catalog is rendered by a render thread (docs/porting/browser-render-worker.md, "B2.7"),
+// and more checks follow: which thread drew the frames (the `catalogRendering` export), the same
+// module kept on one thread (`?RenderThread=false`), and a frame that panics on the render thread,
+// which the page has to see as an error while the frames go on.
+//
+// A view is hit from what its last frame drew, and with a render thread the first frame comes after
+// the view exists: every page is waited for until something of its view is hit before a check
+// sends input (`hit` of the elements of `catalogState`).
+//
+// The last check visits a tour of pages and prints how much of the memory of the module was in use
+// (the `catalogMemory` export): the number a site built with threads, whose memory is fixed, is
+// sized by.
+//
 // With --screenshot the picture of the WebGL2 run at the first size is written to the given file.
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { open, run, assert, sleep } from "../harness.mjs";
+import {
+    DRAWER_EDGE, STATE_TIMEOUT, TOUR, TOUR_SIZE, describe, drive, inContent, inDrawer, navigate, pairs, visit,
+    waitUntilReady
+} from "../catalog-pages.mjs";
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..", "..", "..");
 const argv = process.argv.slice(2);
@@ -51,6 +74,12 @@ if (!fs.existsSync(path.join(site, "index.html"))) {
     process.exit(2);
 }
 
+// A site built with threads has the script that isolates its page.
+const threaded = fs.existsSync(path.join(site, "ferroui-threads.js"));
+// The parameter that keeps a module built with threads on the thread of the page.
+const ONE_THREAD = "RenderThread=false";
+const measured = (text) => console.log(`      measured: ${text}`);
+
 // The list of the asset files of the site (samples/ControlCatalog/build/page_files.rs).
 const MANIFEST = "assets/ControlCatalog.json";
 const manifest = JSON.parse(fs.readFileSync(path.join(site, MANIFEST), "utf8"));
@@ -60,7 +89,6 @@ const fileOf = (asset) => `${manifest.directory}${asset}`;
 // Start-up includes compiling the WebAssembly module, which takes a while on a cold CI runner.
 const START_TIMEOUT = 180_000;
 const FRAME_TIMEOUT = 60_000;
-const STATE_TIMEOUT = 20_000;
 const FIRST_SIZE = { width: 1024, height: 700 };
 const LARGER_SIZE = { width: 1440, height: 900 };
 const SMALLER_SIZE = { width: 800, height: 600 };
@@ -69,45 +97,25 @@ const NARROW_SIZE = { width: 600, height: 700 };
 
 /** Opens the site in a page of `size` and waits until the application has started and drawn. */
 async function start({ mode = "WebGL2", size = FIRST_SIZE, query = "" } = {}) {
-    const page = await open(site, { query: `?RenderingMode=${mode}${query}`, width: size.width, height: size.height });
+    const page = await open(site, { query: `?RenderingMode=${mode}${query}`, width: size.width, height: size.height, isolated: threaded });
     const started = Date.now();
-    try {
-        await page.waitFor(`(() => {
-            const canvas = document.querySelector("#out canvas");
-            const splash = document.querySelector("#out .ferroui-splash");
-            return canvas && canvas.width > 0 && (!splash || splash.classList.contains("splash-close"))
-                && globalThis.controlCatalog && controlCatalog.catalogState() !== "null";
-        })()`, START_TIMEOUT);
-    } catch (error) { await page.close(); throw error; }
+    // Whether a render thread draws the view: a module built with threads, unless the page keeps it
+    // on its own thread.
+    page.onRenderThread = threaded && !query.includes(ONE_THREAD);
+    try { await waitUntilReady(page, START_TIMEOUT); } catch (error) { await page.close(); throw error; }
     page.startSeconds = (Date.now() - started) / 1000;
-    page.state = async () => JSON.parse(await page.evaluate("controlCatalog.catalogState()"));
-    /** Waits until `predicate(state)` holds and returns that state. */
-    page.until = async (description, predicate, timeout = STATE_TIMEOUT) => {
-        let state;
-        for (const end = Date.now() + timeout; Date.now() < end;) {
-            state = await page.state();
-            if (predicate(state)) { return state; }
-            await sleep(100);
+    drive(page);
+    // The size of the canvas in device pixels and the device pixel ratio. A canvas whose control went
+    // to a render thread is sized there: its size is the size of the last frame.
+    page.canvasSize = async () => {
+        const dpr = await page.evaluate("devicePixelRatio");
+        if (page.onRenderThread) {
+            const [width, height] = (await page.rendering()).size.split("x").map(Number);
+            return { width, height, dpr };
         }
-        throw new Error(`timed out waiting until ${description}; the view shows: ${describe(state)}`);
-    };
-    /** The visible element whose text is `text` (and that matches `filter`), waiting for it to appear. */
-    page.find = async (text, filter = () => true) => {
-        const state = await page.until(`"${text}" is shown`, (s) => s.elements.some((e) => e.text === text && filter(e)));
-        return state.elements.find((e) => e.text === text && filter(e));
-    };
-    /** Clicks the middle of an element of the state with real pointer events. */
-    page.clickElement = async (element) => {
-        await page.click(Math.round(element.x + element.width / 2), Math.round(element.y + element.height / 2));
+        return { ...await page.evaluate(`(c => ({ width: c.width, height: c.height }))(document.querySelector("#out canvas"))`), dpr };
     };
     return page;
-}
-
-/** A short description of what a state shows, for failure messages. */
-function describe(state) {
-    if (!state) { return "nothing"; }
-    const texts = state.elements.filter((e) => e.text && e.hit).map((e) => `${e.text}@${Math.round(e.x)},${Math.round(e.y)}`);
-    return `page ${JSON.stringify(state.page)}${state.navigating ? " (navigating)" : ""}, drawer ${state.drawerOpen ? "open" : "closed"}, focus ${JSON.stringify(state.focus)}, texts that can be clicked ${JSON.stringify(texts)}`;
 }
 
 /** The number of distinct colours in a region of a decoded picture. */
@@ -184,7 +192,7 @@ for (const [mode, expectedContext] of [["WebGL2", "webgl2"], ["Software2D", "2d"
         async function waitForFrame(size, region, minimumColours) {
             let canvas; let colours = 0;
             for (const end = Date.now() + FRAME_TIMEOUT; Date.now() < end;) {
-                canvas = await page.evaluate(`(c => ({ width: c.width, height: c.height, dpr: devicePixelRatio }))(document.querySelector("#out canvas"))`);
+                canvas = await page.canvasSize();
                 if (canvas.width === Math.round(size.width * canvas.dpr) && canvas.height === Math.round(size.height * canvas.dpr)) {
                     const picture = await page.screenshot(undefined, { x: 0, y: 0, ...size });
                     colours = distinctColours(picture, region);
@@ -197,9 +205,18 @@ for (const [mode, expectedContext] of [["WebGL2", "webgl2"], ["Software2D", "2d"
 
         const first = await waitForFrame(FIRST_SIZE, undefined, 64);
         console.log(`      drawn at ${FIRST_SIZE.width}x${FIRST_SIZE.height}: canvas ${first.canvas.width}x${first.canvas.height}, ${first.colours} colours`);
-        // Asking a canvas for a context of another kind than the one it has gives null, so this tells
-        // the kind without creating a context.
-        const kind = await page.evaluate(`(c => c.getContext("webgl2") ? "webgl2" : c.getContext("webgl") ? "webgl" : c.getContext("2d") ? "2d" : "unknown")(document.querySelector("#out canvas"))`);
+        let kind;
+        if (page.onRenderThread) {
+            // The canvas of the page gave its control to the render thread and has no context to
+            // ask for: the thread that draws tells what it drew the last frame with.
+            const rendering = await page.rendering();
+            kind = rendering.kind === "software" ? "2d" : rendering.kind === "webgl" ? (rendering.gl === "3" ? "webgl2" : "webgl") : "unknown";
+            assert(rendering.other_thread === "true", `the frames were not drawn by another thread: ${JSON.stringify(rendering)}`);
+        } else {
+            // Asking a canvas for a context of another kind than the one it has gives null, so this
+            // tells the kind without creating a context.
+            kind = await page.evaluate(`(c => c.getContext("webgl2") ? "webgl2" : c.getContext("webgl") ? "webgl" : c.getContext("2d") ? "2d" : "unknown")(document.querySelector("#out canvas"))`);
+        }
         assert(kind === expectedContext, `the canvas has a ${kind} context`);
         if (screenshotFile && mode === "WebGL2") {
             await page.screenshot(screenshotFile, { x: 0, y: 0, ...FIRST_SIZE });
@@ -221,20 +238,6 @@ for (const [mode, expectedContext] of [["WebGL2", "webgl2"], ["Software2D", "2d"
 }
 
 // --- input ---------------------------------------------------------------------------------------------
-
-// The drawer is 260 pixels wide; its elements are those to the left of that edge.
-const DRAWER_EDGE = 260;
-const inDrawer = (e) => e.hit && e.x + e.width <= DRAWER_EDGE;
-const inContent = (e) => e.hit && e.x >= DRAWER_EDGE;
-
-/** Clicks the entry `text` of the drawer and waits until the main view shows the page `header`. */
-async function navigate(page, text, header = text) {
-    await page.clickElement(await page.find(text, inDrawer));
-    // The navigation page ignores a navigation while it runs one (as upstream): wait until it has finished.
-    await page.until(`the page "${header}" is shown`, (s) => s.page === header && !s.navigating
-        // The title bar of the navigation page shows the header of the page.
-        && s.elements.some((e) => e.type === "TextBlock" && e.text === header && e.hit && e.y < 48 && e.x >= DRAWER_EDGE));
-}
 
 check("the module, the list of the asset files and the start-up files are downloaded once, through the preloads of the page", async (page) => {
     // A preload that does not match the request of the script (another name, other credentials) is
@@ -464,5 +467,104 @@ check("the CJK sample of the TextBox page finds its font and draws its glyphs", 
     console.log(`      the CJK text box uses ${box.font}; ${ink} pixels of glyphs`);
     assert(page.errors.length === 0, `errors were logged:\n${page.errors.join("\n")}`);
 }, { size: LARGER_SIZE, query: "&PrefetchAssets=false" });
+
+// --- the render thread (stage B2.7): a site built with threads only --------------------------------
+
+// Waits until the view reports more than `frames` frames.
+async function framesAfter(page, frames, timeout = FRAME_TIMEOUT) {
+    let rendering;
+    for (const end = Date.now() + timeout; Date.now() < end; await sleep(50)) {
+        rendering = await page.rendering();
+        if (Number(rendering.frames) > Number(frames)) { return rendering; }
+    }
+    throw new Error(`no frame was drawn within ${timeout} ms: ${JSON.stringify(rendering)}`);
+}
+
+if (threaded) {
+    check("the frames of the catalog are drawn by a render thread", async (page) => {
+        let rendering = await page.rendering();
+        assert(rendering.on_render_thread === "true", `the render loop of the page does not tick on a render thread: ${JSON.stringify(rendering)}`);
+        assert(rendering.render_thread !== "0" && rendering.page_thread !== "0", `the threads have no ids: ${JSON.stringify(rendering)}`);
+        assert(rendering.other_thread === "true" && rendering.frame_thread === rendering.render_thread && rendering.frame_thread !== rendering.page_thread,
+            `the frames were not drawn by the render thread: ${JSON.stringify(rendering)}`);
+        assert(rendering.kind === "webgl" && rendering.gl === "3", `the mode did not give a WebGL 2 target: ${JSON.stringify(rendering)}`);
+        // The canvas of the page gave its control away: it hands out no context.
+        const context = await page.evaluate(`(() => { try { return document.querySelector("#out canvas").getContext("2d") ? "2d" : "none"; } catch (error) { return error.name; } })()`);
+        assert(context !== "2d", "the page still owns its canvas");
+        // Input reaches the view and is drawn by that thread.
+        await navigate(page, "Basic Input");
+        rendering = await framesAfter(page, rendering.frames);
+        assert(rendering.frame_thread === rendering.render_thread, `a frame after input was drawn by another thread: ${JSON.stringify(rendering)}`);
+        measured(`${rendering.frames} frames in ${rendering.ticks} ticks of the render thread; calls a tick had the main thread serve: ${rendering.proxied} (last function ${rendering.last_proxied})`);
+        assert(rendering.panics === "0", `the render thread panicked: ${JSON.stringify(rendering)}`);
+        assert(page.errors.length === 0, `errors were logged:\n${page.errors.join("\n")}`);
+    });
+
+    check(`with ${ONE_THREAD} the module built with threads draws on the thread of the page`, async (page) => {
+        const rendering = await page.rendering();
+        assert(rendering.on_render_thread === "false" && rendering.render_thread === "0", `a render thread was started: ${JSON.stringify(rendering)}`);
+        assert(Number(rendering.frames) > 0 && rendering.other_thread === "false" && rendering.ticks === "0",
+            `the frames were not drawn by the thread of the page: ${JSON.stringify(rendering)}`);
+        const kind = await page.evaluate(`(c => c.getContext("webgl2") ? "webgl2" : "other")(document.querySelector("#out canvas"))`);
+        assert(kind === "webgl2", "the page did not keep its canvas");
+        await navigate(page, "Basic Input");
+        await navigate(page, "Buttons");
+        await page.find("Standard _button", inContent);
+        assert(page.errors.length === 0, `errors were logged:\n${page.errors.join("\n")}`);
+    }, { query: `&${ONE_THREAD}` });
+
+    // A frame that panics on the render thread is caught by the render loop there (as upstream's
+    // loop catches the exception of a frame). Nothing of it would reach the page by itself: the
+    // platform queues a call for the thread of the page, which logs the message as an error.
+    check("a frame that panics on the render thread is an error of the page, and the frames go on", async (page) => {
+        await navigate(page, "Basic Input");
+        const before = await page.rendering();
+        assert(page.errors.length === 0, `errors were logged before the panic:\n${page.errors.join("\n")}`);
+        assert(await page.evaluate("controlCatalog.catalogPanicInFrame()") === true, "the job that panics was not posted");
+        const reported = (line) => line.includes("the render thread panicked") && line.includes("catalogPanicInFrame");
+        for (const end = Date.now() + STATE_TIMEOUT; Date.now() < end && !page.errors.some(reported); await sleep(100)) { }
+        assert(page.errors.some(reported), `the page logged no error for the panic; its errors:\n${page.errors.join("\n")}\nits log ends:\n${page.log.slice(-6).join("\n")}`);
+        const panics = await page.evaluate("JSON.stringify(controlCatalogPanics())");
+        assert(JSON.parse(panics).length === 1 && JSON.parse(panics)[0].includes("catalogPanicInFrame"), `the script of the platform kept ${panics}`);
+        assert((await page.rendering()).panics === "1", `the panic was not counted: ${JSON.stringify(await page.rendering())}`);
+        // The loop goes on: the view answers input and draws.
+        await navigate(page, "Buttons");
+        const button = await page.find("Standard _button", inContent);
+        await page.clickElement(button);
+        await page.find("Click raised 1 time.", inContent);
+        const after = await framesAfter(page, before.frames);
+        assert(after.frame_thread === after.render_thread && after.panics === "1", `after the panic: ${JSON.stringify(after)}`);
+        measured(`the page logged: ${page.errors.find(reported).slice(0, 200)}`);
+    });
+}
+
+// --- memory ------------------------------------------------------------------------------------------
+
+// The memory of a module built with threads is fixed (FERROUI_BROWSER_THREAD_MEMORY_MB of
+// scripts/build-browser.sh), so what the catalog needs has to be known: the end of the dynamic memory
+// of the module after a tour of pages, sampled ten times a second by the host page
+// (`?MemoryReport=true`). Without threads the memory grows, and the number tells how far.
+check("the memory of the module after a tour of pages", async (page) => {
+    const memory = async () => pairs(await page.evaluate("controlCatalog.catalogMemory()"));
+    const megabytes = (bytes) => (Number(bytes) / (1024 * 1024)).toFixed(1);
+    const atStart = await memory();
+    assert(Number(atStart.top) > 0 && Number(atStart.size) >= Number(atStart.top), `the memory of the module: ${JSON.stringify(atStart)}`);
+    const visited = [];
+    for (const entry of TOUR) {
+        await visit(page, entry);
+        // The page is drawn (and, with the prefetch on, its files have arrived or are on their way).
+        await sleep(700);
+        const now = await memory();
+        visited.push(`${entry.name} ${megabytes(now.top)}`);
+    }
+    // The files of the pages that were not visited arrive too (the prefetch is on).
+    await page.waitFor(`performance.getEntriesByType("mark").some((m) => m.name === "assets prefetched")`, 120_000);
+    await sleep(1000);
+    const atEnd = await memory();
+    console.log(`      end of the dynamic memory after each page, MB: ${visited.join(", ")}`);
+    measured(`memory in use at the start ${megabytes(atStart.top)} MB, at the end ${megabytes(atEnd.top)} MB, peak ${megabytes(atEnd.peak)} MB, of ${megabytes(atEnd.size)} MB (${threaded ? "fixed" : "grown to"})`);
+    assert(Number(atEnd.peak) >= Number(atStart.top) && Number(atEnd.peak) <= Number(atEnd.size), `the memory of the module: ${JSON.stringify(atEnd)}`);
+    assert(page.errors.length === 0, `errors were logged:\n${page.errors.join("\n")}`);
+}, { query: "&MemoryReport=true", size: TOUR_SIZE });
 
 await run(checks);

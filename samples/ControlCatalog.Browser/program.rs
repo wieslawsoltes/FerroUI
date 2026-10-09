@@ -14,6 +14,13 @@
 //! `?RenderingMode=WebGL2;Software2D`, and whether the file dialogs use the
 //! polyfill: `?PreferFileDialogPolyfill=true`.
 //!
+//! Addition of the port: built with threads
+//! (`scripts/build-browser.sh control-catalog-browser --threads`, served
+//! cross-origin isolated, or isolated by the service worker of the site) the
+//! catalog is rendered by a render thread: the compositor and Skia run in a
+//! worker that owns the canvas. `?RenderThread=false` keeps such a module on
+//! the thread of the page. Without threads the option does nothing.
+//!
 //! Additions of the port: the application registers the embedded Inter font
 //! and makes it the default family, because the browser has no system
 //! fonts and the Skia build of the port has no default typeface. Trace
@@ -24,7 +31,9 @@
 //! (`scripts/browser/tests/control_catalog.test.mjs`): the export
 //! [`catalog_state`] reports what the view shows, so that the tests can find
 //! the controls they drive with real pointer and key events and check the
-//! effect.
+//! effect; [`catalog_rendering`] reports which thread drew the frames;
+//! [`catalog_memory`] how much of the memory of the module is in use; and
+//! [`catalog_panic_in_frame`] makes the next frame panic.
 //! The native control demo of the browser (`EmbedSampleWeb`) is in
 //! [`embed_sample_browser`].
 //!
@@ -48,13 +57,18 @@ use page_assets_browser::BrowserPageAssets;
 use ferroui_base::logging::LogEventLevel;
 use ferroui_base::media::{FontFamily, FontManager, FontManagerOptions, Typeface};
 use ferroui_base::metadata::from_markup_value;
+use ferroui_base::rendering::composition::ElementComposition;
 use ferroui_base::rendering::RendererDebugOverlays;
 use ferroui_base::threading::Dispatcher;
 use ferroui_base::{Point, Ref, Visual};
+use ferroui_browser::interop::canvas_helper::{RENDER_TARGET_KIND_SOFTWARE, RENDER_TARGET_KIND_WEB_GL};
+use ferroui_browser::interop::thread_proxy;
+use ferroui_browser::rendering::{BrowserSharedRenderLoop, RenderStatistics, RenderWorker};
 use ferroui_browser::{BrowserAppBuilder, BrowserPlatformOptions, BrowserRenderingMode};
 use ferroui_controls::{AppBuilder, Application, Button, Image, NavigationPage, TextBlock, TextBox, TopLevel};
 use ferroui_fonts_inter::AppBuilderExtension;
 use std::rc::Rc;
+use std::sync::atomic::{AtomicUsize, Ordering};
 use wasm_bindgen::prelude::*;
 
 /// `Main(args)`: the entry point the host page calls once the module is
@@ -184,6 +198,118 @@ pub fn catalog_state() -> String {
     )
 }
 
+/// Where the frames of the view are rendered, as a line of `name=value`
+/// pairs, for the behaviour tests (the fields of `themedViewRendering` of
+/// the example `themed_view` of the platform):
+///
+/// - `frames`: the frames drawn to the canvas so far;
+/// - `frame_thread`: the thread that drew the last one, and `page_thread`:
+///   the thread of the page, which makes this call (both 0 in a module
+///   built without threads); `other_thread`: whether they differ;
+/// - `render_thread`: the render thread of the platform, 0 without one, and
+///   `on_render_thread`: whether the render loop of the page ticks there;
+/// - `kind` (`webgl`, `software`, `none` before the first frame), `gl` (the
+///   major version of OpenGL ES: 2 for WebGL 1, 3 for WebGL 2, 0 in
+///   software) and `size` (device pixels) of the last frame;
+/// - `ticks`: the ticks of the frame loop of the render thread, and
+///   `proxied`: the calls those ticks made the main thread of the page
+///   serve (`unknown` when they are not counted), with `last_proxied`, the
+///   index of the function of the last one in the script of the module (-1
+///   for none);
+/// - `released`: the canvases of closed views the thread that renders has
+///   released, and `panics`: the panics of the render thread.
+///
+/// Not a port.
+#[wasm_bindgen(js_name = catalogRendering)]
+pub fn catalog_rendering() -> String {
+    let statistics = RenderStatistics::current();
+    let page_thread = thread_proxy::current_thread();
+    let kind = match statistics.frame_kind {
+        RENDER_TARGET_KIND_WEB_GL => "webgl",
+        RENDER_TARGET_KIND_SOFTWARE => "software",
+        _ => "none",
+    };
+    format!(
+        "frames={};frame_thread={};page_thread={};other_thread={};render_thread={};on_render_thread={};kind={};gl={};size={}x{};ticks={};proxied={};last_proxied={};released={};panics={}",
+        statistics.frames,
+        statistics.frame_thread,
+        page_thread,
+        statistics.frames > 0 && statistics.frame_thread != page_thread,
+        RenderWorker::thread_id(),
+        BrowserSharedRenderLoop::renders_on_render_thread(),
+        kind,
+        statistics.frame_gl_major_version,
+        statistics.frame_width,
+        statistics.frame_height,
+        statistics.ticks,
+        statistics.tick_proxied_calls.map_or_else(|| "unknown".to_string(), |calls| calls.to_string()),
+        statistics.last_proxied_function,
+        statistics.canvases_released,
+        statistics.render_thread_panics,
+    )
+}
+
+/// Makes the next frame of the view panic, for the behaviour tests: a job
+/// that panics is posted to the compositor of the view and runs on the
+/// thread that renders, inside a frame. Returns whether the job was posted
+/// (`false` before the view has a compositor). Not a port.
+///
+/// The render loop catches the panic and goes on with its next tick, as
+/// upstream's loop does with the exception of a frame. On a render thread
+/// the platform reports the panic to the page, which logs it as an error on
+/// its console.
+#[wasm_bindgen(js_name = catalogPanicInFrame)]
+pub fn catalog_panic_in_frame() -> bool {
+    let Some(top_level) = top_level() else { return false };
+    let Some(visual) = ElementComposition::get_element_visual(&top_level) else { return false };
+    visual.compositor().post_server_job(|_| panic!("catalogPanicInFrame: a frame panics on request"), false);
+    true
+}
+
+/// The largest end of the dynamic memory [`catalog_memory`] has seen.
+static MEMORY_PEAK: AtomicUsize = AtomicUsize::new(0);
+
+/// How much of the memory of the module is in use, in bytes, as a line of
+/// `name=value` pairs, for the measurement of what a site built with threads
+/// needs (its memory is fixed: `FERROUI_BROWSER_THREAD_MEMORY_MB` of
+/// `scripts/build-browser.sh`). Not a port.
+///
+/// - `top`: the end of the dynamic memory now. Everything the module uses
+///   lies below it: its data, the stack of the page, and whatever the
+///   allocator has taken from the system so far, in use or free again (the
+///   stacks of the threads are allocations). The allocator gives nothing
+///   back in the middle, so this is what the module needed so far;
+/// - `peak`: the largest `top` any call of this function has seen (the host
+///   page calls it ten times a second with `?MemoryReport=true`);
+/// - `size`: the size of the memory: what a module built with threads was
+///   linked with, or what the memory of one built without has grown to.
+///
+/// All 0 outside a web page.
+#[wasm_bindgen(js_name = catalogMemory)]
+pub fn catalog_memory() -> String {
+    let (top, size) = module_memory();
+    let peak = MEMORY_PEAK.fetch_max(top, Ordering::SeqCst).max(top);
+    format!("top={top};peak={peak};size={size}")
+}
+
+/// The end of the dynamic memory and the size of the memory of the module.
+#[cfg(target_os = "emscripten")]
+fn module_memory() -> (usize, usize) {
+    extern "C" {
+        fn sbrk(increment: isize) -> *mut std::ffi::c_void;
+        fn emscripten_get_heap_size() -> usize;
+    }
+    // SAFETY: `sbrk(0)` moves nothing and returns the current end of the
+    // dynamic memory; `emscripten_get_heap_size` takes no argument and
+    // returns the size of the memory. Neither touches memory.
+    unsafe { (sbrk(0) as usize, emscripten_get_heap_size()) }
+}
+
+#[cfg(not(target_os = "emscripten"))]
+fn module_memory() -> (usize, usize) {
+    (0, 0)
+}
+
 /// `text` as a JSON string literal.
 fn json_string(text: &str) -> String {
     let mut literal = String::with_capacity(text.len() + 2);
@@ -294,6 +420,13 @@ fn parse_args(args: &[&str]) -> Option<BrowserPlatformOptions> {
         options.rendering_mode = modes;
     }
 
+    // Addition of the port: a module built with threads renders on a render
+    // thread unless the page asks for one thread. A value `bool.TryParse`
+    // rejects keeps the default, as for the option above.
+    if let Some(render_thread) = query_value(query, "RenderThread").and_then(|value| parse_bool(&value)) {
+        options.render_thread = render_thread;
+    }
+
     println!("DemoBrowserPlatformOptions.PreferFileDialogPolyfill: {}", if options.prefer_file_dialog_polyfill { "True" } else { "False" });
     let rendering_mode: Vec<&str> = options.rendering_mode.iter().map(|mode| mode.name()).collect();
     println!("DemoBrowserPlatformOptions.RenderingMode: {}", rendering_mode.join(";"));
@@ -350,6 +483,24 @@ mod tests {
         assert!(!parse_args(&["http://localhost/?PreferFileDialogPolyfill=false"]).unwrap().prefer_file_dialog_polyfill);
         // A value bool.TryParse rejects keeps the default.
         assert!(!parse_args(&["http://localhost/?PreferFileDialogPolyfill=yes"]).unwrap().prefer_file_dialog_polyfill);
+    }
+
+    // Not from upstream: the render thread is an addition of the port.
+    #[test]
+    fn the_render_thread_is_switched_off_from_the_query_string() {
+        assert!(parse_args(&["http://localhost/"]).unwrap().render_thread);
+        assert!(!parse_args(&["http://localhost/?RenderThread=false"]).unwrap().render_thread);
+        assert!(!parse_args(&["http://localhost/?RenderingMode=WebGL2&renderthread=False"]).unwrap().render_thread);
+        assert!(parse_args(&["http://localhost/?RenderThread=true"]).unwrap().render_thread);
+        assert!(parse_args(&["http://localhost/?RenderThread=no"]).unwrap().render_thread);
+    }
+
+    // Not from upstream: the probes of the behaviour tests are additions of the port.
+    #[test]
+    fn the_probes_answer_outside_a_web_page() {
+        assert_eq!("top=0;peak=0;size=0", catalog_memory());
+        assert!(catalog_rendering().starts_with("frames="));
+        assert!(!catalog_panic_in_frame());
     }
 
     #[test]
