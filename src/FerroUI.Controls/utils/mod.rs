@@ -27,6 +27,10 @@ pub(crate) use realized_stack_elements::{RealizedStackElements};
 pub(crate) use virtualizing_snap_points_list::{VirtualizingSnapPointsList};
 
 #[cfg(test)]
+mod ancestor_finder_tests;
+#[cfg(test)]
+mod binding_evaluator_tests;
+#[cfg(test)]
 mod collection_changed_event_manager_tests;
 
 mod clipboard_helper;
