@@ -1,6 +1,5 @@
 //! The class of the document `AboutFerroDialog.xaml`.
 
-use crate::markup::load_component;
 use ferroui_base::input::InputElementImpl;
 use ferroui_base::interactivity::{IRoutedEventArgs, InteractiveImpl, RoutedEventArgs};
 use ferroui_base::layout::LayoutableImpl;
@@ -72,9 +71,6 @@ ferro_class_info!(AboutFerroDialog {
 });
 
 impl AboutFerroDialog {
-    /// The rooted asset path of the document of the class.
-    pub const DOCUMENT_PATH: &'static str = "/AboutFerroDialog.xaml";
-
     /// The URI of the document of the class.
     pub const DOCUMENT_URI: &'static str = "ferres://FerroUI.Dialogs/AboutFerroDialog.xaml";
 
@@ -82,14 +78,20 @@ impl AboutFerroDialog {
         Self { base: Window::construct(PlatformManager::create_window()) }
     }
 
-    /// Creates the dialog and populates it from its document.
+    /// Creates the dialog and populates it from its document
+    /// (`InitializeComponent()`: the compiled markup of the document, which
+    /// the build of the crate generates).
     ///
     /// # Panics
     /// Panics when no windowing platform is registered, and when the
-    /// document fails to load.
+    /// document fails to load (an exception of the constructor in the
+    /// managed original).
     pub fn new() -> Ref<Self> {
+        crate::register_types();
         let this = instantiate(Self::construct());
-        load_component(&this, Self::DOCUMENT_PATH);
+        if let Err(error) = crate::compiled_about_ferro_dialog::populate(None, &this) {
+            panic!("{}: {error}", Self::DOCUMENT_URI);
+        }
         this.set_data_context(Some(Control::boxed(this.clone())));
         this
     }

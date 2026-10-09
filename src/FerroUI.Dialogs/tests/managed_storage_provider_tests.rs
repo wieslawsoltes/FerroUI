@@ -12,15 +12,12 @@ use ferroui_base::Ref;
 use ferroui_controls::primitives::Popup;
 use ferroui_controls::testing::{TestServices, UnitTestApplication};
 use ferroui_controls::{Canvas, ContentControl, Control, Panel, TopLevel, Window, WindowBase};
-use ferroui_markup_xaml_loader::FerroRuntimeXamlLoader;
 use std::cell::RefCell;
 use std::rc::Rc;
 
 fn start() -> ferroui_controls::testing::UnitTestApplicationScope {
     crate::register_types();
-    let scope = UnitTestApplication::start(TestServices::styled_window());
-    FerroRuntimeXamlLoader::register();
-    scope
+    UnitTestApplication::start(TestServices::styled_window())
 }
 
 fn temp_folder(name: &str) -> (std::path::PathBuf, Rc<dyn IStorageFolder>) {
