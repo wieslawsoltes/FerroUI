@@ -5,12 +5,21 @@ name: Pages
 # One-time setting: Settings, Pages, Build and deployment, Source "GitHub Actions". Until it is set the
 # workflow reports that Pages is not enabled and ends without building or deploying, so it does not fail.
 #
-# The site is published only while its WebAssembly module stays within the size budget below
-# (PUBLISHED_MODULE_GZIP_BUDGET_MB, with gzip): above it the size budget step of the deploy job fails and
-# nothing is deployed. The raw and gzip sizes are in the summaries of both jobs.
+# The site carries two WebAssembly modules, the one built without threads and the one built with them
+# (the UI on the thread of the page, the compositor and Skia on a render thread), and its host page
+# loads one of the two: the one with threads where the browser can render from a worker and the page can
+# be made cross-origin isolated, which on GitHub Pages, a host that sets no headers, is done by the
+# service worker of the site and one reload at the first visit; the other one everywhere else
+# (docs/porting/browser-render-worker.md, "B2.8", which also has the list of what to check by hand on
+# the published site: the tests of this workflow run against a local server).
 #
-# The site is the output of `scripts/build-browser.sh control-catalog-browser`, uploaded as it is: GitHub
-# Pages compresses responses itself (gzip, negotiated with Accept-Encoding) and does not serve
+# The site is published only while each of its WebAssembly modules stays within the size budget below
+# (PUBLISHED_MODULE_GZIP_BUDGET_MB, with gzip; a visitor downloads one of the two): above it the size
+# budget step of the deploy job fails and nothing is deployed. The raw and gzip sizes are in the
+# summaries of both jobs.
+#
+# The site is the output of `scripts/build-browser.sh control-catalog-browser --both`, uploaded as it is:
+# GitHub Pages compresses responses itself (gzip, negotiated with Accept-Encoding) and does not serve
 # precompressed files, so none are written.
 
 on:
@@ -28,7 +37,7 @@ concurrency:
   cancel-in-progress: false
 
 env:
-  # The size budget of the published WebAssembly module, in megabytes (1,000,000 bytes) with gzip.
+  # The size budget of each published WebAssembly module, in megabytes (1,000,000 bytes) with gzip.
   PUBLISHED_MODULE_GZIP_BUDGET_MB: 14
   CARGO_TERM_COLOR: always
   CARGO_INCREMENTAL: 0
@@ -37,7 +46,8 @@ jobs:
   build:
     name: Build the site
     runs-on: ubuntu-latest
-    timeout-minutes: 120
+    # Two builds of the catalog, one after the other.
+    timeout-minutes: 240
     # The Pages API (is Pages enabled?) and configure-pages read the Pages settings.
     permissions:
       contents: read
@@ -46,6 +56,8 @@ jobs:
       enabled: ${{ steps.pages.outputs.enabled }}
       wasm-raw-bytes: ${{ steps.sizes.outputs.wasm_raw_bytes }}
       wasm-gzip-bytes: ${{ steps.sizes.outputs.wasm_gzip_bytes }}
+      threads-wasm-raw-bytes: ${{ steps.sizes-threads.outputs.wasm_raw_bytes }}
+      threads-wasm-gzip-bytes: ${{ steps.sizes-threads.outputs.wasm_gzip_bytes }}
     steps:
       - name: Is GitHub Pages enabled with GitHub Actions as its source?
         id: pages
@@ -66,26 +78,44 @@ jobs:
       - uses: ./.github/actions/browser-toolchain
         if: steps.pages.outputs.enabled == 'true'
         with:
-          # Shared with the browser job of the CI workflow, which builds the same site.
+          # Shared with the browser jobs of the CI workflow, which build the same sites.
           cache-key: browser
+          threads: true
+      # The site without threads (target/browser), the site with threads (target/browser-threads) and
+      # the one that is published, composed of the two (target/browser-both).
       - name: Build the site
         if: steps.pages.outputs.enabled == 'true'
-        run: scripts/build-browser.sh control-catalog-browser
-      - name: Test the site before publishing it
+        run: scripts/build-browser.sh control-catalog-browser --both
+      - name: Test the module without threads before publishing it
         if: steps.pages.outputs.enabled == 'true'
         run: node scripts/browser/tests/control_catalog.test.mjs target/browser/control-catalog-browser
-      - name: Sizes of the published modules
+      - name: Test the module with threads before publishing it
+        if: steps.pages.outputs.enabled == 'true'
+        run: node scripts/browser/tests/control_catalog.test.mjs target/browser-threads/control-catalog-browser
+      - name: Test the site before publishing it (which module its page loads)
+        if: steps.pages.outputs.enabled == 'true'
+        run: node scripts/browser/tests/site_loader.test.mjs target/browser-both/control-catalog-browser
+      - name: Sizes of the module without threads
         id: sizes
         if: steps.pages.outputs.enabled == 'true'
         run: >
           node scripts/browser/module-sizes.mjs target/browser/control-catalog-browser
           --github-output "$GITHUB_OUTPUT" | tee -a "$GITHUB_STEP_SUMMARY"
+      - name: Sizes of the module with threads
+        id: sizes-threads
+        if: steps.pages.outputs.enabled == 'true'
+        run: >
+          node scripts/browser/module-sizes.mjs target/browser-threads/control-catalog-browser
+          --github-output "$GITHUB_OUTPUT" | tee -a "$GITHUB_STEP_SUMMARY"
+      - name: Sizes of the published site
+        if: steps.pages.outputs.enabled == 'true'
+        run: node scripts/browser/module-sizes.mjs target/browser-both/control-catalog-browser >> "$GITHUB_STEP_SUMMARY"
       - uses: actions/configure-pages@983d7736d9b0ae728b81ab479565c72886d7745b # v5
         if: steps.pages.outputs.enabled == 'true'
       - uses: actions/upload-pages-artifact@56afc609e74202658d3ffba0e8f6dda462b719fa # v3
         if: steps.pages.outputs.enabled == 'true'
         with:
-          path: target/browser/control-catalog-browser
+          path: target/browser-both/control-catalog-browser
 
   deploy:
     name: Deploy
@@ -102,24 +132,34 @@ jobs:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
-      - name: Size budget of the WebAssembly module
+      - name: Size budget of the WebAssembly modules
         env:
           RAW_BYTES: ${{ needs.build.outputs.wasm-raw-bytes }}
           GZIP_BYTES: ${{ needs.build.outputs.wasm-gzip-bytes }}
+          THREADS_RAW_BYTES: ${{ needs.build.outputs.threads-wasm-raw-bytes }}
+          THREADS_GZIP_BYTES: ${{ needs.build.outputs.threads-wasm-gzip-bytes }}
         run: |
           budget_bytes=$((PUBLISHED_MODULE_GZIP_BUDGET_MB * 1000000))
           mb() { awk -v bytes="$1" 'BEGIN { printf "%.2f MB", bytes / 1000000 }'; }
           {
             echo "| WebAssembly module | Raw | gzip -9 | gzip budget |"
             echo "|---|---:|---:|---:|"
-            echo "| control-catalog-browser | $(mb "$RAW_BYTES") | $(mb "$GZIP_BYTES") | $(mb "$budget_bytes") |"
+            echo "| control-catalog-browser, without threads | $(mb "$RAW_BYTES") | $(mb "$GZIP_BYTES") | $(mb "$budget_bytes") |"
+            echo "| control-catalog-browser, with threads | $(mb "$THREADS_RAW_BYTES") | $(mb "$THREADS_GZIP_BYTES") | $(mb "$budget_bytes") |"
           } >> "$GITHUB_STEP_SUMMARY"
-          if [ -z "$GZIP_BYTES" ] || [ "$GZIP_BYTES" -gt "$budget_bytes" ]; then
-            message="The WebAssembly module is $(mb "${GZIP_BYTES:-0}") with gzip, over the budget of $(mb "$budget_bytes") (PUBLISHED_MODULE_GZIP_BUDGET_MB); the site is not deployed."
-            echo "::error title=Over the size budget::$message"
-            echo "**$message**" >> "$GITHUB_STEP_SUMMARY"
-            exit 1
-          fi
-          echo "Within the gzip budget of $(mb "$budget_bytes")." >> "$GITHUB_STEP_SUMMARY"
+          # A visitor downloads one of the two modules: the budget is for each, not for their sum.
+          over=""
+          check() {
+            if [ -z "$2" ] || [ "$2" -gt "$budget_bytes" ]; then
+              message="The WebAssembly module $1 is $(mb "${2:-0}") with gzip, over the budget of $(mb "$budget_bytes") (PUBLISHED_MODULE_GZIP_BUDGET_MB); the site is not deployed."
+              echo "::error title=Over the size budget::$message"
+              echo "**$message**" >> "$GITHUB_STEP_SUMMARY"
+              over="1"
+            fi
+          }
+          check "without threads" "$GZIP_BYTES"
+          check "with threads" "$THREADS_GZIP_BYTES"
+          [ -z "$over" ] || exit 1
+          echo "Both within the gzip budget of $(mb "$budget_bytes")." >> "$GITHUB_STEP_SUMMARY"
       - id: deployment
         uses: actions/deploy-pages@d6db90164ac5ed86f2b6aed7e0febac5b3c0c03e # v4

@@ -122,3 +122,107 @@ jobs:
           name: control-catalog-browser-screenshot
           path: target/browser/screenshots
           if-no-files-found: ignore
+      # For the job that composes the sites with both modules.
+      - name: Keep the sites built without threads
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: browser-sites
+          path: |
+            target/browser/themed_view
+            target/browser/control-catalog-browser
+          if-no-files-found: error
+          retention-days: 1
+
+  # The build with threads (docs/porting/browser-render-worker.md, "B2.8"): the UI on the thread of
+  # the page, the compositor and Skia on a render thread. A job of its own, beside the one above and
+  # not after it: the build with threads compiles everything a second time (another toolchain, a
+  # standard library of its own, its own target directory), which as further steps of the job above
+  # would about double the wait for a pull request. Run in parallel it costs the installation of the
+  # toolchain a second time (from caches) and nothing else twice: the sites with both modules are
+  # composed, by the job below, from the sites the two jobs built.
+  browser-threads:
+    name: Check (browser with threads, wasm32-unknown-emscripten)
+    runs-on: ubuntu-latest
+    timeout-minutes: 150
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: ./.github/actions/browser-toolchain
+        with:
+          # Shared with the Pages workflow, which builds the same sites.
+          cache-key: browser
+          threads: true
+      # Each build below also type checks, lints and bundles the script module, as every build of
+      # a site does.
+      - name: Build the thread spawn site
+        run: scripts/build-browser.sh thread_spawn --threads
+      - name: A spawned thread, and the isolation of the page, in headless Chrome
+        run: node scripts/browser/tests/thread_spawn.test.mjs
+      - name: Build the render worker site
+        run: scripts/build-browser.sh render_worker_clear --threads
+      - name: Frames from a worker without the compositor, in headless Chrome
+        run: node scripts/browser/tests/render_worker_clear.test.mjs
+      - name: Build the themed view site with threads
+        run: scripts/build-browser.sh themed_view --threads
+      - name: Behaviour tests on the render thread and on one thread, in headless Chrome
+        run: node scripts/browser/tests/themed_view.test.mjs target/browser-threads/themed_view
+      - name: Build the storage view site with threads
+        run: scripts/build-browser.sh storage_view --threads
+      - name: Storage behaviour tests with threads, in headless Chrome
+        run: node scripts/browser/tests/storage_view.test.mjs target/browser-threads/storage_view
+      - name: Build the ControlCatalog site with threads
+        run: scripts/build-browser.sh control-catalog-browser --threads
+      - name: ControlCatalog tests on the render thread, in headless Chrome
+        run: node scripts/browser/tests/control_catalog.test.mjs target/browser-threads/control-catalog-browser --screenshot target/browser-threads/screenshots/control-catalog.png
+      - name: Sizes of the modules built with threads
+        run: node scripts/browser/module-sizes.mjs target/browser-threads/control-catalog-browser >> "$GITHUB_STEP_SUMMARY"
+      - name: Keep the screenshot
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: control-catalog-browser-threads-screenshot
+          path: target/browser-threads/screenshots
+          if-no-files-found: ignore
+      - name: Keep the sites built with threads
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: browser-threads-sites
+          path: |
+            target/browser-threads/themed_view
+            target/browser-threads/control-catalog-browser
+          if-no-files-found: error
+          retention-days: 1
+
+  # The site that is published carries both modules, and its host page chooses one before it requests
+  # either (scripts/browser/threads/ferroui-loader.js). Composed here from the sites of the two jobs
+  # above, which also checks that the files the two builds share are identical, and tested: nothing
+  # is compiled in this job.
+  browser-site:
+    name: Check (browser, the site with both modules)
+    needs: [browser, browser-threads]
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: 24
+      # An artifact of several paths keeps them below their common directory.
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+        with:
+          name: browser-sites
+          path: target/browser
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+        with:
+          name: browser-threads-sites
+          path: target/browser-threads
+      - name: Compose the sites with both modules
+        run: |
+          for application in themed_view control-catalog-browser; do
+            node scripts/browser/combine-site.mjs "target/browser/$application" "target/browser-threads/$application" "target/browser-both/$application"
+          done
+      - name: The loader of the themed view site in headless Chrome (which module, isolation, fallback, requests)
+        run: node scripts/browser/tests/site_loader.test.mjs target/browser-both/themed_view
+      - name: The loader of the ControlCatalog site in headless Chrome
+        run: node scripts/browser/tests/site_loader.test.mjs target/browser-both/control-catalog-browser
+      - name: Sizes of the site with both modules
+        run: node scripts/browser/module-sizes.mjs target/browser-both/control-catalog-browser >> "$GITHUB_STEP_SUMMARY"
