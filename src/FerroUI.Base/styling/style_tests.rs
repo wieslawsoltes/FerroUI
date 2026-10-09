@@ -364,6 +364,21 @@ fn template_style(selector: Selector, count: &Rc<Cell<u32>>) -> Ref<Style> {
     style
 }
 
+// The template of the reference test builds a canvas for the child of a
+// decorator; here it builds the child of a `Class1`.
+#[test]
+fn setter_should_materialize_template_to_property() {
+    let control = Class1::new();
+    let template = Rc::new(ChildTemplate { instantiation_count: Rc::new(Cell::new(0)) });
+    let setter = Setter::new_template(Class1::child_property(), template);
+
+    let style = Style::with_selector(Selectors::is::<Class1>());
+    style.add_setter(setter);
+    try_attach(&style, &control, None);
+
+    assert!(control.get_value(Class1::child_property()).is_some_and(|child| child.is::<Class1>()));
+}
+
 #[test]
 fn template_in_non_matching_style_is_not_built() {
     let count = Rc::new(Cell::new(0));
