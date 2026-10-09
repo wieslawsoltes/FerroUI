@@ -241,3 +241,104 @@ pub const EXPECTED_ELIGIBLE: &[&str] = &[
 
 /// The documents that must not be eligible for emission.
 pub const EXPECTED_NOT_ELIGIBLE: &[&str] = &[];
+
+/// A document of a class of this crate (`x:Class`): the code-behind forms of the corpus.
+pub struct ClassDocument {
+    /// The module of `generated_handlers` that holds the emitter's output for the document.
+    pub module: &'static str,
+    /// The path of the document below the root URI.
+    pub name: &'static str,
+    /// The full name of the class the document populates.
+    pub class: &'static str,
+    pub xaml: &'static str,
+}
+
+/// The documents with a class: a method of the class named in markup as the handler of
+/// an event or as the value of a property of a delegate type. Each is compiled as the
+/// document of its class (`rust_emitter::generate_class_file_with`) by both hosts of the
+/// emitter; the output is `generated_handlers/<module>.rs`, checked in.
+pub const CLASS_DOCUMENTS: &[ClassDocument] = &[
+    // A routed event of the element, and a routed event of another class (an attached event).
+    ClassDocument {
+        module: "routed_event",
+        name: "Handlers/RoutedEvent.xaml",
+        class: "FerroUI.Markup.Xaml.UnitTests.Xaml.MyButton",
+        xaml: "<Button xmlns='https://github.com/ferroui' xmlns:x='http://schemas.microsoft.com/winfx/2006/xaml' x:Class='FerroUI.Markup.Xaml.UnitTests.Xaml.MyButton' Click='OnClick' InputElement.Tapped='OnTapped'/>",
+    },
+    // A routed event of a child handled on the root, and an event whose arguments are of a
+    // class of their own (`RoutedEvent<TappedEventArgs>`) handled on an element below.
+    ClassDocument {
+        module: "attached_event",
+        name: "Handlers/AttachedEvent.xaml",
+        class: "FerroUI.Markup.Xaml.UnitTests.Xaml.MyPanel",
+        xaml: "<Panel xmlns='https://github.com/ferroui' xmlns:x='http://schemas.microsoft.com/winfx/2006/xaml' x:Class='FerroUI.Markup.Xaml.UnitTests.Xaml.MyPanel' Button.Click='OnClick'><Grid DoubleTapped='OnTapped'><Button Name='target'/></Grid></Panel>",
+    },
+    // Events that are not routed events: one of the class of the document, whose handler
+    // takes the arguments untyped (wider parameters than the delegate passes), and the
+    // property-changed event of an element, whose handler takes them exactly.
+    ClassDocument {
+        module: "plain_event",
+        name: "Handlers/PlainEvent.xaml",
+        class: "FerroUI.Markup.Xaml.UnitTests.Xaml.MyHost",
+        xaml: "<Panel xmlns='https://github.com/ferroui' xmlns:x='http://schemas.microsoft.com/winfx/2006/xaml' x:Class='FerroUI.Markup.Xaml.UnitTests.Xaml.MyHost' Opening='OnOpening'><Border Name='target' PropertyChanged='OnPropertyChanged'/></Panel>",
+    },
+    // A method named as the value of a property of a delegate type (an attached property
+    // and a plain one), and a handler with wider parameters on the event of a flyout.
+    ClassDocument {
+        module: "delegate_property",
+        name: "Handlers/DelegateProperty.xaml",
+        class: "FerroUI.Markup.Xaml.UnitTests.Xaml.MyHost",
+        xaml: "<Panel xmlns='https://github.com/ferroui' xmlns:x='http://schemas.microsoft.com/winfx/2006/xaml' x:Class='FerroUI.Markup.Xaml.UnitTests.Xaml.MyHost'><Border Name='target' ToolTip.Placement='Custom' ToolTip.CustomPopupPlacementCallback='OnCustomPlacement'/><Button Name='button'><Button.Flyout><Flyout Placement='Custom' CustomPopupPlacementCallback='OnCustomPlacement' Opening='OnOpening'/></Button.Flyout></Button></Panel>",
+    },
+    // A handler named inside a template: the delegate is created by the build of the
+    // deferred content, over the root object its context has from the document.
+    ClassDocument {
+        module: "template_event",
+        name: "Handlers/TemplateEvent.xaml",
+        class: "FerroUI.Markup.Xaml.UnitTests.Xaml.MyPanel",
+        xaml: "<Panel xmlns='https://github.com/ferroui' xmlns:x='http://schemas.microsoft.com/winfx/2006/xaml' x:Class='FerroUI.Markup.Xaml.UnitTests.Xaml.MyPanel'><Button Name='target'><Button.Template><ControlTemplate><Border Name='part' Tapped='OnTapped'/></ControlTemplate></Button.Template></Button></Panel>",
+    },
+];
+
+/// A document that names a method no method of its root object answers to: the class the
+/// document is compiled for (nothing for a document without one) and how the diagnostic
+/// of the compile must start (the method and the member it is named for).
+pub struct MissingMethodDocument {
+    pub name: &'static str,
+    pub class: Option<&'static str>,
+    pub xaml: &'static str,
+    pub diagnostic: &'static str,
+}
+
+/// The documents that name a method that is not found: neither host compiles them, and
+/// both report the same diagnostic, at the place of the name in the document.
+pub const MISSING_METHOD_DOCUMENTS: &[MissingMethodDocument] = &[
+    // No method of the class has the name.
+    MissingMethodDocument {
+        name: "Handlers/UnknownMethod.xaml",
+        class: Some("FerroUI.Markup.Xaml.UnitTests.Xaml.MyButton"),
+        xaml: "<Button xmlns='https://github.com/ferroui' xmlns:x='http://schemas.microsoft.com/winfx/2006/xaml' x:Class='FerroUI.Markup.Xaml.UnitTests.Xaml.MyButton' Click='NotFound'/>",
+        diagnostic: "No method `NotFound` for `Click` (System.EventHandler`1[FerroUI.Interactivity.RoutedEventArgs]): the class `FerroUI.Markup.Xaml.UnitTests.Xaml.MyButton` of the document has no method of that name that the delegate can call",
+    },
+    // A method of the name exists, with parameters the delegate cannot call it with.
+    MissingMethodDocument {
+        name: "Handlers/OtherParameters.xaml",
+        class: Some("FerroUI.Markup.Xaml.UnitTests.Xaml.MyHost"),
+        xaml: "<Panel xmlns='https://github.com/ferroui' xmlns:x='http://schemas.microsoft.com/winfx/2006/xaml' x:Class='FerroUI.Markup.Xaml.UnitTests.Xaml.MyHost'><Button Click='OnCustomPlacement'/></Panel>",
+        diagnostic: "No method `OnCustomPlacement` for `Click` (System.EventHandler`1[FerroUI.Interactivity.RoutedEventArgs]): the class `FerroUI.Markup.Xaml.UnitTests.Xaml.MyHost` of the document has no method of that name that the delegate can call",
+    },
+    // A property of a delegate type.
+    MissingMethodDocument {
+        name: "Handlers/UnknownMethodOfProperty.xaml",
+        class: Some("FerroUI.Markup.Xaml.UnitTests.Xaml.MyHost"),
+        xaml: "<Panel xmlns='https://github.com/ferroui' xmlns:x='http://schemas.microsoft.com/winfx/2006/xaml' x:Class='FerroUI.Markup.Xaml.UnitTests.Xaml.MyHost'><Border ToolTip.CustomPopupPlacementCallback='NotFound'/></Panel>",
+        diagnostic: "No method `NotFound` for `CustomPopupPlacementCallback` (FerroUI.Controls.Primitives.PopupPositioning.CustomPopupPlacementCallback): the class `FerroUI.Markup.Xaml.UnitTests.Xaml.MyHost` of the document has no method of that name that the delegate can call",
+    },
+    // A document without a class: its root object is a button, which has no such method.
+    MissingMethodDocument {
+        name: "Handlers/WithoutClass.xaml",
+        class: None,
+        xaml: "<Button xmlns='https://github.com/ferroui' xmlns:x='http://schemas.microsoft.com/winfx/2006/xaml' Click='OnClick'/>",
+        diagnostic: "No method `OnClick` for `Click` (System.EventHandler`1[FerroUI.Interactivity.RoutedEventArgs]): the document has no class (`x:Class`), and the type of its root object has no method of that name that the delegate can call",
+    },
+];

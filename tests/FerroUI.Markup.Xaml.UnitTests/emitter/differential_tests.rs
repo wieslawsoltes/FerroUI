@@ -468,7 +468,7 @@ fn collection_items(value: &BoxedValue) -> Option<Result<Vec<Option<BoxedValue>>
     Some(Err(format!("a collection of type {} the harness cannot enumerate", any.type_name())))
 }
 
-fn dump_root(root: &BoxedValue) -> String {
+pub(super) fn dump_root(root: &BoxedValue) -> String {
     let mut output = String::new();
     match ValueTypes::as_object(&**root) {
         Some(object) => {
