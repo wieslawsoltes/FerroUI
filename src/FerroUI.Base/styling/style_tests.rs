@@ -1659,3 +1659,26 @@ fn chaining_class_extends_the_preceding_type_selector() {
     assert_eq!(selector.to_string(), "Class1#bar.foo");
     assert_eq!(with_class.to_string(), "Class1#bar.foo");
 }
+
+/// The styling parent of an element is its inheritance parent when that is a
+/// styled element (the same object), and nothing when the element has no
+/// inheritance parent or one that is not a styled element.
+#[test]
+fn styling_parent_is_the_inheritance_parent_when_it_is_a_styled_element() {
+    let target = Class1::new();
+    assert!(target.styling_parent().is_none());
+
+    let parent = Class3::new();
+    target.set_inheritance_parent(&parent);
+    let host = target.styling_parent().expect("a styling parent");
+    assert!(host.as_element().is_some_and(|element| element.ptr_eq(&parent)));
+    drop(host);
+
+    let not_an_element = Style::new();
+    target.set_inheritance_parent(&not_an_element);
+    assert!(target.styling_parent().is_none());
+    assert!(target.inheritance_parent().is_some_and(|p| p.ptr_eq(&not_an_element)));
+
+    target.set_inheritance_parent(None);
+    assert!(target.styling_parent().is_none());
+}
