@@ -62,6 +62,9 @@ fn register_value_types() {
     classes::register_value_types();
     converters::register_value_types();
     register_assigned_binding();
+    // The delegate of `DataValidationErrors.ErrorConverter` (`Func<object, object>?`): a binding
+    // delivers a converter, and the property holds the nullable form.
+    ValueTypes::register_nullable::<crate::ErrorConverter>();
 }
 
 /// The casts between a binding and the value of a property that is assigned a binding.

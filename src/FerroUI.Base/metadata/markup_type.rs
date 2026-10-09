@@ -725,6 +725,10 @@ pub struct MarkupType {
     /// value must be the value of a member; for a set of flags any
     /// combination of the bits of its members.
     pub enum_from_value: Option<fn(i64) -> Option<BoxedValue>>,
+    /// The numeric value of a value of the enumeration: the cast
+    /// `(int)value` of the managed original. `None` for a value that is not
+    /// of the enumeration type.
+    pub enum_to_value: Option<fn(&dyn crate::AnyValue) -> Option<i64>>,
     pub attributes: &'static [MarkupAttribute],
     /// Views an untyped value of this type as a source of property change
     /// notifications (the `INotifyPropertyChanged` of the managed original),
@@ -773,6 +777,7 @@ impl MarkupType {
             enum_members: &[],
             is_flags: false,
             enum_from_value: None,
+            enum_to_value: None,
             attributes: &[],
             notify_property_changed: None,
             this: not_recorded(),

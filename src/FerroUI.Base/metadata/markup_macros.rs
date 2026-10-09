@@ -286,6 +286,9 @@ macro_rules! ferro_markup_enum {
                         )*
                         ::std::option::Option::None
                     });
+                    markup.enum_to_value = ::std::option::Option::Some(|value| {
+                        value.downcast_ref::<$type_>().map(|value| ::std::clone::Clone::clone(value) as i64)
+                    });
                     $($crate::__ferro_markup_items!(markup, $type_; $($body)*);)?
                     markup
                 };
@@ -334,6 +337,9 @@ macro_rules! ferro_markup_enum {
                             return ::std::option::Option::None;
                         }
                         ::std::option::Option::Some(::std::rc::Rc::new(result) as $crate::BoxedValue)
+                    });
+                    markup.enum_to_value = ::std::option::Option::Some(|value| {
+                        value.downcast_ref::<$type_>().map(|value| value.bits() as i64)
                     });
                     $($crate::__ferro_markup_items!(markup, $type_; $($body)*);)?
                     markup
