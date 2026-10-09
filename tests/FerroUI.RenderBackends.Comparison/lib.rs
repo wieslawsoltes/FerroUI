@@ -166,6 +166,9 @@ pub fn compare(a: &Pixels, b: &Pixels) -> Difference {
 
 #[cfg(test)]
 mod application_tests;
+#[cfg(test)]
+mod codec_tests;
+#[cfg(test)]
 mod effect_tests;
 #[cfg(test)]
 mod tests;

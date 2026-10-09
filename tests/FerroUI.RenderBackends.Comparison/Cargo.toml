@@ -28,3 +28,5 @@ skia-safe.workspace = true
 ferroui-controls.workspace = true
 ferroui-headless.workspace = true
 ferroui-themes-fluent.workspace = true
+# The codec tests write the GIF files they give to both backends.
+gif.workspace = true

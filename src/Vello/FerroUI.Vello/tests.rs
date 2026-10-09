@@ -1512,8 +1512,7 @@ fn render_interface_reports_its_capabilities() {
     assert_eq!(AlphaFormat::Premul, render_interface.default_alpha_format());
     assert!(render_interface.is_supported_bitmap_pixel_format(render_interface.default_pixel_format()));
     assert!(render_interface.is_supported_bitmap_pixel_format(PixelFormat::BGRA8888));
-    // Sixteen bits a pixel are not read or written (design document, gaps).
-    assert!(!render_interface.is_supported_bitmap_pixel_format(PixelFormat::RGB565));
+    assert!(render_interface.is_supported_bitmap_pixel_format(PixelFormat::RGB565));
     assert!(!render_interface.is_supported_bitmap_pixel_format(PixelFormat::RGB32));
     assert!(render_interface.supports_regions());
     assert!(render_interface.create_region().is_empty());
