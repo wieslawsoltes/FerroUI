@@ -113,6 +113,13 @@
   for; the dialogs crate is unchanged and still links the run-time loader. Nothing is half-done in
   the working tree. The browser build was not run by the author.
 
+- The eighth stage (branch `xaml-emit-event-handlers`, on `xaml-themes-on-model-v`, section 18) is
+  DONE, built and run by its author with the commands the stage allowed: the emitter's rule for
+  event handlers in both hosts (`xaml.md` 9.4.4), the dialogs compiled by their build script and
+  without the run-time loader (`xaml.md` 9.5.15), and a first measure of the ControlCatalog against
+  the models, without converting it (section 18: the table is the work list of the next stage).
+  Nothing is half-done in the working tree. The browser build was not run by the author.
+
 Design documents in the repository: `docs/porting/xaml.md`, sections 9 (emitter design: call forms
 A/B/C, build integration, code-behind), 9.5 (source scanner), 9.12 (the 14 rulings), 9.13, and
 decisions 1 to 27. Read section 9 before touching the emitter. `DRAFT-AUTHOR-REPORT.md` is the
@@ -1273,3 +1280,53 @@ cargo tree -p ferroui-build
 **Not run by the author, for the validating session:** the browser build (`scripts/build-browser.sh`, with and without threads): the theme crates' build scripts now build `ferroui-build` for the host, which is the base crate, the loader with `compiler`, `xamlx` and the scanner, and no longer the controls and the XAML runtime library; check that the host build of the base crate under a `wasm32` target build has the features it needs and that the module is the same size (the generated code is byte-identical, so it should be). `cargo build --workspace` and `cargo clippy`, the samples (the ControlCatalog states `features = ["runtime"]` for the loader, which the workspace change relies on), the examples of the Simple theme, and `scripts/check-upstream-name.sh` or its equivalent.
 
 **What remains:** event handlers in the emitter, then the dialogs and the catalog compiled (xaml.md 9.10.1, item 2); the manifest keys of 9.6.1 (with the EditorConfig files found without a call); the compile-time value parser of the build; removing the run-time host from `Build` (the feature `runtime-host`, `Build::assembly` as a type-system input, `TypeSystem::Runtime` and its default) now that nothing uses it; the reference tests of the themes still generate the checked-in file through the run-time host of the emitter (`emitter` feature, a dev-dependency), which is what keeps the references regenerable until the build output is the only copy; `deterministic_id_generator.rs` is still not called.
+
+## 18. What the eighth stage delivered (event handlers in the emitter, the dialogs compiled, the catalog measured), and how to validate it
+
+Branch `xaml-emit-event-handlers`, on `xaml-themes-on-model-v`, built and run by its author with the commands the stage allowed. Read `xaml.md` 9.4.4 and 9.5.15 first.
+
+**Done.**
+
+1. *The emitter's rule for a method named in markup* (`xaml.md` 9.4.4), in both hosts. What exists:
+   - `src/Markup/FerroUI.Markup.Xaml/xaml_il/runtime/compiled.rs` (`rt`): `method_delegate`, `static_method_delegate`, `DelegateArguments`, `delegate_result`, `add_handler`, `add_event_handler`.
+   - `src/Markup/FerroUI.Markup.Xaml.Loader/rust_emitter/emitter.rs`: `Emitter::method_delegate` (the value `XamlLoadMethodDelegateNode`), the case of `XamlDirectCallAddHandler` in `setter_statement` with `routed_event`, `event_assignment` with `subscribed_event` (the direct call of `add_<Event>`). `emit_types.rs`: `Known::Delegate`, answered by `RuntimeEmitTypes` and by `ModelEmitTypes` (`src/FerroUI.Build.Tasks/type_system/emit_types.rs`). Nothing else was asked of either host: the method and the event field were already answered by `EmitTypes::method` and `EmitTypes::field`.
+   - `rust_emitter/transform.rs`: `method_not_found` and `METHOD_NOT_FOUND`, the description of the diagnostic of a method that is not found, in the handler of the diagnostics of `transform_group` (a compile only; the run-time loader does not go through it).
+   - `rust_emitter/compiled.rs`: the loader table of a class with a parameterless constructor and no other loadable document names its parameter `_service_provider` (it does not use it; no existing output has that shape).
+   - Tests: `tests/FerroUI.Markup.Xaml.UnitTests/emitter/event_handlers.rs`, `corpus.rs` (`CLASS_DOCUMENTS`, `MISSING_METHOD_DOCUMENTS`), `emitter/generated_handlers/` (checked in), `build_diagnostics.rs` (`build_reports_a_handler_that_is_not_found`; each fixture of that file now has a directory of its own, the tests run at the same time). The classes are the ones of upstream's `EventTests` in `support/xaml/event_tests.rs`, with their public Rust paths in `support/emitter.rs` (and so in `rust_paths_check.rs`).
+2. *The dialogs* (`xaml.md` 9.5.15): `src/FerroUI.Dialogs/build.rs`, `Cargo.toml`, `lib.rs`, `register_types.rs`, `about_ferro_dialog_xaml.rs`, the two test files; `markup.rs` and `assets.rs` are gone. The crate has no dependency on `ferroui-markup-xaml-loader`, not as a dev-dependency either. `Cargo.lock` changed with it.
+3. *Docs*: `xaml.md` 9.4.4 as implemented, 9.5.15, the rows of the two nodes in 9.8, the status and item 2 of 9.10.1; this file.
+
+Unchanged: the declaration macros and their uses, the base crate and the controls, the run-time type system, the interpreter, the run-time loader, the scanner, `ModelTypeSystem`, `Build`, every generated output that existed (the corpus, both themes, the fixtures: the drift tests and the reference tests hold them).
+
+**Rules a new worker would otherwise rediscover.**
+
+- A method named in markup is a method the markup metadata of the root class declares (`methods:`), nothing else: that is what the interpreter can call. The inherent functions of a class the scanner records (`Scan::functions`) are not handlers until the build generates their metadata (ruling 3 of `xaml.md` 9.12, not started).
+- The subscription of an event that is not a routed event has no typed function (the declaration macros write none for `events:`), so generated code invokes it through the metadata by name (`rt::add_event_handler`). A typed function for it is a change of the declaration macros.
+- The transform reports an error through the handler of the diagnostics and then raises the error the diagnostic was made from (`XamlDiagnostic::to_exception` returns the inner error): a diagnostic that is rewritten must drop `inner_exception`, or the error of the transform keeps the old text.
+- `Build::default_compile_bindings(true)` is now exercised by the build of the dialogs.
+
+**How to validate** (what the author ran, all green, debug profile):
+
+```text
+cargo test -p ferroui-build --lib                                   24 passed
+cargo test -p ferroui-build-scan --lib                              44 passed
+cargo test -p ferroui-markup-xaml-loader --lib                      397 passed, 1 ignored
+cargo test -p ferroui-markup-xaml-loader --lib --no-default-features --features compiler     272 passed
+cargo test -p ferroui-markup-xaml-tests --lib                       586 passed, 16 ignored (578 and 15 before)
+cargo test -p ferroui-themes-simple --lib                           205 passed, 3 ignored
+cargo test -p ferroui-themes-fluent --lib                           200 passed, 2 ignored
+cargo test -p xaml-include-fixture-theme --lib                      3 passed
+cargo test -p xaml-include-fixture-application --lib                28 passed
+cargo test -p ferroui-dialogs --lib                                 49 passed (47 before)
+cargo build -p ferroui-dialogs
+```
+
+The checked-in files of the class documents and of the Rust paths were regenerated with the ignored tests the files name (`emitter::event_handlers::regenerate_class_documents`, `emitter::rust_paths_tests::regenerate_rust_paths_check`).
+
+**Not run by the author, for the validating session:** `cargo build --workspace` and `cargo clippy`; the suites of section 2 beyond the ones above (`ferroui-native` and the ControlCatalog create `AboutFerroDialog`, which now populates itself from compiled markup); the browser build (the dialogs' build script now builds `ferroui-build` for the host, as the themes' do); `scripts/check-upstream-name.sh` or its equivalent.
+
+**What the author doubts.**
+
+1. `rt::add_handler` attaches to the event behind the typed handle of the field (`RoutedEvent<TEventArgs>::as_routed_event`); the interpreter converts the value of the field to the untyped handle and, when no conversion is registered, looks the event up in the registry by owner and name. They are the same event for every field the crates declare; a field that held another event than the one registered under its name would differ.
+2. `method_not_found` recognises the diagnostic by upstream's text and reads the name back from the document by the place of the diagnostic. A change of that text upstream (or in the port of `XamlX`) makes the description disappear, not the error; `a_method_that_is_not_found_is_reported_with_the_document_the_member_and_the_method` fails then.
+3. The delegate of a property of a delegate type was run only as far as the property holding a callback: `CustomPopupPlacement` cannot be created outside the controls crate, so the tests do not call the callback.

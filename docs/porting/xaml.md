@@ -1138,13 +1138,59 @@ Upstream's "no call to `Load(this)` found" check has no equivalent the build too
 
 #### 9.4.4 Event handlers
 
-`Click="OnClick"` reaches the back end as `XamlDirectCallAddHandler` whose value is a `XamlLoadMethodDelegateNode` (created by `XamlTransformHelpers` when the root type has a method with that name and the signature of the delegate's `Invoke`). For this to happen on the build path the type system must list handler methods of the `x:Class` type:
+Implemented (2026-10-09). The design this section had (a closure with typed parameters over the upgraded weak root, handlers found among the inherent functions of the class) is replaced by what was built, which follows the run-time loader exactly.
 
-1. Methods declared in metadata (`markup: { methods: [fn OnClick(Option<BoxedValue>, RoutedEventArgs) => ..] }`) are listed as declared. This form is what the interpreter needs anyway.
-2. In addition the scanner lists the inherent methods of the class found in `impl <Class> { .. }` blocks of the file that contains its `ferro_class!`: for each `fn name(&self, a, b)` with two parameters it projects a method under both its own name and the PascalCase form of its name. Lookup therefore finds `OnClick` first by exact name (a method literally named `OnClick`) and then by `on_click`, which is the "exact name first, then snake_case" rule of section 3.8. Parameter types of such projected methods are *unknown* (9.5.4) and match any delegate signature; rustc checks the real signature at the emitted call.
-3. An odd name is mapped explicitly: `#[doc(alias = "OnURLClicked")]` on the method is read by the scanner (no proc macro involved) *(proposal; alternatively only form 1)*.
+**What the emitter sees.** A method name assigned to an event or to a property of a delegate type is turned into a `XamlLoadMethodDelegateNode` over the root object by the transform, before the back end, in both type systems alike:
 
-Emitted call: the handler method is called by path on the upgraded weak root (`root.on_click(sender, e)`). Handler signatures accepted on the build path: `(&self, &Interactive, &TArgs)` for routed events; for plain events the parameter list of the event's `add` function. The diagnostic for a missing handler is the upstream one (`Unable to find suitable setter or adder for property Click ...`), raised by the transformer because the type system did not list the method.
+| Markup | Setter of the assignment | Value |
+|---|---|---|
+| a routed event (`Click="OnClick"`, `Button.Click="OnClick"`): the declaring type has a static field `<Name>Event` that holds a routed event (`FerroXamlIlTransformRoutedEvent`) | `XamlDirectCallAddHandler` (`AddHandler(RoutedEvent, Delegate, RoutingStrategies, bool)`; for an event with arguments of a class of their own a second one over `AddHandler<TEventArgs>`, of which the plan of the assignment leaves the first) | `XamlLoadMethodDelegateNode` |
+| an event that is not a routed event (`events:` of the metadata: `PropertyChanged`, `Opening`) | `XamlDirectCallPropertySetter` over the subscription `add_<Name>` the type system projects for the event | `XamlLoadMethodDelegateNode` |
+| a property of a delegate type (`ToolTip.CustomPopupPlacementCallback="OnPlacement"`) | the setters of the property | `XamlLoadMethodDelegateNode` |
+
+**Which method.** The one the transform finds, and no other: `XamlTransformHelpers.TryConvertValue` looks for a method of the type of the root object with the name, the return type and exactly the parameter types of the `Invoke` of the delegate type (`FindMethod(name, returnType, allowDowncast: false, parameters)`); when none matches, `FerroXamlIlLanguage::try_convert_method_delegate` accepts the method of that name whose parameters are assignable from the ones the delegate passes (the deviation recorded in DEVIATIONS.md, "Markup metadata and markup events": a handler that takes the arguments untyped receives whatever the event raises). The methods of a type are the ones its markup metadata declares (`markup: { methods: [fn OnClick(Option<BoxedValue>, Rc<dyn IRoutedEventArgs>) => ..] }`), which the scanner reads into the model as it reads every other member. The root object is an instance of the class of the document (`x:Class`); a document without one has the type of its root element, which has the methods of that type only. The signature is therefore checked at compile time by the same code and the same rule as at run time, and rustc checks the emitted call a second time.
+
+Not implemented, and not a rule of the run-time loader either: handlers found among the inherent functions of the class (`impl <Class> { fn on_click(&self, ..) }`, rules 2 and 3 of the earlier text of this section, ruling 3 of 9.12). The scanner records those functions (`Scan::functions`), and the type system does not project them as methods: the interpreter could not call them, so a document would compile and not load. They become handlers when the build generates their metadata entries, which is ruling 3 as a whole and is not started.
+
+**What is emitted.** In the build function, the populate function and the build function of deferred content alike (a handler named inside a template):
+
+```rust
+// MainWindow.xaml(23,30) Click
+rt::add_handler(&button_0, &::ferroui_controls::Button::__markup_field_ClickEvent(), rt::method_delegate(&context, 2, |this, arguments| { crate::MainWindow::__markup_OnClick_0(this, arguments.next()?, arguments.next()?); ::core::result::Result::Ok(::core::option::Option::None) }));
+// MainWindow.xaml(24,12) PropertyChanged
+rt::add_event_handler(rt::class_markup(<::ferroui_base::FerroObject as ::ferroui_base::StaticType>::TYPE), "PropertyChanged", rt::to_value(border_0.clone()), rt::method_delegate(&context, 2, |this, arguments| { .. }), 24, 12)?;
+// MainWindow.xaml(25,12) CustomPopupPlacementCallback
+border_0.set_value(::ferroui_controls::ToolTip::custom_popup_placement_callback_property(), rt::cast(rt::method_delegate(&context, 1, |this, arguments| { .. }), 25, 12)?);
+```
+
+- **The delegate** (`XamlLoadMethodDelegateNode`, upstream's `new TDelegate(root, &Method)`) is `rt::method_delegate(&context, <number of parameters>, |this, arguments| ..)`, a `MarkupDelegate`. The closure calls the typed function of the declared method (`<Class>::__markup_<Name>_<n>`, 9.5.3 form B: `EmitTypes::method` of both hosts states it) with the instance and with each argument read from `arguments` in the type the method declares, which rustc infers from the function. The helper does what `load_method_delegate` of the interpreter does: the root object is read from the context (`root_object_field`), which is why the same text serves a template; it is held weakly (root, element and handler would otherwise form a cycle) and upgraded on each call; a call with another number of arguments than the method takes, an argument that is not of the declared type, a failing fallible method and a root object that is gone all make the call do nothing, since a handler has nowhere to report a failure to; an object passed to an untyped parameter is handed over in the untyped form of the framework; a returned value goes back in its untyped form. A static method is `rt::static_method_delegate`. Refused: a delegate over another object than the root object, a method that is not a declared one or has no typed function, and a method that returns a type (the run-time loader hands a class to the caller in a form of its own).
+- **A routed event** (`XamlDirectCallAddHandler`) is `rt::add_handler(&target, &<Owner>::__markup_field_<Name>Event(), delegate)`: `Interactive::add_handler_untyped(event, delegate, Direct | Bubble, false)`, the call the interpreter makes through `AddHandler`, with the event read through the typed function of the declared field. The handler is called with the element it is attached to and a shared handle to the arguments. A choice of the setter at run time is refused; the plan of an assignment of a method name leaves one setter.
+- **An event that is not a routed event** is `rt::add_event_handler(<metadata of the declaring type>, "<Name>", target, delegate, line, position)?`. Metadata declares the subscription of an event as a callable without a typed function (`events: [Name(..) => |this, handler: MarkupDelegate| ..]`), so this is call form C of 9.5.3: the subscription the interpreter invokes, found by the name of the event in the metadata of the type that declares it. The emitter recognises the case by the method of the setter being the `add` of an event of its declaring type.
+- **A property of a delegate type** takes the delegate through the rule every value follows: the cast the crates register from `MarkupDelegate` to the type of the property (`rt::cast`), which is the conversion the run-time loader applies to the argument of the setter.
+
+**A method that is not found.** No method fits when the class has none of that name, when its parameters are neither the delegate's nor wider, or when the document has no class. The compiler reports that as any assignment no setter takes (`Unable to find suitable setter or adder for property Click of type .. for argument System.String, available setter parameter lists are: ..`, upstream's text, code `FRN3000`, at the attribute), and the run-time loader gives exactly that. A compile describes it (`rust_emitter::transform`, `METHOD_NOT_FOUND`): when a setter of the member takes a delegate, the text assigned is read back from the document at the place of the diagnostic and the diagnostic becomes
+
+```text
+Views/Buttons.xaml(3,13): error FRN3000: No method `OnGo` for `Click` (System.EventHandler`1[FerroUI.Interactivity.RoutedEventArgs]): the document has no class (`x:Class`), and the type of its root object has no method of that name that the delegate can call. Unable to find suitable setter or adder for property Click ..
+```
+
+or, for a document with a class, "the class `Ns.Class` of the document has no method of that name that the delegate can call (a method the markup metadata of the class declares, `methods: [fn OnGo(..) => ..]`, with the parameters of the delegate or wider ones)". A build reports it once, with the document, the place, the code, the method and the member; the group of the document is not compiled.
+
+**Proof.** `tests/FerroUI.Markup.Xaml.UnitTests/emitter/event_handlers.rs` with the class documents of the corpus (`corpus::CLASS_DOCUMENTS`), each compiled as the document of its class by both hosts of the emitter:
+
+| Document | Class | Form | Both hosts | Run |
+|---|---|---|---|---|
+| `Handlers/RoutedEvent.xaml` | `MyButton` | a routed event of the element, and one of another class | the same bytes | the method runs when the event is raised; the object is freed when dropped |
+| `Handlers/AttachedEvent.xaml` | `MyPanel` | a routed event of a child handled on the root; an event with arguments of a class of their own | the same bytes | both methods run; a handler whose object is gone does nothing |
+| `Handlers/PlainEvent.xaml` | `MyHost` | an event of the class with a handler of wider parameters; the property-changed event of an element | the same bytes | the handler cancels the arguments the event raises; the changed property is received |
+| `Handlers/DelegateProperty.xaml` | `MyHost` | a method as the value of an attached and of a plain property of a delegate type; a handler on the event of a flyout | the same bytes | the callbacks are set |
+| `Handlers/TemplateEvent.xaml` | `MyPanel` | a handler named inside a control template | the same bytes | the content the template builds calls the method of the root object |
+| `Handlers/UnknownMethod.xaml` | `MyButton` | no method of the name | the same diagnostic, not compiled | |
+| `Handlers/OtherParameters.xaml` | `MyHost` | a method of the name with other parameters | the same diagnostic, not compiled | |
+| `Handlers/UnknownMethodOfProperty.xaml` | `MyHost` | a property of a delegate type, no method | the same diagnostic, not compiled | |
+| `Handlers/WithoutClass.xaml` | none | a handler on a document without `x:Class` | the same diagnostic, not compiled | |
+
+The output of the five that compile is checked in (`emitter/generated_handlers/`), compiled with the test crate, and kept current by a test; a class populated by it is compared with a class populated by the run-time loader from the same document through the dump of 9.10.2, and the same assertions are made on both. `build_diagnostics.rs` has the error of a build.
 
 #### 9.4.5 Populate override (hot reload, previewer)
 
@@ -1802,9 +1848,28 @@ Numbers of the stage (run by its author, debug profile): `ferroui-build --lib` 2
 AboutFerroDialog.xaml: XamlPropertyAssignmentNode: Click: not a plain property setter (line 63 position 8)
 ```
 
-`Click="Button_OnClick"` reaches the emitter as `XamlDirectCallAddHandler` over a `XamlLoadMethodDelegateNode` (9.4.4), and the emitter has no rule for either: event handlers are the open item of 9.4.4. It is a rule of the emitter (the handler as a closure over the weak root that calls the typed function of the declared method, an `rt` helper that attaches it to the routed event, the two `EmitTypes` hosts answering for the event field and the method, corpus documents), not a rule of the scanner or the model: the transform against the models already produces the node. Until it exists the dialogs keep the run-time loader as a dependency, for that document alone (`markup.rs`, `register_types.rs`); nothing else in the crate uses it outside its tests.
+*(Closed since: the rule is 9.4.4 and the dialogs are compiled by their build, 9.5.15. As this stage left it:)* `Click="Button_OnClick"` reaches the emitter as `XamlDirectCallAddHandler` over a `XamlLoadMethodDelegateNode` (9.4.4), and the emitter has no rule for either: event handlers are the open item of 9.4.4. It is a rule of the emitter (the handler as a closure over the weak root that calls the typed function of the declared method, an `rt` helper that attaches it to the routed event, the two `EmitTypes` hosts answering for the event field and the method, corpus documents), not a rule of the scanner or the model: the transform against the models already produces the node. Until it exists the dialogs keep the run-time loader as a dependency, for that document alone (`markup.rs`, `register_types.rs`); nothing else in the crate uses it outside its tests.
 
 Not done here: the compile-time value parser of the build; the manifest keys; removing the run-time host from `Build` and the `emitter` feature's use by the tests of the themes (the reference tests generate the checked-in file through it); `deterministic_id_generator.rs`, which is still not called (neither host passes an identifier generator to the compiler configuration; wiring it is a change of emitted names to measure against the references).
+
+#### 9.5.15 Implemented (2026-10-09): event handlers, and the dialogs compiled by their build
+
+The rule of the emitter for a method named in markup is 9.4.4. With it the one class document of the dialogs (`src/FerroUI.Dialogs/AboutFerroDialog.xaml`) compiles, and the crate is converted as 9.5.14 said it would be:
+
+| | Before | Now |
+|---|---|---|
+| `build.rs` | exports the type model (`ferroui_build_scan::export`), writes its own asset table (every `.xaml` and `Assets/`) | `Build::from_env().type_system(TypeSystem::Model).default_compile_bindings(true).embed_assets(&["Assets"]).compile_group(XamlGroup::new("compiled_about_ferro_dialog").documents(..).class_document("AboutFerroDialog.xaml")).run()`: the compiled document, the assets, the loader table and the `.xamlmeta` with the type model and the compiled document |
+| `AboutFerroDialog::new` | `markup::load_component(&this, "/AboutFerroDialog.xaml")`: the run-time loader with compiled bindings as the default | `crate::compiled_about_ferro_dialog::populate(None, &this)` |
+| the loader table | written by hand in `register_types.rs`, with `FerroRuntimeXamlLoader::register_class_document` | `compiled_markup::register()` of the build: the assets and `try_load`, which creates the dialog with its constructor |
+| the assets of the assembly | `/AboutFerroDialog.xaml`, `/Assets/Roboto-Light.ttf` | `/Assets/Roboto-Light.ttf` (a compiled document is not a resource of the assembly, as upstream's compiler removes it) |
+| `markup.rs`, `assets.rs` | the loading of the documents of the crate; the asset table | removed |
+| dependencies | `ferroui-markup-xaml-loader` with `runtime`; build: `ferroui-build-scan` | no dependency on the loader at all, not in its tests either (the two tests that registered the run-time loader did not need it); `ferroui-base` with `markup-functions`; build: `ferroui-build` |
+
+The document is emitted whole: the compiled bindings to the static properties of the class (`{Binding Version}` under `x:DataType="dialogs:AboutFerroDialog"`), the dynamic resource of the logo, the font by its relative URI, and `Click="Button_OnClick"` as `rt::add_handler` over `AboutFerroDialog::__markup_Button_OnClick_0`. The tests of the crate are the guard (49 pass; 47 before): the dialog and its bound texts as before, the button opening the address of the project through the launcher of the platform when it is clicked, and a load of the document by its URI creating the dialog.
+
+Both themes take the dialogs as a dependency and read their `.xamlmeta`, which now also lists the compiled document; their output is unchanged, byte for byte (the reference tests of both).
+
+A crate that depends on the dialogs now builds `ferroui-build` for the host (the base crate, the loader with `compiler`, `xamlx`, the scanner), as a crate that depends on a theme already does. Not run by the author: a `wasm32` build.
 
 ### 9.6 Build integration
 
@@ -2081,7 +2146,7 @@ For applications, `export_metadata()` can generate the whole function (`$OUT_DIR
 | `XamlConstantNode` | `constant_value` | literal with suffix (`20.0_f64`, `5_i32`, `true`, `'c'`); enum from numeric value → variant path, flag combination → `A \| B` or `rt::enum_from_value::<T>(n)?` | numeric value that is no member: build error (decision 12) |
 | `XamlRootObjectNode` | `root_object_field()` | the `target` parameter / `rt::cast::<Ref<T>>(&ctx.root_object())?` inside deferred builders | — |
 | `XamlIntermediateRootObjectNode` | `intermediate_root_object()` | the local holding it, or `ctx.intermediate_root_object()` cast | — |
-| `XamlLoadMethodDelegateNode` | `MarkupDelegate` over the method | closure calling the method on the (weakly captured) instance | O1 |
+| `XamlLoadMethodDelegateNode` | `MarkupDelegate` over the method | `rt::method_delegate(&context, n, \|this, arguments\| Class::__markup_Name_k(this, arguments.next()?, ..))`: the typed function of the declared method on the weakly held root object of the context (9.4.4) | O1 |
 | `XamlAstCompilerLocalNode` | read local | the `let` name | — |
 | `XamlAstLocalInitializationNodeEmitter` | evaluate, store, return | `let name = ..;` | — |
 | `XamlValueNodeWithBeginInit` | evaluate, BeginInit | `let x = ..; x.begin_init();` | — |
@@ -2132,7 +2197,7 @@ For applications, `export_metadata()` can generate the whole function (`$OUT_DIR
 | `ClassBindingSetter` | `BindClass(target, name, binding, null)` | form C call of the `BindClass` method declared in `markup_types/well_known.rs` (no public typed function was found) | a `pub` typed entry point would allow form B |
 | `FerroAttachedInstancePropertySetterMethod` | `set_value_untyped(Field, value, LocalValue)` | typed `t.set_value(Owner::p_property(), v)` when the value type is exact, else untyped | setter arity quirk (decision 15) |
 | `FerroAttachedInstancePropertyGetterMethod` | `GetValue(Field)` | `t.get_value(Owner::p_property())` | — |
-| `XamlDirectCallAddHandler` | `AddHandler(event, handler, Direct \| Bubble, false)` | `t.add_handler_with(&Owner::name_event(), closure, RoutingStrategies::DIRECT.union(RoutingStrategies::BUBBLE), false);` | args type narrower than the event's: `add_handler_as` |
+| `XamlDirectCallAddHandler` | `AddHandler(event, handler, Direct \| Bubble, false)` | `rt::add_handler(&t, &Owner::__markup_field_NameEvent(), delegate);` (`add_handler_untyped` with `Direct \| Bubble`, `false`; 9.4.4) | a choice of the setter at run time is refused |
 | `InjectServiceProviderNode` | context as service provider | `sp.clone()` | — |
 | `OptionsMarkupExtensionMethod` | first branch whose condition holds, else default; only tested options and the chosen value are evaluated | `if <cond>(&sp, opt1) { v1 } else if .. { .. } else { default }` as an expression; `OnPlatform` branches may be folded to `cfg!` later | conversion of the branch value to the return type per branch |
 | `ResourceAdderSetter` | dictionary (optional getter), key, value, `Add*`, optional source info | `let d = ..; let k = ..; d.add_deferred(k, value); XamlSourceInfo::set_xaml_source_info_for_key(..)` | key forms (`&str`, `&'static TypeInfo`, `ValueType`) → `ResourceKey` |
@@ -2243,6 +2308,8 @@ Not done, and why (9.6.8): a build script cannot compile a document that names a
 
 **E1 status (2026-10-09, the compiler without the framework; the Fluent theme; diagnostics).** Built and run by its author with the commands of the stage (9.5.14, 9.6.5). Done: the transform and the emitter are the `compiler` feature of the loader, which links neither the XAML runtime library nor the controls (what they shared with the interpreter is `back_end`); `ferroui-build` takes it alone and its run-time host is the feature `runtime-host`, which no crate enables; every emitted output is unchanged (the Simple theme's 82 documents, the corpus 109 of 109, the fixtures). The Fluent theme is compiled by its build script: 86 documents, all identical to the checked-in reference, none refused. The diagnostics of a build have upstream's codes and go through the filter of upstream's task. Stopped: the class document of the dialogs is refused for its event handler (`Click="Button_OnClick"`, 9.4.4), which the emitter has no rule for; the dialogs still link the run-time loader for that document.
 
+**E5 status (2026-10-09, event handlers; the dialogs).** Built and run by its author with the commands of the stage. Done (9.4.4): the emitter's rule for a method of the root object named in markup, in both hosts: a routed event, an event that is not a routed event, a property of a delegate type, a handler inside a template, with the method found and checked by the transform as at run time; a method that is not found is one diagnostic that names the document, the member and the method. Done (9.5.15): the dialogs are compiled by their build script and no longer link the run-time loader. Every output that existed is unchanged (the corpus, both themes, the fixtures). Measured, not converted: the ControlCatalog against the models (HANDOVER.md, section 18): the work list of item 2 below.
+
 Remaining for E5, in order:
 
 1. The rest of the build-time type system (9.5), in stages that each build and test on their own:
@@ -2254,7 +2321,7 @@ Remaining for E5, in order:
    6. **The framework crates export their models and the themes compile in their build scripts** *(done for the base crate, the controls, the XAML runtime library, the dialogs and both themes, 9.5.13 and 9.5.14: the emitter is out of the `runtime` feature of the loader and the Fluent theme compiles in its build script; left: the manifest keys)*: the leaf crate of 9.5.7 (`ferroui-build-scan`: `json`, `model`, `model_set`, `scanner` and the export, with the two text constants and `DocumentModel` owned there, so that the base crate can scan itself), `links` and `build.rs` in the framework crates, the manifest keys of 9.6.1 (`[package.metadata.ferroui]`), then the two themes on `compile_xaml()` with their checked-in files as the differential (the three reasons of 9.6.8 against converting them fall with stage 5: the group no longer needs the theme crate linked, and nothing is built for the host).
 
    Before step 5, the two `XamlIlTests` documents and the dialogs can use the checked-in path.
-2. The ControlCatalog: its documents and the `x:Class` documents of the dialogs compiled, so that neither links the run-time loader (browser-platform.md, section 20, item 3). *(The dialogs were tried in 9.5.14: their one class document compiles up to its event handler. Event handlers in the emitter (9.4.4) come first; then the dialogs' build script is the Simple theme's with `default_compile_bindings(true)`, the constructor calls `crate::compiled_about_ferro_dialog::populate`, the hand-written loader table and `markup.rs` go, and the dependency on the loader with them.)* Measure a few pages first against the estimate there (+6 to +10 MB raw, +0.5 to +1.2 MB gzip on the module); above it, the owner decides.
+2. The ControlCatalog: its documents compiled, so that it does not link the run-time loader (browser-platform.md, section 20, item 3). *(The dialogs are done: 9.4.4 and 9.5.15. The catalog was measured against the models without converting it; the table of what compiles and what is refused, by reason, is section 18 of HANDOVER.md and is the work list.)* Measure a few pages first against the estimate there (+6 to +10 MB raw, +0.5 to +1.2 MB gzip on the module); above it, the owner decides.
 
 #### 9.10.2 Test strategy
 
