@@ -32,7 +32,7 @@ use crate::compiler_extensions::ast_nodes::{
 use crate::compiler_extensions::group_transformers::NewServiceProviderNode;
 use super::compiled_resources::CompiledDocumentBuildMethod;
 use crate::compiler_extensions::transformers::{
-    CombinatorSelectorType, EnsureCapacityNode, FerroNameScopeRegistrationXamlIlNode, FerroXamlIlWellKnownTypesExtensions,
+    ClassBindingSetter, ClassValueSetter, CombinatorSelectorType, EnsureCapacityNode, FerroNameScopeRegistrationXamlIlNode, FerroXamlIlWellKnownTypesExtensions,
     HandleRootObjectScopeNode, OptionsMarkupExtensionMethod, ResourceAdderSetter, XamlIlAttachedPropertyEqualsSelector,
     XamlIlCombinatorSelector, XamlIlDirectCallPropertySetter, XamlIlNestingSelector, XamlIlNotSelector,
     XamlIlNthChildSelector, XamlIlNthChildSelectorType, XamlIlOrSelectorNode, XamlIlPropertyEqualsSelector,
@@ -1351,6 +1351,12 @@ impl<'a> Emitter<'a> {
         if let Some((declaring, event)) = subscribed_event(&setter) {
             return self.event_assignment(node, assignment, &declaring, &event, target);
         }
+        if let Some(class) = setter.as_any().downcast_ref::<ClassValueSetter>() {
+            return self.class_value_assignment(node, assignment, class, target);
+        }
+        if let Some(class) = setter.as_any().downcast_ref::<ClassBindingSetter>() {
+            return self.class_binding_assignment(node, assignment, class, target);
+        }
         if let Some(runtime) = self.direct_setter(&setter) {
             if runtime.declared().is_some() {
                 return self.declared_setter_assignment(node, assignment, &runtime, target);
@@ -1409,6 +1415,76 @@ impl<'a> Emitter<'a> {
             Some(inner) => inner.base.value().as_node().is::<XamlAstRuntimeCastNode>(),
             None => node.is::<XamlAstRuntimeCastNode>(),
         }
+    }
+
+    /// The one value of the assignment of a class (`Classes.name="{Binding ..}"`,
+    /// `Classes.name="True"`).
+    fn class_value(&mut self, node: &Rc<dyn IXamlAstNode>, assignment: &XamlPropertyAssignmentNode) -> EmitResult<Typed<'a>> {
+        let mut values = self.assignment_values(node, assignment)?;
+        match (values.pop(), values.is_empty()) {
+            (Some(value), true) => Ok(value),
+            _ => Err(unsupported(node, format!("{}: the assignment of a class with more than one value", assignment.property.name()))),
+        }
+    }
+
+    /// `target.Classes.Set(className, value)` (`ClassValueSetter`): the collection read with
+    /// the getter of `StyledElement.Classes`, then `Classes.Set(string, bool)`, as the
+    /// interpreter calls the two methods.
+    fn class_value_assignment(
+        &mut self,
+        node: &Rc<dyn IXamlAstNode>,
+        assignment: &Rc<XamlPropertyAssignmentNode>,
+        setter: &ClassValueSetter,
+        target: &Typed<'a>,
+    ) -> EmitResult<()> {
+        let property_name = assignment.property.name();
+        let getter = setter
+            .types
+            .styled_element_classes_property
+            .getter()
+            .and_then(|getter| self.types.method(getter.as_ref()))
+            .ok_or_else(|| unsupported(node, format!("{property_name}: StyledElement.Classes has no getter the type system declares")))?;
+        let set = setter.classes_set_method().map_err(|e| failed(node, e))?;
+        let set = self
+            .types
+            .method(set.as_ref())
+            .ok_or_else(|| unsupported(node, format!("{property_name}: Classes.Set is not a method the type system declares")))?;
+        let classes_type = self.declared_return(node, &getter)?;
+        self.marker(node, &property_name);
+        let value = self.class_value(node, assignment)?;
+        let value = self.bind(&value, "value");
+        let read = self.declared_call(node, &getter, &[Typed { expr: target.expr.clone(), kind: target.kind }])?;
+        let classes = self.local_named("classes");
+        self.line(format!("let {classes} = {read};"));
+        let classes = Typed { expr: classes, kind: self.kind_of(classes_type) };
+        let name = self.exact(Known::String, format!("::std::string::String::from({})", rust_string_literal(&setter.class_name)));
+        let call = self.declared_call(node, &set, &[classes, name, value])?;
+        self.line(format!("{call};"));
+        Ok(())
+    }
+
+    /// `StyledElementExtensions.BindClass(target, className, binding, null)`
+    /// (`ClassBindingSetter`): the typed function of the declared method; what it returns
+    /// (the subscription) is dropped, as the interpreter drops it.
+    fn class_binding_assignment(
+        &mut self,
+        node: &Rc<dyn IXamlAstNode>,
+        assignment: &Rc<XamlPropertyAssignmentNode>,
+        setter: &ClassBindingSetter,
+        target: &Typed<'a>,
+    ) -> EmitResult<()> {
+        let property_name = assignment.property.name();
+        let bind = self
+            .types
+            .method(setter.types.classes_bind_method.as_ref())
+            .ok_or_else(|| unsupported(node, format!("{property_name}: StyledElementExtensions.BindClass is not a method the type system declares")))?;
+        self.marker(node, &property_name);
+        let binding = self.class_value(node, assignment)?;
+        let name = self.exact(Known::String, format!("::std::string::String::from({})", rust_string_literal(&setter.class_name)));
+        let anchor = Typed { expr: "::core::option::Option::None".to_string(), kind: Kind::Null };
+        let call = self.declared_call(node, &bind, &[Typed { expr: target.expr.clone(), kind: target.kind }, name, binding, anchor])?;
+        self.line(format!("let _ = {call};"));
+        Ok(())
     }
 
     /// The priority of an assignment with a priority, held in a local.
