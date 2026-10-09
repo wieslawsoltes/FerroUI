@@ -1320,11 +1320,13 @@ cargo test -p xaml-include-fixture-theme --lib                      3 passed
 cargo test -p xaml-include-fixture-application --lib                28 passed
 cargo test -p ferroui-dialogs --lib                                 49 passed (47 before)
 cargo build -p ferroui-dialogs
+cargo build -p control-catalog                                      builds (it creates the about dialog, and loads its own documents at run time as before)
+cargo test -p control-catalog --lib view_models                     60 passed (594 filtered out)
 ```
 
 The checked-in files of the class documents and of the Rust paths were regenerated with the ignored tests the files name (`emitter::event_handlers::regenerate_class_documents`, `emitter::rust_paths_tests::regenerate_rust_paths_check`).
 
-**Not run by the author, for the validating session:** `cargo build --workspace` and `cargo clippy`; the suites of section 2 beyond the ones above (`ferroui-native` and the ControlCatalog create `AboutFerroDialog`, which now populates itself from compiled markup); the browser build (the dialogs' build script now builds `ferroui-build` for the host, as the themes' do); `scripts/check-upstream-name.sh` or its equivalent.
+**Not run by the author, for the validating session:** `cargo build --workspace` and `cargo clippy`; the suites of section 2 beyond the ones above (`ferroui-native` and the ControlCatalog create `AboutFerroDialog`, which now populates itself from compiled markup; of the suite of the catalog only the tests of its view models were run); the browser build (the dialogs' build script now builds `ferroui-build` for the host, as the themes' do); `scripts/check-upstream-name.sh` or its equivalent.
 
 **What the author doubts.**
 
