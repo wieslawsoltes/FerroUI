@@ -32,7 +32,9 @@ What is counted
     `Theory`, `Test` or `TestCase` (`[Fact]`, `[Theory]`, `[AvaloniaFact]`, `[Fact(Skip = "...")]`, the NUnit
     `[Test]`, ...). A `[Theory]` is one test, however many `[InlineData]` rows it has. Comments, strings and
     preprocessor lines are blanked before the search; code in an inactive `#if` branch is therefore counted too.
-    A name that occurs more than once in a file (overloads, or two classes of one file) is counted once per file.
+    A method that two classes of one file declare is one test per class, listed as `Class.Method` (the class is
+    the one declared last before the method), and the n-th of them is present when the port has n functions of
+    the name; overloads within a class are one test.
 
     Port: every `fn` that follows a `#[test]` attribute (other attributes may stand between them) in a `.rs`
     file below the roots, and every other `fn` of a file that has at least one such test: the port writes a
@@ -52,7 +54,7 @@ The alias file
     [[alias]]                       # the port has the test under a name the rule cannot derive
     project = "Avalonia.Controls.UnitTests"
     file = "GridTests.cs"           # path below the project, with forward slashes
-    test = "Upstream_Method_Name"
+    test = "Upstream_Method_Name"   # or "Class.Upstream_Method_Name" in a file with several test classes
     rust = "the_rust_test_function" # must exist as a test of the port, or the alias is reported as stale
     reason = "why the name differs"
 
@@ -206,10 +208,15 @@ def skip_attribute(text: str, i: int) -> int:
     return n
 
 
-def upstream_tests(text: str) -> list[str]:
-    """The names of the test methods of one C# file, in order, each once."""
+CLASS = re.compile(r"\b(?:class|struct|record)\s+([A-Za-z_]\w*)")
+
+
+def upstream_tests(text: str) -> list[tuple[str, str]]:
+    """The test methods of one C# file as (class, method), in order, each pair once. The class is the one
+    declared last before the method."""
     text = blank_csharp(text)
-    names: list[str] = []
+    classes = [(m.start(), m.group(1)) for m in CLASS.finditer(text)]
+    names: list[tuple[str, str]] = []
     seen = set()
     position = 0
     while True:
@@ -232,10 +239,15 @@ def upstream_tests(text: str) -> list[str]:
         if not d:
             position = max(position, m.end())
             continue
-        name = d.group(1)
-        if name not in seen:
-            seen.add(name)
-            names.append(name)
+        owner = ""
+        for start, name in classes:
+            if start > m.start():
+                break
+            owner = name
+        pair = (owner, d.group(1))
+        if pair not in seen:
+            seen.add(pair)
+            names.append(pair)
     return names
 
 
@@ -402,7 +414,10 @@ def rust_tests(roots: list[str]) -> dict[str, list[tuple[str, str]]]:
                     continue
                 relative = os.path.relpath(path, REPO)
                 found[""].extend((name, relative) for name in tests)
-                for name in dict.fromkeys(tests + RUST_FN.findall(blanked) + macro_test_names(blanked)):
+                functions = RUST_FN.findall(blanked)
+                declared = set(functions)
+                functions += [name for name in dict.fromkeys(macro_test_names(blanked)) if name not in declared]
+                for name in functions:
                     found[normalise_rust(name)].append((name, relative))
     return found
 
@@ -479,15 +494,23 @@ def main() -> int:
     used_file_waivers = set()
 
     for path in sorted(sources):
-        names = upstream_tests(sources[path])
-        if not names:
+        pairs = upstream_tests(sources[path])
+        if not pairs:
             continue
         files_with_tests += 1
-        counts[path] = len(names)
-        total += len(names)
-        for name in names:
+        counts[path] = len(pairs)
+        total += len(pairs)
+        several = len({owner for owner, _ in pairs}) > 1
+        occurrence: dict[str, int] = defaultdict(int)
+        for owner, method in pairs:
+            # A method that several classes of the file declare is one test per class: the n-th of them is
+            # present when the port has n functions of the name.
+            occurrence[method] += 1
+            present = len(port.get(normalise_upstream(method), ())) >= occurrence[method]
+            name = f"{owner}.{method}" if several else method
             key = (path, name)
-            present = normalise_upstream(name) in port
+            if key not in aliases and key not in waivers:
+                key = (path, method)
             if key in aliases:
                 used_aliases.add(key)
                 entry = aliases[key]
