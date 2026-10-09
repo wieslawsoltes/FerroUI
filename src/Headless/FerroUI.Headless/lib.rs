@@ -38,3 +38,5 @@ pub use i_headless_touch_pointer::IHeadlessTouchPointer;
 
 #[cfg(test)]
 mod tests;
+#[cfg(test)]
+mod unit_tests;

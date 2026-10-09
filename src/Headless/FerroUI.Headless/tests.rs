@@ -1,11 +1,13 @@
 //! Tests of the headless platform.
 //!
 //! The upstream tests (the unit test project of the headless platform) run
-//! through the xUnit and NUnit integrations of the platform, with the Simple
-//! theme and the Skia backend. The tests ported here are the ones that need
-//! neither a theme nor rendered pixels; each one sets up an application of
-//! its own with the headless platform, on the test thread (the `PerTest`
-//! isolation of the original). Tests that are not from upstream say so.
+//! on the session of their test assembly, with the Simple theme and the Skia
+//! backend: they are ported in `unit_tests`. The four tests of this file
+//! that carry upstream's names are the upstream tests that need neither a
+//! theme nor rendered pixels, run a second time with the headless drawing,
+//! which the application of the upstream tests does not use; each one sets
+//! up an application of its own with the headless platform, on the test
+//! thread. Tests that are not from upstream say so.
 
 use crate::headless_platform_render_interface::HeadlessPlatformRenderInterface;
 use crate::{FerroHeadlessPlatformExtensions, FerroHeadlessPlatformOptions, HeadlessWindowExtensions};

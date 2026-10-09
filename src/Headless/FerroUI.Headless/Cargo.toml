@@ -14,3 +14,12 @@ path = "lib.rs"
 ferroui-base.workspace = true
 ferroui-controls.workspace = true
 ferroui-harfbuzz.workspace = true
+
+[dev-dependencies]
+ferroui-base = { workspace = true, features = ["testing"] }
+ferroui-controls = { workspace = true, features = ["testing"] }
+# The application of the upstream tests of the platform (`unit_tests/test_application.rs`) has the Simple
+# theme and renders with the Skia backend, as the original's; the tests of the controls that run on the
+# headless platform (`unit_tests/headless_probe_tests.rs`) have the theme. Neither crate is built on this one.
+ferroui-themes-simple = { workspace = true }
+ferroui-skia = { workspace = true }
