@@ -40,12 +40,81 @@ impl BrowserRenderingMode {
     }
 }
 
+/// The render backend a module draws with.
+///
+/// Not in the original, which has one backend. The rendering modes
+/// ([`BrowserRenderingMode`]) keep their meaning with either: they say what
+/// the canvas of a view is (the canvas of a WebGL context, a 2D canvas),
+/// and the backend draws to it with what it has for that kind of canvas.
+///
+/// | mode | Skia | Vello |
+/// |---|---|---|
+/// | `WebGL2` | Ganesh | the hybrid mode (`vello_gpu` over the WebGL2 context) |
+/// | `WebGL1` | Ganesh | not drawn: the mode is taken out of the list |
+/// | `Software2D` | Skia raster | the CPU mode (`vello_cpu`) |
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq, Hash)]
+pub enum BrowserRenderer {
+    /// The Skia backend.
+    #[default]
+    Skia,
+    /// The Vello backend. The module has to be built with the feature
+    /// `vello` of this crate.
+    Vello,
+}
+
+impl BrowserRenderer {
+    /// The backend with the given name, ignoring case.
+    pub fn parse(name: &str) -> Option<BrowserRenderer> {
+        [BrowserRenderer::Skia, BrowserRenderer::Vello].into_iter().find(|renderer| renderer.name().eq_ignore_ascii_case(name))
+    }
+
+    /// The name of the backend.
+    pub fn name(self) -> &'static str {
+        match self {
+            BrowserRenderer::Skia => "Skia",
+            BrowserRenderer::Vello => "Vello",
+        }
+    }
+
+    /// Whether the module was built with the backend.
+    pub fn is_available(self) -> bool {
+        match self {
+            BrowserRenderer::Skia => true,
+            BrowserRenderer::Vello => cfg!(feature = "vello"),
+        }
+    }
+
+    /// The rendering modes of `modes` the backend draws, in their order.
+    /// The Vello backend has no renderer for WebGL 1; a list that asks for
+    /// nothing else is drawn in memory.
+    pub fn rendering_modes(self, modes: &[BrowserRenderingMode]) -> Vec<BrowserRenderingMode> {
+        match self {
+            BrowserRenderer::Skia => modes.to_vec(),
+            BrowserRenderer::Vello => {
+                let drawn: Vec<BrowserRenderingMode> =
+                    modes.iter().copied().filter(|mode| *mode != BrowserRenderingMode::WebGL1).collect();
+                match drawn.is_empty() && !modes.is_empty() {
+                    true => vec![BrowserRenderingMode::Software2D],
+                    false => drawn,
+                }
+            }
+        }
+    }
+}
+
 /// Options of the browser backend.
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct BrowserPlatformOptions {
     /// The rendering modes with fallbacks. The first element has the
     /// highest priority.
     pub rendering_mode: Vec<BrowserRenderingMode>,
+
+    /// The render backend. Skia by default.
+    ///
+    /// Not in the original. The Vello backend needs a module built with the
+    /// feature `vello` of this crate; the application fails to start
+    /// without it, with a message that names the feature.
+    pub renderer: BrowserRenderer,
 
     /// Defines if the service worker used by FerroUI should be registered.
     /// If registered, service worker can work as a save file picker fallback
@@ -89,6 +158,7 @@ impl Default for BrowserPlatformOptions {
                 BrowserRenderingMode::WebGL1,
                 BrowserRenderingMode::Software2D,
             ],
+            renderer: BrowserRenderer::Skia,
             register_ferro_service_worker: false,
             ferro_service_worker_scope: None,
             prefer_file_dialog_polyfill: false,
@@ -126,15 +196,53 @@ fn pre_setup_browser(builder: &AppBuilder, options: Option<BrowserPlatformOption
         None => FerroLocator::current().get_service::<BrowserPlatformOptions>().unwrap_or_default(),
     };
 
+    let renderer = options.renderer;
     FerroLocator::current_mutable().bind_to_self(options);
 
     BrowserWindowingPlatform::set_global_this(dom_helper::get_global_this());
 
-    if builder.windowing_subsystem_initializer().is_none() {
+    let builder = if builder.windowing_subsystem_initializer().is_none() {
         builder.use_browser()
     } else {
         builder.clone()
+    };
+
+    match renderer {
+        BrowserRenderer::Skia => builder,
+        BrowserRenderer::Vello => use_vello_renderer(&builder),
     }
+}
+
+/// The builder with the Vello backend in the place of the render backend it
+/// had: the last one chosen draws.
+///
+/// The modes of the backend are the hybrid mode and then the CPU mode: a
+/// canvas with a WebGL2 context is drawn by the first, a 2D canvas and
+/// everything that ends in memory (bitmaps, layers) by the second. Options
+/// the application registered are kept.
+#[cfg(feature = "vello")]
+fn use_vello_renderer(builder: &AppBuilder) -> AppBuilder {
+    use ferroui_vello::{VelloApplicationExtensions, VelloOptions, VelloRenderingMode};
+
+    if FerroLocator::current().get_service::<VelloOptions>().is_none() {
+        FerroLocator::current_mutable().bind_to_self(Rc::new(VelloOptions {
+            rendering_modes: [Some(VelloRenderingMode::Hybrid), Some(VelloRenderingMode::Cpu), None],
+            ..VelloOptions::default()
+        }));
+    }
+
+    builder.use_vello()
+}
+
+/// # Panics
+/// Always: the module has no Vello backend.
+#[cfg(not(feature = "vello"))]
+fn use_vello_renderer(_builder: &AppBuilder) -> AppBuilder {
+    panic!(
+        "BrowserPlatformOptions::renderer asks for the Vello backend, and the module was built without the feature \
+         `vello` of ferroui-browser (scripts/build-browser.sh <application> --features vello; \
+         docs/porting/vello-backend.md, section 11)"
+    );
 }
 
 impl BrowserAppBuilder for AppBuilder {
@@ -191,6 +299,38 @@ mod tests {
     #[test]
     fn a_module_with_threads_renders_on_a_render_thread_unless_told_not_to() {
         assert!(BrowserPlatformOptions::default().render_thread);
+    }
+
+    #[test]
+    fn skia_is_the_default_renderer_and_draws_every_mode() {
+        let options = BrowserPlatformOptions::default();
+
+        assert_eq!(BrowserRenderer::Skia, options.renderer);
+        assert!(BrowserRenderer::Skia.is_available());
+        assert_eq!(options.rendering_mode, BrowserRenderer::Skia.rendering_modes(&options.rendering_mode));
+    }
+
+    #[test]
+    fn renderers_are_parsed_by_name_ignoring_case() {
+        assert_eq!(Some(BrowserRenderer::Vello), BrowserRenderer::parse("vello"));
+        assert_eq!(Some(BrowserRenderer::Skia), BrowserRenderer::parse("SKIA"));
+        assert_eq!(None, BrowserRenderer::parse("Direct2D"));
+        assert_eq!(None, BrowserRenderer::parse(""));
+        assert_eq!(cfg!(feature = "vello"), BrowserRenderer::Vello.is_available());
+    }
+
+    #[test]
+    fn the_vello_renderer_draws_no_webgl1_canvas() {
+        use BrowserRenderingMode::{Software2D, WebGL1, WebGL2};
+
+        // The default order: the hybrid mode, then the CPU mode.
+        assert_eq!(vec![WebGL2, Software2D], BrowserRenderer::Vello.rendering_modes(&[WebGL2, WebGL1, Software2D]));
+        assert_eq!(vec![Software2D], BrowserRenderer::Vello.rendering_modes(&[Software2D]));
+        assert_eq!(vec![WebGL2], BrowserRenderer::Vello.rendering_modes(&[WebGL2]));
+        // WebGL 1 alone: in memory, which is what the script side falls
+        // back to for a list it cannot serve.
+        assert_eq!(vec![Software2D], BrowserRenderer::Vello.rendering_modes(&[WebGL1]));
+        assert!(BrowserRenderer::Vello.rendering_modes(&[]).is_empty());
     }
 
     #[test]

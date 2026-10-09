@@ -17,6 +17,10 @@ pub struct VelloContext {
     rendering_modes: Vec<VelloRenderingMode>,
     #[cfg(any(feature = "hybrid", feature = "gpu"))]
     gpu: Option<Rc<dyn crate::gpu::IVelloGpu>>,
+    /// The WebGL2 context of a canvas of a web page, whose surface the
+    /// hybrid mode draws to.
+    #[cfg(feature = "hybrid-webgl")]
+    web_gl: Option<Rc<crate::web_gl::VelloWebGlGpu>>,
 }
 
 impl VelloContext {
@@ -27,7 +31,17 @@ impl VelloContext {
             rendering_modes,
             #[cfg(any(feature = "hybrid", feature = "gpu"))]
             gpu: None,
+            #[cfg(feature = "hybrid-webgl")]
+            web_gl: None,
         }
+    }
+
+    /// Creates the backend context of the WebGL2 context of a canvas: the
+    /// canvas is drawn in the hybrid mode by the renderer of that context,
+    /// everything else in memory.
+    #[cfg(feature = "hybrid-webgl")]
+    pub fn with_web_gl(web_gl: Rc<crate::web_gl::VelloWebGlGpu>, rendering_modes: Vec<VelloRenderingMode>) -> Self {
+        Self { web_gl: Some(web_gl), ..Self::new(rendering_modes) }
     }
 
     /// Creates the backend context of a graphics device: the surfaces of
@@ -35,7 +49,7 @@ impl VelloContext {
     /// `rendering_modes` it runs.
     #[cfg(any(feature = "hybrid", feature = "gpu"))]
     pub fn with_gpu(gpu: Rc<dyn crate::gpu::IVelloGpu>, rendering_modes: Vec<VelloRenderingMode>) -> Self {
-        Self { rendering_modes, gpu: Some(gpu) }
+        Self { gpu: Some(gpu), ..Self::new(rendering_modes) }
     }
 
     /// The GPU of the context, when it has one.
@@ -56,6 +70,13 @@ impl IPlatformRenderInterfaceContext for VelloContext {
         #[cfg(any(feature = "hybrid", feature = "gpu"))]
         if let Some(gpu) = &self.gpu {
             if let Some(target) = gpu.clone().try_create_render_target(surfaces, &self.rendering_modes) {
+                return target;
+            }
+        }
+
+        #[cfg(feature = "hybrid-webgl")]
+        if let Some(web_gl) = &self.web_gl {
+            if let Some(target) = web_gl.try_create_render_target(surfaces, &self.rendering_modes) {
                 return target;
             }
         }
@@ -133,6 +154,13 @@ impl IPlatformRenderInterfaceContext for VelloContext {
             }
         }
 
+        #[cfg(feature = "hybrid-webgl")]
+        if let Some(web_gl) = &self.web_gl {
+            if web_gl.is_ready_to_create_render_target(surfaces) {
+                return true;
+            }
+        }
+
         for surface in surfaces {
             if surface.as_framebuffer_surface().is_some() {
                 return surface.is_ready();
@@ -148,6 +176,11 @@ impl IPlatformRenderInterfaceContext for VelloContext {
         #[cfg(any(feature = "hybrid", feature = "gpu"))]
         if let Some(gpu) = &self.gpu {
             gpu.dispose();
+        }
+
+        #[cfg(feature = "hybrid-webgl")]
+        if let Some(web_gl) = &self.web_gl {
+            web_gl.dispose();
         }
     }
 }

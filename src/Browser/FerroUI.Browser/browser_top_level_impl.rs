@@ -98,7 +98,11 @@ impl BrowserTopLevelImpl {
                 BrowserInputHandler::new(input_top_level, container.clone(), input_element, top_level_id);
 
             let opts = FerroLocator::current().get_service::<BrowserPlatformOptions>().unwrap_or_default();
-            let surface = RenderTargetBrowserSurface::create(&container, &opts.rendering_mode, top_level_id);
+            let surface = RenderTargetBrowserSurface::create(
+                &container,
+                &opts.renderer.rendering_modes(&opts.rendering_mode),
+                top_level_id,
+            );
             let compositor = surface.compositor();
 
             Self {

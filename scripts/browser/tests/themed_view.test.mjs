@@ -20,6 +20,18 @@
 // drew the frames (the `themedViewRendering` export), the three rendering modes, a resize, a hidden
 // page, and what a frame asks of the main thread. Against a site built without threads the file runs
 // what it always ran.
+//
+// A second argument is a parameter of the query string that every page of the checks is opened with.
+// `Renderer=Vello` runs the same checks with the Vello render backend, against a site whose module
+// has it (docs/porting/vello-backend.md, section 11):
+//
+//   scripts/build-browser.sh themed_view --features vello
+//   node scripts/browser/tests/themed_view.test.mjs target/browser-vello/themed_view Renderer=Vello
+//
+// Three checks follow then, of what that backend adds: that it is the one that draws, to which kind
+// of canvas in each rendering mode, and that its picture agrees with the picture Skia draws of the
+// same page of the same site, within the bound the two backends differ by in text. Without the
+// argument Skia draws, and the file runs what it always ran.
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
@@ -28,6 +40,9 @@ import { SPLASH_PROBE, open, run, assert, sleep, near, differing, colours, splas
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..", "..", "..");
 const site = process.argv[2] ?? path.join(process.env.CARGO_TARGET_DIR ?? path.join(root, "target"), "browser", "themed_view");
 const threaded = fs.existsSync(path.join(site, "ferroui-threads.js"));
+// The parameter every page of the checks is opened with, and whether it asks for the Vello backend.
+const always = (process.argv[3] ?? "").replace(/^[?&]/, "");
+const vello = /(^|&)Renderer=Vello(&|$)/i.test(always);
 // The parameter that keeps a module built with threads on the thread of the page.
 const ONE_THREAD = "RenderThread=false";
 const withParameter = (query, parameter) => query ? `${query}&${parameter}` : `?${parameter}`;
@@ -38,7 +53,8 @@ const pairs = (line) => Object.fromEntries(line.split(";").map((pair) => {
 // Where the controls are in a 460 x 520 view (see docs/porting/images/themed_view_browser.png).
 const BUTTON = [46, 66]; const CHECK_BOX = [26, 107]; const TEXT_BOX = [230, 149]; const LIST = [200, 300]; const EMPTY = [300, 450];
 
-async function start(query = "") {
+async function start(query = "", parameter = always) {
+    if (parameter) { query = withParameter(query, parameter); }
     const page = await open(site, { query, width: 460, height: 520, isolated: threaded, initScript: SPLASH_PROBE });
     await page.waitForView();
     // The splash closes on the first drawn frame, whichever thread drew it: not on an empty canvas.
@@ -680,6 +696,8 @@ for (const query of ["", "?RenderingMode=Software2D"]) {
 // --- the render thread (stage B2.6): a site built with threads only ------------------------------
 
 const measured = (text) => console.log(`      measured: ${text}`);
+// The share of the pixels of the view the Vello backend may draw more than 32 of 255 away from Skia.
+const VELLO_AGAINST_SKIA = 0.05;
 
 // Waits until no frame has been drawn for a while and returns what the view reports then.
 async function settled(page, quiet = 400, timeout = 15000) {
@@ -804,7 +822,8 @@ if (threaded) {
         assert(page.errors.length === 0, `the page reported errors:\n${page.errors.join("\n")}`);
     }, `?${ONE_THREAD}`);
 
-    for (const [mode, kind, gl] of [["Software2D", "software", "0"], ["WebGL1", "webgl", "2"], ["WebGL2", "webgl", "3"]]) {
+    // The Vello backend has no renderer for WebGL 1: a view that asks for nothing else is drawn in memory.
+    for (const [mode, kind, gl] of [["Software2D", "software", "0"], ["WebGL1", ...(vello ? ["software", "0"] : ["webgl", "2"])], ["WebGL2", "webgl", "3"]]) {
         const query = `?RenderingMode=${mode}`;
         register(`the render thread draws the view with ${mode}`, async (page) => {
             const rendering = await settled(page);
@@ -869,6 +888,55 @@ if (threaded) {
         assertDrawnByRenderThread(shown);
         assert(page.errors.length === 0, `the page reported errors:\n${page.errors.join("\n")}`);
     }, "");
+}
+
+// --- the Vello render backend (stage 9 of docs/porting/vello-backend.md): with Renderer=Vello only ---
+
+if (vello) {
+    // The hybrid mode draws a canvas with a WebGL 2 context, the CPU mode a 2D canvas; there is no
+    // renderer for WebGL 1.
+    for (const [mode, kind, gl] of [["", "webgl", "3"], ["WebGL2", "webgl", "3"], ["Software2D", "software", "0"], ["WebGL1", "software", "0"]]) {
+        const query = mode ? `?RenderingMode=${mode}` : "";
+        register(`the Vello backend draws the view: ${mode || "the default modes"} on a ${kind === "webgl" ? "WebGL 2" : "2D"} canvas`, async (page) => {
+            const rendering = await settled(page);
+            assert(rendering.renderer === "Vello", `the view is not drawn by the Vello backend: ${JSON.stringify(rendering)}`);
+            assert(Number(rendering.frames) > 0, `no frame was drawn: ${JSON.stringify(rendering)}`);
+            assert(rendering.kind === kind && rendering.gl === gl, `expected ${kind} with OpenGL ES ${gl}: ${JSON.stringify(rendering)}`);
+            if (!page.onRenderThread) {
+                const context = kind === "webgl" ? "webgl2" : "2d";
+                assert(await page.evaluate(`!!document.querySelector("canvas").getContext("${context}")`), `the canvas has no ${context} context`);
+            }
+            assert(colours(await page.screenshot()) > 20, "the capture of the page shows no view");
+            assert(rendering.panics === "0", `the render thread panicked: ${JSON.stringify(rendering)}`);
+            assert(page.errors.length === 0, `the page reported errors:\n${page.errors.join("\n")}`);
+        }, query);
+    }
+
+    // The same page of the same site drawn by Skia. The two backends rasterize text differently (the
+    // outlines of the glyphs here, the rasterizer of FreeType there: the comparison harness of the
+    // desktop measures about 3 % of the pixels of a text scene beyond its tolerance of 32 of 255), and
+    // this view is mostly text, so the pictures are compared with that tolerance and a bound, and
+    // they must not be the same picture: then Skia would have drawn both.
+    for (const mode of ["WebGL2", "Software2D"]) {
+        const query = `?RenderingMode=${mode}`;
+        register(`the picture of the Vello backend agrees with the picture of Skia within the bound of text (${mode})`, async (page) => {
+            await settled(page);
+            const skia = await start(query, "");
+            try {
+                const reference = await settled(skia);
+                assert(reference.renderer === "Skia", `the reference is not drawn by Skia: ${JSON.stringify(reference)}`);
+                const drawn = await page.screenshot(); const expected = await skia.screenshot();
+                assert(colours(expected) > 20 && colours(drawn) > 20, `a page was not drawn: ${colours(drawn)} and ${colours(expected)} colours`);
+                const coarse = differing(drawn, expected, 1, { tolerance: 32 });
+                const fine = differing(drawn, expected, 1, { tolerance: 0 });
+                measured(`${mode}: ${coarse.different} of ${coarse.samples} pixels differ from Skia by more than 32 of 255 (${(100 * coarse.different / coarse.samples).toFixed(2)} %), ${fine.different} at all (${(100 * fine.different / fine.samples).toFixed(2)} %)`);
+                assert(fine.different > 0, "the two backends drew the same picture to the last digit: one of them did not draw");
+                assert(coarse.different <= coarse.samples * VELLO_AGAINST_SKIA, `the Vello backend and Skia drew different pictures: ${coarse.different} of ${coarse.samples} pixels differ by more than 32 of 255`);
+                assert(skia.errors.length === 0, `the page drawn by Skia reported errors:\n${skia.errors.join("\n")}`);
+            } finally { await skia.close(); }
+            assert(page.errors.length === 0, `the page reported errors:\n${page.errors.join("\n")}`);
+        }, query);
+    }
 }
 
 await run(checks);

@@ -106,11 +106,18 @@ gif = { version = "=0.14.2", default-features = false, features = ["std"] }
 # the GPU and the compute renderer, both on `wgpu`, each without its default features. `wgpu` with the
 # graphics API of the one desktop platform that is built (Metal); Vulkan and Direct3D 12 join with
 # their platforms. No crate but the Vello backend names these, and only behind its features.
-vello_gpu = { version = "=0.3.0", default-features = false, features = ["std", "wgpu", "text"] }
+# `vello_gpu` has two renderers: over `wgpu` (the feature `hybrid` of the backend adds its `wgpu`
+# feature) and over a WebGL2 context through `web-sys` (the feature `hybrid-webgl` adds its `webgl`
+# feature: the browser, docs/porting/vello-backend.md, section 11).
+vello_gpu = { version = "=0.3.0", default-features = false, features = ["std", "text"] }
 vello = { version = "=0.11.0", default-features = false, features = ["wgpu"] }
 wgpu = { version = "=30.0.1", default-features = false, features = ["std", "wgsl", "metal"] }
 # The version of the `wasm-bindgen` command-line tool on PATH has to be this exact version.
 wasm-bindgen = "=0.2.129"
+# The bindings of the WebGL2 renderer of `vello_gpu`, at the versions that belong to that release
+# of `wasm-bindgen`; the Vello backend names them behind its feature `hybrid-webgl`.
+js-sys = "=0.3.106"
+web-sys = "=0.3.106"
 roxmltree = "0.20"
 harfbuzz-sys = { version = "0.8", default-features = false, features = ["bundled"] }
 rust_decimal = { version = "1.43", default-features = false }

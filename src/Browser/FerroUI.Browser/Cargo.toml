@@ -17,6 +17,16 @@ ferroui-opengl.workspace = true
 ferroui-skia.workspace = true
 ferroui-harfbuzz.workspace = true
 wasm-bindgen.workspace = true
+# The second render backend (feature `vello`): its CPU mode, and its hybrid mode over the WebGL2
+# context of a canvas.
+ferroui-vello = { workspace = true, optional = true, features = ["hybrid-webgl"] }
+
+# The Vello render backend beside Skia, chosen at start with `BrowserPlatformOptions::renderer`
+# (docs/porting/vello-backend.md, section 11). Off by default: it adds the renderers of the Vello
+# project to the module.
+[features]
+default = []
+vello = ["dep:ferroui-vello"]
 
 [dev-dependencies]
 # The example shows a themed view with the embedded default font.

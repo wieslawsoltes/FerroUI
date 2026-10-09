@@ -451,6 +451,7 @@ dependencies = [
  "ferroui-opengl",
  "ferroui-skia",
  "ferroui-themes-fluent",
+ "ferroui-vello",
  "wasm-bindgen",
 ]
 
@@ -710,10 +711,12 @@ dependencies = [
  "ferroui-harfbuzz",
  "ferroui-metal",
  "ferroui-native",
+ "ferroui-opengl",
  "fontique",
  "gif",
  "glifo",
  "jpeg-encoder",
+ "js-sys",
  "kurbo",
  "linesweeper",
  "objc2",
@@ -724,6 +727,8 @@ dependencies = [
  "vello",
  "vello_cpu",
  "vello_gpu",
+ "wasm-bindgen",
+ "web-sys",
  "wgpu",
  "zune-bmp",
  "zune-core",
@@ -2172,10 +2177,12 @@ dependencies = [
  "bytemuck",
  "glifo",
  "hashbrown",
+ "js-sys",
  "log",
  "thiserror",
  "vello_common",
  "vello_gpu_shaders",
+ "web-sys",
  "wgpu",
 ]
 

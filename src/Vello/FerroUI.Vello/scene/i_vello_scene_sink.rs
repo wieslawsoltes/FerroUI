@@ -282,6 +282,16 @@ pub trait IVelloSceneSink {
         panic!("The {:?} rendering mode of the Vello backend replaces what its target holds", self.rendering_mode());
     }
 
+    /// Renders the scene into the drawing buffer of the canvas this sink
+    /// was made for, replacing what it held. Fails for a sink that does not
+    /// belong to a canvas, and when the context could not draw the scene.
+    ///
+    /// Every clip and layer has to be ended first.
+    #[cfg(feature = "hybrid-webgl")]
+    fn render_to_canvas(&mut self) -> Result<(), String> {
+        Err(format!("The {:?} rendering mode of the Vello backend renders into memory", self.rendering_mode()))
+    }
+
     /// What the renderer of this sink does of blurs. A sink that does not
     /// say draws none: the drawing context then renders what is blurred on
     /// the processor and gives the sink an image.
