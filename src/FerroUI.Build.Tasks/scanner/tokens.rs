@@ -105,6 +105,92 @@ pub(crate) fn with_parenthesised_break_values(stream: TokenStream) -> (TokenStre
     (result.into_iter().collect(), changed)
 }
 
+/// Calls `found` with the name of every function of `owner` that `tokens` name by the
+/// path `owner::function`, at any depth (`ValueTypes::register_cast` in an expression, in
+/// the body of a macro, in the arguments of a macro invocation). An item under
+/// `#[cfg(test)]` is left out, as the scanner leaves test code out, and so is the
+/// definition of a macro named in `definitions` (`macro_rules! name { .. }`): what such a
+/// macro writes is read where it is invoked.
+pub(crate) fn calls_of(tokens: &[TokenTree], owner: &str, definitions: &[&str], found: &mut dyn FnMut(&str)) {
+    let mut index = 0;
+    while index < tokens.len() {
+        let token = &tokens[index];
+        let is_left_out_definition = ident_of(token).as_deref() == Some("macro_rules")
+            && tokens.get(index + 1).is_some_and(|next| is_punct(next, '!'))
+            && tokens.get(index + 2).and_then(ident_of).is_some_and(|name| definitions.contains(&name.as_str()));
+        if is_left_out_definition {
+            index += 4;
+            continue;
+        }
+        let is_test_attribute = is_punct(token, '#')
+            && tokens.get(index + 1).and_then(|next| group_of(next, Delimiter::Bracket)).is_some_and(|group| text_of(&tokens_of(group.stream())) == "cfg(test)");
+        if is_test_attribute {
+            // The item ends with its body or with a semicolon.
+            index += 2;
+            while let Some(next) = tokens.get(index) {
+                index += 1;
+                if group_of(next, Delimiter::Brace).is_some() || is_punct(next, ';') {
+                    break;
+                }
+            }
+            continue;
+        }
+        if let TokenTree::Group(group) = token {
+            calls_of(&tokens_of(group.stream()), owner, definitions, found);
+        } else if ident_of(token).as_deref() == Some(owner) && is_path_separator(tokens, index + 1) {
+            if let Some(function) = tokens.get(index + 3).and_then(ident_of) {
+                found(&function);
+            }
+        }
+        index += 1;
+    }
+}
+
+/// Calls `found` with every function of `owner` that `tokens` name with all its type
+/// arguments stated (`owner::function::<A, B>`), at any depth: the name, the types and the
+/// line. A path that leaves a type to inference (`_`) or names a variable of a macro
+/// definition (`$type_`) states nothing.
+pub(crate) fn stated_calls_of(tokens: &[TokenTree], owner: &str, found: &mut dyn FnMut(&str, Vec<Tokens>, usize)) {
+    for (index, token) in tokens.iter().enumerate() {
+        if let TokenTree::Group(group) = token {
+            stated_calls_of(&tokens_of(group.stream()), owner, found);
+            continue;
+        }
+        if ident_of(token).as_deref() != Some(owner) || !is_path_separator(tokens, index + 1) {
+            continue;
+        }
+        let Some(function) = tokens.get(index + 3).and_then(ident_of) else { continue };
+        if !is_path_separator(tokens, index + 4) || !tokens.get(index + 6).is_some_and(|open| is_punct(open, '<')) {
+            continue;
+        }
+        // The type arguments: up to the bracket that closes the first one.
+        let start = index + 7;
+        let mut depth = 1usize;
+        let mut end = start;
+        while end < tokens.len() && depth > 0 {
+            if is_arrow(tokens, end, '-') {
+                end += 2;
+                continue;
+            }
+            if is_punct(&tokens[end], '<') {
+                depth += 1;
+            } else if is_punct(&tokens[end], '>') {
+                depth -= 1;
+            }
+            end += 1;
+        }
+        if depth > 0 {
+            continue;
+        }
+        let arguments = &tokens[start..end - 1];
+        let Ok(types) = split_types(arguments, line_of(token)) else { continue };
+        let stated = types.iter().all(|type_| !type_.is_empty() && !type_.iter().any(|part| is_punct(part, '$')) && !(type_.len() == 1 && ident_of(&type_[0]).as_deref() == Some("_")));
+        if stated && !types.is_empty() {
+            found(&function, types, line_of(token));
+        }
+    }
+}
+
 /// Where a type ends, besides `,`, `;`, `=>` and the end of the tokens, which always end it.
 #[derive(Clone, Copy, Default)]
 pub(crate) struct TypeEnd {
@@ -783,6 +869,26 @@ mod tests {
         let (same, changed) = with_parenthesised_break_values("fn f() { loop { break 'a; } }".parse().expect("tokens"));
         assert!(!changed);
         assert!(syn::parse2::<syn::File>(same).is_ok());
+    }
+
+    /// Not from upstream: the functions of a type that tokens name are found at any depth,
+    /// outside test code.
+    #[test]
+    fn calls_of_a_type_are_found_at_any_depth_outside_test_code() {
+        let source = tokens(
+            "fn a() { ValueTypes::register_cast::<A, B>(f); m!(ValueTypes::register_nullable::<A>()); Other::register_cast(); }\n #[cfg(test)] mod tests { fn b() { ValueTypes::register_object::<A>(); } }\n #[cfg(test)] use x::y; fn c() { g(ValueTypes::register_object::<B>); }",
+        );
+        let mut found = Vec::new();
+        calls_of(&source, "ValueTypes", &[], &mut |function| found.push(function.to_string()));
+        assert_eq!(found, ["register_cast", "register_nullable", "register_object"]);
+
+        let source = tokens("macro_rules! declare { ($t:ty) => { ValueTypes::register_interface::<$t, I>(f); }; }\n fn a() { b(|| ValueTypes::register_element_ref::<A>()); ValueTypes::register_cast::<A, _>(f); }");
+        let mut found = Vec::new();
+        calls_of(&source, "ValueTypes", &["declare"], &mut |function| found.push(function.to_string()));
+        assert_eq!(found, ["register_element_ref", "register_cast"]);
+        let mut stated = Vec::new();
+        stated_calls_of(&source, "ValueTypes", &mut |function, types, _| stated.push((function.to_string(), types.iter().map(|type_| text_of(type_)).collect::<Vec<_>>())));
+        assert_eq!(stated, [("register_element_ref".to_string(), vec!["A".to_string()])]);
     }
 
     /// Not from upstream: the arguments of a generic type, and the invocations of a macro
