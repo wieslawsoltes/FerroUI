@@ -667,6 +667,10 @@ impl Bench {
     /// times.
     fn measure(&self, name: &str, frames: usize, before_frame: impl Fn(usize)) -> Stats {
         let rendered = self.surface.frames();
+        if test_renderer().vello_mode().is_some() {
+            ferroui_vello::perf::enable(None);
+            let _ = ferroui_vello::perf::take_summary();
+        }
         let mut totals = Vec::with_capacity(frames);
         let mut jobs = Vec::with_capacity(frames);
         let mut renders = Vec::with_capacity(frames);
@@ -691,6 +695,10 @@ impl Bench {
             Stats::of(&jobs).median,
             Stats::of(&renders).median,
         );
+        // Where the Vello backend spent the frames (`ferroui_vello::perf`).
+        if test_renderer().vello_mode().is_some() {
+            print!("{}", ferroui_vello::perf::take_summary().report());
+        }
         stats
     }
 
