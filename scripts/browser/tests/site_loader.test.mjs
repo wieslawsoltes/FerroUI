@@ -86,7 +86,27 @@ const NEVER_ISOLATED = "Object.defineProperty(globalThis, 'crossOriginIsolated',
 
 /** Waits until the application has started and a frame was drawn; resolves to where the frames are drawn. */
 async function started(page) {
-    await page.waitFor(`globalThis.${application.global} && Number(/frames=(\\d+)/.exec(${application.rendering})[1]) > 0`, START_TIMEOUT);
+    try {
+        await page.waitFor(`globalThis.${application.global} && Number(/frames=(\\d+)/.exec(${application.rendering})[1]) > 0`, START_TIMEOUT);
+    } catch (error) {
+        // What the page is when the application did not draw: which document this is, whether it
+        // was restored or reloaded, what the loader decided and recorded, and what the view reports.
+        const state = await page.evaluate(`JSON.stringify({
+            visibility: document.visibilityState, isolated: self.crossOriginIsolated,
+            navigation: performance.getEntriesByType("navigation").map((n) => n.type).join(","),
+            timeOrigin: Math.round(performance.timeOrigin), now: Math.round(performance.now()),
+            module: globalThis.ferrouiModule ? { threads: ferrouiModule.threads, reason: ferrouiModule.reason } : null,
+            application: typeof globalThis.${application.global},
+            rendering: (() => { try { return ${application.rendering}; } catch (e) { return "error: " + e.message; } })(),
+            canvases: document.querySelectorAll("canvas").length,
+            canvas: (() => { const c = document.querySelector("canvas"); return c ? c.width + "x" + c.height : null; })(),
+            splash: !!document.querySelector(".ferroui-splash"),
+            controller: navigator.serviceWorker && navigator.serviceWorker.controller ? navigator.serviceWorker.controller.scriptURL : null,
+            session: Object.fromEntries(Object.keys(sessionStorage).map((k) => [k, sessionStorage.getItem(k)])),
+            scripts: performance.getEntriesByType("resource").filter((e) => /\\.(js|wasm)$/.test(new URL(e.name).pathname)).map((e) => new URL(e.name).pathname + ":" + e.responseStatus) })`)
+            .catch((failure) => `the page did not answer: ${failure.message}`);
+        throw new Error(`${error.message.split("\n")[0]}\n      the page: ${state}\n      navigations: ${page.navigations.join(", ")}\n      errors: ${page.errors.join(" | ")}\n${error.message.split("\n").slice(1).join("\n")}`);
+    }
     return pairs(await page.evaluate(application.rendering));
 }
 
