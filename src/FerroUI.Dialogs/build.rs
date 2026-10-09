@@ -40,6 +40,10 @@ fn collect(root: &Path, directory: &Path, found: &mut Vec<(String, PathBuf)>) {
 }
 
 fn main() {
+    // The type model of the crate, scanned from its sources, for the markup compiler of the crates
+    // whose documents name its types (`$OUT_DIR/ferroui_dialogs.xamlmeta`).
+    ferroui_build_scan::export::Export::from_env().run();
+
     let root = PathBuf::from(env::var_os("CARGO_MANIFEST_DIR").expect("CARGO_MANIFEST_DIR"));
     let out = PathBuf::from(env::var_os("OUT_DIR").expect("OUT_DIR")).join("assets.rs");
 
