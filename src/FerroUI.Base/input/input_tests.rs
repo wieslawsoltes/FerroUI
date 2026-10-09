@@ -1971,6 +1971,148 @@ fn hold_should_be_raised_after_hold_duration() {
     assert_eq!(states.borrow().len(), 2);
 }
 
+/// The tree of the hold tests of the reference suite: a border that raises
+/// hold gestures for the mouse, in a root. The platform settings of the root
+/// are the defaults (a hold after 300 milliseconds); the mouse helper presses
+/// at the middle of the border, so the positions of the moves of the
+/// reference tests (from a press at the origin) are offsets from there.
+fn hold_tree() -> GestureTree {
+    let tree = gesture_tree();
+    InputElement::set_is_hold_with_mouse_enabled(&tree.border, true);
+    tree
+}
+
+const HOLD_PRESS: Point = Point::new(50.0, 50.0);
+
+/// The single timer of the dispatcher, with the interval of a hold verified.
+fn single_hold_timer() -> Rc<crate::threading::DispatcherTimer> {
+    let timers = crate::threading::Dispatcher::snapshot_timers_for_unit_tests();
+    assert_eq!(timers.len(), 1);
+    assert_eq!(timers[0].interval(), std::time::Duration::from_millis(300));
+    timers[0].clone()
+}
+
+#[test]
+fn hold_should_not_raised_when_pointer_released_before_timer() {
+    let _scope = crate::threading::Dispatcher::unit_test_scope();
+
+    let mouse = MouseTestHelper::new();
+    let tree = hold_tree();
+    let raised = Rc::new(Cell::new(false));
+
+    let flag = raised.clone();
+    tree.root.root.holding(move |_, e| flag.set(e.holding_state() == HoldingState::Started));
+
+    mouse.down(&tree.border, MouseButton::Left, 1);
+    assert!(!raised.get());
+
+    mouse.up(&tree.border, MouseButton::Left, None);
+    assert!(!raised.get());
+
+    // Verify timer duration, but execute it immediately.
+    let timer = single_hold_timer();
+    force_fire(&timer);
+
+    assert!(!raised.get());
+}
+
+#[test]
+fn hold_should_not_raised_when_pointer_is_moved_before_timer() {
+    let _scope = crate::threading::Dispatcher::unit_test_scope();
+
+    let mouse = MouseTestHelper::new();
+    let tree = hold_tree();
+    let raised = Rc::new(Cell::new(false));
+
+    let flag = raised.clone();
+    tree.root.root.holding(move |_, e| flag.set(e.holding_state() == HoldingState::Completed));
+
+    mouse.down(&tree.border, MouseButton::Left, 1);
+    assert!(!raised.get());
+
+    mouse.move_to(&tree.border, HOLD_PRESS + Vector::new(20.0, 20.0));
+    assert!(!raised.get());
+
+    // Verify timer duration, but execute it immediately.
+    let timer = single_hold_timer();
+    force_fire(&timer);
+
+    assert!(!raised.get());
+}
+
+#[test]
+fn hold_should_be_cancelled_when_second_contact_is_detected() {
+    let _scope = crate::threading::Dispatcher::unit_test_scope();
+
+    let mouse = MouseTestHelper::new();
+    let tree = hold_tree();
+    let cancelled = Rc::new(Cell::new(false));
+
+    let flag = cancelled.clone();
+    tree.root.root.holding(move |_, e| flag.set(e.holding_state() == HoldingState::Canceled));
+
+    mouse.down(&tree.border, MouseButton::Left, 1);
+    assert!(!cancelled.get());
+
+    let timer = single_hold_timer();
+    force_fire(&timer);
+
+    let second_mouse = MouseTestHelper::new();
+
+    second_mouse.down(&tree.border, MouseButton::Left, 1);
+
+    assert!(cancelled.get());
+}
+
+#[test]
+fn hold_should_be_cancelled_when_pointer_moves_too_far() {
+    let _scope = crate::threading::Dispatcher::unit_test_scope();
+
+    let mouse = MouseTestHelper::new();
+    let tree = hold_tree();
+    let cancelled = Rc::new(Cell::new(false));
+
+    let flag = cancelled.clone();
+    tree.root.root.holding(move |_, e| flag.set(e.holding_state() == HoldingState::Canceled));
+
+    mouse.down(&tree.border, MouseButton::Left, 1);
+
+    let timer = single_hold_timer();
+    force_fire(&timer);
+
+    mouse.move_to(&tree.border, HOLD_PRESS + Vector::new(3.0, 3.0));
+
+    assert!(!cancelled.get());
+
+    mouse.move_to(&tree.border, HOLD_PRESS + Vector::new(20.0, 20.0));
+
+    assert!(cancelled.get());
+}
+
+#[test]
+fn hold_should_not_be_raised_for_multiple_contacts() {
+    let _scope = crate::threading::Dispatcher::unit_test_scope();
+
+    let mouse = MouseTestHelper::new();
+    let tree = hold_tree();
+    let raised = Rc::new(Cell::new(false));
+
+    let flag = raised.clone();
+    tree.root.root.holding(move |_, e| flag.set(e.holding_state() == HoldingState::Completed));
+
+    let second_mouse = MouseTestHelper::new();
+
+    mouse.down(&tree.border, MouseButton::Left, 1);
+
+    // Verify timer duration, but execute it immediately.
+    let timer = single_hold_timer();
+    force_fire(&timer);
+
+    second_mouse.down(&tree.border, MouseButton::Left, 1);
+
+    assert!(!raised.get());
+}
+
 // --- hit testing -----------------------------------------------------------------
 
 #[test]
@@ -3238,7 +3380,7 @@ fn double_tapped_event_is_fired_with_touch() {
 }
 
 #[test]
-fn touch_pointer_pressed_counts_clicks_correctly() {
+fn pointer_pressed_counts_clicks_correctly() {
     for click_count in 1..=5 {
         let root = TestRoot::new();
         let touch_device = TouchDevice::new();
@@ -3768,7 +3910,15 @@ fn swipe_recognizer(horizontal: bool, threshold: f64, mouse: bool) -> Ref<SwipeG
 }
 
 #[test]
-fn swipe_does_not_raise_when_both_axes_are_disabled() {
+fn defaults_disable_both_axes() {
+    let recognizer = SwipeGestureRecognizer::new();
+
+    assert!(!recognizer.can_horizontally_swipe());
+    assert!(!recognizer.can_vertically_swipe());
+}
+
+#[test]
+fn does_not_raise_swipe_when_both_axes_are_disabled() {
     let recognizer = SwipeGestureRecognizer::new();
     assert!(!recognizer.can_horizontally_swipe());
     assert!(!recognizer.can_vertically_swipe());
@@ -3790,7 +3940,7 @@ fn swipe_does_not_raise_when_both_axes_are_disabled() {
 }
 
 #[test]
-fn swipe_starts_only_after_threshold_is_exceeded() {
+fn starts_only_after_threshold_is_exceeded() {
     let (border, root) = recognizer_target(swipe_recognizer(true, 50.0, false));
     let touch = TouchTestHelper::new();
     let deltas = Rc::new(RefCell::new(Vec::new()));
@@ -3808,7 +3958,7 @@ fn swipe_starts_only_after_threshold_is_exceeded() {
 }
 
 #[test]
-fn swipe_ended_event_uses_same_id_and_last_velocity() {
+fn ended_event_uses_same_id_and_last_velocity() {
     let (border, root) = recognizer_target(swipe_recognizer(true, 1.0, false));
     let touch = TouchTestHelper::new();
     let updates = Rc::new(RefCell::new(Vec::new()));
@@ -3832,21 +3982,29 @@ fn swipe_ended_event_uses_same_id_and_last_velocity() {
     assert_eq!(updates.last().unwrap().1, Vector::new(5000.0, 0.0));
 }
 
+fn mouse_swipe_raised(enabled: bool) -> bool {
+    let mouse = MouseTestHelper::new();
+    let (border, root) = recognizer_target(swipe_recognizer(true, 1.0, enabled));
+    let raised = Rc::new(Cell::new(false));
+    let flag = raised.clone();
+    root.root.swipe_gesture(move |_, _| flag.set(true));
+
+    mouse.down(&border, MouseButton::Left, 1);
+    mouse.move_to(&border, Point::new(30.0, 50.0));
+    mouse.up(&border, MouseButton::Left, Some(Point::new(30.0, 50.0)));
+
+    raised.get()
+}
+
 #[test]
-fn mouse_swipe_requires_is_mouse_enabled() {
-    for (enabled, expected) in [(false, false), (true, true)] {
-        let mouse = MouseTestHelper::new();
-        let (border, root) = recognizer_target(swipe_recognizer(true, 1.0, enabled));
-        let raised = Rc::new(Cell::new(false));
-        let flag = raised.clone();
-        root.root.swipe_gesture(move |_, _| flag.set(true));
+fn mouse_swipe_is_raised_when_enabled() {
+    assert!(mouse_swipe_raised(true));
+}
 
-        mouse.down(&border, MouseButton::Left, 1);
-        mouse.move_to(&border, Point::new(30.0, 50.0));
-        mouse.up(&border, MouseButton::Left, Some(Point::new(30.0, 50.0)));
-
-        assert_eq!(raised.get(), expected);
-    }
+// Not from the reference tests.
+#[test]
+fn mouse_swipe_is_not_raised_when_disabled() {
+    assert!(!mouse_swipe_raised(false));
 }
 
 fn pinch_raised(cancel_first: bool, same_pointer: bool) -> bool {
