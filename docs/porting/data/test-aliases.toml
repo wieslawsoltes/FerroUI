@@ -113,6 +113,13 @@ test = "TouchMove_Should_Not_Set_IsPointerOver"
 rust = ["touch_move_should_not_set_is_pointer_over_and_cancel_disposes_pointer"]
 reason = "one Rust test continues with the cancellation of the touch"
 
+[[alias]]
+project = "Avalonia.Base.UnitTests"
+file = "Media/PenTests.cs"
+test = "Brush_Is_Added_To_The_Same_Compositor"
+rust = ["pen_brush_is_added_to_the_same_compositor"]
+reason = "rendering/composition/drawing/render_resource_tests.rs holds the render resource tests of the brushes, the pen, the geometries and the transforms, which share the helper of that file: the ones of the pen are prefixed with the class"
+
 # --- Waivers --------------------------------------------------------------------------------------------------
 
 [[waive]]
@@ -342,6 +349,18 @@ file = "Animation/SpringTests.cs"
 test = "SplineEasing_Can_Be_Mutated"
 rust = "spring_easing_can_be_mutated"
 reason = "the test is of `SpringEasing`; upstream's name is the name of the test of KeySplineTests.cs, which the port has as well"
+
+# Types the port does not have by decision (docs/porting/tracking/Avalonia.Base.md).
+
+[[waive]]
+project = "Avalonia.Base.UnitTests"
+file = "Utilities/AvaloniaResourcesIndexTests.cs"
+reason = "the reader and writer of the index of the one manifest resource into which upstream's build task packs the assets of an assembly: a crate of the port registers each embedded asset as a pair of path and bytes (platform/internal/asset_registry.rs), so there is no packed resource and no index to write or read"
+
+[[waive]]
+project = "Avalonia.Base.UnitTests"
+file = "Platform/SlicedStreamTests.cs"
+reason = "`SlicedStream` is a stream over one asset inside the packed manifest resource of an assembly: an embedded asset of the port is a `&'static [u8]` of its own, read through `AssetStream`, so there is nothing to slice"
 
 # === Avalonia.Controls.UnitTests ==============================================================================
 
