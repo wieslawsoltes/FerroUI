@@ -119,17 +119,17 @@ use std::sync::{Arc, Condvar, Mutex, MutexGuard};
 use std::thread;
 use std::time::{Duration, Instant};
 
-const WIDTH: f64 = 1280.0;
-const HEIGHT: f64 = 800.0;
+pub(super) const WIDTH: f64 = 1280.0;
+pub(super) const HEIGHT: f64 = 800.0;
 
 /// A window surface rendered to in memory, as the software surface of the
 /// browser is.
-struct RasterSurface {
+pub(super) struct RasterSurface {
     frames: std::sync::Arc<std::sync::atomic::AtomicU32>,
 }
 
 impl RasterSurface {
-    fn new() -> std::sync::Arc<Self> {
+    pub(super) fn new() -> std::sync::Arc<Self> {
         std::sync::Arc::new(Self { frames: std::sync::Arc::new(std::sync::atomic::AtomicU32::new(0)) })
     }
 }

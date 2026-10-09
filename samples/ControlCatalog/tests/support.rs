@@ -66,11 +66,16 @@ pub fn start_catalog_services(asset_loader: Option<Rc<dyn IAssetLoader>>) -> Uni
 /// in place of the mock ones, a global clock that never ticks and the icon
 /// loader of tests. The theme is the one of the styled window.
 fn catalog_services() -> TestServices {
+    catalog_services_with_clock(Rc::new(TestGlobalClock::default()))
+}
+
+/// [`catalog_services`] with `clock` as the global clock.
+fn catalog_services_with_clock(clock: Rc<TestGlobalClock>) -> TestServices {
     TestServices::styled_window()
         .with_render_interface(Rc::new(ferroui_skia::PlatformRenderInterface::new(None, None)))
         .with_font_manager_impl(Rc::new(ferroui_skia::FontManagerImpl::new()))
         .with_text_shaper_impl(Rc::new(ferroui_harfbuzz::HarfBuzzTextShaper::new()))
-        .with_global_clock(Rc::new(TestGlobalClock::default()))
+        .with_global_clock(clock)
         .with_icon_loader(Rc::new(TestIconLoader))
 }
 
@@ -112,8 +117,15 @@ impl TestApplication {
 /// top-levels rendering through a compositing renderer over a test
 /// compositor instead of the null renderer.
 pub fn start_catalog_compositor_application() -> CompositorTestServices {
+    start_catalog_compositor_application_with_clock(Rc::new(TestGlobalClock::default()))
+}
+
+/// [`start_catalog_compositor_application`] with `clock` as the global
+/// clock: the test ticks it ([`TestGlobalClock::pulse`]), and the animations
+/// and page transitions of the application run to their end.
+pub fn start_catalog_compositor_application_with_clock(clock: Rc<TestGlobalClock>) -> CompositorTestServices {
     register_types();
-    let services = catalog_services()
+    let services = catalog_services_with_clock(clock)
         .with_input_manager(Rc::new(ferroui_base::input::InputManager::new()))
         .with_theme(|| ferroui_themes_fluent::FluentTheme::new().as_style());
     let services = CompositorTestServices::start(services);
@@ -196,9 +208,10 @@ pub fn class_constructs(path: &str, application: TestApplication) {
 }
 
 /// The global clock of the tests: animations a page starts subscribe to
-/// it; it never ticks.
+/// it; it ticks when the test tells it to ([`pulse`](Self::pulse)), which
+/// most tests never do.
 #[derive(Default)]
-struct TestGlobalClock {
+pub struct TestGlobalClock {
     subject: ferroui_base::reactive::LightweightSubject<ferroui_base::animation::TimeSpan>,
     play_state: std::cell::Cell<Option<ferroui_base::animation::PlayState>>,
 }
@@ -209,6 +222,14 @@ impl ferroui_base::reactive::IObservable<ferroui_base::animation::TimeSpan> for 
         observer: Rc<dyn ferroui_base::reactive::IObserver<ferroui_base::animation::TimeSpan>>,
     ) -> Rc<dyn ferroui_base::reactive::IDisposable> {
         self.subject.subscribe(observer)
+    }
+}
+
+impl TestGlobalClock {
+    /// Ticks the clock: its subscribers are told that the time is `time`.
+    pub fn pulse(&self, time: ferroui_base::animation::TimeSpan) {
+        use ferroui_base::reactive::IObserver;
+        self.subject.on_next(time);
     }
 }
 
