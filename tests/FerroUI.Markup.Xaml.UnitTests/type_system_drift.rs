@@ -10,13 +10,26 @@
 //! must be empty is not:
 //!
 //! - **must be empty**: a type or a member that one side has and the other
-//!   does not. The scanner missed a declaration, or a projection rule of one
-//!   type system is not the rule of the other.
+//!   does not, and a difference of a type or a member both have (its kind,
+//!   base, interfaces, the type of a member, its shape, its attributes, the
+//!   value of a member of an enumeration). The scanner missed a declaration
+//!   or a form of one, or a projection rule of one type system is not the
+//!   rule of the other.
 //! - **known**: a kind that differs for a stated reason, which is what only
-//!   the build or the registration at run time decides.
-//! - **open**: a difference of a type that both sides have (the type of a
-//!   member, a base, an attribute). It is the work list of the build-time
-//!   type system: each is a rule to align or a declaration to complete.
+//!   the build or the registration at run time decides: a declaration under a
+//!   `cfg` condition, a class its crate does not list for registration, a
+//!   member of an enumeration that is no constant expression.
+//! - **open**: a Rust type one side maps to a type and the other holds as a
+//!   type no metadata declares. It is printed and does not fail the test: a
+//!   class its crate does not register is such a type until an instance of it
+//!   is created, which another test of the process may do. Each entry is a
+//!   handle to declare or a rule to align.
+//!
+//! The test was the work list of the stage that aligned the two type systems
+//! (docs/porting/xaml.md, 9.5.8); with every kind that must be empty at
+//! nothing it guards them against drift: a declaration form the scanner does
+//! not read, or a registration the model does not state, fails it with the
+//! list of what differs.
 //!
 //! Not from upstream: upstream has one type system per back end over the
 //! same metadata and nothing to compare.
@@ -50,7 +63,7 @@ enum Status {
     MustBeEmpty,
     /// The kind differs for the stated reason.
     Known(&'static str),
-    /// A difference to remove: the work list.
+    /// A difference to remove, which does not fail the test.
     Open,
 }
 
@@ -60,11 +73,11 @@ enum Kind {
     TypeOnlyAtRunTime,
     TypeOnlyInModel,
     TypeUnderCfgOnlyInModel,
+    TypeNotRegistered,
     MemberOnlyAtRunTime,
     MemberOnlyInModel,
     OpaqueSpelling,
     EnumValueNotEvaluated,
-    ListBase,
     HandleNotMappedByModel,
     HandleNotMappedAtRunTime,
     TypeKind,
@@ -81,11 +94,11 @@ impl Kind {
         Kind::TypeOnlyAtRunTime,
         Kind::TypeOnlyInModel,
         Kind::TypeUnderCfgOnlyInModel,
+        Kind::TypeNotRegistered,
         Kind::MemberOnlyAtRunTime,
         Kind::MemberOnlyInModel,
         Kind::OpaqueSpelling,
         Kind::EnumValueNotEvaluated,
-        Kind::ListBase,
         Kind::HandleNotMappedByModel,
         Kind::HandleNotMappedAtRunTime,
         Kind::TypeKind,
@@ -102,11 +115,11 @@ impl Kind {
             Kind::TypeOnlyAtRunTime => "a type the crates register and the model does not have",
             Kind::TypeOnlyInModel => "a type the model has and the crates do not register",
             Kind::TypeUnderCfgOnlyInModel => "a type declared under a `cfg` condition that the crates do not register",
+            Kind::TypeNotRegistered => "a class the model marks as not in the list of registered classes of its crate",
             Kind::MemberOnlyAtRunTime => "a member only the run-time type system has",
             Kind::MemberOnlyInModel => "a member only the build-time type system has",
             Kind::OpaqueSpelling => "a Rust type no metadata declares, spelled differently",
             Kind::EnumValueNotEvaluated => "a member of an enumeration whose value the scanner did not evaluate",
-            Kind::ListBase => "the base of a collection that declares an instantiation of the notifying list as its base",
             Kind::HandleNotMappedByModel => "a Rust type the run-time type system maps to a type and the build-time one does not",
             Kind::HandleNotMappedAtRunTime => "a Rust type the build-time type system maps to a type and the run-time one does not",
             Kind::TypeKind => "the kind of a type (class, value type, enumeration, interface)",
@@ -121,20 +134,30 @@ impl Kind {
 
     fn status(self) -> Status {
         match self {
-            Kind::TypeOnlyAtRunTime | Kind::TypeOnlyInModel | Kind::MemberOnlyAtRunTime | Kind::MemberOnlyInModel => Status::MustBeEmpty,
+            Kind::TypeOnlyAtRunTime
+            | Kind::TypeOnlyInModel
+            | Kind::MemberOnlyAtRunTime
+            | Kind::MemberOnlyInModel
+            | Kind::TypeKind
+            | Kind::Base
+            | Kind::Interfaces
+            | Kind::MemberType
+            | Kind::MemberShape
+            | Kind::Attributes
+            | Kind::EnumValue => Status::MustBeEmpty,
             Kind::TypeUnderCfgOnlyInModel => {
                 Status::Known("the scanner reads a declaration under any `cfg` condition but `test` and records the condition; whether it holds is decided by the build")
             }
+            Kind::TypeNotRegistered => Status::Known(
+                "the crate declares the class and its `TYPES` list leaves it out, so `register_types()` does not make it known; the build-time type system does not find it by name or by handle either. At run time it becomes known when an instance is created, which another test of this process may have done: such a type is not compared",
+            ),
             Kind::OpaqueSpelling => Status::Known(
                 "the run-time type system names such a type by `std::any::type_name` (aliases and default type parameters written out), the build-time one by the normalised text of the declaration; both are opaque and equal only to themselves",
             ),
-            Kind::EnumValueNotEvaluated => {
-                Status::Known("the discriminant is not a literal, or the constant of the flags is built from something else than literals, shifts and other constants (xaml.md 9.5.6, item 5)")
-            }
-            Kind::ListBase => Status::Known(
-                "the run-time type system keeps such a base only when a cast from the collection to the list is registered (`ValueTypes::is_assignable`), which the sources do not state; the build-time one takes the declared `base:` at its word",
+            Kind::EnumValueNotEvaluated => Status::Known(
+                "the discriminant or the constant is not a constant expression over literals and the other members of its type (xaml.md 9.5.6, item 5): a function of the crate, a constant of another type",
             ),
-            _ => Status::Open,
+            Kind::HandleNotMappedByModel | Kind::HandleNotMappedAtRunTime => Status::Open,
         }
     }
 }
@@ -322,7 +345,7 @@ fn compare_methods(differences: &mut Differences, place: &str, runtime: &Rc<dyn 
 }
 
 /// Compares a type both sides have, member by member.
-fn compare(differences: &mut Differences, name: &str, runtime: &Rc<dyn IXamlType>, model: &Rc<dyn IXamlType>, declares_list_base: bool) {
+fn compare(differences: &mut Differences, name: &str, runtime: &Rc<dyn IXamlType>, model: &Rc<dyn IXamlType>) {
     let kinds = |type_: &Rc<dyn IXamlType>| (type_.is_value_type(), type_.is_enum(), type_.is_interface(), type_.generic_parameters().len());
     if kinds(runtime) != kinds(model) {
         differences.add(
@@ -335,7 +358,6 @@ fn compare(differences: &mut Differences, name: &str, runtime: &Rc<dyn IXamlType
     if base_name(runtime) != base_name(model) {
         let text = format!("{name}: at run time {:?}, in the model {:?}", base_name(runtime), base_name(model));
         match (runtime.base_type(), model.base_type()) {
-            _ if declares_list_base => differences.add(Kind::ListBase, text),
             // A base no metadata declares is a difference of its spelling or of a handle.
             (Some(runtime_base), Some(model_base)) if has_opaque(&runtime_base) || has_opaque(&model_base) => {
                 compare_types(differences, &format!("{name}: the base type"), &runtime_base, &model_base)
@@ -439,7 +461,6 @@ fn crate_of(module_path: &str) -> &str {
 /// The build-time type system over the scans of the base and the controls crates agrees
 /// with the run-time type system over the same crates as this test links them.
 #[test]
-#[ignore = "the work list of the next stage of the build-time type system: run with --ignored --nocapture"]
 fn model_type_system_agrees_with_the_runtime_type_system() {
     crate::register_types();
     ferroui_controls::register_types();
@@ -477,15 +498,13 @@ fn model_type_system_agrees_with_the_runtime_type_system() {
             runtime_types.entry(canonical_name(&type_)).or_insert(type_);
         }
     }
-    // In the model: every declaration, with the conditions it is under and whether it
-    // declares an instantiation of the notifying list as its base.
+    // In the model: every declaration, with the conditions it is under and whether its
+    // crate leaves it out of its list of registered classes.
     let mut model_types: BTreeMap<String, (Rc<dyn IXamlType>, Vec<String>, bool)> = BTreeMap::new();
     for model in 0..model_system.models().models().len() {
         for (declared, type_) in model_system.types_of_model(model) {
             let type_: Rc<dyn IXamlType> = type_;
-            let list_base = !declared.object_model
-                && declared.base.as_ref().is_some_and(|base| model_system.resolve(&base.text).generic_type_definition().is_some_and(|definition| definition.full_name() == "FerroUI.Collections.FerroList`1"));
-            model_types.entry(canonical_name(&type_)).or_insert((type_, declared.cfg.clone(), list_base));
+            model_types.entry(canonical_name(&type_)).or_insert((type_, declared.cfg.clone(), declared.unregistered));
         }
     }
     println!("types of {CRATES:?}: {} at run time, {} in the model\n", runtime_types.len(), model_types.len());
@@ -495,24 +514,28 @@ fn model_type_system_agrees_with_the_runtime_type_system() {
     let mut compared = 0;
     for (name, runtime) in &runtime_types {
         match model_types.get(name) {
-            Some((model, _, declares_list_base)) => {
+            // Known at run time because a test of this process created an instance of it.
+            Some((_, _, true)) => {}
+            Some((model, _, false)) => {
                 compared += 1;
-                compare(&mut differences, name, runtime, model, *declares_list_base);
+                compare(&mut differences, name, runtime, model);
             }
             None => differences.add(Kind::TypeOnlyAtRunTime, name.clone()),
         }
     }
-    for (name, (_, cfg, _)) in &model_types {
-        if !runtime_types.contains_key(name) {
-            match cfg.is_empty() {
-                true => differences.add(Kind::TypeOnlyInModel, name.clone()),
-                false => differences.add(Kind::TypeUnderCfgOnlyInModel, format!("{name} (cfg: {})", cfg.join(", "))),
-            }
+    for (name, (_, cfg, unregistered)) in &model_types {
+        let at_run_time = runtime_types.contains_key(name);
+        match (cfg.is_empty(), *unregistered) {
+            (true, true) => differences.add(Kind::TypeNotRegistered, format!("{name}{}", if at_run_time { " (known at run time: an instance was created in this process)" } else { "" })),
+            _ if at_run_time => {}
+            (true, false) => differences.add(Kind::TypeOnlyInModel, name.clone()),
+            (false, _) => differences.add(Kind::TypeUnderCfgOnlyInModel, format!("{name} (cfg: {})", cfg.join(", "))),
         }
     }
 
     // The report: every kind with its number, and its differences.
     println!("{compared} types are on both sides and compared member by member.\n");
+    assert!(compared > 500, "only {compared} types are compared");
     let mut failed: Vec<String> = Vec::new();
     for kind in Kind::ALL {
         let count = differences.count(*kind);
