@@ -94,6 +94,11 @@ if [ -n "$BOTH" ]; then
   "$0" "$APPLICATION" ${MODE[@]+"${MODE[@]}"}
   "$0" "$APPLICATION" ${MODE[@]+"${MODE[@]}"} --threads
   echo "== site with both modules"
+  # The default output directory is this script's own. Whatever is in it is replaced: a build cache
+  # may restore it without the files combine-site.mjs knows an earlier output by, and that script
+  # refuses to replace a directory it does not recognise. A directory given with --out is left to
+  # that check.
+  [ -z "$OUT" ] && rm -rf "$TARGET_DIR/browser-both/$APPLICATION"
   exec node "$ROOT/scripts/browser/combine-site.mjs" "$TARGET_DIR/browser/$APPLICATION" \
     "$TARGET_DIR/browser-threads/$APPLICATION" "${OUT:-$TARGET_DIR/browser-both/$APPLICATION}"
 fi
