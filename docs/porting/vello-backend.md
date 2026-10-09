@@ -135,7 +135,7 @@ Stage 5 added, at exact versions: the features `text` and `png` of `vello_cpu` (
 
 `wgpu` is built with Metal alone: Vulkan and Direct3D 12 join with their platforms. `Cargo.lock` gained 110 packages with the two features when they were added (most are for other targets or build-time: `naga` and its parser generators, the `objc2` framework crates, `web-sys`), changed the version of none, and one more for `ferroui-metal`. A check of the crate from nothing, on the machine of this document, before stage 5: 36 s without a feature, 59 s more for `hybrid` (`wgpu`, `naga`, `vello_gpu`), 30 s more for `gpu` on top (`vello`, its shaders, `skrifa`), 2 s more for both. No crate of an application depends on the features; the comparison harness states both, so a build of the whole workspace has them.
 
-`unsafe`: one file, `gpu/metal.rs` (nine blocks, each with its argument): the raw handles of the Metal contract become objects of `wgpu`. None without the GPU features.
+`unsafe`: two files, each block with its argument: `gpu/metal.rs` (the raw handles of the Metal contract become objects of `wgpu`) and `gpu/metal_offscreen.rs` (the Metal device and surface that are not on screen, of section 11.1: the handles of the contract, the descriptor of a texture and the copy of its pixels). None without the GPU features.
 
 ## 3. File by file
 
