@@ -15,6 +15,7 @@ mod allocation_trace;
 mod allocations;
 mod asset_files;
 mod auto_complete_box_page;
+mod binding_reports;
 mod catalog_tour;
 #[cfg(not(feature = "runtime-markup"))]
 mod compiled_markup;
