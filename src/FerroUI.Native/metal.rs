@@ -18,7 +18,7 @@ use ferroui_base::rendering::composition::CompositionGpuImportedImageSynchroniza
 use ferroui_base::threading::Dispatcher;
 use ferroui_base::PixelSize;
 use ferroui_microcom::{ComPtr, HResult};
-use ferroui_skia::metal::{
+use ferroui_metal::{
     IMetalDevice, IMetalExternalObjectsFeature, IMetalExternalTexture, IMetalPlatformSurface,
     IMetalPlatformSurfaceRenderTarget, IMetalPlatformSurfaceRenderingSession, IMetalSharedEvent,
 };

@@ -48,6 +48,29 @@ of the Independent JPEG Group, whose terms ask for this statement in the
 documentation of a product that uses it in executable form: **this software is
 based in part on the work of the Independent JPEG Group.**
 
+With the feature `hybrid` of the crate (the hybrid rendering mode):
+
+| Crate | Version | Used for | Copyright |
+|---|---|---|---|
+| `vello_gpu` | 0.3.0 | the hybrid rendering mode (the crate that was `vello_hybrid`) | Copyright 2025 the Vello Authors |
+| `vello_gpu_shaders` | 0.3.0 | the shaders of `vello_gpu` | Copyright 2025 the Vello Authors |
+
+With the feature `gpu` (the GPU rendering mode):
+
+| Crate | Version | Used for | Copyright |
+|---|---|---|---|
+| `vello` | 0.11.0 | the GPU rendering mode | Copyright 2022 the Vello Authors |
+| `vello_encoding` | 0.11.0 | the scene encoding of `vello` | Copyright 2022 the Vello Authors |
+| `vello_shaders` | 0.11.0 | the compute shaders of `vello`; its shader sources are offered under the Unlicense as well | Copyright 2022 the Vello Authors |
+| `skrifa`, `read-fonts`, `font-types` | 0.44.0, 0.41.0, 0.12.6 | font tables, linked by `vello` | the Fontations Authors |
+
+With either of them:
+
+| Crate | Version | Used for | Copyright |
+|---|---|---|---|
+| `wgpu`, `wgpu-core`, `wgpu-hal`, `wgpu-types`, `wgpu-naga-bridge`, `wgpu-core-deps-apple` | 30.0.1 | the graphics API of both GPU modes (Metal on macOS) | Copyright (c) the gfx-rs developers |
+| `naga`, `naga-types` | 30.0.1 | shader translation of `wgpu` | Copyright (c) the gfx-rs developers |
+
 Their own dependencies (`bytemuck`, `smallvec`, `euclid`, `guillotiere`,
 `thiserror`, `fdeflate`, `miniz_oxide`, `foldhash`, `hashbrown`, `log`,
 `memmap2` and crates the workspace links already) are under the MIT
@@ -62,6 +85,14 @@ that are linked on that platform only: on Apple platforms `objc2`,
 user); on Windows `windows` and `windows-core` with their parts (MIT or
 Apache License 2.0); on Linux and FreeBSD `yeslogic-fontconfig-sys` and
 `dlib` (MIT); on Android `roxmltree` (MIT or Apache License 2.0).
+
+With the GPU modes the crates above link, beside crates named already,
+`objc2-metal`, `objc2-quartz-core`, `objc2-core-graphics`, `block2`,
+`parking_lot`, `lock_api`, `raw-window-handle`, `raw-window-metal`,
+`codespan-reporting`, `bit-set`, `indexmap`, `half`, `libm`,
+`futures-intrusive`, `static_assertions`, `profiling`, `rustc-hash` and
+`libloading`: under the MIT license, the Apache License 2.0, the zlib
+license, the ISC license (`libloading`) or a choice of them.
 
 No source of these crates is copied into the repository.
 

@@ -961,30 +961,44 @@ fn a_target_keeps_what_earlier_contexts_drew() {
 }
 
 #[test]
-fn rendering_modes_that_are_not_built_fail_with_their_stage() {
-    use crate::scene::try_create_scene_sink;
+fn rendering_modes_that_are_not_built_fail_with_their_feature() {
+    use crate::scene::{create_scene_sink, try_create_scene_sink};
 
     assert!(try_create_scene_sink(VelloRenderingMode::Cpu, 4, 4).is_ok());
-    let hybrid = try_create_scene_sink(VelloRenderingMode::Hybrid, 4, 4).err().unwrap();
-    assert!(hybrid.to_string().contains("stage 7"), "{hybrid}");
-    let gpu = try_create_scene_sink(VelloRenderingMode::Gpu, 4, 4).err().unwrap();
-    assert!(gpu.to_string().contains("stage 8"), "{gpu}");
 
-    // The default order falls back to the mode that is built.
+    // With its feature a mode is available when the machine has a graphics
+    // device for it (gpu/tests.rs); without, it says which feature.
+    #[cfg(not(feature = "hybrid"))]
+    {
+        let hybrid = try_create_scene_sink(VelloRenderingMode::Hybrid, 4, 4).err().unwrap();
+        assert!(hybrid.to_string().contains("feature `hybrid`"), "{hybrid}");
+    }
+    #[cfg(not(feature = "gpu"))]
+    {
+        let gpu = try_create_scene_sink(VelloRenderingMode::Gpu, 4, 4).err().unwrap();
+        assert!(gpu.to_string().contains("feature `gpu`"), "{gpu}");
+    }
+
     assert_eq!(
-        vec![VelloRenderingMode::Gpu, VelloRenderingMode::Hybrid, VelloRenderingMode::Cpu],
+        vec![VelloRenderingMode::Hybrid, VelloRenderingMode::Gpu, VelloRenderingMode::Cpu],
         VelloOptions::default().rendering_mode_order()
     );
     assert_eq!(
         vec![VelloRenderingMode::Hybrid],
         VelloOptions::with_rendering_mode(VelloRenderingMode::Hybrid).rendering_mode_order()
     );
+
+    // What is drawn into memory is drawn by the CPU mode when the order has
+    // it, wherever it stands.
+    let sink = create_scene_sink(&VelloOptions::default().rendering_mode_order(), 4, 4);
+    assert_eq!(VelloRenderingMode::Cpu, sink.rendering_mode());
 }
 
 #[test]
 #[should_panic(expected = "No rendering mode of the Vello backend is available")]
 fn a_target_without_an_available_rendering_mode_fails() {
-    let interface = PlatformRenderInterface::new(VelloOptions::with_rendering_mode(VelloRenderingMode::Gpu));
+    let options = VelloOptions { rendering_modes: [None, None, None], ..VelloOptions::default() };
+    let interface = PlatformRenderInterface::new(options);
     let bitmap = interface.create_render_target_bitmap(PixelSize::new(4, 4), DPI);
     let _ = bitmap.create_drawing_context();
 }

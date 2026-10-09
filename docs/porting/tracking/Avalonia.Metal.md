@@ -7,8 +7,8 @@ Generated from upstream commit `17350180c33b063f0e98abbfd19aa3cae63f5d56`. Back 
 | | |
 |---|---|
 | Upstream | `src/Avalonia.Metal` |
-| FerroUI | `src/Skia/FerroUI.Skia/metal` (exists) |
-| Crate | `ferroui-skia (module metal)` |
+| FerroUI | `src/FerroUI.Metal` (exists) |
+| Crate | `ferroui-metal` |
 | Phase / priority | 1 - desktop (macOS) / P1 |
 | Files | 2/2 (100.0%) |
 | Types | 7/7 (100.0%) |

@@ -26,8 +26,35 @@ zune-jpeg.workspace = true
 zune-bmp.workspace = true
 jpeg-encoder.workspace = true
 gif.workspace = true
+vello_gpu = { workspace = true, optional = true }
+vello = { workspace = true, optional = true }
+wgpu = { workspace = true, optional = true }
+
+# The CPU mode is always built. An application states the GPU modes it uses: each brings its renderer
+# and `wgpu` (docs/porting/vello-backend.md, section 2).
+[features]
+default = []
+# The sparse-strips renderer with the strips drawn on the GPU (`vello_gpu`).
+hybrid = ["dep:vello_gpu", "wgpu-device"]
+# The compute renderer (`vello`).
+gpu = ["dep:vello", "wgpu-device"]
+# What both GPU modes need: `wgpu`, and on macOS the Metal contracts of the platform with the bindings
+# that turn their handles into objects of `wgpu`. Not a feature to state: `hybrid` and `gpu` state it.
+wgpu-device = ["dep:wgpu", "dep:ferroui-metal", "dep:objc2", "dep:objc2-metal"]
+
+# The window of the macOS platform is drawn on the Metal device of the platform (gpu/metal.rs). The
+# bindings are the crates `wgpu` itself links for Metal, at the versions it asks for, so that the
+# objects are of the same types.
+[target.'cfg(target_os = "macos")'.dependencies]
+ferroui-metal = { workspace = true, optional = true }
+objc2 = { version = "0.6.3", optional = true }
+objc2-metal = { version = "0.3.2", optional = true, default-features = false, features = ["std", "MTLDevice", "MTLCommandQueue", "MTLTexture", "MTLResource", "MTLPixelFormat"] }
 
 [dev-dependencies]
 ferroui-controls = { workspace = true, features = ["testing"] }
 ferroui-fonts-inter.workspace = true
 ferroui-harfbuzz.workspace = true
+
+# The example of a window (examples/vello_window.rs) runs on the macOS platform.
+[target.'cfg(target_os = "macos")'.dev-dependencies]
+ferroui-native.workspace = true

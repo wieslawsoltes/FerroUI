@@ -4,14 +4,18 @@
 //! the crates of the Vello project: geometries on `kurbo`, brushes and
 //! blending on `peniko`, and the drawing context on a scene that one of the
 //! renderers of the project draws ([`scene::IVelloSceneSink`]): `vello_cpu`
-//! on the processor today, the hybrid and the compute renderer on the GPU
-//! as the next stages.
+//! on the processor, and with the features `hybrid` and `gpu` of the crate
+//! the sparse-strips renderer on the GPU (`vello_gpu`) and the compute
+//! renderer (`vello`), into memory and into the window of a platform that
+//! renders on a graphics device (`gpu`).
 //!
 //! The backend is an addition of the port (the original has no such
 //! backend): its files follow the Skia backend's, name by name, so that the
 //! two stay comparable. The design, the facts about the renderers it rests
 //! on and what is built are in `docs/porting/vello-backend.md`.
 
+#[cfg(any(feature = "hybrid", feature = "gpu"))]
+pub mod gpu;
 pub mod helpers;
 pub mod scene;
 pub mod vello_extensions;

@@ -9,22 +9,39 @@ use ferroui_base::{PixelSize, Vector};
 use std::any::{Any, TypeId};
 use std::rc::Rc;
 
-/// The Vello render backend bound to software rendering: scenes are
-/// rendered into memory.
-///
-/// The context of a graphics device (the hybrid and the GPU mode drawing
-/// into the surface of a window) is stages 7 and 8 of the design document;
-/// it will hold the device and the queue as the context of the Skia backend
-/// holds its GPU.
+/// The Vello render backend bound to software rendering (scenes are
+/// rendered into memory) or to the graphics device of a platform, whose
+/// surfaces the hybrid and the GPU mode draw to: it holds the GPU as the
+/// context of the Skia backend holds its GPU.
 pub struct VelloContext {
     rendering_modes: Vec<VelloRenderingMode>,
+    #[cfg(any(feature = "hybrid", feature = "gpu"))]
+    gpu: Option<Rc<dyn crate::gpu::IVelloGpu>>,
 }
 
 impl VelloContext {
     /// Creates the backend context of software rendering. Scenes are drawn
     /// in the first of `rendering_modes` that is available.
     pub fn new(rendering_modes: Vec<VelloRenderingMode>) -> Self {
-        Self { rendering_modes }
+        Self {
+            rendering_modes,
+            #[cfg(any(feature = "hybrid", feature = "gpu"))]
+            gpu: None,
+        }
+    }
+
+    /// Creates the backend context of a graphics device: the surfaces of
+    /// the platform the GPU knows are drawn on the device, in the first of
+    /// `rendering_modes` it runs.
+    #[cfg(any(feature = "hybrid", feature = "gpu"))]
+    pub fn with_gpu(gpu: Rc<dyn crate::gpu::IVelloGpu>, rendering_modes: Vec<VelloRenderingMode>) -> Self {
+        Self { rendering_modes, gpu: Some(gpu) }
+    }
+
+    /// The GPU of the context, when it has one.
+    #[cfg(any(feature = "hybrid", feature = "gpu"))]
+    pub fn gpu(&self) -> Option<&Rc<dyn crate::gpu::IVelloGpu>> {
+        self.gpu.as_ref()
     }
 }
 
@@ -36,6 +53,13 @@ impl IOptionalFeatureProvider for VelloContext {
 
 impl IPlatformRenderInterfaceContext for VelloContext {
     fn create_render_target(&self, surfaces: &[std::sync::Arc<dyn IPlatformRenderSurface>]) -> Rc<dyn IRenderTarget> {
+        #[cfg(any(feature = "hybrid", feature = "gpu"))]
+        if let Some(gpu) = &self.gpu {
+            if let Some(target) = gpu.clone().try_create_render_target(surfaces, &self.rendering_modes) {
+                return target;
+            }
+        }
+
         for surface in surfaces {
             if let Some(framebuffer_surface) = surface.as_framebuffer_surface() {
                 return Rc::new(FramebufferRenderTarget::new(framebuffer_surface, false, self.rendering_modes.clone()));
@@ -61,6 +85,13 @@ impl IPlatformRenderInterfaceContext for VelloContext {
     }
 
     fn is_lost(&self) -> bool {
+        // A lost device draws nothing: the compositor makes a new context
+        // and new render targets.
+        #[cfg(any(feature = "hybrid", feature = "gpu"))]
+        if let Some(gpu) = &self.gpu {
+            return gpu.device().is_lost();
+        }
+
         false
     }
 
@@ -70,6 +101,13 @@ impl IPlatformRenderInterfaceContext for VelloContext {
     }
 
     fn is_ready_to_create_render_target(&self, surfaces: &[std::sync::Arc<dyn IPlatformRenderSurface>]) -> bool {
+        #[cfg(any(feature = "hybrid", feature = "gpu"))]
+        if let Some(gpu) = &self.gpu {
+            if gpu.is_ready_to_create_render_target(surfaces) {
+                return true;
+            }
+        }
+
         for surface in surfaces {
             if surface.as_framebuffer_surface().is_some() {
                 return surface.is_ready();
@@ -79,5 +117,10 @@ impl IPlatformRenderInterfaceContext for VelloContext {
         false
     }
 
-    fn dispose(&self) {}
+    fn dispose(&self) {
+        #[cfg(any(feature = "hybrid", feature = "gpu"))]
+        if let Some(gpu) = &self.gpu {
+            gpu.dispose();
+        }
+    }
 }

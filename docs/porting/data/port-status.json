@@ -6784,7 +6784,7 @@
   {
    "name": "Avalonia.Metal",
    "path": "src/Avalonia.Metal",
-   "rust": "src/Skia/FerroUI.Skia/metal",
+   "rust": "src/FerroUI.Metal",
    "scope": "in",
    "detail": "full",
    "files": [

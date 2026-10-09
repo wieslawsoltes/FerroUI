@@ -2,9 +2,10 @@ use crate::geometries::{compare_shape, shapes, GRID_POINTS};
 use crate::scenes::{scenes, SCENE_SIZE};
 use crate::{compare, render, Backend, TOLERANCE};
 
-/// The scenes drawn by the Skia backend and by every rendering mode of the
-/// Vello backend that is built: the table of the design document, and the
-/// bound of every scene.
+/// The scenes drawn by the Skia backend and by the CPU mode of the Vello
+/// backend: the table of the design document, and the bound of every
+/// scene. The other modes are measured in `modes.rs`, against Skia and
+/// against the CPU mode.
 ///
 /// Run with `--nocapture` to see the table.
 #[test]
@@ -12,7 +13,7 @@ fn scenes_stay_within_their_bounds() {
     let skia = Backend::skia();
     let mut failures = Vec::new();
 
-    for mode in Backend::vello_modes() {
+    for mode in [ferroui_vello::VelloRenderingMode::Cpu] {
         let vello = Backend::vello(mode);
         let (mut share_sum, mut count) = (0.0, 0);
 
