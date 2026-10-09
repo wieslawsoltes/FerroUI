@@ -64,6 +64,18 @@
   `markup-xaml` in the drift test, then the call forms and the emitter on `MemberSource`, then
   `compile_xaml()` on the model (`xaml.md` 9.10.1, "Remaining for E5", item 1, stages 4 to 6).
 
+- The build-time type system, fourth stage, is DONE and the fifth is STARTED on branch
+  `xaml-compile-on-model` (on `xaml-type-system-drift-v`), built and run by its author with the
+  seven commands of the stage (section 14). Done: the call form of every callable of the model
+  (`xaml.md` 9.5.9); the emitter reads the type system through `EmitTypes` and transforms against
+  any type system, with the run-time type system as the one implementation, and every checked-in
+  output regenerated without a difference (`xaml.md` 9.5.10). NOT done, and nothing of it is half
+  in place: `EmitTypes` over the models, `compile_xaml()` on the model, the leaf crate and the
+  build scripts of the framework crates, `StyleWithServiceProvider` on the build. Next, in order:
+  `markup-xaml` in the drift test (the transform against the models stops in the configuration
+  of the language, at a constructor of `XamlSourceInfo`), then the list of `xaml.md` 9.10.1,
+  "Remaining for E5", item 1, stage 4.
+
 Design documents in the repository: `docs/porting/xaml.md`, sections 9 (emitter design: call forms
 A/B/C, build integration, code-behind), 9.5 (source scanner), 9.12 (the 14 rulings), 9.13, and
 decisions 1 to 27. Read section 9 before touching the emitter. `DRAFT-AUTHOR-REPORT.md` is the
@@ -959,3 +971,74 @@ What is next (`xaml.md` 9.10.1, "Remaining for E5", item 1, stages 4 to 6): add 
 `CRATES` of the drift test; the call forms and the emitter on `MemberSource`; `compile_xaml()` on
 the model; the leaf crate for the scanner and the model so that the framework crates export their
 models from their build scripts; the manifest keys; the themes compiled in their build scripts.
+
+## 14. What the fourth stage delivered (the call forms) and where the fifth stopped (the emitter against the models), and how to validate it
+
+Read `xaml.md` 9.5.9 and 9.5.10 first: the forms as built and their numbers; the table of what
+the emitter asks of a type system, with what the models lack for each answer; the measurement of
+the transform against the models; what the build crate links. The author ran only the seven
+commands the owner allowed, each as written: the tests of `ferroui-build`, of the loader, of the
+XAML test crate, of the two fixture crates, and `tests::compiled_xaml_tests` of the two themes.
+
+What exists:
+
+- `src/FerroUI.Build.Tasks/call_forms.rs` (new): the choice and its statistics. `model.rs`:
+  `CallForm::CratePath`, `CallableModel::dereferenced`, `TypeModel::parse_call`,
+  `AssemblyModel::functions` (`FunctionsModel`, `FunctionModel`). `scanner/mod.rs`: the closure
+  `|| *Type::function()` (`dereferenced_call`), the choice at the end of `finish`,
+  `Statistics::call_forms` and its line in the summary. `type_system/`: `MemberSource::Declared::call`.
+  The fixtures `tests/fixtures/scanner` (functions of `Border` of every case, two more fields) and
+  `tests/fixtures/dependent` (a callable into the other crate).
+- `src/Markup/FerroUI.Markup.Xaml.Loader/rust_emitter/emit_types.rs` (new): `EmitTypes`, `TypeKey`,
+  `Known`, `EmitClass`, `EmitMarkup`, `EmitProperty`, `MethodInfo`, `ConstructorInfo`, `FieldInfo`.
+  `runtime_types.rs` (new): `RuntimeEmitTypes`. `transform.rs` (new): `transform_group`,
+  `DocumentSource`, `TransformOptions`, `TransformedDocument`, `namespace_table`. `emitter.rs`:
+  every read of the type system through `self.types`; `emit_function` takes the base URI, not a
+  document of the interpreter. `compiled.rs`: `EmitterHost`, `compile_documents_with`,
+  `generate_file_with`. `ferro_xaml_il_runtime_compiler.rs`: `transform_documents`,
+  `transform_document` and `TransformedDocument` are gone (the emitter was their only caller).
+- `tests/FerroUI.Markup.Xaml.UnitTests/emitter/model_transform.rs` (new): the transform of the
+  corpus against `ModelTypeSystem`, measured (0 of 109, one cause).
+
+Unchanged: the declaration macros and their uses, the base and the controls crates, the run-time
+type system, the interpreter, `Build`, every build script, every checked-in generated file,
+`Cargo.toml` and `Cargo.lock` (no dependency was added).
+
+Validation by the session that has the whole workspace:
+
+1. The seven commands, in any order; all passed for the author: `cargo test -p ferroui-build --lib`
+   (49), `cargo test -p ferroui-markup-xaml-loader --lib` (397, 1 ignored),
+   `cargo test -p ferroui-markup-xaml-tests --lib` (575, 15 ignored),
+   `cargo test -p xaml-include-fixture-theme --lib` (4, 1 ignored),
+   `cargo test -p xaml-include-fixture-application --lib` (28),
+   `cargo test -p ferroui-themes-fluent --lib tests::compiled_xaml_tests` and the same for
+   `ferroui-themes-simple` (1 each, 1 ignored).
+2. The regeneration tests, which the author could not run (they are ignored tests): each
+   `regenerate_*` test of the corpus, the two themes and the fixture library, then `git diff`: no
+   difference is expected, because the drift tests of step 1 compare the same text.
+3. The loader without the `emitter` feature (`cargo build -p ferroui-markup-xaml-loader`, and
+   `--no-default-features`): the author built it only with `runtime` and `emitter` together. What
+   was removed from `ferro_xaml_il_runtime_compiler.rs` and `runtime/framework/methods.rs` was
+   under `cfg(any(feature = "emitter", test))`.
+4. `cargo build --workspace`, the suites of section 2 and `scripts/build-browser.sh`: nothing but
+   the loader, the build crate and the XAML test crate changed.
+5. `RUST_TEST_NOCAPTURE=1 cargo test -p ferroui-build --lib` for the "call forms:" lines, and the
+   same variable with the XAML test crate for the measurement of `model_transform.rs`.
+
+What the author doubts:
+
+1. `RuntimeEmitTypes::is_own`, `class_of` and the messages that still say "of the run-time type
+   system": the wording of a reason is unchanged on purpose (the corpus compares none, a host may),
+   and it is wrong for another host. Reword when the second implementation exists.
+2. `transform_group` validates a base URI and keeps the text given, where the interpreter's
+   document kept `Uri::original_string()`; they are the same text for every document of the
+   corpus, the themes and the fixture.
+3. Form B compares the number of arguments only. A function that takes them in other types than
+   the declaration states is a compile error at the emitted call, not a wrong call.
+4. The descriptions of `RuntimeEmitTypes` are leaked once per class, metadata and property per
+   thread. Bounded by the registries; a host that creates threads without end would grow.
+
+For the owner: `ferroui-build` links `ferroui-controls` through `ferroui-markup-xaml` (see
+`xaml.md` 9.5.10). The rule "the build crate never links the controls" does not hold on `main`
+for the transitive graph, and the controls need the leaf crate for their build script as the base
+crate does.

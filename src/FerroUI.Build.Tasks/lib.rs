@@ -89,10 +89,16 @@
 //!   (`ModelTypeSystem`, xaml.md 9.5.5), with the closed table of runtime
 //!   library types it shares with the run-time type system.
 //!
+//! - [`call_forms`]: how generated code calls each member a declaration
+//!   states by a callable (xaml.md 9.5.3), chosen at the end of a scan and
+//!   written into the model.
+//!
 //! [`Build::compile_xaml`] still transforms against the run-time type system.
-//! What is missing between `ModelTypeSystem` and the compilation is the call
-//! forms of 9.5.3 and an emitter that reads them; xaml.md 9.10.1 has the
-//! stages.
+//! The compiler takes its type system from a host and the emitter reads it
+//! through a trait (`rust_emitter::EmitterHost`, `EmitTypes`); what is missing
+//! between `ModelTypeSystem` and the compilation is the implementation of that
+//! trait over the models. xaml.md 9.5.10 lists what it has to answer, and
+//! 9.10.1 has the stages.
 //!
 //! ```ignore
 //! // build.rs of a crate that declares types and has no documents
