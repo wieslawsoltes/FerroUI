@@ -108,29 +108,34 @@ fn measure_should_return_padding_when_no_child_present() {
     assert_eq!(target.desired_size(), Size::new(16.0, 16.0));
 }
 
-#[test]
-fn use_layout_rounding_measure_rounds_padding() {
-    use crate::test_support::{test_scope, TestRoot};
-    use crate::Canvas;
+/// The reference `UseLayoutRounding`.
+mod use_layout_rounding {
+    use super::*;
 
-    let _scope = test_scope();
-    let child = Canvas::new();
-    child.set_width(101.0);
-    child.set_height(101.0);
-    let target = Decorator::new();
-    target.set_padding(Thickness::uniform(1.0));
-    target.set_child(child);
+    #[test]
+    fn measure_rounds_padding() {
+        use crate::test_support::{test_scope, TestRoot};
+        use crate::Canvas;
 
-    let root = TestRoot::new();
-    root.set_layout_scaling(1.5);
-    root.set_use_layout_rounding(true);
-    root.set_child(&target);
-    root.set_client_size(Size::new(1000.0, 1000.0));
+        let _scope = test_scope();
+        let child = Canvas::new();
+        child.set_width(101.0);
+        child.set_height(101.0);
+        let target = Decorator::new();
+        target.set_padding(Thickness::uniform(1.0));
+        target.set_child(child);
 
-    root.layout_manager().execute_initial_layout_pass();
+        let root = TestRoot::new();
+        root.set_layout_scaling(1.5);
+        root.set_use_layout_rounding(true);
+        root.set_child(&target);
+        root.set_client_size(Size::new(1000.0, 1000.0));
 
-    // - 1 pixel padding is rounded up to 1.3333; for both sides it is 2.6666
-    // - Size of 101 gets rounded up to 101.3333
-    // - Desired size = 101.3333 + 2.6666 = 104
-    assert_eq!(target.desired_size(), Size::new(104.0, 104.0));
+        root.layout_manager().execute_initial_layout_pass();
+
+        // - 1 pixel padding is rounded up to 1.3333; for both sides it is 2.6666
+        // - Size of 101 gets rounded up to 101.3333
+        // - Desired size = 101.3333 + 2.6666 = 104
+        assert_eq!(target.desired_size(), Size::new(104.0, 104.0));
+    }
 }
