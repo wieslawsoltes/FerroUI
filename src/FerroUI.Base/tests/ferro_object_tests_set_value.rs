@@ -96,7 +96,7 @@ fn is_set_returns_false_for_unset_property() {
 }
 
 #[test]
-fn is_set_returns_true_for_set_property() {
+fn is_set_returns_false_for_set_property() {
     let target = Class1::new();
 
     target.set_value(Class1::foo_property(), s("foo"));

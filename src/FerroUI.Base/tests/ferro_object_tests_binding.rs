@@ -724,10 +724,10 @@ fn style_binding_overrides_default_value() {
     assert_eq!("stylevalue", target.get_value(Class1::foo_property()));
 }
 
-// Upstream `this_Operator_Returns_Value_Property`: the indexer is the untyped
+// The indexer of the reference class is the untyped
 // getter.
 #[test]
-fn untyped_getter_returns_value_property() {
+fn this_operator_returns_value_property() {
     let target = Class1::new();
 
     target.set_value(Class1::foo_property(), s("newvalue"));
@@ -736,10 +736,10 @@ fn untyped_getter_returns_value_property() {
     assert_eq!(Some(&s("newvalue")), value.downcast_ref::<String>());
 }
 
-// Upstream `this_Operator_Sets_Value_Property`: the indexer is the untyped
+// The indexer of the reference class is the untyped
 // setter.
 #[test]
-fn untyped_setter_sets_value_property() {
+fn this_operator_sets_value_property() {
     let target = Class1::new();
 
     target.set_value_untyped(Class1::foo_property(), &s("newvalue"), LOCAL);
@@ -747,9 +747,8 @@ fn untyped_setter_sets_value_property() {
     assert_eq!("newvalue", target.get_value(Class1::foo_property()));
 }
 
-// Upstream `this_Operator_Doesnt_Accept_Observable`.
 #[test]
-fn untyped_setter_doesnt_accept_observable() {
+fn this_operator_doesnt_accept_observable() {
     let target = Class1::new();
 
     assert_panics(|| {
