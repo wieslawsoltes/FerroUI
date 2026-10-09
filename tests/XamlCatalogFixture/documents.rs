@@ -47,7 +47,6 @@ pub const REFUSED: &[(&str, &str)] = &[
     ("Pages/OpenGl/OpenGlLeasePage.xaml", "the class of the document is not ported"),
     ("Pages/PipsPager/PipsPagerCustomButtonThemesPage.xaml", "PreviousButtonTheme: not a plain property setter"),
     ("Pages/RefreshContainerPage.xaml", "a list created in markup: List<T> is not a class of the object model"),
-    ("Pages/TabControlPage.xaml", "{x:Type sys:Object}: System.Object has no metadata"),
     ("Pages/TransitioningContentControlPage.xaml", "a compiled binding path with a method as a command"),
     ("Pages/TreeViewPage.xaml", "a compiled binding path over a type without metadata: SelectedItemsList"),
     ("Pages/ViewboxPage.xaml", "a list created in markup: System.Collections.ArrayList is not a class of the object model"),
