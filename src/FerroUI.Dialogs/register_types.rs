@@ -1,6 +1,6 @@
 //! The type table of this crate: its namespaces, its classes, what it
-//! states about itself for markup, its embedded assets and the loader of
-//! the documents with a class.
+//! states about itself for markup, its embedded assets and its compiled
+//! markup.
 
 use crate::internal::{
     ChildFitter, FileSizeStringConverter, ManagedFileChooserFilterViewModel, ManagedFileChooserItemType,
@@ -9,11 +9,9 @@ use crate::internal::{
 use crate::{AboutFerroDialog, ManagedFileChooser, ManagedFileChooserOverwritePrompt};
 use ferroui_base::data::converters::IValueConverter;
 use ferroui_base::data::core::ValueTypes;
-use ferroui_base::metadata::{IServiceProvider, MarkupAssembly, MarkupType, MarkupTyped};
-use ferroui_base::{BoxedValue, TypeInfo};
+use ferroui_base::metadata::{MarkupAssembly, MarkupType, MarkupTyped};
+use ferroui_base::TypeInfo;
 use ferroui_controls::primitives::SelectedItemsList;
-use ferroui_markup_xaml::{FerroXamlLoader, XamlLoadException};
-use ferroui_markup_xaml_loader::FerroRuntimeXamlLoader;
 use std::rc::Rc;
 
 /// The dotted namespaces of the modules of this crate.
@@ -55,7 +53,7 @@ ferroui_controls::ferro_markup_list!(ItemViewModelList: Rc<ManagedFileChooserIte
 ferroui_controls::ferro_markup_list!(FilterViewModelList: Rc<ManagedFileChooserFilterViewModel>);
 
 /// Registers the namespaces, the types, the assembly, the embedded assets
-/// and the document loader of this crate (and of the crates it is built
+/// and the compiled markup of this crate (and of the crates it is built
 /// on). Cheap and idempotent.
 pub fn register_types() {
     static ONCE: std::sync::Once = std::sync::Once::new();
@@ -69,9 +67,10 @@ pub fn register_types() {
         FilterViewModelList::register();
         ValueTypes::register_global(register_value_types);
         MarkupAssembly::register(&ASSEMBLY);
-        crate::assets::register();
-        FerroRuntimeXamlLoader::register_class_document(AboutFerroDialog::TYPE, AboutFerroDialog::DOCUMENT_URI);
-        FerroXamlLoader::register_compiled_xaml(ASSEMBLY.name, try_load);
+        // The assets (`Assets/`) and the loader table of the compiled markup, which the build
+        // of the crate generates: a load of the document of a class by its URI creates an
+        // instance of the class, whose constructor populates it.
+        crate::compiled_markup::register();
     });
 }
 
@@ -87,18 +86,4 @@ fn register_value_types() {
     ValueTypes::register_display::<ManagedFileChooserFilterViewModel>();
     ValueTypes::register_nullable::<ManagedFileChooserItemType>();
     ValueTypes::register_nullable::<SelectedItemsList>();
-}
-
-/// The loader of the documents of this assembly that have a class: loading
-/// the document of a class by URI creates an instance of the class (whose
-/// constructor populates it). The other documents are left to the run-time
-/// loader.
-///
-/// This is the table the XAML compiler generates per crate; it is written
-/// by hand until the compiler exists.
-fn try_load(_service_provider: Option<&Rc<dyn IServiceProvider>>, uri: &str) -> Result<Option<BoxedValue>, XamlLoadException> {
-    if uri.eq_ignore_ascii_case(AboutFerroDialog::DOCUMENT_URI) {
-        return Ok(Some(Rc::new(AboutFerroDialog::new()) as BoxedValue));
-    }
-    Ok(None)
 }

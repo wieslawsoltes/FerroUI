@@ -1,66 +1,48 @@
-//! Embeds the assets of the crate.
+//! Compiles the markup of the crate and embeds its assets
+//! (docs/porting/xaml.md, 9.5.13 and 9.6).
 //!
-//! The counterpart of the resource items of the upstream project file:
-//! every markup document (`**/*.xaml`) and everything under `Assets/`. The
-//! table is written to `$OUT_DIR/assets.rs` as `(rooted path, bytes)` pairs
-//! and registered with the asset loader by `register_types()`.
+//! The counterpart of the resource items of the upstream project file and of
+//! its markup compiler: `AboutFerroDialog.xaml`, the document of the class
+//! [`AboutFerroDialog`](../about_ferro_dialog_xaml.rs), is compiled to
+//! `$OUT_DIR/xaml/compiled_about_ferro_dialog.rs`, and everything under
+//! `Assets/` is embedded as an asset of the assembly. A compiled document is
+//! not an asset: the loader table of the compiled markup answers a load by its
+//! URI, as upstream's compiler removes every compiled resource from the
+//! assembly.
+//!
+//! The compiler reads the types from the type models: the one of this crate,
+//! scanned from its sources, and the ones of the crates it is built on, which
+//! Cargo hands to this script as `DEP_<CRATE>_XAML_XAMLMETA`. The script links
+//! the compiler and no crate for its types. The build also writes the
+//! `.xamlmeta` of the crate, with its type model and its compiled document,
+//! and Cargo hands the path of the file to the build scripts of the crates
+//! that depend on this one (`DEP_FERROUI_DIALOGS_XAML_XAMLMETA`): the themes,
+//! whose documents name the types of the dialogs.
 
 use std::env;
-use std::fmt::Write as _;
 use std::fs;
-use std::path::{Path, PathBuf};
+use std::path::PathBuf;
 
-/// Directories of the crate that hold no assets.
-const SKIPPED_DIRECTORIES: &[&str] = &["target", "tests", "examples"];
+use ferroui_build::{Build, TypeSystem, XamlGroup};
 
-fn collect(root: &Path, directory: &Path, found: &mut Vec<(String, PathBuf)>) {
-    println!("cargo::rerun-if-changed={}", directory.display());
-    let mut entries: Vec<PathBuf> = fs::read_dir(directory)
-        .unwrap_or_else(|e| panic!("cannot read {}: {e}", directory.display()))
-        .map(|entry| entry.expect("directory entry").path())
-        .collect();
-    entries.sort();
-
-    for path in entries {
-        let name = path.file_name().and_then(|name| name.to_str()).unwrap_or_default();
-        if path.is_dir() {
-            if !name.starts_with('.') && !(directory == root && SKIPPED_DIRECTORIES.contains(&name)) {
-                collect(root, &path, found);
-            }
-            continue;
-        }
-        let relative = path.strip_prefix(root).expect("a path under the crate directory");
-        let parts: Vec<String> = relative.components().map(|c| c.as_os_str().to_string_lossy().into_owned()).collect();
-        let is_asset = path.extension().is_some_and(|extension| extension == "xaml")
-            || (parts[0] == "Assets" && !name.starts_with('.'));
-        if is_asset {
-            found.push((format!("/{}", parts.join("/")), path));
-        }
-    }
-}
+/// The document of the class `AboutFerroDialog`, by its path below the crate directory.
+const ABOUT_FERRO_DIALOG: &str = "AboutFerroDialog.xaml";
 
 fn main() {
-    // The type model of the crate, scanned from its sources, for the markup compiler of the crates
-    // whose documents name its types (`$OUT_DIR/ferroui_dialogs.xamlmeta`).
-    ferroui_build_scan::export::Export::from_env().run();
-
     let root = PathBuf::from(env::var_os("CARGO_MANIFEST_DIR").expect("CARGO_MANIFEST_DIR"));
-    let out = PathBuf::from(env::var_os("OUT_DIR").expect("OUT_DIR")).join("assets.rs");
+    let path = root.join(ABOUT_FERRO_DIALOG);
+    println!("cargo::rerun-if-changed={}", path.display());
+    let about_ferro_dialog = fs::read_to_string(&path).unwrap_or_else(|e| panic!("cannot read {}: {e}", path.display()));
 
-    let mut assets = Vec::new();
-    collect(&root, &root, &mut assets);
-    assets.sort();
-
-    let mut text = String::from("pub(crate) static ASSETS: &[(&str, &[u8])] = &[\n");
-    for (asset_path, path) in &assets {
-        let path = path.canonicalize().unwrap_or_else(|e| panic!("cannot resolve {}: {e}", path.display()));
-        println!("cargo::rerun-if-changed={}", path.display());
-        writeln!(text, "    ({asset_path:?}, include_bytes!({:?})),", path.display().to_string()).expect("write");
-    }
-    text.push_str("];\n");
-
-    // Written only when it changed, so that the crate is not rebuilt for nothing.
-    if fs::read_to_string(&out).ok().as_deref() != Some(text.as_str()) {
-        fs::write(&out, text).unwrap_or_else(|e| panic!("cannot write {}: {e}", out.display()));
-    }
+    Build::from_env()
+        .type_system(TypeSystem::Model)
+        // The upstream project is built with compiled bindings as the default of its documents.
+        .default_compile_bindings(true)
+        .embed_assets(&["Assets"])
+        .compile_group(
+            XamlGroup::new("compiled_about_ferro_dialog")
+                .documents(&[(ABOUT_FERRO_DIALOG, about_ferro_dialog.as_str())])
+                .class_document(ABOUT_FERRO_DIALOG),
+        )
+        .run();
 }
