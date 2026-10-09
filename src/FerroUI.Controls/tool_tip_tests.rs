@@ -1015,3 +1015,43 @@ fn enabling_the_tool_tip_service_of_the_control_under_the_pointer_updates_the_se
     ToolTip::set_service_enabled(&under_pointer, true);
     assert_eq!(vec![Some(under_pointer.clone().upcast::<Visual>())], service.take_candidates(&scope.window));
 }
+
+/// Not in the reference suite. A pointer event that closes the window it was
+/// delivered to is still processed with that window as its root: the tooltip
+/// service reads the root element of the root, which the reference reads as
+/// null once the top-level has closed (`e.Root.RootElement`), and the port
+/// panicked on (a press on an item of a drop-down, which closes the popup:
+/// the interaction tour of the catalog).
+#[test]
+fn a_pointer_event_that_closes_its_window_reaches_the_tool_tip_service() {
+    use ferroui_base::input::InputElement;
+    let fixture = Fixture::new(false);
+    let _app = start(fixture.configure_services(TestServices::focusable_window()));
+
+    let target = target_with_tip(0);
+    let scope = fixture.setup_window(&target.clone().upcast(), "A_Pointer_Event_That_Closes_Its_Window");
+    scope.mouse_enter(Some(&target.clone().upcast()));
+    fixture.assert_tool_tip_open(&target);
+
+    let content: Ref<Control> = Decorator::new().upcast();
+    let other = fixture.setup_window(&content, "The_Window_That_Closes");
+    let window = other.window.downgrade();
+    content.add_handler(InputElement::pointer_pressed_event(), move |_, _| {
+        if let Some(window) = window.upgrade() {
+            window.close();
+        }
+    });
+    let root: Rc<dyn IInputRoot> = other.window.input_root();
+    let position = other.get_pointer_position(Some(&content));
+    let input = crate::platform::ITopLevelImpl::input(&*other.window_impl).expect("the window handles input");
+    input(Rc::new(RawPointerEventArgs::new(
+        other.device(),
+        other.timestamp(),
+        root.clone(),
+        RawPointerEventType::LeftButtonDown,
+        position,
+        RawInputModifiers::LEFT_MOUSE_BUTTON,
+    )));
+
+    assert!(root.try_root_element().is_none(), "the window closed while its event was processed");
+}

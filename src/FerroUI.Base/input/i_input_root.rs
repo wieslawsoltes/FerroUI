@@ -32,6 +32,13 @@ pub trait IInputRoot {
     /// The root input element.
     fn root_element(&self) -> Ref<InputElement>;
 
+    /// The root input element, or `None` once the root has closed: what the
+    /// reference reads as a null `RootElement`, for the code that runs while
+    /// an event that closed its root is still being processed.
+    fn try_root_element(&self) -> Option<Ref<InputElement>> {
+        Some(self.root_element())
+    }
+
     /// The element keyboard input is sent to when nothing is focused.
     fn focus_root(&self) -> Ref<InputElement>;
 

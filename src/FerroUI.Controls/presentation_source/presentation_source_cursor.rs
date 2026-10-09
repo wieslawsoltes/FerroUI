@@ -83,6 +83,10 @@ impl IInputRoot for PresentationSource {
         PresentationSource::root_element(self)
     }
 
+    fn try_root_element(&self) -> Option<Ref<InputElement>> {
+        self.root_visual()
+    }
+
     fn focus_root(&self) -> Ref<InputElement> {
         PresentationSource::focus_root(self)
     }
