@@ -4687,6 +4687,122 @@ fn build_items_source_typed_list_xaml_untyped(
     ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
 }
 
+/// The base URI and the XML namespaces of `class_value.xaml`.
+static BUILD_CLASS_VALUE_XAML_DOCUMENT: rt::DocumentInfo = rt::DocumentInfo { base_uri: ::core::option::Option::Some("ferres://FerroUI.Markup.Xaml.UnitTests/Emitter/class_value.xaml"), namespaces: XML_NAMESPACES_0 };
+
+/// Generated from `class_value.xaml`.
+pub fn build_class_value_xaml(
+    service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
+) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::StackPanel>, ::ferroui_markup_xaml::XamlLoadException> {
+    // class_value.xaml(1,2) StackPanel
+    let stack_panel_0 = ::ferroui_controls::StackPanel::new();
+    let context = rt::populate_context(service_provider, &BUILD_CLASS_VALUE_XAML_DOCUMENT, rt::to_value(stack_panel_0.clone()));
+    let name_scope = context.name_scope_field();
+    stack_panel_0.begin_init();
+    // class_value.xaml(2,4) Children
+    let children_collection_0 = ::ferroui_controls::Panel::__markup_get_Children(stack_panel_0.upcast_ref::<::ferroui_controls::Panel>());
+    // class_value.xaml(2,4) Border
+    let border_0 = ::ferroui_controls::Border::new();
+    border_0.begin_init();
+    ::ferroui_controls::Controls::__markup_Add_0(&children_collection_0, ::core::clone::Clone::clone(&border_0).upcast::<::ferroui_controls::Control>());
+    // class_value.xaml(2,4) Classes
+    let classes_collection_0 = ::ferroui_base::StyledElement::__markup_get_Classes(border_0.upcast_ref::<::ferroui_base::StyledElement>());
+    ::ferroui_base::controls::Classes::__markup_Add_0(&classes_collection_0, ::std::string::String::from("first"));
+    // class_value.xaml(2,4) class:accent
+    let classes_0 = ::ferroui_base::StyledElement::__markup_get_Classes(border_0.upcast_ref::<::ferroui_base::StyledElement>());
+    ::ferroui_base::controls::Classes::__markup_Set_3(&classes_0, ::std::string::String::from("accent"), ::core::clone::Clone::clone(&true));
+    // class_value.xaml(2,4) class:muted
+    let classes_1 = ::ferroui_base::StyledElement::__markup_get_Classes(border_0.upcast_ref::<::ferroui_base::StyledElement>());
+    ::ferroui_base::controls::Classes::__markup_Set_3(&classes_1, ::std::string::String::from("muted"), ::core::clone::Clone::clone(&false));
+    rt::invoked(border_0.try_end_init(), 2, 4)?;
+    // class_value.xaml(3,4) Children
+    let children_collection_1 = ::ferroui_controls::Panel::__markup_get_Children(stack_panel_0.upcast_ref::<::ferroui_controls::Panel>());
+    // class_value.xaml(3,4) Border
+    let border_1 = ::ferroui_controls::Border::new();
+    border_1.begin_init();
+    ::ferroui_controls::Controls::__markup_Add_0(&children_collection_1, ::core::clone::Clone::clone(&border_1).upcast::<::ferroui_controls::Control>());
+    // class_value.xaml(3,4) class:accent
+    let classes_2 = ::ferroui_base::StyledElement::__markup_get_Classes(border_1.upcast_ref::<::ferroui_base::StyledElement>());
+    ::ferroui_base::controls::Classes::__markup_Set_3(&classes_2, ::std::string::String::from("accent"), ::core::clone::Clone::clone(&false));
+    rt::invoked(border_1.try_end_init(), 3, 4)?;
+    rt::invoked(stack_panel_0.try_end_init(), 1, 2)?;
+    rt::complete_root_name_scope(::core::option::Option::Some(&stack_panel_0), name_scope.as_ref(), 1, 2)?;
+    ::core::result::Result::Ok(stack_panel_0)
+}
+
+fn build_class_value_xaml_untyped(
+    service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
+) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadException> {
+    let root = build_class_value_xaml(service_provider)?;
+    ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
+}
+
+/// The base URI and the XML namespaces of `class_binding.xaml`.
+static BUILD_CLASS_BINDING_XAML_DOCUMENT: rt::DocumentInfo = rt::DocumentInfo { base_uri: ::core::option::Option::Some("ferres://FerroUI.Markup.Xaml.UnitTests/Emitter/class_binding.xaml"), namespaces: XML_NAMESPACES_0 };
+
+/// Generated from `class_binding.xaml`.
+pub fn build_class_binding_xaml(
+    service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
+) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::StackPanel>, ::ferroui_markup_xaml::XamlLoadException> {
+    // class_binding.xaml(1,2) StackPanel
+    let stack_panel_0 = ::ferroui_controls::StackPanel::new();
+    let context = rt::populate_context(service_provider, &BUILD_CLASS_BINDING_XAML_DOCUMENT, rt::to_value(stack_panel_0.clone()));
+    let name_scope = context.name_scope_field();
+    stack_panel_0.begin_init();
+    context.push_parent(rt::to_value(stack_panel_0.clone()));
+    // class_binding.xaml(2,4) Children
+    let children_collection_0 = ::ferroui_controls::Panel::__markup_get_Children(stack_panel_0.upcast_ref::<::ferroui_controls::Panel>());
+    // class_binding.xaml(2,4) CheckBox
+    let check_box_0 = ::ferroui_controls::CheckBox::new();
+    check_box_0.begin_init();
+    ::ferroui_controls::Controls::__markup_Add_0(&children_collection_0, ::core::clone::Clone::clone(&check_box_0).upcast::<::ferroui_controls::Control>());
+    // class_binding.xaml(2,13) Name
+    check_box_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("Toggle")));
+    rt::register_name(name_scope.as_ref(), "Toggle", ::core::clone::Clone::clone(&check_box_0).upcast::<::ferroui_base::FerroObject>(), 2, 13)?;
+    // class_binding.xaml(2,4) IsChecked
+    check_box_0.set_value(::ferroui_controls::primitives::ToggleButton::is_checked_property(), ::core::option::Option::Some(::core::clone::Clone::clone(&true)));
+    rt::invoked(check_box_0.try_end_init(), 2, 4)?;
+    // class_binding.xaml(3,4) Children
+    let children_collection_1 = ::ferroui_controls::Panel::__markup_get_Children(stack_panel_0.upcast_ref::<::ferroui_controls::Panel>());
+    // class_binding.xaml(3,4) Border
+    let border_0 = ::ferroui_controls::Border::new();
+    border_0.begin_init();
+    ::ferroui_controls::Controls::__markup_Add_0(&children_collection_1, ::core::clone::Clone::clone(&border_0).upcast::<::ferroui_controls::Control>());
+    context.push_parent(rt::to_value(border_0.clone()));
+    // class_binding.xaml(3,11) class:accent
+    let reflection_binding_extension_0 = ::ferroui_markup_xaml::markup_extensions::ReflectionBindingExtension::__markup_new_1(::std::string::String::from("#Toggle.IsChecked"));
+    let provided_0 = rt::provide_value(&context, rt::boxed(::std::string::String::from("class:accent")), &reflection_binding_extension_0, ::ferroui_markup_xaml::markup_extensions::ReflectionBindingExtension::__markup_ProvideValue_0);
+    let _ = ::ferroui_base::ClassBindingManager::__markup_BindClass_0(::core::clone::Clone::clone(&border_0).upcast::<::ferroui_base::StyledElement>(), ::std::string::String::from("accent"), ::core::clone::Clone::clone(&provided_0) as ::std::rc::Rc<dyn ::ferroui_base::data::BindingBase>, ::core::option::Option::None);
+    context.pop_parent();
+    rt::invoked(border_0.try_end_init(), 3, 4)?;
+    // class_binding.xaml(4,4) Children
+    let children_collection_2 = ::ferroui_controls::Panel::__markup_get_Children(stack_panel_0.upcast_ref::<::ferroui_controls::Panel>());
+    // class_binding.xaml(4,4) Border
+    let border_1 = ::ferroui_controls::Border::new();
+    border_1.begin_init();
+    ::ferroui_controls::Controls::__markup_Add_0(&children_collection_2, ::core::clone::Clone::clone(&border_1).upcast::<::ferroui_controls::Control>());
+    context.push_parent(rt::to_value(border_1.clone()));
+    // class_binding.xaml(4,11) class:other
+    let reflection_binding_extension_1 = ::ferroui_markup_xaml::markup_extensions::ReflectionBindingExtension::__markup_new_1(::std::string::String::from("IsChecked"));
+    // class_binding.xaml(4,11) ElementName
+    ::ferroui_base::data::ReflectionBinding::__markup_set_ElementName(&rt::cast(::core::clone::Clone::clone(&reflection_binding_extension_1), 4, 11)?, ::core::option::Option::Some(::std::string::String::from("Toggle")));
+    let provided_1 = rt::provide_value(&context, rt::boxed(::std::string::String::from("class:other")), &reflection_binding_extension_1, ::ferroui_markup_xaml::markup_extensions::ReflectionBindingExtension::__markup_ProvideValue_0);
+    let _ = ::ferroui_base::ClassBindingManager::__markup_BindClass_0(::core::clone::Clone::clone(&border_1).upcast::<::ferroui_base::StyledElement>(), ::std::string::String::from("other"), ::core::clone::Clone::clone(&provided_1) as ::std::rc::Rc<dyn ::ferroui_base::data::BindingBase>, ::core::option::Option::None);
+    context.pop_parent();
+    rt::invoked(border_1.try_end_init(), 4, 4)?;
+    context.pop_parent();
+    rt::invoked(stack_panel_0.try_end_init(), 1, 2)?;
+    rt::complete_root_name_scope(::core::option::Option::Some(&stack_panel_0), name_scope.as_ref(), 1, 2)?;
+    ::core::result::Result::Ok(stack_panel_0)
+}
+
+fn build_class_binding_xaml_untyped(
+    service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
+) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadException> {
+    let root = build_class_binding_xaml(service_provider)?;
+    ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
+}
+
 /// The build function of every eligible public document, by document name.
 pub const DOCUMENTS: &[(&str, BuildDocument)] = &[
     ("border_empty.xaml", build_border_empty_xaml_untyped as BuildDocument),
@@ -4806,6 +4922,8 @@ pub const DOCUMENTS: &[(&str, BuildDocument)] = &[
     ("image_brush_source_missing_asset.xaml", build_image_brush_source_missing_asset_xaml_untyped as BuildDocument),
     ("image_source_rooted.xaml", build_image_source_rooted_xaml_untyped as BuildDocument),
     ("items_source_typed_list.xaml", build_items_source_typed_list_xaml_untyped as BuildDocument),
+    ("class_value.xaml", build_class_value_xaml_untyped as BuildDocument),
+    ("class_binding.xaml", build_class_binding_xaml_untyped as BuildDocument),
 ];
 
 /// The loader of the compiled markup of the assembly: builds the document with the URI

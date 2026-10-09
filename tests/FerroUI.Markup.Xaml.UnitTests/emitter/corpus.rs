@@ -133,6 +133,8 @@ pub const DOCUMENTS: &[(&str, &str)] = &[
     ("image_brush_source_missing_asset.xaml", "<Border xmlns='https://github.com/ferroui' xmlns:x='http://schemas.microsoft.com/winfx/2006/xaml'><Border.Background><ImageBrush Source='ferres://FerroUI.Markup.Xaml.UnitTests/Assets/missing.png' Stretch='Fill'/></Border.Background></Border>"),
     ("image_source_rooted.xaml", "<Border xmlns='https://github.com/ferroui' xmlns:x='http://schemas.microsoft.com/winfx/2006/xaml'>\n  <Image Source='/Assets/missing.png'/>\n</Border>\n"),
     ("items_source_typed_list.xaml", "<ItemsControl xmlns='https://github.com/ferroui' xmlns:x='http://schemas.microsoft.com/winfx/2006/xaml'\n              xmlns:t='clr-namespace:FerroUI.Markup.Xaml.UnitTests;assembly=FerroUI.Markup.Xaml.UnitTests'\n              x:DataType='t:Table' ItemsSource='{CompiledBinding Rows}'>\n  <ItemsControl.ItemTemplate>\n    <DataTemplate>\n      <TextBlock Text='{CompiledBinding Name}'/>\n    </DataTemplate>\n  </ItemsControl.ItemTemplate>\n</ItemsControl>\n"),
+    ("class_value.xaml", "<StackPanel xmlns='https://github.com/ferroui' xmlns:x='http://schemas.microsoft.com/winfx/2006/xaml'>\n  <Border Classes='first' Classes.accent='True' Classes.muted='False'/>\n  <Border Classes.accent='False'/>\n</StackPanel>\n"),
+    ("class_binding.xaml", "<StackPanel xmlns='https://github.com/ferroui' xmlns:x='http://schemas.microsoft.com/winfx/2006/xaml'>\n  <CheckBox Name='Toggle' IsChecked='True'/>\n  <Border Classes.accent='{Binding #Toggle.IsChecked}'/>\n  <Border Classes.other='{ReflectionBinding IsChecked, ElementName=Toggle}'/>\n</StackPanel>\n"),
 ];
 
 /// The documents that must be eligible for emission.
@@ -254,6 +256,8 @@ pub const EXPECTED_ELIGIBLE: &[&str] = &[
     "image_brush_source_missing_asset.xaml",
     "image_source_rooted.xaml",
     "items_source_typed_list.xaml",
+    "class_value.xaml",
+    "class_binding.xaml",
 ];
 
 /// The documents whose values depend on the base URI of the document or on a service of

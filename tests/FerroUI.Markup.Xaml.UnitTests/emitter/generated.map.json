@@ -630,6 +630,27 @@
     {"file_lines": [4643, 4645], "document": "items_source_typed_list.xaml", "line": 5, "position": 6},
     {"file_lines": [4646, 4654], "document": "items_source_typed_list.xaml", "line": 6, "position": 8},
     {"file_lines": [4662, 4666], "document": "items_source_typed_list.xaml", "line": 6, "position": 8},
-    {"file_lines": [4667, 4680], "document": "items_source_typed_list.xaml", "line": 6, "position": 18}
+    {"file_lines": [4667, 4680], "document": "items_source_typed_list.xaml", "line": 6, "position": 18},
+    {"file_lines": [4697, 4701], "document": "class_value.xaml", "line": 1, "position": 2},
+    {"file_lines": [4702, 4703], "document": "class_value.xaml", "line": 2, "position": 4},
+    {"file_lines": [4704, 4707], "document": "class_value.xaml", "line": 2, "position": 4},
+    {"file_lines": [4708, 4710], "document": "class_value.xaml", "line": 2, "position": 4},
+    {"file_lines": [4711, 4713], "document": "class_value.xaml", "line": 2, "position": 4},
+    {"file_lines": [4714, 4717], "document": "class_value.xaml", "line": 2, "position": 4},
+    {"file_lines": [4718, 4719], "document": "class_value.xaml", "line": 3, "position": 4},
+    {"file_lines": [4720, 4723], "document": "class_value.xaml", "line": 3, "position": 4},
+    {"file_lines": [4724, 4730], "document": "class_value.xaml", "line": 3, "position": 4},
+    {"file_lines": [4747, 4752], "document": "class_binding.xaml", "line": 1, "position": 2},
+    {"file_lines": [4753, 4754], "document": "class_binding.xaml", "line": 2, "position": 4},
+    {"file_lines": [4755, 4758], "document": "class_binding.xaml", "line": 2, "position": 4},
+    {"file_lines": [4759, 4761], "document": "class_binding.xaml", "line": 2, "position": 13},
+    {"file_lines": [4762, 4764], "document": "class_binding.xaml", "line": 2, "position": 4},
+    {"file_lines": [4765, 4766], "document": "class_binding.xaml", "line": 3, "position": 4},
+    {"file_lines": [4767, 4771], "document": "class_binding.xaml", "line": 3, "position": 4},
+    {"file_lines": [4772, 4777], "document": "class_binding.xaml", "line": 3, "position": 11},
+    {"file_lines": [4778, 4779], "document": "class_binding.xaml", "line": 4, "position": 4},
+    {"file_lines": [4780, 4784], "document": "class_binding.xaml", "line": 4, "position": 4},
+    {"file_lines": [4785, 4786], "document": "class_binding.xaml", "line": 4, "position": 11},
+    {"file_lines": [4787, 4796], "document": "class_binding.xaml", "line": 4, "position": 11}
   ]
 }
