@@ -1,7 +1,7 @@
 use crate::TypeInfo;
 use std::any::Any;
 use std::fmt;
-use std::hash::{Hash, Hasher};
+use std::hash::{BuildHasherDefault, Hash, Hasher};
 use std::rc::Rc;
 
 /// A value usable as a resource key: anything with value equality and a hash.
@@ -133,5 +133,86 @@ impl From<&'static TypeInfo> for ResourceKey {
 impl From<&ResourceKey> for ResourceKey {
     fn from(value: &ResourceKey) -> Self {
         value.clone()
+    }
+}
+
+/// The hasher of the tables keyed by [`ResourceKey`].
+///
+/// A resource lookup probes the table of every dictionary on the way to the
+/// root, and the keys are short: a type, or the name of a resource. The
+/// default hasher of the standard library is built to withstand keys chosen
+/// by an attacker, which the keys of a resource dictionary are not (they are
+/// written in the markup and the code of the application), and costs more
+/// per key than the probe itself. This one takes a word at a time: it
+/// multiplies, and folds the upper half of the product into the lower one,
+/// so that every bit of a word reaches both the bits the table takes its
+/// bucket from and the ones it tags an entry with. The same keys are equal
+/// and are found as before: only the placement in the table differs.
+#[derive(Clone, Copy, Default)]
+pub(crate) struct ResourceKeyHasher {
+    hash: u64,
+}
+
+/// Builds the [`ResourceKeyHasher`] of a table.
+pub(crate) type ResourceKeyBuildHasher = BuildHasherDefault<ResourceKeyHasher>;
+
+impl ResourceKeyHasher {
+    const MULTIPLIER: u64 = 0x51_7c_c1_b7_27_22_0a_95;
+
+    #[inline]
+    fn add(&mut self, word: u64) {
+        let product = (self.hash ^ word).wrapping_mul(Self::MULTIPLIER);
+        self.hash = product ^ (product >> 32);
+    }
+}
+
+impl Hasher for ResourceKeyHasher {
+    #[inline]
+    fn finish(&self) -> u64 {
+        self.hash
+    }
+
+    #[inline]
+    fn write(&mut self, bytes: &[u8]) {
+        let mut chunks = bytes.chunks_exact(8);
+        for chunk in &mut chunks {
+            let mut word = [0u8; 8];
+            word.copy_from_slice(chunk);
+            self.add(u64::from_le_bytes(word));
+        }
+        let rest = chunks.remainder();
+        if !rest.is_empty() {
+            // At most seven bytes are left: the last byte of the word takes
+            // their count, so that a zero byte at the end is not lost.
+            let mut word = [0u8; 8];
+            word[..rest.len()].copy_from_slice(rest);
+            word[7] = rest.len() as u8;
+            self.add(u64::from_le_bytes(word));
+        }
+    }
+
+    #[inline]
+    fn write_u8(&mut self, i: u8) {
+        self.add(u64::from(i));
+    }
+
+    #[inline]
+    fn write_u16(&mut self, i: u16) {
+        self.add(u64::from(i));
+    }
+
+    #[inline]
+    fn write_u32(&mut self, i: u32) {
+        self.add(u64::from(i));
+    }
+
+    #[inline]
+    fn write_u64(&mut self, i: u64) {
+        self.add(i);
+    }
+
+    #[inline]
+    fn write_usize(&mut self, i: usize) {
+        self.add(i as u64);
     }
 }
