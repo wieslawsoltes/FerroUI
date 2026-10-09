@@ -44,10 +44,10 @@ Percentages are `present / (total - waived)`. Member matching is by name with re
 
 | | Ported | Total | Waived | % |
 |---|---:|---:|---:|---:|
-| C# files | 2235 | 2262 | 0 | 98.8% |
-| Types | 2851 | 3132 | 203 | 97.3% |
-| Members | 20723 | 23122 | 2001 | 98.1% |
-| Contracts (interfaces) | 430 | 458 | - | 93.9% |
+| C# files | 2249 | 2262 | 0 | 99.4% |
+| Types | 2905 | 3132 | 204 | 99.2% |
+| Members | 20919 | 23122 | 2003 | 99.1% |
+| Contracts (interfaces) | 434 | 458 | - | 94.8% |
 | Property registrations | 1218 | 1233 | - | 98.8% |
 | Routed events | 108 | 108 | - | 100.0% |
 | Other files (native sources, XAML, TypeScript, fonts) | 243 | 268 | - | 90.7% |
@@ -74,7 +74,7 @@ The % column is member coverage (file coverage for plain file lists).
 | [Avalonia.MicroCom](tracking/Avalonia.MicroCom.md) | `src/Avalonia.MicroCom` | `src/FerroUI.MicroCom` | `ferroui-microcom` | 1/1 | 1/1 | 0/6 (6 waived) | - | 0 - core | P0 |
 | [Avalonia.Native](tracking/Avalonia.Native.md) | `src/Avalonia.Native` | `src/FerroUI.Native` | `ferroui-native` | 47/47 | 64/75 (11 waived) | 452/528 (76 waived) | 100.0% | 1 - desktop (macOS) | P0 |
 | [Avalonia.OpenGL](tracking/Avalonia.OpenGL.md) | `src/Avalonia.OpenGL` | `src/FerroUI.OpenGL` | `ferroui-opengl` | 39/39 | 61/63 (2 waived) | 601/639 (38 waived) | 100.0% | 2 - rendering backends | P2 |
-| [Avalonia.Remote.Protocol](tracking/Avalonia.Remote.Protocol.md) | `src/Avalonia.Remote.Protocol` | `src/FerroUI.Remote.Protocol` | `ferroui-remote-protocol` | 0/14 | 0/55 | 0/202 (1 waived) | 0.0% | 4 - tooling | P3 |
+| [Avalonia.Remote.Protocol](tracking/Avalonia.Remote.Protocol.md) | `src/Avalonia.Remote.Protocol` | `src/FerroUI.Remote.Protocol` | `ferroui-remote-protocol` | 14/14 | 54/55 (1 waived) | 196/202 (3 waived) | 98.5% | 4 - tooling | P3 |
 | [Avalonia.Themes.Fluent](tracking/Avalonia.Themes.Fluent.md) | `src/Avalonia.Themes.Fluent` | `src/FerroUI.Themes.Fluent` | `ferroui-themes-fluent` | 5/5 | 6/6 | 68/73 (5 waived) | 100.0% | 2 - xaml + themes | P1 |
 | [Avalonia.Themes.Simple](tracking/Avalonia.Themes.Simple.md) | `src/Avalonia.Themes.Simple` | `src/FerroUI.Themes.Simple` | `ferroui-themes-simple` | 1/1 | 1/1 | 1/1 | 100.0% | 2 - xaml + themes | P2 |
 | [Avalonia.Browser](tracking/Avalonia.Browser.md) | `src/Browser/Avalonia.Browser` | `src/Browser/FerroUI.Browser` | `ferroui-browser` | 50/50 | 60/62 (2 waived) | 333/428 (93 waived) | 99.4% | 3 - browser | P2 |
@@ -144,7 +144,7 @@ Libraries.
 | `src/Avalonia.MicroCom` | 1 | `src/FerroUI.MicroCom` | workspace member | [Avalonia.MicroCom](tracking/Avalonia.MicroCom.md) |
 | `src/Avalonia.Native` | 49 | `src/FerroUI.Native` | workspace member | [Avalonia.Native](tracking/Avalonia.Native.md) |
 | `src/Avalonia.OpenGL` | 39 | `src/FerroUI.OpenGL` | workspace member | [Avalonia.OpenGL](tracking/Avalonia.OpenGL.md) |
-| `src/Avalonia.Remote.Protocol` | 14 | `src/FerroUI.Remote.Protocol` | not created | [Avalonia.Remote.Protocol](tracking/Avalonia.Remote.Protocol.md) |
+| `src/Avalonia.Remote.Protocol` | 14 | `src/FerroUI.Remote.Protocol` | workspace member | [Avalonia.Remote.Protocol](tracking/Avalonia.Remote.Protocol.md) |
 | `src/Avalonia.Themes.Fluent` | 6 | `src/FerroUI.Themes.Fluent` | workspace member | [Avalonia.Themes.Fluent](tracking/Avalonia.Themes.Fluent.md) |
 | `src/Avalonia.Themes.Simple` | 2 | `src/FerroUI.Themes.Simple` | workspace member | [Avalonia.Themes.Simple](tracking/Avalonia.Themes.Simple.md) |
 | `src/Avalonia.Vulkan` | 30 | `src/FerroUI.Vulkan` | not created | [Avalonia.Vulkan](tracking/Avalonia.Vulkan.md) (out of scope) |
@@ -314,6 +314,7 @@ Upstream unit tests are ported next to the code (`#[cfg(test)] mod tests` or `<f
 | `src/FerroUI.MicroCom` | `src/Avalonia.MicroCom` |
 | `src/FerroUI.Native` | `src/Avalonia.Native` |
 | `src/FerroUI.OpenGL` | `src/Avalonia.OpenGL` |
+| `src/FerroUI.Remote.Protocol` | `src/Avalonia.Remote.Protocol` |
 | `src/FerroUI.Themes.Fluent` | `src/Avalonia.Themes.Fluent` |
 | `src/FerroUI.Themes.Simple` | `src/Avalonia.Themes.Simple` |
 | `src/HarfBuzz/FerroUI.HarfBuzz` | `src/HarfBuzz/Avalonia.HarfBuzz` |
@@ -331,7 +332,7 @@ FerroUI-only crates have no upstream source directory (for example the MicroCom 
 
 ## Rust-only files
 
-327 Rust source files have no upstream counterpart (1 without a recorded reason). They are listed at the end of each project page.
+332 Rust source files have no upstream counterpart (1 without a recorded reason). They are listed at the end of each project page.
 
 | Project | Rust file | Reason |
 |---|---|---|
@@ -490,6 +491,7 @@ FerroUI-only crates have no upstream source directory (for example the MicroCom 
 | [Avalonia.Build.Tasks](tracking/Avalonia.Build.Tasks.md) | `src/FerroUI.Build.Tasks/scanner/source.rs` | the source scanner, which fills the type model from the declaration macros of a crate's sources (docs/porting/xaml.md, 9.5.2, 9.5.6): no counterpart upstream, where the compiler reads the compiled assembly |
 | [Avalonia.Build.Tasks](tracking/Avalonia.Build.Tasks.md) | `src/FerroUI.Build.Tasks/scanner/tests.rs` | the unit tests of the module |
 | [Avalonia.Build.Tasks](tracking/Avalonia.Build.Tasks.md) | `src/FerroUI.Build.Tasks/scanner/tokens.rs` | the source scanner, which fills the type model from the declaration macros of a crate's sources (docs/porting/xaml.md, 9.5.2, 9.5.6): no counterpart upstream, where the compiler reads the compiled assembly |
+| [Avalonia.Build.Tasks](tracking/Avalonia.Build.Tasks.md) | `src/FerroUI.Build.Tasks/type_system/emit_types.rs` | the build-time type system of the compiler over the type models (docs/porting/xaml.md, 9.5.2, 9.5.5): the counterpart of the Cecil type system of upstream's build task (XamlX.IL.Cecil, which the tracking does not list) |
 | [Avalonia.Build.Tasks](tracking/Avalonia.Build.Tasks.md) | `src/FerroUI.Build.Tasks/type_system/model_type_system.rs` | the build-time type system of the compiler over the type models (docs/porting/xaml.md, 9.5.2, 9.5.5): the counterpart of the Cecil type system of upstream's build task (XamlX.IL.Cecil, which the tracking does not list) |
 | [Avalonia.Build.Tasks](tracking/Avalonia.Build.Tasks.md) | `src/FerroUI.Build.Tasks/type_system/tests.rs` | the unit tests of the module |
 | [Avalonia.Build.Tasks](tracking/Avalonia.Build.Tasks.md) | `src/FerroUI.Build.Tasks/type_system/types.rs` | the build-time type system of the compiler over the type models (docs/porting/xaml.md, 9.5.2, 9.5.5): the counterpart of the Cecil type system of upstream's build task (XamlX.IL.Cecil, which the tracking does not list) |
@@ -595,6 +597,10 @@ FerroUI-only crates have no upstream source directory (for example the MicroCom 
 | [Avalonia.OpenGL](tracking/Avalonia.OpenGL.md) | `src/FerroUI.OpenGL/register_types.rs` | the type table of the crate (porting guide, Classes): its namespaces, its classes and what it states about itself for markup; takes the place of the assembly metadata the upstream compiler and loader reflect over |
 | [Avalonia.OpenGL](tracking/Avalonia.OpenGL.md) | `src/FerroUI.OpenGL/rust_paths.rs` | generated by scripts/generate_markup_types.py: the public Rust paths of the registered types of the crate, which the emitter of the XAML compiler writes into generated code |
 | [Avalonia.OpenGL](tracking/Avalonia.OpenGL.md) | `src/FerroUI.OpenGL/testing.rs` | scripted OpenGL implementation of the unit tests |
+| [Avalonia.Remote.Protocol](tracking/Avalonia.Remote.Protocol.md) | `src/FerroUI.Remote.Protocol/assembly.rs` | The table of the exported types of an assembly with their identifier attributes: what `DefaultMessageTypeResolver` reads by reflection upstream (`Assembly.ExportedTypes`) |
+| [Avalonia.Remote.Protocol](tracking/Avalonia.Remote.Protocol.md) | `src/FerroUI.Remote.Protocol/error.rs` | The exceptions the upstream library throws or lets through, as one error value that the exception event of a connection hands to its handlers |
+| [Avalonia.Remote.Protocol](tracking/Avalonia.Remote.Protocol.md) | `src/FerroUI.Remote.Protocol/guid.rs` | `System.Guid` of the runtime library: the text forms and the byte layout (`ToByteArray`) the header of a message carries |
+| [Avalonia.Remote.Protocol](tracking/Avalonia.Remote.Protocol.md) | `src/FerroUI.Remote.Protocol/task.rs` | `Task` and `TaskCompletionSource` of the runtime library, as far as `Send` of a connection uses them: the library has no asynchronous runtime (DEVIATIONS.md, Remote protocol) |
 | [Avalonia.Themes.Fluent](tracking/Avalonia.Themes.Fluent.md) | `src/FerroUI.Themes.Fluent/assets.rs` | the embedded assets of the crate, the table generated by its build script: the counterpart of the resource items of the upstream project file |
 | [Avalonia.Themes.Fluent](tracking/Avalonia.Themes.Fluent.md) | `src/FerroUI.Themes.Fluent/compiled_xaml.rs` | generated by the Rust emitter of the XAML compiler (`rust_emitter::generate_class_file`): the compiled documents of the crate, the counterpart of the IL the upstream build task writes into the assembly |
 | [Avalonia.Themes.Fluent](tracking/Avalonia.Themes.Fluent.md) | `src/FerroUI.Themes.Fluent/register_types.rs` | the type table of the crate (porting guide, Classes): its namespaces, its classes and what it states about itself for markup; takes the place of the assembly metadata the upstream compiler and loader reflect over |
