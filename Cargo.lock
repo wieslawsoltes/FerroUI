@@ -244,6 +244,19 @@ dependencies = [
 ]
 
 [[package]]
+name = "ferroui-designer-support"
+version = "0.1.0"
+dependencies = [
+ "ferroui-base",
+ "ferroui-controls",
+ "ferroui-markup-xaml",
+ "ferroui-markup-xaml-loader",
+ "ferroui-remote-protocol",
+ "ferroui-skia",
+ "xamlx",
+]
+
+[[package]]
 name = "ferroui-desktop"
 version = "0.1.0"
 dependencies = [

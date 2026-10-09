@@ -74,36 +74,44 @@ impl HandlerToken {
 }
 
 /// A multicast delegate: the handlers of an event in the order they were
-/// added.
-pub(crate) struct Delegate<T> {
+/// added. Public for the connections that are implemented outside this
+/// library (the ones of the designer support), which keep their handlers in
+/// one as the connections here do.
+pub struct Delegate<T> {
     handlers: Vec<(HandlerToken, Handler<T>)>,
 }
 
 impl<T> Delegate<T> {
-    pub(crate) fn new() -> Delegate<T> {
+    pub fn new() -> Delegate<T> {
         Delegate { handlers: Vec::new() }
     }
 
     /// `_delegate == null`.
-    pub(crate) fn is_null(&self) -> bool {
+    pub fn is_null(&self) -> bool {
         self.handlers.is_empty()
     }
 
     /// `_delegate += handler`.
-    pub(crate) fn add(&mut self, handler: Handler<T>) -> HandlerToken {
+    pub fn add(&mut self, handler: Handler<T>) -> HandlerToken {
         let token = HandlerToken::next();
         self.handlers.push((token, handler));
         token
     }
 
     /// `_delegate -= handler`.
-    pub(crate) fn remove(&mut self, token: HandlerToken) {
+    pub fn remove(&mut self, token: HandlerToken) {
         self.handlers.retain(|(t, _)| *t != token);
     }
 
     /// The handlers as they are now, to invoke them outside a lock.
-    pub(crate) fn snapshot(&self) -> Vec<Handler<T>> {
+    pub fn snapshot(&self) -> Vec<Handler<T>> {
         self.handlers.iter().map(|(_, handler)| handler.clone()).collect()
+    }
+}
+
+impl<T> Default for Delegate<T> {
+    fn default() -> Self {
+        Delegate::new()
     }
 }
 
