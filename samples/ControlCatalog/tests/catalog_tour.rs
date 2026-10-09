@@ -582,6 +582,55 @@ fn catalog_revisit_memory() {
     }
 }
 
+/// Shows `root` in the window of the tour in place of the main view, with
+/// rendered frames, and takes it out again (`before_it_is_taken_out` runs
+/// between the two). Returns the number of elements of the visual tree it
+/// had while shown and the ones that are still alive, by class, indented by
+/// their depth.
+fn shown_and_taken_out(tour: &Tour, root: Ref<Control>, before_it_is_taken_out: impl FnOnce()) -> (usize, Vec<String>) {
+    tour.window.set_content(Some(Control::boxed(&root)));
+    tour.settle();
+    let mut elements: Vec<(String, ferroui_base::WeakRef<ferroui_base::Visual>)> = Vec::new();
+    let mut pending: Vec<(usize, Ref<ferroui_base::Visual>)> = vec![(0, root.clone().upcast())];
+    while let Some((depth, visual)) = pending.pop() {
+        elements.push((format!("{}{}", "  ".repeat(depth), visual.get_type().name()), visual.downgrade()));
+        for child in visual.get_visual_children().iter().rev() {
+            pending.push((depth + 1, child.clone()));
+        }
+    }
+    before_it_is_taken_out();
+    tour.window.set_content(Some(Control::boxed(&tour.main_view)));
+    drop(root);
+    tour.settle();
+    let alive = elements.iter().filter(|(_, element)| element.upgrade().is_some()).map(|(name, _)| name.clone()).collect();
+    (elements.len(), alive)
+}
+
+/// The controls of the compiled Fluent theme that stayed alive after they
+/// left the tree, each for a cycle of its template: the text box (the owner
+/// of its validation errors, gap C322, and the reflection bindings of a
+/// multi binding of its template, whose type resolver held the context of
+/// the build with the root it built, gap C323: the context of compiled markup
+/// is the one held this way, a template the run-time loader builds is freed
+/// without the fix), the slider (the disposable of its own handler, C324)
+/// and the date picker (the style with a dynamic resource under its text
+/// box, C325).
+#[test]
+fn gap_c323_controls_of_the_compiled_theme_are_freed() {
+    use ferroui_controls::{CalendarDatePicker, Slider, TextBox};
+    let tour = Tour::start();
+    let controls: [(&str, Ref<Control>); 3] = [
+        ("TextBox", TextBox::new().upcast()),
+        ("Slider", Slider::new().upcast()),
+        ("CalendarDatePicker", CalendarDatePicker::new().upcast()),
+    ];
+    for (name, control) in controls {
+        let (elements, alive) = shown_and_taken_out(&tour, control, || {});
+        assert!(elements > 1, "{name} has its template");
+        assert!(alive.is_empty(), "{name}: alive after it left the tree: {alive:?}");
+    }
+}
+
 /// What a piece of markup leaves behind: the elements of `CATALOG_TOUR_XAML`
 /// (the children of a panel, in the namespace of the framework) are shown in
 /// the window of the catalog, with the Fluent theme and rendered frames, and
@@ -606,25 +655,13 @@ fn catalog_markup_survivors() {
         "<Panel xmlns='https://github.com/ferroui' xmlns:x='http://schemas.microsoft.com/winfx/2006/xaml'>{xaml}</Panel>"
     );
     let root = from_markup_value::<Ref<Control>>(&Some(load_text(&document))).expect("a control");
-    tour.window.set_content(Some(Control::boxed(&root)));
-    tour.settle();
-    let mut elements: Vec<(String, ferroui_base::WeakRef<ferroui_base::Visual>)> = Vec::new();
-    let mut pending: Vec<(usize, Ref<ferroui_base::Visual>)> = vec![(0, root.clone().upcast())];
-    while let Some((depth, visual)) = pending.pop() {
-        elements.push((format!("{}{}", "  ".repeat(depth), visual.get_type().name()), visual.downgrade()));
-        for child in visual.get_visual_children().iter().rev() {
-            pending.push((depth + 1, child.clone()));
+    let (elements, alive) = shown_and_taken_out(&tour, root, || {
+        if traced {
+            // What the main view allocates when it is shown again is not the markup's.
+            trace::next_epoch();
         }
-    }
-    if traced {
-        // What the main view allocates when it is shown again is not the markup's.
-        trace::next_epoch();
-    }
-    tour.window.set_content(Some(Control::boxed(&tour.main_view)));
-    drop(root);
-    tour.settle();
-    let alive: Vec<&String> = elements.iter().filter(|(_, element)| element.upgrade().is_some()).map(|(name, _)| name).collect();
-    println!("markup survivors: {} of {} elements are alive", alive.len(), elements.len());
+    });
+    println!("markup survivors: {} of {elements} elements are alive", alive.len());
     for name in alive {
         println!("  {name}");
     }
