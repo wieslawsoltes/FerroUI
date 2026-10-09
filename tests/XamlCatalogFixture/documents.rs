@@ -32,23 +32,17 @@ pub const PAGES: &[&str] = &[
 /// listed here is still refused.
 pub const REFUSED: &[(&str, &str)] = &[
     ("App.xaml", "the include of the theme documents of the colour picker, which is not compiled by its build"),
-    ("CustomThemes.xaml", "a compiled binding path over a type without metadata: FerroList<Rc<SampleInfo>>"),
     ("MainView.xaml", "a container query: no emitter for XamlIlWidthQuery"),
-    ("Pages/CalendarDatePickerPage.xaml", "a compiled binding path over a type without metadata: Nullable<DateTime>"),
     ("Pages/ComboBoxPage.xaml", "a list created in markup: System.Collections.ArrayList is not a class of the object model"),
     ("Pages/ContainerQueryPage.xaml", "a container query: no emitter for XamlIlWidthQuery"),
     ("Pages/ContextFlyoutPage.xaml", "a compiled binding path with a method as a command"),
-    ("Pages/DataValidationPage.xaml", "a compiled binding path over a type without metadata: ErrorConverter"),
     ("Pages/DialogsPage.xaml", "a list created in markup: List<T> is not a class of the object model"),
-    ("Pages/FlexPage.xaml", "a compiled binding path over a type without metadata: Nullable<FlexAlignItems>"),
     ("Pages/FocusPage.xaml", "a list created in markup: List<T> is not a class of the object model"),
     ("Pages/LabelsPage.xaml", "a compiled binding path with a method as a command"),
-    ("Pages/ListBoxPage.xaml", "a compiled binding path over a type without metadata: IObservable<Object>"),
     ("Pages/OpenGl/OpenGlLeasePage.xaml", "the class of the document is not ported"),
     ("Pages/PipsPager/PipsPagerCustomButtonThemesPage.xaml", "PreviousButtonTheme: not a plain property setter"),
     ("Pages/RefreshContainerPage.xaml", "a list created in markup: List<T> is not a class of the object model"),
     ("Pages/TransitioningContentControlPage.xaml", "a compiled binding path with a method as a command"),
-    ("Pages/TreeViewPage.xaml", "a compiled binding path over a type without metadata: SelectedItemsList"),
     ("Pages/ViewboxPage.xaml", "a list created in markup: System.Collections.ArrayList is not a class of the object model"),
 ];
 

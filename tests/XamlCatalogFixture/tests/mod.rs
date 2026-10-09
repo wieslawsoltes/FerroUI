@@ -95,7 +95,13 @@ impl TestApplication {
             TestApplication::UnitTest => {
                 let scope = UnitTestApplication::start(catalog_services().with_theme(|| SimpleTheme::new().as_style()));
                 FerroRuntimeXamlLoader::register();
-                // `CustomThemes.xaml` is not compiled (`documents::REFUSED`): the run-time loader loads it.
+                // The run-time loader loads `CustomThemes.xaml`, as in the tests of the sample,
+                // also when the build compiled the document
+                // (`the_resources_of_the_application_are_compiled` reads its compiled markup).
+                // The first load of the run-time loader in a process also makes the
+                // registrations of its type system (`Option<Vec<T>>` as the nullable form of a
+                // list of values, among them), which the dump of a tree reads values with:
+                // with it here, both trees of a test are dumped in the same state.
                 let custom_themes = try_load_document("/CustomThemes.xaml", None).unwrap_or_else(|error| panic!("/CustomThemes.xaml: {}", describe(&error)));
                 let provider = from_markup_value::<Rc<dyn IResourceProvider>>(&Some(custom_themes)).expect("CustomThemes.xaml is a resource provider");
                 Application::current().expect("the unit test application").resources().merged_dictionaries().add(provider);
@@ -253,6 +259,23 @@ fn populated<T: ObjectType>(path: &str, construct: fn() -> T) -> (Ref<T>, Ref<T>
 /// The number of lines of a dump that name an object of the class `name`.
 fn objects_of(dump: &str, name: &str) -> usize {
     dump.lines().filter(|line| line.trim() == name).count()
+}
+
+/// The document without a class (`CustomThemes.xaml`, the resources the application of the
+/// sample gives its pages) is compiled by a build with the feature `catalog`: its compiled
+/// markup, from the loader table of the crate, holds the resources the run-time loader
+/// builds from the document, by their number.
+#[cfg(feature = "catalog")]
+#[test]
+fn the_resources_of_the_application_are_compiled() {
+    use ferroui_base::controls::IResourceDictionary;
+    let _application = application();
+    let count = |value: BoxedValue| from_markup_value::<Rc<dyn IResourceDictionary>>(&Some(value)).expect("CustomThemes.xaml is a resource dictionary").count();
+    let compiled = crate::compiled_markup::try_load(None, &crate::markup::document_uri("/CustomThemes.xaml")).expect("the compiled markup loads");
+    let compiled = count(compiled.expect("CustomThemes.xaml is compiled"));
+    let loaded = count(try_load_document("/CustomThemes.xaml", None).unwrap_or_else(|error| panic!("{}", describe(&error))));
+    assert!(compiled > 0);
+    assert_eq!(compiled, loaded);
 }
 
 /// The pages of a build without the feature `catalog` are compiled by every build, and

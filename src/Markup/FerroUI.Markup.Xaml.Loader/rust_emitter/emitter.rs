@@ -2229,7 +2229,21 @@ impl<'a> Emitter<'a> {
         let markup = self.markup_expr(node, &declaring)?;
         let property_type = property.property_type();
         let handle = match self.types.handle_of(&*property_type) {
-            Some(handle) if !handle.is_object() => self.handle_expr(node, &property_type)?,
+            Some(handle) if !handle.is_object() => match self.handle_expr(node, &property_type) {
+                Ok(expr) => expr,
+                // A type generated code cannot name (a Rust type no metadata declares, a
+                // nullable form or a stream of the runtime library, a type without a
+                // public path). Its handle is the Rust type the declaration of the
+                // property states for the getter, when the two are the same type: the
+                // run-time library reads it from the declaration.
+                Err(error) => {
+                    let declared = runtime.declared().filter(|_| property.getter().is_some()).and_then(|declared| declared.returns);
+                    if declared != Some(handle.id()) {
+                        return Err(error);
+                    }
+                    format!("rt::declared_property_type({markup}, {}, {})", rust_string_literal(&name), runtime.is_static)
+                }
+            },
             _ => "::ferroui_base::data::core::ValueType::object()".to_string(),
         };
         let cached_boxed_boolean = property.getter().is_some_and(|getter| getter.return_type().is("System", "Boolean"));

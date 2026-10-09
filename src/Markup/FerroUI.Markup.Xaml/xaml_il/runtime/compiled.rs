@@ -478,6 +478,24 @@ pub fn setter_value_property() -> MarkupValue {
     ))
 }
 
+/// The Rust type the declaration of the plain property `name` of `markup` states for its
+/// value: the handle of the type of the property, for a type generated code cannot name
+/// (a Rust type no metadata declares, a nullable form or a stream of the runtime library).
+/// The emitter writes the call only where the run-time loader passes this type as the type
+/// of the property.
+///
+/// # Panics
+/// Panics if `markup` declares no such property: the emitter writes the call only for a
+/// declared property.
+pub fn declared_property_type(markup: &'static MarkupType, name: &str, is_static: bool) -> ValueType {
+    let declared = match is_static {
+        true => markup.static_properties.iter().find(|property| property.name == name),
+        false => markup.find_property(name),
+    };
+    let declared = declared.unwrap_or_else(|| panic!("{} declares no property {name}", markup.full_name()));
+    (declared.type_)()
+}
+
 fn new_clr_property_info(
     markup: &'static MarkupType,
     name: &str,
