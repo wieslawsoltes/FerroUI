@@ -76,8 +76,13 @@ fn registered(name: &str, kind: RegisteredKind, value_type: RustType, owner: &st
         source: None,
         assign_binding: false,
         inherits: false,
+        read_only: false,
         added_owners: Vec::new(),
     }
+}
+
+fn dependent_directory() -> PathBuf {
+    Path::new(env!("CARGO_MANIFEST_DIR")).join("tests").join("fixtures").join("dependent")
 }
 
 /// The type of the model with the markup name `name`.
@@ -157,6 +162,7 @@ fn class_with_every_kind_of_member_is_read_exactly() {
     let function = |name: &str| path(&format!("Border::{name}"), &format!("{BORDER}::{name}"));
 
     let mut expected = TypeModel::new("Border", TypeKind::Class, ty(BORDER), "fixture::controls::border");
+    expected.object_model = true;
     expected.namespace = "Fixture.Controls".to_string();
     expected.explicit_namespace = Some("Fixture.Controls".to_string());
     expected.public_path = Some("::fixture::Border".to_string());
@@ -223,7 +229,11 @@ fn class_with_every_kind_of_member_is_read_exactly() {
     }];
     expected.registered = vec![
         registered("Background", RegisteredKind::Styled, ty(&format!("Option<::std::rc::Rc<dyn {IBRUSH}>>")), BORDER, "background_property"),
-        RegisteredModel { visibility: "pub(crate)".to_string(), ..registered("Thickness", RegisteredKind::Direct, ty("f64"), BORDER, "thickness_property") },
+        RegisteredModel {
+            visibility: "pub(crate)".to_string(),
+            read_only: true,
+            ..registered("Thickness", RegisteredKind::Direct, ty("f64"), BORDER, "thickness_property")
+        },
         RegisteredModel {
             owner: None,
             registration: RegistrationModel::AddedOwner,
@@ -306,6 +316,7 @@ fn class_with_every_kind_of_member_is_read_exactly() {
     // The class the added owner names has the owner; a type that is not imported in the
     // file of the declaration stays as written.
     let mut expected = TypeModel::new("Decorator", TypeKind::Class, ty(DECORATOR), "fixture::controls::decorator");
+    expected.object_model = true;
     expected.namespace = "Fixture.Controls".to_string();
     expected.public_path = Some("::fixture::Decorator".to_string());
     expected.base = Some(ty(CONTROL));
@@ -330,6 +341,7 @@ fn attached_properties_and_static_types_are_read_exactly() {
     let control = unresolved("Control", &["Control"]);
 
     let mut expected = TypeModel::new("Grid", TypeKind::Class, ty(GRID), "fixture::controls::grid");
+    expected.object_model = true;
     expected.namespace = "Fixture.Controls".to_string();
     expected.public_path = Some("::fixture::controls::Grid".to_string());
     expected.base = Some(control.clone());
@@ -338,6 +350,7 @@ fn attached_properties_and_static_types_are_read_exactly() {
     assert_eq!(the_type(&scan, "Grid"), &expected, "\n{}", listing(&scan.diagnostics));
 
     let mut expected = TypeModel::new("Layout", TypeKind::Static, ty(LAYOUT), "fixture::controls::grid");
+    expected.object_model = true;
     expected.namespace = "Fixture.Controls".to_string();
     expected.public_path = Some("::fixture::controls::grid::Layout".to_string());
     expected.type_info = Some(ty(LAYOUT));
@@ -362,12 +375,14 @@ fn attached_properties_and_static_types_are_read_exactly() {
 
     // A class of a nested module under a `cfg` condition, and one a macro of the crate declares.
     let mut expected = TypeModel::new("Span", TypeKind::Class, ty("::fixture::controls::text_block::documents::gated::Span"), "fixture::controls::text_block::documents::gated");
+    expected.object_model = true;
     expected.namespace = "Fixture.Controls.Documents".to_string();
     expected.cfg = vec!["feature = \"inlines\"".to_string()];
     expected.base = Some(ty("::fixture::controls::text_block::documents::Run"));
     assert_eq!(the_type(&scan, "Span"), &expected, "\n{}", listing(&scan.diagnostics));
 
     let mut expected = TypeModel::new("DoubleTransition", TypeKind::Class, ty("::fixture::macros::DoubleTransition"), "fixture::macros");
+    expected.object_model = true;
     expected.namespace = "Fixture".to_string();
     expected.base = Some(ty("::ferroui_base::animation::TransitionBase"));
     expected.default_constructor = Some(path("DoubleTransition::new", "::fixture::macros::DoubleTransition::new"));
@@ -857,6 +872,76 @@ fn fixture_model_round_trips_through_its_file() {
     assert!(text.contains("\"unresolved\": [\n"), "an unresolved type is written with its unresolved paths");
 }
 
+/// The export table of the fixture: every path another crate can write for a type, with
+/// the module that declares it; a private module is on no such path.
+#[test]
+fn export_table_of_the_fixture_has_every_public_path() {
+    let scan = fixture();
+    let declared = |path: &str| scan.model.exports.iter().find(|export| export.path == path).map(|export| export.declared.as_str());
+    assert_eq!(declared("::fixture::Border"), Some(BORDER), "{:?}", scan.model.exports);
+    assert_eq!(declared("::fixture::controls::Border"), Some(BORDER));
+    assert_eq!(declared("::fixture::Decorator"), Some(DECORATOR));
+    assert_eq!(declared("::fixture::controls::decorator::Decorator"), Some(DECORATOR));
+    assert_eq!(declared("::fixture::IBrush"), Some(IBRUSH));
+    assert_eq!(declared("::fixture::media::IBrush"), Some(IBRUSH));
+    assert_eq!(declared("::fixture::Thickness"), Some(THICKNESS));
+    assert_eq!(declared("::fixture::media::Dock"), Some("::fixture::media::Dock"));
+    assert_eq!(declared("::fixture::controls::border::Border"), None);
+    assert_eq!(declared("::fixture::media::brush::IBrush"), None);
+    let mut paths: Vec<&str> = scan.model.exports.iter().map(|export| export.path.as_str()).collect();
+    let listed = paths.len();
+    paths.dedup();
+    assert_eq!(paths.len(), listed, "a path is listed once");
+    // The types of the object model, and no other, are marked as such.
+    let object_model: Vec<&str> = scan.model.types.iter().filter(|type_| type_.object_model).map(|type_| type_.name.as_str()).collect();
+    assert_eq!(object_model, ["Border", "Decorator", "Grid", "Layout", "TextBlock", "Run", "Span", "Brush", "Deep", "Placed", "DoubleTransition", "Root"]);
+}
+
+/// A crate built on another one, scanned alone and with the model of the other: the names
+/// behind the glob import of the other crate, the declaring modules of its types and the
+/// name of a property of it the crate adds an owner to are resolved only with the model.
+#[test]
+fn dependent_crate_is_resolved_with_the_model_of_the_crate_it_is_built_on() {
+    let root = dependent_directory().join("lib.rs");
+    let brush = format!("Option<::std::rc::Rc<dyn {IBRUSH}>>");
+
+    let alone = scan_crate(&ScanOptions::new("dependent", root.clone()));
+    assert_eq!(
+        alone.statistics.unresolved_paths,
+        BTreeMap::from([("Border".to_string(), 1), ("Dock".to_string(), 1), ("IBrush".to_string(), 2)]),
+        "\n{}",
+        listing(&alone.diagnostics)
+    );
+    assert_eq!(alone.statistics.registered_without_name, 2, "{}", alone.summary());
+    let card = the_type(&alone, "Card");
+    assert_eq!(card.base, Some(unresolved("Border", &["Border"])));
+    assert_eq!(card.registered[0].source, Some(CallableModel { path: Some("Border::background_property".to_string()), resolved: None }));
+    let margin = the_type(&alone, "Margin");
+    assert_eq!(margin.properties[2].value_type, ty("Option<::ferroui_base::Ref<::fixture::Decorator>>"));
+
+    let scan = scan_crate(&ScanOptions::new("dependent", root).with_dependencies(vec![fixture().model]));
+    assert!(scan.statistics.unresolved_paths.is_empty(), "{}\n{}", scan.summary(), listing(&scan.diagnostics));
+    assert_eq!(scan.statistics.type_texts_unresolved, 0, "{}", scan.summary());
+    assert_eq!(scan.statistics.registered_without_name, 0, "{}", scan.summary());
+    let card = the_type(&scan, "Card");
+    assert!(card.object_model);
+    assert_eq!(card.base, Some(ty(BORDER)));
+    let names: Vec<(Option<&str>, RegistrationModel)> = card.registered.iter().map(|registered| (registered.name.as_deref(), registered.registration)).collect();
+    assert_eq!(
+        names,
+        [(Some("Background"), RegistrationModel::AddedOwner), (Some("Dock"), RegistrationModel::Declared), (Some("Background"), RegistrationModel::Alias)]
+    );
+    assert_eq!(card.registered[0].value_type, ty(&brush));
+    assert_eq!(card.registered[0].source, Some(path("Border::background_property", &format!("{BORDER}::background_property"))));
+    assert_eq!(card.registered[1].value_type, ty("::fixture::media::Dock"));
+    assert_eq!(card.registered[1].owner, Some(ty("::dependent::Card")));
+    assert_eq!(card.registered[2].value_type, ty(&brush));
+    let margin = the_type(&scan, "Margin");
+    let types: Vec<&RustType> = margin.properties.iter().map(|property| &property.value_type).collect();
+    assert_eq!(types, [&ty(THICKNESS), &ty("Option<::fixture::media::Dock>"), &ty(&format!("Option<::ferroui_base::Ref<{DECORATOR}>>"))]);
+    assert_eq!(scan.model.exports.iter().map(|export| export.path.as_str()).collect::<Vec<_>>(), ["::dependent::Card", "::dependent::panel::Margin"]);
+}
+
 /// A class of a scanned crate by its full name; the failure lists the diagnostics that
 /// may say why it is missing.
 fn class<'a>(scan: &'a Scan, full_name: &str) -> &'a TypeModel {
@@ -999,4 +1084,47 @@ fn real_crates_are_scanned_without_skipping_a_declaration() {
     assert!(controls.statistics.classes > 100, "{}", controls.summary());
     assert!(controls.statistics.registered > 500, "{}", controls.summary());
     assert!(base.statistics.classes > 50 && base.statistics.registered > 50, "{}", base.summary());
+
+    // The export table of the base crate names its types by the paths the controls write.
+    assert!(base.model.exports.len() > base.model.types.len(), "the export table of ferroui_base has {} paths", base.model.exports.len());
+    let set = crate::model_set::ModelSet::new(vec![base.model.clone()]);
+    let ref_path = set.canonical_path("::ferroui_base::Ref");
+    assert!(ref_path.starts_with("::ferroui_base::") && ref_path.ends_with("::Ref"), "{ref_path}");
+    assert_eq!(set.find_rust_type("::ferroui_base::Visual").map(|(_, type_)| type_.full_name()), Some("FerroUI.Visual".to_string()));
+
+    // The controls again, with the model of the base crate attached: what the first scan
+    // left open because it lives in the base crate is resolved against that model.
+    let linked = scan_crate(&options.with_dependencies(vec![base.model.clone()]));
+    println!("==== ferroui_controls, with the model of ferroui_base ====\n{}\n", linked.summary());
+    let unresolved: Vec<String> = linked.diagnostics.iter().filter(|diagnostic| diagnostic.code == codes::UNRESOLVED).map(|diagnostic| diagnostic.to_string()).collect();
+    let mut nameless: Vec<String> = Vec::new();
+    for type_ in &linked.model.types {
+        for registered in type_.registered.iter().filter(|registered| registered.name.is_none()) {
+            nameless.push(format!("{}::{} ({:?}, source {:?})", type_.rust_path.text, registered.accessor, registered.registration, registered.source));
+        }
+    }
+    println!("---- ferroui_controls with ferroui_base: {} unresolved paths, {} registered properties without a name ----", unresolved.len(), nameless.len());
+    for line in unresolved.iter().chain(&nameless) {
+        println!("{line}");
+    }
+    assert!(
+        linked.statistics.unresolved_paths.is_empty() && linked.statistics.type_texts_unresolved == 0,
+        "ferroui_controls with the model of ferroui_base: {} type texts have an unresolved path ({:?}):\n{}",
+        linked.statistics.type_texts_unresolved,
+        linked.statistics.unresolved_paths,
+        unresolved.join("\n")
+    );
+    assert_eq!(linked.statistics.registered_without_name, 0, "ferroui_controls with the model of ferroui_base: registered properties without a name:\n{}", nameless.join("\n"));
+    assert_eq!(linked.statistics.registered, controls.statistics.registered);
+    assert_eq!(linked.model.types.len(), controls.model.types.len());
+
+    // The type texts are canonical: a type of the base crate is named by its declaring module.
+    let decorator = class(&linked, "FerroUI.Controls.Decorator");
+    let child = decorator.registered("Child").unwrap_or_else(|| panic!("Decorator.Child: {:?}", decorator.registered));
+    assert_eq!(child.value_type, ty(&format!("Option<{ref_path}<::ferroui_controls::control::Control>>")));
+    let background = class(&linked, "FerroUI.Controls.Border").registered("Background").expect("Border.Background");
+    assert_eq!(set.canonical(&background.value_type.text), background.value_type.text);
+    // The model with the dependencies is its file, too.
+    let read = crate::model::AssemblyModel::parse(&linked.model.to_json()).expect("the linked model is read back");
+    assert!(read == linked.model, "the linked model read back from its text differs from the scanned one");
 }

@@ -174,6 +174,15 @@ impl Source {
             expanded: BTreeMap::new(),
             read_files: BTreeSet::new(),
         };
+        // The export tables of the crates the crate is built on: what a glob import of one
+        // of their modules brings.
+        for dependency in &options.dependencies {
+            source.modules.extern_crates.insert(dependency.crate_name.clone());
+            source.modules.external_crates.insert(dependency.crate_name.clone());
+            for export in &dependency.exports {
+                source.modules.externals.entry(export.path.clone()).or_insert_with(|| export.declared.clone());
+            }
+        }
         source.read_file(&options.root, 0, true, &[], None);
         source.expand_local_macros();
         source.modules.finish();

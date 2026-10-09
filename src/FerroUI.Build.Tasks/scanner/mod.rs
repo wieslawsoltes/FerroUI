@@ -39,9 +39,12 @@
 //!   [`AccessorModel::call`](crate::model::AccessorModel::call) are not
 //!   chosen (9.5.3): the callable as written, its resolved path, the typed
 //!   function of the member and [`Scan::functions`] are what the choice needs.
-//! - Paths into other crates are absolute as the file spells them; making
-//!   them the paths of the declaring modules needs the models of those crates
-//!   ([`AssemblyModel::dependencies`](crate::model::AssemblyModel::dependencies)).
+//! - Without the models of the crates the crate is built on, paths into them
+//!   are absolute as the file spells them. With them
+//!   ([`ScanOptions::dependencies`]) a path into such a crate is the path of
+//!   the declaring module, a name behind a glob import of such a crate is
+//!   resolved, and an owner added to a property of such a crate has the name
+//!   of the property.
 //! - [`Scan::normalise`] resolves any further type text against the modules
 //!   of the scan (the signatures of the handlers of an `x:Class` type).
 
@@ -60,9 +63,11 @@ use std::path::PathBuf;
 use proc_macro2::TokenTree;
 
 use crate::model::{
-    AccessorModel, AssemblyModel, AttributeModel, AttributeValueModel, CallableModel, EnumMemberModel, GenericModel, MemberModel, ParameterModel,
-    PropertyModel, RegisteredKind, RegisteredModel, RegistrationModel, RustType, TypeKind, TypeModel, XmlnsDefinitionModel, XmlnsPrefixModel,
+    AccessorModel, AssemblyModel, AttributeModel, AttributeValueModel, CallableModel, EnumMemberModel, ExportModel, GenericModel, MemberModel,
+    ParameterModel, PropertyModel, RegisteredKind, RegisteredModel, RegistrationModel, RustType, TypeKind, TypeModel, XmlnsDefinitionModel,
+    XmlnsPrefixModel,
 };
+use crate::model_set::ModelSet;
 use declarations::{
     first_line, property_type, read_registration, Accessor, Declaration, EnumMember, MarkupBody, RawAccessor, RawAttribute, RawMember, RawParameter,
     RawProperty, RawValue,
@@ -113,11 +118,24 @@ pub struct ScanOptions {
     /// The names of the crates the crate is built on. They are needed only where a file
     /// imports a glob of another crate; elsewhere the `use` items tell.
     pub extern_crates: Vec<String>,
+    /// The models of the crates the crate is built on (the ones it depends on directly
+    /// and theirs), as their scans wrote them. With them the scan resolves what lives in
+    /// those crates: the names behind a glob import of one of their modules, the declaring
+    /// module of every type of theirs the crate names (the type texts of the model are
+    /// then canonical, [`ModelSet::canonical`]), and the names of their properties the
+    /// crate adds owners to.
+    pub dependencies: Vec<AssemblyModel>,
 }
 
 impl ScanOptions {
     pub fn new(crate_name: &str, root: impl Into<PathBuf>) -> Self {
-        Self { crate_name: crate_name.to_string(), root: root.into(), assembly_name: None, extern_crates: Vec::new() }
+        Self { crate_name: crate_name.to_string(), root: root.into(), assembly_name: None, extern_crates: Vec::new(), dependencies: Vec::new() }
+    }
+
+    /// The scan with the models of the crates the crate is built on.
+    pub fn with_dependencies(mut self, dependencies: Vec<AssemblyModel>) -> Self {
+        self.dependencies = dependencies;
+        self
     }
 }
 
@@ -404,7 +422,7 @@ pub fn scan_crate(options: &ScanOptions) -> Scan {
         }
     }
     builder.link_properties();
-    builder.finish()
+    builder.finish(&options.dependencies)
 }
 
 /// The text of the type `tokens` written in `module`: every path the modules resolve made
@@ -528,6 +546,7 @@ impl Builder {
     fn class(&mut self, name: &str, base: Option<&Tokens>, kind: TypeKind, site: &Site) {
         let module = self.source.modules.module_path(site.module);
         let mut type_ = TypeModel::new(name, kind, RustType::resolved(&format!("::{module}::{name}")), &module);
+        type_.object_model = true;
         type_.cfg = site.cfg.clone();
         type_.base = base.map(|base| self.rust_type(base, site, None));
         self.add_type(type_, site);
@@ -543,12 +562,14 @@ impl Builder {
             let kind = if type_.class { TypeKind::Class } else { TypeKind::Static };
             match self.index.get(&key) {
                 Some(index) => {
+                    self.model.types[*index].object_model = true;
                     if type_.class {
                         self.model.types[*index].kind = TypeKind::Class;
                     }
                 }
                 None => {
                     let mut model = TypeModel::new(&type_.name, kind, RustType::resolved(&key), &module);
+                    model.object_model = true;
                     model.cfg = type_.site.cfg.clone();
                     self.add_type(model, &type_.site);
                     let message = format!("the runtime type of `{}` is implemented by hand (`impl StaticType`): the model has the type, and not its base", type_.name);
@@ -794,6 +815,7 @@ impl Builder {
                 source: None,
                 assign_binding: registration.assign_binding,
                 inherits: registration.inherits,
+                read_only: kind == RegisteredKind::Direct && registration.read_only,
                 added_owners: Vec::new(),
             };
             match registration.kind {
@@ -947,8 +969,52 @@ impl Builder {
         self.model.metadata = self.text_pairs(&assembly.metadata, &assembly.site, "the metadata of the assembly");
     }
 
+    /// What the models of the crates the crate is built on give the model: every type
+    /// text and every resolved callable is written with the paths of the declaring
+    /// modules, and an owner added to (or an alias of) a property of one of those crates
+    /// has the name of the property.
+    fn link_dependencies(&mut self, dependencies: &[AssemblyModel]) {
+        if dependencies.is_empty() {
+            return;
+        }
+        let set = ModelSet::new(dependencies.to_vec());
+        for type_ in &mut self.model.types {
+            type_.visit_types_mut(&mut |rust_type: &mut RustType| {
+                if rust_type.text.contains("::") {
+                    rust_type.text = set.canonical(&rust_type.text);
+                }
+            });
+            type_.visit_callables_mut(&mut |callable: &mut CallableModel| {
+                let canonical = callable.resolved.as_deref().map(|resolved| set.canonical_path(resolved));
+                if canonical.is_some() {
+                    callable.resolved = canonical;
+                }
+            });
+        }
+        // The names: an accessor is followed to the declaration of its property through
+        // the accessors of this crate and of the other crates alike.
+        let mut models = dependencies.to_vec();
+        models.push(self.model.clone());
+        let own = models.len() - 1;
+        let set = ModelSet::new(models);
+        let mut names: Vec<(usize, usize, String)> = Vec::new();
+        for (type_index, type_) in set.models()[own].types.iter().enumerate() {
+            for (position, registered) in type_.registered.iter().enumerate() {
+                if registered.name.is_some() {
+                    continue;
+                }
+                if let Some(name) = set.name_of(registered) {
+                    names.push((type_index, position, name.to_string()));
+                }
+            }
+        }
+        for (type_index, position, name) in names {
+            self.model.types[type_index].registered[position].name = Some(name);
+        }
+    }
+
     /// The namespaces and the public paths of the types, the functions, the numbers.
-    fn finish(mut self) -> Scan {
+    fn finish(mut self, dependencies: &[AssemblyModel]) -> Scan {
         let public = self.source.modules.public_paths();
         for index in 0..self.model.types.len() {
             let namespace = match &self.model.types[index].explicit_namespace {
@@ -960,6 +1026,8 @@ impl Builder {
             let path = type_.rust_path.text.strip_prefix("dyn ").unwrap_or(&type_.rust_path.text);
             type_.public_path = public.get(path).cloned();
         }
+        self.model.exports = self.source.modules.export_table().into_iter().map(|(path, declared)| ExportModel { path, declared }).collect();
+        self.link_dependencies(dependencies);
 
         // The public paths the crate states for the emitter, against the ones found here.
         let rust_paths = std::mem::take(&mut self.source.rust_paths);
