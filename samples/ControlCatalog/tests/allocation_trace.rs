@@ -107,6 +107,12 @@ mod recording {
         let _ = INSIDE.try_with(|inside| inside.set(false));
     }
 
+    /// Whether the thread is inside the recorder: what it allocates and
+    /// frees there is the recorder's own and is not counted.
+    pub fn is_inside() -> bool {
+        INSIDE.try_with(Cell::get).unwrap_or(false)
+    }
+
     fn call_stack() -> ([usize; FRAMES], u8) {
         let mut frames = [0usize; FRAMES];
         let mut length = 0;
@@ -313,6 +319,10 @@ mod recording {
     pub fn allocated(_ptr: *mut u8, _size: usize) {}
     #[cfg(feature = "count-allocations")]
     pub fn freed(_ptr: *mut u8) {}
+    #[cfg(feature = "count-allocations")]
+    pub fn is_inside() -> bool {
+        false
+    }
     pub fn start() {}
     pub fn stop() {}
     pub fn next_epoch() -> u32 {
@@ -334,7 +344,7 @@ mod recording {
 }
 
 #[cfg(feature = "count-allocations")]
-pub(super) use recording::{allocated, freed};
+pub(super) use recording::{allocated, freed, is_inside};
 
 /// Starts recording: the records of an earlier recording are kept.
 pub fn start() {
@@ -438,9 +448,10 @@ pub fn demangle(name: &str) -> String {
 
 #[test]
 fn a_legacy_symbol_is_demangled_to_its_path() {
+    let implementation = "_$LT$alloc..vec..Vec$LT$T$GT$$u20$as$u20$core..ops..Drop$GT$";
     assert_eq!(
         "<alloc::vec::Vec<T> as core::ops::Drop>::drop",
-        demangle("__ZN66_$LT$alloc..vec..Vec$LT$T$GT$$u20$as$u20$core..ops..Drop$GT$4drop17h0123456789abcdefE")
+        demangle(&format!("__ZN{}{implementation}4drop17h0123456789abcdefE", implementation.len()))
     );
     assert_eq!("core::ptr::drop_in_place", demangle("_ZN4core3ptr13drop_in_place17h0123456789abcdefE"));
     assert_eq!("_malloc", demangle("_malloc"));
