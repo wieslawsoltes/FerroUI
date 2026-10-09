@@ -70,7 +70,7 @@ fn catalog_services() -> TestServices {
 }
 
 /// [`catalog_services`] with `clock` as the global clock.
-fn catalog_services_with_clock(clock: Rc<TestGlobalClock>) -> TestServices {
+pub(super) fn catalog_services_with_clock(clock: Rc<TestGlobalClock>) -> TestServices {
     TestServices::styled_window()
         .with_render_interface(Rc::new(ferroui_skia::PlatformRenderInterface::new(None, None)))
         .with_font_manager_impl(Rc::new(ferroui_skia::FontManagerImpl::new()))
