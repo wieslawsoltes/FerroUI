@@ -355,6 +355,7 @@ pub fn classes() -> Vec<(&'static ::ferroui_base::TypeInfo, &'static str)> {
         (<::ferroui_controls::shapes::Shape as ::ferroui_base::StaticType>::TYPE, "ferroui_controls::shapes::Shape"),
         (<::ferroui_controls::utils::BindingEvaluator as ::ferroui_base::StaticType>::TYPE, "ferroui_controls::utils::BindingEvaluator"),
         (<::ferroui_markup_xaml::diagnostics::XamlSourceInfo as ::ferroui_base::StaticType>::TYPE, "ferroui_markup_xaml::diagnostics::XamlSourceInfo"),
+        (<::ferroui_markup_xaml_tests::support::emitter::Captioned as ::ferroui_base::StaticType>::TYPE, "ferroui_markup_xaml_tests::support::emitter::Captioned"),
         (<::ferroui_markup_xaml_tests::support::emitter::FailingEndInit as ::ferroui_base::StaticType>::TYPE, "ferroui_markup_xaml_tests::support::emitter::FailingEndInit"),
         (<::ferroui_markup_xaml_tests::support::xaml::event_tests::MyButton as ::ferroui_base::StaticType>::TYPE, "ferroui_markup_xaml_tests::support::xaml::event_tests::MyButton"),
         (<::ferroui_markup_xaml_tests::support::xaml::event_tests::MyHost as ::ferroui_base::StaticType>::TYPE, "ferroui_markup_xaml_tests::support::xaml::event_tests::MyHost"),
@@ -883,6 +884,11 @@ pub fn markup_types() -> Vec<(&'static ::ferroui_base::metadata::MarkupType, &'s
         (<dyn ::ferroui_markup_xaml::xamlx_runtime::IXamlParentStackProviderV1 as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "ferroui_markup_xaml::xamlx_runtime::IXamlParentStackProviderV1", true),
         (<dyn ::ferroui_markup_xaml::xamlx_runtime::IXamlXmlNamespaceInfoProviderV1 as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "ferroui_markup_xaml::xamlx_runtime::IXamlXmlNamespaceInfoProviderV1", true),
         (<::ferroui_markup_xaml::xamlx_runtime::XamlXmlNamespaceInfoV1 as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "ferroui_markup_xaml::xamlx_runtime::XamlXmlNamespaceInfoV1", false),
+        (<::ferroui_markup_xaml_tests::support::emitter::Caption as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "ferroui_markup_xaml_tests::support::emitter::Caption", false),
+        (<::ferroui_markup_xaml_tests::support::emitter::CaptionConverter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "ferroui_markup_xaml_tests::support::emitter::CaptionConverter", false),
+        (<::ferroui_markup_xaml_tests::support::emitter::Row as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "ferroui_markup_xaml_tests::support::emitter::Row", false),
+        (<::ferroui_markup_xaml_tests::support::emitter::RowList as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "ferroui_markup_xaml_tests::support::emitter::RowList", false),
+        (<::ferroui_markup_xaml_tests::support::emitter::Table as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "ferroui_markup_xaml_tests::support::emitter::Table", false),
     ]
 }
 
@@ -2029,5 +2035,6 @@ pub fn property_accessors() -> Vec<(&'static ::ferroui_base::FerroProperty, &'st
         (::ferroui_base::Registrable::as_registered_property(::ferroui_controls::shapes::Shape::stroke_property()), "ferroui_controls::shapes::Shape::stroke_property"),
         (::ferroui_base::Registrable::as_registered_property(::ferroui_controls::shapes::Shape::stroke_thickness_property()), "ferroui_controls::shapes::Shape::stroke_thickness_property"),
         (::ferroui_base::Registrable::as_registered_property(::ferroui_controls::utils::BindingEvaluator::value_property()), "ferroui_controls::utils::BindingEvaluator::value_property"),
+        (::ferroui_base::Registrable::as_registered_property(::ferroui_markup_xaml_tests::support::emitter::Captioned::caption_property()), "ferroui_markup_xaml_tests::support::emitter::Captioned::caption_property"),
     ]
 }

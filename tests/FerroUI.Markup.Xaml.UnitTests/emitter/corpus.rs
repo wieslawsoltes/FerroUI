@@ -7,7 +7,8 @@
 //! the emitter does not cover would be). A document in neither list is only reported. A
 //! document whose load fails is compared by the exception type and the message of the error
 //! (`duplicate_name.xaml`, `multiline_duplicate_name.xaml`, `end_init_failure.xaml`, whose
-//! control fails in `EndInit`, `static_resource_missing.xaml`). A document whose
+//! control fails in `EndInit`, `static_resource_missing.xaml`, the documents whose type
+//! converter fails or yields a value of another type, or finds no asset). A document whose
 //! load panics (a value a validator rejects) cannot be in the corpus: the harness does not
 //! catch panics.
 
@@ -124,6 +125,14 @@ pub const DOCUMENTS: &[(&str, &str)] = &[
     ("style_selectors.xaml", "<Border xmlns='https://github.com/ferroui' xmlns:x='http://schemas.microsoft.com/winfx/2006/xaml' Name='Root'><Border.Styles><Style Selector='Button.primary:pointerover'><Setter Property='Opacity' Value='0.5'/></Style><Style Selector='#Root > TextBlock'><Setter Property='Opacity' Value='0.5'/></Style><Style Selector='StackPanel Border'><Setter Property='Opacity' Value='0.5'/></Style><Style Selector='Button /template/ ContentPresenter'><Setter Property='Opacity' Value='0.5'/></Style><Style Selector='TextBlock:not(.muted)'><Setter Property='Opacity' Value='0.5'/></Style><Style Selector='ListBoxItem:nth-child(2n+1)'><Setter Property='Opacity' Value='0.5'/></Style><Style Selector='TextBlock[IsVisible=True]'><Setter Property='Opacity' Value='0.5'/></Style><Style Selector='Border[(Grid.Row)=1]'><Setter Property='Opacity' Value='0.5'/></Style><Style Selector='TextBlock, Border.card'><Setter Property='Opacity' Value='0.5'/></Style><Style Selector=':is(Control)'><Setter Property='Opacity' Value='0.5'/></Style></Border.Styles></Border>"),
     ("style_nested.xaml", "<Border xmlns='https://github.com/ferroui' xmlns:x='http://schemas.microsoft.com/winfx/2006/xaml'><Border.Styles><Style Selector='Button'><Setter Property='Opacity' Value='0.25'/><Style Selector='^:pressed'><Setter Property='Opacity' Value='0.75'/></Style><Style Selector='^ /template/ ContentPresenter'><Setter Property='Margin' Value='2'/></Style></Style></Border.Styles></Border>"),
     ("style_resources.xaml", "<Border xmlns='https://github.com/ferroui' xmlns:x='http://schemas.microsoft.com/winfx/2006/xaml'><Border.Resources><SolidColorBrush x:Key='Accent' Color='Blue'/></Border.Resources><Border.Styles><Style Selector='Border.accent'><Setter Property='Background' Value='{StaticResource Accent}'/><Setter Property='BorderBrush' Value='{DynamicResource Accent}'/></Style></Border.Styles></Border>"),
+    ("type_converter.xaml", "<StackPanel xmlns='https://github.com/ferroui'\n            xmlns:t='clr-namespace:FerroUI.Markup.Xaml.UnitTests;assembly=FerroUI.Markup.Xaml.UnitTests'>\n  <t:Captioned Caption='plain'/>\n  <Border><t:Captioned Caption='@parent'/></Border>\n  <t:Captioned Caption='none'/>\n</StackPanel>\n"),
+    ("type_converter_failure.xaml", "<Border xmlns='https://github.com/ferroui'\n        xmlns:t='clr-namespace:FerroUI.Markup.Xaml.UnitTests;assembly=FerroUI.Markup.Xaml.UnitTests'>\n  <t:Captioned\n      Caption='!text'/>\n</Border>\n"),
+    ("type_converter_cast_failure.xaml", "<Border xmlns='https://github.com/ferroui'\n        xmlns:t='clr-namespace:FerroUI.Markup.Xaml.UnitTests;assembly=FerroUI.Markup.Xaml.UnitTests'>\n  <t:Captioned Caption='number'/>\n</Border>\n"),
+    ("type_converter_base_uri.xaml", "<Border xmlns='https://github.com/ferroui'\n        xmlns:t='clr-namespace:FerroUI.Markup.Xaml.UnitTests;assembly=FerroUI.Markup.Xaml.UnitTests'>\n  <t:Captioned Caption='/name'/>\n</Border>\n"),
+    ("image_source_missing_asset.xaml", "<Border xmlns='https://github.com/ferroui' xmlns:x='http://schemas.microsoft.com/winfx/2006/xaml'>\n  <Image Source='ferres://FerroUI.Markup.Xaml.UnitTests/Assets/missing.png'/>\n</Border>\n"),
+    ("image_brush_source_missing_asset.xaml", "<Border xmlns='https://github.com/ferroui' xmlns:x='http://schemas.microsoft.com/winfx/2006/xaml'><Border.Background><ImageBrush Source='ferres://FerroUI.Markup.Xaml.UnitTests/Assets/missing.png' Stretch='Fill'/></Border.Background></Border>"),
+    ("image_source_rooted.xaml", "<Border xmlns='https://github.com/ferroui' xmlns:x='http://schemas.microsoft.com/winfx/2006/xaml'>\n  <Image Source='/Assets/missing.png'/>\n</Border>\n"),
+    ("items_source_typed_list.xaml", "<ItemsControl xmlns='https://github.com/ferroui' xmlns:x='http://schemas.microsoft.com/winfx/2006/xaml'\n              xmlns:t='clr-namespace:FerroUI.Markup.Xaml.UnitTests;assembly=FerroUI.Markup.Xaml.UnitTests'\n              x:DataType='t:Table' ItemsSource='{CompiledBinding Rows}'>\n  <ItemsControl.ItemTemplate>\n    <DataTemplate>\n      <TextBlock Text='{CompiledBinding Name}'/>\n    </DataTemplate>\n  </ItemsControl.ItemTemplate>\n</ItemsControl>\n"),
 ];
 
 /// The documents that must be eligible for emission.
@@ -237,7 +246,24 @@ pub const EXPECTED_ELIGIBLE: &[&str] = &[
     "style_selectors.xaml",
     "style_nested.xaml",
     "style_resources.xaml",
+    "type_converter.xaml",
+    "type_converter_failure.xaml",
+    "type_converter_cast_failure.xaml",
+    "type_converter_base_uri.xaml",
+    "image_source_missing_asset.xaml",
+    "image_brush_source_missing_asset.xaml",
+    "image_source_rooted.xaml",
+    "items_source_typed_list.xaml",
 ];
+
+/// The documents whose values depend on the base URI of the document or on a service of
+/// the application (a text a type converter converts with the base URI of its context; the
+/// path of an asset, which the asset loader opens). Generated code states the URI of its
+/// document; the run-time loader is given the same URI for them, in an application with an
+/// asset loader, in a test of their own
+/// (`documents_that_read_their_base_uri_build_equal_object_trees`).
+pub const BASE_URI_DOCUMENTS: &[&str] =
+    &["type_converter_base_uri.xaml", "image_source_missing_asset.xaml", "image_brush_source_missing_asset.xaml", "image_source_rooted.xaml"];
 
 /// The documents that must not be eligible for emission.
 pub const EXPECTED_NOT_ELIGIBLE: &[&str] = &[];

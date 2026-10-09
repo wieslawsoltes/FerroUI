@@ -312,6 +312,8 @@ const KNOWN: &[(Known, &str)] = &[
     (Known::Property, "&'static ::ferroui_base::FerroProperty"),
     (Known::OptionProperty, "Option<&'static ::ferroui_base::FerroProperty>"),
     (Known::Delegate, "::ferroui_base::metadata::MarkupDelegate"),
+    (Known::TypeDescriptorContext, "::std::rc::Rc<dyn ::ferroui_markup_xaml::converters::ITypeDescriptorContext>"),
+    (Known::OptionTypeDescriptorContext, "Option<::std::rc::Rc<dyn ::ferroui_markup_xaml::converters::ITypeDescriptorContext>>"),
 ];
 
 /// The primitive types generated code names by their name, and `String` by its path.

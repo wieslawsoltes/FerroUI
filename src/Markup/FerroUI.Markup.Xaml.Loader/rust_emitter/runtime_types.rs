@@ -15,6 +15,7 @@ use ferroui_base::data::core::{ValueType, ValueTypes};
 use ferroui_base::data::CompiledBindingPath;
 use ferroui_base::metadata::{property_accessors, rust_path_of_type, IServiceProvider, MarkupType, MarkupTyped, PropertyAccessor};
 use ferroui_base::{BoxedValue, FerroProperty, StyledElement, TypeInfo};
+use ferroui_markup_xaml::converters::ITypeDescriptorContext;
 use ferroui_markup_xaml::xaml_il::runtime::DeferredContent;
 use xamlx::type_system::{IXamlConstructor, IXamlField, IXamlMethod, IXamlType};
 
@@ -240,6 +241,8 @@ impl EmitTypes for RuntimeEmitTypes {
             Known::Property => TypeId::of::<&'static FerroProperty>(),
             Known::OptionProperty => TypeId::of::<Option<&'static FerroProperty>>(),
             Known::Delegate => TypeId::of::<ferroui_base::metadata::MarkupDelegate>(),
+            Known::TypeDescriptorContext => TypeId::of::<Rc<dyn ITypeDescriptorContext>>(),
+            Known::OptionTypeDescriptorContext => TypeId::of::<Option<Rc<dyn ITypeDescriptorContext>>>(),
         })
     }
 
@@ -277,6 +280,8 @@ impl EmitTypes for RuntimeEmitTypes {
             Known::Property => TypeId::of::<Option<&'static FerroProperty>>(),
             Known::OptionProperty => TypeId::of::<Option<Option<&'static FerroProperty>>>(),
             Known::Delegate => TypeId::of::<Option<ferroui_base::metadata::MarkupDelegate>>(),
+            Known::TypeDescriptorContext => TypeId::of::<Option<Rc<dyn ITypeDescriptorContext>>>(),
+            Known::OptionTypeDescriptorContext => TypeId::of::<Option<Option<Rc<dyn ITypeDescriptorContext>>>>(),
         })
     }
 
