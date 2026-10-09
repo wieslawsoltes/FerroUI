@@ -7,6 +7,12 @@
 //!   resolver ([`IMessageTypeResolver`], [`DefaultMessageTypeResolver`])
 //!   maps identifiers to classes.
 //! - The serialization of a message as a BSON document ([`metsys_bson`]).
+//! - The transports: the contract of a connection
+//!   ([`IFerroRemoteTransportConnection`], whose module states the threading
+//!   contract of the port), the connection over a pair of byte streams, the
+//!   transport over TCP ([`BsonTcpTransport`], [`TcpTransportBase`]) and the
+//!   wrapper that stashes events and queues sends
+//!   ([`TransportConnectionWrapper`]).
 //!
 //! The library is a leaf, as the upstream project is: it uses nothing of the
 //! framework, so that a tool that only talks the protocol can use it alone.
@@ -14,13 +20,20 @@
 pub mod metsys_bson;
 
 mod assembly;
+mod bson_stream_transport;
+mod bson_tcp_transport;
 mod default_message_type_resolver;
 mod design_messages;
 mod error;
+mod event_stash;
 mod ferro_remote_message_guid_attribute;
 mod guid;
 mod i_message_type_resolver;
+mod i_transport;
 mod input_messages;
+mod task;
+mod tcp_transport_base;
+mod transport_connection_wrapper;
 mod transport_messages;
 mod viewport_messages;
 
@@ -55,9 +68,17 @@ pub mod designer {
 }
 
 pub use assembly::{Assembly, ExportedType, ASSEMBLY};
+pub use bson_tcp_transport::BsonTcpTransport;
 pub use default_message_type_resolver::DefaultMessageTypeResolver;
 pub use error::Error;
 pub use ferro_remote_message_guid_attribute::{FerroRemoteMessage, FerroRemoteMessageGuidAttribute};
 pub use guid::Guid;
 pub use i_message_type_resolver::IMessageTypeResolver;
+pub use i_transport::{
+    exception_handler, message_handler, ExceptionHandler, Handler, HandlerToken, IFerroRemoteTransportConnection,
+    Message, MessageHandler,
+};
+pub use task::{Task, TaskCompletionSource};
+pub use tcp_transport_base::{DisposableServer, DisposeCallback, TcpTransportBase};
+pub use transport_connection_wrapper::TransportConnectionWrapper;
 pub use transport_messages::HtmlTransportStartedMessage;
