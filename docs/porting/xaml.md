@@ -1258,6 +1258,22 @@ The type descriptor context is a Rust type the emitter names, in both hosts (`Kn
 
 **Proof.** Seven documents of the corpus (9.10.2), emitted the same by both hosts: a converter of the test crate on a registered property (a text, the nearest parent that is a control, null, the base URI, a failure of the converter, a value of another type), and the converter of bitmaps for an `Image` and an `ImageBrush`. A bitmap that exists is not loaded by any test (the test services decode none): the documents of the bitmap converter are compared by the failure both back ends raise for an asset that does not exist, looked for below the base URI of the document.
 
+#### 9.4.7 Implemented (2026-10-09): the type of an untyped value as a value
+
+`{x:Type x:Object}` and `x:DataType="x:Object"` (`TabControlPage`). `System.Object` is no class of the object model, has no markup metadata and is no primitive of `EmitTypes::primitive_type_name`, so `XamlTypeExtensionNode` had no form for it. The run-time loader passes the value type of the handle of the type (`RuntimeTypeValue::to_handle`, `to_untyped_value`), and the handle of `System.Object` is the Rust type that holds an untyped value. The emitter writes that type where the handle of the named type is the untyped one (`Handle::is_object`, answered by both hosts): `::ferroui_base::data::core::ValueType::of::<::core::option::Option<::ferroui_base::BoxedValue>>()`, which is `ValueType::object()`, as a value type, in its nullable form (`DataTemplate.DataType`) and boxed for an untyped target (`Tag`). Where a class is declared (`&'static TypeInfo`) there is no form, as at run time (`.. is not a class of the object model`). Corpus: `type_extension_object.xaml`.
+
+#### 9.4.8 Implemented (2026-10-09): a compiled binding path over a property whose type generated code cannot name
+
+The element of a plain property in a compiled binding path is `rt::path_property(&builder, <Owner>::MARKUP, "Name", is_static, <type of the property>, ..)`, and so is the description of a provide-value target property (`rt::clr_property_info`). The type of the property was written as the handle of a type with metadata, of a class, of a primitive or of an element reference (`Emitter::handle_expr`), and a document was refused for every other property type: `T has no metadata` and `no public Rust path is recorded for T` (six documents of the catalog: a list of a type of the sample, `SelectedItemsList`, `ErrorConverter`, `Nullable<DateTime>`, `Nullable<FlexAlignItems>`, `IObservable<Object>`).
+
+The run-time loader passes `handle_of(property.property_type())`. For a type nothing declares, that handle is the Rust type the declaration of the property states (the type system made the type from it). So where `handle_expr` has no form, and the handle of the type of the property is the Rust type the declaration states for the getter (`DeclaredMethod::returns` of `EmitTypes::method`, compared by the emitter, in both hosts), the emitter writes
+
+```rust
+rt::declared_property_type(<Owner as MarkupTyped>::MARKUP, "Name", is_static)
+```
+
+which reads the type from the declaration at run time (`MarkupProperty::type_`). Where the two differ (a type of the runtime library with several Rust handles, of which the property states another than the first) or the property has no getter, the document is refused as before: the type generated code would pass is not the one the run-time loader passes. No existing output has the new form (a type `handle_expr` names is written as before). Corpus: `compiled_binding_unnamed_types.xaml` (`Row.Stamp`, a Rust type without metadata, and `Row.Length`, `Option<i32>`), with `compiled_bindings_read_properties_of_types_generated_code_cannot_name`, which sets a data context and reads the values both back ends deliver.
+
 ### 9.5 Typing without the framework linked into the build tool
 
 #### 9.5.1 Inputs of the build-time type system
@@ -1945,7 +1961,71 @@ Everything the measure of the catalog counts as emitted is Rust rustc has not se
 
 It proves, for five documents (`CheckBoxPage`, `ProgressBarPage`, `ButtonSpinnerPage`, `WrapPanelPage`, `ImagePage`): the build emits them from the scan of the sample's own sources; rustc compiles the 207,653 bytes; four of them load to the tree the run-time loader builds, a handler is the method of the class, the compiled bindings deliver the typed list of the view model; the fifth fails to load as it does with the run-time loader, because no bitmap can be loaded in the tests. HANDOVER.md, section 19, has the exact list and what is not proven.
 
-**It also found the first code rustc refuses.** `CanvasPage` and `SliderPage` are emitted and do not compile: the instance of a member a named collection inherits from the list it derives from is passed as `&value`, which is right only where the Rust type dereferences to the Rust type of the base (`RowDefinitions`), and that is not a fact either type system has (`Points`, `TickList`). The measure cannot see it. HANDOVER.md, section 19, "The first real compile: what rustc refuses", has the errors and the ways to give the emitter the fact; it is the first item of the next stage, before any conversion.
+*(Superseded by 9.5.18 and 9.5.19: the fact is a registration, and the fixture is the whole sample.)* **It also found the first code rustc refuses.** `CanvasPage` and `SliderPage` are emitted and do not compile: the instance of a member a named collection inherits from the list it derives from is passed as `&value`, which is right only where the Rust type dereferences to the Rust type of the base (`RowDefinitions`), and that is not a fact either type system has (`Points`, `TickList`). The measure cannot see it. HANDOVER.md, section 19, "The first real compile: what rustc refuses", has the errors and the ways to give the emitter the fact; it is the first item of the next stage, before any conversion.
+
+#### 9.5.18 Implemented (2026-10-09): what dereferences to its base is a registration
+
+The rule of the emitter for the instance of an instance member (`Emitter::receiver`): a value of the declaring type is passed as `&value`; a value of a class that derives from the declaring class as `value.upcast_ref::<Base>()`; a value of a type with markup metadata whose declaration names the declaring type as a base was passed as `&value` too, on the assumption that the Rust type of the one dereferences to the Rust type of the other. The assumption holds for `RowDefinitions` and fails for `Points` and `TickList`, and neither type system could tell them apart (9.5.17).
+
+The fact is now a registration (ruling 8 of HANDOVER.md):
+
+```rust
+// src/FerroUI.Controls/markup_types/plain.rs, next to the casts of the collections
+ValueTypes::register_deref::<RowDefinitions, FerroList<Ref<RowDefinition>>>(|c| c);
+```
+
+| Part | What it does |
+|---|---|
+| `ValueTypes::register_deref::<From, To>(deref: fn(&From) -> &To)` (`ferroui-base`) | The argument is the coercion, written `|c| c`: the call compiles exactly when `&From` coerces to `&To`, so the fact cannot be stated of a pair it does not hold for. With the feature `compiler-metadata` the pair is recorded in the registry of the untyped value conversions (`ValueTypes::dereferences`, `dereference_count`); without it the call records nothing. It registers no conversion: the cast of the pair is `register_cast`, as before |
+| The scanner | `deref` is one more name of `VALUE_REGISTRATIONS` (two type arguments): the call is read like the other registrations with stated types, into `AssemblyModel::value_types`, and a call whose types are not read is counted in `unread_value_types`. The format of the `.xamlmeta` is unchanged (a registration is a name and its types) |
+| `EmitTypes::dereferences(from, to)` | `RuntimeEmitTypes`: the registry. `ModelEmitTypes`: the pairs of the `deref` registrations of the models; when a crate has such a call the scan did not read, a *no* is recorded as a question the models cannot answer and the document is refused (9.5.12) |
+| `Emitter::receiver` | `&value` for a base only when `dereferences(handle of the value, handle of the base)`; otherwise no receiver, and the caller converts the instance as the run-time loader does (`rt::cast` of a clone of the value, through the cast the crate registers; `rt::instance` for the nullable form) |
+| The drift test (`type_system_drift.rs`) | For every type both sides have and each base of it, the two hosts give the same answer; the pairs that dereference are as many as the scans read and as many as the registry holds |
+
+Registered: `KeyFrames` and `Transitions` (base crate), `Controls`, `InlineCollection`, `DataTemplates`, `RowDefinitions`, `ColumnDefinitions` (controls): the named collections that implement `Deref` down to their list. Not registered, because the coercion does not exist: the collections that hold their list (`Points`, `GradientStops`, `PathFigures`, `PathSegments`, `GeometryCollection`, `Transforms`, `DrawingCollection`, `FontFeatureCollection`, `TextDecorationCollection`) and `TickList` (it dereferences to `FerroList<f64>`, and the base its declaration names is `MediaCollection<f64>`). For these the instance is converted by the registered cast, which yields the same list, so `Add` and `Capacity` reach the collection as they do in the run-time loader.
+
+No existing output changed (the corpus, both themes, the dialogs, the fixtures: their byte checks). The corpus has `list_text_held_collection.xaml` (`Points` of a polygon and of a polyline, `Ticks` of a slider, and `RowDefinitions` in one document: the converted instance and the borrowed one side by side), emitted the same by both hosts and equal to the run-time loader's tree; `CanvasPage` and `SliderPage` are in the fixture of 9.5.17, compile, and load to the run-time loader's trees with the points and the ticks of their texts.
+
+#### 9.5.19 Implemented (2026-10-09): everything the compiler emits for the catalog is compiled by rustc and compared
+
+The fixture of 9.5.17 is now the whole sample. It is still not a copy and not a conversion: `samples/ControlCatalog` is unchanged but for the export of five typed lists (below) and loads its documents with the run-time loader.
+
+| Part | What it is |
+|---|---|
+| `lib.rs` | The modules of the sample by `#[path]`: `Controls/mod.rs`, `Converter/mod.rs`, `Models/mod.rs`, `Pages/mod.rs`, `ViewModels/mod.rs`, `Views/mod.rs` and the root files (`app.rs`, `main_view.rs`, `main_window.rs`, `decorated_window.rs`, `transparent_styles.rs`, `icons.rs`, `page_assets.rs`, `smoke.rs`). The scanner follows them: 308 files, 295 types, 0 declarations not read, in about a second. `extern crate self as xaml_catalog_fixture;` (see the errors below) |
+| `markup.rs` | The module of the sample with one difference: `load_component` (what `initialize_component()` of every class calls) populates the instance from the compiled markup of the document when the build compiled it (`populate_compiled`, over the table `COMPILED` the build script writes from the model of the build: document, class, `populate`), and with the run-time loader otherwise, as the sample does |
+| `register_types.rs`, `assets.rs` | The files of the sample with the name of this crate in the namespace table, over the tables the build script writes (the documents and the assets of the sample, as the files are) |
+| `documents.rs` | `PAGES` (the seven pages a build without the feature compiles), `REFUSED` (the documents the compiler refuses, each with its reason), `NOT_LOADED` and `NOT_RUN` (compiled documents the tests cannot compare, each with its reason: both are empty) |
+| `build.rs` | Exports the models of the three crates that do not export theirs yet (the colour picker, the OpenGL controls, `mini-mvvm`) into its output directory, then `Build::new(..).type_system(TypeSystem::Model).default_compile_bindings(true)` with one group per compiled document, as the measure builds them. With the feature `catalog`: every document but `REFUSED`; without it: `PAGES`. A refused document that is not listed fails the build |
+| `tests/mod.rs` | One test per compiled document with a class, written by the build script: `compare(path, application)` creates the class twice without the body of its constructor, populates one by its compiled markup and one by the run-time loader from the same document, and compares the dumps (every object with its class, the registered properties set on it with values and priorities, its name, its logical children), each dumped before the other instance exists. The application is the one the tests of the sample start for the document (`test_applications.txt`): the test services of the catalog (the Skia render interface and font manager, the HarfBuzz shaper, the assets of the sample) with the Simple theme and the resources of `CustomThemes.xaml`, or the application class of the sample |
+
+**What it found.** The build with the feature emits the documents the measure counts and rustc compiles all of them.
+
+| | Emitted | Compiled by rustc | The tree of the run-time loader | Emitted Rust |
+|---|---|---|---|---|
+| The stage before (9.5.17) | 195 | 5 | 4 (the fifth fails the same in both back ends) | 12,908,248 bytes |
+| With the dereference fact (9.5.18) and the lists exported | 199 | 199 | 199 of 199 with a class | 13,185,447 bytes, 138,082 lines |
+| With the type of an untyped value (9.4.7) | 200 | 200 | 200 of 200 | |
+| With the declared type of a property (9.4.8) | 206 | 206 | 205 of 205 with a class; `CustomThemes.xaml` has none and is compared by the number of its resources | 13,800,499 bytes, 144,673 lines |
+
+rustc errors, by cause, over the whole of the emitted code:
+
+| Errors | Code | Cause | Fix |
+|---|---|---|---|
+| 16 (2 documents) | `E0308` | The instance of a member a named collection inherits passed as `&value` (9.5.17) | 9.5.18: the fact is a registration; the emitter converts where it is not registered |
+| 54 (1 document) | `E0433` | A document without a class (`CustomThemes.xaml`) names the classes of its own crate by the name of the crate (`::xaml_catalog_fixture::controls::SamplePage`), which a crate cannot say of itself; the file of a class names them through `crate` (`generate_class_file_with` rewrites the prefix) | The crate declares `extern crate self as <crate>;`, as the include fixture and the XAML test crate do. The emitter is unchanged: writing `crate::` in the file of a group too is the better form, and changes the output of the include fixture, so it is left for the stage that converts the sample |
+
+Nothing else: no other document of the 206 has an error or a warning of its own under rustc.
+
+Every compiled document with a class loads in both back ends and to the same tree. Three things the tests had to do to say so, each a fact about the sample and not about the compiler: a page with bitmaps needs the assets and a render interface that decodes them (the fixture embeds the assets of the sample and uses the Skia services of the sample's tests; `ImagePage` now loads its bitmaps by compiled markup and the images have the sizes of the run-time loader's); pages that read the resources of the application need them (`CustomThemes.xaml`, and for `SettingsPage` the application class); and two instances of one page are not independent (the radio buttons of a group outside a visual tree are one group), so each tree is dumped before the other exists.
+
+**Found and not fixed: a registration only the run-time loader makes.** With the application of a test merging the *compiled* `CustomThemes.xaml`, no run-time load precedes the first compiled page, and 19 comparisons differ in how one value prints: `DataValidationErrors.Errors` is `Option<Vec<BoxedValue>>`, and `Option<Vec<T>>` is registered as the nullable form of `Vec<T>` by the type system of the run-time loader when it is first created (`RuntimeArray::register_element`, `runtime/type_system/values.rs`). The trees are the same; the untyped value conversions of the process are not, until the run-time loader has loaded something. A process with compiled markup only (the converted sample) never gets that registration. The fixture loads `CustomThemes.xaml` with the run-time loader at the start of each test, as the tests of the sample do, and says why. The conversion of the sample has to find which registrations of `RuntimeTypeSystem::new` generated code relies on and move them to where a crate registers its types.
+
+**The lists of the sample.** Compiled markup is a module of its own, so a type it names needs a public path. Five typed lists (`ferro_markup_list!`) were `pub` in private modules: `StandardCursorList`, `CountryList`, `NodeList`, `WrapPanelItemList` and `FormatObjectList` are now in the `pub use` of their modules (`ViewModels/mod.rs`, `Pages/mod.rs`). It is the one change to the sample.
+
+**Cost.** On the machine of the author (the dependencies built, debug profile without debug information): the build script and the test binary without the feature 85 s, with it 165 s; the tests 1 s and 10 s. The build script itself: the three exports and the scan about 2 s, the 206 documents about 11 s. The feature is off by default, so `cargo test --workspace` (CI) builds the seven pages, each with a test, and the other classes populated by the run-time loader; the whole set is `cargo test -p xaml-catalog-fixture --lib --features catalog`.
+
+**The measure and the fixture cannot drift.** `emitter::catalog_measure` reads `documents.rs` of the fixture and fails when the documents it finds refused are not exactly `REFUSED`; the build of the fixture fails when a document outside the list is refused.
 
 ### 9.6 Build integration
 
@@ -2217,7 +2297,7 @@ For applications, `export_metadata()` can generate the whole function (`$OUT_DIR
 | `XamlMarkupExtensionNode` | 9.3.4 | 9.3.4 | — |
 | `XamlObjectInitializationNode` | BeginInit, optional push, manipulation, pop, EndInit | 9.3.2 | `needs_parent_stack` shared (E0) |
 | `XamlNullExtensionNode` | null of pseudo type | `None` | — |
-| `XamlTypeExtensionNode` | `RuntimeTypeValue`, converted at the call site (decision 16) | `T::TYPE` or `ValueType::of::<T>()` by receiving member; boxed per decision 16 for `object` | generic type arguments on the build path |
+| `XamlTypeExtensionNode` | `RuntimeTypeValue`, converted at the call site (decision 16) | `T::TYPE` or `ValueType::of::<T>()` by receiving member; boxed per decision 16 for `object`; `ValueType::of::<Option<BoxedValue>>()` for `System.Object` (9.4.7) | generic type arguments on the build path |
 | `XamlStaticExtensionNode` | static property getter or field value | enum variant path, `Owner::name_property().as_property()`, `Owner::name_event()`, declared static getter (B/C) | literal fields of core types |
 | `XamlConstantNode` | `constant_value` | literal with suffix (`20.0_f64`, `5_i32`, `true`, `'c'`); enum from numeric value → variant path, flag combination → `A \| B` or `rt::enum_from_value::<T>(n)?` | numeric value that is no member: build error (decision 12) |
 | `XamlRootObjectNode` | `root_object_field()` | the `target` parameter / `rt::cast::<Ref<T>>(&ctx.root_object())?` inside deferred builders | — |
@@ -2388,6 +2468,8 @@ Not done, and why (9.6.8): a build script cannot compile a document that names a
 
 **E5 status (2026-10-09, the work list of the catalog).** Built and run by its author with the commands of the stage (HANDOVER.md, section 19). Done: the scanner reads the registrations a macro makes for each type it is invoked with and what a macro of another crate declares (9.5.16); the emitter's rule for a text a type converter converts when the document is loaded (9.4.6) and for a class set in markup (9.8.2), in both hosts, with ten corpus documents more (119, all the same bytes by both hosts and the same trees as the run-time loader's). The measure of the catalog: 195 of 219 documents emitted (84). A first real compile (9.5.17): five pages of the sample, with their classes, compiled by a build and by rustc and compared with the run-time loader. It found emitted code rustc refuses, for one cause, which the next stage starts with. Every output that existed is unchanged.
 
+**E5 status (2026-10-09, the catalog compiled by rustc).** Built and run by its author with the commands of the stage (HANDOVER.md, section 20). Done: what dereferences to its base is a registration both hosts read (9.5.18); the fixture compiles everything the compiler emits for the catalog, rustc accepts all of it, and every compiled document with a class is the tree of the run-time loader (9.5.19: 206 of 219 documents, 205 of 205 trees); the type of an untyped value as a value (9.4.7) and a compiled binding path over a property whose type generated code cannot name (9.4.8), in both hosts, with corpus documents (122, all the same bytes by both hosts and the same trees as the run-time loader's). Refused: 13 documents (lists and arrays created in markup 5, a method as a command 3, container queries 2, the `PipsPager` case 1, `App.xaml` for the colour picker 1, the class that is not ported 1). Not started: those refusals and the colour picker compiled by its build.
+
 Remaining for E5, in order:
 
 1. The rest of the build-time type system (9.5), in stages that each build and test on their own:
@@ -2399,7 +2481,7 @@ Remaining for E5, in order:
    6. **The framework crates export their models and the themes compile in their build scripts** *(done for the base crate, the controls, the XAML runtime library, the dialogs and both themes, 9.5.13 and 9.5.14: the emitter is out of the `runtime` feature of the loader and the Fluent theme compiles in its build script; left: the manifest keys)*: the leaf crate of 9.5.7 (`ferroui-build-scan`: `json`, `model`, `model_set`, `scanner` and the export, with the two text constants and `DocumentModel` owned there, so that the base crate can scan itself), `links` and `build.rs` in the framework crates, the manifest keys of 9.6.1 (`[package.metadata.ferroui]`), then the two themes on `compile_xaml()` with their checked-in files as the differential (the three reasons of 9.6.8 against converting them fall with stage 5: the group no longer needs the theme crate linked, and nothing is built for the host).
 
    Before step 5, the two `XamlIlTests` documents and the dialogs can use the checked-in path.
-2. The ControlCatalog: its documents compiled, so that it does not link the run-time loader (browser-platform.md, section 20, item 3). *(The dialogs are done: 9.4.4 and 9.5.15. The catalog was measured against the models without converting it, and the list was worked down to 24 refused documents of 219; five of its pages compile with rustc and run (9.5.17). Sections 18 and 19 of HANDOVER.md have the tables. Before a conversion: the instance of a member a named collection inherits, which is emitted and does not compile (section 19).)* Measure a few pages first against the estimate there (+6 to +10 MB raw, +0.5 to +1.2 MB gzip on the module); above it, the owner decides.
+2. The ControlCatalog: its documents compiled, so that it does not link the run-time loader (browser-platform.md, section 20, item 3). *(The dialogs are done: 9.4.4 and 9.5.15. The catalog was measured against the models without converting it, and the list was worked down to 24 refused documents of 219; five of its pages compile with rustc and run (9.5.17); then the whole of what is emitted was compiled by rustc and compared, 206 of 219 documents (9.5.19). Sections 18 to 20 of HANDOVER.md have the tables. Before a conversion: the 13 refused documents, the colour picker compiled by its build, and the registrations only the run-time loader makes (9.5.19).)* Measure a few pages first against the estimate there (+6 to +10 MB raw, +0.5 to +1.2 MB gzip on the module); above it, the owner decides.
 
 #### 9.10.2 Test strategy
 
