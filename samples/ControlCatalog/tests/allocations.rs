@@ -58,8 +58,7 @@ pub struct LiveCounts {
 }
 
 /// What is alive in the process, on every thread; zeros without the feature
-/// `count-allocations`. The records of a running allocation trace are
-/// counted too.
+/// `count-allocations`. The records of an allocation trace are not counted.
 pub fn live() -> LiveCounts {
     #[cfg(feature = "count-allocations")]
     {
@@ -105,6 +104,9 @@ mod counting {
     static LIVE_BYTES: AtomicI64 = AtomicI64::new(0);
 
     fn add_live(allocations: i64, bytes: i64) {
+        if trace::is_inside() {
+            return;
+        }
         LIVE_ALLOCATIONS.fetch_add(allocations, Ordering::Relaxed);
         LIVE_BYTES.fetch_add(bytes, Ordering::Relaxed);
     }
@@ -117,6 +119,10 @@ mod counting {
     }
 
     fn add(counter: &'static std::thread::LocalKey<Cell<u64>>, amount: u64) {
+        // What the recorder of the allocation trace allocates is its own.
+        if trace::is_inside() {
+            return;
+        }
         // A thread that is ending has no counts left: nothing is counted.
         let _ = counter.try_with(|cell| cell.set(cell.get() + amount));
     }
