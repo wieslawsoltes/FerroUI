@@ -37,7 +37,7 @@ fn test(progress: f64, old_brush: Rc<dyn IBrush>, new_brush: Rc<dyn IBrush>) {
 }
 
 #[test]
-fn solid_color_brush_opacity_is_interpolated() {
+fn solid_color_brush_opacity_is_interoplated() {
     test(0.0, solid(0.0), solid(0.0));
     test(0.0, solid(0.0), solid(1.0));
     test(0.5, solid(0.0), solid(1.0));
@@ -46,7 +46,7 @@ fn solid_color_brush_opacity_is_interpolated() {
 }
 
 #[test]
-fn linear_gradient_brush_opacity_is_interpolated() {
+fn linear_gradient_brush_opacity_is_interoplated() {
     test(0.0, linear(0.0), linear(0.0));
     test(0.0, linear(0.0), linear(1.0));
     test(0.5, linear(0.0), linear(1.0));

@@ -6,7 +6,8 @@ use crate::styling::Setter;
 use crate::threading::CancellationToken;
 
 #[test]
-fn can_parse_spring() {
+// The type converter of the reference class is `Spring::parse`.
+fn can_parse_spring_via_type_converter() {
     let spring = Spring::parse("1,2 3,4").unwrap();
     assert_eq!(spring.mass(), 1.0);
     assert_eq!(spring.stiffness(), 2.0);
@@ -15,7 +16,7 @@ fn can_parse_spring() {
 }
 
 #[test]
-fn can_handle_invalid_string() {
+fn can_handle_invalid_string_via_type_converter() {
     for input in ["1,2F,3,4", "Foo,Bar,Fee,Buzz"] {
         assert!(Spring::parse(input).is_err());
     }
