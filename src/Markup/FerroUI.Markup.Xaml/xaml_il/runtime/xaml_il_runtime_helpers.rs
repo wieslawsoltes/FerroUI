@@ -12,7 +12,7 @@ use crate::{
 };
 use ferroui_base::controls::{ChildNameScope, IDeferredContent, INameScope, NameScope, NameScopeRef};
 use ferroui_base::data::core::expression_nodes::CastTarget;
-use ferroui_base::data::core::{ValueType, ValueTypes};
+use ferroui_base::data::core::{ValueType, ValueTypes, WeakValue};
 use ferroui_base::data::{BindingBase, BindingPriority};
 use ferroui_base::metadata::{service, IServiceProvider, MarkupAssembly, MarkupType};
 use ferroui_base::{
@@ -94,18 +94,26 @@ pub struct DeferredResult {
 /// exception would propagate from).
 /// [`TemplateContent::load`](crate::templates::TemplateContent::load)
 /// consumes it through `build_with` to also obtain the name scope.
+///
+/// What it captured is held weakly (DEVIATIONS.md, Markup): the content
+/// belongs to a template or a resource declared under those very objects
+/// (the root of the document, the elements and dictionaries above the
+/// declaration, the elements the name scope names), which own it. Held
+/// strongly, as the managed original holds them, the content and they keep
+/// each other alive, which the collector resolves there and nothing resolves
+/// here. An instantiation sees the ones that are still alive.
 pub struct DeferredContent {
     this: Weak<DeferredContent>,
-    parent_name_scope: Option<NameScopeRef>,
-    root_object: Option<BoxedValue>,
-    parent_resource_nodes: Rc<Vec<BoxedValue>>,
+    parent_name_scope: Option<Weak<dyn INameScope>>,
+    root_object: Option<WeakValue>,
+    parent_resource_nodes: Rc<Vec<WeakValue>>,
     builder: DeferredContentBuilder,
     result_type: ValueType,
 }
 
 impl DeferredContent {
     fn new(
-        parent_resource_nodes: Rc<Vec<BoxedValue>>,
+        parent_resource_nodes: Rc<Vec<WeakValue>>,
         root_object: Option<BoxedValue>,
         parent_name_scope: Option<NameScopeRef>,
         builder: DeferredContentBuilder,
@@ -113,8 +121,8 @@ impl DeferredContent {
     ) -> Rc<Self> {
         Rc::new_cyclic(|this| Self {
             this: this.clone(),
-            parent_name_scope,
-            root_object,
+            parent_name_scope: parent_name_scope.map(|scope| Rc::downgrade(&scope.0)),
+            root_object: root_object.as_ref().map(WeakValue::new),
             parent_resource_nodes,
             builder,
             result_type,
@@ -145,14 +153,18 @@ impl DeferredContent {
         &self,
         service_provider: Option<&Rc<dyn IServiceProvider>>,
     ) -> Result<DeferredResult, XamlLoadException> {
-        let scope = match &self.parent_name_scope {
+        let scope = match self.parent_name_scope.as_ref().and_then(Weak::upgrade) {
             None => NameScopeRef::new(NameScope::new()),
-            Some(parent) => NameScopeRef::new(ChildNameScope::new(parent.clone())),
+            Some(parent) => NameScopeRef::new(ChildNameScope::new(NameScopeRef(parent))),
         };
+        // The captured objects that are still alive, for the time of the
+        // instantiation.
+        let parent_resource_nodes: Vec<BoxedValue> =
+            self.parent_resource_nodes.iter().filter_map(WeakValue::upgrade).collect();
         let provider: Rc<dyn IServiceProvider> = DeferredParentServiceProvider::new(
             service_provider.cloned(),
-            self.parent_resource_nodes.clone(),
-            self.root_object.clone(),
+            Rc::new(parent_resource_nodes),
+            self.root_object.as_ref().and_then(WeakValue::upgrade),
             scope.clone(),
         );
         let obj = self.builder.invoke(&provider)?;
@@ -303,7 +315,7 @@ fn name_scope_service(service_type: TypeId, scope: &NameScopeRef) -> Option<Rc<d
 /// resource dictionary), cache the last ones.
 struct LastParentStack {
     parent_stack_provider: Weak<dyn IFerroXamlIlParentStackProvider>,
-    resource_nodes: Weak<Vec<BoxedValue>>,
+    resource_nodes: Weak<Vec<WeakValue>>,
 }
 
 impl LastParentStack {
@@ -311,7 +323,7 @@ impl LastParentStack {
         &self,
         parent_stack_provider: &Rc<dyn IFerroXamlIlParentStackProvider>,
         resource_nodes: &[BoxedValue],
-    ) -> Option<Rc<Vec<BoxedValue>>> {
+    ) -> Option<Rc<Vec<WeakValue>>> {
         let last_parent_stack_provider = self.parent_stack_provider.upgrade()?;
         let last_resource_nodes = self.resource_nodes.upgrade()?;
         if !std::ptr::addr_eq(Rc::as_ptr(parent_stack_provider), Rc::as_ptr(&last_parent_stack_provider))
@@ -323,7 +335,7 @@ impl LastParentStack {
         let same = resource_nodes
             .iter()
             .zip(last_resource_nodes.iter())
-            .all(|(a, b)| ValueTypes::identity_equals(Some(a), Some(b)));
+            .all(|(a, b)| b.upgrade().is_some_and(|b| ValueTypes::identity_equals(Some(a), Some(&b))));
         same.then_some(last_resource_nodes)
     }
 }
@@ -430,7 +442,7 @@ impl XamlIlRuntimeHelpers {
         Ok(DeferredContent::new(resource_nodes, root_object, parent_scope, builder, result_type))
     }
 
-    fn as_resource_nodes_stack(provider: &Rc<dyn IFerroXamlIlParentStackProvider>) -> Rc<Vec<BoxedValue>> {
+    fn as_resource_nodes_stack(provider: &Rc<dyn IFerroXamlIlParentStackProvider>) -> Rc<Vec<WeakValue>> {
         let mut buffer = RESOURCE_NODE_BUFFER.with(|buffer| std::mem::take(&mut *buffer.borrow_mut()));
         buffer.clear();
 
@@ -461,7 +473,7 @@ impl XamlIlRuntimeHelpers {
         let resource_nodes = match cached {
             Some(resource_nodes) => resource_nodes,
             None => {
-                let resource_nodes = Rc::new(buffer.clone());
+                let resource_nodes: Rc<Vec<WeakValue>> = Rc::new(buffer.iter().map(WeakValue::new).collect());
                 LAST_PARENT_STACK.with(|last| {
                     *last.borrow_mut() = Some(LastParentStack {
                         parent_stack_provider: Rc::downgrade(provider),
