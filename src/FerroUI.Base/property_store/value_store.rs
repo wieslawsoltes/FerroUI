@@ -479,6 +479,13 @@ impl ValueStore {
         // inheritance children. Each pair leaves the list as its turn comes,
         // in the order it was added, and the pairs after it stay in the list
         // until theirs.
+        //
+        // Deviation (DEVIATIONS.md, Property system): the dictionary of the
+        // original is sorted by property ID, so it raises the properties in
+        // the order of their IDs; this list is in the order the pairs were
+        // found (the nearest old ancestor first, each store by property ID,
+        // then the properties only the new ancestors hold). The two orders
+        // are the same when all the values come from one store.
         for v in values.drain(..) {
             crate::perf_count!(InheritedValuesCompared);
             let same = match (&v.old, &v.new) {
