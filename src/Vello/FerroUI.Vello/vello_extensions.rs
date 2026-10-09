@@ -88,16 +88,6 @@ pub fn to_join(join: PenLineJoin) -> kurbo::Join {
     }
 }
 
-/// Converts an interpolation mode to the sampling quality of an image:
-/// nearest neighbour, bilinear or bicubic.
-pub fn to_image_quality(interpolation_mode: BitmapInterpolationMode) -> ImageQuality {
-    match interpolation_mode {
-        BitmapInterpolationMode::None => ImageQuality::Low,
-        BitmapInterpolationMode::HighQuality => ImageQuality::High,
-        _ => ImageQuality::Medium,
-    }
-}
-
 /// How an image is sampled in an interpolation mode: the filter, and
 /// whether the image is averaged first when it is drawn reduced
 /// ([`mipmap_helper`](crate::helpers::mipmap_helper)). The modes are those

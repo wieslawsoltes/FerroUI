@@ -67,3 +67,59 @@ fn a_backend_draws_an_effect_scene_the_same_way_twice() {
         }
     }
 }
+
+/// Why a blurred scene has a bound on its mean difference: a blur that is
+/// too wide is within the tolerance in every pixel, and the mean finds it.
+#[test]
+fn the_mean_difference_finds_a_blur_of_another_width() {
+    use ferroui_base::media::effects::ImmutableBlurEffect;
+    use ferroui_base::media::immutable::ImmutableSolidColorBrush;
+    use ferroui_base::media::{BoxShadows, Color, Colors};
+    use ferroui_base::platform::IDrawingContextImpl;
+    use ferroui_base::{Rect, RoundedRect};
+
+    fn blurred(context: &mut dyn IDrawingContextImpl, radius: f64) {
+        context.clear(Colors::WHITE);
+        let effects = context.as_drawing_context_impl_with_effects().expect("a drawing context with effects");
+        effects.push_effect(None, &ImmutableBlurEffect::new(radius));
+        effects.draw_rectangle(
+            Some(&ImmutableSolidColorBrush::new(Color::from_argb(255, 20, 40, 120))),
+            None,
+            RoundedRect::from_rect(Rect::new(50.0, 60.0, 100.0, 80.0)),
+            &BoxShadows::default(),
+        );
+        effects.pop_effect();
+    }
+
+    let skia = Backend::skia();
+    let reference = render(&skia, SCENE_SIZE, &|_, context| blurred(context, 10.0));
+
+    // The same blur by the other backend, and the bound of the mean the
+    // scene would be given: the measured mean, half as much again and 0.05.
+    let mut bound = 0.0f64;
+    for mode in Backend::vello_modes() {
+        let same = compare(&reference, &render(&Backend::vello(mode), SCENE_SIZE, &|_, context| blurred(context, 10.0)));
+        println!("a blur of radius 10 by the other backend: {same:?}");
+        assert!(same.share == 0.0 && same.mean < 0.5, "{same:?}");
+        bound = bound.max(same.mean * 1.5 + 0.05);
+    }
+
+    // A blur that is 30 % wider, by the same backend: no pixel is beyond
+    // the tolerance, so the share passes it; the mean is more than twice
+    // the bound.
+    let wider = compare(&reference, &render(&skia, SCENE_SIZE, &|_, context| blurred(context, 13.0)));
+    println!("a blur of radius 13 against one of radius 10: {wider:?}");
+    assert!(wider.share == 0.0, "{wider:?}");
+    assert!(wider.mean > 2.0 * bound, "{wider:?} against a bound of {bound}");
+
+    // A blur that is moved by two pixels.
+    let moved = compare(
+        &reference,
+        &render(&skia, SCENE_SIZE, &|_, context| {
+            context.set_transform(ferroui_base::Matrix::create_translation(2.0, 0.0));
+            blurred(context, 10.0);
+        }),
+    );
+    println!("a blur of radius 10 moved by two pixels: {moved:?}");
+    assert!(moved.mean > 2.0 * bound, "{moved:?} against a bound of {bound}");
+}
