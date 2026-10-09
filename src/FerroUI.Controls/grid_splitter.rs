@@ -290,7 +290,22 @@ impl ThumbImpl for GridSplitter {
 
 impl GridSplitterImpl for GridSplitter {
     fn get_parent_grid(this: &Self) -> Option<Ref<Grid>> {
-        this.parent().and_then(|parent| parent.cast::<Grid>())
+        // When the splitter is used inside an items control with a grid as
+        // its items panel, its immediate parent is usually the items control
+        // or a content presenter.
+        let parent = this.parent()?;
+        if let Some(grid) = parent.clone().cast::<Grid>() {
+            return Some(grid);
+        }
+
+        let items_control = match parent.clone().cast::<crate::ItemsControl>() {
+            Some(items_control) => items_control,
+            None => {
+                parent.cast::<ContentPresenter>()?;
+                this.parent()?.parent()?.cast::<crate::ItemsControl>()?
+            }
+        };
+        items_control.items_panel_root()?.cast::<Grid>()
     }
 
     fn get_properties_value_source(this: &Self) -> Ref<StyledElement> {

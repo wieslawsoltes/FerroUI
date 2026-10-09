@@ -8,6 +8,20 @@ use crate::{
     Decorator, Border, ColumnDefinition, ColumnDefinitions, Control, Grid, GridLength, GridResizeDirection, GridSplitter,
     GridUnitType, RowDefinition, RowDefinitions,
 };
+use crate::presenters::{ContentPresenter, ItemsPresenter};
+use crate::primitives::TemplatedControl;
+use crate::templates::{
+    FuncControlTemplate, FuncDataTemplate, FuncTemplateNameScopeExtensions, ITemplateOf,
+};
+use crate::testing::{TestServices, UnitTestApplication};
+use crate::{ItemsControl, ItemsSource, Panel, TextBlock};
+use ferroui_base::controls::ResourceKey;
+use ferroui_base::data::core::{Maybe, Value};
+use ferroui_base::data::model::Model;
+use ferroui_base::data::{ReflectionBinding, TemplateBinding};
+use ferroui_base::styling::{ControlTheme, Selectors, Setter, Style};
+use ferroui_base::{BoxedValue, ObjectType};
+use std::rc::Rc;
 use ferroui_base::input::{InputElement, Key, KeyEventArgs, VectorEventArgs};
 use ferroui_base::media::TranslateTransform;
 use ferroui_base::{Rect, Ref, Size, Vector};
@@ -400,6 +414,140 @@ fn works_in_grid() {
     drag_completed(&splitter);
 
     assert_ne!(column0.width(), column2.width());
+}
+
+/// The `TextItem` of the reference.
+struct TextItem {
+    column: i32,
+    text: Option<String>,
+}
+
+ferroui_base::ferro_model!(TextItem, |b| b
+    .read_only::<Value<i32>>("Column", |item| item.column)
+    .read_only::<Maybe<String>>("Text", |item| item.text.clone()));
+
+/// The `SplitterItem` of the reference.
+struct SplitterItem {
+    column: i32,
+}
+
+ferroui_base::ferro_model!(SplitterItem, |b| b.read_only::<Value<i32>>("Column", |item| item.column));
+
+/// An items control with the control theme of the markup of the reference
+/// tests in its resources and a grid with the columns `*,10,*` as its items
+/// panel.
+fn items_control_with_grid_panel() -> Ref<ItemsControl> {
+    let template = FuncControlTemplate::for_type::<ItemsControl>(|_, scope| {
+        let presenter = ItemsPresenter::new();
+        presenter.set_name(Some("PART_ItemsPresenter".to_string()));
+        let property = ItemsControl::items_panel_property().as_property();
+        presenter.bind_binding(property, &TemplateBinding::new(property));
+        let border = Border::new();
+        for property in [
+            TemplatedControl::background_property().as_property(),
+            TemplatedControl::border_brush_property().as_property(),
+            TemplatedControl::border_thickness_property().as_property(),
+            TemplatedControl::corner_radius_property().as_property(),
+            TemplatedControl::padding_property().as_property(),
+        ] {
+            border.bind_binding(property, &TemplateBinding::new(property));
+        }
+        border.set_child(presenter.register_in_name_scope(&**scope));
+        border.upcast()
+    });
+    let theme = ControlTheme::with_setters(
+        ItemsControl::TYPE,
+        [Setter::new(TemplatedControl::template_property(), Some(template))],
+    );
+
+    let items_control = ItemsControl::new();
+    items_control.resources().add_value(ResourceKey::Type(ItemsControl::TYPE), theme);
+    let items_panel: Rc<dyn ITemplateOf<Option<Ref<Panel>>>> = FuncTemplate::new(|| {
+        let grid = Grid::new();
+        grid.set_column_definitions(ColumnDefinitions::parse("*,10,*").unwrap());
+        Some(grid.upcast::<Panel>())
+    });
+    items_control.set_items_panel(items_panel);
+    items_control
+}
+
+/// The reference test builds this tree from markup; it is built in code
+/// here.
+#[test]
+fn works_in_items_control_items_source() {
+    let _app = UnitTestApplication::start(TestServices::styled_window());
+
+    let items_control = items_control_with_grid_panel();
+    items_control.styles().add(Style::with_setters(
+        Selectors::of_type::<ItemsControl>().child().of_type::<ContentPresenter>(),
+        [Setter::new_binding_base(Grid::column_property().as_property(), ReflectionBinding::new("Column"))],
+    ));
+    items_control.data_templates().add(FuncDataTemplate::for_type::<TextItem>(
+        |_, _| {
+            let text_block = TextBlock::new();
+            text_block.bind_binding(TextBlock::text_property().as_property(), &*ReflectionBinding::new("Text"));
+            let border = Border::new();
+            border.set_child(text_block);
+            Some(border.upcast())
+        },
+        false,
+    ));
+    items_control.data_templates().add(FuncDataTemplate::for_type::<SplitterItem>(
+        |_, _| {
+            let splitter = GridSplitter::new();
+            splitter.set_resize_direction(GridResizeDirection::Columns);
+            Some(splitter.upcast())
+        },
+        false,
+    ));
+    let items: [BoxedValue; 3] = [
+        Model::new_model(TextItem { column: 0, text: Some("A".to_string()) }),
+        Model::new_model(SplitterItem { column: 1 }),
+        Model::new_model(TextItem { column: 2, text: Some("B".to_string()) }),
+    ];
+    items_control.set_items_source(Some(ItemsSource::from_items(items.map(Some))));
+
+    let root = TestRoot::with_child(&items_control);
+    root.measure(Size::new(200.0, 100.0));
+    root.arrange(Rect::new(0.0, 0.0, 200.0, 100.0));
+
+    let panel = items_control.items_panel_root().and_then(|panel| panel.cast::<Grid>()).expect("a grid");
+    let cp = panel.children().get(1).cast::<ContentPresenter>().expect("a content presenter");
+    cp.update_child();
+    let splitter = cp.child().and_then(|child| child.cast::<GridSplitter>()).expect("a grid splitter");
+
+    drag_started(&splitter);
+    drag_delta(&splitter, Vector::new(-20.0, 0.0));
+    drag_completed(&splitter);
+
+    assert_ne!(panel.column_definitions().get(0).width(), panel.column_definitions().get(2).width());
+}
+
+/// The reference test builds this tree from markup; it is built in code
+/// here.
+#[test]
+fn works_in_items_control_items() {
+    let _app = UnitTestApplication::start(TestServices::styled_window());
+
+    let items_control = items_control_with_grid_panel();
+    let splitter = GridSplitter::new();
+    splitter.set_resize_direction(GridResizeDirection::Columns);
+    items_control.items().add(Some(Control::boxed(cell(Border::new(), None, Some(0)))));
+    items_control.items().add(Some(Control::boxed(cell(splitter, None, Some(1)))));
+    items_control.items().add(Some(Control::boxed(cell(Border::new(), None, Some(2)))));
+
+    let root = TestRoot::with_child(&items_control);
+    root.measure(Size::new(200.0, 100.0));
+    root.arrange(Rect::new(0.0, 0.0, 200.0, 100.0));
+
+    let panel = items_control.items_panel_root().and_then(|panel| panel.cast::<Grid>()).expect("a grid");
+    let splitter = panel.children().get(1).cast::<GridSplitter>().expect("a grid splitter");
+
+    drag_started(&splitter);
+    drag_delta(&splitter, Vector::new(-20.0, 0.0));
+    drag_completed(&splitter);
+
+    assert_ne!(panel.column_definitions().get(0).width(), panel.column_definitions().get(2).width());
 }
 
 // Additional tests of the preview adorner, which the reference suite only
