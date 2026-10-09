@@ -845,3 +845,46 @@ fn focus_key_input_should_scroll() {
     key_down(&target, Key::Right);
     assert_eq!(Vector::new(0.0, 0.0), target.offset());
 }
+
+#[test]
+fn presenter_preserves_owner_bindings_when_scroll_viewer_is_reattached() {
+    use crate::testing::{TestServices, UnitTestApplication};
+    use crate::Window;
+    use ferroui_base::layout::ILayoutManager;
+
+    let _app = UnitTestApplication::start(TestServices::styled_window());
+    let content = Border::new();
+    content.set_width(200.0);
+    content.set_height(200.0);
+    // The reference runs with the simple theme; the test theme of this crate
+    // has no theme for a scroll viewer, so it gets the template of these tests.
+    let target = templated_target();
+    target.set_content(Some(Control::boxed(content.clone())));
+    let window = Window::new();
+    window.set_content(Some(Control::boxed(target.clone())));
+    window.set_width(100.0);
+    window.set_height(100.0);
+    window.show();
+    window.layout_manager().execute_initial_layout_pass();
+    let presenter = target.presenter().and_then(|presenter| presenter.cast::<ScrollContentPresenter>());
+    let presenter = presenter.expect("a scroll content presenter");
+    assert!(presenter.child().is_some_and(|child| child.ptr_eq(&content)));
+
+    window.set_content(None);
+    assert!(presenter.child().is_some_and(|child| child.ptr_eq(&content)));
+    let replacement = Border::new();
+    replacement.set_width(300.0);
+    replacement.set_height(300.0);
+    target.set_content(Some(Control::boxed(replacement.clone())));
+    assert!(presenter.child().is_none());
+
+    window.set_content(Some(Control::boxed(target.clone())));
+    window.layout_manager().execute_layout_pass();
+    assert!(target.presenter().is_some_and(|current| current.ptr_eq(&presenter)));
+    assert!(presenter.child().is_some_and(|child| child.ptr_eq(&replacement)));
+    target.set_offset(Vector::new(0.0, 20.0));
+    assert_eq!(target.offset(), presenter.offset());
+    assert_eq!(20.0, presenter.offset().y);
+    window.close();
+}
+

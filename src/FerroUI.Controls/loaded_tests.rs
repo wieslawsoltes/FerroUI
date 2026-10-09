@@ -1,5 +1,5 @@
-//! The reference tests show and close a window; a test root stands in for
-//! it here.
+//! The reference tests of a control show and close a window; a test root
+//! stands in for it there.
 
 use crate::test_support::{test_scope, TestRoot};
 use crate::{Control, Panel};
@@ -20,6 +20,35 @@ fn count_loaded(target: &Control) -> (Rc<Cell<i32>>, Rc<Cell<i32>>) {
     let unloaded = unloaded_count.clone();
     target.unloaded(move |_, _| unloaded.set(unloaded.get() + 1));
     (loaded_count, unloaded_count)
+}
+
+#[test]
+fn window_loads_and_unloads() {
+    use crate::testing::{TestServices, UnitTestApplication};
+    use crate::Window;
+
+    // Some other tests are populating the queue and are not resetting the dispatcher, so we need to purge it
+    Control::reset_loaded_queue_for_unit_tests();
+    let _app = UnitTestApplication::start(TestServices::styled_window());
+
+    let target = Window::new();
+    let (loaded_count, unloaded_count) = count_loaded(&target);
+
+    assert_eq!(loaded_count.get(), 0);
+    assert_eq!(unloaded_count.get(), 0);
+
+    target.show();
+    run_loaded_jobs();
+    assert!(target.is_loaded());
+
+    assert_eq!(loaded_count.get(), 1);
+    assert_eq!(unloaded_count.get(), 0);
+
+    target.close();
+
+    assert_eq!(loaded_count.get(), 1);
+    assert_eq!(unloaded_count.get(), 1);
+    assert!(!target.is_loaded());
 }
 
 #[test]
