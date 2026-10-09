@@ -32,7 +32,7 @@ fn should_be_reachable_with_ctor() {
 }
 
 #[test]
-fn should_be_reachable_with_asset_loader() {
+fn should_be_reachable_with_ferres_loader() {
     let _app = start_application();
     let uri = Uri::absolute(&format!("ferres://{}/FluentTheme.xaml", ASSEMBLY.name)).expect("Invalid TryLoad URL");
     let theme = FerroXamlLoader::load(&uri, None).unwrap_or_else(|error| panic!("{}", describe(&error)));
