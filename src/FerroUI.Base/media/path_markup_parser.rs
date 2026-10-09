@@ -695,7 +695,7 @@ mod tests {
     }
 
     #[test]
-    fn returns_error_on_none_defined_command() {
+    fn throws_invalid_data_exception_on_none_defined_command() {
         for path_data in ["0 0", "j"] {
             assert!(parse(path_data).is_err(), "{path_data}");
         }
