@@ -663,3 +663,64 @@ fn indexer_errors_are_the_ones_of_the_managed_original() {
     assert!(log.contains(&format!("Type '{type_name}' does not have an indexer.")), "{:?}", log.messages.borrow());
     Logger::set_thread_sink(None);
 }
+
+// --- the default value converter: a delegate to a command ---------------------
+
+// The two tests of upstream's `DefaultValueConverterTests` that convert a delegate. Upstream's delegates are
+// lambdas; a delegate that converts to a command here is the delegate of a method that metadata declares (the
+// converter reads the parameters of the method, which the delegate of a closure does not have), so the tests
+// are written on the view model of this file and assert what its methods record.
+
+#[test]
+fn can_convert_from_delegate_to_command() {
+    let _scope = Dispatcher::unit_test_scope();
+    register();
+    let vm = MemberVm::new("Ann");
+    let markup = <MemberVm as MarkupTyped>::MARKUP;
+    let method = markup.find_methods("Count").next().expect("the method");
+    let source: BoxedValue = vm.clone();
+    let action: BoxedValue = Rc::new(MarkupDelegate::for_method(Some(source), markup, method));
+
+    let result = crate::data::converters::DefaultValueConverter::instance()
+        .convert(
+            Some(&action),
+            crate::data::core::ValueType::of::<Rc<dyn ICommand>>(),
+            None,
+            &crate::utilities::CultureInfo::invariant_culture(),
+        )
+        .expect("the conversion does not fail");
+
+    let result = result.expect("a command");
+    let command = result.downcast_ref::<Rc<dyn ICommand>>().expect("the result is a command").clone();
+
+    command.execute(Some(&boxed(5)));
+
+    assert_eq!(vm.log(), ["Count 5"]);
+}
+
+#[test]
+fn can_convert_from_delegate_to_command_no_parameters() {
+    let _scope = Dispatcher::unit_test_scope();
+    register();
+    let vm = MemberVm::new("Ann");
+    let markup = <MemberVm as MarkupTyped>::MARKUP;
+    let method = markup.find_methods("Save").next().expect("the method");
+    let source: BoxedValue = vm.clone();
+    let action: BoxedValue = Rc::new(MarkupDelegate::for_method(Some(source), markup, method));
+
+    let result = crate::data::converters::DefaultValueConverter::instance()
+        .convert(
+            Some(&action),
+            crate::data::core::ValueType::of::<Rc<dyn ICommand>>(),
+            None,
+            &crate::utilities::CultureInfo::invariant_culture(),
+        )
+        .expect("the conversion does not fail");
+
+    let result = result.expect("a command");
+    let command = result.downcast_ref::<Rc<dyn ICommand>>().expect("the result is a command").clone();
+
+    command.execute(None);
+
+    assert_eq!(vm.log(), ["Save"]);
+}

@@ -5,9 +5,11 @@
 //! to the value type table by the type that owns them; the tests declare
 //! them for their own types the same way an application does.
 //!
-//! Not ported: `Can_Convert_From_Delegate_To_Command` and
-//! `Can_Convert_From_Delegate_To_Command_No_Parameters` (delegates are not
-//! binding values: methods bind as commands through the method nodes).
+//! `Can_Convert_From_Delegate_To_Command` and
+//! `Can_Convert_From_Delegate_To_Command_No_Parameters` are in
+//! `data/core/plugins/markup_members_tests.rs`: a delegate that converts to
+//! a command is the delegate of a method declared in markup metadata, and
+//! that file has a view model with such methods.
 
 use super::*;
 use crate::animation::TimeSpan;
