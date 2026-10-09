@@ -622,3 +622,90 @@ fn declarations_are_merged_and_found_across_crates() {
     assert_eq!(system.find_type_in_assembly("FerroUI.Controls.Button", "FerroUI.Controls").map(|type_| type_.full_name()), Some("FerroUI.Controls.Button".to_string()));
     assert!(system.find_type_in_assembly("FerroUI.Controls.Button", "FerroUI.Base").is_none());
 }
+
+/// The type system over the scan of the third fixture crate (`tests/fixtures/registration`).
+fn registration() -> Rc<ModelTypeSystem> {
+    let root = Path::new(env!("CARGO_MANIFEST_DIR")).join("tests").join("fixtures").join("registration").join("lib.rs");
+    ModelTypeSystem::new(vec![scan_crate(&ScanOptions::new("registration", root)).model])
+}
+
+fn is_opaque(type_: &Rc<dyn IXamlType>) -> bool {
+    type_.as_any().downcast_ref::<ModelType>().is_some_and(ModelType::is_opaque)
+}
+
+/// What a crate registers decides what its declarations are: a class its list of
+/// registered classes leaves out is not known by its name or by its handle (it is the base
+/// of the classes that derive from it all the same); a property is a member of the owner
+/// its registration names, whichever type has the accessor; an accessor that is a
+/// function of another type carries the path of that type.
+#[test]
+fn registration_decides_the_classes_and_the_owners_of_properties() {
+    let system = registration();
+    let panel = the(&system, "Registration.Panel");
+
+    assert!(system.find_type("Registration.Hidden").is_none());
+    assert!(is_opaque(&system.resolve("::ferroui_base::Ref<::registration::panel::Hidden>")));
+    assert!(is_opaque(&property(&the(&system, "Registration.PanelCollection"), "Owner").property_type()));
+    let hidden = the(&system, "Registration.Deep").base_type().expect("the base of Deep");
+    assert_eq!(hidden.full_name(), "Registration.Hidden");
+    assert!(hidden.base_type().is_some_and(|base| base.equals(&*panel)));
+    assert!(system.resolve("::ferroui_base::Ref<::registration::panel::Deep>").equals(&*the(&system, "Registration.Deep")));
+
+    // `Saved` is registered by the properties of `Slot` with `Panel` as its owner.
+    assert_eq!(panel.properties().iter().map(|property| property.name()).collect::<Vec<_>>(), ["Items", "Mark", "Spacing", "Gap"]);
+    assert_eq!(panel.fields().iter().map(|field| field.name()).collect::<Vec<_>>(), ["ItemsProperty", "MarkProperty", "SpacingProperty", "GapProperty", "SavedProperty"]);
+    let statics: Vec<String> = panel.methods().iter().filter(|method| method.is_static()).map(signature).collect();
+    assert_eq!(statics, ["static GetSaved(Registration.Panel) -> System.Int32", "static SetSaved(Registration.Panel, System.Int32) -> System.Void"]);
+    let slot = the(&system, "Registration.Slot");
+    assert_eq!(slot.properties().iter().map(|property| property.name()).collect::<Vec<_>>(), ["Mark"]);
+    assert_eq!(slot.fields().iter().map(|field| field.name()).collect::<Vec<_>>(), ["MarkProperty"]);
+    assert_eq!(field(&slot, "MarkProperty").field_type().full_name(), "FerroUI.StyledProperty`1[System.Boolean]");
+    assert_eq!(field(&panel, "SavedProperty").field_type().full_name(), "FerroUI.AttachedProperty`1[System.Int32]");
+
+    // The accessors: of the type the property is listed under, of the type whose function
+    // the accessor is, and of the type whose properties register the property.
+    let source_of = |type_: &Rc<dyn IXamlType>, name: &str| field(type_, name).as_any().downcast_ref::<ModelField>().map(|field| field.source().clone());
+    let accessor = |type_path: &str, accessor: &str| Some(MemberSource::Registered { type_path: type_path.to_string(), accessor: accessor.to_string() });
+    assert_eq!(source_of(&panel, "ItemsProperty"), accessor("::registration::Panel", "items_property"));
+    assert_eq!(source_of(&panel, "MarkProperty"), accessor("::registration::panel::Marker", "mark_property"));
+    assert_eq!(source_of(&panel, "SavedProperty"), accessor("::registration::Slot", "saved_property"));
+    assert_eq!(source_of(&slot, "MarkProperty"), accessor("::registration::Slot", "mark_property"));
+    // A direct property registered without a setter, by the accessor a macro writes.
+    let spacing = property(&panel, "Spacing");
+    assert!(spacing.getter().is_some() && spacing.setter().is_none());
+    assert_eq!(field(&panel, "SpacingProperty").field_type().full_name(), "FerroUI.DirectProperty`2[Registration.Panel,System.Double]");
+}
+
+/// A Rust type is one type by every spelling: through a type alias, through the handles a
+/// crate registers next to the declaration, and a collection is the list it declares as
+/// its base only when the crate registers the cast to it.
+#[test]
+fn aliases_registered_handles_and_casts_decide_the_type_of_a_text() {
+    let system = registration();
+    const LIST: &str = "FerroUI.Collections.FerroList`1[Registration.Panel]";
+    let list = system.resolve("::ferroui_base::collections::FerroList<::ferroui_base::Ref<::registration::panel::Panel>>");
+    assert_eq!(list.full_name(), LIST);
+    assert!(system.resolve("::registration::panel::PanelList").equals(&*list));
+    assert!(system.resolve("::registration::PanelList").equals(&*list));
+    // The optional form of the handle of a class is the class, through two aliases.
+    assert!(property(&the(&system, "Registration.Panel"), "Items").property_type().equals(&*list));
+    assert!(is_opaque(&system.resolve("::registration::panel::Lost")));
+
+    // The handles the registration function adds.
+    let contract = the(&system, "Registration.IPanel");
+    let collection = the(&system, "Registration.PanelCollection");
+    assert!(system.resolve("::registration::panel::Wrapper").equals(&*contract));
+    assert!(system.resolve("Option<::registration::panel::Wrapper>").equals(&*collection));
+    assert!(system.resolve("::std::rc::Rc<dyn ::registration::panel::IPanel>").equals(&*contract));
+
+    // The registered cast, by either spelling of the list.
+    assert!(system.is_cast("::registration::panel::PanelCollection", "::registration::panel::PanelList"));
+    assert!(system.is_cast("::registration::panel::PanelCollection", "::ferroui_base::collections::FerroList<::ferroui_base::Ref<::registration::Panel>>"));
+    assert!(system.is_cast("::registration::panel::PanelList", "::ferroui_base::collections::FerroList<::ferroui_base::Ref<::registration::Panel>>"));
+    assert!(!system.is_cast("::registration::panel::PanelStack", "::registration::panel::PanelList"));
+    assert!(collection.base_type().is_some_and(|base| base.equals(&*list)));
+    assert!(list.is_assignable_from(&*collection));
+    let stack = the(&system, "Registration.PanelStack");
+    assert_eq!(stack.base_type().map(|base| base.full_name()), Some("System.Object".to_string()));
+    assert!(!list.is_assignable_from(&*stack));
+}

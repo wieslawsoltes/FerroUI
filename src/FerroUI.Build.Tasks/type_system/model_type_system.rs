@@ -56,6 +56,12 @@ struct Index {
     core_markup: HashMap<String, Vec<Position>>,
     /// The declarations merged into a type of the object model.
     companions: HashMap<Position, Vec<Position>>,
+    /// The registered properties of a type of the object model: the ones whose
+    /// registration names the type as their owner, whichever type has the accessor, each
+    /// by the type it is listed under and its position there, in the order of the models.
+    properties: HashMap<Position, Vec<(Position, usize)>>,
+    /// The casts the crates register, by the texts of the two types.
+    casts: HashSet<(String, String)>,
 }
 
 /// The build-time type system.
@@ -115,7 +121,7 @@ impl ModelTypeSystem {
                 let full_name = type_.full_name();
                 if !type_.object_model && type_.generic.is_none() {
                     let class = model.types.iter().position(|other| {
-                        other.object_model && other.name == type_.name && other.namespace == type_.namespace && other.module == type_.module
+                        other.object_model && !other.unregistered && other.name == type_.name && other.namespace == type_.namespace && other.module == type_.module
                     });
                     if type_.namespace.starts_with("System") && core_names.contains(&full_name) {
                         index.merged.insert(position, Merged::Core(full_name.clone()));
@@ -131,13 +137,33 @@ impl ModelTypeSystem {
                 // The nullable form of a value type or an enumeration (`Option<T>`) is a
                 // type of its own, the `Nullable<T>` of the managed original.
                 if matches!(type_.kind, TypeKind::Struct | TypeKind::Enum) {
-                    index.nullable_owners.entry(format!("Option<{}>", set.canonical(&type_.rust_path.text))).or_insert(position);
+                    index.nullable_owners.entry(format!("Option<{}>", set.expanded(&type_.rust_path.text))).or_insert(position);
                 }
                 match &type_.generic {
                     Some(generic) => index.generic_index.entry(full_name_of(&type_.namespace, &generic.definition)).or_default().push(position),
+                    // A class the crate does not register is not known by its name.
+                    None if type_.unregistered => {}
                     None => {
                         index.names.entry(full_name).or_insert(position);
                     }
+                }
+                // The registry lists a property under the owner its registration names.
+                for (registered_index, registered) in type_.registered.iter().enumerate() {
+                    let named = registered.owner.as_ref().and_then(|owner| set.position_of_rust_type(&owner.text));
+                    let owner = named.filter(|owner| set.type_at(*owner).object_model).unwrap_or(position);
+                    index.properties.entry(owner).or_default().push((position, registered_index));
+                }
+            }
+        }
+        // The handles a crate registers for a type with markup metadata, after the ones the
+        // declarations state: a handle that is already known keeps its type.
+        for model in set.models() {
+            for cast in model.casts.iter().filter(|cast| cast.from.is_resolved() && cast.to.is_resolved()) {
+                index.casts.insert((set.expanded(&cast.from.text), set.expanded(&cast.to.text)));
+            }
+            for handle in &model.handles {
+                if let Some(position) = set.position_of_rust_type(&handle.type_.text) {
+                    index.handle_owners.entry(set.expanded(&handle.handle.text)).or_insert(position);
                 }
             }
         }
@@ -338,7 +364,7 @@ impl ModelTypeSystem {
         }
         for (text, reference) in core_table::core_handles() {
             if let Some(type_) = self.core_reference(&reference) {
-                self.map_handle(&self.set.canonical(&text), &type_);
+                self.map_handle(&self.set.expanded(&text), &type_);
             }
         }
     }
@@ -377,7 +403,7 @@ impl ModelTypeSystem {
                 self.define_synthetic(&assembly, &namespace, &name, ModelTypeKind::Class, &parameters, move |builder| apply(builder, &description, None));
             if is_definition {
                 for handle in core_table::PROPERTY_HANDLES {
-                    self.map_handle(&self.set.canonical(handle), &type_);
+                    self.map_handle(&self.set.expanded(handle), &type_);
                 }
             }
         }
@@ -422,6 +448,10 @@ impl ModelTypeSystem {
                 spec.generic_definition = Some(definition);
                 spec.generic_arguments = arguments;
                 spec
+            }
+            // A class the crate does not register has its name and is not found by it.
+            _ if declared.unregistered => {
+                ModelTypeSpec::new(format!("rust:{}::{}", declared.module, declared.name), namespace, &declared.name, kind, origin)
             }
             _ => {
                 let key = self.unique_key(declared.full_name(), namespace, &declared.module, &declared.name);
@@ -607,12 +637,12 @@ impl ModelTypeSystem {
     // --- lookups ------------------------------------------------------------
 
     /// The type that values of the Rust type `rust_type` (normalised type text, in any
-    /// spelling of its paths) are values of (docs/porting/xaml.md, 9.5.2): a runtime
-    /// library type, a class (for its handle and its optional handle), a type with markup
-    /// metadata (the optional form of a value type is `System.Nullable<T>`), or else an
-    /// opaque type that carries the text.
+    /// spelling of its paths and through any type alias of the models) are values of
+    /// (docs/porting/xaml.md, 9.5.2): a runtime library type, a class (for its handle and
+    /// its optional handle), a type with markup metadata (the optional form of a value
+    /// type is `System.Nullable<T>`), or else an opaque type that carries the text.
     pub fn resolve(&self, rust_type: &str) -> Rc<dyn IXamlType> {
-        let text = self.set.canonical(rust_type);
+        let text = self.set.expanded(rust_type);
         if let Some(found) = self.by_handle.borrow().get(&text) {
             return found.clone();
         }
@@ -649,6 +679,13 @@ impl ModelTypeSystem {
         let type_ = self.model_type(owner);
         type_.add_handle(text);
         Some(type_)
+    }
+
+    /// Whether a value of the Rust type `from` is a value of the Rust type `to`: the two
+    /// are one type, or a crate registers the cast between them.
+    pub fn is_cast(&self, from: &str, to: &str) -> bool {
+        let (from, to) = (self.set.expanded(from), self.set.expanded(to));
+        from == to || self.index.casts.contains(&(from, to))
     }
 
     /// `System.Nullable<T>` of a value type.
@@ -1058,9 +1095,15 @@ impl ModelTypeSystem {
         let declared = self.set.type_at(position);
         let mut members = ModelMembers::default();
         // A collection that derives from an instantiation of the notifying list is that
-        // list only when its values can be cast to it, which the casts registered at run
-        // time decide; the declaration is taken at its word here.
-        members.base_type = match &declared.base {
+        // list (and implements its list contracts) only when its values can be cast to it:
+        // the crate registers the cast from the collection to the list. Without the cast
+        // the collection is a type of its own.
+        let declared_base = declared.base.as_ref().filter(|base| {
+            let resolved = self.resolve(&base.text);
+            let is_list = resolved.as_any().downcast_ref::<ModelType>().and_then(|base| base.definition().map(|definition| definition.key() == FERRO_LIST_DEFINITION));
+            is_list != Some(true) || declared.handles.first().is_some_and(|handle| self.is_cast(&handle.text, &base.text))
+        });
+        members.base_type = match declared_base {
             Some(base) => Some(self.resolve(&base.text)),
             None => match declared.kind {
                 TypeKind::Class | TypeKind::Static => self.find_type("System.Object"),
@@ -1076,7 +1119,7 @@ impl ModelTypeSystem {
             let source = definition.members();
             let parameters = definition.generic_parameter_types();
             let arguments = type_.generic_argument_types();
-            if declared.base.is_none() {
+            if declared_base.is_none() {
                 if let Some(base) = &source.base_type {
                     members.base_type = Some(substitute(base, parameters, arguments));
                 }
@@ -1201,11 +1244,16 @@ impl ModelTypeSystem {
         let has_attribute = |attributes: &[Rc<dyn IXamlCustomAttribute>], name: &str| attributes.iter().any(|attribute| attribute.type_().name() == name);
         // The attributes of declared accessors of attached properties, by accessor name.
         let mut accessor_attributes: Vec<(String, Vec<Rc<dyn IXamlCustomAttribute>>)> = Vec::new();
-        for registered in &declared.registered {
+        for (listed, registered_index) in self.index.properties.get(&position).into_iter().flatten() {
+            let listed = self.set.type_at(*listed);
+            let registered = &listed.registered[*registered_index];
             // A second accessor of a property is no second property.
             if registered.registration == RegistrationModel::Alias {
                 continue;
             }
+            // The accessor is a function of the type it is listed under, unless the model
+            // states another.
+            let type_path = self.set.accessor_type_path(listed, registered).to_string();
             let Some(name) = self.set.name_of(registered).map(str::to_string) else { continue };
             let property_type = self.resolve(&registered.value_type.text);
             let declaration = self.set.declaration_of(registered);
@@ -1470,9 +1518,10 @@ fn is_declared(members: &ModelMembers, name: &str, parameters: usize, first: imp
         .any(|method| method.name == name && !method.is_static && method.parameters.len() == parameters && method.parameters.first().is_some_and(&first))
 }
 
-/// The Rust types that hold a value of the type `declared`, as canonical text, the
-/// untyped form first: the handles its metadata states, the handle and the optional
-/// handle of a class of the object model, the type itself for an enumeration.
+/// The Rust types that hold a value of the type `declared`, as the one text of each
+/// ([`ModelSet::expanded`]), the untyped form first: the handles its metadata states, the
+/// handle and the optional handle of a class of the object model the crate registers, the
+/// type itself for an enumeration.
 fn handles_of(set: &ModelSet, ref_path: &str, declared: &TypeModel) -> Vec<String> {
     let mut handles: Vec<String> = Vec::new();
     let mut add = |handle: String| {
@@ -1480,8 +1529,8 @@ fn handles_of(set: &ModelSet, ref_path: &str, declared: &TypeModel) -> Vec<Strin
             handles.push(handle);
         }
     };
-    let path = set.canonical(&declared.rust_path.text);
-    if declared.object_model && declared.kind == TypeKind::Class {
+    let path = set.expanded(&declared.rust_path.text);
+    if declared.object_model && !declared.unregistered && declared.kind == TypeKind::Class {
         add(format!("{ref_path}<{path}>"));
         add(format!("Option<{ref_path}<{path}>>"));
     }
@@ -1489,7 +1538,7 @@ fn handles_of(set: &ModelSet, ref_path: &str, declared: &TypeModel) -> Vec<Strin
         add(path);
     }
     for handle in &declared.handles {
-        add(set.canonical(&handle.text));
+        add(set.expanded(&handle.text));
     }
     handles
 }
