@@ -10,9 +10,9 @@ Generated from upstream commit `17350180c33b063f0e98abbfd19aa3cae63f5d56`. Back 
 | FerroUI | `src/FerroUI.Native` (exists) |
 | Crate | `ferroui-native` |
 | Phase / priority | 1 - desktop (macOS) / P0 |
-| Files | 47/47 (100.0%), 2 not applicable |
-| Types | 64/75 (11 waived) (100.0%) |
-| Members | 452/528 (76 waived) (100.0%) |
+| Files | 48/48 (100.0%), 1 not applicable |
+| Types | 65/76 (11 waived) (100.0%) |
+| Members | 455/531 (76 waived) (100.0%) |
 | Contracts (interfaces) | 1/4 |
 | Property registrations | 1/1 |
 | Routed events | 0/0 |
@@ -30,7 +30,7 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 
 ## Files
 
-### `(project root)` - files 47/47, types 64/75 (11 waived), members 452/528 (76 waived)
+### `(project root)` - files 48/48, types 65/76 (11 waived), members 455/531 (76 waived)
 
 | Upstream file | Rust file | Status | Types | Members | Notes |
 |---|---|---|---|---|---|
@@ -59,7 +59,7 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 | `DoubleClickHelper.cs` | `double_click_helper.rs` | present | 1/1 | 1/1 |  |
 | `EmbeddableTopLevelImpl.cs` | `embeddable_top_level_impl.rs` | present | 1/1 | 1/1 |  |
 | `Extensions.cs` | `extensions.rs` | present | 1/1 | 2/2 |  |
-| `GpuHandleWrapFeature.cs` | - | n/a | - | - | not-applicable: not ported for now: the feature that retains an `IOSurface` or a shared Metal event while the compositor imports it (`IExternalObjectsHandleWrapRenderInterfaceContextFeature`, whose contract is in the base crate). Upstream creates it in the Metal device (`Metal.cs`) and in the OpenGL context, and `MetalDevice::try_get_feature` of `metal.rs` does not offer it. Applicable with the external objects feature on Metal (`MetalExternalObjectsFeature` of `Metal.cs` and `Gpu/Metal/SkiaMetalExternalObjectsFeature.cs` of the Skia backend, both reported as missing): the entry is removed when that work starts |
+| `GpuHandleWrapFeature.cs` | `gpu_handle_wrap_feature.rs` | present | 1/1 | 3/3 |  |
 | `Helpers.cs` | `helpers.rs` | present | 0/1 (1 waived) | 0/10 (10 waived) |  |
 | `IAvnMenu.cs` | `frn_menu.rs` | present | 1/3 (2 waived) | 3/16 (13 waived) | interface merged into implementation file |
 | `IAvnMenuItem.cs` | `frn_menu_item.rs` | present | 2/2 | 3/4 (1 waived) | merged: the members the file adds to the generated proxy of the native menu item are members of `FrnMenuItem`, the struct that wraps the native item |
