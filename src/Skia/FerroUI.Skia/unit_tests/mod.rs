@@ -10,6 +10,7 @@
 //! `#[cfg_attr(not(windows), ignore = "...")]` with upstream's message.
 
 mod combined_geometry_impl_tests;
+mod drawing_context_helper_tests;
 mod drawing_context_impl_tests;
 mod hit_testing;
 mod media;
