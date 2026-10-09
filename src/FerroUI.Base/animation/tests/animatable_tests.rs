@@ -780,3 +780,67 @@ fn try_get_transition_instance_returns_the_running_instance() {
     border.transitions().unwrap().clear();
     assert!(border.try_get_transition_instance(&handle).is_none());
 }
+
+fn width_transitions() -> Transitions {
+    let transition = DoubleTransition::new();
+    transition.set_property(Some(Layoutable::width_property()));
+    transition.set_duration(seconds(1.0));
+    Transitions::from_items([transition.into()])
+}
+
+/// Not a port. A value that is not a number equals itself to the value
+/// store and to the transitions (the reference compares with
+/// `EqualityComparer<T>.Default` and `object.Equals`). With `==` a width
+/// that is not set was a new base value every time it was set or read
+/// again: here the second assignment of it started a transition of its own,
+/// and the width of the end is not the one assigned last. In the split view
+/// of the Fluent theme, whose pane has a transition of `Width` and a width
+/// from a binding that has no source for a moment, the value the disposed
+/// transition left was reported, taken for another change of the base value
+/// and answered with a transition whose first value was reported the same
+/// way, until the stack overflowed (the interaction tour of the catalog,
+/// the SplitView page).
+#[test]
+fn a_transition_to_a_value_that_is_not_a_number_ends() {
+    start();
+    let clock = TestClock::new();
+    let control = Border::new();
+    control.set_transitions(Some(width_transitions()));
+    let root = TestRoot::with_child(&control);
+    root.set_clock(Some(clock.as_clock()));
+
+    control.set_width(100.0);
+    clock.step(seconds(0.0));
+    clock.step(seconds(2.0));
+    assert_eq!(100.0, control.width());
+
+    control.set_width(50.0);
+    clock.step(seconds(2.0));
+    clock.step(seconds(2.5));
+    assert_eq!(75.0, control.width());
+
+    control.set_width(f64::NAN);
+    clock.step(seconds(2.5));
+    clock.step(seconds(5.0));
+    assert!(control.width().is_nan());
+
+    control.set_width(f64::NAN);
+    control.set_width(10.0);
+    clock.step(seconds(5.0));
+    clock.step(seconds(8.0));
+    assert_eq!(10.0, control.width());
+}
+
+/// Not a port: the equality of [`value_equals`](crate::ferro_property::value_equals).
+#[test]
+fn a_value_that_is_not_a_number_equals_itself_as_a_property_value() {
+    use crate::ferro_property::value_equals;
+    assert!(value_equals(&f64::NAN, &f64::NAN));
+    assert!(value_equals(&f32::NAN, &f32::NAN));
+    assert!(value_equals(&Some(f64::NAN), &Some(f64::NAN)));
+    assert!(!value_equals(&Some(f64::NAN), &None));
+    assert!(!value_equals(&1.0, &f64::NAN));
+    assert!(value_equals(&1.5, &1.5));
+    let (a, b): (BoxedValue, BoxedValue) = (Rc::new(f64::NAN), Rc::new(f64::NAN));
+    assert!(*a == *b);
+}

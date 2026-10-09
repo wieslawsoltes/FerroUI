@@ -53,12 +53,41 @@ impl<T: PartialEq + 'static> AnyValue for T {
     }
 
     fn any_value_eq(&self, other: &dyn AnyValue) -> bool {
-        other.any_value_as_any().downcast_ref::<T>().is_some_and(|other| self == other)
+        other.any_value_as_any().downcast_ref::<T>().is_some_and(|other| value_equals(self, other))
     }
 
     fn any_value_type_name(&self) -> &'static str {
         std::any::type_name::<T>()
     }
+}
+
+/// Whether two property values are equal as the reference compares them
+/// (`EqualityComparer<T>.Default.Equals`, and `object.Equals` for boxed
+/// values): `==`, and a floating-point value that is not a number equals
+/// another that is not a number, bare or nullable. With `==` alone a value
+/// store whose value is NaN (a `Width` that is not set) reports a change
+/// every time the value is set again.
+#[inline]
+pub fn value_equals<T: PartialEq + 'static>(a: &T, b: &T) -> bool {
+    a == b || both_not_a_number(a, b)
+}
+
+#[inline]
+fn both_not_a_number<T: 'static>(a: &T, b: &T) -> bool {
+    let (a, b): (&dyn Any, &dyn Any) = (a, b);
+    if let (Some(a), Some(b)) = (a.downcast_ref::<f64>(), b.downcast_ref::<f64>()) {
+        return a.is_nan() && b.is_nan();
+    }
+    if let (Some(a), Some(b)) = (a.downcast_ref::<f32>(), b.downcast_ref::<f32>()) {
+        return a.is_nan() && b.is_nan();
+    }
+    if let (Some(Some(a)), Some(Some(b))) = (a.downcast_ref::<Option<f64>>(), b.downcast_ref::<Option<f64>>()) {
+        return a.is_nan() && b.is_nan();
+    }
+    if let (Some(Some(a)), Some(Some(b))) = (a.downcast_ref::<Option<f32>>(), b.downcast_ref::<Option<f32>>()) {
+        return a.is_nan() && b.is_nan();
+    }
+    false
 }
 
 impl dyn AnyValue {
