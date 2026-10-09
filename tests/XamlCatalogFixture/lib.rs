@@ -1,4 +1,4 @@
-//! Test fixture of the XAML compiler (docs/porting/xaml.md, 9.5.17, 9.5.18 and 9.10.1,
+//! Test fixture of the XAML compiler (docs/porting/xaml.md, 9.5.17, 9.5.19 and 9.10.1,
 //! item 2): the ControlCatalog with its documents compiled by a build script and its
 //! classes populated by their compiled markup. Not a port of an upstream project, and not a
 //! copy of the sample: the modules of this crate are the source files of
