@@ -43,7 +43,9 @@ use std::rc::Rc;
 use ferroui_base::metadata::MarkupType;
 use ferroui_base::TypeInfo;
 use ferroui_build::scanner::{scan_crate, ScanOptions, Severity};
-use ferroui_build::type_system::{ModelType, ModelTypeSystem};
+use ferroui_build::type_system::{ModelEmitTypes, ModelType, ModelTypeSystem};
+use ferroui_markup_xaml_loader::rust_emitter::emit_types::EmitTypes;
+use ferroui_markup_xaml_loader::rust_emitter::runtime_types::RuntimeEmitTypes;
 use ferroui_markup_xaml_loader::runtime::type_system::{RuntimeType, RuntimeTypeOrigin, RuntimeTypeSystem};
 use xamlx::type_system::{
     IXamlConstructor, IXamlCustomAttribute, IXamlEventInfo, IXamlField, IXamlMember, IXamlMethod, IXamlParameterInfo, IXamlProperty, IXamlType,
@@ -496,6 +498,16 @@ fn model_type_system_agrees_with_the_runtime_type_system() {
         }
         println!();
     }
+    // The pairs of types a crate states the dereference of (`ValueTypes::register_deref`).
+    let stated_dereferences: usize = [&base, &controls, &markup_xaml]
+        .iter()
+        .flat_map(|scan| scan.model.value_types.iter())
+        .filter(|registration| registration.registration == "deref")
+        .inspect(|registration| assert!(registration.types.iter().all(|type_| type_.is_resolved()), "a dereference with a type the scan did not resolve: {registration:?}"))
+        .count();
+    for scan in [&base, &controls, &markup_xaml] {
+        assert!(!scan.model.unread_value_types.iter().any(|(registration, _)| registration == "deref"), "{}: dereferences the scan did not read", scan.model.crate_name);
+    }
     let model_system = ModelTypeSystem::new(vec![base.model, controls.model, markup_xaml.model]);
     let runtime_system = RuntimeTypeSystem::new();
 
@@ -547,6 +559,45 @@ fn model_type_system_agrees_with_the_runtime_type_system() {
             (false, _) => differences.add(Kind::TypeUnderCfgOnlyInModel, format!("{name} (cfg: {})", cfg.join(", "))),
         }
     }
+
+    // Whether the Rust type of a type dereferences to the Rust type of a base its
+    // declaration names (`ValueTypes::register_deref`): the same answer on both sides for
+    // every type and each of its bases, and as many pairs as the crates state.
+    let model_emit = ModelEmitTypes::new(model_system.clone(), Vec::new());
+    let runtime_emit = RuntimeEmitTypes;
+    let mut dereferences: Vec<String> = Vec::new();
+    let mut dereference_differences: Vec<String> = Vec::new();
+    for (name, runtime) in &runtime_types {
+        let Some((model, _, false)) = model_types.get(name) else { continue };
+        let (mut runtime_base, mut model_base) = (runtime.base_type(), model.base_type());
+        while let (Some(runtime_next), Some(model_next)) = (runtime_base, model_base) {
+            let at_run_time = match (runtime_emit.handle_of(&**runtime), runtime_emit.handle_of(&*runtime_next)) {
+                (Some(from), Some(to)) => runtime_emit.dereferences(from.id(), to.id()),
+                _ => false,
+            };
+            let in_the_model = match (model_emit.handle_of(&**model), model_emit.handle_of(&*model_next)) {
+                (Some(from), Some(to)) => model_emit.dereferences(from.id(), to.id()),
+                _ => false,
+            };
+            let pair = format!("{name} to {}", canonical_name(&runtime_next));
+            if at_run_time != in_the_model {
+                dereference_differences.push(format!("{pair}: {at_run_time} at run time, {in_the_model} in the model"));
+            } else if at_run_time {
+                dereferences.push(pair);
+            }
+            runtime_base = runtime_next.base_type();
+            model_base = model_next.base_type();
+        }
+    }
+    println!("---- {} types dereference to a base ({stated_dereferences} stated by the crates) ----", dereferences.len());
+    for pair in &dereferences {
+        println!("{pair}");
+    }
+    println!();
+    assert!(dereference_differences.is_empty(), "the two type systems differ on what dereferences to its base: {dereference_differences:?}");
+    assert_eq!(model_emit.take_unanswered(), Vec::<String>::new(), "the models cannot answer a question about a dereference");
+    assert_eq!(dereferences.len(), stated_dereferences, "a stated dereference is not one of a type to a base of it: {dereferences:?}");
+    assert_eq!(ferroui_base::data::core::ValueTypes::dereference_count(), stated_dereferences, "the dereferences registered at run time and the ones the scans read");
 
     // The report: every kind with its number, and its differences.
     println!("{compared} types are on both sides and compared member by member.\n");

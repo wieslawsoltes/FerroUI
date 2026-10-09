@@ -4803,6 +4803,89 @@ fn build_class_binding_xaml_untyped(
     ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
 }
 
+/// The base URI and the XML namespaces of `list_text_held_collection.xaml`.
+static BUILD_LIST_TEXT_HELD_COLLECTION_XAML_DOCUMENT: rt::DocumentInfo = rt::DocumentInfo { base_uri: ::core::option::Option::Some("ferres://FerroUI.Markup.Xaml.UnitTests/Emitter/list_text_held_collection.xaml"), namespaces: XML_NAMESPACES_0 };
+
+/// Generated from `list_text_held_collection.xaml`.
+pub fn build_list_text_held_collection_xaml(
+    service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
+) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::Canvas>, ::ferroui_markup_xaml::XamlLoadException> {
+    // list_text_held_collection.xaml(1,2) Canvas
+    let canvas_0 = ::ferroui_controls::Canvas::new();
+    let context = rt::populate_context(service_provider, &BUILD_LIST_TEXT_HELD_COLLECTION_XAML_DOCUMENT, rt::to_value(canvas_0.clone()));
+    let name_scope = context.name_scope_field();
+    canvas_0.begin_init();
+    // list_text_held_collection.xaml(2,4) Children
+    let children_collection_0 = ::ferroui_controls::Panel::__markup_get_Children(canvas_0.upcast_ref::<::ferroui_controls::Panel>());
+    // list_text_held_collection.xaml(2,4) Polygon
+    let polygon_0 = ::ferroui_controls::shapes::Polygon::new();
+    polygon_0.begin_init();
+    ::ferroui_controls::Controls::__markup_Add_0(&children_collection_0, ::core::clone::Clone::clone(&polygon_0).upcast::<::ferroui_controls::Control>());
+    // list_text_held_collection.xaml(2,4) Points
+    let points_0 = ::ferroui_base::media::Points::__markup_new_0();
+    rt::invoked(<::ferroui_base::collections::FerroList<::ferroui_base::Point>>::__markup_set_Capacity(&rt::cast(::core::clone::Clone::clone(&points_0), 2, 12)?, 3_i32), 2, 12)?;
+    ::ferroui_base::media::Points::__markup_Add_0(&points_0, ::ferroui_base::Point::__markup_new_1(75.0_f64, 0.0_f64));
+    ::ferroui_base::media::Points::__markup_Add_0(&points_0, ::ferroui_base::Point::__markup_new_1(120.0_f64, 120.0_f64));
+    ::ferroui_base::media::Points::__markup_Add_0(&points_0, ::ferroui_base::Point::__markup_new_1(0.0_f64, 45.0_f64));
+    polygon_0.set_value(::ferroui_controls::shapes::Polygon::points_property(), rt::cast(::core::clone::Clone::clone(&points_0), 2, 12)?);
+    rt::invoked(polygon_0.try_end_init(), 2, 4)?;
+    // list_text_held_collection.xaml(3,4) Children
+    let children_collection_1 = ::ferroui_controls::Panel::__markup_get_Children(canvas_0.upcast_ref::<::ferroui_controls::Panel>());
+    // list_text_held_collection.xaml(3,4) Polyline
+    let polyline_0 = ::ferroui_controls::shapes::Polyline::new();
+    polyline_0.begin_init();
+    ::ferroui_controls::Controls::__markup_Add_0(&children_collection_1, ::core::clone::Clone::clone(&polyline_0).upcast::<::ferroui_controls::Control>());
+    // list_text_held_collection.xaml(3,4) Points
+    let points_1 = ::ferroui_base::media::Points::__markup_new_0();
+    rt::invoked(<::ferroui_base::collections::FerroList<::ferroui_base::Point>>::__markup_set_Capacity(&rt::cast(::core::clone::Clone::clone(&points_1), 3, 13)?, 2_i32), 3, 13)?;
+    ::ferroui_base::media::Points::__markup_Add_0(&points_1, ::ferroui_base::Point::__markup_new_1(0.0_f64, 0.0_f64));
+    ::ferroui_base::media::Points::__markup_Add_0(&points_1, ::ferroui_base::Point::__markup_new_1(65.0_f64, 0.0_f64));
+    polyline_0.set_value(::ferroui_controls::shapes::Polyline::points_property(), rt::cast(::core::clone::Clone::clone(&points_1), 3, 13)?);
+    rt::invoked(polyline_0.try_end_init(), 3, 4)?;
+    // list_text_held_collection.xaml(4,4) Children
+    let children_collection_2 = ::ferroui_controls::Panel::__markup_get_Children(canvas_0.upcast_ref::<::ferroui_controls::Panel>());
+    // list_text_held_collection.xaml(4,4) Slider
+    let slider_0 = ::ferroui_controls::Slider::new();
+    slider_0.begin_init();
+    ::ferroui_controls::Controls::__markup_Add_0(&children_collection_2, ::core::clone::Clone::clone(&slider_0).upcast::<::ferroui_controls::Control>());
+    // list_text_held_collection.xaml(4,4) Ticks
+    let tick_list_0 = ::ferroui_controls::TickList::__markup_new_0();
+    rt::invoked(<::ferroui_base::media::MediaCollection<f64>>::__markup_set_Capacity(&rt::cast(::core::clone::Clone::clone(&tick_list_0), 4, 11)?, 4_i32), 4, 11)?;
+    <::ferroui_base::media::MediaCollection<f64>>::__markup_Add_0(&rt::cast(::core::clone::Clone::clone(&tick_list_0), 4, 11)?, 0.0_f64);
+    <::ferroui_base::media::MediaCollection<f64>>::__markup_Add_0(&rt::cast(::core::clone::Clone::clone(&tick_list_0), 4, 11)?, 20.0_f64);
+    <::ferroui_base::media::MediaCollection<f64>>::__markup_Add_0(&rt::cast(::core::clone::Clone::clone(&tick_list_0), 4, 11)?, 25.0_f64);
+    <::ferroui_base::media::MediaCollection<f64>>::__markup_Add_0(&rt::cast(::core::clone::Clone::clone(&tick_list_0), 4, 11)?, 40.0_f64);
+    slider_0.set_value(::ferroui_controls::Slider::ticks_property(), rt::cast(::core::clone::Clone::clone(&tick_list_0), 4, 11)?);
+    rt::invoked(slider_0.try_end_init(), 4, 4)?;
+    // list_text_held_collection.xaml(5,4) Children
+    let children_collection_3 = ::ferroui_controls::Panel::__markup_get_Children(canvas_0.upcast_ref::<::ferroui_controls::Panel>());
+    // list_text_held_collection.xaml(5,4) Grid
+    let grid_0 = ::ferroui_controls::Grid::new();
+    grid_0.begin_init();
+    ::ferroui_controls::Controls::__markup_Add_0(&children_collection_3, ::core::clone::Clone::clone(&grid_0).upcast::<::ferroui_controls::Control>());
+    // list_text_held_collection.xaml(5,4) RowDefinitions
+    let row_definitions_0 = ::ferroui_controls::RowDefinitions::__markup_new_0();
+    rt::invoked(<::ferroui_controls::FerroListOf<::ferroui_base::Ref<::ferroui_controls::RowDefinition>>>::__markup_set_Capacity(&row_definitions_0, 2_i32), 5, 9)?;
+    // list_text_held_collection.xaml(5,9) RowDefinition
+    let row_definition_0 = ::ferroui_controls::RowDefinition::__markup_new_1(::ferroui_controls::GridLength::__markup_new_2(0.0_f64, ::ferroui_controls::GridUnitType::Auto));
+    ::ferroui_controls::RowDefinitions::__markup_Add_0(&row_definitions_0, ::core::clone::Clone::clone(&row_definition_0));
+    // list_text_held_collection.xaml(5,9) RowDefinition
+    let row_definition_1 = ::ferroui_controls::RowDefinition::__markup_new_1(::ferroui_controls::GridLength::__markup_new_2(1.0_f64, ::ferroui_controls::GridUnitType::Star));
+    ::ferroui_controls::RowDefinitions::__markup_Add_0(&row_definitions_0, ::core::clone::Clone::clone(&row_definition_1));
+    ::ferroui_controls::Grid::__markup_set_RowDefinitions(&grid_0, ::core::clone::Clone::clone(&row_definitions_0));
+    rt::invoked(grid_0.try_end_init(), 5, 4)?;
+    rt::invoked(canvas_0.try_end_init(), 1, 2)?;
+    rt::complete_root_name_scope(::core::option::Option::Some(&canvas_0), name_scope.as_ref(), 1, 2)?;
+    ::core::result::Result::Ok(canvas_0)
+}
+
+fn build_list_text_held_collection_xaml_untyped(
+    service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
+) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadException> {
+    let root = build_list_text_held_collection_xaml(service_provider)?;
+    ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
+}
+
 /// The build function of every eligible public document, by document name.
 pub const DOCUMENTS: &[(&str, BuildDocument)] = &[
     ("border_empty.xaml", build_border_empty_xaml_untyped as BuildDocument),
@@ -4924,6 +5007,7 @@ pub const DOCUMENTS: &[(&str, BuildDocument)] = &[
     ("items_source_typed_list.xaml", build_items_source_typed_list_xaml_untyped as BuildDocument),
     ("class_value.xaml", build_class_value_xaml_untyped as BuildDocument),
     ("class_binding.xaml", build_class_binding_xaml_untyped as BuildDocument),
+    ("list_text_held_collection.xaml", build_list_text_held_collection_xaml_untyped as BuildDocument),
 ];
 
 /// The loader of the compiled markup of the assembly: builds the document with the URI

@@ -427,6 +427,12 @@ fn collection_items(value: &BoxedValue) -> Option<Result<Vec<Option<BoxedValue>>
         let items: Vec<Rc<dyn IDataTemplate>> = templates.to_vec();
         return Some(Ok(items.into_iter().map(|item| Some(Rc::new(item) as BoxedValue)).collect()));
     }
+    if let Some(points) = any.downcast_ref::<ferroui_base::media::Points>() {
+        return Some(Ok(points.list().to_vec().into_iter().map(|point| Some(Rc::new(point) as BoxedValue)).collect()));
+    }
+    if let Some(ticks) = any.downcast_ref::<ferroui_controls::TickList>() {
+        return Some(Ok(ticks.list().to_vec().into_iter().map(|tick| Some(Rc::new(tick) as BoxedValue)).collect()));
+    }
     if let Some(list) = any.downcast_ref::<GestureRecognizerCollection>() {
         return Some(Ok(objects::<GestureRecognizer>(list.to_vec())));
     }

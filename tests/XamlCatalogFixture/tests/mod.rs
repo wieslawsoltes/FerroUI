@@ -20,7 +20,7 @@ use ferroui_markup_xaml_loader::FerroRuntimeXamlLoader;
 
 use crate::documents::{PAGES, SAMPLE};
 use crate::markup::CompiledMarkup;
-use crate::pages::{ButtonSpinnerPage, CheckBoxPage, ImagePage, ProgressBarPage, WrapPanelPage};
+use crate::pages::{ButtonSpinnerPage, CanvasPage, CheckBoxPage, ImagePage, ProgressBarPage, SliderPage, WrapPanelPage};
 use crate::view_models::WrapPanelPageViewModel;
 use crate::ASSEMBLY;
 
@@ -202,6 +202,36 @@ fn wrap_panel_page_is_the_tree_of_the_run_time_loader() {
     };
     assert!(counts(&compiled).contains(&items), "{:?}", counts(&compiled));
     assert_eq!(counts(&compiled), counts(&loaded));
+}
+
+/// Two pages with a list written as text for a named collection that holds its list and
+/// does not dereference to it (`Points` of a polygon and of a polyline, `Ticks` of a
+/// slider): the members of the list are called with the collection converted, as the
+/// run-time loader converts it, and the lists have the elements of the text.
+#[test]
+fn lists_written_as_text_fill_collections_that_do_not_dereference_to_their_list() {
+    use ferroui_controls::shapes::Polygon;
+    use ferroui_controls::Slider;
+    let _application = application();
+    let (compiled, loaded, dump) = populated("Pages/CanvasPage.xaml", CanvasPage::construct);
+    assert!(objects_of(&dump, "FerroUI.Controls.Shapes.Polygon") >= 1, "{dump}");
+    let points = |page: &Ref<CanvasPage>| -> Vec<Vec<ferroui_base::Point>> {
+        page.get_logical_descendants().filter_map(|logical| logical.cast::<Polygon>()).filter_map(|polygon| polygon.points()).map(|points| points.list().to_vec()).collect()
+    };
+    assert!(points(&compiled).iter().any(|points| points.len() == 5), "{:?}", points(&compiled));
+    assert_eq!(points(&compiled), points(&loaded));
+
+    let (compiled, loaded, dump) = populated("Pages/SliderPage.xaml", SliderPage::construct);
+    assert!(objects_of(&dump, "FerroUI.Controls.Slider") >= 1, "{dump}");
+    let ticks = |page: &Ref<SliderPage>| -> Vec<Vec<f64>> {
+        page.get_logical_descendants()
+            .filter_map(|logical| logical.cast::<Slider>())
+            .filter_map(|slider| slider.ticks())
+            .map(|ticks| ticks.list().to_vec())
+            .collect()
+    };
+    assert!(ticks(&compiled).contains(&vec![0.0, 20.0, 25.0, 40.0, 75.0, 100.0]), "{:?}", ticks(&compiled));
+    assert_eq!(ticks(&compiled), ticks(&loaded));
 }
 
 /// A page with handlers of its class, named elements and bitmaps named by the paths of

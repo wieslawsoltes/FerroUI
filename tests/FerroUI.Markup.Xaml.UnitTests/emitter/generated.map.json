@@ -651,6 +651,21 @@
     {"file_lines": [4778, 4779], "document": "class_binding.xaml", "line": 4, "position": 4},
     {"file_lines": [4780, 4784], "document": "class_binding.xaml", "line": 4, "position": 4},
     {"file_lines": [4785, 4786], "document": "class_binding.xaml", "line": 4, "position": 11},
-    {"file_lines": [4787, 4796], "document": "class_binding.xaml", "line": 4, "position": 11}
+    {"file_lines": [4787, 4796], "document": "class_binding.xaml", "line": 4, "position": 11},
+    {"file_lines": [4813, 4817], "document": "list_text_held_collection.xaml", "line": 1, "position": 2},
+    {"file_lines": [4818, 4819], "document": "list_text_held_collection.xaml", "line": 2, "position": 4},
+    {"file_lines": [4820, 4823], "document": "list_text_held_collection.xaml", "line": 2, "position": 4},
+    {"file_lines": [4824, 4831], "document": "list_text_held_collection.xaml", "line": 2, "position": 4},
+    {"file_lines": [4832, 4833], "document": "list_text_held_collection.xaml", "line": 3, "position": 4},
+    {"file_lines": [4834, 4837], "document": "list_text_held_collection.xaml", "line": 3, "position": 4},
+    {"file_lines": [4838, 4844], "document": "list_text_held_collection.xaml", "line": 3, "position": 4},
+    {"file_lines": [4845, 4846], "document": "list_text_held_collection.xaml", "line": 4, "position": 4},
+    {"file_lines": [4847, 4850], "document": "list_text_held_collection.xaml", "line": 4, "position": 4},
+    {"file_lines": [4851, 4859], "document": "list_text_held_collection.xaml", "line": 4, "position": 4},
+    {"file_lines": [4860, 4861], "document": "list_text_held_collection.xaml", "line": 5, "position": 4},
+    {"file_lines": [4862, 4865], "document": "list_text_held_collection.xaml", "line": 5, "position": 4},
+    {"file_lines": [4866, 4868], "document": "list_text_held_collection.xaml", "line": 5, "position": 4},
+    {"file_lines": [4869, 4871], "document": "list_text_held_collection.xaml", "line": 5, "position": 9},
+    {"file_lines": [4872, 4879], "document": "list_text_held_collection.xaml", "line": 5, "position": 9}
   ]
 }

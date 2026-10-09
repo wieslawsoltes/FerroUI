@@ -1060,7 +1060,9 @@ pub struct ValueTypeModel {
     /// `Option<Rc<T>>`), `object` (`Ref<T>` is the handle of the class `T`), `element_ref`
     /// (`ElementRef<T>` of the class `T`), `interface` (the handles of the class `T`
     /// convert to the contract handle `I`), `upcast` (the handles of the class `T` to the
-    /// ones of its base).
+    /// ones of its base), `deref` (a reference to the first type coerces to a reference
+    /// to the second: no conversion, the fact generated code relies on when it passes a
+    /// named collection where a member of the list it derives from takes the list).
     pub registration: String,
     /// The type arguments of the call, in order.
     pub types: Vec<RustType>,
@@ -1069,7 +1071,7 @@ pub struct ValueTypeModel {
 /// The registration functions of the untyped value conversions the scanner reads
 /// ([`ValueTypeModel`], and `cast` for [`CastModel`]), with the number of type arguments.
 pub const VALUE_REGISTRATIONS: &[(&str, usize)] =
-    &[("nullable", 1), ("reference", 1), ("object", 1), ("element_ref", 1), ("interface", 2), ("upcast", 2), ("cast", 2)];
+    &[("nullable", 1), ("reference", 1), ("object", 1), ("element_ref", 1), ("interface", 2), ("upcast", 2), ("cast", 2), ("deref", 2)];
 
 /// A public function of an inherent `impl` block of a type of a crate, as far as the choice
 /// of a call form reads it (9.5.3, form B).

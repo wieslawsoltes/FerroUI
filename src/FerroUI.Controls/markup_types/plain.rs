@@ -436,4 +436,11 @@ pub(super) fn register_value_types() {
     ValueTypes::register_cast::<DataTemplates, FerroList<Rc<dyn IDataTemplate>>>(|c| (**c).clone());
     ValueTypes::register_cast::<RowDefinitions, FerroList<Ref<RowDefinition>>>(|c| (***c).clone());
     ValueTypes::register_cast::<ColumnDefinitions, FerroList<Ref<ColumnDefinition>>>(|c| (***c).clone());
+    // The named collections whose Rust type dereferences to the list: generated code
+    // passes a reference to such a collection where a member of the list takes the list.
+    ValueTypes::register_deref::<Controls, FerroList<Ref<Control>>>(|c| c);
+    ValueTypes::register_deref::<InlineCollection, FerroList<Ref<Inline>>>(|c| c);
+    ValueTypes::register_deref::<DataTemplates, FerroList<Rc<dyn IDataTemplate>>>(|c| c);
+    ValueTypes::register_deref::<RowDefinitions, FerroList<Ref<RowDefinition>>>(|c| c);
+    ValueTypes::register_deref::<ColumnDefinitions, FerroList<Ref<ColumnDefinition>>>(|c| c);
 }
