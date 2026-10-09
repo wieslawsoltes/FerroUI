@@ -1037,6 +1037,18 @@ pub struct CastModel {
     pub to: RustType,
 }
 
+/// A macro the crate exports (`#[macro_export]`) that declares through a declaration
+/// macro: what a crate built on this one declares by invoking it
+/// (`ferroui_controls::ferro_markup_list!(pub Names: String);`). The scan of that crate
+/// expands the invocation with the rules, as it expands the macros of its own crate.
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct MacroModel {
+    pub name: String,
+    /// The rules, each the text of the tokens of its matcher and of its transcriber, with
+    /// `$crate` written as it is.
+    pub rules: Vec<(String, String)>,
+}
+
 /// A registration of Rust types with the untyped value conversions that a function of a
 /// crate makes with its types stated (`ValueTypes::register_nullable::<T>()`): what
 /// decides, next to the casts and the declarations, whether a value of one Rust type is a
@@ -1179,6 +1191,8 @@ pub struct AssemblyModel {
     /// invocation or in test code). A crate with such calls registers more than its model
     /// states, so nothing follows from a registration that is not in the model.
     pub unread_value_types: Vec<(String, i64)>,
+    /// The macros the crate exports that declare through a declaration macro.
+    pub macros: Vec<MacroModel>,
     /// The public functions of the inherent `impl` blocks of the types of the crate that
     /// another crate can name, by type, in the order of the scan.
     pub functions: Vec<FunctionsModel>,
@@ -1206,6 +1220,7 @@ impl AssemblyModel {
             casts: Vec::new(),
             value_types: Vec::new(),
             unread_value_types: Vec::new(),
+            macros: Vec::new(),
             functions: Vec::new(),
             documents: Vec::new(),
             dependencies: Vec::new(),
@@ -1310,6 +1325,10 @@ impl AssemblyModel {
                 Json::Array(parts)
             })
             .list("unread_value_types", &self.unread_value_types, |(registration, count)| Json::Array(vec![Json::string(registration), Json::Integer(*count)]))
+            .list("macros", &self.macros, |exported| {
+                let rules = exported.rules.iter().map(|(matcher, transcriber)| pair_to_json(matcher, transcriber)).collect();
+                Json::Array(vec![Json::string(&exported.name), Json::Array(rules)])
+            })
             .list("functions", &self.functions, FunctionsModel::to_json);
         Json::object(members).to_text()
     }
@@ -1371,6 +1390,16 @@ impl AssemblyModel {
                     _ => Err("the number of registrations that are not read is not an integer".to_string()),
                 },
                 _ => Err("an entry of the registrations that are not read is not a pair".to_string()),
+            })?,
+            macros: fields.list("macros", |exported| match exported {
+                Json::Array(parts) if parts.len() == 2 => match &parts[1] {
+                    Json::Array(rules) => Ok(MacroModel {
+                        name: text_of(&parts[0], "the name of a macro")?,
+                        rules: rules.iter().map(|rule| pair_from_json(rule, "a rule of a macro")).collect::<Result<_, _>>()?,
+                    }),
+                    _ => Err("the rules of a macro are not a list".to_string()),
+                },
+                _ => Err("an exported macro is not a pair".to_string()),
             })?,
             functions: fields.list("functions", FunctionsModel::from_json)?,
             documents,

@@ -56,14 +56,23 @@ fn register_value_types() {
         }};
     }
     for_each_cast!(assignable);
-    // A macro whose rule repeats a part of its input is not expanded: what it registers
-    // is not read.
+    // A macro whose rule repeats a part of its input registers once for each round.
     macro_rules! references {
-        ($($type_:ty),*) => {
+        ($($type_:ty),* $(,)?) => {
             $(ValueTypes::register_reference::<$type_>();)*
         };
     }
-    references![PanelCollection];
+    references![PanelCollection, crate::panel::Deep,];
+    // A macro whose rule takes a fragment the scanner does not match is not expanded: what
+    // it registers is not read.
+    macro_rules! guarded {
+        ($type_:ty, $guard:block) => {
+            if $guard {
+                ValueTypes::register_reference::<$type_>();
+            }
+        };
+    }
+    guarded!(Panel, { true });
 }
 
 macro_rules! for_each_cast {

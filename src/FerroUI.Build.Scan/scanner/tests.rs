@@ -825,7 +825,8 @@ fn every_invocation_of_the_fixture_is_met() {
         ("ferro_class".to_string(), counts(8, 0, 2, 1, 1)),
         ("ferro_class_info".to_string(), counts(3, 0, 1, 0, 0)),
         ("ferro_markup_enum".to_string(), counts(3, 0, 0, 0, 0)),
-        ("ferro_markup_type".to_string(), counts(5, 2, 0, 0, 0)),
+        // One in the definition of the macro the crate exports (`typed_list!`).
+        ("ferro_markup_type".to_string(), counts(5, 2, 1, 0, 0)),
         ("ferro_properties".to_string(), counts(5, 0, 0, 0, 0)),
         ("ferro_property".to_string(), counts(5, 0, 0, 0, 0)),
         ("ferro_static_type".to_string(), counts(2, 0, 0, 0, 0)),
@@ -1032,7 +1033,25 @@ fn dependent_crate_is_resolved_with_the_model_of_the_crate_it_is_built_on() {
     let margin = the_type(&scan, "Margin");
     let types: Vec<&RustType> = margin.properties.iter().map(|property| &property.value_type).collect();
     assert_eq!(types, [&ty(THICKNESS), &ty("Option<::fixture::media::Dock>"), &ty(&format!("Option<::ferroui_base::Ref<{DECORATOR}>>"))]);
-    assert_eq!(scan.model.exports.iter().map(|export| export.path.as_str()).collect::<Vec<_>>(), ["::dependent::Card", "::dependent::panel::Margin"]);
+    assert_eq!(
+        scan.model.exports.iter().map(|export| export.path.as_str()).collect::<Vec<_>>(),
+        ["::dependent::Card", "::dependent::Cards", "::dependent::panel::Margin"]
+    );
+
+    // A macro the other crate exports that declares through a declaration macro is in the
+    // model of that crate with its rules, and its invocation here is expanded with them:
+    // the list is a type of this crate, `$crate` is the path of the other crate. Without
+    // the model the invocation declares nothing.
+    let exported = fixture().model.macros;
+    assert_eq!(exported.iter().map(|exported| (exported.name.as_str(), exported.rules.len())).collect::<Vec<_>>(), [("typed_list", 1)]);
+    assert!(alone.model.types.iter().all(|type_| type_.name != "List`1"));
+    let cards = the_type(&scan, "List`1");
+    assert_eq!(cards.rust_path, ty("::dependent::Cards"));
+    let card = "::ferroui_base::Ref<::dependent::Card>";
+    assert_eq!(cards.handles, [ty(&format!("Vec<{card}>")), ty(&format!("Option<Vec<{card}>>"))]);
+    assert_eq!(cards.generic.as_ref().map(|generic| (generic.definition.as_str(), generic.arguments.clone())), Some(("List`1", vec![ty(card)])));
+    let properties: Vec<(&str, &RustType)> = cards.properties.iter().map(|property| (property.name.as_str(), &property.value_type)).collect();
+    assert_eq!(properties, [("Count", &ty("i32")), ("Dock", &ty("Option<::fixture::media::Dock>"))]);
 
     // The call forms: a function of the other crate is known from the model of that crate
     // only. With it, the public function is called by its path, the accessor of a routed
@@ -1433,7 +1452,7 @@ fn registration_of_a_crate_is_read() {
     );
     // The other registrations with the untyped value conversions: called, handed to a
     // function that calls them, in a closure that is the value of a constant, and in the
-    // expansions of the table.
+    // expansions of the table and of the macro whose rule repeats, once for each round.
     let value_types: Vec<(&str, Vec<&RustType>)> =
         scan.model.value_types.iter().map(|registration| (registration.registration.as_str(), registration.types.iter().collect())).collect();
     assert_eq!(
@@ -1443,6 +1462,8 @@ fn registration_of_a_crate_is_read() {
             ("reference", vec![&ty("::registration::panel::Wrapper")]),
             ("element_ref", vec![&ty(PANEL)]),
             ("upcast", vec![&ty("::registration::panel::Deep"), &ty(PANEL)]),
+            ("reference", vec![&ty("::registration::panel::PanelCollection")]),
+            ("reference", vec![&ty("::registration::panel::Deep")]),
             ("nullable", vec![&shared("::registration::panel::Wrapper")]),
             ("nullable", vec![&shared("dyn ::registration::panel::IPanel")]),
         ],
@@ -1450,8 +1471,8 @@ fn registration_of_a_crate_is_read() {
         listing(&scan.diagnostics)
     );
     // Not read: the cast whose target is left to inference, and what the macro whose rule
-    // repeats registers. The calls in the definition of `assignable!` are read through its
-    // expansions.
+    // takes a block registers. The calls in the definitions of `assignable!` and of
+    // `references!`, whose rule repeats, are read through their expansions.
     assert_eq!(scan.model.unread_value_types, [("cast".to_string(), 1), ("reference".to_string(), 1)]);
     // The model keeps them in its file.
     let read_back = crate::model::AssemblyModel::parse(&scan.model.to_json()).expect("the model is read back");

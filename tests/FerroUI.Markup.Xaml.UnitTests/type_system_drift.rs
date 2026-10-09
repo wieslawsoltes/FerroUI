@@ -477,6 +477,12 @@ fn model_type_system_agrees_with_the_runtime_type_system() {
         &ScanOptions::new("ferroui_markup_xaml", source.join("Markup").join("FerroUI.Markup.Xaml").join("lib.rs"))
             .with_dependencies(vec![base.model.clone(), controls.model.clone()]),
     );
+    // A cast a scan does not read makes the models refuse every question about a cast
+    // (xaml.md 9.5.12): none is left in the crates a document is compiled against.
+    for scan in [&base, &controls, &markup_xaml] {
+        let casts: Vec<&(String, i64)> = scan.model.unread_value_types.iter().filter(|(registration, _)| registration == "cast").collect();
+        assert!(casts.is_empty(), "{}: casts the scan did not read: {casts:?}", scan.model.crate_name);
+    }
     for scan in [&base, &controls, &markup_xaml] {
         println!("==== the scan of {} ====\n{}\n", scan.model.crate_name, scan.summary());
         // What the scanner did not read explains a type or a member only the run-time side has.
@@ -582,4 +588,47 @@ fn opaque_types_are_compared_without_their_paths() {
     assert_eq!(without_paths("core::option::Option<alloc::vec::Vec<(f64, alloc::string::String)>>"), "Option<Vec<(f64, String)>>");
     assert_eq!(without_paths("&'static ferroui_base::FerroProperty"), "&'static FerroProperty");
     assert_eq!(without_paths("Vec<::ferroui_base::ferro_property::BoxedValue>"), "Vec<Rc<dyn AnyValue>>");
+}
+
+/// Not from upstream. The colour picker is read as files (it is not linked into this test:
+/// registering its types would add its assembly to the namespace table of the process, which
+/// the emitter of the other tests writes): the two forms of the crate the scanner did not
+/// read before the catalog was measured against the models (HANDOVER, section 19).
+///
+/// The registrations with the untyped value conversions a macro of the crate makes for each
+/// type it is invoked with (a rule that repeats) are all read, so the models answer the
+/// questions about casts; and the list a macro of the controls crate declares
+/// (`ferroui_controls::ferro_markup_list!`) is a type of the model, with the element type the
+/// data type of an item template is inferred from. Compared with the run-time type system
+/// once, with the crate linked as a fourth crate of the test above: nothing in a kind that
+/// must be empty (before the list was read: the list, a type only the run-time side had).
+#[test]
+fn the_colour_picker_is_read_with_its_macros() {
+    let source = Path::new(env!("CARGO_MANIFEST_DIR")).join("..").join("..").join("src");
+    let base = scan_crate(&ScanOptions::new("ferroui_base", source.join("FerroUI.Base").join("lib.rs")));
+    let controls =
+        scan_crate(&ScanOptions::new("ferroui_controls", source.join("FerroUI.Controls").join("lib.rs")).with_dependencies(vec![base.model.clone()]));
+    // The macro is in the model of the crate that exports it.
+    assert!(controls.model.macros.iter().any(|exported| exported.name == "ferro_markup_list"), "the controls export no `ferro_markup_list!`");
+    let color_picker = scan_crate(
+        &ScanOptions::new("ferroui_controls_color_picker", source.join("FerroUI.Controls.ColorPicker").join("lib.rs"))
+            .with_dependencies(vec![base.model.clone(), controls.model.clone()]),
+    );
+    let not_read: Vec<String> = color_picker.diagnostics_of(Severity::Error).map(|diagnostic| diagnostic.to_string()).collect();
+    assert!(not_read.is_empty(), "the scan of the colour picker does not read: {not_read:?}");
+
+    assert_eq!(color_picker.model.unread_value_types, [], "registrations with the untyped value conversions the scan did not read");
+    let casts_to = |contract: &str| color_picker.model.casts.iter().filter(|cast| cast.from.is_resolved() && cast.to.text.ends_with(contract)).count();
+    assert_eq!(casts_to("IColorPalette>"), 6, "the casts of the six palettes to their contract");
+    assert_eq!(casts_to("IValueConverter>"), 7, "the casts of the seven converters to their contract");
+
+    let list = color_picker
+        .model
+        .types
+        .iter()
+        .find(|type_| type_.rust_path.text.ends_with("::PaletteColorList"))
+        .expect("the list of palette colours `ferro_markup_list!` declares is not a type of the model");
+    assert_eq!(list.full_name(), "FerroUI.Collections.FerroList`1");
+    let arguments: Vec<&str> = list.generic.iter().flat_map(|generic| generic.arguments.iter()).map(|argument| argument.text.as_str()).collect();
+    assert_eq!(arguments, ["::ferroui_base::media::color::Color"]);
 }
