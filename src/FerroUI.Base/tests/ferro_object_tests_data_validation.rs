@@ -1,11 +1,12 @@
 //! Port of the observable-based parts of the upstream `DataValidation` object
-//! tests. Each test runs against a direct property and a styled property.
-//!
-//! Not ported: `Bound_Validated_String_Property_Can_Be_Set_To_Null`, which
-//! needs the binding classes.
+//! tests. Each test runs against a direct property and a styled property;
+//! `Bound_Validated_String_Property_Can_Be_Set_To_Null` is declared by both
+//! upstream test classes with one body, which binds the direct string
+//! property in both.
 
+use super::binding_test_support::ViewModel;
 use super::*;
-use crate::data::{BindingError, BindingPriority, BindingValue, BindingValueType};
+use crate::data::{BindingError, BindingPriority, BindingValue, BindingValueType, ReflectionBinding};
 use crate::*;
 use std::cell::{Cell, RefCell};
 
@@ -16,6 +17,7 @@ pub struct Class1 {
     base: FerroObject,
     non_validated_direct: Cell<i32>,
     direct_int: Cell<i32>,
+    direct_string: RefCell<Option<String>>,
     notifications: RefCell<Vec<Notification>>,
 }
 
@@ -28,8 +30,11 @@ impl FerroObjectImpl for Class1 {
         state: BindingValueType,
         error: Option<&BindingError>,
     ) {
-        let value = *this.get_value_untyped(property).downcast_ref::<i32>().expect("an i32 property");
-        this.notifications.borrow_mut().push((state, value, error.cloned()));
+        // Upstream records the value as an object. The notifications that are asserted are of the integer
+        // properties: the ones of the string property are not recorded.
+        let value = this.get_value_untyped(property);
+        let Some(value) = value.downcast_ref::<i32>() else { return };
+        this.notifications.borrow_mut().push((state, *value, error.cloned()));
     }
 }
 
@@ -56,6 +61,17 @@ impl Class1 {
         )
     });
 
+    ferro_property!(pub fn validated_direct_string_property() -> DirectProperty<Class1, Option<String>> {
+        FerroProperty::register_direct_with::<Class1, _>(
+            "ValidatedDirectString",
+            |o| o.direct_string.borrow().clone(),
+            Some(|o, v| {
+                o.set_and_raise(Class1::validated_direct_string_property(), &o.direct_string, v);
+            }),
+            DirectPropertyMetadata::new(Some(None)).with_enable_data_validation(true),
+        )
+    });
+
     ferro_property!(pub fn non_validated_styled_int_property() -> StyledProperty<i32> {
         FerroProperty::register::<Class1, _>("NonValidatedStyledInt", 0)
     });
@@ -72,6 +88,7 @@ impl Class1 {
             base: FerroObject::construct(),
             non_validated_direct: Cell::new(0),
             direct_int: Cell::new(0),
+            direct_string: RefCell::new(None),
             notifications: RefCell::new(Vec::new()),
         }
     }
@@ -82,6 +99,10 @@ impl Class1 {
 
     fn notifications(&self) -> Vec<Notification> {
         self.notifications.borrow().clone()
+    }
+
+    fn validated_direct_string(&self) -> Option<String> {
+        self.get_direct_value(Self::validated_direct_string_property())
     }
 }
 
@@ -113,6 +134,23 @@ macro_rules! data_validation_tests {
     ($module:ident, $property:ident, $non_validated_property:ident) => {
         mod $module {
             use super::*;
+
+            #[test]
+            fn bound_validated_string_property_can_be_set_to_null() {
+                let source = ViewModel::new();
+                source.set_string_value(Some("foo".to_string()));
+
+                let target = Class1::new();
+                let binding = ReflectionBinding::new("StringValue");
+                binding.set_source(Some(source.clone()));
+                target.bind_binding(Class1::validated_direct_string_property(), &binding);
+
+                assert_eq!(Some("foo".to_string()), target.validated_direct_string());
+
+                source.set_string_value(None);
+
+                assert_eq!(None, target.validated_direct_string());
+            }
 
             #[test]
             fn binding_non_validated_property_does_not_call_update_data_validation() {
