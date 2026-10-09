@@ -27,11 +27,17 @@ impl Interactive {
         handled_events_too: bool,
     ) -> Rc<dyn IDisposable> {
         let token = self.add_handler_with(routed_event, handler, routes, handled_events_too);
-        let instance = self.to_ref();
+        // The managed original captures the object. An element that keeps the
+        // disposable of a handler it added to itself (a templated control and
+        // the handler of its own pointer events) would keep itself alive that
+        // way; the handlers of an object that is gone are gone with it.
+        let instance = self.to_ref().downgrade();
         let routed_event = routed_event.as_routed_event();
 
         Disposable::create(move || {
-            instance.remove_handler(&routed_event, token);
+            if let Some(instance) = instance.upgrade() {
+                instance.remove_handler(&routed_event, token);
+            }
         })
     }
 

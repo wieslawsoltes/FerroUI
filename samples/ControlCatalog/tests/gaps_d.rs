@@ -311,6 +311,15 @@ fn gap_c320_content_of_a_scroll_viewer_that_was_dropped_while_shown() {
 // with the weak references of the object model marked for the allocation trace. Each is a cycle
 // of references the managed original has too.
 
+/// Shows the control in a window, takes it out, lets go of it and returns what remains.
+fn show_and_release(control: Ref<Control>) -> ferroui_base::WeakRef<Control> {
+    let weak = control.downgrade();
+    let window = show_and_remove(control);
+    assert!(weak.upgrade().is_none());
+    window.close();
+    weak
+}
+
 /// C322: `DataValidationErrors.Owner` is the control the errors are shown in, which owns the
 /// errors control through its template.
 #[test]
@@ -407,4 +416,12 @@ fn gap_c323_reflection_binding_declared_in_a_template() {
         assert!(part.upgrade().is_none(), "{value}");
         window.close();
     }
+}
+
+/// C324: the disposable of a routed event handler holds the element the handler was added to. A
+/// slider keeps the disposable of the handler of its own pointer events.
+#[test]
+fn gap_c324_element_that_keeps_the_disposable_of_its_own_handler() {
+    let _app = start_catalog_application();
+    show_and_release(ferroui_controls::Slider::new().upcast());
 }
