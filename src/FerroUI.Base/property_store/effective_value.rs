@@ -1,5 +1,6 @@
 use super::{entry_ptr_eq, IValueEntry};
 use crate::data::{BindingPriority, BindingValueType};
+use crate::ferro_property::value_equals;
 use crate::ferro_property_metadata::CoerceValueCallback;
 use crate::{BoxedValue, FerroObject, FerroProperty, PropertyValue, StyledProperty, StyledPropertyMetadata};
 use std::any::Any;
@@ -207,7 +208,7 @@ impl<T: PropertyValue> EffectiveValue<T> {
         };
 
         if priority <= self.priority.get() {
-            value_changed = *self.value.borrow() != v;
+            value_changed = !value_equals(&*self.value.borrow(), &v);
             // `replace` releases the borrow before the previous value is
             // dropped: dropping a value may run code that reads the property.
             self.value.replace(v.clone());
@@ -218,7 +219,7 @@ impl<T: PropertyValue> EffectiveValue<T> {
         }
 
         if priority <= self.base_priority.get() && priority >= BindingPriority::LocalValue {
-            base_value_changed = self.base_value.borrow().as_ref() != Some(&v);
+            base_value_changed = !self.base_value.borrow().as_ref().is_some_and(|base| value_equals(base, &v));
             self.base_value.replace(Some(v));
             self.base_priority.set(priority);
             if let Some((uncommon, value)) = uncoerced {
@@ -257,7 +258,7 @@ impl<T: PropertyValue> EffectiveValue<T> {
             }
         }
 
-        if *self.value.borrow() != v {
+        if !value_equals(&*self.value.borrow(), &v) {
             self.value.replace(v.clone());
             value_changed = true;
             if let Some(uncommon) = &self.uncommon {
@@ -265,7 +266,7 @@ impl<T: PropertyValue> EffectiveValue<T> {
             }
         }
 
-        if self.base_value.borrow().as_ref() != Some(&bv) {
+        if !self.base_value.borrow().as_ref().is_some_and(|base| value_equals(base, &bv)) {
             self.base_value.replace(Some(v));
             base_value_changed = true;
             if let Some(uncommon) = &self.uncommon {
@@ -390,7 +391,7 @@ impl<T: PropertyValue> EffectiveValueDyn for EffectiveValue<T> {
                 // Coerce the default value and raise if it differs.
                 let default = self.metadata.default_value().clone();
                 let coerced = (uncommon.coerce)(owner, default.clone());
-                if default != coerced {
+                if !value_equals(&default, &coerced) {
                     self.set_coerced_default_value_and_raise(owner, coerced);
                 }
             }
@@ -453,7 +454,7 @@ impl<T: PropertyValue> EffectiveValueDyn for EffectiveValue<T> {
         let o = old_value.map(|v| cast_effective_value::<T>(v).value()).unwrap_or_else(default);
         let n = new_value.map(|v| cast_effective_value::<T>(v).value()).unwrap_or_else(default);
         let priority = if new_value.is_some() { BindingPriority::Inherited } else { BindingPriority::Unset };
-        if o != n {
+        if !value_equals(&o, &n) {
             owner.raise_property_changed(self.property, Some(&o), &n, priority, true);
         }
     }
@@ -494,7 +495,7 @@ impl<T: PropertyValue> EffectiveValueDyn for EffectiveValue<T> {
         };
 
         let old_value = self.value();
-        if new_value != old_value {
+        if !value_equals(&new_value, &old_value) {
             owner.raise_property_changed(self.property, Some(&old_value), &new_value, priority, true);
             if self.property.inherits() {
                 owner.values().on_inherited_effective_value_disposed(owner, self.property, &old_value, &new_value);
