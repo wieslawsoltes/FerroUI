@@ -1,12 +1,17 @@
-# Upstream tests that the port has under another name, and upstream tests that are deliberately not ported.
-# Read by scripts/port-status/test_gaps.py (the format is described at its top). An entry applies only to a test
-# that was not found by name; a waived test is listed with its reason and is not counted as missing.
+# Upstream tests that the port has under another name (`[[alias]]`), and upstream tests that are not ported
+# for a stated reason (`[[waive]]`). Read by scripts/port-status/test_gaps.py; the format is described at its
+# top. One section per upstream test project; every entry names its project and applies to that project only,
+# and only to a test that is not present by name. A waived test is listed with its reason in the output of the
+# project and is not counted as missing.
 #
 # The rule of the port is upstream's test names. An alias is for a name that cannot be kept: one upstream theory
 # that became several tests, two upstream files with a test of the same name that share one Rust file, or a
-# member that the port names differently because it is a different member. A test whose subject is not ported
-# yet, or which needs a crate other than the one its upstream file belongs to, is NOT waived: it stays in the
-# count of missing tests.
+# member that the port names differently because it is a different member. A waiver is for a test that cannot be
+# expressed or whose subject the port does not have by decision. A test whose subject is not ported yet, or
+# which needs a crate other than the one its upstream file belongs to, is NOT waived: it stays in the count of
+# missing tests.
+
+# === Avalonia.Base.UnitTests ==================================================================================
 
 # --- Aliases --------------------------------------------------------------------------------------------------
 
@@ -299,3 +304,100 @@ project = "Avalonia.Base.UnitTests"
 file = "Data/Core/BindingExpressionTests.Property.cs"
 test = "Should_Not_Throw_Exception_On_Duplicate_Properties"
 reason = "model types have no inheritance: a member cannot hide another"
+
+# Names that several upstream tests share, which the port has under a name of its own (found when the count
+# began to ask for as many functions as upstream has tests of a name).
+
+[[alias]]
+project = "Avalonia.Base.UnitTests"
+file = "Styling/SelectorTests_NthLastChild.cs"
+test = "Nth_Child_Match_Control_In_Panel"
+rust = "nth_last_child_match_control_in_panel"
+reason = "SelectorTests_NthChild.cs and SelectorTests_NthLastChild.cs have tests of the same name and share styling/selector_tests.rs: named after the selector"
+
+[[alias]]
+project = "Avalonia.Base.UnitTests"
+file = "Styling/SelectorTests_NthLastChild.cs"
+test = "Nth_Child_Match_Control_In_Panel_With_Offset"
+rust = "nth_last_child_match_control_in_panel_with_offset"
+reason = "SelectorTests_NthChild.cs and SelectorTests_NthLastChild.cs have tests of the same name and share styling/selector_tests.rs: named after the selector"
+
+[[alias]]
+project = "Avalonia.Base.UnitTests"
+file = "Styling/SelectorTests_NthLastChild.cs"
+test = "Nth_Child_Match_Control_In_Panel_With_Negative_Offset"
+rust = "nth_last_child_match_control_in_panel_with_negative_offset"
+reason = "SelectorTests_NthChild.cs and SelectorTests_NthLastChild.cs have tests of the same name and share styling/selector_tests.rs: named after the selector"
+
+[[alias]]
+project = "Avalonia.Base.UnitTests"
+file = "AvaloniaObjectTests_Direct.cs"
+test = "BindingError_With_FallbackValue_Causes_Target_Update"
+rust = "binding_error_with_fallback_value_causes_target_update_2"
+reason = "the file has `Binding_Error_With_FallbackValue_Causes_Target_Update` too, which is the same name in snake case: the second one carries a number"
+
+[[alias]]
+project = "Avalonia.Base.UnitTests"
+file = "Animation/SpringTests.cs"
+test = "SplineEasing_Can_Be_Mutated"
+rust = "spring_easing_can_be_mutated"
+reason = "the test is of `SpringEasing`; upstream's name is the name of the test of KeySplineTests.cs, which the port has as well"
+
+# === Avalonia.Controls.UnitTests ==============================================================================
+
+[[alias]]
+project = "Avalonia.Controls.UnitTests"
+file = "GridLengthTests.cs"
+test = "ToString_AllCulture_Should_Pass"
+rust = "to_string_should_pass"
+reason = "the test sets every culture as the current one and formats; the port has no current culture and formats invariantly, so the three rows are formatted once"
+
+[[waive]]
+project = "Avalonia.Controls.UnitTests"
+file = "NavigationPageTests.cs"
+tests = [
+    "InsertPage_NullPage_ThrowsArgumentNullException",
+    "InsertPage_NullBefore_ThrowsArgumentNullException",
+    "RemovePage_NullPage_ThrowsArgumentNullException",
+    "ReplaceAsync_NullPage_Throws",
+]
+reason = "the argument is a `Ref<Page>`, which cannot be null: the check of the argument has no counterpart"
+
+[[waive]]
+project = "Avalonia.Controls.UnitTests"
+file = "ConnectedAnimationTests.cs"
+tests = [
+    "GetForTopLevel_NullTopLevel_ThrowsArgumentNullException",
+    "PrepareToAnimate_NullKey_ThrowsArgumentNullException",
+    "PrepareToAnimate_NullSource_ThrowsArgumentNullException",
+]
+reason = "the arguments are references (`&TopLevel`, `&str`, `&Visual`), which cannot be null: the checks of the arguments have no counterpart"
+
+[[waive]]
+project = "Avalonia.Controls.UnitTests"
+file = "PanelTests.cs"
+test = "Adding_Null_Child_Should_Throw"
+reason = "the children of a panel are `Ref<Control>`, which cannot be null"
+
+[[waive]]
+project = "Avalonia.Controls.UnitTests"
+file = "Utils/SafeEnumerableHashSetTests.cs"
+reason = "`SafeEnumerableHashSet` is not ported: its one user, the listener set of `Classes`, is a `HandlerList` in the port (docs/porting/data/path-overrides.toml, `Utilities/SafeEnumerableHashSet.cs`), and the tests observe the inner set of the class"
+
+[[waive]]
+project = "Avalonia.Controls.UnitTests"
+file = "ItemsSourceViewTests.cs"
+test = "Cannot_Create_ItemsSourceView_With_Collection_That_Implements_INCC_But_Not_List"
+reason = "an items source of the port is an `Rc<dyn IItemsList>`: a collection that notifies but is not a list cannot be handed to `ItemsSourceView::get_or_create`"
+
+[[waive]]
+project = "Avalonia.Controls.UnitTests"
+file = "Selection/InternalSelectionModelTests.cs"
+test = "Does_Not_Accept_Fixed_Size_Items"
+reason = "`WritableSelectedItems` is an `Rc<FerroList<..>>`, which is never of a fixed size: an array cannot be assigned"
+
+[[waive]]
+project = "Avalonia.Controls.UnitTests"
+file = "Platform/ScreensTests.cs"
+test = "Should_Raise_Event_When_Screen_Changed_From_Another_Thread"
+reason = "the screens of the port are reference counted on the UI thread (`Rc`, not `Send`): a change cannot be pushed from another thread, a platform posts it to the dispatcher itself"
