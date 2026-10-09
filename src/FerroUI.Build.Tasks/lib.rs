@@ -1004,6 +1004,9 @@ fn crate_file(assembly_name: &str, modules: &[Module], loaders: &[String], asset
             text.push_str(&format!("pub mod {module};\n"));
             continue;
         }
+        // A document that is not public (`x:ClassModifier`) and that the documents of its
+        // group only merge has a build function nothing calls: its content is in theirs.
+        text.push_str("#[allow(dead_code)]\n");
         text.push_str(&format!("pub mod {module} {{\n"));
         text.push_str(&format!("    include!({});\n", rust_string_literal(&path.display().to_string())));
         text.push_str("}\n");
