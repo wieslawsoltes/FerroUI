@@ -94,6 +94,8 @@ pub enum Known {
     TypeDescriptorContext,
     /// `Option<Rc<dyn ITypeDescriptorContext>>`.
     OptionTypeDescriptorContext,
+    /// `StyleQuery`: a container query.
+    StyleQuery,
     /// `RuntimeList`: a list of the runtime library created in markup (`List<T>`,
     /// `ArrayList`).
     RuntimeList,

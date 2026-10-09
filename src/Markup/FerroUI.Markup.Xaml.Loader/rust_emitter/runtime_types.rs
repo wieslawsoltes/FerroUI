@@ -244,6 +244,7 @@ impl EmitTypes for RuntimeEmitTypes {
             Known::Delegate => TypeId::of::<ferroui_base::metadata::MarkupDelegate>(),
             Known::TypeDescriptorContext => TypeId::of::<Rc<dyn ITypeDescriptorContext>>(),
             Known::OptionTypeDescriptorContext => TypeId::of::<Option<Rc<dyn ITypeDescriptorContext>>>(),
+            Known::StyleQuery => TypeId::of::<ferroui_base::styling::StyleQuery>(),
             Known::RuntimeList => TypeId::of::<RuntimeList>(),
             Known::ListItems => TypeId::of::<Rc<FerroList<Option<BoxedValue>>>>(),
         })
@@ -285,6 +286,7 @@ impl EmitTypes for RuntimeEmitTypes {
             Known::Delegate => TypeId::of::<Option<ferroui_base::metadata::MarkupDelegate>>(),
             Known::TypeDescriptorContext => TypeId::of::<Option<Rc<dyn ITypeDescriptorContext>>>(),
             Known::OptionTypeDescriptorContext => TypeId::of::<Option<Option<Rc<dyn ITypeDescriptorContext>>>>(),
+            Known::StyleQuery => TypeId::of::<Option<ferroui_base::styling::StyleQuery>>(),
             Known::RuntimeList => TypeId::of::<Option<RuntimeList>>(),
             Known::ListItems => TypeId::of::<Option<Rc<FerroList<Option<BoxedValue>>>>>(),
         })

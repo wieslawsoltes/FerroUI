@@ -471,6 +471,20 @@ fn collection_items(value: &BoxedValue) -> Option<Result<Vec<Option<BoxedValue>>
     if let Some(styles) = ValueTypes::as_object(any).and_then(|object| object.cast::<Styles>()) {
         return Some(Ok((0..styles.count()).map(|index| Some(Rc::new(styles.get(index)) as BoxedValue)).collect()));
     }
+    if let Some(style) = ValueTypes::as_object(any).and_then(|object| object.cast::<ferroui_base::styling::StyleBase>()) {
+        // A style or a control theme as the value of a property (`Theme`): its display form
+        // has its setters; its items are its child styles, dumped as objects.
+        let children = style.children().snapshot();
+        return Some(
+            children
+                .iter()
+                .map(|child| match child.as_object() {
+                    Some(object) => Ok(Some(Rc::new(object.to_ref()) as BoxedValue)),
+                    None => Err("a child style that is not an object".to_string()),
+                })
+                .collect(),
+        );
+    }
     Some(Err(format!("a collection of type {} the harness cannot enumerate", any.type_name())))
 }
 
@@ -895,6 +909,65 @@ fn a_method_is_a_command_in_both_back_ends() {
             "selection 0..8",
         ]
     );
+}
+
+/// Not from upstream. The container queries of a document are the queries the run-time
+/// loader builds, in both back ends: a width, the upstream reading of `and` with an
+/// alternative after it, and two alternatives, each with the name of its container.
+#[test]
+fn container_queries_are_built_by_both_back_ends() {
+    use ferroui_base::styling::ContainerQuery;
+    use ferroui_controls::StackPanel;
+
+    let _base = xaml_test_base();
+    let name = "container_query.xaml";
+    let (_, xaml) = DOCUMENTS.iter().find(|(document, _)| *document == name).expect("a corpus document");
+    let queries = |root: BoxedValue| -> Vec<String> {
+        let panel = ValueTypes::as_object(&*root).and_then(|object| object.cast::<StackPanel>()).expect("the root is a panel");
+        let styles = panel.styles();
+        (0..styles.count())
+            .map(|index| {
+                let style = styles.get(index);
+                let query = style.as_object().and_then(|object| object.to_ref().cast::<ContainerQuery>()).expect("a container query");
+                format!("{} {}", query.name().unwrap_or_default(), query.query().map(|query| query.to_string()).unwrap_or_default())
+            })
+            .collect()
+    };
+    let generated = queries(build_generated(name).expect("the document is eligible").expect("the document is built"));
+    let interpreted = queries(try_load(xaml).expect("the run-time loader loads the document"));
+    assert_eq!(generated.len(), 3);
+    assert!(generated.iter().all(|query| query.starts_with("Host ") && query.len() > "Host ".len()), "{generated:?}");
+    assert_ne!(generated[0], generated[1]);
+    assert_ne!(generated[1], generated[2]);
+    assert_eq!(generated, interpreted);
+}
+
+/// Not from upstream. A static resource written as an element in property element syntax
+/// (`<Button.Theme><StaticResource ResourceKey='Plain'/></Button.Theme>`) is the value of
+/// the property, in both back ends: the setter is chosen by what the extension provides
+/// (among them the adders of the collection the property may hold), and a control theme
+/// and a brush are assigned.
+#[test]
+fn a_static_resource_in_element_syntax_is_the_value_of_its_property() {
+    use ferroui_base::media::Colors;
+    use ferroui_controls::{Border, Button, StackPanel};
+
+    let _base = xaml_test_base();
+    let name = "static_resource_element.xaml";
+    let (_, xaml) = DOCUMENTS.iter().find(|(document, _)| *document == name).expect("a corpus document");
+    let values = |root: BoxedValue| -> (Option<String>, usize, bool) {
+        let panel = ValueTypes::as_object(&*root).and_then(|object| object.cast::<StackPanel>()).expect("the root is a panel");
+        let children = panel.children().to_vec();
+        let button = children.iter().find_map(|child| child.cast::<Button>()).expect("the button");
+        let border = children.iter().find_map(|child| child.cast::<Border>()).expect("the border");
+        let theme = button.theme().expect("the button has its theme");
+        let is_blue = border.background().is_some_and(|brush| brush.as_solid_color_brush().is_some_and(|brush| brush.color() == Colors::BLUE));
+        (theme.target_type().map(|class| class.full_name()), theme.setters().count(), is_blue)
+    };
+    let generated = values(build_generated(name).expect("the document is eligible").expect("the document is built"));
+    let interpreted = values(try_load(xaml).expect("the run-time loader loads the document"));
+    assert_eq!(generated, (Some("FerroUI.Controls.Button".to_string()), 1, true));
+    assert_eq!(generated, interpreted);
 }
 
 /// Not from upstream. Two dumps that hold a value the dump cannot read never compare as
