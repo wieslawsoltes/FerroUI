@@ -103,6 +103,16 @@
   every build, `wasm32` included: NOT VERIFIED by a browser build); the compile-time value parser,
   the manifest keys, diagnostics with codes, the cache.
 
+- The seventh stage (branch `xaml-themes-on-model`, section 17) is DONE for three of its four parts:
+  the compiler is a build tool that does not link the framework (`compiler` feature of the loader;
+  `ferroui-build` no longer builds the controls or the XAML runtime library for the host; its
+  run-time host is the feature `runtime-host`, which nothing enables), the Fluent theme is compiled
+  by its build script (86 documents, byte-identical to the reference, none refused), and the
+  diagnostics of a build have codes and go through the filter of upstream's build task. STOPPED:
+  the class document of the dialogs is refused for its event handler, which the emitter has no rule
+  for; the dialogs crate is unchanged and still links the run-time loader. Nothing is half-done in
+  the working tree. The browser build was not run by the author.
+
 Design documents in the repository: `docs/porting/xaml.md`, sections 9 (emitter design: call forms
 A/B/C, build integration, code-behind), 9.5 (source scanner), 9.12 (the 14 rulings), 9.13, and
 decisions 1 to 27. Read section 9 before touching the emitter. `DRAFT-AUTHOR-REPORT.md` is the
@@ -1226,3 +1236,40 @@ What the author doubts:
 3. `#[path]` with an absolute path inside the file `include_compiled_xaml!()` includes: it
    compiles for the fixture and the theme on the author's toolchain; a path with characters a
    string literal escapes goes through `rust_string_literal` like the `include!` paths.
+
+## 17. What the seventh stage delivered (the compiler without the framework, the Fluent theme, diagnostics), where the dialogs stopped, and how to validate it
+
+Branch `xaml-themes-on-model`, built and run by its author with the commands the stage allowed. Read `xaml.md` 9.5.14 and 9.6.5 first.
+
+**Done.**
+
+1. *The compiler without the framework.* The loader has a `compiler` feature (the transform, the emitter, the file of a group against the type system a host states) that does not imply `runtime`. What the emitter took from the interpreter moved to `back_end/` of the loader, read from the transformed AST alone; the interpreter and the run-time loader import it from there, and their behaviour is the same code. The run-time host of the emitter (`rust_emitter/runtime_host.rs`, `runtime_types.rs`) is the `emitter` feature as before. The workspace states the loader without default features. `ferroui-build` takes `compiler`; `TypeSystem::Runtime` needs its feature `runtime-host`, which no crate enables (none used the run-time host). `cargo tree -p ferroui-build` no longer has `ferroui-controls` or `ferroui-markup-xaml` (the trees are in 9.5.14).
+2. *The Fluent theme* is compiled by its build script against the models: 86 documents, byte-identical to the checked-in `compiled_xaml.rs`, none refused; `build_script_output_is_the_checked_in_reference` holds it. Both themes now build through `ferroui-build`.
+4. *Diagnostics with codes* (`src/FerroUI.Build.Tasks/diagnostics.rs`): the filter of upstream's task is in every transform of a build, `Build::analyzer_config_files`, `Build::warnings_as_errors`, codes `FRN2000`, `FRN3000`, `FRN3001` for what the build itself reports; `Build::default_compile_bindings`.
+
+**Stopped: the dialogs (3).** `AboutFerroDialog.xaml` is the one class document of the crate. Compiled by its build it is refused for `Click="Button_OnClick"` (`XamlPropertyAssignmentNode: Click: not a plain property setter (line 63 position 8)`): the emitter has no rule for `XamlDirectCallAddHandler` and `XamlLoadMethodDelegateNode`. Everything else in the document is emitted (the compiled bindings to the static properties of the class, the dynamic resource, the font). The trial was reverted; the crate is as it was and still depends on the loader with `runtime`, for `markup.rs` (`load_component`) and `register_types.rs` (`register_class_document`). What the next worker does:
+
+- the emitter rule (xaml.md 9.4.4): what the interpreter does is `load_method_delegate` (`runtime/interpreter/evaluators.rs`: a delegate over the weak root, so that root, element and handler do not form a cycle) and `add_handler` (`runtime/framework/setters.rs`: `AddHandler(event, handler, Direct | Bubble, false)`); generated code needs an `rt` helper with those two semantics, the typed function of the declared method from `EmitTypes::method`, and the routed event field from `EmitTypes::field`, answered by both hosts; corpus documents with a class;
+- then the dialogs: `build.rs` as the trial had it (`Build::from_env().type_system(Model).default_compile_bindings(true).compile_group(XamlGroup::new("compiled_about_ferro_dialog").documents(..).class_document("AboutFerroDialog.xaml"))` in place of the export, which `Build` does with the scan), `ferroui_markup_xaml::include_compiled_xaml!()` in `lib.rs`, `AboutFerroDialog::new` calling `crate::compiled_about_ferro_dialog::populate(None, &this)`, the loader table of the build in place of the hand-written `try_load`, `markup.rs` removed, the loader a dev-dependency of the tests only.
+
+`Build::default_compile_bindings` was exercised by that trial only (the document compiled up to the handler with it); it has no test of its own.
+
+**How to validate** (what the author ran, all green, debug profile):
+
+```text
+cargo test -p ferroui-build --lib                                   24 passed
+cargo test -p ferroui-build-scan --lib
+cargo test -p ferroui-markup-xaml-loader --lib                      397 passed, 1 ignored
+cargo test -p ferroui-markup-xaml-loader --lib --no-default-features --features compiler     272 passed
+cargo test -p ferroui-markup-xaml-tests --lib                       578 passed, 15 ignored
+cargo test -p ferroui-themes-simple --lib                           205 passed, 3 ignored
+cargo test -p ferroui-themes-fluent --lib                           200 passed, 2 ignored
+cargo test -p xaml-include-fixture-theme --lib                      3 passed
+cargo test -p xaml-include-fixture-application --lib                28 passed
+cargo test -p ferroui-dialogs --lib                                 47 passed
+cargo tree -p ferroui-build
+```
+
+**Not run by the author, for the validating session:** the browser build (`scripts/build-browser.sh`, with and without threads): the theme crates' build scripts now build `ferroui-build` for the host, which is the base crate, the loader with `compiler`, `xamlx` and the scanner, and no longer the controls and the XAML runtime library; check that the host build of the base crate under a `wasm32` target build has the features it needs and that the module is the same size (the generated code is byte-identical, so it should be). `cargo build --workspace` and `cargo clippy`, the samples (the ControlCatalog states `features = ["runtime"]` for the loader, which the workspace change relies on), the examples of the Simple theme, and `scripts/check-upstream-name.sh` or its equivalent.
+
+**What remains:** event handlers in the emitter, then the dialogs and the catalog compiled (xaml.md 9.10.1, item 2); the manifest keys of 9.6.1 (with the EditorConfig files found without a call); the compile-time value parser of the build; removing the run-time host from `Build` (the feature `runtime-host`, `Build::assembly` as a type-system input, `TypeSystem::Runtime` and its default) now that nothing uses it; the reference tests of the themes still generate the checked-in file through the run-time host of the emitter (`emitter` feature, a dev-dependency), which is what keeps the references regenerable until the build output is the only copy; `deterministic_id_generator.rs` is still not called.
