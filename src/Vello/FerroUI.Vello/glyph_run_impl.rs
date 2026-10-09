@@ -75,9 +75,9 @@ impl GlyphRunImpl {
 
             glyph_positions.push(((current_x + offset.x) as f32, offset.y as f32));
 
-            let glyph_bounds = match face.glyph_path(glyph.glyph_index, font_rendering_em_size) {
-                Some(path) if !path.elements().is_empty() => Some(pixel_bounds(path.bounding_box())),
-                Some(_) => None,
+            let glyph_bounds = match face.glyph_path_bounds(glyph.glyph_index, font_rendering_em_size) {
+                Some(Some(bounds)) => Some(pixel_bounds(bounds)),
+                Some(None) => None,
                 None => {
                     let (top, bottom) =
                         *line_extent.get_or_init(|| bitmap_glyph_extent(&face, font_rendering_em_size));

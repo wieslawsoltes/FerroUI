@@ -16,3 +16,15 @@ path = "lib.rs"
 ferroui-base.workspace = true
 ferroui-skia.workspace = true
 ferroui-vello.workspace = true
+# The text scenes: the shaper both backends are used with, and Skia itself
+# for the one thing the contracts have no member for, an instance of a
+# variable font.
+ferroui-harfbuzz.workspace = true
+skia-safe.workspace = true
+
+# The application on each backend (`application_tests.rs`): the headless
+# platform, the controls and the Fluent theme.
+[dev-dependencies]
+ferroui-controls.workspace = true
+ferroui-headless.workspace = true
+ferroui-themes-fluent.workspace = true

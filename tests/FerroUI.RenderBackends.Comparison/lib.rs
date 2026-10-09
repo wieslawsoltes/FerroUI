@@ -18,6 +18,7 @@
 
 pub mod geometries;
 pub mod scenes;
+pub mod text;
 
 use ferroui_base::platform::{IDrawingContextImpl, IPlatformRenderInterface, IReadableBitmapImpl, PixelFormat};
 use ferroui_base::{PixelSize, Vector};
@@ -163,4 +164,8 @@ pub fn compare(a: &Pixels, b: &Pixels) -> Difference {
 }
 
 #[cfg(test)]
+mod application_tests;
+#[cfg(test)]
 mod tests;
+#[cfg(test)]
+mod text_tests;
