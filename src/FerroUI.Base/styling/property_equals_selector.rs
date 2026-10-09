@@ -1,5 +1,6 @@
 use super::activators::PropertyEqualsActivator;
 use super::{Selector, SelectorMatch, SelectorNode, Style, StyleBase};
+use crate::data::core::{ValueType, ValueTypes};
 use crate::{AnyValue, BoxedValue, FerroProperty, StyledElement, TypeInfo};
 use std::any::Any;
 use std::cell::OnceCell;
@@ -20,20 +21,35 @@ impl PropertyEqualsSelector {
 
     /// Compares a property value with the value of a selector.
     ///
-    /// The selector value must hold exactly the property's value type. A
-    /// property of an untyped value type (`Option<BoxedValue>`) is compared
-    /// by its content.
+    /// A property of an untyped value type (`Option<BoxedValue>`) is compared
+    /// by its content, with the type of the content as the type of the
+    /// property. A selector value of another type than the property is
+    /// converted to it by the type converter of the property type, which
+    /// converts from text (with the invariant culture).
     pub(crate) fn compare(property_value: &BoxedValue, value: &BoxedValue) -> bool {
-        let property_value: &dyn AnyValue = &**property_value;
-        let value: &dyn AnyValue = &**value;
+        let selector_value: &dyn AnyValue = &**value;
 
-        if property_value.value_eq(value) {
+        // The value the comparison is made with: the content of an untyped
+        // property value.
+        let actual: &dyn AnyValue = match (**property_value).downcast_ref::<Option<BoxedValue>>() {
+            Some(Some(inner)) => {
+                if (**property_value).value_eq(selector_value) {
+                    return true;
+                }
+                &**inner
+            }
+            Some(None) => return (**property_value).value_eq(selector_value),
+            None => &**property_value,
+        };
+
+        if actual.value_eq(selector_value) {
             return true;
         }
 
-        if let Some(Some(inner)) = property_value.downcast_ref::<Option<BoxedValue>>() {
-            let inner: &dyn AnyValue = &**inner;
-            return inner.value_eq(value);
+        if value.is::<String>() {
+            if let Some(Some(converted)) = ValueTypes::try_convert(Some(value), ValueType::of_value(actual)) {
+                return actual.value_eq(&*converted);
+            }
         }
 
         false
