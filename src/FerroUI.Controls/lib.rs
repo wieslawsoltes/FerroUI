@@ -309,6 +309,10 @@ mod keyboard_navigation_tests_xy;
 #[cfg(test)]
 mod logging_tests;
 #[cfg(test)]
+mod pointer_over_tests;
+#[cfg(test)]
+mod pointer_tests_base;
+#[cfg(test)]
 mod input_element_gesture_tests;
 #[cfg(test)]
 mod styled_element_tests_theming;
