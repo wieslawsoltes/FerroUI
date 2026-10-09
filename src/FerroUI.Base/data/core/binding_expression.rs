@@ -402,7 +402,7 @@ impl BindingExpression {
         if let Some(converter) = self.converter() {
             if !is_unset(&value) && !BindingOperations::is_do_nothing(value.as_ref()) {
                 value = self.base.convert(
-                    self.should_log_error(),
+                    &|| self.should_log_error(),
                     &|| self.description(),
                     &**converter,
                     Some(&self.converter_culture()),
@@ -543,7 +543,7 @@ impl BindingExpression {
             return true;
         }
         *value = self.base.convert_back(
-            self.should_log_error(),
+            &|| self.should_log_error(),
             &|| self.description(),
             &**converter,
             Some(&self.converter_culture()),

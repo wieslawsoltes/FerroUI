@@ -192,9 +192,13 @@ impl UntypedBindingExpressionBase {
     /// Converts a value using a value converter, logging a warning if the
     /// converter fails; the result is then the unset marker and `error`
     /// holds the failure.
+    ///
+    /// `log_target` is the target to log the failure against, if it should
+    /// be logged (the `should_log_error` of the expression). It is asked
+    /// only when the converter has failed, and after it has.
     pub fn convert(
         &self,
-        log_target: Option<Ref<FerroObject>>,
+        log_target: &dyn Fn() -> Option<Ref<FerroObject>>,
         description: &dyn Fn() -> String,
         converter: &dyn IValueConverter,
         converter_culture: Option<&CultureInfo>,
@@ -208,7 +212,7 @@ impl UntypedBindingExpressionBase {
             Ok(v) => v,
             Err(e) => {
                 let message = Self::conversion_message(value, target_type);
-                if let Some(target) = log_target {
+                if let Some(target) = log_target() {
                     self.log(&target, &description(), &format!("{message}: {e}"), LogEventLevel::Warning);
                 }
                 *error = Some(ExpressionError::new(
@@ -222,9 +226,12 @@ impl UntypedBindingExpressionBase {
 
     /// Converts a value using a value converter's `convert_back`, logging a
     /// warning if the converter fails; the result is then the unset marker.
+    ///
+    /// `log_target` is asked as in [`convert`](Self::convert): only when the
+    /// converter has failed.
     pub fn convert_back(
         &self,
-        log_target: Option<Ref<FerroObject>>,
+        log_target: &dyn Fn() -> Option<Ref<FerroObject>>,
         description: &dyn Fn() -> String,
         converter: &dyn IValueConverter,
         converter_culture: Option<&CultureInfo>,
@@ -237,7 +244,7 @@ impl UntypedBindingExpressionBase {
             Ok(v) => v,
             Err(e) => {
                 let message = Self::conversion_message(value, target_type);
-                if let Some(target) = log_target {
+                if let Some(target) = log_target() {
                     self.log(&target, &description(), &format!("{message}: {e}"), LogEventLevel::Warning);
                 }
                 Some(FerroProperty::unset_value())
