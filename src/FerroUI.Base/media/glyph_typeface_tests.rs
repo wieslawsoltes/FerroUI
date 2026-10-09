@@ -626,13 +626,13 @@ fn face_names_should_contain_invariant_culture_entry() {
 /// C# `private class CustomPlatformTypeface : IPlatformTypeface`: a platform
 /// typeface over the bytes of a stream, family "Custom", without
 /// simulations.
-struct CustomPlatformTypeface {
+pub(crate) struct CustomPlatformTypeface {
     font_memory: UnmanagedFontMemory,
     family_name: String,
 }
 
 impl CustomPlatformTypeface {
-    fn new(stream: &mut dyn Read) -> Rc<dyn IPlatformTypeface> {
+    pub(crate) fn new(stream: &mut dyn Read) -> Rc<dyn IPlatformTypeface> {
         Self::with_family(stream, "Custom")
     }
 

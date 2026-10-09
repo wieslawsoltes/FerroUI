@@ -347,6 +347,62 @@ mod tests {
         assert!(font_memory.try_get_table(OpenTypeTag::parse("glyf")).is_none());
     }
 
+    // The tests of the reference file on the real font. `FromAsset` is
+    // `from_bytes` of the embedded Inter; the variable font of
+    // `Variable_Font_Carries_The_Variation_Tables` is not among the assets.
+
+    fn inter_regular() -> SyntheticFont {
+        SyntheticFont::from_bytes(include_bytes!("../../../../test_assets/fonts/Inter-Regular.ttf")).unwrap()
+    }
+
+    #[test]
+    fn from_asset_produces_a_loadable_typeface() {
+        use crate::media::fonts::testing::TestPlatformTypeface;
+        use crate::media::{FontSimulations, GlyphTypeface};
+
+        let font = inter_regular();
+
+        let typeface = TestPlatformTypeface::from_bytes(font.to_bytes(), FontSimulations::None)
+            .and_then(|platform_typeface| GlyphTypeface::try_create(platform_typeface, FontSimulations::None));
+
+        assert!(typeface.is_some());
+        let typeface = typeface.unwrap();
+        assert!(typeface.glyph_count() > 0);
+        assert!(typeface.character_to_glyph_map().contains_glyph('A' as i32));
+    }
+
+    #[test]
+    fn from_asset_parses_the_core_sfnt_tables() {
+        let font = inter_regular();
+
+        // A static TrueType font carries at least these.
+        assert!(font.contains("head"));
+        assert!(font.contains("maxp"));
+        assert!(font.contains("cmap"));
+        assert!(font.contains("hhea"));
+        assert!(font.contains("hmtx"));
+        assert!(font.contains("glyf"));
+        assert!(font.contains("loca"));
+    }
+
+    #[test]
+    fn to_bytes_round_trips_through_the_real_sfnt_parser() {
+        use crate::media::glyph_typeface_tests::CustomPlatformTypeface;
+        use crate::media::{FontSimulations, GlyphTypeface};
+
+        // `to_bytes` must emit a directory the production `UnmanagedFontMemory` parser
+        // accepts. `CustomPlatformTypeface` wraps `UnmanagedFontMemory::load_from_stream`.
+        let rebuilt = inter_regular().to_bytes();
+
+        let platform_typeface = CustomPlatformTypeface::new(&mut std::io::Cursor::new(rebuilt));
+        let typeface = GlyphTypeface::try_create(platform_typeface, FontSimulations::None);
+
+        assert!(typeface.is_some());
+        let typeface = typeface.unwrap();
+        assert!(typeface.glyph_count() > 0);
+        assert!(typeface.character_to_glyph_map().contains_glyph('A' as i32));
+    }
+
     #[test]
     fn to_bytes_round_trips_through_from_bytes_preserving_tables() {
         let original = sample();
