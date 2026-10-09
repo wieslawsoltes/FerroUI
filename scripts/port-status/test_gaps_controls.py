@@ -89,7 +89,11 @@ import re
 import subprocess
 import sys
 import tarfile
-import tomllib
+
+try:
+    import tomllib
+except ModuleNotFoundError:
+    sys.exit("test_gaps_controls.py needs Python 3.11 or later (tomllib)")
 from collections import defaultdict
 
 REPO = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -257,10 +261,13 @@ def read_project(upstream: str, project: str, commit: str | None) -> dict[str, s
     """Path below the project (forward slashes) -> text, for every `.cs` file of the project."""
     files: dict[str, str] = {}
     if commit:
-        data = subprocess.run(
+        result = subprocess.run(
             ["git", "-C", upstream, "archive", "--format=tar", commit, project],
-            check=True, capture_output=True,
-        ).stdout
+            capture_output=True,
+        )
+        if result.returncode != 0:
+            sys.exit(f"cannot read {project} at {commit}: {result.stderr.decode(errors='replace').strip()}")
+        data = result.stdout
         with tarfile.open(fileobj=io.BytesIO(data)) as tar:
             for member in tar:
                 if member.isfile() and member.name.endswith(".cs"):
