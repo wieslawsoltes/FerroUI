@@ -27,7 +27,8 @@ impl Interactive {
         handled_events_too: bool,
     ) -> Rc<dyn IDisposable> {
         let token = self.add_handler_with(routed_event, handler, routes, handled_events_too);
-        // The managed original captures the object. An element that keeps the
+        // Deviation (DEVIATIONS.md, Routed events): the managed original
+        // captures the object. An element that keeps the
         // disposable of a handler it added to itself (a templated control and
         // the handler of its own pointer events) would keep itself alive that
         // way; the handlers of an object that is gone are gone with it.

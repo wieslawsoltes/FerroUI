@@ -12,7 +12,7 @@ Status: 219 documents, 218 load and show their class; 1 is listed below.
 
 No gap of the framework blocks a document of the list. One gap is open: C101, a reflection binding (`x:CompileBindings="False"`) cannot resolve `$parent[prefix:Type]` for a type of a `using:` namespace (`gaps_a::gap_c101_reflection_binding_parent_of_prefixed_type`). The theme of `SampleGalleryPage` uses such paths with compiled bindings, which resolve them.
 
-No other gap blocks or changes a page. One more is open for the memory of a visit (below): a named root and its name scope hold each other (`gaps_d::open_named_root_of_a_document`).
+No other gap blocks or changes a page, and none is open for the memory of a visit (below).
 
 ## What a visit to a page retains
 
@@ -21,16 +21,20 @@ There is no collector: a page that left the navigation page is freed when the la
 ```sh
 cargo test -p control-catalog --features count-allocations --lib catalog_tour_memory -- --ignored --nocapture --test-threads=1
 cargo test -p control-catalog --features count-allocations --lib catalog_revisit_memory -- --ignored --nocapture --test-threads=1
+cargo test -p control-catalog --features count-allocations --lib catalog_markup_survivors -- --ignored --nocapture --test-threads=1
 ```
 
-The first selects every page of the list (74: all but the settings page, which needs the application of the catalog) with the transition and rendered frames, tour after tour, and prints what is alive at the end of each tour. The second prints, per page, what a second and a third visit add. `CATALOG_TOUR_TRACE` records where the blocks a visit leaves were allocated and prints them by class (with the strong references to each object) and by allocating function; `CATALOG_TOUR_TARGET` prints every block that points into the blocks of one class, which is how the cycles below were found (the module documentation has the variables).
+The first selects every page of the list (74: all but the settings page, which needs the application of the catalog) with the transition and rendered frames, tour after tour, and prints what is alive at the end of each tour. The second prints, per page, what a second and a third visit add. The third shows the markup of `CATALOG_TOUR_XAML` in the window of the catalog, takes it out and prints the elements that are still alive: a page is narrowed down to the control and the shape that stays. `CATALOG_TOUR_TRACE` records where the blocks a visit leaves were allocated and prints them by class (with the strong references to each object) and by allocating function; `CATALOG_TOUR_TARGET` prints every block that points into the blocks of one class, with how many of the pointers are weak references of the object model (the feature marks them, `ferroui-base/tagged-weak-references`), the holders with other pointers first, which is how the causes below were found (the module documentation has the variables).
 
 | | first tour | each further tour | objects of the server compositor per tour |
 |---|---|---|---|
 | before (2026-10-09, base `compositor-object-id-reuse`) | 197.8 MB alive | +143.0 MB (1.9 MB a page, 1 344 000 blocks) | +4391 |
 | after C317 to C320 | 125.9 MB alive | +71.0 MB (0.96 MB a page, 667 000 blocks) | +1750 |
+| after C321 to C330 | 55.6 MB alive | +56 KB (0.8 KB a page, 439 blocks) | +8 |
 
-Closed, each with a reproduction in `tests/gaps_d.rs` and its entry in `docs/porting/DEVIATIONS.md` (every one is a cycle of references that upstream has too and leaves to its collector):
+The last row is measured with the weak references marked (a weak reference is one word larger); the second tour adds 248 KB, the rest of what the first one did not fill, and the tours after it 55 to 66 KB each, six tours measured. The revisits: every page adds nothing on its third visit but the three below.
+
+Closed, each with a reproduction (`tests/gaps_d.rs`; C323 in `tests/catalog_tour.rs`, it needs a compiled template) and its entry in `docs/porting/DEVIATIONS.md`. Every one but C330 is a cycle of references that upstream has too and leaves to its collector; C330 is a list upstream bounds:
 
 | Gap | What kept what alive | Fix |
 |---|---|---|
@@ -38,15 +42,30 @@ Closed, each with a reproduction in `tests/gaps_d.rs` and its entry in `docs/por
 | C318 | The node of a binding of `DataContext` held the parent of its element (the sections of the home page). | The node holds the parent weakly. |
 | C319 | A binding that locates an element (`#name`, `$parent`, the templated parent) held the element it found, and the tracker of an ancestor held the element it searches from (the presenter of every scroll viewer; every element with a `$parent` binding). | The nodes hold their value weakly, the trackers their element and ancestor. |
 | C320 | A binding entry and the observable it was subscribed to held each other after the value store was dropped (the content of every scrolled page: the Calendar page went from 29 MB a visit to 0.9 MB). | The observers hold the entry weakly; an entry dropped while subscribed leaves its source. |
+| C321 | The root of a document holds its name scope and the scope the elements it names: a root with a name of its own. | The scope holds the element it is attached to weakly, every other name as before. |
+| C322 | `DataValidationErrors.Owner` held the control the errors are shown in, and the themes make the owner the `DataContext` of a part of the errors template: every control with validation in its template (TextBox, ComboBox, NumericUpDown, CalendarDatePicker, AutoCompleteBox, Slider, the pickers: NumericUpDown 6.5 MB a visit, Flex Panel 5.5, CalendarDatePicker 4.3, AutoCompleteBox 3.5, ComboBox 3.0). | The owner is an element reference (`ElementRef<Control>`), and an element reference that is a value is the element to a binding. |
+| C323 | The type resolver of a reflection binding held the context of the build, with the root object, the parents and the name scope; the instance of a multi binding holds its bindings: the tree of a compiled template with such a binding (the text box of the Fluent theme). | The resolver holds the type resolver service of the document. |
+| C324 | The disposable of a routed event handler held the element the handler was added to: an element that keeps the disposable of its own handler (every slider). | The disposable holds the element weakly. |
+| C325 | A dynamic resource extension held its anchor, the element the style it is a setter value of is declared under (the text box of the CalendarDatePicker of the Fluent theme). | The extension keeps its anchor as its expressions do: an element or a host weakly. |
+| C326 | The Buttons page of the sample is its own data context (`DataContext = this`): 7.7 MB a visit. | The page sets an element reference to itself; the bindings of its document read the page through it. |
+| C327 | The observer of a local value binding and its source held each other after the object was dropped, with the memory of the object: every text block of the default data template (Calendar 866 KB a visit, TableView 243 KB). | The observers the source holds hold the binding weakly; a binding dropped with its value store leaves its source. |
+| C328 | A view model of the sample keeps an observable of its own properties (`this.WhenAnyValue(..)`), which held the model: the list box page with its 10 000 items (343 KB a visit). | The observable of MiniMvvm holds the model weakly. |
+| C329 | The path of a compiled binding to a named element held the name scope: the binding of a setter of a style under a named element (the Focus page, 751 KB a visit). | The path holds the scope weakly, as the node it creates always has. |
+| C330 | A visual subscribes to the values of its render-affecting properties, and a value many visuals share kept an entry, and the memory of the visual, for every visual that ever drew it: the geometry of the back button of the navigation page (6 KB for every navigation), the icons of spinners and combo boxes. Upstream subscribes with a weak event whose list is compacted. | A visual that is dropped takes its handlers out. |
 
-What remains, from the largest (third visit of the revisits, after the fixes): Buttons 7.7 MB, NumericUpDown 6.5 MB, Flex Panel 5.5 MB, CalendarDatePicker 4.3 MB, AutoCompleteBox 3.5 MB, ComboBox 3.0 MB, Date/Time Picker 2.4 MB, ProgressBar 2.3 MB, Accelerator 2.1 MB; the smallest pages leave about 0.1 MB, which is what the round trip through the home page itself leaves. Known and open:
+What the earlier list had open is closed with these: the named root (C321); the Buttons page (C326); the spine of the home page, which the round trip through the home page no longer leaves (every page but the three below adds nothing on its third visit); the dropped path icons whose memory weak references held (C330). The objects of the server compositor were the visuals of the elements that stayed alive, as supposed: with the elements freed a tour adds 8, the visuals of the two notification managers below, and no table of the compositor grows on its own.
 
-- **A named root.** The name scope of a document holds the elements it names and the root holds the scope, so a root with a name of its own keeps itself alive (`gaps_d::open_named_root_of_a_document`, ignored). Upstream has both references. Holding the names weakly would change what a name scope returns for an element that left the tree; the scope needs to know its owner instead.
-- **Pages that are not freed.** The Buttons page object is still alive after the catalog navigated away (the home page, Border, Calendar and TextBlock pages are freed: `catalog_tour::the_catalog_frees_the_page_it_navigated_away_from`). The holder is not identified; the recording of the page shows its whole tree alive.
-- **The spine of the home page.** After a round trip the content presenter of the page theme, the panel under it and the banner images are alive with one strong reference to the presenter; the holder is not identified.
-- **Server objects.** 1750 objects of the server compositor per tour are the visuals of the elements that are still retained; no table of the compositor was seen to grow on its own, and the ids are reused (the fix of the base branch). To be measured again once the elements are freed.
-- **Dropped objects whose memory is held weakly.** The two path icons the navigation page creates for its back button per navigation are dropped, and weak references keep their blocks (about 1.5 KB each).
-- **Code of the sample, as upstream has it.** `ScreenPage` subscribes to the position of its window and to the screens and never unsubscribes; upstream's page does the same.
+What a tour still adds is the code of three pages of the sample, which upstream has the same way; the window holds what they leave for as long as it lives, in both implementations, so nothing is changed (`docs/porting/DEVIATIONS.md`, ControlCatalog sample):
+
+| Page | A visit leaves | Why |
+|---|---|---|
+| Notifications | 22 KB, 191 blocks, 4 objects of the server compositor | `OnAttachedToVisualTree` creates a `WindowNotificationManager` for the top level, which installs itself in the adorner layer of the window and is never removed. |
+| Clipboard | 22 KB, 191 blocks, 4 objects of the server compositor | The same. |
+| Screens | 11 KB, 57 blocks | `OnAttachedToVisualTree` subscribes to the position of the window and to the changes of its screens, with handlers that hold the presenter of the page, and never unsubscribes. |
+
+Caches that the first visit to a page fills and no later visit grows are not in these figures: the themes and control themes instantiated on first use, the parsed documents, fonts and glyphs (the first tour).
+
+What the measurements do not exercise: a tour selects the pages and renders them; it does not move the pointer or the focus, open a popup, a flyout or a tooltip, or scroll. What those leave is not measured here (the session over the built site, `scripts/browser/catalog-memory.mjs`, scrolls and opens the demos).
 
 ## Code-behind that needs framework API the port does not have
 

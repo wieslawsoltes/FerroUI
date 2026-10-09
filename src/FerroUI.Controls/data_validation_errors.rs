@@ -130,9 +130,10 @@ ferroui_base::ferro_properties! { impl DataValidationErrors {
     ferro_property!(
         /// Defines the `Owner` property.
         ///
-        /// The owner is the control the errors are shown in: an ancestor of
-        /// this control, which this control does not own, so the value is
-        /// an element reference. The themes make it the `DataContext` of a
+        /// Deviation (DEVIATIONS.md, Data validation): the owner is the
+        /// control the errors are shown in, an ancestor of this control,
+        /// which this control does not own, so the value is an element
+        /// reference where the managed property holds the control. The themes make it the `DataContext` of a
         /// part of the template (`DataContext="{TemplateBinding Owner}"`),
         /// which holds the reference as it is.
         pub fn owner_property() -> DirectProperty<DataValidationErrors, Option<ElementRef<Control>>> {

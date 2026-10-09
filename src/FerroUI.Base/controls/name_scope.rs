@@ -6,8 +6,9 @@ use std::collections::HashMap;
 
 type FindResult = Option<Ref<FerroObject>>;
 
-/// An element of a name scope. The element the scope is attached to holds
-/// the scope, so the scope holds that one weakly: held as a reference, as
+/// An element of a name scope. Deviation (DEVIATIONS.md, Name scopes): the
+/// element the scope is attached to holds the scope, so the scope holds that
+/// one weakly: held as a reference, as
 /// the managed original holds every element for its collector, an element
 /// with a name of its own and its scope would keep each other alive. Every
 /// other element is held as a reference.
