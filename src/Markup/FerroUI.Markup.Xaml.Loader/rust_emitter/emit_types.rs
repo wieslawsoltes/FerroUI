@@ -88,6 +88,8 @@ pub enum Known {
     Property,
     /// `Option<&'static FerroProperty>`.
     OptionProperty,
+    /// `MarkupDelegate`: the delegate of a method named in markup.
+    Delegate,
 }
 
 /// The Rust type that holds a value of a type of the type system (its handle).

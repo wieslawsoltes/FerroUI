@@ -311,6 +311,7 @@ const KNOWN: &[(Known, &str)] = &[
     (Known::CompiledBindingPath, "::ferroui_base::data::CompiledBindingPath"),
     (Known::Property, "&'static ::ferroui_base::FerroProperty"),
     (Known::OptionProperty, "Option<&'static ::ferroui_base::FerroProperty>"),
+    (Known::Delegate, "::ferroui_base::metadata::MarkupDelegate"),
 ];
 
 /// The primitive types generated code names by their name, and `String` by its path.
